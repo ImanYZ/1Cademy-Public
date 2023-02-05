@@ -1,11 +1,10 @@
 import { Stack, Typography, useTheme } from "@mui/material";
 import { Box } from "@mui/system";
-import React, { useMemo } from "react";
+import React from "react";
 
 import { gray200, gray600 } from "@/pages/home";
 
-import { useWindowSize } from "../../../hooks/useWindowSize";
-import { RiveComponentMemoized } from "../components/temporals/RiveComponentExtended";
+import { RiveComponentMemoized } from "../home/components/temporals/RiveComponentExtended";
 
 export type TMechanisms = {
   id: string;
@@ -65,18 +64,30 @@ export interface IMechanism {
 
 const Mechanism = ({ mechanisms }: IMechanism) => {
   const theme = useTheme();
-  const { width } = useWindowSize();
+  // const { width } = useWindowSize();
 
-  const canvasDimensions = useMemo(() => {
-    let newWidth = width - 10;
+  // const canvasDimensions = useMemo(() => {
+  //   let newWidth = width - 10;
 
-    if (width >= 600) newWidth = 500;
-    if (width >= 900) newWidth = 350;
-    if (width >= 1200) newWidth = 550;
+  //   if (width >= 600) newWidth = 500;
+  //   if (width >= 900) newWidth = 350;
+  //   if (width >= 1200) newWidth = 550;
 
-    const newHeight = getHeight(newWidth);
-    return { width: newWidth, height: newHeight };
-  }, [width]);
+  //   const newHeight = getHeight(newWidth);
+  //   return { width: newWidth, height: newHeight };
+  // }, [width]);
+  // useEffect(() => {
+  //   let newWidth = width / 2;
+  //   if (width >= 1536) newWidth = 850;
+  //   else if (width >= 1200) newWidth = 750;
+  //   else if (width >= 900) newWidth = 700;
+  //   else if (width >= 600) newWidth = 540;
+  //   else if (width >= 375) newWidth = 370;
+  //   else if (width >= 0) newWidth = width - 20;
+
+  //   const newHeight = getHeight(newWidth);
+  //   setCanvasDimension({ width: newWidth, height: newHeight });
+  // }, [width]);
 
   return (
     <Box>
@@ -84,19 +95,23 @@ const Mechanism = ({ mechanisms }: IMechanism) => {
         <Stack
           key={cur.id}
           direction={{ xs: "column", md: idx % 2 === 0 ? "row" : "row-reverse" }}
-          spacing={{ xs: "32px", md: "auto" }}
+          spacing={{ xs: "32px", md: "16px" }}
           alignItems="center"
           justifyContent={"space-between"}
-          minHeight={{ md: "512px" }}
           sx={{ mb: { xs: "32px", md: "61px" } }}
         >
-          <Box sx={{ maxWidth: { md: "528px" }, textAlign: "left" }}>
+          <Box sx={{ maxWidth: { xs: "none", md: "500px" }, textAlign: "left", flex: 1 }}>
             <Typography component={"h3"} sx={{ fontSize: "30px", fontWeight: "600px", mb: "16px" }}>
               {cur.title}
             </Typography>
             <Typography sx={{ color: theme.palette.mode === "dark" ? gray200 : gray600 }}>{cur.description}</Typography>
           </Box>
-          <Box sx={{ width: canvasDimensions.width, height: canvasDimensions.height }}>
+          <Box
+            sx={{
+              width: { xs: "350px", sm: "500px", md: "550px", lg: "700px" },
+              height: { xs: "350px", sm: "500px", md: "550px", lg: "700px" },
+            }}
+          >
             <RiveComponentMemoized
               src={cur.animation.src}
               artboard={cur.animation.artboard}
@@ -109,7 +124,5 @@ const Mechanism = ({ mechanisms }: IMechanism) => {
     </Box>
   );
 };
-
-const getHeight = (width: number) => (300 * width) / 500;
 
 export default Mechanism;

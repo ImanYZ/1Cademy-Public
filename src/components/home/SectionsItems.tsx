@@ -1,13 +1,13 @@
 import { StatsSchema } from "../../knowledgeTypes";
 
-export type OneCademySection = {
+export type HomepageSection = {
   id: string;
   title: string;
   label: string;
   description: string;
   getDescription?: any;
 };
-export const ONE_CADEMY_SECTIONS = [
+export const ONE_CADEMY_SECTIONS: HomepageSection[] = [
   {
     id: "landing",
     title: "1Cademy's Landing Page",

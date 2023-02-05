@@ -1,37 +1,18 @@
 import EmailIcon from "@mui/icons-material/Email";
 import GitHubIcon from "@mui/icons-material/GitHub";
 import YouTubeIcon from "@mui/icons-material/YouTube";
-import {
-  Box,
-  Divider,
-  DividerProps,
-  IconButton,
-  Link,
-  Stack,
-  styled,
-  SxProps,
-  Theme,
-  Tooltip,
-  Typography,
-} from "@mui/material";
+import { Box, IconButton, Link, Stack, SxProps, Theme, Tooltip, Typography } from "@mui/material";
 import NextImage from "next/image";
 import React from "react";
 
-import { gray800 } from "@/pages/home";
-
-import logo1cademy from "../../public/1Cademy-head.svg";
-import { ONE_CADEMY_SECTIONS } from "./home/SectionsItems";
+import logo1cademy from "../../../public/assistant/1Assistant.svg";
+import { DividerStyled } from "../AppFooter3";
+import { ONE_ASSISTANT_SECTIONS } from "./sections";
 type AppFooterProps = {
   sx?: SxProps<Theme>;
 };
-
 const color = "#EAECF0";
-
-export const DividerStyled = styled((props: DividerProps) => <Divider {...props} />)(() => ({
-  borderColor: gray800,
-}));
-
-const AppFooter3 = ({ sx }: AppFooterProps) => {
+const AssistantFooter = ({ sx }: AppFooterProps) => {
   return (
     <Box
       component={"footer"}
@@ -66,15 +47,16 @@ const AppFooter3 = ({ sx }: AppFooterProps) => {
             <Stack direction={"row"} flexWrap={"wrap"} alignItems={"center"} spacing={"12px"} sx={{ mb: "32px" }}>
               <NextImage src={logo1cademy} alt="logo 1cademy" width="40px" height="40px" />
               <Box component={"span"} sx={{ fontSize: "24px", fontWeight: 600 }}>
-                1Cademy
+                1Assistant
               </Box>
             </Stack>
-            <Typography color={color}> We Synthesize Books & Research Papers Together</Typography>
+            <Typography color={color}>Helps you optimize your life</Typography>
           </Box>
+          <Box></Box>
           <Box>
             <Typography sx={{ fontSize: "14px", fontWeight: 600, color, mb: "16px" }}> Navigation</Typography>
             <Stack spacing={"12px"}>
-              {ONE_CADEMY_SECTIONS.slice(1).map(cur => {
+              {ONE_ASSISTANT_SECTIONS.slice(1).map(cur => {
                 return (
                   <Tooltip key={cur.id} title={cur.title} placement="right">
                     <Link href={`#${cur.id}`} sx={{ textDecoration: "none" }}>
@@ -83,35 +65,6 @@ const AppFooter3 = ({ sx }: AppFooterProps) => {
                   </Tooltip>
                 );
               })}
-            </Stack>
-          </Box>
-          <Box>
-            <Typography sx={{ fontSize: "14px", fontWeight: 600, color, mb: "16px" }}> Other</Typography>
-            <Stack spacing={"12px"}>
-              <Link
-                target="_blank"
-                href="https://1cademy.us/terms"
-                underline="none"
-                sx={{ color: theme => theme.palette.grey[500] }}
-              >
-                Terms
-              </Link>
-              <Link
-                target="_blank"
-                href="https://1cademy.us/privacy"
-                underline="none"
-                sx={{ color: theme => theme.palette.grey[500] }}
-              >
-                Privacy
-              </Link>
-              <Link
-                target="_blank"
-                href="https://1cademy.us/cookie"
-                underline="none"
-                sx={{ color: theme => theme.palette.grey[500] }}
-              >
-                Cookie
-              </Link>
             </Stack>
           </Box>
           <Box>
@@ -146,7 +99,7 @@ const AppFooter3 = ({ sx }: AppFooterProps) => {
         <DividerStyled />
         <br />
         <Stack direction={{ xs: "column", sm: "row" }} justifyContent="space-between" spacing={"8px"}>
-          <span style={{ fontSize: "14px" }}>&copy; 1Cademy {new Date().getFullYear()}</span>
+          <span style={{ fontSize: "14px" }}>&copy; 1Assistant {new Date().getFullYear()}</span>
           <Stack direction={"row"} spacing="16px">
             <GitHubIcon fontSize="medium" sx={{ color: "#98A2B3" }} />
             <Box>
@@ -154,7 +107,7 @@ const AppFooter3 = ({ sx }: AppFooterProps) => {
                 We're committed to OpenSource on
               </Typography>
               <Link
-                href="https://github.com/ImanYZ/1Cademy-Public/"
+                href="https://github.com/ImanYZ/Assistant"
                 target="_blank"
                 rel="noreferrer"
                 sx={{ textDecoration: "underline", ml: "4px" }}
@@ -169,4 +122,4 @@ const AppFooter3 = ({ sx }: AppFooterProps) => {
   );
 };
 
-export default AppFooter3;
+export default AssistantFooter;

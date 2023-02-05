@@ -1,4 +1,13 @@
-const whyItems = [
+export type TWhyItem = {
+  name: string;
+  body: string;
+  image: string;
+  imageDark: string;
+  padding: string;
+  width: string;
+  height: string;
+};
+const whyItems: TWhyItem[] = [
   {
     name: "1Cademy AI assistant motivates the development of valuable habits.",
     body: "The 1Cademy AI assistant not only encourages the formation of beneficial habits, but also intelligently recognizes how these habits can improve your life and motivates you to invest more time in them.",

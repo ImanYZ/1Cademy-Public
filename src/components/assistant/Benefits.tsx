@@ -11,23 +11,22 @@ import {
 } from "@mui/material";
 import { useState } from "react";
 
-import { gray100, orangeDark } from "@/pages/home";
+import { gray100, gray200, gray600, orangeDark } from "@/pages/home";
 
-import valuesItems, { WhyItem } from "../views/valuesItems";
-
+import whyItems, { TWhyItem } from "./whyItems";
 const Benefits = () => {
   const theme = useTheme();
   const [expanded, setExpanded] = useState<string | false>("Option1");
-  const [selectedValue, setSelectedValue] = useState<WhyItem | null>(valuesItems[0] ?? null);
+  const [selectedValue, setSelectedValue] = useState<TWhyItem | null>(whyItems[0] ?? null);
 
   const handleChange = (option: string, name: string) => (event: React.SyntheticEvent, newExpanded: boolean) => {
     setExpanded(newExpanded ? option : false);
-    const newSelectedValues = valuesItems.find(value => value.name === name) ?? valuesItems[0];
+    const newSelectedValues = whyItems.find(item => item.name === name) ?? whyItems[0];
     setSelectedValue(newExpanded ? newSelectedValues : null);
   };
 
-  const getImage = (value: WhyItem | null, sx?: SxProps<Theme>) => {
-    return value ? (
+  const getImage = (item: TWhyItem | null, sx?: SxProps<Theme>) => {
+    return item ? (
       <Box
         sx={{
           width: { xs: "350px", sm: "400px", md: "450px", lg: "600px" },
@@ -38,8 +37,8 @@ const Benefits = () => {
         }}
       >
         <img
-          src={`/static/${theme.palette.mode === "dark" ? value.imageDark : value.image}`}
-          alt={value.name}
+          src={`/${theme.palette.mode === "dark" ? item.imageDark : item.image}`}
+          alt={item.name}
           style={{ width: "100%", height: "100%" }}
         />
       </Box>
@@ -49,7 +48,7 @@ const Benefits = () => {
   return (
     <Stack direction={{ xs: "column-reverse", md: "row" }} justifyContent={"space-between"} sx={{ margin: "auto" }}>
       <Box sx={{ maxWidth: { xs: "none", md: "500px" } }}>
-        {valuesItems.map((value, idx: number) => (
+        {whyItems.map((value, idx: number) => (
           <Accordion
             key={value.name}
             disableGutters
@@ -81,7 +80,7 @@ const Benefits = () => {
               <Typography
                 sx={{ p: "8px", pt: "0" }}
                 fontSize={"16px"}
-                color={theme.palette.mode === "light" ? "#475467" : "#EAECF0"}
+                color={theme.palette.mode === "light" ? gray600 : gray200}
               >
                 {value.body}
               </Typography>
