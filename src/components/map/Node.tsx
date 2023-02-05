@@ -827,19 +827,17 @@ const Node = ({
                           label="Start Time"
                           value={startTimeValue}
                           onChange={newValue => {
+                            console.log(newValue, "newValue");
                             setStartTimeValue(newValue);
                             setVideoStartTime(momentDateToSeconds(moment(newValue)));
+                            if (nodeVideoStartTime !== momentDateToSeconds(moment(newValue))) {
+                              setNodeParts(identifier, node => ({
+                                ...node,
+                                nodeVideoStartTime: momentDateToSeconds(moment(newValue)),
+                              }));
+                            }
                           }}
-                          renderInput={params => (
-                            <TextField
-                              {...params}
-                              onBlur={() => {
-                                if (nodeVideoStartTime !== videoStartTime) {
-                                  setNodeParts(identifier, node => ({ ...node, nodeVideoStartTime: videoStartTime }));
-                                }
-                              }}
-                            />
-                          )}
+                          renderInput={params => <TextField {...params} />}
                         />
                       </LocalizationProvider>
                     </Box>
@@ -878,22 +876,15 @@ const Node = ({
                           value={endTimeValue}
                           onChange={newValue => {
                             setEndTimeValue(newValue);
-                            setVideoEndTime(
-                              60 * 60 * moment(newValue).hours() +
-                                60 * moment(newValue).minutes() +
-                                moment(newValue).seconds()
-                            );
+                            setVideoEndTime(momentDateToSeconds(moment(newValue)));
+                            if (nodeVideoEndTime !== momentDateToSeconds(moment(newValue))) {
+                              setNodeParts(identifier, node => ({
+                                ...node,
+                                nodeVideoEndTime: momentDateToSeconds(moment(newValue)),
+                              }));
+                            }
                           }}
-                          renderInput={params => (
-                            <TextField
-                              {...params}
-                              onBlur={() => {
-                                if (nodeVideoEndTime !== videoEndTime) {
-                                  setNodeParts(identifier, node => ({ ...node, nodeVideoEndTime: videoEndTime }));
-                                }
-                              }}
-                            />
-                          )}
+                          renderInput={params => <TextField {...params} />}
                         />
                       </LocalizationProvider>
                     </Box>
