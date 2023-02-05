@@ -4,7 +4,7 @@ import LightModeIcon from "@mui/icons-material/LightMode";
 import LogoutIcon from "@mui/icons-material/Logout";
 import MenuIcon from "@mui/icons-material/Menu";
 import SearchIcon from "@mui/icons-material/Search";
-import { Link, Typography, useTheme } from "@mui/material";
+import { Link, Modal, Typography, useTheme } from "@mui/material";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import IconButton from "@mui/material/IconButton";
@@ -25,13 +25,14 @@ import { useAuth } from "../context/AuthContext";
 import ROUTES from "../lib/utils/routes";
 import { capitalizeString } from "../lib/utils/string.utils";
 import AppHeaderSearchBar from "./AppHeaderSearchBar2";
-import { ONE_CADEMY_SECTIONS, OneCademySection } from "./home/SectionsItems";
+import AssistantForm from "./assistant/AssistantRegister";
+import { HomepageSection } from "./home/SectionsItems";
 
 export const HEADER_HEIGHT = 80;
 export const HEADER_HEIGHT_MOBILE = 72;
 
 type MenuBarProps = {
-  items: OneCademySection[];
+  items: HomepageSection[];
   onCloseMenu: () => void;
 };
 
@@ -80,14 +81,21 @@ const MenuBar = ({ items, onCloseMenu }: MenuBarProps) => {
 //   homeClick: any;
 // };
 
-const AppHeader = () => {
+export interface IHeaderOptions {
+  page: "ONE_CADEMY" | "ONE_ASSISTANT";
+  sections: HomepageSection[];
+}
+
+const AppHeader = ({ page, sections }: IHeaderOptions) => {
+  const [{ isAuthenticated, user }] = useAuth();
+  const [handleThemeSwitch] = useThemeChange();
+  const theme = useTheme();
+  const router = useRouter();
+
   const [profileMenuOpen, setProfileMenuOpen] = useState(null);
   const isProfileMenuOpen = Boolean(profileMenuOpen);
   const [openMenu, setOpenMenu] = useState(false);
-  const [{ isAuthenticated, user }] = useAuth();
-  const router = useRouter();
-  const [handleThemeSwitch] = useThemeChange();
-  const theme = useTheme();
+  const [openForm, setOpenForm] = useState(false);
 
   const signOut = async () => {
     router.push(ROUTES.home);
@@ -168,7 +176,7 @@ const AppHeader = () => {
                 },
               }}
             >
-              {ONE_CADEMY_SECTIONS.slice(1).map(cur => {
+              {sections.slice(1).map(cur => {
                 return (
                   <Tooltip key={cur.id} title={cur.title}>
                     <Link
@@ -189,8 +197,6 @@ const AppHeader = () => {
             </Stack>
           </Stack>
 
-          {/* <Box sx={{ flexGrow: 1 }}>
-            </Box> */}
           <Stack direction={"row"} justifyContent="flex-end" alignItems="center" spacing={"8px"}>
             <Box
               sx={{
@@ -201,7 +207,6 @@ const AppHeader = () => {
             >
               <AppHeaderSearchBar />
             </Box>
-
             <Tooltip title="Open Searcher">
               <IconButton
                 onClick={() => console.log("onClickSearcher")}
@@ -211,107 +216,111 @@ const AppHeader = () => {
                 <SearchIcon />
               </IconButton>
             </Tooltip>
-
             <Tooltip title="Change theme">
               <IconButton onClick={handleThemeSwitch} size="small">
                 {theme.palette.mode === "dark" ? <LightModeIcon /> : <DarkModeIcon />}
               </IconButton>
             </Tooltip>
 
-            {!isAuthenticated && (
-              <Tooltip title="Apply to join 1Cademy">
-                <Button
-                  variant="contained"
-                  onClick={() => window?.open(ROUTES.apply, "_blank")}
-                  sx={{
-                    background: orangeDark,
-                    fontSize: 16,
-                    borderRadius: 40,
-                    height: "25px",
-                    width: "60px",
-                    textTransform: "capitalize",
-                    ":hover": {
-                      background: theme => theme.palette.common.orange,
-                    },
-                  }}
-                >
-                  Apply
-                </Button>
-              </Tooltip>
-            )}
+            {/* BUTTONS FOR 1CADEMY HOMEPAGE */}
 
-            {isAuthenticated && user ? (
-              <Tooltip title={capitalizeString(user.chooseUname ? user.uname : user.fName ?? "")}>
-                <IconButton onClick={handleProfileMenuOpen}>
-                  <Box
+            <Stack
+              display={page === "ONE_CADEMY" ? "flex" : "none"}
+              direction={"row"}
+              justifyContent="flex-end"
+              alignItems="center"
+              spacing={"8px"}
+            >
+              {!isAuthenticated && (
+                <Tooltip title="Apply to join 1Cademy">
+                  <Button
+                    variant="contained"
+                    onClick={() => window?.open(ROUTES.apply, "_blank")}
                     sx={{
-                      width: "26px",
-                      height: "26px",
-                      borderRadius: "30px",
-                      color: theme => theme.palette.common.gray,
+                      background: orangeDark,
+                      fontSize: 16,
+                      borderRadius: 40,
+                      height: "25px",
+                      width: "60px",
+                      textTransform: "capitalize",
+                      ":hover": {
+                        background: theme => theme.palette.common.orange,
+                      },
                     }}
-                    aria-haspopup="true"
-                    aria-controls="lock-menu"
-                    aria-label={`${user.fName}'s Account`}
-                    aria-expanded={isProfileMenuOpen ? "true" : undefined}
                   >
-                    <Image
-                      src={user.imageUrl || ""}
-                      alt={user.fName}
-                      width="26px"
-                      height="26px"
-                      quality={40}
-                      objectFit="cover"
-                      style={{
-                        borderRadius: "30px",
-                      }}
-                    />
-                  </Box>
-                </IconButton>
-                {/* <Box sx={{ width: "22px", height: "22px",  }}>
-                  <Box
-                    sx={{
-                      width: "inherit",
-                      height: "inherit",
-                      borderRadius: "30px",
-                      color: theme => theme.palette.common.gray,
-                    }}
-                    aria-haspopup="true"
-                    aria-controls="lock-menu"
-                    aria-label={`${user.fName}'s Account`}
-                    aria-expanded={isProfileMenuOpen ? "true" : undefined}
-                    onClick={handleProfileMenuOpen}
-                  >
-                    <Image
-                      src={user.imageUrl || ""}
-                      alt={user.fName}
-                      width="22px"
-                      height="22px"
-                      quality={40}
-                      objectFit="cover"
-                      style={{
-                        borderRadius: "30px",
-                      }}
-                    />
-                  </Box>
-                </Box> */}
+                    Apply
+                  </Button>
+                </Tooltip>
+              )}
 
-                {/* <IconButton
-                  aria-haspopup="true"
-                  aria-controls="lock-menu"
-                  aria-label={`${user.fName}'s Account`}
-                  aria-expanded={isProfileMenuOpen ? "true" : undefined}
-                  onClick={handleProfileMenuOpen}
-                  color="inherit"
-                >
-                </IconButton> */}
-              </Tooltip>
-            ) : (
+              {isAuthenticated && user ? (
+                <Tooltip title={capitalizeString(user.chooseUname ? user.uname : user.fName ?? "")}>
+                  <IconButton onClick={handleProfileMenuOpen}>
+                    <Box
+                      sx={{
+                        width: "26px",
+                        height: "26px",
+                        borderRadius: "30px",
+                        color: theme => theme.palette.common.gray,
+                      }}
+                      aria-haspopup="true"
+                      aria-controls="lock-menu"
+                      aria-label={`${user.fName}'s Account`}
+                      aria-expanded={isProfileMenuOpen ? "true" : undefined}
+                    >
+                      <Image
+                        src={user.imageUrl || ""}
+                        alt={user.fName}
+                        width="26px"
+                        height="26px"
+                        quality={40}
+                        objectFit="cover"
+                        style={{
+                          borderRadius: "30px",
+                        }}
+                      />
+                    </Box>
+                  </IconButton>
+                </Tooltip>
+              ) : (
+                <Tooltip title="SIGN IN/UP">
+                  <Button
+                    variant="contained"
+                    color="secondary"
+                    onClick={signUpHandler}
+                    sx={{
+                      minWidth: "120px",
+                      fontSize: 16,
+                      backgroundColor: theme.palette.mode === "dark" ? "#303030" : "#e4e4e4",
+                      color: theme.palette.mode === "dark" ? theme.palette.common.white : theme.palette.common.black,
+                      borderRadius: 40,
+                      height: "25px",
+                      textTransform: "capitalize",
+                      ":hover": {
+                        backgroundColor: theme.palette.mode === "dark" ? "#444444" : "#cacaca",
+                      },
+                    }}
+                  >
+                    Sign In/Up
+                  </Button>
+                </Tooltip>
+              )}
+            </Stack>
+
+            {/* BUTTONS FOR 1ASSISTANT HOMEPAGE */}
+
+            <Stack
+              display={page === "ONE_ASSISTANT" ? "flex" : "none"}
+              direction={"row"}
+              justifyContent="flex-end"
+              alignItems="center"
+              spacing={"8px"}
+            >
               <Tooltip title="SIGN IN/UP">
                 <Button
                   variant="contained"
                   color="secondary"
-                  onClick={signUpHandler}
+                  onClick={() => setOpenForm(true)}
                   sx={{
                     minWidth: "120px",
                     fontSize: 16,
@@ -328,7 +337,7 @@ const AppHeader = () => {
                   Sign In/Up
                 </Button>
               </Tooltip>
-            )}
+            </Stack>
 
             <IconButton
               onClick={() => setOpenMenu(prev => !prev)}
@@ -340,7 +349,39 @@ const AppHeader = () => {
           </Stack>
         </Stack>
         {isAuthenticated && user && renderProfileMenu}
-        {openMenu && <MenuBar items={ONE_CADEMY_SECTIONS.slice(1)} onCloseMenu={() => setOpenMenu(false)} />}
+
+        {openMenu && <MenuBar items={sections.slice(1)} onCloseMenu={() => setOpenMenu(false)} />}
+
+        {page === "ONE_ASSISTANT" && (
+          <Modal open={openForm} onClose={() => setOpenForm(false)}>
+            <Box
+              sx={{
+                width: "100%",
+                height: "100%",
+                bgcolor: theme => (theme.palette.mode === "dark" ? "#28282ad3" : "#f8f8f8e3"),
+                backdropFilter: "blur(4px)",
+                display: "flex",
+                justifyContent: "center",
+                alignItems: { sx: "flex-start", sm: "center" },
+              }}
+            >
+              <Box
+                sx={{
+                  position: "relative",
+                  maxWidth: "900px",
+                  overflowY: "auto",
+                }}
+              >
+                <IconButton onClick={() => setOpenForm(false)} sx={{ position: "absolute", top: "0px", right: "0px" }}>
+                  <CloseIcon />
+                </IconButton>
+                <Box>
+                  <AssistantForm onSuccessFeedback={() => setOpenForm(false)} />
+                </Box>
+              </Box>
+            </Box>
+          </Modal>
+        )}
       </Box>
     </>
   );

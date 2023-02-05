@@ -12,6 +12,7 @@ const Which = dynamic(() => import("../components/home/views/Which"), { suspense
 import dynamic from "next/dynamic";
 import React, { Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
 
+import { ONE_CADEMY_SECTIONS } from "@/components/home/SectionsItems";
 // import AppHeader, { HEADER_HEIGTH } from "@/components/AppHeader";
 import SearcherPupUp from "@/components/SearcherPupUp";
 import { useInView } from "@/hooks/useObserver";
@@ -377,7 +378,7 @@ export const Home = () => {
         onClickSearcher={() => setOpenSearch}
       /> */}
 
-      <AppHeader />
+      <AppHeader page="ONE_CADEMY" sections={ONE_CADEMY_SECTIONS} />
       <Box sx={{ position: "relative" /* , border: "3px solid green" */ }}>
         <Box
           sx={{ position: "absolute", top: height, bottom: "0px", left: "0px", minWidth: "10px", maxWidth: "180px" }}
