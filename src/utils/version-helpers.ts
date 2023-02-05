@@ -965,8 +965,11 @@ export const generateTagsOfTagsWithNodes = async ({
     // pushing in _tagIds to process them after loop for next recursion
     _tagIds.push(tagId);
 
-    nodeUpdates.tagIds.push(tagId);
-    nodeUpdates.tags.push(nodes[tagId].title);
+    // only push tag to tagIds if it not already present
+    if (!nodeUpdates.tagIds.includes(tagId)) {
+      nodeUpdates.tagIds.push(tagId);
+      nodeUpdates.tags.push(nodes[tagId].title);
+    }
   }
 
   // loading more higher communities
