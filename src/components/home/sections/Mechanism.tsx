@@ -30,7 +30,7 @@ const MECHANISM_ITEMS = [
     },
   },
   {
-    id: "voting",
+    id: "Evaluating",
     title: "Voting",
     description:
       "To ensure the quality of the knowledge graph on 1Cademy, we have implemented a peer-review process. Each individual concept, represented as a node, can be voted on by members of the community, and the score of the node will determine its level of modification or the possibility of deletion.",
