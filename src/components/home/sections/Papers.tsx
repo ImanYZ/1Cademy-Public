@@ -28,7 +28,7 @@ const PAPER_ITEMS = [
   },
   {
     id: "paper-103",
-    title: "Accepted by ACM LAK 2022",
+    title: "ACM LAK 2022",
     content:
       "YeckehZaare, I., Mulligan, V., Ramstad, G. V., &amp; Resnick, P. (2022). Semester-level Spacing but Not Procrastination Affected Student Exam Performance. In [Proceedings of the 12th International Conference on Learning Analytics and Knowledge (LAK&#8216;22) online, March 21-25, 2022. ACM.]",
     link: "https://dl.acm.org/doi/abs/10.1145/3506860.3506907",
