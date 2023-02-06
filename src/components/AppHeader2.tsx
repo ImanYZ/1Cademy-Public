@@ -168,8 +168,8 @@ const AppHeader = ({ page, sections, selectedSectionId }: AppHeaderProps) => {
             </Tooltip>
             <Stack
               direction={"row"}
-              aria-label="scrollable auto tabs navigation bar"
-              spacing={"24px"}
+              aria-label="navigation bar"
+              spacing={{ xs: "16px", lg: "24px" }}
               alignItems={"center"}
               justifyContent={"space-between"}
               sx={{
@@ -206,7 +206,12 @@ const AppHeader = ({ page, sections, selectedSectionId }: AppHeaderProps) => {
               sx={{
                 width: "100%",
                 maxWidth: "240px",
-                display: { xs: isAuthenticated ? "block" : "none", sm: "block" },
+                display: {
+                  xs: isAuthenticated ? "block" : "none",
+                  sm: "block",
+                  md: isAuthenticated ? "block" : "none",
+                  lg: "block",
+                },
               }}
             >
               <AppHeaderSearchBar />
@@ -214,7 +219,14 @@ const AppHeader = ({ page, sections, selectedSectionId }: AppHeaderProps) => {
             <Tooltip title="Open Searcher">
               <IconButton
                 onClick={() => console.log("onClickSearcher")}
-                sx={{ display: { xs: !isAuthenticated ? undefined : "none", sm: "none" } }}
+                sx={{
+                  display: {
+                    xs: !isAuthenticated ? undefined : "none",
+                    sm: "none",
+                    md: "flex",
+                    lg: "none",
+                  },
+                }}
                 size="small"
               >
                 <SearchIcon />
