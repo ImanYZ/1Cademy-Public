@@ -31,19 +31,14 @@ const Hero = ({ headerHeight, headerHeightMobile }: HeroProps) => {
     const imageWidth = 1920;
     const imageHeight = 1450;
 
-    // const ratio = imageWidth / imageHeight;
-
     if (width >= height) {
       const virtualHeight = (width * imageHeight) / imageWidth;
-      console.log({ virtualHeight });
       const offset = (virtualHeight - height) / 2;
-      console.log({ offset });
       pos = (virtualHeight * percentage) / 100;
 
       const tt = pos - offset;
       const desplazamiento = (0.5 * virtualHeight) / 100;
       pos = tt - desplazamiento - 36;
-      console.log(tt);
     } else {
       pos = 80;
     }
