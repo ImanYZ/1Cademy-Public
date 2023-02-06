@@ -18,7 +18,7 @@ import { useRouter } from "next/router";
 import React, { useState } from "react";
 
 import useThemeChange from "@/hooks/useThemeChange";
-import { gray200, gray600, orangeDark } from "@/pages/home";
+import { gray200, gray300, gray600, gray700, orange900, orangeDark } from "@/pages/home";
 
 import oneCademyLogo from "../../public/DarkmodeLogo.png";
 import { useAuth } from "../context/AuthContext";
@@ -191,6 +191,9 @@ const AppHeader = ({ page, sections, selectedSectionId }: AppHeaderProps) => {
                         textDecoration: "none",
                         fontWeight: 600,
                         borderBottom: selectedSectionId === cur.id ? `solid 2px ${orangeDark}` : undefined,
+                        ":hover": {
+                          color: theme => (theme.palette.mode === "dark" ? gray300 : gray700),
+                        },
                       }}
                     >
                       {cur.label}
@@ -260,7 +263,7 @@ const AppHeader = ({ page, sections, selectedSectionId }: AppHeaderProps) => {
                       width: "60px",
                       textTransform: "capitalize",
                       ":hover": {
-                        background: theme => theme.palette.common.orange,
+                        background: orange900,
                       },
                     }}
                   >
