@@ -72,10 +72,11 @@ const Magnitude = () => {
     <Stack direction={{ sx: "column-reverse", md: "row" }} alignItems={"center"} spacing={"96px"}>
       <Box
         sx={{
-          width: { md: "560px" },
+          maxWidth: { md: "560px" },
           display: "grid",
           gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr" },
           rowGap: "88px",
+          columnGap: "32px",
         }}
       >
         {MAGNITUDE_ITEMS_Memo.map(cur => (
