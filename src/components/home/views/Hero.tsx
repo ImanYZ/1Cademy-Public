@@ -1,8 +1,8 @@
-import { Stack, Typography, useTheme } from "@mui/material";
+import { Stack, Typography } from "@mui/material";
 import Box from "@mui/material/Box";
 import React, { useMemo } from "react";
 
-import { orangeDark } from "@/pages/home";
+import { orange900, orangeDark } from "@/pages/home";
 
 import backgroundImageDarkMode from "../../../../public/darkModeLibraryBackground.jpg";
 import { useWindowSize } from "../../../hooks/useWindowSize";
@@ -12,18 +12,7 @@ import { RiveComponentMemoized } from "../components/temporals/RiveComponentExte
 type HeroProps = { headerHeight: number; headerHeightMobile: number };
 
 const Hero = ({ headerHeight, headerHeightMobile }: HeroProps) => {
-  const theme = useTheme();
-  // const isMobile = useMediaQuery("(max-width:600px)");
-
   const { height, width } = useWindowSize({ initialHeight: 1000, initialWidth: 0 });
-
-  // const heroCanvasDimensions = useMemo(() => {
-  //   // const min = width > height ? height : width;
-  //   // if (width < 600) return min - 20;
-  //   // if (width < 900) return min - 40;
-  //   // return min - 100;
-  //   return 128;
-  // }, [width, height]);
 
   const getVirtualHeight = useMemo(() => {
     let pos = 0;
@@ -112,7 +101,7 @@ const Hero = ({ headerHeight, headerHeightMobile }: HeroProps) => {
           fontSize: "18px",
           borderRadius: "8px",
           ":hover": {
-            background: theme.palette.common.orange,
+            background: orange900,
           },
         }}
       >
