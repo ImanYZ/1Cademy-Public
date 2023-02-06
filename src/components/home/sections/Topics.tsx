@@ -104,7 +104,7 @@ const Topics = () => {
                 background: "#00000080",
               }}
             >
-              <Typography sx={{ color: "white", fontSize: "24px" }}>{cur.title}</Typography>
+              <Typography sx={{ color: "white", fontSize: { xs: "20px", xl: "24px" } }}>{cur.title}</Typography>
             </Box>
 
             <Box
