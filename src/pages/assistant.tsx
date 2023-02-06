@@ -3,7 +3,7 @@ import { Box, IconButton, Modal, useMediaQuery } from "@mui/material";
 // const ValuesMemoized = dynamic(() => import("../components/assistant/Why"), { suspense: true, ssr: false });
 // const Which = dynamic(() => import("../components/home/views/Which"), { suspense: true, ssr: false });
 // const WhoWeAre = dynamic(() => import("../components/home/views/WhoWeAre"), { suspense: true, ssr: false });
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 
 import AppHeaderMemoized from "@/components/AppHeader2";
 import AssistantFooter from "@/components/assistant/AssistantFooter";
@@ -37,6 +37,9 @@ const Home = () => {
   const { inView: systemsInView, ref: SystemSectionRef } = useInView(observerOption);
   const { inView: aboutInView, ref: AboutSectionRef } = useInView(observerOption);
 
+  const isScrolling = useRef(false);
+  const timer = useRef<NodeJS.Timeout | null>(null);
+
   useEffect(() => {
     let newSelectedSectionId = "";
     if (mechanismInView) newSelectedSectionId = ONE_ASSISTANT_SECTIONS[1].id;
@@ -56,6 +59,21 @@ const Home = () => {
   const [openForm, setOpenForm] = useState(false);
   const [openSearch, setOpenSearch] = useState(false);
 
+  const onSwitchSection = (newSelectedSectionId: string) => {
+    isScrolling.current = true;
+    if (timer.current) clearTimeout(timer.current);
+
+    timer.current = setTimeout(() => {
+      isScrolling.current = false;
+      if (timer.current) clearTimeout(timer.current);
+    }, 1000);
+
+    setSelectedSectionId(newSelectedSectionId);
+    const newHash = newSelectedSectionId ? `#${newSelectedSectionId}` : "";
+    if (window.location.hash === newHash) return;
+    window.location.hash = newHash;
+  };
+
   return (
     <Box
       id="ScrollableContainer"
@@ -68,7 +86,12 @@ const Home = () => {
         backgroundColor: theme => (theme.palette.mode === "dark" ? "#0A0D14" : "#FFFFFF"),
       }}
     >
-      <AppHeaderMemoized page="ONE_ASSISTANT" sections={ONE_ASSISTANT_SECTIONS} selectedSectionId={selectedSectionId} />
+      <AppHeaderMemoized
+        page="ONE_ASSISTANT"
+        sections={ONE_ASSISTANT_SECTIONS}
+        selectedSectionId={selectedSectionId}
+        onPreventSwitch={onSwitchSection}
+      />
 
       <AssistantHeroMemoized />
 

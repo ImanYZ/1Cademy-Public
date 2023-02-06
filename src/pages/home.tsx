@@ -1,5 +1,5 @@
 import { Box } from "@mui/material";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useQuery } from "react-query";
 
 import AppFooter3 from "@/components/AppFooter3";
@@ -45,6 +45,8 @@ const observerOption: UseInViewProps = { options: { root: null, rootMargin: "-38
 export const Home = () => {
   const [selectedSectionId, setSelectedSectionId] = useState("");
   const { data: stats } = useQuery("stats", getStats);
+  const isScrolling = useRef(false);
+  const timer = useRef<NodeJS.Timeout | null>(null);
 
   const { inView: mechanismInView, ref: MechanismSectionRef } = useInView(observerOption);
   const { inView: magnitudeInView, ref: MagnitudeSectionRef } = useInView(observerOption);
@@ -54,6 +56,8 @@ export const Home = () => {
   const { inView: aboutInView, ref: AboutSectionRef } = useInView(observerOption);
 
   useEffect(() => {
+    if (isScrolling.current) return;
+
     let newSelectedSectionId = "";
     if (mechanismInView) newSelectedSectionId = ONE_CADEMY_SECTIONS[1].id;
     if (magnitudeInView) newSelectedSectionId = ONE_CADEMY_SECTIONS[2].id;
@@ -69,6 +73,21 @@ export const Home = () => {
     window.location.hash = newHash;
   }, [mechanismInView, magnitudeInView, benefitInView, topicsInView, systemsInView, aboutInView]);
 
+  const onSwitchSection = (newSelectedSectionId: string) => {
+    isScrolling.current = true;
+    if (timer.current) clearTimeout(timer.current);
+
+    timer.current = setTimeout(() => {
+      isScrolling.current = false;
+      if (timer.current) clearTimeout(timer.current);
+    }, 1000);
+
+    setSelectedSectionId(newSelectedSectionId);
+    const newHash = newSelectedSectionId ? `#${newSelectedSectionId}` : "";
+    if (window.location.hash === newHash) return;
+    window.location.hash = newHash;
+  };
+
   return (
     <Box
       id="ScrollableContainer"
@@ -81,7 +100,12 @@ export const Home = () => {
         backgroundColor: theme => (theme.palette.mode === "dark" ? "#0A0D14" : "#FFFFFF"),
       }}
     >
-      <AppHeaderMemoized page="ONE_CADEMY" sections={ONE_CADEMY_SECTIONS} selectedSectionId={selectedSectionId} />
+      <AppHeaderMemoized
+        page="ONE_CADEMY"
+        sections={ONE_CADEMY_SECTIONS}
+        selectedSectionId={selectedSectionId}
+        onPreventSwitch={onSwitchSection}
+      />
 
       <HeroMemoized headerHeight={HEADER_HEIGHT} headerHeightMobile={HEADER_HEIGHT_MOBILE} />
 

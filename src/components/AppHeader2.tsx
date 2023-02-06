@@ -33,7 +33,7 @@ export const HEADER_HEIGHT_MOBILE = 72;
 
 type MenuBarProps = {
   items: HomepageSection[];
-  onCloseMenu: () => void;
+  onCloseMenu: (sectionId: string) => void;
   selectedSectionId: string;
 };
 
@@ -58,7 +58,7 @@ const MenuBar = ({ items, onCloseMenu, selectedSectionId }: MenuBarProps) => {
             <Tooltip key={cur.id} title={cur.title} placement={"right"}>
               <Link
                 href={`#${cur.id}`}
-                onClick={onCloseMenu}
+                onClick={() => onCloseMenu(cur.id)}
                 sx={{
                   color: theme => (theme.palette.mode === "dark" ? gray200 : gray600),
                   cursor: "pointer",
@@ -87,9 +87,10 @@ type AppHeaderProps = {
   page: "ONE_CADEMY" | "ONE_ASSISTANT";
   sections: HomepageSection[];
   selectedSectionId: string;
+  onPreventSwitch: (sectionId: string) => void;
 };
 
-const AppHeader = ({ page, sections, selectedSectionId }: AppHeaderProps) => {
+const AppHeader = ({ page, sections, selectedSectionId, onPreventSwitch }: AppHeaderProps) => {
   const [{ isAuthenticated, user }] = useAuth();
   const [handleThemeSwitch] = useThemeChange();
   const theme = useTheme();
@@ -111,6 +112,11 @@ const AppHeader = ({ page, sections, selectedSectionId }: AppHeaderProps) => {
 
   const handleProfileMenuClose = () => {
     setProfileMenuOpen(null);
+  };
+
+  const onCloseMenu = (id: string) => {
+    setOpenMenu(false);
+    onPreventSwitch(id);
   };
 
   const renderProfileMenu = (
@@ -184,6 +190,7 @@ const AppHeader = ({ page, sections, selectedSectionId }: AppHeaderProps) => {
                   <Tooltip key={cur.id} title={cur.title}>
                     <Link
                       href={`#${cur.id}`}
+                      onClick={() => onPreventSwitch(cur.id)}
                       sx={{
                         whiteSpace: "nowrap",
                         color: theme => (theme.palette.mode === "dark" ? gray200 : gray600),
@@ -370,11 +377,7 @@ const AppHeader = ({ page, sections, selectedSectionId }: AppHeaderProps) => {
         {isAuthenticated && user && renderProfileMenu}
 
         {openMenu && (
-          <MenuBar
-            items={sections.slice(1)}
-            onCloseMenu={() => setOpenMenu(false)}
-            selectedSectionId={selectedSectionId}
-          />
+          <MenuBar items={sections.slice(1)} onCloseMenu={onCloseMenu} selectedSectionId={selectedSectionId} />
         )}
 
         {page === "ONE_ASSISTANT" && (
