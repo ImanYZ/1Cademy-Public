@@ -1057,6 +1057,10 @@ export const generateTagsData = async ({
     const { tagRef, tagData } = await getTagRefData(nodeId, t);
     nodeTagRef = tagRef;
     nodeTagData = tagData;
+    if (nodeTagData && !nodeTagData.tags) {
+      nodeTagData.tags = [];
+      nodeTagData.tagIds = [];
+    }
   }
 
   // For the case where there is a tag in the old version of the node that does not exist on its new version.
@@ -1076,14 +1080,18 @@ export const generateTagsData = async ({
       });
       if (nodeTagData) {
         // Remove the tag from the list of tags on nodeTag (the tag corresponding to nodeId).
-        const tagNodeIdx = nodeTagData.tagIds.findIndex((tId: any) => tId === tagId);
-        nodeTagData.tagIds.splice(tagNodeIdx, 1);
-        nodeTagData.tags.splice(tagNodeIdx, 1);
+        const tagNodeIdx = (nodeTagData.tagIds || []).findIndex((tId: any) => tId === tagId);
+        if (tagNodeIdx !== -1) {
+          nodeTagData.tagIds.splice(tagNodeIdx, 1);
+          nodeTagData.tags.splice(tagNodeIdx, 1);
+        }
       }
       // Remove the tag from the list of tags on the node.
-      const nodeTagIdx = nodeTagIds.findIndex((tId: any) => tId === tagId);
-      nodeTagIds.splice(nodeTagIdx, 1);
-      nodeTags.splice(nodeTagIdx, 1);
+      const nodeTagIdx = (nodeTagIds || []).findIndex((tId: any) => tId === tagId);
+      if (nodeTagIdx !== -1) {
+        nodeTagIds.splice(nodeTagIdx, 1);
+        nodeTags.splice(nodeTagIdx, 1);
+      }
     }
   }
   const tagUpdates = {
