@@ -18,6 +18,7 @@ import SearcherPupUp from "@/components/SearcherPupUp";
 import { useWindowSize } from "@/hooks/useWindowSize";
 
 import AssistantForm from "../components/assistant/AssistantRegister";
+import Papers from "../components/home/sections/Papers";
 
 /**
  * animations builded with: https://rive.app/
@@ -162,6 +163,7 @@ const Home = () => {
             {idx === 1 && <Benefits />}
             {idx === 2 && <Systems />}
             {idx === 3 && <About />}
+            {idx === 3 && <Papers />}
           </Box>
         </Box>
       ))}

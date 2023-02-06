@@ -57,6 +57,10 @@ export const Home = () => {
     if (aboutInView) newSelectedSectionId = ONE_CADEMY_SECTIONS[6].id;
 
     setSelectedSectionId(newSelectedSectionId);
+
+    const newHash = newSelectedSectionId ? `#${newSelectedSectionId}` : "";
+    if (window.location.hash === newHash) return;
+    window.location.hash = newHash;
   }, [mechanismInView, magnitudeInView, benefitInView, topicsInView, systemsInView, aboutInView]);
 
   return (
