@@ -71,7 +71,9 @@ export const Home = () => {
       }}
     >
       <AppHeaderMemoized page="ONE_CADEMY" sections={ONE_CADEMY_SECTIONS} />
+
       <HeroMemoized headerHeight={HEADER_HEIGHT} headerHeightMobile={HEADER_HEIGHT_MOBILE} />
+
       {ONE_CADEMY_SECTIONS.slice(1).map((section, idx) => (
         <Box key={section.id} id={section.id} component={"section"} sx={{ py: { xs: "64px", sm: "96px" } }}>
           <Box
