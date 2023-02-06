@@ -378,7 +378,7 @@ export const Home = () => {
         onClickSearcher={() => setOpenSearch}
       /> */}
 
-      <AppHeader page="ONE_CADEMY" sections={ONE_CADEMY_SECTIONS} />
+      <AppHeader page="ONE_CADEMY" sections={ONE_CADEMY_SECTIONS} selectedSectionId={""} />
       <Box sx={{ position: "relative" /* , border: "3px solid green" */ }}>
         <Box
           sx={{ position: "absolute", top: height, bottom: "0px", left: "0px", minWidth: "10px", maxWidth: "180px" }}
