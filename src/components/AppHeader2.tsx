@@ -34,9 +34,10 @@ export const HEADER_HEIGHT_MOBILE = 72;
 type MenuBarProps = {
   items: HomepageSection[];
   onCloseMenu: () => void;
+  selectedSectionId: string;
 };
 
-const MenuBar = ({ items, onCloseMenu }: MenuBarProps) => {
+const MenuBar = ({ items, onCloseMenu, selectedSectionId }: MenuBarProps) => {
   return (
     <Stack
       direction={"column"}
@@ -62,6 +63,7 @@ const MenuBar = ({ items, onCloseMenu }: MenuBarProps) => {
                   color: theme => (theme.palette.mode === "dark" ? gray200 : gray600),
                   cursor: "pointer",
                   textDecoration: "none",
+                  borderBottom: selectedSectionId === cur.id ? `solid 2px ${orangeDark}` : undefined,
                 }}
               >
                 {cur.label}
@@ -81,12 +83,13 @@ const MenuBar = ({ items, onCloseMenu }: MenuBarProps) => {
 //   homeClick: any;
 // };
 
-export interface IHeaderOptions {
+type AppHeaderProps = {
   page: "ONE_CADEMY" | "ONE_ASSISTANT";
   sections: HomepageSection[];
-}
+  selectedSectionId: string;
+};
 
-const AppHeader = ({ page, sections }: IHeaderOptions) => {
+const AppHeader = ({ page, sections, selectedSectionId }: AppHeaderProps) => {
   const [{ isAuthenticated, user }] = useAuth();
   const [handleThemeSwitch] = useThemeChange();
   const theme = useTheme();
@@ -187,6 +190,7 @@ const AppHeader = ({ page, sections }: IHeaderOptions) => {
                         cursor: "pointer",
                         textDecoration: "none",
                         fontWeight: 600,
+                        borderBottom: selectedSectionId === cur.id ? `solid 2px ${orangeDark}` : undefined,
                       }}
                     >
                       {cur.label}
@@ -350,7 +354,13 @@ const AppHeader = ({ page, sections }: IHeaderOptions) => {
         </Stack>
         {isAuthenticated && user && renderProfileMenu}
 
-        {openMenu && <MenuBar items={sections.slice(1)} onCloseMenu={() => setOpenMenu(false)} />}
+        {openMenu && (
+          <MenuBar
+            items={sections.slice(1)}
+            onCloseMenu={() => setOpenMenu(false)}
+            selectedSectionId={selectedSectionId}
+          />
+        )}
 
         {page === "ONE_ASSISTANT" && (
           <Modal open={openForm} onClose={() => setOpenForm(false)}>
