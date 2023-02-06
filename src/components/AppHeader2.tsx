@@ -27,6 +27,7 @@ import { capitalizeString } from "../lib/utils/string.utils";
 import AppHeaderSearchBar from "./AppHeaderSearchBar2";
 import AssistantForm from "./assistant/AssistantRegister";
 import { HomepageSection } from "./home/SectionsItems";
+import SearcherPupUp from "./SearcherPupUp";
 
 export const HEADER_HEIGHT = 80;
 export const HEADER_HEIGHT_MOBILE = 72;
@@ -88,9 +89,11 @@ type AppHeaderProps = {
   sections: HomepageSection[];
   selectedSectionId: string;
   onPreventSwitch: (sectionId: string) => void;
+  // onClickSearcher?: () => void;
 };
 
 const AppHeader = ({ page, sections, selectedSectionId, onPreventSwitch }: AppHeaderProps) => {
+  const [openSearch, setOpenSearch] = useState(false);
   const [{ isAuthenticated, user }] = useAuth();
   const [handleThemeSwitch] = useThemeChange();
   const theme = useTheme();
@@ -226,22 +229,24 @@ const AppHeader = ({ page, sections, selectedSectionId, onPreventSwitch }: AppHe
             >
               <AppHeaderSearchBar />
             </Box>
-            <Tooltip title="Open Searcher">
-              <IconButton
-                onClick={() => console.log("onClickSearcher")}
-                sx={{
-                  display: {
-                    xs: !isAuthenticated ? undefined : "none",
-                    sm: "none",
-                    md: "flex",
-                    lg: "none",
-                  },
-                }}
-                size="small"
-              >
-                <SearchIcon />
-              </IconButton>
-            </Tooltip>
+            {true && (
+              <Tooltip title="Open Searcher">
+                <IconButton
+                  onClick={() => setOpenSearch(true)}
+                  sx={{
+                    display: {
+                      xs: !isAuthenticated ? undefined : "none",
+                      sm: "none",
+                      md: "flex",
+                      lg: "none",
+                    },
+                  }}
+                  size="small"
+                >
+                  <SearchIcon />
+                </IconButton>
+              </Tooltip>
+            )}
             <Tooltip title="Change theme">
               <IconButton onClick={handleThemeSwitch} size="small">
                 {theme.palette.mode === "dark" ? <LightModeIcon /> : <DarkModeIcon />}
@@ -411,6 +416,17 @@ const AppHeader = ({ page, sections, selectedSectionId, onPreventSwitch }: AppHe
           </Modal>
         )}
       </Box>
+      <Modal
+        open={openSearch}
+        onClose={() => setOpenSearch(false)}
+        aria-labelledby="searcher"
+        aria-describedby="search nodes"
+      >
+        <Box>
+          <SearcherPupUp onClose={() => setOpenSearch(false)} />
+        </Box>
+      </Modal>
+      )
     </>
   );
 };
