@@ -965,8 +965,11 @@ export const generateTagsOfTagsWithNodes = async ({
     // pushing in _tagIds to process them after loop for next recursion
     _tagIds.push(tagId);
 
-    nodeUpdates.tagIds.push(tagId);
-    nodeUpdates.tags.push(nodes[tagId].title);
+    // only push tag to tagIds if it not already present
+    if (!nodeUpdates.tagIds.includes(tagId)) {
+      nodeUpdates.tagIds.push(tagId);
+      nodeUpdates.tags.push(nodes[tagId].title);
+    }
   }
 
   // loading more higher communities
@@ -1054,6 +1057,10 @@ export const generateTagsData = async ({
     const { tagRef, tagData } = await getTagRefData(nodeId, t);
     nodeTagRef = tagRef;
     nodeTagData = tagData;
+    if (nodeTagData && !nodeTagData.tags) {
+      nodeTagData.tags = [];
+      nodeTagData.tagIds = [];
+    }
   }
 
   // For the case where there is a tag in the old version of the node that does not exist on its new version.
@@ -1073,14 +1080,18 @@ export const generateTagsData = async ({
       });
       if (nodeTagData) {
         // Remove the tag from the list of tags on nodeTag (the tag corresponding to nodeId).
-        const tagNodeIdx = nodeTagData.tagIds.findIndex((tId: any) => tId === tagId);
-        nodeTagData.tagIds.splice(tagNodeIdx, 1);
-        nodeTagData.tags.splice(tagNodeIdx, 1);
+        const tagNodeIdx = (nodeTagData.tagIds || []).findIndex((tId: any) => tId === tagId);
+        if (tagNodeIdx !== -1) {
+          nodeTagData.tagIds.splice(tagNodeIdx, 1);
+          nodeTagData.tags.splice(tagNodeIdx, 1);
+        }
       }
       // Remove the tag from the list of tags on the node.
-      const nodeTagIdx = nodeTagIds.findIndex((tId: any) => tId === tagId);
-      nodeTagIds.splice(nodeTagIdx, 1);
-      nodeTags.splice(nodeTagIdx, 1);
+      const nodeTagIdx = (nodeTagIds || []).findIndex((tId: any) => tId === tagId);
+      if (nodeTagIdx !== -1) {
+        nodeTagIds.splice(nodeTagIdx, 1);
+        nodeTags.splice(nodeTagIdx, 1);
+      }
     }
   }
   const tagUpdates = {
@@ -1807,6 +1818,42 @@ export const versionCreateUpdate = async ({
               tWriteOperations,
             });
           }
+
+          if (versionData.changedNodeType) {
+            // TODO: move these to queue
+            await detach(async () => {
+              let batch = db.batch();
+              let writeCounts = 0;
+              for (const parent of versionData.parents) {
+                const linkedRef = db.collection("nodes").doc(parent.node);
+                const linkedDoc = await linkedRef.get();
+                const linkedData: any = linkedDoc.data();
+                const newChildren = linkedData.children.filter((child: any) => child.node !== versionData.node);
+                newChildren.push({ title: versionData.title, node: versionData.node, label: "", type: nodeType });
+                batch.update(linkedRef, {
+                  children: newChildren,
+                  updatedAt: Timestamp.fromDate(new Date()),
+                });
+                [batch, writeCounts] = await checkRestartBatchWriteCounts(batch, writeCounts);
+              }
+
+              for (const child of versionData.children) {
+                const linkedRef = db.collection("nodes").doc(child.node);
+                const linkedDoc = await linkedRef.get();
+                const linkedData: any = linkedDoc.data();
+                const newParents = linkedData.parents.filter((parent: any) => parent.node !== versionData.node);
+                newParents.push({ title: versionData.title, node: versionData.node, label: "", type: nodeType });
+                batch.update(linkedRef, {
+                  parents: newParents,
+                  updatedAt: Timestamp.fromDate(new Date()),
+                });
+                [batch, writeCounts] = await checkRestartBatchWriteCounts(batch, writeCounts);
+              }
+
+              await batch.commit();
+            });
+          }
+
           // TODO: move these to queue
           await detach(async () => {
             let linkedNode, linkedNodeChanges;

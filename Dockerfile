@@ -6,6 +6,9 @@ WORKDIR /app
 # Copy lock files if file exists
 COPY package.json package-lock.json* ./
 
+# Installing python3 to assist npm install
+RUN apk add python3
+
 # Omit --production flag for TypeScript devDependencies
 RUN npm ci --legacy-peer-deps
 

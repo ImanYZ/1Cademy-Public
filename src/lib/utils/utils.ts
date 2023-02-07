@@ -325,7 +325,13 @@ export const getVideoDataByUrl = (videoUrl: string, startTime?: number, endTime?
       videoId = results[2];
       videoType = "youtube";
       url = `https://www.youtube.com/embed/${videoId}?rel=0${
-        startTime && endTime && startTime < endTime ? "&start=" + startTime + "&end=" + endTime : ""
+        typeof startTime !== "undefined" &&
+        typeof endTime !== "undefined" &&
+        !isNaN(startTime) &&
+        !isNaN(endTime) &&
+        startTime < endTime
+          ? "&start=" + startTime + "&end=" + endTime
+          : ""
       }`;
     }
   } /* else if (videoUrl && videoUrl.match(/vimeo\.com/)) {
@@ -353,4 +359,8 @@ export const gtmEvent = (eventName: string, eventData: any): void => {
       event: eventName,
     });
   }
+};
+
+export const momentDateToSeconds = (moment: any) => {
+  return 60 * 60 * moment.hours() + 60 * moment.minutes() + moment.seconds();
 };
