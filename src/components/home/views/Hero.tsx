@@ -1,23 +1,55 @@
-import { Stack, Typography, useMediaQuery } from "@mui/material";
+import { Stack, Typography, useTheme } from "@mui/material";
 import Box from "@mui/material/Box";
 import React, { useMemo } from "react";
+
+import { orangeDark } from "@/pages/home";
 
 import backgroundImageDarkMode from "../../../../public/darkModeLibraryBackground.jpg";
 import { useWindowSize } from "../../../hooks/useWindowSize";
 import Button from "../components/Button";
 import { RiveComponentMemoized } from "../components/temporals/RiveComponentExtended";
 
-const Hero = () => {
-  const isMobile = useMediaQuery("(max-width:600px)");
+type HeroProps = { headerHeight: number; headerHeightMobile: number };
+
+const Hero = ({ headerHeight, headerHeightMobile }: HeroProps) => {
+  const theme = useTheme();
+  // const isMobile = useMediaQuery("(max-width:600px)");
 
   const { height, width } = useWindowSize({ initialHeight: 1000, initialWidth: 0 });
 
-  const heroCanvasDimensions = useMemo(() => {
-    const min = width > height ? height : width;
-    if (width < 600) return min - 20;
-    if (width < 900) return min - 40;
-    return min - 100;
-  }, [width, height]);
+  // const heroCanvasDimensions = useMemo(() => {
+  //   // const min = width > height ? height : width;
+  //   // if (width < 600) return min - 20;
+  //   // if (width < 900) return min - 40;
+  //   // return min - 100;
+  //   return 128;
+  // }, [width, height]);
+
+  const getVirtualHeight = useMemo(() => {
+    let pos = 0;
+    const percentage = 27;
+    const imageWidth = 1920;
+    const imageHeight = 1450;
+
+    // const ratio = imageWidth / imageHeight;
+
+    if (width >= height) {
+      const virtualHeight = (width * imageHeight) / imageWidth;
+      console.log({ virtualHeight });
+      const offset = (virtualHeight - height) / 2;
+      console.log({ offset });
+      pos = (virtualHeight * percentage) / 100;
+
+      const tt = pos - offset;
+      const desplazamiento = (0.5 * virtualHeight) / 100;
+      pos = tt - desplazamiento - 36;
+      console.log(tt);
+    } else {
+      pos = 80;
+    }
+
+    return pos;
+  }, [height, width]);
 
   return (
     <Stack
@@ -26,7 +58,8 @@ const Hero = () => {
       alignItems={"center"}
       justifyContent="flex-end"
       sx={{
-        height: "calc(100vh - 70px)",
+        position: "relative",
+        height: { xs: `calc(100vh - ${headerHeightMobile}px)`, md: `calc(100vh - ${headerHeight}px)` },
         width: "100%",
         padding: width < 900 ? "10px" : "20px",
         backgroundColor: "#1d1102",
@@ -36,10 +69,21 @@ const Hero = () => {
         backgroundRepeat: "no-repeat",
       }}
     >
-      <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center", pb: "20px" }}>
-        <Box sx={{ width: heroCanvasDimensions, height: heroCanvasDimensions }}>
+      <Box
+        sx={{
+          position: "absolute",
+          top: { xs: "50px", lg: "70px", xl: "100px" },
+          maxWidth: { xs: "343px", sm: "730px" },
+          margin: "auto",
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          pb: "20px",
+        }}
+      >
+        <Box sx={{ width: "128px", height: "128px", mb: { xs: "64px", sm: "32px" } }}>
           <RiveComponentMemoized
-            src="rive/artboard-1.riv"
+            src="rive/logo.riv"
             animations={["Timeline 1", "dark", "light"]}
             artboard={"artboard-1"}
             autoplay={true}
@@ -47,22 +91,38 @@ const Hero = () => {
         </Box>
         <Typography
           color="white"
-          variant="h5"
-          sx={{ textAlign: "center", width: isMobile ? "300px" : "auto", mb: "20px" }}
+          variant="h2"
+          sx={{ textAlign: "center", fontSize: { xs: "36px", md: "60px" }, fontWeight: 600, mb: "24px" }}
         >
-          WE TAKE NOTES <b>TOGETHER</b>.
+          We Synthesize Books & Research Papers Together
         </Typography>
-        <Button
-          variant="contained"
-          size={width < 900 ? "small" : "large"}
-          component="a"
-          target="_blank"
-          href="https://1cademy.us/#JoinUsSection"
-          sx={{ minWidth: 200, zIndex: 13, textTransform: "uppercase" }}
-        >
-          Apply to Join Us!
-        </Button>
+        <Typography color="white" variant="h5" sx={{ textAlign: "center", fontSize: { xs: "18px", md: "20px" } }}>
+          We are a large community of researchers, students, and instructors dedicated to enhancing the standards of
+          research and education.
+        </Typography>
       </Box>
+      <Button
+        variant="contained"
+        component="a"
+        target="_blank"
+        href="https://1cademy.us/#JoinUsSection"
+        sx={{
+          textTransform: "capitalize",
+          bottom: `${getVirtualHeight}px`,
+          m: "0px",
+          width: { xs: "100%", md: "107px" },
+          maxWidth: { xs: "343px" },
+          height: "60px",
+          background: orangeDark,
+          fontSize: "18px",
+          borderRadius: "8px",
+          ":hover": {
+            background: theme.palette.common.orange,
+          },
+        }}
+      >
+        Apply
+      </Button>
     </Stack>
   );
 };

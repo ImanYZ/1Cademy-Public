@@ -6,6 +6,7 @@ import {
   addToPendingPropsNums,
   compareChoices,
   compareFlatLinks,
+  convertToTGet,
   createUpdateUserVersion,
   getNode,
   getTypedCollections,

@@ -20,6 +20,7 @@ import { admin, db } from "src/lib/firestoreServer/admin";
 import proposeNodeImprovementHandler from "src/pages/api/proposeNodeImprovement";
 import { IInstitution } from "src/types/IInstitution";
 import { INode } from "src/types/INode";
+import { INodeType } from "src/types/INodeType";
 import { INotification } from "src/types/INotification";
 import { IPendingPropNum } from "src/types/IPendingPropNum";
 import { IReputation } from "src/types/IReputationPoint";
@@ -287,6 +288,7 @@ describe("POST /api/proposeNodeImprovement", () => {
             tagIds: [nodes[0].documentId, node4.documentId],
             tags: [nodes[0].title, node4.title],
             id: nodes[2].documentId,
+            nodeType: "Idea" as INodeType,
             addedParents: [String(nodes[0].documentId)],
             addedChildren: [String(nodes[1].documentId)],
             removedParents: [String(nodes[1].documentId)],
@@ -311,7 +313,7 @@ describe("POST /api/proposeNodeImprovement", () => {
 
     it("should be check changedTags=true", async () => {
       let versions = await db
-        .collection("conceptVersions")
+        .collection("ideaVersions")
         .where("title", "==", "RANDOM TITLE")
         .where("node", "==", nodes[2].documentId)
         .where("proposer", "==", users[0].uname)
@@ -322,7 +324,7 @@ describe("POST /api/proposeNodeImprovement", () => {
 
     it("should be check addedTags=true", async () => {
       let versions = await db
-        .collection("conceptVersions")
+        .collection("ideaVersions")
         .where("title", "==", "RANDOM TITLE")
         .where("node", "==", nodes[2].documentId)
         .where("proposer", "==", users[0].uname)
@@ -333,7 +335,7 @@ describe("POST /api/proposeNodeImprovement", () => {
 
     it("should be check changedTitle=true", async () => {
       let versions = await db
-        .collection("conceptVersions")
+        .collection("ideaVersions")
         .where("title", "==", "RANDOM TITLE")
         .where("node", "==", nodes[2].documentId)
         .where("proposer", "==", users[0].uname)
@@ -515,6 +517,29 @@ describe("POST /api/proposeNodeImprovement", () => {
 
     describe("if version getting accepted now", () => {
       describe("if its an improvement", () => {
+        it("node type should be changed", async () => {
+          const nodeDoc = await db.collection("nodes").doc(String(nodes[2].documentId)).get();
+          nodeData = nodeDoc.data() as INode;
+          expect(nodeData.nodeType).toEqual("Idea" as INodeType);
+          expect(nodeData.nodeTypes).toEqual(["Concept", "Idea"]);
+        });
+
+        it("node type should be changed in parents and childrens", async () => {
+          for (const parent of nodeData.parents) {
+            const parentNode = await db.collection("nodes").doc(parent.node).get();
+            const parentNodeData = parentNode.data() as INode;
+            const nodeLink = parentNodeData.children.find(child => child.node === String(nodes[2].documentId));
+            expect(nodeLink?.type).toEqual("Idea" as INodeType);
+          }
+
+          for (const child of nodeData.children) {
+            const childNode = await db.collection("nodes").doc(child.node).get();
+            const childNodeData = childNode.data() as INode;
+            const nodeLink = childNodeData.parents.find(parent => parent.node === String(nodes[2].documentId));
+            expect(nodeLink?.type).toEqual("Idea" as INodeType);
+          }
+        });
+
         it("increase version points of node admin", async () => {
           const nodeDoc = await db.collection("nodes").doc(String(nodes[2].documentId)).get();
           expect(nodeDoc.data()?.versions).toBeGreaterThan(0);
@@ -563,6 +588,7 @@ describe("POST /api/proposeNodeImprovement", () => {
               "addedParents",
               "addedChildren",
               "removedParents",
+              "changedNodeType",
             ]);
           });
         });

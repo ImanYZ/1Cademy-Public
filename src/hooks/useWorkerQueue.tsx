@@ -45,6 +45,8 @@ export const useWorkerQueue = ({
   const [queue, setQueue] = useState<Task[]>([]);
   const [isWorking, setIsWorking] = useState(false);
   const [didWork, setDidWork] = useState(false);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const [deferredTimer, setDeferredTimer] = useState<NodeJS.Timeout | null>(null);
 
   const recalculateGraphWithWorker = useCallback(
     (nodesToRecalculate: FullNodesData, edgesToRecalculate: any) => {
@@ -138,18 +140,27 @@ export const useWorkerQueue = ({
     if (!queue.length) return;
     if (!g?.current) return;
 
-    // CREATE WORKER with Nodes and Nodes changed
-    // console.log("[queue]: recalculateGraphWithWorker", { graph, queue });
-    const individualNodeChanges: FullNodeData[] = queue
-      .map(cur => {
-        if (!cur) return null;
-        return { ...graph.nodes[cur.id], height: cur.height };
-      })
-      .flatMap(cur => cur || []);
-    const nodesToRecalculate = setDagNodes(g.current, individualNodeChanges, graph.nodes, allTags, withClusters);
+    // Implemention of executing only last
+    setDeferredTimer(deferredTimer => {
+      const t = setTimeout(() => {
+        if (deferredTimer) {
+          clearTimeout(deferredTimer);
+        }
+        // CREATE WORKER with Nodes and Nodes changed
+        // console.log("[queue]: recalculateGraphWithWorker", { graph, queue });
+        const individualNodeChanges: FullNodeData[] = queue
+          .map(cur => {
+            if (!cur) return null;
+            return { ...graph.nodes[cur.id], height: cur.height };
+          })
+          .flatMap(cur => cur || []);
+        const nodesToRecalculate = setDagNodes(g.current, individualNodeChanges, graph.nodes, allTags, withClusters);
 
-    recalculateGraphWithWorker(nodesToRecalculate, graph.edges);
-    setQueue([]);
+        recalculateGraphWithWorker(nodesToRecalculate, graph.edges);
+        setQueue([]);
+      }, 100);
+      return t;
+    });
   }, [allTags, g, graph, isWorking, queue, recalculateGraphWithWorker, withClusters]);
 
   const addTask = (newTask: Task) => {

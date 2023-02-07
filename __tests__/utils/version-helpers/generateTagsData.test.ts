@@ -13,6 +13,7 @@ describe("generateTagsData", () => {
   collects.push(new MockData([], "comWeeklyPoints"));
 
   beforeEach(async () => {
+    await Promise.all(collects.map(collect => collect.clean()));
     await Promise.all(collects.map(collect => collect.populate()));
   });
 
