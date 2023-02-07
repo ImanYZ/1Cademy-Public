@@ -213,34 +213,6 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
     }
 
     if (nodeType !== nodeData.nodeType) {
-      for (let parent of nodeData.parents) {
-        const linkedRef = db.collection("nodes").doc(parent.node);
-        const linkedDoc = await convertToTGet(linkedRef, null);
-        const linkedData: any = linkedDoc.data();
-        const newChildren = linkedData.children.filter((child: any) => child.node !== id);
-        newChildren.push({ title: nodeData.title, node: id, label: "", type: nodeType });
-        let newChanges = {
-          children: newChildren,
-          updatedAt: currentTimestamp,
-        };
-        batch.update(linkedRef, newChanges);
-        [batch, writeCounts] = await checkRestartBatchWriteCounts(batch, writeCounts);
-      }
-
-      for (let child of nodeData.children) {
-        const linkedRef = db.collection("nodes").doc(child.node);
-        const linkedDoc = await convertToTGet(linkedRef, null);
-        const linkedData: any = linkedDoc.data();
-        const newParents = linkedData.parents.filter((parent: any) => parent.node !== id);
-        newParents.push({ title: nodeData.title, node: id, label: "", type: nodeType });
-        let newChanges = {
-          parents: newParents,
-          updatedAt: currentTimestamp,
-        };
-
-        batch.update(linkedRef, newChanges);
-        [batch, writeCounts] = await checkRestartBatchWriteCounts(batch, writeCounts);
-      }
       versionData.changedNodeType = true;
 
       const _nodeTypes: string[] = nodeData.nodeTypes || [];

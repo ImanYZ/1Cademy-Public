@@ -1807,6 +1807,42 @@ export const versionCreateUpdate = async ({
               tWriteOperations,
             });
           }
+
+          if (versionData.changedNodeType) {
+            // TODO: move these to queue
+            await detach(async () => {
+              let batch = db.batch();
+              let writeCounts = 0;
+              for (const parent of versionData.parents) {
+                const linkedRef = db.collection("nodes").doc(parent.node);
+                const linkedDoc = await linkedRef.get();
+                const linkedData: any = linkedDoc.data();
+                const newChildren = linkedData.children.filter((child: any) => child.node !== versionData.node);
+                newChildren.push({ title: versionData.title, node: versionData.node, label: "", type: nodeType });
+                batch.update(linkedRef, {
+                  children: newChildren,
+                  updatedAt: Timestamp.fromDate(new Date()),
+                });
+                [batch, writeCounts] = await checkRestartBatchWriteCounts(batch, writeCounts);
+              }
+
+              for (const child of versionData.children) {
+                const linkedRef = db.collection("nodes").doc(child.node);
+                const linkedDoc = await linkedRef.get();
+                const linkedData: any = linkedDoc.data();
+                const newParents = linkedData.parents.filter((parent: any) => parent.node !== versionData.node);
+                newParents.push({ title: versionData.title, node: versionData.node, label: "", type: nodeType });
+                batch.update(linkedRef, {
+                  parents: newParents,
+                  updatedAt: Timestamp.fromDate(new Date()),
+                });
+                [batch, writeCounts] = await checkRestartBatchWriteCounts(batch, writeCounts);
+              }
+
+              await batch.commit();
+            });
+          }
+
           // TODO: move these to queue
           await detach(async () => {
             let linkedNode, linkedNodeChanges;
