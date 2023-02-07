@@ -1,4 +1,4 @@
-import { StatsSchema } from "../../../knowledgeTypes";
+import { StatsSchema } from "../../../../knowledgeTypes";
 
 export type TWhichValue = {
   id: string;

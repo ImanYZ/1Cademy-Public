@@ -2,7 +2,7 @@ import { Box } from "@mui/material";
 import React, { useEffect, useRef, useState } from "react";
 import { useQuery } from "react-query";
 
-import AppFooter3 from "@/components/AppFooter3";
+import AppFooter from "@/components/AppFooter";
 import Benefits from "@/components/home/sections/Benefits";
 import { getStats } from "@/lib/knowledgeApi";
 
@@ -10,6 +10,7 @@ import { AppHeaderMemoized, HEADER_HEIGHT, HEADER_HEIGHT_MOBILE } from "../compo
 import { SectionWrapper } from "../components/home/components/SectionWrapper";
 import UniversitiesMap from "../components/home/components/UniversitiesMap/UniversitiesMap";
 import About from "../components/home/sections/About";
+import { HeroMemoized } from "../components/home/sections/Hero";
 import Join from "../components/home/sections/Join";
 import Magnitude from "../components/home/sections/Magnitude";
 import Mechanism, { MECHANISM_ITEMS } from "../components/home/sections/Mechanism";
@@ -17,7 +18,6 @@ import Papers from "../components/home/sections/Papers";
 import Systems from "../components/home/sections/Systems";
 import Topics from "../components/home/sections/Topics";
 import { ONE_CADEMY_SECTIONS } from "../components/home/SectionsItems";
-import { HeroMemoized } from "../components/home/views/Hero";
 import { useInView, UseInViewProps } from "../hooks/useObserver";
 
 export const gray01 = "#28282a";
@@ -139,7 +139,7 @@ export const Home = () => {
         <Join />
       </Box>
 
-      <AppFooter3 />
+      <AppFooter />
       <style>
         {`
           body{

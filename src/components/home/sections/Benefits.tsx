@@ -13,7 +13,7 @@ import { useState } from "react";
 
 import { gray25, gray50, gray100, gray300, orangeDark } from "@/pages/home";
 
-import valuesItems, { WhyItem } from "../views/valuesItems";
+import valuesItems, { WhyItem } from "./constants/valuesItems";
 
 const Benefits = () => {
   const theme = useTheme();

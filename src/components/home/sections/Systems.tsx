@@ -16,11 +16,11 @@ import { useQuery } from "react-query";
 
 import { getStats } from "@/lib/knowledgeApi";
 import { RE_DETECT_NUMBERS_WITH_COMMAS } from "@/lib/utils/RE";
-import { gray25,gray50, gray100, gray300, orangeDark } from "@/pages/home";
+import { gray25, gray50, gray100, gray300, orangeDark } from "@/pages/home";
 
+import { wrapStringWithBoldTag } from "../../../lib/utils/JSX.utils";
 import { RiveComponentMemoized } from "../components/temporals/RiveComponentExtended";
-import { wrapStringWithBoldTag } from "../views/HowItWorks";
-import whichValues, { TWhichValue } from "../views/whichValues";
+import whichValues, { TWhichValue } from "./constants/whichValues";
 
 const Systems = () => {
   const theme = useTheme();

@@ -1,8 +1,8 @@
 import { Box, Link, Typography } from "@mui/material";
 import React from "react";
 
+import { wrapStringWithTag } from "../../../lib/utils/JSX.utils";
 import { RE_DETECT_TEXT } from "../../../lib/utils/RE";
-import { wrapStringWithTag } from "../views/HowItWorks";
 
 const PAPER_ITEMS = [
   {

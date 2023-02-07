@@ -11,9 +11,10 @@ import {
 } from "@mui/material";
 import { useState } from "react";
 
-import { gray25, gray50,gray100, gray200, gray300, gray600, orangeDark } from "@/pages/home";
+import { gray25, gray50, gray100, gray200, gray300, gray600, orangeDark } from "@/pages/home";
 
 import whyItems, { TWhyItem } from "./whyItems";
+
 const Benefits = () => {
   const theme = useTheme();
   const [expanded, setExpanded] = useState<string | false>("Option1");

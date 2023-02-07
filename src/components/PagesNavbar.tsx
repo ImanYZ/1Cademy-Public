@@ -17,7 +17,7 @@ import React, { FC, ReactNode, useState } from "react";
 import { useAuth } from "@/context/AuthContext";
 import SECTIONS from "@/lib/utils/navbarSections";
 
-import AppFooter from "./AppFooter2";
+import AppFooter from "./AppFooter";
 import AppHeader from "./AppHeader";
 import AppMenuMovil from "./AppMenuMovil";
 import FeedbackForm from "./FeedbackForm";

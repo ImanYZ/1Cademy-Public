@@ -6,7 +6,7 @@ import NextImage from "next/image";
 import React from "react";
 
 import logo1cademy from "../../../public/assistant/1Assistant.svg";
-import { DividerStyled } from "../AppFooter3";
+import { DividerStyled } from "../AppFooter";
 import { ONE_ASSISTANT_SECTIONS } from "./sections";
 type AppFooterProps = {
   sx?: SxProps<Theme>;

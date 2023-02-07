@@ -1,8 +1,5 @@
 import CloseIcon from "@mui/icons-material/Close";
 import { Box, IconButton, Modal, useMediaQuery } from "@mui/material";
-// const ValuesMemoized = dynamic(() => import("../components/assistant/Why"), { suspense: true, ssr: false });
-// const Which = dynamic(() => import("../components/home/views/Which"), { suspense: true, ssr: false });
-// const WhoWeAre = dynamic(() => import("../components/home/views/WhoWeAre"), { suspense: true, ssr: false });
 import React, { useEffect, useRef, useState } from "react";
 
 import AppHeaderMemoized from "@/components/AppHeader2";

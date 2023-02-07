@@ -2,10 +2,10 @@ import { Box, Typography } from "@mui/material";
 import { forwardRef, ReactNode } from "react";
 
 import { StatsSchema } from "../../../knowledgeTypes";
+import { wrapStringWithBoldTag } from "../../../lib/utils/JSX.utils";
 import { RE_DETECT_NUMBERS_WITH_COMMAS } from "../../../lib/utils/RE";
 import { gray200, gray600 } from "../../../pages/home";
 import { HomepageSection } from "../SectionsItems";
-import { wrapStringWithBoldTag } from "../views/HowItWorks";
 
 const getDescription = (section: HomepageSection, stats?: StatsSchema): string => {
   const statsCopy = { ...stats };

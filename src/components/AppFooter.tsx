@@ -19,7 +19,7 @@ export const DividerStyled = styled((props: DividerProps) => <Divider {...props}
   borderColor: gray800,
 }));
 
-const AppFooter3 = ({ sx }: AppFooterProps) => {
+const AppFooter = ({ sx }: AppFooterProps) => {
   return (
     <Box
       component={"footer"}
@@ -155,4 +155,4 @@ const AppFooter3 = ({ sx }: AppFooterProps) => {
   );
 };
 
-export default AppFooter3;
+export default AppFooter;
