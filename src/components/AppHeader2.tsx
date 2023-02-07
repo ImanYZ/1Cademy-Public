@@ -6,14 +6,14 @@ import LightModeIcon from "@mui/icons-material/LightMode";
 import LogoutIcon from "@mui/icons-material/Logout";
 import MenuIcon from "@mui/icons-material/Menu";
 import SearchIcon from "@mui/icons-material/Search";
-import { ClickAwayListener, Collapse, Link, Modal, Typography, useTheme } from "@mui/material";
+import { ClickAwayListener, Collapse, Link, Modal, Theme, Typography, useMediaQuery, useTheme } from "@mui/material";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import IconButton from "@mui/material/IconButton";
 import Menu from "@mui/material/Menu";
 import MenuItem from "@mui/material/MenuItem";
 import Tooltip from "@mui/material/Tooltip";
-import { Stack } from "@mui/system";
+import { Stack, SxProps } from "@mui/system";
 import { getAuth } from "firebase/auth";
 import Image from "next/image";
 import { useRouter } from "next/router";
@@ -23,6 +23,7 @@ import useThemeChange from "@/hooks/useThemeChange";
 import { gray25, gray200, gray300, gray600, gray700, gray900, orange800, orange900, orangeDark } from "@/pages/home";
 
 import oneCademyLogo from "../../public/DarkmodeLogo.png";
+import oneCademyLogoExtended from "../../public/logo-extended.png";
 import { useAuth } from "../context/AuthContext";
 import ROUTES from "../lib/utils/routes";
 import { capitalizeString } from "../lib/utils/string.utils";
@@ -41,12 +42,26 @@ type MenuBarProps = {
 };
 
 const MenuBar = ({ items, onCloseMenu, selectedSectionId }: MenuBarProps) => {
+  const [idxOptionVisible, setIdxOptionVisible] = useState(-1);
+  const [{ isAuthenticated }] = useAuth();
+  const router = useRouter();
+
+  const signUpHandler = () => {
+    router.push(ROUTES.signIn);
+  };
+
   return (
     <Stack
       direction={"column"}
       justifyContent={"space-between"}
       alignItems={"center"}
-      sx={{ height: { xs: `calc(100vh - ${HEADER_HEIGHT_MOBILE}px)`, md: `calc(100vh - ${HEADER_HEIGHT}px)` } }}
+      sx={{
+        height: {
+          xs: `calc(100vh - ${HEADER_HEIGHT_MOBILE}px)`,
+          md: `calc(100vh - ${HEADER_HEIGHT}px)`,
+          overflowY: "auto",
+        },
+      }}
     >
       <Stack
         flex={1}
@@ -56,34 +71,107 @@ const MenuBar = ({ items, onCloseMenu, selectedSectionId }: MenuBarProps) => {
         spacing="32px"
         padding={"32px"}
       >
-        {items.map(cur => {
-          return (
-            <Tooltip key={cur.id} title={cur.title} placement={"right"}>
-              <Link
-                href={`#${cur.id}`}
-                onClick={() => onCloseMenu(cur.id)}
+        {items.map((cur, idx) => {
+          return cur.options.length ? (
+            <Box key={cur.id}>
+              <Box sx={{ display: "flex" }}>
+                <Link
+                  href={`#${cur.id}`}
+                  onClick={() => onCloseMenu(cur.id)}
+                  sx={{
+                    color: theme => (theme.palette.mode === "dark" ? gray200 : gray600),
+                    cursor: "pointer",
+                    textDecoration: "none",
+                    borderBottom: selectedSectionId === cur.id ? `solid 2px ${orangeDark}` : undefined,
+                  }}
+                >
+                  {cur.label}
+                </Link>
+                <IconButton
+                  onClick={() => setIdxOptionVisible(prev => (prev === idx ? -1 : idx))}
+                  size="small"
+                  sx={{ p: "0px", ml: { xs: "4px", lg: "13px" } }}
+                >
+                  {idxOptionVisible === idx ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
+                </IconButton>
+              </Box>
+              <SubMenu
+                onCloseSubMenu={() => setIdxOptionVisible(-1)}
+                sectionVisible={items[idxOptionVisible]}
                 sx={{
-                  color: theme => (theme.palette.mode === "dark" ? gray200 : gray600),
-                  cursor: "pointer",
-                  textDecoration: "none",
-                  borderBottom: selectedSectionId === cur.id ? `solid 2px ${orangeDark}` : undefined,
+                  border: theme => `solid 1px ${theme.palette.mode === "dark" ? "#FFFFFF4D" : gray200}`,
+                  borderRadius: "12px",
                 }}
-              >
-                {cur.label}
-              </Link>
-            </Tooltip>
+              />
+            </Box>
+          ) : (
+            <Link
+              key={cur.id}
+              href={`#${cur.id}`}
+              onClick={() => onCloseMenu(cur.id)}
+              sx={{
+                color: theme => (theme.palette.mode === "dark" ? gray200 : gray600),
+                cursor: "pointer",
+                textDecoration: "none",
+                borderBottom: selectedSectionId === cur.id ? `solid 2px ${orangeDark}` : undefined,
+              }}
+            >
+              {cur.label}
+            </Link>
           );
         })}
+
+        {!isAuthenticated && (
+          <Button
+            variant="contained"
+            onClick={() => window?.open(ROUTES.apply, "_blank")}
+            sx={{
+              display: { xs: "flex", sm: "none" },
+              background: orangeDark,
+              fontSize: 16,
+              borderRadius: 40,
+              height: "25px",
+              textTransform: "capitalize",
+              ":hover": {
+                background: orange900,
+              },
+            }}
+          >
+            Apply
+          </Button>
+        )}
+
+        {!isAuthenticated && (
+          <Button
+            variant="contained"
+            color="secondary"
+            onClick={signUpHandler}
+            sx={{
+              display: { xs: "flex", sm: "none" },
+              fontSize: 16,
+              backgroundColor: theme => (theme.palette.mode === "dark" ? "#303030" : "#e4e4e4"),
+              color: theme => (theme.palette.mode === "dark" ? theme.palette.common.white : theme.palette.common.black),
+              borderRadius: 40,
+              height: "25px",
+              textTransform: "capitalize",
+              ":hover": {
+                backgroundColor: theme => (theme.palette.mode === "dark" ? "#444444" : "#cacaca"),
+              },
+            }}
+          >
+            Sign In/Up
+          </Button>
+        )}
       </Stack>
     </Stack>
   );
 };
 
-type SubMenuProps = { onCloseSubMenu: () => void; sectionVisible?: HomepageSection };
+type SubMenuProps = { onCloseSubMenu: () => void; sectionVisible?: HomepageSection; sx?: SxProps<Theme> };
 
-const SubMenu = ({ onCloseSubMenu, sectionVisible }: SubMenuProps) => {
+const SubMenu = ({ onCloseSubMenu, sectionVisible, sx }: SubMenuProps) => {
   return (
-    <Collapse in={Boolean(sectionVisible)} timeout="auto" unmountOnExit>
+    <Collapse in={Boolean(sectionVisible)} timeout="auto" unmountOnExit sx={{ ...sx }}>
       {sectionVisible && (
         <ClickAwayListener onClickAway={onCloseSubMenu}>
           <Box
@@ -95,10 +183,13 @@ const SubMenu = ({ onCloseSubMenu, sectionVisible }: SubMenuProps) => {
             }}
           >
             <Typography sx={{ mb: "12px", color: orange800 }}>{sectionVisible.title}</Typography>
-            <Box sx={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr" }}>
+            <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", md: "1fr 1fr 1fr" } }}>
               {sectionVisible.options.map(cur => (
                 <Link
                   key={cur.title}
+                  href={cur.link}
+                  rel="noopener"
+                  target="_blank"
                   sx={{
                     textDecoration: "none",
                     p: "12px",
@@ -157,6 +248,7 @@ const AppHeader = ({ page, sections, selectedSectionId, onPreventSwitch }: AppHe
   const [handleThemeSwitch] = useThemeChange();
   const theme = useTheme();
   const router = useRouter();
+  const isMobile = useMediaQuery("(max-width:599px)");
 
   const [profileMenuOpen, setProfileMenuOpen] = useState(null);
   const isProfileMenuOpen = Boolean(profileMenuOpen);
@@ -216,7 +308,7 @@ const AppHeader = ({ page, sections, selectedSectionId, onPreventSwitch }: AppHe
           direction={"row"}
           justifyContent="space-between"
           alignItems="center"
-          spacing={"16px"}
+          spacing={{ xs: "2px", sm: "8px", md: "16px" }}
           sx={{
             px: { xs: "16px", sm: "32px" },
             maxWidth: "1280px",
@@ -227,14 +319,15 @@ const AppHeader = ({ page, sections, selectedSectionId, onPreventSwitch }: AppHe
           <Stack direction={"row"} alignItems="center" spacing={"16px"}>
             <Tooltip title="1Cademy's Landing Page">
               <img
-                src={oneCademyLogo.src}
+                src={isMobile ? oneCademyLogoExtended.src : oneCademyLogo.src}
                 alt="logo"
-                width="60px"
-                height="64px"
+                width={isMobile ? "149px" : "60px"}
+                height={isMobile ? "40px" : "64px"}
                 style={{ cursor: "pointer" }}
                 onClick={() => router.push("/")}
               />
             </Tooltip>
+
             <Stack
               direction={"row"}
               aria-label="navigation bar"
@@ -250,7 +343,7 @@ const AppHeader = ({ page, sections, selectedSectionId, onPreventSwitch }: AppHe
             >
               {sections.slice(1).map((cur, idx) => {
                 return cur.options.length ? (
-                  <Box>
+                  <Box key={cur.id} sx={{ display: "flex" }}>
                     <Link
                       href={`#${cur.id}`}
                       onClick={() => onPreventSwitch(cur.id)}
@@ -271,7 +364,7 @@ const AppHeader = ({ page, sections, selectedSectionId, onPreventSwitch }: AppHe
                     <IconButton
                       onClick={() => setIdxOptionVisible(prev => (prev === idx ? -1 : idx))}
                       size="small"
-                      sx={{ p: "0px", ml: "13px" }}
+                      sx={{ p: "0px", ml: { xs: "4px", lg: "13px" } }}
                     >
                       {idxOptionVisible === idx ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
                     </IconButton>
@@ -355,11 +448,14 @@ const AppHeader = ({ page, sections, selectedSectionId, onPreventSwitch }: AppHe
                     variant="contained"
                     onClick={() => window?.open(ROUTES.apply, "_blank")}
                     sx={{
+                      display: { xs: "none", sm: "flex" },
+                      p: { xs: "6px 10px", lg: undefined },
+                      minWidth: "54px",
                       background: orangeDark,
                       fontSize: 16,
                       borderRadius: 40,
                       height: "25px",
-                      width: "60px",
+                      // width: "60px",
                       textTransform: "capitalize",
                       ":hover": {
                         background: orange900,
@@ -407,7 +503,9 @@ const AppHeader = ({ page, sections, selectedSectionId, onPreventSwitch }: AppHe
                     color="secondary"
                     onClick={signUpHandler}
                     sx={{
-                      minWidth: "120px",
+                      display: { xs: "none", sm: "flex" },
+                      p: { xs: "6px 10px", lg: undefined },
+                      minWidth: "95px",
                       fontSize: 16,
                       backgroundColor: theme.palette.mode === "dark" ? "#303030" : "#e4e4e4",
                       color: theme.palette.mode === "dark" ? theme.palette.common.white : theme.palette.common.black,
@@ -440,7 +538,8 @@ const AppHeader = ({ page, sections, selectedSectionId, onPreventSwitch }: AppHe
                   color="secondary"
                   onClick={() => setOpenForm(true)}
                   sx={{
-                    minWidth: "120px",
+                    p: { xs: "6px 10px", lg: undefined },
+                    minWidth: "95px",
                     fontSize: 16,
                     backgroundColor: theme.palette.mode === "dark" ? "#303030" : "#e4e4e4",
                     color: theme.palette.mode === "dark" ? theme.palette.common.white : theme.palette.common.black,
