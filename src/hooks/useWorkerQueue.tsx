@@ -158,7 +158,7 @@ export const useWorkerQueue = ({
 
         recalculateGraphWithWorker(nodesToRecalculate, graph.edges);
         setQueue([]);
-      }, 500);
+      }, 100);
       return t;
     });
   }, [allTags, g, graph, isWorking, queue, recalculateGraphWithWorker, withClusters]);
