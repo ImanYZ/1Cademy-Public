@@ -34,6 +34,7 @@ export const gray800 = "#1D2939";
 export const gray900 = "#0A0D14";
 export const orangeDark = "#FF6D00";
 export const orangeLight = "#FF6D00";
+export const orange800 = "#FF6D00";
 export const orange900 = "#E56200";
 
 const observerOption: UseInViewProps = { options: { root: null, rootMargin: "-380px 0px -380px 0px", threshold: 0 } };

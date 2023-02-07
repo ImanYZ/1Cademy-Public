@@ -1,10 +1,12 @@
 import CloseIcon from "@mui/icons-material/Close";
 import DarkModeIcon from "@mui/icons-material/DarkMode";
+import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
+import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
 import LightModeIcon from "@mui/icons-material/LightMode";
 import LogoutIcon from "@mui/icons-material/Logout";
 import MenuIcon from "@mui/icons-material/Menu";
 import SearchIcon from "@mui/icons-material/Search";
-import { Link, Modal, Typography, useTheme } from "@mui/material";
+import { ClickAwayListener, Collapse, Link, Modal, Typography, useTheme } from "@mui/material";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import IconButton from "@mui/material/IconButton";
@@ -18,7 +20,7 @@ import { useRouter } from "next/router";
 import React, { useState } from "react";
 
 import useThemeChange from "@/hooks/useThemeChange";
-import { gray200, gray300, gray600, gray700, orange900, orangeDark } from "@/pages/home";
+import { gray25, gray200, gray300, gray600, gray700, gray900, orange800, orange900, orangeDark } from "@/pages/home";
 
 import oneCademyLogo from "../../public/DarkmodeLogo.png";
 import { useAuth } from "../context/AuthContext";
@@ -73,23 +75,80 @@ const MenuBar = ({ items, onCloseMenu, selectedSectionId }: MenuBarProps) => {
           );
         })}
       </Stack>
-      {/* TODO: add footer */}
-      {/* <AppFooter /> */}
     </Stack>
   );
 };
 
-// type AppHeaderProps = {
-//   switchSection: any;
-//   homeClick: any;
-// };
+type SubMenuProps = { onCloseSubMenu: () => void; sectionVisible?: HomepageSection };
+
+const SubMenu = ({ onCloseSubMenu, sectionVisible }: SubMenuProps) => {
+  return (
+    <Collapse in={Boolean(sectionVisible)} timeout="auto" unmountOnExit>
+      {sectionVisible && (
+        <ClickAwayListener onClickAway={onCloseSubMenu}>
+          <Box
+            sx={{
+              p: { xs: "16px", sm: "32px" },
+              maxWidth: "1280px",
+              margin: "auto",
+              // background: theme => (theme.palette.mode === "dark" ? "#16161aff" : "#f8f8f8ff"),
+            }}
+          >
+            <Typography sx={{ mb: "12px", color: orange800 }}>{sectionVisible.title}</Typography>
+            <Box sx={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr" }}>
+              {sectionVisible.options.map(cur => (
+                <Link
+                  key={cur.title}
+                  sx={{
+                    textDecoration: "none",
+                    p: "12px",
+                    cursor: "pointer",
+                    borderRadius: "16px",
+                    color: theme => (theme.palette.mode === "dark" ? gray200 : "black"),
+                    ":hover": {
+                      background: theme => (theme.palette.mode === "dark" ? gray25 : "black"),
+                      // color: theme => (theme.palette.mode === "dark" ? "black" : gray200),
+                      ".link-option-title": {
+                        color: theme => (theme.palette.mode === "dark" ? gray900 : gray200),
+                      },
+                      ".link-option-description": {
+                        color: theme => (theme.palette.mode === "dark" ? gray600 : gray300),
+                      },
+                    },
+                  }}
+                >
+                  <Typography
+                    className="link-option-title"
+                    sx={{
+                      mb: "4px",
+                      color: theme => (theme.palette.mode === "dark" ? gray200 : gray900),
+                      fontSize: "16px",
+                      fontWeight: 600,
+                    }}
+                  >
+                    {cur.title}
+                  </Typography>
+                  <Typography
+                    className="link-option-description"
+                    sx={{ color: theme => (theme.palette.mode === "dark" ? gray300 : gray600), fontSize: "14px" }}
+                  >
+                    {cur.description.split(" ").slice(0, 13).join(" ") + "..."}
+                  </Typography>
+                </Link>
+              ))}
+            </Box>
+          </Box>
+        </ClickAwayListener>
+      )}
+    </Collapse>
+  );
+};
 
 type AppHeaderProps = {
   page: "ONE_CADEMY" | "ONE_ASSISTANT";
   sections: HomepageSection[];
   selectedSectionId: string;
   onPreventSwitch: (sectionId: string) => void;
-  // onClickSearcher?: () => void;
 };
 
 const AppHeader = ({ page, sections, selectedSectionId, onPreventSwitch }: AppHeaderProps) => {
@@ -103,6 +162,7 @@ const AppHeader = ({ page, sections, selectedSectionId, onPreventSwitch }: AppHe
   const isProfileMenuOpen = Boolean(profileMenuOpen);
   const [openMenu, setOpenMenu] = useState(false);
   const [openForm, setOpenForm] = useState(false);
+  const [idxOptionVisible, setIdxOptionVisible] = useState(-1);
 
   const signOut = async () => {
     router.push(ROUTES.home);
@@ -188,8 +248,35 @@ const AppHeader = ({ page, sections, selectedSectionId, onPreventSwitch }: AppHe
                 },
               }}
             >
-              {sections.slice(1).map(cur => {
-                return (
+              {sections.slice(1).map((cur, idx) => {
+                return cur.options.length ? (
+                  <Box>
+                    <Link
+                      href={`#${cur.id}`}
+                      onClick={() => onPreventSwitch(cur.id)}
+                      sx={{
+                        whiteSpace: "nowrap",
+                        color: theme => (theme.palette.mode === "dark" ? gray200 : gray600),
+                        cursor: "pointer",
+                        textDecoration: "none",
+                        fontWeight: 600,
+                        borderBottom: selectedSectionId === cur.id ? `solid 2px ${orangeDark}` : undefined,
+                        ":hover": {
+                          color: theme => (theme.palette.mode === "dark" ? gray300 : gray700),
+                        },
+                      }}
+                    >
+                      {cur.label}
+                    </Link>
+                    <IconButton
+                      onClick={() => setIdxOptionVisible(prev => (prev === idx ? -1 : idx))}
+                      size="small"
+                      sx={{ p: "0px", ml: "13px" }}
+                    >
+                      {idxOptionVisible === idx ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
+                    </IconButton>
+                  </Box>
+                ) : (
                   <Tooltip key={cur.id} title={cur.title}>
                     <Link
                       href={`#${cur.id}`}
@@ -385,6 +472,21 @@ const AppHeader = ({ page, sections, selectedSectionId, onPreventSwitch }: AppHe
           <MenuBar items={sections.slice(1)} onCloseMenu={onCloseMenu} selectedSectionId={selectedSectionId} />
         )}
 
+        <Box
+          sx={{
+            position: "absolute",
+            top: "80px",
+            left: "0px",
+            right: "0px",
+            background: theme => (theme.palette.mode === "dark" ? "#000000ff" : "#f8f8f8ff"),
+          }}
+        >
+          <SubMenu
+            onCloseSubMenu={() => setIdxOptionVisible(-1)}
+            sectionVisible={sections.slice(1)[idxOptionVisible]}
+          />
+        </Box>
+
         {page === "ONE_ASSISTANT" && (
           <Modal open={openForm} onClose={() => setOpenForm(false)}>
             <Box
@@ -426,7 +528,6 @@ const AppHeader = ({ page, sections, selectedSectionId, onPreventSwitch }: AppHe
           <SearcherPupUp onClose={() => setOpenSearch(false)} />
         </Box>
       </Modal>
-      )
     </>
   );
 };
