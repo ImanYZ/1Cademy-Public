@@ -827,15 +827,15 @@ const Node = ({
                           label="Start Time"
                           value={startTimeValue}
                           onChange={newValue => {
-                            console.log(newValue, "newValue");
                             setStartTimeValue(newValue);
-                            setVideoStartTime(momentDateToSeconds(moment(newValue)));
-                            if (nodeVideoStartTime !== momentDateToSeconds(moment(newValue))) {
-                              setNodeParts(identifier, node => ({
-                                ...node,
-                                nodeVideoStartTime: momentDateToSeconds(moment(newValue)),
-                              }));
-                            }
+                            startTransition(() => {
+                              if (nodeVideoStartTime !== momentDateToSeconds(moment(newValue))) {
+                                setNodeParts(identifier, node => ({
+                                  ...node,
+                                  nodeVideoStartTime: momentDateToSeconds(moment(newValue)),
+                                }));
+                              }
+                            });
                           }}
                           renderInput={params => <TextField {...params} />}
                         />
@@ -876,13 +876,14 @@ const Node = ({
                           value={endTimeValue}
                           onChange={newValue => {
                             setEndTimeValue(newValue);
-                            setVideoEndTime(momentDateToSeconds(moment(newValue)));
-                            if (nodeVideoEndTime !== momentDateToSeconds(moment(newValue))) {
-                              setNodeParts(identifier, node => ({
-                                ...node,
-                                nodeVideoEndTime: momentDateToSeconds(moment(newValue)),
-                              }));
-                            }
+                            startTransition(() => {
+                              if (nodeVideoEndTime !== momentDateToSeconds(moment(newValue))) {
+                                setNodeParts(identifier, node => ({
+                                  ...node,
+                                  nodeVideoEndTime: momentDateToSeconds(moment(newValue)),
+                                }));
+                              }
+                            });
                           }}
                           renderInput={params => <TextField {...params} />}
                         />
