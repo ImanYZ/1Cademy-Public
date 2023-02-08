@@ -28,14 +28,11 @@ export const SectionItemSwitcher = ({ items }: SectionItemSwitcherProps) => {
   const MediaComponent = useMemo(() => {
     const selectedItem = items[expandedIdx];
     if (!selectedItem) return null;
+    const src = theme.palette.mode === "dark" ? selectedItem.imageDark : selectedItem.image;
+    console.log({ src });
+    if (!src) return null;
 
-    return (
-      <img
-        src={`${theme.palette.mode === "dark" ? selectedItem.imageDark : selectedItem.image}`}
-        alt={selectedItem.title}
-        style={{ width: "100%", height: "100%" }}
-      />
-    );
+    return <img src={`${src}`} alt={selectedItem.title} style={{ width: "100%", height: "100%" }} />;
   }, [expandedIdx, items, theme.palette.mode]);
 
   return (
@@ -103,19 +100,7 @@ export const SectionItemSwitcher = ({ items }: SectionItemSwitcherProps) => {
               >
                 {cur.content}
               </Typography>
-
-              <Box
-                sx={{
-                  width: { xs: "350px", sm: "400px", md: "450px", lg: "600px" },
-                  minWidth: { xs: "350px", sm: "400px", md: "450px", lg: "600px" },
-                  height: { xs: "350px", sm: "400px", md: "450px", lg: "600px" },
-                  alignSelf: "center",
-                  display: { xs: "block", md: "none" },
-                  m: "0 auto",
-                }}
-              >
-                {MediaComponent}
-              </Box>
+              <Box sx={{ display: { xs: "block", md: "none" }, maxWidth: "400px", m: "auto" }}>{MediaComponent}</Box>
             </AccordionDetails>
           </Accordion>
         ))}
@@ -123,10 +108,10 @@ export const SectionItemSwitcher = ({ items }: SectionItemSwitcherProps) => {
 
       <Box
         sx={{
-          display: { xs: "none", md: "block" },
+          display: { xs: "none", md: "flex", alignItems: "center" },
         }}
       >
-        {MediaComponent}
+        <Box sx={{ width: "100%", height: "auto" }}>{MediaComponent}</Box>
       </Box>
     </Box>
   );
