@@ -29,7 +29,6 @@ export const SectionItemSwitcher = ({ items }: SectionItemSwitcherProps) => {
     const selectedItem = items[expandedIdx];
     if (!selectedItem) return null;
     const src = theme.palette.mode === "dark" ? selectedItem.imageDark : selectedItem.image;
-    console.log({ src });
     if (!src) return null;
 
     return <img src={`${src}`} alt={selectedItem.title} style={{ width: "100%", height: "100%" }} />;

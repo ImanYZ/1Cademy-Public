@@ -11,17 +11,16 @@ import {
   useMediaQuery,
 } from "@mui/material";
 import Box from "@mui/material/Box";
-import { useRouter } from "next/router";
-import React, { FC, ReactNode, useState } from "react";
+import React, { FC, ReactNode, useRef, useState } from "react";
 
-import { useAuth } from "@/context/AuthContext";
-import SECTIONS from "@/lib/utils/navbarSections";
-
+// import { useAuth } from "@/context/AuthContext";
+import ROUTES from "../lib/utils/routes";
 import AppFooter from "./AppFooter";
-import AppHeader from "./AppHeader";
-import AppMenuMovil from "./AppMenuMovil";
+// import AppMenuMovil from "./AppMenuMovil";
 import FeedbackForm from "./FeedbackForm";
 import Head from "./Head";
+import AppHeaderMemoized from "./Header/AppHeader";
+import { ONE_CADEMY_SECTIONS } from "./home/SectionsItems";
 
 type Props = {
   children: ReactNode;
@@ -32,42 +31,47 @@ type Props = {
   onClickSearcher?: () => void;
 };
 
-const PagesNavbar: FC<Props> = ({ children, title, description, enableMenu, onClickSearcher }) => {
-  const router = useRouter();
-
+const PagesNavbar: FC<Props> = ({ children, title, description }) => {
   const isDesktop = useMediaQuery("(min-width:1200px)");
   const [showMobileFeedbackForm, setShowMobileFeedbackForm] = useState(false);
   const [showFeedbackForm, setShowFeedbackForm] = useState(false);
-  const [showMenu, setShowMenu] = useState(false);
-  const [{ isAuthenticated }] = useAuth();
+  // const [showMenu, setShowMenu] = useState(false);
+  // const [{ isAuthenticated }] = useAuth();
 
-  const onSendFeedback = () => {
-    setShowMenu(false);
-    setShowMobileFeedbackForm(true);
-  };
+  const isScrolling = useRef(false);
+  const timer = useRef<NodeJS.Timeout | null>(null);
 
-  const switchSection = (idx: number) => {
-    SECTIONS[idx].label === "NODE" ? router.push(SECTIONS[idx].route) : open(SECTIONS[idx].route, "_blank");
+  // const onSendFeedback = () => {
+  //   setShowMenu(false);
+  //   setShowMobileFeedbackForm(true);
+  // };
+
+  const onSwitchSection = (newSelectedSectionId: string) => {
+    isScrolling.current = true;
+    if (timer.current) clearTimeout(timer.current);
+
+    timer.current = setTimeout(() => {
+      isScrolling.current = false;
+      if (timer.current) clearTimeout(timer.current);
+    }, 1000);
+
+    // setSelectedSectionId(newSelectedSectionId);
+    const newHash = newSelectedSectionId ? `#${newSelectedSectionId}` : "";
+    if (window.location.hash === newHash) return;
+    window.location.hash = newHash;
   };
 
   return (
     <>
       <Head title={title} description={description} />
-      {/* <AppHeaderNavbar
-        showMenu={showMenu}
-        onCloseMenu={onCloseMenu}
-        onShowMenu={onShowMenu}
-        showSearch={showSearch}
-        isSignedIn={isAuthenticated}
-      /> */}
-      {/* //onClickSearcher?: () => void; */}
-      <AppHeader
-        sections={SECTIONS}
-        switchSection={switchSection}
-        enableMenu={enableMenu}
-        onClickSearcher={onClickSearcher}
+      <AppHeaderMemoized
+        page="ONE_CADEMY"
+        sections={ONE_CADEMY_SECTIONS}
+        selectedSectionId={""}
+        onPreventSwitch={onSwitchSection}
+        preUrl={ROUTES.home}
       />
-      {showMenu && <AppMenuMovil isSignedIn={isAuthenticated} onSendFeedback={onSendFeedback} />}
+      {/* {showMenu && <AppMenuMovil isSignedIn={isAuthenticated} onSendFeedback={onSendFeedback} />} */}
       <Box
         component="main"
         sx={{
@@ -133,7 +137,7 @@ const PagesNavbar: FC<Props> = ({ children, title, description, enableMenu, onCl
             <FeedbackForm onSuccessFeedback={() => setShowFeedbackForm(false)} sx={{ padding: "40px 50px" }} />
           </ClickAwayListener>
         }
-        sx={{ display: { xs: "none", md: "block" } }}
+        // sx={{ display: { xs: "none", md: "block" } }}
       >
         <Fab
           aria-label="Open Feedback"
@@ -142,14 +146,16 @@ const PagesNavbar: FC<Props> = ({ children, title, description, enableMenu, onCl
           sx={{
             color: theme => theme.palette.common.white,
             float: "right",
-            display: { xs: "none", md: "flex" },
+            // display: { xs: "none", md: "flex" },
             position: "fixed",
             bottom: "28px",
             right: "30px",
+            width: { xs: "36px", md: "56px" },
+            height: { xs: "36px", md: "56px" },
           }}
         >
           <Tooltip title={"Question/Feedback"} placement="top">
-            <QuestionMarkIcon />
+            <QuestionMarkIcon sx={{ fontSize: { xs: "20px", md: "32px" } }} />
           </Tooltip>
         </Fab>
       </FeedbackTooltip>

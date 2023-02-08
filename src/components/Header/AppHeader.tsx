@@ -45,9 +45,10 @@ type AppHeaderProps = {
   sections: HomepageSection[];
   selectedSectionId: string;
   onPreventSwitch: (sectionId: string) => void;
+  preUrl?: string;
 };
 
-const AppHeader = ({ page, sections, selectedSectionId, onPreventSwitch }: AppHeaderProps) => {
+const AppHeader = ({ page, sections, selectedSectionId, onPreventSwitch, preUrl }: AppHeaderProps) => {
   const [openSearch, setOpenSearch] = useState(false);
   const [{ isAuthenticated, user }] = useAuth();
   const [handleThemeSwitch] = useThemeChange();
@@ -109,6 +110,7 @@ const AppHeader = ({ page, sections, selectedSectionId, onPreventSwitch }: AppHe
           zIndex: "22",
         }}
       >
+        {/* Navbar Left Options */}
         <Stack
           direction={"row"}
           justifyContent="space-between"
@@ -146,10 +148,10 @@ const AppHeader = ({ page, sections, selectedSectionId, onPreventSwitch }: AppHe
                 },
               }}
             >
-              {sections.slice(1).map((cur, idx) => {
-                return cur.options?.length ? (
+              {sections.slice(1).map((cur, idx) =>
+                cur.options?.length ? (
                   <Box key={cur.id} sx={{ display: "flex" }}>
-                    <Link href={`#${cur.id}`}>
+                    <Link href={preUrl ? `${preUrl}#${cur.id}` : `#${cur.id}`} replace>
                       <LinkMUI
                         onClick={() => onPreventSwitch(cur.id)}
                         onMouseOver={() => setIdxOptionVisible(prev => (prev === idx ? -1 : idx))}
@@ -178,7 +180,7 @@ const AppHeader = ({ page, sections, selectedSectionId, onPreventSwitch }: AppHe
                   </Box>
                 ) : (
                   <Tooltip key={cur.id} title={cur.title}>
-                    <Link href={`#${cur.id}`}>
+                    <Link href={preUrl ? `${preUrl}#${cur.id}` : `#${cur.id}`} replace>
                       <LinkMUI
                         onClick={() => onPreventSwitch(cur.id)}
                         onMouseOver={() => setIdxOptionVisible(-1)}
@@ -198,8 +200,8 @@ const AppHeader = ({ page, sections, selectedSectionId, onPreventSwitch }: AppHe
                       </LinkMUI>
                     </Link>
                   </Tooltip>
-                );
-              })}
+                )
+              )}
             </Stack>
           </Stack>
 
