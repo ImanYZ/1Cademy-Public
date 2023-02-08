@@ -145,47 +145,47 @@ const MenuBar = ({ items, onCloseMenu, selectedSectionId }: MenuBarProps) => {
             </Box>
           );
         })}
-
         {!isAuthenticated && (
-          <Button
-            variant="contained"
-            onClick={() => window?.open(ROUTES.apply, "_blank")}
-            sx={{
-              display: { xs: "flex", sm: "none" },
-              background: orangeDark,
-              fontSize: 16,
-              borderRadius: 40,
-              // height: "25px",
-              textTransform: "capitalize",
-              ":hover": {
-                background: orange900,
-              },
-            }}
-          >
-            Apply
-          </Button>
-        )}
+          <Stack spacing={"12px"} sx={{ p: { xs: "12px 16px" }, width: "100%" }}>
+            <Button
+              variant="contained"
+              color="secondary"
+              onClick={signUpHandler}
+              sx={{
+                display: { xs: "flex", sm: "none" },
+                fontSize: 16,
+                backgroundColor: theme => (theme.palette.mode === "dark" ? "#303030" : "#e4e4e4"),
+                color: theme =>
+                  theme.palette.mode === "dark" ? theme.palette.common.white : theme.palette.common.black,
+                borderRadius: 40,
+                // height: "25px",
+                textTransform: "capitalize",
+                ":hover": {
+                  backgroundColor: theme => (theme.palette.mode === "dark" ? "#444444" : "#cacaca"),
+                },
+              }}
+            >
+              Sign In/Up
+            </Button>
 
-        {!isAuthenticated && (
-          <Button
-            variant="contained"
-            color="secondary"
-            onClick={signUpHandler}
-            sx={{
-              display: { xs: "flex", sm: "none" },
-              fontSize: 16,
-              backgroundColor: theme => (theme.palette.mode === "dark" ? "#303030" : "#e4e4e4"),
-              color: theme => (theme.palette.mode === "dark" ? theme.palette.common.white : theme.palette.common.black),
-              borderRadius: 40,
-              // height: "25px",
-              textTransform: "capitalize",
-              ":hover": {
-                backgroundColor: theme => (theme.palette.mode === "dark" ? "#444444" : "#cacaca"),
-              },
-            }}
-          >
-            Sign In/Up
-          </Button>
+            <Button
+              variant="contained"
+              onClick={() => window?.open(ROUTES.apply, "_blank")}
+              sx={{
+                display: { xs: "flex", sm: "none" },
+                background: orangeDark,
+                fontSize: 16,
+                borderRadius: 40,
+                // height: "25px",
+                textTransform: "capitalize",
+                ":hover": {
+                  background: orange900,
+                },
+              }}
+            >
+              Apply to join
+            </Button>
+          </Stack>
         )}
       </Stack>
     </Stack>
