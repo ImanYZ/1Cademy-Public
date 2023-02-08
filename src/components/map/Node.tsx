@@ -1,3 +1,4 @@
+import AdapterMomentJs from "@date-io/moment";
 import { keyframes } from "@emotion/react";
 import AddIcon from "@mui/icons-material/Add";
 import CodeIcon from "@mui/icons-material/Code";
@@ -11,12 +12,15 @@ import MenuBookIcon from "@mui/icons-material/MenuBook";
 import SearchIcon from "@mui/icons-material/Search";
 import ShareIcon from "@mui/icons-material/Share";
 import { Box, Button, Fab, Grid, InputLabel, Switch, TextField, Tooltip, Typography } from "@mui/material";
+import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
+import { TimePicker } from "@mui/x-date-pickers/TimePicker";
+import moment from "moment";
 import React, { useCallback, useDeferredValue, useEffect, useMemo, useRef, useState, useTransition } from "react";
 import { FullNodeData, OpenPart } from "src/nodeBookTypes";
 
 import { useNodeBook } from "@/context/NodeBookContext";
 import { getSearchAutocomplete } from "@/lib/knowledgeApi";
-import { findDiff, getVideoDataByUrl } from "@/lib/utils/utils";
+import { findDiff, getVideoDataByUrl, momentDateToSeconds } from "@/lib/utils/utils";
 import { OpenSidebar } from "@/pages/notebook";
 
 import { useAuth } from "../../context/AuthContext";
@@ -249,7 +253,6 @@ const Node = ({
   const [videoUrl, setVideoUrl] = useState(nodeVideo);
   const [videoStartTime, setVideoStartTime] = useState<any>(nodeVideoStartTime ? nodeVideoStartTime : 0);
   const [videoEndTime, setVideoEndTime] = useState<any>(nodeVideoEndTime ? nodeVideoEndTime : 0);
-
   const nodeRef = useRef(null);
   const previousHeightRef = useRef<number>(0);
   const previousTopRef = useRef<string>("0px");
@@ -260,7 +263,8 @@ const Node = ({
   const [nodeTitleHasIssue, setNodeTitleHasIssue] = useState<boolean>(false);
   const [explainationDesc, setExplainationDesc] = useState<boolean>(false);
   const [openProposal, setOpenProposal] = useState<any>(false);
-
+  const [startTimeValue, setStartTimeValue] = React.useState<any>(moment.utc(nodeVideoStartTime * 1000));
+  const [endTimeValue, setEndTimeValue] = React.useState<any>(moment.utc(nodeVideoEndTime * 1000));
   const [error, setError] = useState<any>(null);
   const [contentCopy, setContentCopy] = useState(content);
   const [isLoading, startTransition] = useTransition();
@@ -268,7 +272,6 @@ const Node = ({
     from: { left: "500px", zIndex: -999 },
     to: { left: "600px", zIndex: 0 },
   });
-
   useEffect(() => {
     setTitleCopy(title);
     setContentCopy(content);
@@ -281,6 +284,19 @@ const Node = ({
     setVideoStartTime((videoStartTime: any) => {
       return videoStartTime !== nodeVideoStartTime ? nodeVideoStartTime : videoStartTime;
     });
+
+    setStartTimeValue((startTime: any) => {
+      return !moment(startTime).isSame(moment(nodeVideoStartTime * 1000))
+        ? moment.utc(nodeVideoStartTime * 1000)
+        : moment.utc(startTime);
+    });
+
+    setEndTimeValue((endTime: any) => {
+      return !moment(endTime).isSame(moment(nodeVideoEndTime * 1000))
+        ? moment.utc(nodeVideoEndTime * 1000)
+        : moment.utc(endTime);
+    });
+
     setVideoEndTime((videoEndTime: any) => {
       return videoEndTime !== nodeVideoEndTime ? nodeVideoEndTime : videoEndTime;
     });
@@ -776,7 +792,7 @@ const Node = ({
                     sx={{
                       display: "flex",
                       flexWrap: "wrap",
-                      justifyContent: "space-between",
+                      justifyContent: "space-around",
                     }}
                   >
                     <Box
@@ -784,9 +800,9 @@ const Node = ({
                         width: "49.5%",
                       }}
                     >
-                      <TextField
+                      {/* <TextField
                         type={"number"}
-                        label={"Start time:"}
+                        label={"Start Time:"}
                         onChange={e => {
                           let startTime = parseInt(e.target.value);
                           setVideoStartTime(!isNaN(startTime) ? startTime : "");
@@ -800,7 +816,30 @@ const Node = ({
                         variant="outlined"
                         fullWidth
                         sx={{ p: "0px", m: "0px", fontWeight: 400, lineHeight: "24px" }}
-                      />
+                      /> */}
+                      <LocalizationProvider dateAdapter={AdapterMomentJs}>
+                        <TimePicker
+                          ampm={false}
+                          openTo="hours"
+                          views={["hours", "minutes", "seconds"]}
+                          inputFormat="HH:mm:ss"
+                          mask="__:__:__"
+                          label="Start Time"
+                          value={startTimeValue}
+                          onChange={newValue => {
+                            setStartTimeValue(newValue);
+                            startTransition(() => {
+                              if (nodeVideoStartTime !== momentDateToSeconds(moment(newValue))) {
+                                setNodeParts(identifier, node => ({
+                                  ...node,
+                                  nodeVideoStartTime: momentDateToSeconds(moment(newValue)),
+                                }));
+                              }
+                            });
+                          }}
+                          renderInput={params => <TextField {...params} />}
+                        />
+                      </LocalizationProvider>
                     </Box>
 
                     <Box
@@ -808,9 +847,9 @@ const Node = ({
                         width: "49.5%",
                       }}
                     >
-                      <TextField
+                      {/* <TextField
                         type={"number"}
-                        label={"End time:"}
+                        label={"End Time:"}
                         onChange={e => {
                           let endTime = parseInt(e.target.value);
                           setVideoEndTime(!isNaN(endTime) ? endTime : "");
@@ -824,7 +863,31 @@ const Node = ({
                         variant="outlined"
                         fullWidth
                         sx={{ p: "0px", m: "0px", fontWeight: 400, lineHeight: "24px" }}
-                      />
+                      /> */}
+
+                      <LocalizationProvider dateAdapter={AdapterMomentJs}>
+                        <TimePicker
+                          ampm={false}
+                          openTo="hours"
+                          views={["hours", "minutes", "seconds"]}
+                          inputFormat="HH:mm:ss"
+                          mask="__:__:__"
+                          label="End Time"
+                          value={endTimeValue}
+                          onChange={newValue => {
+                            setEndTimeValue(newValue);
+                            startTransition(() => {
+                              if (nodeVideoEndTime !== momentDateToSeconds(moment(newValue))) {
+                                setNodeParts(identifier, node => ({
+                                  ...node,
+                                  nodeVideoEndTime: momentDateToSeconds(moment(newValue)),
+                                }));
+                              }
+                            });
+                          }}
+                          renderInput={params => <TextField {...params} />}
+                        />
+                      </LocalizationProvider>
                     </Box>
                   </Box>
                   <Box sx={{ mb: "12px" }}></Box>

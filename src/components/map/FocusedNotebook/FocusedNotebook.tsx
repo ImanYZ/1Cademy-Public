@@ -135,7 +135,7 @@ const FocusedNotebook = ({
         </Tooltip>
         {currentNode.title ? (
           <Grid container spacing={3}>
-            <Grid item sm={12} md={3}>
+            <Grid item xs={12} sm={12} md={3}>
               {parents && parents?.length > 0 && (
                 <MemoizedFocusedLinkedNodes
                   loadNodeData={loadNodeData}
@@ -146,7 +146,7 @@ const FocusedNotebook = ({
                 />
               )}
             </Grid>
-            <Grid item sm={12} md={6}>
+            <Grid item xs={12} sm={12} md={6}>
               <NodeItemFull
                 nodeId={selectedNodeId}
                 node={currentNode as any}
