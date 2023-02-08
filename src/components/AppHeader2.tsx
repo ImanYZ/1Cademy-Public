@@ -20,7 +20,7 @@ import { useRouter } from "next/router";
 import React, { useState } from "react";
 
 import useThemeChange from "@/hooks/useThemeChange";
-import { gray25, gray200, gray300, gray600, gray700, gray900, orange800, orange900, orangeDark } from "@/pages/home";
+import { gray50, gray200, gray300, gray600, gray700, gray900, orange800, orange900, orangeDark } from "@/pages/home";
 
 import oneCademyLogo from "../../public/DarkmodeLogo.png";
 import oneCademyLogoExtended from "../../public/logo-extended.png";
@@ -179,7 +179,7 @@ const SubMenu = ({ onCloseSubMenu, sectionVisible, sx }: SubMenuProps) => {
               p: { xs: "16px", sm: "32px" },
               maxWidth: "1280px",
               margin: "auto",
-              // background: theme => (theme.palette.mode === "dark" ? "#16161aff" : "#f8f8f8ff"),
+              background: theme => (theme.palette.mode === "dark" ? "#000000" : "#ffffff"),
             }}
           >
             <Typography sx={{ mb: "12px", color: orange800 }}>{sectionVisible.title}</Typography>
@@ -197,19 +197,11 @@ const SubMenu = ({ onCloseSubMenu, sectionVisible, sx }: SubMenuProps) => {
                     borderRadius: "16px",
                     color: theme => (theme.palette.mode === "dark" ? gray200 : "black"),
                     ":hover": {
-                      background: theme => (theme.palette.mode === "dark" ? gray25 : "black"),
-                      // color: theme => (theme.palette.mode === "dark" ? "black" : gray200),
-                      ".link-option-title": {
-                        color: theme => (theme.palette.mode === "dark" ? gray900 : gray200),
-                      },
-                      ".link-option-description": {
-                        color: theme => (theme.palette.mode === "dark" ? gray600 : gray300),
-                      },
+                      background: theme => (theme.palette.mode === "dark" ? gray900 : gray50),
                     },
                   }}
                 >
                   <Typography
-                    className="link-option-title"
                     sx={{
                       mb: "4px",
                       color: theme => (theme.palette.mode === "dark" ? gray200 : gray900),
@@ -220,7 +212,6 @@ const SubMenu = ({ onCloseSubMenu, sectionVisible, sx }: SubMenuProps) => {
                     {cur.title}
                   </Typography>
                   <Typography
-                    className="link-option-description"
                     sx={{ color: theme => (theme.palette.mode === "dark" ? gray300 : gray600), fontSize: "14px" }}
                   >
                     {cur.description.split(" ").slice(0, 13).join(" ") + "..."}
