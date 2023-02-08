@@ -38,8 +38,10 @@ import { SubMenu } from "./SubMenu";
 export const HEADER_HEIGHT = 80;
 export const HEADER_HEIGHT_MOBILE = 72;
 
+export type HeaderPage = "ONE_CADEMY" | "ONE_ASSISTANT";
+
 type AppHeaderProps = {
-  page: "ONE_CADEMY" | "ONE_ASSISTANT";
+  page: HeaderPage;
   sections: HomepageSection[];
   selectedSectionId: string;
   onPreventSwitch: (sectionId: string) => void;
@@ -201,6 +203,7 @@ const AppHeader = ({ page, sections, selectedSectionId, onPreventSwitch }: AppHe
             </Stack>
           </Stack>
 
+          {/* Navbar Right Options */}
           <Stack direction={"row"} justifyContent="flex-end" alignItems="center" spacing={"8px"}>
             <Box
               sx={{
@@ -216,6 +219,7 @@ const AppHeader = ({ page, sections, selectedSectionId, onPreventSwitch }: AppHe
             >
               <AppHeaderSearchBar />
             </Box>
+
             {true && (
               <Tooltip title="Open Searcher">
                 <IconButton
@@ -234,22 +238,15 @@ const AppHeader = ({ page, sections, selectedSectionId, onPreventSwitch }: AppHe
                 </IconButton>
               </Tooltip>
             )}
+
             <Tooltip title="Change theme">
               <IconButton onClick={handleThemeSwitch} size="small">
                 {theme.palette.mode === "dark" ? <LightModeIcon /> : <DarkModeIcon />}
               </IconButton>
             </Tooltip>
 
-            {/* BUTTONS FOR 1CADEMY HOMEPAGE */}
-
-            <Stack
-              display={page === "ONE_CADEMY" ? "flex" : "none"}
-              direction={"row"}
-              justifyContent="flex-end"
-              alignItems="center"
-              spacing={"8px"}
-            >
-              {!isAuthenticated && (
+            <Stack display={"flex"} direction={"row"} justifyContent="flex-end" alignItems="center" spacing={"8px"}>
+              {page === "ONE_CADEMY" && !isAuthenticated && (
                 <Tooltip title="Apply to join 1Cademy">
                   <Button
                     variant="contained"
@@ -274,7 +271,7 @@ const AppHeader = ({ page, sections, selectedSectionId, onPreventSwitch }: AppHe
                 </Tooltip>
               )}
 
-              {isAuthenticated && user ? (
+              {page === "ONE_CADEMY" && isAuthenticated && user && (
                 <Tooltip title={capitalizeString(user.chooseUname ? user.uname : user.fName ?? "")}>
                   <IconButton onClick={handleProfileMenuOpen}>
                     <Box
@@ -303,12 +300,14 @@ const AppHeader = ({ page, sections, selectedSectionId, onPreventSwitch }: AppHe
                     </Box>
                   </IconButton>
                 </Tooltip>
-              ) : (
+              )}
+
+              {(!isAuthenticated || page !== "ONE_CADEMY") && (
                 <Tooltip title="SIGN IN/UP">
                   <Button
                     variant="contained"
                     color="secondary"
-                    onClick={signUpHandler}
+                    onClick={page === "ONE_CADEMY" ? signUpHandler : () => setOpenForm(true)}
                     sx={{
                       display: { xs: "none", sm: "flex" },
                       p: { xs: "6px 10px", lg: undefined },
@@ -330,39 +329,6 @@ const AppHeader = ({ page, sections, selectedSectionId, onPreventSwitch }: AppHe
               )}
             </Stack>
 
-            {/* BUTTONS FOR 1ASSISTANT HOMEPAGE */}
-
-            <Stack
-              display={page === "ONE_ASSISTANT" ? "flex" : "none"}
-              direction={"row"}
-              justifyContent="flex-end"
-              alignItems="center"
-              spacing={"8px"}
-            >
-              <Tooltip title="SIGN IN/UP">
-                <Button
-                  variant="contained"
-                  color="secondary"
-                  onClick={() => setOpenForm(true)}
-                  sx={{
-                    p: { xs: "6px 10px", lg: undefined },
-                    minWidth: "95px",
-                    fontSize: 16,
-                    backgroundColor: theme.palette.mode === "dark" ? "#303030" : "#e4e4e4",
-                    color: theme.palette.mode === "dark" ? theme.palette.common.white : theme.palette.common.black,
-                    borderRadius: 40,
-                    height: "25px",
-                    textTransform: "capitalize",
-                    ":hover": {
-                      backgroundColor: theme.palette.mode === "dark" ? "#444444" : "#cacaca",
-                    },
-                  }}
-                >
-                  Sign In/Up
-                </Button>
-              </Tooltip>
-            </Stack>
-
             <IconButton
               onClick={() => setOpenMenu(prev => !prev)}
               sx={{ display: { xs: "flex", md: "none" }, alignSelf: "center" }}
@@ -372,11 +338,8 @@ const AppHeader = ({ page, sections, selectedSectionId, onPreventSwitch }: AppHe
             </IconButton>
           </Stack>
         </Stack>
-        {isAuthenticated && user && renderProfileMenu}
 
-        {/* {openMenu && (
-          <MenuBar items={sections.slice(1)} onCloseMenu={onCloseMenu} selectedSectionId={selectedSectionId} />
-        )} */}
+        {isAuthenticated && user && renderProfileMenu}
 
         <Modal
           open={openMenu}
@@ -385,7 +348,36 @@ const AppHeader = ({ page, sections, selectedSectionId, onPreventSwitch }: AppHe
           aria-describedby="Navigate through sections"
           sx={{ display: { md: "none" } }}
         >
-          <MenuHeader items={sections.slice(1)} onCloseMenu={onCloseMenu} selectedSectionId={selectedSectionId} />
+          <MenuHeader
+            page={page}
+            items={sections.slice(1)}
+            onCloseMenu={onCloseMenu}
+            selectedSectionId={selectedSectionId}
+            otherOptions={
+              page === "ONE_ASSISTANT" ? (
+                <Button
+                  variant="contained"
+                  color="secondary"
+                  onClick={() => setOpenForm(true)}
+                  sx={{
+                    display: { xs: "flex", sm: "none" },
+                    fontSize: 16,
+                    backgroundColor: theme => (theme.palette.mode === "dark" ? "#303030" : "#e4e4e4"),
+                    color: theme =>
+                      theme.palette.mode === "dark" ? theme.palette.common.white : theme.palette.common.black,
+                    borderRadius: 40,
+                    // height: "25px",
+                    textTransform: "capitalize",
+                    ":hover": {
+                      backgroundColor: theme => (theme.palette.mode === "dark" ? "#444444" : "#cacaca"),
+                    },
+                  }}
+                >
+                  Sign In/Up
+                </Button>
+              ) : null
+            }
+          />
         </Modal>
 
         <Box
@@ -448,6 +440,6 @@ const AppHeader = ({ page, sections, selectedSectionId, onPreventSwitch }: AppHe
   );
 };
 
-export const AppHeaderMemoized = React.memo(AppHeader);
+const AppHeaderMemoized = React.memo(AppHeader);
 
 export default AppHeaderMemoized;

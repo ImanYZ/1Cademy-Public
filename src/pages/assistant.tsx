@@ -2,7 +2,6 @@ import CloseIcon from "@mui/icons-material/Close";
 import { Box, IconButton, Modal, useMediaQuery } from "@mui/material";
 import React, { useEffect, useRef, useState } from "react";
 
-import AppHeaderMemoized from "@/components/AppHeader2";
 import AssistantFooter from "@/components/assistant/AssistantFooter";
 import Benefits from "@/components/assistant/Benefits";
 import { AssistantHeroMemoized } from "@/components/assistant/Hero";
@@ -14,6 +13,7 @@ import Systems from "@/components/home/sections/Systems";
 import SearcherPupUp from "@/components/SearcherPupUp";
 
 import AssistantForm from "../components/assistant/AssistantRegister";
+import AppHeaderMemoized from "../components/Header/AppHeader";
 import { SectionWrapper } from "../components/home/components/SectionWrapper";
 import Papers from "../components/home/sections/Papers";
 import { useInView, UseInViewProps } from "../hooks/useObserver";

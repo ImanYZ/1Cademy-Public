@@ -3,24 +3,26 @@ import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
 import { Box, Button, IconButton, Link, Stack } from "@mui/material";
 import { useRouter } from "next/router";
-import { forwardRef, useState } from "react";
+import { forwardRef, ReactNode, useState } from "react";
 
 import oneCademyLogoExtended from "../../../public/logo-extended.png";
 import { useAuth } from "../../context/AuthContext";
 import ROUTES from "../../lib/utils/routes";
 import { gray200, gray600, orange900, orangeDark } from "../../pages/home";
 import { HomepageSection } from "../home/SectionsItems";
-import { HEADER_HEIGHT, HEADER_HEIGHT_MOBILE } from "./AppHeader";
+import { HEADER_HEIGHT, HEADER_HEIGHT_MOBILE, HeaderPage } from "./AppHeader";
 import { SubMenu } from "./SubMenu";
 
 type MenuHeaderProps = {
+  page?: HeaderPage;
   items: HomepageSection[];
   onCloseMenu: (sectionId: string) => void;
   selectedSectionId: string;
+  otherOptions?: ReactNode;
 };
 
 export const MenuHeader = forwardRef<HTMLDivElement, MenuHeaderProps>(
-  ({ items, onCloseMenu, selectedSectionId }, ref) => {
+  ({ items, onCloseMenu, selectedSectionId, page = "ONE_CADEMY", otherOptions = null }, ref) => {
     const [idxOptionVisible, setIdxOptionVisible] = useState(-1);
     const [{ isAuthenticated }] = useAuth();
     const router = useRouter();
@@ -73,7 +75,7 @@ export const MenuHeader = forwardRef<HTMLDivElement, MenuHeaderProps>(
 
         <Stack width={"100%"} direction={"column"} spacing={{ xs: "0px" }} sx={{ padding: { xs: "0px" } }}>
           {items.map((cur, idx) => {
-            return cur.options.length ? (
+            return cur.options?.length ? (
               <Box key={cur.id}>
                 <Box sx={{ p: { xs: "12px 16px" }, display: "flex", justifyContent: "space-between" }}>
                   <Link
@@ -126,8 +128,9 @@ export const MenuHeader = forwardRef<HTMLDivElement, MenuHeaderProps>(
               </Box>
             );
           })}
-          {!isAuthenticated && (
-            <Stack spacing={"12px"} sx={{ p: { xs: "12px 16px" }, width: "100%" }}>
+
+          <Stack spacing={"12px"} sx={{ p: { xs: "12px 16px" }, width: "100%" }}>
+            {!isAuthenticated && page === "ONE_CADEMY" && (
               <Button
                 variant="contained"
                 color="secondary"
@@ -148,7 +151,9 @@ export const MenuHeader = forwardRef<HTMLDivElement, MenuHeaderProps>(
               >
                 Sign In/Up
               </Button>
+            )}
 
+            {!isAuthenticated && page === "ONE_CADEMY" && (
               <Button
                 variant="contained"
                 onClick={() => window?.open(ROUTES.apply, "_blank")}
@@ -157,7 +162,6 @@ export const MenuHeader = forwardRef<HTMLDivElement, MenuHeaderProps>(
                   background: orangeDark,
                   fontSize: 16,
                   borderRadius: 40,
-                  // height: "25px",
                   textTransform: "capitalize",
                   ":hover": {
                     background: orange900,
@@ -166,8 +170,10 @@ export const MenuHeader = forwardRef<HTMLDivElement, MenuHeaderProps>(
               >
                 Apply to join
               </Button>
-            </Stack>
-          )}
+            )}
+
+            {otherOptions}
+          </Stack>
         </Stack>
       </Stack>
     );
