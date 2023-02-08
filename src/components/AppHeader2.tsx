@@ -342,7 +342,7 @@ const AppHeader = ({ page, sections, selectedSectionId, onPreventSwitch }: AppHe
               }}
             >
               {sections.slice(1).map((cur, idx) => {
-                return cur.options.length ? (
+                return cur.options?.length ? (
                   <Box key={cur.id} sx={{ display: "flex" }}>
                     <Link
                       href={`#${cur.id}`}
