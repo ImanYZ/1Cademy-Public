@@ -56,17 +56,45 @@ const MenuBar = ({ items, onCloseMenu, selectedSectionId }: MenuBarProps) => {
       alignItems={"self-start"}
       sx={{
         height: {
-          xs: `calc(100vh - ${HEADER_HEIGHT_MOBILE}px)`,
-          md: `calc(100vh - ${HEADER_HEIGHT}px)`,
+          xs: `calc(100vh)`,
+          md: `calc(100vh)`,
           overflowY: "auto",
         },
+        background: theme => (theme.palette.mode === "dark" ? "#000000" : "#ffffff"),
       }}
     >
-      <Stack width={"100%"} direction={"column"} spacing="32px" sx={{ padding: { xs: "32px 16px", md: "32px" } }}>
+      <Stack
+        direction={"row"}
+        justifyContent="space-between"
+        alignItems="center"
+        sx={{
+          px: { xs: "16px", sm: "32px" },
+          width: "100%",
+          height: { xs: `${HEADER_HEIGHT_MOBILE}px`, md: `${HEADER_HEIGHT}px` },
+        }}
+      >
+        <img
+          src={oneCademyLogoExtended.src}
+          alt="logo"
+          width={"149px"}
+          height={"40px"}
+          style={{ cursor: "pointer" }}
+          onClick={() => router.push(ROUTES.home)}
+        />
+        <IconButton
+          onClick={() => onCloseMenu("")}
+          sx={{ display: { xs: "flex", md: "none" }, alignSelf: "center" }}
+          size="small"
+        >
+          <CloseIcon />
+        </IconButton>
+      </Stack>
+
+      <Stack width={"100%"} direction={"column"} spacing={{ xs: "0px" }} sx={{ padding: { xs: "0px" } }}>
         {items.map((cur, idx) => {
           return cur.options.length ? (
-            <Box key={cur.id} sx={{ border: "solid 1 red" }}>
-              <Box sx={{ display: "flex" }}>
+            <Box key={cur.id}>
+              <Box sx={{ p: { xs: "12px 16px" }, display: "flex", justifyContent: "space-between" }}>
                 <Link
                   href={`#${cur.id}`}
                   onClick={() => onCloseMenu(cur.id)}
@@ -87,29 +115,34 @@ const MenuBar = ({ items, onCloseMenu, selectedSectionId }: MenuBarProps) => {
                   {idxOptionVisible === idx ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
                 </IconButton>
               </Box>
-              <SubMenu
-                onCloseSubMenu={() => setIdxOptionVisible(-1)}
-                sectionVisible={items[idxOptionVisible]}
-                sx={{
-                  border: theme => `solid 1px ${theme.palette.mode === "dark" ? "#FFFFFF4D" : gray200}`,
-                  borderRadius: "12px",
-                }}
-              />
+              {idxOptionVisible === idx && (
+                <Box sx={{ p: { xs: "12px 16px" } }}>
+                  <SubMenu
+                    onCloseSubMenu={() => setIdxOptionVisible(-1)}
+                    sectionVisible={items[idxOptionVisible]}
+                    sx={{
+                      border: theme => `solid 1px ${theme.palette.mode === "dark" ? "#FFFFFF4D" : gray200}`,
+                      borderRadius: "12px",
+                    }}
+                  />
+                </Box>
+              )}
             </Box>
           ) : (
-            <Link
-              key={cur.id}
-              href={`#${cur.id}`}
-              onClick={() => onCloseMenu(cur.id)}
-              sx={{
-                color: theme => (theme.palette.mode === "dark" ? gray200 : gray600),
-                cursor: "pointer",
-                textDecoration: "none",
-                borderBottom: selectedSectionId === cur.id ? `solid 2px ${orangeDark}` : undefined,
-              }}
-            >
-              {cur.label}
-            </Link>
+            <Box key={cur.id} sx={{ p: { xs: "12px 16px" }, display: "flex", justifyContent: "space-between" }}>
+              <Link
+                href={`#${cur.id}`}
+                onClick={() => onCloseMenu(cur.id)}
+                sx={{
+                  color: theme => (theme.palette.mode === "dark" ? gray200 : gray600),
+                  cursor: "pointer",
+                  textDecoration: "none",
+                  borderBottom: selectedSectionId === cur.id ? `solid 2px ${orangeDark}` : undefined,
+                }}
+              >
+                {cur.label}
+              </Link>
+            </Box>
           );
         })}
 
@@ -122,7 +155,7 @@ const MenuBar = ({ items, onCloseMenu, selectedSectionId }: MenuBarProps) => {
               background: orangeDark,
               fontSize: 16,
               borderRadius: 40,
-              height: "25px",
+              // height: "25px",
               textTransform: "capitalize",
               ":hover": {
                 background: orange900,
@@ -144,7 +177,7 @@ const MenuBar = ({ items, onCloseMenu, selectedSectionId }: MenuBarProps) => {
               backgroundColor: theme => (theme.palette.mode === "dark" ? "#303030" : "#e4e4e4"),
               color: theme => (theme.palette.mode === "dark" ? theme.palette.common.white : theme.palette.common.black),
               borderRadius: 40,
-              height: "25px",
+              // height: "25px",
               textTransform: "capitalize",
               ":hover": {
                 backgroundColor: theme => (theme.palette.mode === "dark" ? "#444444" : "#cacaca"),
@@ -168,12 +201,12 @@ const SubMenu = ({ onCloseSubMenu, sectionVisible, sx }: SubMenuProps) => {
         <ClickAwayListener onClickAway={onCloseSubMenu}>
           <Box
             sx={{
-              p: { xs: "16px", sm: "32px" },
+              p: { xs: "36px 12px", md: "32px" },
               maxWidth: "1280px",
               margin: "auto",
             }}
           >
-            <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", md: "1fr 1fr 1fr" } }}>
+            <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr", md: "1fr 1fr 1fr" } }}>
               {sectionVisible.options.map(cur => (
                 <Link
                   key={cur.title}
@@ -309,7 +342,7 @@ const AppHeader = ({ page, sections, selectedSectionId, onPreventSwitch }: AppHe
                 width={isMobile ? "149px" : "60px"}
                 height={isMobile ? "40px" : "64px"}
                 style={{ cursor: "pointer" }}
-                onClick={() => router.push("/")}
+                onClick={() => router.push(ROUTES.home)}
               />
             </Tooltip>
 
@@ -554,9 +587,19 @@ const AppHeader = ({ page, sections, selectedSectionId, onPreventSwitch }: AppHe
         </Stack>
         {isAuthenticated && user && renderProfileMenu}
 
-        {openMenu && (
+        {/* {openMenu && (
           <MenuBar items={sections.slice(1)} onCloseMenu={onCloseMenu} selectedSectionId={selectedSectionId} />
-        )}
+        )} */}
+
+        <Modal
+          open={openMenu}
+          onClose={() => setOpenMenu(false)}
+          aria-labelledby="Menu"
+          aria-describedby="Navigate through sections"
+          sx={{ display: { md: "none" } }}
+        >
+          <MenuBar items={sections.slice(1)} onCloseMenu={onCloseMenu} selectedSectionId={selectedSectionId} />
+        </Modal>
 
         <Box
           sx={{
@@ -565,7 +608,6 @@ const AppHeader = ({ page, sections, selectedSectionId, onPreventSwitch }: AppHe
             left: "0px",
             right: "0px",
             background: theme => (theme.palette.mode === "dark" ? "#000000" : "#ffffff"),
-            // background: theme => (theme.palette.mode === "dark" ? "#000000ff" : "#f8f8f8ff"),
           }}
         >
           <SubMenu

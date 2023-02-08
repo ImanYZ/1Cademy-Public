@@ -32,7 +32,7 @@ export const SectionItemSwitcher = ({ items }: SectionItemSwitcherProps) => {
     return (
       <img
         src={`${theme.palette.mode === "dark" ? selectedItem.imageDark : selectedItem.image}`}
-        alt={selectedItem.name}
+        alt={selectedItem.title}
         style={{ width: "100%", height: "100%" }}
       />
     );
