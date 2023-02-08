@@ -20,7 +20,7 @@ import { useRouter } from "next/router";
 import React, { useState } from "react";
 
 import useThemeChange from "@/hooks/useThemeChange";
-import { gray50, gray200, gray300, gray600, gray700, gray900, orange800, orange900, orangeDark } from "@/pages/home";
+import { gray50, gray200, gray300, gray600, gray700, gray900, orange900, orangeDark } from "@/pages/home";
 
 import oneCademyLogo from "../../public/DarkmodeLogo.png";
 import oneCademyLogoExtended from "../../public/logo-extended.png";
@@ -53,8 +53,7 @@ const MenuBar = ({ items, onCloseMenu, selectedSectionId }: MenuBarProps) => {
   return (
     <Stack
       direction={"column"}
-      justifyContent={"space-between"}
-      alignItems={"center"}
+      alignItems={"self-start"}
       sx={{
         height: {
           xs: `calc(100vh - ${HEADER_HEIGHT_MOBILE}px)`,
@@ -63,17 +62,10 @@ const MenuBar = ({ items, onCloseMenu, selectedSectionId }: MenuBarProps) => {
         },
       }}
     >
-      <Stack
-        flex={1}
-        direction={"column"}
-        alignItems={"center"}
-        justifyContent={"center"}
-        spacing="32px"
-        padding={"32px"}
-      >
+      <Stack width={"100%"} direction={"column"} spacing="32px" sx={{ padding: { xs: "32px 16px", md: "32px" } }}>
         {items.map((cur, idx) => {
           return cur.options.length ? (
-            <Box key={cur.id}>
+            <Box key={cur.id} sx={{ border: "solid 1 red" }}>
               <Box sx={{ display: "flex" }}>
                 <Link
                   href={`#${cur.id}`}
@@ -179,10 +171,8 @@ const SubMenu = ({ onCloseSubMenu, sectionVisible, sx }: SubMenuProps) => {
               p: { xs: "16px", sm: "32px" },
               maxWidth: "1280px",
               margin: "auto",
-              // background: theme => (theme.palette.mode === "dark" ? "#000000" : "#ffffff"),
             }}
           >
-            <Typography sx={{ mb: "12px", color: orange800 }}>{sectionVisible.title}</Typography>
             <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", md: "1fr 1fr 1fr" } }}>
               {sectionVisible.options.map(cur => (
                 <Link
@@ -212,7 +202,11 @@ const SubMenu = ({ onCloseSubMenu, sectionVisible, sx }: SubMenuProps) => {
                     {cur.title}
                   </Typography>
                   <Typography
-                    sx={{ color: theme => (theme.palette.mode === "dark" ? gray300 : gray600), fontSize: "14px" }}
+                    sx={{
+                      display: { xs: "none", md: "block" },
+                      color: theme => (theme.palette.mode === "dark" ? gray300 : gray600),
+                      fontSize: "14px",
+                    }}
                   >
                     {cur.description.split(" ").slice(0, 13).join(" ") + "..."}
                   </Typography>
