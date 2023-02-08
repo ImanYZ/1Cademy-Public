@@ -179,7 +179,7 @@ const SubMenu = ({ onCloseSubMenu, sectionVisible, sx }: SubMenuProps) => {
               p: { xs: "16px", sm: "32px" },
               maxWidth: "1280px",
               margin: "auto",
-              background: theme => (theme.palette.mode === "dark" ? "#000000" : "#ffffff"),
+              // background: theme => (theme.palette.mode === "dark" ? "#000000" : "#ffffff"),
             }}
           >
             <Typography sx={{ mb: "12px", color: orange800 }}>{sectionVisible.title}</Typography>
@@ -338,6 +338,7 @@ const AppHeader = ({ page, sections, selectedSectionId, onPreventSwitch }: AppHe
                     <Link
                       href={`#${cur.id}`}
                       onClick={() => onPreventSwitch(cur.id)}
+                      onMouseOver={() => setIdxOptionVisible(prev => (prev === idx ? -1 : idx))}
                       sx={{
                         whiteSpace: "nowrap",
                         color: theme => (theme.palette.mode === "dark" ? gray200 : gray600),
@@ -365,6 +366,7 @@ const AppHeader = ({ page, sections, selectedSectionId, onPreventSwitch }: AppHe
                     <Link
                       href={`#${cur.id}`}
                       onClick={() => onPreventSwitch(cur.id)}
+                      onMouseOver={() => setIdxOptionVisible(-1)}
                       sx={{
                         whiteSpace: "nowrap",
                         color: theme => (theme.palette.mode === "dark" ? gray200 : gray600),
@@ -568,7 +570,8 @@ const AppHeader = ({ page, sections, selectedSectionId, onPreventSwitch }: AppHe
             top: "80px",
             left: "0px",
             right: "0px",
-            background: theme => (theme.palette.mode === "dark" ? "#000000ff" : "#f8f8f8ff"),
+            background: theme => (theme.palette.mode === "dark" ? "#000000" : "#ffffff"),
+            // background: theme => (theme.palette.mode === "dark" ? "#000000ff" : "#f8f8f8ff"),
           }}
         >
           <SubMenu
