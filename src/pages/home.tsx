@@ -6,7 +6,8 @@ import AppFooter from "@/components/AppFooter";
 import Benefits from "@/components/home/sections/Benefits";
 import { getStats } from "@/lib/knowledgeApi";
 
-import { AppHeaderMemoized, HEADER_HEIGHT, HEADER_HEIGHT_MOBILE } from "../components/AppHeader2";
+import AppHeaderMemoized, { HEADER_HEIGHT, HEADER_HEIGHT_MOBILE } from "../components/Header/AppHeader";
+// import { AppHeaderMemoized, HEADER_HEIGHT, HEADER_HEIGHT_MOBILE } from "../components/AppHeader2";
 import { SectionWrapper } from "../components/home/components/SectionWrapper";
 import UniversitiesMap from "../components/home/components/UniversitiesMap/UniversitiesMap";
 import About from "../components/home/sections/About";
