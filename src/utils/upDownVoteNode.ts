@@ -233,6 +233,7 @@ export const UpDownVoteNode = async ({
         .collection("nodes")
         .where("tagIds", "array-contains", tagId)
         .where("deleted", "==", false)
+        .limit(2)
         .get();
       if (taggedNodeDocs.docs.length <= 1) {
         [batch, writeCounts] = await deleteTagCommunityAndTagsOfTags({
