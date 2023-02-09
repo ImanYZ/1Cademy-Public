@@ -35,63 +35,69 @@ export const SectionItemSwitcher = ({ items }: SectionItemSwitcherProps) => {
   }, [expandedIdx, items, theme.palette.mode]);
 
   return (
-    <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", md: "2fr 1fr" }, columnGap: "20px" }}>
-      <Box>
-        {items.map((cur, idx: number) => (
-          <Accordion
-            key={cur.id}
-            disableGutters
-            elevation={0}
-            square
+    <Box>
+      {items.map((cur, idx: number) => (
+        <Accordion
+          key={cur.id}
+          disableGutters
+          elevation={0}
+          square
+          sx={{
+            background: "transparent",
+            border: "none",
+            borderLeft: theme =>
+              `4px solid ${expandedIdx === idx ? orangeDark : theme.palette.mode === "dark" ? gray25 : gray100}`,
+            "&:before": {
+              display: "none",
+            },
+            ":hover": {
+              borderLeft: expandedIdx !== idx ? `4px solid ${gray300}` : undefined,
+            },
+          }}
+          expanded={expandedIdx === idx}
+          onChange={handleChange(idx)}
+        >
+          <AccordionSummary
             sx={{
-              background: "transparent",
-              border: "none",
-              borderLeft: theme =>
-                `4px solid ${expandedIdx === idx ? orangeDark : theme.palette.mode === "dark" ? gray25 : gray100}`,
-              "&:before": {
-                display: "none",
-              },
               ":hover": {
-                borderLeft: expandedIdx !== idx ? `4px solid ${gray300}` : undefined,
+                background: theme => (theme.palette.mode === "dark" ? "black" : gray50),
               },
             }}
-            expanded={expandedIdx === idx}
-            onChange={handleChange(idx)}
           >
-            <AccordionSummary
+            <Typography
+              component={"h4"}
+              variant={"h4"}
               sx={{
-                ":hover": {
-                  background: theme => (theme.palette.mode === "dark" ? "black" : gray50),
-                },
+                fontSize: "20px",
+                fontWeight: 400,
+                p: "8px",
+                cursor: "pointer",
               }}
             >
-              <Typography
-                component={"h4"}
-                variant={"h4"}
-                sx={{
-                  fontSize: "20px",
-                  fontWeight: 400,
-                  p: "8px",
-                  cursor: "pointer",
-                }}
+              {cur.title}
+            </Typography>
+            {cur.link && (
+              <Button
+                variant="text"
+                href={cur.link}
+                target="_blank"
+                rel="noreferrer"
+                onClick={e => e.stopPropagation()}
+                sx={{ color: orangeDark }}
               >
-                {cur.title}
-              </Typography>
-              {cur.link && (
-                <Button
-                  variant="text"
-                  href={cur.link}
-                  target="_blank"
-                  rel="noreferrer"
-                  onClick={e => e.stopPropagation()}
-                  sx={{ color: orangeDark }}
-                >
-                  Visit
-                  <ArrowForwardIcon fontSize={"small"} sx={{ ml: "10px" }} color="inherit" />
-                </Button>
-              )}
-            </AccordionSummary>
-            <AccordionDetails>
+                Visit
+                <ArrowForwardIcon fontSize={"small"} sx={{ ml: "10px" }} color="inherit" />
+              </Button>
+            )}
+          </AccordionSummary>
+          <AccordionDetails>
+            <Box
+              sx={{
+                display: "grid",
+                gridTemplateColumns: { xs: "1fr", md: MediaComponent ? "2fr 1fr" : "1fr" },
+                // placeItems: "center",
+              }}
+            >
               <Typography
                 sx={{ p: "8px", pt: "0" }}
                 fontSize={"16px"}
@@ -99,19 +105,11 @@ export const SectionItemSwitcher = ({ items }: SectionItemSwitcherProps) => {
               >
                 {cur.content}
               </Typography>
-              <Box sx={{ display: { xs: "block", md: "none" }, maxWidth: "400px", m: "auto" }}>{MediaComponent}</Box>
-            </AccordionDetails>
-          </Accordion>
-        ))}
-      </Box>
-
-      <Box
-        sx={{
-          display: { xs: "none", md: "flex", alignItems: "center" },
-        }}
-      >
-        <Box sx={{ width: "100%", height: "auto" }}>{MediaComponent}</Box>
-      </Box>
+              {MediaComponent && <Box sx={{ maxWidth: "400px", m: "auto" }}>{MediaComponent}</Box>}
+            </Box>
+          </AccordionDetails>
+        </Accordion>
+      ))}
     </Box>
   );
 };
