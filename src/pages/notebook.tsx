@@ -2688,6 +2688,11 @@ const Dashboard = ({}: DashboardProps) => {
           gtmEvent("Reputation", {
             value: 1,
           });
+
+          if (newNode.tags.length == 0) {
+            window.alert("Please add relevant tag(s) to your proposed node.");
+            return;
+          }
           if (newNode.title !== "" && newNode.title !== "Replace this new node title!") {
             const postData: any = {
               ...newNode,
