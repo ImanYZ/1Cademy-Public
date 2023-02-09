@@ -99,7 +99,7 @@ const Hero = ({ headerHeight, headerHeightMobile }: HeroProps) => {
           height: "60px",
           background: orangeDark,
           fontSize: "18px",
-          borderRadius: "8px",
+          borderRadius: "26px",
           ":hover": {
             background: orange900,
           },

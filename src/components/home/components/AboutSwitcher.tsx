@@ -1,22 +1,32 @@
-import { Accordion, AccordionDetails, AccordionSummary, Box, Typography } from "@mui/material";
+import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
+import { Accordion, AccordionDetails, AccordionSummary, Box, Button, Typography } from "@mui/material";
 import React, { useState } from "react";
 
-// import { useMemo } from "react";
-import { gray25, gray50, gray100, gray300, orangeDark } from "../../../pages/home";
+import { gray25, gray50, gray100, gray300, gray850, orangeDark } from "../../../pages/home";
 import Photo from "./Photo";
 
-// import { gray25, gray50, gray100, gray200, gray300, orangeDark } from "../../../../utils/colors";
 const TEAM_ITEMS = [
   {
     id: "item-1",
     title: "1Cademy Architect",
     subtitle: "Iman YeckehZaare",
     image: "home/about/01.jpg",
-    awards: [],
-    description: `
-      Iman YeckehZaare is the founder and architect of 1Cademy. He is currently pursuing his Ph.D. at the University of Michigan, School of Information. He has a Master of Science Degree in Information Science with two specializations in Human-Computer Interaction (HCI) and Information Economics for Management (IEM) from the same institution. Additionally, Iman holds two Bachelor of Engineering Degrees in Computer Science and Information Technology.
-Iman was awarded the title of Best Graduate Student Instructor of the Year 2018-2019 at the University of Michigan, School of Information. He was also a Michigan I-Corps 2013 Graduate, a Campus of the Future 2018 Semi-finalist, an Innovation in Action 2018 2nd Prize awardee, and a Learning Levers 2019 3rd Prize awardee.
-      `,
+    description: (
+      <>
+        <Typography>
+          Iman YeckehZaare is the founder and architect of 1Cademy. He is currently pursuing his Ph.D. at the University
+          of Michigan, School of Information. He has a Master of Science Degree in Information Science with two
+          specializations in Human-Computer Interaction (HCI) and Information Economics for Management (IEM) from the
+          same institution. Additionally, Iman holds two Bachelor of Engineering Degrees in Computer Science and
+          Information Technology.
+        </Typography>
+        <Typography>
+          Iman was awarded the title of Best Graduate Student Instructor of the Year 2018-2019 at the University of
+          Michigan, School of Information. He was also a Michigan I-Corps 2013 Graduate, a Campus of the Future 2018
+          Semi-finalist, an Innovation in Action 2018 2nd Prize awardee, and a Learning Levers 2019 3rd Prize awardee.
+        </Typography>
+      </>
+    ),
     link: "https://www.si.umich.edu/people/iman-yeckehzaare",
   },
   {
@@ -56,30 +66,33 @@ Iman was awarded the title of Best Graduate Student Instructor of the Year 2018-
     title: "1Cademy Advisor",
     subtitle: "Joel Podolny",
     image: "home/about/03.jpg",
-    description: `
-    Joel Podolny is a highly regarded sociologist and CEO of Honor Education. Prior to his current position, Joel served as Vice President of Apple and was the founding Dean of Apple University, where he oversaw the company's internal training program.
-Joel's educational background is equally impressive. He was Dean and Professor of Management at the Yale School of Management and held professorships at the Harvard Business School and Stanford Graduate School of Business. During his tenure at Stanford, he served as senior associate dean and taught courses in business strategy, organizational behavior, and global management. At Harvard, he was a professor and director of research. In 2006, Joel led a major restructuring of the Yale MBA curriculum to better prepare students for the complex and cross-functional global environment. `,
-    link: "https://www.si.umich.edu/people/paul-resnick",
+    description: (
+      <>
+        <Typography>
+          Joel Podolny is a highly regarded sociologist and CEO of Honor Education. Prior to his current position, Joel
+          served as Vice President of Apple and was the founding Dean of Apple University, where he oversaw the
+          company's internal training program.
+        </Typography>
+        <Typography>
+          Joel's educational background is equally impressive. He was Dean and Professor of Management at the Yale
+          School of Management and held professorships at the Harvard Business School and Stanford Graduate School of
+          Business. During his tenure at Stanford, he served as senior associate dean and taught courses in business
+          strategy, organizational behavior, and global management. At Harvard, he was a professor and director of
+          research. In 2006, Joel led a major restructuring of the Yale MBA curriculum to better prepare students for
+          the complex and cross-functional global environment.
+        </Typography>
+      </>
+    ),
+    link: "",
   },
 ];
 
 const Team = () => {
   const [expandedIdx, setExpandedIdx] = useState(0);
-  // const theme = useTheme();
   const handleChange = (idxItem: any) => (event: any, newExpanded: any) => {
     setExpandedIdx(newExpanded ? idxItem : -1);
   };
-  // const MediaComponent = useMemo(() => {
-  //   const selectedItem = TEAM_ITEMS[expandedIdx];
-  //   if (!selectedItem) return null;
-  //   return (
-  //     <img
-  //       src={`${theme.palette.mode === "light" ? selectedItem.imageDark : selectedItem.image}`}
-  //       alt={selectedItem.title}
-  //       style={{ width: "100%", height: "100%", color: gray200 }}
-  //     />
-  //   );
-  // }, [expandedIdx, theme.palette.mode]);
+
   return (
     <Box>
       {TEAM_ITEMS.map((cur, idx) => (
@@ -106,7 +119,7 @@ const Team = () => {
           <AccordionSummary
             sx={{
               ":hover": {
-                background: theme => (theme.palette.mode === "dark" ? "black" : gray50),
+                background: theme => (theme.palette.mode === "dark" ? gray850 : gray50),
               },
             }}
           >
@@ -119,11 +132,23 @@ const Team = () => {
                 p: "8px",
                 cursor: "pointer",
                 textTransform: "none",
-                // color: gray200,
               }}
             >
               {`${cur.subtitle} - ${cur.title}`}
             </Typography>
+            {cur.link && (
+              <Button
+                variant="text"
+                href={cur.link}
+                target="_blank"
+                rel="noreferrer"
+                onClick={e => e.stopPropagation()}
+                sx={{ color: orangeDark }}
+              >
+                Visit
+                <ArrowForwardIcon fontSize={"small"} sx={{ ml: "10px" }} color="inherit" />
+              </Button>
+            )}
           </AccordionSummary>
           <AccordionDetails>
             <Box
@@ -131,7 +156,6 @@ const Team = () => {
                 display: "grid",
                 gridTemplateColumns: { xs: "1fr", md: "2fr 1fr" },
                 justifyItems: "center",
-                // placeItems: "center",
               }}
             >
               <Box
@@ -149,4 +173,5 @@ const Team = () => {
     </Box>
   );
 };
+
 export default Team;

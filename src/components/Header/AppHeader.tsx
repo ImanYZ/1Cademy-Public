@@ -20,7 +20,7 @@ import { useRouter } from "next/router";
 import React, { useState } from "react";
 
 import useThemeChange from "@/hooks/useThemeChange";
-import { orange900, orangeDark } from "@/pages/home";
+import { darkBase, orange900, orangeDark } from "@/pages/home";
 
 import oneCademyLogo from "../../../public/DarkmodeLogo.png";
 import oneCademyLogoExtended from "../../../public/logo-extended.png";
@@ -373,7 +373,7 @@ const AppHeader = ({ page, sections, selectedSectionId, onSwitchSection }: AppHe
             top: "80px",
             left: "0px",
             right: "0px",
-            background: theme => (theme.palette.mode === "dark" ? "#000000" : "#ffffff"),
+            background: theme => (theme.palette.mode === "dark" ? darkBase : "#ffffff"),
           }}
         >
           <SubMenu

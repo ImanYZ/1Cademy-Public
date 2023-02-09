@@ -2,7 +2,7 @@ import { Link, Typography } from "@mui/material";
 import { Box } from "@mui/system";
 import React from "react";
 
-import Team from "../components/AoutSwitcher";
+import Team from "../components/AboutSwitcher";
 
 const ABOUT_ITEMS = [
   {
