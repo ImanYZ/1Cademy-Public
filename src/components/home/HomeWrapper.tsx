@@ -41,28 +41,15 @@ const HomeWrapper = ({
   const { inView: systemsInView, ref: SystemSectionRef } = useInView(observerOption);
   const { inView: aboutInView, ref: AboutSectionRef } = useInView(observerOption);
 
-  //   console.log(inView, router.asPath, `#${section.id}`);
-  console.log("HOME WRAPPER");
-  // useEffect(() => {
-  //   isScrolling.current = true;
+  useEffect(() => {
+    isScrolling.current = true;
 
-  //   timer.current = setTimeout(() => {
-  //     isScrolling.current = false;
-  //     if (timer.current) clearTimeout(timer.current);
-  //   }, 1000);
-  // }, []);
+    timer.current = setTimeout(() => {
+      isScrolling.current = false;
+    }, 1000);
+  }, []);
 
   useEffect(() => {
-    console.log({
-      isScrolling: isScrolling.current,
-      mechanismInView,
-      magnitudeInView,
-      benefitInView,
-      topicsInView,
-      systemsInView,
-      aboutInView,
-    });
-    // if (typeof window !== "undefined") return;
     if (isScrolling.current) return;
 
     let newSelectedSectionId = "";
@@ -73,52 +60,28 @@ const HomeWrapper = ({
     if (systemsInView) newSelectedSectionId = ONE_CADEMY_SECTIONS[5].id;
     if (aboutInView) newSelectedSectionId = ONE_CADEMY_SECTIONS[6].id;
 
-    console.log({ path: router.asPath, id: `#${newSelectedSectionId}` });
-    // if (router.asPath.includes(`#${newSelectedSectionId}`)) return;
-    // if (!inView) return;
-
-    isScrolling.current = true;
-    if (timer.current) clearTimeout(timer.current);
-    timer.current = setTimeout(() => {
-      isScrolling.current = false;
-      if (timer.current) clearTimeout(timer.current);
-    }, 1000);
-
     const newHash = newSelectedSectionId ? `#${newSelectedSectionId}` : "";
     if (window.location.hash === newHash) return;
     window.location.hash = newHash;
 
     setSelectedSectionId(newHash);
-
-    // router
-    //   .replace({ pathname: "/", hash: `#${newSelectedSectionId}` }, undefined, { scroll: false, shallow: false })
-    //   .catch(err => console.log(err));
   }, [mechanismInView, magnitudeInView, benefitInView, topicsInView, systemsInView, aboutInView, router]);
 
-  //   const onSwitchSection = (newSelectedSectionId: string) => {
-  //     isScrolling.current = true;
-  //     if (timer.current) clearTimeout(timer.current);
+  const onSwitchSection = (newSelectedSectionId: string) => {
+    if (isScrolling.current) return;
 
-  //     timer.current = setTimeout(() => {
-  //       isScrolling.current = false;
-  //       if (timer.current) clearTimeout(timer.current);
-  //     }, 1000);
+    const newHash = newSelectedSectionId ? `#${newSelectedSectionId}` : "";
+    if (window.location.hash === newHash) return;
 
-  //     setSelectedSectionId(newSelectedSectionId);
-  //     // const newHash = newSelectedSectionId ? `#${newSelectedSectionId}` : "";
-  //     // // if (window.location.hash === newHash) return;
-  //     // // window.location.hash = newHash;
-  //   };
+    isScrolling.current = true;
 
-  //   useEffect(() => {
-  //     // if (isScrolling.current) return;
+    timer.current = setTimeout(() => {
+      isScrolling.current = false;
+    }, 1000);
 
-  //     setSelectedSectionId(newSelectedSectionId);
-
-  //     const newHash = newSelectedSectionId ? `#${newSelectedSectionId}` : "";
-  //     if (window.location.hash === newHash) return;
-  //     window.location.hash = newHash;
-  //   }, [mechanismInView, magnitudeInView, benefitInView, topicsInView, systemsInView, aboutInView]);
+    setSelectedSectionId(newHash);
+    window.location.hash = newHash;
+  };
 
   return (
     <Box>
@@ -126,14 +89,10 @@ const HomeWrapper = ({
         page="ONE_CADEMY"
         sections={ONE_CADEMY_SECTIONS}
         selectedSectionId={selectedSectionId}
-        onPreventSwitch={(d: string) => {
-          console.log(d);
-        }}
+        onPreventSwitch={onSwitchSection}
       />
 
       {heroSectionChildren}
-
-      {/* <HeroMemoized headerHeight={HEADER_HEIGHT} headerHeightMobile={HEADER_HEIGHT_MOBILE} /> */}
 
       <SectionWrapper ref={MechanismSectionRef} section={ONE_CADEMY_SECTIONS[1]} textAlign="center">
         {mechanismSectionChildren}

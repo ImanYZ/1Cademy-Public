@@ -42,10 +42,12 @@ export type HeaderPage = "ONE_CADEMY" | "ONE_ASSISTANT";
 const ActiveLink = ({
   cur,
   selectedSectionId,
+  onSwitchSection,
 }: // preUrl,
 {
   cur: HomepageSection;
   selectedSectionId: string;
+  onSwitchSection: (id: string) => void;
   preUrl?: string;
 }) => {
   // const router = useRouter();
@@ -59,7 +61,8 @@ const ActiveLink = ({
 
   return (
     <LinkMUI
-      href={`#${cur.id}`}
+      // href={`#${cur.id}`}
+      onClick={() => onSwitchSection(cur.id)}
       // onClick={() => router.push(`#${cur.id}`)}
       // onClick={() => router.push(preUrl ? `${preUrl}#${cur.id}` : `#${cur.id}`)}
       sx={{
@@ -193,7 +196,12 @@ const AppHeader = ({ page, sections, selectedSectionId, onPreventSwitch, preUrl 
                 cur.options?.length ? (
                   <Box key={cur.id} sx={{ display: "flex" }}>
                     {/* <Link href={preUrl ? `${preUrl}#${cur.id}` : `#${cur.id}`} replace> */}
-                    <ActiveLink cur={cur} selectedSectionId={selectedSectionId} preUrl={preUrl} />
+                    <ActiveLink
+                      cur={cur}
+                      selectedSectionId={selectedSectionId}
+                      preUrl={preUrl}
+                      onSwitchSection={onPreventSwitch}
+                    />
                     {/* </Link> */}
                     <IconButton
                       onClick={() => setIdxOptionVisible(prev => (prev === idx ? -1 : idx))}
@@ -204,7 +212,13 @@ const AppHeader = ({ page, sections, selectedSectionId, onPreventSwitch, preUrl 
                     </IconButton>
                   </Box>
                 ) : (
-                  <ActiveLink key={cur.id} cur={cur} selectedSectionId={selectedSectionId} preUrl={preUrl} />
+                  <ActiveLink
+                    key={cur.id}
+                    cur={cur}
+                    selectedSectionId={selectedSectionId}
+                    preUrl={preUrl}
+                    onSwitchSection={onPreventSwitch}
+                  />
                   // <Tooltip key={cur.id} title={cur.title}>
                   // {/* <Link href={preUrl ? `${preUrl}#${cur.id}` : `#${cur.id}`} replace> */}
                   // {/* </Link> */}
