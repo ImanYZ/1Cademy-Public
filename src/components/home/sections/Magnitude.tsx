@@ -84,7 +84,7 @@ const Magnitude = () => {
             <Typography sx={{ fontSize: { xs: "48px", md: "60px" }, mb: "12px", color: orangeDark, fontWeight: 600 }}>
               {cur.value.toLocaleString()}
             </Typography>
-            <Typography component={"h3"} sx={{ fontSize: "18px", fontWeight: 600 }}>
+            <Typography component={"h3"} sx={{ fontSize: "18px", fontWeight: 600, mb: "12px" }}>
               {cur.title}
             </Typography>
             <Typography>{cur.description}</Typography>

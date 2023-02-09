@@ -28,11 +28,13 @@ export const gray300 = "#D0D5DD";
 export const gray600 = "#475467";
 export const gray700 = "#344054";
 export const gray800 = "#1D2939";
+export const gray850 = "#302F2F";
 export const gray900 = "#0A0D14";
 export const orangeDark = "#FF6D00";
 export const orangeLight = "#FF6D00";
 export const orange800 = "#FF6D00";
 export const orange900 = "#E56200";
+export const darkBase = "#242425";
 
 // const observerOption: UseInViewProps = { options: { root: null, rootMargin: "-380px 0px -380px 0px", threshold: 0 } };
 
@@ -50,7 +52,7 @@ export const Home = () => {
         overflowX: "hidden",
         position: "relative",
         scrollBehavior: "smooth",
-        backgroundColor: theme => (theme.palette.mode === "dark" ? "#0A0D14" : "#FFFFFF"),
+        backgroundColor: theme => (theme.palette.mode === "dark" ? darkBase : "#FFFFFF"),
       }}
     >
       <HomeWrapper
