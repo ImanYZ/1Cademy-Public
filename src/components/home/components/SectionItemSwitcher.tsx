@@ -94,7 +94,7 @@ export const SectionItemSwitcher = ({ items }: SectionItemSwitcherProps) => {
             <Box
               sx={{
                 display: "grid",
-                gridTemplateColumns: { xs: "1fr", md: MediaComponent ? "2fr 1fr" : "1fr" },
+                gridTemplateColumns: { xs: "1fr", md: MediaComponent ? "1fr 1fr" : "1fr" },
                 // placeItems: "center",
               }}
             >
@@ -105,7 +105,7 @@ export const SectionItemSwitcher = ({ items }: SectionItemSwitcherProps) => {
               >
                 {cur.content}
               </Typography>
-              {MediaComponent && <Box sx={{ maxWidth: "400px", m: "auto" }}>{MediaComponent}</Box>}
+              {MediaComponent && <Box sx={{ width: "100%", maxWidth: "480px", m: "auto" }}>{MediaComponent}</Box>}
             </Box>
           </AccordionDetails>
         </Accordion>
