@@ -2,7 +2,7 @@ import { Button, Typography, useTheme } from "@mui/material";
 import { Box } from "@mui/system";
 import React from "react";
 
-import { gray200, gray600, orange900, orangeDark } from "@/pages/home";
+import { gray200, gray600, gray850, orange900, orangeDark } from "@/pages/home";
 
 import ROUTES from "../../../lib/utils/routes";
 
@@ -11,7 +11,7 @@ const Join = () => {
   return (
     <Box
       sx={{
-        background: theme => (theme.palette.mode === "dark" ? "#000000" : "#F9FAFB"),
+        background: theme => (theme.palette.mode === "dark" ? gray850 : "#F9FAFB"),
         p: "64px",
         display: "flex",
         flexDirection: "column",
@@ -38,8 +38,10 @@ const Join = () => {
         target="_blank"
         rel="noopener"
         variant="contained"
+        size="large"
         sx={{
           background: orangeDark,
+          borderRadius: "26px",
           ":hover": {
             background: orange900,
           },

@@ -12,6 +12,7 @@ import SearcherPupUp from "@/components/SearcherPupUp";
 
 import AssistantHomeWrapper from "../components/assistant/AssistantHomeWrapper";
 import Papers from "../components/home/sections/Papers";
+import { darkBase } from "./home";
 
 /**
  * animations builded with: https://rive.app/
@@ -75,7 +76,7 @@ const Home = () => {
         overflowX: "hidden",
         position: "relative",
         scrollBehavior: "smooth",
-        backgroundColor: theme => (theme.palette.mode === "dark" ? "#0A0D14" : "#FFFFFF"),
+        backgroundColor: theme => (theme.palette.mode === "dark" ? darkBase : "#FFFFFF"),
       }}
     >
       <AssistantHomeWrapper
