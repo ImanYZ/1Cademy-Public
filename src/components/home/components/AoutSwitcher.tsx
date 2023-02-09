@@ -2,7 +2,7 @@ import { Accordion, AccordionDetails, AccordionSummary, Box, Typography } from "
 import React, { useState } from "react";
 
 // import { useMemo } from "react";
-import { gray25, gray50, gray100, gray200, gray300, orangeDark } from "../../../pages/home";
+import { gray25, gray50, gray100, gray300, orangeDark } from "../../../pages/home";
 import Photo from "./Photo";
 
 // import { gray25, gray50, gray100, gray200, gray300, orangeDark } from "../../../../utils/colors";
@@ -119,7 +119,7 @@ const Team = () => {
                 p: "8px",
                 cursor: "pointer",
                 textTransform: "none",
-                color: gray200,
+                // color: gray200,
               }}
             >
               {`${cur.subtitle} - ${cur.title}`}
