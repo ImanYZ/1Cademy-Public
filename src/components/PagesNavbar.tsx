@@ -11,7 +11,8 @@ import {
   useMediaQuery,
 } from "@mui/material";
 import Box from "@mui/material/Box";
-import React, { FC, ReactNode, useRef, useState } from "react";
+import { useRouter } from "next/router";
+import React, { FC, ReactNode, useState } from "react";
 
 // import { useAuth } from "@/context/AuthContext";
 import ROUTES from "../lib/utils/routes";
@@ -35,11 +36,14 @@ const PagesNavbar: FC<Props> = ({ children, title, description }) => {
   const isDesktop = useMediaQuery("(min-width:1200px)");
   const [showMobileFeedbackForm, setShowMobileFeedbackForm] = useState(false);
   const [showFeedbackForm, setShowFeedbackForm] = useState(false);
+
+  const router = useRouter();
+
   // const [showMenu, setShowMenu] = useState(false);
   // const [{ isAuthenticated }] = useAuth();
 
-  const isScrolling = useRef(false);
-  const timer = useRef<NodeJS.Timeout | null>(null);
+  // const isScrolling = useRef(false);
+  // const timer = useRef<NodeJS.Timeout | null>(null);
 
   // const onSendFeedback = () => {
   //   setShowMenu(false);
@@ -47,18 +51,7 @@ const PagesNavbar: FC<Props> = ({ children, title, description }) => {
   // };
 
   const onSwitchSection = (newSelectedSectionId: string) => {
-    isScrolling.current = true;
-    if (timer.current) clearTimeout(timer.current);
-
-    timer.current = setTimeout(() => {
-      isScrolling.current = false;
-      if (timer.current) clearTimeout(timer.current);
-    }, 1000);
-
-    // setSelectedSectionId(newSelectedSectionId);
-    const newHash = newSelectedSectionId ? `#${newSelectedSectionId}` : "";
-    if (window.location.hash === newHash) return;
-    window.location.hash = newHash;
+    router.push(`${ROUTES.publicHome}#${newSelectedSectionId}`);
   };
 
   return (
@@ -69,9 +62,10 @@ const PagesNavbar: FC<Props> = ({ children, title, description }) => {
         sections={ONE_CADEMY_SECTIONS}
         selectedSectionId={""}
         onPreventSwitch={onSwitchSection}
-        preUrl={ROUTES.home}
       />
+
       {/* {showMenu && <AppMenuMovil isSignedIn={isAuthenticated} onSendFeedback={onSendFeedback} />} */}
+
       <Box
         component="main"
         sx={{

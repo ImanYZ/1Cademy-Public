@@ -1,22 +1,17 @@
-import CloseIcon from "@mui/icons-material/Close";
-import { Box, IconButton, Modal, useMediaQuery } from "@mui/material";
-import React, { useEffect, useRef, useState } from "react";
+import { Box, useMediaQuery } from "@mui/material";
+import React, { useState } from "react";
 
 import AssistantFooter from "@/components/assistant/AssistantFooter";
 import Benefits from "@/components/assistant/Benefits";
 import { AssistantHeroMemoized } from "@/components/assistant/Hero";
 import Mechanism from "@/components/assistant/Mechanism";
 import { ASSISTANT_MECHANISMS } from "@/components/assistant/mechanismItems";
-import { ONE_ASSISTANT_SECTIONS } from "@/components/assistant/sections";
 import About from "@/components/home/sections/About";
 import Systems from "@/components/home/sections/Systems";
 import SearcherPupUp from "@/components/SearcherPupUp";
 
-import AssistantForm from "../components/assistant/AssistantRegister";
-import AppHeaderMemoized from "../components/Header/AppHeader";
-import { SectionWrapper } from "../components/home/components/SectionWrapper";
+import AssistantHomeWrapper from "../components/assistant/AssistantHomeWrapper";
 import Papers from "../components/home/sections/Papers";
-import { useInView, UseInViewProps } from "../hooks/useObserver";
 
 /**
  * animations builded with: https://rive.app/
@@ -24,52 +19,52 @@ import { useInView, UseInViewProps } from "../hooks/useObserver";
 
 export const SECTION_WITH_ANIMATION = 1;
 
-const observerOption: UseInViewProps = { options: { root: null, rootMargin: "-380px 0px -380px 0px", threshold: 0 } };
+// const observerOption: UseInViewProps = { options: { root: null, rootMargin: "-380px 0px -380px 0px", threshold: 0 } };
 
 const Home = () => {
-  const [selectedSectionId, setSelectedSectionId] = useState("");
+  // const [selectedSectionId, setSelectedSectionId] = useState("");
 
-  const { inView: mechanismInView, ref: MechanismSectionRef } = useInView(observerOption);
-  const { inView: benefitInView, ref: BenefitSectionRef } = useInView(observerOption);
-  const { inView: systemsInView, ref: SystemSectionRef } = useInView(observerOption);
-  const { inView: aboutInView, ref: AboutSectionRef } = useInView(observerOption);
+  // const { inView: mechanismInView, ref: MechanismSectionRef } = useInView(observerOption);
+  // const { inView: benefitInView, ref: BenefitSectionRef } = useInView(observerOption);
+  // const { inView: systemsInView, ref: SystemSectionRef } = useInView(observerOption);
+  // const { inView: aboutInView, ref: AboutSectionRef } = useInView(observerOption);
 
-  const isScrolling = useRef(false);
-  const timer = useRef<NodeJS.Timeout | null>(null);
+  // const isScrolling = useRef(false);
+  // const timer = useRef<NodeJS.Timeout | null>(null);
 
-  useEffect(() => {
-    let newSelectedSectionId = "";
-    if (mechanismInView) newSelectedSectionId = ONE_ASSISTANT_SECTIONS[1].id;
-    if (benefitInView) newSelectedSectionId = ONE_ASSISTANT_SECTIONS[2].id;
-    if (systemsInView) newSelectedSectionId = ONE_ASSISTANT_SECTIONS[3].id;
-    if (aboutInView) newSelectedSectionId = ONE_ASSISTANT_SECTIONS[4].id;
+  // useEffect(() => {
+  //   let newSelectedSectionId = "";
+  //   if (mechanismInView) newSelectedSectionId = ONE_ASSISTANT_SECTIONS[1].id;
+  //   if (benefitInView) newSelectedSectionId = ONE_ASSISTANT_SECTIONS[2].id;
+  //   if (systemsInView) newSelectedSectionId = ONE_ASSISTANT_SECTIONS[3].id;
+  //   if (aboutInView) newSelectedSectionId = ONE_ASSISTANT_SECTIONS[4].id;
 
-    setSelectedSectionId(newSelectedSectionId);
+  //   setSelectedSectionId(newSelectedSectionId);
 
-    const newHash = newSelectedSectionId ? `#${newSelectedSectionId}` : "";
-    if (window.location.hash === newHash) return;
-    window.location.hash = newHash;
-  }, [aboutInView, benefitInView, mechanismInView, systemsInView]);
+  //   const newHash = newSelectedSectionId ? `#${newSelectedSectionId}` : "";
+  //   if (window.location.hash === newHash) return;
+  //   window.location.hash = newHash;
+  // }, [aboutInView, benefitInView, mechanismInView, systemsInView]);
 
   const isMobile = useMediaQuery("(max-width:600px)");
 
-  const [openForm, setOpenForm] = useState(false);
+  // const [openForm, setOpenForm] = useState(false);
   const [openSearch, setOpenSearch] = useState(false);
 
-  const onSwitchSection = (newSelectedSectionId: string) => {
-    isScrolling.current = true;
-    if (timer.current) clearTimeout(timer.current);
+  // const onSwitchSection = (newSelectedSectionId: string) => {
+  //   isScrolling.current = true;
+  //   if (timer.current) clearTimeout(timer.current);
 
-    timer.current = setTimeout(() => {
-      isScrolling.current = false;
-      if (timer.current) clearTimeout(timer.current);
-    }, 1000);
+  //   timer.current = setTimeout(() => {
+  //     isScrolling.current = false;
+  //     if (timer.current) clearTimeout(timer.current);
+  //   }, 1000);
 
-    setSelectedSectionId(newSelectedSectionId);
-    const newHash = newSelectedSectionId ? `#${newSelectedSectionId}` : "";
-    if (window.location.hash === newHash) return;
-    window.location.hash = newHash;
-  };
+  //   setSelectedSectionId(newSelectedSectionId);
+  //   const newHash = newSelectedSectionId ? `#${newSelectedSectionId}` : "";
+  //   if (window.location.hash === newHash) return;
+  //   window.location.hash = newHash;
+  // };
 
   return (
     <Box
@@ -83,7 +78,20 @@ const Home = () => {
         backgroundColor: theme => (theme.palette.mode === "dark" ? "#0A0D14" : "#FFFFFF"),
       }}
     >
-      <AppHeaderMemoized
+      <AssistantHomeWrapper
+        heroSectionChildren={<AssistantHeroMemoized />}
+        mechanismtSectionChildren={<Mechanism mechanisms={ASSISTANT_MECHANISMS} />}
+        benefitSectionChildren={<Benefits />}
+        systemsSectionChildren={<Systems />}
+        aboutectionChildren={
+          <>
+            <About />
+            <Papers />
+          </>
+        }
+      />
+
+      {/* <AppHeaderMemoized
         page="ONE_ASSISTANT"
         sections={ONE_ASSISTANT_SECTIONS}
         selectedSectionId={selectedSectionId}
@@ -107,36 +115,7 @@ const Home = () => {
       <SectionWrapper ref={AboutSectionRef} section={ONE_ASSISTANT_SECTIONS[4]}>
         <About />
         <Papers />
-      </SectionWrapper>
-
-      <Modal open={openForm} onClose={() => setOpenForm(false)}>
-        <Box
-          sx={{
-            width: "100%",
-            height: "100%",
-            bgcolor: theme => (theme.palette.mode === "dark" ? "#28282ad3" : "#f8f8f8e3"),
-            backdropFilter: "blur(4px)",
-            display: "flex",
-            justifyContent: "center",
-            alignItems: { xs: "flex-start", sm: "center" },
-          }}
-        >
-          <Box
-            sx={{
-              position: "relative",
-              maxWidth: "900px",
-              overflowY: "auto",
-            }}
-          >
-            <IconButton onClick={() => setOpenForm(false)} sx={{ position: "absolute", top: "0px", right: "0px" }}>
-              <CloseIcon />
-            </IconButton>
-            <Box>
-              <AssistantForm onSuccessFeedback={() => setOpenForm(false)} />
-            </Box>
-          </Box>
-        </Box>
-      </Modal>
+      </SectionWrapper> */}
 
       <AssistantFooter sx={{ px: { xs: "10px", lg: "0px" } }} />
 

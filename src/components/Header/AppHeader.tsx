@@ -38,40 +38,29 @@ export const HEADER_HEIGHT = 80;
 export const HEADER_HEIGHT_MOBILE = 72;
 
 export type HeaderPage = "ONE_CADEMY" | "ONE_ASSISTANT";
+type ActiveLinkProps = {
+  cur: HomepageSection;
+  selectedSectionId: string;
+  onSwitchSection: (id: string) => void;
+  // preUrl?: string;
+};
 
 const ActiveLink = ({
   cur,
   selectedSectionId,
   onSwitchSection,
 }: // preUrl,
-{
-  cur: HomepageSection;
-  selectedSectionId: string;
-  onSwitchSection: (id: string) => void;
-  preUrl?: string;
-}) => {
-  // const router = useRouter();
-  // console.log({ router: router.asPath, id: `/#${cur.id}` });
-
-  // const [path, setPath] = useState("");
-
-  // useEffect(() => {
-  //   setPath(window.location.hash);
-  // }, []);
-
+ActiveLinkProps) => {
+  // preUrl ? `${preUrl}#${cur.id}` : `#${cur.id}`,
   return (
     <LinkMUI
-      // href={`#${cur.id}`}
       onClick={() => onSwitchSection(cur.id)}
-      // onClick={() => router.push(`#${cur.id}`)}
-      // onClick={() => router.push(preUrl ? `${preUrl}#${cur.id}` : `#${cur.id}`)}
       sx={{
         whiteSpace: "nowrap",
         color: theme => (theme.palette.mode === "dark" ? gray200 : gray600),
         cursor: "pointer",
         textDecoration: "none",
         fontWeight: 600,
-        // preUrl ? `${preUrl}#${cur.id}` : `#${cur.id}`
         borderBottom: selectedSectionId === `#${cur.id}` ? `solid 2px ${orangeDark}` : undefined,
         transitions: "all .5s",
         ":hover": {
@@ -89,10 +78,10 @@ type AppHeaderProps = {
   sections: HomepageSection[];
   selectedSectionId: string;
   onPreventSwitch: (sectionId: string) => void;
-  preUrl?: string;
+  // preUrl?: string;
 };
 
-const AppHeader = ({ page, sections, selectedSectionId, onPreventSwitch, preUrl }: AppHeaderProps) => {
+const AppHeader = ({ page, sections, selectedSectionId, onPreventSwitch }: AppHeaderProps) => {
   const [openSearch, setOpenSearch] = useState(false);
   const [{ isAuthenticated, user }] = useAuth();
   const [handleThemeSwitch] = useThemeChange();
@@ -199,7 +188,7 @@ const AppHeader = ({ page, sections, selectedSectionId, onPreventSwitch, preUrl 
                     <ActiveLink
                       cur={cur}
                       selectedSectionId={selectedSectionId}
-                      preUrl={preUrl}
+                      // preUrl={preUrl}
                       onSwitchSection={onPreventSwitch}
                     />
                     {/* </Link> */}
@@ -216,7 +205,7 @@ const AppHeader = ({ page, sections, selectedSectionId, onPreventSwitch, preUrl 
                     key={cur.id}
                     cur={cur}
                     selectedSectionId={selectedSectionId}
-                    preUrl={preUrl}
+                    // preUrl={preUrl}
                     onSwitchSection={onPreventSwitch}
                   />
                   // <Tooltip key={cur.id} title={cur.title}>

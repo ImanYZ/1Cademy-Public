@@ -1,9 +1,8 @@
 import { Box } from "@mui/material";
-import { useRouter } from "next/router";
-import React, { useEffect, useRef, useState } from "react";
-import { ReactNode } from "react-markdown/lib/react-markdown";
+import React, { ReactNode, useEffect, useRef, useState } from "react";
 
 import { useInView, UseInViewProps } from "../../hooks/useObserver";
+import ROUTES from "../../lib/utils/routes";
 import AppHeaderMemoized from "../Header/AppHeader";
 import { SectionWrapper } from "./components/SectionWrapper";
 import { ONE_CADEMY_SECTIONS } from "./SectionsItems";
@@ -31,7 +30,6 @@ const HomeWrapper = ({
 }: HomeWrapperProps) => {
   const isScrolling = useRef(false);
   const timer = useRef<NodeJS.Timeout | null>(null);
-  const router = useRouter();
 
   const [selectedSectionId, setSelectedSectionId] = useState("");
   const { inView: mechanismInView, ref: MechanismSectionRef } = useInView(observerOption);
@@ -65,9 +63,11 @@ const HomeWrapper = ({
     window.location.hash = newHash;
 
     setSelectedSectionId(newHash);
-  }, [mechanismInView, magnitudeInView, benefitInView, topicsInView, systemsInView, aboutInView, router]);
+  }, [aboutInView, benefitInView, magnitudeInView, mechanismInView, systemsInView, topicsInView]);
 
-  const onSwitchSection = (newSelectedSectionId: string) => {
+  const onSwitchSection = (newSelectedSectionId: string, fromOtherPage = false) => {
+    if (fromOtherPage) return (window.location.href = `${ROUTES.publicHome}#${newSelectedSectionId}`);
+
     if (isScrolling.current) return;
 
     const newHash = newSelectedSectionId ? `#${newSelectedSectionId}` : "";

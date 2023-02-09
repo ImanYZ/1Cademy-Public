@@ -41,60 +41,6 @@ export const orange900 = "#E56200";
  */
 
 export const Home = () => {
-  // const [selectedSectionId, setSelectedSectionId] = useState("");
-  // const { data: stats } = useQuery("stats", getStats);
-  // const isScrolling = useRef(false);
-  // const timer = useRef<NodeJS.Timeout | null>(null);
-
-  // const { inView: mechanismInView, ref: MechanismSectionRef } = useInView(observerOption);
-  // const { inView: magnitudeInView, ref: MagnitudeSectionRef } = useInView(observerOption);
-  // const { inView: benefitInView, ref: BenefitSectionRef } = useInView(observerOption);
-  // const { inView: topicsInView, ref: TopicsSectionRef } = useInView(observerOption);
-  // const { inView: systemsInView, ref: SystemSectionRef } = useInView(observerOption);
-  // const { inView: aboutInView, ref: AboutSectionRef } = useInView(observerOption);
-
-  // useEffect(() => {
-  //   isScrolling.current = true;
-
-  //   timer.current = setTimeout(() => {
-  //     isScrolling.current = false;
-  //     if (timer.current) clearTimeout(timer.current);
-  //   }, 1000);
-  // }, []);
-
-  // useEffect(() => {
-  //   if (isScrolling.current) return;
-
-  //   let newSelectedSectionId = "";
-  //   if (mechanismInView) newSelectedSectionId = ONE_CADEMY_SECTIONS[1].id;
-  //   if (magnitudeInView) newSelectedSectionId = ONE_CADEMY_SECTIONS[2].id;
-  //   if (benefitInView) newSelectedSectionId = ONE_CADEMY_SECTIONS[3].id;
-  //   if (topicsInView) newSelectedSectionId = ONE_CADEMY_SECTIONS[4].id;
-  //   if (systemsInView) newSelectedSectionId = ONE_CADEMY_SECTIONS[5].id;
-  //   if (aboutInView) newSelectedSectionId = ONE_CADEMY_SECTIONS[6].id;
-
-  //   setSelectedSectionId(newSelectedSectionId);
-
-  //   const newHash = newSelectedSectionId ? `#${newSelectedSectionId}` : "";
-  //   if (window.location.hash === newHash) return;
-  //   window.location.hash = newHash;
-  // }, [mechanismInView, magnitudeInView, benefitInView, topicsInView, systemsInView, aboutInView]);
-
-  // const onSwitchSection = (newSelectedSectionId: string) => {
-  //   isScrolling.current = true;
-  //   if (timer.current) clearTimeout(timer.current);
-
-  //   timer.current = setTimeout(() => {
-  //     isScrolling.current = false;
-  //     if (timer.current) clearTimeout(timer.current);
-  //   }, 1000);
-
-  //   setSelectedSectionId(newSelectedSectionId);
-  //   // const newHash = newSelectedSectionId ? `#${newSelectedSectionId}` : "";
-  //   // // if (window.location.hash === newHash) return;
-  //   // // window.location.hash = newHash;
-  // };
-
   return (
     <Box
       id="ScrollableContainer"
@@ -126,40 +72,6 @@ export const Home = () => {
           </>
         }
       />
-      {/* <AppHeaderMemoized
-        page="ONE_CADEMY"
-        sections={ONE_CADEMY_SECTIONS}
-        selectedSectionId={selectedSectionId}
-        onPreventSwitch={onSwitchSection}
-      />
-
-      <HeroMemoized headerHeight={HEADER_HEIGHT} headerHeightMobile={HEADER_HEIGHT_MOBILE} />
-
-      <SectionWrapper section={ONE_CADEMY_SECTIONS[1]} textAlign="center">
-        <Mechanism mechanisms={MECHANISM_ITEMS} />
-      </SectionWrapper>
-
-      <SectionWrapper section={ONE_CADEMY_SECTIONS[2]} stats={stats}>
-        <Magnitude />
-        <UniversitiesMap theme={"Dark"} />
-      </SectionWrapper>
-
-      <SectionWrapper section={ONE_CADEMY_SECTIONS[3]}>
-        <Benefits />
-      </SectionWrapper>
-
-      <SectionWrapper section={ONE_CADEMY_SECTIONS[4]}>
-        <Topics />
-      </SectionWrapper>
-
-      <SectionWrapper section={ONE_CADEMY_SECTIONS[5]}>
-        <Systems />
-      </SectionWrapper>
-
-      <SectionWrapper section={ONE_CADEMY_SECTIONS[6]}>
-        <About />
-        <Papers />
-      </SectionWrapper> */}
 
       <Box sx={{ py: { xs: "64px", sm: "96px" }, maxWidth: "1216px", m: "auto" }}>
         <Join />
