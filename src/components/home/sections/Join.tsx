@@ -2,7 +2,7 @@ import { Button, Typography, useTheme } from "@mui/material";
 import { Box } from "@mui/system";
 import React from "react";
 
-import { gray200, gray600, orangeDark } from "@/pages/home";
+import { gray200, gray600, orange900, orangeDark } from "@/pages/home";
 
 import ROUTES from "../../../lib/utils/routes";
 
@@ -41,7 +41,7 @@ const Join = () => {
         sx={{
           background: orangeDark,
           ":hover": {
-            background: theme.palette.common.orange,
+            background: orange900,
           },
         }}
       >

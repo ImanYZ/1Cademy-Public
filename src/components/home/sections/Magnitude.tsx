@@ -7,7 +7,7 @@ import { StatsSchema } from "src/knowledgeTypes";
 import { getStats } from "@/lib/knowledgeApi";
 import { orangeDark } from "@/pages/home";
 
-import { useWindowSize } from "../../../hooks/useWindowSize";
+// import { useWindowSize } from "../../../hooks/useWindowSize";
 
 export type TMagnitudeItem = {
   id: keyof StatsSchema;
@@ -44,7 +44,7 @@ const MAGNITUDE_ITEMS: TMagnitudeItem[] = [
 ];
 
 const Magnitude = () => {
-  const { width } = useWindowSize();
+  // const { width } = useWindowSize();
 
   const { data: stats } = useQuery("stats", getStats);
 
@@ -58,24 +58,25 @@ const Magnitude = () => {
     return x;
   }, [stats]);
 
-  const imageDimensions = useMemo(() => {
-    let newWidth = width - 100;
+  // const imageDimensions = useMemo(() => {
+  //   let newWidth = width - 100;
 
-    if (width >= 600) newWidth = 560;
-    if (width >= 900) newWidth = 400;
-    if (width >= 1200) newWidth = 560;
+  //   if (width >= 600) newWidth = 560;
+  //   if (width >= 900) newWidth = 400;
+  //   if (width >= 1200) newWidth = 560;
 
-    return { width: newWidth, height: newWidth };
-  }, [width]);
+  //   return { width: newWidth, height: newWidth };
+  // }, [width]);
 
   return (
     <Stack direction={{ sx: "column-reverse", md: "row" }} alignItems={"center"} spacing={"96px"}>
       <Box
         sx={{
-          width: { md: "560px" },
+          // maxWidth: { md: "560px" },
           display: "grid",
-          gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr" },
+          gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr", md: "1fr 1fr 1fr 1fr" },
           rowGap: "88px",
+          columnGap: "32px",
         }}
       >
         {MAGNITUDE_ITEMS_Memo.map(cur => (
@@ -90,9 +91,9 @@ const Magnitude = () => {
           </Box>
         ))}
       </Box>
-      <Box>
+      {/* <Box>
         <img src="home/1Cademy.png" alt="1cademy logo" width={imageDimensions.width} height={imageDimensions.height} />
-      </Box>
+      </Box> */}
     </Stack>
   );
 };

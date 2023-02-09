@@ -6,7 +6,7 @@ import NextImage from "next/image";
 import React from "react";
 
 import logo1cademy from "../../../public/assistant/1Assistant.svg";
-import { DividerStyled } from "../AppFooter3";
+import { DividerStyled } from "../AppFooter";
 import { ONE_ASSISTANT_SECTIONS } from "./sections";
 type AppFooterProps = {
   sx?: SxProps<Theme>;
@@ -47,7 +47,7 @@ const AssistantFooter = ({ sx }: AppFooterProps) => {
             <Stack direction={"row"} flexWrap={"wrap"} alignItems={"center"} spacing={"12px"} sx={{ mb: "32px" }}>
               <NextImage src={logo1cademy} alt="logo 1cademy" width="40px" height="40px" />
               <Box component={"span"} sx={{ fontSize: "24px", fontWeight: 600 }}>
-                1Assistant
+                1ssistant
               </Box>
             </Stack>
             <Typography color={color}>Helps you optimize your life</Typography>
@@ -99,7 +99,7 @@ const AssistantFooter = ({ sx }: AppFooterProps) => {
         <DividerStyled />
         <br />
         <Stack direction={{ xs: "column", sm: "row" }} justifyContent="space-between" spacing={"8px"}>
-          <span style={{ fontSize: "14px" }}>&copy; 1Assistant {new Date().getFullYear()}</span>
+          <span style={{ fontSize: "14px" }}>&copy; 1ssistant {new Date().getFullYear()}</span>
           <Stack direction={"row"} spacing="16px">
             <GitHubIcon fontSize="medium" sx={{ color: "#98A2B3" }} />
             <Box>

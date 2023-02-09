@@ -65,7 +65,7 @@ const About = () => {
               display: "flex",
               flexDirection: "column",
               ":hover": {
-                "& :nth-child(2)": {
+                "& .about-card-content": {
                   background: theme => (theme.palette.mode === "dark" ? "#1d1d1d" : "#ebebeb"),
                 },
               },
@@ -83,6 +83,7 @@ const About = () => {
               }}
             />
             <Box
+              className="about-card-content"
               sx={{
                 width: "100%",
                 maxWidth: "300px",

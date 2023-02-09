@@ -6,12 +6,14 @@ export const ONE_ASSISTANT_SECTIONS: HomepageSection[] = [
     title: "1Assistant's Landing Page",
     label: "1Assistant's Landing Page",
     description: "",
+    options: [],
   },
   {
     id: "mechanism",
     title: "Mechanism",
     label: "Mechanism",
     description: "",
+    options: [],
   },
 
   {
@@ -19,12 +21,14 @@ export const ONE_ASSISTANT_SECTIONS: HomepageSection[] = [
     title: "Benefits",
     label: "Benefits",
     description: "",
+    options: [],
   },
   {
     id: "systems",
     title: "Systems",
     label: "Systems",
     description: "",
+    options: [],
   },
-  { id: "about-us", title: "About Us", label: "About Us", description: "" },
+  { id: "about-us", title: "About Us", label: "About Us", description: "", options: [] },
 ];

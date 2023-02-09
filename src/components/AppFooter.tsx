@@ -1,23 +1,11 @@
 import EmailIcon from "@mui/icons-material/Email";
 import GitHubIcon from "@mui/icons-material/GitHub";
 import YouTubeIcon from "@mui/icons-material/YouTube";
-import {
-  Box,
-  Divider,
-  DividerProps,
-  IconButton,
-  Link,
-  Stack,
-  styled,
-  SxProps,
-  Theme,
-  Tooltip,
-  Typography,
-} from "@mui/material";
+import { Box, Divider, DividerProps, IconButton, Link, Stack, styled, SxProps, Theme, Typography } from "@mui/material";
 import NextImage from "next/image";
 import React from "react";
 
-import { gray800 } from "@/pages/home";
+import { gray800, gray900, orangeDark } from "@/pages/home";
 
 import logo1cademy from "../../public/1Cademy-head.svg";
 import { ONE_CADEMY_SECTIONS } from "./home/SectionsItems";
@@ -31,13 +19,13 @@ export const DividerStyled = styled((props: DividerProps) => <Divider {...props}
   borderColor: gray800,
 }));
 
-const AppFooter3 = ({ sx }: AppFooterProps) => {
+const AppFooter = ({ sx }: AppFooterProps) => {
   return (
     <Box
       component={"footer"}
       sx={{
         color,
-        backgroundColor: "#000",
+        backgroundColor: theme => (theme.palette.mode === "dark" ? "#000" : gray900),
         p: "48px 16px",
 
         "& a": {
@@ -72,21 +60,18 @@ const AppFooter3 = ({ sx }: AppFooterProps) => {
             <Typography color={color}> We Synthesize Books & Research Papers Together</Typography>
           </Box>
           <Box>
-            <Typography sx={{ fontSize: "14px", fontWeight: 600, color, mb: "16px" }}> Navigation</Typography>
             <Stack spacing={"12px"}>
               {ONE_CADEMY_SECTIONS.slice(1).map(cur => {
                 return (
-                  <Tooltip key={cur.id} title={cur.title} placement="right">
-                    <Link href={`#${cur.id}`} sx={{ textDecoration: "none" }}>
-                      {cur.label}
-                    </Link>
-                  </Tooltip>
+                  <Link key={cur.id} href={`#${cur.id}`} sx={{ textDecoration: "none" }}>
+                    {cur.label}
+                  </Link>
                 );
               })}
             </Stack>
           </Box>
+
           <Box>
-            <Typography sx={{ fontSize: "14px", fontWeight: 600, color, mb: "16px" }}> Other</Typography>
             <Stack spacing={"12px"}>
               <Link
                 target="_blank"
@@ -112,15 +97,24 @@ const AppFooter3 = ({ sx }: AppFooterProps) => {
               >
                 Cookie
               </Link>
+              <Link
+                target="_blank"
+                href="https://1cademy.us/gdpr"
+                underline="none"
+                sx={{ color: theme => theme.palette.grey[500] }}
+              >
+                GDPR
+              </Link>
             </Stack>
           </Box>
+
           <Box>
             <Box gridColumn={"1 / span 2"} mb="16px">
               <Typography sx={{ fontSize: "14px", fontWeight: 600, color, mb: "16px" }}>Contact Us</Typography>
 
               <Stack direction={"row"} alignItems="center" spacing={"8px"}>
                 <IconButton href="mailto:onecademy@umich.edu" aria-label="Mail us" sx={{ p: "0" }}>
-                  <EmailIcon sx={{ color: "#98A2B3" }} fontSize="medium" />
+                  <EmailIcon sx={{ color: "#98A2B3", ":hover": { color: orangeDark } }} fontSize="medium" />
                 </IconButton>
                 <Typography color={color} sx={{ textDecorationLine: "underline", fontWeight: 600 }}>
                   onecademy@umich.edu
@@ -137,12 +131,14 @@ const AppFooter3 = ({ sx }: AppFooterProps) => {
                 href="https://www.youtube.com/channel/UCKBqMjvnUrxOhfbH1F1VIdQ/"
                 sx={{ p: "0" }}
               >
-                <YouTubeIcon sx={{ color: "#98A2B3" }} fontSize="medium" />
+                <YouTubeIcon sx={{ color: "#98A2B3", ":hover": { color: orangeDark } }} fontSize="medium" />
               </IconButton>
             </Box>
           </Box>
         </Box>
+
         <br />
+
         <DividerStyled />
         <br />
         <Stack direction={{ xs: "column", sm: "row" }} justifyContent="space-between" spacing={"8px"}>
@@ -169,4 +165,4 @@ const AppFooter3 = ({ sx }: AppFooterProps) => {
   );
 };
 
-export default AppFooter3;
+export default AppFooter;
