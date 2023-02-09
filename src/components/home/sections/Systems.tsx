@@ -16,7 +16,7 @@ import { useQuery } from "react-query";
 
 import { getStats } from "@/lib/knowledgeApi";
 import { RE_DETECT_NUMBERS_WITH_COMMAS } from "@/lib/utils/RE";
-import { gray25, gray50, gray100, gray300, orangeDark } from "@/pages/home";
+import { gray25, gray50, gray100, gray300, gray850, orangeDark } from "@/pages/home";
 
 import { wrapStringWithBoldTag } from "../../../lib/utils/JSX.utils";
 import { RiveComponentMemoized } from "../components/temporals/RiveComponentExtended";
@@ -123,7 +123,7 @@ const Systems = () => {
             <AccordionSummary
               sx={{
                 ":hover": {
-                  background: theme => (theme.palette.mode === "dark" ? "black" : gray50),
+                  background: theme => (theme.palette.mode === "dark" ? gray850 : gray50),
                 },
               }}
             >

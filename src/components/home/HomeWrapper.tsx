@@ -41,10 +41,8 @@ const HomeWrapper = ({
 
   useEffect(() => {
     isScrolling.current = true;
-    console.log("start");
     timer.current = setTimeout(() => {
       isScrolling.current = false;
-      console.log("end");
     }, 1300);
   }, []);
 
