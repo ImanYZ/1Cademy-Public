@@ -2,6 +2,8 @@ import { Link, Typography } from "@mui/material";
 import { Box } from "@mui/system";
 import React from "react";
 
+import Team from "../components/AoutSwitcher";
+
 const ABOUT_ITEMS = [
   {
     id: "item-3",
@@ -27,80 +29,92 @@ const ABOUT_ITEMS = [
     description: "awarded research credits to host 1Cademy on GCP services, under award number 205607640.",
     link: "https://cloud.google.com/edu/researchers",
   },
-  {
-    id: "item-1",
-    title: "1Cademy Architect",
-    subtitle: "Iman YeckehZaare",
-    image: "home/about/Iman_YeckehZaare.jpg",
-    description:
-      "Ph.D. Candidate, Awarded as the Best Graduate Student Instructor of the Year 2018-2019 at the University of Michigan, School of Information",
-    link: "https://www.si.umich.edu/people/iman-yeckehzaare",
-  },
-  {
-    id: "item-2",
-    title: "1Cademy Advisor",
-    subtitle: "Paul Resnick",
-    image: "home/about/Paul_Resnick.jpg",
-    description:
-      "Michael D. Cohen Collegiate Professor of Information, Associate Dean for Research and Faculty Affairs and Professor of Information, University of Michigan, School of Information",
-    link: "https://www.si.umich.edu/people/paul-resnick",
-  },
+  // {
+  //   id: "item-1",
+  //   title: "1Cademy Architect",
+  //   subtitle: "Iman YeckehZaare",
+  //   image: "home/about/Iman_YeckehZaare.jpg",
+  //   description:
+  //     "Ph.D. Candidate, Awarded as the Best Graduate Student Instructor of the Year 2018-2019 at the University of Michigan, School of Information",
+  //   link: "https://www.si.umich.edu/people/iman-yeckehzaare",
+  // },
+  // {
+  //   id: "item-2",
+  //   title: "1Cademy Advisor",
+  //   subtitle: "Paul Resnick",
+  //   image: "home/about/Paul_Resnick.jpg",
+  //   description:
+  //     "Michael D. Cohen Collegiate Professor of Information, Associate Dean for Research and Faculty Affairs and Professor of Information, University of Michigan, School of Information",
+  //   link: "https://www.si.umich.edu/people/paul-resnick",
+  // },
 ];
 
 const About = () => {
   return (
-    <Box
-      sx={{
-        pb: { xs: "64px", sm: "96px" },
-        display: "grid",
-        gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr", md: "1fr 1fr 1fr" },
-        gap: "32px",
-        placeItems: "center",
-      }}
-    >
-      {ABOUT_ITEMS.map(cur => (
-        <Link key={cur.id} href={cur.link} target="_blank" rel="noopener" sx={{ textDecoration: "none" }}>
-          <Box
-            sx={{
-              display: "flex",
-              flexDirection: "column",
-              ":hover": {
-                "& .about-card-content": {
-                  background: theme => (theme.palette.mode === "dark" ? "#1d1d1d" : "#ebebeb"),
-                },
-              },
-            }}
-          >
-            <img
-              src={cur.image}
-              alt={cur.title}
-              style={{
-                width: "100%",
-                maxWidth: "300px",
-                height: "240px",
-                borderRadius: "10px 10px 0px 0px",
-                objectFit: "cover",
-              }}
-            />
+    <Box sx={{ pb: { xs: "64px" } }}>
+      <Typography component={"h3"} sx={{ fontSize: "20px", fontWeight: 600, mb: "32px" }}>
+        Sponsors
+      </Typography>
+
+      <Box
+        sx={{
+          display: "grid",
+          gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr", md: "1fr 1fr 1fr" },
+          gap: "32px",
+          placeItems: "center",
+          pb: { xs: "64px" },
+        }}
+      >
+        {ABOUT_ITEMS.map(cur => (
+          <Link key={cur.id} href={cur.link} target="_blank" rel="noopener" sx={{ textDecoration: "none" }}>
             <Box
-              className="about-card-content"
               sx={{
-                width: "100%",
-                maxWidth: "300px",
-                minHeight: "150px",
-                p: "20px 16px",
-                background: theme => (theme.palette.mode === "dark" ? "#000000" : "#F9FAFB"),
+                display: "flex",
+                flexDirection: "column",
+                ":hover": {
+                  "& .about-card-content": {
+                    background: theme => (theme.palette.mode === "dark" ? "#1d1d1d" : "#ebebeb"),
+                  },
+                },
               }}
             >
-              <Typography component={"h3"} sx={{ fontSize: "20px", fontWeight: 700, pb: "12px" }}>
-                {cur.title}
-              </Typography>
-              <Typography sx={{ fontSize: "16px", fontWeight: 600, pb: "8px" }}>{cur.subtitle}</Typography>
-              {cur.description && <Typography sx={{ fontSize: "12px" }}>{cur.description}</Typography>}
+              <img
+                src={cur.image}
+                alt={cur.title}
+                style={{
+                  width: "100%",
+                  maxWidth: "300px",
+                  height: "240px",
+                  borderRadius: "10px 10px 0px 0px",
+                  objectFit: "cover",
+                }}
+              />
+              <Box
+                className="about-card-content"
+                sx={{
+                  width: "100%",
+                  maxWidth: "300px",
+                  minHeight: "150px",
+                  p: "20px 16px",
+                  background: theme => (theme.palette.mode === "dark" ? "#000000" : "#F9FAFB"),
+                }}
+              >
+                <Typography component={"h3"} sx={{ fontSize: "20px", fontWeight: 700, pb: "12px" }}>
+                  {cur.title}
+                </Typography>
+                <Typography sx={{ fontSize: "16px", fontWeight: 600, pb: "8px" }}>{cur.subtitle}</Typography>
+                {cur.description && <Typography sx={{ fontSize: "12px" }}>{cur.description}</Typography>}
+              </Box>
             </Box>
-          </Box>
-        </Link>
-      ))}
+          </Link>
+        ))}
+      </Box>
+
+      <Typography component={"h3"} sx={{ fontSize: "20px", fontWeight: 600, mb: "32px" }}>
+        Our Team
+      </Typography>
+
+      <Team />
     </Box>
   );
 };
