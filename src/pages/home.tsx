@@ -1,14 +1,13 @@
 import { Box } from "@mui/material";
-import React, { useEffect, useRef, useState } from "react";
-import { useQuery } from "react-query";
+import React from "react";
 
+// import { useQuery } from "react-query";
 import AppFooter from "@/components/AppFooter";
 import Benefits from "@/components/home/sections/Benefits";
-import { getStats } from "@/lib/knowledgeApi";
 
-import AppHeaderMemoized, { HEADER_HEIGHT, HEADER_HEIGHT_MOBILE } from "../components/Header/AppHeader";
-import { SectionWrapper } from "../components/home/components/SectionWrapper";
+import { HEADER_HEIGHT, HEADER_HEIGHT_MOBILE } from "../components/Header/AppHeader";
 import UniversitiesMap from "../components/home/components/UniversitiesMap/UniversitiesMap";
+import HomeWrapper from "../components/home/HomeWrapper";
 import About from "../components/home/sections/About";
 import { HeroMemoized } from "../components/home/sections/Hero";
 import Join from "../components/home/sections/Join";
@@ -17,8 +16,6 @@ import Mechanism, { MECHANISM_ITEMS } from "../components/home/sections/Mechanis
 import Papers from "../components/home/sections/Papers";
 import Systems from "../components/home/sections/Systems";
 import Topics from "../components/home/sections/Topics";
-import { ONE_CADEMY_SECTIONS } from "../components/home/SectionsItems";
-import { useInView, UseInViewProps } from "../hooks/useObserver";
 
 export const gray01 = "#28282a";
 export const gray02 = "#202020";
@@ -37,57 +34,66 @@ export const orangeLight = "#FF6D00";
 export const orange800 = "#FF6D00";
 export const orange900 = "#E56200";
 
-const observerOption: UseInViewProps = { options: { root: null, rootMargin: "-380px 0px -380px 0px", threshold: 0 } };
+// const observerOption: UseInViewProps = { options: { root: null, rootMargin: "-380px 0px -380px 0px", threshold: 0 } };
 
 /**
  * animations builded with: https://rive.app/
  */
 
 export const Home = () => {
-  const [selectedSectionId, setSelectedSectionId] = useState("");
-  const { data: stats } = useQuery("stats", getStats);
-  const isScrolling = useRef(false);
-  const timer = useRef<NodeJS.Timeout | null>(null);
+  // const [selectedSectionId, setSelectedSectionId] = useState("");
+  // const { data: stats } = useQuery("stats", getStats);
+  // const isScrolling = useRef(false);
+  // const timer = useRef<NodeJS.Timeout | null>(null);
 
-  const { inView: mechanismInView, ref: MechanismSectionRef } = useInView(observerOption);
-  const { inView: magnitudeInView, ref: MagnitudeSectionRef } = useInView(observerOption);
-  const { inView: benefitInView, ref: BenefitSectionRef } = useInView(observerOption);
-  const { inView: topicsInView, ref: TopicsSectionRef } = useInView(observerOption);
-  const { inView: systemsInView, ref: SystemSectionRef } = useInView(observerOption);
-  const { inView: aboutInView, ref: AboutSectionRef } = useInView(observerOption);
+  // const { inView: mechanismInView, ref: MechanismSectionRef } = useInView(observerOption);
+  // const { inView: magnitudeInView, ref: MagnitudeSectionRef } = useInView(observerOption);
+  // const { inView: benefitInView, ref: BenefitSectionRef } = useInView(observerOption);
+  // const { inView: topicsInView, ref: TopicsSectionRef } = useInView(observerOption);
+  // const { inView: systemsInView, ref: SystemSectionRef } = useInView(observerOption);
+  // const { inView: aboutInView, ref: AboutSectionRef } = useInView(observerOption);
 
-  useEffect(() => {
-    if (isScrolling.current) return;
+  // useEffect(() => {
+  //   isScrolling.current = true;
 
-    let newSelectedSectionId = "";
-    if (mechanismInView) newSelectedSectionId = ONE_CADEMY_SECTIONS[1].id;
-    if (magnitudeInView) newSelectedSectionId = ONE_CADEMY_SECTIONS[2].id;
-    if (benefitInView) newSelectedSectionId = ONE_CADEMY_SECTIONS[3].id;
-    if (topicsInView) newSelectedSectionId = ONE_CADEMY_SECTIONS[4].id;
-    if (systemsInView) newSelectedSectionId = ONE_CADEMY_SECTIONS[5].id;
-    if (aboutInView) newSelectedSectionId = ONE_CADEMY_SECTIONS[6].id;
+  //   timer.current = setTimeout(() => {
+  //     isScrolling.current = false;
+  //     if (timer.current) clearTimeout(timer.current);
+  //   }, 1000);
+  // }, []);
 
-    setSelectedSectionId(newSelectedSectionId);
+  // useEffect(() => {
+  //   if (isScrolling.current) return;
 
-    const newHash = newSelectedSectionId ? `#${newSelectedSectionId}` : "";
-    if (window.location.hash === newHash) return;
-    window.location.hash = newHash;
-  }, [mechanismInView, magnitudeInView, benefitInView, topicsInView, systemsInView, aboutInView]);
+  //   let newSelectedSectionId = "";
+  //   if (mechanismInView) newSelectedSectionId = ONE_CADEMY_SECTIONS[1].id;
+  //   if (magnitudeInView) newSelectedSectionId = ONE_CADEMY_SECTIONS[2].id;
+  //   if (benefitInView) newSelectedSectionId = ONE_CADEMY_SECTIONS[3].id;
+  //   if (topicsInView) newSelectedSectionId = ONE_CADEMY_SECTIONS[4].id;
+  //   if (systemsInView) newSelectedSectionId = ONE_CADEMY_SECTIONS[5].id;
+  //   if (aboutInView) newSelectedSectionId = ONE_CADEMY_SECTIONS[6].id;
 
-  const onSwitchSection = (newSelectedSectionId: string) => {
-    isScrolling.current = true;
-    if (timer.current) clearTimeout(timer.current);
+  //   setSelectedSectionId(newSelectedSectionId);
 
-    timer.current = setTimeout(() => {
-      isScrolling.current = false;
-      if (timer.current) clearTimeout(timer.current);
-    }, 1000);
+  //   const newHash = newSelectedSectionId ? `#${newSelectedSectionId}` : "";
+  //   if (window.location.hash === newHash) return;
+  //   window.location.hash = newHash;
+  // }, [mechanismInView, magnitudeInView, benefitInView, topicsInView, systemsInView, aboutInView]);
 
-    setSelectedSectionId(newSelectedSectionId);
-    const newHash = newSelectedSectionId ? `#${newSelectedSectionId}` : "";
-    if (window.location.hash === newHash) return;
-    window.location.hash = newHash;
-  };
+  // const onSwitchSection = (newSelectedSectionId: string) => {
+  //   isScrolling.current = true;
+  //   if (timer.current) clearTimeout(timer.current);
+
+  //   timer.current = setTimeout(() => {
+  //     isScrolling.current = false;
+  //     if (timer.current) clearTimeout(timer.current);
+  //   }, 1000);
+
+  //   setSelectedSectionId(newSelectedSectionId);
+  //   // const newHash = newSelectedSectionId ? `#${newSelectedSectionId}` : "";
+  //   // // if (window.location.hash === newHash) return;
+  //   // // window.location.hash = newHash;
+  // };
 
   return (
     <Box
@@ -101,7 +107,26 @@ export const Home = () => {
         backgroundColor: theme => (theme.palette.mode === "dark" ? "#0A0D14" : "#FFFFFF"),
       }}
     >
-      <AppHeaderMemoized
+      <HomeWrapper
+        heroSectionChildren={<HeroMemoized headerHeight={HEADER_HEIGHT} headerHeightMobile={HEADER_HEIGHT_MOBILE} />}
+        mechanismSectionChildren={<Mechanism mechanisms={MECHANISM_ITEMS} />}
+        magnitudeSectionChildren={
+          <>
+            <Magnitude />
+            <UniversitiesMap theme={"Dark"} />
+          </>
+        }
+        benefitSectionChildren={<Benefits />}
+        topicsSectionChildren={<Topics />}
+        systemSectionChildren={<Systems />}
+        aboutSectionChildren={
+          <>
+            <About />
+            <Papers />
+          </>
+        }
+      />
+      {/* <AppHeaderMemoized
         page="ONE_CADEMY"
         sections={ONE_CADEMY_SECTIONS}
         selectedSectionId={selectedSectionId}
@@ -110,31 +135,31 @@ export const Home = () => {
 
       <HeroMemoized headerHeight={HEADER_HEIGHT} headerHeightMobile={HEADER_HEIGHT_MOBILE} />
 
-      <SectionWrapper ref={MechanismSectionRef} section={ONE_CADEMY_SECTIONS[1]} textAlign="center">
+      <SectionWrapper section={ONE_CADEMY_SECTIONS[1]} textAlign="center">
         <Mechanism mechanisms={MECHANISM_ITEMS} />
       </SectionWrapper>
 
-      <SectionWrapper ref={MagnitudeSectionRef} section={ONE_CADEMY_SECTIONS[2]} stats={stats}>
+      <SectionWrapper section={ONE_CADEMY_SECTIONS[2]} stats={stats}>
         <Magnitude />
         <UniversitiesMap theme={"Dark"} />
       </SectionWrapper>
 
-      <SectionWrapper ref={BenefitSectionRef} section={ONE_CADEMY_SECTIONS[3]}>
+      <SectionWrapper section={ONE_CADEMY_SECTIONS[3]}>
         <Benefits />
       </SectionWrapper>
 
-      <SectionWrapper ref={TopicsSectionRef} section={ONE_CADEMY_SECTIONS[4]}>
+      <SectionWrapper section={ONE_CADEMY_SECTIONS[4]}>
         <Topics />
       </SectionWrapper>
 
-      <SectionWrapper ref={SystemSectionRef} section={ONE_CADEMY_SECTIONS[5]}>
+      <SectionWrapper section={ONE_CADEMY_SECTIONS[5]}>
         <Systems />
       </SectionWrapper>
 
-      <SectionWrapper ref={AboutSectionRef} section={ONE_CADEMY_SECTIONS[6]}>
+      <SectionWrapper section={ONE_CADEMY_SECTIONS[6]}>
         <About />
         <Papers />
-      </SectionWrapper>
+      </SectionWrapper> */}
 
       <Box sx={{ py: { xs: "64px", sm: "96px" }, maxWidth: "1216px", m: "auto" }}>
         <Join />

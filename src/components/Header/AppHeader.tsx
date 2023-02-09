@@ -16,7 +16,6 @@ import Tooltip from "@mui/material/Tooltip";
 import { Stack } from "@mui/system";
 import { getAuth } from "firebase/auth";
 import Image from "next/image";
-import Link from "next/link";
 import { useRouter } from "next/router";
 import React, { useState } from "react";
 
@@ -39,6 +38,48 @@ export const HEADER_HEIGHT = 80;
 export const HEADER_HEIGHT_MOBILE = 72;
 
 export type HeaderPage = "ONE_CADEMY" | "ONE_ASSISTANT";
+
+const ActiveLink = ({
+  cur,
+  selectedSectionId,
+}: // preUrl,
+{
+  cur: HomepageSection;
+  selectedSectionId: string;
+  preUrl?: string;
+}) => {
+  // const router = useRouter();
+  // console.log({ router: router.asPath, id: `/#${cur.id}` });
+
+  // const [path, setPath] = useState("");
+
+  // useEffect(() => {
+  //   setPath(window.location.hash);
+  // }, []);
+
+  return (
+    <LinkMUI
+      href={`#${cur.id}`}
+      // onClick={() => router.push(`#${cur.id}`)}
+      // onClick={() => router.push(preUrl ? `${preUrl}#${cur.id}` : `#${cur.id}`)}
+      sx={{
+        whiteSpace: "nowrap",
+        color: theme => (theme.palette.mode === "dark" ? gray200 : gray600),
+        cursor: "pointer",
+        textDecoration: "none",
+        fontWeight: 600,
+        // preUrl ? `${preUrl}#${cur.id}` : `#${cur.id}`
+        borderBottom: selectedSectionId === `#${cur.id}` ? `solid 2px ${orangeDark}` : undefined,
+        transitions: "all .5s",
+        ":hover": {
+          color: theme => (theme.palette.mode === "dark" ? gray300 : gray700),
+        },
+      }}
+    >
+      {cur.label}
+    </LinkMUI>
+  );
+};
 
 type AppHeaderProps = {
   page: HeaderPage;
@@ -151,25 +192,9 @@ const AppHeader = ({ page, sections, selectedSectionId, onPreventSwitch, preUrl 
               {sections.slice(1).map((cur, idx) =>
                 cur.options?.length ? (
                   <Box key={cur.id} sx={{ display: "flex" }}>
-                    <Link href={preUrl ? `${preUrl}#${cur.id}` : `#${cur.id}`} replace>
-                      <LinkMUI
-                        onClick={() => onPreventSwitch(cur.id)}
-                        onMouseOver={() => setIdxOptionVisible(prev => (prev === idx ? -1 : idx))}
-                        sx={{
-                          whiteSpace: "nowrap",
-                          color: theme => (theme.palette.mode === "dark" ? gray200 : gray600),
-                          cursor: "pointer",
-                          textDecoration: "none",
-                          fontWeight: 600,
-                          borderBottom: selectedSectionId === cur.id ? `solid 2px ${orangeDark}` : undefined,
-                          ":hover": {
-                            color: theme => (theme.palette.mode === "dark" ? gray300 : gray700),
-                          },
-                        }}
-                      >
-                        {cur.label}
-                      </LinkMUI>
-                    </Link>
+                    {/* <Link href={preUrl ? `${preUrl}#${cur.id}` : `#${cur.id}`} replace> */}
+                    <ActiveLink cur={cur} selectedSectionId={selectedSectionId} preUrl={preUrl} />
+                    {/* </Link> */}
                     <IconButton
                       onClick={() => setIdxOptionVisible(prev => (prev === idx ? -1 : idx))}
                       size="small"
@@ -179,27 +204,11 @@ const AppHeader = ({ page, sections, selectedSectionId, onPreventSwitch, preUrl 
                     </IconButton>
                   </Box>
                 ) : (
-                  <Tooltip key={cur.id} title={cur.title}>
-                    <Link href={preUrl ? `${preUrl}#${cur.id}` : `#${cur.id}`} replace>
-                      <LinkMUI
-                        onClick={() => onPreventSwitch(cur.id)}
-                        onMouseOver={() => setIdxOptionVisible(-1)}
-                        sx={{
-                          whiteSpace: "nowrap",
-                          color: theme => (theme.palette.mode === "dark" ? gray200 : gray600),
-                          cursor: "pointer",
-                          textDecoration: "none",
-                          fontWeight: 600,
-                          borderBottom: selectedSectionId === cur.id ? `solid 2px ${orangeDark}` : undefined,
-                          ":hover": {
-                            color: theme => (theme.palette.mode === "dark" ? gray300 : gray700),
-                          },
-                        }}
-                      >
-                        {cur.label}
-                      </LinkMUI>
-                    </Link>
-                  </Tooltip>
+                  <ActiveLink key={cur.id} cur={cur} selectedSectionId={selectedSectionId} preUrl={preUrl} />
+                  // <Tooltip key={cur.id} title={cur.title}>
+                  // {/* <Link href={preUrl ? `${preUrl}#${cur.id}` : `#${cur.id}`} replace> */}
+                  // {/* </Link> */}
+                  // </Tooltip>
                 )
               )}
             </Stack>

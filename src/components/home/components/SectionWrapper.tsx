@@ -16,6 +16,8 @@ const getDescription = (section: HomepageSection, stats?: StatsSchema): string =
   return section.getDescription(statsCopy);
 };
 
+// const observerOption: UseInViewProps = { options: { root: null, rootMargin: "-480px 0px -380px 0px", threshold: 0 } };
+
 type SectionWrapperProps = {
   section: HomepageSection;
   children: ReactNode;
@@ -25,10 +27,26 @@ type SectionWrapperProps = {
 
 export const SectionWrapper = forwardRef(
   ({ section, children, textAlign = "left", stats }: SectionWrapperProps, ref) => {
+    // const { inView, ref: refTT } = useInView(observerOption);
+    // const router = useRouter();
+
+    // console.log(inView, router.asPath, `#${section.id}`);
+
+    // useEffect(() => {
+    //   // console.log({ inView });
+    //   // if (typeof window !== "undefined") return;
+    //   if (router.asPath.includes(`#${section.id}`)) return;
+    //   if (!inView) return;
+
+    //   router
+    //     .push({ pathname: "/", hash: `#${section.id}` }, undefined, { shallow: true, scroll: false })
+    //     .catch(err => console.log(err));
+    // }, [inView, router, section.id]);
+
     return (
       <Box
-        id={section.id}
         ref={ref}
+        id={section.id}
         component={"section"}
         sx={{
           py: { xs: "64px", sm: "96px" },
