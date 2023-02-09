@@ -37,8 +37,8 @@ const PAPER_ITEMS = [
     title: "ACM LAK 2022: Semester-level Spacing but Not Procrastination Affected Student Exam Performance.",
     content: `Spacing and procrastination are often thought of as opposites. It is possible, however, for a student to space their studying by doing something every day throughout the semester and still procrastinate by waiting until late in the semester to increase their amount of studying. To analyze the relationship between spacing and procrastination, we examined 674 students’ interactions with a course eBook over four semesters of an introductory programming course. We measured each student’s semester-level spacing as the number of days they interacted with the eBook, and each student’s semester-level procrastination as the average delay from the start of the semester for all their eBook interactions. Surprisingly, there was a small, yet positive, correlation between the two measures. Which, then, matters for course performance: studying over more days or studying earlier in the semester? When controlling for total amount of studying, as well as a number of academic and demographic characteristics in an SEM analysis, we find a strong positive effect of spacing but no significant effect of procrastination on final exam scores.`,
     link: "https://dl.acm.org/doi/abs/10.1145/3506860.3506907",
-    image: "",
-    imageDark: "",
+    image: "home/papers/ACM-LAK-2022.svg",
+    imageDark: "home/papers/ACM-LAK-2022--dark.svg",
   },
 
   {
@@ -46,8 +46,8 @@ const PAPER_ITEMS = [
     title: "ACM ICER 2021: Incentivized Spacing and Gender in Computer Science Education.",
     content: `Extensive prior research shows that spacing – the distribution of studying over multiple sessions – significantly improves long-term learning in many disciplines. However, in computer science education, it is unclear if 1) spacing is effective in an incentivized, non-imposed setting and 2) when incentivized, female and male students space their studying differently. To investigate these research questions, we examined how students in an introductory computer science course (378 female and 310 male) spaced their studying. A retrieval practice tool in the course (for 5% of the course grade) incentivized students to space their studying, by awarding a point per day of usage. To measure how much each student spaced, we examined their interactions with the course eBook, which served as their primary learning resource. Specifically, when comparing two students with the same academic and demographic characteristics, the same measure of course easiness, and the same amount of content studied, we considered the student who distributed their studying over more days to be the one who spaced more. Using this definition, our structural equation modeling (SEM) results show that, 1) on average, students who spaced their studying over 14.516 more days (one standard deviation) got 2.25% higher final exam scores; and 2) female students spaced their studying over 4.331 more days than their male counterparts. These results suggest that, in an introductory computer science course, incentivized spacing is effective. Notably, when compared to their male counterparts, female students both exhibited more spacing and obtained higher final exam scores through spacing.`,
     link: "https://dl.acm.org/doi/abs/10.1145/3446871.3469760",
-    image: "",
-    imageDark: "",
+    image: "home/papers/ACM-ICER-2021.svg",
+    imageDark: "home/papers/ACM-ICER-2021--dark.svg",
   },
 
   {
@@ -55,8 +55,8 @@ const PAPER_ITEMS = [
     title: "ACM CHI 2020: Engaging Students in Voluntary Question Generation and Linking.",
     content: `Generating multiple-choice questions is known to improve students' critical thinking and deep learning. Visualizing relationships between concepts enhances meaningful learning, students' ability to relate new concepts to previously learned concepts. We designed and deployed a collaborative learning process through which students generate multiple-choice questions and represent the prerequisite knowledge structure between questions as visual links in a shared map, using a variation of Concept Maps that we call "QMap." We conducted a four-month study with 19 undergraduate students. Students sustained voluntary contributions, creating 992 good questions, and drawing 1,255 meaningful links between the questions. Through analyzing self-reports, observations, and usage data, we report on the technical and social design features that led students to sustain their motivation.`,
     link: "https://dl.acm.org/doi/abs/10.1145/3313831.3376882",
-    image: "",
-    imageDark: "",
+    image: "home/papers/ACM-ICER-2021.svg",
+    imageDark: "home/papers/ACM-ICER-2021--dark.svg",
   },
 
   {
@@ -64,16 +64,16 @@ const PAPER_ITEMS = [
     title: "ACM ICER 2019: A spaced, interleaved retrieval practice tool that is motivating and effective.",
     content: `Retrieval practice, spacing, and interleaving are known to enhance long-term learning and transfer, but reduce short-term performance. It can be difficult to get both students and instructors to use these techniques since they perceive them as impeding initial student learning. We leveraged user experience design and research techniques, including survey and participant observation, to improve the design of a practice tool during a semester of use in a large introductory Python programming course. In this paper, we describe the design features that made the tool effective for learning as well as motivating. These include requiring spacing by giving credit for each day that a student answered a minimum number of questions, adapting a spaced repetition algorithm to schedule topics rather than specific questions, providing a visual representation of the evolving schedule in order to support meta-cognition, and providing several gameful design elements. To assess effectiveness, we estimated a regression model: each hour spent using the practice tool over the course of a semester was associated with an increase in final exam grades of 1.04%, even after controlling for many potential confounds. To assess motivation, we report on the amount of practice tool use: 62 of the 193 students (32%) voluntarily used the tool more than the required 45 days. This provides evidence that the design of the tool successfully overcame the typically negative perceptions of retrieval practice, spacing, and interleaving.`,
     link: "https://dl.acm.org/doi/abs/10.1145/3291279.3339411",
-    image: "",
-    imageDark: "",
+    image: "home/papers/ACM-ICER-2019.svg",
+    imageDark: "home/papers/ACM-ICER-2019.svg",
   },
   {
     id: "paper-107",
     title: "ACM SIGCSE 2019: Speed and Studying: Gendered Pathways to Success.",
     content: `In an introductory Python programming course intended for non-majors with little prior CS experience, with 85 male and 108 female students, we were able to capture electronic traces of students' studying and problem-solving. There was no significant difference in final exam scores by gender but we found that female students spent 12.1 more hours studying over the semester while male students on average earned 2.7 more points per hour of solving problem set questions over the first half of the semester. We were able to capture their learning behavior because students studied using the Runestone interactive textbook and completed weekly problem sets in the same platform for the first half of the semester. We analyzed these logs to determine three quantities for each student. One is study time, as measured by total use of Runestone outside of weekly assignments. The second is speed, as measured by the number of points students earned per hour working on problem sets. The third is earliness, as measured by how far before the deadlines they worked on weekly assignments. We conclude that male students were faster at completing problem sets early in the semester but that female students found an alternative pathway to success.`,
     link: "https://dl.acm.org/doi/abs/10.1145/3287324.3287417",
-    image: "",
-    imageDark: "",
+    image: "home/papers/ACM-SIGCSE-2019.svg",
+    imageDark: "home/papers/ACM-SIGCSE-2019--dark.svg",
   },
   {
     id: "paper-108",
