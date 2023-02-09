@@ -2480,7 +2480,10 @@ const Dashboard = ({}: DashboardProps) => {
           newNode.content === oldNode.content &&
           newNode.nodeType === oldNode.nodeType;
         isTheSame = isTheSame && compareProperty(oldNode, newNode, "nodeImage");
-        if (!("nodeVideo" in oldNode) && newNode["nodeVideo"] !== "") {
+        if (
+          ("nodeVideo" in oldNode && "nodeVideo" in newNode) ||
+          (!("nodeVideo" in oldNode) && newNode["nodeVideo"] !== "")
+        ) {
           isTheSame = isTheSame && compareProperty(oldNode, newNode, "nodeVideo");
         }
         isTheSame = compareFlatLinks(oldNode.tagIds, newNode.tagIds, isTheSame); // CHECK: O checked only ID changes
