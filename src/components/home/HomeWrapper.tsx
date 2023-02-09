@@ -2,7 +2,7 @@ import { Box } from "@mui/material";
 import React, { ReactNode, useEffect, useRef, useState } from "react";
 
 import { useInView, UseInViewProps } from "../../hooks/useObserver";
-import ROUTES from "../../lib/utils/routes";
+// import ROUTES from "../../lib/utils/routes";
 import AppHeaderMemoized from "../Header/AppHeader";
 import { SectionWrapper } from "./components/SectionWrapper";
 import { ONE_CADEMY_SECTIONS } from "./SectionsItems";
@@ -41,10 +41,11 @@ const HomeWrapper = ({
 
   useEffect(() => {
     isScrolling.current = true;
-
+    console.log("start");
     timer.current = setTimeout(() => {
       isScrolling.current = false;
-    }, 1000);
+      console.log("end");
+    }, 1300);
   }, []);
 
   useEffect(() => {
@@ -65,8 +66,8 @@ const HomeWrapper = ({
     setSelectedSectionId(newHash);
   }, [aboutInView, benefitInView, magnitudeInView, mechanismInView, systemsInView, topicsInView]);
 
-  const onSwitchSection = (newSelectedSectionId: string, fromOtherPage = false) => {
-    if (fromOtherPage) return (window.location.href = `${ROUTES.publicHome}#${newSelectedSectionId}`);
+  const onSwitchSection = (newSelectedSectionId: string) => {
+    // if (fromOtherPage) return (window.location.href = `${ROUTES.publicHome}#${newSelectedSectionId}`);
 
     if (isScrolling.current) return;
 
@@ -89,7 +90,7 @@ const HomeWrapper = ({
         page="ONE_CADEMY"
         sections={ONE_CADEMY_SECTIONS}
         selectedSectionId={selectedSectionId}
-        onPreventSwitch={onSwitchSection}
+        onSwitchSection={onSwitchSection}
       />
 
       {heroSectionChildren}

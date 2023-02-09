@@ -83,7 +83,7 @@ const AssistantHomeWrapper = ({
         page="ONE_ASSISTANT"
         sections={ONE_ASSISTANT_SECTIONS}
         selectedSectionId={selectedSectionId}
-        onPreventSwitch={onSwitchSection}
+        onSwitchSection={onSwitchSection}
       />
 
       {heroSectionChildren}

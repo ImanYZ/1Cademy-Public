@@ -6,7 +6,7 @@ import LightModeIcon from "@mui/icons-material/LightMode";
 import LogoutIcon from "@mui/icons-material/Logout";
 import MenuIcon from "@mui/icons-material/Menu";
 import SearchIcon from "@mui/icons-material/Search";
-import { Link as LinkMUI, Modal, Typography, useMediaQuery, useTheme } from "@mui/material";
+import { Modal, Typography, useMediaQuery, useTheme } from "@mui/material";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import IconButton from "@mui/material/IconButton";
@@ -20,7 +20,7 @@ import { useRouter } from "next/router";
 import React, { useState } from "react";
 
 import useThemeChange from "@/hooks/useThemeChange";
-import { gray200, gray300, gray600, gray700, orange900, orangeDark } from "@/pages/home";
+import { orange900, orangeDark } from "@/pages/home";
 
 import oneCademyLogo from "../../../public/DarkmodeLogo.png";
 import oneCademyLogoExtended from "../../../public/logo-extended.png";
@@ -31,6 +31,7 @@ import AppHeaderSearchBar from "../AppHeaderSearchBar2";
 import AssistantForm from "../assistant/AssistantRegister";
 import { HomepageSection } from "../home/SectionsItems";
 import SearcherPupUp from "../SearcherPupUp";
+import { ActiveLink } from "./ActiveLink";
 import { MenuHeader } from "./MenuHeader";
 import { SubMenu } from "./SubMenu";
 
@@ -38,50 +39,16 @@ export const HEADER_HEIGHT = 80;
 export const HEADER_HEIGHT_MOBILE = 72;
 
 export type HeaderPage = "ONE_CADEMY" | "ONE_ASSISTANT";
-type ActiveLinkProps = {
-  cur: HomepageSection;
-  selectedSectionId: string;
-  onSwitchSection: (id: string) => void;
-  // preUrl?: string;
-};
-
-const ActiveLink = ({
-  cur,
-  selectedSectionId,
-  onSwitchSection,
-}: // preUrl,
-ActiveLinkProps) => {
-  // preUrl ? `${preUrl}#${cur.id}` : `#${cur.id}`,
-  return (
-    <LinkMUI
-      onClick={() => onSwitchSection(cur.id)}
-      sx={{
-        whiteSpace: "nowrap",
-        color: theme => (theme.palette.mode === "dark" ? gray200 : gray600),
-        cursor: "pointer",
-        textDecoration: "none",
-        fontWeight: 600,
-        borderBottom: selectedSectionId === `#${cur.id}` ? `solid 2px ${orangeDark}` : undefined,
-        transitions: "all .5s",
-        ":hover": {
-          color: theme => (theme.palette.mode === "dark" ? gray300 : gray700),
-        },
-      }}
-    >
-      {cur.label}
-    </LinkMUI>
-  );
-};
 
 type AppHeaderProps = {
   page: HeaderPage;
   sections: HomepageSection[];
   selectedSectionId: string;
-  onPreventSwitch: (sectionId: string) => void;
+  onSwitchSection: (sectionId: string) => void;
   // preUrl?: string;
 };
 
-const AppHeader = ({ page, sections, selectedSectionId, onPreventSwitch }: AppHeaderProps) => {
+const AppHeader = ({ page, sections, selectedSectionId, onSwitchSection }: AppHeaderProps) => {
   const [openSearch, setOpenSearch] = useState(false);
   const [{ isAuthenticated, user }] = useAuth();
   const [handleThemeSwitch] = useThemeChange();
@@ -108,9 +75,14 @@ const AppHeader = ({ page, sections, selectedSectionId, onPreventSwitch }: AppHe
     setProfileMenuOpen(null);
   };
 
-  const onCloseMenu = (id: string) => {
+  const onCloseMenu = () => {
     setOpenMenu(false);
-    onPreventSwitch(id);
+    // onSwitchSection(id);
+  };
+
+  const onSwitchSectionByMenu = (id: string) => {
+    onSwitchSection(id);
+    setOpenMenu(false);
   };
 
   const renderProfileMenu = (
@@ -186,10 +158,10 @@ const AppHeader = ({ page, sections, selectedSectionId, onPreventSwitch }: AppHe
                   <Box key={cur.id} sx={{ display: "flex" }}>
                     {/* <Link href={preUrl ? `${preUrl}#${cur.id}` : `#${cur.id}`} replace> */}
                     <ActiveLink
-                      cur={cur}
+                      section={cur}
                       selectedSectionId={selectedSectionId}
                       // preUrl={preUrl}
-                      onSwitchSection={onPreventSwitch}
+                      onSwitchSection={onSwitchSection}
                     />
                     {/* </Link> */}
                     <IconButton
@@ -203,10 +175,10 @@ const AppHeader = ({ page, sections, selectedSectionId, onPreventSwitch }: AppHe
                 ) : (
                   <ActiveLink
                     key={cur.id}
-                    cur={cur}
+                    section={cur}
                     selectedSectionId={selectedSectionId}
                     // preUrl={preUrl}
-                    onSwitchSection={onPreventSwitch}
+                    onSwitchSection={onSwitchSection}
                   />
                   // <Tooltip key={cur.id} title={cur.title}>
                   // {/* <Link href={preUrl ? `${preUrl}#${cur.id}` : `#${cur.id}`} replace> */}
@@ -367,6 +339,7 @@ const AppHeader = ({ page, sections, selectedSectionId, onPreventSwitch }: AppHe
             items={sections.slice(1)}
             onCloseMenu={onCloseMenu}
             selectedSectionId={selectedSectionId}
+            onSwitchSection={onSwitchSectionByMenu}
             otherOptions={
               page === "ONE_ASSISTANT" ? (
                 <Button

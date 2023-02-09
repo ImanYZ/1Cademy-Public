@@ -1,28 +1,30 @@
 import CloseIcon from "@mui/icons-material/Close";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
-import { Box, Button, IconButton, Link, Stack } from "@mui/material";
+import { Box, Button, IconButton, Stack } from "@mui/material";
 import { useRouter } from "next/router";
 import { forwardRef, ReactNode, useState } from "react";
 
 import oneCademyLogoExtended from "../../../public/logo-extended.png";
 import { useAuth } from "../../context/AuthContext";
 import ROUTES from "../../lib/utils/routes";
-import { gray200, gray600, orange900, orangeDark } from "../../pages/home";
+import { gray200, orange900, orangeDark } from "../../pages/home";
 import { HomepageSection } from "../home/SectionsItems";
+import { ActiveLink } from "./ActiveLink";
 import { HEADER_HEIGHT, HEADER_HEIGHT_MOBILE, HeaderPage } from "./AppHeader";
 import { SubMenu } from "./SubMenu";
 
 type MenuHeaderProps = {
   page?: HeaderPage;
   items: HomepageSection[];
-  onCloseMenu: (sectionId: string) => void;
+  onCloseMenu: () => void;
   selectedSectionId: string;
+  onSwitchSection: (sectionId: string) => void;
   otherOptions?: ReactNode;
 };
 
 export const MenuHeader = forwardRef<HTMLDivElement, MenuHeaderProps>(
-  ({ items, onCloseMenu, selectedSectionId, page = "ONE_CADEMY", otherOptions = null }, ref) => {
+  ({ items, onCloseMenu, selectedSectionId, onSwitchSection, page = "ONE_CADEMY", otherOptions = null }, ref) => {
     const [idxOptionVisible, setIdxOptionVisible] = useState(-1);
     const [{ isAuthenticated }] = useAuth();
     const router = useRouter();
@@ -65,7 +67,7 @@ export const MenuHeader = forwardRef<HTMLDivElement, MenuHeaderProps>(
             onClick={() => router.push(ROUTES.home)}
           />
           <IconButton
-            onClick={() => onCloseMenu("")}
+            onClick={() => onCloseMenu()}
             sx={{ display: { xs: "flex", md: "none" }, alignSelf: "center" }}
             size="small"
           >
@@ -78,18 +80,7 @@ export const MenuHeader = forwardRef<HTMLDivElement, MenuHeaderProps>(
             return cur.options?.length ? (
               <Box key={cur.id}>
                 <Box sx={{ p: { xs: "12px 16px" }, display: "flex", justifyContent: "space-between" }}>
-                  <Link
-                    href={`#${cur.id}`}
-                    onClick={() => onCloseMenu(cur.id)}
-                    sx={{
-                      color: theme => (theme.palette.mode === "dark" ? gray200 : gray600),
-                      cursor: "pointer",
-                      textDecoration: "none",
-                      borderBottom: selectedSectionId === cur.id ? `solid 2px ${orangeDark}` : undefined,
-                    }}
-                  >
-                    {cur.label}
-                  </Link>
+                  <ActiveLink section={cur} onSwitchSection={onSwitchSection} selectedSectionId={selectedSectionId} />
                   <IconButton
                     onClick={() => setIdxOptionVisible(prev => (prev === idx ? -1 : idx))}
                     size="small"
@@ -113,9 +104,10 @@ export const MenuHeader = forwardRef<HTMLDivElement, MenuHeaderProps>(
               </Box>
             ) : (
               <Box key={cur.id} sx={{ p: { xs: "12px 16px" }, display: "flex", justifyContent: "space-between" }}>
-                <Link
-                  href={`#${cur.id}`}
-                  onClick={() => onCloseMenu(cur.id)}
+                <ActiveLink section={cur} onSwitchSection={onSwitchSection} selectedSectionId={selectedSectionId} />
+                {/* <Link
+                  // href={`#${cur.id}`}
+                  onClick={() => onSwitchSection(cur.id)}
                   sx={{
                     color: theme => (theme.palette.mode === "dark" ? gray200 : gray600),
                     cursor: "pointer",
@@ -124,7 +116,7 @@ export const MenuHeader = forwardRef<HTMLDivElement, MenuHeaderProps>(
                   }}
                 >
                   {cur.label}
-                </Link>
+                </Link> */}
               </Box>
             );
           })}

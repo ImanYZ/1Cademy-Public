@@ -61,7 +61,7 @@ const PagesNavbar: FC<Props> = ({ children, title, description }) => {
         page="ONE_CADEMY"
         sections={ONE_CADEMY_SECTIONS}
         selectedSectionId={""}
-        onPreventSwitch={onSwitchSection}
+        onSwitchSection={onSwitchSection}
       />
 
       {/* {showMenu && <AppMenuMovil isSignedIn={isAuthenticated} onSendFeedback={onSendFeedback} />} */}
