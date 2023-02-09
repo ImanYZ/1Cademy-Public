@@ -11,9 +11,9 @@ import {
 } from "@mui/material";
 import { useState } from "react";
 
-import { gray100, orangeDark } from "@/pages/home";
+import { gray25, gray50, gray100, gray300, orangeDark } from "@/pages/home";
 
-import valuesItems, { WhyItem } from "../views/valuesItems";
+import valuesItems, { WhyItem } from "./constants/valuesItems";
 
 const Benefits = () => {
   const theme = useTheme();
@@ -59,20 +59,39 @@ const Benefits = () => {
               background: "transparent",
               border: "none",
               borderLeft: `4px solid ${
-                expanded === `Option${idx + 1}` ? orangeDark : theme.palette.mode === "dark" ? "#181e2b" : gray100
+                expanded === `Option${idx + 1}` ? orangeDark : theme.palette.mode === "dark" ? gray25 : gray100
               }`,
               "&:before": {
                 display: "none",
+              },
+              ":hover": {
+                borderLeft: theme =>
+                  expanded !== `Option${idx + 1}`
+                    ? theme.palette.mode === "light"
+                      ? `4px solid ${gray300}`
+                      : `4px solid ${gray300}`
+                    : undefined,
               },
             }}
             expanded={expanded === `Option${idx + 1}`}
             onChange={handleChange(`Option${idx + 1}`, value.name)}
           >
-            <AccordionSummary>
+            <AccordionSummary
+              sx={{
+                ":hover": {
+                  background: theme => (theme.palette.mode === "dark" ? "black" : gray50),
+                },
+              }}
+            >
               <Typography
                 component={"h4"}
                 variant={"h4"}
-                sx={{ fontSize: "20px", fontWeight: 400, p: "8px", cursor: "pointer" }}
+                sx={{
+                  fontSize: "20px",
+                  fontWeight: 400,
+                  p: "8px",
+                  cursor: "pointer",
+                }}
               >
                 {value.name}
               </Typography>

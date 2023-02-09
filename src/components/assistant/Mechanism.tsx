@@ -64,6 +64,7 @@ export interface IMechanism {
 
 const Mechanism = ({ mechanisms }: IMechanism) => {
   const theme = useTheme();
+
   // const { width } = useWindowSize();
 
   // const canvasDimensions = useMemo(() => {
