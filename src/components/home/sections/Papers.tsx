@@ -103,7 +103,7 @@ const Papers = () => {
   return (
     <Box>
       <Typography component={"h3"} sx={{ fontSize: "20px", fontWeight: 600, mb: "32px" }}>
-        Recently Published Papers
+        Related Research
       </Typography>
       <SectionItemSwitcher items={PAPER_ITEMS} />
       {/* <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr", md: "1fr 1fr 1fr" }, gap: "24px" }}>
