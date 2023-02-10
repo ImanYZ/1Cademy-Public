@@ -13,8 +13,10 @@ import { useRouter } from "next/router";
 import React, { useEffect, useRef, useState } from "react";
 
 import AppFooter from "@/components/AppFooter";
+import AppHeaderMemoized from "@/components/Header/AppHeader";
 import { allCommunities } from "@/components/home/CommunitiesOrder";
 import YoutubeEmbed from "@/components/home/components/YoutubeEmbed";
+import { ONE_CADEMY_SECTIONS } from "@/components/home/SectionsItems";
 
 // import { ONE_CADEMY_SECTIONS } from "@/components/home/SectionsItems";
 import {
@@ -248,9 +250,9 @@ const Communities = () => {
   const joinUsClick = () => {
     window.location.replace("/#JoinUsSection");
   };
-  // const onSwitchSection = (newSelectedSectionId: number) => {
-  //   window.location.href = `/#${newSelectedSectionId}`;
-  // };
+  const onSwitchSection = (sectionId: string) => {
+    window.location.href = `/#${sectionId}`;
+  };
   return (
     <Box
       id="ScrollableContainer"
@@ -263,7 +265,12 @@ const Communities = () => {
         backgroundColor: theme => (theme.palette.mode === "dark" ? darkBase : "#FFFFFF"),
       }}
     >
-      {/* <AppHeaderMemoized sections={ONE_CADEMY_SECTIONS} onSwitchSection={onSwitchSection} selectedSectionId={-1} /> */}
+      <AppHeaderMemoized
+        sections={ONE_CADEMY_SECTIONS}
+        onSwitchSection={onSwitchSection}
+        selectedSectionId={""}
+        page="COMMUNITIES"
+      />
       <Box
         sx={{
           maxWidth: "1280px",

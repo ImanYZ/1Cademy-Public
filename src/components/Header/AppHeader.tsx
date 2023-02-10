@@ -38,7 +38,7 @@ import { SubMenu } from "./SubMenu";
 export const HEADER_HEIGHT = 80;
 export const HEADER_HEIGHT_MOBILE = 72;
 
-export type HeaderPage = "ONE_CADEMY" | "ONE_ASSISTANT";
+export type HeaderPage = "ONE_CADEMY" | "ONE_ASSISTANT" | "COMMUNITIES";
 
 type AppHeaderProps = {
   page: HeaderPage;
