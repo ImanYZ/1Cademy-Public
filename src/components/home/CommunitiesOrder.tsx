@@ -1,3 +1,4 @@
+import { Typography } from "@mui/material";
 import React from "react";
 
 export const allCommunities = [
@@ -175,7 +176,14 @@ export const allCommunities = [
     YouTube: "M4Xkm0vD7uk",
     description: `The Clinical Psychology community explores research related to mental illness/disorders, mental health treatment, and psychopathology of individuals across the lifespan. Clinical psychology is interdisciplinary and can intersect with various fields such as neuroscience, cognitive psychology, and social psychology. We encourage interns to dive into research that they have particular interest in (e.g., child psychopathology), share their findings, and collaborate with other interns. This internship is designed to motivate independent research, gain research skills such as analysis and interpretation, and work towards conducting research.
     1Cademy allows interns to present their research findings, gain feedback from other interns, and learn how to communicate their findings in a concise and articulate manner.`,
-    accomplishments: `Our community is new. Join our interdisciplinary, transnational group of researchers who have been iteratively developing and executing empirical research on the large-scale, online collaborative platform 1Cademy. The goal of this research community is to investigate the various areas of clinical psychology and strengthen research skills to prepare for a future in the clinical psychology field.`,
+    accomplishments: (
+      <Typography>
+        `Our community is new. Join our interdisciplinary, transnational group of researchers who have been iteratively
+        developing and executing empirical research on the large-scale, online collaborative platform 1Cademy. The goal
+        of this research community is to investigate the various areas of clinical psychology and strengthen research
+        skills to prepare for a future in the clinical psychology field.`
+      </Typography>
+    ),
     gains: [
       `Gain valuable research skills and experience, such as paper analysis, summarization, and making connections between disciplines.`,
       `Work towards publishing research on topics related to clinical psychology.`,
@@ -995,7 +1003,16 @@ export const allCommunities = [
     3) Consultations: We give feedback directly to co-leaders of other communities when they attend our weekly meetings
     Through each of these efforts communities receive the support they need to locate, interpret, abstract, disseminate, and organize knowledge clearly, comprehensively, and accurately on the 1Cademy Platform.
     `,
-    accomplishments: `We've had the opportunity to learn about the different information processes of scholars across many different disciplines, as well as harness the power of cognitive diversity to develop best information practices on the 1Cademy platform. Out of this collective experience, we have been able to build a comprehensive liaison or embedded librarian program that supports communities and academic focuses across the entire platform. Our team has worked with more than 10 communities and coleaders to develop their knowledge map based on their subject of focus.`,
+    accomplishments: (
+      <Typography>
+        We've had the opportunity to learn about the different information processes of scholars across many different
+        disciplines, as well as harness the power of cognitive diversity to develop best information practices on the
+        1Cademy platform. Out of this collective experience, we have been able to build a comprehensive liaison or
+        embedded librarian program that supports communities and academic focuses across the entire platform. Our team
+        has worked with more than 10 communities and coleaders to develop their knowledge map based on their subject of
+        focus.
+      </Typography>
+    ),
     gains: [
       `Organize information on an innovative knowledge mapping platform `,
       `Support communities in disseminating content according to their focus`,

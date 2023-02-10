@@ -16,7 +16,19 @@ import AppFooter from "@/components/AppFooter";
 import { allCommunities } from "@/components/home/CommunitiesOrder";
 import YoutubeEmbed from "@/components/home/components/YoutubeEmbed";
 
-import { darkBase, gray200, gray400, gray600, gray800, orangeDark, orangeLight } from "../home";
+// import { ONE_CADEMY_SECTIONS } from "@/components/home/SectionsItems";
+import {
+  darkBase,
+  gray01,
+  gray02,
+  gray200,
+  gray400,
+  gray600,
+  gray800,
+  orange250,
+  orangeDark,
+  orangeLight,
+} from "../home";
 
 const subSections = [
   {
@@ -98,9 +110,10 @@ const subSections = [
 //   }
 // };
 
-const DividerStyled = styled(props => <Divider {...props} />)(() => ({
+const DividerStyled = styled(props => <Divider {...props} />)(({ theme }) => ({
   marginTop: "32px",
   marginBottom: "32px",
+  borderColor: theme.palette.mode === "dark" ? gray600 : gray200,
 }));
 
 const Communities = () => {
@@ -235,7 +248,9 @@ const Communities = () => {
   const joinUsClick = () => {
     window.location.replace("/#JoinUsSection");
   };
-
+  // const onSwitchSection = (newSelectedSectionId: number) => {
+  //   window.location.href = `/#${newSelectedSectionId}`;
+  // };
   return (
     <Box
       id="ScrollableContainer"
@@ -248,6 +263,7 @@ const Communities = () => {
         backgroundColor: theme => (theme.palette.mode === "dark" ? darkBase : "#FFFFFF"),
       }}
     >
+      {/* <AppHeaderMemoized sections={ONE_CADEMY_SECTIONS} onSwitchSection={onSwitchSection} selectedSectionId={-1} /> */}
       <Box
         sx={{
           maxWidth: "1280px",
@@ -264,22 +280,23 @@ const Communities = () => {
               carouselRef.current.scrollBy(600, 0);
             }}
             sx={{
-              background: gray600,
+              background: gray02,
               position: "absolute",
               right: { xs: "0px", xl: "-28px" },
               top: "calc(50% - 28px)",
               zIndex: "9",
-              ":hover": { background: gray600, opacity: "0.9" },
+              ":hover": { background: gray01, opacity: "0.9", borderColor: gray02 },
               width: { xs: "32px", md: "56px" },
               minWidth: { xs: "32px", md: "56px" },
               height: { xs: "32px", md: "56px" },
               p: "0px",
               borderRadius: "50%",
+              borderColor: "transparent",
               opacity: "0.7",
               transition: "opacity .3s",
             }}
           >
-            <ArrowForwardIcon sx={{ color: "common.white" }} />
+            <ArrowForwardIcon sx={{ color: "white" }} />
           </Button>
           <Button
             variant="outlined"
@@ -289,17 +306,18 @@ const Communities = () => {
               carouselRef.current.scrollBy(-600, 0);
             }}
             sx={{
-              background: gray600,
+              background: gray02,
               position: "absolute",
               left: { xs: "0px", xl: "-28px" },
               top: "calc(50% - 28px)",
               zIndex: "9",
-              ":hover": { background: gray600, opacity: "0.9" },
+              ":hover": { background: gray01, opacity: "0.9", borderColor: gray02 },
               width: { xs: "32px", md: "56px" },
               minWidth: { xs: "32px", md: "56px" },
               height: { xs: "32px", md: "56px" },
               p: "0px",
               borderRadius: "50%",
+              borderColor: gray02,
               opacity: "0.7",
 
               transition: "opacity .3s",
@@ -323,23 +341,18 @@ const Communities = () => {
                 height: "4px",
               },
               "::-webkit-scrollbar-thumb": {
-                backgroundColor: gray600,
+                backgroundColor: gray400,
                 borderRadius: "10px",
               },
             }}
           >
             {communities.map(item => (
-              <Link
-                key={item.id}
-                href={`/communit/${item.id}`}
-                style={{ textDecoration: "none", color: "inherit", display: "block" }}
-              >
+              <Link key={item.id} href={`/community/${item.id}`} style={{ textDecoration: "none", color: "inherit" }}>
                 <Card
                   elevation={0}
                   sx={{
                     minWidth: { xs: "150px", sm: "210px" },
                     maxWidth: { xs: "160px", sm: "220px" },
-                    height: { xs: "100%", sm: "100%" },
                     flex: 1,
                     backgroundColor: "transparent",
                   }}
@@ -351,8 +364,8 @@ const Communities = () => {
                       flexDirection: "column",
                       justifyContent: "flex-start",
                       p: "16px",
-                      border: `1px solid ${gray800}`,
-                      backgroundColor: "black",
+                      border: theme => `1px solid ${theme.palette.mode === "dark" ? gray800 : gray200}`,
+                      backgroundColor: theme => (theme.palette.mode === "dark" ? "black" : "transparent"),
                       borderRadius: "8px",
                       cursor: "pointer",
                       height: "100%",
@@ -368,7 +381,13 @@ const Communities = () => {
                       sx={{ borderRadius: "8px", height: { xs: "100px", sm: "140px" } }}
                     />
                     <CardContent sx={{ p: "16px 0 0 0" }}>
-                      <Typography sx={{ fontSize: "14px", fontWeight: 600, pt: "16px", color: gray200 }}>
+                      <Typography
+                        sx={{
+                          fontSize: "14px",
+                          fontWeight: 600,
+                          pt: "16px",
+                        }}
+                      >
                         {item.title}
                       </Typography>
                     </CardContent>
@@ -388,12 +407,7 @@ const Communities = () => {
           justifyContent={"space-between"}
           mb="16px"
         >
-          <Typography
-            variant="h4"
-            gutterBottom
-            align="center"
-            sx={{ textTransform: "capitalize", m: "0px", color: gray200 }}
-          >
+          <Typography variant="h4" gutterBottom align="center" sx={{ textTransform: "capitalize", m: "0px" }}>
             {community.title}
           </Typography>
           <Button
@@ -425,7 +439,7 @@ const Communities = () => {
           {typeof community.description === "object" && community.description !== null ? (
             community.description
           ) : (
-            <Typography variant="body1" color={gray200} sx={{ textAlign: "left" }}>
+            <Typography variant="body1" sx={{ textAlign: "left" }}>
               {community.description}
             </Typography>
           )}
@@ -453,10 +467,10 @@ const Communities = () => {
                     spacing="8px"
                     sx={{
                       padding: "24px ",
-                      border: `1px solid ${gray800}`,
+                      border: theme => `1px solid ${theme.palette.mode === "dark" ? gray800 : gray200}`,
                       borderRadius: "12px",
                       width: "280px",
-                      backgroundColor: "black",
+                      backgroundColor: theme => (theme.palette.mode === "dark" ? "black" : "transparent"),
                     }}
                   >
                     <Avatar
@@ -468,10 +482,10 @@ const Communities = () => {
                         mb: "4px",
                       }}
                     />
-                    <Typography variant="h5" component="div" fontWeight={600} sx={{ color: gray200 }}>
+                    <Typography variant="h5" component="div" fontWeight={600}>
                       {leader.name}
                     </Typography>
-                    <Typography variant="h5" component="div" sx={{ color: gray200, fontSize: "16px" }}>
+                    <Typography variant="h5" component="div" sx={{ fontSize: "16px" }}>
                       Community leader
                     </Typography>
                     <Stack direction={"row"} spacing="8px">
@@ -521,7 +535,6 @@ const Communities = () => {
             >
               <Box
                 sx={{
-                  color: gray200,
                   flex: 1,
                   maxWidth: "650px",
                   "& ul": {
@@ -535,8 +548,8 @@ const Communities = () => {
                     content: '""',
                     width: "6px",
                     height: "6px",
-                    backgroundColor: gray200,
-                    color: gray200,
+                    backgroundColor: theme => (theme.palette.mode === "dark" ? gray200 : gray800),
+                    color: theme => (theme.palette.mode === "dark" ? gray200 : gray800),
                     borderRadius: "2px",
                     position: "absolute",
                     left: "-20px",
@@ -552,7 +565,6 @@ const Communities = () => {
                   component="div"
                   sx={{
                     fontWeight: 600,
-                    color: gray200,
                   }}
                 >
                   {subSection.title}
@@ -576,37 +588,42 @@ const Communities = () => {
 
         {/* <JoinUs community={community} themeName="dark" /> */}
 
-        <DividerStyled />
-        {/* {typeof community.accomplishments === "object" &&
+        {typeof community.accomplishments === "object" &&
           !Array.isArray(community.accomplishments) &&
           community.accomplishments !== null && (
-            <Box
-              sx={{
-                padding: "10px",
-                mb: "19px",
-                "& a:link": {
-                  color: orangeDark,
-                },
-              }}
-            >
-              <Typography
-                variant="h5"
-                component="div"
+            <>
+              <DividerStyled />
+
+              <Box
                 sx={{
-                  pt: "19px",
-                  pb: "19px",
-                  color: gray200,
+                  padding: "10px",
+                  mb: "19px",
+                  "& a:link": {
+                    color: orangeDark,
+                  },
+                  "& a:visited": {
+                    color: orange250,
+                  },
                 }}
               >
-                Community Accomplishments
-              </Typography>
-              <Typography variant="body2" sx={{ textAlign: "left", color: gray200 }}>
-                {community.accomplishments}
-              </Typography>
-            </Box>
-          )} */}
+                <Typography
+                  variant="h5"
+                  component="div"
+                  sx={{
+                    pt: "19px",
+                    pb: "19px",
+                  }}
+                >
+                  Community Accomplishments
+                </Typography>
 
-        {/* <Box
+                {community.accomplishments}
+              </Box>
+            </>
+          )}
+        <DividerStyled />
+        {/*
+        <Box
           sx={{
             m: "2.5px",
             mt: "10px",
@@ -616,10 +633,6 @@ const Communities = () => {
           <Typography
             sx={{
               display: "block",
-              color: gray200,
-              "& span": {
-                color: gray400,
-              },
             }}
           >
             <b>Leaderboard</b>
@@ -664,10 +677,8 @@ const Communities = () => {
                       }}
                     />
                     <Stack>
-                      <Typography sx={{ fontSize: "16px", fontWeight: 600, color: gray200 }}>
-                        {member.fullname}
-                      </Typography>
-                      <Typography variant="body2" component="div" sx={{ color: gray200 }}>
+                      <Typography sx={{ fontSize: "16px", fontWeight: 600 }}>{member.fullname}</Typography>
+                      <Typography variant="body2" component="div">
                         {idx < 3 ? "🏆" : "✔️"}
                         {" " + Math.round((member.points + Number.EPSILON) * 100) / 100}
                       </Typography>
