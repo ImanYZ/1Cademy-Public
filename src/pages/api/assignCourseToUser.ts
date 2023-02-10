@@ -1,9 +1,11 @@
 import { NextApiRequest, NextApiResponse } from "next";
+import { User } from "src/knowledgeTypes";
+import fbAuth from "src/middlewares/fbAuth";
 import { checkRestartBatchWriteCounts, commitBatch, db } from "../../lib/firestoreServer/admin";
 
-interface Payload {
+interface AssignCourseToUserPayload {
   course: string;
-  uname: string;
+  user: any;
 }
 async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
   try {
@@ -13,15 +15,13 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
 
     let writeCounts = 0;
     let batch = db.batch();
-    const data = req.body.data as Payload;
+    const data = req.body.data as AssignCourseToUserPayload;
 
     if (!data?.course) {
       return res.status(400).json({ message: "Please provide course." });
-    } else if (!data.uname) {
-      return res.status(400).json({ message: "Please provide uname." });
     }
 
-    const userRef = db.doc(`/users/${data.uname}`);
+    const userRef = db.doc(`/users/${data.user.userData.uname}`);
     if ((await userRef.get()).exists) {
       let userData = (await userRef.get()).data();
       if (data.course) {
@@ -32,7 +32,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
         }
 
         let students = semesterData?.students;
-        let checkExistingStudent = students.filter((student: any) => student.uname === data.uname);
+        let checkExistingStudent = students.filter((student: any) => student.uname === data.user.userData.uname);
         if (checkExistingStudent.length > 0) {
           return res.status(400).json({ message: "The course has already assigned to this user." });
         }
@@ -58,4 +58,4 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
   }
 }
 
-export default handler;
+export default fbAuth(handler);

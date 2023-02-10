@@ -179,7 +179,7 @@ const SignUpPage: NextPageWithLayout = () => {
       background: values.background,
       consented: values.signUpAgreement,
       fieldOfInterest: values.fieldOfInterest,
-      course: router.query?.course ? String(router.query?.course) : null, // "2gbmyJVzQY1FBafjBtRx",
+      course: router.query?.course ? String(router.query?.course) : null,
     };
     mutateSignUp.mutate(user);
   };
