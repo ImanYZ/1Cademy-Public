@@ -63,6 +63,8 @@ import { useTagsTreeView } from "@/hooks/useTagsTreeView";
 import { addSuffixToUrlGMT } from "@/lib/utils/string.utils";
 
 import LoadingImg from "../../public/animated-icon-1cademy.gif";
+import { checkExtension } from "../../src/utils/checkExtension";
+import ExtensioDialog from "../components/ExtensioDialog";
 import { MemoizedClustersList } from "../components/map/ClustersList";
 import { MemoizedLinksList } from "../components/map/LinksList";
 import { MemoizedNodeList } from "../components/map/NodesList";
@@ -245,6 +247,9 @@ const Dashboard = ({}: DashboardProps) => {
     selectedNode: "",
     isEnabled: false,
   });
+
+  // dialog installing the extension for chrom
+  const [openInstallExtensionDialog, setOpenInstallExtensionDialog] = useState(false);
 
   const onNodeInViewport = useCallback(
     (nodeId: string) => {
@@ -552,6 +557,16 @@ const Dashboard = ({}: DashboardProps) => {
     },
     [user, allTags]
   );
+
+  const checkInstalled = (installed: boolean) => {
+    const extensionPreference = window.localStorage.getItem("extension-preference");
+    if (!installed && (extensionPreference === "false" || !extensionPreference)) {
+      setOpenInstallExtensionDialog(true);
+    }
+  };
+  useEffect(() => {
+    checkExtension("jdlbjglnnjcjigpodegggihmcaoikeob", checkInstalled);
+  }, []);
 
   //Getting the node from the Url to open and scroll to that node in the first render
   useEffect(() => {
@@ -3365,6 +3380,11 @@ const Dashboard = ({}: DashboardProps) => {
 
   return (
     <div className="MapContainer" style={{ overflow: "hidden" }}>
+      <ExtensioDialog
+        setOpenInstallExtensionDialog={setOpenInstallExtensionDialog}
+        openInstallExtensionDialog={openInstallExtensionDialog}
+      />
+
       <Box
         id="Map"
         sx={{
