@@ -588,6 +588,7 @@ export interface SignUpData extends Omit<User, "userId" | "role"> {
   password: string;
   background: UserBackground;
   theme: UserTheme;
+  course?: string | null;
 }
 
 export type ThemeActions = {

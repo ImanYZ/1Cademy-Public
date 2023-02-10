@@ -2,6 +2,7 @@ import { LoadingButton } from "@mui/lab";
 import { Box, Button, Step, StepLabel, Stepper } from "@mui/material";
 import { FirebaseError } from "firebase/app";
 import { useFormik } from "formik";
+import { useRouter } from "next/router";
 import { useSnackbar } from "notistack";
 import React, { ReactNode, useState } from "react";
 import { useMutation } from "react-query";
@@ -23,6 +24,7 @@ const getDateBySubstractYears = (years: number, date = new Date()) => {
 };
 
 const SignUpPage: NextPageWithLayout = () => {
+  const router = useRouter();
   const [, { handleError }] = useAuth();
   const { enqueueSnackbar } = useSnackbar();
   const minDate = getDateBySubstractYears(100);
@@ -177,6 +179,7 @@ const SignUpPage: NextPageWithLayout = () => {
       background: values.background,
       consented: values.signUpAgreement,
       fieldOfInterest: values.fieldOfInterest,
+      course: router.query?.course ? String(router.query?.course) : null, // "2gbmyJVzQY1FBafjBtRx",
     };
     mutateSignUp.mutate(user);
   };
