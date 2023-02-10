@@ -137,7 +137,17 @@ describe("/signup as student", () => {
     }),
   ];
   const semestersCollection = new MockData([{ students: [] }], "semesters");
-  const collects = [new MockData(institutions, "institutions"), tagsData, creditsData, semestersCollection];
+  const semesterStudentStatsCollection = new MockData([], "semesterStudentStats");
+  const semesterStudentVoteStatsCollection = new MockData([], "semesterStudentVoteStats");
+
+  const collects = [
+    new MockData(institutions, "institutions"),
+    tagsData,
+    creditsData,
+    semestersCollection,
+    semesterStudentStatsCollection,
+    semesterStudentVoteStatsCollection,
+  ];
   let semesterId: string = "";
   beforeAll(async () => {
     await Promise.all(collects.map(collect => collect.populate()));
@@ -198,6 +208,22 @@ describe("/signup as student", () => {
   it("user role should be student", async () => {
     const createdUser = await getAuth().getUserByEmail(body.data.email);
     expect(createdUser.customClaims).toEqual({ student: true });
+  });
+
+  it("semesterStudentStats should be create when use is student", async () => {
+    const semesterStudentStatsRef = await db
+      .collection("semesterStudentStats")
+      .where("uname", "==", body.data.uname)
+      .get();
+    expect(semesterStudentStatsRef.docs[0].data().uname).toEqual(body.data.uname);
+  });
+
+  it("semesterStudentVoteStats should be create when use is student", async () => {
+    const semesterStudentVoteStatsRef = await db
+      .collection("semesterStudentVoteStats")
+      .where("uname", "==", body.data.uname)
+      .get();
+    expect(semesterStudentVoteStatsRef.docs[0].data().uname).toEqual(body.data.uname);
   });
 
   afterAll(async () => {
