@@ -27,7 +27,7 @@ export const ONE_CADEMY_SECTIONS: HomepageSection[] = [
     id: "magnitude",
     title: "Magnitude",
     label: "Magnitude",
-    description: "",
+    description: `Over the past two years, ${1543} students and researchers from ${183} institutions have participated in a large-scale collaboration effort through 1Cademy. This collaboration has resulted in the creation of ${44665} nodes and ${235674} prerequisite links between them, which have been proposed through [${88167}] proposals.`,
     getDescription: ({ users, institutions, nodes, links, proposals }: StatsSchema) =>
       `Over the past two years, [${users}] students and researchers from [${institutions}] institutions have participated in a large-scale collaboration effort through 1Cademy. This collaboration has resulted in the creation of [${nodes}] nodes and [${links}] prerequisite links between them, which have been proposed through [${proposals}] proposals.`,
     options: [],

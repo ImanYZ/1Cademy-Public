@@ -25,6 +25,7 @@ export const gray50 = "#F9FAFB";
 export const gray100 = "#F2F4F7";
 export const gray200 = "#EAECF0";
 export const gray300 = "#D0D5DD";
+export const gray400 = "#98A2B3";
 export const gray600 = "#475467";
 export const gray700 = "#344054";
 export const gray800 = "#1D2939";
