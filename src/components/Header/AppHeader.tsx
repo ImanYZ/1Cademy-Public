@@ -156,19 +156,14 @@ const AppHeader = forwardRef(({ page, sections, selectedSectionId, onSwitchSecti
             >
               {sections.slice(1).map((cur, idx) =>
                 cur.options?.length ? (
-                  <Box
-                    key={cur.id}
-                    onMouseOver={() => setIdxOptionVisible(prev => (prev === idx ? -1 : idx))}
-                    sx={{ display: "flex" }}
-                  >
-                    {/* <Link href={preUrl ? `${preUrl}#${cur.id}` : `#${cur.id}`} replace> */}
-                    <ActiveLink
-                      section={cur}
-                      selectedSectionId={selectedSectionId}
-                      // preUrl={preUrl}
-                      onSwitchSection={onSwitchSection}
-                    />
-                    {/* </Link> */}
+                  <Box key={cur.id} sx={{ display: "flex" }}>
+                    <Box onMouseOver={() => setIdxOptionVisible(prev => (prev === idx ? -1 : idx))}>
+                      <ActiveLink
+                        section={cur}
+                        selectedSectionId={selectedSectionId}
+                        onSwitchSection={onSwitchSection}
+                      />
+                    </Box>
                     <IconButton
                       onClick={() => setIdxOptionVisible(prev => (prev === idx ? -1 : idx))}
                       size="small"
@@ -182,13 +177,8 @@ const AppHeader = forwardRef(({ page, sections, selectedSectionId, onSwitchSecti
                     key={cur.id}
                     section={cur}
                     selectedSectionId={selectedSectionId}
-                    // preUrl={preUrl}
                     onSwitchSection={onSwitchSection}
                   />
-                  // <Tooltip key={cur.id} title={cur.title}>
-                  // {/* <Link href={preUrl ? `${preUrl}#${cur.id}` : `#${cur.id}`} replace> */}
-                  // {/* </Link> */}
-                  // </Tooltip>
                 )
               )}
             </Stack>
