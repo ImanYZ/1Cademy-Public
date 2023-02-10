@@ -17,7 +17,7 @@ import { Stack } from "@mui/system";
 import { getAuth } from "firebase/auth";
 import Image from "next/image";
 import { useRouter } from "next/router";
-import React, { useState } from "react";
+import React, { forwardRef, useState } from "react";
 
 import useThemeChange from "@/hooks/useThemeChange";
 import { darkBase, orange900, orangeDark } from "@/pages/home";
@@ -48,7 +48,7 @@ type AppHeaderProps = {
   // preUrl?: string;
 };
 
-const AppHeader = ({ page, sections, selectedSectionId, onSwitchSection }: AppHeaderProps) => {
+const AppHeader = forwardRef(({ page, sections, selectedSectionId, onSwitchSection }: AppHeaderProps, ref) => {
   const [openSearch, setOpenSearch] = useState(false);
   const [{ isAuthenticated, user }] = useAuth();
   const [handleThemeSwitch] = useThemeChange();
@@ -107,6 +107,7 @@ const AppHeader = ({ page, sections, selectedSectionId, onSwitchSection }: AppHe
   return (
     <>
       <Box
+        ref={ref}
         sx={{
           background: theme => (theme.palette.mode === "dark" ? "rgba(0,0,0,.72)" : "#f8f8f894"),
           backdropFilter: "saturate(180%) blur(20px)",
@@ -156,14 +157,13 @@ const AppHeader = ({ page, sections, selectedSectionId, onSwitchSection }: AppHe
               {sections.slice(1).map((cur, idx) =>
                 cur.options?.length ? (
                   <Box key={cur.id} sx={{ display: "flex" }}>
-                    {/* <Link href={preUrl ? `${preUrl}#${cur.id}` : `#${cur.id}`} replace> */}
-                    <ActiveLink
-                      section={cur}
-                      selectedSectionId={selectedSectionId}
-                      // preUrl={preUrl}
-                      onSwitchSection={onSwitchSection}
-                    />
-                    {/* </Link> */}
+                    <Box onMouseOver={() => setIdxOptionVisible(prev => (prev === idx ? -1 : idx))}>
+                      <ActiveLink
+                        section={cur}
+                        selectedSectionId={selectedSectionId}
+                        onSwitchSection={onSwitchSection}
+                      />
+                    </Box>
                     <IconButton
                       onClick={() => setIdxOptionVisible(prev => (prev === idx ? -1 : idx))}
                       size="small"
@@ -177,13 +177,8 @@ const AppHeader = ({ page, sections, selectedSectionId, onSwitchSection }: AppHe
                     key={cur.id}
                     section={cur}
                     selectedSectionId={selectedSectionId}
-                    // preUrl={preUrl}
                     onSwitchSection={onSwitchSection}
                   />
-                  // <Tooltip key={cur.id} title={cur.title}>
-                  // {/* <Link href={preUrl ? `${preUrl}#${cur.id}` : `#${cur.id}`} replace> */}
-                  // {/* </Link> */}
-                  // </Tooltip>
                 )
               )}
             </Stack>
@@ -425,7 +420,9 @@ const AppHeader = ({ page, sections, selectedSectionId, onSwitchSection }: AppHe
       </Modal>
     </>
   );
-};
+});
+
+AppHeader.displayName = "AppHeader";
 
 const AppHeaderMemoized = React.memo(AppHeader);
 
