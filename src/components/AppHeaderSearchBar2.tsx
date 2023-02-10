@@ -6,6 +6,8 @@ import { styled, SxProps, Theme } from "@mui/material/styles";
 import { useRouter } from "next/router";
 import React, { MouseEvent, useEffect, useState } from "react";
 
+import { gray300 } from "../pages/home";
+
 type AppHeaderSearchBarProps = {
   sx?: SxProps<Theme>;
 };
@@ -29,10 +31,8 @@ const AppHeaderSearchBar = ({ /* searcherUrl, */ sx }: AppHeaderSearchBarProps) 
         display: "flex",
         alignItems: "center",
         width: "100%",
-        background: theme => (theme.palette.mode === "dark" ? "#232324" : "#dadada"),
-        borderRadius: "3px",
-        border: "solid 1px",
-        borderColor: theme => (theme.palette.mode === "dark" ? "#232324" : "#dadada"),
+        borderRadius: "8px",
+        border: `solid 1px ${gray300}`,
         color: theme => (theme.palette.mode === "dark" ? theme.palette.common.white : theme.palette.common.black),
         ...sx,
       }}
