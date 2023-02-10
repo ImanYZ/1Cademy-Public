@@ -1,7 +1,9 @@
 import { Box } from "@mui/material";
 import React, { ReactNode, useCallback, useEffect, useRef, useState } from "react";
+import { useQuery } from "react-query";
 
 import { useInView, UseInViewProps } from "../../hooks/useObserver";
+import { getStats } from "../../lib/knowledgeApi";
 import AppHeaderMemoized from "../Header/AppHeader";
 import { SectionWrapper } from "./components/SectionWrapper";
 import { ONE_CADEMY_SECTIONS } from "./SectionsItems";
@@ -39,6 +41,8 @@ const HomeWrapper = ({
   const { entry: topicsEntry, inView: topicsInView, ref: TopicsSectionRef } = useInView(observerOption);
   const { entry: systemsEntry, inView: systemsInView, ref: SystemSectionRef } = useInView(observerOption);
   const { entry: aboutEntry, inView: aboutInView, ref: AboutSectionRef } = useInView(observerOption);
+
+  const { data: stats } = useQuery("stats", getStats);
 
   useEffect(() => {
     isScrolling.current = true;
@@ -130,7 +134,7 @@ const HomeWrapper = ({
         {mechanismSectionChildren}
       </SectionWrapper>
 
-      <SectionWrapper ref={MagnitudeSectionRef} section={ONE_CADEMY_SECTIONS[2]} /* stats={stats} */>
+      <SectionWrapper ref={MagnitudeSectionRef} section={ONE_CADEMY_SECTIONS[2]} stats={stats}>
         {magnitudeSectionChildren}
       </SectionWrapper>
 
