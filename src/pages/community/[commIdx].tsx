@@ -17,6 +17,7 @@ import AppHeaderMemoized from "@/components/Header/AppHeader";
 import { allCommunities } from "@/components/home/CommunitiesOrder";
 import YoutubeEmbed from "@/components/home/components/YoutubeEmbed";
 import { ONE_CADEMY_SECTIONS } from "@/components/home/SectionsItems";
+import ROUTES from "@/lib/utils/routes";
 
 // import { ONE_CADEMY_SECTIONS } from "@/components/home/SectionsItems";
 import {
@@ -709,7 +710,7 @@ const Communities = () => {
         </Box> */}
       </Box>
 
-      <AppFooter />
+      <AppFooter prevPage={ROUTES.publicHome} />
       <style>
         {`
           body{

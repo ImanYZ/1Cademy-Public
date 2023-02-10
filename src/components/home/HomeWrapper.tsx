@@ -46,6 +46,10 @@ const HomeWrapper = ({
 
   useEffect(() => {
     isScrolling.current = true;
+    if (window.location.hash) {
+      setSelectedSectionId(`${window.location.hash}`);
+    }
+
     timer.current = setTimeout(() => {
       isScrolling.current = false;
     }, 1300);

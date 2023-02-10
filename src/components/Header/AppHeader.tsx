@@ -288,7 +288,13 @@ const AppHeader = forwardRef(({ page, sections, selectedSectionId, onSwitchSecti
                   <Button
                     variant="contained"
                     color="secondary"
-                    onClick={page === "ONE_CADEMY" ? signUpHandler : () => setOpenForm(true)}
+                    onClick={
+                      page === "ONE_CADEMY"
+                        ? signUpHandler
+                        : page === "COMMUNITIES"
+                        ? () => window.open("https://1cademy.us/auth", "_blank")
+                        : () => setOpenForm(true)
+                    }
                     sx={{
                       display: { xs: "none", sm: "flex" },
                       p: { xs: "6px 10px", lg: undefined },
@@ -341,6 +347,27 @@ const AppHeader = forwardRef(({ page, sections, selectedSectionId, onSwitchSecti
                   variant="contained"
                   color="secondary"
                   onClick={() => setOpenForm(true)}
+                  sx={{
+                    display: { xs: "flex", sm: "none" },
+                    fontSize: 16,
+                    backgroundColor: theme => (theme.palette.mode === "dark" ? "#303030" : "#e4e4e4"),
+                    color: theme =>
+                      theme.palette.mode === "dark" ? theme.palette.common.white : theme.palette.common.black,
+                    borderRadius: 40,
+                    // height: "25px",
+                    textTransform: "capitalize",
+                    ":hover": {
+                      backgroundColor: theme => (theme.palette.mode === "dark" ? "#444444" : "#cacaca"),
+                    },
+                  }}
+                >
+                  Sign In/Up
+                </Button>
+              ) : page === "COMMUNITIES" ? (
+                <Button
+                  variant="contained"
+                  color="secondary"
+                  onClick={() => window.open("https://1cademy.us/auth", "_blank")}
                   sx={{
                     display: { xs: "flex", sm: "none" },
                     fontSize: 16,

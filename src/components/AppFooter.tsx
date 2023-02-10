@@ -10,6 +10,7 @@ import { gray800, gray900, orangeDark } from "@/pages/home";
 import logo1cademy from "../../public/1Cademy-head.svg";
 import { ONE_CADEMY_SECTIONS } from "./home/SectionsItems";
 type AppFooterProps = {
+  prevPage?: string;
   sx?: SxProps<Theme>;
 };
 
@@ -19,7 +20,7 @@ export const DividerStyled = styled((props: DividerProps) => <Divider {...props}
   borderColor: gray800,
 }));
 
-const AppFooter = ({ sx }: AppFooterProps) => {
+const AppFooter = ({ prevPage = "", sx }: AppFooterProps) => {
   return (
     <Box
       component={"footer"}
@@ -63,7 +64,7 @@ const AppFooter = ({ sx }: AppFooterProps) => {
             <Stack spacing={"12px"}>
               {ONE_CADEMY_SECTIONS.slice(1).map(cur => {
                 return (
-                  <Link key={cur.id} href={`#${cur.id}`} sx={{ textDecoration: "none" }}>
+                  <Link key={cur.id} href={`${prevPage}#${cur.id}`} sx={{ textDecoration: "none" }}>
                     {cur.label}
                   </Link>
                 );
