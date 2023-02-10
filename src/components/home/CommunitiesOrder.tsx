@@ -36,7 +36,7 @@ export const allCommunities = [
     description: `We study the UX Research and Cognitive Psychology literature on learning and memorizing. Using 1Cademy, we break down articles into granular knowledge pieces, connect them within a larger context of research, communicate our findings to other community members, and utilize our knowledge to conduct research. We conduct online controlled experiments using our research pipeline and co-author research papers to submit to reputable journals and conferences.`,
     accomplishments: (
       <div>
-        <p>We have recently published the following papers in ACM conferences:</p>
+        <Typography>We have recently published the following papers in ACM conferences:</Typography>
         <ul>
           <li>
             <a>
@@ -581,7 +581,7 @@ export const allCommunities = [
     `,
     accomplishments: (
       <div>
-        <p>We have recently published the following papers in ACM conferences:</p>
+        <Typography>We have recently published the following papers in ACM conferences:</Typography>
         <ul>
           <li>
             <a>

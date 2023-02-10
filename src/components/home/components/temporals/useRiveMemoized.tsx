@@ -1,5 +1,5 @@
+import { useRive } from "@rive-app/react-canvas";
 import React, { useMemo } from "react";
-import { useRive } from "rive-react";
 
 export type RiveProps = {
   src: string;

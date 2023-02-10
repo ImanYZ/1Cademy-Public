@@ -373,7 +373,7 @@ const Communities = () => {
                       justifyContent: "flex-start",
                       p: "16px",
                       border: theme => `1px solid ${theme.palette.mode === "dark" ? gray800 : gray200}`,
-                      backgroundColor: theme => (theme.palette.mode === "dark" ? "black" : "transparent"),
+                      backgroundColor: theme => (theme.palette.mode === "dark" ? "#181818" : "transparent"),
                       borderRadius: "8px",
                       cursor: "pointer",
                       height: "100%",
@@ -478,7 +478,7 @@ const Communities = () => {
                       border: theme => `1px solid ${theme.palette.mode === "dark" ? gray800 : gray200}`,
                       borderRadius: "12px",
                       width: "280px",
-                      backgroundColor: theme => (theme.palette.mode === "dark" ? "black" : "transparent"),
+                      backgroundColor: theme => (theme.palette.mode === "dark" ? "#181818" : "transparent"),
                     }}
                   >
                     <Avatar
