@@ -1,6 +1,8 @@
+import { Timestamp } from "firebase-admin/firestore";
 import { NextApiRequest, NextApiResponse } from "next";
 import { User } from "src/knowledgeTypes";
 import fbAuth from "src/middlewares/fbAuth";
+import { ISemesterStudentStat } from "src/types/ICourse";
 import { checkRestartBatchWriteCounts, commitBatch, db } from "../../lib/firestoreServer/admin";
 
 interface AssignCourseToUserPayload {
@@ -46,6 +48,65 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
         });
         batch.update(semesterRef, {
           students: students,
+        });
+        [batch, writeCounts] = await checkRestartBatchWriteCounts(batch, writeCounts);
+
+        // Restoring Deleted documents for stats
+        const semesterStudentStatsDocs = await db
+          .collection("semesterStudentStats")
+          .where("uname", "==", userData?.uname)
+          .get();
+        for (const semesterStudentStatsDoc of semesterStudentStatsDocs.docs) {
+          const semesterStudentStatRef = db.collection("semesterStudentStats").doc(semesterStudentStatsDoc.id);
+          const semesterStudentStat = semesterStudentStatsDoc.data() as ISemesterStudentStat;
+          semesterStudentStat.deleted = false;
+          batch.update(semesterStudentStatRef, semesterStudentStat);
+          [batch, writeCounts] = await checkRestartBatchWriteCounts(batch, writeCounts);
+        }
+        const semesterStudentVoteStatsDocs = await db
+          .collection("semesterStudentVoteStats")
+          .where("uname", "==", userData?.uname)
+          .get();
+        for (const semesterStudentVoteStatsDoc of semesterStudentVoteStatsDocs.docs) {
+          const semesterStudentVoteStatRef = db
+            .collection("semesterStudentVoteStats")
+            .doc(semesterStudentVoteStatsDoc.id);
+          const semesterStudentVoteStat = semesterStudentVoteStatsDoc.data() as ISemesterStudentStat;
+          semesterStudentVoteStat.deleted = false;
+          batch.update(semesterStudentVoteStatRef, semesterStudentVoteStat);
+          [batch, writeCounts] = await checkRestartBatchWriteCounts(batch, writeCounts);
+        }
+
+        const semesterStatRef = db.collection("semesterStudentStats").doc();
+        batch.set(semesterStatRef, {
+          tagId: semesterData.tagId,
+          uname: userData?.uname,
+          days: [],
+          createdAt: Timestamp.now(),
+          updatedAt: Timestamp.now(),
+        });
+        [batch, writeCounts] = await checkRestartBatchWriteCounts(batch, writeCounts);
+
+        const semesterVoteStatRef = db.collection("semesterStudentVoteStats").doc();
+        batch.set(semesterVoteStatRef, {
+          tagId: semesterData.tagId,
+          uname: userData?.uname,
+          upVotes: 0,
+          downVotes: 0,
+          instVotes: 0,
+          agreementsWithInst: 0,
+          disagreementsWithInst: 0,
+          lastActivity: Timestamp.now(),
+          totalPoints: 0,
+          newNodes: 0,
+          improvements: 0,
+          questions: 0,
+          questionPoints: 0,
+          votes: 0,
+          votePoints: 0,
+          deleted: false,
+          createdAt: Timestamp.now(),
+          updatedAt: Timestamp.now(),
         });
         [batch, writeCounts] = await checkRestartBatchWriteCounts(batch, writeCounts);
         await commitBatch(batch);

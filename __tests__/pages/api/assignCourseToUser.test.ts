@@ -45,15 +45,18 @@ describe("POST /api/assignCourseToUser", () => {
   const coursesCollection = new MockData([], "courses");
   const creditsCollection = new MockData([], "credits");
   const semestersCollection = new MockData([{ students: [] }], "semesters");
+  const semesterStudentStatsCollection = new MockData([], "semesterStudentStats");
+  const semesterStudentVoteStatsCollection = new MockData([], "semesterStudentVoteStats");
   const reputationsCollection = new MockData(reputations, "reputations");
 
   const collects = [
     usersCollection,
-    new MockData([], "relationVersions"),
     coursesCollection,
     semestersCollection,
     reputationsCollection,
     creditsCollection,
+    semesterStudentStatsCollection,
+    semesterStudentVoteStatsCollection,
   ];
 
   const nodesCollection = new MockData(nodes, "nodes");
@@ -78,7 +81,7 @@ describe("POST /api/assignCourseToUser", () => {
     await Promise.all(collects.map(collect => collect.populate()));
   });
 
-  describe("should be able to create course using api", () => {
+  describe("should be assign course to existing user using api", () => {
     let semesterId: string = "";
     beforeAll(async () => {
       const semesterRef = await db.collection("semesters").get();
@@ -110,6 +113,22 @@ describe("POST /api/assignCourseToUser", () => {
         lName: users[0]?.lName,
         email: users[0]?.email,
       });
+    });
+
+    it("semesterStudentStats should be create when use is student", async () => {
+      const semesterStudentStatsRef = await db
+        .collection("semesterStudentStats")
+        .where("uname", "==", users[0]?.uname)
+        .get();
+      expect(semesterStudentStatsRef.docs[0].data().uname).toEqual(users[0]?.uname);
+    });
+
+    it("semesterStudentVoteStats should be create when use is student", async () => {
+      const semesterStudentVoteStatsRef = await db
+        .collection("semesterStudentVoteStats")
+        .where("uname", "==", users[0]?.uname)
+        .get();
+      expect(semesterStudentVoteStatsRef.docs[0].data().uname).toEqual(users[0]?.uname);
     });
   });
 
