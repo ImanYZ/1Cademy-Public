@@ -17,7 +17,7 @@ import { Stack } from "@mui/system";
 import { getAuth } from "firebase/auth";
 import Image from "next/image";
 import { useRouter } from "next/router";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 
 import useThemeChange from "@/hooks/useThemeChange";
 import { darkBase, orange900, orangeDark } from "@/pages/home";
@@ -25,6 +25,7 @@ import { darkBase, orange900, orangeDark } from "@/pages/home";
 import oneCademyLogo from "../../../public/DarkmodeLogo.png";
 import oneCademyLogoExtended from "../../../public/logo-extended.png";
 import { useAuth } from "../../context/AuthContext";
+import { postWithToken } from "../../lib/mapApi";
 import ROUTES from "../../lib/utils/routes";
 import { capitalizeString } from "../../lib/utils/string.utils";
 import AppHeaderSearchBar from "../AppHeaderSearchBar2";
@@ -85,6 +86,11 @@ const AppHeader = ({ page, sections, selectedSectionId, onSwitchSection }: AppHe
     setOpenMenu(false);
   };
 
+  useEffect(() => {
+    if (isAuthenticated && router.query?.course) {
+      postWithToken("/assignCourseToUser", { course: router.query?.course });
+    }
+  }, [isAuthenticated]);
   const renderProfileMenu = (
     <Menu id="ProfileMenu" anchorEl={profileMenuOpen} open={isProfileMenuOpen} onClose={handleProfileMenuClose}>
       {isAuthenticated && user && (

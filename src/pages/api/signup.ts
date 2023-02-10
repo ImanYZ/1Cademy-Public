@@ -194,6 +194,28 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
       displayName: data.uname,
       password: data.password,
     });
+
+    if (data?.course) {
+      const semesterRef = db.collection("semesters").doc(data?.course);
+      const semesterData = (await semesterRef.get()).data();
+      if (semesterData) {
+        let students = semesterData.students;
+        students.push({
+          uname: data.uname,
+          chooseUname: data.chooseUname,
+          imageUrl: defaultImageUrl,
+          fName: data.fName,
+          lName: data.lName,
+          email: data.email,
+        });
+        batch.update(semesterRef, {
+          students: students,
+        });
+        [batch, writeCounts] = await checkRestartBatchWriteCounts(batch, writeCounts);
+        await getAuth().setCustomUserClaims(userRecord.uid, { student: true });
+      }
+    }
+
     const currentTimestamp = admin.firestore.Timestamp.fromDate(new Date());
     userData = {
       uname: data.uname,
