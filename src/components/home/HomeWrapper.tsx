@@ -58,7 +58,7 @@ const HomeWrapper = ({
     if (systemsInView) newSelectedSectionId = ONE_CADEMY_SECTIONS[5].id;
     if (aboutInView) newSelectedSectionId = ONE_CADEMY_SECTIONS[6].id;
 
-    const newHash = newSelectedSectionId ? `#${newSelectedSectionId}` : "";
+    const newHash = newSelectedSectionId ? `#${newSelectedSectionId}` : "#";
 
     setSelectedSectionId(newHash);
     window.history.replaceState(null, "", newHash);
