@@ -13,6 +13,10 @@ const ROUTES = {
   instructorsStudents: "/instructors/students",
   instructorsDashboardStudents: "/instructors/dashboard/[uname]",
   apply: "https://1cademy.us/#JoinUsSection",
+  cookiesPolicy: "/policy/cookies",
+  gdprPolicy: "/policy/gdpr",
+  privacyPolicy: "/policy/privacy",
+  termsPolicy: "/policy/terms",
 };
 
 export default ROUTES;
