@@ -276,7 +276,7 @@ const Communities = () => {
         sx={{
           maxWidth: "1280px",
           margin: "auto",
-          px: { xs: "12px", md: "0px" },
+          px: { xs: "12px", lg: "0px" },
         }}
       >
         <Box sx={{ position: "relative" }}>
@@ -372,7 +372,7 @@ const Communities = () => {
                       flexDirection: "column",
                       justifyContent: "flex-start",
                       p: "16px",
-                      border: theme => `1px solid ${theme.palette.mode === "dark" ? gray800 : gray200}`,
+                      border: theme => `1px solid ${theme.palette.mode === "dark" ? darkBase : gray200}`,
                       backgroundColor: theme => (theme.palette.mode === "dark" ? "#181818" : "transparent"),
                       borderRadius: "8px",
                       cursor: "pointer",
@@ -415,7 +415,12 @@ const Communities = () => {
           justifyContent={"space-between"}
           mb="16px"
         >
-          <Typography variant="h4" gutterBottom align="center" sx={{ textTransform: "capitalize", m: "0px" }}>
+          <Typography
+            variant="h1"
+            gutterBottom
+            align="center"
+            sx={{ textTransform: "capitalize", m: "0px", fontWeight: 600 }}
+          >
             {community.title}
           </Typography>
           <Button
@@ -475,7 +480,7 @@ const Communities = () => {
                     spacing="8px"
                     sx={{
                       padding: "24px ",
-                      border: theme => `1px solid ${theme.palette.mode === "dark" ? gray800 : gray200}`,
+                      border: theme => `1px solid ${theme.palette.mode === "dark" ? darkBase : gray200}`,
                       borderRadius: "12px",
                       width: "280px",
                       backgroundColor: theme => (theme.palette.mode === "dark" ? "#181818" : "transparent"),
