@@ -44,8 +44,6 @@ const MAGNITUDE_ITEMS: TMagnitudeItem[] = [
 ];
 
 const Magnitude = () => {
-  // const { width } = useWindowSize();
-
   const { data: stats } = useQuery("stats", getStats);
 
   const MAGNITUDE_ITEMS_Memo = useMemo(() => {
@@ -57,16 +55,6 @@ const Magnitude = () => {
     }, [] as TMagnitudeItem[]);
     return x;
   }, [stats]);
-
-  // const imageDimensions = useMemo(() => {
-  //   let newWidth = width - 100;
-
-  //   if (width >= 600) newWidth = 560;
-  //   if (width >= 900) newWidth = 400;
-  //   if (width >= 1200) newWidth = 560;
-
-  //   return { width: newWidth, height: newWidth };
-  // }, [width]);
 
   return (
     <Stack direction={{ sx: "column-reverse", md: "row" }} alignItems={"center"} spacing={"96px"}>
@@ -91,9 +79,6 @@ const Magnitude = () => {
           </Box>
         ))}
       </Box>
-      {/* <Box>
-        <img src="home/1Cademy.png" alt="1cademy logo" width={imageDimensions.width} height={imageDimensions.height} />
-      </Box> */}
     </Stack>
   );
 };

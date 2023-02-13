@@ -54,9 +54,9 @@ const AssistantHomeWrapper = ({
 
     const newHash = newSelectedSectionId ? `#${newSelectedSectionId}` : "";
     if (window.location.hash === newHash) return;
-    window.location.hash = newHash;
 
     setSelectedSectionId(newHash);
+    window.location.hash = newHash;
   }, [aboutInView, benefitInView, mechanismInView, systemsInView]);
 
   const onSwitchSection = (newSelectedSectionId: string) => {
@@ -74,7 +74,8 @@ const AssistantHomeWrapper = ({
     }, 1000);
 
     setSelectedSectionId(newHash);
-    window.location.hash = newHash;
+    window.history.replaceState(null, "", newHash);
+    // window.location.hash = newHash;
   };
 
   return (
