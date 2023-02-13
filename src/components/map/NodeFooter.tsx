@@ -1513,7 +1513,9 @@ const NodeFooter = ({
       </Box>
       {openSidebar === "USER_INFO" &&
         nodeBookState.showContributors &&
-        nodeBookState.contributorsNodeId === identifier && (
+        nodeBookState.contributorsNodeId === identifier &&
+        contributors &&
+        Object.keys(contributors).length > 0 && (
           <Box sx={{ paddingY: "10px" }}>
             <Grid container spacing={1} sx={{ mt: 0 }}>
               {renderContributors()}
