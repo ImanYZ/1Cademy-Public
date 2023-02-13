@@ -17,10 +17,10 @@ import { Stack } from "@mui/system";
 import { getAuth } from "firebase/auth";
 import Image from "next/image";
 import { useRouter } from "next/router";
-import React, { useEffect, useState } from "react";
+import React, { forwardRef, useEffect, useState } from "react";
 
 import useThemeChange from "@/hooks/useThemeChange";
-import { darkBase, orange900, orangeDark } from "@/pages/home";
+import { orange900, orangeDark } from "@/pages/home";
 
 import oneCademyLogo from "../../../public/DarkmodeLogo.png";
 import oneCademyLogoExtended from "../../../public/logo-extended.png";
@@ -39,7 +39,7 @@ import { SubMenu } from "./SubMenu";
 export const HEADER_HEIGHT = 80;
 export const HEADER_HEIGHT_MOBILE = 72;
 
-export type HeaderPage = "ONE_CADEMY" | "ONE_ASSISTANT";
+export type HeaderPage = "ONE_CADEMY" | "ONE_ASSISTANT" | "COMMUNITIES";
 
 type AppHeaderProps = {
   page: HeaderPage;
@@ -49,7 +49,7 @@ type AppHeaderProps = {
   // preUrl?: string;
 };
 
-const AppHeader = ({ page, sections, selectedSectionId, onSwitchSection }: AppHeaderProps) => {
+const AppHeader = forwardRef(({ page, sections, selectedSectionId, onSwitchSection }: AppHeaderProps, ref) => {
   const [openSearch, setOpenSearch] = useState(false);
   const [{ isAuthenticated, user }] = useAuth();
   const [handleThemeSwitch] = useThemeChange();
@@ -113,6 +113,7 @@ const AppHeader = ({ page, sections, selectedSectionId, onSwitchSection }: AppHe
   return (
     <>
       <Box
+        ref={ref}
         sx={{
           background: theme => (theme.palette.mode === "dark" ? "rgba(0,0,0,.72)" : "#f8f8f894"),
           backdropFilter: "saturate(180%) blur(20px)",
@@ -162,14 +163,13 @@ const AppHeader = ({ page, sections, selectedSectionId, onSwitchSection }: AppHe
               {sections.slice(1).map((cur, idx) =>
                 cur.options?.length ? (
                   <Box key={cur.id} sx={{ display: "flex" }}>
-                    {/* <Link href={preUrl ? `${preUrl}#${cur.id}` : `#${cur.id}`} replace> */}
-                    <ActiveLink
-                      section={cur}
-                      selectedSectionId={selectedSectionId}
-                      // preUrl={preUrl}
-                      onSwitchSection={onSwitchSection}
-                    />
-                    {/* </Link> */}
+                    <Box onMouseEnter={() => setIdxOptionVisible(prev => (prev === idx ? -1 : idx))}>
+                      <ActiveLink
+                        section={cur}
+                        selectedSectionId={selectedSectionId}
+                        onSwitchSection={onSwitchSection}
+                      />
+                    </Box>
                     <IconButton
                       onClick={() => setIdxOptionVisible(prev => (prev === idx ? -1 : idx))}
                       size="small"
@@ -183,13 +183,8 @@ const AppHeader = ({ page, sections, selectedSectionId, onSwitchSection }: AppHe
                     key={cur.id}
                     section={cur}
                     selectedSectionId={selectedSectionId}
-                    // preUrl={preUrl}
                     onSwitchSection={onSwitchSection}
                   />
-                  // <Tooltip key={cur.id} title={cur.title}>
-                  // {/* <Link href={preUrl ? `${preUrl}#${cur.id}` : `#${cur.id}`} replace> */}
-                  // {/* </Link> */}
-                  // </Tooltip>
                 )
               )}
             </Stack>
@@ -299,7 +294,13 @@ const AppHeader = ({ page, sections, selectedSectionId, onSwitchSection }: AppHe
                   <Button
                     variant="contained"
                     color="secondary"
-                    onClick={page === "ONE_CADEMY" ? signUpHandler : () => setOpenForm(true)}
+                    onClick={
+                      page === "ONE_CADEMY"
+                        ? signUpHandler
+                        : page === "COMMUNITIES"
+                        ? () => window.open("https://1cademy.us/auth", "_blank")
+                        : () => setOpenForm(true)
+                    }
                     sx={{
                       display: { xs: "none", sm: "flex" },
                       p: { xs: "6px 10px", lg: undefined },
@@ -368,6 +369,27 @@ const AppHeader = ({ page, sections, selectedSectionId, onSwitchSection }: AppHe
                 >
                   Sign In/Up
                 </Button>
+              ) : page === "COMMUNITIES" ? (
+                <Button
+                  variant="contained"
+                  color="secondary"
+                  onClick={() => window.open("https://1cademy.us/auth", "_blank")}
+                  sx={{
+                    display: { xs: "flex", sm: "none" },
+                    fontSize: 16,
+                    backgroundColor: theme => (theme.palette.mode === "dark" ? "#303030" : "#e4e4e4"),
+                    color: theme =>
+                      theme.palette.mode === "dark" ? theme.palette.common.white : theme.palette.common.black,
+                    borderRadius: 40,
+                    // height: "25px",
+                    textTransform: "capitalize",
+                    ":hover": {
+                      backgroundColor: theme => (theme.palette.mode === "dark" ? "#444444" : "#cacaca"),
+                    },
+                  }}
+                >
+                  Sign In/Up
+                </Button>
               ) : null
             }
           />
@@ -379,7 +401,7 @@ const AppHeader = ({ page, sections, selectedSectionId, onSwitchSection }: AppHe
             top: "80px",
             left: "0px",
             right: "0px",
-            background: theme => (theme.palette.mode === "dark" ? darkBase : "#ffffff"),
+            background: theme => (theme.palette.mode === "dark" ? "#000000ff" : "#ffffff"),
           }}
         >
           <SubMenu
@@ -431,7 +453,9 @@ const AppHeader = ({ page, sections, selectedSectionId, onSwitchSection }: AppHe
       </Modal>
     </>
   );
-};
+});
+
+AppHeader.displayName = "AppHeader";
 
 const AppHeaderMemoized = React.memo(AppHeader);
 

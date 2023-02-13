@@ -119,7 +119,7 @@ const PagesNavbar: FC<Props> = ({ children, title, description }) => {
         )}
       </Box>
 
-      <AppFooter sx={{ px: isDesktop ? "0px" : "10px" }} />
+      <AppFooter sx={{ px: isDesktop ? "0px" : "10px" }} prevPage={ROUTES.publicHome} />
 
       {/* pc feedback */}
 

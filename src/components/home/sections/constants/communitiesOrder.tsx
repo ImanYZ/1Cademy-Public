@@ -1,3 +1,4 @@
+import { Typography } from "@mui/material";
 import React from "react";
 
 const comunity = [
@@ -35,7 +36,7 @@ const comunity = [
     description: `We study the UX Research and Cognitive Psychology literature on learning and memorizing. Using 1Cademy, we break down articles into granular knowledge pieces, connect them within a larger context of research, communicate our findings to other community members, and utilize our knowledge to conduct research. We conduct online controlled experiments using our research pipeline and co-author research papers to submit to reputable journals and conferences.`,
     accomplishments: (
       <div>
-        <p>We have recently published the following papers in ACM conferences:</p>
+        <Typography>We have recently published the following papers in ACM conferences:</Typography>
         <ul>
           <li>
             <a>
@@ -136,7 +137,7 @@ const comunity = [
     ],
     responsibilities: [
       `Complete the University of Michigan Program for the Education and Evaluation in Responsible Conduct of Research (PEERRS) before engaging in the research.`,
-      `Dedicate 25 hours a week over the Summer to engage in all aspects of the research project.`,
+      `Dedicate 20 hours a week to engage in all aspects of the research project.`,
       `Conduct several experiment sessions and guide participants through the session.`,
       `Thematically code the qualitative data collected throughout our experiments.`,
       `Engage in ideation, critical thinking, and peer-review of research proposed by other community members.`,
@@ -474,7 +475,7 @@ const comunity = [
     ],
     responsibilities: [
       `Complete the University of Michigan Program for the Education and Evaluation in Responsible Conduct of Research (PEERRS) before engaging in the research.`,
-      `Dedicate 25 hours a week over the Summer to engage in all aspects of the research project.`,
+      `Dedicate 20 hours a week to engage in all aspects of the research project.`,
       `Engage in ideation, critical thinking, and peer-review of research proposed by other community members.`,
       `Regularly study textbooks and research papers, summarize them, and share the essence of what you learn with our large research team.`,
       `Present the essence of what you learn from the related papers and book chapters in weekly meetings for further discussion.`,

@@ -1,15 +1,29 @@
 import EmailIcon from "@mui/icons-material/Email";
 import GitHubIcon from "@mui/icons-material/GitHub";
 import YouTubeIcon from "@mui/icons-material/YouTube";
-import { Box, Divider, DividerProps, IconButton, Link, Stack, styled, SxProps, Theme, Typography } from "@mui/material";
+import {
+  Box,
+  Divider,
+  DividerProps,
+  IconButton,
+  Link as MuiLink,
+  Stack,
+  styled,
+  SxProps,
+  Theme,
+  Typography,
+} from "@mui/material";
 import NextImage from "next/image";
+import Link from "next/link";
 import React from "react";
 
+import ROUTES from "@/lib/utils/routes";
 import { gray800, gray900, orangeDark } from "@/pages/home";
 
 import logo1cademy from "../../public/1Cademy-head.svg";
 import { ONE_CADEMY_SECTIONS } from "./home/SectionsItems";
 type AppFooterProps = {
+  prevPage?: string;
   sx?: SxProps<Theme>;
 };
 
@@ -19,7 +33,7 @@ export const DividerStyled = styled((props: DividerProps) => <Divider {...props}
   borderColor: gray800,
 }));
 
-const AppFooter = ({ sx }: AppFooterProps) => {
+const AppFooter = ({ prevPage = "", sx }: AppFooterProps) => {
   return (
     <Box
       component={"footer"}
@@ -63,46 +77,26 @@ const AppFooter = ({ sx }: AppFooterProps) => {
             <Stack spacing={"12px"}>
               {ONE_CADEMY_SECTIONS.slice(1).map(cur => {
                 return (
-                  <Link key={cur.id} href={`#${cur.id}`} sx={{ textDecoration: "none" }}>
+                  <MuiLink key={cur.id} href={`${prevPage}#${cur.id}`} sx={{ textDecoration: "none" }}>
                     {cur.label}
-                  </Link>
+                  </MuiLink>
                 );
               })}
             </Stack>
           </Box>
 
           <Box>
-            <Stack spacing={"12px"}>
-              <Link
-                target="_blank"
-                href="https://1cademy.us/terms"
-                underline="none"
-                sx={{ color: theme => theme.palette.grey[500] }}
-              >
+            <Stack spacing={"12px"} sx={{ "&> a": { textDecoration: "none" } }}>
+              <Link target="_blank" href={ROUTES.termsPolicy}>
                 Terms
               </Link>
-              <Link
-                target="_blank"
-                href="https://1cademy.us/privacy"
-                underline="none"
-                sx={{ color: theme => theme.palette.grey[500] }}
-              >
+              <Link target="_blank" href={ROUTES.privacyPolicy}>
                 Privacy
               </Link>
-              <Link
-                target="_blank"
-                href="https://1cademy.us/cookie"
-                underline="none"
-                sx={{ color: theme => theme.palette.grey[500] }}
-              >
+              <Link target="_blank" href={ROUTES.cookiesPolicy}>
                 Cookie
               </Link>
-              <Link
-                target="_blank"
-                href="https://1cademy.us/gdpr"
-                underline="none"
-                sx={{ color: theme => theme.palette.grey[500] }}
-              >
+              <Link target="_blank" href={ROUTES.gdprPolicy}>
                 GDPR
               </Link>
             </Stack>
@@ -149,14 +143,14 @@ const AppFooter = ({ sx }: AppFooterProps) => {
               <Typography color="#D0D5DD" fontSize={"14px"} display={"inline-block"}>
                 We're committed to OpenSource on
               </Typography>
-              <Link
+              <MuiLink
                 href="https://github.com/ImanYZ/1Cademy-Public/"
                 target="_blank"
                 rel="noreferrer"
                 sx={{ textDecoration: "underline", ml: "4px" }}
               >
                 Github
-              </Link>
+              </MuiLink>
             </Box>
           </Stack>
         </Stack>
