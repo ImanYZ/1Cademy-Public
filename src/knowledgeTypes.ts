@@ -369,8 +369,14 @@ export type User = {
   clickedCP?: boolean;
   clickedPP?: boolean;
   clickedTOS?: boolean;
+  clickedGDPR?: boolean;
   color?: string;
   consented?: boolean;
+  GDPRPolicyAgreement?: boolean;
+  termsOfServiceAgreement?: boolean;
+  privacyPolicyAgreement?: boolean;
+  cookiesAgreement?: boolean;
+  ageAgreement?: boolean;
   country?: string;
   createdAt?: Timestamp;
   deCourse?: string;
@@ -579,9 +585,15 @@ export interface SignUpFormValues {
   fieldOfInterest: string;
   signUpAgreement: boolean;
   clickedConsent: boolean;
+  GDPRPolicyAgreement: boolean;
+  termsOfServiceAgreement: boolean;
+  privacyPolicyAgreement: boolean;
+  cookiesAgreement: boolean;
+  ageAgreement: boolean;
   clickedTOS: boolean;
   clickedPP: boolean;
   clickedCP: boolean;
+  clickedGDPR: boolean;
 }
 
 export interface SignUpData extends Omit<User, "userId" | "role"> {
