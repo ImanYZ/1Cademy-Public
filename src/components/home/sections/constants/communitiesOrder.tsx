@@ -137,7 +137,7 @@ const comunity = [
     ],
     responsibilities: [
       `Complete the University of Michigan Program for the Education and Evaluation in Responsible Conduct of Research (PEERRS) before engaging in the research.`,
-      `Dedicate 25 hours a week over the Summer to engage in all aspects of the research project.`,
+      `Dedicate 20 hours a week to engage in all aspects of the research project.`,
       `Conduct several experiment sessions and guide participants through the session.`,
       `Thematically code the qualitative data collected throughout our experiments.`,
       `Engage in ideation, critical thinking, and peer-review of research proposed by other community members.`,
@@ -475,7 +475,7 @@ const comunity = [
     ],
     responsibilities: [
       `Complete the University of Michigan Program for the Education and Evaluation in Responsible Conduct of Research (PEERRS) before engaging in the research.`,
-      `Dedicate 25 hours a week over the Summer to engage in all aspects of the research project.`,
+      `Dedicate 20 hours a week to engage in all aspects of the research project.`,
       `Engage in ideation, critical thinking, and peer-review of research proposed by other community members.`,
       `Regularly study textbooks and research papers, summarize them, and share the essence of what you learn with our large research team.`,
       `Present the essence of what you learn from the related papers and book chapters in weekly meetings for further discussion.`,
