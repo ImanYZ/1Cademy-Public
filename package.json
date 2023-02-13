@@ -36,7 +36,7 @@
     "@mui/material": "5.9.0",
     "@mui/x-date-pickers": "^5.0.0-beta.0",
     "@react-google-maps/api": "^2.7.0",
-    "@rive-app/react-canvas": "^3.0.35",
+    "rive-react": "github:elVengador/rive-react#tmp",
     "@types/d3-collection": "^1.0.10",
     "@types/multer": "^1.4.7",
     "axios": "^0.27.2",

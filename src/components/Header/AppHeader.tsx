@@ -163,7 +163,7 @@ const AppHeader = forwardRef(({ page, sections, selectedSectionId, onSwitchSecti
               {sections.slice(1).map((cur, idx) =>
                 cur.options?.length ? (
                   <Box key={cur.id} sx={{ display: "flex" }}>
-                    <Box onMouseOver={() => setIdxOptionVisible(prev => (prev === idx ? -1 : idx))}>
+                    <Box onMouseEnter={() => setIdxOptionVisible(prev => (prev === idx ? -1 : idx))}>
                       <ActiveLink
                         section={cur}
                         selectedSectionId={selectedSectionId}
