@@ -48,14 +48,15 @@ export const ONE_CADEMY_SECTIONS: HomepageSection[] = [
     options: [
       {
         title: "UX Research In Online Communities",
-        description:
-          "The goal of the health psychology community is to inspire the development of key research skills while conducting a review of health psychology literature. Using credible, scholarly articles, we are exploring various topics within the field of health psychology, including: behavioral therapies for mental illness, the intersection of race and gender in the healthcare industry, what motivates people to maintain a healthy lifestyle, and the complex role of the media in health. As we compile our research using 1Cademy, we hope to discover patterns and gaps in the literature that could be addressed in a future study of our own design. Each week, interns read an article, summarize it using 1Cademy, present their findings to the group, and engage in thoughtful discussion about themes present in their article.",
+        description: `1Cademy is a collaborative community that supports interdisciplinary research and learning through content generation, mapping, and evaluation. We have multiple successful communities from various fields collaborating regularly by summarizing and organizing content on the platform. This community is focused on learning how to make healthier, more engaged online communities in order to improve our users’ learning, contributions, and experience.
+    The UX Research in Online Communities team is dedicated to uncovering, presenting, and compiling the latest literature and research on creating and maintaining engaging and beneficial online communities. Our goal is to understand how to foster online communities where users actively contribute their ideas and value the perspectives of their peers. We are seeking a team of dedicated students to conduct thorough research in various disciplines including psychology, social science, cognitive science, information science, and economics. Utilizing the 1Cademy platform, we will take notes, organize ideas, and map concepts from the literature we find. Ultimately, our aim is to apply our findings to make meaningful improvements to the 1Cademy platform and enhance the user experience of our online communities.
+    `,
         link: "https://1cademy.us/community/Cognitive_Psychology",
       },
       {
         title: "Clinical Psychology",
-        description:
-          "The Disability Studies community explores current and past research related to disability. We investigate a wide range of topics related to disability including, disability legislation, disability culture, the psychosocial impact of disability, the economics of disability, and more. Interns summarize research articles and present their findings weekly with the rest of the group. By using 1Cademy, interns learn how to break down articles into smaller ideas, connect them to broader concepts, extrapolate the research for deeper analysis, and communicate their findings to other community members. We value collaborative learning and expect interns to participate in group discussions to dive deeper into the content.",
+        description: `The Clinical Psychology community explores research related to mental illness/disorders, mental health treatment, and psychopathology of individuals across the lifespan. Clinical psychology is interdisciplinary and can intersect with various fields such as neuroscience, cognitive psychology, and social psychology. We encourage interns to dive into research that they have particular interest in (e.g., child psychopathology), share their findings, and collaborate with other interns. This internship is designed to motivate independent research, gain research skills such as analysis and interpretation, and work towards conducting research.
+        1Cademy allows interns to present their research findings, gain feedback from other interns, and learn how to communicate their findings in a concise and articulate manner.`,
         link: "https://1cademy.us/community/Clinical_Psychology",
       },
       {
@@ -83,9 +84,8 @@ export const ONE_CADEMY_SECTIONS: HomepageSection[] = [
         link: "https://1cademy.us/community/Deep_Learning",
       },
       {
-        title: "UX Research in Online Communities",
-        description:
-          "1Cademy is a collaborative community that supports interdisciplinary research and learning through content generation, mapping, and evaluation. We have multiple successful communities from various fields collaborating regularly by summarizing and organizing content on the platform. This community is focused on learning how to make healthier, more engaged online communities in order to improve our users’ learning, contributions, and experience. The UX Research in Online Communities team is dedicated to uncovering, presenting, and compiling the latest literature and research on creating and maintaining engaging and beneficial online communities. Our goal is to understand how to foster online communities where users actively contribute their ideas and value the perspectives of their peers. We are seeking a team of dedicated students to conduct thorough research in various disciplines including psychology, social science, cognitive science, information science, and economics. Utilizing the 1Cademy platform, we will take notes, organize ideas, and map concepts from the literature we find. Ultimately, our aim is to apply our findings to make meaningful improvements to the 1Cademy platform and enhance the user experience of our online communities",
+        title: "UX Research in Cognitive Psychology of Learning",
+        description: `We study the UX Research and Cognitive Psychology literature on learning and memorizing. Using 1Cademy, we break down articles into granular knowledge pieces, connect them within a larger context of research, communicate our findings to other community members, and utilize our knowledge to conduct research. We conduct online controlled experiments using our research pipeline and co-author research papers to submit to reputable journals and conferences.`,
         link: "https://1cademy.us/community/UX_Research_in_Online_Communities",
       },
       {
