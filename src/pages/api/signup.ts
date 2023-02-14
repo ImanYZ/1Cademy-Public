@@ -271,10 +271,10 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
       imageUrl: defaultImageUrl,
       chooseUname: data.chooseUname,
       color: "#36cd96",
-      clickedConsent: data.clickedConsent,
       clickedTOS: data.clickedTOS,
       clickedPP: data.clickedPP,
       clickedCP: data.clickedCP,
+      clickedGDPR: data.clickedGDPR,
       blocked: false,
       deCredits,
       tag,
@@ -287,6 +287,11 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
       practicing: false,
       userId: userRecord.uid,
       consented: data.consented,
+      GDPRPolicyAgreement: data.GDPRPolicyAgreement,
+      termsOfServiceAgreement: data.termsOfServiceAgreement,
+      privacyPolicyAgreement: data.privacyPolicyAgreement,
+      cookiesAgreement: data.cookiesAgreement,
+      ageAgreement: data.ageAgreement,
       livelinessBar: livebarTypes[Math.floor(Math.random() * livebarTypes.length)],
     };
 
