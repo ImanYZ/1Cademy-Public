@@ -11,6 +11,7 @@ export const TermsOfUse = ({ open, handleClose }: TermsOfUseProps) => {
   return (
     <Dialog
       open={open}
+      maxWidth={"md"}
       onClose={handleClose}
       scroll={"paper"}
       aria-labelledby="scroll-dialog-title"
