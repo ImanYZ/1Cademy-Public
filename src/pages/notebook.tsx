@@ -2601,8 +2601,11 @@ const Dashboard = ({}: DashboardProps) => {
           nodeType: childNodeType,
           parents: [{ node: nodeBookState.selectedNode, label: "", title: thisNode.title, type: thisNode.nodeType }],
           comments: 0,
-          tags: [user.tag],
-          tagIds: [user.tagId],
+          tags: thisNode.tags.filter(tag => tag === user.tag).length > 0 ? thisNode.tags : [...thisNode.tags, user.tag],
+          tagIds:
+            thisNode.tagIds.filter(tagId => tagId === user.tagId).length > 0
+              ? thisNode.tagIds
+              : [...thisNode.tagIds, user.tagId],
           title: "",
           wrongs: 0,
           corrects: 1,

@@ -88,10 +88,16 @@ const SignUpPage: NextPageWithLayout = () => {
     major: null,
     fieldOfInterest: "",
     signUpAgreement: false,
+    GDPRPolicyAgreement: false,
+    termsOfServiceAgreement: false,
+    privacyPolicyAgreement: false,
+    cookiesAgreement: false,
+    ageAgreement: false,
     clickedConsent: false,
     clickedTOS: false,
     clickedPP: false,
     clickedCP: false,
+    clickedGDPR: false,
   };
 
   const validationSchema = yup.object({
@@ -146,6 +152,11 @@ const SignUpPage: NextPageWithLayout = () => {
     major: yup.string().required("Please enter your major").nullable(),
     // fieldOfInterest: yup.string().required("Please enter your field of interest"),
     signUpAgreement: yup.boolean().isTrue("Please accept the Informed Consent to continue"),
+    GDPRPolicyAgreement: yup.boolean().isTrue("Please accept the GDPR Policy to continue"),
+    termsOfServiceAgreement: yup.boolean().isTrue("Please accept Terms of Service to continue"),
+    privacyPolicyAgreement: yup.boolean().isTrue("Please accept the Privacy Policy to continue"),
+    cookiesAgreement: yup.boolean().isTrue("Please accept the Cookie Policy to continue"),
+    ageAgreement: yup.boolean().isTrue("Please accept the Age Agreement to continue"),
   });
 
   const handleSignUp = async (values: SignUpFormValues) => {
@@ -171,6 +182,7 @@ const SignUpPage: NextPageWithLayout = () => {
       clickedTOS: values.clickedTOS,
       clickedPP: values.clickedPP,
       clickedCP: values.clickedCP,
+      clickedGDPR: values.clickedGDPR,
       tag: values.tag,
       tagId: values.tagId,
       deMajor: values.major as string,
@@ -178,6 +190,11 @@ const SignUpPage: NextPageWithLayout = () => {
       theme: values.theme,
       background: values.background,
       consented: values.signUpAgreement,
+      GDPRPolicyAgreement: values.GDPRPolicyAgreement,
+      termsOfServiceAgreement: values.termsOfServiceAgreement,
+      privacyPolicyAgreement: values.privacyPolicyAgreement,
+      cookiesAgreement: values.cookiesAgreement,
+      ageAgreement: values.ageAgreement,
       fieldOfInterest: values.fieldOfInterest,
       course: router.query?.course ? String(router.query?.course) : null,
     };
