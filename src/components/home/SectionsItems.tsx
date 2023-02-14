@@ -51,7 +51,7 @@ export const ONE_CADEMY_SECTIONS: HomepageSection[] = [
         description: `1Cademy is a collaborative community that supports interdisciplinary research and learning through content generation, mapping, and evaluation. We have multiple successful communities from various fields collaborating regularly by summarizing and organizing content on the platform. This community is focused on learning how to make healthier, more engaged online communities in order to improve our users’ learning, contributions, and experience.
     The UX Research in Online Communities team is dedicated to uncovering, presenting, and compiling the latest literature and research on creating and maintaining engaging and beneficial online communities. Our goal is to understand how to foster online communities where users actively contribute their ideas and value the perspectives of their peers. We are seeking a team of dedicated students to conduct thorough research in various disciplines including psychology, social science, cognitive science, information science, and economics. Utilizing the 1Cademy platform, we will take notes, organize ideas, and map concepts from the literature we find. Ultimately, our aim is to apply our findings to make meaningful improvements to the 1Cademy platform and enhance the user experience of our online communities.
     `,
-        link: "/community/Cognitive_Psychology",
+        link: "/community/UX_Research_in_Online_Communities",
       },
       {
         title: "Clinical Psychology",
@@ -86,7 +86,7 @@ export const ONE_CADEMY_SECTIONS: HomepageSection[] = [
       {
         title: "UX Research in Cognitive Psychology of Learning",
         description: `We study the UX Research and Cognitive Psychology literature on learning and memorizing. Using 1Cademy, we break down articles into granular knowledge pieces, connect them within a larger context of research, communicate our findings to other community members, and utilize our knowledge to conduct research. We conduct online controlled experiments using our research pipeline and co-author research papers to submit to reputable journals and conferences.`,
-        link: "/community/UX_Research_in_Online_Communities",
+        link: "/community/Cognitive_Psychology",
       },
       {
         title: "Liaison Librarians",
