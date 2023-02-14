@@ -112,7 +112,8 @@ const FocusedNotebook = ({
     <>
       <Box
         sx={{
-          backgroundColor: "rgba(31,31,31, 1)",
+          backgroundColor: theme =>
+            theme.palette.mode === "dark" ? "rgba(31,31,31, 1)" : theme.palette.common.lightBackground1,
           position: "absolute",
           width: "100%",
           height: "100%",
@@ -128,7 +129,7 @@ const FocusedNotebook = ({
               top: "20px",
               right: "20px",
               zIndex: "99",
-              color: theme => theme.palette.common.white,
+              color: theme => (theme.palette.mode === "dark" ? theme.palette.common.white : "rgba(31,31,31, 1)"),
             }}
             onClick={() => setFocusView({ isEnabled: false, selectedNode: "" })}
           />
