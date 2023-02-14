@@ -52,51 +52,53 @@ const GDRPolicy = () => {
         >
           1Cademy General Data Protection Regulation (GDPR) Policy
         </Typography>
-        <Typography component={"h3"} sx={{ fontSize: "19px", my: "18px", fontWeight: 600 }}>
+
+        <Typography component={"h2"} sx={{ fontSize: "24px", my: "20px", fontWeight: 600 }}>
           Introduction
         </Typography>
         <Typography>
-          1Cadmey respects users' personal and sensitive information and is committed to ensuring the security and
-          privacy of such information in accordance with the requirements of the GDPR. 1Cademy takes the necessary
-          measures to comply with the GDPR regarding personal and sensitive information of users on 1Cademy and all
-          third-party services. The following policy outlines 1Cademy's commitments to the GDPR and the measures it
-          takes to protect users' personal and sensitive information.
+          At 1Cademy, we respect our users' personal and sensitive information and strive to ensure that our users feel
+          secure while using our products and services. We are committed to complying with the General Data Protection
+          Regulation (GDPR) regarding the protection of personal and sensitive information of our users on 1Cademy and
+          all third-party services.
+        </Typography>
+        <Typography>
+          To achieve this, we have taken the necessary steps to inform our users through comprehensive documentation,
+          keep our infrastructures and resources up-to-date, and implement suitable technical and administrative
+          measures to protect our users' data.
+        </Typography>
+        <Typography component={"h2"} sx={{ fontSize: "24px", my: "20px", fontWeight: 600 }}>
+          1Cademy Commitments to the GDPR
+        </Typography>
+        <Typography>
+          As a data controller, 1Cademy is committed to using data processors with suitable technical and administrative
+          measures to ensure the safety of our users' data. Our GDPR assessment includes the following:
         </Typography>
         <Typography component={"h3"} sx={{ fontSize: "19px", my: "18px", fontWeight: 600 }}>
-          Commitments to the GDPR
+          Reliability & Resources
         </Typography>
         <Typography>
-          1Cademy is committed to complying with the GDPR in all its operations. This includes using data processors
-          with suitable technical and administrative measures and assessing 1Cademy's compliance with the GDPR, which
-          may include the following:
+          1Cademy is dedicated to maintaining our defense strategies, developing security review processes, building a
+          robust security infrastructure, and accurately executing our security policies to ensure the protection of our
+          users' data.
         </Typography>
-        <Typography component={"h3"} sx={{ fontSize: "19px", my: "16px", fontWeight: 600 }}>
-          Reliability and Resources
-        </Typography>
-        <Typography>
-          1Cademy is dedicated to maintaining its defense strategies, developing security review processes, building a
-          more robust security infrastructure, and precisely executing 1Cademy’s security policies to ensure the
-          protection of users' personal and sensitive information.
-        </Typography>
-        <Typography component={"h3"} sx={{ fontSize: "19px", my: "16px", fontWeight: 600 }}>
+        <Typography component={"h3"} sx={{ fontSize: "19px", my: "18px", fontWeight: 600 }}>
           Data Safeguard Commitments
-        </Typography>
-        <Typography>
-          1Cademy takes several measures to protect the personal and sensitive information of its users, including:
         </Typography>
         <Typography component={"h4"} sx={{ fontSize: "16px", my: "16px", fontWeight: 600 }}>
           Data Processing Agreements
         </Typography>
         <Typography>
-          1Cademy has data processing agreements in place that clearly communicate its privacy commitment to users.
-          These agreements are updated regularly to reflect the GDPR and to facilitate users' compliance assessment and
-          GDPR readiness when using 1Cademy services.
+          Our data processing agreements for 1Cademy clearly communicate our privacy commitment to our users. We
+          regularly update these agreements based on feedback from our users and lawful authorities, and we have updated
+          these agreements to reflect the GDPR and to help our users assess their compliance and readiness for the GDPR
+          when using our services.
         </Typography>
         <Typography component={"h4"} sx={{ fontSize: "16px", my: "16px", fontWeight: 600 }}>
           Processing According to Instructions
         </Typography>
         <Typography>
-          1Cademy will only process personal data provided by users under the users' instructions, as described in
+          Any data that a user provides to 1Cademy will only be processed under the user's instructions, as described in
           1Cademy's GDPR data processing agreements.
         </Typography>
         <Typography component={"h4"} sx={{ fontSize: "16px", my: "16px", fontWeight: 600 }}>
@@ -104,63 +106,119 @@ const GDRPolicy = () => {
         </Typography>
         <Typography>
           All 1Cademy employees are required to sign a confidentiality agreement and complete compulsory confidentiality
-          and privacy training to manage their responsibilities and expected behavior concerning data protection.
+          and privacy training to manage their responsibilities and expected behavior regarding data protection.
         </Typography>
-        <Typography component={"h4"} sx={{ fontSize: "16px", my: "16px", fontWeight: 600 }}>
+        <Typography component={"h3"} sx={{ fontSize: "19px", my: "18px", fontWeight: 600 }}>
           Use of Subprocessors
         </Typography>
         <Typography>
           Most of the data processing actions required to provide 1Cademy services are run by 1Cademy itself. However,
-          1Cademy may engage third-party vendors to assist in supporting these services. In such cases, 1Cademy
-          thoroughly surveys these third parties to ensure their competence to deliver the appropriate level of security
-          and privacy. 1Cademy complies with the Data Protection Act 1998 when transferring user data to a third-party
-          located outside the European Economic Area (EEA).
+          1Cademy may engage some third-party vendors to assist in supporting these services. In such cases, 1Cademy
+          carefully surveys these third parties to ensure their competence in delivering the appropriate level of
+          security and privacy. 1Cademy complies with the Data Protection Act 1998 when transferring user data to a
+          third-party located outside the European Economic Area (EEA).
         </Typography>
-        <Typography component={"h3"} sx={{ fontSize: "19px", my: "16px", fontWeight: 600 }}>
+        <Typography component={"h3"} sx={{ fontSize: "19px", my: "18px", fontWeight: 600 }}>
           Security of the Services
         </Typography>
         <Typography>
-          1Cademy takes reasonable technical and administrative measures to ensure the protection of users' personal and
-          sensitive information, in accordance with the GDPR. 1Cademy uses state-of-the-art security infrastructures
-          throughout the entire data processing lifecycle, which include:
+          According to the GDPR, reasonable technical and administrative measures must be enforced to ensure an
+          appropriate level of protection for the risk. 1Cademy takes advantage of state-of-the-art security
+          infrastructures throughout the entire data processing lifecycle to provide secure deployment of services,
+          secure storage of data with end-user privacy safeguards, secure communications between services, secure and
+          private communication with consumers over the Internet, and safe operation by administrators.
+        </Typography>
+        <Typography component={"h4"} sx={{ fontSize: "16px", my: "16px", fontWeight: 600 }}>
+          Encryption
+        </Typography>
+        <Typography>
+          1Cademy employs encryption to protect data in transit and at rest. Our data in transit between regions is
+          protected using HTTPS, which is activated by default for all users. 1Cademy encrypts users' content stored at
+          rest, without any action required from users, using one or more encryption mechanisms.
+        </Typography>
+        <Typography component={"h4"} sx={{ fontSize: "16px", my: "16px", fontWeight: 600 }}>
+          Access Controls
+        </Typography>
+        <Typography>
+          For 1Cademy employees, access rights and levels are based on job position and role. Requests for additional
+          access follow a formal process that requires a request and approval from a data or system owner, manager, or
+          other executives, as defined by 1Cadmy's security policies.
+        </Typography>
+
+        <Typography component={"h3"} sx={{ fontSize: "19px", my: "18px", fontWeight: 600 }}>
+          Data Retention and Deletion
+        </Typography>
+        <Typography>
+          1Cademy provides users with the affordance to delete the personal data they have provided to 1Cademy at any
+          time. When 1Cademy receives a complete deletion instruction from users, it will delete the relevant personal
+          data from all of its systems within a maximum period of 100 days unless retention commitments involve. Note
+          that this only applies to users' personal data. We do not delete the data that users publicly share on
+          1Cademy.
+        </Typography>
+        <Typography component={"h3"} sx={{ fontSize: "19px", my: "18px", fontWeight: 600 }}>
+          Incident Notifications
+        </Typography>
+        <Typography>
+          1Cademy will continue to promptly inform you of incidents involving your personal and sensitive information in
+          line with the information incident terms in our recent agreements.{" "}
+        </Typography>
+        <Typography component={"h3"} sx={{ fontSize: "19px", my: "18px", fontWeight: 600 }}>
+          International Data Transfers
+        </Typography>
+        <Typography>
+          The GDPR provides several mechanisms to ameliorate transfers of personal data outside of the EU. These
+          mechanisms are aimed at securing an adequate level of protection or ensuring the performance of suitable
+          safeguards when personal data is transferred to a third country.{" "}
+        </Typography>
+        <Typography component={"h3"} sx={{ fontSize: "19px", my: "18px", fontWeight: 600 }}>
+          Automated Decision-Making
+        </Typography>
+        <Typography>
+          1Cademy may use automated decision-making in processing your personal data for some services and products, you
+          can request a review of the accuracy of an automated decision if you are unhappy with it.{" "}
+        </Typography>
+        <Typography component={"h3"} sx={{ fontSize: "19px", my: "18px", fontWeight: 600 }}>
+          1Cademy Data Protection Principles
         </Typography>
         <ul>
-          <li>Secure deployment of services</li>
-          <li>Secure storage of data with end-user privacy safeguards</li>
-          <li>Secure communications between services</li>
-          <li>Secure and private communication with consumers over the Internet</li>
-          <li>Safe operation by administrators</li>
-          <li>Regular security assessments and vulnerability scans</li>
+          <li>Personal Data shall be processed lawfully, fairly, and in a transparent manner.</li>
           <li>
-            Implementation of firewalls, intrusion detection and prevention systems, and other security technologies
+            The Personal Data collected will only be those specifically required to fulfill 1Cademy services. Such data
+            may be collected directly from users. Such data will only be processed for that purpose.
           </li>
           <li>
-            Implementation of access controls and authentication mechanisms to prevent unauthorized access to sensitive
-            data and systems
+            Personal Data shall only be retained for as long as it is required to fulfill 1Cademy services, or to
+            provide statistics to our Client Company.
           </li>
           <li>
-            Implementation of data backup and disaster recovery solutions to ensure business continuity in case of
-            unforeseen events
+            Personal Data shall be adequate, relevant, and limited to what is necessary in relation to the purposes for
+            which they are collected and/or processed. Personal Data shall be accurate and, where necessary, kept up to
+            date.
+          </li>
+          <li>
+            Users have the right to request from 1Cademy access to and rectification or erasure of their personal data,
+            to object to or request restriction of processing concerning the data, or to the right to data portability.
+            In each case such a request must be put in writing and sent to OUREMAIL HERE.
+          </li>
+          <li>
+            Personal Data shall only be processed based on the legal basis as explained above, except where such
+            interests are overridden by the fundamental rights and freedoms of users which will always take precedence.
+            If users have provided specific additional Consent to the processing, then such consent may be withdrawn at
+            any time (but may then result in an inability to fulfill 1Cademy products/ services requirements).
           </li>
         </ul>
         <Typography>
-          By implementing these measures, 1Cademy is committed to ensuring that all of your data is securely protected,
-          and that you can use our platform with complete peace of mind.
+          The Data Subject has the right to make a complaint directly to a supervisory authority within their own
+          country. For inquiries about 1Cademy's Data Protection compliance please contact via OUREMAIL
         </Typography>
-        <Typography component={"h3"} sx={{ fontSize: "19px", my: "16px", fontWeight: 600 }}>
-          Updates to Privacy Policy
-        </Typography>
-        <Typography>
-          1Cademy reserves the right to change its privacy policy at any time. If there are any material changes to the
-          policy, 1Cademy will notify you via email or through a notice on its website.
-        </Typography>
-        <Typography component={"h3"} sx={{ fontSize: "19px", my: "16px", fontWeight: 600 }}>
-          Contact Informations
+        <Typography component={"h3"} sx={{ fontSize: "19px", my: "18px", fontWeight: 600 }}>
+          Children's Privacy
         </Typography>
         <Typography>
-          If you have any questions or concerns about our privacy policy or the way we collect, use, or store your data,
-          please contact us at <a href="mailto:privacy@1cademy.com">privacy@1cademy.com</a>.
-        </Typography>{" "}
+          Children are not eligible to use 1Cademy products and services. Minors (children under the age of 18) should
+          not submit any personal information to 1Cademy. If you are a minor, you can use 1Cademy only in conjunction
+          with your parents or legal guardians.
+        </Typography>
       </Box>
       <AppFooter prevPage={ROUTES.publicHome} />
       <style>
