@@ -232,7 +232,7 @@ export type NodeFireStore = {
   corrects: number;
   createdAt: Timestamp;
   deleted: boolean;
-  height: number;
+  height?: number; // TODO: height should not exist on DB, remove please
   institNames: string[];
   institutions: {
     [key: string]: { reputation?: number };

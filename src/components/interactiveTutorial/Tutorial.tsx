@@ -65,7 +65,7 @@ export const Tutorial = ({
           bottom: "0px",
           left: "0px",
           right: "0px",
-          backgroundColor: "#5555552d",
+          backgroundColor: "#555555a9",
           transition: "top 1s ease-out,left 1s ease-out",
           boxSizing: "border-box",
           zIndex: 999,
@@ -100,48 +100,76 @@ export const Tutorial = ({
 
   return (
     <div
+      ref={tooltipRef}
+      className={`tooltip tooltip-${currentStep.tooltipPos}`}
       style={{
         position: "absolute",
-        top: `${targetClientRect.top}px`,
-        left: `${targetClientRect.left}px`,
-        width: `${targetClientRect.width}px`,
-        height: `${targetClientRect.height}px`,
-        backgroundColor: "transparent",
-        outline: "5000px solid #5555552d",
+        top: `${tooltipClientRect.top}px`,
+        left: `${tooltipClientRect.left}px`,
         transition: "top 1s ease-out,left 1s ease-out",
-        borderRadius: "1px",
-        outlineOffset: "10px",
-        boxSizing: "border-box",
-        // pointerEvents: "none",
-        zIndex: 999,
+        width: "350px",
+        backgroundColor: "#3a3838",
+        padding: "8px",
+        borderRadius: "8px",
+        color: "white",
+        //   pointerEvents: "none",
       }}
     >
-      <div
-        ref={tooltipRef}
-        className={`tooltip tooltip-${currentStep.tooltipPos}`}
-        style={{
-          position: "absolute",
-          top: `${tooltipClientRect.top}px`,
-          left: `${tooltipClientRect.left}px`,
-          transition: "top 1s ease-out,left 1s ease-out",
-          width: "200px",
-          backgroundColor: "#3a3838",
-          padding: "8px",
-          borderRadius: "8px",
-          color: "white",
-        }}
-      >
-        <h2>{currentStep.title}</h2>
-        <p>{currentStep.description}</p>
-        <button onClick={onPreviousStep}>{"<<"}</button>
+      <h2>{currentStep.title}</h2>
+      <p>{currentStep.description}</p>
+      <button onClick={onPreviousStep}>{"<<"}</button>
 
-        {currentStepIdx < stepsLength - 1 && (
-          <button onClick={onNextStep} style={{ zIndex: 898999 }}>
-            {">>"}
-          </button>
-        )}
-        {currentStepIdx === stepsLength - 1 && <button onClick={onNextStep}>{"Finalize"}</button>}
-      </div>
+      {currentStepIdx < stepsLength - 1 && (
+        <button onClick={onNextStep} style={{ zIndex: 898999 }}>
+          {">>"}
+        </button>
+      )}
+      {currentStepIdx === stepsLength - 1 && <button onClick={onNextStep}>{"Finalize"}</button>}
     </div>
+    // <div
+    //   style={{
+    //     position: "absolute",
+    //     top: `${targetClientRect.top}px`,
+    //     left: `${targetClientRect.left}px`,
+    //     width: `${targetClientRect.width}px`,
+    //     height: `${targetClientRect.height}px`,
+    //     backgroundColor: "transparent",
+    //     outline: "5000px solid #181818d0",
+    //     transition: "top 1s ease-out,left 1s ease-out",
+    //     borderRadius: "1px",
+    //     outlineOffset: "10px",
+    //     boxSizing: "border-box",
+
+    //     zIndex: 999,
+    //   }}
+    // >
+    //   <div
+    //     ref={tooltipRef}
+    //     className={`tooltip tooltip-${currentStep.tooltipPos}`}
+    //     style={{
+    //       position: "absolute",
+    //       top: `${tooltipClientRect.top}px`,
+    //       left: `${tooltipClientRect.left}px`,
+    //       transition: "top 1s ease-out,left 1s ease-out",
+    //       width: "350px",
+    //       backgroundColor: "#3a3838",
+    //       padding: "8px",
+    //       borderRadius: "8px",
+    //       color: "white",
+    //       //   pointerEvents: "none",
+    //     }}
+    //   >
+    //     <h2>{currentStep.title}</h2>
+    //     <p>{currentStep.description}</p>
+    //     <button onClick={onPreviousStep}>{"<<"}</button>
+
+    //     {currentStepIdx < stepsLength - 1 && (
+    //       <button onClick={onNextStep} style={{ zIndex: 898999 }}>
+    //         {">>"}
+    //       </button>
+    //     )}
+    //     {currentStepIdx === stepsLength - 1 && <button onClick={onNextStep}>{"Finalize"}</button>}
+    //   </div>
+    // </div>
   );
 };

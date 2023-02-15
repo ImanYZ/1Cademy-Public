@@ -22,6 +22,7 @@ export const useInteractiveTutorial = ({ steps }: UseInteractiveTutorialProps) =
   const [targetClientRect, setTargetClientRect] = useState<TargetClientRect>({ width: 0, height: 0, top: 0, left: 0 });
   // const tooltipRef = useRef<HTMLDivElement | null>(null);
   const observeTries = useRef(0);
+  const isPlayingTheTutorialRef = useRef(false);
 
   useLayoutEffect(() => {
     // detect element mounted to get clientRect values
@@ -64,6 +65,12 @@ export const useInteractiveTutorial = ({ steps }: UseInteractiveTutorialProps) =
   }, [currentStepIdx, steps]);
 
   const currentStep = useMemo(() => steps[currentStepIdx], [currentStepIdx, steps]);
+
+  const isPlayingTheTutorial = useMemo(() => {
+    const newValue = currentStep ? true : false;
+    isPlayingTheTutorialRef.current = newValue;
+    return newValue;
+  }, [currentStep]);
 
   const disabledElements = useMemo(() => currentStep?.disabledElements ?? [], [currentStep?.disabledElements]);
 
@@ -181,6 +188,8 @@ export const useInteractiveTutorial = ({ steps }: UseInteractiveTutorialProps) =
   // ]);
 
   return {
+    isPlayingTheTutorial,
+    isPlayingTheTutorialRef,
     targetClientRect,
     currentStepIdx,
     onStart,
@@ -188,7 +197,6 @@ export const useInteractiveTutorial = ({ steps }: UseInteractiveTutorialProps) =
     onPreviousStep,
     disabledElements,
     currentStep,
-    // tutorialComponent,
     anchorTutorial,
   };
 };

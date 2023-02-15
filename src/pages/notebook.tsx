@@ -64,6 +64,7 @@ import { useTagsTreeView } from "@/hooks/useTagsTreeView";
 import { addSuffixToUrlGMT } from "@/lib/utils/string.utils";
 
 import LoadingImg from "../../public/animated-icon-1cademy.gif";
+// import nodesData from "../../testUtils/mockCollections/nodes.data";
 import { Tutorial } from "../components/interactiveTutorial/Tutorial";
 import { MemoizedClustersList } from "../components/map/ClustersList";
 import { MemoizedLinksList } from "../components/map/LinksList";
@@ -82,6 +83,7 @@ import { Post, postWithToken } from "../lib/mapApi";
 import { createGraph, dagreUtils } from "../lib/utils/dagre.util";
 import { devLog } from "../lib/utils/develop.util";
 import { getTypedCollections } from "../lib/utils/getTypedCollections";
+import { INTERACTIVE_TUTORIAL_NOTEBOOK_NODES } from "../lib/utils/interactiveTutorialNodes";
 import { NOTEBOOK_STEPS } from "../lib/utils/interactiveTutorialSteps";
 import {
   changedNodes,
@@ -234,10 +236,19 @@ const Dashboard = ({}: DashboardProps) => {
   const lastNodeOperation = useRef<string>("");
   const proposalTimer = useRef<any>(null);
 
-  const { onStart, anchorTutorial, currentStep, currentStepIdx, onNextStep, onPreviousStep, targetClientRect } =
-    useInteractiveTutorial({
-      steps: NOTEBOOK_STEPS,
-    });
+  const {
+    isPlayingTheTutorial,
+    isPlayingTheTutorialRef,
+    onStart,
+    anchorTutorial,
+    currentStep,
+    currentStepIdx,
+    onNextStep,
+    onPreviousStep,
+    targetClientRect,
+  } = useInteractiveTutorial({
+    steps: NOTEBOOK_STEPS,
+  });
 
   // Scroll to node configs
 
@@ -897,6 +908,18 @@ const Dashboard = ({}: DashboardProps) => {
   }, [nodeBookDispatch, openSidebar]);
 
   useEffect(() => {
+    if (isPlayingTheTutorial) return setGraph({ nodes: INTERACTIVE_TUTORIAL_NOTEBOOK_NODES, edges: {} });
+
+    setGraph(prev => {
+      const nodesCopy = { ...prev.nodes };
+      const interactiveTutorialNodeKeys = Object.keys(INTERACTIVE_TUTORIAL_NOTEBOOK_NODES);
+      // const invalidKeys = Object.keys(prev.nodes).filter(key => interactiveTutorialNodeKeys.includes(key));
+      interactiveTutorialNodeKeys.forEach(cur => delete nodesCopy[cur]);
+      // copyNodes.
+      // return {nodes: {...nodesData,['01']}, edges: {}}
+      return { nodes: nodesCopy, edges: prev.edges };
+    });
+
     if (!db) return;
     if (!user?.uname) return;
     if (!allTagsLoaded) return;
@@ -912,7 +935,9 @@ const Dashboard = ({}: DashboardProps) => {
     return () => {
       killSnapshot();
     };
-  }, [allTagsLoaded, db, snapshot, user?.uname, settings.showClusterOptions, notebookChanged]);
+  }, [allTagsLoaded, db, snapshot, user?.uname, settings.showClusterOptions, notebookChanged, isPlayingTheTutorial]);
+  // }, [allTagsLoaded, db, snapshot, user?.uname, settings.showClusterOptions, notebookChanged]);
+
   useEffect(() => {
     if (!db) return;
     if (!user?.uname) return;
@@ -1763,8 +1788,9 @@ const Dashboard = ({}: DashboardProps) => {
         lastNodeOperation.current = "ToggleNode";
         setGraph(({ nodes: oldNodes, edges }) => {
           const thisNode = oldNodes[nodeId];
-
           nodeBookDispatch({ type: "setSelectedNode", payload: nodeId });
+          if (isPlayingTheTutorialRef) return { nodes: oldNodes, edges };
+
           const { nodeRef, userNodeRef } = initNodeStatusChange(nodeId, thisNode.userNodeId);
           const changeNode: any = {
             updatedAt: Timestamp.fromDate(new Date()),

@@ -605,7 +605,7 @@ const Node = ({
       {open ? (
         <>
           <div className="card-content">
-            <div className="card-title" data-hoverable={true}>
+            <div id={`${identifier}-title`} className="card-title" data-hoverable={true}>
               {editable && isNew && (
                 <>
                   {/* New Node with inputs */}
@@ -682,7 +682,7 @@ const Node = ({
                 />
               )}
             </div>
-            <div className="NodeContent" data-hoverable={true}>
+            <div id={`${identifier}-content`} className="NodeContent" data-hoverable={true}>
               <Editor
                 label="Edit the node content:"
                 value={contentCopy}
