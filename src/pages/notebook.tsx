@@ -2,6 +2,7 @@ import AutoFixHighIcon from "@mui/icons-material/AutoFixHigh";
 import CloseIcon from "@mui/icons-material/Close";
 import CodeIcon from "@mui/icons-material/Code";
 import MyLocationIcon from "@mui/icons-material/MyLocation";
+import SchoolIcon from "@mui/icons-material/School";
 import { Masonry } from "@mui/lab";
 import {
   Button,
@@ -63,12 +64,15 @@ import { useTagsTreeView } from "@/hooks/useTagsTreeView";
 import { addSuffixToUrlGMT } from "@/lib/utils/string.utils";
 
 import LoadingImg from "../../public/animated-icon-1cademy.gif";
+import { Tutorial } from "../components/interactiveTutorial/Tutorial";
 import { MemoizedClustersList } from "../components/map/ClustersList";
 import { MemoizedLinksList } from "../components/map/LinksList";
 import { MemoizedNodeList } from "../components/map/NodesList";
 import { MemoizedToolbarSidebar } from "../components/map/Sidebar/SidebarV2/ToolbarSidebar";
 import { NodeItemDashboard } from "../components/NodeItemDashboard";
+import { Portal } from "../components/Portal";
 import { NodeBookProvider, useNodeBook } from "../context/NodeBookContext";
+import { useInteractiveTutorial } from "../hooks/useInteractiveTutorial";
 import { useMemoizedCallback } from "../hooks/useMemoizedCallback";
 import { useWindowSize } from "../hooks/useWindowSize";
 import { useWorkerQueue } from "../hooks/useWorkerQueue";
@@ -78,6 +82,7 @@ import { Post, postWithToken } from "../lib/mapApi";
 import { createGraph, dagreUtils } from "../lib/utils/dagre.util";
 import { devLog } from "../lib/utils/develop.util";
 import { getTypedCollections } from "../lib/utils/getTypedCollections";
+import { NOTEBOOK_STEPS } from "../lib/utils/interactiveTutorialSteps";
 import {
   changedNodes,
   citations,
@@ -228,6 +233,11 @@ const Dashboard = ({}: DashboardProps) => {
 
   const lastNodeOperation = useRef<string>("");
   const proposalTimer = useRef<any>(null);
+
+  const { onStart, anchorTutorial, currentStep, currentStepIdx, onNextStep, onPreviousStep, targetClientRect } =
+    useInteractiveTutorial({
+      steps: NOTEBOOK_STEPS,
+    });
 
   // Scroll to node configs
 
@@ -3368,6 +3378,18 @@ const Dashboard = ({}: DashboardProps) => {
 
   return (
     <div className="MapContainer" style={{ overflow: "hidden" }}>
+      {anchorTutorial && (
+        <Portal anchor="portal">
+          <Tutorial
+            currentStep={currentStep}
+            currentStepIdx={currentStepIdx}
+            onNextStep={onNextStep}
+            onPreviousStep={onPreviousStep}
+            stepsLength={NOTEBOOK_STEPS.length}
+            targetClientRect={targetClientRect}
+          />
+        </Portal>
+      )}
       <Box
         id="Map"
         sx={{
@@ -3676,6 +3698,34 @@ const Dashboard = ({}: DashboardProps) => {
               <AutoFixHighIcon />
             </IconButton>
           </Tooltip>
+
+          <Tooltip
+            title="Start tutorial"
+            placement="left"
+            sx={{
+              position: "fixed",
+              top: {
+                xs: !openSidebar
+                  ? "60px"
+                  : openSidebar && openSidebar !== "SEARCHER_SIDEBAR"
+                  ? `${innerHeight * 0.35 + 65}px`
+                  : `${innerHeight * 0.25 + 65}px`,
+                sm: "60px",
+              },
+              right: "10px",
+              zIndex: "1300",
+              background: theme => (theme.palette.mode === "dark" ? "#1f1f1f" : "#f0f0f0"),
+              ":hover": {
+                background: theme => (theme.palette.mode === "dark" ? "#454545" : "#d6d4d4"),
+              },
+              transition: "all 1s ease",
+            }}
+          >
+            <IconButton color="secondary" onClick={onStart}>
+              <SchoolIcon />
+            </IconButton>
+          </Tooltip>
+
           {process.env.NODE_ENV === "development" && (
             <Tooltip
               title={"Watch geek data"}
@@ -3750,6 +3800,16 @@ const Dashboard = ({}: DashboardProps) => {
                 value={mapInteractionValue}
                 onChange={navigateWhenNotScrolling}
               >
+                {!anchorTutorial && (
+                  <Tutorial
+                    currentStep={currentStep}
+                    currentStepIdx={currentStepIdx}
+                    onNextStep={onNextStep}
+                    onPreviousStep={onPreviousStep}
+                    stepsLength={NOTEBOOK_STEPS.length}
+                    targetClientRect={targetClientRect}
+                  />
+                )}
                 {settings.showClusterOptions && settings.showClusters && (
                   <MemoizedClustersList clusterNodes={clusterNodes} />
                 )}
