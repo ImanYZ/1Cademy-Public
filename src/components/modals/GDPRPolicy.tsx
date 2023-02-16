@@ -11,6 +11,7 @@ export const GDPRPolicy = ({ open, handleClose }: GDPRPolicyyProps) => {
   return (
     <Dialog
       open={open}
+      maxWidth={"md"}
       onClose={handleClose}
       scroll={"paper"}
       aria-labelledby="scroll-dialog-title"
