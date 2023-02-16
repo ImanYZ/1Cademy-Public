@@ -601,6 +601,7 @@ const Node = ({
       }}
     >
       {/* INFO: uncomment this only on develope */}
+      {process.env.NODE_ENV === "development" && identifier}
 
       {open ? (
         <>

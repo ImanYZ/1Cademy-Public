@@ -228,6 +228,10 @@ const Dashboard = ({}: DashboardProps) => {
   const previousLengthEdges = useRef(0);
   const g = useRef(dagreUtils.createGraph());
 
+  // this flag is used in interactive tutorial to fire useEffect when change state
+  const [localSnapshot, setLocalSnapshot] = useState<FullNodesData>({});
+  const shouldResetGraph = useRef(true);
+
   //Notifications
   const [uncheckedNotificationsNum, setUncheckedNotificationsNum] = useState(0);
   const [bookmarkUpdatesNum, setBookmarkUpdatesNum] = useState(0);
@@ -497,6 +501,17 @@ const Dashboard = ({}: DashboardProps) => {
   const openNodeHandler = useMemoizedCallback(
     async (nodeId: string) => {
       devLog("open_Node_Handler", nodeId);
+
+      // start tutorial
+      if (isPlayingTheTutorialRef) {
+        if (!INTERACTIVE_TUTORIAL_NOTEBOOK_NODES[nodeId])
+          return console.warn("Dev: you forgot to update Local Tutorial Nodes");
+        const thisNode = { nodeId: INTERACTIVE_TUTORIAL_NOTEBOOK_NODES[nodeId] };
+        setLocalSnapshot(thisNode);
+        return;
+      }
+      // end tutorial
+
       let linkedNodeRef;
       let userNodeRef = null;
       let userNodeData: UserNodesData | null = null;
@@ -908,20 +923,18 @@ const Dashboard = ({}: DashboardProps) => {
   }, [nodeBookDispatch, openSidebar]);
 
   useEffect(() => {
-    if (isPlayingTheTutorial) {
-      g.current = createGraph();
-      return setGraph({ nodes: INTERACTIVE_TUTORIAL_NOTEBOOK_NODES, edges: {} });
-    }
+    if (isPlayingTheTutorial) return;
 
-    setGraph(prev => {
-      const nodesCopy = { ...prev.nodes };
-      const interactiveTutorialNodeKeys = Object.keys(INTERACTIVE_TUTORIAL_NOTEBOOK_NODES);
-      // const invalidKeys = Object.keys(prev.nodes).filter(key => interactiveTutorialNodeKeys.includes(key));
-      interactiveTutorialNodeKeys.forEach(cur => delete nodesCopy[cur]);
-      // copyNodes.
-      // return {nodes: {...nodesData,['01']}, edges: {}}
-      return { nodes: nodesCopy, edges: prev.edges };
-    });
+    if (!shouldResetGraph.current) {
+      g.current = createGraph();
+
+      setGraph({
+        nodes: {},
+        edges: {},
+      });
+      setLocalSnapshot({});
+      shouldResetGraph.current = true;
+    }
 
     if (!db) return;
     if (!user?.uname) return;
@@ -940,6 +953,188 @@ const Dashboard = ({}: DashboardProps) => {
     };
   }, [allTagsLoaded, db, snapshot, user?.uname, settings.showClusterOptions, notebookChanged, isPlayingTheTutorial]);
   // }, [allTagsLoaded, db, snapshot, user?.uname, settings.showClusterOptions, notebookChanged]);
+
+  useEffect(() => {
+    // local snapshot used only in interactive tutorial
+    if (!isPlayingTheTutorial) return;
+    console.log("effect INTERACTICE TUTORIAL");
+
+    if (shouldResetGraph.current) {
+      g.current = createGraph();
+      const FIRST_KEY_NODE = "01";
+      setGraph({
+        nodes: { [FIRST_KEY_NODE]: INTERACTIVE_TUTORIAL_NOTEBOOK_NODES[FIRST_KEY_NODE] },
+        edges: {},
+      });
+      shouldResetGraph.current = false;
+    }
+    // if (isPlayingTheTutorial) {
+    //   g.current = createGraph();
+    //   return setGraph({ nodes: INTERACTIVE_TUTORIAL_NOTEBOOK_NODES, edges: {} });
+    // }
+
+    // setGraph(prev => {
+    //   const nodesCopy = { ...prev.nodes };
+    //   const interactiveTutorialNodeKeys = Object.keys(INTERACTIVE_TUTORIAL_NOTEBOOK_NODES);
+    //   // const invalidKeys = Object.keys(prev.nodes).filter(key => interactiveTutorialNodeKeys.includes(key));
+    //   interactiveTutorialNodeKeys.forEach(cur => delete nodesCopy[cur]);
+    //   // copyNodes.
+    //   // return {nodes: {...nodesData,['01']}, edges: {}}
+    //   return { nodes: nodesCopy, edges: prev.edges };
+    // });
+
+    const mergeAllNodes = (newAllNodes: FullNodeData[], currentAllNodes: FullNodesData): FullNodesData => {
+      return newAllNodes.reduce(
+        (acu, cur) => {
+          if (cur.nodeChangeType === "added" || cur.nodeChangeType === "modified") {
+            return { ...acu, [cur.node]: cur };
+          }
+          if (cur.nodeChangeType === "removed") {
+            const tmp = { ...acu };
+            delete tmp[cur.node];
+            return tmp;
+          }
+          return acu;
+        },
+        { ...currentAllNodes }
+      );
+    };
+
+    const fillDagre = (fullNodes: FullNodeData[], currentNodes: any, currentEdges: any, withClusters: boolean) => {
+      return fullNodes.reduce(
+        (acu: { newNodes: { [key: string]: any }; newEdges: { [key: string]: any } }, cur) => {
+          let tmpNodes = {};
+          let tmpEdges = {};
+
+          if (cur.nodeChangeType === "added") {
+            const { uNodeData, oldNodes, oldEdges } = makeNodeVisibleInItsLinks(cur, acu.newNodes, acu.newEdges);
+            console.log("here -->", { uNodeData, oldNodes, oldEdges });
+            const res = createOrUpdateNode(g.current, uNodeData, cur.node, oldNodes, oldEdges, allTags, withClusters);
+            console.log("here -->", { res });
+            tmpNodes = res.oldNodes;
+            tmpEdges = res.oldEdges;
+          }
+          if (cur.nodeChangeType === "modified" && cur.visible) {
+            const node = acu.newNodes[cur.node];
+            if (!node) {
+              const res = createOrUpdateNode(
+                g.current,
+                cur,
+                cur.node,
+                acu.newNodes,
+                acu.newEdges,
+                allTags,
+                withClusters
+              );
+              tmpNodes = res.oldNodes;
+              tmpEdges = res.oldEdges;
+            } else {
+              const currentNode: FullNodeData = {
+                ...cur,
+                left: node.left,
+                top: node.top,
+              }; // <----- IMPORTANT: Add positions data from node into cur.node to not set default position into center of screen
+
+              if (!compare2Nodes(cur, node)) {
+                const res = createOrUpdateNode(
+                  g.current,
+                  currentNode,
+                  cur.node,
+                  acu.newNodes,
+                  acu.newEdges,
+                  allTags,
+                  withClusters
+                );
+                tmpNodes = res.oldNodes;
+                tmpEdges = res.oldEdges;
+              }
+            }
+          }
+          // so the NO visible nodes will come as modified and !visible
+          if (cur.nodeChangeType === "removed" || (cur.nodeChangeType === "modified" && !cur.visible)) {
+            if (g.current.hasNode(cur.node)) {
+              g.current.nodes().forEach(function () {});
+              g.current.edges().forEach(function () {});
+              // PROBABLY you need to add hideNodeAndItsLinks, to update children and parents nodes
+
+              // !IMPORTANT, Don't change the order, first remove edges then nodes
+              tmpEdges = removeDagAllEdges(g.current, cur.node, acu.newEdges);
+              tmpNodes = removeDagNode(g.current, cur.node, acu.newNodes);
+            } else {
+              // remove edges
+              const oldEdges = { ...acu.newEdges };
+
+              Object.keys(oldEdges).forEach(key => {
+                if (key.includes(cur.node)) {
+                  delete oldEdges[key];
+                }
+              });
+
+              tmpEdges = oldEdges;
+              // remove node
+              const oldNodes = acu.newNodes;
+              if (cur.node in oldNodes) {
+                delete oldNodes[cur.node];
+              }
+              // tmpEdges = {acu.newEdges,}
+              tmpNodes = { ...oldNodes };
+            }
+          }
+
+          return {
+            newNodes: { ...tmpNodes },
+            newEdges: { ...tmpEdges },
+          };
+        },
+        { newNodes: { ...currentNodes }, newEdges: { ...currentEdges } }
+      );
+    };
+
+    const fullNodes = Object.values(localSnapshot);
+
+    const visibleFullNodes: FullNodeData[] = fullNodes.filter(cur => cur.visible || cur.nodeChangeType === "modified");
+    devLog("3: TUTORIAL: visibleFullNodes", visibleFullNodes);
+    setAllNodes(oldAllNodes => mergeAllNodes(fullNodes, oldAllNodes));
+    devLog("4: TUTORIAL: setAllNodes");
+    setGraph(({ nodes, edges }) => {
+      const visibleFullNodesMerged = visibleFullNodes.map(cur => {
+        const tmpNode = nodes[cur.node];
+        if (tmpNode) {
+          if (tmpNode.hasOwnProperty("simulated")) {
+            delete tmpNode["simulated"];
+          }
+          if (tmpNode.hasOwnProperty("isNew")) {
+            delete tmpNode["isNew"];
+          }
+        }
+
+        const hasParent = cur.parents.length;
+        // IMPROVE: we need to pass the parent which open the node
+        // to use his current position
+        // in this case we are checking first parent
+        // if this doesn't exist will set top:0 and left: 0 + NODE_WIDTH + COLUMN_GAP
+        const nodeParent = hasParent ? nodes[cur.parents[0].node] : null;
+        const topParent = nodeParent?.top ?? 0;
+
+        const leftParent = nodeParent?.left ?? 0;
+
+        return {
+          ...cur,
+          left: tmpNode?.left ?? leftParent + NODE_WIDTH + COLUMN_GAP,
+          top: tmpNode?.top ?? topParent,
+        };
+      });
+
+      devLog("5: TUTORIAL:user Nodes Snapshot:visible Full Nodes Merged", visibleFullNodesMerged);
+      const { newNodes, newEdges } = fillDagre(visibleFullNodesMerged, nodes, edges, settings.showClusterOptions);
+      console.log("-->", { g, newNodes, newEdges });
+
+      if (!Object.keys(newNodes).length) {
+        setNoNodesFoundMessage(true);
+      }
+      return { nodes: newNodes, edges: newEdges };
+    });
+  }, [localSnapshot, settings.showClusterOptions, notebookChanged, isPlayingTheTutorial, allTags]);
 
   useEffect(() => {
     if (!db) return;
@@ -1548,6 +1743,21 @@ const Dashboard = ({}: DashboardProps) => {
     (linkedNodeID: string, typeOperation?: string) => {
       devLog("open Linked Node", { linkedNodeID, typeOperation });
       if (!nodeBookState.choosingNode) {
+        // start tutorial
+        if (isPlayingTheTutorialRef) {
+          let linkedNode = document.getElementById(linkedNodeID);
+          if (linkedNode) {
+            nodeBookDispatch({ type: "setSelectedNode", payload: linkedNodeID });
+            setTimeout(() => {
+              scrollToNode(linkedNodeID);
+            }, 1500);
+          } else {
+            openNodeHandler(linkedNodeID);
+          }
+          return;
+        }
+        // end tutorial
+
         createActionTrack(
           db,
           "NodeOpen",
@@ -1788,12 +1998,20 @@ const Dashboard = ({}: DashboardProps) => {
   const toggleNode = useCallback(
     (event: any, nodeId: string) => {
       if (!nodeBookState.choosingNode) {
+        // start tutorial
+        if (isPlayingTheTutorialRef) {
+          setGraph(({ nodes: oldNodes, edges }) => {
+            const thisNode: FullNodeData = oldNodes[nodeId];
+            return { nodes: { ...oldNodes, [nodeId]: { ...thisNode, open: !thisNode.open } }, edges };
+          });
+          return;
+        }
+        // end tutorial
+
         lastNodeOperation.current = "ToggleNode";
         setGraph(({ nodes: oldNodes, edges }) => {
           const thisNode = oldNodes[nodeId];
           nodeBookDispatch({ type: "setSelectedNode", payload: nodeId });
-          if (isPlayingTheTutorialRef)
-            return { nodes: { ...oldNodes, [nodeId]: { ...thisNode, open: !thisNode.open } }, edges };
 
           const { nodeRef, userNodeRef } = initNodeStatusChange(nodeId, thisNode.userNodeId);
           const changeNode: any = {

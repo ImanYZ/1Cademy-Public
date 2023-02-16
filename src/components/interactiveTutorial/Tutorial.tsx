@@ -112,6 +112,7 @@ export const Tutorial = ({
         padding: "8px",
         borderRadius: "8px",
         color: "white",
+        zIndex: 20,
         //   pointerEvents: "none",
       }}
     >

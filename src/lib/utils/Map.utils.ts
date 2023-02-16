@@ -463,6 +463,8 @@ export const removeDagNode = (g: dagre.graphlib.Graph<{}>, nodeId: string, oldNo
 // edge: data of the new edge
 export const setDagEdge = (g: dagre.graphlib.Graph<{}>, from: string, to: string, edge: any, oldEdges: any) => {
   // checks that the from and to nodes exist in map
+
+  console.log("---->", g.hasNode(from), g.hasNode(to), { from, to });
   if (g.hasNode(from) && g.hasNode(to)) {
     const edgeId = from + "-" + to;
     const newEdge = { ...edge };
@@ -762,6 +764,7 @@ export const createOrUpdateNode = (
       );
     }
     // creates edges from parent nodes to newNode
+    console.log("--->", { newNode });
     for (let parent of newNode.parents) {
       oldEdges = setDagEdge(
         g,
