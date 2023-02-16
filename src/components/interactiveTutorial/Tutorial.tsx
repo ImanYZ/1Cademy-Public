@@ -104,8 +104,8 @@ export const Tutorial = ({
       className={`tooltip tooltip-${currentStep.tooltipPos}`}
       style={{
         position: "absolute",
-        top: `${tooltipClientRect.top}px`,
-        left: `${tooltipClientRect.left}px`,
+        top: `${tooltipClientRect.top + targetClientRect.top}px`,
+        left: `${tooltipClientRect.left + targetClientRect.left}px`,
         transition: "top 1s ease-out,left 1s ease-out",
         width: "350px",
         backgroundColor: "#3a3838",

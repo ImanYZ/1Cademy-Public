@@ -8,7 +8,7 @@ export const NOTEBOOK_STEPS: Step[] = [
       "This tutorial will teach you what nodes are and how they work on 1Cademy Read the content of the node and then click Next to continue.",
     tooltipPos: "top",
     anchor: "",
-    callback: () => console.log("scroll to Node"),
+    callback: () => console.log("cb: scroll to Node"),
     disabledElements: [],
   },
   {
@@ -18,7 +18,7 @@ export const NOTEBOOK_STEPS: Step[] = [
       "This is the content of a node. This is where the concept in the title is described in a granular fashion. ",
     tooltipPos: "top",
     anchor: "",
-    callback: () => console.log("expand Node"),
+    callback: () => console.log("cb: expand Node"),
     disabledElements: [""],
   },
   {

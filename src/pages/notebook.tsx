@@ -908,7 +908,10 @@ const Dashboard = ({}: DashboardProps) => {
   }, [nodeBookDispatch, openSidebar]);
 
   useEffect(() => {
-    if (isPlayingTheTutorial) return setGraph({ nodes: INTERACTIVE_TUTORIAL_NOTEBOOK_NODES, edges: {} });
+    if (isPlayingTheTutorial) {
+      g.current = createGraph();
+      return setGraph({ nodes: INTERACTIVE_TUTORIAL_NOTEBOOK_NODES, edges: {} });
+    }
 
     setGraph(prev => {
       const nodesCopy = { ...prev.nodes };
@@ -1789,7 +1792,8 @@ const Dashboard = ({}: DashboardProps) => {
         setGraph(({ nodes: oldNodes, edges }) => {
           const thisNode = oldNodes[nodeId];
           nodeBookDispatch({ type: "setSelectedNode", payload: nodeId });
-          if (isPlayingTheTutorialRef) return { nodes: oldNodes, edges };
+          if (isPlayingTheTutorialRef)
+            return { nodes: { ...oldNodes, [nodeId]: { ...thisNode, open: !thisNode.open } }, edges };
 
           const { nodeRef, userNodeRef } = initNodeStatusChange(nodeId, thisNode.userNodeId);
           const changeNode: any = {
