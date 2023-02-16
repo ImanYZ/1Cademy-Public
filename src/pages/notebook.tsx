@@ -503,7 +503,7 @@ const Dashboard = ({}: DashboardProps) => {
       devLog("open_Node_Handler", nodeId);
 
       // start tutorial
-      if (isPlayingTheTutorialRef) {
+      if (isPlayingTheTutorialRef.current) {
         if (!INTERACTIVE_TUTORIAL_NOTEBOOK_NODES[nodeId])
           return console.warn("Dev: you forgot to update Local Tutorial Nodes");
         const thisNode = { nodeId: INTERACTIVE_TUTORIAL_NOTEBOOK_NODES[nodeId] };
@@ -934,6 +934,7 @@ const Dashboard = ({}: DashboardProps) => {
       });
       setLocalSnapshot({});
       shouldResetGraph.current = true;
+      console.log("RESET GRAPH");
     }
 
     if (!db) return;
@@ -947,6 +948,7 @@ const Dashboard = ({}: DashboardProps) => {
       where("visible", "==", true),
       where("deleted", "==", false)
     );
+
     const killSnapshot = snapshot(q);
     return () => {
       killSnapshot();
@@ -1008,9 +1010,9 @@ const Dashboard = ({}: DashboardProps) => {
 
           if (cur.nodeChangeType === "added") {
             const { uNodeData, oldNodes, oldEdges } = makeNodeVisibleInItsLinks(cur, acu.newNodes, acu.newEdges);
-            console.log("here -->", { uNodeData, oldNodes, oldEdges });
+
             const res = createOrUpdateNode(g.current, uNodeData, cur.node, oldNodes, oldEdges, allTags, withClusters);
-            console.log("here -->", { res });
+
             tmpNodes = res.oldNodes;
             tmpEdges = res.oldEdges;
           }
@@ -1127,7 +1129,6 @@ const Dashboard = ({}: DashboardProps) => {
 
       devLog("5: TUTORIAL:user Nodes Snapshot:visible Full Nodes Merged", visibleFullNodesMerged);
       const { newNodes, newEdges } = fillDagre(visibleFullNodesMerged, nodes, edges, settings.showClusterOptions);
-      console.log("-->", { g, newNodes, newEdges });
 
       if (!Object.keys(newNodes).length) {
         setNoNodesFoundMessage(true);
@@ -1274,7 +1275,7 @@ const Dashboard = ({}: DashboardProps) => {
   useEffect(() => {
     const currentLengthNodes = Object.keys(graph.nodes).length;
     if (currentLengthNodes < previousLengthNodes.current) {
-      devLog("CHANGE NH 🚀", "recalculate");
+      devLog("CHANGE NH 🚀", "recalculate by length nodes");
       addTask(null);
     }
     previousLengthNodes.current = currentLengthNodes;
@@ -1289,7 +1290,7 @@ const Dashboard = ({}: DashboardProps) => {
   useEffect(() => {
     const currentLengthEdges = Object.keys(graph.edges).length;
     if (currentLengthEdges !== previousLengthEdges.current) {
-      devLog("CHANGE NH 🚀", "recalculate");
+      devLog("CHANGE NH 🚀", "recalculate by length edges");
       addTask(null);
     }
     previousLengthEdges.current = currentLengthEdges;
@@ -1744,7 +1745,7 @@ const Dashboard = ({}: DashboardProps) => {
       devLog("open Linked Node", { linkedNodeID, typeOperation });
       if (!nodeBookState.choosingNode) {
         // start tutorial
-        if (isPlayingTheTutorialRef) {
+        if (isPlayingTheTutorialRef.current) {
           let linkedNode = document.getElementById(linkedNodeID);
           if (linkedNode) {
             nodeBookDispatch({ type: "setSelectedNode", payload: linkedNodeID });
@@ -1999,7 +2000,7 @@ const Dashboard = ({}: DashboardProps) => {
     (event: any, nodeId: string) => {
       if (!nodeBookState.choosingNode) {
         // start tutorial
-        if (isPlayingTheTutorialRef) {
+        if (isPlayingTheTutorialRef.current) {
           setGraph(({ nodes: oldNodes, edges }) => {
             const thisNode: FullNodeData = oldNodes[nodeId];
             return { nodes: { ...oldNodes, [nodeId]: { ...thisNode, open: !thisNode.open } }, edges };

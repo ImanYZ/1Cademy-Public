@@ -414,10 +414,10 @@ export const setDagNodes = (
     individualNodeChanges.forEach(cur => {
       if (!cur?.tagIds?.length) return;
       if (!(cur.tagIds[0] in allTags)) return;
-      console.log("setParent", cur.node, "Tag" + cur.tagIds[0]);
+      // console.log("setParent", cur.node, "Tag" + cur.tagIds[0]);
       g.setParent(cur.node, "Tag" + cur.tagIds[0]);
     });
-    console.log("setDagNodes", g);
+    // console.log("setDagNodes", g);
   }
 
   // if ("tagIds" in node && node.tagIds.length !== 0 && node.tagIds[0] in allTags) {
@@ -464,7 +464,7 @@ export const removeDagNode = (g: dagre.graphlib.Graph<{}>, nodeId: string, oldNo
 export const setDagEdge = (g: dagre.graphlib.Graph<{}>, from: string, to: string, edge: any, oldEdges: any) => {
   // checks that the from and to nodes exist in map
 
-  console.log("---->", g.hasNode(from), g.hasNode(to), { from, to });
+  // console.log("---->", g.hasNode(from), g.hasNode(to), { from, to });
   if (g.hasNode(from) && g.hasNode(to)) {
     const edgeId = from + "-" + to;
     const newEdge = { ...edge };
@@ -764,7 +764,7 @@ export const createOrUpdateNode = (
       );
     }
     // creates edges from parent nodes to newNode
-    console.log("--->", { newNode });
+    // console.log("--->", { newNode });
     for (let parent of newNode.parents) {
       oldEdges = setDagEdge(
         g,

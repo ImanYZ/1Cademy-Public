@@ -69,6 +69,7 @@ export const useInteractiveTutorial = ({ steps }: UseInteractiveTutorialProps) =
   const isPlayingTheTutorial = useMemo(() => {
     const newValue = currentStep ? true : false;
     isPlayingTheTutorialRef.current = newValue;
+    console.log({ isPlayingTheTutorialRef: isPlayingTheTutorialRef.current, newValue });
     return newValue;
   }, [currentStep]);
 
