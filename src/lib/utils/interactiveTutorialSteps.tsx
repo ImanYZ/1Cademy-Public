@@ -77,10 +77,10 @@ export const NOTEBOOK_STEPS: Step[] = [
     disabledElements: [],
   },
   {
-    targetId: "01",
-    childTargetId: "01-children-list",
+    targetId: "02",
+    childTargetId: "02-children-list",
     title: "Basic Navigation: Learning Pathway",
-    description: "By clicking a title, we are taken to the child node.",
+    description: "We can keep opening children or parent nodes to create chains or branches of nodes",
     tooltipPos: "top",
     anchor: "",
     disabledElements: [],
