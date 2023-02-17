@@ -1094,7 +1094,6 @@ const Node = ({
             </div>
             {!nodeBookState.choosingNode && (
               <MemoizedNodeHeader
-                setFocusView={() => setFocusView({ isEnabled: true, selectedNode: identifier })}
                 open={open}
                 onToggleNode={toggleNodeHandler}
                 onHideOffsprings={hideOffspringsHandler}
