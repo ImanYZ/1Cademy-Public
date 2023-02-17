@@ -795,25 +795,25 @@ p {
 }
 .tooltip-top::after {
   border-bottom-width: 0px;
-  border-top-color: #f77e0c;
-  bottom: -9px;
+  border-top-color: #ff6d00;
+  bottom: -10px;
   left: calc(50% - 10px);
 }
 .tooltip-bottom::after {
   border-top-width: 0px;
-  border-bottom-color: #f77e0c;
-  top: -9px;
+  border-bottom-color: #ff6d00;
+  top: -10px;
   left: calc(50% - 10px);
 }
 .tooltip-right::after {
   border-left-width: 0px;
-  border-right-color: #f77e0c;
-  left: -9px;
+  border-right-color: #ff6d00;
+  left: -10px;
   top: calc(50% - 10px);
 }
 .tooltip-left::after {
   border-right-width: 0px;
-  border-left-color: #f77e0c;
-  right: -9px;
+  border-left-color: #ff6d00;
+  right: -10px;
   top: calc(50% - 10px);
 }

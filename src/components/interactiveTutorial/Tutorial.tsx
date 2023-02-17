@@ -1,3 +1,4 @@
+import { Box, Button, Stack, Typography } from "@mui/material";
 import React, { useMemo, useRef } from "react";
 
 import { Step, TargetClientRect } from "../../hooks/useInteractiveTutorial";
@@ -109,34 +110,85 @@ export const Tutorial = ({
     );
 
   return (
-    <div
+    <Box
       ref={tooltipRef}
       className={`tooltip tooltip-${currentStep.tooltipPos}`}
-      style={{
+      sx={{
         position: "absolute",
         top: `${tooltipClientRect.top}px`,
         left: `${tooltipClientRect.left}px`,
         transition: "top 1s ease-out,left 1s ease-out",
-        width: "350px",
-        backgroundColor: "#3a3938",
-        border: "1px solid #f77e0c",
-        padding: "8px",
+        width: "450px",
+        backgroundColor: theme => (theme.palette.mode === "dark" ? "#3F3E3E" : "#f8f8f8"),
+        border: `2px solid #FF6D00`,
+        p: "24px 32px",
         borderRadius: "8px",
         color: "white",
         zIndex: 20,
         //   pointerEvents: "none",
       }}
     >
-      <h2>{currentStep.title}</h2>
-      <p>{currentStep.description}</p>
-      <button onClick={onPreviousStep}>{"<<"}</button>
+      <Typography component={"h2"} sx={{ fontSize: "18px", fontWeight: "bold", mb: "8px" }}>
+        {currentStep.title}
+      </Typography>
+      <Typography variant="body1" sx={{ mb: "16px" }}>
+        {currentStep.description}
+      </Typography>
+      <Stack direction={"row"} alignItems="center" justifyContent={"space-between"} spacing={"16px"}>
+        <Typography sx={{ fontWeight: 300 }}>
+          {currentStepIdx + 1} / {stepsLength}
+        </Typography>
+        <Box>
+          <Button
+            variant="outlined"
+            onClick={onPreviousStep}
+            sx={{
+              borderRadius: "32px",
+              mr: "16px",
 
-      {currentStepIdx < stepsLength - 1 && (
-        <button onClick={onNextStep} style={{ zIndex: 898999 }}>
-          {">>"}
-        </button>
-      )}
-      {currentStepIdx === stepsLength - 1 && <button onClick={onNextStep}>{"Finalize"}</button>}
-    </div>
+              borderColor: theme => (theme.palette.mode === "dark" ? "white" : "black"),
+              color: theme => (theme.palette.mode === "dark" ? "white" : "black"),
+              ":hover": {
+                borderColor: theme => (theme.palette.mode === "dark" ? "white" : "black"),
+                color: theme => (theme.palette.mode === "dark" ? "white" : "black"),
+              },
+              p: "8px 32px",
+            }}
+          >
+            Prev
+          </Button>
+
+          {currentStepIdx < stepsLength - 1 && (
+            <Button
+              variant="contained"
+              onClick={onNextStep}
+              style={{ zIndex: 898999 }}
+              sx={{
+                borderRadius: "32px",
+                p: "8px 32px",
+                backgroundColor: "#FF6D00",
+                ":hover": { backgroundColor: "#f57a1c" },
+              }}
+            >
+              Next
+            </Button>
+          )}
+          {currentStepIdx === stepsLength - 1 && (
+            <Button
+              variant="contained"
+              onClick={onNextStep}
+              sx={{
+                borderRadius: "32px",
+                p: "8px 32px",
+                backgroundColor: "#FF6D00",
+                ":hover": { backgroundColor: "#f57a1c" },
+              }}
+            >
+              {"Finalize"}
+            </Button>
+          )}
+        </Box>
+      </Stack>
+    </Box>
   );
 };
