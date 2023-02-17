@@ -78,9 +78,26 @@ export const NOTEBOOK_STEPS: Step[] = [
   },
   {
     targetId: "02",
-    childTargetId: "02-children-list",
     title: "Basic Navigation: Learning Pathway",
     description: "We can keep opening children or parent nodes to create chains or branches of nodes",
+    tooltipPos: "top",
+    anchor: "",
+    disabledElements: [],
+  },
+  {
+    targetId: "03",
+    title: "Basic Navigation: Learning Pathway",
+    description: "These are learning pathways, and we can use these to follow information from basic to advanced",
+    tooltipPos: "top",
+    anchor: "",
+    disabledElements: [],
+  },
+  {
+    targetId: "03",
+    childTargetId: "03-close-button",
+    title: "Basic Navigation: Learning Pathway",
+    description:
+      "While we can open a lot of nodes, it is important to try to keey your map tidy and close unused nodes.",
     tooltipPos: "top",
     anchor: "",
     disabledElements: [],

@@ -169,7 +169,7 @@ export const INTERACTIVE_TUTORIAL_NOTEBOOK_NODES: FullNodesData = {
     isStudied: false,
     bookmarked: false,
     node: "02",
-    open: false,
+    open: true,
     user: "jn10",
     visible: true,
     wrong: false,
