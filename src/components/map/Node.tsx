@@ -265,6 +265,7 @@ const Node = ({
   const [openProposal, setOpenProposal] = useState<any>(false);
   const [startTimeValue, setStartTimeValue] = React.useState<any>(moment.utc(nodeVideoStartTime * 1000));
   const [endTimeValue, setEndTimeValue] = React.useState<any>(moment.utc(nodeVideoEndTime * 1000));
+  const [timePickerError, setTimePickerError] = React.useState<any>(false);
   const [error, setError] = useState<any>(null);
   const [contentCopy, setContentCopy] = useState(content);
   const [isLoading, startTransition] = useTransition();
@@ -303,7 +304,23 @@ const Node = ({
   }, [nodeVideo, nodeVideoStartTime, nodeVideoEndTime]);
 
   const videoData = useMemo(() => {
-    return getVideoDataByUrl(videoUrl, parseInt(videoStartTime), parseInt(videoEndTime));
+    const startTime = parseInt(videoStartTime);
+    const endTime = parseInt(videoEndTime);
+    if (
+      typeof startTime !== "undefined" &&
+      typeof endTime !== "undefined" &&
+      !isNaN(startTime) &&
+      !isNaN(endTime) &&
+      startTime > endTime
+    ) {
+      setTimePickerError(true);
+    } else {
+      if (timePickerError) {
+        setTimePickerError(false);
+      }
+    }
+
+    return getVideoDataByUrl(videoUrl, startTime, endTime);
   }, [videoUrl, videoStartTime, videoEndTime]);
 
   useEffect(() => {
@@ -673,7 +690,6 @@ const Node = ({
               {editable && <Box sx={{ mb: "12px" }}></Box>}
               {!editable && !unaccepted && !nodeBookState.choosingNode /* && !choosingNode */ && (
                 <MemoizedNodeHeader
-                  setFocusView={() => setFocusView({ isEnabled: true, selectedNode: identifier })}
                   open={open}
                   onToggleNode={toggleNodeHandler}
                   onHideOffsprings={hideOffspringsHandler}
@@ -885,7 +901,13 @@ const Node = ({
                               }
                             });
                           }}
-                          renderInput={params => <TextField {...params} />}
+                          renderInput={params => (
+                            <TextField
+                              {...params}
+                              error={timePickerError}
+                              helperText={timePickerError ? "Should be greater than start time" : ""}
+                            />
+                          )}
                         />
                       </LocalizationProvider>
                     </Box>

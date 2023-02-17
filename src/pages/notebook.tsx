@@ -2,6 +2,7 @@ import AutoFixHighIcon from "@mui/icons-material/AutoFixHigh";
 import CloseIcon from "@mui/icons-material/Close";
 import CodeIcon from "@mui/icons-material/Code";
 import MyLocationIcon from "@mui/icons-material/MyLocation";
+import ShareIcon from "@mui/icons-material/Share";
 import { Masonry } from "@mui/lab";
 import {
   Button,
@@ -3704,6 +3705,37 @@ const Dashboard = ({}: DashboardProps) => {
               </IconButton>
             </Tooltip>
           )}
+          <Tooltip
+            title="Focused view for selected node"
+            placement="left"
+            sx={{
+              position: "fixed",
+              top: {
+                xs: !openSidebar
+                  ? "110px"
+                  : openSidebar && openSidebar !== "SEARCHER_SIDEBAR"
+                  ? `${innerHeight * 0.35 + 120}px`
+                  : `${innerHeight * 0.25 + 120}px`,
+                sm: "110px",
+              },
+              right: "10px",
+              zIndex: "1300",
+              background: theme => (theme.palette.mode === "dark" ? "#1f1f1f" : "#f0f0f0"),
+              ":hover": {
+                background: theme => (theme.palette.mode === "dark" ? "#454545" : "#d6d4d4"),
+              },
+              transition: "all 1s ease",
+            }}
+          >
+            <IconButton
+              color="secondary"
+              onClick={() => {
+                setFocusView({ isEnabled: true, selectedNode: nodeBookState.selectedNode || "" });
+              }}
+            >
+              <ShareIcon />
+            </IconButton>
+          </Tooltip>
           {/* end Data from map */}
 
           {window.innerHeight > 399 && user?.livelinessBar === "interaction" && (
