@@ -194,6 +194,7 @@ const LinkingWords = (props: LinkingWordsProps) => {
               {props.parents.map((parent: any, idx: number) => {
                 return (
                   <Box
+                    id={`${props.identifier}-parent-button-${idx}`}
                     sx={{
                       display: "grid",
                       gridTemplateColumns: props.editable && props.parents.length > 1 ? "1fr 32px" : "1fr",
@@ -454,6 +455,7 @@ const LinkingWords = (props: LinkingWordsProps) => {
               {props.nodesChildren.map((child: any, idx: number) => {
                 return (
                   <Box
+                    id={`${props.identifier}-child-button-${idx}`}
                     sx={{
                       display: "grid",
                       gridTemplateColumns: props.editable && props.parents.length ? "1fr 32px" : "1fr",
