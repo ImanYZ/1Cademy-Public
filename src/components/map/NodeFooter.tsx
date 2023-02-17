@@ -1083,6 +1083,7 @@ const NodeFooter = ({
                   }}
                 >
                   <ContainedButton
+                    id={`${identifier}-button-parent-children`}
                     title="View parent and child nodes."
                     onClick={selectLinkingWords}
                     tooltipPosition="top"

@@ -97,11 +97,7 @@ export const Editor = ({
   }, []);
 
   return (
-    <Box
-      id={id ?? undefined}
-      className={readOnly ? "HyperEditor ReadOnlyEditor" : "HyperEditor"}
-      sx={{ width: "100%" }}
-    >
+    <Box id={id} className={readOnly ? "HyperEditor ReadOnlyEditor" : "HyperEditor"} sx={{ width: "100%" }}>
       <Box sx={{ display: "flex", flexDirection: "column-reverse" }}>
         <Box>
           {option === "EDIT" && !readOnly ? (

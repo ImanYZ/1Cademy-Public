@@ -24,7 +24,7 @@ export const NOTEBOOK_STEPS: Step[] = [
   },
   {
     targetId: "01",
-    childTargetId: "01-content",
+    childTargetId: "01-button-parent-children",
     title: "Basic Navigation: Parent Nodes",
     description: "Most nodes have parents. They can be seen by clicking this button",
     tooltipPos: "top",
