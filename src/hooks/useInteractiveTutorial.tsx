@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { FullNodesData } from "src/nodeBookTypes";
 
-const DEFAULT_NUMBER_OF_TRIES = 5;
+export const DEFAULT_NUMBER_OF_TRIES = 5;
 
 export type Step = {
   id: string;
@@ -14,9 +15,9 @@ export type Step = {
 
 export type TargetClientRect = { width: number; height: number; top: number; left: number };
 
-type UseInteractiveTutorialProps = { steps: Step[] };
+type UseInteractiveTutorialProps = { steps: Step[]; localSnapshot: FullNodesData };
 
-export const useInteractiveTutorial = ({ steps }: UseInteractiveTutorialProps) => {
+export const useInteractiveTutorial = ({ steps, localSnapshot }: UseInteractiveTutorialProps) => {
   const [currentStepIdx, setCurrentStepIdx] = useState(-1);
   /** when targetClientReact = {0,0,0,0} draw in center of screen */
   const [targetClientRect, setTargetClientRect] = useState<TargetClientRect>({ width: 0, height: 0, top: 0, left: 0 });
@@ -24,16 +25,21 @@ export const useInteractiveTutorial = ({ steps }: UseInteractiveTutorialProps) =
   const observeTries = useRef(0);
   const isPlayingTheTutorialRef = useRef(false);
 
-  useLayoutEffect(() => {
+  const getClientRect = useCallback(() => {
+    console.log("first 1");
     // detect element mounted to get clientRect values
-    if (!steps[currentStepIdx]) return;
+    console.log("first", { localSnapshot, ss: localSnapshot[`0${currentStepIdx + 1}`], currentStepIdx });
 
-    const targetId = steps[currentStepIdx].id;
+    if (!localSnapshot[`0${currentStepIdx + 1}`]) return;
+    console.log("first 2");
 
+    const targetId = localSnapshot[`0${currentStepIdx + 1}`].node;
+    console.log({ targetId });
     if (!targetId) {
       // NO target id => show tooltip in screen center
       return setTargetClientRect({ width: 0, height: 0, top: 0, left: 0 });
     }
+    console.log("first 3");
 
     const intervalId = setInterval(() => {
       if (observeTries.current >= DEFAULT_NUMBER_OF_TRIES) {
@@ -41,11 +47,15 @@ export const useInteractiveTutorial = ({ steps }: UseInteractiveTutorialProps) =
         clearInterval(intervalId);
         return;
       }
+      console.log("first 4");
 
       observeTries.current += 1;
       const element = document.getElementById(targetId);
+      console.log("first found", { element });
 
       if (!element) return;
+
+      console.log("first found and passed");
 
       setTargetClientRect({
         width: element.clientWidth,
@@ -56,13 +66,18 @@ export const useInteractiveTutorial = ({ steps }: UseInteractiveTutorialProps) =
       observeTries.current = 0;
       clearInterval(intervalId);
     }, 500);
+    return intervalId;
+  }, [currentStepIdx, localSnapshot]);
+
+  useLayoutEffect(() => {
+    const intervalId = getClientRect();
 
     return () => {
-      clearInterval(intervalId);
+      clearInterval(intervalId as NodeJS.Timer);
 
       return;
     };
-  }, [currentStepIdx, steps]);
+  }, [currentStepIdx, getClientRect]);
 
   const currentStep = useMemo(() => steps[currentStepIdx], [currentStepIdx, steps]);
 
@@ -82,6 +97,7 @@ export const useInteractiveTutorial = ({ steps }: UseInteractiveTutorialProps) =
   const onStart = useCallback(() => setCurrentStepIdx(0), []);
 
   const onNextStep = useCallback(() => {
+    console.log({ currentStepIdx });
     if (currentStepIdx < 0) return;
     if (currentStepIdx === steps.length - 1) return setCurrentStepIdx(-1);
 
@@ -188,6 +204,8 @@ export const useInteractiveTutorial = ({ steps }: UseInteractiveTutorialProps) =
   // ]);
 
   return {
+    setTargetClientRect,
+
     isPlayingTheTutorial,
     isPlayingTheTutorialRef,
     targetClientRect,

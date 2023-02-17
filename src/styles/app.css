@@ -784,3 +784,36 @@ p {
   border-left: 6px solid transparent;
   border-right: 6px solid transparent;
 }
+
+/* TUTORIAL STYLES TOOLTIP */
+.tooltip::after {
+  position: absolute;
+  content: "";
+  border-style: solid;
+  border-width: 10px;
+  border-color: transparent;
+}
+.tooltip-top::after {
+  border-bottom-width: 0px;
+  border-top-color: #f77e0c;
+  bottom: -9px;
+  left: calc(50% - 10px);
+}
+.tooltip-bottom::after {
+  border-top-width: 0px;
+  border-bottom-color: #f77e0c;
+  top: -9px;
+  left: calc(50% - 10px);
+}
+.tooltip-right::after {
+  border-left-width: 0px;
+  border-right-color: #f77e0c;
+  left: -9px;
+  top: calc(50% - 10px);
+}
+.tooltip-left::after {
+  border-right-width: 0px;
+  border-left-color: #f77e0c;
+  right: -9px;
+  top: calc(50% - 10px);
+}

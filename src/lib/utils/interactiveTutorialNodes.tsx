@@ -44,7 +44,7 @@ export const INTERACTIVE_TUTORIAL_NOTEBOOK_NODES: FullNodesData = {
       },
     },
     content: `This tutorial will teach you what nodes are and how they work on 1Cademy
-      
+
       Read the **content** of the **node** and then click **Next** to continue.`,
     children: [
       {
@@ -121,7 +121,7 @@ export const INTERACTIVE_TUTORIAL_NOTEBOOK_NODES: FullNodesData = {
       },
     },
     content: `This tutorial will teach you what nodes are and how they work on 1Cademy
-      
+
       Read the **content** of the **node** and then click **Next** to continue.`,
     children: [],
     changedAt: new Date("2023-02-15T20:49:56.817Z"),

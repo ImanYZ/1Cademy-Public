@@ -24,14 +24,30 @@ export const Tutorial = ({
   const tooltipRef = useRef<HTMLDivElement | null>(null);
 
   const tooltipClientRect = useMemo(() => {
+    // Get the parent container element
+    // const parent = document.querySelector('#parent');
+    // // Get the child element with relative position
+    // const child = parent.querySelector('#child');
+    // // Get the position of the child element relative to the viewport
+    // const childRect = child.getBoundingClientRect();
+    // // Get the position of the parent element relative to the viewport
+    // const parentRect = parent.getBoundingClientRect();
+    // // Calculate the position of the child element relative to the parent element
+    // const childPos = {
+    //   x: childRect.left - parentRect.left,
+    //   y: childRect.top - parentRect.top
+    // };
+    // console.log(childPos);
     if (!tooltipRef.current) return { top: 0, left: 0 };
     if (!currentStep) return { top: 0, left: 0 };
 
+    console.log("first measure ", currentStep, tooltipRef.current);
+    console.log("rect", { top1: targetClientRect.top, theight: tooltipRef.current.clientHeight, TOOLTIP_OFFSET });
     let top = 0;
     let left = 0;
     const pos = currentStep.tooltipPos;
     if (pos === "top") {
-      top = 0 - tooltipRef.current.clientHeight - TOOLTIP_OFFSET;
+      top = targetClientRect.top - tooltipRef.current.clientHeight - TOOLTIP_OFFSET;
       left = targetClientRect.width / 2 - tooltipRef.current.clientWidth / 2;
     }
     if (pos === "bottom") {
@@ -46,8 +62,9 @@ export const Tutorial = ({
       top = targetClientRect.height / 2 - tooltipRef.current.clientHeight / 2;
       left = targetClientRect.width + TOOLTIP_OFFSET;
     }
-    return { top, left };
-  }, [currentStep, targetClientRect.height, targetClientRect.width]);
+    console.log("first new top left", { top: top + targetClientRect.top, left: left + targetClientRect.left });
+    return { top: top + targetClientRect.top, left: left + targetClientRect.left };
+  }, [currentStep, targetClientRect.height, targetClientRect.left, targetClientRect.top, targetClientRect.width]);
 
   if (!currentStep) return null;
 
@@ -79,6 +96,7 @@ export const Tutorial = ({
             transition: "top 1s ease-out,left 1s ease-out",
             width: "200px",
             backgroundColor: "#3a3838",
+            border: "1px solid #f77e0c",
             padding: "8px",
             borderRadius: "8px",
             color: "white",
@@ -104,11 +122,12 @@ export const Tutorial = ({
       className={`tooltip tooltip-${currentStep.tooltipPos}`}
       style={{
         position: "absolute",
-        top: `${tooltipClientRect.top + targetClientRect.top}px`,
-        left: `${tooltipClientRect.left + targetClientRect.left}px`,
+        top: `${tooltipClientRect.top}px`,
+        left: `${tooltipClientRect.left}px`,
         transition: "top 1s ease-out,left 1s ease-out",
         width: "350px",
-        backgroundColor: "#3a3838",
+        backgroundColor: "#3a3938",
+        border: "1px solid #f77e0c",
         padding: "8px",
         borderRadius: "8px",
         color: "white",

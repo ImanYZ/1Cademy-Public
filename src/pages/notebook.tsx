@@ -73,7 +73,7 @@ import { MemoizedToolbarSidebar } from "../components/map/Sidebar/SidebarV2/Tool
 import { NodeItemDashboard } from "../components/NodeItemDashboard";
 import { Portal } from "../components/Portal";
 import { NodeBookProvider, useNodeBook } from "../context/NodeBookContext";
-import { useInteractiveTutorial } from "../hooks/useInteractiveTutorial";
+import { DEFAULT_NUMBER_OF_TRIES, useInteractiveTutorial } from "../hooks/useInteractiveTutorial";
 import { useMemoizedCallback } from "../hooks/useMemoizedCallback";
 import { useWindowSize } from "../hooks/useWindowSize";
 import { useWorkerQueue } from "../hooks/useWorkerQueue";
@@ -239,8 +239,10 @@ const Dashboard = ({}: DashboardProps) => {
 
   const lastNodeOperation = useRef<string>("");
   const proposalTimer = useRef<any>(null);
+  const observeTries = useRef(0);
 
   const {
+    setTargetClientRect,
     isPlayingTheTutorial,
     isPlayingTheTutorialRef,
     onStart,
@@ -252,6 +254,7 @@ const Dashboard = ({}: DashboardProps) => {
     targetClientRect,
   } = useInteractiveTutorial({
     steps: NOTEBOOK_STEPS,
+    localSnapshot,
   });
 
   // Scroll to node configs
@@ -382,11 +385,78 @@ const Dashboard = ({}: DashboardProps) => {
     [onNodeInViewport]
   );
 
+  const getClientRect = useCallback(() => {
+    console.log("first 1");
+    if (!currentStep) return setTargetClientRect({ width: 0, height: 0, top: 0, left: 0 });
+    // detect element mounted to get clientRect values
+    // console.log("first", { nodes: graph.nodes, ss: currentStep.id, currentStepIdx });
+
+    // const targetId = graph.nodes[currentStep.id]?.node;
+
+    // console.log("first 2");
+
+    // console.log({ targetId });
+    // if (!targetId) {
+    //   // NO target id => show tooltip in screen center
+    //   return setTargetClientRect({ width: 0, height: 0, top: 0, left: 0 });
+    // }
+    // console.log("first 3");
+
+    const intervalId = setInterval(() => {
+      if (observeTries.current >= DEFAULT_NUMBER_OF_TRIES) {
+        observeTries.current = 0;
+        clearInterval(intervalId);
+        return;
+      }
+
+      // Get the parent container element
+      // const parent = document.querySelector("#parent");
+      // // Get the child element with relative position
+      // const child = parent.querySelector("#child");
+      // // Get the position of the child element relative to the viewport
+      // const childRect = child.getBoundingClientRect();
+      // // Get the position of the parent element relative to the viewport
+      // const parentRect = parent.getBoundingClientRect();
+      // Calculate the position of the child element relative to the parent element
+      // const childPos = {
+      //   x: childRect.left - parentRect.left,
+      //   y: childRect.top - parentRect.top,
+      // };
+      // console.log(childPos);
+
+      observeTries.current += 1;
+      const element = document.getElementById(currentStep.id);
+
+      console.log("first found", { element });
+
+      if (!element) return;
+
+      element.style.border = "4px solid #ffc813";
+
+      console.log("first found and passed");
+      const elementRect = element.getBoundingClientRect();
+      console.log({ elementRect });
+      setTargetClientRect({
+        width: element.clientWidth,
+        height: element.clientHeight,
+        top: elementRect.top,
+        left: elementRect.left,
+      });
+      observeTries.current = 0;
+      clearInterval(intervalId);
+    }, 500);
+    return intervalId;
+  }, [currentStep, setTargetClientRect]);
+
   const onCompleteWorker = useCallback(() => {
+    if (currentStep) {
+      getClientRect();
+    }
+
     if (!nodeBookState.selectedNode) return;
 
     scrollToNode(nodeBookState.selectedNode);
-  }, [nodeBookState.selectedNode, scrollToNode]);
+  }, [currentStep, getClientRect, nodeBookState.selectedNode, scrollToNode]);
 
   const setOperation = useCallback((operation: string) => {
     lastNodeOperation.current = operation;
@@ -500,12 +570,16 @@ const Dashboard = ({}: DashboardProps) => {
   };
   const openNodeHandler = useMemoizedCallback(
     async (nodeId: string) => {
-      devLog("open_Node_Handler", nodeId);
+      console.log({ nodeId });
 
+      devLog("open_Node_Handler", nodeId);
+      console.log({ isPlayingTheTutorialRef: isPlayingTheTutorialRef.current });
       // start tutorial
-      if (isPlayingTheTutorialRef) {
-        if (!INTERACTIVE_TUTORIAL_NOTEBOOK_NODES[nodeId])
+      if (isPlayingTheTutorialRef.current) {
+        if (!INTERACTIVE_TUTORIAL_NOTEBOOK_NODES[nodeId]) {
+          console.log("Dev: you forgot to update Local Tutorial Nodes");
           return console.warn("Dev: you forgot to update Local Tutorial Nodes");
+        }
         const thisNode = { nodeId: INTERACTIVE_TUTORIAL_NOTEBOOK_NODES[nodeId] };
         setLocalSnapshot(thisNode);
         return;
@@ -518,10 +592,11 @@ const Dashboard = ({}: DashboardProps) => {
 
       const nodeRef = doc(db, "nodes", nodeId);
       const nodeDoc = await getDoc(nodeRef);
-
+      console.log({ nodeDoc });
       const batch = writeBatch(db);
       if (nodeDoc.exists() && user) {
         const thisNode: any = { ...nodeDoc.data(), id: nodeId };
+        console.log({ thisNode });
         try {
           for (let child of thisNode.children) {
             linkedNodeRef = doc(db, "nodes", child.node);
@@ -966,6 +1041,7 @@ const Dashboard = ({}: DashboardProps) => {
         nodes: { [FIRST_KEY_NODE]: INTERACTIVE_TUTORIAL_NOTEBOOK_NODES[FIRST_KEY_NODE] },
         edges: {},
       });
+      setLocalSnapshot({ [FIRST_KEY_NODE]: INTERACTIVE_TUTORIAL_NOTEBOOK_NODES[FIRST_KEY_NODE] });
       shouldResetGraph.current = false;
     }
     // if (isPlayingTheTutorial) {
@@ -1744,7 +1820,7 @@ const Dashboard = ({}: DashboardProps) => {
       devLog("open Linked Node", { linkedNodeID, typeOperation });
       if (!nodeBookState.choosingNode) {
         // start tutorial
-        if (isPlayingTheTutorialRef) {
+        if (isPlayingTheTutorialRef.current) {
           let linkedNode = document.getElementById(linkedNodeID);
           if (linkedNode) {
             nodeBookDispatch({ type: "setSelectedNode", payload: linkedNodeID });
@@ -1999,7 +2075,7 @@ const Dashboard = ({}: DashboardProps) => {
     (event: any, nodeId: string) => {
       if (!nodeBookState.choosingNode) {
         // start tutorial
-        if (isPlayingTheTutorialRef) {
+        if (isPlayingTheTutorialRef.current) {
           setGraph(({ nodes: oldNodes, edges }) => {
             const thisNode: FullNodeData = oldNodes[nodeId];
             return { nodes: { ...oldNodes, [nodeId]: { ...thisNode, open: !thisNode.open } }, edges };
@@ -3743,7 +3819,7 @@ const Dashboard = ({}: DashboardProps) => {
                 <Button onClick={() => nodeBookDispatch({ type: "setSelectionType", payload: "Proposals" })}>
                   Open Proposal
                 </Button>
-                <Button onClick={() => openNodeHandler("PvKh56yLmodMnUqHar2d")}>Open Node Handler</Button>
+                <Button onClick={() => openNodeHandler("JqTvpowT5EBPO1Ajjovq")}>Open Node Handler</Button>
                 <Button onClick={() => setShowRegion(prev => !prev)}>Show Region</Button>
               </Box>
             </Drawer>
@@ -4048,6 +4124,26 @@ const Dashboard = ({}: DashboardProps) => {
                 value={mapInteractionValue}
                 onChange={navigateWhenNotScrolling}
               >
+                <div
+                  style={{
+                    position: "absolute",
+                    width: "8px",
+                    height: "8px",
+                    borderRadius: "50%",
+                    backgroundColor: "yellow",
+                  }}
+                ></div>
+                <div
+                  style={{
+                    position: "absolute",
+                    width: "8px",
+                    height: "8px",
+                    top: "100px",
+                    left: "100px",
+                    borderRadius: "50%",
+                    backgroundColor: "royalblue",
+                  }}
+                ></div>
                 {!anchorTutorial && (
                   <Tutorial
                     currentStep={currentStep}
