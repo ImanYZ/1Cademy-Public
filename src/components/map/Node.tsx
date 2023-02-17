@@ -683,8 +683,9 @@ const Node = ({
                 />
               )}
             </div>
-            <div id={`${identifier}-content`} className="NodeContent" data-hoverable={true}>
+            <div className="NodeContent" data-hoverable={true}>
               <Editor
+                id={`${identifier}-content`}
                 label="Edit the node content:"
                 value={contentCopy}
                 setValue={onSetContent}

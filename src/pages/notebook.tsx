@@ -73,7 +73,7 @@ import { MemoizedToolbarSidebar } from "../components/map/Sidebar/SidebarV2/Tool
 import { NodeItemDashboard } from "../components/NodeItemDashboard";
 import { Portal } from "../components/Portal";
 import { NodeBookProvider, useNodeBook } from "../context/NodeBookContext";
-import { DEFAULT_NUMBER_OF_TRIES, useInteractiveTutorial } from "../hooks/useInteractiveTutorial";
+import { useInteractiveTutorial } from "../hooks/useInteractiveTutorial";
 import { useMemoizedCallback } from "../hooks/useMemoizedCallback";
 import { useWindowSize } from "../hooks/useWindowSize";
 import { useWorkerQueue } from "../hooks/useWorkerQueue";
@@ -239,7 +239,6 @@ const Dashboard = ({}: DashboardProps) => {
 
   const lastNodeOperation = useRef<string>("");
   const proposalTimer = useRef<any>(null);
-  const observeTries = useRef(0);
 
   const {
     setTargetClientRect,
@@ -252,10 +251,7 @@ const Dashboard = ({}: DashboardProps) => {
     onNextStep,
     onPreviousStep,
     targetClientRect,
-  } = useInteractiveTutorial({
-    steps: NOTEBOOK_STEPS,
-    localSnapshot,
-  });
+  } = useInteractiveTutorial({ steps: NOTEBOOK_STEPS });
 
   // Scroll to node configs
 
@@ -385,78 +381,78 @@ const Dashboard = ({}: DashboardProps) => {
     [onNodeInViewport]
   );
 
-  const getClientRect = useCallback(() => {
-    console.log("first 1");
+  useEffect(() => {
     if (!currentStep) return setTargetClientRect({ width: 0, height: 0, top: 0, left: 0 });
-    // detect element mounted to get clientRect values
-    // console.log("first", { nodes: graph.nodes, ss: currentStep.id, currentStepIdx });
 
-    // const targetId = graph.nodes[currentStep.id]?.node;
+    if (currentStep.anchor) {
+      if (!currentStep.childTargetId) return;
+      const targetElement = document.getElementById(currentStep.childTargetId);
 
-    // console.log("first 2");
+      if (!targetElement) return;
+      targetElement.style.border = "4px dashed #ffc813";
+      const elementRect = targetElement.getBoundingClientRect();
 
-    // console.log({ targetId });
-    // if (!targetId) {
-    //   // NO target id => show tooltip in screen center
-    //   return setTargetClientRect({ width: 0, height: 0, top: 0, left: 0 });
-    // }
-    // console.log("first 3");
+      setTargetClientRect({
+        width: elementRect.width,
+        height: elementRect.height,
+        top: targetElement.offsetTop,
+        left: targetElement.offsetLeft,
+      });
+    } else {
+      console.log("----------------- detect client react in interactive map");
 
-    const intervalId = setInterval(() => {
-      if (observeTries.current >= DEFAULT_NUMBER_OF_TRIES) {
-        observeTries.current = 0;
-        clearInterval(intervalId);
-        return;
+      const thisNode = graph.nodes[currentStep.targetId];
+      if (!thisNode) return;
+
+      let { top, left, width = NODE_WIDTH, height = 0 } = thisNode;
+      let offsetChildTop = 0;
+      let offsetChildLeft = 0;
+      if (currentStep.childTargetId) {
+        const targetElement = document.getElementById(currentStep.childTargetId);
+        if (!targetElement) return;
+        targetElement.style.border = "4px dashed #ffc813";
+        const { offsetTop, offsetHeight, offsetParent, offsetLeft, offsetWidth } = targetElement;
+        const { height: childrenHeight, width: childrenWidth } = targetElement.getBoundingClientRect();
+        console.log("child:", {
+          offsetTop,
+          offsetHeight,
+          offsetParent,
+          offsetLeft,
+          offsetWidth,
+          correctHeight: childrenHeight,
+          correctWidth: childrenWidth,
+        });
+        offsetChildTop = offsetTop;
+        offsetChildLeft = offsetLeft;
+        height = childrenHeight;
+        width = childrenWidth;
       }
 
-      // Get the parent container element
-      // const parent = document.querySelector("#parent");
-      // // Get the child element with relative position
-      // const child = parent.querySelector("#child");
-      // // Get the position of the child element relative to the viewport
-      // const childRect = child.getBoundingClientRect();
-      // // Get the position of the parent element relative to the viewport
-      // const parentRect = parent.getBoundingClientRect();
-      // Calculate the position of the child element relative to the parent element
-      // const childPos = {
-      //   x: childRect.left - parentRect.left,
-      //   y: childRect.top - parentRect.top,
-      // };
-      // console.log(childPos);
-
-      observeTries.current += 1;
-      const element = document.getElementById(currentStep.id);
-
-      console.log("first found", { element });
-
-      if (!element) return;
-
-      element.style.border = "4px solid #ffc813";
-
-      console.log("first found and passed");
-      const elementRect = element.getBoundingClientRect();
-      console.log({ elementRect });
-      setTargetClientRect({
-        width: element.clientWidth,
-        height: element.clientHeight,
-        top: elementRect.top,
-        left: elementRect.left,
+      console.log("effect:", {
+        top: top + offsetChildTop,
+        realTop: top,
+        realLeft: left,
+        left: left + offsetChildLeft,
+        width,
+        height,
+        offsetChildTop,
+        offsetChildLeft,
       });
-      observeTries.current = 0;
-      clearInterval(intervalId);
-    }, 500);
-    return intervalId;
-  }, [currentStep, setTargetClientRect]);
+
+      setTargetClientRect({
+        top: top + offsetChildTop,
+        left: left + offsetChildLeft,
+        width,
+        height,
+      });
+    }
+  }, [currentStep, graph.nodes, setTargetClientRect]);
 
   const onCompleteWorker = useCallback(() => {
-    if (currentStep) {
-      getClientRect();
-    }
-
     if (!nodeBookState.selectedNode) return;
 
     scrollToNode(nodeBookState.selectedNode);
-  }, [currentStep, getClientRect, nodeBookState.selectedNode, scrollToNode]);
+  }, [nodeBookState.selectedNode, scrollToNode]);
 
   const setOperation = useCallback((operation: string) => {
     lastNodeOperation.current = operation;
@@ -4136,6 +4132,16 @@ const Dashboard = ({}: DashboardProps) => {
                 <div
                   style={{
                     position: "absolute",
+                    width: "2000px",
+                    height: "3px",
+                    top: "0px",
+                    left: "0px",
+                    backgroundColor: "yellow",
+                  }}
+                ></div>
+                <div
+                  style={{
+                    position: "absolute",
                     width: "8px",
                     height: "8px",
                     top: "100px",
@@ -4144,6 +4150,93 @@ const Dashboard = ({}: DashboardProps) => {
                     backgroundColor: "royalblue",
                   }}
                 ></div>
+                <div
+                  style={{
+                    position: "absolute",
+                    width: "2000px",
+                    height: "3px",
+                    top: "100px",
+                    left: "0px",
+                    backgroundColor: "royalblue",
+                  }}
+                ></div>
+
+                <div
+                  style={{
+                    position: "absolute",
+                    width: "2000px",
+                    height: "3px",
+                    top: "150px",
+                    left: "0px",
+                    backgroundColor: "yellow",
+                  }}
+                ></div>
+
+                <div
+                  style={{
+                    position: "absolute",
+                    width: "2000px",
+                    height: "1px",
+                    top: "160px",
+                    left: "0px",
+                    backgroundColor: "yellow",
+                  }}
+                ></div>
+
+                <div
+                  style={{
+                    position: "absolute",
+                    width: "8px",
+                    height: "8px",
+                    top: "150px",
+                    left: "200px",
+                    borderRadius: "50%",
+                    backgroundColor: "royalblue",
+                  }}
+                ></div>
+                <div
+                  style={{
+                    position: "absolute",
+                    width: "8px",
+                    height: "8px",
+                    top: "150px",
+                    left: "500px",
+                    borderRadius: "50%",
+                    backgroundColor: "royalblue",
+                  }}
+                ></div>
+                <div
+                  style={{
+                    position: "absolute",
+                    width: "8px",
+                    height: "8px",
+                    top: "150px",
+                    left: "600px",
+                    borderRadius: "50%",
+                    backgroundColor: "royalblue",
+                  }}
+                ></div>
+
+                <div
+                  style={{
+                    position: "absolute",
+                    width: "2000px",
+                    height: "3px",
+                    top: "500px",
+                    left: "0px",
+                    backgroundColor: "yellow",
+                  }}
+                ></div>
+                <div
+                  style={{
+                    position: "absolute",
+                    width: "2000px",
+                    height: "3px",
+                    top: "600px",
+                    left: "0px",
+                    backgroundColor: "yellow",
+                  }}
+                />
                 {!anchorTutorial && (
                   <Tutorial
                     currentStep={currentStep}

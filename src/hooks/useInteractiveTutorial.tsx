@@ -1,10 +1,10 @@
-import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
-import { FullNodesData } from "src/nodeBookTypes";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 export const DEFAULT_NUMBER_OF_TRIES = 5;
 
 export type Step = {
-  id: string;
+  targetId: string;
+  childTargetId?: string;
   title: string;
   description: string;
   tooltipPos: "top" | "bottom" | "left" | "right";
@@ -15,69 +15,14 @@ export type Step = {
 
 export type TargetClientRect = { width: number; height: number; top: number; left: number };
 
-type UseInteractiveTutorialProps = { steps: Step[]; localSnapshot: FullNodesData };
+type UseInteractiveTutorialProps = { steps: Step[] };
 
-export const useInteractiveTutorial = ({ steps, localSnapshot }: UseInteractiveTutorialProps) => {
+export const useInteractiveTutorial = ({ steps }: UseInteractiveTutorialProps) => {
   const [currentStepIdx, setCurrentStepIdx] = useState(-1);
   /** when targetClientReact = {0,0,0,0} draw in center of screen */
   const [targetClientRect, setTargetClientRect] = useState<TargetClientRect>({ width: 0, height: 0, top: 0, left: 0 });
-  // const tooltipRef = useRef<HTMLDivElement | null>(null);
-  const observeTries = useRef(0);
+
   const isPlayingTheTutorialRef = useRef(false);
-
-  const getClientRect = useCallback(() => {
-    console.log("first 1");
-    // detect element mounted to get clientRect values
-    console.log("first", { localSnapshot, ss: localSnapshot[`0${currentStepIdx + 1}`], currentStepIdx });
-
-    if (!localSnapshot[`0${currentStepIdx + 1}`]) return;
-    console.log("first 2");
-
-    const targetId = localSnapshot[`0${currentStepIdx + 1}`].node;
-    console.log({ targetId });
-    if (!targetId) {
-      // NO target id => show tooltip in screen center
-      return setTargetClientRect({ width: 0, height: 0, top: 0, left: 0 });
-    }
-    console.log("first 3");
-
-    const intervalId = setInterval(() => {
-      if (observeTries.current >= DEFAULT_NUMBER_OF_TRIES) {
-        observeTries.current = 0;
-        clearInterval(intervalId);
-        return;
-      }
-      console.log("first 4");
-
-      observeTries.current += 1;
-      const element = document.getElementById(targetId);
-      console.log("first found", { element });
-
-      if (!element) return;
-
-      console.log("first found and passed");
-
-      setTargetClientRect({
-        width: element.clientWidth,
-        height: element.clientHeight,
-        top: element.offsetTop,
-        left: element.offsetLeft,
-      });
-      observeTries.current = 0;
-      clearInterval(intervalId);
-    }, 500);
-    return intervalId;
-  }, [currentStepIdx, localSnapshot]);
-
-  useLayoutEffect(() => {
-    const intervalId = getClientRect();
-
-    return () => {
-      clearInterval(intervalId as NodeJS.Timer);
-
-      return;
-    };
-  }, [currentStepIdx, getClientRect]);
 
   const currentStep = useMemo(() => steps[currentStepIdx], [currentStepIdx, steps]);
 
@@ -113,96 +58,6 @@ export const useInteractiveTutorial = ({ steps, localSnapshot }: UseInteractiveT
   const anchorTutorial = useMemo(() => {
     return currentStep?.anchor ?? "";
   }, [currentStep?.anchor]);
-
-  // const tooltipClientRect = useMemo(() => {
-  //   if (!tooltipRef.current) return { top: 0, left: 0 };
-  //   let top = 0;
-  //   let left = 0;
-
-  //   const pos = steps[currentStepIdx].tooltipPos;
-
-  //   if (pos === "top") {
-  //     top = 0 - tooltipRef.current.clientHeight - TOOLTIP_OFFSET;
-  //     left = targetClientRect.width / 2 - tooltipRef.current.clientWidth / 2;
-  //   }
-  //   if (pos === "bottom") {
-  //     top = targetClientRect.height + TOOLTIP_OFFSET;
-  //     left = targetClientRect.width / 2 - tooltipRef.current.clientWidth / 2;
-  //   }
-  //   if (pos === "left") {
-  //     top = targetClientRect.height / 2 - tooltipRef.current.clientHeight / 2;
-  //     left = 0 - tooltipRef.current.clientWidth - TOOLTIP_OFFSET;
-  //   }
-  //   if (pos === "right") {
-  //     top = targetClientRect.height / 2 - tooltipRef.current.clientHeight / 2;
-  //     left = targetClientRect.width + TOOLTIP_OFFSET;
-  //   }
-  //   return { top, left };
-  // }, [currentStepIdx, steps, targetClientRect.height, targetClientRect.width]);
-
-  // const tutorialComponent = useMemo(() => {
-  //   if (currentStepIdx < 0 || currentStepIdx >= steps.length) return null;
-  //   return (
-  //     <div
-  //       style={{
-  //         position: "absolute",
-  //         top: `${targetClientRect.top}px`,
-  //         left: `${targetClientRect.left}px`,
-  //         width: `${targetClientRect.width}px`,
-  //         height: `${targetClientRect.height}px`,
-  //         backgroundColor: "transparent",
-  //         outline: "5000px solid #5555552d",
-  //         transition: "top 1s ease-out,left 1s ease-out",
-  //         borderRadius: "1px",
-  //         outlineOffset: "10px",
-  //         boxSizing: "border-box",
-  //         // pointerEvents: "none",
-  //         zIndex: 999,
-  //       }}
-  //     >
-  //       <div
-  //         ref={tooltipRef}
-  //         className={`tooltip tooltip-${currentStep.tooltipPos}`}
-  //         style={{
-  //           position: "absolute",
-  //           top: `${tooltipClientRect.top}px`,
-  //           left: `${tooltipClientRect.left}px`,
-  //           transition: "top 1s ease-out,left 1s ease-out",
-  //           width: "200px",
-  //           backgroundColor: "#3a3838",
-  //           padding: "8px",
-  //           borderRadius: "8px",
-  //           color: "white",
-  //         }}
-  //       >
-  //         <h2>{currentStep.title}</h2>
-  //         <p>{currentStep.description}</p>
-  //         <button onClick={onPreviousStep}>{"<<"}</button>
-
-  //         {currentStepIdx < steps.length - 1 && (
-  //           <button onClick={onNextStep} style={{ zIndex: 898999 }}>
-  //             {">>"}
-  //           </button>
-  //         )}
-  //         {currentStepIdx === steps.length - 1 && <button onClick={onNextStep}>{"Finalize"}</button>}
-  //       </div>
-  //     </div>
-  //   );
-  // }, [
-  //   currentStep.description,
-  //   currentStep.title,
-  //   currentStep.tooltipPos,
-  //   currentStepIdx,
-  //   onNextStep,
-  //   onPreviousStep,
-  //   steps.length,
-  //   targetClientRect.height,
-  //   targetClientRect.left,
-  //   targetClientRect.top,
-  //   targetClientRect.width,
-  //   tooltipClientRect.left,
-  //   tooltipClientRect.top,
-  // ]);
 
   return {
     setTargetClientRect,
