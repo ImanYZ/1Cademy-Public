@@ -188,7 +188,7 @@ const LinkingWords = (props: LinkingWordsProps) => {
           }}
         >
           {props.openPart === "LinkingWords" && (
-            <Box sx={{ display: "flex", flexDirection: "column", gap: "5px" }}>
+            <Box id={`${props.identifier}-parents-list`} sx={{ display: "flex", flexDirection: "column", gap: "5px" }}>
               <strong>Parents (Prerequisites)</strong>
 
               {props.parents.map((parent: any, idx: number) => {
@@ -449,7 +449,7 @@ const LinkingWords = (props: LinkingWordsProps) => {
             </Box>
           )}
           {props.openPart === "LinkingWords" && (
-            <Box sx={{ display: "flex", flexDirection: "column", gap: "5px" }}>
+            <Box id={`${props.identifier}-children-list`} sx={{ display: "flex", flexDirection: "column", gap: "5px" }}>
               <strong>Children (Follow-ups)</strong>
               {props.nodesChildren.map((child: any, idx: number) => {
                 return (
