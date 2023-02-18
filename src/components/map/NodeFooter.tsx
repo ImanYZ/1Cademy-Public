@@ -1057,6 +1057,7 @@ const NodeFooter = ({
               )}
               {openPart === "LinkingWords" ? (
                 <Box
+                  id={`${identifier}-button-parent-children`}
                   onClick={selectLinkingWords}
                   className={"select-tab-button-node-footer"}
                   sx={{

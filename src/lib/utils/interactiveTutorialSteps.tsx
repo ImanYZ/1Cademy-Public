@@ -42,7 +42,7 @@ export const NOTEBOOK_STEPS: Step[] = [
   },
   {
     targetId: "01",
-    childTargetId: "01-parent-button-0", // TODO: add id-parent-button-idx
+    childTargetId: "01-parent-button-0",
     title: "Basic Navigation: Parent Nodes",
     description: "By clicking a title, we are taken to the parent node.",
     tooltipPos: "top",
@@ -69,7 +69,7 @@ export const NOTEBOOK_STEPS: Step[] = [
   },
   {
     targetId: "01",
-    childTargetId: "01-child-button-0", // TODO: add id-child-button-idx
+    childTargetId: "01-child-button-0",
     title: "Basic Navigation: Child Nodes",
     description: "By clicking a title, we are taken to the child node.",
     tooltipPos: "top",
