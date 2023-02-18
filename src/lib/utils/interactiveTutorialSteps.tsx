@@ -94,10 +94,19 @@ export const NOTEBOOK_STEPS: Step[] = [
   },
   {
     targetId: "03",
-    childTargetId: "03-close-button",
+    childTargetId: "03-hiden-button",
     title: "Basic Navigation: Learning Pathway",
     description:
       "While we can open a lot of nodes, it is important to try to keey your map tidy and close unused nodes.",
+    tooltipPos: "top",
+    anchor: "",
+    disabledElements: [],
+  },
+  {
+    targetId: "02",
+    childTargetId: "02-close-button",
+    title: "Basic Navigation: Learning Pathway",
+    description: "Close nodes does not delete them, it only means they are not displayed currently",
     tooltipPos: "top",
     anchor: "",
     disabledElements: [],

@@ -606,83 +606,85 @@ const Node = ({
       {open ? (
         <>
           <div className="card-content">
-            <div id={`${identifier}-title`} className="card-title" data-hoverable={true}>
-              {editable && isNew && (
-                <>
-                  {/* New Node with inputs */}
-                  <p className="NewChildProposalWarning" style={{ display: "flex", alignItems: "center" }}>
-                    <span> Before proposing, search </span>
-                    <SearchIcon sx={{ color: "orange", mx: "5px", fontSize: "16px" }} />
-                    <span> to ensure the node does not exist.</span>
-                  </p>
-                  {(nodeType === "Concept" ||
-                    nodeType === "Relation" ||
-                    nodeType === "Question" ||
-                    nodeType === "News") &&
-                    references.length === 0 && (
-                      <p className="NewChildProposalWarning">
-                        - Make the reference nodes that you'd like to cite, visible on your map view.
-                      </p>
-                    )}
-                </>
-              )}
-              {/* CHECK: I commented this */}
+            {/* <div className="card-title" data-hoverable={true}> */}
+            {editable && isNew && (
+              <>
+                {/* New Node with inputs */}
+                <p className="NewChildProposalWarning" style={{ display: "flex", alignItems: "center" }}>
+                  <span> Before proposing, search </span>
+                  <SearchIcon sx={{ color: "orange", mx: "5px", fontSize: "16px" }} />
+                  <span> to ensure the node does not exist.</span>
+                </p>
+                {(nodeType === "Concept" ||
+                  nodeType === "Relation" ||
+                  nodeType === "Question" ||
+                  nodeType === "News") &&
+                  references.length === 0 && (
+                    <p className="NewChildProposalWarning">
+                      - Make the reference nodes that you'd like to cite, visible on your map view.
+                    </p>
+                  )}
+              </>
+            )}
+            {/* CHECK: I commented this */}
 
-              {editable && (
-                <Box
-                  sx={{
-                    display: "flex",
-                    justifyContent: "end",
-                    alignItems: "center",
-                    position: "relative",
-                    top: "-5px",
-                  }}
+            {editable && (
+              <Box
+                sx={{
+                  display: "flex",
+                  justifyContent: "end",
+                  alignItems: "center",
+                  position: "relative",
+                  top: "-5px",
+                }}
+              >
+                <Typography
+                  onClick={() => setOption("PREVIEW")}
+                  sx={{ cursor: "pointer", fontSize: "14px", fontWeight: 490, color: "inherit" }}
                 >
-                  <Typography
-                    onClick={() => setOption("PREVIEW")}
-                    sx={{ cursor: "pointer", fontSize: "14px", fontWeight: 490, color: "inherit" }}
-                  >
-                    Preview
-                  </Typography>
-                  <Switch
-                    checked={option === "EDIT"}
-                    onClick={() => onChangeOption(option === "EDIT")}
-                    size="small"
-                    onKeyDown={onKeyEnter}
-                  />
-                  <Typography
-                    onClick={() => setOption("EDIT")}
-                    sx={{ cursor: "pointer", fontSize: "14px", fontWeight: 490, color: "inherit" }}
-                  >
-                    Edit
-                  </Typography>
-                </Box>
-              )}
-
-              <Editor
-                label="Enter the node title:"
-                value={titleCopy}
-                setValue={onSetTitle}
-                onBlurCallback={onBlurNodeTitle}
-                readOnly={!editable}
-                sxPreview={{ fontSize: "25px", fontWeight: 300 }}
-                error={error ? true : false}
-                helperText={error ? error : ""}
-                showEditPreviewSection={false}
-                editOption={option}
-              />
-              {editable && <Box sx={{ mb: "12px" }}></Box>}
-              {!editable && !unaccepted && !nodeBookState.choosingNode /* && !choosingNode */ && (
-                <MemoizedNodeHeader
-                  setFocusView={() => setFocusView({ isEnabled: true, selectedNode: identifier })}
-                  open={open}
-                  onToggleNode={toggleNodeHandler}
-                  onHideOffsprings={hideOffspringsHandler}
-                  onHideNodeHandler={hideNodeHandler}
-                  sx={{ position: "absolute", right: "10px", top: "0px" }}
+                  Preview
+                </Typography>
+                <Switch
+                  checked={option === "EDIT"}
+                  onClick={() => onChangeOption(option === "EDIT")}
+                  size="small"
+                  onKeyDown={onKeyEnter}
                 />
-              )}
-            </div>
+                <Typography
+                  onClick={() => setOption("EDIT")}
+                  sx={{ cursor: "pointer", fontSize: "14px", fontWeight: 490, color: "inherit" }}
+                >
+                  Edit
+                </Typography>
+              </Box>
+            )}
+
+            <Editor
+              id={`${identifier}-title`}
+              label="Enter the node title:"
+              value={titleCopy}
+              setValue={onSetTitle}
+              onBlurCallback={onBlurNodeTitle}
+              readOnly={!editable}
+              sxPreview={{ fontSize: "25px", fontWeight: 300 }}
+              error={error ? true : false}
+              helperText={error ? error : ""}
+              showEditPreviewSection={false}
+              editOption={option}
+            />
+            {editable && <Box sx={{ mb: "12px" }}></Box>}
+            {!editable && !unaccepted && !nodeBookState.choosingNode /* && !choosingNode */ && (
+              <MemoizedNodeHeader
+                id={identifier}
+                setFocusView={() => setFocusView({ isEnabled: true, selectedNode: identifier })}
+                open={open}
+                onToggleNode={toggleNodeHandler}
+                onHideOffsprings={hideOffspringsHandler}
+                onHideNodeHandler={hideNodeHandler}
+                sx={{ position: "absolute", right: "10px", top: "0px" }}
+              />
+            )}
+            {/* </div> */}
             <div className="NodeContent" data-hoverable={true}>
               <Editor
                 id={`${identifier}-content`}
@@ -1062,89 +1064,90 @@ const Node = ({
         </>
       ) : (
         <div className="card-content">
-          <div className="card-title">
-            <div className="NodeTitleClosed">
-              <Editor
-                label="title"
-                value={titleCopy}
-                setValue={setTitleCopy}
-                readOnly={true}
-                sxPreview={{ fontSize: "25px" }}
-              />
-            </div>
-            {!nodeBookState.choosingNode && (
-              <MemoizedNodeHeader
-                setFocusView={() => setFocusView({ isEnabled: true, selectedNode: identifier })}
-                open={open}
-                onToggleNode={toggleNodeHandler}
-                onHideOffsprings={hideOffspringsHandler}
-                onHideNodeHandler={hideNodeHandler}
-                sx={{ position: "absolute", right: "10px", top: "0px" }}
-              />
-            )}
-            <div className="footer">
-              <MemoizedNodeFooter
-                open={false}
-                addVideo={addVideo}
-                setAddVideo={setAddVideo}
-                identifier={identifier}
-                activeNode={activeNode}
-                citationsSelected={citationsSelected}
-                proposalsSelected={proposalsSelected}
-                acceptedProposalsSelected={acceptedProposalsSelected}
-                commentsSelected={commentsSelected}
-                editable={editable}
-                setNodeParts={setNodeParts}
-                title={title}
-                content={content}
-                unaccepted={unaccepted}
-                openPart={openPart}
-                nodeType={nodeType}
-                isNew={isNew}
-                admin={admin}
-                aImgUrl={aImgUrl}
-                aFullname={aFullname}
-                aChooseUname={aChooseUname}
-                viewers={viewers}
-                correctNum={correctNum}
-                markedCorrect={markedCorrect}
-                wrongNum={wrongNum}
-                markedWrong={markedWrong}
-                references={references}
-                tags={tags}
-                parents={parents}
-                nodesChildren={nodesChildren}
-                commentsNum={commentsNum}
-                proposalsNum={proposalsNum}
-                studied={studied}
-                isStudied={isStudied}
-                changed={changed}
-                changedAt={changedAt}
-                bookmarked={bookmarked}
-                bookmarks={bookmarks}
-                reloadPermanentGrpah={reloadPermanentGrpah}
-                onNodeShare={onNodeShare}
-                markStudied={markStudiedHandler}
-                bookmark={bookmarkHandler}
-                openNodePart={openNodePartHandler}
-                selectNode={selectNodeHandler}
-                correctNode={correctNodeHandler}
-                wrongNode={wrongNodeHandler}
-                disableVotes={disableVotes}
-                uploadNodeImage={uploadNodeImageHandler}
-                user={user}
-                citations={citations}
-                setOpenSideBar={setOpenSideBar}
-                locked={locked}
-                openSidebar={openSidebar}
-                contributors={contributors}
-                institutions={institutions}
-                openUserInfoSidebar={openUserInfoSidebar}
-                proposeNodeImprovement={proposeNodeImprovement}
-                setOperation={setOperation}
-              />
-            </div>
+          {/* <div className="card-title"> */}
+          <div className="NodeTitleClosed">
+            <Editor
+              label="title"
+              value={titleCopy}
+              setValue={setTitleCopy}
+              readOnly={true}
+              sxPreview={{ fontSize: "25px" }}
+            />
           </div>
+          {!nodeBookState.choosingNode && (
+            <MemoizedNodeHeader
+              id={identifier}
+              setFocusView={() => setFocusView({ isEnabled: true, selectedNode: identifier })}
+              open={open}
+              onToggleNode={toggleNodeHandler}
+              onHideOffsprings={hideOffspringsHandler}
+              onHideNodeHandler={hideNodeHandler}
+              sx={{ position: "absolute", right: "10px", top: "0px" }}
+            />
+          )}
+          <div className="footer">
+            <MemoizedNodeFooter
+              open={false}
+              addVideo={addVideo}
+              setAddVideo={setAddVideo}
+              identifier={identifier}
+              activeNode={activeNode}
+              citationsSelected={citationsSelected}
+              proposalsSelected={proposalsSelected}
+              acceptedProposalsSelected={acceptedProposalsSelected}
+              commentsSelected={commentsSelected}
+              editable={editable}
+              setNodeParts={setNodeParts}
+              title={title}
+              content={content}
+              unaccepted={unaccepted}
+              openPart={openPart}
+              nodeType={nodeType}
+              isNew={isNew}
+              admin={admin}
+              aImgUrl={aImgUrl}
+              aFullname={aFullname}
+              aChooseUname={aChooseUname}
+              viewers={viewers}
+              correctNum={correctNum}
+              markedCorrect={markedCorrect}
+              wrongNum={wrongNum}
+              markedWrong={markedWrong}
+              references={references}
+              tags={tags}
+              parents={parents}
+              nodesChildren={nodesChildren}
+              commentsNum={commentsNum}
+              proposalsNum={proposalsNum}
+              studied={studied}
+              isStudied={isStudied}
+              changed={changed}
+              changedAt={changedAt}
+              bookmarked={bookmarked}
+              bookmarks={bookmarks}
+              reloadPermanentGrpah={reloadPermanentGrpah}
+              onNodeShare={onNodeShare}
+              markStudied={markStudiedHandler}
+              bookmark={bookmarkHandler}
+              openNodePart={openNodePartHandler}
+              selectNode={selectNodeHandler}
+              correctNode={correctNodeHandler}
+              wrongNode={wrongNodeHandler}
+              disableVotes={disableVotes}
+              uploadNodeImage={uploadNodeImageHandler}
+              user={user}
+              citations={citations}
+              setOpenSideBar={setOpenSideBar}
+              locked={locked}
+              openSidebar={openSidebar}
+              contributors={contributors}
+              institutions={institutions}
+              openUserInfoSidebar={openUserInfoSidebar}
+              proposeNodeImprovement={proposeNodeImprovement}
+              setOperation={setOperation}
+            />
+          </div>
+          {/* </div> */}
         </div>
       )}
       {/* {openSidebar === "PROPOSALS" && !simulated && !isNew && nodeBookState.selectedNode == identifier ? (
@@ -1195,7 +1198,7 @@ const Node = ({
             </Box>
           </Box>
         </>
-        
+
       ) : null} */}
       <Box
         id={identifier + "_" + "childNodes"}

@@ -8,6 +8,7 @@ import { Box, SxProps, Theme } from "@mui/system";
 import React from "react";
 
 type NodeHeaderProps = {
+  id: string;
   setFocusView: () => void;
   open: boolean;
   onToggleNode: any;
@@ -16,7 +17,15 @@ type NodeHeaderProps = {
   sx?: SxProps<Theme>;
 };
 
-const NodeHeader = ({ open, onToggleNode, onHideOffsprings, onHideNodeHandler, sx, setFocusView }: NodeHeaderProps) => {
+const NodeHeader = ({
+  id,
+  open,
+  onToggleNode,
+  onHideOffsprings,
+  onHideNodeHandler,
+  sx,
+  setFocusView,
+}: NodeHeaderProps) => {
   return (
     <Box sx={{ display: "flex", alignItems: "center", ...sx }}>
       <Tooltip title="Focused mode">
@@ -27,11 +36,23 @@ const NodeHeader = ({ open, onToggleNode, onHideOffsprings, onHideNodeHandler, s
 
       <Tooltip title={`${open ? "Close" : "Open"} the node.`}>
         {open ? (
-          <IconButton color="inherit" onClick={onToggleNode} aria-label="Close the node" size="small">
+          <IconButton
+            id={`${id}-close-button`}
+            color="inherit"
+            onClick={onToggleNode}
+            aria-label="Close the node"
+            size="small"
+          >
             <RemoveIcon fontSize="inherit" />
           </IconButton>
         ) : (
-          <IconButton color="inherit" onClick={onToggleNode} aria-label="open the node" size="small">
+          <IconButton
+            id={`${id}-open-button"`}
+            color="inherit"
+            onClick={onToggleNode}
+            aria-label="open the node"
+            size="small"
+          >
             <FullscreenIcon fontSize="inherit" />
           </IconButton>
         )}
@@ -43,7 +64,13 @@ const NodeHeader = ({ open, onToggleNode, onHideOffsprings, onHideNodeHandler, s
         </IconButton>
       </Tooltip>
       <Tooltip title="Hide the node from your map.">
-        <IconButton color="inherit" onClick={e => onHideNodeHandler(e)} aria-label="delete" size="small">
+        <IconButton
+          id={`${id}-hiden-button`}
+          color="inherit"
+          onClick={e => onHideNodeHandler(e)}
+          aria-label="delete"
+          size="small"
+        >
           <CloseIcon fontSize="inherit" />
         </IconButton>
       </Tooltip>

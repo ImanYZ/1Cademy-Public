@@ -4132,7 +4132,18 @@ const Dashboard = ({}: DashboardProps) => {
                 <div
                   style={{
                     position: "absolute",
-                    width: "2000px",
+                    width: "8px",
+                    height: "8px",
+                    borderRadius: "50%",
+                    left: "2900px",
+                    top: "0px",
+                    backgroundColor: "#ff0630",
+                  }}
+                ></div>
+                <div
+                  style={{
+                    position: "absolute",
+                    width: "5000px",
                     height: "3px",
                     top: "0px",
                     left: "0px",
