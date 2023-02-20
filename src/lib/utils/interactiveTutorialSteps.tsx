@@ -114,7 +114,7 @@ export const NOTEBOOK_STEPS: Step[] = [
   // },
   {
     targetId: "sidebar-wrapper-toolbar",
-    title: "Sidebar: Intro",
+    title: "Sidebar - Intro",
     description:
       "The sidebar, on the left of your screen, contains all the important functions and information that users on 1Cademy need. ",
     tooltipPos: "right",
@@ -123,7 +123,7 @@ export const NOTEBOOK_STEPS: Step[] = [
   },
   {
     targetId: "toolbar-profile-button",
-    title: "Sidebar: Profile",
+    title: "Sidebar - Profile",
     description: "your profile can be access by clicking this icon at the top of the sidebar.",
     tooltipPos: "right",
     anchor: "portal",
@@ -131,27 +131,20 @@ export const NOTEBOOK_STEPS: Step[] = [
   },
   {
     targetId: "sidebar-wrapper-user-settings",
-    title: "Sidebar: Profile",
+    title: "Sidebar - Profile",
     description: "On your profile sidebar you will find important information and options.",
     tooltipPos: "right",
     anchor: "portal",
     disabledElements: [],
   },
-  {
-    targetId: "user-settings-picture",
-    title: "Sidebar: Profile",
-    description: "On your profile sidebar you will find important information and options.",
-    tooltipPos: "right",
-    anchor: "portal",
-    disabledElements: [],
-  },
+
   // =================================================================================================
   // =================================================================================================
   // =================================================================================================
   // =================================================================================================
   {
     targetId: "user-settings-picture",
-    title: "Sidebar: Picture",
+    title: "Sidebar - Picture",
     description:
       "Users with pictures for their profile help increase social presence on 1Cademy, they let us know that we are in fact collaborating with other people from around the world",
     tooltipPos: "right",
@@ -160,7 +153,7 @@ export const NOTEBOOK_STEPS: Step[] = [
   },
   {
     targetId: "user-settings-picture",
-    title: "Sidebar: Picture",
+    title: "Sidebar - Picture",
     description: "It is not required that you add a profile picture, but it is recommended.",
     tooltipPos: "right",
     anchor: "portal",
@@ -168,7 +161,7 @@ export const NOTEBOOK_STEPS: Step[] = [
   },
   {
     targetId: "user-settings-picture",
-    title: "Sidebar: Picture",
+    title: "Sidebar - Picture",
     description: "To add a picture click on this icon and upload a picture saved on your computer.",
     tooltipPos: "right",
     anchor: "portal",
@@ -177,16 +170,16 @@ export const NOTEBOOK_STEPS: Step[] = [
 
   // ---------------------------------------------------------------
   {
-    targetId: "user-settings-picture",
-    title: "Sidebar: Community Tag",
+    targetId: "user-settings-community-tag",
+    title: "Sidebar - Community Tag",
     description: "You will want to make sure that you are using an appropriate community tag",
     tooltipPos: "right",
     anchor: "portal",
     disabledElements: [],
   },
   {
-    targetId: "user-settings-picture",
-    title: "Sidebar: Community Tag",
+    targetId: "user-settings-community-tag",
+    title: "Sidebar - Community Tag",
     description:
       "This can be viewed here under your name. You will want to make sure that the tag matches your community because any node you create will have this tag by default.",
     tooltipPos: "right",
@@ -194,24 +187,24 @@ export const NOTEBOOK_STEPS: Step[] = [
     disabledElements: [],
   },
   {
-    targetId: "user-settings-picture",
-    title: "Sidebar: Community Tag",
+    targetId: "user-settings-community-tag",
+    title: "Sidebar - Community Tag",
     description: "To change your community tag, click on the current tag. ",
     tooltipPos: "right",
     anchor: "portal",
     disabledElements: [],
   },
   {
-    targetId: "user-settings-picture",
-    title: "Sidebar: Community Tag",
-    description: "A search box will appear and you can write in your community name to search for their tag. ",
+    targetId: "user-settings-tag-searcher",
+    title: "Sidebar - Community Tag",
+    description: "A search box will appear and you can write in your community name to search for their tag.",
     tooltipPos: "right",
     anchor: "portal",
     disabledElements: [],
   },
   {
-    targetId: "user-settings-picture",
-    title: "Sidebar: Community Tag",
+    targetId: "user-settings-tag-searcher",
+    title: "Sidebar - Community Tag",
     description: "Check the box net to the appropriate tag.",
     tooltipPos: "right",
     anchor: "portal",
@@ -219,16 +212,16 @@ export const NOTEBOOK_STEPS: Step[] = [
   },
   // ---------------------------------------------------------------
   {
-    targetId: "user-settings-picture",
-    title: "Sidebar: Statistics",
+    targetId: "user-settings-statistics",
+    title: "Sidebar - Statistics",
     description: "On your profile your can view the number of upvotes your contributions have generated here",
     tooltipPos: "right",
     anchor: "portal",
     disabledElements: [],
   },
   {
-    targetId: "user-settings-picture",
-    title: "Sidebar: Statistics",
+    targetId: "user-settings-node-types",
+    title: "Sidebar - Statistics",
     description: "you can also see the number of each type of node that you have created. ",
     tooltipPos: "right",
     anchor: "portal",
@@ -236,8 +229,8 @@ export const NOTEBOOK_STEPS: Step[] = [
   },
   // ---------------------------------------------------------------
   {
-    targetId: "user-settings-picture",
-    title: "Sidebar: Personalization",
+    targetId: "user-settings-personalization",
+    title: "Sidebar - Personalization",
     description:
       "Under the statistics you have three tabs that allow you to customize your view and add information about yourself.",
     tooltipPos: "right",
@@ -245,5 +238,3 @@ export const NOTEBOOK_STEPS: Step[] = [
     disabledElements: [],
   },
 ];
-//1 user-settings-community-tag
-//

@@ -392,13 +392,13 @@ const Dashboard = ({}: DashboardProps) => {
       if (!targetElement) return;
 
       targetElement.style.border = "4px dashed #ffc813";
-      const elementRect = targetElement.getBoundingClientRect();
+      const { width, height, top, left } = targetElement.getBoundingClientRect();
 
       setTargetClientRect({
-        width: elementRect.width,
-        height: elementRect.height,
-        top: targetElement.offsetTop,
-        left: targetElement.offsetLeft,
+        width,
+        height,
+        top,
+        left,
       });
     } else {
       console.log("----------------- detect client react in interactive map");
