@@ -156,7 +156,6 @@ const SignUpPage: NextPageWithLayout = () => {
     termsOfServiceAgreement: yup.boolean().isTrue("Please accept Terms of Service to continue"),
     privacyPolicyAgreement: yup.boolean().isTrue("Please accept the Privacy Policy to continue"),
     cookiesAgreement: yup.boolean().isTrue("Please accept the Cookie Policy to continue"),
-    ageAgreement: yup.boolean().isTrue("Please accept the Age Agreement to continue"),
   });
 
   const handleSignUp = async (values: SignUpFormValues) => {
@@ -194,7 +193,6 @@ const SignUpPage: NextPageWithLayout = () => {
       termsOfServiceAgreement: values.termsOfServiceAgreement,
       privacyPolicyAgreement: values.privacyPolicyAgreement,
       cookiesAgreement: values.cookiesAgreement,
-      ageAgreement: values.ageAgreement,
       fieldOfInterest: values.fieldOfInterest,
       course: router.query?.course ? String(router.query?.course) : null,
     };
