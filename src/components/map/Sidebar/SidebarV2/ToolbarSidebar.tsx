@@ -193,6 +193,7 @@ export const ToolbarSidebar = ({
           {/* Searcher button */}
           <Button
             // className="SearchBarIconToolbar"
+            id="toolbar-search-button"
             onClick={() => {
               onOpenSidebar("SEARCHER_SIDEBAR", "Search");
               setIsMenuOpen(false);
