@@ -29,6 +29,7 @@ import {
 import { INodeVersion } from "src/types/INodeVersion";
 import { TypesenseNodeSchema } from "@/lib/schemas/node";
 import { INodeType } from "src/types/INodeType";
+import { IComReputationUpdates } from "./reputations";
 
 export const comPointTypes = [
   "comPoints",
@@ -1625,6 +1626,9 @@ export const versionCreateUpdate = async ({
   }
   // If the version is deleted, the user should have not been able to vote on it.
   if (!deleted) {
+    const reputationTypes: string[] = ["All Time", "Monthly", "Weekly", "Others", "Others Monthly", "Others Weekly"];
+    const comReputationUpdates: IComReputationUpdates = {};
+
     //  proposer and voters are the same user, automatic self-vote
     [newBatch, writeCounts] = await updateReputation({
       batch: newBatch,
@@ -1642,9 +1646,37 @@ export const versionCreateUpdate = async ({
       ltermDayVal: 0,
       voter,
       writeCounts,
+      comReputationUpdates,
       t,
       tWriteOperations,
     });
+
+    for (const tagId in comReputationUpdates) {
+      for (const reputationType of reputationTypes) {
+        if (!comReputationUpdates[tagId][reputationType]) continue;
+
+        if (t) {
+          tWriteOperations.push({
+            objRef: comReputationUpdates[tagId][reputationType].docRef,
+            data: comReputationUpdates[tagId][reputationType].docData,
+            operationType: comReputationUpdates[tagId][reputationType].isNew ? "set" : "update",
+          });
+        } else {
+          if (comReputationUpdates[tagId][reputationType].isNew) {
+            batch.set(
+              comReputationUpdates[tagId][reputationType].docRef,
+              comReputationUpdates[tagId][reputationType].docData
+            );
+          } else {
+            batch.update(
+              comReputationUpdates[tagId][reputationType].docRef,
+              comReputationUpdates[tagId][reputationType].docData
+            );
+          }
+          [batch, writeCounts] = await checkRestartBatchWriteCounts(batch, writeCounts);
+        }
+      }
+    }
 
     let { userVersionData } = await getUserVersion({ versionId, nodeType, uname: voter, t });
     // Mark the userNode for the voter as isStudied = true and changed = false,

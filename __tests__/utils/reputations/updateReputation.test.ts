@@ -1,5 +1,5 @@
-import { commitBatch, db } from "../../../src/lib/firestoreServer/admin";
-import { updateReputation } from "../../../src/utils/reputations";
+import { checkRestartBatchWriteCounts, commitBatch, db } from "../../../src/lib/firestoreServer/admin";
+import { IComReputationUpdates, updateReputation } from "../../../src/utils/reputations";
 import {
   comMonthlyPointsData,
   comOthersPointsData,
@@ -126,12 +126,15 @@ describe("updateReputation", () => {
     it("Voting for first time as Correct", async () => {
       // console.log((await db.collection("comPoints").where("tagId", "==", "r98BjyFDCe4YyLA3U8ZE").get()).docs[0].data(), "comPoints")
       let writeCounts = 0;
-      const batch = db.batch();
+      let batch = db.batch();
 
       // uname is admin
       const { uname, imageUrl, chooseUname, fName, lName } = usersData.getData().find(user => user.uname === "1man");
       const fullname = `${fName} ${lName}`;
       const voter = uname;
+
+      const reputationTypes: string[] = ["All Time", "Monthly", "Weekly", "Others", "Others Monthly", "Others Weekly"];
+      const comReputationUpdates: IComReputationUpdates = {};
 
       const params = {
         batch,
@@ -149,9 +152,31 @@ describe("updateReputation", () => {
         ltermDayVal: 0, // incomplete feature
         voter,
         writeCounts,
+        comReputationUpdates,
       };
-      const [newBatch] = await updateReputation(params);
-      await commitBatch(newBatch);
+
+      [batch, writeCounts] = await updateReputation(params);
+
+      for (const tagId in comReputationUpdates) {
+        for (const reputationType of reputationTypes) {
+          if (!comReputationUpdates[tagId][reputationType]) continue;
+
+          if (comReputationUpdates[tagId][reputationType].isNew) {
+            batch.set(
+              comReputationUpdates[tagId][reputationType].docRef,
+              comReputationUpdates[tagId][reputationType].docData
+            );
+          } else {
+            batch.update(
+              comReputationUpdates[tagId][reputationType].docRef,
+              comReputationUpdates[tagId][reputationType].docData
+            );
+          }
+          [batch, writeCounts] = await checkRestartBatchWriteCounts(batch, writeCounts);
+        }
+      }
+
+      await commitBatch(batch);
 
       // Validating
 
@@ -207,12 +232,15 @@ describe("updateReputation", () => {
     it("Voting for first time as Wrong", async () => {
       // console.log((await db.collection("comPoints").where("tagId", "==", "r98BjyFDCe4YyLA3U8ZE").get()).docs[0].data(), "comPoints")
       let writeCounts = 0;
-      const batch = db.batch();
+      let batch = db.batch();
 
       // uname is admin
       const { uname, imageUrl, chooseUname, fName, lName } = usersData.getData().find(user => user.uname === "1man");
       const fullname = `${fName} ${lName}`;
       const voter = uname;
+
+      const reputationTypes: string[] = ["All Time", "Monthly", "Weekly", "Others", "Others Monthly", "Others Weekly"];
+      const comReputationUpdates: IComReputationUpdates = {};
 
       const params = {
         batch,
@@ -230,9 +258,30 @@ describe("updateReputation", () => {
         ltermDayVal: 0, // incomplete feature
         voter,
         writeCounts,
+        comReputationUpdates,
       };
-      const [newBatch] = await updateReputation(params);
-      await commitBatch(newBatch);
+      [batch, writeCounts] = await updateReputation(params);
+
+      for (const tagId in comReputationUpdates) {
+        for (const reputationType of reputationTypes) {
+          if (!comReputationUpdates[tagId][reputationType]) continue;
+
+          if (comReputationUpdates[tagId][reputationType].isNew) {
+            batch.set(
+              comReputationUpdates[tagId][reputationType].docRef,
+              comReputationUpdates[tagId][reputationType].docData
+            );
+          } else {
+            batch.update(
+              comReputationUpdates[tagId][reputationType].docRef,
+              comReputationUpdates[tagId][reputationType].docData
+            );
+          }
+          [batch, writeCounts] = await checkRestartBatchWriteCounts(batch, writeCounts);
+        }
+      }
+
+      await commitBatch(batch);
 
       // Validating
 
@@ -287,12 +336,15 @@ describe("updateReputation", () => {
 
     it("Swtiching Vote from Correct to Wrong", async () => {
       let writeCounts = 0;
-      const batch = db.batch();
+      let batch = db.batch();
 
       // uname is admin
       const { uname, imageUrl, chooseUname, fName, lName } = usersData.getData().find(user => user.uname === "1man");
       const fullname = `${fName} ${lName}`;
       const voter = uname;
+
+      const reputationTypes: string[] = ["All Time", "Monthly", "Weekly", "Others", "Others Monthly", "Others Weekly"];
+      const comReputationUpdates: IComReputationUpdates = {};
 
       const params = {
         batch,
@@ -310,9 +362,30 @@ describe("updateReputation", () => {
         ltermDayVal: 0, // incomplete feature
         voter,
         writeCounts,
+        comReputationUpdates,
       };
-      const [newBatch] = await updateReputation(params);
-      await commitBatch(newBatch);
+      [batch, writeCounts] = await updateReputation(params);
+
+      for (const tagId in comReputationUpdates) {
+        for (const reputationType of reputationTypes) {
+          if (!comReputationUpdates[tagId][reputationType]) continue;
+
+          if (comReputationUpdates[tagId][reputationType].isNew) {
+            batch.set(
+              comReputationUpdates[tagId][reputationType].docRef,
+              comReputationUpdates[tagId][reputationType].docData
+            );
+          } else {
+            batch.update(
+              comReputationUpdates[tagId][reputationType].docRef,
+              comReputationUpdates[tagId][reputationType].docData
+            );
+          }
+          [batch, writeCounts] = await checkRestartBatchWriteCounts(batch, writeCounts);
+        }
+      }
+
+      await commitBatch(batch);
 
       // Validating
 
@@ -367,12 +440,15 @@ describe("updateReputation", () => {
 
     it("Swtiching Vote from Wrong to Correct", async () => {
       let writeCounts = 0;
-      const batch = db.batch();
+      let batch = db.batch();
 
       // uname is admin
       const { uname, imageUrl, chooseUname, fName, lName } = usersData.getData().find(user => user.uname === "1man");
       const fullname = `${fName} ${lName}`;
       const voter = uname;
+
+      const reputationTypes: string[] = ["All Time", "Monthly", "Weekly", "Others", "Others Monthly", "Others Weekly"];
+      const comReputationUpdates: IComReputationUpdates = {};
 
       const params = {
         batch,
@@ -390,9 +466,30 @@ describe("updateReputation", () => {
         ltermDayVal: 0, // incomplete feature
         voter,
         writeCounts,
+        comReputationUpdates,
       };
-      const [newBatch] = await updateReputation(params);
-      await commitBatch(newBatch);
+      [batch, writeCounts] = await updateReputation(params);
+
+      for (const tagId in comReputationUpdates) {
+        for (const reputationType of reputationTypes) {
+          if (!comReputationUpdates[tagId][reputationType]) continue;
+
+          if (comReputationUpdates[tagId][reputationType].isNew) {
+            batch.set(
+              comReputationUpdates[tagId][reputationType].docRef,
+              comReputationUpdates[tagId][reputationType].docData
+            );
+          } else {
+            batch.update(
+              comReputationUpdates[tagId][reputationType].docRef,
+              comReputationUpdates[tagId][reputationType].docData
+            );
+          }
+          [batch, writeCounts] = await checkRestartBatchWriteCounts(batch, writeCounts);
+        }
+      }
+
+      await commitBatch(batch);
 
       // Validating
 
@@ -447,12 +544,15 @@ describe("updateReputation", () => {
 
     it("Removing Vote as Wrong", async () => {
       let writeCounts = 0;
-      const batch = db.batch();
+      let batch = db.batch();
 
       // uname is admin
       const { uname, imageUrl, chooseUname, fName, lName } = usersData.getData().find(user => user.uname === "1man");
       const fullname = `${fName} ${lName}`;
       const voter = uname;
+
+      const reputationTypes: string[] = ["All Time", "Monthly", "Weekly", "Others", "Others Monthly", "Others Weekly"];
+      const comReputationUpdates: IComReputationUpdates = {};
 
       const params = {
         batch,
@@ -470,9 +570,30 @@ describe("updateReputation", () => {
         ltermDayVal: 0, // incomplete feature
         voter,
         writeCounts,
+        comReputationUpdates,
       };
-      const [newBatch] = await updateReputation(params);
-      await commitBatch(newBatch);
+      [batch, writeCounts] = await updateReputation(params);
+
+      for (const tagId in comReputationUpdates) {
+        for (const reputationType of reputationTypes) {
+          if (!comReputationUpdates[tagId][reputationType]) continue;
+
+          if (comReputationUpdates[tagId][reputationType].isNew) {
+            batch.set(
+              comReputationUpdates[tagId][reputationType].docRef,
+              comReputationUpdates[tagId][reputationType].docData
+            );
+          } else {
+            batch.update(
+              comReputationUpdates[tagId][reputationType].docRef,
+              comReputationUpdates[tagId][reputationType].docData
+            );
+          }
+          [batch, writeCounts] = await checkRestartBatchWriteCounts(batch, writeCounts);
+        }
+      }
+
+      await commitBatch(batch);
 
       // Validating
 
@@ -527,12 +648,15 @@ describe("updateReputation", () => {
 
     it("Removing Vote as Correct", async () => {
       let writeCounts = 0;
-      const batch = db.batch();
+      let batch = db.batch();
 
       // uname is admin
       const { uname, imageUrl, chooseUname, fName, lName } = usersData.getData().find(user => user.uname === "1man");
       const fullname = `${fName} ${lName}`;
       const voter = uname;
+
+      const reputationTypes: string[] = ["All Time", "Monthly", "Weekly", "Others", "Others Monthly", "Others Weekly"];
+      const comReputationUpdates: IComReputationUpdates = {};
 
       const params = {
         batch,
@@ -550,9 +674,30 @@ describe("updateReputation", () => {
         ltermDayVal: 0, // incomplete feature
         voter,
         writeCounts,
+        comReputationUpdates,
       };
-      const [newBatch] = await updateReputation(params);
-      await commitBatch(newBatch);
+      [batch, writeCounts] = await updateReputation(params);
+
+      for (const tagId in comReputationUpdates) {
+        for (const reputationType of reputationTypes) {
+          if (!comReputationUpdates[tagId][reputationType]) continue;
+
+          if (comReputationUpdates[tagId][reputationType].isNew) {
+            batch.set(
+              comReputationUpdates[tagId][reputationType].docRef,
+              comReputationUpdates[tagId][reputationType].docData
+            );
+          } else {
+            batch.update(
+              comReputationUpdates[tagId][reputationType].docRef,
+              comReputationUpdates[tagId][reputationType].docData
+            );
+          }
+          [batch, writeCounts] = await checkRestartBatchWriteCounts(batch, writeCounts);
+        }
+      }
+
+      await commitBatch(batch);
 
       // Validating
 
@@ -609,12 +754,15 @@ describe("updateReputation", () => {
   describe("Should update reputation in general and other collections (All Time, Monthly and Weekly)", () => {
     it("Voting for first time as Correct", async () => {
       let writeCounts = 0;
-      const batch = db.batch();
+      let batch = db.batch();
 
       // uname is admin
       const { uname, imageUrl, chooseUname, fName, lName } = usersData.getData().find(user => user.uname === "1man");
       const fullname = `${fName} ${lName}`;
       const voter = "Ameer";
+
+      const reputationTypes: string[] = ["All Time", "Monthly", "Weekly", "Others", "Others Monthly", "Others Weekly"];
+      const comReputationUpdates: IComReputationUpdates = {};
 
       const params = {
         batch,
@@ -632,9 +780,30 @@ describe("updateReputation", () => {
         ltermDayVal: 0, // incomplete feature
         voter,
         writeCounts,
+        comReputationUpdates,
       };
-      const [newBatch] = await updateReputation(params);
-      await commitBatch(newBatch);
+      [batch, writeCounts] = await updateReputation(params);
+
+      for (const tagId in comReputationUpdates) {
+        for (const reputationType of reputationTypes) {
+          if (!comReputationUpdates[tagId][reputationType]) continue;
+
+          if (comReputationUpdates[tagId][reputationType].isNew) {
+            batch.set(
+              comReputationUpdates[tagId][reputationType].docRef,
+              comReputationUpdates[tagId][reputationType].docData
+            );
+          } else {
+            batch.update(
+              comReputationUpdates[tagId][reputationType].docRef,
+              comReputationUpdates[tagId][reputationType].docData
+            );
+          }
+          [batch, writeCounts] = await checkRestartBatchWriteCounts(batch, writeCounts);
+        }
+      }
+
+      await commitBatch(batch);
 
       // Validating
 
@@ -689,7 +858,10 @@ describe("updateReputation", () => {
 
     it("Voting for first time as Wrong", async () => {
       let writeCounts = 0;
-      const batch = db.batch();
+      let batch = db.batch();
+
+      const reputationTypes: string[] = ["All Time", "Monthly", "Weekly", "Others", "Others Monthly", "Others Weekly"];
+      const comReputationUpdates: IComReputationUpdates = {};
 
       // uname is admin
       const { uname, imageUrl, chooseUname, fName, lName } = usersData.getData().find(user => user.uname === "1man");
@@ -712,9 +884,30 @@ describe("updateReputation", () => {
         ltermDayVal: 0, // incomplete feature
         voter,
         writeCounts,
+        comReputationUpdates,
       };
-      const [newBatch] = await updateReputation(params);
-      await commitBatch(newBatch);
+      [batch, writeCounts] = await updateReputation(params);
+
+      for (const tagId in comReputationUpdates) {
+        for (const reputationType of reputationTypes) {
+          if (!comReputationUpdates[tagId][reputationType]) continue;
+
+          if (comReputationUpdates[tagId][reputationType].isNew) {
+            batch.set(
+              comReputationUpdates[tagId][reputationType].docRef,
+              comReputationUpdates[tagId][reputationType].docData
+            );
+          } else {
+            batch.update(
+              comReputationUpdates[tagId][reputationType].docRef,
+              comReputationUpdates[tagId][reputationType].docData
+            );
+          }
+          [batch, writeCounts] = await checkRestartBatchWriteCounts(batch, writeCounts);
+        }
+      }
+
+      await commitBatch(batch);
 
       // Validating
 
@@ -769,12 +962,15 @@ describe("updateReputation", () => {
 
     it("Swtiching Vote from Correct to Wrong", async () => {
       let writeCounts = 0;
-      const batch = db.batch();
+      let batch = db.batch();
 
       // uname is admin
       const { uname, imageUrl, chooseUname, fName, lName } = usersData.getData().find(user => user.uname === "1man");
       const fullname = `${fName} ${lName}`;
       const voter = uname;
+
+      const reputationTypes: string[] = ["All Time", "Monthly", "Weekly", "Others", "Others Monthly", "Others Weekly"];
+      const comReputationUpdates: IComReputationUpdates = {};
 
       const params = {
         batch,
@@ -792,9 +988,30 @@ describe("updateReputation", () => {
         ltermDayVal: 0, // incomplete feature
         voter,
         writeCounts,
+        comReputationUpdates,
       };
-      const [newBatch] = await updateReputation(params);
-      await commitBatch(newBatch);
+      [batch, writeCounts] = await updateReputation(params);
+
+      for (const tagId in comReputationUpdates) {
+        for (const reputationType of reputationTypes) {
+          if (!comReputationUpdates[tagId][reputationType]) continue;
+
+          if (comReputationUpdates[tagId][reputationType].isNew) {
+            batch.set(
+              comReputationUpdates[tagId][reputationType].docRef,
+              comReputationUpdates[tagId][reputationType].docData
+            );
+          } else {
+            batch.update(
+              comReputationUpdates[tagId][reputationType].docRef,
+              comReputationUpdates[tagId][reputationType].docData
+            );
+          }
+          [batch, writeCounts] = await checkRestartBatchWriteCounts(batch, writeCounts);
+        }
+      }
+
+      await commitBatch(batch);
 
       // Validating
 
@@ -849,12 +1066,15 @@ describe("updateReputation", () => {
 
     it("Swtiching Vote from Wrong to Correct", async () => {
       let writeCounts = 0;
-      const batch = db.batch();
+      let batch = db.batch();
 
       // uname is admin
       const { uname, imageUrl, chooseUname, fName, lName } = usersData.getData().find(user => user.uname === "1man");
       const fullname = `${fName} ${lName}`;
       const voter = "Ameer";
+
+      const reputationTypes: string[] = ["All Time", "Monthly", "Weekly", "Others", "Others Monthly", "Others Weekly"];
+      const comReputationUpdates: IComReputationUpdates = {};
 
       const params = {
         batch,
@@ -872,9 +1092,30 @@ describe("updateReputation", () => {
         ltermDayVal: 0, // incomplete feature
         voter,
         writeCounts,
+        comReputationUpdates,
       };
-      const [newBatch] = await updateReputation(params);
-      await commitBatch(newBatch);
+      [batch, writeCounts] = await updateReputation(params);
+
+      for (const tagId in comReputationUpdates) {
+        for (const reputationType of reputationTypes) {
+          if (!comReputationUpdates[tagId][reputationType]) continue;
+
+          if (comReputationUpdates[tagId][reputationType].isNew) {
+            batch.set(
+              comReputationUpdates[tagId][reputationType].docRef,
+              comReputationUpdates[tagId][reputationType].docData
+            );
+          } else {
+            batch.update(
+              comReputationUpdates[tagId][reputationType].docRef,
+              comReputationUpdates[tagId][reputationType].docData
+            );
+          }
+          [batch, writeCounts] = await checkRestartBatchWriteCounts(batch, writeCounts);
+        }
+      }
+
+      await commitBatch(batch);
 
       // Validating
 
@@ -929,12 +1170,15 @@ describe("updateReputation", () => {
 
     it("Removing Vote as Wrong", async () => {
       let writeCounts = 0;
-      const batch = db.batch();
+      let batch = db.batch();
 
       // uname is admin
       const { uname, imageUrl, chooseUname, fName, lName } = usersData.getData().find(user => user.uname === "1man");
       const fullname = `${fName} ${lName}`;
       const voter = "Ameer";
+
+      const reputationTypes: string[] = ["All Time", "Monthly", "Weekly", "Others", "Others Monthly", "Others Weekly"];
+      const comReputationUpdates: IComReputationUpdates = {};
 
       const params = {
         batch,
@@ -952,9 +1196,31 @@ describe("updateReputation", () => {
         ltermDayVal: 0, // incomplete feature
         voter,
         writeCounts,
+        comReputationUpdates,
       };
-      const [newBatch] = await updateReputation(params);
-      await commitBatch(newBatch);
+
+      [batch, writeCounts] = await updateReputation(params);
+
+      for (const tagId in comReputationUpdates) {
+        for (const reputationType of reputationTypes) {
+          if (!comReputationUpdates[tagId][reputationType]) continue;
+
+          if (comReputationUpdates[tagId][reputationType].isNew) {
+            batch.set(
+              comReputationUpdates[tagId][reputationType].docRef,
+              comReputationUpdates[tagId][reputationType].docData
+            );
+          } else {
+            batch.update(
+              comReputationUpdates[tagId][reputationType].docRef,
+              comReputationUpdates[tagId][reputationType].docData
+            );
+          }
+          [batch, writeCounts] = await checkRestartBatchWriteCounts(batch, writeCounts);
+        }
+      }
+
+      await commitBatch(batch);
 
       // Validating
 
@@ -1009,12 +1275,15 @@ describe("updateReputation", () => {
 
     it("Removing Vote as Correct", async () => {
       let writeCounts = 0;
-      const batch = db.batch();
+      let batch = db.batch();
 
       // uname is admin
       const { uname, imageUrl, chooseUname, fName, lName } = usersData.getData().find(user => user.uname === "1man");
       const fullname = `${fName} ${lName}`;
       const voter = "Ameer";
+
+      const reputationTypes: string[] = ["All Time", "Monthly", "Weekly", "Others", "Others Monthly", "Others Weekly"];
+      const comReputationUpdates: IComReputationUpdates = {};
 
       const params = {
         batch,
@@ -1032,9 +1301,30 @@ describe("updateReputation", () => {
         ltermDayVal: 0, // incomplete feature
         voter,
         writeCounts,
+        comReputationUpdates,
       };
-      const [newBatch] = await updateReputation(params);
-      await commitBatch(newBatch);
+      [batch, writeCounts] = await updateReputation(params);
+
+      for (const tagId in comReputationUpdates) {
+        for (const reputationType of reputationTypes) {
+          if (!comReputationUpdates[tagId][reputationType]) continue;
+
+          if (comReputationUpdates[tagId][reputationType].isNew) {
+            batch.set(
+              comReputationUpdates[tagId][reputationType].docRef,
+              comReputationUpdates[tagId][reputationType].docData
+            );
+          } else {
+            batch.update(
+              comReputationUpdates[tagId][reputationType].docRef,
+              comReputationUpdates[tagId][reputationType].docData
+            );
+          }
+          [batch, writeCounts] = await checkRestartBatchWriteCounts(batch, writeCounts);
+        }
+      }
+
+      await commitBatch(batch);
 
       // Validating
 

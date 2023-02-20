@@ -15,6 +15,7 @@ import { detach, doNeedToDeleteNode, getNodeTypesFromNode, MIN_ACCEPTED_VERSION_
 import { signalNodeDeleteToTypesense, signalNodeVoteToTypesense, updateNodeContributions } from "./version-helpers";
 import { IActionTrack } from "src/types/IActionTrack";
 import { IUser } from "src/types/IUser";
+import { IComReputationUpdates } from "./reputations";
 
 export const setOrIncrementNotificationNums = async ({
   batch,
@@ -455,6 +456,9 @@ export const UpDownVoteNode = async ({
     await commitBatch(batch);
   });
 
+  const reputationTypes: string[] = ["All Time", "Monthly", "Weekly", "Others", "Others Monthly", "Others Weekly"];
+  const comReputationUpdates: IComReputationUpdates = {};
+
   for (let proposer in changedProposers) {
     // Updating the proposer reputation points.
     [batch, writeCounts] = await updateReputation({
@@ -473,6 +477,7 @@ export const UpDownVoteNode = async ({
       ltermDayVal: 0,
       voter: uname,
       writeCounts,
+      comReputationUpdates,
       t,
       tWriteOperations,
     });
@@ -515,6 +520,33 @@ export const UpDownVoteNode = async ({
       batch.set(notificationRef, notificationData);
       [batch, writeCounts] = await checkRestartBatchWriteCounts(batch, writeCounts);
       [batch, writeCounts] = await setOrIncrementNotificationNums({ batch, proposer, writeCounts });
+    }
+  }
+
+  for (const tagId in comReputationUpdates) {
+    for (const reputationType of reputationTypes) {
+      if (!comReputationUpdates[tagId][reputationType]) continue;
+
+      if (t) {
+        tWriteOperations.push({
+          objRef: comReputationUpdates[tagId][reputationType].docRef,
+          data: comReputationUpdates[tagId][reputationType].docData,
+          operationType: comReputationUpdates[tagId][reputationType].isNew ? "set" : "update",
+        });
+      } else {
+        if (comReputationUpdates[tagId][reputationType].isNew) {
+          batch.set(
+            comReputationUpdates[tagId][reputationType].docRef,
+            comReputationUpdates[tagId][reputationType].docData
+          );
+        } else {
+          batch.update(
+            comReputationUpdates[tagId][reputationType].docRef,
+            comReputationUpdates[tagId][reputationType].docData
+          );
+        }
+        [batch, writeCounts] = await checkRestartBatchWriteCounts(batch, writeCounts);
+      }
     }
   }
 
