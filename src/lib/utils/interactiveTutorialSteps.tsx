@@ -112,199 +112,199 @@ export const NOTEBOOK_STEPS: Step[] = [
   //   anchor: "",
   //   disabledElements: [],
   // },
-  {
-    targetId: "sidebar-wrapper-toolbar",
-    title: "Sidebar - Intro",
-    description:
-      "The sidebar, on the left of your screen, contains all the important functions and information that users on 1Cademy need. ",
-    tooltipPos: "right",
-    anchor: "portal",
-    disabledElements: [],
-  },
-  {
-    targetId: "toolbar-profile-button",
-    title: "Sidebar - Profile",
-    description: "your profile can be access by clicking this icon at the top of the sidebar.",
-    tooltipPos: "right",
-    anchor: "portal",
-    disabledElements: [],
-  },
-  {
-    targetId: "sidebar-wrapper-user-settings",
-    title: "Sidebar - Profile",
-    description: "On your profile sidebar you will find important information and options.",
-    tooltipPos: "right",
-    anchor: "portal",
-    disabledElements: [],
-  },
+  // {
+  //   targetId: "sidebar-wrapper-toolbar",
+  //   title: "Sidebar - Intro",
+  //   description:
+  //     "The sidebar, on the left of your screen, contains all the important functions and information that users on 1Cademy need. ",
+  //   tooltipPos: "right",
+  //   anchor: "portal",
+  //   disabledElements: [],
+  // },
+  // {
+  //   targetId: "toolbar-profile-button",
+  //   title: "Sidebar - Profile",
+  //   description: "your profile can be access by clicking this icon at the top of the sidebar.",
+  //   tooltipPos: "right",
+  //   anchor: "portal",
+  //   disabledElements: [],
+  // },
+  // {
+  //   targetId: "sidebar-wrapper-user-settings",
+  //   title: "Sidebar - Profile",
+  //   description: "On your profile sidebar you will find important information and options.",
+  //   tooltipPos: "right",
+  //   anchor: "portal",
+  //   disabledElements: [],
+  // },
 
-  // =================================================================================================
-  // =================================================================================================
-  // =================================================================================================
-  // =================================================================================================
-  {
-    targetId: "user-settings-picture",
-    title: "Sidebar - Picture",
-    description:
-      "Users with pictures for their profile help increase social presence on 1Cademy, they let us know that we are in fact collaborating with other people from around the world",
-    tooltipPos: "right",
-    anchor: "portal",
-    disabledElements: [],
-  },
-  {
-    targetId: "user-settings-picture",
-    title: "Sidebar - Picture",
-    description: "It is not required that you add a profile picture, but it is recommended.",
-    tooltipPos: "right",
-    anchor: "portal",
-    disabledElements: [],
-  },
-  {
-    targetId: "user-settings-picture",
-    title: "Sidebar - Picture",
-    description: "To add a picture click on this icon and upload a picture saved on your computer.",
-    tooltipPos: "right",
-    anchor: "portal",
-    disabledElements: [],
-  },
+  // // =================================================================================================
+  // // =================================================================================================
+  // // =================================================================================================
+  // // =================================================================================================
+  // {
+  //   targetId: "user-settings-picture",
+  //   title: "Sidebar - Picture",
+  //   description:
+  //     "Users with pictures for their profile help increase social presence on 1Cademy, they let us know that we are in fact collaborating with other people from around the world",
+  //   tooltipPos: "right",
+  //   anchor: "portal",
+  //   disabledElements: [],
+  // },
+  // {
+  //   targetId: "user-settings-picture",
+  //   title: "Sidebar - Picture",
+  //   description: "It is not required that you add a profile picture, but it is recommended.",
+  //   tooltipPos: "right",
+  //   anchor: "portal",
+  //   disabledElements: [],
+  // },
+  // {
+  //   targetId: "user-settings-picture",
+  //   title: "Sidebar - Picture",
+  //   description: "To add a picture click on this icon and upload a picture saved on your computer.",
+  //   tooltipPos: "right",
+  //   anchor: "portal",
+  //   disabledElements: [],
+  // },
 
-  // ---------------------------------------------------------------
-  {
-    targetId: "user-settings-community-tag",
-    title: "Sidebar - Community Tag",
-    description: "You will want to make sure that you are using an appropriate community tag",
-    tooltipPos: "right",
-    anchor: "portal",
-    disabledElements: [],
-  },
-  {
-    targetId: "user-settings-community-tag",
-    title: "Sidebar - Community Tag",
-    description:
-      "This can be viewed here under your name. You will want to make sure that the tag matches your community because any node you create will have this tag by default.",
-    tooltipPos: "right",
-    anchor: "portal",
-    disabledElements: [],
-  },
-  {
-    targetId: "user-settings-community-tag",
-    title: "Sidebar - Community Tag",
-    description: "To change your community tag, click on the current tag. ",
-    tooltipPos: "right",
-    anchor: "portal",
-    disabledElements: [],
-  },
-  {
-    targetId: "user-settings-tag-searcher",
-    title: "Sidebar - Community Tag",
-    description: "A search box will appear and you can write in your community name to search for their tag.",
-    tooltipPos: "right",
-    anchor: "portal",
-    disabledElements: [],
-  },
-  {
-    targetId: "user-settings-tag-searcher",
-    title: "Sidebar - Community Tag",
-    description: "Check the box net to the appropriate tag.",
-    tooltipPos: "right",
-    anchor: "portal",
-    disabledElements: [],
-  },
-  // ---------------------------------------------------------------
-  {
-    targetId: "user-settings-statistics",
-    title: "Sidebar - Statistics",
-    description: "On your profile your can view the number of upvotes your contributions have generated here",
-    tooltipPos: "right",
-    anchor: "portal",
-    disabledElements: [],
-  },
-  {
-    targetId: "user-settings-node-types",
-    title: "Sidebar - Statistics",
-    description: "you can also see the number of each type of node that you have created. ",
-    tooltipPos: "right",
-    anchor: "portal",
-    disabledElements: [],
-  },
-  // ---------------------------------------------------------------
-  {
-    targetId: "user-settings-personalization",
-    title: "Sidebar - Personalization",
-    description:
-      "Under the statistics you have three tabs that allow you to customize your view and add information about yourself.",
-    tooltipPos: "right",
-    anchor: "portal",
-    disabledElements: [],
-  },
+  // // ---------------------------------------------------------------
+  // {
+  //   targetId: "user-settings-community-tag",
+  //   title: "Sidebar - Community Tag",
+  //   description: "You will want to make sure that you are using an appropriate community tag",
+  //   tooltipPos: "right",
+  //   anchor: "portal",
+  //   disabledElements: [],
+  // },
+  // {
+  //   targetId: "user-settings-community-tag",
+  //   title: "Sidebar - Community Tag",
+  //   description:
+  //     "This can be viewed here under your name. You will want to make sure that the tag matches your community because any node you create will have this tag by default.",
+  //   tooltipPos: "right",
+  //   anchor: "portal",
+  //   disabledElements: [],
+  // },
+  // {
+  //   targetId: "user-settings-community-tag",
+  //   title: "Sidebar - Community Tag",
+  //   description: "To change your community tag, click on the current tag. ",
+  //   tooltipPos: "right",
+  //   anchor: "portal",
+  //   disabledElements: [],
+  // },
+  // {
+  //   targetId: "user-settings-tag-searcher",
+  //   title: "Sidebar - Community Tag",
+  //   description: "A search box will appear and you can write in your community name to search for their tag.",
+  //   tooltipPos: "right",
+  //   anchor: "portal",
+  //   disabledElements: [],
+  // },
+  // {
+  //   targetId: "user-settings-tag-searcher",
+  //   title: "Sidebar - Community Tag",
+  //   description: "Check the box net to the appropriate tag.",
+  //   tooltipPos: "right",
+  //   anchor: "portal",
+  //   disabledElements: [],
+  // },
+  // // ---------------------------------------------------------------
+  // {
+  //   targetId: "user-settings-statistics",
+  //   title: "Sidebar - Statistics",
+  //   description: "On your profile your can view the number of upvotes your contributions have generated here",
+  //   tooltipPos: "right",
+  //   anchor: "portal",
+  //   disabledElements: [],
+  // },
+  // {
+  //   targetId: "user-settings-node-types",
+  //   title: "Sidebar - Statistics",
+  //   description: "you can also see the number of each type of node that you have created. ",
+  //   tooltipPos: "right",
+  //   anchor: "portal",
+  //   disabledElements: [],
+  // },
+  // // ---------------------------------------------------------------
+  // {
+  //   targetId: "user-settings-personalization",
+  //   title: "Sidebar - Personalization",
+  //   description:
+  //     "Under the statistics you have three tabs that allow you to customize your view and add information about yourself.",
+  //   tooltipPos: "right",
+  //   anchor: "portal",
+  //   disabledElements: [],
+  // },
 
-  // ---------------------------------------------------------------
-  // SEARCH
-  {
-    targetId: "toolbar-search-button",
-    title: "Search",
-    description: "1Cademy has a search engine that can be used to help you find a node, reference, or topic.",
-    tooltipPos: "right",
-    anchor: "portal",
-    disabledElements: [],
-  },
-  {
-    targetId: "sidebar-wrapper-searcher",
-    title: "Search",
-    description: "To search click on this search icon and enter your query.",
-    tooltipPos: "right",
-    anchor: "portal",
-    disabledElements: [],
-  },
-  {
-    targetId: "searcher-sidebar-options",
-    title: "Search",
-    description: "Beyond searching terms there are a number of ways to refine your search.",
-    tooltipPos: "right",
-    anchor: "portal",
-    disabledElements: [],
-  },
-  {
-    targetId: "searcher-tags-button",
-    title: "Search",
-    description:
-      "You can search by tags by clicking this icon and refining your search to one or more selected tags representing information domains and communities.",
-    tooltipPos: "right",
-    anchor: "portal",
-    disabledElements: [],
-  },
-  {
-    targetId: "search-recently-input",
-    title: "Search",
-    description: "You can also refine your search by how recently nodes were created or edited.",
-    tooltipPos: "right",
-    anchor: "portal",
-    disabledElements: [],
-  },
-  {
-    targetId: "recentNodesList",
-    title: "Search",
-    description:
-      "Finally you can further sort by: last viewed, date modified, proposals, upvotes, downvotes, or net votes with this icon.",
-    tooltipPos: "right",
-    anchor: "portal",
-    disabledElements: [],
-  },
-  {
-    targetId: "search-list",
-    title: "Search",
-    description:
-      "After entering search terms, you can select one of the nodes that are retrieved in this list and it will take you to that node.",
-    tooltipPos: "right",
-    anchor: "portal",
-    disabledElements: [],
-  },
+  // // ---------------------------------------------------------------
+  // // SEARCH
+  // {
+  //   targetId: "toolbar-search-button",
+  //   title: "Search",
+  //   description: "1Cademy has a search engine that can be used to help you find a node, reference, or topic.",
+  //   tooltipPos: "right",
+  //   anchor: "portal",
+  //   disabledElements: [],
+  // },
+  // {
+  //   targetId: "sidebar-wrapper-searcher",
+  //   title: "Search",
+  //   description: "To search click on this search icon and enter your query.",
+  //   tooltipPos: "right",
+  //   anchor: "portal",
+  //   disabledElements: [],
+  // },
+  // {
+  //   targetId: "searcher-sidebar-options",
+  //   title: "Search",
+  //   description: "Beyond searching terms there are a number of ways to refine your search.",
+  //   tooltipPos: "right",
+  //   anchor: "portal",
+  //   disabledElements: [],
+  // },
+  // {
+  //   targetId: "searcher-tags-button",
+  //   title: "Search",
+  //   description:
+  //     "You can search by tags by clicking this icon and refining your search to one or more selected tags representing information domains and communities.",
+  //   tooltipPos: "right",
+  //   anchor: "portal",
+  //   disabledElements: [],
+  // },
+  // {
+  //   targetId: "search-recently-input",
+  //   title: "Search",
+  //   description: "You can also refine your search by how recently nodes were created or edited.",
+  //   tooltipPos: "right",
+  //   anchor: "portal",
+  //   disabledElements: [],
+  // },
+  // {
+  //   targetId: "recentNodesList",
+  //   title: "Search",
+  //   description:
+  //     "Finally you can further sort by: last viewed, date modified, proposals, upvotes, downvotes, or net votes with this icon.",
+  //   tooltipPos: "right",
+  //   anchor: "portal",
+  //   disabledElements: [],
+  // },
+  // {
+  //   targetId: "search-list",
+  //   title: "Search",
+  //   description:
+  //     "After entering search terms, you can select one of the nodes that are retrieved in this list and it will take you to that node.",
+  //   tooltipPos: "right",
+  //   anchor: "portal",
+  //   disabledElements: [],
+  // },
 
   // ---------------------------------------------------------------
   // BOOKMARTS/STUDIED
   {
-    targetId: "user-settings-picture",
-    title: "Bookmark/Studied",
+    targetId: "toolbar-bookmarks-button",
+    title: "Bookmark - Studied",
     description:
       "To understand bookmarking, it is important to understand the mechanism for marking nodes as studied or unstudied.",
     tooltipPos: "right",
@@ -313,11 +313,11 @@ export const NOTEBOOK_STEPS: Step[] = [
   },
   // ---------------------------------------------------------------
   {
-    targetId: "user-settings-picture",
-    title: "Bookmark/Studied: Studied",
+    targetId: "01",
+    title: "Bookmark - Studied: Studied",
     description: "Marking nodes as studied is a great way to keep track of your progress on 1Cademy.",
-    tooltipPos: "right",
-    anchor: "portal",
+    tooltipPos: "top",
+    anchor: "",
     disabledElements: [],
   },
   {

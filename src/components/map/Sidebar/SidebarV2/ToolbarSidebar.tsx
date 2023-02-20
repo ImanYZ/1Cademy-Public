@@ -252,6 +252,7 @@ export const ToolbarSidebar = ({
 
           {/* Notifications button */}
           <MemoizedMetaButton
+            id="toolbar-bookmarks-button"
             onClick={() => {
               onOpenSidebar("NOTIFICATION_SIDEBAR", "Notifications");
               setIsMenuOpen(false);
