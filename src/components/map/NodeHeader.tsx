@@ -27,7 +27,10 @@ const NodeHeader = ({
   setFocusView,
 }: NodeHeaderProps) => {
   return (
-    <Box sx={{ display: "flex", alignItems: "center", justifyContent: "flex-end", mt: "-14px", mb: "-10px", ...sx }}>
+    <Box
+      id={`${id}-node-header`}
+      sx={{ display: "flex", alignItems: "center", justifyContent: "flex-end", mt: "-14px", mb: "-10px", ...sx }}
+    >
       <Tooltip title="Focused mode">
         <IconButton color="inherit" onClick={() => setFocusView()} aria-label="focus-mode" size="small">
           <UnfoldMoreIcon fontSize="inherit" sx={{ transform: "rotate(45deg)" }} />
@@ -59,7 +62,13 @@ const NodeHeader = ({
       </Tooltip>
 
       <Tooltip title="Hide all the descendants of this node.">
-        <IconButton color="inherit" onClick={onHideOffsprings} aria-label="delete" size="small">
+        <IconButton
+          id={`${id}-hide-offsprings-button`}
+          color="inherit"
+          onClick={onHideOffsprings}
+          aria-label="delete"
+          size="small"
+        >
           <KeyboardTabIcon fontSize="inherit" sx={{ transform: "scaleX(-1)" }} />
         </IconButton>
       </Tooltip>

@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { ReactNode, useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 export const DEFAULT_NUMBER_OF_TRIES = 5;
 
@@ -6,7 +6,7 @@ export type Step = {
   targetId: string;
   childTargetId?: string;
   title: string;
-  description: string;
+  description: ReactNode;
   tooltipPos: "top" | "bottom" | "left" | "right";
   anchor: string;
   callback?: () => void;

@@ -127,9 +127,7 @@ export const Tutorial = ({
       <Typography component={"h2"} sx={{ fontSize: "18px", fontWeight: "bold", mb: "8px" }}>
         {currentStep.title}
       </Typography>
-      <Typography variant="body1" sx={{ mb: "16px" }}>
-        {currentStep.description}
-      </Typography>
+      {currentStep.description}
       <Stack direction={"row"} alignItems="center" justifyContent={"space-between"} spacing={"16px"}>
         <Typography sx={{ fontWeight: 300 }}>
           {currentStepIdx + 1} / {stepsLength}
