@@ -270,6 +270,8 @@ const Dashboard = ({}: DashboardProps) => {
     isEnabled: false,
   });
 
+  const [nodeTutorial /* setNodeTutorial */] = useState(Boolean(localStorage.getItem("node-tutorial")));
+
   const onNodeInViewport = useCallback(
     (nodeId: string) => {
       const originalNode = document.getElementById(nodeId);
@@ -4021,32 +4023,34 @@ const Dashboard = ({}: DashboardProps) => {
             </IconButton>
           </Tooltip>
 
-          <Tooltip
-            title="Start tutorial"
-            placement="left"
-            sx={{
-              position: "fixed",
-              top: {
-                xs: !openSidebar
-                  ? "60px"
-                  : openSidebar && openSidebar !== "SEARCHER_SIDEBAR"
-                  ? `${innerHeight * 0.35 + 65}px`
-                  : `${innerHeight * 0.25 + 65}px`,
-                sm: "60px",
-              },
-              right: "10px",
-              zIndex: "1300",
-              background: theme => (theme.palette.mode === "dark" ? "#1f1f1f" : "#f0f0f0"),
-              ":hover": {
-                background: theme => (theme.palette.mode === "dark" ? "#454545" : "#d6d4d4"),
-              },
-              transition: "all 1s ease",
-            }}
-          >
-            <IconButton color="secondary" onClick={onStart}>
-              <SchoolIcon />
-            </IconButton>
-          </Tooltip>
+          {!nodeTutorial && (
+            <Tooltip
+              title="Start tutorial"
+              placement="left"
+              sx={{
+                position: "fixed",
+                top: {
+                  xs: !openSidebar
+                    ? "60px"
+                    : openSidebar && openSidebar !== "SEARCHER_SIDEBAR"
+                    ? `${innerHeight * 0.35 + 65}px`
+                    : `${innerHeight * 0.25 + 65}px`,
+                  sm: "60px",
+                },
+                right: "10px",
+                zIndex: "1300",
+                background: theme => (theme.palette.mode === "dark" ? "#1f1f1f" : "#f0f0f0"),
+                ":hover": {
+                  background: theme => (theme.palette.mode === "dark" ? "#454545" : "#d6d4d4"),
+                },
+                transition: "all 1s ease",
+              }}
+            >
+              <IconButton color="secondary" onClick={onStart}>
+                <SchoolIcon />
+              </IconButton>
+            </Tooltip>
+          )}
 
           {process.env.NODE_ENV === "development" && (
             <Tooltip
