@@ -135,8 +135,9 @@ export const InstructorsLayout: FC<Props> = ({ children }) => {
     if (!selectedSemester) return setCourses([]);
     const newCourses = getCourseBySemester(selectedSemester, allCourses);
     setCourses(newCourses);
+    if (router.asPath === ROUTES.instructorsSettingsNew) return;
     setSelectedCourse(newCourses[0]);
-  }, [allCourses, selectedSemester]);
+  }, [allCourses, router.asPath, selectedSemester]);
 
   useEffect(() => {
     if (!instructor) return;
@@ -148,8 +149,7 @@ export const InstructorsLayout: FC<Props> = ({ children }) => {
 
   const onNewCourse = () => {
     setSelectedCourse(null);
-    if (router.route === ROUTES.instructorsSettings) return;
-    router.push(ROUTES.instructorsSettings);
+    router.push(ROUTES.instructorsSettingsNew);
   };
 
   const filteredOptions = semesters.length ? OPTIONS : [SETTING_OPTION];
