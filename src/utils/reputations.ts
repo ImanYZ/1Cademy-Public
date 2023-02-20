@@ -1,7 +1,17 @@
 import { admin, checkRestartBatchWriteCounts, db } from "../lib/firestoreServer/admin";
 import { firstWeekMonthDays } from ".";
 import { convertToTGet } from "./";
-import { CollectionReference, Query, Transaction } from "firebase-admin/firestore";
+import { CollectionReference, Query, DocumentReference } from "firebase-admin/firestore";
+
+export type IComReputationUpdates = {
+  [tagId: string]: {
+    [reputationType: string]: {
+      docRef: DocumentReference<any>;
+      docData: any;
+      isNew: boolean;
+    };
+  };
+};
 
 export const initializeNewReputationData: any = ({ tagId, tag, updatedAt, createdAt }: any) => ({
   // for Concept nodes
@@ -200,6 +210,7 @@ export const updateReputationIncrement = async ({
   firstMonthDay,
   createdAt,
   updatedAt,
+  comReputationUpdates,
   writeCounts,
   t,
   tWriteOperations,
@@ -208,13 +219,18 @@ export const updateReputationIncrement = async ({
   let newBatch = batch;
 
   let rep_Points = initializeNewReputationData({ tagId, tag, updatedAt, createdAt });
-  let com_Points = initializeNewReputationData({ tagId, tag, updatedAt, createdAt });
-  delete com_Points.isAdmin;
-  com_Points.admin = null;
-  com_Points.aImgUrl = null;
-  com_Points.aFullname = null;
-  com_Points.aChooseUname = false;
-  com_Points.adminPoints = 0;
+  let com_Points =
+    comReputationUpdates?.[tagId]?.[reputationType]?.docData ||
+    initializeNewReputationData({ tagId, tag, updatedAt, createdAt });
+  // Only clear admin related props if its coming from initializeNewReputationData
+  if (com_Points.hasOwnProperty("isAdmin")) {
+    delete com_Points.isAdmin;
+    com_Points.admin = null;
+    com_Points.aImgUrl = null;
+    com_Points.aFullname = null;
+    com_Points.aChooseUname = false;
+    com_Points.adminPoints = 0;
+  }
 
   let reputationsQuery,
     // reputationsQueryBaseWhere,
@@ -246,7 +262,7 @@ export const updateReputationIncrement = async ({
     reputationDoc = reputationsQueryBase.doc(reputationsDoc.docs[0].id);
 
     //  obtain all data in the given document
-    rep_Points = (await convertToTGet(reputationDoc, t)).data();
+    rep_Points = reputationsDoc.docs[0].data();
     //  calculate positives, negatives, and total. If they do not exist then create them
     calculatePositivesNegativesTotals(rep_Points);
     updateTheReputationDoc = true;
@@ -264,7 +280,10 @@ export const updateReputationIncrement = async ({
   //  if comPointsQuery returns a doc
   if (comPointsDoc.docs.length > 0) {
     comPointDoc = comPointsQueryBase.doc(comPointsDoc.docs[0].id);
-    com_Points = comPointsDoc.docs[0].data();
+    // only replace com_Points if we are not already accumlating it
+    if (!comReputationUpdates?.[tagId]?.[reputationType]) {
+      com_Points = comPointsDoc.docs[0].data();
+    }
 
     //  calculate positives, negatives. and all time, if they do not exist create them
     calculatePositivesNegativesTotals(com_Points);
@@ -272,7 +291,7 @@ export const updateReputationIncrement = async ({
   } else {
     //  else comPointsQuery did not return a doc, create a reference
     comPointDoc = comPointsQueryBase.doc();
-    com_reputationsDoc = await convertToTGet(reputationsQueryBaseWhere.where("tagId", "==", tagId), t);
+    com_reputationsDoc = await reputationsQueryBaseWhere.where("tagId", "==", tagId).get();
 
     //  iterate through community reputations docs to calculate totals
     //  each user has unique com_reputationDoc
@@ -350,6 +369,22 @@ export const updateReputationIncrement = async ({
     //   }
     // }
   }
+
+  // initializing aggregation of community points documents
+  if (!comReputationUpdates?.[tagId]?.[reputationType]) {
+    if (!comReputationUpdates?.[tagId]) {
+      comReputationUpdates[tagId] = {};
+    }
+
+    if (!comReputationUpdates?.[tagId]?.[reputationType]) {
+      comReputationUpdates[tagId][reputationType] = {
+        docRef: comPointDoc,
+        docData: com_Points,
+        isNew: !updateTheCommunityDoc,
+      };
+    }
+  }
+
   //  update reputation by adding the changes that are referenced in the parameters of this function
   switch (nodeType) {
     case "Concept":
@@ -616,18 +651,7 @@ export const updateReputationIncrement = async ({
     com_PointsDoc_Obj.firstWeekDay = firstWeekDay;
   }
 
-  if (t) {
-    tWriteOperations.push({
-      objRef: comPointDoc,
-      data: com_PointsDoc_Obj,
-      operationType: updateTheCommunityDoc ? "update" : "set",
-    });
-  } else {
-    updateTheCommunityDoc
-      ? newBatch.update(comPointDoc, com_PointsDoc_Obj)
-      : newBatch.set(comPointDoc, com_PointsDoc_Obj);
-    [newBatch, writeCounts] = await checkRestartBatchWriteCounts(newBatch, writeCounts);
-  }
+  comReputationUpdates[tagId][reputationType].docData = com_PointsDoc_Obj;
 
   return [newBatch, writeCounts];
 };
@@ -649,6 +673,7 @@ export const updateReputation = async ({
   ltermDayVal,
   voter,
   writeCounts,
+  comReputationUpdates,
   t,
   tWriteOperations,
 }: any) => {
@@ -689,6 +714,7 @@ export const updateReputation = async ({
         createdAt,
         updatedAt,
         writeCounts,
+        comReputationUpdates,
         t,
         tWriteOperations,
       });
@@ -717,6 +743,7 @@ export const updateReputation = async ({
           createdAt,
           updatedAt,
           writeCounts,
+          comReputationUpdates,
           t,
           tWriteOperations,
         });

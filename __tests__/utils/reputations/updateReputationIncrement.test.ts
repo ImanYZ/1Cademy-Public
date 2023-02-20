@@ -1,6 +1,6 @@
-import { commitBatch, db } from "../../../src/lib/firestoreServer/admin";
+import { checkRestartBatchWriteCounts, commitBatch, db } from "../../../src/lib/firestoreServer/admin";
 import { firstWeekMonthDays } from "../../../src/utils/helpers";
-import { updateReputationIncrement } from "../../../src/utils/reputations";
+import { IComReputationUpdates, updateReputationIncrement } from "../../../src/utils/reputations";
 import {
   comMonthlyPointsData,
   comOthersPointsData,
@@ -54,7 +54,7 @@ describe("updateReputationIncrement", () => {
 
   it("Should increment total, positive and negative points of the community points.", async () => {
     let writeCounts = 0;
-    const batch = db.batch();
+    let batch = db.batch();
 
     const { uname, imageUrl, chooseUname, fName, lName } = await usersData.getData()[0];
     const { firstWeekDay, firstMonthDay } = firstWeekMonthDays();
@@ -71,9 +71,13 @@ describe("updateReputationIncrement", () => {
 
     const beforeComMonthPoints = (await comMonthPointQuery.get()).docs[0].data();
 
+    const reputationTypes: string[] = ["All Time", "Monthly", "Weekly", "Others", "Others Monthly", "Others Weekly"];
+    const comReputationUpdates: IComReputationUpdates = {};
+
     const params = {
       batch,
       writeCounts,
+      comReputationUpdates,
       uname,
       imageUrl,
       fullname,
@@ -92,9 +96,28 @@ describe("updateReputationIncrement", () => {
       createdAt: new Date(),
       updatedAt: new Date(),
     };
-    const [newBatch] = await updateReputationIncrement(params);
+    [batch, writeCounts] = await updateReputationIncrement(params);
 
-    await commitBatch(newBatch);
+    for (const tagId in comReputationUpdates) {
+      for (const reputationType of reputationTypes) {
+        if (!comReputationUpdates[tagId][reputationType]) continue;
+
+        if (comReputationUpdates[tagId][reputationType].isNew) {
+          batch.set(
+            comReputationUpdates[tagId][reputationType].docRef,
+            comReputationUpdates[tagId][reputationType].docData
+          );
+        } else {
+          batch.update(
+            comReputationUpdates[tagId][reputationType].docRef,
+            comReputationUpdates[tagId][reputationType].docData
+          );
+        }
+        [batch, writeCounts] = await checkRestartBatchWriteCounts(batch, writeCounts);
+      }
+    }
+
+    await commitBatch(batch);
 
     const afterComMonthPointsData = (await comMonthPointQuery.get()).docs[0].data();
 
@@ -112,7 +135,7 @@ describe("updateReputationIncrement", () => {
   it("Should increment total, positive and negative points of the reputations points.", async () => {
     ///////
     let writeCounts = 0;
-    const batch = db.batch();
+    let batch = db.batch();
 
     const { uname, imageUrl, chooseUname, fName, lName } = await usersData.getData()[0];
     const { firstWeekDay, firstMonthDay } = firstWeekMonthDays();
@@ -130,9 +153,13 @@ describe("updateReputationIncrement", () => {
 
     const beforeRepMonthPoints = (await repMonthPointQuery.get()).docs[0].data();
 
+    const reputationTypes: string[] = ["All Time", "Monthly", "Weekly", "Others", "Others Monthly", "Others Weekly"];
+    const comReputationUpdates: IComReputationUpdates = {};
+
     const params = {
       batch,
       writeCounts,
+      comReputationUpdates,
       uname,
       imageUrl,
       fullname,
@@ -152,9 +179,28 @@ describe("updateReputationIncrement", () => {
       updatedAt: new Date(),
     };
 
-    const [newBatch] = await updateReputationIncrement(params);
+    [batch, writeCounts] = await updateReputationIncrement(params);
 
-    await commitBatch(newBatch);
+    for (const tagId in comReputationUpdates) {
+      for (const reputationType of reputationTypes) {
+        if (!comReputationUpdates[tagId][reputationType]) continue;
+
+        if (comReputationUpdates[tagId][reputationType].isNew) {
+          batch.set(
+            comReputationUpdates[tagId][reputationType].docRef,
+            comReputationUpdates[tagId][reputationType].docData
+          );
+        } else {
+          batch.update(
+            comReputationUpdates[tagId][reputationType].docRef,
+            comReputationUpdates[tagId][reputationType].docData
+          );
+        }
+        [batch, writeCounts] = await checkRestartBatchWriteCounts(batch, writeCounts);
+      }
+    }
+
+    await commitBatch(batch);
 
     const afterRepMonthPointsData = (await repMonthPointQuery.get()).docs[0].data();
 
@@ -175,7 +221,7 @@ describe("updateReputationIncrement", () => {
     await comMonthlyPointsData.clean();
 
     let writeCounts = 0;
-    const batch = db.batch();
+    let batch = db.batch();
     //
 
     const { uname, imageUrl, chooseUname, fName, lName } = await usersData.getData()[0];
@@ -187,9 +233,13 @@ describe("updateReputationIncrement", () => {
 
     const fullname = `${fName} ${lName}`;
 
+    const reputationTypes: string[] = ["All Time", "Monthly", "Weekly", "Others", "Others Monthly", "Others Weekly"];
+    const comReputationUpdates: IComReputationUpdates = {};
+
     const params = {
       batch,
       writeCounts,
+      comReputationUpdates,
       uname,
       imageUrl,
       fullname,
@@ -209,8 +259,28 @@ describe("updateReputationIncrement", () => {
       updatedAt: new Date(),
     };
 
-    const [newBatch] = await updateReputationIncrement(params);
-    await commitBatch(newBatch);
+    [batch, writeCounts] = await updateReputationIncrement(params);
+
+    for (const tagId in comReputationUpdates) {
+      for (const reputationType of reputationTypes) {
+        if (!comReputationUpdates[tagId][reputationType]) continue;
+
+        if (comReputationUpdates[tagId][reputationType].isNew) {
+          batch.set(
+            comReputationUpdates[tagId][reputationType].docRef,
+            comReputationUpdates[tagId][reputationType].docData
+          );
+        } else {
+          batch.update(
+            comReputationUpdates[tagId][reputationType].docRef,
+            comReputationUpdates[tagId][reputationType].docData
+          );
+        }
+        [batch, writeCounts] = await checkRestartBatchWriteCounts(batch, writeCounts);
+      }
+    }
+
+    await commitBatch(batch);
 
     const comMonthPointQuery = await db
       .collection(comMonthlyPointsData.getCollection())

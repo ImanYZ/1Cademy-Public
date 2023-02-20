@@ -25,7 +25,7 @@ const PAPER_ITEMS = [
   },
   {
     id: "paper-102",
-    title: "ACM SIGCSE 2022: Computer Science Education.",
+    title: "ACM SIGCSE 2022: Another victim of covid-19: Computer science education",
     content: `Prior literature suggests that computer science education (CSE) was less affected by the pandemic than other disciplines. However, it is unclear how the pandemic affected the quality and quantity of students' studying in CSE. We measure the impact of the pandemic on the amount and spacing of students' studying in a large introductory computer science course. Spacing is defined as the distribution of studying over multiple sessions, which is shown to improve long-term learning. Using multiple regression models, we analyzed the total number of students' interactions with the eBook and the number of days they used it, as a proxy for studying amount and spacing, respectively. We compared two sequential winter semesters of the course, one during (Winter 2021) and one prior to the pandemic (Winter 2020). After controlling for possible confounders, the results show that students had 1,345.87 fewer eBook interactions and distributed their studying on 2.36 fewer days during the pandemic when compared to the previous semester prior to the pandemic. We also compared four semesters prior to the pandemic (Fall and Winter of 2018 and 2019) to two semesters during the pandemic (Fall 2020 and Winter 2021). We found, on average, students had 3,376.30 fewer interactions with the eBook and studied the eBook on 16.35 fewer days during the pandemic. Contrary to prior studies, our results indicate that the pandemic negatively affected the amount and spacing of studying in an introductory computer science course, which may have a negative impact on their education.`,
     link: "https://dl.acm.org/doi/abs/10.1145/3478431.3499313",
     image: "home/papers/ACM-SIGCSE-2022-Another-Victim-of-COVID-19--light.svg",
@@ -55,8 +55,8 @@ const PAPER_ITEMS = [
     title: "ACM CHI 2020: Engaging Students in Voluntary Question Generation and Linking.",
     content: `Generating multiple-choice questions is known to improve students' critical thinking and deep learning. Visualizing relationships between concepts enhances meaningful learning, students' ability to relate new concepts to previously learned concepts. We designed and deployed a collaborative learning process through which students generate multiple-choice questions and represent the prerequisite knowledge structure between questions as visual links in a shared map, using a variation of Concept Maps that we call "QMap." We conducted a four-month study with 19 undergraduate students. Students sustained voluntary contributions, creating 992 good questions, and drawing 1,255 meaningful links between the questions. Through analyzing self-reports, observations, and usage data, we report on the technical and social design features that led students to sustain their motivation.`,
     link: "https://dl.acm.org/doi/abs/10.1145/3313831.3376882",
-    image: "home/papers/ACM-ICER-2021.svg",
-    imageDark: "home/papers/ACM-ICER-2021--dark.svg",
+    image: "home/papers/ACM-CHI-2020-Engaging-Students.svg",
+    imageDark: "home/papers/ACM-CHI-2020-Engaging-Students.svg",
   },
 
   {

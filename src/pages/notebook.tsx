@@ -2,7 +2,6 @@ import AutoFixHighIcon from "@mui/icons-material/AutoFixHigh";
 import CloseIcon from "@mui/icons-material/Close";
 import CodeIcon from "@mui/icons-material/Code";
 import MyLocationIcon from "@mui/icons-material/MyLocation";
-import ShareIcon from "@mui/icons-material/Share";
 import { Masonry } from "@mui/lab";
 import {
   Button,
@@ -38,6 +37,7 @@ import {
 } from "firebase/firestore";
 import { getDownloadURL, getStorage, ref, uploadBytesResumable } from "firebase/storage";
 import Image from "next/image";
+import NextImage from "next/image";
 import { Suspense, useCallback, useEffect, useRef, useState } from "react";
 /* eslint-disable */ //This wrapper comments it to use react-map-interaction without types
 // @ts-ignore
@@ -64,6 +64,7 @@ import { useTagsTreeView } from "@/hooks/useTagsTreeView";
 import { addSuffixToUrlGMT } from "@/lib/utils/string.utils";
 
 import LoadingImg from "../../public/animated-icon-1cademy.gif";
+import focusViewLogo from "../../public/focus.svg";
 import { MemoizedClustersList } from "../components/map/ClustersList";
 import { MemoizedLinksList } from "../components/map/LinksList";
 import { MemoizedNodeList } from "../components/map/NodesList";
@@ -3733,7 +3734,7 @@ const Dashboard = ({}: DashboardProps) => {
                 setFocusView({ isEnabled: true, selectedNode: nodeBookState.selectedNode || "" });
               }}
             >
-              <ShareIcon />
+              <NextImage src={focusViewLogo} alt="logo 1cademy" width="24px" height="24px" />
             </IconButton>
           </Tooltip>
           {/* end Data from map */}
