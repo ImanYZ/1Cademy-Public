@@ -27,7 +27,7 @@ const NodeHeader = ({
   setFocusView,
 }: NodeHeaderProps) => {
   return (
-    <Box sx={{ display: "flex", alignItems: "center", ...sx }}>
+    <Box sx={{ display: "flex", alignItems: "center", justifyContent: "flex-end", mt: "-14px", mb: "-10px", ...sx }}>
       <Tooltip title="Focused mode">
         <IconButton color="inherit" onClick={() => setFocusView()} aria-label="focus-mode" size="small">
           <UnfoldMoreIcon fontSize="inherit" sx={{ transform: "rotate(45deg)" }} />
