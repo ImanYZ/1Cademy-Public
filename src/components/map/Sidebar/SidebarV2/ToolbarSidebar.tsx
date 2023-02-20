@@ -641,7 +641,7 @@ export const ToolbarSidebar = ({
       </Tooltip>
 
       <SidebarWrapper
-        id="sidebarWrapper-toolbar"
+        id="sidebar-wrapper-toolbar"
         title=""
         open={open}
         onClose={onClose}

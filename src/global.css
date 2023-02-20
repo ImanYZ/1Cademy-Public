@@ -1342,7 +1342,7 @@ button.MuiTab-textColorInherit:focus {
   width: 160px;
 }
 
-MiniUserPrifilePointsContainer {
+.MiniUserPrifilePointsContainer {
   display: grid;
   grid-template-columns: auto auto auto;
   grid-template-rows: 40px 40px;
@@ -1350,7 +1350,7 @@ MiniUserPrifilePointsContainer {
   margin-bottom: 19px;
 }
 
-MiniUserPrifilePointsContainer .MiniUserProfilePoints {
+.MiniUserPrifilePointsContainer .MiniUserProfilePoints {
   display: flex;
   justify-content: flex-start;
   align-items: center;
@@ -1359,11 +1359,11 @@ MiniUserPrifilePointsContainer .MiniUserProfilePoints {
   height: 40px;
 }
 
-MiniUserPrifilePointsContainer .MiniUserProfilePoints.LeftPoints {
+.MiniUserPrifilePointsContainer .MiniUserProfilePoints.LeftPoints {
   margin-left: 60px;
 }
 
-MiniUserPrifilePointsContainer .MiniUserProfilePoints svg,
+.MiniUserPrifilePointsContainer .MiniUserProfilePoints svg,
 #MiniUserPrifileInstitution img,
 #MiniUserPrifileTotalPoints svg {
   margin-right: 12px;

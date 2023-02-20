@@ -1,4 +1,4 @@
-import { Box, Typography } from "@mui/material";
+import { Typography } from "@mui/material";
 
 import { Step } from "../../hooks/useInteractiveTutorial";
 
@@ -16,25 +16,33 @@ export const NODE_STEPS: Step[] = [
     anchor: "",
     disabledElements: [],
   },
+
   {
     targetId: "01",
     childTargetId: "01-node-header",
     title: "Nodes - Node Header",
     description: (
-      <>
-        <Typography variant="body1" sx={{ mb: "16px" }}>
-          Node headers are one of the ways that you can manipulate what you see on the knowledge graph.
-        </Typography>
-        <Typography variant="body1" sx={{ mb: "16px" }}>
-          In the header are four buttons.
-        </Typography>
-      </>
+      <Typography variant="body1" sx={{ mb: "16px" }}>
+        Node headers are one of the ways that you can manipulate what you see on the knowledge graph.
+      </Typography>
     ),
     tooltipPos: "top",
     anchor: "",
     disabledElements: [],
   },
-
+  {
+    targetId: "01",
+    childTargetId: "01-node-header",
+    title: "Nodes - Node Header",
+    description: (
+      <Typography variant="body1" sx={{ mb: "16px" }}>
+        In the header are four buttons.
+      </Typography>
+    ),
+    tooltipPos: "top",
+    anchor: "",
+    disabledElements: [],
+  },
   {
     targetId: "01",
     childTargetId: "01-hiden-button",
@@ -93,24 +101,119 @@ export const NODE_STEPS: Step[] = [
   {
     targetId: "01",
     childTargetId: "01-node-title",
-    title: "Nodes - Node Body",
+    title: "Nodes - Node Title",
     description: (
-      <>
-        <Typography variant="body1" sx={{ mb: "16px" }}>
-          This is the title.
-        </Typography>
-        <Box component={"ul"}>
-          <Box component={"li"}>We want a title that is concise and accurately describes the information within.</Box>
-          <Box component={"li"}>
-            This means that you need to consider if the title is duplicated or would likely be duplicated.
-          </Box>
-          <Box component={"li"}>
-            For example, <b>“growth”</b> could be used in a number of titles in a number of subjects. Are we talking
-            about an organism growing, a population growing, or economic growth? Make sure the title addresses what is
-            specifically being discussed.
-          </Box>
-        </Box>
-      </>
+      <Typography variant="body1" sx={{ mb: "16px" }}>
+        This is the title.
+      </Typography>
+    ),
+    tooltipPos: "top",
+    anchor: "",
+    disabledElements: [],
+  },
+  {
+    targetId: "01",
+    childTargetId: "01-node-title",
+    title: "Nodes Body - Node Title",
+    description: (
+      <Typography variant="body1" sx={{ mb: "16px" }}>
+        We want a title that is concise and accurately describes the information within.
+      </Typography>
+    ),
+    tooltipPos: "top",
+    anchor: "",
+    disabledElements: [],
+  },
+  {
+    targetId: "01",
+    childTargetId: "01-node-title",
+    title: "Nodes Body - Node Title",
+    description: (
+      <Typography variant="body1" sx={{ mb: "16px" }}>
+        This means that you need to consider if the title is duplicated or would likely be duplicated.
+      </Typography>
+    ),
+    tooltipPos: "top",
+    anchor: "",
+    disabledElements: [],
+  },
+  {
+    targetId: "01",
+    childTargetId: "01-node-title",
+    title: "Nodes Body - Node Title",
+    description: (
+      <Typography variant="body1" sx={{ mb: "16px" }}>
+        For example, <b>“growth”</b> could be used in a number of titles in a number of subjects. Are we talking about
+        an organism growing, a population growing, or economic growth? Make sure the title addresses what is
+        specifically being discussed.
+      </Typography>
+    ),
+    tooltipPos: "top",
+    anchor: "",
+    disabledElements: [],
+  },
+  {
+    targetId: "01",
+    childTargetId: "01-node-content",
+    title: "Node Body - Node Content",
+    description: (
+      <Typography variant="body1" sx={{ mb: "16px" }}>
+        This is the content.
+      </Typography>
+    ),
+    tooltipPos: "top",
+    anchor: "",
+    disabledElements: [],
+  },
+  {
+    targetId: "01",
+    childTargetId: "01-node-content",
+    title: "Node Body - Node Content",
+    description: (
+      <Typography variant="body1" sx={{ mb: "16px" }}>
+        The content of a node describes what is stated in a title.
+      </Typography>
+    ),
+    tooltipPos: "top",
+    anchor: "",
+    disabledElements: [],
+  },
+  {
+    targetId: "01",
+    childTargetId: "01-node-content",
+    title: "Node Body - Node Content",
+    description: (
+      <Typography variant="body1" sx={{ mb: "16px" }}>
+        We want the content to be clear, concise, and accurate.
+      </Typography>
+    ),
+    tooltipPos: "top",
+    anchor: "",
+    disabledElements: [],
+  },
+  {
+    targetId: "01",
+    childTargetId: "01-node-content",
+    title: "Node Body - Node Content",
+    description: (
+      <Typography variant="body1" sx={{ mb: "16px" }}>
+        Beyond normal written content, nodes accept basic markdown to make text bold or italic, and to produce ordered
+        and unordered lists.
+      </Typography>
+    ),
+    tooltipPos: "top",
+    anchor: "",
+    disabledElements: [],
+  },
+  {
+    targetId: "01",
+    childTargetId: "01-node-content",
+    title: "Node Body - Node Content",
+    description: (
+      <Typography variant="body1" sx={{ mb: "16px" }}>
+        Beyond normal written content, nodes accept basic markdown to make text bold or italic, and to produce ordered
+        and unordered lists.
+      </Typography>
     ),
     tooltipPos: "top",
     anchor: "",
