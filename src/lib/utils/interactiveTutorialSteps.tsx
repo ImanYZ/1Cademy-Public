@@ -161,9 +161,19 @@ export const NOTEBOOK_STEPS: Step[] = [
   {
     targetId: "user-settings-picture",
     title: "Sidebar: Picture",
-    description: "It is not required that you add a profile picture, but it is recommended",
+    description: "It is not required that you add a profile picture, but it is recommended.",
+    tooltipPos: "right",
+    anchor: "portal",
+    disabledElements: [],
+  },
+  {
+    targetId: "user-settings-picture",
+    title: "Sidebar: Picture",
+    description: "To add a picture click on this icon and upload a picture saved on your computer.",
     tooltipPos: "right",
     anchor: "portal",
     disabledElements: [],
   },
 ];
+//1 user-settings-community-tag
+//

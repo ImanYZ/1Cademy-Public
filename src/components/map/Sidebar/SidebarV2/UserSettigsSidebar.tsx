@@ -951,7 +951,11 @@ const UserSettigsSidebar = ({
           <div id="MiniUserPrifileIdentity" className="MiniUserPrifileIdentityMobile">
             <div id="MiniUserPrifileName">{user.chooseUname ? user.uname : `${user.fName} ${user.lName}`}</div>
             <div id="MiniUserPrifileTag">
-              <MemoizedMetaButton style={{ padding: "0px" }} onClick={() => choosingNodeClick("Tag")}>
+              <MemoizedMetaButton
+                id="user-settings-community-tag"
+                style={{ padding: "0px" }}
+                onClick={() => choosingNodeClick("Tag")}
+              >
                 <div className="AccountSettingsButton">
                   <LocalOfferIcon
                     sx={{ marginRight: "8px" }}

@@ -23,6 +23,7 @@ type MetaButtonProps = {
   onDoubleClick?: any;
   round?: boolean;
   style?: any;
+  id?: string;
 };
 
 const MetaButton = (props: MetaButtonProps) => {
@@ -50,6 +51,7 @@ const MetaButton = (props: MetaButtonProps) => {
     return (
       <Tooltip title={props.tooltip || ""} placement={props.tooltipPosition} disableInteractive>
         <button
+          id={props.id}
           className={
             // (isSubmitting
             //   ? "disabled MetaButton waves-effect waves-light grey-text hoverable" :
@@ -80,7 +82,9 @@ const MetaButton = (props: MetaButtonProps) => {
   } else {
     return (
       <Tooltip title={props.tooltip ?? ""} placement={props.tooltipPosition || "bottom"}>
-        <Box className="MetaButton">{props.children}</Box>
+        <Box id={props.id} className="MetaButton">
+          {props.children}
+        </Box>
       </Tooltip>
       // <span className={"MetaButton" + ("tooltip" in props && props.tooltip ? " Tooltip" : "")}>
       //   {props.children}
