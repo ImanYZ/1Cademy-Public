@@ -598,10 +598,13 @@ const Node = ({
         top: top ? top : 1000,
         width: width,
         transition: "0.3s",
+        padding: "13px 13px 0px 13px",
       }}
     >
       {/* INFO: uncomment this only on develope */}
-      {process.env.NODE_ENV === "development" && identifier}
+      {process.env.NODE_ENV === "development" && (
+        <Typography sx={{ position: "absolute", top: "-2px" }}>{identifier}</Typography>
+      )}
 
       {open ? (
         <>
@@ -659,6 +662,17 @@ const Node = ({
               </Box>
             )}
 
+            {!editable && !unaccepted && !nodeBookState.choosingNode /* && !choosingNode */ && (
+              <MemoizedNodeHeader
+                id={identifier}
+                setFocusView={() => setFocusView({ isEnabled: true, selectedNode: identifier })}
+                open={open}
+                onToggleNode={toggleNodeHandler}
+                onHideOffsprings={hideOffspringsHandler}
+                onHideNodeHandler={hideNodeHandler}
+                // sx={{ position: "absolute", right: "10px", top: "0px" }}
+              />
+            )}
             <Editor
               id={`${identifier}-title`}
               label="Enter the node title:"
@@ -673,17 +687,6 @@ const Node = ({
               editOption={option}
             />
             {editable && <Box sx={{ mb: "12px" }}></Box>}
-            {!editable && !unaccepted && !nodeBookState.choosingNode /* && !choosingNode */ && (
-              <MemoizedNodeHeader
-                id={identifier}
-                setFocusView={() => setFocusView({ isEnabled: true, selectedNode: identifier })}
-                open={open}
-                onToggleNode={toggleNodeHandler}
-                onHideOffsprings={hideOffspringsHandler}
-                onHideNodeHandler={hideNodeHandler}
-                sx={{ position: "absolute", right: "10px", top: "0px" }}
-              />
-            )}
             {/* </div> */}
             <div className="NodeContent" data-hoverable={true}>
               <Editor
@@ -1064,6 +1067,17 @@ const Node = ({
         </>
       ) : (
         <div className="card-content">
+          {!nodeBookState.choosingNode && (
+            <MemoizedNodeHeader
+              id={identifier}
+              setFocusView={() => setFocusView({ isEnabled: true, selectedNode: identifier })}
+              open={open}
+              onToggleNode={toggleNodeHandler}
+              onHideOffsprings={hideOffspringsHandler}
+              onHideNodeHandler={hideNodeHandler}
+              // sx={{ position: "absolute", right: "10px", top: "0px" }}
+            />
+          )}
           {/* <div className="card-title"> */}
           <div className="NodeTitleClosed">
             <Editor
@@ -1074,17 +1088,6 @@ const Node = ({
               sxPreview={{ fontSize: "25px" }}
             />
           </div>
-          {!nodeBookState.choosingNode && (
-            <MemoizedNodeHeader
-              id={identifier}
-              setFocusView={() => setFocusView({ isEnabled: true, selectedNode: identifier })}
-              open={open}
-              onToggleNode={toggleNodeHandler}
-              onHideOffsprings={hideOffspringsHandler}
-              onHideNodeHandler={hideNodeHandler}
-              sx={{ position: "absolute", right: "10px", top: "0px" }}
-            />
-          )}
           <div className="footer">
             <MemoizedNodeFooter
               open={false}
