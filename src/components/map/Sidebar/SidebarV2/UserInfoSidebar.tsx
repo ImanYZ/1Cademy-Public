@@ -273,6 +273,7 @@ const UserInfoSidebar = ({ open, onClose, theme, openLinkedNode, username }: Use
 
   return (
     <SidebarWrapper
+      id="sidebar-wrapper-user-info"
       title=""
       open={open}
       onClose={onClose}

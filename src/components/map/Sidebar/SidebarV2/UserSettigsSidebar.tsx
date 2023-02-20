@@ -941,6 +941,7 @@ const UserSettigsSidebar = ({
       >
         <div id="MiniUserPrifileHeader" className="MiniUserProfileHeaderMobile">
           <ProfileAvatar
+            id="user-settings-picture"
             userId={user.userId}
             userImage={user.imageUrl}
             setUserImage={setUserImage}
@@ -1083,6 +1084,7 @@ const UserSettigsSidebar = ({
 
   return (
     <SidebarWrapper
+      id="sidebar-wrapper-user-settings"
       title=""
       contentSignalState={contentSignalState}
       open={open}

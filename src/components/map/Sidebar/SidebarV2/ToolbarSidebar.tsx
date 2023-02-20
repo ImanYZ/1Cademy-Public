@@ -179,6 +179,7 @@ export const ToolbarSidebar = ({
 
           {/* User info button */}
           <MemoizedUserStatusSettings
+            id="toolbar-profile-button"
             user={user}
             totalPoints={reputation?.totalPoints || 0}
             totalPositives={reputation?.positives || 0}
@@ -638,6 +639,7 @@ export const ToolbarSidebar = ({
       </Tooltip>
 
       <SidebarWrapper
+        id="sidebarWrapper-toolbar"
         title=""
         open={open}
         onClose={onClose}

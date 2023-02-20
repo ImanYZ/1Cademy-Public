@@ -78,9 +78,9 @@ export const Tutorial = ({
           backgroundColor: "#555555a9",
           transition: "top 1s ease-out,left 1s ease-out",
           boxSizing: "border-box",
-          zIndex: 999,
           display: "grid",
           placeItems: "center",
+          zIndex: 99999,
         }}
       >
         <div
@@ -99,11 +99,7 @@ export const Tutorial = ({
           <p>{currentStep.description}</p>
           <button onClick={onPreviousStep}>{"<<"}</button>
 
-          {currentStepIdx < stepsLength - 1 && (
-            <button onClick={onNextStep} style={{ zIndex: 898999 }}>
-              {">>"}
-            </button>
-          )}
+          {currentStepIdx < stepsLength - 1 && <button onClick={onNextStep}>{">>"}</button>}
           {currentStepIdx === stepsLength - 1 && <button onClick={onNextStep}>{"Finalize"}</button>}
         </div>
       </div>
@@ -124,7 +120,7 @@ export const Tutorial = ({
         p: "24px 32px",
         borderRadius: "8px",
         color: "white",
-        zIndex: 20,
+        zIndex: 99999,
         //   pointerEvents: "none",
       }}
     >

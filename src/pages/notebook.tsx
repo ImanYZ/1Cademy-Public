@@ -385,10 +385,12 @@ const Dashboard = ({}: DashboardProps) => {
     if (!currentStep) return setTargetClientRect({ width: 0, height: 0, top: 0, left: 0 });
 
     if (currentStep.anchor) {
-      if (!currentStep.childTargetId) return;
-      const targetElement = document.getElementById(currentStep.childTargetId);
+      if (!currentStep.targetId) return;
+
+      const targetElement = document.getElementById(currentStep.targetId);
 
       if (!targetElement) return;
+
       targetElement.style.border = "4px dashed #ffc813";
       const elementRect = targetElement.getBoundingClientRect();
 
