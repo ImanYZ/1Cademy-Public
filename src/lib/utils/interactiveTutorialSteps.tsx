@@ -236,4 +236,210 @@ export const NOTEBOOK_STEPS: Step[] = [
     anchor: "portal",
     disabledElements: [],
   },
+
+  // ---------------------------------------------------------------
+  // SEARCH
+  {
+    targetId: "user-settings-picture",
+    title: "Search",
+    description: "1Cademy has a search engine that can be used to help you find a node, reference, or topic.",
+    tooltipPos: "right",
+    anchor: "portal",
+    disabledElements: [],
+  },
+  {
+    targetId: "user-settings-picture",
+    title: "Search",
+    description: "To search click on this search icon and enter your query.",
+    tooltipPos: "right",
+    anchor: "portal",
+    disabledElements: [],
+  },
+  {
+    targetId: "user-settings-picture",
+    title: "Search",
+    description: "Beyond searching terms there are a number of ways to refine your search.",
+    tooltipPos: "right",
+    anchor: "portal",
+    disabledElements: [],
+  },
+  {
+    targetId: "user-settings-picture",
+    title: "Search",
+    description:
+      "You can search by tags by clicking this icon and refining your search to one or more selected tags representing information domains and communities.",
+    tooltipPos: "right",
+    anchor: "portal",
+    disabledElements: [],
+  },
+  {
+    targetId: "user-settings-picture",
+    title: "Search",
+    description: "You can also refine your search by how recently nodes were created or edited.",
+    tooltipPos: "right",
+    anchor: "portal",
+    disabledElements: [],
+  },
+  {
+    targetId: "user-settings-picture",
+    title: "Search",
+    description:
+      "Finally you can further sort by: last viewed, date modified, proposals, upvotes, downvotes, or net votes with this icon.",
+    tooltipPos: "right",
+    anchor: "portal",
+    disabledElements: [],
+  },
+  {
+    targetId: "user-settings-picture",
+    title: "Search",
+    description:
+      "After entering search terms, you can select one of the nodes that are retrieved in this list and it will take you to that node.",
+    tooltipPos: "right",
+    anchor: "portal",
+    disabledElements: [],
+  },
+
+  // ---------------------------------------------------------------
+  // BOOKMARTS/STUDIED
+  {
+    targetId: "user-settings-picture",
+    title: "Bookmark/Studied",
+    description:
+      "To understand bookmarking, it is important to understand the mechanism for marking nodes as studied or unstudied.",
+    tooltipPos: "right",
+    anchor: "portal",
+    disabledElements: [],
+  },
+  // ---------------------------------------------------------------
+  {
+    targetId: "user-settings-picture",
+    title: "Bookmark/Studied: Studied",
+    description: "Marking nodes as studied is a great way to keep track of your progress on 1Cademy.",
+    tooltipPos: "right",
+    anchor: "portal",
+    disabledElements: [],
+  },
+  {
+    targetId: "user-settings-picture",
+    title: "Bookmark/Studied: Studied",
+    description: "Unstudied nodes have a red border like this.",
+    tooltipPos: "right",
+    anchor: "portal",
+    disabledElements: [],
+  },
+  {
+    targetId: "user-settings-picture",
+    title: "Bookmark/Studied: Studied",
+    description:
+      "By clicking this envelope icon in the footer, it markes the node as studied and the border becomes yellow",
+    tooltipPos: "right",
+    anchor: "portal",
+    disabledElements: [],
+  },
+  {
+    targetId: "user-settings-picture",
+    title: "Bookmark/Studied: Studied",
+    description:
+      "A node will remain studied, with a yellow border, until it is changed. If this occurs it will become unstudied, with a red border, again. ",
+    tooltipPos: "right",
+    anchor: "portal",
+    disabledElements: [],
+  },
+  // ---------------------------------------------------------------
+  {
+    targetId: "user-settings-picture",
+    title: "Bookmark/Studied: Bookmark",
+    description: "To bookmark an important node, click this banner icon.",
+    tooltipPos: "right",
+    anchor: "portal",
+    disabledElements: [],
+  },
+  {
+    targetId: "user-settings-picture",
+    title: "Bookmark/Studied: Bookmark",
+    description: "If this node changes, there will be a notification in this bookmark updates tab.",
+    tooltipPos: "right",
+    anchor: "portal",
+    disabledElements: [],
+  },
+  {
+    targetId: "user-settings-picture",
+    title: "Bookmark/Studied: Bookmark",
+    description:
+      "Only nodes that have been designated as unstudied (through the process previously described) can show up in the bookmark updates tab",
+    tooltipPos: "right",
+    anchor: "portal",
+    disabledElements: [],
+  },
+  {
+    targetId: "user-settings-picture",
+    title: "Bookmark/Studied: Bookmark",
+    description: "To view the node in the bookmark updates tab, just click on the title",
+    tooltipPos: "right",
+    anchor: "portal",
+    disabledElements: [],
+  },
+  {
+    targetId: "user-settings-picture",
+    title: "Bookmark/Studied: Bookmark",
+    description: "You can click on the banner icon of bookmarked node to make it so that it is no longer bookmarked",
+    tooltipPos: "right",
+    anchor: "portal",
+    disabledElements: [],
+  },
+
+  // ---------------------------------------------------------------
+  // PENDING LIST
+  {
+    targetId: "user-settings-picture",
+    title: "Pending List",
+    description: "The pending list can be viewed by clicking this tab.",
+    tooltipPos: "right",
+    anchor: "portal",
+    disabledElements: [],
+  },
+  {
+    targetId: "user-settings-picture",
+    title: "Pending List",
+    description: "You can view all the proposed nodes or changes that you have made.",
+    tooltipPos: "right",
+    anchor: "portal",
+    disabledElements: [],
+  },
+  {
+    targetId: "user-settings-picture",
+    title: "Pending List",
+    description: "By clicking on a pending proposed node you can view the node that is being proposed.",
+    tooltipPos: "right",
+    anchor: "portal",
+    disabledElements: [],
+  },
+  {
+    targetId: "user-settings-picture",
+    title: "Pending List",
+    description: "You can also view accepted proposals and similarly click on them to be taken to them on the map.",
+    tooltipPos: "right",
+    anchor: "portal",
+    disabledElements: [],
+  },
+  {
+    targetId: "user-settings-picture",
+    title: "Pending List",
+    description:
+      "Getting proposal accepted is an important process on 1Cademy and will be covered in more detail later.",
+    tooltipPos: "right",
+    anchor: "portal",
+    disabledElements: [],
+  },
+  // ---------------------------------------------------------------
+  // PENDING LIST
+  {
+    targetId: "user-settings-picture",
+    title: "Pending List",
+    description:
+      "Getting proposal accepted is an important process on 1Cademy and will be covered in more detail later.",
+    tooltipPos: "right",
+    anchor: "portal",
+    disabledElements: [],
+  },
 ];
