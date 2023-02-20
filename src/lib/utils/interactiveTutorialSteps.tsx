@@ -437,8 +437,296 @@ export const NOTEBOOK_STEPS: Step[] = [
   {
     targetId: "user-settings-picture",
     title: "Pending List",
+    description: "The pending list can be viewed by clicking this tab",
+    tooltipPos: "right",
+    anchor: "portal",
+    disabledElements: [],
+  },
+  {
+    targetId: "user-settings-picture",
+    title: "Pending List",
+    description: "You can view all the proposed nodes or changes that you have made",
+    tooltipPos: "right",
+    anchor: "portal",
+    disabledElements: [],
+  },
+  {
+    targetId: "user-settings-picture",
+    title: "Pending List",
+    description: "By clicking on a pending proposed node you can view the node that is being proposed.",
+    tooltipPos: "right",
+    anchor: "portal",
+    disabledElements: [],
+  },
+  {
+    targetId: "user-settings-picture",
+    title: "Pending List",
+    description: "You can also view accepted proposals and similarly click on them to be taken to them on the map.",
+    tooltipPos: "right",
+    anchor: "portal",
+    disabledElements: [],
+  },
+  {
+    targetId: "user-settings-picture",
+    title: "Pending List",
     description:
       "Getting proposal accepted is an important process on 1Cademy and will be covered in more detail later.",
+    tooltipPos: "right",
+    anchor: "portal",
+    disabledElements: [],
+  },
+
+  // ---------------------------------------------------------------
+  // LEADERBOARD
+  {
+    targetId: "user-settings-picture",
+    title: "Leaderboard",
+    description:
+      "a leader board for activity for your community can be viewed here. The score is based on net votes (upvotes minus downvotes) that your nodes in the selected community have received",
+    tooltipPos: "right",
+    anchor: "portal",
+    disabledElements: [],
+  },
+  {
+    targetId: "user-settings-picture",
+    title: "Leaderboard",
+    description:
+      "By clicking on this trophy icon the leaderboard can be based on different criteria such as weekly, monthly, or all time",
+    tooltipPos: "right",
+    anchor: "portal",
+    disabledElements: [],
+  },
+
+  // ---------------------------------------------------------------
+  // Nodes
+  {
+    targetId: "user-settings-picture",
+    title: "Nodes",
+    description:
+      "We are familiar with nodes and their main content, but it is important to learn about their header and footer to understand how you can manipulate the map and interact with the nodes.",
+    tooltipPos: "right",
+    anchor: "portal",
+    disabledElements: [],
+  },
+  {
+    targetId: "user-settings-picture",
+    title: "Nodes - Node Header",
+    description: "Node headers are one of the ways that you can manipulate what you see on the knowledge graph.",
+    tooltipPos: "right",
+    anchor: "portal",
+    disabledElements: [],
+  },
+  {
+    targetId: "user-settings-picture",
+    title: "Nodes - Node Header",
+    description: "In the header are four buttons.",
+    tooltipPos: "right",
+    anchor: "portal",
+    disabledElements: [],
+  },
+  {
+    targetId: "user-settings-picture",
+    title: "Nodes - Node Header",
+    description:
+      "This one, which we looked at earlier closes the node. Once again, it just removes it from your view, it does not delete the node from the platform.",
+    tooltipPos: "right",
+    anchor: "portal",
+    disabledElements: [],
+  },
+  {
+    targetId: "user-settings-picture",
+    title: "Nodes - Node Header",
+    description: "This one closes all the open children nodes of the node it is clicked on.",
+    tooltipPos: "right",
+    anchor: "portal",
+    disabledElements: [],
+  },
+  {
+    targetId: "user-settings-picture",
+    title: "Nodes - Node Header",
+    description: "See the branches of children were all removed from view.",
+    tooltipPos: "right",
+    anchor: "portal",
+    disabledElements: [],
+  },
+  {
+    targetId: "user-settings-picture",
+    title: "Nodes - Node Header",
+    description: "This one minimizes the content in a node so only the title is displayed.",
+    tooltipPos: "right",
+    anchor: "portal",
+    disabledElements: [],
+  },
+  {
+    targetId: "user-settings-picture",
+    title: "Nodes - Node Header",
+    description: "This last one switches the view to focus mode.",
+    tooltipPos: "right",
+    anchor: "portal",
+    disabledElements: [],
+  },
+  {
+    targetId: "user-settings-picture",
+    title: "Nodes - Node Header",
+    description: "Here you see the node in focus and have learn choices to focus parent or children nodes. ",
+    tooltipPos: "right",
+    anchor: "portal",
+    disabledElements: [],
+  },
+  {
+    targetId: "user-settings-picture",
+    title: "Nodes - Node Header",
+    description: "You click this button to return to the knowledge graph.",
+    tooltipPos: "right",
+    anchor: "portal",
+    disabledElements: [],
+  },
+  // ---------------------------------------------------------------
+  // Nodes -body
+  {
+    targetId: "user-settings-picture",
+    title: "Nodes - Node Body",
+    description: "Each node has a body that consists of a title and content.",
+    tooltipPos: "right",
+    anchor: "portal",
+    disabledElements: [],
+  },
+  {
+    targetId: "user-settings-picture",
+    title: "Nodes - Node Body",
+    description: "This is the title.",
+    tooltipPos: "right",
+    anchor: "portal",
+    disabledElements: [],
+  },
+  {
+    targetId: "user-settings-picture",
+    title: "Node Body - Title",
+    description: "We want a title that is concise and accurately describes the information within.",
+    tooltipPos: "right",
+    anchor: "portal",
+    disabledElements: [],
+  },
+  {
+    targetId: "user-settings-picture",
+    title: "Node Body - Title",
+    description: "This means that you need to consider if the title is duplicated or would likely be duplicated.",
+    tooltipPos: "right",
+    anchor: "portal",
+    disabledElements: [],
+  },
+  {
+    targetId: "user-settings-picture",
+    title: "Node Body - Title",
+    description:
+      "For example, “growth” could be used in a number of titles in a number of subjects. Are we talking about an organism growing, a population growing, or economic growth? Make sure the title addresses what is specifically being discussed.",
+    tooltipPos: "right",
+    anchor: "portal",
+    disabledElements: [],
+  },
+  // content.
+  {
+    targetId: "user-settings-picture",
+    title: "Node Body - Content",
+    description: "The content of a node describes what is stated in a title",
+    tooltipPos: "right",
+    anchor: "portal",
+    disabledElements: [],
+  },
+  {
+    targetId: "user-settings-picture",
+    title: "Node Body - Content",
+    description: "We want the content to be clear, concise, and accurate",
+    tooltipPos: "right",
+    anchor: "portal",
+    disabledElements: [],
+  },
+  // tools to write title and content
+  {
+    targetId: "user-settings-picture",
+    title: "Node - Node Body",
+    description:
+      "Beyond normal written content, nodes accept basic markdown to make text bold or italic, and to produce ordered and unordered lists. ",
+    tooltipPos: "right",
+    anchor: "portal",
+    disabledElements: [],
+  },
+  {
+    targetId: "user-settings-picture",
+    title: "Node - Node Body",
+    description: "For bold text you place two stars before and after the text you would like to make bold.",
+    tooltipPos: "right",
+    anchor: "portal",
+    disabledElements: [],
+  },
+  {
+    targetId: "user-settings-picture",
+    title: "Node - Node Body",
+    description: "For italicized text you place one star before and after teh text you would like to make italicized.",
+    tooltipPos: "right",
+    anchor: "portal",
+    disabledElements: [],
+  },
+  {
+    targetId: "user-settings-picture",
+    title: "Node - Node Body",
+    description:
+      "For an ordered list you type the number, a period, and then a space before each listed item. Listed items are placed on their own line.",
+    tooltipPos: "right",
+    anchor: "portal",
+    disabledElements: [],
+  },
+  {
+    targetId: "user-settings-picture",
+    title: "Node - Node Body",
+    description:
+      "for an unordered list you type a dash and a space before each listed item. Listed items are placed on their own line. ",
+    tooltipPos: "right",
+    anchor: "portal",
+    disabledElements: [],
+  },
+  {
+    targetId: "user-settings-picture",
+    title: "Node - Node Body",
+    description: "You can also use math jax to create mathematical formulas.",
+    tooltipPos: "right",
+    anchor: "portal",
+    disabledElements: [],
+  },
+  {
+    targetId: "user-settings-picture",
+    title: "Node - Node Body",
+    description:
+      "To learn more about how to write mathematical formulas look at this page: https://math.meta.stackexchange.com/questions/5020/mathjax-basic-tutorial-and-quick-reference ",
+    tooltipPos: "right",
+    anchor: "portal",
+    disabledElements: [],
+  },
+
+  // ---------------------------------------------------------------
+  // Nodes - Footer
+  {
+    targetId: "user-settings-picture",
+    title: "Node - Node Footer",
+    description: "The node footer has many icons.",
+    tooltipPos: "right",
+    anchor: "portal",
+    disabledElements: [],
+  },
+  {
+    targetId: "user-settings-picture",
+    title: "Node - Node Footer",
+    description:
+      "The first is the profile of the top contributor to the node. That is the person that has done the most to make the node in its present form.",
+    tooltipPos: "right",
+    anchor: "portal",
+    disabledElements: [],
+  },
+  {
+    targetId: "user-settings-picture",
+    title: "Node - Node Footer",
+    description:
+      "The first is the profile of the top contributor to the node. That is the person that has done the most to make the node in its present form.",
     tooltipPos: "right",
     anchor: "portal",
     disabledElements: [],
