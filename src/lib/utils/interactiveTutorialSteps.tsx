@@ -174,6 +174,76 @@ export const NOTEBOOK_STEPS: Step[] = [
     anchor: "portal",
     disabledElements: [],
   },
+
+  // ---------------------------------------------------------------
+  {
+    targetId: "user-settings-picture",
+    title: "Sidebar: Community Tag",
+    description: "You will want to make sure that you are using an appropriate community tag",
+    tooltipPos: "right",
+    anchor: "portal",
+    disabledElements: [],
+  },
+  {
+    targetId: "user-settings-picture",
+    title: "Sidebar: Community Tag",
+    description:
+      "This can be viewed here under your name. You will want to make sure that the tag matches your community because any node you create will have this tag by default.",
+    tooltipPos: "right",
+    anchor: "portal",
+    disabledElements: [],
+  },
+  {
+    targetId: "user-settings-picture",
+    title: "Sidebar: Community Tag",
+    description: "To change your community tag, click on the current tag. ",
+    tooltipPos: "right",
+    anchor: "portal",
+    disabledElements: [],
+  },
+  {
+    targetId: "user-settings-picture",
+    title: "Sidebar: Community Tag",
+    description: "A search box will appear and you can write in your community name to search for their tag. ",
+    tooltipPos: "right",
+    anchor: "portal",
+    disabledElements: [],
+  },
+  {
+    targetId: "user-settings-picture",
+    title: "Sidebar: Community Tag",
+    description: "Check the box net to the appropriate tag.",
+    tooltipPos: "right",
+    anchor: "portal",
+    disabledElements: [],
+  },
+  // ---------------------------------------------------------------
+  {
+    targetId: "user-settings-picture",
+    title: "Sidebar: Statistics",
+    description: "On your profile your can view the number of upvotes your contributions have generated here",
+    tooltipPos: "right",
+    anchor: "portal",
+    disabledElements: [],
+  },
+  {
+    targetId: "user-settings-picture",
+    title: "Sidebar: Statistics",
+    description: "you can also see the number of each type of node that you have created. ",
+    tooltipPos: "right",
+    anchor: "portal",
+    disabledElements: [],
+  },
+  // ---------------------------------------------------------------
+  {
+    targetId: "user-settings-picture",
+    title: "Sidebar: Personalization",
+    description:
+      "Under the statistics you have three tabs that allow you to customize your view and add information about yourself.",
+    tooltipPos: "right",
+    anchor: "portal",
+    disabledElements: [],
+  },
 ];
 //1 user-settings-community-tag
 //
