@@ -15,6 +15,7 @@ import OptimizedAvatar from "../OptimizedAvatar";
 // import RoundImage from "./RoundImage";
 
 type UserStatusIconProps = {
+  id?: string;
   uname: string;
   imageUrl: string;
   fullname: string;
@@ -153,6 +154,7 @@ const UserStatusIcon = (props: UserStatusIconProps) => {
   return (
     <Tooltip title={getTooltipTitle()} placement="right">
       <Box
+        id={props.id}
         className={"SidebarButton" + (props.inUserBar ? " inUserBar" : "")}
         // className="SidebarButton"
         onClick={openUserInfo}

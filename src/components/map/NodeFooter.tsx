@@ -386,6 +386,7 @@ const NodeFooter = ({
   return (
     <>
       <Box
+        id={`${identifier}-node-footer`}
         sx={{
           display: "flex",
           alignItems: "center",
@@ -420,6 +421,7 @@ const NodeFooter = ({
               //   />
               <Box onClick={openContributorsSection}>
                 <MemoizedUserStatusIcon
+                  id={`${identifier}-node-footer-user`}
                   uname={user.uname}
                   imageUrl={user.imageUrl || ""}
                   fullname={user.fName + " " + user.lName}
@@ -434,6 +436,7 @@ const NodeFooter = ({
             ) : (
               <Box onClick={openContributorsSection}>
                 <MemoizedUserStatusIcon
+                  id={`${identifier}-node-footer-user`}
                   uname={admin}
                   imageUrl={aImgUrl}
                   fullname={aFullname}
@@ -452,12 +455,14 @@ const NodeFooter = ({
           >
             {/* <NodeTypeIcon nodeType={nodeType} /> */}
 
-            {locked && <NodeTypeIcon nodeType={"locked"} tooltipPlacement={"top"} fontSize={"inherit"} />}
+            {locked && (
+              <NodeTypeIcon id={identifier} nodeType={"locked"} tooltipPlacement={"top"} fontSize={"inherit"} />
+            )}
             {!locked &&
               (editable ? (
                 <MemoizedNodeTypeSelector nodeId={identifier} setNodeParts={setNodeParts} nodeType={nodeType} />
               ) : (
-                <NodeTypeIcon nodeType={nodeType} tooltipPlacement={"top"} fontSize={"inherit"} />
+                <NodeTypeIcon id={identifier} nodeType={nodeType} tooltipPlacement={"top"} fontSize={"inherit"} />
               ))}
             <Tooltip
               title={`This node was last edited at ${dayjs(new Date(changedAt)).hour()}:${dayjs(
@@ -468,6 +473,7 @@ const NodeFooter = ({
               placement={"top"}
             >
               <span
+                id={`${identifier}-node-footer-timestamp`}
                 style={{
                   marginLeft: "10px",
                   display: editable ? "none" : "block",
@@ -482,6 +488,7 @@ const NodeFooter = ({
             {open && (
               <Box sx={{ display: editable || simulated ? "none" : "flex", alignItems: "center", marginLeft: "10px" }}>
                 <ContainedButton
+                  id={`${identifier}-node-footer-propose`}
                   title="Propose/evaluate versions of this node."
                   onClick={proposeNodeImprovementClick}
                   tooltipPosition="top"
@@ -510,6 +517,7 @@ const NodeFooter = ({
                 </ContainedButton>
 
                 <Box
+                  id={`${identifier}-node-footer-votes`}
                   className="tab-double-button-node-footer"
                   sx={{
                     background: theme =>
@@ -522,6 +530,7 @@ const NodeFooter = ({
                   }}
                 >
                   <Box
+                    id={`${identifier}-node-footer-downvotes`}
                     sx={{
                       padding: "2px 0px 2px 5px",
                       borderRadius: "52px 0px 0px 52px",
@@ -578,6 +587,7 @@ const NodeFooter = ({
                     }}
                   />
                   <Box
+                    id={`${identifier}-node-footer-upvotes`}
                     sx={{
                       padding: "2px 5px 2px 5px",
                       borderRadius: "0px 52px 52px 0px",
@@ -811,6 +821,7 @@ const NodeFooter = ({
                       }}
                     >
                       <ContainedButton
+                        id={`${identifier}-node-footer-tags-citations`}
                         title="View tags assigned to this node."
                         onClick={(e: any) => selectTags(e)}
                         tooltipPosition="top"
@@ -848,6 +859,7 @@ const NodeFooter = ({
                 <>
                   {openPart === "References" ? (
                     <Box
+                      id={`${identifier}-node-footer-tags-citations`}
                       onClick={selectReferences}
                       className={"select-tab-button-node-footer"}
                       sx={{
@@ -899,6 +911,7 @@ const NodeFooter = ({
                       }}
                     >
                       <ContainedButton
+                        id={`${identifier}-node-footer-tags-citations`}
                         title="View tags and citations used in this node."
                         onClick={selectReferences}
                         tooltipPosition="top"
@@ -1115,7 +1128,7 @@ const NodeFooter = ({
 
               <IconButton
                 aria-label="more"
-                id="long-button"
+                id={`${identifier}-node-footer-ellipsis`}
                 aria-controls={openMenu ? "long-menu" : undefined}
                 aria-expanded={openMenu ? "true" : undefined}
                 aria-haspopup="true"
@@ -1157,6 +1170,7 @@ const NodeFooter = ({
                     >
                       <MenuItem>
                         <MemoizedMetaButton
+                          id={`${identifier}-node-footer-studied`}
                           tooltip={!isStudied ? 'Mark this node as "studied."' : 'Mark this node as "not studied."'}
                           style={{ padding: "0" }}
                           tooltipPosition="top"

@@ -61,7 +61,7 @@ import { MemoizedUserInfoSidebar } from "@/components/map/Sidebar/SidebarV2/User
 import { MemoizedUserSettingsSidebar } from "@/components/map/Sidebar/SidebarV2/UserSettigsSidebar";
 import { useAuth } from "@/context/AuthContext";
 import { useTagsTreeView } from "@/hooks/useTagsTreeView";
-import { NOTEBOOK_STEPS } from "@/lib/utils/interactiveTutorialSteps";
+import { NODE_STEPS } from "@/lib/utils/nodeTutorialSteps";
 import { addSuffixToUrlGMT } from "@/lib/utils/string.utils";
 
 import LoadingImg from "../../public/animated-icon-1cademy.gif";
@@ -251,7 +251,7 @@ const Dashboard = ({}: DashboardProps) => {
     onNextStep,
     onPreviousStep,
     targetClientRect,
-  } = useInteractiveTutorial({ steps: NOTEBOOK_STEPS });
+  } = useInteractiveTutorial({ steps: NODE_STEPS });
 
   // Scroll to node configs
 
@@ -319,6 +319,16 @@ const Dashboard = ({}: DashboardProps) => {
     },
     [windowHeight, windowInnerLeft, windowInnerRight, windowInnerTop, windowWith]
   );
+
+  useEffect(() => {
+    const cb = (e: any) => {
+      console.log({ target: e?.target, curTarget: e?.currentTarget });
+    };
+    window.document.addEventListener("click", cb);
+    return () => {
+      window.document.removeEventListener("click", cb);
+    };
+  }, []);
 
   useEffect(() => {
     setInnerHeight(window.innerHeight);
@@ -3709,7 +3719,7 @@ const Dashboard = ({}: DashboardProps) => {
             currentStepIdx={currentStepIdx}
             onNextStep={onNextStep}
             onPreviousStep={onPreviousStep}
-            stepsLength={NOTEBOOK_STEPS.length}
+            stepsLength={NODE_STEPS.length}
             targetClientRect={targetClientRect}
           />
         </Portal>
@@ -4260,7 +4270,7 @@ const Dashboard = ({}: DashboardProps) => {
                     currentStepIdx={currentStepIdx}
                     onNextStep={onNextStep}
                     onPreviousStep={onPreviousStep}
-                    stepsLength={NOTEBOOK_STEPS.length}
+                    stepsLength={NODE_STEPS.length}
                     targetClientRect={targetClientRect}
                   />
                 )}

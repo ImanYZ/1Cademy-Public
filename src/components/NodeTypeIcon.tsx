@@ -10,6 +10,7 @@ import MenuBookIcon from "@mui/icons-material/MenuBook";
 // import MoreHorizIcon from "@mui/icons-material/MoreHoriz";
 // import PersonIcon from "@mui/icons-material/Person";
 import ShareIcon from "@mui/icons-material/Share";
+import { Box } from "@mui/material";
 import { SvgIconProps } from "@mui/material/SvgIcon";
 import Tooltip, { TooltipProps } from "@mui/material/Tooltip";
 import { FC } from "react";
@@ -18,11 +19,12 @@ import { NodeType as NodeTypes } from "src/types";
 import { NodeType } from "../knowledgeTypes";
 
 type Props = {
+  id?: string;
   tooltipPlacement?: TooltipProps["placement"];
   nodeType?: NodeType | NodeTypes | "locked";
 } & SvgIconProps;
 
-const NodeTypeIcon: FC<Props> = ({ nodeType, tooltipPlacement = "top", color = "primary", ...rest }) => {
+const NodeTypeIcon: FC<Props> = ({ id, nodeType, tooltipPlacement = "top", color = "primary", ...rest }) => {
   const renderIcon = () => {
     switch (nodeType) {
       case "Code":
@@ -58,7 +60,7 @@ const NodeTypeIcon: FC<Props> = ({ nodeType, tooltipPlacement = "top", color = "
 
   return (
     <Tooltip title={`${nodeType} node`} placement={tooltipPlacement}>
-      {renderIcon()}
+      <Box id={`${id}-node-footer-type`}>{renderIcon()}</Box>
     </Tooltip>
   );
 };
