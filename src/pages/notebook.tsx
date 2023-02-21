@@ -1218,6 +1218,74 @@ const Dashboard = ({}: DashboardProps) => {
   // ---------------------------------------------------------------------
   // ---------------------------------------------------------------------
 
+  const getColumnRows = useCallback((nodes: FullNodesData, column: number) => {
+    let rows: string[] = [];
+    for (const nodeId in nodes) {
+      const node = nodes[nodeId];
+      if (node.left === column) {
+        rows.push(nodeId);
+      }
+    }
+    rows.sort((n1, n2) => (nodes[n1]!.top < nodes[n2]!.top ? -1 : 1));
+    return rows;
+  }, []);
+
+  const processHeightChange = useCallback(
+    (nodeId: string) => {
+      setTimeout(() => {
+        setGraph(graph => {
+          const nodes = graph.nodes;
+          const nodeEl = document.getElementById(nodeId)! as HTMLElement;
+          let height: number = nodeEl.clientHeight;
+          if (isNaN(height)) {
+            height = nodes[nodeId]!.height;
+          }
+
+          let nodesUpdated = false;
+          const nodeData = nodes[nodeId]!;
+          const column = nodeData.left;
+          const rows = getColumnRows(nodes, column);
+          if (rows) {
+            const nodeIdx = rows.indexOf(nodeId);
+            const heightDiff = height - nodes[nodeId]!.height;
+
+            let lastHeight = height;
+            let lastTop = nodes[nodeId]!.top;
+
+            // below of bound
+            for (let idx = nodeIdx + 1; idx < rows.length; idx++) {
+              const _nodeId = rows[idx];
+              const _nodeData = { ...nodes[_nodeId] };
+
+              // if next node doesn't need to move on graph
+              if (_nodeData.top > lastHeight + lastTop) {
+                break;
+              }
+
+              _nodeData.top += heightDiff;
+
+              lastHeight = _nodeData.height;
+              lastTop = _nodeData.top;
+
+              nodesUpdated = true;
+              nodes[_nodeId] = _nodeData;
+            }
+          }
+
+          if (!nodesUpdated) {
+            return graph;
+          }
+
+          return {
+            nodes: { ...nodes },
+            edges: graph.edges,
+          };
+        });
+      }, 200);
+    },
+    [setGraph, getColumnRows]
+  );
+
   const chosenNodeChanged = useCallback(
     (nodeId: string) => {
       setGraph(({ nodes: oldNodes, edges: oldEdges }) => {
@@ -1857,12 +1925,14 @@ const Dashboard = ({}: DashboardProps) => {
             setOpenRecentNodes(true);
           }
         }
+
+        processHeightChange(nodeId);
         nodeBookDispatch({ type: "setSelectedNode", payload: nodeId });
       }
     },
     // TODO: CHECK dependencies
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [user, nodeBookState.choosingNode /*selectionType*/]
+    [user, nodeBookState.choosingNode /*selectionType*/, processHeightChange]
   );
 
   const onNodeShare = useCallback(
