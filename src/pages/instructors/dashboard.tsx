@@ -3,7 +3,7 @@ import { Paper, Typography /* useTheme */, useMediaQuery, useTheme } from "@mui/
 // import { useTheme } from "@mui/material/styles";
 // import useMediaQuery from "@mui/material/useMediaQuery";
 import { Box } from "@mui/system";
-import { collection, doc, getDoc, getDocs, getFirestore, query, where } from "firebase/firestore";
+import { collection, doc, getDoc, getFirestore, onSnapshot, query, where } from "firebase/firestore";
 import { useCallback, useEffect, useState } from "react";
 import {
   BubbleAxis,
@@ -273,30 +273,44 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
         where("tagId", "==", currentSemester.tagId),
         where("deleted", "==", false)
       );
-      const semesterStudentSankeys = await getDocs(q);
-      console.log(
-        "semesterStudentSankeys",
-        semesterStudentSankeys.docs.map(std => std.data())
-      );
-
-      if (semesterStudentSankeys.docs.length) {
-        let _sankeyData: any[] = [];
-        for (const semesterStudentSankey of semesterStudentSankeys.docs) {
-          const _semesterStudentSankey = semesterStudentSankey.data();
-          for (const intraction of _semesterStudentSankey.intractions) {
-            _sankeyData.push({
-              source: studentNameByUname[_semesterStudentSankey.uname],
-              target: studentNameByUname[intraction.uname],
-              upVotes: intraction.upVotes,
-              downVotes: intraction.downVotes,
-              value: intraction.upVotes + intraction.downVotes,
-            });
+      let _sankeyData: any[] = [];
+      onSnapshot(q, async snapshot => {
+        const docChanges = snapshot.docChanges();
+        if (!docChanges.length) {
+          setSankeyData([]);
+          return;
+        }
+        for (let change of docChanges) {
+          const _semesterStudentSankey = change.doc.data();
+          if (change.type === "added") {
+            for (const intraction of _semesterStudentSankey.intractions) {
+              _sankeyData.push({
+                source: studentNameByUname[_semesterStudentSankey.uname],
+                target: studentNameByUname[intraction.uname],
+                upVotes: intraction.upVotes,
+                downVotes: intraction.downVotes,
+                value: intraction.upVotes + intraction.downVotes,
+              });
+            }
+          } else if (change.type === "modified") {
+            const filterSankeyData = _sankeyData.filter(
+              sankey => sankey.source !== studentNameByUname[_semesterStudentSankey.uname]
+            );
+            let newSankeyData: any[] = [];
+            for (const intraction of _semesterStudentSankey.intractions) {
+              newSankeyData.push({
+                source: studentNameByUname[_semesterStudentSankey.uname],
+                target: studentNameByUname[intraction.uname],
+                upVotes: intraction.upVotes,
+                downVotes: intraction.downVotes,
+                value: intraction.upVotes + intraction.downVotes,
+              });
+            }
+            _sankeyData = [...filterSankeyData, ...newSankeyData];
           }
         }
-        setSankeyData(_sankeyData);
-      } else {
-        setSankeyData([]);
-      }
+        setSankeyData([..._sankeyData]);
+      });
     })();
   }, [currentSemester, db, user, students]);
 
@@ -308,21 +322,34 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
     const getSemesterData = async () => {
       const semesterRef = collection(db, "semesterStudentVoteStats");
       const q = query(semesterRef, where("tagId", "==", currentSemester.tagId), where("deleted", "==", false));
-      const semesterDoc = await getDocs(q);
-      if (!semesterDoc.docs.length) {
-        setBubble([]);
-        setStackedBar([]);
-        setThereIsData(false);
-        setSemesterStudentVoteState([]);
+      let semesters: any = [];
+      onSnapshot(q, async snapshot => {
+        const docChanges = snapshot.docChanges();
+        if (!docChanges.length) {
+          setBubble([]);
+          setStackedBar([]);
+          setThereIsData(false);
+          setSemesterStudentVoteState([]);
 
-        return;
-      }
+          return;
+        }
 
-      // semesterStudentVoteState
-      const semester = semesterDoc.docs.map(sem => sem.data() as SemesterStudentVoteStat);
-      setSemesterStudentVoteState(semester);
-      // setSemesterStats(getSemStat(semester));
-      setThereIsData(true);
+        for (let change of docChanges) {
+          if (change.type === "added") {
+            semesters.push(change.doc.data() as SemesterStudentVoteStat);
+          } else if (change.type === "modified") {
+            const index = semesters.findIndex(
+              (semester: SemesterStudentVoteStat) => semester.uname === change.doc.data().uname
+            );
+            semesters[index] = change.doc.data();
+          }
+        }
+        // semesterStudentVoteState
+        setSemesterStudentVoteState([...semesters]);
+        // setSemesterStats(getSemStat(semester));
+        setThereIsData(true);
+      });
+      //const semesterDoc = await getDocs(q);
     };
     getSemesterData();
   }, [currentSemester, db, user]);
@@ -365,6 +392,7 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
     setIsLoading(true);
     const getSemesterStudents = async () => {
       const semesterRef = doc(db, "semesters", currentSemester.tagId);
+
       const semesterDoc = await getDoc(semesterRef);
       if (!semesterDoc.exists()) {
         setSemesterConfig(null);
@@ -397,109 +425,120 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
     const getUserDailyStat = async () => {
       const userDailyStatRef = collection(db, "semesterStudentStats");
       const q = query(userDailyStatRef, where("tagId", "==", currentSemester.tagId), where("deleted", "==", false));
-      const userDailyStatDoc = await getDocs(q);
+      let userDailyStatsIncomplete: SemesterStudentStat[] = [];
+      onSnapshot(q, async snapshot => {
+        const docChanges = snapshot.docChanges();
+        if (!docChanges.length) {
+          setTrendStats({ childProposals: [], editProposals: [], links: [], nodes: [], votes: [], questions: [] });
+          setBoxStats({
+            proposalsPoints: { data: {}, min: 0, max: 1000 },
+            questionsPoints: { data: {}, min: 0, max: 1000 },
+            votesPoints: { data: {}, min: 0, max: 1000 },
+          });
+          setIsLoading(false);
+          setThereIsData(false);
 
-      if (!userDailyStatDoc.docs.length) {
-        setTrendStats({ childProposals: [], editProposals: [], links: [], nodes: [], votes: [], questions: [] });
-        setBoxStats({
-          proposalsPoints: { data: {}, min: 0, max: 1000 },
-          questionsPoints: { data: {}, min: 0, max: 1000 },
-          votesPoints: { data: {}, min: 0, max: 1000 },
-        });
-        setIsLoading(false);
-        setThereIsData(false);
-
-        return;
-      }
-
-      const userDailyStatsIncomplete = userDailyStatDoc.docs.map(dailyStat => dailyStat.data() as SemesterStudentStat);
-      const userDailyStats: ISemesterStudentStat[] = userDailyStatsIncomplete.map(cur => {
-        const daysFixed = cur.days.map(c => ({ day: c.day, chapters: c.chapters ?? [] }));
-        return { ...cur, days: daysFixed };
-      });
-      console.log("res");
-      const res = mapStudentsStatsToDataByDates(userDailyStats);
-      console.log("res");
-      const gg = getGeneralStats(res);
-      console.log("res", res, gg);
-
-      // [{d1}{d2}]
-      // {c:[d1,d2]}
-      const ts = res.reduce(
-        (a: TrendStats, c): TrendStats => {
-          return {
-            childProposals: [...a.childProposals, { date: new Date(c.date), num: c.value.childProposals }],
-            editProposals: [...a.editProposals, { date: new Date(c.date), num: c.value.editProposals }],
-            links: [...a.links, { date: new Date(c.date), num: c.value.links }],
-            nodes: [...a.nodes, { date: new Date(c.date), num: c.value.nodes }],
-            questions: [...a.questions, { date: new Date(c.date), num: c.value.questions }],
-            votes: [...a.votes, { date: new Date(c.date), num: c.value.votes }],
-          };
-        },
-        {
-          childProposals: [],
-          editProposals: [],
-          links: [],
-          nodes: [],
-          questions: [],
-          votes: [],
+          return;
         }
-      );
-      console.log("res:ts", ts);
-      setTrendStats(ts);
+        for (let change of docChanges) {
+          if (change.type === "added") {
+            userDailyStatsIncomplete.push(change.doc.data() as SemesterStudentStat);
+          } else if (change.type === "modified") {
+            const index = userDailyStatsIncomplete.findIndex(
+              (userDailyStat: SemesterStudentStat) => userDailyStat.uname === change.doc.data().uname
+            );
+            userDailyStatsIncomplete[index] = change.doc.data() as SemesterStudentStat;
+          }
+        }
 
-      const proposalsPoints = getBoxPlotData(
-        userDailyStats,
-        "proposals",
-        semesterConfig?.nodeProposals.numPoints,
-        semesterConfig?.nodeProposals.numProposalPerDay
-      );
-      const questionsPoints = getBoxPlotData(
-        userDailyStats,
-        "questions",
-        semesterConfig?.questionProposals.numPoints,
-        semesterConfig?.questionProposals.numQuestionsPerDay
-      );
-      const votesPoints = getBoxPlotData(
-        userDailyStats,
-        "votes",
-        0,
-        0,
-        semesterConfig?.votes.pointIncrementOnAgreement,
-        semesterConfig?.votes.pointDecrementOnAgreement
-      );
-      const { min: minP, max: maxP } = getMaxMinVoxPlotData(proposalsPoints);
-      const { min: minQ, max: maxQ } = getMaxMinVoxPlotData(questionsPoints);
-      const { min: minV, max: maxV } = getMaxMinVoxPlotData(votesPoints);
+        const userDailyStats: ISemesterStudentStat[] = userDailyStatsIncomplete.map(cur => {
+          const daysFixed = cur.days.map(c => ({ day: c.day, chapters: c.chapters ?? [] }));
+          return { ...cur, days: daysFixed };
+        });
+        console.log("res");
+        const res = mapStudentsStatsToDataByDates(userDailyStats);
+        console.log("res");
+        const gg = getGeneralStats(res);
+        console.log("res", res, gg);
 
-      setSemesterStats(gg);
+        // [{d1}{d2}]
+        // {c:[d1,d2]}
+        const ts = res.reduce(
+          (a: TrendStats, c): TrendStats => {
+            return {
+              childProposals: [...a.childProposals, { date: new Date(c.date), num: c.value.childProposals }],
+              editProposals: [...a.editProposals, { date: new Date(c.date), num: c.value.editProposals }],
+              links: [...a.links, { date: new Date(c.date), num: c.value.links }],
+              nodes: [...a.nodes, { date: new Date(c.date), num: c.value.nodes }],
+              questions: [...a.questions, { date: new Date(c.date), num: c.value.questions }],
+              votes: [...a.votes, { date: new Date(c.date), num: c.value.votes }],
+            };
+          },
+          {
+            childProposals: [],
+            editProposals: [],
+            links: [],
+            nodes: [],
+            questions: [],
+            votes: [],
+          }
+        );
+        console.log("res:ts", ts);
+        setTrendStats(ts);
 
-      // setSemesterStats(prev => {
-      //   if (!prev) return null;
-      //   const res = {
-      //     ...prev,
-      //     newNodeProposals: getChildProposal(userDailyStats),
-      //     improvements: getEditProposals(userDailyStats),
-      //   };
-      //   return res;
-      // });
-      setBoxStats({
-        proposalsPoints: { data: proposalsPoints, min: minP, max: maxP },
-        questionsPoints: { data: questionsPoints, min: minQ, max: maxQ },
-        votesPoints: { data: votesPoints, min: minV, max: maxV },
+        const proposalsPoints = getBoxPlotData(
+          userDailyStats,
+          "proposals",
+          semesterConfig?.nodeProposals.numPoints,
+          semesterConfig?.nodeProposals.numProposalPerDay
+        );
+        const questionsPoints = getBoxPlotData(
+          userDailyStats,
+          "questions",
+          semesterConfig?.questionProposals.numPoints,
+          semesterConfig?.questionProposals.numQuestionsPerDay
+        );
+        const votesPoints = getBoxPlotData(
+          userDailyStats,
+          "votes",
+          0,
+          0,
+          semesterConfig?.votes.pointIncrementOnAgreement,
+          semesterConfig?.votes.pointDecrementOnAgreement
+        );
+        const { min: minP, max: maxP } = getMaxMinVoxPlotData(proposalsPoints);
+        const { min: minQ, max: maxQ } = getMaxMinVoxPlotData(questionsPoints);
+        const { min: minV, max: maxV } = getMaxMinVoxPlotData(votesPoints);
+
+        setSemesterStats(gg);
+
+        // setSemesterStats(prev => {
+        //   if (!prev) return null;
+        //   const res = {
+        //     ...prev,
+        //     newNodeProposals: getChildProposal(userDailyStats),
+        //     improvements: getEditProposals(userDailyStats),
+        //   };
+        //   return res;
+        // });
+        setBoxStats({
+          proposalsPoints: { data: proposalsPoints, min: minP, max: maxP },
+          questionsPoints: { data: questionsPoints, min: minQ, max: maxQ },
+          votesPoints: { data: votesPoints, min: minV, max: maxV },
+        });
+
+        setTrendStats({
+          childProposals: makeTrendData(userDailyStats, "newNodes"),
+          editProposals: makeTrendData(userDailyStats, "editProposals"),
+          links: makeTrendData(userDailyStats, "links"),
+          nodes: makeTrendData(userDailyStats, "proposals"),
+          votes: makeTrendData(userDailyStats, "votes"),
+          questions: makeTrendData(userDailyStats, "questions"),
+        });
+        setThereIsData(true);
+
+        setIsLoading(false);
       });
-
-      setTrendStats({
-        childProposals: makeTrendData(userDailyStats, "newNodes"),
-        editProposals: makeTrendData(userDailyStats, "editProposals"),
-        links: makeTrendData(userDailyStats, "links"),
-        nodes: makeTrendData(userDailyStats, "proposals"),
-        votes: makeTrendData(userDailyStats, "votes"),
-        questions: makeTrendData(userDailyStats, "questions"),
-      });
-      setThereIsData(true);
-
-      setIsLoading(false);
     };
     getUserDailyStat();
   }, [currentSemester, db, semesterConfig]);
