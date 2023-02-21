@@ -37,7 +37,7 @@ const UploadButton = (props: any) => {
       <label htmlFor={props.name + "File"}>
         <input
           onChange={handleFileChange}
-          accept={props.mimeTypes.join(", ")}
+          accept={"application/pdf"}
           id={props.name + "File"}
           type="file"
           style={{ display: "none" }}
