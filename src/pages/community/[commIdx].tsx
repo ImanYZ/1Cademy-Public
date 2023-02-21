@@ -33,7 +33,6 @@ import {
   orangeDark,
   orangeLight,
 } from "../home";
-import JoinUs from "./JoinUs";
 
 const subSections = [
   {
