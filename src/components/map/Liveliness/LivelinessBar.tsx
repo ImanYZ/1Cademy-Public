@@ -169,11 +169,11 @@ const LivelinessBar = (props: ILivelinessBarProps) => {
     <>
       <Box
         sx={{
-          top: "155px",
+          top: window.innerHeight > 799 ? "180px" : "190px",
           right: "0px",
           zIndex: 1199,
           position: "absolute",
-          height: `calc(100% - ${window.innerHeight > 799 ? "245px" : "305px"})`,
+          height: `calc(100% - ${window.innerHeight > 799 ? "275px" : "345px"})`,
         }}
       >
         <Box
@@ -194,13 +194,11 @@ const LivelinessBar = (props: ILivelinessBarProps) => {
           <Tooltip title={"24-hour Interactions Leaderboard."} placement="left">
             <Box sx={{ width: "100%", height: "100%", position: "absolute", right: "0px" }}></Box>
           </Tooltip>
-          {window.innerHeight > 799 && (
-            <Box sx={{ color: "ButtonHighlight", fontSize: "23px", marginLeft: "-15px", marginTop: "5px" }}>🏆</Box>
-          )}
+
           <Box
             className="seekbar"
             sx={{
-              height: `calc(100% - ${window.innerHeight > 799 ? "70px" : "28px"})`,
+              height: `calc(100% - ${window.innerHeight > 799 ? "30px" : "28px"})`,
               width: "1px",
               borderRight: theme =>
                 theme.palette.mode === "dark" ? "2px solid #bebebe" : "2px solid rgba(0, 0, 0, 0.6)",
