@@ -19,6 +19,7 @@ import YoutubeEmbed from "@/components/home/components/YoutubeEmbed";
 import { ONE_CADEMY_SECTIONS } from "@/components/home/SectionsItems";
 import ROUTES from "@/lib/utils/routes";
 
+import JoinUs from "../../components/community/JoinUs";
 // import { ONE_CADEMY_SECTIONS } from "@/components/home/SectionsItems";
 import {
   darkBase,
@@ -32,7 +33,6 @@ import {
   orangeDark,
   orangeLight,
 } from "../home";
-import JoinUs from "./JoinUs";
 
 const subSections = [
   {

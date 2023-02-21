@@ -12,7 +12,7 @@ import React, { useEffect, useState } from "react";
 
 import { gray200, gray600, gray700, gray900, orangeDark, orangeLight } from "@/pages/home";
 
-import Button from "../../components/home/components/Button";
+import Button from "../home/components/Button";
 import UploadButton from "./UploadButton";
 type JoinUsProps = {
   themeName: string;
