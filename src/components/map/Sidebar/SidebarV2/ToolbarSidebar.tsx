@@ -150,10 +150,11 @@ MainSidebarProps) => {
   const disableUserStatusButton = disableToolbar; /* || ![].includes(c=>c==="userStatusIconc") */
   const disableSearchButton = disableToolbar;
   const disabledNotificationButton = disableToolbar;
-  const bookmarksButton = disableToolbar;
-  const pendingProposalButton = disableToolbar;
-  const intructorButton = disableToolbar;
-  const leaderboardButton = disableToolbar;
+  const disabledBookmarksButton = disableToolbar;
+  const disabledPendingProposalButton = disableToolbar;
+  const disabledIntructorButton = disableToolbar;
+  const disabledLeaderboardButton = disableToolbar;
+  const disableUserStatusList = disableToolbar;
 
   const toolbarContentMemoized = useMemo(() => {
     return (
@@ -326,7 +327,7 @@ MainSidebarProps) => {
               onOpenSidebar("BOOKMARKS_SIDEBAR", "Bookmarks");
               setIsMenuOpen(false);
             }}
-            disabled={bookmarksButton}
+            disabled={disabledBookmarksButton}
           >
             <Box sx={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "5px", height: "30px" }}>
               <Badge
@@ -371,7 +372,7 @@ MainSidebarProps) => {
               onOpenSidebar("PENDING_PROPOSALS", "PendingProposals");
               setIsMenuOpen(false);
             }}
-            disabled={pendingProposalButton}
+            disabled={disabledPendingProposalButton}
           >
             <Box sx={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "5px", height: "30px" }}>
               <Badge
@@ -415,7 +416,7 @@ MainSidebarProps) => {
                 if (user.role === "INSTRUCTOR") return window.open("/instructors/dashboard", "_blank");
                 if (user.role === "STUDENT") return window.open(`/instructors/dashboard/${user.uname}`, "_blank");
               }}
-              disabled={intructorButton}
+              disabled={disabledIntructorButton}
             >
               <Box
                 sx={{
@@ -475,7 +476,10 @@ MainSidebarProps) => {
           )}
           {user?.tag && (
             <>
-              <MemoizedMetaButton onClick={(e: any) => onOpenLeaderboardOptions(e)} disabled={leaderboardButton}>
+              <MemoizedMetaButton
+                onClick={(e: any) => onOpenLeaderboardOptions(e)}
+                disabled={disabledLeaderboardButton}
+              >
                 <Box
                   sx={{
                     display: "flex",
@@ -587,6 +591,7 @@ MainSidebarProps) => {
                 justifyContent: "flex-start",
                 alignItems: "center",
               }}
+              disabled={disableUserStatusList}
             />
           )}
         </Stack>
@@ -601,17 +606,18 @@ MainSidebarProps) => {
     reputation?.positives,
     reputation?.negatives,
     onOpenUserSettingsSidebar,
-    disableToolbar,
+    disableUserStatusButton,
     disableSearchButton,
+    disableToolbar,
     disabledNotificationButton,
     uncheckedNotificationsNum,
-    bookmarksButton,
+    disabledBookmarksButton,
     bookmarkUpdatesNum,
-    pendingProposalButton,
+    disabledPendingProposalButton,
     pendingProposalsLoaded,
     pendingProposalsNum,
-    intructorButton,
-    leaderboardButton,
+    disabledIntructorButton,
+    disabledLeaderboardButton,
     leaderBoardType,
     anchorEl,
     choices,
@@ -621,6 +627,7 @@ MainSidebarProps) => {
     reloadPermanentGrpah,
     setOpenSideBar,
     reputationSignal,
+    disableUserStatusList,
     onOpenSidebar,
     setIsMenuOpen,
   ]);
@@ -644,10 +651,10 @@ MainSidebarProps) => {
     disableUserStatusButton,
     disableSearchButton,
     disabledNotificationButton,
-    bookmarksButton,
-    pendingProposalButton,
-    intructorButton,
-    leaderboardButton,
+    disabledBookmarksButton,
+    disabledPendingProposalButton,
+    disabledIntructorButton,
+    disabledLeaderboardButton,
   ]);
 
   return (
