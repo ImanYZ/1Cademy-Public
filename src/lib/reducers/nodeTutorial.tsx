@@ -68,11 +68,10 @@ export function nodeTutorialReducer(state: TutorialState, action: DispatchNodeTu
         title: "Nodes",
         description: (
           <Typography variant="body1" sx={{ mb: "16px" }}>
-            We are familiar with nodes and their main content, but it is important to learn about their header and
-            footer to understand how you can manipulate the map and interact with the nodes
+            Node headers are one of the ways that you can manipulate what you see on the knowledge graph.
           </Typography>
         ),
-        disabledElements: [],
+        disabledElements: ["TOOLBAR"],
         enableChildElements: [],
         targetId: "01",
         anchor: "",
@@ -80,7 +79,7 @@ export function nodeTutorialReducer(state: TutorialState, action: DispatchNodeTu
         nextStepName: null,
         previosStepName: "step001",
         tooltipPosition: "top",
-        stepNumber: 2,
+        stepNumber: 3,
         stepLenght: STEPS_LENGHT,
         isClickeable: false,
       };
