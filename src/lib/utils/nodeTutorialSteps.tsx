@@ -1,298 +1,298 @@
-import { Typography } from "@mui/material";
+import { Link, Typography } from "@mui/material";
 
 import { Step } from "../../hooks/useInteractiveTutorial";
 
 export const NODE_STEPS: Step[] = [
-  // {
-  //   targetId: "01",
-  //   title: "Nodes",
-  //   description: (
-  //     <Typography variant="body1" sx={{ mb: "16px" }}>
-  //       We are familiar with nodes and their main content, but it is important to learn about their header and footer to
-  //       understand how you can manipulate the map and interact with the nodes.
-  //     </Typography>
-  //   ),
-  //   tooltipPos: "top",
-  //   anchor: "",
-  //   disabledElements: [],
-  // },
+  {
+    targetId: "01",
+    title: "Nodes",
+    description: (
+      <Typography variant="body1" sx={{ mb: "16px" }}>
+        We are familiar with nodes and their main content, but it is important to learn about their header and footer to
+        understand how you can manipulate the map and interact with the nodes.
+      </Typography>
+    ),
+    tooltipPos: "top",
+    anchor: "",
+    disabledElements: [],
+  },
 
-  // {
-  //   targetId: "01",
-  //   childTargetId: "01-node-header",
-  //   title: "Nodes - Node Header",
-  //   description: (
-  //     <Typography variant="body1" sx={{ mb: "16px" }}>
-  //       Node headers are one of the ways that you can manipulate what you see on the knowledge graph.
-  //     </Typography>
-  //   ),
-  //   tooltipPos: "top",
-  //   anchor: "",
-  //   disabledElements: [],
-  // },
-  // {
-  //   targetId: "01",
-  //   childTargetId: "01-node-header",
-  //   title: "Nodes - Node Header",
-  //   description: (
-  //     <Typography variant="body1" sx={{ mb: "16px" }}>
-  //       In the header are four buttons.
-  //     </Typography>
-  //   ),
-  //   tooltipPos: "top",
-  //   anchor: "",
-  //   disabledElements: [],
-  // },
-  // {
-  //   targetId: "01",
-  //   childTargetId: "01-hiden-button",
-  //   title: "Nodes - Node Header",
-  //   description: (
-  //     <Typography variant="body1" sx={{ mb: "16px" }}>
-  //       This one, which we looked at earlier closes the node. Once again, it just removes it from your view, it does not
-  //       delete the node from the platform.
-  //     </Typography>
-  //   ),
-  //   tooltipPos: "top",
-  //   anchor: "",
-  //   disabledElements: [],
-  // },
-  // {
-  //   targetId: "01",
-  //   childTargetId: "01-hide-offsprings-button",
-  //   title: "Nodes - Node Header",
-  //   description: (
-  //     <Typography variant="body1" sx={{ mb: "16px" }}>
-  //       This one closes all the open children nodes of the node it is clicked on.
-  //     </Typography>
-  //   ),
-  //   tooltipPos: "top",
-  //   anchor: "",
-  //   disabledElements: [],
-  // },
-  // {
-  //   targetId: "01",
-  //   childTargetId: "01-close-button",
-  //   title: "Nodes - Node Header",
-  //   description: (
-  //     <Typography variant="body1" sx={{ mb: "16px" }}>
-  //       This one minimizes the content in a node so only the title is displayed.
-  //     </Typography>
-  //   ),
-  //   tooltipPos: "top",
-  //   anchor: "",
-  //   disabledElements: [],
-  // },
-  // // // ---------------------------------------------------------------
-  // // Nodes -body
-  // {
-  //   targetId: "01",
-  //   childTargetId: "01-node-title",
-  //   title: "Nodes - Node Body",
-  //   description: (
-  //     <Typography variant="body1" sx={{ mb: "16px" }}>
-  //       Each node has a body that consists of a title and content.
-  //     </Typography>
-  //   ),
-  //   tooltipPos: "top",
-  //   anchor: "",
-  //   disabledElements: [],
-  // },
-  // {
-  //   targetId: "01",
-  //   childTargetId: "01-node-title",
-  //   title: "Nodes - Node Title",
-  //   description: (
-  //     <Typography variant="body1" sx={{ mb: "16px" }}>
-  //       This is the title.
-  //     </Typography>
-  //   ),
-  //   tooltipPos: "top",
-  //   anchor: "",
-  //   disabledElements: [],
-  // },
-  // {
-  //   targetId: "01",
-  //   childTargetId: "01-node-title",
-  //   title: "Nodes Body - Node Title",
-  //   description: (
-  //     <Typography variant="body1" sx={{ mb: "16px" }}>
-  //       We want a title that is concise and accurately describes the information within.
-  //     </Typography>
-  //   ),
-  //   tooltipPos: "top",
-  //   anchor: "",
-  //   disabledElements: [],
-  // },
-  // {
-  //   targetId: "01",
-  //   childTargetId: "01-node-title",
-  //   title: "Nodes Body - Node Title",
-  //   description: (
-  //     <Typography variant="body1" sx={{ mb: "16px" }}>
-  //       This means that you need to consider if the title is duplicated or would likely be duplicated.
-  //     </Typography>
-  //   ),
-  //   tooltipPos: "top",
-  //   anchor: "",
-  //   disabledElements: [],
-  // },
-  // {
-  //   targetId: "01",
-  //   childTargetId: "01-node-title",
-  //   title: "Nodes Body - Node Title",
-  //   description: (
-  //     <Typography variant="body1" sx={{ mb: "16px" }}>
-  //       For example, <b>“growth”</b> could be used in a number of titles in a number of subjects. Are we talking about
-  //       an organism growing, a population growing, or economic growth? Make sure the title addresses what is
-  //       specifically being discussed.
-  //     </Typography>
-  //   ),
-  //   tooltipPos: "top",
-  //   anchor: "",
-  //   disabledElements: [],
-  // },
-  // {
-  //   targetId: "01",
-  //   childTargetId: "01-node-content",
-  //   title: "Node Body - Node Content",
-  //   description: (
-  //     <Typography variant="body1" sx={{ mb: "16px" }}>
-  //       This is the content.
-  //     </Typography>
-  //   ),
-  //   tooltipPos: "top",
-  //   anchor: "",
-  //   disabledElements: [],
-  // },
-  // {
-  //   targetId: "01",
-  //   childTargetId: "01-node-content",
-  //   title: "Node Body - Node Content",
-  //   description: (
-  //     <Typography variant="body1" sx={{ mb: "16px" }}>
-  //       The content of a node describes what is stated in a title.
-  //     </Typography>
-  //   ),
-  //   tooltipPos: "top",
-  //   anchor: "",
-  //   disabledElements: [],
-  // },
-  // {
-  //   targetId: "01",
-  //   childTargetId: "01-node-content",
-  //   title: "Node Body - Node Content",
-  //   description: (
-  //     <Typography variant="body1" sx={{ mb: "16px" }}>
-  //       We want the content to be clear, concise, and accurate.
-  //     </Typography>
-  //   ),
-  //   tooltipPos: "top",
-  //   anchor: "",
-  //   disabledElements: [],
-  // },
-  // {
-  //   targetId: "01",
-  //   childTargetId: "01-node-content",
-  //   title: "Node Content - Markdown",
-  //   description: (
-  //     <Typography variant="body1" sx={{ mb: "16px" }}>
-  //       Beyond normal written content, nodes accept basic markdown to make text bold or italic, and to produce ordered
-  //       and unordered lists.
-  //     </Typography>
-  //   ),
-  //   tooltipPos: "top",
-  //   anchor: "",
-  //   disabledElements: [],
-  // },
-  // {
-  //   targetId: "01",
-  //   childTargetId: "01-node-content",
-  //   title: "Node Content - Markdown",
-  //   description: (
-  //     <Typography variant="body1" sx={{ mb: "16px" }}>
-  //       For <b>bold text</b> you place two stars before and after the text you would like to make bold.
-  //     </Typography>
-  //   ),
-  //   tooltipPos: "top",
-  //   anchor: "",
-  //   disabledElements: [],
-  // },
-  // {
-  //   targetId: "01",
-  //   childTargetId: "01-node-content",
-  //   title: "Node Content - Markdown",
-  //   description: (
-  //     <Typography variant="body1" sx={{ mb: "16px" }}>
-  //       For <i>italicized text</i> you place one star before and after the text you would like to make italicized.
-  //     </Typography>
-  //   ),
-  //   tooltipPos: "top",
-  //   anchor: "",
-  //   disabledElements: [],
-  // },
-  // {
-  //   targetId: "01",
-  //   childTargetId: "01-node-content",
-  //   title: "Node Content - Markdown",
-  //   description: (
-  //     <Typography variant="body1" sx={{ mb: "16px" }}>
-  //       For an ordered list you type the number, a period, and then a space before each listed item. Listed items are
-  //       placed on their own line.
-  //     </Typography>
-  //   ),
-  //   tooltipPos: "top",
-  //   anchor: "",
-  //   disabledElements: [],
-  // },
-  // {
-  //   targetId: "01",
-  //   childTargetId: "01-node-content",
-  //   title: "Node Content - Markdown",
-  //   description: (
-  //     <Typography variant="body1" sx={{ mb: "16px" }}>
-  //       for an unordered list you type a dash and a space before each listed item. Listed items are placed on their own
-  //       line.
-  //     </Typography>
-  //   ),
-  //   tooltipPos: "top",
-  //   anchor: "",
-  //   disabledElements: [],
-  // },
-  // {
-  //   targetId: "01",
-  //   childTargetId: "01-node-content",
-  //   title: "Node Content - Math jax",
-  //   description: (
-  //     <Typography variant="body1" sx={{ mb: "16px" }}>
-  //       You can also use math jax to create mathematical formulas.
-  //     </Typography>
-  //   ),
-  //   tooltipPos: "top",
-  //   anchor: "",
-  //   disabledElements: [],
-  // },
-  // {
-  //   targetId: "01",
-  //   childTargetId: "01-node-content",
-  //   title: "Node Content - Math jax",
-  //   description: (
-  //     <Typography variant="body1" sx={{ mb: "16px" }}>
-  //       To learn more about how to write mathematical formulas look at this page:
-  //       <br />
-  //       <Link
-  //         href="https://math.meta.stackexchange.com/questions/5020/mathjax-basic-tutorial-and-quick-reference"
-  //         target={"_blank"}
-  //         rel={"noReferrer"}
-  //       >
-  //         https://math.meta.stackexchange.com/questions/5020/mathjax-basic-tutorial-and-quick-reference
-  //       </Link>
-  //     </Typography>
-  //   ),
-  //   tooltipPos: "top",
-  //   anchor: "",
-  //   disabledElements: [],
-  // },
+  {
+    targetId: "01",
+    childTargetId: "01-node-header",
+    title: "Nodes - Node Header",
+    description: (
+      <Typography variant="body1" sx={{ mb: "16px" }}>
+        Node headers are one of the ways that you can manipulate what you see on the knowledge graph.
+      </Typography>
+    ),
+    tooltipPos: "top",
+    anchor: "",
+    disabledElements: [],
+  },
+  {
+    targetId: "01",
+    childTargetId: "01-node-header",
+    title: "Nodes - Node Header",
+    description: (
+      <Typography variant="body1" sx={{ mb: "16px" }}>
+        In the header are four buttons.
+      </Typography>
+    ),
+    tooltipPos: "top",
+    anchor: "",
+    disabledElements: [],
+  },
+  {
+    targetId: "01",
+    childTargetId: "01-hiden-button",
+    title: "Nodes - Node Header",
+    description: (
+      <Typography variant="body1" sx={{ mb: "16px" }}>
+        This one, which we looked at earlier closes the node. Once again, it just removes it from your view, it does not
+        delete the node from the platform.
+      </Typography>
+    ),
+    tooltipPos: "top",
+    anchor: "",
+    disabledElements: [],
+  },
+  {
+    targetId: "01",
+    childTargetId: "01-hide-offsprings-button",
+    title: "Nodes - Node Header",
+    description: (
+      <Typography variant="body1" sx={{ mb: "16px" }}>
+        This one closes all the open children nodes of the node it is clicked on.
+      </Typography>
+    ),
+    tooltipPos: "top",
+    anchor: "",
+    disabledElements: [],
+  },
+  {
+    targetId: "01",
+    childTargetId: "01-close-button",
+    title: "Nodes - Node Header",
+    description: (
+      <Typography variant="body1" sx={{ mb: "16px" }}>
+        This one minimizes the content in a node so only the title is displayed.
+      </Typography>
+    ),
+    tooltipPos: "top",
+    anchor: "",
+    disabledElements: [],
+  },
+  // // ---------------------------------------------------------------
+  // Nodes -body
+  {
+    targetId: "01",
+    childTargetId: "01-node-title",
+    title: "Nodes - Node Body",
+    description: (
+      <Typography variant="body1" sx={{ mb: "16px" }}>
+        Each node has a body that consists of a title and content.
+      </Typography>
+    ),
+    tooltipPos: "top",
+    anchor: "",
+    disabledElements: [],
+  },
+  {
+    targetId: "01",
+    childTargetId: "01-node-title",
+    title: "Nodes - Node Title",
+    description: (
+      <Typography variant="body1" sx={{ mb: "16px" }}>
+        This is the title.
+      </Typography>
+    ),
+    tooltipPos: "top",
+    anchor: "",
+    disabledElements: [],
+  },
+  {
+    targetId: "01",
+    childTargetId: "01-node-title",
+    title: "Nodes Body - Node Title",
+    description: (
+      <Typography variant="body1" sx={{ mb: "16px" }}>
+        We want a title that is concise and accurately describes the information within.
+      </Typography>
+    ),
+    tooltipPos: "top",
+    anchor: "",
+    disabledElements: [],
+  },
+  {
+    targetId: "01",
+    childTargetId: "01-node-title",
+    title: "Nodes Body - Node Title",
+    description: (
+      <Typography variant="body1" sx={{ mb: "16px" }}>
+        This means that you need to consider if the title is duplicated or would likely be duplicated.
+      </Typography>
+    ),
+    tooltipPos: "top",
+    anchor: "",
+    disabledElements: [],
+  },
+  {
+    targetId: "01",
+    childTargetId: "01-node-title",
+    title: "Nodes Body - Node Title",
+    description: (
+      <Typography variant="body1" sx={{ mb: "16px" }}>
+        For example, <b>“growth”</b> could be used in a number of titles in a number of subjects. Are we talking about
+        an organism growing, a population growing, or economic growth? Make sure the title addresses what is
+        specifically being discussed.
+      </Typography>
+    ),
+    tooltipPos: "top",
+    anchor: "",
+    disabledElements: [],
+  },
+  {
+    targetId: "01",
+    childTargetId: "01-node-content",
+    title: "Node Body - Node Content",
+    description: (
+      <Typography variant="body1" sx={{ mb: "16px" }}>
+        This is the content.
+      </Typography>
+    ),
+    tooltipPos: "top",
+    anchor: "",
+    disabledElements: [],
+  },
+  {
+    targetId: "01",
+    childTargetId: "01-node-content",
+    title: "Node Body - Node Content",
+    description: (
+      <Typography variant="body1" sx={{ mb: "16px" }}>
+        The content of a node describes what is stated in a title.
+      </Typography>
+    ),
+    tooltipPos: "top",
+    anchor: "",
+    disabledElements: [],
+  },
+  {
+    targetId: "01",
+    childTargetId: "01-node-content",
+    title: "Node Body - Node Content",
+    description: (
+      <Typography variant="body1" sx={{ mb: "16px" }}>
+        We want the content to be clear, concise, and accurate.
+      </Typography>
+    ),
+    tooltipPos: "top",
+    anchor: "",
+    disabledElements: [],
+  },
+  {
+    targetId: "01",
+    childTargetId: "01-node-content",
+    title: "Node Content - Markdown",
+    description: (
+      <Typography variant="body1" sx={{ mb: "16px" }}>
+        Beyond normal written content, nodes accept basic markdown to make text bold or italic, and to produce ordered
+        and unordered lists.
+      </Typography>
+    ),
+    tooltipPos: "top",
+    anchor: "",
+    disabledElements: [],
+  },
+  {
+    targetId: "01",
+    childTargetId: "01-node-content",
+    title: "Node Content - Markdown",
+    description: (
+      <Typography variant="body1" sx={{ mb: "16px" }}>
+        For <b>bold text</b> you place two stars before and after the text you would like to make bold.
+      </Typography>
+    ),
+    tooltipPos: "top",
+    anchor: "",
+    disabledElements: [],
+  },
+  {
+    targetId: "01",
+    childTargetId: "01-node-content",
+    title: "Node Content - Markdown",
+    description: (
+      <Typography variant="body1" sx={{ mb: "16px" }}>
+        For <i>italicized text</i> you place one star before and after the text you would like to make italicized.
+      </Typography>
+    ),
+    tooltipPos: "top",
+    anchor: "",
+    disabledElements: [],
+  },
+  {
+    targetId: "01",
+    childTargetId: "01-node-content",
+    title: "Node Content - Markdown",
+    description: (
+      <Typography variant="body1" sx={{ mb: "16px" }}>
+        For an ordered list you type the number, a period, and then a space before each listed item. Listed items are
+        placed on their own line.
+      </Typography>
+    ),
+    tooltipPos: "top",
+    anchor: "",
+    disabledElements: [],
+  },
+  {
+    targetId: "01",
+    childTargetId: "01-node-content",
+    title: "Node Content - Markdown",
+    description: (
+      <Typography variant="body1" sx={{ mb: "16px" }}>
+        for an unordered list you type a dash and a space before each listed item. Listed items are placed on their own
+        line.
+      </Typography>
+    ),
+    tooltipPos: "top",
+    anchor: "",
+    disabledElements: [],
+  },
+  {
+    targetId: "01",
+    childTargetId: "01-node-content",
+    title: "Node Content - Math jax",
+    description: (
+      <Typography variant="body1" sx={{ mb: "16px" }}>
+        You can also use math jax to create mathematical formulas.
+      </Typography>
+    ),
+    tooltipPos: "top",
+    anchor: "",
+    disabledElements: [],
+  },
+  {
+    targetId: "01",
+    childTargetId: "01-node-content",
+    title: "Node Content - Math jax",
+    description: (
+      <Typography variant="body1" sx={{ mb: "16px" }}>
+        To learn more about how to write mathematical formulas look at this page:
+        <br />
+        <Link
+          href="https://math.meta.stackexchange.com/questions/5020/mathjax-basic-tutorial-and-quick-reference"
+          target={"_blank"}
+          rel={"noReferrer"}
+        >
+          https://math.meta.stackexchange.com/questions/5020/mathjax-basic-tutorial-and-quick-reference
+        </Link>
+      </Typography>
+    ),
+    tooltipPos: "top",
+    anchor: "",
+    disabledElements: [],
+  },
   {
     targetId: "01",
     childTargetId: "01-node-footer",

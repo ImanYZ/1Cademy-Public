@@ -1,32 +1,26 @@
 import { Box, Button, Stack, Typography } from "@mui/material";
 import React, { useMemo, useRef } from "react";
 
-import { Step, TargetClientRect } from "../../hooks/useInteractiveTutorial";
+import { TargetClientRect } from "../../hooks/useInteractiveTutorial";
+import { SetStepType, TutorialState } from "../../nodeBookTypes";
 
 const TOOLTIP_OFFSET = 40;
 
 type TutorialProps = {
-  currentStep?: Step;
-  currentStepIdx: number;
-  onNextStep: () => void;
-  onPreviousStep: () => void;
-  stepsLength: number;
+  tutorialState: TutorialState;
+  // dispatchNodeTutorial: Dispatch<SetStep>;
+  onChangeStep: (step: SetStepType) => void;
+  // onNextStep: () => void;
+  // onPreviousStep: () => void;
   targetClientRect: TargetClientRect;
 };
 
-export const Tutorial = ({
-  currentStep,
-  targetClientRect,
-  currentStepIdx,
-  stepsLength,
-  onNextStep,
-  onPreviousStep,
-}: TutorialProps) => {
+export const Tutorial = ({ tutorialState, targetClientRect, onChangeStep }: TutorialProps) => {
   const tooltipRef = useRef<HTMLDivElement | null>(null);
 
   const tooltipClientRect = useMemo(() => {
     if (!tooltipRef.current) return { top: 0, left: 0 };
-    if (!currentStep) return { top: 0, left: 0 };
+    if (!tutorialState) return { top: 0, left: 0 };
 
     console.log("rect", {
       targetClientRect,
@@ -37,7 +31,7 @@ export const Tutorial = ({
     const { height: tooltipHeight } = tooltipRef.current.getBoundingClientRect();
     let top = 0;
     let left = 0;
-    const pos = currentStep.tooltipPos;
+    const pos = tutorialState.tooltipPosition;
     if (pos === "top") {
       top = targetClientRect.top - tooltipHeight - TOOLTIP_OFFSET;
       left = targetClientRect.left + targetClientRect.width / 2 - tooltipRef.current.clientWidth / 2;
@@ -57,9 +51,9 @@ export const Tutorial = ({
     console.log("first new top left", { top, left });
 
     return { top, left };
-  }, [currentStep, targetClientRect]);
+  }, [targetClientRect, tutorialState]);
 
-  if (!currentStep) return null;
+  if (!tutorialState) return null;
 
   if (
     targetClientRect.top === 0 &&
@@ -95,12 +89,16 @@ export const Tutorial = ({
             color: "white",
           }}
         >
-          <h2>{currentStep.title}</h2>
-          <p>{currentStep.description}</p>
-          <button onClick={onPreviousStep}>{"<<"}</button>
+          <h2>{tutorialState.title}</h2>
+          <p>{tutorialState.description}</p>
+          <button onClick={() => onChangeStep(tutorialState.previosStepName)}>{"<<"}</button>
 
-          {currentStepIdx < stepsLength - 1 && <button onClick={onNextStep}>{">>"}</button>}
-          {currentStepIdx === stepsLength - 1 && <button onClick={onNextStep}>{"Finalize"}</button>}
+          {tutorialState.stepNumber < tutorialState.stepLenght && (
+            <button onClick={() => onChangeStep(tutorialState.nextStepName)}>{">>"}</button>
+          )}
+          {tutorialState.stepNumber === tutorialState.stepLenght && (
+            <button onClick={() => onChangeStep(tutorialState.previosStepName)}>{"Finalize"}</button>
+          )}
         </div>
       </div>
     );
@@ -108,7 +106,7 @@ export const Tutorial = ({
   return (
     <Box
       ref={tooltipRef}
-      className={`tooltip tooltip-${currentStep.tooltipPos}`}
+      className={`tooltip tooltip-${tutorialState.tooltipPosition}`}
       sx={{
         position: "absolute",
         top: `${tooltipClientRect.top}px`,
@@ -125,17 +123,17 @@ export const Tutorial = ({
       }}
     >
       <Typography component={"h2"} sx={{ fontSize: "18px", fontWeight: "bold", mb: "8px" }}>
-        {currentStep.title}
+        {tutorialState.title}
       </Typography>
-      {currentStep.description}
+      {tutorialState.description}
       <Stack direction={"row"} alignItems="center" justifyContent={"space-between"} spacing={"16px"}>
         <Typography sx={{ fontWeight: 300 }}>
-          {currentStepIdx + 1} / {stepsLength}
+          {tutorialState.stepNumber} / {tutorialState.stepLenght}
         </Typography>
         <Box>
           <Button
             variant="outlined"
-            onClick={onPreviousStep}
+            onClick={() => onChangeStep(tutorialState.previosStepName)}
             sx={{
               borderRadius: "32px",
               mr: "16px",
@@ -152,10 +150,10 @@ export const Tutorial = ({
             Prev
           </Button>
 
-          {currentStepIdx < stepsLength - 1 && (
+          {tutorialState.stepNumber < tutorialState.stepLenght - 1 && (
             <Button
               variant="contained"
-              onClick={onNextStep}
+              onClick={() => onChangeStep(tutorialState.nextStepName)}
               style={{ zIndex: 898999 }}
               sx={{
                 borderRadius: "32px",
@@ -167,10 +165,10 @@ export const Tutorial = ({
               Next
             </Button>
           )}
-          {currentStepIdx === stepsLength - 1 && (
+          {tutorialState.stepNumber === tutorialState.stepLenght && (
             <Button
               variant="contained"
-              onClick={onNextStep}
+              onClick={() => onChangeStep(tutorialState.nextStepName)}
               sx={{
                 borderRadius: "32px",
                 p: "8px 32px",

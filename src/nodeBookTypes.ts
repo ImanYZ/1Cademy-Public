@@ -1,5 +1,5 @@
 import { Timestamp } from "firebase/firestore";
-import { Dispatch } from "react";
+import React, { Dispatch } from "react";
 
 import { KnowledgeChoice } from "./knowledgeTypes";
 import { NodeType } from "./types";
@@ -168,6 +168,34 @@ export type NodeBookActions = {
   dispatch: Dispatch<DispatchNodeBookActions>;
   handleError: (options: ErrorOptions) => void;
 };
+
+export type SetStepType = null | "default" | "step001" | "step002";
+
+export type TutorialState = null | NodeTutorialState;
+
+interface NodeTutorialState {
+  readonly localSnapshot: FullNodeData[];
+  readonly targetId: string;
+  readonly targetChildId?: string;
+  readonly title: string;
+  readonly description: React.ReactNode;
+  readonly disabledElements: string[];
+  readonly enableChildElements: string[];
+  readonly anchor: string;
+  readonly currentStepName: SetStepType;
+  readonly nextStepName: SetStepType;
+  readonly previosStepName: SetStepType;
+  readonly tooltipPosition: "top" | "bottom" | "left" | "right";
+  readonly stepNumber: number;
+  readonly stepLenght: number;
+  readonly isClickeable: boolean;
+}
+
+export type SetStep = {
+  type: SetStepType;
+};
+
+export type DispatchNodeTutorialAction = SetStep;
 
 export type UserNodesData = {
   // "firstVisit": Timestamp,//CHECK

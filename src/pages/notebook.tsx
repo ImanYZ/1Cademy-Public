@@ -54,14 +54,12 @@ import { MemoizedReputationlinessBar } from "@/components/map/Liveliness/Reputat
 import { MemoizedBookmarksSidebar } from "@/components/map/Sidebar/SidebarV2/BookmarksSidebar";
 import { CitationsSidebar } from "@/components/map/Sidebar/SidebarV2/CitationsSidebar";
 import { MemoizedNotificationSidebar } from "@/components/map/Sidebar/SidebarV2/NotificationSidebar";
-import { MemoizedPendingProposalSidebar } from "@/components/map/Sidebar/SidebarV2/PendingProposalSidebar";
 import { MemoizedProposalsSidebar } from "@/components/map/Sidebar/SidebarV2/ProposalsSidebar";
 import { MemoizedSearcherSidebar } from "@/components/map/Sidebar/SidebarV2/SearcherSidebar";
 import { MemoizedUserInfoSidebar } from "@/components/map/Sidebar/SidebarV2/UserInfoSidebar";
 import { MemoizedUserSettingsSidebar } from "@/components/map/Sidebar/SidebarV2/UserSettigsSidebar";
 import { useAuth } from "@/context/AuthContext";
 import { useTagsTreeView } from "@/hooks/useTagsTreeView";
-import { NODE_STEPS } from "@/lib/utils/nodeTutorialSteps";
 import { addSuffixToUrlGMT } from "@/lib/utils/string.utils";
 
 import LoadingImg from "../../public/animated-icon-1cademy.gif";
@@ -74,7 +72,7 @@ import { MemoizedToolbarSidebar } from "../components/map/Sidebar/SidebarV2/Tool
 import { NodeItemDashboard } from "../components/NodeItemDashboard";
 import { Portal } from "../components/Portal";
 import { NodeBookProvider, useNodeBook } from "../context/NodeBookContext";
-import { useInteractiveTutorial } from "../hooks/useInteractiveTutorial";
+import { TargetClientRect, useInteractiveTutorial } from "../hooks/useInteractiveTutorial2";
 import { useMemoizedCallback } from "../hooks/useMemoizedCallback";
 import { useWindowSize } from "../hooks/useWindowSize";
 import { useWorkerQueue } from "../hooks/useWorkerQueue";
@@ -229,8 +227,9 @@ const Dashboard = ({}: DashboardProps) => {
   const g = useRef(dagreUtils.createGraph());
 
   // this flag is used in interactive tutorial to fire useEffect when change state
-  const [localSnapshot, setLocalSnapshot] = useState<FullNodesData>({});
+  const [, /* localSnapshot */ setLocalSnapshot] = useState<FullNodesData>({});
   const shouldResetGraph = useRef(true);
+  const [targetClientRect, setTargetClientRect] = useState<TargetClientRect>({ width: 0, height: 0, top: 0, left: 0 });
 
   //Notifications
   const [uncheckedNotificationsNum, setUncheckedNotificationsNum] = useState(0);
@@ -240,18 +239,14 @@ const Dashboard = ({}: DashboardProps) => {
   const lastNodeOperation = useRef<string>("");
   const proposalTimer = useRef<any>(null);
 
-  const {
-    setTargetClientRect,
-    isPlayingTheTutorial,
-    isPlayingTheTutorialRef,
-    onStart,
-    anchorTutorial,
-    currentStep,
-    currentStepIdx,
-    onNextStep,
-    onPreviousStep,
-    targetClientRect,
-  } = useInteractiveTutorial({ steps: NODE_STEPS });
+  // const {
+  //   setTargetClientRect,
+  //   isPlayingTheTutorial,
+  //   isPlayingTheTutorialRef,
+  //   onStart,
+  //   anchorTutorial,
+  //   targetClientRect,
+  // } = useInteractiveTutorial({ steps: NOTEBOOK_STEPS });
 
   // Scroll to node configs
 
@@ -272,6 +267,8 @@ const Dashboard = ({}: DashboardProps) => {
 
   const [nodeTutorial /* setNodeTutorial */] = useState(Boolean(localStorage.getItem("node-tutorial")));
 
+  // const [stateNodeTutorial, dispatchNodeTutorial] = useReducer(nodeTutorialReducer, INITIAL_NODE_TUTORIAL_STATE);
+  const { stateNodeTutorial, onChangeStep, isPlayingTheTutorialRef } = useInteractiveTutorial();
   const onNodeInViewport = useCallback(
     (nodeId: string) => {
       const originalNode = document.getElementById(nodeId);
@@ -393,65 +390,86 @@ const Dashboard = ({}: DashboardProps) => {
     [onNodeInViewport]
   );
 
+  // useEffect(() => {
+  //   if (!currentStep) return setTargetClientRect({ width: 0, height: 0, top: 0, left: 0 });
+
+  //   if (currentStep.anchor) {
+  //     if (!currentStep.targetId) return;
+
+  //     const targetElement = document.getElementById(currentStep.targetId);
+
+  //     if (!targetElement) return;
+
+  //     targetElement.style.border = "4px dashed #ffc813";
+  //     const { width, height, top, left } = targetElement.getBoundingClientRect();
+
+  //     setTargetClientRect({ width, height, top, left });
+  //   } else {
+  //     console.log("----------------- detect client react in interactive map");
+
+  //     const thisNode = graph.nodes[currentStep.targetId];
+  //     if (!thisNode) return;
+
+  //     let { top, left, width = NODE_WIDTH, height = 0 } = thisNode;
+  //     let offsetChildTop = 0;
+  //     let offsetChildLeft = 0;
+  //     if (currentStep.childTargetId) {
+  //       const targetElement = document.getElementById(currentStep.childTargetId);
+  //       if (!targetElement) return;
+  //       targetElement.style.border = "4px dashed #ffc813";
+  //       const { offsetTop, offsetHeight, offsetParent, offsetLeft, offsetWidth } = targetElement;
+  //       const { height: childrenHeight, width: childrenWidth } = targetElement.getBoundingClientRect();
+
+  //       offsetChildTop = offsetTop;
+  //       offsetChildLeft = offsetLeft;
+  //       height = childrenHeight;
+  //       width = childrenWidth;
+  //     }
+
+  //     setTargetClientRect({
+  //       top: top + offsetChildTop,
+  //       left: left + offsetChildLeft,
+  //       width,
+  //       height,
+  //     });
+  //   }
+  // }, [currentStep, graph.nodes, setTargetClientRect]);
+
   useEffect(() => {
-    if (!currentStep) return setTargetClientRect({ width: 0, height: 0, top: 0, left: 0 });
+    if (!stateNodeTutorial) return setTargetClientRect({ width: 0, height: 0, top: 0, left: 0 });
 
-    if (currentStep.anchor) {
-      if (!currentStep.targetId) return;
+    if (stateNodeTutorial.anchor) {
+      if (!stateNodeTutorial.targetId) return;
 
-      const targetElement = document.getElementById(currentStep.targetId);
+      const targetElement = document.getElementById(stateNodeTutorial.targetId);
 
       if (!targetElement) return;
 
       targetElement.style.border = "4px dashed #ffc813";
       const { width, height, top, left } = targetElement.getBoundingClientRect();
 
-      setTargetClientRect({
-        width,
-        height,
-        top,
-        left,
-      });
+      setTargetClientRect({ width, height, top, left });
     } else {
       console.log("----------------- detect client react in interactive map");
 
-      const thisNode = graph.nodes[currentStep.targetId];
+      const thisNode = graph.nodes[stateNodeTutorial.targetId];
       if (!thisNode) return;
 
       let { top, left, width = NODE_WIDTH, height = 0 } = thisNode;
       let offsetChildTop = 0;
       let offsetChildLeft = 0;
-      if (currentStep.childTargetId) {
-        const targetElement = document.getElementById(currentStep.childTargetId);
+      if (stateNodeTutorial.targetChildId) {
+        const targetElement = document.getElementById(stateNodeTutorial.targetChildId);
         if (!targetElement) return;
         targetElement.style.border = "4px dashed #ffc813";
-        const { offsetTop, offsetHeight, offsetParent, offsetLeft, offsetWidth } = targetElement;
+        const { offsetTop, offsetLeft } = targetElement;
         const { height: childrenHeight, width: childrenWidth } = targetElement.getBoundingClientRect();
-        console.log("child:", {
-          offsetTop,
-          offsetHeight,
-          offsetParent,
-          offsetLeft,
-          offsetWidth,
-          correctHeight: childrenHeight,
-          correctWidth: childrenWidth,
-        });
+
         offsetChildTop = offsetTop;
         offsetChildLeft = offsetLeft;
         height = childrenHeight;
         width = childrenWidth;
       }
-
-      console.log("effect:", {
-        top: top + offsetChildTop,
-        realTop: top,
-        realLeft: left,
-        left: left + offsetChildLeft,
-        width,
-        height,
-        offsetChildTop,
-        offsetChildLeft,
-      });
 
       setTargetClientRect({
         top: top + offsetChildTop,
@@ -460,7 +478,7 @@ const Dashboard = ({}: DashboardProps) => {
         height,
       });
     }
-  }, [currentStep, graph.nodes, setTargetClientRect]);
+  }, [stateNodeTutorial, graph.nodes, setTargetClientRect]);
 
   const onCompleteWorker = useCallback(() => {
     if (!nodeBookState.selectedNode) return;
@@ -1007,7 +1025,7 @@ const Dashboard = ({}: DashboardProps) => {
   }, [nodeBookDispatch, openSidebar]);
 
   useEffect(() => {
-    if (isPlayingTheTutorial) return;
+    if (stateNodeTutorial) return;
 
     if (!shouldResetGraph.current) {
       g.current = createGraph();
@@ -1037,12 +1055,195 @@ const Dashboard = ({}: DashboardProps) => {
     return () => {
       killSnapshot();
     };
-  }, [allTagsLoaded, db, snapshot, user?.uname, settings.showClusterOptions, notebookChanged, isPlayingTheTutorial]);
+  }, [allTagsLoaded, db, snapshot, stateNodeTutorial, user?.uname, notebookChanged]);
   // }, [allTagsLoaded, db, snapshot, user?.uname, settings.showClusterOptions, notebookChanged]);
+
+  // useEffect(() => {
+  //   // local snapshot used only in interactive tutorial
+  //   if (!isPlayingTheTutorial) return;
+  //   console.log("effect INTERACTICE TUTORIAL");
+
+  //   if (shouldResetGraph.current) {
+  //     g.current = createGraph();
+  //     const FIRST_KEY_NODE = "01";
+  //     setGraph({
+  //       nodes: { [FIRST_KEY_NODE]: INTERACTIVE_TUTORIAL_NOTEBOOK_NODES[FIRST_KEY_NODE] },
+  //       edges: {},
+  //     });
+  //     setLocalSnapshot({ [FIRST_KEY_NODE]: INTERACTIVE_TUTORIAL_NOTEBOOK_NODES[FIRST_KEY_NODE] });
+  //     shouldResetGraph.current = false;
+  //   }
+  //   // if (isPlayingTheTutorial) {
+  //   //   g.current = createGraph();
+  //   //   return setGraph({ nodes: INTERACTIVE_TUTORIAL_NOTEBOOK_NODES, edges: {} });
+  //   // }
+
+  //   // setGraph(prev => {
+  //   //   const nodesCopy = { ...prev.nodes };
+  //   //   const interactiveTutorialNodeKeys = Object.keys(INTERACTIVE_TUTORIAL_NOTEBOOK_NODES);
+  //   //   // const invalidKeys = Object.keys(prev.nodes).filter(key => interactiveTutorialNodeKeys.includes(key));
+  //   //   interactiveTutorialNodeKeys.forEach(cur => delete nodesCopy[cur]);
+  //   //   // copyNodes.
+  //   //   // return {nodes: {...nodesData,['01']}, edges: {}}
+  //   //   return { nodes: nodesCopy, edges: prev.edges };
+  //   // });
+
+  //   const mergeAllNodes = (newAllNodes: FullNodeData[], currentAllNodes: FullNodesData): FullNodesData => {
+  //     return newAllNodes.reduce(
+  //       (acu, cur) => {
+  //         if (cur.nodeChangeType === "added" || cur.nodeChangeType === "modified") {
+  //           return { ...acu, [cur.node]: cur };
+  //         }
+  //         if (cur.nodeChangeType === "removed") {
+  //           const tmp = { ...acu };
+  //           delete tmp[cur.node];
+  //           return tmp;
+  //         }
+  //         return acu;
+  //       },
+  //       { ...currentAllNodes }
+  //     );
+  //   };
+
+  //   const fillDagre = (fullNodes: FullNodeData[], currentNodes: any, currentEdges: any, withClusters: boolean) => {
+  //     return fullNodes.reduce(
+  //       (acu: { newNodes: { [key: string]: any }; newEdges: { [key: string]: any } }, cur) => {
+  //         let tmpNodes = {};
+  //         let tmpEdges = {};
+
+  //         if (cur.nodeChangeType === "added") {
+  //           const { uNodeData, oldNodes, oldEdges } = makeNodeVisibleInItsLinks(cur, acu.newNodes, acu.newEdges);
+
+  //           const res = createOrUpdateNode(g.current, uNodeData, cur.node, oldNodes, oldEdges, allTags, withClusters);
+
+  //           tmpNodes = res.oldNodes;
+  //           tmpEdges = res.oldEdges;
+  //         }
+  //         if (cur.nodeChangeType === "modified" && cur.visible) {
+  //           const node = acu.newNodes[cur.node];
+  //           if (!node) {
+  //             const res = createOrUpdateNode(
+  //               g.current,
+  //               cur,
+  //               cur.node,
+  //               acu.newNodes,
+  //               acu.newEdges,
+  //               allTags,
+  //               withClusters
+  //             );
+  //             tmpNodes = res.oldNodes;
+  //             tmpEdges = res.oldEdges;
+  //           } else {
+  //             const currentNode: FullNodeData = {
+  //               ...cur,
+  //               left: node.left,
+  //               top: node.top,
+  //             }; // <----- IMPORTANT: Add positions data from node into cur.node to not set default position into center of screen
+
+  //             if (!compare2Nodes(cur, node)) {
+  //               const res = createOrUpdateNode(
+  //                 g.current,
+  //                 currentNode,
+  //                 cur.node,
+  //                 acu.newNodes,
+  //                 acu.newEdges,
+  //                 allTags,
+  //                 withClusters
+  //               );
+  //               tmpNodes = res.oldNodes;
+  //               tmpEdges = res.oldEdges;
+  //             }
+  //           }
+  //         }
+  //         // so the NO visible nodes will come as modified and !visible
+  //         if (cur.nodeChangeType === "removed" || (cur.nodeChangeType === "modified" && !cur.visible)) {
+  //           if (g.current.hasNode(cur.node)) {
+  //             g.current.nodes().forEach(function () {});
+  //             g.current.edges().forEach(function () {});
+  //             // PROBABLY you need to add hideNodeAndItsLinks, to update children and parents nodes
+
+  //             // !IMPORTANT, Don't change the order, first remove edges then nodes
+  //             tmpEdges = removeDagAllEdges(g.current, cur.node, acu.newEdges);
+  //             tmpNodes = removeDagNode(g.current, cur.node, acu.newNodes);
+  //           } else {
+  //             // remove edges
+  //             const oldEdges = { ...acu.newEdges };
+
+  //             Object.keys(oldEdges).forEach(key => {
+  //               if (key.includes(cur.node)) {
+  //                 delete oldEdges[key];
+  //               }
+  //             });
+
+  //             tmpEdges = oldEdges;
+  //             // remove node
+  //             const oldNodes = acu.newNodes;
+  //             if (cur.node in oldNodes) {
+  //               delete oldNodes[cur.node];
+  //             }
+  //             // tmpEdges = {acu.newEdges,}
+  //             tmpNodes = { ...oldNodes };
+  //           }
+  //         }
+
+  //         return {
+  //           newNodes: { ...tmpNodes },
+  //           newEdges: { ...tmpEdges },
+  //         };
+  //       },
+  //       { newNodes: { ...currentNodes }, newEdges: { ...currentEdges } }
+  //     );
+  //   };
+
+  //   const fullNodes = Object.values(localSnapshot);
+
+  //   const visibleFullNodes: FullNodeData[] = fullNodes.filter(cur => cur.visible || cur.nodeChangeType === "modified");
+  //   devLog("3: TUTORIAL: visibleFullNodes", visibleFullNodes);
+  //   setAllNodes(oldAllNodes => mergeAllNodes(fullNodes, oldAllNodes));
+  //   devLog("4: TUTORIAL: setAllNodes");
+  //   setGraph(({ nodes, edges }) => {
+  //     const visibleFullNodesMerged = visibleFullNodes.map(cur => {
+  //       const tmpNode = nodes[cur.node];
+  //       if (tmpNode) {
+  //         if (tmpNode.hasOwnProperty("simulated")) {
+  //           delete tmpNode["simulated"];
+  //         }
+  //         if (tmpNode.hasOwnProperty("isNew")) {
+  //           delete tmpNode["isNew"];
+  //         }
+  //       }
+
+  //       const hasParent = cur.parents.length;
+  //       // IMPROVE: we need to pass the parent which open the node
+  //       // to use his current position
+  //       // in this case we are checking first parent
+  //       // if this doesn't exist will set top:0 and left: 0 + NODE_WIDTH + COLUMN_GAP
+  //       const nodeParent = hasParent ? nodes[cur.parents[0].node] : null;
+  //       const topParent = nodeParent?.top ?? 0;
+
+  //       const leftParent = nodeParent?.left ?? 0;
+
+  //       return {
+  //         ...cur,
+  //         left: tmpNode?.left ?? leftParent + NODE_WIDTH + COLUMN_GAP,
+  //         top: tmpNode?.top ?? topParent,
+  //       };
+  //     });
+
+  //     devLog("5: TUTORIAL:user Nodes Snapshot:visible Full Nodes Merged", visibleFullNodesMerged);
+  //     const { newNodes, newEdges } = fillDagre(visibleFullNodesMerged, nodes, edges, settings.showClusterOptions);
+
+  //     if (!Object.keys(newNodes).length) {
+  //       setNoNodesFoundMessage(true);
+  //     }
+  //     return { nodes: newNodes, edges: newEdges };
+  //   });
+  // }, [localSnapshot, settings.showClusterOptions, notebookChanged, isPlayingTheTutorial, allTags]);
 
   useEffect(() => {
     // local snapshot used only in interactive tutorial
-    if (!isPlayingTheTutorial) return;
+    // if (!isPlayingTheTutorial) return;
+    if (!stateNodeTutorial) return;
     console.log("effect INTERACTICE TUTORIAL");
 
     if (shouldResetGraph.current) {
@@ -1055,20 +1256,6 @@ const Dashboard = ({}: DashboardProps) => {
       setLocalSnapshot({ [FIRST_KEY_NODE]: INTERACTIVE_TUTORIAL_NOTEBOOK_NODES[FIRST_KEY_NODE] });
       shouldResetGraph.current = false;
     }
-    // if (isPlayingTheTutorial) {
-    //   g.current = createGraph();
-    //   return setGraph({ nodes: INTERACTIVE_TUTORIAL_NOTEBOOK_NODES, edges: {} });
-    // }
-
-    // setGraph(prev => {
-    //   const nodesCopy = { ...prev.nodes };
-    //   const interactiveTutorialNodeKeys = Object.keys(INTERACTIVE_TUTORIAL_NOTEBOOK_NODES);
-    //   // const invalidKeys = Object.keys(prev.nodes).filter(key => interactiveTutorialNodeKeys.includes(key));
-    //   interactiveTutorialNodeKeys.forEach(cur => delete nodesCopy[cur]);
-    //   // copyNodes.
-    //   // return {nodes: {...nodesData,['01']}, edges: {}}
-    //   return { nodes: nodesCopy, edges: prev.edges };
-    // });
 
     const mergeAllNodes = (newAllNodes: FullNodeData[], currentAllNodes: FullNodesData): FullNodesData => {
       return newAllNodes.reduce(
@@ -1177,7 +1364,7 @@ const Dashboard = ({}: DashboardProps) => {
       );
     };
 
-    const fullNodes = Object.values(localSnapshot);
+    const fullNodes = stateNodeTutorial.localSnapshot;
 
     const visibleFullNodes: FullNodeData[] = fullNodes.filter(cur => cur.visible || cur.nodeChangeType === "modified");
     devLog("3: TUTORIAL: visibleFullNodes", visibleFullNodes);
@@ -1185,7 +1372,7 @@ const Dashboard = ({}: DashboardProps) => {
     devLog("4: TUTORIAL: setAllNodes");
     setGraph(({ nodes, edges }) => {
       const visibleFullNodesMerged = visibleFullNodes.map(cur => {
-        const tmpNode = nodes[cur.node];
+        const tmpNode: FullNodeData = nodes[cur.node];
         if (tmpNode) {
           if (tmpNode.hasOwnProperty("simulated")) {
             delete tmpNode["simulated"];
@@ -1220,7 +1407,7 @@ const Dashboard = ({}: DashboardProps) => {
       }
       return { nodes: newNodes, edges: newEdges };
     });
-  }, [localSnapshot, settings.showClusterOptions, notebookChanged, isPlayingTheTutorial, allTags]);
+  }, [allTags, settings.showClusterOptions, stateNodeTutorial, notebookChanged]);
 
   useEffect(() => {
     if (!db) return;
@@ -3712,16 +3899,9 @@ const Dashboard = ({}: DashboardProps) => {
 
   return (
     <div className="MapContainer" style={{ overflow: "hidden" }}>
-      {anchorTutorial && (
+      {stateNodeTutorial?.anchor && (
         <Portal anchor="portal">
-          <Tutorial
-            currentStep={currentStep}
-            currentStepIdx={currentStepIdx}
-            onNextStep={onNextStep}
-            onPreviousStep={onPreviousStep}
-            stepsLength={NODE_STEPS.length}
-            targetClientRect={targetClientRect}
-          />
+          <Tutorial tutorialState={stateNodeTutorial} onChangeStep={onChangeStep} targetClientRect={targetClientRect} />
         </Portal>
       )}
       <Box
@@ -3891,17 +4071,6 @@ const Dashboard = ({}: DashboardProps) => {
                 innerHeight={innerHeight}
                 innerWidth={windowWith}
               />
-              <MemoizedPendingProposalSidebar
-                theme={settings.theme}
-                openLinkedNode={openLinkedNode}
-                username={user.uname}
-                tagId={user.tagId}
-                open={openSidebar === "PENDING_PROPOSALS"}
-                onClose={() => onCloseSidebar()}
-                sidebarWidth={sidebarWidth()}
-                innerHeight={innerHeight}
-                innerWidth={windowWith}
-              />
               <MemoizedUserInfoSidebar
                 theme={settings.theme}
                 openLinkedNode={openLinkedNode}
@@ -4056,7 +4225,7 @@ const Dashboard = ({}: DashboardProps) => {
                 transition: "all 1s ease",
               }}
             >
-              <IconButton color="secondary" onClick={onStart}>
+              <IconButton color="secondary" onClick={() => onChangeStep("default")}>
                 <SchoolIcon />
               </IconButton>
             </Tooltip>
@@ -4264,13 +4433,10 @@ const Dashboard = ({}: DashboardProps) => {
                     backgroundColor: "yellow",
                   }}
                 />
-                {!anchorTutorial && (
+                {!stateNodeTutorial?.anchor && (
                   <Tutorial
-                    currentStep={currentStep}
-                    currentStepIdx={currentStepIdx}
-                    onNextStep={onNextStep}
-                    onPreviousStep={onPreviousStep}
-                    stepsLength={NODE_STEPS.length}
+                    tutorialState={stateNodeTutorial}
+                    onChangeStep={onChangeStep}
                     targetClientRect={targetClientRect}
                   />
                 )}
