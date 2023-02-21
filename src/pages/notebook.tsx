@@ -4040,6 +4040,7 @@ const Dashboard = ({}: DashboardProps) => {
                 windowHeight={windowHeight}
                 onlineUsers={onlineUsers}
                 usersOnlineStatusLoaded={usersOnlineStatusLoaded}
+                disableToolbar={stateNodeTutorial && stateNodeTutorial.disabledElements.includes("TOOLBAR")}
               />
 
               <MemoizedBookmarksSidebar

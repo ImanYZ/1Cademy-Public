@@ -36,6 +36,8 @@ type MainSidebarProps = {
   reputationSignal: ReputationSignal[];
   onlineUsers: string[];
   usersOnlineStatusLoaded: boolean;
+  disableToolbar?: boolean;
+  enabledToolbarElements?: string[];
 };
 
 export const ToolbarSidebar = ({
@@ -55,7 +57,9 @@ export const ToolbarSidebar = ({
   reputationSignal,
   onlineUsers,
   usersOnlineStatusLoaded,
-}: MainSidebarProps) => {
+  disableToolbar = false,
+}: // enabledToolbarElements = [],
+MainSidebarProps) => {
   const { nodeBookState, nodeBookDispatch } = useNodeBook();
   const isMenuOpen = nodeBookState.isMenuOpen;
 
@@ -143,6 +147,14 @@ export const ToolbarSidebar = ({
     [nodeBookDispatch]
   );
 
+  const disableUserStatusButton = disableToolbar; /* || ![].includes(c=>c==="userStatusIconc") */
+  const disableSearchButton = disableToolbar;
+  const disabledNotificationButton = disableToolbar;
+  const bookmarksButton = disableToolbar;
+  const pendingProposalButton = disableToolbar;
+  const intructorButton = disableToolbar;
+  const leaderboardButton = disableToolbar;
+
   const toolbarContentMemoized = useMemo(() => {
     return (
       <Box
@@ -178,6 +190,7 @@ export const ToolbarSidebar = ({
           </Box>
 
           {/* User info button */}
+
           <MemoizedUserStatusSettings
             id="toolbar-profile-button"
             user={user}
@@ -188,9 +201,11 @@ export const ToolbarSidebar = ({
             online={true} // TODO: get online state from useUserState useEffect
             sx={{ display: isMenuOpen ? "flex" : "", alignItems: "center" }}
             onClick={onOpenUserSettingsSidebar}
+            isDisabled={disableUserStatusButton}
           />
 
           {/* Searcher button */}
+
           <Button
             // className="SearchBarIconToolbar"
             id="toolbar-search-button"
@@ -198,10 +213,11 @@ export const ToolbarSidebar = ({
               onOpenSidebar("SEARCHER_SIDEBAR", "Search");
               setIsMenuOpen(false);
             }}
+            disabled={disableSearchButton}
             sx={{
               width: "100%",
               borderRadius: "0px 50px 50px 0px",
-              backgroundColor: "rgba(255, 152, 0, 1)",
+              backgroundColor: disableSearchButton ? "#383838ff" : "rgba(255, 152, 0, 1)",
               color: "white",
               lineHeight: "19px",
               height: "40px",
@@ -212,7 +228,7 @@ export const ToolbarSidebar = ({
               padding: "6px 0px",
               paddingLeft: isMenuOpen ? "20px" : "0px",
               ":hover": {
-                backgroundColor: "rgba(255, 152, 0, 1)",
+                backgroundColor: disableToolbar ? "#747474ff" : "rgba(255, 152, 0, 1)",
               },
             }}
           >
@@ -257,6 +273,7 @@ export const ToolbarSidebar = ({
               onOpenSidebar("NOTIFICATION_SIDEBAR", "Notifications");
               setIsMenuOpen(false);
             }}
+            disabled={disabledNotificationButton}
           >
             <Box
               sx={{
@@ -309,6 +326,7 @@ export const ToolbarSidebar = ({
               onOpenSidebar("BOOKMARKS_SIDEBAR", "Bookmarks");
               setIsMenuOpen(false);
             }}
+            disabled={bookmarksButton}
           >
             <Box sx={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "5px", height: "30px" }}>
               <Badge
@@ -353,6 +371,7 @@ export const ToolbarSidebar = ({
               onOpenSidebar("PENDING_PROPOSALS", "PendingProposals");
               setIsMenuOpen(false);
             }}
+            disabled={pendingProposalButton}
           >
             <Box sx={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "5px", height: "30px" }}>
               <Badge
@@ -396,6 +415,7 @@ export const ToolbarSidebar = ({
                 if (user.role === "INSTRUCTOR") return window.open("/instructors/dashboard", "_blank");
                 if (user.role === "STUDENT") return window.open(`/instructors/dashboard/${user.uname}`, "_blank");
               }}
+              disabled={intructorButton}
             >
               <Box
                 sx={{
@@ -455,7 +475,7 @@ export const ToolbarSidebar = ({
           )}
           {user?.tag && (
             <>
-              <MemoizedMetaButton onClick={(e: any) => onOpenLeaderboardOptions(e)}>
+              <MemoizedMetaButton onClick={(e: any) => onOpenLeaderboardOptions(e)} disabled={leaderboardButton}>
                 <Box
                   sx={{
                     display: "flex",
@@ -573,29 +593,36 @@ export const ToolbarSidebar = ({
       </Box>
     );
   }, [
-    anchorEl,
-    bookmarkUpdatesNum,
-    choices,
-    firstBoxHeight,
     isMenuOpen,
-    leaderBoardType,
-    onOpenSidebar,
+    firstBoxHeight,
+    theme,
+    user,
+    reputation?.totalPoints,
+    reputation?.positives,
+    reputation?.negatives,
     onOpenUserSettingsSidebar,
+    disableToolbar,
+    disableSearchButton,
+    disabledNotificationButton,
+    uncheckedNotificationsNum,
+    bookmarksButton,
+    bookmarkUpdatesNum,
+    pendingProposalButton,
     pendingProposalsLoaded,
     pendingProposalsNum,
-    reloadPermanentGrpah,
-    reputation?.negatives,
-    reputation?.positives,
-    reputation?.totalPoints,
-    setIsMenuOpen,
-    setOpenSideBar,
-    theme,
-    uncheckedNotificationsNum,
-    user,
+    intructorButton,
+    leaderboardButton,
+    leaderBoardType,
+    anchorEl,
+    choices,
     windowHeight,
-    reputationSignal,
     onlineUsers,
     usersOnlineStatusLoaded,
+    reloadPermanentGrpah,
+    setOpenSideBar,
+    reputationSignal,
+    onOpenSidebar,
+    setIsMenuOpen,
   ]);
 
   const contentSignalState = useMemo(() => {
@@ -613,6 +640,14 @@ export const ToolbarSidebar = ({
     reputationSignal,
     onlineUsers,
     usersOnlineStatusLoaded,
+    disableToolbar,
+    disableUserStatusButton,
+    disableSearchButton,
+    disabledNotificationButton,
+    bookmarksButton,
+    pendingProposalButton,
+    intructorButton,
+    leaderboardButton,
   ]);
 
   return (

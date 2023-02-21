@@ -169,7 +169,7 @@ export type NodeBookActions = {
   handleError: (options: ErrorOptions) => void;
 };
 
-export type SetStepType = null | "default" | "step001" | "step002";
+export type SetStepType = null | "default" | "step001" | "step002" | "step003";
 
 export type TutorialState = null | NodeTutorialState;
 

@@ -20,6 +20,7 @@ type UserStatusSettingsProps = {
   onClick: () => void;
   user: User;
   sx?: SxProps<Theme>;
+  isDisabled?: boolean;
 };
 
 const UserStatusSettings = (props: UserStatusSettingsProps) => {
@@ -87,6 +88,44 @@ const UserStatusSettings = (props: UserStatusSettingsProps) => {
 
     return <span>{title}</span>;
   };
+
+  if (props.isDisabled) {
+    return (
+      <Box
+        id={props.id}
+        // className={"SidebarButton" + (props.inUserBar ? " inUserBar" : "")}
+        className="SidebarButton"
+        // onClick={props.onClick}
+        sx={{
+          // border: "dashed 2px pink",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "flex-start",
+          gap: "5px",
+          padding: "5px 0px",
+          cursor: "pointer",
+        }}
+      >
+        <div className={(pointsGained ? "GainedPoint" : "") + (pointsLost ? "LostPoint" : "")}>
+          <OptimizedAvatar
+            imageUrl={props.imageUrl}
+            renderAsAvatar={true}
+            contained={false}
+            sx={{ border: "none", width: "28px", height: "28px", position: "static" }}
+          />
+          {/* <div className={props.online ? "UserStatusOnlineIcon" : "UserStatusOfflineIcon"}></div> */}
+        </div>
+        {
+          // className={"UserStatusTotalPoints" + (props.inUserBar ? " inUserBar" : "")}
+          <Box className={"customUserStatusTotalPoints"} sx={{ ...props.sx }}>
+            <DoneIcon className="material-icons DoneIcon gray-text" sx={{ fontSize: "16px" }} />
+            <span style={{ fontSize: "14px", paddingLeft: "4px" }}>{shortenNumber(props.totalPoints, 2, false)}</span>
+            {/* {props.user.tag && <div id="UserProfileButtonDefaultTag">{props.user.tag}</div>} */}
+          </Box>
+        }
+      </Box>
+    );
+  }
 
   // this is with changes in styles
   return (
