@@ -1,4 +1,4 @@
-import { ReactNode, useReducer, useRef } from "react";
+import { ReactNode, useCallback, useEffect, useReducer, useRef } from "react";
 
 import { INITIAL_NODE_TUTORIAL_STATE, nodeTutorialReducer } from "../lib/reducers/nodeTutorial";
 import { SetStepType } from "../nodeBookTypes";
@@ -23,6 +23,16 @@ export const useInteractiveTutorial = () => {
   const [stateNodeTutorial, dispatchNodeTutorial] = useReducer(nodeTutorialReducer, INITIAL_NODE_TUTORIAL_STATE);
   const isPlayingTheTutorialRef = useRef(false);
 
+  const onChangeStep = useCallback((step: SetStepType) => {
+    console.log("onchange step", step);
+    dispatchNodeTutorial({ type: step });
+    isPlayingTheTutorialRef.current = step ? true : false;
+  }, []);
+
+  useEffect(() => {
+    onChangeStep("default");
+  }, [onChangeStep]);
+
   useEventListener({
     stepId: stateNodeTutorial?.targetChildId ?? stateNodeTutorial?.targetId,
     cb: stateNodeTutorial?.isClickeable
@@ -32,12 +42,6 @@ export const useInteractiveTutorial = () => {
         }
       : undefined,
   });
-
-  const onChangeStep = (step: SetStepType) => {
-    console.log("onchange step", step);
-    dispatchNodeTutorial({ type: step });
-    isPlayingTheTutorialRef.current = step ? true : false;
-  };
 
   return { stateNodeTutorial, onChangeStep, isPlayingTheTutorialRef };
 };

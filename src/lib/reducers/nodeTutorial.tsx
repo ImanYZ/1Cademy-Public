@@ -47,7 +47,7 @@ export function nodeTutorialReducer(state: TutorialState, action: DispatchNodeTu
             footer to understand how you can manipulate the map and interact with the nodes
           </Typography>
         ),
-        disabledElements: [],
+        disabledElements: ["TOOLBAR"],
         enableChildElements: [],
         targetId: "01",
         anchor: "",
@@ -72,7 +72,7 @@ export function nodeTutorialReducer(state: TutorialState, action: DispatchNodeTu
             footer to understand how you can manipulate the map and interact with the nodes
           </Typography>
         ),
-        disabledElements: [],
+        disabledElements: ["TOOLBAR"],
         enableChildElements: [],
         targetId: "01",
         anchor: "",
@@ -80,7 +80,7 @@ export function nodeTutorialReducer(state: TutorialState, action: DispatchNodeTu
         nextStepName: null,
         previosStepName: "step001",
         tooltipPosition: "top",
-        stepNumber: 2,
+        stepNumber: 3,
         stepLenght: STEPS_LENGHT,
         isClickeable: false,
       };

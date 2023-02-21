@@ -269,6 +269,8 @@ const Dashboard = ({}: DashboardProps) => {
 
   // const [stateNodeTutorial, dispatchNodeTutorial] = useReducer(nodeTutorialReducer, INITIAL_NODE_TUTORIAL_STATE);
   const { stateNodeTutorial, onChangeStep, isPlayingTheTutorialRef } = useInteractiveTutorial();
+  console.log("isPlayingTheTutorialRef", isPlayingTheTutorialRef.current);
+
   const onNodeInViewport = useCallback(
     (nodeId: string) => {
       const originalNode = document.getElementById(nodeId);
@@ -1403,6 +1405,7 @@ const Dashboard = ({}: DashboardProps) => {
     if (!db) return;
     if (!user?.uname) return;
     if (!allTagsLoaded) return;
+    if (stateNodeTutorial) return;
 
     const userNodesRef = collection(db, "userNodes");
     const q = query(
@@ -1414,6 +1417,7 @@ const Dashboard = ({}: DashboardProps) => {
     );
     const bookmarkSnapshot = onSnapshot(q, async snapshot => {
       // console.log("on snapshot");
+      console.log("sn> bookmark");
       const docChanges = snapshot.docChanges();
 
       if (!docChanges.length) {
@@ -1431,12 +1435,14 @@ const Dashboard = ({}: DashboardProps) => {
     return () => {
       bookmarkSnapshot();
     };
-  }, [allTagsLoaded, db, user?.uname]);
+  }, [allTagsLoaded, db, user?.uname, stateNodeTutorial]);
+
   useEffect(() => {
     if (!db) return;
     if (!user?.uname) return;
     if (!user?.tagId) return;
     if (!allTagsLoaded) return;
+    if (stateNodeTutorial) return;
 
     const versionsSnapshots: any[] = [];
     const versions: { [key: string]: any } = {};
@@ -1453,6 +1459,7 @@ const Dashboard = ({}: DashboardProps) => {
       );
 
       const versionsSnapshot = onSnapshot(versionsQuery, async snapshot => {
+        console.log("sn> pending proposal");
         const docChanges = snapshot.docChanges();
         if (docChanges.length > 0) {
           for (let change of docChanges) {
@@ -1509,15 +1516,19 @@ const Dashboard = ({}: DashboardProps) => {
         vSnapshot();
       }
     };
-  }, [allTagsLoaded, db, user?.tagId, user?.uname]);
+  }, [allTagsLoaded, db, user?.tagId, user?.uname, stateNodeTutorial]);
+
   useEffect(() => {
     if (!db) return;
     if (!user?.uname) return;
     if (!allTagsLoaded) return;
+    if (stateNodeTutorial) return;
+
     const notificationNumsCol = collection(db, "notificationNums");
     const q = query(notificationNumsCol, where("uname", "==", user.uname));
 
     const notificationsSnapshot = onSnapshot(q, async snapshot => {
+      console.log("sn> notificationNums");
       if (!snapshot.docs.length) {
         const notificationNumRef = collection(db, "notificationNums");
         setDoc(doc(notificationNumRef), {
@@ -1532,7 +1543,7 @@ const Dashboard = ({}: DashboardProps) => {
     return () => {
       notificationsSnapshot();
     };
-  }, [db, user?.uname, allTagsLoaded]);
+  }, [db, user?.uname, allTagsLoaded, stateNodeTutorial]);
 
   useEffect(() => {
     const currentLengthNodes = Object.keys(graph.nodes).length;
@@ -4030,7 +4041,7 @@ const Dashboard = ({}: DashboardProps) => {
                 windowHeight={windowHeight}
                 onlineUsers={onlineUsers}
                 usersOnlineStatusLoaded={usersOnlineStatusLoaded}
-                disableToolbar={stateNodeTutorial && stateNodeTutorial.disabledElements.includes("TOOLBAR")}
+                disableToolbar={Boolean(stateNodeTutorial && stateNodeTutorial.disabledElements.includes("TOOLBAR"))}
               />
 
               <MemoizedBookmarksSidebar
