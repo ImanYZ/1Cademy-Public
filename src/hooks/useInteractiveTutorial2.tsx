@@ -30,11 +30,11 @@ export const useInteractiveTutorial = () => {
   }, []);
 
   useEffect(() => {
-    onChangeStep("default");
+    onChangeStep(1);
   }, [onChangeStep]);
 
   useEventListener({
-    stepId: stateNodeTutorial?.targetChildId ?? stateNodeTutorial?.targetId,
+    stepId: stateNodeTutorial?.childTargetId ?? stateNodeTutorial?.targetId,
     cb: stateNodeTutorial?.isClickeable
       ? () => {
           dispatchNodeTutorial({ type: stateNodeTutorial?.nextStepName ?? null });
