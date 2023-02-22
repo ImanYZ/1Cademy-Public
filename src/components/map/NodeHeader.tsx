@@ -47,60 +47,68 @@ const NodeHeader = ({
       sx={{ display: "flex", alignItems: "center", justifyContent: "flex-end", mt: "-14px", mb: "-10px", ...sx }}
     >
       <Tooltip title="Focused mode">
-        <IconButton color="inherit" onClick={() => setFocusView()} aria-label="focus-mode" size="small">
-          <UnfoldMoreIcon fontSize="inherit" sx={{ transform: "rotate(45deg)" }} />
-        </IconButton>
+        <span>
+          <IconButton color="inherit" onClick={() => setFocusView()} aria-label="focus-mode" size="small">
+            <UnfoldMoreIcon fontSize="inherit" sx={{ transform: "rotate(45deg)" }} />
+          </IconButton>
+        </span>
       </Tooltip>
 
       <Tooltip title={`${open ? "Close" : "Open"} the node.`}>
-        {open ? (
-          <IconButton
-            disabled={disableCloseButton}
-            id={closeButtonId}
-            color="inherit"
-            onClick={onToggleNode}
-            aria-label="Close the node"
-            size="small"
-          >
-            <RemoveIcon fontSize="inherit" />
-          </IconButton>
-        ) : (
-          <IconButton
-            disabled={disableOpenButton}
-            id={openButtonId}
-            color="inherit"
-            onClick={onToggleNode}
-            aria-label="open the node"
-            size="small"
-          >
-            <FullscreenIcon fontSize="inherit" />
-          </IconButton>
-        )}
+        <span>
+          {open ? (
+            <IconButton
+              disabled={disableCloseButton}
+              id={closeButtonId}
+              color="inherit"
+              onClick={onToggleNode}
+              aria-label="Close the node"
+              size="small"
+            >
+              <RemoveIcon fontSize="inherit" />
+            </IconButton>
+          ) : (
+            <IconButton
+              disabled={disableOpenButton}
+              id={openButtonId}
+              color="inherit"
+              onClick={onToggleNode}
+              aria-label="open the node"
+              size="small"
+            >
+              <FullscreenIcon fontSize="inherit" />
+            </IconButton>
+          )}
+        </span>
       </Tooltip>
 
       <Tooltip title="Hide all the descendants of this node.">
-        <IconButton
-          disabled={disableHideOffspringsButton}
-          id={`${id}-hide-offsprings-button`}
-          color="inherit"
-          onClick={onHideOffsprings}
-          aria-label="delete"
-          size="small"
-        >
-          <KeyboardTabIcon fontSize="inherit" sx={{ transform: "scaleX(-1)" }} />
-        </IconButton>
+        <span>
+          <IconButton
+            disabled={disableHideOffspringsButton}
+            id={`${id}-hide-offsprings-button`}
+            color="inherit"
+            onClick={onHideOffsprings}
+            aria-label="delete"
+            size="small"
+          >
+            <KeyboardTabIcon fontSize="inherit" sx={{ transform: "scaleX(-1)" }} />
+          </IconButton>
+        </span>
       </Tooltip>
       <Tooltip title="Hide the node from your map.">
-        <IconButton
-          disabled={disableHideButton}
-          id={`${id}-hiden-button`}
-          color="inherit"
-          onClick={e => onHideNodeHandler(e)}
-          aria-label="delete"
-          size="small"
-        >
-          <CloseIcon fontSize="inherit" />
-        </IconButton>
+        <span>
+          <IconButton
+            disabled={disableHideButton}
+            id={`${id}-hiden-button`}
+            color="inherit"
+            onClick={e => onHideNodeHandler(e)}
+            aria-label="delete"
+            size="small"
+          >
+            <CloseIcon fontSize="inherit" />
+          </IconButton>
+        </span>
       </Tooltip>
     </Box>
   );

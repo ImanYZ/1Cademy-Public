@@ -568,39 +568,41 @@ const NodeFooter = ({
                     }}
                   >
                     <Tooltip title={"Vote to delete node."} placement={"top"}>
-                      <Button
-                        onClick={wrongNode}
-                        disabled={disableVotes || disableDownvoteButton}
-                        sx={{
-                          padding: "0",
-                          color: "inherit",
-                          fontWeight: 400,
-                          minWidth: "40px",
-                          ...(!disabled && {
-                            ":hover": {
-                              color: "inherit",
-                              background: "transparent",
-                            },
-                          }),
-                        }}
-                      >
-                        <Box
+                      <span>
+                        <Button
+                          onClick={wrongNode}
+                          disabled={disableVotes || disableDownvoteButton}
                           sx={{
-                            display: "flex",
-                            fontSize: "14px",
-                            alignItems: "center",
+                            padding: "0",
+                            color: "inherit",
+                            fontWeight: 400,
+                            minWidth: "40px",
+                            ...(!disabled && {
+                              ":hover": {
+                                color: "inherit",
+                                background: "transparent",
+                              },
+                            }),
                           }}
                         >
-                          <span>{shortenNumber(wrongNum, 2, false)}</span>
-                          <CloseIcon
+                          <Box
                             sx={{
-                              fontSize: "16px",
-                              color: markedWrong ? "red" : "inherit",
-                              marginLeft: "1px",
+                              display: "flex",
+                              fontSize: "14px",
+                              alignItems: "center",
                             }}
-                          />
-                        </Box>
-                      </Button>
+                          >
+                            <span>{shortenNumber(wrongNum, 2, false)}</span>
+                            <CloseIcon
+                              sx={{
+                                fontSize: "16px",
+                                color: markedWrong ? "red" : "inherit",
+                                marginLeft: "1px",
+                              }}
+                            />
+                          </Box>
+                        </Button>
+                      </span>
                     </Tooltip>
                   </Box>
                   <Divider
@@ -629,35 +631,37 @@ const NodeFooter = ({
                     }}
                   >
                     <Tooltip title={"Vote to prevent further changes."} placement={"top"}>
-                      <Button
-                        onClick={correctNode}
-                        disabled={disableVotes || disableUpvoteButton}
-                        sx={{
-                          padding: "0",
-                          color: "inherit",
-                          fontWeight: 400,
-                          minWidth: "40px",
-                          ...(!disableUpvoteButton && {
-                            ":hover": {
-                              color: "inherit",
-                              background: "transparent",
-                            },
-                          }),
-                        }}
-                      >
-                        <Box
+                      <span>
+                        <Button
+                          onClick={correctNode}
+                          disabled={disableVotes || disableUpvoteButton}
                           sx={{
-                            display: "flex",
-                            fontSize: "14px",
-                            alignItems: "center",
+                            padding: "0",
+                            color: "inherit",
+                            fontWeight: 400,
+                            minWidth: "40px",
+                            ...(!disableUpvoteButton && {
+                              ":hover": {
+                                color: "inherit",
+                                background: "transparent",
+                              },
+                            }),
                           }}
                         >
-                          <span>{shortenNumber(correctNum, 2, false)}</span>
-                          <DoneIcon
-                            sx={{ fontSize: "16px", color: markedCorrect ? "#00E676" : "inherit", marginLeft: "1px" }}
-                          />
-                        </Box>
-                      </Button>
+                          <Box
+                            sx={{
+                              display: "flex",
+                              fontSize: "14px",
+                              alignItems: "center",
+                            }}
+                          >
+                            <span>{shortenNumber(correctNum, 2, false)}</span>
+                            <DoneIcon
+                              sx={{ fontSize: "16px", color: markedCorrect ? "#00E676" : "inherit", marginLeft: "1px" }}
+                            />
+                          </Box>
+                        </Button>
+                      </span>
                     </Tooltip>
                   </Box>
                 </Box>

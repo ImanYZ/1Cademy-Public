@@ -4139,7 +4139,14 @@ const Dashboard = ({}: DashboardProps) => {
             </Box>
           )}
 
-          <MemoizedCommunityLeaderboard userTagId={user?.tagId ?? ""} pendingProposalsLoaded={pendingProposalsLoaded} />
+          <MemoizedCommunityLeaderboard
+            userTagId={user?.tagId ?? ""}
+            pendingProposalsLoaded={pendingProposalsLoaded}
+            disabled={Boolean(
+              stateNodeTutorial && stateNodeTutorial.disabledElements.includes("COMMUNITY_LEADERBOARD")
+            )}
+          />
+
           {isQueueWorking && (
             <CircularProgress
               size={46}
@@ -4271,6 +4278,7 @@ const Dashboard = ({}: DashboardProps) => {
               </IconButton>
             </Tooltip>
           )}
+
           {/* end Data from map */}
 
           {window.innerHeight > 399 && user?.livelinessBar === "interaction" && (
@@ -4279,6 +4287,7 @@ const Dashboard = ({}: DashboardProps) => {
               openUserInfoSidebar={openUserInfoSidebar}
               onlineUsers={onlineUsers}
               db={db}
+              disabled={Boolean(stateNodeTutorial && stateNodeTutorial.disabledElements.includes("LIVENESS_BAR"))}
             />
           )}
 
@@ -4289,6 +4298,7 @@ const Dashboard = ({}: DashboardProps) => {
               onlineUsers={onlineUsers}
               db={db}
               user={user}
+              disabled={Boolean(stateNodeTutorial && stateNodeTutorial.disabledElements.includes("LIVENESS_BAR"))}
             />
           )}
 
@@ -4317,7 +4327,7 @@ const Dashboard = ({}: DashboardProps) => {
                 value={mapInteractionValue}
                 onChange={navigateWhenNotScrolling}
               >
-                <div
+                {/* <div
                   style={{
                     position: "absolute",
                     width: "8px",
@@ -4444,7 +4454,7 @@ const Dashboard = ({}: DashboardProps) => {
                     left: "0px",
                     backgroundColor: "yellow",
                   }}
-                />
+                /> */}
                 {!stateNodeTutorial?.anchor && (
                   <Tutorial
                     tutorialState={stateNodeTutorial}

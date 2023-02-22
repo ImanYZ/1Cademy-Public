@@ -218,7 +218,12 @@ MainSidebarProps) => {
             sx={{
               width: "100%",
               borderRadius: "0px 50px 50px 0px",
-              backgroundColor: disableSearchButton ? "#383838ff" : "rgba(255, 152, 0, 1)",
+              backgroundColor: theme =>
+                disableSearchButton
+                  ? theme.palette.mode === "dark"
+                    ? "#383838ff"
+                    : "#bdbdbdff"
+                  : "rgba(255, 152, 0, 1)",
               color: "white",
               lineHeight: "19px",
               height: "40px",

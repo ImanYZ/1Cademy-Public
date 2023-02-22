@@ -23,6 +23,8 @@ const getPrevStep = (step: SetStepType): SetStepType => {
 };
 
 /**
+EX: for notebook sections
+ "TOOLBAR", "01", "LIVENESS_BAR", "COMMUNITY_LEADERBOARD"
 Ex for Node id elements to disable
   "01-close-button",
   "01-open-button",
@@ -60,7 +62,7 @@ export function nodeTutorialReducer(
             footer to understand how you can manipulate the map and interact with the nodes.
           </Typography>
         ),
-        disabledElements: ["TOOLBAR", "01"],
+        disabledElements: ["TOOLBAR", "01", "LIVENESS_BAR", "COMMUNITY_LEADERBOARD"],
         enableChildElements: [],
         anchor: "",
         currentStepName: action.type,
