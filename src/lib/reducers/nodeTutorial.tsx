@@ -85,7 +85,7 @@ export function nodeTutorialReducer(
             Node headers are one of the ways that you can manipulate what you see on the knowledge graph.
           </Typography>
         ),
-        disabledElements: ["TOOLBAR", "01"],
+        disabledElements: ["TOOLBAR", "01", "LIVENESS_BAR", "COMMUNITY_LEADERBOARD"],
         enableChildElements: [],
         targetId: "01",
         childTargetId: "01-node-header",
@@ -112,7 +112,7 @@ export function nodeTutorialReducer(
             In the header are four buttons.
           </Typography>
         ),
-        disabledElements: ["TOOLBAR", "01"],
+        disabledElements: ["TOOLBAR", "01", "LIVENESS_BAR", "COMMUNITY_LEADERBOARD"],
         enableChildElements: [],
         targetId: "01",
         anchor: "",
@@ -138,7 +138,7 @@ export function nodeTutorialReducer(
             not delete the node from the platform.
           </Typography>
         ),
-        disabledElements: ["TOOLBAR", "01"],
+        disabledElements: ["TOOLBAR", "01", "LIVENESS_BAR", "COMMUNITY_LEADERBOARD"],
         enableChildElements: ["01-hiden-button"],
         targetId: "01",
         anchor: "",
@@ -163,7 +163,7 @@ export function nodeTutorialReducer(
             This one closes all the open children nodes of the node it is clicked on.
           </Typography>
         ),
-        disabledElements: ["TOOLBAR", "01"],
+        disabledElements: ["TOOLBAR", "01", "LIVENESS_BAR", "COMMUNITY_LEADERBOARD"],
         enableChildElements: ["01-hide-offsprings-button"],
         targetId: "01",
         anchor: "",
@@ -188,7 +188,7 @@ export function nodeTutorialReducer(
             This one minimizes the content in a node so only the title is displayed.
           </Typography>
         ),
-        disabledElements: ["TOOLBAR", "01"],
+        disabledElements: ["TOOLBAR", "01", "LIVENESS_BAR", "COMMUNITY_LEADERBOARD"],
         enableChildElements: ["01-close-button"],
         targetId: "01",
         anchor: "",
@@ -213,7 +213,7 @@ export function nodeTutorialReducer(
             Each node has a body that consists of a title and content.
           </Typography>
         ),
-        disabledElements: ["TOOLBAR", "01"],
+        disabledElements: ["TOOLBAR", "01", "LIVENESS_BAR", "COMMUNITY_LEADERBOARD"],
         enableChildElements: [],
         targetId: "01",
         anchor: "",
@@ -238,7 +238,7 @@ export function nodeTutorialReducer(
             This is the title.
           </Typography>
         ),
-        disabledElements: ["TOOLBAR", "01"],
+        disabledElements: ["TOOLBAR", "01", "LIVENESS_BAR", "COMMUNITY_LEADERBOARD"],
         enableChildElements: [],
         targetId: "01",
         anchor: "",
@@ -263,7 +263,7 @@ export function nodeTutorialReducer(
             We want a title that is concise and accurately describes the information within.
           </Typography>
         ),
-        disabledElements: ["TOOLBAR", "01"],
+        disabledElements: ["TOOLBAR", "01", "LIVENESS_BAR", "COMMUNITY_LEADERBOARD"],
         enableChildElements: [],
         targetId: "01",
         anchor: "",
@@ -289,7 +289,7 @@ export function nodeTutorialReducer(
             This means that you need to consider if the title is duplicated or would likely be duplicated.
           </Typography>
         ),
-        disabledElements: ["TOOLBAR", "01"],
+        disabledElements: ["TOOLBAR", "01", "LIVENESS_BAR", "COMMUNITY_LEADERBOARD"],
         enableChildElements: [],
         targetId: "01",
         anchor: "",
@@ -317,7 +317,7 @@ export function nodeTutorialReducer(
             specifically being discussed.
           </Typography>
         ),
-        disabledElements: ["TOOLBAR", "01"],
+        disabledElements: ["TOOLBAR", "01", "LIVENESS_BAR", "COMMUNITY_LEADERBOARD"],
         enableChildElements: [],
         targetId: "01",
         anchor: "",
@@ -343,7 +343,7 @@ export function nodeTutorialReducer(
             The content of a node describes what is stated in a title.
           </Typography>
         ),
-        disabledElements: ["TOOLBAR", "01"],
+        disabledElements: ["TOOLBAR", "01", "LIVENESS_BAR", "COMMUNITY_LEADERBOARD"],
         enableChildElements: [],
         targetId: "01",
         anchor: "",
@@ -369,7 +369,7 @@ export function nodeTutorialReducer(
             We want the content to be clear, concise, and accurate.
           </Typography>
         ),
-        disabledElements: ["TOOLBAR", "01"],
+        disabledElements: ["TOOLBAR", "01", "LIVENESS_BAR", "COMMUNITY_LEADERBOARD"],
         enableChildElements: [],
         targetId: "01",
         anchor: "",
@@ -396,7 +396,7 @@ export function nodeTutorialReducer(
             ordered and unordered lists.
           </Typography>
         ),
-        disabledElements: ["TOOLBAR", "01"],
+        disabledElements: ["TOOLBAR", "01", "LIVENESS_BAR", "COMMUNITY_LEADERBOARD"],
         enableChildElements: [],
         targetId: "01",
         anchor: "",
@@ -422,7 +422,7 @@ export function nodeTutorialReducer(
             For <b>bold text</b> you place two stars before and after the text you would like to make bold.
           </Typography>
         ),
-        disabledElements: ["TOOLBAR", "01"],
+        disabledElements: ["TOOLBAR", "01", "LIVENESS_BAR", "COMMUNITY_LEADERBOARD"],
         enableChildElements: [],
         targetId: "01",
         anchor: "",
@@ -447,7 +447,7 @@ export function nodeTutorialReducer(
             For <i>italicized text</i> you place one star before and after the text you would like to make italicized.
           </Typography>
         ),
-        disabledElements: ["TOOLBAR", "01"],
+        disabledElements: ["TOOLBAR", "01", "LIVENESS_BAR", "COMMUNITY_LEADERBOARD"],
         enableChildElements: [],
         targetId: "01",
         anchor: "",
@@ -474,7 +474,7 @@ export function nodeTutorialReducer(
             are placed on their own line.
           </Typography>
         ),
-        disabledElements: ["TOOLBAR", "01"],
+        disabledElements: ["TOOLBAR", "01", "LIVENESS_BAR", "COMMUNITY_LEADERBOARD"],
         enableChildElements: [],
         targetId: "01",
         anchor: "",
@@ -501,7 +501,7 @@ export function nodeTutorialReducer(
             own line.
           </Typography>
         ),
-        disabledElements: ["TOOLBAR", "01"],
+        disabledElements: ["TOOLBAR", "01", "LIVENESS_BAR", "COMMUNITY_LEADERBOARD"],
         enableChildElements: [],
         targetId: "01",
         anchor: "",
@@ -527,7 +527,7 @@ export function nodeTutorialReducer(
             You can also use math jax to create mathematical formulas.
           </Typography>
         ),
-        disabledElements: ["TOOLBAR", "01"],
+        disabledElements: ["TOOLBAR", "01", "LIVENESS_BAR", "COMMUNITY_LEADERBOARD"],
         enableChildElements: [],
         targetId: "01",
         anchor: "",
@@ -557,7 +557,7 @@ export function nodeTutorialReducer(
             sx={{ fontWeight: 400, letterSpacing: "inherit" }}
           />
         ),
-        disabledElements: ["TOOLBAR", "01"],
+        disabledElements: ["TOOLBAR", "01", "LIVENESS_BAR", "COMMUNITY_LEADERBOARD"],
         enableChildElements: [],
         targetId: "01",
         anchor: "",
@@ -583,7 +583,7 @@ export function nodeTutorialReducer(
             The node footer has many icons
           </Typography>
         ),
-        disabledElements: ["TOOLBAR", "01"],
+        disabledElements: ["TOOLBAR", "01", "LIVENESS_BAR", "COMMUNITY_LEADERBOARD"],
         enableChildElements: [],
         targetId: "01",
         anchor: "",
@@ -610,7 +610,7 @@ export function nodeTutorialReducer(
             make the node in its present form.
           </Typography>
         ),
-        disabledElements: ["TOOLBAR", "01"],
+        disabledElements: ["TOOLBAR", "01", "LIVENESS_BAR", "COMMUNITY_LEADERBOARD"],
         enableChildElements: ["01-node-footer-user"],
         targetId: "01",
         anchor: "",
@@ -636,7 +636,7 @@ export function nodeTutorialReducer(
             The next one indicates what type of node it is, this one is a concept node.
           </Typography>
         ),
-        disabledElements: ["TOOLBAR", "01"],
+        disabledElements: ["TOOLBAR", "01", "LIVENESS_BAR", "COMMUNITY_LEADERBOARD"],
         enableChildElements: ["01-node-footer-type"],
         targetId: "01",
         anchor: "",
@@ -662,7 +662,7 @@ export function nodeTutorialReducer(
             The third icon indicates when the latest version of the node was adopted, this one was approved __days ago.
           </Typography>
         ),
-        disabledElements: ["TOOLBAR", "01"],
+        disabledElements: ["TOOLBAR", "01", "LIVENESS_BAR", "COMMUNITY_LEADERBOARD"],
         enableChildElements: [],
         targetId: "01",
         anchor: "",
@@ -689,7 +689,7 @@ export function nodeTutorialReducer(
             children nodes to it.
           </Typography>
         ),
-        disabledElements: ["TOOLBAR", "01"],
+        disabledElements: ["TOOLBAR", "01", "LIVENESS_BAR", "COMMUNITY_LEADERBOARD"],
         enableChildElements: [],
         targetId: "01",
         anchor: "",
@@ -716,7 +716,7 @@ export function nodeTutorialReducer(
             received.
           </Typography>
         ),
-        disabledElements: ["TOOLBAR", "01"],
+        disabledElements: ["TOOLBAR", "01", "LIVENESS_BAR", "COMMUNITY_LEADERBOARD"],
         enableChildElements: [],
         targetId: "01",
         anchor: "",
@@ -742,7 +742,7 @@ export function nodeTutorialReducer(
             effect you are voting on the usefulness of a node.
           </Typography>
         ),
-        disabledElements: ["TOOLBAR", "01"],
+        disabledElements: ["TOOLBAR", "01", "LIVENESS_BAR", "COMMUNITY_LEADERBOARD"],
         enableChildElements: [],
         targetId: "01",
         anchor: "",
@@ -768,7 +768,7 @@ export function nodeTutorialReducer(
             A downvote is infact a vote to remove a node
           </Typography>
         ),
-        disabledElements: ["TOOLBAR", "01"],
+        disabledElements: ["TOOLBAR", "01", "LIVENESS_BAR", "COMMUNITY_LEADERBOARD"],
         enableChildElements: ["01-node-footer-downvotes"],
         targetId: "01",
         anchor: "",
@@ -793,7 +793,7 @@ export function nodeTutorialReducer(
             An upvote is a vote to not change a node
           </Typography>
         ),
-        disabledElements: ["TOOLBAR", "01"],
+        disabledElements: ["TOOLBAR", "01", "LIVENESS_BAR", "COMMUNITY_LEADERBOARD"],
         enableChildElements: ["01-node-footer-upvotes"],
         targetId: "01",
         anchor: "",
@@ -818,7 +818,7 @@ export function nodeTutorialReducer(
             When a ratio with a high enough number of downvotes to upvotes is reached a node can be deleted.
           </Typography>
         ),
-        disabledElements: ["TOOLBAR", "01"],
+        disabledElements: ["TOOLBAR", "01", "LIVENESS_BAR", "COMMUNITY_LEADERBOARD"],
         enableChildElements: [],
         targetId: "01",
         anchor: "",
@@ -844,7 +844,7 @@ export function nodeTutorialReducer(
             proposal will need to change the node. This will be discussed further later on.
           </Typography>
         ),
-        disabledElements: ["TOOLBAR", "01"],
+        disabledElements: ["TOOLBAR", "01", "LIVENESS_BAR", "COMMUNITY_LEADERBOARD"],
         enableChildElements: [],
         targetId: "01",
         anchor: "",
@@ -869,7 +869,7 @@ export function nodeTutorialReducer(
             The next icons are on a single button and represent the tag and citation for a node.
           </Typography>
         ),
-        disabledElements: ["TOOLBAR", "01"],
+        disabledElements: ["TOOLBAR", "01", "LIVENESS_BAR", "COMMUNITY_LEADERBOARD"],
         enableChildElements: [],
         targetId: "01",
         anchor: "",
@@ -895,7 +895,7 @@ export function nodeTutorialReducer(
             the left and the tags for the node on the right.
           </Typography>
         ),
-        disabledElements: ["TOOLBAR", "01"],
+        disabledElements: ["TOOLBAR", "01", "LIVENESS_BAR", "COMMUNITY_LEADERBOARD"],
         enableChildElements: ["01-node-footer-tags-citations"],
         targetId: "01",
         anchor: "",
@@ -920,7 +920,7 @@ export function nodeTutorialReducer(
             The next icon is for parent and child nodes.
           </Typography>
         ),
-        disabledElements: ["TOOLBAR", "01"],
+        disabledElements: ["TOOLBAR", "01", "LIVENESS_BAR", "COMMUNITY_LEADERBOARD"],
         enableChildElements: [],
         targetId: "01",
         anchor: "",
@@ -946,7 +946,7 @@ export function nodeTutorialReducer(
             on the right.
           </Typography>
         ),
-        disabledElements: ["TOOLBAR", "01"],
+        disabledElements: ["TOOLBAR", "01", "LIVENESS_BAR", "COMMUNITY_LEADERBOARD"],
         enableChildElements: ["01-button-parent-children"],
         targetId: "01",
         anchor: "",
@@ -971,7 +971,7 @@ export function nodeTutorialReducer(
             You can click on either the parent or child nodes to open them in the graph.
           </Typography>
         ),
-        disabledElements: ["TOOLBAR", "01"],
+        disabledElements: ["TOOLBAR", "01", "LIVENESS_BAR", "COMMUNITY_LEADERBOARD"],
         enableChildElements: ["01-button-parent-children"],
         targetId: "01",
         anchor: "",
@@ -997,7 +997,7 @@ export function nodeTutorialReducer(
             Finally the ellipses icon can be clicked to open a few other options.
           </Typography>
         ),
-        disabledElements: ["TOOLBAR", "01"],
+        disabledElements: ["TOOLBAR", "01", "LIVENESS_BAR", "COMMUNITY_LEADERBOARD"],
         enableChildElements: ["01-node-footer-ellipsis"],
         targetId: "01",
         anchor: "",
@@ -1026,7 +1026,7 @@ export function nodeTutorialReducer(
             Your can mark a node as studied or bookmarked here.
           </Typography>
         ),
-        disabledElements: ["TOOLBAR", "01"],
+        disabledElements: ["TOOLBAR", "01", "LIVENESS_BAR", "COMMUNITY_LEADERBOARD"],
         enableChildElements: ["01-node-footer-ellipsis"],
         targetId: "01",
         anchor: "",
@@ -1055,7 +1055,7 @@ export function nodeTutorialReducer(
             You can also have the node narrated for you.
           </Typography>
         ),
-        disabledElements: ["TOOLBAR", "01"],
+        disabledElements: ["TOOLBAR", "01", "LIVENESS_BAR", "COMMUNITY_LEADERBOARD"],
         enableChildElements: ["01-node-footer-ellipsis"],
         targetId: "01",
         anchor: "",
@@ -1083,7 +1083,7 @@ export function nodeTutorialReducer(
             Finally, you can share the node to Twitter, Reddit, Facebook, or Linkedin.
           </Typography>
         ),
-        disabledElements: ["TOOLBAR", "01"],
+        disabledElements: ["TOOLBAR", "01", "LIVENESS_BAR", "COMMUNITY_LEADERBOARD"],
         enableChildElements: ["01-node-footer-ellipsis"],
         targetId: "01",
         anchor: "",
@@ -1111,7 +1111,7 @@ export function nodeTutorialReducer(
             Finally, you can share the node to Twitter, Reddit, Facebook, or Linkedin.
           </Typography>
         ),
-        disabledElements: ["TOOLBAR", "01"],
+        disabledElements: ["TOOLBAR", "01", "LIVENESS_BAR", "COMMUNITY_LEADERBOARD"],
         enableChildElements: ["01-node-footer-ellipsis"],
         targetId: "01",
         anchor: "",
@@ -1141,7 +1141,7 @@ export function nodeTutorialReducer(
             There are 6 different types of nodes that all serve specific purposes on 1Cademy
           </Typography>
         ),
-        disabledElements: ["TOOLBAR", "01", "02"],
+        disabledElements: ["TOOLBAR", "01", "02", "LIVENESS_BAR", "COMMUNITY_LEADERBOARD"],
         enableChildElements: [],
         anchor: "",
         currentStepName: action.type,
@@ -1171,7 +1171,7 @@ export function nodeTutorialReducer(
             Concept nodes can be identified by this icon. They represent a single idea or concept.
           </Typography>
         ),
-        disabledElements: ["TOOLBAR", "01", "02"],
+        disabledElements: ["TOOLBAR", "01", "02", "LIVENESS_BAR", "COMMUNITY_LEADERBOARD"],
         enableChildElements: [],
         anchor: "",
         currentStepName: action.type,
@@ -1196,7 +1196,7 @@ export function nodeTutorialReducer(
             Concepts can be superordinate or subordinate.
           </Typography>
         ),
-        disabledElements: ["TOOLBAR", "01", "02"],
+        disabledElements: ["TOOLBAR", "01", "02", "LIVENESS_BAR", "COMMUNITY_LEADERBOARD"],
         enableChildElements: [],
         anchor: "",
         currentStepName: action.type,
@@ -1229,7 +1229,7 @@ export function nodeTutorialReducer(
             incorporates many concepts in it.
           </Typography>
         ),
-        disabledElements: ["TOOLBAR", "01", "02"],
+        disabledElements: ["TOOLBAR", "01", "02", "LIVENESS_BAR", "COMMUNITY_LEADERBOARD"],
         enableChildElements: [],
         anchor: "",
         currentStepName: action.type,
@@ -1262,7 +1262,7 @@ export function nodeTutorialReducer(
             because it is a subordinate topic within the topic of language.
           </Typography>
         ),
-        disabledElements: ["TOOLBAR", "01", "02"],
+        disabledElements: ["TOOLBAR", "01", "02", "LIVENESS_BAR", "COMMUNITY_LEADERBOARD"],
         enableChildElements: [],
         anchor: "",
         currentStepName: action.type,
@@ -1290,7 +1290,7 @@ export function nodeTutorialReducer(
             designated as concept nodes.
           </Typography>
         ),
-        disabledElements: ["TOOLBAR", "01", "02"],
+        disabledElements: ["TOOLBAR", "01", "02", "LIVENESS_BAR", "COMMUNITY_LEADERBOARD"],
         enableChildElements: [],
         anchor: "",
         currentStepName: action.type,
@@ -1329,7 +1329,7 @@ export function nodeTutorialReducer(
             them. They serve to link or arrange groups of concepts.
           </Typography>
         ),
-        disabledElements: ["TOOLBAR", "01", "02", "03"],
+        disabledElements: ["TOOLBAR", "01", "02", "03", "LIVENESS_BAR", "COMMUNITY_LEADERBOARD"],
         enableChildElements: [],
         anchor: "",
         currentStepName: action.type,
@@ -1362,7 +1362,7 @@ export function nodeTutorialReducer(
             a paragraph of description.
           </Typography>
         ),
-        disabledElements: ["TOOLBAR", "01", "02", "03"],
+        disabledElements: ["TOOLBAR", "01", "02", "03", "LIVENESS_BAR", "COMMUNITY_LEADERBOARD"],
         enableChildElements: [],
         anchor: "",
         currentStepName: action.type,
@@ -1390,7 +1390,7 @@ export function nodeTutorialReducer(
             </Typography>
           </>
         ),
-        disabledElements: ["TOOLBAR", "01", "02", "03"],
+        disabledElements: ["TOOLBAR", "01", "02", "03", "LIVENESS_BAR", "COMMUNITY_LEADERBOARD"],
         enableChildElements: [],
         anchor: "",
         currentStepName: action.type,
@@ -1416,7 +1416,7 @@ export function nodeTutorialReducer(
             <ShareIcon /> node will be a bulleted list, but this is not always the case.
           </Typography>
         ),
-        disabledElements: ["TOOLBAR", "01", "02", "03"],
+        disabledElements: ["TOOLBAR", "01", "02", "03", "LIVENESS_BAR", "COMMUNITY_LEADERBOARD"],
         enableChildElements: [],
         anchor: "",
         currentStepName: action.type,
@@ -1442,7 +1442,7 @@ export function nodeTutorialReducer(
             Strictly speaking, a concept node is a single, discreet concept that is then described.
           </Typography>
         ),
-        disabledElements: ["TOOLBAR", "01", "02", "03"],
+        disabledElements: ["TOOLBAR", "01", "02", "03", "LIVENESS_BAR", "COMMUNITY_LEADERBOARD"],
         enableChildElements: [],
         anchor: "",
         currentStepName: action.type,
@@ -1474,7 +1474,7 @@ export function nodeTutorialReducer(
             serves to connect related concept nodes which are then linked as children concept nodes.
           </Typography>
         ),
-        disabledElements: ["TOOLBAR", "01", "02", "03"],
+        disabledElements: ["TOOLBAR", "01", "02", "03", "LIVENESS_BAR", "COMMUNITY_LEADERBOARD"],
         enableChildElements: [],
         anchor: "",
         currentStepName: action.type,
@@ -1515,7 +1515,7 @@ export function nodeTutorialReducer(
             cited in other types of nodes.
           </Typography>
         ),
-        disabledElements: ["TOOLBAR", "01", "02", "03", "04"],
+        disabledElements: ["TOOLBAR", "01", "02", "03", "04", "LIVENESS_BAR", "COMMUNITY_LEADERBOARD"],
         enableChildElements: [],
         anchor: "",
         currentStepName: action.type,
@@ -1541,7 +1541,7 @@ export function nodeTutorialReducer(
             and audio.
           </Typography>
         ),
-        disabledElements: ["TOOLBAR", "01", "02", "03", "04"],
+        disabledElements: ["TOOLBAR", "01", "02", "03", "04", "LIVENESS_BAR", "COMMUNITY_LEADERBOARD"],
         enableChildElements: [],
         anchor: "",
         currentStepName: action.type,
@@ -1567,7 +1567,7 @@ export function nodeTutorialReducer(
             sections, timestamps, or webpages are not included in this type of node.
           </Typography>
         ),
-        disabledElements: ["TOOLBAR", "01", "02", "03", "04"],
+        disabledElements: ["TOOLBAR", "01", "02", "03", "04", "LIVENESS_BAR", "COMMUNITY_LEADERBOARD"],
         enableChildElements: [],
         anchor: "",
         currentStepName: action.type,
@@ -1601,7 +1601,7 @@ export function nodeTutorialReducer(
             APA citation.
           </Typography>
         ),
-        disabledElements: ["TOOLBAR", "01", "02", "03", "04"],
+        disabledElements: ["TOOLBAR", "01", "02", "03", "04", "LIVENESS_BAR", "COMMUNITY_LEADERBOARD"],
         enableChildElements: [],
         anchor: "",
         currentStepName: action.type,
@@ -1632,7 +1632,7 @@ export function nodeTutorialReducer(
             Idea nodes can be identified by this icon. They are used to add ideas not adapted from any source.
           </Typography>
         ),
-        disabledElements: ["TOOLBAR", "01", "02", "03", "04", "05"],
+        disabledElements: ["TOOLBAR", "01", "02", "03", "04", "05", "LIVENESS_BAR", "COMMUNITY_LEADERBOARD"],
         enableChildElements: [],
         anchor: "",
         currentStepName: action.type,
@@ -1665,7 +1665,7 @@ export function nodeTutorialReducer(
             Idea nodes can be used to offer feedback on a node or suggest a direction with future research in an area.
           </Typography>
         ),
-        disabledElements: ["TOOLBAR", "01", "02", "03", "04", "05"],
+        disabledElements: ["TOOLBAR", "01", "02", "03", "04", "05", "LIVENESS_BAR", "COMMUNITY_LEADERBOARD"],
         enableChildElements: [],
         anchor: "",
         currentStepName: action.type,
@@ -1697,7 +1697,7 @@ export function nodeTutorialReducer(
             Question nodes can be identified by this icon. They are used to ask a MULTIPLE CHOICE QUESTION
           </Typography>
         ),
-        disabledElements: ["TOOLBAR", "01", "02", "03", "04", "05"],
+        disabledElements: ["TOOLBAR", "01", "02", "03", "04", "05", "LIVENESS_BAR", "COMMUNITY_LEADERBOARD"],
         enableChildElements: [],
         anchor: "",
         currentStepName: action.type,
@@ -1723,7 +1723,7 @@ export function nodeTutorialReducer(
             will receive feedback.
           </Typography>
         ),
-        disabledElements: ["TOOLBAR", "01", "02", "03", "04", "05", "06"],
+        disabledElements: ["TOOLBAR", "01", "02", "03", "04", "05", "06", "LIVENESS_BAR", "COMMUNITY_LEADERBOARD"],
         enableChildElements: [],
         anchor: "",
         currentStepName: action.type,
@@ -1757,7 +1757,7 @@ export function nodeTutorialReducer(
             something you can do in a community meeting.
           </Typography>
         ),
-        disabledElements: ["TOOLBAR", "01", "02", "03", "04", "05", "06"],
+        disabledElements: ["TOOLBAR", "01", "02", "03", "04", "05", "06", "LIVENESS_BAR", "COMMUNITY_LEADERBOARD"],
         enableChildElements: [],
         anchor: "",
         currentStepName: action.type,
@@ -1790,7 +1790,18 @@ export function nodeTutorialReducer(
             language.
           </Typography>
         ),
-        disabledElements: ["TOOLBAR", "01", "02", "03", "04", "05", "06", "07"],
+        disabledElements: [
+          "TOOLBAR",
+          "01",
+          "02",
+          "03",
+          "04",
+          "05",
+          "06",
+          "07",
+          "LIVENESS_BAR",
+          "COMMUNITY_LEADERBOARD",
+        ],
         enableChildElements: [],
         anchor: "",
         currentStepName: action.type,
@@ -1815,7 +1826,18 @@ export function nodeTutorialReducer(
             Four languages can be specified in a code node: Python, R, HTML, and JavaScript.
           </Typography>
         ),
-        disabledElements: ["TOOLBAR", "01", "02", "03", "04", "05", "06", "07"],
+        disabledElements: [
+          "TOOLBAR",
+          "01",
+          "02",
+          "03",
+          "04",
+          "05",
+          "06",
+          "07",
+          "LIVENESS_BAR",
+          "COMMUNITY_LEADERBOARD",
+        ],
         enableChildElements: [],
         anchor: "",
         currentStepName: action.type,
@@ -1840,7 +1862,18 @@ export function nodeTutorialReducer(
             Each code node is color coded to reflect its specified language.
           </Typography>
         ),
-        disabledElements: ["TOOLBAR", "01", "02", "03", "04", "05", "06", "07"],
+        disabledElements: [
+          "TOOLBAR",
+          "01",
+          "02",
+          "03",
+          "04",
+          "05",
+          "06",
+          "07",
+          "LIVENESS_BAR",
+          "COMMUNITY_LEADERBOARD",
+        ],
         enableChildElements: [],
         anchor: "",
         currentStepName: action.type,
