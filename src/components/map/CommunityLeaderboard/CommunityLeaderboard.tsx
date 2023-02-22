@@ -15,9 +15,10 @@ const comLBTypes = ["Weekly", "Monthly", "All Time", "Self-votes", "Others' Vote
 type CommunityLeaderboardProps = {
   userTagId: string;
   pendingProposalsLoaded: boolean;
+  disabled?: boolean;
 };
 
-const CommunityLeaderboard = ({ userTagId, pendingProposalsLoaded }: CommunityLeaderboardProps) => {
+const CommunityLeaderboard = ({ userTagId, pendingProposalsLoaded, disabled = false }: CommunityLeaderboardProps) => {
   //object of all users' community Points
   // object of all users' weekly community Points
   const [comPointsWeeklyDict, setComPointsWeeklyDict] = useState({});
@@ -43,32 +44,41 @@ const CommunityLeaderboard = ({ userTagId, pendingProposalsLoaded }: CommunityLe
   const [, /** comPointsOthersMonthlyLoaded*/ setComPointsOthersMonthlyLoaded] = useState(false);
 
   useEffect(() => {
+    if (disabled) return;
+    console.log("dd1");
     if (db && userTagId && pendingProposalsLoaded) {
       loadReputationsData(db, true, "All Time", userTagId, setComPointsDict, setComPointsLoaded);
     }
-  }, [db, pendingProposalsLoaded, setComPointsLoaded, userTagId]);
+  }, [db, disabled, pendingProposalsLoaded, setComPointsLoaded, userTagId]);
 
   useEffect(() => {
+    if (disabled) return;
+    console.log("dd2");
     if (db && userTagId && comPointsLoaded) {
       loadReputationsData(db, true, "Monthly", userTagId, setComPointsMonthlyDict, setComPointsMonthlyLoaded);
     }
-  }, [db, comPointsLoaded, userTagId]);
+  }, [db, comPointsLoaded, userTagId, disabled]);
 
   useEffect(() => {
+    if (disabled) return;
+    console.log("dd3");
     if (db && userTagId && comPointsMonthlyLoaded) {
       loadReputationsData(db, true, "Weekly", userTagId, setComPointsWeeklyDict, setComPointsWeeklyLoaded);
     }
-  }, [db, comPointsMonthlyLoaded, userTagId]);
+  }, [db, comPointsMonthlyLoaded, userTagId, disabled]);
 
   useEffect(() => {
+    if (disabled) return;
+    console.log("dd4");
     if (db && userTagId && comPointsWeeklyLoaded) {
       loadReputationsData(db, true, "Others", userTagId, setComPointsOthersDict, setComPointsOthersLoaded);
     }
-  }, [db, comPointsWeeklyLoaded, userTagId]);
+  }, [db, comPointsWeeklyLoaded, userTagId, disabled]);
 
   // console.log("userTagId", userTagId);
 
   useEffect(() => {
+    if (disabled) return;
     if (db && userTagId && comPointsOthersLoaded) {
       loadReputationsData(
         db,
@@ -79,7 +89,7 @@ const CommunityLeaderboard = ({ userTagId, pendingProposalsLoaded }: CommunityLe
         setComPointsOthersMonthlyLoaded
       );
     }
-  }, [db, comPointsOthersLoaded, userTagId]);
+  }, [db, comPointsOthersLoaded, userTagId, disabled]);
 
   // TEST
   const loadReputationPoints = useCallback((comPsDict: any, comPsDict2: any = null) => {
@@ -108,45 +118,51 @@ const CommunityLeaderboard = ({ userTagId, pendingProposalsLoaded }: CommunityLe
   }, []);
 
   useEffect(() => {
+    if (disabled) return;
     if (comLeaderboardType === "All Time") {
       loadReputationPoints(comPointsDict);
     }
-  }, [comLeaderboardType, comPointsDict, loadReputationPoints]);
+  }, [comLeaderboardType, comPointsDict, disabled, loadReputationPoints]);
 
   useEffect(() => {
+    if (disabled) return;
     if (comLeaderboardType === "Monthly") {
-      // console.log("[Com 7]:");
+      console.log("[Com 7]:");
       loadReputationPoints(comPointsMonthlyDict);
     }
-  }, [comLeaderboardType, comPointsMonthlyDict, loadReputationPoints]);
+  }, [comLeaderboardType, comPointsMonthlyDict, disabled, loadReputationPoints]);
 
   useEffect(() => {
+    if (disabled) return;
     if (comLeaderboardType === "Weekly") {
-      // console.log("[Com 8]:");
+      console.log("[Com 8]:");
       loadReputationPoints(comPointsWeeklyDict);
     }
-  }, [comLeaderboardType, comPointsWeeklyDict, loadReputationPoints]);
+  }, [comLeaderboardType, comPointsWeeklyDict, disabled, loadReputationPoints]);
 
   useEffect(() => {
+    if (disabled) return;
     if (comLeaderboardType === "Self-votes") {
-      // console.log("[Com 9]:", { comPointsDict, comPointsOthersDict });
+      console.log("[Com 9]:", { comPointsDict, comPointsOthersDict });
       loadReputationPoints(comPointsDict, comPointsOthersDict);
     }
-  }, [comLeaderboardType, comPointsDict, comPointsOthersDict, loadReputationPoints]);
+  }, [comLeaderboardType, comPointsDict, comPointsOthersDict, disabled, loadReputationPoints]);
 
   useEffect(() => {
+    if (disabled) return;
     if (comLeaderboardType === "Others' Votes") {
-      // console.log("[Com 10]:");
+      console.log("[Com 10]:");
       loadReputationPoints(comPointsOthersDict);
     }
-  }, [comLeaderboardType, comPointsOthersDict, loadReputationPoints]);
+  }, [comLeaderboardType, comPointsOthersDict, disabled, loadReputationPoints]);
 
   useEffect(() => {
+    if (disabled) return;
     if (comLeaderboardType === "Others Monthly") {
-      // console.log("[Com 11]:");
+      console.log("[Com 11]:");
       loadReputationPoints(comPointsOthersMonthlyDict);
     }
-  }, [comLeaderboardType, comPointsOthersMonthlyDict, loadReputationPoints]);
+  }, [comLeaderboardType, comPointsOthersMonthlyDict, disabled, loadReputationPoints]);
 
   const openComLeaderboard = useCallback(() => {
     setComLeaderboardOpen(oldCL => !oldCL);
@@ -177,10 +193,10 @@ const CommunityLeaderboard = ({ userTagId, pendingProposalsLoaded }: CommunityLe
     <Box
       id="ComLeaderboardMain"
       className={comLeaderboardOpen ? undefined : "Minimized"}
-      sx={{ width: { xs: "100%", sm: "70%", md: "90%" } }}
+      sx={{ width: { xs: "100%", sm: "70%", md: "90%" }, opacity: disabled ? 0.8 : 1 }}
     >
       <Box id="ComLeaderboardMinimizer">
-        <MemoizedMetaButton onClick={openComLeaderboard}>
+        <MemoizedMetaButton onClick={openComLeaderboard} disabled={disabled}>
           <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "8px" }}>
             <Box sx={{ color: "ButtonHighlight", fontSize: "18px" }}>🏆</Box>
             <Box sx={{}}>{comLeaderboardOpen ? <ArrowForwardIcon /> : <ArrowBackIcon />}</Box>
