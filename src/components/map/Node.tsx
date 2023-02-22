@@ -137,6 +137,7 @@ type NodeProps = {
   contributors: any;
   institutions: any;
   openUserInfoSidebar: (uname: string, imageUrl: string, fullName: string, chooseUname: string) => void;
+  disabled?: boolean;
 };
 
 const proposedChildTypesIcons: { [key in ProposedChildTypesIcons]: string } = {
@@ -240,6 +241,7 @@ const Node = ({
   contributors,
   institutions,
   openUserInfoSidebar,
+  disabled = false,
 }: NodeProps) => {
   const [{ user }] = useAuth();
   const { nodeBookState, nodeBookDispatch } = useNodeBook();
@@ -670,6 +672,7 @@ const Node = ({
                 onToggleNode={toggleNodeHandler}
                 onHideOffsprings={hideOffspringsHandler}
                 onHideNodeHandler={hideNodeHandler}
+                disabled={disabled}
                 // sx={{ position: "absolute", right: "10px", top: "0px" }}
               />
             )}
@@ -967,6 +970,7 @@ const Node = ({
                 openUserInfoSidebar={openUserInfoSidebar}
                 proposeNodeImprovement={proposeNodeImprovement}
                 setOperation={setOperation}
+                disabled={disabled}
               />
             </div>
           </div>
@@ -1075,6 +1079,7 @@ const Node = ({
               onToggleNode={toggleNodeHandler}
               onHideOffsprings={hideOffspringsHandler}
               onHideNodeHandler={hideNodeHandler}
+              disabled={disabled}
               // sx={{ position: "absolute", right: "10px", top: "0px" }}
             />
           )}
@@ -1148,6 +1153,7 @@ const Node = ({
               openUserInfoSidebar={openUserInfoSidebar}
               proposeNodeImprovement={proposeNodeImprovement}
               setOperation={setOperation}
+              disabled={disabled}
             />
           </div>
           {/* </div> */}
