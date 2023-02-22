@@ -460,8 +460,8 @@ const Dashboard = ({}: DashboardProps) => {
       let { top, left, width = NODE_WIDTH, height = 0 } = thisNode;
       let offsetChildTop = 0;
       let offsetChildLeft = 0;
-      if (stateNodeTutorial.targetChildId) {
-        const targetElement = document.getElementById(stateNodeTutorial.targetChildId);
+      if (stateNodeTutorial.childTargetId) {
+        const targetElement = document.getElementById(stateNodeTutorial.childTargetId);
         if (!targetElement) return;
         targetElement.style.border = "4px dashed #ffc813";
         const { offsetTop, offsetLeft } = targetElement;
@@ -4237,7 +4237,7 @@ const Dashboard = ({}: DashboardProps) => {
                 transition: "all 1s ease",
               }}
             >
-              <IconButton color="secondary" onClick={() => onChangeStep("default")}>
+              <IconButton color="secondary" onClick={() => onChangeStep(1)}>
                 <SchoolIcon />
               </IconButton>
             </Tooltip>
