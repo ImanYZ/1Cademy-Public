@@ -22,13 +22,21 @@ type Props = {
   id?: string;
   tooltipPlacement?: TooltipProps["placement"];
   nodeType?: NodeType | NodeTypes | "locked";
+  // disabled?: boolean;
 } & SvgIconProps;
 
-const NodeTypeIcon: FC<Props> = ({ id, nodeType, tooltipPlacement = "top", color = "primary", ...rest }) => {
+const NodeTypeIcon: FC<Props> = ({
+  id,
+  nodeType,
+  tooltipPlacement = "top",
+  color = "primary",
+  // disabled = false,
+  ...rest
+}) => {
   const renderIcon = () => {
     switch (nodeType) {
       case "Code":
-        return <CodeIcon color={color} {...rest} />;
+        return <CodeIcon color={color} {...rest} sx={{ color: disabled ? "inherith" : undefined }} />;
       case "Concept":
         return <LocalLibraryIcon color={color} {...rest} />;
       case "Relation":
@@ -57,6 +65,13 @@ const NodeTypeIcon: FC<Props> = ({ id, nodeType, tooltipPlacement = "top", color
   };
 
   if (!nodeType) return null;
+
+  // if (disabled)
+  //   return (
+  //     <Box id={`${id}-node-footer-type`} sx={{ color: "gray" }}>
+  //       {renderIcon()}
+  //     </Box>
+  //   );
 
   return (
     <Tooltip title={`${nodeType} node`} placement={tooltipPlacement}>

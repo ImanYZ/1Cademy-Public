@@ -106,6 +106,7 @@ type NodeFooterProps = {
   openUserInfoSidebar: (uname: string, imageUrl: string, fullName: string, chooseUname: string) => void;
   proposeNodeImprovement: any;
   setOperation: any;
+  disabled?: boolean;
 };
 
 const NodeFooter = ({
@@ -166,6 +167,7 @@ const NodeFooter = ({
   openUserInfoSidebar,
   proposeNodeImprovement,
   setOperation,
+  disabled,
 }: NodeFooterProps) => {
   const router = useRouter();
   const db = getFirestore();
@@ -397,28 +399,8 @@ const NodeFooter = ({
       >
         <Box className="NodeFooter Left" sx={{ display: "flex", alignItems: "center", gap: "10px" }}>
           {open &&
+            !disabled &&
             (isNew ? (
-              //   <UserStatusIcon
-              //     uname={username}
-              //     imageUrl={imageUrl}
-              //     fullname={fName + " " + lName}
-              //     chooseUname={chooseUname}
-              //     online={false}
-              //     inUserBar={false}
-              //     inNodeFooter={true}
-              //     reloadPermanentGrpah={reloadPermanentGrpah}
-              //   />
-              // ) : (
-              //   <UserStatusIcon
-              //     uname={admin}
-              //     imageUrl={aImgUrl}
-              //     fullname={aFullname}
-              //     chooseUname={aChooseUname}
-              //     online={false}
-              //     inUserBar={false}
-              //     inNodeFooter={true}
-              //     reloadPermanentGrpah={reloadPermanentGrpah}
-              //   />
               <Box onClick={openContributorsSection}>
                 <MemoizedUserStatusIcon
                   id={`${identifier}-node-footer-user`}
@@ -449,6 +431,9 @@ const NodeFooter = ({
                 />
               </Box>
             ))}
+          {open && disabled && (
+            <Box sx={{ width: "28px", height: "28px", backgroundColor: "gray", borderRadius: "50%" }} />
+          )}
           <div
             className={open ? "NodeTypeIconOpen Tooltip" : "NodeTypeIconClosed Tooltip"}
             style={{ display: "flex", alignItems: "center", fontSize: "16px" }} // font size refL Map.css ln 71
@@ -456,13 +441,30 @@ const NodeFooter = ({
             {/* <NodeTypeIcon nodeType={nodeType} /> */}
 
             {locked && (
-              <NodeTypeIcon id={identifier} nodeType={"locked"} tooltipPlacement={"top"} fontSize={"inherit"} />
+              <NodeTypeIcon
+                id={identifier}
+                nodeType={"locked"}
+                tooltipPlacement={"top"}
+                fontSize={"inherit"}
+                // disabled={disabled}
+              />
             )}
             {!locked &&
               (editable ? (
-                <MemoizedNodeTypeSelector nodeId={identifier} setNodeParts={setNodeParts} nodeType={nodeType} />
+                <MemoizedNodeTypeSelector
+                  nodeId={identifier}
+                  setNodeParts={setNodeParts}
+                  nodeType={nodeType}
+                  disabled={disabled}
+                />
               ) : (
-                <NodeTypeIcon id={identifier} nodeType={nodeType} tooltipPlacement={"top"} fontSize={"inherit"} />
+                <NodeTypeIcon
+                  id={identifier}
+                  nodeType={nodeType}
+                  tooltipPlacement={"top"}
+                  fontSize={"inherit"}
+                  // disabled={disabled}
+                />
               ))}
             <Tooltip
               title={`This node was last edited at ${dayjs(new Date(changedAt)).hour()}:${dayjs(
@@ -510,6 +512,7 @@ const NodeFooter = ({
                     minWidth: "30px",
                     height: "30px",
                   }}
+                  disabled={disabled}
                 >
                   <Box sx={{ display: "flex", alignItems: "center", gap: "4px", fill: "inherit" }}>
                     <CreateIcon sx={{ fontSize: "16px" }} />

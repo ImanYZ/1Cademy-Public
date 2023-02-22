@@ -15,6 +15,7 @@ type NodeHeaderProps = {
   onHideOffsprings: any;
   onHideNodeHandler: any;
   sx?: SxProps<Theme>;
+  disabled?: boolean;
 };
 
 const NodeHeader = ({
@@ -25,6 +26,7 @@ const NodeHeader = ({
   onHideNodeHandler,
   sx,
   setFocusView,
+  disabled,
 }: NodeHeaderProps) => {
   return (
     <Box
@@ -32,7 +34,13 @@ const NodeHeader = ({
       sx={{ display: "flex", alignItems: "center", justifyContent: "flex-end", mt: "-14px", mb: "-10px", ...sx }}
     >
       <Tooltip title="Focused mode">
-        <IconButton color="inherit" onClick={() => setFocusView()} aria-label="focus-mode" size="small">
+        <IconButton
+          disabled={disabled}
+          color="inherit"
+          onClick={() => setFocusView()}
+          aria-label="focus-mode"
+          size="small"
+        >
           <UnfoldMoreIcon fontSize="inherit" sx={{ transform: "rotate(45deg)" }} />
         </IconButton>
       </Tooltip>
@@ -40,6 +48,7 @@ const NodeHeader = ({
       <Tooltip title={`${open ? "Close" : "Open"} the node.`}>
         {open ? (
           <IconButton
+            disabled={disabled}
             id={`${id}-close-button`}
             color="inherit"
             onClick={onToggleNode}
@@ -50,6 +59,7 @@ const NodeHeader = ({
           </IconButton>
         ) : (
           <IconButton
+            disabled={disabled}
             id={`${id}-open-button"`}
             color="inherit"
             onClick={onToggleNode}
@@ -63,6 +73,7 @@ const NodeHeader = ({
 
       <Tooltip title="Hide all the descendants of this node.">
         <IconButton
+          disabled={disabled}
           id={`${id}-hide-offsprings-button`}
           color="inherit"
           onClick={onHideOffsprings}
@@ -74,6 +85,7 @@ const NodeHeader = ({
       </Tooltip>
       <Tooltip title="Hide the node from your map.">
         <IconButton
+          disabled={disabled}
           id={`${id}-hiden-button`}
           color="inherit"
           onClick={e => onHideNodeHandler(e)}
