@@ -1384,7 +1384,7 @@ export function nodeTutorialReducer(
         title: "Nodes - Concept vs Relation",
         description: (
           <>
-            <Typography variant="body1" sx={{ mb: "16px", display: "flex", alignItems: "center" }}>
+            <Typography variant="body1" sx={{ mb: "16px" /* , display: "flex", alignItems: "center"  */ }}>
               It can be difficult to determine the difference between a concept <LocalLibraryIcon fontSize="small" />
               and relation <ShareIcon fontSize="small" /> node.
             </Typography>
@@ -1411,7 +1411,7 @@ export function nodeTutorialReducer(
         childTargetId: "03-node-footer-type",
         title: "Nodes - Concept vs Relation",
         description: (
-          <Typography variant="body1" sx={{ mb: "16px", display: "flex", alignItems: "center" }}>
+          <Typography variant="body1" sx={{ mb: "16px" /* , display: "flex", alignItems: "center" */ }}>
             Typically a concept node <LocalLibraryIcon fontSize="small" /> will be a paragraph and a relation{" "}
             <ShareIcon /> node will be a bulleted list, but this is not always the case.
           </Typography>
@@ -1469,7 +1469,7 @@ export function nodeTutorialReducer(
         childTargetId: "03-node-footer-type",
         title: "Nodes - Concept vs Relation",
         description: (
-          <Typography variant="body1" sx={{ mb: "16px", display: "flex", alignItems: "center" }}>
+          <Typography variant="body1" sx={{ mb: "16px" /* , display: "flex", alignItems: "center"  */ }}>
             A relation node <ShareIcon fontSize="small" /> identifies two or more concepts without defining them. It
             serves to connect related concept nodes which are then linked as children concept nodes.
           </Typography>
