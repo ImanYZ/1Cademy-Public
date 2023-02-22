@@ -15,8 +15,17 @@ import { Box, Button, Fab, Grid, InputLabel, Switch, TextField, Tooltip, Typogra
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { TimePicker } from "@mui/x-date-pickers/TimePicker";
 import moment from "moment";
-import React, { useCallback, useDeferredValue, useEffect, useMemo, useRef, useState, useTransition } from "react";
-import { FullNodeData, OpenPart } from "src/nodeBookTypes";
+import React, {
+  MutableRefObject,
+  useCallback,
+  useDeferredValue,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  useTransition,
+} from "react";
+import { FullNodeData, OpenPart, TNodeBookState } from "src/nodeBookTypes";
 
 import { useNodeBook } from "@/context/NodeBookContext";
 import { getSearchAutocomplete } from "@/lib/knowledgeApi";
@@ -47,6 +56,7 @@ type EditorOptions = "EDIT" | "PREVIEW";
 type ProposedChildTypesIcons = "Concept" | "Relation" | "Question" | "Code" | "Reference" | "Idea";
 type NodeProps = {
   identifier: string;
+  notebookRef: MutableRefObject<TNodeBookState>;
   setFocusView: (state: { selectedNode: string; isEnabled: boolean }) => void;
   activeNode: any;
   citationsSelected: any;
@@ -150,6 +160,7 @@ const proposedChildTypesIcons: { [key in ProposedChildTypesIcons]: string } = {
 
 const Node = ({
   identifier,
+  notebookRef,
   setFocusView,
   activeNode,
   citationsSelected,
@@ -242,7 +253,7 @@ const Node = ({
   openUserInfoSidebar,
 }: NodeProps) => {
   const [{ user }] = useAuth();
-  const { nodeBookState, nodeBookDispatch } = useNodeBook();
+  const { nodeBookDispatch } = useNodeBook();
   const [option, setOption] = useState<EditorOptions>("EDIT");
 
   const [openPart, setOpenPart] = useState<OpenPart>(null);
@@ -357,10 +368,14 @@ const Node = ({
 
   const nodeClickHandler = useCallback(
     (event: any) => {
-      if (nodeBookState.choosingNode) {
+      if (notebookRef.current.choosingNode) {
         // The first Nodes exist, Now is clicking the Chosen Node
+        notebookRef.current.chosenNode = {
+          id: identifier,
+          title,
+        };
         nodeBookDispatch({ type: "setChosenNode", payload: { id: identifier, title } });
-        scrollToNode(nodeBookState.selectedNode);
+        scrollToNode(notebookRef.current.selectedNode);
       } else if (
         "activeElement" in event.currentTarget &&
         "nodeName" in event.currentTarget.activeElement &&
@@ -369,10 +384,11 @@ const Node = ({
         nodeClicked(event, identifier, nodeType, setOpenPart);
       }
       if (event.target.type === "textarea" || event.target.type === "text") {
+        notebookRef.current.selectedNode = identifier;
         nodeBookDispatch({ type: "setSelectedNode", payload: identifier });
       }
     },
-    [nodeBookState.choosingNode, identifier, title, nodeClicked, nodeType]
+    [identifier, title, nodeClicked, nodeType]
   );
 
   const hideNodeHandler = useCallback(
@@ -485,10 +501,12 @@ const Node = ({
         if (isNew) {
           saveProposedChildNode(identifier, "", reason, () => setAbleToPropose(true));
           if (!firstParentId) return;
+          notebookRef.current.selectedNode = firstParentId.node;
           nodeBookDispatch({ type: "setSelectedNode", payload: firstParentId.node });
           return;
         }
         saveProposedImprovement("", reason, () => setAbleToPropose(true));
+        notebookRef.current.selectedNode = identifier;
         nodeBookDispatch({ type: "setSelectedNode", payload: identifier });
         setOperation("ProposeProposals");
       }, 500);
@@ -504,6 +522,7 @@ const Node = ({
     const scrollTo = isNew ? firstParentId.node ?? undefined : identifier;
     if (!scrollTo) return;
     setAbleToPropose(false);
+    notebookRef.current.selectedNode = scrollTo;
     nodeBookDispatch({ type: "setSelectedNode", payload: scrollTo });
     setOperation("CancelProposals");
     closeSideBar();
@@ -531,6 +550,7 @@ const Node = ({
     async (newTitle: string) => {
       setNodeParts(identifier, thisNode => ({ ...thisNode, title: newTitle }));
       if (titleUpdated && newTitle.trim().length > 0) {
+        notebookRef.current.searchByTitleOnly = true;
         nodeBookDispatch({ type: "setSearchByTitleOnly", payload: true });
         let nodes: any = await getSearchAutocomplete(newTitle);
         let exactMatchingNode = nodes.results.filter((title: any) => title === newTitle);
@@ -550,10 +570,12 @@ const Node = ({
         setTitleUpdated(false);
       }
       setOpenSideBar("SEARCHER_SIDEBAR");
+      notebookRef.current.nodeTitleBlured = true;
+      notebookRef.current.searchQuery = newTitle;
       nodeBookDispatch({ type: "setNodeTitleBlured", payload: true });
       nodeBookDispatch({ type: "setSearchQuery", payload: newTitle });
     },
-    [nodeBookDispatch, titleUpdated]
+    [titleUpdated]
   );
 
   const onBlurExplainDesc = useCallback(
@@ -603,10 +625,10 @@ const Node = ({
         (activeNode ? " active" : "") +
         (changed || !isStudied ? " Changed" : "") +
         (isHiding ? " IsHiding" : "") +
-        (nodeBookState.choosingNode &&
-        nodeBookState.choosingNode.id !== identifier &&
+        (notebookRef.current.choosingNode &&
+        notebookRef.current.choosingNode.id !== identifier &&
         !activeNode &&
-        (nodeBookState.choosingNode.type !== "Reference" || nodeType === "Reference")
+        (notebookRef.current.choosingNode.type !== "Reference" || nodeType === "Reference")
           ? " Choosable"
           : "")
       }
@@ -688,7 +710,7 @@ const Node = ({
                 editOption={option}
               />
               {editable && <Box sx={{ mb: "12px" }}></Box>}
-              {!editable && !unaccepted && !nodeBookState.choosingNode /* && !choosingNode */ && (
+              {!editable && !unaccepted && !notebookRef.current.choosingNode /* && !choosingNode */ && (
                 <MemoizedNodeHeader
                   open={open}
                   onToggleNode={toggleNodeHandler}
@@ -1092,7 +1114,7 @@ const Node = ({
                 sxPreview={{ fontSize: "25px" }}
               />
             </div>
-            {!nodeBookState.choosingNode && (
+            {!notebookRef.current.choosingNode && (
               <MemoizedNodeHeader
                 open={open}
                 onToggleNode={toggleNodeHandler}
