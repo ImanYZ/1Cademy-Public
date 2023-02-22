@@ -105,6 +105,13 @@ export const useWorkerQueue = ({
             const resultNode: FullNodeData = oldNodes[nodeId];
             if (!resultNode) return;
 
+            const workerProps = ["left", "top", "x", "y", "height"];
+            const isSame = workerProps.reduce(
+              (c, k) => c && resultNode[k as keyof FullNodeData] === nodes[nodeId][k as keyof FullNodeData],
+              true
+            );
+            if (isSame) return true; // don't update graph for this node
+
             const overrideNode: FullNodeData = {
               ...nodesCopy[nodeId],
               left: resultNode.left,
@@ -163,9 +170,12 @@ export const useWorkerQueue = ({
     });
   }, [allTags, g, graph, isWorking, queue, recalculateGraphWithWorker, withClusters]);
 
-  const addTask = (newTask: Task) => {
-    setQueue(queue => [...queue, newTask]);
-  };
+  const addTask = useCallback(
+    (newTask: Task) => {
+      setQueue(queue => [...queue, newTask]);
+    },
+    [setQueue]
+  );
 
   const queueFinished = useMemo(() => {
     if (!didWork) return false; // it dident execute a task before

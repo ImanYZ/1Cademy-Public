@@ -62,6 +62,28 @@ export interface NodeBookState {
   readonly showContributors: any;
 }
 
+export type TNodeBookState = {
+  sNode: string | null;
+  isSubmitting: boolean;
+  choosingNode: ChoosingNode | null;
+  chosenNode: ChosenNode | null;
+  selectedNode: string | null;
+  initialProposal: string | null;
+  selectionType: SelectionType;
+  selectedTags: string[];
+  openToolbar: boolean;
+  selectedUser: SelectedUser | null;
+  searchByTitleOnly: boolean;
+  searchQuery: string;
+  nodeTitleBlured: boolean;
+  openEditButton: boolean;
+  nodeId: any;
+  isMenuOpen: boolean;
+  lastOperation: LastOperation;
+  contributorsNodeId: any;
+  showContributors: any;
+};
+
 export type SetSNodeAction = {
   type: "setSNode";
   payload: string | null;
@@ -145,6 +167,11 @@ export type SetInitialProposal = {
   payload: string | null;
 };
 
+export type SetAll = {
+  type: "setAll";
+  payload: TNodeBookState;
+};
+
 export type DispatchNodeBookActions =
   | SetSNodeAction
   | SetIsSubmittingAction
@@ -162,7 +189,8 @@ export type DispatchNodeBookActions =
   | SetIsMenuOpen
   | SetLastOperation
   | SetContributorsNodeId
-  | SetInitialProposal;
+  | SetInitialProposal
+  | SetAll;
 
 export type NodeBookActions = {
   dispatch: Dispatch<DispatchNodeBookActions>;
