@@ -1,5 +1,5 @@
-import React from "react";
-import { FullNodeData } from "src/nodeBookTypes";
+import React, { MutableRefObject } from "react";
+import { FullNodeData, TNodeBookState } from "src/nodeBookTypes";
 
 import { useNodeBook } from "@/context/NodeBookContext";
 import { compareNodes, NODE_WIDTH } from "@/lib/utils/Map.utils";
@@ -8,6 +8,7 @@ import { OpenSidebar } from "@/pages/notebook";
 import { MemoizedNode } from "./Node";
 
 type NodeListProps = {
+  notebookRef: MutableRefObject<TNodeBookState>;
   setFocusView: (state: { selectedNode: string; isEnabled: boolean }) => void;
   nodes: { [key: string]: any };
   bookmark: any;
@@ -56,6 +57,7 @@ type NodeListProps = {
 };
 
 const NodesList = ({
+  notebookRef,
   setFocusView,
   nodes,
   bookmark,
@@ -102,7 +104,8 @@ const NodesList = ({
   disabledNodes = [],
   enableChildElements = [],
 }: NodeListProps) => {
-  const { nodeBookState } = useNodeBook();
+  /* eslint-disable-next-line @typescript-eslint/no-unused-vars */
+  const { nodeBookDispatch } = useNodeBook();
 
   return (
     <>
@@ -120,23 +123,23 @@ const NodesList = ({
           bookmarked = nodes[nId].bookmarked;
         }
         let activeNode = false;
-        if (nodeBookState.selectedNode === nId) {
+        if (notebookRef.current.selectedNode === nId) {
           activeNode = true;
         }
         let citationsSelected = false;
-        if (nodeBookState.selectedNode === nId && nodeBookState.selectionType === "Citations") {
+        if (notebookRef.current.selectedNode === nId && notebookRef.current.selectionType === "Citations") {
           citationsSelected = true;
         }
         let proposalsSelected = false;
-        if (nodeBookState.selectedNode === nId && nodeBookState.selectionType === "Proposals") {
+        if (notebookRef.current.selectedNode === nId && notebookRef.current.selectionType === "Proposals") {
           proposalsSelected = true;
         }
         let acceptedProposalsSelected = false;
-        if (nodeBookState.selectedNode === nId && nodeBookState.selectionType === "AcceptedProposals") {
+        if (notebookRef.current.selectedNode === nId && notebookRef.current.selectionType === "AcceptedProposals") {
           acceptedProposalsSelected = true;
         }
         let commentsSelected = false;
-        if (nodeBookState.selectedNode === nId && nodeBookState.selectionType === "Comments") {
+        if (notebookRef.current.selectedNode === nId && notebookRef.current.selectionType === "Comments") {
           commentsSelected = true;
         }
 
@@ -144,6 +147,7 @@ const NodesList = ({
           <MemoizedNode
             key={nId}
             identifier={nId}
+            notebookRef={notebookRef}
             setFocusView={setFocusView}
             activeNode={activeNode}
             citationsSelected={citationsSelected}

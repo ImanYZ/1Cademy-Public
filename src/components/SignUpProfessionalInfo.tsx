@@ -316,7 +316,7 @@ export const SignUpProfessionalInfo = ({ formikProps }: SignUpBasicInformationPr
         </Box>
       </Box>
 
-      <Box sx={{ mb: "16px", display: "flex", alignItems: "center" }}>
+      {/* <Box sx={{ mb: "16px", display: "flex", alignItems: "center" }}>
         <Checkbox checked={values.ageAgreement} onChange={(_, value) => setFieldValue("ageAgreement", value)} />
         <Box>
           <Box>
@@ -328,9 +328,9 @@ export const SignUpProfessionalInfo = ({ formikProps }: SignUpBasicInformationPr
             </FormHelperText>
           )}
         </Box>
-      </Box>
+      </Box> */}
 
-      <Box sx={{ mb: "16px" }}>
+      {/* <Box sx={{ mb: "16px" }}>
         <Typography>By clicking "Sign Up," you acknowledge that you agree to 1Cademy's </Typography>
         <Link
           onClick={() => {
@@ -362,7 +362,7 @@ export const SignUpProfessionalInfo = ({ formikProps }: SignUpBasicInformationPr
           Cookie Policy
         </Link>
         .
-      </Box>
+      </Box> */}
 
       <Suspense
         fallback={

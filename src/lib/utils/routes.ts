@@ -10,6 +10,7 @@ const ROUTES = {
   notebook: "/notebook",
   instructorsDashboard: "/instructors/dashboard",
   instructorsSettings: "/instructors/settings",
+  instructorsSettingsNew: "/instructors/settings#new",
   instructorsStudents: "/instructors/students",
   instructorsDashboardStudents: "/instructors/dashboard/[uname]",
   apply: "https://1cademy.us/#JoinUsSection",

@@ -7,6 +7,7 @@ import { INodeType } from "src/types/INodeType";
 import { IQuestionChoice } from "src/types/IQuestionChoice";
 import { IUser } from "src/types/IUser";
 import { detach } from "src/utils/helpers";
+import { IComReputationUpdates } from "src/utils/reputations";
 import { generateTagsOfTagsWithNodes, signalNodeToTypesense, updateNodeContributions } from "src/utils/version-helpers";
 
 import { admin, checkRestartBatchWriteCounts, commitBatch, db } from "../../lib/firestoreServer/admin";
@@ -144,6 +145,11 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       wrongs: newVersion.wrongs,
       nodeData,
     });
+
+    // TODO: i think we should run transaction here
+    const reputationTypes: string[] = ["All Time", "Monthly", "Weekly", "Others", "Others Monthly", "Others Weekly"];
+    const comReputationUpdates: IComReputationUpdates = {};
+
     if (!parentNodeData) {
       [batch, writeCounts] = await updateReputation({
         batch,
@@ -161,6 +167,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         ltermDayVal: 0,
         voter: req.body.data.user.userData.uname,
         writeCounts,
+        comReputationUpdates,
       });
       newVersion.childType = req.body.data.nodeType;
       newVersion.node = req.body.data.parentId;
@@ -197,6 +204,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         ltermDayVal: 0,
         voter: req.body.data.user.userData.uname,
         writeCounts,
+        comReputationUpdates,
       });
       nodeRef = db.collection("nodes").doc();
       if (versionNodeId && !(await db.collection("nodes").doc(versionNodeId).get()).exists) {
@@ -227,8 +235,8 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         references: req.body.data.references,
         referenceLabels: req.body.data.referenceLabels,
         studied: 1,
-        tagIds: req.body.data.tagIds,
-        tags: req.body.data.tags,
+        tagIds: tagUpdates.tagIds,
+        tags: tagUpdates.tags,
         title: req.body.data.title,
         updatedAt: currentTimestamp,
         versions: 1,
@@ -326,6 +334,26 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       batch.set(userNodeLogRef, newUserNodeObj);
       [batch, writeCounts] = await checkRestartBatchWriteCounts(batch, writeCounts);
     }
+
+    for (const tagId in comReputationUpdates) {
+      for (const reputationType of reputationTypes) {
+        if (!comReputationUpdates[tagId][reputationType]) continue;
+
+        if (comReputationUpdates[tagId][reputationType].isNew) {
+          batch.set(
+            comReputationUpdates[tagId][reputationType].docRef,
+            comReputationUpdates[tagId][reputationType].docData
+          );
+        } else {
+          batch.update(
+            comReputationUpdates[tagId][reputationType].docRef,
+            comReputationUpdates[tagId][reputationType].docData
+          );
+        }
+        [batch, writeCounts] = await checkRestartBatchWriteCounts(batch, writeCounts);
+      }
+    }
+
     const { versionsColl, userVersionsColl }: any = getTypedCollections({
       nodeType: newVersion.accepted ? req.body.data.nodeType : req.body.data.parentType,
     });

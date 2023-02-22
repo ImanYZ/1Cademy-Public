@@ -327,6 +327,7 @@ describe("UpDownVoteNode", () => {
       notificationNumsCollection,
       userNodesLogCollection,
       new MockData(institutions, "institutions"),
+      new MockData([], "actionTracks"),
     ];
 
     beforeEach(async () => {
@@ -774,6 +775,7 @@ describe("UpDownVoteNode", () => {
       notificationNumsCollection,
       userNodesLogCollection,
       new MockData(institutions, "institutions"),
+      new MockData([], "actionTracks"),
     ];
 
     beforeEach(async () => {
@@ -1222,6 +1224,7 @@ describe("UpDownVoteNode", () => {
       notificationNumsCollection,
       userNodesLogCollection,
       new MockData(institutions, "institutions"),
+      new MockData([], "actionTracks"),
     ];
 
     beforeEach(async () => {
@@ -1670,6 +1673,7 @@ describe("UpDownVoteNode", () => {
       notificationNumsCollection,
       userNodesLogCollection,
       new MockData(institutions, "institutions"),
+      new MockData([], "actionTracks"),
     ];
 
     beforeEach(async () => {
@@ -2118,6 +2122,7 @@ describe("UpDownVoteNode", () => {
       notificationNumsCollection,
       userNodesLogCollection,
       new MockData(institutions, "institutions"),
+      new MockData([], "actionTracks"),
     ];
 
     beforeEach(async () => {
@@ -2566,6 +2571,7 @@ describe("UpDownVoteNode", () => {
       notificationNumsCollection,
       userNodesLogCollection,
       new MockData(institutions, "institutions"),
+      new MockData([], "actionTracks"),
     ];
 
     beforeEach(async () => {

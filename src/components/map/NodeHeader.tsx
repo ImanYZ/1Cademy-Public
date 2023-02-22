@@ -2,14 +2,12 @@ import CloseIcon from "@mui/icons-material/Close";
 import FullscreenIcon from "@mui/icons-material/Fullscreen";
 import KeyboardTabIcon from "@mui/icons-material/KeyboardTab";
 import RemoveIcon from "@mui/icons-material/Remove";
-import UnfoldMoreIcon from "@mui/icons-material/UnfoldMore";
 import { IconButton, Tooltip } from "@mui/material";
 import { Box, SxProps, Theme } from "@mui/system";
 import React from "react";
 
 type NodeHeaderProps = {
   id: string;
-  setFocusView: () => void;
   open: boolean;
   onToggleNode: any;
   onHideOffsprings: any;
@@ -26,7 +24,7 @@ const NodeHeader = ({
   onHideOffsprings,
   onHideNodeHandler,
   sx,
-  setFocusView,
+  // setFocusView,
   disabled,
   enableChildElements = [],
 }: NodeHeaderProps) => {
@@ -46,14 +44,6 @@ const NodeHeader = ({
       id={`${id}-node-header`}
       sx={{ display: "flex", alignItems: "center", justifyContent: "flex-end", mt: "-14px", mb: "-10px", ...sx }}
     >
-      <Tooltip title="Focused mode">
-        <span>
-          <IconButton color="inherit" onClick={() => setFocusView()} aria-label="focus-mode" size="small">
-            <UnfoldMoreIcon fontSize="inherit" sx={{ transform: "rotate(45deg)" }} />
-          </IconButton>
-        </span>
-      </Tooltip>
-
       <Tooltip title={`${open ? "Close" : "Open"} the node.`}>
         <span>
           {open ? (
