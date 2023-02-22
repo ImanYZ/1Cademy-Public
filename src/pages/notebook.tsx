@@ -4503,6 +4503,7 @@ const Dashboard = ({}: DashboardProps) => {
                   setOperation={setOperation}
                   openUserInfoSidebar={openUserInfoSidebar}
                   disabledNodes={stateNodeTutorial?.disabledElements ?? []}
+                  enableChildElements={stateNodeTutorial?.enableChildElements}
                 />
               </MapInteractionCSS>
               {showRegion && (

@@ -16,6 +16,7 @@ type NodeHeaderProps = {
   onHideNodeHandler: any;
   sx?: SxProps<Theme>;
   disabled?: boolean;
+  enableChildElements?: string[];
 };
 
 const NodeHeader = ({
@@ -27,20 +28,26 @@ const NodeHeader = ({
   sx,
   setFocusView,
   disabled,
+  enableChildElements = [],
 }: NodeHeaderProps) => {
+  const closeButtonId = `${id}-close-button`;
+  const openButtonId = `${id}-open-button`;
+  const hideOffspringsButtonId = `${id}-hide-offsprings-button`;
+  const hideButtonId = `${id}-hide-button`;
+
+  // this will execute the includes operation only when disable is TRUE (in tutorial)
+  const disableCloseButton = disabled && !enableChildElements.includes(closeButtonId);
+  const disableOpenButton = disabled && !enableChildElements.includes(openButtonId);
+  const disableHideOffspringsButton = disabled && !enableChildElements.includes(hideOffspringsButtonId);
+  const disableHideButton = disabled && !enableChildElements.includes(hideButtonId);
+
   return (
     <Box
       id={`${id}-node-header`}
       sx={{ display: "flex", alignItems: "center", justifyContent: "flex-end", mt: "-14px", mb: "-10px", ...sx }}
     >
       <Tooltip title="Focused mode">
-        <IconButton
-          disabled={disabled}
-          color="inherit"
-          onClick={() => setFocusView()}
-          aria-label="focus-mode"
-          size="small"
-        >
+        <IconButton color="inherit" onClick={() => setFocusView()} aria-label="focus-mode" size="small">
           <UnfoldMoreIcon fontSize="inherit" sx={{ transform: "rotate(45deg)" }} />
         </IconButton>
       </Tooltip>
@@ -48,8 +55,8 @@ const NodeHeader = ({
       <Tooltip title={`${open ? "Close" : "Open"} the node.`}>
         {open ? (
           <IconButton
-            disabled={disabled}
-            id={`${id}-close-button`}
+            disabled={disableCloseButton}
+            id={closeButtonId}
             color="inherit"
             onClick={onToggleNode}
             aria-label="Close the node"
@@ -59,8 +66,8 @@ const NodeHeader = ({
           </IconButton>
         ) : (
           <IconButton
-            disabled={disabled}
-            id={`${id}-open-button"`}
+            disabled={disableOpenButton}
+            id={openButtonId}
             color="inherit"
             onClick={onToggleNode}
             aria-label="open the node"
@@ -73,7 +80,7 @@ const NodeHeader = ({
 
       <Tooltip title="Hide all the descendants of this node.">
         <IconButton
-          disabled={disabled}
+          disabled={disableHideOffspringsButton}
           id={`${id}-hide-offsprings-button`}
           color="inherit"
           onClick={onHideOffsprings}
@@ -85,7 +92,7 @@ const NodeHeader = ({
       </Tooltip>
       <Tooltip title="Hide the node from your map.">
         <IconButton
-          disabled={disabled}
+          disabled={disableHideButton}
           id={`${id}-hiden-button`}
           color="inherit"
           onClick={e => onHideNodeHandler(e)}

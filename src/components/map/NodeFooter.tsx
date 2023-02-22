@@ -107,6 +107,7 @@ type NodeFooterProps = {
   proposeNodeImprovement: any;
   setOperation: any;
   disabled?: boolean;
+  enableChildElements?: string[];
 };
 
 const NodeFooter = ({
@@ -168,6 +169,7 @@ const NodeFooter = ({
   proposeNodeImprovement,
   setOperation,
   disabled,
+  enableChildElements = [],
 }: NodeFooterProps) => {
   const router = useRouter();
   const db = getFirestore();
@@ -182,6 +184,23 @@ const NodeFooter = ({
   const [institutionLogos, setInstitutionLogos] = useState<{
     [institutionName: string]: string;
   }>({});
+
+  const userPictureId = `${identifier}-node-footer-user`;
+  const proposeButtonId = `${identifier}-node-footer-propose`;
+  const downvoteButtonId = `${identifier}-node-footer-downvotes`;
+  const upvoteButtonId = `${identifier}-node-footer-upvotes`;
+  const tagsCitationsButtonId = `${identifier}-node-footer-tags-citations`;
+  const parentChildrenButtonId = `${identifier}-button-parent-children`;
+  const moreOptionsButtonId = `${identifier}-node-footer-ellipsis`;
+
+  // this will execute the includes operation only when disable is TRUE (in tutorial)
+  const disableUserPicture = disabled && !enableChildElements.includes(userPictureId);
+  const disableProposeButton = disabled && !enableChildElements.includes(proposeButtonId);
+  const disableDownvoteButton = disabled && !enableChildElements.includes(downvoteButtonId);
+  const disableUpvoteButton = disabled && !enableChildElements.includes(upvoteButtonId);
+  const disableTagsCitationsButton = disabled && !enableChildElements.includes(tagsCitationsButtonId);
+  const disableParentChildrenButton = disabled && !enableChildElements.includes(parentChildrenButtonId);
+  const disableMoreOptionsButton = disabled && !enableChildElements.includes(moreOptionsButtonId);
 
   const messageTwitter = () => {
     return `1Cademy - Collaboratively Designing Learning Pathways
@@ -385,6 +404,7 @@ const NodeFooter = ({
     },
     [proposeNodeImprovement]
   );
+
   return (
     <>
       <Box
@@ -399,11 +419,11 @@ const NodeFooter = ({
       >
         <Box className="NodeFooter Left" sx={{ display: "flex", alignItems: "center", gap: "10px" }}>
           {open &&
-            !disabled &&
+            !disableUserPicture &&
             (isNew ? (
               <Box onClick={openContributorsSection}>
                 <MemoizedUserStatusIcon
-                  id={`${identifier}-node-footer-user`}
+                  id={userPictureId}
                   uname={user.uname}
                   imageUrl={user.imageUrl || ""}
                   fullname={user.fName + " " + user.lName}
@@ -418,7 +438,7 @@ const NodeFooter = ({
             ) : (
               <Box onClick={openContributorsSection}>
                 <MemoizedUserStatusIcon
-                  id={`${identifier}-node-footer-user`}
+                  id={userPictureId}
                   uname={admin}
                   imageUrl={aImgUrl}
                   fullname={aFullname}
@@ -431,7 +451,7 @@ const NodeFooter = ({
                 />
               </Box>
             ))}
-          {open && disabled && (
+          {open && disableUserPicture && (
             <Box sx={{ width: "28px", height: "28px", backgroundColor: "gray", borderRadius: "50%" }} />
           )}
           <div
@@ -490,7 +510,7 @@ const NodeFooter = ({
             {open && (
               <Box sx={{ display: editable || simulated ? "none" : "flex", alignItems: "center", marginLeft: "10px" }}>
                 <ContainedButton
-                  id={`${identifier}-node-footer-propose`}
+                  id={proposeButtonId}
                   title="Propose/evaluate versions of this node."
                   onClick={proposeNodeImprovementClick}
                   tooltipPosition="top"
@@ -512,7 +532,7 @@ const NodeFooter = ({
                     minWidth: "30px",
                     height: "30px",
                   }}
-                  disabled={disabled}
+                  disabled={disableProposeButton}
                 >
                   <Box sx={{ display: "flex", alignItems: "center", gap: "4px", fill: "inherit" }}>
                     <CreateIcon sx={{ fontSize: "16px" }} />
@@ -533,31 +553,35 @@ const NodeFooter = ({
                   }}
                 >
                   <Box
-                    id={`${identifier}-node-footer-downvotes`}
+                    id={downvoteButtonId}
                     sx={{
                       padding: "2px 0px 2px 5px",
                       borderRadius: "52px 0px 0px 52px",
-                      ":hover": {
-                        background: theme =>
-                          theme.palette.mode === "dark"
-                            ? theme.palette.common.darkBackground2
-                            : theme.palette.common.lightBackground2,
-                      },
+                      ...(!disableDownvoteButton && {
+                        ":hover": {
+                          background: theme =>
+                            theme.palette.mode === "dark"
+                              ? theme.palette.common.darkBackground2
+                              : theme.palette.common.lightBackground2,
+                        },
+                      }),
                     }}
                   >
                     <Tooltip title={"Vote to delete node."} placement={"top"}>
                       <Button
                         onClick={wrongNode}
-                        disabled={disableVotes}
+                        disabled={disableVotes || disableDownvoteButton}
                         sx={{
                           padding: "0",
                           color: "inherit",
                           fontWeight: 400,
                           minWidth: "40px",
-                          ":hover": {
-                            color: "inherit",
-                            background: "transparent",
-                          },
+                          ...(!disabled && {
+                            ":hover": {
+                              color: "inherit",
+                              background: "transparent",
+                            },
+                          }),
                         }}
                       >
                         <Box
@@ -590,31 +614,35 @@ const NodeFooter = ({
                     }}
                   />
                   <Box
-                    id={`${identifier}-node-footer-upvotes`}
+                    id={upvoteButtonId}
                     sx={{
                       padding: "2px 5px 2px 5px",
                       borderRadius: "0px 52px 52px 0px",
-                      ":hover": {
-                        background: theme =>
-                          theme.palette.mode === "dark"
-                            ? theme.palette.common.darkBackground2
-                            : theme.palette.common.lightBackground2,
-                      },
+                      ...(!disabled && {
+                        ":hover": {
+                          background: theme =>
+                            theme.palette.mode === "dark"
+                              ? theme.palette.common.darkBackground2
+                              : theme.palette.common.lightBackground2,
+                        },
+                      }),
                     }}
                   >
                     <Tooltip title={"Vote to prevent further changes."} placement={"top"}>
                       <Button
                         onClick={correctNode}
-                        disabled={disableVotes}
+                        disabled={disableVotes || disableUpvoteButton}
                         sx={{
                           padding: "0",
                           color: "inherit",
                           fontWeight: 400,
                           minWidth: "40px",
-                          ":hover": {
-                            color: "inherit",
-                            background: "transparent",
-                          },
+                          ...(!disableUpvoteButton && {
+                            ":hover": {
+                              color: "inherit",
+                              background: "transparent",
+                            },
+                          }),
                         }}
                       >
                         <Box
@@ -717,6 +745,7 @@ const NodeFooter = ({
                             : theme.palette.common.lightBackground2,
                       },
                     }}
+                    disabled={disabled}
                   >
                     <>
                       <input type="file" ref={inputEl} onChange={uploadNodeImageHandler} hidden />
@@ -750,6 +779,7 @@ const NodeFooter = ({
                             : theme.palette.common.lightBackground2,
                       },
                     }}
+                    disabled={disabled}
                   >
                     <VideoCallIcon sx={{ fontSize: "20px" }} />
                   </ContainedButton>
@@ -787,6 +817,7 @@ const NodeFooter = ({
                               : theme.palette.common.lightBackground2,
                         },
                       }}
+                      disabled={disabled}
                     >
                       <Box sx={{ display: "flex", alignItems: "center", gap: "4px", fill: "inherit", height: "23px" }}>
                         <ArrowForwardIcon sx={{ fontSize: "16px" }} />
@@ -843,6 +874,7 @@ const NodeFooter = ({
                                 : theme.palette.common.lightBackground2,
                           },
                         }}
+                        disabled={disabled}
                       >
                         <Box
                           sx={{ display: "flex", alignItems: "center", gap: "4px", fill: "inherit", height: "23px" }}
@@ -914,7 +946,7 @@ const NodeFooter = ({
                       }}
                     >
                       <ContainedButton
-                        id={`${identifier}-node-footer-tags-citations`}
+                        id={tagsCitationsButtonId}
                         title="View tags and citations used in this node."
                         onClick={selectReferences}
                         tooltipPosition="top"
@@ -934,6 +966,7 @@ const NodeFooter = ({
                                 : theme.palette.common.lightBackground2,
                           },
                         }}
+                        disabled={disableTagsCitationsButton}
                       >
                         <Box
                           sx={{
@@ -1100,7 +1133,7 @@ const NodeFooter = ({
                   }}
                 >
                   <ContainedButton
-                    id={`${identifier}-button-parent-children`}
+                    id={parentChildrenButtonId}
                     title="View parent and child nodes."
                     onClick={selectLinkingWords}
                     tooltipPosition="top"
@@ -1119,6 +1152,7 @@ const NodeFooter = ({
                             : theme.palette.common.lightBackground2,
                       },
                     }}
+                    disabled={disableParentChildrenButton}
                   >
                     <Box sx={{ display: "flex", alignItems: "center", gap: "4px", fill: "inherit" }}>
                       <span className="FooterParentNodesOpen">{shortenNumber(parents.length, 2, false)}</span>
@@ -1131,11 +1165,12 @@ const NodeFooter = ({
 
               <IconButton
                 aria-label="more"
-                id={`${identifier}-node-footer-ellipsis`}
+                id={moreOptionsButtonId}
                 aria-controls={openMenu ? "long-menu" : undefined}
                 aria-expanded={openMenu ? "true" : undefined}
                 aria-haspopup="true"
                 onClick={handleClick}
+                disabled={disableMoreOptionsButton}
                 sx={{
                   display: simulated ? "none" : "flex",
                   background: theme =>
@@ -1469,6 +1504,7 @@ const NodeFooter = ({
               }}
             >
               <MemoizedMetaButton
+                disabled={disabled}
                 tooltip={
                   shortenNumber(correctNum, 2, false) +
                   " 1Cademist" +
@@ -1490,6 +1526,7 @@ const NodeFooter = ({
                 </Box>
               </MemoizedMetaButton>
               <MemoizedMetaButton
+                disabled={disabled}
                 tooltip={
                   `You've ${!bookmarked ? "not " : ""}bookmarked this node. ` +
                   shortenNumber(bookmarks, 2, false) +
@@ -1509,6 +1546,7 @@ const NodeFooter = ({
               </MemoizedMetaButton>
 
               <MemoizedMetaButton
+                disabled={disabled}
                 tooltip={
                   "This node has " +
                   shortenNumber(parents.length, 2, false) +
