@@ -431,7 +431,15 @@ const UsersStatusList = ({ disabled = false, ...props }: UsersStatusListProps) =
       {disabled && (
         <Stack spacing={"10px"}>
           {[1, 2, 3].map(cur => (
-            <Box key={cur} sx={{ width: "28px", height: "28px", backgroundColor: "#3a3a3a", borderRadius: "50%" }} />
+            <Box
+              key={cur}
+              sx={{
+                width: "28px",
+                height: "28px",
+                backgroundColor: theme => (theme.palette.mode === "dark" ? "#3a3a3a" : "#747474ff"),
+                borderRadius: "50%",
+              }}
+            />
           ))}
         </Stack>
       )}
