@@ -150,7 +150,7 @@ export const Tutorial = ({ tutorialState, targetClientRect, onChangeStep }: Tuto
             Prev
           </Button>
 
-          {tutorialState.stepNumber < tutorialState.stepLenght - 1 && (
+          {tutorialState.stepNumber < tutorialState.stepLenght && (
             <Button
               variant="contained"
               onClick={() => onChangeStep(tutorialState.nextStepName)}
