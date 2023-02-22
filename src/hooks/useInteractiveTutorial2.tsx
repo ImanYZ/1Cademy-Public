@@ -30,7 +30,7 @@ export const useInteractiveTutorial = () => {
   }, []);
 
   useEffect(() => {
-    onChangeStep(1);
+    onChangeStep(22);
   }, [onChangeStep]);
 
   useEventListener({

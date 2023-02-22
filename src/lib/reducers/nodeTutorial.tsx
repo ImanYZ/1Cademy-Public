@@ -1,6 +1,8 @@
 import LocalLibraryIcon from "@mui/icons-material/LocalLibrary";
 import ShareIcon from "@mui/icons-material/Share";
-import { Link, Typography } from "@mui/material";
+import { Typography } from "@mui/material";
+
+import MarkdownRender from "@/components/Markdown/MarkdownRender";
 
 import { DispatchNodeTutorialAction, SetStepType, TutorialState } from "../../nodeBookTypes";
 import { INTERACTIVE_TUTORIAL_NOTEBOOK_NODES } from "../utils/interactiveTutorialNodes";
@@ -78,7 +80,7 @@ export function nodeTutorialReducer(state: TutorialState, action: DispatchNodeTu
             Node headers are one of the ways that you can manipulate what you see on the knowledge graph.
           </Typography>
         ),
-        disabledElements: ["TOOLBAR"],
+        disabledElements: ["TOOLBAR", "01"],
         enableChildElements: [],
         targetId: "01",
         childTargetId: "01-node-header",
@@ -105,7 +107,7 @@ export function nodeTutorialReducer(state: TutorialState, action: DispatchNodeTu
             In the header are four buttons.
           </Typography>
         ),
-        disabledElements: ["TOOLBAR"],
+        disabledElements: ["TOOLBAR", "01"],
         enableChildElements: [],
         targetId: "01",
         anchor: "",
@@ -131,8 +133,8 @@ export function nodeTutorialReducer(state: TutorialState, action: DispatchNodeTu
             not delete the node from the platform.
           </Typography>
         ),
-        disabledElements: ["TOOLBAR"],
-        enableChildElements: [],
+        disabledElements: ["TOOLBAR", "01"],
+        enableChildElements: ["01-hiden-button"],
         targetId: "01",
         anchor: "",
         currentStepName: action.type,
@@ -156,8 +158,8 @@ export function nodeTutorialReducer(state: TutorialState, action: DispatchNodeTu
             This one closes all the open children nodes of the node it is clicked on.
           </Typography>
         ),
-        disabledElements: ["TOOLBAR"],
-        enableChildElements: [],
+        disabledElements: ["TOOLBAR", "01"],
+        enableChildElements: ["01-hide-offsprings-button"],
         targetId: "01",
         anchor: "",
         currentStepName: action.type,
@@ -181,8 +183,8 @@ export function nodeTutorialReducer(state: TutorialState, action: DispatchNodeTu
             This one minimizes the content in a node so only the title is displayed.
           </Typography>
         ),
-        disabledElements: ["TOOLBAR"],
-        enableChildElements: [],
+        disabledElements: ["TOOLBAR", "01"],
+        enableChildElements: ["01-close-button"],
         targetId: "01",
         anchor: "",
         currentStepName: action.type,
@@ -197,7 +199,7 @@ export function nodeTutorialReducer(state: TutorialState, action: DispatchNodeTu
       return {
         localSnapshot: [
           // { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["00"], nodeChangeType: "removed", open: false },
-          // { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["01"], nodeChangeType: "added", open: true },
+          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["01"], nodeChangeType: "modified", open: true },
         ],
         childTargetId: "01-node-title",
         title: "Nodes - Node Body",
@@ -206,7 +208,7 @@ export function nodeTutorialReducer(state: TutorialState, action: DispatchNodeTu
             Each node has a body that consists of a title and content.
           </Typography>
         ),
-        disabledElements: ["TOOLBAR"],
+        disabledElements: ["TOOLBAR", "01"],
         enableChildElements: [],
         targetId: "01",
         anchor: "",
@@ -231,7 +233,7 @@ export function nodeTutorialReducer(state: TutorialState, action: DispatchNodeTu
             This is the title.
           </Typography>
         ),
-        disabledElements: ["TOOLBAR"],
+        disabledElements: ["TOOLBAR", "01"],
         enableChildElements: [],
         targetId: "01",
         anchor: "",
@@ -256,7 +258,7 @@ export function nodeTutorialReducer(state: TutorialState, action: DispatchNodeTu
             We want a title that is concise and accurately describes the information within.
           </Typography>
         ),
-        disabledElements: ["TOOLBAR"],
+        disabledElements: ["TOOLBAR", "01"],
         enableChildElements: [],
         targetId: "01",
         anchor: "",
@@ -282,7 +284,7 @@ export function nodeTutorialReducer(state: TutorialState, action: DispatchNodeTu
             This means that you need to consider if the title is duplicated or would likely be duplicated.
           </Typography>
         ),
-        disabledElements: ["TOOLBAR"],
+        disabledElements: ["TOOLBAR", "01"],
         enableChildElements: [],
         targetId: "01",
         anchor: "",
@@ -310,7 +312,7 @@ export function nodeTutorialReducer(state: TutorialState, action: DispatchNodeTu
             specifically being discussed.
           </Typography>
         ),
-        disabledElements: ["TOOLBAR"],
+        disabledElements: ["TOOLBAR", "01"],
         enableChildElements: [],
         targetId: "01",
         anchor: "",
@@ -336,7 +338,7 @@ export function nodeTutorialReducer(state: TutorialState, action: DispatchNodeTu
             The content of a node describes what is stated in a title.
           </Typography>
         ),
-        disabledElements: ["TOOLBAR"],
+        disabledElements: ["TOOLBAR", "01"],
         enableChildElements: [],
         targetId: "01",
         anchor: "",
@@ -362,7 +364,7 @@ export function nodeTutorialReducer(state: TutorialState, action: DispatchNodeTu
             We want the content to be clear, concise, and accurate.
           </Typography>
         ),
-        disabledElements: ["TOOLBAR"],
+        disabledElements: ["TOOLBAR", "01"],
         enableChildElements: [],
         targetId: "01",
         anchor: "",
@@ -389,7 +391,7 @@ export function nodeTutorialReducer(state: TutorialState, action: DispatchNodeTu
             ordered and unordered lists.
           </Typography>
         ),
-        disabledElements: ["TOOLBAR"],
+        disabledElements: ["TOOLBAR", "01"],
         enableChildElements: [],
         targetId: "01",
         anchor: "",
@@ -415,7 +417,7 @@ export function nodeTutorialReducer(state: TutorialState, action: DispatchNodeTu
             For <b>bold text</b> you place two stars before and after the text you would like to make bold.
           </Typography>
         ),
-        disabledElements: ["TOOLBAR"],
+        disabledElements: ["TOOLBAR", "01"],
         enableChildElements: [],
         targetId: "01",
         anchor: "",
@@ -440,7 +442,7 @@ export function nodeTutorialReducer(state: TutorialState, action: DispatchNodeTu
             For <i>italicized text</i> you place one star before and after the text you would like to make italicized.
           </Typography>
         ),
-        disabledElements: ["TOOLBAR"],
+        disabledElements: ["TOOLBAR", "01"],
         enableChildElements: [],
         targetId: "01",
         anchor: "",
@@ -467,7 +469,7 @@ export function nodeTutorialReducer(state: TutorialState, action: DispatchNodeTu
             are placed on their own line.
           </Typography>
         ),
-        disabledElements: ["TOOLBAR"],
+        disabledElements: ["TOOLBAR", "01"],
         enableChildElements: [],
         targetId: "01",
         anchor: "",
@@ -494,7 +496,7 @@ export function nodeTutorialReducer(state: TutorialState, action: DispatchNodeTu
             own line.
           </Typography>
         ),
-        disabledElements: ["TOOLBAR"],
+        disabledElements: ["TOOLBAR", "01"],
         enableChildElements: [],
         targetId: "01",
         anchor: "",
@@ -520,7 +522,7 @@ export function nodeTutorialReducer(state: TutorialState, action: DispatchNodeTu
             You can also use math jax to create mathematical formulas.
           </Typography>
         ),
-        disabledElements: ["TOOLBAR"],
+        disabledElements: ["TOOLBAR", "01"],
         enableChildElements: [],
         targetId: "01",
         anchor: "",
@@ -542,19 +544,15 @@ export function nodeTutorialReducer(state: TutorialState, action: DispatchNodeTu
         childTargetId: "01-node-content",
         title: "Node Content - Math jax",
         description: (
-          <Typography variant="body1" sx={{ mb: "16px" }}>
-            To learn more about how to write mathematical formulas look at this page:
-            <br />
-            <Link
-              href="https://math.meta.stackexchange.com/questions/5020/mathjax-basic-tutorial-and-quick-reference"
-              target={"_blank"}
-              rel={"noReferrer"}
-            >
-              https://math.meta.stackexchange.com/questions/5020/mathjax-basic-tutorial-and-quick-reference
-            </Link>
-          </Typography>
+          <MarkdownRender
+            text={
+              "To learn more about how to write mathematical formulas look at this page: [mathjax-basic-tutorial-and-quick-reference](https://math.meta.stackexchange.com/questions/5020/mathjax-basic-tutorial-and-quick-reference)"
+            }
+            customClass={"custom-react-markdown"}
+            sx={{ fontWeight: 400, letterSpacing: "inherit" }}
+          />
         ),
-        disabledElements: ["TOOLBAR"],
+        disabledElements: ["TOOLBAR", "01"],
         enableChildElements: [],
         targetId: "01",
         anchor: "",
@@ -580,14 +578,14 @@ export function nodeTutorialReducer(state: TutorialState, action: DispatchNodeTu
             The node footer has many icons
           </Typography>
         ),
-        disabledElements: ["TOOLBAR"],
+        disabledElements: ["TOOLBAR", "01"],
         enableChildElements: [],
         targetId: "01",
         anchor: "",
         currentStepName: action.type,
         nextStepName: getNextStep(action.type),
         previosStepName: getPrevStep(action.type),
-        tooltipPosition: "top",
+        tooltipPosition: "bottom",
         stepNumber: action.type,
         stepLenght: STEPS_LENGHT,
         isClickeable: false,
@@ -596,8 +594,8 @@ export function nodeTutorialReducer(state: TutorialState, action: DispatchNodeTu
     case 22:
       return {
         localSnapshot: [
-          // { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["00"], nodeChangeType: "removed", open: false },
-          // { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["01"], nodeChangeType: "added", open: true },
+          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["00"], nodeChangeType: "removed", open: false },
+          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["01"], nodeChangeType: "added", open: true },
         ],
         childTargetId: "01-node-footer-user",
         title: "Nodes - Node Footer",
@@ -607,14 +605,14 @@ export function nodeTutorialReducer(state: TutorialState, action: DispatchNodeTu
             make the node in its present form.
           </Typography>
         ),
-        disabledElements: ["TOOLBAR"],
-        enableChildElements: [],
+        disabledElements: ["TOOLBAR", "01"],
+        enableChildElements: ["01-node-footer-user"],
         targetId: "01",
         anchor: "",
         currentStepName: action.type,
         nextStepName: getNextStep(action.type),
         previosStepName: getPrevStep(action.type),
-        tooltipPosition: "top",
+        tooltipPosition: "bottom",
         stepNumber: action.type,
         stepLenght: STEPS_LENGHT,
         isClickeable: false,
@@ -633,14 +631,14 @@ export function nodeTutorialReducer(state: TutorialState, action: DispatchNodeTu
             The next one indicates what type of node it is, this one is a concept node.
           </Typography>
         ),
-        disabledElements: ["TOOLBAR"],
-        enableChildElements: [],
+        disabledElements: ["TOOLBAR", "01"],
+        enableChildElements: ["01-node-footer-type"],
         targetId: "01",
         anchor: "",
         currentStepName: action.type,
         nextStepName: getNextStep(action.type),
         previosStepName: getPrevStep(action.type),
-        tooltipPosition: "top",
+        tooltipPosition: "bottom",
         stepNumber: action.type,
         stepLenght: STEPS_LENGHT,
         isClickeable: false,
@@ -659,14 +657,14 @@ export function nodeTutorialReducer(state: TutorialState, action: DispatchNodeTu
             The third icon indicates when the latest version of the node was adopted, this one was approved __days ago.
           </Typography>
         ),
-        disabledElements: ["TOOLBAR"],
+        disabledElements: ["TOOLBAR", "01"],
         enableChildElements: [],
         targetId: "01",
         anchor: "",
         currentStepName: action.type,
         nextStepName: getNextStep(action.type),
         previosStepName: getPrevStep(action.type),
-        tooltipPosition: "top",
+        tooltipPosition: "bottom",
         stepNumber: action.type,
         stepLenght: STEPS_LENGHT,
         isClickeable: false,
@@ -682,18 +680,18 @@ export function nodeTutorialReducer(state: TutorialState, action: DispatchNodeTu
         title: "Nodes - Node Footer",
         description: (
           <Typography variant="body1" sx={{ mb: "16px" }}>
-            The fourth icon is the purpose/evaluate versions of this node button.This allows you to edit the node or add
+            The fourth icon is the propose/evaluate versions of this node button.This allows you to edit the node or add
             children nodes to it.
           </Typography>
         ),
-        disabledElements: ["TOOLBAR"],
+        disabledElements: ["TOOLBAR", "01"],
         enableChildElements: [],
         targetId: "01",
         anchor: "",
         currentStepName: action.type,
         nextStepName: getNextStep(action.type),
         previosStepName: getPrevStep(action.type),
-        tooltipPosition: "top",
+        tooltipPosition: "bottom",
         stepNumber: action.type,
         stepLenght: STEPS_LENGHT,
         isClickeable: false,
@@ -713,14 +711,14 @@ export function nodeTutorialReducer(state: TutorialState, action: DispatchNodeTu
             received.
           </Typography>
         ),
-        disabledElements: ["TOOLBAR"],
+        disabledElements: ["TOOLBAR", "01"],
         enableChildElements: [],
         targetId: "01",
         anchor: "",
         currentStepName: action.type,
         nextStepName: getNextStep(action.type),
         previosStepName: getPrevStep(action.type),
-        tooltipPosition: "top",
+        tooltipPosition: "bottom",
         stepNumber: action.type,
         stepLenght: STEPS_LENGHT,
         isClickeable: false,
@@ -739,14 +737,14 @@ export function nodeTutorialReducer(state: TutorialState, action: DispatchNodeTu
             effect you are voting on the usefulness of a node.
           </Typography>
         ),
-        disabledElements: ["TOOLBAR"],
+        disabledElements: ["TOOLBAR", "01"],
         enableChildElements: [],
         targetId: "01",
         anchor: "",
         currentStepName: action.type,
         nextStepName: getNextStep(action.type),
         previosStepName: getPrevStep(action.type),
-        tooltipPosition: "top",
+        tooltipPosition: "bottom",
         stepNumber: action.type,
         stepLenght: STEPS_LENGHT,
         isClickeable: false,
@@ -765,14 +763,14 @@ export function nodeTutorialReducer(state: TutorialState, action: DispatchNodeTu
             A downvote is infact a vote to remove a node
           </Typography>
         ),
-        disabledElements: ["TOOLBAR"],
+        disabledElements: ["TOOLBAR", "01"],
         enableChildElements: [],
         targetId: "01",
         anchor: "",
         currentStepName: action.type,
         nextStepName: getNextStep(action.type),
         previosStepName: getPrevStep(action.type),
-        tooltipPosition: "top",
+        tooltipPosition: "bottom",
         stepNumber: action.type,
         stepLenght: STEPS_LENGHT,
         isClickeable: false,
@@ -790,14 +788,14 @@ export function nodeTutorialReducer(state: TutorialState, action: DispatchNodeTu
             An upvote is a vote to not change a node
           </Typography>
         ),
-        disabledElements: ["TOOLBAR"],
+        disabledElements: ["TOOLBAR", "01"],
         enableChildElements: [],
         targetId: "01",
         anchor: "",
         currentStepName: action.type,
         nextStepName: getNextStep(action.type),
         previosStepName: getPrevStep(action.type),
-        tooltipPosition: "top",
+        tooltipPosition: "bottom",
         stepNumber: action.type,
         stepLenght: STEPS_LENGHT,
         isClickeable: false,
@@ -815,14 +813,14 @@ export function nodeTutorialReducer(state: TutorialState, action: DispatchNodeTu
             When a ratio with a high enough number of downvotes to upvotes is reached a node can be deleted.
           </Typography>
         ),
-        disabledElements: ["TOOLBAR"],
+        disabledElements: ["TOOLBAR", "01"],
         enableChildElements: [],
         targetId: "01",
         anchor: "",
         currentStepName: action.type,
         nextStepName: getNextStep(action.type),
         previosStepName: getPrevStep(action.type),
-        tooltipPosition: "top",
+        tooltipPosition: "bottom",
         stepNumber: action.type,
         stepLenght: STEPS_LENGHT,
         isClickeable: false,
@@ -848,7 +846,7 @@ export function nodeTutorialReducer(state: TutorialState, action: DispatchNodeTu
         currentStepName: action.type,
         nextStepName: getNextStep(action.type),
         previosStepName: getPrevStep(action.type),
-        tooltipPosition: "top",
+        tooltipPosition: "bottom",
         stepNumber: action.type,
         stepLenght: STEPS_LENGHT,
         isClickeable: false,

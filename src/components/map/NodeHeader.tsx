@@ -33,7 +33,7 @@ const NodeHeader = ({
   const closeButtonId = `${id}-close-button`;
   const openButtonId = `${id}-open-button`;
   const hideOffspringsButtonId = `${id}-hide-offsprings-button`;
-  const hideButtonId = `${id}-hide-button`;
+  const hideButtonId = `${id}-hiden-button`;
 
   // this will execute the includes operation only when disable is TRUE (in tutorial)
   const disableCloseButton = disabled && !enableChildElements.includes(closeButtonId);
