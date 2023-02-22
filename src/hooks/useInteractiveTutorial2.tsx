@@ -25,6 +25,7 @@ export const useInteractiveTutorial = () => {
   const [stateNodeTutorial, dispatchNodeTutorial] = useReducer(nodeTutorialReducer, INITIAL_NODE_TUTORIAL_STATE);
   const isPlayingTheTutorialRef = useRef(false);
   const { nodeBookDispatch } = useNodeBook();
+
   const onChangeStep = useCallback(
     (step: SetStepType) => {
       console.log("onchange step", step);

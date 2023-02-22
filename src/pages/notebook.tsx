@@ -447,7 +447,7 @@ const Dashboard = ({}: DashboardProps) => {
 
       if (!targetElement) return;
 
-      targetElement.style.border = "4px dashed #ffc813";
+      targetElement.style.outline = "1px solid #FF6D00";
       const { width, height, top, left } = targetElement.getBoundingClientRect();
 
       setTargetClientRect({ width, height, top, left });
@@ -463,7 +463,8 @@ const Dashboard = ({}: DashboardProps) => {
       if (stateNodeTutorial.childTargetId) {
         const targetElement = document.getElementById(stateNodeTutorial.childTargetId);
         if (!targetElement) return;
-        targetElement.style.border = "4px dashed #ffc813";
+        targetElement.style.outline = "1px solid #FF6D00";
+
         const { offsetTop, offsetLeft } = targetElement;
         const { height: childrenHeight, width: childrenWidth } = targetElement.getBoundingClientRect();
 

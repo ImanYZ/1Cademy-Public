@@ -43,8 +43,13 @@ export function nodeTutorialReducer(
   state: TutorialState,
   { payload, ...action }: DispatchNodeTutorialAction
 ): TutorialState {
-  console.log("set difeault step");
-
+  console.log("set difeault step", state?.targetId, state?.childTargetId);
+  if (state && state.childTargetId) {
+    const element = document.getElementById(state.childTargetId);
+    if (element) {
+      element.style.outline = "none";
+    }
+  }
   switch (action.type) {
     case null:
       return null;
