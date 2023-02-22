@@ -320,16 +320,6 @@ const Dashboard = ({}: DashboardProps) => {
   );
 
   useEffect(() => {
-    const cb = (e: any) => {
-      console.log({ target: e?.target, curTarget: e?.currentTarget });
-    };
-    window.document.addEventListener("click", cb);
-    return () => {
-      window.document.removeEventListener("click", cb);
-    };
-  }, []);
-
-  useEffect(() => {
     setInnerHeight(window.innerHeight);
   }, [user?.uname]);
 
@@ -1029,9 +1019,10 @@ const Dashboard = ({}: DashboardProps) => {
 
   useEffect(() => {
     if (stateNodeTutorial) return;
+    console.log("effect SNAPSHOTS");
 
     if (!shouldResetGraph.current) {
-      g.current = createGraph();
+      console.log("RESET GRAPH");
 
       setGraph({
         nodes: {},
@@ -1039,7 +1030,8 @@ const Dashboard = ({}: DashboardProps) => {
       });
       setLocalSnapshot({});
       shouldResetGraph.current = true;
-      console.log("RESET GRAPH");
+      nodeBookDispatch({ type: "setSelectedNode", payload: null });
+      g.current = createGraph();
     }
 
     if (!db) return;
@@ -1058,190 +1050,8 @@ const Dashboard = ({}: DashboardProps) => {
     return () => {
       killSnapshot();
     };
-  }, [allTagsLoaded, db, snapshot, stateNodeTutorial, user?.uname, notebookChanged]);
+  }, [allTagsLoaded, db, snapshot, stateNodeTutorial, user?.uname, notebookChanged, nodeBookDispatch]);
   // }, [allTagsLoaded, db, snapshot, user?.uname, settings.showClusterOptions, notebookChanged]);
-
-  // useEffect(() => {
-  //   // local snapshot used only in interactive tutorial
-  //   if (!isPlayingTheTutorial) return;
-  //   console.log("effect INTERACTICE TUTORIAL");
-
-  //   if (shouldResetGraph.current) {
-  //     g.current = createGraph();
-  //     const FIRST_KEY_NODE = "01";
-  //     setGraph({
-  //       nodes: { [FIRST_KEY_NODE]: INTERACTIVE_TUTORIAL_NOTEBOOK_NODES[FIRST_KEY_NODE] },
-  //       edges: {},
-  //     });
-  //     setLocalSnapshot({ [FIRST_KEY_NODE]: INTERACTIVE_TUTORIAL_NOTEBOOK_NODES[FIRST_KEY_NODE] });
-  //     shouldResetGraph.current = false;
-  //   }
-  //   // if (isPlayingTheTutorial) {
-  //   //   g.current = createGraph();
-  //   //   return setGraph({ nodes: INTERACTIVE_TUTORIAL_NOTEBOOK_NODES, edges: {} });
-  //   // }
-
-  //   // setGraph(prev => {
-  //   //   const nodesCopy = { ...prev.nodes };
-  //   //   const interactiveTutorialNodeKeys = Object.keys(INTERACTIVE_TUTORIAL_NOTEBOOK_NODES);
-  //   //   // const invalidKeys = Object.keys(prev.nodes).filter(key => interactiveTutorialNodeKeys.includes(key));
-  //   //   interactiveTutorialNodeKeys.forEach(cur => delete nodesCopy[cur]);
-  //   //   // copyNodes.
-  //   //   // return {nodes: {...nodesData,['01']}, edges: {}}
-  //   //   return { nodes: nodesCopy, edges: prev.edges };
-  //   // });
-
-  //   const mergeAllNodes = (newAllNodes: FullNodeData[], currentAllNodes: FullNodesData): FullNodesData => {
-  //     return newAllNodes.reduce(
-  //       (acu, cur) => {
-  //         if (cur.nodeChangeType === "added" || cur.nodeChangeType === "modified") {
-  //           return { ...acu, [cur.node]: cur };
-  //         }
-  //         if (cur.nodeChangeType === "removed") {
-  //           const tmp = { ...acu };
-  //           delete tmp[cur.node];
-  //           return tmp;
-  //         }
-  //         return acu;
-  //       },
-  //       { ...currentAllNodes }
-  //     );
-  //   };
-
-  //   const fillDagre = (fullNodes: FullNodeData[], currentNodes: any, currentEdges: any, withClusters: boolean) => {
-  //     return fullNodes.reduce(
-  //       (acu: { newNodes: { [key: string]: any }; newEdges: { [key: string]: any } }, cur) => {
-  //         let tmpNodes = {};
-  //         let tmpEdges = {};
-
-  //         if (cur.nodeChangeType === "added") {
-  //           const { uNodeData, oldNodes, oldEdges } = makeNodeVisibleInItsLinks(cur, acu.newNodes, acu.newEdges);
-
-  //           const res = createOrUpdateNode(g.current, uNodeData, cur.node, oldNodes, oldEdges, allTags, withClusters);
-
-  //           tmpNodes = res.oldNodes;
-  //           tmpEdges = res.oldEdges;
-  //         }
-  //         if (cur.nodeChangeType === "modified" && cur.visible) {
-  //           const node = acu.newNodes[cur.node];
-  //           if (!node) {
-  //             const res = createOrUpdateNode(
-  //               g.current,
-  //               cur,
-  //               cur.node,
-  //               acu.newNodes,
-  //               acu.newEdges,
-  //               allTags,
-  //               withClusters
-  //             );
-  //             tmpNodes = res.oldNodes;
-  //             tmpEdges = res.oldEdges;
-  //           } else {
-  //             const currentNode: FullNodeData = {
-  //               ...cur,
-  //               left: node.left,
-  //               top: node.top,
-  //             }; // <----- IMPORTANT: Add positions data from node into cur.node to not set default position into center of screen
-
-  //             if (!compare2Nodes(cur, node)) {
-  //               const res = createOrUpdateNode(
-  //                 g.current,
-  //                 currentNode,
-  //                 cur.node,
-  //                 acu.newNodes,
-  //                 acu.newEdges,
-  //                 allTags,
-  //                 withClusters
-  //               );
-  //               tmpNodes = res.oldNodes;
-  //               tmpEdges = res.oldEdges;
-  //             }
-  //           }
-  //         }
-  //         // so the NO visible nodes will come as modified and !visible
-  //         if (cur.nodeChangeType === "removed" || (cur.nodeChangeType === "modified" && !cur.visible)) {
-  //           if (g.current.hasNode(cur.node)) {
-  //             g.current.nodes().forEach(function () {});
-  //             g.current.edges().forEach(function () {});
-  //             // PROBABLY you need to add hideNodeAndItsLinks, to update children and parents nodes
-
-  //             // !IMPORTANT, Don't change the order, first remove edges then nodes
-  //             tmpEdges = removeDagAllEdges(g.current, cur.node, acu.newEdges);
-  //             tmpNodes = removeDagNode(g.current, cur.node, acu.newNodes);
-  //           } else {
-  //             // remove edges
-  //             const oldEdges = { ...acu.newEdges };
-
-  //             Object.keys(oldEdges).forEach(key => {
-  //               if (key.includes(cur.node)) {
-  //                 delete oldEdges[key];
-  //               }
-  //             });
-
-  //             tmpEdges = oldEdges;
-  //             // remove node
-  //             const oldNodes = acu.newNodes;
-  //             if (cur.node in oldNodes) {
-  //               delete oldNodes[cur.node];
-  //             }
-  //             // tmpEdges = {acu.newEdges,}
-  //             tmpNodes = { ...oldNodes };
-  //           }
-  //         }
-
-  //         return {
-  //           newNodes: { ...tmpNodes },
-  //           newEdges: { ...tmpEdges },
-  //         };
-  //       },
-  //       { newNodes: { ...currentNodes }, newEdges: { ...currentEdges } }
-  //     );
-  //   };
-
-  //   const fullNodes = Object.values(localSnapshot);
-
-  //   const visibleFullNodes: FullNodeData[] = fullNodes.filter(cur => cur.visible || cur.nodeChangeType === "modified");
-  //   devLog("3: TUTORIAL: visibleFullNodes", visibleFullNodes);
-  //   setAllNodes(oldAllNodes => mergeAllNodes(fullNodes, oldAllNodes));
-  //   devLog("4: TUTORIAL: setAllNodes");
-  //   setGraph(({ nodes, edges }) => {
-  //     const visibleFullNodesMerged = visibleFullNodes.map(cur => {
-  //       const tmpNode = nodes[cur.node];
-  //       if (tmpNode) {
-  //         if (tmpNode.hasOwnProperty("simulated")) {
-  //           delete tmpNode["simulated"];
-  //         }
-  //         if (tmpNode.hasOwnProperty("isNew")) {
-  //           delete tmpNode["isNew"];
-  //         }
-  //       }
-
-  //       const hasParent = cur.parents.length;
-  //       // IMPROVE: we need to pass the parent which open the node
-  //       // to use his current position
-  //       // in this case we are checking first parent
-  //       // if this doesn't exist will set top:0 and left: 0 + NODE_WIDTH + COLUMN_GAP
-  //       const nodeParent = hasParent ? nodes[cur.parents[0].node] : null;
-  //       const topParent = nodeParent?.top ?? 0;
-
-  //       const leftParent = nodeParent?.left ?? 0;
-
-  //       return {
-  //         ...cur,
-  //         left: tmpNode?.left ?? leftParent + NODE_WIDTH + COLUMN_GAP,
-  //         top: tmpNode?.top ?? topParent,
-  //       };
-  //     });
-
-  //     devLog("5: TUTORIAL:user Nodes Snapshot:visible Full Nodes Merged", visibleFullNodesMerged);
-  //     const { newNodes, newEdges } = fillDagre(visibleFullNodesMerged, nodes, edges, settings.showClusterOptions);
-
-  //     if (!Object.keys(newNodes).length) {
-  //       setNoNodesFoundMessage(true);
-  //     }
-  //     return { nodes: newNodes, edges: newEdges };
-  //   });
-  // }, [localSnapshot, settings.showClusterOptions, notebookChanged, isPlayingTheTutorial, allTags]);
 
   useEffect(() => {
     // local snapshot used only in interactive tutorial

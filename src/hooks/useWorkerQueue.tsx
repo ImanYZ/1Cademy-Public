@@ -139,7 +139,7 @@ export const useWorkerQueue = ({
     if (isWorking) return;
     if (!queue.length) return;
     if (!g?.current) return;
-
+    if (!Object.keys(graph.nodes).length) return setQueue([]); // when nodes are removed we need to clean queue
     // CREATE WORKER with Nodes and Nodes changed
     // console.log("[queue]: recalculateGraphWithWorker", { graph, queue });
     const individualNodeChanges: FullNodeData[] = queue
@@ -148,6 +148,8 @@ export const useWorkerQueue = ({
         return { ...graph.nodes[cur.id], height: cur.height };
       })
       .flatMap(cur => cur || []);
+
+    console.log({ nodes: graph.nodes });
     const nodesToRecalculate = setDagNodes(g.current, individualNodeChanges, graph.nodes, allTags, withClusters);
 
     console.log({ nodes: nodesToRecalculate, edges: graph.edges, g: g.current });

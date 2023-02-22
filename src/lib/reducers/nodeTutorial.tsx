@@ -446,6 +446,7 @@ export function nodeTutorialReducer(
           // { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["00"], nodeChangeType: "removed", open: false },
           // { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["01"], nodeChangeType: "added", open: true },
         ],
+        childTargetId: "01-node-content",
         title: "Node Content - Markdown",
         description: (
           <Typography variant="body1" sx={{ mb: "16px" }}>

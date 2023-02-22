@@ -430,7 +430,7 @@ export const setDagNodes = (
   // Candidate for removal!
   // copyNode: creates copy of the object
   // copies the other attributes of the node (attributes not necessary for dagre object)
-
+  console.log({ individualNodeChanges });
   const nodesChanges: FullNodesData = individualNodeChanges.reduce((acu, cur) => {
     return { ...acu, [cur.node]: { ...copyNode(cur) } };
   }, oldNodes);
@@ -824,7 +824,7 @@ export const createOrUpdateNode = (
 // this works correctly in dashboard with array but,
 // don't work in worker
 export const copyNode = (node: FullNodeData): FullNodeData => {
-  // console.log("\n----->\n -> NODE HERE:", node.parents);
+  console.log("\n----->\n -> NODE HERE:", { ...node });
   let newNode = { ...node };
   newNode.parents = [];
   for (let parent of node.parents) {

@@ -54,7 +54,7 @@ export const useInteractiveTutorial = () => {
   );
 
   useEffect(() => {
-    onChangeStep(1);
+    onChangeStep(40); //64
   }, [onChangeStep]);
 
   useEventListener({

@@ -280,6 +280,7 @@ export const MemoizedNodeList = React.memo(NodesList, (prev, next) => {
     prev.closeSideBar === next.closeSideBar &&
     prev.reloadPermanentGrpah === next.reloadPermanentGrpah &&
     prev.openSidebar === prev.openSidebar &&
-    prev.disabledNodes === next.disabledNodes
+    prev.disabledNodes === next.disabledNodes &&
+    prev.enableChildElements === next.enableChildElements
   );
 });
