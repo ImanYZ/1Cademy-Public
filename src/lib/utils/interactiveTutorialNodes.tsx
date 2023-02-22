@@ -47,7 +47,7 @@ export const INTERACTIVE_TUTORIAL_NOTEBOOK_NODES: FullNodesData = {
     children: [
       {
         type: "Concept",
-        title: "Welcome to the Essentials I Tutorial!",
+        title: "This is a node",
         node: "01",
         label: "",
       },
@@ -119,7 +119,7 @@ export const INTERACTIVE_TUTORIAL_NOTEBOOK_NODES: FullNodesData = {
       },
     },
     content:
-      "This tutorial will teach you what nodes are and how they work on 1Cademy\n\n Read the **content** of the **node** and then click **Next** to continue.",
+      "A node is a single unit of information. Nodes are connected to other nodes. Together they make up a larger body of knowledge.",
     children: [
       {
         type: "Concept",
@@ -146,7 +146,7 @@ export const INTERACTIVE_TUTORIAL_NOTEBOOK_NODES: FullNodesData = {
     versions: 1,
     nodeVideo: "",
     institNames: ["University of Michigan - Ann Arbor"],
-    title: "Welcome to the Essentials I Tutorial!",
+    title: "This is node",
     nodeImage: "",
     userNodeId: "Tvh7IxaVAGkTATAV9RPT",
     nodeChangeType: "added",
@@ -221,7 +221,7 @@ export const INTERACTIVE_TUTORIAL_NOTEBOOK_NODES: FullNodesData = {
     parents: [
       {
         node: "01",
-        title: "Welcome to the Essentials I Tutorial!",
+        title: "This is a node",
         type: "Concept",
         label: "",
         // visible: true,

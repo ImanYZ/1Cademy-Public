@@ -1,4 +1,8 @@
-import { Link, Typography } from "@mui/material";
+import LocalLibraryIcon from "@mui/icons-material/LocalLibrary";
+import ShareIcon from "@mui/icons-material/Share";
+import { Typography } from "@mui/material";
+
+import MarkdownRender from "@/components/Markdown/MarkdownRender";
 
 import { DispatchNodeTutorialAction, SetStepType, TutorialState } from "../../nodeBookTypes";
 import { INTERACTIVE_TUTORIAL_NOTEBOOK_NODES } from "../utils/interactiveTutorialNodes";
@@ -30,7 +34,7 @@ Ex for Node id elements to disable
   "01-node-footer-upvotes",
   "01-node-footer-tags-citations",
   "01-button-parent-children",
-  "01-node-footer-ellipsis", 
+  "01-node-footer-ellipsis",
  */
 
 export function nodeTutorialReducer(state: TutorialState, action: DispatchNodeTutorialAction): TutorialState {
@@ -54,19 +58,7 @@ export function nodeTutorialReducer(state: TutorialState, action: DispatchNodeTu
           </Typography>
         ),
         disabledElements: ["TOOLBAR", "01", "LIVENESS_BAR"],
-        enableChildElements: [
-          "01-close-button",
-          "01-open-button",
-          "01-hide-offsprings-button",
-          "01-hide-button",
-          "01-node-footer-user",
-          "01-node-footer-propose",
-          "01-node-footer-downvotes",
-          "01-node-footer-upvotes",
-          "01-node-footer-tags-citations",
-          "01-button-parent-children",
-          "01-node-footer-ellipsis",
-        ],
+        enableChildElements: [],
         anchor: "",
         currentStepName: action.type,
         nextStepName: getNextStep(action.type),
@@ -88,7 +80,7 @@ export function nodeTutorialReducer(state: TutorialState, action: DispatchNodeTu
             Node headers are one of the ways that you can manipulate what you see on the knowledge graph.
           </Typography>
         ),
-        disabledElements: ["TOOLBAR"],
+        disabledElements: ["TOOLBAR", "01"],
         enableChildElements: [],
         targetId: "01",
         childTargetId: "01-node-header",
@@ -115,7 +107,7 @@ export function nodeTutorialReducer(state: TutorialState, action: DispatchNodeTu
             In the header are four buttons.
           </Typography>
         ),
-        disabledElements: ["TOOLBAR"],
+        disabledElements: ["TOOLBAR", "01"],
         enableChildElements: [],
         targetId: "01",
         anchor: "",
@@ -141,8 +133,8 @@ export function nodeTutorialReducer(state: TutorialState, action: DispatchNodeTu
             not delete the node from the platform.
           </Typography>
         ),
-        disabledElements: ["TOOLBAR"],
-        enableChildElements: [],
+        disabledElements: ["TOOLBAR", "01"],
+        enableChildElements: ["01-hiden-button"],
         targetId: "01",
         anchor: "",
         currentStepName: action.type,
@@ -166,8 +158,8 @@ export function nodeTutorialReducer(state: TutorialState, action: DispatchNodeTu
             This one closes all the open children nodes of the node it is clicked on.
           </Typography>
         ),
-        disabledElements: ["TOOLBAR"],
-        enableChildElements: [],
+        disabledElements: ["TOOLBAR", "01"],
+        enableChildElements: ["01-hide-offsprings-button"],
         targetId: "01",
         anchor: "",
         currentStepName: action.type,
@@ -191,8 +183,8 @@ export function nodeTutorialReducer(state: TutorialState, action: DispatchNodeTu
             This one minimizes the content in a node so only the title is displayed.
           </Typography>
         ),
-        disabledElements: ["TOOLBAR"],
-        enableChildElements: [],
+        disabledElements: ["TOOLBAR", "01"],
+        enableChildElements: ["01-close-button"],
         targetId: "01",
         anchor: "",
         currentStepName: action.type,
@@ -207,7 +199,7 @@ export function nodeTutorialReducer(state: TutorialState, action: DispatchNodeTu
       return {
         localSnapshot: [
           // { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["00"], nodeChangeType: "removed", open: false },
-          // { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["01"], nodeChangeType: "added", open: true },
+          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["01"], nodeChangeType: "modified", open: true },
         ],
         childTargetId: "01-node-title",
         title: "Nodes - Node Body",
@@ -216,7 +208,7 @@ export function nodeTutorialReducer(state: TutorialState, action: DispatchNodeTu
             Each node has a body that consists of a title and content.
           </Typography>
         ),
-        disabledElements: ["TOOLBAR"],
+        disabledElements: ["TOOLBAR", "01"],
         enableChildElements: [],
         targetId: "01",
         anchor: "",
@@ -241,7 +233,7 @@ export function nodeTutorialReducer(state: TutorialState, action: DispatchNodeTu
             This is the title.
           </Typography>
         ),
-        disabledElements: ["TOOLBAR"],
+        disabledElements: ["TOOLBAR", "01"],
         enableChildElements: [],
         targetId: "01",
         anchor: "",
@@ -266,7 +258,7 @@ export function nodeTutorialReducer(state: TutorialState, action: DispatchNodeTu
             We want a title that is concise and accurately describes the information within.
           </Typography>
         ),
-        disabledElements: ["TOOLBAR"],
+        disabledElements: ["TOOLBAR", "01"],
         enableChildElements: [],
         targetId: "01",
         anchor: "",
@@ -292,7 +284,7 @@ export function nodeTutorialReducer(state: TutorialState, action: DispatchNodeTu
             This means that you need to consider if the title is duplicated or would likely be duplicated.
           </Typography>
         ),
-        disabledElements: ["TOOLBAR"],
+        disabledElements: ["TOOLBAR", "01"],
         enableChildElements: [],
         targetId: "01",
         anchor: "",
@@ -320,7 +312,7 @@ export function nodeTutorialReducer(state: TutorialState, action: DispatchNodeTu
             specifically being discussed.
           </Typography>
         ),
-        disabledElements: ["TOOLBAR"],
+        disabledElements: ["TOOLBAR", "01"],
         enableChildElements: [],
         targetId: "01",
         anchor: "",
@@ -346,7 +338,7 @@ export function nodeTutorialReducer(state: TutorialState, action: DispatchNodeTu
             The content of a node describes what is stated in a title.
           </Typography>
         ),
-        disabledElements: ["TOOLBAR"],
+        disabledElements: ["TOOLBAR", "01"],
         enableChildElements: [],
         targetId: "01",
         anchor: "",
@@ -372,7 +364,7 @@ export function nodeTutorialReducer(state: TutorialState, action: DispatchNodeTu
             We want the content to be clear, concise, and accurate.
           </Typography>
         ),
-        disabledElements: ["TOOLBAR"],
+        disabledElements: ["TOOLBAR", "01"],
         enableChildElements: [],
         targetId: "01",
         anchor: "",
@@ -399,7 +391,7 @@ export function nodeTutorialReducer(state: TutorialState, action: DispatchNodeTu
             ordered and unordered lists.
           </Typography>
         ),
-        disabledElements: ["TOOLBAR"],
+        disabledElements: ["TOOLBAR", "01"],
         enableChildElements: [],
         targetId: "01",
         anchor: "",
@@ -425,7 +417,7 @@ export function nodeTutorialReducer(state: TutorialState, action: DispatchNodeTu
             For <b>bold text</b> you place two stars before and after the text you would like to make bold.
           </Typography>
         ),
-        disabledElements: ["TOOLBAR"],
+        disabledElements: ["TOOLBAR", "01"],
         enableChildElements: [],
         targetId: "01",
         anchor: "",
@@ -450,7 +442,7 @@ export function nodeTutorialReducer(state: TutorialState, action: DispatchNodeTu
             For <i>italicized text</i> you place one star before and after the text you would like to make italicized.
           </Typography>
         ),
-        disabledElements: ["TOOLBAR"],
+        disabledElements: ["TOOLBAR", "01"],
         enableChildElements: [],
         targetId: "01",
         anchor: "",
@@ -477,7 +469,7 @@ export function nodeTutorialReducer(state: TutorialState, action: DispatchNodeTu
             are placed on their own line.
           </Typography>
         ),
-        disabledElements: ["TOOLBAR"],
+        disabledElements: ["TOOLBAR", "01"],
         enableChildElements: [],
         targetId: "01",
         anchor: "",
@@ -504,7 +496,7 @@ export function nodeTutorialReducer(state: TutorialState, action: DispatchNodeTu
             own line.
           </Typography>
         ),
-        disabledElements: ["TOOLBAR"],
+        disabledElements: ["TOOLBAR", "01"],
         enableChildElements: [],
         targetId: "01",
         anchor: "",
@@ -530,7 +522,7 @@ export function nodeTutorialReducer(state: TutorialState, action: DispatchNodeTu
             You can also use math jax to create mathematical formulas.
           </Typography>
         ),
-        disabledElements: ["TOOLBAR"],
+        disabledElements: ["TOOLBAR", "01"],
         enableChildElements: [],
         targetId: "01",
         anchor: "",
@@ -552,19 +544,15 @@ export function nodeTutorialReducer(state: TutorialState, action: DispatchNodeTu
         childTargetId: "01-node-content",
         title: "Node Content - Math jax",
         description: (
-          <Typography variant="body1" sx={{ mb: "16px" }}>
-            To learn more about how to write mathematical formulas look at this page:
-            <br />
-            <Link
-              href="https://math.meta.stackexchange.com/questions/5020/mathjax-basic-tutorial-and-quick-reference"
-              target={"_blank"}
-              rel={"noReferrer"}
-            >
-              https://math.meta.stackexchange.com/questions/5020/mathjax-basic-tutorial-and-quick-reference
-            </Link>
-          </Typography>
+          <MarkdownRender
+            text={
+              "To learn more about how to write mathematical formulas look at this page: [mathjax-basic-tutorial-and-quick-reference](https://math.meta.stackexchange.com/questions/5020/mathjax-basic-tutorial-and-quick-reference)"
+            }
+            customClass={"custom-react-markdown"}
+            sx={{ fontWeight: 400, letterSpacing: "inherit" }}
+          />
         ),
-        disabledElements: ["TOOLBAR"],
+        disabledElements: ["TOOLBAR", "01"],
         enableChildElements: [],
         targetId: "01",
         anchor: "",
@@ -590,14 +578,14 @@ export function nodeTutorialReducer(state: TutorialState, action: DispatchNodeTu
             The node footer has many icons
           </Typography>
         ),
-        disabledElements: ["TOOLBAR"],
+        disabledElements: ["TOOLBAR", "01"],
         enableChildElements: [],
         targetId: "01",
         anchor: "",
         currentStepName: action.type,
         nextStepName: getNextStep(action.type),
         previosStepName: getPrevStep(action.type),
-        tooltipPosition: "top",
+        tooltipPosition: "bottom",
         stepNumber: action.type,
         stepLenght: STEPS_LENGHT,
         isClickeable: false,
@@ -606,8 +594,8 @@ export function nodeTutorialReducer(state: TutorialState, action: DispatchNodeTu
     case 22:
       return {
         localSnapshot: [
-          // { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["00"], nodeChangeType: "removed", open: false },
-          // { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["01"], nodeChangeType: "added", open: true },
+          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["00"], nodeChangeType: "removed", open: false },
+          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["01"], nodeChangeType: "added", open: true },
         ],
         childTargetId: "01-node-footer-user",
         title: "Nodes - Node Footer",
@@ -617,14 +605,14 @@ export function nodeTutorialReducer(state: TutorialState, action: DispatchNodeTu
             make the node in its present form.
           </Typography>
         ),
-        disabledElements: ["TOOLBAR"],
-        enableChildElements: [],
+        disabledElements: ["TOOLBAR", "01"],
+        enableChildElements: ["01-node-footer-user"],
         targetId: "01",
         anchor: "",
         currentStepName: action.type,
         nextStepName: getNextStep(action.type),
         previosStepName: getPrevStep(action.type),
-        tooltipPosition: "top",
+        tooltipPosition: "bottom",
         stepNumber: action.type,
         stepLenght: STEPS_LENGHT,
         isClickeable: false,
@@ -643,14 +631,14 @@ export function nodeTutorialReducer(state: TutorialState, action: DispatchNodeTu
             The next one indicates what type of node it is, this one is a concept node.
           </Typography>
         ),
-        disabledElements: ["TOOLBAR"],
-        enableChildElements: [],
+        disabledElements: ["TOOLBAR", "01"],
+        enableChildElements: ["01-node-footer-type"],
         targetId: "01",
         anchor: "",
         currentStepName: action.type,
         nextStepName: getNextStep(action.type),
         previosStepName: getPrevStep(action.type),
-        tooltipPosition: "top",
+        tooltipPosition: "bottom",
         stepNumber: action.type,
         stepLenght: STEPS_LENGHT,
         isClickeable: false,
@@ -669,14 +657,14 @@ export function nodeTutorialReducer(state: TutorialState, action: DispatchNodeTu
             The third icon indicates when the latest version of the node was adopted, this one was approved __days ago.
           </Typography>
         ),
-        disabledElements: ["TOOLBAR"],
+        disabledElements: ["TOOLBAR", "01"],
         enableChildElements: [],
         targetId: "01",
         anchor: "",
         currentStepName: action.type,
         nextStepName: getNextStep(action.type),
         previosStepName: getPrevStep(action.type),
-        tooltipPosition: "top",
+        tooltipPosition: "bottom",
         stepNumber: action.type,
         stepLenght: STEPS_LENGHT,
         isClickeable: false,
@@ -692,18 +680,18 @@ export function nodeTutorialReducer(state: TutorialState, action: DispatchNodeTu
         title: "Nodes - Node Footer",
         description: (
           <Typography variant="body1" sx={{ mb: "16px" }}>
-            The fourth icon is the purpose/evaluate versions of this node button.This allows you to edit the node or add
+            The fourth icon is the propose/evaluate versions of this node button.This allows you to edit the node or add
             children nodes to it.
           </Typography>
         ),
-        disabledElements: ["TOOLBAR"],
+        disabledElements: ["TOOLBAR", "01"],
         enableChildElements: [],
         targetId: "01",
         anchor: "",
         currentStepName: action.type,
         nextStepName: getNextStep(action.type),
         previosStepName: getPrevStep(action.type),
-        tooltipPosition: "top",
+        tooltipPosition: "bottom",
         stepNumber: action.type,
         stepLenght: STEPS_LENGHT,
         isClickeable: false,
@@ -723,14 +711,14 @@ export function nodeTutorialReducer(state: TutorialState, action: DispatchNodeTu
             received.
           </Typography>
         ),
-        disabledElements: ["TOOLBAR"],
+        disabledElements: ["TOOLBAR", "01"],
         enableChildElements: [],
         targetId: "01",
         anchor: "",
         currentStepName: action.type,
         nextStepName: getNextStep(action.type),
         previosStepName: getPrevStep(action.type),
-        tooltipPosition: "top",
+        tooltipPosition: "bottom",
         stepNumber: action.type,
         stepLenght: STEPS_LENGHT,
         isClickeable: false,
@@ -749,14 +737,14 @@ export function nodeTutorialReducer(state: TutorialState, action: DispatchNodeTu
             effect you are voting on the usefulness of a node.
           </Typography>
         ),
-        disabledElements: ["TOOLBAR"],
+        disabledElements: ["TOOLBAR", "01"],
         enableChildElements: [],
         targetId: "01",
         anchor: "",
         currentStepName: action.type,
         nextStepName: getNextStep(action.type),
         previosStepName: getPrevStep(action.type),
-        tooltipPosition: "top",
+        tooltipPosition: "bottom",
         stepNumber: action.type,
         stepLenght: STEPS_LENGHT,
         isClickeable: false,
@@ -775,14 +763,14 @@ export function nodeTutorialReducer(state: TutorialState, action: DispatchNodeTu
             A downvote is infact a vote to remove a node
           </Typography>
         ),
-        disabledElements: ["TOOLBAR"],
+        disabledElements: ["TOOLBAR", "01"],
         enableChildElements: [],
         targetId: "01",
         anchor: "",
         currentStepName: action.type,
         nextStepName: getNextStep(action.type),
         previosStepName: getPrevStep(action.type),
-        tooltipPosition: "top",
+        tooltipPosition: "bottom",
         stepNumber: action.type,
         stepLenght: STEPS_LENGHT,
         isClickeable: false,
@@ -800,14 +788,14 @@ export function nodeTutorialReducer(state: TutorialState, action: DispatchNodeTu
             An upvote is a vote to not change a node
           </Typography>
         ),
-        disabledElements: ["TOOLBAR"],
+        disabledElements: ["TOOLBAR", "01"],
         enableChildElements: [],
         targetId: "01",
         anchor: "",
         currentStepName: action.type,
         nextStepName: getNextStep(action.type),
         previosStepName: getPrevStep(action.type),
-        tooltipPosition: "top",
+        tooltipPosition: "bottom",
         stepNumber: action.type,
         stepLenght: STEPS_LENGHT,
         isClickeable: false,
@@ -825,14 +813,14 @@ export function nodeTutorialReducer(state: TutorialState, action: DispatchNodeTu
             When a ratio with a high enough number of downvotes to upvotes is reached a node can be deleted.
           </Typography>
         ),
-        disabledElements: ["TOOLBAR"],
+        disabledElements: ["TOOLBAR", "01"],
         enableChildElements: [],
         targetId: "01",
         anchor: "",
         currentStepName: action.type,
         nextStepName: getNextStep(action.type),
         previosStepName: getPrevStep(action.type),
-        tooltipPosition: "top",
+        tooltipPosition: "bottom",
         stepNumber: action.type,
         stepLenght: STEPS_LENGHT,
         isClickeable: false,
@@ -858,7 +846,7 @@ export function nodeTutorialReducer(state: TutorialState, action: DispatchNodeTu
         currentStepName: action.type,
         nextStepName: getNextStep(action.type),
         previosStepName: getPrevStep(action.type),
-        tooltipPosition: "top",
+        tooltipPosition: "bottom",
         stepNumber: action.type,
         stepLenght: STEPS_LENGHT,
         isClickeable: false,
@@ -1098,6 +1086,671 @@ export function nodeTutorialReducer(state: TutorialState, action: DispatchNodeTu
         nextStepName: getNextStep(action.type),
         previosStepName: getPrevStep(action.type),
         tooltipPosition: "top",
+        stepNumber: action.type,
+        stepLenght: STEPS_LENGHT,
+        isClickeable: false,
+      };
+    case 41:
+      return {
+        localSnapshot: [
+          // { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["00"], nodeChangeType: "removed", open: false },
+          // { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["01"], nodeChangeType: "added", open: true },
+        ],
+        childTargetId: "01-node-footer-ellipsis",
+        title: "Node Footer - Studied or Bookmarked",
+        description: (
+          // <Typography variant="body1" sx={{ mb: "16px" }}>
+          //   You can mark a node as studied or bookmarked here.
+          // </Typography>
+          <Typography variant="body1" sx={{ mb: "16px" }}>
+            Finally, you can share the node to Twitter, Reddit, Facebook, or Linkedin.
+          </Typography>
+        ),
+        disabledElements: ["TOOLBAR"],
+        enableChildElements: [],
+        targetId: "01",
+        anchor: "",
+        currentStepName: action.type,
+        nextStepName: getNextStep(action.type),
+        previosStepName: getPrevStep(action.type),
+        tooltipPosition: "top",
+        stepNumber: action.type,
+        stepLenght: STEPS_LENGHT,
+        isClickeable: false,
+      };
+    case 42: //42
+      return {
+        localSnapshot: [
+          // { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["00"], nodeChangeType: "removed", open: false },
+          // { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["01"], nodeChangeType: "added", open: true },
+        ],
+        targetId: "01",
+        childTargetId: "01-node-footer-type",
+        title: "Nodes - Type of Nodes",
+        description: (
+          // <Typography variant="body1" sx={{ mb: "16px" }}>
+          //   You can mark a node as studied or bookmarked here.
+          // </Typography>
+          <Typography variant="body1" sx={{ mb: "16px" }}>
+            There are 6 different types of nodes that all serve specific purposes on 1Cademy
+          </Typography>
+        ),
+        disabledElements: ["TOOLBAR", "01"],
+        enableChildElements: [
+          "01-close-button",
+          "01-open-button",
+          "01-hide-offsprings-button",
+          "01-hide-button",
+          "01-node-footer-user",
+          "01-node-footer-propose",
+          "01-node-footer-downvotes",
+          "01-node-footer-upvotes",
+          "01-node-footer-tags-citations",
+          "01-button-parent-children",
+          "01-node-footer-ellipsis",
+        ],
+        anchor: "",
+        currentStepName: action.type,
+        nextStepName: getNextStep(action.type),
+        previosStepName: getPrevStep(action.type),
+        tooltipPosition: "bottom",
+        stepNumber: action.type,
+        stepLenght: STEPS_LENGHT,
+        isClickeable: false,
+      };
+    case 43: //43
+      return {
+        localSnapshot: [
+          // { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["00"], nodeChangeType: "removed", open: false },
+          // { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["01"], nodeChangeType: "added", open: true },
+        ],
+        targetId: "01",
+        childTargetId: "01-node-footer-type",
+        title: "Nodes - Concept",
+        description: (
+          // <Typography variant="body1" sx={{ mb: "16px" }}>
+          //   You can mark a node as studied or bookmarked here.
+          // </Typography>
+          <Typography variant="body1" sx={{ mb: "16px" }}>
+            Concept nodes can be identified by this icon. They represent a single idea or concept.
+          </Typography>
+        ),
+        disabledElements: ["TOOLBAR"],
+        enableChildElements: [],
+        anchor: "",
+        currentStepName: action.type,
+        nextStepName: getNextStep(action.type),
+        previosStepName: getPrevStep(action.type),
+        tooltipPosition: "bottom",
+        stepNumber: action.type,
+        stepLenght: STEPS_LENGHT,
+        isClickeable: false,
+      };
+    case 44: //44
+      return {
+        localSnapshot: [
+          // { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["00"], nodeChangeType: "removed", open: false },
+          // { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["01"], nodeChangeType: "added", open: true },
+        ],
+        targetId: "01",
+        childTargetId: "01-node-footer-type",
+        title: "Nodes - Concept",
+        description: (
+          <Typography variant="body1" sx={{ mb: "16px" }}>
+            Concepts can be superordinate or subordinate.
+          </Typography>
+        ),
+        disabledElements: ["TOOLBAR"],
+        enableChildElements: [],
+        anchor: "",
+        currentStepName: action.type,
+        nextStepName: getNextStep(action.type),
+        previosStepName: getPrevStep(action.type),
+        tooltipPosition: "bottom",
+        stepNumber: action.type,
+        stepLenght: STEPS_LENGHT,
+        isClickeable: false,
+      };
+    case 45: //44
+      return {
+        localSnapshot: [
+          // { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["00"], nodeChangeType: "removed", open: false },
+          // { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["01"], nodeChangeType: "added", open: true },
+        ],
+        targetId: "01",
+        childTargetId: "01-node-footer-type",
+        title: "Nodes - Concept",
+        description: (
+          <Typography variant="body1" sx={{ mb: "16px" }}>
+            A superordinate concept is a general concept or topic. For example, language is a broad topic that
+            incorporates many concepts in it.
+          </Typography>
+        ),
+        disabledElements: ["TOOLBAR"],
+        enableChildElements: [],
+        anchor: "",
+        currentStepName: action.type,
+        nextStepName: getNextStep(action.type),
+        previosStepName: getPrevStep(action.type),
+        tooltipPosition: "bottom",
+        stepNumber: action.type,
+        stepLenght: STEPS_LENGHT,
+        isClickeable: false,
+      };
+    case 46: //44
+      return {
+        localSnapshot: [
+          // { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["00"], nodeChangeType: "removed", open: false },
+          // { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["01"], nodeType: "Concept" },
+        ],
+        targetId: "01",
+        childTargetId: "01-node-footer-type",
+        title: "Nodes - Concept",
+        description: (
+          <Typography variant="body1" sx={{ mb: "16px" }}>
+            Subordinate concepts are specific concepts. An example of a subordinate concept is language comprehension
+            because it is a subordinate topic within the topic of language.
+          </Typography>
+        ),
+        disabledElements: ["TOOLBAR"],
+        enableChildElements: [],
+        anchor: "",
+        currentStepName: action.type,
+        nextStepName: getNextStep(action.type),
+        previosStepName: getPrevStep(action.type),
+        tooltipPosition: "bottom",
+        stepNumber: action.type,
+        stepLenght: STEPS_LENGHT,
+        isClickeable: false,
+      };
+    case 47: //44
+      return {
+        localSnapshot: [
+          // { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["00"], nodeChangeType: "removed", open: false },
+          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["01"], nodeType: "Concept" },
+        ],
+        targetId: "01",
+        childTargetId: "01-node-footer-type",
+        title: "Nodes - Concept",
+        description: (
+          <Typography variant="body1" sx={{ mb: "16px" }}>
+            In terms of node type, whether a concept is subordinate or superordinate does not matter, they will be
+            designated as concept nodes.
+          </Typography>
+        ),
+        disabledElements: ["TOOLBAR"],
+        enableChildElements: [],
+        anchor: "",
+        currentStepName: action.type,
+        nextStepName: getNextStep(action.type),
+        previosStepName: getPrevStep(action.type),
+        tooltipPosition: "bottom",
+        stepNumber: action.type,
+        stepLenght: STEPS_LENGHT,
+        isClickeable: false,
+      };
+    case 48: //44
+      return {
+        localSnapshot: [
+          // { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["00"], nodeChangeType: "removed", open: false },
+          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["01"], nodeType: "Relation" },
+        ],
+        targetId: "01",
+        childTargetId: "01-node-footer-type",
+        title: "Nodes - Relation",
+        description: (
+          <Typography variant="body1" sx={{ mb: "16px" }}>
+            Relation nodes can be identified by this icon. Relation nodes identify multiple concepts without defining
+            them. They serve to link or arrange groups of concepts.
+          </Typography>
+        ),
+        disabledElements: ["TOOLBAR"],
+        enableChildElements: [],
+        anchor: "",
+        currentStepName: action.type,
+        nextStepName: getNextStep(action.type),
+        previosStepName: getPrevStep(action.type),
+        tooltipPosition: "bottom",
+        stepNumber: action.type,
+        stepLenght: STEPS_LENGHT,
+        isClickeable: false,
+      };
+    case 49: //44
+      return {
+        localSnapshot: [
+          // { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["00"], nodeChangeType: "removed", open: false },
+          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["01"], nodeType: "Relation", content: "- uwu" },
+        ],
+        targetId: "01",
+        childTargetId: "01-node-footer-type",
+        title: "Nodes - Relation",
+        description: (
+          <Typography variant="body1" sx={{ mb: "16px" }}>
+            Typically, though not always, relation nodes are bulleted lists of terms representing concepts, rather than
+            a paragraph of description.
+          </Typography>
+        ),
+        disabledElements: ["TOOLBAR"],
+        enableChildElements: [],
+        anchor: "",
+        currentStepName: action.type,
+        nextStepName: getNextStep(action.type),
+        previosStepName: getPrevStep(action.type),
+        tooltipPosition: "bottom",
+        stepNumber: action.type,
+        stepLenght: STEPS_LENGHT,
+        isClickeable: false,
+      };
+    case 50: //44
+      return {
+        localSnapshot: [
+          // { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["00"], nodeChangeType: "removed", open: false },
+          // { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["01"], nodeType: "Relation" },
+        ],
+        targetId: "01",
+        childTargetId: "01-node-footer-type",
+        title: "Nodes - Concept vs Relation",
+        description: (
+          <>
+            <Typography variant="body1" sx={{ mb: "16px", display: "flex", alignItems: "center" }}>
+              It can be difficult to determine the difference between a concept <LocalLibraryIcon fontSize="small" />{" "}
+              and relation <ShareIcon fontSize="small" /> node.
+            </Typography>
+          </>
+        ),
+        disabledElements: ["TOOLBAR"],
+        enableChildElements: [],
+        anchor: "",
+        currentStepName: action.type,
+        nextStepName: getNextStep(action.type),
+        previosStepName: getPrevStep(action.type),
+        tooltipPosition: "bottom",
+        stepNumber: action.type,
+        stepLenght: STEPS_LENGHT,
+        isClickeable: false,
+      };
+    case 51: //44
+      return {
+        localSnapshot: [
+          // { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["00"], nodeChangeType: "removed", open: false },
+          // { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["01"], nodeType: "Relation" },
+        ],
+        targetId: "01",
+        childTargetId: "01-node-footer-type",
+        title: "Nodes - Concept vs Relation",
+        description: (
+          <Typography variant="body1" sx={{ mb: "16px", display: "flex", alignItems: "center" }}>
+            Typically a concept node <LocalLibraryIcon fontSize="small" /> will be a paragraph and a relation{" "}
+            <ShareIcon /> node will be a bulleted list, but this is not always the case.
+          </Typography>
+        ),
+        disabledElements: ["TOOLBAR"],
+        enableChildElements: [],
+        anchor: "",
+        currentStepName: action.type,
+        nextStepName: getNextStep(action.type),
+        previosStepName: getPrevStep(action.type),
+        tooltipPosition: "bottom",
+        stepNumber: action.type,
+        stepLenght: STEPS_LENGHT,
+        isClickeable: false,
+      };
+
+    case 52: //44
+      return {
+        localSnapshot: [
+          // { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["00"], nodeChangeType: "removed", open: false },
+          // { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["01"], nodeType: "Relation" },
+        ],
+        targetId: "01",
+        childTargetId: "01-node-footer-type",
+        title: "Nodes - Concept vs Relation",
+        description: (
+          <Typography variant="body1" sx={{ mb: "16px" }}>
+            Strictly speaking, a concept node is a single, discreet concept that is then described.
+          </Typography>
+        ),
+        disabledElements: ["TOOLBAR"],
+        enableChildElements: [],
+        anchor: "",
+        currentStepName: action.type,
+        nextStepName: getNextStep(action.type),
+        previosStepName: getPrevStep(action.type),
+        tooltipPosition: "bottom",
+        stepNumber: action.type,
+        stepLenght: STEPS_LENGHT,
+        isClickeable: false,
+      };
+    case 53: //44
+      return {
+        localSnapshot: [
+          // { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["00"], nodeChangeType: "removed", open: false },
+          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["01"], nodeType: "Relation" },
+        ],
+        targetId: "01",
+        childTargetId: "01-node-footer-type",
+        title: "Nodes - Concept vs Relation",
+        description: (
+          <Typography variant="body1" sx={{ mb: "16px", display: "flex", alignItems: "center" }}>
+            A relation node <ShareIcon fontSize="small" /> identifies two or more concepts without defining them. It
+            serves to connect related concept nodes which are then linked as children concept nodes.
+          </Typography>
+        ),
+        disabledElements: ["TOOLBAR"],
+        enableChildElements: [],
+        anchor: "",
+        currentStepName: action.type,
+        nextStepName: getNextStep(action.type),
+        previosStepName: getPrevStep(action.type),
+        tooltipPosition: "bottom",
+        stepNumber: action.type,
+        stepLenght: STEPS_LENGHT,
+        isClickeable: false,
+      };
+    case 54: //44
+      return {
+        localSnapshot: [
+          // { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["00"], nodeChangeType: "removed", open: false },
+          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["01"], nodeType: "Reference" },
+        ],
+        targetId: "01",
+        childTargetId: "01-node-footer-type",
+        title: "Nodes - Reference",
+        description: (
+          <Typography variant="body1" sx={{ mb: "16px" }}>
+            Reference nodes can be identified by this icon. Their purpose is to contain reference information and to be
+            cited in other types of nodes.
+          </Typography>
+        ),
+        disabledElements: ["TOOLBAR"],
+        enableChildElements: [],
+        anchor: "",
+        currentStepName: action.type,
+        nextStepName: getNextStep(action.type),
+        previosStepName: getPrevStep(action.type),
+        tooltipPosition: "bottom",
+        stepNumber: action.type,
+        stepLenght: STEPS_LENGHT,
+        isClickeable: false,
+      };
+    case 55: //44
+      return {
+        localSnapshot: [
+          // { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["00"], nodeChangeType: "removed", open: false },
+          // { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["01"], nodeType: "Reference" },
+        ],
+        targetId: "01",
+        childTargetId: "01-node-footer-type",
+        title: "Nodes - Reference",
+        description: (
+          <Typography variant="body1" sx={{ mb: "16px" }}>
+            Reference nodes contain citations in APA format for things like videos, scholarly articles, books, websites,
+            and audio.
+          </Typography>
+        ),
+        disabledElements: ["TOOLBAR"],
+        enableChildElements: [],
+        anchor: "",
+        currentStepName: action.type,
+        nextStepName: getNextStep(action.type),
+        previosStepName: getPrevStep(action.type),
+        tooltipPosition: "bottom",
+        stepNumber: action.type,
+        stepLenght: STEPS_LENGHT,
+        isClickeable: false,
+      };
+    case 56: //44
+      return {
+        localSnapshot: [
+          // { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["00"], nodeChangeType: "removed", open: false },
+          // { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["01"], nodeType: "Reference" },
+        ],
+        targetId: "01",
+        childTargetId: "01-node-footer-type",
+        title: "Nodes - Reference",
+        description: (
+          <Typography variant="body1" sx={{ mb: "16px" }}>
+            It is important to note that reference nodes cite a whole source, information about page numbers, chapters,
+            sections, timestamps, or webpages are not included in this type of node.
+          </Typography>
+        ),
+        disabledElements: ["TOOLBAR"],
+        enableChildElements: [],
+        anchor: "",
+        currentStepName: action.type,
+        nextStepName: getNextStep(action.type),
+        previosStepName: getPrevStep(action.type),
+        tooltipPosition: "bottom",
+        stepNumber: action.type,
+        stepLenght: STEPS_LENGHT,
+        isClickeable: false,
+      };
+    case 57: //44
+      return {
+        localSnapshot: [
+          // { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["00"], nodeChangeType: "removed", open: false },
+          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["01"], nodeType: "Reference" },
+        ],
+        targetId: "01",
+        childTargetId: "01-node-footer-type",
+        title: "Nodes - Reference",
+        description: (
+          <Typography variant="body1" sx={{ mb: "16px" }}>
+            You will want to edit a node by clicking the pencil icon and choose a reference node as a child. In this
+            node you will make the cited source’s title the title of the node and fill the content section with the full
+            APA citation.
+          </Typography>
+        ),
+        disabledElements: ["TOOLBAR"],
+        enableChildElements: [],
+        anchor: "",
+        currentStepName: action.type,
+        nextStepName: getNextStep(action.type),
+        previosStepName: getPrevStep(action.type),
+        tooltipPosition: "bottom",
+        stepNumber: action.type,
+        stepLenght: STEPS_LENGHT,
+        isClickeable: false,
+      };
+    case 58: //44
+      return {
+        localSnapshot: [
+          // { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["00"], nodeChangeType: "removed", open: false },
+          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["01"], nodeType: "Idea" },
+        ],
+        targetId: "01",
+        childTargetId: "01-node-footer-type",
+        title: "Nodes - Idea",
+        description: (
+          <Typography variant="body1" sx={{ mb: "16px" }}>
+            Idea nodes can be identified by this icon. They are used to add ideas not adapted from any source.
+          </Typography>
+        ),
+        disabledElements: ["TOOLBAR"],
+        enableChildElements: [],
+        anchor: "",
+        currentStepName: action.type,
+        nextStepName: getNextStep(action.type),
+        previosStepName: getPrevStep(action.type),
+        tooltipPosition: "bottom",
+        stepNumber: action.type,
+        stepLenght: STEPS_LENGHT,
+        isClickeable: false,
+      };
+    case 59: //44
+      return {
+        localSnapshot: [
+          // { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["00"], nodeChangeType: "removed", open: false },
+          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["01"], nodeType: "Idea" },
+        ],
+        targetId: "01",
+        childTargetId: "01-node-footer-type",
+        title: "Nodes - Idea",
+        description: (
+          <Typography variant="body1" sx={{ mb: "16px" }}>
+            Idea nodes can be used to offer feedback on a node or suggest a direction with future research in an area.
+          </Typography>
+        ),
+        disabledElements: ["TOOLBAR"],
+        enableChildElements: [],
+        anchor: "",
+        currentStepName: action.type,
+        nextStepName: getNextStep(action.type),
+        previosStepName: getPrevStep(action.type),
+        tooltipPosition: "bottom",
+        stepNumber: action.type,
+        stepLenght: STEPS_LENGHT,
+        isClickeable: false,
+      };
+    case 60: //44
+      return {
+        localSnapshot: [
+          // { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["00"], nodeChangeType: "removed", open: false },
+          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["01"], nodeType: "Question" },
+        ],
+        targetId: "01",
+        childTargetId: "01-node-footer-type",
+        title: "Nodes - Question",
+        description: (
+          <Typography variant="body1" sx={{ mb: "16px" }}>
+            Question nodes can be identified by this icon. They are used to ask a MULTIPLE CHOICE QUESTION
+          </Typography>
+        ),
+        disabledElements: ["TOOLBAR"],
+        enableChildElements: [],
+        anchor: "",
+        currentStepName: action.type,
+        nextStepName: getNextStep(action.type),
+        previosStepName: getPrevStep(action.type),
+        tooltipPosition: "bottom",
+        stepNumber: action.type,
+        stepLenght: STEPS_LENGHT,
+        isClickeable: false,
+      };
+    case 61: //44
+      return {
+        localSnapshot: [
+          // { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["00"], nodeChangeType: "removed", open: false },
+          // { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["01"], nodeType: "Question" },
+        ],
+        targetId: "01",
+        childTargetId: "01-node-footer-type",
+        title: "Nodes - Question",
+        description: (
+          <Typography variant="body1" sx={{ mb: "16px" }}>
+            These nodes are used to help study a section of content. A user can select options to answer a question and
+            will receive feedback.
+          </Typography>
+        ),
+        disabledElements: ["TOOLBAR"],
+        enableChildElements: [],
+        anchor: "",
+        currentStepName: action.type,
+        nextStepName: getNextStep(action.type),
+        previosStepName: getPrevStep(action.type),
+        tooltipPosition: "bottom",
+        stepNumber: action.type,
+        stepLenght: STEPS_LENGHT,
+        isClickeable: false,
+      };
+    case 62: //44
+      return {
+        localSnapshot: [
+          // { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["00"], nodeChangeType: "removed", open: false },
+          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["01"], nodeType: "Question" },
+        ],
+        targetId: "01",
+        childTargetId: "01-node-footer-type",
+        title: "Nodes - Question",
+        description: (
+          <Typography variant="body1" sx={{ mb: "16px" }}>
+            Question nodes are not used to ask other users questions about a node or 1Cademy practices. That is
+            something you can do in a community meeting.
+          </Typography>
+        ),
+        disabledElements: ["TOOLBAR"],
+        enableChildElements: [],
+        anchor: "",
+        currentStepName: action.type,
+        nextStepName: getNextStep(action.type),
+        previosStepName: getPrevStep(action.type),
+        tooltipPosition: "bottom",
+        stepNumber: action.type,
+        stepLenght: STEPS_LENGHT,
+        isClickeable: false,
+      };
+    case 63: //44
+      return {
+        localSnapshot: [
+          // { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["00"], nodeChangeType: "removed", open: false },
+          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["01"], nodeType: "Code" },
+        ],
+        targetId: "01",
+        childTargetId: "01-node-footer-type",
+        title: "Nodes - Code",
+        description: (
+          <Typography variant="body1" sx={{ mb: "16px" }}>
+            Code nodes can be identified by this icon. They are used to display a code snippet of a specified programing
+            language.
+          </Typography>
+        ),
+        disabledElements: ["TOOLBAR"],
+        enableChildElements: [],
+        anchor: "",
+        currentStepName: action.type,
+        nextStepName: getNextStep(action.type),
+        previosStepName: getPrevStep(action.type),
+        tooltipPosition: "bottom",
+        stepNumber: action.type,
+        stepLenght: STEPS_LENGHT,
+        isClickeable: false,
+      };
+    case 64: //44
+      return {
+        localSnapshot: [
+          // { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["00"], nodeChangeType: "removed", open: false },
+          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["01"], nodeType: "Code" },
+        ],
+        targetId: "01",
+        childTargetId: "01-node-footer-type",
+        title: "Nodes - Code",
+        description: (
+          <Typography variant="body1" sx={{ mb: "16px" }}>
+            Four languages can be specified in a code node: Python, R, HTML, and JavaScript.
+          </Typography>
+        ),
+        disabledElements: ["TOOLBAR"],
+        enableChildElements: [],
+        anchor: "",
+        currentStepName: action.type,
+        nextStepName: getNextStep(action.type),
+        previosStepName: getPrevStep(action.type),
+        tooltipPosition: "bottom",
+        stepNumber: action.type,
+        stepLenght: STEPS_LENGHT,
+        isClickeable: false,
+      };
+    case 65: //44
+      return {
+        localSnapshot: [
+          // { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["00"], nodeChangeType: "removed", open: false },
+          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["01"], nodeType: "Code" },
+        ],
+        targetId: "01",
+        childTargetId: "01-node-footer-type",
+        title: "Nodes - Code",
+        description: (
+          <Typography variant="body1" sx={{ mb: "16px" }}>
+            Each code node is color coded to reflect its specified language.
+          </Typography>
+        ),
+        disabledElements: ["TOOLBAR"],
+        enableChildElements: [],
+        anchor: "",
+        currentStepName: action.type,
+        nextStepName: getNextStep(action.type),
+        previosStepName: getPrevStep(action.type),
+        tooltipPosition: "bottom",
         stepNumber: action.type,
         stepLenght: STEPS_LENGHT,
         isClickeable: false,
