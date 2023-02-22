@@ -13,7 +13,7 @@ const STEPS_LENGHT = 65;
 
 const getNextStep = (step: SetStepType): SetStepType => {
   if (!step) return 1;
-  if (step === 100) return null;
+  if (step === STEPS_LENGHT) return null;
   return (step + 1) as SetStepType;
 };
 const getPrevStep = (step: SetStepType): SetStepType => {
@@ -1854,8 +1854,8 @@ export function nodeTutorialReducer(
           // { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["00"], nodeChangeType: "removed", open: false },
           // { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["01"], nodeType: "Code" },
         ],
-        targetId: "06",
-        childTargetId: "06-node-footer-type",
+        targetId: "07",
+        childTargetId: "07-node-footer-type",
         title: "Nodes - Code",
         description: (
           <Typography variant="body1" sx={{ mb: "16px" }}>
