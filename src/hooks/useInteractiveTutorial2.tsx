@@ -1,7 +1,9 @@
 import { ReactNode, useCallback, useEffect, useReducer, useRef } from "react";
 
+import { useNodeBook } from "@/context/NodeBookContext";
+
 import { INITIAL_NODE_TUTORIAL_STATE, nodeTutorialReducer } from "../lib/reducers/nodeTutorial";
-import { SetStepType } from "../nodeBookTypes";
+import { SetStepType, StepReducerPayload } from "../nodeBookTypes";
 import useEventListener from "./useEventListener";
 
 export const DEFAULT_NUMBER_OF_TRIES = 5;
@@ -22,22 +24,69 @@ export type TargetClientRect = { width: number; height: number; top: number; lef
 export const useInteractiveTutorial = () => {
   const [stateNodeTutorial, dispatchNodeTutorial] = useReducer(nodeTutorialReducer, INITIAL_NODE_TUTORIAL_STATE);
   const isPlayingTheTutorialRef = useRef(false);
+  const { nodeBookDispatch } = useNodeBook();
+  const onChangeStep = useCallback(
+    (step: SetStepType) => {
+      console.log("onchange step", step);
+      let payload: StepReducerPayload = {};
+      if (step === 42) payload = { callback: () => nodeBookDispatch({ type: "setSelectedNode", payload: "01" }) };
+      if (step === 43) payload = { callback: () => nodeBookDispatch({ type: "setSelectedNode", payload: "02" }) };
+      if (step === 47) payload = { callback: () => nodeBookDispatch({ type: "setSelectedNode", payload: "02" }) };
+      if (step === 48) payload = { callback: () => nodeBookDispatch({ type: "setSelectedNode", payload: "03" }) };
+      if (step === 53) payload = { callback: () => nodeBookDispatch({ type: "setSelectedNode", payload: "03" }) };
 
-  const onChangeStep = useCallback((step: SetStepType) => {
-    console.log("onchange step", step);
-    dispatchNodeTutorial({ type: step });
-    isPlayingTheTutorialRef.current = step ? true : false;
-  }, []);
+      if (step === 54) payload = { callback: () => nodeBookDispatch({ type: "setSelectedNode", payload: "04" }) };
+      if (step === 57) payload = { callback: () => nodeBookDispatch({ type: "setSelectedNode", payload: "04" }) };
+
+      if (step === 58) payload = { callback: () => nodeBookDispatch({ type: "setSelectedNode", payload: "05" }) };
+      if (step === 59) payload = { callback: () => nodeBookDispatch({ type: "setSelectedNode", payload: "05" }) };
+
+      if (step === 60) payload = { callback: () => nodeBookDispatch({ type: "setSelectedNode", payload: "06" }) };
+      if (step === 62) payload = { callback: () => nodeBookDispatch({ type: "setSelectedNode", payload: "06" }) };
+
+      if (step === 63) payload = { callback: () => nodeBookDispatch({ type: "setSelectedNode", payload: "07" }) };
+
+      dispatchNodeTutorial({ type: step, payload });
+      isPlayingTheTutorialRef.current = step ? true : false;
+    },
+    [nodeBookDispatch]
+  );
 
   useEffect(() => {
-    onChangeStep(22);
+    onChangeStep(40);
   }, [onChangeStep]);
 
   useEventListener({
     stepId: stateNodeTutorial?.childTargetId ?? stateNodeTutorial?.targetId,
     cb: stateNodeTutorial?.isClickeable
       ? () => {
-          dispatchNodeTutorial({ type: stateNodeTutorial?.nextStepName ?? null });
+          const stepId = stateNodeTutorial?.childTargetId ?? stateNodeTutorial?.targetId;
+          let payload: StepReducerPayload = {};
+          if (stepId === "42")
+            payload = { callback: () => nodeBookDispatch({ type: "setSelectedNode", payload: "01" }) };
+          if (stepId === "43")
+            payload = { callback: () => nodeBookDispatch({ type: "setSelectedNode", payload: "02" }) };
+          if (stepId === "47")
+            payload = { callback: () => nodeBookDispatch({ type: "setSelectedNode", payload: "02" }) };
+          if (stepId === "48")
+            payload = { callback: () => nodeBookDispatch({ type: "setSelectedNode", payload: "03" }) };
+          if (stepId === "53")
+            payload = { callback: () => nodeBookDispatch({ type: "setSelectedNode", payload: "03" }) };
+          if (stepId === "54")
+            payload = { callback: () => nodeBookDispatch({ type: "setSelectedNode", payload: "04" }) };
+          if (stepId === "57")
+            payload = { callback: () => nodeBookDispatch({ type: "setSelectedNode", payload: "04" }) };
+          if (stepId === "58")
+            payload = { callback: () => nodeBookDispatch({ type: "setSelectedNode", payload: "05" }) };
+          if (stepId === "59")
+            payload = { callback: () => nodeBookDispatch({ type: "setSelectedNode", payload: "05" }) };
+          if (stepId === "60")
+            payload = { callback: () => nodeBookDispatch({ type: "setSelectedNode", payload: "06" }) };
+          if (stepId === "62")
+            payload = { callback: () => nodeBookDispatch({ type: "setSelectedNode", payload: "06" }) };
+          if (stepId === "63")
+            payload = { callback: () => nodeBookDispatch({ type: "setSelectedNode", payload: "07" }) };
+          dispatchNodeTutorial({ type: stateNodeTutorial?.nextStepName ?? null, payload });
           isPlayingTheTutorialRef.current = Boolean(stateNodeTutorial?.nextStepName);
         }
       : undefined,

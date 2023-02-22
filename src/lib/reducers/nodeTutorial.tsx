@@ -9,11 +9,11 @@ import { INTERACTIVE_TUTORIAL_NOTEBOOK_NODES } from "../utils/interactiveTutoria
 
 export const INITIAL_NODE_TUTORIAL_STATE: TutorialState = null;
 
-const STEPS_LENGHT = 41;
+const STEPS_LENGHT = 65;
 
 const getNextStep = (step: SetStepType): SetStepType => {
   if (!step) return 1;
-  if (step === 50) return null;
+  if (step === 100) return null;
   return (step + 1) as SetStepType;
 };
 const getPrevStep = (step: SetStepType): SetStepType => {
@@ -37,7 +37,10 @@ Ex for Node id elements to disable
   "01-node-footer-ellipsis",
  */
 
-export function nodeTutorialReducer(state: TutorialState, action: DispatchNodeTutorialAction): TutorialState {
+export function nodeTutorialReducer(
+  state: TutorialState,
+  { payload, ...action }: DispatchNodeTutorialAction
+): TutorialState {
   console.log("set difeault step");
 
   switch (action.type) {
@@ -594,8 +597,8 @@ export function nodeTutorialReducer(state: TutorialState, action: DispatchNodeTu
     case 22:
       return {
         localSnapshot: [
-          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["00"], nodeChangeType: "removed", open: false },
-          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["01"], nodeChangeType: "added", open: true },
+          // { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["00"], nodeChangeType: "removed", open: false },
+          // { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["01"], nodeChangeType: "added", open: true },
         ],
         childTargetId: "01-node-footer-user",
         title: "Nodes - Node Footer",
@@ -764,7 +767,7 @@ export function nodeTutorialReducer(state: TutorialState, action: DispatchNodeTu
           </Typography>
         ),
         disabledElements: ["TOOLBAR", "01"],
-        enableChildElements: [],
+        enableChildElements: ["01-node-footer-downvotes"],
         targetId: "01",
         anchor: "",
         currentStepName: action.type,
@@ -789,7 +792,7 @@ export function nodeTutorialReducer(state: TutorialState, action: DispatchNodeTu
           </Typography>
         ),
         disabledElements: ["TOOLBAR", "01"],
-        enableChildElements: [],
+        enableChildElements: ["01-node-footer-upvotes"],
         targetId: "01",
         anchor: "",
         currentStepName: action.type,
@@ -839,7 +842,7 @@ export function nodeTutorialReducer(state: TutorialState, action: DispatchNodeTu
             proposal will need to change the node. This will be discussed further later on.
           </Typography>
         ),
-        disabledElements: ["TOOLBAR"],
+        disabledElements: ["TOOLBAR", "01"],
         enableChildElements: [],
         targetId: "01",
         anchor: "",
@@ -864,7 +867,7 @@ export function nodeTutorialReducer(state: TutorialState, action: DispatchNodeTu
             The next icons are on a single button and represent the tag and citation for a node.
           </Typography>
         ),
-        disabledElements: ["TOOLBAR"],
+        disabledElements: ["TOOLBAR", "01"],
         enableChildElements: [],
         targetId: "01",
         anchor: "",
@@ -890,8 +893,8 @@ export function nodeTutorialReducer(state: TutorialState, action: DispatchNodeTu
             the left and the tags for the node on the right.
           </Typography>
         ),
-        disabledElements: ["TOOLBAR"],
-        enableChildElements: [],
+        disabledElements: ["TOOLBAR", "01"],
+        enableChildElements: ["01-node-footer-tags-citations"],
         targetId: "01",
         anchor: "",
         currentStepName: action.type,
@@ -915,7 +918,7 @@ export function nodeTutorialReducer(state: TutorialState, action: DispatchNodeTu
             The next icon is for parent and child nodes.
           </Typography>
         ),
-        disabledElements: ["TOOLBAR"],
+        disabledElements: ["TOOLBAR", "01"],
         enableChildElements: [],
         targetId: "01",
         anchor: "",
@@ -941,8 +944,8 @@ export function nodeTutorialReducer(state: TutorialState, action: DispatchNodeTu
             on the right.
           </Typography>
         ),
-        disabledElements: ["TOOLBAR"],
-        enableChildElements: [],
+        disabledElements: ["TOOLBAR", "01"],
+        enableChildElements: ["01-button-parent-children"],
         targetId: "01",
         anchor: "",
         currentStepName: action.type,
@@ -966,8 +969,8 @@ export function nodeTutorialReducer(state: TutorialState, action: DispatchNodeTu
             You can click on either the parent or child nodes to open them in the graph.
           </Typography>
         ),
-        disabledElements: ["TOOLBAR"],
-        enableChildElements: [],
+        disabledElements: ["TOOLBAR", "01"],
+        enableChildElements: ["01-button-parent-children"],
         targetId: "01",
         anchor: "",
         currentStepName: action.type,
@@ -992,8 +995,8 @@ export function nodeTutorialReducer(state: TutorialState, action: DispatchNodeTu
             Finally the ellipses icon can be clicked to open a few other options.
           </Typography>
         ),
-        disabledElements: ["TOOLBAR"],
-        enableChildElements: [],
+        disabledElements: ["TOOLBAR", "01"],
+        enableChildElements: ["01-node-footer-ellipsis"],
         targetId: "01",
         anchor: "",
         currentStepName: action.type,
@@ -1021,8 +1024,8 @@ export function nodeTutorialReducer(state: TutorialState, action: DispatchNodeTu
             Your can mark a node as studied or bookmarked here.
           </Typography>
         ),
-        disabledElements: ["TOOLBAR"],
-        enableChildElements: [],
+        disabledElements: ["TOOLBAR", "01"],
+        enableChildElements: ["01-node-footer-ellipsis"],
         targetId: "01",
         anchor: "",
         currentStepName: action.type,
@@ -1050,8 +1053,8 @@ export function nodeTutorialReducer(state: TutorialState, action: DispatchNodeTu
             You can also have the node narrated for you.
           </Typography>
         ),
-        disabledElements: ["TOOLBAR"],
-        enableChildElements: [],
+        disabledElements: ["TOOLBAR", "01"],
+        enableChildElements: ["01-node-footer-ellipsis"],
         targetId: "01",
         anchor: "",
         currentStepName: action.type,
@@ -1065,8 +1068,8 @@ export function nodeTutorialReducer(state: TutorialState, action: DispatchNodeTu
     case 40:
       return {
         localSnapshot: [
-          // { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["00"], nodeChangeType: "removed", open: false },
-          // { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["01"], nodeChangeType: "added", open: true },
+          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["00"], nodeChangeType: "removed", open: false },
+          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["01"], nodeChangeType: "added", open: true },
         ],
         childTargetId: "01-node-footer-ellipsis",
         title: "Node Footer - Studied or Bookmarked",
@@ -1078,8 +1081,8 @@ export function nodeTutorialReducer(state: TutorialState, action: DispatchNodeTu
             Finally, you can share the node to Twitter, Reddit, Facebook, or Linkedin.
           </Typography>
         ),
-        disabledElements: ["TOOLBAR"],
-        enableChildElements: [],
+        disabledElements: ["TOOLBAR", "01"],
+        enableChildElements: ["01-node-footer-ellipsis"],
         targetId: "01",
         anchor: "",
         currentStepName: action.type,
@@ -1106,8 +1109,8 @@ export function nodeTutorialReducer(state: TutorialState, action: DispatchNodeTu
             Finally, you can share the node to Twitter, Reddit, Facebook, or Linkedin.
           </Typography>
         ),
-        disabledElements: ["TOOLBAR"],
-        enableChildElements: [],
+        disabledElements: ["TOOLBAR", "01"],
+        enableChildElements: ["01-node-footer-ellipsis"],
         targetId: "01",
         anchor: "",
         currentStepName: action.type,
@@ -1119,10 +1122,11 @@ export function nodeTutorialReducer(state: TutorialState, action: DispatchNodeTu
         isClickeable: false,
       };
     case 42: //42
+      if (payload.callback) payload?.callback();
       return {
         localSnapshot: [
-          // { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["00"], nodeChangeType: "removed", open: false },
-          // { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["01"], nodeChangeType: "added", open: true },
+          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["01"], nodeChangeType: "added", open: true },
+          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["02"], nodeChangeType: "removed", open: true },
         ],
         targetId: "01",
         childTargetId: "01-node-footer-type",
@@ -1135,20 +1139,8 @@ export function nodeTutorialReducer(state: TutorialState, action: DispatchNodeTu
             There are 6 different types of nodes that all serve specific purposes on 1Cademy
           </Typography>
         ),
-        disabledElements: ["TOOLBAR", "01"],
-        enableChildElements: [
-          "01-close-button",
-          "01-open-button",
-          "01-hide-offsprings-button",
-          "01-hide-button",
-          "01-node-footer-user",
-          "01-node-footer-propose",
-          "01-node-footer-downvotes",
-          "01-node-footer-upvotes",
-          "01-node-footer-tags-citations",
-          "01-button-parent-children",
-          "01-node-footer-ellipsis",
-        ],
+        disabledElements: ["TOOLBAR", "01", "02"],
+        enableChildElements: [],
         anchor: "",
         currentStepName: action.type,
         nextStepName: getNextStep(action.type),
@@ -1159,13 +1151,15 @@ export function nodeTutorialReducer(state: TutorialState, action: DispatchNodeTu
         isClickeable: false,
       };
     case 43: //43
+      if (payload.callback) payload?.callback();
       return {
         localSnapshot: [
           // { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["00"], nodeChangeType: "removed", open: false },
-          // { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["01"], nodeChangeType: "added", open: true },
+          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["01"], nodeChangeType: "added", open: true },
+          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["02"], nodeChangeType: "added", open: true },
         ],
-        targetId: "01",
-        childTargetId: "01-node-footer-type",
+        targetId: "02",
+        childTargetId: "02-node-footer-type",
         title: "Nodes - Concept",
         description: (
           // <Typography variant="body1" sx={{ mb: "16px" }}>
@@ -1175,7 +1169,7 @@ export function nodeTutorialReducer(state: TutorialState, action: DispatchNodeTu
             Concept nodes can be identified by this icon. They represent a single idea or concept.
           </Typography>
         ),
-        disabledElements: ["TOOLBAR"],
+        disabledElements: ["TOOLBAR", "01", "02"],
         enableChildElements: [],
         anchor: "",
         currentStepName: action.type,
@@ -1189,18 +1183,18 @@ export function nodeTutorialReducer(state: TutorialState, action: DispatchNodeTu
     case 44: //44
       return {
         localSnapshot: [
-          // { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["00"], nodeChangeType: "removed", open: false },
-          // { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["01"], nodeChangeType: "added", open: true },
+          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["01"], nodeChangeType: "added", open: true },
+          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["02"], nodeChangeType: "added", open: true },
         ],
-        targetId: "01",
-        childTargetId: "01-node-footer-type",
+        targetId: "02",
+        childTargetId: "02-node-footer-type",
         title: "Nodes - Concept",
         description: (
           <Typography variant="body1" sx={{ mb: "16px" }}>
             Concepts can be superordinate or subordinate.
           </Typography>
         ),
-        disabledElements: ["TOOLBAR"],
+        disabledElements: ["TOOLBAR", "01", "02"],
         enableChildElements: [],
         anchor: "",
         currentStepName: action.type,
@@ -1215,10 +1209,17 @@ export function nodeTutorialReducer(state: TutorialState, action: DispatchNodeTu
       return {
         localSnapshot: [
           // { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["00"], nodeChangeType: "removed", open: false },
-          // { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["01"], nodeChangeType: "added", open: true },
+          // {
+          //   ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["01"],
+          //   nodeChangeType: "added",
+          //   open: true,
+          //   title: "Music",
+          //   content:
+          //     '"Music" is a superordinate concept that encompasses various genres, styles, and types of music. Music is a form of artistic expression that uses sound to create emotional and aesthetic experiences for the listener.',
+          // },
         ],
-        targetId: "01",
-        childTargetId: "01-node-footer-type",
+        targetId: "02",
+        childTargetId: "02-node-footer-type",
         title: "Nodes - Concept",
         description: (
           <Typography variant="body1" sx={{ mb: "16px" }}>
@@ -1226,7 +1227,7 @@ export function nodeTutorialReducer(state: TutorialState, action: DispatchNodeTu
             incorporates many concepts in it.
           </Typography>
         ),
-        disabledElements: ["TOOLBAR"],
+        disabledElements: ["TOOLBAR", "01", "02"],
         enableChildElements: [],
         anchor: "",
         currentStepName: action.type,
@@ -1241,10 +1242,17 @@ export function nodeTutorialReducer(state: TutorialState, action: DispatchNodeTu
       return {
         localSnapshot: [
           // { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["00"], nodeChangeType: "removed", open: false },
-          // { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["01"], nodeType: "Concept" },
+          // {
+          //   ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["01"],
+          //   nodeChangeType: "modified",
+          //   open: true,
+          //   title: "Classical Music",
+          //   content:
+          //     "Classical music is a genre of music that is typically characterized by the use of orchestral instruments and is known for its complex harmonies and rich melodies.",
+          // },
         ],
-        targetId: "01",
-        childTargetId: "01-node-footer-type",
+        targetId: "02",
+        childTargetId: "02-node-footer-type",
         title: "Nodes - Concept",
         description: (
           <Typography variant="body1" sx={{ mb: "16px" }}>
@@ -1252,7 +1260,7 @@ export function nodeTutorialReducer(state: TutorialState, action: DispatchNodeTu
             because it is a subordinate topic within the topic of language.
           </Typography>
         ),
-        disabledElements: ["TOOLBAR"],
+        disabledElements: ["TOOLBAR", "01", "02"],
         enableChildElements: [],
         anchor: "",
         currentStepName: action.type,
@@ -1264,13 +1272,15 @@ export function nodeTutorialReducer(state: TutorialState, action: DispatchNodeTu
         isClickeable: false,
       };
     case 47: //44
+      if (payload.callback) payload?.callback();
       return {
         localSnapshot: [
-          // { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["00"], nodeChangeType: "removed", open: false },
-          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["01"], nodeType: "Concept" },
+          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["01"], nodeChangeType: "added", open: true },
+          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["02"], nodeChangeType: "added", open: true },
+          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["03"], nodeChangeType: "removed", open: true, nodeType: "Relation" },
         ],
-        targetId: "01",
-        childTargetId: "01-node-footer-type",
+        targetId: "02",
+        childTargetId: "02-node-footer-type",
         title: "Nodes - Concept",
         description: (
           <Typography variant="body1" sx={{ mb: "16px" }}>
@@ -1278,7 +1288,7 @@ export function nodeTutorialReducer(state: TutorialState, action: DispatchNodeTu
             designated as concept nodes.
           </Typography>
         ),
-        disabledElements: ["TOOLBAR"],
+        disabledElements: ["TOOLBAR", "01", "02"],
         enableChildElements: [],
         anchor: "",
         currentStepName: action.type,
@@ -1290,13 +1300,26 @@ export function nodeTutorialReducer(state: TutorialState, action: DispatchNodeTu
         isClickeable: false,
       };
     case 48: //44
+      if (payload.callback) payload.callback();
       return {
         localSnapshot: [
+          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["01"], nodeChangeType: "added", open: true },
+          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["02"], nodeChangeType: "added", open: true },
+          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["03"], nodeChangeType: "added", open: true, nodeType: "Relation" },
+
           // { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["00"], nodeChangeType: "removed", open: false },
-          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["01"], nodeType: "Relation" },
+          // {
+          //   ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["01"],
+          //   nodeChangeType: "modified",
+          //   nodeType: "Relation",
+          //   open: true,
+          //   title: "Location",
+          //   content:
+          //     "Refers to the position or place of an object in relation to other objects. It is a way of describing where something is in physical space",
+          // },
         ],
-        targetId: "01",
-        childTargetId: "01-node-footer-type",
+        targetId: "03",
+        childTargetId: "03-node-footer-type",
         title: "Nodes - Relation",
         description: (
           <Typography variant="body1" sx={{ mb: "16px" }}>
@@ -1304,7 +1327,7 @@ export function nodeTutorialReducer(state: TutorialState, action: DispatchNodeTu
             them. They serve to link or arrange groups of concepts.
           </Typography>
         ),
-        disabledElements: ["TOOLBAR"],
+        disabledElements: ["TOOLBAR", "01", "02", "03"],
         enableChildElements: [],
         anchor: "",
         currentStepName: action.type,
@@ -1319,10 +1342,17 @@ export function nodeTutorialReducer(state: TutorialState, action: DispatchNodeTu
       return {
         localSnapshot: [
           // { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["00"], nodeChangeType: "removed", open: false },
-          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["01"], nodeType: "Relation", content: "- uwu" },
+          // {
+          //   ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["01"],
+          //   nodeChangeType: "modified",
+          //   nodeType: "Relation",
+          //   open: true,
+          //   title: "Location",
+          //   content: "- DistanceLatitude and longitude\n - GPS\n - Direction\n - Address\n - Geography",
+          // },
         ],
-        targetId: "01",
-        childTargetId: "01-node-footer-type",
+        targetId: "03",
+        childTargetId: "03-node-footer-type",
         title: "Nodes - Relation",
         description: (
           <Typography variant="body1" sx={{ mb: "16px" }}>
@@ -1330,7 +1360,7 @@ export function nodeTutorialReducer(state: TutorialState, action: DispatchNodeTu
             a paragraph of description.
           </Typography>
         ),
-        disabledElements: ["TOOLBAR"],
+        disabledElements: ["TOOLBAR", "01", "02", "03"],
         enableChildElements: [],
         anchor: "",
         currentStepName: action.type,
@@ -1347,18 +1377,18 @@ export function nodeTutorialReducer(state: TutorialState, action: DispatchNodeTu
           // { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["00"], nodeChangeType: "removed", open: false },
           // { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["01"], nodeType: "Relation" },
         ],
-        targetId: "01",
-        childTargetId: "01-node-footer-type",
+        targetId: "03",
+        childTargetId: "03-node-footer-type",
         title: "Nodes - Concept vs Relation",
         description: (
           <>
             <Typography variant="body1" sx={{ mb: "16px", display: "flex", alignItems: "center" }}>
-              It can be difficult to determine the difference between a concept <LocalLibraryIcon fontSize="small" />{" "}
+              It can be difficult to determine the difference between a concept <LocalLibraryIcon fontSize="small" />
               and relation <ShareIcon fontSize="small" /> node.
             </Typography>
           </>
         ),
-        disabledElements: ["TOOLBAR"],
+        disabledElements: ["TOOLBAR", "01", "02", "03"],
         enableChildElements: [],
         anchor: "",
         currentStepName: action.type,
@@ -1375,8 +1405,8 @@ export function nodeTutorialReducer(state: TutorialState, action: DispatchNodeTu
           // { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["00"], nodeChangeType: "removed", open: false },
           // { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["01"], nodeType: "Relation" },
         ],
-        targetId: "01",
-        childTargetId: "01-node-footer-type",
+        targetId: "03",
+        childTargetId: "03-node-footer-type",
         title: "Nodes - Concept vs Relation",
         description: (
           <Typography variant="body1" sx={{ mb: "16px", display: "flex", alignItems: "center" }}>
@@ -1384,7 +1414,7 @@ export function nodeTutorialReducer(state: TutorialState, action: DispatchNodeTu
             <ShareIcon /> node will be a bulleted list, but this is not always the case.
           </Typography>
         ),
-        disabledElements: ["TOOLBAR"],
+        disabledElements: ["TOOLBAR", "01", "02", "03"],
         enableChildElements: [],
         anchor: "",
         currentStepName: action.type,
@@ -1402,15 +1432,15 @@ export function nodeTutorialReducer(state: TutorialState, action: DispatchNodeTu
           // { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["00"], nodeChangeType: "removed", open: false },
           // { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["01"], nodeType: "Relation" },
         ],
-        targetId: "01",
-        childTargetId: "01-node-footer-type",
+        targetId: "03",
+        childTargetId: "03-node-footer-type",
         title: "Nodes - Concept vs Relation",
         description: (
           <Typography variant="body1" sx={{ mb: "16px" }}>
             Strictly speaking, a concept node is a single, discreet concept that is then described.
           </Typography>
         ),
-        disabledElements: ["TOOLBAR"],
+        disabledElements: ["TOOLBAR", "01", "02", "03"],
         enableChildElements: [],
         anchor: "",
         currentStepName: action.type,
@@ -1422,13 +1452,19 @@ export function nodeTutorialReducer(state: TutorialState, action: DispatchNodeTu
         isClickeable: false,
       };
     case 53: //44
+      if (payload.callback) payload?.callback();
       return {
         localSnapshot: [
-          // { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["00"], nodeChangeType: "removed", open: false },
-          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["01"], nodeType: "Relation" },
+          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["03"], nodeChangeType: "added", open: true, nodeType: "Relation" },
+          {
+            ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["04"],
+            nodeChangeType: "removed",
+            open: true,
+            nodeType: "Reference",
+          },
         ],
-        targetId: "01",
-        childTargetId: "01-node-footer-type",
+        targetId: "03",
+        childTargetId: "03-node-footer-type",
         title: "Nodes - Concept vs Relation",
         description: (
           <Typography variant="body1" sx={{ mb: "16px", display: "flex", alignItems: "center" }}>
@@ -1436,7 +1472,7 @@ export function nodeTutorialReducer(state: TutorialState, action: DispatchNodeTu
             serves to connect related concept nodes which are then linked as children concept nodes.
           </Typography>
         ),
-        disabledElements: ["TOOLBAR"],
+        disabledElements: ["TOOLBAR", "01", "02", "03"],
         enableChildElements: [],
         anchor: "",
         currentStepName: action.type,
@@ -1448,13 +1484,28 @@ export function nodeTutorialReducer(state: TutorialState, action: DispatchNodeTu
         isClickeable: false,
       };
     case 54: //44
+      if (payload.callback) payload.callback();
       return {
         localSnapshot: [
+          {
+            ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["04"],
+            nodeChangeType: "added",
+            open: true,
+            nodeType: "Reference",
+          },
           // { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["00"], nodeChangeType: "removed", open: false },
-          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["01"], nodeType: "Reference" },
+          // {
+          //   ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["01"],
+          //   nodeChangeType: "modified",
+          //   nodeType: "Reference",
+          //   open: true,
+          //   title: "Music Education",
+          //   content:
+          //     "Wikimedia Foundation. (2022, June 28). Music education. Wikipedia. Retrieved July 26, 2022, from https://en.wikipedia.org/wiki/Music_education",
+          // },
         ],
-        targetId: "01",
-        childTargetId: "01-node-footer-type",
+        targetId: "04",
+        childTargetId: "04-node-footer-type",
         title: "Nodes - Reference",
         description: (
           <Typography variant="body1" sx={{ mb: "16px" }}>
@@ -1462,7 +1513,7 @@ export function nodeTutorialReducer(state: TutorialState, action: DispatchNodeTu
             cited in other types of nodes.
           </Typography>
         ),
-        disabledElements: ["TOOLBAR"],
+        disabledElements: ["TOOLBAR", "01", "02", "03", "04"],
         enableChildElements: [],
         anchor: "",
         currentStepName: action.type,
@@ -1479,8 +1530,8 @@ export function nodeTutorialReducer(state: TutorialState, action: DispatchNodeTu
           // { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["00"], nodeChangeType: "removed", open: false },
           // { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["01"], nodeType: "Reference" },
         ],
-        targetId: "01",
-        childTargetId: "01-node-footer-type",
+        targetId: "04",
+        childTargetId: "04-node-footer-type",
         title: "Nodes - Reference",
         description: (
           <Typography variant="body1" sx={{ mb: "16px" }}>
@@ -1488,7 +1539,7 @@ export function nodeTutorialReducer(state: TutorialState, action: DispatchNodeTu
             and audio.
           </Typography>
         ),
-        disabledElements: ["TOOLBAR"],
+        disabledElements: ["TOOLBAR", "01", "02", "03", "04"],
         enableChildElements: [],
         anchor: "",
         currentStepName: action.type,
@@ -1505,8 +1556,8 @@ export function nodeTutorialReducer(state: TutorialState, action: DispatchNodeTu
           // { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["00"], nodeChangeType: "removed", open: false },
           // { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["01"], nodeType: "Reference" },
         ],
-        targetId: "01",
-        childTargetId: "01-node-footer-type",
+        targetId: "04",
+        childTargetId: "04-node-footer-type",
         title: "Nodes - Reference",
         description: (
           <Typography variant="body1" sx={{ mb: "16px" }}>
@@ -1514,7 +1565,7 @@ export function nodeTutorialReducer(state: TutorialState, action: DispatchNodeTu
             sections, timestamps, or webpages are not included in this type of node.
           </Typography>
         ),
-        disabledElements: ["TOOLBAR"],
+        disabledElements: ["TOOLBAR", "01", "02", "03", "04"],
         enableChildElements: [],
         anchor: "",
         currentStepName: action.type,
@@ -1526,13 +1577,20 @@ export function nodeTutorialReducer(state: TutorialState, action: DispatchNodeTu
         isClickeable: false,
       };
     case 57: //44
+      if (payload.callback) payload?.callback();
       return {
         localSnapshot: [
           // { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["00"], nodeChangeType: "removed", open: false },
-          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["01"], nodeType: "Reference" },
+
+          {
+            ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["05"],
+            nodeChangeType: "removed",
+            open: true,
+            nodeType: "Idea",
+          },
         ],
-        targetId: "01",
-        childTargetId: "01-node-footer-type",
+        targetId: "04",
+        childTargetId: "04-node-footer-type",
         title: "Nodes - Reference",
         description: (
           <Typography variant="body1" sx={{ mb: "16px" }}>
@@ -1541,7 +1599,7 @@ export function nodeTutorialReducer(state: TutorialState, action: DispatchNodeTu
             APA citation.
           </Typography>
         ),
-        disabledElements: ["TOOLBAR"],
+        disabledElements: ["TOOLBAR", "01", "02", "03", "04"],
         enableChildElements: [],
         anchor: "",
         currentStepName: action.type,
@@ -1553,20 +1611,26 @@ export function nodeTutorialReducer(state: TutorialState, action: DispatchNodeTu
         isClickeable: false,
       };
     case 58: //44
+      if (payload.callback) payload.callback();
       return {
         localSnapshot: [
           // { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["00"], nodeChangeType: "removed", open: false },
-          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["01"], nodeType: "Idea" },
+          {
+            ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["05"],
+            nodeChangeType: "added",
+            open: true,
+            nodeType: "Idea",
+          },
         ],
-        targetId: "01",
-        childTargetId: "01-node-footer-type",
+        targetId: "05",
+        childTargetId: "05-node-footer-type",
         title: "Nodes - Idea",
         description: (
           <Typography variant="body1" sx={{ mb: "16px" }}>
             Idea nodes can be identified by this icon. They are used to add ideas not adapted from any source.
           </Typography>
         ),
-        disabledElements: ["TOOLBAR"],
+        disabledElements: ["TOOLBAR", "01", "02", "03", "04", "05"],
         enableChildElements: [],
         anchor: "",
         currentStepName: action.type,
@@ -1578,20 +1642,28 @@ export function nodeTutorialReducer(state: TutorialState, action: DispatchNodeTu
         isClickeable: false,
       };
     case 59: //44
+      if (payload.callback) payload?.callback();
+
       return {
         localSnapshot: [
           // { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["00"], nodeChangeType: "removed", open: false },
-          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["01"], nodeType: "Idea" },
+          // { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["01"], nodeType: "Idea" },
+          {
+            ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["06"],
+            nodeChangeType: "removed",
+            open: true,
+            nodeType: "Question",
+          },
         ],
-        targetId: "01",
-        childTargetId: "01-node-footer-type",
+        targetId: "05",
+        childTargetId: "05-node-footer-type",
         title: "Nodes - Idea",
         description: (
           <Typography variant="body1" sx={{ mb: "16px" }}>
             Idea nodes can be used to offer feedback on a node or suggest a direction with future research in an area.
           </Typography>
         ),
-        disabledElements: ["TOOLBAR"],
+        disabledElements: ["TOOLBAR", "01", "02", "03", "04", "05"],
         enableChildElements: [],
         anchor: "",
         currentStepName: action.type,
@@ -1603,20 +1675,27 @@ export function nodeTutorialReducer(state: TutorialState, action: DispatchNodeTu
         isClickeable: false,
       };
     case 60: //44
+      if (payload.callback) payload.callback();
       return {
         localSnapshot: [
           // { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["00"], nodeChangeType: "removed", open: false },
-          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["01"], nodeType: "Question" },
+          // { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["01"], nodeType: "Question" },
+          {
+            ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["06"],
+            nodeChangeType: "added",
+            open: true,
+            nodeType: "Question",
+          },
         ],
-        targetId: "01",
-        childTargetId: "01-node-footer-type",
+        targetId: "06",
+        childTargetId: "06-node-footer-type",
         title: "Nodes - Question",
         description: (
           <Typography variant="body1" sx={{ mb: "16px" }}>
             Question nodes can be identified by this icon. They are used to ask a MULTIPLE CHOICE QUESTION
           </Typography>
         ),
-        disabledElements: ["TOOLBAR"],
+        disabledElements: ["TOOLBAR", "01", "02", "03", "04", "05"],
         enableChildElements: [],
         anchor: "",
         currentStepName: action.type,
@@ -1633,8 +1712,8 @@ export function nodeTutorialReducer(state: TutorialState, action: DispatchNodeTu
           // { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["00"], nodeChangeType: "removed", open: false },
           // { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["01"], nodeType: "Question" },
         ],
-        targetId: "01",
-        childTargetId: "01-node-footer-type",
+        targetId: "06",
+        childTargetId: "06-node-footer-type",
         title: "Nodes - Question",
         description: (
           <Typography variant="body1" sx={{ mb: "16px" }}>
@@ -1642,7 +1721,7 @@ export function nodeTutorialReducer(state: TutorialState, action: DispatchNodeTu
             will receive feedback.
           </Typography>
         ),
-        disabledElements: ["TOOLBAR"],
+        disabledElements: ["TOOLBAR", "01", "02", "03", "04", "05", "06"],
         enableChildElements: [],
         anchor: "",
         currentStepName: action.type,
@@ -1654,13 +1733,21 @@ export function nodeTutorialReducer(state: TutorialState, action: DispatchNodeTu
         isClickeable: false,
       };
     case 62: //44
+      if (payload.callback) payload?.callback();
+
       return {
         localSnapshot: [
           // { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["00"], nodeChangeType: "removed", open: false },
-          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["01"], nodeType: "Question" },
+          // { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["01"], nodeType: "Question" },
+          {
+            ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["07"],
+            nodeChangeType: "removed",
+            open: true,
+            nodeType: "Code",
+          },
         ],
-        targetId: "01",
-        childTargetId: "01-node-footer-type",
+        targetId: "06",
+        childTargetId: "06-node-footer-type",
         title: "Nodes - Question",
         description: (
           <Typography variant="body1" sx={{ mb: "16px" }}>
@@ -1668,7 +1755,7 @@ export function nodeTutorialReducer(state: TutorialState, action: DispatchNodeTu
             something you can do in a community meeting.
           </Typography>
         ),
-        disabledElements: ["TOOLBAR"],
+        disabledElements: ["TOOLBAR", "01", "02", "03", "04", "05", "06"],
         enableChildElements: [],
         anchor: "",
         currentStepName: action.type,
@@ -1680,13 +1767,20 @@ export function nodeTutorialReducer(state: TutorialState, action: DispatchNodeTu
         isClickeable: false,
       };
     case 63: //44
+      if (payload.callback) payload.callback();
       return {
         localSnapshot: [
           // { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["00"], nodeChangeType: "removed", open: false },
-          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["01"], nodeType: "Code" },
+          // { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["01"], nodeType: "Code" },
+          {
+            ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["07"],
+            nodeChangeType: "added",
+            open: true,
+            nodeType: "Code",
+          },
         ],
-        targetId: "01",
-        childTargetId: "01-node-footer-type",
+        targetId: "07",
+        childTargetId: "07-node-footer-type",
         title: "Nodes - Code",
         description: (
           <Typography variant="body1" sx={{ mb: "16px" }}>
@@ -1694,7 +1788,7 @@ export function nodeTutorialReducer(state: TutorialState, action: DispatchNodeTu
             language.
           </Typography>
         ),
-        disabledElements: ["TOOLBAR"],
+        disabledElements: ["TOOLBAR", "01", "02", "03", "04", "05", "06", "07"],
         enableChildElements: [],
         anchor: "",
         currentStepName: action.type,
@@ -1711,15 +1805,15 @@ export function nodeTutorialReducer(state: TutorialState, action: DispatchNodeTu
           // { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["00"], nodeChangeType: "removed", open: false },
           { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["01"], nodeType: "Code" },
         ],
-        targetId: "01",
-        childTargetId: "01-node-footer-type",
+        targetId: "07",
+        childTargetId: "07-node-footer-type",
         title: "Nodes - Code",
         description: (
           <Typography variant="body1" sx={{ mb: "16px" }}>
             Four languages can be specified in a code node: Python, R, HTML, and JavaScript.
           </Typography>
         ),
-        disabledElements: ["TOOLBAR"],
+        disabledElements: ["TOOLBAR", "01", "02", "03", "04", "05", "06", "07"],
         enableChildElements: [],
         anchor: "",
         currentStepName: action.type,
@@ -1734,17 +1828,17 @@ export function nodeTutorialReducer(state: TutorialState, action: DispatchNodeTu
       return {
         localSnapshot: [
           // { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["00"], nodeChangeType: "removed", open: false },
-          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["01"], nodeType: "Code" },
+          // { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["01"], nodeType: "Code" },
         ],
-        targetId: "01",
-        childTargetId: "01-node-footer-type",
+        targetId: "06",
+        childTargetId: "06-node-footer-type",
         title: "Nodes - Code",
         description: (
           <Typography variant="body1" sx={{ mb: "16px" }}>
             Each code node is color coded to reflect its specified language.
           </Typography>
         ),
-        disabledElements: ["TOOLBAR"],
+        disabledElements: ["TOOLBAR", "01", "02", "03", "04", "05", "06", "07"],
         enableChildElements: [],
         anchor: "",
         currentStepName: action.type,

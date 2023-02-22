@@ -291,9 +291,12 @@ interface NodeTutorialState {
   readonly stepLenght: number;
   readonly isClickeable: boolean;
 }
-
+export type StepReducerPayload = {
+  callback?: () => void;
+};
 export type SetStep = {
   type: SetStepType;
+  payload: StepReducerPayload;
 };
 
 export type DispatchNodeTutorialAction = SetStep;
