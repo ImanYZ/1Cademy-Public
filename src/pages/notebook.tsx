@@ -4271,6 +4271,7 @@ const Dashboard = ({}: DashboardProps) => {
               </IconButton>
             </Tooltip>
           )}
+
           {/* end Data from map */}
 
           {window.innerHeight > 399 && user?.livelinessBar === "interaction" && (
@@ -4279,6 +4280,7 @@ const Dashboard = ({}: DashboardProps) => {
               openUserInfoSidebar={openUserInfoSidebar}
               onlineUsers={onlineUsers}
               db={db}
+              disabled={Boolean(stateNodeTutorial && stateNodeTutorial.disabledElements.includes("LIVENESS_BAR"))}
             />
           )}
 
@@ -4289,6 +4291,7 @@ const Dashboard = ({}: DashboardProps) => {
               onlineUsers={onlineUsers}
               db={db}
               user={user}
+              disabled={Boolean(stateNodeTutorial && stateNodeTutorial.disabledElements.includes("LIVENESS_BAR"))}
             />
           )}
 

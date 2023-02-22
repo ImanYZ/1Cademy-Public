@@ -36,7 +36,7 @@ const NodeTypeIcon: FC<Props> = ({
   const renderIcon = () => {
     switch (nodeType) {
       case "Code":
-        return <CodeIcon color={color} {...rest} sx={{ color: disabled ? "inherith" : undefined }} />;
+        return <CodeIcon color={color} {...rest} />;
       case "Concept":
         return <LocalLibraryIcon color={color} {...rest} />;
       case "Relation":

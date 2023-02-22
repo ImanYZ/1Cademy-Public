@@ -53,7 +53,7 @@ export function nodeTutorialReducer(state: TutorialState, action: DispatchNodeTu
             footer to understand how you can manipulate the map and interact with the nodes.
           </Typography>
         ),
-        disabledElements: ["TOOLBAR", "01"],
+        disabledElements: ["TOOLBAR", "01", "LIVENESS_BAR"],
         enableChildElements: [
           "01-close-button",
           "01-open-button",

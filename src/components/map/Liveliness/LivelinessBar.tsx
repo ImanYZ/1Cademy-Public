@@ -14,6 +14,7 @@ type ILivelinessBarProps = {
   onlineUsers: string[];
   openUserInfoSidebar: (uname: string, imageUrl: string, fullName: string, chooseUname: string) => void;
   authEmail: string | undefined;
+  disabled?: boolean;
 };
 
 type UserInteractions = {
@@ -28,25 +29,25 @@ type UserInteractions = {
   };
 };
 
-const LivelinessBar = (props: ILivelinessBarProps) => {
+const LivelinessBar = ({ disabled = false, ...props }: ILivelinessBarProps) => {
   const { db, onlineUsers, openUserInfoSidebar, authEmail } = props;
   const [open, setOpen] = useState(false);
   const [isInitialized, setIsInitialized] = useState(false);
   const [usersInteractions, setUsersInteractions] = useState<UserInteractions>({});
   const [barHeight, setBarHeight] = useState<number>(0);
   // const theme = useTheme();
-
   useEffect(() => {
     if (window && window.innerWidth > 768 && window.innerHeight >= 797) {
       setOpen(true);
     }
+    if (disabled) return;
+
     let t: any = null;
     const unsubscribe: {
       finalizer: () => void;
     } = {
       finalizer: () => {},
     };
-
     const snapshotInitializer = () => {
       setUsersInteractions({});
       unsubscribe.finalizer();
@@ -145,7 +146,7 @@ const LivelinessBar = (props: ILivelinessBarProps) => {
     snapshotInitializer();
 
     return () => unsubscribe.finalizer();
-  }, []);
+  }, [disabled]);
 
   useEffect(() => {
     setBarHeight(parseFloat(String(document.getElementById("liveliness-seekbar")?.clientHeight)));
@@ -179,8 +180,10 @@ const LivelinessBar = (props: ILivelinessBarProps) => {
         <Box
           id="livebar"
           sx={{
+            opacity: disabled ? 0.8 : 1,
             width: "56px",
-            background: theme => (theme.palette.mode === "dark" ? "#1f1f1f" : "#f0f0f0"),
+            background: theme =>
+              theme.palette.mode === "dark" ? (disabled ? "#383838ff" : "#1f1f1f") : disabled ? "#b9b9b9" : "#f0f0f0",
             borderRadius: "10px 0px 0px 10px",
             right: 0,
             top: 0,
@@ -227,99 +230,118 @@ const LivelinessBar = (props: ILivelinessBarProps) => {
                 top: "0px",
               }}
             >
-              {unames.map((uname: string) => {
-                const seekPosition = -1 * ((usersInteractions[uname].count / maxActions) * barHeight - 32);
-                return (
-                  <Tooltip
-                    key={uname}
-                    title={
-                      <Box sx={{ textAlign: "center" }}>
-                        <Box component={"span"}>
-                          {usersInteractions[uname].chooseUname ? uname : usersInteractions[uname].fullname}
-                        </Box>
-                        {authEmail === "oneweb@umich.edu" && (
-                          <Box component={"p"} sx={{ my: 0 }}>
-                            {usersInteractions[uname].email}
-                          </Box>
-                        )}
-                        <Box component={"p"} sx={{ my: 0 }}>
-                          {usersInteractions[uname].count} Interaction{usersInteractions[uname].count > 1 ? "s" : ""}
-                        </Box>
-                      </Box>
-                    }
-                  >
+              {disabled &&
+                [1, 2, 3].map(cur => {
+                  return (
                     <Box
-                      onClick={() =>
-                        openUserInfoSidebar(
-                          uname,
-                          usersInteractions[uname].imageUrl,
-                          usersInteractions[uname].fullname,
-                          usersInteractions[uname].chooseUname ? "1" : ""
-                        )
-                      }
-                      className={
-                        usersInteractions[uname].reputation === "Gain"
-                          ? "GainedPoint"
-                          : usersInteractions[uname].reputation === "Loss"
-                          ? "LostPoint"
-                          : ""
-                      }
+                      key={cur}
                       sx={{
                         width: "28px",
                         height: "28px",
-                        cursor: "pointer",
-                        // display: "inline-block",
                         position: "absolute",
-                        left: "0px",
-                        bottom: "0px",
-                        transition: "all 0.2s 0s ease",
-                        transform: `translate(-50%, ${seekPosition}px)`,
-                        "& > .user-image": {
-                          borderRadius: "50%",
-                          overflow: "hidden",
-                          width: "28px",
-                          height: "28px",
-                        },
-                        "&.GainedPoint": {
-                          "& > .user-image": {
-                            boxShadow: "1px 1px 13px 4px rgba(21, 255, 0, 1)",
-                          },
-                        },
-                        "&.LostPoint": {
-                          "& > .user-image": {
-                            boxShadow: "1px 1px 13px 4px rgba(255, 0, 0, 1)",
-                          },
-                        },
-                        "@keyframes slidein": {
-                          from: {
-                            transform: "translateY(0%)",
-                          },
-                          to: {
-                            transform: "translateY(100%)",
-                          },
-                        },
+                        transform: `translate(-50%, ${cur * 10}px)`,
+                        borderRadius: "50%",
+                        background: theme => (theme.palette.mode === "dark" ? "#575757ff" : "#d4d4d4"),
                       }}
+                    />
+                  );
+                })}
+              {!disabled &&
+                unames.map((uname: string) => {
+                  const seekPosition = -1 * ((usersInteractions[uname].count / maxActions) * barHeight - 32);
+                  return (
+                    <Tooltip
+                      key={uname}
+                      title={
+                        <Box sx={{ textAlign: "center" }}>
+                          <Box component={"span"}>
+                            {usersInteractions[uname].chooseUname ? uname : usersInteractions[uname].fullname}
+                          </Box>
+                          {authEmail === "oneweb@umich.edu" && (
+                            <Box component={"p"} sx={{ my: 0 }}>
+                              {usersInteractions[uname].email}
+                            </Box>
+                          )}
+                          <Box component={"p"} sx={{ my: 0 }}>
+                            {usersInteractions[uname].count} Interaction{usersInteractions[uname].count > 1 ? "s" : ""}
+                          </Box>
+                        </Box>
+                      }
                     >
                       <Box
+                        onClick={() =>
+                          openUserInfoSidebar(
+                            uname,
+                            usersInteractions[uname].imageUrl,
+                            usersInteractions[uname].fullname,
+                            usersInteractions[uname].chooseUname ? "1" : ""
+                          )
+                        }
+                        className={
+                          usersInteractions[uname].reputation === "Gain"
+                            ? "GainedPoint"
+                            : usersInteractions[uname].reputation === "Loss"
+                            ? "LostPoint"
+                            : ""
+                        }
                         sx={{
-                          display: isInitialized ? "block" : "none",
+                          width: "28px",
+                          height: "28px",
+                          cursor: "pointer",
+                          // display: "inline-block",
                           position: "absolute",
-                          bottom: "6px",
-                          left: "-16px",
+                          left: "0px",
+                          bottom: "0px",
+                          transition: "all 0.2s 0s ease",
+                          transform: `translate(-50%, ${seekPosition}px)`,
+                          "& > .user-image": {
+                            borderRadius: "50%",
+                            overflow: "hidden",
+                            width: "28px",
+                            height: "28px",
+                          },
+                          "&.GainedPoint": {
+                            "& > .user-image": {
+                              boxShadow: "1px 1px 13px 4px rgba(21, 255, 0, 1)",
+                            },
+                          },
+                          "&.LostPoint": {
+                            "& > .user-image": {
+                              boxShadow: "1px 1px 13px 4px rgba(255, 0, 0, 1)",
+                            },
+                          },
+                          "@keyframes slidein": {
+                            from: {
+                              transform: "translateY(0%)",
+                            },
+                            to: {
+                              transform: "translateY(100%)",
+                            },
+                          },
                         }}
                       >
-                        {usersInteractions[uname].actions.map((action, index) => {
-                          return <MemoizedActionBubble key={index} actionType={action} />;
-                        })}
+                        <Box
+                          sx={{
+                            display: isInitialized ? "block" : "none",
+                            position: "absolute",
+                            bottom: "6px",
+                            left: "-16px",
+                          }}
+                        >
+                          {usersInteractions[uname].actions.map((action, index) => {
+                            return <MemoizedActionBubble key={index} actionType={action} />;
+                          })}
+                        </Box>
+                        <Box className="user-image">
+                          <Image src={usersInteractions[uname].imageUrl} width={28} height={28} objectFit="cover" />
+                        </Box>
+                        <Box
+                          className={onlineUsers.includes(uname) ? "UserStatusOnlineIcon" : "UserStatusOfflineIcon"}
+                        />
                       </Box>
-                      <Box className="user-image">
-                        <Image src={usersInteractions[uname].imageUrl} width={28} height={28} objectFit="cover" />
-                      </Box>
-                      <Box className={onlineUsers.includes(uname) ? "UserStatusOnlineIcon" : "UserStatusOfflineIcon"} />
-                    </Box>
-                  </Tooltip>
-                );
-              })}
+                    </Tooltip>
+                  );
+                })}
             </Box>
           </Box>
           <Box
