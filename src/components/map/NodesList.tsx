@@ -52,6 +52,7 @@ type NodeListProps = {
   setOperation: (operation: string) => void;
   openUserInfoSidebar: (uname: string, imageUrl: string, fullName: string, chooseUname: string) => void;
   disabledNodes: string[];
+  enableChildElements?: string[];
 };
 
 const NodesList = ({
@@ -99,6 +100,7 @@ const NodesList = ({
   setOperation,
   openUserInfoSidebar,
   disabledNodes = [],
+  enableChildElements = [],
 }: NodeListProps) => {
   const { nodeBookState } = useNodeBook();
 
@@ -240,6 +242,7 @@ const NodesList = ({
             institutions={nodes[nId].institutions}
             openUserInfoSidebar={openUserInfoSidebar}
             disabled={disabledNodes.includes(nId)}
+            enableChildElements={enableChildElements}
           />
         );
       })}

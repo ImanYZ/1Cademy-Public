@@ -7,6 +7,21 @@ export const INITIAL_NODE_TUTORIAL_STATE: TutorialState = null;
 
 const STEPS_LENGHT = 10;
 
+/**
+Ex for Node id elements to disable
+  "01-close-button",
+  "01-open-button",
+  "01-hide-offsprings-button",
+  "01-hide-button",
+  "01-node-footer-user",
+  "01-node-footer-propose",
+  "01-node-footer-downvotes",
+  "01-node-footer-upvotes",
+  "01-node-footer-tags-citations",
+  "01-button-parent-children",
+  "01-node-footer-ellipsis", 
+ */
+
 export function nodeTutorialReducer(state: TutorialState, action: DispatchNodeTutorialAction): TutorialState {
   console.log("set difeault step");
 
@@ -27,7 +42,19 @@ export function nodeTutorialReducer(state: TutorialState, action: DispatchNodeTu
           </Typography>
         ),
         disabledElements: ["TOOLBAR", "01"],
-        enableChildElements: [],
+        enableChildElements: [
+          "01-close-button",
+          "01-open-button",
+          "01-hide-offsprings-button",
+          "01-hide-button",
+          "01-node-footer-user",
+          "01-node-footer-propose",
+          "01-node-footer-downvotes",
+          "01-node-footer-upvotes",
+          "01-node-footer-tags-citations",
+          "01-button-parent-children",
+          "01-node-footer-ellipsis",
+        ],
         targetId: "01",
         anchor: "",
         currentStepName: "default",
