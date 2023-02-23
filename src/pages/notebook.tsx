@@ -65,6 +65,7 @@ import { addSuffixToUrlGMT } from "@/lib/utils/string.utils";
 
 import LoadingImg from "../../public/animated-icon-1cademy.gif";
 import focusViewLogo from "../../public/focus.svg";
+import focusViewDarkLogo from "../../public/focus-dark.svg";
 // import nodesData from "../../testUtils/mockCollections/nodes.data";
 import { Tutorial } from "../components/interactiveTutorial/Tutorial";
 import { MemoizedClustersList } from "../components/map/ClustersList";
@@ -4339,7 +4340,12 @@ const Dashboard = ({}: DashboardProps) => {
                 setFocusView({ isEnabled: true, selectedNode: nodeBookState.selectedNode || "" });
               }}
             >
-              <NextImage src={focusViewLogo} alt="logo 1cademy" width="24px" height="24px" />
+              <NextImage
+                src={theme.palette.mode === "light" ? focusViewLogo : focusViewDarkLogo}
+                alt="logo 1cademy"
+                width="24px"
+                height="24px"
+              />
             </IconButton>
           </Tooltip>
           {/* end Data from map */}
