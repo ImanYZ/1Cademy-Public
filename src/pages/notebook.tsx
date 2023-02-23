@@ -2239,15 +2239,8 @@ const Dashboard = ({}: DashboardProps) => {
       if (notebookRef.current.choosingNode) return;
 
       notebookRef.current.selectedNode = nodeId;
-      // start tutorial
-      if (isPlayingTheTutorialRef.current) {
-        setGraph(({ nodes: oldNodes, edges }) => {
-          const thisNode: FullNodeData = oldNodes[nodeId];
-          return { nodes: { ...oldNodes, [nodeId]: { ...thisNode, open: !thisNode.open } }, edges };
-        });
-        return;
-      }
-      // end tutorial
+
+      if (isPlayingTheTutorialRef.current) return;
 
       lastNodeOperation.current = "ToggleNode";
       setGraph(({ nodes: oldNodes, edges }) => {

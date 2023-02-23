@@ -46,7 +46,7 @@ export function nodeTutorialReducer(
   state: TutorialState,
   { payload, ...action }: DispatchNodeTutorialAction
 ): TutorialState {
-  console.log("set difeault step", state?.targetId, state?.childTargetId);
+  console.log({ state, payload });
 
   if (state && state.childTargetId) {
     const element = document.getElementById(state.childTargetId);
@@ -225,7 +225,7 @@ export function nodeTutorialReducer(
       return {
         localSnapshot: [
           // { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["00"], nodeChangeType: "removed", open: false },
-          // { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["01"], nodeChangeType: "added", open: true },
+          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["01"], nodeChangeType: "modified", open: true },
         ],
         childTargetId: "01-close-button",
         title: "Nodes - Node Header",
@@ -246,12 +246,44 @@ export function nodeTutorialReducer(
         targetId: "01",
         anchor: "",
         currentStepName: action.type,
-        nextStepName: getNextStep(action.type),
+        nextStepName: 6.5,
         previosStepName: getPrevStep(action.type),
         tooltipPosition: "top",
         stepNumber: action.type,
         stepLenght: STEPS_LENGHT,
-        isClickeable: false,
+        isClickeable: true,
+      };
+    case 6.5:
+      return {
+        localSnapshot: [
+          // { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["00"], nodeChangeType: "removed", open: false },
+          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["01"], nodeChangeType: "modified", open: false },
+        ],
+        childTargetId: "01-close-button",
+        title: "Nodes - Node Header",
+        description: (
+          <Typography variant="body1" sx={{ mb: "16px" }}>
+            expand
+          </Typography>
+        ),
+        disabledElements: [
+          "TOOLBAR",
+          "01",
+          "LIVENESS_BAR",
+          "COMMUNITY_LEADERBOARD",
+          "SCROLL_TO_NODE_BUTTON",
+          "FOCUS_MODE_BUTTON",
+        ],
+        enableChildElements: ["01-close-button"],
+        targetId: "01",
+        anchor: "",
+        currentStepName: action.type,
+        nextStepName: 7,
+        previosStepName: 6,
+        tooltipPosition: "top",
+        stepNumber: action.type,
+        stepLenght: STEPS_LENGHT,
+        isClickeable: true,
       };
     case 7:
       return {
@@ -279,7 +311,7 @@ export function nodeTutorialReducer(
         anchor: "",
         currentStepName: action.type,
         nextStepName: getNextStep(action.type),
-        previosStepName: getPrevStep(action.type),
+        previosStepName: 6.5,
         tooltipPosition: "top",
         stepNumber: action.type,
         stepLenght: STEPS_LENGHT,
