@@ -1,6 +1,8 @@
 import { Box, Button, Stack, Typography } from "@mui/material";
 import React, { useMemo, useRef } from "react";
 
+import { orange25, orange200 } from "@/pages/home";
+
 import { TargetClientRect } from "../../hooks/useInteractiveTutorial";
 import { SetStepType, TutorialState } from "../../nodeBookTypes";
 
@@ -113,37 +115,37 @@ export const Tutorial = ({ tutorialState, targetClientRect, onChangeStep }: Tuto
         left: `${tooltipClientRect.left}px`,
         transition: "top 1s ease-out,left 1s ease-out",
         width: "450px",
-        backgroundColor: theme => (theme.palette.mode === "dark" ? "#3F3E3E" : "#f8f8f8"),
-        border: `2px solid #FF6D00`,
+        backgroundColor: theme => (theme.palette.mode === "dark" ? "#353535" : orange25),
+        border: theme => `2px solid ${theme.palette.mode === "dark" ? "#816247" : orange200}`,
         p: "24px 32px",
         borderRadius: "8px",
         color: "white",
         zIndex: 99999,
+
         //   pointerEvents: "none",
       }}
     >
-      <Typography component={"h2"} sx={{ fontSize: "18px", fontWeight: "bold", mb: "8px" }}>
-        {tutorialState.title}
-      </Typography>
-      {tutorialState.description}
-      <Stack direction={"row"} alignItems="center" justifyContent={"space-between"} spacing={"16px"}>
-        <Typography sx={{ fontWeight: 300 }}>
+      <Stack direction={"row"} justifyContent="space-between">
+        <Typography component={"h2"} sx={{ fontSize: "18px", fontWeight: "bold", mb: "8px", display: "inline-block" }}>
+          {tutorialState.title}
+        </Typography>
+        <Typography sx={{ display: "inline-block", color: "#818181" }}>
           {tutorialState.stepNumber} / {tutorialState.stepLenght}
         </Typography>
+      </Stack>
+      {tutorialState.description}
+      <Stack direction={"row"} justifyContent={"space-between"} alignItems={"center"}>
+        <Button
+          variant="text"
+          onClick={() => onChangeStep(null)}
+          sx={{
+            borderRadius: "32px",
+            p: "8px 0px",
+          }}
+        >
+          Skip
+        </Button>
         <Box>
-          <Button
-            variant="contained"
-            onClick={() => onChangeStep(null)}
-            sx={{
-              borderRadius: "32px",
-              p: "8px 32px",
-              mr: "16px",
-              backgroundColor: "#FF6D00",
-              ":hover": { backgroundColor: "#f57a1c" },
-            }}
-          >
-            Skip
-          </Button>
           <Button
             variant="outlined"
             onClick={() => onChangeStep(tutorialState.previosStepName)}
@@ -151,12 +153,6 @@ export const Tutorial = ({ tutorialState, targetClientRect, onChangeStep }: Tuto
               borderRadius: "32px",
               mr: "16px",
 
-              borderColor: theme => (theme.palette.mode === "dark" ? "white" : "black"),
-              color: theme => (theme.palette.mode === "dark" ? "white" : "black"),
-              ":hover": {
-                borderColor: theme => (theme.palette.mode === "dark" ? "white" : "black"),
-                color: theme => (theme.palette.mode === "dark" ? "white" : "black"),
-              },
               p: "8px 32px",
             }}
           >
