@@ -141,7 +141,7 @@ type BubbleStatsData = {
 export type TrendStats = {
   childProposals: Trends[];
   editProposals: Trends[];
-  links: Trends[];
+  proposedLinks: Trends[];
   nodes: Trends[];
   votes: Trends[];
   questions: Trends[];
@@ -224,7 +224,7 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
   const [trendStats, setTrendStats] = useState<TrendStats>({
     childProposals: [],
     editProposals: [],
-    links: [],
+    proposedLinks: [],
     nodes: [],
     votes: [],
     questions: [],
@@ -400,7 +400,14 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
       const userDailyStatDoc = await getDocs(q);
 
       if (!userDailyStatDoc.docs.length) {
-        setTrendStats({ childProposals: [], editProposals: [], links: [], nodes: [], votes: [], questions: [] });
+        setTrendStats({
+          childProposals: [],
+          editProposals: [],
+          proposedLinks: [],
+          nodes: [],
+          votes: [],
+          questions: [],
+        });
         setBoxStats({
           proposalsPoints: { data: {}, min: 0, max: 1000 },
           questionsPoints: { data: {}, min: 0, max: 1000 },
@@ -430,7 +437,7 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
           return {
             childProposals: [...a.childProposals, { date: new Date(c.date), num: c.value.childProposals }],
             editProposals: [...a.editProposals, { date: new Date(c.date), num: c.value.editProposals }],
-            links: [...a.links, { date: new Date(c.date), num: c.value.links }],
+            proposedLinks: [...a.proposedLinks, { date: new Date(c.date), num: c.value.links }],
             nodes: [...a.nodes, { date: new Date(c.date), num: c.value.nodes }],
             questions: [...a.questions, { date: new Date(c.date), num: c.value.questions }],
             votes: [...a.votes, { date: new Date(c.date), num: c.value.votes }],
@@ -439,7 +446,7 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
         {
           childProposals: [],
           editProposals: [],
-          links: [],
+          proposedLinks: [],
           nodes: [],
           questions: [],
           votes: [],
@@ -492,7 +499,7 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
       setTrendStats({
         childProposals: semesterConfig?.isProposalRequired ? makeTrendData(userDailyStats, "newNodes") : [],
         editProposals: semesterConfig?.isProposalRequired ? makeTrendData(userDailyStats, "editProposals") : [],
-        links: makeTrendData(userDailyStats, "links"),
+        proposedLinks: makeTrendData(userDailyStats, "links"),
         nodes: makeTrendData(userDailyStats, "proposals"),
         votes: semesterConfig?.isCastingVotesRequired ? makeTrendData(userDailyStats, "votes") : [],
         questions: semesterConfig?.isQuestionProposalRequired ? makeTrendData(userDailyStats, "questions") : [],
