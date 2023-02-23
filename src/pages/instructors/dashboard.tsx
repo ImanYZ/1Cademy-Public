@@ -425,33 +425,6 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
       }
     });
     return () => snapShotFunc();
-
-    // const getSemesterStudents = async () => {
-    //   const semesterRef = doc(db, "semesters", currentSemester.tagId);
-
-    //   const semesterDoc = await getDoc(semesterRef);
-    //   if (!semesterDoc.exists()) {
-    //     setSemesterConfig(null);
-    //     setStudentsCounter(0);
-    //     setStudents(null);
-    //     setMaxProposalsPoints(0);
-    //     setMaxQuestionsPoints(0);
-    //     setThereIsData(false);
-
-    //     return;
-    //   }
-
-    //   const { maxProposalsPoints, maxQuestionsPoints } = getMaxProposalsQuestionsPoints(
-    //     semesterDoc.data() as ISemester
-    //   );
-    //   setSemesterConfig(semesterDoc.data() as ISemester);
-    //   setStudentsCounter((semesterDoc.data() as ISemester).students.length);
-    //   setMaxProposalsPoints(maxProposalsPoints);
-    //   setMaxQuestionsPoints(maxQuestionsPoints);
-    //   setStudents(semesterDoc.data().students);
-    //   setThereIsData(true);
-    // };
-    // getSemesterStudents();
   }, [currentSemester, db]);
 
   useEffect(() => {
