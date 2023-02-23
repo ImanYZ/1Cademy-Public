@@ -117,7 +117,7 @@ export function nodeTutorialReducer(
         title: "Nodes - Node Header",
         description: (
           <Typography variant="body1" sx={{ mb: "16px" }}>
-            In the header are four buttons.
+            In the header are three buttons.
           </Typography>
         ),
         disabledElements: ["TOOLBAR", "01", "LIVENESS_BAR", "COMMUNITY_LEADERBOARD"],
@@ -214,7 +214,7 @@ export function nodeTutorialReducer(
           // { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["00"], nodeChangeType: "removed", open: false },
           { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["01"], nodeChangeType: "modified", open: true },
         ],
-        childTargetId: "01-node-title",
+        childTargetId: "01-node-body",
         title: "Nodes - Node Body",
         description: (
           <Typography variant="body1" sx={{ mb: "16px" }}>

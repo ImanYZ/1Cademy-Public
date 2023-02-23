@@ -717,22 +717,23 @@ const Node = ({
                 // sx={{ position: "absolute", right: "10px", top: "0px" }}
               />
             )}
-            <Editor
-              id={`${identifier}-node-title`}
-              label="Enter the node title:"
-              value={titleCopy}
-              setValue={onSetTitle}
-              onBlurCallback={onBlurNodeTitle}
-              readOnly={!editable}
-              sxPreview={{ fontSize: "25px", fontWeight: 300 }}
-              error={error ? true : false}
-              helperText={error ? error : ""}
-              showEditPreviewSection={false}
-              editOption={option}
-            />
-            {editable && <Box sx={{ mb: "12px" }}></Box>}
-            {/* </div> */}
-            <div className="NodeContent" data-hoverable={true}>
+
+            <div id={`${identifier}-node-body`} className="NodeContent" data-hoverable={true}>
+              <Editor
+                id={`${identifier}-node-title`}
+                label="Enter the node title:"
+                value={titleCopy}
+                setValue={onSetTitle}
+                onBlurCallback={onBlurNodeTitle}
+                readOnly={!editable}
+                sxPreview={{ fontSize: "25px", fontWeight: 300 }}
+                error={error ? true : false}
+                helperText={error ? error : ""}
+                showEditPreviewSection={false}
+                editOption={option}
+              />
+              {editable && <Box sx={{ mb: "12px" }}></Box>}
+              {/* </div> */}
               <Editor
                 id={`${identifier}-node-content`}
                 label="Edit the node content:"
@@ -957,70 +958,70 @@ const Node = ({
                   <Box sx={{ mb: "12px" }}></Box>
                 </>
               )}
-              <MemoizedNodeFooter
-                open={true}
-                addVideo={addVideo}
-                setAddVideo={setAddVideo}
-                identifier={identifier}
-                activeNode={activeNode}
-                citationsSelected={citationsSelected}
-                proposalsSelected={proposalsSelected}
-                acceptedProposalsSelected={acceptedProposalsSelected}
-                commentsSelected={commentsSelected}
-                editable={editable}
-                setNodeParts={setNodeParts}
-                title={title}
-                content={content}
-                unaccepted={unaccepted}
-                openPart={openPart}
-                nodeType={nodeType}
-                isNew={isNew}
-                admin={admin}
-                aImgUrl={aImgUrl}
-                aFullname={aFullname}
-                aChooseUname={aChooseUname}
-                viewers={viewers}
-                correctNum={correctNum}
-                markedCorrect={markedCorrect}
-                wrongNum={wrongNum}
-                markedWrong={markedWrong}
-                references={references}
-                tags={tags}
-                parents={parents}
-                nodesChildren={nodesChildren}
-                commentsNum={commentsNum}
-                proposalsNum={proposalsNum}
-                studied={studied}
-                isStudied={isStudied}
-                changed={changed}
-                changedAt={changedAt}
-                simulated={simulated}
-                bookmarked={bookmarked}
-                bookmarks={bookmarks}
-                reloadPermanentGrpah={reloadPermanentGrpah}
-                onNodeShare={onNodeShare}
-                markStudied={markStudiedHandler}
-                bookmark={bookmarkHandler}
-                openNodePart={openNodePartHandler}
-                selectNode={selectNodeHandler}
-                correctNode={correctNodeHandler}
-                wrongNode={wrongNodeHandler}
-                disableVotes={disableVotes}
-                uploadNodeImage={uploadNodeImageHandler}
-                user={user}
-                citations={citations}
-                setOpenSideBar={setOpenSideBar}
-                locked={locked}
-                openSidebar={openSidebar}
-                contributors={contributors}
-                institutions={institutions}
-                openUserInfoSidebar={openUserInfoSidebar}
-                proposeNodeImprovement={proposeNodeImprovement}
-                setOperation={setOperation}
-                disabled={disabled}
-                enableChildElements={enableChildElements}
-              />
             </div>
+            <MemoizedNodeFooter
+              open={true}
+              addVideo={addVideo}
+              setAddVideo={setAddVideo}
+              identifier={identifier}
+              activeNode={activeNode}
+              citationsSelected={citationsSelected}
+              proposalsSelected={proposalsSelected}
+              acceptedProposalsSelected={acceptedProposalsSelected}
+              commentsSelected={commentsSelected}
+              editable={editable}
+              setNodeParts={setNodeParts}
+              title={title}
+              content={content}
+              unaccepted={unaccepted}
+              openPart={openPart}
+              nodeType={nodeType}
+              isNew={isNew}
+              admin={admin}
+              aImgUrl={aImgUrl}
+              aFullname={aFullname}
+              aChooseUname={aChooseUname}
+              viewers={viewers}
+              correctNum={correctNum}
+              markedCorrect={markedCorrect}
+              wrongNum={wrongNum}
+              markedWrong={markedWrong}
+              references={references}
+              tags={tags}
+              parents={parents}
+              nodesChildren={nodesChildren}
+              commentsNum={commentsNum}
+              proposalsNum={proposalsNum}
+              studied={studied}
+              isStudied={isStudied}
+              changed={changed}
+              changedAt={changedAt}
+              simulated={simulated}
+              bookmarked={bookmarked}
+              bookmarks={bookmarks}
+              reloadPermanentGrpah={reloadPermanentGrpah}
+              onNodeShare={onNodeShare}
+              markStudied={markStudiedHandler}
+              bookmark={bookmarkHandler}
+              openNodePart={openNodePartHandler}
+              selectNode={selectNodeHandler}
+              correctNode={correctNodeHandler}
+              wrongNode={wrongNodeHandler}
+              disableVotes={disableVotes}
+              uploadNodeImage={uploadNodeImageHandler}
+              user={user}
+              citations={citations}
+              setOpenSideBar={setOpenSideBar}
+              locked={locked}
+              openSidebar={openSidebar}
+              contributors={contributors}
+              institutions={institutions}
+              openUserInfoSidebar={openUserInfoSidebar}
+              proposeNodeImprovement={proposeNodeImprovement}
+              setOperation={setOperation}
+              disabled={disabled}
+              enableChildElements={enableChildElements}
+            />
           </div>
           {(openPart === "LinkingWords" || openPart === "Tags" || openPart === "References") && (
             <LinkingWords
