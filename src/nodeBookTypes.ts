@@ -204,6 +204,7 @@ export type SetStepType =
   | 4
   | 5
   | 6
+  | 6.5
   | 7
   | 8
   | 9

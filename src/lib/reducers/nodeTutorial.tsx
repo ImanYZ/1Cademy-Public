@@ -51,7 +51,8 @@ export function nodeTutorialReducer(
   if (state && state.childTargetId) {
     const element = document.getElementById(state.childTargetId);
     if (element) {
-      element.style.outline = "none";
+      // element.style.outline = "none";
+      element.classList.remove("tutorial-pulse");
     }
   }
   if (payload.callback) payload?.callback();
@@ -225,7 +226,7 @@ export function nodeTutorialReducer(
       return {
         localSnapshot: [
           // { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["00"], nodeChangeType: "removed", open: false },
-          // { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["01"], nodeChangeType: "added", open: true },
+          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["01"], nodeChangeType: "added", open: true },
         ],
         childTargetId: "01-close-button",
         title: "Nodes - Node Header",
@@ -246,12 +247,44 @@ export function nodeTutorialReducer(
         targetId: "01",
         anchor: "",
         currentStepName: action.type,
-        nextStepName: getNextStep(action.type),
-        previosStepName: getPrevStep(action.type),
+        nextStepName: 6.5,
+        previosStepName: 5,
         tooltipPosition: "top",
         stepNumber: action.type,
         stepLenght: STEPS_LENGHT,
-        isClickeable: false,
+        isClickeable: true,
+      };
+    case 6.5:
+      return {
+        localSnapshot: [
+          // { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["00"], nodeChangeType: "removed", open: false },
+          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["01"], nodeChangeType: "added", open: false },
+        ],
+        childTargetId: "01-close-button",
+        title: "Nodes - Node Header",
+        description: (
+          <Typography variant="body1" sx={{ mb: "16px" }}>
+            This one minimizes the content in a node so only the title is displayed.
+          </Typography>
+        ),
+        disabledElements: [
+          "TOOLBAR",
+          "01",
+          "LIVENESS_BAR",
+          "COMMUNITY_LEADERBOARD",
+          "SCROLL_TO_NODE_BUTTON",
+          "FOCUS_MODE_BUTTON",
+        ],
+        enableChildElements: ["01-close-button"],
+        targetId: "01",
+        anchor: "",
+        currentStepName: action.type,
+        nextStepName: 7,
+        previosStepName: 6,
+        tooltipPosition: "top",
+        stepNumber: action.type,
+        stepLenght: STEPS_LENGHT,
+        isClickeable: true,
       };
     case 7:
       return {
@@ -279,7 +312,7 @@ export function nodeTutorialReducer(
         anchor: "",
         currentStepName: action.type,
         nextStepName: getNextStep(action.type),
-        previosStepName: getPrevStep(action.type),
+        previosStepName: 6.5,
         tooltipPosition: "top",
         stepNumber: action.type,
         stepLenght: STEPS_LENGHT,

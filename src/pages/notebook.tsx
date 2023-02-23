@@ -468,7 +468,9 @@ const Dashboard = ({}: DashboardProps) => {
 
       if (!targetElement) return;
 
-      targetElement.style.outline = "2px solid #FF6D00";
+      // targetElement.style.outline = "2px solid #FF6D00";
+      targetElement.classList.add("tutorial-pulse");
+
       const { width, height, top, left } = targetElement.getBoundingClientRect();
 
       setTargetClientRect({ width, height, top, left });
@@ -484,7 +486,8 @@ const Dashboard = ({}: DashboardProps) => {
       if (stateNodeTutorial.childTargetId) {
         const targetElement = document.getElementById(stateNodeTutorial.childTargetId);
         if (!targetElement) return;
-        targetElement.style.outline = "2px solid #FF6D00";
+        // targetElement.style.outline = "2px solid #FF6D00";
+        targetElement.classList.add("tutorial-pulse");
 
         const { offsetTop, offsetLeft } = targetElement;
         const { height: childrenHeight, width: childrenWidth } = targetElement.getBoundingClientRect();
@@ -2241,10 +2244,10 @@ const Dashboard = ({}: DashboardProps) => {
       notebookRef.current.selectedNode = nodeId;
       // start tutorial
       if (isPlayingTheTutorialRef.current) {
-        setGraph(({ nodes: oldNodes, edges }) => {
-          const thisNode: FullNodeData = oldNodes[nodeId];
-          return { nodes: { ...oldNodes, [nodeId]: { ...thisNode, open: !thisNode.open } }, edges };
-        });
+        // setGraph(({ nodes: oldNodes, edges }) => {
+        //   const thisNode: FullNodeData = oldNodes[nodeId];
+        //   return { nodes: { ...oldNodes, [nodeId]: { ...thisNode, open: !thisNode.open } }, edges };
+        // });
         return;
       }
       // end tutorial

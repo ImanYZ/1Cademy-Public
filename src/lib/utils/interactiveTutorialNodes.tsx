@@ -689,20 +689,7 @@ export const INTERACTIVE_TUTORIAL_NOTEBOOK_NODES: FullNodesData = {
     maxVersionRating: 4,
     references: [],
     studied: 3,
-    parents: [
-      {
-        label: "",
-        title: "1Cademy",
-        type: "Concept",
-        node: "r98BjyFDCe4YyLA3U8ZE",
-      },
-      {
-        node: "rWYUNisPIVMBoQEYXgNj",
-        label: "",
-        title: "1Cademy Shared Knowledge Graph",
-        type: "Concept",
-      },
-    ],
+    parents: [],
     aImgUrl:
       "https://firebasestorage.googleapis.com/v0/b/onecademy-1.appspot.com/o/ProfilePictures%2F1man_Thu%2C%2006%20Feb%202020%2016%3A26%3A40%20GMT.png?alt=media&token=94459dbb-81f9-462a-83ef-62d1129f5851",
     wrongs: 3,
