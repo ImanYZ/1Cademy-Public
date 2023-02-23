@@ -1960,7 +1960,7 @@ const Dashboard = ({}: DashboardProps) => {
   const openLinkedNode = useCallback(
     (linkedNodeID: string, typeOperation?: string) => {
       devLog("open Linked Node", { linkedNodeID, typeOperation });
-      if (!notebookRef.current.choosingNode) return;
+      if (notebookRef.current.choosingNode) return;
 
       // start tutorial
       if (isPlayingTheTutorialRef.current) {
