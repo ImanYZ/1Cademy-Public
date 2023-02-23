@@ -3939,7 +3939,7 @@ const Dashboard = ({}: DashboardProps) => {
     },
     [nodeBookDispatch]
   );
-
+  // console.log({ nodeBookState });
   return (
     <div className="MapContainer" style={{ overflow: "hidden" }}>
       {stateNodeTutorial?.anchor && (
@@ -4199,31 +4199,40 @@ const Dashboard = ({}: DashboardProps) => {
             />
           )}
           {nodeBookState.selectedNode && (
-            <Tooltip
-              title="Scroll to last Selected Node"
-              placement="left"
-              sx={{
-                position: "fixed",
-                top: {
-                  xs: !openSidebar
-                    ? "10px"
-                    : openSidebar && openSidebar !== "SEARCHER_SIDEBAR"
-                    ? `${innerHeight * 0.35 + 10}px`
-                    : `${innerHeight * 0.25 + 10}px`,
-                  sm: "10px",
-                },
-                right: "10px",
-                zIndex: "1300",
-                background: theme => (theme.palette.mode === "dark" ? "#1f1f1f" : "#f0f0f0"),
-                ":hover": {
-                  background: theme => (theme.palette.mode === "dark" ? "#454545" : "#d6d4d4"),
-                },
-                transition: "all 1s ease",
-              }}
-            >
-              <IconButton color="secondary" onClick={onScrollToLastNode}>
+            <Tooltip title="Scroll to last Selected Node" placement="left">
+              {/* <span> */}
+              <IconButton
+                color="secondary"
+                onClick={onScrollToLastNode}
+                disabled={stateNodeTutorial?.disabledElements.includes("SCROLL_TO_NODE_BUTTON")}
+                sx={{
+                  position: "fixed",
+                  top: {
+                    xs: !openSidebar
+                      ? "10px"
+                      : openSidebar && openSidebar !== "SEARCHER_SIDEBAR"
+                      ? `${innerHeight * 0.35 + 10}px`
+                      : `${innerHeight * 0.25 + 10}px`,
+                    sm: "10px",
+                  },
+                  right: "10px",
+                  zIndex: "1300",
+
+                  transition: "all 1s ease",
+                  background: theme => (theme.palette.mode === "dark" ? "#1f1f1f" : "#f0f0f0"),
+                  ":hover": {
+                    background: theme => (theme.palette.mode === "dark" ? "#454545" : "#d6d4d4"),
+                  },
+                  ":disabled": {
+                    pointerEvents: "auto!important",
+                    background: theme => (theme.palette.mode === "dark" ? "#1f1f1fb9" : "#f0f0f0be"),
+                    cursor: "not-allowed!important",
+                  },
+                }}
+              >
                 <MyLocationIcon />
               </IconButton>
+              {/* </span> */}
             </Tooltip>
           )}
           <Tooltip
@@ -4310,32 +4319,35 @@ const Dashboard = ({}: DashboardProps) => {
               </IconButton>
             </Tooltip>
           )}
-          <Tooltip
-            title="Focused view for selected node"
-            placement="left"
-            sx={{
-              position: "fixed",
-              top: {
-                xs: !openSidebar
-                  ? "110px"
-                  : openSidebar && openSidebar !== "SEARCHER_SIDEBAR"
-                  ? `${innerHeight * 0.35 + 120}px`
-                  : `${innerHeight * 0.25 + 120}px`,
-                sm: "110px",
-              },
-              right: "10px",
-              zIndex: "1300",
-              background: theme => (theme.palette.mode === "dark" ? "#1f1f1f" : "#f0f0f0"),
-              ":hover": {
-                background: theme => (theme.palette.mode === "dark" ? "#454545" : "#d6d4d4"),
-              },
-              transition: "all 1s ease",
-            }}
-          >
+          <Tooltip title="Focused view for selected node" placement="left">
             <IconButton
               color="secondary"
               onClick={() => {
                 setFocusView({ isEnabled: true, selectedNode: nodeBookState.selectedNode || "" });
+              }}
+              disabled={stateNodeTutorial?.disabledElements.includes("FOCUS_MODE_BUTTON")}
+              sx={{
+                position: "fixed",
+                top: {
+                  xs: !openSidebar
+                    ? "110px"
+                    : openSidebar && openSidebar !== "SEARCHER_SIDEBAR"
+                    ? `${innerHeight * 0.35 + 120}px`
+                    : `${innerHeight * 0.25 + 120}px`,
+                  sm: "110px",
+                },
+                right: "10px",
+                zIndex: "1300",
+                background: theme => (theme.palette.mode === "dark" ? "#1f1f1f" : "#f0f0f0"),
+                ":hover": {
+                  background: theme => (theme.palette.mode === "dark" ? "#454545" : "#d6d4d4"),
+                },
+                transition: "all 1s ease",
+                ":disabled": {
+                  pointerEvents: "auto!important",
+                  background: theme => (theme.palette.mode === "dark" ? "#1f1f1fb9" : "#f0f0f0be"),
+                  cursor: "not-allowed!important",
+                },
               }}
             >
               <NextImage src={focusViewLogo} alt="logo 1cademy" width="24px" height="24px" />
