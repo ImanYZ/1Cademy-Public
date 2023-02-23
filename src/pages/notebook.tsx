@@ -299,9 +299,7 @@ const Dashboard = ({}: DashboardProps) => {
 
   const [nodeTutorial /* setNodeTutorial */] = useState(Boolean(localStorage.getItem("node-tutorial")));
 
-  // const [stateNodeTutorial, dispatchNodeTutorial] = useReducer(nodeTutorialReducer, INITIAL_NODE_TUTORIAL_STATE);
   const { stateNodeTutorial, onChangeStep, isPlayingTheTutorialRef } = useInteractiveTutorial({ notebookRef });
-  console.log("isPlayingTheTutorialRef", isPlayingTheTutorialRef.current);
 
   const onNodeInViewport = useCallback(
     (nodeId: string) => {
@@ -624,10 +622,10 @@ const Dashboard = ({}: DashboardProps) => {
   };
   const openNodeHandler = useMemoizedCallback(
     async (nodeId: string) => {
-      console.log({ nodeId });
+      // console.log({ nodeId });
 
       devLog("open_Node_Handler", nodeId);
-      console.log({ isPlayingTheTutorialRef: isPlayingTheTutorialRef.current });
+      // console.log({ isPlayingTheTutorialRef: isPlayingTheTutorialRef.current });
       // start tutorial
       if (isPlayingTheTutorialRef.current) {
         if (!INTERACTIVE_TUTORIAL_NOTEBOOK_NODES[nodeId]) {
@@ -645,11 +643,11 @@ const Dashboard = ({}: DashboardProps) => {
 
       const nodeRef = doc(db, "nodes", nodeId);
       const nodeDoc = await getDoc(nodeRef);
-      console.log({ nodeDoc });
+      // console.log({ nodeDoc });
       const batch = writeBatch(db);
       if (nodeDoc.exists() && user) {
         const thisNode: any = { ...nodeDoc.data(), id: nodeId };
-        console.log({ thisNode });
+        // console.log({ thisNode });
         try {
           for (let child of thisNode.children) {
             linkedNodeRef = doc(db, "nodes", child.node);
@@ -1271,7 +1269,7 @@ const Dashboard = ({}: DashboardProps) => {
     );
     const bookmarkSnapshot = onSnapshot(q, async snapshot => {
       // console.log("on snapshot");
-      console.log("sn> bookmark");
+      // console.log("sn> bookmark");
       const docChanges = snapshot.docChanges();
 
       if (!docChanges.length) {
