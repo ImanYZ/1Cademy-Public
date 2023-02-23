@@ -414,10 +414,10 @@ export const setDagNodes = (
     individualNodeChanges.forEach(cur => {
       if (!cur?.tagIds?.length) return;
       if (!(cur.tagIds[0] in allTags)) return;
-      console.log("setParent", cur.node, "Tag" + cur.tagIds[0]);
+      // console.log("setParent", cur.node, "Tag" + cur.tagIds[0]);
       g.setParent(cur.node, "Tag" + cur.tagIds[0]);
     });
-    console.log("setDagNodes", g);
+    // console.log("setDagNodes", g);
   }
 
   // if ("tagIds" in node && node.tagIds.length !== 0 && node.tagIds[0] in allTags) {
@@ -430,7 +430,7 @@ export const setDagNodes = (
   // Candidate for removal!
   // copyNode: creates copy of the object
   // copies the other attributes of the node (attributes not necessary for dagre object)
-
+  console.log({ individualNodeChanges });
   const nodesChanges: FullNodesData = individualNodeChanges.reduce((acu, cur) => {
     return { ...acu, [cur.node]: { ...copyNode(cur) } };
   }, oldNodes);
@@ -463,6 +463,8 @@ export const removeDagNode = (g: dagre.graphlib.Graph<{}>, nodeId: string, oldNo
 // edge: data of the new edge
 export const setDagEdge = (g: dagre.graphlib.Graph<{}>, from: string, to: string, edge: any, oldEdges: any) => {
   // checks that the from and to nodes exist in map
+
+  // console.log("---->", g.hasNode(from), g.hasNode(to), { from, to });
   if (g.hasNode(from) && g.hasNode(to)) {
     const edgeId = from + "-" + to;
     const newEdge = { ...edge };
@@ -762,6 +764,7 @@ export const createOrUpdateNode = (
       );
     }
     // creates edges from parent nodes to newNode
+    // console.log("--->", { newNode });
     for (let parent of newNode.parents) {
       oldEdges = setDagEdge(
         g,
@@ -821,7 +824,7 @@ export const createOrUpdateNode = (
 // this works correctly in dashboard with array but,
 // don't work in worker
 export const copyNode = (node: FullNodeData): FullNodeData => {
-  // console.log("\n----->\n -> NODE HERE:", node.parents);
+  console.log("\n----->\n -> NODE HERE:", { ...node });
   let newNode = { ...node };
   newNode.parents = [];
   for (let parent of node.parents) {

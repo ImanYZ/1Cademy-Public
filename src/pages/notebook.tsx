@@ -2,6 +2,7 @@ import AutoFixHighIcon from "@mui/icons-material/AutoFixHigh";
 import CloseIcon from "@mui/icons-material/Close";
 import CodeIcon from "@mui/icons-material/Code";
 import MyLocationIcon from "@mui/icons-material/MyLocation";
+import SchoolIcon from "@mui/icons-material/School";
 import { Masonry } from "@mui/lab";
 import {
   Button,
@@ -54,7 +55,6 @@ import { MemoizedReputationlinessBar } from "@/components/map/Liveliness/Reputat
 import { MemoizedBookmarksSidebar } from "@/components/map/Sidebar/SidebarV2/BookmarksSidebar";
 import { CitationsSidebar } from "@/components/map/Sidebar/SidebarV2/CitationsSidebar";
 import { MemoizedNotificationSidebar } from "@/components/map/Sidebar/SidebarV2/NotificationSidebar";
-import { MemoizedPendingProposalSidebar } from "@/components/map/Sidebar/SidebarV2/PendingProposalSidebar";
 import { MemoizedProposalsSidebar } from "@/components/map/Sidebar/SidebarV2/ProposalsSidebar";
 import { MemoizedSearcherSidebar } from "@/components/map/Sidebar/SidebarV2/SearcherSidebar";
 import { MemoizedUserInfoSidebar } from "@/components/map/Sidebar/SidebarV2/UserInfoSidebar";
@@ -65,12 +65,16 @@ import { addSuffixToUrlGMT } from "@/lib/utils/string.utils";
 
 import LoadingImg from "../../public/animated-icon-1cademy.gif";
 import focusViewLogo from "../../public/focus.svg";
+// import nodesData from "../../testUtils/mockCollections/nodes.data";
+import { Tutorial } from "../components/interactiveTutorial/Tutorial";
 import { MemoizedClustersList } from "../components/map/ClustersList";
 import { MemoizedLinksList } from "../components/map/LinksList";
 import { MemoizedNodeList } from "../components/map/NodesList";
 import { MemoizedToolbarSidebar } from "../components/map/Sidebar/SidebarV2/ToolbarSidebar";
 import { NodeItemDashboard } from "../components/NodeItemDashboard";
+import { Portal } from "../components/Portal";
 import { NodeBookProvider, useNodeBook } from "../context/NodeBookContext";
+import { TargetClientRect, useInteractiveTutorial } from "../hooks/useInteractiveTutorial2";
 import { useMemoizedCallback } from "../hooks/useMemoizedCallback";
 import { useWindowSize } from "../hooks/useWindowSize";
 import { useWorkerQueue } from "../hooks/useWorkerQueue";
@@ -80,6 +84,7 @@ import { Post, postWithToken } from "../lib/mapApi";
 import { createGraph, dagreUtils } from "../lib/utils/dagre.util";
 import { devLog } from "../lib/utils/develop.util";
 import { getTypedCollections } from "../lib/utils/getTypedCollections";
+import { INTERACTIVE_TUTORIAL_NOTEBOOK_NODES } from "../lib/utils/interactiveTutorialNodes";
 import {
   changedNodes,
   citations,
@@ -253,6 +258,11 @@ const Dashboard = ({}: DashboardProps) => {
   const previousLengthEdges = useRef(0);
   const g = useRef(dagreUtils.createGraph());
 
+  // this flag is used in interactive tutorial to fire useEffect when change state
+  const [, /* localSnapshot */ setLocalSnapshot] = useState<FullNodesData>({});
+  const shouldResetGraph = useRef(true);
+  const [targetClientRect, setTargetClientRect] = useState<TargetClientRect>({ width: 0, height: 0, top: 0, left: 0 });
+
   //Notifications
   const [uncheckedNotificationsNum, setUncheckedNotificationsNum] = useState(0);
   const [bookmarkUpdatesNum, setBookmarkUpdatesNum] = useState(0);
@@ -260,6 +270,15 @@ const Dashboard = ({}: DashboardProps) => {
 
   const lastNodeOperation = useRef<string>("");
   const proposalTimer = useRef<any>(null);
+
+  // const {
+  //   setTargetClientRect,
+  //   isPlayingTheTutorial,
+  //   isPlayingTheTutorialRef,
+  //   onStart,
+  //   anchorTutorial,
+  //   targetClientRect,
+  // } = useInteractiveTutorial({ steps: NOTEBOOK_STEPS });
 
   // Scroll to node configs
 
@@ -277,6 +296,12 @@ const Dashboard = ({}: DashboardProps) => {
     selectedNode: "",
     isEnabled: false,
   });
+
+  const [nodeTutorial /* setNodeTutorial */] = useState(Boolean(localStorage.getItem("node-tutorial")));
+
+  // const [stateNodeTutorial, dispatchNodeTutorial] = useReducer(nodeTutorialReducer, INITIAL_NODE_TUTORIAL_STATE);
+  const { stateNodeTutorial, onChangeStep, isPlayingTheTutorialRef } = useInteractiveTutorial({ notebookRef });
+  console.log("isPlayingTheTutorialRef", isPlayingTheTutorialRef.current);
 
   const onNodeInViewport = useCallback(
     (nodeId: string) => {
@@ -388,6 +413,97 @@ const Dashboard = ({}: DashboardProps) => {
     },
     [onNodeInViewport]
   );
+
+  // useEffect(() => {
+  //   if (!currentStep) return setTargetClientRect({ width: 0, height: 0, top: 0, left: 0 });
+
+  //   if (currentStep.anchor) {
+  //     if (!currentStep.targetId) return;
+
+  //     const targetElement = document.getElementById(currentStep.targetId);
+
+  //     if (!targetElement) return;
+
+  //     targetElement.style.border = "4px dashed #ffc813";
+  //     const { width, height, top, left } = targetElement.getBoundingClientRect();
+
+  //     setTargetClientRect({ width, height, top, left });
+  //   } else {
+  //     console.log("----------------- detect client react in interactive map");
+
+  //     const thisNode = graph.nodes[currentStep.targetId];
+  //     if (!thisNode) return;
+
+  //     let { top, left, width = NODE_WIDTH, height = 0 } = thisNode;
+  //     let offsetChildTop = 0;
+  //     let offsetChildLeft = 0;
+  //     if (currentStep.childTargetId) {
+  //       const targetElement = document.getElementById(currentStep.childTargetId);
+  //       if (!targetElement) return;
+  //       targetElement.style.border = "4px dashed #ffc813";
+  //       const { offsetTop, offsetHeight, offsetParent, offsetLeft, offsetWidth } = targetElement;
+  //       const { height: childrenHeight, width: childrenWidth } = targetElement.getBoundingClientRect();
+
+  //       offsetChildTop = offsetTop;
+  //       offsetChildLeft = offsetLeft;
+  //       height = childrenHeight;
+  //       width = childrenWidth;
+  //     }
+
+  //     setTargetClientRect({
+  //       top: top + offsetChildTop,
+  //       left: left + offsetChildLeft,
+  //       width,
+  //       height,
+  //     });
+  //   }
+  // }, [currentStep, graph.nodes, setTargetClientRect]);
+
+  useEffect(() => {
+    if (!stateNodeTutorial) return setTargetClientRect({ width: 0, height: 0, top: 0, left: 0 });
+
+    if (stateNodeTutorial.anchor) {
+      if (!stateNodeTutorial.targetId) return;
+
+      const targetElement = document.getElementById(stateNodeTutorial.targetId);
+
+      if (!targetElement) return;
+
+      targetElement.style.outline = "2px solid #FF6D00";
+      const { width, height, top, left } = targetElement.getBoundingClientRect();
+
+      setTargetClientRect({ width, height, top, left });
+    } else {
+      console.log("----------------- detect client react in interactive map");
+
+      const thisNode = graph.nodes[stateNodeTutorial.targetId];
+      if (!thisNode) return;
+
+      let { top, left, width = NODE_WIDTH, height = 0 } = thisNode;
+      let offsetChildTop = 0;
+      let offsetChildLeft = 0;
+      if (stateNodeTutorial.childTargetId) {
+        const targetElement = document.getElementById(stateNodeTutorial.childTargetId);
+        if (!targetElement) return;
+        targetElement.style.outline = "2px solid #FF6D00";
+
+        const { offsetTop, offsetLeft } = targetElement;
+        const { height: childrenHeight, width: childrenWidth } = targetElement.getBoundingClientRect();
+
+        offsetChildTop = offsetTop;
+        offsetChildLeft = offsetLeft;
+        height = childrenHeight;
+        width = childrenWidth;
+      }
+
+      setTargetClientRect({
+        top: top + offsetChildTop,
+        left: left + offsetChildLeft,
+        width,
+        height,
+      });
+    }
+  }, [stateNodeTutorial, graph.nodes, setTargetClientRect]);
 
   const onCompleteWorker = useCallback(() => {
     if (!nodeBookState.selectedNode) return;
@@ -507,17 +623,32 @@ const Dashboard = ({}: DashboardProps) => {
   };
   const openNodeHandler = useMemoizedCallback(
     async (nodeId: string) => {
+      console.log({ nodeId });
+
       devLog("open_Node_Handler", nodeId);
+      console.log({ isPlayingTheTutorialRef: isPlayingTheTutorialRef.current });
+      // start tutorial
+      if (isPlayingTheTutorialRef.current) {
+        if (!INTERACTIVE_TUTORIAL_NOTEBOOK_NODES[nodeId]) {
+          return console.warn("Dev: you forgot to update Local Tutorial Nodes");
+        }
+        const thisNode = { nodeId: INTERACTIVE_TUTORIAL_NOTEBOOK_NODES[nodeId] };
+        setLocalSnapshot(thisNode);
+        return;
+      }
+      // end tutorial
+
       let linkedNodeRef;
       let userNodeRef = null;
       let userNodeData: UserNodesData | null = null;
 
       const nodeRef = doc(db, "nodes", nodeId);
       const nodeDoc = await getDoc(nodeRef);
-
+      console.log({ nodeDoc });
       const batch = writeBatch(db);
       if (nodeDoc.exists() && user) {
         const thisNode: any = { ...nodeDoc.data(), id: nodeId };
+        console.log({ thisNode });
         try {
           for (let child of thisNode.children) {
             linkedNodeRef = doc(db, "nodes", child.node);
@@ -919,6 +1050,22 @@ const Dashboard = ({}: DashboardProps) => {
   }, [nodeBookDispatch, openSidebar]);
 
   useEffect(() => {
+    if (stateNodeTutorial) return;
+    console.log("effect SNAPSHOTS");
+
+    if (!shouldResetGraph.current) {
+      console.log("RESET GRAPH");
+
+      setGraph({
+        nodes: {},
+        edges: {},
+      });
+      setLocalSnapshot({});
+      shouldResetGraph.current = true;
+      nodeBookDispatch({ type: "setSelectedNode", payload: null });
+      g.current = createGraph();
+    }
+
     if (!db) return;
     if (!user?.uname) return;
     if (!allTagsLoaded) return;
@@ -930,15 +1077,188 @@ const Dashboard = ({}: DashboardProps) => {
       where("visible", "==", true),
       where("deleted", "==", false)
     );
+
     const killSnapshot = snapshot(q);
     return () => {
       killSnapshot();
     };
-  }, [allTagsLoaded, db, snapshot, user?.uname, settings.showClusterOptions, notebookChanged]);
+  }, [allTagsLoaded, db, snapshot, stateNodeTutorial, user?.uname, notebookChanged, nodeBookDispatch]);
+  // }, [allTagsLoaded, db, snapshot, user?.uname, settings.showClusterOptions, notebookChanged]);
+
+  useEffect(() => {
+    // local snapshot used only in interactive tutorial
+    // if (!isPlayingTheTutorial) return;
+    if (!stateNodeTutorial) return;
+    console.log("effect INTERACTICE TUTORIAL");
+
+    if (shouldResetGraph.current) {
+      g.current = createGraph();
+      const FIRST_KEY_NODE = "01";
+      setGraph({
+        nodes: { [FIRST_KEY_NODE]: INTERACTIVE_TUTORIAL_NOTEBOOK_NODES[FIRST_KEY_NODE] },
+        edges: {},
+      });
+      setLocalSnapshot({ [FIRST_KEY_NODE]: INTERACTIVE_TUTORIAL_NOTEBOOK_NODES[FIRST_KEY_NODE] });
+      shouldResetGraph.current = false;
+    }
+
+    const mergeAllNodes = (newAllNodes: FullNodeData[], currentAllNodes: FullNodesData): FullNodesData => {
+      return newAllNodes.reduce(
+        (acu, cur) => {
+          if (cur.nodeChangeType === "added" || cur.nodeChangeType === "modified") {
+            return { ...acu, [cur.node]: cur };
+          }
+          if (cur.nodeChangeType === "removed") {
+            const tmp = { ...acu };
+            delete tmp[cur.node];
+            return tmp;
+          }
+          return acu;
+        },
+        { ...currentAllNodes }
+      );
+    };
+
+    const fillDagre = (fullNodes: FullNodeData[], currentNodes: any, currentEdges: any, withClusters: boolean) => {
+      return fullNodes.reduce(
+        (acu: { newNodes: { [key: string]: any }; newEdges: { [key: string]: any } }, cur) => {
+          let tmpNodes = {};
+          let tmpEdges = {};
+
+          if (cur.nodeChangeType === "added") {
+            const { uNodeData, oldNodes, oldEdges } = makeNodeVisibleInItsLinks(cur, acu.newNodes, acu.newEdges);
+
+            const res = createOrUpdateNode(g.current, uNodeData, cur.node, oldNodes, oldEdges, allTags, withClusters);
+
+            tmpNodes = res.oldNodes;
+            tmpEdges = res.oldEdges;
+          }
+          if (cur.nodeChangeType === "modified" && cur.visible) {
+            const node = acu.newNodes[cur.node];
+            if (!node) {
+              const res = createOrUpdateNode(
+                g.current,
+                cur,
+                cur.node,
+                acu.newNodes,
+                acu.newEdges,
+                allTags,
+                withClusters
+              );
+              tmpNodes = res.oldNodes;
+              tmpEdges = res.oldEdges;
+            } else {
+              const currentNode: FullNodeData = {
+                ...cur,
+                left: node.left,
+                top: node.top,
+              }; // <----- IMPORTANT: Add positions data from node into cur.node to not set default position into center of screen
+
+              if (!compare2Nodes(cur, node)) {
+                const res = createOrUpdateNode(
+                  g.current,
+                  currentNode,
+                  cur.node,
+                  acu.newNodes,
+                  acu.newEdges,
+                  allTags,
+                  withClusters
+                );
+                tmpNodes = res.oldNodes;
+                tmpEdges = res.oldEdges;
+              }
+            }
+          }
+          // so the NO visible nodes will come as modified and !visible
+          if (cur.nodeChangeType === "removed" || (cur.nodeChangeType === "modified" && !cur.visible)) {
+            if (g.current.hasNode(cur.node)) {
+              g.current.nodes().forEach(function () {});
+              g.current.edges().forEach(function () {});
+              // PROBABLY you need to add hideNodeAndItsLinks, to update children and parents nodes
+
+              // !IMPORTANT, Don't change the order, first remove edges then nodes
+              tmpEdges = removeDagAllEdges(g.current, cur.node, acu.newEdges);
+              tmpNodes = removeDagNode(g.current, cur.node, acu.newNodes);
+            } else {
+              // remove edges
+              const oldEdges = { ...acu.newEdges };
+
+              Object.keys(oldEdges).forEach(key => {
+                if (key.includes(cur.node)) {
+                  delete oldEdges[key];
+                }
+              });
+
+              tmpEdges = oldEdges;
+              // remove node
+              const oldNodes = acu.newNodes;
+              if (cur.node in oldNodes) {
+                delete oldNodes[cur.node];
+              }
+              // tmpEdges = {acu.newEdges,}
+              tmpNodes = { ...oldNodes };
+            }
+          }
+
+          return {
+            newNodes: { ...tmpNodes },
+            newEdges: { ...tmpEdges },
+          };
+        },
+        { newNodes: { ...currentNodes }, newEdges: { ...currentEdges } }
+      );
+    };
+
+    const fullNodes = stateNodeTutorial.localSnapshot;
+
+    const visibleFullNodes: FullNodeData[] = fullNodes.filter(cur => cur.visible || cur.nodeChangeType === "modified");
+    devLog("3: TUTORIAL: visibleFullNodes", visibleFullNodes);
+    setAllNodes(oldAllNodes => mergeAllNodes(fullNodes, oldAllNodes));
+    devLog("4: TUTORIAL: setAllNodes");
+    setGraph(({ nodes, edges }) => {
+      const visibleFullNodesMerged = visibleFullNodes.map(cur => {
+        const tmpNode: FullNodeData = nodes[cur.node];
+        if (tmpNode) {
+          if (tmpNode.hasOwnProperty("simulated")) {
+            delete tmpNode["simulated"];
+          }
+          if (tmpNode.hasOwnProperty("isNew")) {
+            delete tmpNode["isNew"];
+          }
+        }
+
+        const hasParent = cur.parents.length;
+        // IMPROVE: we need to pass the parent which open the node
+        // to use his current position
+        // in this case we are checking first parent
+        // if this doesn't exist will set top:0 and left: 0 + NODE_WIDTH + COLUMN_GAP
+        const nodeParent = hasParent ? nodes[cur.parents[0].node] : null;
+        const topParent = nodeParent?.top ?? 0;
+
+        const leftParent = nodeParent?.left ?? 0;
+
+        return {
+          ...cur,
+          left: tmpNode?.left ?? leftParent + NODE_WIDTH + COLUMN_GAP,
+          top: tmpNode?.top ?? topParent,
+        };
+      });
+
+      devLog("5: TUTORIAL:user Nodes Snapshot:visible Full Nodes Merged", visibleFullNodesMerged);
+      const { newNodes, newEdges } = fillDagre(visibleFullNodesMerged, nodes, edges, settings.showClusterOptions);
+
+      if (!Object.keys(newNodes).length) {
+        setNoNodesFoundMessage(true);
+      }
+      return { nodes: newNodes, edges: newEdges };
+    });
+  }, [allTags, settings.showClusterOptions, stateNodeTutorial, notebookChanged]);
+
   useEffect(() => {
     if (!db) return;
     if (!user?.uname) return;
     if (!allTagsLoaded) return;
+    if (stateNodeTutorial) return;
 
     const userNodesRef = collection(db, "userNodes");
     const q = query(
@@ -950,6 +1270,7 @@ const Dashboard = ({}: DashboardProps) => {
     );
     const bookmarkSnapshot = onSnapshot(q, async snapshot => {
       // console.log("on snapshot");
+      console.log("sn> bookmark");
       const docChanges = snapshot.docChanges();
 
       if (!docChanges.length) {
@@ -967,12 +1288,14 @@ const Dashboard = ({}: DashboardProps) => {
     return () => {
       bookmarkSnapshot();
     };
-  }, [allTagsLoaded, db, user?.uname]);
+  }, [allTagsLoaded, db, user?.uname, stateNodeTutorial]);
+
   useEffect(() => {
     if (!db) return;
     if (!user?.uname) return;
     if (!user?.tagId) return;
     if (!allTagsLoaded) return;
+    if (stateNodeTutorial) return;
 
     const versionsSnapshots: any[] = [];
     const versions: { [key: string]: any } = {};
@@ -989,6 +1312,7 @@ const Dashboard = ({}: DashboardProps) => {
       );
 
       const versionsSnapshot = onSnapshot(versionsQuery, async snapshot => {
+        console.log("sn> pending proposal");
         const docChanges = snapshot.docChanges();
         if (docChanges.length > 0) {
           for (let change of docChanges) {
@@ -1045,15 +1369,19 @@ const Dashboard = ({}: DashboardProps) => {
         vSnapshot();
       }
     };
-  }, [allTagsLoaded, db, user?.tagId, user?.uname]);
+  }, [allTagsLoaded, db, user?.tagId, user?.uname, stateNodeTutorial]);
+
   useEffect(() => {
     if (!db) return;
     if (!user?.uname) return;
     if (!allTagsLoaded) return;
+    if (stateNodeTutorial) return;
+
     const notificationNumsCol = collection(db, "notificationNums");
     const q = query(notificationNumsCol, where("uname", "==", user.uname));
 
     const notificationsSnapshot = onSnapshot(q, async snapshot => {
+      console.log("sn> notificationNums");
       if (!snapshot.docs.length) {
         const notificationNumRef = collection(db, "notificationNums");
         setDoc(doc(notificationNumRef), {
@@ -1068,12 +1396,12 @@ const Dashboard = ({}: DashboardProps) => {
     return () => {
       notificationsSnapshot();
     };
-  }, [db, user?.uname, allTagsLoaded]);
+  }, [db, user?.uname, allTagsLoaded, stateNodeTutorial]);
 
   useEffect(() => {
     const currentLengthNodes = Object.keys(graph.nodes).length;
     if (currentLengthNodes < previousLengthNodes.current) {
-      devLog("CHANGE NH 🚀", "recalculate");
+      devLog("CHANGE NH 🚀", "recalculate by length nodes");
       addTask(null);
     }
     previousLengthNodes.current = currentLengthNodes;
@@ -1088,7 +1416,7 @@ const Dashboard = ({}: DashboardProps) => {
   useEffect(() => {
     const currentLengthEdges = Object.keys(graph.edges).length;
     if (currentLengthEdges !== previousLengthEdges.current) {
-      devLog("CHANGE NH 🚀", "recalculate");
+      devLog("CHANGE NH 🚀", "recalculate by length edges");
       addTask(null);
     }
     previousLengthEdges.current = currentLengthEdges;
@@ -1273,7 +1601,7 @@ const Dashboard = ({}: DashboardProps) => {
           const nodeEl = document.getElementById(nodeId)! as HTMLElement;
           let height: number = nodeEl.clientHeight;
           if (isNaN(height)) {
-            height = nodes[nodeId]!.height;
+            height = nodes[nodeId]!.height ?? 0; //take a look with Ameer Hamza
           }
 
           let nodesUpdated = false;
@@ -1282,7 +1610,7 @@ const Dashboard = ({}: DashboardProps) => {
           const rows = getColumnRows(nodes, column);
           if (rows) {
             const nodeIdx = rows.indexOf(nodeId);
-            const heightDiff = height - nodes[nodeId]!.height;
+            const heightDiff = height - (nodes[nodeId]!.height ?? 0); //take a look with Ameer Hamza
 
             let lastHeight = height;
             let lastTop = nodes[nodeId]!.top;
@@ -1299,7 +1627,7 @@ const Dashboard = ({}: DashboardProps) => {
 
               _nodeData.top += heightDiff;
 
-              lastHeight = _nodeData.height;
+              lastHeight = _nodeData.height ?? 0; //take a look with Ameer Hamza
               lastTop = _nodeData.top;
 
               nodesUpdated = true;
@@ -1632,6 +1960,23 @@ const Dashboard = ({}: DashboardProps) => {
     (linkedNodeID: string, typeOperation?: string) => {
       devLog("open Linked Node", { linkedNodeID, typeOperation });
       if (!notebookRef.current.choosingNode) return;
+
+      // start tutorial
+      if (isPlayingTheTutorialRef.current) {
+        let linkedNode = document.getElementById(linkedNodeID);
+        if (linkedNode) {
+          nodeBookDispatch({ type: "setSelectedNode", payload: linkedNodeID });
+          notebookRef.current.selectedNode = linkedNodeID;
+          setTimeout(() => {
+            scrollToNode(linkedNodeID);
+          }, 1500);
+        } else {
+          openNodeHandler(linkedNodeID);
+        }
+        return;
+      }
+      // end tutorial
+
       createActionTrack(
         db,
         "NodeOpen",
@@ -1894,11 +2239,22 @@ const Dashboard = ({}: DashboardProps) => {
     (event: any, nodeId: string) => {
       if (notebookRef.current.choosingNode) return;
 
+      notebookRef.current.selectedNode = nodeId;
+      // start tutorial
+      if (isPlayingTheTutorialRef.current) {
+        setGraph(({ nodes: oldNodes, edges }) => {
+          const thisNode: FullNodeData = oldNodes[nodeId];
+          return { nodes: { ...oldNodes, [nodeId]: { ...thisNode, open: !thisNode.open } }, edges };
+        });
+        return;
+      }
+      // end tutorial
+
       lastNodeOperation.current = "ToggleNode";
       setGraph(({ nodes: oldNodes, edges }) => {
         const thisNode = oldNodes[nodeId];
 
-        notebookRef.current.selectedNode = nodeId;
+        // notebookRef.current.selectedNode = nodeId;
         nodeBookDispatch({ type: "setSelectedNode", payload: nodeId });
         const { nodeRef, userNodeRef } = initNodeStatusChange(nodeId, thisNode.userNodeId);
         const changeNode: any = {
@@ -3587,6 +3943,11 @@ const Dashboard = ({}: DashboardProps) => {
 
   return (
     <div className="MapContainer" style={{ overflow: "hidden" }}>
+      {stateNodeTutorial?.anchor && (
+        <Portal anchor="portal">
+          <Tutorial tutorialState={stateNodeTutorial} onChangeStep={onChangeStep} targetClientRect={targetClientRect} />
+        </Portal>
+      )}
       <Box
         id="Map"
         sx={{
@@ -3692,7 +4053,7 @@ const Dashboard = ({}: DashboardProps) => {
                 <Button onClick={() => nodeBookDispatch({ type: "setSelectionType", payload: "Proposals" })}>
                   Open Proposal
                 </Button>
-                <Button onClick={() => openNodeHandler("PvKh56yLmodMnUqHar2d")}>Open Node Handler</Button>
+                <Button onClick={() => openNodeHandler("JqTvpowT5EBPO1Ajjovq")}>Open Node Handler</Button>
                 <Button onClick={() => setShowRegion(prev => !prev)}>Show Region</Button>
               </Box>
             </Drawer>
@@ -3723,6 +4084,7 @@ const Dashboard = ({}: DashboardProps) => {
                 windowHeight={windowHeight}
                 onlineUsers={onlineUsers}
                 usersOnlineStatusLoaded={usersOnlineStatusLoaded}
+                disableToolbar={Boolean(stateNodeTutorial && stateNodeTutorial.disabledElements.includes("TOOLBAR"))}
               />
 
               <MemoizedBookmarksSidebar
@@ -3750,17 +4112,6 @@ const Dashboard = ({}: DashboardProps) => {
                 username={user.uname}
                 open={openSidebar === "NOTIFICATION_SIDEBAR"}
                 onClose={() => setOpenSidebar(null)}
-                sidebarWidth={sidebarWidth()}
-                innerHeight={innerHeight}
-                innerWidth={windowWith}
-              />
-              <MemoizedPendingProposalSidebar
-                theme={settings.theme}
-                openLinkedNode={openLinkedNode}
-                username={user.uname}
-                tagId={user.tagId}
-                open={openSidebar === "PENDING_PROPOSALS"}
-                onClose={() => onCloseSidebar()}
                 sidebarWidth={sidebarWidth()}
                 innerHeight={innerHeight}
                 innerWidth={windowWith}
@@ -3821,7 +4172,14 @@ const Dashboard = ({}: DashboardProps) => {
             </Box>
           )}
 
-          <MemoizedCommunityLeaderboard userTagId={user?.tagId ?? ""} pendingProposalsLoaded={pendingProposalsLoaded} />
+          <MemoizedCommunityLeaderboard
+            userTagId={user?.tagId ?? ""}
+            pendingProposalsLoaded={pendingProposalsLoaded}
+            disabled={Boolean(
+              stateNodeTutorial && stateNodeTutorial.disabledElements.includes("COMMUNITY_LEADERBOARD")
+            )}
+          />
+
           {isQueueWorking && (
             <CircularProgress
               size={46}
@@ -3895,6 +4253,36 @@ const Dashboard = ({}: DashboardProps) => {
               <AutoFixHighIcon />
             </IconButton>
           </Tooltip>
+
+          {!nodeTutorial && (
+            <Tooltip
+              title="Start tutorial"
+              placement="left"
+              sx={{
+                position: "fixed",
+                top: {
+                  xs: !openSidebar
+                    ? "60px"
+                    : openSidebar && openSidebar !== "SEARCHER_SIDEBAR"
+                    ? `${innerHeight * 0.35 + 65}px`
+                    : `${innerHeight * 0.25 + 65}px`,
+                  sm: "60px",
+                },
+                right: "10px",
+                zIndex: "1300",
+                background: theme => (theme.palette.mode === "dark" ? "#1f1f1f" : "#f0f0f0"),
+                ":hover": {
+                  background: theme => (theme.palette.mode === "dark" ? "#454545" : "#d6d4d4"),
+                },
+                transition: "all 1s ease",
+              }}
+            >
+              <IconButton color="secondary" onClick={() => onChangeStep(1)}>
+                <SchoolIcon />
+              </IconButton>
+            </Tooltip>
+          )}
+
           {process.env.NODE_ENV === "development" && (
             <Tooltip
               title={"Watch geek data"}
@@ -3962,6 +4350,7 @@ const Dashboard = ({}: DashboardProps) => {
               openUserInfoSidebar={openUserInfoSidebar}
               onlineUsers={onlineUsers}
               db={db}
+              disabled={Boolean(stateNodeTutorial && stateNodeTutorial.disabledElements.includes("LIVENESS_BAR"))}
             />
           )}
 
@@ -3972,6 +4361,7 @@ const Dashboard = ({}: DashboardProps) => {
               onlineUsers={onlineUsers}
               db={db}
               user={user}
+              disabled={Boolean(stateNodeTutorial && stateNodeTutorial.disabledElements.includes("LIVENESS_BAR"))}
             />
           )}
 
@@ -4000,6 +4390,141 @@ const Dashboard = ({}: DashboardProps) => {
                 value={mapInteractionValue}
                 onChange={navigateWhenNotScrolling}
               >
+                {/* <div
+                  style={{
+                    position: "absolute",
+                    width: "8px",
+                    height: "8px",
+                    borderRadius: "50%",
+                    backgroundColor: "yellow",
+                  }}
+                ></div>
+                <div
+                  style={{
+                    position: "absolute",
+                    width: "8px",
+                    height: "8px",
+                    borderRadius: "50%",
+                    left: "2900px",
+                    top: "0px",
+                    backgroundColor: "#ff0630",
+                  }}
+                ></div>
+                <div
+                  style={{
+                    position: "absolute",
+                    width: "5000px",
+                    height: "3px",
+                    top: "0px",
+                    left: "0px",
+                    backgroundColor: "yellow",
+                  }}
+                ></div>
+                <div
+                  style={{
+                    position: "absolute",
+                    width: "8px",
+                    height: "8px",
+                    top: "100px",
+                    left: "100px",
+                    borderRadius: "50%",
+                    backgroundColor: "royalblue",
+                  }}
+                ></div>
+                <div
+                  style={{
+                    position: "absolute",
+                    width: "2000px",
+                    height: "3px",
+                    top: "100px",
+                    left: "0px",
+                    backgroundColor: "royalblue",
+                  }}
+                ></div>
+
+                <div
+                  style={{
+                    position: "absolute",
+                    width: "2000px",
+                    height: "3px",
+                    top: "150px",
+                    left: "0px",
+                    backgroundColor: "yellow",
+                  }}
+                ></div>
+
+                <div
+                  style={{
+                    position: "absolute",
+                    width: "2000px",
+                    height: "1px",
+                    top: "160px",
+                    left: "0px",
+                    backgroundColor: "yellow",
+                  }}
+                ></div>
+
+                <div
+                  style={{
+                    position: "absolute",
+                    width: "8px",
+                    height: "8px",
+                    top: "150px",
+                    left: "200px",
+                    borderRadius: "50%",
+                    backgroundColor: "royalblue",
+                  }}
+                ></div>
+                <div
+                  style={{
+                    position: "absolute",
+                    width: "8px",
+                    height: "8px",
+                    top: "150px",
+                    left: "500px",
+                    borderRadius: "50%",
+                    backgroundColor: "royalblue",
+                  }}
+                ></div>
+                <div
+                  style={{
+                    position: "absolute",
+                    width: "8px",
+                    height: "8px",
+                    top: "150px",
+                    left: "600px",
+                    borderRadius: "50%",
+                    backgroundColor: "royalblue",
+                  }}
+                ></div>
+
+                <div
+                  style={{
+                    position: "absolute",
+                    width: "2000px",
+                    height: "3px",
+                    top: "500px",
+                    left: "0px",
+                    backgroundColor: "yellow",
+                  }}
+                ></div>
+                <div
+                  style={{
+                    position: "absolute",
+                    width: "2000px",
+                    height: "3px",
+                    top: "600px",
+                    left: "0px",
+                    backgroundColor: "yellow",
+                  }}
+                /> */}
+                {!stateNodeTutorial?.anchor && (
+                  <Tutorial
+                    tutorialState={stateNodeTutorial}
+                    onChangeStep={onChangeStep}
+                    targetClientRect={targetClientRect}
+                  />
+                )}
                 {settings.showClusterOptions && settings.showClusters && (
                   <MemoizedClustersList clusterNodes={clusterNodes} />
                 )}
@@ -4051,6 +4576,8 @@ const Dashboard = ({}: DashboardProps) => {
                   openSidebar={openSidebar}
                   setOperation={setOperation}
                   openUserInfoSidebar={openUserInfoSidebar}
+                  disabledNodes={stateNodeTutorial?.disabledElements ?? []}
+                  enableChildElements={stateNodeTutorial?.enableChildElements}
                 />
               </MapInteractionCSS>
               {showRegion && (

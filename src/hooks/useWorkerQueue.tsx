@@ -56,7 +56,7 @@ export const useWorkerQueue = ({
       let oldEdges = { ...edgesToRecalculate };
       setIsWorking(true);
       const worker: Worker = new Worker(new URL("../workers/MapWorker.ts", import.meta.url));
-      console.log("worker:oldNodes", oldNodes);
+
       worker.postMessage({
         oldMapWidth,
         oldMapHeight,
@@ -146,28 +146,45 @@ export const useWorkerQueue = ({
     if (isWorking) return;
     if (!queue.length) return;
     if (!g?.current) return;
+    if (!Object.keys(graph.nodes).length) return setQueue([]); // when nodes are removed we need to clean queue
+    // CREATE WORKER with Nodes and Nodes changed
+    // console.log("[queue]: recalculateGraphWithWorker", { graph, queue });
+    const individualNodeChanges: FullNodeData[] = queue
+      .map(cur => {
+        if (!cur) return null;
+        return { ...graph.nodes[cur.id], height: cur.height };
+      })
+      .flatMap(cur => cur || []);
 
-    // Implemention of executing only last
-    setDeferredTimer(deferredTimer => {
-      const t = setTimeout(() => {
-        if (deferredTimer) {
-          clearTimeout(deferredTimer);
-        }
-        // CREATE WORKER with Nodes and Nodes changed
-        // console.log("[queue]: recalculateGraphWithWorker", { graph, queue });
-        const individualNodeChanges: FullNodeData[] = queue
-          .map(cur => {
-            if (!cur) return null;
-            return { ...graph.nodes[cur.id], height: cur.height };
-          })
-          .flatMap(cur => cur || []);
-        const nodesToRecalculate = setDagNodes(g.current, individualNodeChanges, graph.nodes, allTags, withClusters);
+    console.log({ nodes: graph.nodes });
+    const nodesToRecalculate = setDagNodes(g.current, individualNodeChanges, graph.nodes, allTags, withClusters);
 
-        recalculateGraphWithWorker(nodesToRecalculate, graph.edges);
-        setQueue([]);
-      }, 100);
-      return t;
-    });
+    console.log({ nodes: nodesToRecalculate, edges: graph.edges, g: g.current });
+    recalculateGraphWithWorker(nodesToRecalculate, graph.edges);
+    setQueue([]);
+
+    // // Implemention of executing only last
+    // setDeferredTimer(deferredTimer => {
+    //   const t = setTimeout(() => {
+    //     if (deferredTimer) {
+    //       clearTimeout(deferredTimer);
+    //     }
+    //     // CREATE WORKER with Nodes and Nodes changed
+    //     // console.log("[queue]: recalculateGraphWithWorker", { graph, queue });
+    //     const individualNodeChanges: FullNodeData[] = queue
+    //       .map(cur => {
+    //         if (!cur) return null;
+    //         return { ...graph.nodes[cur.id], height: cur.height };
+    //       })
+    //       .flatMap(cur => cur || []);
+    //     const nodesToRecalculate = setDagNodes(g.current, individualNodeChanges, graph.nodes, allTags, withClusters);
+
+    //     console.log({ nodes: nodesToRecalculate, edges: graph.edges, g: g.current });
+    //     recalculateGraphWithWorker(nodesToRecalculate, graph.edges);
+    //     setQueue([]);
+    //   }, 100);
+    //   return t;
+    // });
   }, [allTags, g, graph, isWorking, queue, recalculateGraphWithWorker, withClusters]);
 
   const addTask = useCallback(

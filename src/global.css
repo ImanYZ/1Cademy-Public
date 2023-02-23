@@ -229,9 +229,9 @@
 .card {
   margin: 0px;
 }
-.card .card-content {
+/* .card .card-content {
   margin: 13px 13px 0px 13px !important;
-}
+} */
 .card-title .CodeMirror {
   font-size: 25px;
   font-weight: 400;
@@ -1346,7 +1346,7 @@ button.MuiTab-textColorInherit:focus {
   width: 160px;
 }
 
-#MiniUserPrifilePointsContainer {
+.MiniUserPrifilePointsContainer {
   display: grid;
   grid-template-columns: auto auto auto;
   grid-template-rows: 40px 40px;
@@ -1354,7 +1354,7 @@ button.MuiTab-textColorInherit:focus {
   margin-bottom: 19px;
 }
 
-#MiniUserPrifilePointsContainer .MiniUserProfilePoints {
+.MiniUserPrifilePointsContainer .MiniUserProfilePoints {
   display: flex;
   justify-content: flex-start;
   align-items: center;
@@ -1363,11 +1363,11 @@ button.MuiTab-textColorInherit:focus {
   height: 40px;
 }
 
-#MiniUserPrifilePointsContainer .MiniUserProfilePoints.LeftPoints {
+.MiniUserPrifilePointsContainer .MiniUserProfilePoints.LeftPoints {
   margin-left: 60px;
 }
 
-#MiniUserPrifilePointsContainer .MiniUserProfilePoints svg,
+.MiniUserPrifilePointsContainer .MiniUserProfilePoints svg,
 #MiniUserPrifileInstitution img,
 #MiniUserPrifileTotalPoints svg {
   margin-right: 12px;

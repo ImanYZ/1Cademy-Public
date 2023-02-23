@@ -106,6 +106,8 @@ type NodeFooterProps = {
   openUserInfoSidebar: (uname: string, imageUrl: string, fullName: string, chooseUname: string) => void;
   proposeNodeImprovement: any;
   setOperation: any;
+  disabled?: boolean;
+  enableChildElements?: string[];
 };
 
 const NodeFooter = ({
@@ -166,6 +168,8 @@ const NodeFooter = ({
   openUserInfoSidebar,
   proposeNodeImprovement,
   setOperation,
+  disabled,
+  enableChildElements = [],
 }: NodeFooterProps) => {
   const router = useRouter();
   const db = getFirestore();
@@ -180,6 +184,23 @@ const NodeFooter = ({
   const [institutionLogos, setInstitutionLogos] = useState<{
     [institutionName: string]: string;
   }>({});
+
+  const userPictureId = `${identifier}-node-footer-user`;
+  const proposeButtonId = `${identifier}-node-footer-propose`;
+  const downvoteButtonId = `${identifier}-node-footer-downvotes`;
+  const upvoteButtonId = `${identifier}-node-footer-upvotes`;
+  const tagsCitationsButtonId = `${identifier}-node-footer-tags-citations`;
+  const parentChildrenButtonId = `${identifier}-button-parent-children`;
+  const moreOptionsButtonId = `${identifier}-node-footer-ellipsis`;
+
+  // this will execute the includes operation only when disable is TRUE (in tutorial)
+  const disableUserPicture = disabled && !enableChildElements.includes(userPictureId);
+  const disableProposeButton = disabled && !enableChildElements.includes(proposeButtonId);
+  const disableDownvoteButton = disabled && !enableChildElements.includes(downvoteButtonId);
+  const disableUpvoteButton = disabled && !enableChildElements.includes(upvoteButtonId);
+  const disableTagsCitationsButton = disabled && !enableChildElements.includes(tagsCitationsButtonId);
+  const disableParentChildrenButton = disabled && !enableChildElements.includes(parentChildrenButtonId);
+  const disableMoreOptionsButton = disabled && !enableChildElements.includes(moreOptionsButtonId);
 
   const messageTwitter = () => {
     return `1Cademy - Collaboratively Designing Learning Pathways
@@ -383,9 +404,11 @@ const NodeFooter = ({
     },
     [proposeNodeImprovement]
   );
+
   return (
     <>
       <Box
+        id={`${identifier}-node-footer`}
         sx={{
           display: "flex",
           alignItems: "center",
@@ -396,30 +419,11 @@ const NodeFooter = ({
       >
         <Box className="NodeFooter Left" sx={{ display: "flex", alignItems: "center", gap: "10px" }}>
           {open &&
+            !disableUserPicture &&
             (isNew ? (
-              //   <UserStatusIcon
-              //     uname={username}
-              //     imageUrl={imageUrl}
-              //     fullname={fName + " " + lName}
-              //     chooseUname={chooseUname}
-              //     online={false}
-              //     inUserBar={false}
-              //     inNodeFooter={true}
-              //     reloadPermanentGrpah={reloadPermanentGrpah}
-              //   />
-              // ) : (
-              //   <UserStatusIcon
-              //     uname={admin}
-              //     imageUrl={aImgUrl}
-              //     fullname={aFullname}
-              //     chooseUname={aChooseUname}
-              //     online={false}
-              //     inUserBar={false}
-              //     inNodeFooter={true}
-              //     reloadPermanentGrpah={reloadPermanentGrpah}
-              //   />
               <Box onClick={openContributorsSection}>
                 <MemoizedUserStatusIcon
+                  id={userPictureId}
                   uname={user.uname}
                   imageUrl={user.imageUrl || ""}
                   fullname={user.fName + " " + user.lName}
@@ -434,6 +438,7 @@ const NodeFooter = ({
             ) : (
               <Box onClick={openContributorsSection}>
                 <MemoizedUserStatusIcon
+                  id={userPictureId}
                   uname={admin}
                   imageUrl={aImgUrl}
                   fullname={aFullname}
@@ -446,18 +451,40 @@ const NodeFooter = ({
                 />
               </Box>
             ))}
+          {open && disableUserPicture && (
+            <Box sx={{ width: "28px", height: "28px", backgroundColor: "gray", borderRadius: "50%" }} />
+          )}
           <div
             className={open ? "NodeTypeIconOpen Tooltip" : "NodeTypeIconClosed Tooltip"}
             style={{ display: "flex", alignItems: "center", fontSize: "16px" }} // font size refL Map.css ln 71
           >
             {/* <NodeTypeIcon nodeType={nodeType} /> */}
 
-            {locked && <NodeTypeIcon nodeType={"locked"} tooltipPlacement={"top"} fontSize={"inherit"} />}
+            {locked && (
+              <NodeTypeIcon
+                id={identifier}
+                nodeType={"locked"}
+                tooltipPlacement={"top"}
+                fontSize={"inherit"}
+                // disabled={disabled}
+              />
+            )}
             {!locked &&
               (editable ? (
-                <MemoizedNodeTypeSelector nodeId={identifier} setNodeParts={setNodeParts} nodeType={nodeType} />
+                <MemoizedNodeTypeSelector
+                  nodeId={identifier}
+                  setNodeParts={setNodeParts}
+                  nodeType={nodeType}
+                  disabled={disabled}
+                />
               ) : (
-                <NodeTypeIcon nodeType={nodeType} tooltipPlacement={"top"} fontSize={"inherit"} />
+                <NodeTypeIcon
+                  id={identifier}
+                  nodeType={nodeType}
+                  tooltipPlacement={"top"}
+                  fontSize={"inherit"}
+                  // disabled={disabled}
+                />
               ))}
             <Tooltip
               title={`This node was last edited at ${dayjs(new Date(changedAt)).hour()}:${dayjs(
@@ -468,6 +495,7 @@ const NodeFooter = ({
               placement={"top"}
             >
               <span
+                id={`${identifier}-node-footer-timestamp`}
                 style={{
                   marginLeft: "10px",
                   display: editable ? "none" : "block",
@@ -482,6 +510,7 @@ const NodeFooter = ({
             {open && (
               <Box sx={{ display: editable || simulated ? "none" : "flex", alignItems: "center", marginLeft: "10px" }}>
                 <ContainedButton
+                  id={proposeButtonId}
                   title="Propose/evaluate versions of this node."
                   onClick={proposeNodeImprovementClick}
                   tooltipPosition="top"
@@ -503,6 +532,7 @@ const NodeFooter = ({
                     minWidth: "30px",
                     height: "30px",
                   }}
+                  disabled={disableProposeButton}
                 >
                   <Box sx={{ display: "flex", alignItems: "center", gap: "4px", fill: "inherit" }}>
                     <CreateIcon sx={{ fontSize: "16px" }} />
@@ -510,6 +540,7 @@ const NodeFooter = ({
                 </ContainedButton>
 
                 <Box
+                  id={`${identifier}-node-footer-votes`}
                   className="tab-double-button-node-footer"
                   sx={{
                     background: theme =>
@@ -522,49 +553,56 @@ const NodeFooter = ({
                   }}
                 >
                   <Box
+                    id={downvoteButtonId}
                     sx={{
                       padding: "2px 0px 2px 5px",
                       borderRadius: "52px 0px 0px 52px",
-                      ":hover": {
-                        background: theme =>
-                          theme.palette.mode === "dark"
-                            ? theme.palette.common.darkBackground2
-                            : theme.palette.common.lightBackground2,
-                      },
+                      ...(!disableDownvoteButton && {
+                        ":hover": {
+                          background: theme =>
+                            theme.palette.mode === "dark"
+                              ? theme.palette.common.darkBackground2
+                              : theme.palette.common.lightBackground2,
+                        },
+                      }),
                     }}
                   >
                     <Tooltip title={"Vote to delete node."} placement={"top"}>
-                      <Button
-                        onClick={wrongNode}
-                        disabled={disableVotes}
-                        sx={{
-                          padding: "0",
-                          color: "inherit",
-                          fontWeight: 400,
-                          minWidth: "40px",
-                          ":hover": {
-                            color: "inherit",
-                            background: "transparent",
-                          },
-                        }}
-                      >
-                        <Box
+                      <span>
+                        <Button
+                          onClick={wrongNode}
+                          disabled={disableVotes || disableDownvoteButton}
                           sx={{
-                            display: "flex",
-                            fontSize: "14px",
-                            alignItems: "center",
+                            padding: "0",
+                            color: "inherit",
+                            fontWeight: 400,
+                            minWidth: "40px",
+                            ...(!disabled && {
+                              ":hover": {
+                                color: "inherit",
+                                background: "transparent",
+                              },
+                            }),
                           }}
                         >
-                          <span>{shortenNumber(wrongNum, 2, false)}</span>
-                          <CloseIcon
+                          <Box
                             sx={{
-                              fontSize: "16px",
-                              color: markedWrong ? "red" : "inherit",
-                              marginLeft: "1px",
+                              display: "flex",
+                              fontSize: "14px",
+                              alignItems: "center",
                             }}
-                          />
-                        </Box>
-                      </Button>
+                          >
+                            <span>{shortenNumber(wrongNum, 2, false)}</span>
+                            <CloseIcon
+                              sx={{
+                                fontSize: "16px",
+                                color: markedWrong ? "red" : "inherit",
+                                marginLeft: "1px",
+                              }}
+                            />
+                          </Box>
+                        </Button>
+                      </span>
                     </Tooltip>
                   </Box>
                   <Divider
@@ -578,45 +616,52 @@ const NodeFooter = ({
                     }}
                   />
                   <Box
+                    id={upvoteButtonId}
                     sx={{
                       padding: "2px 5px 2px 5px",
                       borderRadius: "0px 52px 52px 0px",
-                      ":hover": {
-                        background: theme =>
-                          theme.palette.mode === "dark"
-                            ? theme.palette.common.darkBackground2
-                            : theme.palette.common.lightBackground2,
-                      },
+                      ...(!disabled && {
+                        ":hover": {
+                          background: theme =>
+                            theme.palette.mode === "dark"
+                              ? theme.palette.common.darkBackground2
+                              : theme.palette.common.lightBackground2,
+                        },
+                      }),
                     }}
                   >
                     <Tooltip title={"Vote to prevent further changes."} placement={"top"}>
-                      <Button
-                        onClick={correctNode}
-                        disabled={disableVotes}
-                        sx={{
-                          padding: "0",
-                          color: "inherit",
-                          fontWeight: 400,
-                          minWidth: "40px",
-                          ":hover": {
-                            color: "inherit",
-                            background: "transparent",
-                          },
-                        }}
-                      >
-                        <Box
+                      <span>
+                        <Button
+                          onClick={correctNode}
+                          disabled={disableVotes || disableUpvoteButton}
                           sx={{
-                            display: "flex",
-                            fontSize: "14px",
-                            alignItems: "center",
+                            padding: "0",
+                            color: "inherit",
+                            fontWeight: 400,
+                            minWidth: "40px",
+                            ...(!disableUpvoteButton && {
+                              ":hover": {
+                                color: "inherit",
+                                background: "transparent",
+                              },
+                            }),
                           }}
                         >
-                          <span>{shortenNumber(correctNum, 2, false)}</span>
-                          <DoneIcon
-                            sx={{ fontSize: "16px", color: markedCorrect ? "#00E676" : "inherit", marginLeft: "1px" }}
-                          />
-                        </Box>
-                      </Button>
+                          <Box
+                            sx={{
+                              display: "flex",
+                              fontSize: "14px",
+                              alignItems: "center",
+                            }}
+                          >
+                            <span>{shortenNumber(correctNum, 2, false)}</span>
+                            <DoneIcon
+                              sx={{ fontSize: "16px", color: markedCorrect ? "#00E676" : "inherit", marginLeft: "1px" }}
+                            />
+                          </Box>
+                        </Button>
+                      </span>
                     </Tooltip>
                   </Box>
                 </Box>
@@ -704,6 +749,7 @@ const NodeFooter = ({
                             : theme.palette.common.lightBackground2,
                       },
                     }}
+                    disabled={disabled}
                   >
                     <>
                       <input type="file" ref={inputEl} onChange={uploadNodeImageHandler} hidden />
@@ -737,6 +783,7 @@ const NodeFooter = ({
                             : theme.palette.common.lightBackground2,
                       },
                     }}
+                    disabled={disabled}
                   >
                     <VideoCallIcon sx={{ fontSize: "20px" }} />
                   </ContainedButton>
@@ -774,6 +821,7 @@ const NodeFooter = ({
                               : theme.palette.common.lightBackground2,
                         },
                       }}
+                      disabled={disabled}
                     >
                       <Box sx={{ display: "flex", alignItems: "center", gap: "4px", fill: "inherit", height: "23px" }}>
                         <ArrowForwardIcon sx={{ fontSize: "16px" }} />
@@ -811,6 +859,7 @@ const NodeFooter = ({
                       }}
                     >
                       <ContainedButton
+                        id={`${identifier}-node-footer-tags-citations`}
                         title="View tags assigned to this node."
                         onClick={(e: any) => selectTags(e)}
                         tooltipPosition="top"
@@ -829,6 +878,7 @@ const NodeFooter = ({
                                 : theme.palette.common.lightBackground2,
                           },
                         }}
+                        disabled={disabled}
                       >
                         <Box
                           sx={{ display: "flex", alignItems: "center", gap: "4px", fill: "inherit", height: "23px" }}
@@ -848,6 +898,7 @@ const NodeFooter = ({
                 <>
                   {openPart === "References" ? (
                     <Box
+                      id={`${identifier}-node-footer-tags-citations`}
                       onClick={selectReferences}
                       className={"select-tab-button-node-footer"}
                       sx={{
@@ -899,6 +950,7 @@ const NodeFooter = ({
                       }}
                     >
                       <ContainedButton
+                        id={tagsCitationsButtonId}
                         title="View tags and citations used in this node."
                         onClick={selectReferences}
                         tooltipPosition="top"
@@ -918,6 +970,7 @@ const NodeFooter = ({
                                 : theme.palette.common.lightBackground2,
                           },
                         }}
+                        disabled={disableTagsCitationsButton}
                       >
                         <Box
                           sx={{
@@ -1057,6 +1110,7 @@ const NodeFooter = ({
               )}
               {openPart === "LinkingWords" ? (
                 <Box
+                  id={`${identifier}-button-parent-children`}
                   onClick={selectLinkingWords}
                   className={"select-tab-button-node-footer"}
                   sx={{
@@ -1083,6 +1137,7 @@ const NodeFooter = ({
                   }}
                 >
                   <ContainedButton
+                    id={parentChildrenButtonId}
                     title="View parent and child nodes."
                     onClick={selectLinkingWords}
                     tooltipPosition="top"
@@ -1101,6 +1156,7 @@ const NodeFooter = ({
                             : theme.palette.common.lightBackground2,
                       },
                     }}
+                    disabled={disableParentChildrenButton}
                   >
                     <Box sx={{ display: "flex", alignItems: "center", gap: "4px", fill: "inherit" }}>
                       <span className="FooterParentNodesOpen">{shortenNumber(parents.length, 2, false)}</span>
@@ -1113,11 +1169,12 @@ const NodeFooter = ({
 
               <IconButton
                 aria-label="more"
-                id="long-button"
+                id={moreOptionsButtonId}
                 aria-controls={openMenu ? "long-menu" : undefined}
                 aria-expanded={openMenu ? "true" : undefined}
                 aria-haspopup="true"
                 onClick={handleClick}
+                disabled={disableMoreOptionsButton}
                 sx={{
                   display: simulated ? "none" : "flex",
                   background: theme =>
@@ -1155,6 +1212,7 @@ const NodeFooter = ({
                     >
                       <MenuItem>
                         <MemoizedMetaButton
+                          id={`${identifier}-node-footer-studied`}
                           tooltip={!isStudied ? 'Mark this node as "studied."' : 'Mark this node as "not studied."'}
                           style={{ padding: "0" }}
                           tooltipPosition="top"
@@ -1450,6 +1508,7 @@ const NodeFooter = ({
               }}
             >
               <MemoizedMetaButton
+                disabled={disabled}
                 tooltip={
                   shortenNumber(correctNum, 2, false) +
                   " 1Cademist" +
@@ -1471,6 +1530,7 @@ const NodeFooter = ({
                 </Box>
               </MemoizedMetaButton>
               <MemoizedMetaButton
+                disabled={disabled}
                 tooltip={
                   `You've ${!bookmarked ? "not " : ""}bookmarked this node. ` +
                   shortenNumber(bookmarks, 2, false) +
@@ -1490,6 +1550,7 @@ const NodeFooter = ({
               </MemoizedMetaButton>
 
               <MemoizedMetaButton
+                disabled={disabled}
                 tooltip={
                   "This node has " +
                   shortenNumber(parents.length, 2, false) +

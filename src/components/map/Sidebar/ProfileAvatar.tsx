@@ -15,12 +15,13 @@ import PercentageLoader from "../PercentageLoader";
 // import PercentageLoader from "../../../PublicComps/PercentageLoader/PercentageLoader";
 // import MetaButton from "../../MetaButton/MetaButton";
 type ProfileAvatarType = {
+  id?: string;
   userId: string;
   userImage?: string;
   setUserImage: (newImage: string) => void;
   userFullName: string;
 };
-const ProfileAvatar = ({ userId, userImage, setUserImage, userFullName }: ProfileAvatarType) => {
+const ProfileAvatar = ({ id, userId, userImage, setUserImage, userFullName }: ProfileAvatarType) => {
   // const firebase = useRecoilValue(firebaseState);
   // const uid = useRecoilValue(uidState);
   // const [imageUrl, setImageUrl] = useRecoilState(imageUrlState);
@@ -150,55 +151,37 @@ const ProfileAvatar = ({ userId, userImage, setUserImage, userFullName }: Profil
   }, [isUploading, inputEl]);
 
   return (
-    <Box>
-      {/* <Box>
-        <input
-          type="file"
-          ref={inputEl}
-          onChange={handleImageChange}
-          accept="image/png, image/jpg, image/jpeg"
-          hidden
-        />
-
-      </Box> */}
+    <Box
+      id={id}
+      sx={{
+        display: "flex",
+        flexDirection: "column",
+        justifyContent: "center",
+        alignItems: "center",
+      }}
+    >
+      <input type="file" ref={inputEl} onChange={handleImageChange} accept="image/png, image/jpg, image/jpeg" hidden />
       <Box
-        id=""
-        sx={{
-          display: "flex",
-          flexDirection: "column",
-          justifyContent: "center",
-          alignItems: "center",
-        }}
+        // round={true}
+        onClick={handleEditImage}
+        // tooltip="Change your profile picture."
+        // tooltipPosition="right"
+        sx={{ position: "relative", width: "170px", height: "170px", padding: "5px" }}
       >
-        <input
-          type="file"
-          ref={inputEl}
-          onChange={handleImageChange}
-          accept="image/png, image/jpg, image/jpeg"
-          hidden
+        {/* TODO: change with NextJs image */}
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          className="profileImage"
+          // style={{ width: imageWidth, height: imageHeight, borderRadius: "50%" }}
+          src={userImage}
+          alt="1Cademist Profile Picture"
         />
-        <Box
-          // round={true}
-          onClick={handleEditImage}
-          // tooltip="Change your profile picture."
-          // tooltipPosition="right"
-          sx={{ position: "relative", width: "170px", height: "170px", padding: "5px" }}
-        >
-          {/* TODO: change with NextJs image */}
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            className="profileImage"
-            // style={{ width: imageWidth, height: imageHeight, borderRadius: "50%" }}
-            src={userImage}
-            alt="1Cademist Profile Picture"
-          />
-          {isUploading && (
-            <PercentageLoader percentage={percentageUploaded} radius={78} widthInPx="170px" heightInPx="170px" />
-          )}
-        </Box>
-
-        {imageUrlError && <div className="errorMessage">{imageUrlError}</div>}
+        {isUploading && (
+          <PercentageLoader percentage={percentageUploaded} radius={78} widthInPx="170px" heightInPx="170px" />
+        )}
       </Box>
+
+      {imageUrlError && <div className="errorMessage">{imageUrlError}</div>}
     </Box>
   );
 };

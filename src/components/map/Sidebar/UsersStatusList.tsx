@@ -1,4 +1,4 @@
-import { Stack, SxProps, Theme } from "@mui/material";
+import { Box, Stack, SxProps, Theme } from "@mui/material";
 import { collection, documentId, getDocs, getFirestore, onSnapshot, query, where } from "firebase/firestore";
 import React, { useCallback, useEffect, useState } from "react";
 import { ReputationSignal } from "src/knowledgeTypes";
@@ -8,6 +8,7 @@ import { OpenSidebar } from "@/pages/notebook";
 import { useAuth } from "../../../context/AuthContext";
 import { loadReputationsData } from "../../../lib/utils/Map.utils";
 import { UsersStatus } from "../../../nodeBookTypes";
+// import OptimizedAvatar from "../../OptimizedAvatar";
 // import { UsersStatus } from "../../../noteBookTypes";
 import { MemoizedUserStatusIcon } from "../UserStatusIcon";
 
@@ -98,9 +99,10 @@ type UsersStatusListProps = {
   sx?: SxProps<Theme>;
   onlineUsers: string[];
   usersOnlineStatusLoaded: boolean;
+  disabled?: boolean;
 };
 
-const UsersStatusList = (props: UsersStatusListProps) => {
+const UsersStatusList = ({ disabled = false, ...props }: UsersStatusListProps) => {
   const [{ user }] = useAuth();
   const db = getFirestore();
 
@@ -221,6 +223,7 @@ const UsersStatusList = (props: UsersStatusListProps) => {
   // Get user data by tag selected
   useEffect(() => {
     if (!user) return;
+    if (disabled) return;
 
     const usersDictTemp: { [key: string]: any } = {};
     const usersQuery = query(collection(db, "users"), where("tagId", "==", user.tagId));
@@ -248,7 +251,7 @@ const UsersStatusList = (props: UsersStatusListProps) => {
     });
     return () => usersSnapshot();
     // }
-  }, [db, user]);
+  }, [db, disabled, user]);
 
   // Load all time reputation after load user
   useEffect(() => {
@@ -425,8 +428,23 @@ const UsersStatusList = (props: UsersStatusListProps) => {
         px: "20px",
       }}
     >
-      {renderUsersList(onlineUsersList, true)}
-      {renderUsersList(usersList, false)}
+      {disabled && (
+        <Stack spacing={"10px"}>
+          {[1, 2, 3].map(cur => (
+            <Box
+              key={cur}
+              sx={{
+                width: "28px",
+                height: "28px",
+                backgroundColor: theme => (theme.palette.mode === "dark" ? "#3a3a3a" : "#747474ff"),
+                borderRadius: "50%",
+              }}
+            />
+          ))}
+        </Stack>
+      )}
+      {!disabled && renderUsersList(onlineUsersList, true)}
+      {!disabled && renderUsersList(usersList, false)}
     </Stack>
   );
 };

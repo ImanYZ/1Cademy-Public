@@ -69,6 +69,7 @@ const App = (props: AppPropsWithLayout) => {
               <ThemeProvider>
                 <CssBaseline />
                 {getLayout(<Component {...pageProps} />)}
+                <div id="portal"></div>
               </ThemeProvider>
             </AuthProvider>
           </SnackbarProvider>

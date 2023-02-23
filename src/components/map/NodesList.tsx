@@ -52,6 +52,8 @@ type NodeListProps = {
   openSidebar: OpenSidebar;
   setOperation: (operation: string) => void;
   openUserInfoSidebar: (uname: string, imageUrl: string, fullName: string, chooseUname: string) => void;
+  disabledNodes: string[];
+  enableChildElements?: string[];
 };
 
 const NodesList = ({
@@ -99,6 +101,8 @@ const NodesList = ({
   openSidebar,
   setOperation,
   openUserInfoSidebar,
+  disabledNodes = [],
+  enableChildElements = [],
 }: NodeListProps) => {
   /* eslint-disable-next-line @typescript-eslint/no-unused-vars */
   const { nodeBookDispatch } = useNodeBook();
@@ -241,6 +245,8 @@ const NodesList = ({
             contributors={nodes[nId].contributors}
             institutions={nodes[nId].institutions}
             openUserInfoSidebar={openUserInfoSidebar}
+            disabled={disabledNodes.includes(nId)}
+            enableChildElements={enableChildElements}
           />
         );
       })}
@@ -277,6 +283,8 @@ export const MemoizedNodeList = React.memo(NodesList, (prev, next) => {
     prev.saveProposedImprovement === next.saveProposedImprovement &&
     prev.closeSideBar === next.closeSideBar &&
     prev.reloadPermanentGrpah === next.reloadPermanentGrpah &&
-    prev.openSidebar === prev.openSidebar
+    prev.openSidebar === prev.openSidebar &&
+    prev.disabledNodes === next.disabledNodes &&
+    prev.enableChildElements === next.enableChildElements
   );
 });
