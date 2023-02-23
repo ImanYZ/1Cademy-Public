@@ -6,6 +6,7 @@ import React, { useCallback, useEffect, useMemo, useState } from "react";
 import MarkdownRender from "./Markdown/MarkdownRender";
 type EditorOptions = "EDIT" | "PREVIEW";
 type EditorProps = {
+  id?: string;
   label: string;
   value: string;
   focus?: boolean;
@@ -20,6 +21,7 @@ type EditorProps = {
 };
 
 export const Editor = ({
+  id,
   label,
   value,
   setValue,
@@ -95,7 +97,7 @@ export const Editor = ({
   }, []);
 
   return (
-    <Box className={readOnly ? "HyperEditor ReadOnlyEditor" : "HyperEditor"} sx={{ width: "100%" }}>
+    <Box id={id} className={readOnly ? "HyperEditor ReadOnlyEditor" : "HyperEditor"} sx={{ width: "100%" }}>
       <Box sx={{ display: "flex", flexDirection: "column-reverse" }}>
         <Box>
           {option === "EDIT" && !readOnly ? (

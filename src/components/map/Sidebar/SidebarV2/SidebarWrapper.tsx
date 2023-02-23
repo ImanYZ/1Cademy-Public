@@ -7,6 +7,7 @@ import React, { ReactNode, useCallback, useMemo, useRef } from "react";
 import { OpenSidebar } from "src/pages/notebook";
 
 type SidebarWrapperProps = {
+  id?: string;
   title: string;
   open: boolean;
   onClose: () => void;
@@ -28,6 +29,7 @@ type SidebarWrapperProps = {
  * Only Sidebar content should be scrollable
  */
 export const SidebarWrapper = ({
+  id,
   title,
   open,
   onClose,
@@ -67,6 +69,7 @@ export const SidebarWrapper = ({
       open={open}
       onClose={onClose}
       PaperProps={{
+        id,
         sx: {
           minWidth: { xs: "0px", sm: width },
           width: { xs: isMenuOpen ? "100%" : "auto", sm: width },

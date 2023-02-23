@@ -1,5 +1,5 @@
 import { Timestamp } from "firebase/firestore";
-import { Dispatch } from "react";
+import React, { Dispatch } from "react";
 
 import { KnowledgeChoice } from "./knowledgeTypes";
 import { NodeType } from "./types";
@@ -61,6 +61,28 @@ export interface NodeBookState {
   readonly contributorsNodeId: any;
   readonly showContributors: any;
 }
+
+export type TNodeBookState = {
+  sNode: string | null;
+  isSubmitting: boolean;
+  choosingNode: ChoosingNode | null;
+  chosenNode: ChosenNode | null;
+  selectedNode: string | null;
+  initialProposal: string | null;
+  selectionType: SelectionType;
+  selectedTags: string[];
+  openToolbar: boolean;
+  selectedUser: SelectedUser | null;
+  searchByTitleOnly: boolean;
+  searchQuery: string;
+  nodeTitleBlured: boolean;
+  openEditButton: boolean;
+  nodeId: any;
+  isMenuOpen: boolean;
+  lastOperation: LastOperation;
+  contributorsNodeId: any;
+  showContributors: any;
+};
 
 export type SetSNodeAction = {
   type: "setSNode";
@@ -145,6 +167,11 @@ export type SetInitialProposal = {
   payload: string | null;
 };
 
+export type SetAll = {
+  type: "setAll";
+  payload: TNodeBookState;
+};
+
 export type DispatchNodeBookActions =
   | SetSNodeAction
   | SetIsSubmittingAction
@@ -162,12 +189,145 @@ export type DispatchNodeBookActions =
   | SetIsMenuOpen
   | SetLastOperation
   | SetContributorsNodeId
-  | SetInitialProposal;
+  | SetInitialProposal
+  | SetAll;
 
 export type NodeBookActions = {
   dispatch: Dispatch<DispatchNodeBookActions>;
   handleError: (options: ErrorOptions) => void;
 };
+
+export type SetStepType =
+  | 1
+  | 2
+  | 3
+  | 4
+  | 5
+  | 6
+  | 7
+  | 8
+  | 9
+  | 10
+  | 11
+  | 12
+  | 13
+  | 14
+  | 15
+  | 16
+  | 17
+  | 18
+  | 19
+  | 20
+  | 21
+  | 22
+  | 23
+  | 24
+  | 25
+  | 26
+  | 27
+  | 28
+  | 29
+  | 30
+  | 31
+  | 32
+  | 33
+  | 34
+  | 35
+  | 36
+  | 37
+  | 38
+  | 39
+  | 40
+  | 41
+  | 42
+  | 43
+  | 44
+  | 45
+  | 46
+  | 47
+  | 48
+  | 49
+  | 50
+  | 51
+  | 52
+  | 53
+  | 54
+  | 55
+  | 56
+  | 57
+  | 58
+  | 59
+  | 60
+  | 61
+  | 62
+  | 63
+  | 64
+  | 65
+  | 66
+  | 67
+  | 68
+  | 69
+  | 70
+  | 71
+  | 72
+  | 73
+  | 74
+  | 75
+  | 76
+  | 77
+  | 78
+  | 79
+  | 80
+  | 81
+  | 82
+  | 83
+  | 84
+  | 85
+  | 86
+  | 87
+  | 88
+  | 89
+  | 90
+  | 91
+  | 92
+  | 93
+  | 94
+  | 95
+  | 96
+  | 97
+  | 98
+  | 99
+  | 100
+  | null;
+
+export type TutorialState = null | NodeTutorialState;
+
+interface NodeTutorialState {
+  readonly localSnapshot: FullNodeData[];
+  readonly targetId: string;
+  readonly childTargetId?: string;
+  readonly title: string;
+  readonly description: React.ReactNode;
+  readonly disabledElements: string[];
+  readonly enableChildElements: string[];
+  readonly anchor: string;
+  readonly currentStepName: SetStepType;
+  readonly nextStepName: SetStepType;
+  readonly previosStepName: SetStepType;
+  readonly tooltipPosition: "top" | "bottom" | "left" | "right";
+  readonly stepNumber: number;
+  readonly stepLenght: number;
+  readonly isClickeable: boolean;
+}
+export type StepReducerPayload = {
+  callback?: () => void;
+};
+export type SetStep = {
+  type: SetStepType;
+  payload: StepReducerPayload;
+};
+
+export type DispatchNodeTutorialAction = SetStep;
 
 export type UserNodesData = {
   // "firstVisit": Timestamp,//CHECK
@@ -232,7 +392,7 @@ export type NodeFireStore = {
   corrects: number;
   createdAt: Timestamp;
   deleted: boolean;
-  height: number;
+  height?: number; // TODO: height should not exist on DB, remove please
   institNames: string[];
   institutions: {
     [key: string]: { reputation?: number };
