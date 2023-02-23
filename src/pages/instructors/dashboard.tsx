@@ -3,7 +3,7 @@ import { Paper, Typography /* useTheme */, useMediaQuery, useTheme } from "@mui/
 // import { useTheme } from "@mui/material/styles";
 // import useMediaQuery from "@mui/material/useMediaQuery";
 import { Box } from "@mui/system";
-import { collection, doc, getDoc, getDocs, getFirestore, query, where } from "firebase/firestore";
+import { collection, getFirestore, onSnapshot, query, where } from "firebase/firestore";
 import { useCallback, useEffect, useState } from "react";
 import {
   BubbleAxis,
@@ -266,23 +266,23 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
     for (const student of students) {
       studentNameByUname[student.uname] = `${student.fName}|${student.lName}`;
     }
-    (async () => {
-      const semesterStudentSankeyCol = collection(db, "semesterStudentSankeys");
-      const q = query(
-        semesterStudentSankeyCol,
-        where("tagId", "==", currentSemester.tagId),
-        where("deleted", "==", false)
-      );
-      const semesterStudentSankeys = await getDocs(q);
-      console.log(
-        "semesterStudentSankeys",
-        semesterStudentSankeys.docs.map(std => std.data())
-      );
 
-      if (semesterStudentSankeys.docs.length) {
-        let _sankeyData: any[] = [];
-        for (const semesterStudentSankey of semesterStudentSankeys.docs) {
-          const _semesterStudentSankey = semesterStudentSankey.data();
+    const semesterStudentSankeyCol = collection(db, "semesterStudentSankeys");
+    const q = query(
+      semesterStudentSankeyCol,
+      where("tagId", "==", currentSemester.tagId),
+      where("deleted", "==", false)
+    );
+    let _sankeyData: any[] = [];
+    const snapShotFunc = onSnapshot(q, async snapshot => {
+      const docChanges = snapshot.docChanges();
+      if (!docChanges.length) {
+        setSankeyData([]);
+        return;
+      }
+      for (let change of docChanges) {
+        const _semesterStudentSankey = change.doc.data();
+        if (change.type === "added") {
           for (const intraction of _semesterStudentSankey.intractions) {
             _sankeyData.push({
               source: studentNameByUname[_semesterStudentSankey.uname],
@@ -292,12 +292,30 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
               value: intraction.upVotes + intraction.downVotes,
             });
           }
+        } else if (change.type === "modified") {
+          const filterSankeyData = _sankeyData.filter(
+            sankey => sankey.source !== studentNameByUname[_semesterStudentSankey.uname]
+          );
+          let newSankeyData: any[] = [];
+          for (const intraction of _semesterStudentSankey.intractions) {
+            newSankeyData.push({
+              source: studentNameByUname[_semesterStudentSankey.uname],
+              target: studentNameByUname[intraction.uname],
+              upVotes: intraction.upVotes,
+              downVotes: intraction.downVotes,
+              value: intraction.upVotes + intraction.downVotes,
+            });
+          }
+          _sankeyData = [...filterSankeyData, ...newSankeyData];
+        } else if (change.type === "removed") {
+          _sankeyData = _sankeyData.filter(
+            sankey => sankey.source !== studentNameByUname[_semesterStudentSankey.uname]
+          );
         }
-        setSankeyData(_sankeyData);
-      } else {
-        setSankeyData([]);
       }
-    })();
+      setSankeyData([..._sankeyData]);
+    });
+    return () => snapShotFunc();
   }, [currentSemester, db, user, students]);
 
   useEffect(() => {
@@ -305,26 +323,41 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
     if (!currentSemester || !currentSemester.tagId) return;
 
     setIsLoading(true);
-    const getSemesterData = async () => {
-      const semesterRef = collection(db, "semesterStudentVoteStats");
-      const q = query(semesterRef, where("tagId", "==", currentSemester.tagId), where("deleted", "==", false));
-      const semesterDoc = await getDocs(q);
-      if (!semesterDoc.docs.length) {
+    const semesterRef = collection(db, "semesterStudentVoteStats");
+    const q = query(semesterRef, where("tagId", "==", currentSemester.tagId), where("deleted", "==", false));
+    let semesters: any = [];
+    const snapShotFunc = onSnapshot(q, async snapshot => {
+      const docChanges = snapshot.docChanges();
+      if (!docChanges.length) {
         setBubble([]);
         setStackedBar([]);
         setThereIsData(false);
         setSemesterStudentVoteState([]);
-
         return;
       }
 
+      for (let change of docChanges) {
+        if (change.type === "added") {
+          semesters.push(change.doc.data() as SemesterStudentVoteStat);
+        } else if (change.type === "modified") {
+          const index = semesters.findIndex(
+            (semester: SemesterStudentVoteStat) => semester.uname === change.doc.data().uname
+          );
+          semesters[index] = change.doc.data();
+        } else if (change.type === "removed") {
+          const index = semesters.findIndex(
+            (semester: SemesterStudentVoteStat) => semester.uname === change.doc.data().uname
+          );
+          semesters.splice(index, 1);
+        }
+      }
       // semesterStudentVoteState
-      const semester = semesterDoc.docs.map(sem => sem.data() as SemesterStudentVoteStat);
-      setSemesterStudentVoteState(semester);
+      setSemesterStudentVoteState([...semesters]);
       // setSemesterStats(getSemStat(semester));
       setThereIsData(true);
-    };
-    getSemesterData();
+    });
+
+    return () => snapShotFunc();
   }, [currentSemester, db, user]);
 
   useEffect(() => {
@@ -363,43 +396,47 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
   useEffect(() => {
     if (!currentSemester || !currentSemester.tagId) return;
     setIsLoading(true);
-    const getSemesterStudents = async () => {
-      const semesterRef = doc(db, "semesters", currentSemester.tagId);
-      const semesterDoc = await getDoc(semesterRef);
-      if (!semesterDoc.exists()) {
+
+    const semesterRef = collection(db, "semesters");
+    const q = query(semesterRef, where("tagId", "==", currentSemester.tagId));
+    const snapShotFunc = onSnapshot(q, async snapshot => {
+      const docChanges = snapshot.docChanges();
+      if (!docChanges.length) {
         setSemesterConfig(null);
         setStudentsCounter(0);
         setStudents(null);
         setMaxProposalsPoints(0);
         setMaxQuestionsPoints(0);
         setThereIsData(false);
-
         return;
       }
 
-      const { maxProposalsPoints, maxQuestionsPoints } = getMaxProposalsQuestionsPoints(
-        semesterDoc.data() as ISemester
-      );
-      setSemesterConfig(semesterDoc.data() as ISemester);
-      setStudentsCounter((semesterDoc.data() as ISemester).students.length);
-      setMaxProposalsPoints(maxProposalsPoints);
-      setMaxQuestionsPoints(maxQuestionsPoints);
-      setStudents(semesterDoc.data().students);
-      setThereIsData(true);
-    };
-    getSemesterStudents();
+      for (let change of docChanges) {
+        const semesterDoc = change.doc;
+        const { maxProposalsPoints, maxQuestionsPoints } = getMaxProposalsQuestionsPoints(
+          semesterDoc.data() as ISemester
+        );
+        setSemesterConfig(semesterDoc.data() as ISemester);
+        setStudentsCounter((semesterDoc.data() as ISemester).students.length);
+        setMaxProposalsPoints(maxProposalsPoints);
+        setMaxQuestionsPoints(maxQuestionsPoints);
+        setStudents(semesterDoc.data().students);
+        setThereIsData(true);
+      }
+    });
+    return () => snapShotFunc();
   }, [currentSemester, db]);
 
   useEffect(() => {
     if (!currentSemester || !currentSemester.tagId || !semesterConfig) return;
 
     setIsLoading(true);
-    const getUserDailyStat = async () => {
-      const userDailyStatRef = collection(db, "semesterStudentStats");
-      const q = query(userDailyStatRef, where("tagId", "==", currentSemester.tagId), where("deleted", "==", false));
-      const userDailyStatDoc = await getDocs(q);
-
-      if (!userDailyStatDoc.docs.length) {
+    const userDailyStatRef = collection(db, "semesterStudentStats");
+    const q = query(userDailyStatRef, where("tagId", "==", currentSemester.tagId), where("deleted", "==", false));
+    let userDailyStatsIncomplete: SemesterStudentStat[] = [];
+    const snapShotFunc = onSnapshot(q, async snapshot => {
+      const docChanges = snapshot.docChanges();
+      if (!docChanges.length) {
         setTrendStats({ childProposals: [], editProposals: [], links: [], nodes: [], votes: [], questions: [] });
         setBoxStats({
           proposalsPoints: { data: {}, min: 0, max: 1000 },
@@ -408,11 +445,24 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
         });
         setIsLoading(false);
         setThereIsData(false);
-
         return;
       }
+      for (let change of docChanges) {
+        if (change.type === "added") {
+          userDailyStatsIncomplete.push(change.doc.data() as SemesterStudentStat);
+        } else if (change.type === "modified") {
+          const index = userDailyStatsIncomplete.findIndex(
+            (userDailyStat: SemesterStudentStat) => userDailyStat.uname === change.doc.data().uname
+          );
+          userDailyStatsIncomplete[index] = change.doc.data() as SemesterStudentStat;
+        } else if (change.type === "removed") {
+          const index = userDailyStatsIncomplete.findIndex(
+            (userDailyStat: SemesterStudentStat) => userDailyStat.uname === change.doc.data().uname
+          );
+          userDailyStatsIncomplete.splice(index, 1);
+        }
+      }
 
-      const userDailyStatsIncomplete = userDailyStatDoc.docs.map(dailyStat => dailyStat.data() as SemesterStudentStat);
       const userDailyStats: ISemesterStudentStat[] = userDailyStatsIncomplete.map(cur => {
         const daysFixed = cur.days.map(c => ({ day: c.day, chapters: c.chapters ?? [] }));
         return { ...cur, days: daysFixed };
@@ -500,8 +550,8 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
       setThereIsData(true);
 
       setIsLoading(false);
-    };
-    getUserDailyStat();
+    });
+    return () => snapShotFunc();
   }, [currentSemester, db, semesterConfig]);
 
   const getMaxProposalsQuestionsPoints = (data: ISemester): MaxPoints => {
