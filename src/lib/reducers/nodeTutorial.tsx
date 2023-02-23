@@ -46,7 +46,7 @@ export function nodeTutorialReducer(
   state: TutorialState,
   { payload, ...action }: DispatchNodeTutorialAction
 ): TutorialState {
-  console.log("set difeault step", state?.targetId, state?.childTargetId);
+  console.log({ state, payload });
 
   if (state && state.childTargetId) {
     const element = document.getElementById(state.childTargetId);
@@ -226,7 +226,7 @@ export function nodeTutorialReducer(
       return {
         localSnapshot: [
           // { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["00"], nodeChangeType: "removed", open: false },
-          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["01"], nodeChangeType: "added", open: true },
+          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["01"], nodeChangeType: "modified", open: true },
         ],
         childTargetId: "01-close-button",
         title: "Nodes - Node Header",
@@ -248,7 +248,7 @@ export function nodeTutorialReducer(
         anchor: "",
         currentStepName: action.type,
         nextStepName: 6.5,
-        previosStepName: 5,
+        previosStepName: getPrevStep(action.type),
         tooltipPosition: "top",
         stepNumber: action.type,
         stepLenght: STEPS_LENGHT,
@@ -258,13 +258,13 @@ export function nodeTutorialReducer(
       return {
         localSnapshot: [
           // { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["00"], nodeChangeType: "removed", open: false },
-          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["01"], nodeChangeType: "added", open: false },
+          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["01"], nodeChangeType: "modified", open: false },
         ],
         childTargetId: "01-close-button",
         title: "Nodes - Node Header",
         description: (
           <Typography variant="body1" sx={{ mb: "16px" }}>
-            This one minimizes the content in a node so only the title is displayed.
+            expand
           </Typography>
         ),
         disabledElements: [
