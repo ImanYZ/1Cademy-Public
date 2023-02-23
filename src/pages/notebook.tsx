@@ -1601,7 +1601,7 @@ const Dashboard = ({}: DashboardProps) => {
           const nodeEl = document.getElementById(nodeId)! as HTMLElement;
           let height: number = nodeEl.clientHeight;
           if (isNaN(height)) {
-            height = nodes[nodeId]!.height;
+            height = nodes[nodeId]!.height ?? 0; //take a look with Ameer Hamza
           }
 
           let nodesUpdated = false;
@@ -1610,7 +1610,7 @@ const Dashboard = ({}: DashboardProps) => {
           const rows = getColumnRows(nodes, column);
           if (rows) {
             const nodeIdx = rows.indexOf(nodeId);
-            const heightDiff = height - nodes[nodeId]!.height;
+            const heightDiff = height - (nodes[nodeId]!.height ?? 0); //take a look with Ameer Hamza
 
             let lastHeight = height;
             let lastTop = nodes[nodeId]!.top;
@@ -1627,7 +1627,7 @@ const Dashboard = ({}: DashboardProps) => {
 
               _nodeData.top += heightDiff;
 
-              lastHeight = _nodeData.height;
+              lastHeight = _nodeData.height ?? 0; //take a look with Ameer Hamza
               lastTop = _nodeData.top;
 
               nodesUpdated = true;
