@@ -370,7 +370,8 @@ const Dashboard = ({}: DashboardProps) => {
           if (isSearcher) {
             lastNodeOperation.current = "";
           }
-          if (onNodeInViewport(nodeId) && !isSearcher) return;
+
+          if (!isPlayingTheTutorialRef.current && onNodeInViewport(nodeId) && !isSearcher) return;
 
           if (
             originalNode &&

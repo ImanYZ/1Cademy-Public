@@ -34,6 +34,13 @@ export const useInteractiveTutorial = ({ notebookRef }: useInteractiveTutorialPr
     (step: SetStepType) => {
       console.log("onchange step", step);
       let payload: StepReducerPayload = {};
+      if (step === 1)
+        payload = {
+          callback: () => {
+            notebookRef.current.selectedNode = "01";
+            nodeBookDispatch({ type: "setSelectedNode", payload: "01" });
+          },
+        };
       if (step === 42)
         payload = {
           callback: () => {

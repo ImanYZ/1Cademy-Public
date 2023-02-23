@@ -44,12 +44,15 @@ export function nodeTutorialReducer(
   { payload, ...action }: DispatchNodeTutorialAction
 ): TutorialState {
   console.log("set difeault step", state?.targetId, state?.childTargetId);
+
   if (state && state.childTargetId) {
     const element = document.getElementById(state.childTargetId);
     if (element) {
       element.style.outline = "none";
     }
   }
+  if (payload.callback) payload?.callback();
+
   switch (action.type) {
     case null:
       return null;
@@ -1130,7 +1133,6 @@ export function nodeTutorialReducer(
         isClickeable: false,
       };
     case 42: //42
-      if (payload.callback) payload?.callback();
       return {
         localSnapshot: [
           { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["01"], nodeChangeType: "added", open: true },
@@ -1159,7 +1161,6 @@ export function nodeTutorialReducer(
         isClickeable: false,
       };
     case 43: //43
-      if (payload.callback) payload?.callback();
       return {
         localSnapshot: [
           // { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["00"], nodeChangeType: "removed", open: false },
@@ -1280,7 +1281,6 @@ export function nodeTutorialReducer(
         isClickeable: false,
       };
     case 47: //44
-      if (payload.callback) payload?.callback();
       return {
         localSnapshot: [
           { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["01"], nodeChangeType: "added", open: true },
@@ -1460,7 +1460,6 @@ export function nodeTutorialReducer(
         isClickeable: false,
       };
     case 53: //44
-      if (payload.callback) payload?.callback();
       return {
         localSnapshot: [
           { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["03"], nodeChangeType: "added", open: true, nodeType: "Relation" },
@@ -1585,7 +1584,6 @@ export function nodeTutorialReducer(
         isClickeable: false,
       };
     case 57: //44
-      if (payload.callback) payload?.callback();
       return {
         localSnapshot: [
           // { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["00"], nodeChangeType: "removed", open: false },
@@ -1650,8 +1648,6 @@ export function nodeTutorialReducer(
         isClickeable: false,
       };
     case 59: //44
-      if (payload.callback) payload?.callback();
-
       return {
         localSnapshot: [
           // { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["00"], nodeChangeType: "removed", open: false },
@@ -1741,8 +1737,6 @@ export function nodeTutorialReducer(
         isClickeable: false,
       };
     case 62: //44
-      if (payload.callback) payload?.callback();
-
       return {
         localSnapshot: [
           // { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["00"], nodeChangeType: "removed", open: false },
