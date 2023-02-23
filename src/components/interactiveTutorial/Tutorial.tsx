@@ -132,6 +132,19 @@ export const Tutorial = ({ tutorialState, targetClientRect, onChangeStep }: Tuto
         </Typography>
         <Box>
           <Button
+            variant="contained"
+            onClick={() => onChangeStep(null)}
+            sx={{
+              borderRadius: "32px",
+              p: "8px 32px",
+              mr: "16px",
+              backgroundColor: "#FF6D00",
+              ":hover": { backgroundColor: "#f57a1c" },
+            }}
+          >
+            Skip
+          </Button>
+          <Button
             variant="outlined"
             onClick={() => onChangeStep(tutorialState.previosStepName)}
             sx={{
