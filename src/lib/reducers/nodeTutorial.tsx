@@ -1,6 +1,8 @@
 import LocalLibraryIcon from "@mui/icons-material/LocalLibrary";
 import ShareIcon from "@mui/icons-material/Share";
 import { Typography } from "@mui/material";
+import dayjs from "dayjs";
+import relativeTime from "dayjs/plugin/relativeTime";
 
 import MarkdownRender from "@/components/Markdown/MarkdownRender";
 
@@ -9,6 +11,7 @@ import { INTERACTIVE_TUTORIAL_NOTEBOOK_NODES } from "../utils/interactiveTutoria
 
 export const INITIAL_NODE_TUTORIAL_STATE: TutorialState = null;
 
+dayjs.extend(relativeTime);
 const STEPS_LENGHT = 65;
 
 const getNextStep = (step: SetStepType): SetStepType => {
@@ -453,7 +456,11 @@ export function nodeTutorialReducer(
         title: "Node Content - Markdown",
         description: (
           <Typography variant="body1" sx={{ mb: "16px" }}>
-            For <i>italicized text</i> you place one star before and after the text you would like to make italicized.
+            For{" "}
+            <Typography component={"span"} sx={{ fontStyle: "italic" }}>
+              italicized text
+            </Typography>{" "}
+            you place one star before and after the text you would like to make italicized.
           </Typography>
         ),
         disabledElements: ["TOOLBAR", "01", "LIVENESS_BAR", "COMMUNITY_LEADERBOARD"],
@@ -506,7 +513,7 @@ export function nodeTutorialReducer(
         title: "Node Content - Markdown",
         description: (
           <Typography variant="body1" sx={{ mb: "16px" }}>
-            for an unordered list you type a dash and a space before each listed item. Listed items are placed on their
+            For an unordered list you type a dash and a space before each listed item. Listed items are placed on their
             own line.
           </Typography>
         ),
@@ -589,7 +596,7 @@ export function nodeTutorialReducer(
         title: "Nodes - Node Footer",
         description: (
           <Typography variant="body1" sx={{ mb: "16px" }}>
-            The node footer has many icons
+            The node footer provides many tools.
           </Typography>
         ),
         disabledElements: ["TOOLBAR", "01", "LIVENESS_BAR", "COMMUNITY_LEADERBOARD"],
@@ -668,7 +675,9 @@ export function nodeTutorialReducer(
         title: "Nodes - Node Footer",
         description: (
           <Typography variant="body1" sx={{ mb: "16px" }}>
-            The third icon indicates when the latest version of the node was adopted, this one was approved __days ago.
+            {`The third icon indicates when the latest version of the node was adopted, this one was approved ${dayjs(
+              new Date(INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["01"].changedAt)
+            ).fromNow()}`}
           </Typography>
         ),
         disabledElements: ["TOOLBAR", "01", "LIVENESS_BAR", "COMMUNITY_LEADERBOARD"],
@@ -774,7 +783,7 @@ export function nodeTutorialReducer(
         title: "Node Footer - Down votes",
         description: (
           <Typography variant="body1" sx={{ mb: "16px" }}>
-            A downvote is infact a vote to remove a node
+            A downvote is in fact a vote to delete a node.
           </Typography>
         ),
         disabledElements: ["TOOLBAR", "01", "LIVENESS_BAR", "COMMUNITY_LEADERBOARD"],
@@ -799,7 +808,7 @@ export function nodeTutorialReducer(
         title: "Node Footer - Up votes",
         description: (
           <Typography variant="body1" sx={{ mb: "16px" }}>
-            An upvote is a vote to not change a node
+            An upvote is a vote to lock a node from further changes.
           </Typography>
         ),
         disabledElements: ["TOOLBAR", "01", "LIVENESS_BAR", "COMMUNITY_LEADERBOARD"],
@@ -824,7 +833,7 @@ export function nodeTutorialReducer(
         title: "Node Footer - Up/Down Votes",
         description: (
           <Typography variant="body1" sx={{ mb: "16px" }}>
-            When a ratio with a high enough number of downvotes to upvotes is reached a node can be deleted.
+            A node with more downvotes than upvotes is automatically deleted.
           </Typography>
         ),
         disabledElements: ["TOOLBAR", "01", "LIVENESS_BAR", "COMMUNITY_LEADERBOARD"],
@@ -849,7 +858,7 @@ export function nodeTutorialReducer(
         title: "Node Footer - Up/Down Votes",
         description: (
           <Typography variant="body1" sx={{ mb: "16px" }}>
-            The difference of upvotes and downvotes, called net vote, also determines how many or few approving votes a
+            The difference of upvotes and downvotes, called net vote, also determines how many approving votes a
             proposal will need to change the node. This will be discussed further later on.
           </Typography>
         ),
@@ -875,7 +884,7 @@ export function nodeTutorialReducer(
         title: "Node Footer - Tag and Citation",
         description: (
           <Typography variant="body1" sx={{ mb: "16px" }}>
-            The next icons are on a single button and represent the tag and citation for a node.
+            The next icons are on a single button and open/close the list of tags and citations for a node.
           </Typography>
         ),
         disabledElements: ["TOOLBAR", "01", "LIVENESS_BAR", "COMMUNITY_LEADERBOARD"],
