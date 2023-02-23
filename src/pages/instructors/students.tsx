@@ -46,41 +46,41 @@ const filterChoices: any = {
   "Vote Points": "votePoints",
 };
 
-const columns: string[] = [
-  "firstName",
-  "lastName",
-  "email",
-  "totalPoints",
-  "wrongs",
-  "corrects",
-  "awards",
-  "newProposals",
-  "editNodeProposals",
-  "proposalsPoints",
-  "questions",
-  "questionPoints",
-  "vote",
-  "votePoints",
-  "lastActivity",
-];
+// const columns: string[] = [
+//   "firstName",
+//   "lastName",
+//   "email",
+//   "totalPoints",
+//   "wrongs",
+//   "corrects",
+//   "awards",
+//   "newProposals",
+//   "editNodeProposals",
+//   "proposalsPoints",
+//   "questions",
+//   "questionPoints",
+//   "vote",
+//   "votePoints",
+//   "lastActivity",
+// ];
 
-const keys = [
-  "First Name",
-  "Last Name",
-  "Email",
-  "Total Poitns",
-  "Wrongs",
-  "Corrects",
-  "Awards",
-  "Child Proposals",
-  "Edit  Proposals",
-  "Proposal Points",
-  "Questions",
-  "Question Points",
-  "Vote",
-  "Vote Points",
-  "Last Activity",
-];
+// const keys = [
+//   "First Name",
+//   "Last Name",
+//   "Email",
+//   "Total Poitns",
+//   "Wrongs",
+//   "Corrects",
+//   "Awards",
+//   "Child Proposals",
+//   "Edit Proposals",
+//   "Proposal Points",
+//   "Questions",
+//   "Question Points",
+//   "Vote",
+//   "Vote Points",
+//   "Last Activity",
+// ];
 
 const keysColumns: any = {
   "First Name": "firstName",
@@ -101,6 +101,42 @@ const keysColumns: any = {
 };
 
 export const Students: InstructorLayoutPage = ({ /* selectedSemester, */ selectedCourse, currentSemester }) => {
+  console.log(currentSemester, "currentSemester");
+  const [keys, setKeys] = useState([
+    "First Name",
+    "Last Name",
+    "Email",
+    "Total Poitns",
+    "Wrongs",
+    "Corrects",
+    "Awards",
+    "Child Proposals",
+    "Edit Proposals",
+    "Proposal Points",
+    "Questions",
+    "Question Points",
+    "Vote",
+    "Vote Points",
+    "Last Activity",
+  ]);
+
+  const [columns, setColumns] = useState([
+    "firstName",
+    "lastName",
+    "email",
+    "totalPoints",
+    "wrongs",
+    "corrects",
+    "awards",
+    "newProposals",
+    "editNodeProposals",
+    "proposalsPoints",
+    "questions",
+    "questionPoints",
+    "vote",
+    "votePoints",
+    "lastActivity",
+  ]);
   const [rows, setRows] = useState<any>([]);
   const [tableRows, setTableRows] = useState<any>([]);
   const [openFilter, setOpenFilter] = useState(false);
@@ -164,6 +200,43 @@ export const Students: InstructorLayoutPage = ({ /* selectedSemester, */ selecte
   }, [db, currentSemester]);
 
   useEffect(() => {
+    setKeys([
+      "First Name",
+      "Last Name",
+      "Email",
+      "Total Poitns",
+      "Wrongs",
+      "Corrects",
+      "Awards",
+      "Child Proposals",
+      "Edit Proposals",
+      "Proposal Points",
+      "Questions",
+      "Question Points",
+      "Vote",
+      "Vote Points",
+      "Last Activity",
+    ]);
+    setColumns([
+      "firstName",
+      "lastName",
+      "email",
+      "totalPoints",
+      "wrongs",
+      "corrects",
+      "awards",
+      "newProposals",
+      "editNodeProposals",
+      "proposalsPoints",
+      "questions",
+      "questionPoints",
+      "vote",
+      "votePoints",
+      "lastActivity",
+    ]);
+  }, [currentSemester]);
+
+  useEffect(() => {
     if (!db) return;
     if (!currentSemester) return;
     if (states.length === 0) return;
@@ -174,17 +247,113 @@ export const Students: InstructorLayoutPage = ({ /* selectedSemester, */ selecte
       if (!docChanges.length) return;
       for (let change of docChanges) {
         if (change.type === "added" || change.type === "modified") {
-          const _students = change.doc.data().students;
-          const { numPoints, numProposalPerDay } = change.doc.data().nodeProposals;
-          console.log("configs", { numPoints, numProposalPerDay });
-          const { onReceiveStar } = change.doc.data().votes;
+          const docData = change.doc.data();
+          if (!docData?.isCastingVotesRequired) {
+            ["Vote", "Vote Points"].map(key => {
+              const index = keys.indexOf(key);
+              if (index !== -1) {
+                keys.splice(index, 1);
+              }
+            });
+
+            ["vote", "votePoints"].map(key => {
+              const index = columns.indexOf(key);
+              if (index !== -1) {
+                columns.splice(index, 1);
+              }
+            });
+          }
+
+          if (!docData?.isQuestionProposalRequired) {
+            ["Questions", "Question Points"].map(key => {
+              const index = keys.indexOf(key);
+              if (index !== -1) {
+                keys.splice(index, 1);
+              }
+            });
+
+            ["questions", "questionPoints"].map(key => {
+              const index = columns.indexOf(key);
+              if (index !== -1) {
+                columns.splice(index, 1);
+              }
+            });
+          }
+
+          if (!docData?.isProposalRequired) {
+            ["Child Proposals", "Edit Proposals", "Proposal Points"].map(key => {
+              const index = keys.indexOf(key);
+              if (index !== -1) {
+                keys.splice(index, 1);
+              }
+            });
+
+            ["newProposals", "editNodeProposals", "proposalsPoints"].map(key => {
+              const index = columns.indexOf(key);
+              if (index !== -1) {
+                columns.splice(index, 1);
+              }
+            });
+          }
+
+          if (!docData?.isGettingVotesRequired) {
+            ["Wrongs", "Corrects", "Awards"].map(key => {
+              const index = keys.indexOf(key);
+              if (index !== -1) {
+                keys.splice(index, 1);
+              }
+            });
+
+            ["wrongs", "corrects", "awards"].map(key => {
+              const index = columns.indexOf(key);
+              if (index !== -1) {
+                columns.splice(index, 1);
+              }
+            });
+          }
+
+          const _students = docData.students;
+          const {
+            onReceiveVote,
+            onReceiveDownVote,
+            onReceiveStar,
+            pointIncrementOnAgreement,
+            pointDecrementOnAgreement,
+          } = docData.votes;
           const _rows: any = [];
           for (let student of _students) {
             const stats: ISemesterStudentVoteStat | undefined = states.find(elm => elm.uname === student.uname);
             if (!stats) continue;
 
             const userStat: any = usersStatus.filter((elm: any) => elm.uname === student.uname)[0];
-            const proposalsPoints = (stats.improvements + stats.newNodes) * (numPoints / numProposalPerDay) || 0;
+
+            let totalPoints: number = 0;
+            let proposalsPoints: number = 0;
+            let questionPoints: number = 0;
+            let votePoints: number = 0;
+            if (docData?.isGettingVotesRequired) {
+              totalPoints +=
+                (stats?.upVotes || 0) * onReceiveVote -
+                (stats?.downVotes || 0) * onReceiveDownVote +
+                (stats?.instVotes || 0) * onReceiveStar;
+            }
+            if (docData?.isCastingVotesRequired) {
+              votePoints =
+                (stats?.agreementsWithInst || 0) * pointIncrementOnAgreement -
+                (stats?.disagreementsWithInst || 0) * pointDecrementOnAgreement;
+              totalPoints += votePoints;
+            }
+            if (docData?.isQuestionProposalRequired) {
+              const { numPoints, numQuestionsPerDay } = docData.questionProposals;
+              questionPoints = stats.questions * (numPoints / numQuestionsPerDay) || 0;
+              totalPoints += questionPoints;
+            }
+            if (docData?.isProposalRequired) {
+              const { numPoints, numProposalPerDay } = docData.nodeProposals;
+              console.log("configs", { numPoints, numProposalPerDay });
+              proposalsPoints = (stats.improvements + stats.newNodes) * (numPoints / numProposalPerDay) || 0;
+              totalPoints += proposalsPoints;
+            }
             _rows.push({
               id: uuidv4(),
               username: student.uname,
@@ -193,8 +362,7 @@ export const Students: InstructorLayoutPage = ({ /* selectedSemester, */ selecte
               firstName: student.fName,
               lastName: student.lName,
               email: student.email,
-              totalPoints:
-                proposalsPoints + stats.questionPoints + stats.votePoints + (stats?.instVotes || 0) * onReceiveStar,
+              totalPoints: totalPoints,
               newProposals: stats?.newNodes || 0,
               editNodeProposals: stats?.improvements || 0,
               proposalsPoints,

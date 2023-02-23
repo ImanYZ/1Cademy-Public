@@ -12,6 +12,7 @@ const ROUTES = {
   instructorsSettings: "/instructors/settings",
   instructorsStudents: "/instructors/students",
   instructorsDashboardStudents: "/instructors/dashboard/[uname]",
+  instructorsNewCourse: "/instructors/course",
   apply: "https://1cademy.us/#JoinUsSection",
   cookiesPolicy: "/policy/cookies",
   gdprPolicy: "/policy/gdpr",

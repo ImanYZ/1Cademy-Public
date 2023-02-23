@@ -490,12 +490,12 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
       });
 
       setTrendStats({
-        childProposals: makeTrendData(userDailyStats, "newNodes"),
-        editProposals: makeTrendData(userDailyStats, "editProposals"),
+        childProposals: semesterConfig?.isProposalRequired ? makeTrendData(userDailyStats, "newNodes") : [],
+        editProposals: semesterConfig?.isProposalRequired ? makeTrendData(userDailyStats, "editProposals") : [],
         links: makeTrendData(userDailyStats, "links"),
         nodes: makeTrendData(userDailyStats, "proposals"),
-        votes: makeTrendData(userDailyStats, "votes"),
-        questions: makeTrendData(userDailyStats, "questions"),
+        votes: semesterConfig?.isCastingVotesRequired ? makeTrendData(userDailyStats, "votes") : [],
+        questions: semesterConfig?.isQuestionProposalRequired ? makeTrendData(userDailyStats, "questions") : [],
       });
       setThereIsData(true);
 
@@ -639,6 +639,7 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
           sx={{
             p: isMovil ? "10px" : "16px",
             backgroundColor: theme => (theme.palette.mode === "light" ? "#FFFFFF" : undefined),
+            display: semesterConfig && !semesterConfig?.isCastingVotesRequired ? "none" : "block",
           }}
         >
           {isLoading && <BubblePlotStatsSkeleton />}
@@ -713,7 +714,13 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
             {isLoading && <BoxPlotStatsSkeleton width={boxPlotWidth} boxes={isLgDesktop ? 3 : isTablet ? 3 : 1} />}
             {!isLoading && (
               <>
-                <Box sx={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+                <Box
+                  sx={{
+                    display: semesterConfig?.isProposalRequired ? "flex" : "none",
+                    flexDirection: "column",
+                    gap: "12px",
+                  }}
+                >
                   <Box sx={{ display: "grid", gridTemplateColumns: "1fr 1fr" }}>
                     <Typography sx={{ fontSize: "16px", justifySelf: "center", alignSelf: "flex-end" }}>
                       Chapters{" "}
@@ -736,7 +743,13 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
                   />
                   {isMovil && <BoxLegend />}
                 </Box>
-                <Box sx={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+                <Box
+                  sx={{
+                    display: semesterConfig?.isQuestionProposalRequired ? "flex" : "none",
+                    flexDirection: "column",
+                    gap: "12px",
+                  }}
+                >
                   <Box sx={{ display: "flex", justifyContent: "space-around" }}>
                     {isMovil && (
                       <Typography sx={{ fontSize: "16px", justifySelf: "center", alignSelf: "flex-end" }}>
@@ -760,7 +773,13 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
                   />
                   {isMovil && <BoxLegend />}
                 </Box>
-                <Box sx={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+                <Box
+                  sx={{
+                    display: semesterConfig?.isCastingVotesRequired ? "flex" : "none",
+                    flexDirection: "column",
+                    gap: "12px",
+                  }}
+                >
                   <Box sx={{ display: "flex", justifyContent: "space-around" }}>
                     {isMovil && (
                       <Typography sx={{ fontSize: "16px", justifySelf: "center", alignSelf: "flex-end" }}>
@@ -843,7 +862,7 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
                 key={i}
                 sx={{
                   p: isMovil ? "10px" : "16px",
-                  display: "flex",
+                  display: trendStats[trendStat as keyof TrendStats].length > 0 ? "flex" : "none",
                   alignItems: "center",
                   justifyContent: "center",
                   backgroundColor: theme => (theme.palette.mode === "light" ? "#FFFFFF" : undefined),
