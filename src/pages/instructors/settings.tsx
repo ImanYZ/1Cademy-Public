@@ -6,17 +6,15 @@ import DialogActions from "@mui/material/DialogActions";
 import DialogContent from "@mui/material/DialogContent";
 import DialogContentText from "@mui/material/DialogContentText";
 import { Box } from "@mui/system";
-import { collection, doc, getDocs, getFirestore, onSnapshot, query } from "firebase/firestore";
+import { doc, getFirestore, onSnapshot } from "firebase/firestore";
 import moment from "moment";
 import Image from "next/image";
 import React, { useEffect, useState } from "react";
-import { Institution } from "src/knowledgeTypes";
 
 import { Post } from "@/lib/mapApi";
 
 import LoadingImg from "../../../public/animated-icon-1cademy.gif";
 import Chapter from "../../components/instructors/setting/Chapter";
-import NewCourse from "../../components/instructors/setting/NewCourse";
 import Proposal from "../../components/instructors/setting/Proposal";
 import Vote from "../../components/instructors/setting/Vote";
 import { InstructorLayoutPage, InstructorsLayout } from "../../components/layouts/InstructorsLayout";
@@ -39,7 +37,6 @@ const CourseSetting: InstructorLayoutPage = ({ selectedSemester, selectedCourse,
   const [errorState, setErrorState] = useState(initialErrorsState);
   const [requestLoader, setRequestLoader] = useState(false);
   const [deleteLoader, setDeleteLoader] = useState(false);
-  const [institutions, setInstitutions] = useState<Institution[]>([]);
   const [chapters, setChapters] = useState<any>([]);
   const [semester, setSemester] = useState<any>({
     syllabus: [],
@@ -74,6 +71,7 @@ const CourseSetting: InstructorLayoutPage = ({ selectedSemester, selectedCourse,
 
   useEffect(() => {
     if (currentSemester) {
+      setLoaded(false);
       const semesterSnapshot = onSnapshot(doc(db, "semesters", currentSemester.tagId), snapshot => {
         let semester: any = snapshot.data();
         if (semester) {
@@ -101,32 +99,12 @@ const CourseSetting: InstructorLayoutPage = ({ selectedSemester, selectedCourse,
             };
           });
           setChapters(semester.syllabus);
+          setLoaded(true);
         }
       });
       return () => semesterSnapshot();
     }
   }, [selectedSemester, selectedCourse, currentSemester]);
-
-  useEffect(() => {
-    const retrieveInstitutions = async () => {
-      const db = getFirestore();
-      const institutionsRef = collection(db, "institutions");
-      const q = query(institutionsRef);
-
-      const querySnapshot = await getDocs(q);
-      let institutions: Institution[] = [];
-      querySnapshot.forEach(doc => {
-        institutions.push({ id: doc.id, ...doc.data() } as Institution);
-      });
-
-      const institutionSorted = institutions
-        .sort((l1, l2) => (l1.name < l2.name ? -1 : 1))
-        .sort((l1, l2) => (l1.country < l2.country ? -1 : 1));
-      setInstitutions(institutionSorted);
-      setLoaded(true);
-    };
-    retrieveInstitutions();
-  }, []);
 
   const handleClickOpen = () => {
     setOpen(true);
@@ -350,10 +328,7 @@ const CourseSetting: InstructorLayoutPage = ({ selectedSemester, selectedCourse,
 
   if (!loaded) {
     return (
-      <Box
-        className="CenterredLoadingImageContainer"
-        sx={{ background: theme => (theme.palette.mode === "dark" ? "#28282A" : "#F5F5F5") }}
-      >
+      <Box className="CenterredLoadingImageContainer" sx={{ background: "transparent" }}>
         <Image
           className="CenterredLoadingImage"
           loading="lazy"
@@ -364,10 +339,6 @@ const CourseSetting: InstructorLayoutPage = ({ selectedSemester, selectedCourse,
         />
       </Box>
     );
-  }
-
-  if (!selectedCourse) {
-    return <NewCourse institutions={institutions} />;
   }
 
   return (

@@ -138,7 +138,7 @@ const HeaderNavbarMovil = ({ options, user, onNewCourse }: HeaderNavbarMovilProp
                 ))}
                 {onNewCourse && (
                   <Button
-                    onClick={() => onNewCourse()}
+                    onClick={() => router.push(ROUTES.instructorsNewCourse)}
                     variant={"contained"}
                     size={"medium"}
                     sx={{ fontFamily: "Work Sans,sans-serif", fontSize: "18px", letterSpacing: "-1px" }}
