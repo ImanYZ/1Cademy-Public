@@ -899,6 +899,43 @@ export function nodeTutorialReducer(
         ),
         disabledElements: [...DISABLE_NOTEBOOK_OPTIONS, "100", "101"],
       };
+    case 70:
+      return {
+        ...getBaseStepConfig(action.type),
+        localSnapshot: [
+          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["100"], nodeChangeType: "added" },
+          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["101"], nodeChangeType: "added" },
+          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["102"] },
+          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["103"] },
+          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["104"] },
+        ],
+        targetId: "101",
+        childTargetId: "101-button-parent-children",
+        title: "Nodes - Node Footer",
+        description: <MarkdownRender text={"The next icon is for parent and child nodes."} />,
+        disabledElements: [...DISABLE_NOTEBOOK_OPTIONS, "100", "101"],
+      };
+    case 71:
+      return {
+        ...getBaseStepConfig(action.type),
+        localSnapshot: [
+          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["100"], nodeChangeType: "added" },
+          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["101"], nodeChangeType: "added" },
+          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["102"] },
+          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["103"] },
+          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["104"] },
+        ],
+        targetId: "101",
+        childTargetId: "101-button-parent-children",
+        title: "Nodes - Node Footer",
+        description: (
+          <MarkdownRender
+            text={"Click the bottom to expand. You will see the parent nodes on the left and child nodes on the right"}
+          />
+        ),
+        disabledElements: [...DISABLE_NOTEBOOK_OPTIONS, "100", "101"],
+        enableChildElements: ["101-button-parent-children"],
+      };
     default:
       return state;
   }

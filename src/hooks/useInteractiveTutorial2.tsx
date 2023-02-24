@@ -95,7 +95,7 @@ export const useInteractiveTutorial = ({ notebookRef }: useInteractiveTutorialPr
             nodeBookDispatch({ type: "setSelectedNode", payload: "104" });
           },
         };
-      if (step === 65)
+      if (step === 66)
         payload = {
           callback: () => {
             notebookRef.current.selectedNode = "101";
