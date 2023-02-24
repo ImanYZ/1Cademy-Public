@@ -13,6 +13,7 @@ type ILivelinessBarProps = {
   openUserInfoSidebar: (uname: string, imageUrl: string, fullName: string, chooseUname: string) => void;
   authEmail: string | undefined;
   user: any;
+  disabled?: boolean;
 };
 
 type UserInteractions = {
@@ -24,7 +25,7 @@ type UserInteractions = {
 };
 
 const ReputationlinessBar = (props: ILivelinessBarProps) => {
-  const { db, onlineUsers, openUserInfoSidebar, authEmail, user } = props;
+  const { db, onlineUsers, openUserInfoSidebar, authEmail, user, disabled = false } = props;
   const [open, setOpen] = useState(false);
   const [usersInteractions, setUsersInteractions] = useState<UserInteractions>({});
   const [users, setUsers] = useState<any>({});
@@ -35,13 +36,14 @@ const ReputationlinessBar = (props: ILivelinessBarProps) => {
     if (window && window.innerWidth > 768 && window.innerHeight >= 797) {
       setOpen(true);
     }
+    if (disabled) return;
+
     let t: any = null;
     const unsubscribe: {
       finalizer: () => void;
     } = {
       finalizer: () => {},
     };
-
     const snapshotInitializer = () => {
       setUsersInteractions({});
       unsubscribe.finalizer();
@@ -50,6 +52,7 @@ const ReputationlinessBar = (props: ILivelinessBarProps) => {
       const q = query(actionTracksCol, where("createdAt", ">=", Timestamp.fromDate(new Date(ts))));
       unsubscribe.finalizer = onSnapshot(q, async snapshot => {
         const docChanges = snapshot.docChanges();
+
         for (const docChange of docChanges) {
           const actionTrackData = docChange.doc.data() as IActionTrack;
           for (const receiverData of actionTrackData.receivers) {
@@ -143,7 +146,7 @@ const ReputationlinessBar = (props: ILivelinessBarProps) => {
     snapshotInitializer();
 
     return () => unsubscribe.finalizer();
-  }, []);
+  }, [disabled]);
 
   useEffect(() => {
     setBarHeight(parseFloat(String(document.getElementById("liveliness-seekbar")?.clientHeight)));
@@ -179,16 +182,17 @@ const ReputationlinessBar = (props: ILivelinessBarProps) => {
     <>
       <Box
         sx={{
-          top: "155px",
+          top: window.innerHeight > 799 ? "180px" : "190px",
           right: "0px",
           zIndex: 1199,
           position: "absolute",
-          height: `calc(100% - ${window.innerHeight > 799 ? "245px" : "305px"})`,
+          height: `calc(100% - ${window.innerHeight > 799 ? "275px" : "345px"})`,
         }}
       >
         <Box
           id="livebar"
           sx={{
+            opacity: disabled ? 0.8 : 1,
             width: "56px",
             background: theme => (theme.palette.mode === "dark" ? "#1f1f1f" : "#f0f0f0"),
             borderRadius: "10px 0px 0px 10px",
@@ -204,13 +208,13 @@ const ReputationlinessBar = (props: ILivelinessBarProps) => {
           <Tooltip title={"24-hour Points Leaderboard."} placement="left">
             <Box sx={{ width: "100%", height: "100%", position: "absolute", right: "0px" }}></Box>
           </Tooltip>
-          {window.innerHeight > 799 && (
+          {/* {window.innerHeight > 799 && (
             <Box sx={{ color: "ButtonHighlight", fontSize: "23px", marginLeft: "-15px", marginTop: "5px" }}>🏆</Box>
-          )}
+          )} */}
           <Box
             className="seekbar"
             sx={{
-              height: `calc(100% - ${window.innerHeight > 799 ? "70px" : "28px"})`,
+              height: `calc(100% - ${window.innerHeight > 799 ? "30px" : "28px"})`,
               width: "1px",
               borderRight: theme =>
                 theme.palette.mode === "dark" ? "2px solid #bebebe" : "2px solid rgba(0, 0, 0, 0.6)",
@@ -237,90 +241,109 @@ const ReputationlinessBar = (props: ILivelinessBarProps) => {
                 top: "0px",
               }}
             >
-              {unames.map((uname: string) => {
-                if (!users[uname]) {
-                  return <></>;
-                }
-                const _count = usersInteractions[uname].count + Math.abs(minActions);
-                const seekPosition = -1 * ((_count / maxActions) * barHeight - (_count === 0 ? 0 : 32));
-                return (
-                  <Tooltip
-                    key={uname}
-                    title={
-                      <Box sx={{ textAlign: "center" }}>
-                        <Box component={"span"}>{users[uname].chooseUname ? uname : users[uname].fullname}</Box>
-                        {authEmail === "oneweb@umich.edu" && (
-                          <Box component={"p"} sx={{ my: 0 }}>
-                            {users[uname].email}
-                          </Box>
-                        )}
-                        <Box component={"p"} sx={{ my: 0 }}>
-                          {usersInteractions[uname].count.toFixed(2)} Point
-                          {usersInteractions[uname].count > 1 ? "s" : ""}
-                        </Box>
-                      </Box>
-                    }
-                  >
+              {disabled &&
+                [1, 2, 3].map(cur => {
+                  return (
                     <Box
-                      onClick={() =>
-                        openUserInfoSidebar(
-                          uname,
-                          users[uname].imageUrl,
-                          users[uname].fullname,
-                          users[uname].chooseUname ? "1" : ""
-                        )
-                      }
-                      className={
-                        usersInteractions[uname].reputation === "Gain"
-                          ? "GainedPoint"
-                          : usersInteractions[uname].reputation === "Loss"
-                          ? "LostPoint"
-                          : ""
-                      }
+                      key={cur}
                       sx={{
                         width: "28px",
                         height: "28px",
-                        cursor: "pointer",
-                        // display: "inline-block",
                         position: "absolute",
-                        left: "0px",
-                        bottom: "0px",
-                        transition: "all 0.2s 0s ease",
-                        transform: `translate(-50%, ${seekPosition}px)`,
-                        "& > .user-image": {
-                          borderRadius: "50%",
-                          overflow: "hidden",
+                        transform: `translate(-50%, ${cur * 40}px)`,
+                        borderRadius: "50%",
+                        background: theme => (theme.palette.mode === "dark" ? "#575757ff" : "#d4d4d4"),
+                      }}
+                    />
+                  );
+                })}
+              {!disabled &&
+                unames.map((uname: string) => {
+                  if (!users[uname]) {
+                    return <></>;
+                  }
+                  const _count = usersInteractions[uname].count + Math.abs(minActions);
+                  const seekPosition = -1 * ((_count / maxActions) * barHeight - (_count === 0 ? 0 : 32));
+                  return (
+                    <Tooltip
+                      key={uname}
+                      title={
+                        <Box sx={{ textAlign: "center" }}>
+                          <Box component={"span"}>{users[uname].chooseUname ? uname : users[uname].fullname}</Box>
+                          {authEmail === "oneweb@umich.edu" && (
+                            <Box component={"p"} sx={{ my: 0 }}>
+                              {users[uname].email}
+                            </Box>
+                          )}
+                          <Box component={"p"} sx={{ my: 0 }}>
+                            {usersInteractions[uname].count.toFixed(2)} Point
+                            {usersInteractions[uname].count > 1 ? "s" : ""}
+                          </Box>
+                        </Box>
+                      }
+                    >
+                      <Box
+                        onClick={() =>
+                          openUserInfoSidebar(
+                            uname,
+                            users[uname].imageUrl,
+                            users[uname].fullname,
+                            users[uname].chooseUname ? "1" : ""
+                          )
+                        }
+                        className={
+                          usersInteractions[uname].reputation === "Gain"
+                            ? "GainedPoint"
+                            : usersInteractions[uname].reputation === "Loss"
+                            ? "LostPoint"
+                            : ""
+                        }
+                        sx={{
                           width: "28px",
                           height: "28px",
-                        },
-                        "&.GainedPoint": {
+                          cursor: "pointer",
+                          // display: "inline-block",
+                          position: "absolute",
+                          left: "0px",
+                          bottom: "0px",
+                          transition: "all 0.2s 0s ease",
+                          transform: `translate(-50%, ${seekPosition}px)`,
                           "& > .user-image": {
-                            boxShadow: "1px 1px 13px 4px rgba(21, 255, 0, 1)",
+                            borderRadius: "50%",
+                            overflow: "hidden",
+                            width: "28px",
+                            height: "28px",
                           },
-                        },
-                        "&.LostPoint": {
-                          "& > .user-image": {
-                            boxShadow: "1px 1px 13px 4px rgba(255, 0, 0, 1)",
+                          "&.GainedPoint": {
+                            "& > .user-image": {
+                              boxShadow: "1px 1px 13px 4px rgba(21, 255, 0, 1)",
+                            },
                           },
-                        },
-                        "@keyframes slidein": {
-                          from: {
-                            transform: "translateY(0%)",
+                          "&.LostPoint": {
+                            "& > .user-image": {
+                              boxShadow: "1px 1px 13px 4px rgba(255, 0, 0, 1)",
+                            },
                           },
-                          to: {
-                            transform: "translateY(100%)",
+                          "@keyframes slidein": {
+                            from: {
+                              transform: "translateY(0%)",
+                            },
+                            to: {
+                              transform: "translateY(100%)",
+                            },
                           },
-                        },
-                      }}
-                    >
-                      <Box className="user-image">
-                        <Image src={users[uname].imageUrl} width={28} height={28} objectFit="cover" />
+                        }}
+                      >
+                        <Box className="user-image">
+                          <Image src={users[uname].imageUrl} width={28} height={28} objectFit="cover" />
+                        </Box>
+                        <Box
+                          className={onlineUsers.includes(uname) ? "UserStatusOnlineIcon" : "UserStatusOfflineIcon"}
+                        />
                       </Box>
-                      <Box className={onlineUsers.includes(uname) ? "UserStatusOnlineIcon" : "UserStatusOfflineIcon"} />
-                    </Box>
-                  </Tooltip>
-                );
-              })}
+                    </Tooltip>
+                  );
+                })}
             </Box>
           </Box>
           <Box

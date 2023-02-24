@@ -23,6 +23,7 @@ type MetaButtonProps = {
   onDoubleClick?: any;
   round?: boolean;
   style?: any;
+  id?: string;
 };
 
 const MetaButton = (props: MetaButtonProps) => {
@@ -49,24 +50,26 @@ const MetaButton = (props: MetaButtonProps) => {
   if ("onClick" in props && props.onClick) {
     return (
       <Tooltip title={props.tooltip || ""} placement={props.tooltipPosition} disableInteractive>
-        <button
-          className={
-            // (isSubmitting
-            //   ? "disabled MetaButton waves-effect waves-light grey-text hoverable" :
-            `MetaButton Clickable waves-effect waves-light grey-text hoverable ${props.disabled && "disabled"} ` +
-            ("round" in props && props.round ? " Round" : "") +
-            // )
-            ("tooltip" in props && props.tooltip ? " Tooltip" : "")
-          }
-          disabled={props.disabled}
-          // style={{ disabled: isSubmitting }}
-          // disabled={isSubmitting}
-          onClick={metaButtonClick}
-          onDoubleClick={handleDoubleClick}
-          style={props?.style}
-        >
-          {props.children}
-          {/* {"tooltip" in props && props.tooltip && (
+        <span>
+          <button
+            id={props.id}
+            className={
+              // (isSubmitting
+              //   ? "disabled MetaButton waves-effect waves-light grey-text hoverable" :
+              `MetaButton Clickable waves-effect waves-light grey-text hoverable ${props.disabled && "disabled"} ` +
+              ("round" in props && props.round ? " Round" : "") +
+              // )
+              ("tooltip" in props && props.tooltip ? " Tooltip" : "")
+            }
+            disabled={props.disabled}
+            // style={{ disabled: isSubmitting }}
+            // disabled={isSubmitting}
+            onClick={metaButtonClick}
+            onDoubleClick={handleDoubleClick}
+            style={props?.style}
+          >
+            {props.children}
+            {/* {"tooltip" in props && props.tooltip && (
           <span
             className={"TooltipText " + (props.tooltipPosition ? props.tooltipPosition : "Bottom")}
             onClick={preventEventPropagation}
@@ -74,13 +77,16 @@ const MetaButton = (props: MetaButtonProps) => {
             {props.tooltip}
           </span>
         )} */}
-        </button>
+          </button>
+        </span>
       </Tooltip>
     );
   } else {
     return (
       <Tooltip title={props.tooltip ?? ""} placement={props.tooltipPosition || "bottom"}>
-        <Box className="MetaButton">{props.children}</Box>
+        <Box id={props.id} className="MetaButton">
+          {props.children}
+        </Box>
       </Tooltip>
       // <span className={"MetaButton" + ("tooltip" in props && props.tooltip ? " Tooltip" : "")}>
       //   {props.children}

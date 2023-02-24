@@ -19,6 +19,7 @@ import YoutubeEmbed from "@/components/home/components/YoutubeEmbed";
 import { ONE_CADEMY_SECTIONS } from "@/components/home/SectionsItems";
 import ROUTES from "@/lib/utils/routes";
 
+import JoinUs from "../../components/community/JoinUs";
 // import { ONE_CADEMY_SECTIONS } from "@/components/home/SectionsItems";
 import {
   darkBase,
@@ -249,7 +250,7 @@ const Communities = () => {
   // };
 
   const joinUsClick = () => {
-    window.location.replace("/#JoinUsSection");
+    window.location.replace("#JoinUsSection");
   };
   const onSwitchSection = (sectionId: string) => {
     window.location.href = `/#${sectionId}`;
@@ -599,7 +600,7 @@ const Communities = () => {
           Apply to Join this Community
         </Typography>
 
-        {/* <JoinUs community={community} themeName="dark" /> */}
+        <JoinUs community={community} themeName="dark" />
 
         {typeof community.accomplishments === "object" &&
           !Array.isArray(community.accomplishments) &&

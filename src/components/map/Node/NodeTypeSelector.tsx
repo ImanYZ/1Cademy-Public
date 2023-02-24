@@ -9,8 +9,9 @@ type NodeTypeSelectorProps = {
   nodeId: string;
   setNodeParts: (nodeId: string, callback: (thisNode: FullNodeData) => FullNodeData) => void;
   nodeType: string;
+  disabled?: boolean;
 };
-const NodeTypeSelector = ({ nodeId, setNodeParts, nodeType }: NodeTypeSelectorProps) => {
+const NodeTypeSelector = ({ nodeId, setNodeParts, nodeType, disabled = false }: NodeTypeSelectorProps) => {
   const nodeTypeOptions = ["Concept", "Relation", "Question", "Reference", "Code", "Idea", "News"];
   const currentId = useId();
 
@@ -53,6 +54,7 @@ const NodeTypeSelector = ({ nodeId, setNodeParts, nodeType }: NodeTypeSelectorPr
             return { ...node, nodeType: selectedNodeType, nodeTypes: Array.from(nodeTypes) } as any;
           });
         }}
+        disabled={disabled}
       >
         {nodeTypeOptions.map(nodeType => {
           return (

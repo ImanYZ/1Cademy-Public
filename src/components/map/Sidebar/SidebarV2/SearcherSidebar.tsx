@@ -306,6 +306,7 @@ const SearcherSidebar = ({
   const searcherOptionsMemoized = useMemo(() => {
     return (
       <Box
+        id="searcher-sidebar-options"
         sx={{
           p: {
             xs: "10px",
@@ -366,6 +367,7 @@ const SearcherSidebar = ({
           )}
 
           <ControlPointIcon
+            id="searcher-tags-button"
             onClick={setShowTagSelectorClick}
             sx={{
               zIndex: 1,
@@ -543,7 +545,7 @@ const SearcherSidebar = ({
                 sortDirection={sortDirection}
                 setSortDirection={onChangeSortDirection}
               />
-              <Box sx={{ display: "flex", alignItems: "center", gap: "5px" }}>
+              <Box id="search-recently-input" sx={{ display: "flex", alignItems: "center", gap: "5px" }}>
                 Edited in past
                 <TextField
                   type="number"
@@ -628,6 +630,7 @@ const SearcherSidebar = ({
 
   return (
     <SidebarWrapper
+      id="sidebar-wrapper-searcher"
       title="Search Nodes"
       headerImage={searcherHeaderImage}
       open={open}
@@ -639,7 +642,7 @@ const SearcherSidebar = ({
       SidebarOptions={searcherOptionsMemoized}
       contentSignalState={contentSignalState}
       SidebarContent={
-        <Box sx={{ p: "2px 4px" }}>
+        <Box id="search-list" sx={{ p: "2px 4px" }}>
           <Box sx={{ display: "flex", flexDirection: "column", gap: "4px" }}>
             {searchResults.data.map((resNode, idx) => {
               return (

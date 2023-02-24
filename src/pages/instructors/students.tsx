@@ -249,14 +249,16 @@ export const Students: InstructorLayoutPage = ({ /* selectedSemester, */ selecte
         if (change.type === "added" || change.type === "modified") {
           const docData = change.doc.data();
           if (!docData?.isCastingVotesRequired) {
-            ["Vote", "Vote Points"].map(key => {
+            const keysToRemove = ["Vote", "Vote Points"];
+            keysToRemove.forEach(key => {
               const index = keys.indexOf(key);
               if (index !== -1) {
                 keys.splice(index, 1);
               }
             });
 
-            ["vote", "votePoints"].map(key => {
+            const columnsToRemove = ["vote", "votePoints"];
+            columnsToRemove.forEach(key => {
               const index = columns.indexOf(key);
               if (index !== -1) {
                 columns.splice(index, 1);
@@ -265,14 +267,16 @@ export const Students: InstructorLayoutPage = ({ /* selectedSemester, */ selecte
           }
 
           if (!docData?.isQuestionProposalRequired) {
-            ["Questions", "Question Points"].map(key => {
+            const keysToRemove = ["Questions", "Question Points"];
+            keysToRemove.forEach(key => {
               const index = keys.indexOf(key);
               if (index !== -1) {
                 keys.splice(index, 1);
               }
             });
 
-            ["questions", "questionPoints"].map(key => {
+            const columnsToRemove = ["questions", "questionPoints"];
+            columnsToRemove.forEach(key => {
               const index = columns.indexOf(key);
               if (index !== -1) {
                 columns.splice(index, 1);
@@ -281,14 +285,16 @@ export const Students: InstructorLayoutPage = ({ /* selectedSemester, */ selecte
           }
 
           if (!docData?.isProposalRequired) {
-            ["Child Proposals", "Edit Proposals", "Proposal Points"].map(key => {
+            const keysToRemove = ["Child Proposals", "Edit Proposals", "Proposal Points"];
+            keysToRemove.forEach(key => {
               const index = keys.indexOf(key);
               if (index !== -1) {
                 keys.splice(index, 1);
               }
             });
 
-            ["newProposals", "editNodeProposals", "proposalsPoints"].map(key => {
+            const columnsToRemove = ["newProposals", "editNodeProposals", "proposalsPoints"];
+            columnsToRemove.forEach(key => {
               const index = columns.indexOf(key);
               if (index !== -1) {
                 columns.splice(index, 1);
@@ -297,14 +303,16 @@ export const Students: InstructorLayoutPage = ({ /* selectedSemester, */ selecte
           }
 
           if (!docData?.isGettingVotesRequired) {
-            ["Wrongs", "Corrects", "Awards"].map(key => {
+            const keysToRemove = ["Wrongs", "Corrects", "Awards"];
+            keysToRemove.forEach(key => {
               const index = keys.indexOf(key);
               if (index !== -1) {
                 keys.splice(index, 1);
               }
             });
 
-            ["wrongs", "corrects", "awards"].map(key => {
+            const columnsToRemove = ["wrongs", "corrects", "awards"];
+            columnsToRemove.forEach(key => {
               const index = columns.indexOf(key);
               if (index !== -1) {
                 columns.splice(index, 1);
@@ -350,7 +358,6 @@ export const Students: InstructorLayoutPage = ({ /* selectedSemester, */ selecte
             }
             if (docData?.isProposalRequired) {
               const { numPoints, numProposalPerDay } = docData.nodeProposals;
-              console.log("configs", { numPoints, numProposalPerDay });
               proposalsPoints = (stats.improvements + stats.newNodes) * (numPoints / numProposalPerDay) || 0;
               totalPoints += proposalsPoints;
             }

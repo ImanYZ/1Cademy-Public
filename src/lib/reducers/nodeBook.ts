@@ -56,6 +56,8 @@ function nodeBookReducer(state: NodeBookState, action: DispatchNodeBookActions):
       return { ...state, isMenuOpen: action.payload };
     case "setContributorsNodeId":
       return { ...state, contributorsNodeId: action.payload.nodeId, showContributors: action.payload.showContributors };
+    case "setAll":
+      return { ...state, ...action?.payload };
     default:
       return { ...state };
   }

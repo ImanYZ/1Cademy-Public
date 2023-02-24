@@ -941,6 +941,7 @@ const UserSettigsSidebar = ({
       >
         <div id="MiniUserPrifileHeader" className="MiniUserProfileHeaderMobile">
           <ProfileAvatar
+            id="user-settings-picture"
             userId={user.userId}
             userImage={user.imageUrl}
             setUserImage={setUserImage}
@@ -950,7 +951,11 @@ const UserSettigsSidebar = ({
           <div id="MiniUserPrifileIdentity" className="MiniUserPrifileIdentityMobile">
             <div id="MiniUserPrifileName">{user.chooseUname ? user.uname : `${user.fName} ${user.lName}`}</div>
             <div id="MiniUserPrifileTag">
-              <MemoizedMetaButton style={{ padding: "0px" }} onClick={() => choosingNodeClick("Tag")}>
+              <MemoizedMetaButton
+                id="user-settings-community-tag"
+                style={{ padding: "0px" }}
+                onClick={() => choosingNodeClick("Tag")}
+              >
                 <div className="AccountSettingsButton">
                   <LocalOfferIcon
                     sx={{ marginRight: "8px" }}
@@ -971,6 +976,7 @@ const UserSettigsSidebar = ({
                       noBackground={true}
                     >
                       <MemoizedTagsSearcher
+                        id="user-settings-tag-searcher"
                         setChosenTags={setChosenTags}
                         chosenTags={chosenTags}
                         allTags={allTags}
@@ -995,13 +1001,17 @@ const UserSettigsSidebar = ({
               />
               <span>{user.deInstit}</span>
             </div>
-            <div id="MiniUserPrifileTotalPoints">
-              <DoneIcon className="material-icons DoneIcon green-text" />
+            <div id="user-settings-statistics">
+              <DoneIcon className="material-icons DoneIcon green-text" sx={{ mr: "12px" }} />
               <span>{shortenNumber(totalPoints, 2, false)}</span>
             </div>
           </div>
         </div>
-        <div id="MiniUserPrifilePointsContainer" style={{ alignItems: "center", justifyContent: "space-around" }}>
+        <div
+          id="user-settings-node-types"
+          className="MiniUserPrifilePointsContainer"
+          style={{ alignItems: "center", justifyContent: "space-around" }}
+        >
           <div className="MiniUserProfilePoints">
             <LocalLibraryIcon className="material-icons amber-text" />
             <span className="ToolbarValue">
@@ -1039,7 +1049,7 @@ const UserSettigsSidebar = ({
             </span>
           </div>
         </div>
-        <Tabs value={value} onChange={handleTabChange} aria-label={"Bookmarks Tabs"}>
+        <Tabs id="user-settings-personalization" value={value} onChange={handleTabChange} aria-label={"Bookmarks Tabs"}>
           {tabsItems.map((tabItem: any, idx: number) => (
             <Tab key={tabItem.title} label={tabItem.title} {...a11yProps(idx)} />
           ))}
@@ -1083,6 +1093,7 @@ const UserSettigsSidebar = ({
 
   return (
     <SidebarWrapper
+      id="sidebar-wrapper-user-settings"
       title=""
       contentSignalState={contentSignalState}
       open={open}
