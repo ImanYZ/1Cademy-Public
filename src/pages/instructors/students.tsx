@@ -46,42 +46,6 @@ const filterChoices: any = {
   "Vote Points": "votePoints",
 };
 
-// const columns: string[] = [
-//   "firstName",
-//   "lastName",
-//   "email",
-//   "totalPoints",
-//   "wrongs",
-//   "corrects",
-//   "awards",
-//   "newProposals",
-//   "editNodeProposals",
-//   "proposalsPoints",
-//   "questions",
-//   "questionPoints",
-//   "vote",
-//   "votePoints",
-//   "lastActivity",
-// ];
-
-// const keys = [
-//   "First Name",
-//   "Last Name",
-//   "Email",
-//   "Total Poitns",
-//   "Wrongs",
-//   "Corrects",
-//   "Awards",
-//   "Child Proposals",
-//   "Edit Proposals",
-//   "Proposal Points",
-//   "Questions",
-//   "Question Points",
-//   "Vote",
-//   "Vote Points",
-//   "Last Activity",
-// ];
-
 const keysColumns: any = {
   "First Name": "firstName",
   "Last Name": "lastName",
