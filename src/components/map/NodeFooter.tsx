@@ -1219,6 +1219,7 @@ const NodeFooter = ({
                           tooltip={!isStudied ? 'Mark this node as "studied."' : 'Mark this node as "not studied."'}
                           style={{ padding: "0" }}
                           tooltipPosition="top"
+                          disabled={disabled}
                         >
                           <Box sx={{ display: "flex", alignItems: "center" }} onClick={markStudied}>
                             <Badge
@@ -1245,6 +1246,7 @@ const NodeFooter = ({
                           tooltip="Bookmark this node."
                           tooltipPosition="top"
                           style={{ padding: "0" }}
+                          disabled={disabled}
                         >
                           <Box sx={{ display: "flex", alignItems: "center" }} onClick={bookmark}>
                             <Badge
@@ -1326,6 +1328,7 @@ const NodeFooter = ({
                                       target="_blank"
                                       rel="noopener"
                                       aria-label="Share on Twitter"
+                                      disabled={disabled}
                                     >
                                       <TwitterIcon
                                         sx={{
@@ -1365,6 +1368,7 @@ const NodeFooter = ({
                                       target="_blank"
                                       rel="noopener"
                                       aria-label="Share on Facebook"
+                                      disabled={disabled}
                                     >
                                       <RedditIcon
                                         sx={{
@@ -1404,6 +1408,7 @@ const NodeFooter = ({
                                       target="_blank"
                                       rel="noopener"
                                       aria-label="Share on Facebook"
+                                      disabled={disabled}
                                     >
                                       <FacebookRoundedIcon
                                         sx={{
@@ -1443,6 +1448,7 @@ const NodeFooter = ({
                                       target="_blank"
                                       rel="noopener"
                                       aria-label="Share on Linkedin"
+                                      disabled={disabled}
                                     >
                                       <LinkedInIcon
                                         sx={{
@@ -1475,6 +1481,7 @@ const NodeFooter = ({
                                         padding: "0",
                                       }}
                                       aria-label="Share on url"
+                                      disabled={disabled}
                                     >
                                       <LinkIcon
                                         sx={{
