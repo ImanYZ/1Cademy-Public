@@ -1,5 +1,12 @@
 // import LocalLibraryIcon from "@mui/icons-material/LocalLibrary";
 // import ShareIcon from "@mui/icons-material/Share";
+import CodeIcon from "@mui/icons-material/Code";
+import EmojiObjectsIcon from "@mui/icons-material/EmojiObjects";
+import HelpOutlineIcon from "@mui/icons-material/HelpOutline";
+import LocalLibraryIcon from "@mui/icons-material/LocalLibrary";
+import MenuBookIcon from "@mui/icons-material/MenuBook";
+import ShareIcon from "@mui/icons-material/Share";
+import { Stack } from "@mui/material";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 
@@ -609,19 +616,127 @@ export function nodeTutorialReducer(
         ...getBaseStepConfig(action.type),
         localSnapshot: [
           { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["100"], nodeChangeType: "added" },
-          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["101"], nodeChangeType: "added", open: false },
+          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["101"], nodeChangeType: "added" },
           { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["102"] },
           { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["103"] },
         ],
         targetId: "101",
-        childTargetId: "101-open-button",
-        title: "Nodes - Node Header",
+        childTargetId: "101-node-footer",
+        title: "Nodes - Node Footer",
         description: <MarkdownRender text={"The node footer provides many tools."} />,
         disabledElements: [...DISABLE_NOTEBOOK_OPTIONS, "100", "101"],
-        enableChildElements: ["101-open-button"],
-        isClickeable: true,
+        tooltipPosition: "bottom",
       };
-
+    case 58:
+      return {
+        ...getBaseStepConfig(action.type),
+        localSnapshot: [
+          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["100"], nodeChangeType: "added" },
+          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["101"], nodeChangeType: "added" },
+          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["102"] },
+          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["103"] },
+        ],
+        targetId: "101",
+        childTargetId: "101-node-footer-user",
+        title: "Nodes - Node Footer",
+        description: (
+          <MarkdownRender
+            text={
+              "The first is the profile of the top contributor to the node. That is the person that has done the most to make the node in its present form."
+            }
+          />
+        ),
+        disabledElements: [...DISABLE_NOTEBOOK_OPTIONS, "100", "101"],
+        tooltipPosition: "bottom",
+      };
+    case 59:
+      return {
+        ...getBaseStepConfig(action.type),
+        localSnapshot: [
+          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["100"], nodeChangeType: "added" },
+          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["101"], nodeChangeType: "added" },
+          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["102"] },
+          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["103"] },
+        ],
+        targetId: "101",
+        childTargetId: "101-node-footer-type",
+        title: "Nodes - Node Footer",
+        description: (
+          <>
+            <MarkdownRender text={"The next one indicates what type of node it is, this one is a concept node."} />
+            <Stack direction={"row"} alignItems="center" spacing={"8px"} justifyContent={"space-around"} py="8px">
+              <CodeIcon color="primary" />
+              <LocalLibraryIcon color="primary" />
+              <ShareIcon color="primary" />
+              <HelpOutlineIcon color="primary" />
+              <MenuBookIcon color="primary" />
+              <EmojiObjectsIcon color="primary" />
+            </Stack>
+          </>
+        ),
+        disabledElements: [...DISABLE_NOTEBOOK_OPTIONS, "100", "101"],
+        tooltipPosition: "bottom",
+      };
+    case 60:
+      return {
+        ...getBaseStepConfig(action.type),
+        localSnapshot: [
+          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["100"], nodeChangeType: "added" },
+          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["101"], nodeChangeType: "added" },
+          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["102"] },
+          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["103"] },
+        ],
+        targetId: "101",
+        childTargetId: "101-node-footer-timestamp",
+        title: "Nodes - Node Footer",
+        description: <MarkdownRender text={"The third icon indicates how long ago the node was approved. "} />,
+        disabledElements: [...DISABLE_NOTEBOOK_OPTIONS, "100", "101"],
+        tooltipPosition: "bottom",
+      };
+    case 61:
+      return {
+        ...getBaseStepConfig(action.type),
+        localSnapshot: [
+          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["100"], nodeChangeType: "added" },
+          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["101"], nodeChangeType: "added" },
+          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["102"] },
+          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["103"] },
+        ],
+        targetId: "101",
+        childTargetId: "101-node-footer-propose",
+        title: "Nodes - Node Footer",
+        description: (
+          <MarkdownRender
+            text={
+              "The fourth icon is the purpose/evaluate versions of this node button.This allows you to edit the node or add child nodes to it."
+            }
+          />
+        ),
+        disabledElements: [...DISABLE_NOTEBOOK_OPTIONS, "100", "101"],
+        tooltipPosition: "bottom",
+      };
+    case 62:
+      return {
+        ...getBaseStepConfig(action.type),
+        localSnapshot: [
+          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["100"], nodeChangeType: "added" },
+          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["101"], nodeChangeType: "added" },
+          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["102"] },
+          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["103"] },
+        ],
+        targetId: "101",
+        childTargetId: "101-node-footer-votes",
+        title: "Nodes - Node Footer",
+        description: (
+          <MarkdownRender
+            text={
+              "The next two icons are the downvote and upvote buttons, which also display each number of votes the node has received."
+            }
+          />
+        ),
+        disabledElements: [...DISABLE_NOTEBOOK_OPTIONS, "100", "101"],
+        tooltipPosition: "bottom",
+      };
     default:
       return state;
   }

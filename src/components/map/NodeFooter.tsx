@@ -452,7 +452,10 @@ const NodeFooter = ({
               </Box>
             ))}
           {open && disableUserPicture && (
-            <Box sx={{ width: "28px", height: "28px", backgroundColor: "gray", borderRadius: "50%" }} />
+            <Box
+              id={userPictureId}
+              sx={{ width: "28px", height: "28px", backgroundColor: "gray", borderRadius: "50%" }}
+            />
           )}
           <div
             className={open ? "NodeTypeIconOpen Tooltip" : "NodeTypeIconClosed Tooltip"}
