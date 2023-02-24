@@ -1248,6 +1248,7 @@ const Dashboard = ({}: DashboardProps) => {
       }
       return { nodes: newNodes, edges: newEdges };
     });
+    setOpenProgressBarMenu(true);
   }, [allTags, settings.showClusterOptions, stateNodeTutorial, notebookChanged]);
 
   useEffect(() => {
