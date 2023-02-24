@@ -2542,6 +2542,8 @@ const Dashboard = ({}: DashboardProps) => {
     (event: any, nodeId: string) => {
       devLog("CORRECT NODE", { nodeId });
       if (notebookRef.current.choosingNode) return;
+      if (isPlayingTheTutorialRef.current) return;
+
       notebookRef.current.selectedNode = nodeId;
       nodeBookDispatch({ type: "setSelectedNode", payload: nodeId });
 
@@ -2580,6 +2582,8 @@ const Dashboard = ({}: DashboardProps) => {
       locked: boolean
     ) => {
       if (notebookRef.current.choosingNode) return;
+      if (isPlayingTheTutorialRef.current) return;
+
       let deleteOK = true;
       notebookRef.current.selectedNode = nodeId;
       nodeBookDispatch({ type: "setSelectedNode", payload: nodeId });
