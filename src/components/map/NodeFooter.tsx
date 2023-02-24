@@ -901,13 +901,13 @@ const NodeFooter = ({
                 <>
                   {openPart === "References" ? (
                     <Box
-                      id={`${identifier}-node-footer-tags-citations`}
-                      onClick={selectReferences}
+                      id={tagsCitationsButtonId}
+                      onClick={disableTagsCitationsButton ? undefined : selectReferences}
                       className={"select-tab-button-node-footer"}
                       sx={{
                         background: theme =>
                           theme.palette.mode === "dark" ? theme.palette.common.darkBackground1 : "#DCDCDC",
-                        cursor: "pointer",
+                        cursor: disableTagsCitationsButton ? "not-allowed" : "pointer",
                       }}
                     >
                       <Box
@@ -1113,7 +1113,7 @@ const NodeFooter = ({
               )}
               {openPart === "LinkingWords" ? (
                 <Box
-                  id={`${identifier}-button-parent-children`}
+                  id={parentChildrenButtonId}
                   onClick={disableParentChildrenButton ? undefined : selectLinkingWords}
                   className={"select-tab-button-node-footer"}
                   sx={{
