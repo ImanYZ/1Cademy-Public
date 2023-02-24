@@ -101,8 +101,8 @@ const keysColumns: any = {
 };
 
 export const Students: InstructorLayoutPage = ({ /* selectedSemester, */ selectedCourse, currentSemester }) => {
-  const [keys, setKeys] = useState(defaultKeys);
-  const [columns, setColumns] = useState(defaultColumns);
+  const [keys, setKeys] = useState([...defaultKeys]);
+  const [columns, setColumns] = useState([...defaultColumns]);
   const [rows, setRows] = useState<any>([]);
   const [tableRows, setTableRows] = useState<any>([]);
   const [openFilter, setOpenFilter] = useState(false);
