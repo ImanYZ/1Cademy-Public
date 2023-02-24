@@ -564,4 +564,15 @@ export const INTERACTIVE_TUTORIAL_NOTEBOOK_NODES: FullNodesData = {
     ],
     nodeVideo: "https://youtu.be/m6qIjU4tpL4",
   },
+  "104": {
+    ...BASE_NODE,
+    node: "104",
+    title: "This node will be removed with a downvote",
+    content:
+      "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Suspendisse ultricies, arcu ut sodales varius, tortor erat gravida lacus, eget maximus arcu nisi nec elit. In eu scelerisque nunc, id condimentum nisl. Aliquam rhoncus tortor a ultricies consequat. ",
+    children: [],
+    parents: [],
+    wrongs: 0,
+    corrects: 1,
+  },
 };

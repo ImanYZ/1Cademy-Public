@@ -88,6 +88,20 @@ export const useInteractiveTutorial = ({ notebookRef }: useInteractiveTutorialPr
             nodeBookDispatch({ type: "setSelectedNode", payload: "101" });
           },
         };
+      if (step === 64)
+        payload = {
+          callback: () => {
+            notebookRef.current.selectedNode = "104";
+            nodeBookDispatch({ type: "setSelectedNode", payload: "104" });
+          },
+        };
+      if (step === 66)
+        payload = {
+          callback: () => {
+            notebookRef.current.selectedNode = "101";
+            nodeBookDispatch({ type: "setSelectedNode", payload: "101" });
+          },
+        };
       dispatchNodeTutorial({ type: step, payload });
       isPlayingTheTutorialRef.current = step ? true : false;
     },
