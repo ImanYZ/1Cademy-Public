@@ -520,6 +520,7 @@ export const INTERACTIVE_TUTORIAL_NOTEBOOK_NODES: FullNodesData = {
         label: "",
       },
     ],
+    corrects: 1,
     nodeVideo: "https://youtu.be/exLS4UadfFU",
   },
   "102": {
