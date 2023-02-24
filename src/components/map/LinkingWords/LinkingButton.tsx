@@ -20,9 +20,10 @@ type LinkingButtonProps = {
   nodeType?: NodeType;
   visible?: boolean;
   iClassName?: string;
+  disabled?: boolean;
 };
 
-const LinkingButton = (props: LinkingButtonProps) => {
+const LinkingButton = ({ disabled = false, ...props }: LinkingButtonProps) => {
   // TODO: check dependencies to remove eslint-disable-next-line
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const linkedNodeClick = useCallback(() => props.onClick(props.linkedNodeID), [props.onClick, props.linkedNodeID]);
@@ -49,6 +50,7 @@ const LinkingButton = (props: LinkingButtonProps) => {
           : "left"
       }
       style={{ padding: "0px" }}
+      disabled={disabled}
     >
       <Box sx={{ display: "flex", alignItems: "center", fontSize: "16px" }}>
         {props.iClassName == "local_offer" ? (

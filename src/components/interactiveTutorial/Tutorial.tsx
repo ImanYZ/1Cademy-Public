@@ -56,6 +56,7 @@ export const Tutorial = ({ tutorialState, targetClientRect, onChangeStep }: Tuto
   }, [targetClientRect, tutorialState]);
 
   if (!tutorialState) return null;
+  if (!tutorialState.currentStepName) return null;
 
   if (
     targetClientRect.top === 0 &&
@@ -95,10 +96,10 @@ export const Tutorial = ({ tutorialState, targetClientRect, onChangeStep }: Tuto
           <p>{tutorialState.description}</p>
           <button onClick={() => onChangeStep(tutorialState.previosStepName)}>{"<<"}</button>
 
-          {tutorialState.stepNumber < tutorialState.stepLenght && (
+          {tutorialState.currentStepName < tutorialState.stepLenght && (
             <button onClick={() => onChangeStep(tutorialState.nextStepName)}>{">>"}</button>
           )}
-          {tutorialState.stepNumber === tutorialState.stepLenght && (
+          {tutorialState.currentStepName === tutorialState.stepLenght && (
             <button onClick={() => onChangeStep(tutorialState.previosStepName)}>{"Finalize"}</button>
           )}
         </div>
@@ -121,25 +122,24 @@ export const Tutorial = ({ tutorialState, targetClientRect, onChangeStep }: Tuto
         borderRadius: "8px",
         color: "white",
         zIndex: 99999,
-
-        //   pointerEvents: "none",
       }}
     >
-      <Stack direction={"row"} justifyContent="space-between">
-        <Typography component={"h2"} sx={{ fontSize: "18px", fontWeight: "bold", mb: "8px", display: "inline-block" }}>
+      <Stack direction={"row"} justifyContent="space-between" sx={{ mb: "12px" }}>
+        <Typography component={"h2"} sx={{ fontSize: "18px", fontWeight: "bold", display: "inline-block" }}>
           {tutorialState.title}
         </Typography>
         <Typography sx={{ display: "inline-block", color: "#818181" }}>
-          {tutorialState.stepNumber} / {tutorialState.stepLenght}
+          {tutorialState.currentStepName} / {tutorialState.stepLenght}
         </Typography>
       </Stack>
+
       {tutorialState.description}
-      <Stack direction={"row"} justifyContent={"space-between"} alignItems={"center"}>
+
+      <Stack direction={"row"} justifyContent={"space-between"} alignItems={"center"} sx={{ mt: "16px" }}>
         <Button
           variant="text"
           onClick={() => onChangeStep(null)}
           sx={{
-            borderRadius: "32px",
             p: "8px 0px",
           }}
         >
@@ -159,7 +159,7 @@ export const Tutorial = ({ tutorialState, targetClientRect, onChangeStep }: Tuto
             Prev
           </Button>
 
-          {tutorialState.stepNumber < tutorialState.stepLenght && !tutorialState.isClickeable && (
+          {tutorialState.currentStepName < tutorialState.stepLenght && !tutorialState.isClickeable && (
             <Button
               variant="contained"
               onClick={() => onChangeStep(tutorialState.nextStepName)}
@@ -174,7 +174,7 @@ export const Tutorial = ({ tutorialState, targetClientRect, onChangeStep }: Tuto
               Next
             </Button>
           )}
-          {tutorialState.stepNumber === tutorialState.stepLenght && (
+          {tutorialState.currentStepName === tutorialState.stepLenght && (
             <Button
               variant="contained"
               onClick={() => onChangeStep(tutorialState.nextStepName)}

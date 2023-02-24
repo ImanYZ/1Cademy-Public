@@ -1111,13 +1111,13 @@ const NodeFooter = ({
               {openPart === "LinkingWords" ? (
                 <Box
                   id={`${identifier}-button-parent-children`}
-                  onClick={selectLinkingWords}
+                  onClick={disableParentChildrenButton ? undefined : selectLinkingWords}
                   className={"select-tab-button-node-footer"}
                   sx={{
                     position: "relative",
                     background: theme =>
                       theme.palette.mode === "dark" ? theme.palette.common.darkBackground1 : "#DCDCDC",
-                    cursor: "pointer",
+                    cursor: disableParentChildrenButton ? "not-allowed" : "pointer",
                   }}
                 >
                   <span className="FooterParentNodesOpen">{shortenNumber(parents.length, 2, false)}</span>

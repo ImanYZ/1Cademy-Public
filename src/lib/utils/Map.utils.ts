@@ -1077,7 +1077,8 @@ export const compare2Nodes = (node1: any, node2: any) => {
     node1.changeFeedback !== node2.changeFeedback ||
     node1.switchChoice !== node2.switchChoice ||
     node1.deleteChoice !== node2.deleteChoice ||
-    node1.addChoice !== node2.addChoice
+    node1.addChoice !== node2.addChoice ||
+    node1.defaultOpenPart !== node2.defaultOpenPart
   ) {
     return false;
   }

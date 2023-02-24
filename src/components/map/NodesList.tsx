@@ -247,6 +247,7 @@ const NodesList = ({
             openUserInfoSidebar={openUserInfoSidebar}
             disabled={disabledNodes.includes(nId)}
             enableChildElements={enableChildElements}
+            defaultOpenPart={nodes[nId].defaultOpenPart}
           />
         );
       })}

@@ -303,7 +303,7 @@ export type SetStepType =
 
 export type TutorialState = null | NodeTutorialState;
 
-interface NodeTutorialState {
+export interface NodeTutorialState {
   readonly localSnapshot: FullNodeData[];
   readonly targetId: string;
   readonly childTargetId?: string;
@@ -316,7 +316,7 @@ interface NodeTutorialState {
   readonly nextStepName: SetStepType;
   readonly previosStepName: SetStepType;
   readonly tooltipPosition: "top" | "bottom" | "left" | "right";
-  readonly stepNumber: number;
+  // readonly stepNumber: number;
   readonly stepLenght: number;
   readonly isClickeable: boolean;
 }
@@ -454,6 +454,7 @@ export type FullNodeData = Omit<UserNodesData, "changedAt" | "createdAt" | "upda
     // top: number;
     x?: number;
     y?: number;
+    defaultOpenPart?: OpenPart;
   };
 
 export type EdgeData = {

@@ -628,17 +628,7 @@ const Dashboard = ({}: DashboardProps) => {
       // console.log({ nodeId });
 
       devLog("open_Node_Handler", nodeId);
-      // console.log({ isPlayingTheTutorialRef: isPlayingTheTutorialRef.current });
-      // start tutorial
-      if (isPlayingTheTutorialRef.current) {
-        if (!INTERACTIVE_TUTORIAL_NOTEBOOK_NODES[nodeId]) {
-          return console.warn("Dev: you forgot to update Local Tutorial Nodes");
-        }
-        const thisNode = { nodeId: INTERACTIVE_TUTORIAL_NOTEBOOK_NODES[nodeId] };
-        setLocalSnapshot(thisNode);
-        return;
-      }
-      // end tutorial
+      if (isPlayingTheTutorialRef.current) return;
 
       let linkedNodeRef;
       let userNodeRef = null;
@@ -1963,21 +1953,7 @@ const Dashboard = ({}: DashboardProps) => {
       devLog("open Linked Node", { linkedNodeID, typeOperation });
       if (notebookRef.current.choosingNode) return;
 
-      // start tutorial
-      if (isPlayingTheTutorialRef.current) {
-        let linkedNode = document.getElementById(linkedNodeID);
-        if (linkedNode) {
-          nodeBookDispatch({ type: "setSelectedNode", payload: linkedNodeID });
-          notebookRef.current.selectedNode = linkedNodeID;
-          setTimeout(() => {
-            scrollToNode(linkedNodeID);
-          }, 1500);
-        } else {
-          openNodeHandler(linkedNodeID);
-        }
-        return;
-      }
-      // end tutorial
+      if (isPlayingTheTutorialRef.current) return;
 
       createActionTrack(
         db,
