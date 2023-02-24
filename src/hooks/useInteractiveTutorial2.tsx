@@ -91,8 +91,15 @@ export const useInteractiveTutorial = ({ notebookRef }: useInteractiveTutorialPr
       if (step === 64)
         payload = {
           callback: () => {
-            notebookRef.current.selectedNode = "101";
+            notebookRef.current.selectedNode = "104";
             nodeBookDispatch({ type: "setSelectedNode", payload: "104" });
+          },
+        };
+      if (step === 65)
+        payload = {
+          callback: () => {
+            notebookRef.current.selectedNode = "101";
+            nodeBookDispatch({ type: "setSelectedNode", payload: "101" });
           },
         };
       dispatchNodeTutorial({ type: step, payload });

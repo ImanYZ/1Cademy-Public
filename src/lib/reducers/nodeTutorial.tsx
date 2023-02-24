@@ -756,6 +756,7 @@ export function nodeTutorialReducer(
         disabledElements: [...DISABLE_NOTEBOOK_OPTIONS, "100", "101"],
         enableChildElements: ["101-node-footer-upvotes"],
         tooltipPosition: "bottom",
+        // isClickeable: true,
       };
     case 64:
       return {
@@ -795,6 +796,90 @@ export function nodeTutorialReducer(
         disabledElements: [...DISABLE_NOTEBOOK_OPTIONS, "100", "101", "104"],
         enableChildElements: ["104-node-footer-downvotes"],
         tooltipPosition: "bottom",
+        // isClickeable: true,
+      };
+    case 66:
+      return {
+        ...getBaseStepConfig(action.type),
+        localSnapshot: [
+          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["100"], nodeChangeType: "added" },
+          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["101"], nodeChangeType: "added" },
+          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["102"] },
+          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["103"] },
+          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["104"] },
+        ],
+        targetId: "101",
+        childTargetId: "101-node-footer-votes",
+        title: "Nodes - Node Footer",
+        description: (
+          <MarkdownRender
+            text={
+              "The difference of upvotes and downvotes, called net vote, also determines how many or few approving votes a proposal needs in order to change the contents of that node. This will be discussed further later on. "
+            }
+          />
+        ),
+        disabledElements: [...DISABLE_NOTEBOOK_OPTIONS, "100", "101", "104"],
+        tooltipPosition: "bottom",
+      };
+    case 67:
+      return {
+        ...getBaseStepConfig(action.type),
+        localSnapshot: [
+          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["100"], nodeChangeType: "added" },
+          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["101"], nodeChangeType: "added" },
+          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["102"] },
+          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["103"] },
+          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["104"] },
+        ],
+        targetId: "101",
+        childTargetId: "101-node-footer-tags-citations",
+        title: "Nodes - Node Footer",
+        description: (
+          <MarkdownRender
+            text={"The next icons are on a single button and represent the tag and citation for a node"}
+          />
+        ),
+        disabledElements: [...DISABLE_NOTEBOOK_OPTIONS, "100", "101"],
+      };
+    case 68:
+      return {
+        ...getBaseStepConfig(action.type),
+        localSnapshot: [
+          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["100"], nodeChangeType: "added" },
+          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["101"], nodeChangeType: "added", defaultOpenPart: null },
+          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["102"] },
+          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["103"] },
+          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["104"] },
+        ],
+        targetId: "101",
+        childTargetId: "101-node-footer-tags-citations",
+        title: "Nodes - Node Footer",
+        description: <MarkdownRender text={"Click the button of the node to expand."} />,
+        disabledElements: [...DISABLE_NOTEBOOK_OPTIONS, "100", "101"],
+        enableChildElements: ["101-node-footer-tags-citations"],
+        isClickeable: true,
+      };
+    case 69:
+      return {
+        ...getBaseStepConfig(action.type),
+        localSnapshot: [
+          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["100"], nodeChangeType: "added" },
+          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["101"], nodeChangeType: "added", defaultOpenPart: "References" },
+          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["102"] },
+          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["103"] },
+          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["104"] },
+        ],
+        targetId: "101",
+        childTargetId: "101-linking-words",
+        title: "Nodes - Node Footer",
+        description: (
+          <MarkdownRender
+            text={
+              "You see the reference for the content of the node on the left and the tags for the node on the right."
+            }
+          />
+        ),
+        disabledElements: [...DISABLE_NOTEBOOK_OPTIONS, "100", "101"],
       };
     default:
       return state;
