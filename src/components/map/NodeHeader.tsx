@@ -38,13 +38,7 @@ const NodeHeader = ({
   const disableOpenButton = disabled && !enableChildElements.includes(openButtonId);
   const disableHideOffspringsButton = disabled && !enableChildElements.includes(hideOffspringsButtonId);
   const disableHideButton = disabled && !enableChildElements.includes(hideButtonId);
-  console.log({
-    disableOpenButton,
-    disabled,
-    disableOpenButton2: !enableChildElements.includes(openButtonId),
-    openButtonId,
-    enableChildElements,
-  });
+
   return (
     <Box
       id={`${id}-node-header`}
