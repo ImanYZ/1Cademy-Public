@@ -41,99 +41,27 @@ export const useInteractiveTutorial = ({ notebookRef }: useInteractiveTutorialPr
             nodeBookDispatch({ type: "setSelectedNode", payload: "01" });
           },
         };
-      if (step === 13)
+      if (step === 14)
         payload = {
           callback: () => {
             notebookRef.current.selectedNode = "00";
             nodeBookDispatch({ type: "setSelectedNode", payload: "00" });
           },
         };
-      if (step === 42)
+      if (step === 15)
         payload = {
           callback: () => {
             notebookRef.current.selectedNode = "01";
             nodeBookDispatch({ type: "setSelectedNode", payload: "01" });
           },
         };
-      if (step === 43)
+      if (step === 16)
         payload = {
           callback: () => {
             notebookRef.current.selectedNode = "02";
             nodeBookDispatch({ type: "setSelectedNode", payload: "02" });
           },
         };
-      if (step === 47)
-        payload = {
-          callback: () => {
-            notebookRef.current.selectedNode = "02";
-            nodeBookDispatch({ type: "setSelectedNode", payload: "02" });
-          },
-        };
-      if (step === 48)
-        payload = {
-          callback: () => {
-            notebookRef.current.selectedNode = "03";
-            nodeBookDispatch({ type: "setSelectedNode", payload: "03" });
-          },
-        };
-      if (step === 53)
-        payload = {
-          callback: () => {
-            notebookRef.current.selectedNode = "03";
-            nodeBookDispatch({ type: "setSelectedNode", payload: "03" });
-          },
-        };
-
-      if (step === 54)
-        payload = {
-          callback: () => {
-            notebookRef.current.selectedNode = "04";
-            nodeBookDispatch({ type: "setSelectedNode", payload: "04" });
-          },
-        };
-      if (step === 57)
-        payload = {
-          callback: () => {
-            notebookRef.current.selectedNode = "04";
-            nodeBookDispatch({ type: "setSelectedNode", payload: "04" });
-          },
-        };
-      if (step === 58)
-        payload = {
-          callback: () => {
-            notebookRef.current.selectedNode = "05";
-            nodeBookDispatch({ type: "setSelectedNode", payload: "05" });
-          },
-        };
-      if (step === 59)
-        payload = {
-          callback: () => {
-            notebookRef.current.selectedNode = "05";
-            nodeBookDispatch({ type: "setSelectedNode", payload: "05" });
-          },
-        };
-      if (step === 60)
-        payload = {
-          callback: () => {
-            notebookRef.current.selectedNode = "06";
-            nodeBookDispatch({ type: "setSelectedNode", payload: "06" });
-          },
-        };
-      if (step === 62)
-        payload = {
-          callback: () => {
-            notebookRef.current.selectedNode = "06";
-            nodeBookDispatch({ type: "setSelectedNode", payload: "06" });
-          },
-        };
-      if (step === 63)
-        payload = {
-          callback: () => {
-            notebookRef.current.selectedNode = "07";
-            nodeBookDispatch({ type: "setSelectedNode", payload: "07" });
-          },
-        };
-
       dispatchNodeTutorial({ type: step, payload });
       isPlayingTheTutorialRef.current = step ? true : false;
     },

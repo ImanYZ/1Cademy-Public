@@ -11,7 +11,7 @@ import { INTERACTIVE_TUTORIAL_NOTEBOOK_NODES } from "../utils/interactiveTutoria
 export const INITIAL_NODE_TUTORIAL_STATE: TutorialState = null;
 
 dayjs.extend(relativeTime);
-const STEPS_LENGHT = 13; // 65
+const STEPS_LENGHT = 25; // 65
 
 const DISABLE_NOTEBOOK_OPTIONS = [
   "TOOLBAR",
@@ -173,7 +173,7 @@ export function nodeTutorialReducer(
         disabledElements: [...DISABLE_NOTEBOOK_OPTIONS, "01"],
       };
 
-    case 5:
+    case 6:
       return {
         ...getBaseStepConfig(action.type),
         localSnapshot: [
@@ -193,7 +193,7 @@ export function nodeTutorialReducer(
         disabledElements: [...DISABLE_NOTEBOOK_OPTIONS, "01"],
       };
 
-    case 6:
+    case 7:
       return {
         ...getBaseStepConfig(action.type),
         localSnapshot: [
@@ -207,7 +207,7 @@ export function nodeTutorialReducer(
         disabledElements: [...DISABLE_NOTEBOOK_OPTIONS, "01"],
       };
 
-    case 7:
+    case 8:
       return {
         ...getBaseStepConfig(action.type),
         localSnapshot: [
@@ -221,7 +221,7 @@ export function nodeTutorialReducer(
         disabledElements: [...DISABLE_NOTEBOOK_OPTIONS, "01"],
       };
 
-    case 8:
+    case 9:
       return {
         ...getBaseStepConfig(action.type),
         localSnapshot: [
@@ -235,7 +235,7 @@ export function nodeTutorialReducer(
         disabledElements: [...DISABLE_NOTEBOOK_OPTIONS, "01"],
       };
 
-    case 9:
+    case 10:
       return {
         ...getBaseStepConfig(action.type),
         localSnapshot: [
@@ -253,7 +253,7 @@ export function nodeTutorialReducer(
 
     // --- BASIC NAVIGATION
 
-    case 10:
+    case 11:
       return {
         ...getBaseStepConfig(action.type),
         localSnapshot: [
@@ -280,7 +280,7 @@ export function nodeTutorialReducer(
         isClickeable: true,
       };
 
-    case 11:
+    case 12:
       return {
         ...getBaseStepConfig(action.type),
         localSnapshot: [
@@ -299,7 +299,7 @@ export function nodeTutorialReducer(
         disabledElements: [...DISABLE_NOTEBOOK_OPTIONS, "01"],
       };
 
-    case 12:
+    case 13:
       return {
         ...getBaseStepConfig(action.type),
         localSnapshot: [
@@ -320,7 +320,7 @@ export function nodeTutorialReducer(
         isClickeable: true,
       };
 
-    case 13:
+    case 14:
       return {
         ...getBaseStepConfig(action.type),
         localSnapshot: [
@@ -342,7 +342,131 @@ export function nodeTutorialReducer(
         ),
         disabledElements: [...DISABLE_NOTEBOOK_OPTIONS, "01", "00"],
       };
-
+    case 15:
+      return {
+        ...getBaseStepConfig(action.type),
+        localSnapshot: [
+          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["00"], nodeChangeType: "added", open: true },
+          {
+            ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["01"],
+            nodeChangeType: "modified",
+            open: true,
+            defaultOpenPart: "LinkingWords",
+          },
+          {
+            ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["02"],
+            nodeChangeType: "removed",
+            open: true,
+          },
+        ],
+        targetId: "01",
+        childTargetId: "01-child-button-0",
+        title: "Basic Navigation - Children Nodes",
+        description: <MarkdownRender text={`Click one of the links to move to the child node`} />,
+        disabledElements: [...DISABLE_NOTEBOOK_OPTIONS, "01", "00"],
+        enableChildElements: ["01-child-button-0"],
+        isClickeable: true,
+      };
+    case 16:
+      return {
+        ...getBaseStepConfig(action.type),
+        localSnapshot: [
+          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["00"], nodeChangeType: "added", open: true },
+          {
+            ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["01"],
+            nodeChangeType: "modified",
+            defaultOpenPart: null,
+            open: true,
+          },
+          {
+            ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["02"],
+            nodeChangeType: "added",
+            defaultOpenPart: null,
+            open: true,
+          },
+        ],
+        targetId: "02",
+        childTargetId: "02-button-parent-children",
+        title: "Basic Navigation - Children Nodes",
+        description: (
+          <MarkdownRender
+            text={`Most nodes have children. After learning this node, you can expand your knowledge by learning its children. Click the same button to see the node’s children list.`}
+          />
+        ),
+        disabledElements: [...DISABLE_NOTEBOOK_OPTIONS, "01", "00"],
+        enableChildElements: ["02-button-parent-children"],
+        isClickeable: true,
+      };
+    case 17:
+      return {
+        ...getBaseStepConfig(action.type),
+        localSnapshot: [
+          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["00"], nodeChangeType: "added", open: true },
+          {
+            ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["01"],
+            nodeChangeType: "modified",
+            open: true,
+          },
+          {
+            ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["02"],
+            nodeChangeType: "modified",
+            open: true,
+            defaultOpenPart: "LinkingWords",
+          },
+        ],
+        targetId: "02",
+        childTargetId: "02-children-list",
+        title: "Basic Navigation - Children Nodes",
+        description: <MarkdownRender text={"You can see the children link(s) listed below in this panel."} />,
+        disabledElements: [...DISABLE_NOTEBOOK_OPTIONS, "01", "00"],
+      };
+    case 18:
+      return {
+        ...getBaseStepConfig(action.type),
+        localSnapshot: [
+          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["00"], nodeChangeType: "added", open: true },
+          {
+            ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["01"],
+            nodeChangeType: "modified",
+            open: true,
+          },
+          {
+            ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["02"],
+            nodeChangeType: "modified",
+            open: true,
+            defaultOpenPart: "LinkingWords",
+          },
+        ],
+        targetId: "02",
+        childTargetId: "02-children-list",
+        title: "Basic Navigation - Children Nodes",
+        description: <MarkdownRender text={"Here you can see the child node for 1Cademy is:"} />,
+        disabledElements: [...DISABLE_NOTEBOOK_OPTIONS, "01", "00"],
+      };
+    case 19:
+      return {
+        ...getBaseStepConfig(action.type),
+        localSnapshot: [
+          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["00"], nodeChangeType: "added", open: true },
+          {
+            ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["01"],
+            nodeChangeType: "modified",
+            open: true,
+          },
+          {
+            ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["02"],
+            nodeChangeType: "modified",
+            open: true,
+            defaultOpenPart: "LinkingWords",
+          },
+        ],
+        targetId: "02",
+        childTargetId: "02-child-button-02",
+        title: "Basic Navigation - Parent Nodes",
+        description: <MarkdownRender text={"Here you can see the child node for 1Cademy is:"} />,
+        disabledElements: [...DISABLE_NOTEBOOK_OPTIONS, "01", "00"],
+        enableChildElements: ["02-child-button-02"],
+      };
     default:
       return state;
   }

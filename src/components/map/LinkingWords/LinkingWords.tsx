@@ -464,6 +464,7 @@ const LinkingWords = ({ disabled, enableChildElements = [], ...props }: LinkingW
                       linkedNodeType="child"
                       nodeType={child.type}
                       visible={child.visible}
+                      disabled={disabled && !enableChildElements.includes(`${props.identifier}-child-button-${idx}`)}
                     />
                     {props.editable && (
                       <Tooltip
