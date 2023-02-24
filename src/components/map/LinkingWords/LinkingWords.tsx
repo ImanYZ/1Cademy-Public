@@ -80,21 +80,12 @@ type LinkingWordsProps = {
   isLoading: boolean;
   onResetButton: (newState: boolean) => void;
   setOperation: (operation: string) => void;
+  disabled?: boolean;
+  enableChildElements?: string[];
 };
 
-const LinkingWords = (props: LinkingWordsProps) => {
-  // const selectedNode = useRecoilValue(selectedNodeState);
-  // const setChoosingNode = useSetRecoilState(choosingNodeState);
-  // const setChoosingType = useSetRecoilState(choosingTypeState);
-  // const [chosenNode, setChosenNode] = useRecoilState(chosenNodeState);
-  // const setChosenNodeTitle = useSetRecoilState(chosenNodeTitleState);
-
+const LinkingWords = ({ disabled, enableChildElements = [], ...props }: LinkingWordsProps) => {
   const { nodeBookState, nodeBookDispatch } = useNodeBook();
-  // const selectedNode = useRecoilValue(selectedNodeState);
-  // const setChoosingNode = useSetRecoilState(choosingNodeState);
-  // const setChoosingType = useSetRecoilState(choosingTypeState);
-  // const [chosenNode, setChosenNode] = useRecoilState(chosenNodeState);
-  // const setChosenNodeTitle = useSetRecoilState(chosenNodeTitleState);
 
   useEffect(() => {
     props.chosenNodeChanged(props.identifier);
@@ -210,6 +201,7 @@ const LinkingWords = (props: LinkingWordsProps) => {
                       linkedNodeType="parent"
                       nodeType={parent.type}
                       visible={parent.visible}
+                      disabled={disabled && !enableChildElements.includes(`${props.identifier}-parent-button-${idx}`)}
                     />
                     {props.editable && props.parents.length > 1 && (
                       <Tooltip
@@ -510,6 +502,7 @@ const LinkingWords = (props: LinkingWordsProps) => {
                 linkedNodeType="children"
                 nodeType={"Relation"}
                 visible={false}
+                disabled={disabled}
               />
               {props.editable && !props.isNew && nodeBookState.selectedNode === props.identifier && (
                 <MemoizedMetaButton
