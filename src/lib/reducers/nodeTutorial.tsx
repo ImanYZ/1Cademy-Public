@@ -11,7 +11,7 @@ import { INTERACTIVE_TUTORIAL_NOTEBOOK_NODES } from "../utils/interactiveTutoria
 export const INITIAL_NODE_TUTORIAL_STATE: TutorialState = null;
 
 dayjs.extend(relativeTime);
-const STEPS_LENGHT = 25; // 65
+const STEPS_LENGHT = 200; // 65
 
 const DISABLE_NOTEBOOK_OPTIONS = [
   "TOOLBAR",
@@ -467,6 +467,161 @@ export function nodeTutorialReducer(
         disabledElements: [...DISABLE_NOTEBOOK_OPTIONS, "01", "00"],
         enableChildElements: ["02-child-button-02"],
       };
+
+    case 50:
+      return {
+        ...getBaseStepConfig(action.type),
+        localSnapshot: [
+          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["100"], nodeChangeType: "added" },
+          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["101"], nodeChangeType: "added" },
+          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["102"], nodeChangeType: "added" },
+          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["103"], nodeChangeType: "added" },
+        ],
+        targetId: "103",
+        childTargetId: "103-node-header",
+        title: "Nodes - Node Header",
+        description: (
+          <MarkdownRender
+            text={"Node headers are one of the ways that you can manipulate what you see on the knowledge graph."}
+          />
+        ),
+        disabledElements: [...DISABLE_NOTEBOOK_OPTIONS, "100", "101", "102", "103"],
+      };
+
+    case 51:
+      return {
+        ...getBaseStepConfig(action.type),
+        localSnapshot: [
+          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["100"], nodeChangeType: "added" },
+          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["101"], nodeChangeType: "added" },
+          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["102"], nodeChangeType: "added" },
+          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["103"], nodeChangeType: "added" },
+        ],
+        targetId: "103",
+        childTargetId: "103-node-header",
+        title: "Nodes - Node Header",
+        description: <MarkdownRender text={"In the header are three buttons."} />,
+        disabledElements: [...DISABLE_NOTEBOOK_OPTIONS, "100", "101", "102", "103"],
+      };
+
+    case 52:
+      return {
+        ...getBaseStepConfig(action.type),
+        localSnapshot: [
+          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["100"], nodeChangeType: "added" },
+          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["101"], nodeChangeType: "added" },
+          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["102"], nodeChangeType: "added" },
+          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["103"], nodeChangeType: "added" },
+        ],
+        targetId: "103",
+        childTargetId: "103-hiden-button",
+        title: "Nodes - Node Header",
+        description: (
+          <MarkdownRender
+            text={
+              "This one, closes the node. Once again, it just removes it from your view, it does not delete the node from the platform."
+            }
+          />
+        ),
+        disabledElements: [...DISABLE_NOTEBOOK_OPTIONS, "100", "101", "102", "103"],
+        enableChildElements: ["103-hiden-button"],
+        isClickeable: true,
+      };
+
+    case 53:
+      return {
+        ...getBaseStepConfig(action.type),
+        localSnapshot: [
+          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["100"], nodeChangeType: "added" },
+          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["101"], nodeChangeType: "added" },
+          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["102"], nodeChangeType: "added" },
+          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["103"] },
+        ],
+        targetId: "101",
+        childTargetId: "101-hide-offsprings-button",
+        title: "Nodes - Node Header",
+        description: (
+          <MarkdownRender text={"This one closes all the open children nodes of the node it is clicked on."} />
+        ),
+        disabledElements: [...DISABLE_NOTEBOOK_OPTIONS, "100", "101", "102"],
+        enableChildElements: ["101-hide-offsprings-button"],
+        isClickeable: true,
+      };
+
+    case 54:
+      return {
+        ...getBaseStepConfig(action.type),
+        localSnapshot: [
+          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["100"], nodeChangeType: "added" },
+          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["101"], nodeChangeType: "added" },
+          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["102"] },
+          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["103"] },
+        ],
+        targetId: "101",
+        title: "Nodes - Node Header",
+        description: <MarkdownRender text={"See the branches of children were all removed from view."} />,
+        disabledElements: [...DISABLE_NOTEBOOK_OPTIONS, "100", "101"],
+      };
+
+    case 55:
+      return {
+        ...getBaseStepConfig(action.type),
+        localSnapshot: [
+          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["100"], nodeChangeType: "added" },
+          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["101"], nodeChangeType: "added" },
+          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["102"] },
+          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["103"] },
+        ],
+        targetId: "101",
+        childTargetId: "101-close-button",
+        title: "Nodes - Node Header",
+        description: (
+          <MarkdownRender text={"This one minimizes the content in a node so only the title is displayed."} />
+        ),
+        disabledElements: [...DISABLE_NOTEBOOK_OPTIONS, "100", "101"],
+        enableChildElements: ["101-close-button"],
+        isClickeable: true,
+      };
+
+    case 56:
+      return {
+        ...getBaseStepConfig(action.type),
+        localSnapshot: [
+          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["100"], nodeChangeType: "added" },
+          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["101"], nodeChangeType: "added", open: false },
+          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["102"] },
+          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["103"] },
+        ],
+        targetId: "101",
+        childTargetId: "101-open-button",
+        title: "Nodes - Node Header",
+        description: (
+          <MarkdownRender text={"This one maximize the content in a node so the title and content are displayed."} />
+        ),
+        disabledElements: [...DISABLE_NOTEBOOK_OPTIONS, "100", "101"],
+        enableChildElements: ["101-open-button"],
+        isClickeable: true,
+      };
+
+    // -------------------- FOOTER
+    case 57:
+      return {
+        ...getBaseStepConfig(action.type),
+        localSnapshot: [
+          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["100"], nodeChangeType: "added" },
+          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["101"], nodeChangeType: "added", open: false },
+          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["102"] },
+          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["103"] },
+        ],
+        targetId: "101",
+        childTargetId: "101-open-button",
+        title: "Nodes - Node Header",
+        description: <MarkdownRender text={"The node footer provides many tools."} />,
+        disabledElements: [...DISABLE_NOTEBOOK_OPTIONS, "100", "101"],
+        enableChildElements: ["101-open-button"],
+        isClickeable: true,
+      };
+
     default:
       return state;
   }

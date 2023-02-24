@@ -86,7 +86,6 @@ import { Post, postWithToken } from "../lib/mapApi";
 import { createGraph, dagreUtils } from "../lib/utils/dagre.util";
 import { devLog } from "../lib/utils/develop.util";
 import { getTypedCollections } from "../lib/utils/getTypedCollections";
-import { INTERACTIVE_TUTORIAL_NOTEBOOK_NODES } from "../lib/utils/interactiveTutorialNodes";
 import {
   changedNodes,
   citations,
@@ -509,6 +508,8 @@ const Dashboard = ({}: DashboardProps) => {
       });
     }
   }, [stateNodeTutorial, graph.nodes, setTargetClientRect]);
+
+  console.log({ graph });
 
   const onCompleteWorker = useCallback(() => {
     if (!nodeBookState.selectedNode) return;
@@ -1088,12 +1089,12 @@ const Dashboard = ({}: DashboardProps) => {
 
     if (shouldResetGraph.current) {
       g.current = createGraph();
-      const FIRST_KEY_NODE = "01";
+      // const FIRST_KEY_NODE = "01";
       setGraph({
-        nodes: { [FIRST_KEY_NODE]: INTERACTIVE_TUTORIAL_NOTEBOOK_NODES[FIRST_KEY_NODE] },
+        nodes: {},
         edges: {},
       });
-      setLocalSnapshot({ [FIRST_KEY_NODE]: INTERACTIVE_TUTORIAL_NOTEBOOK_NODES[FIRST_KEY_NODE] });
+      // setLocalSnapshot({);
       shouldResetGraph.current = false;
     }
 
@@ -2040,6 +2041,8 @@ const Dashboard = ({}: DashboardProps) => {
        * change node
        * create userNodeLog
        */
+
+      if (isPlayingTheTutorialRef.current) return;
 
       setGraph(graph => {
         (async () => {

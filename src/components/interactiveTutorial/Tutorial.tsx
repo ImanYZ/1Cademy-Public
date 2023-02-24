@@ -168,7 +168,7 @@ export const Tutorial = ({
             Prev
           </Button>
 
-          {tutorialState.currentStepName < tutorialState.stepLenght && !tutorialState.isClickeable && (
+          {tutorialState.currentStepName < tutorialState.stepLenght && (
             <Button
               variant="contained"
               onClick={() => onChangeStep(tutorialState.nextStepName)}
@@ -179,6 +179,7 @@ export const Tutorial = ({
                 backgroundColor: "#FF6D00",
                 ":hover": { backgroundColor: "#f57a1c" },
               }}
+              disabled={tutorialState.isClickeable}
             >
               Next
             </Button>

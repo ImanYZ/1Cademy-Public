@@ -1145,6 +1145,7 @@ const Node = ({
               onHideOffsprings={hideOffspringsHandler}
               onHideNodeHandler={hideNodeHandler}
               disabled={disabled}
+              enableChildElements={enableChildElements}
               // sx={{ position: "absolute", right: "10px", top: "0px" }}
             />
           )}

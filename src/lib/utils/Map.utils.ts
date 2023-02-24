@@ -824,7 +824,6 @@ export const createOrUpdateNode = (
 // this works correctly in dashboard with array but,
 // don't work in worker
 export const copyNode = (node: FullNodeData): FullNodeData => {
-  console.log("\n----->\n -> NODE HERE:", { ...node });
   let newNode = { ...node };
   newNode.parents = [];
   for (let parent of node.parents) {

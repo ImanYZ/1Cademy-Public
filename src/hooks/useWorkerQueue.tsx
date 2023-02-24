@@ -155,11 +155,12 @@ export const useWorkerQueue = ({
     const individualNodeChanges: FullNodeData[] = queue
       .map(cur => {
         if (!cur) return null;
+        if (!graph.nodes[cur.id]) return null; // when graph was modified and queue has old values
         return { ...graph.nodes[cur.id], height: cur.height };
       })
       .flatMap(cur => cur || []);
 
-    console.log({ nodes: graph.nodes });
+    console.log({ nodes: graph.nodes, g: g.current, individualNodeChanges });
     const nodesToRecalculate = setDagNodes(g.current, individualNodeChanges, graph.nodes, allTags, withClusters);
 
     console.log({ nodes: nodesToRecalculate, edges: graph.edges, g: g.current });
