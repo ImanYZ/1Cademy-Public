@@ -46,6 +46,42 @@ const filterChoices: any = {
   "Vote Points": "votePoints",
 };
 
+const defaultColumns: string[] = [
+  "firstName",
+  "lastName",
+  "email",
+  "totalPoints",
+  "wrongs",
+  "corrects",
+  "awards",
+  "newProposals",
+  "editNodeProposals",
+  "proposalsPoints",
+  "questions",
+  "questionPoints",
+  "vote",
+  "votePoints",
+  "lastActivity",
+];
+
+const defaultKeys = [
+  "First Name",
+  "Last Name",
+  "Email",
+  "Total Poitns",
+  "Wrongs",
+  "Corrects",
+  "Awards",
+  "Child Proposals",
+  "Edit Proposals",
+  "Proposal Points",
+  "Questions",
+  "Question Points",
+  "Vote",
+  "Vote Points",
+  "Last Activity",
+];
+
 const keysColumns: any = {
   "First Name": "firstName",
   "Last Name": "lastName",
@@ -65,42 +101,8 @@ const keysColumns: any = {
 };
 
 export const Students: InstructorLayoutPage = ({ /* selectedSemester, */ selectedCourse, currentSemester }) => {
-  console.log(currentSemester, "currentSemester");
-  const [keys, setKeys] = useState([
-    "First Name",
-    "Last Name",
-    "Email",
-    "Total Poitns",
-    "Wrongs",
-    "Corrects",
-    "Awards",
-    "Child Proposals",
-    "Edit Proposals",
-    "Proposal Points",
-    "Questions",
-    "Question Points",
-    "Vote",
-    "Vote Points",
-    "Last Activity",
-  ]);
-
-  const [columns, setColumns] = useState([
-    "firstName",
-    "lastName",
-    "email",
-    "totalPoints",
-    "wrongs",
-    "corrects",
-    "awards",
-    "newProposals",
-    "editNodeProposals",
-    "proposalsPoints",
-    "questions",
-    "questionPoints",
-    "vote",
-    "votePoints",
-    "lastActivity",
-  ]);
+  const [keys, setKeys] = useState(defaultKeys);
+  const [columns, setColumns] = useState(defaultColumns);
   const [rows, setRows] = useState<any>([]);
   const [tableRows, setTableRows] = useState<any>([]);
   const [openFilter, setOpenFilter] = useState(false);
@@ -164,40 +166,8 @@ export const Students: InstructorLayoutPage = ({ /* selectedSemester, */ selecte
   }, [db, currentSemester]);
 
   useEffect(() => {
-    setKeys([
-      "First Name",
-      "Last Name",
-      "Email",
-      "Total Poitns",
-      "Wrongs",
-      "Corrects",
-      "Awards",
-      "Child Proposals",
-      "Edit Proposals",
-      "Proposal Points",
-      "Questions",
-      "Question Points",
-      "Vote",
-      "Vote Points",
-      "Last Activity",
-    ]);
-    setColumns([
-      "firstName",
-      "lastName",
-      "email",
-      "totalPoints",
-      "wrongs",
-      "corrects",
-      "awards",
-      "newProposals",
-      "editNodeProposals",
-      "proposalsPoints",
-      "questions",
-      "questionPoints",
-      "vote",
-      "votePoints",
-      "lastActivity",
-    ]);
+    setKeys([...defaultKeys]);
+    setColumns([...defaultColumns]);
   }, [currentSemester]);
 
   useEffect(() => {
