@@ -49,12 +49,11 @@ type ProgressBarTutorial = {
   open: boolean;
   handleCloseProgressBar: any;
 };
+
 const ProgressBar = ({ open, handleCloseProgressBar }: ProgressBarTutorial) => {
   const { height } = useWindowSize();
   const [expanded, setExpanded] = useState<string | false>("Option1");
   const [selectedState, setSelectedStage] = useState<keyof TutorialProgess>(Object.keys(stages)[0]);
-
-  console.log("oooooopen", open);
 
   const handleChange =
     (option: string, stage: keyof TutorialProgess) => (event: React.SyntheticEvent, newExpanded: boolean) => {

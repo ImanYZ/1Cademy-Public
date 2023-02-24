@@ -2,6 +2,7 @@ import ListIcon from "@mui/icons-material/List";
 import { Box, Divider, IconButton, LinearProgress, Stack, styled, Typography } from "@mui/material";
 import React from "react";
 
+import { nodeTutorialReducer } from "@/lib/reducers/nodeTutorial";
 import { gray200 } from "@/pages/home";
 
 const DividerStyled = styled(props => <Divider {...props} />)(({ theme }) => ({
@@ -9,11 +10,14 @@ const DividerStyled = styled(props => <Divider {...props} />)(({ theme }) => ({
 }));
 
 type ProgressBarMenuProps = {
+  currentStep: number;
   open: boolean;
   handleOpenProgressBar: () => void;
 };
 
-const ProgressBarMenu = ({ handleOpenProgressBar, open }: ProgressBarMenuProps) => {
+const counterStep = (nodeTutorialReducer.toString().match(/case\s+\d+/g) || []).length;
+
+const ProgressBarMenu = ({ currentStep, handleOpenProgressBar, open }: ProgressBarMenuProps) => {
   return (
     <Box
       sx={{
@@ -38,7 +42,9 @@ const ProgressBarMenu = ({ handleOpenProgressBar, open }: ProgressBarMenuProps) 
       <DividerStyled />
       <Stack direction={"row"} alignItems="center" justifyContent={"space-between"} my="10px">
         <Typography fontSize={"12px"}>Tutorials</Typography>
-        <Typography fontSize={"12px"}>7/12</Typography>
+        <Typography fontSize={"12px"}>
+          {currentStep} / {counterStep}
+        </Typography>
       </Stack>
       <LinearProgress
         variant="determinate"

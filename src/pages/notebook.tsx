@@ -304,7 +304,6 @@ const Dashboard = ({}: DashboardProps) => {
   const [nodeTutorial /* setNodeTutorial */] = useState(Boolean(localStorage.getItem("node-tutorial")));
 
   const { stateNodeTutorial, onChangeStep, isPlayingTheTutorialRef } = useInteractiveTutorial({ notebookRef });
-
   const onNodeInViewport = useCallback(
     (nodeId: string) => {
       const originalNode = document.getElementById(nodeId);
@@ -4708,7 +4707,11 @@ const Dashboard = ({}: DashboardProps) => {
               </Suspense>
             </Box>
           )}
-          <MemoizedProgressBarMenu open={openProgressBarMenu} handleOpenProgressBar={handleOpenProgressBar} />
+          <MemoizedProgressBarMenu
+            open={openProgressBarMenu}
+            handleOpenProgressBar={handleOpenProgressBar}
+            currentStep={stateNodeTutorial?.currentStepName ?? 0}
+          />
           <MemoizedProgressBar open={openProgressBar} handleCloseProgressBar={handleCloseProgressBar} />
         </Box>
       </Box>
