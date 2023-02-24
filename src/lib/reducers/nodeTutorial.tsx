@@ -84,6 +84,9 @@ Ex for Node id elements to disable
   "01-node-footer-tags-citations",
   "01-button-parent-children",
   "01-node-footer-ellipsis",
+  "01-reference-button-0"
+  "01-tag-button-0"
+  "01-node-footer-menu"
  */
 
 export function nodeTutorialReducer(
@@ -321,7 +324,7 @@ export function nodeTutorialReducer(
         targetId: "01",
         childTargetId: "01-parent-button-0",
         title: "Basic Navigation - Parent Nodes",
-        description: <MarkdownRender text={"Click one of the links to move to the parent node."} />,
+        description: <MarkdownRender text={"Click on the link for “1Cademy."} />,
         disabledElements: [...DISABLE_NOTEBOOK_OPTIONS, "01"],
         enableChildElements: ["01-parent-button-0"],
         isClickeable: true,
@@ -367,11 +370,10 @@ export function nodeTutorialReducer(
           },
         ],
         targetId: "01",
-        childTargetId: "01-child-button-0",
+        childTargetId: "01-children-list",
         title: "Basic Navigation - Children Nodes",
-        description: <MarkdownRender text={`Click one of the links to move to the child node`} />,
+        description: <MarkdownRender text={'Click on the link for "Creating or Improving a node in 1Cademy"'} />,
         disabledElements: [...DISABLE_NOTEBOOK_OPTIONS, "01", "00"],
-        enableChildElements: ["01-child-button-0"],
         isClickeable: true,
       };
     case 16:
