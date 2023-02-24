@@ -48,7 +48,7 @@ const ProgressBarMenu = ({ currentStep, handleOpenProgressBar, open }: ProgressB
       </Stack>
       <LinearProgress
         variant="determinate"
-        value={45}
+        value={(currentStep * 100) / counterStep}
         color={"success"}
         sx={{
           borderRadius: "50px",
