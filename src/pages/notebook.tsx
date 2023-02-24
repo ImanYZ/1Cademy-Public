@@ -59,6 +59,8 @@ import { MemoizedProposalsSidebar } from "@/components/map/Sidebar/SidebarV2/Pro
 import { MemoizedSearcherSidebar } from "@/components/map/Sidebar/SidebarV2/SearcherSidebar";
 import { MemoizedUserInfoSidebar } from "@/components/map/Sidebar/SidebarV2/UserInfoSidebar";
 import { MemoizedUserSettingsSidebar } from "@/components/map/Sidebar/SidebarV2/UserSettigsSidebar";
+import { MemoizedProgressBar } from "@/components/tutorial/ProgressBar";
+import { MemoizedProgressBarMenu } from "@/components/tutorial/ProgressBarMenu";
 import { useAuth } from "@/context/AuthContext";
 import { useTagsTreeView } from "@/hooks/useTagsTreeView";
 import { addSuffixToUrlGMT } from "@/lib/utils/string.utils";
@@ -271,6 +273,8 @@ const Dashboard = ({}: DashboardProps) => {
   const lastNodeOperation = useRef<string>("");
   const proposalTimer = useRef<any>(null);
 
+  const [openProgressBar, setOpenProgressBar] = useState(false);
+  const [openProgressBarMenu, setOpenProgressBarMenu] = useState(false);
   // const {
   //   setTargetClientRect,
   //   isPlayingTheTutorial,
@@ -3936,6 +3940,17 @@ const Dashboard = ({}: DashboardProps) => {
     [nodeBookDispatch]
   );
   // console.log({ nodeBookState });
+
+  const handleOpenProgressBar = () => {
+    setOpenProgressBar(true);
+    setOpenProgressBarMenu(false);
+  };
+
+  const handleCloseProgressBar = () => {
+    setOpenProgressBar(false);
+    setOpenProgressBarMenu(true);
+  };
+
   return (
     <div className="MapContainer" style={{ overflow: "hidden" }}>
       {stateNodeTutorial?.anchor && (
@@ -4281,7 +4296,13 @@ const Dashboard = ({}: DashboardProps) => {
                 transition: "all 1s ease",
               }}
             >
-              <IconButton color="secondary" onClick={() => onChangeStep(1)}>
+              <IconButton
+                color="secondary"
+                onClick={() => {
+                  onChangeStep(1);
+                  setOpenProgressBarMenu(true);
+                }}
+              >
                 <SchoolIcon />
               </IconButton>
             </Tooltip>
@@ -4701,6 +4722,8 @@ const Dashboard = ({}: DashboardProps) => {
               </Suspense>
             </Box>
           )}
+          <MemoizedProgressBarMenu open={openProgressBarMenu} handleOpenProgressBar={handleOpenProgressBar} />
+          <MemoizedProgressBar open={openProgressBar} handleCloseProgressBar={handleCloseProgressBar} />
         </Box>
       </Box>
     </div>
