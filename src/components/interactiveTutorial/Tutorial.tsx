@@ -15,9 +15,15 @@ type TutorialProps = {
   // onNextStep: () => void;
   // onPreviousStep: () => void;
   targetClientRect: TargetClientRect;
+  handleCloseProgressBarMenu: () => void;
 };
 
-export const Tutorial = ({ tutorialState, targetClientRect, onChangeStep }: TutorialProps) => {
+export const Tutorial = ({
+  tutorialState,
+  targetClientRect,
+  onChangeStep,
+  handleCloseProgressBarMenu,
+}: TutorialProps) => {
   const tooltipRef = useRef<HTMLDivElement | null>(null);
 
   const tooltipClientRect = useMemo(() => {
@@ -137,7 +143,10 @@ export const Tutorial = ({ tutorialState, targetClientRect, onChangeStep }: Tuto
       <Stack direction={"row"} justifyContent={"space-between"} alignItems={"center"}>
         <Button
           variant="text"
-          onClick={() => onChangeStep(null)}
+          onClick={() => {
+            handleCloseProgressBarMenu();
+            onChangeStep(null);
+          }}
           sx={{
             borderRadius: "32px",
             p: "8px 0px",
@@ -177,7 +186,10 @@ export const Tutorial = ({ tutorialState, targetClientRect, onChangeStep }: Tuto
           {tutorialState.stepNumber === tutorialState.stepLenght && (
             <Button
               variant="contained"
-              onClick={() => onChangeStep(tutorialState.nextStepName)}
+              onClick={() => {
+                handleCloseProgressBarMenu();
+                onChangeStep(tutorialState.nextStepName);
+              }}
               sx={{
                 borderRadius: "32px",
                 p: "8px 32px",

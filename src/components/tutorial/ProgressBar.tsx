@@ -17,15 +17,15 @@ type TutorialProgess = {
 const stages: TutorialProgess = {
   "Node tutorial": [
     {
-      title: "step 1",
+      title: "step 1a",
       completed: true,
     },
     {
-      title: "step 2",
+      title: "step 2a",
       completed: true,
     },
     {
-      title: "step 3",
+      title: "step 3a",
       completed: false,
     },
   ],
@@ -36,118 +36,6 @@ const stages: TutorialProgess = {
     },
     {
       title: "step 2",
-      completed: false,
-    },
-    {
-      title: "step 3",
-      completed: false,
-    },
-    {
-      title: "step 3",
-      completed: false,
-    },
-    {
-      title: "step 3",
-      completed: false,
-    },
-    {
-      title: "step 3",
-      completed: false,
-    },
-    {
-      title: "step 3",
-      completed: false,
-    },
-    {
-      title: "step 3",
-      completed: false,
-    },
-    {
-      title: "step 3",
-      completed: false,
-    },
-    {
-      title: "step 3",
-      completed: false,
-    },
-    {
-      title: "step 3",
-      completed: false,
-    },
-    {
-      title: "step 3",
-      completed: false,
-    },
-    {
-      title: "step 3",
-      completed: false,
-    },
-    {
-      title: "step 3",
-      completed: false,
-    },
-    {
-      title: "step 3",
-      completed: false,
-    },
-    {
-      title: "step 3",
-      completed: false,
-    },
-    {
-      title: "step 3",
-      completed: false,
-    },
-    {
-      title: "step 3",
-      completed: false,
-    },
-    {
-      title: "step 3",
-      completed: false,
-    },
-    {
-      title: "step 3",
-      completed: false,
-    },
-    {
-      title: "step 3",
-      completed: false,
-    },
-    {
-      title: "step 3",
-      completed: false,
-    },
-    {
-      title: "step 3",
-      completed: false,
-    },
-    {
-      title: "step 3",
-      completed: false,
-    },
-    {
-      title: "step 3",
-      completed: false,
-    },
-    {
-      title: "step 3",
-      completed: false,
-    },
-    {
-      title: "step 3",
-      completed: false,
-    },
-    {
-      title: "step 3",
-      completed: false,
-    },
-    {
-      title: "step 3",
-      completed: false,
-    },
-    {
-      title: "step 3",
       completed: false,
     },
     {

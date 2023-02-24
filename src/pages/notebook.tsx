@@ -3941,21 +3941,29 @@ const Dashboard = ({}: DashboardProps) => {
   );
   // console.log({ nodeBookState });
 
-  const handleOpenProgressBar = () => {
+  const handleOpenProgressBar = useCallback(() => {
     setOpenProgressBar(true);
     setOpenProgressBarMenu(false);
-  };
+  }, []);
 
-  const handleCloseProgressBar = () => {
+  const handleCloseProgressBar = useCallback(() => {
+    console.log("ssssssss");
     setOpenProgressBar(false);
     setOpenProgressBarMenu(true);
-  };
-
+  }, []);
+  const handleCloseProgressBarMenu = useCallback(() => {
+    setOpenProgressBarMenu(false);
+  }, []);
   return (
     <div className="MapContainer" style={{ overflow: "hidden" }}>
       {stateNodeTutorial?.anchor && (
         <Portal anchor="portal">
-          <Tutorial tutorialState={stateNodeTutorial} onChangeStep={onChangeStep} targetClientRect={targetClientRect} />
+          <Tutorial
+            tutorialState={stateNodeTutorial}
+            onChangeStep={onChangeStep}
+            targetClientRect={targetClientRect}
+            handleCloseProgressBarMenu={handleCloseProgressBarMenu}
+          />
         </Portal>
       )}
       <Box
@@ -4551,6 +4559,7 @@ const Dashboard = ({}: DashboardProps) => {
                     tutorialState={stateNodeTutorial}
                     onChangeStep={onChangeStep}
                     targetClientRect={targetClientRect}
+                    handleCloseProgressBarMenu={handleCloseProgressBarMenu}
                   />
                 )}
                 {settings.showClusterOptions && settings.showClusters && (
