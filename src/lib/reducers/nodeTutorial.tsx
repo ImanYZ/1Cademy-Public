@@ -737,6 +737,65 @@ export function nodeTutorialReducer(
         disabledElements: [...DISABLE_NOTEBOOK_OPTIONS, "100", "101"],
         tooltipPosition: "bottom",
       };
+    case 63:
+      return {
+        ...getBaseStepConfig(action.type),
+        localSnapshot: [
+          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["100"], nodeChangeType: "added" },
+          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["101"], nodeChangeType: "added" },
+          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["102"] },
+          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["103"] },
+          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["104"] },
+        ],
+        targetId: "101",
+        childTargetId: "101-node-footer-upvotes",
+        title: "Nodes - Node Footer",
+        description: (
+          <MarkdownRender text={"An upvote is a vote to approve of the node’s contents and not change a node."} />
+        ),
+        disabledElements: [...DISABLE_NOTEBOOK_OPTIONS, "100", "101"],
+        enableChildElements: ["101-node-footer-upvotes"],
+        tooltipPosition: "bottom",
+      };
+    case 64:
+      return {
+        ...getBaseStepConfig(action.type),
+        localSnapshot: [
+          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["100"], nodeChangeType: "added" },
+          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["101"], nodeChangeType: "added" },
+          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["102"] },
+          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["103"] },
+          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["104"], nodeChangeType: "added" },
+        ],
+        targetId: "104",
+        childTargetId: "104-node-footer-downvotes",
+        title: "Nodes - Node Footer",
+        description: <MarkdownRender text={"A downvote is a vote to remove a node."} />,
+        disabledElements: [...DISABLE_NOTEBOOK_OPTIONS, "100", "101", "104"],
+        tooltipPosition: "bottom",
+      };
+    case 65:
+      return {
+        ...getBaseStepConfig(action.type),
+        localSnapshot: [
+          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["100"], nodeChangeType: "added" },
+          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["101"], nodeChangeType: "added" },
+          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["102"] },
+          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["103"] },
+          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["104"], nodeChangeType: "added" },
+        ],
+        targetId: "104",
+        childTargetId: "104-node-footer-downvotes",
+        title: "Nodes - Node Footer",
+        description: (
+          <MarkdownRender
+            text={"When a node has a netvote of zero or has more downvotes than upvotes, the node will be deleted."}
+          />
+        ),
+        disabledElements: [...DISABLE_NOTEBOOK_OPTIONS, "100", "101", "104"],
+        enableChildElements: ["104-node-footer-downvotes"],
+        tooltipPosition: "bottom",
+      };
     default:
       return state;
   }
