@@ -160,7 +160,7 @@ const LinkingWords = ({ disabled, enableChildElements = [], ...props }: LinkingW
   );
 
   return props.openPart === "LinkingWords" || props.openPart === "Tags" || props.openPart === "References" ? (
-    <>
+    <Box id={`${props.identifier}-linking-words`}>
       <Box
         sx={{
           mx: "10px",
@@ -522,7 +522,7 @@ const LinkingWords = ({ disabled, enableChildElements = [], ...props }: LinkingW
           )}
         </Box>
       </Box>
-    </>
+    </Box>
   ) : null;
 };
 

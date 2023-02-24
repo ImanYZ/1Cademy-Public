@@ -6,7 +6,7 @@ import HelpOutlineIcon from "@mui/icons-material/HelpOutline";
 import LocalLibraryIcon from "@mui/icons-material/LocalLibrary";
 import MenuBookIcon from "@mui/icons-material/MenuBook";
 import ShareIcon from "@mui/icons-material/Share";
-import { Stack } from "@mui/material";
+import { Stack, Typography } from "@mui/material";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 
@@ -665,12 +665,30 @@ export function nodeTutorialReducer(
           <>
             <MarkdownRender text={"The next one indicates what type of node it is, this one is a concept node."} />
             <Stack direction={"row"} alignItems="center" spacing={"8px"} justifyContent={"space-around"} py="8px">
-              <CodeIcon color="primary" />
-              <LocalLibraryIcon color="primary" />
-              <ShareIcon color="primary" />
-              <HelpOutlineIcon color="primary" />
-              <MenuBookIcon color="primary" />
-              <EmojiObjectsIcon color="primary" />
+              <Stack alignItems={"center"}>
+                <LocalLibraryIcon color="primary" />
+                <Typography>Concept</Typography>
+              </Stack>
+              <Stack alignItems={"center"}>
+                <ShareIcon color="primary" />
+                <Typography>Relation</Typography>
+              </Stack>
+              <Stack alignItems={"center"}>
+                <MenuBookIcon color="primary" />
+                <Typography>Reference</Typography>
+              </Stack>
+              <Stack alignItems={"center"}>
+                <HelpOutlineIcon color="primary" />
+                <Typography>Question</Typography>
+              </Stack>
+              <Stack alignItems={"center"}>
+                <CodeIcon color="primary" />
+                <Typography>Code</Typography>
+              </Stack>
+              <Stack alignItems={"center"}>
+                <EmojiObjectsIcon color="primary" />
+                <Typography>Idea</Typography>
+              </Stack>
             </Stack>
           </>
         ),
