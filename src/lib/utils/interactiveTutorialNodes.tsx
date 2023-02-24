@@ -43,7 +43,8 @@ export const INTERACTIVE_TUTORIAL_NOTEBOOK_NODES: FullNodesData = {
           "https://firebasestorage.googleapis.com/v0/b/onecademy-dev.appspot.com/o/ProfilePictures%2FJwguflXUHAXGBKGRxbJDnnacv132%2FThu%2C%2002%20Feb%202023%2015%3A19%3A28%20GMT_430x1300.jpeg?alt=media&token=32e515c5-a8d9-4c30-a93b-101f36577cb3",
       },
     },
-    content: "This is the first node, this node doesn't have parents",
+    content:
+      "1Cademy is a collaborative online community that supports interdisciplinary research and learning through content generation, mapping, evaluation, and practice.",
     children: [
       {
         type: "Concept",
@@ -62,7 +63,7 @@ export const INTERACTIVE_TUTORIAL_NOTEBOOK_NODES: FullNodesData = {
     versions: 1,
     nodeVideo: "",
     institNames: ["University of Michigan - Ann Arbor"],
-    title: "This is a parent node",
+    title: "1Cademy",
     nodeImage: "",
     userNodeId: "Tvh7IxaVAGkTATAV9RPT",
     nodeChangeType: "added",
@@ -134,8 +135,8 @@ export const INTERACTIVE_TUTORIAL_NOTEBOOK_NODES: FullNodesData = {
     referenceIds: [],
     children: [
       {
-        node: "02",
-        title: "This is the child node",
+        node: "03",
+        title: "1Cademy Node Components",
         type: "Concept",
         label: "",
       },
@@ -153,7 +154,7 @@ export const INTERACTIVE_TUTORIAL_NOTEBOOK_NODES: FullNodesData = {
     parents: [
       {
         node: "00",
-        title: "This is a parent node",
+        title: "1Cademy",
         type: "Concept",
         label: "",
       },
@@ -275,7 +276,7 @@ export const INTERACTIVE_TUTORIAL_NOTEBOOK_NODES: FullNodesData = {
     referenceLabels: [],
     aImgUrl:
       "https://firebasestorage.googleapis.com/v0/b/onecademy-dev.appspot.com/o/ProfilePictures%2FJwguflXUHAXGBKGRxbJDnnacv132%2FThu%2C%2002%20Feb%202023%2015%3A19%3A28%20GMT_430x1300.jpeg?alt=media&token=32e515c5-a8d9-4c30-a93b-101f36577cb3",
-    nodeType: "Concept",
+    nodeType: "Relation",
     // adminPoints: 29,
     tags: ["1Cademy"],
     aFullname: "jj qq",
@@ -311,7 +312,7 @@ export const INTERACTIVE_TUTORIAL_NOTEBOOK_NODES: FullNodesData = {
     parents: [
       {
         node: "01",
-        title: "This is a node",
+        title: "1Cademy Nodes",
         type: "Concept",
         label: "",
         // visible: true,
@@ -320,7 +321,7 @@ export const INTERACTIVE_TUTORIAL_NOTEBOOK_NODES: FullNodesData = {
     versions: 1,
     nodeVideo: "",
     institNames: ["University of Michigan - Ann Arbor"],
-    title: "This is a Child node",
+    title: "1Cademy Node Components",
     nodeImage: "",
     userNodeId: "Tvh7IxaVAGkTATAV9RPT",
     nodeChangeType: "added",
@@ -388,7 +389,7 @@ export const INTERACTIVE_TUTORIAL_NOTEBOOK_NODES: FullNodesData = {
     parents: [
       {
         node: "01",
-        title: "This is a node",
+        title: "1Cademy Nodes",
         type: "Concept",
         label: "",
         // visible: true,
@@ -397,7 +398,7 @@ export const INTERACTIVE_TUTORIAL_NOTEBOOK_NODES: FullNodesData = {
     versions: 1,
     nodeVideo: "",
     institNames: ["University of Michigan - Ann Arbor"],
-    title: "This is a Relation node",
+    title: "1Cademy Node Components",
     nodeImage: "",
     userNodeId: "Tvh7IxaVAGkTATAV9RPT",
     nodeChangeType: "added",
