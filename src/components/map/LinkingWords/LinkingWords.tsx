@@ -275,6 +275,9 @@ const LinkingWords = ({ disabled, enableChildElements = [], ...props }: LinkingW
                         linkedNodeTitle={refTitle}
                         linkedNodeType="reference"
                         iClassName="menu_book"
+                        disabled={
+                          disabled && !enableChildElements.includes(`${props.identifier}-reference-button-${idx}`)
+                        }
                       />
                     </Box>
                     {props.editable && (
@@ -374,6 +377,7 @@ const LinkingWords = ({ disabled, enableChildElements = [], ...props }: LinkingW
                       linkedNodeTitle={tag.title}
                       linkedNodeType="tag"
                       iClassName="local_offer"
+                      disabled={disabled && !enableChildElements.includes(`${props.identifier}-tag-button-${idx}`)}
                     />
                     {props.editable && (
                       <Tooltip
@@ -424,6 +428,7 @@ const LinkingWords = ({ disabled, enableChildElements = [], ...props }: LinkingW
                       linkedNodeTitle={tag.title}
                       linkedNodeType="tag"
                       iClassName="local_offer"
+                      disabled={disabled && !enableChildElements.includes(`${props.identifier}-tag-button-${idx}`)}
                     />
                     {props.editable && (
                       <div className="LinkDeleteButton">
