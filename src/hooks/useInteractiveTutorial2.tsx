@@ -55,16 +55,29 @@ export const useInteractiveTutorial = ({ notebookRef }: useInteractiveTutorialPr
             nodeBookDispatch({ type: "setSelectedNode", payload: "01" });
           },
         };
-      if (step === 16)
+      if (step === 18)
         payload = {
           callback: () => {
             notebookRef.current.selectedNode = "02";
             nodeBookDispatch({ type: "setSelectedNode", payload: "02" });
           },
         };
-
+      if (step === 22)
+        payload = {
+          callback: () => {
+            notebookRef.current.selectedNode = "03";
+            nodeBookDispatch({ type: "setSelectedNode", payload: "03" });
+          },
+        };
+      if (step === 24)
+        payload = {
+          callback: () => {
+            notebookRef.current.selectedNode = "04";
+            nodeBookDispatch({ type: "setSelectedNode", payload: "04" });
+          },
+        };
       // ---------- Nodes
-      if (step === 50)
+      if (step === 28)
         payload = {
           callback: () => {
             notebookRef.current.selectedNode = "103";
@@ -74,28 +87,28 @@ export const useInteractiveTutorial = ({ notebookRef }: useInteractiveTutorialPr
       dispatchNodeTutorial({ type: step, payload });
       isPlayingTheTutorialRef.current = step ? true : false;
 
-      if (step === 53)
+      if (step === 31)
         payload = {
           callback: () => {
             notebookRef.current.selectedNode = "101";
             nodeBookDispatch({ type: "setSelectedNode", payload: "101" });
           },
         };
-      if (step === 57)
+      if (step === 35)
         payload = {
           callback: () => {
             notebookRef.current.selectedNode = "101";
             nodeBookDispatch({ type: "setSelectedNode", payload: "101" });
           },
         };
-      if (step === 64)
+      if (step === 42)
         payload = {
           callback: () => {
             notebookRef.current.selectedNode = "104";
             nodeBookDispatch({ type: "setSelectedNode", payload: "104" });
           },
         };
-      if (step === 66)
+      if (step === 44)
         payload = {
           callback: () => {
             notebookRef.current.selectedNode = "101";
