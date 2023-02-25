@@ -664,8 +664,6 @@ export function nodeTutorialReducer(
           <MarkdownRender text={"Collapsing a node does not delete it, it only means it is not displayed currently."} />
         ),
         disabledElements: [...DISABLE_NOTEBOOK_OPTIONS, "01", "00", "02", "03", "04"],
-        enableChildElements: ["04-hiden-button"],
-        isClickeable: true,
       };
     case 26:
       return {
@@ -744,12 +742,25 @@ export function nodeTutorialReducer(
       return {
         ...getBaseStepConfig(action.type),
         localSnapshot: [
-          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["100"], nodeChangeType: "added" },
-          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["101"], nodeChangeType: "added" },
-          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["102"], nodeChangeType: "added" },
-          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["103"], nodeChangeType: "added" },
+          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["00"], nodeChangeType: "added" },
+          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["01"], nodeChangeType: "added" },
+          {
+            ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["02"],
+            nodeChangeType: "removed",
+            open: true,
+          },
+          {
+            ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["03"],
+            nodeChangeType: "removed",
+          },
+          {
+            ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["04"],
+            nodeChangeType: "removed",
+          },
+          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["05"], nodeChangeType: "added" },
+          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["06"], nodeChangeType: "added" },
         ],
-        targetId: "103",
+        targetId: "06",
         childTargetId: "103-node-header",
         title: "Nodes - Node Header",
         description: (
@@ -757,35 +768,35 @@ export function nodeTutorialReducer(
             text={"Node headers are one of the ways that you can manipulate what you see on the knowledge graph."}
           />
         ),
-        disabledElements: [...DISABLE_NOTEBOOK_OPTIONS, "100", "101", "102", "103"],
+        disabledElements: [...DISABLE_NOTEBOOK_OPTIONS, "00", "01", "05", "06"],
       };
 
     case 29:
       return {
         ...getBaseStepConfig(action.type),
         localSnapshot: [
-          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["100"], nodeChangeType: "added" },
-          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["101"], nodeChangeType: "added" },
-          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["102"], nodeChangeType: "added" },
-          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["103"], nodeChangeType: "added" },
+          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["00"], nodeChangeType: "added" },
+          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["01"], nodeChangeType: "added" },
+          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["05"], nodeChangeType: "added" },
+          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["06"], nodeChangeType: "added" },
         ],
-        targetId: "103",
+        targetId: "06",
         childTargetId: "103-node-header",
         title: "Nodes - Node Header",
         description: <MarkdownRender text={"In the header are three buttons."} />,
-        disabledElements: [...DISABLE_NOTEBOOK_OPTIONS, "100", "101", "102", "103"],
+        disabledElements: [...DISABLE_NOTEBOOK_OPTIONS, "00", "01", "05", "06"],
       };
 
     case 30:
       return {
         ...getBaseStepConfig(action.type),
         localSnapshot: [
-          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["100"], nodeChangeType: "added" },
-          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["101"], nodeChangeType: "added" },
-          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["102"], nodeChangeType: "added" },
-          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["103"], nodeChangeType: "added" },
+          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["00"], nodeChangeType: "added" },
+          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["01"], nodeChangeType: "added" },
+          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["05"], nodeChangeType: "added" },
+          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["06"], nodeChangeType: "added" },
         ],
-        targetId: "103",
+        targetId: "06",
         childTargetId: "103-hiden-button",
         title: "Nodes - Node Header",
         description: (
@@ -795,7 +806,7 @@ export function nodeTutorialReducer(
             }
           />
         ),
-        disabledElements: [...DISABLE_NOTEBOOK_OPTIONS, "100", "101", "102", "103"],
+        disabledElements: [...DISABLE_NOTEBOOK_OPTIONS, "00", "01", "05", "06"],
         enableChildElements: ["103-hiden-button"],
         isClickeable: true,
       };
@@ -804,18 +815,18 @@ export function nodeTutorialReducer(
       return {
         ...getBaseStepConfig(action.type),
         localSnapshot: [
-          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["100"], nodeChangeType: "added" },
-          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["101"], nodeChangeType: "added" },
-          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["102"], nodeChangeType: "added" },
-          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["103"] },
+          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["00"], nodeChangeType: "added" },
+          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["01"], nodeChangeType: "added" },
+          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["05"], nodeChangeType: "added" },
+          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["06"] },
         ],
-        targetId: "101",
+        targetId: "01",
         childTargetId: "101-hide-offsprings-button",
         title: "Nodes - Node Header",
         description: (
           <MarkdownRender text={"This one closes all the open children nodes of the node it is clicked on."} />
         ),
-        disabledElements: [...DISABLE_NOTEBOOK_OPTIONS, "100", "101", "102"],
+        disabledElements: [...DISABLE_NOTEBOOK_OPTIONS, "00", "01", "05"],
         enableChildElements: ["101-hide-offsprings-button"],
         isClickeable: true,
       };
@@ -824,33 +835,33 @@ export function nodeTutorialReducer(
       return {
         ...getBaseStepConfig(action.type),
         localSnapshot: [
-          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["100"], nodeChangeType: "added" },
-          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["101"], nodeChangeType: "added" },
-          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["102"] },
-          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["103"] },
+          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["00"], nodeChangeType: "added" },
+          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["01"], nodeChangeType: "added" },
+          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["05"] },
+          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["06"] },
         ],
-        targetId: "101",
+        targetId: "01",
         title: "Nodes - Node Header",
         description: <MarkdownRender text={"See the branches of children were all removed from view."} />,
-        disabledElements: [...DISABLE_NOTEBOOK_OPTIONS, "100", "101"],
+        disabledElements: [...DISABLE_NOTEBOOK_OPTIONS, "00", "01"],
       };
 
     case 33:
       return {
         ...getBaseStepConfig(action.type),
         localSnapshot: [
-          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["100"], nodeChangeType: "added" },
-          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["101"], nodeChangeType: "added" },
-          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["102"] },
-          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["103"] },
+          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["00"], nodeChangeType: "added" },
+          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["01"], nodeChangeType: "added" },
+          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["05"] },
+          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["06"] },
         ],
-        targetId: "101",
+        targetId: "01",
         childTargetId: "101-close-button",
         title: "Nodes - Node Header",
         description: (
           <MarkdownRender text={"This one minimizes the content in a node so only the title is displayed."} />
         ),
-        disabledElements: [...DISABLE_NOTEBOOK_OPTIONS, "100", "101"],
+        disabledElements: [...DISABLE_NOTEBOOK_OPTIONS, "00", "01"],
         enableChildElements: ["101-close-button"],
         isClickeable: true,
       };
@@ -859,18 +870,18 @@ export function nodeTutorialReducer(
       return {
         ...getBaseStepConfig(action.type),
         localSnapshot: [
-          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["100"], nodeChangeType: "added" },
-          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["101"], nodeChangeType: "added", open: false },
-          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["102"] },
-          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["103"] },
+          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["00"], nodeChangeType: "added" },
+          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["01"], nodeChangeType: "added", open: false },
+          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["05"] },
+          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["06"] },
         ],
-        targetId: "101",
+        targetId: "01",
         childTargetId: "101-open-button",
         title: "Nodes - Node Header",
         description: (
           <MarkdownRender text={"This one maximize the content in a node so the title and content are displayed."} />
         ),
-        disabledElements: [...DISABLE_NOTEBOOK_OPTIONS, "100", "101"],
+        disabledElements: [...DISABLE_NOTEBOOK_OPTIONS, "00", "01"],
         enableChildElements: ["101-open-button"],
         isClickeable: true,
       };
@@ -880,28 +891,28 @@ export function nodeTutorialReducer(
       return {
         ...getBaseStepConfig(action.type),
         localSnapshot: [
-          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["100"], nodeChangeType: "added" },
-          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["101"], nodeChangeType: "added" },
-          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["102"] },
-          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["103"] },
+          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["00"], nodeChangeType: "added" },
+          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["01"], nodeChangeType: "added" },
+          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["05"] },
+          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["06"] },
         ],
-        targetId: "101",
+        targetId: "01",
         childTargetId: "101-node-footer",
         title: "Nodes - Node Footer",
         description: <MarkdownRender text={"The node footer provides many tools."} />,
-        disabledElements: [...DISABLE_NOTEBOOK_OPTIONS, "100", "101"],
+        disabledElements: [...DISABLE_NOTEBOOK_OPTIONS, "00", "01"],
         tooltipPosition: "bottom",
       };
     case 36:
       return {
         ...getBaseStepConfig(action.type),
         localSnapshot: [
-          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["100"], nodeChangeType: "added" },
-          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["101"], nodeChangeType: "added" },
-          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["102"] },
-          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["103"] },
+          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["00"], nodeChangeType: "added" },
+          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["01"], nodeChangeType: "added" },
+          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["05"] },
+          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["06"] },
         ],
-        targetId: "101",
+        targetId: "01",
         childTargetId: "101-node-footer-user",
         title: "Nodes - Node Footer",
         description: (
@@ -911,19 +922,19 @@ export function nodeTutorialReducer(
             }
           />
         ),
-        disabledElements: [...DISABLE_NOTEBOOK_OPTIONS, "100", "101"],
+        disabledElements: [...DISABLE_NOTEBOOK_OPTIONS, "00", "01"],
         tooltipPosition: "bottom",
       };
     case 37:
       return {
         ...getBaseStepConfig(action.type),
         localSnapshot: [
-          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["100"], nodeChangeType: "added" },
-          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["101"], nodeChangeType: "added" },
-          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["102"] },
-          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["103"] },
+          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["00"], nodeChangeType: "added" },
+          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["01"], nodeChangeType: "added" },
+          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["05"] },
+          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["06"] },
         ],
-        targetId: "101",
+        targetId: "01",
         childTargetId: "101-node-footer-type",
         title: "Nodes - Node Footer",
         description: (
@@ -957,35 +968,35 @@ export function nodeTutorialReducer(
             </Stack>
           </>
         ),
-        disabledElements: [...DISABLE_NOTEBOOK_OPTIONS, "100", "101"],
+        disabledElements: [...DISABLE_NOTEBOOK_OPTIONS, "00", "01"],
         tooltipPosition: "bottom",
       };
     case 38:
       return {
         ...getBaseStepConfig(action.type),
         localSnapshot: [
-          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["100"], nodeChangeType: "added" },
-          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["101"], nodeChangeType: "added" },
-          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["102"] },
-          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["103"] },
+          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["00"], nodeChangeType: "added" },
+          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["01"], nodeChangeType: "added" },
+          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["05"] },
+          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["06"] },
         ],
-        targetId: "101",
+        targetId: "01",
         childTargetId: "101-node-footer-timestamp",
         title: "Nodes - Node Footer",
         description: <MarkdownRender text={"The third icon indicates how long ago the node was approved. "} />,
-        disabledElements: [...DISABLE_NOTEBOOK_OPTIONS, "100", "101"],
+        disabledElements: [...DISABLE_NOTEBOOK_OPTIONS, "00", "01"],
         tooltipPosition: "bottom",
       };
     case 39:
       return {
         ...getBaseStepConfig(action.type),
         localSnapshot: [
-          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["100"], nodeChangeType: "added" },
-          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["101"], nodeChangeType: "added" },
-          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["102"] },
-          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["103"] },
+          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["00"], nodeChangeType: "added" },
+          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["01"], nodeChangeType: "added" },
+          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["05"] },
+          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["06"] },
         ],
-        targetId: "101",
+        targetId: "01",
         childTargetId: "101-node-footer-propose",
         title: "Nodes - Node Footer",
         description: (
@@ -995,19 +1006,19 @@ export function nodeTutorialReducer(
             }
           />
         ),
-        disabledElements: [...DISABLE_NOTEBOOK_OPTIONS, "100", "101"],
+        disabledElements: [...DISABLE_NOTEBOOK_OPTIONS, "00", "01"],
         tooltipPosition: "bottom",
       };
     case 40:
       return {
         ...getBaseStepConfig(action.type),
         localSnapshot: [
-          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["100"], nodeChangeType: "added" },
-          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["101"], nodeChangeType: "added" },
-          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["102"] },
-          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["103"] },
+          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["00"], nodeChangeType: "added" },
+          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["01"], nodeChangeType: "added" },
+          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["05"] },
+          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["06"] },
         ],
-        targetId: "101",
+        targetId: "01",
         childTargetId: "101-node-footer-votes",
         title: "Nodes - Node Footer",
         description: (
@@ -1017,26 +1028,26 @@ export function nodeTutorialReducer(
             }
           />
         ),
-        disabledElements: [...DISABLE_NOTEBOOK_OPTIONS, "100", "101"],
+        disabledElements: [...DISABLE_NOTEBOOK_OPTIONS, "00", "01"],
         tooltipPosition: "bottom",
       };
     case 41:
       return {
         ...getBaseStepConfig(action.type),
         localSnapshot: [
-          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["100"], nodeChangeType: "added" },
-          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["101"], nodeChangeType: "added" },
-          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["102"] },
-          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["103"] },
-          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["104"] },
+          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["00"], nodeChangeType: "added" },
+          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["01"], nodeChangeType: "added" },
+          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["05"] },
+          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["06"] },
+          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["07"] },
         ],
-        targetId: "101",
+        targetId: "01",
         childTargetId: "101-node-footer-upvotes",
         title: "Nodes - Node Footer",
         description: (
           <MarkdownRender text={"An upvote is a vote to approve of the node’s contents and not change a node."} />
         ),
-        disabledElements: [...DISABLE_NOTEBOOK_OPTIONS, "100", "101"],
+        disabledElements: [...DISABLE_NOTEBOOK_OPTIONS, "00", "01"],
         enableChildElements: ["101-node-footer-upvotes"],
         tooltipPosition: "bottom",
         isClickeable: true,
@@ -1046,40 +1057,40 @@ export function nodeTutorialReducer(
         ...getBaseStepConfig(action.type),
         localSnapshot: [
           {
-            ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["100"],
+            ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["00"],
             nodeChangeType: "added",
           },
           {
-            ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["101"],
+            ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["01"],
             nodeChangeType: "added",
             corrects: 2,
             correct: true,
           },
-          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["102"] },
-          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["103"] },
+          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["05"] },
+          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["06"] },
           {
-            ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["104"],
+            ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["07"],
             nodeChangeType: "added",
           },
         ],
-        targetId: "104",
+        targetId: "07",
         childTargetId: "104-node-footer-downvotes",
         title: "Nodes - Node Footer",
         description: <MarkdownRender text={"A downvote is a vote to remove a node."} />,
-        disabledElements: [...DISABLE_NOTEBOOK_OPTIONS, "100", "101", "104"],
+        disabledElements: [...DISABLE_NOTEBOOK_OPTIONS, "00", "01", "07"],
         tooltipPosition: "bottom",
       };
     case 43:
       return {
         ...getBaseStepConfig(action.type),
         localSnapshot: [
-          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["100"], nodeChangeType: "added", corrects: 2, correct: true },
-          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["101"], nodeChangeType: "added" },
-          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["102"] },
-          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["103"] },
-          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["104"], nodeChangeType: "added", wrongs: 0 },
+          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["00"], nodeChangeType: "added", corrects: 2, correct: true },
+          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["01"], nodeChangeType: "added" },
+          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["05"] },
+          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["06"] },
+          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["07"], nodeChangeType: "added", wrongs: 0 },
         ],
-        targetId: "104",
+        targetId: "07",
         childTargetId: "104-node-footer-downvotes",
         title: "Nodes - Node Footer",
         description: (
@@ -1087,7 +1098,7 @@ export function nodeTutorialReducer(
             text={"When a node has a netvote of zero or has more downvotes than upvotes, the node will be deleted."}
           />
         ),
-        disabledElements: [...DISABLE_NOTEBOOK_OPTIONS, "100", "101", "104"],
+        disabledElements: [...DISABLE_NOTEBOOK_OPTIONS, "00", "01", "07"],
         enableChildElements: ["104-node-footer-downvotes"],
         tooltipPosition: "bottom",
         isClickeable: true,
@@ -1096,13 +1107,13 @@ export function nodeTutorialReducer(
       return {
         ...getBaseStepConfig(action.type),
         localSnapshot: [
-          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["100"], nodeChangeType: "added" },
-          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["101"], nodeChangeType: "added", corrects: 2, correct: true },
-          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["102"] },
-          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["103"] },
-          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["104"], nodeChangeType: "removed" },
+          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["00"], nodeChangeType: "added" },
+          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["01"], nodeChangeType: "added", corrects: 2, correct: true },
+          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["05"] },
+          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["06"] },
+          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["07"], nodeChangeType: "removed" },
         ],
-        targetId: "101",
+        targetId: "01",
         childTargetId: "101-node-footer-votes",
         title: "Nodes - Node Footer",
         description: (
@@ -1112,20 +1123,20 @@ export function nodeTutorialReducer(
             }
           />
         ),
-        disabledElements: [...DISABLE_NOTEBOOK_OPTIONS, "100", "101", "104"],
+        disabledElements: [...DISABLE_NOTEBOOK_OPTIONS, "00", "01", "07"],
         tooltipPosition: "bottom",
       };
     case 45:
       return {
         ...getBaseStepConfig(action.type),
         localSnapshot: [
-          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["100"], nodeChangeType: "added" },
-          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["101"], nodeChangeType: "added", corrects: 2, correct: true },
-          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["102"] },
-          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["103"] },
-          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["104"] },
+          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["00"], nodeChangeType: "added" },
+          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["01"], nodeChangeType: "added", corrects: 2, correct: true },
+          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["05"] },
+          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["06"] },
+          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["07"] },
         ],
-        targetId: "101",
+        targetId: "01",
         childTargetId: "101-node-footer-tags-citations",
         title: "Nodes - Node Footer",
         description: (
@@ -1133,29 +1144,29 @@ export function nodeTutorialReducer(
             text={"The next icons are on a single button and represent the tag and citation for a node"}
           />
         ),
-        disabledElements: [...DISABLE_NOTEBOOK_OPTIONS, "100", "101"],
+        disabledElements: [...DISABLE_NOTEBOOK_OPTIONS, "00", "01"],
       };
     case 46:
       return {
         ...getBaseStepConfig(action.type),
         localSnapshot: [
-          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["100"], nodeChangeType: "added" },
+          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["00"], nodeChangeType: "added" },
           {
-            ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["101"],
+            ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["01"],
             nodeChangeType: "added",
             defaultOpenPart: null,
             corrects: 2,
             correct: true,
           },
-          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["102"] },
-          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["103"] },
-          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["104"] },
+          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["05"] },
+          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["06"] },
+          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["07"] },
         ],
-        targetId: "101",
+        targetId: "01",
         childTargetId: "101-node-footer-tags-citations",
         title: "Nodes - Node Footer",
         description: <MarkdownRender text={"Click the button to expand."} />,
-        disabledElements: [...DISABLE_NOTEBOOK_OPTIONS, "100", "101"],
+        disabledElements: [...DISABLE_NOTEBOOK_OPTIONS, "00", "01"],
         enableChildElements: ["101-node-footer-tags-citations"],
         isClickeable: true,
       };
@@ -1163,19 +1174,19 @@ export function nodeTutorialReducer(
       return {
         ...getBaseStepConfig(action.type),
         localSnapshot: [
-          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["100"], nodeChangeType: "added" },
+          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["00"], nodeChangeType: "added" },
           {
-            ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["101"],
+            ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["01"],
             nodeChangeType: "added",
             defaultOpenPart: "References",
             corrects: 2,
             correct: true,
           },
-          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["102"] },
-          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["103"] },
-          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["104"] },
+          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["05"] },
+          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["06"] },
+          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["07"] },
         ],
-        targetId: "101",
+        targetId: "01",
         childTargetId: "101-linking-words",
         title: "Nodes - Node Footer",
         description: (
@@ -1185,51 +1196,51 @@ export function nodeTutorialReducer(
             }
           />
         ),
-        disabledElements: [...DISABLE_NOTEBOOK_OPTIONS, "100", "101"],
+        disabledElements: [...DISABLE_NOTEBOOK_OPTIONS, "00", "01"],
       };
     case 48:
       return {
         ...getBaseStepConfig(action.type),
         localSnapshot: [
-          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["100"], nodeChangeType: "added" },
+          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["00"], nodeChangeType: "added" },
           {
-            ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["101"],
+            ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["01"],
             nodeChangeType: "added",
             defaultOpenPart: null,
             corrects: 2,
             correct: true,
           },
-          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["102"] },
-          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["103"] },
-          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["104"] },
+          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["05"] },
+          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["06"] },
+          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["07"] },
         ],
-        targetId: "101",
+        targetId: "01",
         childTargetId: "101-button-parent-children",
         title: "Nodes - Node Footer",
         description: <MarkdownRender text={"The next icon is for parent and child nodes. "} />,
-        disabledElements: [...DISABLE_NOTEBOOK_OPTIONS, "100", "101"],
+        disabledElements: [...DISABLE_NOTEBOOK_OPTIONS, "00", "01"],
       };
     case 49:
       return {
         ...getBaseStepConfig(action.type),
         localSnapshot: [
-          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["100"], nodeChangeType: "added" },
+          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["00"], nodeChangeType: "added" },
           {
-            ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["101"],
+            ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["01"],
             nodeChangeType: "added",
             defaultOpenPart: null,
             corrects: 2,
             correct: true,
           },
-          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["102"] },
-          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["103"] },
-          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["104"] },
+          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["05"] },
+          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["06"] },
+          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["07"] },
         ],
-        targetId: "101",
+        targetId: "01",
         childTargetId: "101-button-parent-children",
         title: "Nodes - Node Footer",
         description: <MarkdownRender text={"Click the button to expand."} />,
-        disabledElements: [...DISABLE_NOTEBOOK_OPTIONS, "100", "101"],
+        disabledElements: [...DISABLE_NOTEBOOK_OPTIONS, "00", "01"],
         enableChildElements: ["101-button-parent-children"],
         isClickeable: true,
       };
@@ -1237,93 +1248,93 @@ export function nodeTutorialReducer(
       return {
         ...getBaseStepConfig(action.type),
         localSnapshot: [
-          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["100"], nodeChangeType: "added" },
+          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["00"], nodeChangeType: "added" },
           {
-            ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["101"],
+            ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["01"],
             nodeChangeType: "added",
             defaultOpenPart: "LinkingWords",
             corrects: 2,
             correct: true,
           },
-          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["102"] },
-          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["103"] },
-          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["104"] },
+          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["05"] },
+          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["06"] },
+          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["07"] },
         ],
-        targetId: "101",
+        targetId: "01",
         childTargetId: "101-linking-words",
         title: "Nodes - Node Footer",
         description: <MarkdownRender text={"You see the parent nodes on the left and child nodes on the right."} />,
-        disabledElements: [...DISABLE_NOTEBOOK_OPTIONS, "100", "101"],
+        disabledElements: [...DISABLE_NOTEBOOK_OPTIONS, "00", "01"],
       };
     case 51:
       return {
         ...getBaseStepConfig(action.type),
         localSnapshot: [
-          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["100"], nodeChangeType: "added" },
+          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["00"], nodeChangeType: "added" },
           {
-            ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["101"],
+            ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["01"],
             nodeChangeType: "added",
             defaultOpenPart: null,
             corrects: 2,
             correct: true,
           },
-          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["102"] },
-          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["103"] },
-          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["104"] },
+          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["05"] },
+          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["06"] },
+          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["07"] },
         ],
-        targetId: "101",
+        targetId: "01",
         childTargetId: "101-node-footer-ellipsis",
         title: "Nodes - Node Footer",
         description: <MarkdownRender text={"Finally the ellipses icon can be clicked to open a few other options."} />,
-        disabledElements: [...DISABLE_NOTEBOOK_OPTIONS, "100", "101"],
+        disabledElements: [...DISABLE_NOTEBOOK_OPTIONS, "00", "01"],
         enableChildElements: ["101-node-footer-ellipsis"],
       };
     case 52:
       return {
         ...getBaseStepConfig(action.type),
         localSnapshot: [
-          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["100"], nodeChangeType: "added" },
+          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["00"], nodeChangeType: "added" },
           {
-            ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["101"],
+            ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["01"],
             nodeChangeType: "added",
             defaultOpenPart: null,
             corrects: 2,
             correct: true,
           },
-          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["102"] },
-          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["103"] },
-          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["104"] },
+          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["05"] },
+          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["06"] },
+          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["07"] },
         ],
-        targetId: "101",
+        targetId: "01",
         childTargetId: "101-node-footer-ellipsis",
         title: "Nodes - Node Footer",
         description: <MarkdownRender text={"You can also have the node narrated for you."} />,
-        disabledElements: [...DISABLE_NOTEBOOK_OPTIONS, "100", "101"],
+        disabledElements: [...DISABLE_NOTEBOOK_OPTIONS, "00", "01"],
         enableChildElements: ["101-node-footer-ellipsis"],
       };
     case 53:
       return {
         ...getBaseStepConfig(action.type),
         localSnapshot: [
-          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["100"], nodeChangeType: "added" },
+          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["00"], nodeChangeType: "added" },
           {
-            ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["101"],
+            ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["01"],
             nodeChangeType: "added",
             defaultOpenPart: null,
             corrects: 2,
             correct: true,
           },
-          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["102"] },
-          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["103"] },
-          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["104"] },
+          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["05"] },
+          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["06"] },
+          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["07"] },
         ],
-        targetId: "101",
+        targetId: "01",
         childTargetId: "101-node-footer-ellipsis",
         title: "Nodes - Node Footer",
         description: (
           <MarkdownRender text={"Finally, you can share the node to Twitter, Reddit, Facebook, or Linkedin."} />
         ),
-        disabledElements: [...DISABLE_NOTEBOOK_OPTIONS, "100", "101"],
+        disabledElements: [...DISABLE_NOTEBOOK_OPTIONS, "00", "01"],
         enableChildElements: ["101-node-footer-ellipsis"],
       };
     default:
