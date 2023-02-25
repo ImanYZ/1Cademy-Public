@@ -109,7 +109,7 @@ export const useInteractiveTutorial = ({ notebookRef }: useInteractiveTutorialPr
   );
 
   useEffect(() => {
-    onChangeStep(50); //64
+    onChangeStep(72); //64
   }, [onChangeStep]);
 
   useEventListener({

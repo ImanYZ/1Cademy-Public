@@ -509,8 +509,6 @@ const Dashboard = ({}: DashboardProps) => {
     }
   }, [stateNodeTutorial, graph.nodes, setTargetClientRect]);
 
-  console.log({ graph });
-
   const onCompleteWorker = useCallback(() => {
     if (!nodeBookState.selectedNode) return;
 

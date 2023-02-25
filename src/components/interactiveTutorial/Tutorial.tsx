@@ -30,12 +30,12 @@ export const Tutorial = ({
     if (!tooltipRef.current) return { top: 0, left: 0 };
     if (!tutorialState) return { top: 0, left: 0 };
 
-    console.log("rect", {
-      targetClientRect,
-      tooltipRef: tooltipRef.current.clientHeight,
-      tooltipGetClientRects: tooltipRef.current.getClientRects(),
-      tooltipGETVoundClientReact: tooltipRef.current.getBoundingClientRect(),
-    });
+    // console.log("rect", {
+    //   targetClientRect,
+    //   tooltipRef: tooltipRef.current.clientHeight,
+    //   tooltipGetClientRects: tooltipRef.current.getClientRects(),
+    //   tooltipGETVoundClientReact: tooltipRef.current.getBoundingClientRect(),
+    // });
     const { height: tooltipHeight } = tooltipRef.current.getBoundingClientRect();
     let top = 0;
     let left = 0;
@@ -56,7 +56,7 @@ export const Tutorial = ({
       top = targetClientRect.top + targetClientRect.height / 2 - tooltipRef.current.clientHeight / 2;
       left = targetClientRect.left + targetClientRect.width + TOOLTIP_OFFSET;
     }
-    console.log("first new top left", { top, left });
+    // console.log("first new top left", { top, left });
 
     return { top, left };
   }, [targetClientRect, tutorialState]);
