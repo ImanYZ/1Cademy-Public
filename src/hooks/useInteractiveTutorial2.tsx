@@ -29,6 +29,11 @@ export const useInteractiveTutorial = ({ notebookRef }: useInteractiveTutorialPr
   const [stateNodeTutorial, dispatchNodeTutorial] = useReducer(nodeTutorialReducer, INITIAL_NODE_TUTORIAL_STATE);
   const isPlayingTheTutorialRef = useRef(false);
   const { nodeBookDispatch } = useNodeBook();
+  const defaultSelectedNode = useRef<string | null>(null);
+
+  useEffect(() => {
+    if (!defaultSelectedNode.current) defaultSelectedNode.current = notebookRef.current.selectedNode;
+  }, [notebookRef]);
 
   const onChangeStep = useCallback(
     (step: SetStepType) => {
@@ -117,6 +122,13 @@ export const useInteractiveTutorial = ({ notebookRef }: useInteractiveTutorialPr
         payload = {
           callback: () => {
             notebookRef.current.selectedNode = "01";
+            nodeBookDispatch({ type: "setSelectedNode", payload: "01" });
+          },
+        };
+      if (step === 53)
+        payload = {
+          callback: () => {
+            notebookRef.current.selectedNode = defaultSelectedNode.current;
             nodeBookDispatch({ type: "setSelectedNode", payload: "01" });
           },
         };
