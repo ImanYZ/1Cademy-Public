@@ -730,6 +730,8 @@ export function nodeTutorialReducer(
             nodeChangeType: "removed",
             open: true,
           },
+          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["05"], nodeChangeType: "removed" },
+          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["06"], nodeChangeType: "removed" },
         ],
         targetId: "03",
         title: "Learning Pathways",
@@ -761,7 +763,7 @@ export function nodeTutorialReducer(
           { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["06"], nodeChangeType: "added" },
         ],
         targetId: "06",
-        childTargetId: "103-node-header",
+        childTargetId: "06-node-header",
         title: "Nodes - Node Header",
         description: (
           <MarkdownRender
@@ -781,7 +783,7 @@ export function nodeTutorialReducer(
           { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["06"], nodeChangeType: "added" },
         ],
         targetId: "06",
-        childTargetId: "103-node-header",
+        childTargetId: "06-node-header",
         title: "Nodes - Node Header",
         description: <MarkdownRender text={"In the header are three buttons."} />,
         disabledElements: [...DISABLE_NOTEBOOK_OPTIONS, "00", "01", "05", "06"],
@@ -797,7 +799,7 @@ export function nodeTutorialReducer(
           { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["06"], nodeChangeType: "added" },
         ],
         targetId: "06",
-        childTargetId: "103-hiden-button",
+        childTargetId: "06-hiden-button",
         title: "Nodes - Node Header",
         description: (
           <MarkdownRender
@@ -807,7 +809,7 @@ export function nodeTutorialReducer(
           />
         ),
         disabledElements: [...DISABLE_NOTEBOOK_OPTIONS, "00", "01", "05", "06"],
-        enableChildElements: ["103-hiden-button"],
+        enableChildElements: ["06-hiden-button"],
         isClickeable: true,
       };
 
@@ -821,13 +823,13 @@ export function nodeTutorialReducer(
           { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["06"] },
         ],
         targetId: "01",
-        childTargetId: "101-hide-offsprings-button",
+        childTargetId: "01-hide-offsprings-button",
         title: "Nodes - Node Header",
         description: (
           <MarkdownRender text={"This one closes all the open children nodes of the node it is clicked on."} />
         ),
         disabledElements: [...DISABLE_NOTEBOOK_OPTIONS, "00", "01", "05"],
-        enableChildElements: ["101-hide-offsprings-button"],
+        enableChildElements: ["01-hide-offsprings-button"],
         isClickeable: true,
       };
 
@@ -856,13 +858,13 @@ export function nodeTutorialReducer(
           { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["06"] },
         ],
         targetId: "01",
-        childTargetId: "101-close-button",
+        childTargetId: "01-close-button",
         title: "Nodes - Node Header",
         description: (
           <MarkdownRender text={"This one minimizes the content in a node so only the title is displayed."} />
         ),
         disabledElements: [...DISABLE_NOTEBOOK_OPTIONS, "00", "01"],
-        enableChildElements: ["101-close-button"],
+        enableChildElements: ["01-close-button"],
         isClickeable: true,
       };
 
@@ -876,13 +878,13 @@ export function nodeTutorialReducer(
           { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["06"] },
         ],
         targetId: "01",
-        childTargetId: "101-open-button",
+        childTargetId: "01-open-button",
         title: "Nodes - Node Header",
         description: (
           <MarkdownRender text={"This one maximize the content in a node so the title and content are displayed."} />
         ),
         disabledElements: [...DISABLE_NOTEBOOK_OPTIONS, "00", "01"],
-        enableChildElements: ["101-open-button"],
+        enableChildElements: ["01-open-button"],
         isClickeable: true,
       };
 
@@ -897,7 +899,7 @@ export function nodeTutorialReducer(
           { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["06"] },
         ],
         targetId: "01",
-        childTargetId: "101-node-footer",
+        childTargetId: "01-node-footer",
         title: "Nodes - Node Footer",
         description: <MarkdownRender text={"The node footer provides many tools."} />,
         disabledElements: [...DISABLE_NOTEBOOK_OPTIONS, "00", "01"],
@@ -913,7 +915,7 @@ export function nodeTutorialReducer(
           { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["06"] },
         ],
         targetId: "01",
-        childTargetId: "101-node-footer-user",
+        childTargetId: "01-node-footer-user",
         title: "Nodes - Node Footer",
         description: (
           <MarkdownRender
@@ -935,7 +937,7 @@ export function nodeTutorialReducer(
           { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["06"] },
         ],
         targetId: "01",
-        childTargetId: "101-node-footer-type",
+        childTargetId: "01-node-footer-type",
         title: "Nodes - Node Footer",
         description: (
           <>
@@ -981,7 +983,7 @@ export function nodeTutorialReducer(
           { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["06"] },
         ],
         targetId: "01",
-        childTargetId: "101-node-footer-timestamp",
+        childTargetId: "01-node-footer-timestamp",
         title: "Nodes - Node Footer",
         description: <MarkdownRender text={"The third icon indicates how long ago the node was approved. "} />,
         disabledElements: [...DISABLE_NOTEBOOK_OPTIONS, "00", "01"],
@@ -997,7 +999,7 @@ export function nodeTutorialReducer(
           { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["06"] },
         ],
         targetId: "01",
-        childTargetId: "101-node-footer-propose",
+        childTargetId: "01-node-footer-propose",
         title: "Nodes - Node Footer",
         description: (
           <MarkdownRender
@@ -1019,7 +1021,7 @@ export function nodeTutorialReducer(
           { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["06"] },
         ],
         targetId: "01",
-        childTargetId: "101-node-footer-votes",
+        childTargetId: "01-node-footer-votes",
         title: "Nodes - Node Footer",
         description: (
           <MarkdownRender
@@ -1042,13 +1044,13 @@ export function nodeTutorialReducer(
           { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["07"] },
         ],
         targetId: "01",
-        childTargetId: "101-node-footer-upvotes",
+        childTargetId: "01-node-footer-upvotes",
         title: "Nodes - Node Footer",
         description: (
           <MarkdownRender text={"An upvote is a vote to approve of the node’s contents and not change a node."} />
         ),
         disabledElements: [...DISABLE_NOTEBOOK_OPTIONS, "00", "01"],
-        enableChildElements: ["101-node-footer-upvotes"],
+        enableChildElements: ["01-node-footer-upvotes"],
         tooltipPosition: "bottom",
         isClickeable: true,
       };
@@ -1074,7 +1076,7 @@ export function nodeTutorialReducer(
           },
         ],
         targetId: "07",
-        childTargetId: "104-node-footer-downvotes",
+        childTargetId: "07-node-footer-downvotes",
         title: "Nodes - Node Footer",
         description: <MarkdownRender text={"A downvote is a vote to remove a node."} />,
         disabledElements: [...DISABLE_NOTEBOOK_OPTIONS, "00", "01", "07"],
@@ -1091,7 +1093,7 @@ export function nodeTutorialReducer(
           { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["07"], nodeChangeType: "added", wrongs: 0 },
         ],
         targetId: "07",
-        childTargetId: "104-node-footer-downvotes",
+        childTargetId: "07-node-footer-downvotes",
         title: "Nodes - Node Footer",
         description: (
           <MarkdownRender
@@ -1099,7 +1101,7 @@ export function nodeTutorialReducer(
           />
         ),
         disabledElements: [...DISABLE_NOTEBOOK_OPTIONS, "00", "01", "07"],
-        enableChildElements: ["104-node-footer-downvotes"],
+        enableChildElements: ["07-node-footer-downvotes"],
         tooltipPosition: "bottom",
         isClickeable: true,
       };
@@ -1114,7 +1116,7 @@ export function nodeTutorialReducer(
           { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["07"], nodeChangeType: "removed" },
         ],
         targetId: "01",
-        childTargetId: "101-node-footer-votes",
+        childTargetId: "01-node-footer-votes",
         title: "Nodes - Node Footer",
         description: (
           <MarkdownRender
@@ -1137,7 +1139,7 @@ export function nodeTutorialReducer(
           { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["07"] },
         ],
         targetId: "01",
-        childTargetId: "101-node-footer-tags-citations",
+        childTargetId: "01-node-footer-tags-citations",
         title: "Nodes - Node Footer",
         description: (
           <MarkdownRender
@@ -1163,11 +1165,11 @@ export function nodeTutorialReducer(
           { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["07"] },
         ],
         targetId: "01",
-        childTargetId: "101-node-footer-tags-citations",
+        childTargetId: "01-node-footer-tags-citations",
         title: "Nodes - Node Footer",
         description: <MarkdownRender text={"Click the button to expand."} />,
         disabledElements: [...DISABLE_NOTEBOOK_OPTIONS, "00", "01"],
-        enableChildElements: ["101-node-footer-tags-citations"],
+        enableChildElements: ["01-node-footer-tags-citations"],
         isClickeable: true,
       };
     case 47:
@@ -1187,7 +1189,7 @@ export function nodeTutorialReducer(
           { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["07"] },
         ],
         targetId: "01",
-        childTargetId: "101-linking-words",
+        childTargetId: "01-linking-words",
         title: "Nodes - Node Footer",
         description: (
           <MarkdownRender
@@ -1215,7 +1217,7 @@ export function nodeTutorialReducer(
           { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["07"] },
         ],
         targetId: "01",
-        childTargetId: "101-button-parent-children",
+        childTargetId: "01-button-parent-children",
         title: "Nodes - Node Footer",
         description: <MarkdownRender text={"The next icon is for parent and child nodes. "} />,
         disabledElements: [...DISABLE_NOTEBOOK_OPTIONS, "00", "01"],
@@ -1237,11 +1239,11 @@ export function nodeTutorialReducer(
           { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["07"] },
         ],
         targetId: "01",
-        childTargetId: "101-button-parent-children",
+        childTargetId: "01-button-parent-children",
         title: "Nodes - Node Footer",
         description: <MarkdownRender text={"Click the button to expand."} />,
         disabledElements: [...DISABLE_NOTEBOOK_OPTIONS, "00", "01"],
-        enableChildElements: ["101-button-parent-children"],
+        enableChildElements: ["01-button-parent-children"],
         isClickeable: true,
       };
     case 50:
@@ -1261,7 +1263,7 @@ export function nodeTutorialReducer(
           { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["07"] },
         ],
         targetId: "01",
-        childTargetId: "101-linking-words",
+        childTargetId: "01-linking-words",
         title: "Nodes - Node Footer",
         description: <MarkdownRender text={"You see the parent nodes on the left and child nodes on the right."} />,
         disabledElements: [...DISABLE_NOTEBOOK_OPTIONS, "00", "01"],
@@ -1283,11 +1285,11 @@ export function nodeTutorialReducer(
           { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["07"] },
         ],
         targetId: "01",
-        childTargetId: "101-node-footer-ellipsis",
+        childTargetId: "01-node-footer-ellipsis",
         title: "Nodes - Node Footer",
         description: <MarkdownRender text={"Finally the ellipses icon can be clicked to open a few other options."} />,
         disabledElements: [...DISABLE_NOTEBOOK_OPTIONS, "00", "01"],
-        enableChildElements: ["101-node-footer-ellipsis"],
+        enableChildElements: ["01-node-footer-ellipsis"],
       };
     case 52:
       return {
@@ -1306,11 +1308,11 @@ export function nodeTutorialReducer(
           { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["07"] },
         ],
         targetId: "01",
-        childTargetId: "101-node-footer-ellipsis",
+        childTargetId: "01-node-footer-ellipsis",
         title: "Nodes - Node Footer",
         description: <MarkdownRender text={"You can also have the node narrated for you."} />,
         disabledElements: [...DISABLE_NOTEBOOK_OPTIONS, "00", "01"],
-        enableChildElements: ["101-node-footer-ellipsis"],
+        enableChildElements: ["01-node-footer-ellipsis"],
       };
     case 53:
       return {
@@ -1329,13 +1331,13 @@ export function nodeTutorialReducer(
           { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["07"] },
         ],
         targetId: "01",
-        childTargetId: "101-node-footer-ellipsis",
+        childTargetId: "01-node-footer-ellipsis",
         title: "Nodes - Node Footer",
         description: (
           <MarkdownRender text={"Finally, you can share the node to Twitter, Reddit, Facebook, or Linkedin."} />
         ),
         disabledElements: [...DISABLE_NOTEBOOK_OPTIONS, "00", "01"],
-        enableChildElements: ["101-node-footer-ellipsis"],
+        enableChildElements: ["01-node-footer-ellipsis"],
       };
     default:
       return state;

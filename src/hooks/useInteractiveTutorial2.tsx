@@ -87,39 +87,37 @@ export const useInteractiveTutorial = ({ notebookRef }: useInteractiveTutorialPr
       if (step === 28)
         payload = {
           callback: () => {
-            notebookRef.current.selectedNode = "103";
-            nodeBookDispatch({ type: "setSelectedNode", payload: "103" });
+            notebookRef.current.selectedNode = "06";
+            nodeBookDispatch({ type: "setSelectedNode", payload: "06" });
           },
         };
-      dispatchNodeTutorial({ type: step, payload });
-      isPlayingTheTutorialRef.current = step ? true : false;
 
       if (step === 31)
         payload = {
           callback: () => {
-            notebookRef.current.selectedNode = "101";
-            nodeBookDispatch({ type: "setSelectedNode", payload: "101" });
+            notebookRef.current.selectedNode = "01";
+            nodeBookDispatch({ type: "setSelectedNode", payload: "01" });
           },
         };
       if (step === 35)
         payload = {
           callback: () => {
-            notebookRef.current.selectedNode = "101";
-            nodeBookDispatch({ type: "setSelectedNode", payload: "101" });
+            notebookRef.current.selectedNode = "01";
+            nodeBookDispatch({ type: "setSelectedNode", payload: "01" });
           },
         };
       if (step === 42)
         payload = {
           callback: () => {
-            notebookRef.current.selectedNode = "104";
-            nodeBookDispatch({ type: "setSelectedNode", payload: "104" });
+            notebookRef.current.selectedNode = "07";
+            nodeBookDispatch({ type: "setSelectedNode", payload: "07" });
           },
         };
       if (step === 44)
         payload = {
           callback: () => {
-            notebookRef.current.selectedNode = "101";
-            nodeBookDispatch({ type: "setSelectedNode", payload: "101" });
+            notebookRef.current.selectedNode = "01";
+            nodeBookDispatch({ type: "setSelectedNode", payload: "01" });
           },
         };
       dispatchNodeTutorial({ type: step, payload });
