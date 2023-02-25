@@ -259,7 +259,6 @@ const Node = ({
   enableChildElements = [],
   defaultOpenPart: defaultOpenPartByTutorial = null,
 }: NodeProps) => {
-  console.log({ defaultOpenPart: defaultOpenPartByTutorial });
   const [{ user }] = useAuth();
   const { nodeBookDispatch } = useNodeBook();
   const [option, setOption] = useState<EditorOptions>("EDIT");
