@@ -94,7 +94,7 @@ const HeaderNavbar = ({ options, user, onNewCourse }: HeaderNavbarProps) => {
             ))}
             {onNewCourse && (
               <Button
-                onClick={() => onNewCourse()}
+                onClick={() => router.push(ROUTES.instructorsNewCourse)}
                 variant={"contained"}
                 size={"small"}
                 sx={{ fontFamily: "Work Sans,sans-serif", fontSize: "15px", letterSpacing: "-1px", marginLeft: "16px" }}

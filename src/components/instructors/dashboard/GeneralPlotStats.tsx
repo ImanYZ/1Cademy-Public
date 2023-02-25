@@ -75,7 +75,7 @@ export const GeneralPlotStats = ({
           {student ? `${formatNumber(student.editProposals)} / ` : ""}
           {formatNumber(semesterStats?.editProposals)}
         </span>
-        <span style={{ textAlign: "left" }}>Links</span>
+        <span style={{ textAlign: "left" }}>Proposed Links</span>
         <span>
           {student ? `${formatNumber(student.links)} / ` : ""}
           {formatNumber(semesterStats?.links)}

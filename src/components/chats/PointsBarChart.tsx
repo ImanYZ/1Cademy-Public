@@ -41,7 +41,9 @@ function drawChart(
   studentQuestionsRate: StudentStackedBarStatsObject | null,
   theme: UserTheme,
   studentLocation?: StudenBarsSubgroupLocation,
-  mobile?: boolean
+  mobile?: boolean,
+  isQuestionRequired?: boolean,
+  isProposalRequired?: boolean
 ) {
   //   const data = [12, 5, 6, 6, 9, 10];
   //   const height = 120;
@@ -66,7 +68,15 @@ function drawChart(
   // const groups = data.map(d => d.index).flatMap(c => c);
   // console.log({ groups });
 
-  const columns = ["Proposals", "Questions"];
+  const columns: string[] = [];
+
+  if (isProposalRequired) {
+    columns.push("Proposals");
+  }
+
+  if (isQuestionRequired) {
+    columns.push("Questions");
+  }
 
   // remove axis if exist to avoid overdrawing
   svg.select("#axis-x").remove();
@@ -110,7 +120,16 @@ function drawChart(
     },
   ];
 
-  const stackedData = d3.stack().keys(subgroups)(data);
+  let chartData = [];
+  if (isProposalRequired) {
+    chartData.push(data[0] || []);
+  }
+
+  if (isQuestionRequired) {
+    chartData.push(data[1] || []);
+  }
+
+  const stackedData = d3.stack().keys(subgroups)(chartData);
 
   //tooltip
   const tooltip = d3.select("#boxplot-tooltip");
@@ -122,7 +141,6 @@ function drawChart(
   // .style("border-radius", "5px")
 
   // .style("padding", "10px");
-
   const htmlTooltip = (users: ISemesterStudent[]) => {
     console.log("STUDENTS", users);
     const html = users.map(user => {
@@ -289,6 +307,8 @@ type StackedBarProps = {
   theme: UserTheme;
   mobile?: boolean;
   studentLocation?: StudenBarsSubgroupLocation;
+  isQuestionRequired?: boolean;
+  isProposalRequired?: boolean;
 };
 export const PointsBarChart = ({
   data,
@@ -298,12 +318,35 @@ export const PointsBarChart = ({
   theme,
   studentLocation,
   mobile,
+  isQuestionRequired,
+  isProposalRequired,
 }: StackedBarProps) => {
   const svg = useCallback(
     (svgRef: any) => {
-      drawChart(svgRef, data, maxAxisY, proposalsStudents, questionsStudents, theme, studentLocation, mobile);
+      drawChart(
+        svgRef,
+        data,
+        maxAxisY,
+        proposalsStudents,
+        questionsStudents,
+        theme,
+        studentLocation,
+        mobile,
+        isQuestionRequired,
+        isProposalRequired
+      );
     },
-    [data, maxAxisY, mobile, proposalsStudents, questionsStudents, studentLocation, theme]
+    [
+      data,
+      maxAxisY,
+      mobile,
+      proposalsStudents,
+      questionsStudents,
+      studentLocation,
+      theme,
+      isQuestionRequired,
+      isProposalRequired,
+    ]
   );
 
   return (
