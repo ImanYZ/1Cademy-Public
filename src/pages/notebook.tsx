@@ -59,6 +59,8 @@ import { MemoizedProposalsSidebar } from "@/components/map/Sidebar/SidebarV2/Pro
 import { MemoizedSearcherSidebar } from "@/components/map/Sidebar/SidebarV2/SearcherSidebar";
 import { MemoizedUserInfoSidebar } from "@/components/map/Sidebar/SidebarV2/UserInfoSidebar";
 import { MemoizedUserSettingsSidebar } from "@/components/map/Sidebar/SidebarV2/UserSettigsSidebar";
+import { MemoizedProgressBar } from "@/components/tutorial/ProgressBar";
+import { MemoizedProgressBarMenu } from "@/components/tutorial/ProgressBarMenu";
 import { useAuth } from "@/context/AuthContext";
 import { useTagsTreeView } from "@/hooks/useTagsTreeView";
 import { addSuffixToUrlGMT } from "@/lib/utils/string.utils";
@@ -85,7 +87,6 @@ import { Post, postWithToken } from "../lib/mapApi";
 import { createGraph, dagreUtils } from "../lib/utils/dagre.util";
 import { devLog } from "../lib/utils/develop.util";
 import { getTypedCollections } from "../lib/utils/getTypedCollections";
-import { INTERACTIVE_TUTORIAL_NOTEBOOK_NODES } from "../lib/utils/interactiveTutorialNodes";
 import {
   changedNodes,
   citations,
@@ -272,6 +273,8 @@ const Dashboard = ({}: DashboardProps) => {
   const lastNodeOperation = useRef<string>("");
   const proposalTimer = useRef<any>(null);
 
+  const [openProgressBar, setOpenProgressBar] = useState(false);
+  const [openProgressBarMenu, setOpenProgressBarMenu] = useState(false);
   // const {
   //   setTargetClientRect,
   //   isPlayingTheTutorial,
@@ -300,10 +303,7 @@ const Dashboard = ({}: DashboardProps) => {
 
   const [nodeTutorial /* setNodeTutorial */] = useState(Boolean(localStorage.getItem("node-tutorial")));
 
-  // const [stateNodeTutorial, dispatchNodeTutorial] = useReducer(nodeTutorialReducer, INITIAL_NODE_TUTORIAL_STATE);
   const { stateNodeTutorial, onChangeStep, isPlayingTheTutorialRef } = useInteractiveTutorial({ notebookRef });
-  console.log("isPlayingTheTutorialRef", isPlayingTheTutorialRef.current);
-
   const onNodeInViewport = useCallback(
     (nodeId: string) => {
       const originalNode = document.getElementById(nodeId);
@@ -371,7 +371,8 @@ const Dashboard = ({}: DashboardProps) => {
           if (isSearcher) {
             lastNodeOperation.current = "";
           }
-          if (onNodeInViewport(nodeId) && !isSearcher) return;
+
+          if (!isPlayingTheTutorialRef.current && onNodeInViewport(nodeId) && !isSearcher) return;
 
           if (
             originalNode &&
@@ -470,7 +471,9 @@ const Dashboard = ({}: DashboardProps) => {
 
       if (!targetElement) return;
 
-      targetElement.style.outline = "2px solid #FF6D00";
+      // targetElement.style.outline = "2px solid #FF6D00";
+      targetElement.classList.add("tutorial-pulse");
+
       const { width, height, top, left } = targetElement.getBoundingClientRect();
 
       setTargetClientRect({ width, height, top, left });
@@ -486,7 +489,8 @@ const Dashboard = ({}: DashboardProps) => {
       if (stateNodeTutorial.childTargetId) {
         const targetElement = document.getElementById(stateNodeTutorial.childTargetId);
         if (!targetElement) return;
-        targetElement.style.outline = "2px solid #FF6D00";
+        // targetElement.style.outline = "2px solid #FF6D00";
+        targetElement.classList.add("tutorial-pulse");
 
         const { offsetTop, offsetLeft } = targetElement;
         const { height: childrenHeight, width: childrenWidth } = targetElement.getBoundingClientRect();
@@ -624,20 +628,10 @@ const Dashboard = ({}: DashboardProps) => {
   };
   const openNodeHandler = useMemoizedCallback(
     async (nodeId: string) => {
-      console.log({ nodeId });
+      // console.log({ nodeId });
 
       devLog("open_Node_Handler", nodeId);
-      console.log({ isPlayingTheTutorialRef: isPlayingTheTutorialRef.current });
-      // start tutorial
-      if (isPlayingTheTutorialRef.current) {
-        if (!INTERACTIVE_TUTORIAL_NOTEBOOK_NODES[nodeId]) {
-          return console.warn("Dev: you forgot to update Local Tutorial Nodes");
-        }
-        const thisNode = { nodeId: INTERACTIVE_TUTORIAL_NOTEBOOK_NODES[nodeId] };
-        setLocalSnapshot(thisNode);
-        return;
-      }
-      // end tutorial
+      if (isPlayingTheTutorialRef.current) return;
 
       let linkedNodeRef;
       let userNodeRef = null;
@@ -645,11 +639,11 @@ const Dashboard = ({}: DashboardProps) => {
 
       const nodeRef = doc(db, "nodes", nodeId);
       const nodeDoc = await getDoc(nodeRef);
-      console.log({ nodeDoc });
+      // console.log({ nodeDoc });
       const batch = writeBatch(db);
       if (nodeDoc.exists() && user) {
         const thisNode: any = { ...nodeDoc.data(), id: nodeId };
-        console.log({ thisNode });
+        // console.log({ thisNode });
         try {
           for (let child of thisNode.children) {
             linkedNodeRef = doc(db, "nodes", child.node);
@@ -1094,12 +1088,12 @@ const Dashboard = ({}: DashboardProps) => {
 
     if (shouldResetGraph.current) {
       g.current = createGraph();
-      const FIRST_KEY_NODE = "01";
+      // const FIRST_KEY_NODE = "01";
       setGraph({
-        nodes: { [FIRST_KEY_NODE]: INTERACTIVE_TUTORIAL_NOTEBOOK_NODES[FIRST_KEY_NODE] },
+        nodes: {},
         edges: {},
       });
-      setLocalSnapshot({ [FIRST_KEY_NODE]: INTERACTIVE_TUTORIAL_NOTEBOOK_NODES[FIRST_KEY_NODE] });
+      // setLocalSnapshot({);
       shouldResetGraph.current = false;
     }
 
@@ -1253,6 +1247,7 @@ const Dashboard = ({}: DashboardProps) => {
       }
       return { nodes: newNodes, edges: newEdges };
     });
+    setOpenProgressBarMenu(true);
   }, [allTags, settings.showClusterOptions, stateNodeTutorial, notebookChanged]);
 
   useEffect(() => {
@@ -1271,7 +1266,7 @@ const Dashboard = ({}: DashboardProps) => {
     );
     const bookmarkSnapshot = onSnapshot(q, async snapshot => {
       // console.log("on snapshot");
-      console.log("sn> bookmark");
+      // console.log("sn> bookmark");
       const docChanges = snapshot.docChanges();
 
       if (!docChanges.length) {
@@ -1960,23 +1955,9 @@ const Dashboard = ({}: DashboardProps) => {
   const openLinkedNode = useCallback(
     (linkedNodeID: string, typeOperation?: string) => {
       devLog("open Linked Node", { linkedNodeID, typeOperation });
-      if (!notebookRef.current.choosingNode) return;
+      if (notebookRef.current.choosingNode) return;
 
-      // start tutorial
-      if (isPlayingTheTutorialRef.current) {
-        let linkedNode = document.getElementById(linkedNodeID);
-        if (linkedNode) {
-          nodeBookDispatch({ type: "setSelectedNode", payload: linkedNodeID });
-          notebookRef.current.selectedNode = linkedNodeID;
-          setTimeout(() => {
-            scrollToNode(linkedNodeID);
-          }, 1500);
-        } else {
-          openNodeHandler(linkedNodeID);
-        }
-        return;
-      }
-      // end tutorial
+      if (isPlayingTheTutorialRef.current) return;
 
       createActionTrack(
         db,
@@ -2059,6 +2040,8 @@ const Dashboard = ({}: DashboardProps) => {
        * change node
        * create userNodeLog
        */
+
+      if (isPlayingTheTutorialRef.current) return;
 
       setGraph(graph => {
         (async () => {
@@ -2241,15 +2224,8 @@ const Dashboard = ({}: DashboardProps) => {
       if (notebookRef.current.choosingNode) return;
 
       notebookRef.current.selectedNode = nodeId;
-      // start tutorial
-      if (isPlayingTheTutorialRef.current) {
-        setGraph(({ nodes: oldNodes, edges }) => {
-          const thisNode: FullNodeData = oldNodes[nodeId];
-          return { nodes: { ...oldNodes, [nodeId]: { ...thisNode, open: !thisNode.open } }, edges };
-        });
-        return;
-      }
-      // end tutorial
+
+      if (isPlayingTheTutorialRef.current) return;
 
       lastNodeOperation.current = "ToggleNode";
       setGraph(({ nodes: oldNodes, edges }) => {
@@ -2565,6 +2541,8 @@ const Dashboard = ({}: DashboardProps) => {
     (event: any, nodeId: string) => {
       devLog("CORRECT NODE", { nodeId });
       if (notebookRef.current.choosingNode) return;
+      if (isPlayingTheTutorialRef.current) return;
+
       notebookRef.current.selectedNode = nodeId;
       nodeBookDispatch({ type: "setSelectedNode", payload: nodeId });
 
@@ -2603,6 +2581,8 @@ const Dashboard = ({}: DashboardProps) => {
       locked: boolean
     ) => {
       if (notebookRef.current.choosingNode) return;
+      if (isPlayingTheTutorialRef.current) return;
+
       let deleteOK = true;
       notebookRef.current.selectedNode = nodeId;
       nodeBookDispatch({ type: "setSelectedNode", payload: nodeId });
@@ -3941,12 +3921,31 @@ const Dashboard = ({}: DashboardProps) => {
     },
     [nodeBookDispatch]
   );
+  // console.log({ nodeBookState });
 
+  const handleOpenProgressBar = useCallback(() => {
+    setOpenProgressBar(true);
+    setOpenProgressBarMenu(false);
+  }, []);
+
+  const handleCloseProgressBar = useCallback(() => {
+    console.log("ssssssss");
+    setOpenProgressBar(false);
+    setOpenProgressBarMenu(true);
+  }, []);
+  const handleCloseProgressBarMenu = useCallback(() => {
+    setOpenProgressBarMenu(false);
+  }, []);
   return (
     <div className="MapContainer" style={{ overflow: "hidden" }}>
       {stateNodeTutorial?.anchor && (
         <Portal anchor="portal">
-          <Tutorial tutorialState={stateNodeTutorial} onChangeStep={onChangeStep} targetClientRect={targetClientRect} />
+          <Tutorial
+            tutorialState={stateNodeTutorial}
+            onChangeStep={onChangeStep}
+            targetClientRect={targetClientRect}
+            handleCloseProgressBarMenu={handleCloseProgressBarMenu}
+          />
         </Portal>
       )}
       <Box
@@ -4201,31 +4200,40 @@ const Dashboard = ({}: DashboardProps) => {
             />
           )}
           {nodeBookState.selectedNode && (
-            <Tooltip
-              title="Scroll to last Selected Node"
-              placement="left"
-              sx={{
-                position: "fixed",
-                top: {
-                  xs: !openSidebar
-                    ? "10px"
-                    : openSidebar && openSidebar !== "SEARCHER_SIDEBAR"
-                    ? `${innerHeight * 0.35 + 10}px`
-                    : `${innerHeight * 0.25 + 10}px`,
-                  sm: "10px",
-                },
-                right: "10px",
-                zIndex: "1300",
-                background: theme => (theme.palette.mode === "dark" ? "#1f1f1f" : "#f0f0f0"),
-                ":hover": {
-                  background: theme => (theme.palette.mode === "dark" ? "#454545" : "#d6d4d4"),
-                },
-                transition: "all 1s ease",
-              }}
-            >
-              <IconButton color="secondary" onClick={onScrollToLastNode}>
+            <Tooltip title="Scroll to last Selected Node" placement="left">
+              {/* <span> */}
+              <IconButton
+                color="secondary"
+                onClick={onScrollToLastNode}
+                disabled={stateNodeTutorial?.disabledElements.includes("SCROLL_TO_NODE_BUTTON")}
+                sx={{
+                  position: "fixed",
+                  top: {
+                    xs: !openSidebar
+                      ? "10px"
+                      : openSidebar && openSidebar !== "SEARCHER_SIDEBAR"
+                      ? `${innerHeight * 0.35 + 10}px`
+                      : `${innerHeight * 0.25 + 10}px`,
+                    sm: "10px",
+                  },
+                  right: "10px",
+                  zIndex: "1300",
+
+                  transition: "all 1s ease",
+                  background: theme => (theme.palette.mode === "dark" ? "#1f1f1f" : "#f0f0f0"),
+                  ":hover": {
+                    background: theme => (theme.palette.mode === "dark" ? "#454545" : "#d6d4d4"),
+                  },
+                  ":disabled": {
+                    pointerEvents: "auto!important",
+                    background: theme => (theme.palette.mode === "dark" ? "#1f1f1fb9" : "#f0f0f0be"),
+                    cursor: "not-allowed!important",
+                  },
+                }}
+              >
                 <MyLocationIcon />
               </IconButton>
+              {/* </span> */}
             </Tooltip>
           )}
           <Tooltip
@@ -4278,7 +4286,13 @@ const Dashboard = ({}: DashboardProps) => {
                 transition: "all 1s ease",
               }}
             >
-              <IconButton color="secondary" onClick={() => onChangeStep(1)}>
+              <IconButton
+                color="secondary"
+                onClick={() => {
+                  onChangeStep(1);
+                  setOpenProgressBarMenu(true);
+                }}
+              >
                 <SchoolIcon />
               </IconButton>
             </Tooltip>
@@ -4312,32 +4326,35 @@ const Dashboard = ({}: DashboardProps) => {
               </IconButton>
             </Tooltip>
           )}
-          <Tooltip
-            title="Focused view for selected node"
-            placement="left"
-            sx={{
-              position: "fixed",
-              top: {
-                xs: !openSidebar
-                  ? "110px"
-                  : openSidebar && openSidebar !== "SEARCHER_SIDEBAR"
-                  ? `${innerHeight * 0.35 + 120}px`
-                  : `${innerHeight * 0.25 + 120}px`,
-                sm: "110px",
-              },
-              right: "10px",
-              zIndex: "1300",
-              background: theme => (theme.palette.mode === "dark" ? "#1f1f1f" : "#f0f0f0"),
-              ":hover": {
-                background: theme => (theme.palette.mode === "dark" ? "#454545" : "#d6d4d4"),
-              },
-              transition: "all 1s ease",
-            }}
-          >
+          <Tooltip title="Focused view for selected node" placement="left">
             <IconButton
               color="secondary"
               onClick={() => {
                 setFocusView({ isEnabled: true, selectedNode: nodeBookState.selectedNode || "" });
+              }}
+              disabled={stateNodeTutorial?.disabledElements.includes("FOCUS_MODE_BUTTON")}
+              sx={{
+                position: "fixed",
+                top: {
+                  xs: !openSidebar
+                    ? "110px"
+                    : openSidebar && openSidebar !== "SEARCHER_SIDEBAR"
+                    ? `${innerHeight * 0.35 + 120}px`
+                    : `${innerHeight * 0.25 + 120}px`,
+                  sm: "110px",
+                },
+                right: "10px",
+                zIndex: "1300",
+                background: theme => (theme.palette.mode === "dark" ? "#1f1f1f" : "#f0f0f0"),
+                ":hover": {
+                  background: theme => (theme.palette.mode === "dark" ? "#454545" : "#d6d4d4"),
+                },
+                transition: "all 1s ease",
+                ":disabled": {
+                  pointerEvents: "auto!important",
+                  background: theme => (theme.palette.mode === "dark" ? "#1f1f1fb9" : "#f0f0f0be"),
+                  cursor: "not-allowed!important",
+                },
               }}
             >
               <NextImage
@@ -4529,6 +4546,7 @@ const Dashboard = ({}: DashboardProps) => {
                     tutorialState={stateNodeTutorial}
                     onChangeStep={onChangeStep}
                     targetClientRect={targetClientRect}
+                    handleCloseProgressBarMenu={handleCloseProgressBarMenu}
                   />
                 )}
                 {settings.showClusterOptions && settings.showClusters && (
@@ -4700,6 +4718,12 @@ const Dashboard = ({}: DashboardProps) => {
               </Suspense>
             </Box>
           )}
+          <MemoizedProgressBarMenu
+            open={openProgressBarMenu}
+            handleOpenProgressBar={handleOpenProgressBar}
+            currentStep={stateNodeTutorial?.currentStepName ?? 0}
+          />
+          <MemoizedProgressBar open={openProgressBar} handleCloseProgressBar={handleCloseProgressBar} />
         </Box>
       </Box>
     </div>

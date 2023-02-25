@@ -26,6 +26,7 @@ import React, {
   useTransition,
 } from "react";
 import { FullNodeData, OpenPart, TNodeBookState } from "src/nodeBookTypes";
+import { string } from "yup/lib/locale";
 
 import { useNodeBook } from "@/context/NodeBookContext";
 import { getSearchAutocomplete } from "@/lib/knowledgeApi";
@@ -149,6 +150,7 @@ type NodeProps = {
   openUserInfoSidebar: (uname: string, imageUrl: string, fullName: string, chooseUname: string) => void;
   disabled?: boolean;
   enableChildElements?: string[];
+  defaultOpenPart?: OpenPart; // this is only to configure default open part value in tutorial
 };
 
 const proposedChildTypesIcons: { [key in ProposedChildTypesIcons]: string } = {
@@ -255,12 +257,13 @@ const Node = ({
   openUserInfoSidebar,
   disabled = false,
   enableChildElements = [],
+  defaultOpenPart: defaultOpenPartByTutorial = null,
 }: NodeProps) => {
   const [{ user }] = useAuth();
   const { nodeBookDispatch } = useNodeBook();
   const [option, setOption] = useState<EditorOptions>("EDIT");
 
-  const [openPart, setOpenPart] = useState<OpenPart>(null);
+  const [openPart, setOpenPart] = useState<OpenPart>(defaultOpenPartByTutorial);
   const [isHiding, setIsHiding] = useState(false);
   const [imageLoaded, setImageLoaded] = useState(false);
   const [reason, setReason] = useState("");
@@ -288,6 +291,11 @@ const Node = ({
     from: { left: "500px", zIndex: -999 },
     to: { left: "600px", zIndex: 0 },
   });
+
+  useEffect(() => {
+    setOpenPart(defaultOpenPartByTutorial); // this is called ONLY when is override by TUTORIAL
+  }, [defaultOpenPartByTutorial]);
+
   useEffect(() => {
     setTitleCopy(title);
     setContentCopy(content);
@@ -717,22 +725,24 @@ const Node = ({
                 // sx={{ position: "absolute", right: "10px", top: "0px" }}
               />
             )}
-            <Editor
-              id={`${identifier}-node-title`}
-              label="Enter the node title:"
-              value={titleCopy}
-              setValue={onSetTitle}
-              onBlurCallback={onBlurNodeTitle}
-              readOnly={!editable}
-              sxPreview={{ fontSize: "25px", fontWeight: 300 }}
-              error={error ? true : false}
-              helperText={error ? error : ""}
-              showEditPreviewSection={false}
-              editOption={option}
-            />
-            {editable && <Box sx={{ mb: "12px" }}></Box>}
-            {/* </div> */}
-            <div className="NodeContent" data-hoverable={true}>
+
+            <div id={`${identifier}-node-body`} className="NodeContent" data-hoverable={true}>
+              <Editor
+                id={`${identifier}-node-title`}
+                label="Enter the node title:"
+                value={titleCopy}
+                setValue={onSetTitle}
+                onBlurCallback={onBlurNodeTitle}
+                readOnly={!editable}
+                sxPreview={{ fontSize: "25px", fontWeight: 300 }}
+                error={error ? true : false}
+                helperText={error ? error : ""}
+                showEditPreviewSection={false}
+                editOption={option}
+              />
+              {editable && <Box sx={{ mb: "12px" }}></Box>}
+              {/* </div> */}
+
               <Editor
                 id={`${identifier}-node-content`}
                 label="Edit the node content:"
@@ -746,65 +756,74 @@ const Node = ({
               />
               {editable && <Box sx={{ mb: "12px" }}></Box>}
 
-              {nodeImage !== "" && (
-                <>
-                  {editable && (
-                    <div className="RemoveImageDIV">
-                      <MemoizedMetaButton onClick={removeImageHandler} tooltip="Click to remove the image.">
-                        <DeleteForeverIcon sx={{ fontSize: "16px" }} />
-                      </MemoizedMetaButton>
-                    </div>
-                  )}
+              <div id={`${identifier}-node-content-media`}>
+                {nodeImage !== "" && (
+                  <>
+                    {editable && (
+                      <div className="RemoveImageDIV">
+                        <MemoizedMetaButton onClick={removeImageHandler} tooltip="Click to remove the image.">
+                          <DeleteForeverIcon sx={{ fontSize: "16px" }} />
+                        </MemoizedMetaButton>
+                      </div>
+                    )}
 
-                  {/* TODO: change to Next Image */}
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src={nodeImage}
-                    alt="Node image"
-                    className="responsive-img NodeImage"
-                    onLoad={onImageLoad}
-                    onClick={onImageClick}
-                  />
-                </>
-              )}
-              {nodeType === "Question" && (
-                <Box sx={{ display: "flex", flexDirection: "column" }}>
-                  <ul className="collapsible" style={{ padding: "0px" }}>
-                    {choices.map((choice, idx) => {
-                      return (
-                        <QuestionChoices
-                          key={identifier + "Choice" + idx}
-                          identifier={identifier}
-                          nodeRef={nodeRef}
-                          editable={editable}
-                          choices={choices}
-                          idx={idx}
-                          choicesNum={choices.length}
-                          choice={choice}
-                          deleteChoice={deleteChoice}
-                          switchChoice={switchChoice}
-                          changeChoice={changeChoice}
-                          changeFeedback={changeFeedback}
-                          option={option}
-                        />
-                      );
-                    })}
-                  </ul>
-                  {editable && (
-                    <Box sx={{ alignSelf: "flex-end" }}>
-                      <MemoizedMetaButton
-                        onClick={addChoiceHandler}
-                        tooltip="Click to add a new choice to this question."
-                      >
-                        <>
-                          <AddIcon className="green-text" sx={{ fontSize: "16px" }} />
-                          <span>Add Choice</span>
-                        </>
-                      </MemoizedMetaButton>
-                    </Box>
-                  )}
-                </Box>
-              )}
+                    {/* TODO: change to Next Image */}
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={nodeImage}
+                      alt="Node image"
+                      className="responsive-img NodeImage"
+                      onLoad={onImageLoad}
+                      onClick={onImageClick}
+                    />
+                  </>
+                )}
+                {nodeType === "Question" && (
+                  <Box sx={{ display: "flex", flexDirection: "column" }}>
+                    <ul className="collapsible" style={{ padding: "0px" }}>
+                      {choices.map((choice, idx) => {
+                        return (
+                          <QuestionChoices
+                            key={identifier + "Choice" + idx}
+                            identifier={identifier}
+                            nodeRef={nodeRef}
+                            editable={editable}
+                            choices={choices}
+                            idx={idx}
+                            choicesNum={choices.length}
+                            choice={choice}
+                            deleteChoice={deleteChoice}
+                            switchChoice={switchChoice}
+                            changeChoice={changeChoice}
+                            changeFeedback={changeFeedback}
+                            option={option}
+                          />
+                        );
+                      })}
+                    </ul>
+                    {editable && (
+                      <Box sx={{ alignSelf: "flex-end" }}>
+                        <MemoizedMetaButton
+                          onClick={addChoiceHandler}
+                          tooltip="Click to add a new choice to this question."
+                        >
+                          <>
+                            <AddIcon className="green-text" sx={{ fontSize: "16px" }} />
+                            <span>Add Choice</span>
+                          </>
+                        </MemoizedMetaButton>
+                      </Box>
+                    )}
+                  </Box>
+                )}
+                {!editable && nodeVideo && (
+                  <>
+                    <MemoizedNodeVideo addVideo={true} videoData={videoData} />
+                    <Box sx={{ mb: "12px" }}></Box>
+                  </>
+                )}
+              </div>
+
               {editable && (
                 <>
                   <Editor
@@ -822,6 +841,7 @@ const Node = ({
                   />
                 </>
               )}
+
               {editable && addVideo && (
                 <>
                   <Box sx={{ mb: "12px" }}></Box>
@@ -951,76 +971,70 @@ const Node = ({
                   <MemoizedNodeVideo addVideo={addVideo} videoData={videoData} />
                 </>
               )}
-              {!editable && nodeVideo && (
-                <>
-                  <MemoizedNodeVideo addVideo={true} videoData={videoData} />
-                  <Box sx={{ mb: "12px" }}></Box>
-                </>
-              )}
-              <MemoizedNodeFooter
-                open={true}
-                addVideo={addVideo}
-                setAddVideo={setAddVideo}
-                identifier={identifier}
-                activeNode={activeNode}
-                citationsSelected={citationsSelected}
-                proposalsSelected={proposalsSelected}
-                acceptedProposalsSelected={acceptedProposalsSelected}
-                commentsSelected={commentsSelected}
-                editable={editable}
-                setNodeParts={setNodeParts}
-                title={title}
-                content={content}
-                unaccepted={unaccepted}
-                openPart={openPart}
-                nodeType={nodeType}
-                isNew={isNew}
-                admin={admin}
-                aImgUrl={aImgUrl}
-                aFullname={aFullname}
-                aChooseUname={aChooseUname}
-                viewers={viewers}
-                correctNum={correctNum}
-                markedCorrect={markedCorrect}
-                wrongNum={wrongNum}
-                markedWrong={markedWrong}
-                references={references}
-                tags={tags}
-                parents={parents}
-                nodesChildren={nodesChildren}
-                commentsNum={commentsNum}
-                proposalsNum={proposalsNum}
-                studied={studied}
-                isStudied={isStudied}
-                changed={changed}
-                changedAt={changedAt}
-                simulated={simulated}
-                bookmarked={bookmarked}
-                bookmarks={bookmarks}
-                reloadPermanentGrpah={reloadPermanentGrpah}
-                onNodeShare={onNodeShare}
-                markStudied={markStudiedHandler}
-                bookmark={bookmarkHandler}
-                openNodePart={openNodePartHandler}
-                selectNode={selectNodeHandler}
-                correctNode={correctNodeHandler}
-                wrongNode={wrongNodeHandler}
-                disableVotes={disableVotes}
-                uploadNodeImage={uploadNodeImageHandler}
-                user={user}
-                citations={citations}
-                setOpenSideBar={setOpenSideBar}
-                locked={locked}
-                openSidebar={openSidebar}
-                contributors={contributors}
-                institutions={institutions}
-                openUserInfoSidebar={openUserInfoSidebar}
-                proposeNodeImprovement={proposeNodeImprovement}
-                setOperation={setOperation}
-                disabled={disabled}
-                enableChildElements={enableChildElements}
-              />
             </div>
+            <MemoizedNodeFooter
+              open={true}
+              addVideo={addVideo}
+              setAddVideo={setAddVideo}
+              identifier={identifier}
+              activeNode={activeNode}
+              citationsSelected={citationsSelected}
+              proposalsSelected={proposalsSelected}
+              acceptedProposalsSelected={acceptedProposalsSelected}
+              commentsSelected={commentsSelected}
+              editable={editable}
+              setNodeParts={setNodeParts}
+              title={title}
+              content={content}
+              unaccepted={unaccepted}
+              openPart={openPart}
+              nodeType={nodeType}
+              isNew={isNew}
+              admin={admin}
+              aImgUrl={aImgUrl}
+              aFullname={aFullname}
+              aChooseUname={aChooseUname}
+              viewers={viewers}
+              correctNum={correctNum}
+              markedCorrect={markedCorrect}
+              wrongNum={wrongNum}
+              markedWrong={markedWrong}
+              references={references}
+              tags={tags}
+              parents={parents}
+              nodesChildren={nodesChildren}
+              commentsNum={commentsNum}
+              proposalsNum={proposalsNum}
+              studied={studied}
+              isStudied={isStudied}
+              changed={changed}
+              changedAt={changedAt}
+              simulated={simulated}
+              bookmarked={bookmarked}
+              bookmarks={bookmarks}
+              reloadPermanentGrpah={reloadPermanentGrpah}
+              onNodeShare={onNodeShare}
+              markStudied={markStudiedHandler}
+              bookmark={bookmarkHandler}
+              openNodePart={openNodePartHandler}
+              selectNode={selectNodeHandler}
+              correctNode={correctNodeHandler}
+              wrongNode={wrongNodeHandler}
+              disableVotes={disableVotes}
+              uploadNodeImage={uploadNodeImageHandler}
+              user={user}
+              citations={citations}
+              setOpenSideBar={setOpenSideBar}
+              locked={locked}
+              openSidebar={openSidebar}
+              contributors={contributors}
+              institutions={institutions}
+              openUserInfoSidebar={openUserInfoSidebar}
+              proposeNodeImprovement={proposeNodeImprovement}
+              setOperation={setOperation}
+              disabled={disabled}
+              enableChildElements={enableChildElements}
+            />
           </div>
           {(openPart === "LinkingWords" || openPart === "Tags" || openPart === "References") && (
             <LinkingWords
@@ -1047,6 +1061,8 @@ const Node = ({
               isLoading={isLoading}
               onResetButton={newValue => setAbleToPropose(newValue)}
               setOperation={setOperation}
+              disabled={disabled}
+              enableChildElements={enableChildElements}
             />
           )}
           {editable && (
@@ -1128,6 +1144,7 @@ const Node = ({
               onHideOffsprings={hideOffspringsHandler}
               onHideNodeHandler={hideNodeHandler}
               disabled={disabled}
+              enableChildElements={enableChildElements}
               // sx={{ position: "absolute", right: "10px", top: "0px" }}
             />
           )}

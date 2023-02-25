@@ -29,97 +29,109 @@ export const useInteractiveTutorial = ({ notebookRef }: useInteractiveTutorialPr
   const [stateNodeTutorial, dispatchNodeTutorial] = useReducer(nodeTutorialReducer, INITIAL_NODE_TUTORIAL_STATE);
   const isPlayingTheTutorialRef = useRef(false);
   const { nodeBookDispatch } = useNodeBook();
+  const defaultSelectedNode = useRef<string | null>(null);
+
+  useEffect(() => {
+    if (!defaultSelectedNode.current) defaultSelectedNode.current = notebookRef.current.selectedNode;
+  }, [notebookRef]);
 
   const onChangeStep = useCallback(
     (step: SetStepType) => {
       console.log("onchange step", step);
       let payload: StepReducerPayload = {};
-      if (step === 42)
+      if (step === 1)
         payload = {
           callback: () => {
             notebookRef.current.selectedNode = "01";
             nodeBookDispatch({ type: "setSelectedNode", payload: "01" });
           },
         };
-      if (step === 43)
+      if (step === 14)
+        payload = {
+          callback: () => {
+            notebookRef.current.selectedNode = "00";
+            nodeBookDispatch({ type: "setSelectedNode", payload: "00" });
+          },
+        };
+      if (step === 15)
+        payload = {
+          callback: () => {
+            notebookRef.current.selectedNode = "01";
+            nodeBookDispatch({ type: "setSelectedNode", payload: "01" });
+          },
+        };
+      if (step === 18)
         payload = {
           callback: () => {
             notebookRef.current.selectedNode = "02";
             nodeBookDispatch({ type: "setSelectedNode", payload: "02" });
           },
         };
-      if (step === 47)
-        payload = {
-          callback: () => {
-            notebookRef.current.selectedNode = "02";
-            nodeBookDispatch({ type: "setSelectedNode", payload: "02" });
-          },
-        };
-      if (step === 48)
+      if (step === 22)
         payload = {
           callback: () => {
             notebookRef.current.selectedNode = "03";
             nodeBookDispatch({ type: "setSelectedNode", payload: "03" });
           },
         };
-      if (step === 53)
+      if (step === 24)
+        payload = {
+          callback: () => {
+            notebookRef.current.selectedNode = "04";
+            nodeBookDispatch({ type: "setSelectedNode", payload: "04" });
+          },
+        };
+      if (step === 27)
         payload = {
           callback: () => {
             notebookRef.current.selectedNode = "03";
             nodeBookDispatch({ type: "setSelectedNode", payload: "03" });
+          },
+        };
+      // ---------- Nodes
+      if (step === 28)
+        payload = {
+          callback: () => {
+            notebookRef.current.selectedNode = "06";
+            nodeBookDispatch({ type: "setSelectedNode", payload: "06" });
           },
         };
 
-      if (step === 54)
+      if (step === 31)
         payload = {
           callback: () => {
-            notebookRef.current.selectedNode = "04";
-            nodeBookDispatch({ type: "setSelectedNode", payload: "04" });
+            notebookRef.current.selectedNode = "01";
+            nodeBookDispatch({ type: "setSelectedNode", payload: "01" });
           },
         };
-      if (step === 57)
+      if (step === 35)
         payload = {
           callback: () => {
-            notebookRef.current.selectedNode = "04";
-            nodeBookDispatch({ type: "setSelectedNode", payload: "04" });
+            notebookRef.current.selectedNode = "01";
+            nodeBookDispatch({ type: "setSelectedNode", payload: "01" });
           },
         };
-      if (step === 58)
-        payload = {
-          callback: () => {
-            notebookRef.current.selectedNode = "05";
-            nodeBookDispatch({ type: "setSelectedNode", payload: "05" });
-          },
-        };
-      if (step === 59)
-        payload = {
-          callback: () => {
-            notebookRef.current.selectedNode = "05";
-            nodeBookDispatch({ type: "setSelectedNode", payload: "05" });
-          },
-        };
-      if (step === 60)
-        payload = {
-          callback: () => {
-            notebookRef.current.selectedNode = "06";
-            nodeBookDispatch({ type: "setSelectedNode", payload: "06" });
-          },
-        };
-      if (step === 62)
-        payload = {
-          callback: () => {
-            notebookRef.current.selectedNode = "06";
-            nodeBookDispatch({ type: "setSelectedNode", payload: "06" });
-          },
-        };
-      if (step === 63)
+      if (step === 42)
         payload = {
           callback: () => {
             notebookRef.current.selectedNode = "07";
             nodeBookDispatch({ type: "setSelectedNode", payload: "07" });
           },
         };
-
+      if (step === 44)
+        payload = {
+          callback: () => {
+            notebookRef.current.selectedNode = "01";
+            nodeBookDispatch({ type: "setSelectedNode", payload: "01" });
+          },
+        };
+      if (step === 53)
+        payload = {
+          callback: () => {
+            notebookRef.current.selectedNode = defaultSelectedNode.current;
+            nodeBookDispatch({ type: "setSelectedNode", payload: "01" });
+          },
+        };
       dispatchNodeTutorial({ type: step, payload });
       isPlayingTheTutorialRef.current = step ? true : false;
     },
@@ -132,38 +144,7 @@ export const useInteractiveTutorial = ({ notebookRef }: useInteractiveTutorialPr
 
   useEventListener({
     stepId: stateNodeTutorial?.childTargetId ?? stateNodeTutorial?.targetId,
-    cb: stateNodeTutorial?.isClickeable
-      ? () => {
-          const stepId = stateNodeTutorial?.childTargetId ?? stateNodeTutorial?.targetId;
-          let payload: StepReducerPayload = {};
-          if (stepId === "42")
-            payload = { callback: () => nodeBookDispatch({ type: "setSelectedNode", payload: "01" }) };
-          if (stepId === "43")
-            payload = { callback: () => nodeBookDispatch({ type: "setSelectedNode", payload: "02" }) };
-          if (stepId === "47")
-            payload = { callback: () => nodeBookDispatch({ type: "setSelectedNode", payload: "02" }) };
-          if (stepId === "48")
-            payload = { callback: () => nodeBookDispatch({ type: "setSelectedNode", payload: "03" }) };
-          if (stepId === "53")
-            payload = { callback: () => nodeBookDispatch({ type: "setSelectedNode", payload: "03" }) };
-          if (stepId === "54")
-            payload = { callback: () => nodeBookDispatch({ type: "setSelectedNode", payload: "04" }) };
-          if (stepId === "57")
-            payload = { callback: () => nodeBookDispatch({ type: "setSelectedNode", payload: "04" }) };
-          if (stepId === "58")
-            payload = { callback: () => nodeBookDispatch({ type: "setSelectedNode", payload: "05" }) };
-          if (stepId === "59")
-            payload = { callback: () => nodeBookDispatch({ type: "setSelectedNode", payload: "05" }) };
-          if (stepId === "60")
-            payload = { callback: () => nodeBookDispatch({ type: "setSelectedNode", payload: "06" }) };
-          if (stepId === "62")
-            payload = { callback: () => nodeBookDispatch({ type: "setSelectedNode", payload: "06" }) };
-          if (stepId === "63")
-            payload = { callback: () => nodeBookDispatch({ type: "setSelectedNode", payload: "07" }) };
-          dispatchNodeTutorial({ type: stateNodeTutorial?.nextStepName ?? null, payload });
-          isPlayingTheTutorialRef.current = Boolean(stateNodeTutorial?.nextStepName);
-        }
-      : undefined,
+    cb: stateNodeTutorial?.isClickeable ? () => onChangeStep(stateNodeTutorial.nextStepName) : undefined,
   });
 
   return { stateNodeTutorial, onChangeStep, isPlayingTheTutorialRef };
