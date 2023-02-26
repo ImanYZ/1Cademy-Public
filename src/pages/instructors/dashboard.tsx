@@ -21,6 +21,7 @@ import {
   ISemesterStudent /* ISemesterStudentStatDay */,
   ISemesterStudentStat,
   ISemesterStudentStatChapter,
+  ISemesterStudentVoteStat,
 } from "src/types/ICourse";
 
 // import { BoxChart } from "@/components/chats/BoxChart";
@@ -42,7 +43,12 @@ import { StackedBarPlotStatsSkeleton } from "../../components/instructors/skelet
 import { StudentDailyPlotStatsSkeleton } from "../../components/instructors/skeletons/StudentDailyPlotStatsSkeleton";
 import { InstructorLayoutPage, InstructorsLayout } from "../../components/layouts/InstructorsLayout";
 import { useWindowSize } from "../../hooks/useWindowSize";
-import { getGeneralStats, getStackedBarStat, mapStudentsStatsToDataByDates } from "../../lib/utils/charts.utils";
+import {
+  calculateVoteStatPoints,
+  getGeneralStats,
+  getStackedBarStat,
+  mapStudentsStatsToDataByDates,
+} from "../../lib/utils/charts.utils";
 export type Chapter = {
   [key: string]: number[];
 };
@@ -321,11 +327,12 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
   useEffect(() => {
     if (!user) return;
     if (!currentSemester || !currentSemester.tagId) return;
+    if (!semesterConfig) return;
 
     setIsLoading(true);
     const semesterRef = collection(db, "semesterStudentVoteStats");
     const q = query(semesterRef, where("tagId", "==", currentSemester.tagId), where("deleted", "==", false));
-    let semesters: any = [];
+    let semesterStudentVoteStats: ISemesterStudentVoteStat[] = [];
     const snapShotFunc = onSnapshot(q, async snapshot => {
       const docChanges = snapshot.docChanges();
       if (!docChanges.length) {
@@ -338,27 +345,31 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
 
       for (let change of docChanges) {
         if (change.type === "added") {
-          semesters.push(change.doc.data() as SemesterStudentVoteStat);
+          const semesterStudentVoteStat = change.doc.data() as ISemesterStudentVoteStat;
+          const points = calculateVoteStatPoints(semesterStudentVoteStat, semesterConfig!);
+          semesterStudentVoteStats.push({ ...semesterStudentVoteStat, ...points });
         } else if (change.type === "modified") {
-          const index = semesters.findIndex(
-            (semester: SemesterStudentVoteStat) => semester.uname === change.doc.data().uname
+          const index = semesterStudentVoteStats.findIndex(
+            (semester: ISemesterStudentVoteStat) => semester.uname === change.doc.data().uname
           );
-          semesters[index] = change.doc.data();
+          semesterStudentVoteStats[index] = change.doc.data() as ISemesterStudentVoteStat;
+          const points = calculateVoteStatPoints(semesterStudentVoteStats[index], semesterConfig!);
+          semesterStudentVoteStats[index] = { ...semesterStudentVoteStats[index], ...points };
         } else if (change.type === "removed") {
-          const index = semesters.findIndex(
-            (semester: SemesterStudentVoteStat) => semester.uname === change.doc.data().uname
+          const index = semesterStudentVoteStats.findIndex(
+            (semester: ISemesterStudentVoteStat) => semester.uname === change.doc.data().uname
           );
-          semesters.splice(index, 1);
+          semesterStudentVoteStats.splice(index, 1);
         }
       }
       // semesterStudentVoteState
-      setSemesterStudentVoteState([...semesters]);
+      setSemesterStudentVoteState([...semesterStudentVoteStats]);
       // setSemesterStats(getSemStat(semester));
       setThereIsData(true);
     });
 
     return () => snapShotFunc();
-  }, [currentSemester, db, user]);
+  }, [semesterConfig, currentSemester, db, user]);
 
   useEffect(() => {
     // update data in buble
@@ -962,8 +973,8 @@ export const getBubbleStats = (
       points: 0,
       studentsList: [],
     };
-    const votes = d.votes;
-    const votePoints = d.votePoints;
+    const votes = d.agreementsWithInst + d.disagreementsWithInst;
+    const votePoints = d.votePoints!;
     const index = findBubble(bubbleStats, votes, votePoints);
 
     const studentObject: ISemesterStudent | undefined = students.find((user: any) => user.uname === d.uname);
@@ -978,10 +989,10 @@ export const getBubbleStats = (
       if (studentObject) bubbleStat.studentsList = [studentObject];
       bubbleStats.push(bubbleStat);
     }
-    if (d.votes > maxVote) maxVote = d.votes;
-    if (d.votePoints > maxVotePoints) maxVotePoints = d.votePoints;
-    if (d.votes < minVote) minVote = d.votes;
-    if (d.votePoints < minVotePoints) minVotePoints = d.votePoints;
+    if (votes > maxVote) maxVote = votes;
+    if (votePoints > maxVotePoints) maxVotePoints = votePoints;
+    if (votes < minVote) minVote = votes;
+    if (votePoints < minVotePoints) minVotePoints = votePoints;
   });
   return {
     bubbleStats,

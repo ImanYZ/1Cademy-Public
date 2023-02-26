@@ -21,10 +21,11 @@ import Typography from "@mui/material/Typography";
 import { collection, getDocs, getFirestore, onSnapshot, query, where } from "firebase/firestore";
 import LinkNext from "next/link";
 import React, { useEffect, useState } from "react";
-import { ISemesterStudentVoteStat } from "src/types/ICourse";
+import { ISemester, ISemesterStudentVoteStat } from "src/types/ICourse";
 import { v4 as uuidv4 } from "uuid";
 
 import { InstructorLayoutPage, InstructorsLayout } from "@/components/layouts/InstructorsLayout";
+import { calculateVoteStatPoints } from "@/lib/utils/charts.utils";
 
 import { postWithToken } from "../../../src/lib/mapApi";
 import CSVBtn from "../../components/CSVBtn";
@@ -33,7 +34,7 @@ import { StudentFilters, StudentsProfile } from "../../components/instructors/Dr
 import OptimizedAvatar from "../../components/OptimizedAvatar";
 
 const filterChoices: any = {
-  "Total Poitns": "totalPoints",
+  "Total Points": "totalPoints",
   Wrongs: "wrongs",
   Corrects: "corrects",
   Awards: "awards",
@@ -68,7 +69,7 @@ const keys = [
   "First Name",
   "Last Name",
   "Email",
-  "Total Poitns",
+  "Total Points",
   "Wrongs",
   "Corrects",
   "Awards",
@@ -86,7 +87,7 @@ const keysColumns: any = {
   "First Name": "firstName",
   "Last Name": "lastName",
   Email: "email",
-  "Total Poitns": "totalPoints",
+  "Total Points": "totalPoints",
   Wrongs: "wrongs",
   Corrects: "corrects",
   Awards: "awards",
@@ -113,6 +114,7 @@ export const Students: InstructorLayoutPage = ({ /* selectedSemester, */ selecte
     }[]
   >([]);
   const [searchValue, setSearchValue] = useState("");
+  const [semesterConfig, setSemesterConfig] = useState<ISemester | null>(null);
   const theme = useTheme();
   const isMovil = useMediaQuery(theme.breakpoints.down("md"));
   const [openProfile, setOpenProfile] = useState(false);
@@ -130,12 +132,35 @@ export const Students: InstructorLayoutPage = ({ /* selectedSemester, */ selecte
   const id = open ? "simple-popover" : undefined;
 
   useEffect(() => {
+    if (!currentSemester || !currentSemester.tagId) return;
+
+    const semesterRef = collection(db, "semesters");
+    const q = query(semesterRef, where("tagId", "==", currentSemester.tagId));
+    const snapShotFunc = onSnapshot(q, async snapshot => {
+      const docChanges = snapshot.docChanges();
+      if (!docChanges.length) {
+        setSemesterConfig(null);
+        return;
+      }
+
+      for (const change of docChanges) {
+        const semesterDoc = change.doc;
+        setSemesterConfig(semesterDoc.data() as ISemester);
+      }
+    });
+    return () => snapShotFunc();
+  }, [currentSemester, db]);
+
+  useEffect(() => {
     if (isMovil) setEditMode(false);
     if (!isMovil) setOpenProfile(false);
   }, [isMovil]);
+
   useEffect(() => {
     if (!db) return;
     if (!currentSemester) return;
+    if (!semesterConfig) return;
+
     const getStats = async () => {
       const semestersStatsRef = collection(db, "semesterStudentVoteStats");
       const statusRef = collection(db, "status");
@@ -148,7 +173,8 @@ export const Students: InstructorLayoutPage = ({ /* selectedSemester, */ selecte
       if (semestersStatsDoc.docs.length > 0) {
         for (let doc of semestersStatsDoc.docs) {
           const data = doc.data() as ISemesterStudentVoteStat;
-          statsData.push(data);
+          const points = calculateVoteStatPoints(data, semesterConfig!);
+          statsData.push({ ...data, ...points });
         }
       }
       if (statusDoc.docs.length > 0) {
@@ -161,11 +187,12 @@ export const Students: InstructorLayoutPage = ({ /* selectedSemester, */ selecte
       setStates(statsData);
     };
     getStats();
-  }, [db, currentSemester]);
+  }, [db, currentSemester, semesterConfig]);
 
   useEffect(() => {
     if (!db) return;
     if (!currentSemester) return;
+    if (!semesterConfig) return;
     if (states.length === 0) return;
     const semestersRef = collection(db, "semesters");
     const q = query(semestersRef, where("tagId", "==", currentSemester.tagId));
@@ -184,7 +211,7 @@ export const Students: InstructorLayoutPage = ({ /* selectedSemester, */ selecte
             if (!stats) continue;
 
             const userStat: any = usersStatus.filter((elm: any) => elm.uname === student.uname)[0];
-            const proposalsPoints = (stats.improvements + stats.newNodes) * (numPoints / numProposalPerDay) || 0;
+            const proposalsPoints = stats.proposalPoints!;
             _rows.push({
               id: uuidv4(),
               username: student.uname,
@@ -194,7 +221,7 @@ export const Students: InstructorLayoutPage = ({ /* selectedSemester, */ selecte
               lastName: student.lName,
               email: student.email,
               totalPoints:
-                proposalsPoints + stats.questionPoints + stats.votePoints + (stats?.instVotes || 0) * onReceiveStar,
+                proposalsPoints + stats.questionPoints! + stats.votePoints! + (stats?.instVotes || 0) * onReceiveStar,
               newProposals: stats?.newNodes || 0,
               editNodeProposals: stats?.improvements || 0,
               proposalsPoints,
@@ -220,7 +247,7 @@ export const Students: InstructorLayoutPage = ({ /* selectedSemester, */ selecte
     return () => {
       semestersSnapshot();
     };
-  }, [db, states, currentSemester, usersStatus]);
+  }, [db, states, currentSemester, usersStatus, semesterConfig]);
 
   const handleOpenCloseFilter = () => setOpenFilter(!openFilter);
   const handleOpenCloseProfile = () => setOpenProfile(!openProfile);
@@ -322,7 +349,7 @@ export const Students: InstructorLayoutPage = ({ /* selectedSemester, */ selecte
 
   const addFilter = () => {
     const newFilter = {
-      title: "Total Poitns",
+      title: "Total Points",
       operation: "<",
       value: 10,
     };

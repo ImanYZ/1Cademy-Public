@@ -154,6 +154,7 @@ export type ISemesterStudentVoteStat = {
   questions: number; //+-
   questionProposals: number; //+-
   questionPoints?: number;
+  proposalPoints?: number;
   votes?: number;
   votePoints?: number; // depreciated
   deleted: boolean;
