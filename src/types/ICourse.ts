@@ -96,17 +96,17 @@ export type ICourse = {
 export type ISemesterStudentStatChapter = {
   node: string; // chapter node id
   title: string; // chapter title
-  proposals: number; // all pending/accepted proposals
-  questions: number; // all accepted questions
-  nodes: number; // pending/accepted proposals of new nodes
-  questionProposals: number; // all question proposals
-  newNodes: number;
-  links: number; // improvements on children and parent links
+  proposals: number; // all pending/accepted proposals //+-
+  questions: number; // all accepted questions //+-
+  nodes: number; // pending/accepted proposals of new nodes //+-
+  questionProposals: number; // all question proposals //+-
+  newNodes: number; //+-
+  links: number; // pending/accepted links //+
   agreementsWithInst: number;
   disagreementsWithInst: number;
 };
 export type ISemesterStudentStatDay = {
-  day: string; // 11-1-2022
+  day: string; // 11-1-2022 -> now changing to YYYY-MM-DD
   chapters: ISemesterStudentStatChapter[];
 };
 export type ISemesterStudentStat = {
@@ -118,26 +118,63 @@ export type ISemesterStudentStat = {
   createdAt: Timestamp;
   updatedAt: Timestamp;
 };
+
+export type ISemesterStudentVoteStatDay = {
+  proposals: number; // pending/accepted proposals //+
+  questions: number; // accepted questions //+
+  questionProposals: number; // pending/accepted questions //+
+  nodes: number; // pending/accepted questions //+
+  links: number; // pending/accepted links //+
+  agreementsWithInst: number; //+
+  disagreementsWithInst: number; //+
+  newNodes: number; // accepted nodes //+
+  improvements: number; // accepted improvement proposals //+
+  upVotes: number; //+
+  downVotes: number; //+
+  instVotes: number;
+  day: string; // YYYY-MM-DD
+};
 // semesterStudentVoteStats
 export type ISemesterStudentVoteStat = {
   documentId?: string;
   tagId: string; // tagId of semester
   uname: string;
-  upVotes: number;
-  downVotes: number;
+  upVotes: number; //+
+  downVotes: number; //+
   instVotes: number;
-  agreementsWithInst: number;
-  disagreementsWithInst: number;
+  agreementsWithInst: number; //+
+  disagreementsWithInst: number; //+
   lastActivity: Timestamp;
-  totalPoints: number;
-  newNodes: number;
-  improvements: number;
-  links: number;
-  questions: number;
-  questionPoints: number;
-  votes: number;
-  votePoints: number;
+  days: ISemesterStudentVoteStatDay[];
+  totalPoints?: number;
+  nodes: number; // pending/accepted nodes //+-
+  newNodes: number; // accepted nodes //+-
+  improvements: number; // accepted improvement proposals //+-
+  links: number; // pending/accepted links //+-
+  questions: number; //+-
+  questionProposals: number; //+-
+  questionPoints?: number;
+  votes?: number;
+  votePoints?: number; // depreciated
   deleted: boolean;
+  createdAt: Timestamp;
+  updatedAt: Timestamp;
+};
+
+export type ISemesterStudentSankeyInteraction = {
+  upVote: number;
+  downVote: number;
+  uname: string;
+};
+
+// semesterStudentSankeys
+export type ISemesterStudentSankey = {
+  //+
+  documentId?: string;
+  deleted: boolean;
+  intractions: ISemesterStudentSankeyInteraction[];
+  tagId: string;
+  uname: string;
   createdAt: Timestamp;
   updatedAt: Timestamp;
 };
