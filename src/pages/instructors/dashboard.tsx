@@ -661,7 +661,7 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
         >
           {isLoading && <StackedBarPlotStatsSkeleton />}
 
-          {!isLoading && semesterConfig?.isQuestionProposalRequired && (
+          {!isLoading && (semesterConfig?.isQuestionProposalRequired || semesterConfig?.isProposalRequired) && (
             <>
               <Box
                 sx={{
