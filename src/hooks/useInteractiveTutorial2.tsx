@@ -74,6 +74,7 @@ export const useInteractiveTutorial = ({ notebookRef }: useInteractiveTutorialPr
             nodeBookDispatch({ type: "setSelectedNode", payload: "03" });
           },
         };
+
       if (step === 20)
         payload = {
           callback: () => {
@@ -81,7 +82,7 @@ export const useInteractiveTutorial = ({ notebookRef }: useInteractiveTutorialPr
             nodeBookDispatch({ type: "setSelectedNode", payload: "04" });
           },
         };
-      if (step === 24)
+      if (step === 23)
         payload = {
           callback: () => {
             notebookRef.current.selectedNode = "01";

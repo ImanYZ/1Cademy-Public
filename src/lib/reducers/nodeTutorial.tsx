@@ -746,12 +746,13 @@ export function nodeTutorialReducer(
         enableChildElements: ["01-close-button"],
         isClickeable: true,
       };
+
     case 25:
       return {
         ...getBaseStepConfig(action.type),
         localSnapshot: [
           { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["00"], nodeChangeType: "added" },
-          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["01"], nodeChangeType: "added" },
+          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["01"], nodeChangeType: "added", open: false },
           {
             ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["02"],
             nodeChangeType: "removed",
@@ -765,11 +766,11 @@ export function nodeTutorialReducer(
             ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["04"],
             nodeChangeType: "removed",
           },
-          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["05"], nodeChangeType: "added" },
-          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["06"], nodeChangeType: "added" },
+          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["05"], nodeChangeType: "removed" },
+          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["06"], nodeChangeType: "removed" },
         ],
-        targetId: "06",
-        childTargetId: "06-node-header",
+        targetId: "01",
+        childTargetId: "01-node-header",
         title: "Nodes - Node Header",
         description: (
           <MarkdownRender
@@ -787,13 +788,13 @@ export function nodeTutorialReducer(
         localSnapshot: [
           { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["00"], nodeChangeType: "added" },
           { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["01"], nodeChangeType: "added", open: false },
-          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["05"] },
-          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["06"] },
+          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["05"], nodeChangeType: "removed" },
+          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["06"], nodeChangeType: "removed" },
         ],
         targetId: "01",
         childTargetId: "01-open-button",
         title: "Nodes - Node Header",
-        description: <MarkdownRender text={"To expand a node to see its content again, click this button.."} />,
+        description: <MarkdownRender text={"To expand a node to see its content again, click this button."} />,
         disabledElements: [...DISABLE_NOTEBOOK_OPTIONS, "00", "01"],
         enableChildElements: ["01-open-button"],
         isClickeable: true,
@@ -805,7 +806,7 @@ export function nodeTutorialReducer(
         ...getBaseStepConfig(action.type),
         localSnapshot: [
           { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["00"], nodeChangeType: "added" },
-          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["01"], nodeChangeType: "added" },
+          { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["01"], nodeChangeType: "added", open: true },
           { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["05"] },
           { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["06"] },
         ],
@@ -814,7 +815,7 @@ export function nodeTutorialReducer(
         title: "Nodes - Node Footer",
         description: <MarkdownRender text={"The node footer provides many tools."} />,
         disabledElements: [...DISABLE_NOTEBOOK_OPTIONS, "00", "01"],
-        tooltipPosition: "bottom",
+        tooltipPosition: "top",
       };
     case 28:
       return {
@@ -888,7 +889,7 @@ export function nodeTutorialReducer(
         disabledElements: [...DISABLE_NOTEBOOK_OPTIONS, "00", "01"],
         tooltipPosition: "bottom",
       };
-    case 31:
+    case 30:
       return {
         ...getBaseStepConfig(action.type),
         localSnapshot: [
@@ -904,7 +905,7 @@ export function nodeTutorialReducer(
         disabledElements: [...DISABLE_NOTEBOOK_OPTIONS, "00", "01"],
         tooltipPosition: "bottom",
       };
-    case 32:
+    case 31:
       return {
         ...getBaseStepConfig(action.type),
         localSnapshot: [
@@ -926,7 +927,7 @@ export function nodeTutorialReducer(
         disabledElements: [...DISABLE_NOTEBOOK_OPTIONS, "00", "01"],
         tooltipPosition: "bottom",
       };
-    case 33:
+    case 32:
       return {
         ...getBaseStepConfig(action.type),
         localSnapshot: [
@@ -948,7 +949,7 @@ export function nodeTutorialReducer(
         disabledElements: [...DISABLE_NOTEBOOK_OPTIONS, "00", "01"],
         tooltipPosition: "bottom",
       };
-    case 3:
+    case 33:
       return {
         ...getBaseStepConfig(action.type),
         localSnapshot: [
@@ -973,7 +974,7 @@ export function nodeTutorialReducer(
         tooltipPosition: "bottom",
         isClickeable: true,
       };
-    case 35:
+    case 34:
       return {
         ...getBaseStepConfig(action.type),
         localSnapshot: [
@@ -1001,7 +1002,7 @@ export function nodeTutorialReducer(
         disabledElements: [...DISABLE_NOTEBOOK_OPTIONS, "00", "01", "07"],
         tooltipPosition: "bottom",
       };
-    case 36:
+    case 35:
       return {
         ...getBaseStepConfig(action.type),
         localSnapshot: [
@@ -1026,7 +1027,7 @@ export function nodeTutorialReducer(
         tooltipPosition: "bottom",
         isClickeable: true,
       };
-    case 37:
+    case 36:
       return {
         ...getBaseStepConfig(action.type),
         localSnapshot: [
@@ -1049,7 +1050,7 @@ export function nodeTutorialReducer(
         disabledElements: [...DISABLE_NOTEBOOK_OPTIONS, "00", "01", "07"],
         tooltipPosition: "top",
       };
-    case 38:
+    case 37:
       return {
         ...getBaseStepConfig(action.type),
         localSnapshot: [
@@ -1078,7 +1079,7 @@ export function nodeTutorialReducer(
         disabledElements: [...DISABLE_NOTEBOOK_OPTIONS, "00", "01"],
       };
 
-    case 39:
+    case 38:
       return {
         ...getBaseStepConfig(action.type),
         localSnapshot: [
@@ -1102,7 +1103,7 @@ export function nodeTutorialReducer(
         ),
         disabledElements: [...DISABLE_NOTEBOOK_OPTIONS, "00", "01"],
       };
-    case 40:
+    case 39:
       return {
         ...getBaseStepConfig(action.type),
         localSnapshot: [
@@ -1127,7 +1128,7 @@ export function nodeTutorialReducer(
         disabledElements: [...DISABLE_NOTEBOOK_OPTIONS, "00", "01"],
       };
 
-    case 41:
+    case 40:
       return {
         ...getBaseStepConfig(action.type),
         localSnapshot: [
@@ -1151,7 +1152,7 @@ export function nodeTutorialReducer(
         ),
         disabledElements: [...DISABLE_NOTEBOOK_OPTIONS, "00", "01"],
       };
-    case 42:
+    case 41:
       return {
         ...getBaseStepConfig(action.type),
         localSnapshot: [
@@ -1175,7 +1176,7 @@ export function nodeTutorialReducer(
         enableChildElements: ["01-node-footer-ellipsis"],
         isClickeable: true,
       };
-    case 43:
+    case 42:
       return {
         ...getBaseStepConfig(action.type),
         localSnapshot: [
@@ -1198,7 +1199,7 @@ export function nodeTutorialReducer(
         disabledElements: [...DISABLE_NOTEBOOK_OPTIONS, "00", "01"],
         enableChildElements: ["01-node-footer-ellipsis"],
       };
-    case 44:
+    case 43:
       return {
         ...getBaseStepConfig(action.type),
         localSnapshot: [
