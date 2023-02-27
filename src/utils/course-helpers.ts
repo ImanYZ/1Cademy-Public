@@ -304,37 +304,6 @@ export const getStatVoteDayIdx = (statDate: string, studentVoteStat: ISemesterSt
   return dayVIdx;
 };
 
-type IUpdateInstStatsForPreviousVotes = {
-  versionId: string;
-  nodeType: string;
-};
-export const updateInstStatsForPreviousVotes = async ({ versionId, nodeType }: IUpdateInstStatsForPreviousVotes) => {
-  const { userVersionsColl } = getTypedCollections({
-    nodeType: nodeType as NodeType,
-  });
-
-  const upVoters: {
-    [voter: string]: Timestamp;
-  } = {};
-  const downVoters: {
-    [voter: string]: Timestamp;
-  } = {};
-
-  const userVersions = await userVersionsColl.where("version", "==", versionId).get();
-  for (const userVersion of userVersions.docs) {
-    const userVersionData = userVersion.data() as IUserNodeVersion;
-    if (userVersionData.correct) {
-      upVoters[userVersionData.user] = userVersionData.updatedAt as unknown as Timestamp;
-      continue;
-    }
-
-    if (userVersionData.wrong) {
-      downVoters[userVersionData.user] = userVersionData.updatedAt as unknown as Timestamp;
-      continue;
-    }
-  }
-};
-
 type IUpdateStatsOnVersionVote = {
   voter: string; // voter student
   proposer: string; // proposer student

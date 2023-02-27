@@ -431,7 +431,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         approved: !!newVersion.accepted,
         isChild: true,
         linksUpdated: true,
-        nodeType: req.body.data.parentType,
+        nodeType: req.body.data.nodeType,
         proposer: newVersion.proposer,
         tagIds: newVersion.tagIds,
       });
