@@ -18,7 +18,7 @@ import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
 import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
-import { collection, getDocs, getFirestore, onSnapshot, query, where } from "firebase/firestore";
+import { collection, getFirestore, onSnapshot, query, where } from "firebase/firestore";
 import LinkNext from "next/link";
 import React, { useEffect, useState } from "react";
 import { ISemester, ISemesterStudentVoteStat } from "src/types/ICourse";
@@ -125,7 +125,7 @@ export const Students: InstructorLayoutPage = ({ /* selectedSemester, */ selecte
   const [savedTableState, setSavedTableState] = useState([]);
   const [states, setStates] = useState<ISemesterStudentVoteStat[]>([]);
   const [anchorEl, setAnchorEl] = useState(null);
-  const [usersStatus, setUsersStatus] = useState([]);
+  const [usersStatus, setUsersStatus] = useState<any>([]);
   const [newStudents, setNewStudents] = useState([]);
   const [disableEdit, setDisableEdit] = useState(false);
   const open = Boolean(anchorEl);
@@ -163,32 +163,61 @@ export const Students: InstructorLayoutPage = ({ /* selectedSemester, */ selecte
     if (!currentSemester) return;
     if (!semesterConfig) return;
 
-    const getStats = async () => {
-      const semestersStatsRef = collection(db, "semesterStudentVoteStats");
-      const statusRef = collection(db, "status");
-      const qeStatus = query(statusRef);
-      const statusDoc = await getDocs(qeStatus);
-      const qe = query(semestersStatsRef, where("tagId", "==", currentSemester.tagId));
-      const semestersStatsDoc = await getDocs(qe);
-      let statsData: ISemesterStudentVoteStat[] = [];
-      let status: any = [];
-      if (semestersStatsDoc.docs.length > 0) {
-        for (let doc of semestersStatsDoc.docs) {
-          const data = doc.data() as ISemesterStudentVoteStat;
+    const statusRef = collection(db, "status");
+    const qeStatus = query(statusRef);
+    let status: any = [];
+    let statsData: ISemesterStudentVoteStat[] = [];
+    const statusSnapShotFunc = onSnapshot(qeStatus, async snapshot => {
+      const docChanges = snapshot.docChanges();
+      if (!docChanges.length) {
+        return;
+      }
+
+      for (const change of docChanges) {
+        const data = change.doc.data();
+        if (change.type === "added") {
+          status.push(data);
+        } else if (change.type === "modified") {
+          const index = status.findIndex((sts: any) => sts.user === data.user);
+          status[index] = data;
+        } else if (change.type === "removed") {
+          const index = status.findIndex((sts: any) => sts.user === data.user);
+          status.splice(index, 1);
+        }
+      }
+      setUsersStatus([...status]);
+    });
+
+    const semestersStatsRef = collection(db, "semesterStudentVoteStats");
+    const qe = query(semestersStatsRef, where("tagId", "==", currentSemester.tagId));
+
+    const snapShotFunc = onSnapshot(qe, async snapshot => {
+      const docChanges = snapshot.docChanges();
+      if (!docChanges.length) {
+        return;
+      }
+      for (const change of docChanges) {
+        const semesterStudentVoteDoc = change.doc;
+        const data = semesterStudentVoteDoc.data() as ISemesterStudentVoteStat;
+        if (change.type === "added") {
           const points = calculateVoteStatPoints(data, semesterConfig!);
           statsData.push({ ...data, ...points });
+        } else if (change.type === "modified") {
+          const index = statsData.findIndex((stsData: any) => stsData.uname === data.uname);
+          const points = calculateVoteStatPoints(data, semesterConfig!);
+          statsData[index] = { ...data, ...points };
+        } else if (change.type === "removed") {
+          const index = statsData.findIndex((stsData: any) => stsData.uname === data.uname);
+          statsData.splice(index, 1);
         }
       }
-      if (statusDoc.docs.length > 0) {
-        for (let doc of statusDoc.docs) {
-          const data = doc.data();
-          status.push(data);
-        }
-      }
-      setUsersStatus(status);
-      setStates(statsData);
+      setStates([...statsData]);
+    });
+
+    return () => {
+      statusSnapShotFunc();
+      snapShotFunc();
     };
-    getStats();
   }, [db, currentSemester, semesterConfig]);
 
   useEffect(() => {
@@ -288,7 +317,7 @@ export const Students: InstructorLayoutPage = ({ /* selectedSemester, */ selecte
             const stats: ISemesterStudentVoteStat | undefined = states.find(elm => elm.uname === student.uname);
             if (!stats) continue;
 
-            const userStat: any = usersStatus.filter((elm: any) => elm.uname === student.uname)[0];
+            const userStat: any = usersStatus.filter((elm: any) => elm.user === student.uname)[0];
 
             let totalPoints: number = 0;
             let proposalsPoints: number = 0;
