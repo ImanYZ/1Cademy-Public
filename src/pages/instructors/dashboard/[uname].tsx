@@ -32,11 +32,17 @@ import {
   StackedBarStats,
   /*  Trends, */
 } from "../../../instructorsTypes";
-import { getGeneralStats, getStackedBarStat, mapStudentsStatsToDataByDates } from "../../../lib/utils/charts.utils";
+import {
+  calculateVoteStatPoints,
+  getGeneralStats,
+  getStackedBarStat,
+  mapStudentsStatsToDataByDates,
+} from "../../../lib/utils/charts.utils";
 import {
   ISemester,
   ISemesterStudent /* ISemesterStudentStatDay */,
   ISemesterStudentStat,
+  ISemesterStudentVoteStat,
 } from "../../../types/ICourse";
 import {
   BoxStudentsStats,
@@ -71,7 +77,7 @@ const StudentDashboard: InstructorLayoutPage = ({ user, currentSemester, setting
   const [semesterStudentStats, setSemesterStudentStats] = useState<GeneralSemesterStudentsStats | null>(null);
 
   const [students, setStudents] = useState<ISemesterStudent[] | null>(null);
-  const [semesterStudentsVoteState, setSemesterStudentVoteState] = useState<SemesterStudentVoteStat[]>([]);
+  const [semesterStudentsVoteStats, setSemesterStudentVoteStats] = useState<SemesterStudentVoteStat[]>([]);
   const [studentVoteStat, setStudentVoteStat] = useState<SemesterStudentVoteStat | null>(null);
 
   const [bubble, setBubble] = useState<BubbleStats[]>([]);
@@ -138,33 +144,44 @@ const StudentDashboard: InstructorLayoutPage = ({ user, currentSemester, setting
   useEffect(() => {
     if (!user) return;
     if (!currentSemester || !currentSemester.tagId) return;
+    if (!semesterConfig) return;
 
     const getSemesterData = async () => {
-      const semesterRef = collection(db, "semesterStudentVoteStats");
-      const q = query(semesterRef, where("tagId", "==", currentSemester.tagId), where("deleted", "==", false));
-      const semesterDoc = await getDocs(q);
-      if (!semesterDoc.docs.length) {
+      const semesterStudentVoteStatCol = collection(db, "semesterStudentVoteStats");
+      const q = query(
+        semesterStudentVoteStatCol,
+        where("tagId", "==", currentSemester.tagId),
+        where("deleted", "==", false)
+      );
+      const semesterStudentVoteStats = await getDocs(q);
+      if (!semesterStudentVoteStats.docs.length) {
         setBubble([]);
         setStackedBar([]);
         setIsLoading(false);
         setThereIsData(false);
-        setSemesterStudentVoteState([]);
+        setSemesterStudentVoteStats([]);
         return;
       }
 
       // semesterStudentVoteState
-      const semester = semesterDoc.docs.map(sem => sem.data() as SemesterStudentVoteStat);
-      setSemesterStudentVoteState(semester);
+      const _semesterStudentVoteStats = semesterStudentVoteStats.docs.map(sem => {
+        const _sem = sem.data() as ISemesterStudentVoteStat;
+        const points = calculateVoteStatPoints(_sem, semesterConfig!);
+        return { ..._sem, ...points };
+      });
+      setSemesterStudentVoteStats(_semesterStudentVoteStats);
       setIsLoading(false);
       setThereIsData(true);
     };
     getSemesterData();
-  }, [currentSemester, db, user]);
+  }, [semesterConfig, currentSemester, db, user]);
 
   useEffect(() => {
     if (!queryUname) return;
     const tagId = currentSemester?.tagId;
     if (!tagId) return;
+    if (!semesterConfig) return;
+
     const getStudentVoteStats = async () => {
       const semesterStudentVoteStatRef = collection(db, "semesterStudentVoteStats");
       const q = query(semesterStudentVoteStatRef, where("uname", "==", queryUname), where("tagId", "==", tagId));
@@ -174,18 +191,23 @@ const StudentDashboard: InstructorLayoutPage = ({ user, currentSemester, setting
         return;
       }
 
-      setStudentVoteStat(semesterStudentVoteStatDoc.docs[0].data() as SemesterStudentVoteStat);
+      const semesterStudentVoteStat = semesterStudentVoteStatDoc.docs[0].data() as ISemesterStudentVoteStat;
+      const points = calculateVoteStatPoints(semesterStudentVoteStat, semesterConfig!);
+      setStudentVoteStat({
+        ...semesterStudentVoteStat,
+        ...points,
+      });
       setThereIsData(true);
     };
     getStudentVoteStats();
-  }, [currentSemester?.tagId, db, queryUname]);
+  }, [semesterConfig, currentSemester?.tagId, db, queryUname]);
 
   useEffect(() => {
     // update data in buble
-    if (!semesterStudentsVoteState.length) return setBubble([]);
+    if (!semesterStudentsVoteStats.length) return setBubble([]);
 
     const { bubbleStats, maxVote, maxVotePoints, minVote, minVotePoints } = getBubbleStats(
-      semesterStudentsVoteState,
+      semesterStudentsVoteStats,
       students
     );
     setBubble(bubbleStats);
@@ -195,14 +217,14 @@ const StudentDashboard: InstructorLayoutPage = ({ user, currentSemester, setting
       minAxisX: minVote,
       minAxisY: minVotePoints,
     });
-  }, [semesterStudentsVoteState, students]);
+  }, [semesterStudentsVoteStats, students]);
 
   useEffect(() => {
     // update data in stackbar
-    if (!semesterStudentsVoteState.length || !students) return setStackedBar([]);
+    if (!semesterStudentsVoteStats.length || !students) return setStackedBar([]);
 
     const { stackedBarStats, studentStackedBarProposalsStats, studentStackedBarQuestionsStats } = getStackedBarStat(
-      semesterStudentsVoteState,
+      semesterStudentsVoteStats,
       students,
       maxProposalsPoints,
       maxQuestionsPoints
@@ -211,19 +233,19 @@ const StudentDashboard: InstructorLayoutPage = ({ user, currentSemester, setting
     setStackedBar(stackedBarStats);
     setProposalsStudents(studentStackedBarProposalsStats);
     setQuestionsStudents(studentStackedBarQuestionsStats);
-  }, [maxProposalsPoints, maxQuestionsPoints, semesterStudentsVoteState, students]);
+  }, [maxProposalsPoints, maxQuestionsPoints, semesterStudentsVoteStats, students]);
 
   // find student subgroup location in bars
   useEffect(() => {
-    if (!semesterStudentsVoteState || !studentVoteStat) return;
+    if (!semesterStudentsVoteStats || !studentVoteStat) return;
 
-    const sortedByProposals = [...semesterStudentsVoteState].sort((x, y) => y.totalPoints - x.totalPoints);
+    const sortedByProposals = [...semesterStudentsVoteStats].sort((x, y) => y.proposalPoints! - x.proposalPoints!);
     const proposals = sortedByProposals.findIndex(s => s.uname === studentVoteStat?.uname);
-    const sortedByQuestions = [...semesterStudentsVoteState].sort((x, y) => y.questionPoints - x.questionPoints);
+    const sortedByQuestions = [...semesterStudentsVoteStats].sort((x, y) => y.questionPoints! - x.questionPoints!);
     const questions = sortedByQuestions.findIndex(s => s.uname === studentVoteStat?.uname);
 
     setStudentLocation({ proposals: proposals, questions: questions });
-  }, [semesterStudentsVoteState, studentVoteStat]);
+  }, [semesterStudentsVoteStats, studentVoteStat]);
 
   //STATIC "MODIFTY"
   useEffect(() => {

@@ -1,4 +1,11 @@
-import { ISemesterStudent, ISemesterStudentStat, ISemesterStudentStatChapter } from "src/types/ICourse";
+import moment from "moment";
+import {
+  ISemester,
+  ISemesterStudent,
+  ISemesterStudentStat,
+  ISemesterStudentStatChapter,
+  ISemesterStudentVoteStat,
+} from "src/types/ICourse";
 
 import {
   GeneralSemesterStudentsStats,
@@ -11,6 +18,41 @@ import {
   StudentStackedBarStats,
   StudentStackedBarStatsObject,
 } from "../../pages/instructors/dashboard";
+
+export const calculateVoteStatPoints = (voteStat: ISemesterStudentVoteStat, semester: ISemester) => {
+  return voteStat.days
+    .map(statDay => {
+      return {
+        questionPoints:
+          moment(semester.questionProposals.startDate).isSameOrAfter(moment()) &&
+          moment(semester.questionProposals.endDate).isSameOrBefore(moment()) &&
+          statDay.questionProposals >= semester.questionProposals.numQuestionsPerDay
+            ? semester.questionProposals.numPoints
+            : 0,
+        proposalPoints:
+          moment(semester.nodeProposals.startDate).isSameOrAfter(moment()) &&
+          moment(semester.nodeProposals.endDate).isSameOrBefore(moment()) &&
+          statDay.proposals >= semester.nodeProposals.numProposalPerDay
+            ? semester.nodeProposals.numPoints
+            : 0,
+        votePoints:
+          statDay.agreementsWithInst * semester.votes.pointIncrementOnAgreement -
+          statDay.disagreementsWithInst * semester.votes.pointDecrementOnAgreement,
+      };
+    })
+    .reduce(
+      (c, item) => ({
+        questionPoints: c.questionPoints + item.questionPoints,
+        proposalPoints: c.proposalPoints + item.proposalPoints,
+        votePoints: c.votePoints + item.votePoints,
+      }),
+      {
+        questionPoints: 0,
+        proposalPoints: 0,
+        votePoints: 0,
+      }
+    );
+};
 
 // TODO: test
 export const getStackedBarStat = (
@@ -46,10 +88,10 @@ export const getStackedBarStat = (
     cgreaterFifty: 0,
     dgreaterHundred: 0,
   };
-  const sortedByProposals = [...data].sort((x, y) => y.totalPoints - x.totalPoints);
-  const sortedByQuestions = [...data].sort((x, y) => y.questionPoints - x.questionPoints);
+  const sortedByProposals = [...data].sort((x, y) => y.proposalPoints! - x.proposalPoints!);
+  const sortedByQuestions = [...data].sort((x, y) => y.questionPoints! - x.questionPoints!);
   sortedByProposals.map(d => {
-    const proposals = d.totalPoints;
+    const proposals = d.proposalPoints!;
     const proposalSubgroup = getStudentSubgroupInBars(proposals, maxProposalsPoints);
     const student = students.find(student => student.uname === d.uname);
     if (!student) return;
@@ -58,7 +100,7 @@ export const getStackedBarStat = (
     studentProposalsRate[proposalSubgroup as keyof StudentStackedBarStats].push(student);
   });
   sortedByQuestions.map(d => {
-    const question = d.questionPoints;
+    const question = d.questionPoints!;
     const questionsSubgroup = getStudentSubgroupInBars(question, maxQuestionsPoints);
     const student = students.find(student => student.uname === d.uname);
     if (!student) return;

@@ -11,6 +11,7 @@ import { IUser } from "src/types/IUser";
 import { initializeNewReputationData } from "src/utils";
 import { searchAvailableUnameByEmail } from "src/utils/instructor";
 import { v4 as uuidv4 } from "uuid";
+import { createOrRestoreStatDocs } from "src/utils/course-helpers";
 
 export type InstructorSemesterSignUpPayload = {
   students: {
@@ -78,31 +79,8 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
             uname: userData.uname,
           });
 
-          // Restoring Deleted documents for stats
-          const semesterStudentStatsDocs = await db
-            .collection("semesterStudentStats")
-            .where("uname", "==", userData.uname)
-            .get();
-          for (const semesterStudentStatsDoc of semesterStudentStatsDocs.docs) {
-            const semesterStudentStatRef = db.collection("semesterStudentStats").doc(semesterStudentStatsDoc.id);
-            const semesterStudentStat = semesterStudentStatsDoc.data() as ISemesterStudentStat;
-            semesterStudentStat.deleted = false;
-            batch.update(semesterStudentStatRef, semesterStudentStat);
-            [batch, writeCounts] = await checkRestartBatchWriteCounts(batch, writeCounts);
-          }
-          const semesterStudentVoteStatsDocs = await db
-            .collection("semesterStudentVoteStats")
-            .where("uname", "==", userData.uname)
-            .get();
-          for (const semesterStudentVoteStatsDoc of semesterStudentVoteStatsDocs.docs) {
-            const semesterStudentVoteStatRef = db
-              .collection("semesterStudentVoteStats")
-              .doc(semesterStudentVoteStatsDoc.id);
-            const semesterStudentVoteStat = semesterStudentVoteStatsDoc.data() as ISemesterStudentStat;
-            semesterStudentVoteStat.deleted = false;
-            batch.update(semesterStudentVoteStatRef, semesterStudentVoteStat);
-            [batch, writeCounts] = await checkRestartBatchWriteCounts(batch, writeCounts);
-          }
+          // Create or Restoring Deleted documents for stats
+          [batch, writeCounts] = await createOrRestoreStatDocs(semesterData.tagId, userData.uname, batch, writeCounts);
           continue;
         }
 

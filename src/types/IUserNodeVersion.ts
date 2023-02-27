@@ -9,6 +9,7 @@ export type IUserNodeVersion = {
   user: string;
   opened?: boolean;
   nodeType?: INodeType;
+  deleted?: boolean;
   createdAt: Date;
   updatedAt?: Date;
 };

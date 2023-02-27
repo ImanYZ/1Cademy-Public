@@ -1,4 +1,4 @@
-import { admin, checkRestartBatchWriteCounts, commitBatch, db } from "../lib/firestoreServer/admin";
+import { admin, checkRestartBatchWriteCounts, commitBatch, db, TWriteOperation } from "../lib/firestoreServer/admin";
 import {
   arrayToChunks,
   convertToTGet,
@@ -30,6 +30,7 @@ import { INodeVersion } from "src/types/INodeVersion";
 import { TypesenseNodeSchema } from "@/lib/schemas/node";
 import { INodeType } from "src/types/INodeType";
 import { IComReputationUpdates } from "./reputations";
+import { IUserNodeVersion } from "src/types/IUserNodeVersion";
 
 export const comPointTypes = [
   "comPoints",
@@ -1563,6 +1564,77 @@ export const signalNodeToTypesense = async ({
   }
 };
 
+type ITransferUserVersionsToNewNode = {
+  versionId: string;
+  versionType: INodeType;
+  childType: INodeType;
+  newVersionId: string;
+  skipUnames: string[];
+  batch: WriteBatch;
+  writeCounts: number;
+  t: FirebaseFirestore.Transaction;
+  tWriteOperations: TWriteOperation[];
+};
+
+// helper to transfer user versions (votes) from old node to newely created node on approval
+export const transferUserVersionsToNewNode = async ({
+  versionId,
+  versionType,
+  childType,
+  newVersionId,
+  skipUnames,
+  batch,
+  writeCounts,
+  t,
+  tWriteOperations,
+}: ITransferUserVersionsToNewNode) => {
+  const { userVersionsColl: oldUserVersionsColl } = getTypedCollections({
+    nodeType: versionType,
+  });
+  const { userVersionsColl } = getTypedCollections({
+    nodeType: childType,
+  });
+
+  const oldUserVersions = await oldUserVersionsColl.where("version", "==", versionId).get();
+  for (const oldUserVersion of oldUserVersions.docs) {
+    const oldUserVersionData = oldUserVersion.data() as IUserNodeVersion;
+    if (skipUnames.includes(oldUserVersionData.user)) {
+      continue;
+    }
+
+    const newUserVersionData = { ...oldUserVersionData };
+    newUserVersionData.version = newVersionId;
+
+    const oldUserVersionRef = db.collection(oldUserVersionsColl.id).doc(oldUserVersion.id);
+    const newUserVersionRef = db.collection(userVersionsColl.id).doc();
+
+    if (t) {
+      tWriteOperations.push({
+        objRef: newUserVersionRef,
+        data: newUserVersionData,
+        operationType: "set",
+      });
+      tWriteOperations.push({
+        objRef: oldUserVersionRef,
+        data: {
+          deleted: true,
+        },
+        operationType: "update",
+      });
+    } else {
+      batch.set(newUserVersionRef, newUserVersionData);
+      [batch, writeCounts] = await checkRestartBatchWriteCounts(batch, writeCounts);
+
+      batch.update(oldUserVersionRef, {
+        deleted: true,
+      });
+      [batch, writeCounts] = await checkRestartBatchWriteCounts(batch, writeCounts);
+    }
+  }
+
+  return [batch, writeCounts];
+};
+
 export const versionCreateUpdate = async ({
   versionNodeId,
   batch,
@@ -2074,6 +2146,18 @@ export const versionCreateUpdate = async ({
             writeCounts,
             t,
             tWriteOperations,
+          });
+
+          [newBatch, writeCounts] = await transferUserVersionsToNewNode({
+            batch: newBatch,
+            writeCounts,
+            childType,
+            newVersionId: versionRef.id,
+            versionId,
+            skipUnames: [voter],
+            t,
+            tWriteOperations,
+            versionType: nodeType,
           });
 
           // userNode for voter
