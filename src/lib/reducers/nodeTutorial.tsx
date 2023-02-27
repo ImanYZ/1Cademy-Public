@@ -98,8 +98,8 @@ export function nodeTutorialReducer(
   if (state && state.childTargetId) {
     const element = document.getElementById(state.childTargetId);
     if (element) {
-      // element.style.outline = "none";
-      element.classList.remove("tutorial-pulse");
+      element.classList.remove("tutorial-target");
+      element.classList.remove("tutorial-target-pulse");
     }
   }
   if (payload.callback) payload?.callback();
