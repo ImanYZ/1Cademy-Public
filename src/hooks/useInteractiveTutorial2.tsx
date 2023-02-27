@@ -82,6 +82,13 @@ export const useInteractiveTutorial = ({ notebookRef }: useInteractiveTutorialPr
             nodeBookDispatch({ type: "setSelectedNode", payload: "04" });
           },
         };
+      if (step === 22)
+        payload = {
+          callback: () => {
+            notebookRef.current.selectedNode = "04";
+            nodeBookDispatch({ type: "setSelectedNode", payload: "04" });
+          },
+        };
       if (step === 23)
         payload = {
           callback: () => {
@@ -92,8 +99,8 @@ export const useInteractiveTutorial = ({ notebookRef }: useInteractiveTutorialPr
       if (step === 27)
         payload = {
           callback: () => {
-            notebookRef.current.selectedNode = "03";
-            nodeBookDispatch({ type: "setSelectedNode", payload: "03" });
+            notebookRef.current.selectedNode = "01";
+            nodeBookDispatch({ type: "setSelectedNode", payload: "01" });
           },
         };
       // ---------- Nodes
@@ -105,14 +112,35 @@ export const useInteractiveTutorial = ({ notebookRef }: useInteractiveTutorialPr
           },
         };
 
-      if (step === 31)
+      if (step === 32)
+        payload = {
+          callback: () => {
+            notebookRef.current.selectedNode = "07";
+            nodeBookDispatch({ type: "setSelectedNode", payload: "07" });
+          },
+        };
+      if (step === 36)
         payload = {
           callback: () => {
             notebookRef.current.selectedNode = "01";
             nodeBookDispatch({ type: "setSelectedNode", payload: "01" });
           },
         };
-      if (step === 35)
+      if (step === 39)
+        payload = {
+          callback: () => {
+            notebookRef.current.selectedNode = "01";
+            nodeBookDispatch({ type: "setSelectedNode", payload: "01" });
+          },
+        };
+      if (step === 40)
+        payload = {
+          callback: () => {
+            notebookRef.current.selectedNode = "00";
+            nodeBookDispatch({ type: "setSelectedNode", payload: "00" });
+          },
+        };
+      if (step === 41)
         payload = {
           callback: () => {
             notebookRef.current.selectedNode = "01";
@@ -122,24 +150,18 @@ export const useInteractiveTutorial = ({ notebookRef }: useInteractiveTutorialPr
       if (step === 42)
         payload = {
           callback: () => {
-            notebookRef.current.selectedNode = "07";
-            nodeBookDispatch({ type: "setSelectedNode", payload: "07" });
+            notebookRef.current.selectedNode = "08";
+            nodeBookDispatch({ type: "setSelectedNode", payload: "08" });
           },
         };
-      if (step === 44)
+      if (step === 43)
         payload = {
           callback: () => {
             notebookRef.current.selectedNode = "01";
             nodeBookDispatch({ type: "setSelectedNode", payload: "01" });
           },
         };
-      if (step === 53)
-        payload = {
-          callback: () => {
-            notebookRef.current.selectedNode = defaultSelectedNode.current;
-            nodeBookDispatch({ type: "setSelectedNode", payload: "01" });
-          },
-        };
+
       dispatchNodeTutorial({ type: step, payload });
       isPlayingTheTutorialRef.current = step ? true : false;
     },
@@ -147,7 +169,7 @@ export const useInteractiveTutorial = ({ notebookRef }: useInteractiveTutorialPr
   );
 
   useEffect(() => {
-    onChangeStep(1); //64
+    onChangeStep(null); //64
   }, [onChangeStep]);
 
   useEventListener({

@@ -33,7 +33,7 @@ type UserStatusIconProps = {
   disabled?: boolean;
 };
 
-const UserStatusIcon = ({ disabled = true, ...props }: UserStatusIconProps) => {
+const UserStatusIcon = ({ disabled = false, ...props }: UserStatusIconProps) => {
   const db = getFirestore();
   const [{ user }] = useAuth();
   const { nodeBookDispatch } = useNodeBook();
