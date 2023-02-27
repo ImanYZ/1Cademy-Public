@@ -20,7 +20,7 @@ import {
 } from "../../pages/instructors/dashboard";
 
 export const calculateVoteStatPoints = (voteStat: ISemesterStudentVoteStat, semester: ISemester) => {
-  return voteStat.days
+  return (voteStat.days || [])
     .map(statDay => {
       return {
         questionPoints:
