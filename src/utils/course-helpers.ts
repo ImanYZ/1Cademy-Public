@@ -281,6 +281,7 @@ export const getStatDayChapterIdx = (dayStat: ISemesterStudentStatDay, chapterId
 };
 
 export const getStatVoteDayIdx = (statDate: string, studentVoteStat: ISemesterStudentVoteStat) => {
+  if (!studentVoteStat.days) studentVoteStat.days = [];
   let dayVIdx = studentVoteStat.days.findIndex(day => day.day === statDate);
   if (dayVIdx === -1) {
     studentVoteStat.days.push({
@@ -434,25 +435,24 @@ export const updateStatsOnVersionVote = async ({
 
           // to update in per chapter stats documents
           const studentStat = studentStats[uname];
+          // if version voter is not student
+          if (!studentStats[uname]) continue;
+
           const studentVoteStat = studentVoteStats[uname];
           studentStatUpdates[uname] = studentStat;
           studentVoteStatUpdates[uname] = studentVoteStat;
 
           const dayIdx = getStatDayIdx(statDate, studentStat, semester);
 
-          const changeInAgreement =
-            userVersionData.correct === true && voterCorrect === 1
-              ? 1
-              : voterCorrect === -1 && userVersionData.correct === true
-              ? -1
-              : 0;
-
-          const changeInDisagreement =
-            userVersionData.wrong === true && voterWrong === 1
-              ? 1
-              : voterWrong === -1 && userVersionData.wrong === true
-              ? -1
-              : 0;
+          let changeInAgreement = 0;
+          let changeInDisagreement = 0;
+          if (userVersionData.correct === true) {
+            changeInAgreement = voterCorrect === 1 ? 1 : voterCorrect === -1 ? -1 : 0;
+            changeInDisagreement = voterWrong === 1 ? 1 : voterWrong === -1 ? -1 : 0;
+          } else if (userVersionData.wrong === true) {
+            changeInAgreement = voterWrong === 1 ? 1 : voterWrong === -1 ? -1 : 0;
+            changeInDisagreement = voterCorrect === 1 ? 1 : voterCorrect === -1 ? -1 : 0;
+          }
 
           for (const chapterId of chapterIds) {
             const dayStat = studentStat.days[dayIdx];
@@ -469,6 +469,9 @@ export const updateStatsOnVersionVote = async ({
           const dayVoteStat = studentVoteStat.days[dayVIdx];
           dayVoteStat.agreementsWithInst += changeInAgreement;
           dayVoteStat.disagreementsWithInst += changeInDisagreement;
+
+          studentVoteStat.agreementsWithInst += changeInAgreement;
+          studentVoteStat.disagreementsWithInst += changeInDisagreement;
         }
       } else if (!isVoterInst && !isProposerInst && instVersion) {
         // updating agreement/disagreement for student who is voting
@@ -554,18 +557,18 @@ export const updateStatsOnVersionVote = async ({
 
       // if both are students then we can consider updating sankey
       if (!isVoterInst && !isProposerInst) {
-        let interactionIdx = studentSankeys[voter].intractions.findIndex(interaction => interaction.uname === voter);
+        let interactionIdx = studentSankeys[voter].intractions.findIndex(interaction => interaction.uname === proposer);
         if (interactionIdx === -1) {
           studentSankeys[voter].intractions.push({
-            uname: voter,
+            uname: proposer,
             upVote: 0,
             downVote: 0,
           });
           interactionIdx = studentSankeys[voter].intractions.length - 1;
         }
 
-        studentSankeys[voter].intractions[interactionIdx].upVote += voterCorrect === 1 ? 1 : 0;
-        studentSankeys[voter].intractions[interactionIdx].downVote += voterWrong === 1 ? 1 : 0;
+        studentSankeys[voter].intractions[interactionIdx].upVote += voterCorrect;
+        studentSankeys[voter].intractions[interactionIdx].downVote += voterWrong;
 
         const semesterStudentSankeyRef = db.collection("semesterStudentSankeys").doc(studentSankeys[voter].documentId!);
 
@@ -805,28 +808,7 @@ export const updateStatsOnProposal = async ({
       }
 
       for (const chapterId of chapterIds) {
-        let dayIdx = studentStat.days.findIndex(day => day.day === statDate);
-        if (dayIdx === -1) {
-          studentStat.days.push({
-            day: statDate,
-            chapters: [],
-          });
-          dayIdx = studentStat.days.length - 1;
-          for (const syllabusItem of semester.syllabus) {
-            studentStat.days[dayIdx].chapters.push({
-              agreementsWithInst: 0,
-              disagreementsWithInst: 0,
-              proposals: 0,
-              questionProposals: 0,
-              nodes: 0,
-              questions: 0,
-              links: 0,
-              newNodes: 0,
-              node: syllabusItem.node!,
-              title: syllabusItem.title,
-            });
-          }
-        }
+        const dayIdx = getStatDayIdx(statDate, studentStat, semester);
 
         const dayStat = studentStat.days[dayIdx];
         const chapterIdx = dayStat.chapters.findIndex(chapter => chapter.node === chapterId);
@@ -853,26 +835,7 @@ export const updateStatsOnProposal = async ({
         }
       }
 
-      let statDayIdx = studentVoteStat.days.findIndex(day => day.day === statDate);
-      if (statDayIdx === -1) {
-        studentVoteStat.days.push({
-          agreementsWithInst: 0,
-          disagreementsWithInst: 0,
-          day: statDate,
-          upVotes: 0,
-          downVotes: 0,
-          instVotes: 0,
-          nodes: 0,
-          proposals: 0,
-          questionProposals: 0,
-          questions: 0,
-          links: 0,
-          newNodes: 0,
-          improvements: 0,
-        });
-        statDayIdx = studentVoteStat.days.length - 1;
-      }
-
+      const statDayIdx = getStatVoteDayIdx(statDate, studentVoteStat);
       const voteStatDay = studentVoteStat.days[statDayIdx];
 
       voteStatDay.proposals += 1;
@@ -904,6 +867,9 @@ export const updateStatsOnProposal = async ({
         voteStatDay.improvements += 1;
         studentVoteStat.improvements += 1;
       }
+
+      voteStatDay.upVotes += 1;
+      studentVoteStat.upVotes += 1;
 
       // updating sankey data
       let interactionIdx = studentSankey.intractions.findIndex(interaction => interaction.uname === proposer);

@@ -4100,6 +4100,7 @@ const Dashboard = ({}: DashboardProps) => {
                 bookmark={bookmark}
               />
               <MemoizedSearcherSidebar
+                notebookRef={notebookRef}
                 openLinkedNode={openLinkedNode}
                 open={openSidebar === "SEARCHER_SIDEBAR"}
                 onClose={() => setOpenSidebar(null)}
@@ -4148,6 +4149,7 @@ const Dashboard = ({}: DashboardProps) => {
               />
 
               <MemoizedUserSettingsSidebar
+                notebookRef={notebookRef}
                 theme={settings.theme}
                 open={openSidebar === "USER_SETTINGS"}
                 onClose={() => setOpenSidebar(null)}

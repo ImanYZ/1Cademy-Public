@@ -8,7 +8,8 @@ import LaunchIcon from "@mui/icons-material/Launch";
 import LocalOfferIcon from "@mui/icons-material/LocalOffer";
 import MenuBookIcon from "@mui/icons-material/MenuBook";
 import { Box, IconButton, Link, Tooltip } from "@mui/material";
-import React, { useCallback, useEffect } from "react";
+import React, { MutableRefObject, useCallback, useEffect } from "react";
+import { TNodeBookState } from "src/nodeBookTypes";
 
 // import { useRecoilState, useRecoilValue, useSetRecoilState } from "recoil";
 import { useNodeBook } from "@/context/NodeBookContext";
@@ -57,6 +58,7 @@ const separateURL = (text: string, url: string): [boolean, any] => {
 };
 
 type LinkingWordsProps = {
+  notebookRef: MutableRefObject<TNodeBookState>;
   identifier: string;
   editable: any;
   isNew: any;
@@ -84,7 +86,7 @@ type LinkingWordsProps = {
   enableChildElements?: string[];
 };
 
-const LinkingWords = ({ disabled, enableChildElements = [], ...props }: LinkingWordsProps) => {
+const LinkingWords = ({ notebookRef, disabled, enableChildElements = [], ...props }: LinkingWordsProps) => {
   const { nodeBookState, nodeBookDispatch } = useNodeBook();
 
   useEffect(() => {
@@ -138,6 +140,9 @@ const LinkingWords = ({ disabled, enableChildElements = [], ...props }: LinkingW
       }
       // setChosenNode(null);
       // setChosenNodeTitle(null);
+      notebookRef.current.choosingNode = { id: props.identifier, type: linkType };
+      notebookRef.current.selectedNode = props.identifier;
+      notebookRef.current.chosenNode = null;
       nodeBookDispatch({ type: "setChoosingNode", payload: { id: props.identifier, type: linkType } });
       nodeBookDispatch({ type: "setSelectedNode", payload: props.identifier });
       nodeBookDispatch({ type: "setChosenNode", payload: null });
