@@ -174,26 +174,7 @@ const Proposal: FC<Props> = ({ semester, inputsHandler, switchHandler, errorStat
                 borderBottom: "orange",
               }}
             />
-            &nbsp;{semester.nodeProposals.numProposalPerDay > 1 ? "proposals/day" : "proposal/day"} in &nbsp;
-            <FilledInput
-              type="number"
-              value={semester.nodeProposals.totalDaysOfCourse}
-              id="filled-adornment-weight"
-              onChange={event => inputsHandler(event, "nodeProposals", "totalDaysOfCourse")}
-              aria-describedby="filled-weight-helper-text"
-              inputProps={{
-                "aria-label": "days",
-                min: 1,
-              }}
-              sx={{
-                paddingBottom: "10px",
-                height: "40px",
-                width: "70px",
-                borderBottom: "orange",
-              }}
-              error={errorState.nodeProposalDay}
-            />
-            &nbsp;{semester.nodeProposals.totalDaysOfCourse > 1 ? "days" : "day"} of the course.
+            &nbsp;{semester.nodeProposals.numProposalPerDay > 1 ? "proposals/day" : "proposal/day"}.
           </Typography>
           <Typography
             mt={3}
@@ -319,26 +300,7 @@ const Proposal: FC<Props> = ({ semester, inputsHandler, switchHandler, errorStat
                 borderBottom: "orange",
               }}
             />
-            &nbsp;{semester.questionProposals.numQuestionsPerDay > 1 ? "questions/day" : "question/day"} in &nbsp;
-            <FilledInput
-              type="number"
-              value={semester.questionProposals.totalDaysOfCourse}
-              id="filled-adornment-weight"
-              onChange={event => inputsHandler(event, "questionProposals", "totalDaysOfCourse")}
-              aria-describedby="filled-weight-helper-text"
-              inputProps={{
-                "aria-label": "days",
-                min: 1,
-              }}
-              sx={{
-                paddingBottom: "10px",
-                height: "40px",
-                width: "70px",
-                borderBottom: "orange",
-              }}
-              error={errorState.questionProposalDay}
-            />
-            &nbsp;{semester.questionProposals.totalDaysOfCourse > 1 ? "days" : "day"} of the course.
+            &nbsp;{semester.questionProposals.numQuestionsPerDay > 1 ? "questions/day" : "question/day"}.
           </Typography>
           <Typography
             mt={3}
