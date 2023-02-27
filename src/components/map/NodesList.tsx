@@ -256,18 +256,17 @@ const NodesList = ({
 };
 
 export const MemoizedNodeList = React.memo(NodesList, (prev, next) => {
-  const checkDisableElements = () => {
-    prev.disabledNodes.forEach((el, idx) => {
-      if (el !== next.disabledNodes[idx]) return false;
-    });
-    return true;
-  };
-
-  const checkEnableChildElements = () => {
-    prev.enableChildElements.forEach((el, idx) => {
-      if (el !== next.enableChildElements[idx]) return false;
-    });
-    return true;
+  const validateTutorialProps = () => {
+    const disableNodesHasEqualsProperties = !prev.disabledNodes.some((el, idx) => el !== next.disabledNodes[idx]);
+    const enableChildeElementsHasEqualsProporties = !prev.enableChildElements.some(
+      (el, idx) => el === next.enableChildElements[idx]
+    );
+    return (
+      prev.disabledNodes.length === next.disabledNodes.length &&
+      prev.enableChildElements.length === next.enableChildElements.length &&
+      disableNodesHasEqualsProperties &&
+      enableChildeElementsHasEqualsProporties
+    );
   };
 
   return (
@@ -299,9 +298,6 @@ export const MemoizedNodeList = React.memo(NodesList, (prev, next) => {
     prev.closeSideBar === next.closeSideBar &&
     prev.reloadPermanentGrpah === next.reloadPermanentGrpah &&
     prev.openSidebar === prev.openSidebar &&
-    prev.disabledNodes.length === next.disabledNodes.length &&
-    prev.enableChildElements.length === next.enableChildElements.length &&
-    checkDisableElements() &&
-    checkEnableChildElements()
+    validateTutorialProps()
   );
 });
