@@ -112,6 +112,7 @@ const layoutHandler = (
   // update with setDagNode
   // calculate map
   // console.log(oldNodes, JSON.parse(JSON.stringify(oldNodes)));
+  console.log("worker: iterate node to calculate Dimensions");
   Object.keys(oldNodes).map(n => {
     // const nodeN = dag1.node(n);
     const nodeN = g.node(n);
@@ -150,6 +151,7 @@ const layoutHandler = (
   // debugger;
   // console.log("[Worker]:g.edges()", g.edges());
 
+  console.log("worker: iterate edges to update olEdges");
   g.edges().map((e: any) => {
     // const fromNode = g.node(e.v) as any;
     // const toNode = g.node(e.w) as any;
