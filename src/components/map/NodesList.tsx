@@ -53,7 +53,7 @@ type NodeListProps = {
   setOperation: (operation: string) => void;
   openUserInfoSidebar: (uname: string, imageUrl: string, fullName: string, chooseUname: string) => void;
   disabledNodes: string[];
-  enableChildElements?: string[];
+  enableChildElements: string[];
 };
 
 const NodesList = ({
@@ -256,6 +256,20 @@ const NodesList = ({
 };
 
 export const MemoizedNodeList = React.memo(NodesList, (prev, next) => {
+  const checkDisableElements = () => {
+    prev.disabledNodes.forEach((el, idx) => {
+      if (el !== next.disabledNodes[idx]) return false;
+    });
+    return true;
+  };
+
+  const checkEnableChildElements = () => {
+    prev.enableChildElements.forEach((el, idx) => {
+      if (el !== next.enableChildElements[idx]) return false;
+    });
+    return true;
+  };
+
   return (
     compareNodes(prev.nodes, next.nodes) &&
     prev.bookmark === next.bookmark &&
@@ -286,9 +300,8 @@ export const MemoizedNodeList = React.memo(NodesList, (prev, next) => {
     prev.reloadPermanentGrpah === next.reloadPermanentGrpah &&
     prev.openSidebar === prev.openSidebar &&
     prev.disabledNodes.length === next.disabledNodes.length &&
-    prev.enableChildElements?.length === next.enableChildElements?.length &&
-    prev.disabledNodes.forEach((el, idx) => {
-      return el !== next.disabledNodes[idx] ? true : false;
-    })
+    prev.enableChildElements.length === next.enableChildElements.length &&
+    checkDisableElements() &&
+    checkEnableChildElements()
   );
 });
