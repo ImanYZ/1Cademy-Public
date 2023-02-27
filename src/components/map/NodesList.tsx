@@ -53,7 +53,7 @@ type NodeListProps = {
   setOperation: (operation: string) => void;
   openUserInfoSidebar: (uname: string, imageUrl: string, fullName: string, chooseUname: string) => void;
   disabledNodes: string[];
-  enableChildElements?: string[];
+  enableChildElements: string[];
 };
 
 const NodesList = ({
@@ -256,6 +256,20 @@ const NodesList = ({
 };
 
 export const MemoizedNodeList = React.memo(NodesList, (prev, next) => {
+  const validateTutorialProps = () => {
+    // we use some to go out of the iteration the first time we can
+    const disableNodesHasEqualsProperties = !prev.disabledNodes.some((el, idx) => el !== next.disabledNodes[idx]);
+    const enableChildeElementsHasEqualsProperties = !prev.enableChildElements.some(
+      (el, idx) => el !== next.enableChildElements[idx]
+    );
+    return (
+      prev.disabledNodes.length === next.disabledNodes.length &&
+      prev.enableChildElements.length === next.enableChildElements.length &&
+      disableNodesHasEqualsProperties &&
+      enableChildeElementsHasEqualsProperties
+    );
+  };
+
   return (
     compareNodes(prev.nodes, next.nodes) &&
     prev.bookmark === next.bookmark &&
@@ -285,7 +299,6 @@ export const MemoizedNodeList = React.memo(NodesList, (prev, next) => {
     prev.closeSideBar === next.closeSideBar &&
     prev.reloadPermanentGrpah === next.reloadPermanentGrpah &&
     prev.openSidebar === prev.openSidebar &&
-    prev.disabledNodes === next.disabledNodes &&
-    prev.enableChildElements === next.enableChildElements
+    validateTutorialProps()
   );
 });

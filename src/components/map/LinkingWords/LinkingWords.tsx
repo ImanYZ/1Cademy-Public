@@ -267,6 +267,7 @@ const LinkingWords = ({ disabled, enableChildElements = [], ...props }: LinkingW
                   >
                     <Box sx={{ gridColumn: urlRefLabel[0] || props.editable ? "1 / 2" : "1 / span 2" }}>
                       <LinkingButton
+                        id={`${props.identifier}-reference-button-${idx}`}
                         key={props.identifier + "LinkTo" + reference.node}
                         onClick={props.openLinkedNode}
                         // nodeID={props.identifier}
@@ -371,6 +372,7 @@ const LinkingWords = ({ disabled, enableChildElements = [], ...props }: LinkingW
                     key={props.identifier + "LinkTo" + tag.node + "DIV"}
                   >
                     <LinkingButton
+                      id={`${props.identifier}-tag-button-${idx}`}
                       key={props.identifier + "LinkTo" + tag.node}
                       onClick={props.openLinkedNode}
                       linkedNodeID={tag.node}

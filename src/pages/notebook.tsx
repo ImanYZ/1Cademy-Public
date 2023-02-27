@@ -471,8 +471,7 @@ const Dashboard = ({}: DashboardProps) => {
 
       if (!targetElement) return;
 
-      // targetElement.style.outline = "2px solid #FF6D00";
-      targetElement.classList.add("tutorial-pulse");
+      targetElement.classList.add(stateNodeTutorial.isClickeable ? "tutorial-target-pulse" : "tutorial-target");
 
       const { width, height, top, left } = targetElement.getBoundingClientRect();
 
@@ -489,8 +488,8 @@ const Dashboard = ({}: DashboardProps) => {
       if (stateNodeTutorial.childTargetId) {
         const targetElement = document.getElementById(stateNodeTutorial.childTargetId);
         if (!targetElement) return;
-        // targetElement.style.outline = "2px solid #FF6D00";
-        targetElement.classList.add("tutorial-pulse");
+
+        targetElement.classList.add(stateNodeTutorial.isClickeable ? "tutorial-target-pulse" : "tutorial-target");
 
         const { offsetTop, offsetLeft } = targetElement;
         const { height: childrenHeight, width: childrenWidth } = targetElement.getBoundingClientRect();
@@ -1884,6 +1883,8 @@ const Dashboard = ({}: DashboardProps) => {
   const hideOffsprings = useMemoizedCallback(
     nodeId => {
       if (notebookRef.current.choosingNode || !user) return;
+
+      if (isPlayingTheTutorialRef.current) return;
 
       setGraph(graph => {
         (async () => {
@@ -4601,7 +4602,7 @@ const Dashboard = ({}: DashboardProps) => {
                   setOperation={setOperation}
                   openUserInfoSidebar={openUserInfoSidebar}
                   disabledNodes={stateNodeTutorial?.disabledElements ?? []}
-                  enableChildElements={stateNodeTutorial?.enableChildElements}
+                  enableChildElements={stateNodeTutorial?.enableChildElements ?? []}
                 />
               </MapInteractionCSS>
               {showRegion && (

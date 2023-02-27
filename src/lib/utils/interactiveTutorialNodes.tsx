@@ -235,6 +235,11 @@ export const INTERACTIVE_TUTORIAL_NOTEBOOK_NODES: FullNodesData = {
     ],
     corrects: 1,
     nodeVideo: "https://youtu.be/exLS4UadfFU",
+    referenceIds: ["08"],
+    referenceLabels: ["Pages 1-2"],
+    references: ["Improving Collaborative Notetaking Through Finding and Visualizing Prerequisite Knowledge Links"],
+    tagIds: ["00"],
+    tags: ["1Cademy"],
   },
   "05": {
     ...BASE_NODE,
@@ -284,6 +289,18 @@ export const INTERACTIVE_TUTORIAL_NOTEBOOK_NODES: FullNodesData = {
     title: "This node will be removed with a downvote",
     content:
       "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Suspendisse ultricies, arcu ut sodales varius, tortor erat gravida lacus, eget maximus arcu nisi nec elit. In eu scelerisque nunc, id condimentum nisl. Aliquam rhoncus tortor a ultricies consequat. ",
+    children: [],
+    parents: [],
+    wrongs: 0,
+    corrects: 1,
+  },
+  "08": {
+    ...BASE_NODE,
+    node: "08",
+    title: "Improving Collaborative Notetaking Through Finding and Visualizing Prerequisite Knowledge Links",
+    content:
+      "https://www.dropbox.com/s/4u9y20juageywqd/Improving%20Collaborative%20Notetaking%20Through%20Finding.pdf?dl=0",
+    nodeType: "Reference",
     children: [],
     parents: [],
     wrongs: 0,
