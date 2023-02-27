@@ -381,6 +381,7 @@ const Node = ({
 
   const nodeClickHandler = useCallback(
     (event: any) => {
+      console.log(notebookRef.current.choosingNode, "notebookRef.current.choosingNode");
       if (notebookRef.current.choosingNode) {
         // The first Nodes exist, Now is clicking the Chosen Node
         notebookRef.current.chosenNode = {
@@ -1040,6 +1041,7 @@ const Node = ({
           {(openPart === "LinkingWords" || openPart === "Tags" || openPart === "References") && (
             <LinkingWords
               identifier={identifier}
+              notebookRef={notebookRef}
               editable={editable}
               isNew={isNew}
               openPart={openPart}
