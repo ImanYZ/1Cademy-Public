@@ -147,7 +147,7 @@ type BubbleStatsData = {
 export type TrendStats = {
   childProposals: Trends[];
   editProposals: Trends[];
-  links: Trends[];
+  proposedLinks: Trends[];
   nodes: Trends[];
   votes: Trends[];
   questions: Trends[];
@@ -230,7 +230,7 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
   const [trendStats, setTrendStats] = useState<TrendStats>({
     childProposals: [],
     editProposals: [],
-    links: [],
+    proposedLinks: [],
     nodes: [],
     votes: [],
     questions: [],
@@ -406,8 +406,6 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
   //STATIC "MODIFTY"
   useEffect(() => {
     if (!currentSemester || !currentSemester.tagId) return;
-    setIsLoading(true);
-
     const semesterRef = collection(db, "semesters");
     const q = query(semesterRef, where("tagId", "==", currentSemester.tagId));
     const snapShotFunc = onSnapshot(q, async snapshot => {
@@ -440,15 +438,20 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
 
   useEffect(() => {
     if (!currentSemester || !currentSemester.tagId || !semesterConfig) return;
-
-    setIsLoading(true);
     const userDailyStatRef = collection(db, "semesterStudentStats");
     const q = query(userDailyStatRef, where("tagId", "==", currentSemester.tagId), where("deleted", "==", false));
     let userDailyStatsIncomplete: SemesterStudentStat[] = [];
     const snapShotFunc = onSnapshot(q, async snapshot => {
       const docChanges = snapshot.docChanges();
       if (!docChanges.length) {
-        setTrendStats({ childProposals: [], editProposals: [], links: [], nodes: [], votes: [], questions: [] });
+        setTrendStats({
+          childProposals: [],
+          editProposals: [],
+          proposedLinks: [],
+          nodes: [],
+          votes: [],
+          questions: [],
+        });
         setBoxStats({
           proposalsPoints: { data: {}, min: 0, max: 1000 },
           questionsPoints: { data: {}, min: 0, max: 1000 },
@@ -491,7 +494,7 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
           return {
             childProposals: [...a.childProposals, { date: new Date(c.date), num: c.value.childProposals }],
             editProposals: [...a.editProposals, { date: new Date(c.date), num: c.value.editProposals }],
-            links: [...a.links, { date: new Date(c.date), num: c.value.links }],
+            proposedLinks: [...a.proposedLinks, { date: new Date(c.date), num: c.value.links }],
             nodes: [...a.nodes, { date: new Date(c.date), num: c.value.nodes }],
             questions: [...a.questions, { date: new Date(c.date), num: c.value.questions }],
             votes: [...a.votes, { date: new Date(c.date), num: c.value.votes }],
@@ -500,7 +503,7 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
         {
           childProposals: [],
           editProposals: [],
-          links: [],
+          proposedLinks: [],
           nodes: [],
           questions: [],
           votes: [],
@@ -551,12 +554,12 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
       });
 
       setTrendStats({
-        childProposals: makeTrendData(userDailyStats, "newNodes"),
-        editProposals: makeTrendData(userDailyStats, "editProposals"),
-        links: makeTrendData(userDailyStats, "links"),
+        childProposals: semesterConfig?.isProposalRequired ? makeTrendData(userDailyStats, "newNodes") : [],
+        editProposals: semesterConfig?.isProposalRequired ? makeTrendData(userDailyStats, "editProposals") : [],
+        proposedLinks: makeTrendData(userDailyStats, "links"),
         nodes: makeTrendData(userDailyStats, "proposals"),
-        votes: makeTrendData(userDailyStats, "votes"),
-        questions: makeTrendData(userDailyStats, "questions"),
+        votes: semesterConfig?.isCastingVotesRequired ? makeTrendData(userDailyStats, "votes") : [],
+        questions: semesterConfig?.isQuestionProposalRequired ? makeTrendData(userDailyStats, "questions") : [],
       });
       setThereIsData(true);
 
@@ -645,6 +648,7 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
             />
           )}
         </Paper>
+
         <Paper
           ref={stackBarWrapperRef}
           sx={{
@@ -657,7 +661,7 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
         >
           {isLoading && <StackedBarPlotStatsSkeleton />}
 
-          {!isLoading && (
+          {!isLoading && semesterConfig?.isQuestionProposalRequired && (
             <>
               <Box
                 sx={{
@@ -689,11 +693,14 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
                   maxAxisY={studentsCounter}
                   theme={settings.theme}
                   mobile={isMovil}
+                  isQuestionRequired={semesterConfig?.isQuestionProposalRequired}
+                  isProposalRequired={semesterConfig?.isProposalRequired}
                 />
               </Box>
             </>
           )}
         </Paper>
+
         <Paper
           // ref={bubbleRef}
           // className="test"
@@ -703,7 +710,7 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
           }}
         >
           {isLoading && <BubblePlotStatsSkeleton />}
-          {!isLoading && (
+          {!isLoading && semesterConfig?.isCastingVotesRequired && (
             <>
               <Box
                 sx={{
@@ -774,7 +781,13 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
             {isLoading && <BoxPlotStatsSkeleton width={boxPlotWidth} boxes={isLgDesktop ? 3 : isTablet ? 3 : 1} />}
             {!isLoading && (
               <>
-                <Box sx={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+                <Box
+                  sx={{
+                    display: semesterConfig?.isProposalRequired ? "flex" : "none",
+                    flexDirection: "column",
+                    gap: "12px",
+                  }}
+                >
                   <Box sx={{ display: "grid", gridTemplateColumns: "1fr 1fr" }}>
                     <Typography sx={{ fontSize: "16px", justifySelf: "center", alignSelf: "flex-end" }}>
                       Chapters{" "}
@@ -797,7 +810,13 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
                   />
                   {isMovil && <BoxLegend />}
                 </Box>
-                <Box sx={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+                <Box
+                  sx={{
+                    display: semesterConfig?.isQuestionProposalRequired ? "flex" : "none",
+                    flexDirection: "column",
+                    gap: "12px",
+                  }}
+                >
                   <Box sx={{ display: "flex", justifyContent: "space-around" }}>
                     {isMovil && (
                       <Typography sx={{ fontSize: "16px", justifySelf: "center", alignSelf: "flex-end" }}>
@@ -821,7 +840,13 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
                   />
                   {isMovil && <BoxLegend />}
                 </Box>
-                <Box sx={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+                <Box
+                  sx={{
+                    display: semesterConfig?.isCastingVotesRequired ? "flex" : "none",
+                    flexDirection: "column",
+                    gap: "12px",
+                  }}
+                >
                   <Box sx={{ display: "flex", justifyContent: "space-around" }}>
                     {isMovil && (
                       <Typography sx={{ fontSize: "16px", justifySelf: "center", alignSelf: "flex-end" }}>
@@ -904,7 +929,7 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
                 key={i}
                 sx={{
                   p: isMovil ? "10px" : "16px",
-                  display: "flex",
+                  display: trendStats[trendStat as keyof TrendStats].length > 0 ? "flex" : "none",
                   alignItems: "center",
                   justifyContent: "center",
                   backgroundColor: theme => (theme.palette.mode === "light" ? "#FFFFFF" : undefined),

@@ -795,25 +795,45 @@ p {
 }
 .tooltip-top::after {
   border-bottom-width: 0px;
-  border-top-color: #ff6d00;
+  border-top-color: inherit;
   bottom: -10px;
   left: calc(50% - 10px);
 }
 .tooltip-bottom::after {
   border-top-width: 0px;
-  border-bottom-color: #ff6d00;
+  border-bottom-color: inherit;
   top: -10px;
   left: calc(50% - 10px);
 }
 .tooltip-right::after {
   border-left-width: 0px;
-  border-right-color: #ff6d00;
+  border-right-color: inherit;
   left: -10px;
   top: calc(50% - 10px);
 }
 .tooltip-left::after {
   border-right-width: 0px;
-  border-left-color: #ff6d00;
+  border-left-color: inherit;
   right: -10px;
   top: calc(50% - 10px);
+}
+
+.tutorial-pulse {
+  box-shadow: 0 0 0 0 #ff6d00;
+  animation: tutorial-pulse 2s infinite;
+  outline: 1px solid #ff6d00 !important;
+}
+
+@keyframes tutorial-pulse {
+  0% {
+    box-shadow: 0 0 0 0 #ff6d00;
+  }
+
+  70% {
+    box-shadow: 0 0 0 10px rgba(255, 121, 63, 0);
+  }
+
+  100% {
+    box-shadow: 0 0 0 0 rgba(255, 121, 63, 0);
+  }
 }

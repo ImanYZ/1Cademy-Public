@@ -74,6 +74,8 @@ export const useWorkerQueue = ({
       worker.onmessage = e => {
         const { oldMapWidth, oldMapHeight, oldNodes, oldEdges, graph, oldClusterNodes } = e.data;
 
+        console.log("WORKER RESULT", { oldNodes, oldEdges });
+
         const gObject = dagreUtils.mapGraphToObject(g.current);
         const graphObject: GraphObject = graph;
 
@@ -130,6 +132,7 @@ export const useWorkerQueue = ({
 
             edgesCopy[edgeId] = { ...resultEdge };
           });
+          console.log("WORKER Result Merged", { nodes: nodesCopy, edges: edgesCopy });
           return { nodes: nodesCopy, edges: edgesCopy };
         });
 
@@ -152,11 +155,12 @@ export const useWorkerQueue = ({
     const individualNodeChanges: FullNodeData[] = queue
       .map(cur => {
         if (!cur) return null;
+        if (!graph.nodes[cur.id]) return null; // when graph was modified and queue has old values
         return { ...graph.nodes[cur.id], height: cur.height };
       })
       .flatMap(cur => cur || []);
 
-    console.log({ nodes: graph.nodes });
+    console.log({ nodes: graph.nodes, g: g.current, individualNodeChanges });
     const nodesToRecalculate = setDagNodes(g.current, individualNodeChanges, graph.nodes, allTags, withClusters);
 
     console.log({ nodes: nodesToRecalculate, edges: graph.edges, g: g.current });

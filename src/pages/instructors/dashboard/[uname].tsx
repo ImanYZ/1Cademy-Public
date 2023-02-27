@@ -96,7 +96,7 @@ const StudentDashboard: InstructorLayoutPage = ({ user, currentSemester, setting
   const [trendStats, setTrendStats] = useState<TrendStats>({
     childProposals: [],
     editProposals: [],
-    links: [],
+    proposedLinks: [],
     nodes: [],
     votes: [],
     questions: [],
@@ -283,7 +283,14 @@ const StudentDashboard: InstructorLayoutPage = ({ user, currentSemester, setting
       const userDailyStatDoc = await getDocs(q);
 
       if (!userDailyStatDoc.docs.length) {
-        setTrendStats({ childProposals: [], editProposals: [], links: [], nodes: [], votes: [], questions: [] });
+        setTrendStats({
+          childProposals: [],
+          editProposals: [],
+          proposedLinks: [],
+          nodes: [],
+          votes: [],
+          questions: [],
+        });
         setThereIsData(false);
         return;
       }
@@ -323,7 +330,7 @@ const StudentDashboard: InstructorLayoutPage = ({ user, currentSemester, setting
       setTrendStats({
         childProposals: makeTrendData(userDailyStats, "newNodes"),
         editProposals: makeTrendData(userDailyStats, "editProposals"),
-        links: makeTrendData(userDailyStats, "links"),
+        proposedLinks: makeTrendData(userDailyStats, "links"),
         nodes: makeTrendData(userDailyStats, "proposals"),
         votes: makeTrendData(userDailyStats, "votes"),
         questions: makeTrendData(userDailyStats, "questions"),

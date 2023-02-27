@@ -80,21 +80,12 @@ type LinkingWordsProps = {
   isLoading: boolean;
   onResetButton: (newState: boolean) => void;
   setOperation: (operation: string) => void;
+  disabled?: boolean;
+  enableChildElements?: string[];
 };
 
-const LinkingWords = (props: LinkingWordsProps) => {
-  // const selectedNode = useRecoilValue(selectedNodeState);
-  // const setChoosingNode = useSetRecoilState(choosingNodeState);
-  // const setChoosingType = useSetRecoilState(choosingTypeState);
-  // const [chosenNode, setChosenNode] = useRecoilState(chosenNodeState);
-  // const setChosenNodeTitle = useSetRecoilState(chosenNodeTitleState);
-
+const LinkingWords = ({ disabled, enableChildElements = [], ...props }: LinkingWordsProps) => {
   const { nodeBookState, nodeBookDispatch } = useNodeBook();
-  // const selectedNode = useRecoilValue(selectedNodeState);
-  // const setChoosingNode = useSetRecoilState(choosingNodeState);
-  // const setChoosingType = useSetRecoilState(choosingTypeState);
-  // const [chosenNode, setChosenNode] = useRecoilState(chosenNodeState);
-  // const setChosenNodeTitle = useSetRecoilState(chosenNodeTitleState);
 
   useEffect(() => {
     props.chosenNodeChanged(props.identifier);
@@ -169,7 +160,7 @@ const LinkingWords = (props: LinkingWordsProps) => {
   );
 
   return props.openPart === "LinkingWords" || props.openPart === "Tags" || props.openPart === "References" ? (
-    <>
+    <Box id={`${props.identifier}-linking-words`}>
       <Box
         sx={{
           mx: "10px",
@@ -210,6 +201,7 @@ const LinkingWords = (props: LinkingWordsProps) => {
                       linkedNodeType="parent"
                       nodeType={parent.type}
                       visible={parent.visible}
+                      disabled={disabled && !enableChildElements.includes(`${props.identifier}-parent-button-${idx}`)}
                     />
                     {props.editable && props.parents.length > 1 && (
                       <Tooltip
@@ -283,6 +275,9 @@ const LinkingWords = (props: LinkingWordsProps) => {
                         linkedNodeTitle={refTitle}
                         linkedNodeType="reference"
                         iClassName="menu_book"
+                        disabled={
+                          disabled && !enableChildElements.includes(`${props.identifier}-reference-button-${idx}`)
+                        }
                       />
                     </Box>
                     {props.editable && (
@@ -382,6 +377,7 @@ const LinkingWords = (props: LinkingWordsProps) => {
                       linkedNodeTitle={tag.title}
                       linkedNodeType="tag"
                       iClassName="local_offer"
+                      disabled={disabled && !enableChildElements.includes(`${props.identifier}-tag-button-${idx}`)}
                     />
                     {props.editable && (
                       <Tooltip
@@ -432,6 +428,7 @@ const LinkingWords = (props: LinkingWordsProps) => {
                       linkedNodeTitle={tag.title}
                       linkedNodeType="tag"
                       iClassName="local_offer"
+                      disabled={disabled && !enableChildElements.includes(`${props.identifier}-tag-button-${idx}`)}
                     />
                     {props.editable && (
                       <div className="LinkDeleteButton">
@@ -472,6 +469,7 @@ const LinkingWords = (props: LinkingWordsProps) => {
                       linkedNodeType="child"
                       nodeType={child.type}
                       visible={child.visible}
+                      disabled={disabled && !enableChildElements.includes(`${props.identifier}-child-button-${idx}`)}
                     />
                     {props.editable && (
                       <Tooltip
@@ -510,6 +508,7 @@ const LinkingWords = (props: LinkingWordsProps) => {
                 linkedNodeType="children"
                 nodeType={"Relation"}
                 visible={false}
+                disabled={disabled}
               />
               {props.editable && !props.isNew && nodeBookState.selectedNode === props.identifier && (
                 <MemoizedMetaButton
@@ -528,7 +527,7 @@ const LinkingWords = (props: LinkingWordsProps) => {
           )}
         </Box>
       </Box>
-    </>
+    </Box>
   ) : null;
 };
 
