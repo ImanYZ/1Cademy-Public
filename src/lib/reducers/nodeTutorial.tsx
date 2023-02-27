@@ -19,7 +19,7 @@ import { INTERACTIVE_TUTORIAL_NOTEBOOK_NODES } from "../utils/interactiveTutoria
 export const INITIAL_NODE_TUTORIAL_STATE: TutorialState = null;
 
 dayjs.extend(relativeTime);
-const STEPS_LENGHT = 53; // 65
+const STEPS_LENGHT = 43; // 65
 
 const DISABLE_NOTEBOOK_OPTIONS = [
   "TOOLBAR",
@@ -887,7 +887,6 @@ export function nodeTutorialReducer(
           </>
         ),
         disabledElements: [...DISABLE_NOTEBOOK_OPTIONS, "00", "01"],
-        tooltipPosition: "bottom",
       };
     case 30:
       return {
@@ -903,7 +902,6 @@ export function nodeTutorialReducer(
         title: "Nodes - Node Footer",
         description: <MarkdownRender text={"The third icon indicates how long ago the node was updated."} />,
         disabledElements: [...DISABLE_NOTEBOOK_OPTIONS, "00", "01"],
-        tooltipPosition: "bottom",
       };
     case 31:
       return {
@@ -925,7 +923,6 @@ export function nodeTutorialReducer(
           />
         ),
         disabledElements: [...DISABLE_NOTEBOOK_OPTIONS, "00", "01"],
-        tooltipPosition: "bottom",
       };
     case 32:
       return {
@@ -947,7 +944,6 @@ export function nodeTutorialReducer(
           />
         ),
         disabledElements: [...DISABLE_NOTEBOOK_OPTIONS, "00", "01"],
-        tooltipPosition: "bottom",
       };
     case 33:
       return {
@@ -971,7 +967,6 @@ export function nodeTutorialReducer(
         ),
         disabledElements: [...DISABLE_NOTEBOOK_OPTIONS, "00", "01"],
         enableChildElements: ["01-node-footer-upvotes"],
-        tooltipPosition: "bottom",
         isClickeable: true,
       };
     case 34:
@@ -1000,7 +995,6 @@ export function nodeTutorialReducer(
         title: "Nodes - Node Footer",
         description: <MarkdownRender text={"A downvote is a vote to delete a node."} />,
         disabledElements: [...DISABLE_NOTEBOOK_OPTIONS, "00", "01", "07"],
-        tooltipPosition: "bottom",
       };
     case 35:
       return {
@@ -1024,7 +1018,6 @@ export function nodeTutorialReducer(
         ),
         disabledElements: [...DISABLE_NOTEBOOK_OPTIONS, "00", "01", "07"],
         enableChildElements: ["07-node-footer-downvotes"],
-        tooltipPosition: "bottom",
         isClickeable: true,
       };
     case 36:
@@ -1048,7 +1041,6 @@ export function nodeTutorialReducer(
           />
         ),
         disabledElements: [...DISABLE_NOTEBOOK_OPTIONS, "00", "01", "07"],
-        tooltipPosition: "top",
       };
     case 37:
       return {
@@ -1126,6 +1118,8 @@ export function nodeTutorialReducer(
           <MarkdownRender text={"The next icon is for parent and child nodes. **Click** the button to expand. "} />
         ),
         disabledElements: [...DISABLE_NOTEBOOK_OPTIONS, "00", "01"],
+        enableChildElements: ["01-button-parent-children"],
+        isClickeable: true,
       };
 
     case 40:
