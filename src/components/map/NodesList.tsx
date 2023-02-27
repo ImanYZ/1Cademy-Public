@@ -257,15 +257,16 @@ const NodesList = ({
 
 export const MemoizedNodeList = React.memo(NodesList, (prev, next) => {
   const validateTutorialProps = () => {
+    // we use some to go out of the iteration the first time we can
     const disableNodesHasEqualsProperties = !prev.disabledNodes.some((el, idx) => el !== next.disabledNodes[idx]);
-    const enableChildeElementsHasEqualsProporties = !prev.enableChildElements.some(
+    const enableChildeElementsHasEqualsProperties = !prev.enableChildElements.some(
       (el, idx) => el === next.enableChildElements[idx]
     );
     return (
       prev.disabledNodes.length === next.disabledNodes.length &&
       prev.enableChildElements.length === next.enableChildElements.length &&
       disableNodesHasEqualsProperties &&
-      enableChildeElementsHasEqualsProporties
+      enableChildeElementsHasEqualsProperties
     );
   };
 
