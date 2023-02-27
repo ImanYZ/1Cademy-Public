@@ -378,6 +378,7 @@ const Communities = () => {
                       borderRadius: "8px",
                       cursor: "pointer",
                       height: "100%",
+                      borderColor: community.id === item.id ? orangeDark : "",
                       ":hover": {
                         borderColor: orangeDark,
                       },

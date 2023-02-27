@@ -22,7 +22,7 @@ const UploadButton = (props: any) => {
         nameFeild: props.nameFeild,
         function: "uploadButton",
       },
-      "https://1cademy.us/"
+      "*"
     );
     setIsUploading(true);
     setTimeout(() => {

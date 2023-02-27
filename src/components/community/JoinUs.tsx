@@ -47,7 +47,7 @@ const JoinUs = (props: JoinUsProps) => {
     console.log("childWindow :: :: ", childWindow);
     childWindow.postMessage({ communityId: props.community.id }, "*");
     setNeedsUpdate(false);
-  }, [needsUpdate]);
+  }, [needsUpdate, props.community]);
 
   const applyButton = () => {
     window.open("https://1cademy.us/Activities/experiment", "popup");
@@ -55,7 +55,7 @@ const JoinUs = (props: JoinUsProps) => {
   useEffect(() => {
     const childResponse = (event: any) => {
       console.log("event", event.origin);
-      if (!(event.origin === "https://1cademy.us")) return;
+      if (!event.origin.startsWith("https://1cademy.us")) return;
       console.log("event", event?.data);
       if (event?.data) {
         const {
@@ -143,16 +143,13 @@ const JoinUs = (props: JoinUsProps) => {
       setActiveInnerStep(stepsIdx);
       setNeedsUpdate(false);
     }
-  }, [needsUpdate, applicationProcess]);
+  }, [needsUpdate, applicationProcess, props.community]);
 
   useEffect(() => {
     let childWindo: any = document.getElementById("1cademy.usIframe");
     const childWindow = childWindo?.contentWindow;
-    childWindow.postMessage(
-      { communityId: props.community.id, function: "applications" },
-      "https://1cademy.us/JoinUsIframe"
-    );
-  }, [activeStep]);
+    childWindow.postMessage({ communityId: props.community.id, function: "applications" }, "*");
+  }, [activeStep, props.community]);
 
   useEffect(() => {
     const loadExistingApplication = async () => {
@@ -235,7 +232,7 @@ const JoinUs = (props: JoinUsProps) => {
       let childWindo: any = document.getElementById("1cademy.usIframe");
       childWindo.contentWindow.postMessage(
         { fullname, communityId: props.community.id, explanation, function: "explanation" },
-        "https://1cademy.us/"
+        "*"
       );
     }
   };
@@ -245,7 +242,7 @@ const JoinUs = (props: JoinUsProps) => {
       let childWindo: any = document.getElementById("1cademy.usIframe");
       childWindo.contentWindow.postMessage(
         { communityId: props.community.id, courseraUrl, function: "courseraUrl" },
-        "https://1cademy.us/"
+        "*"
       );
       if (!props.community.portfolio && !props.community.hasTest) {
         setApplicationsSubmitted((oldApplicatonsSubmitted: any) => {
@@ -261,7 +258,7 @@ const JoinUs = (props: JoinUsProps) => {
       let childWindo: any = document.getElementById("1cademy.usIframe");
       childWindo.contentWindow.postMessage(
         { communityId: props.community.id, portfolioUrl, function: "portfolioUrl" },
-        "https://1cademy.us/"
+        "*"
       );
       if (!props.community.hasTest) {
         setApplicationsSubmitted((oldApplicatonsSubmitted: any) => {
