@@ -432,7 +432,6 @@ const NodeFooter = ({
       >
         <Box className="NodeFooter Left" sx={{ display: "flex", alignItems: "center", gap: "10px" }}>
           {open &&
-            !disableUserPicture &&
             (isNew ? (
               <Box onClick={openContributorsSection}>
                 <MemoizedUserStatusIcon
@@ -446,6 +445,7 @@ const NodeFooter = ({
                   inNodeFooter={true}
                   reloadPermanentGrpah={reloadPermanentGrpah}
                   setOpenSideBar={setOpenSideBar}
+                  disabled={disableUserPicture}
                 />
               </Box>
             ) : (
@@ -461,15 +461,16 @@ const NodeFooter = ({
                   inNodeFooter={true}
                   reloadPermanentGrpah={reloadPermanentGrpah}
                   setOpenSideBar={setOpenSideBar}
+                  disabled={disableUserPicture}
                 />
               </Box>
             ))}
-          {open && disableUserPicture && (
+          {/* {open && disableUserPicture && (
             <Box
               id={userPictureId}
               sx={{ width: "28px", height: "28px", backgroundColor: "gray", borderRadius: "50%" }}
             />
-          )}
+          )} */}
           <div
             className={open ? "NodeTypeIconOpen Tooltip" : "NodeTypeIconClosed Tooltip"}
             style={{ display: "flex", alignItems: "center", fontSize: "16px" }} // font size refL Map.css ln 71
