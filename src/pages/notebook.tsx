@@ -1884,6 +1884,8 @@ const Dashboard = ({}: DashboardProps) => {
     nodeId => {
       if (notebookRef.current.choosingNode || !user) return;
 
+      if (isPlayingTheTutorialRef.current) return;
+
       setGraph(graph => {
         (async () => {
           const offsprings = recursiveOffsprings(nodeId);
