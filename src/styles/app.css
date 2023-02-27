@@ -824,8 +824,8 @@ p {
 }
 .tutorial-target-pulse {
   box-shadow: 0 0 0 0 #ff6d00;
-  animation: tutorial-pulse 2s infinite;
-  outline: 2px solid #ff6d00 !important;
+  animation: tutorial-pulse 1s infinite;
+  outline: 3px solid #ff6d00 !important;
 }
 
 @keyframes tutorial-pulse {
@@ -834,7 +834,7 @@ p {
   }
 
   70% {
-    box-shadow: 0 0 0 10px rgba(255, 121, 63, 0);
+    box-shadow: 0 0 0 12px rgba(255, 121, 63, 0);
   }
 
   100% {
