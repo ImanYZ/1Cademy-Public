@@ -236,10 +236,10 @@ export const INTERACTIVE_TUTORIAL_NOTEBOOK_NODES: FullNodesData = {
     corrects: 1,
     nodeVideo: "https://youtu.be/exLS4UadfFU",
     referenceIds: ["00002"],
-    referenceLabels: [""],
-    references: ["My python library called Deep Math for Multi Layer Perceptron"],
+    referenceLabels: ["Pages 1-2"],
+    references: ["Improving Collaborative Notetaking Through Finding and Visualizing Prerequisite Knowledge Links"],
     tagIds: ["00001"],
-    tags: ["Deep Learning (in Machine learning)"],
+    tags: ["1Cademy"],
   },
   "05": {
     ...BASE_NODE,
