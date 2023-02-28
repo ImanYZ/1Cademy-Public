@@ -61,12 +61,13 @@ export const useInteractiveTutorial = ({ notebookRef }: useInteractiveTutorialPr
       return setSteps(SEARCHER_STEPS_COMPLETE);
     }
 
+    setStateNodeTutorial(null);
     return setSteps([]);
   }, [currentTutorial]);
 
   const onStart = useCallback(() => {
     console.log("onStart", steps);
-    idxCurrentStepRef.current = 0;
+    idxCurrentStepRef.current = 45;
     const selectedStep = steps[idxCurrentStepRef.current];
     setStateNodeTutorial(selectedStep);
     isPlayingTheTutorialRef.current = true;
@@ -147,7 +148,15 @@ export const useInteractiveTutorial = ({ notebookRef }: useInteractiveTutorialPr
     cb: stateNodeTutorial?.isClickeable ? onNextStep : undefined,
   });
 
-  return { setCurrentTutorial, stateNodeTutorial, onNextStep, onPreviousStep, isPlayingTheTutorialRef };
+  return {
+    setCurrentTutorial,
+    currentTutorial,
+    stateNodeTutorial,
+    onNextStep,
+    onPreviousStep,
+    isPlayingTheTutorialRef,
+    stepsLength: steps.length,
+  };
 };
 
 export const STEPS_NODE_TUTORIAL = [];

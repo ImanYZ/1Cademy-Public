@@ -124,9 +124,11 @@ import {
   FullNodesData,
   // NodeTutorialState,
   TNodeBookState,
+  TutorialTypeKeys,
   // TutorialType,
   UserNodes,
   UserNodesData,
+  UserTutorial,
   UserTutorials,
 } from "../nodeBookTypes";
 import { NodeType, SimpleNode2 } from "../types";
@@ -319,11 +321,18 @@ const Dashboard = ({}: DashboardProps) => {
 
   // const [tutorialSteps, setTutorialSteps] = useState<NodeTutorialState[]>([]);
 
-  const { stateNodeTutorial, onNextStep, onPreviousStep, isPlayingTheTutorialRef, setCurrentTutorial } =
-    useInteractiveTutorial({
-      notebookRef,
-      // currentTutorial,
-    });
+  const {
+    stateNodeTutorial,
+    onNextStep,
+    onPreviousStep,
+    isPlayingTheTutorialRef,
+    setCurrentTutorial,
+    currentTutorial,
+    stepsLength,
+  } = useInteractiveTutorial({
+    notebookRef,
+    // currentTutorial,
+  });
   const onNodeInViewport = useCallback(
     (nodeId: string) => {
       const originalNode = document.getElementById(nodeId);
@@ -1099,7 +1108,7 @@ const Dashboard = ({}: DashboardProps) => {
 
   useEffect(() => {
     // console.log("USE_EFFECT", { userTutorialLoaded, userTutorialNodes: userTutorial.nodes });
-    console.log("USE_EFFECT:tt", userTutorial.nodes.done, userTutorial.nodes.skipped);
+    console.log("USE_EFFECT:tt", userTutorialLoaded, userTutorial.nodes.done, userTutorial.nodes.skipped);
     if (!userTutorialLoaded) return;
     if (!userTutorial.nodes.done && !userTutorial.nodes.skipped) return setFirstLoading(false);
     if (stateNodeTutorial) return;
@@ -1164,6 +1173,7 @@ const Dashboard = ({}: DashboardProps) => {
       });
       // setLocalSnapshot({);
       shouldResetGraph.current = false;
+      setCurrentTutorial("NODES");
     }
 
     const mergeAllNodes = (newAllNodes: FullNodeData[], currentAllNodes: FullNodesData): FullNodesData => {
@@ -4037,6 +4047,64 @@ const Dashboard = ({}: DashboardProps) => {
   //   [db, onChangeStep, user, userTutorial]
   // );
 
+  const onSkipTutorial = useCallback(async () => {
+    if (!user) return;
+    if (!stateNodeTutorial) return;
+    if (!currentTutorial) return;
+
+    const keyTutorial: TutorialTypeKeys | null =
+      currentTutorial === "NODES" ? "nodes" : currentTutorial === "SEARCHER" ? "searcher" : null;
+    if (!keyTutorial) return;
+
+    const tutorialUpdated: UserTutorial = {
+      ...userTutorial[keyTutorial],
+      currentStep: stateNodeTutorial.currentStepName,
+      skipped: true,
+    };
+    const userTutorialUpdated = { ...userTutorial, [keyTutorial]: tutorialUpdated };
+    setCurrentTutorial(null);
+
+    // setUserTutorial(userTutorialUpdated);
+
+    const tutorialRef = doc(db, "userTutorial", user.uname);
+    const tutorialDoc = await getDoc(tutorialRef);
+
+    if (tutorialDoc.exists()) {
+      await updateDoc(tutorialRef, userTutorialUpdated);
+    } else {
+      await setDoc(tutorialRef, userTutorialUpdated);
+    }
+  }, [currentTutorial, db, setCurrentTutorial, stateNodeTutorial, user, userTutorial]);
+
+  const onFinalizeTutorial = useCallback(async () => {
+    if (!user) return;
+    if (!stateNodeTutorial) return;
+    if (!currentTutorial) return;
+
+    const keyTutorial: TutorialTypeKeys | null =
+      currentTutorial === "NODES" ? "nodes" : currentTutorial === "SEARCHER" ? "searcher" : null;
+    if (!keyTutorial) return;
+
+    const tutorialUpdated: UserTutorial = {
+      ...userTutorial[keyTutorial],
+      currentStep: stateNodeTutorial.currentStepName,
+      done: true,
+    };
+    const userTutorialUpdated: UserTutorials = { ...userTutorial, [keyTutorial]: tutorialUpdated };
+    setCurrentTutorial(null);
+
+    // setUserTutorial(userTutorialUpdated);
+
+    const tutorialRef = doc(db, "userTutorial", user.uname);
+    const tutorialDoc = await getDoc(tutorialRef);
+
+    if (tutorialDoc.exists()) {
+      await updateDoc(tutorialRef, userTutorialUpdated);
+    } else {
+      await setDoc(tutorialRef, userTutorialUpdated);
+    }
+  }, [currentTutorial, db, setCurrentTutorial, stateNodeTutorial, user, userTutorial]);
+
   return (
     <div className="MapContainer" style={{ overflow: "hidden" }}>
       {stateNodeTutorial?.anchor && (
@@ -4046,10 +4114,11 @@ const Dashboard = ({}: DashboardProps) => {
             // onChangeStep={onChangeStep}
             targetClientRect={targetClientRect}
             handleCloseProgressBarMenu={handleCloseProgressBarMenu}
-            onSkip={() => console.log("skip")}
-            onFinalize={() => console.log("fff")}
+            onSkip={onSkipTutorial}
+            onFinalize={onFinalizeTutorial}
             onNextStep={onNextStep}
             onPreviousStep={onPreviousStep}
+            stepsLength={stepsLength}
           />
         </Portal>
       )}
@@ -4651,10 +4720,11 @@ const Dashboard = ({}: DashboardProps) => {
                     tutorialState={stateNodeTutorial}
                     targetClientRect={targetClientRect}
                     handleCloseProgressBarMenu={handleCloseProgressBarMenu}
-                    onSkip={() => console.log("skip")}
-                    onFinalize={() => console.log("fff")}
+                    onSkip={onSkipTutorial}
+                    onFinalize={onFinalizeTutorial}
                     onNextStep={onNextStep}
                     onPreviousStep={onPreviousStep}
+                    stepsLength={stepsLength}
                     // tutorialState={stateNodeTutorial}
                     // onChangeStep={onChangeStep}
                     // targetClientRect={targetClientRect}
