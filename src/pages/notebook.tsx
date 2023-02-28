@@ -2052,7 +2052,38 @@ const Dashboard = ({}: DashboardProps) => {
     [recursiveOffsprings, isPlayingTheTutorialRef]
   );
 
-  console.log({ isPlayingTheTutorialRef: isPlayingTheTutorialRef.current });
+  const onFinalizeTutorial = useCallback(async () => {
+    if (!user) return;
+    if (!stateNodeTutorial) return;
+    if (!currentTutorial) return;
+
+    console.log(1);
+    const keyTutorial: TutorialTypeKeys | null =
+      currentTutorial === "NODES" ? "nodes" : currentTutorial === "SEARCHER" ? "searcher" : null;
+    if (!keyTutorial) return;
+
+    console.log(2);
+
+    const tutorialUpdated: UserTutorial = {
+      ...userTutorial[keyTutorial],
+      currentStep: stateNodeTutorial.currentStepName,
+      done: true,
+    };
+    const userTutorialUpdated: UserTutorials = { ...userTutorial, [keyTutorial]: tutorialUpdated };
+    setCurrentTutorial(null);
+    setOpenSidebar(null);
+    setUserTutorial(userTutorialUpdated);
+
+    const tutorialRef = doc(db, "userTutorial", user.uname);
+    const tutorialDoc = await getDoc(tutorialRef);
+
+    if (tutorialDoc.exists()) {
+      await updateDoc(tutorialRef, userTutorialUpdated);
+    } else {
+      await setDoc(tutorialRef, userTutorialUpdated);
+    }
+    console.log(3);
+  }, [currentTutorial, db, setCurrentTutorial, stateNodeTutorial, user, userTutorial]);
 
   const openLinkedNode = useCallback(
     (linkedNodeID: string, typeOperation?: string) => {
@@ -2061,13 +2092,13 @@ const Dashboard = ({}: DashboardProps) => {
         typeOperation,
         isPlayingTheTutorialRef: isPlayingTheTutorialRef.current,
       });
-      console.log(0, isPlayingTheTutorialRef.current);
+      console.log("linked 0", isPlayingTheTutorialRef.current);
 
       if (notebookRef.current.choosingNode) return;
 
       if (isPlayingTheTutorialRef.current && currentTutorial !== "SEARCHER") return;
 
-      console.log("openinig lnked node");
+      console.log("lib");
 
       createActionTrack(
         db,
@@ -2114,6 +2145,12 @@ const Dashboard = ({}: DashboardProps) => {
       if (typeOperation === "CitationSidebar") {
         setOpenSidebar(null);
       }
+      console.log("Current tutoriial");
+      if (currentTutorial === "SEARCHER") {
+        console.log("Finalize tutoriial called");
+
+        onFinalizeTutorial();
+      }
     },
 
     [
@@ -2121,6 +2158,7 @@ const Dashboard = ({}: DashboardProps) => {
       db,
       isPlayingTheTutorialRef,
       nodeBookDispatch,
+      onFinalizeTutorial,
       openNodeHandler,
       scrollToNode,
       user?.chooseUname,
@@ -4102,35 +4140,6 @@ const Dashboard = ({}: DashboardProps) => {
       skipped: true,
     };
     const userTutorialUpdated = { ...userTutorial, [keyTutorial]: tutorialUpdated };
-    setCurrentTutorial(null);
-    setOpenSidebar(null);
-    setUserTutorial(userTutorialUpdated);
-
-    const tutorialRef = doc(db, "userTutorial", user.uname);
-    const tutorialDoc = await getDoc(tutorialRef);
-
-    if (tutorialDoc.exists()) {
-      await updateDoc(tutorialRef, userTutorialUpdated);
-    } else {
-      await setDoc(tutorialRef, userTutorialUpdated);
-    }
-  }, [currentTutorial, db, setCurrentTutorial, stateNodeTutorial, user, userTutorial]);
-
-  const onFinalizeTutorial = useCallback(async () => {
-    if (!user) return;
-    if (!stateNodeTutorial) return;
-    if (!currentTutorial) return;
-
-    const keyTutorial: TutorialTypeKeys | null =
-      currentTutorial === "NODES" ? "nodes" : currentTutorial === "SEARCHER" ? "searcher" : null;
-    if (!keyTutorial) return;
-
-    const tutorialUpdated: UserTutorial = {
-      ...userTutorial[keyTutorial],
-      currentStep: stateNodeTutorial.currentStepName,
-      done: true,
-    };
-    const userTutorialUpdated: UserTutorials = { ...userTutorial, [keyTutorial]: tutorialUpdated };
     setCurrentTutorial(null);
     setOpenSidebar(null);
     setUserTutorial(userTutorialUpdated);
