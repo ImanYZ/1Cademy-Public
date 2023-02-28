@@ -2,7 +2,6 @@ import AutoFixHighIcon from "@mui/icons-material/AutoFixHigh";
 import CloseIcon from "@mui/icons-material/Close";
 import CodeIcon from "@mui/icons-material/Code";
 import MyLocationIcon from "@mui/icons-material/MyLocation";
-import SchoolIcon from "@mui/icons-material/School";
 import { Masonry } from "@mui/lab";
 import {
   Button,
@@ -59,8 +58,8 @@ import { MemoizedProposalsSidebar } from "@/components/map/Sidebar/SidebarV2/Pro
 import { MemoizedSearcherSidebar } from "@/components/map/Sidebar/SidebarV2/SearcherSidebar";
 import { MemoizedUserInfoSidebar } from "@/components/map/Sidebar/SidebarV2/UserInfoSidebar";
 import { MemoizedUserSettingsSidebar } from "@/components/map/Sidebar/SidebarV2/UserSettigsSidebar";
-import { MemoizedProgressBar } from "@/components/tutorial/ProgressBar";
-import { MemoizedProgressBarMenu } from "@/components/tutorial/ProgressBarMenu";
+// import { MemoizedProgressBar } from "@/components/tutorial/ProgressBar";
+// import { MemoizedProgressBarMenu } from "@/components/tutorial/ProgressBarMenu";
 import { useAuth } from "@/context/AuthContext";
 import { useTagsTreeView } from "@/hooks/useTagsTreeView";
 import { addSuffixToUrlGMT } from "@/lib/utils/string.utils";
@@ -77,7 +76,8 @@ import { MemoizedToolbarSidebar } from "../components/map/Sidebar/SidebarV2/Tool
 import { NodeItemDashboard } from "../components/NodeItemDashboard";
 import { Portal } from "../components/Portal";
 import { NodeBookProvider, useNodeBook } from "../context/NodeBookContext";
-import { TargetClientRect, useInteractiveTutorial } from "../hooks/useInteractiveTutorial2";
+// import { TargetClientRect } from "../hooks/useInteractiveTutorial2";
+import { TargetClientRect, useInteractiveTutorial } from "../hooks/useInteractiveTutorial3";
 import { useMemoizedCallback } from "../hooks/useMemoizedCallback";
 import { useWindowSize } from "../hooks/useWindowSize";
 import { useWorkerQueue } from "../hooks/useWorkerQueue";
@@ -121,12 +121,19 @@ import {
   EdgesData,
   FullNodeData,
   FullNodesData,
+  // NodeTutorialState,
   TNodeBookState,
+  TutorialTypeKeys,
+  // TutorialType,
   UserNodes,
   UserNodesData,
+  UserTutorial,
+  UserTutorials,
 } from "../nodeBookTypes";
 import { NodeType, SimpleNode2 } from "../types";
 import { doNeedToDeleteNode, getNodeTypesFromNode, isVersionApproved } from "../utils/helpers";
+
+export type TutorialType = "NODES" | "SEARCHER" | null;
 
 type DashboardProps = {};
 
@@ -273,8 +280,16 @@ const Dashboard = ({}: DashboardProps) => {
   const lastNodeOperation = useRef<string>("");
   const proposalTimer = useRef<any>(null);
 
-  const [openProgressBar, setOpenProgressBar] = useState(false);
-  const [openProgressBarMenu, setOpenProgressBarMenu] = useState(false);
+  // const [openProgressBar, setOpenProgressBar] = useState(false);
+  const [, /* openProgressBarMenu */ setOpenProgressBarMenu] = useState(false);
+
+  const [userTutorial, setUserTutorial] = useState<UserTutorials>({
+    nodes: { currentStep: 1, done: false, skipped: false },
+    searcher: { currentStep: 1, done: false, skipped: false },
+  });
+
+  // const [currentTutorial, setCurrentTutorial] = useState<TutorialType>(null);
+
   // const {
   //   setTargetClientRect,
   //   isPlayingTheTutorial,
@@ -301,9 +316,22 @@ const Dashboard = ({}: DashboardProps) => {
     isEnabled: false,
   });
 
-  const [nodeTutorial /* setNodeTutorial */] = useState(Boolean(localStorage.getItem("node-tutorial")));
+  // const [nodeTutorial /* setNodeTutorial */] = useState(Boolean(localStorage.getItem("node-tutorial")));
 
-  const { stateNodeTutorial, onChangeStep, isPlayingTheTutorialRef } = useInteractiveTutorial({ notebookRef });
+  // const [tutorialSteps, setTutorialSteps] = useState<NodeTutorialState[]>([]);
+
+  const {
+    stateNodeTutorial,
+    onNextStep,
+    onPreviousStep,
+    isPlayingTheTutorialRef,
+    setCurrentTutorial,
+    currentTutorial,
+    stepsLength,
+  } = useInteractiveTutorial({
+    notebookRef,
+    // currentTutorial,
+  });
   const onNodeInViewport = useCallback(
     (nodeId: string) => {
       const originalNode = document.getElementById(nodeId);
@@ -463,19 +491,22 @@ const Dashboard = ({}: DashboardProps) => {
 
   useEffect(() => {
     if (!stateNodeTutorial) return setTargetClientRect({ width: 0, height: 0, top: 0, left: 0 });
-
+    let timeoutId: any;
     if (stateNodeTutorial.anchor) {
-      if (!stateNodeTutorial.targetId) return;
+      timeoutId = setTimeout(() => {
+        if (!stateNodeTutorial.childTargetId) return;
 
-      const targetElement = document.getElementById(stateNodeTutorial.targetId);
+        const targetElement = document.getElementById(stateNodeTutorial.childTargetId);
 
-      if (!targetElement) return;
+        if (!targetElement) return;
 
-      targetElement.classList.add(stateNodeTutorial.isClickeable ? "tutorial-target-pulse" : "tutorial-target");
+        targetElement.classList.add(stateNodeTutorial.isClickeable ? "tutorial-target-pulse" : "tutorial-target");
 
-      const { width, height, top, left } = targetElement.getBoundingClientRect();
+        const { width, height, top, left } = targetElement.getBoundingClientRect();
 
-      setTargetClientRect({ width, height, top, left });
+        console.log({ width, height, top, left });
+        setTargetClientRect({ width, height, top, left });
+      }, stateNodeTutorial.delay);
     } else {
       console.log("----------------- detect client react in interactive map");
 
@@ -506,6 +537,9 @@ const Dashboard = ({}: DashboardProps) => {
         width,
         height,
       });
+      return () => {
+        if (timeoutId) clearTimeout(timeoutId);
+      };
     }
   }, [stateNodeTutorial, graph.nodes, setTargetClientRect]);
 
@@ -545,6 +579,9 @@ const Dashboard = ({}: DashboardProps) => {
 
   // flag for whether all tags data is downloaded from server
   // const [allTagsLoaded, setAllTagsLoaded] = useState(false);
+
+  // flag for whether tutorial state was loaded
+  const [userTutorialLoaded, setUserTutorialLoaded] = useState(false);
 
   // flag for whether users' nodes data is downloaded from server
   const [userNodesLoaded, setUserNodesLoaded] = useState(false);
@@ -729,6 +766,37 @@ const Dashboard = ({}: DashboardProps) => {
       scrollToNode(noodeIdFromDashboard);
     }, 1000);
   }, [firstScrollToNode, graph.nodes, nodeBookDispatch, openNodeHandler, scrollToNode]);
+
+  useEffect(() => {
+    devLog("USE_EFFECT", { userTutorialLoaded, user });
+    if (!user) return;
+    if (userTutorialLoaded) return;
+
+    devLog("USE_EFFECT", "get-user-tutorial");
+    const getTutorialState = async () => {
+      const tutorialRef = doc(db, "userTutorial", user.uname);
+      const tutorialDoc = await getDoc(tutorialRef);
+      console.log(tutorialDoc);
+
+      // TODO: load step from DB
+      if (tutorialDoc.exists()) {
+        const tutorial = tutorialDoc.data() as UserTutorials;
+        setUserTutorial(tutorial);
+        if (tutorial.nodes.done) return setUserTutorialLoaded(true);
+        if (tutorial.nodes.skipped) return setUserTutorialLoaded(true);
+        setCurrentTutorial("NODES");
+        // // onChangeStep(tutorial.nodes.currentStep);
+      } else {
+        console.log("will-start");
+        setCurrentTutorial("NODES");
+      }
+
+      // setUserTutorialLoaded(true);
+    };
+
+    getTutorialState();
+    setUserTutorialLoaded(true);
+  }, [db, setCurrentTutorial, user, user?.userId, userTutorialLoaded]);
 
   //  bd => state (first render)
   useEffect(() => {
@@ -1044,12 +1112,19 @@ const Dashboard = ({}: DashboardProps) => {
   }, [nodeBookDispatch, openSidebar]);
 
   useEffect(() => {
+    // console.log("USE_EFFECT", { userTutorialLoaded, userTutorialNodes: userTutorial.nodes });
+    console.log("USE_EFFECT:tt", userTutorialLoaded, userTutorial.nodes.done, userTutorial.nodes.skipped);
+    // const tutorialFinished = userTutorial.nodes.done || userTutorial.nodes.skipped;
+    if (!userTutorialLoaded) return;
+    // if (!tutorialFinished) return setFirstLoading(false);
     if (stateNodeTutorial) return;
-    console.log("effect SNAPSHOTS");
+    // if(userTutorial.nodes.done ||userTutorial.nodes.skipped){
+
+    // }
+
+    devLog("USE_EFFECT", "nodes synchronization");
 
     if (!shouldResetGraph.current) {
-      console.log("RESET GRAPH");
-
       setGraph({
         nodes: {},
         edges: {},
@@ -1076,14 +1151,28 @@ const Dashboard = ({}: DashboardProps) => {
     return () => {
       killSnapshot();
     };
-  }, [allTagsLoaded, db, snapshot, stateNodeTutorial, user?.uname, notebookChanged, nodeBookDispatch]);
+  }, [
+    allTagsLoaded,
+    db,
+    snapshot,
+    stateNodeTutorial,
+    user?.uname,
+    notebookChanged,
+    nodeBookDispatch,
+    userTutorialLoaded,
+    userTutorial.nodes.done,
+    userTutorial.nodes.skipped,
+  ]);
   // }, [allTagsLoaded, db, snapshot, user?.uname, settings.showClusterOptions, notebookChanged]);
 
   useEffect(() => {
     // local snapshot used only in interactive tutorial
     // if (!isPlayingTheTutorial) return;
+    console.log("useEffect", "interactive-tutorial", {});
+    console.log(stateNodeTutorial, userTutorial.nodes.done, userTutorial.nodes.skipped);
     if (!stateNodeTutorial) return;
-    console.log("effect INTERACTICE TUTORIAL");
+    // if (userTutorial.nodes.done || userTutorial.nodes.skipped) return;
+    devLog("USE_EFFECT", "interactive-tutorial");
 
     if (shouldResetGraph.current) {
       g.current = createGraph();
@@ -1247,7 +1336,16 @@ const Dashboard = ({}: DashboardProps) => {
       return { nodes: newNodes, edges: newEdges };
     });
     setOpenProgressBarMenu(true);
-  }, [allTags, settings.showClusterOptions, stateNodeTutorial, notebookChanged]);
+  }, [
+    allTags,
+    settings.showClusterOptions,
+    stateNodeTutorial,
+    notebookChanged,
+    userTutorial.nodes.done,
+    userTutorial.nodes.skipped,
+    userTutorial.nodes.currentStep,
+    setCurrentTutorial,
+  ]);
 
   useEffect(() => {
     if (!db) return;
@@ -3924,28 +4022,113 @@ const Dashboard = ({}: DashboardProps) => {
   );
   // console.log({ nodeBookState });
 
-  const handleOpenProgressBar = useCallback(() => {
-    setOpenProgressBar(true);
-    setOpenProgressBarMenu(false);
-  }, []);
+  // const handleOpenProgressBar = useCallback(() => {
+  //   setOpenProgressBar(true);
+  //   setOpenProgressBarMenu(false);
+  // }, []);
 
-  const handleCloseProgressBar = useCallback(() => {
-    console.log("ssssssss");
-    setOpenProgressBar(false);
-    setOpenProgressBarMenu(true);
-  }, []);
+  // const handleCloseProgressBar = useCallback(() => {
+  //   console.log("ssssssss");
+  //   setOpenProgressBar(false);
+  //   setOpenProgressBarMenu(true);
+  // }, []);
+
   const handleCloseProgressBarMenu = useCallback(() => {
     setOpenProgressBarMenu(false);
   }, []);
+
+  // const onUpdateNode = useCallback(
+  //   async (tutorialKey: TutorialType) => {
+  //     if (!user) return;
+
+  //     const userTutorialUpdated = { ...userTutorial, [tutorialKey]: tutorialUpdated };
+  //     onChangeStep(null);
+  //     setUserTutorial(userTutorialUpdated);
+
+  //     const tutorialRef = doc(db, "userTutorial", user.uname);
+  //     const tutorialDoc = await getDoc(tutorialRef);
+
+  //     if (tutorialDoc.exists()) {
+  //       await updateDoc(tutorialRef, userTutorialUpdated);
+  //     } else {
+  //       await setDoc(tutorialRef, userTutorialUpdated);
+  //     }
+  //   },
+  //   [db, onChangeStep, user, userTutorial]
+  // );
+
+  const onSkipTutorial = useCallback(async () => {
+    if (!user) return;
+    if (!stateNodeTutorial) return;
+    if (!currentTutorial) return;
+
+    const keyTutorial: TutorialTypeKeys | null =
+      currentTutorial === "NODES" ? "nodes" : currentTutorial === "SEARCHER" ? "searcher" : null;
+    if (!keyTutorial) return;
+
+    const tutorialUpdated: UserTutorial = {
+      ...userTutorial[keyTutorial],
+      currentStep: stateNodeTutorial.currentStepName,
+      skipped: true,
+    };
+    const userTutorialUpdated = { ...userTutorial, [keyTutorial]: tutorialUpdated };
+    setCurrentTutorial(null);
+    setOpenSidebar(null);
+    setUserTutorial(userTutorialUpdated);
+
+    const tutorialRef = doc(db, "userTutorial", user.uname);
+    const tutorialDoc = await getDoc(tutorialRef);
+
+    if (tutorialDoc.exists()) {
+      await updateDoc(tutorialRef, userTutorialUpdated);
+    } else {
+      await setDoc(tutorialRef, userTutorialUpdated);
+    }
+  }, [currentTutorial, db, setCurrentTutorial, stateNodeTutorial, user, userTutorial]);
+
+  const onFinalizeTutorial = useCallback(async () => {
+    if (!user) return;
+    if (!stateNodeTutorial) return;
+    if (!currentTutorial) return;
+
+    const keyTutorial: TutorialTypeKeys | null =
+      currentTutorial === "NODES" ? "nodes" : currentTutorial === "SEARCHER" ? "searcher" : null;
+    if (!keyTutorial) return;
+
+    const tutorialUpdated: UserTutorial = {
+      ...userTutorial[keyTutorial],
+      currentStep: stateNodeTutorial.currentStepName,
+      done: true,
+    };
+    const userTutorialUpdated: UserTutorials = { ...userTutorial, [keyTutorial]: tutorialUpdated };
+    setCurrentTutorial(null);
+    setOpenSidebar(null);
+    setUserTutorial(userTutorialUpdated);
+
+    const tutorialRef = doc(db, "userTutorial", user.uname);
+    const tutorialDoc = await getDoc(tutorialRef);
+
+    if (tutorialDoc.exists()) {
+      await updateDoc(tutorialRef, userTutorialUpdated);
+    } else {
+      await setDoc(tutorialRef, userTutorialUpdated);
+    }
+  }, [currentTutorial, db, setCurrentTutorial, stateNodeTutorial, user, userTutorial]);
+
   return (
     <div className="MapContainer" style={{ overflow: "hidden" }}>
       {stateNodeTutorial?.anchor && (
         <Portal anchor="portal">
           <Tutorial
             tutorialState={stateNodeTutorial}
-            onChangeStep={onChangeStep}
+            // onChangeStep={onChangeStep}
             targetClientRect={targetClientRect}
             handleCloseProgressBarMenu={handleCloseProgressBarMenu}
+            onSkip={onSkipTutorial}
+            onFinalize={onFinalizeTutorial}
+            onNextStep={onNextStep}
+            onPreviousStep={onPreviousStep}
+            stepsLength={stepsLength}
           />
         </Portal>
       )}
@@ -4086,6 +4269,8 @@ const Dashboard = ({}: DashboardProps) => {
                 onlineUsers={onlineUsers}
                 usersOnlineStatusLoaded={usersOnlineStatusLoaded}
                 disableToolbar={Boolean(stateNodeTutorial && stateNodeTutorial.disabledElements.includes("TOOLBAR"))}
+                setCurrentTutorial={setCurrentTutorial}
+                userTutorial={userTutorial}
               />
 
               <MemoizedBookmarksSidebar
@@ -4107,6 +4292,8 @@ const Dashboard = ({}: DashboardProps) => {
                 sidebarWidth={sidebarWidth()}
                 innerHeight={innerHeight}
                 innerWidth={windowWith}
+                disableSearcher={Boolean(stateNodeTutorial?.disabledElements.includes("SEARCHER_SIDEBAR"))}
+                enableElements={stateNodeTutorial?.enableChildElements ?? []}
               />
               <MemoizedNotificationSidebar
                 theme={settings.theme}
@@ -4266,7 +4453,7 @@ const Dashboard = ({}: DashboardProps) => {
             </IconButton>
           </Tooltip>
 
-          {!nodeTutorial && (
+          {/* {!stateNodeTutorial && (
             <Tooltip
               title="Start tutorial"
               placement="left"
@@ -4292,14 +4479,14 @@ const Dashboard = ({}: DashboardProps) => {
               <IconButton
                 color="secondary"
                 onClick={() => {
-                  onChangeStep(1);
+                  setCurrentTutorial("NODES");
                   setOpenProgressBarMenu(true);
                 }}
               >
-                <SchoolIcon />
+                <HelpIcon />
               </IconButton>
             </Tooltip>
-          )}
+          )} */}
 
           {process.env.NODE_ENV === "development" && (
             <Tooltip
@@ -4547,9 +4734,18 @@ const Dashboard = ({}: DashboardProps) => {
                 {!stateNodeTutorial?.anchor && (
                   <Tutorial
                     tutorialState={stateNodeTutorial}
-                    onChangeStep={onChangeStep}
                     targetClientRect={targetClientRect}
                     handleCloseProgressBarMenu={handleCloseProgressBarMenu}
+                    onSkip={onSkipTutorial}
+                    onFinalize={onFinalizeTutorial}
+                    onNextStep={onNextStep}
+                    onPreviousStep={onPreviousStep}
+                    stepsLength={stepsLength}
+                    // tutorialState={stateNodeTutorial}
+                    // onChangeStep={onChangeStep}
+                    // targetClientRect={targetClientRect}
+                    // handleCloseProgressBarMenu={handleCloseProgressBarMenu}
+                    // onSkipTutorial={onSkipTutorial}
                   />
                 )}
                 {settings.showClusterOptions && settings.showClusters && (
@@ -4721,12 +4917,12 @@ const Dashboard = ({}: DashboardProps) => {
               </Suspense>
             </Box>
           )}
-          <MemoizedProgressBarMenu
+          {/* <MemoizedProgressBarMenu
             open={openProgressBarMenu}
             handleOpenProgressBar={handleOpenProgressBar}
             currentStep={stateNodeTutorial?.currentStepName ?? 0}
           />
-          <MemoizedProgressBar open={openProgressBar} handleCloseProgressBar={handleCloseProgressBar} />
+          <MemoizedProgressBar open={openProgressBar} handleCloseProgressBar={handleCloseProgressBar} /> */}
         </Box>
       </Box>
     </div>

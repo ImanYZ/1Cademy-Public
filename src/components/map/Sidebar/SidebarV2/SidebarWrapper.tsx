@@ -24,6 +24,7 @@ type SidebarWrapperProps = {
   contentSignalState: any;
   openSidebar?: OpenSidebar;
   innerHeight?: number;
+  disabled?: boolean;
 };
 /**
  * Only Sidebar content should be scrollable
@@ -46,6 +47,7 @@ export const SidebarWrapper = ({
   contentSignalState,
   innerHeight,
   openSidebar,
+  disabled,
 }: SidebarWrapperProps) => {
   const sidebarContentRef = useRef<any>(null);
   const theme = useTheme();
@@ -184,6 +186,7 @@ export const SidebarWrapper = ({
         >
           <Tooltip title="Close the sidebar." placement="left">
             <IconButton
+              disabled={disabled}
               onClick={onClose}
               sx={{
                 background: theme => (theme.palette.mode === "light" ? "rgb(240,240,240)" : "rgb(31,31,31)"),
