@@ -24,7 +24,7 @@ import {
 import { Box } from "@mui/system";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
-import React, { useCallback, useEffect, useMemo, useState, useTransition } from "react";
+import React, { MutableRefObject, useCallback, useEffect, useMemo, useState, useTransition } from "react";
 
 import searcherHeaderImage from "../../../../../public/Magnifier_Compas.jpg";
 import { useNodeBook } from "../../../../context/NodeBookContext";
@@ -33,7 +33,7 @@ import { useTagsTreeView } from "../../../../hooks/useTagsTreeView";
 import { SearchNodesResponse } from "../../../../knowledgeTypes";
 import { Post } from "../../../../lib/mapApi";
 import shortenNumber from "../../../../lib/utils/shortenNumber";
-import { SortDirection, SortValues } from "../../../../nodeBookTypes";
+import { SortDirection, SortValues, TNodeBookState } from "../../../../nodeBookTypes";
 import { NodeType } from "../../../../types";
 import { Editor } from "../../../Editor";
 import NodeTypeIcon from "../../../NodeTypeIcon2";
@@ -49,6 +49,7 @@ const doNothing = () => {};
 dayjs.extend(relativeTime);
 
 type SearcherSidebarProps = {
+  notebookRef: MutableRefObject<TNodeBookState>;
   openLinkedNode: any;
   open: boolean;
   onClose: () => void;
@@ -70,6 +71,7 @@ const NODE_TYPES_ARRAY: NodeType[] = ["Concept", "Code", "Reference", "Relation"
 const MAX_TAGS_IN_MOBILE = 2;
 
 const SearcherSidebar = ({
+  notebookRef,
   openLinkedNode,
   open,
   onClose,
@@ -186,6 +188,7 @@ const SearcherSidebar = ({
     if (nodeBookState.searchQuery && nodeBookState.nodeTitleBlured) {
       setSearch(nodeBookState.searchQuery);
       onSearch(1, nodeBookState.searchQuery, sortOption, sortDirection, nodeTypes);
+      notebookRef.current.nodeTitleBlured = false;
       nodeBookDispatch({ type: "setNodeTitleBlured", payload: false });
     }
   }, [
@@ -215,6 +218,7 @@ const SearcherSidebar = ({
       return copyAllTags;
     });
 
+    notebookRef.current.chosenNode = null;
     nodeBookDispatch({ type: "setChosenNode", payload: null });
   }, [
     allTags,
@@ -230,6 +234,7 @@ const SearcherSidebar = ({
       let val = event.target.value;
       setSearch(val);
       startTransition(() => {
+        notebookRef.current.searchQuery = val;
         nodeBookDispatch({ type: "setSearchQuery", payload: val });
       });
     },
@@ -288,6 +293,7 @@ const SearcherSidebar = ({
   const setShowTagSelectorClick = useCallback(() => {
     setShowTagSelector(prevValue => {
       const chosingNodePayload = prevValue ? null : { id: "searcher", type: null };
+      notebookRef.current.choosingNode = chosingNodePayload;
       nodeBookDispatch({ type: "setChoosingNode", payload: chosingNodePayload });
       return !prevValue;
     });
