@@ -490,3 +490,14 @@ export type UsersStatus = "All Time" | "Monthly" | "Weekly" | "Others Votes" | "
 // };
 
 // export type ClusterNodes = { [key: string]: Cluster };
+
+export type TutorialType = "nodes" | "searcher";
+export type UserTutorial = {
+  currentStep: SetStepType;
+  done: boolean;
+  skipped: boolean;
+};
+
+export type UserTutorials = {
+  [key in TutorialType]: UserTutorial;
+};

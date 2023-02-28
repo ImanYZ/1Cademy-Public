@@ -4,25 +4,34 @@ import React, { useMemo, useRef } from "react";
 import { orange25, orange200 } from "@/pages/home";
 
 import { TargetClientRect } from "../../hooks/useInteractiveTutorial";
-import { SetStepType, TutorialState } from "../../nodeBookTypes";
+import { TutorialState } from "../../nodeBookTypes";
 
 const TOOLTIP_OFFSET = 40;
 
 type TutorialProps = {
   tutorialState: TutorialState;
+
   // dispatchNodeTutorial: Dispatch<SetStep>;
-  onChangeStep: (step: SetStepType) => void;
-  // onNextStep: () => void;
-  // onPreviousStep: () => void;
+  // onChangeStep: (step: SetStepType) => void;
+  onNextStep: () => void;
+  onPreviousStep: () => void;
   targetClientRect: TargetClientRect;
   handleCloseProgressBarMenu: () => void;
+  // onUpdateNode: (tutorialKey: TutorialType, tutorialUpdated: UserTutorial) => void;
+  onSkip: () => void;
+  onFinalize: () => void;
 };
 
 export const Tutorial = ({
   tutorialState,
   targetClientRect,
-  onChangeStep,
+  onNextStep,
+  onPreviousStep,
   handleCloseProgressBarMenu,
+  // onSkipTutorial,
+  // onUpdateNode,
+  onSkip,
+  onFinalize,
 }: TutorialProps) => {
   const tooltipRef = useRef<HTMLDivElement | null>(null);
 
@@ -61,8 +70,11 @@ export const Tutorial = ({
     return { top, left };
   }, [targetClientRect, tutorialState]);
 
+  console.log({ tutorialState, tooltipClientRect, targetClientRect });
   if (!tutorialState) return null;
+  console.log(1);
   if (!tutorialState.currentStepName) return null;
+  console.log(2);
 
   if (
     targetClientRect.top === 0 &&
@@ -100,18 +112,17 @@ export const Tutorial = ({
         >
           <h2>{tutorialState.title}</h2>
           <p>{tutorialState.description}</p>
-          <button onClick={() => onChangeStep(tutorialState.previosStepName)}>{"<<"}</button>
+          <button onClick={onNextStep}>{"<<"}</button>
 
-          {tutorialState.currentStepName < tutorialState.stepLenght && (
-            <button onClick={() => onChangeStep(tutorialState.nextStepName)}>{">>"}</button>
-          )}
+          {tutorialState.currentStepName < tutorialState.stepLenght && <button onClick={onNextStep}>{">>"}</button>}
           {tutorialState.currentStepName === tutorialState.stepLenght && (
-            <button onClick={() => onChangeStep(tutorialState.previosStepName)}>{"Finalize"}</button>
+            <button onClick={onNextStep}>{"Finalize"}</button>
           )}
         </div>
       </div>
     );
 
+  console.log(3);
   return (
     <Box
       ref={tooltipRef}
@@ -146,7 +157,9 @@ export const Tutorial = ({
           variant="text"
           onClick={() => {
             handleCloseProgressBarMenu();
-            onChangeStep(null);
+            // onChangeStep(null);
+            // onUpdateNode("nodes", tutorialState.currentStepName, {});
+            onSkip();
           }}
           sx={{
             p: "8px 0px",
@@ -155,23 +168,25 @@ export const Tutorial = ({
           Skip
         </Button>
         <Box>
-          <Button
-            variant="outlined"
-            onClick={() => onChangeStep(tutorialState.previosStepName)}
-            sx={{
-              borderRadius: "32px",
-              mr: "16px",
+          {tutorialState.currentStepName > 1 && (
+            <Button
+              variant="outlined"
+              onClick={onPreviousStep}
+              sx={{
+                borderRadius: "32px",
+                mr: "16px",
 
-              p: "8px 32px",
-            }}
-          >
-            Prev
-          </Button>
+                p: "8px 32px",
+              }}
+            >
+              Prev
+            </Button>
+          )}
 
           {tutorialState.currentStepName < tutorialState.stepLenght && (
             <Button
               variant="contained"
-              onClick={() => onChangeStep(tutorialState.nextStepName)}
+              onClick={onNextStep}
               style={{ zIndex: 898999 }}
               sx={{
                 borderRadius: "32px",
@@ -189,7 +204,8 @@ export const Tutorial = ({
               variant="contained"
               onClick={() => {
                 handleCloseProgressBarMenu();
-                onChangeStep(tutorialState.nextStepName);
+                // onNextStep();
+                onFinalize();
               }}
               sx={{
                 borderRadius: "32px",

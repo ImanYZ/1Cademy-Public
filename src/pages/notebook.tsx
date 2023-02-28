@@ -77,7 +77,8 @@ import { MemoizedToolbarSidebar } from "../components/map/Sidebar/SidebarV2/Tool
 import { NodeItemDashboard } from "../components/NodeItemDashboard";
 import { Portal } from "../components/Portal";
 import { NodeBookProvider, useNodeBook } from "../context/NodeBookContext";
-import { TargetClientRect, useInteractiveTutorial } from "../hooks/useInteractiveTutorial2";
+// import { TargetClientRect } from "../hooks/useInteractiveTutorial2";
+import { TargetClientRect, useInteractiveTutorial } from "../hooks/useInteractiveTutorial3";
 import { useMemoizedCallback } from "../hooks/useMemoizedCallback";
 import { useWindowSize } from "../hooks/useWindowSize";
 import { useWorkerQueue } from "../hooks/useWorkerQueue";
@@ -121,12 +122,17 @@ import {
   EdgesData,
   FullNodeData,
   FullNodesData,
+  // NodeTutorialState,
   TNodeBookState,
+  // TutorialType,
   UserNodes,
   UserNodesData,
+  UserTutorials,
 } from "../nodeBookTypes";
 import { NodeType, SimpleNode2 } from "../types";
 import { doNeedToDeleteNode, getNodeTypesFromNode, isVersionApproved } from "../utils/helpers";
+
+export type TutorialType = "NODES" | "SEARCHER" | null;
 
 type DashboardProps = {};
 
@@ -275,6 +281,14 @@ const Dashboard = ({}: DashboardProps) => {
 
   const [openProgressBar, setOpenProgressBar] = useState(false);
   const [openProgressBarMenu, setOpenProgressBarMenu] = useState(false);
+
+  const [userTutorial /* setUserTutorial */] = useState<UserTutorials>({
+    nodes: { currentStep: 1, done: false, skipped: false },
+    searcher: { currentStep: 1, done: false, skipped: false },
+  });
+
+  const [currentTutorial, setCurrentTutorial] = useState<TutorialType>(null);
+
   // const {
   //   setTargetClientRect,
   //   isPlayingTheTutorial,
@@ -301,9 +315,14 @@ const Dashboard = ({}: DashboardProps) => {
     isEnabled: false,
   });
 
-  const [nodeTutorial /* setNodeTutorial */] = useState(Boolean(localStorage.getItem("node-tutorial")));
+  // const [nodeTutorial /* setNodeTutorial */] = useState(Boolean(localStorage.getItem("node-tutorial")));
 
-  const { stateNodeTutorial, onChangeStep, isPlayingTheTutorialRef } = useInteractiveTutorial({ notebookRef });
+  // const [tutorialSteps, setTutorialSteps] = useState<NodeTutorialState[]>([]);
+
+  const { stateNodeTutorial, onNextStep, onPreviousStep, isPlayingTheTutorialRef } = useInteractiveTutorial({
+    notebookRef,
+    currentTutorial,
+  });
   const onNodeInViewport = useCallback(
     (nodeId: string) => {
       const originalNode = document.getElementById(nodeId);
@@ -546,6 +565,9 @@ const Dashboard = ({}: DashboardProps) => {
   // flag for whether all tags data is downloaded from server
   // const [allTagsLoaded, setAllTagsLoaded] = useState(false);
 
+  // flag for whether tutorial state was loaded
+  const [userTutorialLoaded, setUserTutorialLoaded] = useState(false);
+
   // flag for whether users' nodes data is downloaded from server
   const [userNodesLoaded, setUserNodesLoaded] = useState(false);
 
@@ -729,6 +751,37 @@ const Dashboard = ({}: DashboardProps) => {
       scrollToNode(noodeIdFromDashboard);
     }, 1000);
   }, [firstScrollToNode, graph.nodes, nodeBookDispatch, openNodeHandler, scrollToNode]);
+
+  useEffect(() => {
+    devLog("USE_EFFECT", { userTutorialLoaded, user });
+    if (!user) return;
+    if (userTutorialLoaded) return;
+
+    devLog("USE_EFFECT", "get-user-tutorial");
+    const getTutorialState = async () => {
+      const tutorialRef = doc(db, "userTutorial", user.uname);
+      const tutorialDoc = await getDoc(tutorialRef);
+      console.log(tutorialDoc);
+
+      // TODO: load step from DB
+      // if (tutorialDoc.exists()) {
+      //   const tutorial = tutorialDoc.data() as UserTutorials;
+      //   setUserTutorial(tutorial);
+
+      //   if (tutorial.nodes.done) return;
+      //   if (tutorial.nodes.skipped) return;
+      //   setCurrentTutorial("NODES");
+      //   // onChangeStep(tutorial.nodes.currentStep);
+      // } else {
+      //   setCurrentTutorial("NODES");
+      // }
+
+      // setUserTutorialLoaded(true);
+    };
+
+    getTutorialState();
+    setUserTutorialLoaded(true);
+  }, [db, user, user?.userId, userTutorialLoaded]);
 
   //  bd => state (first render)
   useEffect(() => {
@@ -1044,12 +1097,15 @@ const Dashboard = ({}: DashboardProps) => {
   }, [nodeBookDispatch, openSidebar]);
 
   useEffect(() => {
+    // console.log("USE_EFFECT", { userTutorialLoaded, userTutorialNodes: userTutorial.nodes });
+    console.log("USE_EFFECT:tt", userTutorial.nodes.done, userTutorial.nodes.skipped);
+    if (!userTutorialLoaded) return;
+    if (!userTutorial.nodes.done && !userTutorial.nodes.skipped) return setFirstLoading(false);
     if (stateNodeTutorial) return;
-    console.log("effect SNAPSHOTS");
+
+    devLog("USE_EFFECT", "nodes synchronization");
 
     if (!shouldResetGraph.current) {
-      console.log("RESET GRAPH");
-
       setGraph({
         nodes: {},
         edges: {},
@@ -1076,14 +1132,27 @@ const Dashboard = ({}: DashboardProps) => {
     return () => {
       killSnapshot();
     };
-  }, [allTagsLoaded, db, snapshot, stateNodeTutorial, user?.uname, notebookChanged, nodeBookDispatch]);
+  }, [
+    allTagsLoaded,
+    db,
+    snapshot,
+    stateNodeTutorial,
+    user?.uname,
+    notebookChanged,
+    nodeBookDispatch,
+    userTutorialLoaded,
+    userTutorial.nodes.done,
+    userTutorial.nodes.skipped,
+  ]);
   // }, [allTagsLoaded, db, snapshot, user?.uname, settings.showClusterOptions, notebookChanged]);
 
   useEffect(() => {
     // local snapshot used only in interactive tutorial
     // if (!isPlayingTheTutorial) return;
+    console.log(stateNodeTutorial, userTutorial.nodes.done, userTutorial.nodes.skipped);
     if (!stateNodeTutorial) return;
-    console.log("effect INTERACTICE TUTORIAL");
+    if (userTutorial.nodes.done || userTutorial.nodes.skipped) return;
+    devLog("USE_EFFECT", "interactive tutorial");
 
     if (shouldResetGraph.current) {
       g.current = createGraph();
@@ -1247,7 +1316,15 @@ const Dashboard = ({}: DashboardProps) => {
       return { nodes: newNodes, edges: newEdges };
     });
     setOpenProgressBarMenu(true);
-  }, [allTags, settings.showClusterOptions, stateNodeTutorial, notebookChanged]);
+  }, [
+    allTags,
+    settings.showClusterOptions,
+    stateNodeTutorial,
+    notebookChanged,
+    userTutorial.nodes.done,
+    userTutorial.nodes.skipped,
+    userTutorial.nodes.currentStep,
+  ]);
 
   useEffect(() => {
     if (!db) return;
@@ -3934,18 +4011,44 @@ const Dashboard = ({}: DashboardProps) => {
     setOpenProgressBar(false);
     setOpenProgressBarMenu(true);
   }, []);
+
   const handleCloseProgressBarMenu = useCallback(() => {
     setOpenProgressBarMenu(false);
   }, []);
+
+  // const onUpdateNode = useCallback(
+  //   async (tutorialKey: TutorialType) => {
+  //     if (!user) return;
+
+  //     const userTutorialUpdated = { ...userTutorial, [tutorialKey]: tutorialUpdated };
+  //     onChangeStep(null);
+  //     setUserTutorial(userTutorialUpdated);
+
+  //     const tutorialRef = doc(db, "userTutorial", user.uname);
+  //     const tutorialDoc = await getDoc(tutorialRef);
+
+  //     if (tutorialDoc.exists()) {
+  //       await updateDoc(tutorialRef, userTutorialUpdated);
+  //     } else {
+  //       await setDoc(tutorialRef, userTutorialUpdated);
+  //     }
+  //   },
+  //   [db, onChangeStep, user, userTutorial]
+  // );
+
   return (
     <div className="MapContainer" style={{ overflow: "hidden" }}>
       {stateNodeTutorial?.anchor && (
         <Portal anchor="portal">
           <Tutorial
             tutorialState={stateNodeTutorial}
-            onChangeStep={onChangeStep}
+            // onChangeStep={onChangeStep}
             targetClientRect={targetClientRect}
             handleCloseProgressBarMenu={handleCloseProgressBarMenu}
+            onSkip={() => console.log("skip")}
+            onFinalize={() => console.log("fff")}
+            onNextStep={onNextStep}
+            onPreviousStep={onPreviousStep}
           />
         </Portal>
       )}
@@ -4264,7 +4367,7 @@ const Dashboard = ({}: DashboardProps) => {
             </IconButton>
           </Tooltip>
 
-          {!nodeTutorial && (
+          {!stateNodeTutorial && (
             <Tooltip
               title="Start tutorial"
               placement="left"
@@ -4290,7 +4393,7 @@ const Dashboard = ({}: DashboardProps) => {
               <IconButton
                 color="secondary"
                 onClick={() => {
-                  onChangeStep(1);
+                  setCurrentTutorial("NODES");
                   setOpenProgressBarMenu(true);
                 }}
               >
@@ -4545,9 +4648,17 @@ const Dashboard = ({}: DashboardProps) => {
                 {!stateNodeTutorial?.anchor && (
                   <Tutorial
                     tutorialState={stateNodeTutorial}
-                    onChangeStep={onChangeStep}
                     targetClientRect={targetClientRect}
                     handleCloseProgressBarMenu={handleCloseProgressBarMenu}
+                    onSkip={() => console.log("skip")}
+                    onFinalize={() => console.log("fff")}
+                    onNextStep={onNextStep}
+                    onPreviousStep={onPreviousStep}
+                    // tutorialState={stateNodeTutorial}
+                    // onChangeStep={onChangeStep}
+                    // targetClientRect={targetClientRect}
+                    // handleCloseProgressBarMenu={handleCloseProgressBarMenu}
+                    // onSkipTutorial={onSkipTutorial}
                   />
                 )}
                 {settings.showClusterOptions && settings.showClusters && (
