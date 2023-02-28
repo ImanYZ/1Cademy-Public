@@ -1981,7 +1981,7 @@ const Dashboard = ({}: DashboardProps) => {
   const hideOffsprings = useMemoizedCallback(
     nodeId => {
       if (notebookRef.current.choosingNode || !user) return;
-
+      console.log({ isPlayingTheTutorialRef: isPlayingTheTutorialRef.current });
       if (isPlayingTheTutorialRef.current) return;
 
       setGraph(graph => {
@@ -2048,19 +2048,22 @@ const Dashboard = ({}: DashboardProps) => {
         return graph;
       });
     },
-    [recursiveOffsprings]
+    [recursiveOffsprings, isPlayingTheTutorialRef]
   );
+
+  console.log({ isPlayingTheTutorialRef: isPlayingTheTutorialRef.current });
 
   const openLinkedNode = useCallback(
     (linkedNodeID: string, typeOperation?: string) => {
       devLog("open Linked Node", {
         linkedNodeID,
         typeOperation,
+        isPlayingTheTutorialRef: isPlayingTheTutorialRef.current,
       });
       if (notebookRef.current.choosingNode) return;
-      // console.log(11);
+
       if (isPlayingTheTutorialRef.current) return;
-      // console.log(22);
+
       createActionTrack(
         db,
         "NodeOpen",
@@ -2231,9 +2234,17 @@ const Dashboard = ({}: DashboardProps) => {
         return graph;
       });
     },
-    // TODO: CHECK dependencies
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [user, setGraph, initNodeStatusChange /*navigateToFirstParent*/]
+    [
+      isPlayingTheTutorialRef,
+      db,
+      user?.uname,
+      user?.fName,
+      user?.lName,
+      user?.chooseUname,
+      user?.imageUrl,
+      initNodeStatusChange,
+      nodeBookDispatch,
+    ]
   );
 
   const openAllChildren = useCallback((nodeId: string) => {
