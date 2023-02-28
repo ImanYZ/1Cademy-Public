@@ -143,7 +143,7 @@ export const INTERACTIVE_TUTORIAL_NOTEBOOK_NODES: FullNodesData = {
     institNames: ["University of Michigan - Ann Arbor"],
     title: "Creating or improving a node in 1Cademy",
     nodeImage:
-      "https://firebasestorage.googleapis.com/v0/b/onecademy-1.appspot.com/o/UploadedImages%2FTirdadBarghi_Tue%2C%2011%20Feb%202020%2018%3A04%3A43%20GMT.JPG?alt=media&token=d0036406-c99f-4d39-8a92-1975f1d13c80",
+      "https://firebasestorage.googleapis.com/v0/b/onecademy-1.appspot.com/o/UploadedImages%2FK3DmaX1ZAfXSZ5EzWvz46uJ09fZ2%2FTue%2C%2028%20Feb%202023%2013%3A46%3A32%20GMT_430x1300.png?alt=media&token=98c21b70-0c10-4e57-a23d-352d26299008",
     userNodeId: "Tvh7IxaVAGkTATAV9RPT",
     nodeChangeType: "added",
     userNodeChangeType: "added",

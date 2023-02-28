@@ -171,7 +171,7 @@ const NODES_STEPS: {
     description: (
       <MarkdownRender
         text={
-          "This is the content, the content of a node describes what is stated in a title. we want the content to be clear, concise, and accurate."
+          'This is the "content", which describes what is stated in a title. we want the content to be clear, concise, and accurate.'
         }
       />
     ),
