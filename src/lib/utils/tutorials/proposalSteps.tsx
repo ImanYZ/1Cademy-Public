@@ -55,7 +55,9 @@ const STEPS: {
 }[] = [
   {
     // ...getBaseStepConfig(action.type),
-    localSnapshot: [{ ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["00"], nodeChangeType: "added", open: true }],
+    localSnapshot: [
+      { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["00"], nodeChangeType: "added", open: true, editable: true },
+    ],
     targetId: "00",
     title: "Proposals: Overview",
     description: (
