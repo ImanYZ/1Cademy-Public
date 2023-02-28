@@ -284,7 +284,7 @@ const Dashboard = ({}: DashboardProps) => {
   const [openProgressBar, setOpenProgressBar] = useState(false);
   const [openProgressBarMenu, setOpenProgressBarMenu] = useState(false);
 
-  const [userTutorial /* setUserTutorial */] = useState<UserTutorials>({
+  const [userTutorial, setUserTutorial] = useState<UserTutorials>({
     nodes: { currentStep: 1, done: false, skipped: false },
     searcher: { currentStep: 1, done: false, skipped: false },
   });
@@ -774,24 +774,24 @@ const Dashboard = ({}: DashboardProps) => {
       console.log(tutorialDoc);
 
       // TODO: load step from DB
-      // if (tutorialDoc.exists()) {
-      //   const tutorial = tutorialDoc.data() as UserTutorials;
-      //   setUserTutorial(tutorial);
-
-      //   if (tutorial.nodes.done) return;
-      //   if (tutorial.nodes.skipped) return;
-      //   setCurrentTutorial("NODES");
-      //   // onChangeStep(tutorial.nodes.currentStep);
-      // } else {
-      //   setCurrentTutorial("NODES");
-      // }
+      if (tutorialDoc.exists()) {
+        const tutorial = tutorialDoc.data() as UserTutorials;
+        setUserTutorial(tutorial);
+        if (tutorial.nodes.done) return setUserTutorialLoaded(true);
+        if (tutorial.nodes.skipped) return setUserTutorialLoaded(true);
+        setCurrentTutorial("NODES");
+        // // onChangeStep(tutorial.nodes.currentStep);
+      } else {
+        console.log("will-start");
+        setCurrentTutorial("NODES");
+      }
 
       // setUserTutorialLoaded(true);
     };
 
     getTutorialState();
     setUserTutorialLoaded(true);
-  }, [db, user, user?.userId, userTutorialLoaded]);
+  }, [db, setCurrentTutorial, user, user?.userId, userTutorialLoaded]);
 
   //  bd => state (first render)
   useEffect(() => {
@@ -1109,9 +1109,13 @@ const Dashboard = ({}: DashboardProps) => {
   useEffect(() => {
     // console.log("USE_EFFECT", { userTutorialLoaded, userTutorialNodes: userTutorial.nodes });
     console.log("USE_EFFECT:tt", userTutorialLoaded, userTutorial.nodes.done, userTutorial.nodes.skipped);
+    // const tutorialFinished = userTutorial.nodes.done || userTutorial.nodes.skipped;
     if (!userTutorialLoaded) return;
-    if (!userTutorial.nodes.done && !userTutorial.nodes.skipped) return setFirstLoading(false);
+    // if (!tutorialFinished) return setFirstLoading(false);
     if (stateNodeTutorial) return;
+    // if(userTutorial.nodes.done ||userTutorial.nodes.skipped){
+
+    // }
 
     devLog("USE_EFFECT", "nodes synchronization");
 
@@ -1159,10 +1163,11 @@ const Dashboard = ({}: DashboardProps) => {
   useEffect(() => {
     // local snapshot used only in interactive tutorial
     // if (!isPlayingTheTutorial) return;
+    console.log("useEffect", "interactive-tutorial", {});
     console.log(stateNodeTutorial, userTutorial.nodes.done, userTutorial.nodes.skipped);
     if (!stateNodeTutorial) return;
-    if (userTutorial.nodes.done || userTutorial.nodes.skipped) return;
-    devLog("USE_EFFECT", "interactive tutorial");
+    // if (userTutorial.nodes.done || userTutorial.nodes.skipped) return;
+    devLog("USE_EFFECT", "interactive-tutorial");
 
     if (shouldResetGraph.current) {
       g.current = createGraph();
@@ -1173,7 +1178,6 @@ const Dashboard = ({}: DashboardProps) => {
       });
       // setLocalSnapshot({);
       shouldResetGraph.current = false;
-      setCurrentTutorial("NODES");
     }
 
     const mergeAllNodes = (newAllNodes: FullNodeData[], currentAllNodes: FullNodesData): FullNodesData => {
@@ -1335,6 +1339,7 @@ const Dashboard = ({}: DashboardProps) => {
     userTutorial.nodes.done,
     userTutorial.nodes.skipped,
     userTutorial.nodes.currentStep,
+    setCurrentTutorial,
   ]);
 
   useEffect(() => {

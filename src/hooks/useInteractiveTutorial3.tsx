@@ -50,36 +50,48 @@ export const useInteractiveTutorial = ({ notebookRef }: useInteractiveTutorialPr
     }
   };
 
+  // useEffect(() => {
+
+  // }, [currentTutorial]);
+
+  // const onStart = useCallback(() => {
+  //   console.log("onStart", steps);
+  //   idxCurrentStepRef.current = 45;
+  //   const selectedStep = steps[idxCurrentStepRef.current];
+  //   setStateNodeTutorial(selectedStep);
+  //   isPlayingTheTutorialRef.current = true;
+  //   notebookRef.current.selectedNode = selectedStep.targetId;
+  //   nodeBookDispatch({ type: "setSelectedNode", payload: selectedStep.targetId });
+  // }, [nodeBookDispatch, notebookRef, steps]);
+
   useEffect(() => {
+    if (!currentTutorial) {
+      setStateNodeTutorial(null);
+      return setSteps([]);
+    }
+
+    console.log("==> call NODES2");
+    let newSteps: NodeTutorialState[] = [];
     console.log({ currentTutorial, NODES_STEPS_COMPLETE });
     if (currentTutorial === "NODES") {
       console.log("NODES");
-      return setSteps(NODES_STEPS_COMPLETE);
+      newSteps = NODES_STEPS_COMPLETE;
+      //  setSteps(NODES_STEPS_COMPLETE);
     }
     if (currentTutorial === "SEARCHER") {
       console.log("SEARCHER");
-      return setSteps(SEARCHER_STEPS_COMPLETE);
+      newSteps = SEARCHER_STEPS_COMPLETE;
+      //  setSteps(SEARCHER_STEPS_COMPLETE);
     }
 
-    setStateNodeTutorial(null);
-    return setSteps([]);
-  }, [currentTutorial]);
-
-  const onStart = useCallback(() => {
-    console.log("onStart", steps);
-    idxCurrentStepRef.current = 45;
-    const selectedStep = steps[idxCurrentStepRef.current];
+    idxCurrentStepRef.current = 0;
+    const selectedStep = newSteps[idxCurrentStepRef.current];
     setStateNodeTutorial(selectedStep);
     isPlayingTheTutorialRef.current = true;
     notebookRef.current.selectedNode = selectedStep.targetId;
     nodeBookDispatch({ type: "setSelectedNode", payload: selectedStep.targetId });
-  }, [nodeBookDispatch, notebookRef, steps]);
-
-  useEffect(() => {
-    if (!currentTutorial) return;
-    if (!steps.length) return;
-    onStart();
-  }, [currentTutorial, onStart, steps.length]);
+    setSteps(newSteps);
+  }, [currentTutorial, nodeBookDispatch, notebookRef, steps.length]);
 
   useEffect(() => {
     if (!defaultSelectedNode.current) defaultSelectedNode.current = notebookRef.current.selectedNode;
