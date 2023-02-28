@@ -1,11 +1,5 @@
 import moment from "moment";
-import {
-  ISemester,
-  ISemesterStudent,
-  ISemesterStudentStat,
-  ISemesterStudentStatChapter,
-  ISemesterStudentVoteStat,
-} from "src/types/ICourse";
+import { ISemester, ISemesterStudent, ISemesterStudentVoteStat } from "src/types/ICourse";
 
 import {
   GeneralSemesterStudentsStats,
@@ -131,7 +125,7 @@ export const getStudentSubgroupInBars = (points: number, maxPoints: number): key
 };
 
 const getInitialSumChapterPerDay = () => {
-  const init: GeneralSemesterStudentsStats = {
+  const init: any = {
     childProposals: 0,
     editProposals: 0,
     links: 0,
@@ -143,38 +137,32 @@ const getInitialSumChapterPerDay = () => {
   return init;
 };
 
-const sumChapterPerDay = (chapters: ISemesterStudentStatChapter[]) => {
-  const initialValue = getInitialSumChapterPerDay();
-  return chapters.reduce(
-    (a: GeneralSemesterStudentsStats, c) => ({
-      ...a,
-      childProposals: a.childProposals + c.nodes,
-      editProposals: a.editProposals + c.nodes + c.proposals,
-      links: a.links + c.links,
-      nodes: a.nodes + c.newNodes, // TODO: check this
-      questions: a.questions + c.questions,
-      votes: a.votes + c.agreementsWithInst + c.disagreementsWithInst,
-    }),
-    initialValue
-  );
+const sumChapterPerDay = (day: any) => {
+  return {
+    ...day,
+    childProposals: day.nodes,
+    editProposals: day.proposals - day.nodes,
+    links: day.links,
+    nodes: day.newNodes,
+    questions: day.questions,
+    votes: day.agreementsWithInst + day.disagreementsWithInst,
+  };
 };
 
 // TODO: test
-export const mapStudentsStatsToDataByDates = (data: ISemesterStudentStat[]): MappedData[] => {
+export const mapStudentsStatsToDataByDates = (data: ISemesterStudentVoteStat[]): MappedData[] => {
   // resByStudents: [{d1,d2},{d1,d3}]
-  const resByStudents = data.map(student => {
-    return student.days.reduce((acu: { [key: string]: GeneralSemesterStudentsStats }, cur) => {
-      console.log("curcur", cur);
-      const responseSumChapterPerDay = { day: cur.day, chaptersSum: sumChapterPerDay(cur.chapters ?? []) };
 
-      const prevDay = acu[cur.day] ?? getInitialSumChapterPerDay();
-      const sum: GeneralSemesterStudentsStats = {
-        childProposals: prevDay.childProposals + responseSumChapterPerDay.chaptersSum.childProposals,
-        editProposals: prevDay.editProposals + responseSumChapterPerDay.chaptersSum.editProposals,
-        links: prevDay.links + responseSumChapterPerDay.chaptersSum.links,
-        nodes: prevDay.nodes + responseSumChapterPerDay.chaptersSum.nodes,
-        questions: prevDay.questions + responseSumChapterPerDay.chaptersSum.questions,
-        votes: prevDay.votes + responseSumChapterPerDay.chaptersSum.votes,
+  const resByStudents = data.map(student => {
+    return student.days.reduce((acu: any, cur) => {
+      const responseSumChapterPerDay = { day: cur.day, chaptersSum: sumChapterPerDay(cur) };
+      const sum: any = {
+        childProposals: responseSumChapterPerDay.chaptersSum.childProposals,
+        editProposals: responseSumChapterPerDay.chaptersSum.editProposals,
+        links: responseSumChapterPerDay.chaptersSum.links,
+        nodes: responseSumChapterPerDay.chaptersSum.nodes,
+        questions: responseSumChapterPerDay.chaptersSum.questions,
+        votes: responseSumChapterPerDay.chaptersSum.votes,
       };
       return { ...acu, [cur.day]: sum };
     }, {});
@@ -182,7 +170,7 @@ export const mapStudentsStatsToDataByDates = (data: ISemesterStudentStat[]): Map
 
   // resByDay: {d1,d2,d3}
   const resByDay = resByStudents.reduce((acu, cur) => {
-    return Object.entries(cur).reduce((acuStudent: { [key: string]: GeneralSemesterStudentsStats }, [key, value]) => {
+    return Object.entries(cur).reduce((acuStudent: any, [key, value]: any) => {
       const prevStudent = acuStudent[key] ?? getInitialSumChapterPerDay();
       const sumsStudents: GeneralSemesterStudentsStats = {
         childProposals: prevStudent.childProposals + value.childProposals,
@@ -194,10 +182,10 @@ export const mapStudentsStatsToDataByDates = (data: ISemesterStudentStat[]): Map
       };
       return { ...acuStudent, [key]: sumsStudents };
     }, acu);
-  });
+  }, {});
 
   // [{date,value},{date,value},{date,value}]
-  return Object.entries(resByDay).map(([date, value]) => ({ date, value }));
+  return Object.entries(resByDay).map(([date, value]: any) => ({ date, value }));
 };
 
 export const getGeneralStats = (data: MappedData[]) => {
