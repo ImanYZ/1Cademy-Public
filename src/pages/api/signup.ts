@@ -8,6 +8,7 @@ import { isEmail, isEmpty } from "@/lib/utils/utils";
 
 import { admin, checkRestartBatchWriteCounts, commitBatch, db } from "../../lib/firestoreServer/admin";
 import { IInstitution } from "src/types/IInstitution";
+import { createOrRestoreStatDocs } from "src/utils/course-helpers";
 
 const addPracticeQuestions = async (
   batch: WriteBatch,
@@ -213,38 +214,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
         });
         [batch, writeCounts] = await checkRestartBatchWriteCounts(batch, writeCounts);
 
-        const semesterStatRef = db.collection("semesterStudentStats").doc();
-        batch.set(semesterStatRef, {
-          tagId: semesterData.tagId,
-          uname: data.uname,
-          days: [],
-          createdAt: Timestamp.now(),
-          updatedAt: Timestamp.now(),
-        });
-        [batch, writeCounts] = await checkRestartBatchWriteCounts(batch, writeCounts);
-
-        const semesterVoteStatRef = db.collection("semesterStudentVoteStats").doc();
-        batch.set(semesterVoteStatRef, {
-          tagId: semesterData.tagId,
-          uname: data.uname,
-          upVotes: 0,
-          downVotes: 0,
-          instVotes: 0,
-          agreementsWithInst: 0,
-          disagreementsWithInst: 0,
-          lastActivity: Timestamp.now(),
-          totalPoints: 0,
-          newNodes: 0,
-          improvements: 0,
-          questions: 0,
-          questionPoints: 0,
-          votes: 0,
-          votePoints: 0,
-          deleted: false,
-          createdAt: Timestamp.now(),
-          updatedAt: Timestamp.now(),
-        });
-        [batch, writeCounts] = await checkRestartBatchWriteCounts(batch, writeCounts);
+        [batch, writeCounts] = await createOrRestoreStatDocs(data?.course, data.uname, batch, writeCounts);
         await getAuth().setCustomUserClaims(userRecord.uid, { student: true });
       }
     }
