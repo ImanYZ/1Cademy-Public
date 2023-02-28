@@ -293,9 +293,9 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
             _sankeyData.push({
               source: studentNameByUname[_semesterStudentSankey.uname],
               target: studentNameByUname[intraction.uname],
-              upVotes: intraction.upVotes,
-              downVotes: intraction.downVotes,
-              value: intraction.upVotes + intraction.downVotes,
+              upVotes: intraction.upVote,
+              downVotes: intraction.downVote,
+              value: intraction.upVote + intraction.downVote,
             });
           }
         } else if (change.type === "modified") {
@@ -307,9 +307,9 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
             newSankeyData.push({
               source: studentNameByUname[_semesterStudentSankey.uname],
               target: studentNameByUname[intraction.uname],
-              upVotes: intraction.upVotes,
-              downVotes: intraction.downVotes,
-              value: intraction.upVotes + intraction.downVotes,
+              upVotes: intraction.upVote,
+              downVotes: intraction.downVote,
+              value: intraction.upVote + intraction.downVote,
             });
           }
           _sankeyData = [...filterSankeyData, ...newSankeyData];
@@ -661,7 +661,7 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
         >
           {isLoading && <StackedBarPlotStatsSkeleton />}
 
-          {!isLoading && semesterConfig?.isQuestionProposalRequired && (
+          {!isLoading && (semesterConfig?.isQuestionProposalRequired || semesterConfig?.isProposalRequired) && (
             <>
               <Box
                 sx={{
