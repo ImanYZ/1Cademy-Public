@@ -1,5 +1,11 @@
 import moment from "moment";
-import { ISemester, ISemesterStudent, ISemesterStudentStat, ISemesterStudentVoteStat } from "src/types/ICourse";
+import {
+  ISemester,
+  ISemesterStudent,
+  ISemesterStudentStat,
+  ISemesterStudentStatChapter,
+  ISemesterStudentVoteStat,
+} from "src/types/ICourse";
 
 import {
   GeneralSemesterStudentsStats,
