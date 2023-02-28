@@ -57,7 +57,7 @@ type SearcherSidebarProps = {
   innerHeight?: number;
   innerWidth: number;
   disableSearcher?: boolean;
-  enableElements?: string[];
+  enableElements: string[];
 };
 
 type Pagination = {
@@ -79,7 +79,7 @@ const SearcherSidebar = ({
   innerHeight,
   innerWidth,
   disableSearcher,
-  enableElements,
+  enableElements = [],
 }: SearcherSidebarProps) => {
   const { nodeBookState, nodeBookDispatch } = useNodeBook();
   const { allTags, setAllTags } = useTagsTreeView();
@@ -110,11 +110,16 @@ const SearcherSidebar = ({
 
   const selectedTags = useMemo<TagTreeView[]>(() => Object.values(allTags).filter(tag => tag.checked), [allTags]);
 
+  console.log("enableElements", enableElements);
+
   // tutorial constants
-  const disableInputSearcher = disableSearcher && !enableElements?.includes("search-input");
-  const disableSearchIcon = disableSearcher && !enableElements?.includes("SearchIcon");
-  const disableEditedInThePast = disableSearcher && !enableElements?.includes("search-recently-input");
-  const disableRecentNodeList = disableSearcher && !enableElements?.includes("recentNodesList");
+  const disableInputSearcher = disableSearcher && !enableElements.includes("search-input");
+  const disableSearchIcon = disableSearcher && !enableElements.includes("SearchIcon");
+  const disableEditedInThePast = disableSearcher && !enableElements.includes("search-recently-input");
+  const disableRecentNodeList = disableSearcher && !enableElements.includes("recentNodesList");
+  const disableSearchItem = disableSearcher && !enableElements.includes("search-item");
+
+  console.log({ disableSearchList: disableSearchItem });
 
   const onSearch = useCallback(
     async (page: number, q: string, sortOption: SortValues, sortDirection: SortDirection, nodeTypes: NodeType[]) => {
@@ -310,7 +315,7 @@ const SearcherSidebar = ({
 
   const contentSignalState = useMemo(() => {
     return { updated: true };
-  }, [isRetrieving, searchResults]);
+  }, [isRetrieving, searchResults, JSON.stringify(enableElements), disableSearcher]);
 
   const setChosenTagsCallback = useCallback(
     (newChosenTags: ChosenTag[]) => {
@@ -676,7 +681,16 @@ const SearcherSidebar = ({
                 <Paper
                   elevation={3}
                   key={`resNode${idx}`}
-                  onClick={() => openLinkedNode(resNode.id, "Searcher")}
+                  onClick={
+                    disableSearchItem
+                      ? () => {
+                          console.log("calling Openlinked true");
+                        }
+                      : () => {
+                          console.log("calling Openlinked");
+                          openLinkedNode(resNode.id, "Searcher");
+                        }
+                  }
                   sx={{
                     listStyle: "none",
                     padding: {
@@ -684,7 +698,8 @@ const SearcherSidebar = ({
                       sm: "10px",
                     },
                     borderLeft: "studied" in resNode && resNode.studied ? "solid 4px #fdc473" : " solid 4px #fd7373",
-                    cursor: "pointer",
+                    cursor: disableSearchItem ? "not-allowed" : "pointer",
+                    opacity: disableSearchItem ? "0.5" : "1",
                   }}
                 >
                   {innerWidth > theme.breakpoints.values.sm && (

@@ -324,7 +324,10 @@ const UserInfoSidebar = ({ open, onClose, theme, openLinkedNode, username }: Use
               )}
             </div>
           </div>
-          <div id="MiniUserPrifilePointsContainer" style={{ alignItems: "center", justifyContent: "space-around" }}>
+          <div
+            className="MiniUserPrifilePointsContainer"
+            style={{ alignItems: "center", justifyContent: "space-around" }}
+          >
             {sUserObj && (
               <>
                 <div className="MiniUserProfilePoints">

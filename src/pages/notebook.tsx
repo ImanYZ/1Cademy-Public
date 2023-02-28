@@ -667,7 +667,7 @@ const Dashboard = ({}: DashboardProps) => {
       // console.log({ nodeId });
 
       devLog("open_Node_Handler", nodeId);
-      if (isPlayingTheTutorialRef.current) return;
+      if (isPlayingTheTutorialRef.current && currentTutorial !== "SEARCHER") return;
 
       let linkedNodeRef;
       let userNodeRef = null;
@@ -675,7 +675,7 @@ const Dashboard = ({}: DashboardProps) => {
 
       const nodeRef = doc(db, "nodes", nodeId);
       const nodeDoc = await getDoc(nodeRef);
-      // console.log({ nodeDoc });
+      console.log({ exist: nodeDoc.exists() });
       const batch = writeBatch(db);
       if (nodeDoc.exists() && user) {
         const thisNode: any = { ...nodeDoc.data(), id: nodeId };
@@ -735,6 +735,7 @@ const Dashboard = ({}: DashboardProps) => {
           batch.set(doc(userNodeLogRef), userNodeLogData);
           await batch.commit();
 
+          notebookRef.current.selectedNode = nodeId;
           nodeBookDispatch({ type: "setSelectedNode", payload: nodeId });
           /* setTimeout(() => {
             scrollToNode(nodeId);
@@ -744,7 +745,7 @@ const Dashboard = ({}: DashboardProps) => {
         }
       }
     },
-    [user, allTags]
+    [user, allTags, currentTutorial]
   );
 
   //Getting the node from the Url to open and scroll to that node in the first render
@@ -2051,7 +2052,38 @@ const Dashboard = ({}: DashboardProps) => {
     [recursiveOffsprings, isPlayingTheTutorialRef]
   );
 
-  console.log({ isPlayingTheTutorialRef: isPlayingTheTutorialRef.current });
+  const onFinalizeTutorial = useCallback(async () => {
+    if (!user) return;
+    if (!stateNodeTutorial) return;
+    if (!currentTutorial) return;
+
+    console.log(1);
+    const keyTutorial: TutorialTypeKeys | null =
+      currentTutorial === "NODES" ? "nodes" : currentTutorial === "SEARCHER" ? "searcher" : null;
+    if (!keyTutorial) return;
+
+    console.log(2);
+
+    const tutorialUpdated: UserTutorial = {
+      ...userTutorial[keyTutorial],
+      currentStep: stateNodeTutorial.currentStepName,
+      done: true,
+    };
+    const userTutorialUpdated: UserTutorials = { ...userTutorial, [keyTutorial]: tutorialUpdated };
+    setCurrentTutorial(null);
+    setOpenSidebar(null);
+    setUserTutorial(userTutorialUpdated);
+
+    const tutorialRef = doc(db, "userTutorial", user.uname);
+    const tutorialDoc = await getDoc(tutorialRef);
+
+    if (tutorialDoc.exists()) {
+      await updateDoc(tutorialRef, userTutorialUpdated);
+    } else {
+      await setDoc(tutorialRef, userTutorialUpdated);
+    }
+    console.log(3);
+  }, [currentTutorial, db, setCurrentTutorial, stateNodeTutorial, user, userTutorial]);
 
   const openLinkedNode = useCallback(
     (linkedNodeID: string, typeOperation?: string) => {
@@ -2060,9 +2092,13 @@ const Dashboard = ({}: DashboardProps) => {
         typeOperation,
         isPlayingTheTutorialRef: isPlayingTheTutorialRef.current,
       });
+      console.log("linked 0", isPlayingTheTutorialRef.current);
+
       if (notebookRef.current.choosingNode) return;
 
-      if (isPlayingTheTutorialRef.current) return;
+      if (isPlayingTheTutorialRef.current && currentTutorial !== "SEARCHER") return;
+
+      console.log("lib");
 
       createActionTrack(
         db,
@@ -2109,12 +2145,20 @@ const Dashboard = ({}: DashboardProps) => {
       if (typeOperation === "CitationSidebar") {
         setOpenSidebar(null);
       }
+      console.log("Current tutoriial");
+      if (currentTutorial === "SEARCHER") {
+        console.log("Finalize tutoriial called");
+
+        onFinalizeTutorial();
+      }
     },
 
     [
+      currentTutorial,
       db,
       isPlayingTheTutorialRef,
       nodeBookDispatch,
+      onFinalizeTutorial,
       openNodeHandler,
       scrollToNode,
       user?.chooseUname,
@@ -4096,35 +4140,6 @@ const Dashboard = ({}: DashboardProps) => {
       skipped: true,
     };
     const userTutorialUpdated = { ...userTutorial, [keyTutorial]: tutorialUpdated };
-    setCurrentTutorial(null);
-    setOpenSidebar(null);
-    setUserTutorial(userTutorialUpdated);
-
-    const tutorialRef = doc(db, "userTutorial", user.uname);
-    const tutorialDoc = await getDoc(tutorialRef);
-
-    if (tutorialDoc.exists()) {
-      await updateDoc(tutorialRef, userTutorialUpdated);
-    } else {
-      await setDoc(tutorialRef, userTutorialUpdated);
-    }
-  }, [currentTutorial, db, setCurrentTutorial, stateNodeTutorial, user, userTutorial]);
-
-  const onFinalizeTutorial = useCallback(async () => {
-    if (!user) return;
-    if (!stateNodeTutorial) return;
-    if (!currentTutorial) return;
-
-    const keyTutorial: TutorialTypeKeys | null =
-      currentTutorial === "NODES" ? "nodes" : currentTutorial === "SEARCHER" ? "searcher" : null;
-    if (!keyTutorial) return;
-
-    const tutorialUpdated: UserTutorial = {
-      ...userTutorial[keyTutorial],
-      currentStep: stateNodeTutorial.currentStepName,
-      done: true,
-    };
-    const userTutorialUpdated: UserTutorials = { ...userTutorial, [keyTutorial]: tutorialUpdated };
     setCurrentTutorial(null);
     setOpenSidebar(null);
     setUserTutorial(userTutorialUpdated);

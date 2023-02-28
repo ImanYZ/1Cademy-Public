@@ -158,6 +158,7 @@ export const SidebarWrapper = ({
       )}
       <Box>{SidebarOptions}</Box>
       <Box
+        id={`${id}-content`}
         ref={sidebarContentRef}
         sx={{
           height: "100%",
