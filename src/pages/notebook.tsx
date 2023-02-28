@@ -287,7 +287,7 @@ const Dashboard = ({}: DashboardProps) => {
     searcher: { currentStep: 1, done: false, skipped: false },
   });
 
-  const [currentTutorial, setCurrentTutorial] = useState<TutorialType>(null);
+  // const [currentTutorial, setCurrentTutorial] = useState<TutorialType>(null);
 
   // const {
   //   setTargetClientRect,
@@ -319,10 +319,11 @@ const Dashboard = ({}: DashboardProps) => {
 
   // const [tutorialSteps, setTutorialSteps] = useState<NodeTutorialState[]>([]);
 
-  const { stateNodeTutorial, onNextStep, onPreviousStep, isPlayingTheTutorialRef } = useInteractiveTutorial({
-    notebookRef,
-    currentTutorial,
-  });
+  const { stateNodeTutorial, onNextStep, onPreviousStep, isPlayingTheTutorialRef, setCurrentTutorial } =
+    useInteractiveTutorial({
+      notebookRef,
+      // currentTutorial,
+    });
   const onNodeInViewport = useCallback(
     (nodeId: string) => {
       const originalNode = document.getElementById(nodeId);
