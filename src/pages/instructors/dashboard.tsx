@@ -47,7 +47,7 @@ import {
   calculateVoteStatPoints,
   getGeneralStats,
   getStackedBarStat,
-  mapStudentsStatsToDataByDates,
+  mapStudentsStatsDataByDates,
 } from "../../lib/utils/charts.utils";
 export type Chapter = {
   [key: string]: number[];
@@ -340,6 +340,14 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
         setStackedBar([]);
         setThereIsData(false);
         setSemesterStudentVoteState([]);
+        setTrendStats({
+          childProposals: [],
+          editProposals: [],
+          proposedLinks: [],
+          nodes: [],
+          votes: [],
+          questions: [],
+        });
         return;
       }
 
@@ -362,6 +370,39 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
           semesterStudentVoteStats.splice(index, 1);
         }
       }
+
+      const res = mapStudentsStatsDataByDates(semesterStudentVoteStats);
+      const gg = getGeneralStats(res);
+      const ts = res.reduce(
+        (a: TrendStats, c): TrendStats => {
+          return {
+            childProposals: semesterConfig?.isProposalRequired
+              ? [...a.childProposals, { date: new Date(c.date), num: c.value.childProposals }]
+              : [],
+            editProposals: semesterConfig?.isProposalRequired
+              ? [...a.editProposals, { date: new Date(c.date), num: c.value.editProposals }]
+              : [],
+            proposedLinks: [...a.proposedLinks, { date: new Date(c.date), num: c.value.links }],
+            nodes: [...a.nodes, { date: new Date(c.date), num: c.value.nodes }],
+            questions: semesterConfig?.isQuestionProposalRequired
+              ? [...a.questions, { date: new Date(c.date), num: c.value.questions }]
+              : [],
+            votes: semesterConfig?.isCastingVotesRequired
+              ? [...a.votes, { date: new Date(c.date), num: c.value.votes }]
+              : [],
+          };
+        },
+        {
+          childProposals: [],
+          editProposals: [],
+          proposedLinks: [],
+          nodes: [],
+          questions: [],
+          votes: [],
+        }
+      );
+      setTrendStats(ts);
+      setSemesterStats(gg);
       // semesterStudentVoteState
       setSemesterStudentVoteState([...semesterStudentVoteStats]);
       // setSemesterStats(getSemStat(semester));
@@ -444,14 +485,6 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
     const snapShotFunc = onSnapshot(q, async snapshot => {
       const docChanges = snapshot.docChanges();
       if (!docChanges.length) {
-        setTrendStats({
-          childProposals: [],
-          editProposals: [],
-          proposedLinks: [],
-          nodes: [],
-          votes: [],
-          questions: [],
-        });
         setBoxStats({
           proposalsPoints: { data: {}, min: 0, max: 1000 },
           questionsPoints: { data: {}, min: 0, max: 1000 },
@@ -481,36 +514,6 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
         const daysFixed = cur.days.map(c => ({ day: c.day, chapters: c.chapters ?? [] }));
         return { ...cur, days: daysFixed };
       });
-      console.log("res");
-      const res = mapStudentsStatsToDataByDates(userDailyStats);
-      console.log("res");
-      const gg = getGeneralStats(res);
-      console.log("res", res, gg);
-
-      // [{d1}{d2}]
-      // {c:[d1,d2]}
-      const ts = res.reduce(
-        (a: TrendStats, c): TrendStats => {
-          return {
-            childProposals: [...a.childProposals, { date: new Date(c.date), num: c.value.childProposals }],
-            editProposals: [...a.editProposals, { date: new Date(c.date), num: c.value.editProposals }],
-            proposedLinks: [...a.proposedLinks, { date: new Date(c.date), num: c.value.links }],
-            nodes: [...a.nodes, { date: new Date(c.date), num: c.value.nodes }],
-            questions: [...a.questions, { date: new Date(c.date), num: c.value.questions }],
-            votes: [...a.votes, { date: new Date(c.date), num: c.value.votes }],
-          };
-        },
-        {
-          childProposals: [],
-          editProposals: [],
-          proposedLinks: [],
-          nodes: [],
-          questions: [],
-          votes: [],
-        }
-      );
-      console.log("res:ts", ts);
-      setTrendStats(ts);
 
       const proposalsPoints = getBoxPlotData(
         userDailyStats,
@@ -536,8 +539,6 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
       const { min: minQ, max: maxQ } = getMaxMinVoxPlotData(questionsPoints);
       const { min: minV, max: maxV } = getMaxMinVoxPlotData(votesPoints);
 
-      setSemesterStats(gg);
-
       // setSemesterStats(prev => {
       //   if (!prev) return null;
       //   const res = {
@@ -551,15 +552,6 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
         proposalsPoints: { data: proposalsPoints, min: minP, max: maxP },
         questionsPoints: { data: questionsPoints, min: minQ, max: maxQ },
         votesPoints: { data: votesPoints, min: minV, max: maxV },
-      });
-
-      setTrendStats({
-        childProposals: semesterConfig?.isProposalRequired ? makeTrendData(userDailyStats, "newNodes") : [],
-        editProposals: semesterConfig?.isProposalRequired ? makeTrendData(userDailyStats, "editProposals") : [],
-        proposedLinks: makeTrendData(userDailyStats, "links"),
-        nodes: makeTrendData(userDailyStats, "proposals"),
-        votes: semesterConfig?.isCastingVotesRequired ? makeTrendData(userDailyStats, "votes") : [],
-        questions: semesterConfig?.isQuestionProposalRequired ? makeTrendData(userDailyStats, "questions") : [],
       });
       setThereIsData(true);
 
