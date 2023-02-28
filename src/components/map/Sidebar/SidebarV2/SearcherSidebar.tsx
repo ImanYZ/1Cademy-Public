@@ -110,7 +110,10 @@ const SearcherSidebar = ({
 
   // tutorial constants
   const disableInputSearcher = disableSearcher && !enableElements?.includes("search-input");
-  const disableSearchIcon = disableSearcher && (!search || !enableElements?.includes("SearchIcon"));
+  const disableSearchIcon = disableSearcher && !enableElements?.includes("SearchIcon");
+  const disableEditedInThePast = disableSearcher && !enableElements?.includes("search-recently-input");
+  const disableRecentNodeList = disableSearcher && !enableElements?.includes("recentNodesList");
+
   const onSearch = useCallback(
     async (page: number, q: string, sortOption: SortValues, sortDirection: SortDirection, nodeTypes: NodeType[]) => {
       try {
@@ -550,7 +553,7 @@ const SearcherSidebar = ({
                 recentNodes={searchResults}
                 setRecentNodes={setSearchResults}
                 onlyTags={onlyTags}
-                disabled={disableSearcher}
+                disabled={disableRecentNodeList}
                 sortOption={sortOption}
                 setSortOption={onChangeSortOptions}
                 sortDirection={sortDirection}
@@ -563,7 +566,7 @@ const SearcherSidebar = ({
                   defaultValue={nodesUpdatedSince}
                   onChange={setNodesUpdatedSinceClick}
                   size="small"
-                  disabled={disableSearcher}
+                  disabled={disableEditedInThePast}
                   sx={{
                     width: "76px",
                     p: "0px",
@@ -632,12 +635,14 @@ const SearcherSidebar = ({
     openSortOptions,
     searchResults,
     onlyTags,
+    disableRecentNodeList,
     sortOption,
     onChangeSortOptions,
     sortDirection,
     onChangeSortDirection,
     nodesUpdatedSince,
     setNodesUpdatedSinceClick,
+    disableEditedInThePast,
     sidebarWidth,
     deleteChip,
     onSearch,

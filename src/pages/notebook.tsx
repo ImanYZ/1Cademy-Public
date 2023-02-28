@@ -2,7 +2,6 @@ import AutoFixHighIcon from "@mui/icons-material/AutoFixHigh";
 import CloseIcon from "@mui/icons-material/Close";
 import CodeIcon from "@mui/icons-material/Code";
 import MyLocationIcon from "@mui/icons-material/MyLocation";
-import SchoolIcon from "@mui/icons-material/School";
 import { Masonry } from "@mui/lab";
 import {
   Button,
@@ -59,8 +58,8 @@ import { MemoizedProposalsSidebar } from "@/components/map/Sidebar/SidebarV2/Pro
 import { MemoizedSearcherSidebar } from "@/components/map/Sidebar/SidebarV2/SearcherSidebar";
 import { MemoizedUserInfoSidebar } from "@/components/map/Sidebar/SidebarV2/UserInfoSidebar";
 import { MemoizedUserSettingsSidebar } from "@/components/map/Sidebar/SidebarV2/UserSettigsSidebar";
-import { MemoizedProgressBar } from "@/components/tutorial/ProgressBar";
-import { MemoizedProgressBarMenu } from "@/components/tutorial/ProgressBarMenu";
+// import { MemoizedProgressBar } from "@/components/tutorial/ProgressBar";
+// import { MemoizedProgressBarMenu } from "@/components/tutorial/ProgressBarMenu";
 import { useAuth } from "@/context/AuthContext";
 import { useTagsTreeView } from "@/hooks/useTagsTreeView";
 import { addSuffixToUrlGMT } from "@/lib/utils/string.utils";
@@ -281,8 +280,8 @@ const Dashboard = ({}: DashboardProps) => {
   const lastNodeOperation = useRef<string>("");
   const proposalTimer = useRef<any>(null);
 
-  const [openProgressBar, setOpenProgressBar] = useState(false);
-  const [openProgressBarMenu, setOpenProgressBarMenu] = useState(false);
+  // const [openProgressBar, setOpenProgressBar] = useState(false);
+  const [, /* openProgressBarMenu */ setOpenProgressBarMenu] = useState(false);
 
   const [userTutorial, setUserTutorial] = useState<UserTutorials>({
     nodes: { currentStep: 1, done: false, skipped: false },
@@ -4023,16 +4022,16 @@ const Dashboard = ({}: DashboardProps) => {
   );
   // console.log({ nodeBookState });
 
-  const handleOpenProgressBar = useCallback(() => {
-    setOpenProgressBar(true);
-    setOpenProgressBarMenu(false);
-  }, []);
+  // const handleOpenProgressBar = useCallback(() => {
+  //   setOpenProgressBar(true);
+  //   setOpenProgressBarMenu(false);
+  // }, []);
 
-  const handleCloseProgressBar = useCallback(() => {
-    console.log("ssssssss");
-    setOpenProgressBar(false);
-    setOpenProgressBarMenu(true);
-  }, []);
+  // const handleCloseProgressBar = useCallback(() => {
+  //   console.log("ssssssss");
+  //   setOpenProgressBar(false);
+  //   setOpenProgressBarMenu(true);
+  // }, []);
 
   const handleCloseProgressBarMenu = useCallback(() => {
     setOpenProgressBarMenu(false);
@@ -4074,8 +4073,8 @@ const Dashboard = ({}: DashboardProps) => {
     };
     const userTutorialUpdated = { ...userTutorial, [keyTutorial]: tutorialUpdated };
     setCurrentTutorial(null);
-
-    // setUserTutorial(userTutorialUpdated);
+    setOpenSidebar(null);
+    setUserTutorial(userTutorialUpdated);
 
     const tutorialRef = doc(db, "userTutorial", user.uname);
     const tutorialDoc = await getDoc(tutorialRef);
@@ -4103,8 +4102,8 @@ const Dashboard = ({}: DashboardProps) => {
     };
     const userTutorialUpdated: UserTutorials = { ...userTutorial, [keyTutorial]: tutorialUpdated };
     setCurrentTutorial(null);
-
-    // setUserTutorial(userTutorialUpdated);
+    setOpenSidebar(null);
+    setUserTutorial(userTutorialUpdated);
 
     const tutorialRef = doc(db, "userTutorial", user.uname);
     const tutorialDoc = await getDoc(tutorialRef);
@@ -4271,6 +4270,7 @@ const Dashboard = ({}: DashboardProps) => {
                 usersOnlineStatusLoaded={usersOnlineStatusLoaded}
                 disableToolbar={Boolean(stateNodeTutorial && stateNodeTutorial.disabledElements.includes("TOOLBAR"))}
                 setCurrentTutorial={setCurrentTutorial}
+                userTutorial={userTutorial}
               />
 
               <MemoizedBookmarksSidebar
@@ -4451,7 +4451,7 @@ const Dashboard = ({}: DashboardProps) => {
             </IconButton>
           </Tooltip>
 
-          {!stateNodeTutorial && (
+          {/* {!stateNodeTutorial && (
             <Tooltip
               title="Start tutorial"
               placement="left"
@@ -4477,14 +4477,14 @@ const Dashboard = ({}: DashboardProps) => {
               <IconButton
                 color="secondary"
                 onClick={() => {
-                  setCurrentTutorial("SEARCHER");
+                  setCurrentTutorial("NODES");
                   setOpenProgressBarMenu(true);
                 }}
               >
-                <SchoolIcon />
+                <HelpIcon />
               </IconButton>
             </Tooltip>
-          )}
+          )} */}
 
           {process.env.NODE_ENV === "development" && (
             <Tooltip
@@ -4915,12 +4915,12 @@ const Dashboard = ({}: DashboardProps) => {
               </Suspense>
             </Box>
           )}
-          <MemoizedProgressBarMenu
+          {/* <MemoizedProgressBarMenu
             open={openProgressBarMenu}
             handleOpenProgressBar={handleOpenProgressBar}
             currentStep={stateNodeTutorial?.currentStepName ?? 0}
           />
-          <MemoizedProgressBar open={openProgressBar} handleCloseProgressBar={handleCloseProgressBar} />
+          <MemoizedProgressBar open={openProgressBar} handleCloseProgressBar={handleCloseProgressBar} /> */}
         </Box>
       </Box>
     </div>

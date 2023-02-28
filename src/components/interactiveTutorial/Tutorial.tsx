@@ -100,25 +100,73 @@ export const Tutorial = ({
           zIndex: 99999,
         }}
       >
-        <div
+        <Box
           ref={tooltipRef}
-          style={{
+          sx={{
             transition: "top 1s ease-out,left 1s ease-out",
-            width: "200px",
-            backgroundColor: "#3a3838",
-            border: "1px solid #f77e0c",
-            padding: "8px",
+            width: "450px",
+            backgroundColor: theme => (theme.palette.mode === "dark" ? "#353535" : orange25),
+            border: theme => `2px solid ${theme.palette.mode === "dark" ? "#816247" : orange200}`,
+            p: "24px 32px",
             borderRadius: "8px",
             color: "white",
+            zIndex: 99999,
           }}
         >
           <h2>{tutorialState.title}</h2>
           <p>{tutorialState.description}</p>
           <button onClick={onNextStep}>{"<<"}</button>
 
-          {tutorialState.currentStepName < stepsLength && <button onClick={onNextStep}>{">>"}</button>}
-          {tutorialState.currentStepName === stepsLength && <button onClick={onNextStep}>{"Finalize"}</button>}
-        </div>
+          {tutorialState.currentStepName > 1 && (
+            <Button
+              variant="outlined"
+              onClick={onPreviousStep}
+              sx={{
+                borderRadius: "32px",
+                mr: "16px",
+
+                p: "8px 32px",
+              }}
+            >
+              Prev
+            </Button>
+          )}
+
+          {tutorialState.currentStepName < stepsLength && (
+            <Button
+              variant="contained"
+              onClick={onNextStep}
+              style={{ zIndex: 898999 }}
+              sx={{
+                borderRadius: "32px",
+                p: "8px 32px",
+                backgroundColor: "#FF6D00",
+                ":hover": { backgroundColor: "#f57a1c" },
+              }}
+              disabled={tutorialState.isClickeable}
+            >
+              Next
+            </Button>
+          )}
+          {tutorialState.currentStepName === stepsLength && (
+            <Button
+              variant="contained"
+              onClick={() => {
+                handleCloseProgressBarMenu();
+                // onNextStep();
+                onFinalize();
+              }}
+              sx={{
+                borderRadius: "32px",
+                p: "8px 32px",
+                backgroundColor: "#FF6D00",
+                ":hover": { backgroundColor: "#f57a1c" },
+              }}
+            >
+              {"Finalize"}
+            </Button>
+          )}
+        </Box>
       </div>
     );
 

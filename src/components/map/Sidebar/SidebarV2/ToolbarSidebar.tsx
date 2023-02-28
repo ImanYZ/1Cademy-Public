@@ -9,7 +9,7 @@ import { useNodeBook } from "@/context/NodeBookContext";
 import LogoDarkMode from "../../../../../public/LogoDarkMode.svg";
 import LogoLightMode from "../../../../../public/LogoLightMode.svg";
 import { Reputation, ReputationSignal, User, UserTheme } from "../../../../knowledgeTypes";
-import { UsersStatus } from "../../../../nodeBookTypes";
+import { UsersStatus, UserTutorials } from "../../../../nodeBookTypes";
 import { OpenSidebar, TutorialType } from "../../../../pages/notebook";
 import { MemoizedMetaButton } from "../../MetaButton";
 import { MemoizedUserStatusSettings } from "../../UserStatusSettings";
@@ -38,7 +38,8 @@ type MainSidebarProps = {
   usersOnlineStatusLoaded: boolean;
   disableToolbar?: boolean;
   enabledToolbarElements?: string[];
-  setCurrentTutorial?: Dispatch<SetStateAction<TutorialType>>;
+  userTutorial: UserTutorials;
+  setCurrentTutorial: Dispatch<SetStateAction<TutorialType>>;
 };
 
 export const ToolbarSidebar = ({
@@ -59,6 +60,7 @@ export const ToolbarSidebar = ({
   onlineUsers,
   usersOnlineStatusLoaded,
   disableToolbar = false,
+  userTutorial,
   setCurrentTutorial,
 }: // enabledToolbarElements = [],
 MainSidebarProps) => {
@@ -213,7 +215,9 @@ MainSidebarProps) => {
             // className="SearchBarIconToolbar"
             id="toolbar-search-button"
             onClick={() => {
-              setCurrentTutorial && setCurrentTutorial("SEARCHER");
+              const searcherTutorialFinalized = userTutorial.searcher.done || userTutorial.searcher.skipped;
+              if (!searcherTutorialFinalized) setCurrentTutorial("SEARCHER");
+
               onOpenSidebar("SEARCHER_SIDEBAR", "Search");
               setIsMenuOpen(false);
             }}
@@ -636,6 +640,9 @@ MainSidebarProps) => {
     setOpenSideBar,
     reputationSignal,
     disableUserStatusList,
+    userTutorial.searcher.done,
+    userTutorial.searcher.skipped,
+    setCurrentTutorial,
     onOpenSidebar,
     setIsMenuOpen,
   ]);
@@ -663,6 +670,8 @@ MainSidebarProps) => {
     disabledPendingProposalButton,
     disabledIntructorButton,
     disabledLeaderboardButton,
+    userTutorial.searcher.done,
+    userTutorial.searcher.skipped,
   ]);
 
   return (

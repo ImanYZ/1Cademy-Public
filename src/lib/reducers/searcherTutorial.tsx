@@ -10,7 +10,6 @@ import { FullNodeData, NodeTutorialState, TutorialState } from "../../nodeBookTy
 export const INITIAL_NODE_TUTORIAL_STATE: TutorialState = null;
 
 dayjs.extend(relativeTime);
-const STEPS_LENGHT = 47; // 65
 
 const DISABLE_NOTEBOOK_OPTIONS = [
   "TOOLBAR",
@@ -45,7 +44,6 @@ const getBaseStepConfig = (step: number, max: number) => {
     anchor: "Portal",
     ...getStepsValues(step, max),
     tooltipPosition: "top",
-    stepLenght: STEPS_LENGHT,
     isClickeable: false,
     delay: 0,
   };
@@ -122,7 +120,7 @@ const NODES_STEPS: {
     targetId: "sidebar-wrapper-searcher",
     childTargetId: "SearchIcon",
     title: "Search Engine",
-    description: <MarkdownRender text={"**Click** on this search icon, make sure you wrote your query."} />,
+    description: <MarkdownRender text={"**Click** on this search icon."} />,
     disabledElements: [...DISABLE_NOTEBOOK_OPTIONS],
     enableChildElements: ["SearchIcon"],
     tooltipPosition: "bottom",
