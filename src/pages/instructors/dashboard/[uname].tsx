@@ -192,14 +192,7 @@ const StudentDashboard: InstructorLayoutPage = ({ user, currentSemester, setting
 
       const semesterStudentVoteStatAllDoc = await getDocs(qByAll);
       if (!semesterStudentVoteStatAllDoc.docs.length) {
-        setTrendStats({
-          childProposals: [],
-          editProposals: [],
-          proposedLinks: [],
-          nodes: [],
-          votes: [],
-          questions: [],
-        });
+        setSemesterStats(null);
         return;
       }
       const userDailyStats = semesterStudentVoteStatAllDoc.docs.map(
@@ -211,6 +204,15 @@ const StudentDashboard: InstructorLayoutPage = ({ user, currentSemester, setting
       const semesterStudentVoteStatDoc = await getDocs(qByStudent);
       if (!semesterStudentVoteStatDoc.docs.length) {
         setThereIsData(false);
+        setSemesterStudentStats(null);
+        setTrendStats({
+          childProposals: [],
+          editProposals: [],
+          proposedLinks: [],
+          nodes: [],
+          votes: [],
+          questions: [],
+        });
         return;
       }
 
