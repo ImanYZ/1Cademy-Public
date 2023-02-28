@@ -25,10 +25,10 @@ export type TargetClientRect = { width: number; height: number; top: number; lef
 type useInteractiveTutorialProps = {
   notebookRef: MutableRefObject<TNodeBookState>;
   // tutorialSteps: NodeTutorialState[];
-  currentTutorial: TutorialType;
+  // currentTutorial: TutorialType;
 };
 
-export const useInteractiveTutorial = ({ notebookRef, currentTutorial }: useInteractiveTutorialProps) => {
+export const useInteractiveTutorial = ({ notebookRef }: useInteractiveTutorialProps) => {
   // const [stateNodeTutorial, dispatchNodeTutorial] = useReducer(nodeTutorialReducer, INITIAL_NODE_TUTORIAL_STATE);
   const isPlayingTheTutorialRef = useRef(false);
   const idxCurrentStepRef = useRef(-1);
@@ -36,6 +36,7 @@ export const useInteractiveTutorial = ({ notebookRef, currentTutorial }: useInte
   const defaultSelectedNode = useRef<string | null>(null);
   const [stateNodeTutorial, setStateNodeTutorial] = useState<NodeTutorialState | null>(null);
   const [steps, setSteps] = useState<NodeTutorialState[]>([]);
+  const [currentTutorial, setCurrentTutorial] = useState<TutorialType>(null);
 
   console.log({ steps });
 
@@ -43,12 +44,14 @@ export const useInteractiveTutorial = ({ notebookRef, currentTutorial }: useInte
     console.log({ currentTutorial, NODES_STEPS_COMPLETE });
     if (currentTutorial === "NODES") {
       console.log("NODES");
-      setSteps(NODES_STEPS_COMPLETE);
+      return setSteps(NODES_STEPS_COMPLETE);
     }
     if (currentTutorial === "SEARCHER") {
       console.log("SEARCHER");
-      setSteps(SEARCHER_STEPS_COMPLETE);
+      return setSteps(SEARCHER_STEPS_COMPLETE);
     }
+
+    return setSteps([]);
   }, [currentTutorial]);
 
   const onStart = useCallback(() => {
@@ -76,7 +79,7 @@ export const useInteractiveTutorial = ({ notebookRef, currentTutorial }: useInte
       idxCurrentStepRef.current = -1;
       setStateNodeTutorial(null);
       isPlayingTheTutorialRef.current = false;
-
+      setCurrentTutorial(null);
       // notebookRef.current.selectedNode = selectedStep.targetId;
       // nodeBookDispatch({ type: "setSelectedNode", payload: selectedStep.targetId });
     } else {
@@ -119,7 +122,7 @@ export const useInteractiveTutorial = ({ notebookRef, currentTutorial }: useInte
     cb: stateNodeTutorial?.isClickeable ? onNextStep : undefined,
   });
 
-  return { stateNodeTutorial, onNextStep, onPreviousStep, isPlayingTheTutorialRef };
+  return { setCurrentTutorial, stateNodeTutorial, onNextStep, onPreviousStep, isPlayingTheTutorialRef };
 };
 
 export const STEPS_NODE_TUTORIAL = [];
