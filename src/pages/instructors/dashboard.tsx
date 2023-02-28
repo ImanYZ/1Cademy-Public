@@ -47,7 +47,7 @@ import {
   calculateVoteStatPoints,
   getGeneralStats,
   getStackedBarStat,
-  mapStudentsStatsToDataByDates,
+  mapStudentsStatsDataByDates,
 } from "../../lib/utils/charts.utils";
 export type Chapter = {
   [key: string]: number[];
@@ -371,7 +371,7 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
         }
       }
 
-      const res = mapStudentsStatsToDataByDates(semesterStudentVoteStats);
+      const res = mapStudentsStatsDataByDates(semesterStudentVoteStats);
       const gg = getGeneralStats(res);
       const ts = res.reduce(
         (a: TrendStats, c): TrendStats => {
@@ -401,7 +401,6 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
           votes: [],
         }
       );
-      console.log("res:ts", ts);
       setTrendStats(ts);
       setSemesterStats(gg);
       // semesterStudentVoteState
