@@ -214,7 +214,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
         });
         [batch, writeCounts] = await checkRestartBatchWriteCounts(batch, writeCounts);
 
-        [batch, writeCounts] = await createOrRestoreStatDocs(data?.course, data.uname, batch, writeCounts);
+        [batch, writeCounts] = await createOrRestoreStatDocs(data?.course!, data.uname, batch, writeCounts);
         await getAuth().setCustomUserClaims(userRecord.uid, { student: true });
       }
     }
