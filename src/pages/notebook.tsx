@@ -4393,7 +4393,7 @@ const Dashboard = ({}: DashboardProps) => {
               <IconButton
                 color="secondary"
                 onClick={() => {
-                  setCurrentTutorial("NODES");
+                  setCurrentTutorial("SEARCHER");
                   setOpenProgressBarMenu(true);
                 }}
               >

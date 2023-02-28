@@ -312,13 +312,14 @@ export interface NodeTutorialState {
   readonly disabledElements: string[];
   readonly enableChildElements: string[];
   readonly anchor: string;
-  readonly currentStepName: SetStepType;
-  readonly nextStepName: SetStepType;
-  readonly previosStepName: SetStepType;
+  readonly currentStepName: number;
+  readonly nextStepName: number;
+  readonly previosStepName: number;
   readonly tooltipPosition: "top" | "bottom" | "left" | "right";
   // readonly stepNumber: number;
   readonly stepLenght: number;
   readonly isClickeable: boolean;
+  delay?: number;
 }
 export type StepReducerPayload = {
   callback?: () => void;
