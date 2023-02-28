@@ -67,7 +67,13 @@ export const useInteractiveTutorial = ({ notebookRef }: useInteractiveTutorialPr
 
   useEffect(() => {
     if (!currentTutorial) {
-      setStateNodeTutorial(null);
+      setStateNodeTutorial(prev => {
+        if (prev?.childTargetId) {
+          removeStyleFromTarget(prev.childTargetId);
+        }
+
+        return null;
+      });
       return setSteps([]);
     }
 

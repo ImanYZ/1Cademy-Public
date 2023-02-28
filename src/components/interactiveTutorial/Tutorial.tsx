@@ -113,59 +113,84 @@ export const Tutorial = ({
             zIndex: 99999,
           }}
         >
-          <h2>{tutorialState.title}</h2>
-          <p>{tutorialState.description}</p>
-          <button onClick={onNextStep}>{"<<"}</button>
+          <Stack direction={"row"} justifyContent="space-between" sx={{ mb: "12px" }}>
+            <Typography component={"h2"} sx={{ fontSize: "18px", fontWeight: "bold", display: "inline-block" }}>
+              {tutorialState.title}
+            </Typography>
+            <Typography sx={{ display: "inline-block", color: "#818181" }}>
+              {tutorialState.currentStepName} / {stepsLength}
+            </Typography>
+          </Stack>
 
-          {tutorialState.currentStepName > 1 && (
-            <Button
-              variant="outlined"
-              onClick={onPreviousStep}
-              sx={{
-                borderRadius: "32px",
-                mr: "16px",
+          {tutorialState.description}
 
-                p: "8px 32px",
-              }}
-            >
-              Prev
-            </Button>
-          )}
-
-          {tutorialState.currentStepName < stepsLength && (
+          <Stack direction={"row"} justifyContent={"space-between"} alignItems={"center"} sx={{ mt: "16px" }}>
             <Button
-              variant="contained"
-              onClick={onNextStep}
-              style={{ zIndex: 898999 }}
-              sx={{
-                borderRadius: "32px",
-                p: "8px 32px",
-                backgroundColor: "#FF6D00",
-                ":hover": { backgroundColor: "#f57a1c" },
-              }}
-              disabled={tutorialState.isClickeable}
-            >
-              Next
-            </Button>
-          )}
-          {tutorialState.currentStepName === stepsLength && (
-            <Button
-              variant="contained"
+              variant="text"
               onClick={() => {
                 handleCloseProgressBarMenu();
-                // onNextStep();
-                onFinalize();
+                // onChangeStep(null);
+                // onUpdateNode("nodes", tutorialState.currentStepName, {});
+                onSkip();
               }}
               sx={{
-                borderRadius: "32px",
-                p: "8px 32px",
-                backgroundColor: "#FF6D00",
-                ":hover": { backgroundColor: "#f57a1c" },
+                p: "8px 0px",
               }}
             >
-              {"Finalize"}
+              Skip
             </Button>
-          )}
+            <Box>
+              {tutorialState.currentStepName > 1 && (
+                <Button
+                  variant="outlined"
+                  onClick={onPreviousStep}
+                  sx={{
+                    borderRadius: "32px",
+                    mr: "16px",
+
+                    p: "8px 32px",
+                  }}
+                >
+                  Prev
+                </Button>
+              )}
+
+              {tutorialState.currentStepName < stepsLength && (
+                <Button
+                  variant="contained"
+                  onClick={onNextStep}
+                  style={{ zIndex: 898999 }}
+                  sx={{
+                    borderRadius: "32px",
+                    p: "8px 32px",
+                    backgroundColor: "#FF6D00",
+                    ":hover": { backgroundColor: "#f57a1c" },
+                  }}
+                  disabled={tutorialState.isClickeable}
+                >
+                  Next
+                </Button>
+              )}
+              {tutorialState.currentStepName === stepsLength && (
+                <Button
+                  variant="contained"
+                  onClick={() => {
+                    handleCloseProgressBarMenu();
+                    // onNextStep();
+                    onFinalize();
+                  }}
+                  sx={{
+                    borderRadius: "32px",
+                    p: "8px 32px",
+                    backgroundColor: "#FF6D00",
+                    ":hover": { backgroundColor: "#f57a1c" },
+                  }}
+                >
+                  {"Finalize"}
+                </Button>
+              )}
+            </Box>
+          </Stack>
         </Box>
       </div>
     );
