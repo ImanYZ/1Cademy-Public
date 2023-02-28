@@ -317,7 +317,7 @@ export interface NodeTutorialState {
   readonly previosStepName: number;
   readonly tooltipPosition: "top" | "bottom" | "left" | "right";
   // readonly stepNumber: number;
-  readonly stepLenght: number;
+  // readonly stepLenght: number;
   readonly isClickeable: boolean;
   delay?: number;
 }

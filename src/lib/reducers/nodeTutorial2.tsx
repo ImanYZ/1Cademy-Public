@@ -19,7 +19,7 @@ import { INTERACTIVE_TUTORIAL_NOTEBOOK_NODES } from "../utils/interactiveTutoria
 export const INITIAL_NODE_TUTORIAL_STATE: TutorialState = null;
 
 dayjs.extend(relativeTime);
-const STEPS_LENGHT = 47; // 65
+// const STEPS_LENGHT = 47; // 65
 
 const DISABLE_NOTEBOOK_OPTIONS = [
   "TOOLBAR",
@@ -53,7 +53,7 @@ const getBaseStepConfig = (step: number, max: number) => {
     anchor: "",
     ...getStepsValues(step, max),
     tooltipPosition: "top",
-    stepLenght: STEPS_LENGHT,
+    // stepLenght: STEPS_LENGHT,
     isClickeable: false,
   };
 

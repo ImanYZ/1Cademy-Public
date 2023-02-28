@@ -41,6 +41,16 @@ export const useInteractiveTutorial = ({ notebookRef }: useInteractiveTutorialPr
 
   console.log({ steps });
 
+  const removeStyleFromTarget = (childTargetId: string) => {
+    if (childTargetId) {
+      const element = document.getElementById(childTargetId);
+      if (element) {
+        element.classList.remove("tutorial-target");
+        element.classList.remove("tutorial-target-pulse");
+      }
+    }
+  };
+
   useEffect(() => {
     console.log({ currentTutorial, NODES_STEPS_COMPLETE });
     if (currentTutorial === "NODES") {
@@ -52,12 +62,13 @@ export const useInteractiveTutorial = ({ notebookRef }: useInteractiveTutorialPr
       return setSteps(SEARCHER_STEPS_COMPLETE);
     }
 
+    setStateNodeTutorial(null);
     return setSteps([]);
   }, [currentTutorial]);
 
   const onStart = useCallback(() => {
     console.log("onStart", steps);
-    idxCurrentStepRef.current = 0;
+    idxCurrentStepRef.current = 45;
     const selectedStep = steps[idxCurrentStepRef.current];
     setStateNodeTutorial(selectedStep);
     isPlayingTheTutorialRef.current = true;
@@ -78,7 +89,12 @@ export const useInteractiveTutorial = ({ notebookRef }: useInteractiveTutorialPr
   const onNextStep = useCallback(() => {
     if (idxCurrentStepRef.current === steps.length - 1) {
       idxCurrentStepRef.current = -1;
-      setStateNodeTutorial(null);
+      setStateNodeTutorial(prev => {
+        if (prev?.childTargetId) {
+          removeStyleFromTarget(prev.childTargetId);
+        }
+        return null;
+      });
       isPlayingTheTutorialRef.current = false;
       setCurrentTutorial(null);
       // notebookRef.current.selectedNode = selectedStep.targetId;
@@ -86,7 +102,12 @@ export const useInteractiveTutorial = ({ notebookRef }: useInteractiveTutorialPr
     } else {
       idxCurrentStepRef.current += 1;
       const selectedStep = steps[idxCurrentStepRef.current];
-      setStateNodeTutorial(selectedStep);
+      setStateNodeTutorial(prev => {
+        if (prev?.childTargetId) {
+          removeStyleFromTarget(prev.childTargetId);
+        }
+        return selectedStep;
+      });
       isPlayingTheTutorialRef.current = true;
 
       notebookRef.current.selectedNode = selectedStep.targetId;
@@ -99,7 +120,12 @@ export const useInteractiveTutorial = ({ notebookRef }: useInteractiveTutorialPr
 
     idxCurrentStepRef.current -= 1;
     const selectedStep = steps[idxCurrentStepRef.current];
-    setStateNodeTutorial(selectedStep);
+    setStateNodeTutorial(prev => {
+      if (prev?.childTargetId) {
+        removeStyleFromTarget(prev.childTargetId);
+      }
+      return selectedStep;
+    });
     isPlayingTheTutorialRef.current = true;
 
     notebookRef.current.selectedNode = selectedStep.targetId;
@@ -123,7 +149,15 @@ export const useInteractiveTutorial = ({ notebookRef }: useInteractiveTutorialPr
     cb: stateNodeTutorial?.isClickeable ? onNextStep : undefined,
   });
 
-  return { setCurrentTutorial, stateNodeTutorial, onNextStep, onPreviousStep, isPlayingTheTutorialRef };
+  return {
+    setCurrentTutorial,
+    currentTutorial,
+    stateNodeTutorial,
+    onNextStep,
+    onPreviousStep,
+    isPlayingTheTutorialRef,
+    stepsLength: steps.length,
+  };
 };
 
 export const STEPS_NODE_TUTORIAL = [];

@@ -20,6 +20,7 @@ type TutorialProps = {
   // onUpdateNode: (tutorialKey: TutorialType, tutorialUpdated: UserTutorial) => void;
   onSkip: () => void;
   onFinalize: () => void;
+  stepsLength: number;
 };
 
 export const Tutorial = ({
@@ -32,6 +33,7 @@ export const Tutorial = ({
   // onUpdateNode,
   onSkip,
   onFinalize,
+  stepsLength,
 }: TutorialProps) => {
   const tooltipRef = useRef<HTMLDivElement | null>(null);
 
@@ -114,10 +116,8 @@ export const Tutorial = ({
           <p>{tutorialState.description}</p>
           <button onClick={onNextStep}>{"<<"}</button>
 
-          {tutorialState.currentStepName < tutorialState.stepLenght && <button onClick={onNextStep}>{">>"}</button>}
-          {tutorialState.currentStepName === tutorialState.stepLenght && (
-            <button onClick={onNextStep}>{"Finalize"}</button>
-          )}
+          {tutorialState.currentStepName < stepsLength && <button onClick={onNextStep}>{">>"}</button>}
+          {tutorialState.currentStepName === stepsLength && <button onClick={onNextStep}>{"Finalize"}</button>}
         </div>
       </div>
     );
@@ -146,7 +146,7 @@ export const Tutorial = ({
           {tutorialState.title}
         </Typography>
         <Typography sx={{ display: "inline-block", color: "#818181" }}>
-          {tutorialState.currentStepName} / {tutorialState.stepLenght}
+          {tutorialState.currentStepName} / {stepsLength}
         </Typography>
       </Stack>
 
@@ -183,7 +183,7 @@ export const Tutorial = ({
             </Button>
           )}
 
-          {tutorialState.currentStepName < tutorialState.stepLenght && (
+          {tutorialState.currentStepName < stepsLength && (
             <Button
               variant="contained"
               onClick={onNextStep}
@@ -199,7 +199,7 @@ export const Tutorial = ({
               Next
             </Button>
           )}
-          {tutorialState.currentStepName === tutorialState.stepLenght && (
+          {tutorialState.currentStepName === stepsLength && (
             <Button
               variant="contained"
               onClick={() => {

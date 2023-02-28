@@ -3,7 +3,7 @@ import { MutableRefObject, ReactNode, useCallback, useEffect, useReducer, useRef
 import { useNodeBook } from "@/context/NodeBookContext";
 
 import { INITIAL_NODE_TUTORIAL_STATE, nodeTutorialReducer } from "../lib/reducers/nodeTutorial";
-import { SetStepType, StepReducerPayload, TNodeBookState } from "../nodeBookTypes";
+import { StepReducerPayload, TNodeBookState } from "../nodeBookTypes";
 import useEventListener from "./useEventListener";
 
 export const DEFAULT_NUMBER_OF_TRIES = 5;
