@@ -2115,7 +2115,7 @@ const Dashboard = ({}: DashboardProps) => {
 
     [
       db,
-      isPlayingTheTutorialRef.current,
+      isPlayingTheTutorialRef,
       nodeBookDispatch,
       openNodeHandler,
       scrollToNode,
