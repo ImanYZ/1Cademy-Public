@@ -982,8 +982,8 @@ export const generateTagsOfTagsWithNodes = async ({
 
   const _tagIds: string[] = [];
   // storing these to restore tags and tagIds
-  let __tagIds: string[] = nodes[nodeId].tagIds;
-  let __tags: string[] = nodes[nodeId].tags;
+  let __tagIds: string[] = [...nodes[nodeId].tagIds];
+  let __tags: string[] = [...nodes[nodeId].tags];
 
   nodes[nodeId].tagIds = [];
   nodes[nodeId].tags = [];
