@@ -667,7 +667,7 @@ const Dashboard = ({}: DashboardProps) => {
       // console.log({ nodeId });
 
       devLog("open_Node_Handler", nodeId);
-      if (isPlayingTheTutorialRef.current) return;
+      if (isPlayingTheTutorialRef.current && currentTutorial !== "SEARCHER") return;
 
       let linkedNodeRef;
       let userNodeRef = null;
@@ -735,6 +735,7 @@ const Dashboard = ({}: DashboardProps) => {
           batch.set(doc(userNodeLogRef), userNodeLogData);
           await batch.commit();
 
+          notebookRef.current.selectedNode = nodeId;
           nodeBookDispatch({ type: "setSelectedNode", payload: nodeId });
           /* setTimeout(() => {
             scrollToNode(nodeId);
@@ -744,7 +745,7 @@ const Dashboard = ({}: DashboardProps) => {
         }
       }
     },
-    [user, allTags]
+    [user, allTags, currentTutorial]
   );
 
   //Getting the node from the Url to open and scroll to that node in the first render
@@ -2064,7 +2065,9 @@ const Dashboard = ({}: DashboardProps) => {
 
       if (notebookRef.current.choosingNode) return;
 
-      if (isPlayingTheTutorialRef.current) return;
+      if (isPlayingTheTutorialRef.current && currentTutorial !== "SEARCHER") return;
+
+      console.log("openinig lnked node");
 
       createActionTrack(
         db,
@@ -2114,6 +2117,7 @@ const Dashboard = ({}: DashboardProps) => {
     },
 
     [
+      currentTutorial,
       db,
       isPlayingTheTutorialRef,
       nodeBookDispatch,

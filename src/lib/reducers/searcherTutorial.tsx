@@ -195,6 +195,7 @@ const NODES_STEPS: {
     disabledElements: [...DISABLE_NOTEBOOK_OPTIONS, "01"],
     enableChildElements: ["search-list"],
     tooltipPosition: "right",
+    isClickeable: true,
   },
 ];
 
