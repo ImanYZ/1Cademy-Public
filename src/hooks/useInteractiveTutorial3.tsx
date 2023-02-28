@@ -4,6 +4,7 @@ import { useNodeBook } from "@/context/NodeBookContext";
 import { SEARCHER_STEPS_COMPLETE } from "@/lib/reducers/searcherTutorial";
 
 import { NODES_STEPS_COMPLETE } from "../lib/reducers/nodeTutorial2";
+import { PROPOSAL_STEPS_COMPLETE } from "../lib/utils/tutorials/proposalSteps";
 import { NodeTutorialState, TNodeBookState } from "../nodeBookTypes";
 import { TutorialType } from "../pages/notebook";
 import useEventListener from "./useEventListener";
@@ -82,13 +83,18 @@ export const useInteractiveTutorial = ({ notebookRef }: useInteractiveTutorialPr
     let newSteps: NodeTutorialState[] = [];
     console.log({ currentTutorial, NODES_STEPS_COMPLETE });
     if (currentTutorial === "NODES") {
-      console.log("NODES");
+      console.log("FILL NODES");
       newSteps = NODES_STEPS_COMPLETE;
       //  setSteps(NODES_STEPS_COMPLETE);
     }
     if (currentTutorial === "SEARCHER") {
-      console.log("SEARCHER");
+      console.log("FILL SEARCHER");
       newSteps = SEARCHER_STEPS_COMPLETE;
+      //  setSteps(SEARCHER_STEPS_COMPLETE);
+    }
+    if (currentTutorial === "PROPOSAL") {
+      console.log("FILL PROPOSAL");
+      newSteps = PROPOSAL_STEPS_COMPLETE;
       //  setSteps(SEARCHER_STEPS_COMPLETE);
     }
 

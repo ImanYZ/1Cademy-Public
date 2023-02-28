@@ -492,7 +492,7 @@ export type UsersStatus = "All Time" | "Monthly" | "Weekly" | "Others Votes" | "
 
 // export type ClusterNodes = { [key: string]: Cluster };
 
-export type TutorialTypeKeys = "nodes" | "searcher";
+export type TutorialTypeKeys = "nodes" | "searcher" | "proposal";
 export type UserTutorial = {
   currentStep: number;
   done: boolean;

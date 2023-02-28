@@ -32,7 +32,7 @@ import { string } from "yup/lib/locale";
 import { useNodeBook } from "@/context/NodeBookContext";
 import { getSearchAutocomplete } from "@/lib/knowledgeApi";
 import { findDiff, getVideoDataByUrl, momentDateToSeconds } from "@/lib/utils/utils";
-import { OpenSidebar } from "@/pages/notebook";
+import { OpenSidebar, TutorialType } from "@/pages/notebook";
 
 import { useAuth } from "../../context/AuthContext";
 import { KnowledgeChoice } from "../../knowledgeTypes";
@@ -152,6 +152,8 @@ type NodeProps = {
   disabled?: boolean;
   enableChildElements?: string[];
   defaultOpenPart?: OpenPart; // this is only to configure default open part value in tutorial
+  showProposeTutorial?: boolean; // this flag is to enable tutorial first time user click in pencil
+  setCurrentTutorial: (newValue: TutorialType) => void;
 };
 
 const proposedChildTypesIcons: { [key in ProposedChildTypesIcons]: string } = {
@@ -259,6 +261,8 @@ const Node = ({
   disabled = false,
   enableChildElements = [],
   defaultOpenPart: defaultOpenPartByTutorial = null,
+  showProposeTutorial = false,
+  setCurrentTutorial,
 }: NodeProps) => {
   const [{ user }] = useAuth();
   const { nodeBookDispatch } = useNodeBook();
@@ -1036,6 +1040,8 @@ const Node = ({
               setOperation={setOperation}
               disabled={disabled}
               enableChildElements={enableChildElements}
+              showProposeTutorial={showProposeTutorial}
+              setCurrentTutorial={setCurrentTutorial}
             />
           </div>
           {(openPart === "LinkingWords" || openPart === "Tags" || openPart === "References") && (

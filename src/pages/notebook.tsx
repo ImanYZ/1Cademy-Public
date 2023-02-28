@@ -133,7 +133,7 @@ import {
 import { NodeType, SimpleNode2 } from "../types";
 import { doNeedToDeleteNode, getNodeTypesFromNode, isVersionApproved } from "../utils/helpers";
 
-export type TutorialType = "NODES" | "SEARCHER" | null;
+export type TutorialType = "NODES" | "SEARCHER" | "PROPOSAL" | null;
 
 type DashboardProps = {};
 
@@ -286,6 +286,7 @@ const Dashboard = ({}: DashboardProps) => {
   const [userTutorial, setUserTutorial] = useState<UserTutorials>({
     nodes: { currentStep: 1, done: false, skipped: false },
     searcher: { currentStep: 1, done: false, skipped: false },
+    proposal: { currentStep: 1, done: false, skipped: false },
   });
 
   // const [currentTutorial, setCurrentTutorial] = useState<TutorialType>(null);
@@ -782,7 +783,7 @@ const Dashboard = ({}: DashboardProps) => {
       // TODO: load step from DB
       if (tutorialDoc.exists()) {
         const tutorial = tutorialDoc.data() as UserTutorials;
-        setUserTutorial(tutorial);
+        setUserTutorial(prev => ({ ...prev, ...tutorial }));
         if (tutorial.nodes.done) return setUserTutorialLoaded(true);
         if (tutorial.nodes.skipped) return setUserTutorialLoaded(true);
         setCurrentTutorial("NODES");
@@ -4642,134 +4643,6 @@ const Dashboard = ({}: DashboardProps) => {
                 value={mapInteractionValue}
                 onChange={navigateWhenNotScrolling}
               >
-                {/* <div
-                  style={{
-                    position: "absolute",
-                    width: "8px",
-                    height: "8px",
-                    borderRadius: "50%",
-                    backgroundColor: "yellow",
-                  }}
-                ></div>
-                <div
-                  style={{
-                    position: "absolute",
-                    width: "8px",
-                    height: "8px",
-                    borderRadius: "50%",
-                    left: "2900px",
-                    top: "0px",
-                    backgroundColor: "#ff0630",
-                  }}
-                ></div>
-                <div
-                  style={{
-                    position: "absolute",
-                    width: "5000px",
-                    height: "3px",
-                    top: "0px",
-                    left: "0px",
-                    backgroundColor: "yellow",
-                  }}
-                ></div>
-                <div
-                  style={{
-                    position: "absolute",
-                    width: "8px",
-                    height: "8px",
-                    top: "100px",
-                    left: "100px",
-                    borderRadius: "50%",
-                    backgroundColor: "royalblue",
-                  }}
-                ></div>
-                <div
-                  style={{
-                    position: "absolute",
-                    width: "2000px",
-                    height: "3px",
-                    top: "100px",
-                    left: "0px",
-                    backgroundColor: "royalblue",
-                  }}
-                ></div>
-
-                <div
-                  style={{
-                    position: "absolute",
-                    width: "2000px",
-                    height: "3px",
-                    top: "150px",
-                    left: "0px",
-                    backgroundColor: "yellow",
-                  }}
-                ></div>
-
-                <div
-                  style={{
-                    position: "absolute",
-                    width: "2000px",
-                    height: "1px",
-                    top: "160px",
-                    left: "0px",
-                    backgroundColor: "yellow",
-                  }}
-                ></div>
-
-                <div
-                  style={{
-                    position: "absolute",
-                    width: "8px",
-                    height: "8px",
-                    top: "150px",
-                    left: "200px",
-                    borderRadius: "50%",
-                    backgroundColor: "royalblue",
-                  }}
-                ></div>
-                <div
-                  style={{
-                    position: "absolute",
-                    width: "8px",
-                    height: "8px",
-                    top: "150px",
-                    left: "500px",
-                    borderRadius: "50%",
-                    backgroundColor: "royalblue",
-                  }}
-                ></div>
-                <div
-                  style={{
-                    position: "absolute",
-                    width: "8px",
-                    height: "8px",
-                    top: "150px",
-                    left: "600px",
-                    borderRadius: "50%",
-                    backgroundColor: "royalblue",
-                  }}
-                ></div>
-
-                <div
-                  style={{
-                    position: "absolute",
-                    width: "2000px",
-                    height: "3px",
-                    top: "500px",
-                    left: "0px",
-                    backgroundColor: "yellow",
-                  }}
-                ></div>
-                <div
-                  style={{
-                    position: "absolute",
-                    width: "2000px",
-                    height: "3px",
-                    top: "600px",
-                    left: "0px",
-                    backgroundColor: "yellow",
-                  }}
-                /> */}
                 {!stateNodeTutorial?.anchor && (
                   <Tutorial
                     tutorialState={stateNodeTutorial}
@@ -4840,6 +4713,8 @@ const Dashboard = ({}: DashboardProps) => {
                   openUserInfoSidebar={openUserInfoSidebar}
                   disabledNodes={stateNodeTutorial?.disabledElements ?? []}
                   enableChildElements={stateNodeTutorial?.enableChildElements ?? []}
+                  showProposeTutorial={!(userTutorial.proposal.done || userTutorial.proposal.skipped)}
+                  setCurrentTutorial={setCurrentTutorial}
                 />
               </MapInteractionCSS>
               {showRegion && (

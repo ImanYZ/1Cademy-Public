@@ -43,7 +43,7 @@ import { useRouter } from "next/router";
 import React, { ReactNode, useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { useNodeBook } from "@/context/NodeBookContext";
-import { OpenSidebar } from "@/pages/notebook";
+import { OpenSidebar, TutorialType } from "@/pages/notebook";
 
 import { User } from "../../knowledgeTypes";
 import shortenNumber from "../../lib/utils/shortenNumber";
@@ -120,6 +120,8 @@ type NodeFooterProps = {
   setOperation: any;
   disabled?: boolean;
   enableChildElements?: string[];
+  showProposeTutorial?: boolean;
+  setCurrentTutorial: (newValue: TutorialType) => void;
 };
 
 const NodeFooter = ({
@@ -182,6 +184,8 @@ const NodeFooter = ({
   setOperation,
   disabled,
   enableChildElements = [],
+  showProposeTutorial = false,
+  setCurrentTutorial,
 }: NodeFooterProps) => {
   const router = useRouter();
   const db = getFirestore();
@@ -410,12 +414,27 @@ const NodeFooter = ({
 
   const proposeNodeImprovementClick = useCallback(
     (event: any) => {
+      // const searcherTutorialFinalized = userTutorial.searcher.done || userTutorial.searcher.skipped;
+      console.log({ showProposeTutorial });
+      if (showProposeTutorial) {
+        console.log("start proposal TUTORIAL");
+        return setCurrentTutorial("PROPOSAL");
+      }
+
       selectPendingProposals(event);
       setOperation("CancelProposals");
       nodeBookDispatch({ type: "setSelectedNode", payload: identifier });
       proposeNodeImprovement(event, identifier);
     },
-    [proposeNodeImprovement]
+    [
+      identifier,
+      nodeBookDispatch,
+      proposeNodeImprovement,
+      selectPendingProposals,
+      setCurrentTutorial,
+      setOperation,
+      showProposeTutorial,
+    ]
   );
 
   return (
