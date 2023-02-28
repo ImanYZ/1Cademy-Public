@@ -1,5 +1,5 @@
-import React from "react";
-import { FullNodeData } from "src/nodeBookTypes";
+import React, { MutableRefObject } from "react";
+import { FullNodeData, TNodeBookState } from "src/nodeBookTypes";
 
 import { useNodeBook } from "@/context/NodeBookContext";
 import { compareNodes, NODE_WIDTH } from "@/lib/utils/Map.utils";
@@ -8,6 +8,7 @@ import { OpenSidebar } from "@/pages/notebook";
 import { MemoizedNode } from "./Node";
 
 type NodeListProps = {
+  notebookRef: MutableRefObject<TNodeBookState>;
   setFocusView: (state: { selectedNode: string; isEnabled: boolean }) => void;
   nodes: { [key: string]: any };
   bookmark: any;
@@ -51,9 +52,12 @@ type NodeListProps = {
   openSidebar: OpenSidebar;
   setOperation: (operation: string) => void;
   openUserInfoSidebar: (uname: string, imageUrl: string, fullName: string, chooseUname: string) => void;
+  disabledNodes: string[];
+  enableChildElements: string[];
 };
 
 const NodesList = ({
+  notebookRef,
   setFocusView,
   nodes,
   bookmark,
@@ -97,8 +101,11 @@ const NodesList = ({
   openSidebar,
   setOperation,
   openUserInfoSidebar,
+  disabledNodes = [],
+  enableChildElements = [],
 }: NodeListProps) => {
-  const { nodeBookState } = useNodeBook();
+  /* eslint-disable-next-line @typescript-eslint/no-unused-vars */
+  const { nodeBookDispatch } = useNodeBook();
 
   return (
     <>
@@ -116,23 +123,23 @@ const NodesList = ({
           bookmarked = nodes[nId].bookmarked;
         }
         let activeNode = false;
-        if (nodeBookState.selectedNode === nId) {
+        if (notebookRef.current.selectedNode === nId) {
           activeNode = true;
         }
         let citationsSelected = false;
-        if (nodeBookState.selectedNode === nId && nodeBookState.selectionType === "Citations") {
+        if (notebookRef.current.selectedNode === nId && notebookRef.current.selectionType === "Citations") {
           citationsSelected = true;
         }
         let proposalsSelected = false;
-        if (nodeBookState.selectedNode === nId && nodeBookState.selectionType === "Proposals") {
+        if (notebookRef.current.selectedNode === nId && notebookRef.current.selectionType === "Proposals") {
           proposalsSelected = true;
         }
         let acceptedProposalsSelected = false;
-        if (nodeBookState.selectedNode === nId && nodeBookState.selectionType === "AcceptedProposals") {
+        if (notebookRef.current.selectedNode === nId && notebookRef.current.selectionType === "AcceptedProposals") {
           acceptedProposalsSelected = true;
         }
         let commentsSelected = false;
-        if (nodeBookState.selectedNode === nId && nodeBookState.selectionType === "Comments") {
+        if (notebookRef.current.selectedNode === nId && notebookRef.current.selectionType === "Comments") {
           commentsSelected = true;
         }
 
@@ -140,6 +147,7 @@ const NodesList = ({
           <MemoizedNode
             key={nId}
             identifier={nId}
+            notebookRef={notebookRef}
             setFocusView={setFocusView}
             activeNode={activeNode}
             citationsSelected={citationsSelected}
@@ -237,6 +245,9 @@ const NodesList = ({
             contributors={nodes[nId].contributors}
             institutions={nodes[nId].institutions}
             openUserInfoSidebar={openUserInfoSidebar}
+            disabled={disabledNodes.includes(nId)}
+            enableChildElements={enableChildElements}
+            defaultOpenPart={nodes[nId].defaultOpenPart}
           />
         );
       })}
@@ -245,6 +256,20 @@ const NodesList = ({
 };
 
 export const MemoizedNodeList = React.memo(NodesList, (prev, next) => {
+  const validateTutorialProps = () => {
+    // we use some to go out of the iteration the first time we can
+    const disableNodesHasEqualsProperties = !prev.disabledNodes.some((el, idx) => el !== next.disabledNodes[idx]);
+    const enableChildeElementsHasEqualsProperties = !prev.enableChildElements.some(
+      (el, idx) => el !== next.enableChildElements[idx]
+    );
+    return (
+      prev.disabledNodes.length === next.disabledNodes.length &&
+      prev.enableChildElements.length === next.enableChildElements.length &&
+      disableNodesHasEqualsProperties &&
+      enableChildeElementsHasEqualsProperties
+    );
+  };
+
   return (
     compareNodes(prev.nodes, next.nodes) &&
     prev.bookmark === next.bookmark &&
@@ -273,6 +298,7 @@ export const MemoizedNodeList = React.memo(NodesList, (prev, next) => {
     prev.saveProposedImprovement === next.saveProposedImprovement &&
     prev.closeSideBar === next.closeSideBar &&
     prev.reloadPermanentGrpah === next.reloadPermanentGrpah &&
-    prev.openSidebar === prev.openSidebar
+    prev.openSidebar === prev.openSidebar &&
+    validateTutorialProps()
   );
 });

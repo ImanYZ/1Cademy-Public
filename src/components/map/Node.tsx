@@ -8,6 +8,7 @@ import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
 import EmojiObjectsIcon from "@mui/icons-material/EmojiObjects";
 import HelpOutlineIcon from "@mui/icons-material/HelpOutline";
 import LocalLibraryIcon from "@mui/icons-material/LocalLibrary";
+import LockIcon from "@mui/icons-material/Lock";
 import MenuBookIcon from "@mui/icons-material/MenuBook";
 import SearchIcon from "@mui/icons-material/Search";
 import ShareIcon from "@mui/icons-material/Share";
@@ -15,8 +16,18 @@ import { Box, Button, Fab, Grid, InputLabel, Switch, TextField, Tooltip, Typogra
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { TimePicker } from "@mui/x-date-pickers/TimePicker";
 import moment from "moment";
-import React, { useCallback, useDeferredValue, useEffect, useMemo, useRef, useState, useTransition } from "react";
-import { FullNodeData, OpenPart } from "src/nodeBookTypes";
+import React, {
+  MutableRefObject,
+  useCallback,
+  useDeferredValue,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  useTransition,
+} from "react";
+import { FullNodeData, OpenPart, TNodeBookState } from "src/nodeBookTypes";
+import { string } from "yup/lib/locale";
 
 import { useNodeBook } from "@/context/NodeBookContext";
 import { getSearchAutocomplete } from "@/lib/knowledgeApi";
@@ -47,6 +58,7 @@ type EditorOptions = "EDIT" | "PREVIEW";
 type ProposedChildTypesIcons = "Concept" | "Relation" | "Question" | "Code" | "Reference" | "Idea";
 type NodeProps = {
   identifier: string;
+  notebookRef: MutableRefObject<TNodeBookState>;
   setFocusView: (state: { selectedNode: string; isEnabled: boolean }) => void;
   activeNode: any;
   citationsSelected: any;
@@ -137,6 +149,9 @@ type NodeProps = {
   contributors: any;
   institutions: any;
   openUserInfoSidebar: (uname: string, imageUrl: string, fullName: string, chooseUname: string) => void;
+  disabled?: boolean;
+  enableChildElements?: string[];
+  defaultOpenPart?: OpenPart; // this is only to configure default open part value in tutorial
 };
 
 const proposedChildTypesIcons: { [key in ProposedChildTypesIcons]: string } = {
@@ -150,6 +165,7 @@ const proposedChildTypesIcons: { [key in ProposedChildTypesIcons]: string } = {
 
 const Node = ({
   identifier,
+  notebookRef,
   setFocusView,
   activeNode,
   citationsSelected,
@@ -240,12 +256,15 @@ const Node = ({
   contributors,
   institutions,
   openUserInfoSidebar,
+  disabled = false,
+  enableChildElements = [],
+  defaultOpenPart: defaultOpenPartByTutorial = null,
 }: NodeProps) => {
   const [{ user }] = useAuth();
-  const { nodeBookState, nodeBookDispatch } = useNodeBook();
+  const { nodeBookDispatch } = useNodeBook();
   const [option, setOption] = useState<EditorOptions>("EDIT");
 
-  const [openPart, setOpenPart] = useState<OpenPart>(null);
+  const [openPart, setOpenPart] = useState<OpenPart>(defaultOpenPartByTutorial);
   const [isHiding, setIsHiding] = useState(false);
   const [imageLoaded, setImageLoaded] = useState(false);
   const [reason, setReason] = useState("");
@@ -273,6 +292,11 @@ const Node = ({
     from: { left: "500px", zIndex: -999 },
     to: { left: "600px", zIndex: 0 },
   });
+
+  useEffect(() => {
+    setOpenPart(defaultOpenPartByTutorial); // this is called ONLY when is override by TUTORIAL
+  }, [defaultOpenPartByTutorial]);
+
   useEffect(() => {
     setTitleCopy(title);
     setContentCopy(content);
@@ -357,10 +381,15 @@ const Node = ({
 
   const nodeClickHandler = useCallback(
     (event: any) => {
-      if (nodeBookState.choosingNode) {
+      console.log(notebookRef.current.choosingNode, "notebookRef.current.choosingNode");
+      if (notebookRef.current.choosingNode) {
         // The first Nodes exist, Now is clicking the Chosen Node
+        notebookRef.current.chosenNode = {
+          id: identifier,
+          title,
+        };
         nodeBookDispatch({ type: "setChosenNode", payload: { id: identifier, title } });
-        scrollToNode(nodeBookState.selectedNode);
+        scrollToNode(notebookRef.current.selectedNode);
       } else if (
         "activeElement" in event.currentTarget &&
         "nodeName" in event.currentTarget.activeElement &&
@@ -369,10 +398,11 @@ const Node = ({
         nodeClicked(event, identifier, nodeType, setOpenPart);
       }
       if (event.target.type === "textarea" || event.target.type === "text") {
+        notebookRef.current.selectedNode = identifier;
         nodeBookDispatch({ type: "setSelectedNode", payload: identifier });
       }
     },
-    [nodeBookState.choosingNode, identifier, title, nodeClicked, nodeType]
+    [identifier, title, nodeClicked, nodeType]
   );
 
   const hideNodeHandler = useCallback(
@@ -485,10 +515,12 @@ const Node = ({
         if (isNew) {
           saveProposedChildNode(identifier, "", reason, () => setAbleToPropose(true));
           if (!firstParentId) return;
+          notebookRef.current.selectedNode = firstParentId.node;
           nodeBookDispatch({ type: "setSelectedNode", payload: firstParentId.node });
           return;
         }
         saveProposedImprovement("", reason, () => setAbleToPropose(true));
+        notebookRef.current.selectedNode = identifier;
         nodeBookDispatch({ type: "setSelectedNode", payload: identifier });
         setOperation("ProposeProposals");
       }, 500);
@@ -504,6 +536,7 @@ const Node = ({
     const scrollTo = isNew ? firstParentId.node ?? undefined : identifier;
     if (!scrollTo) return;
     setAbleToPropose(false);
+    notebookRef.current.selectedNode = scrollTo;
     nodeBookDispatch({ type: "setSelectedNode", payload: scrollTo });
     setOperation("CancelProposals");
     closeSideBar();
@@ -531,6 +564,7 @@ const Node = ({
     async (newTitle: string) => {
       setNodeParts(identifier, thisNode => ({ ...thisNode, title: newTitle }));
       if (titleUpdated && newTitle.trim().length > 0) {
+        notebookRef.current.searchByTitleOnly = true;
         nodeBookDispatch({ type: "setSearchByTitleOnly", payload: true });
         let nodes: any = await getSearchAutocomplete(newTitle);
         let exactMatchingNode = nodes.results.filter((title: any) => title === newTitle);
@@ -550,10 +584,12 @@ const Node = ({
         setTitleUpdated(false);
       }
       setOpenSideBar("SEARCHER_SIDEBAR");
+      notebookRef.current.nodeTitleBlured = true;
+      notebookRef.current.searchQuery = newTitle;
       nodeBookDispatch({ type: "setNodeTitleBlured", payload: true });
       nodeBookDispatch({ type: "setSearchQuery", payload: newTitle });
     },
-    [nodeBookDispatch, titleUpdated]
+    [titleUpdated]
   );
 
   const onBlurExplainDesc = useCallback(
@@ -603,10 +639,10 @@ const Node = ({
         (activeNode ? " active" : "") +
         (changed || !isStudied ? " Changed" : "") +
         (isHiding ? " IsHiding" : "") +
-        (nodeBookState.choosingNode &&
-        nodeBookState.choosingNode.id !== identifier &&
+        (notebookRef.current.choosingNode &&
+        notebookRef.current.choosingNode.id !== identifier &&
         !activeNode &&
-        (nodeBookState.choosingNode.type !== "Reference" || nodeType === "Reference")
+        (notebookRef.current.choosingNode.type !== "Reference" || nodeType === "Reference")
           ? " Choosable"
           : "")
       }
@@ -615,67 +651,86 @@ const Node = ({
         top: top ? top : 1000,
         width: width,
         transition: "0.3s",
+        padding: "13px 13px 0px 13px",
       }}
     >
       {/* INFO: uncomment this only on develope */}
+      {process.env.NODE_ENV === "development" && (
+        <Typography sx={{ position: "absolute", top: "-2px" }}>{identifier}</Typography>
+      )}
 
       {open ? (
         <>
           <div className="card-content">
-            <div className="card-title" data-hoverable={true}>
-              {editable && isNew && (
-                <>
-                  {/* New Node with inputs */}
-                  <p className="NewChildProposalWarning" style={{ display: "flex", alignItems: "center" }}>
-                    <span> Before proposing, search </span>
-                    <SearchIcon sx={{ color: "orange", mx: "5px", fontSize: "16px" }} />
-                    <span> to ensure the node does not exist.</span>
-                  </p>
-                  {(nodeType === "Concept" ||
-                    nodeType === "Relation" ||
-                    nodeType === "Question" ||
-                    nodeType === "News") &&
-                    references.length === 0 && (
-                      <p className="NewChildProposalWarning">
-                        - Make the reference nodes that you'd like to cite, visible on your map view.
-                      </p>
-                    )}
-                </>
-              )}
-              {/* CHECK: I commented this */}
+            {/* <div className="card-title" data-hoverable={true}> */}
+            {editable && isNew && (
+              <>
+                {/* New Node with inputs */}
+                <p className="NewChildProposalWarning" style={{ display: "flex", alignItems: "center" }}>
+                  <span> Before proposing, search </span>
+                  <SearchIcon sx={{ color: "orange", mx: "5px", fontSize: "16px" }} />
+                  <span> to ensure the node does not exist.</span>
+                </p>
+                {(nodeType === "Concept" ||
+                  nodeType === "Relation" ||
+                  nodeType === "Question" ||
+                  nodeType === "News") &&
+                  references.length === 0 && (
+                    <p className="NewChildProposalWarning">
+                      - Make the reference nodes that you'd like to cite, visible on your map view.
+                    </p>
+                  )}
+              </>
+            )}
+            {/* CHECK: I commented this */}
 
-              {editable && (
-                <Box
-                  sx={{
-                    display: "flex",
-                    justifyContent: "end",
-                    alignItems: "center",
-                    position: "relative",
-                    top: "-5px",
-                  }}
+            {editable && (
+              <Box
+                sx={{
+                  display: "flex",
+                  justifyContent: "end",
+                  alignItems: "center",
+                  position: "relative",
+                  top: "-5px",
+                }}
+              >
+                <Typography
+                  onClick={() => setOption("PREVIEW")}
+                  sx={{ cursor: "pointer", fontSize: "14px", fontWeight: 490, color: "inherit" }}
                 >
-                  <Typography
-                    onClick={() => setOption("PREVIEW")}
-                    sx={{ cursor: "pointer", fontSize: "14px", fontWeight: 490, color: "inherit" }}
-                  >
-                    Preview
-                  </Typography>
-                  <Switch
-                    checked={option === "EDIT"}
-                    onClick={() => onChangeOption(option === "EDIT")}
-                    size="small"
-                    onKeyDown={onKeyEnter}
-                  />
-                  <Typography
-                    onClick={() => setOption("EDIT")}
-                    sx={{ cursor: "pointer", fontSize: "14px", fontWeight: 490, color: "inherit" }}
-                  >
-                    Edit
-                  </Typography>
-                </Box>
-              )}
+                  Preview
+                </Typography>
+                <Switch
+                  checked={option === "EDIT"}
+                  onClick={() => onChangeOption(option === "EDIT")}
+                  size="small"
+                  onKeyDown={onKeyEnter}
+                />
+                <Typography
+                  onClick={() => setOption("EDIT")}
+                  sx={{ cursor: "pointer", fontSize: "14px", fontWeight: 490, color: "inherit" }}
+                >
+                  Edit
+                </Typography>
+              </Box>
+            )}
 
+            {!editable && !unaccepted && !notebookRef.current.choosingNode /* && !choosingNode */ && (
+              <MemoizedNodeHeader
+                id={identifier}
+                open={open}
+                onToggleNode={toggleNodeHandler}
+                onHideOffsprings={hideOffspringsHandler}
+                onHideNodeHandler={hideNodeHandler}
+                disabled={disabled}
+                enableChildElements={enableChildElements}
+                // sx={{ position: "absolute", right: "10px", top: "0px" }}
+              />
+            )}
+
+            <div id={`${identifier}-node-body`} className="NodeContent" data-hoverable={true}>
               <Editor
+                id={`${identifier}-node-title`}
                 label="Enter the node title:"
                 value={titleCopy}
                 setValue={onSetTitle}
@@ -688,18 +743,10 @@ const Node = ({
                 editOption={option}
               />
               {editable && <Box sx={{ mb: "12px" }}></Box>}
-              {!editable && !unaccepted && !nodeBookState.choosingNode /* && !choosingNode */ && (
-                <MemoizedNodeHeader
-                  open={open}
-                  onToggleNode={toggleNodeHandler}
-                  onHideOffsprings={hideOffspringsHandler}
-                  onHideNodeHandler={hideNodeHandler}
-                  sx={{ position: "absolute", right: "10px", top: "0px" }}
-                />
-              )}
-            </div>
-            <div className="NodeContent" data-hoverable={true}>
+              {/* </div> */}
+
               <Editor
+                id={`${identifier}-node-content`}
                 label="Edit the node content:"
                 value={contentCopy}
                 setValue={onSetContent}
@@ -711,65 +758,74 @@ const Node = ({
               />
               {editable && <Box sx={{ mb: "12px" }}></Box>}
 
-              {nodeImage !== "" && (
-                <>
-                  {editable && (
-                    <div className="RemoveImageDIV">
-                      <MemoizedMetaButton onClick={removeImageHandler} tooltip="Click to remove the image.">
-                        <DeleteForeverIcon sx={{ fontSize: "16px" }} />
-                      </MemoizedMetaButton>
-                    </div>
-                  )}
+              <div id={`${identifier}-node-content-media`}>
+                {nodeImage !== "" && (
+                  <>
+                    {editable && (
+                      <div className="RemoveImageDIV">
+                        <MemoizedMetaButton onClick={removeImageHandler} tooltip="Click to remove the image.">
+                          <DeleteForeverIcon sx={{ fontSize: "16px" }} />
+                        </MemoizedMetaButton>
+                      </div>
+                    )}
 
-                  {/* TODO: change to Next Image */}
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src={nodeImage}
-                    alt="Node image"
-                    className="responsive-img NodeImage"
-                    onLoad={onImageLoad}
-                    onClick={onImageClick}
-                  />
-                </>
-              )}
-              {nodeType === "Question" && (
-                <Box sx={{ display: "flex", flexDirection: "column" }}>
-                  <ul className="collapsible" style={{ padding: "0px" }}>
-                    {choices.map((choice, idx) => {
-                      return (
-                        <QuestionChoices
-                          key={identifier + "Choice" + idx}
-                          identifier={identifier}
-                          nodeRef={nodeRef}
-                          editable={editable}
-                          choices={choices}
-                          idx={idx}
-                          choicesNum={choices.length}
-                          choice={choice}
-                          deleteChoice={deleteChoice}
-                          switchChoice={switchChoice}
-                          changeChoice={changeChoice}
-                          changeFeedback={changeFeedback}
-                          option={option}
-                        />
-                      );
-                    })}
-                  </ul>
-                  {editable && (
-                    <Box sx={{ alignSelf: "flex-end" }}>
-                      <MemoizedMetaButton
-                        onClick={addChoiceHandler}
-                        tooltip="Click to add a new choice to this question."
-                      >
-                        <>
-                          <AddIcon className="green-text" sx={{ fontSize: "16px" }} />
-                          <span>Add Choice</span>
-                        </>
-                      </MemoizedMetaButton>
-                    </Box>
-                  )}
-                </Box>
-              )}
+                    {/* TODO: change to Next Image */}
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={nodeImage}
+                      alt="Node image"
+                      className="responsive-img NodeImage"
+                      onLoad={onImageLoad}
+                      onClick={onImageClick}
+                    />
+                  </>
+                )}
+                {nodeType === "Question" && (
+                  <Box sx={{ display: "flex", flexDirection: "column" }}>
+                    <ul className="collapsible" style={{ padding: "0px" }}>
+                      {choices.map((choice, idx) => {
+                        return (
+                          <QuestionChoices
+                            key={identifier + "Choice" + idx}
+                            identifier={identifier}
+                            nodeRef={nodeRef}
+                            editable={editable}
+                            choices={choices}
+                            idx={idx}
+                            choicesNum={choices.length}
+                            choice={choice}
+                            deleteChoice={deleteChoice}
+                            switchChoice={switchChoice}
+                            changeChoice={changeChoice}
+                            changeFeedback={changeFeedback}
+                            option={option}
+                          />
+                        );
+                      })}
+                    </ul>
+                    {editable && (
+                      <Box sx={{ alignSelf: "flex-end" }}>
+                        <MemoizedMetaButton
+                          onClick={addChoiceHandler}
+                          tooltip="Click to add a new choice to this question."
+                        >
+                          <>
+                            <AddIcon className="green-text" sx={{ fontSize: "16px" }} />
+                            <span>Add Choice</span>
+                          </>
+                        </MemoizedMetaButton>
+                      </Box>
+                    )}
+                  </Box>
+                )}
+                {!editable && nodeVideo && (
+                  <>
+                    <MemoizedNodeVideo addVideo={true} videoData={videoData} />
+                    <Box sx={{ mb: "12px" }}></Box>
+                  </>
+                )}
+              </div>
+
               {editable && (
                 <>
                   <Editor
@@ -787,6 +843,7 @@ const Node = ({
                   />
                 </>
               )}
+
               {editable && addVideo && (
                 <>
                   <Box sx={{ mb: "12px" }}></Box>
@@ -916,78 +973,75 @@ const Node = ({
                   <MemoizedNodeVideo addVideo={addVideo} videoData={videoData} />
                 </>
               )}
-              {!editable && nodeVideo && (
-                <>
-                  <MemoizedNodeVideo addVideo={true} videoData={videoData} />
-                  <Box sx={{ mb: "12px" }}></Box>
-                </>
-              )}
-              <MemoizedNodeFooter
-                open={true}
-                addVideo={addVideo}
-                setAddVideo={setAddVideo}
-                identifier={identifier}
-                activeNode={activeNode}
-                citationsSelected={citationsSelected}
-                proposalsSelected={proposalsSelected}
-                acceptedProposalsSelected={acceptedProposalsSelected}
-                commentsSelected={commentsSelected}
-                editable={editable}
-                setNodeParts={setNodeParts}
-                title={title}
-                content={content}
-                unaccepted={unaccepted}
-                openPart={openPart}
-                nodeType={nodeType}
-                isNew={isNew}
-                admin={admin}
-                aImgUrl={aImgUrl}
-                aFullname={aFullname}
-                aChooseUname={aChooseUname}
-                viewers={viewers}
-                correctNum={correctNum}
-                markedCorrect={markedCorrect}
-                wrongNum={wrongNum}
-                markedWrong={markedWrong}
-                references={references}
-                tags={tags}
-                parents={parents}
-                nodesChildren={nodesChildren}
-                commentsNum={commentsNum}
-                proposalsNum={proposalsNum}
-                studied={studied}
-                isStudied={isStudied}
-                changed={changed}
-                changedAt={changedAt}
-                simulated={simulated}
-                bookmarked={bookmarked}
-                bookmarks={bookmarks}
-                reloadPermanentGrpah={reloadPermanentGrpah}
-                onNodeShare={onNodeShare}
-                markStudied={markStudiedHandler}
-                bookmark={bookmarkHandler}
-                openNodePart={openNodePartHandler}
-                selectNode={selectNodeHandler}
-                correctNode={correctNodeHandler}
-                wrongNode={wrongNodeHandler}
-                disableVotes={disableVotes}
-                uploadNodeImage={uploadNodeImageHandler}
-                user={user}
-                citations={citations}
-                setOpenSideBar={setOpenSideBar}
-                locked={locked}
-                openSidebar={openSidebar}
-                contributors={contributors}
-                institutions={institutions}
-                openUserInfoSidebar={openUserInfoSidebar}
-                proposeNodeImprovement={proposeNodeImprovement}
-                setOperation={setOperation}
-              />
             </div>
+            <MemoizedNodeFooter
+              open={true}
+              addVideo={addVideo}
+              setAddVideo={setAddVideo}
+              identifier={identifier}
+              activeNode={activeNode}
+              citationsSelected={citationsSelected}
+              proposalsSelected={proposalsSelected}
+              acceptedProposalsSelected={acceptedProposalsSelected}
+              commentsSelected={commentsSelected}
+              editable={editable}
+              setNodeParts={setNodeParts}
+              title={title}
+              content={content}
+              unaccepted={unaccepted}
+              openPart={openPart}
+              nodeType={nodeType}
+              isNew={isNew}
+              admin={admin}
+              aImgUrl={aImgUrl}
+              aFullname={aFullname}
+              aChooseUname={aChooseUname}
+              viewers={viewers}
+              correctNum={correctNum}
+              markedCorrect={markedCorrect}
+              wrongNum={wrongNum}
+              markedWrong={markedWrong}
+              references={references}
+              tags={tags}
+              parents={parents}
+              nodesChildren={nodesChildren}
+              commentsNum={commentsNum}
+              proposalsNum={proposalsNum}
+              studied={studied}
+              isStudied={isStudied}
+              changed={changed}
+              changedAt={changedAt}
+              simulated={simulated}
+              bookmarked={bookmarked}
+              bookmarks={bookmarks}
+              reloadPermanentGrpah={reloadPermanentGrpah}
+              onNodeShare={onNodeShare}
+              markStudied={markStudiedHandler}
+              bookmark={bookmarkHandler}
+              openNodePart={openNodePartHandler}
+              selectNode={selectNodeHandler}
+              correctNode={correctNodeHandler}
+              wrongNode={wrongNodeHandler}
+              disableVotes={disableVotes}
+              uploadNodeImage={uploadNodeImageHandler}
+              user={user}
+              citations={citations}
+              setOpenSideBar={setOpenSideBar}
+              locked={locked}
+              openSidebar={openSidebar}
+              contributors={contributors}
+              institutions={institutions}
+              openUserInfoSidebar={openUserInfoSidebar}
+              proposeNodeImprovement={proposeNodeImprovement}
+              setOperation={setOperation}
+              disabled={disabled}
+              enableChildElements={enableChildElements}
+            />
           </div>
           {(openPart === "LinkingWords" || openPart === "Tags" || openPart === "References") && (
             <LinkingWords
               identifier={identifier}
+              notebookRef={notebookRef}
               editable={editable}
               isNew={isNew}
               openPart={openPart}
@@ -1010,6 +1064,8 @@ const Node = ({
               isLoading={isLoading}
               onResetButton={newValue => setAbleToPropose(newValue)}
               setOperation={setOperation}
+              disabled={disabled}
+              enableChildElements={enableChildElements}
             />
           )}
           {editable && (
@@ -1082,88 +1138,93 @@ const Node = ({
         </>
       ) : (
         <div className="card-content">
-          <div className="card-title">
-            <div className="NodeTitleClosed">
-              <Editor
-                label="title"
-                value={titleCopy}
-                setValue={setTitleCopy}
-                readOnly={true}
-                sxPreview={{ fontSize: "25px" }}
-              />
-            </div>
-            {!nodeBookState.choosingNode && (
-              <MemoizedNodeHeader
-                open={open}
-                onToggleNode={toggleNodeHandler}
-                onHideOffsprings={hideOffspringsHandler}
-                onHideNodeHandler={hideNodeHandler}
-                sx={{ position: "absolute", right: "10px", top: "0px" }}
-              />
-            )}
-            <div className="footer">
-              <MemoizedNodeFooter
-                open={false}
-                addVideo={addVideo}
-                setAddVideo={setAddVideo}
-                identifier={identifier}
-                activeNode={activeNode}
-                citationsSelected={citationsSelected}
-                proposalsSelected={proposalsSelected}
-                acceptedProposalsSelected={acceptedProposalsSelected}
-                commentsSelected={commentsSelected}
-                editable={editable}
-                setNodeParts={setNodeParts}
-                title={title}
-                content={content}
-                unaccepted={unaccepted}
-                openPart={openPart}
-                nodeType={nodeType}
-                isNew={isNew}
-                admin={admin}
-                aImgUrl={aImgUrl}
-                aFullname={aFullname}
-                aChooseUname={aChooseUname}
-                viewers={viewers}
-                correctNum={correctNum}
-                markedCorrect={markedCorrect}
-                wrongNum={wrongNum}
-                markedWrong={markedWrong}
-                references={references}
-                tags={tags}
-                parents={parents}
-                nodesChildren={nodesChildren}
-                commentsNum={commentsNum}
-                proposalsNum={proposalsNum}
-                studied={studied}
-                isStudied={isStudied}
-                changed={changed}
-                changedAt={changedAt}
-                bookmarked={bookmarked}
-                bookmarks={bookmarks}
-                reloadPermanentGrpah={reloadPermanentGrpah}
-                onNodeShare={onNodeShare}
-                markStudied={markStudiedHandler}
-                bookmark={bookmarkHandler}
-                openNodePart={openNodePartHandler}
-                selectNode={selectNodeHandler}
-                correctNode={correctNodeHandler}
-                wrongNode={wrongNodeHandler}
-                disableVotes={disableVotes}
-                uploadNodeImage={uploadNodeImageHandler}
-                user={user}
-                citations={citations}
-                setOpenSideBar={setOpenSideBar}
-                locked={locked}
-                openSidebar={openSidebar}
-                contributors={contributors}
-                institutions={institutions}
-                openUserInfoSidebar={openUserInfoSidebar}
-                proposeNodeImprovement={proposeNodeImprovement}
-                setOperation={setOperation}
-              />
-            </div>
+          {!notebookRef.current.choosingNode && (
+            <MemoizedNodeHeader
+              id={identifier}
+              // setFocusView={() => setFocusView({ isEnabled: true, selectedNode: identifier })}
+              open={open}
+              onToggleNode={toggleNodeHandler}
+              onHideOffsprings={hideOffspringsHandler}
+              onHideNodeHandler={hideNodeHandler}
+              disabled={disabled}
+              enableChildElements={enableChildElements}
+              // sx={{ position: "absolute", right: "10px", top: "0px" }}
+            />
+          )}
+          {/* <div className="card-title"> */}
+          <div className="NodeTitleClosed">
+            <Editor
+              label="title"
+              value={titleCopy}
+              setValue={setTitleCopy}
+              readOnly={true}
+              sxPreview={{ fontSize: "25px" }}
+            />
           </div>
+          <div className="footer">
+            <MemoizedNodeFooter
+              open={false}
+              addVideo={addVideo}
+              setAddVideo={setAddVideo}
+              identifier={identifier}
+              activeNode={activeNode}
+              citationsSelected={citationsSelected}
+              proposalsSelected={proposalsSelected}
+              acceptedProposalsSelected={acceptedProposalsSelected}
+              commentsSelected={commentsSelected}
+              editable={editable}
+              setNodeParts={setNodeParts}
+              title={title}
+              content={content}
+              unaccepted={unaccepted}
+              openPart={openPart}
+              nodeType={nodeType}
+              isNew={isNew}
+              admin={admin}
+              aImgUrl={aImgUrl}
+              aFullname={aFullname}
+              aChooseUname={aChooseUname}
+              viewers={viewers}
+              correctNum={correctNum}
+              markedCorrect={markedCorrect}
+              wrongNum={wrongNum}
+              markedWrong={markedWrong}
+              references={references}
+              tags={tags}
+              parents={parents}
+              nodesChildren={nodesChildren}
+              commentsNum={commentsNum}
+              proposalsNum={proposalsNum}
+              studied={studied}
+              isStudied={isStudied}
+              changed={changed}
+              changedAt={changedAt}
+              bookmarked={bookmarked}
+              bookmarks={bookmarks}
+              reloadPermanentGrpah={reloadPermanentGrpah}
+              onNodeShare={onNodeShare}
+              markStudied={markStudiedHandler}
+              bookmark={bookmarkHandler}
+              openNodePart={openNodePartHandler}
+              selectNode={selectNodeHandler}
+              correctNode={correctNodeHandler}
+              wrongNode={wrongNodeHandler}
+              disableVotes={disableVotes}
+              uploadNodeImage={uploadNodeImageHandler}
+              user={user}
+              citations={citations}
+              setOpenSideBar={setOpenSideBar}
+              locked={locked}
+              openSidebar={openSidebar}
+              contributors={contributors}
+              institutions={institutions}
+              openUserInfoSidebar={openUserInfoSidebar}
+              proposeNodeImprovement={proposeNodeImprovement}
+              setOperation={setOperation}
+              disabled={disabled}
+            />
+          </div>
+          {/* </div> */}
         </div>
       )}
       {/* {openSidebar === "PROPOSALS" && !simulated && !isNew && nodeBookState.selectedNode == identifier ? (
@@ -1214,7 +1275,7 @@ const Node = ({
             </Box>
           </Box>
         </>
-        
+
       ) : null} */}
       <Box
         id={identifier + "_" + "childNodes"}

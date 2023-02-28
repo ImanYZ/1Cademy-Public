@@ -27,6 +27,7 @@ import { INotification } from "src/types/INotification";
 import { ITag } from "src/types/ITag";
 import { IUser } from "src/types/IUser";
 import { IUserNode } from "src/types/IUserNode";
+import { IUserNodeVersion } from "src/types/IUserNodeVersion";
 import { getTypedCollections } from "src/utils";
 import { createInstitution } from "testUtils/fakers/institution";
 import { createNode, createNodeVersion, createUserNodeVersion, getDefaultNode } from "testUtils/fakers/node";
@@ -640,6 +641,14 @@ describe("POST /api/rateVersion", () => {
         })
       );
 
+      users.push(
+        createUser({
+          sNode: nodes[0],
+          tag: nodes[0],
+          institutionName: institutions[0].name,
+        })
+      );
+
       nodes.push(
         createNode({
           admin: users[0],
@@ -759,6 +768,21 @@ describe("POST /api/rateVersion", () => {
         } as ITag,
       ];
 
+      const userVersions = [
+        createUserNodeVersion({
+          node: nodes[1],
+          user: users[1],
+          version: nodeVersions[1],
+          correct: true,
+        }),
+        createUserNodeVersion({
+          node: nodes[1],
+          user: users[2],
+          version: nodeVersions[1],
+          correct: true,
+        }),
+      ];
+
       const collects = [
         usersCollection,
         creditsCollection,
@@ -805,17 +829,7 @@ describe("POST /api/rateVersion", () => {
           "status"
         ),
 
-        new MockData(
-          [
-            createUserNodeVersion({
-              node: nodes[1],
-              user: users[1],
-              version: nodeVersions[1],
-              correct: true,
-            }),
-          ],
-          "userConceptVersions"
-        ),
+        new MockData(userVersions, "userConceptVersions"),
         new MockData([], "actionTracks"),
       ];
 
@@ -907,6 +921,25 @@ describe("POST /api/rateVersion", () => {
         const newNodeVersions = await db.collection(versionsColl.id).where("node", "==", newNode.id).get();
         expect(newNodeVersions.docs.length).toEqual(1);
         newNodeVersion = newNodeVersions.docs[0];
+      });
+
+      it("old user versions should be deleted", async () => {
+        const userConceptVersions = await db
+          .collection("userConceptVersions")
+          .where("version", "==", nodeVersions[1].documentId!)
+          .get();
+        for (const userConceptVersion of userConceptVersions.docs) {
+          const userConceptVersionData = userConceptVersion.data() as IUserNodeVersion;
+          expect(userConceptVersionData.deleted);
+        }
+      });
+
+      it("old user versions should be copied under new version", async () => {
+        const userQuestionVersions = await db
+          .collection("userQuestionVersions")
+          .where("version", "==", newNodeVersion.id)
+          .get();
+        expect(userQuestionVersions.docs.length).toEqual(2); // voter (proposer of node), previous voter
       });
 
       it("create user version in relative nodeType user version collection", async () => {

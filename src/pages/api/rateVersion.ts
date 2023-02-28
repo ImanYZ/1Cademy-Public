@@ -4,6 +4,7 @@ import { INode } from "src/types/INode";
 import { INodeType } from "src/types/INodeType";
 import { INodeVersion } from "src/types/INodeVersion";
 import { IUser } from "src/types/IUser";
+import { updateStatsOnVersionVote } from "src/utils/course-helpers";
 import { detach, isVersionApproved } from "src/utils/helpers";
 import { signalNodeToTypesense, updateNodeContributions } from "src/utils/version-helpers";
 
@@ -404,6 +405,24 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         nodeId: versionData.childType && isAccepted ? newUpdates.nodeId : versionData.node,
         receivers: [versionData.proposer],
       } as IActionTrack);
+    });
+
+    // TODO: move these to queue
+    await detach(async () => {
+      await updateStatsOnVersionVote({
+        approved: accepted,
+        justApproved: accepted === false && isApproved,
+        isChild: !!versionData.childType,
+        nodeId: versionData.node,
+        nodeType: (versionData.childType || nodeType) as INodeType,
+        parentType: versionData.childType ? (nodeType as INodeType) : undefined,
+        proposer: versionData.proposer,
+        tagIds: versionData.tagIds,
+        versionId: req.body.versionId,
+        voter: uname,
+        voterCorrect: correct,
+        voterWrong: wrong,
+      });
     });
 
     // we need update contributors, contribNames, institNames, institutions

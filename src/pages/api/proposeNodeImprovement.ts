@@ -22,6 +22,7 @@ import { generateTagsOfTagsWithNodes, signalNodeToTypesense, updateNodeContribut
 import { getTypesenseClient, typesenseDocumentExists } from "@/lib/typesense/typesense.config";
 import { INodeVersion } from "src/types/INodeVersion";
 import { IActionTrack } from "src/types/IActionTrack";
+import { updateStatsOnProposal } from "src/utils/course-helpers";
 
 // Logic
 // - getting versionsColl, userVersionsColl based on nodeType
@@ -363,6 +364,23 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         nodeId: versionData.node,
         receivers: [userData.uname],
       } as IActionTrack);
+    });
+
+    // TODO: move these to queue
+    await detach(async () => {
+      await updateStatsOnProposal({
+        approved: !!versionData.accepted,
+        isChild: false,
+        linksUpdated: !!(
+          versionData.addedParents ||
+          versionData.addedChildren ||
+          versionData.removedParents ||
+          versionData.removedChildren
+        ),
+        nodeType,
+        proposer: versionData.proposer,
+        tagIds: versionData.tagIds,
+      });
     });
 
     // update typesense record for node

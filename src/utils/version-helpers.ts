@@ -1,4 +1,4 @@
-import { admin, checkRestartBatchWriteCounts, commitBatch, db } from "../lib/firestoreServer/admin";
+import { admin, checkRestartBatchWriteCounts, commitBatch, db, TWriteOperation } from "../lib/firestoreServer/admin";
 import {
   arrayToChunks,
   convertToTGet,
@@ -30,6 +30,7 @@ import { INodeVersion } from "src/types/INodeVersion";
 import { TypesenseNodeSchema } from "@/lib/schemas/node";
 import { INodeType } from "src/types/INodeType";
 import { IComReputationUpdates } from "./reputations";
+import { IUserNodeVersion } from "src/types/IUserNodeVersion";
 
 export const comPointTypes = [
   "comPoints",
@@ -899,12 +900,13 @@ export const deleteTagFromNodeTagCommunityAndTagsOfTags = async ({
 };
 
 // Returns true if the node results in a cycle, otherwise returns false.
-export const hasCycle = ({ tagsOfNodes, nodeId, path = [] }: any) =>
-  path.includes(nodeId)
+export const hasCycle = ({ tagsOfNodes, nodeId, path = [] }: any) => {
+  return path.includes(nodeId)
     ? true
-    : (tagsOfNodes?.[nodeId]?.tagIds || []).some((tagId: any) =>
-        hasCycle({ tagsOfNodes, nodeId: tagId, path: [...path, nodeId] })
-      );
+    : (tagsOfNodes?.[nodeId]?.tagIds || []).some((tagId: any) => {
+        return hasCycle({ tagsOfNodes, nodeId: tagId, path: [...path, nodeId] });
+      });
+};
 
 export const loadNodeByIds = async (
   nodeIds: string[],
@@ -913,13 +915,30 @@ export const loadNodeByIds = async (
   }
 ) => {
   const _nodeIds = arrayToChunks(
-    nodeIds.filter(nodeId => !nodes[nodeId]),
+    nodeIds.filter(nodeId => nodeId).filter(nodeId => !nodes[nodeId]),
     10
   );
   for (const nodeIds of _nodeIds) {
     const _nodes = await db.collection("nodes").where("__name__", "in", nodeIds).get();
     for (const node of _nodes.docs) {
       nodes[node.id] = node.data() as INode;
+    }
+  }
+};
+
+export const loadRecursiveTagIdsFromNode = async (
+  nodeIds: string[],
+  nodes: {
+    [nodeId: string]: INode;
+  }
+) => {
+  await loadNodeByIds(nodeIds, nodes);
+
+  for (const nodeId of nodeIds) {
+    // if node is removed
+    if (!nodes[nodeId] || nodes[nodeId].deleted) continue;
+    if (nodes[nodeId].tagIds && nodes[nodeId].tagIds.length) {
+      await loadRecursiveTagIdsFromNode(nodes[nodeId].tagIds, nodes);
     }
   }
 };
@@ -948,18 +967,50 @@ export const generateTagsOfTagsWithNodes = async ({
     visitedNodeIds.push(nodeId);
   }
 
+  // for proposing child node, we pass nodeId as ""
+  if (!nodes[nodeId]) {
+    nodes[nodeId] = {
+      tagIds: [],
+      tags: [],
+    } as any;
+  }
+
   // loading tagIds in nodes list
-  await loadNodeByIds(tagIds, nodes);
+  await loadNodeByIds([...tagIds, nodeId], nodes);
+  // loading recursive tag ids to match cycle
+  await loadRecursiveTagIdsFromNode(tagIds, nodes);
 
   const _tagIds: string[] = [];
+  // storing these to restore tags and tagIds
+  let __tagIds: string[] = [...nodes[nodeId].tagIds];
+  let __tags: string[] = [...nodes[nodeId].tags];
+
+  nodes[nodeId].tagIds = [];
+  nodes[nodeId].tags = [];
+
   for (const tagId of tagIds) {
     visitedNodeIds.push(tagId);
     // if given tag is deleted we don't want it to be present in tag lists
-    if (nodes[tagId].deleted) {
+    // or if already validated cycle for this tag id and its present under nodeUpdates.tagIds
+    if (nodes[tagId].deleted || nodeUpdates.tagIds.includes(tagId)) {
       continue;
     }
+
+    // temp push tagId to check cycle
+    nodes[nodeId].tagIds.push(tagId);
+    nodes[nodeId].tags.push(nodes[tagId].title);
+
     // if given tag is already present in visited nodes that means its a cycle
-    if (nodes[tagId].tagIds.some(_tagId => visitedNodeIds.includes(_tagId))) {
+    if (
+      hasCycle({
+        tagsOfNodes: nodes,
+        nodeId,
+        path: [],
+      })
+    ) {
+      // removing temp tagId
+      nodes[nodeId].tagIds.splice(nodes[nodeId].tagIds.length - 1, 1);
+      nodes[nodeId].tags.splice(nodes[nodeId].tags.length - 1, 1);
       continue;
     }
 
@@ -983,6 +1034,10 @@ export const generateTagsOfTagsWithNodes = async ({
       visitedNodeIds,
     });
   }
+
+  // restoring old state of node
+  nodes[nodeId].tagIds = __tagIds;
+  nodes[nodeId].tags = __tags;
 };
 
 //  recusively generate tags starting from a given node (top down)
@@ -1563,6 +1618,77 @@ export const signalNodeToTypesense = async ({
   }
 };
 
+type ITransferUserVersionsToNewNode = {
+  versionId: string;
+  versionType: INodeType;
+  childType: INodeType;
+  newVersionId: string;
+  skipUnames: string[];
+  batch: WriteBatch;
+  writeCounts: number;
+  t: FirebaseFirestore.Transaction;
+  tWriteOperations: TWriteOperation[];
+};
+
+// helper to transfer user versions (votes) from old node to newely created node on approval
+export const transferUserVersionsToNewNode = async ({
+  versionId,
+  versionType,
+  childType,
+  newVersionId,
+  skipUnames,
+  batch,
+  writeCounts,
+  t,
+  tWriteOperations,
+}: ITransferUserVersionsToNewNode) => {
+  const { userVersionsColl: oldUserVersionsColl } = getTypedCollections({
+    nodeType: versionType,
+  });
+  const { userVersionsColl } = getTypedCollections({
+    nodeType: childType,
+  });
+
+  const oldUserVersions = await oldUserVersionsColl.where("version", "==", versionId).get();
+  for (const oldUserVersion of oldUserVersions.docs) {
+    const oldUserVersionData = oldUserVersion.data() as IUserNodeVersion;
+    if (skipUnames.includes(oldUserVersionData.user)) {
+      continue;
+    }
+
+    const newUserVersionData = { ...oldUserVersionData };
+    newUserVersionData.version = newVersionId;
+
+    const oldUserVersionRef = db.collection(oldUserVersionsColl.id).doc(oldUserVersion.id);
+    const newUserVersionRef = db.collection(userVersionsColl.id).doc();
+
+    if (t) {
+      tWriteOperations.push({
+        objRef: newUserVersionRef,
+        data: newUserVersionData,
+        operationType: "set",
+      });
+      tWriteOperations.push({
+        objRef: oldUserVersionRef,
+        data: {
+          deleted: true,
+        },
+        operationType: "update",
+      });
+    } else {
+      batch.set(newUserVersionRef, newUserVersionData);
+      [batch, writeCounts] = await checkRestartBatchWriteCounts(batch, writeCounts);
+
+      batch.update(oldUserVersionRef, {
+        deleted: true,
+      });
+      [batch, writeCounts] = await checkRestartBatchWriteCounts(batch, writeCounts);
+    }
+  }
+
+  return [batch, writeCounts];
+};
+
 export const versionCreateUpdate = async ({
   versionNodeId,
   batch,
@@ -2074,6 +2200,18 @@ export const versionCreateUpdate = async ({
             writeCounts,
             t,
             tWriteOperations,
+          });
+
+          [newBatch, writeCounts] = await transferUserVersionsToNewNode({
+            batch: newBatch,
+            writeCounts,
+            childType,
+            newVersionId: versionRef.id,
+            versionId,
+            skipUnames: [voter],
+            t,
+            tWriteOperations,
+            versionType: nodeType,
           });
 
           // userNode for voter

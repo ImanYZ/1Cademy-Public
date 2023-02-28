@@ -18,13 +18,14 @@ import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
 import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
-import { collection, getDocs, getFirestore, onSnapshot, query, where } from "firebase/firestore";
+import { collection, getFirestore, onSnapshot, query, where } from "firebase/firestore";
 import LinkNext from "next/link";
 import React, { useEffect, useState } from "react";
-import { ISemesterStudentVoteStat } from "src/types/ICourse";
+import { ISemester, ISemesterStudentVoteStat } from "src/types/ICourse";
 import { v4 as uuidv4 } from "uuid";
 
 import { InstructorLayoutPage, InstructorsLayout } from "@/components/layouts/InstructorsLayout";
+import { calculateVoteStatPoints } from "@/lib/utils/charts.utils";
 
 import { postWithToken } from "../../../src/lib/mapApi";
 import CSVBtn from "../../components/CSVBtn";
@@ -33,7 +34,7 @@ import { StudentFilters, StudentsProfile } from "../../components/instructors/Dr
 import OptimizedAvatar from "../../components/OptimizedAvatar";
 
 const filterChoices: any = {
-  "Total Poitns": "totalPoints",
+  "Total Points": "totalPoints",
   Wrongs: "wrongs",
   Corrects: "corrects",
   Awards: "awards",
@@ -46,7 +47,7 @@ const filterChoices: any = {
   "Vote Points": "votePoints",
 };
 
-const columns: string[] = [
+const defaultColumns: string[] = [
   "firstName",
   "lastName",
   "email",
@@ -64,16 +65,16 @@ const columns: string[] = [
   "lastActivity",
 ];
 
-const keys = [
+const defaultKeys = [
   "First Name",
   "Last Name",
   "Email",
-  "Total Poitns",
+  "Total Points",
   "Wrongs",
   "Corrects",
   "Awards",
   "Child Proposals",
-  "Edit  Proposals",
+  "Edit Proposals",
   "Proposal Points",
   "Questions",
   "Question Points",
@@ -86,7 +87,7 @@ const keysColumns: any = {
   "First Name": "firstName",
   "Last Name": "lastName",
   Email: "email",
-  "Total Poitns": "totalPoints",
+  "Total Points": "totalPoints",
   Wrongs: "wrongs",
   Corrects: "corrects",
   Awards: "awards",
@@ -101,6 +102,8 @@ const keysColumns: any = {
 };
 
 export const Students: InstructorLayoutPage = ({ /* selectedSemester, */ selectedCourse, currentSemester }) => {
+  const [keys, setKeys] = useState([...defaultKeys]);
+  const [columns, setColumns] = useState([...defaultColumns]);
   const [rows, setRows] = useState<any>([]);
   const [tableRows, setTableRows] = useState<any>([]);
   const [openFilter, setOpenFilter] = useState(false);
@@ -113,6 +116,7 @@ export const Students: InstructorLayoutPage = ({ /* selectedSemester, */ selecte
     }[]
   >([]);
   const [searchValue, setSearchValue] = useState("");
+  const [semesterConfig, setSemesterConfig] = useState<ISemester | null>(null);
   const theme = useTheme();
   const isMovil = useMediaQuery(theme.breakpoints.down("md"));
   const [openProfile, setOpenProfile] = useState(false);
@@ -121,7 +125,7 @@ export const Students: InstructorLayoutPage = ({ /* selectedSemester, */ selecte
   const [savedTableState, setSavedTableState] = useState([]);
   const [states, setStates] = useState<ISemesterStudentVoteStat[]>([]);
   const [anchorEl, setAnchorEl] = useState(null);
-  const [usersStatus, setUsersStatus] = useState([]);
+  const [usersStatus, setUsersStatus] = useState<any>([]);
   const [newStudents, setNewStudents] = useState([]);
   const [disableEdit, setDisableEdit] = useState(false);
   const open = Boolean(anchorEl);
@@ -130,42 +134,101 @@ export const Students: InstructorLayoutPage = ({ /* selectedSemester, */ selecte
   const id = open ? "simple-popover" : undefined;
 
   useEffect(() => {
+    if (!currentSemester || !currentSemester.tagId) return;
+
+    const semesterRef = collection(db, "semesters");
+    const q = query(semesterRef, where("tagId", "==", currentSemester.tagId));
+    const snapShotFunc = onSnapshot(q, async snapshot => {
+      const docChanges = snapshot.docChanges();
+      if (!docChanges.length) {
+        setSemesterConfig(null);
+        return;
+      }
+
+      for (const change of docChanges) {
+        const semesterDoc = change.doc;
+        setSemesterConfig(semesterDoc.data() as ISemester);
+      }
+    });
+    return () => snapShotFunc();
+  }, [currentSemester, db]);
+
+  useEffect(() => {
     if (isMovil) setEditMode(false);
     if (!isMovil) setOpenProfile(false);
   }, [isMovil]);
-  useEffect(() => {
-    if (!db) return;
-    if (!currentSemester) return;
-    const getStats = async () => {
-      const semestersStatsRef = collection(db, "semesterStudentVoteStats");
-      const statusRef = collection(db, "status");
-      const qeStatus = query(statusRef);
-      const statusDoc = await getDocs(qeStatus);
-      const qe = query(semestersStatsRef, where("tagId", "==", currentSemester.tagId));
-      const semestersStatsDoc = await getDocs(qe);
-      let statsData: ISemesterStudentVoteStat[] = [];
-      let status: any = [];
-      if (semestersStatsDoc.docs.length > 0) {
-        for (let doc of semestersStatsDoc.docs) {
-          const data = doc.data() as ISemesterStudentVoteStat;
-          statsData.push(data);
-        }
-      }
-      if (statusDoc.docs.length > 0) {
-        for (let doc of statusDoc.docs) {
-          const data = doc.data();
-          status.push(data);
-        }
-      }
-      setUsersStatus(status);
-      setStates(statsData);
-    };
-    getStats();
-  }, [db, currentSemester]);
 
   useEffect(() => {
     if (!db) return;
     if (!currentSemester) return;
+    if (!semesterConfig) return;
+
+    const statusRef = collection(db, "status");
+    const qeStatus = query(statusRef);
+    let status: any = [];
+    let statsData: ISemesterStudentVoteStat[] = [];
+    const statusSnapShotFunc = onSnapshot(qeStatus, async snapshot => {
+      const docChanges = snapshot.docChanges();
+      if (!docChanges.length) {
+        return;
+      }
+
+      for (const change of docChanges) {
+        const data = change.doc.data();
+        if (change.type === "added") {
+          status.push(data);
+        } else if (change.type === "modified") {
+          const index = status.findIndex((sts: any) => sts.user === data.user);
+          status[index] = data;
+        } else if (change.type === "removed") {
+          const index = status.findIndex((sts: any) => sts.user === data.user);
+          status.splice(index, 1);
+        }
+      }
+      setUsersStatus([...status]);
+    });
+
+    const semestersStatsRef = collection(db, "semesterStudentVoteStats");
+    const qe = query(semestersStatsRef, where("tagId", "==", currentSemester.tagId));
+
+    const snapShotFunc = onSnapshot(qe, async snapshot => {
+      const docChanges = snapshot.docChanges();
+      if (!docChanges.length) {
+        return;
+      }
+      for (const change of docChanges) {
+        const semesterStudentVoteDoc = change.doc;
+        const data = semesterStudentVoteDoc.data() as ISemesterStudentVoteStat;
+        if (change.type === "added") {
+          const points = calculateVoteStatPoints(data, semesterConfig!);
+          statsData.push({ ...data, ...points });
+        } else if (change.type === "modified") {
+          const index = statsData.findIndex((stsData: any) => stsData.uname === data.uname);
+          const points = calculateVoteStatPoints(data, semesterConfig!);
+          statsData[index] = { ...data, ...points };
+        } else if (change.type === "removed") {
+          const index = statsData.findIndex((stsData: any) => stsData.uname === data.uname);
+          statsData.splice(index, 1);
+        }
+      }
+      setStates([...statsData]);
+    });
+
+    return () => {
+      statusSnapShotFunc();
+      snapShotFunc();
+    };
+  }, [db, currentSemester, semesterConfig]);
+
+  useEffect(() => {
+    setKeys([...defaultKeys]);
+    setColumns([...defaultColumns]);
+  }, [currentSemester]);
+
+  useEffect(() => {
+    if (!db) return;
+    if (!currentSemester) return;
+    if (!semesterConfig) return;
     if (states.length === 0) return;
     const semestersRef = collection(db, "semesters");
     const q = query(semestersRef, where("tagId", "==", currentSemester.tagId));
@@ -174,17 +237,110 @@ export const Students: InstructorLayoutPage = ({ /* selectedSemester, */ selecte
       if (!docChanges.length) return;
       for (let change of docChanges) {
         if (change.type === "added" || change.type === "modified") {
-          const _students = change.doc.data().students;
-          const { numPoints, numProposalPerDay } = change.doc.data().nodeProposals;
-          console.log("configs", { numPoints, numProposalPerDay });
-          const { onReceiveStar } = change.doc.data().votes;
+          const docData = change.doc.data();
+          if (!docData?.isCastingVotesRequired) {
+            const keysToRemove = ["Vote", "Vote Points"];
+            keysToRemove.forEach(key => {
+              const index = keys.indexOf(key);
+              if (index !== -1) {
+                keys.splice(index, 1);
+              }
+            });
+
+            const columnsToRemove = ["vote", "votePoints"];
+            columnsToRemove.forEach(key => {
+              const index = columns.indexOf(key);
+              if (index !== -1) {
+                columns.splice(index, 1);
+              }
+            });
+          }
+
+          if (!docData?.isQuestionProposalRequired) {
+            const keysToRemove = ["Questions", "Question Points"];
+            keysToRemove.forEach(key => {
+              const index = keys.indexOf(key);
+              if (index !== -1) {
+                keys.splice(index, 1);
+              }
+            });
+
+            const columnsToRemove = ["questions", "questionPoints"];
+            columnsToRemove.forEach(key => {
+              const index = columns.indexOf(key);
+              if (index !== -1) {
+                columns.splice(index, 1);
+              }
+            });
+          }
+
+          if (!docData?.isProposalRequired) {
+            const keysToRemove = ["Child Proposals", "Edit Proposals", "Proposal Points"];
+            keysToRemove.forEach(key => {
+              const index = keys.indexOf(key);
+              if (index !== -1) {
+                keys.splice(index, 1);
+              }
+            });
+
+            const columnsToRemove = ["newProposals", "editNodeProposals", "proposalsPoints"];
+            columnsToRemove.forEach(key => {
+              const index = columns.indexOf(key);
+              if (index !== -1) {
+                columns.splice(index, 1);
+              }
+            });
+          }
+
+          if (!docData?.isGettingVotesRequired) {
+            const keysToRemove = ["Wrongs", "Corrects", "Awards"];
+            keysToRemove.forEach(key => {
+              const index = keys.indexOf(key);
+              if (index !== -1) {
+                keys.splice(index, 1);
+              }
+            });
+
+            const columnsToRemove = ["wrongs", "corrects", "awards"];
+            columnsToRemove.forEach(key => {
+              const index = columns.indexOf(key);
+              if (index !== -1) {
+                columns.splice(index, 1);
+              }
+            });
+          }
+
+          const _students = docData.students;
+          const { onReceiveVote, onReceiveDownVote, onReceiveStar } = docData.votes;
           const _rows: any = [];
           for (let student of _students) {
             const stats: ISemesterStudentVoteStat | undefined = states.find(elm => elm.uname === student.uname);
             if (!stats) continue;
 
-            const userStat: any = usersStatus.filter((elm: any) => elm.uname === student.uname)[0];
-            const proposalsPoints = (stats.improvements + stats.newNodes) * (numPoints / numProposalPerDay) || 0;
+            const userStat: any = usersStatus.filter((elm: any) => elm.user === student.uname)[0];
+
+            let totalPoints: number = 0;
+            let proposalsPoints: number = 0;
+            let questionPoints: number = 0;
+            let votePoints: number = 0;
+            if (docData?.isGettingVotesRequired) {
+              totalPoints +=
+                (stats?.upVotes || 0) * onReceiveVote -
+                (stats?.downVotes || 0) * onReceiveDownVote +
+                (stats?.instVotes || 0) * onReceiveStar;
+            }
+            if (docData?.isCastingVotesRequired) {
+              votePoints = stats.votePoints!;
+              totalPoints += votePoints;
+            }
+            if (docData?.isQuestionProposalRequired) {
+              questionPoints = stats.questionPoints!;
+              totalPoints += questionPoints;
+            }
+            if (docData?.isProposalRequired) {
+              proposalsPoints = stats.proposalPoints!;
+              totalPoints += proposalsPoints;
+            }
             _rows.push({
               id: uuidv4(),
               username: student.uname,
@@ -193,8 +349,7 @@ export const Students: InstructorLayoutPage = ({ /* selectedSemester, */ selecte
               firstName: student.fName,
               lastName: student.lName,
               email: student.email,
-              totalPoints:
-                proposalsPoints + stats.questionPoints + stats.votePoints + (stats?.instVotes || 0) * onReceiveStar,
+              totalPoints: totalPoints,
               newProposals: stats?.newNodes || 0,
               editNodeProposals: stats?.improvements || 0,
               proposalsPoints,
@@ -220,7 +375,7 @@ export const Students: InstructorLayoutPage = ({ /* selectedSemester, */ selecte
     return () => {
       semestersSnapshot();
     };
-  }, [db, states, currentSemester, usersStatus]);
+  }, [db, states, currentSemester, usersStatus, semesterConfig]);
 
   const handleOpenCloseFilter = () => setOpenFilter(!openFilter);
   const handleOpenCloseProfile = () => setOpenProfile(!openProfile);
@@ -322,7 +477,7 @@ export const Students: InstructorLayoutPage = ({ /* selectedSemester, */ selecte
 
   const addFilter = () => {
     const newFilter = {
-      title: "Total Poitns",
+      title: "Total Points",
       operation: "<",
       value: 10,
     };

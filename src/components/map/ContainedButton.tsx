@@ -1,10 +1,11 @@
-import { Button, Tooltip, TooltipProps,useTheme } from "@mui/material";
+import { Button, Tooltip, TooltipProps, useTheme } from "@mui/material";
 import { SxProps, Theme } from "@mui/system";
 import React from "react";
 
 import { UserTheme } from "../../knowledgeTypes";
 
 type ContainedButtonProps = {
+  id?: string;
   title: string;
   tooltipPosition?: TooltipProps["placement"];
   onClick: any;
@@ -14,6 +15,7 @@ type ContainedButtonProps = {
 };
 
 export const ContainedButton = ({
+  id,
   title,
   onClick,
   disabled = false,
@@ -34,6 +36,7 @@ export const ContainedButton = ({
       {/* this span prevents Tooltip error when button is disable */}
       <span>
         <Button
+          id={id}
           onClick={disabled ? undefined : onClick}
           disabled={disabled}
           variant="outlined"

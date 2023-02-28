@@ -65,8 +65,8 @@ const calculateClusters = (g: dagre.graphlib.Graph<{}>, oldNodes: FullNodesData,
 
   // Update OldClusterNodes
   for (let cNode in clusterRegions) {
-    const nodeN = g.node("Tag" + cNode);
-    console.log("setParent:nodeN", nodeN, cNode);
+    // const nodeN = g.node("Tag" + cNode);
+    // console.log("setParent:nodeN", nodeN, cNode);
     // const nodeN = dag1.node("Tag" + cNode) as any;
     // console.log('  --- ---- --- >>', nodeN)
     oldClusterNodes[cNode] = {
@@ -93,8 +93,8 @@ const layoutHandler = (
 ) => {
   let oldClusterNodes = {};
   const startTimer = performance.now();
-  // debugger
-  // console.log("{ WORKER }", { oldNodes, oldEdges });
+  // debugger;
+  console.log("{ WORKER }", { oldNodes, oldEdges });
   let mapNewWidth, mapNewHeight;
   // while (mapChangedFlag) {
   // mapChangedFlag = false;
@@ -111,6 +111,8 @@ const layoutHandler = (
   // calculate OFFSETs
   // update with setDagNode
   // calculate map
+  // console.log(oldNodes, JSON.parse(JSON.stringify(oldNodes)));
+  console.log("worker: iterate node to calculate Dimensions");
   Object.keys(oldNodes).map(n => {
     // const nodeN = dag1.node(n);
     const nodeN = g.node(n);
@@ -121,6 +123,7 @@ const layoutHandler = (
       const thisNode = { ...oldNodes[n] };
       //  if the distance between the new edge and old edge is >= constant value MIN_CHANGE
       //  update the map's width and mapChangedFlag accordingly
+      // console.log(thisNode, n, JSON.parse(JSON.stringify(thisNode)));
       if (
         !("left" in thisNode) ||
         !("top" in thisNode) ||
@@ -146,14 +149,15 @@ const layoutHandler = (
 
   // ITERATE EDGES and calculate the new positions
   // debugger;
-  // console.log("[Worker]:g.edges()", g.edges().length);
+  // console.log("[Worker]:g.edges()", g.edges());
 
+  console.log("worker: iterate edges to update olEdges");
   g.edges().map((e: any) => {
     // const fromNode = g.node(e.v) as any;
     // const toNode = g.node(e.w) as any;
     const fromNode = oldNodes[e.v];
     const toNode = oldNodes[e.w];
-
+    // console.log({ fromNode, toNode });
     if (
       "left" in fromNode &&
       "top" in fromNode &&
@@ -163,9 +167,9 @@ const layoutHandler = (
       "height" in toNode
     ) {
       const newFromX = fromNode.left + NODE_WIDTH;
-      const newFromY = fromNode.top + Math.floor(fromNode.height / 2);
+      const newFromY = fromNode.top + Math.floor((fromNode.height ?? 25) / 2);
       const newToX = toNode.left;
-      const newToY = toNode.top + Math.floor(toNode.height / 2);
+      const newToY = toNode.top + Math.floor((toNode.height ?? 25) / 2);
       const thisEdge = oldEdges[e.v + "-" + e.w];
       // console.log(JSON.stringify({thisEdge, v: e.v, w: e.w, fromNode, toNode}), "thisEdge, e.v, e.w")
 

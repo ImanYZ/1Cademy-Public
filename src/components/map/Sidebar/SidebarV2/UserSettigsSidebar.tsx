@@ -38,9 +38,9 @@ import {
   where,
   writeBatch,
 } from "firebase/firestore";
-import React, { Suspense, useCallback, useEffect, useMemo, useState } from "react";
+import React, { MutableRefObject, Suspense, useCallback, useEffect, useMemo, useState } from "react";
 import { DispatchAuthActions, Reputation, User, UserSettings, UserTheme } from "src/knowledgeTypes";
-import { DispatchNodeBookActions, NodeBookState } from "src/nodeBookTypes";
+import { DispatchNodeBookActions, NodeBookState, TNodeBookState } from "src/nodeBookTypes";
 import { NodeType } from "src/types";
 
 import OptimizedAvatar from "@/components/OptimizedAvatar";
@@ -62,6 +62,7 @@ import { SidebarWrapper } from "./SidebarWrapper";
 dayjs.extend(relativeTime);
 
 type UserSettingsSidebarProps = {
+  notebookRef: MutableRefObject<TNodeBookState>;
   open: boolean;
   onClose: () => void;
   theme: UserTheme;
@@ -77,6 +78,7 @@ type UserSettingsSidebarProps = {
 export const NODE_TYPE_OPTIONS: NodeType[] = ["Code", "Concept", "Idea", "Question", "Reference", "Relation"];
 
 const UserSettigsSidebar = ({
+  notebookRef,
   open,
   onClose,
   user,
@@ -312,6 +314,7 @@ const UserSettigsSidebar = ({
 
   useEffect(() => {
     if (chosenTags.length > 0 && chosenTags[0].id in allTags) {
+      notebookRef.current.chosenNode = { id: chosenTags[0].id, title: chosenTags[0].title };
       nodeBookDispatch({ type: "setChosenNode", payload: { id: chosenTags[0].id, title: chosenTags[0].title } });
     }
   }, [allTags, chosenTags, nodeBookDispatch]);
@@ -321,6 +324,8 @@ const UserSettigsSidebar = ({
     const setDefaultTag = async () => {
       if (nodeBookState.choosingNode?.id === "Tag" && nodeBookState.chosenNode) {
         const { id: nodeId, title: nodeTitle } = nodeBookState.chosenNode;
+        notebookRef.current.choosingNode = null;
+        notebookRef.current.chosenNode = null;
         nodeBookDispatch({ type: "setChoosingNode", payload: null });
         nodeBookDispatch({ type: "setChosenNode", payload: null });
         try {
@@ -349,8 +354,10 @@ const UserSettigsSidebar = ({
   }, [dispatch, nodeBookDispatch, nodeBookState.choosingNode?.id, nodeBookState.chosenNode, user]);
 
   const choosingNodeClick = useCallback(
-    (choosingNodeTag: string) =>
-      nodeBookDispatch({ type: "setChoosingNode", payload: { id: choosingNodeTag, type: null } }),
+    (choosingNodeTag: string) => {
+      notebookRef.current.choosingNode = { id: choosingNodeTag, type: null };
+      nodeBookDispatch({ type: "setChoosingNode", payload: { id: choosingNodeTag, type: null } });
+    },
     [nodeBookDispatch]
   );
 
@@ -527,6 +534,8 @@ const UserSettigsSidebar = ({
   );
 
   const closeTagSelector = useCallback(() => {
+    notebookRef.current.chosenNode = null;
+    notebookRef.current.choosingNode = null;
     nodeBookDispatch({ type: "setChosenNode", payload: null });
     nodeBookDispatch({ type: "setChoosingNode", payload: null });
   }, [nodeBookDispatch]);
@@ -941,6 +950,7 @@ const UserSettigsSidebar = ({
       >
         <div id="MiniUserPrifileHeader" className="MiniUserProfileHeaderMobile">
           <ProfileAvatar
+            id="user-settings-picture"
             userId={user.userId}
             userImage={user.imageUrl}
             setUserImage={setUserImage}
@@ -950,7 +960,11 @@ const UserSettigsSidebar = ({
           <div id="MiniUserPrifileIdentity" className="MiniUserPrifileIdentityMobile">
             <div id="MiniUserPrifileName">{user.chooseUname ? user.uname : `${user.fName} ${user.lName}`}</div>
             <div id="MiniUserPrifileTag">
-              <MemoizedMetaButton style={{ padding: "0px" }} onClick={() => choosingNodeClick("Tag")}>
+              <MemoizedMetaButton
+                id="user-settings-community-tag"
+                style={{ padding: "0px" }}
+                onClick={() => choosingNodeClick("Tag")}
+              >
                 <div className="AccountSettingsButton">
                   <LocalOfferIcon
                     sx={{ marginRight: "8px" }}
@@ -971,6 +985,7 @@ const UserSettigsSidebar = ({
                       noBackground={true}
                     >
                       <MemoizedTagsSearcher
+                        id="user-settings-tag-searcher"
                         setChosenTags={setChosenTags}
                         chosenTags={chosenTags}
                         allTags={allTags}
@@ -995,13 +1010,17 @@ const UserSettigsSidebar = ({
               />
               <span>{user.deInstit}</span>
             </div>
-            <div id="MiniUserPrifileTotalPoints">
-              <DoneIcon className="material-icons DoneIcon green-text" />
+            <div id="user-settings-statistics">
+              <DoneIcon className="material-icons DoneIcon green-text" sx={{ mr: "12px" }} />
               <span>{shortenNumber(totalPoints, 2, false)}</span>
             </div>
           </div>
         </div>
-        <div id="MiniUserPrifilePointsContainer" style={{ alignItems: "center", justifyContent: "space-around" }}>
+        <div
+          id="user-settings-node-types"
+          className="MiniUserPrifilePointsContainer"
+          style={{ alignItems: "center", justifyContent: "space-around" }}
+        >
           <div className="MiniUserProfilePoints">
             <LocalLibraryIcon className="material-icons amber-text" />
             <span className="ToolbarValue">
@@ -1039,7 +1058,7 @@ const UserSettigsSidebar = ({
             </span>
           </div>
         </div>
-        <Tabs value={value} onChange={handleTabChange} aria-label={"Bookmarks Tabs"}>
+        <Tabs id="user-settings-personalization" value={value} onChange={handleTabChange} aria-label={"Bookmarks Tabs"}>
           {tabsItems.map((tabItem: any, idx: number) => (
             <Tab key={tabItem.title} label={tabItem.title} {...a11yProps(idx)} />
           ))}
@@ -1083,6 +1102,7 @@ const UserSettigsSidebar = ({
 
   return (
     <SidebarWrapper
+      id="sidebar-wrapper-user-settings"
       title=""
       contentSignalState={contentSignalState}
       open={open}

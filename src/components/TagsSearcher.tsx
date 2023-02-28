@@ -34,6 +34,7 @@ type TagsExploratorySearcherProps = {
   setChosenTags: (newChosenTags: ChosenTag[]) => void;
   multiple?: boolean;
   sx?: SxProps<Theme>;
+  id?: string;
 };
 
 /**
@@ -41,6 +42,7 @@ type TagsExploratorySearcherProps = {
  * it can be configurable to select one or multiple tags
  */
 const TagsSearcher = ({
+  id,
   allTags,
   setAllTags,
   chosenTags,
@@ -220,7 +222,7 @@ const TagsSearcher = ({
   );
 
   return (
-    <Box data-testid="tree-view">
+    <Box id={id} data-testid="tree-view">
       <Autocomplete
         multiple
         disableCloseOnSelect

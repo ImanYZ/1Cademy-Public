@@ -6,6 +6,7 @@ import { INodeLink } from "src/types/INodeLink";
 import { INodeType } from "src/types/INodeType";
 import { IQuestionChoice } from "src/types/IQuestionChoice";
 import { IUser } from "src/types/IUser";
+import { updateStatsOnProposal } from "src/utils/course-helpers";
 import { detach } from "src/utils/helpers";
 import { IComReputationUpdates } from "src/utils/reputations";
 import { generateTagsOfTagsWithNodes, signalNodeToTypesense, updateNodeContributions } from "src/utils/version-helpers";
@@ -422,6 +423,18 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         nodeId: newVersion.node,
         receivers: [req.body.data.user.userData.uname],
       } as IActionTrack);
+    });
+
+    // TODO: move these to queue
+    await detach(async () => {
+      await updateStatsOnProposal({
+        approved: !!newVersion.accepted,
+        isChild: true,
+        linksUpdated: true,
+        nodeType: req.body.data.nodeType,
+        proposer: newVersion.proposer,
+        tagIds: newVersion.tagIds,
+      });
     });
 
     // we need update contributors, contribNames, institNames, institutions

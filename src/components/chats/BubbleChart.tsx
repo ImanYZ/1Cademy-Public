@@ -210,7 +210,7 @@ function drawChart(
       .select("#location")
       .selectAll("path")
       .attr("d", locationIconPath)
-      .attr("transform", `translate(${x(student.votes) + 23},${y(student.votePoints)})`) //-23 and -24 because of right plot tranlation
+      .attr("transform", `translate(${x(student.votes!) + 23},${y(student.votePoints!)})`) //-23 and -24 because of right plot tranlation
       .attr("fill", "#EF5350");
   }
   // svg
