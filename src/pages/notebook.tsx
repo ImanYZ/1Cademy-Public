@@ -675,7 +675,7 @@ const Dashboard = ({}: DashboardProps) => {
 
       const nodeRef = doc(db, "nodes", nodeId);
       const nodeDoc = await getDoc(nodeRef);
-      // console.log({ nodeDoc });
+      console.log({ exist: nodeDoc.exists() });
       const batch = writeBatch(db);
       if (nodeDoc.exists() && user) {
         const thisNode: any = { ...nodeDoc.data(), id: nodeId };
@@ -2057,10 +2057,12 @@ const Dashboard = ({}: DashboardProps) => {
         linkedNodeID,
         typeOperation,
       });
+      console.log(0, isPlayingTheTutorialRef.current);
+
       if (notebookRef.current.choosingNode) return;
-      // console.log(11);
+      console.log(11);
       if (isPlayingTheTutorialRef.current) return;
-      // console.log(22);
+      console.log(22);
       createActionTrack(
         db,
         "NodeOpen",
@@ -2110,7 +2112,7 @@ const Dashboard = ({}: DashboardProps) => {
 
     [
       db,
-      isPlayingTheTutorialRef,
+      isPlayingTheTutorialRef.current,
       nodeBookDispatch,
       openNodeHandler,
       scrollToNode,
