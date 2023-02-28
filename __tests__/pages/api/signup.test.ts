@@ -149,11 +149,6 @@ describe("/signup as student", () => {
     semesterStudentVoteStatsCollection,
   ];
   let semesterId: string = "";
-  beforeAll(async () => {
-    await Promise.all(collects.map(collect => collect.populate()));
-    const semesterRef = await db.collection("semesters").get();
-    semesterId = semesterRef.docs[0].id;
-  });
 
   const body = {
     data: {
@@ -189,8 +184,14 @@ describe("/signup as student", () => {
     },
   };
 
-  it("course should be assign to user", async () => {
+  beforeAll(async () => {
+    await Promise.all(collects.map(collect => collect.populate()));
+    const semesterRef = await db.collection("semesters").get();
+    semesterId = semesterRef.docs[0].id;
     body.data.course = semesterId;
+  });
+
+  it("course should be assign to user", async () => {
     const { req, res } = createPostReq(body);
     await handler(req, res);
     const semesterRef = db.collection("semesters").doc(semesterId);
