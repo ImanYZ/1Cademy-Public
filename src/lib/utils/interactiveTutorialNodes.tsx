@@ -292,7 +292,7 @@ export const INTERACTIVE_TUTORIAL_NOTEBOOK_NODES: FullNodesData = {
     children: [],
     parents: [],
     wrongs: 0,
-    corrects: 1,
+    corrects: 0,
   },
   "08": {
     ...BASE_NODE,

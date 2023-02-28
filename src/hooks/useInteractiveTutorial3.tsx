@@ -1,8 +1,9 @@
 import { MutableRefObject, ReactNode, useCallback, useEffect, useRef, useState } from "react";
 
 import { useNodeBook } from "@/context/NodeBookContext";
+import { SEARCHER_STEPS_COMPLETE } from "@/lib/reducers/searcherTutorial";
 
-import { NODES_STEPS_COMPLETE, SEARCHER_STEPS_COMPLETE } from "../lib/reducers/nodeTutorial2";
+import { NODES_STEPS_COMPLETE } from "../lib/reducers/nodeTutorial2";
 import { NodeTutorialState, TNodeBookState } from "../nodeBookTypes";
 import { TutorialType } from "../pages/notebook";
 import useEventListener from "./useEventListener";

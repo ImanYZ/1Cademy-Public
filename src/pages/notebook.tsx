@@ -483,19 +483,22 @@ const Dashboard = ({}: DashboardProps) => {
 
   useEffect(() => {
     if (!stateNodeTutorial) return setTargetClientRect({ width: 0, height: 0, top: 0, left: 0 });
-
+    let timeoutId: any;
     if (stateNodeTutorial.anchor) {
-      if (!stateNodeTutorial.targetId) return;
+      timeoutId = setTimeout(() => {
+        if (!stateNodeTutorial.childTargetId) return;
 
-      const targetElement = document.getElementById(stateNodeTutorial.targetId);
+        const targetElement = document.getElementById(stateNodeTutorial.childTargetId);
 
-      if (!targetElement) return;
+        if (!targetElement) return;
 
-      targetElement.classList.add(stateNodeTutorial.isClickeable ? "tutorial-target-pulse" : "tutorial-target");
+        targetElement.classList.add(stateNodeTutorial.isClickeable ? "tutorial-target-pulse" : "tutorial-target");
 
-      const { width, height, top, left } = targetElement.getBoundingClientRect();
+        const { width, height, top, left } = targetElement.getBoundingClientRect();
 
-      setTargetClientRect({ width, height, top, left });
+        console.log({ width, height, top, left });
+        setTargetClientRect({ width, height, top, left });
+      }, stateNodeTutorial.delay);
     } else {
       console.log("----------------- detect client react in interactive map");
 
@@ -526,6 +529,9 @@ const Dashboard = ({}: DashboardProps) => {
         width,
         height,
       });
+      return () => {
+        if (timeoutId) clearTimeout(timeoutId);
+      };
     }
   }, [stateNodeTutorial, graph.nodes, setTargetClientRect]);
 
@@ -4190,6 +4196,7 @@ const Dashboard = ({}: DashboardProps) => {
                 onlineUsers={onlineUsers}
                 usersOnlineStatusLoaded={usersOnlineStatusLoaded}
                 disableToolbar={Boolean(stateNodeTutorial && stateNodeTutorial.disabledElements.includes("TOOLBAR"))}
+                setCurrentTutorial={setCurrentTutorial}
               />
 
               <MemoizedBookmarksSidebar
@@ -4210,6 +4217,8 @@ const Dashboard = ({}: DashboardProps) => {
                 sidebarWidth={sidebarWidth()}
                 innerHeight={innerHeight}
                 innerWidth={windowWith}
+                disableSearcher={Boolean(stateNodeTutorial?.disabledElements.includes("SEARCHER_SIDEBAR"))}
+                enableElements={stateNodeTutorial?.enableChildElements ?? []}
               />
               <MemoizedNotificationSidebar
                 theme={settings.theme}

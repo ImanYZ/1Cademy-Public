@@ -2,7 +2,7 @@ import KeyboardArrowLeftIcon from "@mui/icons-material/KeyboardArrowLeft";
 import MenuIcon from "@mui/icons-material/Menu";
 import { Badge, Box, Button, IconButton, Menu, MenuItem, Stack, Tooltip } from "@mui/material";
 import { addDoc, collection, doc, getFirestore, setDoc, Timestamp } from "firebase/firestore";
-import React, { useCallback, useMemo, useState } from "react";
+import React, { Dispatch, SetStateAction, useCallback, useMemo, useState } from "react";
 
 import { useNodeBook } from "@/context/NodeBookContext";
 
@@ -10,7 +10,7 @@ import LogoDarkMode from "../../../../../public/LogoDarkMode.svg";
 import LogoLightMode from "../../../../../public/LogoLightMode.svg";
 import { Reputation, ReputationSignal, User, UserTheme } from "../../../../knowledgeTypes";
 import { UsersStatus } from "../../../../nodeBookTypes";
-import { OpenSidebar } from "../../../../pages/notebook";
+import { OpenSidebar, TutorialType } from "../../../../pages/notebook";
 import { MemoizedMetaButton } from "../../MetaButton";
 import { MemoizedUserStatusSettings } from "../../UserStatusSettings";
 import UsersStatusList from "../UsersStatusList";
@@ -38,6 +38,7 @@ type MainSidebarProps = {
   usersOnlineStatusLoaded: boolean;
   disableToolbar?: boolean;
   enabledToolbarElements?: string[];
+  setCurrentTutorial?: Dispatch<SetStateAction<TutorialType>>;
 };
 
 export const ToolbarSidebar = ({
@@ -58,6 +59,7 @@ export const ToolbarSidebar = ({
   onlineUsers,
   usersOnlineStatusLoaded,
   disableToolbar = false,
+  setCurrentTutorial,
 }: // enabledToolbarElements = [],
 MainSidebarProps) => {
   const { nodeBookState, nodeBookDispatch } = useNodeBook();
@@ -211,6 +213,7 @@ MainSidebarProps) => {
             // className="SearchBarIconToolbar"
             id="toolbar-search-button"
             onClick={() => {
+              setCurrentTutorial && setCurrentTutorial("SEARCHER");
               onOpenSidebar("SEARCHER_SIDEBAR", "Search");
               setIsMenuOpen(false);
             }}
