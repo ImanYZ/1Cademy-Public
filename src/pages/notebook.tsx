@@ -441,7 +441,7 @@ const Dashboard = ({}: DashboardProps) => {
         }, 400);
       }
     },
-    [onNodeInViewport]
+    [isPlayingTheTutorialRef, onNodeInViewport]
   );
 
   // useEffect(() => {
@@ -1981,7 +1981,7 @@ const Dashboard = ({}: DashboardProps) => {
   const hideOffsprings = useMemoizedCallback(
     nodeId => {
       if (notebookRef.current.choosingNode || !user) return;
-
+      console.log({ isPlayingTheTutorialRef: isPlayingTheTutorialRef.current });
       if (isPlayingTheTutorialRef.current) return;
 
       setGraph(graph => {
@@ -2048,12 +2048,18 @@ const Dashboard = ({}: DashboardProps) => {
         return graph;
       });
     },
-    [recursiveOffsprings]
+    [recursiveOffsprings, isPlayingTheTutorialRef]
   );
+
+  console.log({ isPlayingTheTutorialRef: isPlayingTheTutorialRef.current });
 
   const openLinkedNode = useCallback(
     (linkedNodeID: string, typeOperation?: string) => {
-      devLog("open Linked Node", { linkedNodeID, typeOperation });
+      devLog("open Linked Node", {
+        linkedNodeID,
+        typeOperation,
+        isPlayingTheTutorialRef: isPlayingTheTutorialRef.current,
+      });
       if (notebookRef.current.choosingNode) return;
 
       if (isPlayingTheTutorialRef.current) return;
@@ -2104,9 +2110,19 @@ const Dashboard = ({}: DashboardProps) => {
         setOpenSidebar(null);
       }
     },
-    // TODO: CHECK dependencies
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [openNodeHandler, setOpenSidebar, user]
+
+    [
+      db,
+      isPlayingTheTutorialRef,
+      nodeBookDispatch,
+      openNodeHandler,
+      scrollToNode,
+      user?.chooseUname,
+      user?.fName,
+      user?.imageUrl,
+      user?.lName,
+      user?.uname,
+    ]
   );
 
   const getNodeUserNode = useCallback(
@@ -2218,9 +2234,17 @@ const Dashboard = ({}: DashboardProps) => {
         return graph;
       });
     },
-    // TODO: CHECK dependencies
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [user, setGraph, initNodeStatusChange /*navigateToFirstParent*/]
+    [
+      isPlayingTheTutorialRef,
+      db,
+      user?.uname,
+      user?.fName,
+      user?.lName,
+      user?.chooseUname,
+      user?.imageUrl,
+      initNodeStatusChange,
+      nodeBookDispatch,
+    ]
   );
 
   const openAllChildren = useCallback((nodeId: string) => {

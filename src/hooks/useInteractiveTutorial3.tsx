@@ -74,6 +74,7 @@ export const useInteractiveTutorial = ({ notebookRef }: useInteractiveTutorialPr
 
         return null;
       });
+      isPlayingTheTutorialRef.current = false;
       return setSteps([]);
     }
 
