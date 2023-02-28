@@ -441,7 +441,7 @@ const Dashboard = ({}: DashboardProps) => {
         }, 400);
       }
     },
-    [onNodeInViewport]
+    [isPlayingTheTutorialRef, onNodeInViewport]
   );
 
   // useEffect(() => {
@@ -2053,11 +2053,14 @@ const Dashboard = ({}: DashboardProps) => {
 
   const openLinkedNode = useCallback(
     (linkedNodeID: string, typeOperation?: string) => {
-      devLog("open Linked Node", { linkedNodeID, typeOperation });
+      devLog("open Linked Node", {
+        linkedNodeID,
+        typeOperation,
+      });
       if (notebookRef.current.choosingNode) return;
-
+      // console.log(11);
       if (isPlayingTheTutorialRef.current) return;
-
+      // console.log(22);
       createActionTrack(
         db,
         "NodeOpen",
@@ -2104,9 +2107,19 @@ const Dashboard = ({}: DashboardProps) => {
         setOpenSidebar(null);
       }
     },
-    // TODO: CHECK dependencies
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [openNodeHandler, setOpenSidebar, user]
+
+    [
+      db,
+      isPlayingTheTutorialRef,
+      nodeBookDispatch,
+      openNodeHandler,
+      scrollToNode,
+      user?.chooseUname,
+      user?.fName,
+      user?.imageUrl,
+      user?.lName,
+      user?.uname,
+    ]
   );
 
   const getNodeUserNode = useCallback(
