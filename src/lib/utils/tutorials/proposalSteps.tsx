@@ -77,7 +77,7 @@ const OVERVIEW_STEPS: StepTutorialBase[] = [
       />
     ),
     disabledElements: [...DISABLE_NOTEBOOK_OPTIONS, "00"],
-    targetDefaultProperties: { editable: true },
+    targetDefaultProperties: { editable: false },
   },
   {
     localSnapshot: [{ ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["00"], nodeChangeType: "modified", open: true }],

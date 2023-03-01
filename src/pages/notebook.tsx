@@ -1184,9 +1184,28 @@ const Dashboard = ({}: DashboardProps) => {
     if (currentTutorial !== "PROPOSAL") return;
     if (!stateNodeTutorial) return;
     if (!stateNodeTutorial.targetDefaultProperties) return;
-    if (!graph.nodes[stateNodeTutorial.targetId]) return;
 
-    console.log("SET NODE PARTs EDITABLE");
+    const thisNode = graph.nodes[stateNodeTutorial.targetId];
+    if (!thisNode) return;
+
+    const keys = Object.keys(stateNodeTutorial.targetDefaultProperties) as (keyof FullNodeData)[];
+
+    const isEqualsProperties = (key: keyof FullNodeData) => {
+      // console.log(1, "SNP");
+      if (!stateNodeTutorial.targetDefaultProperties) return true;
+      // console.log(2, "SNP", thisNode, stateNodeTutorial?.targetDefaultProperties[key]);
+      // if (!thisNode[key]) return true;
+      // console.log(3, "SNP");
+      // if (!stateNodeTutorial?.targetDefaultProperties[key]) return;
+      // console.log(3, "SNP", thisNode[key], stateNodeTutorial?.targetDefaultProperties[key]);
+
+      return thisNode[key] === stateNodeTutorial?.targetDefaultProperties[key];
+    };
+    // console.log("SNP");
+    const isEquals = keys.some(isEqualsProperties);
+
+    if (isEquals) return;
+
     setNodeParts(stateNodeTutorial.targetId, node => ({ ...node, ...stateNodeTutorial.targetDefaultProperties }));
   }, [stateNodeTutorial, currentTutorial, setNodeParts, graph.nodes]);
 
