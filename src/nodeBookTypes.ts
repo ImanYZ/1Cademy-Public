@@ -303,6 +303,17 @@ export type NodeBookActions = {
 
 export type TutorialState = null | NodeTutorialState;
 
+export type StepTutorialBase = {
+  localSnapshot: FullNodeData[];
+  targetId: string;
+  childTargetId?: string;
+  title: string;
+  description: React.ReactNode;
+  disabledElements?: string[];
+  enableChildElements?: string[];
+  isClickeable?: boolean;
+  forceScrollToNode?: boolean;
+};
 export interface NodeTutorialState {
   readonly localSnapshot: FullNodeData[];
   readonly targetId: string;

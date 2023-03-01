@@ -1115,13 +1115,13 @@ const Dashboard = ({}: DashboardProps) => {
   useEffect(() => {
     // console.log("USE_EFFECT", { userTutorialLoaded, userTutorialNodes: userTutorial.nodes });
     console.log("USE_EFFECT:tt", userTutorialLoaded, userTutorial.nodes.done, userTutorial.nodes.skipped);
-    // const tutorialFinished = userTutorial.nodes.done || userTutorial.nodes.skipped;
-    if (!userTutorialLoaded) return;
-    // if (!tutorialFinished) return setFirstLoading(false);
-    if (stateNodeTutorial) return;
-    // if(userTutorial.nodes.done ||userTutorial.nodes.skipped){
 
-    // }
+    if (!db) return;
+    if (!user?.uname) return;
+    if (!allTagsLoaded) return;
+    if (!userTutorialLoaded) return;
+    if (!userTutorial.nodes.done && !userTutorial.nodes.skipped) return;
+    if (stateNodeTutorial) return;
 
     devLog("USE_EFFECT", "nodes synchronization");
 
@@ -1135,10 +1135,6 @@ const Dashboard = ({}: DashboardProps) => {
       nodeBookDispatch({ type: "setSelectedNode", payload: null });
       g.current = createGraph();
     }
-
-    if (!db) return;
-    if (!user?.uname) return;
-    if (!allTagsLoaded) return;
 
     const userNodesRef = collection(db, "userNodes");
     const q = query(
@@ -1165,6 +1161,14 @@ const Dashboard = ({}: DashboardProps) => {
     userTutorial.nodes.skipped,
   ]);
   // }, [allTagsLoaded, db, snapshot, user?.uname, settings.showClusterOptions, notebookChanged]);
+
+  // useEffect(() => {
+  //   // here we force scrollToNode in every step
+  //   if (!stateNodeTutorial) return;
+  //   if (currentTutorial !== "NODES") return;
+
+  //   scrollToNode(stateNodeTutorial.targetId);
+  // }, [currentTutorial, scrollToNode, stateNodeTutorial]);
 
   useEffect(() => {
     // local snapshot used only in interactive tutorial
