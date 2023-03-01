@@ -209,25 +209,25 @@ export type StepTutorialBase = {
   enableChildElements?: string[];
   isClickeable?: boolean;
   forceScrollToNode?: boolean;
+  targetDefaultProperties?: Partial<FullNodeData>;
 };
 export interface NodeTutorialState {
-  readonly localSnapshot: FullNodeData[];
-  readonly targetId: string;
-  readonly childTargetId?: string;
-  readonly title: string;
-  readonly description: React.ReactNode;
-  readonly disabledElements: string[];
-  readonly enableChildElements: string[];
-  readonly anchor: string;
-  readonly currentStepName: number;
-  readonly nextStepName: number;
-  readonly previosStepName: number;
-  readonly tooltipPosition: "top" | "bottom" | "left" | "right";
-  // readonly stepNumber: number;
-  // readonly stepLenght: number;
-  readonly isClickeable: boolean;
+  localSnapshot: FullNodeData[];
+  targetId: string;
+  childTargetId?: string;
+  title: string;
+  description: React.ReactNode;
+  disabledElements: string[];
+  enableChildElements: string[];
+  anchor: string;
+  currentStepName: number;
+  nextStepName: number;
+  previosStepName: number;
+  tooltipPosition: "top" | "bottom" | "left" | "right";
+  isClickeable: boolean;
   targetDelay?: number;
   forceScrollToNode?: boolean;
+  targetDefaultProperties?: Partial<FullNodeData>;
 }
 export type StepReducerPayload = {
   callback?: () => void;

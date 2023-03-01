@@ -749,6 +749,15 @@ const Dashboard = ({}: DashboardProps) => {
     [user, allTags, currentTutorial]
   );
 
+  const setNodeParts = useCallback((nodeId: string, innerFunc: (thisNode: FullNodeData) => FullNodeData) => {
+    setGraph(({ nodes: oldNodes, edges }) => {
+      setSelectedNodeType(oldNodes[nodeId].nodeType);
+      const thisNode = { ...oldNodes[nodeId] };
+      const newNode = { ...oldNodes, [nodeId]: innerFunc(thisNode) };
+      return { nodes: newNode, edges };
+    });
+  }, []);
+
   //Getting the node from the Url to open and scroll to that node in the first render
   useEffect(() => {
     const queryString = window.location.search;
@@ -1161,7 +1170,7 @@ const Dashboard = ({}: DashboardProps) => {
   // }, [allTagsLoaded, db, snapshot, user?.uname, settings.showClusterOptions, notebookChanged]);
 
   useEffect(() => {
-    // here we force scrollToNode in required steps from tutorial
+    // here we force scrollToNode in required steps from TUTORIAL
     // this is only set up when worker doesn't make any change when a step change
     if (!stateNodeTutorial) return;
     if (currentTutorial !== "NODES") return;
@@ -1169,6 +1178,17 @@ const Dashboard = ({}: DashboardProps) => {
 
     scrollToNode(stateNodeTutorial.targetId);
   }, [currentTutorial, scrollToNode, stateNodeTutorial]);
+
+  useEffect(() => {
+    // here we set up the default properties of a node in TUTORIAL
+    if (currentTutorial !== "PROPOSAL") return;
+    if (!stateNodeTutorial) return;
+    if (!stateNodeTutorial.targetDefaultProperties) return;
+    if (!graph.nodes[stateNodeTutorial.targetId]) return;
+
+    console.log("SET NODE PARTs EDITABLE");
+    setNodeParts(stateNodeTutorial.targetId, node => ({ ...node, ...stateNodeTutorial.targetDefaultProperties }));
+  }, [stateNodeTutorial, currentTutorial, setNodeParts, graph.nodes]);
 
   useEffect(() => {
     // Local Snapshot used only in interactive tutorial
@@ -1953,15 +1973,6 @@ const Dashboard = ({}: DashboardProps) => {
 
     setSelectedNodeType(nodeType);
     setOpenPart("LinkingWords");
-  }, []);
-
-  const setNodeParts = useCallback((nodeId: string, innerFunc: (thisNode: FullNodeData) => FullNodeData) => {
-    setGraph(({ nodes: oldNodes, edges }) => {
-      setSelectedNodeType(oldNodes[nodeId].nodeType);
-      const thisNode = { ...oldNodes[nodeId] };
-      const newNode = { ...oldNodes, [nodeId]: innerFunc(thisNode) };
-      return { nodes: newNode, edges };
-    });
   }, []);
 
   const recursiveOffsprings = useCallback((nodeId: string): any[] => {

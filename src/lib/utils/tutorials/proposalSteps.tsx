@@ -3,7 +3,7 @@ import relativeTime from "dayjs/plugin/relativeTime";
 
 import MarkdownRender from "@/components/Markdown/MarkdownRender";
 
-import { FullNodeData, NodeTutorialState, TutorialState } from "../../../nodeBookTypes";
+import { NodeTutorialState, StepTutorialBase, TutorialState } from "../../../nodeBookTypes";
 import { INTERACTIVE_TUTORIAL_NOTEBOOK_NODES } from "../interactiveTutorialNodes";
 // import { FullNodeData, NodeTutorialState, TutorialState } from "../../nodeBookTypes";
 // import { INTERACTIVE_TUTORIAL_NOTEBOOK_NODES } from "../utils/interactiveTutorialNodes";
@@ -43,30 +43,16 @@ Ex for Node id elements to disable
   "01-node-footer-menu"
  */
 
-type Step = {
-  localSnapshot: FullNodeData[];
-  targetId: string;
-  childTargetId?: string;
-  title: string;
-  description: React.ReactNode;
-  disabledElements?: string[];
-  enableChildElements?: string[];
-  isClickeable?: boolean;
-  tooltipPosition?: "top" | "bottom" | "left" | "right";
-  anchor?: string;
-};
-
-const OVERVIEW_STEPS: Step[] = [
+const OVERVIEW_STEPS: StepTutorialBase[] = [
   {
-    localSnapshot: [
-      { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["00"], nodeChangeType: "modified", open: true, editable: true },
-    ],
+    localSnapshot: [{ ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["00"], nodeChangeType: "modified", open: true }],
     targetId: "00",
     title: "Proposals: Overview",
     description: (
       <MarkdownRender text={"Most of what you will do on 1Cademy will revolve around making proposals to nodes."} />
     ),
     disabledElements: [...DISABLE_NOTEBOOK_OPTIONS, "00"],
+    targetDefaultProperties: { editable: true },
   },
   {
     localSnapshot: [
@@ -78,6 +64,7 @@ const OVERVIEW_STEPS: Step[] = [
       <MarkdownRender text={"You will need to propose a change to a node in order to add or edit content."} />
     ),
     disabledElements: [...DISABLE_NOTEBOOK_OPTIONS, "00"],
+    targetDefaultProperties: { editable: true },
   },
   {
     localSnapshot: [
@@ -112,7 +99,7 @@ const OVERVIEW_STEPS: Step[] = [
   },
 ];
 
-const FINDING_PREREQUISITES_STEPS: Step[] = [
+const FINDING_PREREQUISITES_STEPS: StepTutorialBase[] = [
   {
     localSnapshot: [
       { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["00"], nodeChangeType: "added", open: true, editable: false },
@@ -219,7 +206,7 @@ const FINDING_PREREQUISITES_STEPS: Step[] = [
   },
 ];
 
-const PROPOSING_EDITS_STEPS: Step[] = [
+const PROPOSING_EDITS_STEPS: StepTutorialBase[] = [
   {
     localSnapshot: [
       { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["00"], nodeChangeType: "added", open: true, editable: true },
