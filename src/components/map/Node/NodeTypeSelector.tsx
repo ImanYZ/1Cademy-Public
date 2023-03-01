@@ -16,7 +16,7 @@ const NodeTypeSelector = ({ nodeId, setNodeParts, nodeType, disabled = false }: 
   const currentId = useId();
 
   return (
-    <FormControl sx={{ width: 120 }}>
+    <FormControl id={`${nodeId}-node-type-selector`} sx={{ width: 120 }}>
       <Select
         sx={{
           m: 0,

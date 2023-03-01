@@ -319,7 +319,7 @@ export interface NodeTutorialState {
   // readonly stepNumber: number;
   // readonly stepLenght: number;
   readonly isClickeable: boolean;
-  delay?: number;
+  targetDelay?: number;
 }
 export type StepReducerPayload = {
   callback?: () => void;

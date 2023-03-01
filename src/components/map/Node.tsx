@@ -1084,6 +1084,7 @@ const Node = ({
                 }}
               />
               <Box
+                id={`${identifier}-button-propose-cancel`}
                 className="ProposalCommentSubmitButton"
                 sx={{
                   textAlign: "center",
@@ -1093,6 +1094,7 @@ const Node = ({
                 }}
               >
                 <Button
+                  disabled={disabled}
                   color="error"
                   variant="contained"
                   className="btn waves-effect waves-light hoverable red"
@@ -1108,7 +1110,7 @@ const Node = ({
                   variant="contained"
                   className="btn waves-effect waves-light hoverable green"
                   onClick={proposalSubmit}
-                  disabled={!ableToPropose ?? false}
+                  disabled={(!ableToPropose ?? false) || disabled}
                   sx={{
                     padding: "6px",
                   }}
@@ -1228,9 +1230,9 @@ const Node = ({
               proposeNodeImprovement={proposeNodeImprovement}
               setOperation={setOperation}
               disabled={disabled}
+              setCurrentTutorial={setCurrentTutorial}
             />
           </div>
-          {/* </div> */}
         </div>
       )}
       {/* {openSidebar === "PROPOSALS" && !simulated && !isNew && nodeBookState.selectedNode == identifier ? (
@@ -1303,6 +1305,7 @@ const Node = ({
             return (
               <Tooltip title={`Propose a ${childNodeType} child`} placement="right" key={index}>
                 <Fab
+                  disabled={disabled}
                   color="primary"
                   sx={{
                     background: "#1F1F1F",

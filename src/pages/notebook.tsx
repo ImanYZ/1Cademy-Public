@@ -507,7 +507,7 @@ const Dashboard = ({}: DashboardProps) => {
 
         console.log({ width, height, top, left });
         setTargetClientRect({ width, height, top, left });
-      }, stateNodeTutorial.delay);
+      }, stateNodeTutorial.targetDelay);
     } else {
       console.log("----------------- detect client react in interactive map");
 
@@ -1328,13 +1328,13 @@ const Dashboard = ({}: DashboardProps) => {
           top: tmpNode?.top ?? topParent,
         };
       });
-
       devLog("5: TUTORIAL:user Nodes Snapshot:visible Full Nodes Merged", visibleFullNodesMerged);
       const { newNodes, newEdges } = fillDagre(visibleFullNodesMerged, nodes, edges, settings.showClusterOptions);
 
       if (!Object.keys(newNodes).length) {
         setNoNodesFoundMessage(true);
       }
+
       return { nodes: newNodes, edges: newEdges };
     });
     setOpenProgressBarMenu(true);

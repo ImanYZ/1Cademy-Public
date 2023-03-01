@@ -245,7 +245,10 @@ const LinkingWords = ({ notebookRef, disabled, enableChildElements = [], ...prop
           )}
 
           {props.openPart === "References" && (
-            <Box sx={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+            <Box
+              id={`${props.identifier}-node-references`}
+              sx={{ display: "flex", flexDirection: "column", gap: "8px" }}
+            >
               <strong>References</strong>
 
               {props.references.map((reference: any, idx: number) => {
@@ -334,7 +337,10 @@ const LinkingWords = ({ notebookRef, disabled, enableChildElements = [], ...prop
               })}
 
               {props.editable && (
-                <Box sx={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+                <Box
+                  id={`${props.identifier}-link-reference-button`}
+                  sx={{ display: "flex", flexDirection: "column", gap: "16px" }}
+                >
                   <MemoizedMetaButton
                     onClick={choosingNewLinkedNode("Reference")}
                     tooltip="Link to a reference node."
@@ -365,7 +371,10 @@ const LinkingWords = ({ notebookRef, disabled, enableChildElements = [], ...prop
         >
           {props.openPart === "References" && (
             //StyleRef, f-size from Map.css ln 71
-            <Box sx={{ display: "flex", flexDirection: "column", gap: "5px", fontSize: "16px" }}>
+            <Box
+              id={`${props.identifier}-node-tags`}
+              sx={{ display: "flex", flexDirection: "column", gap: "5px", fontSize: "16px" }}
+            >
               <strong>Tags</strong>
               {props.tags.map((tag: any, idx: number) => {
                 return (
@@ -422,7 +431,7 @@ const LinkingWords = ({ notebookRef, disabled, enableChildElements = [], ...prop
           )}
 
           {props.openPart === "Tags" && (
-            <Box sx={{ fontSize: "16px" }}>
+            <Box id={`${props.identifier}-node-tags`} sx={{ fontSize: "16px" }}>
               <strong>Tags</strong>
               {props.tags.map((tag: any, idx: number) => {
                 return (

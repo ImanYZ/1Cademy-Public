@@ -799,7 +799,7 @@ export const createOrUpdateNode = (
       //   !newNode.open &&
       //   "closedHeight" in newNode &&
       //   Number(newNode.closedHeight)
-      // ) {
+      // ) {S
       //   height = Number(newNode.closedHeight);
       // }
       newNodeData = {

@@ -98,6 +98,7 @@ export const useInteractiveTutorial = ({ notebookRef }: useInteractiveTutorialPr
       //  setSteps(SEARCHER_STEPS_COMPLETE);
     }
 
+    console.log({ newSteps });
     idxCurrentStepRef.current = 0;
     const selectedStep = newSteps[idxCurrentStepRef.current];
     setStateNodeTutorial(selectedStep);
