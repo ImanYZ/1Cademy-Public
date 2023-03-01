@@ -2021,7 +2021,7 @@ button.MuiTab-textColorInherit:focus {
   display: grid;
   /* grid-template-columns: 205px 120px auto; */
   grid-template-columns: 205px 1fr 1fr;
-  margin-top: 13px;
+  /* margin-top: 4px; */
   color: gray;
 }
 
