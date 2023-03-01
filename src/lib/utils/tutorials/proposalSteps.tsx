@@ -55,9 +55,7 @@ const OVERVIEW_STEPS: StepTutorialBase[] = [
     targetDefaultProperties: { editable: true },
   },
   {
-    localSnapshot: [
-      { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["00"], nodeChangeType: "added", open: true, editable: true },
-    ],
+    localSnapshot: [{ ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["00"], nodeChangeType: "modified", open: true }],
     targetId: "00",
     title: "Proposals: Overview",
     description: (
@@ -67,9 +65,7 @@ const OVERVIEW_STEPS: StepTutorialBase[] = [
     targetDefaultProperties: { editable: true },
   },
   {
-    localSnapshot: [
-      { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["00"], nodeChangeType: "added", open: true, editable: true },
-    ],
+    localSnapshot: [{ ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["00"], nodeChangeType: "modified", open: true }],
     targetId: "00",
     childTargetId: "00_childNodes",
     title: "Proposals: Overview",
@@ -81,11 +77,10 @@ const OVERVIEW_STEPS: StepTutorialBase[] = [
       />
     ),
     disabledElements: [...DISABLE_NOTEBOOK_OPTIONS, "00"],
+    targetDefaultProperties: { editable: true },
   },
   {
-    localSnapshot: [
-      { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["00"], nodeChangeType: "added", open: true, editable: true },
-    ],
+    localSnapshot: [{ ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["00"], nodeChangeType: "modified", open: true }],
     targetId: "00",
     title: "Proposals: Overview",
     description: (
@@ -96,6 +91,7 @@ const OVERVIEW_STEPS: StepTutorialBase[] = [
       />
     ),
     disabledElements: [...DISABLE_NOTEBOOK_OPTIONS, "00"],
+    targetDefaultProperties: { editable: true },
   },
 ];
 
