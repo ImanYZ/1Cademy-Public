@@ -1162,13 +1162,15 @@ const Dashboard = ({}: DashboardProps) => {
   ]);
   // }, [allTagsLoaded, db, snapshot, user?.uname, settings.showClusterOptions, notebookChanged]);
 
-  // useEffect(() => {
-  //   // here we force scrollToNode in every step
-  //   if (!stateNodeTutorial) return;
-  //   if (currentTutorial !== "NODES") return;
+  useEffect(() => {
+    // here we force scrollToNode in required steps from tutorial
+    // this is only set up when worker doesn't make any change when a step change
+    if (!stateNodeTutorial) return;
+    if (currentTutorial !== "NODES") return;
+    if(!stateNodeTutorial.forceScrollToNode) return;
 
-  //   scrollToNode(stateNodeTutorial.targetId);
-  // }, [currentTutorial, scrollToNode, stateNodeTutorial]);
+    scrollToNode(stateNodeTutorial.targetId);
+  }, [currentTutorial, scrollToNode, stateNodeTutorial]);
 
   useEffect(() => {
     // local snapshot used only in interactive tutorial

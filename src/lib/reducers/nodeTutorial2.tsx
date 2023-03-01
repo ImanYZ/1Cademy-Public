@@ -1135,6 +1135,7 @@ const NODES_STEPS: StepTutorialBase[] = [
     title: "Nodes - Node Footer",
     description: <MarkdownRender text={"This is the cited reference"} />,
     disabledElements: [...DISABLE_NOTEBOOK_OPTIONS, "00", "01", "08"],
+    forceScrollToNode: true,
   },
 
   {
@@ -1162,6 +1163,7 @@ const NODES_STEPS: StepTutorialBase[] = [
     disabledElements: [...DISABLE_NOTEBOOK_OPTIONS, "00", "01", "08"],
     enableChildElements: ["01-button-parent-children"],
     isClickeable: true,
+    forceScrollToNode: true,
   },
 
   {
