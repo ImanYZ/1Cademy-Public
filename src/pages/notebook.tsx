@@ -1114,15 +1114,12 @@ const Dashboard = ({}: DashboardProps) => {
   }, [nodeBookDispatch, openSidebar]);
 
   useEffect(() => {
-    // console.log("USE_EFFECT", { userTutorialLoaded, userTutorialNodes: userTutorial.nodes });
-    console.log("USE_EFFECT:tt", userTutorialLoaded, userTutorial.nodes.done, userTutorial.nodes.skipped);
-    // const tutorialFinished = userTutorial.nodes.done || userTutorial.nodes.skipped;
+    if (!db) return;
+    if (!user?.uname) return;
+    if (!allTagsLoaded) return;
     if (!userTutorialLoaded) return;
-    // if (!tutorialFinished) return setFirstLoading(false);
+    if (!userTutorial.nodes.done && !userTutorial.nodes.skipped) return;
     if (stateNodeTutorial) return;
-    // if(userTutorial.nodes.done ||userTutorial.nodes.skipped){
-
-    // }
 
     devLog("USE_EFFECT", "nodes synchronization");
 
@@ -1136,10 +1133,6 @@ const Dashboard = ({}: DashboardProps) => {
       nodeBookDispatch({ type: "setSelectedNode", payload: null });
       g.current = createGraph();
     }
-
-    if (!db) return;
-    if (!user?.uname) return;
-    if (!allTagsLoaded) return;
 
     const userNodesRef = collection(db, "userNodes");
     const q = query(
@@ -1168,22 +1161,27 @@ const Dashboard = ({}: DashboardProps) => {
   // }, [allTagsLoaded, db, snapshot, user?.uname, settings.showClusterOptions, notebookChanged]);
 
   useEffect(() => {
-    // local snapshot used only in interactive tutorial
-    // if (!isPlayingTheTutorial) return;
-    console.log("useEffect", "interactive-tutorial", {});
-    console.log(stateNodeTutorial, userTutorial.nodes.done, userTutorial.nodes.skipped);
+    // here we force scrollToNode in required steps from tutorial
+    // this is only set up when worker doesn't make any change when a step change
     if (!stateNodeTutorial) return;
-    // if (userTutorial.nodes.done || userTutorial.nodes.skipped) return;
+    if (currentTutorial !== "NODES") return;
+    if (!stateNodeTutorial.forceScrollToNode) return;
+
+    scrollToNode(stateNodeTutorial.targetId);
+  }, [currentTutorial, scrollToNode, stateNodeTutorial]);
+
+  useEffect(() => {
+    // Local Snapshot used only in interactive tutorial
+    if (!stateNodeTutorial) return;
+
     devLog("USE_EFFECT", "interactive-tutorial");
 
     if (shouldResetGraph.current) {
       g.current = createGraph();
-      // const FIRST_KEY_NODE = "01";
       setGraph({
         nodes: {},
         edges: {},
       });
-      // setLocalSnapshot({);
       shouldResetGraph.current = false;
     }
 

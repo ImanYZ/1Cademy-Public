@@ -11,13 +11,13 @@ import {
   CircularProgress,
   IconButton,
   InputAdornment,
+  InputBase,
   ListItemIcon,
   ListItemText,
   MenuItem,
   Paper,
   Select,
   SelectChangeEvent,
-  TextField,
   useMediaQuery,
   useTheme,
 } from "@mui/material";
@@ -548,7 +548,7 @@ const SearcherSidebar = ({
                 }}
               />
             </Box>
-            <div
+            <Box
               id="nodesUpdatedSinceContainer"
               style={{
                 display: innerWidth > theme.breakpoints.values.sm || openSortOptions ? "flex" : "none",
@@ -557,6 +557,8 @@ const SearcherSidebar = ({
                 fontSize: innerWidth > 410 ? "14px" : "11px",
                 flexWrap: "wrap",
                 gap: "10px",
+                paddingTop: "13px",
+                // marginTop: "13px",
               }}
             >
               <RecentNodesList
@@ -572,7 +574,7 @@ const SearcherSidebar = ({
               />
               <Box id="search-recently-input" sx={{ display: "flex", alignItems: "center", gap: "5px" }}>
                 Edited in past
-                <TextField
+                <InputBase
                   type="number"
                   defaultValue={nodesUpdatedSince}
                   onChange={setNodesUpdatedSinceClick}
@@ -581,17 +583,14 @@ const SearcherSidebar = ({
                   sx={{
                     width: "76px",
                     p: "0px",
-                    "& fieldset": {
-                      borderWidth: 1,
+                  }}
+                  inputProps={{
+                    style: {
+                      padding: "4px 8px",
+                      border: "solid 1px rgba(88, 88, 88,.7)",
                       borderRadius: "16px",
-                      borderColor: "rgba(88, 88, 88,.7)",
-                    },
-                    "&:hover": {
-                      borderColor: "red",
                     },
                   }}
-                  inputProps={{ style: { padding: "4px 8px" } }}
-                  variant="outlined"
                 />
                 days
               </Box>
@@ -605,7 +604,7 @@ const SearcherSidebar = ({
               >
                 {shortenNumber(searchResults.totalResults, 2, false)} Results
               </div>
-            </div>
+            </Box>
           </>
         )}
 
