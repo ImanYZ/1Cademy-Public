@@ -82,7 +82,6 @@ Ex for Node id elements to disable
 
 const NODES_STEPS: StepTutorialBase[] = [
   {
-    // ...getBaseStepConfig(action.type),
     localSnapshot: [
       { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["00"], nodeChangeType: "removed", open: false },
       { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["01"], nodeChangeType: "added", open: true },
@@ -94,7 +93,6 @@ const NODES_STEPS: StepTutorialBase[] = [
   },
 
   {
-    // ...getBaseStepConfig(action.type),
     localSnapshot: [
       { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["00"], nodeChangeType: "removed", open: false },
       { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["01"], nodeChangeType: "added", open: true },
@@ -107,7 +105,6 @@ const NODES_STEPS: StepTutorialBase[] = [
   },
 
   {
-    // ...getBaseStepConfig(action.type),
     localSnapshot: [
       { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["00"], nodeChangeType: "removed", open: false },
       { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["01"], nodeChangeType: "added", open: true },
@@ -126,7 +123,6 @@ const NODES_STEPS: StepTutorialBase[] = [
   },
 
   {
-    // ...getBaseStepConfig(action.type),
     localSnapshot: [
       { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["00"], nodeChangeType: "removed", open: false },
       { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["01"], nodeChangeType: "added", open: true },
@@ -145,7 +141,6 @@ const NODES_STEPS: StepTutorialBase[] = [
   },
 
   {
-    // ...getBaseStepConfig(action.type),
     localSnapshot: [
       { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["00"], nodeChangeType: "removed", open: false },
       { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["01"], nodeChangeType: "added", open: true },
@@ -164,7 +159,6 @@ const NODES_STEPS: StepTutorialBase[] = [
   },
 
   {
-    // ...getBaseStepConfig(action.type),
     localSnapshot: [
       { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["00"], nodeChangeType: "removed", open: false },
       { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["01"], nodeChangeType: "added", open: true },
@@ -181,7 +175,6 @@ const NODES_STEPS: StepTutorialBase[] = [
   // --- BASIC NAVIGATION
 
   {
-    // ...getBaseStepConfig(action.type),
     localSnapshot: [
       { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["00"], nodeChangeType: "removed", open: false },
       {
@@ -207,7 +200,6 @@ const NODES_STEPS: StepTutorialBase[] = [
   },
 
   {
-    // ...getBaseStepConfig(action.type),
     localSnapshot: [
       { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["00"], nodeChangeType: "removed", open: false },
       {
@@ -225,7 +217,6 @@ const NODES_STEPS: StepTutorialBase[] = [
   },
 
   {
-    // ...getBaseStepConfig(action.type),
     localSnapshot: [
       { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["00"], nodeChangeType: "removed", open: false },
       {
@@ -245,7 +236,6 @@ const NODES_STEPS: StepTutorialBase[] = [
   },
 
   {
-    // ...getBaseStepConfig(action.type),
     localSnapshot: [
       { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["00"], nodeChangeType: "added", open: true },
       {
@@ -265,7 +255,6 @@ const NODES_STEPS: StepTutorialBase[] = [
   },
 
   {
-    // ...getBaseStepConfig(action.type),
     localSnapshot: [
       { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["00"], nodeChangeType: "added", open: true },
       {
@@ -289,7 +278,6 @@ const NODES_STEPS: StepTutorialBase[] = [
   },
 
   {
-    // ...getBaseStepConfig(action.type),
     localSnapshot: [
       { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["00"], nodeChangeType: "added", open: true },
       {
@@ -307,7 +295,6 @@ const NODES_STEPS: StepTutorialBase[] = [
   },
 
   {
-    // ...getBaseStepConfig(action.type),
     localSnapshot: [
       { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["00"], nodeChangeType: "added", open: true },
       {
@@ -332,7 +319,6 @@ const NODES_STEPS: StepTutorialBase[] = [
   },
 
   {
-    // ...getBaseStepConfig(action.type),
     localSnapshot: [
       { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["00"], nodeChangeType: "added", open: true },
       {
@@ -354,7 +340,6 @@ const NODES_STEPS: StepTutorialBase[] = [
   },
 
   {
-    // ...getBaseStepConfig(action.type),
     localSnapshot: [
       { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["00"], nodeChangeType: "added", open: true },
       {
@@ -382,7 +367,6 @@ const NODES_STEPS: StepTutorialBase[] = [
   },
 
   {
-    // ...getBaseStepConfig(action.type),
     localSnapshot: [
       { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["00"], nodeChangeType: "added", open: true },
       {
@@ -407,7 +391,6 @@ const NODES_STEPS: StepTutorialBase[] = [
   },
 
   {
-    // ...getBaseStepConfig(action.type),
     localSnapshot: [
       { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["00"], nodeChangeType: "added", open: true },
       {
@@ -442,7 +425,6 @@ const NODES_STEPS: StepTutorialBase[] = [
   },
 
   {
-    // ...getBaseStepConfig(action.type),
     localSnapshot: [
       { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["00"], nodeChangeType: "added", open: true },
       {
@@ -473,7 +455,6 @@ const NODES_STEPS: StepTutorialBase[] = [
   },
 
   {
-    // ...getBaseStepConfig(action.type),
     localSnapshot: [
       { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["00"], nodeChangeType: "added", open: true },
       {
@@ -508,7 +489,6 @@ const NODES_STEPS: StepTutorialBase[] = [
   },
 
   {
-    // ...getBaseStepConfig(action.type),
     localSnapshot: [
       { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["00"], nodeChangeType: "added", open: true },
       {
@@ -544,7 +524,6 @@ const NODES_STEPS: StepTutorialBase[] = [
   },
 
   {
-    // ...getBaseStepConfig(action.type),
     localSnapshot: [
       { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["00"], nodeChangeType: "added", open: true },
       {
@@ -582,7 +561,6 @@ const NODES_STEPS: StepTutorialBase[] = [
   },
 
   {
-    // ...getBaseStepConfig(action.type),
     localSnapshot: [
       { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["00"], nodeChangeType: "added", open: true },
       {
@@ -620,7 +598,6 @@ const NODES_STEPS: StepTutorialBase[] = [
   },
 
   {
-    // ...getBaseStepConfig(action.type),
     localSnapshot: [
       { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["00"], nodeChangeType: "added", open: true },
       {
@@ -660,7 +637,6 @@ const NODES_STEPS: StepTutorialBase[] = [
   },
 
   {
-    // ...getBaseStepConfig(action.type),
     localSnapshot: [
       { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["00"], nodeChangeType: "added", open: true },
       {
@@ -700,7 +676,6 @@ const NODES_STEPS: StepTutorialBase[] = [
   },
 
   {
-    // ...getBaseStepConfig(action.type),
     localSnapshot: [
       { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["00"], nodeChangeType: "added" },
       { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["01"], nodeChangeType: "added", open: false },
@@ -732,7 +707,6 @@ const NODES_STEPS: StepTutorialBase[] = [
   },
 
   {
-    // ...getBaseStepConfig(action.type),
     localSnapshot: [
       { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["00"], nodeChangeType: "added" },
       { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["01"], nodeChangeType: "added", open: false },
@@ -751,7 +725,6 @@ const NODES_STEPS: StepTutorialBase[] = [
   // -------------------- FOOTER
 
   {
-    // ...getBaseStepConfig(action.type),
     localSnapshot: [
       { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["00"], nodeChangeType: "added" },
       { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["01"], nodeChangeType: "added", open: true },
@@ -767,7 +740,6 @@ const NODES_STEPS: StepTutorialBase[] = [
   },
 
   {
-    // ...getBaseStepConfig(action.type),
     localSnapshot: [
       { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["00"], nodeChangeType: "added" },
       { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["01"], nodeChangeType: "added" },
@@ -789,7 +761,6 @@ const NODES_STEPS: StepTutorialBase[] = [
   },
 
   {
-    // ...getBaseStepConfig(action.type),
     localSnapshot: [
       { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["00"], nodeChangeType: "added" },
       { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["01"], nodeChangeType: "added" },
@@ -838,7 +809,6 @@ const NODES_STEPS: StepTutorialBase[] = [
   },
 
   {
-    // ...getBaseStepConfig(action.type),
     localSnapshot: [
       { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["00"], nodeChangeType: "added" },
       { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["01"], nodeChangeType: "added" },
@@ -853,7 +823,6 @@ const NODES_STEPS: StepTutorialBase[] = [
   },
 
   {
-    // ...getBaseStepConfig(action.type),
     localSnapshot: [
       { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["00"], nodeChangeType: "added" },
       { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["01"], nodeChangeType: "added" },
@@ -874,7 +843,6 @@ const NODES_STEPS: StepTutorialBase[] = [
   },
 
   {
-    // ...getBaseStepConfig(action.type),
     localSnapshot: [
       { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["00"], nodeChangeType: "added" },
       { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["01"], nodeChangeType: "added" },
@@ -895,7 +863,6 @@ const NODES_STEPS: StepTutorialBase[] = [
   },
 
   {
-    // ...getBaseStepConfig(action.type),
     localSnapshot: [
       { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["00"], nodeChangeType: "added" },
       { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["01"], nodeChangeType: "added" },
@@ -919,7 +886,6 @@ const NODES_STEPS: StepTutorialBase[] = [
   },
 
   {
-    // ...getBaseStepConfig(action.type),
     localSnapshot: [
       {
         ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["00"],
@@ -946,7 +912,6 @@ const NODES_STEPS: StepTutorialBase[] = [
   },
 
   {
-    // ...getBaseStepConfig(action.type),
     localSnapshot: [
       { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["00"], nodeChangeType: "added", corrects: 2, correct: true },
       { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["01"], nodeChangeType: "added" },
@@ -970,7 +935,6 @@ const NODES_STEPS: StepTutorialBase[] = [
   },
 
   {
-    // ...getBaseStepConfig(action.type),
     localSnapshot: [
       { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["00"], nodeChangeType: "added" },
       { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["01"], nodeChangeType: "added", corrects: 2, correct: true },
@@ -992,7 +956,6 @@ const NODES_STEPS: StepTutorialBase[] = [
   },
 
   {
-    // ...getBaseStepConfig(action.type),
     localSnapshot: [
       { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["00"], nodeChangeType: "added" },
       {
@@ -1022,7 +985,6 @@ const NODES_STEPS: StepTutorialBase[] = [
   },
 
   {
-    // ...getBaseStepConfig(action.type),
     localSnapshot: [
       { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["00"], nodeChangeType: "added" },
       {
@@ -1046,7 +1008,6 @@ const NODES_STEPS: StepTutorialBase[] = [
   },
 
   {
-    // ...getBaseStepConfig(action.type),
     localSnapshot: [
       { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["00"], nodeChangeType: "added" },
       {
@@ -1070,7 +1031,6 @@ const NODES_STEPS: StepTutorialBase[] = [
   },
 
   {
-    // ...getBaseStepConfig(action.type),
     localSnapshot: [
       { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["00"], nodeChangeType: "added" },
       {
@@ -1091,7 +1051,6 @@ const NODES_STEPS: StepTutorialBase[] = [
   },
 
   {
-    // ...getBaseStepConfig(action.type),
     localSnapshot: [
       { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["00"], nodeChangeType: "added" },
       {
@@ -1116,7 +1075,6 @@ const NODES_STEPS: StepTutorialBase[] = [
   },
 
   {
-    // ...getBaseStepConfig(action.type),
     localSnapshot: [
       { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["00"], nodeChangeType: "added" },
       {
@@ -1139,7 +1097,6 @@ const NODES_STEPS: StepTutorialBase[] = [
   },
 
   {
-    // ...getBaseStepConfig(action.type),
     localSnapshot: [
       { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["00"], nodeChangeType: "added" },
       {
@@ -1167,7 +1124,6 @@ const NODES_STEPS: StepTutorialBase[] = [
   },
 
   {
-    // ...getBaseStepConfig(action.type),
     localSnapshot: [
       { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["00"], nodeChangeType: "added" },
       {
@@ -1192,7 +1148,6 @@ const NODES_STEPS: StepTutorialBase[] = [
   },
 
   {
-    // ...getBaseStepConfig(action.type),
     localSnapshot: [
       { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["00"], nodeChangeType: "added" },
       {
@@ -1217,7 +1172,6 @@ const NODES_STEPS: StepTutorialBase[] = [
   },
 
   {
-    // ...getBaseStepConfig(action.type),
     localSnapshot: [
       { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["00"], nodeChangeType: "added" },
       {
@@ -1247,7 +1201,6 @@ const NODES_STEPS: StepTutorialBase[] = [
   },
 
   {
-    // ...getBaseStepConfig(action.type),
     localSnapshot: [
       { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["00"], nodeChangeType: "added" },
       {

@@ -1113,9 +1113,6 @@ const Dashboard = ({}: DashboardProps) => {
   }, [nodeBookDispatch, openSidebar]);
 
   useEffect(() => {
-    // console.log("USE_EFFECT", { userTutorialLoaded, userTutorialNodes: userTutorial.nodes });
-    console.log("USE_EFFECT:tt", userTutorialLoaded, userTutorial.nodes.done, userTutorial.nodes.skipped);
-
     if (!db) return;
     if (!user?.uname) return;
     if (!allTagsLoaded) return;
@@ -1167,28 +1164,23 @@ const Dashboard = ({}: DashboardProps) => {
     // this is only set up when worker doesn't make any change when a step change
     if (!stateNodeTutorial) return;
     if (currentTutorial !== "NODES") return;
-    if(!stateNodeTutorial.forceScrollToNode) return;
+    if (!stateNodeTutorial.forceScrollToNode) return;
 
     scrollToNode(stateNodeTutorial.targetId);
   }, [currentTutorial, scrollToNode, stateNodeTutorial]);
 
   useEffect(() => {
-    // local snapshot used only in interactive tutorial
-    // if (!isPlayingTheTutorial) return;
-    console.log("useEffect", "interactive-tutorial", {});
-    console.log(stateNodeTutorial, userTutorial.nodes.done, userTutorial.nodes.skipped);
+    // Local Snapshot used only in interactive tutorial
     if (!stateNodeTutorial) return;
-    // if (userTutorial.nodes.done || userTutorial.nodes.skipped) return;
+
     devLog("USE_EFFECT", "interactive-tutorial");
 
     if (shouldResetGraph.current) {
       g.current = createGraph();
-      // const FIRST_KEY_NODE = "01";
       setGraph({
         nodes: {},
         edges: {},
       });
-      // setLocalSnapshot({);
       shouldResetGraph.current = false;
     }
 
