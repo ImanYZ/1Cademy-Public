@@ -745,86 +745,87 @@ const Node = ({
               {editable && <Box sx={{ mb: "12px" }}></Box>}
               {/* </div> */}
 
-              <Editor
-                id={`${identifier}-node-content`}
-                label="Edit the node content:"
-                value={contentCopy}
-                setValue={onSetContent}
-                onBlurCallback={value => onBlurContent(value)}
-                readOnly={!editable}
-                sxPreview={{ marginTop: "13px" }}
-                showEditPreviewSection={false}
-                editOption={option}
-              />
-              {editable && <Box sx={{ mb: "12px" }}></Box>}
+              <Box id={`${identifier}-node-content`}>
+                <Editor
+                  label="Edit the node content:"
+                  value={contentCopy}
+                  setValue={onSetContent}
+                  onBlurCallback={value => onBlurContent(value)}
+                  readOnly={!editable}
+                  sxPreview={{ marginTop: "13px" }}
+                  showEditPreviewSection={false}
+                  editOption={option}
+                />
+                {editable && <Box sx={{ mb: "12px" }}></Box>}
 
-              <div id={`${identifier}-node-content-media`}>
-                {nodeImage !== "" && (
-                  <>
-                    {editable && (
-                      <div className="RemoveImageDIV">
-                        <MemoizedMetaButton onClick={removeImageHandler} tooltip="Click to remove the image.">
-                          <DeleteForeverIcon sx={{ fontSize: "16px" }} />
-                        </MemoizedMetaButton>
-                      </div>
-                    )}
+                <div id={`${identifier}-node-content-media`}>
+                  {nodeImage !== "" && (
+                    <>
+                      {editable && (
+                        <div className="RemoveImageDIV">
+                          <MemoizedMetaButton onClick={removeImageHandler} tooltip="Click to remove the image.">
+                            <DeleteForeverIcon sx={{ fontSize: "16px" }} />
+                          </MemoizedMetaButton>
+                        </div>
+                      )}
 
-                    {/* TODO: change to Next Image */}
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img
-                      src={nodeImage}
-                      alt="Node image"
-                      className="responsive-img NodeImage"
-                      onLoad={onImageLoad}
-                      onClick={onImageClick}
-                    />
-                  </>
-                )}
-                {nodeType === "Question" && (
-                  <Box sx={{ display: "flex", flexDirection: "column" }}>
-                    <ul className="collapsible" style={{ padding: "0px" }}>
-                      {choices.map((choice, idx) => {
-                        return (
-                          <QuestionChoices
-                            key={identifier + "Choice" + idx}
-                            identifier={identifier}
-                            nodeRef={nodeRef}
-                            editable={editable}
-                            choices={choices}
-                            idx={idx}
-                            choicesNum={choices.length}
-                            choice={choice}
-                            deleteChoice={deleteChoice}
-                            switchChoice={switchChoice}
-                            changeChoice={changeChoice}
-                            changeFeedback={changeFeedback}
-                            option={option}
-                          />
-                        );
-                      })}
-                    </ul>
-                    {editable && (
-                      <Box sx={{ alignSelf: "flex-end" }}>
-                        <MemoizedMetaButton
-                          onClick={addChoiceHandler}
-                          tooltip="Click to add a new choice to this question."
-                        >
-                          <>
-                            <AddIcon className="green-text" sx={{ fontSize: "16px" }} />
-                            <span>Add Choice</span>
-                          </>
-                        </MemoizedMetaButton>
-                      </Box>
-                    )}
-                  </Box>
-                )}
-                {!editable && nodeVideo && (
-                  <>
-                    <MemoizedNodeVideo addVideo={true} videoData={videoData} />
-                    <Box sx={{ mb: "12px" }}></Box>
-                  </>
-                )}
-              </div>
+                      {/* TODO: change to Next Image */}
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img
+                        src={nodeImage}
+                        alt="Node image"
+                        className="responsive-img NodeImage"
+                        onLoad={onImageLoad}
+                        onClick={onImageClick}
+                      />
+                    </>
+                  )}
+                  {nodeType === "Question" && (
+                    <Box sx={{ display: "flex", flexDirection: "column" }}>
+                      <ul className="collapsible" style={{ padding: "0px" }}>
+                        {choices.map((choice, idx) => {
+                          return (
+                            <QuestionChoices
+                              key={identifier + "Choice" + idx}
+                              identifier={identifier}
+                              nodeRef={nodeRef}
+                              editable={editable}
+                              choices={choices}
+                              idx={idx}
+                              choicesNum={choices.length}
+                              choice={choice}
+                              deleteChoice={deleteChoice}
+                              switchChoice={switchChoice}
+                              changeChoice={changeChoice}
+                              changeFeedback={changeFeedback}
+                              option={option}
+                            />
+                          );
+                        })}
+                      </ul>
+                      {editable && (
+                        <Box sx={{ alignSelf: "flex-end" }}>
+                          <MemoizedMetaButton
+                            onClick={addChoiceHandler}
+                            tooltip="Click to add a new choice to this question."
+                          >
+                            <>
+                              <AddIcon className="green-text" sx={{ fontSize: "16px" }} />
+                              <span>Add Choice</span>
+                            </>
+                          </MemoizedMetaButton>
+                        </Box>
+                      )}
+                    </Box>
+                  )}
+                  {!editable && nodeVideo && (
+                    <>
+                      <MemoizedNodeVideo addVideo={true} videoData={videoData} />
+                      <Box sx={{ mb: "12px" }}></Box>
+                    </>
+                  )}
+                </div>
+              </Box>
 
               {editable && (
                 <>
