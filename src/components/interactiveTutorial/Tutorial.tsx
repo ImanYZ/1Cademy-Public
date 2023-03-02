@@ -1,7 +1,7 @@
 import { Box, Button, Stack, Typography } from "@mui/material";
 import React, { useMemo, useRef } from "react";
 
-import { orange25, orange200 } from "@/pages/home";
+import { gray50, gray200, gray700, gray800 } from "@/pages/home";
 
 import { TargetClientRect } from "../../hooks/useInteractiveTutorial";
 import { TutorialState } from "../../nodeBookTypes";
@@ -105,8 +105,7 @@ export const Tutorial = ({
           sx={{
             transition: "top 1s ease-out,left 1s ease-out",
             width: "450px",
-            backgroundColor: theme => (theme.palette.mode === "dark" ? "#353535" : orange25),
-            border: theme => `2px solid ${theme.palette.mode === "dark" ? "#816247" : orange200}`,
+            backgroundColor: "#4B535C",
             p: "24px 32px",
             borderRadius: "8px",
             color: "white",
@@ -206,11 +205,11 @@ export const Tutorial = ({
         left: `${tooltipClientRect.left}px`,
         transition: "top 1s ease-out,left 1s ease-out",
         width: "450px",
-        backgroundColor: theme => (theme.palette.mode === "dark" ? "#353535" : orange25),
-        border: theme => `2px solid ${theme.palette.mode === "dark" ? "#816247" : orange200}`,
+        backgroundColor: theme => (theme.palette.mode === "dark" ? "#4B535C" : "#C5D0DF"),
+        borderColor: theme => (theme.palette.mode === "dark" ? "#4B535C" : "#C5D0DF"),
         p: "24px 32px",
         borderRadius: "8px",
-        color: "white",
+        color: theme => (theme.palette.mode === "dark" ? gray50 : gray800),
         zIndex: 99999,
       }}
     >
@@ -218,7 +217,7 @@ export const Tutorial = ({
         <Typography component={"h2"} sx={{ fontSize: "18px", fontWeight: "bold", display: "inline-block" }}>
           {tutorialState.title}
         </Typography>
-        <Typography sx={{ display: "inline-block", color: "#818181" }}>
+        <Typography sx={{ display: "inline-block", color: "inherit" }}>
           {tutorialState.currentStepName} / {stepsLength}
         </Typography>
       </Stack>
@@ -235,7 +234,9 @@ export const Tutorial = ({
             onSkip();
           }}
           sx={{
+            color: "inherit",
             p: "8px 0px",
+            ":hover": { backgroundColor: theme => (theme.palette.mode === "dark" ? "#575f68" : "#d7dee6") },
           }}
         >
           Skip
@@ -248,8 +249,14 @@ export const Tutorial = ({
               sx={{
                 borderRadius: "32px",
                 mr: "16px",
-
                 p: "8px 32px",
+                color: "inherit",
+                borderColor: theme => (theme.palette.mode === "dark" ? gray50 : gray800),
+                ":hover": {
+                  borderColor: "inherit",
+                  color: "inherit",
+                  backgroundColor: theme => (theme.palette.mode === "dark" ? "#575f68" : "#d7dee6"),
+                },
               }}
             >
               Prev
@@ -264,8 +271,11 @@ export const Tutorial = ({
               sx={{
                 borderRadius: "32px",
                 p: "8px 32px",
-                backgroundColor: "#FF6D00",
-                ":hover": { backgroundColor: "#f57a1c" },
+                color: theme => (theme.palette.mode === "dark" ? gray800 : gray50),
+                backgroundColor: theme => (theme.palette.mode === "dark" ? gray50 : gray800),
+                ":hover": {
+                  backgroundColor: theme => (theme.palette.mode === "dark" ? gray200 : gray700),
+                },
               }}
               disabled={tutorialState.isClickeable}
             >
@@ -283,8 +293,11 @@ export const Tutorial = ({
               sx={{
                 borderRadius: "32px",
                 p: "8px 32px",
-                backgroundColor: "#FF6D00",
-                ":hover": { backgroundColor: "#f57a1c" },
+                color: theme => (theme.palette.mode === "dark" ? gray800 : gray50),
+                backgroundColor: theme => (theme.palette.mode === "dark" ? gray50 : gray800),
+                ":hover": {
+                  backgroundColor: theme => (theme.palette.mode === "dark" ? gray200 : gray700),
+                },
               }}
             >
               {"Finalize"}
