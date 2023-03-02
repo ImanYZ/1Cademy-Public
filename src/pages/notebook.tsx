@@ -91,7 +91,6 @@ import {
   changedNodes,
   citations,
   COLUMN_GAP,
-  compare2Nodes,
   compareAndUpdateNodeLinks,
   compareChoices,
   compareFlatLinks,
@@ -99,11 +98,9 @@ import {
   compareProperty,
   copyNode,
   createActionTrack,
-  createOrUpdateNode,
   generateReputationSignal,
   getSelectionText,
   hideNodeAndItsLinks,
-  makeNodeVisibleInItsLinks,
   NODE_WIDTH,
   removeDagAllEdges,
   removeDagEdge,
@@ -114,7 +111,13 @@ import {
   tempNodes,
 } from "../lib/utils/Map.utils";
 import { newId } from "../lib/utils/newid";
-import { buildFullNodes, getNodes, getUserNodeChanges } from "../lib/utils/nodesSyncronization.utils";
+import {
+  buildFullNodes,
+  fillDagre,
+  getNodes,
+  getUserNodeChanges,
+  mergeAllNodes,
+} from "../lib/utils/nodesSyncronization.utils";
 import { gtmEvent, imageLoaded, isValidHttpUrl } from "../lib/utils/utils";
 import {
   ChoosingType,
@@ -926,111 +929,6 @@ const Dashboard = ({}: DashboardProps) => {
 
   const snapshot = useCallback(
     (q: Query<DocumentData>) => {
-      const fillDagre = (fullNodes: FullNodeData[], currentNodes: any, currentEdges: any, withClusters: boolean) => {
-        return fullNodes.reduce(
-          (acu: { newNodes: { [key: string]: any }; newEdges: { [key: string]: any } }, cur) => {
-            let tmpNodes = {};
-            let tmpEdges = {};
-
-            if (cur.nodeChangeType === "added") {
-              const { uNodeData, oldNodes, oldEdges } = makeNodeVisibleInItsLinks(cur, acu.newNodes, acu.newEdges);
-              const res = createOrUpdateNode(g.current, uNodeData, cur.node, oldNodes, oldEdges, allTags, withClusters);
-              tmpNodes = res.oldNodes;
-              tmpEdges = res.oldEdges;
-            }
-            if (cur.nodeChangeType === "modified" && cur.visible) {
-              const node = acu.newNodes[cur.node];
-              if (!node) {
-                const res = createOrUpdateNode(
-                  g.current,
-                  cur,
-                  cur.node,
-                  acu.newNodes,
-                  acu.newEdges,
-                  allTags,
-                  withClusters
-                );
-                tmpNodes = res.oldNodes;
-                tmpEdges = res.oldEdges;
-              } else {
-                const currentNode: FullNodeData = {
-                  ...cur,
-                  left: node.left,
-                  top: node.top,
-                }; // <----- IMPORTANT: Add positions data from node into cur.node to not set default position into center of screen
-
-                if (!compare2Nodes(cur, node)) {
-                  const res = createOrUpdateNode(
-                    g.current,
-                    currentNode,
-                    cur.node,
-                    acu.newNodes,
-                    acu.newEdges,
-                    allTags,
-                    withClusters
-                  );
-                  tmpNodes = res.oldNodes;
-                  tmpEdges = res.oldEdges;
-                }
-              }
-            }
-            // so the NO visible nodes will come as modified and !visible
-            if (cur.nodeChangeType === "removed" || (cur.nodeChangeType === "modified" && !cur.visible)) {
-              if (g.current.hasNode(cur.node)) {
-                g.current.nodes().forEach(function () {});
-                g.current.edges().forEach(function () {});
-                // PROBABLY you need to add hideNodeAndItsLinks, to update children and parents nodes
-
-                // !IMPORTANT, Don't change the order, first remove edges then nodes
-                tmpEdges = removeDagAllEdges(g.current, cur.node, acu.newEdges);
-                tmpNodes = removeDagNode(g.current, cur.node, acu.newNodes);
-              } else {
-                // remove edges
-                const oldEdges = { ...acu.newEdges };
-
-                Object.keys(oldEdges).forEach(key => {
-                  if (key.includes(cur.node)) {
-                    delete oldEdges[key];
-                  }
-                });
-
-                tmpEdges = oldEdges;
-                // remove node
-                const oldNodes = acu.newNodes;
-                if (cur.node in oldNodes) {
-                  delete oldNodes[cur.node];
-                }
-                // tmpEdges = {acu.newEdges,}
-                tmpNodes = { ...oldNodes };
-              }
-            }
-
-            return {
-              newNodes: { ...tmpNodes },
-              newEdges: { ...tmpEdges },
-            };
-          },
-          { newNodes: { ...currentNodes }, newEdges: { ...currentEdges } }
-        );
-      };
-
-      const mergeAllNodes = (newAllNodes: FullNodeData[], currentAllNodes: FullNodesData): FullNodesData => {
-        return newAllNodes.reduce(
-          (acu, cur) => {
-            if (cur.nodeChangeType === "added" || cur.nodeChangeType === "modified") {
-              return { ...acu, [cur.node]: cur };
-            }
-            if (cur.nodeChangeType === "removed") {
-              const tmp = { ...acu };
-              delete tmp[cur.node];
-              return tmp;
-            }
-            return acu;
-          },
-          { ...currentAllNodes }
-        );
-      };
-
       const userNodesSnapshot = onSnapshot(
         q,
         async snapshot => {
@@ -1088,7 +986,14 @@ const Dashboard = ({}: DashboardProps) => {
             });
 
             devLog("5:user Nodes Snapshot:visible Full Nodes Merged", visibleFullNodesMerged);
-            const { newNodes, newEdges } = fillDagre(visibleFullNodesMerged, nodes, edges, settings.showClusterOptions);
+            const { newNodes, newEdges } = fillDagre(
+              g.current,
+              visibleFullNodesMerged,
+              nodes,
+              edges,
+              settings.showClusterOptions,
+              allTags
+            );
 
             if (!Object.keys(newNodes).length) {
               setNoNodesFoundMessage(true);
@@ -1228,113 +1133,6 @@ const Dashboard = ({}: DashboardProps) => {
       shouldResetGraph.current = false;
     }
 
-    const mergeAllNodes = (newAllNodes: FullNodeData[], currentAllNodes: FullNodesData): FullNodesData => {
-      return newAllNodes.reduce(
-        (acu, cur) => {
-          if (cur.nodeChangeType === "added" || cur.nodeChangeType === "modified") {
-            return { ...acu, [cur.node]: cur };
-          }
-          if (cur.nodeChangeType === "removed") {
-            const tmp = { ...acu };
-            delete tmp[cur.node];
-            return tmp;
-          }
-          return acu;
-        },
-        { ...currentAllNodes }
-      );
-    };
-
-    const fillDagre = (fullNodes: FullNodeData[], currentNodes: any, currentEdges: any, withClusters: boolean) => {
-      return fullNodes.reduce(
-        (acu: { newNodes: { [key: string]: any }; newEdges: { [key: string]: any } }, cur) => {
-          let tmpNodes = {};
-          let tmpEdges = {};
-
-          if (cur.nodeChangeType === "added") {
-            const { uNodeData, oldNodes, oldEdges } = makeNodeVisibleInItsLinks(cur, acu.newNodes, acu.newEdges);
-
-            const res = createOrUpdateNode(g.current, uNodeData, cur.node, oldNodes, oldEdges, allTags, withClusters);
-
-            tmpNodes = res.oldNodes;
-            tmpEdges = res.oldEdges;
-          }
-          if (cur.nodeChangeType === "modified" && cur.visible) {
-            const node = acu.newNodes[cur.node];
-            if (!node) {
-              const res = createOrUpdateNode(
-                g.current,
-                cur,
-                cur.node,
-                acu.newNodes,
-                acu.newEdges,
-                allTags,
-                withClusters
-              );
-              tmpNodes = res.oldNodes;
-              tmpEdges = res.oldEdges;
-            } else {
-              const currentNode: FullNodeData = {
-                ...cur,
-                left: node.left,
-                top: node.top,
-              }; // <----- IMPORTANT: Add positions data from node into cur.node to not set default position into center of screen
-
-              if (!compare2Nodes(cur, node)) {
-                const res = createOrUpdateNode(
-                  g.current,
-                  currentNode,
-                  cur.node,
-                  acu.newNodes,
-                  acu.newEdges,
-                  allTags,
-                  withClusters
-                );
-                tmpNodes = res.oldNodes;
-                tmpEdges = res.oldEdges;
-              }
-            }
-          }
-          // so the NO visible nodes will come as modified and !visible
-          if (cur.nodeChangeType === "removed" || (cur.nodeChangeType === "modified" && !cur.visible)) {
-            if (g.current.hasNode(cur.node)) {
-              g.current.nodes().forEach(function () {});
-              g.current.edges().forEach(function () {});
-              // PROBABLY you need to add hideNodeAndItsLinks, to update children and parents nodes
-
-              // !IMPORTANT, Don't change the order, first remove edges then nodes
-              tmpEdges = removeDagAllEdges(g.current, cur.node, acu.newEdges);
-              tmpNodes = removeDagNode(g.current, cur.node, acu.newNodes);
-            } else {
-              // remove edges
-              const oldEdges = { ...acu.newEdges };
-
-              Object.keys(oldEdges).forEach(key => {
-                if (key.includes(cur.node)) {
-                  delete oldEdges[key];
-                }
-              });
-
-              tmpEdges = oldEdges;
-              // remove node
-              const oldNodes = acu.newNodes;
-              if (cur.node in oldNodes) {
-                delete oldNodes[cur.node];
-              }
-              // tmpEdges = {acu.newEdges,}
-              tmpNodes = { ...oldNodes };
-            }
-          }
-
-          return {
-            newNodes: { ...tmpNodes },
-            newEdges: { ...tmpEdges },
-          };
-        },
-        { newNodes: { ...currentNodes }, newEdges: { ...currentEdges } }
-      );
-    };
-
     const fullNodes = stateNodeTutorial.localSnapshot;
 
     const visibleFullNodes: FullNodeData[] = fullNodes.filter(cur => cur.visible || cur.nodeChangeType === "modified");
@@ -1370,7 +1168,14 @@ const Dashboard = ({}: DashboardProps) => {
         };
       });
       devLog("5: TUTORIAL:user Nodes Snapshot:visible Full Nodes Merged", visibleFullNodesMerged);
-      const { newNodes, newEdges } = fillDagre(visibleFullNodesMerged, nodes, edges, settings.showClusterOptions);
+      const { newNodes, newEdges } = fillDagre(
+        g.current,
+        visibleFullNodesMerged,
+        nodes,
+        edges,
+        settings.showClusterOptions,
+        allTags
+      );
 
       if (!Object.keys(newNodes).length) {
         setNoNodesFoundMessage(true);
