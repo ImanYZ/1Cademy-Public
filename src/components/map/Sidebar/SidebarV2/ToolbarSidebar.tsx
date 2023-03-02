@@ -380,6 +380,7 @@ MainSidebarProps) => {
 
           {/* Pending proposal sidebar */}
           <MemoizedMetaButton
+            id="toolbar-pending-list"
             onClick={() => {
               onOpenSidebar("PENDING_PROPOSALS", "PendingProposals");
               setIsMenuOpen(false);
