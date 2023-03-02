@@ -18,7 +18,7 @@ type EditorProps = {
   helperText?: String;
   editOption?: EditorOptions;
   showEditPreviewSection?: boolean;
-  disabled: boolean;
+  disabled?: boolean;
 };
 
 export const Editor = ({
