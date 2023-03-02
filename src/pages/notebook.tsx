@@ -2090,12 +2090,7 @@ const Dashboard = ({}: DashboardProps) => {
     if (!stateNodeTutorial) return;
     if (!currentTutorial) return;
 
-    console.log(1);
-    const keyTutorial: TutorialTypeKeys | null =
-      currentTutorial === "NODES" ? "nodes" : currentTutorial === "SEARCHER" ? "searcher" : null;
-    if (!keyTutorial) return;
-
-    console.log(2);
+    const keyTutorial: TutorialTypeKeys = currentTutorial.toLowerCase() as TutorialTypeKeys;
 
     const tutorialUpdated: UserTutorial = {
       ...userTutorial[keyTutorial],
@@ -2115,7 +2110,6 @@ const Dashboard = ({}: DashboardProps) => {
     } else {
       await setDoc(tutorialRef, userTutorialUpdated);
     }
-    console.log(3);
   }, [currentTutorial, db, setCurrentTutorial, stateNodeTutorial, user, userTutorial]);
 
   const openLinkedNode = useCallback(
@@ -4175,9 +4169,7 @@ const Dashboard = ({}: DashboardProps) => {
     if (!stateNodeTutorial) return;
     if (!currentTutorial) return;
 
-    const keyTutorial: TutorialTypeKeys | null =
-      currentTutorial === "NODES" ? "nodes" : currentTutorial === "SEARCHER" ? "searcher" : null;
-    if (!keyTutorial) return;
+    const keyTutorial: TutorialTypeKeys = currentTutorial.toLowerCase() as TutorialTypeKeys;
 
     const tutorialUpdated: UserTutorial = {
       ...userTutorial[keyTutorial],
