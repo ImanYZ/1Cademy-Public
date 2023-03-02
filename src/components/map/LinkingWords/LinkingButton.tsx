@@ -88,6 +88,7 @@ const LinkingButton = ({ disabled = false, id, ...props }: LinkingButtonProps) =
           setValue={doNothing}
           label={""}
           value={props.linkedNodeTitle}
+          disabled={disabled}
           sxPreview={{ fontSize: "14px", lineHeight: "1.5" }}
         />
         {/* CHECK: I commented this, please uncomment this */}
