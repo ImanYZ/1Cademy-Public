@@ -45,7 +45,7 @@ const getBaseStepConfig = (step: number, max: number) => {
     ...getStepsValues(step, max),
     tooltipPosition: "top",
     isClickeable: false,
-    delay: 0,
+    targetDelay: 0,
   };
 
   return tt;

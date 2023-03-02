@@ -10,13 +10,20 @@ type NodeTypeSelectorProps = {
   setNodeParts: (nodeId: string, callback: (thisNode: FullNodeData) => FullNodeData) => void;
   nodeType: string;
   disabled?: boolean;
+  disabledItems?: boolean;
 };
-const NodeTypeSelector = ({ nodeId, setNodeParts, nodeType, disabled = false }: NodeTypeSelectorProps) => {
+const NodeTypeSelector = ({
+  nodeId,
+  setNodeParts,
+  nodeType,
+  disabled = false,
+  disabledItems = false,
+}: NodeTypeSelectorProps) => {
   const nodeTypeOptions = ["Concept", "Relation", "Question", "Reference", "Code", "Idea", "News"];
   const currentId = useId();
 
   return (
-    <FormControl sx={{ width: 120 }}>
+    <FormControl id={`${nodeId}-node-type-selector`} sx={{ width: 120 }}>
       <Select
         sx={{
           m: 0,
@@ -58,7 +65,7 @@ const NodeTypeSelector = ({ nodeId, setNodeParts, nodeType, disabled = false }: 
       >
         {nodeTypeOptions.map(nodeType => {
           return (
-            <MenuItem key={nodeType} value={nodeType}>
+            <MenuItem disabled={disabledItems} key={nodeType} value={nodeType}>
               <NodeTypeIcon nodeType={nodeType as any} tooltipPlacement={"top"} fontSize={"inherit"} />
               <Box sx={{ marginLeft: "5px" }}>{nodeType}</Box>
             </MenuItem>

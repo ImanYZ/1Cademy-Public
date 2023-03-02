@@ -88,6 +88,10 @@ type LinkingWordsProps = {
 
 const LinkingWords = ({ notebookRef, disabled, enableChildElements = [], ...props }: LinkingWordsProps) => {
   const { nodeBookState, nodeBookDispatch } = useNodeBook();
+  const disableAddReference = disabled;
+  const disableAddTag = disabled;
+  const disableRemoveReference = disabled;
+  const disableRemoveTag = disabled;
 
   useEffect(() => {
     props.chosenNodeChanged(props.identifier);
@@ -245,7 +249,10 @@ const LinkingWords = ({ notebookRef, disabled, enableChildElements = [], ...prop
           )}
 
           {props.openPart === "References" && (
-            <Box sx={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+            <Box
+              id={`${props.identifier}-node-references`}
+              sx={{ display: "flex", flexDirection: "column", gap: "8px" }}
+            >
               <strong>References</strong>
 
               {props.references.map((reference: any, idx: number) => {
@@ -298,7 +305,7 @@ const LinkingWords = ({ notebookRef, disabled, enableChildElements = [], ...prop
                             },
                           }}
                         >
-                          <IconButton onClick={deleteLink(idx, "Reference")}>
+                          <IconButton onClick={deleteLink(idx, "Reference")} disabled={disableRemoveReference}>
                             <DeleteForeverIcon sx={{ fontSize: "16px" }} />
                           </IconButton>
                         </Tooltip>
@@ -334,8 +341,12 @@ const LinkingWords = ({ notebookRef, disabled, enableChildElements = [], ...prop
               })}
 
               {props.editable && (
-                <Box sx={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+                <Box
+                  id={`${props.identifier}-link-reference-button`}
+                  sx={{ display: "flex", flexDirection: "column", gap: "16px" }}
+                >
                   <MemoizedMetaButton
+                    disabled={disableAddReference}
                     onClick={choosingNewLinkedNode("Reference")}
                     tooltip="Link to a reference node."
                     tooltipPosition="left"
@@ -365,14 +376,17 @@ const LinkingWords = ({ notebookRef, disabled, enableChildElements = [], ...prop
         >
           {props.openPart === "References" && (
             //StyleRef, f-size from Map.css ln 71
-            <Box sx={{ display: "flex", flexDirection: "column", gap: "5px", fontSize: "16px" }}>
+            <Box
+              id={`${props.identifier}-node-tags`}
+              sx={{ display: "flex", flexDirection: "column", gap: "5px", fontSize: "16px" }}
+            >
               <strong>Tags</strong>
               {props.tags.map((tag: any, idx: number) => {
                 return (
                   <Box
                     sx={{
                       display: "grid",
-                      gridTemplateColumns: props.editable && props.parents.length ? "1fr 32px" : "1fr",
+                      gridTemplateColumns: props.editable && props.tags.length ? "1fr 32px" : "1fr",
                     }}
                     key={props.identifier + "LinkTo" + tag.node + "DIV"}
                   >
@@ -397,7 +411,7 @@ const LinkingWords = ({ notebookRef, disabled, enableChildElements = [], ...prop
                           },
                         }}
                       >
-                        <IconButton onClick={deleteLink(idx, "Tag")}>
+                        <IconButton onClick={deleteLink(idx, "Tag")} disabled={disableRemoveTag}>
                           <DeleteForeverIcon sx={{ fontSize: "16px" }} />
                         </IconButton>
                       </Tooltip>
@@ -410,6 +424,7 @@ const LinkingWords = ({ notebookRef, disabled, enableChildElements = [], ...prop
                   onClick={choosingNewLinkedNode("Tag")}
                   tooltip="Link to a node."
                   tooltipPosition="left"
+                  disabled={disableAddTag}
                 >
                   <Box sx={{ display: "flex", gap: "px" }}>
                     <LocalOfferIcon sx={{ color: "#f9a825", fontSize: "inherit" }} />
@@ -422,7 +437,7 @@ const LinkingWords = ({ notebookRef, disabled, enableChildElements = [], ...prop
           )}
 
           {props.openPart === "Tags" && (
-            <Box sx={{ fontSize: "16px" }}>
+            <Box id={`${props.identifier}-node-tags`} sx={{ fontSize: "16px" }}>
               <strong>Tags</strong>
               {props.tags.map((tag: any, idx: number) => {
                 return (
