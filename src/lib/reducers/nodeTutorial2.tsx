@@ -171,9 +171,114 @@ const NODES_STEPS: StepTutorialConfig[] = [
     ),
     disabledElements: [...DISABLE_NOTEBOOK_OPTIONS, "01"],
   },
-
   // --- BASIC NAVIGATION
+  //PANNING
+  {
+    localSnapshot: [
+      { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["00"], nodeChangeType: "removed", open: false },
+      { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["01"], nodeChangeType: "added", open: true },
+    ],
+    targetId: "01",
+    title: "Basic Navigation - Panning",
+    description: (
+      <MarkdownRender
+        text={
+          "1Cademy allows you to view many nodes linked together. Sometimes the graph you are looking at can grow really large."
+        }
+      />
+    ),
+    disabledElements: [...DISABLE_NOTEBOOK_OPTIONS, "01"],
+  },
+  {
+    localSnapshot: [
+      { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["00"], nodeChangeType: "removed", open: false },
+      { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["01"], nodeChangeType: "added", open: true },
+    ],
+    targetId: "01",
+    title: "Basic Navigation - Panning",
+    description: <MarkdownRender text={"You can manipulate you field of view by panning the screen."} />,
+    disabledElements: [...DISABLE_NOTEBOOK_OPTIONS, "01"],
+  },
+  {
+    localSnapshot: [
+      { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["00"], nodeChangeType: "removed", open: false },
+      { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["01"], nodeChangeType: "added", open: true },
+    ],
+    targetId: "01",
+    title: "Basic Navigation - Panning",
+    description: (
+      <MarkdownRender
+        text={
+          "You can do this by sliding two fingers on the track pad or clicking sliding with either a finger or the mouse."
+        }
+      />
+    ),
+    disabledElements: [...DISABLE_NOTEBOOK_OPTIONS, "01"],
+  },
+  {
+    localSnapshot: [
+      { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["00"], nodeChangeType: "removed", open: false },
+      { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["01"], nodeChangeType: "added", open: true },
+    ],
+    targetId: "01",
+    title: "Basic Navigation - Panning",
+    description: <MarkdownRender text={"Give it a try."} />,
+    disabledElements: [...DISABLE_NOTEBOOK_OPTIONS, "01"],
+  },
 
+  //ZOOMING
+  {
+    localSnapshot: [
+      { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["00"], nodeChangeType: "removed", open: false },
+      { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["01"], nodeChangeType: "added", open: true },
+    ],
+    targetId: "01",
+    title: "Basic Navigation - Zomming",
+    description: <MarkdownRender text={" You can also zoom in and out."} />,
+    disabledElements: [...DISABLE_NOTEBOOK_OPTIONS, "01"],
+  },
+  {
+    localSnapshot: [
+      { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["00"], nodeChangeType: "removed", open: false },
+      { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["01"], nodeChangeType: "added", open: true },
+    ],
+    targetId: "01",
+    title: "Basic Navigation - Zomming",
+    description: (
+      <MarkdownRender
+        text={
+          "To zoom in, you can slide two fingers away from each other on the track pad or press control (commande Mac) +"
+        }
+      />
+    ),
+    disabledElements: [...DISABLE_NOTEBOOK_OPTIONS, "01"],
+  },
+  {
+    localSnapshot: [
+      { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["00"], nodeChangeType: "removed", open: false },
+      { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["01"], nodeChangeType: "added", open: true },
+    ],
+    targetId: "01",
+    title: "Basic Navigation - Zomming",
+    description: (
+      <MarkdownRender
+        text={"To zoom out, you can slide to fingers toward each other on the track or press control (command Mac) -"}
+      />
+    ),
+    disabledElements: [...DISABLE_NOTEBOOK_OPTIONS, "01"],
+  },
+  {
+    localSnapshot: [
+      { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["00"], nodeChangeType: "removed", open: false },
+      { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["01"], nodeChangeType: "added", open: true },
+    ],
+    targetId: "01",
+    title: "Basic Navigation - Zomming",
+    description: <MarkdownRender text={"Give it a try."} />,
+    disabledElements: [...DISABLE_NOTEBOOK_OPTIONS, "01"],
+  },
+
+  //NEXT
   {
     localSnapshot: [
       { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["00"], nodeChangeType: "removed", open: false },
