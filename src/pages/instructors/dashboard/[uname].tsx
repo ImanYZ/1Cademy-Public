@@ -1,7 +1,7 @@
 import PlaceIcon from "@mui/icons-material/Place";
 import SquareIcon from "@mui/icons-material/Square";
 import { Box, Paper, Typography, useMediaQuery, useTheme } from "@mui/material";
-import { collection, doc, getDoc, getDocs, getFirestore, query, where } from "firebase/firestore";
+import { collection, doc, getDoc, getDocs, getFirestore, onSnapshot, query, where } from "firebase/firestore";
 import { useCallback, useEffect, useState } from "react";
 
 import { BoxChart } from "@/components/chats/BoxChart";
@@ -182,27 +182,86 @@ const StudentDashboard: InstructorLayoutPage = ({ user, currentSemester, setting
     if (!semesterConfig) return;
 
     const getStudentVoteStats = async () => {
-      const semesterStudentVoteStatRef = collection(db, "semesterStudentVoteStats");
-      const qByAll = query(semesterStudentVoteStatRef, where("tagId", "==", tagId));
-      const qByStudent = query(
-        semesterStudentVoteStatRef,
-        where("uname", "==", queryUname),
-        where("tagId", "==", tagId)
-      );
+      // const semesterStudentVoteStatDoc = await getDocs(qByStudent);
+      // if (!semesterStudentVoteStatDoc.docs.length) {
+      // }
+      // const semesterStudentVoteStat = semesterStudentVoteStatDoc.docs[0].data() as ISemesterStudentVoteStat;
+      // const points = calculateVoteStatPoints(semesterStudentVoteStat, semesterConfig!);
+      // setStudentVoteStat({
+      //   ...semesterStudentVoteStat,
+      //   ...points,
+      // });
+      // const res = mapStudentsStatsDataByDates([semesterStudentVoteStat]);
+      // const gg = getGeneralStats(res);
+      // setSemesterStudentStats(gg);
+      // const ts = res.reduce(
+      //   (a: TrendStats, c): TrendStats => {
+      //     return {
+      //       childProposals: semesterConfig?.isProposalRequired
+      //         ? [...a.childProposals, { date: new Date(c.date), num: c.value.childProposals }]
+      //         : [],
+      //       editProposals: semesterConfig?.isProposalRequired
+      //         ? [...a.editProposals, { date: new Date(c.date), num: c.value.editProposals }]
+      //         : [],
+      //       proposedLinks: [...a.proposedLinks, { date: new Date(c.date), num: c.value.links }],
+      //       nodes: [...a.nodes, { date: new Date(c.date), num: c.value.nodes }],
+      //       questions: semesterConfig?.isQuestionProposalRequired
+      //         ? [...a.questions, { date: new Date(c.date), num: c.value.questions }]
+      //         : [],
+      //       votes: semesterConfig?.isCastingVotesRequired
+      //         ? [...a.votes, { date: new Date(c.date), num: c.value.votes }]
+      //         : [],
+      //     };
+      //   },
+      //   {
+      //     childProposals: [],
+      //     editProposals: [],
+      //     proposedLinks: [],
+      //     nodes: [],
+      //     questions: [],
+      //     votes: [],
+      //   }
+      // );
+      // setTrendStats(ts);
+      // setThereIsData(true);
+    };
+    getStudentVoteStats();
+    const semesterStudentVoteStatRef = collection(db, "semesterStudentVoteStats");
+    const qByAll = query(semesterStudentVoteStatRef, where("tagId", "==", tagId));
+    const qByStudent = query(semesterStudentVoteStatRef, where("uname", "==", queryUname), where("tagId", "==", tagId));
 
-      const semesterStudentVoteStatAllDoc = await getDocs(qByAll);
-      if (!semesterStudentVoteStatAllDoc.docs.length) {
+    // const semesterStudentVoteStatAllDoc = await getDocs(qByAll);
+    let userDailyStats: ISemesterStudentVoteStat[] = [];
+    const snapShotFuncForAll = onSnapshot(qByAll, async snapshot => {
+      const docChanges = snapshot.docChanges();
+      if (!docChanges.length) {
         setSemesterStats(null);
         return;
       }
-      const userDailyStats = semesterStudentVoteStatAllDoc.docs.map(
-        dailyStat => dailyStat.data() as ISemesterStudentVoteStat
-      );
-      const resAll = mapStudentsStatsDataByDates(userDailyStats);
-      const ggAll = getGeneralStats(resAll);
-      setSemesterStats(ggAll);
-      const semesterStudentVoteStatDoc = await getDocs(qByStudent);
-      if (!semesterStudentVoteStatDoc.docs.length) {
+      for (let change of docChanges) {
+        if (change.type === "added") {
+          userDailyStats.push(change.doc.data() as ISemesterStudentVoteStat);
+        } else if (change.type === "modified") {
+          const index = userDailyStats.findIndex(
+            (userDailyStat: ISemesterStudentVoteStat) => userDailyStat.uname === change.doc.data().uname
+          );
+          userDailyStats[index] = change.doc.data() as ISemesterStudentVoteStat;
+        } else if (change.type === "removed") {
+          const index = userDailyStats.findIndex(
+            (userDailyStat: ISemesterStudentVoteStat) => userDailyStat.uname === change.doc.data().uname
+          );
+          userDailyStats.splice(index, 1);
+        }
+
+        const resAll = mapStudentsStatsDataByDates(userDailyStats);
+        const ggAll = getGeneralStats(resAll);
+        setSemesterStats(ggAll);
+      }
+    });
+
+    const snapShotFunc = onSnapshot(qByStudent, async snapshot => {
+      const docChanges = snapshot.docChanges();
+      if (!docChanges.length) {
         setThereIsData(false);
         setSemesterStudentStats(null);
         setTrendStats({
@@ -215,53 +274,61 @@ const StudentDashboard: InstructorLayoutPage = ({ user, currentSemester, setting
         });
         return;
       }
+      for (let change of docChanges) {
+        if (change.type === "added" || change.type === "modified") {
+          const semesterStudentVoteStat = change.doc.data() as ISemesterStudentVoteStat;
+          const points = calculateVoteStatPoints(semesterStudentVoteStat, semesterConfig!);
+          setStudentVoteStat({
+            ...semesterStudentVoteStat,
+            ...points,
+          });
 
-      const semesterStudentVoteStat = semesterStudentVoteStatDoc.docs[0].data() as ISemesterStudentVoteStat;
-      const points = calculateVoteStatPoints(semesterStudentVoteStat, semesterConfig!);
-      setStudentVoteStat({
-        ...semesterStudentVoteStat,
-        ...points,
-      });
-
-      const res = mapStudentsStatsDataByDates([semesterStudentVoteStat]);
-      const gg = getGeneralStats(res);
-      setSemesterStudentStats(gg);
-      const ts = res.reduce(
-        (a: TrendStats, c): TrendStats => {
-          return {
-            childProposals: semesterConfig?.isProposalRequired
-              ? [...a.childProposals, { date: new Date(c.date), num: c.value.childProposals }]
-              : [],
-            editProposals: semesterConfig?.isProposalRequired
-              ? [...a.editProposals, { date: new Date(c.date), num: c.value.editProposals }]
-              : [],
-            proposedLinks: [...a.proposedLinks, { date: new Date(c.date), num: c.value.links }],
-            nodes: [...a.nodes, { date: new Date(c.date), num: c.value.nodes }],
-            questions: semesterConfig?.isQuestionProposalRequired
-              ? [...a.questions, { date: new Date(c.date), num: c.value.questions }]
-              : [],
-            votes: semesterConfig?.isCastingVotesRequired
-              ? [...a.votes, { date: new Date(c.date), num: c.value.votes }]
-              : [],
-          };
-        },
-        {
-          childProposals: [],
-          editProposals: [],
-          proposedLinks: [],
-          nodes: [],
-          questions: [],
-          votes: [],
+          const res = mapStudentsStatsDataByDates([semesterStudentVoteStat]);
+          const gg = getGeneralStats(res);
+          setSemesterStudentStats(gg);
+          const ts = res.reduce(
+            (a: TrendStats, c): TrendStats => {
+              return {
+                childProposals: semesterConfig?.isProposalRequired
+                  ? [...a.childProposals, { date: new Date(c.date), num: c.value.childProposals }]
+                  : [],
+                editProposals: semesterConfig?.isProposalRequired
+                  ? [...a.editProposals, { date: new Date(c.date), num: c.value.editProposals }]
+                  : [],
+                proposedLinks: [...a.proposedLinks, { date: new Date(c.date), num: c.value.links }],
+                nodes: [...a.nodes, { date: new Date(c.date), num: c.value.nodes }],
+                questions: semesterConfig?.isQuestionProposalRequired
+                  ? [...a.questions, { date: new Date(c.date), num: c.value.questions }]
+                  : [],
+                votes: semesterConfig?.isCastingVotesRequired
+                  ? [...a.votes, { date: new Date(c.date), num: c.value.votes }]
+                  : [],
+              };
+            },
+            {
+              childProposals: [],
+              editProposals: [],
+              proposedLinks: [],
+              nodes: [],
+              questions: [],
+              votes: [],
+            }
+          );
+          setTrendStats(ts);
+          setThereIsData(true);
+          return;
         }
-      );
-      setTrendStats(ts);
-      setThereIsData(true);
+      }
+    });
+
+    return () => {
+      snapShotFunc();
+      snapShotFuncForAll();
     };
-    getStudentVoteStats();
   }, [semesterConfig, currentSemester?.tagId, db, queryUname]);
 
   useEffect(() => {
-    // update data in buble
+    // update datass in buble
     if (!semesterStudentsVoteStats.length) return setBubble([]);
 
     const { bubbleStats, maxVote, maxVotePoints, minVote, minVotePoints } = getBubbleStats(
@@ -335,19 +402,40 @@ const StudentDashboard: InstructorLayoutPage = ({ user, currentSemester, setting
     if (!currentSemester || !currentSemester.tagId || !queryUname || !semesterConfig) return;
 
     setIsLoading(true);
-    const getUserDailyStat = async () => {
-      const userDailyStatRef = collection(db, "semesterStudentStats");
-      const q = query(userDailyStatRef, where("tagId", "==", currentSemester.tagId), where("uname", "==", queryUname));
-      const userDailyStatDoc = await getDocs(q);
-
-      if (!userDailyStatDoc.docs.length) {
-        setThereIsData(false);
-        return;
+    // const getUserDailyStat = async () => {
+    // if (!userDailyStatDoc.docs.length) {
+    //   setThereIsData(false);
+    //   return;
+    // }
+    // const userDailyStatsIncomplete = userDailyStatDoc.docs
+    //   .map(dailyStat => dailyStat.data() as SemesterStudentStat)
+    //   .slice(0, 1);
+    // };
+    // getUserDailyStat();
+    const userDailyStatRef = collection(db, "semesterStudentStats");
+    const q = query(userDailyStatRef, where("tagId", "==", currentSemester.tagId), where("uname", "==", queryUname));
+    // const userDailyStatDoc = await getDocs(q);
+    let userDailyStatsIncomplete: SemesterStudentStat[] = [];
+    const snapShotFunc = onSnapshot(q, async snapshot => {
+      const docChanges = snapshot.docChanges();
+      if (!docChanges.length) {
       }
-
-      const userDailyStatsIncomplete = userDailyStatDoc.docs
-        .map(dailyStat => dailyStat.data() as SemesterStudentStat)
-        .slice(0, 1);
+      for (let change of docChanges) {
+        if (change.type === "added") {
+          userDailyStatsIncomplete.push(change.doc.data() as SemesterStudentStat);
+        } else if (change.type === "modified") {
+          const index = userDailyStatsIncomplete.findIndex(
+            (userDailyStat: SemesterStudentStat) => userDailyStat.uname === change.doc.data().uname
+          );
+          userDailyStatsIncomplete[index] = change.doc.data() as SemesterStudentStat;
+        } else if (change.type === "removed") {
+          const index = userDailyStatsIncomplete.findIndex(
+            (userDailyStat: SemesterStudentStat) => userDailyStat.uname === change.doc.data().uname
+          );
+          userDailyStatsIncomplete.splice(index, 1);
+        }
+      }
+      userDailyStatsIncomplete = userDailyStatsIncomplete.slice(0, 1);
       const userDailyStats: ISemesterStudentStat[] = userDailyStatsIncomplete.map(cur => {
         const daysFixed = cur.days.map(c => ({ day: c.day, chapters: c.chapters ?? [] }));
         return { ...cur, days: daysFixed };
@@ -375,18 +463,18 @@ const StudentDashboard: InstructorLayoutPage = ({ user, currentSemester, setting
       );
       setStudentBoxStat({ proposalsPoints, questionsPoints, votesPoints });
       setThereIsData(true);
-    };
-    getUserDailyStat();
+    });
+    return () => snapShotFunc();
   }, [currentSemester, db, queryUname, semesterConfig]);
   useEffect(() => {
     if (!currentSemester || !currentSemester.tagId || !semesterConfig) return;
     setIsLoading(true);
-    const getUserDailyStat = async () => {
-      const userDailyStatRef = collection(db, "semesterStudentStats");
-      const q = query(userDailyStatRef, where("tagId", "==", currentSemester.tagId), where("deleted", "==", false));
-      const userDailyStatDoc = await getDocs(q);
-
-      if (!userDailyStatDoc.docs.length) {
+    const userDailyStatRef = collection(db, "semesterStudentStats");
+    const q = query(userDailyStatRef, where("tagId", "==", currentSemester.tagId), where("deleted", "==", false));
+    let userDailyStats: SemesterStudentStat[] = [];
+    const snapShotFunc = onSnapshot(q, async snapshot => {
+      const docChanges = snapshot.docChanges();
+      if (!docChanges.length) {
         setBoxStats({
           proposalsPoints: { data: {}, min: 0, max: 1000 },
           questionsPoints: { data: {}, min: 0, max: 1000 },
@@ -394,11 +482,25 @@ const StudentDashboard: InstructorLayoutPage = ({ user, currentSemester, setting
         });
         setIsLoading(false);
         setThereIsData(false);
-
         return;
       }
 
-      const userDailyStats = userDailyStatDoc.docs.map(dailyStat => dailyStat.data() as SemesterStudentStat);
+      for (let change of docChanges) {
+        if (change.type === "added") {
+          userDailyStats.push(change.doc.data() as SemesterStudentStat);
+        } else if (change.type === "modified") {
+          const index = userDailyStats.findIndex(
+            (userDailyStat: SemesterStudentStat) => userDailyStat.uname === change.doc.data().uname
+          );
+          userDailyStats[index] = change.doc.data() as SemesterStudentStat;
+        } else if (change.type === "removed") {
+          const index = userDailyStats.findIndex(
+            (userDailyStat: SemesterStudentStat) => userDailyStat.uname === change.doc.data().uname
+          );
+          userDailyStats.splice(index, 1);
+        }
+      }
+
       const proposalsPoints = getBoxPlotData(
         userDailyStats,
         "proposals",
@@ -430,8 +532,8 @@ const StudentDashboard: InstructorLayoutPage = ({ user, currentSemester, setting
       });
       setIsLoading(false);
       setThereIsData(true);
-    };
-    getUserDailyStat();
+    });
+    return () => snapShotFunc();
   }, [currentSemester, db, semesterConfig]);
 
   const getMaxProposalsQuestionsPoints = (data: ISemester): MaxPoints => {
@@ -450,27 +552,46 @@ const StudentDashboard: InstructorLayoutPage = ({ user, currentSemester, setting
     for (const student of students) {
       studentNameByUname[student.uname] = `${student.fName} ${student.lName}`;
     }
-    (async () => {
-      const semesterStudentSankeyCol = collection(db, "semesterStudentSankeys");
-      const q = query(
-        semesterStudentSankeyCol,
-        where("tagId", "==", currentSemester.tagId),
-        where("uname", "==", queryUname),
-        where("deleted", "==", false)
-      );
-      const semesterStudentSankeys = await getDocs(q);
-      if (!semesterStudentSankeys.docs.length) {
+    const semesterStudentSankeyCol = collection(db, "semesterStudentSankeys");
+    const q = query(
+      semesterStudentSankeyCol,
+      where("tagId", "==", currentSemester.tagId),
+      where("uname", "==", queryUname),
+      where("deleted", "==", false)
+    );
+
+    const snapShotFunc = onSnapshot(q, async snapshot => {
+      const docChanges = snapshot.docChanges();
+      if (!docChanges.length) {
         setStudentInteractions(null);
         return;
       }
+      for (let change of docChanges) {
+        const _semesterStudentSankey = change.doc.data();
+        if (change.type === "added" || change.type === "modified") {
+          const chartData = _semesterStudentSankey.intractions.map((cur: any) => ({
+            label: studentNameByUname[cur.uname],
+            amount: cur.upVotes + cur.downVotes,
+          }));
+          setStudentInteractions(chartData);
+          return;
+        }
+      }
+    });
 
-      const data = semesterStudentSankeys.docs.map(std => std.data())[0];
-      const chartData = data.intractions.map((cur: any) => ({
-        label: studentNameByUname[cur.uname],
-        amount: cur.upVotes + cur.downVotes,
-      }));
-      setStudentInteractions(chartData);
-    })();
+    // const semesterStudentSankeys = await getDocs(q);
+    // if (!semesterStudentSankeys.docs.length) {
+    //   setStudentInteractions(null);
+    //   return;
+    // }
+
+    // const data = semesterStudentSankeys.docs.map(std => std.data())[0];
+    // const chartData = data.intractions.map((cur: any) => ({
+    //   label: studentNameByUname[cur.uname],
+    //   amount: cur.upVotes + cur.downVotes,
+    // }));
+    // setStudentInteractions(chartData);
+    return () => snapShotFunc();
   }, [currentSemester, db, students, queryUname]);
 
   const trendPlotWith = isMovil ? windowWidth - 60 : isTablet ? windowWidth - 100 : windowWidth - 140;
