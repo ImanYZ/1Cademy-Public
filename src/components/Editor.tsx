@@ -18,6 +18,7 @@ type EditorProps = {
   helperText?: String;
   editOption?: EditorOptions;
   showEditPreviewSection?: boolean;
+  disabled?: boolean;
 };
 
 export const Editor = ({
@@ -33,6 +34,7 @@ export const Editor = ({
   helperText,
   editOption = "EDIT",
   showEditPreviewSection = true,
+  disabled = false,
 }: EditorProps) => {
   // const [value, setValue] = React.useState<string>('');
   // const [canEdit, setCanEdit] = useState(true);
@@ -102,6 +104,7 @@ export const Editor = ({
         <Box>
           {option === "EDIT" && !readOnly ? (
             <TextField
+              disabled={disabled}
               label={!readOnly ? label : undefined}
               variant="outlined"
               id={inputId}

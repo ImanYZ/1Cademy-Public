@@ -1,6 +1,22 @@
 import { doc, DocumentChange, DocumentData, Firestore, getDoc } from "firebase/firestore";
 
-import { FullNodeData, NodeFireStore, NodesData, UserNodeChanges, UserNodesData } from "../../nodeBookTypes";
+import { AllTagsTreeView } from "@/components/TagsSearcher";
+
+import {
+  FullNodeData,
+  FullNodesData,
+  NodeFireStore,
+  NodesData,
+  UserNodeChanges,
+  UserNodesData,
+} from "../../nodeBookTypes";
+import {
+  compare2Nodes,
+  createOrUpdateNode,
+  makeNodeVisibleInItsLinks,
+  removeDagAllEdges,
+  removeDagNode,
+} from "./Map.utils";
 // import { FullNodeData, NodeFireStore, NodesData, UserNodeChanges } from "../../noteBookTypes";
 
 export const getUserNodeChanges = (docChanges: DocumentChange<DocumentData>[]): UserNodeChanges[] => {
@@ -95,4 +111,101 @@ export const buildFullNodes = (userNodesChanges: UserNodeChanges[], nodesData: N
     .flatMap(cur => cur || []);
 
   return res;
+};
+export const mergeAllNodes = (newAllNodes: FullNodeData[], currentAllNodes: FullNodesData): FullNodesData => {
+  return newAllNodes.reduce(
+    (acu, cur) => {
+      if (cur.nodeChangeType === "added" || cur.nodeChangeType === "modified") {
+        return { ...acu, [cur.node]: cur };
+      }
+      if (cur.nodeChangeType === "removed") {
+        const tmp = { ...acu };
+        delete tmp[cur.node];
+        return tmp;
+      }
+      return acu;
+    },
+    { ...currentAllNodes }
+  );
+};
+
+export const fillDagre = (
+  g: dagre.graphlib.Graph<{}>,
+  fullNodes: FullNodeData[],
+  currentNodes: any,
+  currentEdges: any,
+  withClusters: boolean,
+  allTags: AllTagsTreeView
+) => {
+  return fullNodes.reduce(
+    (acu: { newNodes: { [key: string]: any }; newEdges: { [key: string]: any } }, cur) => {
+      let tmpNodes = {};
+      let tmpEdges = {};
+
+      if (cur.nodeChangeType === "added") {
+        const { uNodeData, oldNodes, oldEdges } = makeNodeVisibleInItsLinks(cur, acu.newNodes, acu.newEdges);
+
+        const res = createOrUpdateNode(g, uNodeData, cur.node, oldNodes, oldEdges, allTags, withClusters);
+
+        tmpNodes = res.oldNodes;
+        tmpEdges = res.oldEdges;
+      }
+      if (cur.nodeChangeType === "modified" && cur.visible) {
+        const node = acu.newNodes[cur.node];
+        if (!node) {
+          const res = createOrUpdateNode(g, cur, cur.node, acu.newNodes, acu.newEdges, allTags, withClusters);
+          tmpNodes = res.oldNodes;
+          tmpEdges = res.oldEdges;
+        } else {
+          const currentNode: FullNodeData = {
+            ...cur,
+            left: node.left,
+            top: node.top,
+          }; // <----- IMPORTANT: Add positions data from node into cur.node to not set default position into center of screen
+
+          if (!compare2Nodes(cur, node)) {
+            const res = createOrUpdateNode(g, currentNode, cur.node, acu.newNodes, acu.newEdges, allTags, withClusters);
+            tmpNodes = res.oldNodes;
+            tmpEdges = res.oldEdges;
+          }
+        }
+      }
+      // so the NO visible nodes will come as modified and !visible
+      if (cur.nodeChangeType === "removed" || (cur.nodeChangeType === "modified" && !cur.visible)) {
+        if (g.hasNode(cur.node)) {
+          g.nodes().forEach(function () {});
+          g.edges().forEach(function () {});
+          // PROBABLY you need to add hideNodeAndItsLinks, to update children and parents nodes
+
+          // !IMPORTANT, Don't change the order, first remove edges then nodes
+          tmpEdges = removeDagAllEdges(g, cur.node, acu.newEdges);
+          tmpNodes = removeDagNode(g, cur.node, acu.newNodes);
+        } else {
+          // remove edges
+          const oldEdges = { ...acu.newEdges };
+
+          Object.keys(oldEdges).forEach(key => {
+            if (key.includes(cur.node)) {
+              delete oldEdges[key];
+            }
+          });
+
+          tmpEdges = oldEdges;
+          // remove node
+          const oldNodes = acu.newNodes;
+          if (cur.node in oldNodes) {
+            delete oldNodes[cur.node];
+          }
+          // tmpEdges = {acu.newEdges,}
+          tmpNodes = { ...oldNodes };
+        }
+      }
+
+      return {
+        newNodes: { ...tmpNodes },
+        newEdges: { ...tmpEdges },
+      };
+    },
+    { newNodes: { ...currentNodes }, newEdges: { ...currentEdges } }
+  );
 };

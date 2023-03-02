@@ -45,7 +45,7 @@ const getBaseStepConfig = (step: number, max: number) => {
     ...getStepsValues(step, max),
     tooltipPosition: "top",
     isClickeable: false,
-    delay: 0,
+    targetDelay: 0,
   };
 
   return tt;
@@ -69,6 +69,10 @@ Ex for Node id elements to disable
   "01-reference-button-0"
   "01-tag-button-0"
   "01-node-footer-menu"
+  "SearchIcon"
+  "search-recently-input"
+  "recentNodesList"
+  "search-list"
  */
 
 const NODES_STEPS: {
@@ -183,7 +187,7 @@ const NODES_STEPS: {
   {
     localSnapshot: [],
     targetId: "sidebar-wrapper-searcher",
-    childTargetId: "sidebar-wrapper-searcher",
+    childTargetId: "sidebar-wrapper-searcher-content",
     title: "Search Engine",
     description: (
       <MarkdownRender
@@ -193,7 +197,7 @@ const NODES_STEPS: {
       />
     ),
     disabledElements: [...DISABLE_NOTEBOOK_OPTIONS, "01"],
-    enableChildElements: ["search-list"],
+    enableChildElements: ["search-item"],
     tooltipPosition: "right",
   },
 ];

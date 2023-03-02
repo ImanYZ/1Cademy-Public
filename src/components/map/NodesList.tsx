@@ -3,7 +3,7 @@ import { FullNodeData, TNodeBookState } from "src/nodeBookTypes";
 
 import { useNodeBook } from "@/context/NodeBookContext";
 import { compareNodes, NODE_WIDTH } from "@/lib/utils/Map.utils";
-import { OpenSidebar } from "@/pages/notebook";
+import { OpenSidebar, TutorialType } from "@/pages/notebook";
 
 import { MemoizedNode } from "./Node";
 
@@ -54,6 +54,8 @@ type NodeListProps = {
   openUserInfoSidebar: (uname: string, imageUrl: string, fullName: string, chooseUname: string) => void;
   disabledNodes: string[];
   enableChildElements: string[];
+  showProposeTutorial?: boolean; // this flag is to enable tutorial first time user click in pencil
+  setCurrentTutorial: (newValue: TutorialType) => void;
 };
 
 const NodesList = ({
@@ -103,6 +105,8 @@ const NodesList = ({
   openUserInfoSidebar,
   disabledNodes = [],
   enableChildElements = [],
+  showProposeTutorial = false,
+  setCurrentTutorial,
 }: NodeListProps) => {
   /* eslint-disable-next-line @typescript-eslint/no-unused-vars */
   const { nodeBookDispatch } = useNodeBook();
@@ -248,6 +252,8 @@ const NodesList = ({
             disabled={disabledNodes.includes(nId)}
             enableChildElements={enableChildElements}
             defaultOpenPart={nodes[nId].defaultOpenPart}
+            showProposeTutorial={showProposeTutorial}
+            setCurrentTutorial={setCurrentTutorial}
           />
         );
       })}
@@ -298,7 +304,8 @@ export const MemoizedNodeList = React.memo(NodesList, (prev, next) => {
     prev.saveProposedImprovement === next.saveProposedImprovement &&
     prev.closeSideBar === next.closeSideBar &&
     prev.reloadPermanentGrpah === next.reloadPermanentGrpah &&
-    prev.openSidebar === prev.openSidebar &&
+    prev.openSidebar === prev.openSidebar && // TODO: check this
+    prev.showProposeTutorial === next.showProposeTutorial &&
     validateTutorialProps()
   );
 });
