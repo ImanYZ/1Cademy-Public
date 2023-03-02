@@ -3,7 +3,7 @@ import relativeTime from "dayjs/plugin/relativeTime";
 
 import MarkdownRender from "@/components/Markdown/MarkdownRender";
 
-import { NodeTutorialState, StepTutorialBase, TutorialState } from "../../../nodeBookTypes";
+import { NodeTutorialState, StepTutorialConfig, TutorialState } from "../../../nodeBookTypes";
 import { INTERACTIVE_TUTORIAL_NOTEBOOK_NODES } from "../interactiveTutorialNodes";
 // import { FullNodeData, NodeTutorialState, TutorialState } from "../../nodeBookTypes";
 // import { INTERACTIVE_TUTORIAL_NOTEBOOK_NODES } from "../utils/interactiveTutorialNodes";
@@ -16,7 +16,7 @@ dayjs.extend(relativeTime);
 
 const DISABLE_NOTEBOOK_OPTIONS = [
   "TOOLBAR",
-  "SEARCHER",
+  "SEARCHER_SIDEBAR",
   "LIVENESS_BAR",
   "COMMUNITY_LEADERBOARD",
   "SCROLL_TO_NODE_BUTTON",
@@ -43,9 +43,16 @@ Ex for Node id elements to disable
   "01-node-footer-menu"
  */
 
-const OVERVIEW_STEPS: StepTutorialBase[] = [
+const OVERVIEW_STEPS: StepTutorialConfig[] = [
   {
-    localSnapshot: [{ ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["00"], nodeChangeType: "modified", open: true }],
+    localSnapshot: [
+      {
+        ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["00"],
+        nodeChangeType: "modified",
+        open: true,
+        defaultOpenPart: "References",
+      },
+    ],
     targetId: "00",
     title: "Proposals: Overview",
     description: (
@@ -55,7 +62,7 @@ const OVERVIEW_STEPS: StepTutorialBase[] = [
     targetDefaultProperties: { editable: true },
   },
   {
-    localSnapshot: [{ ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["00"], nodeChangeType: "modified", open: true }],
+    localSnapshot: [],
     targetId: "00",
     title: "Proposals: Overview",
     description: (
@@ -65,7 +72,7 @@ const OVERVIEW_STEPS: StepTutorialBase[] = [
     targetDefaultProperties: { editable: true },
   },
   {
-    localSnapshot: [{ ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["00"], nodeChangeType: "modified", open: true }],
+    localSnapshot: [],
     targetId: "00",
     childTargetId: "00_childNodes",
     title: "Proposals: Overview",
@@ -77,10 +84,10 @@ const OVERVIEW_STEPS: StepTutorialBase[] = [
       />
     ),
     disabledElements: [...DISABLE_NOTEBOOK_OPTIONS, "00"],
-    targetDefaultProperties: { editable: false },
+    targetDefaultProperties: { editable: true },
   },
   {
-    localSnapshot: [{ ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["00"], nodeChangeType: "modified", open: true }],
+    localSnapshot: [],
     targetId: "00",
     title: "Proposals: Overview",
     description: (
@@ -95,13 +102,11 @@ const OVERVIEW_STEPS: StepTutorialBase[] = [
   },
 ];
 
-const FINDING_PREREQUISITES_STEPS: StepTutorialBase[] = [
+const FINDING_PREREQUISITES_STEPS: StepTutorialConfig[] = [
   {
-    localSnapshot: [
-      { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["00"], nodeChangeType: "added", open: true, editable: false },
-    ],
+    localSnapshot: [],
     targetId: "00",
-    title: "Proposals: Proposing Edits",
+    title: "Proposals: Finding Prerequisites",
     description: (
       <MarkdownRender
         text={
@@ -110,13 +115,12 @@ const FINDING_PREREQUISITES_STEPS: StepTutorialBase[] = [
       />
     ),
     disabledElements: [...DISABLE_NOTEBOOK_OPTIONS, "00"],
+    targetDefaultProperties: { editable: true },
   },
   {
-    localSnapshot: [
-      { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["00"], nodeChangeType: "added", open: true, editable: true },
-    ],
+    localSnapshot: [],
     targetId: "00",
-    title: "Proposals: Proposing Edits",
+    title: "Proposals: Finding Prerequisites",
     description: (
       <MarkdownRender
         text={
@@ -125,13 +129,12 @@ const FINDING_PREREQUISITES_STEPS: StepTutorialBase[] = [
       />
     ),
     disabledElements: [...DISABLE_NOTEBOOK_OPTIONS, "00"],
+    targetDefaultProperties: { editable: true },
   },
   {
-    localSnapshot: [
-      { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["00"], nodeChangeType: "added", open: true, editable: true },
-    ],
+    localSnapshot: [],
     targetId: "00",
-    title: "Proposals: Proposing Edits",
+    title: "Proposals: Finding Prerequisites",
     description: (
       <MarkdownRender
         text={
@@ -140,13 +143,12 @@ const FINDING_PREREQUISITES_STEPS: StepTutorialBase[] = [
       />
     ),
     disabledElements: [...DISABLE_NOTEBOOK_OPTIONS, "00"],
+    targetDefaultProperties: { editable: true },
   },
   {
-    localSnapshot: [
-      { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["00"], nodeChangeType: "added", open: true, editable: true },
-    ],
+    localSnapshot: [],
     targetId: "00",
-    title: "Proposals: Proposing Edits",
+    title: "Proposals: Finding Prerequisites",
     description: (
       <MarkdownRender
         text={
@@ -155,14 +157,13 @@ const FINDING_PREREQUISITES_STEPS: StepTutorialBase[] = [
       />
     ),
     disabledElements: [...DISABLE_NOTEBOOK_OPTIONS, "00"],
+    targetDefaultProperties: { editable: true },
   },
   {
-    localSnapshot: [
-      { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["00"], nodeChangeType: "added", open: true, editable: true },
-    ],
+    localSnapshot: [],
     targetId: "00",
     childTargetId: "toolbar-search-button",
-    title: "Proposals: Proposing Edits",
+    title: "Proposals: Finding Prerequisites",
     description: (
       <MarkdownRender
         text={"In order to see if the prerequisite already exists, you can use the search feature on the toolbar."}
@@ -171,13 +172,12 @@ const FINDING_PREREQUISITES_STEPS: StepTutorialBase[] = [
     tooltipPosition: "right",
     anchor: "Portal",
     disabledElements: [...DISABLE_NOTEBOOK_OPTIONS, "00"],
+    targetDefaultProperties: { editable: true },
   },
   {
-    localSnapshot: [
-      { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["00"], nodeChangeType: "added", open: true, editable: true },
-    ],
+    localSnapshot: [],
     targetId: "00",
-    title: "Proposals: Proposing Edits",
+    title: "Proposals: Finding Prerequisites",
     description: (
       <MarkdownRender
         text={
@@ -186,97 +186,74 @@ const FINDING_PREREQUISITES_STEPS: StepTutorialBase[] = [
       />
     ),
     disabledElements: [...DISABLE_NOTEBOOK_OPTIONS, "00"],
+    targetDefaultProperties: { editable: true },
   },
   {
-    localSnapshot: [
-      { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["00"], nodeChangeType: "added", open: true, editable: true },
-    ],
+    localSnapshot: [],
     targetId: "00",
-    title: "Proposals: Proposing Edits",
+    title: "Proposals: Finding Prerequisites",
     description: (
       <MarkdownRender
         text={"Sometimes you will need to build the branch of nodes leading to the information you intend on adding."}
       />
     ),
     disabledElements: [...DISABLE_NOTEBOOK_OPTIONS, "00"],
+    targetDefaultProperties: { editable: true },
   },
 ];
 
-const PROPOSING_EDITS_STEPS: StepTutorialBase[] = [
+const PROPOSING_EDITS_STEPS: StepTutorialConfig[] = [
   {
-    localSnapshot: [
-      { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["00"], nodeChangeType: "added", open: true, editable: true },
-    ],
+    localSnapshot: [],
     targetId: "00",
     childTargetId: "00-node-body",
     title: "Proposals: Proposing Edits",
     description: <MarkdownRender text={"Try changing the title and content."} />,
     disabledElements: [...DISABLE_NOTEBOOK_OPTIONS, "00"],
+    enableChildElements: ["00-node-title", "00-node-content", "00-node-why"],
+    targetDefaultProperties: { editable: true },
   },
   {
-    localSnapshot: [
-      { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["00"], nodeChangeType: "added", open: true, editable: true },
-    ],
+    localSnapshot: [],
     targetId: "00",
     childTargetId: "00-node-type-selector",
     title: "Proposals: Proposing Edits",
     description: <MarkdownRender text={"You can also change the type of node here."} />,
     disabledElements: [...DISABLE_NOTEBOOK_OPTIONS, "00"],
+    enableChildElements: ["00-node-type-selector"],
+    targetDefaultProperties: { editable: true },
   },
   {
-    localSnapshot: [
-      {
-        ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["00"],
-        nodeChangeType: "added",
-        open: true,
-        editable: true,
-        defaultOpenPart: "References",
-      },
-    ],
+    localSnapshot: [],
     targetId: "00",
     childTargetId: "00-node-references",
     title: "Proposals: Proposing Edits",
     description: <MarkdownRender text={"You can add and remove citations."} />,
     disabledElements: [...DISABLE_NOTEBOOK_OPTIONS, "00"],
+    targetDefaultProperties: { editable: true },
   },
   {
-    localSnapshot: [
-      {
-        ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["00"],
-        nodeChangeType: "added",
-        open: true,
-        editable: true,
-        defaultOpenPart: "References",
-      },
-    ],
+    localSnapshot: [],
     targetId: "00",
     childTargetId: "00-node-tags",
     title: "Proposals: Proposing Edits",
     description: <MarkdownRender text={"Add or remove tags here."} />,
     disabledElements: [...DISABLE_NOTEBOOK_OPTIONS, "00"],
+    targetDefaultProperties: { editable: true },
   },
   {
-    localSnapshot: [
-      {
-        ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["00"],
-        nodeChangeType: "added",
-        open: true,
-        editable: true,
-        defaultOpenPart: null,
-      },
-    ],
+    localSnapshot: [],
     targetId: "00",
     childTargetId: "00-button-parent-children",
     title: "Proposals: Proposing Edits",
     description: <MarkdownRender text={"You can even change parent and children nodes by clicking on this icon."} />,
     disabledElements: [...DISABLE_NOTEBOOK_OPTIONS, "00"],
+    targetDefaultProperties: { editable: true },
   },
   {
-    localSnapshot: [
-      { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["00"], nodeChangeType: "added", open: true, editable: true },
-    ],
+    localSnapshot: [],
     targetId: "00",
-    childTargetId: "00-button-propose-cancel",
+    childTargetId: "00-button-propose-proposal",
     title: "Proposals: Proposing Edits",
     description: (
       <MarkdownRender
@@ -286,10 +263,186 @@ const PROPOSING_EDITS_STEPS: StepTutorialBase[] = [
       />
     ),
     disabledElements: [...DISABLE_NOTEBOOK_OPTIONS, "00"],
+    enableChildElements: ["00-button-propose-proposal"],
+    targetDefaultProperties: { editable: true, defaultOpenPart: "References" },
+    isClickeable: true,
+  },
+];
+
+const RECONCILING_PROPOSALS_STEPS: StepTutorialConfig[] = [
+  {
+    localSnapshot: [],
+    targetId: "00",
+    title: "Proposals: Reconciling Proposals",
+    description: (
+      <MarkdownRender
+        text={"Just because you have proposed a change, it does not mean that the change will be implemented."}
+      />
+    ),
+    disabledElements: [...DISABLE_NOTEBOOK_OPTIONS, "00"],
+    targetDefaultProperties: {
+      editable: false,
+      defaultOpenPart: null,
+      corrects: 1,
+      correct: true,
+      changedAt: new Date(),
+    },
+  },
+  {
+    localSnapshot: [],
+    targetId: "00",
+    childTargetId: "00-node-footer-votes",
+    title: "Proposals: Reconciling Proposals",
+    description: (
+      <MarkdownRender
+        text={
+          "Proposals need to be approved by more than one person in some cases, it depends on the net vote of the node that the proposals are changing."
+        }
+      />
+    ),
+    disabledElements: [...DISABLE_NOTEBOOK_OPTIONS, "00"],
+    tooltipPosition: "bottom",
+    targetDefaultProperties: { editable: false },
+  },
+  {
+    localSnapshot: [],
+    targetId: "00",
+    childTargetId: "00-node-footer-votes",
+    title: "Proposals: Reconciling Proposals",
+    description: (
+      <MarkdownRender
+        text={
+          "As we discussed earlier, every node has a net vote. This is the difference between upvotes and downvotes and can be calculated here."
+        }
+      />
+    ),
+    disabledElements: [...DISABLE_NOTEBOOK_OPTIONS, "00"],
+    tooltipPosition: "bottom",
+  },
+  {
+    localSnapshot: [],
+    targetId: "00",
+    childTargetId: "00-node-footer-votes",
+    title: "Proposals: Reconciling Proposals",
+    description: (
+      <MarkdownRender
+        text={"A proposal needs to have a number of approving votes equal to half of the net vote number."}
+      />
+    ),
+    disabledElements: [...DISABLE_NOTEBOOK_OPTIONS, "00"],
+    tooltipPosition: "bottom",
+  },
+  {
+    localSnapshot: [],
+    targetId: "00",
+    childTargetId: "00-node-footer-votes",
+    title: "Proposals: Reconciling Proposals",
+    description: (
+      <MarkdownRender
+        text={"For example, a node with 4 upvotes and 0 downvotes needs 2 votes for a proposal to change it."}
+      />
+    ),
+    disabledElements: [...DISABLE_NOTEBOOK_OPTIONS, "00"],
+    tooltipPosition: "bottom",
+  },
+  {
+    localSnapshot: [],
+    targetId: "00",
+    childTargetId: "00-node-footer-votes",
+    title: "Proposals: Reconciling Proposals",
+    description: (
+      <MarkdownRender
+        text={
+          "Another example is if a node has 7 upvotes and 1 downvote, a proposal will need 3 upvotes to be approved."
+        }
+      />
+    ),
+    disabledElements: [...DISABLE_NOTEBOOK_OPTIONS, "00"],
+    tooltipPosition: "bottom",
+  },
+  {
+    localSnapshot: [],
+    targetId: "00",
+    childTargetId: "00-node-footer-votes",
+    title: "Proposals: Reconciling Proposals",
+    description: (
+      <MarkdownRender
+        text={
+          "A proposal to a node with a netvote of 2 or less will automatically be approved as the proposal itself automatically carries a single vote in its favor from the person that made it."
+        }
+      />
+    ),
+    disabledElements: [...DISABLE_NOTEBOOK_OPTIONS, "00"],
+    tooltipPosition: "bottom",
+  },
+  {
+    localSnapshot: [],
+    targetId: "00",
+    childTargetId: "00-node-footer-downvotes",
+    title: "Proposals: Reconciling Proposals",
+    description: (
+      <MarkdownRender
+        text={
+          "Proposals can also receive downvotes, which will affect the number of upvotes needed to approve the proposal."
+        }
+      />
+    ),
+    disabledElements: [...DISABLE_NOTEBOOK_OPTIONS, "00"],
+    tooltipPosition: "bottom",
+  },
+  {
+    localSnapshot: [],
+    targetId: "00",
+    childTargetId: "00-node-footer-downvotes",
+    title: "Proposals: Reconciling Proposals",
+    description: (
+      <MarkdownRender
+        text={
+          "For example, if a node with 7 upvotes and 1 downvote, a proposal with 4 upvotes and 1 downvote will be approved"
+        }
+      />
+    ),
+    disabledElements: [...DISABLE_NOTEBOOK_OPTIONS, "00"],
+    tooltipPosition: "bottom",
+  },
+  {
+    localSnapshot: [],
+    targetId: "00",
+    childTargetId: "00-node-footer-downvotes",
+    title: "Proposals: Reconciling Proposals",
+    description: (
+      <MarkdownRender
+        text={
+          "However, if a node with 8 upvotes and 2 downvotes has a proposal with 5 upvotes and 4 downvotes, the proposal will not be implemented."
+        }
+      />
+    ),
+    disabledElements: [...DISABLE_NOTEBOOK_OPTIONS, "00"],
+    tooltipPosition: "bottom",
+  },
+  {
+    localSnapshot: [],
+    targetId: "00",
+    childTargetId: "00-node-footer-votes",
+    title: "Proposals: Reconciling Proposals",
+    description: (
+      <MarkdownRender
+        text={
+          "A proposal that has been made but not received an adequate number of upvotes is a pending proposal. It will remain there until it is deleted by its creator."
+        }
+      />
+    ),
+    disabledElements: [...DISABLE_NOTEBOOK_OPTIONS, "00"],
+    tooltipPosition: "bottom",
   },
 ];
 console.log(PROPOSING_EDITS_STEPS, FINDING_PREREQUISITES_STEPS);
-export const PROPOSAL_STEPS_COMPLETE: NodeTutorialState[] = OVERVIEW_STEPS.map((c, i, s) => {
+export const PROPOSAL_STEPS_COMPLETE: NodeTutorialState[] = [
+  ...OVERVIEW_STEPS,
+  ...FINDING_PREREQUISITES_STEPS,
+  ...PROPOSING_EDITS_STEPS,
+  ...RECONCILING_PROPOSALS_STEPS,
+].map((c, i, s) => {
   return {
     ...getBaseStepConfig(i + 1, s.length),
     ...c,

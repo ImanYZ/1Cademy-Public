@@ -199,7 +199,7 @@ export type NodeBookActions = {
 
 export type TutorialState = null | NodeTutorialState;
 
-export type StepTutorialBase = {
+export type StepTutorialConfig = {
   localSnapshot: FullNodeData[];
   targetId: string;
   childTargetId?: string;
@@ -210,6 +210,8 @@ export type StepTutorialBase = {
   isClickeable?: boolean;
   forceScrollToNode?: boolean;
   targetDefaultProperties?: Partial<FullNodeData>;
+  tooltipPosition?: "top" | "bottom" | "left" | "right";
+  anchor?: string;
 };
 export interface NodeTutorialState {
   localSnapshot: FullNodeData[];

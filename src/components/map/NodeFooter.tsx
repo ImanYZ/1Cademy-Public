@@ -208,6 +208,7 @@ const NodeFooter = ({
   const tagsCitationsButtonId = `${identifier}-node-footer-tags-citations`;
   const parentChildrenButtonId = `${identifier}-button-parent-children`;
   const moreOptionsButtonId = `${identifier}-node-footer-ellipsis`;
+  const nodeTypeSelectorId = `${identifier}-node-type-selector`;
 
   // this will execute the includes operation only when disable is TRUE (in tutorial)
   const disableUserPicture = disabled && !enableChildElements.includes(userPictureId);
@@ -218,6 +219,7 @@ const NodeFooter = ({
   const disableParentChildrenButton = disabled && !enableChildElements.includes(parentChildrenButtonId);
   const disableMoreOptionsButton = disabled && !enableChildElements.includes(moreOptionsButtonId);
   const disableFooterMenuOptions = enableChildElements.includes(moreOptionsButtonId);
+  const disableNodeTypeSelector = disabled && !enableChildElements.includes(nodeTypeSelectorId);
 
   const messageTwitter = () => {
     return `1Cademy - Collaboratively Designing Learning Pathways
@@ -511,7 +513,8 @@ const NodeFooter = ({
                   nodeId={identifier}
                   setNodeParts={setNodeParts}
                   nodeType={nodeType}
-                  disabled={disabled}
+                  disabled={disableNodeTypeSelector}
+                  disabledItems={disabled}
                 />
               ) : (
                 <NodeTypeIcon

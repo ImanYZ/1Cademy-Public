@@ -13,7 +13,7 @@ import relativeTime from "dayjs/plugin/relativeTime";
 
 import MarkdownRender from "@/components/Markdown/MarkdownRender";
 
-import { NodeTutorialState, StepTutorialBase, TutorialState } from "../../nodeBookTypes";
+import { NodeTutorialState, StepTutorialConfig, TutorialState } from "../../nodeBookTypes";
 import { INTERACTIVE_TUTORIAL_NOTEBOOK_NODES } from "../utils/interactiveTutorialNodes";
 
 export const INITIAL_NODE_TUTORIAL_STATE: TutorialState = null;
@@ -80,7 +80,7 @@ Ex for Node id elements to disable
   "01-node-footer-menu"
  */
 
-const NODES_STEPS: StepTutorialBase[] = [
+const NODES_STEPS: StepTutorialConfig[] = [
   {
     localSnapshot: [
       { ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["00"], nodeChangeType: "removed", open: false },

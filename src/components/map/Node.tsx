@@ -297,6 +297,13 @@ const Node = ({
     to: { left: "600px", zIndex: 0 },
   });
 
+  const disableTitle = disabled && !enableChildElements.includes(`${identifier}-node-title`);
+  const disableContent = disabled && !enableChildElements.includes(`${identifier}-node-content`);
+  const disableWhy = disabled && !enableChildElements.includes(`${identifier}-node-why`);
+  const disableSwitchPreview = disabled;
+  const disableProposeButton = disabled && !enableChildElements.includes(`${identifier}-button-propose-proposal`);
+  const disableCancelButton = disabled && !enableChildElements.includes(`${identifier}-button-cancel-proposal`);
+
   useEffect(() => {
     setOpenPart(defaultOpenPartByTutorial); // this is called ONLY when is override by TUTORIAL
   }, [defaultOpenPartByTutorial]);
@@ -705,6 +712,7 @@ const Node = ({
                   Preview
                 </Typography>
                 <Switch
+                  disabled={disableSwitchPreview}
                   checked={option === "EDIT"}
                   onClick={() => onChangeOption(option === "EDIT")}
                   size="small"
@@ -745,6 +753,7 @@ const Node = ({
                 helperText={error ? error : ""}
                 showEditPreviewSection={false}
                 editOption={option}
+                disabled={disableTitle}
               />
               {editable && <Box sx={{ mb: "12px" }}></Box>}
               {/* </div> */}
@@ -759,6 +768,7 @@ const Node = ({
                   sxPreview={{ marginTop: "13px" }}
                   showEditPreviewSection={false}
                   editOption={option}
+                  disabled={disableContent}
                 />
                 {editable && <Box sx={{ mb: "12px" }}></Box>}
 
@@ -834,6 +844,7 @@ const Node = ({
               {editable && (
                 <>
                   <Editor
+                    id={`${identifier}-node-why`}
                     label={
                       "Explain why you propose this " +
                       (isNew ? nodeType + " child node" : "new version") +
@@ -845,6 +856,7 @@ const Node = ({
                     onBlurCallback={onBlurExplainDesc}
                     showEditPreviewSection={false}
                     editOption={option}
+                    disabled={disableWhy}
                   />
                 </>
               )}
@@ -1095,11 +1107,12 @@ const Node = ({
                 }}
               >
                 <Button
-                  disabled={disabled}
+                  id={`${identifier}-button-cancel-proposal`}
                   color="error"
                   variant="contained"
                   className="btn waves-effect waves-light hoverable red"
                   onClick={onCancelProposal}
+                  disabled={disableCancelButton}
                   sx={{
                     padding: "6px",
                   }}
@@ -1107,11 +1120,12 @@ const Node = ({
                   Cancel
                 </Button>
                 <Button
+                  id={`${identifier}-button-propose-proposal`}
                   color="success"
                   variant="contained"
                   className="btn waves-effect waves-light hoverable green"
                   onClick={proposalSubmit}
-                  disabled={(!ableToPropose ?? false) || disabled}
+                  disabled={(!ableToPropose ?? false) || disableProposeButton}
                   sx={{
                     padding: "6px",
                   }}
@@ -1163,6 +1177,7 @@ const Node = ({
           {/* <div className="card-title"> */}
           <div className="NodeTitleClosed">
             <Editor
+              disabled={disabled}
               label="title"
               value={titleCopy}
               setValue={setTitleCopy}
