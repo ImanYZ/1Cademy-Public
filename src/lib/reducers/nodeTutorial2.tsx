@@ -7,7 +7,7 @@ import LocalLibraryIcon from "@mui/icons-material/LocalLibrary";
 import LockIcon from "@mui/icons-material/Lock";
 import MenuBookIcon from "@mui/icons-material/MenuBook";
 import ShareIcon from "@mui/icons-material/Share";
-import { Stack, Typography } from "@mui/material";
+import { Box, Stack, Typography } from "@mui/material";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 
@@ -878,7 +878,7 @@ const NODES_STEPS: StepTutorialConfig[] = [
     description: (
       <>
         <MarkdownRender text={"The next one indicates what type of node it is, this one is a concept node."} />
-        <Stack direction={"row"} alignItems="center" spacing={"8px"} justifyContent={"space-around"} py="8px">
+        <Box sx={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr 1fr", mt: "10px" }}>
           <Stack alignItems={"center"}>
             <LocalLibraryIcon color="primary" />
             <Typography>Concept</Typography>
@@ -907,7 +907,7 @@ const NODES_STEPS: StepTutorialConfig[] = [
             <LockIcon color="primary" />
             <Typography>Lock</Typography>
           </Stack>
-        </Stack>
+        </Box>
       </>
     ),
     disabledElements: [...DISABLE_NOTEBOOK_OPTIONS, "00", "01"],
