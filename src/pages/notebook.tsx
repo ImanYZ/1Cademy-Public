@@ -1181,10 +1181,14 @@ const Dashboard = ({}: DashboardProps) => {
 
   useEffect(() => {
     // here we set up the default properties of a node in TUTORIAL
+
     if (currentTutorial !== "PROPOSAL") return;
     if (!stateNodeTutorial) return;
     if (!stateNodeTutorial.targetDefaultProperties) return;
 
+    // if (stateNodeTutorial.currentStepName === 17) {
+    //   debugger;
+    // }
     const thisNode = graph.nodes[stateNodeTutorial.targetId];
     if (!thisNode) return;
 
@@ -1201,8 +1205,8 @@ const Dashboard = ({}: DashboardProps) => {
 
       return thisNode[key] === stateNodeTutorial?.targetDefaultProperties[key];
     };
-    // console.log("SNP");
     const isEquals = keys.some(isEqualsProperties);
+    console.log("SNP", isEquals);
 
     if (isEquals) return;
 
@@ -3283,7 +3287,18 @@ const Dashboard = ({}: DashboardProps) => {
         };
       });
     },
-    [addedParents, addedChildren, removedParents, removedChildren, getMapGraph]
+    [
+      isPlayingTheTutorialRef,
+      nodeBookDispatch,
+      allNodes,
+      nodeBookState.selectedNode,
+      addedParents,
+      addedChildren,
+      removedParents,
+      removedChildren,
+      getMapGraph,
+      scrollToNode,
+    ]
   );
 
   const proposeNewChild = useCallback(

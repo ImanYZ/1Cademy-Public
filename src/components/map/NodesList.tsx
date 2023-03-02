@@ -3,7 +3,7 @@ import { FullNodeData, TNodeBookState } from "src/nodeBookTypes";
 
 import { useNodeBook } from "@/context/NodeBookContext";
 import { compareNodes, NODE_WIDTH } from "@/lib/utils/Map.utils";
-import { OpenSidebar } from "@/pages/notebook";
+import { OpenSidebar, TutorialType } from "@/pages/notebook";
 
 import { MemoizedNode } from "./Node";
 

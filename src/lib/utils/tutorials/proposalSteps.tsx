@@ -248,7 +248,7 @@ const PROPOSING_EDITS_STEPS: StepTutorialConfig[] = [
     title: "Proposals: Proposing Edits",
     description: <MarkdownRender text={"You can even change parent and children nodes by clicking on this icon."} />,
     disabledElements: [...DISABLE_NOTEBOOK_OPTIONS, "00"],
-    targetDefaultProperties: { editable: true },
+    targetDefaultProperties: { editable: true, defaultOpenPart: null },
   },
   {
     localSnapshot: [],
@@ -264,7 +264,13 @@ const PROPOSING_EDITS_STEPS: StepTutorialConfig[] = [
     ),
     disabledElements: [...DISABLE_NOTEBOOK_OPTIONS, "00"],
     enableChildElements: ["00-button-propose-proposal"],
-    targetDefaultProperties: { editable: true, defaultOpenPart: "References" },
+    targetDefaultProperties: {
+      editable: true,
+      defaultOpenPart: "References",
+      corrects: 0,
+      correct: false,
+      changedAt: new Date("2020-01-30T03:58:24.537Z"),
+    },
     isClickeable: true,
   },
 ];

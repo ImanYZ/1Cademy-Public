@@ -524,12 +524,15 @@ const Node = ({
         const firstParentId: any = parents[0];
 
         if (isNew) {
+          console.log("PROPOSE NEW");
           saveProposedChildNode(identifier, "", reason, () => setAbleToPropose(true));
           if (!firstParentId) return;
           notebookRef.current.selectedNode = firstParentId.node;
           nodeBookDispatch({ type: "setSelectedNode", payload: firstParentId.node });
           return;
         }
+        console.log("PROPOSE");
+
         saveProposedImprovement("", reason, () => setAbleToPropose(true));
         notebookRef.current.selectedNode = identifier;
         nodeBookDispatch({ type: "setSelectedNode", payload: identifier });
