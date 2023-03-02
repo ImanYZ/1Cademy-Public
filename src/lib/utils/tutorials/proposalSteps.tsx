@@ -79,7 +79,7 @@ const OVERVIEW_STEPS: StepTutorialConfig[] = [
     description: (
       <MarkdownRender
         text={
-          "You will also have the option to add any of the six types of children nodes which are listed along the right side."
+          "You will also have the option to add any of the six types of child nodes which are listed along the right side."
         }
       />
     ),
@@ -93,7 +93,7 @@ const OVERVIEW_STEPS: StepTutorialConfig[] = [
     description: (
       <MarkdownRender
         text={
-          "It is very important to know that new nodes are always added as a proposed change to an existing node which is the default parent node of the one being created."
+          "It is very important to know that new nodes are always added as a proposed child nodes for an existing node, which if accepted, will be the parent node of the one being created."
         }
       />
     ),
@@ -228,7 +228,9 @@ const PROPOSING_EDITS_STEPS: StepTutorialConfig[] = [
     targetId: "00",
     childTargetId: "00-node-references",
     title: "Proposals: Proposing Edits",
-    description: <MarkdownRender text={"You can add and remove citations."} />,
+    description: (
+      <MarkdownRender text={"You can add and remove citations to references used in the content of the node."} />
+    ),
     disabledElements: [...DISABLE_NOTEBOOK_OPTIONS, "00"],
     targetDefaultProperties: { editable: true },
   },
@@ -258,7 +260,7 @@ const PROPOSING_EDITS_STEPS: StepTutorialConfig[] = [
     description: (
       <MarkdownRender
         text={
-          "Once you are done making the necessary changes, you similarly have the option to propose or cancel on the bottom. "
+          "Let's assume you just made some changes. Now, it's the time to click this button to submit your proposal. Alternatively, you can click the cancel button, to withdraw your proposal."
         }
       />
     ),
@@ -332,7 +334,9 @@ const RECONCILING_PROPOSALS_STEPS: StepTutorialConfig[] = [
     title: "Proposals: Reconciling Proposals",
     description: (
       <MarkdownRender
-        text={"A proposal needs to have a number of approving votes equal to half of the net vote number."}
+        text={
+          "If a proposal gets a number of approving votes equal to half of the net vote on the corresponding node, it will be automatically accepted and the corresponding changes are made on the map."
+        }
       />
     ),
     disabledElements: [...DISABLE_NOTEBOOK_OPTIONS, "00"],
@@ -404,7 +408,7 @@ const RECONCILING_PROPOSALS_STEPS: StepTutorialConfig[] = [
     description: (
       <MarkdownRender
         text={
-          "For example, if a node with 7 upvotes and 1 downvote, a proposal with 4 upvotes and 1 downvote will be approved"
+          "For example, if a node has 7 upvotes and 1 downvote, a proposal with 4 upvotes and 1 downvote will be approved."
         }
       />
     ),
@@ -428,18 +432,17 @@ const RECONCILING_PROPOSALS_STEPS: StepTutorialConfig[] = [
   },
   {
     localSnapshot: [],
-    targetId: "00",
-    childTargetId: "00-node-footer-votes",
+    targetId: "toolbar-pending-list",
+    childTargetId: "toolbar-pending-list",
     title: "Proposals: Reconciling Proposals",
     description: (
       <MarkdownRender
-        text={
-          "A proposal that has been made but not received an adequate number of upvotes is a pending proposal. It will remain there until it is deleted by its creator."
-        }
+        text={"You can see all the proposals that are pending by clicking on the pending list button here."}
       />
     ),
+    anchor: "Portal",
     disabledElements: [...DISABLE_NOTEBOOK_OPTIONS, "00"],
-    tooltipPosition: "bottom",
+    tooltipPosition: "right",
   },
 ];
 console.log(PROPOSING_EDITS_STEPS, FINDING_PREREQUISITES_STEPS);
