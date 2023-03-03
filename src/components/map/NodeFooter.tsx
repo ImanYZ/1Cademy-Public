@@ -440,7 +440,6 @@ const NodeFooter = ({
           alignItems: "center",
           justifyContent: "space-between",
           mt: "10px",
-          marginBottom: openSidebar === "PROPOSALS" || openPart ? "0px" : "10px",
         }}
       >
         <Box className="NodeFooter Left" sx={{ display: "flex", alignItems: "center", gap: "10px" }}>
