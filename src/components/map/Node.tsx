@@ -739,6 +739,7 @@ const Node = ({
                 onHideNodeHandler={hideNodeHandler}
                 disabled={disabled}
                 enableChildElements={enableChildElements}
+                sx={{ float: "right" }}
                 // sx={{ position: "absolute", right: "10px", top: "0px" }}
               />
             )}
@@ -1174,6 +1175,7 @@ const Node = ({
               onHideNodeHandler={hideNodeHandler}
               disabled={disabled}
               enableChildElements={enableChildElements}
+              sx={{ float: "right" }}
               // sx={{ position: "absolute", right: "10px", top: "0px" }}
             />
           )}

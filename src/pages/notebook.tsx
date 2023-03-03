@@ -505,7 +505,13 @@ const Dashboard = ({}: DashboardProps) => {
 
         if (!targetElement) return;
 
-        targetElement.classList.add(stateNodeTutorial.isClickeable ? "tutorial-target-pulse" : "tutorial-target");
+        targetElement.classList.add(
+          stateNodeTutorial.isClickeable
+            ? "tutorial-target-pulse"
+            : stateNodeTutorial.largeTarget
+            ? "tutorial-target-large"
+            : "tutorial-target"
+        );
 
         const { width, height, top, left } = targetElement.getBoundingClientRect();
 
@@ -525,7 +531,13 @@ const Dashboard = ({}: DashboardProps) => {
         const targetElement = document.getElementById(stateNodeTutorial.childTargetId);
         if (!targetElement) return;
 
-        targetElement.classList.add(stateNodeTutorial.isClickeable ? "tutorial-target-pulse" : "tutorial-target");
+        targetElement.classList.add(
+          stateNodeTutorial.isClickeable
+            ? "tutorial-target-pulse"
+            : stateNodeTutorial.largeTarget
+            ? "tutorial-target-large"
+            : "tutorial-target"
+        );
 
         const { offsetTop, offsetLeft } = targetElement;
         const { height: childrenHeight, width: childrenWidth } = targetElement.getBoundingClientRect();

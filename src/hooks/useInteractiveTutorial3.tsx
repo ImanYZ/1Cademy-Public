@@ -42,6 +42,7 @@ export const useInteractiveTutorial = ({ notebookRef }: useInteractiveTutorialPr
       const element = document.getElementById(childTargetId);
       if (element) {
         element.classList.remove("tutorial-target");
+        element.classList.remove("tutorial-target-large");
         element.classList.remove("tutorial-target-pulse");
       }
     }
