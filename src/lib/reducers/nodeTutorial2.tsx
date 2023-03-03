@@ -55,6 +55,7 @@ const getBaseStepConfig = (step: number, max: number) => {
     tooltipPosition: "top",
     // stepLenght: STEPS_LENGHT,
     isClickeable: false,
+    largeTarget: false,
   };
 
   return tt;
@@ -102,6 +103,7 @@ const NODES_STEPS: StepTutorialConfig[] = [
     title: "Introduction",
     description: <MarkdownRender text={"Each node has a body that consists of a title and content."} />,
     disabledElements: [...DISABLE_NOTEBOOK_OPTIONS, "01"],
+    largeTarget: true,
   },
 
   {
@@ -156,6 +158,7 @@ const NODES_STEPS: StepTutorialConfig[] = [
       />
     ),
     disabledElements: [...DISABLE_NOTEBOOK_OPTIONS, "01"],
+    largeTarget: true,
   },
 
   {
@@ -170,6 +173,7 @@ const NODES_STEPS: StepTutorialConfig[] = [
       <MarkdownRender text={"In addition to text, the content may include a small image or a short video."} />
     ),
     disabledElements: [...DISABLE_NOTEBOOK_OPTIONS, "01"],
+    largeTarget: true,
   },
   // --- BASIC NAVIGATION
   //PANNING
