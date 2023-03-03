@@ -2376,7 +2376,7 @@ const Dashboard = ({}: DashboardProps) => {
         referenceLabelsCopy[referenceIdx] = newLabel;
         thisNode.referenceLabels = referenceLabelsCopy;
         return {
-          nodes: { ...graph.nodes, [nodeId]: thisNode },
+          nodes: { ...nodes, [nodeId]: thisNode },
           edges,
         };
       });
