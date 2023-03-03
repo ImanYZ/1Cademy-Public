@@ -54,6 +54,7 @@ import { MemoizedReputationlinessBar } from "@/components/map/Liveliness/Reputat
 import { MemoizedBookmarksSidebar } from "@/components/map/Sidebar/SidebarV2/BookmarksSidebar";
 import { CitationsSidebar } from "@/components/map/Sidebar/SidebarV2/CitationsSidebar";
 import { MemoizedNotificationSidebar } from "@/components/map/Sidebar/SidebarV2/NotificationSidebar";
+import { MemoizedPendingProposalSidebar } from "@/components/map/Sidebar/SidebarV2/PendingProposalSidebar";
 import { MemoizedProposalsSidebar } from "@/components/map/Sidebar/SidebarV2/ProposalsSidebar";
 import { MemoizedSearcherSidebar } from "@/components/map/Sidebar/SidebarV2/SearcherSidebar";
 import { MemoizedUserInfoSidebar } from "@/components/map/Sidebar/SidebarV2/UserInfoSidebar";
@@ -4182,6 +4183,17 @@ const Dashboard = ({}: DashboardProps) => {
                 username={user.uname}
                 open={openSidebar === "NOTIFICATION_SIDEBAR"}
                 onClose={() => setOpenSidebar(null)}
+                sidebarWidth={sidebarWidth()}
+                innerHeight={innerHeight}
+                innerWidth={windowWith}
+              />
+              <MemoizedPendingProposalSidebar
+                theme={settings.theme}
+                openLinkedNode={openLinkedNode}
+                username={user.uname}
+                tagId={user.tagId}
+                open={openSidebar === "PENDING_PROPOSALS"}
+                onClose={() => onCloseSidebar()}
                 sidebarWidth={sidebarWidth()}
                 innerHeight={innerHeight}
                 innerWidth={windowWith}
