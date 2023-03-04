@@ -1,12 +1,11 @@
 import { Box } from "@mui/material";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
-import { NodeTutorialState, StepTutorialConfig, TutorialState } from "src/nodeBookTypes";
+import { TutorialState, TutorialStep, TutorialStepConfig } from "src/nodeBookTypes";
 
 import { RiveComponentMemoized } from "@/components/home/components/temporals/RiveComponentExtended";
 import MarkdownRender from "@/components/Markdown/MarkdownRender";
 
-import { INTERACTIVE_TUTORIAL_NOTEBOOK_NODES } from "../interactiveTutorialNodes";
 // import { FullNodeData, NodeTutorialState, TutorialState } from "../../nodeBookTypes";
 // import { INTERACTIVE_TUTORIAL_NOTEBOOK_NODES } from "../utils/interactiveTutorialNodes";
 import { getBaseStepConfig } from "./tutorial.utils";
@@ -16,14 +15,14 @@ export const INITIAL_NODE_TUTORIAL_STATE: TutorialState = null;
 dayjs.extend(relativeTime);
 // const STEPS_LENGHT = 47; // 65
 
-const DISABLE_NOTEBOOK_OPTIONS = [
-  "TOOLBAR",
-  "SEARCHER_SIDEBAR",
-  "LIVENESS_BAR",
-  "COMMUNITY_LEADERBOARD",
-  "SCROLL_TO_NODE_BUTTON",
-  "FOCUS_MODE_BUTTON",
-];
+// const DISABLE_NOTEBOOK_OPTIONS = [
+//   "TOOLBAR",
+//   "SEARCHER_SIDEBAR",
+//   "LIVENESS_BAR",
+//   "COMMUNITY_LEADERBOARD",
+//   "SCROLL_TO_NODE_BUTTON",
+//   "FOCUS_MODE_BUTTON",
+// ];
 
 /**
 EX: for notebook sections
@@ -45,17 +44,8 @@ Ex for Node id elements to disable
   "01-node-footer-menu"
  */
 
-const NAVIGATION_STEPS: StepTutorialConfig[] = [
+const NAVIGATION_STEPS: TutorialStepConfig[] = [
   {
-    localSnapshot: [
-      {
-        ...INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["00"],
-        nodeChangeType: "modified",
-        open: true,
-        defaultOpenPart: "References",
-      },
-    ],
-    targetId: "MapContent",
     title: "Navigaton: Panninig",
     description: (
       <>
@@ -64,7 +54,7 @@ const NAVIGATION_STEPS: StepTutorialConfig[] = [
             "You can manipulate your field of view by panning the screen by sliding two fingers on the trackpad or clicking, sliding with either a finger or the mouse."
           }
         />
-        <Box width="200px" height="200px" m="0 auto" mt="8px">
+        <Box width="150px" height="150px" m="0 auto" mt="8px">
           <RiveComponentMemoized
             src="rive-tutorial/panning.riv"
             artboard="New Artboard"
@@ -74,14 +64,10 @@ const NAVIGATION_STEPS: StepTutorialConfig[] = [
         </Box>
       </>
     ),
-    disabledElements: [...DISABLE_NOTEBOOK_OPTIONS, "00"],
-    targetDefaultProperties: { editable: true },
-    tooltipPosition: "topLeft",
+    tooltipPosition: "bottomLeft",
     anchor: "Portal",
   },
   {
-    localSnapshot: [],
-    targetId: "00",
     title: "Navigaton: Zoom In",
     description: (
       <MarkdownRender
@@ -90,24 +76,22 @@ const NAVIGATION_STEPS: StepTutorialConfig[] = [
         }
       />
     ),
-    disabledElements: [...DISABLE_NOTEBOOK_OPTIONS, "00"],
-    targetDefaultProperties: { editable: true },
+    tooltipPosition: "bottomLeft",
+    anchor: "Portal",
   },
   {
-    localSnapshot: [],
-    targetId: "00",
     title: "Navigaton: Zoom Out",
     description: (
       <MarkdownRender
         text={"To zoom out, you can slide to fingers toward each other on the track or press control (command Mac) -"}
       />
     ),
-    disabledElements: [...DISABLE_NOTEBOOK_OPTIONS, "00"],
-    targetDefaultProperties: { editable: true },
+    tooltipPosition: "bottomLeft",
+    anchor: "Portal",
   },
 ];
 
-export const NAVIGATION_STEPS_COMPLETE: NodeTutorialState[] = [...NAVIGATION_STEPS].map((c, i, s) => {
+export const NAVIGATION_STEPS_COMPLETE: TutorialStep[] = [...NAVIGATION_STEPS].map((c, i, s) => {
   return {
     ...getBaseStepConfig(i + 1, s.length),
     ...c,

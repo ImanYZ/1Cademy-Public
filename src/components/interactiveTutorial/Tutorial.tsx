@@ -4,20 +4,16 @@ import React, { useMemo, useRef } from "react";
 import { gray50, gray200, gray700, gray800 } from "@/pages/home";
 
 import { TargetClientRect } from "../../hooks/useInteractiveTutorial";
-import { TutorialState } from "../../nodeBookTypes";
+import { TutorialStep } from "../../nodeBookTypes";
 
 const TOOLTIP_OFFSET = 40;
 
 type TutorialProps = {
-  tutorialState: TutorialState;
-
-  // dispatchNodeTutorial: Dispatch<SetStep>;
-  // onChangeStep: (step: SetStepType) => void;
+  tutorialState: TutorialStep | null;
   onNextStep: () => void;
   onPreviousStep: () => void;
   targetClientRect: TargetClientRect;
   handleCloseProgressBarMenu: () => void;
-  // onUpdateNode: (tutorialKey: TutorialType, tutorialUpdated: UserTutorial) => void;
   onSkip: () => void;
   onFinalize: () => void;
   stepsLength: number;
@@ -78,6 +74,12 @@ export const Tutorial = ({
   if (!tutorialState.currentStepName) return null;
   console.log(2);
 
+  let location = { top: "10px", bottom: "10px", left: "10px", right: "10px" };
+
+  if (tutorialState.tooltipPosition === "topLeft") location = { ...location, bottom: "", right: "" };
+  else if (tutorialState.tooltipPosition === "topRight") location = { ...location, bottom: "", left: "" };
+  else if (tutorialState.tooltipPosition === "bottomLeft") location = { ...location, top: "", right: "" };
+  else if (tutorialState.tooltipPosition === "bottomRight") location = { ...location, top: "", left: "" };
   if (
     targetClientRect.top === 0 &&
     targetClientRect.left === 0 &&
@@ -88,12 +90,10 @@ export const Tutorial = ({
       <div
         style={{
           position: "absolute",
-          top: "10px",
-          bottom: tutorialState.tooltipPosition === "topLeft" ? undefined : "10px",
-          left: "10px",
-          right: tutorialState.tooltipPosition === "topLeft" ? undefined : "10px",
+          ...location,
           backgroundColor: "#55555500",
-          transition: "top 1s ease-out,left 1s ease-out",
+          height: "auto",
+          transition: "top 1s ease-out,bottom 1s ease-out,left 1s ease-out,rigth 1s ease-out,height 1s ease-out",
           boxSizing: "border-box",
           display: "grid",
           placeItems: "center",
@@ -277,7 +277,7 @@ export const Tutorial = ({
                   backgroundColor: theme => (theme.palette.mode === "dark" ? gray200 : gray700),
                 },
               }}
-              disabled={tutorialState.isClickeable}
+              // disabled={tutorialState.isClickeable}
             >
               Next
             </Button>

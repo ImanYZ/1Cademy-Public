@@ -496,6 +496,7 @@ const Dashboard = ({}: DashboardProps) => {
   // }, [currentStep, graph.nodes, setTargetClientRect]);
 
   useEffect(() => {
+    if (!nodeBookState.selectedNode) return;
     if (!stateNodeTutorial) return setTargetClientRect({ width: 0, height: 0, top: 0, left: 0 });
     let timeoutId: any;
     if (stateNodeTutorial.anchor) {
@@ -516,20 +517,20 @@ const Dashboard = ({}: DashboardProps) => {
 
         const { width, height, top, left } = targetElement.getBoundingClientRect();
 
-        console.log({ width, height, top, left });
         setTargetClientRect({ width, height, top, left });
       }, stateNodeTutorial.targetDelay);
     } else {
       console.log("----------------- detect client react in interactive map");
 
-      const thisNode = graph.nodes[stateNodeTutorial.targetId];
+      const thisNode = graph.nodes[nodeBookState.selectedNode] || graph.nodes[Object.keys(graph.nodes)[0]];
       if (!thisNode) return;
 
       let { top, left, width = NODE_WIDTH, height = 0 } = thisNode;
       let offsetChildTop = 0;
       let offsetChildLeft = 0;
       if (stateNodeTutorial.childTargetId) {
-        const targetElement = document.getElementById(stateNodeTutorial.childTargetId);
+        const targetElementId = nodeBookState.selectedNode || Object.keys(graph.nodes)[0] || "r98BjyFDCe4YyLA3U8ZE";
+        const targetElement = document.getElementById(`${targetElementId}-${stateNodeTutorial.childTargetId}`);
         if (!targetElement) return;
 
         targetElement.classList.add(
@@ -559,7 +560,7 @@ const Dashboard = ({}: DashboardProps) => {
         if (timeoutId) clearTimeout(timeoutId);
       };
     }
-  }, [stateNodeTutorial, graph.nodes, setTargetClientRect]);
+  }, [stateNodeTutorial, graph.nodes, setTargetClientRect, nodeBookState.selectedNode]);
 
   const onCompleteWorker = useCallback(() => {
     if (!nodeBookState.selectedNode) return;
@@ -796,11 +797,11 @@ const Dashboard = ({}: DashboardProps) => {
   }, [firstScrollToNode, graph.nodes, nodeBookDispatch, openNodeHandler, scrollToNode]);
 
   useEffect(() => {
+    console.log("USE_EFFECT", "get-user-tutorial", userTutorialLoaded);
     devLog("USE_EFFECT", { userTutorialLoaded, user });
     if (!user) return;
-    if (userTutorialLoaded) return;
+    // if (userTutorialLoaded) return;
 
-    devLog("USE_EFFECT", "get-user-tutorial");
     const getTutorialState = async () => {
       const tutorialRef = doc(db, "userTutorial", user.uname);
       const tutorialDoc = await getDoc(tutorialRef);
@@ -810,10 +811,12 @@ const Dashboard = ({}: DashboardProps) => {
       if (tutorialDoc.exists()) {
         const tutorial = tutorialDoc.data() as UserTutorials;
         setUserTutorial(prev => ({ ...prev, ...tutorial }));
-        if (tutorial.nodes.done) return setUserTutorialLoaded(true);
-        if (tutorial.nodes.skipped) return setUserTutorialLoaded(true);
-        setCurrentTutorial("NODES");
-        // // onChangeStep(tutorial.nodes.currentStep);
+        if (!tutorial.navigation.done && !tutorial.navigation.skipped) {
+          setCurrentTutorial("NAVIGATION");
+        } else if (!tutorial.nodes.done && !tutorial.nodes.skipped) {
+          setCurrentTutorial("NODES");
+        }
+        return setUserTutorialLoaded(true);
       } else {
         console.log("will-start");
         setCurrentTutorial("NAVIGATION");
@@ -1045,9 +1048,9 @@ const Dashboard = ({}: DashboardProps) => {
     if (!db) return;
     if (!user?.uname) return;
     if (!allTagsLoaded) return;
-    if (!userTutorialLoaded) return;
-    if (!userTutorial.nodes.done && !userTutorial.nodes.skipped) return;
-    if (stateNodeTutorial) return;
+    // if (!userTutorialLoaded) return;
+    // if (!userTutorial.nodes.done && !userTutorial.nodes.skipped) return;
+    // if (stateNodeTutorial) return;
 
     devLog("USE_EFFECT", "nodes synchronization");
 
@@ -1093,121 +1096,121 @@ const Dashboard = ({}: DashboardProps) => {
     // this is only set up when worker doesn't make any change when a step change
     if (!stateNodeTutorial) return;
     if (currentTutorial !== "NODES") return;
-    if (!stateNodeTutorial.forceScrollToNode) return;
+    // if (!stateNodeTutorial.forceScrollToNode) return;
 
     scrollToNode(stateNodeTutorial.targetId);
   }, [currentTutorial, scrollToNode, stateNodeTutorial]);
 
-  useEffect(() => {
-    // here we set up the default properties of a node in TUTORIAL
+  // useEffect(() => {
+  //   // here we set up the default properties of a node in TUTORIAL
 
-    if (currentTutorial !== "PROPOSAL") return;
-    if (!stateNodeTutorial) return;
-    if (!stateNodeTutorial.targetDefaultProperties) return;
+  //   if (currentTutorial !== "PROPOSAL") return;
+  //   if (!stateNodeTutorial) return;
+  //   // if (!stateNodeTutorial.targetDefaultProperties) return;
 
-    // if (stateNodeTutorial.currentStepName === 17) {
-    //   debugger;
-    // }
-    const thisNode = graph.nodes[stateNodeTutorial.targetId];
-    if (!thisNode) return;
+  //   // if (stateNodeTutorial.currentStepName === 17) {
+  //   //   debugger;
+  //   // }
+  //   const thisNode = graph.nodes[stateNodeTutorial.targetId];
+  //   if (!thisNode) return;
 
-    const keys = Object.keys(stateNodeTutorial.targetDefaultProperties) as (keyof FullNodeData)[];
+  //   const keys = Object.keys(stateNodeTutorial.targetDefaultProperties) as (keyof FullNodeData)[];
 
-    const isEqualsProperties = (key: keyof FullNodeData) => {
-      // console.log(1, "SNP");
-      if (!stateNodeTutorial.targetDefaultProperties) return true;
-      // console.log(2, "SNP", thisNode, stateNodeTutorial?.targetDefaultProperties[key]);
-      // if (!thisNode[key]) return true;
-      // console.log(3, "SNP");
-      // if (!stateNodeTutorial?.targetDefaultProperties[key]) return;
-      // console.log(3, "SNP", thisNode[key], stateNodeTutorial?.targetDefaultProperties[key]);
+  //   const isEqualsProperties = (key: keyof FullNodeData) => {
+  //     // console.log(1, "SNP");
+  //     if (!stateNodeTutorial.targetDefaultProperties) return true;
+  //     // console.log(2, "SNP", thisNode, stateNodeTutorial?.targetDefaultProperties[key]);
+  //     // if (!thisNode[key]) return true;
+  //     // console.log(3, "SNP");
+  //     // if (!stateNodeTutorial?.targetDefaultProperties[key]) return;
+  //     // console.log(3, "SNP", thisNode[key], stateNodeTutorial?.targetDefaultProperties[key]);
 
-      return thisNode[key] === stateNodeTutorial?.targetDefaultProperties[key];
-    };
-    const isEquals = keys.some(isEqualsProperties);
-    console.log("SNP", isEquals);
+  //     return thisNode[key] === stateNodeTutorial?.targetDefaultProperties[key];
+  //   };
+  //   const isEquals = keys.some(isEqualsProperties);
+  //   console.log("SNP", isEquals);
 
-    if (isEquals) return;
+  //   if (isEquals) return;
 
-    setNodeParts(stateNodeTutorial.targetId, node => ({ ...node, ...stateNodeTutorial.targetDefaultProperties }));
-  }, [stateNodeTutorial, currentTutorial, setNodeParts, graph.nodes]);
+  //   setNodeParts(stateNodeTutorial.targetId, node => ({ ...node, ...stateNodeTutorial.targetDefaultProperties }));
+  // }, [stateNodeTutorial, currentTutorial, setNodeParts, graph.nodes]);
 
-  useEffect(() => {
-    // Local Snapshot used only in interactive tutorial
-    if (!stateNodeTutorial) return;
+  // useEffect(() => {
+  //   // Local Snapshot used only in interactive tutorial
+  //   if (!stateNodeTutorial) return;
 
-    devLog("USE_EFFECT", "interactive-tutorial");
+  //   devLog("USE_EFFECT", "interactive-tutorial");
 
-    if (shouldResetGraph.current) {
-      g.current = createGraph();
-      setGraph({
-        nodes: {},
-        edges: {},
-      });
-      shouldResetGraph.current = false;
-    }
+  //   if (shouldResetGraph.current) {
+  //     g.current = createGraph();
+  //     setGraph({
+  //       nodes: {},
+  //       edges: {},
+  //     });
+  //     shouldResetGraph.current = false;
+  //   }
 
-    const fullNodes = stateNodeTutorial.localSnapshot;
+  //   const fullNodes = stateNodeTutorial.localSnapshot;
 
-    const visibleFullNodes: FullNodeData[] = fullNodes.filter(cur => cur.visible || cur.nodeChangeType === "modified");
-    devLog("3: TUTORIAL: visibleFullNodes", visibleFullNodes);
-    setAllNodes(oldAllNodes => mergeAllNodes(fullNodes, oldAllNodes));
-    devLog("4: TUTORIAL: setAllNodes");
-    setGraph(({ nodes, edges }) => {
-      const visibleFullNodesMerged = visibleFullNodes.map(cur => {
-        const tmpNode: FullNodeData = nodes[cur.node];
-        if (tmpNode) {
-          if (tmpNode.hasOwnProperty("simulated")) {
-            delete tmpNode["simulated"];
-          }
-          if (tmpNode.hasOwnProperty("isNew")) {
-            delete tmpNode["isNew"];
-          }
-        }
+  //   const visibleFullNodes: FullNodeData[] = fullNodes.filter(cur => cur.visible || cur.nodeChangeType === "modified");
+  //   devLog("3: TUTORIAL: visibleFullNodes", visibleFullNodes);
+  //   setAllNodes(oldAllNodes => mergeAllNodes(fullNodes, oldAllNodes));
+  //   devLog("4: TUTORIAL: setAllNodes");
+  //   setGraph(({ nodes, edges }) => {
+  //     const visibleFullNodesMerged = visibleFullNodes.map(cur => {
+  //       const tmpNode: FullNodeData = nodes[cur.node];
+  //       if (tmpNode) {
+  //         if (tmpNode.hasOwnProperty("simulated")) {
+  //           delete tmpNode["simulated"];
+  //         }
+  //         if (tmpNode.hasOwnProperty("isNew")) {
+  //           delete tmpNode["isNew"];
+  //         }
+  //       }
 
-        const hasParent = cur.parents.length;
-        // IMPROVE: we need to pass the parent which open the node
-        // to use his current position
-        // in this case we are checking first parent
-        // if this doesn't exist will set top:0 and left: 0 + NODE_WIDTH + COLUMN_GAP
-        const nodeParent = hasParent ? nodes[cur.parents[0].node] : null;
-        const topParent = nodeParent?.top ?? 0;
+  //       const hasParent = cur.parents.length;
+  //       // IMPROVE: we need to pass the parent which open the node
+  //       // to use his current position
+  //       // in this case we are checking first parent
+  //       // if this doesn't exist will set top:0 and left: 0 + NODE_WIDTH + COLUMN_GAP
+  //       const nodeParent = hasParent ? nodes[cur.parents[0].node] : null;
+  //       const topParent = nodeParent?.top ?? 0;
 
-        const leftParent = nodeParent?.left ?? 0;
+  //       const leftParent = nodeParent?.left ?? 0;
 
-        return {
-          ...cur,
-          left: tmpNode?.left ?? leftParent + NODE_WIDTH + COLUMN_GAP,
-          top: tmpNode?.top ?? topParent,
-        };
-      });
-      devLog("5: TUTORIAL:user Nodes Snapshot:visible Full Nodes Merged", visibleFullNodesMerged);
-      const { newNodes, newEdges } = fillDagre(
-        g.current,
-        visibleFullNodesMerged,
-        nodes,
-        edges,
-        settings.showClusterOptions,
-        allTags
-      );
+  //       return {
+  //         ...cur,
+  //         left: tmpNode?.left ?? leftParent + NODE_WIDTH + COLUMN_GAP,
+  //         top: tmpNode?.top ?? topParent,
+  //       };
+  //     });
+  //     devLog("5: TUTORIAL:user Nodes Snapshot:visible Full Nodes Merged", visibleFullNodesMerged);
+  //     const { newNodes, newEdges } = fillDagre(
+  //       g.current,
+  //       visibleFullNodesMerged,
+  //       nodes,
+  //       edges,
+  //       settings.showClusterOptions,
+  //       allTags
+  //     );
 
-      if (!Object.keys(newNodes).length) {
-        setNoNodesFoundMessage(true);
-      }
+  //     if (!Object.keys(newNodes).length) {
+  //       setNoNodesFoundMessage(true);
+  //     }
 
-      return { nodes: newNodes, edges: newEdges };
-    });
-    setOpenProgressBarMenu(true);
-  }, [
-    allTags,
-    settings.showClusterOptions,
-    stateNodeTutorial,
-    notebookChanged,
-    userTutorial.nodes.done,
-    userTutorial.nodes.skipped,
-    userTutorial.nodes.currentStep,
-    setCurrentTutorial,
-  ]);
+  //     return { nodes: newNodes, edges: newEdges };
+  //   });
+  //   setOpenProgressBarMenu(true);
+  // }, [
+  //   allTags,
+  //   settings.showClusterOptions,
+  //   stateNodeTutorial,
+  //   notebookChanged,
+  //   userTutorial.nodes.done,
+  //   userTutorial.nodes.skipped,
+  //   userTutorial.nodes.currentStep,
+  //   setCurrentTutorial,
+  // ]);
 
   useEffect(() => {
     if (!db) return;
@@ -1835,7 +1838,7 @@ const Dashboard = ({}: DashboardProps) => {
     nodeId => {
       if (notebookRef.current.choosingNode || !user) return;
       console.log({ isPlayingTheTutorialRef: isPlayingTheTutorialRef.current });
-      if (isPlayingTheTutorialRef.current) return;
+      // if (isPlayingTheTutorialRef.current) return;
 
       setGraph(graph => {
         (async () => {
@@ -1917,7 +1920,8 @@ const Dashboard = ({}: DashboardProps) => {
       done: true,
     };
     const userTutorialUpdated: UserTutorials = { ...userTutorial, [keyTutorial]: tutorialUpdated };
-    setCurrentTutorial(null);
+    if (currentTutorial === "NAVIGATION") setCurrentTutorial("NODES");
+    else setCurrentTutorial(null);
     setOpenSidebar(null);
     setUserTutorial(userTutorialUpdated);
 
@@ -2046,7 +2050,7 @@ const Dashboard = ({}: DashboardProps) => {
        * create userNodeLog
        */
 
-      if (isPlayingTheTutorialRef.current) return;
+      // if (isPlayingTheTutorialRef.current) return;
 
       setGraph(graph => {
         (async () => {
@@ -2125,7 +2129,6 @@ const Dashboard = ({}: DashboardProps) => {
       });
     },
     [
-      isPlayingTheTutorialRef,
       db,
       user?.uname,
       user?.fName,
@@ -2238,7 +2241,7 @@ const Dashboard = ({}: DashboardProps) => {
 
       notebookRef.current.selectedNode = nodeId;
 
-      if (isPlayingTheTutorialRef.current) return;
+      // if (isPlayingTheTutorialRef.current) return;
 
       lastNodeOperation.current = "ToggleNode";
       setGraph(({ nodes: oldNodes, edges }) => {
@@ -4072,6 +4075,7 @@ const Dashboard = ({}: DashboardProps) => {
               <Box>
                 <Button onClick={() => console.log("DAGGER", g)}>Dagre</Button>
                 <Button onClick={() => console.log(nodeBookState)}>nodeBookState</Button>
+                <Button onClick={() => console.log(notebookRef)}>notebookRef</Button>
                 <Button onClick={() => console.log(user)}>user</Button>
                 <Button onClick={() => console.log(settings)}>setting</Button>
                 <Button onClick={() => console.log(reputation)}>reputation</Button>
@@ -4163,7 +4167,7 @@ const Dashboard = ({}: DashboardProps) => {
                 windowHeight={windowHeight}
                 onlineUsers={onlineUsers}
                 usersOnlineStatusLoaded={usersOnlineStatusLoaded}
-                disableToolbar={Boolean(stateNodeTutorial && stateNodeTutorial.disabledElements.includes("TOOLBAR"))}
+                disableToolbar={Boolean(["TutorialStep"].includes("TOOLBAR"))}
                 setCurrentTutorial={setCurrentTutorial}
                 userTutorial={userTutorial}
               />
@@ -4187,8 +4191,8 @@ const Dashboard = ({}: DashboardProps) => {
                 sidebarWidth={sidebarWidth()}
                 innerHeight={innerHeight}
                 innerWidth={windowWith}
-                disableSearcher={Boolean(stateNodeTutorial?.disabledElements.includes("SEARCHER_SIDEBAR"))}
-                enableElements={stateNodeTutorial?.enableChildElements ?? []}
+                disableSearcher={Boolean(["TT"].includes("SEARCHER_SIDEBAR"))}
+                enableElements={[]}
               />
               <MemoizedNotificationSidebar
                 theme={settings.theme}
@@ -4271,9 +4275,7 @@ const Dashboard = ({}: DashboardProps) => {
           <MemoizedCommunityLeaderboard
             userTagId={user?.tagId ?? ""}
             pendingProposalsLoaded={pendingProposalsLoaded}
-            disabled={Boolean(
-              stateNodeTutorial && stateNodeTutorial.disabledElements.includes("COMMUNITY_LEADERBOARD")
-            )}
+            disabled={Boolean(["TT"].includes("COMMUNITY_LEADERBOARD"))}
           />
 
           {isQueueWorking && (
@@ -4301,7 +4303,7 @@ const Dashboard = ({}: DashboardProps) => {
               <IconButton
                 color="secondary"
                 onClick={onScrollToLastNode}
-                disabled={stateNodeTutorial?.disabledElements.includes("SCROLL_TO_NODE_BUTTON")}
+                disabled={["TT"].includes("SCROLL_TO_NODE_BUTTON")}
                 sx={{
                   position: "fixed",
                   top: {
@@ -4428,7 +4430,7 @@ const Dashboard = ({}: DashboardProps) => {
               onClick={() => {
                 setFocusView({ isEnabled: true, selectedNode: nodeBookState.selectedNode || "" });
               }}
-              disabled={stateNodeTutorial?.disabledElements.includes("FOCUS_MODE_BUTTON")}
+              disabled={["TT"].includes("FOCUS_MODE_BUTTON")}
               sx={{
                 position: "fixed",
                 top: {
@@ -4469,7 +4471,7 @@ const Dashboard = ({}: DashboardProps) => {
               openUserInfoSidebar={openUserInfoSidebar}
               onlineUsers={onlineUsers}
               db={db}
-              disabled={Boolean(stateNodeTutorial && stateNodeTutorial.disabledElements.includes("LIVENESS_BAR"))}
+              disabled={Boolean(["TT"].includes("LIVENESS_BAR"))}
             />
           )}
 
@@ -4480,7 +4482,7 @@ const Dashboard = ({}: DashboardProps) => {
               onlineUsers={onlineUsers}
               db={db}
               user={user}
-              disabled={Boolean(stateNodeTutorial && stateNodeTutorial.disabledElements.includes("LIVENESS_BAR"))}
+              disabled={Boolean(["TT"].includes("LIVENESS_BAR"))}
             />
           )}
 
@@ -4577,8 +4579,8 @@ const Dashboard = ({}: DashboardProps) => {
                   openSidebar={openSidebar}
                   setOperation={setOperation}
                   openUserInfoSidebar={openUserInfoSidebar}
-                  disabledNodes={stateNodeTutorial?.disabledElements ?? []}
-                  enableChildElements={stateNodeTutorial?.enableChildElements ?? []}
+                  disabledNodes={[]}
+                  enableChildElements={[]}
                   showProposeTutorial={!(userTutorial.proposal.done || userTutorial.proposal.skipped)}
                   setCurrentTutorial={setCurrentTutorial}
                 />

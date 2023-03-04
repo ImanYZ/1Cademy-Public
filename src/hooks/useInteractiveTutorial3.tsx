@@ -1,12 +1,10 @@
 import { MutableRefObject, ReactNode, useCallback, useEffect, useRef, useState } from "react";
 
 import { useNodeBook } from "@/context/NodeBookContext";
-import { SEARCHER_STEPS_COMPLETE } from "@/lib/reducers/searcherTutorial";
 import { NAVIGATION_STEPS_COMPLETE } from "@/lib/utils/tutorials/navigationSteps";
 
 import { NODES_STEPS_COMPLETE } from "../lib/reducers/nodeTutorial2";
-import { PROPOSAL_STEPS_COMPLETE } from "../lib/utils/tutorials/proposalSteps";
-import { NodeTutorialState, TNodeBookState } from "../nodeBookTypes";
+import { TNodeBookState, TutorialStep } from "../nodeBookTypes";
 import { TutorialType } from "../pages/notebook";
 import useEventListener from "./useEventListener";
 
@@ -34,20 +32,24 @@ export const useInteractiveTutorial = ({ notebookRef }: useInteractiveTutorialPr
   const idxCurrentStepRef = useRef(-1);
   const { nodeBookDispatch } = useNodeBook();
   const defaultSelectedNode = useRef<string | null>(null);
-  const [stateNodeTutorial, setStateNodeTutorial] = useState<NodeTutorialState | null>(null);
-  const [steps, setSteps] = useState<NodeTutorialState[]>([]);
+  const [stateNodeTutorial, setStateNodeTutorial] = useState<TutorialStep | null>(null);
+  const [steps, setSteps] = useState<TutorialStep[]>([]);
   const [currentTutorial, setCurrentTutorial] = useState<TutorialType>(null);
 
-  const removeStyleFromTarget = (childTargetId: string) => {
-    if (childTargetId) {
-      const element = document.getElementById(childTargetId);
-      if (element) {
-        element.classList.remove("tutorial-target");
-        element.classList.remove("tutorial-target-large");
-        element.classList.remove("tutorial-target-pulse");
+  const removeStyleFromTarget = useCallback(
+    (childTargetId: string) => {
+      console.log(`ssssssss  ${notebookRef.current.selectedNode}-${childTargetId}`);
+      if (childTargetId) {
+        const element = document.getElementById(`${notebookRef.current.selectedNode}-${childTargetId}`);
+        if (element) {
+          element.classList.remove("tutorial-target");
+          element.classList.remove("tutorial-target-large");
+          element.classList.remove("tutorial-target-pulse");
+        }
       }
-    }
-  };
+    },
+    [notebookRef]
+  );
 
   useEffect(() => {
     if (!currentTutorial) {
@@ -62,20 +64,20 @@ export const useInteractiveTutorial = ({ notebookRef }: useInteractiveTutorialPr
       return setSteps([]);
     }
 
-    let newSteps: NodeTutorialState[] = [];
+    let newSteps: TutorialStep[] = [];
     if (currentTutorial === "NODES") {
       console.log("FILL NODES");
       newSteps = NODES_STEPS_COMPLETE;
     }
-    if (currentTutorial === "SEARCHER") {
-      console.log("FILL SEARCHER");
-      newSteps = SEARCHER_STEPS_COMPLETE;
-    }
-    if (currentTutorial === "PROPOSAL") {
-      console.log("FILL PROPOSAL");
-      newSteps = PROPOSAL_STEPS_COMPLETE;
-      //  setSteps(SEARCHER_STEPS_COMPLETE);
-    }
+    // if (currentTutorial === "SEARCHER") {
+    //   console.log("FILL SEARCHER");
+    //   newSteps = SEARCHER_STEPS_COMPLETE;
+    // }
+    // if (currentTutorial === "PROPOSAL") {
+    //   console.log("FILL PROPOSAL");
+    //   newSteps = PROPOSAL_STEPS_COMPLETE;
+    //   //  setSteps(SEARCHER_STEPS_COMPLETE);
+    // }
     if (currentTutorial === "NAVIGATION") {
       console.log("NAVIGATION");
       newSteps = NAVIGATION_STEPS_COMPLETE;
@@ -87,10 +89,10 @@ export const useInteractiveTutorial = ({ notebookRef }: useInteractiveTutorialPr
     const selectedStep = newSteps[idxCurrentStepRef.current];
     setStateNodeTutorial(selectedStep);
     isPlayingTheTutorialRef.current = true;
-    notebookRef.current.selectedNode = selectedStep.targetId;
-    nodeBookDispatch({ type: "setSelectedNode", payload: selectedStep.targetId });
+    // notebookRef.current.selectedNode = selectedStep.targetId;
+    // nodeBookDispatch({ type: "setSelectedNode", payload: selectedStep.targetId });
     setSteps(newSteps);
-  }, [currentTutorial, nodeBookDispatch, notebookRef, steps.length]);
+  }, [currentTutorial, nodeBookDispatch, notebookRef, removeStyleFromTarget, steps.length]);
 
   useEffect(() => {
     if (!defaultSelectedNode.current) defaultSelectedNode.current = notebookRef.current.selectedNode;
@@ -118,10 +120,10 @@ export const useInteractiveTutorial = ({ notebookRef }: useInteractiveTutorialPr
       });
       isPlayingTheTutorialRef.current = true;
 
-      notebookRef.current.selectedNode = selectedStep.targetId;
-      nodeBookDispatch({ type: "setSelectedNode", payload: selectedStep.targetId });
+      // notebookRef.current.selectedNode = selectedStep.targetId;
+      // nodeBookDispatch({ type: "setSelectedNode", payload: selectedStep.targetId });
     }
-  }, [nodeBookDispatch, notebookRef, steps]);
+  }, [removeStyleFromTarget, steps]);
 
   const onPreviousStep = useCallback(() => {
     if (idxCurrentStepRef.current === 0) return;
@@ -136,9 +138,9 @@ export const useInteractiveTutorial = ({ notebookRef }: useInteractiveTutorialPr
     });
     isPlayingTheTutorialRef.current = true;
 
-    notebookRef.current.selectedNode = selectedStep.targetId;
-    nodeBookDispatch({ type: "setSelectedNode", payload: selectedStep.targetId });
-  }, [nodeBookDispatch, notebookRef, steps]);
+    // notebookRef.current.selectedNode = selectedStep.targetId;
+    // nodeBookDispatch({ type: "setSelectedNode", payload: selectedStep.targetId });
+  }, [removeStyleFromTarget, steps]);
 
   useEventListener({
     stepId: stateNodeTutorial?.childTargetId ?? stateNodeTutorial?.targetId,

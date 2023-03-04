@@ -3,7 +3,7 @@ import relativeTime from "dayjs/plugin/relativeTime";
 
 import MarkdownRender from "@/components/Markdown/MarkdownRender";
 
-import { NodeTutorialState, StepTutorialConfig, TutorialState } from "../../../nodeBookTypes";
+import { StepTutorialConfig, TutorialState, TutorialStep } from "../../../nodeBookTypes";
 import { INTERACTIVE_TUTORIAL_NOTEBOOK_NODES } from "../interactiveTutorialNodes";
 // import { FullNodeData, NodeTutorialState, TutorialState } from "../../nodeBookTypes";
 // import { INTERACTIVE_TUTORIAL_NOTEBOOK_NODES } from "../utils/interactiveTutorialNodes";
@@ -446,7 +446,7 @@ const RECONCILING_PROPOSALS_STEPS: StepTutorialConfig[] = [
   },
 ];
 console.log(PROPOSING_EDITS_STEPS, FINDING_PREREQUISITES_STEPS);
-export const PROPOSAL_STEPS_COMPLETE: NodeTutorialState[] = [
+export const PROPOSAL_STEPS_COMPLETE: TutorialStep[] = [
   ...OVERVIEW_STEPS,
   ...FINDING_PREREQUISITES_STEPS,
   ...PROPOSING_EDITS_STEPS,

@@ -235,14 +235,15 @@ export interface NodeTutorialState {
 }
 
 export type TutorialStepConfig = {
-  targetId: string;
+  targetId?: string;
   childTargetId?: string;
   title: string;
   description: React.ReactNode;
-  anchor: string;
-  tooltipPosition?: "top" | "bottom" | "left" | "right";
+  anchor?: string;
+  tooltipPosition?: "top" | "bottom" | "left" | "right" | "topLeft" | "topRight" | "bottomLeft" | "bottomRight";
   targetDelay?: number;
   largeTarget?: boolean;
+  isClickeable?: boolean;
 };
 
 export type TutorialStep = {
@@ -254,9 +255,10 @@ export type TutorialStep = {
   currentStepName: number;
   nextStepName: number;
   previosStepName: number;
-  tooltipPosition: "top" | "bottom" | "left" | "right";
+  tooltipPosition: "top" | "bottom" | "left" | "right" | "topLeft" | "topRight" | "bottomLeft" | "bottomRight";
   targetDelay?: number;
   largeTarget?: boolean;
+  isClickeable?: boolean;
 };
 
 export type StepReducerPayload = {
