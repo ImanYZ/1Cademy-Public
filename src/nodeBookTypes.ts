@@ -233,15 +233,35 @@ export interface NodeTutorialState {
   targetDefaultProperties?: Partial<FullNodeData>;
   largeTarget?: boolean;
 }
+
+export type TutorialStepConfig = {
+  targetId: string;
+  childTargetId?: string;
+  title: string;
+  description: React.ReactNode;
+  anchor: string;
+  tooltipPosition?: "top" | "bottom" | "left" | "right";
+  targetDelay?: number;
+  largeTarget?: boolean;
+};
+
+export type TutorialStep = {
+  targetId: string;
+  childTargetId?: string;
+  title: string;
+  description: React.ReactNode;
+  anchor: string;
+  currentStepName: number;
+  nextStepName: number;
+  previosStepName: number;
+  tooltipPosition: "top" | "bottom" | "left" | "right";
+  targetDelay?: number;
+  largeTarget?: boolean;
+};
+
 export type StepReducerPayload = {
   callback?: () => void;
 };
-// export type SetStep = {
-//   type: SetStepType;
-//   payload: StepReducerPayload;
-// };
-
-// export type DispatchNodeTutorialAction = SetStep;
 
 export type UserNodesData = {
   // "firstVisit": Timestamp,//CHECK
