@@ -41,7 +41,7 @@ import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import { collection, getDocs, getFirestore, query, where } from "firebase/firestore";
 import { useRouter } from "next/router";
-import React, { ReactNode, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import React, { MutableRefObject, ReactNode, useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { useNodeBook } from "@/context/NodeBookContext";
 import { orange25, orange200 } from "@/pages/home";
@@ -49,7 +49,7 @@ import { OpenSidebar, TutorialType } from "@/pages/notebook";
 
 import { User } from "../../knowledgeTypes";
 import shortenNumber from "../../lib/utils/shortenNumber";
-import { FullNodeData, OpenPart } from "../../nodeBookTypes";
+import { FullNodeData, OpenPart, TNodeBookState } from "../../nodeBookTypes";
 import LeaderboardChip from "../LeaderboardChip";
 import { MemoizedHeadlessLeaderboardChip } from "../map/FocusedNotebook/HeadlessLeaderboardChip";
 import NodeTypeIcon from "../NodeTypeIcon";
@@ -66,6 +66,7 @@ type NodeFooterProps = {
   addVideo: boolean;
   setAddVideo: (addVideo: boolean) => void;
   identifier: any;
+  notebookRef: MutableRefObject<TNodeBookState>;
   activeNode: any;
   citationsSelected: any;
   proposalsSelected: any;
@@ -132,6 +133,7 @@ const NodeFooter = ({
   addVideo,
   setAddVideo,
   identifier,
+  notebookRef,
   // activeNode,
   // proposalsSelected,
   // acceptedProposalsSelected,
@@ -405,18 +407,23 @@ const NodeFooter = ({
   }, [_institutions]);
 
   const openContributorsSection = useCallback(() => {
-    if (nodeBookState.contributorsNodeId != identifier) {
+    if (notebookRef.current.contributorsNodeId != identifier) {
+      notebookRef.current.contributorsNodeId = { nodeId: identifier, showContributors: true };
       nodeBookDispatch({
         type: "setContributorsNodeId",
         payload: { nodeId: identifier, showContributors: true },
       });
     } else {
+      notebookRef.current.contributorsNodeId = {
+        nodeId: identifier,
+        showContributors: !notebookRef.current.showContributors,
+      };
       nodeBookDispatch({
         type: "setContributorsNodeId",
-        payload: { nodeId: identifier, showContributors: !nodeBookState.showContributors },
+        payload: { nodeId: identifier, showContributors: !notebookRef.current.showContributors },
       });
     }
-  }, [nodeBookDispatch, nodeBookState.contributorsNodeId]);
+  }, [nodeBookDispatch]);
 
   const proposeNodeImprovementClick = useCallback(
     (event: any) => {
@@ -425,6 +432,7 @@ const NodeFooter = ({
 
       selectPendingProposals(event);
       setOperation("CancelProposals");
+      notebookRef.current.selectedNode = identifier;
       nodeBookDispatch({ type: "setSelectedNode", payload: identifier });
       proposeNodeImprovement(event, identifier);
     },
