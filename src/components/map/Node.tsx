@@ -556,6 +556,16 @@ const Node = ({
     closeSideBar();
   };
 
+  const proposeNodeImprovementHandler = useCallback(
+    (event: any, nodeId: string = "") => {
+      setOpenPart("References");
+      setReason("");
+      cleanEditorLink();
+      proposeNodeImprovement(event, nodeId);
+    },
+    [setOpenPart, setReason, cleanEditorLink]
+  );
+
   useEffect(() => {
     if (editable) {
       setOpenPart("References");
@@ -999,6 +1009,7 @@ const Node = ({
               addVideo={addVideo}
               setAddVideo={setAddVideo}
               identifier={identifier}
+              notebookRef={notebookRef}
               activeNode={activeNode}
               citationsSelected={citationsSelected}
               proposalsSelected={proposalsSelected}
@@ -1052,7 +1063,7 @@ const Node = ({
               contributors={contributors}
               institutions={institutions}
               openUserInfoSidebar={openUserInfoSidebar}
-              proposeNodeImprovement={proposeNodeImprovement}
+              proposeNodeImprovement={proposeNodeImprovementHandler}
               setOperation={setOperation}
               disabled={disabled}
               enableChildElements={enableChildElements}
@@ -1194,6 +1205,7 @@ const Node = ({
               addVideo={addVideo}
               setAddVideo={setAddVideo}
               identifier={identifier}
+              notebookRef={notebookRef}
               activeNode={activeNode}
               citationsSelected={citationsSelected}
               proposalsSelected={proposalsSelected}

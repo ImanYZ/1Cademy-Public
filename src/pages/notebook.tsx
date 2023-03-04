@@ -2843,6 +2843,7 @@ const Dashboard = ({}: DashboardProps) => {
 
         return { nodes: newNodes, edges };
       });
+      processHeightChange(nodeId);
       //setOpenSidebar(null);
       scrollToNode(selectedNode);
     },
