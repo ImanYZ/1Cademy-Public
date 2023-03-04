@@ -2591,12 +2591,6 @@ const Dashboard = ({}: DashboardProps) => {
       const _corrects = corrects + correctChange;
       const _wrongs = wrongs + wrongChange;
 
-      setGraph(graph => {
-        const node = graph.nodes[nodeId];
-        generateReputationSignal(db, node, user, wrongChange, "Wrong", nodeId, setReputationSignal);
-        return graph;
-      });
-
       const willRemoveNode = doNeedToDeleteNode(_corrects, _wrongs, locked);
       if (willRemoveNode) {
         deleteOK = window.confirm("You are going to permanently delete this node by downvoting it. Are you sure?");
@@ -2604,20 +2598,24 @@ const Dashboard = ({}: DashboardProps) => {
 
       if (!deleteOK) return;
 
-      const nNode = graph.nodes[nodeId];
-      if (nNode?.locked) return;
+      setGraph(graph => {
+        const node = graph.nodes[nodeId];
+        
 
-      if (willRemoveNode) {
-        setGraph(({ nodes, edges }) => {
-          const tmpEdges = removeDagAllEdges(g.current, nodeId, edges);
-          const tmpNodes = removeDagNode(g.current, nodeId, nodes);
-          return { nodes: tmpNodes, edges: tmpEdges };
-        });
-        notebookRef.current.selectedNode = nNode.parents[0]?.node ?? null;
-        nodeBookDispatch({ type: "setSelectedNode", payload: nNode.parents[0]?.node ?? null });
-      } else {
-        setNodeParts(nodeId, node => {
-          return {
+        if (node?.locked) return graph;
+        generateReputationSignal(db, node, user, wrongChange, "Wrong", nodeId, setReputationSignal);
+
+        let nodes = graph.nodes;
+        let edges = graph.edges;
+
+        if (willRemoveNode) {
+          edges = removeDagAllEdges(g.current, nodeId, edges);
+          nodes = removeDagNode(g.current, nodeId, nodes);
+
+          notebookRef.current.selectedNode = node.parents[0]?.node ?? null;
+          nodeBookDispatch({ type: "setSelectedNode", payload: node.parents[0]?.node ?? null });
+        } else {
+          nodes[nodeId] = {
             ...node,
             wrong: !wrong,
             correct: false,
@@ -2625,17 +2623,22 @@ const Dashboard = ({}: DashboardProps) => {
             corrects: _corrects,
             disableVotes: true,
           };
-        });
-      }
+        }
+  
+        if (!willRemoveNode) {
+          nodes[nodeId] = {
+            ...node,
+            disableVotes: false,
+          };
+        }
 
-      await idToken();
-      await getMapGraph(`/wrongNode/${nodeId}`);
+        (async() => {
+          await idToken();
+          await getMapGraph(`/wrongNode/${nodeId}`);
+        })();
 
-      if (!willRemoveNode) {
-        setNodeParts(nodeId, node => {
-          return { ...node, disableVotes: false };
-        });
-      }
+        return {nodes, edges};
+      });
     },
     [getMapGraph, setNodeParts]
   );
