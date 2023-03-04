@@ -821,6 +821,7 @@ p {
 .tutorial-target {
   animation: tutorial-tt 2s infinite;
   outline: 1px solid #ff6d00;
+  outline-offset: 4px;
 }
 
 @keyframes tutorial-tt {

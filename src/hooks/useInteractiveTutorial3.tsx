@@ -2,6 +2,7 @@ import { MutableRefObject, ReactNode, useCallback, useEffect, useRef, useState }
 
 import { useNodeBook } from "@/context/NodeBookContext";
 import { SEARCHER_STEPS_COMPLETE } from "@/lib/reducers/searcherTutorial";
+import { NAVIGATION_STEPS_COMPLETE } from "@/lib/utils/tutorials/navigationSteps";
 
 import { NODES_STEPS_COMPLETE } from "../lib/reducers/nodeTutorial2";
 import { PROPOSAL_STEPS_COMPLETE } from "../lib/utils/tutorials/proposalSteps";
@@ -72,6 +73,11 @@ export const useInteractiveTutorial = ({ notebookRef }: useInteractiveTutorialPr
     if (currentTutorial === "PROPOSAL") {
       console.log("FILL PROPOSAL");
       newSteps = PROPOSAL_STEPS_COMPLETE;
+      //  setSteps(SEARCHER_STEPS_COMPLETE);
+    }
+    if (currentTutorial === "NAVIGATION") {
+      console.log("NAVIGATION");
+      newSteps = NAVIGATION_STEPS_COMPLETE;
       //  setSteps(SEARCHER_STEPS_COMPLETE);
     }
 

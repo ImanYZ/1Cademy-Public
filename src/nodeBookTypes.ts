@@ -210,7 +210,7 @@ export type StepTutorialConfig = {
   isClickeable?: boolean;
   forceScrollToNode?: boolean;
   targetDefaultProperties?: Partial<FullNodeData>;
-  tooltipPosition?: "top" | "bottom" | "left" | "right";
+  tooltipPosition?: "top" | "bottom" | "left" | "right" | "topLeft";
   anchor?: string;
 };
 export interface NodeTutorialState {
@@ -225,7 +225,7 @@ export interface NodeTutorialState {
   currentStepName: number;
   nextStepName: number;
   previosStepName: number;
-  tooltipPosition: "top" | "bottom" | "left" | "right";
+  tooltipPosition: "top" | "bottom" | "left" | "right" | "topLeft";
   isClickeable: boolean;
   targetDelay?: number;
   forceScrollToNode?: boolean;
@@ -402,7 +402,7 @@ export type UsersStatus = "All Time" | "Monthly" | "Weekly" | "Others Votes" | "
 
 // export type ClusterNodes = { [key: string]: Cluster };
 
-export type TutorialTypeKeys = "nodes" | "searcher" | "proposal";
+export type TutorialTypeKeys = "nodes" | "searcher" | "proposal" | "navigation";
 export type UserTutorial = {
   currentStep: number;
   done: boolean;

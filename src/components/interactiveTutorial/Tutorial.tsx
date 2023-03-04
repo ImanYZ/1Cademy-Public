@@ -88,11 +88,11 @@ export const Tutorial = ({
       <div
         style={{
           position: "absolute",
-          top: "0px",
-          bottom: "0px",
-          left: "0px",
-          right: "0px",
-          backgroundColor: "#555555a9",
+          top: "10px",
+          bottom: tutorialState.tooltipPosition === "topLeft" ? undefined : "10px",
+          left: "10px",
+          right: tutorialState.tooltipPosition === "topLeft" ? undefined : "10px",
+          backgroundColor: "#55555500",
           transition: "top 1s ease-out,left 1s ease-out",
           boxSizing: "border-box",
           display: "grid",

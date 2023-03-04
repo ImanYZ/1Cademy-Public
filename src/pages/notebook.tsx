@@ -137,7 +137,7 @@ import {
 import { NodeType, SimpleNode2 } from "../types";
 import { doNeedToDeleteNode, getNodeTypesFromNode, isVersionApproved } from "../utils/helpers";
 
-export type TutorialType = "NODES" | "SEARCHER" | "PROPOSAL" | null;
+export type TutorialType = "NODES" | "SEARCHER" | "PROPOSAL" | "NAVIGATION" | null;
 
 type DashboardProps = {};
 
@@ -291,6 +291,7 @@ const Dashboard = ({}: DashboardProps) => {
     nodes: { currentStep: 1, done: false, skipped: false },
     searcher: { currentStep: 1, done: false, skipped: false },
     proposal: { currentStep: 1, done: false, skipped: false },
+    navigation: { currentStep: 1, done: false, skipped: false },
   });
 
   // const [currentTutorial, setCurrentTutorial] = useState<TutorialType>(null);
@@ -803,7 +804,7 @@ const Dashboard = ({}: DashboardProps) => {
         // // onChangeStep(tutorial.nodes.currentStep);
       } else {
         console.log("will-start");
-        setCurrentTutorial("NODES");
+        setCurrentTutorial("NAVIGATION");
       }
 
       // setUserTutorialLoaded(true);
@@ -4124,7 +4125,7 @@ const Dashboard = ({}: DashboardProps) => {
               </Box>
             </Drawer>
           }
-          {user && reputation && (
+          {user && reputation && (userTutorial.navigation.done || userTutorial.navigation.skipped) && (
             <Box
               sx={{
                 "& .GainedPoint, & .LostPoint": {
