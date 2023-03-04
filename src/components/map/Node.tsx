@@ -556,6 +556,16 @@ const Node = ({
     closeSideBar();
   };
 
+  const proposeNodeImprovementHandler = useCallback(
+    (event: any, nodeId: string = "") => {
+      setOpenPart("References");
+      setReason("");
+      cleanEditorLink();
+      proposeNodeImprovement(event, nodeId);
+    },
+    [setOpenPart, setReason, cleanEditorLink]
+  );
+
   useEffect(() => {
     if (editable) {
       setOpenPart("References");
@@ -665,7 +675,7 @@ const Node = ({
         top: top ? top : 1000,
         width: width,
         transition: "0.3s",
-        padding: "13px 13px 0px 13px",
+        padding: "13px 13px 13px 13px",
       }}
     >
       {/* INFO: uncomment this only on develope */}
@@ -739,6 +749,7 @@ const Node = ({
                 onHideNodeHandler={hideNodeHandler}
                 disabled={disabled}
                 enableChildElements={enableChildElements}
+                sx={{ float: "right" }}
                 // sx={{ position: "absolute", right: "10px", top: "0px" }}
               />
             )}
@@ -999,6 +1010,7 @@ const Node = ({
               addVideo={addVideo}
               setAddVideo={setAddVideo}
               identifier={identifier}
+              notebookRef={notebookRef}
               activeNode={activeNode}
               citationsSelected={citationsSelected}
               proposalsSelected={proposalsSelected}
@@ -1052,7 +1064,7 @@ const Node = ({
               contributors={contributors}
               institutions={institutions}
               openUserInfoSidebar={openUserInfoSidebar}
-              proposeNodeImprovement={proposeNodeImprovement}
+              proposeNodeImprovement={proposeNodeImprovementHandler}
               setOperation={setOperation}
               disabled={disabled}
               enableChildElements={enableChildElements}
@@ -1174,6 +1186,7 @@ const Node = ({
               onHideNodeHandler={hideNodeHandler}
               disabled={disabled}
               enableChildElements={enableChildElements}
+              sx={{ float: "right" }}
               // sx={{ position: "absolute", right: "10px", top: "0px" }}
             />
           )}
@@ -1194,6 +1207,7 @@ const Node = ({
               addVideo={addVideo}
               setAddVideo={setAddVideo}
               identifier={identifier}
+              notebookRef={notebookRef}
               activeNode={activeNode}
               citationsSelected={citationsSelected}
               proposalsSelected={proposalsSelected}

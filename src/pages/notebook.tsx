@@ -259,10 +259,22 @@ const Dashboard = ({}: DashboardProps) => {
   const [openProposal, setOpenProposal] = useState<string>("");
 
   // when proposing improvements, lists of added/removed parent/child links
-  const [addedParents, setAddedParents] = useState<string[]>([]);
-  const [addedChildren, setAddedChildren] = useState<string[]>([]);
-  const [removedParents, setRemovedParents] = useState<string[]>([]);
-  const [removedChildren, setRemovedChildren] = useState<string[]>([]);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const [updatedLinks, setUpdatedLinks] = useState<{
+    addedParents: string[],
+    addedChildren: string[],
+    removedParents: string[],
+    removedChildren: string[]
+  }>({
+    addedParents: [],
+    addedChildren: [],
+    removedParents: [],
+    removedChildren: [],
+  });
+  // const [addedParents, setAddedParents] = useState<string[]>([]);
+  // const [addedChildren, setAddedChildren] = useState<string[]>([]);
+  // const [removedParents, setRemovedParents] = useState<string[]>([]);
+  // const [removedChildren, setRemovedChildren] = useState<string[]>([]);
 
   const [firstLoading, setFirstLoading] = useState(true);
   const [pendingProposalsLoaded /* , setPendingProposalsLoaded */] = useState(true);
@@ -505,7 +517,13 @@ const Dashboard = ({}: DashboardProps) => {
 
         if (!targetElement) return;
 
-        targetElement.classList.add(stateNodeTutorial.isClickeable ? "tutorial-target-pulse" : "tutorial-target");
+        targetElement.classList.add(
+          stateNodeTutorial.isClickeable
+            ? "tutorial-target-pulse"
+            : stateNodeTutorial.largeTarget
+            ? "tutorial-target-large"
+            : "tutorial-target"
+        );
 
         const { width, height, top, left } = targetElement.getBoundingClientRect();
 
@@ -525,7 +543,13 @@ const Dashboard = ({}: DashboardProps) => {
         const targetElement = document.getElementById(stateNodeTutorial.childTargetId);
         if (!targetElement) return;
 
-        targetElement.classList.add(stateNodeTutorial.isClickeable ? "tutorial-target-pulse" : "tutorial-target");
+        targetElement.classList.add(
+          stateNodeTutorial.isClickeable
+            ? "tutorial-target-pulse"
+            : stateNodeTutorial.largeTarget
+            ? "tutorial-target-large"
+            : "tutorial-target"
+        );
 
         const { offsetTop, offsetLeft } = targetElement;
         const { height: childrenHeight, width: childrenWidth } = targetElement.getBoundingClientRect();
@@ -777,6 +801,7 @@ const Dashboard = ({}: DashboardProps) => {
       const selectedNodeDash = graph.nodes[noodeIdFromDashboard];
       if (selectedNodeDash?.top === 0) return;
       if (selectedNodeDash) return;
+      notebookRef.current.selectedNode = noodeIdFromDashboard;
       nodeBookDispatch({ type: "setSelectedNode", payload: noodeIdFromDashboard });
       scrollToNode(noodeIdFromDashboard);
     }, 1000);
@@ -822,6 +847,7 @@ const Dashboard = ({}: DashboardProps) => {
         const selectedNode = graph.nodes[user?.sNode];
         if (!selectedNode) return;
         if (selectedNode.top === 0) return;
+        notebookRef.current.selectedNode = user.sNode;
         nodeBookDispatch({ type: "setSelectedNode", payload: user.sNode });
         scrollToNode(user.sNode);
         setFirstScrollToNode(true);
@@ -1045,6 +1071,7 @@ const Dashboard = ({}: DashboardProps) => {
       });
       setLocalSnapshot({});
       shouldResetGraph.current = true;
+      notebookRef.current.selectedNode = null;
       nodeBookDispatch({ type: "setSelectedNode", payload: null });
       g.current = createGraph();
     }
@@ -1472,10 +1499,12 @@ const Dashboard = ({}: DashboardProps) => {
   const resetAddedRemovedParentsChildren = useCallback(() => {
     // CHECK: this could be improve merging this 4 states in 1 state object
     // so we reduce the rerenders, also we can set only the empty array here
-    setAddedParents(oldAddedParents => (oldAddedParents.length > 0 ? oldAddedParents : []));
-    setAddedChildren(oldAddedChildren => (oldAddedChildren.length > 0 ? oldAddedChildren : []));
-    setRemovedParents(oldRemovedParents => (oldRemovedParents.length > 0 ? oldRemovedParents : []));
-    setRemovedChildren(oldRemovedChildren => (oldRemovedChildren.length > 0 ? oldRemovedChildren : []));
+    setUpdatedLinks({
+      addedParents: [],
+      addedChildren: [],
+      removedChildren: [],
+      removedParents: [],
+    });
   }, []);
 
   const getMapGraph = useCallback(
@@ -1593,128 +1622,131 @@ const Dashboard = ({}: DashboardProps) => {
 
   const chosenNodeChanged = useCallback(
     (nodeId: string) => {
-      setGraph(({ nodes: oldNodes, edges: oldEdges }) => {
-        if (!notebookRef.current.choosingNode || !notebookRef.current.chosenNode)
-          return { nodes: oldNodes, edges: oldEdges };
-        if (nodeId !== notebookRef.current.choosingNode.id) return { nodes: oldNodes, edges: oldEdges };
-
-        const thisNode = copyNode(oldNodes[nodeId]);
-        const chosenNodeObj = copyNode(oldNodes[notebookRef.current.chosenNode.id]);
-
-        let newEdges: EdgesData = oldEdges;
-
-        const validLink =
-          (notebookRef.current.choosingNode.type === "Reference" &&
-            /* thisNode.referenceIds.filter(l => l === nodeBookState.chosenNode?.id).length === 0 &&*/
-            notebookRef.current.chosenNode.id !== nodeId &&
-            chosenNodeObj.nodeType === notebookRef.current.choosingNode.type) ||
-          (notebookRef.current.choosingNode.type === "Tag" &&
-            thisNode.tagIds.filter(l => l === notebookRef.current.chosenNode?.id).length === 0) ||
-          (notebookRef.current.choosingNode.type === "Parent" &&
-            notebookRef.current.choosingNode.id !== notebookRef.current.chosenNode.id &&
-            thisNode.parents.filter((l: any) => l.node === notebookRef.current.chosenNode?.id).length === 0) ||
-          (notebookRef.current.choosingNode.type === "Child" &&
-            notebookRef.current.choosingNode.id !== notebookRef.current.chosenNode.id &&
-            thisNode.children.filter((l: any) => l.node === notebookRef.current.chosenNode?.id).length === 0);
-
-        if (!validLink) return { nodes: oldNodes, edges: oldEdges };
-
-        if (notebookRef.current.choosingNode.type === "Reference") {
-          thisNode.references = [...thisNode.references, chosenNodeObj.title];
-          thisNode.referenceIds = [...thisNode.referenceIds, notebookRef.current.chosenNode.id];
-          thisNode.referenceLabels = [...thisNode.referenceLabels, ""];
-        } else if (notebookRef.current.choosingNode.type === "Tag") {
-          thisNode.tags = [...thisNode.tags, chosenNodeObj.title];
-          thisNode.tagIds = [...thisNode.tagIds, notebookRef.current.chosenNode.id];
-        } else if (notebookRef.current.choosingNode.type === "Parent") {
-          thisNode.parents = [
-            ...thisNode.parents,
-            {
-              node: notebookRef.current.chosenNode.id,
-              title: chosenNodeObj.title,
-              label: "",
-              type: chosenNodeObj.nodeType,
-            },
-          ];
-          if (!(notebookRef.current.chosenNode.id in changedNodes)) {
-            changedNodes[notebookRef.current.chosenNode.id] = copyNode(oldNodes[notebookRef.current.chosenNode.id]);
+      setUpdatedLinks((updatedLinks) => {
+        setGraph(({ nodes: oldNodes, edges: oldEdges }) => {
+          if (!notebookRef.current.choosingNode || !notebookRef.current.chosenNode)
+            return { nodes: oldNodes, edges: oldEdges };
+          if (nodeId !== notebookRef.current.choosingNode.id) return { nodes: oldNodes, edges: oldEdges };
+  
+          const thisNode = copyNode(oldNodes[nodeId]);
+          const chosenNodeObj = copyNode(oldNodes[notebookRef.current.chosenNode.id]);
+  
+          let newEdges: EdgesData = oldEdges;
+  
+          const validLink =
+            (notebookRef.current.choosingNode.type === "Reference" &&
+              /* thisNode.referenceIds.filter(l => l === nodeBookState.chosenNode?.id).length === 0 &&*/
+              notebookRef.current.chosenNode.id !== nodeId &&
+              chosenNodeObj.nodeType === notebookRef.current.choosingNode.type) ||
+            (notebookRef.current.choosingNode.type === "Tag" &&
+              thisNode.tagIds.filter(l => l === notebookRef.current.chosenNode?.id).length === 0) ||
+            (notebookRef.current.choosingNode.type === "Parent" &&
+              notebookRef.current.choosingNode.id !== notebookRef.current.chosenNode.id &&
+              thisNode.parents.filter((l: any) => l.node === notebookRef.current.chosenNode?.id).length === 0) ||
+            (notebookRef.current.choosingNode.type === "Child" &&
+              notebookRef.current.choosingNode.id !== notebookRef.current.chosenNode.id &&
+              thisNode.children.filter((l: any) => l.node === notebookRef.current.chosenNode?.id).length === 0);
+  
+          if (!validLink) return { nodes: oldNodes, edges: oldEdges };
+  
+          if (notebookRef.current.choosingNode.type === "Reference") {
+            thisNode.references = [...thisNode.references, chosenNodeObj.title];
+            thisNode.referenceIds = [...thisNode.referenceIds, notebookRef.current.chosenNode.id];
+            thisNode.referenceLabels = [...thisNode.referenceLabels, ""];
+          } else if (notebookRef.current.choosingNode.type === "Tag") {
+            thisNode.tags = [...thisNode.tags, chosenNodeObj.title];
+            thisNode.tagIds = [...thisNode.tagIds, notebookRef.current.chosenNode.id];
+          } else if (notebookRef.current.choosingNode.type === "Parent") {
+            thisNode.parents = [
+              ...thisNode.parents,
+              {
+                node: notebookRef.current.chosenNode.id,
+                title: chosenNodeObj.title,
+                label: "",
+                type: chosenNodeObj.nodeType,
+              },
+            ];
+            if (!(notebookRef.current.chosenNode.id in changedNodes)) {
+              changedNodes[notebookRef.current.chosenNode.id] = copyNode(oldNodes[notebookRef.current.chosenNode.id]);
+            }
+            chosenNodeObj.children = [
+              ...chosenNodeObj.children,
+              {
+                node: notebookRef.current.choosingNode.id,
+                title: thisNode.title,
+                label: "",
+                type: chosenNodeObj.nodeType,
+              },
+            ];
+            const chosenNodeId = notebookRef.current.chosenNode.id;
+            if (updatedLinks.removedParents.includes(notebookRef.current.chosenNode.id)) {
+              updatedLinks.removedParents = updatedLinks.removedParents.filter((nId: string) => nId !== chosenNodeId);
+            } else {
+              updatedLinks.addedParents = [...updatedLinks.addedParents, chosenNodeId];
+            }
+  
+            if (notebookRef.current.chosenNode && notebookRef.current.choosingNode) {
+              newEdges = setDagEdge(
+                g.current,
+                notebookRef.current.chosenNode.id,
+                notebookRef.current.choosingNode.id,
+                { label: "" },
+                { ...oldEdges }
+              );
+            }
+          } else if (notebookRef.current.choosingNode.type === "Child") {
+            thisNode.children = [
+              ...thisNode.children,
+              {
+                node: notebookRef.current.chosenNode.id,
+                title: chosenNodeObj.title,
+                label: "",
+                type: chosenNodeObj.nodeType,
+              },
+            ];
+            if (!(notebookRef.current.chosenNode.id in changedNodes)) {
+              changedNodes[notebookRef.current.chosenNode.id] = copyNode(oldNodes[notebookRef.current.chosenNode.id]);
+            }
+            chosenNodeObj.parents = [
+              ...chosenNodeObj.parents,
+              {
+                node: notebookRef.current.choosingNode.id,
+                title: thisNode.title,
+                label: "",
+                type: chosenNodeObj.nodeType,
+              },
+            ];
+            if (notebookRef.current.chosenNode && notebookRef.current.choosingNode) {
+              newEdges = setDagEdge(
+                g.current,
+                notebookRef.current.choosingNode.id,
+                notebookRef.current.chosenNode.id,
+                { label: "" },
+                { ...oldEdges }
+              );
+            }
+            if (updatedLinks.removedChildren.includes(notebookRef.current.chosenNode.id)) {
+              const chosenNodeId = notebookRef.current.choosingNode.id;
+              updatedLinks.removedChildren = updatedLinks.removedChildren.filter(nId => nId !== chosenNodeId);
+            } else {
+              updatedLinks.addedChildren = [...updatedLinks.addedChildren, notebookRef.current.chosenNode.id];
+            }
           }
-          chosenNodeObj.children = [
-            ...chosenNodeObj.children,
-            {
-              node: notebookRef.current.choosingNode.id,
-              title: thisNode.title,
-              label: "",
-              type: chosenNodeObj.nodeType,
-            },
-          ];
-          const chosenNodeId = notebookRef.current.chosenNode.id;
-          if (removedParents.includes(notebookRef.current.chosenNode.id)) {
-            setRemovedParents(removedParents.filter((nId: string) => nId !== chosenNodeId));
-          } else {
-            setAddedParents(oldAddedParents => [...oldAddedParents, chosenNodeId]);
-          }
-
-          if (notebookRef.current.chosenNode && notebookRef.current.choosingNode) {
-            newEdges = setDagEdge(
-              g.current,
-              notebookRef.current.chosenNode.id,
-              notebookRef.current.choosingNode.id,
-              { label: "" },
-              { ...oldEdges }
-            );
-          }
-        } else if (notebookRef.current.choosingNode.type === "Child") {
-          thisNode.children = [
-            ...thisNode.children,
-            {
-              node: notebookRef.current.chosenNode.id,
-              title: chosenNodeObj.title,
-              label: "",
-              type: chosenNodeObj.nodeType,
-            },
-          ];
-          if (!(notebookRef.current.chosenNode.id in changedNodes)) {
-            changedNodes[notebookRef.current.chosenNode.id] = copyNode(oldNodes[notebookRef.current.chosenNode.id]);
-          }
-          chosenNodeObj.parents = [
-            ...chosenNodeObj.parents,
-            {
-              node: notebookRef.current.choosingNode.id,
-              title: thisNode.title,
-              label: "",
-              type: chosenNodeObj.nodeType,
-            },
-          ];
-          if (notebookRef.current.chosenNode && notebookRef.current.choosingNode) {
-            newEdges = setDagEdge(
-              g.current,
-              notebookRef.current.choosingNode.id,
-              notebookRef.current.chosenNode.id,
-              { label: "" },
-              { ...oldEdges }
-            );
-          }
-          if (removedChildren.includes(notebookRef.current.chosenNode.id)) {
-            const chosenNodeId = notebookRef.current.choosingNode.id;
-            setRemovedChildren(removedChildren.filter(nId => nId !== chosenNodeId));
-          } else {
-            setAddedChildren([...addedChildren, notebookRef.current.chosenNode.id]);
-          }
-        }
-
-        const chosenNode = notebookRef.current.chosenNode.id;
-        notebookRef.current.choosingNode = null;
-        notebookRef.current.chosenNode = null;
-        nodeBookDispatch({ type: "setChoosingNode", payload: null });
-        nodeBookDispatch({ type: "setChosenNode", payload: null });
-
-        const newNodes = {
-          ...oldNodes,
-          [nodeId]: thisNode,
-          [chosenNode]: chosenNodeObj,
-        };
-        return { nodes: newNodes, edges: newEdges };
+  
+          const chosenNode = notebookRef.current.chosenNode.id;
+          notebookRef.current.choosingNode = null;
+          notebookRef.current.chosenNode = null;
+          nodeBookDispatch({ type: "setChoosingNode", payload: null });
+          nodeBookDispatch({ type: "setChosenNode", payload: null });
+  
+          const newNodes = {
+            ...oldNodes,
+            [nodeId]: thisNode,
+            [chosenNode]: chosenNodeObj,
+          };
+          return { nodes: newNodes, edges: newEdges };
+        });
+        return {...updatedLinks};
       });
     },
     // TODO: CHECK dependencies
@@ -1722,75 +1754,75 @@ const Dashboard = ({}: DashboardProps) => {
     [
       notebookRef.current.choosingNode,
       notebookRef.current.chosenNode,
-      removedParents,
-      addedParents,
-      removedChildren,
-      addedChildren,
     ]
   );
 
   const deleteLink = useCallback(
     (nodeId: string, linkIdx: number, linkType: ChoosingType) => {
-      setGraph(({ nodes, edges }) => {
-        let oldNodes = { ...nodes };
-        let newEdges = { ...edges };
-        const thisNode = copyNode(oldNodes[nodeId]);
+      setUpdatedLinks((updatedLinks) => {
+        setGraph(({ nodes, edges }) => {
+          let oldNodes = { ...nodes };
+          let newEdges = { ...edges };
+          const thisNode = copyNode(oldNodes[nodeId]);
+  
+          if (linkType === "Parent") {
+            let parentNode = null;
+            const parentId = thisNode.parents[linkIdx].node;
+            thisNode.parents = [...thisNode.parents];
+            thisNode.parents.splice(linkIdx, 1);
+            if (updatedLinks.addedParents.includes(parentId)) {
+              updatedLinks.addedParents = updatedLinks.addedParents.filter(nId => nId !== parentId);
+            } else {
+              updatedLinks.removedParents = [...updatedLinks.removedParents, parentId];
+            }
+            if (parentId in oldNodes) {
+              parentNode = copyNode(oldNodes[parentId]);
+              newEdges = removeDagEdge(g.current, parentId, nodeId, { ...newEdges });
+              if (!(parentId in changedNodes)) {
+                changedNodes[parentId] = copyNode(oldNodes[parentId]);
+              }
+              parentNode.children = parentNode.children.filter(l => l.node !== nodeId);
+              oldNodes[parentId] = parentNode;
+            }
+          } else if (linkType === "Child") {
+            let childNode = null;
+            const childId = thisNode.children[linkIdx].node;
+            thisNode.children = [...thisNode.children];
+            thisNode.children.splice(linkIdx, 1);
+            if (updatedLinks.addedChildren.includes(childId)) {
+              updatedLinks.addedChildren = updatedLinks.addedChildren.filter(nId => nId !== childId);
+            } else {
+              updatedLinks.removedChildren = [...updatedLinks.removedChildren, childId];
+            }
+            if (childId in oldNodes) {
+              childNode = oldNodes[childId];
+              newEdges = removeDagEdge(g.current, nodeId, childId, { ...newEdges });
+              if (!(childId in changedNodes)) {
+                changedNodes[childId] = copyNode(oldNodes[childId]);
+              }
+              childNode.parents = childNode.parents.filter(l => l.node !== nodeId);
+              oldNodes[childId] = childNode;
+            }
+          } else if (linkType === "Reference") {
+            thisNode.references = [...thisNode.references];
+            thisNode.references.splice(linkIdx, 1);
+            thisNode.referenceIds.splice(linkIdx, 1);
+            thisNode.referenceLabels.splice(linkIdx, 1);
+          } else if (linkType === "Tag") {
+            thisNode.tags = [...thisNode.tags];
+            thisNode.tags.splice(linkIdx, 1);
+            thisNode.tagIds.splice(linkIdx, 1);
+          }
+          oldNodes[nodeId] = thisNode;
+          return { nodes: oldNodes, edges: newEdges };
+        });
 
-        if (linkType === "Parent") {
-          let parentNode = null;
-          const parentId = thisNode.parents[linkIdx].node;
-          thisNode.parents = [...thisNode.parents];
-          thisNode.parents.splice(linkIdx, 1);
-          if (addedParents.includes(parentId)) {
-            setAddedParents(addedParents.filter(nId => nId !== parentId));
-          } else {
-            setRemovedParents(oldRemovedParents => [...oldRemovedParents, parentId]);
-          }
-          if (parentId in oldNodes) {
-            parentNode = copyNode(oldNodes[parentId]);
-            newEdges = removeDagEdge(g.current, parentId, nodeId, { ...newEdges });
-            if (!(parentId in changedNodes)) {
-              changedNodes[parentId] = copyNode(oldNodes[parentId]);
-            }
-            parentNode.children = parentNode.children.filter(l => l.node !== nodeId);
-            oldNodes[parentId] = parentNode;
-          }
-        } else if (linkType === "Child") {
-          let childNode = null;
-          const childId = thisNode.children[linkIdx].node;
-          thisNode.children = [...thisNode.children];
-          thisNode.children.splice(linkIdx, 1);
-          if (addedChildren.includes(childId)) {
-            setAddedChildren(addedChildren.filter(nId => nId !== childId));
-          } else {
-            setRemovedChildren([...removedChildren, childId]);
-          }
-          if (childId in oldNodes) {
-            childNode = oldNodes[childId];
-            newEdges = removeDagEdge(g.current, nodeId, childId, { ...newEdges });
-            if (!(childId in changedNodes)) {
-              changedNodes[childId] = copyNode(oldNodes[childId]);
-            }
-            childNode.parents = childNode.parents.filter(l => l.node !== nodeId);
-            oldNodes[childId] = childNode;
-          }
-        } else if (linkType === "Reference") {
-          thisNode.references = [...thisNode.references];
-          thisNode.references.splice(linkIdx, 1);
-          thisNode.referenceIds.splice(linkIdx, 1);
-          thisNode.referenceLabels.splice(linkIdx, 1);
-        } else if (linkType === "Tag") {
-          thisNode.tags = [...thisNode.tags];
-          thisNode.tags.splice(linkIdx, 1);
-          thisNode.tagIds.splice(linkIdx, 1);
-        }
-        oldNodes[nodeId] = thisNode;
-        return { nodes: oldNodes, edges: newEdges };
+        return {...updatedLinks};
       });
     },
     // TODO: CHECK dependencies
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [setGraph, addedParents, removedParents, addedChildren, removedChildren]
+    [setGraph]
   );
 
   const nodeClicked = useCallback((event: any, nodeId: string, nodeType: any, setOpenPart: any) => {
@@ -2231,7 +2263,7 @@ const Dashboard = ({}: DashboardProps) => {
       setGraph(({ nodes: oldNodes, edges }) => {
         const thisNode = oldNodes[nodeId];
 
-        // notebookRef.current.selectedNode = nodeId;
+        notebookRef.current.selectedNode = nodeId;
         nodeBookDispatch({ type: "setSelectedNode", payload: nodeId });
         const { nodeRef, userNodeRef } = initNodeStatusChange(nodeId, thisNode.userNodeId);
         const changeNode: any = {
@@ -2592,12 +2624,6 @@ const Dashboard = ({}: DashboardProps) => {
       const _corrects = corrects + correctChange;
       const _wrongs = wrongs + wrongChange;
 
-      setGraph(graph => {
-        const node = graph.nodes[nodeId];
-        generateReputationSignal(db, node, user, wrongChange, "Wrong", nodeId, setReputationSignal);
-        return graph;
-      });
-
       const willRemoveNode = doNeedToDeleteNode(_corrects, _wrongs, locked);
       if (willRemoveNode) {
         deleteOK = window.confirm("You are going to permanently delete this node by downvoting it. Are you sure?");
@@ -2605,20 +2631,24 @@ const Dashboard = ({}: DashboardProps) => {
 
       if (!deleteOK) return;
 
-      const nNode = graph.nodes[nodeId];
-      if (nNode?.locked) return;
+      setGraph(graph => {
+        const node = graph.nodes[nodeId];
+        
 
-      if (willRemoveNode) {
-        setGraph(({ nodes, edges }) => {
-          const tmpEdges = removeDagAllEdges(g.current, nodeId, edges);
-          const tmpNodes = removeDagNode(g.current, nodeId, nodes);
-          return { nodes: tmpNodes, edges: tmpEdges };
-        });
-        notebookRef.current.selectedNode = nNode.parents[0]?.node ?? null;
-        nodeBookDispatch({ type: "setSelectedNode", payload: nNode.parents[0]?.node ?? null });
-      } else {
-        setNodeParts(nodeId, node => {
-          return {
+        if (node?.locked) return graph;
+        generateReputationSignal(db, node, user, wrongChange, "Wrong", nodeId, setReputationSignal);
+
+        let nodes = graph.nodes;
+        let edges = graph.edges;
+
+        if (willRemoveNode) {
+          edges = removeDagAllEdges(g.current, nodeId, edges);
+          nodes = removeDagNode(g.current, nodeId, nodes);
+
+          notebookRef.current.selectedNode = node.parents[0]?.node ?? null;
+          nodeBookDispatch({ type: "setSelectedNode", payload: node.parents[0]?.node ?? null });
+        } else {
+          nodes[nodeId] = {
             ...node,
             wrong: !wrong,
             correct: false,
@@ -2626,17 +2656,22 @@ const Dashboard = ({}: DashboardProps) => {
             corrects: _corrects,
             disableVotes: true,
           };
-        });
-      }
+        }
+  
+        if (!willRemoveNode) {
+          nodes[nodeId] = {
+            ...node,
+            disableVotes: false,
+          };
+        }
 
-      await idToken();
-      await getMapGraph(`/wrongNode/${nodeId}`);
+        (async() => {
+          await idToken();
+          await getMapGraph(`/wrongNode/${nodeId}`);
+        })();
 
-      if (!willRemoveNode) {
-        setNodeParts(nodeId, node => {
-          return { ...node, disableVotes: false };
-        });
-      }
+        return {nodes, edges};
+      });
     },
     [getMapGraph, setNodeParts]
   );
@@ -2844,6 +2879,7 @@ const Dashboard = ({}: DashboardProps) => {
 
         return { nodes: newNodes, edges };
       });
+      processHeightChange(nodeId);
       //setOpenSidebar(null);
       scrollToNode(selectedNode);
     },
@@ -2935,167 +2971,165 @@ const Dashboard = ({}: DashboardProps) => {
       nodeBookDispatch({ type: "setChoosingNode", payload: null });
       let referencesOK = true;
 
-      setGraph(graph => {
-        const selectedNodeId = notebookRef.current.selectedNode!;
-        if (
-          (graph.nodes[selectedNodeId].nodeType === "Concept" ||
-            graph.nodes[selectedNodeId].nodeType === "Relation" ||
-            graph.nodes[selectedNodeId].nodeType === "Question" ||
-            graph.nodes[selectedNodeId].nodeType === "News") &&
-          graph.nodes[selectedNodeId].references.length === 0
-        ) {
-          referencesOK = window.confirm("You are proposing a node without any reference. Are you sure?");
-        }
-
-        if (!referencesOK) return graph;
-
-        gtmEvent("Propose", {
-          customType: "improvement",
-        });
-        gtmEvent("Interaction", {
-          customType: "improvement",
-        });
-        gtmEvent("Reputation", {
-          value: 1,
-        });
-
-        const newNode = { ...graph.nodes[selectedNodeId] };
-        if (newNode.children.length > 0) {
-          const newChildren = [];
-          for (let child of newNode.children) {
-            newChildren.push({
-              node: child.node,
-              title: child.title,
-              label: child.label,
-              type: child.type,
-            });
+      setUpdatedLinks((updatedLinks) => {
+        setGraph(graph => {
+          const selectedNodeId = notebookRef.current.selectedNode!;
+          if (
+            (graph.nodes[selectedNodeId].nodeType === "Concept" ||
+              graph.nodes[selectedNodeId].nodeType === "Relation" ||
+              graph.nodes[selectedNodeId].nodeType === "Question" ||
+              graph.nodes[selectedNodeId].nodeType === "News") &&
+            graph.nodes[selectedNodeId].references.length === 0
+          ) {
+            referencesOK = window.confirm("You are proposing a node without any reference. Are you sure?");
           }
-          newNode.children = newChildren;
-          const newParents = [];
-          for (let parent of newNode.parents) {
-            newParents.push({
-              node: parent.node,
-              title: parent.title,
-              label: parent.label,
-              type: parent.type,
-            });
-          }
-          newNode.parents = newParents;
-        }
-        const keyFound = Object.keys(allNodes).find(key => allNodes[key].node === nodeBookState.selectedNode);
-        if (!keyFound) return graph;
-
-        const oldNode = allNodes[keyFound];
-        let isTheSame =
-          newNode.title === oldNode.title &&
-          newNode.content === oldNode.content &&
-          newNode.nodeType === oldNode.nodeType;
-        isTheSame = isTheSame && compareProperty(oldNode, newNode, "nodeImage");
-        if (
-          ("nodeVideo" in oldNode && "nodeVideo" in newNode) ||
-          (!("nodeVideo" in oldNode) && newNode["nodeVideo"] !== "")
-        ) {
-          isTheSame = isTheSame && compareProperty(oldNode, newNode, "nodeVideo");
-        }
-        isTheSame = compareFlatLinks(oldNode.tagIds, newNode.tagIds, isTheSame); // CHECK: O checked only ID changes
-        isTheSame = compareFlatLinks(oldNode.referenceIds, newNode.referenceIds, isTheSame); // CHECK: O checked only ID changes
-        isTheSame = compareLinks(oldNode.parents, newNode.parents, isTheSame, false);
-        isTheSame = compareLinks(oldNode.children, newNode.children, isTheSame, false);
-        isTheSame = compareFlatLinks(oldNode.referenceLabels, newNode.referenceLabels, isTheSame);
-
-        isTheSame = compareChoices(oldNode, newNode, isTheSame);
-        if (isTheSame) {
-          onFail();
-          setTimeout(() => {
-            window.alert("You've not changed anything yet!");
+  
+          if (!referencesOK) return graph;
+  
+          gtmEvent("Propose", {
+            customType: "improvement",
           });
-          return graph;
-        }
-
-        const postData: any = {
-          ...newNode,
-          id: nodeBookState.selectedNode,
-          summary: summary,
-          proposal: reason,
-          addedParents,
-          addedChildren,
-          removedParents,
-          removedChildren,
-        };
-        delete postData.isStudied;
-        delete postData.bookmarked;
-        delete postData.correct;
-        delete postData.updatedAt;
-        delete postData.open;
-        delete postData.visible;
-        delete postData.deleted;
-        delete postData.wrong;
-        delete postData.createdAt;
-        delete postData.firstVisit;
-        delete postData.lastVisit;
-        delete postData.versions;
-        delete postData.viewers;
-        delete postData.comments;
-        delete postData.wrongs;
-        delete postData.corrects;
-        delete postData.studied;
-        delete postData.editable;
-        delete postData.left;
-        delete postData.top;
-        delete postData.height;
-
-        const willBeApproved = isVersionApproved({ corrects: 1, wrongs: 0, nodeData: newNode });
-
-        if (willBeApproved) {
-          const newParentIds: string[] = newNode.parents.map(parent => parent.node);
-          const newChildIds: string[] = newNode.children.map(child => child.node);
-          const oldParentIds: string[] = oldNode.parents.map(parent => parent.node);
-          const oldChildIds: string[] = oldNode.children.map(child => child.node);
-          const idsToBeRemoved = Array.from(
-            new Set<string>([
-              ...newParentIds,
-              ...newChildIds,
-              notebookRef.current.selectedNode!,
-              ...oldParentIds,
-              ...oldChildIds,
-            ])
-          );
-          idsToBeRemoved.forEach(idToBeRemoved => {
-            if (changedNodes.hasOwnProperty(idToBeRemoved)) {
-              delete changedNodes[idToBeRemoved];
+          gtmEvent("Interaction", {
+            customType: "improvement",
+          });
+          gtmEvent("Reputation", {
+            value: 1,
+          });
+  
+          const newNode = { ...graph.nodes[selectedNodeId] };
+          if (newNode.children.length > 0) {
+            const newChildren = [];
+            for (let child of newNode.children) {
+              newChildren.push({
+                node: child.node,
+                title: child.title,
+                label: child.label,
+                type: child.type,
+              });
             }
-          });
-        }
+            newNode.children = newChildren;
+            const newParents = [];
+            for (let parent of newNode.parents) {
+              newParents.push({
+                node: parent.node,
+                title: parent.title,
+                label: parent.label,
+                type: parent.type,
+              });
+            }
+            newNode.parents = newParents;
+          }
+          const keyFound = changedNodes.hasOwnProperty(selectedNodeId);
+          if (!keyFound) return graph;
+  
+          const oldNode = changedNodes[selectedNodeId] as FullNodeData;
+          let isTheSame =
+            newNode.title === oldNode.title &&
+            newNode.content === oldNode.content &&
+            newNode.nodeType === oldNode.nodeType;
+          isTheSame = isTheSame && compareProperty(oldNode, newNode, "nodeImage");
+          if (
+            ("nodeVideo" in oldNode && "nodeVideo" in newNode) ||
+            (!("nodeVideo" in oldNode) && newNode["nodeVideo"] !== "")
+          ) {
+            isTheSame = isTheSame && compareProperty(oldNode, newNode, "nodeVideo");
+          }
+          isTheSame = compareFlatLinks(oldNode.tagIds, newNode.tagIds, isTheSame); // CHECK: O checked only ID changes
+          isTheSame = compareFlatLinks(oldNode.referenceIds, newNode.referenceIds, isTheSame); // CHECK: O checked only ID changes
+          isTheSame = compareLinks(oldNode.parents, newNode.parents, isTheSame, false);
+          isTheSame = compareLinks(oldNode.children, newNode.children, isTheSame, false);
+          isTheSame = compareFlatLinks(oldNode.referenceLabels, newNode.referenceLabels, isTheSame);
+  
+          isTheSame = compareChoices(oldNode, newNode, isTheSame);
+          if (isTheSame) {
+            onFail();
+            setTimeout(() => {
+              window.alert("You've not changed anything yet!");
+            });
+            return graph;
+          }
+  
+          const postData: any = {
+            ...newNode,
+            id: notebookRef.current.selectedNode,
+            summary: summary,
+            proposal: reason,
+            addedParents: updatedLinks.addedParents,
+            addedChildren: updatedLinks.addedChildren,
+            removedParents: updatedLinks.removedParents,
+            removedChildren: updatedLinks.removedChildren,
+          };
+          delete postData.isStudied;
+          delete postData.bookmarked;
+          delete postData.correct;
+          delete postData.updatedAt;
+          delete postData.open;
+          delete postData.visible;
+          delete postData.deleted;
+          delete postData.wrong;
+          delete postData.createdAt;
+          delete postData.firstVisit;
+          delete postData.lastVisit;
+          delete postData.versions;
+          delete postData.viewers;
+          delete postData.comments;
+          delete postData.wrongs;
+          delete postData.corrects;
+          delete postData.studied;
+          delete postData.editable;
+          delete postData.left;
+          delete postData.top;
+          delete postData.height;
+  
+          const willBeApproved = isVersionApproved({ corrects: 1, wrongs: 0, nodeData: newNode });
+  
+          if (willBeApproved) {
+            const newParentIds: string[] = newNode.parents.map(parent => parent.node);
+            const newChildIds: string[] = newNode.children.map(child => child.node);
+            const oldParentIds: string[] = oldNode.parents.map(parent => parent.node);
+            const oldChildIds: string[] = oldNode.children.map(child => child.node);
+            const idsToBeRemoved = Array.from(
+              new Set<string>([
+                ...newParentIds,
+                ...newChildIds,
+                notebookRef.current.selectedNode!,
+                ...oldParentIds,
+                ...oldChildIds,
+              ])
+            );
+            idsToBeRemoved.forEach(idToBeRemoved => {
+              if (changedNodes.hasOwnProperty(idToBeRemoved)) {
+                delete changedNodes[idToBeRemoved];
+              }
+            });
+          }
+  
+          const nodes = {
+            ...graph.nodes,
+            [selectedNodeId]: {
+              ...graph.nodes[selectedNodeId],
+              editable: false,
+            },
+          };
+  
+          getMapGraph("/proposeNodeImprovement", postData, !willBeApproved);
+  
+          setTimeout(() => {
+            scrollToNode(selectedNodeId);
+          }, 200);
+  
+          return {
+            nodes,
+            edges: graph.edges,
+          };
+        });
 
-        const nodes = {
-          ...graph.nodes,
-          [selectedNodeId]: {
-            ...graph.nodes[selectedNodeId],
-            editable: false,
-          },
-        };
-
-        getMapGraph("/proposeNodeImprovement", postData, !willBeApproved);
-
-        setTimeout(() => {
-          scrollToNode(selectedNodeId);
-        }, 200);
-
-        return {
-          nodes,
-          edges: graph.edges,
-        };
+        return updatedLinks;
       });
     },
     [
       isPlayingTheTutorialRef,
       nodeBookDispatch,
-      allNodes,
-      nodeBookState.selectedNode,
-      addedParents,
-      addedChildren,
-      removedParents,
-      removedChildren,
       getMapGraph,
       scrollToNode,
     ]
@@ -3899,11 +3933,13 @@ const Dashboard = ({}: DashboardProps) => {
 
   // this method was required to cleanup editor added, removed child and parent list
   const cleanEditorLink = useCallback(() => {
-    setAddedParents([]);
-    setAddedChildren([]);
-    setRemovedParents([]);
-    setRemovedChildren([]);
-  }, [setAddedParents, setAddedChildren, setRemovedParents, setRemovedChildren]);
+    setUpdatedLinks({
+      addedParents: [],
+      addedChildren: [],
+      removedChildren: [],
+      removedParents: [],
+    });
+  }, []);
 
   const onScrollToLastNode = () => {
     if (!nodeBookState.selectedNode) return;
@@ -3928,6 +3964,7 @@ const Dashboard = ({}: DashboardProps) => {
 
   const setSelectedNode = useCallback(
     (nodeId: string) => {
+      notebookRef.current.selectedNode = nodeId;
       nodeBookDispatch({ type: "setSelectedNode", payload: nodeId });
       scrollToNode(nodeId);
     },
@@ -4031,6 +4068,9 @@ const Dashboard = ({}: DashboardProps) => {
             Click the node you'd like to link to...{" "}
             <Button
               onClick={() => {
+                notebookRef.current.choosingNode = null;
+                notebookRef.current.selectedNode = null;
+                notebookRef.current.chosenNode = null;
                 nodeBookDispatch({ type: "setChoosingNode", payload: null });
                 nodeBookDispatch({ type: "setSelectedNode", payload: null });
                 nodeBookDispatch({ type: "setChosenNode", payload: null });
