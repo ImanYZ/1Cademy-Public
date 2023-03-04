@@ -665,7 +665,7 @@ const Node = ({
         top: top ? top : 1000,
         width: width,
         transition: "0.3s",
-        padding: "13px 13px 0px 13px",
+        padding: "13px 13px 13px 13px",
       }}
     >
       {/* INFO: uncomment this only on develope */}
@@ -739,6 +739,7 @@ const Node = ({
                 onHideNodeHandler={hideNodeHandler}
                 disabled={disabled}
                 enableChildElements={enableChildElements}
+                sx={{ float: "right" }}
                 // sx={{ position: "absolute", right: "10px", top: "0px" }}
               />
             )}
@@ -1174,6 +1175,7 @@ const Node = ({
               onHideNodeHandler={hideNodeHandler}
               disabled={disabled}
               enableChildElements={enableChildElements}
+              sx={{ float: "right" }}
               // sx={{ position: "absolute", right: "10px", top: "0px" }}
             />
           )}

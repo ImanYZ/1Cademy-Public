@@ -212,6 +212,7 @@ export type StepTutorialConfig = {
   targetDefaultProperties?: Partial<FullNodeData>;
   tooltipPosition?: "top" | "bottom" | "left" | "right" | "topLeft";
   anchor?: string;
+  largeTarget?: boolean;
 };
 export interface NodeTutorialState {
   localSnapshot: FullNodeData[];
@@ -230,6 +231,7 @@ export interface NodeTutorialState {
   targetDelay?: number;
   forceScrollToNode?: boolean;
   targetDefaultProperties?: Partial<FullNodeData>;
+  largeTarget?: boolean;
 }
 export type StepReducerPayload = {
   callback?: () => void;
