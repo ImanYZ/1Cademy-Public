@@ -1,9 +1,11 @@
 import { Box } from "@mui/material";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
+import { useEffect } from "react";
+import { useRive } from "rive-react";
 import { TutorialState, TutorialStep, TutorialStepConfig } from "src/nodeBookTypes";
 
-import { RiveComponentMemoized } from "@/components/home/components/temporals/RiveComponentExtended";
+// import { RiveComponentMemoized } from "@/components/home/components/temporals/RiveComponentExtended";
 import MarkdownRender from "@/components/Markdown/MarkdownRender";
 
 // import { FullNodeData, NodeTutorialState, TutorialState } from "../../nodeBookTypes";
@@ -43,10 +45,23 @@ Ex for Node id elements to disable
   "01-tag-button-0"
   "01-node-footer-menu"
  */
+const RiveComponentAnimated = ({ src, artboard, animations, autoplay }: any) => {
+  const { rive, RiveComponent } = useRive({
+    src,
+    artboard,
+    animations,
+    autoplay,
+  });
+  useEffect(() => {
+    if (!rive) return;
+    rive.load({ src, artboard, animations, autoplay });
+  }, [animations, artboard, autoplay, rive, src]);
 
+  return <RiveComponent className={`rive-canvas`} />;
+};
 const NAVIGATION_STEPS: TutorialStepConfig[] = [
   {
-    title: "Navigaton: Panninig",
+    title: "Navigaton: Pan",
     description: (
       <>
         <MarkdownRender
@@ -54,8 +69,8 @@ const NAVIGATION_STEPS: TutorialStepConfig[] = [
             "You can manipulate your field of view by panning the screen by sliding two fingers on the trackpad or clicking, sliding with either a finger or the mouse."
           }
         />
-        <Box width="150px" height="150px" m="0 auto" mt="8px">
-          <RiveComponentMemoized
+        <Box width="200px" height="200px" m="0 auto" mt="8px">
+          <RiveComponentAnimated
             src="rive-tutorial/panning.riv"
             artboard="New Artboard"
             animations={["Timeline 1"]}
@@ -70,25 +85,35 @@ const NAVIGATION_STEPS: TutorialStepConfig[] = [
   {
     title: "Navigaton: Zoom In",
     description: (
-      <MarkdownRender
-        text={
-          "To zoom in, you can slide two fingers away from each other on the track pad or press control (command Mac) +"
-        }
-      />
+      <>
+        <MarkdownRender
+          text={
+            "To **zoom in**, you can slide two fingers away from each other on the track pad or press control (command Mac) + and To **zoom out**, you can slide to fingers toward each other on the track or press control (command Mac) -"
+          }
+        />
+        <Box width="200px" height="200px" m="0 auto" mt="8px">
+          <RiveComponentAnimated
+            src="rive-tutorial/zooming.riv"
+            artboard="New Artboard"
+            animations={["Timeline 1"]}
+            autoplay={true}
+          />
+        </Box>
+      </>
     ),
     tooltipPosition: "bottomLeft",
     anchor: "Portal",
   },
-  {
-    title: "Navigaton: Zoom Out",
-    description: (
-      <MarkdownRender
-        text={"To zoom out, you can slide to fingers toward each other on the track or press control (command Mac) -"}
-      />
-    ),
-    tooltipPosition: "bottomLeft",
-    anchor: "Portal",
-  },
+  // {
+  //   title: "Navigaton: Zoom Out",
+  //   description: (
+  //     <MarkdownRender
+  //       text={"To zoom out, you can slide to fingers toward each other on the track or press control (command Mac) -"}
+  //     />
+  //   ),
+  //   tooltipPosition: "bottomLeft",
+  //   anchor: "Portal",
+  // },
 ];
 
 export const NAVIGATION_STEPS_COMPLETE: TutorialStep[] = [...NAVIGATION_STEPS].map((c, i, s) => {

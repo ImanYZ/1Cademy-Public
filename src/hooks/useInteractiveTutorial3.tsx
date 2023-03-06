@@ -96,6 +96,8 @@ export const useInteractiveTutorial = ({}: useInteractiveTutorialProps) => {
     if (idxCurrentStepRef.current === steps.length - 1) {
       idxCurrentStepRef.current = -1;
       setStateNodeTutorial(prev => {
+        console.log("sssssssss", { prev });
+
         if (prev?.childTargetId) {
           removeStyleFromTarget(prev.childTargetId);
         }
@@ -107,6 +109,7 @@ export const useInteractiveTutorial = ({}: useInteractiveTutorialProps) => {
       idxCurrentStepRef.current += 1;
       const selectedStep = steps[idxCurrentStepRef.current];
       setStateNodeTutorial(prev => {
+        console.log("sssssssss", { prev });
         if (prev?.childTargetId) {
           removeStyleFromTarget(prev.childTargetId);
         }

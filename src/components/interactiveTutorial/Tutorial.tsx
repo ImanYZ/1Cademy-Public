@@ -131,7 +131,9 @@ export const Tutorial = ({
                 onSkip();
               }}
               sx={{
+                color: "inherit",
                 p: "8px 0px",
+                ":hover": { backgroundColor: theme => (theme.palette.mode === "dark" ? "#575f68" : "#d7dee6") },
               }}
             >
               Skip
@@ -144,8 +146,14 @@ export const Tutorial = ({
                   sx={{
                     borderRadius: "32px",
                     mr: "16px",
-
                     p: "8px 32px",
+                    color: "inherit",
+                    borderColor: theme => (theme.palette.mode === "dark" ? gray50 : gray800),
+                    ":hover": {
+                      borderColor: "inherit",
+                      color: "inherit",
+                      backgroundColor: theme => (theme.palette.mode === "dark" ? "#575f68" : "#d7dee6"),
+                    },
                   }}
                 >
                   Prev
@@ -160,8 +168,11 @@ export const Tutorial = ({
                   sx={{
                     borderRadius: "32px",
                     p: "8px 32px",
-                    backgroundColor: "#FF6D00",
-                    ":hover": { backgroundColor: "#f57a1c" },
+                    color: theme => (theme.palette.mode === "dark" ? gray800 : gray50),
+                    backgroundColor: theme => (theme.palette.mode === "dark" ? gray50 : gray800),
+                    ":hover": {
+                      backgroundColor: theme => (theme.palette.mode === "dark" ? gray200 : gray700),
+                    },
                   }}
                   disabled={tutorialState.isClickeable}
                 >
@@ -179,8 +190,11 @@ export const Tutorial = ({
                   sx={{
                     borderRadius: "32px",
                     p: "8px 32px",
-                    backgroundColor: "#FF6D00",
-                    ":hover": { backgroundColor: "#f57a1c" },
+                    color: theme => (theme.palette.mode === "dark" ? gray800 : gray50),
+                    backgroundColor: theme => (theme.palette.mode === "dark" ? gray50 : gray800),
+                    ":hover": {
+                      backgroundColor: theme => (theme.palette.mode === "dark" ? gray200 : gray700),
+                    },
                   }}
                 >
                   {"Finalize"}
