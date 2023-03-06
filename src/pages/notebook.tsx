@@ -2623,14 +2623,18 @@ const Dashboard = ({}: DashboardProps) => {
 
       const willRemoveNode = doNeedToDeleteNode(_corrects, _wrongs, locked);
       if (willRemoveNode) {
-        const currentNode = graph.nodes[nodeId];
-        if (currentNode?.children.length > 0) {
-          window.alert(
-            "To be able to delete this node, you should first delete its children or move them under other parent node."
-          );
-          return;
-        }
-        deleteOK = window.confirm("You are going to permanently delete this node by downvoting it. Are you sure?");
+        setGraph(graph => {
+          const node = graph.nodes[nodeId];
+          if (node?.children.length > 0) {
+            window.alert(
+              "To be able to delete this node, you should first delete its children or move them under other parent node."
+            );
+            deleteOK = false;
+          } else {
+            deleteOK = window.confirm("You are going to permanently delete this node by downvoting it. Are you sure?");
+          }
+          return graph;
+        });
       }
 
       if (!deleteOK) return;
