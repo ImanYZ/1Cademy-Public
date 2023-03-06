@@ -312,11 +312,7 @@ const NODES_STEPS: TutorialStepConfig[] = [
     title: "Nodes - Node Footer",
     description: (
       <>
-        <MarkdownRender
-          text={
-            "This indicates what type of node this is, this is a ______ node. There are six types of nodes on 1Cademy."
-          }
-        />
+        <MarkdownRender text={"This indicates what type of node this is. There are six types of nodes on 1Cademy."} />
         <Box sx={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr 1fr", mt: "10px" }}>
           <Stack alignItems={"center"}>
             <LocalLibraryIcon color="primary" />
