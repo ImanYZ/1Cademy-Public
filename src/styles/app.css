@@ -13,7 +13,7 @@ body.LightMode {
   background-color: #dfdfdf;
 }
 body.Image.LightMode {
-  background-image: url(../../public/lightModeLibraryBackground.jpg);
+  background-image: url(../../public/lightModeLibraryBackground.png);
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
