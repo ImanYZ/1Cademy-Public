@@ -1,10 +1,9 @@
-import { MutableRefObject, ReactNode, useCallback, useEffect, useRef, useState } from "react";
+import { ReactNode, useCallback, useEffect, useRef, useState } from "react";
 
-import { useNodeBook } from "@/context/NodeBookContext";
 import { NAVIGATION_STEPS_COMPLETE } from "@/lib/utils/tutorials/navigationSteps";
 
 import { NODES_STEPS_COMPLETE } from "../lib/reducers/nodeTutorial2";
-import { TNodeBookState, TutorialStep } from "../nodeBookTypes";
+import { TutorialStep } from "../nodeBookTypes";
 import { TutorialType } from "../pages/notebook";
 import useEventListener from "./useEventListener";
 
@@ -24,22 +23,24 @@ export type Step = {
 export type TargetClientRect = { width: number; height: number; top: number; left: number };
 
 type useInteractiveTutorialProps = {
-  notebookRef: MutableRefObject<TNodeBookState>;
+  // notebookRef: MutableRefObject<TNodeBookState>;
 };
 
-export const useInteractiveTutorial = ({ notebookRef }: useInteractiveTutorialProps) => {
+export const useInteractiveTutorial = ({}: useInteractiveTutorialProps) => {
   const isPlayingTheTutorialRef = useRef(false);
   const idxCurrentStepRef = useRef(-1);
-  const { nodeBookDispatch } = useNodeBook();
+  // const { nodeBookDispatch } = useNodeBook();
   // const defaultSelectedNode = useRef<string | null>(null);
   const [stateNodeTutorial, setStateNodeTutorial] = useState<TutorialStep | null>(null);
   const [steps, setSteps] = useState<TutorialStep[]>([]);
   const [currentTutorial, setCurrentTutorial] = useState<TutorialType>(null);
+  const [targetId, setTargetId] = useState("");
 
   const removeStyleFromTarget = useCallback(
     (childTargetId: string) => {
       if (childTargetId) {
-        const element = document.getElementById(`${notebookRef.current.selectedNode}-${childTargetId}`);
+        const elementId = targetId ? `${targetId}-${childTargetId}` : childTargetId;
+        const element = document.getElementById(elementId);
         if (element) {
           element.classList.remove("tutorial-target");
           element.classList.remove("tutorial-target-large");
@@ -47,7 +48,7 @@ export const useInteractiveTutorial = ({ notebookRef }: useInteractiveTutorialPr
         }
       }
     },
-    [notebookRef]
+    [targetId]
   );
 
   useEffect(() => {
@@ -88,14 +89,8 @@ export const useInteractiveTutorial = ({ notebookRef }: useInteractiveTutorialPr
     const selectedStep = newSteps[idxCurrentStepRef.current];
     setStateNodeTutorial(selectedStep);
     isPlayingTheTutorialRef.current = true;
-    // notebookRef.current.selectedNode = selectedStep.targetId;
-    // nodeBookDispatch({ type: "setSelectedNode", payload: selectedStep.targetId });
     setSteps(newSteps);
-  }, [currentTutorial, nodeBookDispatch, notebookRef, removeStyleFromTarget, steps.length]);
-
-  // useEffect(() => {
-  //   if (!defaultSelectedNode.current) defaultSelectedNode.current = notebookRef.current.selectedNode;
-  // }, [notebookRef]);
+  }, [currentTutorial, removeStyleFromTarget]);
 
   const onNextStep = useCallback(() => {
     if (idxCurrentStepRef.current === steps.length - 1) {
@@ -118,9 +113,6 @@ export const useInteractiveTutorial = ({ notebookRef }: useInteractiveTutorialPr
         return selectedStep;
       });
       isPlayingTheTutorialRef.current = true;
-
-      // notebookRef.current.selectedNode = selectedStep.targetId;
-      // nodeBookDispatch({ type: "setSelectedNode", payload: selectedStep.targetId });
     }
   }, [removeStyleFromTarget, steps]);
 
@@ -136,9 +128,6 @@ export const useInteractiveTutorial = ({ notebookRef }: useInteractiveTutorialPr
       return selectedStep;
     });
     isPlayingTheTutorialRef.current = true;
-
-    // notebookRef.current.selectedNode = selectedStep.targetId;
-    // nodeBookDispatch({ type: "setSelectedNode", payload: selectedStep.targetId });
   }, [removeStyleFromTarget, steps]);
 
   useEventListener({
@@ -154,6 +143,8 @@ export const useInteractiveTutorial = ({ notebookRef }: useInteractiveTutorialPr
     onPreviousStep,
     isPlayingTheTutorialRef,
     stepsLength: steps.length,
+    setTargetId,
+    targetId,
   };
 };
 

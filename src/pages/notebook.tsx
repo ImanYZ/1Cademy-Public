@@ -271,9 +271,6 @@ const Dashboard = ({}: DashboardProps) => {
   const previousLengthEdges = useRef(0);
   const g = useRef(dagreUtils.createGraph());
 
-  // this flag is used in interactive tutorial to fire useEffect when change state
-  const [, /* localSnapshot */ setLocalSnapshot] = useState<FullNodesData>({});
-  const shouldResetGraph = useRef(true);
   const [targetClientRect, setTargetClientRect] = useState<TargetClientRect>({ width: 0, height: 0, top: 0, left: 0 });
 
   //Notifications
@@ -322,10 +319,6 @@ const Dashboard = ({}: DashboardProps) => {
     isEnabled: false,
   });
 
-  // const [nodeTutorial /* setNodeTutorial */] = useState(Boolean(localStorage.getItem("node-tutorial")));
-
-  // const [tutorialSteps, setTutorialSteps] = useState<NodeTutorialState[]>([]);
-
   const {
     stateNodeTutorial,
     onNextStep,
@@ -334,10 +327,9 @@ const Dashboard = ({}: DashboardProps) => {
     setCurrentTutorial,
     currentTutorial,
     stepsLength,
-  } = useInteractiveTutorial({
-    notebookRef,
-    // currentTutorial,
-  });
+    setTargetId,
+    targetId,
+  } = useInteractiveTutorial({});
   const onNodeInViewport = useCallback(
     (nodeId: string) => {
       const originalNode = document.getElementById(nodeId);
@@ -450,51 +442,6 @@ const Dashboard = ({}: DashboardProps) => {
     [isPlayingTheTutorialRef, onNodeInViewport]
   );
 
-  // useEffect(() => {
-  //   if (!currentStep) return setTargetClientRect({ width: 0, height: 0, top: 0, left: 0 });
-
-  //   if (currentStep.anchor) {
-  //     if (!currentStep.targetId) return;
-
-  //     const targetElement = document.getElementById(currentStep.targetId);
-
-  //     if (!targetElement) return;
-
-  //     targetElement.style.border = "4px dashed #ffc813";
-  //     const { width, height, top, left } = targetElement.getBoundingClientRect();
-
-  //     setTargetClientRect({ width, height, top, left });
-  //   } else {
-  //     console.log("----------------- detect client react in interactive map");
-
-  //     const thisNode = graph.nodes[currentStep.targetId];
-  //     if (!thisNode) return;
-
-  //     let { top, left, width = NODE_WIDTH, height = 0 } = thisNode;
-  //     let offsetChildTop = 0;
-  //     let offsetChildLeft = 0;
-  //     if (currentStep.childTargetId) {
-  //       const targetElement = document.getElementById(currentStep.childTargetId);
-  //       if (!targetElement) return;
-  //       targetElement.style.border = "4px dashed #ffc813";
-  //       const { offsetTop, offsetHeight, offsetParent, offsetLeft, offsetWidth } = targetElement;
-  //       const { height: childrenHeight, width: childrenWidth } = targetElement.getBoundingClientRect();
-
-  //       offsetChildTop = offsetTop;
-  //       offsetChildLeft = offsetLeft;
-  //       height = childrenHeight;
-  //       width = childrenWidth;
-  //     }
-
-  //     setTargetClientRect({
-  //       top: top + offsetChildTop,
-  //       left: left + offsetChildLeft,
-  //       width,
-  //       height,
-  //     });
-  //   }
-  // }, [currentStep, graph.nodes, setTargetClientRect]);
-
   useEffect(() => {
     if (!nodeBookState.selectedNode) return;
     if (!stateNodeTutorial) return setTargetClientRect({ width: 0, height: 0, top: 0, left: 0 });
@@ -504,42 +451,29 @@ const Dashboard = ({}: DashboardProps) => {
         if (!stateNodeTutorial.childTargetId) return;
 
         const targetElement = document.getElementById(stateNodeTutorial.childTargetId);
-
         if (!targetElement) return;
 
-        targetElement.classList.add(
-          stateNodeTutorial.isClickeable
-            ? "tutorial-target-pulse"
-            : stateNodeTutorial.largeTarget
-            ? "tutorial-target-large"
-            : "tutorial-target"
-        );
-
+        targetElement.classList.add(stateNodeTutorial.largeTarget ? "tutorial-target-large" : "tutorial-target");
         const { width, height, top, left } = targetElement.getBoundingClientRect();
 
         setTargetClientRect({ width, height, top, left });
       }, stateNodeTutorial.targetDelay);
     } else {
       console.log("----------------- detect client react in interactive map");
+      if (!targetId) return;
 
-      const thisNode = graph.nodes[nodeBookState.selectedNode] || graph.nodes[Object.keys(graph.nodes)[0]];
+      const thisNode = graph.nodes[targetId];
       if (!thisNode) return;
 
       let { top, left, width = NODE_WIDTH, height = 0 } = thisNode;
       let offsetChildTop = 0;
       let offsetChildLeft = 0;
+
       if (stateNodeTutorial.childTargetId) {
-        const targetElementId = nodeBookState.selectedNode || Object.keys(graph.nodes)[0] || "r98BjyFDCe4YyLA3U8ZE";
-        const targetElement = document.getElementById(`${targetElementId}-${stateNodeTutorial.childTargetId}`);
+        const targetElement = document.getElementById(`${targetId}-${stateNodeTutorial.childTargetId}`);
         if (!targetElement) return;
 
-        targetElement.classList.add(
-          stateNodeTutorial.isClickeable
-            ? "tutorial-target-pulse"
-            : stateNodeTutorial.largeTarget
-            ? "tutorial-target-large"
-            : "tutorial-target"
-        );
+        targetElement.classList.add(stateNodeTutorial.largeTarget ? "tutorial-target-large" : "tutorial-target");
 
         const { offsetTop, offsetLeft } = targetElement;
         const { height: childrenHeight, width: childrenWidth } = targetElement.getBoundingClientRect();
@@ -556,11 +490,12 @@ const Dashboard = ({}: DashboardProps) => {
         width,
         height,
       });
-      return () => {
-        if (timeoutId) clearTimeout(timeoutId);
-      };
     }
-  }, [stateNodeTutorial, graph.nodes, setTargetClientRect, nodeBookState.selectedNode]);
+
+    return () => {
+      if (timeoutId) clearTimeout(timeoutId);
+    };
+  }, [stateNodeTutorial, graph.nodes, setTargetClientRect, nodeBookState.selectedNode, targetId]);
 
   const onCompleteWorker = useCallback(() => {
     if (!nodeBookState.selectedNode) return;
@@ -797,37 +732,58 @@ const Dashboard = ({}: DashboardProps) => {
   }, [firstScrollToNode, graph.nodes, nodeBookDispatch, openNodeHandler, scrollToNode]);
 
   useEffect(() => {
-    console.log("USE_EFFECT", "get-user-tutorial", userTutorialLoaded);
-    devLog("USE_EFFECT", { userTutorialLoaded, user });
-    if (!user) return;
-    // if (userTutorialLoaded) return;
+    // fetch user tutorial state first time
 
+    if (!user) return;
+    if (userTutorialLoaded) return;
+
+    devLog("USE_EFFECT: FETCH_USER_TUTORIAL", { userTutorialLoaded, user });
     const getTutorialState = async () => {
       const tutorialRef = doc(db, "userTutorial", user.uname);
       const tutorialDoc = await getDoc(tutorialRef);
-      console.log(tutorialDoc);
 
-      // TODO: load step from DB
       if (tutorialDoc.exists()) {
         const tutorial = tutorialDoc.data() as UserTutorials;
         setUserTutorial(prev => ({ ...prev, ...tutorial }));
-        // if (!tutorial.navigation.done && !tutorial.navigation.skipped) {
-        //   setCurrentTutorial("NAVIGATION");
-        // } else if (!tutorial.nodes.done && !tutorial.nodes.skipped) {
-        //   setCurrentTutorial("NODES");
-        // }
-        // return setUserTutorialLoaded(true);
-      } else {
-        console.log("will-start");
-        setCurrentTutorial("NAVIGATION");
       }
 
-      // setUserTutorialLoaded(true);
+      setUserTutorialLoaded(true);
     };
 
     getTutorialState();
-    setUserTutorialLoaded(true);
   }, [db, setCurrentTutorial, user, user?.userId, userTutorialLoaded]);
+
+  useEffect(() => {
+    // detect triggers to change tutorials
+
+    if (currentTutorial) return;
+    if (!userTutorialLoaded) return;
+
+    devLog("USE_EFFECT: DETECT_TRIGGER_TUTORIAL", { userTutorial });
+
+    if (!userTutorial.navigation.done && !userTutorial.navigation.skipped) {
+      setCurrentTutorial("NAVIGATION");
+      return;
+    }
+
+    if (!userTutorial.nodes.done && !userTutorial.nodes.skipped) {
+      console.log({ keys: Object.keys(graph.nodes) });
+      const nodeTargetId = nodeBookState.selectedNode || Object.keys(graph.nodes)[0] || "";
+      if (!nodeTargetId) return;
+
+      setTargetId(nodeTargetId);
+      setCurrentTutorial("NODES");
+      return;
+    }
+  }, [
+    currentTutorial,
+    graph.nodes,
+    nodeBookState.selectedNode,
+    setCurrentTutorial,
+    setTargetId,
+    userTutorial,
+    userTutorialLoaded,
+  ]);
 
   //  bd => state (first render)
   useEffect(() => {
@@ -924,6 +880,7 @@ const Dashboard = ({}: DashboardProps) => {
   // list of online users
   useEffect(() => {
     if (!user) return;
+
     const usersStatusQuery = query(collection(db, "status"), where("state", "==", "online"));
     const unsubscribe = onSnapshot(usersStatusQuery, snapshot => {
       const docChanges = snapshot.docChanges();
@@ -1048,22 +1005,22 @@ const Dashboard = ({}: DashboardProps) => {
     if (!db) return;
     if (!user?.uname) return;
     if (!allTagsLoaded) return;
-    // if (!userTutorialLoaded) return;
+    if (!userTutorialLoaded) return;
     // if (!userTutorial.nodes.done && !userTutorial.nodes.skipped) return;
     // if (stateNodeTutorial) return;
 
     devLog("USE_EFFECT", "nodes synchronization");
 
-    if (!shouldResetGraph.current) {
-      setGraph({
-        nodes: {},
-        edges: {},
-      });
-      setLocalSnapshot({});
-      shouldResetGraph.current = true;
-      nodeBookDispatch({ type: "setSelectedNode", payload: null });
-      g.current = createGraph();
-    }
+    // if (!shouldResetGraph.current) {
+    //   setGraph({
+    //     nodes: {},
+    //     edges: {},
+    //   });
+    //   setLocalSnapshot({});
+    //   shouldResetGraph.current = true;
+    //   nodeBookDispatch({ type: "setSelectedNode", payload: null });
+    //   g.current = createGraph();
+    // }
 
     const userNodesRef = collection(db, "userNodes");
     const q = query(
@@ -1100,117 +1057,6 @@ const Dashboard = ({}: DashboardProps) => {
 
     scrollToNode(stateNodeTutorial.targetId);
   }, [currentTutorial, scrollToNode, stateNodeTutorial]);
-
-  // useEffect(() => {
-  //   // here we set up the default properties of a node in TUTORIAL
-
-  //   if (currentTutorial !== "PROPOSAL") return;
-  //   if (!stateNodeTutorial) return;
-  //   // if (!stateNodeTutorial.targetDefaultProperties) return;
-
-  //   // if (stateNodeTutorial.currentStepName === 17) {
-  //   //   debugger;
-  //   // }
-  //   const thisNode = graph.nodes[stateNodeTutorial.targetId];
-  //   if (!thisNode) return;
-
-  //   const keys = Object.keys(stateNodeTutorial.targetDefaultProperties) as (keyof FullNodeData)[];
-
-  //   const isEqualsProperties = (key: keyof FullNodeData) => {
-  //     // console.log(1, "SNP");
-  //     if (!stateNodeTutorial.targetDefaultProperties) return true;
-  //     // console.log(2, "SNP", thisNode, stateNodeTutorial?.targetDefaultProperties[key]);
-  //     // if (!thisNode[key]) return true;
-  //     // console.log(3, "SNP");
-  //     // if (!stateNodeTutorial?.targetDefaultProperties[key]) return;
-  //     // console.log(3, "SNP", thisNode[key], stateNodeTutorial?.targetDefaultProperties[key]);
-
-  //     return thisNode[key] === stateNodeTutorial?.targetDefaultProperties[key];
-  //   };
-  //   const isEquals = keys.some(isEqualsProperties);
-  //   console.log("SNP", isEquals);
-
-  //   if (isEquals) return;
-
-  //   setNodeParts(stateNodeTutorial.targetId, node => ({ ...node, ...stateNodeTutorial.targetDefaultProperties }));
-  // }, [stateNodeTutorial, currentTutorial, setNodeParts, graph.nodes]);
-
-  // useEffect(() => {
-  //   // Local Snapshot used only in interactive tutorial
-  //   if (!stateNodeTutorial) return;
-
-  //   devLog("USE_EFFECT", "interactive-tutorial");
-
-  //   if (shouldResetGraph.current) {
-  //     g.current = createGraph();
-  //     setGraph({
-  //       nodes: {},
-  //       edges: {},
-  //     });
-  //     shouldResetGraph.current = false;
-  //   }
-
-  //   const fullNodes = stateNodeTutorial.localSnapshot;
-
-  //   const visibleFullNodes: FullNodeData[] = fullNodes.filter(cur => cur.visible || cur.nodeChangeType === "modified");
-  //   devLog("3: TUTORIAL: visibleFullNodes", visibleFullNodes);
-  //   setAllNodes(oldAllNodes => mergeAllNodes(fullNodes, oldAllNodes));
-  //   devLog("4: TUTORIAL: setAllNodes");
-  //   setGraph(({ nodes, edges }) => {
-  //     const visibleFullNodesMerged = visibleFullNodes.map(cur => {
-  //       const tmpNode: FullNodeData = nodes[cur.node];
-  //       if (tmpNode) {
-  //         if (tmpNode.hasOwnProperty("simulated")) {
-  //           delete tmpNode["simulated"];
-  //         }
-  //         if (tmpNode.hasOwnProperty("isNew")) {
-  //           delete tmpNode["isNew"];
-  //         }
-  //       }
-
-  //       const hasParent = cur.parents.length;
-  //       // IMPROVE: we need to pass the parent which open the node
-  //       // to use his current position
-  //       // in this case we are checking first parent
-  //       // if this doesn't exist will set top:0 and left: 0 + NODE_WIDTH + COLUMN_GAP
-  //       const nodeParent = hasParent ? nodes[cur.parents[0].node] : null;
-  //       const topParent = nodeParent?.top ?? 0;
-
-  //       const leftParent = nodeParent?.left ?? 0;
-
-  //       return {
-  //         ...cur,
-  //         left: tmpNode?.left ?? leftParent + NODE_WIDTH + COLUMN_GAP,
-  //         top: tmpNode?.top ?? topParent,
-  //       };
-  //     });
-  //     devLog("5: TUTORIAL:user Nodes Snapshot:visible Full Nodes Merged", visibleFullNodesMerged);
-  //     const { newNodes, newEdges } = fillDagre(
-  //       g.current,
-  //       visibleFullNodesMerged,
-  //       nodes,
-  //       edges,
-  //       settings.showClusterOptions,
-  //       allTags
-  //     );
-
-  //     if (!Object.keys(newNodes).length) {
-  //       setNoNodesFoundMessage(true);
-  //     }
-
-  //     return { nodes: newNodes, edges: newEdges };
-  //   });
-  //   setOpenProgressBarMenu(true);
-  // }, [
-  //   allTags,
-  //   settings.showClusterOptions,
-  //   stateNodeTutorial,
-  //   notebookChanged,
-  //   userTutorial.nodes.done,
-  //   userTutorial.nodes.skipped,
-  //   userTutorial.nodes.currentStep,
-  //   setCurrentTutorial,
-  // ]);
 
   useEffect(() => {
     if (!db) return;
@@ -1913,16 +1759,13 @@ const Dashboard = ({}: DashboardProps) => {
     if (!currentTutorial) return;
 
     const keyTutorial: TutorialTypeKeys = currentTutorial.toLowerCase() as TutorialTypeKeys;
-
     const tutorialUpdated: UserTutorial = {
       ...userTutorial[keyTutorial],
       currentStep: stateNodeTutorial.currentStepName,
       done: true,
     };
     const userTutorialUpdated: UserTutorials = { ...userTutorial, [keyTutorial]: tutorialUpdated };
-    if (currentTutorial === "NAVIGATION") setCurrentTutorial("NODES");
-    else setCurrentTutorial(null);
-    setOpenSidebar(null);
+    setCurrentTutorial(null);
     setUserTutorial(userTutorialUpdated);
 
     const tutorialRef = doc(db, "userTutorial", user.uname);
@@ -4128,6 +3971,15 @@ const Dashboard = ({}: DashboardProps) => {
 
               <Divider />
 
+              <Typography>Tutorial:</Typography>
+              <Box>
+                <Button onClick={() => console.log(currentTutorial)}>Current tutorial</Button>
+                <Button onClick={() => console.log(userTutorial)}>userTutorial</Button>
+                <Button onClick={() => console.log(targetId)}>targetId</Button>
+              </Box>
+
+              <Divider />
+
               <Typography>Functions:</Typography>
               <Box>
                 <Button onClick={() => nodeBookDispatch({ type: "setSelectionType", payload: "Proposals" })}>
@@ -4471,7 +4323,6 @@ const Dashboard = ({}: DashboardProps) => {
               openUserInfoSidebar={openUserInfoSidebar}
               onlineUsers={onlineUsers}
               db={db}
-              disabled={Boolean(["TT"].includes("LIVENESS_BAR"))}
             />
           )}
 
@@ -4482,7 +4333,6 @@ const Dashboard = ({}: DashboardProps) => {
               onlineUsers={onlineUsers}
               db={db}
               user={user}
-              disabled={Boolean(["TT"].includes("LIVENESS_BAR"))}
             />
           )}
 
