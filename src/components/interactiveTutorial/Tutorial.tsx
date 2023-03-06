@@ -68,11 +68,8 @@ export const Tutorial = ({
     return { top, left };
   }, [targetClientRect, tutorialState]);
 
-  console.log({ tutorialState, tooltipClientRect, targetClientRect });
   if (!tutorialState) return null;
-  console.log(1);
   if (!tutorialState.currentStepName) return null;
-  console.log(2);
 
   let location = { top: "10px", bottom: "10px", left: "10px", right: "10px" };
 
@@ -195,7 +192,6 @@ export const Tutorial = ({
       </div>
     );
 
-  console.log(3);
   return (
     <Box
       ref={tooltipRef}

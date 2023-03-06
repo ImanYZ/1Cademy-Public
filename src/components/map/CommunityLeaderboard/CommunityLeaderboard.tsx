@@ -45,7 +45,7 @@ const CommunityLeaderboard = ({ userTagId, pendingProposalsLoaded, disabled = fa
 
   useEffect(() => {
     if (disabled) return;
-    console.log("dd1");
+    // console.log("dd1");
     if (db && userTagId && pendingProposalsLoaded) {
       loadReputationsData(db, true, "All Time", userTagId, setComPointsDict, setComPointsLoaded);
     }
@@ -53,7 +53,7 @@ const CommunityLeaderboard = ({ userTagId, pendingProposalsLoaded, disabled = fa
 
   useEffect(() => {
     if (disabled) return;
-    console.log("dd2");
+    // console.log("dd2");
     if (db && userTagId && comPointsLoaded) {
       loadReputationsData(db, true, "Monthly", userTagId, setComPointsMonthlyDict, setComPointsMonthlyLoaded);
     }
@@ -61,7 +61,7 @@ const CommunityLeaderboard = ({ userTagId, pendingProposalsLoaded, disabled = fa
 
   useEffect(() => {
     if (disabled) return;
-    console.log("dd3");
+    // console.log("dd3");
     if (db && userTagId && comPointsMonthlyLoaded) {
       loadReputationsData(db, true, "Weekly", userTagId, setComPointsWeeklyDict, setComPointsWeeklyLoaded);
     }
@@ -69,7 +69,7 @@ const CommunityLeaderboard = ({ userTagId, pendingProposalsLoaded, disabled = fa
 
   useEffect(() => {
     if (disabled) return;
-    console.log("dd4");
+    // console.log("dd4");
     if (db && userTagId && comPointsWeeklyLoaded) {
       loadReputationsData(db, true, "Others", userTagId, setComPointsOthersDict, setComPointsOthersLoaded);
     }
@@ -127,7 +127,7 @@ const CommunityLeaderboard = ({ userTagId, pendingProposalsLoaded, disabled = fa
   useEffect(() => {
     if (disabled) return;
     if (comLeaderboardType === "Monthly") {
-      console.log("[Com 7]:");
+      // console.log("[Com 7]:");
       loadReputationPoints(comPointsMonthlyDict);
     }
   }, [comLeaderboardType, comPointsMonthlyDict, disabled, loadReputationPoints]);
@@ -135,7 +135,7 @@ const CommunityLeaderboard = ({ userTagId, pendingProposalsLoaded, disabled = fa
   useEffect(() => {
     if (disabled) return;
     if (comLeaderboardType === "Weekly") {
-      console.log("[Com 8]:");
+      // console.log("[Com 8]:");
       loadReputationPoints(comPointsWeeklyDict);
     }
   }, [comLeaderboardType, comPointsWeeklyDict, disabled, loadReputationPoints]);
@@ -143,7 +143,7 @@ const CommunityLeaderboard = ({ userTagId, pendingProposalsLoaded, disabled = fa
   useEffect(() => {
     if (disabled) return;
     if (comLeaderboardType === "Self-votes") {
-      console.log("[Com 9]:", { comPointsDict, comPointsOthersDict });
+      // console.log("[Com 9]:", { comPointsDict, comPointsOthersDict });
       loadReputationPoints(comPointsDict, comPointsOthersDict);
     }
   }, [comLeaderboardType, comPointsDict, comPointsOthersDict, disabled, loadReputationPoints]);
@@ -151,7 +151,7 @@ const CommunityLeaderboard = ({ userTagId, pendingProposalsLoaded, disabled = fa
   useEffect(() => {
     if (disabled) return;
     if (comLeaderboardType === "Others' Votes") {
-      console.log("[Com 10]:");
+      // console.log("[Com 10]:");
       loadReputationPoints(comPointsOthersDict);
     }
   }, [comLeaderboardType, comPointsOthersDict, disabled, loadReputationPoints]);
@@ -159,7 +159,7 @@ const CommunityLeaderboard = ({ userTagId, pendingProposalsLoaded, disabled = fa
   useEffect(() => {
     if (disabled) return;
     if (comLeaderboardType === "Others Monthly") {
-      console.log("[Com 11]:");
+      // console.log("[Com 11]:");
       loadReputationPoints(comPointsOthersMonthlyDict);
     }
   }, [comLeaderboardType, comPointsOthersMonthlyDict, disabled, loadReputationPoints]);

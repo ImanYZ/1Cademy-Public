@@ -132,7 +132,6 @@ export const useWorkerQueue = ({
 
             edgesCopy[edgeId] = { ...resultEdge };
           });
-          console.log("WORKER Result Merged", { nodes: nodesCopy, edges: edgesCopy });
           return { nodes: nodesCopy, edges: edgesCopy };
         });
 
@@ -160,10 +159,8 @@ export const useWorkerQueue = ({
       })
       .flatMap(cur => cur || []);
 
-    console.log({ nodes: graph.nodes, g: g.current, individualNodeChanges });
     const nodesToRecalculate = setDagNodes(g.current, individualNodeChanges, graph.nodes, allTags, withClusters);
 
-    console.log({ nodes: nodesToRecalculate, edges: graph.edges, g: g.current });
     recalculateGraphWithWorker(nodesToRecalculate, graph.edges);
     setQueue([]);
 

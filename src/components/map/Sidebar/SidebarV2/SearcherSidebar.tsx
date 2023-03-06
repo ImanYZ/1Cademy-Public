@@ -110,16 +110,12 @@ const SearcherSidebar = ({
 
   const selectedTags = useMemo<TagTreeView[]>(() => Object.values(allTags).filter(tag => tag.checked), [allTags]);
 
-  console.log("enableElements", enableElements);
-
   // tutorial constants
   const disableInputSearcher = disableSearcher && !enableElements.includes("search-input");
   const disableSearchIcon = disableSearcher && !enableElements.includes("SearchIcon");
   const disableEditedInThePast = disableSearcher && !enableElements.includes("search-recently-input");
   const disableRecentNodeList = disableSearcher && !enableElements.includes("recentNodesList");
   const disableSearchItem = disableSearcher && !enableElements.includes("search-item");
-
-  console.log({ disableSearchList: disableSearchItem });
 
   const onSearch = useCallback(
     async (page: number, q: string, sortOption: SortValues, sortDirection: SortDirection, nodeTypes: NodeType[]) => {
@@ -682,11 +678,8 @@ const SearcherSidebar = ({
                   key={`resNode${idx}`}
                   onClick={
                     disableSearchItem
-                      ? () => {
-                          console.log("calling Openlinked true");
-                        }
+                      ? () => {}
                       : () => {
-                          console.log("calling Openlinked");
                           openLinkedNode(resNode.id, "Searcher");
                         }
                   }

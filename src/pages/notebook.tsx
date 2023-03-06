@@ -459,7 +459,6 @@ const Dashboard = ({}: DashboardProps) => {
         setTargetClientRect({ width, height, top, left });
       }, stateNodeTutorial.targetDelay);
     } else {
-      console.log("----------------- detect client react in interactive map");
       if (!targetId) return;
 
       const thisNode = graph.nodes[targetId];
@@ -629,7 +628,6 @@ const Dashboard = ({}: DashboardProps) => {
 
       const nodeRef = doc(db, "nodes", nodeId);
       const nodeDoc = await getDoc(nodeRef);
-      console.log({ exist: nodeDoc.exists() });
       const batch = writeBatch(db);
       if (nodeDoc.exists() && user) {
         const thisNode: any = { ...nodeDoc.data(), id: nodeId };
@@ -767,7 +765,6 @@ const Dashboard = ({}: DashboardProps) => {
     }
 
     if (!userTutorial.nodes.done && !userTutorial.nodes.skipped) {
-      console.log({ keys: Object.keys(graph.nodes) });
       const nodeTargetId = nodeBookState.selectedNode || Object.keys(graph.nodes)[0] || "";
       if (!nodeTargetId) return;
 
@@ -1116,7 +1113,6 @@ const Dashboard = ({}: DashboardProps) => {
       );
 
       const versionsSnapshot = onSnapshot(versionsQuery, async snapshot => {
-        console.log("sn> pending proposal");
         const docChanges = snapshot.docChanges();
         if (docChanges.length > 0) {
           for (let change of docChanges) {
@@ -1185,7 +1181,6 @@ const Dashboard = ({}: DashboardProps) => {
     const q = query(notificationNumsCol, where("uname", "==", user.uname));
 
     const notificationsSnapshot = onSnapshot(q, async snapshot => {
-      console.log("sn> notificationNums");
       if (!snapshot.docs.length) {
         const notificationNumRef = collection(db, "notificationNums");
         setDoc(doc(notificationNumRef), {
@@ -1683,8 +1678,6 @@ const Dashboard = ({}: DashboardProps) => {
   const hideOffsprings = useMemoizedCallback(
     nodeId => {
       if (notebookRef.current.choosingNode || !user) return;
-      console.log({ isPlayingTheTutorialRef: isPlayingTheTutorialRef.current });
-      // if (isPlayingTheTutorialRef.current) return;
 
       setGraph(graph => {
         (async () => {
@@ -1785,13 +1778,10 @@ const Dashboard = ({}: DashboardProps) => {
         typeOperation,
         isPlayingTheTutorialRef: isPlayingTheTutorialRef.current,
       });
-      console.log("linked 0", isPlayingTheTutorialRef.current);
 
       if (notebookRef.current.choosingNode) return;
 
       if (isPlayingTheTutorialRef.current && currentTutorial !== "SEARCHER") return;
-
-      console.log("lib");
 
       createActionTrack(
         db,
@@ -1838,10 +1828,7 @@ const Dashboard = ({}: DashboardProps) => {
       if (typeOperation === "CitationSidebar") {
         setOpenSidebar(null);
       }
-      console.log("Current tutoriial");
       if (currentTutorial === "SEARCHER") {
-        console.log("Finalize tutoriial called");
-
         onFinalizeTutorial();
       }
     },
