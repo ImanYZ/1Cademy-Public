@@ -5,51 +5,12 @@ import relativeTime from "dayjs/plugin/relativeTime";
 
 import MarkdownRender from "@/components/Markdown/MarkdownRender";
 
-import { FullNodeData, NodeTutorialState, TutorialState } from "../../nodeBookTypes";
+import { TutorialState, TutorialStep, TutorialStepConfig } from "../../nodeBookTypes";
+import { getBaseStepConfig } from "../utils/tutorials/tutorial.utils";
 
 export const INITIAL_NODE_TUTORIAL_STATE: TutorialState = null;
 
 dayjs.extend(relativeTime);
-
-const DISABLE_NOTEBOOK_OPTIONS = [
-  "TOOLBAR",
-  "LIVENESS_BAR",
-  "COMMUNITY_LEADERBOARD",
-  "SCROLL_TO_NODE_BUTTON",
-  "FOCUS_MODE_BUTTON",
-  "SEARCHER_SIDEBAR",
-];
-
-const getStepsValues = (step: number, max: number) => {
-  // steps = [1,...max]
-  return {
-    currentStepName: step,
-    nextStepName: step === max ? 0 : step + 1,
-    previosStepName: step === 1 ? 1 : step - 1,
-  };
-};
-
-const getBaseStepConfig = (step: number, max: number) => {
-  // DON'T CHANGE THIS, THIS WILL OVERRIDE ALL STEPS 🚨
-
-  const tt: NodeTutorialState = {
-    localSnapshot: [],
-    targetId: "",
-    title: "",
-    description: null,
-    // Description can be added in markdown in this way
-    // <MarkdownRender text={"This node defines a node in\n\n\n```js\nconsole.log('sd')\n```\n1Cademy!"} />
-    disabledElements: [],
-    enableChildElements: [],
-    anchor: "Portal",
-    ...getStepsValues(step, max),
-    tooltipPosition: "top",
-    isClickeable: false,
-    targetDelay: 0,
-  };
-
-  return tt;
-};
 
 /**
 EX: for notebook sections
@@ -75,25 +36,8 @@ Ex for Node id elements to disable
   "search-list"
  */
 
-const NODES_STEPS: {
-  localSnapshot: FullNodeData[];
-  targetId: string;
-  childTargetId?: string;
-  title: string;
-  description: React.ReactNode;
-  disabledElements?: string[];
-  enableChildElements?: string[];
-  // anchor: string;
-  // currentStepName: SetStepType;
-  // nextStepName: SetStepType;
-  // previosStepName: SetStepType;
-  tooltipPosition?: "top" | "bottom" | "left" | "right";
-  // stepLenght: number;
-  isClickeable?: boolean;
-  delay?: number;
-}[] = [
+const NODES_STEPS: TutorialStepConfig[] = [
   {
-    localSnapshot: [],
     targetId: "sidebar-wrapper-searcher",
     childTargetId: "sidebar-wrapper-searcher",
     title: "Search Engine",
@@ -102,46 +46,39 @@ const NODES_STEPS: {
         text={"1Cademy has a search engine that can be used to help you find a node, reference, or topic."}
       />
     ),
-    disabledElements: [...DISABLE_NOTEBOOK_OPTIONS],
-    enableChildElements: ["toolbar-search-button"],
+
     tooltipPosition: "right",
-    delay: 450,
+    targetDelay: 450,
+    anchor: "Portal",
   },
 
   {
-    localSnapshot: [],
     targetId: "sidebar-wrapper-searcher",
     childTargetId: "search-input",
     title: "Search Engine",
     description: <MarkdownRender text={"To search enter your query"} />,
-    disabledElements: [...DISABLE_NOTEBOOK_OPTIONS],
-    enableChildElements: ["search-input"],
     tooltipPosition: "bottom",
+    anchor: "Portal",
   },
 
   {
-    localSnapshot: [],
     targetId: "sidebar-wrapper-searcher",
     childTargetId: "SearchIcon",
     title: "Search Engine",
     description: <MarkdownRender text={"**Click** on this search icon."} />,
-    disabledElements: [...DISABLE_NOTEBOOK_OPTIONS],
-    enableChildElements: ["SearchIcon"],
     tooltipPosition: "bottom",
     isClickeable: true,
+    anchor: "Portal",
   },
   {
-    localSnapshot: [],
     targetId: "sidebar-wrapper-searcher",
     childTargetId: "searcher-sidebar-options",
     title: "Search Engine",
     description: <MarkdownRender text={"Beyond searching terms there are a number of ways to refine your search."} />,
-    disabledElements: [...DISABLE_NOTEBOOK_OPTIONS, "01"],
-    enableChildElements: ["searcher-sidebar-options"],
     tooltipPosition: "right",
+    anchor: "Portal",
   },
   {
-    localSnapshot: [],
     targetId: "sidebar-wrapper-searcher",
     childTargetId: "searcher-tags-button",
     title: "Search Engine",
@@ -152,24 +89,21 @@ const NODES_STEPS: {
         }
       />
     ),
-    disabledElements: [...DISABLE_NOTEBOOK_OPTIONS, "01"],
-    enableChildElements: ["searcher-tags-button"],
+
     tooltipPosition: "right",
+    anchor: "Portal",
   },
   {
-    localSnapshot: [],
     targetId: "sidebar-wrapper-searcher",
     childTargetId: "search-recently-input",
     title: "Search Engine",
     description: (
       <MarkdownRender text={"You can also refine your search by how recently nodes were created or edited."} />
     ),
-    disabledElements: [...DISABLE_NOTEBOOK_OPTIONS, "01"],
-    enableChildElements: ["search-recently-input"],
     tooltipPosition: "right",
+    anchor: "Portal",
   },
   {
-    localSnapshot: [],
     targetId: "sidebar-wrapper-searcher",
     childTargetId: "recentNodesList",
     title: "Search Engine",
@@ -180,12 +114,11 @@ const NODES_STEPS: {
         }
       />
     ),
-    disabledElements: [...DISABLE_NOTEBOOK_OPTIONS, "01"],
-    enableChildElements: ["recentNodesList"],
+
     tooltipPosition: "right",
+    anchor: "Portal",
   },
   {
-    localSnapshot: [],
     targetId: "sidebar-wrapper-searcher",
     childTargetId: "sidebar-wrapper-searcher-content",
     title: "Search Engine",
@@ -196,13 +129,12 @@ const NODES_STEPS: {
         }
       />
     ),
-    disabledElements: [...DISABLE_NOTEBOOK_OPTIONS, "01"],
-    enableChildElements: ["search-item"],
     tooltipPosition: "right",
+    anchor: "Portal",
   },
 ];
 
-export const SEARCHER_STEPS_COMPLETE: NodeTutorialState[] = NODES_STEPS.map((c, i, s) => {
+export const SEARCHER_STEPS_COMPLETE: TutorialStep[] = NODES_STEPS.map((c, i, s) => {
   return {
     ...getBaseStepConfig(i + 1, s.length),
     ...c,

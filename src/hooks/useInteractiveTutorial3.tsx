@@ -30,8 +30,6 @@ type useInteractiveTutorialProps = {
 export const useInteractiveTutorial = ({}: useInteractiveTutorialProps) => {
   const isPlayingTheTutorialRef = useRef(false);
   const idxCurrentStepRef = useRef(-1);
-  // const { nodeBookDispatch } = useNodeBook();
-  // const defaultSelectedNode = useRef<string | null>(null);
   const [stateNodeTutorial, setStateNodeTutorial] = useState<TutorialStep | null>(null);
   const [steps, setSteps] = useState<TutorialStep[]>([]);
   const [currentTutorial, setCurrentTutorial] = useState<TutorialType>(null);
@@ -73,6 +71,7 @@ export const useInteractiveTutorial = ({}: useInteractiveTutorialProps) => {
     if (currentTutorial === "SEARCHER") {
       console.log("FILL SEARCHER");
       newSteps = SEARCHER_STEPS_COMPLETE;
+      setTargetId("");
     }
     // if (currentTutorial === "PROPOSAL") {
     //   console.log("FILL PROPOSAL");

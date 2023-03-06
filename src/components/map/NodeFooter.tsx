@@ -1059,7 +1059,7 @@ const NodeFooter = ({
                   //   }bookmarked this node. ` +
                   //   shortenNumber(bookmarks, 2, false) +
                   //   " 1Cademist" +
-                  //   (bookmarks === 1 ? " has" : "s have") +
+                  //   (bookmarks === 1 ? " has" : " have") +
                   //   " bookmarked this node."
                   // }
                   tooltipPosition="top"
