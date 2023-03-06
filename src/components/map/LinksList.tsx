@@ -1,3 +1,4 @@
+import { useTheme } from "@mui/material";
 import React from "react";
 
 import { compareEdgeIds, compareEdges } from "../../lib/utils/Map.utils";
@@ -10,6 +11,7 @@ type LinkListProps = {
 };
 
 export const LinksList = ({ edgeIds, edges }: LinkListProps) => {
+  const theme = useTheme();
   return (
     <>
       {edgeIds.map(eId => {
@@ -19,7 +21,7 @@ export const LinksList = ({ edgeIds, edges }: LinkListProps) => {
             label={edges[eId].label}
             from={{ x: edges[eId].fromX, y: edges[eId].fromY - 1 }}
             to={{ x: edges[eId].toX, y: edges[eId].toY - 1 }}
-            color="#01d36a"
+            color={theme.palette.mode === "dark" ? "#01d36a" : "#1CAC44"}
           />
         );
       })}
