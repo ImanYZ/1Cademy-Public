@@ -756,6 +756,7 @@ const Dashboard = ({}: DashboardProps) => {
 
     if (currentTutorial) return;
     if (!userTutorialLoaded) return;
+    if (firstLoading) return;
 
     devLog("USE_EFFECT: DETECT_TRIGGER_TUTORIAL", { userTutorial });
 
@@ -770,11 +771,15 @@ const Dashboard = ({}: DashboardProps) => {
 
       setTargetId(nodeTargetId);
       setCurrentTutorial("NODES");
+      nodeBookDispatch({ type: "setSelectedNode", payload: nodeTargetId });
+      notebookRef.current.selectedNode = nodeTargetId;
       return;
     }
   }, [
     currentTutorial,
+    firstLoading,
     graph.nodes,
+    nodeBookDispatch,
     nodeBookState.selectedNode,
     setCurrentTutorial,
     setTargetId,
@@ -792,6 +797,7 @@ const Dashboard = ({}: DashboardProps) => {
         if (!selectedNode) return;
         if (selectedNode.top === 0) return;
         nodeBookDispatch({ type: "setSelectedNode", payload: user.sNode });
+        notebookRef.current.selectedNode = user.sNode;
         scrollToNode(user.sNode);
         setFirstScrollToNode(true);
         setIsSubmitting(false);
