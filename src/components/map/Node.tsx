@@ -393,7 +393,7 @@ const Node = ({
   const nodeClickHandler = useCallback(
     (event: any) => {
       console.log(notebookRef.current.choosingNode, "notebookRef.current.choosingNode");
-      if (notebookRef.current.choosingNode) {
+      if (!notebookRef.current.choosingNode || notebookRef.current.choosingNode.id !== identifier) {
         // The first Nodes exist, Now is clicking the Chosen Node
         notebookRef.current.chosenNode = {
           id: identifier,
@@ -408,10 +408,9 @@ const Node = ({
       ) {
         nodeClicked(event, identifier, nodeType, setOpenPart);
       }
-      if (event.target.type === "textarea" || event.target.type === "text") {
-        notebookRef.current.selectedNode = identifier;
-        nodeBookDispatch({ type: "setSelectedNode", payload: identifier });
-      }
+
+      notebookRef.current.selectedNode = identifier;
+      nodeBookDispatch({ type: "setSelectedNode", payload: identifier });
     },
     [identifier, title, nodeClicked, nodeType]
   );
