@@ -2,7 +2,6 @@ import AutoFixHighIcon from "@mui/icons-material/AutoFixHigh";
 import CloseIcon from "@mui/icons-material/Close";
 import CodeIcon from "@mui/icons-material/Code";
 import MyLocationIcon from "@mui/icons-material/MyLocation";
-import SchoolIcon from "@mui/icons-material/School";
 import { Masonry } from "@mui/lab";
 import {
   Button,
@@ -55,12 +54,13 @@ import { MemoizedReputationlinessBar } from "@/components/map/Liveliness/Reputat
 import { MemoizedBookmarksSidebar } from "@/components/map/Sidebar/SidebarV2/BookmarksSidebar";
 import { CitationsSidebar } from "@/components/map/Sidebar/SidebarV2/CitationsSidebar";
 import { MemoizedNotificationSidebar } from "@/components/map/Sidebar/SidebarV2/NotificationSidebar";
+import { MemoizedPendingProposalSidebar } from "@/components/map/Sidebar/SidebarV2/PendingProposalSidebar";
 import { MemoizedProposalsSidebar } from "@/components/map/Sidebar/SidebarV2/ProposalsSidebar";
 import { MemoizedSearcherSidebar } from "@/components/map/Sidebar/SidebarV2/SearcherSidebar";
 import { MemoizedUserInfoSidebar } from "@/components/map/Sidebar/SidebarV2/UserInfoSidebar";
 import { MemoizedUserSettingsSidebar } from "@/components/map/Sidebar/SidebarV2/UserSettigsSidebar";
-import { MemoizedProgressBar } from "@/components/tutorial/ProgressBar";
-import { MemoizedProgressBarMenu } from "@/components/tutorial/ProgressBarMenu";
+// import { MemoizedProgressBar } from "@/components/tutorial/ProgressBar";
+// import { MemoizedProgressBarMenu } from "@/components/tutorial/ProgressBarMenu";
 import { useAuth } from "@/context/AuthContext";
 import { useTagsTreeView } from "@/hooks/useTagsTreeView";
 import { addSuffixToUrlGMT } from "@/lib/utils/string.utils";
@@ -77,7 +77,8 @@ import { MemoizedToolbarSidebar } from "../components/map/Sidebar/SidebarV2/Tool
 import { NodeItemDashboard } from "../components/NodeItemDashboard";
 import { Portal } from "../components/Portal";
 import { NodeBookProvider, useNodeBook } from "../context/NodeBookContext";
-import { TargetClientRect, useInteractiveTutorial } from "../hooks/useInteractiveTutorial2";
+// import { TargetClientRect } from "../hooks/useInteractiveTutorial2";
+import { TargetClientRect, useInteractiveTutorial } from "../hooks/useInteractiveTutorial3";
 import { useMemoizedCallback } from "../hooks/useMemoizedCallback";
 import { useWindowSize } from "../hooks/useWindowSize";
 import { useWorkerQueue } from "../hooks/useWorkerQueue";
@@ -91,7 +92,6 @@ import {
   changedNodes,
   citations,
   COLUMN_GAP,
-  compare2Nodes,
   compareAndUpdateNodeLinks,
   compareChoices,
   compareFlatLinks,
@@ -99,11 +99,9 @@ import {
   compareProperty,
   copyNode,
   createActionTrack,
-  createOrUpdateNode,
   generateReputationSignal,
   getSelectionText,
   hideNodeAndItsLinks,
-  makeNodeVisibleInItsLinks,
   NODE_WIDTH,
   removeDagAllEdges,
   removeDagEdge,
@@ -114,19 +112,32 @@ import {
   tempNodes,
 } from "../lib/utils/Map.utils";
 import { newId } from "../lib/utils/newid";
-import { buildFullNodes, getNodes, getUserNodeChanges } from "../lib/utils/nodesSyncronization.utils";
+import {
+  buildFullNodes,
+  fillDagre,
+  getNodes,
+  getUserNodeChanges,
+  mergeAllNodes,
+} from "../lib/utils/nodesSyncronization.utils";
 import { gtmEvent, imageLoaded, isValidHttpUrl } from "../lib/utils/utils";
 import {
   ChoosingType,
   EdgesData,
   FullNodeData,
   FullNodesData,
+  // NodeTutorialState,
   TNodeBookState,
+  TutorialTypeKeys,
+  // TutorialType,
   UserNodes,
   UserNodesData,
+  UserTutorial,
+  UserTutorials,
 } from "../nodeBookTypes";
 import { NodeType, SimpleNode2 } from "../types";
 import { doNeedToDeleteNode, getNodeTypesFromNode, isVersionApproved } from "../utils/helpers";
+
+export type TutorialType = "NODES" | "SEARCHER" | "PROPOSAL" | null;
 
 type DashboardProps = {};
 
@@ -248,10 +259,22 @@ const Dashboard = ({}: DashboardProps) => {
   const [openProposal, setOpenProposal] = useState<string>("");
 
   // when proposing improvements, lists of added/removed parent/child links
-  const [addedParents, setAddedParents] = useState<string[]>([]);
-  const [addedChildren, setAddedChildren] = useState<string[]>([]);
-  const [removedParents, setRemovedParents] = useState<string[]>([]);
-  const [removedChildren, setRemovedChildren] = useState<string[]>([]);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const [updatedLinks, setUpdatedLinks] = useState<{
+    addedParents: string[],
+    addedChildren: string[],
+    removedParents: string[],
+    removedChildren: string[]
+  }>({
+    addedParents: [],
+    addedChildren: [],
+    removedParents: [],
+    removedChildren: [],
+  });
+  // const [addedParents, setAddedParents] = useState<string[]>([]);
+  // const [addedChildren, setAddedChildren] = useState<string[]>([]);
+  // const [removedParents, setRemovedParents] = useState<string[]>([]);
+  // const [removedChildren, setRemovedChildren] = useState<string[]>([]);
 
   const [firstLoading, setFirstLoading] = useState(true);
   const [pendingProposalsLoaded /* , setPendingProposalsLoaded */] = useState(true);
@@ -273,8 +296,17 @@ const Dashboard = ({}: DashboardProps) => {
   const lastNodeOperation = useRef<string>("");
   const proposalTimer = useRef<any>(null);
 
-  const [openProgressBar, setOpenProgressBar] = useState(false);
-  const [openProgressBarMenu, setOpenProgressBarMenu] = useState(false);
+  // const [openProgressBar, setOpenProgressBar] = useState(false);
+  const [, /* openProgressBarMenu */ setOpenProgressBarMenu] = useState(false);
+
+  const [userTutorial, setUserTutorial] = useState<UserTutorials>({
+    nodes: { currentStep: 1, done: false, skipped: false },
+    searcher: { currentStep: 1, done: false, skipped: false },
+    proposal: { currentStep: 1, done: false, skipped: false },
+  });
+
+  // const [currentTutorial, setCurrentTutorial] = useState<TutorialType>(null);
+
   // const {
   //   setTargetClientRect,
   //   isPlayingTheTutorial,
@@ -301,9 +333,22 @@ const Dashboard = ({}: DashboardProps) => {
     isEnabled: false,
   });
 
-  const [nodeTutorial /* setNodeTutorial */] = useState(Boolean(localStorage.getItem("node-tutorial")));
+  // const [nodeTutorial /* setNodeTutorial */] = useState(Boolean(localStorage.getItem("node-tutorial")));
 
-  const { stateNodeTutorial, onChangeStep, isPlayingTheTutorialRef } = useInteractiveTutorial({ notebookRef });
+  // const [tutorialSteps, setTutorialSteps] = useState<NodeTutorialState[]>([]);
+
+  const {
+    stateNodeTutorial,
+    onNextStep,
+    onPreviousStep,
+    isPlayingTheTutorialRef,
+    setCurrentTutorial,
+    currentTutorial,
+    stepsLength,
+  } = useInteractiveTutorial({
+    notebookRef,
+    // currentTutorial,
+  });
   const onNodeInViewport = useCallback(
     (nodeId: string) => {
       const originalNode = document.getElementById(nodeId);
@@ -413,7 +458,7 @@ const Dashboard = ({}: DashboardProps) => {
         }, 400);
       }
     },
-    [onNodeInViewport]
+    [isPlayingTheTutorialRef, onNodeInViewport]
   );
 
   // useEffect(() => {
@@ -463,20 +508,28 @@ const Dashboard = ({}: DashboardProps) => {
 
   useEffect(() => {
     if (!stateNodeTutorial) return setTargetClientRect({ width: 0, height: 0, top: 0, left: 0 });
-
+    let timeoutId: any;
     if (stateNodeTutorial.anchor) {
-      if (!stateNodeTutorial.targetId) return;
+      timeoutId = setTimeout(() => {
+        if (!stateNodeTutorial.childTargetId) return;
 
-      const targetElement = document.getElementById(stateNodeTutorial.targetId);
+        const targetElement = document.getElementById(stateNodeTutorial.childTargetId);
 
-      if (!targetElement) return;
+        if (!targetElement) return;
 
-      // targetElement.style.outline = "2px solid #FF6D00";
-      targetElement.classList.add("tutorial-pulse");
+        targetElement.classList.add(
+          stateNodeTutorial.isClickeable
+            ? "tutorial-target-pulse"
+            : stateNodeTutorial.largeTarget
+            ? "tutorial-target-large"
+            : "tutorial-target"
+        );
 
-      const { width, height, top, left } = targetElement.getBoundingClientRect();
+        const { width, height, top, left } = targetElement.getBoundingClientRect();
 
-      setTargetClientRect({ width, height, top, left });
+        console.log({ width, height, top, left });
+        setTargetClientRect({ width, height, top, left });
+      }, stateNodeTutorial.targetDelay);
     } else {
       console.log("----------------- detect client react in interactive map");
 
@@ -489,8 +542,14 @@ const Dashboard = ({}: DashboardProps) => {
       if (stateNodeTutorial.childTargetId) {
         const targetElement = document.getElementById(stateNodeTutorial.childTargetId);
         if (!targetElement) return;
-        // targetElement.style.outline = "2px solid #FF6D00";
-        targetElement.classList.add("tutorial-pulse");
+
+        targetElement.classList.add(
+          stateNodeTutorial.isClickeable
+            ? "tutorial-target-pulse"
+            : stateNodeTutorial.largeTarget
+            ? "tutorial-target-large"
+            : "tutorial-target"
+        );
 
         const { offsetTop, offsetLeft } = targetElement;
         const { height: childrenHeight, width: childrenWidth } = targetElement.getBoundingClientRect();
@@ -507,6 +566,9 @@ const Dashboard = ({}: DashboardProps) => {
         width,
         height,
       });
+      return () => {
+        if (timeoutId) clearTimeout(timeoutId);
+      };
     }
   }, [stateNodeTutorial, graph.nodes, setTargetClientRect]);
 
@@ -546,6 +608,9 @@ const Dashboard = ({}: DashboardProps) => {
 
   // flag for whether all tags data is downloaded from server
   // const [allTagsLoaded, setAllTagsLoaded] = useState(false);
+
+  // flag for whether tutorial state was loaded
+  const [userTutorialLoaded, setUserTutorialLoaded] = useState(false);
 
   // flag for whether users' nodes data is downloaded from server
   const [userNodesLoaded, setUserNodesLoaded] = useState(false);
@@ -631,7 +696,7 @@ const Dashboard = ({}: DashboardProps) => {
       // console.log({ nodeId });
 
       devLog("open_Node_Handler", nodeId);
-      if (isPlayingTheTutorialRef.current) return;
+      if (isPlayingTheTutorialRef.current && currentTutorial !== "SEARCHER") return;
 
       let linkedNodeRef;
       let userNodeRef = null;
@@ -639,7 +704,7 @@ const Dashboard = ({}: DashboardProps) => {
 
       const nodeRef = doc(db, "nodes", nodeId);
       const nodeDoc = await getDoc(nodeRef);
-      // console.log({ nodeDoc });
+      console.log({ exist: nodeDoc.exists() });
       const batch = writeBatch(db);
       if (nodeDoc.exists() && user) {
         const thisNode: any = { ...nodeDoc.data(), id: nodeId };
@@ -699,6 +764,7 @@ const Dashboard = ({}: DashboardProps) => {
           batch.set(doc(userNodeLogRef), userNodeLogData);
           await batch.commit();
 
+          notebookRef.current.selectedNode = nodeId;
           nodeBookDispatch({ type: "setSelectedNode", payload: nodeId });
           /* setTimeout(() => {
             scrollToNode(nodeId);
@@ -708,8 +774,17 @@ const Dashboard = ({}: DashboardProps) => {
         }
       }
     },
-    [user, allTags]
+    [user, allTags, currentTutorial]
   );
+
+  const setNodeParts = useCallback((nodeId: string, innerFunc: (thisNode: FullNodeData) => FullNodeData) => {
+    setGraph(({ nodes: oldNodes, edges }) => {
+      setSelectedNodeType(oldNodes[nodeId].nodeType);
+      const thisNode = { ...oldNodes[nodeId] };
+      const newNode = { ...oldNodes, [nodeId]: innerFunc(thisNode) };
+      return { nodes: newNode, edges };
+    });
+  }, []);
 
   //Getting the node from the Url to open and scroll to that node in the first render
   useEffect(() => {
@@ -726,10 +801,42 @@ const Dashboard = ({}: DashboardProps) => {
       const selectedNodeDash = graph.nodes[noodeIdFromDashboard];
       if (selectedNodeDash?.top === 0) return;
       if (selectedNodeDash) return;
+      notebookRef.current.selectedNode = noodeIdFromDashboard;
       nodeBookDispatch({ type: "setSelectedNode", payload: noodeIdFromDashboard });
       scrollToNode(noodeIdFromDashboard);
     }, 1000);
   }, [firstScrollToNode, graph.nodes, nodeBookDispatch, openNodeHandler, scrollToNode]);
+
+  useEffect(() => {
+    devLog("USE_EFFECT", { userTutorialLoaded, user });
+    if (!user) return;
+    if (userTutorialLoaded) return;
+
+    devLog("USE_EFFECT", "get-user-tutorial");
+    const getTutorialState = async () => {
+      const tutorialRef = doc(db, "userTutorial", user.uname);
+      const tutorialDoc = await getDoc(tutorialRef);
+      console.log(tutorialDoc);
+
+      // TODO: load step from DB
+      if (tutorialDoc.exists()) {
+        const tutorial = tutorialDoc.data() as UserTutorials;
+        setUserTutorial(prev => ({ ...prev, ...tutorial }));
+        if (tutorial.nodes.done) return setUserTutorialLoaded(true);
+        if (tutorial.nodes.skipped) return setUserTutorialLoaded(true);
+        setCurrentTutorial("NODES");
+        // // onChangeStep(tutorial.nodes.currentStep);
+      } else {
+        console.log("will-start");
+        setCurrentTutorial("NODES");
+      }
+
+      // setUserTutorialLoaded(true);
+    };
+
+    getTutorialState();
+    setUserTutorialLoaded(true);
+  }, [db, setCurrentTutorial, user, user?.userId, userTutorialLoaded]);
 
   //  bd => state (first render)
   useEffect(() => {
@@ -740,6 +847,7 @@ const Dashboard = ({}: DashboardProps) => {
         const selectedNode = graph.nodes[user?.sNode];
         if (!selectedNode) return;
         if (selectedNode.top === 0) return;
+        notebookRef.current.selectedNode = user.sNode;
         nodeBookDispatch({ type: "setSelectedNode", payload: user.sNode });
         scrollToNode(user.sNode);
         setFirstScrollToNode(true);
@@ -848,111 +956,6 @@ const Dashboard = ({}: DashboardProps) => {
 
   const snapshot = useCallback(
     (q: Query<DocumentData>) => {
-      const fillDagre = (fullNodes: FullNodeData[], currentNodes: any, currentEdges: any, withClusters: boolean) => {
-        return fullNodes.reduce(
-          (acu: { newNodes: { [key: string]: any }; newEdges: { [key: string]: any } }, cur) => {
-            let tmpNodes = {};
-            let tmpEdges = {};
-
-            if (cur.nodeChangeType === "added") {
-              const { uNodeData, oldNodes, oldEdges } = makeNodeVisibleInItsLinks(cur, acu.newNodes, acu.newEdges);
-              const res = createOrUpdateNode(g.current, uNodeData, cur.node, oldNodes, oldEdges, allTags, withClusters);
-              tmpNodes = res.oldNodes;
-              tmpEdges = res.oldEdges;
-            }
-            if (cur.nodeChangeType === "modified" && cur.visible) {
-              const node = acu.newNodes[cur.node];
-              if (!node) {
-                const res = createOrUpdateNode(
-                  g.current,
-                  cur,
-                  cur.node,
-                  acu.newNodes,
-                  acu.newEdges,
-                  allTags,
-                  withClusters
-                );
-                tmpNodes = res.oldNodes;
-                tmpEdges = res.oldEdges;
-              } else {
-                const currentNode: FullNodeData = {
-                  ...cur,
-                  left: node.left,
-                  top: node.top,
-                }; // <----- IMPORTANT: Add positions data from node into cur.node to not set default position into center of screen
-
-                if (!compare2Nodes(cur, node)) {
-                  const res = createOrUpdateNode(
-                    g.current,
-                    currentNode,
-                    cur.node,
-                    acu.newNodes,
-                    acu.newEdges,
-                    allTags,
-                    withClusters
-                  );
-                  tmpNodes = res.oldNodes;
-                  tmpEdges = res.oldEdges;
-                }
-              }
-            }
-            // so the NO visible nodes will come as modified and !visible
-            if (cur.nodeChangeType === "removed" || (cur.nodeChangeType === "modified" && !cur.visible)) {
-              if (g.current.hasNode(cur.node)) {
-                g.current.nodes().forEach(function () {});
-                g.current.edges().forEach(function () {});
-                // PROBABLY you need to add hideNodeAndItsLinks, to update children and parents nodes
-
-                // !IMPORTANT, Don't change the order, first remove edges then nodes
-                tmpEdges = removeDagAllEdges(g.current, cur.node, acu.newEdges);
-                tmpNodes = removeDagNode(g.current, cur.node, acu.newNodes);
-              } else {
-                // remove edges
-                const oldEdges = { ...acu.newEdges };
-
-                Object.keys(oldEdges).forEach(key => {
-                  if (key.includes(cur.node)) {
-                    delete oldEdges[key];
-                  }
-                });
-
-                tmpEdges = oldEdges;
-                // remove node
-                const oldNodes = acu.newNodes;
-                if (cur.node in oldNodes) {
-                  delete oldNodes[cur.node];
-                }
-                // tmpEdges = {acu.newEdges,}
-                tmpNodes = { ...oldNodes };
-              }
-            }
-
-            return {
-              newNodes: { ...tmpNodes },
-              newEdges: { ...tmpEdges },
-            };
-          },
-          { newNodes: { ...currentNodes }, newEdges: { ...currentEdges } }
-        );
-      };
-
-      const mergeAllNodes = (newAllNodes: FullNodeData[], currentAllNodes: FullNodesData): FullNodesData => {
-        return newAllNodes.reduce(
-          (acu, cur) => {
-            if (cur.nodeChangeType === "added" || cur.nodeChangeType === "modified") {
-              return { ...acu, [cur.node]: cur };
-            }
-            if (cur.nodeChangeType === "removed") {
-              const tmp = { ...acu };
-              delete tmp[cur.node];
-              return tmp;
-            }
-            return acu;
-          },
-          { ...currentAllNodes }
-        );
-      };
-
       const userNodesSnapshot = onSnapshot(
         q,
         async snapshot => {
@@ -1010,7 +1013,14 @@ const Dashboard = ({}: DashboardProps) => {
             });
 
             devLog("5:user Nodes Snapshot:visible Full Nodes Merged", visibleFullNodesMerged);
-            const { newNodes, newEdges } = fillDagre(visibleFullNodesMerged, nodes, edges, settings.showClusterOptions);
+            const { newNodes, newEdges } = fillDagre(
+              g.current,
+              visibleFullNodesMerged,
+              nodes,
+              edges,
+              settings.showClusterOptions,
+              allTags
+            );
 
             if (!Object.keys(newNodes).length) {
               setNoNodesFoundMessage(true);
@@ -1045,25 +1055,26 @@ const Dashboard = ({}: DashboardProps) => {
   }, [nodeBookDispatch, openSidebar]);
 
   useEffect(() => {
+    if (!db) return;
+    if (!user?.uname) return;
+    if (!allTagsLoaded) return;
+    if (!userTutorialLoaded) return;
+    if (!userTutorial.nodes.done && !userTutorial.nodes.skipped) return;
     if (stateNodeTutorial) return;
-    console.log("effect SNAPSHOTS");
+
+    devLog("USE_EFFECT", "nodes synchronization");
 
     if (!shouldResetGraph.current) {
-      console.log("RESET GRAPH");
-
       setGraph({
         nodes: {},
         edges: {},
       });
       setLocalSnapshot({});
       shouldResetGraph.current = true;
+      notebookRef.current.selectedNode = null;
       nodeBookDispatch({ type: "setSelectedNode", payload: null });
       g.current = createGraph();
     }
-
-    if (!db) return;
-    if (!user?.uname) return;
-    if (!allTagsLoaded) return;
 
     const userNodesRef = collection(db, "userNodes");
     const q = query(
@@ -1077,132 +1088,78 @@ const Dashboard = ({}: DashboardProps) => {
     return () => {
       killSnapshot();
     };
-  }, [allTagsLoaded, db, snapshot, stateNodeTutorial, user?.uname, notebookChanged, nodeBookDispatch]);
+  }, [
+    allTagsLoaded,
+    db,
+    snapshot,
+    stateNodeTutorial,
+    user?.uname,
+    notebookChanged,
+    nodeBookDispatch,
+    userTutorialLoaded,
+    userTutorial.nodes.done,
+    userTutorial.nodes.skipped,
+  ]);
   // }, [allTagsLoaded, db, snapshot, user?.uname, settings.showClusterOptions, notebookChanged]);
 
   useEffect(() => {
-    // local snapshot used only in interactive tutorial
-    // if (!isPlayingTheTutorial) return;
+    // here we force scrollToNode in required steps from TUTORIAL
+    // this is only set up when worker doesn't make any change when a step change
     if (!stateNodeTutorial) return;
-    console.log("effect INTERACTICE TUTORIAL");
+    if (currentTutorial !== "NODES") return;
+    if (!stateNodeTutorial.forceScrollToNode) return;
+
+    scrollToNode(stateNodeTutorial.targetId);
+  }, [currentTutorial, scrollToNode, stateNodeTutorial]);
+
+  useEffect(() => {
+    // here we set up the default properties of a node in TUTORIAL
+
+    if (currentTutorial !== "PROPOSAL") return;
+    if (!stateNodeTutorial) return;
+    if (!stateNodeTutorial.targetDefaultProperties) return;
+
+    // if (stateNodeTutorial.currentStepName === 17) {
+    //   debugger;
+    // }
+    const thisNode = graph.nodes[stateNodeTutorial.targetId];
+    if (!thisNode) return;
+
+    const keys = Object.keys(stateNodeTutorial.targetDefaultProperties) as (keyof FullNodeData)[];
+
+    const isEqualsProperties = (key: keyof FullNodeData) => {
+      // console.log(1, "SNP");
+      if (!stateNodeTutorial.targetDefaultProperties) return true;
+      // console.log(2, "SNP", thisNode, stateNodeTutorial?.targetDefaultProperties[key]);
+      // if (!thisNode[key]) return true;
+      // console.log(3, "SNP");
+      // if (!stateNodeTutorial?.targetDefaultProperties[key]) return;
+      // console.log(3, "SNP", thisNode[key], stateNodeTutorial?.targetDefaultProperties[key]);
+
+      return thisNode[key] === stateNodeTutorial?.targetDefaultProperties[key];
+    };
+    const isEquals = keys.some(isEqualsProperties);
+    console.log("SNP", isEquals);
+
+    if (isEquals) return;
+
+    setNodeParts(stateNodeTutorial.targetId, node => ({ ...node, ...stateNodeTutorial.targetDefaultProperties }));
+  }, [stateNodeTutorial, currentTutorial, setNodeParts, graph.nodes]);
+
+  useEffect(() => {
+    // Local Snapshot used only in interactive tutorial
+    if (!stateNodeTutorial) return;
+
+    devLog("USE_EFFECT", "interactive-tutorial");
 
     if (shouldResetGraph.current) {
       g.current = createGraph();
-      // const FIRST_KEY_NODE = "01";
       setGraph({
         nodes: {},
         edges: {},
       });
-      // setLocalSnapshot({);
       shouldResetGraph.current = false;
     }
-
-    const mergeAllNodes = (newAllNodes: FullNodeData[], currentAllNodes: FullNodesData): FullNodesData => {
-      return newAllNodes.reduce(
-        (acu, cur) => {
-          if (cur.nodeChangeType === "added" || cur.nodeChangeType === "modified") {
-            return { ...acu, [cur.node]: cur };
-          }
-          if (cur.nodeChangeType === "removed") {
-            const tmp = { ...acu };
-            delete tmp[cur.node];
-            return tmp;
-          }
-          return acu;
-        },
-        { ...currentAllNodes }
-      );
-    };
-
-    const fillDagre = (fullNodes: FullNodeData[], currentNodes: any, currentEdges: any, withClusters: boolean) => {
-      return fullNodes.reduce(
-        (acu: { newNodes: { [key: string]: any }; newEdges: { [key: string]: any } }, cur) => {
-          let tmpNodes = {};
-          let tmpEdges = {};
-
-          if (cur.nodeChangeType === "added") {
-            const { uNodeData, oldNodes, oldEdges } = makeNodeVisibleInItsLinks(cur, acu.newNodes, acu.newEdges);
-
-            const res = createOrUpdateNode(g.current, uNodeData, cur.node, oldNodes, oldEdges, allTags, withClusters);
-
-            tmpNodes = res.oldNodes;
-            tmpEdges = res.oldEdges;
-          }
-          if (cur.nodeChangeType === "modified" && cur.visible) {
-            const node = acu.newNodes[cur.node];
-            if (!node) {
-              const res = createOrUpdateNode(
-                g.current,
-                cur,
-                cur.node,
-                acu.newNodes,
-                acu.newEdges,
-                allTags,
-                withClusters
-              );
-              tmpNodes = res.oldNodes;
-              tmpEdges = res.oldEdges;
-            } else {
-              const currentNode: FullNodeData = {
-                ...cur,
-                left: node.left,
-                top: node.top,
-              }; // <----- IMPORTANT: Add positions data from node into cur.node to not set default position into center of screen
-
-              if (!compare2Nodes(cur, node)) {
-                const res = createOrUpdateNode(
-                  g.current,
-                  currentNode,
-                  cur.node,
-                  acu.newNodes,
-                  acu.newEdges,
-                  allTags,
-                  withClusters
-                );
-                tmpNodes = res.oldNodes;
-                tmpEdges = res.oldEdges;
-              }
-            }
-          }
-          // so the NO visible nodes will come as modified and !visible
-          if (cur.nodeChangeType === "removed" || (cur.nodeChangeType === "modified" && !cur.visible)) {
-            if (g.current.hasNode(cur.node)) {
-              g.current.nodes().forEach(function () {});
-              g.current.edges().forEach(function () {});
-              // PROBABLY you need to add hideNodeAndItsLinks, to update children and parents nodes
-
-              // !IMPORTANT, Don't change the order, first remove edges then nodes
-              tmpEdges = removeDagAllEdges(g.current, cur.node, acu.newEdges);
-              tmpNodes = removeDagNode(g.current, cur.node, acu.newNodes);
-            } else {
-              // remove edges
-              const oldEdges = { ...acu.newEdges };
-
-              Object.keys(oldEdges).forEach(key => {
-                if (key.includes(cur.node)) {
-                  delete oldEdges[key];
-                }
-              });
-
-              tmpEdges = oldEdges;
-              // remove node
-              const oldNodes = acu.newNodes;
-              if (cur.node in oldNodes) {
-                delete oldNodes[cur.node];
-              }
-              // tmpEdges = {acu.newEdges,}
-              tmpNodes = { ...oldNodes };
-            }
-          }
-
-          return {
-            newNodes: { ...tmpNodes },
-            newEdges: { ...tmpEdges },
-          };
-        },
-        { newNodes: { ...currentNodes }, newEdges: { ...currentEdges } }
-      );
-    };
 
     const fullNodes = stateNodeTutorial.localSnapshot;
 
@@ -1238,17 +1195,33 @@ const Dashboard = ({}: DashboardProps) => {
           top: tmpNode?.top ?? topParent,
         };
       });
-
       devLog("5: TUTORIAL:user Nodes Snapshot:visible Full Nodes Merged", visibleFullNodesMerged);
-      const { newNodes, newEdges } = fillDagre(visibleFullNodesMerged, nodes, edges, settings.showClusterOptions);
+      const { newNodes, newEdges } = fillDagre(
+        g.current,
+        visibleFullNodesMerged,
+        nodes,
+        edges,
+        settings.showClusterOptions,
+        allTags
+      );
 
       if (!Object.keys(newNodes).length) {
         setNoNodesFoundMessage(true);
       }
+
       return { nodes: newNodes, edges: newEdges };
     });
     setOpenProgressBarMenu(true);
-  }, [allTags, settings.showClusterOptions, stateNodeTutorial, notebookChanged]);
+  }, [
+    allTags,
+    settings.showClusterOptions,
+    stateNodeTutorial,
+    notebookChanged,
+    userTutorial.nodes.done,
+    userTutorial.nodes.skipped,
+    userTutorial.nodes.currentStep,
+    setCurrentTutorial,
+  ]);
 
   useEffect(() => {
     if (!db) return;
@@ -1526,10 +1499,12 @@ const Dashboard = ({}: DashboardProps) => {
   const resetAddedRemovedParentsChildren = useCallback(() => {
     // CHECK: this could be improve merging this 4 states in 1 state object
     // so we reduce the rerenders, also we can set only the empty array here
-    setAddedParents(oldAddedParents => (oldAddedParents.length > 0 ? oldAddedParents : []));
-    setAddedChildren(oldAddedChildren => (oldAddedChildren.length > 0 ? oldAddedChildren : []));
-    setRemovedParents(oldRemovedParents => (oldRemovedParents.length > 0 ? oldRemovedParents : []));
-    setRemovedChildren(oldRemovedChildren => (oldRemovedChildren.length > 0 ? oldRemovedChildren : []));
+    setUpdatedLinks({
+      addedParents: [],
+      addedChildren: [],
+      removedChildren: [],
+      removedParents: [],
+    });
   }, []);
 
   const getMapGraph = useCallback(
@@ -1647,128 +1622,131 @@ const Dashboard = ({}: DashboardProps) => {
 
   const chosenNodeChanged = useCallback(
     (nodeId: string) => {
-      setGraph(({ nodes: oldNodes, edges: oldEdges }) => {
-        if (!notebookRef.current.choosingNode || !notebookRef.current.chosenNode)
-          return { nodes: oldNodes, edges: oldEdges };
-        if (nodeId !== notebookRef.current.choosingNode.id) return { nodes: oldNodes, edges: oldEdges };
-
-        const thisNode = copyNode(oldNodes[nodeId]);
-        const chosenNodeObj = copyNode(oldNodes[notebookRef.current.chosenNode.id]);
-
-        let newEdges: EdgesData = oldEdges;
-
-        const validLink =
-          (notebookRef.current.choosingNode.type === "Reference" &&
-            /* thisNode.referenceIds.filter(l => l === nodeBookState.chosenNode?.id).length === 0 &&*/
-            notebookRef.current.chosenNode.id !== nodeId &&
-            chosenNodeObj.nodeType === notebookRef.current.choosingNode.type) ||
-          (notebookRef.current.choosingNode.type === "Tag" &&
-            thisNode.tagIds.filter(l => l === notebookRef.current.chosenNode?.id).length === 0) ||
-          (notebookRef.current.choosingNode.type === "Parent" &&
-            notebookRef.current.choosingNode.id !== notebookRef.current.chosenNode.id &&
-            thisNode.parents.filter((l: any) => l.node === notebookRef.current.chosenNode?.id).length === 0) ||
-          (notebookRef.current.choosingNode.type === "Child" &&
-            notebookRef.current.choosingNode.id !== notebookRef.current.chosenNode.id &&
-            thisNode.children.filter((l: any) => l.node === notebookRef.current.chosenNode?.id).length === 0);
-
-        if (!validLink) return { nodes: oldNodes, edges: oldEdges };
-
-        if (notebookRef.current.choosingNode.type === "Reference") {
-          thisNode.references = [...thisNode.references, chosenNodeObj.title];
-          thisNode.referenceIds = [...thisNode.referenceIds, notebookRef.current.chosenNode.id];
-          thisNode.referenceLabels = [...thisNode.referenceLabels, ""];
-        } else if (notebookRef.current.choosingNode.type === "Tag") {
-          thisNode.tags = [...thisNode.tags, chosenNodeObj.title];
-          thisNode.tagIds = [...thisNode.tagIds, notebookRef.current.chosenNode.id];
-        } else if (notebookRef.current.choosingNode.type === "Parent") {
-          thisNode.parents = [
-            ...thisNode.parents,
-            {
-              node: notebookRef.current.chosenNode.id,
-              title: chosenNodeObj.title,
-              label: "",
-              type: chosenNodeObj.nodeType,
-            },
-          ];
-          if (!(notebookRef.current.chosenNode.id in changedNodes)) {
-            changedNodes[notebookRef.current.chosenNode.id] = copyNode(oldNodes[notebookRef.current.chosenNode.id]);
+      setUpdatedLinks((updatedLinks) => {
+        setGraph(({ nodes: oldNodes, edges: oldEdges }) => {
+          if (!notebookRef.current.choosingNode || !notebookRef.current.chosenNode)
+            return { nodes: oldNodes, edges: oldEdges };
+          if (nodeId !== notebookRef.current.choosingNode.id) return { nodes: oldNodes, edges: oldEdges };
+  
+          const thisNode = copyNode(oldNodes[nodeId]);
+          const chosenNodeObj = copyNode(oldNodes[notebookRef.current.chosenNode.id]);
+  
+          let newEdges: EdgesData = oldEdges;
+  
+          const validLink =
+            (notebookRef.current.choosingNode.type === "Reference" &&
+              /* thisNode.referenceIds.filter(l => l === nodeBookState.chosenNode?.id).length === 0 &&*/
+              notebookRef.current.chosenNode.id !== nodeId &&
+              chosenNodeObj.nodeType === notebookRef.current.choosingNode.type) ||
+            (notebookRef.current.choosingNode.type === "Tag" &&
+              thisNode.tagIds.filter(l => l === notebookRef.current.chosenNode?.id).length === 0) ||
+            (notebookRef.current.choosingNode.type === "Parent" &&
+              notebookRef.current.choosingNode.id !== notebookRef.current.chosenNode.id &&
+              thisNode.parents.filter((l: any) => l.node === notebookRef.current.chosenNode?.id).length === 0) ||
+            (notebookRef.current.choosingNode.type === "Child" &&
+              notebookRef.current.choosingNode.id !== notebookRef.current.chosenNode.id &&
+              thisNode.children.filter((l: any) => l.node === notebookRef.current.chosenNode?.id).length === 0);
+  
+          if (!validLink) return { nodes: oldNodes, edges: oldEdges };
+  
+          if (notebookRef.current.choosingNode.type === "Reference") {
+            thisNode.references = [...thisNode.references, chosenNodeObj.title];
+            thisNode.referenceIds = [...thisNode.referenceIds, notebookRef.current.chosenNode.id];
+            thisNode.referenceLabels = [...thisNode.referenceLabels, ""];
+          } else if (notebookRef.current.choosingNode.type === "Tag") {
+            thisNode.tags = [...thisNode.tags, chosenNodeObj.title];
+            thisNode.tagIds = [...thisNode.tagIds, notebookRef.current.chosenNode.id];
+          } else if (notebookRef.current.choosingNode.type === "Parent") {
+            thisNode.parents = [
+              ...thisNode.parents,
+              {
+                node: notebookRef.current.chosenNode.id,
+                title: chosenNodeObj.title,
+                label: "",
+                type: chosenNodeObj.nodeType,
+              },
+            ];
+            if (!(notebookRef.current.chosenNode.id in changedNodes)) {
+              changedNodes[notebookRef.current.chosenNode.id] = copyNode(oldNodes[notebookRef.current.chosenNode.id]);
+            }
+            chosenNodeObj.children = [
+              ...chosenNodeObj.children,
+              {
+                node: notebookRef.current.choosingNode.id,
+                title: thisNode.title,
+                label: "",
+                type: chosenNodeObj.nodeType,
+              },
+            ];
+            const chosenNodeId = notebookRef.current.chosenNode.id;
+            if (updatedLinks.removedParents.includes(notebookRef.current.chosenNode.id)) {
+              updatedLinks.removedParents = updatedLinks.removedParents.filter((nId: string) => nId !== chosenNodeId);
+            } else {
+              updatedLinks.addedParents = [...updatedLinks.addedParents, chosenNodeId];
+            }
+  
+            if (notebookRef.current.chosenNode && notebookRef.current.choosingNode) {
+              newEdges = setDagEdge(
+                g.current,
+                notebookRef.current.chosenNode.id,
+                notebookRef.current.choosingNode.id,
+                { label: "" },
+                { ...oldEdges }
+              );
+            }
+          } else if (notebookRef.current.choosingNode.type === "Child") {
+            thisNode.children = [
+              ...thisNode.children,
+              {
+                node: notebookRef.current.chosenNode.id,
+                title: chosenNodeObj.title,
+                label: "",
+                type: chosenNodeObj.nodeType,
+              },
+            ];
+            if (!(notebookRef.current.chosenNode.id in changedNodes)) {
+              changedNodes[notebookRef.current.chosenNode.id] = copyNode(oldNodes[notebookRef.current.chosenNode.id]);
+            }
+            chosenNodeObj.parents = [
+              ...chosenNodeObj.parents,
+              {
+                node: notebookRef.current.choosingNode.id,
+                title: thisNode.title,
+                label: "",
+                type: chosenNodeObj.nodeType,
+              },
+            ];
+            if (notebookRef.current.chosenNode && notebookRef.current.choosingNode) {
+              newEdges = setDagEdge(
+                g.current,
+                notebookRef.current.choosingNode.id,
+                notebookRef.current.chosenNode.id,
+                { label: "" },
+                { ...oldEdges }
+              );
+            }
+            if (updatedLinks.removedChildren.includes(notebookRef.current.chosenNode.id)) {
+              const chosenNodeId = notebookRef.current.choosingNode.id;
+              updatedLinks.removedChildren = updatedLinks.removedChildren.filter(nId => nId !== chosenNodeId);
+            } else {
+              updatedLinks.addedChildren = [...updatedLinks.addedChildren, notebookRef.current.chosenNode.id];
+            }
           }
-          chosenNodeObj.children = [
-            ...chosenNodeObj.children,
-            {
-              node: notebookRef.current.choosingNode.id,
-              title: thisNode.title,
-              label: "",
-              type: chosenNodeObj.nodeType,
-            },
-          ];
-          const chosenNodeId = notebookRef.current.chosenNode.id;
-          if (removedParents.includes(notebookRef.current.chosenNode.id)) {
-            setRemovedParents(removedParents.filter((nId: string) => nId !== chosenNodeId));
-          } else {
-            setAddedParents(oldAddedParents => [...oldAddedParents, chosenNodeId]);
-          }
-
-          if (notebookRef.current.chosenNode && notebookRef.current.choosingNode) {
-            newEdges = setDagEdge(
-              g.current,
-              notebookRef.current.chosenNode.id,
-              notebookRef.current.choosingNode.id,
-              { label: "" },
-              { ...oldEdges }
-            );
-          }
-        } else if (notebookRef.current.choosingNode.type === "Child") {
-          thisNode.children = [
-            ...thisNode.children,
-            {
-              node: notebookRef.current.chosenNode.id,
-              title: chosenNodeObj.title,
-              label: "",
-              type: chosenNodeObj.nodeType,
-            },
-          ];
-          if (!(notebookRef.current.chosenNode.id in changedNodes)) {
-            changedNodes[notebookRef.current.chosenNode.id] = copyNode(oldNodes[notebookRef.current.chosenNode.id]);
-          }
-          chosenNodeObj.parents = [
-            ...chosenNodeObj.parents,
-            {
-              node: notebookRef.current.choosingNode.id,
-              title: thisNode.title,
-              label: "",
-              type: chosenNodeObj.nodeType,
-            },
-          ];
-          if (notebookRef.current.chosenNode && notebookRef.current.choosingNode) {
-            newEdges = setDagEdge(
-              g.current,
-              notebookRef.current.choosingNode.id,
-              notebookRef.current.chosenNode.id,
-              { label: "" },
-              { ...oldEdges }
-            );
-          }
-          if (removedChildren.includes(notebookRef.current.chosenNode.id)) {
-            const chosenNodeId = notebookRef.current.choosingNode.id;
-            setRemovedChildren(removedChildren.filter(nId => nId !== chosenNodeId));
-          } else {
-            setAddedChildren([...addedChildren, notebookRef.current.chosenNode.id]);
-          }
-        }
-
-        const chosenNode = notebookRef.current.chosenNode.id;
-        notebookRef.current.choosingNode = null;
-        notebookRef.current.chosenNode = null;
-        nodeBookDispatch({ type: "setChoosingNode", payload: null });
-        nodeBookDispatch({ type: "setChosenNode", payload: null });
-
-        const newNodes = {
-          ...oldNodes,
-          [nodeId]: thisNode,
-          [chosenNode]: chosenNodeObj,
-        };
-        return { nodes: newNodes, edges: newEdges };
+  
+          const chosenNode = notebookRef.current.chosenNode.id;
+          notebookRef.current.choosingNode = null;
+          notebookRef.current.chosenNode = null;
+          nodeBookDispatch({ type: "setChoosingNode", payload: null });
+          nodeBookDispatch({ type: "setChosenNode", payload: null });
+  
+          const newNodes = {
+            ...oldNodes,
+            [nodeId]: thisNode,
+            [chosenNode]: chosenNodeObj,
+          };
+          return { nodes: newNodes, edges: newEdges };
+        });
+        return {...updatedLinks};
       });
     },
     // TODO: CHECK dependencies
@@ -1776,75 +1754,75 @@ const Dashboard = ({}: DashboardProps) => {
     [
       notebookRef.current.choosingNode,
       notebookRef.current.chosenNode,
-      removedParents,
-      addedParents,
-      removedChildren,
-      addedChildren,
     ]
   );
 
   const deleteLink = useCallback(
     (nodeId: string, linkIdx: number, linkType: ChoosingType) => {
-      setGraph(({ nodes, edges }) => {
-        let oldNodes = { ...nodes };
-        let newEdges = { ...edges };
-        const thisNode = copyNode(oldNodes[nodeId]);
+      setUpdatedLinks((updatedLinks) => {
+        setGraph(({ nodes, edges }) => {
+          let oldNodes = { ...nodes };
+          let newEdges = { ...edges };
+          const thisNode = copyNode(oldNodes[nodeId]);
+  
+          if (linkType === "Parent") {
+            let parentNode = null;
+            const parentId = thisNode.parents[linkIdx].node;
+            thisNode.parents = [...thisNode.parents];
+            thisNode.parents.splice(linkIdx, 1);
+            if (updatedLinks.addedParents.includes(parentId)) {
+              updatedLinks.addedParents = updatedLinks.addedParents.filter(nId => nId !== parentId);
+            } else {
+              updatedLinks.removedParents = [...updatedLinks.removedParents, parentId];
+            }
+            if (parentId in oldNodes) {
+              parentNode = copyNode(oldNodes[parentId]);
+              newEdges = removeDagEdge(g.current, parentId, nodeId, { ...newEdges });
+              if (!(parentId in changedNodes)) {
+                changedNodes[parentId] = copyNode(oldNodes[parentId]);
+              }
+              parentNode.children = parentNode.children.filter(l => l.node !== nodeId);
+              oldNodes[parentId] = parentNode;
+            }
+          } else if (linkType === "Child") {
+            let childNode = null;
+            const childId = thisNode.children[linkIdx].node;
+            thisNode.children = [...thisNode.children];
+            thisNode.children.splice(linkIdx, 1);
+            if (updatedLinks.addedChildren.includes(childId)) {
+              updatedLinks.addedChildren = updatedLinks.addedChildren.filter(nId => nId !== childId);
+            } else {
+              updatedLinks.removedChildren = [...updatedLinks.removedChildren, childId];
+            }
+            if (childId in oldNodes) {
+              childNode = oldNodes[childId];
+              newEdges = removeDagEdge(g.current, nodeId, childId, { ...newEdges });
+              if (!(childId in changedNodes)) {
+                changedNodes[childId] = copyNode(oldNodes[childId]);
+              }
+              childNode.parents = childNode.parents.filter(l => l.node !== nodeId);
+              oldNodes[childId] = childNode;
+            }
+          } else if (linkType === "Reference") {
+            thisNode.references = [...thisNode.references];
+            thisNode.references.splice(linkIdx, 1);
+            thisNode.referenceIds.splice(linkIdx, 1);
+            thisNode.referenceLabels.splice(linkIdx, 1);
+          } else if (linkType === "Tag") {
+            thisNode.tags = [...thisNode.tags];
+            thisNode.tags.splice(linkIdx, 1);
+            thisNode.tagIds.splice(linkIdx, 1);
+          }
+          oldNodes[nodeId] = thisNode;
+          return { nodes: oldNodes, edges: newEdges };
+        });
 
-        if (linkType === "Parent") {
-          let parentNode = null;
-          const parentId = thisNode.parents[linkIdx].node;
-          thisNode.parents = [...thisNode.parents];
-          thisNode.parents.splice(linkIdx, 1);
-          if (addedParents.includes(parentId)) {
-            setAddedParents(addedParents.filter(nId => nId !== parentId));
-          } else {
-            setRemovedParents(oldRemovedParents => [...oldRemovedParents, parentId]);
-          }
-          if (parentId in oldNodes) {
-            parentNode = copyNode(oldNodes[parentId]);
-            newEdges = removeDagEdge(g.current, parentId, nodeId, { ...newEdges });
-            if (!(parentId in changedNodes)) {
-              changedNodes[parentId] = copyNode(oldNodes[parentId]);
-            }
-            parentNode.children = parentNode.children.filter(l => l.node !== nodeId);
-            oldNodes[parentId] = parentNode;
-          }
-        } else if (linkType === "Child") {
-          let childNode = null;
-          const childId = thisNode.children[linkIdx].node;
-          thisNode.children = [...thisNode.children];
-          thisNode.children.splice(linkIdx, 1);
-          if (addedChildren.includes(childId)) {
-            setAddedChildren(addedChildren.filter(nId => nId !== childId));
-          } else {
-            setRemovedChildren([...removedChildren, childId]);
-          }
-          if (childId in oldNodes) {
-            childNode = oldNodes[childId];
-            newEdges = removeDagEdge(g.current, nodeId, childId, { ...newEdges });
-            if (!(childId in changedNodes)) {
-              changedNodes[childId] = copyNode(oldNodes[childId]);
-            }
-            childNode.parents = childNode.parents.filter(l => l.node !== nodeId);
-            oldNodes[childId] = childNode;
-          }
-        } else if (linkType === "Reference") {
-          thisNode.references = [...thisNode.references];
-          thisNode.references.splice(linkIdx, 1);
-          thisNode.referenceIds.splice(linkIdx, 1);
-          thisNode.referenceLabels.splice(linkIdx, 1);
-        } else if (linkType === "Tag") {
-          thisNode.tags = [...thisNode.tags];
-          thisNode.tags.splice(linkIdx, 1);
-          thisNode.tagIds.splice(linkIdx, 1);
-        }
-        oldNodes[nodeId] = thisNode;
-        return { nodes: oldNodes, edges: newEdges };
+        return {...updatedLinks};
       });
     },
     // TODO: CHECK dependencies
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [setGraph, addedParents, removedParents, addedChildren, removedChildren]
+    [setGraph]
   );
 
   const nodeClicked = useCallback((event: any, nodeId: string, nodeType: any, setOpenPart: any) => {
@@ -1856,15 +1834,6 @@ const Dashboard = ({}: DashboardProps) => {
 
     setSelectedNodeType(nodeType);
     setOpenPart("LinkingWords");
-  }, []);
-
-  const setNodeParts = useCallback((nodeId: string, innerFunc: (thisNode: FullNodeData) => FullNodeData) => {
-    setGraph(({ nodes: oldNodes, edges }) => {
-      setSelectedNodeType(oldNodes[nodeId].nodeType);
-      const thisNode = { ...oldNodes[nodeId] };
-      const newNode = { ...oldNodes, [nodeId]: innerFunc(thisNode) };
-      return { nodes: newNode, edges };
-    });
   }, []);
 
   const recursiveOffsprings = useCallback((nodeId: string): any[] => {
@@ -1884,6 +1853,8 @@ const Dashboard = ({}: DashboardProps) => {
   const hideOffsprings = useMemoizedCallback(
     nodeId => {
       if (notebookRef.current.choosingNode || !user) return;
+      console.log({ isPlayingTheTutorialRef: isPlayingTheTutorialRef.current });
+      if (isPlayingTheTutorialRef.current) return;
 
       setGraph(graph => {
         (async () => {
@@ -1949,15 +1920,50 @@ const Dashboard = ({}: DashboardProps) => {
         return graph;
       });
     },
-    [recursiveOffsprings]
+    [recursiveOffsprings, isPlayingTheTutorialRef]
   );
+
+  const onFinalizeTutorial = useCallback(async () => {
+    if (!user) return;
+    if (!stateNodeTutorial) return;
+    if (!currentTutorial) return;
+
+    const keyTutorial: TutorialTypeKeys = currentTutorial.toLowerCase() as TutorialTypeKeys;
+
+    const tutorialUpdated: UserTutorial = {
+      ...userTutorial[keyTutorial],
+      currentStep: stateNodeTutorial.currentStepName,
+      done: true,
+    };
+    const userTutorialUpdated: UserTutorials = { ...userTutorial, [keyTutorial]: tutorialUpdated };
+    setCurrentTutorial(null);
+    setOpenSidebar(null);
+    setUserTutorial(userTutorialUpdated);
+
+    const tutorialRef = doc(db, "userTutorial", user.uname);
+    const tutorialDoc = await getDoc(tutorialRef);
+
+    if (tutorialDoc.exists()) {
+      await updateDoc(tutorialRef, userTutorialUpdated);
+    } else {
+      await setDoc(tutorialRef, userTutorialUpdated);
+    }
+  }, [currentTutorial, db, setCurrentTutorial, stateNodeTutorial, user, userTutorial]);
 
   const openLinkedNode = useCallback(
     (linkedNodeID: string, typeOperation?: string) => {
-      devLog("open Linked Node", { linkedNodeID, typeOperation });
+      devLog("open Linked Node", {
+        linkedNodeID,
+        typeOperation,
+        isPlayingTheTutorialRef: isPlayingTheTutorialRef.current,
+      });
+      console.log("linked 0", isPlayingTheTutorialRef.current);
+
       if (notebookRef.current.choosingNode) return;
 
-      if (isPlayingTheTutorialRef.current) return;
+      if (isPlayingTheTutorialRef.current && currentTutorial !== "SEARCHER") return;
+
+      console.log("lib");
 
       createActionTrack(
         db,
@@ -2004,10 +2010,28 @@ const Dashboard = ({}: DashboardProps) => {
       if (typeOperation === "CitationSidebar") {
         setOpenSidebar(null);
       }
+      console.log("Current tutoriial");
+      if (currentTutorial === "SEARCHER") {
+        console.log("Finalize tutoriial called");
+
+        onFinalizeTutorial();
+      }
     },
-    // TODO: CHECK dependencies
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [openNodeHandler, setOpenSidebar, user]
+
+    [
+      currentTutorial,
+      db,
+      isPlayingTheTutorialRef,
+      nodeBookDispatch,
+      onFinalizeTutorial,
+      openNodeHandler,
+      scrollToNode,
+      user?.chooseUname,
+      user?.fName,
+      user?.imageUrl,
+      user?.lName,
+      user?.uname,
+    ]
   );
 
   const getNodeUserNode = useCallback(
@@ -2119,9 +2143,17 @@ const Dashboard = ({}: DashboardProps) => {
         return graph;
       });
     },
-    // TODO: CHECK dependencies
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [user, setGraph, initNodeStatusChange /*navigateToFirstParent*/]
+    [
+      isPlayingTheTutorialRef,
+      db,
+      user?.uname,
+      user?.fName,
+      user?.lName,
+      user?.chooseUname,
+      user?.imageUrl,
+      initNodeStatusChange,
+      nodeBookDispatch,
+    ]
   );
 
   const openAllChildren = useCallback((nodeId: string) => {
@@ -2231,7 +2263,7 @@ const Dashboard = ({}: DashboardProps) => {
       setGraph(({ nodes: oldNodes, edges }) => {
         const thisNode = oldNodes[nodeId];
 
-        // notebookRef.current.selectedNode = nodeId;
+        notebookRef.current.selectedNode = nodeId;
         nodeBookDispatch({ type: "setSelectedNode", payload: nodeId });
         const { nodeRef, userNodeRef } = initNodeStatusChange(nodeId, thisNode.userNodeId);
         const changeNode: any = {
@@ -2377,7 +2409,7 @@ const Dashboard = ({}: DashboardProps) => {
         referenceLabelsCopy[referenceIdx] = newLabel;
         thisNode.referenceLabels = referenceLabelsCopy;
         return {
-          nodes: { ...graph.nodes, [nodeId]: thisNode },
+          nodes: { ...nodes, [nodeId]: thisNode },
           edges,
         };
       });
@@ -2592,12 +2624,6 @@ const Dashboard = ({}: DashboardProps) => {
       const _corrects = corrects + correctChange;
       const _wrongs = wrongs + wrongChange;
 
-      setGraph(graph => {
-        const node = graph.nodes[nodeId];
-        generateReputationSignal(db, node, user, wrongChange, "Wrong", nodeId, setReputationSignal);
-        return graph;
-      });
-
       const willRemoveNode = doNeedToDeleteNode(_corrects, _wrongs, locked);
       if (willRemoveNode) {
         deleteOK = window.confirm("You are going to permanently delete this node by downvoting it. Are you sure?");
@@ -2605,20 +2631,24 @@ const Dashboard = ({}: DashboardProps) => {
 
       if (!deleteOK) return;
 
-      const nNode = graph.nodes[nodeId];
-      if (nNode?.locked) return;
+      setGraph(graph => {
+        const node = graph.nodes[nodeId];
+        
 
-      if (willRemoveNode) {
-        setGraph(({ nodes, edges }) => {
-          const tmpEdges = removeDagAllEdges(g.current, nodeId, edges);
-          const tmpNodes = removeDagNode(g.current, nodeId, nodes);
-          return { nodes: tmpNodes, edges: tmpEdges };
-        });
-        notebookRef.current.selectedNode = nNode.parents[0]?.node ?? null;
-        nodeBookDispatch({ type: "setSelectedNode", payload: nNode.parents[0]?.node ?? null });
-      } else {
-        setNodeParts(nodeId, node => {
-          return {
+        if (node?.locked) return graph;
+        generateReputationSignal(db, node, user, wrongChange, "Wrong", nodeId, setReputationSignal);
+
+        let nodes = graph.nodes;
+        let edges = graph.edges;
+
+        if (willRemoveNode) {
+          edges = removeDagAllEdges(g.current, nodeId, edges);
+          nodes = removeDagNode(g.current, nodeId, nodes);
+
+          notebookRef.current.selectedNode = node.parents[0]?.node ?? null;
+          nodeBookDispatch({ type: "setSelectedNode", payload: node.parents[0]?.node ?? null });
+        } else {
+          nodes[nodeId] = {
             ...node,
             wrong: !wrong,
             correct: false,
@@ -2626,17 +2656,22 @@ const Dashboard = ({}: DashboardProps) => {
             corrects: _corrects,
             disableVotes: true,
           };
-        });
-      }
+        }
+  
+        if (!willRemoveNode) {
+          nodes[nodeId] = {
+            ...node,
+            disableVotes: false,
+          };
+        }
 
-      await idToken();
-      await getMapGraph(`/wrongNode/${nodeId}`);
+        (async() => {
+          await idToken();
+          await getMapGraph(`/wrongNode/${nodeId}`);
+        })();
 
-      if (!willRemoveNode) {
-        setNodeParts(nodeId, node => {
-          return { ...node, disableVotes: false };
-        });
-      }
+        return {nodes, edges};
+      });
     },
     [getMapGraph, setNodeParts]
   );
@@ -2844,6 +2879,7 @@ const Dashboard = ({}: DashboardProps) => {
 
         return { nodes: newNodes, edges };
       });
+      processHeightChange(nodeId);
       //setOpenSidebar(null);
       scrollToNode(selectedNode);
     },
@@ -2927,6 +2963,7 @@ const Dashboard = ({}: DashboardProps) => {
   const saveProposedImprovement = useCallback(
     (summary: any, reason: any, onFail: any) => {
       if (!notebookRef.current.selectedNode) return;
+      if (isPlayingTheTutorialRef.current) return;
 
       notebookRef.current.chosenNode = null;
       notebookRef.current.choosingNode = null;
@@ -2934,159 +2971,168 @@ const Dashboard = ({}: DashboardProps) => {
       nodeBookDispatch({ type: "setChoosingNode", payload: null });
       let referencesOK = true;
 
-      setGraph(graph => {
-        const selectedNodeId = notebookRef.current.selectedNode!;
-        if (
-          (graph.nodes[selectedNodeId].nodeType === "Concept" ||
-            graph.nodes[selectedNodeId].nodeType === "Relation" ||
-            graph.nodes[selectedNodeId].nodeType === "Question" ||
-            graph.nodes[selectedNodeId].nodeType === "News") &&
-          graph.nodes[selectedNodeId].references.length === 0
-        ) {
-          referencesOK = window.confirm("You are proposing a node without any reference. Are you sure?");
-        }
-
-        if (!referencesOK) return graph;
-
-        gtmEvent("Propose", {
-          customType: "improvement",
-        });
-        gtmEvent("Interaction", {
-          customType: "improvement",
-        });
-        gtmEvent("Reputation", {
-          value: 1,
-        });
-
-        const newNode = { ...graph.nodes[selectedNodeId] };
-        if (newNode.children.length > 0) {
-          const newChildren = [];
-          for (let child of newNode.children) {
-            newChildren.push({
-              node: child.node,
-              title: child.title,
-              label: child.label,
-              type: child.type,
-            });
+      setUpdatedLinks((updatedLinks) => {
+        setGraph(graph => {
+          const selectedNodeId = notebookRef.current.selectedNode!;
+          if (
+            (graph.nodes[selectedNodeId].nodeType === "Concept" ||
+              graph.nodes[selectedNodeId].nodeType === "Relation" ||
+              graph.nodes[selectedNodeId].nodeType === "Question" ||
+              graph.nodes[selectedNodeId].nodeType === "News") &&
+            graph.nodes[selectedNodeId].references.length === 0
+          ) {
+            referencesOK = window.confirm("You are proposing a node without any reference. Are you sure?");
           }
-          newNode.children = newChildren;
-          const newParents = [];
-          for (let parent of newNode.parents) {
-            newParents.push({
-              node: parent.node,
-              title: parent.title,
-              label: parent.label,
-              type: parent.type,
-            });
-          }
-          newNode.parents = newParents;
-        }
-        const keyFound = Object.keys(allNodes).find(key => allNodes[key].node === nodeBookState.selectedNode);
-        if (!keyFound) return graph;
-
-        const oldNode = allNodes[keyFound];
-        let isTheSame =
-          newNode.title === oldNode.title &&
-          newNode.content === oldNode.content &&
-          newNode.nodeType === oldNode.nodeType;
-        isTheSame = isTheSame && compareProperty(oldNode, newNode, "nodeImage");
-        if (
-          ("nodeVideo" in oldNode && "nodeVideo" in newNode) ||
-          (!("nodeVideo" in oldNode) && newNode["nodeVideo"] !== "")
-        ) {
-          isTheSame = isTheSame && compareProperty(oldNode, newNode, "nodeVideo");
-        }
-        isTheSame = compareFlatLinks(oldNode.tagIds, newNode.tagIds, isTheSame); // CHECK: O checked only ID changes
-        isTheSame = compareFlatLinks(oldNode.referenceIds, newNode.referenceIds, isTheSame); // CHECK: O checked only ID changes
-        isTheSame = compareLinks(oldNode.parents, newNode.parents, isTheSame, false);
-        isTheSame = compareLinks(oldNode.children, newNode.children, isTheSame, false);
-        isTheSame = compareFlatLinks(oldNode.referenceLabels, newNode.referenceLabels, isTheSame);
-
-        isTheSame = compareChoices(oldNode, newNode, isTheSame);
-        if (isTheSame) {
-          onFail();
-          setTimeout(() => {
-            window.alert("You've not changed anything yet!");
+  
+          if (!referencesOK) return graph;
+  
+          gtmEvent("Propose", {
+            customType: "improvement",
           });
-          return graph;
-        }
-
-        const postData: any = {
-          ...newNode,
-          id: nodeBookState.selectedNode,
-          summary: summary,
-          proposal: reason,
-          addedParents,
-          addedChildren,
-          removedParents,
-          removedChildren,
-        };
-        delete postData.isStudied;
-        delete postData.bookmarked;
-        delete postData.correct;
-        delete postData.updatedAt;
-        delete postData.open;
-        delete postData.visible;
-        delete postData.deleted;
-        delete postData.wrong;
-        delete postData.createdAt;
-        delete postData.firstVisit;
-        delete postData.lastVisit;
-        delete postData.versions;
-        delete postData.viewers;
-        delete postData.comments;
-        delete postData.wrongs;
-        delete postData.corrects;
-        delete postData.studied;
-        delete postData.editable;
-        delete postData.left;
-        delete postData.top;
-        delete postData.height;
-
-        const willBeApproved = isVersionApproved({ corrects: 1, wrongs: 0, nodeData: newNode });
-
-        if (willBeApproved) {
-          const newParentIds: string[] = newNode.parents.map(parent => parent.node);
-          const newChildIds: string[] = newNode.children.map(child => child.node);
-          const oldParentIds: string[] = oldNode.parents.map(parent => parent.node);
-          const oldChildIds: string[] = oldNode.children.map(child => child.node);
-          const idsToBeRemoved = Array.from(
-            new Set<string>([
-              ...newParentIds,
-              ...newChildIds,
-              notebookRef.current.selectedNode!,
-              ...oldParentIds,
-              ...oldChildIds,
-            ])
-          );
-          idsToBeRemoved.forEach(idToBeRemoved => {
-            if (changedNodes.hasOwnProperty(idToBeRemoved)) {
-              delete changedNodes[idToBeRemoved];
+          gtmEvent("Interaction", {
+            customType: "improvement",
+          });
+          gtmEvent("Reputation", {
+            value: 1,
+          });
+  
+          const newNode = { ...graph.nodes[selectedNodeId] };
+          if (newNode.children.length > 0) {
+            const newChildren = [];
+            for (let child of newNode.children) {
+              newChildren.push({
+                node: child.node,
+                title: child.title,
+                label: child.label,
+                type: child.type,
+              });
             }
-          });
-        }
+            newNode.children = newChildren;
+            const newParents = [];
+            for (let parent of newNode.parents) {
+              newParents.push({
+                node: parent.node,
+                title: parent.title,
+                label: parent.label,
+                type: parent.type,
+              });
+            }
+            newNode.parents = newParents;
+          }
+          const keyFound = changedNodes.hasOwnProperty(selectedNodeId);
+          if (!keyFound) return graph;
+  
+          const oldNode = changedNodes[selectedNodeId] as FullNodeData;
+          let isTheSame =
+            newNode.title === oldNode.title &&
+            newNode.content === oldNode.content &&
+            newNode.nodeType === oldNode.nodeType;
+          isTheSame = isTheSame && compareProperty(oldNode, newNode, "nodeImage");
+          if (
+            ("nodeVideo" in oldNode && "nodeVideo" in newNode) ||
+            (!("nodeVideo" in oldNode) && newNode["nodeVideo"] !== "")
+          ) {
+            isTheSame = isTheSame && compareProperty(oldNode, newNode, "nodeVideo");
+          }
+          isTheSame = compareFlatLinks(oldNode.tagIds, newNode.tagIds, isTheSame); // CHECK: O checked only ID changes
+          isTheSame = compareFlatLinks(oldNode.referenceIds, newNode.referenceIds, isTheSame); // CHECK: O checked only ID changes
+          isTheSame = compareLinks(oldNode.parents, newNode.parents, isTheSame, false);
+          isTheSame = compareLinks(oldNode.children, newNode.children, isTheSame, false);
+          isTheSame = compareFlatLinks(oldNode.referenceLabels, newNode.referenceLabels, isTheSame);
+  
+          isTheSame = compareChoices(oldNode, newNode, isTheSame);
+          if (isTheSame) {
+            onFail();
+            setTimeout(() => {
+              window.alert("You've not changed anything yet!");
+            });
+            return graph;
+          }
+  
+          const postData: any = {
+            ...newNode,
+            id: notebookRef.current.selectedNode,
+            summary: summary,
+            proposal: reason,
+            addedParents: updatedLinks.addedParents,
+            addedChildren: updatedLinks.addedChildren,
+            removedParents: updatedLinks.removedParents,
+            removedChildren: updatedLinks.removedChildren,
+          };
+          delete postData.isStudied;
+          delete postData.bookmarked;
+          delete postData.correct;
+          delete postData.updatedAt;
+          delete postData.open;
+          delete postData.visible;
+          delete postData.deleted;
+          delete postData.wrong;
+          delete postData.createdAt;
+          delete postData.firstVisit;
+          delete postData.lastVisit;
+          delete postData.versions;
+          delete postData.viewers;
+          delete postData.comments;
+          delete postData.wrongs;
+          delete postData.corrects;
+          delete postData.studied;
+          delete postData.editable;
+          delete postData.left;
+          delete postData.top;
+          delete postData.height;
+  
+          const willBeApproved = isVersionApproved({ corrects: 1, wrongs: 0, nodeData: newNode });
+  
+          if (willBeApproved) {
+            const newParentIds: string[] = newNode.parents.map(parent => parent.node);
+            const newChildIds: string[] = newNode.children.map(child => child.node);
+            const oldParentIds: string[] = oldNode.parents.map(parent => parent.node);
+            const oldChildIds: string[] = oldNode.children.map(child => child.node);
+            const idsToBeRemoved = Array.from(
+              new Set<string>([
+                ...newParentIds,
+                ...newChildIds,
+                notebookRef.current.selectedNode!,
+                ...oldParentIds,
+                ...oldChildIds,
+              ])
+            );
+            idsToBeRemoved.forEach(idToBeRemoved => {
+              if (changedNodes.hasOwnProperty(idToBeRemoved)) {
+                delete changedNodes[idToBeRemoved];
+              }
+            });
+          }
+  
+          const nodes = {
+            ...graph.nodes,
+            [selectedNodeId]: {
+              ...graph.nodes[selectedNodeId],
+              editable: false,
+            },
+          };
+  
+          getMapGraph("/proposeNodeImprovement", postData, !willBeApproved);
+  
+          setTimeout(() => {
+            scrollToNode(selectedNodeId);
+          }, 200);
+  
+          return {
+            nodes,
+            edges: graph.edges,
+          };
+        });
 
-        const nodes = {
-          ...graph.nodes,
-          [selectedNodeId]: {
-            ...graph.nodes[selectedNodeId],
-            editable: false,
-          },
-        };
-
-        getMapGraph("/proposeNodeImprovement", postData, !willBeApproved);
-
-        setTimeout(() => {
-          scrollToNode(selectedNodeId);
-        }, 200);
-
-        return {
-          nodes,
-          edges: graph.edges,
-        };
+        return updatedLinks;
       });
     },
-    [addedParents, addedChildren, removedParents, removedChildren, getMapGraph]
+    [
+      isPlayingTheTutorialRef,
+      nodeBookDispatch,
+      getMapGraph,
+      scrollToNode,
+    ]
   );
 
   const proposeNewChild = useCallback(
@@ -3887,11 +3933,13 @@ const Dashboard = ({}: DashboardProps) => {
 
   // this method was required to cleanup editor added, removed child and parent list
   const cleanEditorLink = useCallback(() => {
-    setAddedParents([]);
-    setAddedChildren([]);
-    setRemovedParents([]);
-    setRemovedChildren([]);
-  }, [setAddedParents, setAddedChildren, setRemovedParents, setRemovedChildren]);
+    setUpdatedLinks({
+      addedParents: [],
+      addedChildren: [],
+      removedChildren: [],
+      removedParents: [],
+    });
+  }, []);
 
   const onScrollToLastNode = () => {
     if (!nodeBookState.selectedNode) return;
@@ -3916,6 +3964,7 @@ const Dashboard = ({}: DashboardProps) => {
 
   const setSelectedNode = useCallback(
     (nodeId: string) => {
+      notebookRef.current.selectedNode = nodeId;
       nodeBookDispatch({ type: "setSelectedNode", payload: nodeId });
       scrollToNode(nodeId);
     },
@@ -3923,28 +3972,82 @@ const Dashboard = ({}: DashboardProps) => {
   );
   // console.log({ nodeBookState });
 
-  const handleOpenProgressBar = useCallback(() => {
-    setOpenProgressBar(true);
-    setOpenProgressBarMenu(false);
-  }, []);
+  // const handleOpenProgressBar = useCallback(() => {
+  //   setOpenProgressBar(true);
+  //   setOpenProgressBarMenu(false);
+  // }, []);
 
-  const handleCloseProgressBar = useCallback(() => {
-    console.log("ssssssss");
-    setOpenProgressBar(false);
-    setOpenProgressBarMenu(true);
-  }, []);
+  // const handleCloseProgressBar = useCallback(() => {
+  //   console.log("ssssssss");
+  //   setOpenProgressBar(false);
+  //   setOpenProgressBarMenu(true);
+  // }, []);
+
   const handleCloseProgressBarMenu = useCallback(() => {
     setOpenProgressBarMenu(false);
   }, []);
+
+  // const onUpdateNode = useCallback(
+  //   async (tutorialKey: TutorialType) => {
+  //     if (!user) return;
+
+  //     const userTutorialUpdated = { ...userTutorial, [tutorialKey]: tutorialUpdated };
+  //     onChangeStep(null);
+  //     setUserTutorial(userTutorialUpdated);
+
+  //     const tutorialRef = doc(db, "userTutorial", user.uname);
+  //     const tutorialDoc = await getDoc(tutorialRef);
+
+  //     if (tutorialDoc.exists()) {
+  //       await updateDoc(tutorialRef, userTutorialUpdated);
+  //     } else {
+  //       await setDoc(tutorialRef, userTutorialUpdated);
+  //     }
+  //   },
+  //   [db, onChangeStep, user, userTutorial]
+  // );
+
+  const onSkipTutorial = useCallback(async () => {
+    if (!user) return;
+    if (!stateNodeTutorial) return;
+    if (!currentTutorial) return;
+
+    const keyTutorial: TutorialTypeKeys = currentTutorial.toLowerCase() as TutorialTypeKeys;
+
+    const tutorialUpdated: UserTutorial = {
+      ...userTutorial[keyTutorial],
+      currentStep: stateNodeTutorial.currentStepName,
+      skipped: true,
+    };
+    const userTutorialUpdated = { ...userTutorial, [keyTutorial]: tutorialUpdated };
+    setCurrentTutorial(null);
+    setOpenSidebar(null);
+    setUserTutorial(userTutorialUpdated);
+
+    const tutorialRef = doc(db, "userTutorial", user.uname);
+    const tutorialDoc = await getDoc(tutorialRef);
+
+    if (tutorialDoc.exists()) {
+      await updateDoc(tutorialRef, userTutorialUpdated);
+    } else {
+      await setDoc(tutorialRef, userTutorialUpdated);
+    }
+  }, [currentTutorial, db, setCurrentTutorial, stateNodeTutorial, user, userTutorial]);
+
   return (
     <div className="MapContainer" style={{ overflow: "hidden" }}>
       {stateNodeTutorial?.anchor && (
         <Portal anchor="portal">
           <Tutorial
             tutorialState={stateNodeTutorial}
-            onChangeStep={onChangeStep}
+            // onChangeStep={onChangeStep}
             targetClientRect={targetClientRect}
             handleCloseProgressBarMenu={handleCloseProgressBarMenu}
+            onSkip={onSkipTutorial}
+            onFinalize={onFinalizeTutorial}
+            onNextStep={onNextStep}
+            onPreviousStep={onPreviousStep}
+            stepsLength={stepsLength}
           />
         </Portal>
       )}
@@ -3965,6 +4068,9 @@ const Dashboard = ({}: DashboardProps) => {
             Click the node you'd like to link to...{" "}
             <Button
               onClick={() => {
+                notebookRef.current.choosingNode = null;
+                notebookRef.current.selectedNode = null;
+                notebookRef.current.chosenNode = null;
                 nodeBookDispatch({ type: "setChoosingNode", payload: null });
                 nodeBookDispatch({ type: "setSelectedNode", payload: null });
                 nodeBookDispatch({ type: "setChosenNode", payload: null });
@@ -4085,6 +4191,8 @@ const Dashboard = ({}: DashboardProps) => {
                 onlineUsers={onlineUsers}
                 usersOnlineStatusLoaded={usersOnlineStatusLoaded}
                 disableToolbar={Boolean(stateNodeTutorial && stateNodeTutorial.disabledElements.includes("TOOLBAR"))}
+                setCurrentTutorial={setCurrentTutorial}
+                userTutorial={userTutorial}
               />
 
               <MemoizedBookmarksSidebar
@@ -4099,12 +4207,15 @@ const Dashboard = ({}: DashboardProps) => {
                 bookmark={bookmark}
               />
               <MemoizedSearcherSidebar
+                notebookRef={notebookRef}
                 openLinkedNode={openLinkedNode}
                 open={openSidebar === "SEARCHER_SIDEBAR"}
                 onClose={() => setOpenSidebar(null)}
                 sidebarWidth={sidebarWidth()}
                 innerHeight={innerHeight}
                 innerWidth={windowWith}
+                disableSearcher={Boolean(stateNodeTutorial?.disabledElements.includes("SEARCHER_SIDEBAR"))}
+                enableElements={stateNodeTutorial?.enableChildElements ?? []}
               />
               <MemoizedNotificationSidebar
                 theme={settings.theme}
@@ -4112,6 +4223,17 @@ const Dashboard = ({}: DashboardProps) => {
                 username={user.uname}
                 open={openSidebar === "NOTIFICATION_SIDEBAR"}
                 onClose={() => setOpenSidebar(null)}
+                sidebarWidth={sidebarWidth()}
+                innerHeight={innerHeight}
+                innerWidth={windowWith}
+              />
+              <MemoizedPendingProposalSidebar
+                theme={settings.theme}
+                openLinkedNode={openLinkedNode}
+                username={user.uname}
+                tagId={user.tagId}
+                open={openSidebar === "PENDING_PROPOSALS"}
+                onClose={() => onCloseSidebar()}
                 sidebarWidth={sidebarWidth()}
                 innerHeight={innerHeight}
                 innerWidth={windowWith}
@@ -4147,6 +4269,7 @@ const Dashboard = ({}: DashboardProps) => {
               />
 
               <MemoizedUserSettingsSidebar
+                notebookRef={notebookRef}
                 theme={settings.theme}
                 open={openSidebar === "USER_SETTINGS"}
                 onClose={() => setOpenSidebar(null)}
@@ -4263,7 +4386,7 @@ const Dashboard = ({}: DashboardProps) => {
             </IconButton>
           </Tooltip>
 
-          {!nodeTutorial && (
+          {/* {!stateNodeTutorial && (
             <Tooltip
               title="Start tutorial"
               placement="left"
@@ -4289,14 +4412,14 @@ const Dashboard = ({}: DashboardProps) => {
               <IconButton
                 color="secondary"
                 onClick={() => {
-                  onChangeStep(1);
+                  setCurrentTutorial("NODES");
                   setOpenProgressBarMenu(true);
                 }}
               >
-                <SchoolIcon />
+                <HelpIcon />
               </IconButton>
             </Tooltip>
-          )}
+          )} */}
 
           {process.env.NODE_ENV === "development" && (
             <Tooltip
@@ -4413,140 +4536,21 @@ const Dashboard = ({}: DashboardProps) => {
                 value={mapInteractionValue}
                 onChange={navigateWhenNotScrolling}
               >
-                {/* <div
-                  style={{
-                    position: "absolute",
-                    width: "8px",
-                    height: "8px",
-                    borderRadius: "50%",
-                    backgroundColor: "yellow",
-                  }}
-                ></div>
-                <div
-                  style={{
-                    position: "absolute",
-                    width: "8px",
-                    height: "8px",
-                    borderRadius: "50%",
-                    left: "2900px",
-                    top: "0px",
-                    backgroundColor: "#ff0630",
-                  }}
-                ></div>
-                <div
-                  style={{
-                    position: "absolute",
-                    width: "5000px",
-                    height: "3px",
-                    top: "0px",
-                    left: "0px",
-                    backgroundColor: "yellow",
-                  }}
-                ></div>
-                <div
-                  style={{
-                    position: "absolute",
-                    width: "8px",
-                    height: "8px",
-                    top: "100px",
-                    left: "100px",
-                    borderRadius: "50%",
-                    backgroundColor: "royalblue",
-                  }}
-                ></div>
-                <div
-                  style={{
-                    position: "absolute",
-                    width: "2000px",
-                    height: "3px",
-                    top: "100px",
-                    left: "0px",
-                    backgroundColor: "royalblue",
-                  }}
-                ></div>
-
-                <div
-                  style={{
-                    position: "absolute",
-                    width: "2000px",
-                    height: "3px",
-                    top: "150px",
-                    left: "0px",
-                    backgroundColor: "yellow",
-                  }}
-                ></div>
-
-                <div
-                  style={{
-                    position: "absolute",
-                    width: "2000px",
-                    height: "1px",
-                    top: "160px",
-                    left: "0px",
-                    backgroundColor: "yellow",
-                  }}
-                ></div>
-
-                <div
-                  style={{
-                    position: "absolute",
-                    width: "8px",
-                    height: "8px",
-                    top: "150px",
-                    left: "200px",
-                    borderRadius: "50%",
-                    backgroundColor: "royalblue",
-                  }}
-                ></div>
-                <div
-                  style={{
-                    position: "absolute",
-                    width: "8px",
-                    height: "8px",
-                    top: "150px",
-                    left: "500px",
-                    borderRadius: "50%",
-                    backgroundColor: "royalblue",
-                  }}
-                ></div>
-                <div
-                  style={{
-                    position: "absolute",
-                    width: "8px",
-                    height: "8px",
-                    top: "150px",
-                    left: "600px",
-                    borderRadius: "50%",
-                    backgroundColor: "royalblue",
-                  }}
-                ></div>
-
-                <div
-                  style={{
-                    position: "absolute",
-                    width: "2000px",
-                    height: "3px",
-                    top: "500px",
-                    left: "0px",
-                    backgroundColor: "yellow",
-                  }}
-                ></div>
-                <div
-                  style={{
-                    position: "absolute",
-                    width: "2000px",
-                    height: "3px",
-                    top: "600px",
-                    left: "0px",
-                    backgroundColor: "yellow",
-                  }}
-                /> */}
                 {!stateNodeTutorial?.anchor && (
                   <Tutorial
                     tutorialState={stateNodeTutorial}
-                    onChangeStep={onChangeStep}
                     targetClientRect={targetClientRect}
                     handleCloseProgressBarMenu={handleCloseProgressBarMenu}
+                    onSkip={onSkipTutorial}
+                    onFinalize={onFinalizeTutorial}
+                    onNextStep={onNextStep}
+                    onPreviousStep={onPreviousStep}
+                    stepsLength={stepsLength}
+                    // tutorialState={stateNodeTutorial}
+                    // onChangeStep={onChangeStep}
+                    // targetClientRect={targetClientRect}
+                    // handleCloseProgressBarMenu={handleCloseProgressBarMenu}
+                    // onSkipTutorial={onSkipTutorial}
                   />
                 )}
                 {settings.showClusterOptions && settings.showClusters && (
@@ -4601,7 +4605,9 @@ const Dashboard = ({}: DashboardProps) => {
                   setOperation={setOperation}
                   openUserInfoSidebar={openUserInfoSidebar}
                   disabledNodes={stateNodeTutorial?.disabledElements ?? []}
-                  enableChildElements={stateNodeTutorial?.enableChildElements}
+                  enableChildElements={stateNodeTutorial?.enableChildElements ?? []}
+                  showProposeTutorial={!(userTutorial.proposal.done || userTutorial.proposal.skipped)}
+                  setCurrentTutorial={setCurrentTutorial}
                 />
               </MapInteractionCSS>
               {showRegion && (
@@ -4718,12 +4724,12 @@ const Dashboard = ({}: DashboardProps) => {
               </Suspense>
             </Box>
           )}
-          <MemoizedProgressBarMenu
+          {/* <MemoizedProgressBarMenu
             open={openProgressBarMenu}
             handleOpenProgressBar={handleOpenProgressBar}
             currentStep={stateNodeTutorial?.currentStepName ?? 0}
           />
-          <MemoizedProgressBar open={openProgressBar} handleCloseProgressBar={handleCloseProgressBar} />
+          <MemoizedProgressBar open={openProgressBar} handleCloseProgressBar={handleCloseProgressBar} /> */}
         </Box>
       </Box>
     </div>

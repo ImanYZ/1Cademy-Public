@@ -30,6 +30,7 @@ import {
   MenuItemProps,
   MenuList,
   Paper,
+  Stack,
   styled,
   Tooltip,
   Typography,
@@ -40,17 +41,19 @@ import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import { collection, getDocs, getFirestore, query, where } from "firebase/firestore";
 import { useRouter } from "next/router";
-import React, { ReactNode, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import React, { MutableRefObject, ReactNode, useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { useNodeBook } from "@/context/NodeBookContext";
-import { OpenSidebar } from "@/pages/notebook";
+import { orange25, orange200 } from "@/pages/home";
+import { OpenSidebar, TutorialType } from "@/pages/notebook";
 
 import { User } from "../../knowledgeTypes";
 import shortenNumber from "../../lib/utils/shortenNumber";
-import { FullNodeData, OpenPart } from "../../nodeBookTypes";
+import { FullNodeData, OpenPart, TNodeBookState } from "../../nodeBookTypes";
 import LeaderboardChip from "../LeaderboardChip";
 import { MemoizedHeadlessLeaderboardChip } from "../map/FocusedNotebook/HeadlessLeaderboardChip";
 import NodeTypeIcon from "../NodeTypeIcon";
+import { Portal } from "../Portal";
 import { ContainedButton } from "./ContainedButton";
 import { MemoizedMetaButton } from "./MetaButton";
 import { MemoizedNodeTypeSelector } from "./Node/NodeTypeSelector";
@@ -63,6 +66,7 @@ type NodeFooterProps = {
   addVideo: boolean;
   setAddVideo: (addVideo: boolean) => void;
   identifier: any;
+  notebookRef: MutableRefObject<TNodeBookState>;
   activeNode: any;
   citationsSelected: any;
   proposalsSelected: any;
@@ -120,6 +124,8 @@ type NodeFooterProps = {
   setOperation: any;
   disabled?: boolean;
   enableChildElements?: string[];
+  showProposeTutorial?: boolean;
+  setCurrentTutorial: (newValue: TutorialType) => void;
 };
 
 const NodeFooter = ({
@@ -127,6 +133,7 @@ const NodeFooter = ({
   addVideo,
   setAddVideo,
   identifier,
+  notebookRef,
   // activeNode,
   // proposalsSelected,
   // acceptedProposalsSelected,
@@ -182,6 +189,8 @@ const NodeFooter = ({
   setOperation,
   disabled,
   enableChildElements = [],
+  showProposeTutorial = false,
+  setCurrentTutorial,
 }: NodeFooterProps) => {
   const router = useRouter();
   const db = getFirestore();
@@ -196,6 +205,7 @@ const NodeFooter = ({
   const [institutionLogos, setInstitutionLogos] = useState<{
     [institutionName: string]: string;
   }>({});
+  const [openProposalConfirm, setOpenProposalConfirm] = useState(false);
 
   const userPictureId = `${identifier}-node-footer-user`;
   const proposeButtonId = `${identifier}-node-footer-propose`;
@@ -204,6 +214,7 @@ const NodeFooter = ({
   const tagsCitationsButtonId = `${identifier}-node-footer-tags-citations`;
   const parentChildrenButtonId = `${identifier}-button-parent-children`;
   const moreOptionsButtonId = `${identifier}-node-footer-ellipsis`;
+  const nodeTypeSelectorId = `${identifier}-node-type-selector`;
 
   // this will execute the includes operation only when disable is TRUE (in tutorial)
   const disableUserPicture = disabled && !enableChildElements.includes(userPictureId);
@@ -214,6 +225,7 @@ const NodeFooter = ({
   const disableParentChildrenButton = disabled && !enableChildElements.includes(parentChildrenButtonId);
   const disableMoreOptionsButton = disabled && !enableChildElements.includes(moreOptionsButtonId);
   const disableFooterMenuOptions = enableChildElements.includes(moreOptionsButtonId);
+  const disableNodeTypeSelector = disabled && !enableChildElements.includes(nodeTypeSelectorId);
 
   const messageTwitter = () => {
     return `1Cademy - Collaboratively Designing Learning Pathways
@@ -395,27 +407,36 @@ const NodeFooter = ({
   }, [_institutions]);
 
   const openContributorsSection = useCallback(() => {
-    if (nodeBookState.contributorsNodeId != identifier) {
+    if (notebookRef.current.contributorsNodeId != identifier) {
+      notebookRef.current.contributorsNodeId = { nodeId: identifier, showContributors: true };
       nodeBookDispatch({
         type: "setContributorsNodeId",
         payload: { nodeId: identifier, showContributors: true },
       });
     } else {
+      notebookRef.current.contributorsNodeId = {
+        nodeId: identifier,
+        showContributors: !notebookRef.current.showContributors,
+      };
       nodeBookDispatch({
         type: "setContributorsNodeId",
-        payload: { nodeId: identifier, showContributors: !nodeBookState.showContributors },
+        payload: { nodeId: identifier, showContributors: !notebookRef.current.showContributors },
       });
     }
-  }, [nodeBookDispatch, nodeBookState.contributorsNodeId]);
+  }, [nodeBookDispatch]);
 
   const proposeNodeImprovementClick = useCallback(
     (event: any) => {
+      // const searcherTutorialFinalized = userTutorial.searcher.done || userTutorial.searcher.skipped;
+      console.log({ showProposeTutorial });
+
       selectPendingProposals(event);
       setOperation("CancelProposals");
+      notebookRef.current.selectedNode = identifier;
       nodeBookDispatch({ type: "setSelectedNode", payload: identifier });
       proposeNodeImprovement(event, identifier);
     },
-    [proposeNodeImprovement]
+    [identifier, nodeBookDispatch, proposeNodeImprovement, selectPendingProposals, setOperation, showProposeTutorial]
   );
 
   return (
@@ -427,12 +448,10 @@ const NodeFooter = ({
           alignItems: "center",
           justifyContent: "space-between",
           mt: "10px",
-          marginBottom: openSidebar === "PROPOSALS" || openPart ? "0px" : "10px",
         }}
       >
         <Box className="NodeFooter Left" sx={{ display: "flex", alignItems: "center", gap: "10px" }}>
           {open &&
-            !disableUserPicture &&
             (isNew ? (
               <Box onClick={openContributorsSection}>
                 <MemoizedUserStatusIcon
@@ -446,6 +465,7 @@ const NodeFooter = ({
                   inNodeFooter={true}
                   reloadPermanentGrpah={reloadPermanentGrpah}
                   setOpenSideBar={setOpenSideBar}
+                  disabled={disableUserPicture}
                 />
               </Box>
             ) : (
@@ -461,15 +481,16 @@ const NodeFooter = ({
                   inNodeFooter={true}
                   reloadPermanentGrpah={reloadPermanentGrpah}
                   setOpenSideBar={setOpenSideBar}
+                  disabled={disableUserPicture}
                 />
               </Box>
             ))}
-          {open && disableUserPicture && (
+          {/* {open && disableUserPicture && (
             <Box
               id={userPictureId}
               sx={{ width: "28px", height: "28px", backgroundColor: "gray", borderRadius: "50%" }}
             />
-          )}
+          )} */}
           <div
             className={open ? "NodeTypeIconOpen Tooltip" : "NodeTypeIconClosed Tooltip"}
             style={{ display: "flex", alignItems: "center", fontSize: "16px" }} // font size refL Map.css ln 71
@@ -491,7 +512,8 @@ const NodeFooter = ({
                   nodeId={identifier}
                   setNodeParts={setNodeParts}
                   nodeType={nodeType}
-                  disabled={disabled}
+                  disabled={disableNodeTypeSelector}
+                  disabledItems={disabled}
                 />
               ) : (
                 <NodeTypeIcon
@@ -528,7 +550,7 @@ const NodeFooter = ({
                 <ContainedButton
                   id={proposeButtonId}
                   title="Propose/evaluate versions of this node."
-                  onClick={proposeNodeImprovementClick}
+                  onClick={showProposeTutorial ? () => setOpenProposalConfirm(true) : proposeNodeImprovementClick}
                   tooltipPosition="top"
                   sx={{
                     background: (theme: any) =>
@@ -1938,6 +1960,78 @@ const NodeFooter = ({
             </Grid>
           </Box>
         )}
+      {showProposeTutorial && openProposalConfirm && (
+        <Portal anchor="portal">
+          <div
+            style={{
+              position: "absolute",
+              top: "0px",
+              bottom: "0px",
+              left: "0px",
+              right: "0px",
+              backgroundColor: "#555555a9",
+              transition: "top 1s ease-out,left 1s ease-out",
+              boxSizing: "border-box",
+              display: "grid",
+              placeItems: "center",
+              zIndex: 99999,
+            }}
+          >
+            <Box
+              sx={{
+                transition: "top 1s ease-out,left 1s ease-out",
+                width: "450px",
+                backgroundColor: theme => (theme.palette.mode === "dark" ? "#353535" : orange25),
+                border: theme => `2px solid ${theme.palette.mode === "dark" ? "#816247" : orange200}`,
+                p: "24px 32px",
+                borderRadius: "8px",
+                color: "white",
+                zIndex: 99999,
+              }}
+            >
+              <Typography
+                component={"h2"}
+                sx={{ fontSize: "18px", fontWeight: "bold", display: "inline-block", textAlign: "center" }}
+              >
+                Tutorial Proposal
+              </Typography>
+              <Typography component={"p"} sx={{ fontSize: "16px", display: "inline-block" }}>
+                Would you like to take the Proposals Tutorial ?
+              </Typography>
+              <Stack direction={"row"} justifyContent={"space-between"} alignItems={"center"} sx={{ mt: "16px" }}>
+                <Button
+                  variant="text"
+                  onClick={e => {
+                    setOpenProposalConfirm(false);
+                    proposeNodeImprovementClick(e);
+                  }}
+                  sx={{
+                    p: "8px 0px",
+                  }}
+                >
+                  Cancel
+                </Button>
+                <Box>
+                  <Button
+                    variant="outlined"
+                    onClick={() => {
+                      setCurrentTutorial("PROPOSAL");
+                    }}
+                    sx={{
+                      borderRadius: "32px",
+                      mr: "16px",
+
+                      p: "8px 32px",
+                    }}
+                  >
+                    Get Started
+                  </Button>
+                </Box>
+              </Stack>
+            </Box>
+          </div>
+        </Portal>
+      )}
     </>
   );
 };

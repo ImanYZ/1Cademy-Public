@@ -42,6 +42,7 @@ const ValidatedInput = (props: any) => {
 
     // touched - set to true if you have clicked the textfield
     <TextField
+      disable={props.disabled}
       variant="outlined"
       label={props.label}
       helperText={props.errorMessage && touched && <span>{props.errorMessage}</span>}

@@ -143,7 +143,7 @@ export const INTERACTIVE_TUTORIAL_NOTEBOOK_NODES: FullNodesData = {
     institNames: ["University of Michigan - Ann Arbor"],
     title: "Creating or improving a node in 1Cademy",
     nodeImage:
-      "https://firebasestorage.googleapis.com/v0/b/onecademy-1.appspot.com/o/UploadedImages%2FTirdadBarghi_Tue%2C%2011%20Feb%202020%2018%3A04%3A43%20GMT.JPG?alt=media&token=d0036406-c99f-4d39-8a92-1975f1d13c80",
+      "https://firebasestorage.googleapis.com/v0/b/onecademy-1.appspot.com/o/UploadedImages%2FK3DmaX1ZAfXSZ5EzWvz46uJ09fZ2%2FTue%2C%2028%20Feb%202023%2013%3A46%3A32%20GMT_430x1300.png?alt=media&token=98c21b70-0c10-4e57-a23d-352d26299008",
     userNodeId: "Tvh7IxaVAGkTATAV9RPT",
     nodeChangeType: "added",
     userNodeChangeType: "added",
@@ -235,6 +235,11 @@ export const INTERACTIVE_TUTORIAL_NOTEBOOK_NODES: FullNodesData = {
     ],
     corrects: 1,
     nodeVideo: "https://youtu.be/exLS4UadfFU",
+    referenceIds: ["08"],
+    referenceLabels: ["Pages 1-2"],
+    references: ["Improving Collaborative Notetaking Through Finding and Visualizing Prerequisite Knowledge Links"],
+    tagIds: ["00"],
+    tags: ["1Cademy"],
   },
   "05": {
     ...BASE_NODE,
@@ -284,6 +289,18 @@ export const INTERACTIVE_TUTORIAL_NOTEBOOK_NODES: FullNodesData = {
     title: "This node will be removed with a downvote",
     content:
       "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Suspendisse ultricies, arcu ut sodales varius, tortor erat gravida lacus, eget maximus arcu nisi nec elit. In eu scelerisque nunc, id condimentum nisl. Aliquam rhoncus tortor a ultricies consequat. ",
+    children: [],
+    parents: [],
+    wrongs: 0,
+    corrects: 0,
+  },
+  "08": {
+    ...BASE_NODE,
+    node: "08",
+    title: "Improving Collaborative Notetaking Through Finding and Visualizing Prerequisite Knowledge Links",
+    content:
+      "https://www.dropbox.com/s/4u9y20juageywqd/Improving%20Collaborative%20Notetaking%20Through%20Finding.pdf?dl=0",
+    nodeType: "Reference",
     children: [],
     parents: [],
     wrongs: 0,

@@ -8,6 +8,7 @@ import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
 import EmojiObjectsIcon from "@mui/icons-material/EmojiObjects";
 import HelpOutlineIcon from "@mui/icons-material/HelpOutline";
 import LocalLibraryIcon from "@mui/icons-material/LocalLibrary";
+import LockIcon from "@mui/icons-material/Lock";
 import MenuBookIcon from "@mui/icons-material/MenuBook";
 import SearchIcon from "@mui/icons-material/Search";
 import ShareIcon from "@mui/icons-material/Share";
@@ -31,7 +32,7 @@ import { string } from "yup/lib/locale";
 import { useNodeBook } from "@/context/NodeBookContext";
 import { getSearchAutocomplete } from "@/lib/knowledgeApi";
 import { findDiff, getVideoDataByUrl, momentDateToSeconds } from "@/lib/utils/utils";
-import { OpenSidebar } from "@/pages/notebook";
+import { OpenSidebar, TutorialType } from "@/pages/notebook";
 
 import { useAuth } from "../../context/AuthContext";
 import { KnowledgeChoice } from "../../knowledgeTypes";
@@ -151,6 +152,8 @@ type NodeProps = {
   disabled?: boolean;
   enableChildElements?: string[];
   defaultOpenPart?: OpenPart; // this is only to configure default open part value in tutorial
+  showProposeTutorial?: boolean; // this flag is to enable tutorial first time user click in pencil
+  setCurrentTutorial: (newValue: TutorialType) => void;
 };
 
 const proposedChildTypesIcons: { [key in ProposedChildTypesIcons]: string } = {
@@ -258,6 +261,8 @@ const Node = ({
   disabled = false,
   enableChildElements = [],
   defaultOpenPart: defaultOpenPartByTutorial = null,
+  showProposeTutorial = false,
+  setCurrentTutorial,
 }: NodeProps) => {
   const [{ user }] = useAuth();
   const { nodeBookDispatch } = useNodeBook();
@@ -291,6 +296,13 @@ const Node = ({
     from: { left: "500px", zIndex: -999 },
     to: { left: "600px", zIndex: 0 },
   });
+
+  const disableTitle = disabled && !enableChildElements.includes(`${identifier}-node-title`);
+  const disableContent = disabled && !enableChildElements.includes(`${identifier}-node-content`);
+  const disableWhy = disabled && !enableChildElements.includes(`${identifier}-node-why`);
+  const disableSwitchPreview = disabled;
+  const disableProposeButton = disabled && !enableChildElements.includes(`${identifier}-button-propose-proposal`);
+  const disableCancelButton = disabled && !enableChildElements.includes(`${identifier}-button-cancel-proposal`);
 
   useEffect(() => {
     setOpenPart(defaultOpenPartByTutorial); // this is called ONLY when is override by TUTORIAL
@@ -380,7 +392,8 @@ const Node = ({
 
   const nodeClickHandler = useCallback(
     (event: any) => {
-      if (notebookRef.current.choosingNode) {
+      console.log(notebookRef.current.choosingNode, "notebookRef.current.choosingNode");
+      if (!notebookRef.current.choosingNode || notebookRef.current.choosingNode.id !== identifier) {
         // The first Nodes exist, Now is clicking the Chosen Node
         notebookRef.current.chosenNode = {
           id: identifier,
@@ -395,10 +408,9 @@ const Node = ({
       ) {
         nodeClicked(event, identifier, nodeType, setOpenPart);
       }
-      if (event.target.type === "textarea" || event.target.type === "text") {
-        notebookRef.current.selectedNode = identifier;
-        nodeBookDispatch({ type: "setSelectedNode", payload: identifier });
-      }
+
+      notebookRef.current.selectedNode = identifier;
+      nodeBookDispatch({ type: "setSelectedNode", payload: identifier });
     },
     [identifier, title, nodeClicked, nodeType]
   );
@@ -511,12 +523,15 @@ const Node = ({
         const firstParentId: any = parents[0];
 
         if (isNew) {
+          console.log("PROPOSE NEW");
           saveProposedChildNode(identifier, "", reason, () => setAbleToPropose(true));
           if (!firstParentId) return;
           notebookRef.current.selectedNode = firstParentId.node;
           nodeBookDispatch({ type: "setSelectedNode", payload: firstParentId.node });
           return;
         }
+        console.log("PROPOSE");
+
         saveProposedImprovement("", reason, () => setAbleToPropose(true));
         notebookRef.current.selectedNode = identifier;
         nodeBookDispatch({ type: "setSelectedNode", payload: identifier });
@@ -539,6 +554,16 @@ const Node = ({
     setOperation("CancelProposals");
     closeSideBar();
   };
+
+  const proposeNodeImprovementHandler = useCallback(
+    (event: any, nodeId: string = "") => {
+      setOpenPart("References");
+      setReason("");
+      cleanEditorLink();
+      proposeNodeImprovement(event, nodeId);
+    },
+    [setOpenPart, setReason, cleanEditorLink]
+  );
 
   useEffect(() => {
     if (editable) {
@@ -649,7 +674,7 @@ const Node = ({
         top: top ? top : 1000,
         width: width,
         transition: "0.3s",
-        padding: "13px 13px 0px 13px",
+        padding: "13px 13px 13px 13px",
       }}
     >
       {/* INFO: uncomment this only on develope */}
@@ -699,6 +724,7 @@ const Node = ({
                   Preview
                 </Typography>
                 <Switch
+                  disabled={disableSwitchPreview}
                   checked={option === "EDIT"}
                   onClick={() => onChangeOption(option === "EDIT")}
                   size="small"
@@ -722,6 +748,7 @@ const Node = ({
                 onHideNodeHandler={hideNodeHandler}
                 disabled={disabled}
                 enableChildElements={enableChildElements}
+                sx={{ float: "right" }}
                 // sx={{ position: "absolute", right: "10px", top: "0px" }}
               />
             )}
@@ -739,94 +766,98 @@ const Node = ({
                 helperText={error ? error : ""}
                 showEditPreviewSection={false}
                 editOption={option}
+                disabled={disableTitle}
               />
               {editable && <Box sx={{ mb: "12px" }}></Box>}
               {/* </div> */}
 
-              <Editor
-                id={`${identifier}-node-content`}
-                label="Edit the node content:"
-                value={contentCopy}
-                setValue={onSetContent}
-                onBlurCallback={value => onBlurContent(value)}
-                readOnly={!editable}
-                sxPreview={{ marginTop: "13px" }}
-                showEditPreviewSection={false}
-                editOption={option}
-              />
-              {editable && <Box sx={{ mb: "12px" }}></Box>}
+              <Box id={`${identifier}-node-content`}>
+                <Editor
+                  label="Edit the node content:"
+                  value={contentCopy}
+                  setValue={onSetContent}
+                  onBlurCallback={value => onBlurContent(value)}
+                  readOnly={!editable}
+                  sxPreview={{ marginTop: "13px" }}
+                  showEditPreviewSection={false}
+                  editOption={option}
+                  disabled={disableContent}
+                />
+                {editable && <Box sx={{ mb: "12px" }}></Box>}
 
-              <div id={`${identifier}-node-content-media`}>
-                {nodeImage !== "" && (
-                  <>
-                    {editable && (
-                      <div className="RemoveImageDIV">
-                        <MemoizedMetaButton onClick={removeImageHandler} tooltip="Click to remove the image.">
-                          <DeleteForeverIcon sx={{ fontSize: "16px" }} />
-                        </MemoizedMetaButton>
-                      </div>
-                    )}
+                <div id={`${identifier}-node-content-media`}>
+                  {nodeImage !== "" && (
+                    <>
+                      {editable && (
+                        <div className="RemoveImageDIV">
+                          <MemoizedMetaButton onClick={removeImageHandler} tooltip="Click to remove the image.">
+                            <DeleteForeverIcon sx={{ fontSize: "16px" }} />
+                          </MemoizedMetaButton>
+                        </div>
+                      )}
 
-                    {/* TODO: change to Next Image */}
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img
-                      src={nodeImage}
-                      alt="Node image"
-                      className="responsive-img NodeImage"
-                      onLoad={onImageLoad}
-                      onClick={onImageClick}
-                    />
-                  </>
-                )}
-                {nodeType === "Question" && (
-                  <Box sx={{ display: "flex", flexDirection: "column" }}>
-                    <ul className="collapsible" style={{ padding: "0px" }}>
-                      {choices.map((choice, idx) => {
-                        return (
-                          <QuestionChoices
-                            key={identifier + "Choice" + idx}
-                            identifier={identifier}
-                            nodeRef={nodeRef}
-                            editable={editable}
-                            choices={choices}
-                            idx={idx}
-                            choicesNum={choices.length}
-                            choice={choice}
-                            deleteChoice={deleteChoice}
-                            switchChoice={switchChoice}
-                            changeChoice={changeChoice}
-                            changeFeedback={changeFeedback}
-                            option={option}
-                          />
-                        );
-                      })}
-                    </ul>
-                    {editable && (
-                      <Box sx={{ alignSelf: "flex-end" }}>
-                        <MemoizedMetaButton
-                          onClick={addChoiceHandler}
-                          tooltip="Click to add a new choice to this question."
-                        >
-                          <>
-                            <AddIcon className="green-text" sx={{ fontSize: "16px" }} />
-                            <span>Add Choice</span>
-                          </>
-                        </MemoizedMetaButton>
-                      </Box>
-                    )}
-                  </Box>
-                )}
-                {!editable && nodeVideo && (
-                  <>
-                    <MemoizedNodeVideo addVideo={true} videoData={videoData} />
-                    <Box sx={{ mb: "12px" }}></Box>
-                  </>
-                )}
-              </div>
+                      {/* TODO: change to Next Image */}
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img
+                        src={nodeImage}
+                        alt="Node image"
+                        className="responsive-img NodeImage"
+                        onLoad={onImageLoad}
+                        onClick={onImageClick}
+                      />
+                    </>
+                  )}
+                  {nodeType === "Question" && (
+                    <Box sx={{ display: "flex", flexDirection: "column" }}>
+                      <ul className="collapsible" style={{ padding: "0px" }}>
+                        {choices.map((choice, idx) => {
+                          return (
+                            <QuestionChoices
+                              key={identifier + "Choice" + idx}
+                              identifier={identifier}
+                              nodeRef={nodeRef}
+                              editable={editable}
+                              choices={choices}
+                              idx={idx}
+                              choicesNum={choices.length}
+                              choice={choice}
+                              deleteChoice={deleteChoice}
+                              switchChoice={switchChoice}
+                              changeChoice={changeChoice}
+                              changeFeedback={changeFeedback}
+                              option={option}
+                            />
+                          );
+                        })}
+                      </ul>
+                      {editable && (
+                        <Box sx={{ alignSelf: "flex-end" }}>
+                          <MemoizedMetaButton
+                            onClick={addChoiceHandler}
+                            tooltip="Click to add a new choice to this question."
+                          >
+                            <>
+                              <AddIcon className="green-text" sx={{ fontSize: "16px" }} />
+                              <span>Add Choice</span>
+                            </>
+                          </MemoizedMetaButton>
+                        </Box>
+                      )}
+                    </Box>
+                  )}
+                  {!editable && nodeVideo && (
+                    <>
+                      <MemoizedNodeVideo addVideo={true} videoData={videoData} />
+                      <Box sx={{ mb: "12px" }}></Box>
+                    </>
+                  )}
+                </div>
+              </Box>
 
               {editable && (
                 <>
                   <Editor
+                    id={`${identifier}-node-why`}
                     label={
                       "Explain why you propose this " +
                       (isNew ? nodeType + " child node" : "new version") +
@@ -838,6 +869,7 @@ const Node = ({
                     onBlurCallback={onBlurExplainDesc}
                     showEditPreviewSection={false}
                     editOption={option}
+                    disabled={disableWhy}
                   />
                 </>
               )}
@@ -977,6 +1009,7 @@ const Node = ({
               addVideo={addVideo}
               setAddVideo={setAddVideo}
               identifier={identifier}
+              notebookRef={notebookRef}
               activeNode={activeNode}
               citationsSelected={citationsSelected}
               proposalsSelected={proposalsSelected}
@@ -1030,15 +1063,18 @@ const Node = ({
               contributors={contributors}
               institutions={institutions}
               openUserInfoSidebar={openUserInfoSidebar}
-              proposeNodeImprovement={proposeNodeImprovement}
+              proposeNodeImprovement={proposeNodeImprovementHandler}
               setOperation={setOperation}
               disabled={disabled}
               enableChildElements={enableChildElements}
+              showProposeTutorial={showProposeTutorial}
+              setCurrentTutorial={setCurrentTutorial}
             />
           </div>
           {(openPart === "LinkingWords" || openPart === "Tags" || openPart === "References") && (
             <LinkingWords
               identifier={identifier}
+              notebookRef={notebookRef}
               editable={editable}
               isNew={isNew}
               openPart={openPart}
@@ -1075,6 +1111,7 @@ const Node = ({
                 }}
               />
               <Box
+                id={`${identifier}-button-propose-cancel`}
                 className="ProposalCommentSubmitButton"
                 sx={{
                   textAlign: "center",
@@ -1084,10 +1121,12 @@ const Node = ({
                 }}
               >
                 <Button
+                  id={`${identifier}-button-cancel-proposal`}
                   color="error"
                   variant="contained"
                   className="btn waves-effect waves-light hoverable red"
                   onClick={onCancelProposal}
+                  disabled={disableCancelButton}
                   sx={{
                     padding: "6px",
                   }}
@@ -1095,11 +1134,12 @@ const Node = ({
                   Cancel
                 </Button>
                 <Button
+                  id={`${identifier}-button-propose-proposal`}
                   color="success"
                   variant="contained"
                   className="btn waves-effect waves-light hoverable green"
                   onClick={proposalSubmit}
-                  disabled={!ableToPropose ?? false}
+                  disabled={(!ableToPropose ?? false) || disableProposeButton}
                   sx={{
                     padding: "6px",
                   }}
@@ -1145,12 +1185,14 @@ const Node = ({
               onHideNodeHandler={hideNodeHandler}
               disabled={disabled}
               enableChildElements={enableChildElements}
+              sx={{ float: "right" }}
               // sx={{ position: "absolute", right: "10px", top: "0px" }}
             />
           )}
           {/* <div className="card-title"> */}
           <div className="NodeTitleClosed">
             <Editor
+              disabled={disabled}
               label="title"
               value={titleCopy}
               setValue={setTitleCopy}
@@ -1164,6 +1206,7 @@ const Node = ({
               addVideo={addVideo}
               setAddVideo={setAddVideo}
               identifier={identifier}
+              notebookRef={notebookRef}
               activeNode={activeNode}
               citationsSelected={citationsSelected}
               proposalsSelected={proposalsSelected}
@@ -1219,9 +1262,9 @@ const Node = ({
               proposeNodeImprovement={proposeNodeImprovement}
               setOperation={setOperation}
               disabled={disabled}
+              setCurrentTutorial={setCurrentTutorial}
             />
           </div>
-          {/* </div> */}
         </div>
       )}
       {/* {openSidebar === "PROPOSALS" && !simulated && !isNew && nodeBookState.selectedNode == identifier ? (
@@ -1294,6 +1337,7 @@ const Node = ({
             return (
               <Tooltip title={`Propose a ${childNodeType} child`} placement="right" key={index}>
                 <Fab
+                  disabled={disabled}
                   color="primary"
                   sx={{
                     background: "#1F1F1F",

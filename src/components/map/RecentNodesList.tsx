@@ -83,6 +83,7 @@ const RecentNodesList = (props: any) => {
     <>
       <FormControl
         id={props.id}
+        disabled={props.disabled}
         sx={{
           "& fieldset": {
             borderWidth: 1,

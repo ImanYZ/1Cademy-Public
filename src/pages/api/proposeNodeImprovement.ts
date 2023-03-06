@@ -175,6 +175,10 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
     if (nodeType === "Question") {
       versionData.choices = choices;
     }
+    if (nodeType !== nodeData.nodeType) {
+      versionData.changedNodeType = true;
+    }
+
     [batch, writeCounts] = await versionCreateUpdate({
       batch,
       nodeId: id,
@@ -214,8 +218,6 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
     }
 
     if (nodeType !== nodeData.nodeType) {
-      versionData.changedNodeType = true;
-
       const _nodeTypes: string[] = nodeData.nodeTypes || [];
       _nodeTypes.push(nodeData.nodeType);
       const nodeTypes = new Set<string>(_nodeTypes);

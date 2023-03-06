@@ -8,7 +8,7 @@ import { createContext, Dispatch, FC, ReactNode, SetStateAction, useCallback, us
 import { useAuth } from "@/context/AuthContext";
 
 import darkModeLibraryImage from "../../../public/darkModeLibraryBackground.jpg";
-import lightModeLibraryImage from "../../../public/lightModeLibraryBackground.jpg";
+import lightModeLibraryImage from "../../../public/lightModeLibraryBackground.png";
 import logoGoogleCloud from "../../../public/logo-google-cloud.svg";
 import logoHonor from "../../../public/logo-honor.jpeg";
 import logoSchoolOfInformation from "../../../public/logo-school-of-information.png";

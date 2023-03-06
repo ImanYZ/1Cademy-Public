@@ -42,7 +42,15 @@ const NodeHeader = ({
   return (
     <Box
       id={`${id}-node-header`}
-      sx={{ display: "flex", alignItems: "center", justifyContent: "flex-end", mt: "-14px", mb: "-10px", ...sx }}
+      sx={{
+        display: "flex",
+        alignItems: "center",
+        borderRadius: "4px",
+        justifyContent: "flex-end",
+        mt: "-14px",
+        mb: "-10px",
+        ...sx,
+      }}
     >
       <Tooltip title={`${open ? "Close" : "Open"} the node.`}>
         <span>

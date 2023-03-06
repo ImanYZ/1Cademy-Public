@@ -320,10 +320,24 @@ const processNodeIdsFromSyllabusItem = async ({
     }
   }
 
+  const _tagIds = [...tagIds];
+  const _tags = [...tags];
+
+  let parentTagIdx = _tagIds.indexOf(parentId);
+  if (parentTagIdx === -1) {
+    _tagIds.push(parentId);
+    _tags.push(parentTitle);
+  } else {
+    _tagIds[parentTagIdx] = parentId;
+    _tags[parentTagIdx] = parentTitle;
+  }
+
   if (item.node) {
     if (updateNodes) {
       const nodeChanges = {
         title: `Ch.${chapter} ${item.title} - ${semesterTitle}`,
+        tagIds: _tagIds,
+        tags: _tags,
         parents: [
           {
             node: parentId,
@@ -333,6 +347,7 @@ const processNodeIdsFromSyllabusItem = async ({
         ],
         children,
         content: createNodeContent(children),
+        deleted: false,
       };
 
       const nodeData = (await nodeRef.get()).data() as INode;
@@ -355,8 +370,8 @@ const processNodeIdsFromSyllabusItem = async ({
       universityTitle,
       nodeRef,
       children,
-      tagIds,
-      tags
+      _tagIds,
+      _tags
     );
     [batch, writeCounts] = await checkRestartBatchWriteCounts(batch, writeCounts);
     item.node = newId;

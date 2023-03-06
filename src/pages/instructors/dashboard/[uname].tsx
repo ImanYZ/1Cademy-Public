@@ -36,7 +36,7 @@ import {
   calculateVoteStatPoints,
   getGeneralStats,
   getStackedBarStat,
-  mapStudentsStatsToDataByDates,
+  mapStudentsStatsDataByDates,
 } from "../../../lib/utils/charts.utils";
 import {
   ISemester,
@@ -51,7 +51,6 @@ import {
   getBubbleStats,
   getMaxMinVoxPlotData,
   groupStudentPointsDayChapter,
-  makeTrendData,
   StudenBarsSubgroupLocation,
   StudentStackedBarStatsObject,
   TrendStats,
@@ -184,10 +183,36 @@ const StudentDashboard: InstructorLayoutPage = ({ user, currentSemester, setting
 
     const getStudentVoteStats = async () => {
       const semesterStudentVoteStatRef = collection(db, "semesterStudentVoteStats");
-      const q = query(semesterStudentVoteStatRef, where("uname", "==", queryUname), where("tagId", "==", tagId));
-      const semesterStudentVoteStatDoc = await getDocs(q);
+      const qByAll = query(semesterStudentVoteStatRef, where("tagId", "==", tagId));
+      const qByStudent = query(
+        semesterStudentVoteStatRef,
+        where("uname", "==", queryUname),
+        where("tagId", "==", tagId)
+      );
+
+      const semesterStudentVoteStatAllDoc = await getDocs(qByAll);
+      if (!semesterStudentVoteStatAllDoc.docs.length) {
+        setSemesterStats(null);
+        return;
+      }
+      const userDailyStats = semesterStudentVoteStatAllDoc.docs.map(
+        dailyStat => dailyStat.data() as ISemesterStudentVoteStat
+      );
+      const resAll = mapStudentsStatsDataByDates(userDailyStats);
+      const ggAll = getGeneralStats(resAll);
+      setSemesterStats(ggAll);
+      const semesterStudentVoteStatDoc = await getDocs(qByStudent);
       if (!semesterStudentVoteStatDoc.docs.length) {
         setThereIsData(false);
+        setSemesterStudentStats(null);
+        setTrendStats({
+          childProposals: [],
+          editProposals: [],
+          proposedLinks: [],
+          nodes: [],
+          votes: [],
+          questions: [],
+        });
         return;
       }
 
@@ -197,6 +222,39 @@ const StudentDashboard: InstructorLayoutPage = ({ user, currentSemester, setting
         ...semesterStudentVoteStat,
         ...points,
       });
+
+      const res = mapStudentsStatsDataByDates([semesterStudentVoteStat]);
+      const gg = getGeneralStats(res);
+      setSemesterStudentStats(gg);
+      const ts = res.reduce(
+        (a: TrendStats, c): TrendStats => {
+          return {
+            childProposals: semesterConfig?.isProposalRequired
+              ? [...a.childProposals, { date: new Date(c.date), num: c.value.childProposals }]
+              : [],
+            editProposals: semesterConfig?.isProposalRequired
+              ? [...a.editProposals, { date: new Date(c.date), num: c.value.editProposals }]
+              : [],
+            proposedLinks: [...a.proposedLinks, { date: new Date(c.date), num: c.value.links }],
+            nodes: [...a.nodes, { date: new Date(c.date), num: c.value.nodes }],
+            questions: semesterConfig?.isQuestionProposalRequired
+              ? [...a.questions, { date: new Date(c.date), num: c.value.questions }]
+              : [],
+            votes: semesterConfig?.isCastingVotesRequired
+              ? [...a.votes, { date: new Date(c.date), num: c.value.votes }]
+              : [],
+          };
+        },
+        {
+          childProposals: [],
+          editProposals: [],
+          proposedLinks: [],
+          nodes: [],
+          questions: [],
+          votes: [],
+        }
+      );
+      setTrendStats(ts);
       setThereIsData(true);
     };
     getStudentVoteStats();
@@ -283,14 +341,6 @@ const StudentDashboard: InstructorLayoutPage = ({ user, currentSemester, setting
       const userDailyStatDoc = await getDocs(q);
 
       if (!userDailyStatDoc.docs.length) {
-        setTrendStats({
-          childProposals: [],
-          editProposals: [],
-          proposedLinks: [],
-          nodes: [],
-          votes: [],
-          questions: [],
-        });
         setThereIsData(false);
         return;
       }
@@ -302,9 +352,6 @@ const StudentDashboard: InstructorLayoutPage = ({ user, currentSemester, setting
         const daysFixed = cur.days.map(c => ({ day: c.day, chapters: c.chapters ?? [] }));
         return { ...cur, days: daysFixed };
       });
-      const res = mapStudentsStatsToDataByDates(userDailyStats);
-      const gg = getGeneralStats(res);
-      setSemesterStudentStats(gg);
 
       const proposalsPoints = groupStudentPointsDayChapter(
         userDailyStats[0],
@@ -327,14 +374,6 @@ const StudentDashboard: InstructorLayoutPage = ({ user, currentSemester, setting
         semesterConfig?.votes.pointDecrementOnAgreement
       );
       setStudentBoxStat({ proposalsPoints, questionsPoints, votesPoints });
-      setTrendStats({
-        childProposals: makeTrendData(userDailyStats, "newNodes"),
-        editProposals: makeTrendData(userDailyStats, "editProposals"),
-        proposedLinks: makeTrendData(userDailyStats, "links"),
-        nodes: makeTrendData(userDailyStats, "proposals"),
-        votes: makeTrendData(userDailyStats, "votes"),
-        questions: makeTrendData(userDailyStats, "questions"),
-      });
       setThereIsData(true);
     };
     getUserDailyStat();
@@ -360,10 +399,6 @@ const StudentDashboard: InstructorLayoutPage = ({ user, currentSemester, setting
       }
 
       const userDailyStats = userDailyStatDoc.docs.map(dailyStat => dailyStat.data() as SemesterStudentStat);
-      const res = mapStudentsStatsToDataByDates(userDailyStats);
-      const gg = getGeneralStats(res);
-
-      setSemesterStats(gg);
       const proposalsPoints = getBoxPlotData(
         userDailyStats,
         "proposals",

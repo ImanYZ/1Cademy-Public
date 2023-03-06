@@ -12,6 +12,7 @@ import { MemoizedMetaButton } from "../MetaButton";
 const doNothing = () => {};
 
 type LinkingButtonProps = {
+  id?: string;
   onClick: any;
   // nodeID: any,
   linkedNodeID: any;
@@ -23,7 +24,7 @@ type LinkingButtonProps = {
   disabled?: boolean;
 };
 
-const LinkingButton = ({ disabled = false, ...props }: LinkingButtonProps) => {
+const LinkingButton = ({ disabled = false, id, ...props }: LinkingButtonProps) => {
   // TODO: check dependencies to remove eslint-disable-next-line
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const linkedNodeClick = useCallback(() => props.onClick(props.linkedNodeID), [props.onClick, props.linkedNodeID]);
@@ -40,6 +41,7 @@ const LinkingButton = ({ disabled = false, ...props }: LinkingButtonProps) => {
   // }
   return (
     <MemoizedMetaButton
+      id={id}
       onClick={linkedNodeClick}
       tooltip={`${props.visible ? "Navigate to" : "Open"} ${
         props.linkedNodeType === "children" ? " all the children." : " this " + props.linkedNodeType + " node."
@@ -86,6 +88,7 @@ const LinkingButton = ({ disabled = false, ...props }: LinkingButtonProps) => {
           setValue={doNothing}
           label={""}
           value={props.linkedNodeTitle}
+          disabled={disabled}
           sxPreview={{ fontSize: "14px", lineHeight: "1.5" }}
         />
         {/* CHECK: I commented this, please uncomment this */}

@@ -8,7 +8,8 @@ import LaunchIcon from "@mui/icons-material/Launch";
 import LocalOfferIcon from "@mui/icons-material/LocalOffer";
 import MenuBookIcon from "@mui/icons-material/MenuBook";
 import { Box, IconButton, Link, Tooltip } from "@mui/material";
-import React, { useCallback, useEffect } from "react";
+import React, { MutableRefObject, useCallback, useEffect } from "react";
+import { TNodeBookState } from "src/nodeBookTypes";
 
 // import { useRecoilState, useRecoilValue, useSetRecoilState } from "recoil";
 import { useNodeBook } from "@/context/NodeBookContext";
@@ -57,6 +58,7 @@ const separateURL = (text: string, url: string): [boolean, any] => {
 };
 
 type LinkingWordsProps = {
+  notebookRef: MutableRefObject<TNodeBookState>;
   identifier: string;
   editable: any;
   isNew: any;
@@ -84,8 +86,12 @@ type LinkingWordsProps = {
   enableChildElements?: string[];
 };
 
-const LinkingWords = ({ disabled, enableChildElements = [], ...props }: LinkingWordsProps) => {
+const LinkingWords = ({ notebookRef, disabled, enableChildElements = [], ...props }: LinkingWordsProps) => {
   const { nodeBookState, nodeBookDispatch } = useNodeBook();
+  const disableAddReference = disabled;
+  const disableAddTag = disabled;
+  const disableRemoveReference = disabled;
+  const disableRemoveTag = disabled;
 
   useEffect(() => {
     props.chosenNodeChanged(props.identifier);
@@ -138,6 +144,9 @@ const LinkingWords = ({ disabled, enableChildElements = [], ...props }: LinkingW
       }
       // setChosenNode(null);
       // setChosenNodeTitle(null);
+      notebookRef.current.choosingNode = { id: props.identifier, type: linkType };
+      notebookRef.current.selectedNode = props.identifier;
+      notebookRef.current.chosenNode = null;
       nodeBookDispatch({ type: "setChoosingNode", payload: { id: props.identifier, type: linkType } });
       nodeBookDispatch({ type: "setSelectedNode", payload: props.identifier });
       nodeBookDispatch({ type: "setChosenNode", payload: null });
@@ -240,7 +249,10 @@ const LinkingWords = ({ disabled, enableChildElements = [], ...props }: LinkingW
           )}
 
           {props.openPart === "References" && (
-            <Box sx={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+            <Box
+              id={`${props.identifier}-node-references`}
+              sx={{ display: "flex", flexDirection: "column", gap: "8px" }}
+            >
               <strong>References</strong>
 
               {props.references.map((reference: any, idx: number) => {
@@ -267,6 +279,7 @@ const LinkingWords = ({ disabled, enableChildElements = [], ...props }: LinkingW
                   >
                     <Box sx={{ gridColumn: urlRefLabel[0] || props.editable ? "1 / 2" : "1 / span 2" }}>
                       <LinkingButton
+                        id={`${props.identifier}-reference-button-${idx}`}
                         key={props.identifier + "LinkTo" + reference.node}
                         onClick={props.openLinkedNode}
                         // nodeID={props.identifier}
@@ -292,7 +305,7 @@ const LinkingWords = ({ disabled, enableChildElements = [], ...props }: LinkingW
                             },
                           }}
                         >
-                          <IconButton onClick={deleteLink(idx, "Reference")}>
+                          <IconButton onClick={deleteLink(idx, "Reference")} disabled={disableRemoveReference}>
                             <DeleteForeverIcon sx={{ fontSize: "16px" }} />
                           </IconButton>
                         </Tooltip>
@@ -328,8 +341,12 @@ const LinkingWords = ({ disabled, enableChildElements = [], ...props }: LinkingW
               })}
 
               {props.editable && (
-                <Box sx={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+                <Box
+                  id={`${props.identifier}-link-reference-button`}
+                  sx={{ display: "flex", flexDirection: "column", gap: "16px" }}
+                >
                   <MemoizedMetaButton
+                    disabled={disableAddReference}
                     onClick={choosingNewLinkedNode("Reference")}
                     tooltip="Link to a reference node."
                     tooltipPosition="left"
@@ -359,18 +376,22 @@ const LinkingWords = ({ disabled, enableChildElements = [], ...props }: LinkingW
         >
           {props.openPart === "References" && (
             //StyleRef, f-size from Map.css ln 71
-            <Box sx={{ display: "flex", flexDirection: "column", gap: "5px", fontSize: "16px" }}>
+            <Box
+              id={`${props.identifier}-node-tags`}
+              sx={{ display: "flex", flexDirection: "column", gap: "5px", fontSize: "16px" }}
+            >
               <strong>Tags</strong>
               {props.tags.map((tag: any, idx: number) => {
                 return (
                   <Box
                     sx={{
                       display: "grid",
-                      gridTemplateColumns: props.editable && props.parents.length ? "1fr 32px" : "1fr",
+                      gridTemplateColumns: props.editable && props.tags.length ? "1fr 32px" : "1fr",
                     }}
                     key={props.identifier + "LinkTo" + tag.node + "DIV"}
                   >
                     <LinkingButton
+                      id={`${props.identifier}-tag-button-${idx}`}
                       key={props.identifier + "LinkTo" + tag.node}
                       onClick={props.openLinkedNode}
                       linkedNodeID={tag.node}
@@ -390,7 +411,7 @@ const LinkingWords = ({ disabled, enableChildElements = [], ...props }: LinkingW
                           },
                         }}
                       >
-                        <IconButton onClick={deleteLink(idx, "Tag")}>
+                        <IconButton onClick={deleteLink(idx, "Tag")} disabled={disableRemoveTag}>
                           <DeleteForeverIcon sx={{ fontSize: "16px" }} />
                         </IconButton>
                       </Tooltip>
@@ -403,6 +424,7 @@ const LinkingWords = ({ disabled, enableChildElements = [], ...props }: LinkingW
                   onClick={choosingNewLinkedNode("Tag")}
                   tooltip="Link to a node."
                   tooltipPosition="left"
+                  disabled={disableAddTag}
                 >
                   <Box sx={{ display: "flex", gap: "px" }}>
                     <LocalOfferIcon sx={{ color: "#f9a825", fontSize: "inherit" }} />
@@ -415,7 +437,7 @@ const LinkingWords = ({ disabled, enableChildElements = [], ...props }: LinkingW
           )}
 
           {props.openPart === "Tags" && (
-            <Box sx={{ fontSize: "16px" }}>
+            <Box id={`${props.identifier}-node-tags`} sx={{ fontSize: "16px" }}>
               <strong>Tags</strong>
               {props.tags.map((tag: any, idx: number) => {
                 return (

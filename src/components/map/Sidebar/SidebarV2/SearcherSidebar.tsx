@@ -11,20 +11,20 @@ import {
   CircularProgress,
   IconButton,
   InputAdornment,
+  InputBase,
   ListItemIcon,
   ListItemText,
   MenuItem,
   Paper,
   Select,
   SelectChangeEvent,
-  TextField,
   useMediaQuery,
   useTheme,
 } from "@mui/material";
 import { Box } from "@mui/system";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
-import React, { useCallback, useEffect, useMemo, useState, useTransition } from "react";
+import React, { MutableRefObject, useCallback, useEffect, useMemo, useState, useTransition } from "react";
 
 import searcherHeaderImage from "../../../../../public/Magnifier_Compas.jpg";
 import { useNodeBook } from "../../../../context/NodeBookContext";
@@ -33,7 +33,7 @@ import { useTagsTreeView } from "../../../../hooks/useTagsTreeView";
 import { SearchNodesResponse } from "../../../../knowledgeTypes";
 import { Post } from "../../../../lib/mapApi";
 import shortenNumber from "../../../../lib/utils/shortenNumber";
-import { SortDirection, SortValues } from "../../../../nodeBookTypes";
+import { SortDirection, SortValues, TNodeBookState } from "../../../../nodeBookTypes";
 import { NodeType } from "../../../../types";
 import { Editor } from "../../../Editor";
 import NodeTypeIcon from "../../../NodeTypeIcon2";
@@ -49,12 +49,15 @@ const doNothing = () => {};
 dayjs.extend(relativeTime);
 
 type SearcherSidebarProps = {
+  notebookRef: MutableRefObject<TNodeBookState>;
   openLinkedNode: any;
   open: boolean;
   onClose: () => void;
   sidebarWidth: number;
   innerHeight?: number;
   innerWidth: number;
+  disableSearcher?: boolean;
+  enableElements: string[];
 };
 
 type Pagination = {
@@ -68,12 +71,15 @@ const NODE_TYPES_ARRAY: NodeType[] = ["Concept", "Code", "Reference", "Relation"
 const MAX_TAGS_IN_MOBILE = 2;
 
 const SearcherSidebar = ({
+  notebookRef,
   openLinkedNode,
   open,
   onClose,
   sidebarWidth,
   innerHeight,
   innerWidth,
+  disableSearcher,
+  enableElements = [],
 }: SearcherSidebarProps) => {
   const { nodeBookState, nodeBookDispatch } = useNodeBook();
   const { allTags, setAllTags } = useTagsTreeView();
@@ -103,6 +109,17 @@ const SearcherSidebar = ({
   const { ref: refInfinityLoaderTrigger, inView: inViewInfinityLoaderTrigger } = useInView();
 
   const selectedTags = useMemo<TagTreeView[]>(() => Object.values(allTags).filter(tag => tag.checked), [allTags]);
+
+  console.log("enableElements", enableElements);
+
+  // tutorial constants
+  const disableInputSearcher = disableSearcher && !enableElements.includes("search-input");
+  const disableSearchIcon = disableSearcher && !enableElements.includes("SearchIcon");
+  const disableEditedInThePast = disableSearcher && !enableElements.includes("search-recently-input");
+  const disableRecentNodeList = disableSearcher && !enableElements.includes("recentNodesList");
+  const disableSearchItem = disableSearcher && !enableElements.includes("search-item");
+
+  console.log({ disableSearchList: disableSearchItem });
 
   const onSearch = useCallback(
     async (page: number, q: string, sortOption: SortValues, sortDirection: SortDirection, nodeTypes: NodeType[]) => {
@@ -176,6 +193,7 @@ const SearcherSidebar = ({
     if (nodeBookState.searchQuery && nodeBookState.nodeTitleBlured) {
       setSearch(nodeBookState.searchQuery);
       onSearch(1, nodeBookState.searchQuery, sortOption, sortDirection, nodeTypes);
+      notebookRef.current.nodeTitleBlured = false;
       nodeBookDispatch({ type: "setNodeTitleBlured", payload: false });
     }
   }, [
@@ -205,6 +223,7 @@ const SearcherSidebar = ({
       return copyAllTags;
     });
 
+    notebookRef.current.chosenNode = null;
     nodeBookDispatch({ type: "setChosenNode", payload: null });
   }, [
     allTags,
@@ -220,6 +239,7 @@ const SearcherSidebar = ({
       let val = event.target.value;
       setSearch(val);
       startTransition(() => {
+        notebookRef.current.searchQuery = val;
         nodeBookDispatch({ type: "setSearchQuery", payload: val });
       });
     },
@@ -278,6 +298,7 @@ const SearcherSidebar = ({
   const setShowTagSelectorClick = useCallback(() => {
     setShowTagSelector(prevValue => {
       const chosingNodePayload = prevValue ? null : { id: "searcher", type: null };
+      notebookRef.current.choosingNode = chosingNodePayload;
       nodeBookDispatch({ type: "setChoosingNode", payload: chosingNodePayload });
       return !prevValue;
     });
@@ -294,7 +315,7 @@ const SearcherSidebar = ({
 
   const contentSignalState = useMemo(() => {
     return { updated: true };
-  }, [isRetrieving, searchResults]);
+  }, [isRetrieving, searchResults, JSON.stringify(enableElements), disableSearcher]);
 
   const setChosenTagsCallback = useCallback(
     (newChosenTags: ChosenTag[]) => {
@@ -368,11 +389,12 @@ const SearcherSidebar = ({
 
           <ControlPointIcon
             id="searcher-tags-button"
-            onClick={setShowTagSelectorClick}
+            onClick={disableSearcher ? undefined : setShowTagSelectorClick}
             sx={{
               zIndex: 1,
               transform: showTagSelector ? "rotate(45deg)" : "rotate(0deg)",
-              cursor: "pointer",
+              cursor: disableSearcher ? "not-allowed" : "pointer",
+
               color: "rgba(88, 88, 88,1)",
               fontWeight: "none",
             }}
@@ -400,18 +422,20 @@ const SearcherSidebar = ({
 
         {((isMovil && !showTagSelector) || !isMovil) && (
           <>
-            <Box>
+            <Box id="search-input">
               <ValidatedInput
                 identification="SearchQuery"
                 name="SearchQuery"
                 type="text"
                 onChange={handleChange}
                 value={search}
+                disabled={disableInputSearcher}
                 onKeyPress={onSearchEnter}
                 InputProps={{
                   startAdornment: (
                     <InputAdornment position="start">
                       <Select
+                        disabled={disableSearcher}
                         multiple
                         MenuProps={{ id: "nodeSelectMenu" }}
                         value={nodeTypes}
@@ -478,7 +502,7 @@ const SearcherSidebar = ({
                     </InputAdornment>
                   ),
                   endAdornment: (
-                    <InputAdornment position="end">
+                    <InputAdornment position="end" disablePointerEvents={disableSearchIcon}>
                       <IconButton
                         id="SearchIcon"
                         onClick={() => onSearch(1, search, sortOption, sortDirection, nodeTypes)}
@@ -524,7 +548,7 @@ const SearcherSidebar = ({
                 }}
               />
             </Box>
-            <div
+            <Box
               id="nodesUpdatedSinceContainer"
               style={{
                 display: innerWidth > theme.breakpoints.values.sm || openSortOptions ? "flex" : "none",
@@ -533,6 +557,8 @@ const SearcherSidebar = ({
                 fontSize: innerWidth > 410 ? "14px" : "11px",
                 flexWrap: "wrap",
                 gap: "10px",
+                paddingTop: "13px",
+                // marginTop: "13px",
               }}
             >
               <RecentNodesList
@@ -540,6 +566,7 @@ const SearcherSidebar = ({
                 recentNodes={searchResults}
                 setRecentNodes={setSearchResults}
                 onlyTags={onlyTags}
+                disabled={disableRecentNodeList}
                 sortOption={sortOption}
                 setSortOption={onChangeSortOptions}
                 sortDirection={sortDirection}
@@ -547,25 +574,23 @@ const SearcherSidebar = ({
               />
               <Box id="search-recently-input" sx={{ display: "flex", alignItems: "center", gap: "5px" }}>
                 Edited in past
-                <TextField
+                <InputBase
                   type="number"
                   defaultValue={nodesUpdatedSince}
                   onChange={setNodesUpdatedSinceClick}
                   size="small"
+                  disabled={disableEditedInThePast}
                   sx={{
                     width: "76px",
                     p: "0px",
-                    "& fieldset": {
-                      borderWidth: 1,
+                  }}
+                  inputProps={{
+                    style: {
+                      padding: "4px 8px",
+                      border: "solid 1px rgba(88, 88, 88,.7)",
                       borderRadius: "16px",
-                      borderColor: "rgba(88, 88, 88,.7)",
-                    },
-                    "&:hover": {
-                      borderColor: "red",
                     },
                   }}
-                  inputProps={{ style: { padding: "4px 8px" } }}
-                  variant="outlined"
                 />
                 days
               </Box>
@@ -579,7 +604,7 @@ const SearcherSidebar = ({
               >
                 {shortenNumber(searchResults.totalResults, 2, false)} Results
               </div>
-            </div>
+            </Box>
           </>
         )}
 
@@ -606,23 +631,28 @@ const SearcherSidebar = ({
     setChosenTagsCallback,
     viewTagsInMovil,
     selectedTags,
+    disableSearcher,
     handleChange,
     search,
+    disableInputSearcher,
     onSearchEnter,
     nodeTypes,
     onChangeNoteType,
+    disableSearchIcon,
     onFocusSearcherInput,
     innerWidth,
     theme.breakpoints.values.sm,
     openSortOptions,
     searchResults,
     onlyTags,
+    disableRecentNodeList,
     sortOption,
     onChangeSortOptions,
     sortDirection,
     onChangeSortDirection,
     nodesUpdatedSince,
     setNodesUpdatedSinceClick,
+    disableEditedInThePast,
     sidebarWidth,
     deleteChip,
     onSearch,
@@ -641,6 +671,7 @@ const SearcherSidebar = ({
       // anchor="right"
       SidebarOptions={searcherOptionsMemoized}
       contentSignalState={contentSignalState}
+      disabled={disableSearcher}
       SidebarContent={
         <Box id="search-list" sx={{ p: "2px 4px" }}>
           <Box sx={{ display: "flex", flexDirection: "column", gap: "4px" }}>
@@ -649,7 +680,16 @@ const SearcherSidebar = ({
                 <Paper
                   elevation={3}
                   key={`resNode${idx}`}
-                  onClick={() => openLinkedNode(resNode.id, "Searcher")}
+                  onClick={
+                    disableSearchItem
+                      ? () => {
+                          console.log("calling Openlinked true");
+                        }
+                      : () => {
+                          console.log("calling Openlinked");
+                          openLinkedNode(resNode.id, "Searcher");
+                        }
+                  }
                   sx={{
                     listStyle: "none",
                     padding: {
@@ -657,7 +697,8 @@ const SearcherSidebar = ({
                       sm: "10px",
                     },
                     borderLeft: "studied" in resNode && resNode.studied ? "solid 4px #fdc473" : " solid 4px #fd7373",
-                    cursor: "pointer",
+                    cursor: disableSearchItem ? "not-allowed" : "pointer",
+                    opacity: disableSearchItem ? "0.5" : "1",
                   }}
                 >
                   {innerWidth > theme.breakpoints.values.sm && (

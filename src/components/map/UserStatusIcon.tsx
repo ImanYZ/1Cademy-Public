@@ -30,9 +30,10 @@ type UserStatusIconProps = {
   tagTitle?: string;
   setOpenSideBar: (sidebar: OpenSidebar) => void;
   sx?: SxProps<Theme>;
+  disabled?: boolean;
 };
 
-const UserStatusIcon = (props: UserStatusIconProps) => {
+const UserStatusIcon = ({ disabled = false, ...props }: UserStatusIconProps) => {
   const db = getFirestore();
   const [{ user }] = useAuth();
   const { nodeBookDispatch } = useNodeBook();
@@ -151,6 +152,47 @@ const UserStatusIcon = (props: UserStatusIconProps) => {
   };
 
   // this is with changes in styles
+  if (disabled)
+    return (
+      <Box
+        id={props.id}
+        className={"SidebarButton" + (props.inUserBar ? " inUserBar" : "")}
+        sx={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "flex-center",
+          gap: "10px",
+          padding: "5px 0px",
+          ...props.sx,
+        }}
+      >
+        <div>
+          <OptimizedAvatar
+            imageUrl={props.imageUrl}
+            renderAsAvatar={true}
+            contained={false}
+            sx={{
+              border: "none",
+              width: "28px",
+              height: "28px",
+              position: "static",
+              filter: "grayscale(1)",
+            }}
+          />
+          {!props.inNodeFooter && (
+            <div className={props.online ? "UserStatusOnlineIcon" : "UserStatusOfflineIcon"}></div>
+          )}
+        </div>
+        {!props.inNodeFooter && (
+          <Box className="customUserStatusTotalPoints fromSideBar">
+            <DoneIcon className="material-icons DoneIcon gray-text" sx={{ fontSize: "16px" }} />
+            <span style={{ fontSize: "14px", paddingLeft: "4px" }}>{shortenNumber(props.totalPoints, 2, false)}</span>
+            {props.inUserBar && props.tagTitle && <div id="UserProfileButtonDefaultTag">{props.tagTitle}</div>}
+          </Box>
+        )}
+      </Box>
+    );
+
   return (
     <Tooltip title={getTooltipTitle()} placement="right">
       <Box
