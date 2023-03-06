@@ -289,6 +289,7 @@ export type NodeFireStore = {
     label: string;
     title: string;
     type: string;
+    visible?: boolean;
   }[];
   choices: KnowledgeChoice[];
   closedHeight?: number;
@@ -324,6 +325,7 @@ export type NodeFireStore = {
     label: string;
     title: string;
     type: string;
+    visible?: boolean;
   }[];
   referenceIds: string[];
   referenceLabels: string[];

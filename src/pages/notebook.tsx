@@ -261,10 +261,10 @@ const Dashboard = ({}: DashboardProps) => {
   // when proposing improvements, lists of added/removed parent/child links
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [updatedLinks, setUpdatedLinks] = useState<{
-    addedParents: string[],
-    addedChildren: string[],
-    removedParents: string[],
-    removedChildren: string[]
+    addedParents: string[];
+    addedChildren: string[];
+    removedParents: string[];
+    removedChildren: string[];
   }>({
     addedParents: [],
     addedChildren: [],
@@ -1622,17 +1622,17 @@ const Dashboard = ({}: DashboardProps) => {
 
   const chosenNodeChanged = useCallback(
     (nodeId: string) => {
-      setUpdatedLinks((updatedLinks) => {
+      setUpdatedLinks(updatedLinks => {
         setGraph(({ nodes: oldNodes, edges: oldEdges }) => {
           if (!notebookRef.current.choosingNode || !notebookRef.current.chosenNode)
             return { nodes: oldNodes, edges: oldEdges };
           if (nodeId !== notebookRef.current.choosingNode.id) return { nodes: oldNodes, edges: oldEdges };
-  
+
           const thisNode = copyNode(oldNodes[nodeId]);
           const chosenNodeObj = copyNode(oldNodes[notebookRef.current.chosenNode.id]);
-  
+
           let newEdges: EdgesData = oldEdges;
-  
+
           const validLink =
             (notebookRef.current.choosingNode.type === "Reference" &&
               /* thisNode.referenceIds.filter(l => l === nodeBookState.chosenNode?.id).length === 0 &&*/
@@ -1646,9 +1646,9 @@ const Dashboard = ({}: DashboardProps) => {
             (notebookRef.current.choosingNode.type === "Child" &&
               notebookRef.current.choosingNode.id !== notebookRef.current.chosenNode.id &&
               thisNode.children.filter((l: any) => l.node === notebookRef.current.chosenNode?.id).length === 0);
-  
+
           if (!validLink) return { nodes: oldNodes, edges: oldEdges };
-  
+
           if (notebookRef.current.choosingNode.type === "Reference") {
             thisNode.references = [...thisNode.references, chosenNodeObj.title];
             thisNode.referenceIds = [...thisNode.referenceIds, notebookRef.current.chosenNode.id];
@@ -1684,7 +1684,7 @@ const Dashboard = ({}: DashboardProps) => {
             } else {
               updatedLinks.addedParents = [...updatedLinks.addedParents, chosenNodeId];
             }
-  
+
             if (notebookRef.current.chosenNode && notebookRef.current.choosingNode) {
               newEdges = setDagEdge(
                 g.current,
@@ -1732,13 +1732,13 @@ const Dashboard = ({}: DashboardProps) => {
               updatedLinks.addedChildren = [...updatedLinks.addedChildren, notebookRef.current.chosenNode.id];
             }
           }
-  
+
           const chosenNode = notebookRef.current.chosenNode.id;
           notebookRef.current.choosingNode = null;
           notebookRef.current.chosenNode = null;
           nodeBookDispatch({ type: "setChoosingNode", payload: null });
           nodeBookDispatch({ type: "setChosenNode", payload: null });
-  
+
           const newNodes = {
             ...oldNodes,
             [nodeId]: thisNode,
@@ -1746,25 +1746,22 @@ const Dashboard = ({}: DashboardProps) => {
           };
           return { nodes: newNodes, edges: newEdges };
         });
-        return {...updatedLinks};
+        return { ...updatedLinks };
       });
     },
     // TODO: CHECK dependencies
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [
-      notebookRef.current.choosingNode,
-      notebookRef.current.chosenNode,
-    ]
+    [notebookRef.current.choosingNode, notebookRef.current.chosenNode]
   );
 
   const deleteLink = useCallback(
     (nodeId: string, linkIdx: number, linkType: ChoosingType) => {
-      setUpdatedLinks((updatedLinks) => {
+      setUpdatedLinks(updatedLinks => {
         setGraph(({ nodes, edges }) => {
           let oldNodes = { ...nodes };
           let newEdges = { ...edges };
           const thisNode = copyNode(oldNodes[nodeId]);
-  
+
           if (linkType === "Parent") {
             let parentNode = null;
             const parentId = thisNode.parents[linkIdx].node;
@@ -1817,7 +1814,7 @@ const Dashboard = ({}: DashboardProps) => {
           return { nodes: oldNodes, edges: newEdges };
         });
 
-        return {...updatedLinks};
+        return { ...updatedLinks };
       });
     },
     // TODO: CHECK dependencies
@@ -2078,6 +2075,18 @@ const Dashboard = ({}: DashboardProps) => {
 
           const thisNode = graph.nodes[nodeId];
           const { nodeRef, userNodeRef } = initNodeStatusChange(nodeId, thisNode.userNodeId);
+
+          // flagged closing node as visible = false in parents
+          for (const parent of thisNode.parents) {
+            if (!graph.nodes[parent.node]) continue;
+            const childIdx = graph.nodes[parent.node].children.findIndex(child => child.node === nodeId);
+            if (childIdx !== -1) {
+              graph.nodes[parent.node] = { ...graph.nodes[parent.node] };
+              graph.nodes[parent.node].children = { ...graph.nodes[parent.node].children };
+              const child = graph.nodes[parent.node].children[childIdx];
+              child.visible = false;
+            }
+          }
 
           const userNodeData = {
             changed: thisNode.changed || false,
@@ -2633,7 +2642,6 @@ const Dashboard = ({}: DashboardProps) => {
 
       setGraph(graph => {
         const node = graph.nodes[nodeId];
-        
 
         if (node?.locked) return graph;
         generateReputationSignal(db, node, user, wrongChange, "Wrong", nodeId, setReputationSignal);
@@ -2657,7 +2665,7 @@ const Dashboard = ({}: DashboardProps) => {
             disableVotes: true,
           };
         }
-  
+
         if (!willRemoveNode) {
           nodes[nodeId] = {
             ...node,
@@ -2665,12 +2673,12 @@ const Dashboard = ({}: DashboardProps) => {
           };
         }
 
-        (async() => {
+        (async () => {
           await idToken();
           await getMapGraph(`/wrongNode/${nodeId}`);
         })();
 
-        return {nodes, edges};
+        return { nodes, edges };
       });
     },
     [getMapGraph, setNodeParts]
@@ -2971,7 +2979,7 @@ const Dashboard = ({}: DashboardProps) => {
       nodeBookDispatch({ type: "setChoosingNode", payload: null });
       let referencesOK = true;
 
-      setUpdatedLinks((updatedLinks) => {
+      setUpdatedLinks(updatedLinks => {
         setGraph(graph => {
           const selectedNodeId = notebookRef.current.selectedNode!;
           if (
@@ -2983,9 +2991,9 @@ const Dashboard = ({}: DashboardProps) => {
           ) {
             referencesOK = window.confirm("You are proposing a node without any reference. Are you sure?");
           }
-  
+
           if (!referencesOK) return graph;
-  
+
           gtmEvent("Propose", {
             customType: "improvement",
           });
@@ -2995,7 +3003,7 @@ const Dashboard = ({}: DashboardProps) => {
           gtmEvent("Reputation", {
             value: 1,
           });
-  
+
           const newNode = { ...graph.nodes[selectedNodeId] };
           if (newNode.children.length > 0) {
             const newChildren = [];
@@ -3021,7 +3029,7 @@ const Dashboard = ({}: DashboardProps) => {
           }
           const keyFound = changedNodes.hasOwnProperty(selectedNodeId);
           if (!keyFound) return graph;
-  
+
           const oldNode = changedNodes[selectedNodeId] as FullNodeData;
           let isTheSame =
             newNode.title === oldNode.title &&
@@ -3039,7 +3047,7 @@ const Dashboard = ({}: DashboardProps) => {
           isTheSame = compareLinks(oldNode.parents, newNode.parents, isTheSame, false);
           isTheSame = compareLinks(oldNode.children, newNode.children, isTheSame, false);
           isTheSame = compareFlatLinks(oldNode.referenceLabels, newNode.referenceLabels, isTheSame);
-  
+
           isTheSame = compareChoices(oldNode, newNode, isTheSame);
           if (isTheSame) {
             onFail();
@@ -3048,7 +3056,7 @@ const Dashboard = ({}: DashboardProps) => {
             });
             return graph;
           }
-  
+
           const postData: any = {
             ...newNode,
             id: notebookRef.current.selectedNode,
@@ -3080,9 +3088,9 @@ const Dashboard = ({}: DashboardProps) => {
           delete postData.left;
           delete postData.top;
           delete postData.height;
-  
+
           const willBeApproved = isVersionApproved({ corrects: 1, wrongs: 0, nodeData: newNode });
-  
+
           if (willBeApproved) {
             const newParentIds: string[] = newNode.parents.map(parent => parent.node);
             const newChildIds: string[] = newNode.children.map(child => child.node);
@@ -3103,7 +3111,7 @@ const Dashboard = ({}: DashboardProps) => {
               }
             });
           }
-  
+
           const nodes = {
             ...graph.nodes,
             [selectedNodeId]: {
@@ -3111,13 +3119,13 @@ const Dashboard = ({}: DashboardProps) => {
               editable: false,
             },
           };
-  
+
           getMapGraph("/proposeNodeImprovement", postData, !willBeApproved);
-  
+
           setTimeout(() => {
             scrollToNode(selectedNodeId);
           }, 200);
-  
+
           return {
             nodes,
             edges: graph.edges,
@@ -3127,12 +3135,7 @@ const Dashboard = ({}: DashboardProps) => {
         return updatedLinks;
       });
     },
-    [
-      isPlayingTheTutorialRef,
-      nodeBookDispatch,
-      getMapGraph,
-      scrollToNode,
-    ]
+    [isPlayingTheTutorialRef, nodeBookDispatch, getMapGraph, scrollToNode]
   );
 
   const proposeNewChild = useCallback(
