@@ -60,6 +60,9 @@ export const proposalSummariesGenerator = (proposal: any) => {
   if (proposal.removedChildren) {
     proposalSummaries.push("- Deleted Children.");
   }
+  if (proposal.changedNodeType) {
+    proposalSummaries.push("- Changed Node Type.");
+  }
   return proposalSummaries;
 };
 
