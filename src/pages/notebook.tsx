@@ -811,12 +811,12 @@ const Dashboard = ({}: DashboardProps) => {
       if (tutorialDoc.exists()) {
         const tutorial = tutorialDoc.data() as UserTutorials;
         setUserTutorial(prev => ({ ...prev, ...tutorial }));
-        if (!tutorial.navigation.done && !tutorial.navigation.skipped) {
-          setCurrentTutorial("NAVIGATION");
-        } else if (!tutorial.nodes.done && !tutorial.nodes.skipped) {
-          setCurrentTutorial("NODES");
-        }
-        return setUserTutorialLoaded(true);
+        // if (!tutorial.navigation.done && !tutorial.navigation.skipped) {
+        //   setCurrentTutorial("NAVIGATION");
+        // } else if (!tutorial.nodes.done && !tutorial.nodes.skipped) {
+        //   setCurrentTutorial("NODES");
+        // }
+        // return setUserTutorialLoaded(true);
       } else {
         console.log("will-start");
         setCurrentTutorial("NAVIGATION");

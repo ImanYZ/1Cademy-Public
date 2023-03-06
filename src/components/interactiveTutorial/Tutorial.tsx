@@ -80,6 +80,7 @@ export const Tutorial = ({
   else if (tutorialState.tooltipPosition === "topRight") location = { ...location, bottom: "", left: "" };
   else if (tutorialState.tooltipPosition === "bottomLeft") location = { ...location, top: "", right: "" };
   else if (tutorialState.tooltipPosition === "bottomRight") location = { ...location, top: "", left: "" };
+
   if (
     targetClientRect.top === 0 &&
     targetClientRect.left === 0 &&

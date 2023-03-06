@@ -31,14 +31,13 @@ export const useInteractiveTutorial = ({ notebookRef }: useInteractiveTutorialPr
   const isPlayingTheTutorialRef = useRef(false);
   const idxCurrentStepRef = useRef(-1);
   const { nodeBookDispatch } = useNodeBook();
-  const defaultSelectedNode = useRef<string | null>(null);
+  // const defaultSelectedNode = useRef<string | null>(null);
   const [stateNodeTutorial, setStateNodeTutorial] = useState<TutorialStep | null>(null);
   const [steps, setSteps] = useState<TutorialStep[]>([]);
   const [currentTutorial, setCurrentTutorial] = useState<TutorialType>(null);
 
   const removeStyleFromTarget = useCallback(
     (childTargetId: string) => {
-      console.log(`ssssssss  ${notebookRef.current.selectedNode}-${childTargetId}`);
       if (childTargetId) {
         const element = document.getElementById(`${notebookRef.current.selectedNode}-${childTargetId}`);
         if (element) {
@@ -94,9 +93,9 @@ export const useInteractiveTutorial = ({ notebookRef }: useInteractiveTutorialPr
     setSteps(newSteps);
   }, [currentTutorial, nodeBookDispatch, notebookRef, removeStyleFromTarget, steps.length]);
 
-  useEffect(() => {
-    if (!defaultSelectedNode.current) defaultSelectedNode.current = notebookRef.current.selectedNode;
-  }, [notebookRef]);
+  // useEffect(() => {
+  //   if (!defaultSelectedNode.current) defaultSelectedNode.current = notebookRef.current.selectedNode;
+  // }, [notebookRef]);
 
   const onNextStep = useCallback(() => {
     if (idxCurrentStepRef.current === steps.length - 1) {
