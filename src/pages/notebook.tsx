@@ -506,7 +506,7 @@ const Dashboard = ({}: DashboardProps) => {
     lastNodeOperation.current = operation;
   }, []);
 
-  const { addTask, queue, isQueueWorking, queueFinished } = useWorkerQueue({
+  const { addTask, isQueueWorking, queueFinished } = useWorkerQueue({
     g,
     graph,
     setGraph,
@@ -537,7 +537,7 @@ const Dashboard = ({}: DashboardProps) => {
   const [userTutorialLoaded, setUserTutorialLoaded] = useState(false);
 
   // flag for whether users' nodes data is downloaded from server
-  const [userNodesLoaded, setUserNodesLoaded] = useState(false);
+  const [, /* userNodesLoaded */ setUserNodesLoaded] = useState(false);
 
   // flag set to true when sending request to server
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -753,6 +753,7 @@ const Dashboard = ({}: DashboardProps) => {
 
   useEffect(() => {
     // detect triggers to change tutorials
+    // tutorials are trigger over selected node because is visible in that time
 
     if (currentTutorial) return;
     if (!userTutorialLoaded) return;
@@ -766,13 +767,14 @@ const Dashboard = ({}: DashboardProps) => {
     }
 
     if (!userTutorial.nodes.done && !userTutorial.nodes.skipped) {
-      const nodeTargetId = nodeBookState.selectedNode || Object.keys(graph.nodes)[0] || "";
+      const nodeTargetId =
+        (nodeBookState.selectedNode && graph.nodes[nodeBookState.selectedNode].open && nodeBookState.selectedNode) ||
+        "";
+      console.log({ nodeTargetId });
       if (!nodeTargetId) return;
 
       setTargetId(nodeTargetId);
       setCurrentTutorial("NODES");
-      nodeBookDispatch({ type: "setSelectedNode", payload: nodeTargetId });
-      notebookRef.current.selectedNode = nodeTargetId;
       return;
     }
   }, [
@@ -781,8 +783,10 @@ const Dashboard = ({}: DashboardProps) => {
     graph.nodes,
     nodeBookDispatch,
     nodeBookState.selectedNode,
+    scrollToNode,
     setCurrentTutorial,
     setTargetId,
+    targetId,
     userTutorial,
     userTutorialLoaded,
   ]);
@@ -790,34 +794,36 @@ const Dashboard = ({}: DashboardProps) => {
   //  bd => state (first render)
   useEffect(() => {
     setTimeout(() => {
-      if (user?.sNode === nodeBookState.selectedNode) return;
-      if (!firstScrollToNode && queueFinished && urlNodeProcess) {
-        if (!user?.sNode) return;
-        const selectedNode = graph.nodes[user?.sNode];
+      if (!user) return;
+      if (firstScrollToNode) return;
+      if (!queueFinished) return;
+      if (!urlNodeProcess) return;
+
+      if (user.sNode) {
+        if (user.sNode === nodeBookState.selectedNode) return;
+
+        const selectedNode = graph.nodes[user.sNode];
         if (!selectedNode) return;
         if (selectedNode.top === 0) return;
+
         nodeBookDispatch({ type: "setSelectedNode", payload: user.sNode });
         notebookRef.current.selectedNode = user.sNode;
+
         scrollToNode(user.sNode);
         setFirstScrollToNode(true);
-        setIsSubmitting(false);
-        if (queueFinished) {
-          setFirstLoading(false);
-        }
       }
+      setIsSubmitting(false);
+      setFirstLoading(false);
     }, 1000);
   }, [
     firstScrollToNode,
     graph.nodes,
-    isQueueWorking,
     nodeBookDispatch,
     nodeBookState.selectedNode,
-    queue.length,
     queueFinished,
     scrollToNode,
     urlNodeProcess,
-    user?.sNode,
-    userNodesLoaded,
+    user,
   ]);
 
   // called after first time map is rendered
