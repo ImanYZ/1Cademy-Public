@@ -1,5 +1,6 @@
 import { ReactNode, useCallback, useEffect, useRef, useState } from "react";
 
+import { SEARCHER_STEPS_COMPLETE } from "@/lib/reducers/searcherTutorial";
 import { NAVIGATION_STEPS_COMPLETE } from "@/lib/utils/tutorials/navigationSteps";
 
 import { NODES_STEPS_COMPLETE } from "../lib/reducers/nodeTutorial2";
@@ -69,10 +70,10 @@ export const useInteractiveTutorial = ({}: useInteractiveTutorialProps) => {
       console.log("FILL NODES");
       newSteps = NODES_STEPS_COMPLETE;
     }
-    // if (currentTutorial === "SEARCHER") {
-    //   console.log("FILL SEARCHER");
-    //   newSteps = SEARCHER_STEPS_COMPLETE;
-    // }
+    if (currentTutorial === "SEARCHER") {
+      console.log("FILL SEARCHER");
+      newSteps = SEARCHER_STEPS_COMPLETE;
+    }
     // if (currentTutorial === "PROPOSAL") {
     //   console.log("FILL PROPOSAL");
     //   newSteps = PROPOSAL_STEPS_COMPLETE;

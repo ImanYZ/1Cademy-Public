@@ -75,7 +75,7 @@ Ex for Node id elements to disable
 
 const NODES_STEPS: TutorialStepConfig[] = [
   {
-    title: "Introduction",
+    title: "Introduction - What is a Node",
     description: (
       <MarkdownRender
         text={
@@ -87,7 +87,7 @@ const NODES_STEPS: TutorialStepConfig[] = [
 
   {
     childTargetId: "node-title",
-    title: "Introduction",
+    title: "Introduction - Node Title",
     description: (
       <MarkdownRender
         text={
@@ -100,7 +100,7 @@ const NODES_STEPS: TutorialStepConfig[] = [
 
   {
     childTargetId: "node-content",
-    title: "Introduction",
+    title: "Introduction - Node Content",
     description: (
       <MarkdownRender
         text={
@@ -297,7 +297,7 @@ const NODES_STEPS: TutorialStepConfig[] = [
 
   {
     childTargetId: "node-footer-user",
-    title: "Nodes - Node Footer",
+    title: "Nodes - Node Contributor",
     description: (
       <MarkdownRender
         text={
@@ -309,7 +309,7 @@ const NODES_STEPS: TutorialStepConfig[] = [
 
   {
     childTargetId: "node-footer-type",
-    title: "Nodes - Node Footer",
+    title: "Nodes - Node Type",
     description: (
       <>
         <MarkdownRender text={"This indicates what type of node this is. There are six types of nodes on 1Cademy."} />
@@ -349,7 +349,7 @@ const NODES_STEPS: TutorialStepConfig[] = [
 
   {
     childTargetId: "node-footer-timestamp",
-    title: "Nodes - Node Footer",
+    title: "Nodes - Last update",
     description: <MarkdownRender text={"The third icon indicates how long ago the node was updated."} />,
   },
 
@@ -367,7 +367,7 @@ const NODES_STEPS: TutorialStepConfig[] = [
 
   {
     childTargetId: "node-footer-votes",
-    title: "Nodes - Node Footer",
+    title: "Nodes - Votes",
     description: (
       <MarkdownRender
         text={
@@ -379,7 +379,7 @@ const NODES_STEPS: TutorialStepConfig[] = [
 
   {
     childTargetId: "node-footer-upvotes",
-    title: "Nodes - Node Footer",
+    title: "Nodes - Node Downvotes",
     description: (
       <MarkdownRender
         text={
@@ -392,7 +392,7 @@ const NODES_STEPS: TutorialStepConfig[] = [
 
   {
     childTargetId: "node-footer-downvotes",
-    title: "Nodes - Node Footer",
+    title: "Nodes - Node Upvotes",
     description: (
       <MarkdownRender
         text={
@@ -405,7 +405,7 @@ const NODES_STEPS: TutorialStepConfig[] = [
 
   {
     childTargetId: "node-footer-votes",
-    title: "Nodes - Node Footer",
+    title: "Nodes - Netvotes",
     description: (
       <MarkdownRender
         text={
@@ -417,7 +417,7 @@ const NODES_STEPS: TutorialStepConfig[] = [
 
   {
     childTargetId: "node-footer-tags-citations",
-    title: "Nodes - Node Footer",
+    title: "Nodes - Tags and Ciitations",
     description: (
       <MarkdownRender
         text={
@@ -430,7 +430,7 @@ const NODES_STEPS: TutorialStepConfig[] = [
 
   {
     childTargetId: "button-parent-children",
-    title: "Nodes - Node Footer",
+    title: "Nodes - Parents and Children",
     description: (
       <MarkdownRender text={"The next icon is for parent and child nodes. **Click** the button to expand. "} />
     ),
@@ -439,7 +439,7 @@ const NODES_STEPS: TutorialStepConfig[] = [
 
   {
     childTargetId: "node-footer-ellipsis",
-    title: "Nodes - Node Footer",
+    title: "Nodes - More Options",
     description: (
       <MarkdownRender
         text={
