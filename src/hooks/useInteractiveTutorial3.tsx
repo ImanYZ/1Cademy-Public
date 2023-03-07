@@ -1,7 +1,6 @@
 import { ReactNode, useCallback, useEffect, useRef, useState } from "react";
 
-import { SEARCHER_STEPS_COMPLETE } from "@/lib/reducers/searcherTutorial";
-import { NAVIGATION_STEPS_COMPLETE } from "@/lib/utils/tutorials/navigationSteps";
+import { NAVIGATION_STEPS_COMPLETE } from "@/lib/utils/tutorials/navigationTutorialSteps";
 import {
   PROPOSING_CODE_EDIT_COMPLETE,
   PROPOSING_CONCEPT_EDIT_COMPLETE,
@@ -9,9 +8,10 @@ import {
   PROPOSING_QUESTION_EDIT_COMPLETE,
   PROPOSING_REFERENCE_EDIT_COMPLETE,
   PROPOSING_RELATION_EDIT_COMPLETE,
-} from "@/lib/utils/tutorials/proposalSteps";
+} from "@/lib/utils/tutorials/proposalTutorialSteps";
+import { SEARCHER_STEPS_COMPLETE } from "@/lib/utils/tutorials/searcherTutorialSteps";
 
-import { NODES_STEPS_COMPLETE } from "../lib/reducers/nodeTutorial2";
+import { NODES_STEPS_COMPLETE } from "../lib/utils/tutorials/nodeTutorialSteps";
 import { TutorialStep } from "../nodeBookTypes";
 import { TutorialType } from "../pages/notebook";
 import useEventListener from "./useEventListener";

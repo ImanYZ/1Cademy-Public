@@ -5,8 +5,8 @@ import relativeTime from "dayjs/plugin/relativeTime";
 
 import MarkdownRender from "@/components/Markdown/MarkdownRender";
 
-import { TutorialState, TutorialStep, TutorialStepConfig } from "../../nodeBookTypes";
-import { getBaseStepConfig } from "../utils/tutorials/tutorial.utils";
+import { TutorialState, TutorialStep, TutorialStepConfig } from "../../../nodeBookTypes";
+import { getBaseStepConfig } from "./tutorial.utils";
 
 export const INITIAL_NODE_TUTORIAL_STATE: TutorialState = null;
 

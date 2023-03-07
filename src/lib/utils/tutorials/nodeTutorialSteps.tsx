@@ -13,7 +13,7 @@ import relativeTime from "dayjs/plugin/relativeTime";
 
 import MarkdownRender from "@/components/Markdown/MarkdownRender";
 
-import { TutorialState, TutorialStep, TutorialStepConfig } from "../../nodeBookTypes";
+import { TutorialState, TutorialStep, TutorialStepConfig } from "../../../nodeBookTypes";
 
 export const INITIAL_NODE_TUTORIAL_STATE: TutorialState = null;
 
