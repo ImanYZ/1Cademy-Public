@@ -103,10 +103,10 @@ export const Tutorial = ({
           sx={{
             transition: "top 1s ease-out,left 1s ease-out",
             width: "450px",
-            backgroundColor: "#4B535C",
+            backgroundColor: theme => (theme.palette.mode === "dark" ? "#4B535C" : "#C5D0DF"),
             p: "24px 32px",
             borderRadius: "8px",
-            color: "white",
+            color: theme => (theme.palette.mode === "dark" ? gray50 : gray800),
             zIndex: 99999,
           }}
         >
@@ -217,7 +217,7 @@ export const Tutorial = ({
         transition: "top 1s ease-out,left 1s ease-out",
         width: "450px",
         backgroundColor: theme => (theme.palette.mode === "dark" ? "#4B535C" : "#C5D0DF"),
-        borderColor: theme => (theme.palette.mode === "dark" ? "#4B535C" : "#C5D0DF"),
+        // borderColor: theme => (theme.palette.mode === "dark" ? "#4B535C" : "#C5D0DF"),
         p: "24px 32px",
         borderRadius: "8px",
         color: theme => (theme.palette.mode === "dark" ? gray50 : gray800),
