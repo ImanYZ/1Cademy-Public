@@ -85,23 +85,26 @@ export const useInteractiveTutorial = ({}: useInteractiveTutorialProps) => {
       newSteps = SEARCHER_STEPS_COMPLETE;
       setTargetId("");
     }
+    if (currentTutorial === "PROPOSAL") {
+      newSteps = PROPOSAL_STEPS_COMPLETE;
+    }
     if (currentTutorial === "PROPOSAL_CONCEPT") {
-      newSteps = [...PROPOSING_CONCEPT_EDIT_COMPLETE, ...PROPOSAL_STEPS_COMPLETE];
+      newSteps = PROPOSING_CONCEPT_EDIT_COMPLETE;
     }
     if (currentTutorial === "PROPOSAL_REFERENCE") {
-      newSteps = [...PROPOSING_REFERENCE_EDIT_COMPLETE, ...PROPOSAL_STEPS_COMPLETE];
+      newSteps = PROPOSING_REFERENCE_EDIT_COMPLETE;
     }
     if (currentTutorial === "PROPOSAL_RELATION") {
-      newSteps = [...PROPOSING_RELATION_EDIT_COMPLETE, ...PROPOSAL_STEPS_COMPLETE];
+      newSteps = PROPOSING_RELATION_EDIT_COMPLETE;
     }
     if (currentTutorial === "PROPOSAL_IDEA") {
-      newSteps = [...PROPOSING_IDEA_EDIT_COMPLETE, ...PROPOSAL_STEPS_COMPLETE];
+      newSteps = PROPOSING_IDEA_EDIT_COMPLETE;
     }
     if (currentTutorial === "PROPOSAL_QUESTION") {
-      newSteps = [...PROPOSING_QUESTION_EDIT_COMPLETE, ...PROPOSAL_STEPS_COMPLETE];
+      newSteps = PROPOSING_QUESTION_EDIT_COMPLETE;
     }
     if (currentTutorial === "PROPOSAL_CODE") {
-      newSteps = [...PROPOSING_CODE_EDIT_COMPLETE, ...PROPOSAL_STEPS_COMPLETE];
+      newSteps = PROPOSING_CODE_EDIT_COMPLETE;
     }
     console.log({ newSteps });
     idxCurrentStepRef.current = 0;
@@ -115,7 +118,7 @@ export const useInteractiveTutorial = ({}: useInteractiveTutorialProps) => {
     if (idxCurrentStepRef.current === steps.length - 1) {
       idxCurrentStepRef.current = -1;
       setStateNodeTutorial(prev => {
-        console.log("sssssssss", { prev });
+        console.log("sssssssssrrr", { prev });
 
         if (prev?.childTargetId) {
           removeStyleFromTarget(prev.childTargetId);
@@ -128,7 +131,7 @@ export const useInteractiveTutorial = ({}: useInteractiveTutorialProps) => {
       idxCurrentStepRef.current += 1;
       const selectedStep = steps[idxCurrentStepRef.current];
       setStateNodeTutorial(prev => {
-        console.log("sssssssss", { prev });
+        console.log("sssssssss", { prev, selectedStep });
         if (prev?.childTargetId) {
           removeStyleFromTarget(prev.childTargetId);
         }
