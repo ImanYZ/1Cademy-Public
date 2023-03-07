@@ -123,7 +123,15 @@ import {
 } from "../lib/utils/nodesSyncronization.utils";
 import { NAVIGATION_STEPS_COMPLETE } from "../lib/utils/tutorials/navigationTutorialSteps";
 import { NODES_STEPS_COMPLETE } from "../lib/utils/tutorials/nodeTutorialSteps";
-import { PROPOSAL_STEPS_COMPLETE } from "../lib/utils/tutorials/proposalTutorialSteps";
+import { PROPOSING_CODE_EDIT_COMPLETE } from "../lib/utils/tutorials/proposalSteps";
+import {
+  PROPOSAL_STEPS_COMPLETE,
+  PROPOSING_CONCEPT_EDIT_COMPLETE,
+  PROPOSING_IDEA_EDIT_COMPLETE,
+  PROPOSING_QUESTION_EDIT_COMPLETE,
+  PROPOSING_REFERENCE_EDIT_COMPLETE,
+  PROPOSING_RELATION_EDIT_COMPLETE,
+} from "../lib/utils/tutorials/proposalTutorialSteps";
 import { SEARCHER_STEPS_COMPLETE } from "../lib/utils/tutorials/searcherTutorialSteps";
 import { gtmEvent, imageLoaded, isValidHttpUrl } from "../lib/utils/utils";
 import {
@@ -4603,6 +4611,12 @@ const Dashboard = ({}: DashboardProps) => {
               nodes: NODES_STEPS_COMPLETE,
               searcher: SEARCHER_STEPS_COMPLETE,
               proposal: PROPOSAL_STEPS_COMPLETE,
+              proposalCode: PROPOSING_CODE_EDIT_COMPLETE,
+              proposalConcept: PROPOSING_CONCEPT_EDIT_COMPLETE,
+              proposalIdea: PROPOSING_IDEA_EDIT_COMPLETE,
+              proposalQuestion: PROPOSING_QUESTION_EDIT_COMPLETE,
+              proposalReference: PROPOSING_REFERENCE_EDIT_COMPLETE,
+              proposalRelation: PROPOSING_RELATION_EDIT_COMPLETE,
             }}
             userTutorialState={userTutorial}
           />

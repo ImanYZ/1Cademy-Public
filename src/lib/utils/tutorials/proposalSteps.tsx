@@ -1,7 +1,7 @@
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 
-import MarkdownRender from "@/components/Markdown/Markdown_Proposed";
+import MarkdownRender from "@/components/Markdown/MarkdownRender";
 
 import { TutorialState, TutorialStep, TutorialStepConfig } from "../../../nodeBookTypes";
 // import { FullNodeData, NodeTutorialState, TutorialState } from "../../nodeBookTypes";
