@@ -75,7 +75,7 @@ Ex for Node id elements to disable
 
 const NODES_STEPS: TutorialStepConfig[] = [
   {
-    title: "Introduction - What is a Node",
+    title: "What is a Node",
     description: (
       <MarkdownRender
         text={
@@ -87,7 +87,7 @@ const NODES_STEPS: TutorialStepConfig[] = [
 
   {
     childTargetId: "node-title",
-    title: "Introduction - Node Title",
+    title: "Node Title",
     description: (
       <MarkdownRender
         text={
@@ -100,7 +100,7 @@ const NODES_STEPS: TutorialStepConfig[] = [
 
   {
     childTargetId: "node-content",
-    title: "Introduction - Node Content",
+    title: "Node Content",
     description: (
       <MarkdownRender
         text={
@@ -110,194 +110,9 @@ const NODES_STEPS: TutorialStepConfig[] = [
     ),
   },
 
-  // {
-  //   childTargetId: "parents-list",
-  //   title: "Basic Navigation - Parent Nodes",
-  //   description: <MarkdownRender text={"You can see the parent link(s) listed below in this panel."} />,
-  // },
-
-  // {
-  //   childTargetId: "parent-button-0",
-  //   title: "Basic Navigation - Parent Nodes",
-  //   description: <MarkdownRender text={"Click on the link for “1Cademy."} />,
-  //   isClickeable: true,
-  // },
-
-  // {
-  //   title: "Basic Navigation - Parent Nodes",
-  //   description: (
-  //     <MarkdownRender text={`The parent node defines **${INTERACTIVE_TUTORIAL_NOTEBOOK_NODES["00"].title}**`} />
-  //   ),
-  // },
-
-  // {
-  //   childTargetId: "children-list",
-  //   title: "Basic Navigation - Children Nodes",
-  //   description: (
-  //     <MarkdownRender
-  //       text={
-  //         "Most nodes have children. After learning the “1Cademy Nodes” node, you can expand your knowledge by learning from its children."
-  //       }
-  //     />
-  //   ),
-  // },
-
-  // {
-  //   childTargetId: "children-list",
-  //   title: "Basic Navigation - Children Nodes",
-  //   description: <MarkdownRender text={"You can see the children link(s) listed below in this panel."} />,
-  // },
-
-  // {
-  //   childTargetId: "child-button-0",
-  //   title: "Basic Navigation - Children Nodes",
-  //   description: <MarkdownRender text={`Click here to view the first child node for “1Cademy Nodes”`} />,
-  //   isClickeable: true,
-  // },
-
-  // {
-  //   targetId: "02",
-  //   title: "Basic Navigation - Children Nodes",
-  //   description: <MarkdownRender text={"Here you can see the child node for “1Cademy Nodes”."} />,
-  // },
-
-  // {
-  //   targetId: "02",
-  //   title: "Learning Pathways",
-  //   description: (
-  //     <MarkdownRender
-  //       text={
-  //         "We can keep opening child nodes to create branches of nodes. These are learning pathways, and we can use these to follow information from basic to advanced."
-  //       }
-  //     />
-  //   ),
-  // },
-
-  // {
-  //   targetId: "02",
-  //   childTargetId: "02-button-parent-children",
-  //   title: "Learning Pathways",
-  //   description: <MarkdownRender text={"open the children of “Creating or improving a node in 1Cademy”."} />,
-  //   isClickeable: true,
-  // },
-
-  // {
-  //   targetId: "02",
-  //   childTargetId: "02-child-button-0",
-  //   title: "Learning Pathways",
-  //   description: (
-  //     <MarkdownRender
-  //       text={"Open the first child node “Modifications in 1Cademy” and continue expanding the learning pathway."}
-  //     />
-  //   ),
-  //   isClickeable: true,
-  // },
-
-  // {
-  //   targetId: "03",
-  //   childTargetId: "03-button-parent-children",
-  //   title: "Learning Pathways",
-  //   description: <MarkdownRender text={"Now open the children of “Modifications in 1Cademy”."} />,
-  //   isClickeable: true,
-  // },
-
-  // {
-  //   targetId: "03",
-  //   childTargetId: "03-child-button-0",
-  //   title: "Learning Pathways",
-  //   description: <MarkdownRender text={"Click on “Adding a new node to 1Cademy”."} />,
-  //   isClickeable: true,
-  // },
-
-  // {
-  //   targetId: "04",
-  //   title: "Learning Pathways",
-  //   description: (
-  //     <MarkdownRender
-  //       text={"While we can open a lot of nodes, it is important to try to keep your map tidy and close unused nodes."}
-  //     />
-  //   ),
-  // },
-
-  // {
-  //   targetId: "04",
-  //   childTargetId: "04-hiden-button",
-  //   title: "Learning Pathways",
-  //   description: (
-  //     <MarkdownRender
-  //       text={
-  //         "Hiding a node does not delete it, it only hides it from your notebook. You can always search and return it to your notebook."
-  //       }
-  //     />
-  //   ),
-  // },
-
-  // {
-  //   targetId: "04",
-  //   childTargetId: "04-hiden-button",
-  //   title: "Learning Pathways",
-  //   description: (
-  //     <MarkdownRender
-  //       text={"To hide the “Adding a new node to 1Cademy” node, click the “X” button at the top right of the node."}
-  //     />
-  //   ),
-  //   isClickeable: true,
-  // },
-
-  // {
-  //   childTargetId: "hide-offsprings-button",
-  //   title: "Learning Pathways",
-  //   description: (
-  //     <MarkdownRender
-  //       text={
-  //         'To hide all the off-springs of the node "1Cademy Nodes", click the “|<--” button at the top right of the node.'
-  //       }
-  //     />
-  //   ),
-  //   isClickeable: true,
-  // },
-
-  // {
-  //   childTargetId: "close-button",
-  //   title: "Learning Pathways",
-  //   description: (
-  //     <MarkdownRender
-  //       text={'To collapse the node “1Cademy Nodes” click the "-" button, so only the title is displayed.'}
-  //     />
-  //   ),
-  //   isClickeable: true,
-  // },
-
-  // {
-  //   childTargetId: "node-header",
-  //   title: "Nodes - Node Header",
-  //   description: (
-  //     <MarkdownRender
-  //       text={"The three buttons in the node header help you modify the view of the knowledge graph in your notebook."}
-  //     />
-  //   ),
-  // },
-
-  // {
-  //   childTargetId: "open-button",
-  //   title: "Nodes - Node Header",
-  //   description: <MarkdownRender text={"To expand a node to see its content again, click this button."} />,
-  //   isClickeable: true,
-  // },
-
-  // -------------------- FOOTER
-
-  // {
-  //   childTargetId: "node-footer",
-  //   title: "Nodes - Node Footer",
-  //   description: <MarkdownRender text={"The node footer provides many tools."} />,
-
-  //   // tooltipPosition: "top",
-  // },
-
   {
     childTargetId: "node-footer-user",
-    title: "Nodes - Node Contributor",
+    title: "Node Contributor",
     description: (
       <MarkdownRender
         text={
@@ -309,7 +124,7 @@ const NODES_STEPS: TutorialStepConfig[] = [
 
   {
     childTargetId: "node-footer-type",
-    title: "Nodes - Node Type",
+    title: "Node Type",
     description: (
       <>
         <MarkdownRender text={"This indicates what type of node this is. There are six types of nodes on 1Cademy."} />
@@ -349,13 +164,13 @@ const NODES_STEPS: TutorialStepConfig[] = [
 
   {
     childTargetId: "node-footer-timestamp",
-    title: "Nodes - Last update",
+    title: "Last update",
     description: <MarkdownRender text={"The third icon indicates how long ago the node was updated."} />,
   },
 
   {
     childTargetId: "node-footer-propose",
-    title: "Nodes - Node Footer",
+    title: "Node Footer",
     description: (
       <MarkdownRender
         text={
@@ -367,7 +182,7 @@ const NODES_STEPS: TutorialStepConfig[] = [
 
   {
     childTargetId: "node-footer-votes",
-    title: "Nodes - Votes",
+    title: "Votes",
     description: (
       <MarkdownRender
         text={
@@ -379,7 +194,7 @@ const NODES_STEPS: TutorialStepConfig[] = [
 
   {
     childTargetId: "node-footer-upvotes",
-    title: "Nodes - Node Downvotes",
+    title: "Node Downvotes",
     description: (
       <MarkdownRender
         text={
@@ -392,7 +207,7 @@ const NODES_STEPS: TutorialStepConfig[] = [
 
   {
     childTargetId: "node-footer-downvotes",
-    title: "Nodes - Node Upvotes",
+    title: "Node Upvotes",
     description: (
       <MarkdownRender
         text={
@@ -405,7 +220,7 @@ const NODES_STEPS: TutorialStepConfig[] = [
 
   {
     childTargetId: "node-footer-votes",
-    title: "Nodes - Netvotes",
+    title: "Netvotes",
     description: (
       <MarkdownRender
         text={
@@ -417,7 +232,7 @@ const NODES_STEPS: TutorialStepConfig[] = [
 
   {
     childTargetId: "node-footer-tags-citations",
-    title: "Nodes - Tags and Ciitations",
+    title: "Tags and Ciitations",
     description: (
       <MarkdownRender
         text={
@@ -430,7 +245,7 @@ const NODES_STEPS: TutorialStepConfig[] = [
 
   {
     childTargetId: "button-parent-children",
-    title: "Nodes - Parents and Children",
+    title: "Parents and Children",
     description: (
       <MarkdownRender text={"The next icon is for parent and child nodes. **Click** the button to expand. "} />
     ),
@@ -439,7 +254,7 @@ const NODES_STEPS: TutorialStepConfig[] = [
 
   {
     childTargetId: "node-footer-ellipsis",
-    title: "Nodes - More Options",
+    title: "More Options",
     description: (
       <MarkdownRender
         text={

@@ -61,7 +61,7 @@ const RiveComponentAnimated = ({ src, artboard, animations, autoplay }: any) => 
 };
 const NAVIGATION_STEPS: TutorialStepConfig[] = [
   {
-    title: "Navigaton: Pan",
+    title: "Panning",
     description: (
       <>
         <MarkdownRender
@@ -83,7 +83,7 @@ const NAVIGATION_STEPS: TutorialStepConfig[] = [
     anchor: "Portal",
   },
   {
-    title: "Navigaton: Zoom In",
+    title: "Zooming In and Zooming out",
     description: (
       <>
         <MarkdownRender
