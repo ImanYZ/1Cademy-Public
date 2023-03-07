@@ -310,16 +310,16 @@ const Dashboard = ({}: DashboardProps) => {
   const [, /* openProgressBarMenu */ setOpenProgressBarMenu] = useState(false);
 
   const [userTutorial, setUserTutorial] = useState<UserTutorials>({
-    nodes: { currentStep: 1, done: false, skipped: false },
-    searcher: { currentStep: 1, done: false, skipped: false },
-    proposal: { currentStep: 1, done: false, skipped: false },
-    proposalConcept: { currentStep: 1, done: false, skipped: false },
-    proposalRelation: { currentStep: 1, done: false, skipped: false },
-    proposalReference: { currentStep: 1, done: false, skipped: false },
-    proposalIdea: { currentStep: 1, done: false, skipped: false },
-    proposalQuestion: { currentStep: 1, done: false, skipped: false },
-    proposalCode: { currentStep: 1, done: false, skipped: false },
-    navigation: { currentStep: 1, done: false, skipped: false },
+    nodes: { currentStep: 1, done: false, skipped: false, forceTutorialAgain: false },
+    searcher: { currentStep: 1, done: false, skipped: false, forceTutorialAgain: false },
+    proposal: { currentStep: 1, done: false, skipped: false, forceTutorialAgain: false },
+    proposalConcept: { currentStep: 1, done: false, skipped: false, forceTutorialAgain: false },
+    proposalRelation: { currentStep: 1, done: false, skipped: false, forceTutorialAgain: false },
+    proposalReference: { currentStep: 1, done: false, skipped: false, forceTutorialAgain: false },
+    proposalIdea: { currentStep: 1, done: false, skipped: false, forceTutorialAgain: false },
+    proposalQuestion: { currentStep: 1, done: false, skipped: false, forceTutorialAgain: false },
+    proposalCode: { currentStep: 1, done: false, skipped: false, forceTutorialAgain: false },
+    navigation: { currentStep: 1, done: false, skipped: false, forceTutorialAgain: false },
   });
 
   // const [currentTutorial, setCurrentTutorial] = useState<TutorialType>(null);
@@ -792,7 +792,10 @@ const Dashboard = ({}: DashboardProps) => {
 
     devLog("USE_EFFECT: DETECT_TRIGGER_TUTORIAL", { userTutorial });
 
-    if (!userTutorial.navigation.done && !userTutorial.navigation.skipped) {
+    if (
+      (!userTutorial.navigation.done && !userTutorial.navigation.skipped) ||
+      userTutorial.navigation.forceTutorialAgain
+    ) {
       setCurrentTutorial("NAVIGATION");
       return;
     }
@@ -801,8 +804,14 @@ const Dashboard = ({}: DashboardProps) => {
       const nodeTargetId =
         (nodeBookState.selectedNode && graph.nodes[nodeBookState.selectedNode].open && nodeBookState.selectedNode) ||
         "";
+
+      // if (userTutorial.nodes.previousStepsDone) {
+      //   // setCurrentTutorial("NODES", true);
+      // }
       console.log({ nodeTargetId });
-      if (!nodeTargetId) return;
+      if (!nodeTargetId) {
+        return setCurrentTutorial("NODES");
+      }
 
       setTargetId(nodeTargetId);
       setCurrentTutorial("NODES");
@@ -4619,6 +4628,7 @@ const Dashboard = ({}: DashboardProps) => {
               proposalRelation: PROPOSING_RELATION_EDIT_COMPLETE,
             }}
             userTutorialState={userTutorial}
+            setUserTutorialState={setUserTutorial}
           />
         </Box>
       </Box>

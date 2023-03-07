@@ -3,7 +3,7 @@ import CloseIcon from "@mui/icons-material/Close";
 import DoneIcon from "@mui/icons-material/Done";
 import { Accordion, AccordionDetails, AccordionSummary, Box, IconButton, Typography } from "@mui/material";
 import { Stack } from "@mui/system";
-import React, { useState } from "react";
+import React, { Dispatch, SetStateAction, useState } from "react";
 
 import { TutorialStep, TutorialTypeKeys, UserTutorials } from "../../nodeBookTypes";
 // type TutorialStage = {
@@ -52,6 +52,7 @@ type TutorialTableOfContentProps = {
   handleCloseProgressBar: () => void;
   tutorials: Tutorials;
   userTutorialState: UserTutorials;
+  setUserTutorialState: Dispatch<SetStateAction<UserTutorials>>;
 };
 
 const TutorialTableOfContent = ({
@@ -59,6 +60,7 @@ const TutorialTableOfContent = ({
   handleCloseProgressBar,
   tutorials,
   userTutorialState,
+  setUserTutorialState,
 }: TutorialTableOfContentProps) => {
   // const { height } = useWindowSize();
   const [expanded, setExpanded] = useState<string | false>("Option1");
@@ -81,8 +83,6 @@ const TutorialTableOfContent = ({
         backgroundColor: theme => (theme.palette.mode === "dark" ? "rgb(31,31,31)" : "rgb(240,240,240)"),
         width: "300px",
         bottom: "0px",
-        // height,
-        // maxHeight: `${height}px`,
         right: `${open ? "0px" : "-400px"}`,
         transition: "right 300ms ease-out",
         zIndex: 99999,
@@ -120,7 +120,15 @@ const TutorialTableOfContent = ({
             onChange={handleChange(`Option${idx + 1}`, keyTutorial)}
           >
             <AccordionSummary>
-              <Box sx={{ display: "flex", alignItems: "center" }}>
+              <Box
+                onClick={() =>
+                  setUserTutorialState(pre => ({
+                    ...pre,
+                    [keyTutorial]: { ...pre[keyTutorial], forceTutorialAgain: true },
+                  }))
+                }
+                sx={{ display: "flex", alignItems: "center" }}
+              >
                 <ArrowForwardIosSharpIcon
                   fontSize="small"
                   sx={{
@@ -145,13 +153,11 @@ const TutorialTableOfContent = ({
                 {tutorials[keyTutorial].map((cur, idx) => (
                   <Stack key={cur.title} component={"li"} direction={"row"} alignItems="center" spacing={"8px"}>
                     {userTutorialState[keyTutorial].currentStep > idx + 1 && <DoneIcon fontSize="small" />}
-                    {/* {cur.completed && <DoneIcon fontSize="small" />} */}
                     <Typography
                       sx={{
                         display: "inline-block",
                         color: theme => (theme.palette.mode === "light" ? "#475467" : "#EAECF0"),
                         opacity: "0.5",
-                        // ml: cur.completed ? "0px" : "28px",
                         ml: userTutorialState[keyTutorial].currentStep > idx + 1 ? "0px" : "28px",
                       }}
                       fontSize={"16px"}

@@ -76,7 +76,6 @@ export const useInteractiveTutorial = ({}: useInteractiveTutorialProps) => {
     if (currentTutorial === "NAVIGATION") {
       console.log("NAVIGATION");
       newSteps = NAVIGATION_STEPS_COMPLETE;
-      //  setSteps(SEARCHER_STEPS_COMPLETE);
     }
     if (currentTutorial === "NODES") {
       console.log("FILL NODES");

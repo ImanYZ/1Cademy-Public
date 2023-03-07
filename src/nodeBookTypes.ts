@@ -437,10 +437,13 @@ export type TutorialTypeKeys =
   | "proposalIdea"
   | "proposalQuestion"
   | "proposalCode";
+
 export type UserTutorial = {
   currentStep: number;
   done: boolean;
   skipped: boolean;
+  forceTutorialAgain: boolean;
+  previousStepsDone: boolean;
 };
 
 export type UserTutorials = {
