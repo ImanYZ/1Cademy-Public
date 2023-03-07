@@ -46,7 +46,7 @@ const NODE_CONCEPT_STEPS: TutorialStepConfig[] = [
     title: "What is a Concept Node",
     description: (
       <Stack>
-        <MarkdownRender text={"This is a concept node. It can be distinguished by this icon here."} />
+        <MarkdownRender text={"This is a **Concept** node. It can be distinguished by this icon here."} />
         <LocalLibraryIcon sx={{ alignSelf: "center" }} />
         <MarkdownRender text={"Concept nodes describe a single, discrete concept"} />
       </Stack>
@@ -76,7 +76,7 @@ const NODE_RELATION_STEPS: TutorialStepConfig[] = [
     title: "What is a Relation Node",
     description: (
       <Stack>
-        <MarkdownRender text={"This is a relation node. It can be identified by this icon."} />
+        <MarkdownRender text={"This is a **Relation** node. It can be identified by this icon."} />
         <ShareIcon sx={{ alignSelf: "center" }} />
         <MarkdownRender
           text={
@@ -110,7 +110,7 @@ const NODE_REFERENCE_STEPS: TutorialStepConfig[] = [
     title: "What is a Reference node",
     description: (
       <Stack>
-        <MarkdownRender text={"This is a reference node. It can be identified by this icon. "} />
+        <MarkdownRender text={"This is a **Reference** node. It can be identified by this icon. "} />
         <MenuBookIcon sx={{ alignSelf: "center" }} />
         <MarkdownRender
           text={
@@ -127,7 +127,7 @@ const NODE_QUESTION_STEPS: TutorialStepConfig[] = [
     title: "What is a Question node",
     description: (
       <Stack>
-        <MarkdownRender text={"This is a question node. It can be identified by this icon."} />
+        <MarkdownRender text={"This is a **Question** node. It can be identified by this icon."} />
         <HelpOutlineIcon sx={{ alignSelf: "center" }} />
         <MarkdownRender
           text={"Question nodes contain multiple choice questions that are intended to help people study a topic."}
