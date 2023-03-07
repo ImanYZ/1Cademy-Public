@@ -810,6 +810,8 @@ const Dashboard = ({}: DashboardProps) => {
       const nodeType = changedNode && changedNode.nodeType;
       if (!userTutorial.proposal.done && !userTutorial.proposal.skipped) {
         setCurrentTutorial("PROPOSAL");
+        setTargetId(nodeBookState.selectedNode ?? "");
+        return;
       }
       if (!userTutorial.proposalConcept.done && !userTutorial.proposalConcept.skipped && nodeType === "Concept") {
         setCurrentTutorial(`PROPOSAL_CONCEPT`);

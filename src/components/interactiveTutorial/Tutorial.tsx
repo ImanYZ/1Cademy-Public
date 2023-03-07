@@ -230,9 +230,11 @@ export const Tutorial = ({
         <Typography component={"h2"} sx={{ fontSize: "18px", fontWeight: "bold", display: "inline-block" }}>
           {tutorialState.title}
         </Typography>
-        <Typography sx={{ display: "inline-block", color: "inherit" }}>
-          {tutorialState.currentStepName} / {stepsLength}
-        </Typography>
+        {stepsLength <= 1 || (
+          <Typography sx={{ display: "inline-block", color: "inherit" }}>
+            {tutorialState.currentStepName} / {stepsLength}
+          </Typography>
+        )}
       </Stack>
 
       {tutorialState.description}

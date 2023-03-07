@@ -174,7 +174,7 @@ const NODES_STEPS: TutorialStepConfig[] = [
     description: (
       <MarkdownRender
         text={
-          "The fourth one is the purpose/evaluate button. This allows you to edit the node or add child nodes to it."
+          "This button is to propose a new node or evaluate versions of the current node. This is where you go to add a new node, edit the current node, or evaluate other proposed edits to the node."
         }
       />
     ),
@@ -198,7 +198,7 @@ const NODES_STEPS: TutorialStepConfig[] = [
     description: (
       <MarkdownRender
         text={
-          "Click the upvote button to signal the community that the current state of this node is so helpful that you'd like to lock it from further changes."
+          "This is the downvote button. You can downvote nodes that you think are inaccurate. A downvote is a vote to remove a node and it lowers the threshold of approvals needed for a proposed change to that node."
         }
       />
     ),
@@ -211,7 +211,7 @@ const NODES_STEPS: TutorialStepConfig[] = [
     description: (
       <MarkdownRender
         text={
-          "Click the downvote button to vote for deleting the node. The node will be deleted, as soon as it gets more downvotes than upvotes (negative netvotes)."
+          "This is the upvote button. You can upvote nodes that you think are good. An upvote is a vote to not change a node because upvotes make it more difficult to delete or change a node."
         }
       />
     ),
@@ -232,11 +232,11 @@ const NODES_STEPS: TutorialStepConfig[] = [
 
   {
     childTargetId: "node-footer-tags-citations",
-    title: "Tags and Ciitations",
+    title: "Tags and Citations",
     description: (
       <MarkdownRender
         text={
-          "The next icons are on a single button and represent the cited references and tags on the node. **Click** the button to expand."
+          "This button is for tags and citations. When you click on it you see a panel that contains the sources used to create the node and a panel that shows all the tags for the node."
         }
       />
     ),
@@ -247,7 +247,11 @@ const NODES_STEPS: TutorialStepConfig[] = [
     childTargetId: "button-parent-children",
     title: "Parents and Children",
     description: (
-      <MarkdownRender text={"The next icon is for parent and child nodes. **Click** the button to expand. "} />
+      <MarkdownRender
+        text={
+          "This button displays the parent and child nodes linked to the node. The left panel displays the parent or superordinate nodes and the right panel displays child or subordinate nodes."
+        }
+      />
     ),
     isClickeable: true,
   },
@@ -258,7 +262,7 @@ const NODES_STEPS: TutorialStepConfig[] = [
     description: (
       <MarkdownRender
         text={
-          "Finally, click the ellipses button to mark a node as **Studied**, **“Bookmark”** the node for later review, you can make it **“Narrated”** for you and share the node on your Twitter, Reddit, Facebook, or Linkedin profiles. "
+          "This button gives you the options to bookmark and mark a node as studied. It also gives you the option to have a node narrated and to share a node on social media."
         }
       />
     ),
