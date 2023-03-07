@@ -1,3 +1,5 @@
+import CodeIcon from "@mui/icons-material/Code";
+import EmojiObjectsIcon from "@mui/icons-material/EmojiObjects";
 import HelpOutlineIcon from "@mui/icons-material/HelpOutline";
 import LocalLibraryIcon from "@mui/icons-material/LocalLibrary";
 import MenuBookIcon from "@mui/icons-material/MenuBook";
@@ -7,7 +9,7 @@ import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import { TutorialState, TutorialStep, TutorialStepConfig } from "src/nodeBookTypes";
 
-import MarkdownRender from "@/components/Markdown/Markdown_Proposed";
+import MarkdownRender from "@/components/Markdown/MarkdownRender";
 
 import { getBaseStepConfig } from "./tutorial.utils";
 
@@ -135,10 +137,57 @@ const NODE_QUESTION_STEPS: TutorialStepConfig[] = [
     isClickeable: true,
   },
 ];
-console.log({ NODE_RELATION_STEPS, NODE_REFERENCE_STEPS, NODE_QUESTION_STEPS });
-export const SEARCHER_STEPS_COMPLETE: TutorialStep[] = NODE_CONCEPT_STEPS.map((c, i, s) => {
-  return {
-    ...getBaseStepConfig(i + 1, s.length),
-    ...c,
-  };
+const NODE_IDEA_STEPS: TutorialStepConfig[] = [
+  {
+    title: "What is a Idea node",
+    description: (
+      <Stack>
+        <MarkdownRender text={"This is an **Idea** node. It can be identified by this icon."} />
+        <EmojiObjectsIcon sx={{ alignSelf: "center" }} />
+        <MarkdownRender
+          text={
+            "Idea nodes are used to state an idea like potential concepts to add or a conclusion drawn from a collection of nodes. They are the creator’s ideas and do not have a citation."
+          }
+        />
+      </Stack>
+    ),
+    isClickeable: true,
+  },
+];
+const NODE_CODE_STEPS: TutorialStepConfig[] = [
+  {
+    title: "What is a Code node",
+    description: (
+      <Stack>
+        <MarkdownRender text={"This is a **Code** node. It can be identified by this icon."} />
+        <CodeIcon sx={{ alignSelf: "center" }} />
+        <MarkdownRender
+          text={
+            "Code nodes contain code snippets from a programming language including Python, R, HTML, and JavaScript."
+          }
+        />
+      </Stack>
+    ),
+    isClickeable: true,
+  },
+];
+console.log({ NODE_RELATION_STEPS, NODE_REFERENCE_STEPS, NODE_QUESTION_STEPS, NODE_IDEA_STEPS, NODE_CODE_STEPS });
+
+export const NODE_CONCEPT_COMPLETE: TutorialStep[] = NODE_CONCEPT_STEPS.map((c, i, s) => {
+  return { ...getBaseStepConfig(i + 1, s.length), ...c };
+});
+export const NODE_RELATION_COMPLETE: TutorialStep[] = NODE_RELATION_STEPS.map((c, i, s) => {
+  return { ...getBaseStepConfig(i + 1, s.length), ...c };
+});
+export const NODE_REFERENCE_COMPLETE: TutorialStep[] = NODE_REFERENCE_STEPS.map((c, i, s) => {
+  return { ...getBaseStepConfig(i + 1, s.length), ...c };
+});
+export const NODE_IDEA_COMPLETE: TutorialStep[] = NODE_IDEA_STEPS.map((c, i, s) => {
+  return { ...getBaseStepConfig(i + 1, s.length), ...c };
+});
+export const NODE_QUESTION_COMPLETE: TutorialStep[] = NODE_QUESTION_STEPS.map((c, i, s) => {
+  return { ...getBaseStepConfig(i + 1, s.length), ...c };
+});
+export const NODE_CODE_COMPLETE: TutorialStep[] = NODE_CODE_STEPS.map((c, i, s) => {
+  return { ...getBaseStepConfig(i + 1, s.length), ...c };
 });
