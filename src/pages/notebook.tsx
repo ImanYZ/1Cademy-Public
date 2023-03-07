@@ -137,7 +137,18 @@ import {
 import { NodeType, SimpleNode2 } from "../types";
 import { doNeedToDeleteNode, getNodeTypesFromNode, isVersionApproved } from "../utils/helpers";
 
-export type TutorialType = "NODES" | "SEARCHER" | "PROPOSAL" | "NAVIGATION" | null;
+export type TutorialType =
+  | "NODES"
+  | "SEARCHER"
+  | "PROPOSAL"
+  | "NAVIGATION"
+  | "PROPOSAL_CONCEPT"
+  | "PROPOSAL_RELATION"
+  | "PROPOSAL_REFERENCE"
+  | "PROPOSAL_IDEA"
+  | "PROPOSAL_QUESTION"
+  | "PROPOSAL_CODE"
+  | null;
 
 type DashboardProps = {};
 
@@ -777,12 +788,43 @@ const Dashboard = ({}: DashboardProps) => {
       setCurrentTutorial("NODES");
       return;
     }
+    if (!userTutorial.searcher.done && !userTutorial.searcher.skipped && openSidebar === "SEARCHER_SIDEBAR") {
+      setCurrentTutorial("SEARCHER");
+      return;
+    }
+    const changedNode: FullNodeData = nodeBookState.selectedNode ? changedNodes[nodeBookState.selectedNode] : null;
+
+    if (changedNode && !userTutorial.proposal.done && !userTutorial.proposal.skipped) {
+      setTargetId(nodeBookState.selectedNode ?? "");
+
+      const nodeType = changedNode.nodeType;
+      if (nodeType === "Concept") {
+        setCurrentTutorial(`PROPOSAL_CONCEPT`);
+      }
+      if (nodeType === "Relation") {
+        setCurrentTutorial(`PROPOSAL_RELATION`);
+      }
+      if (nodeType === "Reference") {
+        setCurrentTutorial(`PROPOSAL_REFERENCE`);
+      }
+      if (nodeType === "Idea") {
+        setCurrentTutorial(`PROPOSAL_IDEA`);
+      }
+      if (nodeType === "Question") {
+        setCurrentTutorial(`PROPOSAL_QUESTION`);
+      }
+      if (nodeType === "Code") {
+        setCurrentTutorial(`PROPOSAL_CODE`);
+      }
+      return;
+    }
   }, [
     currentTutorial,
     firstLoading,
     graph.nodes,
     nodeBookDispatch,
     nodeBookState.selectedNode,
+    openSidebar,
     scrollToNode,
     setCurrentTutorial,
     setTargetId,
@@ -1012,11 +1054,10 @@ const Dashboard = ({}: DashboardProps) => {
 
   useEffect(() => {
     if (!db) return;
-    if (!user?.uname) return;
+    if (!user) return;
+    if (!user.uname) return;
     if (!allTagsLoaded) return;
     if (!userTutorialLoaded) return;
-    // if (!userTutorial.nodes.done && !userTutorial.nodes.skipped) return;
-    // if (stateNodeTutorial) return;
 
     devLog("USE_EFFECT", "nodes synchronization");
 
@@ -1043,25 +1084,15 @@ const Dashboard = ({}: DashboardProps) => {
     return () => {
       killSnapshot();
     };
-  }, [
-    allTagsLoaded,
-    db,
-    snapshot,
-    stateNodeTutorial,
-    user?.uname,
-    notebookChanged,
-    nodeBookDispatch,
-    userTutorialLoaded,
-    userTutorial.nodes.done,
-    userTutorial.nodes.skipped,
-  ]);
-  // }, [allTagsLoaded, db, snapshot, user?.uname, settings.showClusterOptions, notebookChanged]);
+    //IMPORTANT: notebookChanged used in dependecies because of the redraw graph (magic wand button)
+  }, [allTagsLoaded, db, snapshot, user, userTutorialLoaded, notebookChanged]);
 
   useEffect(() => {
     // here we force scrollToNode in required steps from TUTORIAL
     // this is only set up when worker doesn't make any change when a step change
     if (!stateNodeTutorial) return;
     if (currentTutorial !== "NODES") return;
+
     // if (!stateNodeTutorial.forceScrollToNode) return;
 
     scrollToNode(stateNodeTutorial.targetId);

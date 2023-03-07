@@ -2,6 +2,14 @@ import { ReactNode, useCallback, useEffect, useRef, useState } from "react";
 
 import { SEARCHER_STEPS_COMPLETE } from "@/lib/reducers/searcherTutorial";
 import { NAVIGATION_STEPS_COMPLETE } from "@/lib/utils/tutorials/navigationSteps";
+import {
+  PROPOSING_CODE_EDIT_COMPLETE,
+  PROPOSING_CONCEPT_EDIT_COMPLETE,
+  PROPOSING_IDEA_EDIT_COMPLETE,
+  PROPOSING_QUESTION_EDIT_COMPLETE,
+  PROPOSING_REFERENCE_EDIT_COMPLETE,
+  PROPOSING_RELATION_EDIT_COMPLETE,
+} from "@/lib/utils/tutorials/proposalSteps";
 
 import { NODES_STEPS_COMPLETE } from "../lib/reducers/nodeTutorial2";
 import { TutorialStep } from "../nodeBookTypes";
@@ -64,26 +72,37 @@ export const useInteractiveTutorial = ({}: useInteractiveTutorialProps) => {
     }
 
     let newSteps: TutorialStep[] = [];
-    if (currentTutorial === "NODES") {
-      console.log("FILL NODES");
-      newSteps = NODES_STEPS_COMPLETE;
-    }
-    if (currentTutorial === "SEARCHER") {
-      console.log("FILL SEARCHER");
-      newSteps = SEARCHER_STEPS_COMPLETE;
-      setTargetId("");
-    }
-    // if (currentTutorial === "PROPOSAL") {
-    //   console.log("FILL PROPOSAL");
-    //   newSteps = PROPOSAL_STEPS_COMPLETE;
-    //   //  setSteps(SEARCHER_STEPS_COMPLETE);
-    // }
     if (currentTutorial === "NAVIGATION") {
       console.log("NAVIGATION");
       newSteps = NAVIGATION_STEPS_COMPLETE;
       //  setSteps(SEARCHER_STEPS_COMPLETE);
     }
-
+    if (currentTutorial === "NODES") {
+      console.log("FILL NODES");
+      newSteps = NODES_STEPS_COMPLETE;
+    }
+    if (currentTutorial === "SEARCHER") {
+      newSteps = SEARCHER_STEPS_COMPLETE;
+      setTargetId("");
+    }
+    if (currentTutorial === "PROPOSAL_CONCEPT") {
+      newSteps = PROPOSING_CONCEPT_EDIT_COMPLETE;
+    }
+    if (currentTutorial === "PROPOSAL_REFERENCE") {
+      newSteps = PROPOSING_REFERENCE_EDIT_COMPLETE;
+    }
+    if (currentTutorial === "PROPOSAL_RELATION") {
+      newSteps = PROPOSING_RELATION_EDIT_COMPLETE;
+    }
+    if (currentTutorial === "PROPOSAL_IDEA") {
+      newSteps = PROPOSING_IDEA_EDIT_COMPLETE;
+    }
+    if (currentTutorial === "PROPOSAL_QUESTION") {
+      newSteps = PROPOSING_QUESTION_EDIT_COMPLETE;
+    }
+    if (currentTutorial === "PROPOSAL_CODE") {
+      newSteps = PROPOSING_CODE_EDIT_COMPLETE;
+    }
     console.log({ newSteps });
     idxCurrentStepRef.current = 0;
     const selectedStep = newSteps[idxCurrentStepRef.current];

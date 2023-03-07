@@ -542,7 +542,7 @@ const NodeFooter = ({
                 <ContainedButton
                   id={proposeButtonId}
                   title="Propose/evaluate versions of this node."
-                  onClick={showProposeTutorial ? () => setOpenProposalConfirm(true) : proposeNodeImprovementClick}
+                  onClick={proposeNodeImprovementClick}
                   tooltipPosition="top"
                   sx={{
                     background: (theme: any) =>
@@ -752,6 +752,7 @@ const NodeFooter = ({
                 // new Node or unaccepted proposal
 
                 <Box
+                  id={`${identifier}-node-footer-image-video`}
                   sx={{
                     display: editable ? "flex" : "none",
                     alignItems: "center",
