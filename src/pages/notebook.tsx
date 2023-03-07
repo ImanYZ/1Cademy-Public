@@ -77,7 +77,7 @@ import { MemoizedNodeList } from "../components/map/NodesList";
 import { MemoizedToolbarSidebar } from "../components/map/Sidebar/SidebarV2/ToolbarSidebar";
 import { NodeItemDashboard } from "../components/NodeItemDashboard";
 import { Portal } from "../components/Portal";
-import { MemoizedProgressBar } from "../components/tutorial/ProgressBar";
+import { MemoizedTutorialTableOfContent } from "../components/tutorial/TutorialTableOfContent";
 import { NodeBookProvider, useNodeBook } from "../context/NodeBookContext";
 // import { TargetClientRect } from "../hooks/useInteractiveTutorial2";
 import { TargetClientRect, useInteractiveTutorial } from "../hooks/useInteractiveTutorial3";
@@ -121,6 +121,10 @@ import {
   getUserNodeChanges,
   mergeAllNodes,
 } from "../lib/utils/nodesSyncronization.utils";
+import { NAVIGATION_STEPS_COMPLETE } from "../lib/utils/tutorials/navigationTutorialSteps";
+import { NODES_STEPS_COMPLETE } from "../lib/utils/tutorials/nodeTutorialSteps";
+import { PROPOSAL_STEPS_COMPLETE } from "../lib/utils/tutorials/proposalTutorialSteps";
+import { SEARCHER_STEPS_COMPLETE } from "../lib/utils/tutorials/searcherTutorialSteps";
 import { gtmEvent, imageLoaded, isValidHttpUrl } from "../lib/utils/utils";
 import {
   ChoosingType,
@@ -4554,7 +4558,17 @@ const Dashboard = ({}: DashboardProps) => {
             handleOpenProgressBar={handleOpenProgressBar}
             currentStep={stateNodeTutorial?.currentStepName ?? 0}
           /> */}
-          <MemoizedProgressBar open={openProgressBar} handleCloseProgressBar={() => setOpenProgressBar(false)} />
+          <MemoizedTutorialTableOfContent
+            open={openProgressBar}
+            handleCloseProgressBar={() => setOpenProgressBar(false)}
+            tutorials={{
+              navigation: NAVIGATION_STEPS_COMPLETE,
+              nodes: NODES_STEPS_COMPLETE,
+              searcher: SEARCHER_STEPS_COMPLETE,
+              proposal: PROPOSAL_STEPS_COMPLETE,
+            }}
+            userTutorialState={userTutorial}
+          />
         </Box>
       </Box>
     </div>
