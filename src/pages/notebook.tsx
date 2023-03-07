@@ -1,6 +1,7 @@
 import AutoFixHighIcon from "@mui/icons-material/AutoFixHigh";
 import CloseIcon from "@mui/icons-material/Close";
 import CodeIcon from "@mui/icons-material/Code";
+import HelpIcon from "@mui/icons-material/Help";
 import MyLocationIcon from "@mui/icons-material/MyLocation";
 import { Masonry } from "@mui/lab";
 import {
@@ -76,6 +77,7 @@ import { MemoizedNodeList } from "../components/map/NodesList";
 import { MemoizedToolbarSidebar } from "../components/map/Sidebar/SidebarV2/ToolbarSidebar";
 import { NodeItemDashboard } from "../components/NodeItemDashboard";
 import { Portal } from "../components/Portal";
+import { MemoizedProgressBar } from "../components/tutorial/ProgressBar";
 import { NodeBookProvider, useNodeBook } from "../context/NodeBookContext";
 // import { TargetClientRect } from "../hooks/useInteractiveTutorial2";
 import { TargetClientRect, useInteractiveTutorial } from "../hooks/useInteractiveTutorial3";
@@ -281,7 +283,7 @@ const Dashboard = ({}: DashboardProps) => {
   const lastNodeOperation = useRef<string>("");
   const proposalTimer = useRef<any>(null);
 
-  // const [openProgressBar, setOpenProgressBar] = useState(false);
+  const [openProgressBar, setOpenProgressBar] = useState(false);
   const [, /* openProgressBarMenu */ setOpenProgressBarMenu] = useState(false);
 
   const [userTutorial, setUserTutorial] = useState<UserTutorials>({
@@ -4198,7 +4200,7 @@ const Dashboard = ({}: DashboardProps) => {
                   : `${innerHeight * 0.25 + 65}px`,
                 sm: "60px",
               },
-              right: "10px",
+              right: "60px",
               zIndex: "1300",
               background: theme => (theme.palette.mode === "dark" ? "#1f1f1f" : "#f0f0f0"),
               ":hover": {
@@ -4212,7 +4214,7 @@ const Dashboard = ({}: DashboardProps) => {
             </IconButton>
           </Tooltip>
 
-          {/* {!stateNodeTutorial && (
+          {
             <Tooltip
               title="Start tutorial"
               placement="left"
@@ -4238,14 +4240,13 @@ const Dashboard = ({}: DashboardProps) => {
               <IconButton
                 color="secondary"
                 onClick={() => {
-                  setCurrentTutorial("NODES");
-                  setOpenProgressBarMenu(true);
+                  setOpenProgressBar(true);
                 }}
               >
                 <HelpIcon />
               </IconButton>
             </Tooltip>
-          )} */}
+          }
 
           {process.env.NODE_ENV === "development" && (
             <Tooltip
@@ -4552,8 +4553,8 @@ const Dashboard = ({}: DashboardProps) => {
             open={openProgressBarMenu}
             handleOpenProgressBar={handleOpenProgressBar}
             currentStep={stateNodeTutorial?.currentStepName ?? 0}
-          />
-          <MemoizedProgressBar open={openProgressBar} handleCloseProgressBar={handleCloseProgressBar} /> */}
+          /> */}
+          <MemoizedProgressBar open={openProgressBar} handleCloseProgressBar={() => setOpenProgressBar(false)} />
         </Box>
       </Box>
     </div>

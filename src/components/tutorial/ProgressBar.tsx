@@ -67,7 +67,7 @@ const ProgressBar = ({ open, handleCloseProgressBar }: ProgressBarTutorial) => {
         position: "fixed",
         top: 0,
         backgroundColor: theme => (theme.palette.mode === "dark" ? "rgb(31,31,31)" : "rgb(240,240,240)"),
-        width: "400px",
+        width: "300px",
         height,
         maxHeight: `${height}px`,
         right: `${open ? "0px" : "-400px"}`,
@@ -75,13 +75,22 @@ const ProgressBar = ({ open, handleCloseProgressBar }: ProgressBarTutorial) => {
         zIndex: 99999,
       }}
     >
-      <Box sx={{ backgroundColor: "#3F3E3E", p: "24px 36px", position: "relative" }}>
+      <Box
+        sx={{
+          backgroundColor: theme => (theme.palette.mode === "dark" ? "#3F3E3E" : "rgb(212, 212, 212)"),
+          p: "10px",
+          position: "relative",
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+        }}
+      >
         <Typography fontSize={"16px"}>Welcome to {selectedState}!</Typography>
-        <IconButton onClick={handleCloseProgressBar} sx={{ position: "absolute", top: "8px", right: "8px" }}>
+        <IconButton onClick={handleCloseProgressBar}>
           <CloseIcon fontSize="medium" />
         </IconButton>
       </Box>
-      <Box sx={{ p: "24px 36px" }}>
+      <Box>
         {Object.keys(stages).map((stage, idx) => (
           <Accordion
             key={stage}
@@ -89,7 +98,6 @@ const ProgressBar = ({ open, handleCloseProgressBar }: ProgressBarTutorial) => {
             elevation={0}
             square
             sx={{
-              background: "transparent",
               border: "none",
               "&:before": {
                 display: "none",
@@ -105,15 +113,13 @@ const ProgressBar = ({ open, handleCloseProgressBar }: ProgressBarTutorial) => {
                   sx={{
                     transform: `rotate(${expanded === `Option${idx + 1}` ? "-90deg" : "90deg"})`,
                     transition: "transform 100ms linear",
+                    mr: "8px",
                   }}
                 />
                 <Typography
                   component={"h4"}
                   variant={"h4"}
                   sx={{
-                    fontSize: "24px",
-                    fontWeight: 700,
-                    p: "8px",
                     cursor: "pointer",
                   }}
                 >
