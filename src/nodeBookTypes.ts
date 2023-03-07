@@ -426,13 +426,17 @@ export type UsersStatus = "All Time" | "Monthly" | "Weekly" | "Others Votes" | "
 
 // export type ClusterNodes = { [key: string]: Cluster };
 
-export type TutorialTypeKeys = "nodes" | "searcher" | "proposal" | "navigation";
-// | "proposalConcept"
-// | "proposalRelation"
-// | "proposalReference"
-// | "proposalIdea"
-// | "proposalQuestion"
-// | "proposalCode";
+export type TutorialTypeKeys =
+  | "nodes"
+  | "searcher"
+  | "proposal"
+  | "navigation"
+  | "proposalConcept"
+  | "proposalRelation"
+  | "proposalReference"
+  | "proposalIdea"
+  | "proposalQuestion"
+  | "proposalCode";
 export type UserTutorial = {
   currentStep: number;
   done: boolean;
