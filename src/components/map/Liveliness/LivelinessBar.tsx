@@ -51,7 +51,7 @@ const LivelinessBar = ({ disabled = false, ...props }: ILivelinessBarProps) => {
     const snapshotInitializer = () => {
       setUsersInteractions({});
       unsubscribe.finalizer();
-      const ts = new Date().getTime() - 86400000;
+      const ts = new Date().getTime() - 604800000;
       const actionTracksCol = collection(db, "actionTracks");
       const q = query(actionTracksCol, where("createdAt", ">=", Timestamp.fromDate(new Date(ts))));
       unsubscribe.finalizer = onSnapshot(q, async snapshot => {
