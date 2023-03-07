@@ -1,6 +1,7 @@
 import { ReactNode, useCallback, useEffect, useRef, useState } from "react";
 
 import { NAVIGATION_STEPS_COMPLETE } from "@/lib/utils/tutorials/navigationTutorialSteps";
+import { PROPOSAL_STEPS_COMPLETE } from "@/lib/utils/tutorials/proposalSteps";
 import {
   PROPOSING_CODE_EDIT_COMPLETE,
   PROPOSING_CONCEPT_EDIT_COMPLETE,
@@ -86,22 +87,22 @@ export const useInteractiveTutorial = ({}: useInteractiveTutorialProps) => {
       setTargetId("");
     }
     if (currentTutorial === "PROPOSAL_CONCEPT") {
-      newSteps = PROPOSING_CONCEPT_EDIT_COMPLETE;
+      newSteps = [...PROPOSING_CONCEPT_EDIT_COMPLETE, ...PROPOSAL_STEPS_COMPLETE];
     }
     if (currentTutorial === "PROPOSAL_REFERENCE") {
-      newSteps = PROPOSING_REFERENCE_EDIT_COMPLETE;
+      newSteps = [...PROPOSING_REFERENCE_EDIT_COMPLETE, ...PROPOSAL_STEPS_COMPLETE];
     }
     if (currentTutorial === "PROPOSAL_RELATION") {
-      newSteps = PROPOSING_RELATION_EDIT_COMPLETE;
+      newSteps = [...PROPOSING_RELATION_EDIT_COMPLETE, ...PROPOSAL_STEPS_COMPLETE];
     }
     if (currentTutorial === "PROPOSAL_IDEA") {
-      newSteps = PROPOSING_IDEA_EDIT_COMPLETE;
+      newSteps = [...PROPOSING_IDEA_EDIT_COMPLETE, ...PROPOSAL_STEPS_COMPLETE];
     }
     if (currentTutorial === "PROPOSAL_QUESTION") {
-      newSteps = PROPOSING_QUESTION_EDIT_COMPLETE;
+      newSteps = [...PROPOSING_QUESTION_EDIT_COMPLETE, ...PROPOSAL_STEPS_COMPLETE];
     }
     if (currentTutorial === "PROPOSAL_CODE") {
-      newSteps = PROPOSING_CODE_EDIT_COMPLETE;
+      newSteps = [...PROPOSING_CODE_EDIT_COMPLETE, ...PROPOSAL_STEPS_COMPLETE];
     }
     console.log({ newSteps });
     idxCurrentStepRef.current = 0;
