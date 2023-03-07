@@ -64,7 +64,7 @@ import { MemoizedUserSettingsSidebar } from "@/components/map/Sidebar/SidebarV2/
 // import { MemoizedProgressBarMenu } from "@/components/tutorial/ProgressBarMenu";
 import { useAuth } from "@/context/AuthContext";
 import { useTagsTreeView } from "@/hooks/useTagsTreeView";
-import { addSuffixToUrlGMT } from "@/lib/utils/string.utils";
+import { addSuffixToUrlGMT, capitalizeFirstLetter } from "@/lib/utils/string.utils";
 
 import LoadingImg from "../../public/animated-icon-1cademy.gif";
 import focusViewLogo from "../../public/focus.svg";
@@ -804,30 +804,32 @@ const Dashboard = ({}: DashboardProps) => {
       setCurrentTutorial("SEARCHER");
       return;
     }
+
     const changedNode: FullNodeData = nodeBookState.selectedNode ? changedNodes[nodeBookState.selectedNode] : null;
-
-    if (changedNode && !userTutorial.proposal.done && !userTutorial.proposal.skipped) {
-      setTargetId(nodeBookState.selectedNode ?? "");
-
-      const nodeType = changedNode.nodeType;
-      if (nodeType === "Concept") {
+    if (changedNode) {
+      const nodeType = changedNode && changedNode.nodeType;
+      if (!userTutorial.proposal.done && !userTutorial.proposal.skipped) {
+        setCurrentTutorial("PROPOSAL");
+      }
+      if (!userTutorial.proposalConcept.done && !userTutorial.proposalConcept.skipped && nodeType === "Concept") {
         setCurrentTutorial(`PROPOSAL_CONCEPT`);
       }
-      if (nodeType === "Relation") {
+      if (!userTutorial.proposalRelation.done && !userTutorial.proposalRelation.skipped && nodeType === "Relation") {
         setCurrentTutorial(`PROPOSAL_RELATION`);
       }
-      if (nodeType === "Reference") {
+      if (!userTutorial.proposalReference.done && !userTutorial.proposalReference.skipped && nodeType === "Reference") {
         setCurrentTutorial(`PROPOSAL_REFERENCE`);
       }
-      if (nodeType === "Idea") {
+      if (!userTutorial.proposalIdea.done && !userTutorial.proposalIdea.skipped && nodeType === "Idea") {
         setCurrentTutorial(`PROPOSAL_IDEA`);
       }
-      if (nodeType === "Question") {
+      if (!userTutorial.proposalQuestion.done && !userTutorial.proposalQuestion.skipped && nodeType === "Question") {
         setCurrentTutorial(`PROPOSAL_QUESTION`);
       }
-      if (nodeType === "Code") {
+      if (!userTutorial.proposalCode.done && !userTutorial.proposalCode.skipped && nodeType === "Code") {
         setCurrentTutorial(`PROPOSAL_CODE`);
       }
+      setTargetId(nodeBookState.selectedNode ?? "");
       return;
     }
   }, [
@@ -1806,12 +1808,17 @@ const Dashboard = ({}: DashboardProps) => {
     if (!stateNodeTutorial) return;
     if (!currentTutorial) return;
 
-    const keyTutorial: TutorialTypeKeys = currentTutorial.toLowerCase() as TutorialTypeKeys;
+    const keyTutorial: TutorialTypeKeys = currentTutorial
+      .split("_")
+      .map((el, idx) => (idx > 0 ? capitalizeFirstLetter(el.toLocaleLowerCase()) : el.toLowerCase()))
+      .join("") as TutorialTypeKeys;
+
     const tutorialUpdated: UserTutorial = {
       ...userTutorial[keyTutorial],
       currentStep: stateNodeTutorial.currentStepName,
       done: true,
     };
+    console.log({ tutorialUpdated, keyTutorial });
     const userTutorialUpdated: UserTutorials = { ...userTutorial, [keyTutorial]: tutorialUpdated };
     setCurrentTutorial(null);
     setUserTutorial(userTutorialUpdated);
@@ -3876,8 +3883,10 @@ const Dashboard = ({}: DashboardProps) => {
     if (!stateNodeTutorial) return;
     if (!currentTutorial) return;
 
-    const keyTutorial: TutorialTypeKeys = currentTutorial.toLowerCase() as TutorialTypeKeys;
-
+    const keyTutorial: TutorialTypeKeys = currentTutorial
+      .split("_")
+      .map((el, idx) => (idx > 0 ? capitalizeFirstLetter(el.toLocaleLowerCase()) : el.toLowerCase()))
+      .join("") as TutorialTypeKeys;
     const tutorialUpdated: UserTutorial = {
       ...userTutorial[keyTutorial],
       currentStep: stateNodeTutorial.currentStepName,
