@@ -55,7 +55,7 @@ const NODES_STEPS: TutorialStepConfig[] = [
   {
     targetId: "sidebar-wrapper-searcher",
     childTargetId: "search-input",
-    title: "Search Engine",
+    title: "Search Query",
     description: <MarkdownRender text={"To search enter your query"} />,
     tooltipPosition: "bottom",
     anchor: "Portal",
@@ -64,7 +64,7 @@ const NODES_STEPS: TutorialStepConfig[] = [
   {
     targetId: "sidebar-wrapper-searcher",
     childTargetId: "SearchIcon",
-    title: "Search Engine",
+    title: "How to search",
     description: <MarkdownRender text={"**Click** on this search icon."} />,
     tooltipPosition: "bottom",
     isClickeable: true,
@@ -73,7 +73,7 @@ const NODES_STEPS: TutorialStepConfig[] = [
   {
     targetId: "sidebar-wrapper-searcher",
     childTargetId: "searcher-sidebar-options",
-    title: "Search Engine",
+    title: "Options",
     description: <MarkdownRender text={"Beyond searching terms there are a number of ways to refine your search."} />,
     tooltipPosition: "right",
     anchor: "Portal",
@@ -81,7 +81,7 @@ const NODES_STEPS: TutorialStepConfig[] = [
   {
     targetId: "sidebar-wrapper-searcher",
     childTargetId: "searcher-tags-button",
-    title: "Search Engine",
+    title: "Filter by tags",
     description: (
       <MarkdownRender
         text={
@@ -89,14 +89,13 @@ const NODES_STEPS: TutorialStepConfig[] = [
         }
       />
     ),
-
     tooltipPosition: "right",
     anchor: "Portal",
   },
   {
     targetId: "sidebar-wrapper-searcher",
     childTargetId: "search-recently-input",
-    title: "Search Engine",
+    title: "Filter by Dates",
     description: (
       <MarkdownRender text={"You can also refine your search by how recently nodes were created or edited."} />
     ),
@@ -106,7 +105,7 @@ const NODES_STEPS: TutorialStepConfig[] = [
   {
     targetId: "sidebar-wrapper-searcher",
     childTargetId: "recentNodesList",
-    title: "Search Engine",
+    title: "Sort Options",
     description: (
       <MarkdownRender
         text={
@@ -114,14 +113,13 @@ const NODES_STEPS: TutorialStepConfig[] = [
         }
       />
     ),
-
     tooltipPosition: "right",
     anchor: "Portal",
   },
   {
     targetId: "sidebar-wrapper-searcher",
     childTargetId: "sidebar-wrapper-searcher-content",
-    title: "Search Engine",
+    title: "Search Results",
     description: (
       <MarkdownRender
         text={
