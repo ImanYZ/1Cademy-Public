@@ -1,12 +1,13 @@
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
+import { TutorialState, TutorialStep, TutorialStepConfig } from "src/nodeBookTypes";
 
-import MarkdownRender from "@/components/Markdown/MarkdownRender";
+import MarkdownRender from "@/components/Markdown/Markdown_Proposed";
 
-import { TutorialState, TutorialStep, TutorialStepConfig } from "../../../nodeBookTypes";
+import { getBaseStepConfig } from "./tutorial.utils";
+
 // import { FullNodeData, NodeTutorialState, TutorialState } from "../../nodeBookTypes";
 // import { INTERACTIVE_TUTORIAL_NOTEBOOK_NODES } from "../utils/interactiveTutorialNodes";
-import { getBaseStepConfig } from "./tutorial.utils";
 
 export const INITIAL_NODE_TUTORIAL_STATE: TutorialState = null;
 
@@ -411,49 +412,28 @@ const RECONCILING_PROPOSALS_STEPS: TutorialStepConfig[] = [
   },
 ];
 console.log(OVERVIEW_STEPS, PROPOSING_EDITS_STEPS, FINDING_PREREQUISITES_STEPS, RECONCILING_PROPOSALS_STEPS);
-export const PROPOSAL_STEPS_COMPLETE: TutorialStep[] = [
-  /* ...OVERVIEW_STEPS, */
-  /*   ...FINDING_PREREQUISITES_STEPS, */
-  ...PROPOSING_EDITS_STEPS,
-  /* ...RECONCILING_PROPOSALS_STEPS, */
-].map((c, i, s) => {
+export const PROPOSAL_STEPS_COMPLETE: TutorialStep[] = PROPOSING_EDITS_STEPS.map((c, i, s) => {
   return {
     ...getBaseStepConfig(i + 1, s.length),
     ...c,
   };
 });
 
-export const PROPOSING_CONCEPT_EDIT_COMPLETE: TutorialStep[] = [
-  ...PROPOSING_CONCEPT_EDIT,
-  ...PROPOSING_EDITS_STEPS,
-].map((c, i, s) => {
+export const PROPOSING_CONCEPT_EDIT_COMPLETE: TutorialStep[] = PROPOSING_CONCEPT_EDIT.map((c, i, s) => {
   return { ...getBaseStepConfig(i + 1, s.length), ...c };
 });
-export const PROPOSING_RELATION_EDIT_COMPLETE: TutorialStep[] = [
-  ...PROPOSING_RELATION_EDIT,
-  ...PROPOSING_EDITS_STEPS,
-].map((c, i, s) => {
+export const PROPOSING_RELATION_EDIT_COMPLETE: TutorialStep[] = PROPOSING_RELATION_EDIT.map((c, i, s) => {
   return { ...getBaseStepConfig(i + 1, s.length), ...c };
 });
-export const PROPOSING_REFERENCE_EDIT_COMPLETE: TutorialStep[] = [
-  ...PROPOSING_REFERENCE_EDIT,
-  ...PROPOSING_EDITS_STEPS,
-].map((c, i, s) => {
+export const PROPOSING_REFERENCE_EDIT_COMPLETE: TutorialStep[] = PROPOSING_REFERENCE_EDIT.map((c, i, s) => {
   return { ...getBaseStepConfig(i + 1, s.length), ...c };
 });
-export const PROPOSING_IDEA_EDIT_COMPLETE: TutorialStep[] = [...PROPOSING_IDEA_EDIT, ...PROPOSING_EDITS_STEPS].map(
-  (c, i, s) => {
-    return { ...getBaseStepConfig(i + 1, s.length), ...c };
-  }
-);
-export const PROPOSING_QUESTION_EDIT_COMPLETE: TutorialStep[] = [
-  ...PROPOSING_QUESTION_EDIT,
-  ...PROPOSING_EDITS_STEPS,
-].map((c, i, s) => {
+export const PROPOSING_IDEA_EDIT_COMPLETE: TutorialStep[] = PROPOSING_IDEA_EDIT.map((c, i, s) => {
   return { ...getBaseStepConfig(i + 1, s.length), ...c };
 });
-export const PROPOSING_CODE_EDIT_COMPLETE: TutorialStep[] = [...PROPOSING_CODE_EDIT, ...PROPOSING_EDITS_STEPS].map(
-  (c, i, s) => {
-    return { ...getBaseStepConfig(i + 1, s.length), ...c };
-  }
-);
+export const PROPOSING_QUESTION_EDIT_COMPLETE: TutorialStep[] = PROPOSING_QUESTION_EDIT.map((c, i, s) => {
+  return { ...getBaseStepConfig(i + 1, s.length), ...c };
+});
+export const PROPOSING_CODE_EDIT_COMPLETE: TutorialStep[] = PROPOSING_CODE_EDIT.map((c, i, s) => {
+  return { ...getBaseStepConfig(i + 1, s.length), ...c };
+});
