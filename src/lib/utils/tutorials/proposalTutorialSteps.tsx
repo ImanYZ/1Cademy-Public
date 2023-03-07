@@ -2,8 +2,7 @@ import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import { TutorialState, TutorialStep, TutorialStepConfig } from "src/nodeBookTypes";
 
-import MarkdownRender from "@/components/Markdown/Markdown_Proposed";
-
+import MarkdownRender from "../../../components/Markdown/MarkdownRender";
 import { getBaseStepConfig } from "./tutorial.utils";
 
 // import { FullNodeData, NodeTutorialState, TutorialState } from "../../nodeBookTypes";
@@ -34,113 +33,6 @@ Ex for Node id elements to disable
   "01-node-footer-menu"
  */
 
-const OVERVIEW_STEPS: TutorialStepConfig[] = [
-  {
-    title: "Proposals: Overview",
-    description: (
-      <MarkdownRender text={"Most of what you will do on 1Cademy will revolve around making proposals to nodes."} />
-    ),
-  },
-  {
-    title: "Proposals: Overview",
-    description: (
-      <MarkdownRender text={"You will need to propose a change to a node in order to add or edit content."} />
-    ),
-  },
-  {
-    childTargetId: "childNodes",
-    title: "Proposals: Overview",
-    description: (
-      <MarkdownRender
-        text={
-          "You will also have the option to add any of the six types of child nodes which are listed along the right side."
-        }
-      />
-    ),
-  },
-  {
-    title: "Proposals: Overview",
-    description: (
-      <MarkdownRender
-        text={
-          "It is very important to know that new nodes are always added as a proposed child nodes for an existing node, which if accepted, will be the parent node of the one being created."
-        }
-      />
-    ),
-  },
-];
-
-const FINDING_PREREQUISITES_STEPS: TutorialStepConfig[] = [
-  {
-    title: "Proposals: Finding Prerequisites",
-    description: (
-      <MarkdownRender
-        text={
-          "Because new nodes are the children of a node you are editing, an important first step is to determine which node you will be attaching it to."
-        }
-      />
-    ),
-  },
-  {
-    title: "Proposals: Finding Prerequisites",
-    description: (
-      <MarkdownRender
-        text={
-          "Nodes on 1Cademy represent branches of hierarchical relationships where a user will need to know the first concept to understand the concepts linked as children."
-        }
-      />
-    ),
-  },
-  {
-    title: "Proposals: Finding Prerequisites",
-    description: (
-      <MarkdownRender
-        text={
-          "Therefore, you need to know the foundational information before you can understand new information. For example, you need to learn how to count before you can learn to add. "
-        }
-      />
-    ),
-  },
-  {
-    title: "Proposals: Finding Prerequisites",
-    description: (
-      <MarkdownRender
-        text={
-          "When you want to add new content to 1Cademy you need to determine what prerequisite information is required and add your nodes onto the correct prerequisite. If it does not exist then you will need to add it first and link it to the best prerequisite related to what you are adding."
-        }
-      />
-    ),
-  },
-  {
-    childTargetId: "toolbar-search-button",
-    title: "Proposals: Finding Prerequisites",
-    description: (
-      <MarkdownRender
-        text={"In order to see if the prerequisite already exists, you can use the search feature on the toolbar."}
-      />
-    ),
-    tooltipPosition: "right",
-    anchor: "Portal",
-  },
-  {
-    title: "Proposals: Finding Prerequisites",
-    description: (
-      <MarkdownRender
-        text={
-          "You can also manually search through an area of nodes by opening children and parent nodes to find the correct branch of information where you would like to add your nodes."
-        }
-      />
-    ),
-  },
-  {
-    title: "Proposals: Finding Prerequisites",
-    description: (
-      <MarkdownRender
-        text={"Sometimes you will need to build the branch of nodes leading to the information you intend on adding."}
-      />
-    ),
-  },
-];
 const PROPOSING_CONCEPT_EDIT: TutorialStepConfig[] = [
   {
     title: "Proposing Edits - Concept Node",
@@ -153,6 +45,7 @@ const PROPOSING_CONCEPT_EDIT: TutorialStepConfig[] = [
     ),
   },
 ];
+
 const PROPOSING_RELATION_EDIT: TutorialStepConfig[] = [
   {
     title: "Proposing Edits - Relation Node",
@@ -165,6 +58,7 @@ const PROPOSING_RELATION_EDIT: TutorialStepConfig[] = [
     ),
   },
 ];
+
 const PROPOSING_REFERENCE_EDIT: TutorialStepConfig[] = [
   {
     title: "Proposing Edits - Reference Node",
@@ -177,6 +71,7 @@ const PROPOSING_REFERENCE_EDIT: TutorialStepConfig[] = [
     ),
   },
 ];
+
 const PROPOSING_IDEA_EDIT: TutorialStepConfig[] = [
   {
     title: "Proposing Edits - Idea Node",
@@ -189,6 +84,7 @@ const PROPOSING_IDEA_EDIT: TutorialStepConfig[] = [
     ),
   },
 ];
+
 const PROPOSING_QUESTION_EDIT: TutorialStepConfig[] = [
   {
     title: "Proposing Edits - Question Node",
@@ -201,6 +97,7 @@ const PROPOSING_QUESTION_EDIT: TutorialStepConfig[] = [
     ),
   },
 ];
+
 const PROPOSING_CODE_EDIT: TutorialStepConfig[] = [
   {
     title: "Proposing Edits - Code Node",
@@ -213,6 +110,7 @@ const PROPOSING_CODE_EDIT: TutorialStepConfig[] = [
     ),
   },
 ];
+
 const PROPOSING_EDITS_STEPS: TutorialStepConfig[] = [
   {
     childTargetId: "node-body",
@@ -273,145 +171,145 @@ const PROPOSING_EDITS_STEPS: TutorialStepConfig[] = [
   },
 ];
 
-const RECONCILING_PROPOSALS_STEPS: TutorialStepConfig[] = [
-  {
-    title: "Proposals: Reconciling Proposals",
-    description: (
-      <MarkdownRender
-        text={"Just because you have proposed a change, it does not mean that the change will be implemented."}
-      />
-    ),
-  },
-  {
-    childTargetId: "node-footer-votes",
-    title: "Proposals: Reconciling Proposals",
-    description: (
-      <MarkdownRender
-        text={
-          "Proposals need to be approved by more than one person in some cases, it depends on the net vote of the node that the proposals are changing."
-        }
-      />
-    ),
+// const RECONCILING_PROPOSALS_STEPS: TutorialStepConfig[] = [
+//   {
+//     title: "Proposals: Reconciling Proposals",
+//     description: (
+//       <MarkdownRender
+//         text={"Just because you have proposed a change, it does not mean that the change will be implemented."}
+//       />
+//     ),
+//   },
+//   {
+//     childTargetId: "node-footer-votes",
+//     title: "Proposals: Reconciling Proposals",
+//     description: (
+//       <MarkdownRender
+//         text={
+//           "Proposals need to be approved by more than one person in some cases, it depends on the net vote of the node that the proposals are changing."
+//         }
+//       />
+//     ),
 
-    tooltipPosition: "bottom",
-  },
-  {
-    childTargetId: "node-footer-votes",
-    title: "Proposals: Reconciling Proposals",
-    description: (
-      <MarkdownRender
-        text={
-          "As we discussed earlier, every node has a net vote. This is the difference between upvotes and downvotes and can be calculated here."
-        }
-      />
-    ),
+//     tooltipPosition: "bottom",
+//   },
+//   {
+//     childTargetId: "node-footer-votes",
+//     title: "Proposals: Reconciling Proposals",
+//     description: (
+//       <MarkdownRender
+//         text={
+//           "As we discussed earlier, every node has a net vote. This is the difference between upvotes and downvotes and can be calculated here."
+//         }
+//       />
+//     ),
 
-    tooltipPosition: "bottom",
-  },
-  {
-    childTargetId: "node-footer-votes",
-    title: "Proposals: Reconciling Proposals",
-    description: (
-      <MarkdownRender
-        text={
-          "If a proposal gets a number of approving votes equal to half of the net vote on the corresponding node, it will be automatically accepted and the corresponding changes are made on the map."
-        }
-      />
-    ),
+//     tooltipPosition: "bottom",
+//   },
+//   {
+//     childTargetId: "node-footer-votes",
+//     title: "Proposals: Reconciling Proposals",
+//     description: (
+//       <MarkdownRender
+//         text={
+//           "If a proposal gets a number of approving votes equal to half of the net vote on the corresponding node, it will be automatically accepted and the corresponding changes are made on the map."
+//         }
+//       />
+//     ),
 
-    tooltipPosition: "bottom",
-  },
-  {
-    childTargetId: "node-footer-votes",
-    title: "Proposals: Reconciling Proposals",
-    description: (
-      <MarkdownRender
-        text={"For example, a node with 4 upvotes and 0 downvotes needs 2 votes for a proposal to change it."}
-      />
-    ),
+//     tooltipPosition: "bottom",
+//   },
+//   {
+//     childTargetId: "node-footer-votes",
+//     title: "Proposals: Reconciling Proposals",
+//     description: (
+//       <MarkdownRender
+//         text={"For example, a node with 4 upvotes and 0 downvotes needs 2 votes for a proposal to change it."}
+//       />
+//     ),
 
-    tooltipPosition: "bottom",
-  },
-  {
-    childTargetId: "node-footer-votes",
-    title: "Proposals: Reconciling Proposals",
-    description: (
-      <MarkdownRender
-        text={
-          "Another example is if a node has 7 upvotes and 1 downvote, a proposal will need 3 upvotes to be approved."
-        }
-      />
-    ),
+//     tooltipPosition: "bottom",
+//   },
+//   {
+//     childTargetId: "node-footer-votes",
+//     title: "Proposals: Reconciling Proposals",
+//     description: (
+//       <MarkdownRender
+//         text={
+//           "Another example is if a node has 7 upvotes and 1 downvote, a proposal will need 3 upvotes to be approved."
+//         }
+//       />
+//     ),
 
-    tooltipPosition: "bottom",
-  },
-  {
-    childTargetId: "node-footer-votes",
-    title: "Proposals: Reconciling Proposals",
-    description: (
-      <MarkdownRender
-        text={
-          "A proposal to a node with a netvote of 2 or less will automatically be approved as the proposal itself automatically carries a single vote in its favor from the person that made it."
-        }
-      />
-    ),
+//     tooltipPosition: "bottom",
+//   },
+//   {
+//     childTargetId: "node-footer-votes",
+//     title: "Proposals: Reconciling Proposals",
+//     description: (
+//       <MarkdownRender
+//         text={
+//           "A proposal to a node with a netvote of 2 or less will automatically be approved as the proposal itself automatically carries a single vote in its favor from the person that made it."
+//         }
+//       />
+//     ),
 
-    tooltipPosition: "bottom",
-  },
-  {
-    childTargetId: "node-footer-downvotes",
-    title: "Proposals: Reconciling Proposals",
-    description: (
-      <MarkdownRender
-        text={
-          "Proposals can also receive downvotes, which will affect the number of upvotes needed to approve the proposal."
-        }
-      />
-    ),
+//     tooltipPosition: "bottom",
+//   },
+//   {
+//     childTargetId: "node-footer-downvotes",
+//     title: "Proposals: Reconciling Proposals",
+//     description: (
+//       <MarkdownRender
+//         text={
+//           "Proposals can also receive downvotes, which will affect the number of upvotes needed to approve the proposal."
+//         }
+//       />
+//     ),
 
-    tooltipPosition: "bottom",
-  },
-  {
-    childTargetId: "node-footer-downvotes",
-    title: "Proposals: Reconciling Proposals",
-    description: (
-      <MarkdownRender
-        text={
-          "For example, if a node has 7 upvotes and 1 downvote, a proposal with 4 upvotes and 1 downvote will be approved."
-        }
-      />
-    ),
+//     tooltipPosition: "bottom",
+//   },
+//   {
+//     childTargetId: "node-footer-downvotes",
+//     title: "Proposals: Reconciling Proposals",
+//     description: (
+//       <MarkdownRender
+//         text={
+//           "For example, if a node has 7 upvotes and 1 downvote, a proposal with 4 upvotes and 1 downvote will be approved."
+//         }
+//       />
+//     ),
 
-    tooltipPosition: "bottom",
-  },
-  {
-    childTargetId: "node-footer-downvotes",
-    title: "Proposals: Reconciling Proposals",
-    description: (
-      <MarkdownRender
-        text={
-          "However, if a node with 8 upvotes and 2 downvotes has a proposal with 5 upvotes and 4 downvotes, the proposal will not be implemented."
-        }
-      />
-    ),
+//     tooltipPosition: "bottom",
+//   },
+//   {
+//     childTargetId: "node-footer-downvotes",
+//     title: "Proposals: Reconciling Proposals",
+//     description: (
+//       <MarkdownRender
+//         text={
+//           "However, if a node with 8 upvotes and 2 downvotes has a proposal with 5 upvotes and 4 downvotes, the proposal will not be implemented."
+//         }
+//       />
+//     ),
 
-    tooltipPosition: "bottom",
-  },
-  {
-    targetId: "toolbar-pending-list",
-    childTargetId: "toolbar-pending-list",
-    title: "Proposals: Reconciling Proposals",
-    description: (
-      <MarkdownRender
-        text={"You can see all the proposals that are pending by clicking on the pending list button here."}
-      />
-    ),
-    anchor: "Portal",
+//     tooltipPosition: "bottom",
+//   },
+//   {
+//     targetId: "toolbar-pending-list",
+//     childTargetId: "toolbar-pending-list",
+//     title: "Proposals: Reconciling Proposals",
+//     description: (
+//       <MarkdownRender
+//         text={"You can see all the proposals that are pending by clicking on the pending list button here."}
+//       />
+//     ),
+//     anchor: "Portal",
 
-    tooltipPosition: "right",
-  },
-];
-console.log(OVERVIEW_STEPS, PROPOSING_EDITS_STEPS, FINDING_PREREQUISITES_STEPS, RECONCILING_PROPOSALS_STEPS);
+//     tooltipPosition: "right",
+//   },
+// ];
+// console.log(OVERVIEW_STEPS, PROPOSING_EDITS_STEPS, FINDING_PREREQUISITES_STEPS, RECONCILING_PROPOSALS_STEPS);
 export const PROPOSAL_STEPS_COMPLETE: TutorialStep[] = PROPOSING_EDITS_STEPS.map((c, i, s) => {
   return {
     ...getBaseStepConfig(i + 1, s.length),

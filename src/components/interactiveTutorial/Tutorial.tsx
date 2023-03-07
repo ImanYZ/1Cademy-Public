@@ -219,7 +219,7 @@ export const Tutorial = ({
         transition: "top 1s ease-out,left 1s ease-out",
         width: "450px",
         backgroundColor: theme => (theme.palette.mode === "dark" ? "#4B535C" : "#C5D0DF"),
-        // borderColor: theme => (theme.palette.mode === "dark" ? "#4B535C" : "#C5D0DF"),
+        borderColor: theme => (theme.palette.mode === "dark" ? "#4B535C" : "#C5D0DF") /* this is used in tooltip */,
         p: "24px 32px",
         borderRadius: "8px",
         color: theme => (theme.palette.mode === "dark" ? gray50 : gray800),
