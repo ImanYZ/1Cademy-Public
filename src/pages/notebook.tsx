@@ -4129,6 +4129,7 @@ const Dashboard = ({}: DashboardProps) => {
             onNextStep={onNextStep}
             onPreviousStep={onPreviousStep}
             stepsLength={stepsLength}
+            node={graph.nodes[nodeBookState.selectedNode ?? ""]}
           />
         </Portal>
       )}
@@ -4629,6 +4630,7 @@ const Dashboard = ({}: DashboardProps) => {
                     onNextStep={onNextStep}
                     onPreviousStep={onPreviousStep}
                     stepsLength={stepsLength}
+                    node={graph.nodes[nodeBookState.selectedNode ?? ""]}
                     // tutorialState={stateNodeTutorial}
                     // onChangeStep={onChangeStep}
                     // targetClientRect={targetClientRect}

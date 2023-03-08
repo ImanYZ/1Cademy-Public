@@ -238,7 +238,7 @@ export type TutorialStepConfig = {
   targetId?: string;
   childTargetId?: string;
   title: string;
-  description: React.ReactNode;
+  description: React.ReactNode | ((node: FullNodeData) => React.ReactNode);
   anchor?: string;
   tooltipPosition?: "top" | "bottom" | "left" | "right" | "topLeft" | "topRight" | "bottomLeft" | "bottomRight";
   targetDelay?: number;
@@ -250,7 +250,7 @@ export type TutorialStep = {
   targetId: string;
   childTargetId?: string;
   title: string;
-  description: React.ReactNode;
+  description: React.ReactNode | ((node: FullNodeData) => React.ReactNode);
   anchor: string;
   currentStepName: number;
   nextStepName: number;

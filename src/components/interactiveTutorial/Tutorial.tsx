@@ -4,7 +4,7 @@ import React, { useMemo, useRef } from "react";
 import { gray50, gray200, gray700, gray800 } from "@/pages/home";
 
 import { TargetClientRect } from "../../hooks/useInteractiveTutorial";
-import { TutorialStep } from "../../nodeBookTypes";
+import { FullNodeData, TutorialStep } from "../../nodeBookTypes";
 
 const TOOLTIP_OFFSET = 40;
 
@@ -17,6 +17,7 @@ type TutorialProps = {
   onSkip: () => void;
   onFinalize: () => void;
   stepsLength: number;
+  node: FullNodeData;
 };
 
 export const Tutorial = ({
@@ -30,6 +31,7 @@ export const Tutorial = ({
   onSkip,
   onFinalize,
   stepsLength,
+  node,
 }: TutorialProps) => {
   const tooltipRef = useRef<HTMLDivElement | null>(null);
 
@@ -121,7 +123,9 @@ export const Tutorial = ({
             )}
           </Stack>
 
-          {tutorialState.description}
+          {typeof tutorialState.description === "function"
+            ? tutorialState.description(node)
+            : tutorialState.description}
 
           <Stack direction={"row"} justifyContent={"space-between"} alignItems={"center"} sx={{ mt: "16px" }}>
             <Button
@@ -237,7 +241,7 @@ export const Tutorial = ({
         )}
       </Stack>
 
-      {tutorialState.description}
+      {typeof tutorialState.description === "function" ? tutorialState.description(node) : tutorialState.description}
 
       <Stack direction={"row"} justifyContent={"space-between"} alignItems={"center"} sx={{ mt: "16px" }}>
         <Button
