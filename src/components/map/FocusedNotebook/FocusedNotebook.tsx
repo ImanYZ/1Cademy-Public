@@ -176,7 +176,7 @@ const FocusedNotebook = ({
                 editable={false}
               />
             </Grid>
-            <Grid item sm={12} md={3}>
+            <Grid item xs={12} sm={12} md={3}>
               {children && children?.length > 0 && (
                 <MemoizedFocusedLinkedNodes
                   loadNodeData={loadNodeData}
