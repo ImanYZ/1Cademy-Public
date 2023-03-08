@@ -65,7 +65,17 @@ import { MemoizedUserSettingsSidebar } from "@/components/map/Sidebar/SidebarV2/
 import { useAuth } from "@/context/AuthContext";
 import { useTagsTreeView } from "@/hooks/useTagsTreeView";
 import { addSuffixToUrlGMT, capitalizeFirstLetter } from "@/lib/utils/string.utils";
-import { NODE_CODE_COMPLETE } from "@/lib/utils/tutorials/nodetypeTutorialSteps";
+import {
+  NODE_CODE_COMPLETE,
+  NODE_IDEA_COMPLETE,
+  NODE_QUESTION_COMPLETE,
+  NODE_REFERENCE_COMPLETE,
+  NODE_RELATION_COMPLETE,
+} from "@/lib/utils/tutorials/nodetypeTutorialSteps";
+import {
+  RECONCILING_ACCEPTED_PROPOSALS_STEPS_COMPLETE,
+  RECONCILING_NOT_ACCEPTED_PROPOSALS_STEPS_COMPLETE,
+} from "@/lib/utils/tutorials/reconcilingProposalsTutorialSteps";
 
 import LoadingImg from "../../public/animated-icon-1cademy.gif";
 import focusViewLogo from "../../public/focus.svg";
@@ -158,12 +168,19 @@ export type TutorialType =
   | "PROPOSAL"
   | "NAVIGATION"
   | "CONCEPT"
+  | "RELATION"
+  | "REFERENCE"
+  | "IDEA"
+  | "QUESTION"
+  | "CODE"
   | "PROPOSAL_CONCEPT"
   | "PROPOSAL_RELATION"
   | "PROPOSAL_REFERENCE"
   | "PROPOSAL_IDEA"
   | "PROPOSAL_QUESTION"
   | "PROPOSAL_CODE"
+  | "RECONCILING_ACCEPTED_PROPOSAL"
+  | "RECONCILING_NOT_ACCEPTED_PROPOSAL"
   | null;
 
 type DashboardProps = {};
@@ -314,9 +331,15 @@ const Dashboard = ({}: DashboardProps) => {
   const [, /* openProgressBarMenu */ setOpenProgressBarMenu] = useState(false);
 
   const [userTutorial, setUserTutorial] = useState<UserTutorials>({
+    navigation: { currentStep: 1, done: false, skipped: false },
     nodes: { currentStep: 1, done: false, skipped: false },
     searcher: { currentStep: 1, done: false, skipped: false },
     concept: { currentStep: 1, done: false, skipped: false },
+    relation: { currentStep: 1, done: false, skipped: false },
+    reference: { currentStep: 1, done: false, skipped: false },
+    question: { currentStep: 1, done: false, skipped: false },
+    idea: { currentStep: 1, done: false, skipped: false },
+    code: { currentStep: 1, done: false, skipped: false },
     proposal: { currentStep: 1, done: false, skipped: false },
     proposalConcept: { currentStep: 1, done: false, skipped: false },
     proposalRelation: { currentStep: 1, done: false, skipped: false },
@@ -324,7 +347,8 @@ const Dashboard = ({}: DashboardProps) => {
     proposalIdea: { currentStep: 1, done: false, skipped: false },
     proposalQuestion: { currentStep: 1, done: false, skipped: false },
     proposalCode: { currentStep: 1, done: false, skipped: false },
-    navigation: { currentStep: 1, done: false, skipped: false },
+    reconcilingAcceptedProposal: { currentStep: 1, done: false, skipped: false },
+    reconcilingNotAcceptedProposal: { currentStep: 1, done: false, skipped: false },
   });
 
   // const [currentTutorial, setCurrentTutorial] = useState<TutorialType>(null);
@@ -921,6 +945,72 @@ const Dashboard = ({}: DashboardProps) => {
       setTargetId(selectedNode.node);
       setCurrentTutorial("CONCEPT");
       return;
+    }
+    if (
+      selectedNode &&
+      selectedNode.nodeType === "Relation" &&
+      !userTutorial.relation.done &&
+      !userTutorial.relation.skipped
+    ) {
+      setTargetId(selectedNode.node);
+      setCurrentTutorial("RELATION");
+      return;
+    }
+    if (
+      selectedNode &&
+      selectedNode.nodeType === "Reference" &&
+      !userTutorial.reference.done &&
+      !userTutorial.reference.skipped
+    ) {
+      setTargetId(selectedNode.node);
+      setCurrentTutorial("REFERENCE");
+      return;
+    }
+    if (
+      selectedNode &&
+      selectedNode.nodeType === "Question" &&
+      !userTutorial.question.done &&
+      !userTutorial.question.skipped
+    ) {
+      setTargetId(selectedNode.node);
+      setCurrentTutorial("QUESTION");
+      return;
+    }
+    if (selectedNode && selectedNode.nodeType === "Idea" && !userTutorial.idea.done && !userTutorial.idea.skipped) {
+      setTargetId(selectedNode.node);
+      setCurrentTutorial("IDEA");
+      return;
+    }
+    if (selectedNode && selectedNode.nodeType === "Code" && !userTutorial.code.done && !userTutorial.code.skipped) {
+      setTargetId(selectedNode.node);
+      setCurrentTutorial("CODE");
+      return;
+    }
+
+    const proposalNode = graph.nodes[targetId];
+    if (proposalNode && lastNodeOperation.current === "ProposeProposals") {
+      const willBeApproved = isVersionApproved({
+        corrects: proposalNode.corrects,
+        wrongs: proposalNode.corrects,
+        nodeData: proposalNode,
+      });
+      console.log({ willBeApproved });
+      if (
+        willBeApproved &&
+        !userTutorial.reconcilingAcceptedProposal.skipped &&
+        !userTutorial.reconcilingAcceptedProposal.done
+      ) {
+        setCurrentTutorial("RECONCILING_ACCEPTED_PROPOSAL");
+        return;
+      }
+      if (
+        !willBeApproved &&
+        !userTutorial.reconcilingNotAcceptedProposal.skipped &&
+        !userTutorial.reconcilingNotAcceptedProposal.done
+      ) {
+        setCurrentTutorial("RECONCILING_NOT_ACCEPTED_PROPOSAL");
+        return;
+      }
     }
   }, [
     currentTutorial,
@@ -3018,6 +3108,7 @@ const Dashboard = ({}: DashboardProps) => {
         isTheSame = compareChoices(oldNode, newNode, isTheSame);
         if (isTheSame) {
           onFail();
+          setOperation;
           setTimeout(() => {
             window.alert("You've not changed anything yet!");
           });
@@ -4732,6 +4823,13 @@ const Dashboard = ({}: DashboardProps) => {
               proposalReference: PROPOSING_REFERENCE_EDIT_COMPLETE,
               proposalRelation: PROPOSING_RELATION_EDIT_COMPLETE,
               concept: NODE_CODE_COMPLETE,
+              relation: NODE_RELATION_COMPLETE,
+              reference: NODE_REFERENCE_COMPLETE,
+              question: NODE_QUESTION_COMPLETE,
+              idea: NODE_IDEA_COMPLETE,
+              code: NODE_CODE_COMPLETE,
+              reconcilingAcceptedProposal: RECONCILING_ACCEPTED_PROPOSALS_STEPS_COMPLETE,
+              reconcilingNotAcceptedProposal: RECONCILING_NOT_ACCEPTED_PROPOSALS_STEPS_COMPLETE,
             }}
             userTutorialState={userTutorial}
             setCurrentTutorial={setCurrentTutorial}

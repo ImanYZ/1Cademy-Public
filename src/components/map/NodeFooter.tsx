@@ -761,6 +761,7 @@ const NodeFooter = ({
                   }}
                 >
                   <ContainedButton
+                    id={`${identifier}-node-footer-image`}
                     title="Upload an image to better explain this node."
                     onClick={() => uploadImageClicked()}
                     tooltipPosition="top"
@@ -795,6 +796,7 @@ const NodeFooter = ({
                   </ContainedButton>
 
                   <ContainedButton
+                    id={`${identifier}-node-footer-video`}
                     title="Cite a video from Youtube or Vimeo."
                     onClick={() => setAddVideo(!addVideo)}
                     tooltipPosition="top"

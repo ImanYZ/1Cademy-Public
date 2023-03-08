@@ -1,4 +1,4 @@
-import { Box } from "@mui/material";
+import { Box, useTheme } from "@mui/material";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import { useEffect } from "react";
@@ -46,16 +46,17 @@ Ex for Node id elements to disable
   "01-node-footer-menu"
  */
 const RiveComponentAnimated = ({ src, artboard, animations, autoplay }: any) => {
+  const theme = useTheme();
   const { rive, RiveComponent } = useRive({
     src,
     artboard,
-    animations,
+    animations: [theme.palette.mode],
     autoplay,
   });
   useEffect(() => {
     if (!rive) return;
-    rive.load({ src, artboard, animations, autoplay });
-  }, [animations, artboard, autoplay, rive, src]);
+    rive.load({ src, artboard, animations: [theme.palette.mode], autoplay });
+  }, [animations, artboard, autoplay, rive, src, theme.palette.mode]);
 
   return <RiveComponent className={`rive-canvas`} />;
 };
@@ -69,7 +70,7 @@ const NAVIGATION_STEPS: TutorialStepConfig[] = [
             "You can manipulate your field of view by panning the screen by sliding two fingers on the trackpad or clicking, sliding with either a finger or the mouse."
           }
         />
-        <Box width="200px" height="200px" m="0 auto" mt="8px">
+        <Box width="380px" height="200px" m="0 auto" mt="8px">
           <RiveComponentAnimated
             src="rive-tutorial/panning.riv"
             artboard="New Artboard"
@@ -91,7 +92,7 @@ const NAVIGATION_STEPS: TutorialStepConfig[] = [
             "To **zoom in**, you can slide two fingers away from each other on the track pad or press control (command Mac) + and To **zoom out**, you can slide to fingers toward each other on the track or press control (command Mac) -"
           }
         />
-        <Box width="200px" height="200px" m="0 auto" mt="8px">
+        <Box width="380px" height="200px" m="0 auto" mt="8px">
           <RiveComponentAnimated
             src="rive-tutorial/zooming.riv"
             artboard="New Artboard"

@@ -1,9 +1,16 @@
 import { ReactNode, useCallback, useEffect, useRef, useState } from "react";
 
 import { NAVIGATION_STEPS_COMPLETE } from "@/lib/utils/tutorials/navigationTutorialSteps";
-import { NODE_CONCEPT_COMPLETE } from "@/lib/utils/tutorials/nodetypeTutorialSteps";
-import { PROPOSAL_STEPS_COMPLETE } from "@/lib/utils/tutorials/proposalSteps";
 import {
+  NODE_CODE_COMPLETE,
+  NODE_CONCEPT_COMPLETE,
+  NODE_IDEA_COMPLETE,
+  NODE_QUESTION_COMPLETE,
+  NODE_REFERENCE_COMPLETE,
+  NODE_RELATION_COMPLETE,
+} from "@/lib/utils/tutorials/nodetypeTutorialSteps";
+import {
+  PROPOSAL_STEPS_COMPLETE,
   PROPOSING_CODE_EDIT_COMPLETE,
   PROPOSING_CONCEPT_EDIT_COMPLETE,
   PROPOSING_IDEA_EDIT_COMPLETE,
@@ -11,6 +18,10 @@ import {
   PROPOSING_REFERENCE_EDIT_COMPLETE,
   PROPOSING_RELATION_EDIT_COMPLETE,
 } from "@/lib/utils/tutorials/proposalTutorialSteps";
+import {
+  RECONCILING_ACCEPTED_PROPOSALS_STEPS_COMPLETE,
+  RECONCILING_NOT_ACCEPTED_PROPOSALS_STEPS_COMPLETE,
+} from "@/lib/utils/tutorials/reconcilingProposalsTutorialSteps";
 import { SEARCHER_STEPS_COMPLETE } from "@/lib/utils/tutorials/searcherTutorialSteps";
 
 import { NODES_STEPS_COMPLETE } from "../lib/utils/tutorials/nodeTutorialSteps";
@@ -89,6 +100,21 @@ export const useInteractiveTutorial = ({}: useInteractiveTutorialProps) => {
     if (currentTutorial === "CONCEPT") {
       newSteps = NODE_CONCEPT_COMPLETE;
     }
+    if (currentTutorial === "RELATION") {
+      newSteps = NODE_RELATION_COMPLETE;
+    }
+    if (currentTutorial === "REFERENCE") {
+      newSteps = NODE_REFERENCE_COMPLETE;
+    }
+    if (currentTutorial === "QUESTION") {
+      newSteps = NODE_QUESTION_COMPLETE;
+    }
+    if (currentTutorial === "IDEA") {
+      newSteps = NODE_IDEA_COMPLETE;
+    }
+    if (currentTutorial === "CODE") {
+      newSteps = NODE_CODE_COMPLETE;
+    }
     if (currentTutorial === "PROPOSAL") {
       newSteps = PROPOSAL_STEPS_COMPLETE;
     }
@@ -109,6 +135,12 @@ export const useInteractiveTutorial = ({}: useInteractiveTutorialProps) => {
     }
     if (currentTutorial === "PROPOSAL_CODE") {
       newSteps = PROPOSING_CODE_EDIT_COMPLETE;
+    }
+    if (currentTutorial === "RECONCILING_ACCEPTED_PROPOSAL") {
+      newSteps = RECONCILING_ACCEPTED_PROPOSALS_STEPS_COMPLETE;
+    }
+    if (currentTutorial === "RECONCILING_NOT_ACCEPTED_PROPOSAL") {
+      newSteps = RECONCILING_NOT_ACCEPTED_PROPOSALS_STEPS_COMPLETE;
     }
     console.log({ newSteps });
     idxCurrentStepRef.current = 0;

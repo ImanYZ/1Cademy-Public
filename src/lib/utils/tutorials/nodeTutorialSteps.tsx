@@ -193,7 +193,7 @@ const NODES_STEPS: TutorialStepConfig[] = [
   },
 
   {
-    childTargetId: "node-footer-upvotes",
+    childTargetId: "node-footer-downvotes",
     title: "Node Downvotes",
     description: (
       <MarkdownRender
@@ -206,7 +206,7 @@ const NODES_STEPS: TutorialStepConfig[] = [
   },
 
   {
-    childTargetId: "node-footer-downvotes",
+    childTargetId: "node-footer-upvotes",
     title: "Node Upvotes",
     description: (
       <MarkdownRender

@@ -432,13 +432,19 @@ export type TutorialTypeKeys =
   | "proposal"
   | "navigation"
   | "concept"
+  | "relation"
+  | "reference"
+  | "idea"
+  | "question"
+  | "code"
   | "proposalConcept"
   | "proposalRelation"
   | "proposalReference"
   | "proposalIdea"
   | "proposalQuestion"
-  | "proposalCode";
-
+  | "proposalCode"
+  | "reconcilingAcceptedProposal"
+  | "reconcilingNotAcceptedProposal";
 export type UserTutorial = {
   currentStep: number;
   done: boolean;
