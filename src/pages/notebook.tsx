@@ -4835,6 +4835,7 @@ const Dashboard = ({}: DashboardProps) => {
               reconcilingNotAcceptedProposal: RECONCILING_NOT_ACCEPTED_PROPOSALS_STEPS_COMPLETE,
             }}
             userTutorialState={userTutorial}
+            setCurrentTutorial={setCurrentTutorial}
             setUserTutorialState={setUserTutorial}
           />
         </Box>

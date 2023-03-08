@@ -7,6 +7,7 @@ import { Stack } from "@mui/system";
 import React, { Dispatch, SetStateAction, useState } from "react";
 
 import { TutorialStep, TutorialTypeKeys, UserTutorials } from "../../nodeBookTypes";
+import { TutorialType } from "../../pages/notebook";
 // type TutorialStage = {
 //   title: string;
 //   completed: boolean;
@@ -53,6 +54,7 @@ type TutorialTableOfContentProps = {
   handleCloseProgressBar: () => void;
   tutorials: Tutorials;
   userTutorialState: UserTutorials;
+  setCurrentTutorial: (newTutorial: TutorialType) => void;
   setUserTutorialState: Dispatch<SetStateAction<UserTutorials>>;
 };
 
@@ -61,6 +63,7 @@ const TutorialTableOfContent = ({
   handleCloseProgressBar,
   tutorials,
   userTutorialState,
+  setCurrentTutorial,
   setUserTutorialState,
 }: TutorialTableOfContentProps) => {
   // const { height } = useWindowSize();
@@ -143,10 +146,14 @@ const TutorialTableOfContent = ({
                   onClick={e => {
                     e.stopPropagation();
                     console.log("force tutorial", keyTutorial);
-                    setUserTutorialState(pre => ({
-                      ...pre,
-                      [keyTutorial]: { ...pre[keyTutorial], forceTutorial: true },
-                    }));
+                    setUserTutorialState(pre => {
+                      const tt = (Object.keys(pre) as Array<TutorialTypeKeys>).reduce((acu, cur) => {
+                        return { ...acu, [cur]: { ...pre[cur], forceTutorial: cur === keyTutorial ? true : false } };
+                      }, {}) as UserTutorials;
+
+                      return tt;
+                    });
+                    setCurrentTutorial(null);
                   }}
                 >
                   <PlayArrowIcon />
