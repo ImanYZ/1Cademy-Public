@@ -260,7 +260,7 @@ const Node = ({
   openUserInfoSidebar,
   disabled = false,
   enableChildElements = [],
-  defaultOpenPart: defaultOpenPartByTutorial = null,
+  defaultOpenPart: defaultOpenPartByTutorial = "LinkingWords",
   showProposeTutorial = false,
   setCurrentTutorial,
 }: NodeProps) => {
