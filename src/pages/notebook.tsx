@@ -990,11 +990,12 @@ const Dashboard = ({}: DashboardProps) => {
       return;
     }
 
-    const proposalNode = graph.nodes[targetId];
+    const proposalNode = graph.nodes[nodeBookState.selectedNode ?? ""];
+    console.log({ proposalNode });
     if (proposalNode && lastNodeOperation.current === "ProposeProposals") {
       const willBeApproved = isVersionApproved({
-        corrects: proposalNode.corrects,
-        wrongs: proposalNode.corrects,
+        corrects: 1,
+        wrongs: 0,
         nodeData: proposalNode,
       });
       console.log({ willBeApproved });
@@ -1004,6 +1005,7 @@ const Dashboard = ({}: DashboardProps) => {
         !userTutorial.reconcilingAcceptedProposal.done
       ) {
         setCurrentTutorial("RECONCILING_ACCEPTED_PROPOSAL");
+        setTargetId(willBeApproved.node);
         return;
       }
       if (
@@ -1012,6 +1014,8 @@ const Dashboard = ({}: DashboardProps) => {
         !userTutorial.reconcilingNotAcceptedProposal.done
       ) {
         setCurrentTutorial("RECONCILING_NOT_ACCEPTED_PROPOSAL");
+        setOpenSidebar(null);
+        setTargetId(willBeApproved.node);
         return;
       }
     }
