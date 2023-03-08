@@ -36,10 +36,13 @@ const TutorialTableOfContent = ({
     Object.keys(tutorials)[0] as TutorialTypeKeys
   );
 
+  const onExpandTutorial = (option: string, stage: keyof Tutorials, newExpanded: boolean) => {
+    setExpanded(newExpanded ? option : false);
+    setSelectedTutorial(stage);
+  };
   const handleChange =
     (option: string, stage: keyof Tutorials) => (event: React.SyntheticEvent, newExpanded: boolean) => {
-      setExpanded(newExpanded ? option : false);
-      setSelectedTutorial(stage);
+      onExpandTutorial(option, stage, newExpanded);
     };
 
   return (
@@ -121,13 +124,19 @@ const TutorialTableOfContent = ({
                   onClick={e => {
                     e.stopPropagation();
                     console.log("force tutorial", keyTutorial);
-                    setUserTutorialState(pre => {
-                      const tt = (Object.keys(pre) as Array<TutorialTypeKeys>).reduce((acu, cur) => {
-                        return { ...acu, [cur]: { ...pre[cur], forceTutorial: cur === keyTutorial ? true : false } };
+                    setUserTutorialState(previousTutorialStep => {
+                      const tutorialStepModified = (
+                        Object.keys(previousTutorialStep) as Array<TutorialTypeKeys>
+                      ).reduce((acu, cur) => {
+                        return {
+                          ...acu,
+                          [cur]: { ...previousTutorialStep[cur], forceTutorial: cur === keyTutorial ? true : false },
+                        };
                       }, {}) as UserTutorials;
 
-                      return tt;
+                      return tutorialStepModified;
                     });
+                    onExpandTutorial(`Option${idx + 1}`, keyTutorial, true);
                     setCurrentTutorial(null);
                   }}
                 >
