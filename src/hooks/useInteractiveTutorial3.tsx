@@ -1,6 +1,7 @@
 import { ReactNode, useCallback, useEffect, useRef, useState } from "react";
 
 import { NAVIGATION_STEPS_COMPLETE } from "@/lib/utils/tutorials/navigationTutorialSteps";
+import { NODE_CONCEPT_COMPLETE } from "@/lib/utils/tutorials/nodetypeTutorialSteps";
 import { PROPOSAL_STEPS_COMPLETE } from "@/lib/utils/tutorials/proposalSteps";
 import {
   PROPOSING_CODE_EDIT_COMPLETE,
@@ -84,6 +85,9 @@ export const useInteractiveTutorial = ({}: useInteractiveTutorialProps) => {
     if (currentTutorial === "SEARCHER") {
       newSteps = SEARCHER_STEPS_COMPLETE;
       setTargetId("");
+    }
+    if (currentTutorial === "CONCEPT") {
+      newSteps = NODE_CONCEPT_COMPLETE;
     }
     if (currentTutorial === "PROPOSAL") {
       newSteps = PROPOSAL_STEPS_COMPLETE;
