@@ -2006,13 +2006,6 @@ const Dashboard = ({}: DashboardProps) => {
       .map((el, idx) => (idx > 0 ? capitalizeFirstLetter(el.toLocaleLowerCase()) : el.toLowerCase()))
       .join("") as TutorialTypeKeys;
 
-    if (userTutorial[keyTutorial].forceTutorial) {
-      // when is forced by Table of Content the changes are locally
-      setUserTutorial(prev => ({ ...prev, [keyTutorial]: { ...prev[keyTutorial], forceTutorial: false } }));
-      setCurrentTutorial(null);
-      return;
-    }
-
     const tutorialUpdated: UserTutorial = {
       ...userTutorial[keyTutorial],
       currentStep: stateNodeTutorial.currentStepName,
@@ -2024,6 +2017,9 @@ const Dashboard = ({}: DashboardProps) => {
     setCurrentTutorial(null);
     setUserTutorial(userTutorialUpdated);
 
+    // if (userTutorial[keyTutorial].forceTutorial) return;
+    // if(userTutorial[keyTutorial])
+
     const tutorialRef = doc(db, "userTutorial", user.uname);
     const tutorialDoc = await getDoc(tutorialRef);
 
@@ -2032,7 +2028,7 @@ const Dashboard = ({}: DashboardProps) => {
     } else {
       await setDoc(tutorialRef, userTutorialUpdated);
     }
-  }, [currentTutorial, db, setCurrentTutorial, stateNodeTutorial, user, userTutorial]);
+  }, [currentTutorial, db, setCurrentTutorial, setUserTutorial, stateNodeTutorial, user, userTutorial]);
 
   const openLinkedNode = useCallback(
     (linkedNodeID: string, typeOperation?: string) => {
@@ -4090,23 +4086,26 @@ const Dashboard = ({}: DashboardProps) => {
       .map((el, idx) => (idx > 0 ? capitalizeFirstLetter(el.toLocaleLowerCase()) : el.toLowerCase()))
       .join("") as TutorialTypeKeys;
 
-    if (userTutorial[keyTutorial].forceTutorial) {
-      console.log("skip tutorial");
-      // when is forced by Table of Content the changes are locally
-      setUserTutorial(prev => ({ ...prev, [keyTutorial]: { ...prev[keyTutorial], forceTutorial: false } }));
-      setCurrentTutorial(null);
-      return;
-    }
+    // if (userTutorial[keyTutorial].forceTutorial) {
+    //   console.log("skip tutorial");
+    //   // when is forced by Table of Content the changes are locally
+    //   setUserTutorial(prev => ({ ...prev, [keyTutorial]: { ...prev[keyTutorial], forceTutorial: false } }));
+    //   setCurrentTutorial(null);
+    //   return;
+    // }
 
     const tutorialUpdated: UserTutorial = {
       ...userTutorial[keyTutorial],
       currentStep: stateNodeTutorial.currentStepName,
       skipped: true,
+      forceTutorial: false,
     };
     const userTutorialUpdated = { ...userTutorial, [keyTutorial]: tutorialUpdated };
     setCurrentTutorial(null);
     setOpenSidebar(null);
     setUserTutorial(userTutorialUpdated);
+
+    if (userTutorial[keyTutorial].forceTutorial) return;
 
     const tutorialRef = doc(db, "userTutorial", user.uname);
     const tutorialDoc = await getDoc(tutorialRef);

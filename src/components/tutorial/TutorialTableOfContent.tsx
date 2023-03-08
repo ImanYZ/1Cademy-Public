@@ -132,7 +132,7 @@ const TutorialTableOfContent = ({
               <Stack component={"ul"} spacing="19px" m={0} p={"0 0 0 28px"} sx={{ listStyle: "none" }}>
                 {tutorials[keyTutorial].map((cur, idx) => (
                   <Stack key={cur.title} component={"li"} direction={"row"} alignItems="center" spacing={"8px"}>
-                    {userTutorialState[keyTutorial].currentStep > idx + 1 && (
+                    {userTutorialState[keyTutorial].currentStep >= idx + 1 && (
                       <CheckCircleIcon fontSize="small" color={"success"} />
                     )}
                     <Typography
