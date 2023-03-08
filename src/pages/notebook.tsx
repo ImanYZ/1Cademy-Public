@@ -310,16 +310,16 @@ const Dashboard = ({}: DashboardProps) => {
   const [, /* openProgressBarMenu */ setOpenProgressBarMenu] = useState(false);
 
   const [userTutorial, setUserTutorial] = useState<UserTutorials>({
-    nodes: { currentStep: 1, done: false, skipped: false, forceTutorialAgain: false },
-    searcher: { currentStep: 1, done: false, skipped: false, forceTutorialAgain: false },
-    proposal: { currentStep: 1, done: false, skipped: false, forceTutorialAgain: false },
-    proposalConcept: { currentStep: 1, done: false, skipped: false, forceTutorialAgain: false },
-    proposalRelation: { currentStep: 1, done: false, skipped: false, forceTutorialAgain: false },
-    proposalReference: { currentStep: 1, done: false, skipped: false, forceTutorialAgain: false },
-    proposalIdea: { currentStep: 1, done: false, skipped: false, forceTutorialAgain: false },
-    proposalQuestion: { currentStep: 1, done: false, skipped: false, forceTutorialAgain: false },
-    proposalCode: { currentStep: 1, done: false, skipped: false, forceTutorialAgain: false },
-    navigation: { currentStep: 1, done: false, skipped: false, forceTutorialAgain: false },
+    nodes: { currentStep: 1, done: false, skipped: false },
+    searcher: { currentStep: 1, done: false, skipped: false },
+    proposal: { currentStep: 1, done: false, skipped: false },
+    proposalConcept: { currentStep: 1, done: false, skipped: false },
+    proposalRelation: { currentStep: 1, done: false, skipped: false },
+    proposalReference: { currentStep: 1, done: false, skipped: false },
+    proposalIdea: { currentStep: 1, done: false, skipped: false },
+    proposalQuestion: { currentStep: 1, done: false, skipped: false },
+    proposalCode: { currentStep: 1, done: false, skipped: false },
+    navigation: { currentStep: 1, done: false, skipped: false },
   });
 
   // const [currentTutorial, setCurrentTutorial] = useState<TutorialType>(null);
