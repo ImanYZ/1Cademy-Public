@@ -2065,28 +2065,28 @@ const Dashboard = ({}: DashboardProps) => {
       if (isPlayingTheTutorialRef.current) return;
 
       setGraph(graph => {
+        const parentNode = getFirstParent(nodeId);
+
+        const thisNode = graph.nodes[nodeId];
+        const { nodeRef, userNodeRef } = initNodeStatusChange(nodeId, thisNode.userNodeId);
+
+        // flagged closing node as visible = false in parents
+        for (const parent of thisNode.parents) {
+          if (!graph.nodes[parent.node]) continue;
+          const childIdx = graph.nodes[parent.node].children.findIndex(child => child.node === nodeId);
+          if (childIdx !== -1) {
+            graph.nodes[parent.node] = { ...graph.nodes[parent.node] };
+            graph.nodes[parent.node].children = [...graph.nodes[parent.node].children];
+            const child = graph.nodes[parent.node].children[childIdx];
+            child.visible = false;
+          }
+        }
+
         (async () => {
           const batch = writeBatch(db);
           const username = user?.uname;
           if (notebookRef.current.choosingNode) return;
           if (!username) return;
-
-          const parentNode = getFirstParent(nodeId);
-
-          const thisNode = graph.nodes[nodeId];
-          const { nodeRef, userNodeRef } = initNodeStatusChange(nodeId, thisNode.userNodeId);
-
-          // flagged closing node as visible = false in parents
-          for (const parent of thisNode.parents) {
-            if (!graph.nodes[parent.node]) continue;
-            const childIdx = graph.nodes[parent.node].children.findIndex(child => child.node === nodeId);
-            if (childIdx !== -1) {
-              graph.nodes[parent.node] = { ...graph.nodes[parent.node] };
-              graph.nodes[parent.node].children = { ...graph.nodes[parent.node].children };
-              const child = graph.nodes[parent.node].children[childIdx];
-              child.visible = false;
-            }
-          }
 
           const userNodeData = {
             changed: thisNode.changed || false,
