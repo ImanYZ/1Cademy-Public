@@ -65,6 +65,7 @@ import { MemoizedUserSettingsSidebar } from "@/components/map/Sidebar/SidebarV2/
 import { useAuth } from "@/context/AuthContext";
 import { useTagsTreeView } from "@/hooks/useTagsTreeView";
 import { addSuffixToUrlGMT, capitalizeFirstLetter } from "@/lib/utils/string.utils";
+import { NODE_CODE_COMPLETE } from "@/lib/utils/tutorials/nodetypeTutorialSteps";
 
 import LoadingImg from "../../public/animated-icon-1cademy.gif";
 import focusViewLogo from "../../public/focus.svg";
@@ -156,6 +157,7 @@ export type TutorialType =
   | "SEARCHER"
   | "PROPOSAL"
   | "NAVIGATION"
+  | "CONCEPT"
   | "PROPOSAL_CONCEPT"
   | "PROPOSAL_RELATION"
   | "PROPOSAL_REFERENCE"
@@ -176,6 +178,8 @@ export type OpenSidebar =
   | "USER_SETTINGS"
   | "CITATIONS"
   | null;
+
+type Graph = { nodes: FullNodesData; edges: EdgesData };
 /**
  * 1. NODES CHANGES - LISTENER with SNAPSHOT
  *      Type: useEffect
@@ -224,7 +228,7 @@ const Dashboard = ({}: DashboardProps) => {
   const [nodeChanges /*setNodeChanges*/] = useState<NodeChanges[]>([]);
   // nodes: dictionary of all nodes visible on map for specific user
   // edges: dictionary of all edges visible on map for specific user
-  const [graph, setGraph] = useState<{ nodes: FullNodesData; edges: EdgesData }>({ nodes: {}, edges: {} });
+  const [graph, setGraph] = useState<Graph>({ nodes: {}, edges: {} });
   // this allNodes is DEPRECATED
   const [allNodes, setAllNodes] = useState<FullNodesData>({});
   // as map grows, width and height grows based on the nodes shown on the map
@@ -312,6 +316,7 @@ const Dashboard = ({}: DashboardProps) => {
   const [userTutorial, setUserTutorial] = useState<UserTutorials>({
     nodes: { currentStep: 1, done: false, skipped: false },
     searcher: { currentStep: 1, done: false, skipped: false },
+    concept: { currentStep: 1, done: false, skipped: false },
     proposal: { currentStep: 1, done: false, skipped: false },
     proposalConcept: { currentStep: 1, done: false, skipped: false },
     proposalRelation: { currentStep: 1, done: false, skipped: false },
@@ -812,39 +817,79 @@ const Dashboard = ({}: DashboardProps) => {
       setCurrentTutorial("SEARCHER");
       return;
     }
-
     const changedNode: FullNodeData = nodeBookState.selectedNode ? changedNodes[nodeBookState.selectedNode] : null;
-    if (changedNode) {
-      const nodeType = changedNode && changedNode.nodeType;
-      if (!userTutorial.proposal.done && !userTutorial.proposal.skipped) {
-        setCurrentTutorial("PROPOSAL");
-        setTargetId(nodeBookState.selectedNode ?? "");
-        return;
-      }
-      if (!userTutorial.proposalConcept.done && !userTutorial.proposalConcept.skipped && nodeType === "Concept") {
-        setCurrentTutorial(`PROPOSAL_CONCEPT`);
-      }
-      if (!userTutorial.proposalRelation.done && !userTutorial.proposalRelation.skipped && nodeType === "Relation") {
-        setCurrentTutorial(`PROPOSAL_RELATION`);
-      }
-      if (!userTutorial.proposalReference.done && !userTutorial.proposalReference.skipped && nodeType === "Reference") {
-        setCurrentTutorial(`PROPOSAL_REFERENCE`);
-      }
-      if (!userTutorial.proposalIdea.done && !userTutorial.proposalIdea.skipped && nodeType === "Idea") {
-        setCurrentTutorial(`PROPOSAL_IDEA`);
-      }
-      if (!userTutorial.proposalQuestion.done && !userTutorial.proposalQuestion.skipped && nodeType === "Question") {
-        setCurrentTutorial(`PROPOSAL_QUESTION`);
-      }
-      if (!userTutorial.proposalCode.done && !userTutorial.proposalCode.skipped && nodeType === "Code") {
-        setCurrentTutorial(`PROPOSAL_CODE`);
-      }
+    const nodeType = changedNode && changedNode.nodeType;
+    if (changedNode && !userTutorial.proposal.done && !userTutorial.proposal.skipped) {
+      setCurrentTutorial("PROPOSAL");
       setTargetId(nodeBookState.selectedNode ?? "");
+      return;
+    }
+    if (
+      changedNode &&
+      !userTutorial.proposalConcept.done &&
+      !userTutorial.proposalConcept.skipped &&
+      nodeType === "Concept"
+    ) {
+      setCurrentTutorial(`PROPOSAL_CONCEPT`);
+      setTargetId(nodeBookState.selectedNode ?? "");
+      return;
+    }
+    if (
+      changedNode &&
+      !userTutorial.proposalRelation.done &&
+      !userTutorial.proposalRelation.skipped &&
+      nodeType === "Relation"
+    ) {
+      setCurrentTutorial(`PROPOSAL_RELATION`);
+      setTargetId(nodeBookState.selectedNode ?? "");
+      return;
+    }
+    if (
+      changedNode &&
+      !userTutorial.proposalReference.done &&
+      !userTutorial.proposalReference.skipped &&
+      nodeType === "Reference"
+    ) {
+      setCurrentTutorial(`PROPOSAL_REFERENCE`);
+      setTargetId(nodeBookState.selectedNode ?? "");
+      return;
+    }
+    if (changedNode && !userTutorial.proposalIdea.done && !userTutorial.proposalIdea.skipped && nodeType === "Idea") {
+      setCurrentTutorial(`PROPOSAL_IDEA`);
+      setTargetId(nodeBookState.selectedNode ?? "");
+      return;
+    }
+    if (
+      changedNode &&
+      !userTutorial.proposalQuestion.done &&
+      !userTutorial.proposalQuestion.skipped &&
+      nodeType === "Question"
+    ) {
+      setCurrentTutorial(`PROPOSAL_QUESTION`);
+      setTargetId(nodeBookState.selectedNode ?? "");
+      return;
+    }
+    if (changedNode && !userTutorial.proposalCode.done && !userTutorial.proposalCode.skipped && nodeType === "Code") {
+      setCurrentTutorial(`PROPOSAL_CODE`);
+      setTargetId(nodeBookState.selectedNode ?? "");
+      return;
+    }
+
+    const selectedNode = graph.nodes[nodeBookState.selectedNode ?? ""];
+    if (
+      selectedNode &&
+      selectedNode.nodeType === "Concept" &&
+      !userTutorial.concept.done &&
+      !userTutorial.concept.skipped
+    ) {
+      setTargetId(selectedNode.node);
+      setCurrentTutorial("CONCEPT");
       return;
     }
   }, [
     currentTutorial,
     firstLoading,
+    graph,
     graph.nodes,
     nodeBookDispatch,
     nodeBookState.selectedNode,
@@ -4628,6 +4673,7 @@ const Dashboard = ({}: DashboardProps) => {
               proposalQuestion: PROPOSING_QUESTION_EDIT_COMPLETE,
               proposalReference: PROPOSING_REFERENCE_EDIT_COMPLETE,
               proposalRelation: PROPOSING_RELATION_EDIT_COMPLETE,
+              concept: NODE_CODE_COMPLETE,
             }}
             userTutorialState={userTutorial}
           />

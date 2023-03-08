@@ -431,6 +431,7 @@ export type TutorialTypeKeys =
   | "searcher"
   | "proposal"
   | "navigation"
+  | "concept"
   | "proposalConcept"
   | "proposalRelation"
   | "proposalReference"
