@@ -1,9 +1,10 @@
 import ArrowForwardIosSharpIcon from "@mui/icons-material/ArrowForwardIosSharp";
 import CloseIcon from "@mui/icons-material/Close";
 import DoneIcon from "@mui/icons-material/Done";
+import PlayArrowIcon from "@mui/icons-material/PlayArrow";
 import { Accordion, AccordionDetails, AccordionSummary, Box, IconButton, Typography } from "@mui/material";
 import { Stack } from "@mui/system";
-import React, { useState } from "react";
+import React, { Dispatch, SetStateAction, useState } from "react";
 
 import { TutorialStep, TutorialTypeKeys, UserTutorials } from "../../nodeBookTypes";
 // type TutorialStage = {
@@ -52,6 +53,7 @@ type TutorialTableOfContentProps = {
   handleCloseProgressBar: () => void;
   tutorials: Tutorials;
   userTutorialState: UserTutorials;
+  setUserTutorialState: Dispatch<SetStateAction<UserTutorials>>;
 };
 
 const TutorialTableOfContent = ({
@@ -59,10 +61,11 @@ const TutorialTableOfContent = ({
   handleCloseProgressBar,
   tutorials,
   userTutorialState,
+  setUserTutorialState,
 }: TutorialTableOfContentProps) => {
   // const { height } = useWindowSize();
   const [expanded, setExpanded] = useState<string | false>("Option1");
-  const [selectedTutorial, setSelectedTutorial] = useState<TutorialTypeKeys>(
+  const [, /* selectedTutorial */ setSelectedTutorial] = useState<TutorialTypeKeys>(
     Object.keys(tutorials)[0] as TutorialTypeKeys
   );
 
@@ -81,8 +84,6 @@ const TutorialTableOfContent = ({
         backgroundColor: theme => (theme.palette.mode === "dark" ? "rgb(31,31,31)" : "rgb(240,240,240)"),
         width: "300px",
         bottom: "0px",
-        // height,
-        // maxHeight: `${height}px`,
         right: `${open ? "0px" : "-400px"}`,
         transition: "right 300ms ease-out",
         zIndex: 99999,
@@ -98,7 +99,7 @@ const TutorialTableOfContent = ({
           alignItems: "center",
         }}
       >
-        <Typography fontSize={"16px"}>Welcome to {selectedTutorial}!</Typography>
+        <Typography fontSize={"16px"}>Notebook tutorial</Typography>
         <IconButton onClick={handleCloseProgressBar}>
           <CloseIcon fontSize="medium" />
         </IconButton>
@@ -138,20 +139,39 @@ const TutorialTableOfContent = ({
                 >
                   {keyTutorial}
                 </Typography>
+                <IconButton
+                  onClick={e => {
+                    e.stopPropagation();
+                    console.log("force tutorial", keyTutorial);
+                    setUserTutorialState(pre => ({
+                      ...pre,
+                      [keyTutorial]: { ...pre[keyTutorial], forceTutorial: true },
+                    }));
+                  }}
+                >
+                  <PlayArrowIcon />
+                </IconButton>
               </Box>
             </AccordionSummary>
             <AccordionDetails>
               <Stack component={"ul"} spacing="19px" m={0} p={"0 0 0 28px"} sx={{ listStyle: "none" }}>
                 {tutorials[keyTutorial].map((cur, idx) => (
-                  <Stack key={cur.title} component={"li"} direction={"row"} alignItems="center" spacing={"8px"}>
+                  <Stack
+                    key={cur.title}
+                    component={"li"}
+                    direction={"row"}
+                    alignItems="center"
+                    spacing={"8px"}
+                    // onClick={() => {
+                    //   set
+                    // }}
+                  >
                     {userTutorialState[keyTutorial].currentStep > idx + 1 && <DoneIcon fontSize="small" />}
-                    {/* {cur.completed && <DoneIcon fontSize="small" />} */}
                     <Typography
                       sx={{
                         display: "inline-block",
                         color: theme => (theme.palette.mode === "light" ? "#475467" : "#EAECF0"),
                         opacity: "0.5",
-                        // ml: cur.completed ? "0px" : "28px",
                         ml: userTutorialState[keyTutorial].currentStep > idx + 1 ? "0px" : "28px",
                       }}
                       fontSize={"16px"}

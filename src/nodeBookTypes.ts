@@ -449,6 +449,7 @@ export type UserTutorial = {
   currentStep: number;
   done: boolean;
   skipped: boolean;
+  forceTutorial: boolean;
 };
 
 export type UserTutorials = {

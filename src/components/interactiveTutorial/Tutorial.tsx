@@ -199,7 +199,7 @@ export const Tutorial = ({
                     },
                   }}
                 >
-                  {"Finalize"}
+                  {"Got It"}
                 </Button>
               )}
             </Box>
