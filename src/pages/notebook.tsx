@@ -330,26 +330,26 @@ const Dashboard = ({}: DashboardProps) => {
   const [openProgressBar, setOpenProgressBar] = useState(false);
   const [, /* openProgressBarMenu */ setOpenProgressBarMenu] = useState(false);
 
-  const [userTutorial, setUserTutorial] = useState<UserTutorials>({
-    navigation: { currentStep: 1, done: false, skipped: false },
-    nodes: { currentStep: 1, done: false, skipped: false },
-    searcher: { currentStep: 1, done: false, skipped: false },
-    concept: { currentStep: 1, done: false, skipped: false },
-    relation: { currentStep: 1, done: false, skipped: false },
-    reference: { currentStep: 1, done: false, skipped: false },
-    question: { currentStep: 1, done: false, skipped: false },
-    idea: { currentStep: 1, done: false, skipped: false },
-    code: { currentStep: 1, done: false, skipped: false },
-    proposal: { currentStep: 1, done: false, skipped: false },
-    proposalConcept: { currentStep: 1, done: false, skipped: false },
-    proposalRelation: { currentStep: 1, done: false, skipped: false },
-    proposalReference: { currentStep: 1, done: false, skipped: false },
-    proposalIdea: { currentStep: 1, done: false, skipped: false },
-    proposalQuestion: { currentStep: 1, done: false, skipped: false },
-    proposalCode: { currentStep: 1, done: false, skipped: false },
-    reconcilingAcceptedProposal: { currentStep: 1, done: false, skipped: false },
-    reconcilingNotAcceptedProposal: { currentStep: 1, done: false, skipped: false },
-  });
+  // const [userTutorial, setUserTutorial] = useState<UserTutorials>({
+  //   navigation: { currentStep: 1, done: false, skipped: false },
+  //   nodes: { currentStep: 1, done: false, skipped: false },
+  //   searcher: { currentStep: 1, done: false, skipped: false },
+  //   concept: { currentStep: 1, done: false, skipped: false },
+  //   relation: { currentStep: 1, done: false, skipped: false },
+  //   reference: { currentStep: 1, done: false, skipped: false },
+  //   question: { currentStep: 1, done: false, skipped: false },
+  //   idea: { currentStep: 1, done: false, skipped: false },
+  //   code: { currentStep: 1, done: false, skipped: false },
+  //   proposal: { currentStep: 1, done: false, skipped: false },
+  //   proposalConcept: { currentStep: 1, done: false, skipped: false },
+  //   proposalRelation: { currentStep: 1, done: false, skipped: false },
+  //   proposalReference: { currentStep: 1, done: false, skipped: false },
+  //   proposalIdea: { currentStep: 1, done: false, skipped: false },
+  //   proposalQuestion: { currentStep: 1, done: false, skipped: false },
+  //   proposalCode: { currentStep: 1, done: false, skipped: false },
+  //   reconcilingAcceptedProposal: { currentStep: 1, done: false, skipped: false },
+  //   reconcilingNotAcceptedProposal: { currentStep: 1, done: false, skipped: false },
+  // });
 
   // const [currentTutorial, setCurrentTutorial] = useState<TutorialType>(null);
 
@@ -389,7 +389,10 @@ const Dashboard = ({}: DashboardProps) => {
     stepsLength,
     setTargetId,
     targetId,
-  } = useInteractiveTutorial({});
+    userTutorial,
+    userTutorialLoaded,
+    setUserTutorial,
+  } = useInteractiveTutorial({ user });
   const onNodeInViewport = useCallback(
     (nodeId: string) => {
       const originalNode = document.getElementById(nodeId);
@@ -593,8 +596,8 @@ const Dashboard = ({}: DashboardProps) => {
   // flag for whether all tags data is downloaded from server
   // const [allTagsLoaded, setAllTagsLoaded] = useState(false);
 
-  // flag for whether tutorial state was loaded
-  const [userTutorialLoaded, setUserTutorialLoaded] = useState(false);
+  // // flag for whether tutorial state was loaded
+  // const [userTutorialLoaded, setUserTutorialLoaded] = useState(false);
 
   // flag for whether users' nodes data is downloaded from server
   const [, /* userNodesLoaded */ setUserNodesLoaded] = useState(false);
@@ -794,27 +797,27 @@ const Dashboard = ({}: DashboardProps) => {
     }, 1000);
   }, [firstScrollToNode, graph.nodes, nodeBookDispatch, openNodeHandler, scrollToNode]);
 
-  useEffect(() => {
-    // fetch user tutorial state first time
+  // useEffect(() => {
+  //   // fetch user tutorial state first time
 
-    if (!user) return;
-    if (userTutorialLoaded) return;
+  //   if (!user) return;
+  //   if (userTutorialLoaded) return;
 
-    devLog("USE_EFFECT: FETCH_USER_TUTORIAL", { userTutorialLoaded, user });
-    const getTutorialState = async () => {
-      const tutorialRef = doc(db, "userTutorial", user.uname);
-      const tutorialDoc = await getDoc(tutorialRef);
+  //   devLog("USE_EFFECT: FETCH_USER_TUTORIAL", { userTutorialLoaded, user });
+  //   const getTutorialState = async () => {
+  //     const tutorialRef = doc(db, "userTutorial", user.uname);
+  //     const tutorialDoc = await getDoc(tutorialRef);
 
-      if (tutorialDoc.exists()) {
-        const tutorial = tutorialDoc.data() as UserTutorials;
-        setUserTutorial(prev => ({ ...prev, ...tutorial }));
-      }
+  //     if (tutorialDoc.exists()) {
+  //       const tutorial = tutorialDoc.data() as UserTutorials;
+  //       setUserTutorial(prev => ({ ...prev, ...tutorial }));
+  //     }
 
-      setUserTutorialLoaded(true);
-    };
+  //     setUserTutorialLoaded(true);
+  //   };
 
-    getTutorialState();
-  }, [db, setCurrentTutorial, user, user?.userId, userTutorialLoaded]);
+  //   getTutorialState();
+  // }, [db, setCurrentTutorial, user, user?.userId, userTutorialLoaded]);
 
   useEffect(() => {
     // detect triggers to change tutorials
@@ -4113,7 +4116,7 @@ const Dashboard = ({}: DashboardProps) => {
     } else {
       await setDoc(tutorialRef, userTutorialUpdated);
     }
-  }, [currentTutorial, db, setCurrentTutorial, stateNodeTutorial, user, userTutorial]);
+  }, [currentTutorial, db, setCurrentTutorial, setUserTutorial, stateNodeTutorial, user, userTutorial]);
 
   return (
     <div className="MapContainer" style={{ overflow: "hidden" }}>

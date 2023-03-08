@@ -1,51 +1,15 @@
 import ArrowForwardIosSharpIcon from "@mui/icons-material/ArrowForwardIosSharp";
+import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import CloseIcon from "@mui/icons-material/Close";
-import DoneIcon from "@mui/icons-material/Done";
-import PlayArrowIcon from "@mui/icons-material/PlayArrow";
+// import DoneIcon from "@mui/icons-material/Done";
+import PlayCircleIcon from "@mui/icons-material/PlayCircle";
+// import PlayArrowIcon from "@mui/icons-material/PlayArrow";
 import { Accordion, AccordionDetails, AccordionSummary, Box, IconButton, Typography } from "@mui/material";
 import { Stack } from "@mui/system";
 import React, { Dispatch, SetStateAction, useState } from "react";
 
 import { TutorialStep, TutorialTypeKeys, UserTutorials } from "../../nodeBookTypes";
 import { TutorialType } from "../../pages/notebook";
-// type TutorialStage = {
-//   title: string;
-//   completed: boolean;
-// };
-// type TutorialProgess = {
-//   [key: string]: TutorialStage[];
-// };
-
-// const stages: TutorialProgess = {
-//   "Node tutorial": [
-//     {
-//       title: "step 1a",
-//       completed: true,
-//     },
-//     {
-//       title: "step 2a",
-//       completed: true,
-//     },
-//     {
-//       title: "step 3a",
-//       completed: false,
-//     },
-//   ],
-//   "Sidebar tutorial": [
-//     {
-//       title: "step 1",
-//       completed: false,
-//     },
-//     {
-//       title: "step 2",
-//       completed: false,
-//     },
-//     {
-//       title: "step 3",
-//       completed: false,
-//     },
-//   ],
-// };
 
 type Tutorials = { [key in TutorialTypeKeys]: TutorialStep[] };
 
@@ -84,7 +48,8 @@ const TutorialTableOfContent = ({
       sx={{
         position: "fixed",
         top: "0px",
-        backgroundColor: theme => (theme.palette.mode === "dark" ? "rgb(31,31,31)" : "rgb(240,240,240)"),
+        // backgroundColor: theme => (theme.palette.mode === "dark" ? "rgb(31,31,31)" : "rgb(240,240,240)"),
+        background: theme => (theme.palette.mode === "dark" ? "rgb(31,31,31)" : "rgb(240,240,240)"),
         width: "300px",
         bottom: "0px",
         right: `${open ? "0px" : "-400px"}`,
@@ -94,15 +59,15 @@ const TutorialTableOfContent = ({
     >
       <Box
         sx={{
-          backgroundColor: theme => (theme.palette.mode === "dark" ? "#3F3E3E" : "rgb(212, 212, 212)"),
-          p: "10px",
+          // backgroundColor: theme => (theme.palette.mode === "dark" ? "#3F3E3E" : "rgb(212, 212, 212)"),
+          p: "32px 24px",
           position: "relative",
           display: "flex",
           justifyContent: "space-between",
           alignItems: "center",
         }}
       >
-        <Typography fontSize={"16px"}>Notebook tutorial</Typography>
+        <Typography fontSize={"24px"}>Notebook tutorial</Typography>
         <IconButton onClick={handleCloseProgressBar}>
           <CloseIcon fontSize="medium" />
         </IconButton>
@@ -116,6 +81,7 @@ const TutorialTableOfContent = ({
             square
             sx={{
               border: "none",
+              background: theme => (theme.palette.mode === "dark" ? "rgb(31,31,31)" : "rgb(240,240,240)"),
               "&:before": {
                 display: "none",
               },
@@ -124,24 +90,26 @@ const TutorialTableOfContent = ({
             onChange={handleChange(`Option${idx + 1}`, keyTutorial)}
           >
             <AccordionSummary>
-              <Box sx={{ display: "flex", alignItems: "center" }}>
-                <ArrowForwardIosSharpIcon
-                  fontSize="small"
-                  sx={{
-                    transform: `rotate(${expanded === `Option${idx + 1}` ? "-90deg" : "90deg"})`,
-                    transition: "transform 100ms linear",
-                    mr: "8px",
-                  }}
-                />
-                <Typography
-                  component={"h4"}
-                  variant={"h4"}
-                  sx={{
-                    cursor: "pointer",
-                  }}
-                >
-                  {keyTutorial}
-                </Typography>
+              <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%" }}>
+                <Box sx={{ display: "flex", alignItems: "center" }}>
+                  <ArrowForwardIosSharpIcon
+                    fontSize="small"
+                    sx={{
+                      transform: `rotate(${expanded === `Option${idx + 1}` ? "-90deg" : "90deg"})`,
+                      transition: "transform 100ms linear",
+                      mr: "8px",
+                    }}
+                  />
+                  <Typography
+                    component={"h4"}
+                    variant={"h4"}
+                    sx={{
+                      cursor: "pointer",
+                    }}
+                  >
+                    {keyTutorial}
+                  </Typography>
+                </Box>
                 <IconButton
                   onClick={e => {
                     e.stopPropagation();
@@ -156,24 +124,17 @@ const TutorialTableOfContent = ({
                     setCurrentTutorial(null);
                   }}
                 >
-                  <PlayArrowIcon />
+                  <PlayCircleIcon />
                 </IconButton>
               </Box>
             </AccordionSummary>
             <AccordionDetails>
               <Stack component={"ul"} spacing="19px" m={0} p={"0 0 0 28px"} sx={{ listStyle: "none" }}>
                 {tutorials[keyTutorial].map((cur, idx) => (
-                  <Stack
-                    key={cur.title}
-                    component={"li"}
-                    direction={"row"}
-                    alignItems="center"
-                    spacing={"8px"}
-                    // onClick={() => {
-                    //   set
-                    // }}
-                  >
-                    {userTutorialState[keyTutorial].currentStep > idx + 1 && <DoneIcon fontSize="small" />}
+                  <Stack key={cur.title} component={"li"} direction={"row"} alignItems="center" spacing={"8px"}>
+                    {userTutorialState[keyTutorial].currentStep > idx + 1 && (
+                      <CheckCircleIcon fontSize="small" color={"success"} />
+                    )}
                     <Typography
                       sx={{
                         display: "inline-block",
