@@ -48,6 +48,8 @@ const TutorialTableOfContent = ({
       sx={{
         position: "fixed",
         top: "0px",
+        display: "grid",
+        gridTemplateRows: "1fr auto",
         // backgroundColor: theme => (theme.palette.mode === "dark" ? "rgb(31,31,31)" : "rgb(240,240,240)"),
         background: theme => (theme.palette.mode === "dark" ? "rgb(31,31,31)" : "rgb(240,240,240)"),
         width: "300px",
@@ -72,7 +74,7 @@ const TutorialTableOfContent = ({
           <CloseIcon fontSize="medium" />
         </IconButton>
       </Box>
-      <Box>
+      <Box sx={{ overflowY: "auto" }}>
         {(Object.keys(tutorials) as Array<TutorialTypeKeys>).map((keyTutorial, idx) => (
           <Accordion
             key={keyTutorial}
@@ -104,10 +106,15 @@ const TutorialTableOfContent = ({
                     component={"h4"}
                     variant={"h4"}
                     sx={{
+                      // flexGrow: 1,
                       cursor: "pointer",
+                      // textOverflow: "ellipsis",
+                      // overflow: "hidden",
+                      // whiteSpace: "nowrap",
                     }}
                   >
-                    {keyTutorial}
+                    {keyTutorial.slice(0, 20)}
+                    {keyTutorial.length > 20 && "..."}
                   </Typography>
                 </Box>
                 <IconButton
