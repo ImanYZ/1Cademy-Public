@@ -115,19 +115,32 @@ const PROPOSING_EDITS_STEPS: TutorialStepConfig[] = [
   {
     childTargetId: "node-body",
     title: "Proposing Edits - Edit Title",
-    description: <MarkdownRender text={"You can start changing the title"} />,
+    description: (
+      <MarkdownRender
+        text={
+          "This field allows you to edit the title. It is important to remember that titles need to be concise but descriptive enough to uniquely identify the concept or group of concepts described in the node."
+        }
+      />
+    ),
   },
+
   {
     childTargetId: "preview-edit",
     title: "Proposing Edits - Preview or Edit",
-    description: <MarkdownRender text={"You can switch to preview what you have changed before"} />,
+    description: (
+      <MarkdownRender
+        text={"This allows you to see what the node you are proposing or editing will look like when it is submitted."}
+      />
+    ),
   },
   {
     childTargetId: "node-footer-user",
     title: "Proposing Edits - Contributor",
     description: (
       <MarkdownRender
-        text={"Note that the contributor is the person that has done the most to make the node in its present form."}
+        text={
+          "This icon shows who the top contributor to a node is. The top contributor is the person that receives credit for the node."
+        }
       />
     ),
   },
@@ -137,16 +150,35 @@ const PROPOSING_EDITS_STEPS: TutorialStepConfig[] = [
     description: <MarkdownRender text={"You can also change the type of node here."} />,
   },
   {
-    childTargetId: "node-footer-image-video",
-    title: "Proposing Edits - Image or Video",
-    description: <MarkdownRender text={"You can also upload a small image or video"} />,
+    childTargetId: "node-footer-image",
+    title: "Proposing Edits - Image ",
+    description: (
+      <MarkdownRender
+        text={
+          "Here you can add an embedded image into a node. It is usually helpful to have some text explaining the image. You should also offer a citation crediting the creator of the image if it is not your own."
+        }
+      />
+    ),
+  },
+  {
+    childTargetId: "node-footer-image",
+    title: "Proposing Edits - Video",
+    description: (
+      <MarkdownRender
+        text={
+          "Here you can add the URL of a video. Videos cannot be embedded but the URL allows people to watch a video."
+        }
+      />
+    ),
   },
   {
     childTargetId: "node-footer-tags-citations",
     title: "Proposing Edits - Tags and Citations",
     description: (
       <MarkdownRender
-        text={"You can add and remove **Tags** or **Citations** to references used in the content of the node."}
+        text={
+          "Here you can add references by clicking “Cite an existing Reference” and then clicking a reference node for the citation you want to add. You will want to have the reference node you are citing open before doing this. You can also remove a citation by clicking the trash can icon to the right of a citation."
+        }
       />
     ),
   },
@@ -157,12 +189,25 @@ const PROPOSING_EDITS_STEPS: TutorialStepConfig[] = [
     description: <MarkdownRender text={"You can even change parent and children nodes by clicking on this icon."} />,
   },
   {
+    childTargetId: "button-cancel-proposal",
+    title: "Proposing Edits - Propose",
+    description: (
+      <MarkdownRender
+        text={
+          "While working on a proposal, if you determine that you do not want to submit it, you can click on the **cancel button**. This will eliminate the proposed changes you have been working on."
+        }
+      />
+    ),
+
+    isClickeable: true,
+  },
+  {
     childTargetId: "button-propose-proposal",
     title: "Proposing Edits - Propose",
     description: (
       <MarkdownRender
         text={
-          "Let's assume you just made some changes. Now, it's the time to click this button to submit your proposal. Alternatively, you can click the cancel button, to withdraw your proposal."
+          "Once you have created a proposal and are satisfied with its content, you can click the the **propose button**. This will submit the proposal you have worked on."
         }
       />
     ),

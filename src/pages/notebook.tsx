@@ -65,7 +65,13 @@ import { MemoizedUserSettingsSidebar } from "@/components/map/Sidebar/SidebarV2/
 import { useAuth } from "@/context/AuthContext";
 import { useTagsTreeView } from "@/hooks/useTagsTreeView";
 import { addSuffixToUrlGMT, capitalizeFirstLetter } from "@/lib/utils/string.utils";
-import { NODE_CODE_COMPLETE } from "@/lib/utils/tutorials/nodetypeTutorialSteps";
+import {
+  NODE_CODE_COMPLETE,
+  NODE_IDEA_COMPLETE,
+  NODE_QUESTION_COMPLETE,
+  NODE_REFERENCE_COMPLETE,
+  NODE_RELATION_COMPLETE,
+} from "@/lib/utils/tutorials/nodetypeTutorialSteps";
 
 import LoadingImg from "../../public/animated-icon-1cademy.gif";
 import focusViewLogo from "../../public/focus.svg";
@@ -158,6 +164,11 @@ export type TutorialType =
   | "PROPOSAL"
   | "NAVIGATION"
   | "CONCEPT"
+  | "RELATION"
+  | "REFERENCE"
+  | "IDEA"
+  | "QUESTION"
+  | "CODE"
   | "PROPOSAL_CONCEPT"
   | "PROPOSAL_RELATION"
   | "PROPOSAL_REFERENCE"
@@ -317,6 +328,11 @@ const Dashboard = ({}: DashboardProps) => {
     nodes: { currentStep: 1, done: false, skipped: false },
     searcher: { currentStep: 1, done: false, skipped: false },
     concept: { currentStep: 1, done: false, skipped: false },
+    relation: { currentStep: 1, done: false, skipped: false },
+    reference: { currentStep: 1, done: false, skipped: false },
+    question: { currentStep: 1, done: false, skipped: false },
+    idea: { currentStep: 1, done: false, skipped: false },
+    code: { currentStep: 1, done: false, skipped: false },
     proposal: { currentStep: 1, done: false, skipped: false },
     proposalConcept: { currentStep: 1, done: false, skipped: false },
     proposalRelation: { currentStep: 1, done: false, skipped: false },
@@ -884,6 +900,46 @@ const Dashboard = ({}: DashboardProps) => {
     ) {
       setTargetId(selectedNode.node);
       setCurrentTutorial("CONCEPT");
+      return;
+    }
+    if (
+      selectedNode &&
+      selectedNode.nodeType === "Relation" &&
+      !userTutorial.relation.done &&
+      !userTutorial.relation.skipped
+    ) {
+      setTargetId(selectedNode.node);
+      setCurrentTutorial("RELATION");
+      return;
+    }
+    if (
+      selectedNode &&
+      selectedNode.nodeType === "Reference" &&
+      !userTutorial.reference.done &&
+      !userTutorial.reference.skipped
+    ) {
+      setTargetId(selectedNode.node);
+      setCurrentTutorial("REFERENCE");
+      return;
+    }
+    if (
+      selectedNode &&
+      selectedNode.nodeType === "Question" &&
+      !userTutorial.question.done &&
+      !userTutorial.question.skipped
+    ) {
+      setTargetId(selectedNode.node);
+      setCurrentTutorial("QUESTION");
+      return;
+    }
+    if (selectedNode && selectedNode.nodeType === "Idea" && !userTutorial.idea.done && !userTutorial.idea.skipped) {
+      setTargetId(selectedNode.node);
+      setCurrentTutorial("IDEA");
+      return;
+    }
+    if (selectedNode && selectedNode.nodeType === "Code" && !userTutorial.code.done && !userTutorial.code.skipped) {
+      setTargetId(selectedNode.node);
+      setCurrentTutorial("CODE");
       return;
     }
   }, [
@@ -4674,6 +4730,11 @@ const Dashboard = ({}: DashboardProps) => {
               proposalReference: PROPOSING_REFERENCE_EDIT_COMPLETE,
               proposalRelation: PROPOSING_RELATION_EDIT_COMPLETE,
               concept: NODE_CODE_COMPLETE,
+              relation: NODE_RELATION_COMPLETE,
+              reference: NODE_REFERENCE_COMPLETE,
+              question: NODE_QUESTION_COMPLETE,
+              idea: NODE_IDEA_COMPLETE,
+              code: NODE_CODE_COMPLETE,
             }}
             userTutorialState={userTutorial}
           />
