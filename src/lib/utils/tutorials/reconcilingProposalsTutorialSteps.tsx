@@ -62,15 +62,21 @@ const RECONCILING_ACCEPTED_PROPOSALS_STEPS: TutorialStepConfig[] = [
 ];
 const RECONCILING_NOT_ACCEPTED_PROPOSALS_STEPS: TutorialStepConfig[] = [
   {
+    targetId: "toolbar-pending-list",
+    childTargetId: "toolbar-pending-list",
     title: "Reconciling Proposals",
     description: (
       <MarkdownRender
         text={"Just because you have proposed a change, it does not mean that the change will be implemented."}
       />
     ),
+    anchor: "Portal",
+    tooltipPosition: "right",
   },
 
   {
+    targetId: "sidebar-wrapper-pending-list",
+    childTargetId: "sidebar-wrapper-pending-list",
     title: "Reconciling Proposals",
     description: (
       <Stack spacing={"16px"}>
@@ -80,12 +86,17 @@ const RECONCILING_NOT_ACCEPTED_PROPOSALS_STEPS: TutorialStepConfig[] = [
           sx={{ alignSelf: "center" }}
         />
         <MarkdownRender
-          text={"The proposal does not get **Aproved** then it will go the **list of pending proposal**"}
+          text={"The proposal does **not** get **Aproved** then it will go the **list of pending proposal**"}
         />
       </Stack>
     ),
+    anchor: "Portal",
+    tooltipPosition: "right",
+    targetDelay: 450,
   },
   {
+    targetId: "sidebar-wrapper-pending-list",
+    childTargetId: "sidebar-wrapper-pending-list",
     title: "Reconciling Proposals",
     description: (
       <Stack spacing={"16px"}>
@@ -99,6 +110,9 @@ const RECONCILING_NOT_ACCEPTED_PROPOSALS_STEPS: TutorialStepConfig[] = [
         />
       </Stack>
     ),
+    tooltipPosition: "right",
+
+    anchor: "Portal",
   },
 ];
 export const RECONCILING_ACCEPTED_PROPOSALS_STEPS_COMPLETE: TutorialStep[] = RECONCILING_ACCEPTED_PROPOSALS_STEPS.map(
