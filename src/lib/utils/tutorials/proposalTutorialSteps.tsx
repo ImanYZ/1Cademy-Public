@@ -161,7 +161,7 @@ const PROPOSING_EDITS_STEPS: TutorialStepConfig[] = [
     ),
   },
   {
-    childTargetId: "node-footer-image",
+    childTargetId: "node-footer-video",
     title: "Proposing Edits - Video",
     description: (
       <MarkdownRender
