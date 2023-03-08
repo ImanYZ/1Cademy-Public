@@ -652,10 +652,10 @@ const Dashboard = ({}: DashboardProps) => {
     return width;
   };
   const openNodeHandler = useMemoizedCallback(
-    async (nodeId: string) => {
+    async (nodeId: string, openWithDefaultValues: Partial<UserNodesData> = {}) => {
       // console.log({ nodeId });
 
-      devLog("open_Node_Handler", nodeId);
+      devLog("open_Node_Handler", { nodeId, openWithDefaultValues });
       if (isPlayingTheTutorialRef.current && currentTutorial !== "SEARCHER") return;
 
       let linkedNodeRef;
@@ -685,7 +685,11 @@ const Dashboard = ({}: DashboardProps) => {
             // if exist documents update the first
             userNodeId = userNodeDoc.docs[0].id;
             const userNodeRef = doc(db, "userNodes", userNodeId);
-            userNodeData = userNodeDoc.docs[0].data() as UserNodesData;
+            const userNodeDataTmp = userNodeDoc.docs[0].data() as UserNodesData;
+            userNodeData = {
+              ...userNodeDataTmp,
+              ...openWithDefaultValues,
+            };
             userNodeData.visible = true;
             userNodeData.updatedAt = Timestamp.fromDate(new Date());
             batch.update(userNodeRef, userNodeData);
@@ -694,6 +698,7 @@ const Dashboard = ({}: DashboardProps) => {
             userNodeRef = collection(db, "userNodes");
 
             userNodeData = {
+              ...openWithDefaultValues,
               changed: true,
               correct: false,
               createdAt: Timestamp.fromDate(new Date()),
@@ -790,6 +795,7 @@ const Dashboard = ({}: DashboardProps) => {
   useEffect(() => {
     // detect triggers to change tutorials
     // tutorials are trigger over selected node because is visible in that time
+    console.log("TTT", { currentTutorial, userTutorial, userTutorialLoaded, firstLoading });
 
     if (currentTutorial) return;
     if (!userTutorialLoaded) return;
@@ -797,37 +803,58 @@ const Dashboard = ({}: DashboardProps) => {
 
     devLog("USE_EFFECT: DETECT_TRIGGER_TUTORIAL", { userTutorial });
 
-    if (
-      (!userTutorial.navigation.done && !userTutorial.navigation.skipped) ||
-      userTutorial.navigation.forceTutorialAgain
-    ) {
+    // --------------------------
+    if ((!userTutorial.navigation.done && !userTutorial.navigation.skipped) || userTutorial.navigation.forceTutorial) {
       setCurrentTutorial("NAVIGATION");
       return;
     }
 
-    if (!userTutorial.nodes.done && !userTutorial.nodes.skipped) {
+    // --------------------------
+    if ((!userTutorial.nodes.done && !userTutorial.nodes.skipped) || userTutorial.nodes.forceTutorial) {
       const nodeTargetId =
         (nodeBookState.selectedNode && graph.nodes[nodeBookState.selectedNode].open && nodeBookState.selectedNode) ||
         "";
 
-      // if (userTutorial.nodes.previousStepsDone) {
-      //   // setCurrentTutorial("NODES", true);
-      // }
-      console.log({ nodeTargetId });
       if (!nodeTargetId) {
-        return setCurrentTutorial("NODES");
+        if (!userTutorial.nodes.forceTutorial) return;
+
+        // if is tutorial is forced and states are not correct, we set up the correct states
+        const idTarget = "r98BjyFDCe4YyLA3U8ZE";
+        const targetElement = document.getElementById(idTarget);
+        if (!targetElement) return openNodeHandler(idTarget, { open: true });
+
+        notebookRef.current.selectedNode = idTarget;
+        nodeBookDispatch({ type: "setSelectedNode", payload: idTarget });
+        setNodeParts(idTarget, node => ({ ...node, open: true }));
+        scrollToNode(idTarget);
+        return;
       }
 
       setTargetId(nodeTargetId);
       setCurrentTutorial("NODES");
       return;
     }
-    if (!userTutorial.searcher.done && !userTutorial.searcher.skipped && openSidebar === "SEARCHER_SIDEBAR") {
+
+    // --------------------------
+    if (
+      (!userTutorial.searcher.done && !userTutorial.searcher.skipped && openSidebar === "SEARCHER_SIDEBAR") ||
+      userTutorial.searcher.forceTutorial
+    ) {
+      if (openSidebar !== "SEARCHER_SIDEBAR") {
+        if (!userTutorial.searcher.forceTutorial) return;
+
+        // if is tutorial is forced and states are not correct, we set up the correct states
+        setOpenSidebar("SEARCHER_SIDEBAR");
+        return;
+      }
       setCurrentTutorial("SEARCHER");
       return;
     }
+
+    // --------------------------
     const changedNode: FullNodeData = nodeBookState.selectedNode ? changedNodes[nodeBookState.selectedNode] : null;
     const nodeType = changedNode && changedNode.nodeType;
+
     if (changedNode && !userTutorial.proposal.done && !userTutorial.proposal.skipped) {
       setCurrentTutorial("PROPOSAL");
       setTargetId(nodeBookState.selectedNode ?? "");
@@ -918,19 +945,22 @@ const Dashboard = ({}: DashboardProps) => {
       if (firstScrollToNode) return;
       if (!queueFinished) return;
       if (!urlNodeProcess) return;
+      console.log("BD=>state");
 
-      if (user.sNode) {
-        if (user.sNode === nodeBookState.selectedNode) return;
-
+      if (user.sNode && user.sNode === nodeBookState.selectedNode) {
+        // if (user.sNode === nodeBookState.selectedNode) return;
+        // console.log("11");
         const selectedNode = graph.nodes[user.sNode];
-        if (!selectedNode) return;
-        if (selectedNode.top === 0) return;
+        if (selectedNode && selectedNode.top === 0) {
+          console.log("22");
+          if (selectedNode.top === 0) return;
+          console.log("33");
+          nodeBookDispatch({ type: "setSelectedNode", payload: user.sNode });
+          notebookRef.current.selectedNode = user.sNode;
 
-        nodeBookDispatch({ type: "setSelectedNode", payload: user.sNode });
-        notebookRef.current.selectedNode = user.sNode;
-
-        scrollToNode(user.sNode);
-        setFirstScrollToNode(true);
+          scrollToNode(user.sNode);
+          setFirstScrollToNode(true);
+        }
       }
       setIsSubmitting(false);
       setFirstLoading(false);
@@ -1877,10 +1907,18 @@ const Dashboard = ({}: DashboardProps) => {
       .map((el, idx) => (idx > 0 ? capitalizeFirstLetter(el.toLocaleLowerCase()) : el.toLowerCase()))
       .join("") as TutorialTypeKeys;
 
+    if (userTutorial[keyTutorial].forceTutorial) {
+      // when is forced by Table of Content the changes are locally
+      setUserTutorial(prev => ({ ...prev, [keyTutorial]: { ...prev[keyTutorial], forceTutorial: false } }));
+      setCurrentTutorial(null);
+      return;
+    }
+
     const tutorialUpdated: UserTutorial = {
       ...userTutorial[keyTutorial],
       currentStep: stateNodeTutorial.currentStepName,
       done: true,
+      forceTutorial: false,
     };
     console.log({ tutorialUpdated, keyTutorial });
     const userTutorialUpdated: UserTutorials = { ...userTutorial, [keyTutorial]: tutorialUpdated };
@@ -3951,6 +3989,15 @@ const Dashboard = ({}: DashboardProps) => {
       .split("_")
       .map((el, idx) => (idx > 0 ? capitalizeFirstLetter(el.toLocaleLowerCase()) : el.toLowerCase()))
       .join("") as TutorialTypeKeys;
+
+    if (userTutorial[keyTutorial].forceTutorial) {
+      console.log("skip tutorial");
+      // when is forced by Table of Content the changes are locally
+      setUserTutorial(prev => ({ ...prev, [keyTutorial]: { ...prev[keyTutorial], forceTutorial: false } }));
+      setCurrentTutorial(null);
+      return;
+    }
+
     const tutorialUpdated: UserTutorial = {
       ...userTutorial[keyTutorial],
       currentStep: stateNodeTutorial.currentStepName,
@@ -4103,7 +4150,7 @@ const Dashboard = ({}: DashboardProps) => {
                 <Button onClick={() => nodeBookDispatch({ type: "setSelectionType", payload: "Proposals" })}>
                   Open Proposal
                 </Button>
-                <Button onClick={() => openNodeHandler("JqTvpowT5EBPO1Ajjovq")}>Open Node Handler</Button>
+                <Button onClick={() => openNodeHandler("r98BjyFDCe4YyLA3U8ZE")}>Open Node Handler</Button>
                 <Button onClick={() => setShowRegion(prev => !prev)}>Show Region</Button>
               </Box>
             </Drawer>

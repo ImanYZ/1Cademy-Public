@@ -1,6 +1,7 @@
 import ArrowForwardIosSharpIcon from "@mui/icons-material/ArrowForwardIosSharp";
 import CloseIcon from "@mui/icons-material/Close";
 import DoneIcon from "@mui/icons-material/Done";
+import PlayArrowIcon from "@mui/icons-material/PlayArrow";
 import { Accordion, AccordionDetails, AccordionSummary, Box, IconButton, Typography } from "@mui/material";
 import { Stack } from "@mui/system";
 import React, { Dispatch, SetStateAction, useState } from "react";
@@ -64,7 +65,7 @@ const TutorialTableOfContent = ({
 }: TutorialTableOfContentProps) => {
   // const { height } = useWindowSize();
   const [expanded, setExpanded] = useState<string | false>("Option1");
-  const [selectedTutorial, setSelectedTutorial] = useState<TutorialTypeKeys>(
+  const [, /* selectedTutorial */ setSelectedTutorial] = useState<TutorialTypeKeys>(
     Object.keys(tutorials)[0] as TutorialTypeKeys
   );
 
@@ -98,7 +99,7 @@ const TutorialTableOfContent = ({
           alignItems: "center",
         }}
       >
-        <Typography fontSize={"16px"}>Welcome to {selectedTutorial}!</Typography>
+        <Typography fontSize={"16px"}>Notebook tutorial</Typography>
         <IconButton onClick={handleCloseProgressBar}>
           <CloseIcon fontSize="medium" />
         </IconButton>
@@ -120,15 +121,7 @@ const TutorialTableOfContent = ({
             onChange={handleChange(`Option${idx + 1}`, keyTutorial)}
           >
             <AccordionSummary>
-              <Box
-                onClick={() =>
-                  setUserTutorialState(pre => ({
-                    ...pre,
-                    [keyTutorial]: { ...pre[keyTutorial], forceTutorialAgain: true },
-                  }))
-                }
-                sx={{ display: "flex", alignItems: "center" }}
-              >
+              <Box sx={{ display: "flex", alignItems: "center" }}>
                 <ArrowForwardIosSharpIcon
                   fontSize="small"
                   sx={{
@@ -146,12 +139,33 @@ const TutorialTableOfContent = ({
                 >
                   {keyTutorial}
                 </Typography>
+                <IconButton
+                  onClick={e => {
+                    e.stopPropagation();
+                    console.log("force tutorial", keyTutorial);
+                    setUserTutorialState(pre => ({
+                      ...pre,
+                      [keyTutorial]: { ...pre[keyTutorial], forceTutorial: true },
+                    }));
+                  }}
+                >
+                  <PlayArrowIcon />
+                </IconButton>
               </Box>
             </AccordionSummary>
             <AccordionDetails>
               <Stack component={"ul"} spacing="19px" m={0} p={"0 0 0 28px"} sx={{ listStyle: "none" }}>
                 {tutorials[keyTutorial].map((cur, idx) => (
-                  <Stack key={cur.title} component={"li"} direction={"row"} alignItems="center" spacing={"8px"}>
+                  <Stack
+                    key={cur.title}
+                    component={"li"}
+                    direction={"row"}
+                    alignItems="center"
+                    spacing={"8px"}
+                    // onClick={() => {
+                    //   set
+                    // }}
+                  >
                     {userTutorialState[keyTutorial].currentStep > idx + 1 && <DoneIcon fontSize="small" />}
                     <Typography
                       sx={{
