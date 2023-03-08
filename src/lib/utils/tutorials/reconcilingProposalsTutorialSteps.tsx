@@ -1,7 +1,9 @@
+import CheckIcon from "@mui/icons-material/Check";
 import { Stack } from "@mui/material";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
-import { TutorialState, TutorialStep, TutorialStepConfig } from "src/nodeBookTypes";
+import { FullNodeData, TutorialState, TutorialStep, TutorialStepConfig } from "src/nodeBookTypes";
+import { Box } from "victory";
 
 import MarkdownRender from "@/components/Markdown/MarkdownRender";
 
@@ -44,11 +46,21 @@ const RECONCILING_ACCEPTED_PROPOSALS_STEPS: TutorialStepConfig[] = [
 
   {
     title: "Reconciling Proposals",
-    description: (
+    description: (node: FullNodeData) => (
       <Stack spacing={"16px"}>
         <MarkdownRender text={"If the node you are changing has:"} />
-        {/* <MarkdownRender text="$$\text{Net Vote proposal} \geq \frac{\text{Net Vote Node}}{2} : \text{Aproved}$$" /> */}
-        <MarkdownRender text="$$\text{Net Vote Node} \leq 2 $$" sx={{ alignSelf: "center" }} />
+        <Stack direction={"row"} justifyContent="center" alignItems={"center"}>
+          <Box>
+            {node.corrects}
+            <CheckIcon />
+          </Box>
+          <Box>
+            {node.wrongs}
+            <CheckIcon />
+          </Box>
+          <MarkdownRender text="$$ \leq $$" />
+          {node.corrects - node.wrongs}
+        </Stack>
         <MarkdownRender
           text={
             "The proposal gets **Aproved Atomatically** then it will be implemented on the **Map** and will be moved to the accepted proposal list"
