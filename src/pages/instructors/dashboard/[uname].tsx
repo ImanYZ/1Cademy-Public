@@ -180,52 +180,6 @@ const StudentDashboard: InstructorLayoutPage = ({ user, currentSemester, setting
     const tagId = currentSemester?.tagId;
     if (!tagId) return;
     if (!semesterConfig) return;
-
-    const getStudentVoteStats = async () => {
-      // const semesterStudentVoteStatDoc = await getDocs(qByStudent);
-      // if (!semesterStudentVoteStatDoc.docs.length) {
-      // }
-      // const semesterStudentVoteStat = semesterStudentVoteStatDoc.docs[0].data() as ISemesterStudentVoteStat;
-      // const points = calculateVoteStatPoints(semesterStudentVoteStat, semesterConfig!);
-      // setStudentVoteStat({
-      //   ...semesterStudentVoteStat,
-      //   ...points,
-      // });
-      // const res = mapStudentsStatsDataByDates([semesterStudentVoteStat]);
-      // const gg = getGeneralStats(res);
-      // setSemesterStudentStats(gg);
-      // const ts = res.reduce(
-      //   (a: TrendStats, c): TrendStats => {
-      //     return {
-      //       childProposals: semesterConfig?.isProposalRequired
-      //         ? [...a.childProposals, { date: new Date(c.date), num: c.value.childProposals }]
-      //         : [],
-      //       editProposals: semesterConfig?.isProposalRequired
-      //         ? [...a.editProposals, { date: new Date(c.date), num: c.value.editProposals }]
-      //         : [],
-      //       proposedLinks: [...a.proposedLinks, { date: new Date(c.date), num: c.value.links }],
-      //       nodes: [...a.nodes, { date: new Date(c.date), num: c.value.nodes }],
-      //       questions: semesterConfig?.isQuestionProposalRequired
-      //         ? [...a.questions, { date: new Date(c.date), num: c.value.questions }]
-      //         : [],
-      //       votes: semesterConfig?.isCastingVotesRequired
-      //         ? [...a.votes, { date: new Date(c.date), num: c.value.votes }]
-      //         : [],
-      //     };
-      //   },
-      //   {
-      //     childProposals: [],
-      //     editProposals: [],
-      //     proposedLinks: [],
-      //     nodes: [],
-      //     questions: [],
-      //     votes: [],
-      //   }
-      // );
-      // setTrendStats(ts);
-      // setThereIsData(true);
-    };
-    getStudentVoteStats();
     const semesterStudentVoteStatRef = collection(db, "semesterStudentVoteStats");
     const qByAll = query(semesterStudentVoteStatRef, where("tagId", "==", tagId));
     const qByStudent = query(semesterStudentVoteStatRef, where("uname", "==", queryUname), where("tagId", "==", tagId));
@@ -402,16 +356,6 @@ const StudentDashboard: InstructorLayoutPage = ({ user, currentSemester, setting
     if (!currentSemester || !currentSemester.tagId || !queryUname || !semesterConfig) return;
 
     setIsLoading(true);
-    // const getUserDailyStat = async () => {
-    // if (!userDailyStatDoc.docs.length) {
-    //   setThereIsData(false);
-    //   return;
-    // }
-    // const userDailyStatsIncomplete = userDailyStatDoc.docs
-    //   .map(dailyStat => dailyStat.data() as SemesterStudentStat)
-    //   .slice(0, 1);
-    // };
-    // getUserDailyStat();
     const userDailyStatRef = collection(db, "semesterStudentStats");
     const q = query(userDailyStatRef, where("tagId", "==", currentSemester.tagId), where("uname", "==", queryUname));
     // const userDailyStatDoc = await getDocs(q);
@@ -578,19 +522,6 @@ const StudentDashboard: InstructorLayoutPage = ({ user, currentSemester, setting
         }
       }
     });
-
-    // const semesterStudentSankeys = await getDocs(q);
-    // if (!semesterStudentSankeys.docs.length) {
-    //   setStudentInteractions(null);
-    //   return;
-    // }
-
-    // const data = semesterStudentSankeys.docs.map(std => std.data())[0];
-    // const chartData = data.intractions.map((cur: any) => ({
-    //   label: studentNameByUname[cur.uname],
-    //   amount: cur.upVotes + cur.downVotes,
-    // }));
-    // setStudentInteractions(chartData);
     return () => snapShotFunc();
   }, [currentSemester, db, students, queryUname]);
 
