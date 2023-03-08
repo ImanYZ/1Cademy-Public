@@ -422,7 +422,7 @@ const NodeFooter = ({
     (event: any) => {
       // const searcherTutorialFinalized = userTutorial.searcher.done || userTutorial.searcher.skipped;
       console.log({ showProposeTutorial });
-
+      console.log({ selectNode: identifier });
       selectPendingProposals(event);
       setOperation("CancelProposals");
       nodeBookDispatch({ type: "setSelectedNode", payload: identifier });
