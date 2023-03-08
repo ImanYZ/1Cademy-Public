@@ -442,7 +442,9 @@ export type TutorialTypeKeys =
   | "proposalReference"
   | "proposalIdea"
   | "proposalQuestion"
-  | "proposalCode";
+  | "proposalCode"
+  | "reconcilingAcceptedProposal"
+  | "reconcilingNotAcceptedProposal";
 export type UserTutorial = {
   currentStep: number;
   done: boolean;

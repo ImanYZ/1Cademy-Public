@@ -18,6 +18,10 @@ import {
   PROPOSING_REFERENCE_EDIT_COMPLETE,
   PROPOSING_RELATION_EDIT_COMPLETE,
 } from "@/lib/utils/tutorials/proposalTutorialSteps";
+import {
+  RECONCILING_ACCEPTED_PROPOSALS_STEPS_COMPLETE,
+  RECONCILING_NOT_ACCEPTED_PROPOSALS_STEPS_COMPLETE,
+} from "@/lib/utils/tutorials/reconcilingProposalsTutorialSteps";
 import { SEARCHER_STEPS_COMPLETE } from "@/lib/utils/tutorials/searcherTutorialSteps";
 
 import { NODES_STEPS_COMPLETE } from "../lib/utils/tutorials/nodeTutorialSteps";
@@ -132,6 +136,12 @@ export const useInteractiveTutorial = ({}: useInteractiveTutorialProps) => {
     }
     if (currentTutorial === "PROPOSAL_CODE") {
       newSteps = PROPOSING_CODE_EDIT_COMPLETE;
+    }
+    if (currentTutorial === "RECONCILING_ACCEPTED_PROPOSAL") {
+      newSteps = RECONCILING_ACCEPTED_PROPOSALS_STEPS_COMPLETE;
+    }
+    if (currentTutorial === "RECONCILING_NOT_ACCEPTED_PROPOSAL") {
+      newSteps = RECONCILING_NOT_ACCEPTED_PROPOSALS_STEPS_COMPLETE;
     }
     console.log({ newSteps });
     idxCurrentStepRef.current = 0;

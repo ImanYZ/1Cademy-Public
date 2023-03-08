@@ -72,6 +72,10 @@ import {
   NODE_REFERENCE_COMPLETE,
   NODE_RELATION_COMPLETE,
 } from "@/lib/utils/tutorials/nodetypeTutorialSteps";
+import {
+  RECONCILING_ACCEPTED_PROPOSALS_STEPS_COMPLETE,
+  RECONCILING_NOT_ACCEPTED_PROPOSALS_STEPS_COMPLETE,
+} from "@/lib/utils/tutorials/reconcilingProposalsTutorialSteps";
 
 import LoadingImg from "../../public/animated-icon-1cademy.gif";
 import focusViewLogo from "../../public/focus.svg";
@@ -175,6 +179,8 @@ export type TutorialType =
   | "PROPOSAL_IDEA"
   | "PROPOSAL_QUESTION"
   | "PROPOSAL_CODE"
+  | "RECONCILING_ACCEPTED_PROPOSAL"
+  | "RECONCILING_NOT_ACCEPTED_PROPOSAL"
   | null;
 
 type DashboardProps = {};
@@ -325,6 +331,7 @@ const Dashboard = ({}: DashboardProps) => {
   const [, /* openProgressBarMenu */ setOpenProgressBarMenu] = useState(false);
 
   const [userTutorial, setUserTutorial] = useState<UserTutorials>({
+    navigation: { currentStep: 1, done: false, skipped: false },
     nodes: { currentStep: 1, done: false, skipped: false },
     searcher: { currentStep: 1, done: false, skipped: false },
     concept: { currentStep: 1, done: false, skipped: false },
@@ -340,7 +347,8 @@ const Dashboard = ({}: DashboardProps) => {
     proposalIdea: { currentStep: 1, done: false, skipped: false },
     proposalQuestion: { currentStep: 1, done: false, skipped: false },
     proposalCode: { currentStep: 1, done: false, skipped: false },
-    navigation: { currentStep: 1, done: false, skipped: false },
+    reconcilingAcceptedProposal: { currentStep: 1, done: false, skipped: false },
+    reconcilingNotAcceptedProposal: { currentStep: 1, done: false, skipped: false },
   });
 
   // const [currentTutorial, setCurrentTutorial] = useState<TutorialType>(null);
@@ -941,6 +949,32 @@ const Dashboard = ({}: DashboardProps) => {
       setTargetId(selectedNode.node);
       setCurrentTutorial("CODE");
       return;
+    }
+
+    const proposalNode = graph.nodes[targetId];
+    if (proposalNode && lastNodeOperation.current === "ProposeProposals") {
+      const willBeApproved = isVersionApproved({
+        corrects: proposalNode.corrects,
+        wrongs: proposalNode.corrects,
+        nodeData: proposalNode,
+      });
+      console.log({ willBeApproved });
+      if (
+        willBeApproved &&
+        !userTutorial.reconcilingAcceptedProposal.skipped &&
+        !userTutorial.reconcilingAcceptedProposal.done
+      ) {
+        setCurrentTutorial("RECONCILING_ACCEPTED_PROPOSAL");
+        return;
+      }
+      if (
+        !willBeApproved &&
+        !userTutorial.reconcilingNotAcceptedProposal.skipped &&
+        !userTutorial.reconcilingNotAcceptedProposal.done
+      ) {
+        setCurrentTutorial("RECONCILING_NOT_ACCEPTED_PROPOSAL");
+        return;
+      }
     }
   }, [
     currentTutorial,
@@ -3025,6 +3059,7 @@ const Dashboard = ({}: DashboardProps) => {
         isTheSame = compareChoices(oldNode, newNode, isTheSame);
         if (isTheSame) {
           onFail();
+          setOperation;
           setTimeout(() => {
             window.alert("You've not changed anything yet!");
           });
@@ -4735,6 +4770,8 @@ const Dashboard = ({}: DashboardProps) => {
               question: NODE_QUESTION_COMPLETE,
               idea: NODE_IDEA_COMPLETE,
               code: NODE_CODE_COMPLETE,
+              reconcilingAcceptedProposal: RECONCILING_ACCEPTED_PROPOSALS_STEPS_COMPLETE,
+              reconcilingNotAcceptedProposal: RECONCILING_NOT_ACCEPTED_PROPOSALS_STEPS_COMPLETE,
             }}
             userTutorialState={userTutorial}
           />
