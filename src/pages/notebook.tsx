@@ -4732,6 +4732,7 @@ const Dashboard = ({}: DashboardProps) => {
               concept: NODE_CODE_COMPLETE,
             }}
             userTutorialState={userTutorial}
+            setCurrentTutorial={setCurrentTutorial}
             setUserTutorialState={setUserTutorial}
           />
         </Box>
