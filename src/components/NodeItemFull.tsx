@@ -23,7 +23,7 @@ import { KnowledgeNode } from "../knowledgeTypes";
 import FullScreenImage from "./FullScreenImage";
 import MarkdownRender from "./Markdown/MarkdownRender";
 import NodeTypeIcon from "./NodeTypeIcon";
-import { FocusedViewNodeVotes,NodeVotes } from "./NodeVotes";
+import { FocusedViewNodeVotes, NodeVotes } from "./NodeVotes";
 import QuestionItem from "./QuestionItem";
 import { ShareButtons } from "./ShareButtons";
 

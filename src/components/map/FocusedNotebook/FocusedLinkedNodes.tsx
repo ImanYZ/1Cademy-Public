@@ -93,9 +93,15 @@ const FocusedLinkedNodes = ({ header, nodeLinks, nodes, navigateToNode, loadNode
                 sx={{ display: "flex" }}
                 onClick={() => navigateToNode(nodeLink.node)}
                 secondaryAction={
-                  <Box sx={{ display: "flex", flexDirection: "row", alignItems: "center" }}>
+                  <Box
+                    sx={{
+                      display: "flex",
+                      flexDirection: "row",
+                      alignItems: "center",
+                    }}
+                  >
                     <ListItemIcon>
-                      <NodeTypeIcon tooltipPlacement="bottom" nodeType={nodeLink.type} sx={{ marginLeft: "auto" }} />
+                      <NodeTypeIcon tooltipPlacement="bottom" nodeType={nodeLink.type} sx={{ marginLeft: "100px" }} />
                     </ListItemIcon>
                   </Box>
                 }
