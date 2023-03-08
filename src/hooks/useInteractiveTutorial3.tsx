@@ -9,8 +9,8 @@ import {
   NODE_REFERENCE_COMPLETE,
   NODE_RELATION_COMPLETE,
 } from "@/lib/utils/tutorials/nodetypeTutorialSteps";
-import { PROPOSAL_STEPS_COMPLETE } from "@/lib/utils/tutorials/proposalSteps";
 import {
+  PROPOSAL_STEPS_COMPLETE,
   PROPOSING_CODE_EDIT_COMPLETE,
   PROPOSING_CONCEPT_EDIT_COMPLETE,
   PROPOSING_IDEA_EDIT_COMPLETE,
