@@ -2708,7 +2708,7 @@ const Dashboard = ({}: DashboardProps) => {
       const _wrongs = wrongs + wrongChange;
 
       setGraph(graph => {
-        const updatedNodeIds: string[] = [];
+        const updatedNodeIds: string[] = [nodeId];
         const node = graph.nodes[nodeId];
 
         const willRemoveNode = doNeedToDeleteNode(_corrects, _wrongs, locked);
@@ -2736,6 +2736,7 @@ const Dashboard = ({}: DashboardProps) => {
           nodes = removeDagNode(g.current, nodeId, nodes);
 
           notebookRef.current.selectedNode = node.parents[0]?.node ?? null;
+          updatedNodeIds.push(notebookRef.current.selectedNode!);
           nodeBookDispatch({ type: "setSelectedNode", payload: node.parents[0]?.node ?? null });
         } else {
           nodes[nodeId] = {
@@ -3070,10 +3071,10 @@ const Dashboard = ({}: DashboardProps) => {
       let referencesOK = true;
 
       setUpdatedLinks(updatedLinks => {
-        setGraph(graph => {          
+        setGraph(graph => {
           const selectedNodeId = notebookRef.current.selectedNode!;
           const updatedNodeIds: string[] = [selectedNodeId];
-          
+
           if (
             (graph.nodes[selectedNodeId].nodeType === "Concept" ||
               graph.nodes[selectedNodeId].nodeType === "Relation" ||
@@ -4180,7 +4181,11 @@ const Dashboard = ({}: DashboardProps) => {
       )}
       <Box
         id="Map"
-        className={notebookRef.current.choosingNode && notebookRef.current.choosingNode.type !== "Reference" ? "ChoosableNotebook" : ""}
+        className={
+          notebookRef.current.choosingNode && notebookRef.current.choosingNode.type !== "Reference"
+            ? "ChoosableNotebook"
+            : ""
+        }
         sx={{
           overflow: "hidden",
           position: "relative",
