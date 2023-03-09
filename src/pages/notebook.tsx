@@ -820,242 +820,6 @@ const Dashboard = ({}: DashboardProps) => {
   //   getTutorialState();
   // }, [db, setCurrentTutorial, user, user?.userId, userTutorialLoaded]);
 
-  useEffect(() => {
-    // detect triggers to change tutorials
-    // tutorials are trigger over selected node because is visible in that time
-    console.log("TTT", { currentTutorial, userTutorial, userTutorialLoaded, firstLoading });
-
-    if (currentTutorial) return;
-    if (!userTutorialLoaded) return;
-    if (firstLoading) return;
-
-    devLog("USE_EFFECT: DETECT_TRIGGER_TUTORIAL", { userTutorial });
-
-    // --------------------------
-    if ((!userTutorial.navigation.done && !userTutorial.navigation.skipped) || userTutorial.navigation.forceTutorial) {
-      setCurrentTutorial("NAVIGATION");
-      return;
-    }
-
-    // --------------------------
-    if ((!userTutorial.nodes.done && !userTutorial.nodes.skipped) || userTutorial.nodes.forceTutorial) {
-      const nodeTargetId =
-        (nodeBookState.selectedNode && graph.nodes[nodeBookState.selectedNode]?.open && nodeBookState.selectedNode) ||
-        "";
-
-      if (!nodeTargetId) {
-        if (!userTutorial.nodes.forceTutorial) return;
-
-        // if is tutorial is forced and states are not correct, we set up the correct states
-        const idTarget = "r98BjyFDCe4YyLA3U8ZE"; // TODO: set up Node id in production
-        const targetElement = document.getElementById(idTarget);
-        if (!targetElement) return openNodeHandler(idTarget, { open: true });
-
-        notebookRef.current.selectedNode = idTarget;
-        nodeBookDispatch({ type: "setSelectedNode", payload: idTarget });
-        setNodeParts(idTarget, node => ({ ...node, open: true }));
-        scrollToNode(idTarget);
-        return;
-      }
-
-      setTargetId(nodeTargetId);
-      setCurrentTutorial("NODES");
-      return;
-    }
-
-    // --------------------------
-    if (
-      (!userTutorial.searcher.done && !userTutorial.searcher.skipped && openSidebar === "SEARCHER_SIDEBAR") ||
-      userTutorial.searcher.forceTutorial
-    ) {
-      if (openSidebar !== "SEARCHER_SIDEBAR") {
-        if (!userTutorial.searcher.forceTutorial) return;
-
-        // if is tutorial is forced and states are not correct, we set up the correct states
-        setOpenSidebar("SEARCHER_SIDEBAR");
-        return;
-      }
-      setCurrentTutorial("SEARCHER");
-      return;
-    }
-
-    // --------------------------
-    const changedNode: FullNodeData = nodeBookState.selectedNode ? changedNodes[nodeBookState.selectedNode] : null;
-    const nodeType = changedNode && changedNode.nodeType;
-
-    if (
-      (changedNode && !userTutorial.proposal.done && !userTutorial.proposal.skipped) ||
-      userTutorial.proposal.forceTutorial
-    ) {
-      if (!changedNode) {
-        if (!userTutorial.proposal.forceTutorial) return;
-
-        // if is tutorial is forced and states are not correct, we set up the correct states
-        const idTarget = "r98BjyFDCe4YyLA3U8ZE"; // TODO: set up Node id in production
-        const targetElement = document.getElementById(idTarget);
-        if (!targetElement) return openNodeHandler(idTarget, { open: true, editable: true });
-
-        notebookRef.current.selectedNode = idTarget;
-        nodeBookDispatch({ type: "setSelectedNode", payload: idTarget });
-        setNodeParts(idTarget, node => ({ ...node, open: true /* , editable: true */ }));
-        // scrollToNode(idTarget);
-        proposeNodeImprovement(idTarget);
-        return;
-      }
-      setCurrentTutorial("PROPOSAL");
-      setTargetId(changedNode.node);
-      return;
-    }
-    if (
-      changedNode &&
-      !userTutorial.proposalConcept.done &&
-      !userTutorial.proposalConcept.skipped &&
-      nodeType === "Concept"
-    ) {
-      setCurrentTutorial(`PROPOSAL_CONCEPT`);
-      setTargetId(nodeBookState.selectedNode ?? "");
-      return;
-    }
-    if (
-      changedNode &&
-      !userTutorial.proposalRelation.done &&
-      !userTutorial.proposalRelation.skipped &&
-      nodeType === "Relation"
-    ) {
-      setCurrentTutorial(`PROPOSAL_RELATION`);
-      setTargetId(nodeBookState.selectedNode ?? "");
-      return;
-    }
-    if (
-      changedNode &&
-      !userTutorial.proposalReference.done &&
-      !userTutorial.proposalReference.skipped &&
-      nodeType === "Reference"
-    ) {
-      setCurrentTutorial(`PROPOSAL_REFERENCE`);
-      setTargetId(nodeBookState.selectedNode ?? "");
-      return;
-    }
-    if (changedNode && !userTutorial.proposalIdea.done && !userTutorial.proposalIdea.skipped && nodeType === "Idea") {
-      setCurrentTutorial(`PROPOSAL_IDEA`);
-      setTargetId(nodeBookState.selectedNode ?? "");
-      return;
-    }
-    if (
-      changedNode &&
-      !userTutorial.proposalQuestion.done &&
-      !userTutorial.proposalQuestion.skipped &&
-      nodeType === "Question"
-    ) {
-      setCurrentTutorial(`PROPOSAL_QUESTION`);
-      setTargetId(nodeBookState.selectedNode ?? "");
-      return;
-    }
-    if (changedNode && !userTutorial.proposalCode.done && !userTutorial.proposalCode.skipped && nodeType === "Code") {
-      setCurrentTutorial(`PROPOSAL_CODE`);
-      setTargetId(nodeBookState.selectedNode ?? "");
-      return;
-    }
-
-    const selectedNode = graph.nodes[nodeBookState.selectedNode ?? ""];
-    if (
-      selectedNode &&
-      selectedNode.nodeType === "Concept" &&
-      !userTutorial.concept.done &&
-      !userTutorial.concept.skipped
-    ) {
-      setTargetId(selectedNode.node);
-      setCurrentTutorial("CONCEPT");
-      return;
-    }
-    if (
-      selectedNode &&
-      selectedNode.nodeType === "Relation" &&
-      !userTutorial.relation.done &&
-      !userTutorial.relation.skipped
-    ) {
-      setTargetId(selectedNode.node);
-      setCurrentTutorial("RELATION");
-      return;
-    }
-    if (
-      selectedNode &&
-      selectedNode.nodeType === "Reference" &&
-      !userTutorial.reference.done &&
-      !userTutorial.reference.skipped
-    ) {
-      setTargetId(selectedNode.node);
-      setCurrentTutorial("REFERENCE");
-      return;
-    }
-    if (
-      selectedNode &&
-      selectedNode.nodeType === "Question" &&
-      !userTutorial.question.done &&
-      !userTutorial.question.skipped
-    ) {
-      setTargetId(selectedNode.node);
-      setCurrentTutorial("QUESTION");
-      return;
-    }
-    if (selectedNode && selectedNode.nodeType === "Idea" && !userTutorial.idea.done && !userTutorial.idea.skipped) {
-      setTargetId(selectedNode.node);
-      setCurrentTutorial("IDEA");
-      return;
-    }
-    if (selectedNode && selectedNode.nodeType === "Code" && !userTutorial.code.done && !userTutorial.code.skipped) {
-      setTargetId(selectedNode.node);
-      setCurrentTutorial("CODE");
-      return;
-    }
-
-    const proposalNode = graph.nodes[nodeBookState.selectedNode ?? ""];
-    console.log({ proposalNode });
-    if (proposalNode && lastNodeOperation.current === "ProposeProposals") {
-      const willBeApproved = isVersionApproved({
-        corrects: 1,
-        wrongs: 0,
-        nodeData: proposalNode,
-      });
-      console.log({ willBeApproved });
-      if (
-        willBeApproved &&
-        !userTutorial.reconcilingAcceptedProposal.skipped &&
-        !userTutorial.reconcilingAcceptedProposal.done
-      ) {
-        setCurrentTutorial("RECONCILING_ACCEPTED_PROPOSAL");
-        setTargetId(willBeApproved.node);
-        return;
-      }
-      if (
-        !willBeApproved &&
-        !userTutorial.reconcilingNotAcceptedProposal.skipped &&
-        !userTutorial.reconcilingNotAcceptedProposal.done
-      ) {
-        setCurrentTutorial("RECONCILING_NOT_ACCEPTED_PROPOSAL");
-        setOpenSidebar("PROPOSALS");
-        setTargetId(willBeApproved.node);
-        return;
-      }
-    }
-  }, [
-    currentTutorial,
-    firstLoading,
-    graph,
-    graph.nodes,
-    nodeBookDispatch,
-    nodeBookState.selectedNode,
-    openNodeHandler,
-    openSidebar,
-    scrollToNode,
-    setCurrentTutorial,
-    setNodeParts,
-    setTargetId,
-    targetId,
-    userTutorial,
-    userTutorialLoaded,
-  ]);
-
   //  bd => state (first render)
   useEffect(() => {
     setTimeout(() => {
@@ -4125,17 +3889,263 @@ const Dashboard = ({}: DashboardProps) => {
   }, [currentTutorial, db, setCurrentTutorial, setInitialStep, setUserTutorial, stateNodeTutorial, user, userTutorial]);
 
   useEffect(() => {
-    const idTarget = targetFromRemote.current;
-    if (!idTarget) return;
-    if (!graph.nodes[idTarget]) return;
+    const detectTargetFromRemote = () => {
+      const idTarget = targetFromRemote.current;
+      if (!idTarget) return;
+      if (!graph.nodes[idTarget]) return;
 
-    notebookRef.current.selectedNode = idTarget;
-    nodeBookDispatch({ type: "setSelectedNode", payload: idTarget });
-    setNodeParts(idTarget, node => ({ ...node, open: true /* , editable: true */ }));
-    // scrollToNode(idTarget);
-    proposeNodeImprovement(idTarget);
-    targetFromRemote.current = "";
+      notebookRef.current.selectedNode = idTarget;
+      nodeBookDispatch({ type: "setSelectedNode", payload: idTarget });
+      setNodeParts(idTarget, node => ({ ...node, open: true /* , editable: true */ }));
+      // scrollToNode(idTarget);
+      proposeNodeImprovement(idTarget);
+      targetFromRemote.current = "";
+    };
+    detectTargetFromRemote();
   }, [graph, nodeBookDispatch, proposeNodeImprovement, setNodeParts]);
+
+  useEffect(() => {
+    const detectTriggerTutorial = () => {
+      // detect triggers to change tutorials
+      // tutorials are trigger over selected node because is visible in that time
+      console.log("TTT", { currentTutorial, userTutorial, userTutorialLoaded, firstLoading });
+
+      if (currentTutorial) return;
+      if (!userTutorialLoaded) return;
+      if (firstLoading) return;
+
+      devLog("USE_EFFECT: DETECT_TRIGGER_TUTORIAL", { userTutorial });
+
+      // --------------------------
+      if (
+        (!userTutorial.navigation.done && !userTutorial.navigation.skipped) ||
+        userTutorial.navigation.forceTutorial
+      ) {
+        setCurrentTutorial("NAVIGATION");
+        return;
+      }
+
+      // --------------------------
+      if ((!userTutorial.nodes.done && !userTutorial.nodes.skipped) || userTutorial.nodes.forceTutorial) {
+        const nodeTargetId =
+          (nodeBookState.selectedNode && graph.nodes[nodeBookState.selectedNode]?.open && nodeBookState.selectedNode) ||
+          "";
+
+        if (!nodeTargetId) {
+          if (!userTutorial.nodes.forceTutorial) return;
+
+          // if is tutorial is forced and states are not correct, we set up the correct states
+          const idTarget = "r98BjyFDCe4YyLA3U8ZE"; // TODO: set up Node id in production
+          const targetElement = document.getElementById(idTarget);
+          if (!targetElement) return openNodeHandler(idTarget, { open: true });
+
+          notebookRef.current.selectedNode = idTarget;
+          nodeBookDispatch({ type: "setSelectedNode", payload: idTarget });
+          setNodeParts(idTarget, node => ({ ...node, open: true }));
+          scrollToNode(idTarget);
+          return;
+        }
+
+        setTargetId(nodeTargetId);
+        setCurrentTutorial("NODES");
+        return;
+      }
+
+      // --------------------------
+      if (
+        (!userTutorial.searcher.done && !userTutorial.searcher.skipped && openSidebar === "SEARCHER_SIDEBAR") ||
+        userTutorial.searcher.forceTutorial
+      ) {
+        if (openSidebar !== "SEARCHER_SIDEBAR") {
+          if (!userTutorial.searcher.forceTutorial) return;
+
+          // if is tutorial is forced and states are not correct, we set up the correct states
+          setOpenSidebar("SEARCHER_SIDEBAR");
+          return;
+        }
+        setCurrentTutorial("SEARCHER");
+        return;
+      }
+
+      // --------------------------
+      const changedNode: FullNodeData = nodeBookState.selectedNode ? changedNodes[nodeBookState.selectedNode] : null;
+      const nodeType = changedNode && changedNode.nodeType;
+
+      if (
+        (changedNode && !userTutorial.proposal.done && !userTutorial.proposal.skipped) ||
+        userTutorial.proposal.forceTutorial
+      ) {
+        if (!changedNode) {
+          if (!userTutorial.proposal.forceTutorial) return;
+
+          // if is tutorial is forced and states are not correct, we set up the correct states
+          const idTarget = "r98BjyFDCe4YyLA3U8ZE"; // TODO: set up Node id in production
+          const targetElement = document.getElementById(idTarget);
+          if (!targetElement) return openNodeHandler(idTarget, { open: true, editable: true });
+
+          notebookRef.current.selectedNode = idTarget;
+          nodeBookDispatch({ type: "setSelectedNode", payload: idTarget });
+          setNodeParts(idTarget, node => ({ ...node, open: true /* , editable: true */ }));
+          // scrollToNode(idTarget);
+          proposeNodeImprovement(idTarget);
+          return;
+        }
+        setCurrentTutorial("PROPOSAL");
+        setTargetId(changedNode.node);
+        return;
+      }
+      if (
+        changedNode &&
+        !userTutorial.proposalConcept.done &&
+        !userTutorial.proposalConcept.skipped &&
+        nodeType === "Concept"
+      ) {
+        setCurrentTutorial(`PROPOSAL_CONCEPT`);
+        setTargetId(nodeBookState.selectedNode ?? "");
+        return;
+      }
+      if (
+        changedNode &&
+        !userTutorial.proposalRelation.done &&
+        !userTutorial.proposalRelation.skipped &&
+        nodeType === "Relation"
+      ) {
+        setCurrentTutorial(`PROPOSAL_RELATION`);
+        setTargetId(nodeBookState.selectedNode ?? "");
+        return;
+      }
+      if (
+        changedNode &&
+        !userTutorial.proposalReference.done &&
+        !userTutorial.proposalReference.skipped &&
+        nodeType === "Reference"
+      ) {
+        setCurrentTutorial(`PROPOSAL_REFERENCE`);
+        setTargetId(nodeBookState.selectedNode ?? "");
+        return;
+      }
+      if (changedNode && !userTutorial.proposalIdea.done && !userTutorial.proposalIdea.skipped && nodeType === "Idea") {
+        setCurrentTutorial(`PROPOSAL_IDEA`);
+        setTargetId(nodeBookState.selectedNode ?? "");
+        return;
+      }
+      if (
+        changedNode &&
+        !userTutorial.proposalQuestion.done &&
+        !userTutorial.proposalQuestion.skipped &&
+        nodeType === "Question"
+      ) {
+        setCurrentTutorial(`PROPOSAL_QUESTION`);
+        setTargetId(nodeBookState.selectedNode ?? "");
+        return;
+      }
+      if (changedNode && !userTutorial.proposalCode.done && !userTutorial.proposalCode.skipped && nodeType === "Code") {
+        setCurrentTutorial(`PROPOSAL_CODE`);
+        setTargetId(nodeBookState.selectedNode ?? "");
+        return;
+      }
+
+      const selectedNode = graph.nodes[nodeBookState.selectedNode ?? ""];
+      if (
+        selectedNode &&
+        selectedNode.nodeType === "Concept" &&
+        !userTutorial.concept.done &&
+        !userTutorial.concept.skipped
+      ) {
+        setTargetId(selectedNode.node);
+        setCurrentTutorial("CONCEPT");
+        return;
+      }
+      if (
+        selectedNode &&
+        selectedNode.nodeType === "Relation" &&
+        !userTutorial.relation.done &&
+        !userTutorial.relation.skipped
+      ) {
+        setTargetId(selectedNode.node);
+        setCurrentTutorial("RELATION");
+        return;
+      }
+      if (
+        selectedNode &&
+        selectedNode.nodeType === "Reference" &&
+        !userTutorial.reference.done &&
+        !userTutorial.reference.skipped
+      ) {
+        setTargetId(selectedNode.node);
+        setCurrentTutorial("REFERENCE");
+        return;
+      }
+      if (
+        selectedNode &&
+        selectedNode.nodeType === "Question" &&
+        !userTutorial.question.done &&
+        !userTutorial.question.skipped
+      ) {
+        setTargetId(selectedNode.node);
+        setCurrentTutorial("QUESTION");
+        return;
+      }
+      if (selectedNode && selectedNode.nodeType === "Idea" && !userTutorial.idea.done && !userTutorial.idea.skipped) {
+        setTargetId(selectedNode.node);
+        setCurrentTutorial("IDEA");
+        return;
+      }
+      if (selectedNode && selectedNode.nodeType === "Code" && !userTutorial.code.done && !userTutorial.code.skipped) {
+        setTargetId(selectedNode.node);
+        setCurrentTutorial("CODE");
+        return;
+      }
+
+      const proposalNode = graph.nodes[nodeBookState.selectedNode ?? ""];
+      console.log({ proposalNode });
+      if (proposalNode && lastNodeOperation.current === "ProposeProposals") {
+        const willBeApproved = isVersionApproved({
+          corrects: 1,
+          wrongs: 0,
+          nodeData: proposalNode,
+        });
+        console.log({ willBeApproved });
+        if (
+          willBeApproved &&
+          !userTutorial.reconcilingAcceptedProposal.skipped &&
+          !userTutorial.reconcilingAcceptedProposal.done
+        ) {
+          setCurrentTutorial("RECONCILING_ACCEPTED_PROPOSAL");
+          setTargetId(willBeApproved.node);
+          return;
+        }
+        if (
+          !willBeApproved &&
+          !userTutorial.reconcilingNotAcceptedProposal.skipped &&
+          !userTutorial.reconcilingNotAcceptedProposal.done
+        ) {
+          setCurrentTutorial("RECONCILING_NOT_ACCEPTED_PROPOSAL");
+          setOpenSidebar("PROPOSALS");
+          setTargetId(willBeApproved.node);
+          return;
+        }
+      }
+    };
+    detectTriggerTutorial();
+  }, [
+    currentTutorial,
+    firstLoading,
+    graph,
+    graph.nodes,
+    nodeBookDispatch,
+    nodeBookState.selectedNode,
+    openNodeHandler,
+    openSidebar,
+    proposeNodeImprovement,
+    scrollToNode,
+    setCurrentTutorial,
+    setNodeParts,
+    setTargetId,
+    targetId,
+    userTutorial,
+    userTutorialLoaded,
+  ]);
 
   return (
     <div className="MapContainer" style={{ overflow: "hidden" }}>
