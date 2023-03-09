@@ -429,7 +429,7 @@ const NodeFooter = ({
     (event: any) => {
       // const searcherTutorialFinalized = userTutorial.searcher.done || userTutorial.searcher.skipped;
       console.log({ showProposeTutorial });
-
+      console.log({ selectNode: identifier });
       selectPendingProposals(event);
       setOperation("CancelProposals");
       notebookRef.current.selectedNode = identifier;
@@ -550,7 +550,7 @@ const NodeFooter = ({
                 <ContainedButton
                   id={proposeButtonId}
                   title="Propose/evaluate versions of this node."
-                  onClick={showProposeTutorial ? () => setOpenProposalConfirm(true) : proposeNodeImprovementClick}
+                  onClick={proposeNodeImprovementClick}
                   tooltipPosition="top"
                   sx={{
                     background: (theme: any) =>
@@ -760,6 +760,7 @@ const NodeFooter = ({
                 // new Node or unaccepted proposal
 
                 <Box
+                  id={`${identifier}-node-footer-image-video`}
                   sx={{
                     display: editable ? "flex" : "none",
                     alignItems: "center",
@@ -768,6 +769,7 @@ const NodeFooter = ({
                   }}
                 >
                   <ContainedButton
+                    id={`${identifier}-node-footer-image`}
                     title="Upload an image to better explain this node."
                     onClick={() => uploadImageClicked()}
                     tooltipPosition="top"
@@ -802,6 +804,7 @@ const NodeFooter = ({
                   </ContainedButton>
 
                   <ContainedButton
+                    id={`${identifier}-node-footer-video`}
                     title="Cite a video from Youtube or Vimeo."
                     onClick={() => setAddVideo(!addVideo)}
                     tooltipPosition="top"
@@ -1067,7 +1070,7 @@ const NodeFooter = ({
                   //   }bookmarked this node. ` +
                   //   shortenNumber(bookmarks, 2, false) +
                   //   " 1Cademist" +
-                  //   (bookmarks === 1 ? " has" : "s have") +
+                  //   (bookmarks === 1 ? " has" : " have") +
                   //   " bookmarked this node."
                   // }
                   tooltipPosition="top"

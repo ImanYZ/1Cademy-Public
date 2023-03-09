@@ -707,6 +707,7 @@ const Node = ({
 
             {editable && (
               <Box
+                id={`${identifier}-preview-edit`}
                 sx={{
                   display: "flex",
                   justifyContent: "end",
@@ -1316,7 +1317,7 @@ const Node = ({
 
       ) : null} */}
       <Box
-        id={identifier + "_" + "childNodes"}
+        id={`${identifier}_childNodes`}
         sx={{
           display: !isNew && editable ? "flex" : "none",
           flexDirection: "column",
