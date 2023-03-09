@@ -1411,7 +1411,7 @@ const Dashboard = ({}: DashboardProps) => {
   const getMapGraph = useCallback(
     async (mapURL: string, postData: any = false, resetGraph: boolean = true) => {
       if (resetGraph) {
-        reloadPermanentGraph();
+        setTimeout(() => reloadPermanentGraph(), 200);
       }
 
       try {
@@ -3627,10 +3627,13 @@ const Dashboard = ({}: DashboardProps) => {
             return { nodes: newNodes, edges: oldEdges };
           }
         });
-        setNodeUpdates({
-          nodeIds: updatedNodeIds,
-          updatedAt: new Date(),
-        });
+
+        setTimeout(() => {
+          setNodeUpdates({
+            nodeIds: updatedNodeIds,
+            updatedAt: new Date(),
+          });
+        }, 200);
         if (nodeBookState.selectedNode) scrollToNode(nodeBookState.selectedNode);
       }, 1000);
     },
