@@ -1355,10 +1355,12 @@ const Dashboard = ({}: DashboardProps) => {
         delete changedNodes[cId];
       }
 
-      setNodeUpdates({
-        nodeIds: updatedNodeIds,
-        updatedAt: new Date(),
-      });
+      setTimeout(() => {
+        setNodeUpdates({
+          nodeIds: updatedNodeIds,
+          updatedAt: new Date(),
+        });
+      }, 200);
       return {
         nodes: oldNodes,
         edges: oldEdges,
