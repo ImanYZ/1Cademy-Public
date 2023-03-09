@@ -1,3 +1,4 @@
+import LiveHelpIcon from "@mui/icons-material/LiveHelp";
 import { Box, Button, Stack, Typography } from "@mui/material";
 import React, { useMemo, useRef } from "react";
 
@@ -231,9 +232,12 @@ export const Tutorial = ({
       }}
     >
       <Stack direction={"row"} justifyContent="space-between" sx={{ mb: "12px" }}>
-        <Typography component={"h2"} sx={{ fontSize: "18px", fontWeight: "bold", display: "inline-block" }}>
-          {tutorialState.title}
-        </Typography>
+        <Stack direction={"row"} alignItems="center" spacing={"8px"}>
+          <Typography component={"h2"} sx={{ fontSize: "18px", fontWeight: "bold", display: "inline-block" }}>
+            {tutorialState.title}
+          </Typography>
+          <LiveHelpIcon />
+        </Stack>
         {stepsLength <= 1 || (
           <Typography sx={{ display: "inline-block", color: "inherit" }}>
             {tutorialState.currentStepName} / {stepsLength}
