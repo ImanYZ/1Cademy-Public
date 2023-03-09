@@ -852,7 +852,7 @@ const Dashboard = ({}: DashboardProps) => {
       if (firstScrollToNode) return;
       if (!queueFinished) return;
       if (!urlNodeProcess) return;
-      console.log("BD=>state");
+      // console.log("BD=>state");
 
       if (user.sNode && user.sNode === nodeBookState.selectedNode) {
         // if (user.sNode === nodeBookState.selectedNode) return;
@@ -2820,7 +2820,7 @@ const Dashboard = ({}: DashboardProps) => {
       //setOpenSidebar(null);
       scrollToNode(selectedNode);
     },
-    [reloadPermanentGraph, scrollToNode]
+    [processHeightChange, reloadPermanentGraph, scrollToNode]
   );
 
   const selectNode = useCallback(
@@ -4023,11 +4023,11 @@ const Dashboard = ({}: DashboardProps) => {
       devLog("DETECT_REMOTE_TARGET");
       notebookRef.current.selectedNode = idTarget;
       nodeBookDispatch({ type: "setSelectedNode", payload: idTarget });
-      setNodeParts(idTarget, node => ({ ...node, open: true /* , editable: true */ }));
+      setNodeParts(idTarget, node => ({ ...node, open: true, editable: true }));
       // scrollToNode(idTarget);
       // console.log('first')
       proposeNodeImprovement(null, idTarget);
-      targetFromRemote.current = "";
+      targetFromRemote.current = "DETECTED";
     };
     detectTargetFromRemote();
   }, [graph, nodeBookDispatch, proposeNodeImprovement, setNodeParts]);
@@ -4036,7 +4036,7 @@ const Dashboard = ({}: DashboardProps) => {
     const detectTriggerTutorial = () => {
       // detect triggers to change tutorials
       // tutorials are trigger over selected node because is visible in that time
-      console.log("TTT", { currentTutorial, userTutorial, userTutorialLoaded, firstLoading });
+      // console.log("TTT", { currentTutorial, userTutorial, userTutorialLoaded, firstLoading });
 
       if (currentTutorial) return;
       if (!userTutorialLoaded) return;
@@ -4275,21 +4275,26 @@ const Dashboard = ({}: DashboardProps) => {
         userTutorial.proposalCode.forceTutorial
       ) {
         if (!changedNode) {
-          console.log("opening code");
+          console.log("opening code", targetFromRemote.current);
           if (!userTutorial.proposalCode.forceTutorial) return;
-
+          if (targetFromRemote.current === "DETECTED") return;
+          console.log("code 11");
           const idTarget = "E1nIWQ7RIC3pRLvk0Bk5";
           const targetElement = document.getElementById(idTarget);
+          console.log("code 12");
           if (!targetElement) {
             targetFromRemote.current = idTarget;
             return openNodeHandler(idTarget, { open: true, editable: true });
           }
 
+          console.log("code 13");
           setNodeParts(idTarget, node => ({ ...node, open: true }));
           proposeNodeImprovement(null, idTarget);
           return;
         }
+        console.log("code 14");
         if (changedNode.nodeType === "Code") {
+          console.log("code 15");
           setCurrentTutorial(`PROPOSAL_CODE`);
           setTargetId(changedNode.node);
         }

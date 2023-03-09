@@ -76,7 +76,7 @@ export const useWorkerQueue = ({
       worker.onmessage = e => {
         const { oldMapWidth, oldMapHeight, oldNodes, oldEdges, graph, oldClusterNodes } = e.data;
 
-        console.log("WORKER RESULT", { oldNodes, oldEdges });
+        // console.log("WORKER RESULT", { oldNodes, oldEdges });
 
         const gObject = dagreUtils.mapGraphToObject(g.current);
         const graphObject: GraphObject = graph;
@@ -140,7 +140,7 @@ export const useWorkerQueue = ({
             nodeIds: updatedNodeIds,
             updatedAt: new Date(),
           });
-          console.log("WORKER Result Merged", { nodes: nodesCopy, edges: edgesCopy });
+          // console.log("WORKER Result Merged", { nodes: nodesCopy, edges: edgesCopy });
           return { nodes: nodesCopy, edges: edgesCopy };
         });
 
