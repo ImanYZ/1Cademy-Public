@@ -2749,16 +2749,17 @@ const Dashboard = ({}: DashboardProps) => {
           };
         }
 
-        if (!willRemoveNode) {
-          nodes[nodeId] = {
-            ...node,
-            disableVotes: false,
-          };
-        }
-
         (async () => {
-          await idToken();
-          await getMapGraph(`/wrongNode/${nodeId}`);
+          try {
+            await idToken();
+            await getMapGraph(`/wrongNode/${nodeId}`);
+          } catch(e) {}
+
+          if (!willRemoveNode) {
+            setNodeParts(nodeId, (node) => {
+              return {...node, disableVotes: false};
+            });
+          }
         })();
 
         setNodeUpdates({
@@ -2830,7 +2831,7 @@ const Dashboard = ({}: DashboardProps) => {
       });
     },
     [setNodeParts]
-  );
+  );  
 
   const deleteChoice = useCallback(
     (nodeRef: any, nodeId: string, choiceIdx: number) => {
