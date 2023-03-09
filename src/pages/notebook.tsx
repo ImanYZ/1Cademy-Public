@@ -1486,11 +1486,8 @@ const Dashboard = ({}: DashboardProps) => {
         tempNodes.delete(tempNode);
       });
 
-      console.log(changedNodes, "changedNodes updatedNodeIds");
-
       for (let cId of Object.keys(changedNodes)) {
         const changedNode = changedNodes[cId];
-        console.log(changedNode, "changedNode, updatedNodeIds");
         if (cId in oldNodes) {
           oldEdges = compareAndUpdateNodeLinks(g.current, oldNodes[cId], cId, changedNode, oldEdges);
         } else {
@@ -1510,7 +1507,6 @@ const Dashboard = ({}: DashboardProps) => {
       }
 
       setTimeout(() => {
-        console.log(updatedNodeIds, "updatedNodeIds");
         setNodeUpdates({
           nodeIds: updatedNodeIds,
           updatedAt: new Date(),
