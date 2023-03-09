@@ -89,7 +89,7 @@ const NAVIGATION_STEPS: TutorialStepConfig[] = [
       <>
         <MarkdownRender
           text={
-            "To **zoom in**, you can slide two fingers away from each other on the track pad or press control (command Mac) + and To **zoom out**, you can slide to fingers toward each other on the track or press control (command Mac) -"
+            "To **zoom in**, you can slide two fingers away from each other on the track pad or press control (command Mac) + and to **zoom out**, you can slide to fingers toward each other on the track or press control (command Mac) -"
           }
         />
         <Box width="380px" height="200px" m="0 auto" mt="8px">
