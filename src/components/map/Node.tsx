@@ -410,7 +410,7 @@ const Node = ({
         nodeClicked(event, identifier, nodeType, setOpenPart);
       }
 
-      if (event.target.type === "textarea" || event.target.type === "text") {
+      if (!notebookRef.current.choosingNode && notebookRef.current.selectedNode !== identifier) {
         notebookRef.current.selectedNode = identifier;
         nodeBookDispatch({ type: "setSelectedNode", payload: identifier });
       }
