@@ -119,6 +119,7 @@ const PendingProposalSidebar = ({
 
   return (
     <SidebarWrapper
+      id="sidebar-wrapper-pending-list"
       title="Pending Proposals"
       headerImage={theme === "Dark" ? referencesDarkTheme : referencesLightTheme}
       open={open}
