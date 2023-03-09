@@ -789,11 +789,11 @@ const Dashboard = ({}: DashboardProps) => {
       setSelectedNodeType(oldNodes[nodeId].nodeType);
       const thisNode = { ...oldNodes[nodeId] };
       const newNode = { ...oldNodes, [nodeId]: innerFunc(thisNode) };
+      setNodeUpdates({
+        nodeIds: [nodeId],
+        updatedAt: new Date(),
+      });
       return { nodes: newNode, edges };
-    });
-    setNodeUpdates({
-      nodeIds: [nodeId],
-      updatedAt: new Date(),
     });
   }, []);
 
@@ -2753,11 +2753,11 @@ const Dashboard = ({}: DashboardProps) => {
           try {
             await idToken();
             await getMapGraph(`/wrongNode/${nodeId}`);
-          } catch(e) {}
+          } catch (e) {}
 
           if (!willRemoveNode) {
-            setNodeParts(nodeId, (node) => {
-              return {...node, disableVotes: false};
+            setNodeParts(nodeId, node => {
+              return { ...node, disableVotes: false };
             });
           }
         })();
@@ -2831,7 +2831,7 @@ const Dashboard = ({}: DashboardProps) => {
       });
     },
     [setNodeParts]
-  );  
+  );
 
   const deleteChoice = useCallback(
     (nodeRef: any, nodeId: string, choiceIdx: number) => {
