@@ -127,6 +127,7 @@ import {
   FullNodesData,
   // NodeTutorialState,
   TNodeBookState,
+  TNodeUpdates,
   TutorialTypeKeys,
   // TutorialType,
   UserNodes,
@@ -200,6 +201,11 @@ const Dashboard = ({}: DashboardProps) => {
   // nodes: dictionary of all nodes visible on map for specific user
   // edges: dictionary of all edges visible on map for specific user
   const [graph, setGraph] = useState<{ nodes: FullNodesData; edges: EdgesData }>({ nodes: {}, edges: {} });
+  const [nodeUpdates, setNodeUpdates] = useState<TNodeUpdates>({
+    nodeIds: [],
+    updatedAt: new Date(),
+  });
+
   // this allNodes is DEPRECATED
   const [allNodes, setAllNodes] = useState<FullNodesData>({});
   // as map grows, width and height grows based on the nodes shown on the map
@@ -583,6 +589,7 @@ const Dashboard = ({}: DashboardProps) => {
   }, []);
 
   const { addTask, queue, isQueueWorking, queueFinished } = useWorkerQueue({
+    setNodeUpdates,
     g,
     graph,
     setGraph,
@@ -784,6 +791,10 @@ const Dashboard = ({}: DashboardProps) => {
       const newNode = { ...oldNodes, [nodeId]: innerFunc(thisNode) };
       return { nodes: newNode, edges };
     });
+    setNodeUpdates({
+      nodeIds: [nodeId],
+      updatedAt: new Date(),
+    });
   }, []);
 
   //Getting the node from the Url to open and scroll to that node in the first render
@@ -849,6 +860,10 @@ const Dashboard = ({}: DashboardProps) => {
         if (selectedNode.top === 0) return;
         notebookRef.current.selectedNode = user.sNode;
         nodeBookDispatch({ type: "setSelectedNode", payload: user.sNode });
+        setNodeUpdates({
+          nodeIds: [user.sNode],
+          updatedAt: new Date(),
+        });
         scrollToNode(user.sNode);
         setFirstScrollToNode(true);
         setIsSubmitting(false);
@@ -1013,14 +1028,21 @@ const Dashboard = ({}: DashboardProps) => {
             });
 
             devLog("5:user Nodes Snapshot:visible Full Nodes Merged", visibleFullNodesMerged);
+            const updatedNodeIds: string[] = [];
             const { newNodes, newEdges } = fillDagre(
               g.current,
               visibleFullNodesMerged,
               nodes,
               edges,
               settings.showClusterOptions,
-              allTags
+              allTags,
+              updatedNodeIds
             );
+
+            setNodeUpdates({
+              nodeIds: updatedNodeIds,
+              updatedAt: new Date(),
+            });
 
             if (!Object.keys(newNodes).length) {
               setNoNodesFoundMessage(true);
@@ -1068,6 +1090,10 @@ const Dashboard = ({}: DashboardProps) => {
       setGraph({
         nodes: {},
         edges: {},
+      });
+      setNodeUpdates({
+        nodeIds: [],
+        updatedAt: new Date(),
       });
       setLocalSnapshot({});
       shouldResetGraph.current = true;
@@ -1158,6 +1184,10 @@ const Dashboard = ({}: DashboardProps) => {
         nodes: {},
         edges: {},
       });
+      setNodeUpdates({
+        nodeIds: [],
+        updatedAt: new Date(),
+      });
       shouldResetGraph.current = false;
     }
 
@@ -1196,14 +1226,22 @@ const Dashboard = ({}: DashboardProps) => {
         };
       });
       devLog("5: TUTORIAL:user Nodes Snapshot:visible Full Nodes Merged", visibleFullNodesMerged);
+      const updatedNodeIds: string[] = [];
+
       const { newNodes, newEdges } = fillDagre(
         g.current,
         visibleFullNodesMerged,
         nodes,
         edges,
         settings.showClusterOptions,
-        allTags
+        allTags,
+        updatedNodeIds
       );
+
+      setNodeUpdates({
+        nodeIds: updatedNodeIds,
+        updatedAt: new Date(),
+      });
 
       if (!Object.keys(newNodes).length) {
         setNoNodesFoundMessage(true);
@@ -1379,6 +1417,10 @@ const Dashboard = ({}: DashboardProps) => {
   useEffect(() => {
     g.current = createGraph();
     setGraph({ nodes: {}, edges: {} });
+    setNodeUpdates({
+      nodeIds: [],
+      updatedAt: new Date(),
+    });
     devLog("CHANGE NH 🚀", { showClusterOptions: settings.showClusterOptions });
   }, [settings.showClusterOptions]);
 
@@ -1430,14 +1472,17 @@ const Dashboard = ({}: DashboardProps) => {
     devLog("RELOAD PERMANENT GRAPH");
 
     setGraph(({ nodes: oldNodes, edges: oldEdges }) => {
+      const updatedNodeIds: string[] = [];
+
       if (tempNodes.size > 0 || Object.keys(changedNodes).length > 0) {
         oldNodes = { ...oldNodes };
         oldEdges = { ...oldEdges };
       }
 
       tempNodes.forEach(tempNode => {
-        oldEdges = removeDagAllEdges(g.current, tempNode, oldEdges);
+        oldEdges = removeDagAllEdges(g.current, tempNode, oldEdges, updatedNodeIds);
         oldNodes = removeDagNode(g.current, tempNode, oldNodes);
+        updatedNodeIds.push(tempNode);
         tempNodes.delete(tempNode);
       });
 
@@ -1457,9 +1502,14 @@ const Dashboard = ({}: DashboardProps) => {
           settings.showClusterOptions,
           null
         );
+        updatedNodeIds.push(cId);
         delete changedNodes[cId];
       }
 
+      setNodeUpdates({
+        nodeIds: updatedNodeIds,
+        updatedAt: new Date(),
+      });
       return {
         nodes: oldNodes,
         edges: oldEdges,
@@ -1624,10 +1674,13 @@ const Dashboard = ({}: DashboardProps) => {
     (nodeId: string) => {
       setUpdatedLinks(updatedLinks => {
         setGraph(({ nodes: oldNodes, edges: oldEdges }) => {
+          const updatedNodeIds: string[] = [];
           if (!notebookRef.current.choosingNode || !notebookRef.current.chosenNode)
             return { nodes: oldNodes, edges: oldEdges };
           if (nodeId !== notebookRef.current.choosingNode.id) return { nodes: oldNodes, edges: oldEdges };
 
+          updatedNodeIds.push(nodeId);
+          updatedNodeIds.push(notebookRef.current.chosenNode.id);
           const thisNode = copyNode(oldNodes[nodeId]);
           const chosenNodeObj = copyNode(oldNodes[notebookRef.current.chosenNode.id]);
 
@@ -1744,6 +1797,10 @@ const Dashboard = ({}: DashboardProps) => {
             [nodeId]: thisNode,
             [chosenNode]: chosenNodeObj,
           };
+          setNodeUpdates({
+            nodeIds: updatedNodeIds,
+            updatedAt: new Date(),
+          });
           return { nodes: newNodes, edges: newEdges };
         });
         return { ...updatedLinks };
@@ -1758,6 +1815,7 @@ const Dashboard = ({}: DashboardProps) => {
     (nodeId: string, linkIdx: number, linkType: ChoosingType) => {
       setUpdatedLinks(updatedLinks => {
         setGraph(({ nodes, edges }) => {
+          const updatedNodeIds: string[] = [nodeId];
           let oldNodes = { ...nodes };
           let newEdges = { ...edges };
           const thisNode = copyNode(oldNodes[nodeId]);
@@ -1811,6 +1869,10 @@ const Dashboard = ({}: DashboardProps) => {
             thisNode.tagIds.splice(linkIdx, 1);
           }
           oldNodes[nodeId] = thisNode;
+          setNodeUpdates({
+            nodeIds: updatedNodeIds,
+            updatedAt: new Date(),
+          });
           return { nodes: oldNodes, edges: newEdges };
         });
 
@@ -1855,6 +1917,7 @@ const Dashboard = ({}: DashboardProps) => {
 
       setGraph(graph => {
         (async () => {
+          const updatedNodeIds: string[] = [];
           const offsprings = recursiveOffsprings(nodeId);
           notebookRef.current.selectedNode = nodeId;
           nodeBookDispatch({ type: "setSelectedNode", payload: nodeId });
@@ -1907,8 +1970,12 @@ const Dashboard = ({}: DashboardProps) => {
             let oldNodes = { ...graph.nodes };
             let oldEdges = { ...graph.edges };
             for (let offspring of offsprings) {
-              ({ oldNodes, oldEdges } = hideNodeAndItsLinks(g.current, offspring, oldNodes, oldEdges));
+              ({ oldNodes, oldEdges } = hideNodeAndItsLinks(g.current, offspring, oldNodes, oldEdges, updatedNodeIds));
             }
+            setNodeUpdates({
+              nodeIds: updatedNodeIds,
+              updatedAt: new Date(),
+            });
           } catch (err) {
             console.error(err);
           }
@@ -2065,28 +2132,28 @@ const Dashboard = ({}: DashboardProps) => {
       if (isPlayingTheTutorialRef.current) return;
 
       setGraph(graph => {
+        const parentNode = getFirstParent(nodeId);
+
+        const thisNode = graph.nodes[nodeId];
+        const { nodeRef, userNodeRef } = initNodeStatusChange(nodeId, thisNode.userNodeId);
+
+        // flagged closing node as visible = false in parents
+        for (const parent of thisNode.parents) {
+          if (!graph.nodes[parent.node]) continue;
+          const childIdx = graph.nodes[parent.node].children.findIndex(child => child.node === nodeId);
+          if (childIdx !== -1) {
+            graph.nodes[parent.node] = { ...graph.nodes[parent.node] };
+            graph.nodes[parent.node].children = [...graph.nodes[parent.node].children];
+            const child = graph.nodes[parent.node].children[childIdx];
+            child.visible = false;
+          }
+        }
+
         (async () => {
           const batch = writeBatch(db);
           const username = user?.uname;
           if (notebookRef.current.choosingNode) return;
           if (!username) return;
-
-          const parentNode = getFirstParent(nodeId);
-
-          const thisNode = graph.nodes[nodeId];
-          const { nodeRef, userNodeRef } = initNodeStatusChange(nodeId, thisNode.userNodeId);
-
-          // flagged closing node as visible = false in parents
-          for (const parent of thisNode.parents) {
-            if (!graph.nodes[parent.node]) continue;
-            const childIdx = graph.nodes[parent.node].children.findIndex(child => child.node === nodeId);
-            if (childIdx !== -1) {
-              graph.nodes[parent.node] = { ...graph.nodes[parent.node] };
-              graph.nodes[parent.node].children = { ...graph.nodes[parent.node].children };
-              const child = graph.nodes[parent.node].children[childIdx];
-              child.visible = false;
-            }
-          }
 
           const userNodeData = {
             changed: thisNode.changed || false,
@@ -2509,6 +2576,9 @@ const Dashboard = ({}: DashboardProps) => {
     (event: any, nodeId: string) => {
       if (notebookRef.current.choosingNode) return;
       setGraph(({ nodes: oldNodes, edges }) => {
+        const updatedNodeIds: string[] = [];
+        updatedNodeIds.push(nodeId);
+
         const thisNode = oldNodes[nodeId];
         nodeBookDispatch({ type: "setSelectedNode", payload: nodeId });
         notebookRef.current.selectedNode = nodeId;
@@ -2569,6 +2639,10 @@ const Dashboard = ({}: DashboardProps) => {
           nodeId,
           []
         );
+        setNodeUpdates({
+          nodeIds: updatedNodeIds,
+          updatedAt: new Date(),
+        });
         return { nodes: oldNodes, edges };
       });
       event.currentTarget.blur();
@@ -2634,6 +2708,7 @@ const Dashboard = ({}: DashboardProps) => {
       const _wrongs = wrongs + wrongChange;
 
       setGraph(graph => {
+        const updatedNodeIds: string[] = [nodeId];
         const node = graph.nodes[nodeId];
 
         const willRemoveNode = doNeedToDeleteNode(_corrects, _wrongs, locked);
@@ -2657,10 +2732,11 @@ const Dashboard = ({}: DashboardProps) => {
         let edges = graph.edges;
 
         if (willRemoveNode) {
-          edges = removeDagAllEdges(g.current, nodeId, edges);
+          edges = removeDagAllEdges(g.current, nodeId, edges, updatedNodeIds);
           nodes = removeDagNode(g.current, nodeId, nodes);
 
           notebookRef.current.selectedNode = node.parents[0]?.node ?? null;
+          updatedNodeIds.push(notebookRef.current.selectedNode!);
           nodeBookDispatch({ type: "setSelectedNode", payload: node.parents[0]?.node ?? null });
         } else {
           nodes[nodeId] = {
@@ -2685,6 +2761,10 @@ const Dashboard = ({}: DashboardProps) => {
           await getMapGraph(`/wrongNode/${nodeId}`);
         })();
 
+        setNodeUpdates({
+          nodeIds: updatedNodeIds,
+          updatedAt: new Date(),
+        });
         return { nodes, edges };
       });
     },
@@ -2894,6 +2974,10 @@ const Dashboard = ({}: DashboardProps) => {
 
         return { nodes: newNodes, edges };
       });
+      setNodeUpdates({
+        nodeIds: [selectedNode],
+        updatedAt: new Date(),
+      });
       processHeightChange(nodeId);
       //setOpenSidebar(null);
       scrollToNode(selectedNode);
@@ -2989,6 +3073,8 @@ const Dashboard = ({}: DashboardProps) => {
       setUpdatedLinks(updatedLinks => {
         setGraph(graph => {
           const selectedNodeId = notebookRef.current.selectedNode!;
+          const updatedNodeIds: string[] = [selectedNodeId];
+
           if (
             (graph.nodes[selectedNodeId].nodeType === "Concept" ||
               graph.nodes[selectedNodeId].nodeType === "Relation" ||
@@ -3133,6 +3219,11 @@ const Dashboard = ({}: DashboardProps) => {
             scrollToNode(selectedNodeId);
           }, 200);
 
+          setNodeUpdates({
+            nodeIds: updatedNodeIds,
+            updatedAt: new Date(),
+          });
+
           return {
             nodes,
             edges: graph.edges,
@@ -3155,6 +3246,8 @@ const Dashboard = ({}: DashboardProps) => {
       reloadPermanentGraph();
       const newNodeId = newId(db);
       setGraph(graph => {
+        const updatedNodeIds: string[] = [];
+
         const { nodes: oldNodes, edges } = graph;
         const selectedNodeId = notebookRef.current.selectedNode!;
         if (!selectedNodeId) return graph; // CHECK: I added this to validate
@@ -3229,12 +3322,18 @@ const Dashboard = ({}: DashboardProps) => {
         );
         if (!selectedNodeId) return { nodes: newNodes, edges };
         const newEdges = setDagEdge(g.current, selectedNodeId, newNodeId, { label: "" }, { ...edges });
+        updatedNodeIds.push(selectedNodeId, newNodeId);
 
         notebookRef.current.selectedNode = newNodeId;
         nodeBookDispatch({ type: "setSelectedNode", payload: newNodeId });
         setTimeout(() => {
           scrollToNode(newNodeId);
         }, 3500);
+
+        setNodeUpdates({
+          nodeIds: updatedNodeIds,
+          updatedAt: new Date(),
+        });
         return { nodes: newNodes, edges: newEdges };
       });
     },
@@ -3260,6 +3359,7 @@ const Dashboard = ({}: DashboardProps) => {
       nodeBookDispatch({ type: "setChosenNode", payload: null });
 
       setGraph(graph => {
+        const updatedNodeIds: string[] = [newNodeId];
         const newNode = graph.nodes[newNodeId];
 
         if (!newNode.title) {
@@ -3371,7 +3471,10 @@ const Dashboard = ({}: DashboardProps) => {
         setTimeout(() => {
           onComplete();
         }, 200);
-
+        setNodeUpdates({
+          nodeIds: updatedNodeIds,
+          updatedAt: new Date(),
+        });
         return { nodes, edges };
       });
     },
@@ -3563,6 +3666,8 @@ const Dashboard = ({}: DashboardProps) => {
         event.preventDefault();
         setOpenProposal(proposal.id);
         reloadPermanentGraph();
+
+        const updatedNodeIds: string[] = [nodeBookState.selectedNode!, newNodeId];
         setGraph(({ nodes: oldNodes, edges }) => {
           if (!nodeBookState.selectedNode) return { nodes: oldNodes, edges };
           if (!(nodeBookState.selectedNode in changedNodes)) {
@@ -3684,6 +3789,10 @@ const Dashboard = ({}: DashboardProps) => {
             );
             return { nodes: newNodes, edges: oldEdges };
           }
+        });
+        setNodeUpdates({
+          nodeIds: updatedNodeIds,
+          updatedAt: new Date(),
         });
         if (nodeBookState.selectedNode) scrollToNode(nodeBookState.selectedNode);
       }, 1000);
@@ -3890,6 +3999,7 @@ const Dashboard = ({}: DashboardProps) => {
         } catch (error) {
           console.error(error);
         }
+        const updatedNodeIds: string[] = [nodeBookState.selectedNode!, newNodeId];
         setGraph(({ nodes: oldNodes, edges }) => {
           if (!nodeBookState.selectedNode) return { nodes: oldNodes, edges };
           if (
@@ -3912,6 +4022,10 @@ const Dashboard = ({}: DashboardProps) => {
           }
           setProposals(proposalsTemp);
           return { nodes: oldNodes, edges };
+        });
+        setNodeUpdates({
+          nodeIds: updatedNodeIds,
+          updatedAt: new Date(),
         });
       }
     },
@@ -3965,6 +4079,10 @@ const Dashboard = ({}: DashboardProps) => {
   const onRedrawGraph = useCallback(() => {
     setGraph(() => {
       return { nodes: {}, edges: {} };
+    });
+    setNodeUpdates({
+      nodeIds: [],
+      updatedAt: new Date(),
     });
     g.current = createGraph();
     setTimeout(() => {
@@ -4063,6 +4181,11 @@ const Dashboard = ({}: DashboardProps) => {
       )}
       <Box
         id="Map"
+        className={
+          notebookRef.current.choosingNode && notebookRef.current.choosingNode.type !== "Reference"
+            ? "ChoosableNotebook"
+            : ""
+        }
         sx={{
           overflow: "hidden",
           position: "relative",
@@ -4568,6 +4691,7 @@ const Dashboard = ({}: DashboardProps) => {
                 )}
                 <MemoizedLinksList edgeIds={edgeIds} edges={graph.edges} selectedRelation={selectedRelation} />
                 <MemoizedNodeList
+                  nodeUpdates={nodeUpdates}
                   notebookRef={notebookRef}
                   setFocusView={setFocusView}
                   nodes={graph.nodes}
