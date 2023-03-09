@@ -114,9 +114,12 @@ export const Tutorial = ({
           }}
         >
           <Stack direction={"row"} justifyContent="space-between" sx={{ mb: "12px" }}>
-            <Typography component={"h2"} sx={{ fontSize: "18px", fontWeight: "bold", display: "inline-block" }}>
-              {tutorialState.title}
-            </Typography>
+            <Stack direction={"row"} alignItems="center" spacing={"8px"}>
+              <Typography component={"h2"} sx={{ fontSize: "18px", fontWeight: "bold", display: "inline-block" }}>
+                {tutorialState.title}
+              </Typography>
+              <LiveHelpIcon />
+            </Stack>
             {stepsLength <= 1 || (
               <Typography sx={{ display: "inline-block", color: "#818181" }}>
                 {tutorialState.currentStepName} / {stepsLength}
@@ -129,22 +132,24 @@ export const Tutorial = ({
             : tutorialState.description}
 
           <Stack direction={"row"} justifyContent={"space-between"} alignItems={"center"} sx={{ mt: "16px" }}>
-            <Button
-              variant="text"
-              onClick={() => {
-                handleCloseProgressBarMenu();
-                // onChangeStep(null);
-                // onUpdateNode("nodes", tutorialState.currentStepName, {});
-                onSkip();
-              }}
-              sx={{
-                color: "inherit",
-                p: "8px 0px",
-                ":hover": { backgroundColor: theme => (theme.palette.mode === "dark" ? "#575f68" : "#d7dee6") },
-              }}
-            >
-              Skip
-            </Button>
+            {tutorialState.currentStepName !== stepsLength && (
+              <Button
+                variant="text"
+                onClick={() => {
+                  handleCloseProgressBarMenu();
+                  // onChangeStep(null);
+                  // onUpdateNode("nodes", tutorialState.currentStepName, {});
+                  onSkip();
+                }}
+                sx={{
+                  color: "inherit",
+                  p: "8px 0px",
+                  ":hover": { backgroundColor: theme => (theme.palette.mode === "dark" ? "#575f68" : "#d7dee6") },
+                }}
+              >
+                Skip
+              </Button>
+            )}
             <Box>
               {tutorialState.currentStepName > 1 && (
                 <Button
@@ -204,7 +209,7 @@ export const Tutorial = ({
                     },
                   }}
                 >
-                  {"Got It"}
+                  Got It
                 </Button>
               )}
             </Box>
@@ -248,22 +253,24 @@ export const Tutorial = ({
       {typeof tutorialState.description === "function" ? tutorialState.description(node) : tutorialState.description}
 
       <Stack direction={"row"} justifyContent={"space-between"} alignItems={"center"} sx={{ mt: "16px" }}>
-        <Button
-          variant="text"
-          onClick={() => {
-            handleCloseProgressBarMenu();
-            // onChangeStep(null);
-            // onUpdateNode("nodes", tutorialState.currentStepName, {});
-            onSkip();
-          }}
-          sx={{
-            color: "inherit",
-            p: "8px 0px",
-            ":hover": { backgroundColor: theme => (theme.palette.mode === "dark" ? "#575f68" : "#d7dee6") },
-          }}
-        >
-          Skip
-        </Button>
+        {tutorialState.currentStepName !== stepsLength && (
+          <Button
+            variant="text"
+            onClick={() => {
+              handleCloseProgressBarMenu();
+              // onChangeStep(null);
+              // onUpdateNode("nodes", tutorialState.currentStepName, {});
+              onSkip();
+            }}
+            sx={{
+              color: "inherit",
+              p: "8px 0px",
+              ":hover": { backgroundColor: theme => (theme.palette.mode === "dark" ? "#575f68" : "#d7dee6") },
+            }}
+          >
+            Skip
+          </Button>
+        )}
         <Box>
           {tutorialState.currentStepName > 1 && (
             <Button
@@ -323,7 +330,7 @@ export const Tutorial = ({
                 },
               }}
             >
-              {"Finalize"}
+              Got it
             </Button>
           )}
         </Box>

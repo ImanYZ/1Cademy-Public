@@ -79,7 +79,7 @@ const RECONCILING_ACCEPTED_PROPOSALS_STEPS: TutorialStepConfig[] = [
         </Stack>
         <MarkdownRender
           text={
-            "The proposal gets **Aproved Atomatically** then it will be implemented on the **Map** and will be moved to the accepted proposal list"
+            "The proposal gets **Approved Atomatically** then it will be implemented on the **Map**. It'll go to the **pending proposals** list of the node."
           }
         />
 
@@ -160,7 +160,7 @@ const RECONCILING_NOT_ACCEPTED_PROPOSALS_STEPS: TutorialStepConfig[] = [
 
         <MarkdownRender
           text={
-            "The proposal will **NOT** get **implemented**. It'll go to the **pending proposals** list on the node."
+            "The proposal will **NOT** get **implemented**. It'll go to the **pending proposals** list of the node."
           }
         />
       </Stack>
