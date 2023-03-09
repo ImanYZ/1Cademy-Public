@@ -3996,52 +3996,132 @@ const Dashboard = ({}: DashboardProps) => {
         setTargetId(changedNode.node);
         return;
       }
+
       if (
-        changedNode &&
-        !userTutorial.proposalConcept.done &&
-        !userTutorial.proposalConcept.skipped &&
-        nodeType === "Concept"
+        (changedNode &&
+          !userTutorial.proposalConcept.done &&
+          !userTutorial.proposalConcept.skipped &&
+          nodeType === "Concept") ||
+        userTutorial.proposalConcept.forceTutorial
       ) {
+        if (!changedNode) {
+          if (!userTutorial.proposalConcept.forceTutorial) {
+            const idTarget = "r98BjyFDCe4YyLA3U8ZE";
+            const targetElement = document.getElementById(idTarget);
+            if (!targetElement) return openNodeHandler(idTarget, { open: true, editable: true });
+
+            setNodeParts(idTarget, node => ({ ...node, open: true }));
+            proposeNodeImprovement(idTarget);
+            return;
+          }
+        }
         setCurrentTutorial(`PROPOSAL_CONCEPT`);
         setTargetId(nodeBookState.selectedNode ?? "");
         return;
       }
+
       if (
-        changedNode &&
-        !userTutorial.proposalRelation.done &&
-        !userTutorial.proposalRelation.skipped &&
-        nodeType === "Relation"
+        (changedNode &&
+          !userTutorial.proposalRelation.done &&
+          !userTutorial.proposalRelation.skipped &&
+          nodeType === "Relation") ||
+        userTutorial.proposalRelation.forceTutorial
       ) {
+        if (!changedNode) {
+          if (!userTutorial.proposalRelation.forceTutorial) {
+            const idTarget = "zYYmaXvhab7hH2uRI9Up";
+            const targetElement = document.getElementById(idTarget);
+            if (!targetElement) return openNodeHandler(idTarget, { open: true, editable: true });
+
+            setNodeParts(idTarget, node => ({ ...node, open: true }));
+            proposeNodeImprovement(idTarget);
+            return;
+          }
+        }
         setCurrentTutorial(`PROPOSAL_RELATION`);
         setTargetId(nodeBookState.selectedNode ?? "");
         return;
       }
       if (
-        changedNode &&
-        !userTutorial.proposalReference.done &&
-        !userTutorial.proposalReference.skipped &&
-        nodeType === "Reference"
+        (changedNode &&
+          !userTutorial.proposalReference.done &&
+          !userTutorial.proposalReference.skipped &&
+          nodeType === "Reference") ||
+        userTutorial.proposalReference.forceTutorial
       ) {
+        if (!changedNode) {
+          if (!userTutorial.proposalReference.forceTutorial) {
+            const idTarget = "P631lWeKsBtszZRDlmsM";
+            const targetElement = document.getElementById(idTarget);
+            if (!targetElement) return openNodeHandler(idTarget, { open: true, editable: true });
+
+            setNodeParts(idTarget, node => ({ ...node, open: true }));
+            proposeNodeImprovement(idTarget);
+            return;
+          }
+        }
+
         setCurrentTutorial(`PROPOSAL_REFERENCE`);
         setTargetId(nodeBookState.selectedNode ?? "");
         return;
       }
-      if (changedNode && !userTutorial.proposalIdea.done && !userTutorial.proposalIdea.skipped && nodeType === "Idea") {
+      if (
+        (changedNode && !userTutorial.proposalIdea.done && !userTutorial.proposalIdea.skipped && nodeType === "Idea") ||
+        userTutorial.proposalIdea.forceTutorial
+      ) {
+        if (!changedNode) {
+          if (!userTutorial.proposalIdea.forceTutorial) {
+            const idTarget = "v9wGPxRCI4DRq11o7uH2";
+            const targetElement = document.getElementById(idTarget);
+            if (!targetElement) return openNodeHandler(idTarget, { open: true, editable: true });
+
+            setNodeParts(idTarget, node => ({ ...node, open: true }));
+            proposeNodeImprovement(idTarget);
+            return;
+          }
+        }
+
         setCurrentTutorial(`PROPOSAL_IDEA`);
         setTargetId(nodeBookState.selectedNode ?? "");
         return;
       }
       if (
-        changedNode &&
-        !userTutorial.proposalQuestion.done &&
-        !userTutorial.proposalQuestion.skipped &&
-        nodeType === "Question"
+        (changedNode &&
+          !userTutorial.proposalQuestion.done &&
+          !userTutorial.proposalQuestion.skipped &&
+          nodeType === "Question") ||
+        userTutorial.proposalQuestion.forceTutorial
       ) {
+        if (!changedNode) {
+          if (!userTutorial.proposalQuestion.forceTutorial) {
+            const idTarget = "qO9uK6UdYRLWm4Olihlw";
+            const targetElement = document.getElementById(idTarget);
+            if (!targetElement) return openNodeHandler(idTarget, { open: true, editable: true });
+
+            setNodeParts(idTarget, node => ({ ...node, open: true }));
+            proposeNodeImprovement(idTarget);
+            return;
+          }
+        }
         setCurrentTutorial(`PROPOSAL_QUESTION`);
         setTargetId(nodeBookState.selectedNode ?? "");
         return;
       }
-      if (changedNode && !userTutorial.proposalCode.done && !userTutorial.proposalCode.skipped && nodeType === "Code") {
+      if (
+        (changedNode && !userTutorial.proposalCode.done && !userTutorial.proposalCode.skipped && nodeType === "Code") ||
+        userTutorial.proposalCode.forceTutorial
+      ) {
+        if (!changedNode) {
+          if (!userTutorial.proposalCode.forceTutorial) {
+            const idTarget = "E1nIWQ7RIC3pRLvk0Bk5";
+            const targetElement = document.getElementById(idTarget);
+            if (!targetElement) return openNodeHandler(idTarget, { open: true, editable: true });
+
+            setNodeParts(idTarget, node => ({ ...node, open: true }));
+            proposeNodeImprovement(idTarget);
+            return;
+          }
+        }
         setCurrentTutorial(`PROPOSAL_CODE`);
         setTargetId(nodeBookState.selectedNode ?? "");
         return;
