@@ -171,7 +171,6 @@ const NODE_CODE_STEPS: TutorialStepConfig[] = [
     isClickeable: true,
   },
 ];
-console.log({ NODE_RELATION_STEPS, NODE_REFERENCE_STEPS, NODE_QUESTION_STEPS, NODE_IDEA_STEPS, NODE_CODE_STEPS });
 
 export const NODE_CONCEPT_COMPLETE: TutorialStep[] = NODE_CONCEPT_STEPS.map((c, i, s) => {
   return { ...getBaseStepConfig(i + 1, s.length), ...c };
