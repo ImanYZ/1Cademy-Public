@@ -20,7 +20,7 @@ import { getInstitutionsByName } from "@/lib/firestoreClient/institutions";
 
 import MarkdownRender from "./Markdown/MarkdownRender";
 import NodeTypeIcon from "./NodeTypeIcon";
-import NodeVotes from "./NodeVotes";
+import { NodeVotes } from "./NodeVotes";
 import OptimizedAvatar from "./OptimizedAvatar";
 import QuestionItem from "./QuestionItem";
 

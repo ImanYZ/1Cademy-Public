@@ -54,24 +54,18 @@ const FocusedLinkedNodes = ({ header, nodeLinks, nodes, navigateToNode, loadNode
     <Card>
       <CardHeader
         sx={{
-          backgroundColor: theme => theme.palette.common.darkGrayBackground,
-          color: theme => theme.palette.common.white,
+          backgroundColor: theme => (theme.palette.mode === "dark" ? "#242425" : "#EAECF0"),
+          color: theme => (theme.palette.mode === "dark" ? theme.palette.common.white : "#1D2939"),
         }}
         title={
           <Box sx={{ textAlign: "center" }}>
-            <TypographyUnderlined
-              variant="h6"
-              fontWeight="300"
-              gutterBottom
-              align="center"
-              sx={{ color: theme => theme.palette.common.white }}
-            >
+            <TypographyUnderlined variant="h6" fontWeight="500" gutterBottom align="center" sx={{ color: "inherit" }}>
               {header}
             </TypographyUnderlined>
           </Box>
         }
       ></CardHeader>
-      <List sx={{ p: "0px" }}>
+      <List sx={{ p: "0px", background: theme => (theme.palette.mode === "dark" ? "#303134" : "#F2F4F7") }}>
         {nodeLinks.map(nodeLink => {
           const nodeImageUrl = linkedNodes[nodeLink.node] ? linkedNodes[nodeLink.node].nodeImage : "";
           const nodeTitle = linkedNodes[nodeLink.node] ? linkedNodes[nodeLink.node].title : "";
@@ -99,9 +93,15 @@ const FocusedLinkedNodes = ({ header, nodeLinks, nodes, navigateToNode, loadNode
                 sx={{ display: "flex" }}
                 onClick={() => navigateToNode(nodeLink.node)}
                 secondaryAction={
-                  <Box sx={{ display: "flex", flexDirection: "row", alignItems: "center" }}>
+                  <Box
+                    sx={{
+                      display: "flex",
+                      flexDirection: "row",
+                      alignItems: "center",
+                    }}
+                  >
                     <ListItemIcon>
-                      <NodeTypeIcon tooltipPlacement="bottom" nodeType={nodeLink.type} sx={{ marginLeft: "auto" }} />
+                      <NodeTypeIcon tooltipPlacement="bottom" nodeType={nodeLink.type} sx={{ marginLeft: "100px" }} />
                     </ListItemIcon>
                   </Box>
                 }

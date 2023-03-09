@@ -6,7 +6,7 @@ import { EdgesData, FullNodesData } from "src/nodeBookTypes";
 import { INode } from "src/types/INode";
 import { INodeLink } from "src/types/INodeLink";
 
-import { NodeItemFull } from "../../NodeItemFull";
+import { FocusedNodeItemFull } from "../../NodeItemFull";
 import { MemoizedFocusedLinkedNodes } from "./FocusedLinkedNodes";
 import { MemoizedFocusedNodeContributors } from "./FocusedNodeContributors";
 import FocusedNodeSkeleton from "./FocusedNodeSkeleton";
@@ -118,7 +118,7 @@ const FocusedNotebook = ({
           width: "100%",
           height: "100%",
           zIndex: 1399,
-          padding: "50px 40px",
+          padding: "50px 10px",
           overflow: "auto",
         }}
       >
@@ -148,7 +148,7 @@ const FocusedNotebook = ({
               )}
             </Grid>
             <Grid item xs={12} sm={12} md={6}>
-              <NodeItemFull
+              <FocusedNodeItemFull
                 nodeId={selectedNodeId}
                 node={currentNode as any}
                 contributors={
@@ -176,7 +176,7 @@ const FocusedNotebook = ({
                 editable={false}
               />
             </Grid>
-            <Grid item sm={12} md={3}>
+            <Grid item xs={12} sm={12} md={3}>
               {children && children?.length > 0 && (
                 <MemoizedFocusedLinkedNodes
                   loadNodeData={loadNodeData}
