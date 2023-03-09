@@ -392,6 +392,7 @@ const Dashboard = ({}: DashboardProps) => {
     userTutorial,
     userTutorialLoaded,
     setUserTutorial,
+    setInitialStep,
   } = useInteractiveTutorial({ user });
   const onNodeInViewport = useCallback(
     (nodeId: string) => {
@@ -2006,13 +2007,6 @@ const Dashboard = ({}: DashboardProps) => {
       .map((el, idx) => (idx > 0 ? capitalizeFirstLetter(el.toLocaleLowerCase()) : el.toLowerCase()))
       .join("") as TutorialTypeKeys;
 
-    if (userTutorial[keyTutorial].forceTutorial) {
-      // when is forced by Table of Content the changes are locally
-      setUserTutorial(prev => ({ ...prev, [keyTutorial]: { ...prev[keyTutorial], forceTutorial: false } }));
-      setCurrentTutorial(null);
-      return;
-    }
-
     const tutorialUpdated: UserTutorial = {
       ...userTutorial[keyTutorial],
       currentStep: stateNodeTutorial.currentStepName,
@@ -2022,7 +2016,11 @@ const Dashboard = ({}: DashboardProps) => {
     console.log({ tutorialUpdated, keyTutorial });
     const userTutorialUpdated: UserTutorials = { ...userTutorial, [keyTutorial]: tutorialUpdated };
     setCurrentTutorial(null);
+    setInitialStep(0);
     setUserTutorial(userTutorialUpdated);
+
+    // if (userTutorial[keyTutorial].forceTutorial) return;
+    // if(userTutorial[keyTutorial])
 
     const tutorialRef = doc(db, "userTutorial", user.uname);
     const tutorialDoc = await getDoc(tutorialRef);
@@ -2032,7 +2030,7 @@ const Dashboard = ({}: DashboardProps) => {
     } else {
       await setDoc(tutorialRef, userTutorialUpdated);
     }
-  }, [currentTutorial, db, setCurrentTutorial, stateNodeTutorial, user, userTutorial]);
+  }, [currentTutorial, db, setCurrentTutorial, setInitialStep, setUserTutorial, stateNodeTutorial, user, userTutorial]);
 
   const openLinkedNode = useCallback(
     (linkedNodeID: string, typeOperation?: string) => {
@@ -4090,23 +4088,27 @@ const Dashboard = ({}: DashboardProps) => {
       .map((el, idx) => (idx > 0 ? capitalizeFirstLetter(el.toLocaleLowerCase()) : el.toLowerCase()))
       .join("") as TutorialTypeKeys;
 
-    if (userTutorial[keyTutorial].forceTutorial) {
-      console.log("skip tutorial");
-      // when is forced by Table of Content the changes are locally
-      setUserTutorial(prev => ({ ...prev, [keyTutorial]: { ...prev[keyTutorial], forceTutorial: false } }));
-      setCurrentTutorial(null);
-      return;
-    }
+    // if (userTutorial[keyTutorial].forceTutorial) {
+    //   console.log("skip tutorial");
+    //   // when is forced by Table of Content the changes are locally
+    //   setUserTutorial(prev => ({ ...prev, [keyTutorial]: { ...prev[keyTutorial], forceTutorial: false } }));
+    //   setCurrentTutorial(null);
+    //   return;
+    // }
 
     const tutorialUpdated: UserTutorial = {
       ...userTutorial[keyTutorial],
       currentStep: stateNodeTutorial.currentStepName,
       skipped: true,
+      forceTutorial: false,
     };
     const userTutorialUpdated = { ...userTutorial, [keyTutorial]: tutorialUpdated };
     setCurrentTutorial(null);
     setOpenSidebar(null);
+    setInitialStep(0);
     setUserTutorial(userTutorialUpdated);
+
+    if (userTutorial[keyTutorial].forceTutorial) return;
 
     const tutorialRef = doc(db, "userTutorial", user.uname);
     const tutorialDoc = await getDoc(tutorialRef);
@@ -4116,7 +4118,7 @@ const Dashboard = ({}: DashboardProps) => {
     } else {
       await setDoc(tutorialRef, userTutorialUpdated);
     }
-  }, [currentTutorial, db, setCurrentTutorial, setUserTutorial, stateNodeTutorial, user, userTutorial]);
+  }, [currentTutorial, db, setCurrentTutorial, setInitialStep, setUserTutorial, stateNodeTutorial, user, userTutorial]);
 
   return (
     <div className="MapContainer" style={{ overflow: "hidden" }}>
@@ -4821,28 +4823,35 @@ const Dashboard = ({}: DashboardProps) => {
             open={openProgressBar}
             handleCloseProgressBar={() => setOpenProgressBar(false)}
             tutorials={{
-              navigation: NAVIGATION_STEPS_COMPLETE,
-              nodes: NODES_STEPS_COMPLETE,
-              searcher: SEARCHER_STEPS_COMPLETE,
-              proposal: PROPOSAL_STEPS_COMPLETE,
-              proposalCode: PROPOSING_CODE_EDIT_COMPLETE,
-              proposalConcept: PROPOSING_CONCEPT_EDIT_COMPLETE,
-              proposalIdea: PROPOSING_IDEA_EDIT_COMPLETE,
-              proposalQuestion: PROPOSING_QUESTION_EDIT_COMPLETE,
-              proposalReference: PROPOSING_REFERENCE_EDIT_COMPLETE,
-              proposalRelation: PROPOSING_RELATION_EDIT_COMPLETE,
-              concept: NODE_CODE_COMPLETE,
-              relation: NODE_RELATION_COMPLETE,
-              reference: NODE_REFERENCE_COMPLETE,
-              question: NODE_QUESTION_COMPLETE,
-              idea: NODE_IDEA_COMPLETE,
-              code: NODE_CODE_COMPLETE,
-              reconcilingAcceptedProposal: RECONCILING_ACCEPTED_PROPOSALS_STEPS_COMPLETE,
-              reconcilingNotAcceptedProposal: RECONCILING_NOT_ACCEPTED_PROPOSALS_STEPS_COMPLETE,
+              navigation: { title: "Navigation", steps: NAVIGATION_STEPS_COMPLETE },
+              nodes: { title: "Node", steps: NODES_STEPS_COMPLETE },
+              searcher: { title: "Searcher", steps: SEARCHER_STEPS_COMPLETE },
+              proposal: { title: "Proposal", steps: PROPOSAL_STEPS_COMPLETE },
+              proposalCode: { title: "Proposal Code", steps: PROPOSING_CODE_EDIT_COMPLETE },
+              proposalConcept: { title: "Proposal Concept", steps: PROPOSING_CONCEPT_EDIT_COMPLETE },
+              proposalIdea: { title: "Proposal Idea", steps: PROPOSING_IDEA_EDIT_COMPLETE },
+              proposalQuestion: { title: "Proposal Question", steps: PROPOSING_QUESTION_EDIT_COMPLETE },
+              proposalReference: { title: "Proposal Reference", steps: PROPOSING_REFERENCE_EDIT_COMPLETE },
+              proposalRelation: { title: "Proposal Relation", steps: PROPOSING_RELATION_EDIT_COMPLETE },
+              concept: { title: "Concept Node", steps: NODE_CODE_COMPLETE },
+              relation: { title: "Relation Node", steps: NODE_RELATION_COMPLETE },
+              reference: { title: "Reference Node", steps: NODE_REFERENCE_COMPLETE },
+              question: { title: "Question Node", steps: NODE_QUESTION_COMPLETE },
+              idea: { title: "Idea Node", steps: NODE_IDEA_COMPLETE },
+              code: { title: "Code Node", steps: NODE_CODE_COMPLETE },
+              reconcilingAcceptedProposal: {
+                title: "Accepted Proposals",
+                steps: RECONCILING_ACCEPTED_PROPOSALS_STEPS_COMPLETE,
+              },
+              reconcilingNotAcceptedProposal: {
+                title: "Not Accepted Proposal",
+                steps: RECONCILING_NOT_ACCEPTED_PROPOSALS_STEPS_COMPLETE,
+              },
             }}
             userTutorialState={userTutorial}
             setCurrentTutorial={setCurrentTutorial}
             setUserTutorialState={setUserTutorial}
+            setInitialStep={setInitialStep}
           />
         </Box>
       </Box>
