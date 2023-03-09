@@ -2700,7 +2700,7 @@ const Dashboard = ({}: DashboardProps) => {
 
   const proposeNodeImprovement = useCallback(
     (event: any, nodeId: string = "") => {
-      devLog("PROPOSE_NODE_IMPROVEMENT");
+      devLog("PROPOSE_NODE_IMPROVEMENT", nodeId);
       // event.preventDefault();
       const selectedNode = nodeId || notebookRef.current.selectedNode;
       if (!selectedNode) return;
@@ -2719,7 +2719,7 @@ const Dashboard = ({}: DashboardProps) => {
           ...oldNodes,
           [selectedNode]: thisNode,
         };
-
+        console.log("willupdategraph");
         return { nodes: newNodes, edges };
       });
       //setOpenSidebar(null);
@@ -3896,11 +3896,13 @@ const Dashboard = ({}: DashboardProps) => {
       if (!idTarget) return;
       if (!graph.nodes[idTarget]) return;
 
+      devLog("DETECT_REMOTE_TARGET");
       notebookRef.current.selectedNode = idTarget;
       nodeBookDispatch({ type: "setSelectedNode", payload: idTarget });
       setNodeParts(idTarget, node => ({ ...node, open: true /* , editable: true */ }));
       // scrollToNode(idTarget);
-      proposeNodeImprovement(idTarget);
+      // console.log('first')
+      proposeNodeImprovement(null, idTarget);
       targetFromRemote.current = "";
     };
     detectTargetFromRemote();
@@ -3977,25 +3979,34 @@ const Dashboard = ({}: DashboardProps) => {
         (changedNode && !userTutorial.proposal.done && !userTutorial.proposal.skipped) ||
         userTutorial.proposal.forceTutorial
       ) {
+        console.log("PP1");
         if (!changedNode) {
+          console.log("PP2");
           if (!userTutorial.proposal.forceTutorial) return;
 
+          console.log("PP3");
           // if is tutorial is forced and states are not correct, we set up the correct states
           const idTarget = "r98BjyFDCe4YyLA3U8ZE"; // TODO: set up Node id in production
           const targetElement = document.getElementById(idTarget);
-          if (!targetElement) return openNodeHandler(idTarget, { open: true, editable: true });
+          if (!targetElement) {
+            targetFromRemote.current = idTarget;
+            return openNodeHandler(idTarget, { open: true, editable: true });
+          }
 
+          console.log("PP4");
           notebookRef.current.selectedNode = idTarget;
           nodeBookDispatch({ type: "setSelectedNode", payload: idTarget });
           setNodeParts(idTarget, node => ({ ...node, open: true /* , editable: true */ }));
           // scrollToNode(idTarget);
-          proposeNodeImprovement(idTarget);
+          proposeNodeImprovement(null, idTarget);
           return;
         }
+        console.log("PP5");
         setCurrentTutorial("PROPOSAL");
         setTargetId(changedNode.node);
         return;
       }
+
       if (
         changedNode &&
         !userTutorial.proposalConcept.done &&
@@ -4006,6 +4017,7 @@ const Dashboard = ({}: DashboardProps) => {
         setTargetId(nodeBookState.selectedNode ?? "");
         return;
       }
+
       if (
         changedNode &&
         !userTutorial.proposalRelation.done &&
@@ -4016,6 +4028,7 @@ const Dashboard = ({}: DashboardProps) => {
         setTargetId(nodeBookState.selectedNode ?? "");
         return;
       }
+
       if (
         changedNode &&
         !userTutorial.proposalReference.done &&
