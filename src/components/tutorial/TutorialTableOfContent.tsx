@@ -21,6 +21,7 @@ type TutorialTableOfContentProps = {
   setCurrentTutorial: (newTutorial: TutorialType) => void;
   setUserTutorialState: Dispatch<SetStateAction<UserTutorials>>;
   setInitialStep: (initialStep: number) => void;
+  reloadPermanentGraph: () => void;
 };
 
 const TutorialTableOfContent = ({
@@ -31,6 +32,7 @@ const TutorialTableOfContent = ({
   setCurrentTutorial,
   setUserTutorialState,
   setInitialStep,
+  reloadPermanentGraph,
 }: TutorialTableOfContentProps) => {
   const [expanded, setExpanded] = useState<string | false>("Option1");
   const [, /* selectedTutorial */ setSelectedTutorial] = useState<TutorialTypeKeys>(
@@ -161,6 +163,7 @@ const TutorialTableOfContent = ({
                     <IconButton
                       onClick={e => {
                         e.stopPropagation();
+                        reloadPermanentGraph();
                         console.log("force tutorial", keyTutorial);
                         setUserTutorialState(previousTutorialStep => {
                           const tutorialStepModified = (

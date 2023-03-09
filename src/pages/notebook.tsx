@@ -3973,7 +3973,7 @@ const Dashboard = ({}: DashboardProps) => {
 
       // --------------------------
       const changedNode: FullNodeData = nodeBookState.selectedNode ? changedNodes[nodeBookState.selectedNode] : null;
-      const nodeType = changedNode && changedNode.nodeType;
+      // const nodeType = changedNode && changedNode.nodeType;
 
       if (
         (changedNode && !userTutorial.proposal.done && !userTutorial.proposal.skipped) ||
@@ -4011,22 +4011,26 @@ const Dashboard = ({}: DashboardProps) => {
         (changedNode &&
           !userTutorial.proposalConcept.done &&
           !userTutorial.proposalConcept.skipped &&
-          nodeType === "Concept") ||
+          changedNode.nodeType === "Concept") ||
         userTutorial.proposalConcept.forceTutorial
       ) {
         if (!changedNode) {
-          if (!userTutorial.proposalConcept.forceTutorial) {
-            const idTarget = "r98BjyFDCe4YyLA3U8ZE";
-            const targetElement = document.getElementById(idTarget);
-            if (!targetElement) return openNodeHandler(idTarget, { open: true, editable: true });
+          if (!userTutorial.proposalConcept.forceTutorial) return;
 
-            setNodeParts(idTarget, node => ({ ...node, open: true }));
-            proposeNodeImprovement(idTarget);
-            return;
+          const idTarget = "r98BjyFDCe4YyLA3U8ZE";
+          const targetElement = document.getElementById(idTarget);
+          if (!targetElement) {
+            targetFromRemote.current = idTarget;
+            return openNodeHandler(idTarget, { open: true, editable: true });
           }
+          setNodeParts(idTarget, node => ({ ...node, open: true }));
+          proposeNodeImprovement(null, idTarget);
+          return;
         }
-        setCurrentTutorial(`PROPOSAL_CONCEPT`);
-        setTargetId(nodeBookState.selectedNode ?? "");
+        if (changedNode.nodeType === "Concept") {
+          setCurrentTutorial(`PROPOSAL_CONCEPT`);
+          setTargetId(changedNode.node);
+        }
         return;
       }
 
@@ -4034,22 +4038,26 @@ const Dashboard = ({}: DashboardProps) => {
         (changedNode &&
           !userTutorial.proposalRelation.done &&
           !userTutorial.proposalRelation.skipped &&
-          nodeType === "Relation") ||
+          changedNode.nodeType === "Relation") ||
         userTutorial.proposalRelation.forceTutorial
       ) {
         if (!changedNode) {
-          if (!userTutorial.proposalRelation.forceTutorial) {
-            const idTarget = "zYYmaXvhab7hH2uRI9Up";
-            const targetElement = document.getElementById(idTarget);
-            if (!targetElement) return openNodeHandler(idTarget, { open: true, editable: true });
-
-            setNodeParts(idTarget, node => ({ ...node, open: true }));
-            proposeNodeImprovement(idTarget);
-            return;
+          if (!userTutorial.proposalRelation.forceTutorial) return;
+          const idTarget = "zYYmaXvhab7hH2uRI9Up";
+          const targetElement = document.getElementById(idTarget);
+          if (!targetElement) {
+            targetFromRemote.current = idTarget;
+            return openNodeHandler(idTarget, { open: true, editable: true });
           }
+
+          setNodeParts(idTarget, node => ({ ...node, open: true }));
+          proposeNodeImprovement(null, idTarget);
+          return;
         }
-        setCurrentTutorial(`PROPOSAL_RELATION`);
-        setTargetId(nodeBookState.selectedNode ?? "");
+        if (changedNode.nodeType === "Concept") {
+          setCurrentTutorial(`PROPOSAL_RELATION`);
+          setTargetId(changedNode.node);
+        }
         return;
       }
 
@@ -4057,84 +4065,111 @@ const Dashboard = ({}: DashboardProps) => {
         (changedNode &&
           !userTutorial.proposalReference.done &&
           !userTutorial.proposalReference.skipped &&
-          nodeType === "Reference") ||
+          changedNode.nodeType === "Reference") ||
         userTutorial.proposalReference.forceTutorial
       ) {
         if (!changedNode) {
-          if (!userTutorial.proposalReference.forceTutorial) {
-            const idTarget = "P631lWeKsBtszZRDlmsM";
-            const targetElement = document.getElementById(idTarget);
-            if (!targetElement) return openNodeHandler(idTarget, { open: true, editable: true });
+          if (!userTutorial.proposalReference.forceTutorial) return;
 
-            setNodeParts(idTarget, node => ({ ...node, open: true }));
-            proposeNodeImprovement(idTarget);
-            return;
+          const idTarget = "P631lWeKsBtszZRDlmsM";
+          const targetElement = document.getElementById(idTarget);
+          if (!targetElement) {
+            targetFromRemote.current = idTarget;
+            return openNodeHandler(idTarget, { open: true, editable: true });
           }
-        }
 
-        setCurrentTutorial(`PROPOSAL_REFERENCE`);
-        setTargetId(nodeBookState.selectedNode ?? "");
+          setNodeParts(idTarget, node => ({ ...node, open: true }));
+          proposeNodeImprovement(null, idTarget);
+          return;
+        }
+        if (changedNode.nodeType === "Reference") {
+          setCurrentTutorial(`PROPOSAL_REFERENCE`);
+          setTargetId(changedNode.node);
+        }
         return;
       }
       if (
-        (changedNode && !userTutorial.proposalIdea.done && !userTutorial.proposalIdea.skipped && nodeType === "Idea") ||
+        (changedNode &&
+          !userTutorial.proposalIdea.done &&
+          !userTutorial.proposalIdea.skipped &&
+          changedNode.nodeType === "Idea") ||
         userTutorial.proposalIdea.forceTutorial
       ) {
         if (!changedNode) {
-          if (!userTutorial.proposalIdea.forceTutorial) {
-            const idTarget = "v9wGPxRCI4DRq11o7uH2";
-            const targetElement = document.getElementById(idTarget);
-            if (!targetElement) return openNodeHandler(idTarget, { open: true, editable: true });
+          if (!userTutorial.proposalIdea.forceTutorial) return;
 
-            setNodeParts(idTarget, node => ({ ...node, open: true }));
-            proposeNodeImprovement(idTarget);
-            return;
+          const idTarget = "v9wGPxRCI4DRq11o7uH2";
+          const targetElement = document.getElementById(idTarget);
+          if (!targetElement) {
+            targetFromRemote.current = idTarget;
+            return openNodeHandler(idTarget, { open: true, editable: true });
           }
-        }
 
-        setCurrentTutorial(`PROPOSAL_IDEA`);
-        setTargetId(nodeBookState.selectedNode ?? "");
+          setNodeParts(idTarget, node => ({ ...node, open: true, editable: true }));
+          proposeNodeImprovement(null, idTarget);
+          return;
+        }
+        if (changedNode.nodeType === "Idea") {
+          setCurrentTutorial(`PROPOSAL_IDEA`);
+          setTargetId(changedNode.node);
+        }
         return;
       }
       if (
         (changedNode &&
           !userTutorial.proposalQuestion.done &&
           !userTutorial.proposalQuestion.skipped &&
-          nodeType === "Question") ||
+          changedNode.nodeType === "Question") ||
         userTutorial.proposalQuestion.forceTutorial
       ) {
         if (!changedNode) {
-          if (!userTutorial.proposalQuestion.forceTutorial) {
-            const idTarget = "qO9uK6UdYRLWm4Olihlw";
-            const targetElement = document.getElementById(idTarget);
-            if (!targetElement) return openNodeHandler(idTarget, { open: true, editable: true });
+          if (!userTutorial.proposalQuestion.forceTutorial) return;
 
-            setNodeParts(idTarget, node => ({ ...node, open: true }));
-            proposeNodeImprovement(idTarget);
-            return;
+          const idTarget = "qO9uK6UdYRLWm4Olihlw";
+          const targetElement = document.getElementById(idTarget);
+          console.log({ targetElement });
+          if (!targetElement) {
+            targetFromRemote.current = idTarget;
+            return openNodeHandler(idTarget, { open: true, editable: true });
           }
+
+          setNodeParts(idTarget, node => ({ ...node, open: true }));
+          proposeNodeImprovement(null, idTarget);
+          return;
         }
-        setCurrentTutorial(`PROPOSAL_QUESTION`);
-        setTargetId(nodeBookState.selectedNode ?? "");
+        if (changedNode.nodeType === "Question") {
+          setCurrentTutorial(`PROPOSAL_QUESTION`);
+          setTargetId(changedNode.node);
+        }
         return;
       }
       if (
-        (changedNode && !userTutorial.proposalCode.done && !userTutorial.proposalCode.skipped && nodeType === "Code") ||
+        (changedNode &&
+          !userTutorial.proposalCode.done &&
+          !userTutorial.proposalCode.skipped &&
+          changedNode.nodeType === "Code") ||
         userTutorial.proposalCode.forceTutorial
       ) {
         if (!changedNode) {
-          if (!userTutorial.proposalCode.forceTutorial) {
-            const idTarget = "E1nIWQ7RIC3pRLvk0Bk5";
-            const targetElement = document.getElementById(idTarget);
-            if (!targetElement) return openNodeHandler(idTarget, { open: true, editable: true });
+          console.log("opening code");
+          if (!userTutorial.proposalCode.forceTutorial) return;
 
-            setNodeParts(idTarget, node => ({ ...node, open: true }));
-            proposeNodeImprovement(idTarget);
-            return;
+          const idTarget = "E1nIWQ7RIC3pRLvk0Bk5";
+          const targetElement = document.getElementById(idTarget);
+          if (!targetElement) {
+            targetFromRemote.current = idTarget;
+            return openNodeHandler(idTarget, { open: true, editable: true });
           }
+
+          setNodeParts(idTarget, node => ({ ...node, open: true }));
+          proposeNodeImprovement(null, idTarget);
+          return;
         }
-        setCurrentTutorial(`PROPOSAL_CODE`);
-        setTargetId(nodeBookState.selectedNode ?? "");
+        if (changedNode.nodeType === "Code") {
+          setCurrentTutorial(`PROPOSAL_CODE`);
+          setTargetId(changedNode.node);
+        }
+
         return;
       }
 
@@ -4941,6 +4976,7 @@ const Dashboard = ({}: DashboardProps) => {
           /> */}
           <MemoizedTutorialTableOfContent
             open={openProgressBar}
+            reloadPermanentGraph={reloadPermanentGraph}
             handleCloseProgressBar={() => setOpenProgressBar(false)}
             tutorials={{
               navigation: { title: "Navigation", steps: NAVIGATION_STEPS_COMPLETE },
