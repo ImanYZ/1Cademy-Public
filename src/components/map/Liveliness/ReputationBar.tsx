@@ -262,8 +262,10 @@ const ReputationlinessBar = (props: ILivelinessBarProps) => {
                   if (!users[uname]) {
                     return <></>;
                   }
-                  const _count = usersInteractions[uname].count + Math.abs(minActions);
-                  const seekPosition = -1 * ((_count / maxActions) * barHeight - (_count === 0 ? 0 : 32));
+                  const maxActionsLog = Math.log(maxActions);
+                  const totalInteraction = usersInteractions[uname].count + Math.abs(minActions);
+                  const _count = Math.log(totalInteraction > 0 ? totalInteraction : 1);
+                  const seekPosition = -1 * ((_count / maxActionsLog) * barHeight - (_count === 0 ? 0 : 32));
                   return (
                     <Tooltip
                       key={uname}

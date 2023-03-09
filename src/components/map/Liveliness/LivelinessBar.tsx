@@ -246,7 +246,12 @@ const LivelinessBar = ({ disabled = false, ...props }: ILivelinessBarProps) => {
                 })}
               {!disabled &&
                 unames.map((uname: string) => {
-                  const seekPosition = -1 * ((usersInteractions[uname].count / maxActions) * barHeight - 32);
+                  const seekPosition =
+                    -1 *
+                    ((Math.log(usersInteractions[uname].count > 0 ? usersInteractions[uname].count : 1) /
+                      Math.log(maxActions)) *
+                      barHeight -
+                      32);
                   return (
                     <Tooltip
                       key={uname}
