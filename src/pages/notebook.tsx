@@ -1486,8 +1486,11 @@ const Dashboard = ({}: DashboardProps) => {
         tempNodes.delete(tempNode);
       });
 
+      console.log(changedNodes, "changedNodes updatedNodeIds");
+
       for (let cId of Object.keys(changedNodes)) {
         const changedNode = changedNodes[cId];
+        console.log(changedNode, "changedNode, updatedNodeIds");
         if (cId in oldNodes) {
           oldEdges = compareAndUpdateNodeLinks(g.current, oldNodes[cId], cId, changedNode, oldEdges);
         } else {
@@ -1507,6 +1510,7 @@ const Dashboard = ({}: DashboardProps) => {
       }
 
       setTimeout(() => {
+        console.log(updatedNodeIds, "updatedNodeIds");
         setNodeUpdates({
           nodeIds: updatedNodeIds,
           updatedAt: new Date(),
@@ -1562,7 +1566,7 @@ const Dashboard = ({}: DashboardProps) => {
   const getMapGraph = useCallback(
     async (mapURL: string, postData: any = false, resetGraph: boolean = true) => {
       if (resetGraph) {
-        reloadPermanentGraph();
+        setTimeout(() => reloadPermanentGraph(), 200);
       }
 
       try {
@@ -3793,10 +3797,13 @@ const Dashboard = ({}: DashboardProps) => {
             return { nodes: newNodes, edges: oldEdges };
           }
         });
-        setNodeUpdates({
-          nodeIds: updatedNodeIds,
-          updatedAt: new Date(),
-        });
+
+        setTimeout(() => {
+          setNodeUpdates({
+            nodeIds: updatedNodeIds,
+            updatedAt: new Date(),
+          });
+        }, 200);
         if (nodeBookState.selectedNode) scrollToNode(nodeBookState.selectedNode);
       }, 1000);
     },
