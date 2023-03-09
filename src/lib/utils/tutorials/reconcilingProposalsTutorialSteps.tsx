@@ -90,8 +90,8 @@ const RECONCILING_ACCEPTED_PROPOSALS_STEPS: TutorialStepConfig[] = [
 ];
 const RECONCILING_NOT_ACCEPTED_PROPOSALS_STEPS: TutorialStepConfig[] = [
   {
-    targetId: "toolbar-pending-list",
-    childTargetId: "toolbar-pending-list",
+    targetId: "sidebar-wrapper-proposalst",
+    childTargetId: "sidebar-wrapper-proposals",
     title: "Reconciling Proposals",
     description: (
       <MarkdownRender
@@ -103,8 +103,8 @@ const RECONCILING_NOT_ACCEPTED_PROPOSALS_STEPS: TutorialStepConfig[] = [
   },
 
   {
-    targetId: "sidebar-wrapper-pending-list",
-    childTargetId: "sidebar-wrapper-pending-list",
+    targetId: "sidebar-wrapper-proposals",
+    childTargetId: "sidebar-wrapper-proposals",
     title: "Reconciling Proposals",
     description: (node: FullNodeData) => (
       <Stack spacing={"8px"}>
@@ -170,8 +170,8 @@ const RECONCILING_NOT_ACCEPTED_PROPOSALS_STEPS: TutorialStepConfig[] = [
     targetDelay: 450,
   },
   {
-    targetId: "sidebar-wrapper-pending-list",
-    childTargetId: "sidebar-wrapper-pending-list",
+    targetId: "sidebar-wrapper-proposals",
+    childTargetId: "sidebar-wrapper-proposals",
     title: "Reconciling Proposals",
     description: (
       <Stack spacing={"16px"}>
