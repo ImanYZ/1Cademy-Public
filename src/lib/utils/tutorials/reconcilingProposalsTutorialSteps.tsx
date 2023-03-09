@@ -1,9 +1,9 @@
 import CheckIcon from "@mui/icons-material/Check";
-import { Stack } from "@mui/material";
+import CloseIcon from "@mui/icons-material/Close";
+import { Divider, Stack, Typography } from "@mui/material";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import { FullNodeData, TutorialState, TutorialStep, TutorialStepConfig } from "src/nodeBookTypes";
-import { Box } from "victory";
 
 import MarkdownRender from "@/components/Markdown/MarkdownRender";
 
@@ -47,19 +47,35 @@ const RECONCILING_ACCEPTED_PROPOSALS_STEPS: TutorialStepConfig[] = [
   {
     title: "Reconciling Proposals",
     description: (node: FullNodeData) => (
-      <Stack spacing={"16px"}>
+      <Stack spacing={"8px"}>
         <MarkdownRender text={"If the node you are changing has:"} />
-        <Stack direction={"row"} justifyContent="center" alignItems={"center"}>
-          <Box>
-            {node.corrects}
-            <CheckIcon />
-          </Box>
-          <Box>
-            {node.wrongs}
-            <CheckIcon />
-          </Box>
+        {/* <MarkdownRender text="$$\text{upvotes} - \text{downvotes} \leq 2 $$" sx={{ alignSelf: "center" }} /> */}
+        <Stack direction={"row"} justifyContent="center" alignItems={"center"} spacing={"8px"}>
+          <Stack direction={"row"} alignItems="center">
+            <Typography># of</Typography>
+            <CheckIcon color="success" />
+          </Stack>
+          <MarkdownRender text="$$ - $$" />
+          <Stack direction={"row"} alignItems="center">
+            <Typography># of</Typography>
+            <CloseIcon color="error" />
+          </Stack>
           <MarkdownRender text="$$ \leq $$" />
-          {node.corrects - node.wrongs}
+          <Typography>2</Typography>
+        </Stack>
+        <MarkdownRender text={"In this case: "} sx={{ alignSelf: "flex-start" }} />
+        <Stack direction={"row"} justifyContent="center" alignItems={"center"} spacing={"8px"}>
+          <Stack direction={"row"} alignItems="center">
+            <Typography>{node.corrects}</Typography>
+            <CheckIcon color="success" />
+          </Stack>
+          <MarkdownRender text="$$ - $$" />
+          <Stack direction={"row"} alignItems="center">
+            <Typography>{node.wrongs}</Typography>
+            <CloseIcon color="error" />
+          </Stack>
+          <MarkdownRender text="$$ = $$" />
+          <Typography>{node.corrects - node.wrongs}</Typography>
         </Stack>
         <MarkdownRender
           text={
@@ -90,15 +106,62 @@ const RECONCILING_NOT_ACCEPTED_PROPOSALS_STEPS: TutorialStepConfig[] = [
     targetId: "sidebar-wrapper-pending-list",
     childTargetId: "sidebar-wrapper-pending-list",
     title: "Reconciling Proposals",
-    description: (
-      <Stack spacing={"16px"}>
-        <MarkdownRender text={"If the node you are changing has:"} />
+    description: (node: FullNodeData) => (
+      <Stack spacing={"8px"}>
+        <MarkdownRender text={"A proposal will go to the pending list if:"} />
         <MarkdownRender
-          text="$$\text{Net Vote Proposal} < \frac{\text{Net Vote Node}}{2}   $$"
-          sx={{ alignSelf: "center" }}
+          text="$$\text{Net Vote of Proposal} < \frac{\text{Net Vote of Node}}{2}$$"
+          sx={{ fontSize: "14px" }}
         />
+        <Stack direction={"row"} alignItems="center">
+          <MarkdownRender text="$$\text{Net Vote} : \text{Upvotes} $$" sx={{ fontSize: "14px" }} />
+          <CheckIcon color="success" />
+          <MarkdownRender text="$$ - $$" sx={{ fontSize: "14px" }} />
+          <MarkdownRender text="$$\text{Downvotes}$$" sx={{ fontSize: "14px" }} />
+          <CloseIcon color="error" />
+        </Stack>
+
+        <MarkdownRender text=" " sx={{ fontSize: "14px" }} />
+        <Typography>
+          In this case, the proposal has <b>1</b> up-vote and <b>0</b> down-votes for a node with <b>{node.corrects}</b>{" "}
+          up-vote{node.corrects > 1 && "s"} and <b>{node.wrongs}</b> down-vote
+          {node.wrongs > 1 && "s"}
+        </Typography>
+
+        <Stack direction={"row"} alignItems="center" justifyContent={"center"} spacing="8px">
+          <Stack direction={"row"} justifyContent="center" alignItems={"center"} spacing={"8px"}>
+            <Stack direction={"row"} alignItems="center">
+              <Typography>1</Typography>
+              <CheckIcon color="success" />
+            </Stack>
+            <MarkdownRender text="$$ - $$" />
+            <Stack direction={"row"} alignItems="center">
+              <Typography>0</Typography>
+              <CloseIcon color="error" />
+            </Stack>
+          </Stack>
+          <MarkdownRender text={"$$ < $$"} />
+          <Stack alignItems={"center"}>
+            <Stack direction={"row"} justifyContent="center" alignItems={"center"} spacing={"8px"}>
+              <Stack direction={"row"} alignItems="center">
+                <Typography>{node.corrects}</Typography>
+                <CheckIcon color="success" />
+              </Stack>
+              <MarkdownRender text="$$ - $$" />
+              <Stack direction={"row"} alignItems="center">
+                <Typography>{node.wrongs}</Typography>
+                <CloseIcon color="error" />
+              </Stack>
+            </Stack>
+            <Divider sx={{ alignSelf: "normal" }} />
+            <Typography>2</Typography>
+          </Stack>
+        </Stack>
+
         <MarkdownRender
-          text={"The proposal does **not** get **Aproved** then it will go the **list of pending proposal**"}
+          text={
+            "The proposal will **NOT** get **implemented**. It'll go to the **pending proposals** list on the node."
+          }
         />
       </Stack>
     ),
