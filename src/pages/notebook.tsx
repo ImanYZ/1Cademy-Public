@@ -1015,7 +1015,7 @@ const Dashboard = ({}: DashboardProps) => {
         !userTutorial.reconcilingNotAcceptedProposal.done
       ) {
         setCurrentTutorial("RECONCILING_NOT_ACCEPTED_PROPOSAL");
-        setOpenSidebar(null);
+        setOpenSidebar("PROPOSALS");
         setTargetId(willBeApproved.node);
         return;
       }
