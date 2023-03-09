@@ -507,54 +507,56 @@ const Dashboard = ({}: DashboardProps) => {
   );
 
   useEffect(() => {
-    if (!nodeBookState.selectedNode) return;
-    if (!stateNodeTutorial) return setTargetClientRect({ width: 0, height: 0, top: 0, left: 0 });
     let timeoutId: any;
-    if (stateNodeTutorial.anchor) {
-      timeoutId = setTimeout(() => {
-        if (!stateNodeTutorial.childTargetId) return;
+    const onGetClientRect = () => {
+      if (!nodeBookState.selectedNode) return;
+      if (!stateNodeTutorial) return setTargetClientRect({ width: 0, height: 0, top: 0, left: 0 });
+      if (stateNodeTutorial.anchor) {
+        timeoutId = setTimeout(() => {
+          if (!stateNodeTutorial.childTargetId) return;
 
-        const targetElement = document.getElementById(stateNodeTutorial.childTargetId);
-        if (!targetElement) return;
+          const targetElement = document.getElementById(stateNodeTutorial.childTargetId);
+          if (!targetElement) return;
 
-        targetElement.classList.add(stateNodeTutorial.largeTarget ? "tutorial-target-large" : "tutorial-target");
-        const { width, height, top, left } = targetElement.getBoundingClientRect();
+          targetElement.classList.add(stateNodeTutorial.largeTarget ? "tutorial-target-large" : "tutorial-target");
+          const { width, height, top, left } = targetElement.getBoundingClientRect();
 
-        setTargetClientRect({ width, height, top, left });
-      }, stateNodeTutorial.targetDelay);
-    } else {
-      if (!targetId) return;
+          setTargetClientRect({ width, height, top, left });
+        }, stateNodeTutorial.targetDelay);
+      } else {
+        if (!targetId) return;
 
-      const thisNode = graph.nodes[targetId];
-      if (!thisNode) return;
+        const thisNode = graph.nodes[targetId];
+        if (!thisNode) return;
 
-      let { top, left, width = NODE_WIDTH, height = 0 } = thisNode;
-      let offsetChildTop = 0;
-      let offsetChildLeft = 0;
+        let { top, left, width = NODE_WIDTH, height = 0 } = thisNode;
+        let offsetChildTop = 0;
+        let offsetChildLeft = 0;
 
-      if (stateNodeTutorial.childTargetId) {
-        const targetElement = document.getElementById(`${targetId}-${stateNodeTutorial.childTargetId}`);
-        if (!targetElement) return;
+        if (stateNodeTutorial.childTargetId) {
+          const targetElement = document.getElementById(`${targetId}-${stateNodeTutorial.childTargetId}`);
+          if (!targetElement) return;
 
-        targetElement.classList.add(stateNodeTutorial.largeTarget ? "tutorial-target-large" : "tutorial-target");
+          targetElement.classList.add(stateNodeTutorial.largeTarget ? "tutorial-target-large" : "tutorial-target");
 
-        const { offsetTop, offsetLeft } = targetElement;
-        const { height: childrenHeight, width: childrenWidth } = targetElement.getBoundingClientRect();
+          const { offsetTop, offsetLeft } = targetElement;
+          const { height: childrenHeight, width: childrenWidth } = targetElement.getBoundingClientRect();
 
-        offsetChildTop = offsetTop;
-        offsetChildLeft = offsetLeft;
-        height = childrenHeight;
-        width = childrenWidth;
+          offsetChildTop = offsetTop;
+          offsetChildLeft = offsetLeft;
+          height = childrenHeight;
+          width = childrenWidth;
+        }
+
+        setTargetClientRect({
+          top: top + offsetChildTop,
+          left: left + offsetChildLeft,
+          width,
+          height,
+        });
       }
-
-      setTargetClientRect({
-        top: top + offsetChildTop,
-        left: left + offsetChildLeft,
-        width,
-        height,
-      });
-    }
-
+    };
+    onGetClientRect();
     return () => {
       if (timeoutId) clearTimeout(timeoutId);
     };
