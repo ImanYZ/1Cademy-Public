@@ -38,8 +38,17 @@ const CHILD_CONCEPT_PROPOSAL_STEPS: TutorialStepConfig[] = [
     description: (
       <MarkdownRender
         text={
-          "Concept nodes should be a single concept that is defined. It is important that a clear definition is provided and that more than one concept is not being defined."
+          "In this form you can create a concept node. It has all the same fields as editing a node. Concept nodes should be a single concept that is defined. It is important that a clear definition is provided and that more than one concept is not being defined."
         }
+      />
+    ),
+    isClickeable: true,
+  },
+  {
+    title: "Proposing Child Concept Node",
+    description: (
+      <MarkdownRender
+        text={"Before you hit the propose button make sure that you link a reference node as a citation."}
       />
     ),
     isClickeable: true,
@@ -51,8 +60,17 @@ const CHILD_RELATION_PROPOSAL_STEPS: TutorialStepConfig[] = [
     description: (
       <MarkdownRender
         text={
-          "Relation nodes should contain multiple concepts, but they are not defined. A common arrangement of concepts is a concept node then a relation node covering a selection of specific concepts related to the first concept, and then each of those concepts defined in concept nodes coming off of the relation node."
+          "In this form you can create a relation node. It has all the same fields as editing a node. Relation nodes should contain multiple concepts, but they are not defined. A common arrangement of concepts is a concept node then a relation node covering a selection of specific concepts related to the first concept, and then each of those concepts defined in concept nodes coming off of the relation node."
         }
+      />
+    ),
+    isClickeable: true,
+  },
+  {
+    title: "Proposing Child Relation Node",
+    description: (
+      <MarkdownRender
+        text={"Before you hit the propose button make sure that you link a reference node as a citation."}
       />
     ),
     isClickeable: true,
@@ -64,7 +82,18 @@ const CHILD_REFERENCE_PROPOSAL_STEPS: TutorialStepConfig[] = [
     description: (
       <MarkdownRender
         text={
-          "Reference nodes are what you use to cite a source in other node types (with the exception of idea and question nodes). In a reference node you just want the title of the source and its APA citation in the content. Page numbers, URLs, and time stamps are added when a reference node is cited by another node, they are not added into individual reference nodes."
+          "In this form you can create a reference node. It has all the same fields as editing a node. Reference nodes are what you use to cite a source in other node types (with the exception of idea and question nodes). In a reference node you just want the title of the source and its APA citation in the content. Page numbers, URLs, and time stamps are added when a reference node is cited by another node, they are not added into individual reference nodes."
+        }
+      />
+    ),
+    isClickeable: true,
+  },
+  {
+    title: "Proposing Child Reference Node",
+    description: (
+      <MarkdownRender
+        text={
+          "Before adding a concept or relation node, you will typically want to make the reference node for the source you will be citing. Once you have made the reference node, you can click on it when you are prompted to when you are adding a citation to your concept or relation node."
         }
       />
     ),
@@ -90,9 +119,16 @@ const CHILD_IDEA_PROPOSAL_STEPS: TutorialStepConfig[] = [
     description: (
       <MarkdownRender
         text={
-          "Idea nodes are your own unique thoughts and do not need to cite a reference. There are a number of reasons to use one. This could include offering ideas for the arrangement of future nodes in an area, or offering some insights or theories based on information covered in previous nodes."
+          "In this form you can create an idea node. It has all the same fields as editing a node. There are a number of reasons to use one. This could include offering ideas for the arrangement of future nodes in an area, or offering some insights or theories based on information covered in previous nodes."
         }
       />
+    ),
+    isClickeable: true,
+  },
+  {
+    title: "Proposing Child Idea Node",
+    description: (
+      <MarkdownRender text={"Because an idea node contains your own ideas, you do not need to add a citation."} />
     ),
     isClickeable: true,
   },
@@ -103,8 +139,17 @@ const CHILD_CODE_PROPOSAL_STEPS: TutorialStepConfig[] = [
     description: (
       <MarkdownRender
         text={
-          "Code nodes are used to display a snippet of programming language code (Python, R, HTML, or JavaScript). They should have properly formatted code, and the programming language used should be identifiable."
+          "In this form you can create a code node. It has all the same fields as editing a node. Code nodes are used to display a snippet of programming language code (Python, R, HTML, or JavaScript). They should have properly formatted code, and the programming language used should be identifiable."
         }
+      />
+    ),
+    isClickeable: true,
+  },
+  {
+    title: "Proposing Child Code Node",
+    description: (
+      <MarkdownRender
+        text={"Before you hit the propose button make sure that you link a reference node as a citation."}
       />
     ),
     isClickeable: true,
@@ -121,5 +166,23 @@ console.log({
 });
 
 export const CHILD_PROPOSAL_COMPLETE: TutorialStepConfig[] = CHILD_PROPOSAL_STEPS.map((c, i, s) => {
+  return { ...getBaseStepConfig(i + 1, s.length), ...c };
+});
+export const CHILD_CONCEPT_PROPOSAL_COMPLETE: TutorialStepConfig[] = CHILD_CONCEPT_PROPOSAL_STEPS.map((c, i, s) => {
+  return { ...getBaseStepConfig(i + 1, s.length), ...c };
+});
+export const CHILD_RELATION_PROPOSAL_COMPLETE: TutorialStepConfig[] = CHILD_RELATION_PROPOSAL_STEPS.map((c, i, s) => {
+  return { ...getBaseStepConfig(i + 1, s.length), ...c };
+});
+export const CHILD_REFERENCE_PROPOSAL_COMPLETE: TutorialStepConfig[] = CHILD_REFERENCE_PROPOSAL_STEPS.map((c, i, s) => {
+  return { ...getBaseStepConfig(i + 1, s.length), ...c };
+});
+export const CHILD_IDEA_PROPOSAL_COMPLETE: TutorialStepConfig[] = CHILD_IDEA_PROPOSAL_STEPS.map((c, i, s) => {
+  return { ...getBaseStepConfig(i + 1, s.length), ...c };
+});
+export const CHILD_QUESTION_PROPOSAL_COMPLETE: TutorialStepConfig[] = CHILD_QUESTION_PROPOSAL_STEPS.map((c, i, s) => {
+  return { ...getBaseStepConfig(i + 1, s.length), ...c };
+});
+export const CHILD_CODE_PROPOSAL_COMPLETE: TutorialStepConfig[] = CHILD_CODE_PROPOSAL_STEPS.map((c, i, s) => {
   return { ...getBaseStepConfig(i + 1, s.length), ...c };
 });
