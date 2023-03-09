@@ -51,7 +51,7 @@ const LivelinessBar = ({ disabled = false, ...props }: ILivelinessBarProps) => {
     const snapshotInitializer = () => {
       setUsersInteractions({});
       unsubscribe.finalizer();
-      const ts = new Date().getTime() - 86400000;
+      const ts = new Date().getTime() - 604800000;
       const actionTracksCol = collection(db, "actionTracks");
       const q = query(actionTracksCol, where("createdAt", ">=", Timestamp.fromDate(new Date(ts))));
       unsubscribe.finalizer = onSnapshot(q, async snapshot => {
@@ -246,7 +246,12 @@ const LivelinessBar = ({ disabled = false, ...props }: ILivelinessBarProps) => {
                 })}
               {!disabled &&
                 unames.map((uname: string) => {
-                  const seekPosition = -1 * ((usersInteractions[uname].count / maxActions) * barHeight - 32);
+                  const seekPosition =
+                    -1 *
+                    ((Math.log(usersInteractions[uname].count > 0 ? usersInteractions[uname].count : 1) /
+                      Math.log(maxActions)) *
+                      barHeight -
+                      32);
                   return (
                     <Tooltip
                       key={uname}
