@@ -22,7 +22,7 @@ import { getNodePageUrl } from "@/lib/utils/utils";
 import { SimpleNode } from "../knowledgeTypes";
 import MarkdownRender from "./Markdown/MarkdownRender";
 import NodeTypeIcon from "./NodeTypeIcon";
-import NodeVotes from "./NodeVotes";
+import { NodeVotes } from "./NodeVotes";
 import OptimizedAvatar from "./OptimizedAvatar";
 import QuestionItem from "./QuestionItem";
 
