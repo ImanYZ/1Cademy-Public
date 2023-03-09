@@ -148,7 +148,7 @@ const TutorialTableOfContent = ({
                       <Typography
                         sx={{
                           display: "inline-block",
-                          color: theme => (theme.palette.mode === "light" ? "#475467" : "#EAECF0"),
+                          color: theme => (theme.palette.mode === "light" ? "#1d2229" : "#EAECF0"),
                           opacity: "0.5",
                           ml: userTutorialState[keyTutorial].currentStep > idx + 1 ? "0px" : "28px",
                         }}
