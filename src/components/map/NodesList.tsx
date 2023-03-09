@@ -1,5 +1,5 @@
 import React, { MutableRefObject } from "react";
-import { FullNodeData, TNodeBookState } from "src/nodeBookTypes";
+import { FullNodeData, TNodeBookState, TNodeUpdates } from "src/nodeBookTypes";
 
 import { useNodeBook } from "@/context/NodeBookContext";
 import { compareNodes, NODE_WIDTH } from "@/lib/utils/Map.utils";
@@ -8,6 +8,7 @@ import { OpenSidebar, TutorialType } from "@/pages/notebook";
 import { MemoizedNode } from "./Node";
 
 type NodeListProps = {
+  nodeUpdates: TNodeUpdates;
   notebookRef: MutableRefObject<TNodeBookState>;
   setFocusView: (state: { selectedNode: string; isEnabled: boolean }) => void;
   nodes: { [key: string]: any };
@@ -59,6 +60,7 @@ type NodeListProps = {
 };
 
 const NodesList = ({
+  nodeUpdates,
   notebookRef,
   setFocusView,
   nodes,
@@ -151,6 +153,8 @@ const NodesList = ({
           <MemoizedNode
             key={nId}
             identifier={nId}
+            nodeBookDispatch={nodeBookDispatch}
+            nodeUpdates={nodeUpdates}
             notebookRef={notebookRef}
             setFocusView={setFocusView}
             activeNode={activeNode}
@@ -277,7 +281,8 @@ export const MemoizedNodeList = React.memo(NodesList, (prev, next) => {
   };
 
   return (
-    compareNodes(prev.nodes, next.nodes) &&
+    (prev.nodeUpdates.updatedAt === next.nodeUpdates.updatedAt ||
+      (prev.showProposeTutorial === next.showProposeTutorial && compareNodes(prev.nodes, next.nodes))) &&
     prev.bookmark === next.bookmark &&
     prev.markStudied === next.markStudied &&
     prev.chosenNodeChanged === next.chosenNodeChanged &&

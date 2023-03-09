@@ -383,6 +383,10 @@ export type EdgeData = {
 
 export type FullNodesData = { [key: string]: FullNodeData };
 export type EdgesData = { [key: string]: EdgeData };
+export type TNodeUpdates = {
+  nodeIds: string[];
+  updatedAt: Date;
+};
 
 export type SortDirection = "ASCENDING" | "DESCENDING";
 export type SortValues =

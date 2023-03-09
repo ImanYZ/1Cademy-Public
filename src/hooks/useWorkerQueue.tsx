@@ -4,7 +4,7 @@ import { Dispatch, MutableRefObject, SetStateAction, useCallback, useEffect, use
 import { AllTagsTreeView } from "../components/TagsSearcher";
 import { dagreUtils, GraphObject } from "../lib/utils/dagre.util";
 import { setDagNodes } from "../lib/utils/Map.utils";
-import { EdgeData, EdgesData, FullNodeData, FullNodesData } from "../nodeBookTypes";
+import { EdgeData, EdgesData, FullNodeData, FullNodesData, TNodeUpdates } from "../nodeBookTypes";
 
 export type Task = {
   id: string;
@@ -12,6 +12,7 @@ export type Task = {
 } | null;
 
 type UseWorkerQueueProps = {
+  setNodeUpdates: (nodeUpdates: TNodeUpdates) => void;
   g: MutableRefObject<graphlib.Graph<{}>>;
   graph: { nodes: FullNodesData; edges: EdgesData };
   setGraph: Dispatch<
@@ -30,6 +31,7 @@ type UseWorkerQueueProps = {
   withClusters: boolean;
 };
 export const useWorkerQueue = ({
+  setNodeUpdates,
   g,
   graph,
   setGraph,
@@ -103,6 +105,7 @@ export const useWorkerQueue = ({
         setGraph(({ nodes, edges }) => {
           // console.log("[queue]: set results", { nodes, edges, gg, oldNodes, oldEdges });
           const nodesCopy = { ...nodes };
+          const updatedNodeIds: string[] = [];
           Object.keys(nodesCopy).forEach(nodeId => {
             const resultNode: FullNodeData = oldNodes[nodeId];
             if (!resultNode) return;
@@ -122,6 +125,7 @@ export const useWorkerQueue = ({
               y: resultNode.y,
               height: resultNode.height ? resultNode.height : nodesCopy[nodeId].height,
             };
+            updatedNodeIds.push(nodeId);
             nodesCopy[nodeId] = overrideNode;
           });
 
@@ -131,6 +135,10 @@ export const useWorkerQueue = ({
             if (!resultEdge) return;
 
             edgesCopy[edgeId] = { ...resultEdge };
+          });
+          setNodeUpdates({
+            nodeIds: updatedNodeIds,
+            updatedAt: new Date(),
           });
           console.log("WORKER Result Merged", { nodes: nodesCopy, edges: edgesCopy });
           return { nodes: nodesCopy, edges: edgesCopy };
