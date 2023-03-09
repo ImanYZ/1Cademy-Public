@@ -190,7 +190,7 @@ const PROPOSING_EDITS_STEPS: TutorialStepConfig[] = [
   },
   {
     childTargetId: "button-cancel-proposal",
-    title: "Proposing Edits - Propose",
+    title: "Proposing Edits - Cancel Propose",
     description: (
       <MarkdownRender
         text={
@@ -203,7 +203,7 @@ const PROPOSING_EDITS_STEPS: TutorialStepConfig[] = [
   },
   {
     childTargetId: "button-propose-proposal",
-    title: "Proposing Edits - Propose",
+    title: "Proposing Edits - Create Proposal",
     description: (
       <MarkdownRender
         text={

@@ -255,6 +255,7 @@ const Dashboard = ({}: DashboardProps) => {
   // mapRendered: flag for first time map is rendered (set to true after first time)
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [mapRendered, setMapRendered] = useState(false);
+  const targetFromRemote = useRef("");
 
   const notebookRef = useRef<TNodeBookState>({
     sNode: null,
@@ -847,7 +848,7 @@ const Dashboard = ({}: DashboardProps) => {
         if (!userTutorial.nodes.forceTutorial) return;
 
         // if is tutorial is forced and states are not correct, we set up the correct states
-        const idTarget = "r98BjyFDCe4YyLA3U8ZE";
+        const idTarget = "r98BjyFDCe4YyLA3U8ZE"; // TODO: set up Node id in production
         const targetElement = document.getElementById(idTarget);
         if (!targetElement) return openNodeHandler(idTarget, { open: true });
 
@@ -883,9 +884,27 @@ const Dashboard = ({}: DashboardProps) => {
     const changedNode: FullNodeData = nodeBookState.selectedNode ? changedNodes[nodeBookState.selectedNode] : null;
     const nodeType = changedNode && changedNode.nodeType;
 
-    if (changedNode && !userTutorial.proposal.done && !userTutorial.proposal.skipped) {
+    if (
+      (changedNode && !userTutorial.proposal.done && !userTutorial.proposal.skipped) ||
+      userTutorial.proposal.forceTutorial
+    ) {
+      if (!changedNode) {
+        if (!userTutorial.proposal.forceTutorial) return;
+
+        // if is tutorial is forced and states are not correct, we set up the correct states
+        const idTarget = "r98BjyFDCe4YyLA3U8ZE"; // TODO: set up Node id in production
+        const targetElement = document.getElementById(idTarget);
+        if (!targetElement) return openNodeHandler(idTarget, { open: true, editable: true });
+
+        notebookRef.current.selectedNode = idTarget;
+        nodeBookDispatch({ type: "setSelectedNode", payload: idTarget });
+        setNodeParts(idTarget, node => ({ ...node, open: true /* , editable: true */ }));
+        // scrollToNode(idTarget);
+        proposeNodeImprovement(idTarget);
+        return;
+      }
       setCurrentTutorial("PROPOSAL");
-      setTargetId(nodeBookState.selectedNode ?? "");
+      setTargetId(changedNode.node);
       return;
     }
     if (
@@ -2930,7 +2949,7 @@ const Dashboard = ({}: DashboardProps) => {
   const proposeNodeImprovement = useCallback(
     (event: any, nodeId: string = "") => {
       devLog("PROPOSE_NODE_IMPROVEMENT");
-      event.preventDefault();
+      // event.preventDefault();
       const selectedNode = nodeId || notebookRef.current.selectedNode;
       if (!selectedNode) return;
       setOpenProposal("ProposeEditTo" + selectedNode);
@@ -4119,6 +4138,19 @@ const Dashboard = ({}: DashboardProps) => {
       await setDoc(tutorialRef, userTutorialUpdated);
     }
   }, [currentTutorial, db, setCurrentTutorial, setInitialStep, setUserTutorial, stateNodeTutorial, user, userTutorial]);
+
+  useEffect(() => {
+    const idTarget = targetFromRemote.current;
+    if (!idTarget) return;
+    if (!graph.nodes[idTarget]) return;
+
+    notebookRef.current.selectedNode = idTarget;
+    nodeBookDispatch({ type: "setSelectedNode", payload: idTarget });
+    setNodeParts(idTarget, node => ({ ...node, open: true /* , editable: true */ }));
+    // scrollToNode(idTarget);
+    proposeNodeImprovement(idTarget);
+    targetFromRemote.current = "";
+  }, [graph, nodeBookDispatch, proposeNodeImprovement, setNodeParts]);
 
   return (
     <div className="MapContainer" style={{ overflow: "hidden" }}>
