@@ -52,12 +52,12 @@ const RECONCILING_ACCEPTED_PROPOSALS_STEPS: TutorialStepConfig[] = [
         {/* <MarkdownRender text="$$\text{upvotes} - \text{downvotes} \leq 2 $$" sx={{ alignSelf: "center" }} /> */}
         <Stack direction={"row"} justifyContent="center" alignItems={"center"} spacing={"8px"}>
           <Stack direction={"row"} alignItems="center">
-            <Typography># of</Typography>
+            <Typography>Upvotes</Typography>
             <CheckIcon color="success" />
           </Stack>
           <MarkdownRender text="$$ - $$" />
           <Stack direction={"row"} alignItems="center">
-            <Typography># of</Typography>
+            <Typography>Downvotes</Typography>
             <CloseIcon color="error" />
           </Stack>
           <MarkdownRender text="$$ \leq $$" />
