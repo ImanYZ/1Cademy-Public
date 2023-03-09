@@ -180,7 +180,7 @@ const TutorialTableOfContent = ({
 
                           return tutorialStepModified;
                         });
-                        console.log("ccc:", { option: `Option${tutorialIdx + 1}`, step: idx + 1 });
+
                         onExpandTutorial(`Option${tutorialIdx + 1}`, keyTutorial, true);
                         setInitialStep(idx);
                         setCurrentTutorial(null);
