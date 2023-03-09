@@ -485,7 +485,12 @@ export const removeDagEdge = (g: dagre.graphlib.Graph<{}>, from: string, to: str
 };
 
 // hides all edges for the node with nodeId
-export const removeDagAllEdges = (g: dagre.graphlib.Graph<{}>, nodeId: string, edges: EdgesData) => {
+export const removeDagAllEdges = (
+  g: dagre.graphlib.Graph<{}>,
+  nodeId: string,
+  edges: EdgesData,
+  updatedNodeIds: string[]
+) => {
   const oldEdges = { ...edges };
   // debugger
   // nodeEdges: array of all edges connected to nodeId or null (if there are no edges)
@@ -505,6 +510,8 @@ export const removeDagAllEdges = (g: dagre.graphlib.Graph<{}>, nodeId: string, e
       // from: edge.v, to: edge.w
       g.removeEdge(edge.v, edge.w);
       const edgeId = edge.v + "-" + edge.w;
+      updatedNodeIds.push(edge.v);
+      updatedNodeIds.push(edge.w);
       // removes edge from oldEdges
       if (edgeId in oldEdges) {
         delete oldEdges[edgeId];
@@ -515,7 +522,13 @@ export const removeDagAllEdges = (g: dagre.graphlib.Graph<{}>, nodeId: string, e
 };
 
 // for hiding nodes in the map
-export const hideNodeAndItsLinks = (g: dagre.graphlib.Graph<{}>, nodeId: string, oldNodes: any, oldEdges: any) => {
+export const hideNodeAndItsLinks = (
+  g: dagre.graphlib.Graph<{}>,
+  nodeId: string,
+  oldNodes: any,
+  oldEdges: any,
+  updatedNodeIds: string[]
+) => {
   // for every parent
   for (let parent of oldNodes[nodeId].parents) {
     // if parent is visible on map
@@ -556,7 +569,7 @@ export const hideNodeAndItsLinks = (g: dagre.graphlib.Graph<{}>, nodeId: string,
   }
 
   // remove edges from this node to every other node
-  oldEdges = removeDagAllEdges(g, nodeId, { ...oldEdges });
+  oldEdges = removeDagAllEdges(g, nodeId, { ...oldEdges }, updatedNodeIds);
   // removes the node itself
   oldNodes = removeDagNode(g, nodeId, oldNodes);
   return { oldNodes, oldEdges };

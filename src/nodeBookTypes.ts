@@ -311,6 +311,7 @@ export type NodeFireStore = {
     label: string;
     title: string;
     type: string;
+    visible?: boolean;
   }[];
   choices: KnowledgeChoice[];
   closedHeight?: number;
@@ -346,6 +347,7 @@ export type NodeFireStore = {
     label: string;
     title: string;
     type: string;
+    visible?: boolean;
   }[];
   referenceIds: string[];
   referenceLabels: string[];
@@ -403,6 +405,10 @@ export type EdgeData = {
 
 export type FullNodesData = { [key: string]: FullNodeData };
 export type EdgesData = { [key: string]: EdgeData };
+export type TNodeUpdates = {
+  nodeIds: string[];
+  updatedAt: Date;
+};
 
 export type SortDirection = "ASCENDING" | "DESCENDING";
 export type SortValues =

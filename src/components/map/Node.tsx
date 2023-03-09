@@ -26,8 +26,7 @@ import React, {
   useState,
   useTransition,
 } from "react";
-import { FullNodeData, OpenPart, TNodeBookState } from "src/nodeBookTypes";
-import { string } from "yup/lib/locale";
+import { DispatchNodeBookActions, FullNodeData, OpenPart, TNodeBookState, TNodeUpdates } from "src/nodeBookTypes";
 
 import { useNodeBook } from "@/context/NodeBookContext";
 import { getSearchAutocomplete } from "@/lib/knowledgeApi";
@@ -58,6 +57,8 @@ type EditorOptions = "EDIT" | "PREVIEW";
 type ProposedChildTypesIcons = "Concept" | "Relation" | "Question" | "Code" | "Reference" | "Idea";
 type NodeProps = {
   identifier: string;
+  nodeBookDispatch: React.Dispatch<DispatchNodeBookActions>;
+  nodeUpdates: TNodeUpdates;
   notebookRef: MutableRefObject<TNodeBookState>;
   setFocusView: (state: { selectedNode: string; isEnabled: boolean }) => void;
   activeNode: any;
@@ -167,6 +168,7 @@ const proposedChildTypesIcons: { [key in ProposedChildTypesIcons]: string } = {
 
 const Node = ({
   identifier,
+  nodeBookDispatch,
   notebookRef,
   setFocusView,
   activeNode,
@@ -260,12 +262,11 @@ const Node = ({
   openUserInfoSidebar,
   disabled = false,
   enableChildElements = [],
-  defaultOpenPart: defaultOpenPartByTutorial = null,
+  defaultOpenPart: defaultOpenPartByTutorial = "LinkingWords",
   showProposeTutorial = false,
   setCurrentTutorial,
 }: NodeProps) => {
   const [{ user }] = useAuth();
-  const { nodeBookDispatch } = useNodeBook();
   const [option, setOption] = useState<EditorOptions>("EDIT");
 
   const [openPart, setOpenPart] = useState<OpenPart>(defaultOpenPartByTutorial);
@@ -393,7 +394,7 @@ const Node = ({
   const nodeClickHandler = useCallback(
     (event: any) => {
       console.log(notebookRef.current.choosingNode, "notebookRef.current.choosingNode");
-      if (notebookRef.current.choosingNode) {
+      if (notebookRef.current.choosingNode && notebookRef.current.choosingNode.id !== identifier) {
         // The first Nodes exist, Now is clicking the Chosen Node
         notebookRef.current.chosenNode = {
           id: identifier,
@@ -408,7 +409,8 @@ const Node = ({
       ) {
         nodeClicked(event, identifier, nodeType, setOpenPart);
       }
-      if (event.target.type === "textarea" || event.target.type === "text") {
+
+      if (!notebookRef.current.choosingNode && notebookRef.current.selectedNode !== identifier) {
         notebookRef.current.selectedNode = identifier;
         nodeBookDispatch({ type: "setSelectedNode", payload: identifier });
       }
@@ -556,6 +558,16 @@ const Node = ({
     closeSideBar();
   };
 
+  const proposeNodeImprovementHandler = useCallback(
+    (event: any, nodeId: string = "") => {
+      setOpenPart("References");
+      setReason("");
+      cleanEditorLink();
+      proposeNodeImprovement(event, nodeId);
+    },
+    [setOpenPart, setReason, cleanEditorLink]
+  );
+
   useEffect(() => {
     if (editable) {
       setOpenPart("References");
@@ -653,12 +665,7 @@ const Node = ({
         (activeNode ? " active" : "") +
         (changed || !isStudied ? " Changed" : "") +
         (isHiding ? " IsHiding" : "") +
-        (notebookRef.current.choosingNode &&
-        notebookRef.current.choosingNode.id !== identifier &&
-        !activeNode &&
-        (notebookRef.current.choosingNode.type !== "Reference" || nodeType === "Reference")
-          ? " Choosable"
-          : "")
+        (nodeType === "Reference" ? " Choosable" : "")
       }
       style={{
         left: left ? left : 1000,
@@ -1001,6 +1008,7 @@ const Node = ({
               addVideo={addVideo}
               setAddVideo={setAddVideo}
               identifier={identifier}
+              notebookRef={notebookRef}
               activeNode={activeNode}
               citationsSelected={citationsSelected}
               proposalsSelected={proposalsSelected}
@@ -1054,7 +1062,7 @@ const Node = ({
               contributors={contributors}
               institutions={institutions}
               openUserInfoSidebar={openUserInfoSidebar}
-              proposeNodeImprovement={proposeNodeImprovement}
+              proposeNodeImprovement={proposeNodeImprovementHandler}
               setOperation={setOperation}
               disabled={disabled}
               enableChildElements={enableChildElements}
@@ -1197,6 +1205,7 @@ const Node = ({
               addVideo={addVideo}
               setAddVideo={setAddVideo}
               identifier={identifier}
+              notebookRef={notebookRef}
               activeNode={activeNode}
               citationsSelected={citationsSelected}
               proposalsSelected={proposalsSelected}
@@ -1366,4 +1375,19 @@ const Node = ({
   );
 };
 
-export const MemoizedNode = React.memo(Node);
+export const MemoizedNode = React.memo(Node, (prev, next) => {
+  if (prev.showProposeTutorial === next.showProposeTutorial) {
+    return prev === next;
+  }
+
+  const positionNotChanged = prev.top === next.top && prev.left === next.left;
+  if (
+    !positionNotChanged ||
+    (prev.nodeUpdates.updatedAt !== next.nodeUpdates.updatedAt && prev.nodeUpdates.nodeIds.includes(prev.identifier)) ||
+    (prev.nodeUpdates.updatedAt !== next.nodeUpdates.updatedAt && next.nodeUpdates.nodeIds.includes(next.identifier))
+  ) {
+    return false;
+  }
+
+  return true;
+});

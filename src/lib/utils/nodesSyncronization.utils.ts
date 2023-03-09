@@ -135,7 +135,8 @@ export const fillDagre = (
   currentNodes: any,
   currentEdges: any,
   withClusters: boolean,
-  allTags: AllTagsTreeView
+  allTags: AllTagsTreeView,
+  updatedNodeIds: string[]
 ) => {
   return fullNodes.reduce(
     (acu: { newNodes: { [key: string]: any }; newEdges: { [key: string]: any } }, cur) => {
@@ -145,6 +146,7 @@ export const fillDagre = (
       if (cur.nodeChangeType === "added") {
         const { uNodeData, oldNodes, oldEdges } = makeNodeVisibleInItsLinks(cur, acu.newNodes, acu.newEdges);
 
+        updatedNodeIds.push(cur.node);
         const res = createOrUpdateNode(g, uNodeData, cur.node, oldNodes, oldEdges, allTags, withClusters);
 
         tmpNodes = res.oldNodes;
@@ -153,6 +155,7 @@ export const fillDagre = (
       if (cur.nodeChangeType === "modified" && cur.visible) {
         const node = acu.newNodes[cur.node];
         if (!node) {
+          updatedNodeIds.push(cur.node);
           const res = createOrUpdateNode(g, cur, cur.node, acu.newNodes, acu.newEdges, allTags, withClusters);
           tmpNodes = res.oldNodes;
           tmpEdges = res.oldEdges;
@@ -164,6 +167,7 @@ export const fillDagre = (
           }; // <----- IMPORTANT: Add positions data from node into cur.node to not set default position into center of screen
 
           if (!compare2Nodes(cur, node)) {
+            updatedNodeIds.push(cur.node);
             const res = createOrUpdateNode(g, currentNode, cur.node, acu.newNodes, acu.newEdges, allTags, withClusters);
             tmpNodes = res.oldNodes;
             tmpEdges = res.oldEdges;
@@ -172,13 +176,14 @@ export const fillDagre = (
       }
       // so the NO visible nodes will come as modified and !visible
       if (cur.nodeChangeType === "removed" || (cur.nodeChangeType === "modified" && !cur.visible)) {
+        updatedNodeIds.push(cur.node);
         if (g.hasNode(cur.node)) {
-          g.nodes().forEach(function () {});
-          g.edges().forEach(function () {});
+          // g.nodes().forEach(function () {});
+          // g.edges().forEach(function () {});
           // PROBABLY you need to add hideNodeAndItsLinks, to update children and parents nodes
 
           // !IMPORTANT, Don't change the order, first remove edges then nodes
-          tmpEdges = removeDagAllEdges(g, cur.node, acu.newEdges);
+          tmpEdges = removeDagAllEdges(g, cur.node, acu.newEdges, updatedNodeIds);
           tmpNodes = removeDagNode(g, cur.node, acu.newNodes);
         } else {
           // remove edges

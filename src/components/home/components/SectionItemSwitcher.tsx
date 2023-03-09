@@ -83,7 +83,7 @@ export const SectionItemSwitcher = ({ items }: SectionItemSwitcherProps) => {
                 target="_blank"
                 rel="noreferrer"
                 onClick={e => e.stopPropagation()}
-                sx={{ color: orangeDark }}
+                sx={{ color: orangeDark, display: "flex", alignItems: "center", alignSelf: "center" }}
               >
                 Visit
                 <ArrowForwardIcon fontSize={"small"} sx={{ ml: "10px" }} color="inherit" />
