@@ -392,6 +392,7 @@ const Dashboard = ({}: DashboardProps) => {
     userTutorial,
     userTutorialLoaded,
     setUserTutorial,
+    setInitialStep,
   } = useInteractiveTutorial({ user });
   const onNodeInViewport = useCallback(
     (nodeId: string) => {
@@ -2015,6 +2016,7 @@ const Dashboard = ({}: DashboardProps) => {
     console.log({ tutorialUpdated, keyTutorial });
     const userTutorialUpdated: UserTutorials = { ...userTutorial, [keyTutorial]: tutorialUpdated };
     setCurrentTutorial(null);
+    setInitialStep(0);
     setUserTutorial(userTutorialUpdated);
 
     // if (userTutorial[keyTutorial].forceTutorial) return;
@@ -2028,7 +2030,7 @@ const Dashboard = ({}: DashboardProps) => {
     } else {
       await setDoc(tutorialRef, userTutorialUpdated);
     }
-  }, [currentTutorial, db, setCurrentTutorial, setUserTutorial, stateNodeTutorial, user, userTutorial]);
+  }, [currentTutorial, db, setCurrentTutorial, setInitialStep, setUserTutorial, stateNodeTutorial, user, userTutorial]);
 
   const openLinkedNode = useCallback(
     (linkedNodeID: string, typeOperation?: string) => {
@@ -4103,6 +4105,7 @@ const Dashboard = ({}: DashboardProps) => {
     const userTutorialUpdated = { ...userTutorial, [keyTutorial]: tutorialUpdated };
     setCurrentTutorial(null);
     setOpenSidebar(null);
+    setInitialStep(0);
     setUserTutorial(userTutorialUpdated);
 
     if (userTutorial[keyTutorial].forceTutorial) return;
@@ -4115,7 +4118,7 @@ const Dashboard = ({}: DashboardProps) => {
     } else {
       await setDoc(tutorialRef, userTutorialUpdated);
     }
-  }, [currentTutorial, db, setCurrentTutorial, setUserTutorial, stateNodeTutorial, user, userTutorial]);
+  }, [currentTutorial, db, setCurrentTutorial, setInitialStep, setUserTutorial, stateNodeTutorial, user, userTutorial]);
 
   return (
     <div className="MapContainer" style={{ overflow: "hidden" }}>
@@ -4848,6 +4851,7 @@ const Dashboard = ({}: DashboardProps) => {
             userTutorialState={userTutorial}
             setCurrentTutorial={setCurrentTutorial}
             setUserTutorialState={setUserTutorial}
+            setInitialStep={setInitialStep}
           />
         </Box>
       </Box>

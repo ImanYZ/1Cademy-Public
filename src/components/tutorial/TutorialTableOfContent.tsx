@@ -20,6 +20,7 @@ type TutorialTableOfContentProps = {
   userTutorialState: UserTutorials;
   setCurrentTutorial: (newTutorial: TutorialType) => void;
   setUserTutorialState: Dispatch<SetStateAction<UserTutorials>>;
+  setInitialStep: (initialStep: number) => void;
 };
 
 const TutorialTableOfContent = ({
@@ -29,6 +30,7 @@ const TutorialTableOfContent = ({
   userTutorialState,
   setCurrentTutorial,
   setUserTutorialState,
+  setInitialStep,
 }: TutorialTableOfContentProps) => {
   const [expanded, setExpanded] = useState<string | false>("Option1");
   const [, /* selectedTutorial */ setSelectedTutorial] = useState<TutorialTypeKeys>(
@@ -74,8 +76,8 @@ const TutorialTableOfContent = ({
           <CloseIcon fontSize="medium" />
         </IconButton>
       </Box>
-      <Box sx={{ overflowY: "auto" }}>
-        {(Object.keys(tutorials) as Array<TutorialTypeKeys>).map((keyTutorial, idx) => (
+      <Box className="scroll-styled" sx={{ overflowY: "auto" }}>
+        {(Object.keys(tutorials) as Array<TutorialTypeKeys>).map((keyTutorial, tutorialIdx) => (
           <Accordion
             key={keyTutorial}
             disableGutters
@@ -88,8 +90,8 @@ const TutorialTableOfContent = ({
                 display: "none",
               },
             }}
-            expanded={expanded === `Option${idx + 1}`}
-            onChange={handleChange(`Option${idx + 1}`, keyTutorial)}
+            expanded={expanded === `Option${tutorialIdx + 1}`}
+            onChange={handleChange(`Option${tutorialIdx + 1}`, keyTutorial)}
           >
             <AccordionSummary
               sx={{
@@ -120,7 +122,7 @@ const TutorialTableOfContent = ({
                 <ArrowForwardIosSharpIcon
                   fontSize="small"
                   sx={{
-                    transform: `rotate(${expanded === `Option${idx + 1}` ? "-90deg" : "90deg"})`,
+                    transform: `rotate(${expanded === `Option${tutorialIdx + 1}` ? "-90deg" : "90deg"})`,
                     transition: "transform 100ms linear",
                   }}
                 />
@@ -175,7 +177,9 @@ const TutorialTableOfContent = ({
 
                           return tutorialStepModified;
                         });
-                        onExpandTutorial(`Option${idx + 1}`, keyTutorial, true);
+                        console.log("ccc:", { option: `Option${tutorialIdx + 1}`, step: idx + 1 });
+                        onExpandTutorial(`Option${tutorialIdx + 1}`, keyTutorial, true);
+                        setInitialStep(idx);
                         setCurrentTutorial(null);
                       }}
                       size={"small"}

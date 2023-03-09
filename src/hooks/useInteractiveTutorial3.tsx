@@ -61,6 +61,7 @@ export const useInteractiveTutorial = ({ user }: useInteractiveTutorialProps) =>
   const [steps, setSteps] = useState<TutorialStep[]>([]);
   const [currentTutorial, setCurrentTutorial] = useState<TutorialType>(null);
   const [targetId, setTargetId] = useState("");
+  const [initialStep, setInitialStep] = useState(0);
 
   const [userTutorial, setUserTutorial] = useState<UserTutorials>({
     navigation: { currentStep: -1, done: false, skipped: false },
@@ -140,7 +141,6 @@ export const useInteractiveTutorial = ({ user }: useInteractiveTutorialProps) =>
         if (prev?.childTargetId) {
           removeStyleFromTarget(prev.childTargetId);
         }
-
         return null;
       });
       isPlayingTheTutorialRef.current = false;
@@ -206,16 +206,16 @@ export const useInteractiveTutorial = ({ user }: useInteractiveTutorialProps) =>
       newSteps = RECONCILING_NOT_ACCEPTED_PROPOSALS_STEPS_COMPLETE;
     }
 
-    const selectedStep = newSteps[0];
+    const selectedStep = newSteps[initialStep];
     setStateNodeTutorial(selectedStep);
     isPlayingTheTutorialRef.current = true;
     setSteps(newSteps);
     if (!keyTutorial) return;
     setUserTutorial(prev => ({
       ...prev,
-      [keyTutorial]: { ...prev[keyTutorial], currentStep: 1 },
+      [keyTutorial]: { ...prev[keyTutorial], currentStep: initialStep + 1 || 1 },
     }));
-  }, [currentTutorial, keyTutorial, removeStyleFromTarget]);
+  }, [currentTutorial, initialStep, keyTutorial, removeStyleFromTarget]);
 
   const onNextStep = useCallback(() => {
     // console.log("ccc: on Next Step");
@@ -284,6 +284,7 @@ export const useInteractiveTutorial = ({ user }: useInteractiveTutorialProps) =>
     userTutorialLoaded,
     setUserTutorial,
     keyTutorial,
+    setInitialStep,
   };
 };
 
