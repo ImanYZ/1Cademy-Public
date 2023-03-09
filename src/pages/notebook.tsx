@@ -4820,24 +4820,30 @@ const Dashboard = ({}: DashboardProps) => {
             open={openProgressBar}
             handleCloseProgressBar={() => setOpenProgressBar(false)}
             tutorials={{
-              navigation: NAVIGATION_STEPS_COMPLETE,
-              nodes: NODES_STEPS_COMPLETE,
-              searcher: SEARCHER_STEPS_COMPLETE,
-              proposal: PROPOSAL_STEPS_COMPLETE,
-              proposalCode: PROPOSING_CODE_EDIT_COMPLETE,
-              proposalConcept: PROPOSING_CONCEPT_EDIT_COMPLETE,
-              proposalIdea: PROPOSING_IDEA_EDIT_COMPLETE,
-              proposalQuestion: PROPOSING_QUESTION_EDIT_COMPLETE,
-              proposalReference: PROPOSING_REFERENCE_EDIT_COMPLETE,
-              proposalRelation: PROPOSING_RELATION_EDIT_COMPLETE,
-              concept: NODE_CODE_COMPLETE,
-              relation: NODE_RELATION_COMPLETE,
-              reference: NODE_REFERENCE_COMPLETE,
-              question: NODE_QUESTION_COMPLETE,
-              idea: NODE_IDEA_COMPLETE,
-              code: NODE_CODE_COMPLETE,
-              reconcilingAcceptedProposal: RECONCILING_ACCEPTED_PROPOSALS_STEPS_COMPLETE,
-              reconcilingNotAcceptedProposal: RECONCILING_NOT_ACCEPTED_PROPOSALS_STEPS_COMPLETE,
+              navigation: { title: "Navigation", steps: NAVIGATION_STEPS_COMPLETE },
+              nodes: { title: "Node", steps: NODES_STEPS_COMPLETE },
+              searcher: { title: "Searcher", steps: SEARCHER_STEPS_COMPLETE },
+              proposal: { title: "Proposal", steps: PROPOSAL_STEPS_COMPLETE },
+              proposalCode: { title: "Proposal Code", steps: PROPOSING_CODE_EDIT_COMPLETE },
+              proposalConcept: { title: "Proposal Concept", steps: PROPOSING_CONCEPT_EDIT_COMPLETE },
+              proposalIdea: { title: "Proposal Idea", steps: PROPOSING_IDEA_EDIT_COMPLETE },
+              proposalQuestion: { title: "Proposal Question", steps: PROPOSING_QUESTION_EDIT_COMPLETE },
+              proposalReference: { title: "Proposal Reference", steps: PROPOSING_REFERENCE_EDIT_COMPLETE },
+              proposalRelation: { title: "Proposal Relation", steps: PROPOSING_RELATION_EDIT_COMPLETE },
+              concept: { title: "Concept Node", steps: NODE_CODE_COMPLETE },
+              relation: { title: "Relation Node", steps: NODE_RELATION_COMPLETE },
+              reference: { title: "Reference Node", steps: NODE_REFERENCE_COMPLETE },
+              question: { title: "Question Node", steps: NODE_QUESTION_COMPLETE },
+              idea: { title: "Idea Node", steps: NODE_IDEA_COMPLETE },
+              code: { title: "Code Node", steps: NODE_CODE_COMPLETE },
+              reconcilingAcceptedProposal: {
+                title: "Accepted Proposals",
+                steps: RECONCILING_ACCEPTED_PROPOSALS_STEPS_COMPLETE,
+              },
+              reconcilingNotAcceptedProposal: {
+                title: "Not Accepted Proposal",
+                steps: RECONCILING_NOT_ACCEPTED_PROPOSALS_STEPS_COMPLETE,
+              },
             }}
             userTutorialState={userTutorial}
             setCurrentTutorial={setCurrentTutorial}
