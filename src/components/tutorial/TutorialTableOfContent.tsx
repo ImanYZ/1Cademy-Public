@@ -132,7 +132,7 @@ const TutorialTableOfContent = ({
               <Stack component={"ul"} m={0} p={"0px"} sx={{ listStyle: "none" }}>
                 {tutorials[keyTutorial].steps.map((cur, idx) => (
                   <Stack
-                    key={cur.title}
+                    key={`${cur.title}-${idx}`}
                     component={"li"}
                     direction={"row"}
                     alignItems="center"

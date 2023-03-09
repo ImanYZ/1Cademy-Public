@@ -684,8 +684,7 @@ const Dashboard = ({}: DashboardProps) => {
     async (nodeId: string, openWithDefaultValues: Partial<UserNodesData> = {}) => {
       // console.log({ nodeId });
 
-      devLog("open_Node_Handler", { nodeId, openWithDefaultValues });
-      if (isPlayingTheTutorialRef.current && currentTutorial !== "SEARCHER") return;
+      devLog("  ", { nodeId, openWithDefaultValues });
 
       let linkedNodeRef;
       let userNodeRef = null;
@@ -841,7 +840,7 @@ const Dashboard = ({}: DashboardProps) => {
     // --------------------------
     if ((!userTutorial.nodes.done && !userTutorial.nodes.skipped) || userTutorial.nodes.forceTutorial) {
       const nodeTargetId =
-        (nodeBookState.selectedNode && graph.nodes[nodeBookState.selectedNode].open && nodeBookState.selectedNode) ||
+        (nodeBookState.selectedNode && graph.nodes[nodeBookState.selectedNode]?.open && nodeBookState.selectedNode) ||
         "";
 
       if (!nodeTargetId) {
@@ -2061,8 +2060,6 @@ const Dashboard = ({}: DashboardProps) => {
 
       if (notebookRef.current.choosingNode) return;
 
-      if (isPlayingTheTutorialRef.current && currentTutorial !== "SEARCHER") return;
-
       createActionTrack(
         db,
         "NodeOpen",
@@ -2108,17 +2105,12 @@ const Dashboard = ({}: DashboardProps) => {
       if (typeOperation === "CitationSidebar") {
         setOpenSidebar(null);
       }
-      if (currentTutorial === "SEARCHER") {
-        onFinalizeTutorial();
-      }
     },
 
     [
-      currentTutorial,
       db,
       isPlayingTheTutorialRef,
       nodeBookDispatch,
-      onFinalizeTutorial,
       openNodeHandler,
       scrollToNode,
       user?.chooseUname,
@@ -2159,8 +2151,6 @@ const Dashboard = ({}: DashboardProps) => {
        * change node
        * create userNodeLog
        */
-
-      // if (isPlayingTheTutorialRef.current) return;
 
       setGraph(graph => {
         (async () => {
@@ -2350,8 +2340,6 @@ const Dashboard = ({}: DashboardProps) => {
       if (notebookRef.current.choosingNode) return;
 
       notebookRef.current.selectedNode = nodeId;
-
-      // if (isPlayingTheTutorialRef.current) return;
 
       lastNodeOperation.current = "ToggleNode";
       setGraph(({ nodes: oldNodes, edges }) => {
@@ -2667,7 +2655,6 @@ const Dashboard = ({}: DashboardProps) => {
     (event: any, nodeId: string) => {
       devLog("CORRECT NODE", { nodeId });
       if (notebookRef.current.choosingNode) return;
-      if (isPlayingTheTutorialRef.current) return;
 
       notebookRef.current.selectedNode = nodeId;
       nodeBookDispatch({ type: "setSelectedNode", payload: nodeId });
@@ -2707,7 +2694,6 @@ const Dashboard = ({}: DashboardProps) => {
       locked: boolean
     ) => {
       if (notebookRef.current.choosingNode) return;
-      if (isPlayingTheTutorialRef.current) return;
 
       let deleteOK = true;
       notebookRef.current.selectedNode = nodeId;
@@ -3053,7 +3039,6 @@ const Dashboard = ({}: DashboardProps) => {
   const saveProposedImprovement = useCallback(
     (summary: any, reason: any, onFail: any) => {
       if (!notebookRef.current.selectedNode) return;
-      if (isPlayingTheTutorialRef.current) return;
 
       notebookRef.current.chosenNode = null;
       notebookRef.current.choosingNode = null;
