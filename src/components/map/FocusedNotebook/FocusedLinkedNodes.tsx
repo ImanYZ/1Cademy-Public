@@ -25,7 +25,7 @@ type FocusedLinkedNodesProps = {
   nodes: FullNodesData;
   nodeLinks: INodeLink[];
   navigateToNode: (nodeId: string) => void;
-  width?: number;
+  width: number;
 };
 
 const FocusedLinkedNodes = ({
