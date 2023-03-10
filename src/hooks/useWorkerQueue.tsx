@@ -134,7 +134,6 @@ export const useWorkerQueue = ({
           Object.keys(edgesCopy).forEach(edgeId => {
             const resultEdge: EdgeData = oldEdges[edgeId];
             if (!resultEdge) {
-              delete edgesCopy[edgeId];
               return;
             }
 
