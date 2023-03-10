@@ -27,8 +27,6 @@ export const Tutorial = ({
   onNextStep,
   onPreviousStep,
   handleCloseProgressBarMenu,
-  // onSkipTutorial,
-  // onUpdateNode,
   onSkip,
   onFinalize,
   stepsLength,
@@ -40,12 +38,6 @@ export const Tutorial = ({
     if (!tooltipRef.current) return { top: 0, left: 0 };
     if (!tutorialState) return { top: 0, left: 0 };
 
-    // console.log("rect", {
-    //   targetClientRect,
-    //   tooltipRef: tooltipRef.current.clientHeight,
-    //   tooltipGetClientRects: tooltipRef.current.getClientRects(),
-    //   tooltipGETVoundClientReact: tooltipRef.current.getBoundingClientRect(),
-    // });
     const { height: tooltipHeight } = tooltipRef.current.getBoundingClientRect();
     let top = 0;
     let left = 0;
@@ -66,7 +58,6 @@ export const Tutorial = ({
       top = targetClientRect.top + targetClientRect.height / 2 - tooltipRef.current.clientHeight / 2;
       left = targetClientRect.left + targetClientRect.width + TOOLTIP_OFFSET;
     }
-    // console.log("first new top left", { top, left });
 
     return { top, left };
   }, [targetClientRect, tutorialState]);
@@ -133,8 +124,6 @@ export const Tutorial = ({
               variant="text"
               onClick={() => {
                 handleCloseProgressBarMenu();
-                // onChangeStep(null);
-                // onUpdateNode("nodes", tutorialState.currentStepName, {});
                 onSkip();
               }}
               sx={{
@@ -191,7 +180,6 @@ export const Tutorial = ({
                   variant="contained"
                   onClick={() => {
                     handleCloseProgressBarMenu();
-                    // onNextStep();
                     onFinalize();
                   }}
                   sx={{
@@ -252,8 +240,6 @@ export const Tutorial = ({
           variant="text"
           onClick={() => {
             handleCloseProgressBarMenu();
-            // onChangeStep(null);
-            // onUpdateNode("nodes", tutorialState.currentStepName, {});
             onSkip();
           }}
           sx={{
@@ -300,7 +286,6 @@ export const Tutorial = ({
                   backgroundColor: theme => (theme.palette.mode === "dark" ? gray200 : gray700),
                 },
               }}
-              // disabled={tutorialState.isClickeable}
             >
               Next
             </Button>

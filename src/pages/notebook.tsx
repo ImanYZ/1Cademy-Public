@@ -701,9 +701,7 @@ const Dashboard = ({}: DashboardProps) => {
   };
   const openNodeHandler = useMemoizedCallback(
     async (nodeId: string, openWithDefaultValues: Partial<UserNodesData> = {}) => {
-      // console.log({ nodeId });
-
-      devLog("  ", { nodeId, openWithDefaultValues });
+      devLog("OPEN_NODE_HANDLER", { nodeId, openWithDefaultValues });
 
       let linkedNodeRef;
       let userNodeRef = null;
@@ -714,7 +712,7 @@ const Dashboard = ({}: DashboardProps) => {
       const batch = writeBatch(db);
       if (nodeDoc.exists() && user) {
         const thisNode: any = { ...nodeDoc.data(), id: nodeId };
-        // console.log({ thisNode });
+
         try {
           for (let child of thisNode.children) {
             linkedNodeRef = doc(db, "nodes", child.node);
@@ -851,16 +849,12 @@ const Dashboard = ({}: DashboardProps) => {
       if (firstScrollToNode) return;
       if (!queueFinished) return;
       if (!urlNodeProcess) return;
-      // console.log("BD=>state");
 
       if (user.sNode && user.sNode === nodeBookState.selectedNode) {
-        // if (user.sNode === nodeBookState.selectedNode) return;
-        // console.log("11");
         const selectedNode = graph.nodes[user.sNode];
         if (selectedNode && selectedNode.top === 0) {
-          console.log("22");
           if (selectedNode.top === 0) return;
-          console.log("33");
+
           nodeBookDispatch({ type: "setSelectedNode", payload: user.sNode });
           notebookRef.current.selectedNode = user.sNode;
           setNodeUpdates({
@@ -1126,8 +1120,6 @@ const Dashboard = ({}: DashboardProps) => {
       where("deleted", "==", false)
     );
     const bookmarkSnapshot = onSnapshot(q, async snapshot => {
-      // console.log("on snapshot");
-      // console.log("sn> bookmark");
       const docChanges = snapshot.docChanges();
 
       if (!docChanges.length) {
@@ -1851,14 +1843,11 @@ const Dashboard = ({}: DashboardProps) => {
       done: true,
       forceTutorial: false,
     };
-    console.log({ tutorialUpdated, keyTutorial });
+
     const userTutorialUpdated: UserTutorials = { ...userTutorial, [keyTutorial]: tutorialUpdated };
     setCurrentTutorial(null);
     setInitialStep(0);
     setUserTutorial(userTutorialUpdated);
-
-    // if (userTutorial[keyTutorial].forceTutorial) return;
-    // if(userTutorial[keyTutorial])
 
     const tutorialRef = doc(db, "userTutorial", user.uname);
     const tutorialDoc = await getDoc(tutorialRef);
@@ -2808,7 +2797,6 @@ const Dashboard = ({}: DashboardProps) => {
           ...oldNodes,
           [selectedNode]: thisNode,
         };
-        console.log("willupdategraph");
         return { nodes: newNodes, edges };
       });
       setNodeUpdates({
@@ -3937,42 +3925,10 @@ const Dashboard = ({}: DashboardProps) => {
     },
     [nodeBookDispatch]
   );
-  // console.log({ nodeBookState });
-
-  // const handleOpenProgressBar = useCallback(() => {
-  //   setOpenProgressBar(true);
-  //   setOpenProgressBarMenu(false);
-  // }, []);
-
-  // const handleCloseProgressBar = useCallback(() => {
-  //   console.log("ssssssss");
-  //   setOpenProgressBar(false);
-  //   setOpenProgressBarMenu(true);
-  // }, []);
 
   const handleCloseProgressBarMenu = useCallback(() => {
     setOpenProgressBarMenu(false);
   }, []);
-
-  // const onUpdateNode = useCallback(
-  //   async (tutorialKey: TutorialType) => {
-  //     if (!user) return;
-
-  //     const userTutorialUpdated = { ...userTutorial, [tutorialKey]: tutorialUpdated };
-  //     onChangeStep(null);
-  //     setUserTutorial(userTutorialUpdated);
-
-  //     const tutorialRef = doc(db, "userTutorial", user.uname);
-  //     const tutorialDoc = await getDoc(tutorialRef);
-
-  //     if (tutorialDoc.exists()) {
-  //       await updateDoc(tutorialRef, userTutorialUpdated);
-  //     } else {
-  //       await setDoc(tutorialRef, userTutorialUpdated);
-  //     }
-  //   },
-  //   [db, onChangeStep, user, userTutorial]
-  // );
 
   const onSkipTutorial = useCallback(async () => {
     if (!user) return;
@@ -3983,14 +3939,6 @@ const Dashboard = ({}: DashboardProps) => {
       .split("_")
       .map((el, idx) => (idx > 0 ? capitalizeFirstLetter(el.toLocaleLowerCase()) : el.toLowerCase()))
       .join("") as TutorialTypeKeys;
-
-    // if (userTutorial[keyTutorial].forceTutorial) {
-    //   console.log("skip tutorial");
-    //   // when is forced by Table of Content the changes are locally
-    //   setUserTutorial(prev => ({ ...prev, [keyTutorial]: { ...prev[keyTutorial], forceTutorial: false } }));
-    //   setCurrentTutorial(null);
-    //   return;
-    // }
 
     const tutorialUpdated: UserTutorial = {
       ...userTutorial[keyTutorial],
@@ -4015,26 +3963,6 @@ const Dashboard = ({}: DashboardProps) => {
       await setDoc(tutorialRef, userTutorialUpdated);
     }
   }, [currentTutorial, db, setCurrentTutorial, setInitialStep, setUserTutorial, stateNodeTutorial, user, userTutorial]);
-
-  // useEffect(() => {
-  //   const detectTargetFromRemote = () => {
-  //     const idTarget = targetFromRemoteToBeDetected.current;
-  //     if (!idTarget) return;
-  //     if (!graph.nodes[idTarget]) return;
-
-  //     devLog("DETECT_REMOTE_TARGET");
-  //     // notebookRef.current.selectedNode = idTarget;
-  //     // nodeBookDispatch({ type: "setSelectedNode", payload: idTarget });
-  //     setNodeParts(idTarget, node => ({ ...node, open: true, editable: true }));
-  //     // scrollToNode(idTarget);
-  //     // console.log('first')
-  //     proposeNodeImprovement(null, idTarget);
-  //     nodeBookDispatch({ type: "setSelectedNode", payload: idTarget });
-  //     notebookRef.current.selectedNode = idTarget;
-  //     targetFromRemoteToBeDetected.current = "";
-  //   };
-  //   detectTargetFromRemote();
-  // }, [graph, nodeBookDispatch, proposeNodeImprovement, setNodeParts]);
 
   const forceTutorial = useCallback(
     (idTarget: string, tutorial: TutorialType, isEditable = false) => {
@@ -4499,7 +4427,6 @@ const Dashboard = ({}: DashboardProps) => {
               <Box>
                 <Button onClick={() => console.log(nodeChanges)}>node changes</Button>
                 <Button onClick={() => console.log(mapRendered)}>map rendered</Button>
-                {/* <Button onClick={() => console.log(mapChanged)}>map changed</Button> */}
                 <Button onClick={() => console.log(userNodeChanges)}>user node changes</Button>
                 <Button onClick={() => console.log(nodeBookState)}>show global state</Button>
                 <Button
