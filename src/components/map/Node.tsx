@@ -31,7 +31,7 @@ import { DispatchNodeBookActions, FullNodeData, OpenPart, TNodeBookState, TNodeU
 import { useNodeBook } from "@/context/NodeBookContext";
 import { getSearchAutocomplete } from "@/lib/knowledgeApi";
 import { findDiff, getVideoDataByUrl, momentDateToSeconds } from "@/lib/utils/utils";
-import { OpenSidebar, TutorialType } from "@/pages/notebook";
+import { OpenSidebar } from "@/pages/notebook";
 
 import { useAuth } from "../../context/AuthContext";
 import { KnowledgeChoice } from "../../knowledgeTypes";
@@ -152,9 +152,6 @@ type NodeProps = {
   openUserInfoSidebar: (uname: string, imageUrl: string, fullName: string, chooseUname: string) => void;
   disabled?: boolean;
   enableChildElements?: string[];
-  defaultOpenPart?: OpenPart; // this is only to configure default open part value in tutorial
-  showProposeTutorial?: boolean; // this flag is to enable tutorial first time user click in pencil
-  setCurrentTutorial: (newValue: TutorialType) => void;
 };
 
 const proposedChildTypesIcons: { [key in ProposedChildTypesIcons]: string } = {
@@ -262,14 +259,11 @@ const Node = ({
   openUserInfoSidebar,
   disabled = false,
   enableChildElements = [],
-  defaultOpenPart: defaultOpenPartByTutorial = "LinkingWords",
-  showProposeTutorial = false,
-  setCurrentTutorial,
 }: NodeProps) => {
   const [{ user }] = useAuth();
   const [option, setOption] = useState<EditorOptions>("EDIT");
 
-  const [openPart, setOpenPart] = useState<OpenPart>(defaultOpenPartByTutorial);
+  const [openPart, setOpenPart] = useState<OpenPart>(null);
   const [isHiding, setIsHiding] = useState(false);
   const [imageLoaded, setImageLoaded] = useState(false);
   const [reason, setReason] = useState("");
@@ -304,10 +298,6 @@ const Node = ({
   const disableSwitchPreview = disabled;
   const disableProposeButton = disabled && !enableChildElements.includes(`${identifier}-button-propose-proposal`);
   const disableCancelButton = disabled && !enableChildElements.includes(`${identifier}-button-cancel-proposal`);
-
-  useEffect(() => {
-    setOpenPart(defaultOpenPartByTutorial); // this is called ONLY when is override by TUTORIAL
-  }, [defaultOpenPartByTutorial]);
 
   useEffect(() => {
     setTitleCopy(title);
@@ -1066,8 +1056,6 @@ const Node = ({
               setOperation={setOperation}
               disabled={disabled}
               enableChildElements={enableChildElements}
-              showProposeTutorial={showProposeTutorial}
-              setCurrentTutorial={setCurrentTutorial}
             />
           </div>
           {(openPart === "LinkingWords" || openPart === "Tags" || openPart === "References") && (
@@ -1261,7 +1249,6 @@ const Node = ({
               proposeNodeImprovement={proposeNodeImprovement}
               setOperation={setOperation}
               disabled={disabled}
-              setCurrentTutorial={setCurrentTutorial}
             />
           </div>
         </div>
@@ -1376,10 +1363,6 @@ const Node = ({
 };
 
 export const MemoizedNode = React.memo(Node, (prev, next) => {
-  if (prev.showProposeTutorial === next.showProposeTutorial) {
-    return prev === next;
-  }
-
   const positionNotChanged = prev.top === next.top && prev.left === next.left;
   if (
     !positionNotChanged ||

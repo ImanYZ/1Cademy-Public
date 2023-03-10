@@ -391,7 +391,6 @@ export type FullNodeData = Omit<UserNodesData, "changedAt" | "createdAt" | "upda
     // top: number;
     x?: number;
     y?: number;
-    defaultOpenPart?: OpenPart;
   };
 
 export type EdgeData = {
@@ -450,7 +449,10 @@ export type TutorialTypeKeys =
   | "proposalQuestion"
   | "proposalCode"
   | "reconcilingAcceptedProposal"
-  | "reconcilingNotAcceptedProposal";
+  | "reconcilingNotAcceptedProposal"
+  | "childProposal"
+  | "childConcept";
+
 export type UserTutorial = {
   currentStep: number;
   done: boolean;

@@ -30,7 +30,6 @@ import {
   MenuItemProps,
   MenuList,
   Paper,
-  Stack,
   styled,
   Tooltip,
   Typography,
@@ -44,8 +43,7 @@ import { useRouter } from "next/router";
 import React, { MutableRefObject, ReactNode, useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { useNodeBook } from "@/context/NodeBookContext";
-import { orange25, orange200 } from "@/pages/home";
-import { OpenSidebar, TutorialType } from "@/pages/notebook";
+import { OpenSidebar } from "@/pages/notebook";
 
 import { User } from "../../knowledgeTypes";
 import shortenNumber from "../../lib/utils/shortenNumber";
@@ -53,7 +51,6 @@ import { FullNodeData, OpenPart, TNodeBookState } from "../../nodeBookTypes";
 import LeaderboardChip from "../LeaderboardChip";
 import { MemoizedHeadlessLeaderboardChip } from "../map/FocusedNotebook/HeadlessLeaderboardChip";
 import NodeTypeIcon from "../NodeTypeIcon";
-import { Portal } from "../Portal";
 import { ContainedButton } from "./ContainedButton";
 import { MemoizedMetaButton } from "./MetaButton";
 import { MemoizedNodeTypeSelector } from "./Node/NodeTypeSelector";
@@ -125,7 +122,6 @@ type NodeFooterProps = {
   disabled?: boolean;
   enableChildElements?: string[];
   showProposeTutorial?: boolean;
-  setCurrentTutorial: (newValue: TutorialType) => void;
 };
 
 const NodeFooter = ({
@@ -189,8 +185,6 @@ const NodeFooter = ({
   setOperation,
   disabled,
   enableChildElements = [],
-  showProposeTutorial = false,
-  setCurrentTutorial,
 }: NodeFooterProps) => {
   const router = useRouter();
   const db = getFirestore();
@@ -205,7 +199,6 @@ const NodeFooter = ({
   const [institutionLogos, setInstitutionLogos] = useState<{
     [institutionName: string]: string;
   }>({});
-  const [openProposalConfirm, setOpenProposalConfirm] = useState(false);
 
   const userPictureId = `${identifier}-node-footer-user`;
   const proposeButtonId = `${identifier}-node-footer-propose`;
@@ -427,16 +420,13 @@ const NodeFooter = ({
 
   const proposeNodeImprovementClick = useCallback(
     (event: any) => {
-      // const searcherTutorialFinalized = userTutorial.searcher.done || userTutorial.searcher.skipped;
-      console.log({ showProposeTutorial });
-      console.log({ selectNode: identifier });
       selectPendingProposals(event);
       setOperation("CancelProposals");
       notebookRef.current.selectedNode = identifier;
       nodeBookDispatch({ type: "setSelectedNode", payload: identifier });
       proposeNodeImprovement(event, identifier);
     },
-    [identifier, nodeBookDispatch, proposeNodeImprovement, selectPendingProposals, setOperation, showProposeTutorial]
+    [identifier, nodeBookDispatch, proposeNodeImprovement, selectPendingProposals, setOperation]
   );
 
   return (
@@ -1963,78 +1953,6 @@ const NodeFooter = ({
             </Grid>
           </Box>
         )}
-      {showProposeTutorial && openProposalConfirm && (
-        <Portal anchor="portal">
-          <div
-            style={{
-              position: "absolute",
-              top: "0px",
-              bottom: "0px",
-              left: "0px",
-              right: "0px",
-              backgroundColor: "#555555a9",
-              transition: "top 1s ease-out,left 1s ease-out",
-              boxSizing: "border-box",
-              display: "grid",
-              placeItems: "center",
-              zIndex: 99999,
-            }}
-          >
-            <Box
-              sx={{
-                transition: "top 1s ease-out,left 1s ease-out",
-                width: "450px",
-                backgroundColor: theme => (theme.palette.mode === "dark" ? "#353535" : orange25),
-                border: theme => `2px solid ${theme.palette.mode === "dark" ? "#816247" : orange200}`,
-                p: "24px 32px",
-                borderRadius: "8px",
-                color: "white",
-                zIndex: 99999,
-              }}
-            >
-              <Typography
-                component={"h2"}
-                sx={{ fontSize: "18px", fontWeight: "bold", display: "inline-block", textAlign: "center" }}
-              >
-                Tutorial Proposal
-              </Typography>
-              <Typography component={"p"} sx={{ fontSize: "16px", display: "inline-block" }}>
-                Would you like to take the Proposals Tutorial ?
-              </Typography>
-              <Stack direction={"row"} justifyContent={"space-between"} alignItems={"center"} sx={{ mt: "16px" }}>
-                <Button
-                  variant="text"
-                  onClick={e => {
-                    setOpenProposalConfirm(false);
-                    proposeNodeImprovementClick(e);
-                  }}
-                  sx={{
-                    p: "8px 0px",
-                  }}
-                >
-                  Cancel
-                </Button>
-                <Box>
-                  <Button
-                    variant="outlined"
-                    onClick={() => {
-                      setCurrentTutorial("PROPOSAL");
-                    }}
-                    sx={{
-                      borderRadius: "32px",
-                      mr: "16px",
-
-                      p: "8px 32px",
-                    }}
-                  >
-                    Get Started
-                  </Button>
-                </Box>
-              </Stack>
-            </Box>
-          </div>
-        </Portal>
-      )}
     </>
   );
 };

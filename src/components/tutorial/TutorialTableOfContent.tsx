@@ -7,7 +7,7 @@ import { Stack } from "@mui/system";
 import React, { Dispatch, SetStateAction, useState } from "react";
 
 import { TutorialStep, TutorialTypeKeys, UserTutorials } from "../../nodeBookTypes";
-import { TutorialType } from "../../pages/notebook";
+// import { TutorialKeys } from "../../pages/notebook";
 
 type Tutorials = { [key in TutorialTypeKeys]: { title: string; steps: TutorialStep[] } };
 
@@ -16,7 +16,8 @@ type TutorialTableOfContentProps = {
   handleCloseProgressBar: () => void;
   tutorials: Tutorials;
   userTutorialState: UserTutorials;
-  setCurrentTutorial: (newTutorial: TutorialType) => void;
+  onCancelTutorial: () => void;
+  // setCurrentTutorial: (newTutorial: TutorialTypeKeys) => void;
   setUserTutorialState: Dispatch<SetStateAction<UserTutorials>>;
   setInitialStep: (initialStep: number) => void;
   reloadPermanentGraph: () => void;
@@ -27,7 +28,8 @@ const TutorialTableOfContent = ({
   handleCloseProgressBar,
   tutorials,
   userTutorialState,
-  setCurrentTutorial,
+  onCancelTutorial,
+  // setCurrentTutorial,
   setUserTutorialState,
   setInitialStep,
   reloadPermanentGraph,
@@ -178,8 +180,8 @@ const TutorialTableOfContent = ({
                         });
 
                         onExpandTutorial(`Option${tutorialIdx + 1}`, keyTutorial, true);
-                        setInitialStep(idx);
-                        setCurrentTutorial(null);
+                        setInitialStep(idx + 1);
+                        onCancelTutorial();
                       }}
                       size={"small"}
                       sx={{ p: "0px" }}
