@@ -1647,10 +1647,12 @@ const Dashboard = ({}: DashboardProps) => {
             [nodeId]: thisNode,
             [chosenNode]: chosenNodeObj,
           };
-          setNodeUpdates({
-            nodeIds: updatedNodeIds,
-            updatedAt: new Date(),
-          });
+          setTimeout(() => {
+            setNodeUpdates({
+              nodeIds: updatedNodeIds,
+              updatedAt: new Date(),
+            });
+          }, 200);
           return { nodes: newNodes, edges: newEdges };
         });
         return { ...updatedLinks };

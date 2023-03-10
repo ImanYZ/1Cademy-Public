@@ -397,14 +397,15 @@ const Node = ({
           id: identifier,
           title,
         };
-        chosenNodeChanged(identifier);
-        setAbleToPropose(true);
         nodeBookDispatch({ type: "setChosenNode", payload: { id: identifier, title } });
+        chosenNodeChanged(notebookRef.current.choosingNode.id);
+        setAbleToPropose(true);
         scrollToNode(notebookRef.current.selectedNode);
       } else if (
         "activeElement" in event.currentTarget &&
         "nodeName" in event.currentTarget.activeElement &&
-        event.currentTarget.activeElement.nodeName !== "INPUT"
+        event.currentTarget.activeElement.nodeName !== "INPUT" &&
+        !notebookRef.current.choosingNode
       ) {
         nodeClicked(event, identifier, nodeType, setOpenPart);
       }
@@ -1401,6 +1402,9 @@ export const MemoizedNode = React.memo(Node, (prev, next) => {
     (prev.nodeUpdates.updatedAt !== next.nodeUpdates.updatedAt && prev.nodeUpdates.nodeIds.includes(prev.identifier)) ||
     (prev.nodeUpdates.updatedAt !== next.nodeUpdates.updatedAt && next.nodeUpdates.nodeIds.includes(next.identifier))
   ) {
+    if (next.identifier === "pQbAryhwz1QQSCLz2p7P") {
+      console.log("chosenNode children", next.references);
+    }
     return false;
   }
 
