@@ -10,6 +10,7 @@ import { MemoizedNode } from "./Node";
 type NodeListProps = {
   nodeUpdates: TNodeUpdates;
   notebookRef: MutableRefObject<TNodeBookState>;
+  setNodeUpdates: (updates: TNodeUpdates) => void;
   setFocusView: (state: { selectedNode: string; isEnabled: boolean }) => void;
   nodes: { [key: string]: any };
   bookmark: any;
@@ -62,6 +63,7 @@ type NodeListProps = {
 const NodesList = ({
   nodeUpdates,
   notebookRef,
+  setNodeUpdates,
   setFocusView,
   nodes,
   bookmark,
@@ -155,6 +157,7 @@ const NodesList = ({
             identifier={nId}
             nodeBookDispatch={nodeBookDispatch}
             nodeUpdates={nodeUpdates}
+            setNodeUpdates={setNodeUpdates}
             notebookRef={notebookRef}
             setFocusView={setFocusView}
             activeNode={activeNode}

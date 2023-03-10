@@ -28,7 +28,6 @@ import React, {
 } from "react";
 import { DispatchNodeBookActions, FullNodeData, OpenPart, TNodeBookState, TNodeUpdates } from "src/nodeBookTypes";
 
-import { useNodeBook } from "@/context/NodeBookContext";
 import { getSearchAutocomplete } from "@/lib/knowledgeApi";
 import { findDiff, getVideoDataByUrl, momentDateToSeconds } from "@/lib/utils/utils";
 import { OpenSidebar, TutorialType } from "@/pages/notebook";
@@ -59,6 +58,7 @@ type NodeProps = {
   identifier: string;
   nodeBookDispatch: React.Dispatch<DispatchNodeBookActions>;
   nodeUpdates: TNodeUpdates;
+  setNodeUpdates: (updates: TNodeUpdates) => void;
   notebookRef: MutableRefObject<TNodeBookState>;
   setFocusView: (state: { selectedNode: string; isEnabled: boolean }) => void;
   activeNode: any;
@@ -169,6 +169,7 @@ const proposedChildTypesIcons: { [key in ProposedChildTypesIcons]: string } = {
 const Node = ({
   identifier,
   nodeBookDispatch,
+  setNodeUpdates,
   notebookRef,
   setFocusView,
   activeNode,
@@ -306,10 +307,6 @@ const Node = ({
   const disableCancelButton = disabled && !enableChildElements.includes(`${identifier}-button-cancel-proposal`);
 
   useEffect(() => {
-    setOpenPart(defaultOpenPartByTutorial); // this is called ONLY when is override by TUTORIAL
-  }, [defaultOpenPartByTutorial]);
-
-  useEffect(() => {
     setTitleCopy(title);
     setContentCopy(content);
   }, [title, content]);
@@ -400,6 +397,8 @@ const Node = ({
           id: identifier,
           title,
         };
+        chosenNodeChanged(identifier);
+        setAbleToPropose(true);
         nodeBookDispatch({ type: "setChosenNode", payload: { id: identifier, title } });
         scrollToNode(notebookRef.current.selectedNode);
       } else if (
@@ -411,8 +410,13 @@ const Node = ({
       }
 
       if (!notebookRef.current.choosingNode && notebookRef.current.selectedNode !== identifier) {
+        const updatedNodeIds: string[] = [notebookRef.current.selectedNode!, identifier];
         notebookRef.current.selectedNode = identifier;
         nodeBookDispatch({ type: "setSelectedNode", payload: identifier });
+        setNodeUpdates({
+          nodeIds: updatedNodeIds,
+          updatedAt: new Date(),
+        });
       }
     },
     [identifier, title, nodeClicked, nodeType]
@@ -1009,6 +1013,7 @@ const Node = ({
               setAddVideo={setAddVideo}
               identifier={identifier}
               notebookRef={notebookRef}
+              nodeBookDispatch={nodeBookDispatch}
               activeNode={activeNode}
               citationsSelected={citationsSelected}
               proposalsSelected={proposalsSelected}
@@ -1074,6 +1079,7 @@ const Node = ({
             <LinkingWords
               identifier={identifier}
               notebookRef={notebookRef}
+              nodeBookDispatch={nodeBookDispatch}
               editable={editable}
               isNew={isNew}
               openPart={openPart}
@@ -1206,6 +1212,7 @@ const Node = ({
               setAddVideo={setAddVideo}
               identifier={identifier}
               notebookRef={notebookRef}
+              nodeBookDispatch={nodeBookDispatch}
               activeNode={activeNode}
               citationsSelected={citationsSelected}
               proposalsSelected={proposalsSelected}
@@ -1376,13 +1383,21 @@ const Node = ({
 };
 
 export const MemoizedNode = React.memo(Node, (prev, next) => {
-  if (prev.showProposeTutorial === next.showProposeTutorial) {
+  if (next.showProposeTutorial) {
     return prev === next;
   }
 
-  const positionNotChanged = prev.top === next.top && prev.left === next.left;
+  const basicChanges =
+    prev.top === next.top &&
+    prev.left === next.left &&
+    prev.activeNode === next.activeNode &&
+    prev.proposalsSelected === next.proposalsSelected &&
+    prev.acceptedProposalsSelected === next.acceptedProposalsSelected &&
+    prev.commentsSelected === next.commentsSelected &&
+    prev.unaccepted === next.unaccepted &&
+    prev.disableVotes === next.disableVotes;
   if (
-    !positionNotChanged ||
+    !basicChanges ||
     (prev.nodeUpdates.updatedAt !== next.nodeUpdates.updatedAt && prev.nodeUpdates.nodeIds.includes(prev.identifier)) ||
     (prev.nodeUpdates.updatedAt !== next.nodeUpdates.updatedAt && next.nodeUpdates.nodeIds.includes(next.identifier))
   ) {
