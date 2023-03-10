@@ -596,6 +596,7 @@ MainSidebarProps) => {
               onlineUsers={onlineUsers}
               usersOnlineStatusLoaded={usersOnlineStatusLoaded}
               usersStatus={leaderBoardType}
+              nodeBookDispatch={nodeBookDispatch}
               reloadPermanentGraph={reloadPermanentGrpah}
               setOpenSideBar={setOpenSideBar}
               reputationSignal={reputationSignal}
