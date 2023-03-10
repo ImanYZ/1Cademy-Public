@@ -1,6 +1,6 @@
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
-import { TutorialState, TutorialStepConfig } from "src/nodeBookTypes";
+import { TutorialState, TutorialStep, TutorialStepConfig } from "src/nodeBookTypes";
 
 import MarkdownRender from "@/components/Markdown/MarkdownRender";
 
@@ -196,36 +196,36 @@ const EXPAND_STEPS: TutorialStepConfig[] = [];
 //   return { ...getBaseStepConfig(i + 1, s.length), ...c };
 // });
 
-export const PARENT_CHILDREN_STEPS_COMPLETE = PARENT_CHILDREN_STEPS.map((c, i, s) => {
+export const PARENT_CHILDREN_STEPS_COMPLETE: TutorialStep[] = PARENT_CHILDREN_STEPS.map((c, i, s) => {
   return { ...getBaseStepConfig(i + 1, s.length), ...c };
 });
-export const PARENT_STEPS_COMPLETE = PARENT_STEPS.map((c, i, s) => {
+export const PARENT_STEPS_COMPLETE: TutorialStep[] = PARENT_STEPS.map((c, i, s) => {
   return { ...getBaseStepConfig(i + 1, s.length), ...c };
 });
-export const CHILD_STEPS_COMPLETE = CHILD_STEPS.map((c, i, s) => {
+export const CHILD_STEPS_COMPLETE: TutorialStep[] = CHILD_STEPS.map((c, i, s) => {
   return { ...getBaseStepConfig(i + 1, s.length), ...c };
 });
-export const REFERENCES_TAGS_STEPS_COMPLETE = REFERENCES_TAGS_STEPS.map((c, i, s) => {
+export const REFERENCES_TAGS_STEPS_COMPLETE: TutorialStep[] = REFERENCES_TAGS_STEPS.map((c, i, s) => {
   return { ...getBaseStepConfig(i + 1, s.length), ...c };
 });
-export const TAG_NODE_STEPS_COMPLETE = TAG_NODE_STEPS.map((c, i, s) => {
+export const TAG_NODE_STEPS_COMPLETE: TutorialStep[] = TAG_NODE_STEPS.map((c, i, s) => {
   return { ...getBaseStepConfig(i + 1, s.length), ...c };
 });
-export const UPTOVE_STEPS_COMPLETE = UPTOVE_STEPS.map((c, i, s) => {
+export const UPTOVE_STEPS_COMPLETE: TutorialStep[] = UPTOVE_STEPS.map((c, i, s) => {
   return { ...getBaseStepConfig(i + 1, s.length), ...c };
 });
-export const DOWNVOTE_STEPS_COMPLETE = DOWNVOTE_STEPS.map((c, i, s) => {
+export const DOWNVOTE_STEPS_COMPLETE: TutorialStep[] = DOWNVOTE_STEPS.map((c, i, s) => {
   return { ...getBaseStepConfig(i + 1, s.length), ...c };
 });
-export const HIDE_STEPS_COMPLETE = HIDE_STEPS.map((c, i, s) => {
+export const HIDE_STEPS_COMPLETE: TutorialStep[] = HIDE_STEPS.map((c, i, s) => {
   return { ...getBaseStepConfig(i + 1, s.length), ...c };
 });
-export const HIDE_OFFSPRING_STEPS_COMPLETE = HIDE_OFFSPRING_STEPS.map((c, i, s) => {
+export const HIDE_OFFSPRING_STEPS_COMPLETE: TutorialStep[] = HIDE_OFFSPRING_STEPS.map((c, i, s) => {
   return { ...getBaseStepConfig(i + 1, s.length), ...c };
 });
-export const CLOSE_STEPS_COMPLETE = CLOSE_STEPS.map((c, i, s) => {
+export const CLOSE_STEPS_COMPLETE: TutorialStep[] = CLOSE_STEPS.map((c, i, s) => {
   return { ...getBaseStepConfig(i + 1, s.length), ...c };
 });
-export const EXPAND_STEPS_COMPLETE = EXPAND_STEPS.map((c, i, s) => {
+export const EXPAND_STEPS_COMPLETE: TutorialStep[] = EXPAND_STEPS.map((c, i, s) => {
   return { ...getBaseStepConfig(i + 1, s.length), ...c };
 });

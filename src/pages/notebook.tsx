@@ -4653,6 +4653,7 @@ const Dashboard = ({}: DashboardProps) => {
             <Tooltip title="Scroll to last Selected Node" placement="left">
               {/* <span> */}
               <IconButton
+                id="scroll-to-node-button"
                 color="secondary"
                 onClick={onScrollToLastNode}
                 disabled={["TT"].includes("SCROLL_TO_NODE_BUTTON")}
@@ -4714,11 +4715,51 @@ const Dashboard = ({}: DashboardProps) => {
               transition: "all 1s ease",
             }}
           >
-            <IconButton color="secondary" onClick={onRedrawGraph}>
+            <IconButton id="redraw-graph-button" color="secondary" onClick={onRedrawGraph}>
               <AutoFixHighIcon />
             </IconButton>
           </Tooltip>
 
+          <Tooltip title="Focused view for selected node" placement="left">
+            <IconButton
+              id="focused-view-button"
+              color="secondary"
+              onClick={() => {
+                setFocusView({ isEnabled: true, selectedNode: nodeBookState.selectedNode || "" });
+              }}
+              disabled={["TT"].includes("FOCUS_MODE_BUTTON")}
+              sx={{
+                position: "fixed",
+                top: {
+                  xs: !openSidebar
+                    ? "10px"
+                    : openSidebar && openSidebar !== "SEARCHER_SIDEBAR"
+                    ? `${innerHeight * 0.35 + 10}px`
+                    : `${innerHeight * 0.25 + 10}px`,
+                  sm: "10px",
+                },
+                right: "60px",
+                zIndex: "1300",
+                background: theme => (theme.palette.mode === "dark" ? "#1f1f1f" : "#f0f0f0"),
+                ":hover": {
+                  background: theme => (theme.palette.mode === "dark" ? "#454545" : "#d6d4d4"),
+                },
+                transition: "all 1s ease",
+                ":disabled": {
+                  pointerEvents: "auto!important",
+                  background: theme => (theme.palette.mode === "dark" ? "#1f1f1fb9" : "#f0f0f0be"),
+                  cursor: "not-allowed!important",
+                },
+              }}
+            >
+              <NextImage
+                src={theme.palette.mode === "light" ? focusViewLogo : focusViewDarkLogo}
+                alt="focused view"
+                width="24px"
+                height="24px"
+              />
+            </IconButton>
+          </Tooltip>
           {
             <Tooltip
               title="Start tutorial"
@@ -4749,6 +4790,7 @@ const Dashboard = ({}: DashboardProps) => {
               }}
             >
               <IconButton
+                id="table-of-content-button"
                 color="secondary"
                 onClick={() => {
                   setOpenProgressBar(true);
@@ -4781,51 +4823,6 @@ const Dashboard = ({}: DashboardProps) => {
             </Tooltip>
           )}
 
-          <Tooltip title="Focused view for selected node" placement="left">
-            <IconButton
-              color="secondary"
-              onClick={() => {
-                setFocusView({ isEnabled: true, selectedNode: nodeBookState.selectedNode || "" });
-              }}
-              disabled={["TT"].includes("FOCUS_MODE_BUTTON")}
-              sx={{
-                position: "fixed",
-                top: {
-                  // xs: !openSidebar
-                  //   ? "110px"
-                  //   : openSidebar && openSidebar !== "SEARCHER_SIDEBAR"
-                  //   ? `${innerHeight * 0.35 + 120}px`
-                  //   : `${innerHeight * 0.25 + 120}px`,
-                  // sm: "110px",
-                  xs: !openSidebar
-                    ? "10px"
-                    : openSidebar && openSidebar !== "SEARCHER_SIDEBAR"
-                    ? `${innerHeight * 0.35 + 10}px`
-                    : `${innerHeight * 0.25 + 10}px`,
-                  sm: "10px",
-                },
-                right: "60px",
-                zIndex: "1300",
-                background: theme => (theme.palette.mode === "dark" ? "#1f1f1f" : "#f0f0f0"),
-                ":hover": {
-                  background: theme => (theme.palette.mode === "dark" ? "#454545" : "#d6d4d4"),
-                },
-                transition: "all 1s ease",
-                ":disabled": {
-                  pointerEvents: "auto!important",
-                  background: theme => (theme.palette.mode === "dark" ? "#1f1f1fb9" : "#f0f0f0be"),
-                  cursor: "not-allowed!important",
-                },
-              }}
-            >
-              <NextImage
-                src={theme.palette.mode === "light" ? focusViewLogo : focusViewDarkLogo}
-                alt="logo 1cademy"
-                width="24px"
-                height="24px"
-              />
-            </IconButton>
-          </Tooltip>
           {/* end Data from map */}
 
           {window.innerHeight > 399 && user?.livelinessBar === "interaction" && (
