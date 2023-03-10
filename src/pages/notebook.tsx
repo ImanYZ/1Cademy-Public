@@ -4644,7 +4644,7 @@ const Dashboard = ({}: DashboardProps) => {
                   sm: "7px",
                 },
 
-                right: "7px",
+                right: "157px",
                 zIndex: "1300",
               }}
             />
@@ -4666,7 +4666,7 @@ const Dashboard = ({}: DashboardProps) => {
                       : `${innerHeight * 0.25 + 10}px`,
                     sm: "10px",
                   },
-                  right: "10px",
+                  right: "160px",
                   zIndex: "1300",
 
                   transition: "all 1s ease",
@@ -4692,14 +4692,20 @@ const Dashboard = ({}: DashboardProps) => {
             sx={{
               position: "fixed",
               top: {
+                // xs: !openSidebar
+                //   ? "60px"
+                //   : openSidebar && openSidebar !== "SEARCHER_SIDEBAR"
+                //   ? `${innerHeight * 0.35 + 65}px`
+                //   : `${innerHeight * 0.25 + 65}px`,
+                // sm: "60px",
                 xs: !openSidebar
-                  ? "60px"
+                  ? "10px"
                   : openSidebar && openSidebar !== "SEARCHER_SIDEBAR"
-                  ? `${innerHeight * 0.35 + 65}px`
-                  : `${innerHeight * 0.25 + 65}px`,
-                sm: "60px",
+                  ? `${innerHeight * 0.35 + 10}px`
+                  : `${innerHeight * 0.25 + 10}px`,
+                sm: "10px",
               },
-              right: "60px",
+              right: "110px",
               zIndex: "1300",
               background: theme => (theme.palette.mode === "dark" ? "#1f1f1f" : "#f0f0f0"),
               ":hover": {
@@ -4720,12 +4726,18 @@ const Dashboard = ({}: DashboardProps) => {
               sx={{
                 position: "fixed",
                 top: {
+                  // xs: !openSidebar
+                  //   ? "60px"
+                  //   : openSidebar && openSidebar !== "SEARCHER_SIDEBAR"
+                  //   ? `${innerHeight * 0.35 + 65}px`
+                  //   : `${innerHeight * 0.25 + 65}px`,
+                  // sm: "60px",
                   xs: !openSidebar
-                    ? "60px"
+                    ? "10px"
                     : openSidebar && openSidebar !== "SEARCHER_SIDEBAR"
-                    ? `${innerHeight * 0.35 + 65}px`
-                    : `${innerHeight * 0.25 + 65}px`,
-                  sm: "60px",
+                    ? `${innerHeight * 0.35 + 10}px`
+                    : `${innerHeight * 0.25 + 10}px`,
+                  sm: "10px",
                 },
                 right: "10px",
                 zIndex: "1300",
@@ -4768,6 +4780,7 @@ const Dashboard = ({}: DashboardProps) => {
               </IconButton>
             </Tooltip>
           )}
+
           <Tooltip title="Focused view for selected node" placement="left">
             <IconButton
               color="secondary"
@@ -4778,14 +4791,20 @@ const Dashboard = ({}: DashboardProps) => {
               sx={{
                 position: "fixed",
                 top: {
+                  // xs: !openSidebar
+                  //   ? "110px"
+                  //   : openSidebar && openSidebar !== "SEARCHER_SIDEBAR"
+                  //   ? `${innerHeight * 0.35 + 120}px`
+                  //   : `${innerHeight * 0.25 + 120}px`,
+                  // sm: "110px",
                   xs: !openSidebar
-                    ? "110px"
+                    ? "10px"
                     : openSidebar && openSidebar !== "SEARCHER_SIDEBAR"
-                    ? `${innerHeight * 0.35 + 120}px`
-                    : `${innerHeight * 0.25 + 120}px`,
-                  sm: "110px",
+                    ? `${innerHeight * 0.35 + 10}px`
+                    : `${innerHeight * 0.25 + 10}px`,
+                  sm: "10px",
                 },
-                right: "10px",
+                right: "60px",
                 zIndex: "1300",
                 background: theme => (theme.palette.mode === "dark" ? "#1f1f1f" : "#f0f0f0"),
                 ":hover": {
