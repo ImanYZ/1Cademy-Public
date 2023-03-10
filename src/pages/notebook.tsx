@@ -701,9 +701,7 @@ const Dashboard = ({}: DashboardProps) => {
   };
   const openNodeHandler = useMemoizedCallback(
     async (nodeId: string, openWithDefaultValues: Partial<UserNodesData> = {}) => {
-      // console.log({ nodeId });
-
-      devLog("  ", { nodeId, openWithDefaultValues });
+      devLog("OPEN_NODE_HANDLER", { nodeId, openWithDefaultValues });
 
       let linkedNodeRef;
       let userNodeRef = null;
@@ -714,7 +712,7 @@ const Dashboard = ({}: DashboardProps) => {
       const batch = writeBatch(db);
       if (nodeDoc.exists() && user) {
         const thisNode: any = { ...nodeDoc.data(), id: nodeId };
-        // console.log({ thisNode });
+
         try {
           for (let child of thisNode.children) {
             linkedNodeRef = doc(db, "nodes", child.node);
@@ -775,8 +773,8 @@ const Dashboard = ({}: DashboardProps) => {
           batch.set(doc(userNodeLogRef), userNodeLogData);
           await batch.commit();
 
-          notebookRef.current.selectedNode = nodeId; // THIS DOSENT GUARANTY CORRECT SELECTED NODE, WE NEED TO DETECT WHEN GRAPH UPDATE HIS VALUES
-          nodeBookDispatch({ type: "setSelectedNode", payload: nodeId }); // SAME FOR THIS
+          notebookRef.current.selectedNode = nodeId; // CHECK: THIS DOESN'T GUARANTY CORRECT SELECTED NODE, WE NEED TO DETECT WHEN GRAPH UPDATE HIS VALUES
+          nodeBookDispatch({ type: "setSelectedNode", payload: nodeId }); // CHECK: SAME FOR THIS
           /* setTimeout(() => {
             scrollToNode(nodeId);
           }, 2000); */
@@ -851,16 +849,12 @@ const Dashboard = ({}: DashboardProps) => {
       if (firstScrollToNode) return;
       if (!queueFinished) return;
       if (!urlNodeProcess) return;
-      // console.log("BD=>state");
 
       if (user.sNode && user.sNode === nodeBookState.selectedNode) {
-        // if (user.sNode === nodeBookState.selectedNode) return;
-        // console.log("11");
         const selectedNode = graph.nodes[user.sNode];
         if (selectedNode && selectedNode.top === 0) {
-          console.log("22");
           if (selectedNode.top === 0) return;
-          console.log("33");
+
           nodeBookDispatch({ type: "setSelectedNode", payload: user.sNode });
           notebookRef.current.selectedNode = user.sNode;
           setNodeUpdates({
@@ -1126,8 +1120,6 @@ const Dashboard = ({}: DashboardProps) => {
       where("deleted", "==", false)
     );
     const bookmarkSnapshot = onSnapshot(q, async snapshot => {
-      // console.log("on snapshot");
-      // console.log("sn> bookmark");
       const docChanges = snapshot.docChanges();
 
       if (!docChanges.length) {
@@ -1851,14 +1843,11 @@ const Dashboard = ({}: DashboardProps) => {
       done: true,
       forceTutorial: false,
     };
-    console.log({ tutorialUpdated, keyTutorial });
+
     const userTutorialUpdated: UserTutorials = { ...userTutorial, [keyTutorial]: tutorialUpdated };
     setCurrentTutorial(null);
     setInitialStep(0);
     setUserTutorial(userTutorialUpdated);
-
-    // if (userTutorial[keyTutorial].forceTutorial) return;
-    // if(userTutorial[keyTutorial])
 
     const tutorialRef = doc(db, "userTutorial", user.uname);
     const tutorialDoc = await getDoc(tutorialRef);
@@ -2808,7 +2797,6 @@ const Dashboard = ({}: DashboardProps) => {
           ...oldNodes,
           [selectedNode]: thisNode,
         };
-        console.log("willupdategraph");
         return { nodes: newNodes, edges };
       });
       setNodeUpdates({
@@ -3937,42 +3925,10 @@ const Dashboard = ({}: DashboardProps) => {
     },
     [nodeBookDispatch]
   );
-  // console.log({ nodeBookState });
-
-  // const handleOpenProgressBar = useCallback(() => {
-  //   setOpenProgressBar(true);
-  //   setOpenProgressBarMenu(false);
-  // }, []);
-
-  // const handleCloseProgressBar = useCallback(() => {
-  //   console.log("ssssssss");
-  //   setOpenProgressBar(false);
-  //   setOpenProgressBarMenu(true);
-  // }, []);
 
   const handleCloseProgressBarMenu = useCallback(() => {
     setOpenProgressBarMenu(false);
   }, []);
-
-  // const onUpdateNode = useCallback(
-  //   async (tutorialKey: TutorialType) => {
-  //     if (!user) return;
-
-  //     const userTutorialUpdated = { ...userTutorial, [tutorialKey]: tutorialUpdated };
-  //     onChangeStep(null);
-  //     setUserTutorial(userTutorialUpdated);
-
-  //     const tutorialRef = doc(db, "userTutorial", user.uname);
-  //     const tutorialDoc = await getDoc(tutorialRef);
-
-  //     if (tutorialDoc.exists()) {
-  //       await updateDoc(tutorialRef, userTutorialUpdated);
-  //     } else {
-  //       await setDoc(tutorialRef, userTutorialUpdated);
-  //     }
-  //   },
-  //   [db, onChangeStep, user, userTutorial]
-  // );
 
   const onSkipTutorial = useCallback(async () => {
     if (!user) return;
@@ -3983,14 +3939,6 @@ const Dashboard = ({}: DashboardProps) => {
       .split("_")
       .map((el, idx) => (idx > 0 ? capitalizeFirstLetter(el.toLocaleLowerCase()) : el.toLowerCase()))
       .join("") as TutorialTypeKeys;
-
-    // if (userTutorial[keyTutorial].forceTutorial) {
-    //   console.log("skip tutorial");
-    //   // when is forced by Table of Content the changes are locally
-    //   setUserTutorial(prev => ({ ...prev, [keyTutorial]: { ...prev[keyTutorial], forceTutorial: false } }));
-    //   setCurrentTutorial(null);
-    //   return;
-    // }
 
     const tutorialUpdated: UserTutorial = {
       ...userTutorial[keyTutorial],
@@ -4016,36 +3964,18 @@ const Dashboard = ({}: DashboardProps) => {
     }
   }, [currentTutorial, db, setCurrentTutorial, setInitialStep, setUserTutorial, stateNodeTutorial, user, userTutorial]);
 
-  // useEffect(() => {
-  //   const detectTargetFromRemote = () => {
-  //     const idTarget = targetFromRemoteToBeDetected.current;
-  //     if (!idTarget) return;
-  //     if (!graph.nodes[idTarget]) return;
-
-  //     devLog("DETECT_REMOTE_TARGET");
-  //     // notebookRef.current.selectedNode = idTarget;
-  //     // nodeBookDispatch({ type: "setSelectedNode", payload: idTarget });
-  //     setNodeParts(idTarget, node => ({ ...node, open: true, editable: true }));
-  //     // scrollToNode(idTarget);
-  //     // console.log('first')
-  //     proposeNodeImprovement(null, idTarget);
-  //     nodeBookDispatch({ type: "setSelectedNode", payload: idTarget });
-  //     notebookRef.current.selectedNode = idTarget;
-  //     targetFromRemoteToBeDetected.current = "";
-  //   };
-  //   detectTargetFromRemote();
-  // }, [graph, nodeBookDispatch, proposeNodeImprovement, setNodeParts]);
-
   const forceTutorial = useCallback(
-    (idTarget: string, tutorial: TutorialType) => {
+    (idTarget: string, tutorial: TutorialType, isEditable = false) => {
       devLog("FORCE_TUTORIAL", { idTarget, tutorial });
       const targetElement = document.getElementById(idTarget);
       if (!targetElement) {
-        return openNodeHandler(idTarget, { open: true, editable: true });
+        return isEditable
+          ? openNodeHandler(idTarget, { open: true, editable: true })
+          : openNodeHandler(idTarget, { open: true });
       }
 
       setNodeParts(idTarget, node => ({ ...node, open: true }));
-      proposeNodeImprovement(null, idTarget);
+      if (isEditable) proposeNodeImprovement(null, idTarget);
       nodeBookDispatch({ type: "setSelectedNode", payload: idTarget });
       notebookRef.current.selectedNode = idTarget;
       setCurrentTutorial(tutorial);
@@ -4055,11 +3985,14 @@ const Dashboard = ({}: DashboardProps) => {
   );
 
   useEffect(() => {
+    /**
+     * This useEffect with detect conditions to call a tutorial
+     * we need selected node over required node
+     * This useEffect executed 2 times when we force tutorial
+     * 1. first time will set up required states
+     * 2. second time will run tutorial
+     */
     const detectTriggerTutorial = () => {
-      // detect triggers to change tutorials
-      // tutorials are trigger over selected node because is visible in that time
-      // console.log("TTT", { currentTutorial, userTutorial, userTutorialLoaded, firstLoading });
-
       if (currentTutorial) return;
       if (!userTutorialLoaded) return;
       if (firstLoading) return;
@@ -4067,6 +4000,7 @@ const Dashboard = ({}: DashboardProps) => {
       devLog("USE_EFFECT: DETECT_TRIGGER_TUTORIAL", { userTutorial });
 
       // --------------------------
+
       if (
         (!userTutorial.navigation.done && !userTutorial.navigation.skipped) ||
         userTutorial.navigation.forceTutorial
@@ -4076,6 +4010,7 @@ const Dashboard = ({}: DashboardProps) => {
       }
 
       // --------------------------
+
       if ((!userTutorial.nodes.done && !userTutorial.nodes.skipped) || userTutorial.nodes.forceTutorial) {
         const nodeTargetId =
           (nodeBookState.selectedNode && graph.nodes[nodeBookState.selectedNode]?.open && nodeBookState.selectedNode) ||
@@ -4084,8 +4019,7 @@ const Dashboard = ({}: DashboardProps) => {
         if (!nodeTargetId) {
           if (!userTutorial.nodes.forceTutorial) return;
 
-          // if is tutorial is forced and states are not correct, we set up the correct states
-          const idTarget = "r98BjyFDCe4YyLA3U8ZE"; // TODO: set up Node id in production
+          const idTarget = "r98BjyFDCe4YyLA3U8ZE";
           const targetElement = document.getElementById(idTarget);
           if (!targetElement) return openNodeHandler(idTarget, { open: true });
 
@@ -4109,7 +4043,6 @@ const Dashboard = ({}: DashboardProps) => {
         if (openSidebar !== "SEARCHER_SIDEBAR") {
           if (!userTutorial.searcher.forceTutorial) return;
 
-          // if is tutorial is forced and states are not correct, we set up the correct states
           setOpenSidebar("SEARCHER_SIDEBAR");
           return;
         }
@@ -4119,202 +4052,278 @@ const Dashboard = ({}: DashboardProps) => {
 
       // --------------------------
 
-      const changedNode: FullNodeData = nodeBookState.selectedNode ? changedNodes[nodeBookState.selectedNode] : null;
+      const selectedNodeFromChangedNodes: FullNodeData = nodeBookState.selectedNode
+        ? changedNodes[nodeBookState.selectedNode]
+        : null;
 
       // --------------------------
 
       if (userTutorial.proposal.forceTutorial) {
-        return forceTutorial("r98BjyFDCe4YyLA3U8ZE", "PROPOSAL");
+        return forceTutorial("r98BjyFDCe4YyLA3U8ZE", "PROPOSAL", true);
       }
 
-      if (changedNode && !userTutorial.proposal.done && !userTutorial.proposal.skipped) {
+      if (selectedNodeFromChangedNodes && !userTutorial.proposal.done && !userTutorial.proposal.skipped) {
         setCurrentTutorial(`PROPOSAL`);
-        setTargetId(changedNode.node);
+        setTargetId(selectedNodeFromChangedNodes.node);
         return;
       }
 
       // --------------------------
 
       if (userTutorial.proposalConcept.forceTutorial) {
-        return forceTutorial("r98BjyFDCe4YyLA3U8ZE", "PROPOSAL_CONCEPT");
+        return forceTutorial("r98BjyFDCe4YyLA3U8ZE", "PROPOSAL_CONCEPT", true);
       }
 
       if (
-        changedNode &&
+        selectedNodeFromChangedNodes &&
         !userTutorial.proposalConcept.done &&
         !userTutorial.proposalConcept.skipped &&
-        changedNode.nodeType === "Concept"
+        selectedNodeFromChangedNodes.nodeType === "Concept"
       ) {
         setCurrentTutorial(`PROPOSAL_CONCEPT`);
-        setTargetId(changedNode.node);
+        setTargetId(selectedNodeFromChangedNodes.node);
         return;
       }
 
       // --------------------------
 
       if (userTutorial.proposalRelation.forceTutorial) {
-        return forceTutorial("zYYmaXvhab7hH2uRI9Up", "PROPOSAL_RELATION");
+        return forceTutorial("zYYmaXvhab7hH2uRI9Up", "PROPOSAL_RELATION", true);
       }
 
       if (
-        changedNode &&
+        selectedNodeFromChangedNodes &&
         !userTutorial.proposalRelation.done &&
         !userTutorial.proposalRelation.skipped &&
-        changedNode.nodeType === "Relation"
+        selectedNodeFromChangedNodes.nodeType === "Relation"
       ) {
         setCurrentTutorial(`PROPOSAL_RELATION`);
-        setTargetId(changedNode.node);
+        setTargetId(selectedNodeFromChangedNodes.node);
         return;
       }
 
       // --------------------------
 
       if (userTutorial.proposalReference.forceTutorial) {
-        return forceTutorial("P631lWeKsBtszZRDlmsM", "PROPOSAL_REFERENCE");
+        return forceTutorial("P631lWeKsBtszZRDlmsM", "PROPOSAL_REFERENCE", true);
       }
 
       if (
-        changedNode &&
+        selectedNodeFromChangedNodes &&
         !userTutorial.proposalReference.done &&
         !userTutorial.proposalReference.skipped &&
-        changedNode.nodeType === "Reference"
+        selectedNodeFromChangedNodes.nodeType === "Reference"
       ) {
         setCurrentTutorial(`PROPOSAL_REFERENCE`);
-        setTargetId(changedNode.node);
+        setTargetId(selectedNodeFromChangedNodes.node);
         return;
       }
 
       // --------------------------
 
       if (userTutorial.proposalIdea.forceTutorial) {
-        return forceTutorial("v9wGPxRCI4DRq11o7uH2", "PROPOSAL_IDEA");
+        return forceTutorial("v9wGPxRCI4DRq11o7uH2", "PROPOSAL_IDEA", true);
       }
 
       if (
-        changedNode &&
+        selectedNodeFromChangedNodes &&
         !userTutorial.proposalIdea.done &&
         !userTutorial.proposalIdea.skipped &&
-        changedNode.nodeType === "Idea"
+        selectedNodeFromChangedNodes.nodeType === "Idea"
       ) {
         setCurrentTutorial(`PROPOSAL_IDEA`);
-        setTargetId(changedNode.node);
+        setTargetId(selectedNodeFromChangedNodes.node);
         return;
       }
 
       // --------------------------
 
       if (userTutorial.proposalQuestion.forceTutorial) {
-        return forceTutorial("qO9uK6UdYRLWm4Olihlw", "PROPOSAL_QUESTION");
+        return forceTutorial("qO9uK6UdYRLWm4Olihlw", "PROPOSAL_QUESTION", true);
       }
 
       if (
-        changedNode &&
+        selectedNodeFromChangedNodes &&
         !userTutorial.proposalQuestion.done &&
         !userTutorial.proposalQuestion.skipped &&
-        changedNode.nodeType === "Question"
+        selectedNodeFromChangedNodes.nodeType === "Question"
       ) {
         setCurrentTutorial(`PROPOSAL_QUESTION`);
-        setTargetId(changedNode.node);
+        setTargetId(selectedNodeFromChangedNodes.node);
         return;
       }
 
       // --------------------------
 
       if (userTutorial.proposalCode.forceTutorial) {
-        return forceTutorial("E1nIWQ7RIC3pRLvk0Bk5", "PROPOSAL_CODE");
+        return forceTutorial("E1nIWQ7RIC3pRLvk0Bk5", "PROPOSAL_CODE", true);
       }
 
       if (
-        changedNode &&
+        selectedNodeFromChangedNodes &&
         !userTutorial.proposalCode.done &&
         !userTutorial.proposalCode.skipped &&
-        changedNode.nodeType === "Code"
+        selectedNodeFromChangedNodes.nodeType === "Code"
       ) {
         setCurrentTutorial(`PROPOSAL_CODE`);
-        setTargetId(changedNode.node);
+        setTargetId(selectedNodeFromChangedNodes.node);
         return;
       }
 
-      const selectedNode = graph.nodes[nodeBookState.selectedNode ?? ""];
+      // --------------------------
+
+      const selectedNodeFromGraph = graph.nodes[nodeBookState.selectedNode ?? ""];
+
+      // --------------------------
+
+      if (userTutorial.concept.forceTutorial) {
+        return forceTutorial("r98BjyFDCe4YyLA3U8ZE", "CONCEPT");
+      }
+
       if (
-        selectedNode &&
-        selectedNode.nodeType === "Concept" &&
+        selectedNodeFromGraph &&
+        selectedNodeFromGraph.nodeType === "Concept" &&
         !userTutorial.concept.done &&
         !userTutorial.concept.skipped
       ) {
-        setTargetId(selectedNode.node);
+        setTargetId(selectedNodeFromGraph.node);
         setCurrentTutorial("CONCEPT");
         return;
       }
+
+      // --------------------------
+
+      if (userTutorial.relation.forceTutorial) {
+        return forceTutorial("zYYmaXvhab7hH2uRI9Up", "RELATION");
+      }
+
       if (
-        selectedNode &&
-        selectedNode.nodeType === "Relation" &&
+        selectedNodeFromGraph &&
+        selectedNodeFromGraph.nodeType === "Relation" &&
         !userTutorial.relation.done &&
         !userTutorial.relation.skipped
       ) {
-        setTargetId(selectedNode.node);
+        setTargetId(selectedNodeFromGraph.node);
         setCurrentTutorial("RELATION");
         return;
       }
+
+      // --------------------------
+
+      if (userTutorial.reference.forceTutorial) {
+        return forceTutorial("P631lWeKsBtszZRDlmsM", "REFERENCE");
+      }
+
       if (
-        selectedNode &&
-        selectedNode.nodeType === "Reference" &&
+        selectedNodeFromGraph &&
+        selectedNodeFromGraph.nodeType === "Reference" &&
         !userTutorial.reference.done &&
         !userTutorial.reference.skipped
       ) {
-        setTargetId(selectedNode.node);
+        setTargetId(selectedNodeFromGraph.node);
         setCurrentTutorial("REFERENCE");
         return;
       }
+
+      // --------------------------
+
+      if (userTutorial.question.forceTutorial) {
+        return forceTutorial("P631lWeKsBtszZRDlmsM", "QUESTION");
+      }
+
       if (
-        selectedNode &&
-        selectedNode.nodeType === "Question" &&
+        selectedNodeFromGraph &&
+        selectedNodeFromGraph.nodeType === "Reference" &&
         !userTutorial.question.done &&
         !userTutorial.question.skipped
       ) {
-        setTargetId(selectedNode.node);
+        setTargetId(selectedNodeFromGraph.node);
         setCurrentTutorial("QUESTION");
         return;
       }
-      if (selectedNode && selectedNode.nodeType === "Idea" && !userTutorial.idea.done && !userTutorial.idea.skipped) {
-        setTargetId(selectedNode.node);
+
+      // --------------------------
+
+      if (userTutorial.idea.forceTutorial) {
+        return forceTutorial("v9wGPxRCI4DRq11o7uH2", "IDEA");
+      }
+
+      if (
+        selectedNodeFromGraph &&
+        selectedNodeFromGraph.nodeType === "Idea" &&
+        !userTutorial.idea.done &&
+        !userTutorial.idea.skipped
+      ) {
+        setTargetId(selectedNodeFromGraph.node);
         setCurrentTutorial("IDEA");
         return;
       }
-      if (selectedNode && selectedNode.nodeType === "Code" && !userTutorial.code.done && !userTutorial.code.skipped) {
-        setTargetId(selectedNode.node);
+
+      // --------------------------
+
+      if (userTutorial.code.forceTutorial) {
+        return forceTutorial("E1nIWQ7RIC3pRLvk0Bk5", "CODE");
+      }
+
+      if (
+        selectedNodeFromGraph &&
+        selectedNodeFromGraph.nodeType === "Code" &&
+        !userTutorial.code.done &&
+        !userTutorial.code.skipped
+      ) {
+        setTargetId(selectedNodeFromGraph.node);
         setCurrentTutorial("CODE");
         return;
       }
 
-      const proposalNode = graph.nodes[nodeBookState.selectedNode ?? ""];
-      console.log({ proposalNode });
-      if (proposalNode && lastNodeOperation.current === "ProposeProposals") {
+      // --------------------------
+
+      if (userTutorial.reconcilingAcceptedProposal.forceTutorial) {
+        return forceTutorial("zp6PeUOlmejdQTAqK2xX", "RECONCILING_ACCEPTED_PROPOSAL");
+      }
+
+      if (
+        selectedNodeFromGraph &&
+        lastNodeOperation.current === "ProposeProposals" &&
+        !userTutorial.reconcilingAcceptedProposal.done &&
+        !userTutorial.reconcilingAcceptedProposal.skipped
+      ) {
         const willBeApproved = isVersionApproved({
           corrects: 1,
           wrongs: 0,
-          nodeData: proposalNode,
+          nodeData: selectedNodeFromGraph,
         });
-        console.log({ willBeApproved });
-        if (
-          willBeApproved &&
-          !userTutorial.reconcilingAcceptedProposal.skipped &&
-          !userTutorial.reconcilingAcceptedProposal.done
-        ) {
-          setCurrentTutorial("RECONCILING_ACCEPTED_PROPOSAL");
-          setTargetId(willBeApproved.node);
-          return;
-        }
-        if (
-          !willBeApproved &&
-          !userTutorial.reconcilingNotAcceptedProposal.skipped &&
-          !userTutorial.reconcilingNotAcceptedProposal.done
-        ) {
-          setCurrentTutorial("RECONCILING_NOT_ACCEPTED_PROPOSAL");
-          setOpenSidebar("PROPOSALS");
-          setTargetId(willBeApproved.node);
-          return;
-        }
+        if (!willBeApproved) return;
+
+        setCurrentTutorial("RECONCILING_ACCEPTED_PROPOSAL");
+        setTargetId(willBeApproved.node);
+        return;
+      }
+
+      // --------------------------
+
+      if (userTutorial.reconcilingNotAcceptedProposal.forceTutorial) {
+        setOpenSidebar("PROPOSALS");
+        return forceTutorial("r98BjyFDCe4YyLA3U8ZE", "RECONCILING_NOT_ACCEPTED_PROPOSAL");
+      }
+
+      if (
+        selectedNodeFromGraph &&
+        lastNodeOperation.current === "ProposeProposals" &&
+        !userTutorial.reconcilingNotAcceptedProposal.done &&
+        !userTutorial.reconcilingNotAcceptedProposal.skipped
+      ) {
+        const willBeApproved = isVersionApproved({
+          corrects: 1,
+          wrongs: 0,
+          nodeData: selectedNodeFromGraph,
+        });
+        if (willBeApproved) return;
+
+        setCurrentTutorial("RECONCILING_NOT_ACCEPTED_PROPOSAL");
+        setOpenSidebar("PROPOSALS");
+        setTargetId(willBeApproved.node);
+        return;
       }
     };
     detectTriggerTutorial();
@@ -4413,11 +4422,11 @@ const Dashboard = ({}: DashboardProps) => {
                 <Button onClick={() => console.log(user)}>user</Button>
                 <Button onClick={() => console.log(settings)}>setting</Button>
                 <Button onClick={() => console.log(reputation)}>reputation</Button>
+                <Button onClick={() => console.log(openSidebar)}>open sidebar</Button>
               </Box>
               <Box>
                 <Button onClick={() => console.log(nodeChanges)}>node changes</Button>
                 <Button onClick={() => console.log(mapRendered)}>map rendered</Button>
-                {/* <Button onClick={() => console.log(mapChanged)}>map changed</Button> */}
                 <Button onClick={() => console.log(userNodeChanges)}>user node changes</Button>
                 <Button onClick={() => console.log(nodeBookState)}>show global state</Button>
                 <Button

@@ -1,9 +1,7 @@
 import ArrowForwardIosSharpIcon from "@mui/icons-material/ArrowForwardIosSharp";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import CloseIcon from "@mui/icons-material/Close";
-// import DoneIcon from "@mui/icons-material/Done";
 import PlayCircleIcon from "@mui/icons-material/PlayCircle";
-// import PlayArrowIcon from "@mui/icons-material/PlayArrow";
 import { Accordion, AccordionDetails, AccordionSummary, Box, IconButton, Typography } from "@mui/material";
 import { Stack } from "@mui/system";
 import React, { Dispatch, SetStateAction, useState } from "react";
@@ -110,7 +108,6 @@ const TutorialTableOfContent = ({
                   p: "18px 24px",
                 }}
               >
-                {/* <Box sx={{ display: "flex", alignItems: "center" }}> */}
                 <Typography
                   component={"h4"}
                   variant={"h4"}
@@ -164,7 +161,6 @@ const TutorialTableOfContent = ({
                       onClick={e => {
                         e.stopPropagation();
                         reloadPermanentGraph();
-                        console.log("force tutorial", keyTutorial);
                         setUserTutorialState(previousTutorialStep => {
                           const tutorialStepModified = (
                             Object.keys(previousTutorialStep) as Array<TutorialTypeKeys>
