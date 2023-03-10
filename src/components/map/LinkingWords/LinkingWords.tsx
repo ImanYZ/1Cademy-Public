@@ -73,6 +73,7 @@ type LinkingWordsProps = {
   deleteLink: any;
   openLinkedNode: any;
   openAllChildren: any;
+  openAllParent: any;
   saveProposedChildNode: any;
   saveProposedImprovement: any;
   closeSideBar: any;
@@ -228,6 +229,18 @@ const LinkingWords = ({
                   </Box>
                 );
               })}
+
+              <LinkingButton
+                key={props.identifier + "LinkToAllParent"}
+                onClick={props.openAllParent}
+                // nodeID={props.identifier}
+                linkedNodeID={props.identifier}
+                linkedNodeTitle={"All Parent"}
+                linkedNodeType="parent"
+                nodeType={"Relation"}
+                visible={false}
+                disabled={disabled}
+              />
 
               {props.editable && !props.isNew && notebookRef.current.selectedNode === props.identifier && (
                 <MemoizedMetaButton

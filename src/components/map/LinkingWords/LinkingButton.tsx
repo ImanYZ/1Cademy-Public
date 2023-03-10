@@ -44,7 +44,9 @@ const LinkingButton = ({ disabled = false, id, ...props }: LinkingButtonProps) =
       id={id}
       onClick={linkedNodeClick}
       tooltip={`${props.visible ? "Navigate to" : "Open"} ${
-        props.linkedNodeType === "children" ? " all the children." : " this " + props.linkedNodeType + " node."
+        props.linkedNodeType === "children" || props.linkedNodeType === "parent"
+          ? ` all the ${props.linkedNodeType}.`
+          : " this " + props.linkedNodeType + " node."
       }`}
       tooltipPosition={
         props.linkedNodeType === "child" || props.linkedNodeType === "children" || props.linkedNodeType === "tag"

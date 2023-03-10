@@ -113,6 +113,7 @@ type NodeProps = {
   deleteLink: any;
   openLinkedNode: any;
   openAllChildren: any;
+  openAllParent: any;
   onHideNode: any;
   hideOffsprings: any;
   toggleNode: (event: any, id: string) => void;
@@ -224,6 +225,7 @@ const Node = ({
   deleteLink,
   openLinkedNode,
   openAllChildren,
+  openAllParent,
   onHideNode,
   hideOffsprings: onHideOffsprings,
   toggleNode,
@@ -1094,6 +1096,7 @@ const Node = ({
               deleteLink={deleteLinkHandler}
               openLinkedNode={openLinkedNode}
               openAllChildren={openAllChildren}
+              openAllParent={openAllParent}
               saveProposedChildNode={saveProposedChildNode}
               saveProposedImprovement={saveProposedImprovement}
               closeSideBar={closeSideBar}
