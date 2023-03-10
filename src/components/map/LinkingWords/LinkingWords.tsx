@@ -421,6 +421,7 @@ const LinkingWords = ({ notebookRef, disabled, enableChildElements = [], ...prop
               })}
               {props.editable && props.openPart === "References" && (
                 <MemoizedMetaButton
+                  id={`${props.identifier}-tag-node`}
                   onClick={choosingNewLinkedNode("Tag")}
                   tooltip="Link to a node."
                   tooltipPosition="left"

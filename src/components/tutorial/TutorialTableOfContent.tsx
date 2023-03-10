@@ -71,7 +71,7 @@ const TutorialTableOfContent = ({
           alignItems: "center",
         }}
       >
-        <Typography fontSize={"24px"}>Notebook tutorial</Typography>
+        <Typography fontSize={"24px"}>Notebook Tutorial</Typography>
         <IconButton onClick={handleCloseProgressBar} size={"small"}>
           <CloseIcon fontSize="medium" />
         </IconButton>
