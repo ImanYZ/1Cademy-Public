@@ -3,11 +3,11 @@ import DoneIcon from "@mui/icons-material/Done";
 import { Box, SxProps, Theme, Tooltip } from "@mui/material";
 import { addDoc, collection, getFirestore, Timestamp } from "firebase/firestore";
 import React, { useCallback, useEffect, useState } from "react";
+import { DispatchNodeBookActions } from "src/nodeBookTypes";
 
 import { OpenSidebar } from "@/pages/notebook";
 
 import { useAuth } from "../../context/AuthContext";
-import { useNodeBook } from "../../context/NodeBookContext";
 import usePrevious from "../../hooks/usePrevious";
 // import { preventEventPropagation } from "../../lib/utils/eventHandlers";
 import shortenNumber from "../../lib/utils/shortenNumber";
@@ -16,6 +16,7 @@ import OptimizedAvatar from "../OptimizedAvatar";
 
 type UserStatusIconProps = {
   id?: string;
+  nodeBookDispatch: React.Dispatch<DispatchNodeBookActions>;
   uname: string;
   imageUrl: string;
   fullname: string;
@@ -33,10 +34,9 @@ type UserStatusIconProps = {
   disabled?: boolean;
 };
 
-const UserStatusIcon = ({ disabled = false, ...props }: UserStatusIconProps) => {
+const UserStatusIcon = ({ nodeBookDispatch, disabled = false, ...props }: UserStatusIconProps) => {
   const db = getFirestore();
   const [{ user }] = useAuth();
-  const { nodeBookDispatch } = useNodeBook();
   const [pointsGained, setPointsGained] = useState(false);
   const [pointsLost, setPointsLost] = useState(false);
 

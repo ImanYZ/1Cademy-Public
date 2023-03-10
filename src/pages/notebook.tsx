@@ -791,11 +791,11 @@ const Dashboard = ({}: DashboardProps) => {
       setSelectedNodeType(oldNodes[nodeId].nodeType);
       const thisNode = { ...oldNodes[nodeId] };
       const newNode = { ...oldNodes, [nodeId]: innerFunc(thisNode) };
-      setNodeUpdates({
-        nodeIds: [nodeId],
-        updatedAt: new Date(),
-      });
       return { nodes: newNode, edges };
+    });
+    setNodeUpdates({
+      nodeIds: [nodeId],
+      updatedAt: new Date(),
     });
   }, []);
 
@@ -1460,6 +1460,7 @@ const Dashboard = ({}: DashboardProps) => {
     (nodeId: string) => {
       setTimeout(() => {
         setGraph(graph => {
+          const updatedNodeIds: string[] = [];
           const nodes = { ...graph.nodes };
           const nodeEl = document.getElementById(nodeId)! as HTMLElement;
           let height: number = nodeEl.clientHeight;
@@ -1494,6 +1495,7 @@ const Dashboard = ({}: DashboardProps) => {
               lastTop = _nodeData.top;
 
               nodesUpdated = true;
+              updatedNodeIds.push(_nodeId);
               nodes[_nodeId] = _nodeData;
             }
           }
@@ -1502,6 +1504,12 @@ const Dashboard = ({}: DashboardProps) => {
             return graph;
           }
 
+          setTimeout(() => {
+            setNodeUpdates({
+              nodeIds: updatedNodeIds,
+              updatedAt: new Date(),
+            });
+          }, 100);
           return {
             nodes: { ...nodes },
             edges: graph.edges,
@@ -1735,6 +1743,8 @@ const Dashboard = ({}: DashboardProps) => {
 
     setSelectedNodeType(nodeType);
     setOpenPart("LinkingWords");
+    
+    processHeightChange(nodeId);
   }, []);
 
   const recursiveOffsprings = useCallback((nodeId: string): any[] => {
@@ -4878,6 +4888,7 @@ const Dashboard = ({}: DashboardProps) => {
                 <MemoizedNodeList
                   nodeUpdates={nodeUpdates}
                   notebookRef={notebookRef}
+                  setNodeUpdates={setNodeUpdates}
                   setFocusView={setFocusView}
                   nodes={graph.nodes}
                   bookmark={bookmark}
