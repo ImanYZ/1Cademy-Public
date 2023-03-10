@@ -25,12 +25,21 @@ type FocusedLinkedNodesProps = {
   nodes: FullNodesData;
   nodeLinks: INodeLink[];
   navigateToNode: (nodeId: string) => void;
+  width: number;
 };
 
-const FocusedLinkedNodes = ({ header, nodeLinks, nodes, navigateToNode, loadNodeData }: FocusedLinkedNodesProps) => {
+const FocusedLinkedNodes = ({
+  header,
+  nodeLinks,
+  nodes,
+  navigateToNode,
+  loadNodeData,
+  width,
+}: FocusedLinkedNodesProps) => {
   const [linkedNodes, setLinkedNodes] = useState<{
     [nodeId: string]: any;
   }>({});
+
   useEffect(() => {
     let _nodes: {
       [nodeId: string]: any;
@@ -86,7 +95,7 @@ const FocusedLinkedNodes = ({ header, nodeLinks, nodes, navigateToNode, loadNode
                   )}
                 </Box>
               }
-              placement="left"
+              placement={width > 899 ? "left" : "top"}
             >
               <ListItem
                 disablePadding
