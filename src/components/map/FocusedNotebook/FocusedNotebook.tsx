@@ -144,6 +144,7 @@ const FocusedNotebook = ({
                   navigateToNode={navigateToNode}
                   nodeLinks={(parents as INodeLink[]) || []}
                   header="Learn Before"
+                  width={window.innerWidth}
                 />
               )}
             </Grid>
@@ -184,6 +185,7 @@ const FocusedNotebook = ({
                   navigateToNode={navigateToNode}
                   nodeLinks={(children as INodeLink[]) || []}
                   header="Learn After"
+                  width={window.innerWidth}
                 />
               )}
             </Grid>

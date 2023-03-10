@@ -61,8 +61,10 @@ const FocusedViewHeadlessLeaderboardChip = ({
       icon={
         <OptimizedAvatar
           sx={{
-            border: theme =>
-              theme.palette.mode === "dark" ? "1px solid #404040!important" : "1px solid #D0D5DD!important",
+            ...(renderAsAvatar && {
+              border: theme =>
+                theme.palette.mode === "dark" ? "1px solid #404040!important" : "1px solid #D0D5DD!important",
+            }),
           }}
           name={name}
           imageUrl={imageUrl}

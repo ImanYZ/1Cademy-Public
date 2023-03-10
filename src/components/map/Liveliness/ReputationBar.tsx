@@ -259,7 +259,7 @@ const ReputationlinessBar = (props: ILivelinessBarProps) => {
                 })}
               {!disabled &&
                 unames.map((uname: string) => {
-                  if (!users[uname]) {
+                  if (!users[uname] || usersInteractions[uname].count < 1) {
                     return <></>;
                   }
                   const maxActionsLog = Math.log(maxActions);
