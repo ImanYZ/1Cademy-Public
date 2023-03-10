@@ -4205,7 +4205,8 @@ const Dashboard = ({}: DashboardProps) => {
         !userTutorial.code.skipped
       ) {
         setTargetId(selectedNodeFromGraph.node);
-        // setCurrentTutorial("CODE");
+        setTutorial({ name: "code", step: 1, steps: [] });
+
         return;
       }
 
@@ -4228,7 +4229,7 @@ const Dashboard = ({}: DashboardProps) => {
         });
         if (!willBeApproved) return;
 
-        // setCurrentTutorial("RECONCILING_ACCEPTED_PROPOSAL");
+        setTutorial({ name: "reconcilingAcceptedProposal", step: 1, steps: [] });
         setTargetId(willBeApproved.node);
         return;
       }
@@ -4253,7 +4254,7 @@ const Dashboard = ({}: DashboardProps) => {
         });
         if (willBeApproved) return;
 
-        // setCurrentTutorial("RECONCILING_NOT_ACCEPTED_PROPOSAL");
+        setTutorial({ name: "reconcilingNotAcceptedProposal", step: 1, steps: [] });
         setOpenSidebar("PROPOSALS");
         setTargetId(willBeApproved.node);
         return;
@@ -4279,7 +4280,8 @@ const Dashboard = ({}: DashboardProps) => {
 
       if (selectedNodeFromTemporalNode && !userTutorial.childProposal.done && !userTutorial.childProposal.skipped) {
         setTargetId(selectedNodeFromTemporalNode.node);
-        // setCurrentTutorial("CHILD_PROPOSAL");
+        setTutorial({ name: "childProposal", step: 1, steps: [] });
+
         return;
       }
 
@@ -4296,7 +4298,7 @@ const Dashboard = ({}: DashboardProps) => {
         !userTutorial.childConcept.skipped
       ) {
         setTargetId(selectedNodeFromTemporalNode.node);
-        // setCurrentTutorial("CHILD_CONCEPT");
+        setTutorial({ name: "childConcept", step: 1, steps: [] });
         return;
       }
     };
