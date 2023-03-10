@@ -7,7 +7,7 @@ import { OpenSidebar } from "@/pages/notebook";
 
 import { useAuth } from "../../../context/AuthContext";
 import { loadReputationsData } from "../../../lib/utils/Map.utils";
-import { UsersStatus } from "../../../nodeBookTypes";
+import { DispatchNodeBookActions, UsersStatus } from "../../../nodeBookTypes";
 // import OptimizedAvatar from "../../OptimizedAvatar";
 // import { UsersStatus } from "../../../noteBookTypes";
 import { MemoizedUserStatusIcon } from "../UserStatusIcon";
@@ -93,6 +93,7 @@ const usersListObjFromReputationObj = (user: any, userReputation: any, uname: st
 
 type UsersStatusListProps = {
   usersStatus: UsersStatus;
+  nodeBookDispatch: React.Dispatch<DispatchNodeBookActions>;
   reloadPermanentGraph: any;
   reputationSignal: ReputationSignal[];
   setOpenSideBar: (sidebar: OpenSidebar) => void;
@@ -102,7 +103,7 @@ type UsersStatusListProps = {
   disabled?: boolean;
 };
 
-const UsersStatusList = ({ disabled = false, ...props }: UsersStatusListProps) => {
+const UsersStatusList = ({ nodeBookDispatch, disabled = false, ...props }: UsersStatusListProps) => {
   const [{ user }] = useAuth();
   const db = getFirestore();
 
@@ -394,6 +395,7 @@ const UsersStatusList = ({ disabled = false, ...props }: UsersStatusListProps) =
       return uList.map((user: any) => (
         <MemoizedUserStatusIcon
           key={"User" + user.uname}
+          nodeBookDispatch={nodeBookDispatch}
           uname={user.uname}
           totalPoints={user.totalPoints}
           totalPositives={user.totalPositives}
