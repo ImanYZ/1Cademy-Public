@@ -79,7 +79,7 @@ const RECONCILING_ACCEPTED_PROPOSALS_STEPS: TutorialStepConfig[] = [
         </Stack>
         <MarkdownRender
           text={
-            "The proposal gets **Aproved Atomatically** then it will be implemented on the **Map** and will be moved to the accepted proposal list"
+            "The proposal gets **Approved Atomatically** then it will be implemented on the **Map**. It'll go to the **pending proposals** list of the node."
           }
         />
 
@@ -100,6 +100,7 @@ const RECONCILING_NOT_ACCEPTED_PROPOSALS_STEPS: TutorialStepConfig[] = [
     ),
     anchor: "Portal",
     tooltipPosition: "right",
+    targetDelay: 300,
   },
 
   {
@@ -160,14 +161,14 @@ const RECONCILING_NOT_ACCEPTED_PROPOSALS_STEPS: TutorialStepConfig[] = [
 
         <MarkdownRender
           text={
-            "The proposal will **NOT** get **implemented**. It'll go to the **pending proposals** list on the node."
+            "The proposal will **NOT** get **implemented**. It'll go to the **pending proposals** list of the node."
           }
         />
       </Stack>
     ),
     anchor: "Portal",
     tooltipPosition: "right",
-    targetDelay: 450,
+    targetDelay: 300,
   },
   {
     targetId: "sidebar-wrapper-proposals",
@@ -188,6 +189,7 @@ const RECONCILING_NOT_ACCEPTED_PROPOSALS_STEPS: TutorialStepConfig[] = [
     tooltipPosition: "right",
 
     anchor: "Portal",
+    targetDelay: 300,
   },
 ];
 export const RECONCILING_ACCEPTED_PROPOSALS_STEPS_COMPLETE: TutorialStep[] = RECONCILING_ACCEPTED_PROPOSALS_STEPS.map(
