@@ -3937,7 +3937,6 @@ const Dashboard = ({}: DashboardProps) => {
         userTutorial.navigation.forceTutorial
       ) {
         setTutorial({ name: "navigation", step: 1, steps: [] });
-        // setCurrentTutorial("NAVIGATION");
         return;
       }
 
@@ -3963,7 +3962,6 @@ const Dashboard = ({}: DashboardProps) => {
         }
 
         setTargetId(nodeTargetId);
-        // setCurrentTutorial("NODES");
         setTutorial({ name: "nodes", step: 1, steps: [] });
         return;
       }
@@ -3979,7 +3977,7 @@ const Dashboard = ({}: DashboardProps) => {
           setOpenSidebar("SEARCHER_SIDEBAR");
           return;
         }
-        // setCurrentTutorial("SEARCHER");
+        setTutorial({ name: "searcher", step: 1, steps: [] });
         return;
       }
 
@@ -3996,7 +3994,7 @@ const Dashboard = ({}: DashboardProps) => {
       }
 
       if (selectedNodeFromChangedNodes && !userTutorial.proposal.done && !userTutorial.proposal.skipped) {
-        // setCurrentTutorial(`PROPOSAL`);
+        setTutorial({ name: "proposal", step: 1, steps: [] });
         setTargetId(selectedNodeFromChangedNodes.node);
         return;
       }
@@ -4013,7 +4011,7 @@ const Dashboard = ({}: DashboardProps) => {
         !userTutorial.proposalConcept.skipped &&
         selectedNodeFromChangedNodes.nodeType === "Concept"
       ) {
-        // setCurrentTutorial(`PROPOSAL_CONCEPT`);
+        setTutorial({ name: "proposalConcept", step: 1, steps: [] });
         setTargetId(selectedNodeFromChangedNodes.node);
         return;
       }
@@ -4030,7 +4028,7 @@ const Dashboard = ({}: DashboardProps) => {
         !userTutorial.proposalRelation.skipped &&
         selectedNodeFromChangedNodes.nodeType === "Relation"
       ) {
-        // setCurrentTutorial(`PROPOSAL_RELATION`);
+        setTutorial({ name: "proposalRelation", step: 1, steps: [] });
         setTargetId(selectedNodeFromChangedNodes.node);
         return;
       }
@@ -4047,7 +4045,7 @@ const Dashboard = ({}: DashboardProps) => {
         !userTutorial.proposalReference.skipped &&
         selectedNodeFromChangedNodes.nodeType === "Reference"
       ) {
-        // setCurrentTutorial(`PROPOSAL_REFERENCE`);
+        setTutorial({ name: "proposalReference", step: 1, steps: [] });
         setTargetId(selectedNodeFromChangedNodes.node);
         return;
       }
@@ -4064,7 +4062,7 @@ const Dashboard = ({}: DashboardProps) => {
         !userTutorial.proposalIdea.skipped &&
         selectedNodeFromChangedNodes.nodeType === "Idea"
       ) {
-        // setCurrentTutorial(`PROPOSAL_IDEA`);
+        setTutorial({ name: "proposalIdea", step: 1, steps: [] });
         setTargetId(selectedNodeFromChangedNodes.node);
         return;
       }
@@ -4081,7 +4079,7 @@ const Dashboard = ({}: DashboardProps) => {
         !userTutorial.proposalQuestion.skipped &&
         selectedNodeFromChangedNodes.nodeType === "Question"
       ) {
-        // setCurrentTutorial(`PROPOSAL_QUESTION`);
+        setTutorial({ name: "proposalQuestion", step: 1, steps: [] });
         setTargetId(selectedNodeFromChangedNodes.node);
         return;
       }
@@ -4098,7 +4096,7 @@ const Dashboard = ({}: DashboardProps) => {
         !userTutorial.proposalCode.skipped &&
         selectedNodeFromChangedNodes.nodeType === "Code"
       ) {
-        // setCurrentTutorial(`PROPOSAL_CODE`);
+        setTutorial({ name: "proposalCode", step: 1, steps: [] });
         setTargetId(selectedNodeFromChangedNodes.node);
         return;
       }
@@ -4120,7 +4118,7 @@ const Dashboard = ({}: DashboardProps) => {
         !userTutorial.concept.skipped
       ) {
         setTargetId(selectedNodeFromGraph.node);
-        // setCurrentTutorial("CONCEPT");
+        setTutorial({ name: "concept", step: 1, steps: [] });
         return;
       }
 
@@ -4137,7 +4135,7 @@ const Dashboard = ({}: DashboardProps) => {
         !userTutorial.relation.skipped
       ) {
         setTargetId(selectedNodeFromGraph.node);
-        // setCurrentTutorial("RELATION");
+        setTutorial({ name: "relation", step: 1, steps: [] });
         return;
       }
 
@@ -4154,7 +4152,7 @@ const Dashboard = ({}: DashboardProps) => {
         !userTutorial.reference.skipped
       ) {
         setTargetId(selectedNodeFromGraph.node);
-        // setCurrentTutorial("REFERENCE");
+        setTutorial({ name: "reference", step: 1, steps: [] });
         return;
       }
 
@@ -4171,7 +4169,7 @@ const Dashboard = ({}: DashboardProps) => {
         !userTutorial.question.skipped
       ) {
         setTargetId(selectedNodeFromGraph.node);
-        // setCurrentTutorial("QUESTION");
+        setTutorial({ name: "question", step: 1, steps: [] });
         return;
       }
 
@@ -4188,7 +4186,7 @@ const Dashboard = ({}: DashboardProps) => {
         !userTutorial.idea.skipped
       ) {
         setTargetId(selectedNodeFromGraph.node);
-        // setCurrentTutorial("IDEA");
+        setTutorial({ name: "idea", step: 1, steps: [] });
         return;
       }
 
