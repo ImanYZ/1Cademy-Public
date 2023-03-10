@@ -131,25 +131,8 @@ export const Tutorial = ({
             ? tutorialState.description(node)
             : tutorialState.description}
 
-          <Stack direction={"row"} justifyContent={"space-between"} alignItems={"center"} sx={{ mt: "16px" }}>
-            {tutorialState.currentStepName !== stepsLength && (
-              <Button
-                variant="text"
-                onClick={() => {
-                  handleCloseProgressBarMenu();
-                  // onChangeStep(null);
-                  // onUpdateNode("nodes", tutorialState.currentStepName, {});
-                  onSkip();
-                }}
-                sx={{
-                  color: "inherit",
-                  p: "8px 0px",
-                  ":hover": { backgroundColor: theme => (theme.palette.mode === "dark" ? "#575f68" : "#d7dee6") },
-                }}
-              >
-                Skip
-              </Button>
-            )}
+          {/* INFO: reversed used for showing buttons always to right no matter the number of buttons */}
+          <Stack direction={"row-reverse"} justifyContent={"space-between"} alignItems={"center"} sx={{ mt: "16px" }}>
             <Box>
               {tutorialState.currentStepName > 1 && (
                 <Button
@@ -213,6 +196,24 @@ export const Tutorial = ({
                 </Button>
               )}
             </Box>
+            {tutorialState.currentStepName !== stepsLength && (
+              <Button
+                variant="text"
+                onClick={() => {
+                  handleCloseProgressBarMenu();
+                  // onChangeStep(null);
+                  // onUpdateNode("nodes", tutorialState.currentStepName, {});
+                  onSkip();
+                }}
+                sx={{
+                  color: "inherit",
+                  p: "8px 0px",
+                  ":hover": { backgroundColor: theme => (theme.palette.mode === "dark" ? "#575f68" : "#d7dee6") },
+                }}
+              >
+                Skip
+              </Button>
+            )}
           </Stack>
         </Box>
       </div>
@@ -252,25 +253,8 @@ export const Tutorial = ({
 
       {typeof tutorialState.description === "function" ? tutorialState.description(node) : tutorialState.description}
 
-      <Stack direction={"row"} justifyContent={"space-between"} alignItems={"center"} sx={{ mt: "16px" }}>
-        {tutorialState.currentStepName !== stepsLength && (
-          <Button
-            variant="text"
-            onClick={() => {
-              handleCloseProgressBarMenu();
-              // onChangeStep(null);
-              // onUpdateNode("nodes", tutorialState.currentStepName, {});
-              onSkip();
-            }}
-            sx={{
-              color: "inherit",
-              p: "8px 0px",
-              ":hover": { backgroundColor: theme => (theme.palette.mode === "dark" ? "#575f68" : "#d7dee6") },
-            }}
-          >
-            Skip
-          </Button>
-        )}
+      {/* INFO: reversed used for showing buttons always to right no matter the number of elements */}
+      <Stack direction={"row-reverse"} justifyContent={"space-between"} alignItems={"center"} sx={{ mt: "16px" }}>
         <Box>
           {tutorialState.currentStepName > 1 && (
             <Button
@@ -334,6 +318,24 @@ export const Tutorial = ({
             </Button>
           )}
         </Box>
+        {tutorialState.currentStepName !== stepsLength && (
+          <Button
+            variant="text"
+            onClick={() => {
+              handleCloseProgressBarMenu();
+              // onChangeStep(null);
+              // onUpdateNode("nodes", tutorialState.currentStepName, {});
+              onSkip();
+            }}
+            sx={{
+              color: "inherit",
+              p: "8px 0px",
+              ":hover": { backgroundColor: theme => (theme.palette.mode === "dark" ? "#575f68" : "#d7dee6") },
+            }}
+          >
+            Skip
+          </Button>
+        )}
       </Stack>
     </Box>
   );

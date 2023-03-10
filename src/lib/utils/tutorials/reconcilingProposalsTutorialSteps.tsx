@@ -100,6 +100,7 @@ const RECONCILING_NOT_ACCEPTED_PROPOSALS_STEPS: TutorialStepConfig[] = [
     ),
     anchor: "Portal",
     tooltipPosition: "right",
+    targetDelay: 300,
   },
 
   {
@@ -167,7 +168,7 @@ const RECONCILING_NOT_ACCEPTED_PROPOSALS_STEPS: TutorialStepConfig[] = [
     ),
     anchor: "Portal",
     tooltipPosition: "right",
-    targetDelay: 450,
+    targetDelay: 300,
   },
   {
     targetId: "sidebar-wrapper-proposals",
@@ -188,6 +189,7 @@ const RECONCILING_NOT_ACCEPTED_PROPOSALS_STEPS: TutorialStepConfig[] = [
     tooltipPosition: "right",
 
     anchor: "Portal",
+    targetDelay: 300,
   },
 ];
 export const RECONCILING_ACCEPTED_PROPOSALS_STEPS_COMPLETE: TutorialStep[] = RECONCILING_ACCEPTED_PROPOSALS_STEPS.map(
