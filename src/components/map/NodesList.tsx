@@ -285,7 +285,7 @@ export const MemoizedNodeList = React.memo(NodesList, (prev, next) => {
 
   return (
     (prev.nodeUpdates.updatedAt === next.nodeUpdates.updatedAt ||
-      (prev.showProposeTutorial === next.showProposeTutorial && compareNodes(prev.nodes, next.nodes))) &&
+      (!!next.showProposeTutorial && compareNodes(prev.nodes, next.nodes))) &&
     prev.bookmark === next.bookmark &&
     prev.markStudied === next.markStudied &&
     prev.chosenNodeChanged === next.chosenNodeChanged &&
