@@ -7,7 +7,6 @@ import { Stack } from "@mui/system";
 import React, { Dispatch, SetStateAction, useState } from "react";
 
 import { TutorialStep, TutorialTypeKeys, UserTutorials } from "../../nodeBookTypes";
-// import { TutorialKeys } from "../../pages/notebook";
 
 type Tutorials = { [key in TutorialTypeKeys]: { title: string; steps: TutorialStep[] } };
 
@@ -17,7 +16,6 @@ type TutorialTableOfContentProps = {
   tutorials: Tutorials;
   userTutorialState: UserTutorials;
   onCancelTutorial: () => void;
-  // setCurrentTutorial: (newTutorial: TutorialTypeKeys) => void;
   setUserTutorialState: Dispatch<SetStateAction<UserTutorials>>;
   setInitialStep: (initialStep: number) => void;
   reloadPermanentGraph: () => void;
@@ -43,10 +41,34 @@ const TutorialTableOfContent = ({
     setExpanded(newExpanded ? option : false);
     setSelectedTutorial(stage);
   };
+
   const handleChange =
     (option: string, stage: keyof Tutorials) => (event: React.SyntheticEvent, newExpanded: boolean) => {
       onExpandTutorial(option, stage, newExpanded);
     };
+
+  const onStartTutorial = (keyTutorial: TutorialTypeKeys, tutorialIdx: number, stepIdx: number) => {
+    reloadPermanentGraph();
+    setUserTutorialState(previousTutorialStep => {
+      const tutorialStepModified = (Object.keys(previousTutorialStep) as Array<TutorialTypeKeys>).reduce((acu, cur) => {
+        return {
+          ...acu,
+          [cur]: {
+            ...previousTutorialStep[cur],
+            forceTutorial: cur === keyTutorial ? true : false,
+          },
+        };
+      }, {}) as UserTutorials;
+
+      return tutorialStepModified;
+    });
+
+    onExpandTutorial(`Option${tutorialIdx + 1}`, keyTutorial, true);
+    setInitialStep(stepIdx + 1);
+    onCancelTutorial();
+  };
+
+  console.log("loop");
 
   return (
     <Box
@@ -162,26 +184,7 @@ const TutorialTableOfContent = ({
                     <IconButton
                       onClick={e => {
                         e.stopPropagation();
-                        reloadPermanentGraph();
-                        setUserTutorialState(previousTutorialStep => {
-                          const tutorialStepModified = (
-                            Object.keys(previousTutorialStep) as Array<TutorialTypeKeys>
-                          ).reduce((acu, cur) => {
-                            return {
-                              ...acu,
-                              [cur]: {
-                                ...previousTutorialStep[cur],
-                                forceTutorial: cur === keyTutorial ? true : false,
-                              },
-                            };
-                          }, {}) as UserTutorials;
-
-                          return tutorialStepModified;
-                        });
-
-                        onExpandTutorial(`Option${tutorialIdx + 1}`, keyTutorial, true);
-                        setInitialStep(idx + 1);
-                        onCancelTutorial();
+                        onStartTutorial(keyTutorial, tutorialIdx, idx);
                       }}
                       size={"small"}
                       sx={{ p: "0px" }}

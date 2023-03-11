@@ -5,11 +5,13 @@ import React, { useMemo, useRef } from "react";
 import { gray50, gray200, gray700, gray800 } from "@/pages/home";
 
 import { TargetClientRect } from "../../hooks/useInteractiveTutorial";
+import { Tutorial } from "../../hooks/useInteractiveTutorial3";
 import { FullNodeData, TutorialStep } from "../../nodeBookTypes";
 
 const TOOLTIP_OFFSET = 40;
 
 type TutorialProps = {
+  tutorial: Tutorial;
   tutorialStep: TutorialStep | null;
   onNextStep: () => void;
   onPreviousStep: () => void;
@@ -22,6 +24,7 @@ type TutorialProps = {
 };
 
 export const TooltipTutorial = ({
+  tutorial,
   tutorialStep,
   targetClientRect,
   onNextStep,
@@ -34,6 +37,7 @@ export const TooltipTutorial = ({
 }: TutorialProps) => {
   const tooltipRef = useRef<HTMLDivElement | null>(null);
 
+  console.log({ tutorialStep, tutorial });
   const tooltipClientRect = useMemo(() => {
     if (!tooltipRef.current) return { top: 0, left: 0 };
     if (!tutorialStep) return { top: 0, left: 0 };

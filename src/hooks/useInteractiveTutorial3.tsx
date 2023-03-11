@@ -1,5 +1,5 @@
 import { doc, getDoc, getFirestore } from "firebase/firestore";
-import { ReactNode, useCallback, useEffect, useRef, useState } from "react";
+import { ReactNode, useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { NAVIGATION_STEPS_COMPLETE } from "@/lib/utils/tutorials/navigationTutorialSteps";
 import {
@@ -59,7 +59,7 @@ export type Tutorial = { name: TutorialTypeKeys; steps: TutorialStep[]; step: nu
 export const useInteractiveTutorial = ({ user }: useInteractiveTutorialProps) => {
   const db = getFirestore();
   const isPlayingTheTutorialRef = useRef(false);
-  const [currentStep, setCurrentStep] = useState<TutorialStep | null>(null);
+  // const [currentStep, setCurrentStep] = useState<TutorialStep | null>(null);
   const [tutorial, setTutorial] = useState<Tutorial>(null);
   const [targetId, setTargetId] = useState("");
   const [initialStep, setInitialStep] = useState(0);
@@ -113,136 +113,138 @@ export const useInteractiveTutorial = ({ user }: useInteractiveTutorialProps) =>
     getTutorialState();
   }, [db, user, userTutorialLoaded]);
 
-  useEffect(() => {
-    const fillTutorialData = () => {
-      if (!tutorial) {
-        setCurrentStep(prev => {
-          if (prev?.childTargetId) removeStyleFromTarget(prev.childTargetId, prev.targetId);
-          return null;
-        });
-        return null;
-      }
+  const startTutorial = useCallback(
+    (newTutorial: TutorialTypeKeys) => {
+      setTutorial(prevTutorial => {
+        console.log({ prevTutorial });
+        // // const previousStep = getTutorialStep(prevTutorial);
+        // // if (previousStep?.childTargetId) removeStyleFromTarget(previousStep.childTargetId, previousStep.targetId);
+        // if (!tutorial) return null;
+        // if (!newTutorial) return null;
 
-      let newSteps: TutorialStep[] = [];
-      if (tutorial.name === "navigation") {
-        newSteps = NAVIGATION_STEPS_COMPLETE;
-      }
-      if (tutorial.name === "nodes") {
-        // console.log("FILL NODES");
-        newSteps = NODES_STEPS_COMPLETE;
-      }
-      if (tutorial.name === "searcher") {
-        newSteps = SEARCHER_STEPS_COMPLETE;
-        setTargetId("");
-      }
-      if (tutorial.name === "concept") {
-        newSteps = NODE_CONCEPT_COMPLETE;
-      }
-      if (tutorial.name === "relation") {
-        newSteps = NODE_RELATION_COMPLETE;
-      }
-      if (tutorial.name === "reference") {
-        newSteps = NODE_REFERENCE_COMPLETE;
-      }
-      if (tutorial.name === "question") {
-        newSteps = NODE_QUESTION_COMPLETE;
-      }
-      if (tutorial.name === "idea") {
-        newSteps = NODE_IDEA_COMPLETE;
-      }
-      if (tutorial.name === "code") {
-        newSteps = NODE_CODE_COMPLETE;
-      }
-      if (tutorial.name === "proposal") {
-        newSteps = PROPOSAL_STEPS_COMPLETE;
-      }
-      if (tutorial.name === "proposalConcept") {
-        newSteps = PROPOSING_CONCEPT_EDIT_COMPLETE;
-      }
-      if (tutorial.name === "proposalReference") {
-        newSteps = PROPOSING_REFERENCE_EDIT_COMPLETE;
-      }
-      if (tutorial.name === "proposalRelation") {
-        newSteps = PROPOSING_RELATION_EDIT_COMPLETE;
-      }
-      if (tutorial.name === "proposalIdea") {
-        newSteps = PROPOSING_IDEA_EDIT_COMPLETE;
-      }
-      if (tutorial.name === "proposalQuestion") {
-        newSteps = PROPOSING_QUESTION_EDIT_COMPLETE;
-      }
-      if (tutorial.name === "proposalCode") {
-        newSteps = PROPOSING_CODE_EDIT_COMPLETE;
-      }
-      if (tutorial.name === "reconcilingAcceptedProposal") {
-        newSteps = RECONCILING_ACCEPTED_PROPOSALS_STEPS_COMPLETE;
-      }
-      if (tutorial.name === "reconcilingNotAcceptedProposal") {
-        newSteps = RECONCILING_NOT_ACCEPTED_PROPOSALS_STEPS_COMPLETE;
-      }
-      if (tutorial.name === "childProposal") {
-        newSteps = CHILD_PROPOSAL_COMPLETE;
-      }
-      if (tutorial.name === "childConcept") {
-        newSteps = CHILD_CONCEPT_PROPOSAL_COMPLETE;
-      }
+        let newSteps: TutorialStep[] = [];
+        if (newTutorial === "navigation") {
+          newSteps = NAVIGATION_STEPS_COMPLETE;
+        }
+        if (newTutorial === "nodes") {
+          // console.log("FILL NODES");
+          newSteps = NODES_STEPS_COMPLETE;
+        }
+        if (newTutorial === "searcher") {
+          newSteps = SEARCHER_STEPS_COMPLETE;
+          setTargetId("");
+        }
+        if (newTutorial === "concept") {
+          newSteps = NODE_CONCEPT_COMPLETE;
+        }
+        if (newTutorial === "relation") {
+          newSteps = NODE_RELATION_COMPLETE;
+        }
+        if (newTutorial === "reference") {
+          newSteps = NODE_REFERENCE_COMPLETE;
+        }
+        if (newTutorial === "question") {
+          newSteps = NODE_QUESTION_COMPLETE;
+        }
+        if (newTutorial === "idea") {
+          newSteps = NODE_IDEA_COMPLETE;
+        }
+        if (newTutorial === "code") {
+          newSteps = NODE_CODE_COMPLETE;
+        }
+        if (newTutorial === "proposal") {
+          newSteps = PROPOSAL_STEPS_COMPLETE;
+        }
+        if (newTutorial === "proposalConcept") {
+          newSteps = PROPOSING_CONCEPT_EDIT_COMPLETE;
+        }
+        if (newTutorial === "proposalReference") {
+          newSteps = PROPOSING_REFERENCE_EDIT_COMPLETE;
+        }
+        if (newTutorial === "proposalRelation") {
+          newSteps = PROPOSING_RELATION_EDIT_COMPLETE;
+        }
+        if (newTutorial === "proposalIdea") {
+          newSteps = PROPOSING_IDEA_EDIT_COMPLETE;
+        }
+        if (newTutorial === "proposalQuestion") {
+          newSteps = PROPOSING_QUESTION_EDIT_COMPLETE;
+        }
+        if (newTutorial === "proposalCode") {
+          newSteps = PROPOSING_CODE_EDIT_COMPLETE;
+        }
+        if (newTutorial === "reconcilingAcceptedProposal") {
+          newSteps = RECONCILING_ACCEPTED_PROPOSALS_STEPS_COMPLETE;
+        }
+        if (newTutorial === "reconcilingNotAcceptedProposal") {
+          newSteps = RECONCILING_NOT_ACCEPTED_PROPOSALS_STEPS_COMPLETE;
+        }
+        if (newTutorial === "childProposal") {
+          newSteps = CHILD_PROPOSAL_COMPLETE;
+        }
+        if (newTutorial === "childConcept") {
+          newSteps = CHILD_CONCEPT_PROPOSAL_COMPLETE;
+        }
 
-      setTutorial(prev => (prev ? { ...prev, steps: newSteps, step: 1 } : null));
+        setUserTutorial(prev => ({
+          ...prev,
+          [newTutorial]: { ...prev[newTutorial], currentStep: initialStep || 1 },
+        }));
 
-      if (!tutorial.name) return;
-      setUserTutorial(prev => ({
-        ...prev,
-        [tutorial.name]: { ...prev[tutorial.name], currentStep: initialStep || 1 },
-      }));
-    };
-
-    fillTutorialData();
-  }, [initialStep, tutorial]);
+        return { name: newTutorial, steps: newSteps, step: initialStep || 1 };
+      });
+    },
+    [initialStep]
+  );
 
   const onNextStep = useCallback(() => {
-    if (!tutorial) return;
+    () => console.log(tutorial);
+    // if (!tutorial) return;
 
-    setCurrentStep(prev => {
-      if (!prev) return null;
-      if (tutorial.step >= tutorial.steps.length) {
-        isPlayingTheTutorialRef.current = false;
-        setTutorial(null);
-        return null;
-      }
+    // setCurrentStep(prev => {
+    //   if (!prev) return null;
+    //   if (tutorial.step >= tutorial.steps.length) {
+    //     isPlayingTheTutorialRef.current = false;
+    //     setTutorial(null);
+    //     return null;
+    //   }
 
-      if (prev?.childTargetId) removeStyleFromTarget(prev.childTargetId, prev.targetId);
-      const newStep = tutorial.step < tutorial.steps.length ? tutorial.step + 1 : tutorial.step;
-      setUserTutorial(prevUserTutorial => ({
-        ...prevUserTutorial,
-        [tutorial.name]: {
-          ...prevUserTutorial[tutorial.name],
-          currentStep: newStep,
-        },
-      }));
-      return tutorial.steps[newStep - 1];
-    });
+    //   if (prev?.childTargetId) removeStyleFromTarget(prev.childTargetId, prev.targetId);
+    //   const newStep = tutorial.step < tutorial.steps.length ? tutorial.step + 1 : tutorial.step;
+    //   setUserTutorial(prevUserTutorial => ({
+    //     ...prevUserTutorial,
+    //     [tutorial.name]: {
+    //       ...prevUserTutorial[tutorial.name],
+    //       currentStep: newStep,
+    //     },
+    //   }));
+    //   return tutorial.steps[newStep - 1];
+    // });
   }, [tutorial]);
 
   const onPreviousStep = useCallback(() => {
-    if (!tutorial) return;
+    () => console.log(tutorial);
+    // if (!tutorial) return;
 
-    setCurrentStep(prev => {
-      if (!prev) return null;
-      if (tutorial.step === 1) {
-        isPlayingTheTutorialRef.current = false;
-        setTutorial(null);
-        return null;
-      }
+    // setCurrentStep(prev => {
+    //   if (!prev) return null;
+    //   if (tutorial.step === 1) {
+    //     isPlayingTheTutorialRef.current = false;
+    //     setTutorial(null);
+    //     return null;
+    //   }
 
-      if (prev?.childTargetId) removeStyleFromTarget(prev.childTargetId, prev.targetId);
-      const newStep = tutorial.step > 1 ? tutorial.step - 1 : tutorial.step;
-      setUserTutorial(prevUserTutorial => ({
-        ...prevUserTutorial,
-        [tutorial.name]: { ...prevUserTutorial[tutorial.name], currentStep: newStep },
-      }));
-      return tutorial.steps[newStep - 1];
-    });
+    //   if (prev?.childTargetId) removeStyleFromTarget(prev.childTargetId, prev.targetId);
+    //   const newStep = tutorial.step > 1 ? tutorial.step - 1 : tutorial.step;
+    //   setUserTutorial(prevUserTutorial => ({
+    //     ...prevUserTutorial,
+    //     [tutorial.name]: { ...prevUserTutorial[tutorial.name], currentStep: newStep },
+    //   }));
+    //   return tutorial.steps[newStep - 1];
+    // });
   }, [tutorial]);
+
+  const currentStep = useMemo(() => getTutorialStep(tutorial), [tutorial]);
 
   useEventListener({
     stepId: currentStep?.childTargetId ?? currentStep?.targetId,
@@ -250,6 +252,7 @@ export const useInteractiveTutorial = ({ user }: useInteractiveTutorialProps) =>
   });
 
   return {
+    startTutorial,
     tutorial,
     setTutorial,
     currentStep,
@@ -267,9 +270,10 @@ export const useInteractiveTutorial = ({ user }: useInteractiveTutorialProps) =>
 
 export const STEPS_NODE_TUTORIAL = [];
 
-const removeStyleFromTarget = (childTargetId: string, targetId?: string) => {
+export const removeStyleFromTarget = (childTargetId: string, targetId?: string) => {
   if (childTargetId) {
     const elementId = targetId ? `${targetId}-${childTargetId}` : childTargetId;
+    console.log({ elementId });
     const element = document.getElementById(elementId);
     if (element) {
       element.classList.remove("tutorial-target");
@@ -277,4 +281,9 @@ const removeStyleFromTarget = (childTargetId: string, targetId?: string) => {
       element.classList.remove("tutorial-target-pulse");
     }
   }
+};
+
+export const getTutorialStep = (tutorial: Tutorial) => {
+  if (!tutorial) return null;
+  return tutorial.steps[tutorial.step - 1];
 };
