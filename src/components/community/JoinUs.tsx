@@ -10,7 +10,19 @@ import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
 import React, { useEffect, useState } from "react";
 
-import { gray200, gray600, gray700, gray900, orangeDark, orangeLight } from "@/pages/home";
+import {
+  gray200,
+  gray300,
+  gray600,
+  gray800,
+  green100,
+  orangeDark,
+  orangeLight,
+  orangeLighter,
+  successDark,
+  warningDark,
+  yellow100,
+} from "@/pages/home";
 
 import Button from "../home/components/Button";
 import UploadButton from "./UploadButton";
@@ -286,14 +298,42 @@ const JoinUs = (props: JoinUsProps) => {
         m: 0,
       }}
     >
-      <Alert severity="success" sx={{ p: "24px 20px", mb: "16px", borderRadius: "12px", color: gray700 }}>
-        <strong style={{ color: gray900 }}>Please note: </strong>
+      <Alert
+        severity="success"
+        sx={{
+          p: "24px 20px",
+          mb: "16px",
+          borderRadius: "12px",
+          color: theme => (theme.palette.mode === "dark" ? green100 : "#344054"),
+          fontWeight: 500,
+          backgroundColor: theme => (theme.palette.mode === "dark" ? successDark : "#ECFDF3"),
+          "& svg": {
+            fill: "common.black",
+          },
+        }}
+      >
+        <Box sx={{ fontWeight: "bold", color: theme => (theme.palette.mode === "dark" ? "white" : "#344054") }}>
+          Please note:{" "}
+        </Box>
         <br />
         Our application process is sequential; i.e., you need to complete each step to unlock the following steps.
       </Alert>
       {props.community && (
-        <Alert severity="warning" sx={{ p: "24px 20px", borderRadius: "12px", color: gray700 }}>
-          <strong style={{ color: gray900 }}>Please note: </strong>
+        <Alert
+          severity="warning"
+          sx={{
+            p: "24px 20px",
+            borderRadius: "12px",
+            color: theme => (theme.palette.mode === "dark" ? yellow100 : "#344054"),
+            fontWeight: 500,
+            backgroundColor: theme => (theme.palette.mode === "dark" ? warningDark : "#FEF6EE"),
+            "&  a:link": { color: theme => (theme.palette.mode === "dark" ? orangeDark : "#1570EF") },
+            "& a:visited": { color: theme => (theme.palette.mode === "dark" ? orangeLighter : "#1570EF") },
+          }}
+        >
+          <Box sx={{ fontWeight: "bold", color: theme => (theme.palette.mode === "dark" ? "white" : "#344054") }}>
+            Please note:{" "}
+          </Box>
           <br />
           Participation is unpaid, solely for the purpose of improving research and education, and this position meets{" "}
           <a href="https://www.dol.gov/whd/regs/compliance/whdfs71.htm" target="_blank" rel="noreferrer">
@@ -330,19 +370,19 @@ const JoinUs = (props: JoinUsProps) => {
           "& .MuiStepLabel-label": {
             fontSize: "20px",
             fontWeight: 600,
-            color: gray600,
+            color: theme => (theme.palette.mode === "dark" ? gray600 : gray300),
           },
 
           "& .MuiStepLabel-label.Mui-active": {
             fontWeight: 600,
-            color: gray200,
+            color: theme => (theme.palette.mode === "dark" ? gray200 : gray800),
           },
           "& .MuiStepLabel-label.Mui-completed": {
             fontWeight: 600,
             color: gray200,
           },
           "& .MuiButton-root": {
-            backgroundColor: orangeDark,
+            backgroundColor: theme => (theme.palette.mode === "dark" ? orangeDark : gray200),
           },
           "& .MuiButton-root:hover": {
             backgroundColor: orangeLight,
@@ -358,7 +398,7 @@ const JoinUs = (props: JoinUsProps) => {
           <StepContent>
             <Typography
               sx={{
-                color: gray200,
+                color: theme => (theme.palette.mode === "dark" ? gray200 : gray800),
                 lineHeight: "24px",
               }}
             >
@@ -398,7 +438,7 @@ const JoinUs = (props: JoinUsProps) => {
           <StepContent>
             <Typography
               sx={{
-                color: themeName === "dark" ? "common.white" : undefined,
+                color: theme => (theme.palette.mode === "dark" ? gray200 : gray800),
               }}
             >
               Please check your Google Calendar. You're invited to three UX Experiment sessions. Please attend all the
@@ -698,7 +738,7 @@ const JoinUs = (props: JoinUsProps) => {
                     <StepContent>
                       <Typography
                         sx={{
-                          color: themeName === "dark" ? "common.white" : undefined,
+                          color: theme => (theme.palette.mode === "dark" ? gray200 : gray800),
                         }}
                       >
                         The last step to apply to this community is a test of your domain-specific knowledge. If you are
