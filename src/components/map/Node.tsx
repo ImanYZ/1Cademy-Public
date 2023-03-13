@@ -113,6 +113,7 @@ type NodeProps = {
   deleteLink: any;
   openLinkedNode: any;
   openAllChildren: any;
+  openAllParent: any;
   onHideNode: any;
   hideOffsprings: any;
   toggleNode: (event: any, id: string) => void;
@@ -224,6 +225,7 @@ const Node = ({
   deleteLink,
   openLinkedNode,
   openAllChildren,
+  openAllParent,
   onHideNode,
   hideOffsprings: onHideOffsprings,
   toggleNode,
@@ -390,7 +392,6 @@ const Node = ({
 
   const nodeClickHandler = useCallback(
     (event: any) => {
-      console.log(notebookRef.current.choosingNode, "notebookRef.current.choosingNode");
       if (notebookRef.current.choosingNode && notebookRef.current.choosingNode.id !== identifier) {
         // The first Nodes exist, Now is clicking the Chosen Node
         notebookRef.current.chosenNode = {
@@ -1095,6 +1096,7 @@ const Node = ({
               deleteLink={deleteLinkHandler}
               openLinkedNode={openLinkedNode}
               openAllChildren={openAllChildren}
+              openAllParent={openAllParent}
               saveProposedChildNode={saveProposedChildNode}
               saveProposedImprovement={saveProposedImprovement}
               closeSideBar={closeSideBar}

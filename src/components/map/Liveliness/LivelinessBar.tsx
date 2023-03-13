@@ -251,7 +251,7 @@ const LivelinessBar = ({ disabled = false, ...props }: ILivelinessBarProps) => {
                     ((Math.log(usersInteractions[uname].count > 0 ? usersInteractions[uname].count : 1) /
                       Math.log(maxActions)) *
                       barHeight -
-                      32);
+                      10);
                   return (
                     <Tooltip
                       key={uname}
