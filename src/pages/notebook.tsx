@@ -364,9 +364,9 @@ const Dashboard = ({}: DashboardProps) => {
     isPlayingTheTutorialRef,
     setTargetId,
     targetId,
-    userTutorial: tutorialStep,
     userTutorialLoaded,
     setUserTutorial,
+    userTutorial,
     setInitialStep,
   } = useInteractiveTutorial({ user });
   const onNodeInViewport = useCallback(
@@ -658,6 +658,7 @@ const Dashboard = ({}: DashboardProps) => {
     return width;
   };
   const openNodeHandler = useMemoizedCallback(
+    // TODO: remove openWithDefaultValues
     async (nodeId: string, openWithDefaultValues: Partial<UserNodesData> = {}) => {
       devLog("OPEN_NODE_HANDLER", { nodeId, openWithDefaultValues });
 
@@ -1781,13 +1782,13 @@ const Dashboard = ({}: DashboardProps) => {
     if (!tutorial) return;
 
     const tutorialUpdated: UserTutorial = {
-      ...tutorialStep[tutorial.name],
+      ...userTutorial[tutorial.name],
       currentStep: currentStep.currentStepName,
       done: true,
       forceTutorial: false,
     };
 
-    const userTutorialUpdated: UserTutorials = { ...tutorialStep, [tutorial.name]: tutorialUpdated };
+    const userTutorialUpdated: UserTutorials = { ...userTutorial, [tutorial.name]: tutorialUpdated };
     setTutorial(null);
     setInitialStep(0);
     setUserTutorial(userTutorialUpdated);
@@ -1800,7 +1801,7 @@ const Dashboard = ({}: DashboardProps) => {
     } else {
       await setDoc(tutorialRef, userTutorialUpdated);
     }
-  }, [currentStep, db, setInitialStep, setTutorial, setUserTutorial, tutorial, user, tutorialStep]);
+  }, [currentStep, db, setInitialStep, setTutorial, setUserTutorial, tutorial, user, userTutorial]);
 
   const openLinkedNode = useCallback(
     (linkedNodeID: string, typeOperation?: string) => {
@@ -3879,17 +3880,18 @@ const Dashboard = ({}: DashboardProps) => {
     if (!tutorial) return;
 
     const tutorialUpdated: UserTutorial = {
-      ...tutorialStep[tutorial.name],
+      ...userTutorial[tutorial.name],
       currentStep: tutorial.step,
       skipped: true,
       forceTutorial: false,
     };
-    const userTutorialUpdated = { ...tutorialStep, [tutorial.step]: tutorialUpdated };
+    const userTutorialUpdated = { ...userTutorial, [tutorial.name]: tutorialUpdated };
+    const wasForcedTutorial = userTutorial[tutorial.name].forceTutorial;
+    setUserTutorial(userTutorialUpdated);
     setOpenSidebar(null);
     setTutorial(null);
-    setUserTutorial(userTutorialUpdated);
 
-    if (tutorialStep[tutorial.name].forceTutorial) return;
+    if (wasForcedTutorial) return;
 
     const tutorialRef = doc(db, "userTutorial", user.uname);
     const tutorialDoc = await getDoc(tutorialRef);
@@ -3899,20 +3901,18 @@ const Dashboard = ({}: DashboardProps) => {
     } else {
       await setDoc(tutorialRef, userTutorialUpdated);
     }
-  }, [user, currentStep, tutorial, tutorialStep, setTutorial, setUserTutorial, db]);
+  }, [user, currentStep, tutorial, userTutorial, setTutorial, setUserTutorial, db]);
 
   const forceTutorial = useCallback(
-    (idTarget: string, tutorialName: TutorialTypeKeys, isEditable = false) => {
+    (idTarget: string, tutorialName: TutorialTypeKeys, openWithDefaultValues: Partial<FullNodeData> = {}) => {
       devLog("FORCE_TUTORIAL", { idTarget, tutorial: tutorialName });
       const targetElement = document.getElementById(idTarget);
       if (!targetElement) {
-        return isEditable
-          ? openNodeHandler(idTarget, { open: true, editable: true })
-          : openNodeHandler(idTarget, { open: true });
+        return openNodeHandler(idTarget);
       }
 
-      setNodeParts(idTarget, node => ({ ...node, open: true }));
-      if (isEditable) proposeNodeImprovement(null, idTarget);
+      setNodeParts(idTarget, node => ({ ...node, ...openWithDefaultValues /* , open: true */ }));
+      if (openWithDefaultValues?.editable) proposeNodeImprovement(null, idTarget);
       nodeBookDispatch({ type: "setSelectedNode", payload: idTarget });
       notebookRef.current.selectedNode = idTarget;
       startTutorial(tutorialName);
@@ -3935,13 +3935,13 @@ const Dashboard = ({}: DashboardProps) => {
       if (firstLoading) return;
       if (tutorial) return;
 
-      devLog("USE_EFFECT: DETECT_TRIGGER_TUTORIAL", { userTutorial: tutorialStep });
+      devLog("USE_EFFECT: DETECT_TRIGGER_TUTORIAL", { userTutorial });
 
       // --------------------------
 
       if (
-        (!tutorialStep.navigation.done && !tutorialStep.navigation.skipped) ||
-        tutorialStep.navigation.forceTutorial
+        (!userTutorial.navigation.done && !userTutorial.navigation.skipped) ||
+        userTutorial.navigation.forceTutorial
       ) {
         setTutorial({ name: "navigation", step: 1, steps: [] });
         return;
@@ -3949,38 +3949,54 @@ const Dashboard = ({}: DashboardProps) => {
 
       // --------------------------
 
-      if ((!tutorialStep.nodes.done && !tutorialStep.nodes.skipped) || tutorialStep.nodes.forceTutorial) {
-        const nodeTargetId =
-          (nodeBookState.selectedNode && graph.nodes[nodeBookState.selectedNode]?.open && nodeBookState.selectedNode) ||
-          "";
+      const selectedNodeFromGraph: FullNodeData | null = nodeBookState.selectedNode
+        ? graph.nodes[nodeBookState.selectedNode]
+        : null;
 
-        if (!nodeTargetId) {
-          if (!tutorialStep.nodes.forceTutorial) return;
+      // --------------------------
 
-          const idTarget = "r98BjyFDCe4YyLA3U8ZE";
-          const targetElement = document.getElementById(idTarget);
-          if (!targetElement) return openNodeHandler(idTarget, { open: true });
+      if (userTutorial.nodes.forceTutorial) {
+        return forceTutorial("r98BjyFDCe4YyLA3U8ZE", "nodes");
+      }
 
-          notebookRef.current.selectedNode = idTarget;
-          nodeBookDispatch({ type: "setSelectedNode", payload: idTarget });
-          setNodeParts(idTarget, node => ({ ...node, open: true }));
-          scrollToNode(idTarget);
-          return;
-        }
-
-        setTargetId(nodeTargetId);
-        startTutorial("nodes");
-        // setTutorial({ name: "nodes", step: 1, steps: [] });
+      if (selectedNodeFromGraph && !userTutorial.nodes.done && !userTutorial.nodes.skipped) {
+        setTutorial({ name: "nodes", step: 1, steps: [] });
+        setTargetId(selectedNodeFromGraph.node);
         return;
       }
 
+      // if ((!tutorialStep.nodes.done && !tutorialStep.nodes.skipped) || tutorialStep.nodes.forceTutorial) {
+      //   const nodeTargetId =
+      //     (nodeBookState.selectedNode && graph.nodes[nodeBookState.selectedNode]?.open && nodeBookState.selectedNode) ||
+      //     "";
+
+      //   if (!nodeTargetId) {
+      //     if (!tutorialStep.nodes.forceTutorial) return;
+
+      //     const idTarget = "r98BjyFDCe4YyLA3U8ZE";
+      //     const targetElement = document.getElementById(idTarget);
+      //     if (!targetElement) return openNodeHandler(idTarget, { open: true });
+
+      //     notebookRef.current.selectedNode = idTarget;
+      //     nodeBookDispatch({ type: "setSelectedNode", payload: idTarget });
+      //     setNodeParts(idTarget, node => ({ ...node, open: true }));
+      //     scrollToNode(idTarget);
+      //     return;
+      //   }
+
+      //   setTargetId(nodeTargetId);
+      //   startTutorial("nodes");
+      //   // setTutorial({ name: "nodes", step: 1, steps: [] });
+      //   return;
+      // }
+
       // --------------------------
       if (
-        (!tutorialStep.searcher.done && !tutorialStep.searcher.skipped && openSidebar === "SEARCHER_SIDEBAR") ||
-        tutorialStep.searcher.forceTutorial
+        (!userTutorial.searcher.done && !userTutorial.searcher.skipped && openSidebar === "SEARCHER_SIDEBAR") ||
+        userTutorial.searcher.forceTutorial
       ) {
         if (openSidebar !== "SEARCHER_SIDEBAR") {
-          if (!tutorialStep.searcher.forceTutorial) return;
+          if (!userTutorial.searcher.forceTutorial) return;
 
           setOpenSidebar("SEARCHER_SIDEBAR");
           return;
@@ -3997,11 +4013,11 @@ const Dashboard = ({}: DashboardProps) => {
 
       // --------------------------
 
-      if (tutorialStep.proposal.forceTutorial) {
-        return forceTutorial("r98BjyFDCe4YyLA3U8ZE", "proposal", true);
+      if (userTutorial.proposal.forceTutorial) {
+        return forceTutorial("r98BjyFDCe4YyLA3U8ZE", "proposal", { editable: true });
       }
 
-      if (selectedNodeFromChangedNodes && !tutorialStep.proposal.done && !tutorialStep.proposal.skipped) {
+      if (selectedNodeFromChangedNodes && !userTutorial.proposal.done && !userTutorial.proposal.skipped) {
         setTutorial({ name: "proposal", step: 1, steps: [] });
         setTargetId(selectedNodeFromChangedNodes.node);
         return;
@@ -4009,14 +4025,14 @@ const Dashboard = ({}: DashboardProps) => {
 
       // --------------------------
 
-      if (tutorialStep.proposalConcept.forceTutorial) {
-        return forceTutorial("r98BjyFDCe4YyLA3U8ZE", "proposalConcept", true);
+      if (userTutorial.proposalConcept.forceTutorial) {
+        return forceTutorial("r98BjyFDCe4YyLA3U8ZE", "proposalConcept", { editable: true });
       }
 
       if (
         selectedNodeFromChangedNodes &&
-        !tutorialStep.proposalConcept.done &&
-        !tutorialStep.proposalConcept.skipped &&
+        !userTutorial.proposalConcept.done &&
+        !userTutorial.proposalConcept.skipped &&
         selectedNodeFromChangedNodes.nodeType === "Concept"
       ) {
         setTutorial({ name: "proposalConcept", step: 1, steps: [] });
@@ -4026,14 +4042,14 @@ const Dashboard = ({}: DashboardProps) => {
 
       // --------------------------
 
-      if (tutorialStep.proposalRelation.forceTutorial) {
-        return forceTutorial("zYYmaXvhab7hH2uRI9Up", "proposalRelation", true);
+      if (userTutorial.proposalRelation.forceTutorial) {
+        return forceTutorial("zYYmaXvhab7hH2uRI9Up", "proposalRelation", { editable: true });
       }
 
       if (
         selectedNodeFromChangedNodes &&
-        !tutorialStep.proposalRelation.done &&
-        !tutorialStep.proposalRelation.skipped &&
+        !userTutorial.proposalRelation.done &&
+        !userTutorial.proposalRelation.skipped &&
         selectedNodeFromChangedNodes.nodeType === "Relation"
       ) {
         setTutorial({ name: "proposalRelation", step: 1, steps: [] });
@@ -4043,14 +4059,14 @@ const Dashboard = ({}: DashboardProps) => {
 
       // --------------------------
 
-      if (tutorialStep.proposalReference.forceTutorial) {
-        return forceTutorial("P631lWeKsBtszZRDlmsM", "proposalReference", true);
+      if (userTutorial.proposalReference.forceTutorial) {
+        return forceTutorial("P631lWeKsBtszZRDlmsM", "proposalReference", { editable: true });
       }
 
       if (
         selectedNodeFromChangedNodes &&
-        !tutorialStep.proposalReference.done &&
-        !tutorialStep.proposalReference.skipped &&
+        !userTutorial.proposalReference.done &&
+        !userTutorial.proposalReference.skipped &&
         selectedNodeFromChangedNodes.nodeType === "Reference"
       ) {
         setTutorial({ name: "proposalReference", step: 1, steps: [] });
@@ -4060,14 +4076,14 @@ const Dashboard = ({}: DashboardProps) => {
 
       // --------------------------
 
-      if (tutorialStep.proposalIdea.forceTutorial) {
-        return forceTutorial("v9wGPxRCI4DRq11o7uH2", "proposalIdea", true);
+      if (userTutorial.proposalIdea.forceTutorial) {
+        return forceTutorial("v9wGPxRCI4DRq11o7uH2", "proposalIdea", { editable: true });
       }
 
       if (
         selectedNodeFromChangedNodes &&
-        !tutorialStep.proposalIdea.done &&
-        !tutorialStep.proposalIdea.skipped &&
+        !userTutorial.proposalIdea.done &&
+        !userTutorial.proposalIdea.skipped &&
         selectedNodeFromChangedNodes.nodeType === "Idea"
       ) {
         setTutorial({ name: "proposalIdea", step: 1, steps: [] });
@@ -4077,14 +4093,14 @@ const Dashboard = ({}: DashboardProps) => {
 
       // --------------------------
 
-      if (tutorialStep.proposalQuestion.forceTutorial) {
-        return forceTutorial("qO9uK6UdYRLWm4Olihlw", "proposalQuestion", true);
+      if (userTutorial.proposalQuestion.forceTutorial) {
+        return forceTutorial("qO9uK6UdYRLWm4Olihlw", "proposalQuestion", { editable: true });
       }
 
       if (
         selectedNodeFromChangedNodes &&
-        !tutorialStep.proposalQuestion.done &&
-        !tutorialStep.proposalQuestion.skipped &&
+        !userTutorial.proposalQuestion.done &&
+        !userTutorial.proposalQuestion.skipped &&
         selectedNodeFromChangedNodes.nodeType === "Question"
       ) {
         setTutorial({ name: "proposalQuestion", step: 1, steps: [] });
@@ -4094,14 +4110,14 @@ const Dashboard = ({}: DashboardProps) => {
 
       // --------------------------
 
-      if (tutorialStep.proposalCode.forceTutorial) {
-        return forceTutorial("E1nIWQ7RIC3pRLvk0Bk5", "proposalCode", true);
+      if (userTutorial.proposalCode.forceTutorial) {
+        return forceTutorial("E1nIWQ7RIC3pRLvk0Bk5", "proposalCode", { editable: true });
       }
 
       if (
         selectedNodeFromChangedNodes &&
-        !tutorialStep.proposalCode.done &&
-        !tutorialStep.proposalCode.skipped &&
+        !userTutorial.proposalCode.done &&
+        !userTutorial.proposalCode.skipped &&
         selectedNodeFromChangedNodes.nodeType === "Code"
       ) {
         setTutorial({ name: "proposalCode", step: 1, steps: [] });
@@ -4111,19 +4127,19 @@ const Dashboard = ({}: DashboardProps) => {
 
       // --------------------------
 
-      const selectedNodeFromGraph = graph.nodes[nodeBookState.selectedNode ?? ""];
+      // const selectedNodeFromGraph = graph.nodes[nodeBookState.selectedNode ?? ""];
 
       // --------------------------
 
-      if (tutorialStep.concept.forceTutorial) {
+      if (userTutorial.concept.forceTutorial) {
         return forceTutorial("r98BjyFDCe4YyLA3U8ZE", "concept");
       }
 
       if (
         selectedNodeFromGraph &&
         selectedNodeFromGraph.nodeType === "Concept" &&
-        !tutorialStep.concept.done &&
-        !tutorialStep.concept.skipped
+        !userTutorial.concept.done &&
+        !userTutorial.concept.skipped
       ) {
         setTargetId(selectedNodeFromGraph.node);
         setTutorial({ name: "concept", step: 1, steps: [] });
@@ -4132,15 +4148,15 @@ const Dashboard = ({}: DashboardProps) => {
 
       // --------------------------
 
-      if (tutorialStep.relation.forceTutorial) {
+      if (userTutorial.relation.forceTutorial) {
         return forceTutorial("zYYmaXvhab7hH2uRI9Up", "relation");
       }
 
       if (
         selectedNodeFromGraph &&
         selectedNodeFromGraph.nodeType === "Relation" &&
-        !tutorialStep.relation.done &&
-        !tutorialStep.relation.skipped
+        !userTutorial.relation.done &&
+        !userTutorial.relation.skipped
       ) {
         setTargetId(selectedNodeFromGraph.node);
         setTutorial({ name: "relation", step: 1, steps: [] });
@@ -4149,15 +4165,15 @@ const Dashboard = ({}: DashboardProps) => {
 
       // --------------------------
 
-      if (tutorialStep.reference.forceTutorial) {
+      if (userTutorial.reference.forceTutorial) {
         return forceTutorial("P631lWeKsBtszZRDlmsM", "reference");
       }
 
       if (
         selectedNodeFromGraph &&
         selectedNodeFromGraph.nodeType === "Reference" &&
-        !tutorialStep.reference.done &&
-        !tutorialStep.reference.skipped
+        !userTutorial.reference.done &&
+        !userTutorial.reference.skipped
       ) {
         setTargetId(selectedNodeFromGraph.node);
         setTutorial({ name: "reference", step: 1, steps: [] });
@@ -4166,15 +4182,15 @@ const Dashboard = ({}: DashboardProps) => {
 
       // --------------------------
 
-      if (tutorialStep.question.forceTutorial) {
+      if (userTutorial.question.forceTutorial) {
         return forceTutorial("P631lWeKsBtszZRDlmsM", "question");
       }
 
       if (
         selectedNodeFromGraph &&
         selectedNodeFromGraph.nodeType === "Reference" &&
-        !tutorialStep.question.done &&
-        !tutorialStep.question.skipped
+        !userTutorial.question.done &&
+        !userTutorial.question.skipped
       ) {
         setTargetId(selectedNodeFromGraph.node);
         setTutorial({ name: "question", step: 1, steps: [] });
@@ -4183,15 +4199,15 @@ const Dashboard = ({}: DashboardProps) => {
 
       // --------------------------
 
-      if (tutorialStep.idea.forceTutorial) {
+      if (userTutorial.idea.forceTutorial) {
         return forceTutorial("v9wGPxRCI4DRq11o7uH2", "idea");
       }
 
       if (
         selectedNodeFromGraph &&
         selectedNodeFromGraph.nodeType === "Idea" &&
-        !tutorialStep.idea.done &&
-        !tutorialStep.idea.skipped
+        !userTutorial.idea.done &&
+        !userTutorial.idea.skipped
       ) {
         setTargetId(selectedNodeFromGraph.node);
         setTutorial({ name: "idea", step: 1, steps: [] });
@@ -4200,15 +4216,15 @@ const Dashboard = ({}: DashboardProps) => {
 
       // --------------------------
 
-      if (tutorialStep.code.forceTutorial) {
+      if (userTutorial.code.forceTutorial) {
         return forceTutorial("E1nIWQ7RIC3pRLvk0Bk5", "code");
       }
 
       if (
         selectedNodeFromGraph &&
         selectedNodeFromGraph.nodeType === "Code" &&
-        !tutorialStep.code.done &&
-        !tutorialStep.code.skipped
+        !userTutorial.code.done &&
+        !userTutorial.code.skipped
       ) {
         setTargetId(selectedNodeFromGraph.node);
         setTutorial({ name: "code", step: 1, steps: [] });
@@ -4217,15 +4233,15 @@ const Dashboard = ({}: DashboardProps) => {
 
       // --------------------------
 
-      if (tutorialStep.reconcilingAcceptedProposal.forceTutorial) {
+      if (userTutorial.reconcilingAcceptedProposal.forceTutorial) {
         return forceTutorial("zp6PeUOlmejdQTAqK2xX", "reconcilingAcceptedProposal");
       }
 
       if (
         selectedNodeFromGraph &&
         lastNodeOperation.current === "ProposeProposals" &&
-        !tutorialStep.reconcilingAcceptedProposal.done &&
-        !tutorialStep.reconcilingAcceptedProposal.skipped
+        !userTutorial.reconcilingAcceptedProposal.done &&
+        !userTutorial.reconcilingAcceptedProposal.skipped
       ) {
         const willBeApproved = isVersionApproved({
           corrects: 1,
@@ -4241,7 +4257,7 @@ const Dashboard = ({}: DashboardProps) => {
 
       // --------------------------
 
-      if (tutorialStep.reconcilingNotAcceptedProposal.forceTutorial) {
+      if (userTutorial.reconcilingNotAcceptedProposal.forceTutorial) {
         setOpenSidebar("PROPOSALS");
         return forceTutorial("r98BjyFDCe4YyLA3U8ZE", "reconcilingNotAcceptedProposal");
       }
@@ -4249,8 +4265,8 @@ const Dashboard = ({}: DashboardProps) => {
       if (
         selectedNodeFromGraph &&
         lastNodeOperation.current === "ProposeProposals" &&
-        !tutorialStep.reconcilingNotAcceptedProposal.done &&
-        !tutorialStep.reconcilingNotAcceptedProposal.skipped
+        !userTutorial.reconcilingNotAcceptedProposal.done &&
+        !userTutorial.reconcilingNotAcceptedProposal.skipped
       ) {
         const willBeApproved = isVersionApproved({
           corrects: 1,
@@ -4279,11 +4295,11 @@ const Dashboard = ({}: DashboardProps) => {
 
       // --------------------------
 
-      if (tutorialStep.childProposal.forceTutorial) {
+      if (userTutorial.childProposal.forceTutorial) {
         return forceTutorial("r98BjyFDCe4YyLA3U8ZE", "childProposal");
       }
 
-      if (selectedNodeFromTemporalNode && !tutorialStep.childProposal.done && !tutorialStep.childProposal.skipped) {
+      if (selectedNodeFromTemporalNode && !userTutorial.childProposal.done && !userTutorial.childProposal.skipped) {
         setTargetId(selectedNodeFromTemporalNode.node);
         setTutorial({ name: "childProposal", step: 1, steps: [] });
 
@@ -4292,15 +4308,15 @@ const Dashboard = ({}: DashboardProps) => {
 
       // --------------------------
 
-      if (tutorialStep.childConcept.forceTutorial) {
+      if (userTutorial.childConcept.forceTutorial) {
         return forceTutorial("r98BjyFDCe4YyLA3U8ZE", "concept");
       }
 
       if (
         selectedNodeFromTemporalNode &&
         selectedNodeFromTemporalNode.nodeType === "Concept" &&
-        !tutorialStep.childConcept.done &&
-        !tutorialStep.childConcept.skipped
+        !userTutorial.childConcept.done &&
+        !userTutorial.childConcept.skipped
       ) {
         setTargetId(selectedNodeFromTemporalNode.node);
         setTutorial({ name: "childConcept", step: 1, steps: [] });
@@ -4324,7 +4340,7 @@ const Dashboard = ({}: DashboardProps) => {
     setTutorial,
     targetId,
     tutorial,
-    tutorialStep,
+    userTutorial,
     userTutorialLoaded,
   ]);
 
@@ -4457,7 +4473,7 @@ const Dashboard = ({}: DashboardProps) => {
               <Typography>Tutorial:</Typography>
               <Box>
                 <Button onClick={() => console.log(tutorial)}>Tutorial</Button>
-                <Button onClick={() => console.log(tutorialStep)}>tutorialStep</Button>
+                <Button onClick={() => console.log(userTutorial)}>tutorialStep</Button>
                 <Button onClick={() => console.log(targetId)}>targetId</Button>
               </Box>
 
@@ -4476,7 +4492,7 @@ const Dashboard = ({}: DashboardProps) => {
               </Box>
             </Drawer>
           }
-          {user && reputation && (tutorialStep.navigation.done || tutorialStep.navigation.skipped) && (
+          {user && reputation && (userTutorial.navigation.done || userTutorial.navigation.skipped) && (
             <Box
               sx={{
                 "& .GainedPoint, & .LostPoint": {
@@ -4504,7 +4520,7 @@ const Dashboard = ({}: DashboardProps) => {
                 usersOnlineStatusLoaded={usersOnlineStatusLoaded}
                 disableToolbar={Boolean(["TutorialStep"].includes("TOOLBAR"))}
                 // setCurrentTutorial={setCurrentTutorial}
-                userTutorial={tutorialStep}
+                userTutorial={userTutorial}
               />
 
               <MemoizedBookmarksSidebar
@@ -5081,7 +5097,7 @@ const Dashboard = ({}: DashboardProps) => {
               childConcept: { title: "Propose Child Concept Node", steps: CHILD_CONCEPT_PROPOSAL_COMPLETE },
               childProposal: { title: "Child Proposal", steps: CHILD_PROPOSAL_COMPLETE },
             }}
-            userTutorialState={tutorialStep}
+            userTutorialState={userTutorial}
             onCancelTutorial={() =>
               setTutorial(p => {
                 const previousStep = getTutorialStep(p);
