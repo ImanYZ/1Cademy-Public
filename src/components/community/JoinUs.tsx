@@ -384,7 +384,7 @@ const JoinUs = (props: JoinUsProps) => {
             color: gray200,
           },
           "& .MuiButton-root": {
-            backgroundColor: theme => (theme.palette.mode === "dark" ? orangeDark : gray200),
+            backgroundColor: orangeDark,
           },
           "& .MuiButton-root:hover": {
             backgroundColor: orangeLight,
