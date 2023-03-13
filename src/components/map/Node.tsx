@@ -392,7 +392,6 @@ const Node = ({
 
   const nodeClickHandler = useCallback(
     (event: any) => {
-      console.log(notebookRef.current.choosingNode, "notebookRef.current.choosingNode");
       if (notebookRef.current.choosingNode && notebookRef.current.choosingNode.id !== identifier) {
         // The first Nodes exist, Now is clicking the Chosen Node
         notebookRef.current.chosenNode = {

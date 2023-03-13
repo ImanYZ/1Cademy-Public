@@ -2197,8 +2197,8 @@ const Dashboard = ({}: DashboardProps) => {
               batch.update(linkedNodeRef, { updatedAt: Timestamp.fromDate(new Date()) });
             }
 
-            for (let parent of thisNode.parents) {
-              linkedNodeRef = doc(db, "nodes", parent.node);
+            for (let par of thisNode.parents) {
+              linkedNodeRef = doc(db, "nodes", par.node);
               batch.update(linkedNodeRef, { updatedAt: Timestamp.fromDate(new Date()) });
             }
 
@@ -2258,7 +2258,7 @@ const Dashboard = ({}: DashboardProps) => {
 
       return graph;
     });
-    lastNodeOperation.current = "OpenAllChildren";
+    lastNodeOperation.current = "OpenAllParent";
   }, []);
 
   const toggleNode = useCallback(

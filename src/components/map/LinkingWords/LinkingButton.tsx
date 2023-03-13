@@ -17,7 +17,7 @@ type LinkingButtonProps = {
   // nodeID: any,
   linkedNodeID: any;
   linkedNodeTitle: string;
-  linkedNodeType: "child" | "children" | "tag" | "parent" | "reference";
+  linkedNodeType: "child" | "children" | "tag" | "parent" | "parents" | "reference";
   nodeType?: NodeType;
   visible?: boolean;
   iClassName?: string;
@@ -82,7 +82,12 @@ const LinkingButton = ({ disabled = false, id, ...props }: LinkingButtonProps) =
           fontSize={"inherit"}
           sx={{
             marginRight: "4px",
-            color: props.linkedNodeType !== "children" ? (props.visible ? "#00E676" : "#f9a825") : "gray",
+            color:
+              props.linkedNodeType !== "children" && props.linkedNodeType !== "parents"
+                ? props.visible
+                  ? "#00E676"
+                  : "#f9a825"
+                : "gray",
           }}
         />
         <Editor
