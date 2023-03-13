@@ -4,7 +4,7 @@ import { Dispatch, MutableRefObject, SetStateAction, useCallback, useEffect, use
 import { AllTagsTreeView } from "../components/TagsSearcher";
 import { dagreUtils, GraphObject } from "../lib/utils/dagre.util";
 import { setDagNodes } from "../lib/utils/Map.utils";
-import { EdgeData, EdgesData, FullNodeData, FullNodesData } from "../nodeBookTypes";
+import { EdgeData, EdgesData, FullNodeData, FullNodesData, TNodeUpdates } from "../nodeBookTypes";
 
 export type Task = {
   id: string;
@@ -12,6 +12,7 @@ export type Task = {
 } | null;
 
 type UseWorkerQueueProps = {
+  setNodeUpdates: (nodeUpdates: TNodeUpdates) => void;
   g: MutableRefObject<graphlib.Graph<{}>>;
   graph: { nodes: FullNodesData; edges: EdgesData };
   setGraph: Dispatch<
@@ -30,6 +31,7 @@ type UseWorkerQueueProps = {
   withClusters: boolean;
 };
 export const useWorkerQueue = ({
+  setNodeUpdates,
   g,
   graph,
   setGraph,
@@ -74,7 +76,7 @@ export const useWorkerQueue = ({
       worker.onmessage = e => {
         const { oldMapWidth, oldMapHeight, oldNodes, oldEdges, graph, oldClusterNodes } = e.data;
 
-        console.log("WORKER RESULT", { oldNodes, oldEdges });
+        // console.log("WORKER RESULT", { oldNodes, oldEdges });
 
         const gObject = dagreUtils.mapGraphToObject(g.current);
         const graphObject: GraphObject = graph;
@@ -103,6 +105,7 @@ export const useWorkerQueue = ({
         setGraph(({ nodes, edges }) => {
           // console.log("[queue]: set results", { nodes, edges, gg, oldNodes, oldEdges });
           const nodesCopy = { ...nodes };
+          const updatedNodeIds: string[] = [];
           Object.keys(nodesCopy).forEach(nodeId => {
             const resultNode: FullNodeData = oldNodes[nodeId];
             if (!resultNode) return;
@@ -122,17 +125,30 @@ export const useWorkerQueue = ({
               y: resultNode.y,
               height: resultNode.height ? resultNode.height : nodesCopy[nodeId].height,
             };
+            updatedNodeIds.push(nodeId);
             nodesCopy[nodeId] = overrideNode;
           });
 
-          const edgesCopy = { ...edges };
+          const edgesCopy: EdgesData = { ...edges };
+          const edgeKeys = ["fromX", "fromY", "label", "points", "toX", "toY"];
           Object.keys(edgesCopy).forEach(edgeId => {
             const resultEdge: EdgeData = oldEdges[edgeId];
-            if (!resultEdge) return;
+            if (!resultEdge) {
+              return;
+            }
 
-            edgesCopy[edgeId] = { ...resultEdge };
+            const isChanged = edgeKeys.some(
+              k => resultEdge[k as keyof EdgeData] === edgesCopy[edgeId][k as keyof EdgeData]
+            );
+            if (isChanged) {
+              edgesCopy[edgeId] = { ...resultEdge };
+            }
           });
-          console.log("WORKER Result Merged", { nodes: nodesCopy, edges: edgesCopy });
+          setNodeUpdates({
+            nodeIds: updatedNodeIds,
+            updatedAt: new Date(),
+          });
+          // console.log("WORKER Result Merged", { nodes: nodesCopy, edges: edgesCopy });
           return { nodes: nodesCopy, edges: edgesCopy };
         });
 
@@ -160,10 +176,8 @@ export const useWorkerQueue = ({
       })
       .flatMap(cur => cur || []);
 
-    console.log({ nodes: graph.nodes, g: g.current, individualNodeChanges });
     const nodesToRecalculate = setDagNodes(g.current, individualNodeChanges, graph.nodes, allTags, withClusters);
 
-    console.log({ nodes: nodesToRecalculate, edges: graph.edges, g: g.current });
     recalculateGraphWithWorker(nodesToRecalculate, graph.edges);
     setQueue([]);
 

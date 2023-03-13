@@ -26,10 +26,8 @@ import React, {
   useState,
   useTransition,
 } from "react";
-import { FullNodeData, OpenPart, TNodeBookState } from "src/nodeBookTypes";
-import { string } from "yup/lib/locale";
+import { DispatchNodeBookActions, FullNodeData, OpenPart, TNodeBookState, TNodeUpdates } from "src/nodeBookTypes";
 
-import { useNodeBook } from "@/context/NodeBookContext";
 import { getSearchAutocomplete } from "@/lib/knowledgeApi";
 import { findDiff, getVideoDataByUrl, momentDateToSeconds } from "@/lib/utils/utils";
 import { OpenSidebar, TutorialType } from "@/pages/notebook";
@@ -58,6 +56,9 @@ type EditorOptions = "EDIT" | "PREVIEW";
 type ProposedChildTypesIcons = "Concept" | "Relation" | "Question" | "Code" | "Reference" | "Idea";
 type NodeProps = {
   identifier: string;
+  nodeBookDispatch: React.Dispatch<DispatchNodeBookActions>;
+  nodeUpdates: TNodeUpdates;
+  setNodeUpdates: (updates: TNodeUpdates) => void;
   notebookRef: MutableRefObject<TNodeBookState>;
   setFocusView: (state: { selectedNode: string; isEnabled: boolean }) => void;
   activeNode: any;
@@ -167,6 +168,8 @@ const proposedChildTypesIcons: { [key in ProposedChildTypesIcons]: string } = {
 
 const Node = ({
   identifier,
+  nodeBookDispatch,
+  setNodeUpdates,
   notebookRef,
   setFocusView,
   activeNode,
@@ -260,12 +263,11 @@ const Node = ({
   openUserInfoSidebar,
   disabled = false,
   enableChildElements = [],
-  defaultOpenPart: defaultOpenPartByTutorial = null,
+  defaultOpenPart: defaultOpenPartByTutorial = "LinkingWords",
   showProposeTutorial = false,
   setCurrentTutorial,
 }: NodeProps) => {
   const [{ user }] = useAuth();
-  const { nodeBookDispatch } = useNodeBook();
   const [option, setOption] = useState<EditorOptions>("EDIT");
 
   const [openPart, setOpenPart] = useState<OpenPart>(defaultOpenPartByTutorial);
@@ -303,10 +305,6 @@ const Node = ({
   const disableSwitchPreview = disabled;
   const disableProposeButton = disabled && !enableChildElements.includes(`${identifier}-button-propose-proposal`);
   const disableCancelButton = disabled && !enableChildElements.includes(`${identifier}-button-cancel-proposal`);
-
-  useEffect(() => {
-    setOpenPart(defaultOpenPartByTutorial); // this is called ONLY when is override by TUTORIAL
-  }, [defaultOpenPartByTutorial]);
 
   useEffect(() => {
     setTitleCopy(title);
@@ -393,24 +391,34 @@ const Node = ({
   const nodeClickHandler = useCallback(
     (event: any) => {
       console.log(notebookRef.current.choosingNode, "notebookRef.current.choosingNode");
-      if (!notebookRef.current.choosingNode || notebookRef.current.choosingNode.id !== identifier) {
+      if (notebookRef.current.choosingNode && notebookRef.current.choosingNode.id !== identifier) {
         // The first Nodes exist, Now is clicking the Chosen Node
         notebookRef.current.chosenNode = {
           id: identifier,
           title,
         };
         nodeBookDispatch({ type: "setChosenNode", payload: { id: identifier, title } });
+        chosenNodeChanged(notebookRef.current.choosingNode.id);
+        setAbleToPropose(true);
         scrollToNode(notebookRef.current.selectedNode);
       } else if (
         "activeElement" in event.currentTarget &&
         "nodeName" in event.currentTarget.activeElement &&
-        event.currentTarget.activeElement.nodeName !== "INPUT"
+        event.currentTarget.activeElement.nodeName !== "INPUT" &&
+        !notebookRef.current.choosingNode
       ) {
         nodeClicked(event, identifier, nodeType, setOpenPart);
       }
 
-      notebookRef.current.selectedNode = identifier;
-      nodeBookDispatch({ type: "setSelectedNode", payload: identifier });
+      if (!notebookRef.current.choosingNode && notebookRef.current.selectedNode !== identifier) {
+        const updatedNodeIds: string[] = [notebookRef.current.selectedNode!, identifier];
+        notebookRef.current.selectedNode = identifier;
+        nodeBookDispatch({ type: "setSelectedNode", payload: identifier });
+        setNodeUpdates({
+          nodeIds: updatedNodeIds,
+          updatedAt: new Date(),
+        });
+      }
     },
     [identifier, title, nodeClicked, nodeType]
   );
@@ -662,12 +670,7 @@ const Node = ({
         (activeNode ? " active" : "") +
         (changed || !isStudied ? " Changed" : "") +
         (isHiding ? " IsHiding" : "") +
-        (notebookRef.current.choosingNode &&
-        notebookRef.current.choosingNode.id !== identifier &&
-        !activeNode &&
-        (notebookRef.current.choosingNode.type !== "Reference" || nodeType === "Reference")
-          ? " Choosable"
-          : "")
+        (nodeType === "Reference" ? " Choosable" : "")
       }
       style={{
         left: left ? left : 1000,
@@ -709,6 +712,7 @@ const Node = ({
 
             {editable && (
               <Box
+                id={`${identifier}-preview-edit`}
                 sx={{
                   display: "flex",
                   justifyContent: "end",
@@ -1010,6 +1014,7 @@ const Node = ({
               setAddVideo={setAddVideo}
               identifier={identifier}
               notebookRef={notebookRef}
+              nodeBookDispatch={nodeBookDispatch}
               activeNode={activeNode}
               citationsSelected={citationsSelected}
               proposalsSelected={proposalsSelected}
@@ -1075,6 +1080,7 @@ const Node = ({
             <LinkingWords
               identifier={identifier}
               notebookRef={notebookRef}
+              nodeBookDispatch={nodeBookDispatch}
               editable={editable}
               isNew={isNew}
               openPart={openPart}
@@ -1207,6 +1213,7 @@ const Node = ({
               setAddVideo={setAddVideo}
               identifier={identifier}
               notebookRef={notebookRef}
+              nodeBookDispatch={nodeBookDispatch}
               activeNode={activeNode}
               citationsSelected={citationsSelected}
               proposalsSelected={proposalsSelected}
@@ -1318,7 +1325,7 @@ const Node = ({
 
       ) : null} */}
       <Box
-        id={identifier + "_" + "childNodes"}
+        id={`${identifier}_childNodes`}
         sx={{
           display: !isNew && editable ? "flex" : "none",
           flexDirection: "column",
@@ -1376,4 +1383,30 @@ const Node = ({
   );
 };
 
-export const MemoizedNode = React.memo(Node);
+export const MemoizedNode = React.memo(Node, (prev, next) => {
+  if (next.showProposeTutorial) {
+    return prev === next;
+  }
+
+  const basicChanges =
+    prev.top === next.top &&
+    prev.left === next.left &&
+    prev.activeNode === next.activeNode &&
+    prev.proposalsSelected === next.proposalsSelected &&
+    prev.acceptedProposalsSelected === next.acceptedProposalsSelected &&
+    prev.commentsSelected === next.commentsSelected &&
+    prev.unaccepted === next.unaccepted &&
+    prev.disableVotes === next.disableVotes;
+  if (
+    !basicChanges ||
+    (prev.nodeUpdates.updatedAt !== next.nodeUpdates.updatedAt && prev.nodeUpdates.nodeIds.includes(prev.identifier)) ||
+    (prev.nodeUpdates.updatedAt !== next.nodeUpdates.updatedAt && next.nodeUpdates.nodeIds.includes(next.identifier))
+  ) {
+    if (next.identifier === "pQbAryhwz1QQSCLz2p7P") {
+      console.log("chosenNode children", next.references);
+    }
+    return false;
+  }
+
+  return true;
+});

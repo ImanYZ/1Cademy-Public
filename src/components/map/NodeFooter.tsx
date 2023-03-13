@@ -43,13 +43,12 @@ import { collection, getDocs, getFirestore, query, where } from "firebase/firest
 import { useRouter } from "next/router";
 import React, { MutableRefObject, ReactNode, useCallback, useEffect, useMemo, useRef, useState } from "react";
 
-import { useNodeBook } from "@/context/NodeBookContext";
 import { orange25, orange200 } from "@/pages/home";
 import { OpenSidebar, TutorialType } from "@/pages/notebook";
 
 import { User } from "../../knowledgeTypes";
 import shortenNumber from "../../lib/utils/shortenNumber";
-import { FullNodeData, OpenPart, TNodeBookState } from "../../nodeBookTypes";
+import { DispatchNodeBookActions, FullNodeData, OpenPart, TNodeBookState } from "../../nodeBookTypes";
 import LeaderboardChip from "../LeaderboardChip";
 import { MemoizedHeadlessLeaderboardChip } from "../map/FocusedNotebook/HeadlessLeaderboardChip";
 import NodeTypeIcon from "../NodeTypeIcon";
@@ -67,6 +66,7 @@ type NodeFooterProps = {
   setAddVideo: (addVideo: boolean) => void;
   identifier: any;
   notebookRef: MutableRefObject<TNodeBookState>;
+  nodeBookDispatch: React.Dispatch<DispatchNodeBookActions>;
   activeNode: any;
   citationsSelected: any;
   proposalsSelected: any;
@@ -134,6 +134,7 @@ const NodeFooter = ({
   setAddVideo,
   identifier,
   notebookRef,
+  nodeBookDispatch,
   // activeNode,
   // proposalsSelected,
   // acceptedProposalsSelected,
@@ -194,7 +195,6 @@ const NodeFooter = ({
 }: NodeFooterProps) => {
   const router = useRouter();
   const db = getFirestore();
-  const { nodeBookState, nodeBookDispatch } = useNodeBook();
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const [percentageUploaded, setPercentageUploaded] = useState(0);
@@ -429,7 +429,7 @@ const NodeFooter = ({
     (event: any) => {
       // const searcherTutorialFinalized = userTutorial.searcher.done || userTutorial.searcher.skipped;
       console.log({ showProposeTutorial });
-
+      console.log({ selectNode: identifier });
       selectPendingProposals(event);
       setOperation("CancelProposals");
       notebookRef.current.selectedNode = identifier;
@@ -456,6 +456,7 @@ const NodeFooter = ({
               <Box onClick={openContributorsSection}>
                 <MemoizedUserStatusIcon
                   id={userPictureId}
+                  nodeBookDispatch={nodeBookDispatch}
                   uname={user.uname}
                   imageUrl={user.imageUrl || ""}
                   fullname={user.fName + " " + user.lName}
@@ -472,6 +473,7 @@ const NodeFooter = ({
               <Box onClick={openContributorsSection}>
                 <MemoizedUserStatusIcon
                   id={userPictureId}
+                  nodeBookDispatch={nodeBookDispatch}
                   uname={admin}
                   imageUrl={aImgUrl}
                   fullname={aFullname}
@@ -550,7 +552,7 @@ const NodeFooter = ({
                 <ContainedButton
                   id={proposeButtonId}
                   title="Propose/evaluate versions of this node."
-                  onClick={showProposeTutorial ? () => setOpenProposalConfirm(true) : proposeNodeImprovementClick}
+                  onClick={proposeNodeImprovementClick}
                   tooltipPosition="top"
                   sx={{
                     background: (theme: any) =>
@@ -760,6 +762,7 @@ const NodeFooter = ({
                 // new Node or unaccepted proposal
 
                 <Box
+                  id={`${identifier}-node-footer-image-video`}
                   sx={{
                     display: editable ? "flex" : "none",
                     alignItems: "center",
@@ -768,6 +771,7 @@ const NodeFooter = ({
                   }}
                 >
                   <ContainedButton
+                    id={`${identifier}-node-footer-image`}
                     title="Upload an image to better explain this node."
                     onClick={() => uploadImageClicked()}
                     tooltipPosition="top"
@@ -802,6 +806,7 @@ const NodeFooter = ({
                   </ContainedButton>
 
                   <ContainedButton
+                    id={`${identifier}-node-footer-video`}
                     title="Cite a video from Youtube or Vimeo."
                     onClick={() => setAddVideo(!addVideo)}
                     tooltipPosition="top"
@@ -847,7 +852,7 @@ const NodeFooter = ({
                             ? theme.palette.common.darkBackground1
                             : theme.palette.common.lightBackground1,
                         color:
-                          openSidebar === "CITATIONS" && nodeBookState.selectedNode === identifier
+                          openSidebar === "CITATIONS" && notebookRef.current.selectedNode === identifier
                             ? theme => theme.palette.common.orange
                             : "inherit",
                         fontWeight: 400,
@@ -1067,7 +1072,7 @@ const NodeFooter = ({
                   //   }bookmarked this node. ` +
                   //   shortenNumber(bookmarks, 2, false) +
                   //   " 1Cademist" +
-                  //   (bookmarks === 1 ? " has" : "s have") +
+                  //   (bookmarks === 1 ? " has" : " have") +
                   //   " bookmarked this node."
                   // }
                   tooltipPosition="top"
@@ -1940,8 +1945,8 @@ const NodeFooter = ({
         </Box>
       </Box>
       {openSidebar === "USER_INFO" &&
-        nodeBookState.showContributors &&
-        nodeBookState.contributorsNodeId === identifier &&
+        notebookRef.current.showContributors &&
+        notebookRef.current.contributorsNodeId === identifier &&
         contributors &&
         Object.keys(contributors).length > 0 && (
           <Box sx={{ paddingY: "10px" }}>

@@ -1,6 +1,7 @@
 import AutoFixHighIcon from "@mui/icons-material/AutoFixHigh";
 import CloseIcon from "@mui/icons-material/Close";
 import CodeIcon from "@mui/icons-material/Code";
+import HelpIcon from "@mui/icons-material/Help";
 import MyLocationIcon from "@mui/icons-material/MyLocation";
 import { Masonry } from "@mui/lab";
 import {
@@ -63,7 +64,18 @@ import { MemoizedUserSettingsSidebar } from "@/components/map/Sidebar/SidebarV2/
 // import { MemoizedProgressBarMenu } from "@/components/tutorial/ProgressBarMenu";
 import { useAuth } from "@/context/AuthContext";
 import { useTagsTreeView } from "@/hooks/useTagsTreeView";
-import { addSuffixToUrlGMT } from "@/lib/utils/string.utils";
+import { addSuffixToUrlGMT, capitalizeFirstLetter } from "@/lib/utils/string.utils";
+import {
+  NODE_CODE_COMPLETE,
+  NODE_IDEA_COMPLETE,
+  NODE_QUESTION_COMPLETE,
+  NODE_REFERENCE_COMPLETE,
+  NODE_RELATION_COMPLETE,
+} from "@/lib/utils/tutorials/nodetypeTutorialSteps";
+import {
+  RECONCILING_ACCEPTED_PROPOSALS_STEPS_COMPLETE,
+  RECONCILING_NOT_ACCEPTED_PROPOSALS_STEPS_COMPLETE,
+} from "@/lib/utils/tutorials/reconcilingProposalsTutorialSteps";
 
 import LoadingImg from "../../public/animated-icon-1cademy.gif";
 import focusViewLogo from "../../public/focus.svg";
@@ -76,6 +88,7 @@ import { MemoizedNodeList } from "../components/map/NodesList";
 import { MemoizedToolbarSidebar } from "../components/map/Sidebar/SidebarV2/ToolbarSidebar";
 import { NodeItemDashboard } from "../components/NodeItemDashboard";
 import { Portal } from "../components/Portal";
+import { MemoizedTutorialTableOfContent } from "../components/tutorial/TutorialTableOfContent";
 import { NodeBookProvider, useNodeBook } from "../context/NodeBookContext";
 // import { TargetClientRect } from "../hooks/useInteractiveTutorial2";
 import { TargetClientRect, useInteractiveTutorial } from "../hooks/useInteractiveTutorial3";
@@ -119,6 +132,18 @@ import {
   getUserNodeChanges,
   mergeAllNodes,
 } from "../lib/utils/nodesSyncronization.utils";
+import { NAVIGATION_STEPS_COMPLETE } from "../lib/utils/tutorials/navigationTutorialSteps";
+import { NODES_STEPS_COMPLETE } from "../lib/utils/tutorials/nodeTutorialSteps";
+import { PROPOSING_CODE_EDIT_COMPLETE } from "../lib/utils/tutorials/proposalSteps";
+import {
+  PROPOSAL_STEPS_COMPLETE,
+  PROPOSING_CONCEPT_EDIT_COMPLETE,
+  PROPOSING_IDEA_EDIT_COMPLETE,
+  PROPOSING_QUESTION_EDIT_COMPLETE,
+  PROPOSING_REFERENCE_EDIT_COMPLETE,
+  PROPOSING_RELATION_EDIT_COMPLETE,
+} from "../lib/utils/tutorials/proposalTutorialSteps";
+import { SEARCHER_STEPS_COMPLETE } from "../lib/utils/tutorials/searcherTutorialSteps";
 import { gtmEvent, imageLoaded, isValidHttpUrl } from "../lib/utils/utils";
 import {
   ChoosingType,
@@ -127,6 +152,7 @@ import {
   FullNodesData,
   // NodeTutorialState,
   TNodeBookState,
+  TNodeUpdates,
   TutorialTypeKeys,
   // TutorialType,
   UserNodes,
@@ -137,7 +163,26 @@ import {
 import { NodeType, SimpleNode2 } from "../types";
 import { doNeedToDeleteNode, getNodeTypesFromNode, isVersionApproved } from "../utils/helpers";
 
-export type TutorialType = "NODES" | "SEARCHER" | "PROPOSAL" | null;
+export type TutorialType =
+  | "NODES"
+  | "SEARCHER"
+  | "PROPOSAL"
+  | "NAVIGATION"
+  | "CONCEPT"
+  | "RELATION"
+  | "REFERENCE"
+  | "IDEA"
+  | "QUESTION"
+  | "CODE"
+  | "PROPOSAL_CONCEPT"
+  | "PROPOSAL_RELATION"
+  | "PROPOSAL_REFERENCE"
+  | "PROPOSAL_IDEA"
+  | "PROPOSAL_QUESTION"
+  | "PROPOSAL_CODE"
+  | "RECONCILING_ACCEPTED_PROPOSAL"
+  | "RECONCILING_NOT_ACCEPTED_PROPOSAL"
+  | null;
 
 type DashboardProps = {};
 
@@ -151,6 +196,8 @@ export type OpenSidebar =
   | "USER_SETTINGS"
   | "CITATIONS"
   | null;
+
+type Graph = { nodes: FullNodesData; edges: EdgesData };
 /**
  * 1. NODES CHANGES - LISTENER with SNAPSHOT
  *      Type: useEffect
@@ -199,7 +246,11 @@ const Dashboard = ({}: DashboardProps) => {
   const [nodeChanges /*setNodeChanges*/] = useState<NodeChanges[]>([]);
   // nodes: dictionary of all nodes visible on map for specific user
   // edges: dictionary of all edges visible on map for specific user
-  const [graph, setGraph] = useState<{ nodes: FullNodesData; edges: EdgesData }>({ nodes: {}, edges: {} });
+  const [graph, setGraph] = useState<Graph>({ nodes: {}, edges: {} });
+  const [nodeUpdates, setNodeUpdates] = useState<TNodeUpdates>({
+    nodeIds: [],
+    updatedAt: new Date(),
+  });
   // this allNodes is DEPRECATED
   const [allNodes, setAllNodes] = useState<FullNodesData>({});
   // as map grows, width and height grows based on the nodes shown on the map
@@ -261,10 +312,10 @@ const Dashboard = ({}: DashboardProps) => {
   // when proposing improvements, lists of added/removed parent/child links
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [updatedLinks, setUpdatedLinks] = useState<{
-    addedParents: string[],
-    addedChildren: string[],
-    removedParents: string[],
-    removedChildren: string[]
+    addedParents: string[];
+    addedChildren: string[];
+    removedParents: string[];
+    removedChildren: string[];
   }>({
     addedParents: [],
     addedChildren: [],
@@ -283,9 +334,6 @@ const Dashboard = ({}: DashboardProps) => {
   const previousLengthEdges = useRef(0);
   const g = useRef(dagreUtils.createGraph());
 
-  // this flag is used in interactive tutorial to fire useEffect when change state
-  const [, /* localSnapshot */ setLocalSnapshot] = useState<FullNodesData>({});
-  const shouldResetGraph = useRef(true);
   const [targetClientRect, setTargetClientRect] = useState<TargetClientRect>({ width: 0, height: 0, top: 0, left: 0 });
 
   //Notifications
@@ -296,14 +344,29 @@ const Dashboard = ({}: DashboardProps) => {
   const lastNodeOperation = useRef<string>("");
   const proposalTimer = useRef<any>(null);
 
-  // const [openProgressBar, setOpenProgressBar] = useState(false);
+  const [openProgressBar, setOpenProgressBar] = useState(false);
   const [, /* openProgressBarMenu */ setOpenProgressBarMenu] = useState(false);
 
-  const [userTutorial, setUserTutorial] = useState<UserTutorials>({
-    nodes: { currentStep: 1, done: false, skipped: false },
-    searcher: { currentStep: 1, done: false, skipped: false },
-    proposal: { currentStep: 1, done: false, skipped: false },
-  });
+  // const [userTutorial, setUserTutorial] = useState<UserTutorials>({
+  //   navigation: { currentStep: 1, done: false, skipped: false },
+  //   nodes: { currentStep: 1, done: false, skipped: false },
+  //   searcher: { currentStep: 1, done: false, skipped: false },
+  //   concept: { currentStep: 1, done: false, skipped: false },
+  //   relation: { currentStep: 1, done: false, skipped: false },
+  //   reference: { currentStep: 1, done: false, skipped: false },
+  //   question: { currentStep: 1, done: false, skipped: false },
+  //   idea: { currentStep: 1, done: false, skipped: false },
+  //   code: { currentStep: 1, done: false, skipped: false },
+  //   proposal: { currentStep: 1, done: false, skipped: false },
+  //   proposalConcept: { currentStep: 1, done: false, skipped: false },
+  //   proposalRelation: { currentStep: 1, done: false, skipped: false },
+  //   proposalReference: { currentStep: 1, done: false, skipped: false },
+  //   proposalIdea: { currentStep: 1, done: false, skipped: false },
+  //   proposalQuestion: { currentStep: 1, done: false, skipped: false },
+  //   proposalCode: { currentStep: 1, done: false, skipped: false },
+  //   reconcilingAcceptedProposal: { currentStep: 1, done: false, skipped: false },
+  //   reconcilingNotAcceptedProposal: { currentStep: 1, done: false, skipped: false },
+  // });
 
   // const [currentTutorial, setCurrentTutorial] = useState<TutorialType>(null);
 
@@ -333,10 +396,6 @@ const Dashboard = ({}: DashboardProps) => {
     isEnabled: false,
   });
 
-  // const [nodeTutorial /* setNodeTutorial */] = useState(Boolean(localStorage.getItem("node-tutorial")));
-
-  // const [tutorialSteps, setTutorialSteps] = useState<NodeTutorialState[]>([]);
-
   const {
     stateNodeTutorial,
     onNextStep,
@@ -345,10 +404,13 @@ const Dashboard = ({}: DashboardProps) => {
     setCurrentTutorial,
     currentTutorial,
     stepsLength,
-  } = useInteractiveTutorial({
-    notebookRef,
-    // currentTutorial,
-  });
+    setTargetId,
+    targetId,
+    userTutorial,
+    userTutorialLoaded,
+    setUserTutorial,
+    setInitialStep,
+  } = useInteractiveTutorial({ user });
   const onNodeInViewport = useCallback(
     (nodeId: string) => {
       const originalNode = document.getElementById(nodeId);
@@ -461,116 +523,61 @@ const Dashboard = ({}: DashboardProps) => {
     [isPlayingTheTutorialRef, onNodeInViewport]
   );
 
-  // useEffect(() => {
-  //   if (!currentStep) return setTargetClientRect({ width: 0, height: 0, top: 0, left: 0 });
-
-  //   if (currentStep.anchor) {
-  //     if (!currentStep.targetId) return;
-
-  //     const targetElement = document.getElementById(currentStep.targetId);
-
-  //     if (!targetElement) return;
-
-  //     targetElement.style.border = "4px dashed #ffc813";
-  //     const { width, height, top, left } = targetElement.getBoundingClientRect();
-
-  //     setTargetClientRect({ width, height, top, left });
-  //   } else {
-  //     console.log("----------------- detect client react in interactive map");
-
-  //     const thisNode = graph.nodes[currentStep.targetId];
-  //     if (!thisNode) return;
-
-  //     let { top, left, width = NODE_WIDTH, height = 0 } = thisNode;
-  //     let offsetChildTop = 0;
-  //     let offsetChildLeft = 0;
-  //     if (currentStep.childTargetId) {
-  //       const targetElement = document.getElementById(currentStep.childTargetId);
-  //       if (!targetElement) return;
-  //       targetElement.style.border = "4px dashed #ffc813";
-  //       const { offsetTop, offsetHeight, offsetParent, offsetLeft, offsetWidth } = targetElement;
-  //       const { height: childrenHeight, width: childrenWidth } = targetElement.getBoundingClientRect();
-
-  //       offsetChildTop = offsetTop;
-  //       offsetChildLeft = offsetLeft;
-  //       height = childrenHeight;
-  //       width = childrenWidth;
-  //     }
-
-  //     setTargetClientRect({
-  //       top: top + offsetChildTop,
-  //       left: left + offsetChildLeft,
-  //       width,
-  //       height,
-  //     });
-  //   }
-  // }, [currentStep, graph.nodes, setTargetClientRect]);
-
   useEffect(() => {
-    if (!stateNodeTutorial) return setTargetClientRect({ width: 0, height: 0, top: 0, left: 0 });
     let timeoutId: any;
-    if (stateNodeTutorial.anchor) {
-      timeoutId = setTimeout(() => {
-        if (!stateNodeTutorial.childTargetId) return;
+    const onGetClientRect = () => {
+      if (!nodeBookState.selectedNode) return;
+      if (!stateNodeTutorial) return setTargetClientRect({ width: 0, height: 0, top: 0, left: 0 });
+      if (stateNodeTutorial.anchor) {
+        timeoutId = setTimeout(() => {
+          if (!stateNodeTutorial.childTargetId) return;
 
-        const targetElement = document.getElementById(stateNodeTutorial.childTargetId);
+          const targetElement = document.getElementById(stateNodeTutorial.childTargetId);
+          if (!targetElement) return;
 
-        if (!targetElement) return;
+          targetElement.classList.add(stateNodeTutorial.largeTarget ? "tutorial-target-large" : "tutorial-target");
+          const { width, height, top, left } = targetElement.getBoundingClientRect();
 
-        targetElement.classList.add(
-          stateNodeTutorial.isClickeable
-            ? "tutorial-target-pulse"
-            : stateNodeTutorial.largeTarget
-            ? "tutorial-target-large"
-            : "tutorial-target"
-        );
+          setTargetClientRect({ width, height, top, left });
+        }, stateNodeTutorial.targetDelay);
+      } else {
+        if (!targetId) return;
 
-        const { width, height, top, left } = targetElement.getBoundingClientRect();
+        const thisNode = graph.nodes[targetId];
+        if (!thisNode) return;
 
-        console.log({ width, height, top, left });
-        setTargetClientRect({ width, height, top, left });
-      }, stateNodeTutorial.targetDelay);
-    } else {
-      console.log("----------------- detect client react in interactive map");
+        let { top, left, width = NODE_WIDTH, height = 0 } = thisNode;
+        let offsetChildTop = 0;
+        let offsetChildLeft = 0;
 
-      const thisNode = graph.nodes[stateNodeTutorial.targetId];
-      if (!thisNode) return;
+        if (stateNodeTutorial.childTargetId) {
+          const targetElement = document.getElementById(`${targetId}-${stateNodeTutorial.childTargetId}`);
+          if (!targetElement) return;
 
-      let { top, left, width = NODE_WIDTH, height = 0 } = thisNode;
-      let offsetChildTop = 0;
-      let offsetChildLeft = 0;
-      if (stateNodeTutorial.childTargetId) {
-        const targetElement = document.getElementById(stateNodeTutorial.childTargetId);
-        if (!targetElement) return;
+          targetElement.classList.add(stateNodeTutorial.largeTarget ? "tutorial-target-large" : "tutorial-target");
 
-        targetElement.classList.add(
-          stateNodeTutorial.isClickeable
-            ? "tutorial-target-pulse"
-            : stateNodeTutorial.largeTarget
-            ? "tutorial-target-large"
-            : "tutorial-target"
-        );
+          const { offsetTop, offsetLeft } = targetElement;
+          const { height: childrenHeight, width: childrenWidth } = targetElement.getBoundingClientRect();
 
-        const { offsetTop, offsetLeft } = targetElement;
-        const { height: childrenHeight, width: childrenWidth } = targetElement.getBoundingClientRect();
+          offsetChildTop = offsetTop;
+          offsetChildLeft = offsetLeft;
+          height = childrenHeight;
+          width = childrenWidth;
+        }
 
-        offsetChildTop = offsetTop;
-        offsetChildLeft = offsetLeft;
-        height = childrenHeight;
-        width = childrenWidth;
+        setTargetClientRect({
+          top: top + offsetChildTop,
+          left: left + offsetChildLeft,
+          width,
+          height,
+        });
       }
-
-      setTargetClientRect({
-        top: top + offsetChildTop,
-        left: left + offsetChildLeft,
-        width,
-        height,
-      });
-      return () => {
-        if (timeoutId) clearTimeout(timeoutId);
-      };
-    }
-  }, [stateNodeTutorial, graph.nodes, setTargetClientRect]);
+    };
+    onGetClientRect();
+    return () => {
+      if (timeoutId) clearTimeout(timeoutId);
+    };
+  }, [stateNodeTutorial, graph.nodes, setTargetClientRect, nodeBookState.selectedNode, targetId]);
 
   const onCompleteWorker = useCallback(() => {
     if (!nodeBookState.selectedNode) return;
@@ -582,7 +589,8 @@ const Dashboard = ({}: DashboardProps) => {
     lastNodeOperation.current = operation;
   }, []);
 
-  const { addTask, queue, isQueueWorking, queueFinished } = useWorkerQueue({
+  const { addTask, isQueueWorking, queueFinished } = useWorkerQueue({
+    setNodeUpdates,
     g,
     graph,
     setGraph,
@@ -609,11 +617,11 @@ const Dashboard = ({}: DashboardProps) => {
   // flag for whether all tags data is downloaded from server
   // const [allTagsLoaded, setAllTagsLoaded] = useState(false);
 
-  // flag for whether tutorial state was loaded
-  const [userTutorialLoaded, setUserTutorialLoaded] = useState(false);
+  // // flag for whether tutorial state was loaded
+  // const [userTutorialLoaded, setUserTutorialLoaded] = useState(false);
 
   // flag for whether users' nodes data is downloaded from server
-  const [userNodesLoaded, setUserNodesLoaded] = useState(false);
+  const [, /* userNodesLoaded */ setUserNodesLoaded] = useState(false);
 
   // flag set to true when sending request to server
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -692,11 +700,8 @@ const Dashboard = ({}: DashboardProps) => {
     return width;
   };
   const openNodeHandler = useMemoizedCallback(
-    async (nodeId: string) => {
-      // console.log({ nodeId });
-
-      devLog("open_Node_Handler", nodeId);
-      if (isPlayingTheTutorialRef.current && currentTutorial !== "SEARCHER") return;
+    async (nodeId: string, openWithDefaultValues: Partial<UserNodesData> = {}) => {
+      devLog("OPEN_NODE_HANDLER", { nodeId, openWithDefaultValues });
 
       let linkedNodeRef;
       let userNodeRef = null;
@@ -704,11 +709,10 @@ const Dashboard = ({}: DashboardProps) => {
 
       const nodeRef = doc(db, "nodes", nodeId);
       const nodeDoc = await getDoc(nodeRef);
-      console.log({ exist: nodeDoc.exists() });
       const batch = writeBatch(db);
       if (nodeDoc.exists() && user) {
         const thisNode: any = { ...nodeDoc.data(), id: nodeId };
-        // console.log({ thisNode });
+
         try {
           for (let child of thisNode.children) {
             linkedNodeRef = doc(db, "nodes", child.node);
@@ -726,7 +730,11 @@ const Dashboard = ({}: DashboardProps) => {
             // if exist documents update the first
             userNodeId = userNodeDoc.docs[0].id;
             const userNodeRef = doc(db, "userNodes", userNodeId);
-            userNodeData = userNodeDoc.docs[0].data() as UserNodesData;
+            const userNodeDataTmp = userNodeDoc.docs[0].data() as UserNodesData;
+            userNodeData = {
+              ...userNodeDataTmp,
+              ...openWithDefaultValues,
+            };
             userNodeData.visible = true;
             userNodeData.updatedAt = Timestamp.fromDate(new Date());
             batch.update(userNodeRef, userNodeData);
@@ -735,6 +743,7 @@ const Dashboard = ({}: DashboardProps) => {
             userNodeRef = collection(db, "userNodes");
 
             userNodeData = {
+              ...openWithDefaultValues,
               changed: true,
               correct: false,
               createdAt: Timestamp.fromDate(new Date()),
@@ -764,8 +773,8 @@ const Dashboard = ({}: DashboardProps) => {
           batch.set(doc(userNodeLogRef), userNodeLogData);
           await batch.commit();
 
-          notebookRef.current.selectedNode = nodeId;
-          nodeBookDispatch({ type: "setSelectedNode", payload: nodeId });
+          notebookRef.current.selectedNode = nodeId; // CHECK: THIS DOESN'T GUARANTY CORRECT SELECTED NODE, WE NEED TO DETECT WHEN GRAPH UPDATE HIS VALUES
+          nodeBookDispatch({ type: "setSelectedNode", payload: nodeId }); // CHECK: SAME FOR THIS
           /* setTimeout(() => {
             scrollToNode(nodeId);
           }, 2000); */
@@ -783,6 +792,10 @@ const Dashboard = ({}: DashboardProps) => {
       const thisNode = { ...oldNodes[nodeId] };
       const newNode = { ...oldNodes, [nodeId]: innerFunc(thisNode) };
       return { nodes: newNode, edges };
+    });
+    setNodeUpdates({
+      nodeIds: [nodeId],
+      updatedAt: new Date(),
     });
   }, []);
 
@@ -807,68 +820,63 @@ const Dashboard = ({}: DashboardProps) => {
     }, 1000);
   }, [firstScrollToNode, graph.nodes, nodeBookDispatch, openNodeHandler, scrollToNode]);
 
-  useEffect(() => {
-    devLog("USE_EFFECT", { userTutorialLoaded, user });
-    if (!user) return;
-    if (userTutorialLoaded) return;
+  // useEffect(() => {
+  //   // fetch user tutorial state first time
 
-    devLog("USE_EFFECT", "get-user-tutorial");
-    const getTutorialState = async () => {
-      const tutorialRef = doc(db, "userTutorial", user.uname);
-      const tutorialDoc = await getDoc(tutorialRef);
-      console.log(tutorialDoc);
+  //   if (!user) return;
+  //   if (userTutorialLoaded) return;
 
-      // TODO: load step from DB
-      if (tutorialDoc.exists()) {
-        const tutorial = tutorialDoc.data() as UserTutorials;
-        setUserTutorial(prev => ({ ...prev, ...tutorial }));
-        if (tutorial.nodes.done) return setUserTutorialLoaded(true);
-        if (tutorial.nodes.skipped) return setUserTutorialLoaded(true);
-        setCurrentTutorial("NODES");
-        // // onChangeStep(tutorial.nodes.currentStep);
-      } else {
-        console.log("will-start");
-        setCurrentTutorial("NODES");
-      }
+  //   devLog("USE_EFFECT: FETCH_USER_TUTORIAL", { userTutorialLoaded, user });
+  //   const getTutorialState = async () => {
+  //     const tutorialRef = doc(db, "userTutorial", user.uname);
+  //     const tutorialDoc = await getDoc(tutorialRef);
 
-      // setUserTutorialLoaded(true);
-    };
+  //     if (tutorialDoc.exists()) {
+  //       const tutorial = tutorialDoc.data() as UserTutorials;
+  //       setUserTutorial(prev => ({ ...prev, ...tutorial }));
+  //     }
 
-    getTutorialState();
-    setUserTutorialLoaded(true);
-  }, [db, setCurrentTutorial, user, user?.userId, userTutorialLoaded]);
+  //     setUserTutorialLoaded(true);
+  //   };
+
+  //   getTutorialState();
+  // }, [db, setCurrentTutorial, user, user?.userId, userTutorialLoaded]);
 
   //  bd => state (first render)
   useEffect(() => {
     setTimeout(() => {
-      if (user?.sNode === nodeBookState.selectedNode) return;
-      if (!firstScrollToNode && queueFinished && urlNodeProcess) {
-        if (!user?.sNode) return;
-        const selectedNode = graph.nodes[user?.sNode];
-        if (!selectedNode) return;
-        if (selectedNode.top === 0) return;
-        notebookRef.current.selectedNode = user.sNode;
-        nodeBookDispatch({ type: "setSelectedNode", payload: user.sNode });
-        scrollToNode(user.sNode);
-        setFirstScrollToNode(true);
-        setIsSubmitting(false);
-        if (queueFinished) {
-          setFirstLoading(false);
+      if (!user) return;
+      if (firstScrollToNode) return;
+      if (!queueFinished) return;
+      if (!urlNodeProcess) return;
+
+      if (user.sNode && user.sNode === nodeBookState.selectedNode) {
+        const selectedNode = graph.nodes[user.sNode];
+        if (selectedNode && selectedNode.top === 0) {
+          if (selectedNode.top === 0) return;
+
+          nodeBookDispatch({ type: "setSelectedNode", payload: user.sNode });
+          notebookRef.current.selectedNode = user.sNode;
+          setNodeUpdates({
+            nodeIds: [user.sNode],
+            updatedAt: new Date(),
+          });
+          scrollToNode(user.sNode);
+          setFirstScrollToNode(true);
         }
       }
+      setIsSubmitting(false);
+      setFirstLoading(false);
     }, 1000);
   }, [
     firstScrollToNode,
     graph.nodes,
-    isQueueWorking,
     nodeBookDispatch,
     nodeBookState.selectedNode,
-    queue.length,
     queueFinished,
     scrollToNode,
     urlNodeProcess,
-    user?.sNode,
-    userNodesLoaded,
+    user,
   ]);
 
   // called after first time map is rendered
@@ -934,6 +942,7 @@ const Dashboard = ({}: DashboardProps) => {
   // list of online users
   useEffect(() => {
     if (!user) return;
+
     const usersStatusQuery = query(collection(db, "status"), where("state", "==", "online"));
     const unsubscribe = onSnapshot(usersStatusQuery, snapshot => {
       const docChanges = snapshot.docChanges();
@@ -1013,14 +1022,21 @@ const Dashboard = ({}: DashboardProps) => {
             });
 
             devLog("5:user Nodes Snapshot:visible Full Nodes Merged", visibleFullNodesMerged);
+            const updatedNodeIds: string[] = [];
             const { newNodes, newEdges } = fillDagre(
               g.current,
               visibleFullNodesMerged,
               nodes,
               edges,
               settings.showClusterOptions,
-              allTags
+              allTags,
+              updatedNodeIds
             );
+
+            setNodeUpdates({
+              nodeIds: updatedNodeIds,
+              updatedAt: new Date(),
+            });
 
             if (!Object.keys(newNodes).length) {
               setNoNodesFoundMessage(true);
@@ -1056,25 +1072,12 @@ const Dashboard = ({}: DashboardProps) => {
 
   useEffect(() => {
     if (!db) return;
-    if (!user?.uname) return;
+    if (!user) return;
+    if (!user.uname) return;
     if (!allTagsLoaded) return;
     if (!userTutorialLoaded) return;
-    if (!userTutorial.nodes.done && !userTutorial.nodes.skipped) return;
-    if (stateNodeTutorial) return;
 
     devLog("USE_EFFECT", "nodes synchronization");
-
-    if (!shouldResetGraph.current) {
-      setGraph({
-        nodes: {},
-        edges: {},
-      });
-      setLocalSnapshot({});
-      shouldResetGraph.current = true;
-      notebookRef.current.selectedNode = null;
-      nodeBookDispatch({ type: "setSelectedNode", payload: null });
-      g.current = createGraph();
-    }
 
     const userNodesRef = collection(db, "userNodes");
     const q = query(
@@ -1088,140 +1091,19 @@ const Dashboard = ({}: DashboardProps) => {
     return () => {
       killSnapshot();
     };
-  }, [
-    allTagsLoaded,
-    db,
-    snapshot,
-    stateNodeTutorial,
-    user?.uname,
-    notebookChanged,
-    nodeBookDispatch,
-    userTutorialLoaded,
-    userTutorial.nodes.done,
-    userTutorial.nodes.skipped,
-  ]);
-  // }, [allTagsLoaded, db, snapshot, user?.uname, settings.showClusterOptions, notebookChanged]);
+    //IMPORTANT: notebookChanged used in dependecies because of the redraw graph (magic wand button)
+  }, [allTagsLoaded, db, snapshot, user, userTutorialLoaded, notebookChanged]);
 
   useEffect(() => {
     // here we force scrollToNode in required steps from TUTORIAL
     // this is only set up when worker doesn't make any change when a step change
     if (!stateNodeTutorial) return;
     if (currentTutorial !== "NODES") return;
-    if (!stateNodeTutorial.forceScrollToNode) return;
+
+    // if (!stateNodeTutorial.forceScrollToNode) return;
 
     scrollToNode(stateNodeTutorial.targetId);
   }, [currentTutorial, scrollToNode, stateNodeTutorial]);
-
-  useEffect(() => {
-    // here we set up the default properties of a node in TUTORIAL
-
-    if (currentTutorial !== "PROPOSAL") return;
-    if (!stateNodeTutorial) return;
-    if (!stateNodeTutorial.targetDefaultProperties) return;
-
-    // if (stateNodeTutorial.currentStepName === 17) {
-    //   debugger;
-    // }
-    const thisNode = graph.nodes[stateNodeTutorial.targetId];
-    if (!thisNode) return;
-
-    const keys = Object.keys(stateNodeTutorial.targetDefaultProperties) as (keyof FullNodeData)[];
-
-    const isEqualsProperties = (key: keyof FullNodeData) => {
-      // console.log(1, "SNP");
-      if (!stateNodeTutorial.targetDefaultProperties) return true;
-      // console.log(2, "SNP", thisNode, stateNodeTutorial?.targetDefaultProperties[key]);
-      // if (!thisNode[key]) return true;
-      // console.log(3, "SNP");
-      // if (!stateNodeTutorial?.targetDefaultProperties[key]) return;
-      // console.log(3, "SNP", thisNode[key], stateNodeTutorial?.targetDefaultProperties[key]);
-
-      return thisNode[key] === stateNodeTutorial?.targetDefaultProperties[key];
-    };
-    const isEquals = keys.some(isEqualsProperties);
-    console.log("SNP", isEquals);
-
-    if (isEquals) return;
-
-    setNodeParts(stateNodeTutorial.targetId, node => ({ ...node, ...stateNodeTutorial.targetDefaultProperties }));
-  }, [stateNodeTutorial, currentTutorial, setNodeParts, graph.nodes]);
-
-  useEffect(() => {
-    // Local Snapshot used only in interactive tutorial
-    if (!stateNodeTutorial) return;
-
-    devLog("USE_EFFECT", "interactive-tutorial");
-
-    if (shouldResetGraph.current) {
-      g.current = createGraph();
-      setGraph({
-        nodes: {},
-        edges: {},
-      });
-      shouldResetGraph.current = false;
-    }
-
-    const fullNodes = stateNodeTutorial.localSnapshot;
-
-    const visibleFullNodes: FullNodeData[] = fullNodes.filter(cur => cur.visible || cur.nodeChangeType === "modified");
-    devLog("3: TUTORIAL: visibleFullNodes", visibleFullNodes);
-    setAllNodes(oldAllNodes => mergeAllNodes(fullNodes, oldAllNodes));
-    devLog("4: TUTORIAL: setAllNodes");
-    setGraph(({ nodes, edges }) => {
-      const visibleFullNodesMerged = visibleFullNodes.map(cur => {
-        const tmpNode: FullNodeData = nodes[cur.node];
-        if (tmpNode) {
-          if (tmpNode.hasOwnProperty("simulated")) {
-            delete tmpNode["simulated"];
-          }
-          if (tmpNode.hasOwnProperty("isNew")) {
-            delete tmpNode["isNew"];
-          }
-        }
-
-        const hasParent = cur.parents.length;
-        // IMPROVE: we need to pass the parent which open the node
-        // to use his current position
-        // in this case we are checking first parent
-        // if this doesn't exist will set top:0 and left: 0 + NODE_WIDTH + COLUMN_GAP
-        const nodeParent = hasParent ? nodes[cur.parents[0].node] : null;
-        const topParent = nodeParent?.top ?? 0;
-
-        const leftParent = nodeParent?.left ?? 0;
-
-        return {
-          ...cur,
-          left: tmpNode?.left ?? leftParent + NODE_WIDTH + COLUMN_GAP,
-          top: tmpNode?.top ?? topParent,
-        };
-      });
-      devLog("5: TUTORIAL:user Nodes Snapshot:visible Full Nodes Merged", visibleFullNodesMerged);
-      const { newNodes, newEdges } = fillDagre(
-        g.current,
-        visibleFullNodesMerged,
-        nodes,
-        edges,
-        settings.showClusterOptions,
-        allTags
-      );
-
-      if (!Object.keys(newNodes).length) {
-        setNoNodesFoundMessage(true);
-      }
-
-      return { nodes: newNodes, edges: newEdges };
-    });
-    setOpenProgressBarMenu(true);
-  }, [
-    allTags,
-    settings.showClusterOptions,
-    stateNodeTutorial,
-    notebookChanged,
-    userTutorial.nodes.done,
-    userTutorial.nodes.skipped,
-    userTutorial.nodes.currentStep,
-    setCurrentTutorial,
-  ]);
 
   useEffect(() => {
     if (!db) return;
@@ -1238,8 +1120,6 @@ const Dashboard = ({}: DashboardProps) => {
       where("deleted", "==", false)
     );
     const bookmarkSnapshot = onSnapshot(q, async snapshot => {
-      // console.log("on snapshot");
-      // console.log("sn> bookmark");
       const docChanges = snapshot.docChanges();
 
       if (!docChanges.length) {
@@ -1281,7 +1161,6 @@ const Dashboard = ({}: DashboardProps) => {
       );
 
       const versionsSnapshot = onSnapshot(versionsQuery, async snapshot => {
-        console.log("sn> pending proposal");
         const docChanges = snapshot.docChanges();
         if (docChanges.length > 0) {
           for (let change of docChanges) {
@@ -1350,7 +1229,6 @@ const Dashboard = ({}: DashboardProps) => {
     const q = query(notificationNumsCol, where("uname", "==", user.uname));
 
     const notificationsSnapshot = onSnapshot(q, async snapshot => {
-      console.log("sn> notificationNums");
       if (!snapshot.docs.length) {
         const notificationNumRef = collection(db, "notificationNums");
         setDoc(doc(notificationNumRef), {
@@ -1379,6 +1257,10 @@ const Dashboard = ({}: DashboardProps) => {
   useEffect(() => {
     g.current = createGraph();
     setGraph({ nodes: {}, edges: {} });
+    setNodeUpdates({
+      nodeIds: [],
+      updatedAt: new Date(),
+    });
     devLog("CHANGE NH 🚀", { showClusterOptions: settings.showClusterOptions });
   }, [settings.showClusterOptions]);
 
@@ -1430,14 +1312,17 @@ const Dashboard = ({}: DashboardProps) => {
     devLog("RELOAD PERMANENT GRAPH");
 
     setGraph(({ nodes: oldNodes, edges: oldEdges }) => {
+      const updatedNodeIds: string[] = [];
+
       if (tempNodes.size > 0 || Object.keys(changedNodes).length > 0) {
         oldNodes = { ...oldNodes };
         oldEdges = { ...oldEdges };
       }
 
       tempNodes.forEach(tempNode => {
-        oldEdges = removeDagAllEdges(g.current, tempNode, oldEdges);
+        oldEdges = removeDagAllEdges(g.current, tempNode, oldEdges, updatedNodeIds);
         oldNodes = removeDagNode(g.current, tempNode, oldNodes);
+        updatedNodeIds.push(tempNode);
         tempNodes.delete(tempNode);
       });
 
@@ -1457,9 +1342,16 @@ const Dashboard = ({}: DashboardProps) => {
           settings.showClusterOptions,
           null
         );
+        updatedNodeIds.push(cId);
         delete changedNodes[cId];
       }
 
+      setTimeout(() => {
+        setNodeUpdates({
+          nodeIds: updatedNodeIds,
+          updatedAt: new Date(),
+        });
+      }, 200);
       return {
         nodes: oldNodes,
         edges: oldEdges,
@@ -1510,7 +1402,7 @@ const Dashboard = ({}: DashboardProps) => {
   const getMapGraph = useCallback(
     async (mapURL: string, postData: any = false, resetGraph: boolean = true) => {
       if (resetGraph) {
-        reloadPermanentGraph();
+        setTimeout(() => reloadPermanentGraph(), 200);
       }
 
       try {
@@ -1568,6 +1460,7 @@ const Dashboard = ({}: DashboardProps) => {
     (nodeId: string) => {
       setTimeout(() => {
         setGraph(graph => {
+          const updatedNodeIds: string[] = [];
           const nodes = { ...graph.nodes };
           const nodeEl = document.getElementById(nodeId)! as HTMLElement;
           let height: number = nodeEl.clientHeight;
@@ -1602,6 +1495,7 @@ const Dashboard = ({}: DashboardProps) => {
               lastTop = _nodeData.top;
 
               nodesUpdated = true;
+              updatedNodeIds.push(_nodeId);
               nodes[_nodeId] = _nodeData;
             }
           }
@@ -1610,6 +1504,12 @@ const Dashboard = ({}: DashboardProps) => {
             return graph;
           }
 
+          setTimeout(() => {
+            setNodeUpdates({
+              nodeIds: updatedNodeIds,
+              updatedAt: new Date(),
+            });
+          }, 100);
           return {
             nodes: { ...nodes },
             edges: graph.edges,
@@ -1622,17 +1522,20 @@ const Dashboard = ({}: DashboardProps) => {
 
   const chosenNodeChanged = useCallback(
     (nodeId: string) => {
-      setUpdatedLinks((updatedLinks) => {
+      setUpdatedLinks(updatedLinks => {
         setGraph(({ nodes: oldNodes, edges: oldEdges }) => {
+          const updatedNodeIds: string[] = [];
           if (!notebookRef.current.choosingNode || !notebookRef.current.chosenNode)
             return { nodes: oldNodes, edges: oldEdges };
           if (nodeId !== notebookRef.current.choosingNode.id) return { nodes: oldNodes, edges: oldEdges };
-  
+
+          updatedNodeIds.push(nodeId);
+          updatedNodeIds.push(notebookRef.current.chosenNode.id);
           const thisNode = copyNode(oldNodes[nodeId]);
           const chosenNodeObj = copyNode(oldNodes[notebookRef.current.chosenNode.id]);
-  
+
           let newEdges: EdgesData = oldEdges;
-  
+
           const validLink =
             (notebookRef.current.choosingNode.type === "Reference" &&
               /* thisNode.referenceIds.filter(l => l === nodeBookState.chosenNode?.id).length === 0 &&*/
@@ -1646,9 +1549,9 @@ const Dashboard = ({}: DashboardProps) => {
             (notebookRef.current.choosingNode.type === "Child" &&
               notebookRef.current.choosingNode.id !== notebookRef.current.chosenNode.id &&
               thisNode.children.filter((l: any) => l.node === notebookRef.current.chosenNode?.id).length === 0);
-  
+
           if (!validLink) return { nodes: oldNodes, edges: oldEdges };
-  
+
           if (notebookRef.current.choosingNode.type === "Reference") {
             thisNode.references = [...thisNode.references, chosenNodeObj.title];
             thisNode.referenceIds = [...thisNode.referenceIds, notebookRef.current.chosenNode.id];
@@ -1684,7 +1587,7 @@ const Dashboard = ({}: DashboardProps) => {
             } else {
               updatedLinks.addedParents = [...updatedLinks.addedParents, chosenNodeId];
             }
-  
+
             if (notebookRef.current.chosenNode && notebookRef.current.choosingNode) {
               newEdges = setDagEdge(
                 g.current,
@@ -1732,39 +1635,43 @@ const Dashboard = ({}: DashboardProps) => {
               updatedLinks.addedChildren = [...updatedLinks.addedChildren, notebookRef.current.chosenNode.id];
             }
           }
-  
+
           const chosenNode = notebookRef.current.chosenNode.id;
           notebookRef.current.choosingNode = null;
           notebookRef.current.chosenNode = null;
           nodeBookDispatch({ type: "setChoosingNode", payload: null });
           nodeBookDispatch({ type: "setChosenNode", payload: null });
-  
+
           const newNodes = {
             ...oldNodes,
             [nodeId]: thisNode,
             [chosenNode]: chosenNodeObj,
           };
+          setTimeout(() => {
+            setNodeUpdates({
+              nodeIds: updatedNodeIds,
+              updatedAt: new Date(),
+            });
+          }, 200);
           return { nodes: newNodes, edges: newEdges };
         });
-        return {...updatedLinks};
+        return { ...updatedLinks };
       });
     },
     // TODO: CHECK dependencies
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [
-      notebookRef.current.choosingNode,
-      notebookRef.current.chosenNode,
-    ]
+    [notebookRef.current.choosingNode, notebookRef.current.chosenNode]
   );
 
   const deleteLink = useCallback(
     (nodeId: string, linkIdx: number, linkType: ChoosingType) => {
-      setUpdatedLinks((updatedLinks) => {
+      setUpdatedLinks(updatedLinks => {
         setGraph(({ nodes, edges }) => {
+          const updatedNodeIds: string[] = [nodeId];
           let oldNodes = { ...nodes };
           let newEdges = { ...edges };
           const thisNode = copyNode(oldNodes[nodeId]);
-  
+
           if (linkType === "Parent") {
             let parentNode = null;
             const parentId = thisNode.parents[linkIdx].node;
@@ -1814,10 +1721,14 @@ const Dashboard = ({}: DashboardProps) => {
             thisNode.tagIds.splice(linkIdx, 1);
           }
           oldNodes[nodeId] = thisNode;
+          setNodeUpdates({
+            nodeIds: updatedNodeIds,
+            updatedAt: new Date(),
+          });
           return { nodes: oldNodes, edges: newEdges };
         });
 
-        return {...updatedLinks};
+        return { ...updatedLinks };
       });
     },
     // TODO: CHECK dependencies
@@ -1834,6 +1745,8 @@ const Dashboard = ({}: DashboardProps) => {
 
     setSelectedNodeType(nodeType);
     setOpenPart("LinkingWords");
+    
+    processHeightChange(nodeId);
   }, []);
 
   const recursiveOffsprings = useCallback((nodeId: string): any[] => {
@@ -1853,11 +1766,10 @@ const Dashboard = ({}: DashboardProps) => {
   const hideOffsprings = useMemoizedCallback(
     nodeId => {
       if (notebookRef.current.choosingNode || !user) return;
-      console.log({ isPlayingTheTutorialRef: isPlayingTheTutorialRef.current });
-      if (isPlayingTheTutorialRef.current) return;
 
       setGraph(graph => {
         (async () => {
+          const updatedNodeIds: string[] = [];
           const offsprings = recursiveOffsprings(nodeId);
           notebookRef.current.selectedNode = nodeId;
           nodeBookDispatch({ type: "setSelectedNode", payload: nodeId });
@@ -1910,8 +1822,12 @@ const Dashboard = ({}: DashboardProps) => {
             let oldNodes = { ...graph.nodes };
             let oldEdges = { ...graph.edges };
             for (let offspring of offsprings) {
-              ({ oldNodes, oldEdges } = hideNodeAndItsLinks(g.current, offspring, oldNodes, oldEdges));
+              ({ oldNodes, oldEdges } = hideNodeAndItsLinks(g.current, offspring, oldNodes, oldEdges, updatedNodeIds));
             }
+            setNodeUpdates({
+              nodeIds: updatedNodeIds,
+              updatedAt: new Date(),
+            });
           } catch (err) {
             console.error(err);
           }
@@ -1928,16 +1844,21 @@ const Dashboard = ({}: DashboardProps) => {
     if (!stateNodeTutorial) return;
     if (!currentTutorial) return;
 
-    const keyTutorial: TutorialTypeKeys = currentTutorial.toLowerCase() as TutorialTypeKeys;
+    const keyTutorial: TutorialTypeKeys = currentTutorial
+      .split("_")
+      .map((el, idx) => (idx > 0 ? capitalizeFirstLetter(el.toLocaleLowerCase()) : el.toLowerCase()))
+      .join("") as TutorialTypeKeys;
 
     const tutorialUpdated: UserTutorial = {
       ...userTutorial[keyTutorial],
       currentStep: stateNodeTutorial.currentStepName,
       done: true,
+      forceTutorial: false,
     };
+
     const userTutorialUpdated: UserTutorials = { ...userTutorial, [keyTutorial]: tutorialUpdated };
     setCurrentTutorial(null);
-    setOpenSidebar(null);
+    setInitialStep(0);
     setUserTutorial(userTutorialUpdated);
 
     const tutorialRef = doc(db, "userTutorial", user.uname);
@@ -1948,7 +1869,7 @@ const Dashboard = ({}: DashboardProps) => {
     } else {
       await setDoc(tutorialRef, userTutorialUpdated);
     }
-  }, [currentTutorial, db, setCurrentTutorial, stateNodeTutorial, user, userTutorial]);
+  }, [currentTutorial, db, setCurrentTutorial, setInitialStep, setUserTutorial, stateNodeTutorial, user, userTutorial]);
 
   const openLinkedNode = useCallback(
     (linkedNodeID: string, typeOperation?: string) => {
@@ -1957,13 +1878,8 @@ const Dashboard = ({}: DashboardProps) => {
         typeOperation,
         isPlayingTheTutorialRef: isPlayingTheTutorialRef.current,
       });
-      console.log("linked 0", isPlayingTheTutorialRef.current);
 
       if (notebookRef.current.choosingNode) return;
-
-      if (isPlayingTheTutorialRef.current && currentTutorial !== "SEARCHER") return;
-
-      console.log("lib");
 
       createActionTrack(
         db,
@@ -2010,20 +1926,12 @@ const Dashboard = ({}: DashboardProps) => {
       if (typeOperation === "CitationSidebar") {
         setOpenSidebar(null);
       }
-      console.log("Current tutoriial");
-      if (currentTutorial === "SEARCHER") {
-        console.log("Finalize tutoriial called");
-
-        onFinalizeTutorial();
-      }
     },
 
     [
-      currentTutorial,
       db,
       isPlayingTheTutorialRef,
       nodeBookDispatch,
-      onFinalizeTutorial,
       openNodeHandler,
       scrollToNode,
       user?.chooseUname,
@@ -2065,19 +1973,29 @@ const Dashboard = ({}: DashboardProps) => {
        * create userNodeLog
        */
 
-      if (isPlayingTheTutorialRef.current) return;
-
       setGraph(graph => {
+        const parentNode = getFirstParent(nodeId);
+
+        const thisNode = graph.nodes[nodeId];
+        const { nodeRef, userNodeRef } = initNodeStatusChange(nodeId, thisNode.userNodeId);
+
+        // flagged closing node as visible = false in parents
+        for (const parent of thisNode.parents) {
+          if (!graph.nodes[parent.node]) continue;
+          const childIdx = graph.nodes[parent.node].children.findIndex(child => child.node === nodeId);
+          if (childIdx !== -1) {
+            graph.nodes[parent.node] = { ...graph.nodes[parent.node] };
+            graph.nodes[parent.node].children = [...graph.nodes[parent.node].children];
+            const child = graph.nodes[parent.node].children[childIdx];
+            child.visible = false;
+          }
+        }
+
         (async () => {
           const batch = writeBatch(db);
           const username = user?.uname;
           if (notebookRef.current.choosingNode) return;
           if (!username) return;
-
-          const parentNode = getFirstParent(nodeId);
-
-          const thisNode = graph.nodes[nodeId];
-          const { nodeRef, userNodeRef } = initNodeStatusChange(nodeId, thisNode.userNodeId);
 
           const userNodeData = {
             changed: thisNode.changed || false,
@@ -2144,7 +2062,6 @@ const Dashboard = ({}: DashboardProps) => {
       });
     },
     [
-      isPlayingTheTutorialRef,
       db,
       user?.uname,
       user?.fName,
@@ -2256,8 +2173,6 @@ const Dashboard = ({}: DashboardProps) => {
       if (notebookRef.current.choosingNode) return;
 
       notebookRef.current.selectedNode = nodeId;
-
-      if (isPlayingTheTutorialRef.current) return;
 
       lastNodeOperation.current = "ToggleNode";
       setGraph(({ nodes: oldNodes, edges }) => {
@@ -2500,6 +2415,9 @@ const Dashboard = ({}: DashboardProps) => {
     (event: any, nodeId: string) => {
       if (notebookRef.current.choosingNode) return;
       setGraph(({ nodes: oldNodes, edges }) => {
+        const updatedNodeIds: string[] = [];
+        updatedNodeIds.push(nodeId);
+
         const thisNode = oldNodes[nodeId];
         nodeBookDispatch({ type: "setSelectedNode", payload: nodeId });
         notebookRef.current.selectedNode = nodeId;
@@ -2560,6 +2478,10 @@ const Dashboard = ({}: DashboardProps) => {
           nodeId,
           []
         );
+        setNodeUpdates({
+          nodeIds: updatedNodeIds,
+          updatedAt: new Date(),
+        });
         return { nodes: oldNodes, edges };
       });
       event.currentTarget.blur();
@@ -2573,7 +2495,6 @@ const Dashboard = ({}: DashboardProps) => {
     (event: any, nodeId: string) => {
       devLog("CORRECT NODE", { nodeId });
       if (notebookRef.current.choosingNode) return;
-      if (isPlayingTheTutorialRef.current) return;
 
       notebookRef.current.selectedNode = nodeId;
       nodeBookDispatch({ type: "setSelectedNode", payload: nodeId });
@@ -2613,7 +2534,6 @@ const Dashboard = ({}: DashboardProps) => {
       locked: boolean
     ) => {
       if (notebookRef.current.choosingNode) return;
-      if (isPlayingTheTutorialRef.current) return;
 
       let deleteOK = true;
       notebookRef.current.selectedNode = nodeId;
@@ -2624,16 +2544,23 @@ const Dashboard = ({}: DashboardProps) => {
       const _corrects = corrects + correctChange;
       const _wrongs = wrongs + wrongChange;
 
-      const willRemoveNode = doNeedToDeleteNode(_corrects, _wrongs, locked);
-      if (willRemoveNode) {
-        deleteOK = window.confirm("You are going to permanently delete this node by downvoting it. Are you sure?");
-      }
-
-      if (!deleteOK) return;
-
       setGraph(graph => {
+        const updatedNodeIds: string[] = [nodeId];
         const node = graph.nodes[nodeId];
-        
+
+        const willRemoveNode = doNeedToDeleteNode(_corrects, _wrongs, locked);
+        if (willRemoveNode) {
+          if (node?.children.length > 0) {
+            window.alert(
+              "To be able to delete this node, you should first delete its children or move them under other parent node."
+            );
+            deleteOK = false;
+          } else {
+            deleteOK = window.confirm("You are going to permanently delete this node by downvoting it. Are you sure?");
+          }
+        }
+
+        if (!deleteOK) return graph;
 
         if (node?.locked) return graph;
         generateReputationSignal(db, node, user, wrongChange, "Wrong", nodeId, setReputationSignal);
@@ -2642,10 +2569,11 @@ const Dashboard = ({}: DashboardProps) => {
         let edges = graph.edges;
 
         if (willRemoveNode) {
-          edges = removeDagAllEdges(g.current, nodeId, edges);
+          edges = removeDagAllEdges(g.current, nodeId, edges, updatedNodeIds);
           nodes = removeDagNode(g.current, nodeId, nodes);
 
           notebookRef.current.selectedNode = node.parents[0]?.node ?? null;
+          updatedNodeIds.push(notebookRef.current.selectedNode!);
           nodeBookDispatch({ type: "setSelectedNode", payload: node.parents[0]?.node ?? null });
         } else {
           nodes[nodeId] = {
@@ -2657,20 +2585,25 @@ const Dashboard = ({}: DashboardProps) => {
             disableVotes: true,
           };
         }
-  
-        if (!willRemoveNode) {
-          nodes[nodeId] = {
-            ...node,
-            disableVotes: false,
-          };
-        }
 
-        (async() => {
-          await idToken();
-          await getMapGraph(`/wrongNode/${nodeId}`);
+        (async () => {
+          try {
+            await idToken();
+            await getMapGraph(`/wrongNode/${nodeId}`);
+          } catch (e) {}
+
+          if (!willRemoveNode) {
+            setNodeParts(nodeId, node => {
+              return { ...node, disableVotes: false };
+            });
+          }
         })();
 
-        return {nodes, edges};
+        setNodeUpdates({
+          nodeIds: updatedNodeIds,
+          updatedAt: new Date(),
+        });
+        return { nodes, edges };
       });
     },
     [getMapGraph, setNodeParts]
@@ -2857,8 +2790,8 @@ const Dashboard = ({}: DashboardProps) => {
 
   const proposeNodeImprovement = useCallback(
     (event: any, nodeId: string = "") => {
-      devLog("PROPOSE_NODE_IMPROVEMENT");
-      event.preventDefault();
+      devLog("PROPOSE_NODE_IMPROVEMENT", nodeId);
+      // event.preventDefault();
       const selectedNode = nodeId || notebookRef.current.selectedNode;
       if (!selectedNode) return;
       setOpenProposal("ProposeEditTo" + selectedNode);
@@ -2876,14 +2809,17 @@ const Dashboard = ({}: DashboardProps) => {
           ...oldNodes,
           [selectedNode]: thisNode,
         };
-
         return { nodes: newNodes, edges };
+      });
+      setNodeUpdates({
+        nodeIds: [selectedNode],
+        updatedAt: new Date(),
       });
       processHeightChange(nodeId);
       //setOpenSidebar(null);
       scrollToNode(selectedNode);
     },
-    [reloadPermanentGraph, scrollToNode]
+    [processHeightChange, reloadPermanentGraph, scrollToNode]
   );
 
   const selectNode = useCallback(
@@ -2963,7 +2899,6 @@ const Dashboard = ({}: DashboardProps) => {
   const saveProposedImprovement = useCallback(
     (summary: any, reason: any, onFail: any) => {
       if (!notebookRef.current.selectedNode) return;
-      if (isPlayingTheTutorialRef.current) return;
 
       notebookRef.current.chosenNode = null;
       notebookRef.current.choosingNode = null;
@@ -2971,9 +2906,11 @@ const Dashboard = ({}: DashboardProps) => {
       nodeBookDispatch({ type: "setChoosingNode", payload: null });
       let referencesOK = true;
 
-      setUpdatedLinks((updatedLinks) => {
+      setUpdatedLinks(updatedLinks => {
         setGraph(graph => {
           const selectedNodeId = notebookRef.current.selectedNode!;
+          const updatedNodeIds: string[] = [selectedNodeId];
+
           if (
             (graph.nodes[selectedNodeId].nodeType === "Concept" ||
               graph.nodes[selectedNodeId].nodeType === "Relation" ||
@@ -2983,9 +2920,9 @@ const Dashboard = ({}: DashboardProps) => {
           ) {
             referencesOK = window.confirm("You are proposing a node without any reference. Are you sure?");
           }
-  
+
           if (!referencesOK) return graph;
-  
+
           gtmEvent("Propose", {
             customType: "improvement",
           });
@@ -2995,7 +2932,7 @@ const Dashboard = ({}: DashboardProps) => {
           gtmEvent("Reputation", {
             value: 1,
           });
-  
+
           const newNode = { ...graph.nodes[selectedNodeId] };
           if (newNode.children.length > 0) {
             const newChildren = [];
@@ -3021,7 +2958,7 @@ const Dashboard = ({}: DashboardProps) => {
           }
           const keyFound = changedNodes.hasOwnProperty(selectedNodeId);
           if (!keyFound) return graph;
-  
+
           const oldNode = changedNodes[selectedNodeId] as FullNodeData;
           let isTheSame =
             newNode.title === oldNode.title &&
@@ -3039,7 +2976,7 @@ const Dashboard = ({}: DashboardProps) => {
           isTheSame = compareLinks(oldNode.parents, newNode.parents, isTheSame, false);
           isTheSame = compareLinks(oldNode.children, newNode.children, isTheSame, false);
           isTheSame = compareFlatLinks(oldNode.referenceLabels, newNode.referenceLabels, isTheSame);
-  
+
           isTheSame = compareChoices(oldNode, newNode, isTheSame);
           if (isTheSame) {
             onFail();
@@ -3048,7 +2985,7 @@ const Dashboard = ({}: DashboardProps) => {
             });
             return graph;
           }
-  
+
           const postData: any = {
             ...newNode,
             id: notebookRef.current.selectedNode,
@@ -3080,9 +3017,9 @@ const Dashboard = ({}: DashboardProps) => {
           delete postData.left;
           delete postData.top;
           delete postData.height;
-  
+
           const willBeApproved = isVersionApproved({ corrects: 1, wrongs: 0, nodeData: newNode });
-  
+
           if (willBeApproved) {
             const newParentIds: string[] = newNode.parents.map(parent => parent.node);
             const newChildIds: string[] = newNode.children.map(child => child.node);
@@ -3103,7 +3040,7 @@ const Dashboard = ({}: DashboardProps) => {
               }
             });
           }
-  
+
           const nodes = {
             ...graph.nodes,
             [selectedNodeId]: {
@@ -3111,13 +3048,18 @@ const Dashboard = ({}: DashboardProps) => {
               editable: false,
             },
           };
-  
+
           getMapGraph("/proposeNodeImprovement", postData, !willBeApproved);
-  
+
           setTimeout(() => {
             scrollToNode(selectedNodeId);
           }, 200);
-  
+
+          setNodeUpdates({
+            nodeIds: updatedNodeIds,
+            updatedAt: new Date(),
+          });
+
           return {
             nodes,
             edges: graph.edges,
@@ -3127,12 +3069,7 @@ const Dashboard = ({}: DashboardProps) => {
         return updatedLinks;
       });
     },
-    [
-      isPlayingTheTutorialRef,
-      nodeBookDispatch,
-      getMapGraph,
-      scrollToNode,
-    ]
+    [isPlayingTheTutorialRef, nodeBookDispatch, getMapGraph, scrollToNode]
   );
 
   const proposeNewChild = useCallback(
@@ -3145,6 +3082,8 @@ const Dashboard = ({}: DashboardProps) => {
       reloadPermanentGraph();
       const newNodeId = newId(db);
       setGraph(graph => {
+        const updatedNodeIds: string[] = [];
+
         const { nodes: oldNodes, edges } = graph;
         const selectedNodeId = notebookRef.current.selectedNode!;
         if (!selectedNodeId) return graph; // CHECK: I added this to validate
@@ -3219,12 +3158,18 @@ const Dashboard = ({}: DashboardProps) => {
         );
         if (!selectedNodeId) return { nodes: newNodes, edges };
         const newEdges = setDagEdge(g.current, selectedNodeId, newNodeId, { label: "" }, { ...edges });
+        updatedNodeIds.push(selectedNodeId, newNodeId);
 
         notebookRef.current.selectedNode = newNodeId;
         nodeBookDispatch({ type: "setSelectedNode", payload: newNodeId });
         setTimeout(() => {
           scrollToNode(newNodeId);
         }, 3500);
+
+        setNodeUpdates({
+          nodeIds: updatedNodeIds,
+          updatedAt: new Date(),
+        });
         return { nodes: newNodes, edges: newEdges };
       });
     },
@@ -3250,6 +3195,7 @@ const Dashboard = ({}: DashboardProps) => {
       nodeBookDispatch({ type: "setChosenNode", payload: null });
 
       setGraph(graph => {
+        const updatedNodeIds: string[] = [newNodeId];
         const newNode = graph.nodes[newNodeId];
 
         if (!newNode.title) {
@@ -3361,7 +3307,10 @@ const Dashboard = ({}: DashboardProps) => {
         setTimeout(() => {
           onComplete();
         }, 200);
-
+        setNodeUpdates({
+          nodeIds: updatedNodeIds,
+          updatedAt: new Date(),
+        });
         return { nodes, edges };
       });
     },
@@ -3553,6 +3502,8 @@ const Dashboard = ({}: DashboardProps) => {
         event.preventDefault();
         setOpenProposal(proposal.id);
         reloadPermanentGraph();
+
+        const updatedNodeIds: string[] = [nodeBookState.selectedNode!, newNodeId];
         setGraph(({ nodes: oldNodes, edges }) => {
           if (!nodeBookState.selectedNode) return { nodes: oldNodes, edges };
           if (!(nodeBookState.selectedNode in changedNodes)) {
@@ -3675,6 +3626,13 @@ const Dashboard = ({}: DashboardProps) => {
             return { nodes: newNodes, edges: oldEdges };
           }
         });
+
+        setTimeout(() => {
+          setNodeUpdates({
+            nodeIds: updatedNodeIds,
+            updatedAt: new Date(),
+          });
+        }, 200);
         if (nodeBookState.selectedNode) scrollToNode(nodeBookState.selectedNode);
       }, 1000);
     },
@@ -3880,6 +3838,7 @@ const Dashboard = ({}: DashboardProps) => {
         } catch (error) {
           console.error(error);
         }
+        const updatedNodeIds: string[] = [nodeBookState.selectedNode!, newNodeId];
         setGraph(({ nodes: oldNodes, edges }) => {
           if (!nodeBookState.selectedNode) return { nodes: oldNodes, edges };
           if (
@@ -3902,6 +3861,10 @@ const Dashboard = ({}: DashboardProps) => {
           }
           setProposals(proposalsTemp);
           return { nodes: oldNodes, edges };
+        });
+        setNodeUpdates({
+          nodeIds: updatedNodeIds,
+          updatedAt: new Date(),
         });
       }
     },
@@ -3956,6 +3919,10 @@ const Dashboard = ({}: DashboardProps) => {
     setGraph(() => {
       return { nodes: {}, edges: {} };
     });
+    setNodeUpdates({
+      nodeIds: [],
+      updatedAt: new Date(),
+    });
     g.current = createGraph();
     setTimeout(() => {
       setNotebookChanges({ updated: true });
@@ -3970,59 +3937,34 @@ const Dashboard = ({}: DashboardProps) => {
     },
     [nodeBookDispatch]
   );
-  // console.log({ nodeBookState });
-
-  // const handleOpenProgressBar = useCallback(() => {
-  //   setOpenProgressBar(true);
-  //   setOpenProgressBarMenu(false);
-  // }, []);
-
-  // const handleCloseProgressBar = useCallback(() => {
-  //   console.log("ssssssss");
-  //   setOpenProgressBar(false);
-  //   setOpenProgressBarMenu(true);
-  // }, []);
 
   const handleCloseProgressBarMenu = useCallback(() => {
     setOpenProgressBarMenu(false);
   }, []);
-
-  // const onUpdateNode = useCallback(
-  //   async (tutorialKey: TutorialType) => {
-  //     if (!user) return;
-
-  //     const userTutorialUpdated = { ...userTutorial, [tutorialKey]: tutorialUpdated };
-  //     onChangeStep(null);
-  //     setUserTutorial(userTutorialUpdated);
-
-  //     const tutorialRef = doc(db, "userTutorial", user.uname);
-  //     const tutorialDoc = await getDoc(tutorialRef);
-
-  //     if (tutorialDoc.exists()) {
-  //       await updateDoc(tutorialRef, userTutorialUpdated);
-  //     } else {
-  //       await setDoc(tutorialRef, userTutorialUpdated);
-  //     }
-  //   },
-  //   [db, onChangeStep, user, userTutorial]
-  // );
 
   const onSkipTutorial = useCallback(async () => {
     if (!user) return;
     if (!stateNodeTutorial) return;
     if (!currentTutorial) return;
 
-    const keyTutorial: TutorialTypeKeys = currentTutorial.toLowerCase() as TutorialTypeKeys;
+    const keyTutorial: TutorialTypeKeys = currentTutorial
+      .split("_")
+      .map((el, idx) => (idx > 0 ? capitalizeFirstLetter(el.toLocaleLowerCase()) : el.toLowerCase()))
+      .join("") as TutorialTypeKeys;
 
     const tutorialUpdated: UserTutorial = {
       ...userTutorial[keyTutorial],
       currentStep: stateNodeTutorial.currentStepName,
       skipped: true,
+      forceTutorial: false,
     };
     const userTutorialUpdated = { ...userTutorial, [keyTutorial]: tutorialUpdated };
     setCurrentTutorial(null);
     setOpenSidebar(null);
+    setInitialStep(0);
     setUserTutorial(userTutorialUpdated);
+
+    if (userTutorial[keyTutorial].forceTutorial) return;
 
     const tutorialRef = doc(db, "userTutorial", user.uname);
     const tutorialDoc = await getDoc(tutorialRef);
@@ -4032,7 +3974,390 @@ const Dashboard = ({}: DashboardProps) => {
     } else {
       await setDoc(tutorialRef, userTutorialUpdated);
     }
-  }, [currentTutorial, db, setCurrentTutorial, stateNodeTutorial, user, userTutorial]);
+  }, [currentTutorial, db, setCurrentTutorial, setInitialStep, setUserTutorial, stateNodeTutorial, user, userTutorial]);
+
+  const forceTutorial = useCallback(
+    (idTarget: string, tutorial: TutorialType, isEditable = false) => {
+      devLog("FORCE_TUTORIAL", { idTarget, tutorial });
+      const targetElement = document.getElementById(idTarget);
+      if (!targetElement) {
+        return isEditable
+          ? openNodeHandler(idTarget, { open: true, editable: true })
+          : openNodeHandler(idTarget, { open: true });
+      }
+
+      setNodeParts(idTarget, node => ({ ...node, open: true }));
+      if (isEditable) proposeNodeImprovement(null, idTarget);
+      nodeBookDispatch({ type: "setSelectedNode", payload: idTarget });
+      notebookRef.current.selectedNode = idTarget;
+      setCurrentTutorial(tutorial);
+      setTargetId(idTarget);
+    },
+    [nodeBookDispatch, openNodeHandler, proposeNodeImprovement, setCurrentTutorial, setNodeParts, setTargetId]
+  );
+
+  useEffect(() => {
+    /**
+     * This useEffect with detect conditions to call a tutorial
+     * we need selected node over required node
+     * This useEffect executed 2 times when we force tutorial
+     * 1. first time will set up required states
+     * 2. second time will run tutorial
+     */
+    const detectTriggerTutorial = () => {
+      if (currentTutorial) return;
+      if (!userTutorialLoaded) return;
+      if (firstLoading) return;
+
+      devLog("USE_EFFECT: DETECT_TRIGGER_TUTORIAL", { userTutorial });
+
+      // --------------------------
+
+      if (
+        (!userTutorial.navigation.done && !userTutorial.navigation.skipped) ||
+        userTutorial.navigation.forceTutorial
+      ) {
+        setCurrentTutorial("NAVIGATION");
+        return;
+      }
+
+      // --------------------------
+
+      if ((!userTutorial.nodes.done && !userTutorial.nodes.skipped) || userTutorial.nodes.forceTutorial) {
+        const nodeTargetId =
+          (nodeBookState.selectedNode && graph.nodes[nodeBookState.selectedNode]?.open && nodeBookState.selectedNode) ||
+          "";
+
+        if (!nodeTargetId) {
+          if (!userTutorial.nodes.forceTutorial) return;
+
+          const idTarget = "r98BjyFDCe4YyLA3U8ZE";
+          const targetElement = document.getElementById(idTarget);
+          if (!targetElement) return openNodeHandler(idTarget, { open: true });
+
+          notebookRef.current.selectedNode = idTarget;
+          nodeBookDispatch({ type: "setSelectedNode", payload: idTarget });
+          setNodeParts(idTarget, node => ({ ...node, open: true }));
+          scrollToNode(idTarget);
+          return;
+        }
+
+        setTargetId(nodeTargetId);
+        setCurrentTutorial("NODES");
+        return;
+      }
+
+      // --------------------------
+      if (
+        (!userTutorial.searcher.done && !userTutorial.searcher.skipped && openSidebar === "SEARCHER_SIDEBAR") ||
+        userTutorial.searcher.forceTutorial
+      ) {
+        if (openSidebar !== "SEARCHER_SIDEBAR") {
+          if (!userTutorial.searcher.forceTutorial) return;
+
+          setOpenSidebar("SEARCHER_SIDEBAR");
+          return;
+        }
+        setCurrentTutorial("SEARCHER");
+        return;
+      }
+
+      // --------------------------
+
+      const selectedNodeFromChangedNodes: FullNodeData = nodeBookState.selectedNode
+        ? changedNodes[nodeBookState.selectedNode]
+        : null;
+
+      // --------------------------
+
+      if (userTutorial.proposal.forceTutorial) {
+        return forceTutorial("r98BjyFDCe4YyLA3U8ZE", "PROPOSAL", true);
+      }
+
+      if (selectedNodeFromChangedNodes && !userTutorial.proposal.done && !userTutorial.proposal.skipped) {
+        setCurrentTutorial(`PROPOSAL`);
+        setTargetId(selectedNodeFromChangedNodes.node);
+        return;
+      }
+
+      // --------------------------
+
+      if (userTutorial.proposalConcept.forceTutorial) {
+        return forceTutorial("r98BjyFDCe4YyLA3U8ZE", "PROPOSAL_CONCEPT", true);
+      }
+
+      if (
+        selectedNodeFromChangedNodes &&
+        !userTutorial.proposalConcept.done &&
+        !userTutorial.proposalConcept.skipped &&
+        selectedNodeFromChangedNodes.nodeType === "Concept"
+      ) {
+        setCurrentTutorial(`PROPOSAL_CONCEPT`);
+        setTargetId(selectedNodeFromChangedNodes.node);
+        return;
+      }
+
+      // --------------------------
+
+      if (userTutorial.proposalRelation.forceTutorial) {
+        return forceTutorial("zYYmaXvhab7hH2uRI9Up", "PROPOSAL_RELATION", true);
+      }
+
+      if (
+        selectedNodeFromChangedNodes &&
+        !userTutorial.proposalRelation.done &&
+        !userTutorial.proposalRelation.skipped &&
+        selectedNodeFromChangedNodes.nodeType === "Relation"
+      ) {
+        setCurrentTutorial(`PROPOSAL_RELATION`);
+        setTargetId(selectedNodeFromChangedNodes.node);
+        return;
+      }
+
+      // --------------------------
+
+      if (userTutorial.proposalReference.forceTutorial) {
+        return forceTutorial("P631lWeKsBtszZRDlmsM", "PROPOSAL_REFERENCE", true);
+      }
+
+      if (
+        selectedNodeFromChangedNodes &&
+        !userTutorial.proposalReference.done &&
+        !userTutorial.proposalReference.skipped &&
+        selectedNodeFromChangedNodes.nodeType === "Reference"
+      ) {
+        setCurrentTutorial(`PROPOSAL_REFERENCE`);
+        setTargetId(selectedNodeFromChangedNodes.node);
+        return;
+      }
+
+      // --------------------------
+
+      if (userTutorial.proposalIdea.forceTutorial) {
+        return forceTutorial("v9wGPxRCI4DRq11o7uH2", "PROPOSAL_IDEA", true);
+      }
+
+      if (
+        selectedNodeFromChangedNodes &&
+        !userTutorial.proposalIdea.done &&
+        !userTutorial.proposalIdea.skipped &&
+        selectedNodeFromChangedNodes.nodeType === "Idea"
+      ) {
+        setCurrentTutorial(`PROPOSAL_IDEA`);
+        setTargetId(selectedNodeFromChangedNodes.node);
+        return;
+      }
+
+      // --------------------------
+
+      if (userTutorial.proposalQuestion.forceTutorial) {
+        return forceTutorial("qO9uK6UdYRLWm4Olihlw", "PROPOSAL_QUESTION", true);
+      }
+
+      if (
+        selectedNodeFromChangedNodes &&
+        !userTutorial.proposalQuestion.done &&
+        !userTutorial.proposalQuestion.skipped &&
+        selectedNodeFromChangedNodes.nodeType === "Question"
+      ) {
+        setCurrentTutorial(`PROPOSAL_QUESTION`);
+        setTargetId(selectedNodeFromChangedNodes.node);
+        return;
+      }
+
+      // --------------------------
+
+      if (userTutorial.proposalCode.forceTutorial) {
+        return forceTutorial("E1nIWQ7RIC3pRLvk0Bk5", "PROPOSAL_CODE", true);
+      }
+
+      if (
+        selectedNodeFromChangedNodes &&
+        !userTutorial.proposalCode.done &&
+        !userTutorial.proposalCode.skipped &&
+        selectedNodeFromChangedNodes.nodeType === "Code"
+      ) {
+        setCurrentTutorial(`PROPOSAL_CODE`);
+        setTargetId(selectedNodeFromChangedNodes.node);
+        return;
+      }
+
+      // --------------------------
+
+      const selectedNodeFromGraph = graph.nodes[nodeBookState.selectedNode ?? ""];
+
+      // --------------------------
+
+      if (userTutorial.concept.forceTutorial) {
+        return forceTutorial("r98BjyFDCe4YyLA3U8ZE", "CONCEPT");
+      }
+
+      if (
+        selectedNodeFromGraph &&
+        selectedNodeFromGraph.nodeType === "Concept" &&
+        !userTutorial.concept.done &&
+        !userTutorial.concept.skipped
+      ) {
+        setTargetId(selectedNodeFromGraph.node);
+        setCurrentTutorial("CONCEPT");
+        return;
+      }
+
+      // --------------------------
+
+      if (userTutorial.relation.forceTutorial) {
+        return forceTutorial("zYYmaXvhab7hH2uRI9Up", "RELATION");
+      }
+
+      if (
+        selectedNodeFromGraph &&
+        selectedNodeFromGraph.nodeType === "Relation" &&
+        !userTutorial.relation.done &&
+        !userTutorial.relation.skipped
+      ) {
+        setTargetId(selectedNodeFromGraph.node);
+        setCurrentTutorial("RELATION");
+        return;
+      }
+
+      // --------------------------
+
+      if (userTutorial.reference.forceTutorial) {
+        return forceTutorial("P631lWeKsBtszZRDlmsM", "REFERENCE");
+      }
+
+      if (
+        selectedNodeFromGraph &&
+        selectedNodeFromGraph.nodeType === "Reference" &&
+        !userTutorial.reference.done &&
+        !userTutorial.reference.skipped
+      ) {
+        setTargetId(selectedNodeFromGraph.node);
+        setCurrentTutorial("REFERENCE");
+        return;
+      }
+
+      // --------------------------
+
+      if (userTutorial.question.forceTutorial) {
+        return forceTutorial("P631lWeKsBtszZRDlmsM", "QUESTION");
+      }
+
+      if (
+        selectedNodeFromGraph &&
+        selectedNodeFromGraph.nodeType === "Reference" &&
+        !userTutorial.question.done &&
+        !userTutorial.question.skipped
+      ) {
+        setTargetId(selectedNodeFromGraph.node);
+        setCurrentTutorial("QUESTION");
+        return;
+      }
+
+      // --------------------------
+
+      if (userTutorial.idea.forceTutorial) {
+        return forceTutorial("v9wGPxRCI4DRq11o7uH2", "IDEA");
+      }
+
+      if (
+        selectedNodeFromGraph &&
+        selectedNodeFromGraph.nodeType === "Idea" &&
+        !userTutorial.idea.done &&
+        !userTutorial.idea.skipped
+      ) {
+        setTargetId(selectedNodeFromGraph.node);
+        setCurrentTutorial("IDEA");
+        return;
+      }
+
+      // --------------------------
+
+      if (userTutorial.code.forceTutorial) {
+        return forceTutorial("E1nIWQ7RIC3pRLvk0Bk5", "CODE");
+      }
+
+      if (
+        selectedNodeFromGraph &&
+        selectedNodeFromGraph.nodeType === "Code" &&
+        !userTutorial.code.done &&
+        !userTutorial.code.skipped
+      ) {
+        setTargetId(selectedNodeFromGraph.node);
+        setCurrentTutorial("CODE");
+        return;
+      }
+
+      // --------------------------
+
+      if (userTutorial.reconcilingAcceptedProposal.forceTutorial) {
+        return forceTutorial("zp6PeUOlmejdQTAqK2xX", "RECONCILING_ACCEPTED_PROPOSAL");
+      }
+
+      if (
+        selectedNodeFromGraph &&
+        lastNodeOperation.current === "ProposeProposals" &&
+        !userTutorial.reconcilingAcceptedProposal.done &&
+        !userTutorial.reconcilingAcceptedProposal.skipped
+      ) {
+        const willBeApproved = isVersionApproved({
+          corrects: 1,
+          wrongs: 0,
+          nodeData: selectedNodeFromGraph,
+        });
+        if (!willBeApproved) return;
+
+        setCurrentTutorial("RECONCILING_ACCEPTED_PROPOSAL");
+        setTargetId(willBeApproved.node);
+        return;
+      }
+
+      // --------------------------
+
+      if (userTutorial.reconcilingNotAcceptedProposal.forceTutorial) {
+        setOpenSidebar("PROPOSALS");
+        return forceTutorial("r98BjyFDCe4YyLA3U8ZE", "RECONCILING_NOT_ACCEPTED_PROPOSAL");
+      }
+
+      if (
+        selectedNodeFromGraph &&
+        lastNodeOperation.current === "ProposeProposals" &&
+        !userTutorial.reconcilingNotAcceptedProposal.done &&
+        !userTutorial.reconcilingNotAcceptedProposal.skipped
+      ) {
+        const willBeApproved = isVersionApproved({
+          corrects: 1,
+          wrongs: 0,
+          nodeData: selectedNodeFromGraph,
+        });
+        if (willBeApproved) return;
+
+        setCurrentTutorial("RECONCILING_NOT_ACCEPTED_PROPOSAL");
+        setOpenSidebar("PROPOSALS");
+        setTargetId(willBeApproved.node);
+        return;
+      }
+    };
+    detectTriggerTutorial();
+  }, [
+    currentTutorial,
+    firstLoading,
+    forceTutorial,
+    graph,
+    graph.nodes,
+    nodeBookDispatch,
+    nodeBookState.selectedNode,
+    openNodeHandler,
+    openSidebar,
+    proposeNodeImprovement,
+    scrollToNode,
+    setCurrentTutorial,
+    setNodeParts,
+    setTargetId,
+    targetId,
+    userTutorial,
+    userTutorialLoaded,
+  ]);
 
   return (
     <div className="MapContainer" style={{ overflow: "hidden" }}>
@@ -4048,11 +4373,17 @@ const Dashboard = ({}: DashboardProps) => {
             onNextStep={onNextStep}
             onPreviousStep={onPreviousStep}
             stepsLength={stepsLength}
+            node={graph.nodes[nodeBookState.selectedNode ?? ""]}
           />
         </Portal>
       )}
       <Box
         id="Map"
+        className={
+          notebookRef.current.choosingNode && notebookRef.current.choosingNode.type !== "Reference"
+            ? "ChoosableNotebook"
+            : ""
+        }
         sx={{
           overflow: "hidden",
           position: "relative",
@@ -4099,14 +4430,15 @@ const Dashboard = ({}: DashboardProps) => {
               <Box>
                 <Button onClick={() => console.log("DAGGER", g)}>Dagre</Button>
                 <Button onClick={() => console.log(nodeBookState)}>nodeBookState</Button>
+                <Button onClick={() => console.log(notebookRef)}>notebookRef</Button>
                 <Button onClick={() => console.log(user)}>user</Button>
                 <Button onClick={() => console.log(settings)}>setting</Button>
                 <Button onClick={() => console.log(reputation)}>reputation</Button>
+                <Button onClick={() => console.log(openSidebar)}>open sidebar</Button>
               </Box>
               <Box>
                 <Button onClick={() => console.log(nodeChanges)}>node changes</Button>
                 <Button onClick={() => console.log(mapRendered)}>map rendered</Button>
-                {/* <Button onClick={() => console.log(mapChanged)}>map changed</Button> */}
                 <Button onClick={() => console.log(userNodeChanges)}>user node changes</Button>
                 <Button onClick={() => console.log(nodeBookState)}>show global state</Button>
                 <Button
@@ -4151,6 +4483,15 @@ const Dashboard = ({}: DashboardProps) => {
 
               <Divider />
 
+              <Typography>Tutorial:</Typography>
+              <Box>
+                <Button onClick={() => console.log(currentTutorial)}>Current tutorial</Button>
+                <Button onClick={() => console.log(userTutorial)}>userTutorial</Button>
+                <Button onClick={() => console.log(targetId)}>targetId</Button>
+              </Box>
+
+              <Divider />
+
               <Typography>Functions:</Typography>
               <Box>
                 <Button onClick={() => nodeBookDispatch({ type: "setSelectionType", payload: "Proposals" })}>
@@ -4159,12 +4500,12 @@ const Dashboard = ({}: DashboardProps) => {
                 <Button onClick={() => nodeBookDispatch({ type: "setSelectionType", payload: "Proposals" })}>
                   Open Proposal
                 </Button>
-                <Button onClick={() => openNodeHandler("JqTvpowT5EBPO1Ajjovq")}>Open Node Handler</Button>
+                <Button onClick={() => openNodeHandler("r98BjyFDCe4YyLA3U8ZE")}>Open Node Handler</Button>
                 <Button onClick={() => setShowRegion(prev => !prev)}>Show Region</Button>
               </Box>
             </Drawer>
           }
-          {user && reputation && (
+          {user && reputation && (userTutorial.navigation.done || userTutorial.navigation.skipped) && (
             <Box
               sx={{
                 "& .GainedPoint, & .LostPoint": {
@@ -4190,7 +4531,7 @@ const Dashboard = ({}: DashboardProps) => {
                 windowHeight={windowHeight}
                 onlineUsers={onlineUsers}
                 usersOnlineStatusLoaded={usersOnlineStatusLoaded}
-                disableToolbar={Boolean(stateNodeTutorial && stateNodeTutorial.disabledElements.includes("TOOLBAR"))}
+                disableToolbar={Boolean(["TutorialStep"].includes("TOOLBAR"))}
                 setCurrentTutorial={setCurrentTutorial}
                 userTutorial={userTutorial}
               />
@@ -4214,8 +4555,8 @@ const Dashboard = ({}: DashboardProps) => {
                 sidebarWidth={sidebarWidth()}
                 innerHeight={innerHeight}
                 innerWidth={windowWith}
-                disableSearcher={Boolean(stateNodeTutorial?.disabledElements.includes("SEARCHER_SIDEBAR"))}
-                enableElements={stateNodeTutorial?.enableChildElements ?? []}
+                disableSearcher={Boolean(["TT"].includes("SEARCHER_SIDEBAR"))}
+                enableElements={[]}
               />
               <MemoizedNotificationSidebar
                 theme={settings.theme}
@@ -4298,9 +4639,7 @@ const Dashboard = ({}: DashboardProps) => {
           <MemoizedCommunityLeaderboard
             userTagId={user?.tagId ?? ""}
             pendingProposalsLoaded={pendingProposalsLoaded}
-            disabled={Boolean(
-              stateNodeTutorial && stateNodeTutorial.disabledElements.includes("COMMUNITY_LEADERBOARD")
-            )}
+            disabled={Boolean(["TT"].includes("COMMUNITY_LEADERBOARD"))}
           />
 
           {isQueueWorking && (
@@ -4328,7 +4667,7 @@ const Dashboard = ({}: DashboardProps) => {
               <IconButton
                 color="secondary"
                 onClick={onScrollToLastNode}
-                disabled={stateNodeTutorial?.disabledElements.includes("SCROLL_TO_NODE_BUTTON")}
+                disabled={["TT"].includes("SCROLL_TO_NODE_BUTTON")}
                 sx={{
                   position: "fixed",
                   top: {
@@ -4372,7 +4711,7 @@ const Dashboard = ({}: DashboardProps) => {
                   : `${innerHeight * 0.25 + 65}px`,
                 sm: "60px",
               },
-              right: "10px",
+              right: "60px",
               zIndex: "1300",
               background: theme => (theme.palette.mode === "dark" ? "#1f1f1f" : "#f0f0f0"),
               ":hover": {
@@ -4386,7 +4725,7 @@ const Dashboard = ({}: DashboardProps) => {
             </IconButton>
           </Tooltip>
 
-          {/* {!stateNodeTutorial && (
+          {
             <Tooltip
               title="Start tutorial"
               placement="left"
@@ -4412,30 +4751,22 @@ const Dashboard = ({}: DashboardProps) => {
               <IconButton
                 color="secondary"
                 onClick={() => {
-                  setCurrentTutorial("NODES");
-                  setOpenProgressBarMenu(true);
+                  setOpenProgressBar(true);
                 }}
               >
                 <HelpIcon />
               </IconButton>
             </Tooltip>
-          )} */}
+          }
 
           {process.env.NODE_ENV === "development" && (
             <Tooltip
               title={"Watch geek data"}
               sx={{
                 position: "fixed",
-                top: {
-                  xs: !openSidebar
-                    ? "10px"
-                    : openSidebar && openSidebar !== "SEARCHER_SIDEBAR"
-                    ? `${innerHeight * 0.35 + 120}px`
-                    : `${innerHeight * 0.25 + 120}px`,
-                  sm: "110px",
-                },
-                right: "60px",
-                zIndex: "1300",
+                bottom: "60px",
+                left: "10px",
+                zIndex: "99999",
                 transition: "all 1s ease",
                 background: theme => (theme.palette.mode === "dark" ? "#1f1f1f" : "#f0f0f0"),
                 ":hover": {
@@ -4455,7 +4786,7 @@ const Dashboard = ({}: DashboardProps) => {
               onClick={() => {
                 setFocusView({ isEnabled: true, selectedNode: nodeBookState.selectedNode || "" });
               }}
-              disabled={stateNodeTutorial?.disabledElements.includes("FOCUS_MODE_BUTTON")}
+              disabled={["TT"].includes("FOCUS_MODE_BUTTON")}
               sx={{
                 position: "fixed",
                 top: {
@@ -4496,7 +4827,6 @@ const Dashboard = ({}: DashboardProps) => {
               openUserInfoSidebar={openUserInfoSidebar}
               onlineUsers={onlineUsers}
               db={db}
-              disabled={Boolean(stateNodeTutorial && stateNodeTutorial.disabledElements.includes("LIVENESS_BAR"))}
             />
           )}
 
@@ -4507,7 +4837,6 @@ const Dashboard = ({}: DashboardProps) => {
               onlineUsers={onlineUsers}
               db={db}
               user={user}
-              disabled={Boolean(stateNodeTutorial && stateNodeTutorial.disabledElements.includes("LIVENESS_BAR"))}
             />
           )}
 
@@ -4546,6 +4875,7 @@ const Dashboard = ({}: DashboardProps) => {
                     onNextStep={onNextStep}
                     onPreviousStep={onPreviousStep}
                     stepsLength={stepsLength}
+                    node={graph.nodes[nodeBookState.selectedNode ?? ""]}
                     // tutorialState={stateNodeTutorial}
                     // onChangeStep={onChangeStep}
                     // targetClientRect={targetClientRect}
@@ -4558,7 +4888,9 @@ const Dashboard = ({}: DashboardProps) => {
                 )}
                 <MemoizedLinksList edgeIds={edgeIds} edges={graph.edges} selectedRelation={selectedRelation} />
                 <MemoizedNodeList
+                  nodeUpdates={nodeUpdates}
                   notebookRef={notebookRef}
+                  setNodeUpdates={setNodeUpdates}
                   setFocusView={setFocusView}
                   nodes={graph.nodes}
                   bookmark={bookmark}
@@ -4604,8 +4936,8 @@ const Dashboard = ({}: DashboardProps) => {
                   openSidebar={openSidebar}
                   setOperation={setOperation}
                   openUserInfoSidebar={openUserInfoSidebar}
-                  disabledNodes={stateNodeTutorial?.disabledElements ?? []}
-                  enableChildElements={stateNodeTutorial?.enableChildElements ?? []}
+                  disabledNodes={[]}
+                  enableChildElements={[]}
                   showProposeTutorial={!(userTutorial.proposal.done || userTutorial.proposal.skipped)}
                   setCurrentTutorial={setCurrentTutorial}
                 />
@@ -4728,8 +5060,42 @@ const Dashboard = ({}: DashboardProps) => {
             open={openProgressBarMenu}
             handleOpenProgressBar={handleOpenProgressBar}
             currentStep={stateNodeTutorial?.currentStepName ?? 0}
+          /> */}
+          <MemoizedTutorialTableOfContent
+            open={openProgressBar}
+            reloadPermanentGraph={reloadPermanentGraph}
+            handleCloseProgressBar={() => setOpenProgressBar(false)}
+            tutorials={{
+              navigation: { title: "Navigation", steps: NAVIGATION_STEPS_COMPLETE },
+              nodes: { title: "Node", steps: NODES_STEPS_COMPLETE },
+              searcher: { title: "Searcher", steps: SEARCHER_STEPS_COMPLETE },
+              proposal: { title: "Proposal", steps: PROPOSAL_STEPS_COMPLETE },
+              proposalCode: { title: "Proposal Code", steps: PROPOSING_CODE_EDIT_COMPLETE },
+              proposalConcept: { title: "Proposal Concept", steps: PROPOSING_CONCEPT_EDIT_COMPLETE },
+              proposalIdea: { title: "Proposal Idea", steps: PROPOSING_IDEA_EDIT_COMPLETE },
+              proposalQuestion: { title: "Proposal Question", steps: PROPOSING_QUESTION_EDIT_COMPLETE },
+              proposalReference: { title: "Proposal Reference", steps: PROPOSING_REFERENCE_EDIT_COMPLETE },
+              proposalRelation: { title: "Proposal Relation", steps: PROPOSING_RELATION_EDIT_COMPLETE },
+              concept: { title: "Concept Node", steps: NODE_CODE_COMPLETE },
+              relation: { title: "Relation Node", steps: NODE_RELATION_COMPLETE },
+              reference: { title: "Reference Node", steps: NODE_REFERENCE_COMPLETE },
+              question: { title: "Question Node", steps: NODE_QUESTION_COMPLETE },
+              idea: { title: "Idea Node", steps: NODE_IDEA_COMPLETE },
+              code: { title: "Code Node", steps: NODE_CODE_COMPLETE },
+              reconcilingAcceptedProposal: {
+                title: "Accepted Proposals",
+                steps: RECONCILING_ACCEPTED_PROPOSALS_STEPS_COMPLETE,
+              },
+              reconcilingNotAcceptedProposal: {
+                title: "Not Accepted Proposal",
+                steps: RECONCILING_NOT_ACCEPTED_PROPOSALS_STEPS_COMPLETE,
+              },
+            }}
+            userTutorialState={userTutorial}
+            setCurrentTutorial={setCurrentTutorial}
+            setUserTutorialState={setUserTutorial}
+            setInitialStep={setInitialStep}
           />
-          <MemoizedProgressBar open={openProgressBar} handleCloseProgressBar={handleCloseProgressBar} /> */}
         </Box>
       </Box>
     </div>

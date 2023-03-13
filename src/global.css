@@ -170,7 +170,7 @@
   border-color: #fd7373;
 }
 .LightMode .Node.Changed {
-  border-color: #ffa5a5;
+  border-color: #fd7373;
   border-width: 4px;
 }
 
@@ -179,13 +179,13 @@
 }
 
 .Node.active,
-.Node.Choosable:hover {
+.ChoosableNotebook .Node.Choosable:hover {
   -webkit-box-shadow: 1px 0px 10px 7px rgba(190, 190, 190, 1);
   -moz-box-shadow: 1px 0px 10px 7px rgba(190, 190, 190, 1);
   box-shadow: 1px 0px 10px 7px rgba(190, 190, 190, 1);
 }
 .LightMode .Node.active,
-.LightMode .Node.Choosable:hover {
+.LightMode .ChoosableNotebook .Node.Choosable:hover {
   -webkit-box-shadow: 1px 0px 10px 7px rgb(0, 204, 255, 0.7);
   -moz-box-shadow: 1px 0px 10px 7px rgb(0, 204, 255, 0.7);
   box-shadow: 1px 0px 10px 7px rgb(0, 204, 255, 0.7);

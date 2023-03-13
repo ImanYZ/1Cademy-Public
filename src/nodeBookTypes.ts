@@ -210,7 +210,7 @@ export type StepTutorialConfig = {
   isClickeable?: boolean;
   forceScrollToNode?: boolean;
   targetDefaultProperties?: Partial<FullNodeData>;
-  tooltipPosition?: "top" | "bottom" | "left" | "right";
+  tooltipPosition?: "top" | "bottom" | "left" | "right" | "topLeft";
   anchor?: string;
   largeTarget?: boolean;
 };
@@ -226,22 +226,44 @@ export interface NodeTutorialState {
   currentStepName: number;
   nextStepName: number;
   previosStepName: number;
-  tooltipPosition: "top" | "bottom" | "left" | "right";
+  tooltipPosition: "top" | "bottom" | "left" | "right" | "topLeft";
   isClickeable: boolean;
   targetDelay?: number;
   forceScrollToNode?: boolean;
   targetDefaultProperties?: Partial<FullNodeData>;
   largeTarget?: boolean;
 }
+
+export type TutorialStepConfig = {
+  targetId?: string;
+  childTargetId?: string;
+  title: string;
+  description: React.ReactNode | ((node: FullNodeData) => React.ReactNode);
+  anchor?: string;
+  tooltipPosition?: "top" | "bottom" | "left" | "right" | "topLeft" | "topRight" | "bottomLeft" | "bottomRight";
+  targetDelay?: number;
+  largeTarget?: boolean;
+  isClickeable?: boolean;
+};
+
+export type TutorialStep = {
+  targetId: string;
+  childTargetId?: string;
+  title: string;
+  description: React.ReactNode | ((node: FullNodeData) => React.ReactNode);
+  anchor: string;
+  currentStepName: number;
+  nextStepName: number;
+  previosStepName: number;
+  tooltipPosition: "top" | "bottom" | "left" | "right" | "topLeft" | "topRight" | "bottomLeft" | "bottomRight";
+  targetDelay?: number;
+  largeTarget?: boolean;
+  isClickeable?: boolean;
+};
+
 export type StepReducerPayload = {
   callback?: () => void;
 };
-// export type SetStep = {
-//   type: SetStepType;
-//   payload: StepReducerPayload;
-// };
-
-// export type DispatchNodeTutorialAction = SetStep;
 
 export type UserNodesData = {
   // "firstVisit": Timestamp,//CHECK
@@ -289,6 +311,7 @@ export type NodeFireStore = {
     label: string;
     title: string;
     type: string;
+    visible?: boolean;
   }[];
   choices: KnowledgeChoice[];
   closedHeight?: number;
@@ -324,6 +347,7 @@ export type NodeFireStore = {
     label: string;
     title: string;
     type: string;
+    visible?: boolean;
   }[];
   referenceIds: string[];
   referenceLabels: string[];
@@ -381,6 +405,10 @@ export type EdgeData = {
 
 export type FullNodesData = { [key: string]: FullNodeData };
 export type EdgesData = { [key: string]: EdgeData };
+export type TNodeUpdates = {
+  nodeIds: string[];
+  updatedAt: Date;
+};
 
 export type SortDirection = "ASCENDING" | "DESCENDING";
 export type SortValues =
@@ -404,11 +432,30 @@ export type UsersStatus = "All Time" | "Monthly" | "Weekly" | "Others Votes" | "
 
 // export type ClusterNodes = { [key: string]: Cluster };
 
-export type TutorialTypeKeys = "nodes" | "searcher" | "proposal";
+export type TutorialTypeKeys =
+  | "nodes"
+  | "searcher"
+  | "proposal"
+  | "navigation"
+  | "concept"
+  | "relation"
+  | "reference"
+  | "idea"
+  | "question"
+  | "code"
+  | "proposalConcept"
+  | "proposalRelation"
+  | "proposalReference"
+  | "proposalIdea"
+  | "proposalQuestion"
+  | "proposalCode"
+  | "reconcilingAcceptedProposal"
+  | "reconcilingNotAcceptedProposal";
 export type UserTutorial = {
   currentStep: number;
   done: boolean;
   skipped: boolean;
+  forceTutorial?: boolean;
 };
 
 export type UserTutorials = {

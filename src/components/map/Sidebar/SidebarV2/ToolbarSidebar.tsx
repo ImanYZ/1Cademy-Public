@@ -215,8 +215,8 @@ MainSidebarProps) => {
             // className="SearchBarIconToolbar"
             id="toolbar-search-button"
             onClick={() => {
-              const searcherTutorialFinalized = userTutorial.searcher.done || userTutorial.searcher.skipped;
-              if (!searcherTutorialFinalized) setCurrentTutorial("SEARCHER");
+              // const searcherTutorialFinalized = userTutorial.searcher.done || userTutorial.searcher.skipped;
+              // if (!searcherTutorialFinalized) setCurrentTutorial("SEARCHER");
 
               onOpenSidebar("SEARCHER_SIDEBAR", "Search");
               setIsMenuOpen(false);
@@ -596,6 +596,7 @@ MainSidebarProps) => {
               onlineUsers={onlineUsers}
               usersOnlineStatusLoaded={usersOnlineStatusLoaded}
               usersStatus={leaderBoardType}
+              nodeBookDispatch={nodeBookDispatch}
               reloadPermanentGraph={reloadPermanentGrpah}
               setOpenSideBar={setOpenSideBar}
               reputationSignal={reputationSignal}

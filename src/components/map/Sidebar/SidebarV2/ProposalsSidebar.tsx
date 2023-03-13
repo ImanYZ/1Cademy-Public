@@ -94,6 +94,7 @@ const ProposalsSidebar = ({
 
   return (
     <SidebarWrapper
+      id="sidebar-wrapper-proposals"
       title="Proposals"
       headerImage={theme === "Dark" ? referencesDarkTheme : referencesLightTheme}
       open={open}

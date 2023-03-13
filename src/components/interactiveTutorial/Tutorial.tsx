@@ -1,26 +1,24 @@
+import LiveHelpIcon from "@mui/icons-material/LiveHelp";
 import { Box, Button, Stack, Typography } from "@mui/material";
 import React, { useMemo, useRef } from "react";
 
 import { gray50, gray200, gray700, gray800 } from "@/pages/home";
 
 import { TargetClientRect } from "../../hooks/useInteractiveTutorial";
-import { TutorialState } from "../../nodeBookTypes";
+import { FullNodeData, TutorialStep } from "../../nodeBookTypes";
 
 const TOOLTIP_OFFSET = 40;
 
 type TutorialProps = {
-  tutorialState: TutorialState;
-
-  // dispatchNodeTutorial: Dispatch<SetStep>;
-  // onChangeStep: (step: SetStepType) => void;
+  tutorialState: TutorialStep | null;
   onNextStep: () => void;
   onPreviousStep: () => void;
   targetClientRect: TargetClientRect;
   handleCloseProgressBarMenu: () => void;
-  // onUpdateNode: (tutorialKey: TutorialType, tutorialUpdated: UserTutorial) => void;
   onSkip: () => void;
   onFinalize: () => void;
   stepsLength: number;
+  node: FullNodeData;
 };
 
 export const Tutorial = ({
@@ -29,11 +27,10 @@ export const Tutorial = ({
   onNextStep,
   onPreviousStep,
   handleCloseProgressBarMenu,
-  // onSkipTutorial,
-  // onUpdateNode,
   onSkip,
   onFinalize,
   stepsLength,
+  node,
 }: TutorialProps) => {
   const tooltipRef = useRef<HTMLDivElement | null>(null);
 
@@ -41,12 +38,6 @@ export const Tutorial = ({
     if (!tooltipRef.current) return { top: 0, left: 0 };
     if (!tutorialState) return { top: 0, left: 0 };
 
-    // console.log("rect", {
-    //   targetClientRect,
-    //   tooltipRef: tooltipRef.current.clientHeight,
-    //   tooltipGetClientRects: tooltipRef.current.getClientRects(),
-    //   tooltipGETVoundClientReact: tooltipRef.current.getBoundingClientRect(),
-    // });
     const { height: tooltipHeight } = tooltipRef.current.getBoundingClientRect();
     let top = 0;
     let left = 0;
@@ -67,16 +58,19 @@ export const Tutorial = ({
       top = targetClientRect.top + targetClientRect.height / 2 - tooltipRef.current.clientHeight / 2;
       left = targetClientRect.left + targetClientRect.width + TOOLTIP_OFFSET;
     }
-    // console.log("first new top left", { top, left });
 
     return { top, left };
   }, [targetClientRect, tutorialState]);
 
-  console.log({ tutorialState, tooltipClientRect, targetClientRect });
   if (!tutorialState) return null;
-  console.log(1);
   if (!tutorialState.currentStepName) return null;
-  console.log(2);
+
+  let location = { top: "10px", bottom: "10px", left: "10px", right: "10px" };
+
+  if (tutorialState.tooltipPosition === "topLeft") location = { ...location, bottom: "", right: "" };
+  else if (tutorialState.tooltipPosition === "topRight") location = { ...location, bottom: "", left: "" };
+  else if (tutorialState.tooltipPosition === "bottomLeft") location = { ...location, top: "", right: "" };
+  else if (tutorialState.tooltipPosition === "bottomRight") location = { ...location, top: "", left: "" };
 
   if (
     targetClientRect.top === 0 &&
@@ -88,12 +82,10 @@ export const Tutorial = ({
       <div
         style={{
           position: "absolute",
-          top: "0px",
-          bottom: "0px",
-          left: "0px",
-          right: "0px",
-          backgroundColor: "#555555a9",
-          transition: "top 1s ease-out,left 1s ease-out",
+          ...location,
+          backgroundColor: "#55555500",
+          height: "auto",
+          transition: "top 1s ease-out,bottom 1s ease-out,left 1s ease-out,rigth 1s ease-out,height 1s ease-out",
           boxSizing: "border-box",
           display: "grid",
           placeItems: "center",
@@ -105,39 +97,33 @@ export const Tutorial = ({
           sx={{
             transition: "top 1s ease-out,left 1s ease-out",
             width: "450px",
-            backgroundColor: "#4B535C",
+            backgroundColor: theme => (theme.palette.mode === "dark" ? "#4B535C" : "#C5D0DF"),
             p: "24px 32px",
             borderRadius: "8px",
-            color: "white",
+            color: theme => (theme.palette.mode === "dark" ? gray50 : gray800),
             zIndex: 99999,
           }}
         >
           <Stack direction={"row"} justifyContent="space-between" sx={{ mb: "12px" }}>
-            <Typography component={"h2"} sx={{ fontSize: "18px", fontWeight: "bold", display: "inline-block" }}>
-              {tutorialState.title}
-            </Typography>
-            <Typography sx={{ display: "inline-block", color: "#818181" }}>
-              {tutorialState.currentStepName} / {stepsLength}
-            </Typography>
+            <Stack direction={"row"} alignItems="center" spacing={"8px"}>
+              <Typography component={"h2"} sx={{ fontSize: "18px", fontWeight: "bold", display: "inline-block" }}>
+                {tutorialState.title}
+              </Typography>
+              <LiveHelpIcon />
+            </Stack>
+            {stepsLength <= 1 || (
+              <Typography sx={{ display: "inline-block", color: "#818181" }}>
+                {tutorialState.currentStepName} / {stepsLength}
+              </Typography>
+            )}
           </Stack>
 
-          {tutorialState.description}
+          {typeof tutorialState.description === "function"
+            ? tutorialState.description(node)
+            : tutorialState.description}
 
-          <Stack direction={"row"} justifyContent={"space-between"} alignItems={"center"} sx={{ mt: "16px" }}>
-            <Button
-              variant="text"
-              onClick={() => {
-                handleCloseProgressBarMenu();
-                // onChangeStep(null);
-                // onUpdateNode("nodes", tutorialState.currentStepName, {});
-                onSkip();
-              }}
-              sx={{
-                p: "8px 0px",
-              }}
-            >
-              Skip
-            </Button>
+          {/* INFO: reversed used for showing buttons always to right no matter the number of buttons */}
+          <Stack direction={"row-reverse"} justifyContent={"space-between"} alignItems={"center"} sx={{ mt: "16px" }}>
             <Box>
               {tutorialState.currentStepName > 1 && (
                 <Button
@@ -146,8 +132,14 @@ export const Tutorial = ({
                   sx={{
                     borderRadius: "32px",
                     mr: "16px",
-
                     p: "8px 32px",
+                    color: "inherit",
+                    borderColor: theme => (theme.palette.mode === "dark" ? gray50 : gray800),
+                    ":hover": {
+                      borderColor: "inherit",
+                      color: "inherit",
+                      backgroundColor: theme => (theme.palette.mode === "dark" ? "#575f68" : "#d7dee6"),
+                    },
                   }}
                 >
                   Prev
@@ -162,8 +154,11 @@ export const Tutorial = ({
                   sx={{
                     borderRadius: "32px",
                     p: "8px 32px",
-                    backgroundColor: "#FF6D00",
-                    ":hover": { backgroundColor: "#f57a1c" },
+                    color: theme => (theme.palette.mode === "dark" ? gray800 : gray50),
+                    backgroundColor: theme => (theme.palette.mode === "dark" ? gray50 : gray800),
+                    ":hover": {
+                      backgroundColor: theme => (theme.palette.mode === "dark" ? gray200 : gray700),
+                    },
                   }}
                   disabled={tutorialState.isClickeable}
                 >
@@ -175,26 +170,45 @@ export const Tutorial = ({
                   variant="contained"
                   onClick={() => {
                     handleCloseProgressBarMenu();
-                    // onNextStep();
                     onFinalize();
                   }}
                   sx={{
                     borderRadius: "32px",
                     p: "8px 32px",
-                    backgroundColor: "#FF6D00",
-                    ":hover": { backgroundColor: "#f57a1c" },
+                    color: theme => (theme.palette.mode === "dark" ? gray800 : gray50),
+                    backgroundColor: theme => (theme.palette.mode === "dark" ? gray50 : gray800),
+                    ":hover": {
+                      backgroundColor: theme => (theme.palette.mode === "dark" ? gray200 : gray700),
+                    },
                   }}
                 >
-                  {"Finalize"}
+                  Got It
                 </Button>
               )}
             </Box>
+            {tutorialState.currentStepName !== stepsLength && (
+              <Button
+                variant="text"
+                onClick={() => {
+                  handleCloseProgressBarMenu();
+                  // onChangeStep(null);
+                  // onUpdateNode("nodes", tutorialState.currentStepName, {});
+                  onSkip();
+                }}
+                sx={{
+                  color: "inherit",
+                  p: "8px 0px",
+                  ":hover": { backgroundColor: theme => (theme.palette.mode === "dark" ? "#575f68" : "#d7dee6") },
+                }}
+              >
+                Skip
+              </Button>
+            )}
           </Stack>
         </Box>
       </div>
     );
 
-  console.log(3);
   return (
     <Box
       ref={tooltipRef}
@@ -206,7 +220,7 @@ export const Tutorial = ({
         transition: "top 1s ease-out,left 1s ease-out",
         width: "450px",
         backgroundColor: theme => (theme.palette.mode === "dark" ? "#4B535C" : "#C5D0DF"),
-        borderColor: theme => (theme.palette.mode === "dark" ? "#4B535C" : "#C5D0DF"),
+        borderColor: theme => (theme.palette.mode === "dark" ? "#4B535C" : "#C5D0DF") /* this is used in tooltip */,
         p: "24px 32px",
         borderRadius: "8px",
         color: theme => (theme.palette.mode === "dark" ? gray50 : gray800),
@@ -214,33 +228,23 @@ export const Tutorial = ({
       }}
     >
       <Stack direction={"row"} justifyContent="space-between" sx={{ mb: "12px" }}>
-        <Typography component={"h2"} sx={{ fontSize: "18px", fontWeight: "bold", display: "inline-block" }}>
-          {tutorialState.title}
-        </Typography>
-        <Typography sx={{ display: "inline-block", color: "inherit" }}>
-          {tutorialState.currentStepName} / {stepsLength}
-        </Typography>
+        <Stack direction={"row"} alignItems="center" spacing={"8px"}>
+          <Typography component={"h2"} sx={{ fontSize: "18px", fontWeight: "bold", display: "inline-block" }}>
+            {tutorialState.title}
+          </Typography>
+          <LiveHelpIcon />
+        </Stack>
+        {stepsLength <= 1 || (
+          <Typography sx={{ display: "inline-block", color: "inherit" }}>
+            {tutorialState.currentStepName} / {stepsLength}
+          </Typography>
+        )}
       </Stack>
 
-      {tutorialState.description}
+      {typeof tutorialState.description === "function" ? tutorialState.description(node) : tutorialState.description}
 
-      <Stack direction={"row"} justifyContent={"space-between"} alignItems={"center"} sx={{ mt: "16px" }}>
-        <Button
-          variant="text"
-          onClick={() => {
-            handleCloseProgressBarMenu();
-            // onChangeStep(null);
-            // onUpdateNode("nodes", tutorialState.currentStepName, {});
-            onSkip();
-          }}
-          sx={{
-            color: "inherit",
-            p: "8px 0px",
-            ":hover": { backgroundColor: theme => (theme.palette.mode === "dark" ? "#575f68" : "#d7dee6") },
-          }}
-        >
-          Skip
-        </Button>
+      {/* INFO: reversed used for showing buttons always to right no matter the number of elements */}
+      <Stack direction={"row-reverse"} justifyContent={"space-between"} alignItems={"center"} sx={{ mt: "16px" }}>
         <Box>
           {tutorialState.currentStepName > 1 && (
             <Button
@@ -277,7 +281,6 @@ export const Tutorial = ({
                   backgroundColor: theme => (theme.palette.mode === "dark" ? gray200 : gray700),
                 },
               }}
-              disabled={tutorialState.isClickeable}
             >
               Next
             </Button>
@@ -300,10 +303,28 @@ export const Tutorial = ({
                 },
               }}
             >
-              {"Finalize"}
+              Got it
             </Button>
           )}
         </Box>
+        {tutorialState.currentStepName !== stepsLength && (
+          <Button
+            variant="text"
+            onClick={() => {
+              handleCloseProgressBarMenu();
+              // onChangeStep(null);
+              // onUpdateNode("nodes", tutorialState.currentStepName, {});
+              onSkip();
+            }}
+            sx={{
+              color: "inherit",
+              p: "8px 0px",
+              ":hover": { backgroundColor: theme => (theme.palette.mode === "dark" ? "#575f68" : "#d7dee6") },
+            }}
+          >
+            Skip
+          </Button>
+        )}
       </Stack>
     </Box>
   );
