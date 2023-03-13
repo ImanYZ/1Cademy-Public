@@ -254,7 +254,7 @@ const PROPOSING_EDITS_STEPS: TutorialStepConfig[] = [
 
   {
     childTargetId: "button-parent-children",
-    title: "Proposing Edits - Parent and Children",
+    title: "Proposing Edits - Parents and Children",
     description: <MarkdownRender text={"You can even change parent and children nodes by clicking on this icon."} />,
   },
   {

@@ -113,7 +113,7 @@ const PROPOSING_CODE_EDIT: TutorialStepConfig[] = [
 
 const PROPOSING_EDITS_STEPS: TutorialStepConfig[] = [
   {
-    childTargetId: "node-body",
+    childTargetId: "node-title",
     title: "Proposing Edits - Edit Title",
     description: (
       <MarkdownRender
@@ -129,7 +129,9 @@ const PROPOSING_EDITS_STEPS: TutorialStepConfig[] = [
     title: "Proposing Edits - Preview or Edit",
     description: (
       <MarkdownRender
-        text={"This allows you to see what the node you are proposing or editing will look like when it is submitted."}
+        text={
+          "The preview allows you to see what the node you are proposing or editing will look like when it is implemented."
+        }
       />
     ),
   },
@@ -139,7 +141,7 @@ const PROPOSING_EDITS_STEPS: TutorialStepConfig[] = [
     description: (
       <MarkdownRender
         text={
-          "This icon shows who the top contributor to a node is. The top contributor is the person that receives credit for the node."
+          "This is the profile picture for the top contributor of this node. Among all the contributors who submitted proposals on this node, this person received higher netvotes on their proposals on this node."
         }
       />
     ),
@@ -147,7 +149,7 @@ const PROPOSING_EDITS_STEPS: TutorialStepConfig[] = [
   {
     childTargetId: "node-type-selector",
     title: "Proposing Edits - Node Type",
-    description: <MarkdownRender text={"You can also change the type of node here."} />,
+    description: <MarkdownRender text={"You can also change the type of the node here."} />,
   },
   {
     childTargetId: "node-footer-image",
@@ -155,7 +157,7 @@ const PROPOSING_EDITS_STEPS: TutorialStepConfig[] = [
     description: (
       <MarkdownRender
         text={
-          "Here you can add an embedded image into a node. It is usually helpful to have some text explaining the image. You should also offer a citation crediting the creator of the image if it is not your own."
+          "Click this button is you'd like to upload an image into the node. It is usually helpful to have some text explaining the image. You should also offer a citation crediting the creator of the image if it is not your own. Note that you're not allowed to upload an image if the creator has not given you the permission to distribute it."
         }
       />
     ),
@@ -164,11 +166,7 @@ const PROPOSING_EDITS_STEPS: TutorialStepConfig[] = [
     childTargetId: "node-footer-video",
     title: "Proposing Edits - Video",
     description: (
-      <MarkdownRender
-        text={
-          "Here you can add the URL of a video. Videos cannot be embedded but the URL allows people to watch a video."
-        }
-      />
+      <MarkdownRender text={"Click this button if you'd like to add a slice of a YouTube video to the node."} />
     ),
   },
   {
@@ -177,7 +175,7 @@ const PROPOSING_EDITS_STEPS: TutorialStepConfig[] = [
     description: (
       <MarkdownRender
         text={
-          "Here you can add references by clicking “Cite an existing Reference” and then clicking a reference node for the citation you want to add. You will want to have the reference node you are citing open before doing this. You can also remove a citation by clicking the trash can icon to the right of a citation."
+          "Here you can add references (on the left) and tags (on the right) by clicking “Cite an existing Reference/Tag” and then clicking a reference/tag node that you'd like to cite. You will want to have the reference/tag node you are citing open before doing this. You can also remove a citation by clicking the trash can icon to the right of a citation. The left number shows the number of references and the right one shows the number of tags cited on this node."
         }
       />
     ),
@@ -185,8 +183,14 @@ const PROPOSING_EDITS_STEPS: TutorialStepConfig[] = [
 
   {
     childTargetId: "button-parent-children",
-    title: "Proposing Edits - Parent and Children",
-    description: <MarkdownRender text={"You can even change parent and children nodes by clicking on this icon."} />,
+    title: "Proposing Edits - Parents and Children",
+    description: (
+      <MarkdownRender
+        text={
+          "You can even change parent and child nodes by clicking on this icon. The left number shows the number of parents and the right one shows the number of children linked to this node."
+        }
+      />
+    ),
   },
   {
     childTargetId: "button-cancel-proposal",
@@ -207,7 +211,7 @@ const PROPOSING_EDITS_STEPS: TutorialStepConfig[] = [
     description: (
       <MarkdownRender
         text={
-          "Once you have created a proposal and are satisfied with its content, you can click the the **propose button**. This will submit the proposal you have worked on."
+          "Once you have created a proposal and are satisfied with its content, you can click the propose button. This will submit the proposal you have worked on."
         }
       />
     ),

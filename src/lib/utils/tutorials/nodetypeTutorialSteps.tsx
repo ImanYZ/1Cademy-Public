@@ -59,7 +59,7 @@ const NODE_CONCEPT_STEPS: TutorialStepConfig[] = [
       <>
         <MarkdownRender
           text={
-            "Concept and relation nodes are very common. While concept nodes define a single concept, relation nodes list several concepts but do not define them."
+            "Concept and relation nodes are very common. While each Concept node defines/explains a unique concept, each Relation node explains the relationship between different Concept nodes, without defining/explaining any of them."
           }
         />
         <Stack direction={"row"} justifyContent={"center"} alignItems={"center"} spacing="32px">
@@ -80,7 +80,7 @@ const NODE_RELATION_STEPS: TutorialStepConfig[] = [
         <ShareIcon sx={{ alignSelf: "center" }} />
         <MarkdownRender
           text={
-            "Relation nodes list concepts and help arrange the structure of information on a graph. The provide facets for groups of subordinate nodes to be linked to a superordinate node"
+            "A Relation explains the relationship between different Concept nodes, without defining/explaining any of them. For example, you can list a number of node titles to group them in a Relation node. Another example is a Relation node that compared/contrasts two or more nodes."
           }
         />
       </Stack>
