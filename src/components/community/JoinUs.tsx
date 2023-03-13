@@ -306,6 +306,7 @@ const JoinUs = (props: JoinUsProps) => {
           borderRadius: "12px",
           color: theme => (theme.palette.mode === "dark" ? green100 : "#344054"),
           fontWeight: 500,
+          fontSize: "14px",
           backgroundColor: theme => (theme.palette.mode === "dark" ? successDark : "#ECFDF3"),
           "& svg": {
             fill: "common.black",
@@ -326,6 +327,7 @@ const JoinUs = (props: JoinUsProps) => {
             borderRadius: "12px",
             color: theme => (theme.palette.mode === "dark" ? yellow100 : "#344054"),
             fontWeight: 500,
+            fontSize: "14px",
             backgroundColor: theme => (theme.palette.mode === "dark" ? warningDark : "#FEF6EE"),
             "&  a:link": { color: theme => (theme.palette.mode === "dark" ? orangeDark : "#1570EF") },
             "& a:visited": { color: theme => (theme.palette.mode === "dark" ? orangeLighter : "#1570EF") },
