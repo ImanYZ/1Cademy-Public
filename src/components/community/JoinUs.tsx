@@ -293,7 +293,6 @@ const JoinUs = (props: JoinUsProps) => {
       component="section"
       sx={{
         scrollMarginTop: "80px",
-
         p: 0,
         m: 0,
       }}
@@ -305,7 +304,7 @@ const JoinUs = (props: JoinUsProps) => {
           mb: "16px",
           borderRadius: "12px",
           color: theme => (theme.palette.mode === "dark" ? green100 : "#344054"),
-          fontWeight: 500,
+          fontWeight: 400,
           fontSize: "14px",
           backgroundColor: theme => (theme.palette.mode === "dark" ? successDark : "#ECFDF3"),
           "& svg": {
@@ -313,7 +312,7 @@ const JoinUs = (props: JoinUsProps) => {
           },
         }}
       >
-        <Box sx={{ fontWeight: "bold", color: theme => (theme.palette.mode === "dark" ? "white" : "#344054") }}>
+        <Box sx={{ fontWeight: 400, color: theme => (theme.palette.mode === "dark" ? "white" : "#344054") }}>
           Please note:{" "}
         </Box>
         <br />
@@ -326,14 +325,14 @@ const JoinUs = (props: JoinUsProps) => {
             p: "24px 20px",
             borderRadius: "12px",
             color: theme => (theme.palette.mode === "dark" ? yellow100 : "#344054"),
-            fontWeight: 500,
+            fontWeight: 400,
             fontSize: "14px",
             backgroundColor: theme => (theme.palette.mode === "dark" ? warningDark : "#FEF6EE"),
             "&  a:link": { color: theme => (theme.palette.mode === "dark" ? orangeDark : "#1570EF") },
             "& a:visited": { color: theme => (theme.palette.mode === "dark" ? orangeLighter : "#1570EF") },
           }}
         >
-          <Box sx={{ fontWeight: "bold", color: theme => (theme.palette.mode === "dark" ? "white" : "#344054") }}>
+          <Box sx={{ fontWeight: 400, color: theme => (theme.palette.mode === "dark" ? "white" : "#344054") }}>
             Please note:{" "}
           </Box>
           <br />
