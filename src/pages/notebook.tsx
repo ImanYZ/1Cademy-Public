@@ -758,11 +758,11 @@ const Dashboard = ({}: DashboardProps) => {
       setSelectedNodeType(oldNodes[nodeId].nodeType);
       const thisNode = { ...oldNodes[nodeId] };
       const newNode = { ...oldNodes, [nodeId]: innerFunc(thisNode) };
-      setNodeUpdates({
-        nodeIds: [nodeId],
-        updatedAt: new Date(),
-      });
       return { nodes: newNode, edges };
+    });
+    setNodeUpdates({
+      nodeIds: [nodeId],
+      updatedAt: new Date(),
     });
   }, []);
 
@@ -1417,6 +1417,7 @@ const Dashboard = ({}: DashboardProps) => {
     (nodeId: string) => {
       setTimeout(() => {
         setGraph(graph => {
+          const updatedNodeIds: string[] = [];
           const nodes = { ...graph.nodes };
           const nodeEl = document.getElementById(nodeId)! as HTMLElement;
           let height: number = nodeEl.clientHeight;
@@ -1451,6 +1452,7 @@ const Dashboard = ({}: DashboardProps) => {
               lastTop = _nodeData.top;
 
               nodesUpdated = true;
+              updatedNodeIds.push(_nodeId);
               nodes[_nodeId] = _nodeData;
             }
           }
@@ -1459,6 +1461,12 @@ const Dashboard = ({}: DashboardProps) => {
             return graph;
           }
 
+          setTimeout(() => {
+            setNodeUpdates({
+              nodeIds: updatedNodeIds,
+              updatedAt: new Date(),
+            });
+          }, 100);
           return {
             nodes: { ...nodes },
             edges: graph.edges,
@@ -1596,10 +1604,12 @@ const Dashboard = ({}: DashboardProps) => {
             [nodeId]: thisNode,
             [chosenNode]: chosenNodeObj,
           };
-          setNodeUpdates({
-            nodeIds: updatedNodeIds,
-            updatedAt: new Date(),
-          });
+          setTimeout(() => {
+            setNodeUpdates({
+              nodeIds: updatedNodeIds,
+              updatedAt: new Date(),
+            });
+          }, 200);
           return { nodes: newNodes, edges: newEdges };
         });
         return { ...updatedLinks };
@@ -1692,6 +1702,8 @@ const Dashboard = ({}: DashboardProps) => {
 
     setSelectedNodeType(nodeType);
     setOpenPart("LinkingWords");
+
+    processHeightChange(nodeId);
   }, []);
 
   const recursiveOffsprings = useCallback((nodeId: string): any[] => {
@@ -2079,6 +2091,101 @@ const Dashboard = ({}: DashboardProps) => {
       return graph;
     });
     lastNodeOperation.current = "OpenAllChildren";
+  }, []);
+
+  const openAllParent = useCallback((nodeId: string) => {
+    if (notebookRef.current.choosingNode || !user) return;
+
+    let linkedNode = null;
+    let linkedNodeId = null;
+    let linkedNodeRef = null;
+    let userNodeRef = null;
+    let userNodeData = null;
+    const batch = writeBatch(db);
+
+    setGraph(graph => {
+      const thisNode = graph.nodes[nodeId];
+
+      (async () => {
+        try {
+          for (const parent of thisNode.parents) {
+            linkedNodeId = parent.node as string;
+            linkedNode = document.getElementById(linkedNodeId);
+            if (linkedNode) continue;
+
+            const nodeRef = doc(db, "nodes", linkedNodeId);
+            const nodeDoc = await getDoc(nodeRef);
+
+            if (!nodeDoc.exists()) continue;
+            const thisNode: any = { ...nodeDoc.data(), id: linkedNodeId };
+
+            for (let chi of thisNode.children) {
+              linkedNodeRef = doc(db, "nodes", chi.node);
+              batch.update(linkedNodeRef, { updatedAt: Timestamp.fromDate(new Date()) });
+            }
+
+            for (let par of thisNode.parents) {
+              linkedNodeRef = doc(db, "nodes", par.node);
+              batch.update(linkedNodeRef, { updatedAt: Timestamp.fromDate(new Date()) });
+            }
+
+            const userNodesRef = collection(db, "userNodes");
+            const userNodeQuery = query(
+              userNodesRef,
+              where("node", "==", linkedNodeId),
+              where("user", "==", user.uname),
+              limit(1)
+            );
+            const userNodeDoc = await getDocs(userNodeQuery);
+
+            if (userNodeDoc.docs.length > 0) {
+              userNodeRef = doc(db, "userNodes", userNodeDoc.docs[0].id);
+              userNodeData = userNodeDoc.docs[0].data();
+              userNodeData.visible = true;
+              userNodeData.updatedAt = Timestamp.fromDate(new Date());
+              batch.update(userNodeRef, userNodeData);
+            } else {
+              userNodeData = {
+                changed: true,
+                correct: false,
+                createdAt: Timestamp.fromDate(new Date()),
+                updatedAt: Timestamp.fromDate(new Date()),
+                deleted: false,
+                isStudied: false,
+                bookmarked: false,
+                node: linkedNodeId,
+                open: true,
+                user: user.uname,
+                visible: true,
+                wrong: false,
+              };
+              userNodeRef = await addDoc(collection(db, "userNodes"), userNodeData);
+            }
+
+            batch.update(nodeRef, {
+              viewers: thisNode.viewers + 1,
+              updatedAt: Timestamp.fromDate(new Date()),
+            });
+            const userNodeLogRef = collection(db, "userNodesLog");
+            const userNodeLogData = {
+              ...userNodeData,
+              createdAt: Timestamp.fromDate(new Date()),
+            };
+
+            batch.set(doc(userNodeLogRef), userNodeLogData);
+          }
+
+          notebookRef.current.selectedNode = nodeId;
+          nodeBookDispatch({ type: "setSelectedNode", payload: nodeId });
+          await batch.commit();
+        } catch (err) {
+          console.error(err);
+        }
+      })();
+
+      return graph;
+    });
+    lastNodeOperation.current = "OpenAllParent";
   }, []);
 
   const toggleNode = useCallback(
@@ -4726,7 +4833,9 @@ const Dashboard = ({}: DashboardProps) => {
           background:
             settings.background === "Color"
               ? theme =>
-                  settings.theme === "Dark" ? theme.palette.common.darkGrayBackground : theme.palette.common.white
+                  settings.theme === "Dark"
+                    ? theme.palette.common.darkGrayBackground
+                    : theme.palette.common.lightGrayBackground
               : undefined,
         }}
       >
@@ -4948,6 +5057,7 @@ const Dashboard = ({}: DashboardProps) => {
 
               <MemoizedUserSettingsSidebar
                 notebookRef={notebookRef}
+                openLinkedNode={openLinkedNode}
                 theme={settings.theme}
                 open={openSidebar === "USER_SETTINGS"}
                 onClose={() => setOpenSidebar(null)}
@@ -5247,6 +5357,7 @@ const Dashboard = ({}: DashboardProps) => {
                 <MemoizedNodeList
                   nodeUpdates={nodeUpdates}
                   notebookRef={notebookRef}
+                  setNodeUpdates={setNodeUpdates}
                   setFocusView={setFocusView}
                   nodes={graph.nodes}
                   bookmark={bookmark}
@@ -5257,6 +5368,7 @@ const Dashboard = ({}: DashboardProps) => {
                   cleanEditorLink={cleanEditorLink}
                   openLinkedNode={openLinkedNode}
                   openAllChildren={openAllChildren}
+                  openAllParent={openAllParent}
                   hideNodeHandler={hideNodeHandler}
                   hideOffsprings={hideOffsprings}
                   toggleNode={toggleNode}

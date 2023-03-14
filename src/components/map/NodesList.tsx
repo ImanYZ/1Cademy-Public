@@ -10,6 +10,7 @@ import { MemoizedNode } from "./Node";
 type NodeListProps = {
   nodeUpdates: TNodeUpdates;
   notebookRef: MutableRefObject<TNodeBookState>;
+  setNodeUpdates: (updates: TNodeUpdates) => void;
   setFocusView: (state: { selectedNode: string; isEnabled: boolean }) => void;
   nodes: { [key: string]: any };
   bookmark: any;
@@ -19,6 +20,7 @@ type NodeListProps = {
   deleteLink: any;
   openLinkedNode: any;
   openAllChildren: any;
+  openAllParent: any;
   hideNodeHandler: any;
   hideOffsprings: any;
   toggleNode: (event: any, id: string) => void;
@@ -60,6 +62,7 @@ type NodeListProps = {
 const NodesList = ({
   nodeUpdates,
   notebookRef,
+  setNodeUpdates,
   setFocusView,
   nodes,
   bookmark,
@@ -69,6 +72,7 @@ const NodesList = ({
   deleteLink,
   openLinkedNode,
   openAllChildren,
+  openAllParent,
   hideOffsprings,
   hideNodeHandler,
   toggleNode,
@@ -151,6 +155,7 @@ const NodesList = ({
             identifier={nId}
             nodeBookDispatch={nodeBookDispatch}
             nodeUpdates={nodeUpdates}
+            setNodeUpdates={setNodeUpdates}
             notebookRef={notebookRef}
             setFocusView={setFocusView}
             activeNode={activeNode}
@@ -212,6 +217,7 @@ const NodesList = ({
             deleteLink={deleteLink}
             openLinkedNode={openLinkedNode}
             openAllChildren={openAllChildren}
+            openAllParent={openAllParent}
             onHideNode={hideNodeHandler}
             hideOffsprings={hideOffsprings}
             toggleNode={toggleNode}
@@ -275,7 +281,7 @@ export const MemoizedNodeList = React.memo(NodesList, (prev, next) => {
 
   return (
     (prev.nodeUpdates.updatedAt === next.nodeUpdates.updatedAt ||
-      (prev.showProposeTutorial === next.showProposeTutorial && compareNodes(prev.nodes, next.nodes))) &&
+      (!!next.showProposeTutorial && compareNodes(prev.nodes, next.nodes))) &&
     prev.bookmark === next.bookmark &&
     prev.markStudied === next.markStudied &&
     prev.chosenNodeChanged === next.chosenNodeChanged &&
@@ -283,6 +289,7 @@ export const MemoizedNodeList = React.memo(NodesList, (prev, next) => {
     prev.deleteLink === next.deleteLink &&
     prev.openLinkedNode === next.openLinkedNode &&
     prev.openAllChildren === next.openAllChildren &&
+    prev.openAllParent === next.openAllParent &&
     prev.hideNodeHandler === next.hideNodeHandler &&
     prev.hideOffsprings === next.hideOffsprings &&
     prev.toggleNode === next.toggleNode &&
