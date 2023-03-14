@@ -3094,10 +3094,11 @@ const Dashboard = ({}: DashboardProps) => {
 
   const proposeNewChild = useCallback(
     (event: any, childNodeType: string) => {
+      // TODO: add types ChildNodeType
       if (!user) return;
 
       devLog("PROPOSE_NEW_CHILD", { childNodeType });
-      event.preventDefault();
+      event && event.preventDefault();
       setOpenProposal("ProposeNew" + childNodeType + "ChildNode");
       reloadPermanentGraph();
       const newNodeId = newId(db);
@@ -3180,6 +3181,7 @@ const Dashboard = ({}: DashboardProps) => {
         const newEdges = setDagEdge(g.current, selectedNodeId, newNodeId, { label: "" }, { ...edges });
         updatedNodeIds.push(selectedNodeId, newNodeId);
 
+        console.log("willupdateselectedNode");
         notebookRef.current.selectedNode = newNodeId;
         nodeBookDispatch({ type: "setSelectedNode", payload: newNodeId });
         setTimeout(() => {
@@ -3193,7 +3195,7 @@ const Dashboard = ({}: DashboardProps) => {
         return { nodes: newNodes, edges: newEdges };
       });
     },
-    [user, allTags, reloadPermanentGraph, settings.showClusterOptions]
+    [user, reloadPermanentGraph, db, allTags, settings.showClusterOptions, nodeBookDispatch, scrollToNode]
   );
 
   const onNodeTitleBlur = useCallback(async (newTitle: string) => {
@@ -4008,14 +4010,22 @@ const Dashboard = ({}: DashboardProps) => {
     if (!currentStep) return;
     if (!tutorial) return;
 
-    console.log(111);
     if (tutorial.name === "tmpEditNode") {
-      console.log(112);
       if (currentStep.isClickeable) {
         proposeNodeImprovement(null, targetId);
-        console.log(113);
       }
       setTutorial(null);
+      return;
+    }
+
+    console.log(111);
+    if (tutorial.name === "tmpProposalConceptChild") {
+      console.log(112);
+      if (currentStep.isClickeable) {
+        proposeNewChild(null, "Concept");
+        console.log(113);
+      }
+      // setTutorial(null);
       console.log(114);
       return;
     }
@@ -4047,6 +4057,7 @@ const Dashboard = ({}: DashboardProps) => {
     currentStep,
     db,
     forcedTutorial,
+    proposeNewChild,
     proposeNodeImprovement,
     setTutorial,
     setUserTutorial,
@@ -4119,6 +4130,32 @@ const Dashboard = ({}: DashboardProps) => {
 
       console.log("112");
       const thisNode = graph.nodes[newTargetId];
+      if (!thisNode) return false;
+      if (!targetIsValid(thisNode)) return false;
+
+      console.log("113");
+      startTutorial(tutorialName);
+      setTargetId(newTargetId);
+      return true;
+    },
+    [forcedTutorial, graph.nodes, nodeBookState.selectedNode, setTargetId, startTutorial, userTutorial]
+  );
+
+  const detectAndCallChildTutorial = useCallback(
+    (tutorialName: TutorialTypeKeys, targetIsValid: (node: FullNodeData) => boolean) => {
+      const tutorialsIsForced = forcedTutorial === tutorialName;
+      const canDetect = tutorialsIsForced || (!userTutorial[tutorialName].done && !userTutorial[tutorialName].skipped);
+
+      console.log("111");
+      if (!canDetect) return false;
+
+      devLog("DETECT_AND_CALL_CHILD_TUTORIAL", { tutorialName });
+
+      const newTargetId = nodeBookState.selectedNode ?? "";
+      if (!newTargetId) return false;
+
+      console.log("112", newTargetId);
+      const thisNode = graph.nodes[newTargetId]; // this is the child node
       if (!thisNode) return false;
       if (!targetIsValid(thisNode)) return false;
 
@@ -4379,7 +4416,7 @@ const Dashboard = ({}: DashboardProps) => {
         thisNode => thisNode && thisNode.open && thisNode.editable
       );
 
-      console.log({ launchedtutorial, forcedTutorial });
+      // console.log({ launchedtutorial, forcedTutorial });
       if (launchedtutorial) return;
 
       if (forcedTutorial === "proposal") {
@@ -4751,6 +4788,56 @@ const Dashboard = ({}: DashboardProps) => {
       //   return;
       // }
 
+      // node child ./
+      const childProposalLaunched = detectAndCallChildTutorial(
+        "childProposal",
+        node => node && Boolean(node.isNew) && node.open && node.editable
+      );
+      console.log({ childProposalLaunched });
+      if (childProposalLaunched) return;
+      // node edit ------------------------
+
+      const proposalConceptChildLaunched = detectAndCallTutorial(
+        "tmpProposalConceptChild",
+        node => node && node.open && node.editable
+      );
+      console.log({ proposalConceptChildLaunched });
+      if (proposalConceptChildLaunched) return;
+      // node ------------------------------
+
+      if (forcedTutorial === "childProposal") {
+        const defaultStates = { open: true };
+        const targetIsInvalid = (node: FullNodeData) => !node.open || node.editable;
+        const newTargetId = "r98BjyFDCe4YyLA3U8ZE";
+        const thisNode = graph.nodes[newTargetId];
+        console.log(11);
+        if (!thisNode || targetIsInvalid(thisNode)) {
+          if (!tutorialStateWasSetUpRef.current) {
+            console.log(12);
+            openNodeHandler(newTargetId, defaultStates);
+            tutorialStateWasSetUpRef.current = true;
+          }
+          return;
+        }
+
+        console.log(13);
+        // disableForceTutorial("proposal");
+        tutorialStateWasSetUpRef.current = false;
+        nodeBookDispatch({ type: "setSelectedNode", payload: newTargetId });
+        notebookRef.current.selectedNode = newTargetId;
+        console.log("tmpEditNode is launched");
+        startTutorial("tmpEditNode");
+        setTargetId(newTargetId);
+
+        setNodeUpdates({
+          nodeIds: [newTargetId],
+          updatedAt: new Date(),
+        });
+
+        return;
+        // detectAndForceTutorial("tmpEditNode", "r98BjyFDCe4YyLA3U8ZE", thisNode => thisNode.open, { open: true });
+      }
+
       // // --------------------------
 
       // if (userTutorial.childConcept.forceTutorial) {
@@ -4770,6 +4857,7 @@ const Dashboard = ({}: DashboardProps) => {
     };
     detectTriggerTutorial();
   }, [
+    detectAndCallChildTutorial,
     detectAndCallTutorial,
     detectAndForceTutorial,
     firstLoading,
@@ -4786,6 +4874,24 @@ const Dashboard = ({}: DashboardProps) => {
     userTutorial,
     userTutorialLoaded,
   ]);
+
+  useEffect(() => {
+    if (!userTutorialLoaded) return;
+    if (firstLoading) return;
+    if (!tutorial) return;
+
+    devLog("USE_EFFECT: DETECT_TO_REMOVE_TUTORIAL", tutorial);
+
+    if (tutorial.name === "tmpProposalConceptChild") {
+      const isValid = (node: FullNodeData) => node && node.open && node.editable;
+      const node = graph.nodes[targetId];
+      if (!isValid(node)) {
+        setTutorial(null);
+      }
+    }
+  }, [firstLoading, graph.nodes, setTutorial, targetId, tutorial, userTutorialLoaded]);
+
+  console.log({ selectedNode: nodeBookState.selectedNode });
 
   useEffect(() => {
     if (!tutorial) return;
@@ -5559,6 +5665,7 @@ const Dashboard = ({}: DashboardProps) => {
               childConcept: { title: "Propose Child Concept Node", steps: CHILD_CONCEPT_PROPOSAL_COMPLETE },
               childProposal: { title: "Child Proposal", steps: CHILD_PROPOSAL_COMPLETE },
               tmpEditNode: { title: "hide this tmp", steps: [] },
+              tmpProposalConceptChild: { title: "hide this tmp", steps: [] },
             }}
             userTutorialState={userTutorial}
             onCancelTutorial={() =>

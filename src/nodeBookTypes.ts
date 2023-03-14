@@ -452,7 +452,8 @@ export type TutorialTypeKeys =
   | "reconcilingNotAcceptedProposal"
   | "childProposal"
   | "childConcept"
-  | "tmpEditNode";
+  | "tmpEditNode"
+  | "tmpProposalConceptChild";
 
 export type UserTutorial = {
   currentStep: number;

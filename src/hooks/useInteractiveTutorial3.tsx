@@ -19,6 +19,7 @@ import {
   PROPOSING_REFERENCE_EDIT_COMPLETE,
   PROPOSING_RELATION_EDIT_COMPLETE,
   TMP_EDIT_NODE,
+  TMP_PROPOSE_CHILD_CONCEPT,
 } from "@/lib/utils/tutorials/proposalTutorialSteps";
 import {
   RECONCILING_ACCEPTED_PROPOSALS_STEPS_COMPLETE,
@@ -87,6 +88,7 @@ export const useInteractiveTutorial = ({ user }: useInteractiveTutorialProps) =>
     childProposal: { currentStep: -1, done: false, skipped: false },
     childConcept: { currentStep: -1, done: false, skipped: false },
     tmpEditNode: { currentStep: -1, done: false, skipped: false },
+    tmpProposalConceptChild: { currentStep: -1, done: false, skipped: false },
   });
 
   // flag for whether tutorial state was loaded
@@ -189,6 +191,10 @@ export const useInteractiveTutorial = ({ user }: useInteractiveTutorialProps) =>
       //----------------- tmp nodes
       if (newTutorial === "tmpEditNode") {
         newSteps = TMP_EDIT_NODE;
+      }
+
+      if (newTutorial === "tmpProposalConceptChild") {
+        newSteps = TMP_PROPOSE_CHILD_CONCEPT;
       }
 
       setUserTutorial(prev => ({

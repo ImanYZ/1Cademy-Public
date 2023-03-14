@@ -41,6 +41,15 @@ const TMP_EDIT_NODE_CONFIG: TutorialStepConfig[] = [
   },
 ];
 
+const TMP_PROPOSE_CHILD_CONCEPT_CONFIG: TutorialStepConfig[] = [
+  {
+    title: "Propose Child - Concept",
+    description: <MarkdownRender text={"**Click** on concept icon button to create a new concept child"} />,
+    isClickeable: true,
+    // childTargetId:""
+  },
+];
+
 const PROPOSING_CONCEPT_EDIT: TutorialStepConfig[] = [
   {
     title: "Proposing Edits - Concept Node",
@@ -229,6 +238,10 @@ const PROPOSING_EDITS_STEPS: TutorialStepConfig[] = [
 ];
 
 export const TMP_EDIT_NODE: TutorialStep[] = TMP_EDIT_NODE_CONFIG.map((c, i, s) => {
+  return { ...getBaseStepConfig(i + 1, s.length), ...c };
+});
+
+export const TMP_PROPOSE_CHILD_CONCEPT: TutorialStep[] = TMP_PROPOSE_CHILD_CONCEPT_CONFIG.map((c, i, s) => {
   return { ...getBaseStepConfig(i + 1, s.length), ...c };
 });
 
