@@ -37,6 +37,7 @@ const TMP_EDIT_NODE_CONFIG: TutorialStepConfig[] = [
   {
     title: "Propose Node - Edit Node",
     description: <MarkdownRender text={"**Click** on pencil button to enter in Edit Node"} />,
+    isClickeable: true,
   },
 ];
 

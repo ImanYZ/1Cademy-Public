@@ -486,8 +486,9 @@ const Dashboard = ({}: DashboardProps) => {
   useEffect(() => {
     let timeoutId: any;
     const getTooltipClientRect = () => {
-      devLog("GET_TOOLTIP_CLIENT_RECT", { currentStep, targetId });
       if (!currentStep) return setTargetClientRect({ width: 0, height: 0, top: 0, left: 0 });
+
+      devLog("GET_TOOLTIP_CLIENT_RECT", { currentStep, targetId });
 
       if (currentStep.anchor) {
         timeoutId = setTimeout(() => {
@@ -505,14 +506,14 @@ const Dashboard = ({}: DashboardProps) => {
         return;
       }
 
-      console.log(22);
+      // console.log(22);
       if (!targetId) return;
 
-      console.log(23);
+      // console.log(23);
       const thisNode = graph.nodes[targetId];
       if (!thisNode) return;
 
-      console.log(24);
+      // console.log(24);
       let { top, left, width = NODE_WIDTH, height = 0 } = thisNode;
       let offsetChildTop = 0;
       let offsetChildLeft = 0;
@@ -1782,37 +1783,6 @@ const Dashboard = ({}: DashboardProps) => {
     },
     [recursiveOffsprings, isPlayingTheTutorialRef]
   );
-
-  const onFinalizeTutorial = useCallback(async () => {
-    if (!user) return;
-    if (!currentStep) return;
-    if (!tutorial) return;
-
-    const tutorialUpdated: UserTutorial = {
-      ...userTutorial[tutorial.name],
-      currentStep: currentStep.currentStepName,
-      done: true,
-      // forceTutorial: false,
-    };
-
-    const userTutorialUpdated: UserTutorials = { ...userTutorial, [tutorial.name]: tutorialUpdated };
-    const wasForcedTutorial = tutorial.name === forcedTutorial;
-
-    setTutorial(null);
-    // setInitialStep(0);
-    setUserTutorial(userTutorialUpdated);
-
-    if (wasForcedTutorial) return setForcedTutorial(null);
-
-    const tutorialRef = doc(db, "userTutorial", user.uname);
-    const tutorialDoc = await getDoc(tutorialRef);
-
-    if (tutorialDoc.exists()) {
-      await updateDoc(tutorialRef, userTutorialUpdated);
-    } else {
-      await setDoc(tutorialRef, userTutorialUpdated);
-    }
-  }, [currentStep, db, forcedTutorial, setTutorial, setUserTutorial, tutorial, user, userTutorial]);
 
   const openLinkedNode = useCallback(
     (linkedNodeID: string, typeOperation?: string) => {
@@ -3926,6 +3896,59 @@ const Dashboard = ({}: DashboardProps) => {
     }
   }, [user, currentStep, tutorial, userTutorial, forcedTutorial, setUserTutorial, setTutorial, db]);
 
+  const onFinalizeTutorial = useCallback(async () => {
+    if (!user) return;
+    if (!currentStep) return;
+    if (!tutorial) return;
+
+    console.log(111);
+    if (tutorial.name === "tmpEditNode") {
+      console.log(112);
+      if (currentStep.isClickeable) {
+        proposeNodeImprovement(null, targetId);
+        console.log(113);
+      }
+      setTutorial(null);
+      console.log(114);
+      return;
+    }
+
+    const tutorialUpdated: UserTutorial = {
+      ...userTutorial[tutorial.name],
+      currentStep: currentStep.currentStepName,
+      done: true,
+    };
+
+    const userTutorialUpdated: UserTutorials = { ...userTutorial, [tutorial.name]: tutorialUpdated };
+    const wasForcedTutorial = tutorial.name === forcedTutorial;
+
+    setTutorial(null);
+    setUserTutorial(userTutorialUpdated);
+
+    console.log(wasForcedTutorial);
+    if (wasForcedTutorial) return setForcedTutorial(null);
+
+    const tutorialRef = doc(db, "userTutorial", user.uname);
+    const tutorialDoc = await getDoc(tutorialRef);
+
+    if (tutorialDoc.exists()) {
+      await updateDoc(tutorialRef, userTutorialUpdated);
+    } else {
+      await setDoc(tutorialRef, userTutorialUpdated);
+    }
+  }, [
+    currentStep,
+    db,
+    forcedTutorial,
+    proposeNodeImprovement,
+    setTutorial,
+    setUserTutorial,
+    targetId,
+    tutorial,
+    user,
+    userTutorial,
+  ]);
+
   /**
    * Detect the trigger to call a tutorial
    * if graph is invalid, DB is modified with correct state
@@ -3975,10 +3998,11 @@ const Dashboard = ({}: DashboardProps) => {
    * then we wait until graph has correct state to call tutorial
    */
   const detectAndCallTutorial = useCallback(
-    (tutorialName: TutorialTypeKeys, targetIsInvalid: (node: FullNodeData) => boolean) => {
+    (tutorialName: TutorialTypeKeys, targetIsValid: (node: FullNodeData) => boolean) => {
       const tutorialsIsForced = forcedTutorial === tutorialName;
       const canDetect = tutorialsIsForced || (!userTutorial[tutorialName].done && !userTutorial[tutorialName].skipped);
 
+      console.log("111");
       if (!canDetect) return false;
 
       devLog("DETECT_AND_CALL_TUTORIAL", { tutorialName });
@@ -3986,10 +4010,12 @@ const Dashboard = ({}: DashboardProps) => {
       const newTargetId = nodeBookState.selectedNode ?? "";
       if (!newTargetId) return false;
 
+      console.log("112");
       const thisNode = graph.nodes[newTargetId];
       if (!thisNode) return false;
-      if (targetIsInvalid(thisNode)) return false;
+      if (!targetIsValid(thisNode)) return false;
 
+      console.log("113");
       startTutorial(tutorialName);
       setTargetId(newTargetId);
       return true;
@@ -4243,7 +4269,7 @@ const Dashboard = ({}: DashboardProps) => {
 
       const launchedtutorial = detectAndCallTutorial(
         "proposal",
-        thisNode => (thisNode && !thisNode.open) || !thisNode.editable
+        thisNode => thisNode && thisNode.open && thisNode.editable
       );
 
       console.log({ launchedtutorial, forcedTutorial });
@@ -4267,8 +4293,16 @@ const Dashboard = ({}: DashboardProps) => {
         console.log(13);
         // disableForceTutorial("proposal");
         tutorialStateWasSetUpRef.current = false;
+        nodeBookDispatch({ type: "setSelectedNode", payload: newTargetId });
+        notebookRef.current.selectedNode = newTargetId;
         startTutorial("tmpEditNode");
         setTargetId(newTargetId);
+
+        setNodeUpdates({
+          nodeIds: [newTargetId],
+          updatedAt: new Date(),
+        });
+
         return;
         // detectAndForceTutorial("tmpEditNode", "r98BjyFDCe4YyLA3U8ZE", thisNode => thisNode.open, { open: true });
       }
@@ -4632,7 +4666,9 @@ const Dashboard = ({}: DashboardProps) => {
     detectAndCallTutorial,
     detectAndForceTutorial,
     firstLoading,
+    forcedTutorial,
     graph.nodes,
+    nodeBookDispatch,
     nodeBookState.selectedNode,
     openNodeHandler,
     openSidebar,
