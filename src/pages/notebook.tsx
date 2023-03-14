@@ -4321,17 +4321,17 @@ const Dashboard = ({}: DashboardProps) => {
         const defaultStates = { open: true };
         const newTargetId = "r98BjyFDCe4YyLA3U8ZE";
         const thisNode = graph.nodes[newTargetId];
-        console.log(11);
+        // console.log("nodes", 11);
         if (!nodesTutorialIsValid(thisNode)) {
           if (!tutorialStateWasSetUpRef.current) {
-            console.log(12);
+            // console.log("nodes", 12);
             openNodeHandler(newTargetId, defaultStates);
             tutorialStateWasSetUpRef.current = true;
           }
           return;
         }
 
-        console.log(13);
+        // console.log("nodes", 13);
         tutorialStateWasSetUpRef.current = false;
         nodeBookDispatch({ type: "setSelectedNode", payload: newTargetId });
         notebookRef.current.selectedNode = newTargetId;
@@ -4925,11 +4925,25 @@ const Dashboard = ({}: DashboardProps) => {
 
     devLog("USE_EFFECT: DETECT_TO_REMOVE_TUTORIAL", tutorial);
 
+    if (tutorial.name === "nodes") {
+      const nodesTutorialIsValid = (node: FullNodeData) => node && node.open;
+      const node = graph.nodes[targetId];
+      if (!nodesTutorialIsValid(node)) {
+        setTutorial(null);
+        setForcedTutorial(null);
+        // tutorialStateWasSetUpRef.current = false;
+        // console.log("remove node t");
+      }
+    }
+
     if (tutorial.name === "tmpProposalConceptChild") {
       const isValid = (node: FullNodeData) => node && node.open && node.editable;
       const node = graph.nodes[targetId];
       if (!isValid(node)) {
         setTutorial(null);
+        setForcedTutorial(null);
+        // tutorialStateWasSetUpRef.current = false;
+        // console.log("remove tmpProposal t");
       }
     }
   }, [firstLoading, graph.nodes, setTutorial, targetId, tutorial, userTutorialLoaded]);
