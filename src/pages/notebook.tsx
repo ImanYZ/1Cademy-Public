@@ -4124,8 +4124,10 @@ const Dashboard = ({}: DashboardProps) => {
       const isValidForcedTutorial = forcedTutorial
         ? (forcedTutorial === "nodes" && ["nodes"].includes(tutorialName)) ||
           (forcedTutorial === "proposal" && ["proposal"].includes(tutorialName)) ||
-          (forcedTutorial === "childProposal" && ["childProposal", "tmpProposalConceptChild"].includes(tutorialName))
-        : true;
+          (forcedTutorial === "proposalCode" && ["proposalCode"].includes(tutorialName)) ||
+          (forcedTutorial === "childProposal" && ["childProposal"].includes(tutorialName)) ||
+          (forcedTutorial === "tmpProposalConceptChild" && ["tmpProposalConceptChild"].includes(tutorialName))
+        : !["tmpProposalConceptChild"].includes(tutorialName);
       if (!isValidForcedTutorial) return false;
       if (!canDetect) return false;
 
@@ -4134,9 +4136,10 @@ const Dashboard = ({}: DashboardProps) => {
       const newTargetId = nodeBookState.selectedNode ?? "";
       if (!newTargetId) return false;
 
-      console.log("112");
+      console.log("112", newTargetId);
       const thisNode = graph.nodes[newTargetId];
       if (!thisNode) return false;
+      console.log({ result: targetIsValid(thisNode) });
       if (!targetIsValid(thisNode)) return false;
 
       console.log("113");
@@ -4496,6 +4499,41 @@ const Dashboard = ({}: DashboardProps) => {
 
       // --------------------------
 
+      const codeProposalTutorialIsValid = (node: FullNodeData) =>
+        node && node.open && node.editable && node.nodeType === "Code";
+      const codeProposalTutorialIsValidForced = (node: FullNodeData) => node && node.open && node.nodeType === "Code";
+
+      const conceptProposalTutorialLaunched = detectAndCallTutorial("proposalCode", codeProposalTutorialIsValid);
+      if (conceptProposalTutorialLaunched) return;
+
+      if (forcedTutorial === "proposalCode") {
+        const defaultStates = { open: true };
+        const newTargetId = "E1nIWQ7RIC3pRLvk0Bk5";
+        const thisNode = graph.nodes[newTargetId];
+        if (!codeProposalTutorialIsValidForced(thisNode)) {
+          if (!tutorialStateWasSetUpRef.current) {
+            openNodeHandler(newTargetId, defaultStates);
+            tutorialStateWasSetUpRef.current = true;
+          }
+          return;
+        }
+        tutorialStateWasSetUpRef.current = false;
+        nodeBookDispatch({ type: "setSelectedNode", payload: newTargetId });
+        notebookRef.current.selectedNode = newTargetId;
+        startTutorial("tmpEditNode");
+        setTargetId(newTargetId);
+
+        setNodeUpdates({
+          nodeIds: [newTargetId],
+          updatedAt: new Date(),
+        });
+
+        return;
+      }
+      // --------------------------
+
+      // --------------------------
+
       // const selectedNodeFromChangedNodes: FullNodeData = nodeBookState.selectedNode
       //   ? changedNodes[nodeBookState.selectedNode]
       //   : null;
@@ -4831,6 +4869,7 @@ const Dashboard = ({}: DashboardProps) => {
       //   return;
       // }
 
+      const tmpEditNodeIsValid = (node: FullNodeData) => node && node.open && !node.editable;
       // node child ./
       const childProposalLaunched = detectAndCallChildTutorial(
         "childProposal",
@@ -4850,11 +4889,11 @@ const Dashboard = ({}: DashboardProps) => {
 
       if (forcedTutorial === "childProposal") {
         const defaultStates = { open: true };
-        const targetIsInvalid = (node: FullNodeData) => !node.open || node.editable;
+        // const targetIsInvalid = (node: FullNodeData) => !node.open || node.editable;
         const newTargetId = "r98BjyFDCe4YyLA3U8ZE";
         const thisNode = graph.nodes[newTargetId];
         console.log(11);
-        if (!thisNode || targetIsInvalid(thisNode)) {
+        if (!tmpEditNodeIsValid(thisNode)) {
           if (!tutorialStateWasSetUpRef.current) {
             console.log(12);
             openNodeHandler(newTargetId, defaultStates);
@@ -4935,15 +4974,30 @@ const Dashboard = ({}: DashboardProps) => {
         // console.log("remove node t");
       }
     }
-
+    if (tutorial.name === "proposalCode") {
+      const codeProposalTutorialIsValid = (node: FullNodeData) =>
+        node && node.open && node.editable && node.nodeType === "Code";
+      const node = graph.nodes[targetId];
+      if (!codeProposalTutorialIsValid(node)) {
+        setTutorial(null);
+        setForcedTutorial(null);
+      }
+    }
+    if (tutorial.name === "tmpEditNode") {
+      const tmpEditNodeIsValid = (node: FullNodeData) => node && node.open && !node.editable;
+      const node = graph.nodes[targetId];
+      if (!tmpEditNodeIsValid(node)) {
+        setTutorial(null);
+        if (node.editable) return;
+        setForcedTutorial(null);
+      }
+    }
     if (tutorial.name === "tmpProposalConceptChild") {
       const isValid = (node: FullNodeData) => node && node.open && node.editable;
       const node = graph.nodes[targetId];
       if (!isValid(node)) {
         setTutorial(null);
         setForcedTutorial(null);
-        // tutorialStateWasSetUpRef.current = false;
-        // console.log("remove tmpProposal t");
       }
     }
   }, [firstLoading, graph.nodes, setTutorial, targetId, tutorial, userTutorialLoaded]);
