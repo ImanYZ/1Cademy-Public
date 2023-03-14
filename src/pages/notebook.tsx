@@ -4485,7 +4485,9 @@ const Dashboard = ({}: DashboardProps) => {
           background:
             settings.background === "Color"
               ? theme =>
-                  settings.theme === "Dark" ? theme.palette.common.darkGrayBackground : theme.palette.common.white
+                  settings.theme === "Dark"
+                    ? theme.palette.common.darkGrayBackground
+                    : theme.palette.common.lightGrayBackground
               : undefined,
         }}
       >
