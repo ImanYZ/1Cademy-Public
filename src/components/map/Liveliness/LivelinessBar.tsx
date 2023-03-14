@@ -156,6 +156,16 @@ const LivelinessBar = ({ disabled = false, ...props }: ILivelinessBarProps) => {
     return Object.keys(usersInteractions);
   }, [usersInteractions]);
 
+  const minActions: number = useMemo(() => {
+    return Math.min(
+      0,
+      unames.reduce(
+        (carry, uname: string) => (carry > usersInteractions[uname].count ? usersInteractions[uname].count : carry),
+        0
+      )
+    );
+  }, [usersInteractions]);
+
   const maxActions: number = useMemo(() => {
     return Math.max(
       10,
@@ -164,7 +174,7 @@ const LivelinessBar = ({ disabled = false, ...props }: ILivelinessBarProps) => {
         0
       )
     );
-  }, [usersInteractions]);
+  }, [usersInteractions, minActions]);
 
   return (
     <>
@@ -246,12 +256,10 @@ const LivelinessBar = ({ disabled = false, ...props }: ILivelinessBarProps) => {
                 })}
               {!disabled &&
                 unames.map((uname: string) => {
-                  const seekPosition =
-                    -1 *
-                    ((Math.log(usersInteractions[uname].count > 0 ? usersInteractions[uname].count : 1) /
-                      Math.log(maxActions)) *
-                      barHeight -
-                      10);
+                  const maxActionsLog = Math.log(maxActions);
+                  const totalInteraction = usersInteractions[uname].count + Math.abs(minActions);
+                  const _count = Math.log(totalInteraction > 0 ? totalInteraction : 1);
+                  const seekPosition = -1 * ((_count / maxActionsLog) * barHeight - (_count === 0 ? 0 : 32));
                   return (
                     <Tooltip
                       key={uname}

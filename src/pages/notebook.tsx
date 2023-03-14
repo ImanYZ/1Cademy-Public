@@ -4706,6 +4706,7 @@ const Dashboard = ({}: DashboardProps) => {
 
               <MemoizedUserSettingsSidebar
                 notebookRef={notebookRef}
+                openLinkedNode={openLinkedNode}
                 theme={settings.theme}
                 open={openSidebar === "USER_SETTINGS"}
                 onClose={() => setOpenSidebar(null)}
