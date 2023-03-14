@@ -4123,16 +4123,27 @@ const Dashboard = ({}: DashboardProps) => {
       const tutorialsIsForced = forcedTutorial === tutorialName;
       const canDetect = tutorialsIsForced || (!userTutorial[tutorialName].done && !userTutorial[tutorialName].skipped);
 
-      console.log("111");
+      console.log("x111", { tutorialName });
+      console.log(forcedTutorial === "tmpProposalConceptChild", ["tmpProposalConceptChild"].includes(tutorialName));
       const isValidForcedTutorial = forcedTutorial
         ? (forcedTutorial === "nodes" && ["nodes"].includes(tutorialName)) ||
           (forcedTutorial === "proposal" && ["proposal"].includes(tutorialName)) ||
           (forcedTutorial === "proposalCode" && ["proposalCode"].includes(tutorialName)) ||
           (forcedTutorial === "childProposal" && ["childProposal"].includes(tutorialName)) ||
           (forcedTutorial === "tmpEditNode" && ["tmpEditNode"].includes(tutorialName)) ||
-          (forcedTutorial === "tmpProposalConceptChild" && ["tmpProposalConceptChild"].includes(tutorialName)) ||
-          (forcedTutorial === "childConcept" && ["childConcept"].includes(tutorialName))
+          // (forcedTutorial === "tmpProposalConceptChild" && ["tmpProposalConceptChild"].includes(tutorialName)) ||
+          (forcedTutorial === "childConcept" && ["childConcept", "tmpProposalConceptChild"].includes(tutorialName))
         : !["tmpProposalConceptChild", "tmpEditNode"].includes(tutorialName);
+
+      console.log({
+        1: forcedTutorial === "nodes" && ["nodes"].includes(tutorialName),
+        2: forcedTutorial === "proposal" && ["proposal"].includes(tutorialName),
+        3: forcedTutorial === "proposalCode" && ["proposalCode"].includes(tutorialName),
+        4: forcedTutorial === "childProposal" && ["childProposal"].includes(tutorialName),
+        5: forcedTutorial === "tmpEditNode" && ["tmpEditNode"].includes(tutorialName),
+        6: forcedTutorial === "tmpProposalConceptChild" && ["tmpProposalConceptChild"].includes(tutorialName),
+        7: forcedTutorial === "childConcept" && ["childConcept"].includes(tutorialName),
+      });
       console.log({ isValidForcedTutorial, thisone: "" });
       if (!isValidForcedTutorial) return false;
 
