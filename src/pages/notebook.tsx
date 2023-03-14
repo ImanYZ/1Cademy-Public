@@ -4988,7 +4988,7 @@ const Dashboard = ({}: DashboardProps) => {
       const node = graph.nodes[targetId];
       if (!tmpEditNodeIsValid(node)) {
         setTutorial(null);
-        if (node.editable) return;
+        if (node && node.editable) return;
         setForcedTutorial(null);
       }
     }
