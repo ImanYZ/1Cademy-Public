@@ -451,13 +451,14 @@ export type TutorialTypeKeys =
   | "reconcilingAcceptedProposal"
   | "reconcilingNotAcceptedProposal"
   | "childProposal"
-  | "childConcept";
+  | "childConcept"
+  | "tmpEditNode";
 
 export type UserTutorial = {
   currentStep: number;
   done: boolean;
   skipped: boolean;
-  forceTutorial?: boolean;
+  // forceTutorial?: boolean;
 };
 
 export type UserTutorials = {

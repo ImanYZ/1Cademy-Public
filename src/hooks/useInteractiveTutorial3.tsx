@@ -18,6 +18,7 @@ import {
   PROPOSING_QUESTION_EDIT_COMPLETE,
   PROPOSING_REFERENCE_EDIT_COMPLETE,
   PROPOSING_RELATION_EDIT_COMPLETE,
+  TMP_EDIT_NODE,
 } from "@/lib/utils/tutorials/proposalTutorialSteps";
 import {
   RECONCILING_ACCEPTED_PROPOSALS_STEPS_COMPLETE,
@@ -62,7 +63,7 @@ export const useInteractiveTutorial = ({ user }: useInteractiveTutorialProps) =>
   // const [currentStep, setCurrentStep] = useState<TutorialStep | null>(null);
   const [tutorial, setTutorial] = useState<Tutorial>(null);
   const [targetId, setTargetId] = useState("");
-  const [initialStep, setInitialStep] = useState(0);
+  // const [initialStep, setInitialStep] = useState(0);
 
   const [userTutorial, setUserTutorial] = useState<UserTutorials>({
     navigation: { currentStep: -1, done: false, skipped: false },
@@ -85,6 +86,7 @@ export const useInteractiveTutorial = ({ user }: useInteractiveTutorialProps) =>
     reconcilingNotAcceptedProposal: { currentStep: -1, done: false, skipped: false },
     childProposal: { currentStep: -1, done: false, skipped: false },
     childConcept: { currentStep: -1, done: false, skipped: false },
+    tmpEditNode: { currentStep: -1, done: false, skipped: false },
   });
 
   // flag for whether tutorial state was loaded
@@ -113,89 +115,90 @@ export const useInteractiveTutorial = ({ user }: useInteractiveTutorialProps) =>
     getTutorialState();
   }, [db, user, userTutorialLoaded]);
 
-  const startTutorial = useCallback(
-    (newTutorial: TutorialTypeKeys) => {
-      setTutorial(prevTutorial => {
-        console.log({ prevTutorial });
-        // // const previousStep = getTutorialStep(prevTutorial);
-        // // if (previousStep?.childTargetId) removeStyleFromTarget(previousStep.childTargetId, previousStep.targetId);
-        // if (!tutorial) return null;
-        // if (!newTutorial) return null;
+  const startTutorial = useCallback((newTutorial: TutorialTypeKeys) => {
+    setTutorial(prevTutorial => {
+      console.log({ prevTutorial });
+      // // const previousStep = getTutorialStep(prevTutorial);
+      // // if (previousStep?.childTargetId) removeStyleFromTarget(previousStep.childTargetId, previousStep.targetId);
+      // if (!tutorial) return null;
+      // if (!newTutorial) return null;
 
-        let newSteps: TutorialStep[] = [];
-        if (newTutorial === "navigation") {
-          newSteps = NAVIGATION_STEPS_COMPLETE;
-        }
-        if (newTutorial === "nodes") {
-          // console.log("FILL NODES");
-          newSteps = NODES_STEPS_COMPLETE;
-        }
-        if (newTutorial === "searcher") {
-          newSteps = SEARCHER_STEPS_COMPLETE;
-          setTargetId("");
-        }
-        if (newTutorial === "concept") {
-          newSteps = NODE_CONCEPT_COMPLETE;
-        }
-        if (newTutorial === "relation") {
-          newSteps = NODE_RELATION_COMPLETE;
-        }
-        if (newTutorial === "reference") {
-          newSteps = NODE_REFERENCE_COMPLETE;
-        }
-        if (newTutorial === "question") {
-          newSteps = NODE_QUESTION_COMPLETE;
-        }
-        if (newTutorial === "idea") {
-          newSteps = NODE_IDEA_COMPLETE;
-        }
-        if (newTutorial === "code") {
-          newSteps = NODE_CODE_COMPLETE;
-        }
-        if (newTutorial === "proposal") {
-          newSteps = PROPOSAL_STEPS_COMPLETE;
-        }
-        if (newTutorial === "proposalConcept") {
-          newSteps = PROPOSING_CONCEPT_EDIT_COMPLETE;
-        }
-        if (newTutorial === "proposalReference") {
-          newSteps = PROPOSING_REFERENCE_EDIT_COMPLETE;
-        }
-        if (newTutorial === "proposalRelation") {
-          newSteps = PROPOSING_RELATION_EDIT_COMPLETE;
-        }
-        if (newTutorial === "proposalIdea") {
-          newSteps = PROPOSING_IDEA_EDIT_COMPLETE;
-        }
-        if (newTutorial === "proposalQuestion") {
-          newSteps = PROPOSING_QUESTION_EDIT_COMPLETE;
-        }
-        if (newTutorial === "proposalCode") {
-          newSteps = PROPOSING_CODE_EDIT_COMPLETE;
-        }
-        if (newTutorial === "reconcilingAcceptedProposal") {
-          newSteps = RECONCILING_ACCEPTED_PROPOSALS_STEPS_COMPLETE;
-        }
-        if (newTutorial === "reconcilingNotAcceptedProposal") {
-          newSteps = RECONCILING_NOT_ACCEPTED_PROPOSALS_STEPS_COMPLETE;
-        }
-        if (newTutorial === "childProposal") {
-          newSteps = CHILD_PROPOSAL_COMPLETE;
-        }
-        if (newTutorial === "childConcept") {
-          newSteps = CHILD_CONCEPT_PROPOSAL_COMPLETE;
-        }
+      let newSteps: TutorialStep[] = [];
+      if (newTutorial === "navigation") {
+        newSteps = NAVIGATION_STEPS_COMPLETE;
+      }
+      if (newTutorial === "nodes") {
+        // console.log("FILL NODES");
+        newSteps = NODES_STEPS_COMPLETE;
+      }
+      if (newTutorial === "searcher") {
+        newSteps = SEARCHER_STEPS_COMPLETE;
+        setTargetId("");
+      }
+      if (newTutorial === "concept") {
+        newSteps = NODE_CONCEPT_COMPLETE;
+      }
+      if (newTutorial === "relation") {
+        newSteps = NODE_RELATION_COMPLETE;
+      }
+      if (newTutorial === "reference") {
+        newSteps = NODE_REFERENCE_COMPLETE;
+      }
+      if (newTutorial === "question") {
+        newSteps = NODE_QUESTION_COMPLETE;
+      }
+      if (newTutorial === "idea") {
+        newSteps = NODE_IDEA_COMPLETE;
+      }
+      if (newTutorial === "code") {
+        newSteps = NODE_CODE_COMPLETE;
+      }
+      if (newTutorial === "proposal") {
+        newSteps = PROPOSAL_STEPS_COMPLETE;
+      }
+      if (newTutorial === "proposalConcept") {
+        newSteps = PROPOSING_CONCEPT_EDIT_COMPLETE;
+      }
+      if (newTutorial === "proposalReference") {
+        newSteps = PROPOSING_REFERENCE_EDIT_COMPLETE;
+      }
+      if (newTutorial === "proposalRelation") {
+        newSteps = PROPOSING_RELATION_EDIT_COMPLETE;
+      }
+      if (newTutorial === "proposalIdea") {
+        newSteps = PROPOSING_IDEA_EDIT_COMPLETE;
+      }
+      if (newTutorial === "proposalQuestion") {
+        newSteps = PROPOSING_QUESTION_EDIT_COMPLETE;
+      }
+      if (newTutorial === "proposalCode") {
+        newSteps = PROPOSING_CODE_EDIT_COMPLETE;
+      }
+      if (newTutorial === "reconcilingAcceptedProposal") {
+        newSteps = RECONCILING_ACCEPTED_PROPOSALS_STEPS_COMPLETE;
+      }
+      if (newTutorial === "reconcilingNotAcceptedProposal") {
+        newSteps = RECONCILING_NOT_ACCEPTED_PROPOSALS_STEPS_COMPLETE;
+      }
+      if (newTutorial === "childProposal") {
+        newSteps = CHILD_PROPOSAL_COMPLETE;
+      }
+      if (newTutorial === "childConcept") {
+        newSteps = CHILD_CONCEPT_PROPOSAL_COMPLETE;
+      }
+      //----------------- tmp nodes
+      if (newTutorial === "tmpEditNode") {
+        newSteps = TMP_EDIT_NODE;
+      }
 
-        setUserTutorial(prev => ({
-          ...prev,
-          [newTutorial]: { ...prev[newTutorial], currentStep: initialStep || 1 },
-        }));
+      setUserTutorial(prev => ({
+        ...prev,
+        [newTutorial]: { ...prev[newTutorial], currentStep: /*  initialStep || */ 1 },
+      }));
 
-        return { name: newTutorial, steps: newSteps, step: initialStep || 1 };
-      });
-    },
-    [initialStep]
-  );
+      return { name: newTutorial, steps: newSteps, step: /*  initialStep || */ 1 };
+    });
+  }, []);
 
   const onNextStep = useCallback(() => {
     () => console.log(tutorial);
@@ -264,7 +267,7 @@ export const useInteractiveTutorial = ({ user }: useInteractiveTutorialProps) =>
     userTutorial,
     userTutorialLoaded,
     setUserTutorial,
-    setInitialStep,
+    // setInitialStep,
   };
 };
 

@@ -24,7 +24,7 @@ type TutorialProps = {
 };
 
 export const TooltipTutorial = ({
-  tutorial,
+  // tutorial,// TODO: remove
   tutorialStep,
   targetClientRect,
   onNextStep,
@@ -37,7 +37,7 @@ export const TooltipTutorial = ({
 }: TutorialProps) => {
   const tooltipRef = useRef<HTMLDivElement | null>(null);
 
-  console.log({ tutorialStep, tutorial });
+  // console.log({ tutorialStep, tutorial });
   const tooltipClientRect = useMemo(() => {
     if (!tooltipRef.current) return { top: 0, left: 0 };
     if (!tutorialStep) return { top: 0, left: 0 };

@@ -33,6 +33,13 @@ Ex for Node id elements to disable
   "01-node-footer-menu"
  */
 
+const TMP_EDIT_NODE_CONFIG: TutorialStepConfig[] = [
+  {
+    title: "Propose Node - Edit Node",
+    description: <MarkdownRender text={"**Click** on pencil button to enter in Edit Node"} />,
+  },
+];
+
 const PROPOSING_CONCEPT_EDIT: TutorialStepConfig[] = [
   {
     title: "Proposing Edits - Concept Node",
@@ -220,145 +227,10 @@ const PROPOSING_EDITS_STEPS: TutorialStepConfig[] = [
   },
 ];
 
-// const RECONCILING_PROPOSALS_STEPS: TutorialStepConfig[] = [
-//   {
-//     title: "Proposals: Reconciling Proposals",
-//     description: (
-//       <MarkdownRender
-//         text={"Just because you have proposed a change, it does not mean that the change will be implemented."}
-//       />
-//     ),
-//   },
-//   {
-//     childTargetId: "node-footer-votes",
-//     title: "Proposals: Reconciling Proposals",
-//     description: (
-//       <MarkdownRender
-//         text={
-//           "Proposals need to be approved by more than one person in some cases, it depends on the net vote of the node that the proposals are changing."
-//         }
-//       />
-//     ),
+export const TMP_EDIT_NODE: TutorialStep[] = TMP_EDIT_NODE_CONFIG.map((c, i, s) => {
+  return { ...getBaseStepConfig(i + 1, s.length), ...c };
+});
 
-//     tooltipPosition: "bottom",
-//   },
-//   {
-//     childTargetId: "node-footer-votes",
-//     title: "Proposals: Reconciling Proposals",
-//     description: (
-//       <MarkdownRender
-//         text={
-//           "As we discussed earlier, every node has a net vote. This is the difference between upvotes and downvotes and can be calculated here."
-//         }
-//       />
-//     ),
-
-//     tooltipPosition: "bottom",
-//   },
-//   {
-//     childTargetId: "node-footer-votes",
-//     title: "Proposals: Reconciling Proposals",
-//     description: (
-//       <MarkdownRender
-//         text={
-//           "If a proposal gets a number of approving votes equal to half of the net vote on the corresponding node, it will be automatically accepted and the corresponding changes are made on the map."
-//         }
-//       />
-//     ),
-
-//     tooltipPosition: "bottom",
-//   },
-//   {
-//     childTargetId: "node-footer-votes",
-//     title: "Proposals: Reconciling Proposals",
-//     description: (
-//       <MarkdownRender
-//         text={"For example, a node with 4 upvotes and 0 downvotes needs 2 votes for a proposal to change it."}
-//       />
-//     ),
-
-//     tooltipPosition: "bottom",
-//   },
-//   {
-//     childTargetId: "node-footer-votes",
-//     title: "Proposals: Reconciling Proposals",
-//     description: (
-//       <MarkdownRender
-//         text={
-//           "Another example is if a node has 7 upvotes and 1 downvote, a proposal will need 3 upvotes to be approved."
-//         }
-//       />
-//     ),
-
-//     tooltipPosition: "bottom",
-//   },
-//   {
-//     childTargetId: "node-footer-votes",
-//     title: "Proposals: Reconciling Proposals",
-//     description: (
-//       <MarkdownRender
-//         text={
-//           "A proposal to a node with a netvote of 2 or less will automatically be approved as the proposal itself automatically carries a single vote in its favor from the person that made it."
-//         }
-//       />
-//     ),
-
-//     tooltipPosition: "bottom",
-//   },
-//   {
-//     childTargetId: "node-footer-downvotes",
-//     title: "Proposals: Reconciling Proposals",
-//     description: (
-//       <MarkdownRender
-//         text={
-//           "Proposals can also receive downvotes, which will affect the number of upvotes needed to approve the proposal."
-//         }
-//       />
-//     ),
-
-//     tooltipPosition: "bottom",
-//   },
-//   {
-//     childTargetId: "node-footer-downvotes",
-//     title: "Proposals: Reconciling Proposals",
-//     description: (
-//       <MarkdownRender
-//         text={
-//           "For example, if a node has 7 upvotes and 1 downvote, a proposal with 4 upvotes and 1 downvote will be approved."
-//         }
-//       />
-//     ),
-
-//     tooltipPosition: "bottom",
-//   },
-//   {
-//     childTargetId: "node-footer-downvotes",
-//     title: "Proposals: Reconciling Proposals",
-//     description: (
-//       <MarkdownRender
-//         text={
-//           "However, if a node with 8 upvotes and 2 downvotes has a proposal with 5 upvotes and 4 downvotes, the proposal will not be implemented."
-//         }
-//       />
-//     ),
-
-//     tooltipPosition: "bottom",
-//   },
-//   {
-//     targetId: "toolbar-pending-list",
-//     childTargetId: "toolbar-pending-list",
-//     title: "Proposals: Reconciling Proposals",
-//     description: (
-//       <MarkdownRender
-//         text={"You can see all the proposals that are pending by clicking on the pending list button here."}
-//       />
-//     ),
-//     anchor: "Portal",
-
-//     tooltipPosition: "right",
-//   },
-// ];
-// console.log(OVERVIEW_STEPS, PROPOSING_EDITS_STEPS, FINDING_PREREQUISITES_STEPS, RECONCILING_PROPOSALS_STEPS);
 export const PROPOSAL_STEPS_COMPLETE: TutorialStep[] = PROPOSING_EDITS_STEPS.map((c, i, s) => {
   return {
     ...getBaseStepConfig(i + 1, s.length),
@@ -369,18 +241,23 @@ export const PROPOSAL_STEPS_COMPLETE: TutorialStep[] = PROPOSING_EDITS_STEPS.map
 export const PROPOSING_CONCEPT_EDIT_COMPLETE: TutorialStep[] = PROPOSING_CONCEPT_EDIT.map((c, i, s) => {
   return { ...getBaseStepConfig(i + 1, s.length), ...c };
 });
+
 export const PROPOSING_RELATION_EDIT_COMPLETE: TutorialStep[] = PROPOSING_RELATION_EDIT.map((c, i, s) => {
   return { ...getBaseStepConfig(i + 1, s.length), ...c };
 });
+
 export const PROPOSING_REFERENCE_EDIT_COMPLETE: TutorialStep[] = PROPOSING_REFERENCE_EDIT.map((c, i, s) => {
   return { ...getBaseStepConfig(i + 1, s.length), ...c };
 });
+
 export const PROPOSING_IDEA_EDIT_COMPLETE: TutorialStep[] = PROPOSING_IDEA_EDIT.map((c, i, s) => {
   return { ...getBaseStepConfig(i + 1, s.length), ...c };
 });
+
 export const PROPOSING_QUESTION_EDIT_COMPLETE: TutorialStep[] = PROPOSING_QUESTION_EDIT.map((c, i, s) => {
   return { ...getBaseStepConfig(i + 1, s.length), ...c };
 });
+
 export const PROPOSING_CODE_EDIT_COMPLETE: TutorialStep[] = PROPOSING_CODE_EDIT.map((c, i, s) => {
   return { ...getBaseStepConfig(i + 1, s.length), ...c };
 });

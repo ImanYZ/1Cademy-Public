@@ -317,6 +317,9 @@ const Dashboard = ({}: DashboardProps) => {
   // const [removedParents, setRemovedParents] = useState<string[]>([]);
   // const [removedChildren, setRemovedChildren] = useState<string[]>([]);
 
+  const tutorialStateWasSetUpRef = useRef(false);
+  // const forcedTutorial = useRef<TutorialTypeKeys | null>(null);
+  const [forcedTutorial, setForcedTutorial] = useState<TutorialTypeKeys | null>(null);
   const [firstLoading, setFirstLoading] = useState(true);
   const [pendingProposalsLoaded /* , setPendingProposalsLoaded */] = useState(true);
 
@@ -367,7 +370,6 @@ const Dashboard = ({}: DashboardProps) => {
     userTutorialLoaded,
     setUserTutorial,
     userTutorial,
-    setInitialStep,
   } = useInteractiveTutorial({ user });
   const onNodeInViewport = useCallback(
     (nodeId: string) => {
@@ -483,9 +485,10 @@ const Dashboard = ({}: DashboardProps) => {
 
   useEffect(() => {
     let timeoutId: any;
-    const onGetClientRect = () => {
-      if (!nodeBookState.selectedNode) return;
+    const getTooltipClientRect = () => {
+      devLog("GET_TOOLTIP_CLIENT_RECT", { currentStep, targetId });
       if (!currentStep) return setTargetClientRect({ width: 0, height: 0, top: 0, left: 0 });
+
       if (currentStep.anchor) {
         timeoutId = setTimeout(() => {
           if (!currentStep.childTargetId) return;
@@ -498,40 +501,45 @@ const Dashboard = ({}: DashboardProps) => {
 
           setTargetClientRect({ width, height, top, left });
         }, currentStep.targetDelay);
-      } else {
-        if (!targetId) return;
 
-        const thisNode = graph.nodes[targetId];
-        if (!thisNode) return;
-
-        let { top, left, width = NODE_WIDTH, height = 0 } = thisNode;
-        let offsetChildTop = 0;
-        let offsetChildLeft = 0;
-
-        if (currentStep.childTargetId) {
-          const targetElement = document.getElementById(`${targetId}-${currentStep.childTargetId}`);
-          if (!targetElement) return;
-
-          targetElement.classList.add(currentStep.largeTarget ? "tutorial-target-large" : "tutorial-target");
-
-          const { offsetTop, offsetLeft } = targetElement;
-          const { height: childrenHeight, width: childrenWidth } = targetElement.getBoundingClientRect();
-
-          offsetChildTop = offsetTop;
-          offsetChildLeft = offsetLeft;
-          height = childrenHeight;
-          width = childrenWidth;
-        }
-
-        setTargetClientRect({
-          top: top + offsetChildTop,
-          left: left + offsetChildLeft,
-          width,
-          height,
-        });
+        return;
       }
+
+      console.log(22);
+      if (!targetId) return;
+
+      console.log(23);
+      const thisNode = graph.nodes[targetId];
+      if (!thisNode) return;
+
+      console.log(24);
+      let { top, left, width = NODE_WIDTH, height = 0 } = thisNode;
+      let offsetChildTop = 0;
+      let offsetChildLeft = 0;
+
+      if (currentStep.childTargetId) {
+        const targetElement = document.getElementById(`${targetId}-${currentStep.childTargetId}`);
+        if (!targetElement) return;
+
+        targetElement.classList.add(currentStep.largeTarget ? "tutorial-target-large" : "tutorial-target");
+
+        const { offsetTop, offsetLeft } = targetElement;
+        const { height: childrenHeight, width: childrenWidth } = targetElement.getBoundingClientRect();
+
+        offsetChildTop = offsetTop;
+        offsetChildLeft = offsetLeft;
+        height = childrenHeight;
+        width = childrenWidth;
+      }
+
+      setTargetClientRect({
+        top: top + offsetChildTop,
+        left: left + offsetChildLeft,
+        width,
+        height,
+      });
     };
-    onGetClientRect();
+    getTooltipClientRect();
     return () => {
       if (timeoutId) clearTimeout(timeoutId);
     };
@@ -658,7 +666,6 @@ const Dashboard = ({}: DashboardProps) => {
     return width;
   };
   const openNodeHandler = useMemoizedCallback(
-    // TODO: remove openWithDefaultValues
     async (nodeId: string, openWithDefaultValues: Partial<UserNodesData> = {}) => {
       devLog("OPEN_NODE_HANDLER", { nodeId, openWithDefaultValues });
 
@@ -1785,13 +1792,17 @@ const Dashboard = ({}: DashboardProps) => {
       ...userTutorial[tutorial.name],
       currentStep: currentStep.currentStepName,
       done: true,
-      forceTutorial: false,
+      // forceTutorial: false,
     };
 
     const userTutorialUpdated: UserTutorials = { ...userTutorial, [tutorial.name]: tutorialUpdated };
+    const wasForcedTutorial = tutorial.name === forcedTutorial;
+
     setTutorial(null);
-    setInitialStep(0);
+    // setInitialStep(0);
     setUserTutorial(userTutorialUpdated);
+
+    if (wasForcedTutorial) return setForcedTutorial(null);
 
     const tutorialRef = doc(db, "userTutorial", user.uname);
     const tutorialDoc = await getDoc(tutorialRef);
@@ -1801,7 +1812,7 @@ const Dashboard = ({}: DashboardProps) => {
     } else {
       await setDoc(tutorialRef, userTutorialUpdated);
     }
-  }, [currentStep, db, setInitialStep, setTutorial, setUserTutorial, tutorial, user, userTutorial]);
+  }, [currentStep, db, forcedTutorial, setTutorial, setUserTutorial, tutorial, user, userTutorial]);
 
   const openLinkedNode = useCallback(
     (linkedNodeID: string, typeOperation?: string) => {
@@ -3874,6 +3885,19 @@ const Dashboard = ({}: DashboardProps) => {
     setOpenProgressBarMenu(false);
   }, []);
 
+  // const disableForceTutorial = useCallback(
+  //   (tutorialName: TutorialTypeKeys) => {
+  //     setUserTutorial(userTutorial => {
+  //       const tutorialUpdated: UserTutorial = {
+  //         ...userTutorial[tutorialName],
+  //       };
+  //       const userTutorialUpdated = { ...userTutorial, [tutorialName]: tutorialUpdated };
+  //       return userTutorialUpdated;
+  //     });
+  //   },
+  //   [setUserTutorial]
+  // );
+
   const onSkipTutorial = useCallback(async () => {
     if (!user) return;
     if (!currentStep) return;
@@ -3883,15 +3907,14 @@ const Dashboard = ({}: DashboardProps) => {
       ...userTutorial[tutorial.name],
       currentStep: tutorial.step,
       skipped: true,
-      forceTutorial: false,
     };
     const userTutorialUpdated = { ...userTutorial, [tutorial.name]: tutorialUpdated };
-    const wasForcedTutorial = userTutorial[tutorial.name].forceTutorial;
+    const wasForcedTutorial = tutorial.name === forcedTutorial;
     setUserTutorial(userTutorialUpdated);
     setOpenSidebar(null);
     setTutorial(null);
 
-    if (wasForcedTutorial) return;
+    if (wasForcedTutorial) return setForcedTutorial(null);
 
     const tutorialRef = doc(db, "userTutorial", user.uname);
     const tutorialDoc = await getDoc(tutorialRef);
@@ -3901,26 +3924,185 @@ const Dashboard = ({}: DashboardProps) => {
     } else {
       await setDoc(tutorialRef, userTutorialUpdated);
     }
-  }, [user, currentStep, tutorial, userTutorial, setTutorial, setUserTutorial, db]);
+  }, [user, currentStep, tutorial, userTutorial, forcedTutorial, setUserTutorial, setTutorial, db]);
 
-  const forceTutorial = useCallback(
-    (idTarget: string, tutorialName: TutorialTypeKeys, openWithDefaultValues: Partial<FullNodeData> = {}) => {
-      devLog("FORCE_TUTORIAL", { idTarget, tutorial: tutorialName });
-      const targetElement = document.getElementById(idTarget);
-      if (!targetElement) {
-        return openNodeHandler(idTarget);
+  /**
+   * Detect the trigger to call a tutorial
+   * if graph is invalid, DB is modified with correct state
+   * then we wait until graph has correct state to call tutorial
+   */
+  const detectAndForceTutorial = useCallback(
+    (
+      tutorialName: TutorialTypeKeys,
+      targetId: string,
+      targetIsInvalid: (node: FullNodeData) => boolean,
+      defaultStates: Partial<FullNodeData> = { open: true }
+    ) => {
+      const tutorialsIsForced = forcedTutorial === tutorialName;
+      if (tutorialsIsForced || userTutorial[tutorialName].done || userTutorial[tutorialName].skipped) return;
+
+      devLog("DETECT_AND_FORCE_TUTORIAL", { tutorialName, targetId, defaultStates });
+
+      const newTargetId = tutorialsIsForced ? targetId : nodeBookState.selectedNode ?? "";
+      console.log(10, newTargetId);
+
+      if (!newTargetId) return;
+
+      // console.log(11);
+      const thisNode = graph.nodes[newTargetId];
+      if ((tutorialsIsForced && !thisNode) || targetIsInvalid(thisNode)) {
+        if (!tutorialStateWasSetUpRef.current) {
+          // console.log(12);
+          openNodeHandler(newTargetId, defaultStates);
+          tutorialStateWasSetUpRef.current = true;
+        }
+        return;
       }
 
-      setNodeParts(idTarget, node => ({ ...node, ...openWithDefaultValues /* , open: true */ }));
-      if (openWithDefaultValues?.editable) proposeNodeImprovement(null, idTarget);
-      nodeBookDispatch({ type: "setSelectedNode", payload: idTarget });
-      notebookRef.current.selectedNode = idTarget;
+      // console.log(13);
+      // disableForceTutorial(tutorialName);
+      tutorialStateWasSetUpRef.current = false;
       startTutorial(tutorialName);
-      // setTutorial({ name: tutorialName, step: 1, steps: [] });
-      setTargetId(idTarget);
+      setTargetId(newTargetId);
+      return;
     },
-    [nodeBookDispatch, openNodeHandler, proposeNodeImprovement, setNodeParts, setTargetId, startTutorial]
+    [forcedTutorial, graph.nodes, nodeBookState.selectedNode, openNodeHandler, setTargetId, startTutorial, userTutorial]
   );
+
+  /**
+   * Detect the trigger to call a tutorial
+   * if graph is invalid, DB is modified with correct state
+   * then we wait until graph has correct state to call tutorial
+   */
+  const detectAndCallTutorial = useCallback(
+    (tutorialName: TutorialTypeKeys, targetIsInvalid: (node: FullNodeData) => boolean) => {
+      const tutorialsIsForced = forcedTutorial === tutorialName;
+      const canDetect = tutorialsIsForced || (!userTutorial[tutorialName].done && !userTutorial[tutorialName].skipped);
+
+      if (!canDetect) return false;
+
+      devLog("DETECT_AND_CALL_TUTORIAL", { tutorialName });
+
+      const newTargetId = nodeBookState.selectedNode ?? "";
+      if (!newTargetId) return false;
+
+      const thisNode = graph.nodes[newTargetId];
+      if (!thisNode) return false;
+      if (targetIsInvalid(thisNode)) return false;
+
+      startTutorial(tutorialName);
+      setTargetId(newTargetId);
+      return true;
+    },
+    [forcedTutorial, graph.nodes, nodeBookState.selectedNode, setTargetId, startTutorial, userTutorial]
+  );
+
+  // const detectAndCallEditNodeTutorial = useCallback(
+  //   (
+  //     tutorialName: TutorialTypeKeys,
+  //     targetId: string,
+  //     targetIsInvalid: (node: FullNodeData) => boolean,
+  //     defaultStates: Partial<FullNodeData> = { open: true }
+  //   ) => {
+  //     const tutorialsIsForced = forcedTutorial === tutorialName;
+  //     if (!tutorialsIsForced && (userTutorial[tutorialName].done || userTutorial[tutorialName].skipped)) return;
+
+  //     devLog("DETECT_AND_CALL_EDIT_NODE_TUTORIAL");
+
+  //     const newTargetId = tutorialsIsForced ? targetId : nodeBookState.selectedNode ?? "";
+  //     console.log(11);
+  //     if (!newTargetId) return;
+
+  //     console.log(12);
+  //     const thisNode = graph.nodes[newTargetId];
+  //     if ((tutorialsIsForced && !thisNode) || targetIsInvalid(thisNode)) {
+  //       if (!tutorialStateWasSetUpRef.current) {
+  //         console.log(13);
+  //         openNodeHandler(newTargetId, defaultStates);
+  //         tutorialStateWasSetUpRef.current = true;
+  //       }
+  //       return;
+  //     }
+
+  //     if (!tutorialsIsForced && !changedNodes[newTargetId]) return;
+  //     console.log(14, { newTargetId });
+  //     // disableForceTutorial(tutorialName);
+  //     tutorialStateWasSetUpRef.current = false;
+  //     startTutorial(tutorialName);
+  //     setTargetId(newTargetId);
+  //     return;
+  //   },
+  //   [forcedTutorial, graph.nodes, nodeBookState.selectedNode, openNodeHandler, setTargetId, startTutorial, userTutorial]
+  // );
+
+  // const detectAndCallChildNodeTutorial = useCallback(
+  //   (
+  //     tutorialName: TutorialTypeKeys,
+  //     targetId: string,
+  //     targetIsInvalid: (node: FullNodeData) => boolean,
+  //     defaultStates: Partial<FullNodeData> = { open: true }
+  //   ) => {
+  //     const tutorialsIsForced = forcedTutorial.current === tutorialName;
+  //     if (tutorialsIsForced || userTutorial[tutorialName].done || userTutorial[tutorialName].skipped) return;
+
+  //     const newTargetId = tutorialsIsForced ? targetId : nodeBookState.selectedNode ?? "";
+  //     // newTargetId: in forced is a parent, in normal is a new child
+
+  //     if (!newTargetId) return;
+
+  //     const thisNode = graph.nodes[newTargetId];
+  //     if ((tutorialsIsForced && !thisNode) || targetIsInvalid(thisNode)) {
+  //       // isNew:true
+  //       if (!tutorialStateWasSetUpRef.current) {
+  //         openNodeHandler(newTargetId, defaultStates);
+  //         tutorialStateWasSetUpRef.current = true;
+  //       }
+  //       return;
+  //     }
+
+  //     if (!tutorialsIsForced && !changedNodes[newTargetId]) return;
+
+  //     disableForceTutorial(tutorialName);
+  //     tutorialStateWasSetUpRef.current = false;
+  //     startTutorial(tutorialName);
+  //     setTargetId(newTargetId);
+  //   },
+  //   [
+  //     disableForceTutorial,
+  //     graph.nodes,
+  //     nodeBookState.selectedNode,
+  //     openNodeHandler,
+  //     setTargetId,
+  //     startTutorial,
+  //     userTutorial,
+  //   ]
+  // );
+
+  // const forceTutorial = useCallback(
+  //   (targetId: string, tutorialName: TutorialTypeKeys, openWithDefaultValues: Partial<FullNodeData> = {}) => {
+  //     devLog("FORCE_TUTORIAL", { idTarget: targetId, tutorialName, openWithDefaultValues });
+  //     // const targetElement = document.getElementById(idTarget);
+  //     const thisNode = graph.nodes[targetId];
+  //     if (!thisNode || !thisNode.open) {
+  //       return openNodeHandler(targetId, openWithDefaultValues);
+  //     }
+  //     // const targetElement = document.getElementById(idTarget);
+  //     // if (!targetElement) {
+  //     //   return openNodeHandler(idTarget);
+  //     // }
+
+  //     // setNodeParts(idTarget, node => ({ ...node, ...openWithDefaultValues }));
+  //     // nodeBookDispatch({ type: "setSelectedNode", payload: idTarget });
+  //     // notebookRef.current.selectedNode = idTarget;
+  //     // startTutorial(tutorialName);
+
+  //     // openLinkedNode(targetId);
+
+  //     if (openWithDefaultValues?.editable) proposeNodeImprovement(null, targetId);
+  //     setTargetId(targetId);
+  //   },
+  //   [graph.nodes, openNodeHandler, proposeNodeImprovement, setTargetId]
+  // );
 
   useEffect(() => {
     /**
@@ -3931,6 +4113,7 @@ const Dashboard = ({}: DashboardProps) => {
      * 2. second time will run tutorial
      */
     const detectTriggerTutorial = () => {
+      console.log({ userTutorialLoaded, firstLoading, tutorial });
       if (!userTutorialLoaded) return;
       if (firstLoading) return;
       if (tutorial) return;
@@ -3939,64 +4122,115 @@ const Dashboard = ({}: DashboardProps) => {
 
       // --------------------------
 
-      if (
-        (!userTutorial.navigation.done && !userTutorial.navigation.skipped) ||
-        userTutorial.navigation.forceTutorial
-      ) {
-        setTutorial({ name: "navigation", step: 1, steps: [] });
+      if ((!userTutorial.navigation.done && !userTutorial.navigation.skipped) || forcedTutorial === "navigation") {
+        startTutorial("navigation");
         return;
       }
 
       // --------------------------
 
-      const selectedNodeFromGraph: FullNodeData | null = nodeBookState.selectedNode
-        ? graph.nodes[nodeBookState.selectedNode]
-        : null;
+      // const selectedNodeFromGraph: FullNodeData | null = nodeBookState.selectedNode
+      //   ? graph.nodes[nodeBookState.selectedNode]
+      //   : null;
 
       // --------------------------
 
-      if (userTutorial.nodes.forceTutorial) {
-        return forceTutorial("r98BjyFDCe4YyLA3U8ZE", "nodes");
-      }
+      // // // detectAndForceTutorial("nodes", "r98BjyFDCe4YyLA3U8ZE", thisNode => thisNode && !thisNode.open);
+      // if (userTutorial.nodes.forceTutorial || (!userTutorial.nodes.done && !userTutorial.nodes.skipped)) {
+      //   const newTargetId = userTutorial.nodes.forceTutorial
+      //     ? "r98BjyFDCe4YyLA3U8ZE"
+      //     : nodeBookState.selectedNode ?? "";
 
-      if (selectedNodeFromGraph && !userTutorial.nodes.done && !userTutorial.nodes.skipped) {
-        setTutorial({ name: "nodes", step: 1, steps: [] });
-        setTargetId(selectedNodeFromGraph.node);
-        return;
-      }
+      //   if (!newTargetId) return;
 
-      // if ((!tutorialStep.nodes.done && !tutorialStep.nodes.skipped) || tutorialStep.nodes.forceTutorial) {
-      //   const nodeTargetId =
-      //     (nodeBookState.selectedNode && graph.nodes[nodeBookState.selectedNode]?.open && nodeBookState.selectedNode) ||
-      //     "";
-
-      //   if (!nodeTargetId) {
-      //     if (!tutorialStep.nodes.forceTutorial) return;
-
-      //     const idTarget = "r98BjyFDCe4YyLA3U8ZE";
-      //     const targetElement = document.getElementById(idTarget);
-      //     if (!targetElement) return openNodeHandler(idTarget, { open: true });
-
-      //     notebookRef.current.selectedNode = idTarget;
-      //     nodeBookDispatch({ type: "setSelectedNode", payload: idTarget });
-      //     setNodeParts(idTarget, node => ({ ...node, open: true }));
-      //     scrollToNode(idTarget);
+      //   const thisNode = graph.nodes[newTargetId];
+      //   const targetIsInvalid = thisNode && !thisNode.open;
+      //   if (!thisNode || targetIsInvalid) {
+      //     if (!tutorialStateWasSetUpRef.current) {
+      //       openNodeHandler(newTargetId, { open: true });
+      //       tutorialStateWasSetUpRef.current = true;
+      //     }
       //     return;
       //   }
 
-      //   setTargetId(nodeTargetId);
+      //   disableForceTutorial("nodes");
+      //   tutorialStateWasSetUpRef.current = false;
       //   startTutorial("nodes");
-      //   // setTutorial({ name: "nodes", step: 1, steps: [] });
+      //   setTargetId(newTargetId);
       //   return;
       // }
+
+      // // if(userTutorial.nodes.forceTutorial)
+
+      // // if (userTutorial.nodes.forceTutorial) {
+      // //   // const thisNode = graph.nodes[targetId];
+      // //   if (!thisNode || !thisNode.open) {
+      // //     openNodeHandler(newTargetId, {open:true});
+      // //   }
+      // //   // return forceTutorial("r98BjyFDCe4YyLA3U8ZE", "nodes", { open: true });
+      // // }
+
+      // // if (selectedNodeFromGraph && !userTutorial.nodes.done && !userTutorial.nodes.skipped) {
+      // //   const thisNode = graph.nodes[newTargetId];
+      // //   if (!thisNode || !thisNode.open) {
+      // //     openNodeHandler(newTargetId, {open:true});
+      // //   }
+      // //   // setTutorial({ name: "nodes", step: 1, steps: [] });
+      // //   // setTargetId(selectedNodeFromGraph.node);
+      // //   // return;
+      // }
+
+      // // if ((!tutorialStep.nodes.done && !tutorialStep.nodes.skipped) || tutorialStep.nodes.forceTutorial) {
+      // //   const nodeTargetId =
+      // //     (nodeBookState.selectedNode && graph.nodes[nodeBookState.selectedNode]?.open && nodeBookState.selectedNode) ||
+      // //     "";
+
+      // //   if (!nodeTargetId) {
+      // //     if (!tutorialStep.nodes.forceTutorial) return;
+
+      // //     const idTarget = "r98BjyFDCe4YyLA3U8ZE";
+      // //     const targetElement = document.getElementById(idTarget);
+      // //     if (!targetElement) return openNodeHandler(idTarget, { open: true });
+
+      // //     notebookRef.current.selectedNode = idTarget;
+      // //     nodeBookDispatch({ type: "setSelectedNode", payload: idTarget });
+      // //     setNodeParts(idTarget, node => ({ ...node, open: true }));
+      // //     scrollToNode(idTarget);
+      // //     return;
+      // //   }
+
+      // //   if(userTutorial.nodes.forceTutorial)
+
+      // // if (userTutorial.nodes.forceTutorial) {
+      // //   // const thisNode = graph.nodes[targetId];
+      // //   if (!thisNode || !thisNode.open) {
+      // //     openNodeHandler(newTargetId, {open:true});
+      // //   }
+      // //   // return forceTutorial("r98BjyFDCe4YyLA3U8ZE", "nodes", { open: true });
+      // // }
+
+      // // if (selectedNodeFromGraph && !userTutorial.nodes.done && !userTutorial.nodes.skipped) {
+      // //   const thisNode = graph.nodes[newTargetId];
+      // //   if (!thisNode || !thisNode.open) {
+      // //     openNodeHandler(newTargetId, {open:true});
+      // //   }
+      // //   // setTutorial({ name: "nodes", step: 1, steps: [] });
+      // //   // setTargetId(selectedNodeFromGraph.node);
+      // //   // return;
+      // }
+
+      // // if ((!tutorialStep.nodes.done && !tutorialStep.nodes.skipped) || tutorialStep.nodes.forceTutorial) {
+      // //   const nodeTargetId =
+      // //     (nodeBookState.selectedNode && graph.nodes[nodeBookState.selectedNode]?.open && nodeBookState.selectedNode) ||
+      // //
 
       // --------------------------
       if (
         (!userTutorial.searcher.done && !userTutorial.searcher.skipped && openSidebar === "SEARCHER_SIDEBAR") ||
-        userTutorial.searcher.forceTutorial
+        forcedTutorial === "searcher"
       ) {
         if (openSidebar !== "SEARCHER_SIDEBAR") {
-          if (!userTutorial.searcher.forceTutorial) return;
+          if (forcedTutorial !== "searcher") return;
 
           setOpenSidebar("SEARCHER_SIDEBAR");
           return;
@@ -4007,342 +4241,421 @@ const Dashboard = ({}: DashboardProps) => {
 
       // --------------------------
 
-      const selectedNodeFromChangedNodes: FullNodeData = nodeBookState.selectedNode
-        ? changedNodes[nodeBookState.selectedNode]
-        : null;
+      const launchedtutorial = detectAndCallTutorial(
+        "proposal",
+        thisNode => (thisNode && !thisNode.open) || !thisNode.editable
+      );
 
-      // --------------------------
+      console.log({ launchedtutorial, forcedTutorial });
+      if (launchedtutorial) return;
 
-      if (userTutorial.proposal.forceTutorial) {
-        return forceTutorial("r98BjyFDCe4YyLA3U8ZE", "proposal", { editable: true });
-      }
+      if (forcedTutorial === "proposal") {
+        const defaultStates = { open: true };
+        const targetIsInvalid = (node: FullNodeData) => !node.open || node.editable;
+        const newTargetId = "r98BjyFDCe4YyLA3U8ZE";
+        const thisNode = graph.nodes[newTargetId];
+        console.log(11);
+        if (!thisNode || targetIsInvalid(thisNode)) {
+          if (!tutorialStateWasSetUpRef.current) {
+            console.log(12);
+            openNodeHandler(newTargetId, defaultStates);
+            tutorialStateWasSetUpRef.current = true;
+          }
+          return;
+        }
 
-      if (selectedNodeFromChangedNodes && !userTutorial.proposal.done && !userTutorial.proposal.skipped) {
-        setTutorial({ name: "proposal", step: 1, steps: [] });
-        setTargetId(selectedNodeFromChangedNodes.node);
+        console.log(13);
+        // disableForceTutorial("proposal");
+        tutorialStateWasSetUpRef.current = false;
+        startTutorial("tmpEditNode");
+        setTargetId(newTargetId);
         return;
+        // detectAndForceTutorial("tmpEditNode", "r98BjyFDCe4YyLA3U8ZE", thisNode => thisNode.open, { open: true });
       }
 
       // --------------------------
 
-      if (userTutorial.proposalConcept.forceTutorial) {
-        return forceTutorial("r98BjyFDCe4YyLA3U8ZE", "proposalConcept", { editable: true });
-      }
-
-      if (
-        selectedNodeFromChangedNodes &&
-        !userTutorial.proposalConcept.done &&
-        !userTutorial.proposalConcept.skipped &&
-        selectedNodeFromChangedNodes.nodeType === "Concept"
-      ) {
-        setTutorial({ name: "proposalConcept", step: 1, steps: [] });
-        setTargetId(selectedNodeFromChangedNodes.node);
-        return;
-      }
+      // const selectedNodeFromChangedNodes: FullNodeData = nodeBookState.selectedNode
+      //   ? changedNodes[nodeBookState.selectedNode]
+      //   : null;
 
       // --------------------------
 
-      if (userTutorial.proposalRelation.forceTutorial) {
-        return forceTutorial("zYYmaXvhab7hH2uRI9Up", "proposalRelation", { editable: true });
-      }
+      // if (!userTutorial.proposal.forceTutorial) {
 
-      if (
-        selectedNodeFromChangedNodes &&
-        !userTutorial.proposalRelation.done &&
-        !userTutorial.proposalRelation.skipped &&
-        selectedNodeFromChangedNodes.nodeType === "Relation"
-      ) {
-        setTutorial({ name: "proposalRelation", step: 1, steps: [] });
-        setTargetId(selectedNodeFromChangedNodes.node);
-        return;
-      }
-
-      // --------------------------
-
-      if (userTutorial.proposalReference.forceTutorial) {
-        return forceTutorial("P631lWeKsBtszZRDlmsM", "proposalReference", { editable: true });
-      }
-
-      if (
-        selectedNodeFromChangedNodes &&
-        !userTutorial.proposalReference.done &&
-        !userTutorial.proposalReference.skipped &&
-        selectedNodeFromChangedNodes.nodeType === "Reference"
-      ) {
-        setTutorial({ name: "proposalReference", step: 1, steps: [] });
-        setTargetId(selectedNodeFromChangedNodes.node);
-        return;
-      }
-
-      // --------------------------
-
-      if (userTutorial.proposalIdea.forceTutorial) {
-        return forceTutorial("v9wGPxRCI4DRq11o7uH2", "proposalIdea", { editable: true });
-      }
-
-      if (
-        selectedNodeFromChangedNodes &&
-        !userTutorial.proposalIdea.done &&
-        !userTutorial.proposalIdea.skipped &&
-        selectedNodeFromChangedNodes.nodeType === "Idea"
-      ) {
-        setTutorial({ name: "proposalIdea", step: 1, steps: [] });
-        setTargetId(selectedNodeFromChangedNodes.node);
-        return;
-      }
-
-      // --------------------------
-
-      if (userTutorial.proposalQuestion.forceTutorial) {
-        return forceTutorial("qO9uK6UdYRLWm4Olihlw", "proposalQuestion", { editable: true });
-      }
-
-      if (
-        selectedNodeFromChangedNodes &&
-        !userTutorial.proposalQuestion.done &&
-        !userTutorial.proposalQuestion.skipped &&
-        selectedNodeFromChangedNodes.nodeType === "Question"
-      ) {
-        setTutorial({ name: "proposalQuestion", step: 1, steps: [] });
-        setTargetId(selectedNodeFromChangedNodes.node);
-        return;
-      }
-
-      // --------------------------
-
-      if (userTutorial.proposalCode.forceTutorial) {
-        return forceTutorial("E1nIWQ7RIC3pRLvk0Bk5", "proposalCode", { editable: true });
-      }
-
-      if (
-        selectedNodeFromChangedNodes &&
-        !userTutorial.proposalCode.done &&
-        !userTutorial.proposalCode.skipped &&
-        selectedNodeFromChangedNodes.nodeType === "Code"
-      ) {
-        setTutorial({ name: "proposalCode", step: 1, steps: [] });
-        setTargetId(selectedNodeFromChangedNodes.node);
-        return;
-      }
-
-      // --------------------------
-
-      // const selectedNodeFromGraph = graph.nodes[nodeBookState.selectedNode ?? ""];
-
-      // --------------------------
-
-      if (userTutorial.concept.forceTutorial) {
-        return forceTutorial("r98BjyFDCe4YyLA3U8ZE", "concept");
-      }
-
-      if (
-        selectedNodeFromGraph &&
-        selectedNodeFromGraph.nodeType === "Concept" &&
-        !userTutorial.concept.done &&
-        !userTutorial.concept.skipped
-      ) {
-        setTargetId(selectedNodeFromGraph.node);
-        setTutorial({ name: "concept", step: 1, steps: [] });
-        return;
-      }
-
-      // --------------------------
-
-      if (userTutorial.relation.forceTutorial) {
-        return forceTutorial("zYYmaXvhab7hH2uRI9Up", "relation");
-      }
-
-      if (
-        selectedNodeFromGraph &&
-        selectedNodeFromGraph.nodeType === "Relation" &&
-        !userTutorial.relation.done &&
-        !userTutorial.relation.skipped
-      ) {
-        setTargetId(selectedNodeFromGraph.node);
-        setTutorial({ name: "relation", step: 1, steps: [] });
-        return;
-      }
-
-      // --------------------------
-
-      if (userTutorial.reference.forceTutorial) {
-        return forceTutorial("P631lWeKsBtszZRDlmsM", "reference");
-      }
-
-      if (
-        selectedNodeFromGraph &&
-        selectedNodeFromGraph.nodeType === "Reference" &&
-        !userTutorial.reference.done &&
-        !userTutorial.reference.skipped
-      ) {
-        setTargetId(selectedNodeFromGraph.node);
-        setTutorial({ name: "reference", step: 1, steps: [] });
-        return;
-      }
-
-      // --------------------------
-
-      if (userTutorial.question.forceTutorial) {
-        return forceTutorial("P631lWeKsBtszZRDlmsM", "question");
-      }
-
-      if (
-        selectedNodeFromGraph &&
-        selectedNodeFromGraph.nodeType === "Reference" &&
-        !userTutorial.question.done &&
-        !userTutorial.question.skipped
-      ) {
-        setTargetId(selectedNodeFromGraph.node);
-        setTutorial({ name: "question", step: 1, steps: [] });
-        return;
-      }
-
-      // --------------------------
-
-      if (userTutorial.idea.forceTutorial) {
-        return forceTutorial("v9wGPxRCI4DRq11o7uH2", "idea");
-      }
-
-      if (
-        selectedNodeFromGraph &&
-        selectedNodeFromGraph.nodeType === "Idea" &&
-        !userTutorial.idea.done &&
-        !userTutorial.idea.skipped
-      ) {
-        setTargetId(selectedNodeFromGraph.node);
-        setTutorial({ name: "idea", step: 1, steps: [] });
-        return;
-      }
-
-      // --------------------------
-
-      if (userTutorial.code.forceTutorial) {
-        return forceTutorial("E1nIWQ7RIC3pRLvk0Bk5", "code");
-      }
-
-      if (
-        selectedNodeFromGraph &&
-        selectedNodeFromGraph.nodeType === "Code" &&
-        !userTutorial.code.done &&
-        !userTutorial.code.skipped
-      ) {
-        setTargetId(selectedNodeFromGraph.node);
-        setTutorial({ name: "code", step: 1, steps: [] });
-        return;
-      }
-
-      // --------------------------
-
-      if (userTutorial.reconcilingAcceptedProposal.forceTutorial) {
-        return forceTutorial("zp6PeUOlmejdQTAqK2xX", "reconcilingAcceptedProposal");
-      }
-
-      if (
-        selectedNodeFromGraph &&
-        lastNodeOperation.current === "ProposeProposals" &&
-        !userTutorial.reconcilingAcceptedProposal.done &&
-        !userTutorial.reconcilingAcceptedProposal.skipped
-      ) {
-        const willBeApproved = isVersionApproved({
-          corrects: 1,
-          wrongs: 0,
-          nodeData: selectedNodeFromGraph,
-        });
-        if (!willBeApproved) return;
-
-        setTutorial({ name: "reconcilingAcceptedProposal", step: 1, steps: [] });
-        setTargetId(willBeApproved.node);
-        return;
-      }
-
-      // --------------------------
-
-      if (userTutorial.reconcilingNotAcceptedProposal.forceTutorial) {
-        setOpenSidebar("PROPOSALS");
-        return forceTutorial("r98BjyFDCe4YyLA3U8ZE", "reconcilingNotAcceptedProposal");
-      }
-
-      if (
-        selectedNodeFromGraph &&
-        lastNodeOperation.current === "ProposeProposals" &&
-        !userTutorial.reconcilingNotAcceptedProposal.done &&
-        !userTutorial.reconcilingNotAcceptedProposal.skipped
-      ) {
-        const willBeApproved = isVersionApproved({
-          corrects: 1,
-          wrongs: 0,
-          nodeData: selectedNodeFromGraph,
-        });
-        if (willBeApproved) return;
-
-        setTutorial({ name: "reconcilingNotAcceptedProposal", step: 1, steps: [] });
-        setOpenSidebar("PROPOSALS");
-        setTargetId(willBeApproved.node);
-        return;
-      }
-
-      // --------------------------
-
-      const selectedNodeIdFromTemporalNodes: string =
-        nodeBookState.selectedNode && tempNodes.has(nodeBookState.selectedNode) ? nodeBookState.selectedNode : "";
-      const selectedNodeFromTemporalNode = graph.nodes[selectedNodeIdFromTemporalNodes];
-
-      // --------------------------
-
-      // if (userTutorial.childProposal.forceTutorial || userTutorial.childConcept.forceTutorial) {
-      //   return forceTutorial("r98BjyFDCe4YyLA3U8ZE", "PRE_STEP_CHILD_PROPOSAL");
       // }
 
-      // --------------------------
+      // if (userTutorial.proposal.forceTutorial) {
+      //   return forceTutorial("r98BjyFDCe4YyLA3U8ZE", "proposal", { open: true, editable: true });
+      // }
 
-      if (userTutorial.childProposal.forceTutorial) {
-        return forceTutorial("r98BjyFDCe4YyLA3U8ZE", "childProposal");
-      }
+      // if (selectedNodeFromChangedNodes && !userTutorial.proposal.done && !userTutorial.proposal.skipped) {
+      //   setTutorial({ name: "proposal", step: 1, steps: [] });
+      //   setTargetId(selectedNodeFromChangedNodes.node);
+      //   return;
+      // }
 
-      if (selectedNodeFromTemporalNode && !userTutorial.childProposal.done && !userTutorial.childProposal.skipped) {
-        setTargetId(selectedNodeFromTemporalNode.node);
-        setTutorial({ name: "childProposal", step: 1, steps: [] });
+      // // --------------------------
 
-        return;
-      }
+      // if (userTutorial.proposalConcept.forceTutorial) {
+      //   return forceTutorial("r98BjyFDCe4YyLA3U8ZE", "proposalConcept", { open: true, editable: true });
+      // }
 
-      // --------------------------
+      // if (
+      //   selectedNodeFromChangedNodes &&
+      //   !userTutorial.proposalConcept.done &&
+      //   !userTutorial.proposalConcept.skipped &&
+      //   selectedNodeFromChangedNodes.nodeType === "Concept"
+      // ) {
+      //   setTutorial({ name: "proposalConcept", step: 1, steps: [] });
+      //   setTargetId(selectedNodeFromChangedNodes.node);
+      //   return;
+      // }
 
-      if (userTutorial.childConcept.forceTutorial) {
-        return forceTutorial("r98BjyFDCe4YyLA3U8ZE", "concept");
-      }
+      // // --------------------------
 
-      if (
-        selectedNodeFromTemporalNode &&
-        selectedNodeFromTemporalNode.nodeType === "Concept" &&
-        !userTutorial.childConcept.done &&
-        !userTutorial.childConcept.skipped
-      ) {
-        setTargetId(selectedNodeFromTemporalNode.node);
-        setTutorial({ name: "childConcept", step: 1, steps: [] });
-        return;
-      }
+      // if (userTutorial.proposalRelation.forceTutorial) {
+      //   return forceTutorial("zYYmaXvhab7hH2uRI9Up", "proposalRelation", { open: true, editable: true });
+      // }
+
+      // if (
+      //   selectedNodeFromChangedNodes &&
+      //   !userTutorial.proposalRelation.done &&
+      //   !userTutorial.proposalRelation.skipped &&
+      //   selectedNodeFromChangedNodes.nodeType === "Relation"
+      // ) {
+      //   setTutorial({ name: "proposalRelation", step: 1, steps: [] });
+      //   setTargetId(selectedNodeFromChangedNodes.node);
+      //   return;
+      // }
+
+      // // --------------------------
+
+      // if (userTutorial.proposalReference.forceTutorial) {
+      //   return forceTutorial("P631lWeKsBtszZRDlmsM", "proposalReference", { open: true, editable: true });
+      // }
+
+      // if (
+      //   selectedNodeFromChangedNodes &&
+      //   !userTutorial.proposalReference.done &&
+      //   !userTutorial.proposalReference.skipped &&
+      //   selectedNodeFromChangedNodes.nodeType === "Reference"
+      // ) {
+      //   setTutorial({ name: "proposalReference", step: 1, steps: [] });
+      //   setTargetId(selectedNodeFromChangedNodes.node);
+      //   return;
+      // }
+
+      // // --------------------------
+
+      // if (userTutorial.proposalIdea.forceTutorial) {
+      //   return forceTutorial("v9wGPxRCI4DRq11o7uH2", "proposalIdea", { open: true, editable: true });
+      // }
+
+      // if (
+      //   selectedNodeFromChangedNodes &&
+      //   !userTutorial.proposalIdea.done &&
+      //   !userTutorial.proposalIdea.skipped &&
+      //   selectedNodeFromChangedNodes.nodeType === "Idea"
+      // ) {
+      //   setTutorial({ name: "proposalIdea", step: 1, steps: [] });
+      //   setTargetId(selectedNodeFromChangedNodes.node);
+      //   return;
+      // }
+
+      // // --------------------------
+
+      // if (userTutorial.proposalQuestion.forceTutorial) {
+      //   return forceTutorial("qO9uK6UdYRLWm4Olihlw", "proposalQuestion", { open: true, editable: true });
+      // }
+
+      // if (
+      //   selectedNodeFromChangedNodes &&
+      //   !userTutorial.proposalQuestion.done &&
+      //   !userTutorial.proposalQuestion.skipped &&
+      //   selectedNodeFromChangedNodes.nodeType === "Question"
+      // ) {
+      //   setTutorial({ name: "proposalQuestion", step: 1, steps: [] });
+      //   setTargetId(selectedNodeFromChangedNodes.node);
+      //   return;
+      // }
+
+      // // --------------------------
+
+      // if (userTutorial.proposalCode.forceTutorial) {
+      //   return forceTutorial("E1nIWQ7RIC3pRLvk0Bk5", "proposalCode", { open: true, editable: true });
+      // }
+
+      // if (
+      //   selectedNodeFromChangedNodes &&
+      //   !userTutorial.proposalCode.done &&
+      //   !userTutorial.proposalCode.skipped &&
+      //   selectedNodeFromChangedNodes.nodeType === "Code"
+      // ) {
+      //   setTutorial({ name: "proposalCode", step: 1, steps: [] });
+      //   setTargetId(selectedNodeFromChangedNodes.node);
+      //   return;
+      // }
+
+      // // --------------------------
+
+      // // const selectedNodeFromGraph = graph.nodes[nodeBookState.selectedNode ?? ""];
+
+      // // --------------------------
+
+      // if (userTutorial.concept.forceTutorial) {
+      //   return forceTutorial("r98BjyFDCe4YyLA3U8ZE", "concept", { open: true });
+      // }
+
+      // if (
+      //   selectedNodeFromGraph &&
+      //   selectedNodeFromGraph.nodeType === "Concept" &&
+      //   !userTutorial.concept.done &&
+      //   !userTutorial.concept.skipped
+      // ) {
+      //   setTargetId(selectedNodeFromGraph.node);
+      //   setTutorial({ name: "concept", step: 1, steps: [] });
+      //   return;
+      // }
+
+      // // --------------------------
+
+      // if (userTutorial.relation.forceTutorial) {
+      //   return forceTutorial("zYYmaXvhab7hH2uRI9Up", "relation", { open: true });
+      // }
+
+      // if (
+      //   selectedNodeFromGraph &&
+      //   selectedNodeFromGraph.nodeType === "Relation" &&
+      //   !userTutorial.relation.done &&
+      //   !userTutorial.relation.skipped
+      // ) {
+      //   setTargetId(selectedNodeFromGraph.node);
+      //   setTutorial({ name: "relation", step: 1, steps: [] });
+      //   return;
+      // }
+
+      // // --------------------------
+
+      // if (userTutorial.reference.forceTutorial) {
+      //   return forceTutorial("P631lWeKsBtszZRDlmsM", "reference", { open: true });
+      // }
+
+      // if (
+      //   selectedNodeFromGraph &&
+      //   selectedNodeFromGraph.nodeType === "Reference" &&
+      //   !userTutorial.reference.done &&
+      //   !userTutorial.reference.skipped
+      // ) {
+      //   setTargetId(selectedNodeFromGraph.node);
+      //   setTutorial({ name: "reference", step: 1, steps: [] });
+      //   return;
+      // }
+
+      // // --------------------------
+
+      // if (userTutorial.question.forceTutorial) {
+      //   return forceTutorial("P631lWeKsBtszZRDlmsM", "question", { open: true });
+      // }
+
+      // if (
+      //   selectedNodeFromGraph &&
+      //   selectedNodeFromGraph.nodeType === "Reference" &&
+      //   !userTutorial.question.done &&
+      //   !userTutorial.question.skipped
+      // ) {
+      //   setTargetId(selectedNodeFromGraph.node);
+      //   setTutorial({ name: "question", step: 1, steps: [] });
+      //   return;
+      // }
+
+      // // --------------------------
+
+      // if (userTutorial.idea.forceTutorial) {
+      //   return forceTutorial("v9wGPxRCI4DRq11o7uH2", "idea", { open: true });
+      // }
+
+      // if (
+      //   selectedNodeFromGraph &&
+      //   selectedNodeFromGraph.nodeType === "Idea" &&
+      //   !userTutorial.idea.done &&
+      //   !userTutorial.idea.skipped
+      // ) {
+      //   setTargetId(selectedNodeFromGraph.node);
+      //   setTutorial({ name: "idea", step: 1, steps: [] });
+      //   return;
+      // }
+
+      // // --------------------------
+
+      // if (userTutorial.code.forceTutorial) {
+      //   return forceTutorial("E1nIWQ7RIC3pRLvk0Bk5", "code", { open: true });
+      // }
+
+      // if (
+      //   selectedNodeFromGraph &&
+      //   selectedNodeFromGraph.nodeType === "Code" &&
+      //   !userTutorial.code.done &&
+      //   !userTutorial.code.skipped
+      // ) {
+      //   setTargetId(selectedNodeFromGraph.node);
+      //   setTutorial({ name: "code", step: 1, steps: [] });
+      //   return;
+      // }
+
+      // // --------------------------
+
+      // if (userTutorial.reconcilingAcceptedProposal.forceTutorial) {
+      //   return forceTutorial("zp6PeUOlmejdQTAqK2xX", "reconcilingAcceptedProposal", { open: true });
+      // }
+
+      // if (
+      //   selectedNodeFromGraph &&
+      //   lastNodeOperation.current === "ProposeProposals" &&
+      //   !userTutorial.reconcilingAcceptedProposal.done &&
+      //   !userTutorial.reconcilingAcceptedProposal.skipped
+      // ) {
+      //   const willBeApproved = isVersionApproved({
+      //     corrects: 1,
+      //     wrongs: 0,(
+      // // //   tutorialName: TutorialTypeKeys,
+      // // //   targetId: string,
+      // // //   targetIsInvalid: (node: FullNodeData) => boolean,
+      // // //   defaultStates: Partial<FullNodeData> = { open: true }
+      // // // ) => {
+      // // //   if (
+      // // //     userTutorial[tutorialName].forceTutorial &&
+      // // //     userTutorial[tutorialName].done &&
+      // // //     userTutorial[tutorialName].skipped
+      // // //   )
+      // // //     return;
+
+      // // //   const newTargetId = userTutorial[tutorialName].forceTutorial ? targetId : nodeBookState.selectedNode ?? "";
+
+      // // //   if (!newTargetId) return;
+
+      // // //   const thisNode = graph.nodes[newTargetId];
+      // // //   // const targetIsInvalid = thisNode && !thisNode.open;
+      // // //   if (!thisNode || targetIsInvalid(thisNode)) {
+      // // //     if (!tutorialStateWasSetUpRef.current) {
+      // // //       openNodeHandler(newTargetId, defaultStates);
+      // // //       tutorialStateWasSetUpRef.current = true;
+      // // //     }
+      // // //     return;
+      // // //   }
+
+      // // //   disableForceTutorial(tutorialName);
+      // // //   tutorialStateWasSetUpRef.current = false;
+      // // //   startTutorial(tutorialName);
+      // // //   setTargetId(newTargetId);
+      // // //   return;
+      // // // }
+      //     nodeData: selectedNodeFromGraph,
+      //   });
+      //   if (!willBeApproved) return;
+
+      //   setTutorial({ name: "reconcilingAcceptedProposal", step: 1, steps: [] });
+      //   setTargetId(willBeApproved.node);
+      //   return;
+      // }
+
+      // // --------------------------
+
+      // if (userTutorial.reconcilingNotAcceptedProposal.forceTutorial) {
+      //   setOpenSidebar("PROPOSALS");
+      //   return forceTutorial("r98BjyFDCe4YyLA3U8ZE", "reconcilingNotAcceptedProposal", { open: true });
+      // }
+
+      // if (
+      //   selectedNodeFromGraph &&
+      //   lastNodeOperation.current === "ProposeProposals" &&
+      //   !userTutorial.reconcilingNotAcceptedProposal.done &&
+      //   !userTutorial.reconcilingNotAcceptedProposal.skipped
+      // ) {
+      //   const willBeApproved = isVersionApproved({
+      //     corrects: 1,
+      //     wrongs: 0,
+      //     nodeData: selectedNodeFromGraph,
+      //   });
+      //   if (willBeApproved) return;
+
+      //   setTutorial({ name: "reconcilingNotAcceptedProposal", step: 1, steps: [] });
+      //   setOpenSidebar("PROPOSALS");
+      //   setTargetId(willBeApproved.node);
+      //   return;
+      // }
+
+      // // --------------------------
+
+      // const selectedNodeIdFromTemporalNodes: string =
+      //   nodeBookState.selectedNode && tempNodes.has(nodeBookState.selectedNode) ? nodeBookState.selectedNode : "";
+      // const selectedNodeFromTemporalNode = graph.nodes[selectedNodeIdFromTemporalNodes];
+
+      // // --------------------------
+
+      // // if (userTutorial.childProposal.forceTutorial || userTutorial.childConcept.forceTutorial) {
+      // //   return forceTutorial("r98BjyFDCe4YyLA3U8ZE", "PRE_STEP_CHILD_PROPOSAL");
+      // // }
+
+      // // --------------------------
+
+      // if (userTutorial.childProposal.forceTutorial) {
+      //   return forceTutorial("r98BjyFDCe4YyLA3U8ZE", "childProposal", { open: true });
+      // }
+
+      // if (selectedNodeFromTemporalNode && !userTutorial.childProposal.done && !userTutorial.childProposal.skipped) {
+      //   setTargetId(selectedNodeFromTemporalNode.node);
+      //   setTutorial({ name: "childProposal", step: 1, steps: [] });
+
+      //   return;
+      // }
+
+      // // --------------------------
+
+      // if (userTutorial.childConcept.forceTutorial) {
+      //   return forceTutorial("r98BjyFDCe4YyLA3U8ZE", "childConcept", { open: true });
+      // }
+
+      // if (
+      //   selectedNodeFromTemporalNode &&
+      //   selectedNodeFromTemporalNode.nodeType === "Concept" &&
+      //   !userTutorial.childConcept.done &&
+      //   !userTutorial.childConcept.skipped
+      // ) {
+      //   setTargetId(selectedNodeFromTemporalNode.node);
+      //   setTutorial({ name: "childConcept", step: 1, steps: [] });
+      //   return;
+      // }
     };
     detectTriggerTutorial();
   }, [
+    detectAndCallTutorial,
+    detectAndForceTutorial,
     firstLoading,
-    forceTutorial,
-    graph,
     graph.nodes,
-    nodeBookDispatch,
     nodeBookState.selectedNode,
     openNodeHandler,
     openSidebar,
-    proposeNodeImprovement,
-    scrollToNode,
-    setNodeParts,
     setTargetId,
     setTutorial,
-    targetId,
+    startTutorial,
     tutorial,
     userTutorial,
     userTutorialLoaded,
   ]);
+
+  useEffect(() => {
+    if (!tutorial) return;
+    if (tutorial.name === "childProposal") {
+      const thisNode = graph.nodes[targetId];
+      if (!thisNode) return;
+
+      const childTargetId = thisNode.children.map(cur => cur.node).find(cur => tempNodes.has(cur));
+      if (!childTargetId) return;
+
+      setTargetId(childTargetId);
+    }
+  }, [graph.nodes, setTargetId, targetId, tutorial]);
 
   return (
     <div className="MapContainer" style={{ overflow: "hidden" }}>
@@ -4473,8 +4786,9 @@ const Dashboard = ({}: DashboardProps) => {
               <Typography>Tutorial:</Typography>
               <Box>
                 <Button onClick={() => console.log(tutorial)}>Tutorial</Button>
-                <Button onClick={() => console.log(userTutorial)}>tutorialStep</Button>
+                <Button onClick={() => console.log(userTutorial)}>userTutorial</Button>
                 <Button onClick={() => console.log(targetId)}>targetId</Button>
+                <Button onClick={() => console.log(forcedTutorial)}>forcedTutorial</Button>
               </Box>
 
               <Divider />
@@ -5096,6 +5410,7 @@ const Dashboard = ({}: DashboardProps) => {
               },
               childConcept: { title: "Propose Child Concept Node", steps: CHILD_CONCEPT_PROPOSAL_COMPLETE },
               childProposal: { title: "Child Proposal", steps: CHILD_PROPOSAL_COMPLETE },
+              tmpEditNode: { title: "hide this tmp", steps: [] },
             }}
             userTutorialState={userTutorial}
             onCancelTutorial={() =>
@@ -5107,8 +5422,7 @@ const Dashboard = ({}: DashboardProps) => {
                 return null;
               })
             }
-            setUserTutorialState={setUserTutorial}
-            setInitialStep={setInitialStep}
+            onForceTutorial={setForcedTutorial}
           />
         </Box>
       </Box>

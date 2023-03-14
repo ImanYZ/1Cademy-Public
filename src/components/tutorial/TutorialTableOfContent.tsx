@@ -4,7 +4,7 @@ import CloseIcon from "@mui/icons-material/Close";
 import PlayCircleIcon from "@mui/icons-material/PlayCircle";
 import { Accordion, AccordionDetails, AccordionSummary, Box, IconButton, Typography } from "@mui/material";
 import { Stack } from "@mui/system";
-import React, { Dispatch, SetStateAction, useState } from "react";
+import React, { useState } from "react";
 
 import { TutorialStep, TutorialTypeKeys, UserTutorials } from "../../nodeBookTypes";
 
@@ -16,8 +16,7 @@ type TutorialTableOfContentProps = {
   tutorials: Tutorials;
   userTutorialState: UserTutorials;
   onCancelTutorial: () => void;
-  setUserTutorialState: Dispatch<SetStateAction<UserTutorials>>;
-  setInitialStep: (initialStep: number) => void;
+  onForceTutorial: (keyTutorial: TutorialTypeKeys) => void;
   reloadPermanentGraph: () => void;
 };
 
@@ -27,9 +26,7 @@ const TutorialTableOfContent = ({
   tutorials,
   userTutorialState,
   onCancelTutorial,
-  // setCurrentTutorial,
-  setUserTutorialState,
-  setInitialStep,
+  onForceTutorial,
   reloadPermanentGraph,
 }: TutorialTableOfContentProps) => {
   const [expanded, setExpanded] = useState<string | false>("Option1");
@@ -47,28 +44,12 @@ const TutorialTableOfContent = ({
       onExpandTutorial(option, stage, newExpanded);
     };
 
-  const onStartTutorial = (keyTutorial: TutorialTypeKeys, tutorialIdx: number, stepIdx: number) => {
+  const onStartTutorial = (keyTutorial: TutorialTypeKeys, tutorialIdx: number) => {
     reloadPermanentGraph();
-    setUserTutorialState(previousTutorialStep => {
-      const tutorialStepModified = (Object.keys(previousTutorialStep) as Array<TutorialTypeKeys>).reduce((acu, cur) => {
-        return {
-          ...acu,
-          [cur]: {
-            ...previousTutorialStep[cur],
-            forceTutorial: cur === keyTutorial ? true : false,
-          },
-        };
-      }, {}) as UserTutorials;
-
-      return tutorialStepModified;
-    });
-
+    onForceTutorial(keyTutorial);
     onExpandTutorial(`Option${tutorialIdx + 1}`, keyTutorial, true);
-    setInitialStep(stepIdx + 1);
     onCancelTutorial();
   };
-
-  console.log("loop");
 
   return (
     <Box
@@ -184,7 +165,7 @@ const TutorialTableOfContent = ({
                     <IconButton
                       onClick={e => {
                         e.stopPropagation();
-                        onStartTutorial(keyTutorial, tutorialIdx, idx);
+                        onStartTutorial(keyTutorial, tutorialIdx);
                       }}
                       size={"small"}
                       sx={{ p: "0px" }}
