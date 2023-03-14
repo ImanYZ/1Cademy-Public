@@ -4121,6 +4121,11 @@ const Dashboard = ({}: DashboardProps) => {
       const canDetect = tutorialsIsForced || (!userTutorial[tutorialName].done && !userTutorial[tutorialName].skipped);
 
       console.log("111");
+      const isValidForcedTutorial =
+        forcedTutorial &&
+        ((forcedTutorial === "proposal" && ["proposal"].includes(tutorialName)) ||
+          (forcedTutorial === "childProposal" && ["childProposal", "tmpProposalConceptChild"].includes(tutorialName)));
+      if (!isValidForcedTutorial) return false;
       if (!canDetect) return false;
 
       devLog("DETECT_AND_CALL_TUTORIAL", { tutorialName });
