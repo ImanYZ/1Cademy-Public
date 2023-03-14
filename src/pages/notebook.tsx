@@ -4010,10 +4010,13 @@ const Dashboard = ({}: DashboardProps) => {
     if (!currentStep) return;
     if (!tutorial) return;
 
+    console.log(11111);
     if (tutorial.name === "tmpEditNode") {
       if (currentStep.isClickeable) {
+        console.log(11112);
         proposeNodeImprovement(null, targetId);
       }
+      console.log(11113);
       setTutorial(null);
       return;
     }
@@ -4126,9 +4129,13 @@ const Dashboard = ({}: DashboardProps) => {
           (forcedTutorial === "proposal" && ["proposal"].includes(tutorialName)) ||
           (forcedTutorial === "proposalCode" && ["proposalCode"].includes(tutorialName)) ||
           (forcedTutorial === "childProposal" && ["childProposal"].includes(tutorialName)) ||
-          (forcedTutorial === "tmpProposalConceptChild" && ["tmpProposalConceptChild"].includes(tutorialName))
-        : !["tmpProposalConceptChild"].includes(tutorialName);
+          (forcedTutorial === "tmpEditNode" && ["tmpEditNode"].includes(tutorialName)) ||
+          (forcedTutorial === "tmpProposalConceptChild" && ["tmpProposalConceptChild"].includes(tutorialName)) ||
+          (forcedTutorial === "childConcept" && ["childConcept"].includes(tutorialName))
+        : !["tmpProposalConceptChild", "tmpEditNode"].includes(tutorialName);
+      console.log({ isValidForcedTutorial, thisone: "" });
       if (!isValidForcedTutorial) return false;
+
       if (!canDetect) return false;
 
       devLog("DETECT_AND_CALL_TUTORIAL", { tutorialName });
@@ -4154,8 +4161,12 @@ const Dashboard = ({}: DashboardProps) => {
     (tutorialName: TutorialTypeKeys, targetIsValid: (node: FullNodeData) => boolean) => {
       const tutorialsIsForced = forcedTutorial === tutorialName;
       const canDetect = tutorialsIsForced || (!userTutorial[tutorialName].done && !userTutorial[tutorialName].skipped);
+      const isValidForcedTutorial = forcedTutorial
+        ? forcedTutorial === "childConcept" && ["childConcept"].includes(tutorialName)
+        : !["tmpProposalConceptChild", "tmpEditNode"].includes(tutorialName);
 
       console.log("111");
+      if (!isValidForcedTutorial) return false;
       if (!canDetect) return false;
 
       devLog("DETECT_AND_CALL_CHILD_TUTORIAL", { tutorialName });
@@ -4869,6 +4880,7 @@ const Dashboard = ({}: DashboardProps) => {
       //   return;
       // }
 
+      // ------------------------
       const tmpEditNodeIsValid = (node: FullNodeData) => node && node.open && !node.editable;
       // node child ./
       const childProposalLaunched = detectAndCallChildTutorial(
@@ -4877,17 +4889,24 @@ const Dashboard = ({}: DashboardProps) => {
       );
       console.log({ childProposalLaunched });
       if (childProposalLaunched) return;
-      // node edit ------------------------
 
+      //------------------------
+      const childConceptProposalIsValid = (node: FullNodeData) =>
+        node && Boolean(node.isNew) && node.open && node.editable && node.nodeType === "Concept";
+
+      const childConceptProposalLaunched = detectAndCallChildTutorial("childConcept", childConceptProposalIsValid);
+      if (childConceptProposalLaunched) return;
+
+      // ------------------------
       const proposalConceptChildLaunched = detectAndCallTutorial(
         "tmpProposalConceptChild",
         node => node && node.open && node.editable
       );
       console.log({ proposalConceptChildLaunched });
       if (proposalConceptChildLaunched) return;
-      // node ------------------------------
 
-      if (forcedTutorial === "childProposal") {
+      // ------------------------
+      if (forcedTutorial === "childProposal" || forcedTutorial === "childConcept") {
         const defaultStates = { open: true };
         // const targetIsInvalid = (node: FullNodeData) => !node.open || node.editable;
         const newTargetId = "r98BjyFDCe4YyLA3U8ZE";
@@ -4984,25 +5003,31 @@ const Dashboard = ({}: DashboardProps) => {
       }
     }
     if (tutorial.name === "tmpEditNode") {
+      console.log("111aaa");
       const tmpEditNodeIsValid = (node: FullNodeData) => node && node.open && !node.editable;
       const node = graph.nodes[targetId];
       if (!tmpEditNodeIsValid(node)) {
+        console.log("222aaa");
         setTutorial(null);
         if (node && node.editable) return;
+        console.log("333aaa");
+
         setForcedTutorial(null);
       }
     }
     if (tutorial.name === "tmpProposalConceptChild") {
+      console.log("aaaaaaaa");
       const isValid = (node: FullNodeData) => node && node.open && node.editable;
       const node = graph.nodes[targetId];
       if (!isValid(node)) {
+        console.log("bbbb");
         setTutorial(null);
+        if (node && !node.editable) return;
+        console.log("ccccc");
         setForcedTutorial(null);
       }
     }
   }, [firstLoading, graph.nodes, setTutorial, targetId, tutorial, userTutorialLoaded]);
-
-  console.log({ selectedNode: nodeBookState.selectedNode });
 
   useEffect(() => {
     if (!tutorial) return;
