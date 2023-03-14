@@ -8,6 +8,7 @@ const PDFView = (props: any) => {
         margin: "19px 0px 0px 0px",
         padding: "10px",
         height: props.height,
+        width: "700px",
       }}
     >
       <object data={props.fileUrl} type="application/pdf" width="100%" height="100%">

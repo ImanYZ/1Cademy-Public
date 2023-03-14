@@ -8,12 +8,10 @@ import LaunchIcon from "@mui/icons-material/Launch";
 import LocalOfferIcon from "@mui/icons-material/LocalOffer";
 import MenuBookIcon from "@mui/icons-material/MenuBook";
 import { Box, IconButton, Link, Tooltip } from "@mui/material";
-import React, { MutableRefObject, useCallback, useEffect } from "react";
-import { TNodeBookState } from "src/nodeBookTypes";
+import React, { MutableRefObject, useCallback } from "react";
+import { DispatchNodeBookActions, TNodeBookState } from "src/nodeBookTypes";
 
 // import { useRecoilState, useRecoilValue, useSetRecoilState } from "recoil";
-import { useNodeBook } from "@/context/NodeBookContext";
-
 import { MemoizedMetaButton } from "../MetaButton";
 // import { selectedNodeState } from "../../../../store/MapAtoms";
 // import {
@@ -59,6 +57,7 @@ const separateURL = (text: string, url: string): [boolean, any] => {
 
 type LinkingWordsProps = {
   notebookRef: MutableRefObject<TNodeBookState>;
+  nodeBookDispatch: React.Dispatch<DispatchNodeBookActions>;
   identifier: string;
   editable: any;
   isNew: any;
@@ -74,6 +73,7 @@ type LinkingWordsProps = {
   deleteLink: any;
   openLinkedNode: any;
   openAllChildren: any;
+  openAllParent: any;
   saveProposedChildNode: any;
   saveProposedImprovement: any;
   closeSideBar: any;
@@ -86,19 +86,17 @@ type LinkingWordsProps = {
   enableChildElements?: string[];
 };
 
-const LinkingWords = ({ notebookRef, disabled, enableChildElements = [], ...props }: LinkingWordsProps) => {
-  const { nodeBookState, nodeBookDispatch } = useNodeBook();
+const LinkingWords = ({
+  nodeBookDispatch,
+  notebookRef,
+  disabled,
+  enableChildElements = [],
+  ...props
+}: LinkingWordsProps) => {
   const disableAddReference = disabled;
   const disableAddTag = disabled;
   const disableRemoveReference = disabled;
   const disableRemoveTag = disabled;
-
-  useEffect(() => {
-    props.chosenNodeChanged(props.identifier);
-    props.setAbleToPropose(true);
-    // TODO: check dependencies to remove eslint-disable-next-line
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [nodeBookState.chosenNode]);
 
   // const referenceLabelChangeHandler = useCallback(
   //   (idx: any) => {
@@ -232,7 +230,19 @@ const LinkingWords = ({ notebookRef, disabled, enableChildElements = [], ...prop
                 );
               })}
 
-              {props.editable && !props.isNew && nodeBookState.selectedNode === props.identifier && (
+              <LinkingButton
+                key={props.identifier + "LinkToAllParent"}
+                onClick={props.openAllParent}
+                // nodeID={props.identifier}
+                linkedNodeID={props.identifier}
+                linkedNodeTitle={"All Parents"}
+                linkedNodeType="parents"
+                nodeType={"Relation"}
+                visible={false}
+                disabled={disabled}
+              />
+
+              {props.editable && !props.isNew && notebookRef.current.selectedNode === props.identifier && (
                 <MemoizedMetaButton
                   onClick={choosingNewLinkedNode("Parent")}
                   tooltip="Link to an existing parent node."
@@ -532,7 +542,7 @@ const LinkingWords = ({ notebookRef, disabled, enableChildElements = [], ...prop
                 visible={false}
                 disabled={disabled}
               />
-              {props.editable && !props.isNew && nodeBookState.selectedNode === props.identifier && (
+              {props.editable && !props.isNew && notebookRef.current.selectedNode === props.identifier && (
                 <MemoizedMetaButton
                   onClick={choosingNewLinkedNode("Child")}
                   tooltip="Link to an existing child node."

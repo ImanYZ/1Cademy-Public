@@ -38,6 +38,11 @@ export const orange250 = "#DCA882";
 export const orange800 = "#FF6D00";
 export const orange900 = "#E56200";
 export const darkBase = "#242425";
+export const yellow100 = "#FEF7C3";
+export const warningDark = "#34322E";
+export const green100 = "#D1FADF";
+export const successDark = "#282C29";
+export const orangeLighter = "#faa666";
 
 export const orange25 = "#FFF2EA";
 export const orange200 = "#FFC29C";

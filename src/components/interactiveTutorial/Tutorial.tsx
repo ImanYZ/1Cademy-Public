@@ -1,3 +1,4 @@
+import LiveHelpIcon from "@mui/icons-material/LiveHelp";
 import { Box, Button, Stack, Typography } from "@mui/material";
 import React, { useMemo, useRef } from "react";
 
@@ -26,8 +27,6 @@ export const Tutorial = ({
   onNextStep,
   onPreviousStep,
   handleCloseProgressBarMenu,
-  // onSkipTutorial,
-  // onUpdateNode,
   onSkip,
   onFinalize,
   stepsLength,
@@ -39,12 +38,6 @@ export const Tutorial = ({
     if (!tooltipRef.current) return { top: 0, left: 0 };
     if (!tutorialState) return { top: 0, left: 0 };
 
-    // console.log("rect", {
-    //   targetClientRect,
-    //   tooltipRef: tooltipRef.current.clientHeight,
-    //   tooltipGetClientRects: tooltipRef.current.getClientRects(),
-    //   tooltipGETVoundClientReact: tooltipRef.current.getBoundingClientRect(),
-    // });
     const { height: tooltipHeight } = tooltipRef.current.getBoundingClientRect();
     let top = 0;
     let left = 0;
@@ -65,7 +58,6 @@ export const Tutorial = ({
       top = targetClientRect.top + targetClientRect.height / 2 - tooltipRef.current.clientHeight / 2;
       left = targetClientRect.left + targetClientRect.width + TOOLTIP_OFFSET;
     }
-    // console.log("first new top left", { top, left });
 
     return { top, left };
   }, [targetClientRect, tutorialState]);
@@ -113,9 +105,12 @@ export const Tutorial = ({
           }}
         >
           <Stack direction={"row"} justifyContent="space-between" sx={{ mb: "12px" }}>
-            <Typography component={"h2"} sx={{ fontSize: "18px", fontWeight: "bold", display: "inline-block" }}>
-              {tutorialState.title}
-            </Typography>
+            <Stack direction={"row"} alignItems="center" spacing={"8px"}>
+              <Typography component={"h2"} sx={{ fontSize: "18px", fontWeight: "bold", display: "inline-block" }}>
+                {tutorialState.title}
+              </Typography>
+              <LiveHelpIcon />
+            </Stack>
             {stepsLength <= 1 || (
               <Typography sx={{ display: "inline-block", color: "#818181" }}>
                 {tutorialState.currentStepName} / {stepsLength}
@@ -127,23 +122,8 @@ export const Tutorial = ({
             ? tutorialState.description(node)
             : tutorialState.description}
 
-          <Stack direction={"row"} justifyContent={"space-between"} alignItems={"center"} sx={{ mt: "16px" }}>
-            <Button
-              variant="text"
-              onClick={() => {
-                handleCloseProgressBarMenu();
-                // onChangeStep(null);
-                // onUpdateNode("nodes", tutorialState.currentStepName, {});
-                onSkip();
-              }}
-              sx={{
-                color: "inherit",
-                p: "8px 0px",
-                ":hover": { backgroundColor: theme => (theme.palette.mode === "dark" ? "#575f68" : "#d7dee6") },
-              }}
-            >
-              Skip
-            </Button>
+          {/* INFO: reversed used for showing buttons always to right no matter the number of buttons */}
+          <Stack direction={"row-reverse"} justifyContent={"space-between"} alignItems={"center"} sx={{ mt: "16px" }}>
             <Box>
               {tutorialState.currentStepName > 1 && (
                 <Button
@@ -190,7 +170,6 @@ export const Tutorial = ({
                   variant="contained"
                   onClick={() => {
                     handleCloseProgressBarMenu();
-                    // onNextStep();
                     onFinalize();
                   }}
                   sx={{
@@ -203,10 +182,28 @@ export const Tutorial = ({
                     },
                   }}
                 >
-                  {"Got It"}
+                  Got It
                 </Button>
               )}
             </Box>
+            {tutorialState.currentStepName !== stepsLength && (
+              <Button
+                variant="text"
+                onClick={() => {
+                  handleCloseProgressBarMenu();
+                  // onChangeStep(null);
+                  // onUpdateNode("nodes", tutorialState.currentStepName, {});
+                  onSkip();
+                }}
+                sx={{
+                  color: "inherit",
+                  p: "8px 0px",
+                  ":hover": { backgroundColor: theme => (theme.palette.mode === "dark" ? "#575f68" : "#d7dee6") },
+                }}
+              >
+                Skip
+              </Button>
+            )}
           </Stack>
         </Box>
       </div>
@@ -231,9 +228,12 @@ export const Tutorial = ({
       }}
     >
       <Stack direction={"row"} justifyContent="space-between" sx={{ mb: "12px" }}>
-        <Typography component={"h2"} sx={{ fontSize: "18px", fontWeight: "bold", display: "inline-block" }}>
-          {tutorialState.title}
-        </Typography>
+        <Stack direction={"row"} alignItems="center" spacing={"8px"}>
+          <Typography component={"h2"} sx={{ fontSize: "18px", fontWeight: "bold", display: "inline-block" }}>
+            {tutorialState.title}
+          </Typography>
+          <LiveHelpIcon />
+        </Stack>
         {stepsLength <= 1 || (
           <Typography sx={{ display: "inline-block", color: "inherit" }}>
             {tutorialState.currentStepName} / {stepsLength}
@@ -243,23 +243,8 @@ export const Tutorial = ({
 
       {typeof tutorialState.description === "function" ? tutorialState.description(node) : tutorialState.description}
 
-      <Stack direction={"row"} justifyContent={"space-between"} alignItems={"center"} sx={{ mt: "16px" }}>
-        <Button
-          variant="text"
-          onClick={() => {
-            handleCloseProgressBarMenu();
-            // onChangeStep(null);
-            // onUpdateNode("nodes", tutorialState.currentStepName, {});
-            onSkip();
-          }}
-          sx={{
-            color: "inherit",
-            p: "8px 0px",
-            ":hover": { backgroundColor: theme => (theme.palette.mode === "dark" ? "#575f68" : "#d7dee6") },
-          }}
-        >
-          Skip
-        </Button>
+      {/* INFO: reversed used for showing buttons always to right no matter the number of elements */}
+      <Stack direction={"row-reverse"} justifyContent={"space-between"} alignItems={"center"} sx={{ mt: "16px" }}>
         <Box>
           {tutorialState.currentStepName > 1 && (
             <Button
@@ -296,7 +281,6 @@ export const Tutorial = ({
                   backgroundColor: theme => (theme.palette.mode === "dark" ? gray200 : gray700),
                 },
               }}
-              // disabled={tutorialState.isClickeable}
             >
               Next
             </Button>
@@ -319,10 +303,28 @@ export const Tutorial = ({
                 },
               }}
             >
-              {"Finalize"}
+              Got it
             </Button>
           )}
         </Box>
+        {tutorialState.currentStepName !== stepsLength && (
+          <Button
+            variant="text"
+            onClick={() => {
+              handleCloseProgressBarMenu();
+              // onChangeStep(null);
+              // onUpdateNode("nodes", tutorialState.currentStepName, {});
+              onSkip();
+            }}
+            sx={{
+              color: "inherit",
+              p: "8px 0px",
+              ":hover": { backgroundColor: theme => (theme.palette.mode === "dark" ? "#575f68" : "#d7dee6") },
+            }}
+          >
+            Skip
+          </Button>
+        )}
       </Stack>
     </Box>
   );

@@ -76,7 +76,7 @@ export const useWorkerQueue = ({
       worker.onmessage = e => {
         const { oldMapWidth, oldMapHeight, oldNodes, oldEdges, graph, oldClusterNodes } = e.data;
 
-        console.log("WORKER RESULT", { oldNodes, oldEdges });
+        // console.log("WORKER RESULT", { oldNodes, oldEdges });
 
         const gObject = dagreUtils.mapGraphToObject(g.current);
         const graphObject: GraphObject = graph;
@@ -129,18 +129,26 @@ export const useWorkerQueue = ({
             nodesCopy[nodeId] = overrideNode;
           });
 
-          const edgesCopy = { ...edges };
+          const edgesCopy: EdgesData = { ...edges };
+          const edgeKeys = ["fromX", "fromY", "label", "points", "toX", "toY"];
           Object.keys(edgesCopy).forEach(edgeId => {
             const resultEdge: EdgeData = oldEdges[edgeId];
-            if (!resultEdge) return;
+            if (!resultEdge) {
+              return;
+            }
 
-            edgesCopy[edgeId] = { ...resultEdge };
+            const isChanged = edgeKeys.some(
+              k => resultEdge[k as keyof EdgeData] === edgesCopy[edgeId][k as keyof EdgeData]
+            );
+            if (isChanged) {
+              edgesCopy[edgeId] = { ...resultEdge };
+            }
           });
           setNodeUpdates({
             nodeIds: updatedNodeIds,
             updatedAt: new Date(),
           });
-          console.log("WORKER Result Merged", { nodes: nodesCopy, edges: edgesCopy });
+          // console.log("WORKER Result Merged", { nodes: nodesCopy, edges: edgesCopy });
           return { nodes: nodesCopy, edges: edgesCopy };
         });
 

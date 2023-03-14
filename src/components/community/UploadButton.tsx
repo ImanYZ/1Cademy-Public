@@ -22,7 +22,7 @@ const UploadButton = (props: any) => {
         nameFeild: props.nameFeild,
         function: "uploadButton",
       },
-      "https://1cademy.us/"
+      "*"
     );
     setIsUploading(true);
     setTimeout(() => {
@@ -58,7 +58,7 @@ const UploadButton = (props: any) => {
         </LoadingButton>
       </label>
       {props.uploadError && <Alert severity="warning">{props.uploadError}</Alert>}
-      <PDFView fileUrl={props.fileUrl} height="220px" />
+      <PDFView fileUrl={props.fileUrl} height="500px" />
     </>
   );
 };

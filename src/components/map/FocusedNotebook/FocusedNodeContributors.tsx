@@ -1,7 +1,7 @@
 import { Box, Grid, Typography } from "@mui/material";
 import React from "react";
 
-import { MemoizedHeadlessLeaderboardChip } from "./HeadlessLeaderboardChip";
+import { MemoizedFocusedViewHeadlessLeaderboardChip } from "./HeadlessLeaderboardChip";
 
 const FocusedNodeContributors = ({ contributors, institutions }: any) => {
   return (
@@ -12,7 +12,7 @@ const FocusedNodeContributors = ({ contributors, institutions }: any) => {
       <Grid container spacing={1} sx={{ mt: 0 }}>
         {contributors.map((el: any, idx: number) => (
           <Grid item key={idx}>
-            <MemoizedHeadlessLeaderboardChip
+            <MemoizedFocusedViewHeadlessLeaderboardChip
               key={idx}
               name={el.chooseUname ? el.username : el.fullname}
               imageUrl={el.imageUrl}
@@ -28,7 +28,7 @@ const FocusedNodeContributors = ({ contributors, institutions }: any) => {
       <Grid container spacing={1} sx={{ mt: 0 }}>
         {institutions.map((el: any, idx: number) => (
           <Grid item key={idx}>
-            <MemoizedHeadlessLeaderboardChip
+            <MemoizedFocusedViewHeadlessLeaderboardChip
               key={idx}
               name={el.name}
               imageUrl={el.logoURL}

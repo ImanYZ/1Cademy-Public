@@ -77,7 +77,15 @@ const FocusedTagsList = ({ nodes, node, sx, navigateToNode, loadNodeData }: Tags
               <Chip
                 onClick={() => navigateToNode(node.tagIds[idx])}
                 label={<MarkdownRender text={tag} />}
-                sx={{ p: "20px", color: "black", fontSize: "14px", borderRadius: "20px" }}
+                sx={{
+                  p: "20px",
+                  color: "black",
+                  fontSize: "14px",
+                  borderRadius: "20px",
+                  background: theme => (theme.palette.mode === "dark" ? "#232426" : "#D0D5DD"),
+                  border: theme =>
+                    theme.palette.mode === "dark" ? "1px solid #404040!important" : "1px solid #D0D5DD!important",
+                }}
               />
             </HtmlTooltip>
           );
