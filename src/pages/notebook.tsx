@@ -4121,10 +4121,11 @@ const Dashboard = ({}: DashboardProps) => {
       const canDetect = tutorialsIsForced || (!userTutorial[tutorialName].done && !userTutorial[tutorialName].skipped);
 
       console.log("111");
-      const isValidForcedTutorial =
-        forcedTutorial &&
-        ((forcedTutorial === "proposal" && ["proposal"].includes(tutorialName)) ||
-          (forcedTutorial === "childProposal" && ["childProposal", "tmpProposalConceptChild"].includes(tutorialName)));
+      const isValidForcedTutorial = forcedTutorial
+        ? (forcedTutorial === "nodes" && ["nodes"].includes(tutorialName)) ||
+          (forcedTutorial === "proposal" && ["proposal"].includes(tutorialName)) ||
+          (forcedTutorial === "childProposal" && ["childProposal", "tmpProposalConceptChild"].includes(tutorialName))
+        : true;
       if (!isValidForcedTutorial) return false;
       if (!canDetect) return false;
 
@@ -4299,6 +4300,7 @@ const Dashboard = ({}: DashboardProps) => {
 
       if ((!userTutorial.navigation.done && !userTutorial.navigation.skipped) || forcedTutorial === "navigation") {
         startTutorial("navigation");
+        // TODO: force 1cademy node  if there isn't nodes
         return;
       }
 
@@ -4307,6 +4309,42 @@ const Dashboard = ({}: DashboardProps) => {
       // const selectedNodeFromGraph: FullNodeData | null = nodeBookState.selectedNode
       //   ? graph.nodes[nodeBookState.selectedNode]
       //   : null;
+
+      // --------------------------
+
+      const nodesTutorialIsValid = (node: FullNodeData) => node && node.open;
+
+      const nodesTutorialLaunched = detectAndCallTutorial("nodes", nodesTutorialIsValid);
+      if (nodesTutorialLaunched) return;
+
+      if (forcedTutorial === "nodes") {
+        const defaultStates = { open: true };
+        const newTargetId = "r98BjyFDCe4YyLA3U8ZE";
+        const thisNode = graph.nodes[newTargetId];
+        console.log(11);
+        if (!nodesTutorialIsValid(thisNode)) {
+          if (!tutorialStateWasSetUpRef.current) {
+            console.log(12);
+            openNodeHandler(newTargetId, defaultStates);
+            tutorialStateWasSetUpRef.current = true;
+          }
+          return;
+        }
+
+        console.log(13);
+        tutorialStateWasSetUpRef.current = false;
+        nodeBookDispatch({ type: "setSelectedNode", payload: newTargetId });
+        notebookRef.current.selectedNode = newTargetId;
+        startTutorial("nodes");
+        setTargetId(newTargetId);
+
+        setNodeUpdates({
+          nodeIds: [newTargetId],
+          updatedAt: new Date(),
+        });
+
+        return;
+      }
 
       // --------------------------
 
