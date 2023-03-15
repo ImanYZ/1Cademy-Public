@@ -186,7 +186,7 @@ const ReputationlinessBar = (props: ILivelinessBarProps) => {
           right: "0px",
           zIndex: 1199,
           position: "absolute",
-          height: `calc(100% - ${window.innerHeight > 799 ? "275px" : "345px"})`,
+          height: `calc(100% - ${window.innerHeight > 799 ? "375px" : "345px"})`,
         }}
       >
         <Box
@@ -202,7 +202,7 @@ const ReputationlinessBar = (props: ILivelinessBarProps) => {
             height: "100%",
             transform: !open ? "translate(calc(100%), 0px)" : null,
             transition: "all 0.2s 0s ease",
-            padding: "0px 0px 0px 32px",
+            padding: "0px 0px 0px 28px",
           }}
         >
           <Tooltip title={"24-hour Points Leaderboard."} placement="left">
