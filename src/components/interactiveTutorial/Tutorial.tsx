@@ -4,8 +4,7 @@ import React, { useMemo, useRef } from "react";
 
 import { gray50, gray200, gray700, gray800 } from "@/pages/home";
 
-import { TargetClientRect } from "../../hooks/useInteractiveTutorial";
-import { Tutorial } from "../../hooks/useInteractiveTutorial3";
+import { TargetClientRect, Tutorial } from "../../hooks/useInteractiveTutorial3";
 import { FullNodeData, TutorialStep } from "../../nodeBookTypes";
 
 const TOOLTIP_OFFSET = 40;

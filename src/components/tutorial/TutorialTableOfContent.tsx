@@ -106,33 +106,45 @@ const TutorialTableOfContent = ({
                   "& .MuiAccordionSummary-content": { m: "0px" },
                 }}
               >
-                <Box
+                <Stack
+                  direction={"row"}
+                  alignItems={"center"}
+                  spacing={"10px"}
                   sx={{
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "space-between",
                     width: "100%",
                     p: "18px 24px",
                   }}
                 >
-                  <Typography
-                    component={"h4"}
-                    variant={"h4"}
-                    sx={{
-                      cursor: "pointer",
+                  <IconButton
+                    onClick={e => {
+                      e.stopPropagation();
+                      onStartTutorial(keyTutorial, tutorialIdx);
                     }}
+                    size={"small"}
+                    sx={{ p: "0px" }}
                   >
-                    {tutorials[keyTutorial].title.slice(0, 20)}
-                    {tutorials[keyTutorial].title.length > 20 && "..."}
-                  </Typography>
-                  <ArrowForwardIosSharpIcon
-                    fontSize="small"
-                    sx={{
-                      transform: `rotate(${expanded === `Option${tutorialIdx + 1}` ? "-90deg" : "90deg"})`,
-                      transition: "transform 100ms linear",
-                    }}
-                  />
-                </Box>
+                    <PlayCircleIcon />
+                  </IconButton>
+                  <Box sx={{ display: "flex", flexGrow: 1, alignItems: "center", justifyContent: "space-between" }}>
+                    <Typography
+                      component={"h4"}
+                      variant={"h4"}
+                      sx={{
+                        cursor: "pointer",
+                      }}
+                    >
+                      {tutorials[keyTutorial].title.slice(0, 20)}
+                      {tutorials[keyTutorial].title.length > 20 && "..."}
+                    </Typography>
+                    <ArrowForwardIosSharpIcon
+                      fontSize="small"
+                      sx={{
+                        transform: `rotate(${expanded === `Option${tutorialIdx + 1}` ? "-90deg" : "90deg"})`,
+                        transition: "transform 100ms linear",
+                      }}
+                    />
+                  </Box>
+                </Stack>
               </AccordionSummary>
               <AccordionDetails sx={{ p: "0px" }}>
                 <Stack component={"ul"} m={0} p={"0px"} sx={{ listStyle: "none" }}>
@@ -142,38 +154,24 @@ const TutorialTableOfContent = ({
                       component={"li"}
                       direction={"row"}
                       alignItems="center"
-                      justifyContent={"space-between"}
                       spacing={"8px"}
                       sx={{ p: "12px 24px" }}
                     >
-                      <Stack key={cur.title} component={"li"} direction={"row"} alignItems="center" spacing={"8px"}>
-                        {userTutorialState[keyTutorial].currentStep >= idx + 1 && (
-                          <CheckCircleIcon fontSize="small" color={"success"} />
-                        )}
+                      {userTutorialState[keyTutorial].currentStep >= idx + 1 && (
+                        <CheckCircleIcon fontSize="small" color={"success"} />
+                      )}
 
-                        <Typography
-                          sx={{
-                            display: "inline-block",
-                            color: theme => (theme.palette.mode === "light" ? "#1d2229" : "#EAECF0"),
-                            opacity: "0.5",
-                            ml: userTutorialState[keyTutorial].currentStep > idx + 1 ? "0px" : "28px",
-                          }}
-                          fontSize={"16px"}
-                        >
-                          {cur.title}
-                        </Typography>
-                      </Stack>
-
-                      <IconButton
-                        onClick={e => {
-                          e.stopPropagation();
-                          onStartTutorial(keyTutorial, tutorialIdx);
+                      <Typography
+                        sx={{
+                          display: "inline-block",
+                          color: theme => (theme.palette.mode === "light" ? "#1d2229" : "#EAECF0"),
+                          opacity: "0.5",
+                          ml: userTutorialState[keyTutorial].currentStep > idx + 1 ? "0px" : "28px",
                         }}
-                        size={"small"}
-                        sx={{ p: "0px" }}
+                        fontSize={"16px"}
                       >
-                        <PlayCircleIcon />
-                      </IconButton>
+                        {cur.title}
+                      </Typography>
                     </Stack>
                   ))}
                 </Stack>
