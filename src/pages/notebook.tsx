@@ -5121,44 +5121,50 @@ const Dashboard = ({}: DashboardProps) => {
       if (childProposalLaunched) return;
 
       //------------------------
+
       const childConceptProposalIsValid = (node: FullNodeData) =>
         node && Boolean(node.isNew) && node.open && node.editable && node.nodeType === "Concept";
-
       const childConceptProposalLaunched = detectAndCallChildTutorial("childConcept", childConceptProposalIsValid);
       if (childConceptProposalLaunched) return;
+
       //------------------------
+
       const relationChildProposalIsValid = (node: FullNodeData) =>
         node && Boolean(node.isNew) && node.open && node.editable && node.nodeType === "Relation";
-
       const childRelationProposalLaunched = detectAndCallChildTutorial("childRelation", relationChildProposalIsValid);
       if (childRelationProposalLaunched) return;
+
       // ------------------------
+
       const referenceChildProposalIsValid = (node: FullNodeData) =>
         node && Boolean(node.isNew) && node.open && node.editable && node.nodeType === "Reference";
-
       const childReferenceProposalLaunched = detectAndCallChildTutorial(
         "childReference",
         referenceChildProposalIsValid
       );
       if (childReferenceProposalLaunched) return;
+
       // ------------------------
+
       const questionChildProposalIsValid = (node: FullNodeData) =>
         node && Boolean(node.isNew) && node.open && node.editable && node.nodeType === "Question";
-
       const childQuestionProposalLaunched = detectAndCallChildTutorial("childQuestion", questionChildProposalIsValid);
       if (childQuestionProposalLaunched) return;
+
       // ------------------------
+
       const ideaChildProposalIsValid = (node: FullNodeData) =>
         node && Boolean(node.isNew) && node.open && node.editable && node.nodeType === "Idea";
-
       const childIdeaProposalLaunched = detectAndCallChildTutorial("childIdea", ideaChildProposalIsValid);
       if (childIdeaProposalLaunched) return;
+
       // ------------------------
+
       const codeChildProposalIsValid = (node: FullNodeData) =>
         node && Boolean(node.isNew) && node.open && node.editable && node.nodeType === "Code";
-
       const childCodeProposalLaunched = detectAndCallChildTutorial("childCode", codeChildProposalIsValid);
       if (childCodeProposalLaunched) return;
+
       // ------------------------
 
       const proposalConceptChildLaunched = detectAndCallTutorial(
