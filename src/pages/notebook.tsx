@@ -4749,7 +4749,7 @@ const Dashboard = ({}: DashboardProps) => {
             id="RightButtonsdMain"
             className={buttonsOpen ? undefined : "Minimized"}
             sx={{
-              width: { xs: "70%", md: "15%" },
+              width: { xs: "80%", md: "18%" },
               opacity: 1,
               cursor: "pointer",
               top: {
@@ -4762,51 +4762,29 @@ const Dashboard = ({}: DashboardProps) => {
               },
             }}
           >
-            <Box id="RightButtonsMinimizer">
-              <Box
-                onClick={() => setButtonsOpen(!buttonsOpen)}
-                sx={{
-                  display: "flex",
-                  flexDirection: "column",
-                  alignItems: "center",
-                  marginLeft: "10px",
-                  marginTop: "20px",
-                }}
-              >
-                <Box>
-                  {buttonsOpen ? (
-                    <ArrowForwardIosIcon
-                      sx={{ color: theme => (theme.palette.mode === "dark" ? "#A4A4A4" : "#98A2B3") }}
-                    />
-                  ) : (
-                    <ArrowForwardIosIcon
-                      sx={{
-                        color: theme => (theme.palette.mode === "dark" ? "#A4A4A4" : "#98A2B3"),
-                        transform: "scaleX(-1)",
-                      }}
-                    />
-                  )}
-                </Box>
-              </Box>
-            </Box>
             <Box
               sx={{
                 position: "fixed",
-                right: "0px",
+                width: "60px",
+                right: "8px",
                 background: theme => (theme.palette.mode === "dark" ? "#1F1F1F" : "#f2f4f7"),
-                height: "65px",
-                borderLeft: theme =>
-                  buttonsOpen ? (theme.palette.mode === "dark" ? "solid 1px 575757" : "solid 1px #d0d5dd") : undefined,
+                height: "60px",
+                borderRadius: buttonsOpen ? "0px 8px 8px 0px" : "8px",
+                padding: "10px",
                 zIndex: 999999,
-                cursor: "auto",
               }}
+              onClick={() => setButtonsOpen(true)}
             >
               <IconButton
                 color="secondary"
                 sx={{
-                  marginTop: "12px",
+                  ":hover": {
+                    width: "40px",
+                    height: "40px",
+                    borderRadius: "8px",
+                    background: buttonsOpen ? "#55402B" : "inherit",
+                  },
                 }}
-                disabled={true}
               >
                 <NextImage
                   src={
@@ -4837,20 +4815,46 @@ const Dashboard = ({}: DashboardProps) => {
                 className="RightButtonsItems"
                 sx={{
                   width: "100%",
-                  paddingRight: "80px",
                   display: "flex",
                   justifyContent: "flex-start",
                   alignItems: "center",
-                  gap: "10px",
+                  gap: {
+                    xs: "5px",
+                    md: "10px",
+                  },
                   height: "inherit",
                 }}
               >
+                <Box id="RightButtonsMinimizer">
+                  <Box
+                    onClick={() => setButtonsOpen(false)}
+                    sx={{
+                      display: "flex",
+                      flexDirection: "column",
+                      alignItems: "center",
+                      marginLeft: "10px",
+                      marginTop: "24px",
+                    }}
+                  >
+                    <Box>
+                      <ArrowForwardIosIcon
+                        fontSize="inherit"
+                        sx={{
+                          color: theme => (theme.palette.mode === "dark" ? "#A4A4A4" : "#98A2B3"),
+                        }}
+                      />
+                    </Box>
+                  </Box>
+                </Box>
                 {isQueueWorking && buttonsOpen && (
                   <CircularProgress
                     size={46}
                     sx={{
                       position: "absolute",
-                      left: "33px",
+                      left: {
+                        xs: "32px",
+                        md: "37px",
+                      },
                       zIndex: "1300",
                     }}
                   />

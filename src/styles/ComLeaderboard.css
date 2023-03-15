@@ -3,10 +3,10 @@
   /* grid-template-columns: 145px auto; */
   align-items: center;
   position: fixed;
-  right: 45px;
+  right: 18px;
   bottom: 0px;
   top: 1px;
-  height: 65px;
+  height: 60px;
   z-index: 1;
   -o-transition: width 1s; /* opera */
   -ms-transition: width 1s; /* IE 10 */
@@ -16,7 +16,7 @@
 }
 
 #RightButtonsdMain.Minimized {
-  width: 35px;
+  width: 0px;
 }
 
 #RightButtonsMinimizer {
@@ -37,19 +37,23 @@
 }
 
 #RightButtonsContainer {
+  border-top-left-radius: 8px;
+  border-bottom-left-radius: 8px;
   margin-right: 50px;
   height: 100%;
   width: 100%;
   background-color: rgb(31, 31, 31);
+  border-right: solid 1px #575757;
 }
 .LightMode #RightButtonsContainer {
   background-color: #f2f4f7;
+  border-right: solid 1px #d0d5dd;
 }
 
 .RightButtonsItems {
   overflow-x: hidden;
   overflow-y: hidden;
-  padding-left: 5px;
+  padding-left: 0px;
 }
 
 #ComLeaderboardMain {
