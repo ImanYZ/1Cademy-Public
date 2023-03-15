@@ -4749,7 +4749,7 @@ const Dashboard = ({}: DashboardProps) => {
             id="RightButtonsdMain"
             className={buttonsOpen ? undefined : "Minimized"}
             sx={{
-              width: { xs: "80%", md: "18%" },
+              width: { xs: "80%", sm: "37%", md: "18%" },
               opacity: 1,
               cursor: "pointer",
               top: {
@@ -4771,10 +4771,21 @@ const Dashboard = ({}: DashboardProps) => {
                 height: "60px",
                 borderRadius: buttonsOpen ? "0px 8px 8px 0px" : "8px",
                 padding: "10px",
-                zIndex: 999999,
+                zIndex: 1299,
               }}
               onClick={() => setButtonsOpen(true)}
             >
+              {isQueueWorking && (
+                <CircularProgress
+                  size={46}
+                  sx={{
+                    position: "absolute",
+                    right: "7px",
+                    bottom: "7px",
+                    zIndex: "1300",
+                  }}
+                />
+              )}
               <IconButton
                 color="secondary"
                 sx={{
@@ -4846,20 +4857,6 @@ const Dashboard = ({}: DashboardProps) => {
                     </Box>
                   </Box>
                 </Box>
-                {isQueueWorking && buttonsOpen && (
-                  <CircularProgress
-                    size={46}
-                    sx={{
-                      position: "absolute",
-                      left: {
-                        xs: "32px",
-                        md: "37px",
-                      },
-                      zIndex: "1300",
-                    }}
-                  />
-                )}
-
                 <Tooltip title="Scroll to last Selected Node" placement="bottom">
                   {/* <span> */}
                   <IconButton
