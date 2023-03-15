@@ -5126,8 +5126,41 @@ const Dashboard = ({}: DashboardProps) => {
 
       const childConceptProposalLaunched = detectAndCallChildTutorial("childConcept", childConceptProposalIsValid);
       if (childConceptProposalLaunched) return;
+      //------------------------
+      const relationChildProposalIsValid = (node: FullNodeData) =>
+        node && Boolean(node.isNew) && node.open && node.editable && node.nodeType === "Relation";
 
+      const childRelationProposalLaunched = detectAndCallChildTutorial("childRelation", relationChildProposalIsValid);
+      if (childRelationProposalLaunched) return;
       // ------------------------
+      const referenceChildProposalIsValid = (node: FullNodeData) =>
+        node && Boolean(node.isNew) && node.open && node.editable && node.nodeType === "Reference";
+
+      const childReferenceProposalLaunched = detectAndCallChildTutorial(
+        "childReference",
+        referenceChildProposalIsValid
+      );
+      if (childReferenceProposalLaunched) return;
+      // ------------------------
+      const questionChildProposalIsValid = (node: FullNodeData) =>
+        node && Boolean(node.isNew) && node.open && node.editable && node.nodeType === "Question";
+
+      const childQuestionProposalLaunched = detectAndCallChildTutorial("childQuestion", questionChildProposalIsValid);
+      if (childQuestionProposalLaunched) return;
+      // ------------------------
+      const ideaChildProposalIsValid = (node: FullNodeData) =>
+        node && Boolean(node.isNew) && node.open && node.editable && node.nodeType === "Idea";
+
+      const childIdeaProposalLaunched = detectAndCallChildTutorial("childIdea", ideaChildProposalIsValid);
+      if (childIdeaProposalLaunched) return;
+      // ------------------------
+      const codeChildProposalIsValid = (node: FullNodeData) =>
+        node && Boolean(node.isNew) && node.open && node.editable && node.nodeType === "Code";
+
+      const childCodeProposalLaunched = detectAndCallChildTutorial("childCode", codeChildProposalIsValid);
+      if (childCodeProposalLaunched) return;
+      // ------------------------
+
       const proposalConceptChildLaunched = detectAndCallTutorial(
         "tmpProposalConceptChild",
         node => node && node.open && node.editable
@@ -5223,6 +5256,33 @@ const Dashboard = ({}: DashboardProps) => {
         // console.log("remove node t");
       }
     }
+    const conceptTutorialIsValid = (thisNode: FullNodeData) =>
+      thisNode && thisNode.open && thisNode.nodeType === "Concept";
+    detectAndRemoveTutorial("concept", conceptTutorialIsValid);
+
+    // --------------------------
+
+    const relationTutorialIsValid = (thisNode: FullNodeData) =>
+      thisNode && thisNode.open && thisNode.nodeType === "Relation";
+    detectAndRemoveTutorial("relation", relationTutorialIsValid);
+
+    // --------------------------
+    const referenceTutorialIsValid = (thisNode: FullNodeData) =>
+      thisNode && thisNode.open && thisNode.nodeType === "Reference";
+    detectAndRemoveTutorial("reference", referenceTutorialIsValid);
+
+    // --------------------------
+    const questionTutorialIsValid = (thisNode: FullNodeData) =>
+      thisNode && thisNode.open && thisNode.nodeType === "Question";
+    detectAndRemoveTutorial("question", questionTutorialIsValid);
+
+    // --------------------------
+    const ideaTutorialIsValid = (thisNode: FullNodeData) => thisNode && thisNode.open && thisNode.nodeType === "Idea";
+    detectAndRemoveTutorial("idea", ideaTutorialIsValid);
+
+    // --------------------------
+    const codeTutorialIsValid = (thisNode: FullNodeData) => thisNode && thisNode.open && thisNode.nodeType === "Code";
+    detectAndRemoveTutorial("code", codeTutorialIsValid);
     // --------------------------
     const conceptProposalTutorialIsValid = (thisNode: FullNodeData) =>
       thisNode && thisNode.open && thisNode.editable && thisNode.nodeType === "Concept";
@@ -5256,34 +5316,6 @@ const Dashboard = ({}: DashboardProps) => {
     //   }
     // }
     // --------------------------
-
-    const conceptTutorialIsValid = (thisNode: FullNodeData) =>
-      thisNode && thisNode.open && thisNode.nodeType === "Concept";
-    detectAndRemoveTutorial("concept", conceptTutorialIsValid);
-
-    // --------------------------
-
-    const relationTutorialIsValid = (thisNode: FullNodeData) =>
-      thisNode && thisNode.open && thisNode.nodeType === "Relation";
-    detectAndRemoveTutorial("relation", relationTutorialIsValid);
-
-    // --------------------------
-    const referenceTutorialIsValid = (thisNode: FullNodeData) =>
-      thisNode && thisNode.open && thisNode.nodeType === "Reference";
-    detectAndRemoveTutorial("reference", referenceTutorialIsValid);
-
-    // --------------------------
-    const questionTutorialIsValid = (thisNode: FullNodeData) =>
-      thisNode && thisNode.open && thisNode.nodeType === "Question";
-    detectAndRemoveTutorial("question", questionTutorialIsValid);
-
-    // --------------------------
-    const ideaTutorialIsValid = (thisNode: FullNodeData) => thisNode && thisNode.open && thisNode.nodeType === "Idea";
-    detectAndRemoveTutorial("idea", ideaTutorialIsValid);
-
-    // --------------------------
-    const codeTutorialIsValid = (thisNode: FullNodeData) => thisNode && thisNode.open && thisNode.nodeType === "Code";
-    detectAndRemoveTutorial("code", codeTutorialIsValid);
 
     // --------------------------
     if (tutorial.name === "childConcept") {
