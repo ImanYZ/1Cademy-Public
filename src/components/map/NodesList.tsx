@@ -2,7 +2,7 @@ import React, { MutableRefObject } from "react";
 import { FullNodeData, TNodeBookState, TNodeUpdates } from "src/nodeBookTypes";
 
 import { useNodeBook } from "@/context/NodeBookContext";
-import { compareNodes, NODE_WIDTH } from "@/lib/utils/Map.utils";
+import { NODE_WIDTH } from "@/lib/utils/Map.utils";
 import { OpenSidebar } from "@/pages/notebook";
 
 import { MemoizedNode } from "./Node";
@@ -280,8 +280,7 @@ export const MemoizedNodeList = React.memo(NodesList, (prev, next) => {
   };
 
   return (
-    (prev.nodeUpdates.updatedAt === next.nodeUpdates.updatedAt ||
-      (!!next.showProposeTutorial && compareNodes(prev.nodes, next.nodes))) &&
+    prev.nodeUpdates.updatedAt === next.nodeUpdates.updatedAt &&
     prev.bookmark === next.bookmark &&
     prev.markStudied === next.markStudied &&
     prev.chosenNodeChanged === next.chosenNodeChanged &&
@@ -310,7 +309,6 @@ export const MemoizedNodeList = React.memo(NodesList, (prev, next) => {
     prev.closeSideBar === next.closeSideBar &&
     prev.reloadPermanentGrpah === next.reloadPermanentGrpah &&
     prev.openSidebar === prev.openSidebar && // TODO: check this
-    prev.showProposeTutorial === next.showProposeTutorial &&
     validateTutorialProps()
   );
 });
