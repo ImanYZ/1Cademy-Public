@@ -294,7 +294,7 @@ const Dashboard = ({}: DashboardProps) => {
   });
 
   const [openSidebar, setOpenSidebar] = useState<OpenSidebar>(null);
-  const [buttonsOpen, setButtonsOpen] = useState<boolean>(false);
+  const [buttonsOpen, setButtonsOpen] = useState<boolean>(true);
 
   // object of cluster boundaries
   const [clusterNodes, setClusterNodes] = useState({});
@@ -4767,7 +4767,7 @@ const Dashboard = ({}: DashboardProps) => {
                 position: "fixed",
                 width: "60px",
                 right: "8px",
-                background: theme => (theme.palette.mode === "dark" ? "#1F1F1F" : "#f2f4f7"),
+                background: theme => (theme.palette.mode === "dark" ? "#2F2F2F" : "#f2f4f7"),
                 height: "60px",
                 borderRadius: buttonsOpen ? "0px 8px 8px 0px" : "8px",
                 padding: "10px",

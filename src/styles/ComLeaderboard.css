@@ -27,7 +27,7 @@
   height: 65px;
   padding-right: 10px;
   border-radius: 10px 0px 0px 10px;
-  background-color: rgb(31, 31, 31);
+  background-color: #2f2f2f;
   border-right: solid 1px #575757;
 }
 
@@ -42,7 +42,7 @@
   margin-right: 50px;
   height: 100%;
   width: 100%;
-  background-color: rgb(31, 31, 31);
+  background-color: #2f2f2f;
   border-right: solid 1px #575757;
 }
 .LightMode #RightButtonsContainer {
