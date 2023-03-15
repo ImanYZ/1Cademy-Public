@@ -33,7 +33,15 @@ import { PROPOSING_IDEA_EDIT_COMPLETE } from "../lib/utils/tutorials/proposalIde
 import { PROPOSING_QUESTION_EDIT_COMPLETE } from "../lib/utils/tutorials/proposalQuestionTutorialSteps";
 import { PROPOSING_REFERENCE_EDIT_COMPLETE } from "../lib/utils/tutorials/proposalReferenceTutorialSteps";
 import { PROPOSING_RELATION_EDIT_COMPLETE } from "../lib/utils/tutorials/proposalRelationTutorialSteps";
-import { TMP_EDIT_NODE, TMP_PROPOSE_CHILD_CONCEPT } from "../lib/utils/tutorials/temporalTutorialSteps";
+import {
+  TMP_EDIT_NODE,
+  TMP_PROPOSE_CHILD_CODE,
+  TMP_PROPOSE_CHILD_CONCEPT,
+  TMP_PROPOSE_CHILD_IDEA,
+  TMP_PROPOSE_CHILD_QUESTION,
+  TMP_PROPOSE_CHILD_REFERENCE,
+  TMP_PROPOSE_CHILD_RELATION,
+} from "../lib/utils/tutorials/temporalTutorialSteps";
 import { TutorialStep, TutorialTypeKeys, UserTutorials } from "../nodeBookTypes";
 import useEventListener from "./useEventListener";
 
@@ -94,7 +102,11 @@ export const useInteractiveTutorial = ({ user }: useInteractiveTutorialProps) =>
     childCode: { currentStep: -1, done: false, skipped: false },
     tmpEditNode: { currentStep: -1, done: false, skipped: false },
     tmpProposalConceptChild: { currentStep: -1, done: false, skipped: false },
-    tmpProposal: { currentStep: -1, done: false, skipped: false },
+    tmpProposalRelationChild: { currentStep: -1, done: false, skipped: false },
+    tmpProposalReferenceChild: { currentStep: -1, done: false, skipped: false },
+    tmpProposalQuestionChild: { currentStep: -1, done: false, skipped: false },
+    tmpProposalIdeaChild: { currentStep: -1, done: false, skipped: false },
+    tmpProposalCodeChild: { currentStep: -1, done: false, skipped: false },
   });
 
   // flag for whether tutorial state was loaded
@@ -215,6 +227,21 @@ export const useInteractiveTutorial = ({ user }: useInteractiveTutorialProps) =>
 
       if (newTutorial === "tmpProposalConceptChild") {
         newSteps = TMP_PROPOSE_CHILD_CONCEPT;
+      }
+      if (newTutorial === "tmpProposalRelationChild") {
+        newSteps = TMP_PROPOSE_CHILD_RELATION;
+      }
+      if (newTutorial === "tmpProposalReferenceChild") {
+        newSteps = TMP_PROPOSE_CHILD_REFERENCE;
+      }
+      if (newTutorial === "tmpProposalQuestionChild") {
+        newSteps = TMP_PROPOSE_CHILD_QUESTION;
+      }
+      if (newTutorial === "tmpProposalIdeaChild") {
+        newSteps = TMP_PROPOSE_CHILD_IDEA;
+      }
+      if (newTutorial === "tmpProposalCodeChild") {
+        newSteps = TMP_PROPOSE_CHILD_CODE;
       }
 
       setUserTutorial(prev => ({

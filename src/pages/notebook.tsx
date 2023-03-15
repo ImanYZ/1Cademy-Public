@@ -5165,15 +5165,53 @@ const Dashboard = ({}: DashboardProps) => {
       const childCodeProposalLaunched = detectAndCallChildTutorial("childCode", codeChildProposalIsValid);
       if (childCodeProposalLaunched) return;
 
-      // ------------------------
+      // // ------------------------
 
-      const proposalConceptChildLaunched = detectAndCallTutorial(
-        "tmpProposalConceptChild",
-        node => node && node.open && node.editable
-      );
-      console.log({ proposalConceptChildLaunched });
-      if (proposalConceptChildLaunched) return;
+      // const proposalConceptChildLaunched = detectAndCallTutorial(
+      //   "tmpProposalConceptChild",
+      //   node => node && node.open && node.editable
+      // );
+      // console.log({ proposalConceptChildLaunched });
+      // if (proposalConceptChildLaunched) return;
+      // // ------------------------
 
+      // const proposalRelationChildLaunched = detectAndCallTutorial(
+      //   "tmpProposalRelationChild",
+      //   node => node && node.open && node.editable
+      // );
+      // console.log({ proposalRelationChildLaunched });
+      // if (proposalRelationChildLaunched) return;
+      // // ------------------------
+
+      // const proposalConceptChildLaunched = detectAndCallTutorial(
+      //   "tmpProposalConceptChild",
+      //   node => node && node.open && node.editable
+      // );
+      // console.log({ proposalConceptChildLaunched });
+      // if (proposalConceptChildLaunched) return;
+      // // ------------------------
+
+      // const proposalConceptChildLaunched = detectAndCallTutorial(
+      //   "tmpProposalConceptChild",
+      //   node => node && node.open && node.editable
+      // );
+      // console.log({ proposalConceptChildLaunched });
+      // if (proposalConceptChildLaunched) return;
+      // // ------------------------
+
+      // const proposalConceptChildLaunched = detectAndCallTutorial(
+      //   "tmpProposalConceptChild",
+      //   node => node && node.open && node.editable
+      // );
+      // console.log({ proposalConceptChildLaunched });
+      // if (proposalConceptChildLaunched) return;
+      // // ------------------------
+      // const proposalConceptChildLaunched = detectAndCallTutorial(
+      //   "tmpProposalConceptChild",
+      //   node => node && node.open && node.editable
+      // );
+      // console.log({ proposalConceptChildLaunched });
+      // if (proposalConceptChildLaunched) return;
       // ------------------------
       if (forcedTutorial === "childProposal" || forcedTutorial === "childConcept") {
         const defaultStates = { open: true };
