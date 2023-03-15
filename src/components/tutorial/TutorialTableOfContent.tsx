@@ -8,7 +8,7 @@ import React, { useState } from "react";
 
 import { TutorialStep, TutorialTypeKeys, UserTutorials } from "../../nodeBookTypes";
 
-type Tutorials = { [key in TutorialTypeKeys]: { title: string; steps: TutorialStep[] } };
+type Tutorials = { [key in TutorialTypeKeys]: { title: string; steps: TutorialStep[]; hide: boolean } };
 
 type TutorialTableOfContentProps = {
   open: boolean;
@@ -58,7 +58,7 @@ const TutorialTableOfContent = ({
         position: "fixed",
         top: "0px",
         display: "grid",
-        gridTemplateRows: "1fr auto",
+        gridTemplateRows: "auto 1fr",
         background: theme => (theme.palette.mode === "dark" ? "rgb(31,31,31)" : "rgb(240,240,240)"),
         width: "300px",
         bottom: "0px",
@@ -82,102 +82,104 @@ const TutorialTableOfContent = ({
         </IconButton>
       </Box>
       <Box className="scroll-styled" sx={{ overflowY: "auto" }}>
-        {(Object.keys(tutorials) as Array<TutorialTypeKeys>).map((keyTutorial, tutorialIdx) => (
-          <Accordion
-            key={keyTutorial}
-            disableGutters
-            elevation={0}
-            square
-            sx={{
-              border: "none",
-              background: theme => (theme.palette.mode === "dark" ? "rgb(31,31,31)" : "rgb(240,240,240)"),
-              "&:before": {
-                display: "none",
-              },
-            }}
-            expanded={expanded === `Option${tutorialIdx + 1}`}
-            onChange={handleChange(`Option${tutorialIdx + 1}`, keyTutorial)}
-          >
-            <AccordionSummary
+        {(Object.keys(tutorials) as Array<TutorialTypeKeys>)
+          .filter(keyTutorial => !tutorials[keyTutorial].hide)
+          .map((keyTutorial, tutorialIdx) => (
+            <Accordion
+              key={keyTutorial}
+              disableGutters
+              elevation={0}
+              square
               sx={{
-                p: "0px",
-                "& .MuiAccordionSummary-content": { m: "0px" },
+                border: "none",
+                background: theme => (theme.palette.mode === "dark" ? "rgb(31,31,31)" : "rgb(240,240,240)"),
+                "&:before": {
+                  display: "none",
+                },
               }}
+              expanded={expanded === `Option${tutorialIdx + 1}`}
+              onChange={handleChange(`Option${tutorialIdx + 1}`, keyTutorial)}
             >
-              <Box
+              <AccordionSummary
                 sx={{
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "space-between",
-                  width: "100%",
-                  p: "18px 24px",
+                  p: "0px",
+                  "& .MuiAccordionSummary-content": { m: "0px" },
                 }}
               >
-                <Typography
-                  component={"h4"}
-                  variant={"h4"}
+                <Box
                   sx={{
-                    cursor: "pointer",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "space-between",
+                    width: "100%",
+                    p: "18px 24px",
                   }}
                 >
-                  {tutorials[keyTutorial].title.slice(0, 20)}
-                  {tutorials[keyTutorial].title.length > 20 && "..."}
-                </Typography>
-                <ArrowForwardIosSharpIcon
-                  fontSize="small"
-                  sx={{
-                    transform: `rotate(${expanded === `Option${tutorialIdx + 1}` ? "-90deg" : "90deg"})`,
-                    transition: "transform 100ms linear",
-                  }}
-                />
-              </Box>
-            </AccordionSummary>
-            <AccordionDetails sx={{ p: "0px" }}>
-              <Stack component={"ul"} m={0} p={"0px"} sx={{ listStyle: "none" }}>
-                {tutorials[keyTutorial].steps.map((cur, idx) => (
-                  <Stack
-                    key={`${cur.title}-${idx}`}
-                    component={"li"}
-                    direction={"row"}
-                    alignItems="center"
-                    justifyContent={"space-between"}
-                    spacing={"8px"}
-                    sx={{ p: "12px 24px" }}
+                  <Typography
+                    component={"h4"}
+                    variant={"h4"}
+                    sx={{
+                      cursor: "pointer",
+                    }}
                   >
-                    <Stack key={cur.title} component={"li"} direction={"row"} alignItems="center" spacing={"8px"}>
-                      {userTutorialState[keyTutorial].currentStep >= idx + 1 && (
-                        <CheckCircleIcon fontSize="small" color={"success"} />
-                      )}
-
-                      <Typography
-                        sx={{
-                          display: "inline-block",
-                          color: theme => (theme.palette.mode === "light" ? "#1d2229" : "#EAECF0"),
-                          opacity: "0.5",
-                          ml: userTutorialState[keyTutorial].currentStep > idx + 1 ? "0px" : "28px",
-                        }}
-                        fontSize={"16px"}
-                      >
-                        {cur.title}
-                      </Typography>
-                    </Stack>
-
-                    <IconButton
-                      onClick={e => {
-                        e.stopPropagation();
-                        onStartTutorial(keyTutorial, tutorialIdx);
-                      }}
-                      size={"small"}
-                      sx={{ p: "0px" }}
+                    {tutorials[keyTutorial].title.slice(0, 20)}
+                    {tutorials[keyTutorial].title.length > 20 && "..."}
+                  </Typography>
+                  <ArrowForwardIosSharpIcon
+                    fontSize="small"
+                    sx={{
+                      transform: `rotate(${expanded === `Option${tutorialIdx + 1}` ? "-90deg" : "90deg"})`,
+                      transition: "transform 100ms linear",
+                    }}
+                  />
+                </Box>
+              </AccordionSummary>
+              <AccordionDetails sx={{ p: "0px" }}>
+                <Stack component={"ul"} m={0} p={"0px"} sx={{ listStyle: "none" }}>
+                  {tutorials[keyTutorial].steps.map((cur, idx) => (
+                    <Stack
+                      key={`${cur.title}-${idx}`}
+                      component={"li"}
+                      direction={"row"}
+                      alignItems="center"
+                      justifyContent={"space-between"}
+                      spacing={"8px"}
+                      sx={{ p: "12px 24px" }}
                     >
-                      <PlayCircleIcon />
-                    </IconButton>
-                  </Stack>
-                ))}
-              </Stack>
-            </AccordionDetails>
-          </Accordion>
-        ))}
+                      <Stack key={cur.title} component={"li"} direction={"row"} alignItems="center" spacing={"8px"}>
+                        {userTutorialState[keyTutorial].currentStep >= idx + 1 && (
+                          <CheckCircleIcon fontSize="small" color={"success"} />
+                        )}
+
+                        <Typography
+                          sx={{
+                            display: "inline-block",
+                            color: theme => (theme.palette.mode === "light" ? "#1d2229" : "#EAECF0"),
+                            opacity: "0.5",
+                            ml: userTutorialState[keyTutorial].currentStep > idx + 1 ? "0px" : "28px",
+                          }}
+                          fontSize={"16px"}
+                        >
+                          {cur.title}
+                        </Typography>
+                      </Stack>
+
+                      <IconButton
+                        onClick={e => {
+                          e.stopPropagation();
+                          onStartTutorial(keyTutorial, tutorialIdx);
+                        }}
+                        size={"small"}
+                        sx={{ p: "0px" }}
+                      >
+                        <PlayCircleIcon />
+                      </IconButton>
+                    </Stack>
+                  ))}
+                </Stack>
+              </AccordionDetails>
+            </Accordion>
+          ))}
       </Box>
     </Box>
   );

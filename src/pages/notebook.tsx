@@ -5968,8 +5968,8 @@ const Dashboard = ({}: DashboardProps) => {
               },
               childConcept: { title: "Propose Child Concept Node", steps: CHILD_CONCEPT_PROPOSAL_COMPLETE },
               childProposal: { title: "Child Proposal", steps: CHILD_PROPOSAL_COMPLETE },
-              tmpEditNode: { title: "hide this tmp", steps: [] },
-              tmpProposalConceptChild: { title: "hide this tmp", steps: [] },
+              tmpEditNode: { title: "Temporal Edit Node", steps: [], hide: true },
+              tmpProposalConceptChild: { title: "Temporal Edit Node", steps: [], hide: true },
             }}
             userTutorialState={userTutorial}
             onCancelTutorial={() =>
