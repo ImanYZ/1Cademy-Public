@@ -8,7 +8,7 @@ import React, { useState } from "react";
 
 import { TutorialStep, TutorialTypeKeys, UserTutorials } from "../../nodeBookTypes";
 
-type Tutorials = { [key in TutorialTypeKeys]: { title: string; steps: TutorialStep[]; hide: boolean } };
+type Tutorials = { [key in TutorialTypeKeys]: { title: string; steps: TutorialStep[]; hide?: boolean } };
 
 type TutorialTableOfContentProps = {
   open: boolean;
