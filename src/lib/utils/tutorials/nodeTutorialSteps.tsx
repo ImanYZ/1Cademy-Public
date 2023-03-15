@@ -1,5 +1,3 @@
-// import LocalLibraryIcon from "@mui/icons-material/LocalLibrary";
-// import ShareIcon from "@mui/icons-material/Share";
 import CodeIcon from "@mui/icons-material/Code";
 import EmojiObjectsIcon from "@mui/icons-material/EmojiObjects";
 import HelpOutlineIcon from "@mui/icons-material/HelpOutline";
@@ -8,70 +6,13 @@ import LockIcon from "@mui/icons-material/Lock";
 import MenuBookIcon from "@mui/icons-material/MenuBook";
 import ShareIcon from "@mui/icons-material/Share";
 import { Box, Stack, Typography } from "@mui/material";
-import dayjs from "dayjs";
-import relativeTime from "dayjs/plugin/relativeTime";
 
 import MarkdownRender from "@/components/Markdown/MarkdownRender";
 
 import { TutorialState, TutorialStep, TutorialStepConfig } from "../../../nodeBookTypes";
+import { getBaseStepConfig } from "./tutorial.utils";
 
 export const INITIAL_NODE_TUTORIAL_STATE: TutorialState = null;
-
-dayjs.extend(relativeTime);
-// const STEPS_LENGHT = 47; // 65
-
-// const DISABLE_NOTEBOOK_OPTIONS = [
-//   "TOOLBAR",
-//   "LIVENESS_BAR",
-//   "COMMUNITY_LEADERBOARD",
-//   "SCROLL_TO_NODE_BUTTON",
-//   "FOCUS_MODE_BUTTON",
-// ];
-
-const getStepsValues = (step: number, max: number) => {
-  // steps = [1,...max]
-  return {
-    currentStepName: step,
-    nextStepName: step === max ? 0 : step + 1,
-    previosStepName: step === 1 ? 1 : step - 1,
-  };
-};
-
-const getBaseStepConfig = (step: number, max: number) => {
-  // DON'T CHANGE THIS, THIS WILL OVERRIDE ALL STEPS 🚨
-
-  const tt: TutorialStep = {
-    targetId: "",
-    title: "",
-    description: null,
-    anchor: "",
-    ...getStepsValues(step, max),
-    tooltipPosition: "top",
-    largeTarget: false,
-  };
-
-  return tt;
-};
-
-/**
-EX: for notebook sections
- "TOOLBAR", "01", "LIVENESS_BAR", "COMMUNITY_LEADERBOARD", "SCROLL_TO_NODE_BUTTON", "FOCUS_MODE_BUTTON"
-Ex for Node id elements to disable
-  "close-button",
-  "open-button",
-  "hide-offsprings-button",
-  "hide-button",
-  "node-footer-user",
-  "node-footer-propose",
-  "node-footer-downvotes",
-  "node-footer-upvotes",
-  "node-footer-tags-citations",
-  "button-parent-children",
-  "node-footer-ellipsis",
-  "reference-button-0"
-  "tag-button-0"
-  "node-footer-menu"
- */
 
 const NODES_STEPS: TutorialStepConfig[] = [
   {

@@ -1,5 +1,3 @@
-// import LocalLibraryIcon from "@mui/icons-material/LocalLibrary";
-// import ShareIcon from "@mui/icons-material/Share";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 
@@ -11,30 +9,6 @@ import { getBaseStepConfig } from "./tutorial.utils";
 export const INITIAL_NODE_TUTORIAL_STATE: TutorialState = null;
 
 dayjs.extend(relativeTime);
-
-/**
-EX: for notebook sections
- "TOOLBAR", "01", "LIVENESS_BAR", "COMMUNITY_LEADERBOARD", "SCROLL_TO_NODE_BUTTON", "FOCUS_MODE_BUTTON"
-Ex for Node id elements to disable
-  "01-close-button",
-  "01-open-button",
-  "01-hide-offsprings-button",
-  "01-hide-button",
-  "01-node-footer-user",
-  "01-node-footer-propose",
-  "01-node-footer-downvotes",
-  "01-node-footer-upvotes",
-  "01-node-footer-tags-citations",
-  "01-button-parent-children",
-  "01-node-footer-ellipsis",
-  "01-reference-button-0"
-  "01-tag-button-0"
-  "01-node-footer-menu"
-  "SearchIcon"
-  "search-recently-input"
-  "recentNodesList"
-  "search-list"
- */
 
 const NODES_STEPS: TutorialStepConfig[] = [
   {

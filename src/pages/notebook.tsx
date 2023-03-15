@@ -66,13 +66,6 @@ import { useAuth } from "@/context/AuthContext";
 import { useTagsTreeView } from "@/hooks/useTagsTreeView";
 import { addSuffixToUrlGMT } from "@/lib/utils/string.utils";
 import {
-  NODE_CODE_COMPLETE,
-  NODE_IDEA_COMPLETE,
-  NODE_QUESTION_COMPLETE,
-  NODE_REFERENCE_COMPLETE,
-  NODE_RELATION_COMPLETE,
-} from "@/lib/utils/tutorials/nodetypeTutorialSteps";
-import {
   RECONCILING_ACCEPTED_PROPOSALS_STEPS_COMPLETE,
   RECONCILING_NOT_ACCEPTED_PROPOSALS_STEPS_COMPLETE,
 } from "@/lib/utils/tutorials/reconcilingProposalsTutorialSteps";
@@ -142,16 +135,19 @@ import {
   CHILD_PROPOSAL_COMPLETE,
 } from "../lib/utils/tutorials/childrenProposalTutorialStep";
 import { NAVIGATION_STEPS_COMPLETE } from "../lib/utils/tutorials/navigationTutorialSteps";
+import { NODE_CODE } from "../lib/utils/tutorials/nodeCodeTutorialSteps";
+import { NODE_IDEA } from "../lib/utils/tutorials/nodeIdeaTutorialSteps";
+import { NODE_QUESTION } from "../lib/utils/tutorials/nodeQuestionStepTutorialStep";
+import { NODE_REFERENCE } from "../lib/utils/tutorials/nodeReferenceTutorialSteps";
+import { NODE_RELATION } from "../lib/utils/tutorials/nodeRelationTutorialSteps";
 import { NODES_STEPS_COMPLETE } from "../lib/utils/tutorials/nodeTutorialSteps";
-import { PROPOSING_CODE_EDIT_COMPLETE } from "../lib/utils/tutorials/proposalSteps";
-import {
-  PROPOSAL_STEPS_COMPLETE,
-  PROPOSING_CONCEPT_EDIT_COMPLETE,
-  PROPOSING_IDEA_EDIT_COMPLETE,
-  PROPOSING_QUESTION_EDIT_COMPLETE,
-  PROPOSING_REFERENCE_EDIT_COMPLETE,
-  PROPOSING_RELATION_EDIT_COMPLETE,
-} from "../lib/utils/tutorials/proposalTutorialSteps";
+import { PROPOSING_CODE_EDIT_COMPLETE } from "../lib/utils/tutorials/proposalCodeTutorialStep";
+import { PROPOSING_CONCEPT_EDIT_COMPLETE } from "../lib/utils/tutorials/proposalConceptTutorialStep";
+import { PROPOSING_IDEA_EDIT_COMPLETE } from "../lib/utils/tutorials/proposalIdeaTutorialSteps";
+import { PROPOSING_QUESTION_EDIT_COMPLETE } from "../lib/utils/tutorials/proposalQuestionTutorialSteps";
+import { PROPOSING_REFERENCE_EDIT_COMPLETE } from "../lib/utils/tutorials/proposalReferenceTutorialSteps";
+import { PROPOSING_RELATION_EDIT_COMPLETE } from "../lib/utils/tutorials/proposalRelationTutorialSteps";
+import { PROPOSAL_STEPS_COMPLETE } from "../lib/utils/tutorials/proposalTutorialSteps";
 import { SEARCHER_STEPS_COMPLETE } from "../lib/utils/tutorials/searcherTutorialSteps";
 import { gtmEvent, imageLoaded, isValidHttpUrl } from "../lib/utils/utils";
 import {
@@ -5848,12 +5844,12 @@ const Dashboard = ({}: DashboardProps) => {
               proposalQuestion: { title: "Proposal Question", steps: PROPOSING_QUESTION_EDIT_COMPLETE },
               proposalReference: { title: "Proposal Reference", steps: PROPOSING_REFERENCE_EDIT_COMPLETE },
               proposalRelation: { title: "Proposal Relation", steps: PROPOSING_RELATION_EDIT_COMPLETE },
-              concept: { title: "Concept Node", steps: NODE_CODE_COMPLETE },
-              relation: { title: "Relation Node", steps: NODE_RELATION_COMPLETE },
-              reference: { title: "Reference Node", steps: NODE_REFERENCE_COMPLETE },
-              question: { title: "Question Node", steps: NODE_QUESTION_COMPLETE },
-              idea: { title: "Idea Node", steps: NODE_IDEA_COMPLETE },
-              code: { title: "Code Node", steps: NODE_CODE_COMPLETE },
+              concept: { title: "Concept Node", steps: NODE_CODE },
+              relation: { title: "Relation Node", steps: NODE_RELATION },
+              reference: { title: "Reference Node", steps: NODE_REFERENCE },
+              question: { title: "Question Node", steps: NODE_QUESTION },
+              idea: { title: "Idea Node", steps: NODE_IDEA },
+              code: { title: "Code Node", steps: NODE_CODE },
               reconcilingAcceptedProposal: {
                 title: "Accepted Proposals",
                 steps: RECONCILING_ACCEPTED_PROPOSALS_STEPS_COMPLETE,

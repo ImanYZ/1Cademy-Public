@@ -2,25 +2,7 @@ import { doc, getDoc, getFirestore } from "firebase/firestore";
 import { ReactNode, useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { NAVIGATION_STEPS_COMPLETE } from "@/lib/utils/tutorials/navigationTutorialSteps";
-import {
-  NODE_CODE_COMPLETE,
-  NODE_CONCEPT_COMPLETE,
-  NODE_IDEA_COMPLETE,
-  NODE_QUESTION_COMPLETE,
-  NODE_REFERENCE_COMPLETE,
-  NODE_RELATION_COMPLETE,
-} from "@/lib/utils/tutorials/nodetypeTutorialSteps";
-import {
-  PROPOSAL_STEPS_COMPLETE,
-  PROPOSING_CODE_EDIT_COMPLETE,
-  PROPOSING_CONCEPT_EDIT_COMPLETE,
-  PROPOSING_IDEA_EDIT_COMPLETE,
-  PROPOSING_QUESTION_EDIT_COMPLETE,
-  PROPOSING_REFERENCE_EDIT_COMPLETE,
-  PROPOSING_RELATION_EDIT_COMPLETE,
-  TMP_EDIT_NODE,
-  TMP_PROPOSE_CHILD_CONCEPT,
-} from "@/lib/utils/tutorials/proposalTutorialSteps";
+import { PROPOSAL_STEPS_COMPLETE } from "@/lib/utils/tutorials/proposalTutorialSteps";
 import {
   RECONCILING_ACCEPTED_PROPOSALS_STEPS_COMPLETE,
   RECONCILING_NOT_ACCEPTED_PROPOSALS_STEPS_COMPLETE,
@@ -33,7 +15,20 @@ import {
   CHILD_CONCEPT_PROPOSAL_COMPLETE,
   CHILD_PROPOSAL_COMPLETE,
 } from "../lib/utils/tutorials/childrenProposalTutorialStep";
+import { NODE_CODE } from "../lib/utils/tutorials/nodeCodeTutorialSteps";
+import { NODE_CONCEPT } from "../lib/utils/tutorials/nodeConceptTutorialStep";
+import { NODE_IDEA } from "../lib/utils/tutorials/nodeIdeaTutorialSteps";
+import { NODE_QUESTION } from "../lib/utils/tutorials/nodeQuestionStepTutorialStep";
+import { NODE_REFERENCE } from "../lib/utils/tutorials/nodeReferenceTutorialSteps";
+import { NODE_RELATION } from "../lib/utils/tutorials/nodeRelationTutorialSteps";
 import { NODES_STEPS_COMPLETE } from "../lib/utils/tutorials/nodeTutorialSteps";
+import { PROPOSING_CODE_EDIT_COMPLETE } from "../lib/utils/tutorials/proposalCodeTutorialStep";
+import { PROPOSING_CONCEPT_EDIT_COMPLETE } from "../lib/utils/tutorials/proposalConceptTutorialStep";
+import { PROPOSING_IDEA_EDIT_COMPLETE } from "../lib/utils/tutorials/proposalIdeaTutorialSteps";
+import { PROPOSING_QUESTION_EDIT_COMPLETE } from "../lib/utils/tutorials/proposalQuestionTutorialSteps";
+import { PROPOSING_REFERENCE_EDIT_COMPLETE } from "../lib/utils/tutorials/proposalReferenceTutorialSteps";
+import { PROPOSING_RELATION_EDIT_COMPLETE } from "../lib/utils/tutorials/proposalRelationTutorialSteps";
+import { TMP_EDIT_NODE, TMP_PROPOSE_CHILD_CONCEPT } from "../lib/utils/tutorials/temporalTutorialSteps";
 import { TutorialStep, TutorialTypeKeys, UserTutorials } from "../nodeBookTypes";
 import useEventListener from "./useEventListener";
 
@@ -130,7 +125,6 @@ export const useInteractiveTutorial = ({ user }: useInteractiveTutorialProps) =>
         newSteps = NAVIGATION_STEPS_COMPLETE;
       }
       if (newTutorial === "nodes") {
-        // console.log("FILL NODES");
         newSteps = NODES_STEPS_COMPLETE;
       }
       if (newTutorial === "searcher") {
@@ -138,22 +132,22 @@ export const useInteractiveTutorial = ({ user }: useInteractiveTutorialProps) =>
         setTargetId("");
       }
       if (newTutorial === "concept") {
-        newSteps = NODE_CONCEPT_COMPLETE;
+        newSteps = NODE_CONCEPT;
       }
       if (newTutorial === "relation") {
-        newSteps = NODE_RELATION_COMPLETE;
+        newSteps = NODE_RELATION;
       }
       if (newTutorial === "reference") {
-        newSteps = NODE_REFERENCE_COMPLETE;
+        newSteps = NODE_REFERENCE;
       }
       if (newTutorial === "question") {
-        newSteps = NODE_QUESTION_COMPLETE;
+        newSteps = NODE_QUESTION;
       }
       if (newTutorial === "idea") {
-        newSteps = NODE_IDEA_COMPLETE;
+        newSteps = NODE_IDEA;
       }
       if (newTutorial === "code") {
-        newSteps = NODE_CODE_COMPLETE;
+        newSteps = NODE_CODE;
       }
       if (newTutorial === "proposal") {
         newSteps = PROPOSAL_STEPS_COMPLETE;

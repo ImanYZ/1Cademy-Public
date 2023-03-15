@@ -1,20 +1,8 @@
-import dayjs from "dayjs";
-import relativeTime from "dayjs/plugin/relativeTime";
 import { TutorialStep, TutorialStepConfig } from "src/nodeBookTypes";
 
 import MarkdownRender from "@/components/Markdown/MarkdownRender";
 
 import { getBaseStepConfig } from "./tutorial.utils";
-
-dayjs.extend(relativeTime);
-
-// const PROPOSE_CHANGES: TutorialStepConfig[] = [
-//   {
-//     title: "To Propose a ",
-//     description: <MarkdownRender text={"To propose changes, first click on pencil button"} />,
-//     isClickeable: true,
-//   },
-// ];
 
 const PROPOSE_CONCEPT_NODES_STEPS: TutorialStepConfig[] = [
   {
@@ -177,15 +165,6 @@ const CHILD_CODE_PROPOSAL_STEPS: TutorialStepConfig[] = [
     isClickeable: true,
   },
 ];
-
-console.log({
-  CHILD_CONCEPT_PROPOSAL_STEPS,
-  CHILD_REFERENCE_PROPOSAL_STEPS,
-  CHILD_RELATION_PROPOSAL_STEPS,
-  CHILD_IDEA_PROPOSAL_STEPS,
-  CHILD_QUESTION_PROPOSAL_STEPS,
-  CHILD_CODE_PROPOSAL_STEPS,
-});
 
 export const CHILD_PROPOSAL_COMPLETE: TutorialStep[] = CHILD_PROPOSAL_STEPS.map((c, i, s) => {
   return { ...getBaseStepConfig(i + 1, s.length), ...c };
