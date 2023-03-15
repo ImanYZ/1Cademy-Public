@@ -4798,6 +4798,7 @@ const Dashboard = ({}: DashboardProps) => {
                 borderLeft: theme =>
                   buttonsOpen ? (theme.palette.mode === "dark" ? "solid 1px 575757" : "solid 1px #d0d5dd") : undefined,
                 zIndex: 999999,
+                cursor: "auto",
               }}
             >
               <IconButton
@@ -4805,6 +4806,7 @@ const Dashboard = ({}: DashboardProps) => {
                 sx={{
                   marginTop: "12px",
                 }}
+                disabled={true}
               >
                 <NextImage
                   src={
