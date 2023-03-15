@@ -6139,7 +6139,12 @@ const Dashboard = ({}: DashboardProps) => {
               childCode: { title: "Propose Child Code Node", steps: CHILD_CODE_PROPOSAL_COMPLETE },
 
               tmpEditNode: { title: "Temporal Edit Node", steps: [], hide: true },
-              tmpProposalConceptChild: { title: "Temporal Edit Node", steps: [], hide: true },
+              tmpProposalConceptChild: { title: "Temporal Concept Node", steps: [], hide: true },
+              tmpProposalRelationChild: { title: "Temporal Relation Node", steps: [], hide: true },
+              tmpProposalQuestionChild: { title: "Temporal Question Node", steps: [], hide: true },
+              tmpProposalReferenceChild: { title: "Temporal Reference Node", steps: [], hide: true },
+              tmpProposalCodeChild: { title: "Temporal Code Node", steps: [], hide: true },
+              tmpProposalIdeaChild: { title: "Temporal Idea Node", steps: [], hide: true },
             }}
             userTutorialState={userTutorial}
             onCancelTutorial={() =>
