@@ -4079,38 +4079,47 @@ const Dashboard = ({}: DashboardProps) => {
     (
       tutorialName: TutorialTypeKeys,
       targetId: string,
-      targetIsInvalid: (node: FullNodeData) => boolean,
+      targetIsValid: (node: FullNodeData) => boolean,
       defaultStates: Partial<FullNodeData> = { open: true }
     ) => {
-      const tutorialsIsForced = forcedTutorial === tutorialName;
-      if (tutorialsIsForced || userTutorial[tutorialName].done || userTutorial[tutorialName].skipped) return;
+      if (forcedTutorial !== tutorialName) return false;
 
-      devLog("DETECT_AND_FORCE_TUTORIAL", { tutorialName, targetId, defaultStates });
-
-      const newTargetId = tutorialsIsForced ? targetId : nodeBookState.selectedNode ?? "";
-      console.log(10, newTargetId);
-
-      if (!newTargetId) return;
-
-      // console.log(11);
-      const thisNode = graph.nodes[newTargetId];
-      if ((tutorialsIsForced && !thisNode) || targetIsInvalid(thisNode)) {
+      const thisNode = graph.nodes[targetId];
+      if (!targetIsValid(thisNode)) {
         if (!tutorialStateWasSetUpRef.current) {
-          // console.log(12);
-          openNodeHandler(newTargetId, defaultStates);
+          openNodeHandler(targetId, defaultStates);
           tutorialStateWasSetUpRef.current = true;
         }
-        return;
+        return true;
       }
-
-      // console.log(13);
-      // disableForceTutorial(tutorialName);
       tutorialStateWasSetUpRef.current = false;
+      nodeBookDispatch({ type: "setSelectedNode", payload: targetId });
+      notebookRef.current.selectedNode = targetId;
       startTutorial(tutorialName);
-      setTargetId(newTargetId);
-      return;
+      setTargetId(targetId);
+
+      setNodeUpdates({
+        nodeIds: [targetId],
+        updatedAt: new Date(),
+      });
+
+      return true;
     },
-    [forcedTutorial, graph.nodes, nodeBookState.selectedNode, openNodeHandler, setTargetId, startTutorial, userTutorial]
+    [forcedTutorial, graph.nodes, nodeBookDispatch, openNodeHandler, setTargetId, startTutorial]
+  );
+
+  const detectAndRemoveTutorial = useCallback(
+    (tutorialName: TutorialTypeKeys, targetIsValid: (node: FullNodeData) => boolean) => {
+      if (!tutorial) return;
+      if (tutorial.name !== tutorialName) return;
+
+      const node = graph.nodes[targetId];
+      if (!targetIsValid(node)) {
+        setTutorial(null);
+        setForcedTutorial(null);
+      }
+    },
+    [graph.nodes, setTutorial, targetId, tutorial]
   );
 
   /**
@@ -4562,30 +4571,96 @@ const Dashboard = ({}: DashboardProps) => {
       const conceptTutorialLaunched = detectAndCallTutorial("concept", conceptTutorialIsValid);
       if (conceptTutorialLaunched) return;
 
-      if (forcedTutorial === "concept") {
-        const defaultStates = { open: true };
-        const newTargetId = "r98BjyFDCe4YyLA3U8ZE";
-        const thisNode = graph.nodes[newTargetId];
-        if (!conceptTutorialIsValid(thisNode)) {
-          if (!tutorialStateWasSetUpRef.current) {
-            openNodeHandler(newTargetId, defaultStates);
-            tutorialStateWasSetUpRef.current = true;
-          }
-          return;
-        }
-        tutorialStateWasSetUpRef.current = false;
-        nodeBookDispatch({ type: "setSelectedNode", payload: newTargetId });
-        notebookRef.current.selectedNode = newTargetId;
-        startTutorial("concept");
-        setTargetId(newTargetId);
+      const conceptForcedTutorialLaunched = detectAndForceTutorial(
+        "concept",
+        "r98BjyFDCe4YyLA3U8ZE",
+        conceptTutorialIsValid
+      );
+      if (conceptForcedTutorialLaunched) return;
+      // --------------------------
 
-        setNodeUpdates({
-          nodeIds: [newTargetId],
-          updatedAt: new Date(),
-        });
+      const relationTutorialIsValid = (thisNode: FullNodeData) =>
+        thisNode && thisNode.open && thisNode.nodeType === "Relation";
+      const relationTutorialLaunched = detectAndCallTutorial("relation", relationTutorialIsValid);
+      if (relationTutorialLaunched) return;
 
-        return;
-      }
+      const relationForcedTutorialLaunched = detectAndForceTutorial(
+        "relation",
+        "zYYmaXvhab7hH2uRI9Up",
+        relationTutorialIsValid
+      );
+      if (relationForcedTutorialLaunched) return;
+
+      // --------------------------
+      const referenceTutorialIsValid = (thisNode: FullNodeData) =>
+        thisNode && thisNode.open && thisNode.nodeType === "Reference";
+      const referenceTutorialLaunched = detectAndCallTutorial("reference", referenceTutorialIsValid);
+      if (referenceTutorialLaunched) return;
+
+      const referenceForcedTutorialLaunched = detectAndForceTutorial(
+        "reference",
+        "P631lWeKsBtszZRDlmsM",
+        referenceTutorialIsValid
+      );
+      if (referenceForcedTutorialLaunched) return;
+
+      // --------------------------
+
+      const questionTutorialIsValid = (thisNode: FullNodeData) =>
+        thisNode && thisNode.open && thisNode.nodeType === "Question";
+      const questionTutorialLaunched = detectAndCallTutorial("question", questionTutorialIsValid);
+      if (questionTutorialLaunched) return;
+
+      const questionForcedTutorialLaunched = detectAndForceTutorial(
+        "question",
+        "P631lWeKsBtszZRDlmsM",
+        questionTutorialIsValid
+      );
+      if (questionForcedTutorialLaunched) return;
+
+      // --------------------------
+
+      const ideaTutorialIsValid = (thisNode: FullNodeData) => thisNode && thisNode.open && thisNode.nodeType === "Idea";
+      const ideaTutorialLaunched = detectAndCallTutorial("idea", ideaTutorialIsValid);
+      if (ideaTutorialLaunched) return;
+
+      const ideaForcedTutorialLaunched = detectAndForceTutorial("idea", "v9wGPxRCI4DRq11o7uH2", ideaTutorialIsValid);
+      if (ideaForcedTutorialLaunched) return;
+
+      // --------------------------
+
+      const codeTutorialIsValid = (thisNode: FullNodeData) => thisNode && thisNode.open && thisNode.nodeType === "Code";
+      const codeTutorialLaunched = detectAndCallTutorial("code", codeTutorialIsValid);
+      if (codeTutorialLaunched) return;
+
+      const codeForcedTutorialLaunched = detectAndForceTutorial("code", "E1nIWQ7RIC3pRLvk0Bk5", codeTutorialIsValid);
+      if (codeForcedTutorialLaunched) return;
+
+      // --------------------------
+      // if (forcedTutorial === "concept") {
+      //   const defaultStates = { open: true };
+      //   const newTargetId = "r98BjyFDCe4YyLA3U8ZE";
+      //   const thisNode = graph.nodes[newTargetId];
+      //   if (!conceptTutorialIsValid(thisNode)) {
+      //     if (!tutorialStateWasSetUpRef.current) {
+      //       openNodeHandler(newTargetId, defaultStates);
+      //       tutorialStateWasSetUpRef.current = true;
+      //     }
+      //     return;
+      //   }
+      //   tutorialStateWasSetUpRef.current = false;
+      //   nodeBookDispatch({ type: "setSelectedNode", payload: newTargetId });
+      //   notebookRef.current.selectedNode = newTargetId;
+      //   startTutorial("concept");
+      //   setTargetId(newTargetId);
+
+      //   setNodeUpdates({
+      //     nodeIds: [newTargetId],
+      //     updatedAt: new Date(),
+      //   });
+
+      //   return;
+      // }
 
       // --------------------------
 
@@ -5046,16 +5121,45 @@ const Dashboard = ({}: DashboardProps) => {
         setForcedTutorial(null);
       }
     }
-    if (tutorial.name === "concept") {
-      const conceptTutorialIsValid = (thisNode: FullNodeData) =>
-        thisNode && thisNode.open && thisNode.nodeType === "Concept";
-      const node = graph.nodes[targetId];
-      if (!conceptTutorialIsValid(node)) {
-        setTutorial(null);
-        setForcedTutorial(null);
-      }
-    }
 
+    // if (tutorial.name === "concept") {
+    //   const node = graph.nodes[targetId];
+    //   if (!conceptTutorialIsValid(node)) {
+    //     setTutorial(null);
+    //     setForcedTutorial(null);
+    //   }
+    // }
+    // --------------------------
+
+    const conceptTutorialIsValid = (thisNode: FullNodeData) =>
+      thisNode && thisNode.open && thisNode.nodeType === "Concept";
+    detectAndRemoveTutorial("concept", conceptTutorialIsValid);
+
+    // --------------------------
+
+    const relationTutorialIsValid = (thisNode: FullNodeData) =>
+      thisNode && thisNode.open && thisNode.nodeType === "Relation";
+    detectAndRemoveTutorial("relation", relationTutorialIsValid);
+
+    // --------------------------
+    const referenceTutorialIsValid = (thisNode: FullNodeData) =>
+      thisNode && thisNode.open && thisNode.nodeType === "Reference";
+    detectAndRemoveTutorial("reference", referenceTutorialIsValid);
+
+    // --------------------------
+    const questionTutorialIsValid = (thisNode: FullNodeData) =>
+      thisNode && thisNode.open && thisNode.nodeType === "Question";
+    detectAndRemoveTutorial("question", questionTutorialIsValid);
+
+    // --------------------------
+    const ideaTutorialIsValid = (thisNode: FullNodeData) => thisNode && thisNode.open && thisNode.nodeType === "Idea";
+    detectAndRemoveTutorial("idea", ideaTutorialIsValid);
+
+    // --------------------------
+    const codeTutorialIsValid = (thisNode: FullNodeData) => thisNode && thisNode.open && thisNode.nodeType === "Code";
+    detectAndRemoveTutorial("code", codeTutorialIsValid);
+
+    // --------------------------
     if (tutorial.name === "childConcept") {
       const childConceptProposalIsValid = (node: FullNodeData) =>
         node && Boolean(node.isNew) && node.open && node.editable && node.nodeType === "Concept";
