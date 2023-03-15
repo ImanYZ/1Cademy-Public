@@ -4095,7 +4095,20 @@ const Dashboard = ({}: DashboardProps) => {
       tutorialStateWasSetUpRef.current = false;
       nodeBookDispatch({ type: "setSelectedNode", payload: targetId });
       notebookRef.current.selectedNode = targetId;
-      startTutorial(tutorialName);
+
+      startTutorial(
+        [
+          "proposal",
+          "proposalConcept",
+          "proposalRelation",
+          "proposalReference",
+          "proposalQuestion",
+          "proposalIdea",
+          "proposalCode",
+        ].includes(tutorialName)
+          ? "tmpEditNode"
+          : tutorialName
+      );
       setTargetId(targetId);
 
       setNodeUpdates({
@@ -4137,6 +4150,11 @@ const Dashboard = ({}: DashboardProps) => {
       const isValidForcedTutorial = forcedTutorial
         ? (forcedTutorial === "nodes" && ["nodes"].includes(tutorialName)) ||
           (forcedTutorial === "proposal" && ["proposal", "tmpEditNode"].includes(tutorialName)) ||
+          (forcedTutorial === "proposalConcept" && ["proposalConcept", "tmpEditNode"].includes(tutorialName)) ||
+          (forcedTutorial === "proposalRelation" && ["proposalRelation", "tmpEditNode"].includes(tutorialName)) ||
+          (forcedTutorial === "proposalReference" && ["proposalReference", "tmpEditNode"].includes(tutorialName)) ||
+          (forcedTutorial === "proposalQuestion" && ["proposalQuestion", "tmpEditNode"].includes(tutorialName)) ||
+          (forcedTutorial === "proposalIdea" && ["proposalIdea", "tmpEditNode"].includes(tutorialName)) ||
           (forcedTutorial === "proposalCode" && ["proposalCode", "tmpEditNode"].includes(tutorialName)) ||
           (forcedTutorial === "childProposal" &&
             ["childProposal", "tmpProposalConceptChild", "tmpEditNode"].includes(tutorialName)) ||
@@ -4537,8 +4555,8 @@ const Dashboard = ({}: DashboardProps) => {
         node && node.open && node.editable && node.nodeType === "Code";
       const codeProposalTutorialIsValidForced = (node: FullNodeData) => node && node.open && node.nodeType === "Code";
 
-      const conceptProposalTutorialLaunched = detectAndCallTutorial("proposalCode", codeProposalTutorialIsValid);
-      if (conceptProposalTutorialLaunched) return;
+      const codeProposalTutorialLaunched = detectAndCallTutorial("proposalCode", codeProposalTutorialIsValid);
+      if (codeProposalTutorialLaunched) return;
 
       if (forcedTutorial === "proposalCode") {
         const defaultStates = { open: true };
@@ -4564,6 +4582,98 @@ const Dashboard = ({}: DashboardProps) => {
 
         return;
       }
+      // --------------------------
+
+      const conceptProposalTutorialIsValid = (node: FullNodeData) =>
+        node && node.open && node.editable && node.nodeType === "Concept";
+      const conceptProposalTutorialIsValidForced = (node: FullNodeData) =>
+        node && node.open && node.nodeType === "Concept";
+
+      const conceptProposalTutorialLaunched = detectAndCallTutorial("proposalConcept", conceptProposalTutorialIsValid);
+      if (conceptProposalTutorialLaunched) return;
+
+      const conceptProposalForcedTutorialLaunched = detectAndForceTutorial(
+        "proposalConcept",
+        "r98BjyFDCe4YyLA3U8ZE",
+        conceptProposalTutorialIsValidForced
+      );
+      if (conceptProposalForcedTutorialLaunched) return;
+      // --------------------------
+
+      const relationProposalTutorialIsValid = (node: FullNodeData) =>
+        node && node.open && node.editable && node.nodeType === "Relation";
+      const relationProposalTutorialIsValidForced = (node: FullNodeData) =>
+        node && node.open && node.nodeType === "Relation";
+
+      const relationProposalTutorialLaunched = detectAndCallTutorial(
+        "proposalRelation",
+        relationProposalTutorialIsValid
+      );
+      if (relationProposalTutorialLaunched) return;
+
+      const relationProposalForcedTutorialLaunched = detectAndForceTutorial(
+        "proposalRelation",
+        "zYYmaXvhab7hH2uRI9Up",
+        relationProposalTutorialIsValidForced
+      );
+      if (relationProposalForcedTutorialLaunched) return;
+
+      // --------------------------
+
+      const referenceProposalTutorialIsValid = (node: FullNodeData) =>
+        node && node.open && node.editable && node.nodeType === "Reference";
+      const referenceProposalTutorialIsValidForced = (node: FullNodeData) =>
+        node && node.open && node.nodeType === "Reference";
+
+      const referenceProposalTutorialLaunched = detectAndCallTutorial(
+        "proposalReference",
+        referenceProposalTutorialIsValid
+      );
+      if (referenceProposalTutorialLaunched) return;
+
+      const referenceProposalForcedTutorialLaunched = detectAndForceTutorial(
+        "proposalReference",
+        "P631lWeKsBtszZRDlmsM",
+        referenceProposalTutorialIsValidForced
+      );
+      if (referenceProposalForcedTutorialLaunched) return;
+
+      // --------------------------
+
+      const questionProposalTutorialIsValid = (node: FullNodeData) =>
+        node && node.open && node.editable && node.nodeType === "Question";
+      const questionProposalTutorialIsValidForced = (node: FullNodeData) =>
+        node && node.open && node.nodeType === "Question";
+
+      const questionProposalTutorialLaunched = detectAndCallTutorial(
+        "proposalQuestion",
+        questionProposalTutorialIsValid
+      );
+      if (questionProposalTutorialLaunched) return;
+
+      const questionProposalForcedTutorialLaunched = detectAndForceTutorial(
+        "proposalQuestion",
+        "qO9uK6UdYRLWm4Olihlw",
+        questionProposalTutorialIsValidForced
+      );
+      if (questionProposalForcedTutorialLaunched) return;
+
+      // --------------------------
+
+      const ideaProposalTutorialIsValid = (node: FullNodeData) =>
+        node && node.open && node.editable && node.nodeType === "Idea";
+      const ideaProposalTutorialIsValidForced = (node: FullNodeData) => node && node.open && node.nodeType === "Idea";
+
+      const ideaProposalTutorialLaunched = detectAndCallTutorial("proposalIdea", ideaProposalTutorialIsValid);
+      if (ideaProposalTutorialLaunched) return;
+
+      const ideaProposalForcedTutorialLaunched = detectAndForceTutorial(
+        "proposalIdea",
+        "v9wGPxRCI4DRq11o7uH2",
+        ideaProposalTutorialIsValidForced
+      );
+      if (ideaProposalForcedTutorialLaunched) return;
+
       // --------------------------
 
       const conceptTutorialIsValid = (thisNode: FullNodeData) =>
@@ -4613,7 +4723,7 @@ const Dashboard = ({}: DashboardProps) => {
 
       const questionForcedTutorialLaunched = detectAndForceTutorial(
         "question",
-        "P631lWeKsBtszZRDlmsM",
+        "qO9uK6UdYRLWm4Olihlw",
         questionTutorialIsValid
       );
       if (questionForcedTutorialLaunched) return;
@@ -5942,22 +6052,22 @@ const Dashboard = ({}: DashboardProps) => {
             reloadPermanentGraph={reloadPermanentGraph}
             handleCloseProgressBar={() => setOpenProgressBar(false)}
             tutorials={{
-              navigation: { title: "Navigation", steps: NAVIGATION_STEPS_COMPLETE },
-              nodes: { title: "Node", steps: NODES_STEPS_COMPLETE },
-              searcher: { title: "Searcher", steps: SEARCHER_STEPS_COMPLETE },
-              proposal: { title: "Proposal", steps: PROPOSAL_STEPS_COMPLETE },
-              proposalCode: { title: "Proposal Code", steps: PROPOSING_CODE_EDIT_COMPLETE },
-              proposalConcept: { title: "Proposal Concept", steps: PROPOSING_CONCEPT_EDIT_COMPLETE },
+              navigation: { title: "x Navigation", steps: NAVIGATION_STEPS_COMPLETE },
+              nodes: { title: "x Node", steps: NODES_STEPS_COMPLETE },
+              searcher: { title: "x Searcher", steps: SEARCHER_STEPS_COMPLETE },
+              proposal: { title: "x Proposal", steps: PROPOSAL_STEPS_COMPLETE },
+              proposalCode: { title: "x Proposal Code", steps: PROPOSING_CODE_EDIT_COMPLETE },
+              proposalConcept: { title: "x Proposal Concept", steps: PROPOSING_CONCEPT_EDIT_COMPLETE },
               proposalIdea: { title: "Proposal Idea", steps: PROPOSING_IDEA_EDIT_COMPLETE },
               proposalQuestion: { title: "Proposal Question", steps: PROPOSING_QUESTION_EDIT_COMPLETE },
               proposalReference: { title: "Proposal Reference", steps: PROPOSING_REFERENCE_EDIT_COMPLETE },
               proposalRelation: { title: "Proposal Relation", steps: PROPOSING_RELATION_EDIT_COMPLETE },
-              concept: { title: "Concept Node", steps: NODE_CODE_COMPLETE },
-              relation: { title: "Relation Node", steps: NODE_RELATION_COMPLETE },
-              reference: { title: "Reference Node", steps: NODE_REFERENCE_COMPLETE },
-              question: { title: "Question Node", steps: NODE_QUESTION_COMPLETE },
-              idea: { title: "Idea Node", steps: NODE_IDEA_COMPLETE },
-              code: { title: "Code Node", steps: NODE_CODE_COMPLETE },
+              concept: { title: "x Concept Node", steps: NODE_CODE_COMPLETE },
+              relation: { title: "x Relation Node", steps: NODE_RELATION_COMPLETE },
+              reference: { title: "x Reference Node", steps: NODE_REFERENCE_COMPLETE },
+              question: { title: "x Question Node", steps: NODE_QUESTION_COMPLETE },
+              idea: { title: "x Idea Node", steps: NODE_IDEA_COMPLETE },
+              code: { title: "x Code Node", steps: NODE_CODE_COMPLETE },
               reconcilingAcceptedProposal: {
                 title: "Accepted Proposals",
                 steps: RECONCILING_ACCEPTED_PROPOSALS_STEPS_COMPLETE,
@@ -5966,8 +6076,8 @@ const Dashboard = ({}: DashboardProps) => {
                 title: "Not Accepted Proposal",
                 steps: RECONCILING_NOT_ACCEPTED_PROPOSALS_STEPS_COMPLETE,
               },
-              childConcept: { title: "Propose Child Concept Node", steps: CHILD_CONCEPT_PROPOSAL_COMPLETE },
-              childProposal: { title: "Child Proposal", steps: CHILD_PROPOSAL_COMPLETE },
+              childConcept: { title: "x Propose Child Concept Node", steps: CHILD_CONCEPT_PROPOSAL_COMPLETE },
+              childProposal: { title: "x Child Proposal", steps: CHILD_PROPOSAL_COMPLETE },
               tmpEditNode: { title: "Temporal Edit Node", steps: [], hide: true },
               tmpProposalConceptChild: { title: "Temporal Edit Node", steps: [], hide: true },
             }}
