@@ -4127,12 +4127,14 @@ const Dashboard = ({}: DashboardProps) => {
       console.log(forcedTutorial === "tmpProposalConceptChild", ["tmpProposalConceptChild"].includes(tutorialName));
       const isValidForcedTutorial = forcedTutorial
         ? (forcedTutorial === "nodes" && ["nodes"].includes(tutorialName)) ||
-          (forcedTutorial === "proposal" && ["proposal"].includes(tutorialName)) ||
-          (forcedTutorial === "proposalCode" && ["proposalCode"].includes(tutorialName)) ||
-          (forcedTutorial === "childProposal" && ["childProposal"].includes(tutorialName)) ||
-          (forcedTutorial === "tmpEditNode" && ["tmpEditNode"].includes(tutorialName)) ||
+          (forcedTutorial === "proposal" && ["proposal", "tmpEditNode"].includes(tutorialName)) ||
+          (forcedTutorial === "proposalCode" && ["proposalCode", "tmpEditNode"].includes(tutorialName)) ||
+          (forcedTutorial === "childProposal" &&
+            ["childProposal", "tmpProposalConceptChild", "tmpEditNode"].includes(tutorialName)) ||
+          // (forcedTutorial === "tmpEditNode" && ["tmpEditNode"].includes(tutorialName)) ||
           // (forcedTutorial === "tmpProposalConceptChild" && ["tmpProposalConceptChild"].includes(tutorialName)) ||
-          (forcedTutorial === "childConcept" && ["childConcept", "tmpProposalConceptChild"].includes(tutorialName))
+          (forcedTutorial === "childConcept" &&
+            ["childConcept", "tmpProposalConceptChild", "tmpEditNode"].includes(tutorialName))
         : !["tmpProposalConceptChild", "tmpEditNode"].includes(tutorialName);
 
       console.log({
@@ -4156,6 +4158,7 @@ const Dashboard = ({}: DashboardProps) => {
 
       console.log("112", newTargetId);
       const thisNode = graph.nodes[newTargetId];
+      console.log("112.5", { thisNode });
       if (!thisNode) return false;
       console.log({ result: targetIsValid(thisNode) });
       if (!targetIsValid(thisNode)) return false;
@@ -5009,6 +5012,16 @@ const Dashboard = ({}: DashboardProps) => {
         node && node.open && node.editable && node.nodeType === "Code";
       const node = graph.nodes[targetId];
       if (!codeProposalTutorialIsValid(node)) {
+        setTutorial(null);
+        setForcedTutorial(null);
+      }
+    }
+    if (tutorial.name === "childConcept") {
+      const childConceptProposalIsValid = (node: FullNodeData) =>
+        node && Boolean(node.isNew) && node.open && node.editable && node.nodeType === "Concept";
+
+      const node = graph.nodes[targetId];
+      if (!childConceptProposalIsValid(node)) {
         setTutorial(null);
         setForcedTutorial(null);
       }
