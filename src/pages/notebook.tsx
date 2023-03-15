@@ -4557,6 +4557,36 @@ const Dashboard = ({}: DashboardProps) => {
       }
       // --------------------------
 
+      const conceptTutorialIsValid = (thisNode: FullNodeData) =>
+        thisNode && thisNode.open && thisNode.nodeType === "Concept";
+      const conceptTutorialLaunched = detectAndCallTutorial("concept", conceptTutorialIsValid);
+      if (conceptTutorialLaunched) return;
+
+      if (forcedTutorial === "concept") {
+        const defaultStates = { open: true };
+        const newTargetId = "r98BjyFDCe4YyLA3U8ZE";
+        const thisNode = graph.nodes[newTargetId];
+        if (!conceptTutorialIsValid(thisNode)) {
+          if (!tutorialStateWasSetUpRef.current) {
+            openNodeHandler(newTargetId, defaultStates);
+            tutorialStateWasSetUpRef.current = true;
+          }
+          return;
+        }
+        tutorialStateWasSetUpRef.current = false;
+        nodeBookDispatch({ type: "setSelectedNode", payload: newTargetId });
+        notebookRef.current.selectedNode = newTargetId;
+        startTutorial("concept");
+        setTargetId(newTargetId);
+
+        setNodeUpdates({
+          nodeIds: [newTargetId],
+          updatedAt: new Date(),
+        });
+
+        return;
+      }
+
       // --------------------------
 
       // const selectedNodeFromChangedNodes: FullNodeData = nodeBookState.selectedNode
@@ -5016,6 +5046,16 @@ const Dashboard = ({}: DashboardProps) => {
         setForcedTutorial(null);
       }
     }
+    if (tutorial.name === "concept") {
+      const conceptTutorialIsValid = (thisNode: FullNodeData) =>
+        thisNode && thisNode.open && thisNode.nodeType === "Concept";
+      const node = graph.nodes[targetId];
+      if (!conceptTutorialIsValid(node)) {
+        setTutorial(null);
+        setForcedTutorial(null);
+      }
+    }
+
     if (tutorial.name === "childConcept") {
       const childConceptProposalIsValid = (node: FullNodeData) =>
         node && Boolean(node.isNew) && node.open && node.editable && node.nodeType === "Concept";
