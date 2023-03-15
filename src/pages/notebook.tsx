@@ -5222,16 +5222,31 @@ const Dashboard = ({}: DashboardProps) => {
         // console.log("remove node t");
       }
     }
-    if (tutorial.name === "proposalCode") {
-      const codeProposalTutorialIsValid = (node: FullNodeData) =>
-        node && node.open && node.editable && node.nodeType === "Code";
-      const node = graph.nodes[targetId];
-      if (!codeProposalTutorialIsValid(node)) {
-        setTutorial(null);
-        setForcedTutorial(null);
-      }
-    }
-
+    // --------------------------
+    const conceptProposalTutorialIsValid = (thisNode: FullNodeData) =>
+      thisNode && thisNode.open && thisNode.editable && thisNode.nodeType === "Concept";
+    detectAndRemoveTutorial("proposalConcept", conceptProposalTutorialIsValid);
+    // --------------------------
+    const relationProposalTutorialIsValid = (thisNode: FullNodeData) =>
+      thisNode && thisNode.open && thisNode.editable && thisNode.nodeType === "Relation";
+    detectAndRemoveTutorial("proposalRelation", relationProposalTutorialIsValid);
+    // --------------------------
+    const referenceProposalTutorialIsValid = (thisNode: FullNodeData) =>
+      thisNode && thisNode.open && thisNode.editable && thisNode.nodeType === "Reference";
+    detectAndRemoveTutorial("proposalReference", referenceProposalTutorialIsValid);
+    // --------------------------
+    const questionProposalTutorialIsValid = (thisNode: FullNodeData) =>
+      thisNode && thisNode.open && thisNode.editable && thisNode.nodeType === "Question";
+    detectAndRemoveTutorial("proposalQuestion", questionProposalTutorialIsValid);
+    // --------------------------
+    const ideaProposalTutorialIsValid = (thisNode: FullNodeData) =>
+      thisNode && thisNode.open && thisNode.editable && thisNode.nodeType === "Idea";
+    detectAndRemoveTutorial("proposalIdea", ideaProposalTutorialIsValid);
+    // --------------------------
+    const codeProposalTutorialIsValid = (thisNode: FullNodeData) =>
+      thisNode && thisNode.open && thisNode.editable && thisNode.nodeType === "Code";
+    detectAndRemoveTutorial("proposalCode", codeProposalTutorialIsValid);
+    // --------------------------
     // if (tutorial.name === "concept") {
     //   const node = graph.nodes[targetId];
     //   if (!conceptTutorialIsValid(node)) {
@@ -5305,7 +5320,7 @@ const Dashboard = ({}: DashboardProps) => {
         setForcedTutorial(null);
       }
     }
-  }, [firstLoading, graph.nodes, setTutorial, targetId, tutorial, userTutorialLoaded]);
+  }, [detectAndRemoveTutorial, firstLoading, graph.nodes, setTutorial, targetId, tutorial, userTutorialLoaded]);
 
   useEffect(() => {
     if (!tutorial) return;
