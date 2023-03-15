@@ -4162,7 +4162,17 @@ const Dashboard = ({}: DashboardProps) => {
           // (forcedTutorial === "tmpEditNode" && ["tmpEditNode"].includes(tutorialName)) ||
           // (forcedTutorial === "tmpProposalConceptChild" && ["tmpProposalConceptChild"].includes(tutorialName)) ||
           (forcedTutorial === "childConcept" &&
-            ["childConcept", "tmpProposalConceptChild", "tmpEditNode"].includes(tutorialName))
+            ["childConcept", "tmpProposalConceptChild", "tmpEditNode"].includes(tutorialName)) ||
+          (forcedTutorial === "childRelation" &&
+            ["childRelation", "tmpProposalRelationChild", "tmpEditNode"].includes(tutorialName)) ||
+          (forcedTutorial === "childReference" &&
+            ["childReference", "tmpProposalReferenceChild", "tmpEditNode"].includes(tutorialName)) ||
+          (forcedTutorial === "childQuestion" &&
+            ["childQuestion", "tmpProposalQuestionChild", "tmpEditNode"].includes(tutorialName)) ||
+          (forcedTutorial === "childIdea" &&
+            ["childIdea", "tmpProposalIdeaChild", "tmpEditNode"].includes(tutorialName)) ||
+          (forcedTutorial === "childCode" &&
+            ["childCode", "tmpProposalCodeChild", "tmpEditNode"].includes(tutorialName))
         : !["tmpProposalConceptChild", "tmpEditNode"].includes(tutorialName);
 
       console.log({
@@ -4173,6 +4183,22 @@ const Dashboard = ({}: DashboardProps) => {
         5: forcedTutorial === "tmpEditNode" && ["tmpEditNode"].includes(tutorialName),
         6: forcedTutorial === "tmpProposalConceptChild" && ["tmpProposalConceptChild"].includes(tutorialName),
         7: forcedTutorial === "childConcept" && ["childConcept"].includes(tutorialName),
+        8:
+          forcedTutorial === "childConcept" &&
+          ["childConcept", "tmpProposalConceptChild", "tmpEditNode"].includes(tutorialName),
+        9:
+          forcedTutorial === "childRelation" &&
+          ["childRelation", "tmpProposalRelationChild", "tmpEditNode"].includes(tutorialName),
+        10:
+          forcedTutorial === "childReference" &&
+          ["childReference", "tmpProposalReferenceChild", "tmpEditNode"].includes(tutorialName),
+        11:
+          forcedTutorial === "childQuestion" &&
+          ["childQuestion", "tmpProposalQuestionChild", "tmpEditNode"].includes(tutorialName),
+        12:
+          forcedTutorial === "childIdea" && ["childIdea", "tmpProposalIdeaChild", "tmpEditNode"].includes(tutorialName),
+        13:
+          forcedTutorial === "childCode" && ["childCode", "tmpProposalCodeChild", "tmpEditNode"].includes(tutorialName),
       });
       console.log({ isValidForcedTutorial, thisone: "" });
       if (!isValidForcedTutorial) return false;
@@ -5165,55 +5191,67 @@ const Dashboard = ({}: DashboardProps) => {
       const childCodeProposalLaunched = detectAndCallChildTutorial("childCode", codeChildProposalIsValid);
       if (childCodeProposalLaunched) return;
 
-      // // ------------------------
-
-      // const proposalConceptChildLaunched = detectAndCallTutorial(
-      //   "tmpProposalConceptChild",
-      //   node => node && node.open && node.editable
-      // );
-      // console.log({ proposalConceptChildLaunched });
-      // if (proposalConceptChildLaunched) return;
-      // // ------------------------
-
-      // const proposalRelationChildLaunched = detectAndCallTutorial(
-      //   "tmpProposalRelationChild",
-      //   node => node && node.open && node.editable
-      // );
-      // console.log({ proposalRelationChildLaunched });
-      // if (proposalRelationChildLaunched) return;
-      // // ------------------------
-
-      // const proposalConceptChildLaunched = detectAndCallTutorial(
-      //   "tmpProposalConceptChild",
-      //   node => node && node.open && node.editable
-      // );
-      // console.log({ proposalConceptChildLaunched });
-      // if (proposalConceptChildLaunched) return;
-      // // ------------------------
-
-      // const proposalConceptChildLaunched = detectAndCallTutorial(
-      //   "tmpProposalConceptChild",
-      //   node => node && node.open && node.editable
-      // );
-      // console.log({ proposalConceptChildLaunched });
-      // if (proposalConceptChildLaunched) return;
-      // // ------------------------
-
-      // const proposalConceptChildLaunched = detectAndCallTutorial(
-      //   "tmpProposalConceptChild",
-      //   node => node && node.open && node.editable
-      // );
-      // console.log({ proposalConceptChildLaunched });
-      // if (proposalConceptChildLaunched) return;
-      // // ------------------------
-      // const proposalConceptChildLaunched = detectAndCallTutorial(
-      //   "tmpProposalConceptChild",
-      //   node => node && node.open && node.editable
-      // );
-      // console.log({ proposalConceptChildLaunched });
-      // if (proposalConceptChildLaunched) return;
       // ------------------------
-      if (forcedTutorial === "childProposal" || forcedTutorial === "childConcept") {
+
+      const proposalConceptChildLaunched = detectAndCallTutorial(
+        "tmpProposalConceptChild",
+        node => node && node.open && node.editable
+      );
+      console.log({ proposalConceptChildLaunched });
+      if (proposalConceptChildLaunched) return;
+
+      // ------------------------
+
+      const proposalRelationChildLaunched = detectAndCallTutorial(
+        "tmpProposalRelationChild",
+        node => node && node.open && node.editable
+      );
+      console.log({ proposalRelationChildLaunched });
+      if (proposalRelationChildLaunched) return;
+
+      // ------------------------
+
+      const proposalReferenceChildLaunched = detectAndCallTutorial(
+        "tmpProposalReferenceChild",
+        node => node && node.open && node.editable
+      );
+      console.log({ proposalReferenceChildLaunched });
+      if (proposalReferenceChildLaunched) return;
+
+      // ------------------------
+
+      const proposalQuestionChildLaunched = detectAndCallTutorial(
+        "tmpProposalQuestionChild",
+        node => node && node.open && node.editable
+      );
+      console.log({ proposalQuestionChildLaunched });
+      if (proposalQuestionChildLaunched) return;
+
+      // ------------------------
+
+      const proposalIdeaChildLaunched = detectAndCallTutorial(
+        "tmpProposalIdeaChild",
+        node => node && node.open && node.editable
+      );
+      console.log({ proposalIdeaChildLaunched });
+      if (proposalIdeaChildLaunched) return;
+
+      // ------------------------
+
+      const proposalCodeChildLaunched = detectAndCallTutorial(
+        "tmpProposalCodeChild",
+        node => node && node.open && node.editable
+      );
+      console.log({ proposalCodeChildLaunched });
+      if (proposalCodeChildLaunched) return;
+
+      // ------------------------
+
+      if (
+        forcedTutorial === "childProposal" ||
+        forcedTutorial === "childConcept" ||
+        forcedTutorial === "childQuestion"
+      ) {
         const defaultStates = { open: true };
         // const targetIsInvalid = (node: FullNodeData) => !node.open || node.editable;
         const newTargetId = "r98BjyFDCe4YyLA3U8ZE";
