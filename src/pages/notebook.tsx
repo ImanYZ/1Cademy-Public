@@ -131,8 +131,13 @@ import {
   mergeAllNodes,
 } from "../lib/utils/nodesSyncronization.utils";
 import {
+  CHILD_CODE_PROPOSAL_COMPLETE,
   CHILD_CONCEPT_PROPOSAL_COMPLETE,
+  CHILD_IDEA_PROPOSAL_COMPLETE,
   CHILD_PROPOSAL_COMPLETE,
+  CHILD_QUESTION_PROPOSAL_COMPLETE,
+  CHILD_REFERENCE_PROPOSAL_COMPLETE,
+  CHILD_RELATION_PROPOSAL_COMPLETE,
 } from "../lib/utils/tutorials/childrenProposalTutorialStep";
 import { NAVIGATION_STEPS_COMPLETE } from "../lib/utils/tutorials/navigationTutorialSteps";
 import { NODE_CODE } from "../lib/utils/tutorials/nodeCodeTutorialSteps";
@@ -6087,8 +6092,14 @@ const Dashboard = ({}: DashboardProps) => {
                 title: "Not Accepted Proposal",
                 steps: RECONCILING_NOT_ACCEPTED_PROPOSALS_STEPS_COMPLETE,
               },
-              childConcept: { title: "x Propose Child Concept Node", steps: CHILD_CONCEPT_PROPOSAL_COMPLETE },
               childProposal: { title: "x Child Proposal", steps: CHILD_PROPOSAL_COMPLETE },
+              childConcept: { title: "x Propose Child Concept Node", steps: CHILD_CONCEPT_PROPOSAL_COMPLETE },
+              childRelation: { title: "Propose Child Relation Node", steps: CHILD_RELATION_PROPOSAL_COMPLETE },
+              childReference: { title: "Propose Child Reference Node", steps: CHILD_REFERENCE_PROPOSAL_COMPLETE },
+              childQuestion: { title: "Propose Child Question Node", steps: CHILD_QUESTION_PROPOSAL_COMPLETE },
+              childIdea: { title: "Propose Child Idea Node", steps: CHILD_IDEA_PROPOSAL_COMPLETE },
+              childCode: { title: "Propose Child Code Node", steps: CHILD_CODE_PROPOSAL_COMPLETE },
+
               tmpEditNode: { title: "Temporal Edit Node", steps: [], hide: true },
               tmpProposalConceptChild: { title: "Temporal Edit Node", steps: [], hide: true },
             }}

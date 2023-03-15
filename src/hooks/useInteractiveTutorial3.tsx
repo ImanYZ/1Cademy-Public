@@ -12,8 +12,13 @@ import { SEARCHER_STEPS_COMPLETE } from "@/lib/utils/tutorials/searcherTutorialS
 import { User } from "../knowledgeTypes";
 import { devLog } from "../lib/utils/develop.util";
 import {
+  CHILD_CODE_PROPOSAL_COMPLETE,
   CHILD_CONCEPT_PROPOSAL_COMPLETE,
+  CHILD_IDEA_PROPOSAL_COMPLETE,
   CHILD_PROPOSAL_COMPLETE,
+  CHILD_QUESTION_PROPOSAL_COMPLETE,
+  CHILD_REFERENCE_PROPOSAL_COMPLETE,
+  CHILD_RELATION_PROPOSAL_COMPLETE,
 } from "../lib/utils/tutorials/childrenProposalTutorialStep";
 import { NODE_CODE } from "../lib/utils/tutorials/nodeCodeTutorialSteps";
 import { NODE_CONCEPT } from "../lib/utils/tutorials/nodeConceptTutorialStep";
@@ -82,6 +87,11 @@ export const useInteractiveTutorial = ({ user }: useInteractiveTutorialProps) =>
     reconcilingNotAcceptedProposal: { currentStep: -1, done: false, skipped: false },
     childProposal: { currentStep: -1, done: false, skipped: false },
     childConcept: { currentStep: -1, done: false, skipped: false },
+    childRelation: { currentStep: -1, done: false, skipped: false },
+    childReference: { currentStep: -1, done: false, skipped: false },
+    childQuestion: { currentStep: -1, done: false, skipped: false },
+    childIdea: { currentStep: -1, done: false, skipped: false },
+    childCode: { currentStep: -1, done: false, skipped: false },
     tmpEditNode: { currentStep: -1, done: false, skipped: false },
     tmpProposalConceptChild: { currentStep: -1, done: false, skipped: false },
   });
@@ -181,6 +191,21 @@ export const useInteractiveTutorial = ({ user }: useInteractiveTutorialProps) =>
       }
       if (newTutorial === "childConcept") {
         newSteps = CHILD_CONCEPT_PROPOSAL_COMPLETE;
+      }
+      if (newTutorial === "childRelation") {
+        newSteps = CHILD_RELATION_PROPOSAL_COMPLETE;
+      }
+      if (newTutorial === "childReference") {
+        newSteps = CHILD_REFERENCE_PROPOSAL_COMPLETE;
+      }
+      if (newTutorial === "childQuestion") {
+        newSteps = CHILD_QUESTION_PROPOSAL_COMPLETE;
+      }
+      if (newTutorial === "childIdea") {
+        newSteps = CHILD_IDEA_PROPOSAL_COMPLETE;
+      }
+      if (newTutorial === "childCode") {
+        newSteps = CHILD_CODE_PROPOSAL_COMPLETE;
       }
       //----------------- tmp nodes
       if (newTutorial === "tmpEditNode") {
