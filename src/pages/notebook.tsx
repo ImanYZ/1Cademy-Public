@@ -4075,38 +4075,60 @@ const Dashboard = ({}: DashboardProps) => {
     (
       tutorialName: TutorialTypeKeys,
       targetId: string,
-      targetIsInvalid: (node: FullNodeData) => boolean,
+      targetIsValid: (node: FullNodeData) => boolean,
       defaultStates: Partial<FullNodeData> = { open: true }
     ) => {
-      const tutorialsIsForced = forcedTutorial === tutorialName;
-      if (tutorialsIsForced || userTutorial[tutorialName].done || userTutorial[tutorialName].skipped) return;
+      if (forcedTutorial !== tutorialName) return false;
 
-      devLog("DETECT_AND_FORCE_TUTORIAL", { tutorialName, targetId, defaultStates });
-
-      const newTargetId = tutorialsIsForced ? targetId : nodeBookState.selectedNode ?? "";
-      console.log(10, newTargetId);
-
-      if (!newTargetId) return;
-
-      // console.log(11);
-      const thisNode = graph.nodes[newTargetId];
-      if ((tutorialsIsForced && !thisNode) || targetIsInvalid(thisNode)) {
+      const thisNode = graph.nodes[targetId];
+      if (!targetIsValid(thisNode)) {
         if (!tutorialStateWasSetUpRef.current) {
-          // console.log(12);
-          openNodeHandler(newTargetId, defaultStates);
+          openNodeHandler(targetId, defaultStates);
           tutorialStateWasSetUpRef.current = true;
         }
-        return;
+        return true;
       }
-
-      // console.log(13);
-      // disableForceTutorial(tutorialName);
       tutorialStateWasSetUpRef.current = false;
-      startTutorial(tutorialName);
-      setTargetId(newTargetId);
-      return;
+      nodeBookDispatch({ type: "setSelectedNode", payload: targetId });
+      notebookRef.current.selectedNode = targetId;
+
+      startTutorial(
+        [
+          "proposal",
+          "proposalConcept",
+          "proposalRelation",
+          "proposalReference",
+          "proposalQuestion",
+          "proposalIdea",
+          "proposalCode",
+        ].includes(tutorialName)
+          ? "tmpEditNode"
+          : tutorialName
+      );
+      setTargetId(targetId);
+
+      setNodeUpdates({
+        nodeIds: [targetId],
+        updatedAt: new Date(),
+      });
+
+      return true;
     },
-    [forcedTutorial, graph.nodes, nodeBookState.selectedNode, openNodeHandler, setTargetId, startTutorial, userTutorial]
+    [forcedTutorial, graph.nodes, nodeBookDispatch, openNodeHandler, setTargetId, startTutorial]
+  );
+
+  const detectAndRemoveTutorial = useCallback(
+    (tutorialName: TutorialTypeKeys, targetIsValid: (node: FullNodeData) => boolean) => {
+      if (!tutorial) return;
+      if (tutorial.name !== tutorialName) return;
+
+      const node = graph.nodes[targetId];
+      if (!targetIsValid(node)) {
+        setTutorial(null);
+        setForcedTutorial(null);
+      }
+    },
+    [graph.nodes, setTutorial, targetId, tutorial]
   );
 
   /**
@@ -4124,6 +4146,11 @@ const Dashboard = ({}: DashboardProps) => {
       const isValidForcedTutorial = forcedTutorial
         ? (forcedTutorial === "nodes" && ["nodes"].includes(tutorialName)) ||
           (forcedTutorial === "proposal" && ["proposal", "tmpEditNode"].includes(tutorialName)) ||
+          (forcedTutorial === "proposalConcept" && ["proposalConcept", "tmpEditNode"].includes(tutorialName)) ||
+          (forcedTutorial === "proposalRelation" && ["proposalRelation", "tmpEditNode"].includes(tutorialName)) ||
+          (forcedTutorial === "proposalReference" && ["proposalReference", "tmpEditNode"].includes(tutorialName)) ||
+          (forcedTutorial === "proposalQuestion" && ["proposalQuestion", "tmpEditNode"].includes(tutorialName)) ||
+          (forcedTutorial === "proposalIdea" && ["proposalIdea", "tmpEditNode"].includes(tutorialName)) ||
           (forcedTutorial === "proposalCode" && ["proposalCode", "tmpEditNode"].includes(tutorialName)) ||
           (forcedTutorial === "childProposal" &&
             ["childProposal", "tmpProposalConceptChild", "tmpEditNode"].includes(tutorialName)) ||
@@ -4524,8 +4551,8 @@ const Dashboard = ({}: DashboardProps) => {
         node && node.open && node.editable && node.nodeType === "Code";
       const codeProposalTutorialIsValidForced = (node: FullNodeData) => node && node.open && node.nodeType === "Code";
 
-      const conceptProposalTutorialLaunched = detectAndCallTutorial("proposalCode", codeProposalTutorialIsValid);
-      if (conceptProposalTutorialLaunched) return;
+      const codeProposalTutorialLaunched = detectAndCallTutorial("proposalCode", codeProposalTutorialIsValid);
+      if (codeProposalTutorialLaunched) return;
 
       if (forcedTutorial === "proposalCode") {
         const defaultStates = { open: true };
@@ -4553,35 +4580,193 @@ const Dashboard = ({}: DashboardProps) => {
       }
       // --------------------------
 
+      const conceptProposalTutorialIsValid = (node: FullNodeData) =>
+        node && node.open && node.editable && node.nodeType === "Concept";
+      const conceptProposalTutorialIsValidForced = (node: FullNodeData) =>
+        node && node.open && node.nodeType === "Concept";
+
+      const conceptProposalTutorialLaunched = detectAndCallTutorial("proposalConcept", conceptProposalTutorialIsValid);
+      if (conceptProposalTutorialLaunched) return;
+
+      const conceptProposalForcedTutorialLaunched = detectAndForceTutorial(
+        "proposalConcept",
+        "r98BjyFDCe4YyLA3U8ZE",
+        conceptProposalTutorialIsValidForced
+      );
+      if (conceptProposalForcedTutorialLaunched) return;
+      // --------------------------
+
+      const relationProposalTutorialIsValid = (node: FullNodeData) =>
+        node && node.open && node.editable && node.nodeType === "Relation";
+      const relationProposalTutorialIsValidForced = (node: FullNodeData) =>
+        node && node.open && node.nodeType === "Relation";
+
+      const relationProposalTutorialLaunched = detectAndCallTutorial(
+        "proposalRelation",
+        relationProposalTutorialIsValid
+      );
+      if (relationProposalTutorialLaunched) return;
+
+      const relationProposalForcedTutorialLaunched = detectAndForceTutorial(
+        "proposalRelation",
+        "zYYmaXvhab7hH2uRI9Up",
+        relationProposalTutorialIsValidForced
+      );
+      if (relationProposalForcedTutorialLaunched) return;
+
+      // --------------------------
+
+      const referenceProposalTutorialIsValid = (node: FullNodeData) =>
+        node && node.open && node.editable && node.nodeType === "Reference";
+      const referenceProposalTutorialIsValidForced = (node: FullNodeData) =>
+        node && node.open && node.nodeType === "Reference";
+
+      const referenceProposalTutorialLaunched = detectAndCallTutorial(
+        "proposalReference",
+        referenceProposalTutorialIsValid
+      );
+      if (referenceProposalTutorialLaunched) return;
+
+      const referenceProposalForcedTutorialLaunched = detectAndForceTutorial(
+        "proposalReference",
+        "P631lWeKsBtszZRDlmsM",
+        referenceProposalTutorialIsValidForced
+      );
+      if (referenceProposalForcedTutorialLaunched) return;
+
+      // --------------------------
+
+      const questionProposalTutorialIsValid = (node: FullNodeData) =>
+        node && node.open && node.editable && node.nodeType === "Question";
+      const questionProposalTutorialIsValidForced = (node: FullNodeData) =>
+        node && node.open && node.nodeType === "Question";
+
+      const questionProposalTutorialLaunched = detectAndCallTutorial(
+        "proposalQuestion",
+        questionProposalTutorialIsValid
+      );
+      if (questionProposalTutorialLaunched) return;
+
+      const questionProposalForcedTutorialLaunched = detectAndForceTutorial(
+        "proposalQuestion",
+        "qO9uK6UdYRLWm4Olihlw",
+        questionProposalTutorialIsValidForced
+      );
+      if (questionProposalForcedTutorialLaunched) return;
+
+      // --------------------------
+
+      const ideaProposalTutorialIsValid = (node: FullNodeData) =>
+        node && node.open && node.editable && node.nodeType === "Idea";
+      const ideaProposalTutorialIsValidForced = (node: FullNodeData) => node && node.open && node.nodeType === "Idea";
+
+      const ideaProposalTutorialLaunched = detectAndCallTutorial("proposalIdea", ideaProposalTutorialIsValid);
+      if (ideaProposalTutorialLaunched) return;
+
+      const ideaProposalForcedTutorialLaunched = detectAndForceTutorial(
+        "proposalIdea",
+        "v9wGPxRCI4DRq11o7uH2",
+        ideaProposalTutorialIsValidForced
+      );
+      if (ideaProposalForcedTutorialLaunched) return;
+
+      // --------------------------
+
       const conceptTutorialIsValid = (thisNode: FullNodeData) =>
         thisNode && thisNode.open && thisNode.nodeType === "Concept";
       const conceptTutorialLaunched = detectAndCallTutorial("concept", conceptTutorialIsValid);
       if (conceptTutorialLaunched) return;
 
-      if (forcedTutorial === "concept") {
-        const defaultStates = { open: true };
-        const newTargetId = "r98BjyFDCe4YyLA3U8ZE";
-        const thisNode = graph.nodes[newTargetId];
-        if (!conceptTutorialIsValid(thisNode)) {
-          if (!tutorialStateWasSetUpRef.current) {
-            openNodeHandler(newTargetId, defaultStates);
-            tutorialStateWasSetUpRef.current = true;
-          }
-          return;
-        }
-        tutorialStateWasSetUpRef.current = false;
-        nodeBookDispatch({ type: "setSelectedNode", payload: newTargetId });
-        notebookRef.current.selectedNode = newTargetId;
-        startTutorial("concept");
-        setTargetId(newTargetId);
+      const conceptForcedTutorialLaunched = detectAndForceTutorial(
+        "concept",
+        "r98BjyFDCe4YyLA3U8ZE",
+        conceptTutorialIsValid
+      );
+      if (conceptForcedTutorialLaunched) return;
+      // --------------------------
 
-        setNodeUpdates({
-          nodeIds: [newTargetId],
-          updatedAt: new Date(),
-        });
+      const relationTutorialIsValid = (thisNode: FullNodeData) =>
+        thisNode && thisNode.open && thisNode.nodeType === "Relation";
+      const relationTutorialLaunched = detectAndCallTutorial("relation", relationTutorialIsValid);
+      if (relationTutorialLaunched) return;
 
-        return;
-      }
+      const relationForcedTutorialLaunched = detectAndForceTutorial(
+        "relation",
+        "zYYmaXvhab7hH2uRI9Up",
+        relationTutorialIsValid
+      );
+      if (relationForcedTutorialLaunched) return;
+
+      // --------------------------
+      const referenceTutorialIsValid = (thisNode: FullNodeData) =>
+        thisNode && thisNode.open && thisNode.nodeType === "Reference";
+      const referenceTutorialLaunched = detectAndCallTutorial("reference", referenceTutorialIsValid);
+      if (referenceTutorialLaunched) return;
+
+      const referenceForcedTutorialLaunched = detectAndForceTutorial(
+        "reference",
+        "P631lWeKsBtszZRDlmsM",
+        referenceTutorialIsValid
+      );
+      if (referenceForcedTutorialLaunched) return;
+
+      // --------------------------
+
+      const questionTutorialIsValid = (thisNode: FullNodeData) =>
+        thisNode && thisNode.open && thisNode.nodeType === "Question";
+      const questionTutorialLaunched = detectAndCallTutorial("question", questionTutorialIsValid);
+      if (questionTutorialLaunched) return;
+
+      const questionForcedTutorialLaunched = detectAndForceTutorial(
+        "question",
+        "qO9uK6UdYRLWm4Olihlw",
+        questionTutorialIsValid
+      );
+      if (questionForcedTutorialLaunched) return;
+
+      // --------------------------
+
+      const ideaTutorialIsValid = (thisNode: FullNodeData) => thisNode && thisNode.open && thisNode.nodeType === "Idea";
+      const ideaTutorialLaunched = detectAndCallTutorial("idea", ideaTutorialIsValid);
+      if (ideaTutorialLaunched) return;
+
+      const ideaForcedTutorialLaunched = detectAndForceTutorial("idea", "v9wGPxRCI4DRq11o7uH2", ideaTutorialIsValid);
+      if (ideaForcedTutorialLaunched) return;
+
+      // --------------------------
+
+      const codeTutorialIsValid = (thisNode: FullNodeData) => thisNode && thisNode.open && thisNode.nodeType === "Code";
+      const codeTutorialLaunched = detectAndCallTutorial("code", codeTutorialIsValid);
+      if (codeTutorialLaunched) return;
+
+      const codeForcedTutorialLaunched = detectAndForceTutorial("code", "E1nIWQ7RIC3pRLvk0Bk5", codeTutorialIsValid);
+      if (codeForcedTutorialLaunched) return;
+
+      // --------------------------
+      // if (forcedTutorial === "concept") {
+      //   const defaultStates = { open: true };
+      //   const newTargetId = "r98BjyFDCe4YyLA3U8ZE";
+      //   const thisNode = graph.nodes[newTargetId];
+      //   if (!conceptTutorialIsValid(thisNode)) {
+      //     if (!tutorialStateWasSetUpRef.current) {
+      //       openNodeHandler(newTargetId, defaultStates);
+      //       tutorialStateWasSetUpRef.current = true;
+      //     }
+      //     return;
+      //   }
+      //   tutorialStateWasSetUpRef.current = false;
+      //   nodeBookDispatch({ type: "setSelectedNode", payload: newTargetId });
+      //   notebookRef.current.selectedNode = newTargetId;
+      //   startTutorial("concept");
+      //   setTargetId(newTargetId);
+
+      //   setNodeUpdates({
+      //     nodeIds: [newTargetId],
+      //     updatedAt: new Date(),
+      //   });
+
+      //   return;
+      // }
 
       // --------------------------
 
@@ -5033,25 +5218,69 @@ const Dashboard = ({}: DashboardProps) => {
         // console.log("remove node t");
       }
     }
-    if (tutorial.name === "proposalCode") {
-      const codeProposalTutorialIsValid = (node: FullNodeData) =>
-        node && node.open && node.editable && node.nodeType === "Code";
-      const node = graph.nodes[targetId];
-      if (!codeProposalTutorialIsValid(node)) {
-        setTutorial(null);
-        setForcedTutorial(null);
-      }
-    }
-    if (tutorial.name === "concept") {
-      const conceptTutorialIsValid = (thisNode: FullNodeData) =>
-        thisNode && thisNode.open && thisNode.nodeType === "Concept";
-      const node = graph.nodes[targetId];
-      if (!conceptTutorialIsValid(node)) {
-        setTutorial(null);
-        setForcedTutorial(null);
-      }
-    }
+    // --------------------------
+    const conceptProposalTutorialIsValid = (thisNode: FullNodeData) =>
+      thisNode && thisNode.open && thisNode.editable && thisNode.nodeType === "Concept";
+    detectAndRemoveTutorial("proposalConcept", conceptProposalTutorialIsValid);
+    // --------------------------
+    const relationProposalTutorialIsValid = (thisNode: FullNodeData) =>
+      thisNode && thisNode.open && thisNode.editable && thisNode.nodeType === "Relation";
+    detectAndRemoveTutorial("proposalRelation", relationProposalTutorialIsValid);
+    // --------------------------
+    const referenceProposalTutorialIsValid = (thisNode: FullNodeData) =>
+      thisNode && thisNode.open && thisNode.editable && thisNode.nodeType === "Reference";
+    detectAndRemoveTutorial("proposalReference", referenceProposalTutorialIsValid);
+    // --------------------------
+    const questionProposalTutorialIsValid = (thisNode: FullNodeData) =>
+      thisNode && thisNode.open && thisNode.editable && thisNode.nodeType === "Question";
+    detectAndRemoveTutorial("proposalQuestion", questionProposalTutorialIsValid);
+    // --------------------------
+    const ideaProposalTutorialIsValid = (thisNode: FullNodeData) =>
+      thisNode && thisNode.open && thisNode.editable && thisNode.nodeType === "Idea";
+    detectAndRemoveTutorial("proposalIdea", ideaProposalTutorialIsValid);
+    // --------------------------
+    const codeProposalTutorialIsValid = (thisNode: FullNodeData) =>
+      thisNode && thisNode.open && thisNode.editable && thisNode.nodeType === "Code";
+    detectAndRemoveTutorial("proposalCode", codeProposalTutorialIsValid);
+    // --------------------------
+    // if (tutorial.name === "concept") {
+    //   const node = graph.nodes[targetId];
+    //   if (!conceptTutorialIsValid(node)) {
+    //     setTutorial(null);
+    //     setForcedTutorial(null);
+    //   }
+    // }
+    // --------------------------
 
+    const conceptTutorialIsValid = (thisNode: FullNodeData) =>
+      thisNode && thisNode.open && thisNode.nodeType === "Concept";
+    detectAndRemoveTutorial("concept", conceptTutorialIsValid);
+
+    // --------------------------
+
+    const relationTutorialIsValid = (thisNode: FullNodeData) =>
+      thisNode && thisNode.open && thisNode.nodeType === "Relation";
+    detectAndRemoveTutorial("relation", relationTutorialIsValid);
+
+    // --------------------------
+    const referenceTutorialIsValid = (thisNode: FullNodeData) =>
+      thisNode && thisNode.open && thisNode.nodeType === "Reference";
+    detectAndRemoveTutorial("reference", referenceTutorialIsValid);
+
+    // --------------------------
+    const questionTutorialIsValid = (thisNode: FullNodeData) =>
+      thisNode && thisNode.open && thisNode.nodeType === "Question";
+    detectAndRemoveTutorial("question", questionTutorialIsValid);
+
+    // --------------------------
+    const ideaTutorialIsValid = (thisNode: FullNodeData) => thisNode && thisNode.open && thisNode.nodeType === "Idea";
+    detectAndRemoveTutorial("idea", ideaTutorialIsValid);
+
+    // --------------------------
+    const codeTutorialIsValid = (thisNode: FullNodeData) => thisNode && thisNode.open && thisNode.nodeType === "Code";
+    detectAndRemoveTutorial("code", codeTutorialIsValid);
+
+    // --------------------------
     if (tutorial.name === "childConcept") {
       const childConceptProposalIsValid = (node: FullNodeData) =>
         node && Boolean(node.isNew) && node.open && node.editable && node.nodeType === "Concept";
@@ -5087,7 +5316,7 @@ const Dashboard = ({}: DashboardProps) => {
         setForcedTutorial(null);
       }
     }
-  }, [firstLoading, graph.nodes, setTutorial, targetId, tutorial, userTutorialLoaded]);
+  }, [detectAndRemoveTutorial, firstLoading, graph.nodes, setTutorial, targetId, tutorial, userTutorialLoaded]);
 
   useEffect(() => {
     if (!tutorial) return;
@@ -5834,22 +6063,22 @@ const Dashboard = ({}: DashboardProps) => {
             reloadPermanentGraph={reloadPermanentGraph}
             handleCloseProgressBar={() => setOpenProgressBar(false)}
             tutorials={{
-              navigation: { title: "Navigation", steps: NAVIGATION_STEPS_COMPLETE },
-              nodes: { title: "Node", steps: NODES_STEPS_COMPLETE },
-              searcher: { title: "Searcher", steps: SEARCHER_STEPS_COMPLETE },
-              proposal: { title: "Proposal", steps: PROPOSAL_STEPS_COMPLETE },
-              proposalCode: { title: "Proposal Code", steps: PROPOSING_CODE_EDIT_COMPLETE },
-              proposalConcept: { title: "Proposal Concept", steps: PROPOSING_CONCEPT_EDIT_COMPLETE },
-              proposalIdea: { title: "Proposal Idea", steps: PROPOSING_IDEA_EDIT_COMPLETE },
-              proposalQuestion: { title: "Proposal Question", steps: PROPOSING_QUESTION_EDIT_COMPLETE },
-              proposalReference: { title: "Proposal Reference", steps: PROPOSING_REFERENCE_EDIT_COMPLETE },
-              proposalRelation: { title: "Proposal Relation", steps: PROPOSING_RELATION_EDIT_COMPLETE },
-              concept: { title: "Concept Node", steps: NODE_CODE },
-              relation: { title: "Relation Node", steps: NODE_RELATION },
-              reference: { title: "Reference Node", steps: NODE_REFERENCE },
-              question: { title: "Question Node", steps: NODE_QUESTION },
-              idea: { title: "Idea Node", steps: NODE_IDEA },
-              code: { title: "Code Node", steps: NODE_CODE },
+              navigation: { title: "x Navigation", steps: NAVIGATION_STEPS_COMPLETE },
+              nodes: { title: "x Node", steps: NODES_STEPS_COMPLETE },
+              searcher: { title: "x Searcher", steps: SEARCHER_STEPS_COMPLETE },
+              proposal: { title: "x Proposal", steps: PROPOSAL_STEPS_COMPLETE },
+              proposalCode: { title: "x Proposal Code", steps: PROPOSING_CODE_EDIT_COMPLETE },
+              proposalConcept: { title: "x Proposal Concept", steps: PROPOSING_CONCEPT_EDIT_COMPLETE },
+              proposalIdea: { title: "x Proposal Idea", steps: PROPOSING_IDEA_EDIT_COMPLETE },
+              proposalQuestion: { title: "x Proposal Question", steps: PROPOSING_QUESTION_EDIT_COMPLETE },
+              proposalReference: { title: "x Proposal Reference", steps: PROPOSING_REFERENCE_EDIT_COMPLETE },
+              proposalRelation: { title: "x Proposal Relation", steps: PROPOSING_RELATION_EDIT_COMPLETE },
+              concept: { title: "x Concept Node", steps: NODE_CODE },
+              relation: { title: "x Relation Node", steps: NODE_RELATION },
+              reference: { title: "x Reference Node", steps: NODE_REFERENCE },
+              question: { title: "x Question Node", steps: NODE_QUESTION },
+              idea: { title: "x Idea Node", steps: NODE_IDEA },
+              code: { title: "x Code Node", steps: NODE_CODE },
               reconcilingAcceptedProposal: {
                 title: "Accepted Proposals",
                 steps: RECONCILING_ACCEPTED_PROPOSALS_STEPS_COMPLETE,
@@ -5858,8 +6087,8 @@ const Dashboard = ({}: DashboardProps) => {
                 title: "Not Accepted Proposal",
                 steps: RECONCILING_NOT_ACCEPTED_PROPOSALS_STEPS_COMPLETE,
               },
-              childConcept: { title: "Propose Child Concept Node", steps: CHILD_CONCEPT_PROPOSAL_COMPLETE },
-              childProposal: { title: "Child Proposal", steps: CHILD_PROPOSAL_COMPLETE },
+              childConcept: { title: "x Propose Child Concept Node", steps: CHILD_CONCEPT_PROPOSAL_COMPLETE },
+              childProposal: { title: "x Child Proposal", steps: CHILD_PROPOSAL_COMPLETE },
               tmpEditNode: { title: "Temporal Edit Node", steps: [], hide: true },
               tmpProposalConceptChild: { title: "Temporal Edit Node", steps: [], hide: true },
             }}
