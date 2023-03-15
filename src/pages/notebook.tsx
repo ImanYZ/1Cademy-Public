@@ -1,3 +1,4 @@
+import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
 import AutoFixHighIcon from "@mui/icons-material/AutoFixHigh";
 import CloseIcon from "@mui/icons-material/Close";
 import CodeIcon from "@mui/icons-material/Code";
@@ -4748,7 +4749,7 @@ const Dashboard = ({}: DashboardProps) => {
             id="RightButtonsdMain"
             className={buttonsOpen ? undefined : "Minimized"}
             sx={{
-              width: { xs: "75%", md: "17%" },
+              width: { xs: "80%", md: "18%" },
               opacity: 1,
               cursor: "pointer",
               top: {
@@ -4772,7 +4773,7 @@ const Dashboard = ({}: DashboardProps) => {
                 padding: "10px",
                 zIndex: 999999,
               }}
-              onClick={() => setButtonsOpen(!buttonsOpen)}
+              onClick={() => setButtonsOpen(true)}
             >
               <IconButton
                 color="secondary"
@@ -4817,22 +4818,43 @@ const Dashboard = ({}: DashboardProps) => {
                   display: "flex",
                   justifyContent: "flex-start",
                   alignItems: "center",
-                  gap: "10px",
+                  gap: {
+                    xs: "5px",
+                    md: "10px",
+                  },
                   height: "inherit",
-                  borderRight: theme =>
-                    buttonsOpen
-                      ? theme.palette.mode === "dark"
-                        ? "solid 1px 575757"
-                        : "solid 1px #d0d5dd"
-                      : undefined,
                 }}
               >
+                <Box id="RightButtonsMinimizer">
+                  <Box
+                    onClick={() => setButtonsOpen(false)}
+                    sx={{
+                      display: "flex",
+                      flexDirection: "column",
+                      alignItems: "center",
+                      marginLeft: "10px",
+                      marginTop: "24px",
+                    }}
+                  >
+                    <Box>
+                      <ArrowForwardIosIcon
+                        fontSize="inherit"
+                        sx={{
+                          color: theme => (theme.palette.mode === "dark" ? "#A4A4A4" : "#98A2B3"),
+                        }}
+                      />
+                    </Box>
+                  </Box>
+                </Box>
                 {isQueueWorking && buttonsOpen && (
                   <CircularProgress
                     size={46}
                     sx={{
                       position: "absolute",
-                      left: "2px",
+                      left: {
+                        xs: "32px",
+                        md: "37px",
+                      },
                       zIndex: "1300",
                     }}
                   />
