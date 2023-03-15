@@ -5,7 +5,7 @@ import { getBaseStepConfig } from "./tutorial.utils";
 const TMP_EDIT_NODE_CONFIG: TutorialStepConfig[] = [
   {
     title: "Propose Node - Edit Node",
-    description: <MarkdownRender text={"**Click** on pencil button to enter in Edit Node"} />,
+    description: <MarkdownRender text={"**Click** on pencil button to enter in Edit Node."} />,
     childTargetId: "node-footer-propose",
     isClickeable: true,
   },
@@ -14,7 +14,7 @@ const TMP_EDIT_NODE_CONFIG: TutorialStepConfig[] = [
 const TMP_PROPOSE_CHILD_CONCEPT_CONFIG: TutorialStepConfig[] = [
   {
     title: "Propose Child - Concept",
-    description: <MarkdownRender text={"**Click** on concept icon button to create a new concept child"} />,
+    description: <MarkdownRender text={"**Click** on concept icon button to create a new concept child."} />,
     childTargetId: "propose-concept-child",
     isClickeable: true,
   },
@@ -22,8 +22,8 @@ const TMP_PROPOSE_CHILD_CONCEPT_CONFIG: TutorialStepConfig[] = [
 
 const TMP_PROPOSE_CHILD_RELATION_CONFIG: TutorialStepConfig[] = [
   {
-    title: "Propose Child - Concept",
-    description: <MarkdownRender text={"**Click** on concept icon button to create a new concept child"} />,
+    title: "Propose Child - Relation",
+    description: <MarkdownRender text={"**Click** on Relation icon button to create a new Relation child."} />,
     childTargetId: "propose-relation-child",
     isClickeable: true,
   },
@@ -31,8 +31,8 @@ const TMP_PROPOSE_CHILD_RELATION_CONFIG: TutorialStepConfig[] = [
 
 const TMP_PROPOSE_CHILD_QUESTION_CONFIG: TutorialStepConfig[] = [
   {
-    title: "Propose Child - Concept",
-    description: <MarkdownRender text={"**Click** on concept icon button to create a new concept child"} />,
+    title: "Propose Child - Question",
+    description: <MarkdownRender text={"**Click** on Question icon button to create a new Question child."} />,
     childTargetId: "propose-question-child",
     isClickeable: true,
   },
@@ -40,8 +40,8 @@ const TMP_PROPOSE_CHILD_QUESTION_CONFIG: TutorialStepConfig[] = [
 
 const TMP_PROPOSE_CHILD_CODE_CONFIG: TutorialStepConfig[] = [
   {
-    title: "Propose Child - Concept",
-    description: <MarkdownRender text={"**Click** on concept icon button to create a new concept child"} />,
+    title: "Propose Child - Code",
+    description: <MarkdownRender text={"**Click** on Code icon button to create a new Code child."} />,
     childTargetId: "propose-code-child",
     isClickeable: true,
   },
@@ -49,8 +49,8 @@ const TMP_PROPOSE_CHILD_CODE_CONFIG: TutorialStepConfig[] = [
 
 const TMP_PROPOSE_CHILD_REFERENCE_CONFIG: TutorialStepConfig[] = [
   {
-    title: "Propose Child - Concept",
-    description: <MarkdownRender text={"**Click** on concept icon button to create a new concept child"} />,
+    title: "Propose Child - Reference",
+    description: <MarkdownRender text={"**Click** on reference icon button to create a new reference child."} />,
     childTargetId: "propose-reference-child",
     isClickeable: true,
   },
@@ -58,8 +58,8 @@ const TMP_PROPOSE_CHILD_REFERENCE_CONFIG: TutorialStepConfig[] = [
 
 const TMP_PROPOSE_CHILD_IDEA_CONFIG: TutorialStepConfig[] = [
   {
-    title: "Propose Child - Concept",
-    description: <MarkdownRender text={"**Click** on concept icon button to create a new concept child"} />,
+    title: "Propose Child - Idea",
+    description: <MarkdownRender text={"**Click** on Idea icon button to create a new Idea child."} />,
     childTargetId: "propose-idea-child",
     isClickeable: true,
   },
