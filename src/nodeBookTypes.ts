@@ -453,7 +453,12 @@ export type TutorialTypeKeys =
   | "childProposal"
   | "childConcept"
   | "tmpEditNode"
-  | "tmpProposalConceptChild";
+  | "tmpProposalConceptChild"
+  | "tmpProposalRelationChild"
+  | "tmpProposalQuestionChild"
+  | "tmpProposalReferenceChild"
+  | "tmpProposalCodeChild"
+  | "tmpProposalIdeaChild";
 
 export type UserTutorial = {
   currentStep: number;

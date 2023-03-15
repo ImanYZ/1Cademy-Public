@@ -84,6 +84,7 @@ export const useInteractiveTutorial = ({ user }: useInteractiveTutorialProps) =>
     childConcept: { currentStep: -1, done: false, skipped: false },
     tmpEditNode: { currentStep: -1, done: false, skipped: false },
     tmpProposalConceptChild: { currentStep: -1, done: false, skipped: false },
+    tmpProposal: { currentStep: -1, done: false, skipped: false },
   });
 
   // flag for whether tutorial state was loaded
