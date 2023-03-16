@@ -295,6 +295,7 @@ const Dashboard = ({}: DashboardProps) => {
 
   const [openSidebar, setOpenSidebar] = useState<OpenSidebar>(null);
   const [buttonsOpen, setButtonsOpen] = useState<boolean>(true);
+  const [ableToPropose, setAbleToPropose] = useState(false);
 
   // object of cluster boundaries
   const [clusterNodes, setClusterNodes] = useState({});
@@ -5074,6 +5075,8 @@ const Dashboard = ({}: DashboardProps) => {
                   enableChildElements={[]}
                   showProposeTutorial={!(userTutorial.proposal.done || userTutorial.proposal.skipped)}
                   setCurrentTutorial={setCurrentTutorial}
+                  ableToPropose={ableToPropose}
+                  setAbleToPropose={setAbleToPropose}
                 />
               </MapInteractionCSS>
               {showRegion && (

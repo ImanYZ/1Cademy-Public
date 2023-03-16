@@ -59,6 +59,8 @@ type NodeListProps = {
   enableChildElements: string[];
   showProposeTutorial?: boolean; // this flag is to enable tutorial first time user click in pencil
   setCurrentTutorial: (newValue: TutorialType) => void;
+  ableToPropose: boolean;
+  setAbleToPropose: (newValue: boolean) => void;
 };
 
 const NodesList = ({
@@ -113,6 +115,8 @@ const NodesList = ({
   enableChildElements = [],
   showProposeTutorial = false,
   setCurrentTutorial,
+  ableToPropose,
+  setAbleToPropose,
 }: NodeListProps) => {
   /* eslint-disable-next-line @typescript-eslint/no-unused-vars */
   const { nodeBookDispatch } = useNodeBook();
@@ -264,6 +268,8 @@ const NodesList = ({
             defaultOpenPart={nodes[nId].defaultOpenPart}
             showProposeTutorial={showProposeTutorial}
             setCurrentTutorial={setCurrentTutorial}
+            ableToPropose={ableToPropose}
+            setAbleToPropose={setAbleToPropose}
           />
         );
       })}
@@ -318,6 +324,7 @@ export const MemoizedNodeList = React.memo(NodesList, (prev, next) => {
     prev.reloadPermanentGrpah === next.reloadPermanentGrpah &&
     prev.openSidebar === prev.openSidebar && // TODO: check this
     prev.showProposeTutorial === next.showProposeTutorial &&
+    prev.ableToPropose === next.ableToPropose &&
     validateTutorialProps()
   );
 });
