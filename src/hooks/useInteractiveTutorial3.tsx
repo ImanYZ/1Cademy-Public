@@ -254,51 +254,32 @@ export const useInteractiveTutorial = ({ user }: useInteractiveTutorialProps) =>
   }, []);
 
   const onNextStep = useCallback(() => {
-    () => console.log(tutorial);
-    // if (!tutorial) return;
+    setTutorial(prevTutorial => {
+      if (!prevTutorial) return null;
+      if (prevTutorial.step >= prevTutorial.steps.length) return null;
 
-    // setCurrentStep(prev => {
-    //   if (!prev) return null;
-    //   if (tutorial.step >= tutorial.steps.length) {
-    //     isPlayingTheTutorialRef.current = false;
-    //     setTutorial(null);
-    //     return null;
-    //   }
-
-    //   if (prev?.childTargetId) removeStyleFromTarget(prev.childTargetId, prev.targetId);
-    //   const newStep = tutorial.step < tutorial.steps.length ? tutorial.step + 1 : tutorial.step;
-    //   setUserTutorial(prevUserTutorial => ({
-    //     ...prevUserTutorial,
-    //     [tutorial.name]: {
-    //       ...prevUserTutorial[tutorial.name],
-    //       currentStep: newStep,
-    //     },
-    //   }));
-    //   return tutorial.steps[newStep - 1];
-    // });
-  }, [tutorial]);
+      const newStep = prevTutorial.step + 1;
+      setUserTutorial(prevUserTutorial => ({
+        ...prevUserTutorial,
+        [prevTutorial.name]: { ...prevUserTutorial[prevTutorial.name], currentStep: newStep },
+      }));
+      return { ...prevTutorial, step: newStep };
+    });
+  }, []);
 
   const onPreviousStep = useCallback(() => {
-    () => console.log(tutorial);
-    // if (!tutorial) return;
+    setTutorial(prevTutorial => {
+      if (!prevTutorial) return null;
+      if (prevTutorial.step <= 1) return prevTutorial;
 
-    // setCurrentStep(prev => {
-    //   if (!prev) return null;
-    //   if (tutorial.step === 1) {
-    //     isPlayingTheTutorialRef.current = false;
-    //     setTutorial(null);
-    //     return null;
-    //   }
-
-    //   if (prev?.childTargetId) removeStyleFromTarget(prev.childTargetId, prev.targetId);
-    //   const newStep = tutorial.step > 1 ? tutorial.step - 1 : tutorial.step;
-    //   setUserTutorial(prevUserTutorial => ({
-    //     ...prevUserTutorial,
-    //     [tutorial.name]: { ...prevUserTutorial[tutorial.name], currentStep: newStep },
-    //   }));
-    //   return tutorial.steps[newStep - 1];
-    // });
-  }, [tutorial]);
+      const newStep = prevTutorial.step - 1;
+      setUserTutorial(prevUserTutorial => ({
+        ...prevUserTutorial,
+        [prevTutorial.name]: { ...prevUserTutorial[prevTutorial.name], currentStep: newStep },
+      }));
+      return { ...prevTutorial, step: newStep };
+    });
+  }, []);
 
   const currentStep = useMemo(() => getTutorialStep(tutorial), [tutorial]);
 
