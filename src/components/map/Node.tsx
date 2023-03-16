@@ -156,6 +156,8 @@ type NodeProps = {
   defaultOpenPart?: OpenPart; // this is only to configure default open part value in tutorial
   showProposeTutorial?: boolean; // this flag is to enable tutorial first time user click in pencil
   setCurrentTutorial: (newValue: TutorialType) => void;
+  ableToPropose: boolean;
+  setAbleToPropose: (newValue: boolean) => void;
 };
 
 const proposedChildTypesIcons: { [key in ProposedChildTypesIcons]: string } = {
@@ -268,6 +270,8 @@ const Node = ({
   defaultOpenPart: defaultOpenPartByTutorial = "LinkingWords",
   showProposeTutorial = false,
   setCurrentTutorial,
+  ableToPropose,
+  setAbleToPropose,
 }: NodeProps) => {
   const [{ user }] = useAuth();
   const [option, setOption] = useState<EditorOptions>("EDIT");
@@ -286,7 +290,7 @@ const Node = ({
   const observer = useRef<ResizeObserver | null>(null);
   const [titleCopy, setTitleCopy] = useState(title);
   const [titleUpdated, setTitleUpdated] = useState(false);
-  const [ableToPropose, setAbleToPropose] = useState(false);
+
   const [nodeTitleHasIssue, setNodeTitleHasIssue] = useState<boolean>(false);
   const [explainationDesc, setExplainationDesc] = useState<boolean>(false);
   const [openProposal, setOpenProposal] = useState<any>(false);
@@ -585,6 +589,7 @@ const Node = ({
   useEffect(() => {
     if (!editable && !activeNode) {
       setOpenPart(null);
+      setAbleToPropose(false);
     }
   }, [editable, activeNode]);
 
