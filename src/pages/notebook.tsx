@@ -4793,8 +4793,8 @@ const Dashboard = ({}: DashboardProps) => {
                   size={46}
                   sx={{
                     position: "absolute",
-                    right: { xs: "0px", sm: "7px" },
-                    bottom: { xs: "0px", sm: "7px" },
+                    right: { xs: "-1px", sm: "7px" },
+                    bottom: { xs: "-1px", sm: "7px" },
                     zIndex: "1300",
                   }}
                 />
@@ -4803,7 +4803,7 @@ const Dashboard = ({}: DashboardProps) => {
                 color="secondary"
                 sx={{
                   width: windowWith <= 599 ? "36px" : undefined,
-                  height: windowWith <= 599 ? "26px" : undefined,
+                  height: windowWith <= 599 ? "25px" : undefined,
                   ":hover": {
                     width: { xs: "36px", sm: "40px" },
                     height: { xs: "26px", sm: "40px" },
