@@ -180,11 +180,11 @@ const LivelinessBar = ({ disabled = false, ...props }: ILivelinessBarProps) => {
     <>
       <Box
         sx={{
-          top: window.innerHeight > 799 ? "180px" : "190px",
+          top: window.innerHeight > 799 ? "180px" : "165px",
           right: "0px",
           zIndex: 1199,
           position: "absolute",
-          height: `calc(100% - ${window.innerHeight > 799 ? "375px" : "345px"})`,
+          height: `calc(100% - ${window.innerHeight > 799 ? "375px" : "420px"})`,
         }}
       >
         <Box
