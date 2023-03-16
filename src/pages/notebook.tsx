@@ -4135,6 +4135,25 @@ const Dashboard = ({}: DashboardProps) => {
    * if graph is invalid, DB is modified with correct state
    * then we wait until graph has correct state to call tutorial
    */
+  const detectAndCallSidebarTutorial = useCallback(
+    (tutorialName: TutorialTypeKeys, sidebar: OpenSidebar) => {
+      const shouldIgnore = !forcedTutorial && (userTutorial[tutorialName].done || userTutorial[tutorialName].skipped);
+      if (shouldIgnore) return false;
+
+      devLog("DETECT_AND_CALL_SIDEBAR_TUTORIAL", { tutorialName, node: nodeBookState.selectedNode });
+      if (openSidebar !== sidebar) {
+        setOpenSidebar(sidebar);
+      }
+      startTutorial(tutorialName);
+      return true;
+    },
+    [forcedTutorial, nodeBookState.selectedNode, openSidebar, startTutorial, userTutorial]
+  );
+  /**
+   * Detect the trigger to call a tutorial
+   * if graph is invalid, DB is modified with correct state
+   * then we wait until graph has correct state to call tutorial
+   */
   const detectAndCallTutorial = useCallback(
     (tutorialName: TutorialTypeKeys, targetIsValid: (node: FullNodeData) => boolean) => {
       const shouldIgnore = !forcedTutorial && (userTutorial[tutorialName].done || userTutorial[tutorialName].skipped);
@@ -4253,20 +4272,22 @@ const Dashboard = ({}: DashboardProps) => {
       }
 
       // --------------------------
-      if (
-        (!userTutorial.searcher.done && !userTutorial.searcher.skipped && openSidebar === "SEARCHER_SIDEBAR") ||
-        forcedTutorial === "searcher"
-      ) {
-        if (openSidebar !== "SEARCHER_SIDEBAR") {
-          if (forcedTutorial !== "searcher") return;
+      // if (userTutorial.searcher.done || userTutorial.searcher.skipped || forcedTutorial === "searcher") {
+      //   console.log("searcher tut");
+      //   if (openSidebar !== "SEARCHER_SIDEBAR") {
+      //     console.log("open");
+      //     setOpenSidebar("SEARCHER_SIDEBAR");
+      //   }
+      //   console.log("start");
 
-          setOpenSidebar("SEARCHER_SIDEBAR");
-          return;
-        }
-        setTutorial({ name: "searcher", step: 1, steps: [] });
-        return;
+      //   startTutorial("searcher");
+      //   return;
+      // }
+
+      if (forcedTutorial === "searcher" || openSidebar === "SEARCHER_SIDEBAR") {
+        const result = detectAndCallSidebarTutorial("searcher", "SEARCHER_SIDEBAR");
+        if (result) return;
       }
-
       // --------------------------
 
       if (forcedTutorial === "proposal" || !forcedTutorial) {
@@ -4635,17 +4656,16 @@ const Dashboard = ({}: DashboardProps) => {
     detectTriggerTutorial();
   }, [
     detectAndCallChildTutorial,
+    detectAndCallSidebarTutorial,
     detectAndCallTutorial,
     detectAndForceTutorial,
     firstLoading,
     forcedTutorial,
     graph.nodes,
     nodeBookDispatch,
-    nodeBookState.selectedNode,
     openNodeHandler,
     openSidebar,
     setTargetId,
-    setTutorial,
     startTutorial,
     tutorial,
     userTutorial,
@@ -4773,7 +4793,21 @@ const Dashboard = ({}: DashboardProps) => {
         setForcedTutorial(null);
       }
     }
-  }, [detectAndRemoveTutorial, firstLoading, graph.nodes, setTutorial, targetId, tutorial, userTutorialLoaded]);
+    if (tutorial.name === "searcher") {
+      if (openSidebar === "SEARCHER_SIDEBAR") return;
+      setTutorial(null);
+      setForcedTutorial(null);
+    }
+  }, [
+    detectAndRemoveTutorial,
+    firstLoading,
+    graph.nodes,
+    openSidebar,
+    setTutorial,
+    targetId,
+    tutorial,
+    userTutorialLoaded,
+  ]);
 
   useEffect(() => {
     if (!tutorial) return;
