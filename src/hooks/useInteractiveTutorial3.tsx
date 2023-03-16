@@ -253,11 +253,15 @@ export const useInteractiveTutorial = ({ user }: useInteractiveTutorialProps) =>
     });
   }, []);
 
+  const currentStep = useMemo(() => getTutorialStep(tutorial), [tutorial]);
+
   const onNextStep = useCallback(() => {
     setTutorial(prevTutorial => {
       if (!prevTutorial) return null;
+      if (!currentStep) return null;
       if (prevTutorial.step >= prevTutorial.steps.length) return null;
 
+      if (currentStep?.childTargetId) removeStyleFromTarget(currentStep.childTargetId, targetId);
       const newStep = prevTutorial.step + 1;
       setUserTutorial(prevUserTutorial => ({
         ...prevUserTutorial,
@@ -265,13 +269,15 @@ export const useInteractiveTutorial = ({ user }: useInteractiveTutorialProps) =>
       }));
       return { ...prevTutorial, step: newStep };
     });
-  }, []);
+  }, [currentStep, targetId]);
 
   const onPreviousStep = useCallback(() => {
     setTutorial(prevTutorial => {
       if (!prevTutorial) return null;
+      if (!currentStep) return null;
       if (prevTutorial.step <= 1) return prevTutorial;
 
+      if (currentStep?.childTargetId) removeStyleFromTarget(currentStep.childTargetId, targetId);
       const newStep = prevTutorial.step - 1;
       setUserTutorial(prevUserTutorial => ({
         ...prevUserTutorial,
@@ -279,9 +285,7 @@ export const useInteractiveTutorial = ({ user }: useInteractiveTutorialProps) =>
       }));
       return { ...prevTutorial, step: newStep };
     });
-  }, []);
-
-  const currentStep = useMemo(() => getTutorialStep(tutorial), [tutorial]);
+  }, [currentStep, targetId]);
 
   useEventListener({
     stepId: currentStep?.childTargetId ?? currentStep?.targetId,

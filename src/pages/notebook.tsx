@@ -3961,19 +3961,6 @@ const Dashboard = ({}: DashboardProps) => {
     setOpenProgressBarMenu(false);
   }, []);
 
-  // const disableForceTutorial = useCallback(
-  //   (tutorialName: TutorialTypeKeys) => {
-  //     setUserTutorial(userTutorial => {
-  //       const tutorialUpdated: UserTutorial = {
-  //         ...userTutorial[tutorialName],
-  //       };
-  //       const userTutorialUpdated = { ...userTutorial, [tutorialName]: tutorialUpdated };
-  //       return userTutorialUpdated;
-  //     });
-  //   },
-  //   [setUserTutorial]
-  // );
-
   const onSkipTutorial = useCallback(async () => {
     if (!user) return;
     if (!currentStep) return;
@@ -4007,18 +3994,15 @@ const Dashboard = ({}: DashboardProps) => {
     if (!currentStep) return;
     if (!tutorial) return;
 
-    console.log(11111);
+    if (currentStep?.childTargetId) removeStyleFromTarget(currentStep.childTargetId, targetId);
+
     if (tutorial.name === "tmpEditNode") {
       if (currentStep.isClickeable) {
-        console.log(11112);
         proposeNodeImprovement(null, targetId);
       }
-      console.log(11113);
       setTutorial(null);
       return;
     }
-
-    console.log(111);
 
     const tmpChildrenMap = new Map<TutorialTypeKeys, NodeType>();
     tmpChildrenMap.set("tmpProposalConceptChild", "Concept");
@@ -4029,12 +4013,9 @@ const Dashboard = ({}: DashboardProps) => {
     tmpChildrenMap.set("tmpProposalCodeChild", "Code");
 
     if (tmpChildrenMap.has(tutorial.name)) {
-      console.log(112);
       if (currentStep.isClickeable) {
         proposeNewChild(null, tmpChildrenMap.get(tutorial.name) as string);
-        console.log(113);
       }
-      console.log(114);
       return;
     }
 
@@ -4050,7 +4031,6 @@ const Dashboard = ({}: DashboardProps) => {
     setTutorial(null);
     setUserTutorial(userTutorialUpdated);
 
-    console.log(wasForcedTutorial);
     if (wasForcedTutorial) return setForcedTutorial(null);
 
     const tutorialRef = doc(db, "userTutorial", user.uname);
