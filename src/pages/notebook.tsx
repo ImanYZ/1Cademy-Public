@@ -481,25 +481,21 @@ const Dashboard = ({}: DashboardProps) => {
   );
 
   useEffect(() => {
-    let timeoutId: any;
     const getTooltipClientRect = () => {
       if (!currentStep) return setTargetClientRect({ width: 0, height: 0, top: 0, left: 0 });
 
       devLog("GET_TOOLTIP_CLIENT_RECT", { currentStep, targetId });
 
       if (currentStep.anchor) {
-        timeoutId = setTimeout(() => {
-          if (!currentStep.childTargetId) return;
+        if (!currentStep.childTargetId) return;
 
-          const targetElement = document.getElementById(currentStep.childTargetId);
-          if (!targetElement) return;
+        const targetElement = document.getElementById(currentStep.childTargetId);
+        if (!targetElement) return;
 
-          targetElement.classList.add(currentStep.largeTarget ? "tutorial-target-large" : "tutorial-target");
-          const { width, height, top, left } = targetElement.getBoundingClientRect();
+        targetElement.classList.add(currentStep.largeTarget ? "tutorial-target-large" : "tutorial-target");
+        const { width, height, top, left } = targetElement.getBoundingClientRect();
 
-          setTargetClientRect({ width, height, top, left });
-        }, currentStep.targetDelay);
-
+        setTargetClientRect({ width, height, top, left });
         return;
       }
 
@@ -537,7 +533,12 @@ const Dashboard = ({}: DashboardProps) => {
         height,
       });
     };
-    getTooltipClientRect();
+
+    let timeoutId: any;
+    timeoutId = setTimeout(() => {
+      getTooltipClientRect();
+    }, currentStep?.targetDelay || 200);
+
     return () => {
       if (timeoutId) clearTimeout(timeoutId);
     };
