@@ -1403,7 +1403,8 @@ export const MemoizedNode = React.memo(Node, (prev, next) => {
     prev.acceptedProposalsSelected === next.acceptedProposalsSelected &&
     prev.commentsSelected === next.commentsSelected &&
     prev.unaccepted === next.unaccepted &&
-    prev.disableVotes === next.disableVotes;
+    prev.disableVotes === next.disableVotes &&
+    prev.ableToPropose === next.ableToPropose;
   if (
     !basicChanges ||
     (prev.nodeUpdates.updatedAt !== next.nodeUpdates.updatedAt && prev.nodeUpdates.nodeIds.includes(prev.identifier)) ||

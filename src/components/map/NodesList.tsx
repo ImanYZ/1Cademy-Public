@@ -324,6 +324,7 @@ export const MemoizedNodeList = React.memo(NodesList, (prev, next) => {
     prev.reloadPermanentGrpah === next.reloadPermanentGrpah &&
     prev.openSidebar === prev.openSidebar && // TODO: check this
     prev.showProposeTutorial === next.showProposeTutorial &&
+    prev.ableToPropose === next.ableToPropose &&
     validateTutorialProps()
   );
 });
