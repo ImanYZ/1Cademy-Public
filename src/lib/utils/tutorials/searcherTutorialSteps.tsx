@@ -24,6 +24,7 @@ const NODES_STEPS: TutorialStepConfig[] = [
     tooltipPosition: "right",
     targetDelay: 450,
     anchor: "Portal",
+    outline: "inside",
   },
 
   {
@@ -51,6 +52,7 @@ const NODES_STEPS: TutorialStepConfig[] = [
     description: <MarkdownRender text={"Beyond searching terms there are a number of ways to refine your search."} />,
     tooltipPosition: "right",
     anchor: "Portal",
+    outline: "inside",
   },
   {
     targetId: "sidebar-wrapper-searcher",
