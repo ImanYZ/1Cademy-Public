@@ -4750,7 +4750,19 @@ const Dashboard = ({}: DashboardProps) => {
             id="RightButtonsdMain"
             className={buttonsOpen ? undefined : "Minimized"}
             sx={{
-              width: { xs: "80%", sm: "37%", md: "18%" },
+              width: {
+                xs: "270px",
+                sm: "300px",
+                ...(process.env.NODE_ENV === "development" && { xs: "310px", sm: "340px" }),
+              },
+              height: {
+                xs: "44px",
+                sm: "60px",
+              },
+              right: {
+                xs: "8px",
+                sm: "18px",
+              },
               opacity: 1,
               cursor: "pointer",
               top: {
@@ -4766,10 +4778,10 @@ const Dashboard = ({}: DashboardProps) => {
             <Box
               sx={{
                 position: "fixed",
-                width: "60px",
+                width: { xs: "50px", sm: "60px" },
                 right: "8px",
                 background: theme => (theme.palette.mode === "dark" ? "#2F2F2F" : "#f2f4f7"),
-                height: "60px",
+                height: { xs: "44px", sm: "60px" },
                 borderRadius: buttonsOpen ? "0px 8px 8px 0px" : "8px",
                 padding: "10px",
                 zIndex: 1299,
@@ -4781,8 +4793,8 @@ const Dashboard = ({}: DashboardProps) => {
                   size={46}
                   sx={{
                     position: "absolute",
-                    right: "7px",
-                    bottom: "7px",
+                    right: { xs: "0px", sm: "7px" },
+                    bottom: { xs: "0px", sm: "7px" },
                     zIndex: "1300",
                   }}
                 />
@@ -4790,9 +4802,11 @@ const Dashboard = ({}: DashboardProps) => {
               <IconButton
                 color="secondary"
                 sx={{
+                  width: windowWith <= 599 ? "36px" : undefined,
+                  height: windowWith <= 599 ? "26px" : undefined,
                   ":hover": {
-                    width: "40px",
-                    height: "40px",
+                    width: { xs: "36px", sm: "40px" },
+                    height: { xs: "26px", sm: "40px" },
                     borderRadius: "8px",
                     background: buttonsOpen ? "#55402B" : "inherit",
                   },
@@ -4846,6 +4860,7 @@ const Dashboard = ({}: DashboardProps) => {
                       alignItems: "center",
                       marginLeft: "10px",
                       marginTop: "24px",
+                      cursor: "pointer",
                     }}
                   >
                     <Box>
@@ -4905,23 +4920,6 @@ const Dashboard = ({}: DashboardProps) => {
                   </IconButton>
                 </Tooltip>
 
-                {process.env.NODE_ENV === "development" && (
-                  <Tooltip
-                    title={"Watch geek data"}
-                    placement="bottom"
-                    sx={{
-                      ":hover": {
-                        background: theme.palette.mode === "dark" ? "#404040" : "#EAECF0",
-                        borderRadius: "8px",
-                      },
-                    }}
-                  >
-                    {/* DEVTOOLS */}
-                    <IconButton onClick={() => setOpenDeveloperMenu(!openDeveloperMenu)}>
-                      <CodeIcon sx={{ color: theme => (theme.palette.mode === "dark" ? "#CACACA" : "#667085") }} />
-                    </IconButton>
-                  </Tooltip>
-                )}
                 <Tooltip
                   title="Focused view for selected node"
                   placement="bottom"
@@ -4947,9 +4945,23 @@ const Dashboard = ({}: DashboardProps) => {
                     />
                   </IconButton>
                 </Tooltip>
-                {/* <IconButton color="secondary">
-                  <NextImage src={buttonsOpen ? toolBoxOpen : toolBox} alt="logo 1cademy" width="24px" height="24px" />
-                </IconButton> */}
+                {process.env.NODE_ENV === "development" && (
+                  <Tooltip
+                    title={"Watch geek data"}
+                    placement="bottom"
+                    sx={{
+                      ":hover": {
+                        background: theme.palette.mode === "dark" ? "#404040" : "#EAECF0",
+                        borderRadius: "8px",
+                      },
+                    }}
+                  >
+                    {/* DEVTOOLS */}
+                    <IconButton onClick={() => setOpenDeveloperMenu(!openDeveloperMenu)}>
+                      <CodeIcon sx={{ color: theme => (theme.palette.mode === "dark" ? "#CACACA" : "#667085") }} />
+                    </IconButton>
+                  </Tooltip>
+                )}
               </Box>
             </Box>
           </Box>

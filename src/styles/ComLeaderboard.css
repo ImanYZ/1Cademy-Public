@@ -3,10 +3,8 @@
   /* grid-template-columns: 145px auto; */
   align-items: center;
   position: fixed;
-  right: 18px;
   bottom: 0px;
   top: 1px;
-  height: 60px;
   z-index: 1;
   -o-transition: width 1s; /* opera */
   -ms-transition: width 1s; /* IE 10 */
@@ -42,6 +40,7 @@
   margin-right: 50px;
   height: 100%;
   width: 100%;
+  cursor: auto;
   background-color: #2f2f2f;
   border-right: solid 1px #575757;
 }
