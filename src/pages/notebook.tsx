@@ -5144,60 +5144,6 @@ const Dashboard = ({}: DashboardProps) => {
       //   return;
       // }
 
-      // // --------------------------
-      const proposalConceptChildLaunched = detectAndCallTutorial(
-        "tmpProposalConceptChild",
-        node => node && node.open && node.editable
-      );
-      console.log({ proposalConceptChildLaunched });
-      if (proposalConceptChildLaunched) return;
-
-      // ------------------------
-
-      const proposalRelationChildLaunched = detectAndCallTutorial(
-        "tmpProposalRelationChild",
-        node => node && node.open && node.editable
-      );
-      console.log({ proposalRelationChildLaunched });
-      if (proposalRelationChildLaunched) return;
-
-      // ------------------------
-
-      const proposalReferenceChildLaunched = detectAndCallTutorial(
-        "tmpProposalReferenceChild",
-        node => node && node.open && node.editable
-      );
-      console.log({ proposalReferenceChildLaunched });
-      if (proposalReferenceChildLaunched) return;
-
-      // ------------------------
-
-      const proposalQuestionChildLaunched = detectAndCallTutorial(
-        "tmpProposalQuestionChild",
-        node => node && node.open && node.editable
-      );
-      console.log({ proposalQuestionChildLaunched });
-      if (proposalQuestionChildLaunched) return;
-
-      // ------------------------
-
-      const proposalIdeaChildLaunched = detectAndCallTutorial(
-        "tmpProposalIdeaChild",
-        node => node && node.open && node.editable
-      );
-      console.log({ proposalIdeaChildLaunched });
-      if (proposalIdeaChildLaunched) return;
-
-      // ------------------------
-
-      const proposalCodeChildLaunched = detectAndCallTutorial(
-        "tmpProposalCodeChild",
-        node => node && node.open && node.editable
-      );
-      console.log({ proposalCodeChildLaunched });
-      if (proposalCodeChildLaunched) return;
-
-      // ------------------------
       // ------------------------
       const tmpEditNodeIsValid = (node: FullNodeData) => node && node.open && !node.editable;
       // node child ./
@@ -5254,6 +5200,62 @@ const Dashboard = ({}: DashboardProps) => {
       if (childCodeProposalLaunched) return;
 
       // ------------------------
+
+      // // --------------------------
+      const proposalConceptChildLaunched = detectAndCallTutorial(
+        "tmpProposalConceptChild",
+        node => node && node.open && node.editable
+      );
+      console.log({ proposalConceptChildLaunched });
+      if (proposalConceptChildLaunched) return;
+
+      // ------------------------
+
+      const proposalRelationChildLaunched = detectAndCallTutorial(
+        "tmpProposalRelationChild",
+        node => node && node.open && node.editable
+      );
+      console.log({ proposalRelationChildLaunched });
+      if (proposalRelationChildLaunched) return;
+
+      // ------------------------
+
+      const proposalReferenceChildLaunched = detectAndCallTutorial(
+        "tmpProposalReferenceChild",
+        node => node && node.open && node.editable
+      );
+      console.log({ proposalReferenceChildLaunched });
+      if (proposalReferenceChildLaunched) return;
+
+      // ------------------------
+
+      const proposalQuestionChildLaunched = detectAndCallTutorial(
+        "tmpProposalQuestionChild",
+        node => node && node.open && node.editable
+      );
+      console.log({ proposalQuestionChildLaunched });
+      if (proposalQuestionChildLaunched) return;
+
+      // ------------------------
+
+      const proposalIdeaChildLaunched = detectAndCallTutorial(
+        "tmpProposalIdeaChild",
+        node => node && node.open && node.editable
+      );
+      console.log({ proposalIdeaChildLaunched });
+      if (proposalIdeaChildLaunched) return;
+
+      // ------------------------
+
+      const proposalCodeChildLaunched = detectAndCallTutorial(
+        "tmpProposalCodeChild",
+        node => node && node.open && node.editable
+      );
+      console.log({ proposalCodeChildLaunched });
+      if (proposalCodeChildLaunched) return;
+
+      // ------------------------
+      //
 
       const childTypes: TutorialTypeKeys[] = [
         "childProposal",
@@ -5437,7 +5439,7 @@ const Dashboard = ({}: DashboardProps) => {
         setForcedTutorial(null);
       }
     }
-    if (tutorial.name === "tmpProposalConceptChild") {
+    if (tutorial.name === "tmpProposalConceptChild" || tutorial.name === "tmpProposalQuestionChild") {
       console.log("aaaaaaaa");
       const isValid = (node: FullNodeData) => node && node.open && node.editable;
       const node = graph.nodes[targetId];
