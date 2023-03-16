@@ -4148,7 +4148,7 @@ const Dashboard = ({}: DashboardProps) => {
   const detectAndCallTutorial = useCallback(
     (tutorialName: TutorialTypeKeys, targetIsValid: (node: FullNodeData) => boolean) => {
       // const canDetect = !userTutorial[tutorialName].done && !userTutorial[tutorialName].skipped && !forcedTutorial;
-      const shouldIgnore = userTutorial[tutorialName].done || userTutorial[tutorialName].skipped;
+      const shouldIgnore = (userTutorial[tutorialName].done || userTutorial[tutorialName].skipped) && !forcedTutorial;
 
       console.log("x111", { tutorialName });
       const isValidForcedTutorial = forcedTutorial
@@ -4196,8 +4196,6 @@ const Dashboard = ({}: DashboardProps) => {
         9:
           forcedTutorial === "childProposal" &&
           ["childProposal", "tmpProposalConceptChild", "tmpEditNode"].includes(tutorialName),
-        // (forcedTutorial === "tmpEditNode" && ["tmpEditNode"].includes(tutorialName)) ||
-        // (forcedTutorial === "tmpProposalConceptChild" && ["tmpProposalConceptChild"].includes(tutorialName)) ||
         10:
           forcedTutorial === "childConcept" &&
           ["childConcept", "tmpProposalConceptChild", "tmpEditNode"].includes(tutorialName),
@@ -4423,10 +4421,12 @@ const Dashboard = ({}: DashboardProps) => {
 
       // --------------------------
 
-      const nodesTutorialIsValid = (node: FullNodeData) => node && node.open && !node.editable;
+      const nodesTutorialIsValid = (node: FullNodeData) => node && node.open && !node.editable && !node.isNew;
 
-      const nodesTutorialLaunched = detectAndCallTutorial("nodes", nodesTutorialIsValid);
-      if (nodesTutorialLaunched) return;
+      if (forcedTutorial === "nodes" || !forcedTutorial) {
+        const nodesTutorialLaunched = detectAndCallTutorial("nodes", nodesTutorialIsValid);
+        if (nodesTutorialLaunched) return;
+      }
 
       if (forcedTutorial === "nodes") {
         const defaultStates = { open: true };
@@ -5268,12 +5268,14 @@ const Dashboard = ({}: DashboardProps) => {
 
       // ------------------------
 
-      const proposalCodeChildLaunched = detectAndCallTutorial(
-        "tmpProposalCodeChild",
-        node => node && node.open && node.editable && !Boolean(node.isNew)
-      );
-      console.log({ proposalCodeChildLaunched });
-      if (proposalCodeChildLaunched) return;
+      if (forcedTutorial === "childCode") {
+        const proposalCodeChildLaunched = detectAndCallTutorial(
+          "tmpProposalCodeChild",
+          node => node && node.open && node.editable && !Boolean(node.isNew)
+        );
+        console.log({ proposalCodeChildLaunched });
+        if (proposalCodeChildLaunched) return;
+      }
 
       // ------------------------
       //
