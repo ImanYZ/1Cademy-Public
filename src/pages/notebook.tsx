@@ -4632,6 +4632,19 @@ const Dashboard = ({}: DashboardProps) => {
         const result = detectAndForceTutorial("tmpEditNode", "r98BjyFDCe4YyLA3U8ZE", tmpEditNodeIsValid);
         if (result) return;
       }
+
+      // ------------------------
+
+      if (forcedTutorial === "reconcilingAcceptedProposal" || lastNodeOperation.current === "ProposeProposals") {
+        console.log("reconcilingAcceptedProposal");
+        const acceptedProposalLaunched = detectAndCallTutorial("reconcilingAcceptedProposal", node => {
+          console.log({
+            reconcilingAcceptedProposalRes: node && node.open && isVersionApproved({ corrects: 1, wrongs: 0, node }),
+          });
+          return node && node.open && isVersionApproved({ corrects: 1, wrongs: 0, node });
+        });
+        if (acceptedProposalLaunched) return;
+      }
     };
 
     detectTriggerTutorial();
@@ -5552,11 +5565,11 @@ const Dashboard = ({}: DashboardProps) => {
               idea: { title: "x Idea Node", steps: NODE_IDEA },
               code: { title: "x Code Node", steps: NODE_CODE },
               reconcilingAcceptedProposal: {
-                title: "Accepted Proposals",
+                title: "Reconciling Accepted Proposals",
                 steps: RECONCILING_ACCEPTED_PROPOSALS_STEPS_COMPLETE,
               },
               reconcilingNotAcceptedProposal: {
-                title: "Not Accepted Proposal",
+                title: "Reconciling Not Accepted Proposal",
                 steps: RECONCILING_NOT_ACCEPTED_PROPOSALS_STEPS_COMPLETE,
               },
               childProposal: { title: "x Child Proposal", steps: CHILD_PROPOSAL_COMPLETE },
