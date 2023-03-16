@@ -12,7 +12,7 @@ dayjs.extend(relativeTime);
 
 const NODES_STEPS: TutorialStepConfig[] = [
   {
-    targetId: "sidebar-wrapper-searcher",
+    targetId: "sidebar-wrapper-searcher--options-content",
     childTargetId: "sidebar-wrapper-searcher",
     title: "Search Engine",
     description: (
@@ -105,6 +105,7 @@ const NODES_STEPS: TutorialStepConfig[] = [
     ),
     tooltipPosition: "right",
     anchor: "Portal",
+    outline: "inside",
   },
 ];
 

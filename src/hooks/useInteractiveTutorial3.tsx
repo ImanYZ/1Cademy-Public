@@ -318,7 +318,9 @@ export const removeStyleFromTarget = (childTargetId: string, targetId?: string) 
     const element = document.getElementById(elementId);
     if (element) {
       element.classList.remove("tutorial-target");
-      element.classList.remove("tutorial-target-large");
+      element.classList.remove("tutorial-target-shallow");
+      element.classList.remove("tutorial-target-outside");
+      element.classList.remove("tutorial-target-inside");
       element.classList.remove("tutorial-target-pulse");
     }
   }
