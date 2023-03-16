@@ -4137,90 +4137,19 @@ const Dashboard = ({}: DashboardProps) => {
    */
   const detectAndCallTutorial = useCallback(
     (tutorialName: TutorialTypeKeys, targetIsValid: (node: FullNodeData) => boolean) => {
-      // const canDetect = !userTutorial[tutorialName].done && !userTutorial[tutorialName].skipped && !forcedTutorial;
       const shouldIgnore = !forcedTutorial && (userTutorial[tutorialName].done || userTutorial[tutorialName].skipped);
-
-      console.log("x111", { tutorialName });
-      // const isValidForcedTutorial = forcedTutorial
-      //   ? (forcedTutorial === "nodes" && ["nodes"].includes(tutorialName)) ||
-      //     (forcedTutorial === "proposal" && ["proposal", "tmpEditNode"].includes(tutorialName)) ||
-      //     (forcedTutorial === "proposalConcept" && ["proposalConcept", "tmpEditNode"].includes(tutorialName)) ||
-      //     (forcedTutorial === "proposalRelation" && ["proposalRelation", "tmpEditNode"].includes(tutorialName)) ||
-      //     (forcedTutorial === "proposalReference" && ["proposalReference", "tmpEditNode"].includes(tutorialName)) ||
-      //     (forcedTutorial === "proposalQuestion" && ["proposalQuestion", "tmpEditNode"].includes(tutorialName)) ||
-      //     (forcedTutorial === "proposalIdea" && ["proposalIdea", "tmpEditNode"].includes(tutorialName)) ||
-      //     (forcedTutorial === "proposalCode" && ["proposalCode", "tmpEditNode"].includes(tutorialName)) ||
-      //     (forcedTutorial === "childProposal" &&
-      //       ["childProposal", "tmpProposalConceptChild", "tmpEditNode"].includes(tutorialName)) ||
-      //     (forcedTutorial === "childConcept" &&
-      //       ["childConcept", "tmpProposalConceptChild", "tmpEditNode"].includes(tutorialName)) ||
-      //     (forcedTutorial === "childRelation" &&
-      //       ["childRelation", "tmpProposalRelationChild", "tmpEditNode"].includes(tutorialName)) ||
-      //     (forcedTutorial === "childReference" &&
-      //       ["childReference", "tmpProposalReferenceChild", "tmpEditNode"].includes(tutorialName)) ||
-      //     (forcedTutorial === "childQuestion" &&
-      //       ["childQuestion", "tmpProposalQuestionChild", "tmpEditNode"].includes(tutorialName)) ||
-      //     (forcedTutorial === "childIdea" &&
-      //       ["childIdea", "tmpProposalIdeaChild", "tmpEditNode"].includes(tutorialName)) ||
-      //     (forcedTutorial === "childCode" &&
-      //       ["childCode", "tmpProposalCodeChild", "tmpEditNode"].includes(tutorialName))
-      //   : ![
-      //       "tmpEditNode",
-      //       "tmpProposalConceptChild",
-      //       "tmpProposalRelationChild",
-      //       "tmpProposalReferenceChild",
-      //       "tmpProposalQuestionChild",
-      //       "tmpProposalIdeaChild",
-      //       "tmpProposalCodeChild",
-      //     ].includes(tutorialName);
-
-      // console.log({
-      //   1: forcedTutorial === "nodes" && ["nodes"].includes(tutorialName),
-      //   2: forcedTutorial === "proposal" && ["proposal", "tmpEditNode"].includes(tutorialName),
-      //   3: forcedTutorial === "proposalConcept" && ["proposalConcept", "tmpEditNode"].includes(tutorialName),
-      //   4: forcedTutorial === "proposalRelation" && ["proposalRelation", "tmpEditNode"].includes(tutorialName),
-      //   5: forcedTutorial === "proposalReference" && ["proposalReference", "tmpEditNode"].includes(tutorialName),
-      //   6: forcedTutorial === "proposalQuestion" && ["proposalQuestion", "tmpEditNode"].includes(tutorialName),
-      //   7: forcedTutorial === "proposalIdea" && ["proposalIdea", "tmpEditNode"].includes(tutorialName),
-      //   8: forcedTutorial === "proposalCode" && ["proposalCode", "tmpEditNode"].includes(tutorialName),
-      //   9:
-      //     forcedTutorial === "childProposal" &&
-      //     ["childProposal", "tmpProposalConceptChild", "tmpEditNode"].includes(tutorialName),
-      //   10:
-      //     forcedTutorial === "childConcept" &&
-      //     ["childConcept", "tmpProposalConceptChild", "tmpEditNode"].includes(tutorialName),
-      //   11:
-      //     forcedTutorial === "childRelation" &&
-      //     ["childRelation", "tmpProposalRelationChild", "tmpEditNode"].includes(tutorialName),
-      //   12:
-      //     forcedTutorial === "childReference" &&
-      //     ["childReference", "tmpProposalReferenceChild", "tmpEditNode"].includes(tutorialName),
-      //   13:
-      //     forcedTutorial === "childQuestion" &&
-      //     ["childQuestion", "tmpProposalQuestionChild", "tmpEditNode"].includes(tutorialName),
-      //   14:
-      //     forcedTutorial === "childIdea" && ["childIdea", "tmpProposalIdeaChild", "tmpEditNode"].includes(tutorialName),
-      // });
-      // console.log("---->>", { shouldIgnore, isValidForcedTutorial });
-      // // if (!isValidForcedTutorial) return false;
-      console.log({ shouldIgnore });
       if (shouldIgnore) return false;
 
       devLog("DETECT_AND_CALL_TUTORIAL", { tutorialName, node: nodeBookState.selectedNode });
 
       const newTargetId = nodeBookState.selectedNode ?? "";
-      console.log("111.5", newTargetId);
-
       if (!newTargetId) return false;
 
-      console.log("112", newTargetId);
       const thisNode = graph.nodes[newTargetId];
-      console.log("112.5", { thisNode });
+
       if (!thisNode) return false;
-      console.log({ result: targetIsValid(thisNode) });
       if (!targetIsValid(thisNode)) return false;
 
-      console.log("113");
       startTutorial(tutorialName);
       setTargetId(newTargetId);
       return true;
@@ -4233,14 +4162,8 @@ const Dashboard = ({}: DashboardProps) => {
       const tutorialsIsForced = forcedTutorial === tutorialName;
       const canDetect = tutorialsIsForced || (!userTutorial[tutorialName].done && !userTutorial[tutorialName].skipped);
       const isValidForcedTutorialChild = forcedTutorial
-        ? forcedTutorial === tutorialName
-        : // (forcedTutorial === "childConcept" && ["childConcept"].includes(tutorialName)) ||
-          //   (forcedTutorial === "childRelation" && ["childRelation"].includes(tutorialName)) ||
-          //   (forcedTutorial === "childReference" && ["childReference"].includes(tutorialName)) ||
-          //   (forcedTutorial === "childQuestion" && ["childQuestion"].includes(tutorialName)) ||
-          //   (forcedTutorial === "childIdea" && ["childIdea"].includes(tutorialName)) ||
-          //   (forcedTutorial === "childCode" && ["childCode"].includes(tutorialName))
-          ![
+        ? forcedTutorial === tutorialName // CHECK: this probably is unrequired
+        : ![
             "tmpEditNode",
             "tmpProposalConceptChild",
             "tmpProposalConceptChild",
@@ -4251,7 +4174,6 @@ const Dashboard = ({}: DashboardProps) => {
             "tmpProposalCodeChild",
           ].includes(tutorialName);
 
-      console.log("111", { isValidForcedTutorialChild });
       if (!isValidForcedTutorialChild) return false;
       if (!canDetect) return false;
 
@@ -4260,125 +4182,16 @@ const Dashboard = ({}: DashboardProps) => {
       const newTargetId = nodeBookState.selectedNode ?? "";
       if (!newTargetId) return false;
 
-      console.log("112", newTargetId);
       const thisNode = graph.nodes[newTargetId]; // this is the child node
       if (!thisNode) return false;
       if (!targetIsValid(thisNode)) return false;
 
-      console.log("113");
       startTutorial(tutorialName);
       setTargetId(newTargetId);
       return true;
     },
     [forcedTutorial, graph.nodes, nodeBookState.selectedNode, setTargetId, startTutorial, userTutorial]
   );
-
-  // const detectAndCallEditNodeTutorial = useCallback(
-  //   (
-  //     tutorialName: TutorialTypeKeys,
-  //     targetId: string,
-  //     targetIsInvalid: (node: FullNodeData) => boolean,
-  //     defaultStates: Partial<FullNodeData> = { open: true }
-  //   ) => {
-  //     const tutorialsIsForced = forcedTutorial === tutorialName;
-  //     if (!tutorialsIsForced && (userTutorial[tutorialName].done || userTutorial[tutorialName].skipped)) return;
-
-  //     devLog("DETECT_AND_CALL_EDIT_NODE_TUTORIAL");
-
-  //     const newTargetId = tutorialsIsForced ? targetId : nodeBookState.selectedNode ?? "";
-  //     console.log(11);
-  //     if (!newTargetId) return;
-
-  //     console.log(12);
-  //     const thisNode = graph.nodes[newTargetId];
-  //     if ((tutorialsIsForced && !thisNode) || targetIsInvalid(thisNode)) {
-  //       if (!tutorialStateWasSetUpRef.current) {
-  //         console.log(13);
-  //         openNodeHandler(newTargetId, defaultStates);
-  //         tutorialStateWasSetUpRef.current = true;
-  //       }
-  //       return;
-  //     }
-
-  //     if (!tutorialsIsForced && !changedNodes[newTargetId]) return;
-  //     console.log(14, { newTargetId });
-  //     // disableForceTutorial(tutorialName);
-  //     tutorialStateWasSetUpRef.current = false;
-  //     startTutorial(tutorialName);
-  //     setTargetId(newTargetId);
-  //     return;
-  //   },
-  //   [forcedTutorial, graph.nodes, nodeBookState.selectedNode, openNodeHandler, setTargetId, startTutorial, userTutorial]
-  // );
-
-  // const detectAndCallChildNodeTutorial = useCallback(
-  //   (
-  //     tutorialName: TutorialTypeKeys,
-  //     targetId: string,
-  //     targetIsInvalid: (node: FullNodeData) => boolean,
-  //     defaultStates: Partial<FullNodeData> = { open: true }
-  //   ) => {
-  //     const tutorialsIsForced = forcedTutorial.current === tutorialName;
-  //     if (tutorialsIsForced || userTutorial[tutorialName].done || userTutorial[tutorialName].skipped) return;
-
-  //     const newTargetId = tutorialsIsForced ? targetId : nodeBookState.selectedNode ?? "";
-  //     // newTargetId: in forced is a parent, in normal is a new child
-
-  //     if (!newTargetId) return;
-
-  //     const thisNode = graph.nodes[newTargetId];
-  //     if ((tutorialsIsForced && !thisNode) || targetIsInvalid(thisNode)) {
-  //       // isNew:true
-  //       if (!tutorialStateWasSetUpRef.current) {
-  //         openNodeHandler(newTargetId, defaultStates);
-  //         tutorialStateWasSetUpRef.current = true;
-  //       }
-  //       return;
-  //     }
-
-  //     if (!tutorialsIsForced && !changedNodes[newTargetId]) return;
-
-  //     disableForceTutorial(tutorialName);
-  //     tutorialStateWasSetUpRef.current = false;
-  //     startTutorial(tutorialName);
-  //     setTargetId(newTargetId);
-  //   },
-  //   [
-  //     disableForceTutorial,
-  //     graph.nodes,
-  //     nodeBookState.selectedNode,
-  //     openNodeHandler,
-  //     setTargetId,
-  //     startTutorial,
-  //     userTutorial,
-  //   ]
-  // );
-
-  // const forceTutorial = useCallback(
-  //   (targetId: string, tutorialName: TutorialTypeKeys, openWithDefaultValues: Partial<FullNodeData> = {}) => {
-  //     devLog("FORCE_TUTORIAL", { idTarget: targetId, tutorialName, openWithDefaultValues });
-  //     // const targetElement = document.getElementById(idTarget);
-  //     const thisNode = graph.nodes[targetId];
-  //     if (!thisNode || !thisNode.open) {
-  //       return openNodeHandler(targetId, openWithDefaultValues);
-  //     }
-  //     // const targetElement = document.getElementById(idTarget);
-  //     // if (!targetElement) {
-  //     //   return openNodeHandler(idTarget);
-  //     // }
-
-  //     // setNodeParts(idTarget, node => ({ ...node, ...openWithDefaultValues }));
-  //     // nodeBookDispatch({ type: "setSelectedNode", payload: idTarget });
-  //     // notebookRef.current.selectedNode = idTarget;
-  //     // startTutorial(tutorialName);
-
-  //     // openLinkedNode(targetId);
-
-  //     if (openWithDefaultValues?.editable) proposeNodeImprovement(null, targetId);
-  //     setTargetId(targetId);
-  //   },
-  //   [graph.nodes, openNodeHandler, proposeNodeImprovement, setTargetId]
-  // );
 
   useEffect(() => {
     /**
@@ -4473,13 +4286,6 @@ const Dashboard = ({}: DashboardProps) => {
         if (result) return;
       }
 
-      // const codeProposalForcedTutorialLaunched = detectAndForceTutorial(
-      //   "proposalCode",
-      //   "E1nIWQ7RIC3pRLvk0Bk5",
-      //   codeProposalTutorialIsValidForced
-      // );
-      // if (codeProposalForcedTutorialLaunched) return;
-
       // --------------------------
 
       if (forcedTutorial === "proposalConcept" || !forcedTutorial) {
@@ -4489,13 +4295,6 @@ const Dashboard = ({}: DashboardProps) => {
         const result = detectAndCallTutorial("proposalConcept", conceptProposalTutorialIsValid);
         if (result) return;
       }
-
-      // const conceptProposalForcedTutorialLaunched = detectAndForceTutorial(
-      //   "proposalConcept",
-      //   "r98BjyFDCe4YyLA3U8ZE",
-      //   conceptProposalTutorialIsValidForced
-      // );
-      // if (conceptProposalForcedTutorialLaunched) return;
 
       // --------------------------
 
@@ -4510,13 +4309,6 @@ const Dashboard = ({}: DashboardProps) => {
         if (relationProposalTutorialLaunched) return;
       }
 
-      // const relationProposalForcedTutorialLaunched = detectAndForceTutorial(
-      //   "proposalRelation",
-      //   "zYYmaXvhab7hH2uRI9Up",
-      //   relationProposalTutorialIsValidForced
-      // );
-      // if (relationProposalForcedTutorialLaunched) return;
-
       // --------------------------
 
       const referenceProposalTutorialIsValid = (node: FullNodeData) =>
@@ -4530,13 +4322,6 @@ const Dashboard = ({}: DashboardProps) => {
         if (referenceProposalTutorialLaunched) return;
       }
 
-      // const referenceProposalForcedTutorialLaunched = detectAndForceTutorial(
-      //   "proposalReference",
-      //   "P631lWeKsBtszZRDlmsM",
-      //   referenceProposalTutorialIsValidForced
-      // );
-      // if (referenceProposalForcedTutorialLaunched) return;
-
       // --------------------------
 
       const questionProposalTutorialIsValid = (node: FullNodeData) =>
@@ -4547,13 +4332,6 @@ const Dashboard = ({}: DashboardProps) => {
         if (result) return;
       }
 
-      // const questionProposalForcedTutorialLaunched = detectAndForceTutorial(
-      //   "proposalQuestion",
-      //   "qO9uK6UdYRLWm4Olihlw",
-      //   questionProposalTutorialIsValidForced
-      // );
-      // if (questionProposalForcedTutorialLaunched) return;
-
       // --------------------------
 
       const ideaProposalTutorialIsValid = (node: FullNodeData) =>
@@ -4563,13 +4341,6 @@ const Dashboard = ({}: DashboardProps) => {
         const result = detectAndCallTutorial("proposalIdea", ideaProposalTutorialIsValid);
         if (result) return;
       }
-
-      // const ideaProposalForcedTutorialLaunched = detectAndForceTutorial(
-      //   "proposalIdea",
-      //   "v9wGPxRCI4DRq11o7uH2",
-      //   ideaProposalTutorialIsValidForced
-      // );
-      // if (ideaProposalForcedTutorialLaunched) return;
 
       // --------------------------
 
