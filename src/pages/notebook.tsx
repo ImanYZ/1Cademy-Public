@@ -4019,13 +4019,21 @@ const Dashboard = ({}: DashboardProps) => {
     }
 
     console.log(111);
-    if (tutorial.name === "tmpProposalConceptChild") {
+
+    const tmpChildrenMap = new Map<TutorialTypeKeys, NodeType>();
+    tmpChildrenMap.set("tmpProposalConceptChild", "Concept");
+    tmpChildrenMap.set("tmpProposalRelationChild", "Relation");
+    tmpChildrenMap.set("tmpProposalReferenceChild", "Reference");
+    tmpChildrenMap.set("tmpProposalQuestionChild", "Question");
+    tmpChildrenMap.set("tmpProposalIdeaChild", "Idea");
+    tmpChildrenMap.set("tmpProposalCodeChild", "Code");
+
+    if (tmpChildrenMap.has(tutorial.name)) {
       console.log(112);
       if (currentStep.isClickeable) {
-        proposeNewChild(null, "Concept");
+        proposeNewChild(null, tmpChildrenMap.get(tutorial.name) as string);
         console.log(113);
       }
-      // setTutorial(null);
       console.log(114);
       return;
     }
@@ -4139,11 +4147,9 @@ const Dashboard = ({}: DashboardProps) => {
    */
   const detectAndCallTutorial = useCallback(
     (tutorialName: TutorialTypeKeys, targetIsValid: (node: FullNodeData) => boolean) => {
-      const tutorialsIsForced = forcedTutorial === tutorialName;
-      const canDetect = tutorialsIsForced || (!userTutorial[tutorialName].done && !userTutorial[tutorialName].skipped);
+      const canDetect = !userTutorial[tutorialName].done && !userTutorial[tutorialName].skipped && !forcedTutorial;
 
       console.log("x111", { tutorialName });
-      console.log(forcedTutorial === "tmpProposalConceptChild", ["tmpProposalConceptChild"].includes(tutorialName));
       const isValidForcedTutorial = forcedTutorial
         ? (forcedTutorial === "nodes" && ["nodes"].includes(tutorialName)) ||
           (forcedTutorial === "proposal" && ["proposal", "tmpEditNode"].includes(tutorialName)) ||
@@ -4173,37 +4179,43 @@ const Dashboard = ({}: DashboardProps) => {
 
       console.log({
         1: forcedTutorial === "nodes" && ["nodes"].includes(tutorialName),
-        2: forcedTutorial === "proposal" && ["proposal"].includes(tutorialName),
-        3: forcedTutorial === "proposalCode" && ["proposalCode"].includes(tutorialName),
-        4: forcedTutorial === "childProposal" && ["childProposal"].includes(tutorialName),
-        5: forcedTutorial === "tmpEditNode" && ["tmpEditNode"].includes(tutorialName),
-        6: forcedTutorial === "tmpProposalConceptChild" && ["tmpProposalConceptChild"].includes(tutorialName),
-        7: forcedTutorial === "childConcept" && ["childConcept"].includes(tutorialName),
-        8:
+        2: forcedTutorial === "proposal" && ["proposal", "tmpEditNode"].includes(tutorialName),
+        3: forcedTutorial === "proposalConcept" && ["proposalConcept", "tmpEditNode"].includes(tutorialName),
+        4: forcedTutorial === "proposalRelation" && ["proposalRelation", "tmpEditNode"].includes(tutorialName),
+        5: forcedTutorial === "proposalReference" && ["proposalReference", "tmpEditNode"].includes(tutorialName),
+        6: forcedTutorial === "proposalQuestion" && ["proposalQuestion", "tmpEditNode"].includes(tutorialName),
+        7: forcedTutorial === "proposalIdea" && ["proposalIdea", "tmpEditNode"].includes(tutorialName),
+        8: forcedTutorial === "proposalCode" && ["proposalCode", "tmpEditNode"].includes(tutorialName),
+        9:
+          forcedTutorial === "childProposal" &&
+          ["childProposal", "tmpProposalConceptChild", "tmpEditNode"].includes(tutorialName),
+        // (forcedTutorial === "tmpEditNode" && ["tmpEditNode"].includes(tutorialName)) ||
+        // (forcedTutorial === "tmpProposalConceptChild" && ["tmpProposalConceptChild"].includes(tutorialName)) ||
+        10:
           forcedTutorial === "childConcept" &&
           ["childConcept", "tmpProposalConceptChild", "tmpEditNode"].includes(tutorialName),
-        9:
+        11:
           forcedTutorial === "childRelation" &&
           ["childRelation", "tmpProposalRelationChild", "tmpEditNode"].includes(tutorialName),
-        10:
+        12:
           forcedTutorial === "childReference" &&
           ["childReference", "tmpProposalReferenceChild", "tmpEditNode"].includes(tutorialName),
-        11:
+        13:
           forcedTutorial === "childQuestion" &&
           ["childQuestion", "tmpProposalQuestionChild", "tmpEditNode"].includes(tutorialName),
-        12:
+        14:
           forcedTutorial === "childIdea" && ["childIdea", "tmpProposalIdeaChild", "tmpEditNode"].includes(tutorialName),
-        13:
-          forcedTutorial === "childCode" && ["childCode", "tmpProposalCodeChild", "tmpEditNode"].includes(tutorialName),
       });
       console.log({ isValidForcedTutorial, thisone: "" });
-      if (!isValidForcedTutorial) return false;
+      // if (!isValidForcedTutorial) return false;
 
-      if (!canDetect) return false;
+      if (!canDetect && !isValidForcedTutorial) return false;
 
-      devLog("DETECT_AND_CALL_TUTORIAL", { tutorialName });
+      devLog("DETECT_AND_CALL_TUTORIAL", { tutorialName, node: nodeBookState.selectedNode });
 
       const newTargetId = nodeBookState.selectedNode ?? "";
+      console.log("111.5", newTargetId);
+
       if (!newTargetId) return false;
 
       console.log("112", newTargetId);
@@ -5132,6 +5144,60 @@ const Dashboard = ({}: DashboardProps) => {
       //   return;
       // }
 
+      // // --------------------------
+      const proposalConceptChildLaunched = detectAndCallTutorial(
+        "tmpProposalConceptChild",
+        node => node && node.open && node.editable
+      );
+      console.log({ proposalConceptChildLaunched });
+      if (proposalConceptChildLaunched) return;
+
+      // ------------------------
+
+      const proposalRelationChildLaunched = detectAndCallTutorial(
+        "tmpProposalRelationChild",
+        node => node && node.open && node.editable
+      );
+      console.log({ proposalRelationChildLaunched });
+      if (proposalRelationChildLaunched) return;
+
+      // ------------------------
+
+      const proposalReferenceChildLaunched = detectAndCallTutorial(
+        "tmpProposalReferenceChild",
+        node => node && node.open && node.editable
+      );
+      console.log({ proposalReferenceChildLaunched });
+      if (proposalReferenceChildLaunched) return;
+
+      // ------------------------
+
+      const proposalQuestionChildLaunched = detectAndCallTutorial(
+        "tmpProposalQuestionChild",
+        node => node && node.open && node.editable
+      );
+      console.log({ proposalQuestionChildLaunched });
+      if (proposalQuestionChildLaunched) return;
+
+      // ------------------------
+
+      const proposalIdeaChildLaunched = detectAndCallTutorial(
+        "tmpProposalIdeaChild",
+        node => node && node.open && node.editable
+      );
+      console.log({ proposalIdeaChildLaunched });
+      if (proposalIdeaChildLaunched) return;
+
+      // ------------------------
+
+      const proposalCodeChildLaunched = detectAndCallTutorial(
+        "tmpProposalCodeChild",
+        node => node && node.open && node.editable
+      );
+      console.log({ proposalCodeChildLaunched });
+      if (proposalCodeChildLaunched) return;
+
+      // ------------------------
       // ------------------------
       const tmpEditNodeIsValid = (node: FullNodeData) => node && node.open && !node.editable;
       // node child ./
@@ -5189,65 +5255,17 @@ const Dashboard = ({}: DashboardProps) => {
 
       // ------------------------
 
-      const proposalConceptChildLaunched = detectAndCallTutorial(
-        "tmpProposalConceptChild",
-        node => node && node.open && node.editable
-      );
-      console.log({ proposalConceptChildLaunched });
-      if (proposalConceptChildLaunched) return;
+      const childTypes: TutorialTypeKeys[] = [
+        "childProposal",
+        "childConcept",
+        "childRelation",
+        "childReference",
+        "childQuestion",
+        "childIdea",
+        "childCode",
+      ];
 
-      // ------------------------
-
-      const proposalRelationChildLaunched = detectAndCallTutorial(
-        "tmpProposalRelationChild",
-        node => node && node.open && node.editable
-      );
-      console.log({ proposalRelationChildLaunched });
-      if (proposalRelationChildLaunched) return;
-
-      // ------------------------
-
-      const proposalReferenceChildLaunched = detectAndCallTutorial(
-        "tmpProposalReferenceChild",
-        node => node && node.open && node.editable
-      );
-      console.log({ proposalReferenceChildLaunched });
-      if (proposalReferenceChildLaunched) return;
-
-      // ------------------------
-
-      const proposalQuestionChildLaunched = detectAndCallTutorial(
-        "tmpProposalQuestionChild",
-        node => node && node.open && node.editable
-      );
-      console.log({ proposalQuestionChildLaunched });
-      if (proposalQuestionChildLaunched) return;
-
-      // ------------------------
-
-      const proposalIdeaChildLaunched = detectAndCallTutorial(
-        "tmpProposalIdeaChild",
-        node => node && node.open && node.editable
-      );
-      console.log({ proposalIdeaChildLaunched });
-      if (proposalIdeaChildLaunched) return;
-
-      // ------------------------
-
-      const proposalCodeChildLaunched = detectAndCallTutorial(
-        "tmpProposalCodeChild",
-        node => node && node.open && node.editable
-      );
-      console.log({ proposalCodeChildLaunched });
-      if (proposalCodeChildLaunched) return;
-
-      // ------------------------
-
-      if (
-        forcedTutorial === "childProposal" ||
-        forcedTutorial === "childConcept" ||
-        forcedTutorial === "childQuestion"
-      ) {
+      if (forcedTutorial && childTypes.includes(forcedTutorial)) {
         const defaultStates = { open: true };
         // const targetIsInvalid = (node: FullNodeData) => !node.open || node.editable;
         const newTargetId = "r98BjyFDCe4YyLA3U8ZE";

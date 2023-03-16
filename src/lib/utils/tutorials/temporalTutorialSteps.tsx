@@ -35,6 +35,7 @@ const TMP_PROPOSE_CHILD_QUESTION_CONFIG: TutorialStepConfig[] = [
     description: <MarkdownRender text={"**Click** on Question icon button to create a new Question child."} />,
     childTargetId: "propose-question-child",
     isClickeable: true,
+    targetDelay: 500,
   },
 ];
 
