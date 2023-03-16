@@ -494,7 +494,7 @@ const Dashboard = ({}: DashboardProps) => {
           const targetElement = document.getElementById(currentStep.childTargetId);
           if (!targetElement) return;
 
-          targetElement.classList.add(currentStep.largeTarget ? "tutorial-target-large" : "tutorial-target");
+          targetElement.classList.add(`tutorial-target-${currentStep.outline}`);
           const { width, height, top, left } = targetElement.getBoundingClientRect();
 
           setTargetClientRect({ width, height, top, left });
@@ -519,7 +519,7 @@ const Dashboard = ({}: DashboardProps) => {
         const targetElement = document.getElementById(`${targetId}-${currentStep.childTargetId}`);
         if (!targetElement) return;
 
-        targetElement.classList.add(currentStep.largeTarget ? "tutorial-target-large" : "tutorial-target");
+        targetElement.classList.add(`tutorial-target-${currentStep.outline}`);
 
         const { offsetTop, offsetLeft } = targetElement;
         const { height: childrenHeight, width: childrenWidth } = targetElement.getBoundingClientRect();

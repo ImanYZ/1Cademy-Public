@@ -242,7 +242,8 @@ export type TutorialStepConfig = {
   anchor?: string;
   tooltipPosition?: "top" | "bottom" | "left" | "right" | "topLeft" | "topRight" | "bottomLeft" | "bottomRight";
   targetDelay?: number;
-  largeTarget?: boolean;
+  outline?: "shallow" | "outside" | "inside";
+
   isClickeable?: boolean;
 };
 
@@ -257,7 +258,7 @@ export type TutorialStep = {
   previosStepName: number;
   tooltipPosition: "top" | "bottom" | "left" | "right" | "topLeft" | "topRight" | "bottomLeft" | "bottomRight";
   targetDelay?: number;
-  largeTarget?: boolean;
+  outline?: "shallow" | "outside" | "inside";
   isClickeable?: boolean;
 };
 

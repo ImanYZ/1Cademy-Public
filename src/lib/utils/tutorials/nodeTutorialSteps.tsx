@@ -36,7 +36,7 @@ const NODES_STEPS: TutorialStepConfig[] = [
         }
       />
     ),
-    largeTarget: true,
+    outline: true,
   },
 
   {
