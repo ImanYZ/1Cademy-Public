@@ -422,7 +422,6 @@ const Dashboard = ({}: DashboardProps) => {
 
   const scrollToNode = useCallback(
     (nodeId: string, tries = 0) => {
-      devLog("scroll To Node", { nodeId, tries });
       if (tries === 10) return;
 
       if (!scrollToNodeInitialized.current) {
@@ -436,7 +435,8 @@ const Dashboard = ({}: DashboardProps) => {
             lastNodeOperation.current = "";
           }
 
-          if (!isPlayingTheTutorialRef.current && onNodeInViewport(nodeId) && !isSearcher) return;
+          if (onNodeInViewport(nodeId) && !isSearcher && !forcedTutorial) return;
+          devLog("scroll To Node", { nodeId, tries });
 
           if (
             originalNode &&
@@ -477,7 +477,7 @@ const Dashboard = ({}: DashboardProps) => {
         }, 400);
       }
     },
-    [isPlayingTheTutorialRef, onNodeInViewport]
+    [forcedTutorial, onNodeInViewport]
   );
 
   useEffect(() => {
@@ -4068,8 +4068,6 @@ const Dashboard = ({}: DashboardProps) => {
       targetIsValid: (node: FullNodeData) => boolean,
       defaultStates: Partial<FullNodeData> = { open: true }
     ) => {
-      // if (forcedTutorial !== tutorialName) return false;
-
       devLog("DETECT_AND_CALL_TUTORIAL", { tutorialName, targetId });
 
       const thisNode = graph.nodes[targetId];
@@ -4081,11 +4079,13 @@ const Dashboard = ({}: DashboardProps) => {
         return true;
       }
       tutorialStateWasSetUpRef.current = false;
-      nodeBookDispatch({ type: "setSelectedNode", payload: targetId });
-      notebookRef.current.selectedNode = targetId;
 
       startTutorial(tutorialName);
       setTargetId(targetId);
+
+      nodeBookDispatch({ type: "setSelectedNode", payload: targetId });
+      notebookRef.current.selectedNode = targetId;
+      scrollToNode(targetId);
 
       setNodeUpdates({
         nodeIds: [targetId],
@@ -4094,7 +4094,7 @@ const Dashboard = ({}: DashboardProps) => {
 
       return true;
     },
-    [graph.nodes, nodeBookDispatch, openNodeHandler, setTargetId, startTutorial]
+    [graph.nodes, nodeBookDispatch, openNodeHandler, scrollToNode, setTargetId, startTutorial]
   );
 
   const detectAndRemoveTutorial = useCallback(
@@ -4111,11 +4111,6 @@ const Dashboard = ({}: DashboardProps) => {
     [graph.nodes, setTutorial, targetId, tutorial]
   );
 
-  /**
-   * Detect the trigger to call a tutorial
-   * if graph is invalid, DB is modified with correct state
-   * then we wait until graph has correct state to call tutorial
-   */
   const detectAndCallSidebarTutorial = useCallback(
     (tutorialName: TutorialTypeKeys, sidebar: OpenSidebar) => {
       const shouldIgnore = !forcedTutorial && (userTutorial[tutorialName].done || userTutorial[tutorialName].skipped);
@@ -4130,11 +4125,7 @@ const Dashboard = ({}: DashboardProps) => {
     },
     [forcedTutorial, nodeBookState.selectedNode, openSidebar, startTutorial, userTutorial]
   );
-  /**
-   * Detect the trigger to call a tutorial
-   * if graph is invalid, DB is modified with correct state
-   * then we wait until graph has correct state to call tutorial
-   */
+
   const detectAndCallTutorial = useCallback(
     (tutorialName: TutorialTypeKeys, targetIsValid: (node: FullNodeData) => boolean) => {
       const shouldIgnore = !forcedTutorial && (userTutorial[tutorialName].done || userTutorial[tutorialName].skipped);
@@ -4152,9 +4143,23 @@ const Dashboard = ({}: DashboardProps) => {
 
       startTutorial(tutorialName);
       setTargetId(newTargetId);
+      if (forcedTutorial) {
+        nodeBookDispatch({ type: "setSelectedNode", payload: newTargetId });
+        notebookRef.current.selectedNode = newTargetId;
+        scrollToNode(newTargetId);
+      }
       return true;
     },
-    [forcedTutorial, graph.nodes, nodeBookState.selectedNode, setTargetId, startTutorial, userTutorial]
+    [
+      forcedTutorial,
+      graph.nodes,
+      nodeBookDispatch,
+      nodeBookState.selectedNode,
+      scrollToNode,
+      setTargetId,
+      startTutorial,
+      userTutorial,
+    ]
   );
 
   const detectAndCallChildTutorial = useCallback(
@@ -4188,9 +4193,23 @@ const Dashboard = ({}: DashboardProps) => {
 
       startTutorial(tutorialName);
       setTargetId(newTargetId);
+      if (forcedTutorial) {
+        nodeBookDispatch({ type: "setSelectedNode", payload: newTargetId });
+        notebookRef.current.selectedNode = newTargetId;
+        scrollToNode(newTargetId);
+      }
       return true;
     },
-    [forcedTutorial, graph.nodes, nodeBookState.selectedNode, setTargetId, startTutorial, userTutorial]
+    [
+      forcedTutorial,
+      graph.nodes,
+      nodeBookDispatch,
+      nodeBookState.selectedNode,
+      scrollToNode,
+      setTargetId,
+      startTutorial,
+      userTutorial,
+    ]
   );
 
   useEffect(() => {
