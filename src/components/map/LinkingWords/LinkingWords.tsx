@@ -486,9 +486,10 @@ const LinkingWords = ({
                   <Box
                     id={`${props.identifier}-child-button-${idx}`}
                     sx={{
-                      display: "grid",
-                      gridTemplateColumns: props.editable && props.parents.length ? "1fr 32px" : "1fr",
+                      display: "flex",
+                      //gridTemplateColumns: props.editable && props.parents.length ? "1fr 32px" : "1fr",
                       alignItems: "center",
+                      justifyContent: "space-between",
                     }}
                     key={props.identifier + "LinkTo" + child.node + "DIV"}
                   >
