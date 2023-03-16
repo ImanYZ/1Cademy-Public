@@ -4237,12 +4237,17 @@ const Dashboard = ({}: DashboardProps) => {
     (tutorialName: TutorialTypeKeys, targetIsValid: (node: FullNodeData) => boolean) => {
       const tutorialsIsForced = forcedTutorial === tutorialName;
       const canDetect = tutorialsIsForced || (!userTutorial[tutorialName].done && !userTutorial[tutorialName].skipped);
-      const isValidForcedTutorial = forcedTutorial
-        ? forcedTutorial === "childConcept" && ["childConcept"].includes(tutorialName)
+      const isValidForcedTutorialChild = forcedTutorial
+        ? (forcedTutorial === "childConcept" && ["childConcept"].includes(tutorialName)) ||
+          (forcedTutorial === "childRelation" && ["childRelation"].includes(tutorialName)) ||
+          (forcedTutorial === "childReference" && ["childReference"].includes(tutorialName)) ||
+          (forcedTutorial === "childQuestion" && ["childQuestion"].includes(tutorialName)) ||
+          (forcedTutorial === "childIdea" && ["childIdea"].includes(tutorialName)) ||
+          (forcedTutorial === "childCode" && ["childQuestion"].includes(tutorialName))
         : !["tmpProposalConceptChild", "tmpEditNode"].includes(tutorialName);
 
-      console.log("111");
-      if (!isValidForcedTutorial) return false;
+      console.log("111", { isValidForcedTutorialChild });
+      if (!isValidForcedTutorialChild) return false;
       if (!canDetect) return false;
 
       devLog("DETECT_AND_CALL_CHILD_TUTORIAL", { tutorialName });
@@ -5439,7 +5444,14 @@ const Dashboard = ({}: DashboardProps) => {
         setForcedTutorial(null);
       }
     }
-    if (tutorial.name === "tmpProposalConceptChild" || tutorial.name === "tmpProposalQuestionChild") {
+    if (
+      tutorial.name === "tmpProposalConceptChild" ||
+      tutorial.name === "tmpProposalQuestionChild" ||
+      tutorial.name === "tmpProposalRelationChild" ||
+      tutorial.name === "tmpProposalReferenceChild" ||
+      tutorial.name === "tmpProposalIdeaChild" ||
+      tutorial.name === "tmpProposalCodeChild"
+    ) {
       console.log("aaaaaaaa");
       const isValid = (node: FullNodeData) => node && node.open && node.editable;
       const node = graph.nodes[targetId];
