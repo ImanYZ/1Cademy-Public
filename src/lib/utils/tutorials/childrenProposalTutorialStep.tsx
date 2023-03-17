@@ -47,7 +47,6 @@ const CHILD_CONCEPT_PROPOSAL_STEPS: TutorialStepConfig[] = [
         }
       />
     ),
-    isClickeable: true,
   },
   {
     title: "Proposing Child Concept Node",
@@ -56,7 +55,14 @@ const CHILD_CONCEPT_PROPOSAL_STEPS: TutorialStepConfig[] = [
         text={"Before you hit the propose button make sure that you link a reference node as a citation."}
       />
     ),
-    isClickeable: true,
+  },
+  {
+    title: "Proposing Child Concept Node",
+    description: (
+      <MarkdownRender
+        text={"Before you hit the propose button make sure that you link a reference node as a citation."}
+      />
+    ),
   },
 ];
 
