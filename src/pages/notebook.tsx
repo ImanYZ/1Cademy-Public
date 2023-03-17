@@ -331,7 +331,7 @@ const Dashboard = ({}: DashboardProps) => {
   const [bookmarkUpdatesNum, setBookmarkUpdatesNum] = useState(0);
   const [pendingProposalsNum, setPendingProposalsNum] = useState(0);
 
-  const lastNodeOperation = useRef<string>("");
+  const lastNodeOperation = useRef<{ name: string; data: string } | null>(null);
   const proposalTimer = useRef<any>(null);
 
   const [openProgressBar, setOpenProgressBar] = useState(false);
@@ -368,6 +368,7 @@ const Dashboard = ({}: DashboardProps) => {
     setUserTutorial,
     userTutorial,
   } = useInteractiveTutorial({ user });
+
   const onNodeInViewport = useCallback(
     (nodeId: string) => {
       const originalNode = document.getElementById(nodeId);
@@ -430,9 +431,9 @@ const Dashboard = ({}: DashboardProps) => {
           if (!originalNode) {
             return;
           }
-          const isSearcher = ["Searcher"].includes(lastNodeOperation.current);
+          const isSearcher = lastNodeOperation.current ? ["Searcher"].includes(lastNodeOperation.current.name) : false;
           if (isSearcher) {
-            lastNodeOperation.current = "";
+            lastNodeOperation.current = null;
           }
 
           if (onNodeInViewport(nodeId) && !isSearcher && !forcedTutorial) return;
@@ -551,7 +552,7 @@ const Dashboard = ({}: DashboardProps) => {
   }, [nodeBookState.selectedNode, scrollToNode]);
 
   const setOperation = useCallback((operation: string) => {
-    lastNodeOperation.current = operation;
+    lastNodeOperation.current = { name: operation, data: "" };
   }, []);
 
   const { addTask, isQueueWorking, queueFinished } = useWorkerQueue({
@@ -1824,7 +1825,7 @@ const Dashboard = ({}: DashboardProps) => {
 
       let linkedNode = document.getElementById(linkedNodeID);
       if (typeOperation) {
-        lastNodeOperation.current = "Searcher";
+        lastNodeOperation.current = { name: "Searcher", data: "" };
       }
       const isInitialProposal = String(typeOperation).startsWith("initialProposal-");
       if (isInitialProposal) {
@@ -2088,7 +2089,7 @@ const Dashboard = ({}: DashboardProps) => {
 
       return graph;
     });
-    lastNodeOperation.current = "OpenAllChildren";
+    lastNodeOperation.current = { name: "OpenAllChildren", data: "" };
   }, []);
 
   const openAllParent = useCallback((nodeId: string) => {
@@ -2183,7 +2184,7 @@ const Dashboard = ({}: DashboardProps) => {
 
       return graph;
     });
-    lastNodeOperation.current = "OpenAllParent";
+    lastNodeOperation.current = { name: "OpenAllParent", data: "" };
   }, []);
 
   const toggleNode = useCallback(
@@ -2192,7 +2193,7 @@ const Dashboard = ({}: DashboardProps) => {
 
       notebookRef.current.selectedNode = nodeId;
 
-      lastNodeOperation.current = "ToggleNode";
+      lastNodeOperation.current = { name: "ToggleNode", data: "" };
       setGraph(({ nodes: oldNodes, edges }) => {
         const thisNode = oldNodes[nodeId];
 
@@ -2268,7 +2269,7 @@ const Dashboard = ({}: DashboardProps) => {
 
   const openNodePart = useCallback(
     (event: any, nodeId: string, partType: any, openPart: any, setOpenPart: any) => {
-      lastNodeOperation.current = partType;
+      lastNodeOperation.current = { name: partType, data: "" };
       if (notebookRef.current.choosingNode) return;
 
       if (partType === "PendingProposals") {
@@ -3037,6 +3038,9 @@ const Dashboard = ({}: DashboardProps) => {
           delete postData.height;
 
           const willBeApproved = isVersionApproved({ corrects: 1, wrongs: 0, nodeData: newNode });
+
+          lastNodeOperation.current = { name: "ProposeProposals", data: willBeApproved ? "accepted" : "notAccepted" };
+          console.log({ willBeApproved, lastOps: lastNodeOperation.current });
 
           if (willBeApproved) {
             const newParentIds: string[] = newNode.parents.map(parent => parent.node);
@@ -4211,7 +4215,7 @@ const Dashboard = ({}: DashboardProps) => {
       userTutorial,
     ]
   );
-
+  console.log({ lastOps: lastNodeOperation.current });
   useEffect(() => {
     /**
      * This useEffect with detect conditions to call a tutorial
@@ -4654,15 +4658,41 @@ const Dashboard = ({}: DashboardProps) => {
 
       // ------------------------
 
-      if (forcedTutorial === "reconcilingAcceptedProposal" || lastNodeOperation.current === "ProposeProposals") {
-        console.log("reconcilingAcceptedProposal");
+      if (
+        forcedTutorial === "reconcilingAcceptedProposal" ||
+        (lastNodeOperation.current &&
+          lastNodeOperation.current.name === "ProposeProposals" &&
+          lastNodeOperation.current.data === "accepted")
+      ) {
         const acceptedProposalLaunched = detectAndCallTutorial("reconcilingAcceptedProposal", node => {
-          console.log({
-            reconcilingAcceptedProposalRes: node && node.open && isVersionApproved({ corrects: 1, wrongs: 0, node }),
-          });
-          return node && node.open && isVersionApproved({ corrects: 1, wrongs: 0, node });
+          return node && node.open;
         });
         if (acceptedProposalLaunched) return;
+      }
+
+      // if (forcedTutorial === "reconcilingAcceptedProposal") {
+      //   const result = detectAndForceTutorial(
+      //     "reconcilingAcceptedProposal",
+      //     "r98BjyFDCe4YyLA3U8ZE",
+      //     node => node && node.open
+      //   );
+      //   if (result) return;
+      // }
+
+      // ------------------------
+
+      if (
+        forcedTutorial === "reconcilingNotAcceptedProposal" ||
+        (lastNodeOperation.current &&
+          lastNodeOperation.current.name === "ProposeProposals" &&
+          lastNodeOperation.current.data === "notAccepted")
+      ) {
+        const notAcceptedProposalLaunched = detectAndCallTutorial(
+          "reconcilingNotAcceptedProposal",
+          node => node && node.open
+        );
+        setOpenSidebar("PROPOSALS");
+        if (notAcceptedProposalLaunched) return;
       }
     };
 

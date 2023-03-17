@@ -515,7 +515,6 @@ const Node = ({
         saveProposedImprovement("", reason, () => setAbleToPropose(true));
         notebookRef.current.selectedNode = identifier;
         nodeBookDispatch({ type: "setSelectedNode", payload: identifier });
-        setOperation("ProposeProposals");
       }, 500);
     },
 
