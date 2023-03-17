@@ -4848,7 +4848,7 @@ const Dashboard = ({}: DashboardProps) => {
       const reconcilingAcceptedProposalIsValid = (node: FullNodeData) =>
         node && node.open && isVersionApproved({ corrects: 1, wrongs: 0, nodeData: node });
 
-      const node = graph.nodes[targetId];
+      const node = graph.nodes[nodeBookState.selectedNode ?? ""];
       if (!reconcilingAcceptedProposalIsValid(node)) {
         setTutorial(null);
         setForcedTutorial(null);
@@ -4862,7 +4862,7 @@ const Dashboard = ({}: DashboardProps) => {
         !isVersionApproved({ corrects: 1, wrongs: 0, nodeData: node }) &&
         openSidebar === "PROPOSALS";
 
-      const node = graph.nodes[targetId];
+      const node = graph.nodes[nodeBookState.selectedNode ?? ""];
       if (!reconcilingNotAcceptedProposalIsValid(node)) {
         setOpenSidebar(null);
         setTutorial(null);
@@ -4879,6 +4879,7 @@ const Dashboard = ({}: DashboardProps) => {
     detectAndRemoveTutorial,
     firstLoading,
     graph.nodes,
+    nodeBookState.selectedNode,
     openSidebar,
     setTutorial,
     targetId,
