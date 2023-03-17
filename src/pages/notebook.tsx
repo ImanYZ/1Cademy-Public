@@ -4843,6 +4843,33 @@ const Dashboard = ({}: DashboardProps) => {
         setForcedTutorial(null);
       }
     }
+
+    if (tutorial.name === "reconcilingAcceptedProposal") {
+      const reconcilingAcceptedProposalIsValid = (node: FullNodeData) =>
+        node && node.open && isVersionApproved({ corrects: 1, wrongs: 0, nodeData: node });
+
+      const node = graph.nodes[targetId];
+      if (!reconcilingAcceptedProposalIsValid(node)) {
+        setTutorial(null);
+        setForcedTutorial(null);
+      }
+    }
+
+    if (tutorial.name === "reconcilingNotAcceptedProposal") {
+      const reconcilingNotAcceptedProposalIsValid = (node: FullNodeData) =>
+        node &&
+        node.open &&
+        !isVersionApproved({ corrects: 1, wrongs: 0, nodeData: node }) &&
+        openSidebar === "PROPOSALS";
+
+      const node = graph.nodes[targetId];
+      if (!reconcilingNotAcceptedProposalIsValid(node)) {
+        setOpenSidebar(null);
+        setTutorial(null);
+        setForcedTutorial(null);
+      }
+    }
+
     if (tutorial.name === "searcher") {
       if (openSidebar === "SEARCHER_SIDEBAR") return;
       setTutorial(null);
