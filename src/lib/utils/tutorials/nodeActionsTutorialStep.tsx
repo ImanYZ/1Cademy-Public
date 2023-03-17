@@ -12,16 +12,24 @@ dayjs.extend(relativeTime);
 
 const PARENT_CHILDREN_STEPS: TutorialStepConfig[] = [
   {
-    title: "Parent and Children",
-    childTargetId: "button-parent-children",
+    title: "Parents",
+    childTargetId: "parents-list",
     description: (
       <MarkdownRender
         text={
-          "Here is a list of parent nodes and a list of child nodes for this node. Parent nodes are superordinate concepts that provide prerequisite information for the current node. Child nodes are subordinate nodes that provide more specific or advanced information on a topic."
+          "Here is a list of parent nodes. Parent nodes are superordinate concepts that provide prerequisite information for the current node."
         }
       />
     ),
-    isClickeable: true,
+  },
+  {
+    title: "Children",
+    childTargetId: "children-list",
+    description: (
+      <MarkdownRender
+        text={"This is the list of child nodes. It contains all the nodes that are subordinate to this node."}
+      />
+    ),
   },
 ];
 const PARENT_STEPS: TutorialStepConfig[] = [
