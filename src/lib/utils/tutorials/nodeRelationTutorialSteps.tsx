@@ -15,7 +15,7 @@ const NODE_RELATION_STEPS_CONFIG: TutorialStepConfig[] = [
         <ShareIcon sx={{ alignSelf: "center" }} />
         <MarkdownRender
           text={
-            "A Relation explains the relationship between different Concept nodes, without defining/explaining any of them. For example, you can list a number of node titles to group them in a Relation node. Another example is a Relation node that compared/contrasts two or more nodes."
+            "Relation nodes list concepts and help arrange the structure of information on a graph. They provide facets for groups of subordinate nodes to be linked to a superordinate node."
           }
         />
       </Stack>

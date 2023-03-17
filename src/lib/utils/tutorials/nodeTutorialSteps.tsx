@@ -36,7 +36,7 @@ const NODES_STEPS: TutorialStepConfig[] = [
         }
       />
     ),
-    outline: true,
+    outline: "outside",
   },
 
   {
