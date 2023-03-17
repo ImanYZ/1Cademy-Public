@@ -84,7 +84,7 @@ import { MemoizedNodeList } from "../components/map/NodesList";
 import { MemoizedToolbarSidebar } from "../components/map/Sidebar/SidebarV2/ToolbarSidebar";
 import { NodeItemDashboard } from "../components/NodeItemDashboard";
 import { Portal } from "../components/Portal";
-import { MemoizedTutorialTableOfContent } from "../components/tutorial/TutorialTableOfContent";
+import { GroupTutorial, MemoizedTutorialTableOfContent } from "../components/tutorial/TutorialTableOfContent";
 import { NodeBookProvider, useNodeBook } from "../context/NodeBookContext";
 import {
   getTutorialStep,
@@ -143,6 +143,7 @@ import {
 } from "../lib/utils/tutorials/childrenProposalTutorialStep";
 import { NAVIGATION_STEPS_COMPLETE } from "../lib/utils/tutorials/navigationTutorialSteps";
 import { NODE_CODE } from "../lib/utils/tutorials/nodeCodeTutorialSteps";
+import { NODE_CONCEPT } from "../lib/utils/tutorials/nodeConceptTutorialStep";
 import { NODE_IDEA } from "../lib/utils/tutorials/nodeIdeaTutorialSteps";
 import { NODE_QUESTION } from "../lib/utils/tutorials/nodeQuestionStepTutorialStep";
 import { NODE_REFERENCE } from "../lib/utils/tutorials/nodeReferenceTutorialSteps";
@@ -3974,6 +3975,22 @@ const Dashboard = ({}: DashboardProps) => {
     setOpenProgressBarMenu(false);
   }, []);
 
+  const onCancelTutorial = useCallback(
+    () =>
+      setTutorial(p => {
+        const previousStep = getTutorialStep(p);
+        console.log({ previousStep });
+        if (previousStep?.childTargetId) removeStyleFromTarget(previousStep.childTargetId, targetId); // TODO: check this
+
+        return null;
+      }),
+    [setTutorial, targetId]
+  );
+
+  const onCloseTableOfContent = useCallback(() => {
+    setOpenProgressBar(false);
+  }, []);
+
   const onSkipTutorial = useCallback(async () => {
     if (!user) return;
     if (!currentStep) return;
@@ -5665,58 +5682,10 @@ const Dashboard = ({}: DashboardProps) => {
           <MemoizedTutorialTableOfContent
             open={openProgressBar}
             reloadPermanentGraph={reloadPermanentGraph}
-            handleCloseProgressBar={() => setOpenProgressBar(false)}
-            tutorials={{
-              navigation: { title: "x Navigation", steps: NAVIGATION_STEPS_COMPLETE },
-              nodes: { title: "x Node", steps: NODES_STEPS_COMPLETE },
-              searcher: { title: "x Searcher", steps: SEARCHER_STEPS_COMPLETE },
-              proposal: { title: "x Proposal", steps: PROPOSAL_STEPS_COMPLETE },
-              proposalCode: { title: "x Proposal Code", steps: PROPOSING_CODE_EDIT_COMPLETE },
-              proposalConcept: { title: "x Proposal Concept", steps: PROPOSING_CONCEPT_EDIT_COMPLETE },
-              proposalIdea: { title: "x Proposal Idea", steps: PROPOSING_IDEA_EDIT_COMPLETE },
-              proposalQuestion: { title: "x Proposal Question", steps: PROPOSING_QUESTION_EDIT_COMPLETE },
-              proposalReference: { title: "x Proposal Reference", steps: PROPOSING_REFERENCE_EDIT_COMPLETE },
-              proposalRelation: { title: "x Proposal Relation", steps: PROPOSING_RELATION_EDIT_COMPLETE },
-              concept: { title: "x Concept Node", steps: NODE_CODE },
-              relation: { title: "x Relation Node", steps: NODE_RELATION },
-              reference: { title: "x Reference Node", steps: NODE_REFERENCE },
-              question: { title: "x Question Node", steps: NODE_QUESTION },
-              idea: { title: "x Idea Node", steps: NODE_IDEA },
-              code: { title: "x Code Node", steps: NODE_CODE },
-              reconcilingAcceptedProposal: {
-                title: "Reconciling Accepted Proposals",
-                steps: RECONCILING_ACCEPTED_PROPOSALS_STEPS_COMPLETE,
-              },
-              reconcilingNotAcceptedProposal: {
-                title: "Reconciling Not Accepted Proposal",
-                steps: RECONCILING_NOT_ACCEPTED_PROPOSALS_STEPS_COMPLETE,
-              },
-              childProposal: { title: "x Child Proposal", steps: CHILD_PROPOSAL_COMPLETE },
-              childConcept: { title: "x Propose Child Concept Node", steps: CHILD_CONCEPT_PROPOSAL_COMPLETE },
-              childRelation: { title: "Propose Child Relation Node", steps: CHILD_RELATION_PROPOSAL_COMPLETE },
-              childReference: { title: "Propose Child Reference Node", steps: CHILD_REFERENCE_PROPOSAL_COMPLETE },
-              childQuestion: { title: "Propose Child Question Node", steps: CHILD_QUESTION_PROPOSAL_COMPLETE },
-              childIdea: { title: "Propose Child Idea Node", steps: CHILD_IDEA_PROPOSAL_COMPLETE },
-              childCode: { title: "Propose Child Code Node", steps: CHILD_CODE_PROPOSAL_COMPLETE },
-
-              tmpEditNode: { title: "Temporal Edit Node", steps: [], hide: true },
-              tmpProposalConceptChild: { title: "Temporal Concept Node", steps: [], hide: true },
-              tmpProposalRelationChild: { title: "Temporal Relation Node", steps: [], hide: true },
-              tmpProposalQuestionChild: { title: "Temporal Question Node", steps: [], hide: true },
-              tmpProposalReferenceChild: { title: "Temporal Reference Node", steps: [], hide: true },
-              tmpProposalCodeChild: { title: "Temporal Code Node", steps: [], hide: true },
-              tmpProposalIdeaChild: { title: "Temporal Idea Node", steps: [], hide: true },
-            }}
+            handleCloseProgressBar={onCloseTableOfContent}
+            groupTutorials={gg}
             userTutorialState={userTutorial}
-            onCancelTutorial={() =>
-              setTutorial(p => {
-                const previousStep = getTutorialStep(p);
-                console.log({ previousStep });
-                if (previousStep?.childTargetId) removeStyleFromTarget(previousStep.childTargetId, targetId); // TODO: check this
-
-                return null;
-              })
-            }
+            onCancelTutorial={onCancelTutorial}
             onForceTutorial={setForcedTutorial}
           />
         </Box>
@@ -5734,3 +5703,173 @@ export default withAuthUser({
   shouldRedirectToLogin: true,
   shouldRedirectToHomeIfAuthenticated: false,
 })(NodeBook);
+
+const gg: GroupTutorial[] = [
+  {
+    title: "Basics",
+    tutorials: [
+      {
+        title: "Navigation",
+        tutorialSteps: { tutorialKey: "navigation", steps: NAVIGATION_STEPS_COMPLETE },
+        tutorials: [],
+      },
+      {
+        title: "Nodes",
+        tutorialSteps: { tutorialKey: "nodes", steps: NODES_STEPS_COMPLETE },
+        tutorials: [],
+      },
+      {
+        title: "Searcher",
+        tutorialSteps: { tutorialKey: "searcher", steps: SEARCHER_STEPS_COMPLETE },
+        tutorials: [],
+      },
+    ],
+  },
+  {
+    title: "Node Types",
+    tutorials: [
+      {
+        title: "Concept Node",
+        tutorialSteps: { tutorialKey: "concept", steps: NODE_CONCEPT },
+        tutorials: [],
+      },
+      {
+        title: "Relation Node",
+        tutorialSteps: { tutorialKey: "relation", steps: NODE_RELATION },
+        tutorials: [],
+      },
+      {
+        title: "Reference Node",
+        tutorialSteps: { tutorialKey: "reference", steps: NODE_REFERENCE },
+        tutorials: [],
+      },
+      {
+        title: "Question Node",
+        tutorialSteps: { tutorialKey: "question", steps: NODE_QUESTION },
+        tutorials: [],
+      },
+      {
+        title: "Code Node",
+        tutorialSteps: { tutorialKey: "code", steps: NODE_CODE },
+        tutorials: [],
+      },
+      {
+        title: "Idea Node",
+        tutorialSteps: { tutorialKey: "idea", steps: NODE_IDEA },
+        tutorials: [],
+      },
+    ],
+  },
+  {
+    title: "Proposal",
+    tutorials: [
+      {
+        title: "Proposing Edit",
+        tutorialSteps: { tutorialKey: "proposal", steps: PROPOSAL_STEPS_COMPLETE },
+        tutorials: [],
+      },
+      {
+        title: "Edit Node Types",
+        tutorials: [
+          {
+            title: "Edit Concept Node",
+            tutorialSteps: { tutorialKey: "proposalConcept", steps: PROPOSING_CONCEPT_EDIT_COMPLETE },
+            tutorials: [],
+          },
+          {
+            title: "Edit Relation Node",
+            tutorialSteps: { tutorialKey: "proposalRelation", steps: PROPOSING_RELATION_EDIT_COMPLETE },
+            tutorials: [],
+          },
+          {
+            title: "Edit Reference Node",
+            tutorialSteps: { tutorialKey: "proposalReference", steps: PROPOSING_REFERENCE_EDIT_COMPLETE },
+            tutorials: [],
+          },
+          {
+            title: "Edit Question Node",
+            tutorialSteps: { tutorialKey: "proposalQuestion", steps: PROPOSING_QUESTION_EDIT_COMPLETE },
+            tutorials: [],
+          },
+          {
+            title: "Edit Code Node",
+            tutorials: [],
+            tutorialSteps: { tutorialKey: "proposalCode", steps: PROPOSING_CODE_EDIT_COMPLETE },
+          },
+          {
+            title: "Edit Idea Node",
+            tutorialSteps: { tutorialKey: "proposalIdea", steps: PROPOSING_IDEA_EDIT_COMPLETE },
+            tutorials: [],
+          },
+        ],
+      },
+      {
+        title: "New node types",
+        tutorialSteps: { tutorialKey: "childProposal", steps: CHILD_PROPOSAL_COMPLETE },
+        tutorials: [
+          {
+            title: "New Concept Node",
+            tutorialSteps: { tutorialKey: "childConcept", steps: CHILD_CONCEPT_PROPOSAL_COMPLETE },
+            tutorials: [],
+          },
+          {
+            title: "New Relation Node",
+            tutorialSteps: { tutorialKey: "childRelation", steps: CHILD_RELATION_PROPOSAL_COMPLETE },
+            tutorials: [],
+          },
+          {
+            title: "New Reference Node",
+            tutorialSteps: { tutorialKey: "childReference", steps: CHILD_REFERENCE_PROPOSAL_COMPLETE },
+            tutorials: [],
+          },
+          {
+            title: "New Question Node",
+            tutorialSteps: { tutorialKey: "childQuestion", steps: CHILD_QUESTION_PROPOSAL_COMPLETE },
+            tutorials: [],
+          },
+          {
+            title: "New Code Node",
+            tutorials: [],
+            tutorialSteps: { tutorialKey: "childCode", steps: CHILD_CODE_PROPOSAL_COMPLETE },
+          },
+          {
+            title: "New Idea Node",
+            tutorialSteps: { tutorialKey: "childIdea", steps: CHILD_IDEA_PROPOSAL_COMPLETE },
+            tutorials: [],
+          },
+        ],
+      },
+      {
+        title: "Reconciling",
+        tutorials: [
+          {
+            title: "Reconciling Accepted Proposals",
+            tutorialSteps: {
+              tutorialKey: "reconcilingAcceptedProposal",
+              steps: RECONCILING_ACCEPTED_PROPOSALS_STEPS_COMPLETE,
+            },
+            tutorials: [],
+          },
+          {
+            title: "Reconciling Not Accepted Proposal",
+            tutorialSteps: {
+              tutorialKey: "reconcilingNotAcceptedProposal",
+              steps: RECONCILING_NOT_ACCEPTED_PROPOSALS_STEPS_COMPLETE,
+            },
+            tutorials: [],
+          },
+        ],
+      },
+      {
+        title: "Siderbars",
+        tutorials: [
+          {
+            title: "Searcher",
+            tutorialSteps: { tutorialKey: "searcher", steps: SEARCHER_STEPS_COMPLETE },
+            tutorials: [],
+          },
+        ],
+      },
+    ],
+  },
+];
