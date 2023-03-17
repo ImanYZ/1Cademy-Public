@@ -46,7 +46,7 @@ const TutorialTableOfContent = ({
   const CustomAccordion = ({ tutorials, level = 0 }: { tutorials: GroupTutorial[]; level?: number }) => {
     return (
       <>
-        {tutorials.map((currentTutorial, tutorialIdx) => {
+        {tutorials.map(currentTutorial => {
           return (
             <Accordion
               key={currentTutorial.title}
@@ -82,7 +82,9 @@ const TutorialTableOfContent = ({
                     <IconButton
                       onClick={e => {
                         e.stopPropagation();
-                        onStartTutorial(currentTutorial.tutorialSteps.tutorialKey, tutorialIdx);
+                        if (currentTutorial.tutorialSteps) {
+                          onStartTutorial(currentTutorial.tutorialSteps.tutorialKey);
+                        }
                       }}
                       size={"small"}
                       sx={{ p: "0px" }}
@@ -132,7 +134,8 @@ const TutorialTableOfContent = ({
                       spacing={"8px"}
                       sx={{ p: "12px 24px" }}
                     >
-                      {userTutorialState[currentTutorial.tutorialSteps.tutorialKey].currentStep >= idx + 1 ? (
+                      {currentTutorial.tutorialSteps &&
+                      userTutorialState[currentTutorial.tutorialSteps.tutorialKey].currentStep >= idx + 1 ? (
                         <CheckCircleIcon fontSize="small" color={"success"} />
                       ) : (
                         <Box sx={{ width: "20px", height: "20px" }} />
@@ -169,7 +172,7 @@ const TutorialTableOfContent = ({
         gridTemplateRows: "auto 1fr",
         background: theme => (theme.palette.mode === "dark" ? "#2f2f2f" : "#f2f4f7"),
         borderRadius: "8px",
-        width: "348px",
+        width: "350px",
         bottom: "7px",
         right: `${open ? "7px" : "-400px"}`,
         transition: "right 300ms ease-out",
