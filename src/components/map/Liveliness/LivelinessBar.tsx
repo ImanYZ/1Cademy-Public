@@ -180,11 +180,11 @@ const LivelinessBar = ({ disabled = false, ...props }: ILivelinessBarProps) => {
     <>
       <Box
         sx={{
-          top: window.innerHeight > 799 ? "180px" : "190px",
+          top: window.innerHeight > 799 ? "180px" : "165px",
           right: "0px",
           zIndex: 1199,
           position: "absolute",
-          height: `calc(100% - ${window.innerHeight > 799 ? "275px" : "345px"})`,
+          height: `calc(100% - ${window.innerHeight > 799 ? "375px" : "420px"})`,
         }}
       >
         <Box
@@ -193,7 +193,7 @@ const LivelinessBar = ({ disabled = false, ...props }: ILivelinessBarProps) => {
             opacity: disabled ? 0.8 : 1,
             width: "56px",
             background: theme =>
-              theme.palette.mode === "dark" ? (disabled ? "#383838ff" : "#1f1f1f") : disabled ? "#b9b9b9" : "#f0f0f0",
+              theme.palette.mode === "dark" ? (disabled ? "#383838ff" : "#2F2F2F") : disabled ? "#b9b9b9" : "#F2F4F7",
             borderRadius: "10px 0px 0px 10px",
             right: 0,
             top: 0,
@@ -201,10 +201,10 @@ const LivelinessBar = ({ disabled = false, ...props }: ILivelinessBarProps) => {
             height: "100%",
             transform: !open ? "translate(calc(100%), 0px)" : null,
             transition: "all 0.2s 0s ease",
-            padding: "0px 0px 0px 32px",
+            padding: "5px 0px 0px 28px",
           }}
         >
-          <Tooltip title={"24-hour Interactions Leaderboard."} placement="left">
+          <Tooltip title={"Weekly Interactions Leaderboard."} placement="left">
             <Box sx={{ width: "100%", height: "100%", position: "absolute", right: "0px" }}></Box>
           </Tooltip>
 
@@ -259,7 +259,7 @@ const LivelinessBar = ({ disabled = false, ...props }: ILivelinessBarProps) => {
                   const maxActionsLog = Math.log(maxActions);
                   const totalInteraction = usersInteractions[uname].count + Math.abs(minActions);
                   const _count = Math.log(totalInteraction > 0 ? totalInteraction : 1);
-                  const seekPosition = -1 * ((_count / maxActionsLog) * barHeight - (_count === 0 ? 0 : 32));
+                  const seekPosition = -1 * ((_count / maxActionsLog) * barHeight - (_count === 0 ? 0 : 35));
                   return (
                     <Tooltip
                       key={uname}
@@ -346,9 +346,14 @@ const LivelinessBar = ({ disabled = false, ...props }: ILivelinessBarProps) => {
                         <Box className="user-image">
                           <Image src={usersInteractions[uname].imageUrl} width={28} height={28} objectFit="cover" />
                         </Box>
-                        <Box
-                          className={onlineUsers.includes(uname) ? "UserStatusOnlineIcon" : "UserStatusOfflineIcon"}
-                        />
+                        {onlineUsers.includes(uname) && (
+                          <Box
+                            sx={{
+                              background: "#12B76A",
+                            }}
+                            className="UserStatusOnlineIcon"
+                          />
+                        )}
                       </Box>
                     </Tooltip>
                   );
@@ -357,7 +362,7 @@ const LivelinessBar = ({ disabled = false, ...props }: ILivelinessBarProps) => {
           </Box>
           <Box
             sx={{
-              background: theme => (theme.palette.mode === "dark" ? "#1f1f1f" : "#f0f0f0"),
+              background: theme => (theme.palette.mode === "dark" ? "#2F2F2F" : "#F2F4F7"),
               display: "flex",
               top: "50%",
               transform: "translate(0px, -50%)",

@@ -135,6 +135,11 @@ type NodeProps = {
   openUserInfoSidebar: (uname: string, imageUrl: string, fullName: string, chooseUname: string) => void;
   disabled?: boolean;
   enableChildElements?: string[];
+  // defaultOpenPart?: OpenPart; // this is only to configure default open part value in tutorial
+  // showProposeTutorial?: boolean; // this flag is to enable tutorial first time user click in pencil
+  // setCurrentTutorial: (newValue: TutorialType) => void;
+  ableToPropose: boolean;
+  setAbleToPropose: (newValue: boolean) => void;
 };
 
 const proposedChildTypesIcons: { [key in ProposedChildTypesIcons]: string } = {
@@ -239,6 +244,11 @@ const Node = ({
   openUserInfoSidebar,
   disabled = false,
   enableChildElements = [],
+  // defaultOpenPart: defaultOpenPartByTutorial = "LinkingWords",
+  // showProposeTutorial = false,
+  // setCurrentTutorial,
+  ableToPropose,
+  setAbleToPropose,
 }: NodeProps) => {
   const [{ user }] = useAuth();
   const [option, setOption] = useState<EditorOptions>("EDIT");
@@ -257,7 +267,7 @@ const Node = ({
   const observer = useRef<ResizeObserver | null>(null);
   const [titleCopy, setTitleCopy] = useState(title);
   const [titleUpdated, setTitleUpdated] = useState(false);
-  const [ableToPropose, setAbleToPropose] = useState(false);
+
   const [nodeTitleHasIssue, setNodeTitleHasIssue] = useState<boolean>(false);
   const [explainationDesc, setExplainationDesc] = useState<boolean>(false);
   const [openProposal, setOpenProposal] = useState<any>(false);
@@ -555,6 +565,7 @@ const Node = ({
   useEffect(() => {
     if (!editable && !activeNode) {
       setOpenPart(null);
+      setAbleToPropose(false);
     }
   }, [editable, activeNode]);
 
@@ -1362,7 +1373,8 @@ export const MemoizedNode = React.memo(Node, (prev, next) => {
     prev.acceptedProposalsSelected === next.acceptedProposalsSelected &&
     prev.commentsSelected === next.commentsSelected &&
     prev.unaccepted === next.unaccepted &&
-    prev.disableVotes === next.disableVotes;
+    prev.disableVotes === next.disableVotes &&
+    (!next.activeNode || prev.ableToPropose === next.ableToPropose);
   if (
     !basicChanges ||
     (prev.nodeUpdates.updatedAt !== next.nodeUpdates.updatedAt && prev.nodeUpdates.nodeIds.includes(prev.identifier)) ||
