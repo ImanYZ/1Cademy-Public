@@ -8,7 +8,7 @@ const PROPOSING_CODE_EDIT: TutorialStepConfig[] = [
     description: (
       <MarkdownRender
         text={
-          "Proposing an edit to the **Code Node** involves making changes to the displayed code snippet of a specified programming language. This can include modifying existing code, adding new code, or removing existing code using the appropriate programming syntax."
+          "For a **code** node you will want to add a snippet of programming language code. Make sure that it is formatted correctly and that it includes the correct language name. To make your own edits, you just need to add edits to the fields you can change and then click the green propose button at the bottom right."
         }
       />
     ),

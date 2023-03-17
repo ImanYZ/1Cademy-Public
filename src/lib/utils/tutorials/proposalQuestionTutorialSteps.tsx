@@ -8,7 +8,7 @@ const PROPOSING_QUESTION_EDIT: TutorialStepConfig[] = [
     description: (
       <MarkdownRender
         text={
-          "Proposing an edit to the **Question Node**  involves modifying the content of a multiple-choice question and its answer options. This can include changing the wording of the question, adding or removing answer options, or adjusting the feedback given to the user after answering the question."
+          "For a **question** node, you you will want to make a question to quiz someone about the information in the previous node (nodes). It should be a multiple choice question that can have more than one correct answer. To make your own edits, you just need to add edits to the fields you can change and then click the green propose button at the bottom right."
         }
       />
     ),
