@@ -8,7 +8,7 @@ const PROPOSING_REFERENCE_EDIT: TutorialStepConfig[] = [
     description: (
       <MarkdownRender
         text={
-          "Proposing an edit to the **Reference Node** involves adding, modifying, or deleting reference information, Note that purpose is to be cited in other types of nodes."
+          "For a **reference** node, you will want to add the title of the work your are citing to the title field and the APA citation to the content field. You should not add page numbers, time stamps, or URLs in a reference node. To make your own edits, you just need to add edits to the fields you can change and then click the green propose button at the bottom right."
         }
       />
     ),

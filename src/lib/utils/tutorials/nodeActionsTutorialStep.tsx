@@ -12,16 +12,24 @@ dayjs.extend(relativeTime);
 
 const PARENT_CHILDREN_STEPS: TutorialStepConfig[] = [
   {
-    title: "Parent and Children",
-    childTargetId: "button-parent-children",
+    title: "Parents",
+    childTargetId: "parents-list",
     description: (
       <MarkdownRender
         text={
-          "Here is a list of parent nodes and a list of child nodes for this node. Parent nodes are superordinate concepts that provide prerequisite information for the current node. Child nodes are subordinate nodes that provide more specific or advanced information on a topic."
+          "Here is a list of parent nodes. Parent nodes are superordinate concepts that provide prerequisite information for the current node."
         }
       />
     ),
-    isClickeable: true,
+  },
+  {
+    title: "Children",
+    childTargetId: "children-list",
+    description: (
+      <MarkdownRender
+        text={"This is the list of child nodes. It contains all the nodes that are subordinate to this node."}
+      />
+    ),
   },
 ];
 const PARENT_STEPS: TutorialStepConfig[] = [
@@ -29,9 +37,7 @@ const PARENT_STEPS: TutorialStepConfig[] = [
     title: "Parent node",
     description: (
       <MarkdownRender
-        text={
-          "This is a parent node. It is a single concept node or a relation node containing several concepts (of which the current node is included). Clicking on this item will open the node to the left side of the current node."
-        }
+        text={"This is a parent node. It is a node containing information superordinate to the previous node."}
       />
     ),
     isClickeable: true,
@@ -43,7 +49,7 @@ const CHILD_STEPS: TutorialStepConfig[] = [
     description: (
       <MarkdownRender
         text={
-          "This is a child node. It is a single concept node or a relation node containing several concepts that are subordinate to the previous node. Clicking on this item will open the node to the right side of the current node."
+          "This is a child node. It is a single node containing information that is subordinate to the previous node."
         }
       />
     ),
@@ -97,7 +103,7 @@ const UPTOVE_STEPS: TutorialStepConfig[] = [
     description: (
       <MarkdownRender
         text={
-          "This button allows you upvote a node. An upvote serves to make a node more permanent. It raises the threshold of net votes a proposal needs to change a node, and makes it so more downvotes are needed to delete the node altogether."
+          "This button allows you to upvote a node. An upvote serves to make a node more permanent. It raises the threshold of net votes a proposal needs to change a node, and makes it so more downvotes are needed to delete the node altogether."
         }
       />
     ),

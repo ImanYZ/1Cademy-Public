@@ -8,7 +8,7 @@ const PROPOSING_IDEA_EDIT: TutorialStepConfig[] = [
     description: (
       <MarkdownRender
         text={
-          "Proposing an edit to the **Idea Node** involves revising the content of the node to provide **constructive feedback** or suggest new directions for future research. Remember to be concise and clear in your feedback."
+          "For an **idea** node, you should add your own ideas that pertain to the previous node(s). This is where you can make suggestions for this area of the map or state some thoughts about how the information can be interpreted. Because these include your own ideas, you do not need to cite a reference. To make your own edits, you just need to add edits to the fields you can change and then click the green propose button at the bottom right."
         }
       />
     ),

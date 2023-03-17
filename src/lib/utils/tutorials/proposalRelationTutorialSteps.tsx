@@ -8,7 +8,7 @@ const PROPOSING_RELATION_EDIT: TutorialStepConfig[] = [
     description: (
       <MarkdownRender
         text={
-          "Proposing an edit to the **Relation Node** will affect multiple concepts identified within the node. It is important to note that the **Relation node** does not define these concepts."
+          "For a **relation** node, you will want to be sure that it includes several concepts that are not defined. To make your own edits, you just need to add edits to the fields you can change and then click the green propose button at the bottom right."
         }
       />
     ),

@@ -105,7 +105,7 @@ const PROPOSING_EDITS_STEPS: TutorialStepConfig[] = [
     description: (
       <MarkdownRender
         text={
-          "Once you have created a proposal and are satisfied with its content, you can click the propose button. This will submit the proposal you have worked on."
+          "Once you have created a proposal and are satisfied with its content, you can click on the **propose button**. This will submit the proposal you have worked on."
         }
       />
     ),
