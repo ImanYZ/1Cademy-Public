@@ -4848,7 +4848,7 @@ const Dashboard = ({}: DashboardProps) => {
       const reconcilingAcceptedProposalIsValid = (node: FullNodeData) =>
         node && node.open && isVersionApproved({ corrects: 1, wrongs: 0, nodeData: node });
 
-      const node = graph.nodes[nodeBookState.selectedNode ?? ""];
+      const node = graph.nodes[targetId];
       if (!reconcilingAcceptedProposalIsValid(node)) {
         setTutorial(null);
         setForcedTutorial(null);
@@ -4862,7 +4862,7 @@ const Dashboard = ({}: DashboardProps) => {
         !isVersionApproved({ corrects: 1, wrongs: 0, nodeData: node }) &&
         openSidebar === "PROPOSALS";
 
-      const node = graph.nodes[nodeBookState.selectedNode ?? ""];
+      const node = graph.nodes[targetId];
       if (!reconcilingNotAcceptedProposalIsValid(node)) {
         setOpenSidebar(null);
         setTutorial(null);
@@ -4915,7 +4915,7 @@ const Dashboard = ({}: DashboardProps) => {
               onNextStep={onNextStep}
               onPreviousStep={onPreviousStep}
               stepsLength={tutorial.steps.length}
-              node={graph.nodes[nodeBookState.selectedNode ?? ""]}
+              node={graph.nodes[targetId]}
             />
           )}
         </Portal>
@@ -5442,7 +5442,7 @@ const Dashboard = ({}: DashboardProps) => {
                     onNextStep={onNextStep}
                     onPreviousStep={onPreviousStep}
                     stepsLength={tutorial.steps.length}
-                    node={graph.nodes[nodeBookState.selectedNode ?? ""]}
+                    node={graph.nodes[targetId]}
                     // tutorialState={stateNodeTutorial}
                     // onChangeStep={onChangeStep}
                     // targetClientRect={targetClientRect}
