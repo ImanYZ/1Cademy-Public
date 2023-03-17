@@ -4215,7 +4215,6 @@ const Dashboard = ({}: DashboardProps) => {
       userTutorial,
     ]
   );
-  console.log({ lastOps: lastNodeOperation.current });
   useEffect(() => {
     /**
      * This useEffect with detect conditions to call a tutorial
@@ -4664,21 +4663,20 @@ const Dashboard = ({}: DashboardProps) => {
           lastNodeOperation.current.name === "ProposeProposals" &&
           lastNodeOperation.current.data === "accepted")
       ) {
-        const acceptedProposalLaunched = detectAndCallTutorial("reconcilingAcceptedProposal", node => {
-          return node && node.open;
-        });
+        const acceptedProposalLaunched = detectAndCallTutorial(
+          "reconcilingAcceptedProposal",
+          node => node && node.open && isVersionApproved({ corrects: 1, wrongs: 0, nodeData: node })
+        );
         if (acceptedProposalLaunched) return;
       }
-
-      // if (forcedTutorial === "reconcilingAcceptedProposal") {
-      //   const result = detectAndForceTutorial(
-      //     "reconcilingAcceptedProposal",
-      //     "r98BjyFDCe4YyLA3U8ZE",
-      //     node => node && node.open
-      //   );
-      //   if (result) return;
-      // }
-
+      if (forcedTutorial === "reconcilingAcceptedProposal") {
+        const result = detectAndForceTutorial(
+          "reconcilingAcceptedProposal",
+          "zYYmaXvhab7hH2uRI9Up",
+          node => node && node.open
+        );
+        if (result) return;
+      }
       // ------------------------
 
       if (
@@ -4689,10 +4687,19 @@ const Dashboard = ({}: DashboardProps) => {
       ) {
         const notAcceptedProposalLaunched = detectAndCallTutorial(
           "reconcilingNotAcceptedProposal",
-          node => node && node.open
+          node => node && node.open && !isVersionApproved({ corrects: 1, wrongs: 0, nodeData: node })
         );
         setOpenSidebar("PROPOSALS");
         if (notAcceptedProposalLaunched) return;
+      }
+
+      if (forcedTutorial === "reconcilingNotAcceptedProposal") {
+        const result = detectAndForceTutorial(
+          "reconcilingNotAcceptedProposal",
+          "r98BjyFDCe4YyLA3U8ZE",
+          node => node && node.open
+        );
+        if (result) return;
       }
     };
 
