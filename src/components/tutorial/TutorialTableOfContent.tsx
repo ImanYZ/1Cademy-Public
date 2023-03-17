@@ -164,13 +164,14 @@ const TutorialTableOfContent = ({
       id="progress-bar"
       sx={{
         position: "fixed",
-        top: "0px",
+        top: "75px",
         display: "grid",
         gridTemplateRows: "auto 1fr",
-        background: theme => (theme.palette.mode === "dark" ? "rgb(31,31,31)" : "rgb(240,240,240)"),
-        width: "300px",
-        bottom: "0px",
-        right: `${open ? "0px" : "-400px"}`,
+        background: theme => (theme.palette.mode === "dark" ? "#2f2f2f" : "#f2f4f7"),
+        borderRadius: "8px",
+        width: "348px",
+        bottom: "7px",
+        right: `${open ? "7px" : "-400px"}`,
         transition: "right 300ms ease-out",
         zIndex: 99999,
       }}
