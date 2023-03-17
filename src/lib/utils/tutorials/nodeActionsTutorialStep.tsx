@@ -95,7 +95,7 @@ const UPTOVE_STEPS: TutorialStepConfig[] = [
     description: (
       <MarkdownRender
         text={
-          "This button allows you upvote a node. An upvote serves to make a node more permanent. It raises the threshold of net votes a proposal needs to change a node, and makes it so more downvotes are needed to delete the node altogether."
+          "This button allows you to upvote a node. An upvote serves to make a node more permanent. It raises the threshold of net votes a proposal needs to change a node, and makes it so more downvotes are needed to delete the node altogether."
         }
       />
     ),
