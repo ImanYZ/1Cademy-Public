@@ -5,7 +5,13 @@ import { getBaseStepConfig } from "./tutorial.utils";
 const TMP_EDIT_NODE_CONFIG: TutorialStepConfig[] = [
   {
     title: "Propose Node - Edit Node",
-    description: <MarkdownRender text={"**Click** on pencil button to enter in Edit Node."} />,
+    description: (
+      <MarkdownRender
+        text={
+          "This button allows you to edit and evaluate this node. By **clicking** on this button you can make changes to the title, content, references, tags, note type, parents and children, and you can view proposed changes to the node on the side bar."
+        }
+      />
+    ),
     childTargetId: "node-footer-propose",
     isClickeable: true,
   },
@@ -17,7 +23,7 @@ const TMP_PROPOSE_CHILD_CONCEPT_CONFIG: TutorialStepConfig[] = [
     description: (
       <MarkdownRender
         text={
-          "To add a new **concept** node, you will propose an edit to the existing node that will serve as its parent node. It is important that you find a logical prerequisite to the node that you are adding. If there is not one, then you will need to build the necessary prerequisite node or nodes. Once you have a prerequisite, you will need to click this button. Instead of editing the node content, you will click the concept node icon on the right."
+          "Once you have a prerequisite, you will need to click this button. Instead of editing the node content, you will **click** the concept node icon on the right."
         }
       />
     ),
@@ -44,7 +50,13 @@ const TMP_PROPOSE_CHILD_RELATION_CONFIG: TutorialStepConfig[] = [
 const TMP_PROPOSE_CHILD_REFERENCE_CONFIG: TutorialStepConfig[] = [
   {
     title: "Propose Child - Reference",
-    description: <MarkdownRender text={"**Click** on reference icon button to create a new reference child."} />,
+    description: (
+      <MarkdownRender
+        text={
+          "Once you have a prerequisite, you will need to click this button. Instead of editing the node content, you will **click** the reference node icon on the right."
+        }
+      />
+    ),
     childTargetId: "propose-reference-child",
     isClickeable: true,
   },
