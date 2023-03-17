@@ -4697,7 +4697,14 @@ const Dashboard = ({}: DashboardProps) => {
         const result = detectAndCallSidebarTutorial("searcher", "SEARCHER_SIDEBAR");
         if (result) return;
       }
+      if (forcedTutorial === "tableOfContents" || openProgressBar) {
+        const shouldIgnore =
+          !forcedTutorial && (userTutorial["tableOfContents"].done || userTutorial["tableOfContents"].skipped);
+        if (shouldIgnore) return;
+        startTutorial("tableOfContents");
 
+        return;
+      }
       // --------------------------
     };
 
@@ -4712,6 +4719,7 @@ const Dashboard = ({}: DashboardProps) => {
     graph.nodes,
     nodeBookDispatch,
     openNodeHandler,
+    openProgressBar,
     openSidebar,
     setTargetId,
     startTutorial,
@@ -5352,6 +5360,7 @@ const Dashboard = ({}: DashboardProps) => {
                   }}
                 >
                   <IconButton
+                    id="toolbox-table-of-contents"
                     color="secondary"
                     onClick={() => {
                       setOpenProgressBar(true);

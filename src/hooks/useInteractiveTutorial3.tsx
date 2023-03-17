@@ -8,6 +8,7 @@ import {
   RECONCILING_NOT_ACCEPTED_PROPOSALS_STEPS_COMPLETE,
 } from "@/lib/utils/tutorials/reconcilingProposalsTutorialSteps";
 import { SEARCHER_STEPS_COMPLETE } from "@/lib/utils/tutorials/searcherTutorialSteps";
+import { TABLE_CONTENT_STEPS_COMPLETE } from "@/lib/utils/tutorials/toolbooxTutorialSteps";
 
 import { User } from "../knowledgeTypes";
 import { devLog } from "../lib/utils/develop.util";
@@ -107,6 +108,7 @@ export const useInteractiveTutorial = ({ user }: useInteractiveTutorialProps) =>
     tmpProposalQuestionChild: { currentStep: -1, done: false, skipped: false },
     tmpProposalIdeaChild: { currentStep: -1, done: false, skipped: false },
     tmpProposalCodeChild: { currentStep: -1, done: false, skipped: false },
+    tableOfContents: { currentStep: -1, done: false, skipped: false },
   });
 
   // flag for whether tutorial state was loaded
@@ -243,7 +245,9 @@ export const useInteractiveTutorial = ({ user }: useInteractiveTutorialProps) =>
       if (newTutorial === "tmpProposalCodeChild") {
         newSteps = TMP_PROPOSE_CHILD_CODE;
       }
-
+      if (newTutorial === "tableOfContents") {
+        newSteps = TABLE_CONTENT_STEPS_COMPLETE;
+      }
       setUserTutorial(prev => ({
         ...prev,
         [newTutorial]: { ...prev[newTutorial], currentStep: /*  initialStep || */ 1 },
