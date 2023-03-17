@@ -5,6 +5,7 @@ import { getBaseStepConfig } from "./tutorial.utils";
 const TABLE_CONTENT_STEPS: TutorialStepConfig[] = [
   {
     title: "Tutorial Table of Contents",
+    targetId: "node-footer-propose",
     childTargetId: "node-footer-propose",
     description: (
       <MarkdownRender
