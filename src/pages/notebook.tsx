@@ -4274,25 +4274,6 @@ const Dashboard = ({}: DashboardProps) => {
         return;
       }
 
-      // --------------------------
-      // if (userTutorial.searcher.done || userTutorial.searcher.skipped || forcedTutorial === "searcher") {
-      //   console.log("searcher tut");
-      //   if (openSidebar !== "SEARCHER_SIDEBAR") {
-      //     console.log("open");
-      //     setOpenSidebar("SEARCHER_SIDEBAR");
-      //   }
-      //   console.log("start");
-
-      //   startTutorial("searcher");
-      //   return;
-      // }
-
-      if (forcedTutorial === "searcher" || openSidebar === "SEARCHER_SIDEBAR") {
-        const result = detectAndCallSidebarTutorial("searcher", "SEARCHER_SIDEBAR");
-        if (result) return;
-      }
-      // --------------------------
-
       if (forcedTutorial === "proposal" || !forcedTutorial) {
         const result = detectAndCallTutorial(
           "proposal",
@@ -4701,6 +4682,15 @@ const Dashboard = ({}: DashboardProps) => {
         );
         if (result) return;
       }
+
+      // --------------------------
+
+      if (forcedTutorial === "searcher" || openSidebar === "SEARCHER_SIDEBAR") {
+        const result = detectAndCallSidebarTutorial("searcher", "SEARCHER_SIDEBAR");
+        if (result) return;
+      }
+
+      // --------------------------
     };
 
     detectTriggerTutorial();
