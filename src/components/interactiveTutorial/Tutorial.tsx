@@ -4,13 +4,14 @@ import React, { useMemo, useRef } from "react";
 
 import { gray50, gray200, gray700, gray800 } from "@/pages/home";
 
-import { TargetClientRect } from "../../hooks/useInteractiveTutorial";
+import { TargetClientRect, Tutorial } from "../../hooks/useInteractiveTutorial3";
 import { FullNodeData, TutorialStep } from "../../nodeBookTypes";
 
 const TOOLTIP_OFFSET = 40;
 
 type TutorialProps = {
-  tutorialState: TutorialStep | null;
+  tutorial: Tutorial;
+  tutorialStep: TutorialStep | null;
   onNextStep: () => void;
   onPreviousStep: () => void;
   targetClientRect: TargetClientRect;
@@ -21,8 +22,9 @@ type TutorialProps = {
   node: FullNodeData;
 };
 
-export const Tutorial = ({
-  tutorialState,
+export const TooltipTutorial = ({
+  // tutorial,// TODO: remove
+  tutorialStep,
   targetClientRect,
   onNextStep,
   onPreviousStep,
@@ -34,14 +36,15 @@ export const Tutorial = ({
 }: TutorialProps) => {
   const tooltipRef = useRef<HTMLDivElement | null>(null);
 
+  // console.log({ tutorialStep, tutorial });
   const tooltipClientRect = useMemo(() => {
     if (!tooltipRef.current) return { top: 0, left: 0 };
-    if (!tutorialState) return { top: 0, left: 0 };
+    if (!tutorialStep) return { top: 0, left: 0 };
 
     const { height: tooltipHeight } = tooltipRef.current.getBoundingClientRect();
     let top = 0;
     let left = 0;
-    const pos = tutorialState.tooltipPosition;
+    const pos = tutorialStep.tooltipPosition;
     if (pos === "top") {
       top = targetClientRect.top - tooltipHeight - TOOLTIP_OFFSET;
       left = targetClientRect.left + targetClientRect.width / 2 - tooltipRef.current.clientWidth / 2;
@@ -51,7 +54,7 @@ export const Tutorial = ({
       left = targetClientRect.left + targetClientRect.width / 2 - tooltipRef.current.clientWidth / 2;
     }
     if (pos === "left") {
-      top = targetClientRect.height + targetClientRect.height / 2 - tooltipRef.current.clientHeight / 2;
+      top = targetClientRect.top + targetClientRect.height / 2 - tooltipRef.current.clientHeight / 2;
       left = targetClientRect.left - tooltipRef.current.clientWidth - TOOLTIP_OFFSET;
     }
     if (pos === "right") {
@@ -60,17 +63,17 @@ export const Tutorial = ({
     }
 
     return { top, left };
-  }, [targetClientRect, tutorialState]);
+  }, [targetClientRect, tutorialStep]);
 
-  if (!tutorialState) return null;
-  if (!tutorialState.currentStepName) return null;
+  if (!tutorialStep) return null;
+  if (!tutorialStep.currentStepName) return null;
 
   let location = { top: "10px", bottom: "10px", left: "10px", right: "10px" };
 
-  if (tutorialState.tooltipPosition === "topLeft") location = { ...location, bottom: "", right: "" };
-  else if (tutorialState.tooltipPosition === "topRight") location = { ...location, bottom: "", left: "" };
-  else if (tutorialState.tooltipPosition === "bottomLeft") location = { ...location, top: "", right: "" };
-  else if (tutorialState.tooltipPosition === "bottomRight") location = { ...location, top: "", left: "" };
+  if (tutorialStep.tooltipPosition === "topLeft") location = { ...location, bottom: "", right: "" };
+  else if (tutorialStep.tooltipPosition === "topRight") location = { ...location, bottom: "", left: "" };
+  else if (tutorialStep.tooltipPosition === "bottomLeft") location = { ...location, top: "", right: "" };
+  else if (tutorialStep.tooltipPosition === "bottomRight") location = { ...location, top: "", left: "" };
 
   if (
     targetClientRect.top === 0 &&
@@ -107,25 +110,23 @@ export const Tutorial = ({
           <Stack direction={"row"} justifyContent="space-between" sx={{ mb: "12px" }}>
             <Stack direction={"row"} alignItems="center" spacing={"8px"}>
               <Typography component={"h2"} sx={{ fontSize: "18px", fontWeight: "bold", display: "inline-block" }}>
-                {tutorialState.title}
+                {tutorialStep.title}
               </Typography>
               <LiveHelpIcon />
             </Stack>
             {stepsLength <= 1 || (
               <Typography sx={{ display: "inline-block", color: "#818181" }}>
-                {tutorialState.currentStepName} / {stepsLength}
+                {tutorialStep.currentStepName} / {stepsLength}
               </Typography>
             )}
           </Stack>
 
-          {typeof tutorialState.description === "function"
-            ? tutorialState.description(node)
-            : tutorialState.description}
+          {typeof tutorialStep.description === "function" ? tutorialStep.description(node) : tutorialStep.description}
 
           {/* INFO: reversed used for showing buttons always to right no matter the number of buttons */}
           <Stack direction={"row-reverse"} justifyContent={"space-between"} alignItems={"center"} sx={{ mt: "16px" }}>
             <Box>
-              {tutorialState.currentStepName > 1 && (
+              {tutorialStep.currentStepName > 1 && (
                 <Button
                   variant="outlined"
                   onClick={onPreviousStep}
@@ -146,7 +147,7 @@ export const Tutorial = ({
                 </Button>
               )}
 
-              {tutorialState.currentStepName < stepsLength && (
+              {tutorialStep.currentStepName < stepsLength && (
                 <Button
                   variant="contained"
                   onClick={onNextStep}
@@ -160,12 +161,12 @@ export const Tutorial = ({
                       backgroundColor: theme => (theme.palette.mode === "dark" ? gray200 : gray700),
                     },
                   }}
-                  disabled={tutorialState.isClickeable}
+                  disabled={tutorialStep.isClickeable}
                 >
                   Next
                 </Button>
               )}
-              {tutorialState.currentStepName === stepsLength && (
+              {tutorialStep.currentStepName === stepsLength && (
                 <Button
                   variant="contained"
                   onClick={() => {
@@ -186,7 +187,7 @@ export const Tutorial = ({
                 </Button>
               )}
             </Box>
-            {tutorialState.currentStepName !== stepsLength && (
+            {tutorialStep.currentStepName !== stepsLength && (
               <Button
                 variant="text"
                 onClick={() => {
@@ -212,7 +213,7 @@ export const Tutorial = ({
   return (
     <Box
       ref={tooltipRef}
-      className={`tooltip tooltip-${tutorialState.tooltipPosition}`}
+      className={`tooltip tooltip-${tutorialStep.tooltipPosition}`}
       sx={{
         position: "absolute",
         top: `${tooltipClientRect.top}px`,
@@ -230,23 +231,23 @@ export const Tutorial = ({
       <Stack direction={"row"} justifyContent="space-between" sx={{ mb: "12px" }}>
         <Stack direction={"row"} alignItems="center" spacing={"8px"}>
           <Typography component={"h2"} sx={{ fontSize: "18px", fontWeight: "bold", display: "inline-block" }}>
-            {tutorialState.title}
+            {tutorialStep.title}
           </Typography>
           <LiveHelpIcon />
         </Stack>
         {stepsLength <= 1 || (
           <Typography sx={{ display: "inline-block", color: "inherit" }}>
-            {tutorialState.currentStepName} / {stepsLength}
+            {tutorialStep.currentStepName} / {stepsLength}
           </Typography>
         )}
       </Stack>
 
-      {typeof tutorialState.description === "function" ? tutorialState.description(node) : tutorialState.description}
+      {typeof tutorialStep.description === "function" ? tutorialStep.description(node) : tutorialStep.description}
 
       {/* INFO: reversed used for showing buttons always to right no matter the number of elements */}
       <Stack direction={"row-reverse"} justifyContent={"space-between"} alignItems={"center"} sx={{ mt: "16px" }}>
         <Box>
-          {tutorialState.currentStepName > 1 && (
+          {tutorialStep.currentStepName > 1 && (
             <Button
               variant="outlined"
               onClick={onPreviousStep}
@@ -267,7 +268,7 @@ export const Tutorial = ({
             </Button>
           )}
 
-          {tutorialState.currentStepName < stepsLength && (
+          {tutorialStep.currentStepName < stepsLength && (
             <Button
               variant="contained"
               onClick={onNextStep}
@@ -285,7 +286,7 @@ export const Tutorial = ({
               Next
             </Button>
           )}
-          {tutorialState.currentStepName === stepsLength && (
+          {tutorialStep.currentStepName === stepsLength && (
             <Button
               variant="contained"
               onClick={() => {
@@ -307,7 +308,7 @@ export const Tutorial = ({
             </Button>
           )}
         </Box>
-        {tutorialState.currentStepName !== stepsLength && (
+        {tutorialStep.currentStepName !== stepsLength && (
           <Button
             variant="text"
             onClick={() => {

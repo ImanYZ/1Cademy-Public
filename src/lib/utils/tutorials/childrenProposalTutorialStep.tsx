@@ -1,12 +1,16 @@
-import dayjs from "dayjs";
-import relativeTime from "dayjs/plugin/relativeTime";
-import { TutorialStepConfig } from "src/nodeBookTypes";
+import { TutorialStep, TutorialStepConfig } from "src/nodeBookTypes";
 
 import MarkdownRender from "@/components/Markdown/MarkdownRender";
 
 import { getBaseStepConfig } from "./tutorial.utils";
 
-dayjs.extend(relativeTime);
+const PROPOSE_CONCEPT_NODES_STEPS: TutorialStepConfig[] = [
+  {
+    title: "To Propose a ",
+    description: <MarkdownRender text={"To Propose a concept child node, click on concept icon button"} />,
+    isClickeable: true,
+  },
+];
 
 const CHILD_PROPOSAL_STEPS: TutorialStepConfig[] = [
   {
@@ -32,6 +36,7 @@ const CHILD_PROPOSAL_STEPS: TutorialStepConfig[] = [
     isClickeable: true,
   },
 ];
+
 const CHILD_CONCEPT_PROPOSAL_STEPS: TutorialStepConfig[] = [
   {
     title: "Proposing Child Concept Node",
@@ -42,7 +47,6 @@ const CHILD_CONCEPT_PROPOSAL_STEPS: TutorialStepConfig[] = [
         }
       />
     ),
-    isClickeable: true,
   },
   {
     title: "Proposing Child Concept Node",
@@ -51,9 +55,17 @@ const CHILD_CONCEPT_PROPOSAL_STEPS: TutorialStepConfig[] = [
         text={"Before you hit the propose button make sure that you link a reference node as a citation."}
       />
     ),
-    isClickeable: true,
+  },
+  {
+    title: "Proposing Child Concept Node",
+    description: (
+      <MarkdownRender
+        text={"Before you hit the propose button make sure that you link a reference node as a citation."}
+      />
+    ),
   },
 ];
+
 const CHILD_RELATION_PROPOSAL_STEPS: TutorialStepConfig[] = [
   {
     title: "Proposing Child Relation Node",
@@ -76,6 +88,7 @@ const CHILD_RELATION_PROPOSAL_STEPS: TutorialStepConfig[] = [
     isClickeable: true,
   },
 ];
+
 const CHILD_REFERENCE_PROPOSAL_STEPS: TutorialStepConfig[] = [
   {
     title: "Proposing Child Reference Node",
@@ -100,6 +113,7 @@ const CHILD_REFERENCE_PROPOSAL_STEPS: TutorialStepConfig[] = [
     isClickeable: true,
   },
 ];
+
 const CHILD_QUESTION_PROPOSAL_STEPS: TutorialStepConfig[] = [
   {
     title: "Proposing Child Question Node",
@@ -113,6 +127,7 @@ const CHILD_QUESTION_PROPOSAL_STEPS: TutorialStepConfig[] = [
     isClickeable: true,
   },
 ];
+
 const CHILD_IDEA_PROPOSAL_STEPS: TutorialStepConfig[] = [
   {
     title: "Proposing Child Idea Node",
@@ -133,6 +148,7 @@ const CHILD_IDEA_PROPOSAL_STEPS: TutorialStepConfig[] = [
     isClickeable: true,
   },
 ];
+
 const CHILD_CODE_PROPOSAL_STEPS: TutorialStepConfig[] = [
   {
     title: "Proposing Child Code Node",
@@ -156,33 +172,30 @@ const CHILD_CODE_PROPOSAL_STEPS: TutorialStepConfig[] = [
   },
 ];
 
-console.log({
-  CHILD_CONCEPT_PROPOSAL_STEPS,
-  CHILD_REFERENCE_PROPOSAL_STEPS,
-  CHILD_RELATION_PROPOSAL_STEPS,
-  CHILD_IDEA_PROPOSAL_STEPS,
-  CHILD_QUESTION_PROPOSAL_STEPS,
-  CHILD_CODE_PROPOSAL_STEPS,
+export const CHILD_PROPOSAL_COMPLETE: TutorialStep[] = CHILD_PROPOSAL_STEPS.map((c, i, s) => {
+  return { ...getBaseStepConfig(i + 1, s.length), ...c };
 });
 
-export const CHILD_PROPOSAL_COMPLETE: TutorialStepConfig[] = CHILD_PROPOSAL_STEPS.map((c, i, s) => {
+export const PROPOSE_CONCEPT_NODES_COMPLETE: TutorialStep[] = PROPOSE_CONCEPT_NODES_STEPS.map((c, i, s) => {
   return { ...getBaseStepConfig(i + 1, s.length), ...c };
 });
-export const CHILD_CONCEPT_PROPOSAL_COMPLETE: TutorialStepConfig[] = CHILD_CONCEPT_PROPOSAL_STEPS.map((c, i, s) => {
+
+export const CHILD_CONCEPT_PROPOSAL_COMPLETE: TutorialStep[] = CHILD_CONCEPT_PROPOSAL_STEPS.map((c, i, s) => {
   return { ...getBaseStepConfig(i + 1, s.length), ...c };
 });
-export const CHILD_RELATION_PROPOSAL_COMPLETE: TutorialStepConfig[] = CHILD_RELATION_PROPOSAL_STEPS.map((c, i, s) => {
+
+export const CHILD_RELATION_PROPOSAL_COMPLETE: TutorialStep[] = CHILD_RELATION_PROPOSAL_STEPS.map((c, i, s) => {
   return { ...getBaseStepConfig(i + 1, s.length), ...c };
 });
-export const CHILD_REFERENCE_PROPOSAL_COMPLETE: TutorialStepConfig[] = CHILD_REFERENCE_PROPOSAL_STEPS.map((c, i, s) => {
+export const CHILD_REFERENCE_PROPOSAL_COMPLETE: TutorialStep[] = CHILD_REFERENCE_PROPOSAL_STEPS.map((c, i, s) => {
   return { ...getBaseStepConfig(i + 1, s.length), ...c };
 });
-export const CHILD_IDEA_PROPOSAL_COMPLETE: TutorialStepConfig[] = CHILD_IDEA_PROPOSAL_STEPS.map((c, i, s) => {
+export const CHILD_IDEA_PROPOSAL_COMPLETE: TutorialStep[] = CHILD_IDEA_PROPOSAL_STEPS.map((c, i, s) => {
   return { ...getBaseStepConfig(i + 1, s.length), ...c };
 });
-export const CHILD_QUESTION_PROPOSAL_COMPLETE: TutorialStepConfig[] = CHILD_QUESTION_PROPOSAL_STEPS.map((c, i, s) => {
+export const CHILD_QUESTION_PROPOSAL_COMPLETE: TutorialStep[] = CHILD_QUESTION_PROPOSAL_STEPS.map((c, i, s) => {
   return { ...getBaseStepConfig(i + 1, s.length), ...c };
 });
-export const CHILD_CODE_PROPOSAL_COMPLETE: TutorialStepConfig[] = CHILD_CODE_PROPOSAL_STEPS.map((c, i, s) => {
+export const CHILD_CODE_PROPOSAL_COMPLETE: TutorialStep[] = CHILD_CODE_PROPOSAL_STEPS.map((c, i, s) => {
   return { ...getBaseStepConfig(i + 1, s.length), ...c };
 });
