@@ -54,7 +54,7 @@ export const TooltipTutorial = ({
       left = targetClientRect.left + targetClientRect.width / 2 - tooltipRef.current.clientWidth / 2;
     }
     if (pos === "left") {
-      top = targetClientRect.height + targetClientRect.height / 2 - tooltipRef.current.clientHeight / 2;
+      top = targetClientRect.top + targetClientRect.height / 2 - tooltipRef.current.clientHeight / 2;
       left = targetClientRect.left - tooltipRef.current.clientWidth - TOOLTIP_OFFSET;
     }
     if (pos === "right") {

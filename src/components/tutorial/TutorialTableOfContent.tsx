@@ -46,7 +46,7 @@ const TutorialTableOfContent = ({
   const CustomAccordion = ({ tutorials, level = 0 }: { tutorials: GroupTutorial[]; level?: number }) => {
     return (
       <>
-        {tutorials.map((currentTutorial, tutorialIdx) => {
+        {tutorials.map(currentTutorial => {
           return (
             <Accordion
               key={currentTutorial.title}
@@ -82,7 +82,7 @@ const TutorialTableOfContent = ({
                     <IconButton
                       onClick={e => {
                         e.stopPropagation();
-                        onStartTutorial(currentTutorial.tutorialSteps.tutorialKey, tutorialIdx);
+                        onStartTutorial(currentTutorial.tutorialSteps.tutorialKey);
                       }}
                       size={"small"}
                       sx={{ p: "0px" }}

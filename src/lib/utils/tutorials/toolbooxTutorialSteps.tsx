@@ -5,8 +5,8 @@ import { getBaseStepConfig } from "./tutorial.utils";
 const TABLE_CONTENT_STEPS: TutorialStepConfig[] = [
   {
     title: "Tutorial Table of Contents",
-    targetId: "node-footer-propose",
-    childTargetId: "node-footer-propose",
+    targetId: "toolbox-table-of-contents",
+    childTargetId: "toolbox-table-of-contents",
     description: (
       <MarkdownRender
         text={
@@ -16,7 +16,8 @@ const TABLE_CONTENT_STEPS: TutorialStepConfig[] = [
     ),
     anchor: "Portal",
     isClickeable: true,
-    targetDelay: 300,
+    targetDelay: 450,
+    tooltipPosition: "bottom",
   },
 ];
 

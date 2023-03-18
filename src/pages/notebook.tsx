@@ -4299,6 +4299,19 @@ const Dashboard = ({}: DashboardProps) => {
         return;
       }
 
+      // --------------------------
+
+      if (forcedTutorial === "tableOfContents" || userTutorial["nodes"].done || userTutorial["nodes"].skipped) {
+        const shouldIgnore =
+          !forcedTutorial && (userTutorial["tableOfContents"].done || userTutorial["tableOfContents"].skipped);
+        if (shouldIgnore) return;
+        startTutorial("tableOfContents");
+
+        return;
+      }
+
+      // --------------------------
+
       if (forcedTutorial === "proposal" || !forcedTutorial) {
         const result = detectAndCallTutorial(
           "proposal",
@@ -4714,14 +4727,7 @@ const Dashboard = ({}: DashboardProps) => {
         const result = detectAndCallSidebarTutorial("searcher", "SEARCHER_SIDEBAR");
         if (result) return;
       }
-      if (forcedTutorial === "tableOfContents" || openProgressBar) {
-        const shouldIgnore =
-          !forcedTutorial && (userTutorial["tableOfContents"].done || userTutorial["tableOfContents"].skipped);
-        if (shouldIgnore) return;
-        startTutorial("tableOfContents");
 
-        return;
-      }
       // --------------------------
     };
 
@@ -4979,7 +4985,7 @@ const Dashboard = ({}: DashboardProps) => {
             </Button>
           </div>
         )}
-        <Box sx={{ width: "100vw", height: "100vh" }}>
+        <Box sx={{ width: "100vw", height: "100vh", overflow: "hidden" }}>
           {
             <Drawer anchor={"right"} open={openDeveloperMenu} onClose={() => setOpenDeveloperMenu(false)}>
               {/* Data from map, don't REMOVE */}

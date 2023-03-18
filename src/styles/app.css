@@ -1,6 +1,7 @@
 body {
   background-image: none;
   background-color: #121212;
+  overflow: hidden;
 }
 body.Image {
   background-image: url(../../public/darkModeLibraryBackground.jpg);
