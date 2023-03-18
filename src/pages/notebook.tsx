@@ -4001,11 +4001,15 @@ const Dashboard = ({}: DashboardProps) => {
       currentStep: tutorial.step,
       skipped: true,
     };
+
+    if (currentStep?.childTargetId) removeStyleFromTarget(currentStep.childTargetId, targetId);
+
     const userTutorialUpdated = { ...userTutorial, [tutorial.name]: tutorialUpdated };
     const wasForcedTutorial = tutorial.name === forcedTutorial;
     setUserTutorial(userTutorialUpdated);
     setOpenSidebar(null);
     setTutorial(null);
+    setTargetId("");
 
     if (wasForcedTutorial) return setForcedTutorial(null);
 
@@ -4017,13 +4021,25 @@ const Dashboard = ({}: DashboardProps) => {
     } else {
       await setDoc(tutorialRef, userTutorialUpdated);
     }
-  }, [user, currentStep, tutorial, userTutorial, forcedTutorial, setUserTutorial, setTutorial, db]);
+  }, [
+    user,
+    currentStep,
+    tutorial,
+    userTutorial,
+    targetId,
+    forcedTutorial,
+    setUserTutorial,
+    setTutorial,
+    setTargetId,
+    db,
+  ]);
 
   const onFinalizeTutorial = useCallback(async () => {
     if (!user) return;
     if (!currentStep) return;
     if (!tutorial) return;
 
+    console.log({ childTargetId: currentStep?.childTargetId, targetId });
     if (currentStep?.childTargetId) removeStyleFromTarget(currentStep.childTargetId, targetId);
 
     if (tutorial.name === "tmpEditNode") {
@@ -4060,6 +4076,7 @@ const Dashboard = ({}: DashboardProps) => {
 
     setTutorial(null);
     setUserTutorial(userTutorialUpdated);
+    setTargetId("");
 
     if (wasForcedTutorial) return setForcedTutorial(null);
 
@@ -4077,6 +4094,7 @@ const Dashboard = ({}: DashboardProps) => {
     forcedTutorial,
     proposeNewChild,
     proposeNodeImprovement,
+    setTargetId,
     setTutorial,
     setUserTutorial,
     targetId,

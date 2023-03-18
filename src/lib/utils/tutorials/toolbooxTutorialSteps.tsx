@@ -5,7 +5,6 @@ import { getBaseStepConfig } from "./tutorial.utils";
 const TABLE_CONTENT_STEPS: TutorialStepConfig[] = [
   {
     title: "Tutorial Table of Contents",
-    targetId: "toolbox-table-of-contents",
     childTargetId: "toolbox-table-of-contents",
     description: (
       <MarkdownRender
