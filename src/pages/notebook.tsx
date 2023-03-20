@@ -61,18 +61,9 @@ import { MemoizedProposalsSidebar } from "@/components/map/Sidebar/SidebarV2/Pro
 import { MemoizedSearcherSidebar } from "@/components/map/Sidebar/SidebarV2/SearcherSidebar";
 import { MemoizedUserInfoSidebar } from "@/components/map/Sidebar/SidebarV2/UserInfoSidebar";
 import { MemoizedUserSettingsSidebar } from "@/components/map/Sidebar/SidebarV2/UserSettigsSidebar";
-// import { MemoizedProgressBar } from "@/components/tutorial/ProgressBar";
-// import { MemoizedProgressBarMenu } from "@/components/tutorial/ProgressBarMenu";
 import { useAuth } from "@/context/AuthContext";
 import { useTagsTreeView } from "@/hooks/useTagsTreeView";
-import { addSuffixToUrlGMT, capitalizeFirstLetter } from "@/lib/utils/string.utils";
-import {
-  NODE_CODE_COMPLETE,
-  NODE_IDEA_COMPLETE,
-  NODE_QUESTION_COMPLETE,
-  NODE_REFERENCE_COMPLETE,
-  NODE_RELATION_COMPLETE,
-} from "@/lib/utils/tutorials/nodetypeTutorialSteps";
+import { addSuffixToUrlGMT } from "@/lib/utils/string.utils";
 import {
   RECONCILING_ACCEPTED_PROPOSALS_STEPS_COMPLETE,
   RECONCILING_NOT_ACCEPTED_PROPOSALS_STEPS_COMPLETE,
@@ -84,18 +75,23 @@ import focusViewDarkLogo from "../../public/focus-dark.svg";
 import toolBox from "../../public/toolbox.svg";
 import toolBoxDark from "../../public/toolbox-dark.svg";
 import toolBoxOpen from "../../public/toolbox-open.svg";
+import { TooltipTutorial } from "../components/interactiveTutorial/Tutorial";
 // import nodesData from "../../testUtils/mockCollections/nodes.data";
-import { Tutorial } from "../components/interactiveTutorial/Tutorial";
+// import { Tutorial } from "../components/interactiveTutorial/Tutorial";
 import { MemoizedClustersList } from "../components/map/ClustersList";
 import { MemoizedLinksList } from "../components/map/LinksList";
 import { MemoizedNodeList } from "../components/map/NodesList";
 import { MemoizedToolbarSidebar } from "../components/map/Sidebar/SidebarV2/ToolbarSidebar";
 import { NodeItemDashboard } from "../components/NodeItemDashboard";
 import { Portal } from "../components/Portal";
-import { MemoizedTutorialTableOfContent } from "../components/tutorial/TutorialTableOfContent";
+import { GroupTutorial, MemoizedTutorialTableOfContent } from "../components/tutorial/TutorialTableOfContent";
 import { NodeBookProvider, useNodeBook } from "../context/NodeBookContext";
-// import { TargetClientRect } from "../hooks/useInteractiveTutorial2";
-import { TargetClientRect, useInteractiveTutorial } from "../hooks/useInteractiveTutorial3";
+import {
+  getTutorialStep,
+  removeStyleFromTarget,
+  TargetClientRect,
+  useInteractiveTutorial,
+} from "../hooks/useInteractiveTutorial3";
 import { useMemoizedCallback } from "../hooks/useMemoizedCallback";
 import { useWindowSize } from "../hooks/useWindowSize";
 import { useWorkerQueue } from "../hooks/useWorkerQueue";
@@ -136,17 +132,30 @@ import {
   getUserNodeChanges,
   mergeAllNodes,
 } from "../lib/utils/nodesSyncronization.utils";
-import { NAVIGATION_STEPS_COMPLETE } from "../lib/utils/tutorials/navigationTutorialSteps";
-import { NODES_STEPS_COMPLETE } from "../lib/utils/tutorials/nodeTutorialSteps";
-import { PROPOSING_CODE_EDIT_COMPLETE } from "../lib/utils/tutorials/proposalSteps";
 import {
-  PROPOSAL_STEPS_COMPLETE,
-  PROPOSING_CONCEPT_EDIT_COMPLETE,
-  PROPOSING_IDEA_EDIT_COMPLETE,
-  PROPOSING_QUESTION_EDIT_COMPLETE,
-  PROPOSING_REFERENCE_EDIT_COMPLETE,
-  PROPOSING_RELATION_EDIT_COMPLETE,
-} from "../lib/utils/tutorials/proposalTutorialSteps";
+  CHILD_CODE_PROPOSAL_COMPLETE,
+  CHILD_CONCEPT_PROPOSAL_COMPLETE,
+  CHILD_IDEA_PROPOSAL_COMPLETE,
+  CHILD_PROPOSAL_COMPLETE,
+  CHILD_QUESTION_PROPOSAL_COMPLETE,
+  CHILD_REFERENCE_PROPOSAL_COMPLETE,
+  CHILD_RELATION_PROPOSAL_COMPLETE,
+} from "../lib/utils/tutorials/childrenProposalTutorialStep";
+import { NAVIGATION_STEPS_COMPLETE } from "../lib/utils/tutorials/navigationTutorialSteps";
+import { NODE_CODE } from "../lib/utils/tutorials/nodeCodeTutorialSteps";
+import { NODE_CONCEPT } from "../lib/utils/tutorials/nodeConceptTutorialStep";
+import { NODE_IDEA } from "../lib/utils/tutorials/nodeIdeaTutorialSteps";
+import { NODE_QUESTION } from "../lib/utils/tutorials/nodeQuestionStepTutorialStep";
+import { NODE_REFERENCE } from "../lib/utils/tutorials/nodeReferenceTutorialSteps";
+import { NODE_RELATION } from "../lib/utils/tutorials/nodeRelationTutorialSteps";
+import { NODES_STEPS_COMPLETE } from "../lib/utils/tutorials/nodeTutorialSteps";
+import { PROPOSING_CODE_EDIT_COMPLETE } from "../lib/utils/tutorials/proposalCodeTutorialStep";
+import { PROPOSING_CONCEPT_EDIT_COMPLETE } from "../lib/utils/tutorials/proposalConceptTutorialStep";
+import { PROPOSING_IDEA_EDIT_COMPLETE } from "../lib/utils/tutorials/proposalIdeaTutorialSteps";
+import { PROPOSING_QUESTION_EDIT_COMPLETE } from "../lib/utils/tutorials/proposalQuestionTutorialSteps";
+import { PROPOSING_REFERENCE_EDIT_COMPLETE } from "../lib/utils/tutorials/proposalReferenceTutorialSteps";
+import { PROPOSING_RELATION_EDIT_COMPLETE } from "../lib/utils/tutorials/proposalRelationTutorialSteps";
+import { PROPOSAL_STEPS_COMPLETE } from "../lib/utils/tutorials/proposalTutorialSteps";
 import { SEARCHER_STEPS_COMPLETE } from "../lib/utils/tutorials/searcherTutorialSteps";
 import { gtmEvent, imageLoaded, isValidHttpUrl } from "../lib/utils/utils";
 import {
@@ -167,26 +176,7 @@ import {
 import { NodeType, SimpleNode2 } from "../types";
 import { doNeedToDeleteNode, getNodeTypesFromNode, isVersionApproved } from "../utils/helpers";
 
-export type TutorialType =
-  | "NODES"
-  | "SEARCHER"
-  | "PROPOSAL"
-  | "NAVIGATION"
-  | "CONCEPT"
-  | "RELATION"
-  | "REFERENCE"
-  | "IDEA"
-  | "QUESTION"
-  | "CODE"
-  | "PROPOSAL_CONCEPT"
-  | "PROPOSAL_RELATION"
-  | "PROPOSAL_REFERENCE"
-  | "PROPOSAL_IDEA"
-  | "PROPOSAL_QUESTION"
-  | "PROPOSAL_CODE"
-  | "RECONCILING_ACCEPTED_PROPOSAL"
-  | "RECONCILING_NOT_ACCEPTED_PROPOSAL"
-  | null;
+// export type TutorialKeys = TutorialTypeKeys | null;
 
 type DashboardProps = {};
 
@@ -333,6 +323,9 @@ const Dashboard = ({}: DashboardProps) => {
   // const [removedParents, setRemovedParents] = useState<string[]>([]);
   // const [removedChildren, setRemovedChildren] = useState<string[]>([]);
 
+  const tutorialStateWasSetUpRef = useRef(false);
+  // const forcedTutorial = useRef<TutorialTypeKeys | null>(null);
+  const [forcedTutorial, setForcedTutorial] = useState<TutorialTypeKeys | null>(null);
   const [firstLoading, setFirstLoading] = useState(true);
   const [pendingProposalsLoaded /* , setPendingProposalsLoaded */] = useState(true);
 
@@ -347,43 +340,11 @@ const Dashboard = ({}: DashboardProps) => {
   const [bookmarkUpdatesNum, setBookmarkUpdatesNum] = useState(0);
   const [pendingProposalsNum, setPendingProposalsNum] = useState(0);
 
-  const lastNodeOperation = useRef<string>("");
+  const lastNodeOperation = useRef<{ name: string; data: string } | null>(null);
   const proposalTimer = useRef<any>(null);
 
   const [openProgressBar, setOpenProgressBar] = useState(false);
   const [, /* openProgressBarMenu */ setOpenProgressBarMenu] = useState(false);
-
-  // const [userTutorial, setUserTutorial] = useState<UserTutorials>({
-  //   navigation: { currentStep: 1, done: false, skipped: false },
-  //   nodes: { currentStep: 1, done: false, skipped: false },
-  //   searcher: { currentStep: 1, done: false, skipped: false },
-  //   concept: { currentStep: 1, done: false, skipped: false },
-  //   relation: { currentStep: 1, done: false, skipped: false },
-  //   reference: { currentStep: 1, done: false, skipped: false },
-  //   question: { currentStep: 1, done: false, skipped: false },
-  //   idea: { currentStep: 1, done: false, skipped: false },
-  //   code: { currentStep: 1, done: false, skipped: false },
-  //   proposal: { currentStep: 1, done: false, skipped: false },
-  //   proposalConcept: { currentStep: 1, done: false, skipped: false },
-  //   proposalRelation: { currentStep: 1, done: false, skipped: false },
-  //   proposalReference: { currentStep: 1, done: false, skipped: false },
-  //   proposalIdea: { currentStep: 1, done: false, skipped: false },
-  //   proposalQuestion: { currentStep: 1, done: false, skipped: false },
-  //   proposalCode: { currentStep: 1, done: false, skipped: false },
-  //   reconcilingAcceptedProposal: { currentStep: 1, done: false, skipped: false },
-  //   reconcilingNotAcceptedProposal: { currentStep: 1, done: false, skipped: false },
-  // });
-
-  // const [currentTutorial, setCurrentTutorial] = useState<TutorialType>(null);
-
-  // const {
-  //   setTargetClientRect,
-  //   isPlayingTheTutorial,
-  //   isPlayingTheTutorialRef,
-  //   onStart,
-  //   anchorTutorial,
-  //   targetClientRect,
-  // } = useInteractiveTutorial({ steps: NOTEBOOK_STEPS });
 
   // Scroll to node configs
 
@@ -403,20 +364,20 @@ const Dashboard = ({}: DashboardProps) => {
   });
 
   const {
-    stateNodeTutorial,
+    startTutorial,
+    tutorial,
+    setTutorial,
+    currentStep,
     onNextStep,
     onPreviousStep,
     isPlayingTheTutorialRef,
-    setCurrentTutorial,
-    currentTutorial,
-    stepsLength,
     setTargetId,
     targetId,
-    userTutorial,
     userTutorialLoaded,
     setUserTutorial,
-    setInitialStep,
+    userTutorial,
   } = useInteractiveTutorial({ user });
+
   const onNodeInViewport = useCallback(
     (nodeId: string) => {
       const originalNode = document.getElementById(nodeId);
@@ -471,7 +432,6 @@ const Dashboard = ({}: DashboardProps) => {
 
   const scrollToNode = useCallback(
     (nodeId: string, tries = 0) => {
-      devLog("scroll To Node", { nodeId, tries });
       if (tries === 10) return;
 
       if (!scrollToNodeInitialized.current) {
@@ -480,12 +440,13 @@ const Dashboard = ({}: DashboardProps) => {
           if (!originalNode) {
             return;
           }
-          const isSearcher = ["Searcher"].includes(lastNodeOperation.current);
+          const isSearcher = lastNodeOperation.current ? ["Searcher"].includes(lastNodeOperation.current.name) : false;
           if (isSearcher) {
-            lastNodeOperation.current = "";
+            lastNodeOperation.current = null;
           }
 
-          if (!isPlayingTheTutorialRef.current && onNodeInViewport(nodeId) && !isSearcher) return;
+          if (onNodeInViewport(nodeId) && !isSearcher && !forcedTutorial) return;
+          devLog("scroll To Node", { nodeId, tries });
 
           if (
             originalNode &&
@@ -526,64 +487,72 @@ const Dashboard = ({}: DashboardProps) => {
         }, 400);
       }
     },
-    [isPlayingTheTutorialRef, onNodeInViewport]
+    [forcedTutorial, onNodeInViewport]
   );
 
   useEffect(() => {
-    let timeoutId: any;
-    const onGetClientRect = () => {
-      if (!nodeBookState.selectedNode) return;
-      if (!stateNodeTutorial) return setTargetClientRect({ width: 0, height: 0, top: 0, left: 0 });
-      if (stateNodeTutorial.anchor) {
-        timeoutId = setTimeout(() => {
-          if (!stateNodeTutorial.childTargetId) return;
+    const getTooltipClientRect = () => {
+      if (!currentStep) return setTargetClientRect({ width: 0, height: 0, top: 0, left: 0 });
 
-          const targetElement = document.getElementById(stateNodeTutorial.childTargetId);
-          if (!targetElement) return;
+      devLog("GET_TOOLTIP_CLIENT_RECT", { currentStep, targetId });
 
-          targetElement.classList.add(stateNodeTutorial.largeTarget ? "tutorial-target-large" : "tutorial-target");
-          const { width, height, top, left } = targetElement.getBoundingClientRect();
+      if (currentStep.anchor) {
+        if (!currentStep.childTargetId) return;
 
-          setTargetClientRect({ width, height, top, left });
-        }, stateNodeTutorial.targetDelay);
-      } else {
-        if (!targetId) return;
+        const targetElement = document.getElementById(currentStep.childTargetId);
+        if (!targetElement) return;
 
-        const thisNode = graph.nodes[targetId];
-        if (!thisNode) return;
+        targetElement.classList.add(`tutorial-target-${currentStep.outline}`);
+        const { width, height, top, left } = targetElement.getBoundingClientRect();
 
-        let { top, left, width = NODE_WIDTH, height = 0 } = thisNode;
-        let offsetChildTop = 0;
-        let offsetChildLeft = 0;
-
-        if (stateNodeTutorial.childTargetId) {
-          const targetElement = document.getElementById(`${targetId}-${stateNodeTutorial.childTargetId}`);
-          if (!targetElement) return;
-
-          targetElement.classList.add(stateNodeTutorial.largeTarget ? "tutorial-target-large" : "tutorial-target");
-
-          const { offsetTop, offsetLeft } = targetElement;
-          const { height: childrenHeight, width: childrenWidth } = targetElement.getBoundingClientRect();
-
-          offsetChildTop = offsetTop;
-          offsetChildLeft = offsetLeft;
-          height = childrenHeight;
-          width = childrenWidth;
-        }
-
-        setTargetClientRect({
-          top: top + offsetChildTop,
-          left: left + offsetChildLeft,
-          width,
-          height,
-        });
+        setTargetClientRect({ width, height, top, left });
+        return;
       }
+
+      // console.log(22);
+      if (!targetId) return;
+
+      // console.log(23);
+      const thisNode = graph.nodes[targetId];
+      if (!thisNode) return;
+
+      // console.log(24);
+      let { top, left, width = NODE_WIDTH, height = 0 } = thisNode;
+      let offsetChildTop = 0;
+      let offsetChildLeft = 0;
+
+      if (currentStep.childTargetId) {
+        const targetElement = document.getElementById(`${targetId}-${currentStep.childTargetId}`);
+        if (!targetElement) return;
+
+        targetElement.classList.add(`tutorial-target-${currentStep.outline}`);
+
+        const { offsetTop, offsetLeft } = targetElement;
+        const { height: childrenHeight, width: childrenWidth } = targetElement.getBoundingClientRect();
+
+        offsetChildTop = offsetTop;
+        offsetChildLeft = offsetLeft;
+        height = childrenHeight;
+        width = childrenWidth;
+      }
+
+      setTargetClientRect({
+        top: top + offsetChildTop,
+        left: left + offsetChildLeft,
+        width,
+        height,
+      });
     };
-    onGetClientRect();
+
+    let timeoutId: any;
+    timeoutId = setTimeout(() => {
+      getTooltipClientRect();
+    }, currentStep?.targetDelay || 200);
+
     return () => {
       if (timeoutId) clearTimeout(timeoutId);
     };
-  }, [stateNodeTutorial, graph.nodes, setTargetClientRect, nodeBookState.selectedNode, targetId]);
+  }, [currentStep, graph.nodes, setTargetClientRect, nodeBookState.selectedNode, targetId]);
 
   const onCompleteWorker = useCallback(() => {
     if (!nodeBookState.selectedNode) return;
@@ -592,7 +561,7 @@ const Dashboard = ({}: DashboardProps) => {
   }, [nodeBookState.selectedNode, scrollToNode]);
 
   const setOperation = useCallback((operation: string) => {
-    lastNodeOperation.current = operation;
+    lastNodeOperation.current = { name: operation, data: "" };
   }, []);
 
   const { addTask, isQueueWorking, queueFinished } = useWorkerQueue({
@@ -789,7 +758,7 @@ const Dashboard = ({}: DashboardProps) => {
         }
       }
     },
-    [user, allTags, currentTutorial]
+    [user, allTags]
   );
 
   const setNodeParts = useCallback((nodeId: string, innerFunc: (thisNode: FullNodeData) => FullNodeData) => {
@@ -1101,21 +1070,11 @@ const Dashboard = ({}: DashboardProps) => {
   }, [allTagsLoaded, db, snapshot, user, userTutorialLoaded, notebookChanged]);
 
   useEffect(() => {
-    // here we force scrollToNode in required steps from TUTORIAL
-    // this is only set up when worker doesn't make any change when a step change
-    if (!stateNodeTutorial) return;
-    if (currentTutorial !== "NODES") return;
-
-    // if (!stateNodeTutorial.forceScrollToNode) return;
-
-    scrollToNode(stateNodeTutorial.targetId);
-  }, [currentTutorial, scrollToNode, stateNodeTutorial]);
-
-  useEffect(() => {
     if (!db) return;
     if (!user?.uname) return;
     if (!allTagsLoaded) return;
-    if (stateNodeTutorial) return;
+    if (tutorial) return;
+    if (currentStep) return;
 
     const userNodesRef = collection(db, "userNodes");
     const q = query(
@@ -1143,14 +1102,14 @@ const Dashboard = ({}: DashboardProps) => {
     return () => {
       bookmarkSnapshot();
     };
-  }, [allTagsLoaded, db, user?.uname, stateNodeTutorial]);
+  }, [allTagsLoaded, db, user?.uname, currentStep, tutorial]);
 
   useEffect(() => {
     if (!db) return;
     if (!user?.uname) return;
     if (!user?.tagId) return;
     if (!allTagsLoaded) return;
-    if (stateNodeTutorial) return;
+    if (currentStep) return;
 
     const versionsSnapshots: any[] = [];
     const versions: { [key: string]: any } = {};
@@ -1223,13 +1182,13 @@ const Dashboard = ({}: DashboardProps) => {
         vSnapshot();
       }
     };
-  }, [allTagsLoaded, db, user?.tagId, user?.uname, stateNodeTutorial]);
+  }, [allTagsLoaded, db, user?.tagId, user?.uname, currentStep]);
 
   useEffect(() => {
     if (!db) return;
     if (!user?.uname) return;
     if (!allTagsLoaded) return;
-    if (stateNodeTutorial) return;
+    if (currentStep) return;
 
     const notificationNumsCol = collection(db, "notificationNums");
     const q = query(notificationNumsCol, where("uname", "==", user.uname));
@@ -1249,7 +1208,7 @@ const Dashboard = ({}: DashboardProps) => {
     return () => {
       notificationsSnapshot();
     };
-  }, [db, user?.uname, allTagsLoaded, stateNodeTutorial]);
+  }, [db, user?.uname, allTagsLoaded, currentStep]);
 
   useEffect(() => {
     const currentLengthNodes = Object.keys(graph.nodes).length;
@@ -1845,38 +1804,6 @@ const Dashboard = ({}: DashboardProps) => {
     [recursiveOffsprings, isPlayingTheTutorialRef]
   );
 
-  const onFinalizeTutorial = useCallback(async () => {
-    if (!user) return;
-    if (!stateNodeTutorial) return;
-    if (!currentTutorial) return;
-
-    const keyTutorial: TutorialTypeKeys = currentTutorial
-      .split("_")
-      .map((el, idx) => (idx > 0 ? capitalizeFirstLetter(el.toLocaleLowerCase()) : el.toLowerCase()))
-      .join("") as TutorialTypeKeys;
-
-    const tutorialUpdated: UserTutorial = {
-      ...userTutorial[keyTutorial],
-      currentStep: stateNodeTutorial.currentStepName,
-      done: true,
-      forceTutorial: false,
-    };
-
-    const userTutorialUpdated: UserTutorials = { ...userTutorial, [keyTutorial]: tutorialUpdated };
-    setCurrentTutorial(null);
-    setInitialStep(0);
-    setUserTutorial(userTutorialUpdated);
-
-    const tutorialRef = doc(db, "userTutorial", user.uname);
-    const tutorialDoc = await getDoc(tutorialRef);
-
-    if (tutorialDoc.exists()) {
-      await updateDoc(tutorialRef, userTutorialUpdated);
-    } else {
-      await setDoc(tutorialRef, userTutorialUpdated);
-    }
-  }, [currentTutorial, db, setCurrentTutorial, setInitialStep, setUserTutorial, stateNodeTutorial, user, userTutorial]);
-
   const openLinkedNode = useCallback(
     (linkedNodeID: string, typeOperation?: string) => {
       devLog("open Linked Node", {
@@ -1907,7 +1834,7 @@ const Dashboard = ({}: DashboardProps) => {
 
       let linkedNode = document.getElementById(linkedNodeID);
       if (typeOperation) {
-        lastNodeOperation.current = "Searcher";
+        lastNodeOperation.current = { name: "Searcher", data: "" };
       }
       const isInitialProposal = String(typeOperation).startsWith("initialProposal-");
       if (isInitialProposal) {
@@ -2171,7 +2098,7 @@ const Dashboard = ({}: DashboardProps) => {
 
       return graph;
     });
-    lastNodeOperation.current = "OpenAllChildren";
+    lastNodeOperation.current = { name: "OpenAllChildren", data: "" };
   }, []);
 
   const openAllParent = useCallback((nodeId: string) => {
@@ -2266,7 +2193,7 @@ const Dashboard = ({}: DashboardProps) => {
 
       return graph;
     });
-    lastNodeOperation.current = "OpenAllParent";
+    lastNodeOperation.current = { name: "OpenAllParent", data: "" };
   }, []);
 
   const toggleNode = useCallback(
@@ -2275,7 +2202,7 @@ const Dashboard = ({}: DashboardProps) => {
 
       notebookRef.current.selectedNode = nodeId;
 
-      lastNodeOperation.current = "ToggleNode";
+      lastNodeOperation.current = { name: "ToggleNode", data: "" };
       setGraph(({ nodes: oldNodes, edges }) => {
         const thisNode = oldNodes[nodeId];
 
@@ -2351,7 +2278,7 @@ const Dashboard = ({}: DashboardProps) => {
 
   const openNodePart = useCallback(
     (event: any, nodeId: string, partType: any, openPart: any, setOpenPart: any) => {
-      lastNodeOperation.current = partType;
+      lastNodeOperation.current = { name: partType, data: "" };
       if (notebookRef.current.choosingNode) return;
 
       if (partType === "PendingProposals") {
@@ -3121,6 +3048,9 @@ const Dashboard = ({}: DashboardProps) => {
 
           const willBeApproved = isVersionApproved({ corrects: 1, wrongs: 0, nodeData: newNode });
 
+          lastNodeOperation.current = { name: "ProposeProposals", data: willBeApproved ? "accepted" : "notAccepted" };
+          console.log({ willBeApproved, lastOps: lastNodeOperation.current });
+
           if (willBeApproved) {
             const newParentIds: string[] = newNode.parents.map(parent => parent.node);
             const newChildIds: string[] = newNode.children.map(child => child.node);
@@ -3175,10 +3105,11 @@ const Dashboard = ({}: DashboardProps) => {
 
   const proposeNewChild = useCallback(
     (event: any, childNodeType: string) => {
+      // TODO: add types ChildNodeType
       if (!user) return;
 
       devLog("PROPOSE_NEW_CHILD", { childNodeType });
-      event.preventDefault();
+      event && event.preventDefault();
       setOpenProposal("ProposeNew" + childNodeType + "ChildNode");
       reloadPermanentGraph();
       const newNodeId = newId(db);
@@ -3261,6 +3192,7 @@ const Dashboard = ({}: DashboardProps) => {
         const newEdges = setDagEdge(g.current, selectedNodeId, newNodeId, { label: "" }, { ...edges });
         updatedNodeIds.push(selectedNodeId, newNodeId);
 
+        console.log("willupdateselectedNode");
         notebookRef.current.selectedNode = newNodeId;
         nodeBookDispatch({ type: "setSelectedNode", payload: newNodeId });
         setTimeout(() => {
@@ -3274,7 +3206,7 @@ const Dashboard = ({}: DashboardProps) => {
         return { nodes: newNodes, edges: newEdges };
       });
     },
-    [user, allTags, reloadPermanentGraph, settings.showClusterOptions]
+    [user, reloadPermanentGraph, db, allTags, settings.showClusterOptions, nodeBookDispatch, scrollToNode]
   );
 
   const onNodeTitleBlur = useCallback(async (newTitle: string) => {
@@ -4043,29 +3975,43 @@ const Dashboard = ({}: DashboardProps) => {
     setOpenProgressBarMenu(false);
   }, []);
 
+  const onCancelTutorial = useCallback(
+    () =>
+      setTutorial(p => {
+        const previousStep = getTutorialStep(p);
+        console.log({ previousStep });
+        if (previousStep?.childTargetId) removeStyleFromTarget(previousStep.childTargetId, targetId); // TODO: check this
+
+        return null;
+      }),
+    [setTutorial, targetId]
+  );
+
+  const onCloseTableOfContent = useCallback(() => {
+    setOpenProgressBar(false);
+  }, []);
+
   const onSkipTutorial = useCallback(async () => {
     if (!user) return;
-    if (!stateNodeTutorial) return;
-    if (!currentTutorial) return;
-
-    const keyTutorial: TutorialTypeKeys = currentTutorial
-      .split("_")
-      .map((el, idx) => (idx > 0 ? capitalizeFirstLetter(el.toLocaleLowerCase()) : el.toLowerCase()))
-      .join("") as TutorialTypeKeys;
+    if (!currentStep) return;
+    if (!tutorial) return;
 
     const tutorialUpdated: UserTutorial = {
-      ...userTutorial[keyTutorial],
-      currentStep: stateNodeTutorial.currentStepName,
+      ...userTutorial[tutorial.name],
+      currentStep: tutorial.step,
       skipped: true,
-      forceTutorial: false,
     };
-    const userTutorialUpdated = { ...userTutorial, [keyTutorial]: tutorialUpdated };
-    setCurrentTutorial(null);
-    setOpenSidebar(null);
-    setInitialStep(0);
-    setUserTutorial(userTutorialUpdated);
 
-    if (userTutorial[keyTutorial].forceTutorial) return;
+    if (currentStep?.childTargetId) removeStyleFromTarget(currentStep.childTargetId, targetId);
+
+    const userTutorialUpdated = { ...userTutorial, [tutorial.name]: tutorialUpdated };
+    const wasForcedTutorial = tutorial.name === forcedTutorial;
+    setUserTutorial(userTutorialUpdated);
+    setOpenSidebar(null);
+    setTutorial(null);
+    setTargetId("");
+
+    if (wasForcedTutorial) return setForcedTutorial(null);
 
     const tutorialRef = doc(db, "userTutorial", user.uname);
     const tutorialDoc = await getDoc(tutorialRef);
@@ -4075,28 +4021,243 @@ const Dashboard = ({}: DashboardProps) => {
     } else {
       await setDoc(tutorialRef, userTutorialUpdated);
     }
-  }, [currentTutorial, db, setCurrentTutorial, setInitialStep, setUserTutorial, stateNodeTutorial, user, userTutorial]);
+  }, [
+    user,
+    currentStep,
+    tutorial,
+    userTutorial,
+    targetId,
+    forcedTutorial,
+    setUserTutorial,
+    setTutorial,
+    setTargetId,
+    db,
+  ]);
 
-  const forceTutorial = useCallback(
-    (idTarget: string, tutorial: TutorialType, isEditable = false) => {
-      devLog("FORCE_TUTORIAL", { idTarget, tutorial });
-      const targetElement = document.getElementById(idTarget);
-      if (!targetElement) {
-        return isEditable
-          ? openNodeHandler(idTarget, { open: true, editable: true })
-          : openNodeHandler(idTarget, { open: true });
+  const onFinalizeTutorial = useCallback(async () => {
+    if (!user) return;
+    if (!currentStep) return;
+    if (!tutorial) return;
+
+    console.log({ childTargetId: currentStep?.childTargetId, targetId });
+    if (currentStep?.childTargetId) removeStyleFromTarget(currentStep.childTargetId, targetId);
+
+    if (tutorial.name === "tmpEditNode") {
+      if (currentStep.isClickeable) {
+        proposeNodeImprovement(null, targetId);
       }
+      setTutorial(null);
+      return;
+    }
 
-      setNodeParts(idTarget, node => ({ ...node, open: true }));
-      if (isEditable) proposeNodeImprovement(null, idTarget);
-      nodeBookDispatch({ type: "setSelectedNode", payload: idTarget });
-      notebookRef.current.selectedNode = idTarget;
-      setCurrentTutorial(tutorial);
-      setTargetId(idTarget);
+    const tmpChildrenMap = new Map<TutorialTypeKeys, NodeType>();
+    tmpChildrenMap.set("tmpProposalConceptChild", "Concept");
+    tmpChildrenMap.set("tmpProposalRelationChild", "Relation");
+    tmpChildrenMap.set("tmpProposalReferenceChild", "Reference");
+    tmpChildrenMap.set("tmpProposalQuestionChild", "Question");
+    tmpChildrenMap.set("tmpProposalIdeaChild", "Idea");
+    tmpChildrenMap.set("tmpProposalCodeChild", "Code");
+
+    if (tmpChildrenMap.has(tutorial.name)) {
+      if (currentStep.isClickeable) {
+        proposeNewChild(null, tmpChildrenMap.get(tutorial.name) as string);
+      }
+      return;
+    }
+
+    const tutorialUpdated: UserTutorial = {
+      ...userTutorial[tutorial.name],
+      currentStep: currentStep.currentStepName,
+      done: true,
+    };
+
+    const userTutorialUpdated: UserTutorials = { ...userTutorial, [tutorial.name]: tutorialUpdated };
+    const wasForcedTutorial = tutorial.name === forcedTutorial;
+
+    setTutorial(null);
+    setUserTutorial(userTutorialUpdated);
+    setTargetId("");
+
+    if (wasForcedTutorial) return setForcedTutorial(null);
+
+    const tutorialRef = doc(db, "userTutorial", user.uname);
+    const tutorialDoc = await getDoc(tutorialRef);
+
+    if (tutorialDoc.exists()) {
+      await updateDoc(tutorialRef, userTutorialUpdated);
+    } else {
+      await setDoc(tutorialRef, userTutorialUpdated);
+    }
+  }, [
+    currentStep,
+    db,
+    forcedTutorial,
+    proposeNewChild,
+    proposeNodeImprovement,
+    setTargetId,
+    setTutorial,
+    setUserTutorial,
+    targetId,
+    tutorial,
+    user,
+    userTutorial,
+  ]);
+
+  /**
+   * Detect the trigger to call a tutorial
+   * if graph is invalid, DB is modified with correct state
+   * then we wait until graph has correct state to call tutorial
+   */
+  const detectAndForceTutorial = useCallback(
+    (
+      tutorialName: TutorialTypeKeys,
+      targetId: string,
+      targetIsValid: (node: FullNodeData) => boolean,
+      defaultStates: Partial<FullNodeData> = { open: true }
+    ) => {
+      devLog("DETECT_AND_CALL_TUTORIAL", { tutorialName, targetId });
+
+      const thisNode = graph.nodes[targetId];
+      if (!targetIsValid(thisNode)) {
+        if (!tutorialStateWasSetUpRef.current) {
+          openNodeHandler(targetId, defaultStates);
+          tutorialStateWasSetUpRef.current = true;
+        }
+        return true;
+      }
+      tutorialStateWasSetUpRef.current = false;
+
+      startTutorial(tutorialName);
+      setTargetId(targetId);
+
+      nodeBookDispatch({ type: "setSelectedNode", payload: targetId });
+      notebookRef.current.selectedNode = targetId;
+      scrollToNode(targetId);
+
+      setNodeUpdates({
+        nodeIds: [targetId],
+        updatedAt: new Date(),
+      });
+
+      return true;
     },
-    [nodeBookDispatch, openNodeHandler, proposeNodeImprovement, setCurrentTutorial, setNodeParts, setTargetId]
+    [graph.nodes, nodeBookDispatch, openNodeHandler, scrollToNode, setTargetId, startTutorial]
   );
 
+  const detectAndRemoveTutorial = useCallback(
+    (tutorialName: TutorialTypeKeys, targetIsValid: (node: FullNodeData) => boolean) => {
+      if (!tutorial) return;
+      if (tutorial.name !== tutorialName) return;
+
+      const node = graph.nodes[targetId];
+      if (!targetIsValid(node)) {
+        setTutorial(null);
+        setForcedTutorial(null);
+      }
+    },
+    [graph.nodes, setTutorial, targetId, tutorial]
+  );
+
+  const detectAndCallSidebarTutorial = useCallback(
+    (tutorialName: TutorialTypeKeys, sidebar: OpenSidebar) => {
+      const shouldIgnore = !forcedTutorial && (userTutorial[tutorialName].done || userTutorial[tutorialName].skipped);
+      if (shouldIgnore) return false;
+
+      devLog("DETECT_AND_CALL_SIDEBAR_TUTORIAL", { tutorialName, node: nodeBookState.selectedNode });
+      if (openSidebar !== sidebar) {
+        setOpenSidebar(sidebar);
+      }
+      startTutorial(tutorialName);
+      return true;
+    },
+    [forcedTutorial, nodeBookState.selectedNode, openSidebar, startTutorial, userTutorial]
+  );
+
+  const detectAndCallTutorial = useCallback(
+    (tutorialName: TutorialTypeKeys, targetIsValid: (node: FullNodeData) => boolean) => {
+      const shouldIgnore = !forcedTutorial && (userTutorial[tutorialName].done || userTutorial[tutorialName].skipped);
+      if (shouldIgnore) return false;
+
+      devLog("DETECT_AND_CALL_TUTORIAL", { tutorialName, node: nodeBookState.selectedNode });
+
+      const newTargetId = nodeBookState.selectedNode ?? "";
+      if (!newTargetId) return false;
+
+      const thisNode = graph.nodes[newTargetId];
+
+      if (!thisNode) return false;
+      if (!targetIsValid(thisNode)) return false;
+
+      startTutorial(tutorialName);
+      setTargetId(newTargetId);
+      if (forcedTutorial) {
+        nodeBookDispatch({ type: "setSelectedNode", payload: newTargetId });
+        notebookRef.current.selectedNode = newTargetId;
+        scrollToNode(newTargetId);
+      }
+      return true;
+    },
+    [
+      forcedTutorial,
+      graph.nodes,
+      nodeBookDispatch,
+      nodeBookState.selectedNode,
+      scrollToNode,
+      setTargetId,
+      startTutorial,
+      userTutorial,
+    ]
+  );
+
+  const detectAndCallChildTutorial = useCallback(
+    (tutorialName: TutorialTypeKeys, targetIsValid: (node: FullNodeData) => boolean) => {
+      const tutorialsIsForced = forcedTutorial === tutorialName;
+      const canDetect = tutorialsIsForced || (!userTutorial[tutorialName].done && !userTutorial[tutorialName].skipped);
+      const isValidForcedTutorialChild = forcedTutorial
+        ? forcedTutorial === tutorialName // CHECK: this probably is unrequired
+        : ![
+            "tmpEditNode",
+            "tmpProposalConceptChild",
+            "tmpProposalConceptChild",
+            "tmpProposalRelationChild",
+            "tmpProposalReferenceChild",
+            "tmpProposalQuestionChild",
+            "tmpProposalIdeaChild",
+            "tmpProposalCodeChild",
+          ].includes(tutorialName);
+
+      if (!isValidForcedTutorialChild) return false;
+      if (!canDetect) return false;
+
+      devLog("DETECT_AND_CALL_CHILD_TUTORIAL", { tutorialName });
+
+      const newTargetId = nodeBookState.selectedNode ?? "";
+      if (!newTargetId) return false;
+
+      const thisNode = graph.nodes[newTargetId]; // this is the child node
+      if (!thisNode) return false;
+      if (!targetIsValid(thisNode)) return false;
+
+      startTutorial(tutorialName);
+      setTargetId(newTargetId);
+      if (forcedTutorial) {
+        nodeBookDispatch({ type: "setSelectedNode", payload: newTargetId });
+        notebookRef.current.selectedNode = newTargetId;
+        scrollToNode(newTargetId);
+      }
+      return true;
+    },
+    [
+      forcedTutorial,
+      graph.nodes,
+      nodeBookDispatch,
+      nodeBookState.selectedNode,
+      scrollToNode,
+      setTargetId,
+      startTutorial,
+      userTutorial,
+    ]
+  );
   useEffect(() => {
     /**
      * This useEffect with detect conditions to call a tutorial
@@ -4106,376 +4267,704 @@ const Dashboard = ({}: DashboardProps) => {
      * 2. second time will run tutorial
      */
     const detectTriggerTutorial = () => {
-      if (currentTutorial) return;
+      console.log({ userTutorialLoaded, firstLoading, tutorial });
       if (!userTutorialLoaded) return;
       if (firstLoading) return;
+      if (tutorial) return;
 
       devLog("USE_EFFECT: DETECT_TRIGGER_TUTORIAL", { userTutorial });
 
       // --------------------------
 
-      if (
-        (!userTutorial.navigation.done && !userTutorial.navigation.skipped) ||
-        userTutorial.navigation.forceTutorial
-      ) {
-        setCurrentTutorial("NAVIGATION");
+      if ((!userTutorial.navigation.done && !userTutorial.navigation.skipped) || forcedTutorial === "navigation") {
+        startTutorial("navigation");
+        // TODO: force 1cademy node  if there isn't nodes
         return;
       }
 
       // --------------------------
 
-      if ((!userTutorial.nodes.done && !userTutorial.nodes.skipped) || userTutorial.nodes.forceTutorial) {
-        const nodeTargetId =
-          (nodeBookState.selectedNode && graph.nodes[nodeBookState.selectedNode]?.open && nodeBookState.selectedNode) ||
-          "";
+      const nodesTutorialIsValid = (node: FullNodeData) => node && node.open && !node.editable && !node.isNew;
 
-        if (!nodeTargetId) {
-          if (!userTutorial.nodes.forceTutorial) return;
+      if (forcedTutorial === "nodes" || !forcedTutorial) {
+        const result = detectAndCallTutorial("nodes", nodesTutorialIsValid);
+        if (result) return;
+      }
 
-          const idTarget = "r98BjyFDCe4YyLA3U8ZE";
-          const targetElement = document.getElementById(idTarget);
-          if (!targetElement) return openNodeHandler(idTarget, { open: true });
-
-          notebookRef.current.selectedNode = idTarget;
-          nodeBookDispatch({ type: "setSelectedNode", payload: idTarget });
-          setNodeParts(idTarget, node => ({ ...node, open: true }));
-          scrollToNode(idTarget);
+      if (forcedTutorial === "nodes") {
+        const defaultStates = { open: true };
+        const newTargetId = "r98BjyFDCe4YyLA3U8ZE";
+        const thisNode = graph.nodes[newTargetId];
+        if (!nodesTutorialIsValid(thisNode)) {
+          if (!tutorialStateWasSetUpRef.current) {
+            openNodeHandler(newTargetId, defaultStates);
+            tutorialStateWasSetUpRef.current = true;
+          }
           return;
         }
 
-        setTargetId(nodeTargetId);
-        setCurrentTutorial("NODES");
-        return;
-      }
+        tutorialStateWasSetUpRef.current = false;
+        nodeBookDispatch({ type: "setSelectedNode", payload: newTargetId });
+        notebookRef.current.selectedNode = newTargetId;
+        startTutorial("nodes");
+        setTargetId(newTargetId);
 
-      // --------------------------
-      if (
-        (!userTutorial.searcher.done && !userTutorial.searcher.skipped && openSidebar === "SEARCHER_SIDEBAR") ||
-        userTutorial.searcher.forceTutorial
-      ) {
-        if (openSidebar !== "SEARCHER_SIDEBAR") {
-          if (!userTutorial.searcher.forceTutorial) return;
-
-          setOpenSidebar("SEARCHER_SIDEBAR");
-          return;
-        }
-        setCurrentTutorial("SEARCHER");
-        return;
-      }
-
-      // --------------------------
-
-      const selectedNodeFromChangedNodes: FullNodeData = nodeBookState.selectedNode
-        ? changedNodes[nodeBookState.selectedNode]
-        : null;
-
-      // --------------------------
-
-      if (userTutorial.proposal.forceTutorial) {
-        return forceTutorial("r98BjyFDCe4YyLA3U8ZE", "PROPOSAL", true);
-      }
-
-      if (selectedNodeFromChangedNodes && !userTutorial.proposal.done && !userTutorial.proposal.skipped) {
-        setCurrentTutorial(`PROPOSAL`);
-        setTargetId(selectedNodeFromChangedNodes.node);
-        return;
-      }
-
-      // --------------------------
-
-      if (userTutorial.proposalConcept.forceTutorial) {
-        return forceTutorial("r98BjyFDCe4YyLA3U8ZE", "PROPOSAL_CONCEPT", true);
-      }
-
-      if (
-        selectedNodeFromChangedNodes &&
-        !userTutorial.proposalConcept.done &&
-        !userTutorial.proposalConcept.skipped &&
-        selectedNodeFromChangedNodes.nodeType === "Concept"
-      ) {
-        setCurrentTutorial(`PROPOSAL_CONCEPT`);
-        setTargetId(selectedNodeFromChangedNodes.node);
-        return;
-      }
-
-      // --------------------------
-
-      if (userTutorial.proposalRelation.forceTutorial) {
-        return forceTutorial("zYYmaXvhab7hH2uRI9Up", "PROPOSAL_RELATION", true);
-      }
-
-      if (
-        selectedNodeFromChangedNodes &&
-        !userTutorial.proposalRelation.done &&
-        !userTutorial.proposalRelation.skipped &&
-        selectedNodeFromChangedNodes.nodeType === "Relation"
-      ) {
-        setCurrentTutorial(`PROPOSAL_RELATION`);
-        setTargetId(selectedNodeFromChangedNodes.node);
-        return;
-      }
-
-      // --------------------------
-
-      if (userTutorial.proposalReference.forceTutorial) {
-        return forceTutorial("P631lWeKsBtszZRDlmsM", "PROPOSAL_REFERENCE", true);
-      }
-
-      if (
-        selectedNodeFromChangedNodes &&
-        !userTutorial.proposalReference.done &&
-        !userTutorial.proposalReference.skipped &&
-        selectedNodeFromChangedNodes.nodeType === "Reference"
-      ) {
-        setCurrentTutorial(`PROPOSAL_REFERENCE`);
-        setTargetId(selectedNodeFromChangedNodes.node);
-        return;
-      }
-
-      // --------------------------
-
-      if (userTutorial.proposalIdea.forceTutorial) {
-        return forceTutorial("v9wGPxRCI4DRq11o7uH2", "PROPOSAL_IDEA", true);
-      }
-
-      if (
-        selectedNodeFromChangedNodes &&
-        !userTutorial.proposalIdea.done &&
-        !userTutorial.proposalIdea.skipped &&
-        selectedNodeFromChangedNodes.nodeType === "Idea"
-      ) {
-        setCurrentTutorial(`PROPOSAL_IDEA`);
-        setTargetId(selectedNodeFromChangedNodes.node);
-        return;
-      }
-
-      // --------------------------
-
-      if (userTutorial.proposalQuestion.forceTutorial) {
-        return forceTutorial("qO9uK6UdYRLWm4Olihlw", "PROPOSAL_QUESTION", true);
-      }
-
-      if (
-        selectedNodeFromChangedNodes &&
-        !userTutorial.proposalQuestion.done &&
-        !userTutorial.proposalQuestion.skipped &&
-        selectedNodeFromChangedNodes.nodeType === "Question"
-      ) {
-        setCurrentTutorial(`PROPOSAL_QUESTION`);
-        setTargetId(selectedNodeFromChangedNodes.node);
-        return;
-      }
-
-      // --------------------------
-
-      if (userTutorial.proposalCode.forceTutorial) {
-        return forceTutorial("E1nIWQ7RIC3pRLvk0Bk5", "PROPOSAL_CODE", true);
-      }
-
-      if (
-        selectedNodeFromChangedNodes &&
-        !userTutorial.proposalCode.done &&
-        !userTutorial.proposalCode.skipped &&
-        selectedNodeFromChangedNodes.nodeType === "Code"
-      ) {
-        setCurrentTutorial(`PROPOSAL_CODE`);
-        setTargetId(selectedNodeFromChangedNodes.node);
-        return;
-      }
-
-      // --------------------------
-
-      const selectedNodeFromGraph = graph.nodes[nodeBookState.selectedNode ?? ""];
-
-      // --------------------------
-
-      if (userTutorial.concept.forceTutorial) {
-        return forceTutorial("r98BjyFDCe4YyLA3U8ZE", "CONCEPT");
-      }
-
-      if (
-        selectedNodeFromGraph &&
-        selectedNodeFromGraph.nodeType === "Concept" &&
-        !userTutorial.concept.done &&
-        !userTutorial.concept.skipped
-      ) {
-        setTargetId(selectedNodeFromGraph.node);
-        setCurrentTutorial("CONCEPT");
-        return;
-      }
-
-      // --------------------------
-
-      if (userTutorial.relation.forceTutorial) {
-        return forceTutorial("zYYmaXvhab7hH2uRI9Up", "RELATION");
-      }
-
-      if (
-        selectedNodeFromGraph &&
-        selectedNodeFromGraph.nodeType === "Relation" &&
-        !userTutorial.relation.done &&
-        !userTutorial.relation.skipped
-      ) {
-        setTargetId(selectedNodeFromGraph.node);
-        setCurrentTutorial("RELATION");
-        return;
-      }
-
-      // --------------------------
-
-      if (userTutorial.reference.forceTutorial) {
-        return forceTutorial("P631lWeKsBtszZRDlmsM", "REFERENCE");
-      }
-
-      if (
-        selectedNodeFromGraph &&
-        selectedNodeFromGraph.nodeType === "Reference" &&
-        !userTutorial.reference.done &&
-        !userTutorial.reference.skipped
-      ) {
-        setTargetId(selectedNodeFromGraph.node);
-        setCurrentTutorial("REFERENCE");
-        return;
-      }
-
-      // --------------------------
-
-      if (userTutorial.question.forceTutorial) {
-        return forceTutorial("P631lWeKsBtszZRDlmsM", "QUESTION");
-      }
-
-      if (
-        selectedNodeFromGraph &&
-        selectedNodeFromGraph.nodeType === "Reference" &&
-        !userTutorial.question.done &&
-        !userTutorial.question.skipped
-      ) {
-        setTargetId(selectedNodeFromGraph.node);
-        setCurrentTutorial("QUESTION");
-        return;
-      }
-
-      // --------------------------
-
-      if (userTutorial.idea.forceTutorial) {
-        return forceTutorial("v9wGPxRCI4DRq11o7uH2", "IDEA");
-      }
-
-      if (
-        selectedNodeFromGraph &&
-        selectedNodeFromGraph.nodeType === "Idea" &&
-        !userTutorial.idea.done &&
-        !userTutorial.idea.skipped
-      ) {
-        setTargetId(selectedNodeFromGraph.node);
-        setCurrentTutorial("IDEA");
-        return;
-      }
-
-      // --------------------------
-
-      if (userTutorial.code.forceTutorial) {
-        return forceTutorial("E1nIWQ7RIC3pRLvk0Bk5", "CODE");
-      }
-
-      if (
-        selectedNodeFromGraph &&
-        selectedNodeFromGraph.nodeType === "Code" &&
-        !userTutorial.code.done &&
-        !userTutorial.code.skipped
-      ) {
-        setTargetId(selectedNodeFromGraph.node);
-        setCurrentTutorial("CODE");
-        return;
-      }
-
-      // --------------------------
-
-      if (userTutorial.reconcilingAcceptedProposal.forceTutorial) {
-        return forceTutorial("zp6PeUOlmejdQTAqK2xX", "RECONCILING_ACCEPTED_PROPOSAL");
-      }
-
-      if (
-        selectedNodeFromGraph &&
-        lastNodeOperation.current === "ProposeProposals" &&
-        !userTutorial.reconcilingAcceptedProposal.done &&
-        !userTutorial.reconcilingAcceptedProposal.skipped
-      ) {
-        const willBeApproved = isVersionApproved({
-          corrects: 1,
-          wrongs: 0,
-          nodeData: selectedNodeFromGraph,
+        setNodeUpdates({
+          nodeIds: [newTargetId],
+          updatedAt: new Date(),
         });
-        if (!willBeApproved) return;
 
-        setCurrentTutorial("RECONCILING_ACCEPTED_PROPOSAL");
-        setTargetId(willBeApproved.node);
         return;
       }
 
       // --------------------------
 
-      if (userTutorial.reconcilingNotAcceptedProposal.forceTutorial) {
-        setOpenSidebar("PROPOSALS");
-        return forceTutorial("r98BjyFDCe4YyLA3U8ZE", "RECONCILING_NOT_ACCEPTED_PROPOSAL");
-      }
+      if (forcedTutorial === "tableOfContents" || userTutorial["nodes"].done || userTutorial["nodes"].skipped) {
+        const shouldIgnore =
+          !forcedTutorial && (userTutorial["tableOfContents"].done || userTutorial["tableOfContents"].skipped);
+        if (shouldIgnore) return;
+        startTutorial("tableOfContents");
 
-      if (
-        selectedNodeFromGraph &&
-        lastNodeOperation.current === "ProposeProposals" &&
-        !userTutorial.reconcilingNotAcceptedProposal.done &&
-        !userTutorial.reconcilingNotAcceptedProposal.skipped
-      ) {
-        const willBeApproved = isVersionApproved({
-          corrects: 1,
-          wrongs: 0,
-          nodeData: selectedNodeFromGraph,
-        });
-        if (willBeApproved) return;
-
-        setCurrentTutorial("RECONCILING_NOT_ACCEPTED_PROPOSAL");
-        setOpenSidebar("PROPOSALS");
-        setTargetId(willBeApproved.node);
         return;
       }
+
+      // --------------------------
+
+      if (forcedTutorial === "proposal" || !forcedTutorial) {
+        const result = detectAndCallTutorial(
+          "proposal",
+          thisNode => thisNode && thisNode.open && thisNode.editable && !thisNode.isNew
+        );
+        if (result) return;
+      }
+
+      // --------------------------
+
+      if (forcedTutorial === "proposalCode" || !forcedTutorial) {
+        const codeProposalTutorialIsValid = (node: FullNodeData) =>
+          node && node.open && node.editable && node.nodeType === "Code";
+        const result = detectAndCallTutorial("proposalCode", codeProposalTutorialIsValid);
+        if (result) return;
+      }
+
+      // --------------------------
+
+      if (forcedTutorial === "proposalConcept" || !forcedTutorial) {
+        const conceptProposalTutorialIsValid = (node: FullNodeData) =>
+          node && node.open && node.editable && node.nodeType === "Concept";
+
+        const result = detectAndCallTutorial("proposalConcept", conceptProposalTutorialIsValid);
+        if (result) return;
+      }
+
+      // --------------------------
+
+      const relationProposalTutorialIsValid = (node: FullNodeData) =>
+        node && node.open && node.editable && node.nodeType === "Relation";
+
+      if (forcedTutorial === "proposalRelation" || !forcedTutorial) {
+        const relationProposalTutorialLaunched = detectAndCallTutorial(
+          "proposalRelation",
+          relationProposalTutorialIsValid
+        );
+        if (relationProposalTutorialLaunched) return;
+      }
+
+      // --------------------------
+
+      const referenceProposalTutorialIsValid = (node: FullNodeData) =>
+        node && node.open && node.editable && node.nodeType === "Reference";
+
+      if (forcedTutorial === "proposalReference" || !forcedTutorial) {
+        const referenceProposalTutorialLaunched = detectAndCallTutorial(
+          "proposalReference",
+          referenceProposalTutorialIsValid
+        );
+        if (referenceProposalTutorialLaunched) return;
+      }
+
+      // --------------------------
+
+      const questionProposalTutorialIsValid = (node: FullNodeData) =>
+        node && node.open && node.editable && node.nodeType === "Question";
+
+      if (forcedTutorial === "proposalQuestion" || !forcedTutorial) {
+        const result = detectAndCallTutorial("proposalQuestion", questionProposalTutorialIsValid);
+        if (result) return;
+      }
+
+      // --------------------------
+
+      const ideaProposalTutorialIsValid = (node: FullNodeData) =>
+        node && node.open && node.editable && node.nodeType === "Idea";
+
+      if (forcedTutorial === "proposalIdea" || !forcedTutorial) {
+        const result = detectAndCallTutorial("proposalIdea", ideaProposalTutorialIsValid);
+        if (result) return;
+      }
+
+      // --------------------------
+
+      const conceptTutorialIsValid = (thisNode: FullNodeData) =>
+        thisNode && thisNode.open && thisNode.nodeType === "Concept";
+
+      if (forcedTutorial === "concept" || !forcedTutorial) {
+        const result = detectAndCallTutorial("concept", conceptTutorialIsValid);
+        if (result) return;
+      }
+
+      if (forcedTutorial === "concept") {
+        const conceptForcedTutorialLaunched = detectAndForceTutorial(
+          "concept",
+          "r98BjyFDCe4YyLA3U8ZE",
+          conceptTutorialIsValid
+        );
+        if (conceptForcedTutorialLaunched) return;
+      }
+      // --------------------------
+
+      const relationTutorialIsValid = (thisNode: FullNodeData) =>
+        thisNode && thisNode.open && thisNode.nodeType === "Relation";
+
+      if (forcedTutorial === "relation" || !forcedTutorial) {
+        const result = detectAndCallTutorial("relation", relationTutorialIsValid);
+        if (result) return;
+      }
+
+      if (forcedTutorial === "relation") {
+        const relationForcedTutorialLaunched = detectAndForceTutorial(
+          "relation",
+          "zYYmaXvhab7hH2uRI9Up",
+          relationTutorialIsValid
+        );
+        if (relationForcedTutorialLaunched) return;
+      }
+
+      // --------------------------
+      const referenceTutorialIsValid = (thisNode: FullNodeData) =>
+        thisNode && thisNode.open && thisNode.nodeType === "Reference";
+
+      if (forcedTutorial === "reference" || !forcedTutorial) {
+        const result = detectAndCallTutorial("reference", referenceTutorialIsValid);
+        if (result) return;
+      }
+
+      if (forcedTutorial === "reference") {
+        const referenceForcedTutorialLaunched = detectAndForceTutorial(
+          "reference",
+          "P631lWeKsBtszZRDlmsM",
+          referenceTutorialIsValid
+        );
+        if (referenceForcedTutorialLaunched) return;
+      }
+
+      // --------------------------
+
+      const questionTutorialIsValid = (thisNode: FullNodeData) =>
+        thisNode && thisNode.open && thisNode.nodeType === "Question";
+
+      if (forcedTutorial === "question" || !forcedTutorial) {
+        const result = detectAndCallTutorial("question", questionTutorialIsValid);
+        if (result) return;
+      }
+
+      if (forcedTutorial === "question") {
+        const questionForcedTutorialLaunched = detectAndForceTutorial(
+          "question",
+          "qO9uK6UdYRLWm4Olihlw",
+          questionTutorialIsValid
+        );
+        if (questionForcedTutorialLaunched) return;
+      }
+
+      // --------------------------
+
+      const ideaTutorialIsValid = (thisNode: FullNodeData) => thisNode && thisNode.open && thisNode.nodeType === "Idea";
+
+      if (forcedTutorial === "idea" || !forcedTutorial) {
+        const result = detectAndCallTutorial("idea", ideaTutorialIsValid);
+        if (result) return;
+      }
+
+      if (forcedTutorial === "idea") {
+        const ideaForcedTutorialLaunched = detectAndForceTutorial("idea", "v9wGPxRCI4DRq11o7uH2", ideaTutorialIsValid);
+        if (ideaForcedTutorialLaunched) return;
+      }
+
+      // --------------------------
+
+      const codeTutorialIsValid = (thisNode: FullNodeData) => thisNode && thisNode.open && thisNode.nodeType === "Code";
+
+      if (forcedTutorial === "code" || !forcedTutorial) {
+        const result = detectAndCallTutorial("code", codeTutorialIsValid);
+        if (result) return;
+      }
+
+      if (forcedTutorial === "code") {
+        const codeForcedTutorialLaunched = detectAndForceTutorial("code", "E1nIWQ7RIC3pRLvk0Bk5", codeTutorialIsValid);
+        if (codeForcedTutorialLaunched) return;
+      }
+
+      // ------------------------
+
+      if (forcedTutorial === "childProposal" || !forcedTutorial) {
+        const result = detectAndCallChildTutorial(
+          "childProposal",
+          node => node && Boolean(node.isNew) && node.open && node.editable
+        );
+        if (result) return;
+      }
+
+      //------------------------
+
+      if (forcedTutorial === "childConcept" || !forcedTutorial) {
+        const childConceptProposalIsValid = (node: FullNodeData) =>
+          node && Boolean(node.isNew) && node.open && node.editable && node.nodeType === "Concept";
+        const result = detectAndCallChildTutorial("childConcept", childConceptProposalIsValid);
+        if (result) return;
+      }
+
+      //------------------------
+
+      if (forcedTutorial === "childRelation" || !forcedTutorial) {
+        const relationChildProposalIsValid = (node: FullNodeData) =>
+          node && Boolean(node.isNew) && node.open && node.editable && node.nodeType === "Relation";
+        const result = detectAndCallChildTutorial("childRelation", relationChildProposalIsValid);
+        if (result) return;
+      }
+
+      // ------------------------
+
+      if (forcedTutorial === "childReference" || !forcedTutorial) {
+        const referenceChildProposalIsValid = (node: FullNodeData) =>
+          node && Boolean(node.isNew) && node.open && node.editable && node.nodeType === "Reference";
+        const result = detectAndCallChildTutorial("childReference", referenceChildProposalIsValid);
+        if (result) return;
+      }
+
+      // ------------------------
+
+      if (forcedTutorial === "childQuestion" || !forcedTutorial) {
+        const questionChildProposalIsValid = (node: FullNodeData) =>
+          node && Boolean(node.isNew) && node.open && node.editable && node.nodeType === "Question";
+        const result = detectAndCallChildTutorial("childQuestion", questionChildProposalIsValid);
+        if (result) return;
+      }
+
+      // ------------------------
+
+      if (forcedTutorial === "childIdea" || !forcedTutorial) {
+        const ideaChildProposalIsValid = (node: FullNodeData) =>
+          node && Boolean(node.isNew) && node.open && node.editable && node.nodeType === "Idea";
+        const result = detectAndCallChildTutorial("childIdea", ideaChildProposalIsValid);
+        if (result) return;
+      }
+
+      // ------------------------
+
+      if (forcedTutorial === "childCode" || !forcedTutorial) {
+        const codeChildProposalIsValid = (node: FullNodeData) =>
+          node && Boolean(node.isNew) && node.open && node.editable && node.nodeType === "Code";
+        const result = detectAndCallChildTutorial("childCode", codeChildProposalIsValid);
+        if (result) return;
+      }
+
+      // -----------------------
+
+      if (forcedTutorial && ["childProposal", "childConcept"].includes(forcedTutorial)) {
+        const proposalConceptChildLaunched = detectAndCallTutorial(
+          "tmpProposalConceptChild",
+          node => node && node.open && node.editable && !Boolean(node.isNew)
+        );
+        if (proposalConceptChildLaunched) return;
+      }
+
+      // ------------------------
+
+      if (forcedTutorial === "childRelation") {
+        const proposalRelationChildLaunched = detectAndCallTutorial(
+          "tmpProposalRelationChild",
+          node => node && node.open && node.editable && !Boolean(node.isNew)
+        );
+        if (proposalRelationChildLaunched) return;
+      }
+
+      // ------------------------
+
+      if (forcedTutorial === "childReference") {
+        const proposalReferenceChildLaunched = detectAndCallTutorial(
+          "tmpProposalReferenceChild",
+          node => node && node.open && node.editable && !Boolean(node.isNew)
+        );
+        if (proposalReferenceChildLaunched) return;
+      }
+
+      // ------------------------
+
+      if (forcedTutorial === "childQuestion") {
+        const proposalQuestionChildLaunched = detectAndCallTutorial(
+          "tmpProposalQuestionChild",
+          node => node && node.open && node.editable && !Boolean(node.isNew)
+        );
+        if (proposalQuestionChildLaunched) return;
+      }
+
+      // ------------------------
+
+      if (forcedTutorial === "childIdea") {
+        const proposalIdeaChildLaunched = detectAndCallTutorial(
+          "tmpProposalIdeaChild",
+          node => node && node.open && node.editable && !Boolean(node.isNew)
+        );
+        if (proposalIdeaChildLaunched) return;
+      }
+
+      // ------------------------
+
+      if (forcedTutorial === "childCode") {
+        const proposalCodeChildLaunched = detectAndCallTutorial(
+          "tmpProposalCodeChild",
+          node => node && node.open && node.editable && !Boolean(node.isNew)
+        );
+        if (proposalCodeChildLaunched) return;
+      }
+
+      // ------------------------
+
+      const tmpEditNodeIsValid = (node: FullNodeData) => node && node.open && !node.editable;
+
+      const proposalForcedValues = new Map<
+        TutorialTypeKeys,
+        { targetId: string; validator: (node: FullNodeData) => boolean }
+      >();
+      proposalForcedValues.set("proposal", {
+        targetId: "r98BjyFDCe4YyLA3U8ZE",
+        validator: (node: FullNodeData) => tmpEditNodeIsValid(node),
+      });
+      proposalForcedValues.set("proposalConcept", {
+        targetId: "r98BjyFDCe4YyLA3U8ZE",
+        validator: (node: FullNodeData) => tmpEditNodeIsValid(node) && node.nodeType === "Concept",
+      });
+      proposalForcedValues.set("proposalCode", {
+        targetId: "E1nIWQ7RIC3pRLvk0Bk5",
+        validator: (node: FullNodeData) => tmpEditNodeIsValid(node) && node.nodeType === "Code",
+      });
+      proposalForcedValues.set("proposalRelation", {
+        targetId: "zYYmaXvhab7hH2uRI9Up",
+        validator: (node: FullNodeData) => tmpEditNodeIsValid(node) && node.nodeType === "Relation",
+      });
+      proposalForcedValues.set("proposalReference", {
+        targetId: "P631lWeKsBtszZRDlmsM",
+        validator: (node: FullNodeData) => tmpEditNodeIsValid(node) && node.nodeType === "Reference",
+      });
+      proposalForcedValues.set("proposalQuestion", {
+        targetId: "qO9uK6UdYRLWm4Olihlw",
+        validator: (node: FullNodeData) => tmpEditNodeIsValid(node) && node.nodeType === "Question",
+      });
+      proposalForcedValues.set("proposalIdea", {
+        targetId: "v9wGPxRCI4DRq11o7uH2",
+        validator: (node: FullNodeData) => tmpEditNodeIsValid(node) && node.nodeType === "Idea",
+      });
+
+      if (forcedTutorial && proposalForcedValues.has(forcedTutorial)) {
+        const tt = proposalForcedValues.get(forcedTutorial);
+        if (!tt) return;
+
+        const { targetId, validator } = tt;
+        const result = detectAndForceTutorial("tmpEditNode", targetId, validator);
+        if (result) return;
+      }
+
+      // ------------------------
+
+      const childTypes: TutorialTypeKeys[] = [
+        "childProposal",
+        "childConcept",
+        "childRelation",
+        "childReference",
+        "childQuestion",
+        "childIdea",
+        "childCode",
+      ];
+
+      if (forcedTutorial && childTypes.includes(forcedTutorial)) {
+        const result = detectAndForceTutorial("tmpEditNode", "r98BjyFDCe4YyLA3U8ZE", tmpEditNodeIsValid);
+        if (result) return;
+      }
+
+      // ------------------------
+
+      if (
+        forcedTutorial === "reconcilingAcceptedProposal" ||
+        (lastNodeOperation.current &&
+          lastNodeOperation.current.name === "ProposeProposals" &&
+          lastNodeOperation.current.data === "accepted")
+      ) {
+        const acceptedProposalLaunched = detectAndCallTutorial(
+          "reconcilingAcceptedProposal",
+          node => node && node.open && isVersionApproved({ corrects: 1, wrongs: 0, nodeData: node })
+        );
+        if (acceptedProposalLaunched) return;
+      }
+      if (forcedTutorial === "reconcilingAcceptedProposal") {
+        const result = detectAndForceTutorial(
+          "reconcilingAcceptedProposal",
+          "zYYmaXvhab7hH2uRI9Up",
+          node => node && node.open
+        );
+        if (result) return;
+      }
+      // ------------------------
+
+      if (
+        forcedTutorial === "reconcilingNotAcceptedProposal" ||
+        (lastNodeOperation.current &&
+          lastNodeOperation.current.name === "ProposeProposals" &&
+          lastNodeOperation.current.data === "notAccepted")
+      ) {
+        const notAcceptedProposalLaunched = detectAndCallTutorial(
+          "reconcilingNotAcceptedProposal",
+          node => node && node.open && !isVersionApproved({ corrects: 1, wrongs: 0, nodeData: node })
+        );
+        setOpenSidebar("PROPOSALS");
+        if (notAcceptedProposalLaunched) return;
+      }
+
+      if (forcedTutorial === "reconcilingNotAcceptedProposal") {
+        const result = detectAndForceTutorial(
+          "reconcilingNotAcceptedProposal",
+          "r98BjyFDCe4YyLA3U8ZE",
+          node => node && node.open
+        );
+        if (result) return;
+      }
+
+      // --------------------------
+
+      if (forcedTutorial === "searcher" || openSidebar === "SEARCHER_SIDEBAR") {
+        const result = detectAndCallSidebarTutorial("searcher", "SEARCHER_SIDEBAR");
+        if (result) return;
+      }
+
+      // --------------------------
     };
+
     detectTriggerTutorial();
   }, [
-    currentTutorial,
+    detectAndCallChildTutorial,
+    detectAndCallSidebarTutorial,
+    detectAndCallTutorial,
+    detectAndForceTutorial,
     firstLoading,
-    forceTutorial,
-    graph,
+    forcedTutorial,
     graph.nodes,
     nodeBookDispatch,
-    nodeBookState.selectedNode,
     openNodeHandler,
+    openProgressBar,
     openSidebar,
-    proposeNodeImprovement,
-    scrollToNode,
-    setCurrentTutorial,
-    setNodeParts,
     setTargetId,
-    targetId,
+    startTutorial,
+    tutorial,
     userTutorial,
     userTutorialLoaded,
   ]);
 
+  useEffect(() => {
+    if (!userTutorialLoaded) return;
+    if (firstLoading) return;
+    if (!tutorial) return;
+
+    devLog("USE_EFFECT: DETECT_TO_REMOVE_TUTORIAL", tutorial);
+
+    if (tutorial.name === "nodes") {
+      const nodesTutorialIsValid = (node: FullNodeData) => node && node.open;
+      const node = graph.nodes[targetId];
+      if (!nodesTutorialIsValid(node)) {
+        setTutorial(null);
+        setForcedTutorial(null);
+        // tutorialStateWasSetUpRef.current = false;
+        // console.log("remove node t");
+      }
+    }
+    const conceptTutorialIsValid = (thisNode: FullNodeData) =>
+      thisNode && thisNode.open && thisNode.nodeType === "Concept";
+    detectAndRemoveTutorial("concept", conceptTutorialIsValid);
+
+    // --------------------------
+
+    const relationTutorialIsValid = (thisNode: FullNodeData) =>
+      thisNode && thisNode.open && thisNode.nodeType === "Relation";
+    detectAndRemoveTutorial("relation", relationTutorialIsValid);
+
+    // --------------------------
+    const referenceTutorialIsValid = (thisNode: FullNodeData) =>
+      thisNode && thisNode.open && thisNode.nodeType === "Reference";
+    detectAndRemoveTutorial("reference", referenceTutorialIsValid);
+
+    // --------------------------
+    const questionTutorialIsValid = (thisNode: FullNodeData) =>
+      thisNode && thisNode.open && thisNode.nodeType === "Question";
+    detectAndRemoveTutorial("question", questionTutorialIsValid);
+
+    // --------------------------
+    const ideaTutorialIsValid = (thisNode: FullNodeData) => thisNode && thisNode.open && thisNode.nodeType === "Idea";
+    detectAndRemoveTutorial("idea", ideaTutorialIsValid);
+
+    // --------------------------
+    const codeTutorialIsValid = (thisNode: FullNodeData) => thisNode && thisNode.open && thisNode.nodeType === "Code";
+    detectAndRemoveTutorial("code", codeTutorialIsValid);
+    // --------------------------
+    const conceptProposalTutorialIsValid = (thisNode: FullNodeData) =>
+      thisNode && thisNode.open && thisNode.editable && thisNode.nodeType === "Concept";
+    detectAndRemoveTutorial("proposalConcept", conceptProposalTutorialIsValid);
+    // --------------------------
+    const relationProposalTutorialIsValid = (thisNode: FullNodeData) =>
+      thisNode && thisNode.open && thisNode.editable && thisNode.nodeType === "Relation";
+    detectAndRemoveTutorial("proposalRelation", relationProposalTutorialIsValid);
+    // --------------------------
+    const referenceProposalTutorialIsValid = (thisNode: FullNodeData) =>
+      thisNode && thisNode.open && thisNode.editable && thisNode.nodeType === "Reference";
+    detectAndRemoveTutorial("proposalReference", referenceProposalTutorialIsValid);
+    // --------------------------
+    const questionProposalTutorialIsValid = (thisNode: FullNodeData) =>
+      thisNode && thisNode.open && thisNode.editable && thisNode.nodeType === "Question";
+    detectAndRemoveTutorial("proposalQuestion", questionProposalTutorialIsValid);
+    // --------------------------
+    const ideaProposalTutorialIsValid = (thisNode: FullNodeData) =>
+      thisNode && thisNode.open && thisNode.editable && thisNode.nodeType === "Idea";
+    detectAndRemoveTutorial("proposalIdea", ideaProposalTutorialIsValid);
+    // --------------------------
+    const codeProposalTutorialIsValid = (thisNode: FullNodeData) =>
+      thisNode && thisNode.open && thisNode.editable && thisNode.nodeType === "Code";
+    detectAndRemoveTutorial("proposalCode", codeProposalTutorialIsValid);
+    // --------------------------
+    // if (tutorial.name === "concept") {
+    //   const node = graph.nodes[targetId];
+    //   if (!conceptTutorialIsValid(node)) {
+    //     setTutorial(null);
+    //     setForcedTutorial(null);
+    //   }
+    // }
+    // --------------------------
+
+    // --------------------------
+    if (tutorial.name === "childConcept") {
+      const childConceptProposalIsValid = (node: FullNodeData) =>
+        node && Boolean(node.isNew) && node.open && node.editable && node.nodeType === "Concept";
+
+      const node = graph.nodes[targetId];
+      if (!childConceptProposalIsValid(node)) {
+        setTutorial(null);
+        setForcedTutorial(null);
+      }
+    }
+    if (tutorial.name === "tmpEditNode") {
+      console.log("111aaa");
+      const tmpEditNodeIsValid = (node: FullNodeData) => node && node.open && !node.editable;
+      const node = graph.nodes[targetId];
+      if (!tmpEditNodeIsValid(node)) {
+        console.log("222aaa");
+        setTutorial(null);
+        if (node && node.editable) return;
+        console.log("333aaa");
+
+        setForcedTutorial(null);
+      }
+    }
+    if (
+      tutorial.name === "tmpProposalConceptChild" ||
+      tutorial.name === "tmpProposalQuestionChild" ||
+      tutorial.name === "tmpProposalRelationChild" ||
+      tutorial.name === "tmpProposalReferenceChild" ||
+      tutorial.name === "tmpProposalIdeaChild" ||
+      tutorial.name === "tmpProposalCodeChild"
+    ) {
+      console.log("aaaaaaaa");
+      const isValid = (node: FullNodeData) => node && node.open && node.editable && !Boolean(node.isNew);
+      const node = graph.nodes[targetId];
+      if (!isValid(node)) {
+        console.log("bbbb");
+        setTutorial(null);
+        if (node && !node.editable) return;
+        console.log("ccccc");
+        setForcedTutorial(null);
+      }
+    }
+
+    if (tutorial.name === "reconcilingAcceptedProposal") {
+      const reconcilingAcceptedProposalIsValid = (node: FullNodeData) =>
+        node && node.open && isVersionApproved({ corrects: 1, wrongs: 0, nodeData: node });
+
+      const node = graph.nodes[targetId];
+      if (!reconcilingAcceptedProposalIsValid(node)) {
+        setTutorial(null);
+        setForcedTutorial(null);
+      }
+    }
+
+    if (tutorial.name === "reconcilingNotAcceptedProposal") {
+      const reconcilingNotAcceptedProposalIsValid = (node: FullNodeData) =>
+        node &&
+        node.open &&
+        !isVersionApproved({ corrects: 1, wrongs: 0, nodeData: node }) &&
+        openSidebar === "PROPOSALS";
+
+      const node = graph.nodes[targetId];
+      if (!reconcilingNotAcceptedProposalIsValid(node)) {
+        setOpenSidebar(null);
+        setTutorial(null);
+        setForcedTutorial(null);
+      }
+    }
+
+    if (tutorial.name === "searcher") {
+      if (openSidebar === "SEARCHER_SIDEBAR") return;
+      setTutorial(null);
+      setForcedTutorial(null);
+    }
+  }, [
+    detectAndRemoveTutorial,
+    firstLoading,
+    graph.nodes,
+    nodeBookState.selectedNode,
+    openSidebar,
+    setTutorial,
+    targetId,
+    tutorial,
+    userTutorialLoaded,
+  ]);
+
+  useEffect(() => {
+    if (!tutorial) return;
+    if (tutorial.name === "childProposal") {
+      const thisNode = graph.nodes[targetId];
+      if (!thisNode) return;
+
+      const childTargetId = thisNode.children.map(cur => cur.node).find(cur => tempNodes.has(cur));
+      if (!childTargetId) return;
+
+      setTargetId(childTargetId);
+    }
+  }, [graph.nodes, setTargetId, targetId, tutorial]);
+
   return (
     <div className="MapContainer" style={{ overflow: "hidden" }}>
-      {stateNodeTutorial?.anchor && (
+      {currentStep?.anchor && (
         <Portal anchor="portal">
-          <Tutorial
-            tutorialState={stateNodeTutorial}
-            // onChangeStep={onChangeStep}
-            targetClientRect={targetClientRect}
-            handleCloseProgressBarMenu={handleCloseProgressBarMenu}
-            onSkip={onSkipTutorial}
-            onFinalize={onFinalizeTutorial}
-            onNextStep={onNextStep}
-            onPreviousStep={onPreviousStep}
-            stepsLength={stepsLength}
-            node={graph.nodes[nodeBookState.selectedNode ?? ""]}
-          />
+          {tutorial && (
+            <TooltipTutorial
+              tutorialStep={currentStep}
+              tutorial={tutorial}
+              targetClientRect={targetClientRect}
+              handleCloseProgressBarMenu={handleCloseProgressBarMenu}
+              onSkip={onSkipTutorial}
+              onFinalize={onFinalizeTutorial}
+              onNextStep={onNextStep}
+              onPreviousStep={onPreviousStep}
+              stepsLength={tutorial.steps.length}
+              node={graph.nodes[targetId]}
+            />
+          )}
         </Portal>
       )}
       <Box
@@ -4514,7 +5003,7 @@ const Dashboard = ({}: DashboardProps) => {
             </Button>
           </div>
         )}
-        <Box sx={{ width: "100vw", height: "100vh" }}>
+        <Box sx={{ width: "100vw", height: "100vh", overflow: "hidden" }}>
           {
             <Drawer anchor={"right"} open={openDeveloperMenu} onClose={() => setOpenDeveloperMenu(false)}>
               {/* Data from map, don't REMOVE */}
@@ -4588,9 +5077,10 @@ const Dashboard = ({}: DashboardProps) => {
 
               <Typography>Tutorial:</Typography>
               <Box>
-                <Button onClick={() => console.log(currentTutorial)}>Current tutorial</Button>
+                <Button onClick={() => console.log(tutorial)}>Tutorial</Button>
                 <Button onClick={() => console.log(userTutorial)}>userTutorial</Button>
                 <Button onClick={() => console.log(targetId)}>targetId</Button>
+                <Button onClick={() => console.log(forcedTutorial)}>forcedTutorial</Button>
               </Box>
 
               <Divider />
@@ -4635,7 +5125,7 @@ const Dashboard = ({}: DashboardProps) => {
                 onlineUsers={onlineUsers}
                 usersOnlineStatusLoaded={usersOnlineStatusLoaded}
                 disableToolbar={Boolean(["TutorialStep"].includes("TOOLBAR"))}
-                setCurrentTutorial={setCurrentTutorial}
+                // setCurrentTutorial={setCurrentTutorial}
                 userTutorial={userTutorial}
               />
 
@@ -4911,6 +5401,7 @@ const Dashboard = ({}: DashboardProps) => {
                   }}
                 >
                   <IconButton
+                    id="toolbox-table-of-contents"
                     color="secondary"
                     onClick={() => {
                       setOpenProgressBar(true);
@@ -5011,17 +5502,18 @@ const Dashboard = ({}: DashboardProps) => {
                 value={mapInteractionValue}
                 onChange={navigateWhenNotScrolling}
               >
-                {!stateNodeTutorial?.anchor && (
-                  <Tutorial
-                    tutorialState={stateNodeTutorial}
+                {!currentStep?.anchor && tutorial && (
+                  <TooltipTutorial
+                    tutorial={tutorial}
+                    tutorialStep={currentStep}
                     targetClientRect={targetClientRect}
                     handleCloseProgressBarMenu={handleCloseProgressBarMenu}
                     onSkip={onSkipTutorial}
                     onFinalize={onFinalizeTutorial}
                     onNextStep={onNextStep}
                     onPreviousStep={onPreviousStep}
-                    stepsLength={stepsLength}
-                    node={graph.nodes[nodeBookState.selectedNode ?? ""]}
+                    stepsLength={tutorial.steps.length}
+                    node={graph.nodes[targetId]}
                     // tutorialState={stateNodeTutorial}
                     // onChangeStep={onChangeStep}
                     // targetClientRect={targetClientRect}
@@ -5085,8 +5577,8 @@ const Dashboard = ({}: DashboardProps) => {
                   openUserInfoSidebar={openUserInfoSidebar}
                   disabledNodes={[]}
                   enableChildElements={[]}
-                  showProposeTutorial={!(userTutorial.proposal.done || userTutorial.proposal.skipped)}
-                  setCurrentTutorial={setCurrentTutorial}
+                  // showProposeTutorial={!(userTutorial.proposal.done || userTutorial.proposal.skipped)}
+                  // setCurrentTutorial={setCurrentTutorial}
                   ableToPropose={ableToPropose}
                   setAbleToPropose={setAbleToPropose}
                 />
@@ -5213,37 +5705,11 @@ const Dashboard = ({}: DashboardProps) => {
           <MemoizedTutorialTableOfContent
             open={openProgressBar}
             reloadPermanentGraph={reloadPermanentGraph}
-            handleCloseProgressBar={() => setOpenProgressBar(false)}
-            tutorials={{
-              navigation: { title: "Navigation", steps: NAVIGATION_STEPS_COMPLETE },
-              nodes: { title: "Node", steps: NODES_STEPS_COMPLETE },
-              searcher: { title: "Searcher", steps: SEARCHER_STEPS_COMPLETE },
-              proposal: { title: "Proposal", steps: PROPOSAL_STEPS_COMPLETE },
-              proposalCode: { title: "Proposal Code", steps: PROPOSING_CODE_EDIT_COMPLETE },
-              proposalConcept: { title: "Proposal Concept", steps: PROPOSING_CONCEPT_EDIT_COMPLETE },
-              proposalIdea: { title: "Proposal Idea", steps: PROPOSING_IDEA_EDIT_COMPLETE },
-              proposalQuestion: { title: "Proposal Question", steps: PROPOSING_QUESTION_EDIT_COMPLETE },
-              proposalReference: { title: "Proposal Reference", steps: PROPOSING_REFERENCE_EDIT_COMPLETE },
-              proposalRelation: { title: "Proposal Relation", steps: PROPOSING_RELATION_EDIT_COMPLETE },
-              concept: { title: "Concept Node", steps: NODE_CODE_COMPLETE },
-              relation: { title: "Relation Node", steps: NODE_RELATION_COMPLETE },
-              reference: { title: "Reference Node", steps: NODE_REFERENCE_COMPLETE },
-              question: { title: "Question Node", steps: NODE_QUESTION_COMPLETE },
-              idea: { title: "Idea Node", steps: NODE_IDEA_COMPLETE },
-              code: { title: "Code Node", steps: NODE_CODE_COMPLETE },
-              reconcilingAcceptedProposal: {
-                title: "Accepted Proposals",
-                steps: RECONCILING_ACCEPTED_PROPOSALS_STEPS_COMPLETE,
-              },
-              reconcilingNotAcceptedProposal: {
-                title: "Not Accepted Proposal",
-                steps: RECONCILING_NOT_ACCEPTED_PROPOSALS_STEPS_COMPLETE,
-              },
-            }}
+            handleCloseProgressBar={onCloseTableOfContent}
+            groupTutorials={gg}
             userTutorialState={userTutorial}
-            setCurrentTutorial={setCurrentTutorial}
-            setUserTutorialState={setUserTutorial}
-            setInitialStep={setInitialStep}
+            onCancelTutorial={onCancelTutorial}
+            onForceTutorial={setForcedTutorial}
           />
         </Box>
       </Box>
@@ -5260,3 +5726,173 @@ export default withAuthUser({
   shouldRedirectToLogin: true,
   shouldRedirectToHomeIfAuthenticated: false,
 })(NodeBook);
+
+const gg: GroupTutorial[] = [
+  {
+    title: "Basics",
+    tutorials: [
+      {
+        title: "Navigation",
+        tutorialSteps: { tutorialKey: "navigation", steps: NAVIGATION_STEPS_COMPLETE },
+        tutorials: [],
+      },
+      {
+        title: "Nodes",
+        tutorialSteps: { tutorialKey: "nodes", steps: NODES_STEPS_COMPLETE },
+        tutorials: [],
+      },
+      {
+        title: "Searcher",
+        tutorialSteps: { tutorialKey: "searcher", steps: SEARCHER_STEPS_COMPLETE },
+        tutorials: [],
+      },
+    ],
+  },
+  {
+    title: "Node Types",
+    tutorials: [
+      {
+        title: "Concept Node",
+        tutorialSteps: { tutorialKey: "concept", steps: NODE_CONCEPT },
+        tutorials: [],
+      },
+      {
+        title: "Relation Node",
+        tutorialSteps: { tutorialKey: "relation", steps: NODE_RELATION },
+        tutorials: [],
+      },
+      {
+        title: "Reference Node",
+        tutorialSteps: { tutorialKey: "reference", steps: NODE_REFERENCE },
+        tutorials: [],
+      },
+      {
+        title: "Question Node",
+        tutorialSteps: { tutorialKey: "question", steps: NODE_QUESTION },
+        tutorials: [],
+      },
+      {
+        title: "Code Node",
+        tutorialSteps: { tutorialKey: "code", steps: NODE_CODE },
+        tutorials: [],
+      },
+      {
+        title: "Idea Node",
+        tutorialSteps: { tutorialKey: "idea", steps: NODE_IDEA },
+        tutorials: [],
+      },
+    ],
+  },
+  {
+    title: "Proposal",
+    tutorials: [
+      {
+        title: "Proposing Edit",
+        tutorialSteps: { tutorialKey: "proposal", steps: PROPOSAL_STEPS_COMPLETE },
+        tutorials: [],
+      },
+      {
+        title: "Edit Node Types",
+        tutorials: [
+          {
+            title: "Edit Concept Node",
+            tutorialSteps: { tutorialKey: "proposalConcept", steps: PROPOSING_CONCEPT_EDIT_COMPLETE },
+            tutorials: [],
+          },
+          {
+            title: "Edit Relation Node",
+            tutorialSteps: { tutorialKey: "proposalRelation", steps: PROPOSING_RELATION_EDIT_COMPLETE },
+            tutorials: [],
+          },
+          {
+            title: "Edit Reference Node",
+            tutorialSteps: { tutorialKey: "proposalReference", steps: PROPOSING_REFERENCE_EDIT_COMPLETE },
+            tutorials: [],
+          },
+          {
+            title: "Edit Question Node",
+            tutorialSteps: { tutorialKey: "proposalQuestion", steps: PROPOSING_QUESTION_EDIT_COMPLETE },
+            tutorials: [],
+          },
+          {
+            title: "Edit Code Node",
+            tutorials: [],
+            tutorialSteps: { tutorialKey: "proposalCode", steps: PROPOSING_CODE_EDIT_COMPLETE },
+          },
+          {
+            title: "Edit Idea Node",
+            tutorialSteps: { tutorialKey: "proposalIdea", steps: PROPOSING_IDEA_EDIT_COMPLETE },
+            tutorials: [],
+          },
+        ],
+      },
+      {
+        title: "New node types",
+        tutorialSteps: { tutorialKey: "childProposal", steps: CHILD_PROPOSAL_COMPLETE },
+        tutorials: [
+          {
+            title: "New Concept Node",
+            tutorialSteps: { tutorialKey: "childConcept", steps: CHILD_CONCEPT_PROPOSAL_COMPLETE },
+            tutorials: [],
+          },
+          {
+            title: "New Relation Node",
+            tutorialSteps: { tutorialKey: "childRelation", steps: CHILD_RELATION_PROPOSAL_COMPLETE },
+            tutorials: [],
+          },
+          {
+            title: "New Reference Node",
+            tutorialSteps: { tutorialKey: "childReference", steps: CHILD_REFERENCE_PROPOSAL_COMPLETE },
+            tutorials: [],
+          },
+          {
+            title: "New Question Node",
+            tutorialSteps: { tutorialKey: "childQuestion", steps: CHILD_QUESTION_PROPOSAL_COMPLETE },
+            tutorials: [],
+          },
+          {
+            title: "New Code Node",
+            tutorials: [],
+            tutorialSteps: { tutorialKey: "childCode", steps: CHILD_CODE_PROPOSAL_COMPLETE },
+          },
+          {
+            title: "New Idea Node",
+            tutorialSteps: { tutorialKey: "childIdea", steps: CHILD_IDEA_PROPOSAL_COMPLETE },
+            tutorials: [],
+          },
+        ],
+      },
+      {
+        title: "Reconciling",
+        tutorials: [
+          {
+            title: "Reconciling Accepted Proposals",
+            tutorialSteps: {
+              tutorialKey: "reconcilingAcceptedProposal",
+              steps: RECONCILING_ACCEPTED_PROPOSALS_STEPS_COMPLETE,
+            },
+            tutorials: [],
+          },
+          {
+            title: "Reconciling Not Accepted Proposal",
+            tutorialSteps: {
+              tutorialKey: "reconcilingNotAcceptedProposal",
+              steps: RECONCILING_NOT_ACCEPTED_PROPOSALS_STEPS_COMPLETE,
+            },
+            tutorials: [],
+          },
+        ],
+      },
+      {
+        title: "Siderbars",
+        tutorials: [
+          {
+            title: "Searcher",
+            tutorialSteps: { tutorialKey: "searcher", steps: SEARCHER_STEPS_COMPLETE },
+            tutorials: [],
+          },
+        ],
+      },
+    ],
+  },
+];

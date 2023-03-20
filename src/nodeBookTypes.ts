@@ -242,7 +242,8 @@ export type TutorialStepConfig = {
   anchor?: string;
   tooltipPosition?: "top" | "bottom" | "left" | "right" | "topLeft" | "topRight" | "bottomLeft" | "bottomRight";
   targetDelay?: number;
-  largeTarget?: boolean;
+  outline?: "shallow" | "outside" | "inside";
+
   isClickeable?: boolean;
 };
 
@@ -257,7 +258,7 @@ export type TutorialStep = {
   previosStepName: number;
   tooltipPosition: "top" | "bottom" | "left" | "right" | "topLeft" | "topRight" | "bottomLeft" | "bottomRight";
   targetDelay?: number;
-  largeTarget?: boolean;
+  outline?: "shallow" | "outside" | "inside";
   isClickeable?: boolean;
 };
 
@@ -391,7 +392,6 @@ export type FullNodeData = Omit<UserNodesData, "changedAt" | "createdAt" | "upda
     // top: number;
     x?: number;
     y?: number;
-    defaultOpenPart?: OpenPart;
   };
 
 export type EdgeData = {
@@ -450,12 +450,28 @@ export type TutorialTypeKeys =
   | "proposalQuestion"
   | "proposalCode"
   | "reconcilingAcceptedProposal"
-  | "reconcilingNotAcceptedProposal";
+  | "reconcilingNotAcceptedProposal"
+  | "childProposal"
+  | "childConcept"
+  | "childRelation"
+  | "childReference"
+  | "childQuestion"
+  | "childIdea"
+  | "childCode"
+  | "tmpEditNode"
+  | "tmpProposalConceptChild"
+  | "tmpProposalRelationChild"
+  | "tmpProposalQuestionChild"
+  | "tmpProposalReferenceChild"
+  | "tmpProposalCodeChild"
+  | "tmpProposalIdeaChild"
+  | "tableOfContents";
+
 export type UserTutorial = {
   currentStep: number;
   done: boolean;
   skipped: boolean;
-  forceTutorial?: boolean;
+  // forceTutorial?: boolean;
 };
 
 export type UserTutorials = {

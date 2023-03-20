@@ -2,47 +2,41 @@ import AdapterMomentJs from "@date-io/moment";
 import { keyframes } from "@emotion/react";
 import AddIcon from "@mui/icons-material/Add";
 import CodeIcon from "@mui/icons-material/Code";
-/* eslint-disable @typescript-eslint/no-unused-vars */
-/* eslint-disable react-hooks/exhaustive-deps */
 import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
 import EmojiObjectsIcon from "@mui/icons-material/EmojiObjects";
 import HelpOutlineIcon from "@mui/icons-material/HelpOutline";
 import LocalLibraryIcon from "@mui/icons-material/LocalLibrary";
-import LockIcon from "@mui/icons-material/Lock";
 import MenuBookIcon from "@mui/icons-material/MenuBook";
 import SearchIcon from "@mui/icons-material/Search";
 import ShareIcon from "@mui/icons-material/Share";
-import { Box, Button, Fab, Grid, InputLabel, Switch, TextField, Tooltip, Typography } from "@mui/material";
+import { Box, Button, Fab, Stack, Switch, TextField, Tooltip, Typography } from "@mui/material";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { TimePicker } from "@mui/x-date-pickers/TimePicker";
 import moment from "moment";
-import React, {
-  MutableRefObject,
-  useCallback,
-  useDeferredValue,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-  useTransition,
-} from "react";
-import { DispatchNodeBookActions, FullNodeData, OpenPart, TNodeBookState, TNodeUpdates } from "src/nodeBookTypes";
+import React, { MutableRefObject, useCallback, useEffect, useMemo, useRef, useState, useTransition } from "react";
+import { DispatchNodeBookActions, FullNodeData, OpenPart, TNodeUpdates } from "src/nodeBookTypes";
 
+import { useNodeBook } from "@/context/NodeBookContext";
 import { getSearchAutocomplete } from "@/lib/knowledgeApi";
+import { Post } from "@/lib/mapApi";
 import { findDiff, getVideoDataByUrl, momentDateToSeconds } from "@/lib/utils/utils";
-import { OpenSidebar, TutorialType } from "@/pages/notebook";
+import { OpenSidebar } from "@/pages/notebook";
 
 import { useAuth } from "../../context/AuthContext";
 import { KnowledgeChoice } from "../../knowledgeTypes";
+import { SearchNodesResponse } from "../../knowledgeTypes";
+import { TNodeBookState } from "../../nodeBookTypes";
+import { NodeType } from "../../types";
 // import { FullNodeData } from "../../noteBookTypes";
 import { Editor } from "../Editor";
+import HtmlTooltip from "../HtmlTooltip";
+import MarkdownRender from "../Markdown/MarkdownRender";
+import NodeTypeIcon from "../NodeTypeIcon2";
 // import LeaderboardChip from "../LeaderboardChip";
 // import NodeTypeIcon from "../NodeTypeIcon";
 // import EditProposal from "./EditProposal";
 import LinkingWords from "./LinkingWords/LinkingWords";
 import { MemoizedMetaButton } from "./MetaButton";
-// import NewChildProposal from "./NewChildProposal";
-// import { MemoizedNodeTypeSelector } from "./Node/NodeTypeSelector";
 import { MemoizedNodeVideo } from "./Node/NodeVideo";
 import { MemoizedNodeFooter } from "./NodeFooter";
 import { MemoizedNodeHeader } from "./NodeHeader";
@@ -153,9 +147,9 @@ type NodeProps = {
   openUserInfoSidebar: (uname: string, imageUrl: string, fullName: string, chooseUname: string) => void;
   disabled?: boolean;
   enableChildElements?: string[];
-  defaultOpenPart?: OpenPart; // this is only to configure default open part value in tutorial
-  showProposeTutorial?: boolean; // this flag is to enable tutorial first time user click in pencil
-  setCurrentTutorial: (newValue: TutorialType) => void;
+  // defaultOpenPart?: OpenPart; // this is only to configure default open part value in tutorial
+  // showProposeTutorial?: boolean; // this flag is to enable tutorial first time user click in pencil
+  // setCurrentTutorial: (newValue: TutorialType) => void;
   ableToPropose: boolean;
   setAbleToPropose: (newValue: boolean) => void;
 };
@@ -169,12 +163,20 @@ const proposedChildTypesIcons: { [key in ProposedChildTypesIcons]: string } = {
   Idea: "emoji_objects",
 };
 
+type Pagination = {
+  data: any[];
+  lastPageLoaded: number;
+  totalPage: number;
+  totalResults: number;
+};
+
+const NODE_TYPES_ARRAY: NodeType[] = ["Concept", "Code", "Reference", "Relation", "Question", "Idea"];
+
 const Node = ({
   identifier,
   nodeBookDispatch,
   setNodeUpdates,
   notebookRef,
-  setFocusView,
   activeNode,
   citationsSelected,
   proposalsSelected,
@@ -187,7 +189,6 @@ const Node = ({
   editable,
   unaccepted,
   nodeType,
-  isTag,
   isNew,
   title,
   content,
@@ -212,7 +213,6 @@ const Node = ({
   aImgUrl,
   aFullname,
   aChooseUname,
-  lastVisit,
   studied,
   isStudied,
   changed,
@@ -245,13 +245,11 @@ const Node = ({
   switchChoice,
   deleteChoice,
   addChoice,
-  onNodeTitleBLur,
   saveProposedChildNode,
   saveProposedImprovement,
   closeSideBar,
   reloadPermanentGrpah,
   setOpenMedia,
-  setOpenSearch,
   setNodeParts,
   citations,
   setOpenSideBar,
@@ -267,16 +265,17 @@ const Node = ({
   openUserInfoSidebar,
   disabled = false,
   enableChildElements = [],
-  defaultOpenPart: defaultOpenPartByTutorial = "LinkingWords",
-  showProposeTutorial = false,
-  setCurrentTutorial,
+  // defaultOpenPart: defaultOpenPartByTutorial = "LinkingWords",
+  // showProposeTutorial = false,
+  // setCurrentTutorial,
   ableToPropose,
   setAbleToPropose,
 }: NodeProps) => {
   const [{ user }] = useAuth();
+  const { nodeBookState } = useNodeBook();
   const [option, setOption] = useState<EditorOptions>("EDIT");
 
-  const [openPart, setOpenPart] = useState<OpenPart>(defaultOpenPartByTutorial);
+  const [openPart, setOpenPart] = useState<OpenPart>(null);
   const [isHiding, setIsHiding] = useState(false);
   const [imageLoaded, setImageLoaded] = useState(false);
   const [reason, setReason] = useState("");
@@ -290,7 +289,12 @@ const Node = ({
   const observer = useRef<ResizeObserver | null>(null);
   const [titleCopy, setTitleCopy] = useState(title);
   const [titleUpdated, setTitleUpdated] = useState(false);
-
+  const [searchResults, setSearchResults] = useState<Pagination>({
+    data: [],
+    lastPageLoaded: 0,
+    totalPage: 0,
+    totalResults: 0,
+  });
   const [nodeTitleHasIssue, setNodeTitleHasIssue] = useState<boolean>(false);
   const [explainationDesc, setExplainationDesc] = useState<boolean>(false);
   const [openProposal, setOpenProposal] = useState<any>(false);
@@ -439,11 +443,9 @@ const Node = ({
 
   const onSetTitle = (newTitle: string) => {
     setTitleCopy(newTitle);
-    if (newTitle.trim().length > 0) {
-      if (contentCopy.trim().length > 0 || imageLoaded) setAbleToPropose(true);
-    } else {
-      setAbleToPropose(false);
-    }
+    const hasContent = !!contentCopy.trim().length;
+    const hasImage = !!imageLoaded;
+    setAbleToPropose(newTitle.trim().length > 0 && (hasContent || hasImage));
     setTitleUpdated(true);
   };
   const onSetContent = (newContent: string) => {
@@ -548,7 +550,6 @@ const Node = ({
         saveProposedImprovement("", reason, () => setAbleToPropose(true));
         notebookRef.current.selectedNode = identifier;
         nodeBookDispatch({ type: "setSelectedNode", payload: identifier });
-        setOperation("ProposeProposals");
       }, 500);
     },
 
@@ -607,27 +608,65 @@ const Node = ({
         let exactMatchingNode = nodes.results.filter((title: any) => title === newTitle);
         let diff = findDiff(nodes.results[0] ?? "", newTitle);
         if (!explainationDesc) {
-          if (exactMatchingNode.length > 0 || diff.length <= 3) {
-            setError(
-              "This title is too close to another node's title shown in the search results on the left. Please differentiate this from other node titles by making it more specific, or in the reasoning section below carefully explain why the title should be as you entered."
-            );
+          if (exactMatchingNode.length > 0 || diff.length <= 1) {
+            onSearch(1, newTitle.trim());
             setNodeTitleHasIssue(true);
             setAbleToPropose(false);
           } else {
+            setSearchResults({
+              data: [],
+              lastPageLoaded: 0,
+              totalPage: 0,
+              totalResults: 0,
+            });
             setError(null);
             if (contentCopy.trim().length > 0 || imageLoaded) setAbleToPropose(true);
           }
         }
         setTitleUpdated(false);
       }
-      setOpenSideBar("SEARCHER_SIDEBAR");
       notebookRef.current.nodeTitleBlured = true;
       notebookRef.current.searchQuery = newTitle;
-      nodeBookDispatch({ type: "setNodeTitleBlured", payload: true });
-      nodeBookDispatch({ type: "setSearchQuery", payload: newTitle });
+
+      // setOpenSideBar("SEARCHER_SIDEBAR");
+      // nodeBookDispatch({ type: "setNodeTitleBlured", payload: true });
+      // nodeBookDispatch({ type: "setSearchQuery", payload: newTitle });
     },
     [titleUpdated]
   );
+
+  const onSearch = useCallback(async (page: number, q: string) => {
+    try {
+      if (page < 1) {
+        setSearchResults({
+          data: [],
+          lastPageLoaded: 0,
+          totalPage: 0,
+          totalResults: 0,
+        });
+      }
+      const data: SearchNodesResponse = await Post<SearchNodesResponse>("/searchNodesInNotebook", {
+        q,
+        nodeTypes: NODE_TYPES_ARRAY,
+        tags: [],
+        nodesUpdatedSince: 1000,
+        sortOption: "NOT_SELECTED",
+        sortDirection: "DESCENDING",
+        page,
+        onlyTitle: nodeBookState.searchByTitleOnly,
+      });
+
+      const newData = page === 1 ? data.data : [...searchResults.data, ...data.data];
+      setSearchResults({
+        data: newData,
+        lastPageLoaded: data.page,
+        totalPage: Math.ceil((data.numResults || 0) / (data.perPage || 10)),
+        totalResults: data.numResults,
+      });
+    } catch (err) {
+      console.error(err);
+    }
+  }, []);
 
   const onBlurExplainDesc = useCallback(
     async (text: string) => {
@@ -778,10 +817,64 @@ const Node = ({
                 editOption={option}
                 disabled={disableTitle}
               />
-              {editable && <Box sx={{ mb: "12px" }}></Box>}
+              {editable && searchResults.data.length > 0 && (
+                <Box sx={{ background: "#183658", mb: "12px", padding: "5px 0px 0px 15px" }}>
+                  <Typography
+                    sx={{
+                      color: theme => theme.palette.common.white,
+                    }}
+                    variant="h4"
+                  >
+                    Make sure you are proposing a node different from following:
+                  </Typography>
+                  <Box className="node-suggestions" sx={{ height: "70px", marginTop: "5px", overflowY: "scroll" }}>
+                    {searchResults.data.map((resNode, idx) => {
+                      return (
+                        <Box key={idx}>
+                          <HtmlTooltip
+                            title={
+                              <Typography variant="body2" component="div">
+                                <MarkdownRender text={resNode.content} />
+                              </Typography>
+                            }
+                            placement={"right"}
+                          >
+                            <Button
+                              onClick={() => openLinkedNode(resNode.id, "Searcher")}
+                              sx={{
+                                ":hover": {
+                                  background: "transparent",
+                                },
+                              }}
+                            >
+                              <Stack direction={"row"} spacing={2}>
+                                <NodeTypeIcon nodeType={resNode.nodeType} fontSize="inherit" />
+                                <Typography
+                                  sx={{
+                                    color: theme => theme.palette.common.white,
+                                  }}
+                                  fontSize={13}
+                                  variant="subtitle1"
+                                >
+                                  {resNode.title}
+                                </Typography>
+                              </Stack>
+                            </Button>
+                          </HtmlTooltip>
+                        </Box>
+                      );
+                    })}
+                  </Box>
+                </Box>
+              )}
               {/* </div> */}
 
-              <Box id={`${identifier}-node-content`}>
+              <Box
+                sx={{
+                  mt: editable ? "12px" : undefined,
+                }}
+                id={`${identifier}-node-content`}
+              >
                 <Editor
                   label="Edit the node content:"
                   value={contentCopy}
@@ -1078,8 +1171,6 @@ const Node = ({
               setOperation={setOperation}
               disabled={disabled}
               enableChildElements={enableChildElements}
-              showProposeTutorial={showProposeTutorial}
-              setCurrentTutorial={setCurrentTutorial}
             />
           </div>
           {(openPart === "LinkingWords" || openPart === "Tags" || openPart === "References") && (
@@ -1276,7 +1367,6 @@ const Node = ({
               proposeNodeImprovement={proposeNodeImprovement}
               setOperation={setOperation}
               disabled={disabled}
-              setCurrentTutorial={setCurrentTutorial}
             />
           </div>
         </div>
@@ -1351,6 +1441,7 @@ const Node = ({
             return (
               <Tooltip title={`Propose a ${childNodeType} child`} placement="right" key={index}>
                 <Fab
+                  id={`${identifier}-propose-${childNodeType.toLowerCase()}-child`}
                   disabled={disabled}
                   color="primary"
                   sx={{
@@ -1391,10 +1482,6 @@ const Node = ({
 };
 
 export const MemoizedNode = React.memo(Node, (prev, next) => {
-  if (next.showProposeTutorial) {
-    return prev === next;
-  }
-
   const basicChanges =
     prev.top === next.top &&
     prev.left === next.left &&
