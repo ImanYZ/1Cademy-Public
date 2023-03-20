@@ -831,6 +831,16 @@ p {
   outline-offset: 5px;
 }
 
+.node-suggestions::-webkit-scrollbar {
+  /* CHECK: I add this to hide scroll and have functionality */
+  width: 6px;
+  height: 8px;
+}
+.node-suggestions::-webkit-scrollbar-thumb {
+  background: #ffffff;
+  border-radius: 10px;
+}
+
 .tutorial-target-inside {
   animation: tutorial-tt 2s infinite;
   outline: 1px solid #ff6d00;
