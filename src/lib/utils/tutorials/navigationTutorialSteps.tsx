@@ -5,17 +5,13 @@ import { useEffect } from "react";
 import { useRive } from "rive-react";
 import { TutorialState, TutorialStep, TutorialStepConfig } from "src/nodeBookTypes";
 
-// import { RiveComponentMemoized } from "@/components/home/components/temporals/RiveComponentExtended";
 import MarkdownRender from "@/components/Markdown/MarkdownRender";
 
-// import { FullNodeData, NodeTutorialState, TutorialState } from "../../nodeBookTypes";
-// import { INTERACTIVE_TUTORIAL_NOTEBOOK_NODES } from "../utils/interactiveTutorialNodes";
 import { getBaseStepConfig } from "./tutorial.utils";
 
 export const INITIAL_NODE_TUTORIAL_STATE: TutorialState = null;
 
 dayjs.extend(relativeTime);
-// const STEPS_LENGHT = 47; // 65
 
 // const DISABLE_NOTEBOOK_OPTIONS = [
 //   "TOOLBAR",
@@ -105,16 +101,6 @@ const NAVIGATION_STEPS: TutorialStepConfig[] = [
     tooltipPosition: "bottomLeft",
     anchor: "Portal",
   },
-  // {
-  //   title: "Navigaton: Zoom Out",
-  //   description: (
-  //     <MarkdownRender
-  //       text={"To zoom out, you can slide to fingers toward each other on the track or press control (command Mac) -"}
-  //     />
-  //   ),
-  //   tooltipPosition: "bottomLeft",
-  //   anchor: "Portal",
-  // },
 ];
 
 export const NAVIGATION_STEPS_COMPLETE: TutorialStep[] = [...NAVIGATION_STEPS].map((c, i, s) => {

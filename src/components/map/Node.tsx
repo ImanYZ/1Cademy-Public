@@ -2,42 +2,30 @@ import AdapterMomentJs from "@date-io/moment";
 import { keyframes } from "@emotion/react";
 import AddIcon from "@mui/icons-material/Add";
 import CodeIcon from "@mui/icons-material/Code";
-/* eslint-disable @typescript-eslint/no-unused-vars */
-/* eslint-disable react-hooks/exhaustive-deps */
 import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
 import EmojiObjectsIcon from "@mui/icons-material/EmojiObjects";
 import HelpOutlineIcon from "@mui/icons-material/HelpOutline";
 import LocalLibraryIcon from "@mui/icons-material/LocalLibrary";
-import LockIcon from "@mui/icons-material/Lock";
 import MenuBookIcon from "@mui/icons-material/MenuBook";
 import SearchIcon from "@mui/icons-material/Search";
 import ShareIcon from "@mui/icons-material/Share";
-import { Box, Button, Fab, Grid, InputLabel, Stack, Switch, TextField, Tooltip, Typography } from "@mui/material";
+import { Box, Button, Fab, Stack, Switch, TextField, Tooltip, Typography } from "@mui/material";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { TimePicker } from "@mui/x-date-pickers/TimePicker";
 import moment from "moment";
-import React, {
-  MutableRefObject,
-  useCallback,
-  useDeferredValue,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-  useTransition,
-} from "react";
+import React, { MutableRefObject, useCallback, useEffect, useMemo, useRef, useState, useTransition } from "react";
 import { DispatchNodeBookActions, FullNodeData, OpenPart, TNodeUpdates } from "src/nodeBookTypes";
 
 import { useNodeBook } from "@/context/NodeBookContext";
 import { getSearchAutocomplete } from "@/lib/knowledgeApi";
 import { Post } from "@/lib/mapApi";
 import { findDiff, getVideoDataByUrl, momentDateToSeconds } from "@/lib/utils/utils";
-import { OpenSidebar, TutorialType } from "@/pages/notebook";
+import { OpenSidebar } from "@/pages/notebook";
 
 import { useAuth } from "../../context/AuthContext";
 import { KnowledgeChoice } from "../../knowledgeTypes";
 import { SearchNodesResponse } from "../../knowledgeTypes";
-import { SortDirection, SortValues, TNodeBookState } from "../../nodeBookTypes";
+import { TNodeBookState } from "../../nodeBookTypes";
 import { NodeType } from "../../types";
 // import { FullNodeData } from "../../noteBookTypes";
 import { Editor } from "../Editor";
@@ -49,8 +37,6 @@ import NodeTypeIcon from "../NodeTypeIcon2";
 // import EditProposal from "./EditProposal";
 import LinkingWords from "./LinkingWords/LinkingWords";
 import { MemoizedMetaButton } from "./MetaButton";
-// import NewChildProposal from "./NewChildProposal";
-// import { MemoizedNodeTypeSelector } from "./Node/NodeTypeSelector";
 import { MemoizedNodeVideo } from "./Node/NodeVideo";
 import { MemoizedNodeFooter } from "./NodeFooter";
 import { MemoizedNodeHeader } from "./NodeHeader";
@@ -161,9 +147,9 @@ type NodeProps = {
   openUserInfoSidebar: (uname: string, imageUrl: string, fullName: string, chooseUname: string) => void;
   disabled?: boolean;
   enableChildElements?: string[];
-  defaultOpenPart?: OpenPart; // this is only to configure default open part value in tutorial
-  showProposeTutorial?: boolean; // this flag is to enable tutorial first time user click in pencil
-  setCurrentTutorial: (newValue: TutorialType) => void;
+  // defaultOpenPart?: OpenPart; // this is only to configure default open part value in tutorial
+  // showProposeTutorial?: boolean; // this flag is to enable tutorial first time user click in pencil
+  // setCurrentTutorial: (newValue: TutorialType) => void;
   ableToPropose: boolean;
   setAbleToPropose: (newValue: boolean) => void;
 };
@@ -191,7 +177,6 @@ const Node = ({
   nodeBookDispatch,
   setNodeUpdates,
   notebookRef,
-  setFocusView,
   activeNode,
   citationsSelected,
   proposalsSelected,
@@ -204,7 +189,6 @@ const Node = ({
   editable,
   unaccepted,
   nodeType,
-  isTag,
   isNew,
   title,
   content,
@@ -229,7 +213,6 @@ const Node = ({
   aImgUrl,
   aFullname,
   aChooseUname,
-  lastVisit,
   studied,
   isStudied,
   changed,
@@ -262,13 +245,11 @@ const Node = ({
   switchChoice,
   deleteChoice,
   addChoice,
-  onNodeTitleBLur,
   saveProposedChildNode,
   saveProposedImprovement,
   closeSideBar,
   reloadPermanentGrpah,
   setOpenMedia,
-  setOpenSearch,
   setNodeParts,
   citations,
   setOpenSideBar,
@@ -284,9 +265,9 @@ const Node = ({
   openUserInfoSidebar,
   disabled = false,
   enableChildElements = [],
-  defaultOpenPart: defaultOpenPartByTutorial = "LinkingWords",
-  showProposeTutorial = false,
-  setCurrentTutorial,
+  // defaultOpenPart: defaultOpenPartByTutorial = "LinkingWords",
+  // showProposeTutorial = false,
+  // setCurrentTutorial,
   ableToPropose,
   setAbleToPropose,
 }: NodeProps) => {
@@ -294,7 +275,7 @@ const Node = ({
   const { nodeBookState } = useNodeBook();
   const [option, setOption] = useState<EditorOptions>("EDIT");
 
-  const [openPart, setOpenPart] = useState<OpenPart>(defaultOpenPartByTutorial);
+  const [openPart, setOpenPart] = useState<OpenPart>(null);
   const [isHiding, setIsHiding] = useState(false);
   const [imageLoaded, setImageLoaded] = useState(false);
   const [reason, setReason] = useState("");
@@ -569,7 +550,6 @@ const Node = ({
         saveProposedImprovement("", reason, () => setAbleToPropose(true));
         notebookRef.current.selectedNode = identifier;
         nodeBookDispatch({ type: "setSelectedNode", payload: identifier });
-        setOperation("ProposeProposals");
       }, 500);
     },
 
@@ -1191,8 +1171,6 @@ const Node = ({
               setOperation={setOperation}
               disabled={disabled}
               enableChildElements={enableChildElements}
-              showProposeTutorial={showProposeTutorial}
-              setCurrentTutorial={setCurrentTutorial}
             />
           </div>
           {(openPart === "LinkingWords" || openPart === "Tags" || openPart === "References") && (
@@ -1389,7 +1367,6 @@ const Node = ({
               proposeNodeImprovement={proposeNodeImprovement}
               setOperation={setOperation}
               disabled={disabled}
-              setCurrentTutorial={setCurrentTutorial}
             />
           </div>
         </div>
@@ -1464,6 +1441,7 @@ const Node = ({
             return (
               <Tooltip title={`Propose a ${childNodeType} child`} placement="right" key={index}>
                 <Fab
+                  id={`${identifier}-propose-${childNodeType.toLowerCase()}-child`}
                   disabled={disabled}
                   color="primary"
                   sx={{
@@ -1504,10 +1482,6 @@ const Node = ({
 };
 
 export const MemoizedNode = React.memo(Node, (prev, next) => {
-  if (next.showProposeTutorial) {
-    return prev === next;
-  }
-
   const basicChanges =
     prev.top === next.top &&
     prev.left === next.left &&

@@ -752,7 +752,7 @@ export const createOrUpdateNode = (
   if (!(nodeId in oldNodes)) {
     newNodeData = {
       ...newNode,
-      editable: false,
+      // editable: false,
       // width: NODE_WIDTH,
       // height,
     };
@@ -817,7 +817,7 @@ export const createOrUpdateNode = (
       newNodeData = {
         ...node,
         ...newNode,
-        editable: false,
+        // editable: false,
         // width: NODE_WIDTH,
         // height,
       };
