@@ -9,7 +9,7 @@ const TABLE_CONTENT_STEPS: TutorialStepConfig[] = [
     description: (
       <MarkdownRender
         text={
-          "For reviewing the interactive and organized set of tutorials of each feature you will need to click this button."
+          "You can click this button to view a full list of the tutorials for 1Cademy. It indicates which ones you have and have not completed. You can click on any of the listed tutorials to take them again if you need a refresher on any of 1Cademy’s features."
         }
       />
     ),

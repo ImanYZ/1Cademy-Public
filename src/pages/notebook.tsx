@@ -62,6 +62,7 @@ import { MemoizedSearcherSidebar } from "@/components/map/Sidebar/SidebarV2/Sear
 import { MemoizedUserInfoSidebar } from "@/components/map/Sidebar/SidebarV2/UserInfoSidebar";
 import { MemoizedUserSettingsSidebar } from "@/components/map/Sidebar/SidebarV2/UserSettigsSidebar";
 import { useAuth } from "@/context/AuthContext";
+import useEventListener from "@/hooks/useEventListener";
 import { useTagsTreeView } from "@/hooks/useTagsTreeView";
 import { addSuffixToUrlGMT } from "@/lib/utils/string.utils";
 import {
@@ -4039,7 +4040,8 @@ const Dashboard = ({}: DashboardProps) => {
     if (!currentStep) return;
     if (!tutorial) return;
 
-    console.log({ childTargetId: currentStep?.childTargetId, targetId });
+    devLog("ON_FINALIZE_TUTORIAL", { childTargetId: currentStep?.childTargetId, targetId });
+
     if (currentStep?.childTargetId) removeStyleFromTarget(currentStep.childTargetId, targetId);
 
     if (tutorial.name === "tmpEditNode") {
@@ -4102,6 +4104,15 @@ const Dashboard = ({}: DashboardProps) => {
     user,
     userTutorial,
   ]);
+
+  useEventListener({
+    stepId: currentStep?.childTargetId ?? currentStep?.targetId,
+    cb: currentStep?.isClickeable
+      ? tutorial && tutorial.step === tutorial?.steps.length
+        ? onNextStep
+        : onFinalizeTutorial
+      : undefined,
+  });
 
   /**
    * Detect the trigger to call a tutorial
@@ -4320,13 +4331,15 @@ const Dashboard = ({}: DashboardProps) => {
       // --------------------------
 
       if (forcedTutorial === "tableOfContents" || userTutorial["nodes"].done || userTutorial["nodes"].skipped) {
-        const shouldIgnore =
-          !forcedTutorial && (userTutorial["tableOfContents"].done || userTutorial["tableOfContents"].skipped);
-        if (shouldIgnore) return;
-        startTutorial("tableOfContents");
-
-        return;
+        const shouldIgnore = forcedTutorial
+          ? forcedTutorial !== "tableOfContents"
+          : userTutorial["tableOfContents"].done || userTutorial["tableOfContents"].skipped;
+        if (!shouldIgnore) {
+          startTutorial("tableOfContents");
+          return;
+        }
       }
+      // --------------------------
 
       // --------------------------
 
@@ -5402,9 +5415,12 @@ const Dashboard = ({}: DashboardProps) => {
                 >
                   <IconButton
                     id="toolbox-table-of-contents"
-                    color="secondary"
+                    color="error"
                     onClick={() => {
-                      setOpenProgressBar(true);
+                      setOpenProgressBar(prev => !prev);
+                      if (tutorial?.name === "tableOfContents") {
+                        onFinalizeTutorial();
+                      }
                     }}
                   >
                     <HelpIcon sx={{ color: theme => (theme.palette.mode === "dark" ? "#CACACA" : "#667085") }} />
