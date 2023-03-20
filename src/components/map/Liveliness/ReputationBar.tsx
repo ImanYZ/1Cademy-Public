@@ -47,7 +47,7 @@ const ReputationlinessBar = (props: ILivelinessBarProps) => {
     const snapshotInitializer = () => {
       setUsersInteractions({});
       unsubscribe.finalizer();
-      const ts = new Date().getTime() - 604800000;
+      const ts = new Date().getTime() - 86400000;
       const actionTracksCol = collection(db, "actionTracks");
       const q = query(actionTracksCol, where("createdAt", ">=", Timestamp.fromDate(new Date(ts))));
       unsubscribe.finalizer = onSnapshot(q, async snapshot => {
@@ -205,7 +205,7 @@ const ReputationlinessBar = (props: ILivelinessBarProps) => {
             padding: "5px 0px 0px 28px",
           }}
         >
-          <Tooltip title={"Weekly Points Leaderboard."} placement="left">
+          <Tooltip title={"24-hour Points Leaderboard."} placement="left">
             <Box sx={{ width: "100%", height: "100%", position: "absolute", right: "0px" }}></Box>
           </Tooltip>
           {/* {window.innerHeight > 799 && (
