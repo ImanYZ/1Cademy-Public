@@ -822,10 +822,11 @@ const Node = ({
                   <Typography
                     sx={{
                       color: theme => theme.palette.common.white,
+                      fontSize: "17px",
                     }}
                     variant="h4"
                   >
-                    Make sure you are proposing a node different from following:
+                    Make sure the node title you propose is different from the following:
                   </Typography>
                   <Box className="node-suggestions" sx={{ height: "70px", marginTop: "5px", overflowY: "scroll" }}>
                     {searchResults.data.map((resNode, idx) => {
