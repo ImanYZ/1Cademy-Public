@@ -4331,13 +4331,15 @@ const Dashboard = ({}: DashboardProps) => {
       // --------------------------
 
       if (forcedTutorial === "tableOfContents" || userTutorial["nodes"].done || userTutorial["nodes"].skipped) {
-        const shouldIgnore =
-          !forcedTutorial && (userTutorial["tableOfContents"].done || userTutorial["tableOfContents"].skipped);
-        if (shouldIgnore) return;
-        startTutorial("tableOfContents");
-
-        return;
+        const shouldIgnore = forcedTutorial
+          ? forcedTutorial !== "tableOfContents"
+          : userTutorial["tableOfContents"].done || userTutorial["tableOfContents"].skipped;
+        if (!shouldIgnore) {
+          startTutorial("tableOfContents");
+          return;
+        }
       }
+      // --------------------------
 
       // --------------------------
 
