@@ -4039,7 +4039,8 @@ const Dashboard = ({}: DashboardProps) => {
     if (!currentStep) return;
     if (!tutorial) return;
 
-    console.log({ childTargetId: currentStep?.childTargetId, targetId });
+    devLog("ON_FINALIZE_TUTORIAL", { childTargetId: currentStep?.childTargetId, targetId });
+
     if (currentStep?.childTargetId) removeStyleFromTarget(currentStep.childTargetId, targetId);
 
     if (tutorial.name === "tmpEditNode") {
@@ -4319,14 +4320,14 @@ const Dashboard = ({}: DashboardProps) => {
 
       // --------------------------
 
-      if (forcedTutorial === "tableOfContents" || userTutorial["nodes"].done || userTutorial["nodes"].skipped) {
-        const shouldIgnore =
-          !forcedTutorial && (userTutorial["tableOfContents"].done || userTutorial["tableOfContents"].skipped);
-        if (shouldIgnore) return;
-        startTutorial("tableOfContents");
+      // if (forcedTutorial === "tableOfContents" || userTutorial["nodes"].done || userTutorial["nodes"].skipped) {
+      //   const shouldIgnore =
+      //     !forcedTutorial && (userTutorial["tableOfContents"].done || userTutorial["tableOfContents"].skipped);
+      //   if (shouldIgnore) return;
+      //   startTutorial("tableOfContents");
 
-        return;
-      }
+      //   return;
+      // }
 
       // --------------------------
 
@@ -4947,6 +4948,8 @@ const Dashboard = ({}: DashboardProps) => {
     }
   }, [graph.nodes, setTargetId, targetId, tutorial]);
 
+  console.log("before jsx", { tutorial });
+
   return (
     <div className="MapContainer" style={{ overflow: "hidden" }}>
       {currentStep?.anchor && (
@@ -5395,19 +5398,25 @@ const Dashboard = ({}: DashboardProps) => {
                   placement="bottom"
                   sx={{
                     ":hover": {
-                      background: theme.palette.mode === "dark" ? "#404040" : "#EAECF0",
+                      // background: theme.palette.mode === "dark" ? "#404040" : "#EAECF0",
                       borderRadius: "8px",
                     },
                   }}
                 >
                   <IconButton
                     id="toolbox-table-of-contents"
-                    color="secondary"
+                    color="error"
                     onClick={() => {
-                      setOpenProgressBar(true);
+                      // debugger;
+                      // console.log({ tutorial });
+                      setOpenProgressBar(prev => !prev);
+                      // if (tutorial?.name === "tableOfContents") {
+                      //   console.log("finalize toc");
+                      //   // onFinalizeTutorial();
+                      // }
                     }}
                   >
-                    <HelpIcon sx={{ color: theme => (theme.palette.mode === "dark" ? "#CACACA" : "#667085") }} />
+                    <HelpIcon /*  sx={{ color: theme => (theme.palette.mode === "dark" ? "#CACACA" : "#667085") }} */ />
                   </IconButton>
                 </Tooltip>
 

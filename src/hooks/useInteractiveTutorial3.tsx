@@ -68,6 +68,8 @@ type useInteractiveTutorialProps = {
 export type Tutorial = { name: TutorialTypeKeys; steps: TutorialStep[]; step: number } | null;
 
 export const useInteractiveTutorial = ({ user }: useInteractiveTutorialProps) => {
+  console.log("hooooooook called");
+
   const db = getFirestore();
   const isPlayingTheTutorialRef = useRef(false);
   // const [currentStep, setCurrentStep] = useState<TutorialStep | null>(null);
