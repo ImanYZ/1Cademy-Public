@@ -4948,8 +4948,6 @@ const Dashboard = ({}: DashboardProps) => {
     }
   }, [graph.nodes, setTargetId, targetId, tutorial]);
 
-  console.log("before jsx", { tutorial });
-
   return (
     <div className="MapContainer" style={{ overflow: "hidden" }}>
       {currentStep?.anchor && (
@@ -5398,7 +5396,7 @@ const Dashboard = ({}: DashboardProps) => {
                   placement="bottom"
                   sx={{
                     ":hover": {
-                      // background: theme.palette.mode === "dark" ? "#404040" : "#EAECF0",
+                      background: theme.palette.mode === "dark" ? "#404040" : "#EAECF0",
                       borderRadius: "8px",
                     },
                   }}
@@ -5416,7 +5414,7 @@ const Dashboard = ({}: DashboardProps) => {
                       // }
                     }}
                   >
-                    <HelpIcon /*  sx={{ color: theme => (theme.palette.mode === "dark" ? "#CACACA" : "#667085") }} */ />
+                    <HelpIcon sx={{ color: theme => (theme.palette.mode === "dark" ? "#CACACA" : "#667085") }} />
                   </IconButton>
                 </Tooltip>
 
