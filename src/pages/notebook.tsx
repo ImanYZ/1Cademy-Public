@@ -62,6 +62,7 @@ import { MemoizedSearcherSidebar } from "@/components/map/Sidebar/SidebarV2/Sear
 import { MemoizedUserInfoSidebar } from "@/components/map/Sidebar/SidebarV2/UserInfoSidebar";
 import { MemoizedUserSettingsSidebar } from "@/components/map/Sidebar/SidebarV2/UserSettigsSidebar";
 import { useAuth } from "@/context/AuthContext";
+import useEventListener from "@/hooks/useEventListener";
 import { useTagsTreeView } from "@/hooks/useTagsTreeView";
 import { addSuffixToUrlGMT } from "@/lib/utils/string.utils";
 import {
@@ -4104,6 +4105,15 @@ const Dashboard = ({}: DashboardProps) => {
     userTutorial,
   ]);
 
+  useEventListener({
+    stepId: currentStep?.childTargetId ?? currentStep?.targetId,
+    cb: currentStep?.isClickeable
+      ? tutorial && tutorial.step === tutorial?.steps.length
+        ? onNextStep
+        : onFinalizeTutorial
+      : undefined,
+  });
+
   /**
    * Detect the trigger to call a tutorial
    * if graph is invalid, DB is modified with correct state
@@ -4320,14 +4330,14 @@ const Dashboard = ({}: DashboardProps) => {
 
       // --------------------------
 
-      // if (forcedTutorial === "tableOfContents" || userTutorial["nodes"].done || userTutorial["nodes"].skipped) {
-      //   const shouldIgnore =
-      //     !forcedTutorial && (userTutorial["tableOfContents"].done || userTutorial["tableOfContents"].skipped);
-      //   if (shouldIgnore) return;
-      //   startTutorial("tableOfContents");
+      if (forcedTutorial === "tableOfContents" || userTutorial["nodes"].done || userTutorial["nodes"].skipped) {
+        const shouldIgnore =
+          !forcedTutorial && (userTutorial["tableOfContents"].done || userTutorial["tableOfContents"].skipped);
+        if (shouldIgnore) return;
+        startTutorial("tableOfContents");
 
-      //   return;
-      // }
+        return;
+      }
 
       // --------------------------
 
@@ -5405,13 +5415,10 @@ const Dashboard = ({}: DashboardProps) => {
                     id="toolbox-table-of-contents"
                     color="error"
                     onClick={() => {
-                      // debugger;
-                      // console.log({ tutorial });
                       setOpenProgressBar(prev => !prev);
-                      // if (tutorial?.name === "tableOfContents") {
-                      //   console.log("finalize toc");
-                      //   // onFinalizeTutorial();
-                      // }
+                      if (tutorial?.name === "tableOfContents") {
+                        onFinalizeTutorial();
+                      }
                     }}
                   >
                     <HelpIcon sx={{ color: theme => (theme.palette.mode === "dark" ? "#CACACA" : "#667085") }} />
