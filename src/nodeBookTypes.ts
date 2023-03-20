@@ -243,8 +243,9 @@ export type TutorialStepConfig = {
   tooltipPosition?: "top" | "bottom" | "left" | "right" | "topLeft" | "topRight" | "bottomLeft" | "bottomRight";
   targetDelay?: number;
   outline?: "shallow" | "outside" | "inside";
-
   isClickeable?: boolean;
+  leftOffset?: number;
+  topOffset?: number;
 };
 
 export type TutorialStep = {
@@ -260,6 +261,8 @@ export type TutorialStep = {
   targetDelay?: number;
   outline?: "shallow" | "outside" | "inside";
   isClickeable?: boolean;
+  leftOffset: number;
+  topOffset: number;
 };
 
 export type StepReducerPayload = {

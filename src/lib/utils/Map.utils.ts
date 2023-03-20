@@ -32,6 +32,7 @@ export const NODE_GAP = 19; // The minimum gap between the stacked nodes.
 export const COLUMN_GAP = 190; // The minimum gap between the node columns.
 export const XOFFSET = 580; // Default X offset to shift all the nodes and relations.
 export const YOFFSET = 160; // Default Y offset to shift all the nodes and relations.
+export const LEFT_OFFSET_NEW_CHILDREN_BUTTON = 20; // offset from right border
 
 // export const visibleNodes = new Set();
 // set of ids of changedNodes: for example (proposal nodes)
