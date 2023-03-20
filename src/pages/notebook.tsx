@@ -74,6 +74,7 @@ import focusViewLogo from "../../public/focus.svg";
 import focusViewDarkLogo from "../../public/focus-dark.svg";
 import toolBox from "../../public/toolbox.svg";
 import toolBoxDark from "../../public/toolbox-dark.svg";
+import toolBoxDarkOpen from "../../public/toolbox-dark-open.svg";
 import toolBoxOpen from "../../public/toolbox-open.svg";
 import { TooltipTutorial } from "../components/interactiveTutorial/Tutorial";
 // import nodesData from "../../testUtils/mockCollections/nodes.data";
@@ -428,6 +429,7 @@ const Dashboard = ({}: DashboardProps) => {
 
   useEffect(() => {
     setInnerHeight(window.innerHeight);
+    setButtonsOpen(window.innerHeight > 399 ? true : false);
   }, [user?.uname]);
 
   const scrollToNode = useCallback(
@@ -5275,16 +5277,20 @@ const Dashboard = ({}: DashboardProps) => {
                 borderRadius: buttonsOpen ? "0px 8px 8px 0px" : "8px",
                 padding: "10px",
                 zIndex: 1299,
+                boxShadow: theme =>
+                  theme.palette.mode === "dark"
+                    ? "0px 1px 2px rgba(0, 0, 0, 0.06), 0px 1px 3px rgba(0, 0, 0, 0.1)"
+                    : "box-shadow: 0px 1px 2px rgba(0, 0, 0, 0.06), 0px 1px 3px rgba(0, 0, 0, 0.1)",
               }}
-              onClick={() => setButtonsOpen(true)}
+              onClick={() => setButtonsOpen(!buttonsOpen)}
             >
               {isQueueWorking && (
                 <CircularProgress
                   size={46}
                   sx={{
                     position: "absolute",
-                    right: { xs: "-1px", sm: "7px" },
-                    bottom: { xs: "-1px", sm: "7px" },
+                    right: { xs: "1px", sm: "7px" },
+                    bottom: { xs: "0px", sm: "7px" },
                     zIndex: "1300",
                   }}
                 />
@@ -5292,13 +5298,17 @@ const Dashboard = ({}: DashboardProps) => {
               <IconButton
                 color="secondary"
                 sx={{
-                  width: windowWith <= 599 ? "36px" : undefined,
+                  padding: { xs: "0px !important", sm: "8px!important" },
+
+                  width: windowWith <= 599 ? "30px" : undefined,
                   height: windowWith <= 599 ? "25px" : undefined,
                   ":hover": {
-                    width: { xs: "36px", sm: "40px" },
-                    height: { xs: "26px", sm: "40px" },
+                    bottom: windowWith <= 599 ? "2px" : undefined,
+                    width: { xs: "32px", sm: "40px" },
+                    height: { xs: "30px", sm: "40px" },
                     borderRadius: "8px",
-                    background: buttonsOpen ? "#55402B" : "inherit",
+                    background: theme =>
+                      buttonsOpen ? (theme.palette.mode === "dark" ? "#55402B" : "#FDEAD7") : "inherit",
                   },
                 }}
               >
@@ -5306,7 +5316,7 @@ const Dashboard = ({}: DashboardProps) => {
                   src={
                     theme.palette.mode === "dark"
                       ? buttonsOpen
-                        ? toolBoxOpen
+                        ? toolBoxDarkOpen
                         : toolBoxDark
                       : buttonsOpen
                       ? toolBoxOpen
@@ -5368,7 +5378,7 @@ const Dashboard = ({}: DashboardProps) => {
                   <IconButton
                     color="secondary"
                     onClick={onScrollToLastNode}
-                    disabled={["TT"].includes("SCROLL_TO_NODE_BUTTON")}
+                    disabled={!nodeBookState.selectedNode ? true : false}
                   >
                     <MyLocationIcon sx={{ color: theme => (theme.palette.mode === "dark" ? "#CACACA" : "#667085") }} />
                   </IconButton>
