@@ -1,7 +1,8 @@
 import LiveHelpIcon from "@mui/icons-material/LiveHelp";
 import { Box, Button, Stack, Typography } from "@mui/material";
-import React, { useMemo, useRef } from "react";
+import React, { useCallback, useMemo, useRef } from "react";
 
+import { useWindowSize } from "@/hooks/useWindowSize";
 import { gray50, gray200, gray700, gray800 } from "@/pages/home";
 
 import { TargetClientRect, Tutorial } from "../../hooks/useInteractiveTutorial3";
@@ -35,35 +36,96 @@ export const TooltipTutorial = ({
   node,
 }: TutorialProps) => {
   const tooltipRef = useRef<HTMLDivElement | null>(null);
+  const { width: windowWidth, height: windowHeight } = useWindowSize();
 
   // console.log({ tutorialStep, tutorial });
-  const tooltipClientRect = useMemo(() => {
-    if (!tooltipRef.current) return { top: 0, left: 0 };
-    if (!tutorialStep) return { top: 0, left: 0 };
 
-    const { height: tooltipHeight } = tooltipRef.current.getBoundingClientRect();
+  const calcWithExceed = useCallback(
+    (top: number, left: number) => {
+      if (!tooltipRef.current) return { top, left };
+
+      //if the width of tooltip exceeds the winwow heigth
+      const exceedBottom = top + tooltipRef.current.clientHeight - windowHeight;
+      top = exceedBottom > 0 ? top - exceedBottom - 4 : top;
+
+      //if the top of the tooltip is less than - 0
+      top = top < 0 ? 10 : top;
+
+      //if the width of tooltip exceeds the winwow width
+      const exceedRight = left + tooltipRef.current.clientWidth - windowWidth;
+      left = exceedRight > 0 ? left - exceedRight - 4 : left;
+
+      //if the left of the tooltip is less than - 0
+      left = left < 0 ? 10 : left;
+      return { top, left };
+    },
+    [windowHeight, windowWidth]
+  );
+  const tooltipClientRect = useMemo(() => {
     let top = 0;
     let left = 0;
+    let tailTop = 0;
+    let tailLeft = 0;
+
+    if (!tooltipRef.current) return { top, left, tailLeft, tailTop };
+    if (!tutorialStep) return { top, left, tailLeft, tailTop };
+
+    const { height: tooltipHeight } = tooltipRef.current.getBoundingClientRect();
     const pos = tutorialStep.tooltipPosition;
     if (pos === "top") {
       top = targetClientRect.top - tooltipHeight - TOOLTIP_OFFSET;
       left = targetClientRect.left + targetClientRect.width / 2 - tooltipRef.current.clientWidth / 2;
+      tailTop = tooltipRef.current.clientHeight;
+      tailLeft = targetClientRect.left - tooltipRef.current.offsetLeft + 10;
+      if (tutorialStep.anchor === "Portal") {
+        const { top: newTop, left: newLeft } = calcWithExceed(top, left);
+        top = newTop;
+        left = newLeft;
+      }
     }
     if (pos === "bottom") {
       top = targetClientRect.top + targetClientRect.height + TOOLTIP_OFFSET;
       left = targetClientRect.left + targetClientRect.width / 2 - tooltipRef.current.clientWidth / 2;
+      tailTop = -10;
+      tailLeft = targetClientRect.left - tooltipRef.current.offsetLeft + 10;
+      if (tutorialStep.anchor === "Portal") {
+        const { top: newTop, left: newLeft } = calcWithExceed(top, left);
+        top = newTop;
+        left = newLeft;
+      }
     }
     if (pos === "left") {
       top = targetClientRect.top + targetClientRect.height / 2 - tooltipRef.current.clientHeight / 2;
       left = targetClientRect.left - tooltipRef.current.clientWidth - TOOLTIP_OFFSET;
+      tailTop = targetClientRect.top + targetClientRect.height / 2 - tooltipRef.current.offsetTop - 10;
+      tailLeft = tooltipRef.current.clientWidth;
+      if (tutorialStep.anchor === "Portal") {
+        const { top: newTop, left: newLeft } = calcWithExceed(top, left);
+        top = newTop;
+        left = newLeft;
+      }
     }
     if (pos === "right") {
       top = targetClientRect.top + targetClientRect.height / 2 - tooltipRef.current.clientHeight / 2;
       left = targetClientRect.left + targetClientRect.width + TOOLTIP_OFFSET;
+      tailTop = targetClientRect.top + targetClientRect.height / 2 - tooltipRef.current.offsetTop - 10;
+      tailLeft = -10;
+      if (tutorialStep.anchor === "Portal") {
+        const { top: newTop, left: newLeft } = calcWithExceed(top, left);
+        top = newTop;
+        left = newLeft;
+      }
     }
 
-    return { top, left };
-  }, [targetClientRect, tutorialStep]);
+    return { top, left, tailTop, tailLeft };
+  }, [
+    calcWithExceed,
+    targetClientRect.height,
+    targetClientRect.left,
+    targetClientRect.top,
+    targetClientRect.width,
+    tutorialStep,
+  ]);
 
   if (!tutorialStep) return null;
   if (!tutorialStep.currentStepName) return null;
@@ -226,6 +288,11 @@ export const TooltipTutorial = ({
         borderRadius: "8px",
         color: theme => (theme.palette.mode === "dark" ? gray50 : gray800),
         zIndex: 99999,
+
+        ":after": {
+          top: `${tooltipClientRect.tailTop}px`,
+          left: `${tooltipClientRect.tailLeft}px`,
+        },
       }}
     >
       <Stack direction={"row"} justifyContent="space-between" sx={{ mb: "12px" }}>
