@@ -84,6 +84,7 @@ type LinkingWordsProps = {
   setOperation: (operation: string) => void;
   disabled?: boolean;
   enableChildElements?: string[];
+  nodeType: any;
 };
 
 const LinkingWords = ({
@@ -258,7 +259,7 @@ const LinkingWords = ({
             </Box>
           )}
 
-          {props.openPart === "References" && (
+          {props.openPart === "References" && props.nodeType !== "Reference" && (
             <Box
               id={`${props.identifier}-node-references`}
               sx={{ display: "flex", flexDirection: "column", gap: "8px" }}
@@ -544,19 +545,22 @@ const LinkingWords = ({
                 visible={false}
                 disabled={disabled}
               />
-              {props.editable && !props.isNew && notebookRef.current.selectedNode === props.identifier && (
-                <MemoizedMetaButton
-                  onClick={choosingNewLinkedNode("Child")}
-                  tooltip="Link to an existing child node."
-                  tooltipPosition="right"
-                >
-                  <>
-                    <span>Link to an existing Child node</span>
-                    <AddIcon sx={{ color: "#00E676", fontSize: "16px" }} />
-                    <ArrowForwardIcon sx={{ color: "#00E676", fontSize: "16px" }} />
-                  </>
-                </MemoizedMetaButton>
-              )}
+              {props.editable &&
+                !props.isNew &&
+                props.nodeType !== "Reference" &&
+                notebookRef.current.selectedNode === props.identifier && (
+                  <MemoizedMetaButton
+                    onClick={choosingNewLinkedNode("Child")}
+                    tooltip="Link to an existing child node."
+                    tooltipPosition="right"
+                  >
+                    <>
+                      <span>Link to an existing Child node</span>
+                      <AddIcon sx={{ color: "#00E676", fontSize: "16px" }} />
+                      <ArrowForwardIcon sx={{ color: "#00E676", fontSize: "16px" }} />
+                    </>
+                  </MemoizedMetaButton>
+                )}
             </Box>
           )}
         </Box>
