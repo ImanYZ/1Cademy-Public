@@ -2,7 +2,11 @@ import { doc, getDoc, getFirestore } from "firebase/firestore";
 import { ReactNode, useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { NAVIGATION_STEPS_COMPLETE } from "@/lib/utils/tutorials/navigationTutorialSteps";
-import { CLOSE_STEPS_COMPLETE, OPEN_STEPS_COMPLETE } from "@/lib/utils/tutorials/nodeActionsTutorialStep";
+import {
+  CLOSE_OPEN_STEPS_COMPLETE,
+  CLOSE_STEPS_COMPLETE,
+  OPEN_STEPS_COMPLETE,
+} from "@/lib/utils/tutorials/nodeActionsTutorialStep";
 import { PROPOSAL_STEPS_COMPLETE } from "@/lib/utils/tutorials/proposalTutorialSteps";
 import {
   RECONCILING_ACCEPTED_PROPOSALS_STEPS_COMPLETE,
@@ -119,6 +123,7 @@ export const useInteractiveTutorial = ({ user }: useInteractiveTutorialProps) =>
     scrollToNode: { currentStep: -1, done: false, skipped: false },
     closeNode: { currentStep: -1, done: false, skipped: false },
     openNode: { currentStep: -1, done: false, skipped: false },
+    closeOpenNode: { currentStep: -1, done: false, skipped: false },
   });
 
   // flag for whether tutorial state was loaded
@@ -249,6 +254,9 @@ export const useInteractiveTutorial = ({ user }: useInteractiveTutorialProps) =>
       }
       if (newTutorial === "openNode") {
         newSteps = OPEN_STEPS_COMPLETE;
+      }
+      if (newTutorial === "closeOpenNode") {
+        newSteps = CLOSE_OPEN_STEPS_COMPLETE;
       }
       //----------------- tmp nodes
 

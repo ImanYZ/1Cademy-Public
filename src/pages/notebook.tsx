@@ -4306,6 +4306,15 @@ const Dashboard = ({}: DashboardProps) => {
 
       // --------------------------
 
+      const closeOpenNodeTutorialIsValid = (node: FullNodeData) => node && node.open;
+
+      if (forcedTutorial === "closeOpenNode") {
+        const result = detectAndForceTutorial("closeOpenNode", "r98BjyFDCe4YyLA3U8ZE", closeOpenNodeTutorialIsValid);
+        if (result) return;
+      }
+
+      // --------------------------
+
       const closeNodeTutorialIsValid = (node: FullNodeData) => Boolean(node);
 
       if (

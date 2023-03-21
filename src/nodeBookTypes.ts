@@ -473,7 +473,8 @@ export type TutorialTypeKeys =
   | "redrawGraph"
   | "scrollToNode"
   | "closeNode"
-  | "openNode";
+  | "openNode"
+  | "closeOpenNode";
 
 export type UserTutorial = {
   currentStep: number;
