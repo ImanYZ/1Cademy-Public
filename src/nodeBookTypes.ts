@@ -467,7 +467,8 @@ export type TutorialTypeKeys =
   | "tmpProposalIdeaChild"
   | "tableOfContents"
   | "focusMode"
-  | "redrawGraph";
+  | "redrawGraph"
+  | "scrollToNode";
 
 export type UserTutorial = {
   currentStep: number;

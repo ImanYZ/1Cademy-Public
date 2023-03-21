@@ -8,7 +8,12 @@ import {
   RECONCILING_NOT_ACCEPTED_PROPOSALS_STEPS_COMPLETE,
 } from "@/lib/utils/tutorials/reconcilingProposalsTutorialSteps";
 import { SEARCHER_STEPS_COMPLETE } from "@/lib/utils/tutorials/searcherTutorialSteps";
-import { FOCUS_MODE_STEPS, REDRAW_GRAPH_STEPS, TABLE_CONTENT_STEPS } from "@/lib/utils/tutorials/toolbooxTutorialSteps";
+import {
+  FOCUS_MODE_STEPS,
+  REDRAW_GRAPH_STEPS,
+  SCROLL_TO_NODE_STEPS,
+  TABLE_CONTENT_STEPS,
+} from "@/lib/utils/tutorials/toolbooxTutorialSteps";
 
 import { User } from "../knowledgeTypes";
 import { devLog } from "../lib/utils/develop.util";
@@ -110,6 +115,7 @@ export const useInteractiveTutorial = ({ user }: useInteractiveTutorialProps) =>
     tableOfContents: { currentStep: -1, done: false, skipped: false },
     focusMode: { currentStep: -1, done: false, skipped: false },
     redrawGraph: { currentStep: -1, done: false, skipped: false },
+    scrollToNode: { currentStep: -1, done: false, skipped: false },
   });
 
   // flag for whether tutorial state was loaded
@@ -231,6 +237,9 @@ export const useInteractiveTutorial = ({ user }: useInteractiveTutorialProps) =>
       }
       if (newTutorial === "redrawGraph") {
         newSteps = REDRAW_GRAPH_STEPS;
+      }
+      if (newTutorial === "scrollToNode") {
+        newSteps = SCROLL_TO_NODE_STEPS;
       }
 
       //----------------- tmp nodes
