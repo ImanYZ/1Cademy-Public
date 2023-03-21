@@ -44,7 +44,6 @@ import {
   TMP_PROPOSE_CHILD_RELATION,
 } from "../lib/utils/tutorials/temporalTutorialSteps";
 import { TutorialStep, TutorialTypeKeys, UserTutorials } from "../nodeBookTypes";
-import useEventListener from "./useEventListener";
 
 export const DEFAULT_NUMBER_OF_TRIES = 5;
 
@@ -263,7 +262,7 @@ export const useInteractiveTutorial = ({ user }: useInteractiveTutorialProps) =>
     setTutorial(prevTutorial => {
       if (!prevTutorial) return null;
       if (!currentStep) return null;
-      if (prevTutorial.step >= prevTutorial.steps.length) return null;
+      if (prevTutorial.step >= prevTutorial.steps.length) return prevTutorial;
 
       if (currentStep?.childTargetId) removeStyleFromTarget(currentStep.childTargetId, targetId);
       const newStep = prevTutorial.step + 1;
@@ -291,11 +290,6 @@ export const useInteractiveTutorial = ({ user }: useInteractiveTutorialProps) =>
     });
   }, [currentStep, targetId]);
 
-  useEventListener({
-    stepId: currentStep?.childTargetId ?? currentStep?.targetId,
-    cb: currentStep?.isClickeable ? onNextStep : undefined,
-  });
-
   return {
     startTutorial,
     tutorial,
@@ -309,7 +303,6 @@ export const useInteractiveTutorial = ({ user }: useInteractiveTutorialProps) =>
     userTutorial,
     userTutorialLoaded,
     setUserTutorial,
-    // setInitialStep,
   };
 };
 
