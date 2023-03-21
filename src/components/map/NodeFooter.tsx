@@ -122,6 +122,7 @@ type NodeFooterProps = {
   disabled?: boolean;
   enableChildElements?: string[];
   showProposeTutorial?: boolean;
+  setAbleToPropose: any;
 };
 
 const NodeFooter = ({
@@ -186,6 +187,7 @@ const NodeFooter = ({
   setOperation,
   disabled,
   enableChildElements = [],
+  setAbleToPropose,
 }: NodeFooterProps) => {
   const router = useRouter();
   const db = getFirestore();
@@ -506,6 +508,7 @@ const NodeFooter = ({
                   nodeType={nodeType}
                   disabled={disableNodeTypeSelector}
                   disabledItems={disabled}
+                  setAbleToPropose={setAbleToPropose}
                 />
               ) : (
                 <NodeTypeIcon
