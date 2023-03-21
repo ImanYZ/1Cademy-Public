@@ -787,32 +787,32 @@ p {
 }
 
 /* TUTORIAL STYLES TOOLTIP */
-.tooltip {
+.tooltip::after {
   position: absolute;
-  /* content: ""; */
+  content: "";
   border-style: solid;
   border-width: 10px;
   border-color: transparent;
 }
-.tooltip-top {
+.tooltip-top::after {
   border-bottom-width: 0px;
   border-top-color: inherit;
-  /* bottom: -10px;
-  left: calc(50% - 10px); */
+  bottom: -10px;
+  left: calc(50% - 10px);
 }
-.tooltip-bottom {
+.tooltip-bottom::after {
   border-top-width: 0px;
   border-bottom-color: inherit;
   /* top: -10px;
   left: calc(50% - 10px); */
 }
-.tooltip-right {
+.tooltip-right::after {
   border-left-width: 0px;
   border-right-color: inherit;
   /* left: -10px;
   top: calc(50% - 10px); */
 }
-.tooltip-left {
+.tooltip-left::after {
   border-right-width: 0px;
   border-left-color: inherit;
   /* right: -10px;

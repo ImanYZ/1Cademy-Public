@@ -63,14 +63,15 @@ export const TooltipTutorial = ({
     [windowHeight, windowWidth]
   );
 
-  const tooltipClientRect = useMemo(() => {
+  const tooltipRect = useMemo(() => {
     let top = 0;
     let left = 0;
-
+    let exceedTop = 0;
+    let exceedLeft = 0;
     console.log("TOOLTIP_CLIENT_RECT", { tutorialStep });
 
-    if (!tooltipRef.current) return { top, left };
-    if (!tutorialStep) return { top, left };
+    if (!tooltipRef.current) return { top, left, exceedTop, exceedLeft };
+    if (!tutorialStep) return { top, left, exceedTop, exceedLeft };
 
     const { height: tooltipHeight } = tooltipRef.current.getBoundingClientRect();
     const pos = tutorialStep.tooltipPosition;
@@ -79,6 +80,9 @@ export const TooltipTutorial = ({
       left = targetClientRect.left + targetClientRect.width / 2 - tooltipRef.current.clientWidth / 2;
       if (tutorialStep.anchor === "Portal") {
         const { top: newTop, left: newLeft } = calcWithExceed(top, left);
+
+        exceedLeft = left - newLeft;
+        exceedTop = top - newTop;
         top = newTop;
         left = newLeft;
       }
@@ -88,32 +92,42 @@ export const TooltipTutorial = ({
       left = targetClientRect.left + targetClientRect.width / 2 - tooltipRef.current.clientWidth / 2;
       if (tutorialStep.anchor === "Portal") {
         const { top: newTop, left: newLeft } = calcWithExceed(top, left);
+        console.log("calc", { top, left, newTop, newLeft });
+        exceedLeft = left - newLeft;
+        exceedTop = top - newTop;
         top = newTop;
         left = newLeft;
       }
     }
     if (pos === "left") {
-      top = targetClientRect.top + targetClientRect.height / 2 - tooltipRef.current.clientHeight / 2;
+      top =
+        targetClientRect.top + targetClientRect.height / 2 - tooltipRef.current.clientHeight / 2 + TOOLTIP_TALE_SIZE;
       left = targetClientRect.left - tooltipRef.current.clientWidth - TOOLTIP_OFFSET;
       console.log(1, { top, left });
       if (tutorialStep.anchor === "Portal") {
         const { top: newTop, left: newLeft } = calcWithExceed(top, left);
+        console.log("calc", { top, left, newTop, newLeft, exceedLeft: left - newLeft, exceedTop: top - newTop });
+        exceedLeft = left - newLeft;
+        exceedTop = top - newTop;
         top = newTop;
         left = newLeft;
       }
     }
 
     if (pos === "right") {
-      top = targetClientRect.top + targetClientRect.height / 2 - tooltipRef.current.clientHeight / 2;
+      top =
+        targetClientRect.top + targetClientRect.height / 2 - tooltipRef.current.clientHeight / 2 + TOOLTIP_TALE_SIZE;
       left = targetClientRect.left + targetClientRect.width + TOOLTIP_OFFSET;
       if (tutorialStep.anchor === "Portal") {
         const { top: newTop, left: newLeft } = calcWithExceed(top, left);
+        exceedLeft = left - newLeft;
+        exceedTop = top - newTop;
         top = newTop;
         left = newLeft;
       }
     }
 
-    return { top, left };
+    return { top, left, exceedTop, exceedLeft };
   }, [
     calcWithExceed,
     targetClientRect.height,
@@ -122,34 +136,67 @@ export const TooltipTutorial = ({
     targetClientRect.width,
     tutorialStep,
   ]);
-  const tooltipTaleClientRect = useMemo(() => {
-    let top = 0;
-    let left = 0;
+  // const tooltipTaleClientRect = useMemo(() => {
+  //   let top = 0;
+  //   let left = 0;
 
-    console.log("TOOLTIP_TALE_CLIENT_RECT", { tutorialStep });
+  //   console.log("TOOLTIP_TALE_CLIENT_RECT", { tutorialStep });
 
-    if (!tutorialStep) return { top, left };
+  //   if (!tutorialStep) return { top, left };
+
+  //   const pos = tutorialStep.tooltipPosition;
+  //   if (pos === "top") {
+  //     top = targetClientRect.top - TOOLTIP_OFFSET;
+  //     left = targetClientRect.left + targetClientRect.width / 2 - TOOLTIP_TALE_SIZE / 2;
+  //   }
+  //   if (pos === "bottom") {
+  //     top = targetClientRect.top + targetClientRect.height + TOOLTIP_OFFSET - TOOLTIP_TALE_SIZE;
+  //     left = targetClientRect.left + targetClientRect.width / 2 - TOOLTIP_TALE_SIZE / 2;
+  //   }
+  //   if (pos === "left") {
+  //     top = targetClientRect.top + targetClientRect.height / 2 - TOOLTIP_TALE_SIZE / 2;
+  //     left = targetClientRect.left - TOOLTIP_OFFSET;
+  //   }
+  //   if (pos === "right") {
+  //     top = targetClientRect.top + targetClientRect.height / 2 - TOOLTIP_TALE_SIZE / 2;
+  //     left = targetClientRect.left + targetClientRect.width + TOOLTIP_OFFSET - TOOLTIP_TALE_SIZE;
+  //   }
+
+  //   return { top, left };
+  // }, [targetClientRect.height, targetClientRect.left, targetClientRect.top, targetClientRect.width, tutorialStep]);
+
+  const taleRect = useMemo(() => {
+    let top = undefined;
+    let left = undefined;
+    let right = undefined;
+    let bottom = undefined;
+    if (!tooltipRef.current) return { top, left, right, bottom };
+    if (!tutorialStep) return { top, left, right, bottom };
+
+    //keep for recalc memo, otherwise will catch wrong prev  position
+    if (!targetClientRect) return { top, left, right, bottom };
 
     const pos = tutorialStep.tooltipPosition;
+
     if (pos === "top") {
-      top = targetClientRect.top - TOOLTIP_OFFSET;
-      left = targetClientRect.left + targetClientRect.width / 2 - TOOLTIP_TALE_SIZE / 2;
+      bottom = -TOOLTIP_TALE_SIZE;
+      left = tooltipRef.current.clientWidth / 2 - TOOLTIP_TALE_SIZE;
     }
     if (pos === "bottom") {
-      top = targetClientRect.top + targetClientRect.height + TOOLTIP_OFFSET - TOOLTIP_TALE_SIZE;
-      left = targetClientRect.left + targetClientRect.width / 2 - TOOLTIP_TALE_SIZE / 2;
+      top = -TOOLTIP_TALE_SIZE;
+      left = tooltipRef.current.clientWidth / 2 - TOOLTIP_TALE_SIZE;
     }
     if (pos === "left") {
-      top = targetClientRect.top + targetClientRect.height / 2 - TOOLTIP_TALE_SIZE / 2;
-      left = targetClientRect.left - TOOLTIP_OFFSET + TOOLTIP_TALE_SIZE;
+      top = tooltipRef.current.clientHeight / 2 - TOOLTIP_TALE_SIZE;
+      right = -TOOLTIP_TALE_SIZE;
     }
     if (pos === "right") {
-      top = targetClientRect.top + targetClientRect.height / 2 - TOOLTIP_TALE_SIZE / 2;
-      left = targetClientRect.left + targetClientRect.width + TOOLTIP_OFFSET;
+      top = tooltipRef.current.clientHeight / 2 - TOOLTIP_TALE_SIZE;
+      left = -TOOLTIP_TALE_SIZE;
     }
 
-    return { top, left };
-  }, [targetClientRect.height, targetClientRect.left, targetClientRect.top, targetClientRect.width, tutorialStep]);
+    return { top, left, right, bottom };
+  }, [tutorialStep, targetClientRect]);
 
   if (!tutorialStep) return null;
   if (!tutorialStep.currentStepName) return null;
@@ -297,135 +344,140 @@ export const TooltipTutorial = ({
     );
 
   return (
-    <>
-      <Box
-        ref={tooltipRef}
-        sx={{
-          position: "absolute",
-          top: `${tooltipClientRect.top}px`,
-          left: `${tooltipClientRect.left}px`,
-          transition: "top 500ms ease-out,left 500ms ease-out",
-          width: "450px",
-          backgroundColor: theme => (theme.palette.mode === "dark" ? "#4B535C" : "#C5D0DF"),
-          borderColor: theme => (theme.palette.mode === "dark" ? "#4B535C" : "#C5D0DF") /* this is used in tooltip */,
-          p: "24px 32px",
-          borderRadius: "8px",
-          color: theme => (theme.palette.mode === "dark" ? gray50 : gray800),
-          zIndex: 99999,
+    <Box
+      ref={tooltipRef}
+      className={`tooltip tooltip-${tutorialStep.tooltipPosition}`}
+      sx={{
+        position: "absolute",
+        top: `${tooltipRect.top}px`,
+        left: `${tooltipRect.left}px`,
+        transition: "top 750ms ease-out,left 750ms ease-out, border-color 1s linear",
+        width: "450px",
+        backgroundColor: theme => (theme.palette.mode === "dark" ? "#4B535C" : "#C5D0DF"),
+        borderColor: theme => (theme.palette.mode === "dark" ? "#4B535C" : "#C5D0DF") /* this is used in tooltip */,
+        p: "24px 32px",
+        borderRadius: "8px",
+        color: theme => (theme.palette.mode === "dark" ? gray50 : gray800),
+        zIndex: 99999,
 
-          // ":after": {
-          //   top: `${tooltipTaleClientRect.top}px`,
-          //   left: `${tooltipTaleClientRect.left - 10}px`,
-          // },
-        }}
-      >
-        <Stack direction={"row"} justifyContent="space-between" sx={{ mb: "12px" }}>
-          <Stack direction={"row"} alignItems="center" spacing={"8px"}>
-            <Typography component={"h2"} sx={{ fontSize: "18px", fontWeight: "bold", display: "inline-block" }}>
-              {tutorialStep.title}
-            </Typography>
-            <LiveHelpIcon />
-          </Stack>
-          {stepsLength <= 1 || (
-            <Typography sx={{ display: "inline-block", color: "inherit" }}>
-              {tutorialStep.currentStepName} / {stepsLength}
-            </Typography>
-          )}
+        ":after": {
+          top: taleRect.top ? `${taleRect.top + tooltipRect.exceedTop}px` : undefined,
+          bottom: taleRect.bottom ? `${taleRect.bottom}px` : undefined,
+          left: taleRect.left ? `${taleRect.left + tooltipRect.exceedLeft}px` : undefined,
+          right: taleRect.right ? `${taleRect.right}px` : undefined,
+        },
+      }}
+    >
+      <Stack direction={"row"} justifyContent="space-between" sx={{ mb: "12px" }}>
+        <Stack direction={"row"} alignItems="center" spacing={"8px"}>
+          <Typography component={"h2"} sx={{ fontSize: "18px", fontWeight: "bold", display: "inline-block" }}>
+            {tutorialStep.title}
+          </Typography>
+          <LiveHelpIcon />
         </Stack>
+        {stepsLength <= 1 || (
+          <Typography sx={{ display: "inline-block", color: "inherit" }}>
+            {tutorialStep.currentStepName} / {stepsLength}
+          </Typography>
+        )}
+      </Stack>
 
-        {typeof tutorialStep.description === "function" ? tutorialStep.description(node) : tutorialStep.description}
+      {typeof tutorialStep.description === "function" ? tutorialStep.description(node) : tutorialStep.description}
 
-        {/* INFO: reversed used for showing buttons always to right no matter the number of elements */}
-        <Stack direction={"row-reverse"} justifyContent={"space-between"} alignItems={"center"} sx={{ mt: "16px" }}>
-          <Box>
-            {tutorialStep.currentStepName > 1 && (
-              <Button
-                variant="outlined"
-                onClick={onPreviousStep}
-                sx={{
-                  borderRadius: "32px",
-                  mr: "16px",
-                  p: "8px 32px",
-                  color: "inherit",
-                  borderColor: theme => (theme.palette.mode === "dark" ? gray50 : gray800),
-                  ":hover": {
-                    borderColor: "inherit",
-                    color: "inherit",
-                    backgroundColor: theme => (theme.palette.mode === "dark" ? "#575f68" : "#d7dee6"),
-                  },
-                }}
-              >
-                Prev
-              </Button>
-            )}
-
-            {tutorialStep.currentStepName < stepsLength && (
-              <Button
-                variant="contained"
-                onClick={onNextStep}
-                style={{ zIndex: 898999 }}
-                sx={{
-                  borderRadius: "32px",
-                  p: "8px 32px",
-                  color: theme => (theme.palette.mode === "dark" ? gray800 : gray50),
-                  backgroundColor: theme => (theme.palette.mode === "dark" ? gray50 : gray800),
-                  ":hover": {
-                    backgroundColor: theme => (theme.palette.mode === "dark" ? gray200 : gray700),
-                  },
-                }}
-              >
-                Next
-              </Button>
-            )}
-            {tutorialStep.currentStepName === stepsLength && (
-              <Button
-                variant="contained"
-                onClick={() => {
-                  handleCloseProgressBarMenu();
-                  // onNextStep();
-                  onFinalize();
-                }}
-                sx={{
-                  borderRadius: "32px",
-                  p: "8px 32px",
-                  color: theme => (theme.palette.mode === "dark" ? gray800 : gray50),
-                  backgroundColor: theme => (theme.palette.mode === "dark" ? gray50 : gray800),
-                  ":hover": {
-                    backgroundColor: theme => (theme.palette.mode === "dark" ? gray200 : gray700),
-                  },
-                }}
-              >
-                Got it
-              </Button>
-            )}
-          </Box>
-          {tutorialStep.currentStepName !== stepsLength && (
+      {/* INFO: reversed used for showing buttons always to right no matter the number of elements */}
+      <Stack direction={"row-reverse"} justifyContent={"space-between"} alignItems={"center"} sx={{ mt: "16px" }}>
+        <Box>
+          {tutorialStep.currentStepName > 1 && (
             <Button
-              variant="text"
-              onClick={() => {
-                handleCloseProgressBarMenu();
-                // onChangeStep(null);
-                // onUpdateNode("nodes", tutorialState.currentStepName, {});
-                onSkip();
-              }}
+              variant="outlined"
+              onClick={onPreviousStep}
               sx={{
+                borderRadius: "32px",
+                mr: "16px",
+                p: "8px 32px",
                 color: "inherit",
-                p: "8px 0px",
-                ":hover": { backgroundColor: theme => (theme.palette.mode === "dark" ? "#575f68" : "#d7dee6") },
+                borderColor: theme => (theme.palette.mode === "dark" ? gray50 : gray800),
+                ":hover": {
+                  borderColor: "inherit",
+                  color: "inherit",
+                  backgroundColor: theme => (theme.palette.mode === "dark" ? "#575f68" : "#d7dee6"),
+                },
               }}
             >
-              Skip
+              Prev
             </Button>
           )}
-        </Stack>
-      </Box>
-      <Box
+
+          {tutorialStep.currentStepName < stepsLength && (
+            <Button
+              variant="contained"
+              onClick={onNextStep}
+              style={{ zIndex: 898999 }}
+              sx={{
+                borderRadius: "32px",
+                p: "8px 32px",
+                color: theme => (theme.palette.mode === "dark" ? gray800 : gray50),
+                backgroundColor: theme => (theme.palette.mode === "dark" ? gray50 : gray800),
+                ":hover": {
+                  backgroundColor: theme => (theme.palette.mode === "dark" ? gray200 : gray700),
+                },
+              }}
+            >
+              Next
+            </Button>
+          )}
+          {tutorialStep.currentStepName === stepsLength && (
+            <Button
+              variant="contained"
+              onClick={() => {
+                handleCloseProgressBarMenu();
+                // onNextStep();
+                onFinalize();
+              }}
+              sx={{
+                borderRadius: "32px",
+                p: "8px 32px",
+                color: theme => (theme.palette.mode === "dark" ? gray800 : gray50),
+                backgroundColor: theme => (theme.palette.mode === "dark" ? gray50 : gray800),
+                ":hover": {
+                  backgroundColor: theme => (theme.palette.mode === "dark" ? gray200 : gray700),
+                },
+              }}
+            >
+              Got it
+            </Button>
+          )}
+        </Box>
+        {tutorialStep.currentStepName !== stepsLength && (
+          <Button
+            variant="text"
+            onClick={() => {
+              handleCloseProgressBarMenu();
+              // onChangeStep(null);
+              // onUpdateNode("nodes", tutorialState.currentStepName, {});
+              onSkip();
+            }}
+            sx={{
+              color: "inherit",
+              p: "8px 0px",
+              ":hover": { backgroundColor: theme => (theme.palette.mode === "dark" ? "#575f68" : "#d7dee6") },
+            }}
+          >
+            Skip
+          </Button>
+        )}
+      </Stack>
+    </Box>
+  );
+};
+{
+  /* <Box
         sx={{
           position: "absolute",
           border: "solid 10px transparent",
           top: `${tooltipTaleClientRect.top}px`,
-          left: `${tooltipTaleClientRect.left - 10}px`,
-          transition: "top 500ms ease-out,left 500ms ease-out",
+          left: `${tooltipTaleClientRect.left}px`,
+          transition: "top 750ms ease-out,left 750ms ease-out, border-color 1s linear",
           zIndex: 99999,
           //tale onto TOP
           borderBottomWidth: `${tutorialStep.tooltipPosition === "top" ? 0 : undefined}`,
@@ -452,7 +504,5 @@ export const TooltipTutorial = ({
               ? theme => (theme.palette.mode === "dark" ? "#4B535C" : "#C5D0DF")
               : undefined,
         }}
-      ></Box>
-    </>
-  );
-};
+      ></Box> */
+}

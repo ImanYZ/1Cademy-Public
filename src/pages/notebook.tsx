@@ -547,7 +547,7 @@ const Dashboard = ({}: DashboardProps) => {
     let timeoutId: any;
     timeoutId = setTimeout(() => {
       getTooltipClientRect();
-    }, 500);
+    }, currentStep?.targetDelay || 200);
 
     return () => {
       if (timeoutId) clearTimeout(timeoutId);
