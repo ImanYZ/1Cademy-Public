@@ -5437,7 +5437,7 @@ const Dashboard = ({}: DashboardProps) => {
                 </Box>
                 <Tooltip title="Scroll to last Selected Node" placement="bottom">
                   <IconButton
-                    id="toolbox-focus-mode"
+                    id="toolbox-scroll-to-node"
                     color="secondary"
                     onClick={onScrollToLastNode}
                     disabled={!nodeBookState.selectedNode ? true : false}
@@ -5500,8 +5500,10 @@ const Dashboard = ({}: DashboardProps) => {
                     color="secondary"
                     onClick={() => {
                       setFocusView({ isEnabled: true, selectedNode: nodeBookState.selectedNode || "" });
+                      if (tutorial?.name === "focusMode") {
+                        onFinalizeTutorial();
+                      }
                     }}
-                    disabled={["TT"].includes("FOCUS_MODE_BUTTON")}
                   >
                     <NextImage
                       src={theme.palette.mode === "light" ? focusViewLogo : focusViewDarkLogo}
