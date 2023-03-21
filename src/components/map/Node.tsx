@@ -580,6 +580,11 @@ const Node = ({
   );
 
   useEffect(() => {
+    if (!editable) {
+      if (ableToPropose) {
+        setAbleToPropose(false);
+      }
+    }
     if (editable) {
       setOpenPart("References");
       setReason("");
@@ -590,7 +595,6 @@ const Node = ({
   useEffect(() => {
     if (!editable && !activeNode) {
       setOpenPart(null);
-      setAbleToPropose(false);
     }
   }, [editable, activeNode]);
 
@@ -1172,6 +1176,7 @@ const Node = ({
               setOperation={setOperation}
               disabled={disabled}
               enableChildElements={enableChildElements}
+              setAbleToPropose={setAbleToPropose}
             />
           </div>
           {(openPart === "LinkingWords" || openPart === "Tags" || openPart === "References") && (
@@ -1369,6 +1374,7 @@ const Node = ({
               proposeNodeImprovement={proposeNodeImprovement}
               setOperation={setOperation}
               disabled={disabled}
+              setAbleToPropose={setAbleToPropose}
             />
           </div>
         </div>

@@ -11,6 +11,7 @@ type NodeTypeSelectorProps = {
   nodeType: string;
   disabled?: boolean;
   disabledItems?: boolean;
+  setAbleToPropose?: any;
 };
 const NodeTypeSelector = ({
   nodeId,
@@ -18,6 +19,7 @@ const NodeTypeSelector = ({
   nodeType,
   disabled = false,
   disabledItems = false,
+  setAbleToPropose,
 }: NodeTypeSelectorProps) => {
   const nodeTypeOptions = ["Concept", "Relation", "Question", "Reference", "Code", "Idea", "News"];
   const currentId = useId();
@@ -60,6 +62,7 @@ const NodeTypeSelector = ({
             const nodeTypes = new Set([...(node.nodeTypes || []), selectedNodeType]);
             return { ...node, nodeType: selectedNodeType, nodeTypes: Array.from(nodeTypes) } as any;
           });
+          setAbleToPropose(true);
         }}
         disabled={disabled}
       >
