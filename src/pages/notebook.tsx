@@ -4321,13 +4321,34 @@ const Dashboard = ({}: DashboardProps) => {
           (!forcedTutorial && !userTutorial["tableOfContents"].done && !userTutorial["tableOfContents"].skipped) ||
           userTutorial["focusMode"].done ||
           userTutorial["focusMode"].skipped;
-        if (shouldIgnore) return;
-        if (buttonsOpen) return startTutorial("focusMode");
+        if (!shouldIgnore) {
+          if (buttonsOpen) return startTutorial("focusMode");
+        }
       }
 
       if (forcedTutorial === "focusMode") {
         if (buttonsOpen) {
           return startTutorial("focusMode");
+        } else {
+          return setButtonsOpen(true);
+        }
+      }
+
+      // --------------------------
+
+      if (forcedTutorial === "redrawGraph" || !forcedTutorial) {
+        const shouldIgnore =
+          (!forcedTutorial && !userTutorial["focusMode"].done && !userTutorial["focusMode"].skipped) ||
+          userTutorial["redrawGraph"].done ||
+          userTutorial["redrawGraph"].skipped;
+        if (!shouldIgnore) {
+          if (buttonsOpen) return startTutorial("redrawGraph");
+        }
+      }
+
+      if (forcedTutorial === "redrawGraph") {
+        if (buttonsOpen) {
+          return startTutorial("redrawGraph");
         } else {
           return setButtonsOpen(true);
         }
@@ -4919,6 +4940,15 @@ const Dashboard = ({}: DashboardProps) => {
 
     // --------------------------
 
+    if (tutorial.name === "redrawGraph") {
+      if (!buttonsOpen) {
+        setTutorial(null);
+        setForcedTutorial(null);
+      }
+    }
+
+    // --------------------------
+
     if (tutorial.name === "reconcilingAcceptedProposal") {
       const reconcilingAcceptedProposalIsValid = (node: FullNodeData) =>
         node && node.open && isVersionApproved({ corrects: 1, wrongs: 0, nodeData: node });
@@ -5427,7 +5457,16 @@ const Dashboard = ({}: DashboardProps) => {
                     },
                   }}
                 >
-                  <IconButton id="toolbox-redraw-graph" color="secondary" onClick={onRedrawGraph}>
+                  <IconButton
+                    id="toolbox-redraw-graph"
+                    color="secondary"
+                    onClick={() => {
+                      onRedrawGraph();
+                      if (tutorial?.name === "redrawGraph") {
+                        onFinalizeTutorial();
+                      }
+                    }}
+                  >
                     <AutoFixHighIcon sx={{ color: theme => (theme.palette.mode === "dark" ? "#CACACA" : "#667085") }} />
                   </IconButton>
                 </Tooltip>

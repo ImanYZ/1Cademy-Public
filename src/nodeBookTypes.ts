@@ -466,7 +466,8 @@ export type TutorialTypeKeys =
   | "tmpProposalCodeChild"
   | "tmpProposalIdeaChild"
   | "tableOfContents"
-  | "focusMode";
+  | "focusMode"
+  | "redrawGraph";
 
 export type UserTutorial = {
   currentStep: number;

@@ -38,10 +38,32 @@ const FOCUS_MODE_STEPS_CONFIG: TutorialStepConfig[] = [
   },
 ];
 
+const REDRAW_GRAPH_STEPS_CONFIG: TutorialStepConfig[] = [
+  {
+    title: "Redraw Graph",
+    childTargetId: "toolbox-redraw-graph",
+    description: (
+      <MarkdownRender
+        text={
+          "If you click this button it will redraw your graph. This is like refreshing the page and helps correct any issues where nodes have become misaligned. The graph that is redrawn will contain all the nodes that you previously had open."
+        }
+      />
+    ),
+    anchor: "Portal",
+    isClickeable: true,
+    targetDelay: 800,
+    tooltipPosition: "bottom",
+  },
+];
+
 export const TABLE_CONTENT_STEPS: TutorialStep[] = TABLE_CONTENT_STEPS_CONFIG.map((c, i, s) => {
   return { ...getBaseStepConfig(i + 1, s.length), ...c };
 });
 
 export const FOCUS_MODE_STEPS: TutorialStep[] = FOCUS_MODE_STEPS_CONFIG.map((c, i, s) => {
+  return { ...getBaseStepConfig(i + 1, s.length), ...c };
+});
+
+export const REDRAW_GRAPH_STEPS: TutorialStep[] = REDRAW_GRAPH_STEPS_CONFIG.map((c, i, s) => {
   return { ...getBaseStepConfig(i + 1, s.length), ...c };
 });
