@@ -2177,12 +2177,13 @@ const Dashboard = ({}: DashboardProps) => {
 
       notebookRef.current.selectedNode = nodeId;
 
-      lastNodeOperation.current = { name: "ToggleNode", data: "" };
       setGraph(({ nodes: oldNodes, edges }) => {
         const thisNode = oldNodes[nodeId];
 
         notebookRef.current.selectedNode = nodeId;
         nodeBookDispatch({ type: "setSelectedNode", payload: nodeId });
+        lastNodeOperation.current = { name: "ToggleNode", data: thisNode.open ? "closeNode" : "openNode" };
+
         const { nodeRef, userNodeRef } = initNodeStatusChange(nodeId, thisNode.userNodeId);
         const changeNode: any = {
           updatedAt: Timestamp.fromDate(new Date()),
@@ -4305,20 +4306,31 @@ const Dashboard = ({}: DashboardProps) => {
 
       // --------------------------
 
-      const closeNodeTutorialIsValid = (node: FullNodeData) => node && node.open && !node.editable && !node.isNew;
+      const closeNodeTutorialIsValid = (node: FullNodeData) => Boolean(node);
 
-      if (forcedTutorial === "closeNode" || !forcedTutorial) {
+      if (
+        lastNodeOperation.current &&
+        lastNodeOperation.current.name === "ToggleNode" &&
+        lastNodeOperation.current.data === "closeNode"
+      ) {
         const result = detectAndCallTutorial("closeNode", closeNodeTutorialIsValid);
-        if (result) return;
-      }
-
-      if (forcedTutorial === "closeNode") {
-        const result = detectAndForceTutorial("closeNode", "r98BjyFDCe4YyLA3U8ZE", closeNodeTutorialIsValid);
         if (result) return;
       }
 
       // --------------------------
 
+      const openNodeTutorialIsValid = (node: FullNodeData) => Boolean(node);
+
+      if (
+        lastNodeOperation.current &&
+        lastNodeOperation.current.name === "ToggleNode" &&
+        lastNodeOperation.current.data === "openNode"
+      ) {
+        const result = detectAndCallTutorial("openNode", openNodeTutorialIsValid);
+        if (result) return;
+      }
+
+      // --------------------------
       if (forcedTutorial === "tableOfContents" || userTutorial["nodes"].done || userTutorial["nodes"].skipped) {
         const shouldIgnore = forcedTutorial
           ? forcedTutorial !== "tableOfContents"
@@ -5224,6 +5236,12 @@ const Dashboard = ({}: DashboardProps) => {
                 </Button>
                 <Button onClick={() => openNodeHandler("r98BjyFDCe4YyLA3U8ZE")}>Open Node Handler</Button>
                 <Button onClick={() => setShowRegion(prev => !prev)}>Show Region</Button>
+              </Box>
+              <Typography>Last Operation:</Typography>
+              <Box>
+                <Button onClick={() => console.log({ lastOperaion: lastNodeOperation.current })}>
+                  lastNodeOperation
+                </Button>
               </Box>
             </Drawer>
           }

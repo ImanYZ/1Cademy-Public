@@ -1,10 +1,9 @@
 import FullscreenIcon from "@mui/icons-material/Fullscreen";
 import RemoveIcon from "@mui/icons-material/Remove";
-import { IconButton, Stack, Typography } from "@mui/material";
+import { Box, IconButton, Stack, Typography } from "@mui/material";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import { TutorialState, TutorialStepConfig } from "src/nodeBookTypes";
-import { Box } from "victory";
 
 import MarkdownRender from "@/components/Markdown/MarkdownRender";
 
@@ -179,14 +178,15 @@ const CLOSE_OPEN_STEPS: TutorialStepConfig[] = [
 
 const OPEN_STEPS: TutorialStepConfig[] = [
   {
-    title: "Closing a Node",
+    title: "Expanding a Node",
+    childTargetId: "node-header",
     description: (
       <Box>
-        <Stack direction={"row"} alignItems="center">
-          <IconButton>
-            <Typography>This button</Typography>
+        <Typography>This button:</Typography>
+        <Stack direction={"row"} alignItems="center" justifyContent={"center"}>
+          <IconButton size="small" sx={{ backgroundColor: "#cfcfcf24" }}>
+            <FullscreenIcon />
           </IconButton>
-          <FullscreenIcon />
         </Stack>
         <MarkdownRender text={"Allowed you to expand the node that has been closed and seel all of its content."} />
       </Box>
@@ -197,12 +197,13 @@ const OPEN_STEPS: TutorialStepConfig[] = [
 
 const CLOSE_STEPS: TutorialStepConfig[] = [
   {
-    title: "Expanding a node",
+    title: "Closing a node",
+    childTargetId: "node-header",
     description: (
       <Box>
-        <Stack direction={"row"} alignItems="center">
-          <Typography>This button</Typography>
-          <IconButton>
+        <Typography>This button : </Typography>
+        <Stack direction={"row"} alignItems="center" justifyContent={"center"}>
+          <IconButton size="small" sx={{ backgroundColor: "#cfcfcf24" }}>
             <RemoveIcon />
           </IconButton>
         </Stack>
