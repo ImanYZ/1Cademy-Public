@@ -118,6 +118,7 @@ export const useInteractiveTutorial = ({ user }: useInteractiveTutorialProps) =>
     redrawGraph: { currentStep: -1, done: false, skipped: false },
     scrollToNode: { currentStep: -1, done: false, skipped: false },
     closeNode: { currentStep: -1, done: false, skipped: false },
+    openNode: { currentStep: -1, done: false, skipped: false },
   });
 
   // flag for whether tutorial state was loaded

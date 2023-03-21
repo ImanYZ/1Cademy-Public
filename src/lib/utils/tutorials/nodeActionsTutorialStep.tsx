@@ -1,6 +1,10 @@
+import FullscreenIcon from "@mui/icons-material/Fullscreen";
+import MinimizeIcon from "@mui/icons-material/Minimize";
+import { IconButton, Stack, Typography } from "@mui/material";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import { TutorialState, TutorialStepConfig } from "src/nodeBookTypes";
+import { Box } from "victory";
 
 import MarkdownRender from "@/components/Markdown/MarkdownRender";
 
@@ -152,7 +156,7 @@ const HIDE_OFFSPRING_STEPS: TutorialStepConfig[] = [
     isClickeable: true,
   },
 ];
-const CLOSE_STEPS: TutorialStepConfig[] = [
+const CLOSE_OPEN_STEPS: TutorialStepConfig[] = [
   {
     title: "Closing a Node",
     childTargetId: "close-button",
@@ -172,7 +176,42 @@ const CLOSE_STEPS: TutorialStepConfig[] = [
     isClickeable: true,
   },
 ];
-const EXPAND_STEPS: TutorialStepConfig[] = [];
+
+const OPEN_STEPS: TutorialStepConfig[] = [
+  {
+    title: "Closing a Node",
+    description: (
+      <Box>
+        <Stack direction={"row"} alignItems="center">
+          <IconButton>
+            <Typography>This button</Typography>
+          </IconButton>
+          <FullscreenIcon />
+        </Stack>
+        <MarkdownRender text={"Allowed you to expand the node that has been closed and seel all of its content."} />
+      </Box>
+    ),
+    isClickeable: true,
+  },
+];
+
+const CLOSE_STEPS: TutorialStepConfig[] = [
+  {
+    title: "Expanding a node",
+    description: (
+      <Box>
+        <Stack direction={"row"} alignItems="center">
+          <Typography>This button</Typography>
+          <IconButton>
+            <MinimizeIcon />
+          </IconButton>
+        </Stack>
+        <MarkdownRender text={"Allowed you to close a node so that only the title is displayed."} />
+      </Box>
+    ),
+    isClickeable: true,
+  },
+];
 
 export const PARENT_CHILDREN_STEPS_COMPLETE = PARENT_CHILDREN_STEPS.map((c, i, s) => {
   return { ...getBaseStepConfig(i + 1, s.length), ...c };
@@ -204,6 +243,9 @@ export const HIDE_OFFSPRING_STEPS_COMPLETE = HIDE_OFFSPRING_STEPS.map((c, i, s) 
 export const CLOSE_STEPS_COMPLETE = CLOSE_STEPS.map((c, i, s) => {
   return { ...getBaseStepConfig(i + 1, s.length), ...c };
 });
-export const EXPAND_STEPS_COMPLETE = EXPAND_STEPS.map((c, i, s) => {
+export const OPEN_STEPS_COMPLETE = OPEN_STEPS.map((c, i, s) => {
+  return { ...getBaseStepConfig(i + 1, s.length), ...c };
+});
+export const CLOSE_OPEN_STEPS_COMPLETE = CLOSE_OPEN_STEPS.map((c, i, s) => {
   return { ...getBaseStepConfig(i + 1, s.length), ...c };
 });

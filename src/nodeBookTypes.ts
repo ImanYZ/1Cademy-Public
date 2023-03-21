@@ -472,7 +472,8 @@ export type TutorialTypeKeys =
   | "focusMode"
   | "redrawGraph"
   | "scrollToNode"
-  | "closeNode";
+  | "closeNode"
+  | "openNode";
 
 export type UserTutorial = {
   currentStep: number;
