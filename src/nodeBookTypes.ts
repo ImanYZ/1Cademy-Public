@@ -471,7 +471,9 @@ export type TutorialTypeKeys =
   | "tableOfContents"
   | "focusMode"
   | "redrawGraph"
-  | "scrollToNode";
+  | "scrollToNode"
+  | "upVoteTutorial"
+  | "downVoteTutorial";
 
 export type UserTutorial = {
   currentStep: number;

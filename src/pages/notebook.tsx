@@ -2521,6 +2521,7 @@ const Dashboard = ({}: DashboardProps) => {
         return { ...node, correct: !correct, wrong: false, corrects, wrongs, disableVotes: true };
       });
       event.currentTarget.blur();
+      lastNodeOperation.current = { name: "upvote", data: "" };
     },
     [getMapGraph, setNodeParts, setReputationSignal]
   );
@@ -2552,6 +2553,7 @@ const Dashboard = ({}: DashboardProps) => {
         const node = graph.nodes[nodeId];
 
         const willRemoveNode = doNeedToDeleteNode(_corrects, _wrongs, locked);
+        lastNodeOperation.current = { name: "downvote", data: willRemoveNode ? "removed" : "" };
         if (willRemoveNode) {
           if (node?.children.length > 0) {
             window.alert(
@@ -4791,6 +4793,19 @@ const Dashboard = ({}: DashboardProps) => {
 
       // --------------------------
 
+      if (
+        (forcedTutorial === "upVoteTutorial" || !forcedTutorial) &&
+        lastNodeOperation.current &&
+        lastNodeOperation.current.name === "upvote"
+      ) {
+        const notAcceptedProposalLaunched = detectAndCallTutorial("upVoteTutorial", node => node && node.open);
+        if (notAcceptedProposalLaunched) return;
+      }
+
+      // TODO: setup a prestep to click on upcote
+
+      // --------------------------
+
       if (forcedTutorial === "searcher" || openSidebar === "SEARCHER_SIDEBAR") {
         const result = detectAndCallSidebarTutorial("searcher", "SEARCHER_SIDEBAR");
         if (result) return;
@@ -4831,6 +4846,7 @@ const Dashboard = ({}: DashboardProps) => {
       return;
     }
 
+    // HERE we dont need upvote tutorial, if is removed we need to continue displaying tutorial
     devLog("USE_EFFECT: DETECT_TO_REMOVE_TUTORIAL", tutorial);
 
     if (tutorial.name === "nodes") {

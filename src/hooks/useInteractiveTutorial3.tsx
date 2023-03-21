@@ -26,6 +26,7 @@ import {
   CHILD_REFERENCE_PROPOSAL_COMPLETE,
   CHILD_RELATION_PROPOSAL_COMPLETE,
 } from "../lib/utils/tutorials/childrenProposalTutorialStep";
+import { UPTOVE_STEPS_COMPLETE } from "../lib/utils/tutorials/nodeActionsTutorialStep";
 import { NODE_CODE } from "../lib/utils/tutorials/nodeCodeTutorialSteps";
 import { NODE_CONCEPT } from "../lib/utils/tutorials/nodeConceptTutorialStep";
 import { NODE_IDEA } from "../lib/utils/tutorials/nodeIdeaTutorialSteps";
@@ -116,6 +117,8 @@ export const useInteractiveTutorial = ({ user }: useInteractiveTutorialProps) =>
     focusMode: { currentStep: -1, done: false, skipped: false },
     redrawGraph: { currentStep: -1, done: false, skipped: false },
     scrollToNode: { currentStep: -1, done: false, skipped: false },
+    upVoteTutorial: { currentStep: -1, done: false, skipped: false },
+    downVoteTutorial: { currentStep: -1, done: false, skipped: false },
   });
 
   // flag for whether tutorial state was loaded
@@ -147,10 +150,6 @@ export const useInteractiveTutorial = ({ user }: useInteractiveTutorialProps) =>
   const startTutorial = useCallback((newTutorial: TutorialTypeKeys) => {
     setTutorial(prevTutorial => {
       console.log({ prevTutorial });
-      // // const previousStep = getTutorialStep(prevTutorial);
-      // // if (previousStep?.childTargetId) removeStyleFromTarget(previousStep.childTargetId, previousStep.targetId);
-      // if (!tutorial) return null;
-      // if (!newTutorial) return null;
 
       let newSteps: TutorialStep[] = [];
       if (newTutorial === "navigation") {
@@ -240,6 +239,12 @@ export const useInteractiveTutorial = ({ user }: useInteractiveTutorialProps) =>
       }
       if (newTutorial === "scrollToNode") {
         newSteps = SCROLL_TO_NODE_STEPS;
+      }
+
+      // node actions
+
+      if (newTutorial === "upVoteTutorial") {
+        newSteps = UPTOVE_STEPS_COMPLETE;
       }
 
       //----------------- tmp nodes
