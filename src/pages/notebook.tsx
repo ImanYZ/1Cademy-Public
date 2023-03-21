@@ -4305,6 +4305,20 @@ const Dashboard = ({}: DashboardProps) => {
 
       // --------------------------
 
+      const closeNodeTutorialIsValid = (node: FullNodeData) => node && node.open && !node.editable && !node.isNew;
+
+      if (forcedTutorial === "closeNode" || !forcedTutorial) {
+        const result = detectAndCallTutorial("closeNode", closeNodeTutorialIsValid);
+        if (result) return;
+      }
+
+      if (forcedTutorial === "closeNode") {
+        const result = detectAndForceTutorial("closeNode", "r98BjyFDCe4YyLA3U8ZE", closeNodeTutorialIsValid);
+        if (result) return;
+      }
+
+      // --------------------------
+
       if (forcedTutorial === "tableOfContents" || userTutorial["nodes"].done || userTutorial["nodes"].skipped) {
         const shouldIgnore = forcedTutorial
           ? forcedTutorial !== "tableOfContents"
