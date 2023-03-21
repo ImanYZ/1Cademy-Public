@@ -4874,6 +4874,11 @@ const Dashboard = ({}: DashboardProps) => {
 
     // --------------------------
 
+    const proposalTutorialIsValid = (thisNode: FullNodeData) => thisNode && thisNode.open && thisNode.editable;
+    detectAndRemoveTutorial("proposal", proposalTutorialIsValid);
+
+    // --------------------------
+
     const conceptProposalTutorialIsValid = (thisNode: FullNodeData) =>
       thisNode && thisNode.open && thisNode.editable && thisNode.nodeType === "Concept";
     detectAndRemoveTutorial("proposalConcept", conceptProposalTutorialIsValid);
@@ -4924,14 +4929,11 @@ const Dashboard = ({}: DashboardProps) => {
     // --------------------------
 
     if (tutorial.name === "tmpEditNode") {
-      console.log("111aaa");
       const tmpEditNodeIsValid = (node: FullNodeData) => node && node.open && !node.editable;
       const node = graph.nodes[targetId];
       if (!tmpEditNodeIsValid(node)) {
-        console.log("222aaa");
         setTutorial(null);
         if (node && node.editable) return;
-        console.log("333aaa");
 
         setForcedTutorial(null);
       }
@@ -4947,14 +4949,11 @@ const Dashboard = ({}: DashboardProps) => {
       tutorial.name === "tmpProposalIdeaChild" ||
       tutorial.name === "tmpProposalCodeChild"
     ) {
-      // console.log("aaaaaaaa");
       const isValid = (node: FullNodeData) => node && node.open && node.editable && !Boolean(node.isNew);
       const node = graph.nodes[targetId];
       if (!isValid(node)) {
-        // console.log("bbbb");
         setTutorial(null);
         if (node && !node.editable) return;
-        // console.log("ccccc");
         setForcedTutorial(null);
       }
     }
