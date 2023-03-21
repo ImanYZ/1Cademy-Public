@@ -92,7 +92,6 @@ export const TooltipTutorial = ({
       left = targetClientRect.left + targetClientRect.width / 2 - tooltipRef.current.clientWidth / 2;
       if (tutorialStep.anchor === "Portal") {
         const { top: newTop, left: newLeft } = calcWithExceed(top, left);
-        console.log("calc", { top, left, newTop, newLeft });
         exceedLeft = left - newLeft;
         exceedTop = top - newTop;
         top = newTop;
@@ -103,10 +102,8 @@ export const TooltipTutorial = ({
       top =
         targetClientRect.top + targetClientRect.height / 2 - tooltipRef.current.clientHeight / 2 + TOOLTIP_TALE_SIZE;
       left = targetClientRect.left - tooltipRef.current.clientWidth - TOOLTIP_OFFSET;
-      console.log(1, { top, left });
       if (tutorialStep.anchor === "Portal") {
         const { top: newTop, left: newLeft } = calcWithExceed(top, left);
-        console.log("calc", { top, left, newTop, newLeft, exceedLeft: left - newLeft, exceedTop: top - newTop });
         exceedLeft = left - newLeft;
         exceedTop = top - newTop;
         top = newTop;
@@ -346,7 +343,6 @@ export const TooltipTutorial = ({
   return (
     <Box
       ref={tooltipRef}
-      className={`tooltip tooltip-${tutorialStep.tooltipPosition}`}
       sx={{
         position: "absolute",
         top: `${tooltipRect.top}px`,
@@ -361,6 +357,33 @@ export const TooltipTutorial = ({
         zIndex: 99999,
 
         ":after": {
+          position: "absolute",
+          content: "''",
+          border: "solid 10px transparent",
+          //tale onto TOP
+          borderBottomWidth: `${tutorialStep.tooltipPosition === "top" ? 0 : undefined}`,
+          borderTopColor:
+            tutorialStep.tooltipPosition === "top"
+              ? theme => (theme.palette.mode === "dark" ? "#4B535C" : "#C5D0DF")
+              : undefined,
+          //tale onto BOTTOM
+          borderTopWidth: `${tutorialStep.tooltipPosition === "bottom" ? 0 : undefined}`,
+          borderBottomColor:
+            tutorialStep.tooltipPosition === "bottom"
+              ? theme => (theme.palette.mode === "dark" ? "#4B535C" : "#C5D0DF")
+              : undefined,
+          //tale onto LEFT
+          borderRightWidth: `${tutorialStep.tooltipPosition === "left" ? 0 : undefined}`,
+          borderLeftColor:
+            tutorialStep.tooltipPosition === "left"
+              ? theme => (theme.palette.mode === "dark" ? "#4B535C" : "#C5D0DF")
+              : undefined,
+          //tale onto RIGHT
+          borderLeftWidth: `${tutorialStep.tooltipPosition === "right" ? 0 : undefined}`,
+          borderRightColor:
+            tutorialStep.tooltipPosition === "right"
+              ? theme => (theme.palette.mode === "dark" ? "#4B535C" : "#C5D0DF")
+              : undefined,
           top: taleRect.top ? `${taleRect.top + tooltipRect.exceedTop}px` : undefined,
           bottom: taleRect.bottom ? `${taleRect.bottom}px` : undefined,
           left: taleRect.left ? `${taleRect.left + tooltipRect.exceedLeft}px` : undefined,
