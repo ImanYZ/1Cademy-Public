@@ -65,10 +65,6 @@ import { useAuth } from "@/context/AuthContext";
 import useEventListener from "@/hooks/useEventListener";
 import { useTagsTreeView } from "@/hooks/useTagsTreeView";
 import { addSuffixToUrlGMT } from "@/lib/utils/string.utils";
-import {
-  RECONCILING_ACCEPTED_PROPOSALS_STEPS_COMPLETE,
-  RECONCILING_NOT_ACCEPTED_PROPOSALS_STEPS_COMPLETE,
-} from "@/lib/utils/tutorials/reconcilingProposalsTutorialSteps";
 
 import LoadingImg from "../../public/animated-icon-1cademy.gif";
 import focusViewLogo from "../../public/focus.svg";
@@ -86,7 +82,7 @@ import { MemoizedNodeList } from "../components/map/NodesList";
 import { MemoizedToolbarSidebar } from "../components/map/Sidebar/SidebarV2/ToolbarSidebar";
 import { NodeItemDashboard } from "../components/NodeItemDashboard";
 import { Portal } from "../components/Portal";
-import { GroupTutorial, MemoizedTutorialTableOfContent } from "../components/tutorial/TutorialTableOfContent";
+import { MemoizedTutorialTableOfContent } from "../components/tutorial/TutorialTableOfContent";
 import { NodeBookProvider, useNodeBook } from "../context/NodeBookContext";
 import {
   getTutorialStep,
@@ -134,31 +130,7 @@ import {
   getUserNodeChanges,
   mergeAllNodes,
 } from "../lib/utils/nodesSyncronization.utils";
-import {
-  CHILD_CODE_PROPOSAL_COMPLETE,
-  CHILD_CONCEPT_PROPOSAL_COMPLETE,
-  CHILD_IDEA_PROPOSAL_COMPLETE,
-  CHILD_PROPOSAL_COMPLETE,
-  CHILD_QUESTION_PROPOSAL_COMPLETE,
-  CHILD_REFERENCE_PROPOSAL_COMPLETE,
-  CHILD_RELATION_PROPOSAL_COMPLETE,
-} from "../lib/utils/tutorials/childrenProposalTutorialStep";
-import { NAVIGATION_STEPS_COMPLETE } from "../lib/utils/tutorials/navigationTutorialSteps";
-import { NODE_CODE } from "../lib/utils/tutorials/nodeCodeTutorialSteps";
-import { NODE_CONCEPT } from "../lib/utils/tutorials/nodeConceptTutorialStep";
-import { NODE_IDEA } from "../lib/utils/tutorials/nodeIdeaTutorialSteps";
-import { NODE_QUESTION } from "../lib/utils/tutorials/nodeQuestionStepTutorialStep";
-import { NODE_REFERENCE } from "../lib/utils/tutorials/nodeReferenceTutorialSteps";
-import { NODE_RELATION } from "../lib/utils/tutorials/nodeRelationTutorialSteps";
-import { NODES_STEPS_COMPLETE } from "../lib/utils/tutorials/nodeTutorialSteps";
-import { PROPOSING_CODE_EDIT_COMPLETE } from "../lib/utils/tutorials/proposalCodeTutorialStep";
-import { PROPOSING_CONCEPT_EDIT_COMPLETE } from "../lib/utils/tutorials/proposalConceptTutorialStep";
-import { PROPOSING_IDEA_EDIT_COMPLETE } from "../lib/utils/tutorials/proposalIdeaTutorialSteps";
-import { PROPOSING_QUESTION_EDIT_COMPLETE } from "../lib/utils/tutorials/proposalQuestionTutorialSteps";
-import { PROPOSING_REFERENCE_EDIT_COMPLETE } from "../lib/utils/tutorials/proposalReferenceTutorialSteps";
-import { PROPOSING_RELATION_EDIT_COMPLETE } from "../lib/utils/tutorials/proposalRelationTutorialSteps";
-import { PROPOSAL_STEPS_COMPLETE } from "../lib/utils/tutorials/proposalTutorialSteps";
-import { SEARCHER_STEPS_COMPLETE } from "../lib/utils/tutorials/searcherTutorialSteps";
+import { GROUP_TUTORIALS } from "../lib/utils/tutorials/grouptutorials";
 import { gtmEvent, imageLoaded, isValidHttpUrl } from "../lib/utils/utils";
 import {
   ChoosingType,
@@ -4341,7 +4313,25 @@ const Dashboard = ({}: DashboardProps) => {
           return;
         }
       }
+
       // --------------------------
+
+      if (forcedTutorial === "focusMode" || !forcedTutorial) {
+        const shouldIgnore =
+          (!forcedTutorial && !userTutorial["tableOfContents"].done && !userTutorial["tableOfContents"].skipped) ||
+          userTutorial["focusMode"].done ||
+          userTutorial["focusMode"].skipped;
+        if (shouldIgnore) return;
+        if (buttonsOpen) return startTutorial("focusMode");
+      }
+
+      if (forcedTutorial === "focusMode") {
+        if (buttonsOpen) {
+          return startTutorial("focusMode");
+        } else {
+          return setButtonsOpen(true);
+        }
+      }
 
       // --------------------------
 
@@ -4766,6 +4756,7 @@ const Dashboard = ({}: DashboardProps) => {
 
     detectTriggerTutorial();
   }, [
+    buttonsOpen,
     detectAndCallChildTutorial,
     detectAndCallSidebarTutorial,
     detectAndCallTutorial,
@@ -4826,43 +4817,48 @@ const Dashboard = ({}: DashboardProps) => {
     detectAndRemoveTutorial("idea", ideaTutorialIsValid);
 
     // --------------------------
+
     const codeTutorialIsValid = (thisNode: FullNodeData) => thisNode && thisNode.open && thisNode.nodeType === "Code";
     detectAndRemoveTutorial("code", codeTutorialIsValid);
+
     // --------------------------
+
     const conceptProposalTutorialIsValid = (thisNode: FullNodeData) =>
       thisNode && thisNode.open && thisNode.editable && thisNode.nodeType === "Concept";
     detectAndRemoveTutorial("proposalConcept", conceptProposalTutorialIsValid);
+
     // --------------------------
+
     const relationProposalTutorialIsValid = (thisNode: FullNodeData) =>
       thisNode && thisNode.open && thisNode.editable && thisNode.nodeType === "Relation";
     detectAndRemoveTutorial("proposalRelation", relationProposalTutorialIsValid);
+
     // --------------------------
+
     const referenceProposalTutorialIsValid = (thisNode: FullNodeData) =>
       thisNode && thisNode.open && thisNode.editable && thisNode.nodeType === "Reference";
     detectAndRemoveTutorial("proposalReference", referenceProposalTutorialIsValid);
+
     // --------------------------
+
     const questionProposalTutorialIsValid = (thisNode: FullNodeData) =>
       thisNode && thisNode.open && thisNode.editable && thisNode.nodeType === "Question";
     detectAndRemoveTutorial("proposalQuestion", questionProposalTutorialIsValid);
+
     // --------------------------
+
     const ideaProposalTutorialIsValid = (thisNode: FullNodeData) =>
       thisNode && thisNode.open && thisNode.editable && thisNode.nodeType === "Idea";
     detectAndRemoveTutorial("proposalIdea", ideaProposalTutorialIsValid);
+
     // --------------------------
+
     const codeProposalTutorialIsValid = (thisNode: FullNodeData) =>
       thisNode && thisNode.open && thisNode.editable && thisNode.nodeType === "Code";
     detectAndRemoveTutorial("proposalCode", codeProposalTutorialIsValid);
-    // --------------------------
-    // if (tutorial.name === "concept") {
-    //   const node = graph.nodes[targetId];
-    //   if (!conceptTutorialIsValid(node)) {
-    //     setTutorial(null);
-    //     setForcedTutorial(null);
-    //   }
-    // }
-    // --------------------------
 
     // --------------------------
+
     if (tutorial.name === "childConcept") {
       const childConceptProposalIsValid = (node: FullNodeData) =>
         node && Boolean(node.isNew) && node.open && node.editable && node.nodeType === "Concept";
@@ -4873,6 +4869,9 @@ const Dashboard = ({}: DashboardProps) => {
         setForcedTutorial(null);
       }
     }
+
+    // --------------------------
+
     if (tutorial.name === "tmpEditNode") {
       console.log("111aaa");
       const tmpEditNodeIsValid = (node: FullNodeData) => node && node.open && !node.editable;
@@ -4886,6 +4885,9 @@ const Dashboard = ({}: DashboardProps) => {
         setForcedTutorial(null);
       }
     }
+
+    // --------------------------
+
     if (
       tutorial.name === "tmpProposalConceptChild" ||
       tutorial.name === "tmpProposalQuestionChild" ||
@@ -4906,6 +4908,17 @@ const Dashboard = ({}: DashboardProps) => {
       }
     }
 
+    // --------------------------
+
+    if (tutorial.name === "focusMode") {
+      if (!buttonsOpen) {
+        setTutorial(null);
+        setForcedTutorial(null);
+      }
+    }
+
+    // --------------------------
+
     if (tutorial.name === "reconcilingAcceptedProposal") {
       const reconcilingAcceptedProposalIsValid = (node: FullNodeData) =>
         node && node.open && isVersionApproved({ corrects: 1, wrongs: 0, nodeData: node });
@@ -4916,6 +4929,8 @@ const Dashboard = ({}: DashboardProps) => {
         setForcedTutorial(null);
       }
     }
+
+    // --------------------------
 
     if (tutorial.name === "reconcilingNotAcceptedProposal") {
       const reconcilingNotAcceptedProposalIsValid = (node: FullNodeData) =>
@@ -4932,12 +4947,17 @@ const Dashboard = ({}: DashboardProps) => {
       }
     }
 
+    // --------------------------
+
     if (tutorial.name === "searcher") {
       if (openSidebar === "SEARCHER_SIDEBAR") return;
       setTutorial(null);
       setForcedTutorial(null);
     }
+
+    // --------------------------
   }, [
+    buttonsOpen,
     detectAndRemoveTutorial,
     firstLoading,
     graph.nodes,
@@ -5387,15 +5407,14 @@ const Dashboard = ({}: DashboardProps) => {
                   </Box>
                 </Box>
                 <Tooltip title="Scroll to last Selected Node" placement="bottom">
-                  {/* <span> */}
                   <IconButton
+                    id="toolbox-scroll-to-node"
                     color="secondary"
                     onClick={onScrollToLastNode}
                     disabled={!nodeBookState.selectedNode ? true : false}
                   >
                     <MyLocationIcon sx={{ color: theme => (theme.palette.mode === "dark" ? "#CACACA" : "#667085") }} />
                   </IconButton>
-                  {/* </span> */}
                 </Tooltip>
 
                 <Tooltip
@@ -5408,7 +5427,7 @@ const Dashboard = ({}: DashboardProps) => {
                     },
                   }}
                 >
-                  <IconButton color="secondary" onClick={onRedrawGraph}>
+                  <IconButton id="toolbox-redraw-graph" color="secondary" onClick={onRedrawGraph}>
                     <AutoFixHighIcon sx={{ color: theme => (theme.palette.mode === "dark" ? "#CACACA" : "#667085") }} />
                   </IconButton>
                 </Tooltip>
@@ -5448,11 +5467,14 @@ const Dashboard = ({}: DashboardProps) => {
                   }}
                 >
                   <IconButton
+                    id="toolbox-focus-mode"
                     color="secondary"
                     onClick={() => {
                       setFocusView({ isEnabled: true, selectedNode: nodeBookState.selectedNode || "" });
+                      if (tutorial?.name === "focusMode") {
+                        onFinalizeTutorial();
+                      }
                     }}
-                    disabled={["TT"].includes("FOCUS_MODE_BUTTON")}
                   >
                     <NextImage
                       src={theme.palette.mode === "light" ? focusViewLogo : focusViewDarkLogo}
@@ -5732,7 +5754,7 @@ const Dashboard = ({}: DashboardProps) => {
             open={openProgressBar}
             reloadPermanentGraph={reloadPermanentGraph}
             handleCloseProgressBar={onCloseTableOfContent}
-            groupTutorials={gg}
+            groupTutorials={GROUP_TUTORIALS}
             userTutorialState={userTutorial}
             onCancelTutorial={onCancelTutorial}
             onForceTutorial={setForcedTutorial}
@@ -5752,173 +5774,3 @@ export default withAuthUser({
   shouldRedirectToLogin: true,
   shouldRedirectToHomeIfAuthenticated: false,
 })(NodeBook);
-
-const gg: GroupTutorial[] = [
-  {
-    title: "Basics",
-    tutorials: [
-      {
-        title: "Navigation",
-        tutorialSteps: { tutorialKey: "navigation", steps: NAVIGATION_STEPS_COMPLETE },
-        tutorials: [],
-      },
-      {
-        title: "Nodes",
-        tutorialSteps: { tutorialKey: "nodes", steps: NODES_STEPS_COMPLETE },
-        tutorials: [],
-      },
-      {
-        title: "Searcher",
-        tutorialSteps: { tutorialKey: "searcher", steps: SEARCHER_STEPS_COMPLETE },
-        tutorials: [],
-      },
-    ],
-  },
-  {
-    title: "Node Types",
-    tutorials: [
-      {
-        title: "Concept Node",
-        tutorialSteps: { tutorialKey: "concept", steps: NODE_CONCEPT },
-        tutorials: [],
-      },
-      {
-        title: "Relation Node",
-        tutorialSteps: { tutorialKey: "relation", steps: NODE_RELATION },
-        tutorials: [],
-      },
-      {
-        title: "Reference Node",
-        tutorialSteps: { tutorialKey: "reference", steps: NODE_REFERENCE },
-        tutorials: [],
-      },
-      {
-        title: "Question Node",
-        tutorialSteps: { tutorialKey: "question", steps: NODE_QUESTION },
-        tutorials: [],
-      },
-      {
-        title: "Code Node",
-        tutorialSteps: { tutorialKey: "code", steps: NODE_CODE },
-        tutorials: [],
-      },
-      {
-        title: "Idea Node",
-        tutorialSteps: { tutorialKey: "idea", steps: NODE_IDEA },
-        tutorials: [],
-      },
-    ],
-  },
-  {
-    title: "Proposal",
-    tutorials: [
-      {
-        title: "Proposing Edit",
-        tutorialSteps: { tutorialKey: "proposal", steps: PROPOSAL_STEPS_COMPLETE },
-        tutorials: [],
-      },
-      {
-        title: "Edit Node Types",
-        tutorials: [
-          {
-            title: "Edit Concept Node",
-            tutorialSteps: { tutorialKey: "proposalConcept", steps: PROPOSING_CONCEPT_EDIT_COMPLETE },
-            tutorials: [],
-          },
-          {
-            title: "Edit Relation Node",
-            tutorialSteps: { tutorialKey: "proposalRelation", steps: PROPOSING_RELATION_EDIT_COMPLETE },
-            tutorials: [],
-          },
-          {
-            title: "Edit Reference Node",
-            tutorialSteps: { tutorialKey: "proposalReference", steps: PROPOSING_REFERENCE_EDIT_COMPLETE },
-            tutorials: [],
-          },
-          {
-            title: "Edit Question Node",
-            tutorialSteps: { tutorialKey: "proposalQuestion", steps: PROPOSING_QUESTION_EDIT_COMPLETE },
-            tutorials: [],
-          },
-          {
-            title: "Edit Code Node",
-            tutorials: [],
-            tutorialSteps: { tutorialKey: "proposalCode", steps: PROPOSING_CODE_EDIT_COMPLETE },
-          },
-          {
-            title: "Edit Idea Node",
-            tutorialSteps: { tutorialKey: "proposalIdea", steps: PROPOSING_IDEA_EDIT_COMPLETE },
-            tutorials: [],
-          },
-        ],
-      },
-      {
-        title: "New node types",
-        tutorialSteps: { tutorialKey: "childProposal", steps: CHILD_PROPOSAL_COMPLETE },
-        tutorials: [
-          {
-            title: "New Concept Node",
-            tutorialSteps: { tutorialKey: "childConcept", steps: CHILD_CONCEPT_PROPOSAL_COMPLETE },
-            tutorials: [],
-          },
-          {
-            title: "New Relation Node",
-            tutorialSteps: { tutorialKey: "childRelation", steps: CHILD_RELATION_PROPOSAL_COMPLETE },
-            tutorials: [],
-          },
-          {
-            title: "New Reference Node",
-            tutorialSteps: { tutorialKey: "childReference", steps: CHILD_REFERENCE_PROPOSAL_COMPLETE },
-            tutorials: [],
-          },
-          {
-            title: "New Question Node",
-            tutorialSteps: { tutorialKey: "childQuestion", steps: CHILD_QUESTION_PROPOSAL_COMPLETE },
-            tutorials: [],
-          },
-          {
-            title: "New Code Node",
-            tutorials: [],
-            tutorialSteps: { tutorialKey: "childCode", steps: CHILD_CODE_PROPOSAL_COMPLETE },
-          },
-          {
-            title: "New Idea Node",
-            tutorialSteps: { tutorialKey: "childIdea", steps: CHILD_IDEA_PROPOSAL_COMPLETE },
-            tutorials: [],
-          },
-        ],
-      },
-      {
-        title: "Reconciling",
-        tutorials: [
-          {
-            title: "Reconciling Accepted Proposals",
-            tutorialSteps: {
-              tutorialKey: "reconcilingAcceptedProposal",
-              steps: RECONCILING_ACCEPTED_PROPOSALS_STEPS_COMPLETE,
-            },
-            tutorials: [],
-          },
-          {
-            title: "Reconciling Not Accepted Proposal",
-            tutorialSteps: {
-              tutorialKey: "reconcilingNotAcceptedProposal",
-              steps: RECONCILING_NOT_ACCEPTED_PROPOSALS_STEPS_COMPLETE,
-            },
-            tutorials: [],
-          },
-        ],
-      },
-      {
-        title: "Siderbars",
-        tutorials: [
-          {
-            title: "Searcher",
-            tutorialSteps: { tutorialKey: "searcher", steps: SEARCHER_STEPS_COMPLETE },
-            tutorials: [],
-          },
-        ],
-      },
-    ],
-  },
-];
