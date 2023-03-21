@@ -132,41 +132,24 @@ export const TooltipTutorial = ({
 
     const pos = tutorialStep.tooltipPosition;
     if (pos === "top") {
-      top = targetClientRect.top - TOOLTIP_TALE_SIZE - TOOLTIP_OFFSET;
+      top = targetClientRect.top - TOOLTIP_OFFSET;
       left = targetClientRect.left + targetClientRect.width / 2 - TOOLTIP_TALE_SIZE / 2;
-      if (tutorialStep.anchor === "Portal") {
-        const { top: newTop, left: newLeft } = calcWithExceed(top, left);
-        top = newTop;
-        left = newLeft;
-      }
     }
     if (pos === "bottom") {
-      top = targetClientRect.top + targetClientRect.height + TOOLTIP_TALE_SIZE + 2 * TOOLTIP_TALE_SIZE;
+      top = targetClientRect.top + targetClientRect.height + TOOLTIP_OFFSET;
       left = targetClientRect.left + targetClientRect.width / 2 - TOOLTIP_TALE_SIZE / 2;
     }
     if (pos === "left") {
       top = targetClientRect.top + targetClientRect.height / 2 - TOOLTIP_TALE_SIZE / 2;
-      left = targetClientRect.left - TOOLTIP_TALE_SIZE - 2 * TOOLTIP_TALE_SIZE;
+      left = targetClientRect.left - TOOLTIP_OFFSET;
     }
     if (pos === "right") {
       top = targetClientRect.top + targetClientRect.height / 2 - TOOLTIP_TALE_SIZE / 2;
       left = targetClientRect.left + targetClientRect.width + TOOLTIP_OFFSET;
-      if (tutorialStep.anchor === "Portal") {
-        const { top: newTop, left: newLeft } = calcWithExceed(top, left);
-        top = newTop;
-        left = newLeft;
-      }
     }
-    console.log("tale", { top, left });
+
     return { top, left };
-  }, [
-    calcWithExceed,
-    targetClientRect.height,
-    targetClientRect.left,
-    targetClientRect.top,
-    targetClientRect.width,
-    tutorialStep,
-  ]);
+  }, [targetClientRect.height, targetClientRect.left, targetClientRect.top, targetClientRect.width, tutorialStep]);
 
   if (!tutorialStep) return null;
   if (!tutorialStep.currentStepName) return null;
@@ -321,7 +304,7 @@ export const TooltipTutorial = ({
           position: "absolute",
           top: `${tooltipClientRect.top}px`,
           left: `${tooltipClientRect.left}px`,
-          transition: "top 1s ease-out,left 1s ease-out",
+          transition: "top 500ms ease-out,left 500ms ease-out",
           width: "450px",
           backgroundColor: theme => (theme.palette.mode === "dark" ? "#4B535C" : "#C5D0DF"),
           borderColor: theme => (theme.palette.mode === "dark" ? "#4B535C" : "#C5D0DF") /* this is used in tooltip */,
@@ -442,11 +425,12 @@ export const TooltipTutorial = ({
           border: "solid 10px transparent",
           top: `${tooltipTaleClientRect.top}px`,
           left: `${tooltipTaleClientRect.left - 10}px`,
-          transition: "top 1s ease-out,left 1s ease-out",
+          transition: "top 500ms ease-out,left 500ms ease-out",
+          zIndex: 99999,
           //tale onto TOP
           borderBottomWidth: `${tutorialStep.tooltipPosition === "top" ? 0 : undefined}`,
           borderTopColor:
-            tutorialStep.tooltipPosition === "bottom"
+            tutorialStep.tooltipPosition === "top"
               ? theme => (theme.palette.mode === "dark" ? "#4B535C" : "#C5D0DF")
               : undefined,
           //tale onto BOTTOM

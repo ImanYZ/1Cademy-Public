@@ -15,7 +15,6 @@ const TABLE_CONTENT_STEPS: TutorialStepConfig[] = [
     ),
     anchor: "Portal",
     isClickeable: true,
-    targetDelay: 450,
     tooltipPosition: "bottom",
   },
   {
@@ -30,7 +29,6 @@ const TABLE_CONTENT_STEPS: TutorialStepConfig[] = [
     ),
     anchor: "Portal",
     isClickeable: true,
-    targetDelay: 450,
     tooltipPosition: "left",
   },
   {
@@ -45,7 +43,6 @@ const TABLE_CONTENT_STEPS: TutorialStepConfig[] = [
     ),
     anchor: "Portal",
     isClickeable: true,
-    targetDelay: 450,
     tooltipPosition: "right",
   },
 
@@ -61,7 +58,6 @@ const TABLE_CONTENT_STEPS: TutorialStepConfig[] = [
     ),
     anchor: "Portal",
     isClickeable: true,
-    targetDelay: 450,
     tooltipPosition: "bottom",
   },
 ];
