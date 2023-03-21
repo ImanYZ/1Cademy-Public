@@ -18,66 +18,52 @@ const TABLE_CONTENT_STEPS: TutorialStepConfig[] = [
     targetDelay: 450,
     tooltipPosition: "bottom",
   },
-  // {
-  //   title: "Tutorial Table of Contents",
-  //   childTargetId: "ComLeaderboardMinimizer",
-  //   description: (
-  //     <MarkdownRender
-  //       text={
-  //         "For reviewing the interactive and organized set of tutorials of each feature you will need to click this button. For reviewing the interactive and organized set of tutorials of each feature you will need to click this button.For reviewing the interactive and organized set of tutorials of each feature you will need to click this button.For reviewing the interactive and organized set of tutorials of each feature you will need to click this button."
-  //       }
-  //     />
-  //   ),
-  //   anchor: "Portal",
-  //   isClickeable: true,
-  //   targetDelay: 450,
-  //   tooltipPosition: "left",
-  // },
-  // {
-  //   title: "Tutorial Table of Contents",
-  //   childTargetId: "ComLeaderboardMinimizer",
-  //   description: (
-  //     <MarkdownRender
-  //       text={
-  //         "For reviewing the interactive and organized set of tutorials of each feature you will need to click this button. For reviewing the interactive and organized set of tutorials of each feature you will need to click this button.For reviewing the interactive and organized set of tutorials of each feature you will need to click this button.For reviewing the interactive and organized set of tutorials of each feature you will need to click this button."
-  //       }
-  //     />
-  //   ),
-  //   anchor: "Portal",
-  //   isClickeable: true,
-  //   targetDelay: 450,
-  //   tooltipPosition: "top",
-  // },
-  // {
-  //   title: "Tutorial Table of Contents",
-  //   childTargetId: "toolbox-table-of-contents",
-  //   description: (
-  //     <MarkdownRender
-  //       text={
-  //         "For reviewing the interactive and organized set of tutorials of each feature you will need to click this button. For reviewing the interactive and organized set of tutorials of each feature you will need to click this button.For reviewing the interactive and organized set of tutorials of each feature you will need to click this button.For reviewing the interactive and organized set of tutorials of each feature you will need to click this button."
-  //       }
-  //     />
-  //   ),
-  //   anchor: "Portal",
-  //   isClickeable: true,
-  //   targetDelay: 450,
-  //   tooltipPosition: "top",
-  // },
-  // {
-  //   title: "Tutorial Table of Contents",
-  //   childTargetId: "toolbox-table-of-contents",
-  //   description: (
-  //     <MarkdownRender
-  //       text={
-  //         "For reviewing the interactive and organized set of tutorials of each feature you will need to click this button. For reviewing the interactive and organized set of tutorials of each feature you will need to click this button.For reviewing the interactive and organized set of tutorials of each feature you will need to click this button.For reviewing the interactive and organized set of tutorials of each feature you will need to click this button."
-  //       }
-  //     />
-  //   ),
-  //   anchor: "Portal",
-  //   isClickeable: true,
-  //   targetDelay: 450,
-  //   tooltipPosition: "bottom",
-  // },
+  {
+    title: "Tutorial Table of Contents",
+    childTargetId: "ComLeaderboardMinimizer",
+    description: (
+      <MarkdownRender
+        text={
+          "For reviewing the interactive and organized set of tutorials of each feature you will need to click this button. For reviewing the interactive and organized set of tutorials of each feature you will need to click this button.For reviewing the interactive and organized set of tutorials of each feature you will need to click this button.For reviewing the interactive and organized set of tutorials of each feature you will need to click this button."
+        }
+      />
+    ),
+    anchor: "Portal",
+    isClickeable: true,
+    targetDelay: 450,
+    tooltipPosition: "left",
+  },
+  {
+    title: "Tutorial Table of Contents",
+    childTargetId: "toolbar-profile-button",
+    description: (
+      <MarkdownRender
+        text={
+          "For reviewing the interactive and organized set of tutorials of each feature you will need to click this button. For reviewing the interactive and organized set of tutorials of each feature you will need to click this button.For reviewing the interactive and organized set of tutorials of each feature you will need to click this button.For reviewing the interactive and organized set of tutorials of each feature you will need to click this button."
+        }
+      />
+    ),
+    anchor: "Portal",
+    isClickeable: true,
+    targetDelay: 450,
+    tooltipPosition: "right",
+  },
+
+  {
+    title: "Tutorial Table of Contents",
+    childTargetId: "toolbox-table-of-contents",
+    description: (
+      <MarkdownRender
+        text={
+          "For reviewing the interactive and organized set of tutorials of each feature you will need to click this button. For reviewing the interactive and organized set of tutorials of each feature you will need to click this button.For reviewing the interactive and organized set of tutorials of each feature you will need to click this button.For reviewing the interactive and organized set of tutorials of each feature you will need to click this button."
+        }
+      />
+    ),
+    anchor: "Portal",
+    isClickeable: true,
+    targetDelay: 450,
+    tooltipPosition: "bottom",
+  },
 ];
 
 export const TABLE_CONTENT_STEPS_COMPLETE: TutorialStep[] = TABLE_CONTENT_STEPS.map((c, i, s) => {
