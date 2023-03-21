@@ -44,6 +44,7 @@ import { Suspense, useCallback, useEffect, useRef, useState } from "react";
 /* eslint-disable */ //This wrapper comments it to use react-map-interaction without types
 // @ts-ignore
 import { MapInteractionCSS } from "react-map-interaction";
+import { start } from "repl";
 import { INodeType } from "src/types/INodeType";
 /* eslint-enable */
 import { INotificationNum } from "src/types/INotification";
@@ -4341,7 +4342,25 @@ const Dashboard = ({}: DashboardProps) => {
           return;
         }
       }
+
       // --------------------------
+
+      if (forcedTutorial === "focusMode" || !forcedTutorial) {
+        const shouldIgnore =
+          (!forcedTutorial && !userTutorial["tableOfContents"].done && !userTutorial["tableOfContents"].skipped) ||
+          userTutorial["focusMode"].done ||
+          userTutorial["focusMode"].skipped;
+        if (shouldIgnore) return;
+        if (buttonsOpen) return startTutorial("focusMode");
+      }
+
+      if (forcedTutorial === "focusMode") {
+        if (buttonsOpen) {
+          return startTutorial("focusMode");
+        } else {
+          return setButtonsOpen(true);
+        }
+      }
 
       // --------------------------
 
@@ -4766,6 +4785,7 @@ const Dashboard = ({}: DashboardProps) => {
 
     detectTriggerTutorial();
   }, [
+    buttonsOpen,
     detectAndCallChildTutorial,
     detectAndCallSidebarTutorial,
     detectAndCallTutorial,
@@ -4826,43 +4846,48 @@ const Dashboard = ({}: DashboardProps) => {
     detectAndRemoveTutorial("idea", ideaTutorialIsValid);
 
     // --------------------------
+
     const codeTutorialIsValid = (thisNode: FullNodeData) => thisNode && thisNode.open && thisNode.nodeType === "Code";
     detectAndRemoveTutorial("code", codeTutorialIsValid);
+
     // --------------------------
+
     const conceptProposalTutorialIsValid = (thisNode: FullNodeData) =>
       thisNode && thisNode.open && thisNode.editable && thisNode.nodeType === "Concept";
     detectAndRemoveTutorial("proposalConcept", conceptProposalTutorialIsValid);
+
     // --------------------------
+
     const relationProposalTutorialIsValid = (thisNode: FullNodeData) =>
       thisNode && thisNode.open && thisNode.editable && thisNode.nodeType === "Relation";
     detectAndRemoveTutorial("proposalRelation", relationProposalTutorialIsValid);
+
     // --------------------------
+
     const referenceProposalTutorialIsValid = (thisNode: FullNodeData) =>
       thisNode && thisNode.open && thisNode.editable && thisNode.nodeType === "Reference";
     detectAndRemoveTutorial("proposalReference", referenceProposalTutorialIsValid);
+
     // --------------------------
+
     const questionProposalTutorialIsValid = (thisNode: FullNodeData) =>
       thisNode && thisNode.open && thisNode.editable && thisNode.nodeType === "Question";
     detectAndRemoveTutorial("proposalQuestion", questionProposalTutorialIsValid);
+
     // --------------------------
+
     const ideaProposalTutorialIsValid = (thisNode: FullNodeData) =>
       thisNode && thisNode.open && thisNode.editable && thisNode.nodeType === "Idea";
     detectAndRemoveTutorial("proposalIdea", ideaProposalTutorialIsValid);
+
     // --------------------------
+
     const codeProposalTutorialIsValid = (thisNode: FullNodeData) =>
       thisNode && thisNode.open && thisNode.editable && thisNode.nodeType === "Code";
     detectAndRemoveTutorial("proposalCode", codeProposalTutorialIsValid);
-    // --------------------------
-    // if (tutorial.name === "concept") {
-    //   const node = graph.nodes[targetId];
-    //   if (!conceptTutorialIsValid(node)) {
-    //     setTutorial(null);
-    //     setForcedTutorial(null);
-    //   }
-    // }
-    // --------------------------
 
     // --------------------------
+
     if (tutorial.name === "childConcept") {
       const childConceptProposalIsValid = (node: FullNodeData) =>
         node && Boolean(node.isNew) && node.open && node.editable && node.nodeType === "Concept";
@@ -4873,6 +4898,9 @@ const Dashboard = ({}: DashboardProps) => {
         setForcedTutorial(null);
       }
     }
+
+    // --------------------------
+
     if (tutorial.name === "tmpEditNode") {
       console.log("111aaa");
       const tmpEditNodeIsValid = (node: FullNodeData) => node && node.open && !node.editable;
@@ -4886,6 +4914,9 @@ const Dashboard = ({}: DashboardProps) => {
         setForcedTutorial(null);
       }
     }
+
+    // --------------------------
+
     if (
       tutorial.name === "tmpProposalConceptChild" ||
       tutorial.name === "tmpProposalQuestionChild" ||
@@ -4906,6 +4937,17 @@ const Dashboard = ({}: DashboardProps) => {
       }
     }
 
+    // --------------------------
+
+    if (tutorial.name === "focusMode") {
+      if (!buttonsOpen) {
+        setTutorial(null);
+        setForcedTutorial(null);
+      }
+    }
+
+    // --------------------------
+
     if (tutorial.name === "reconcilingAcceptedProposal") {
       const reconcilingAcceptedProposalIsValid = (node: FullNodeData) =>
         node && node.open && isVersionApproved({ corrects: 1, wrongs: 0, nodeData: node });
@@ -4916,6 +4958,8 @@ const Dashboard = ({}: DashboardProps) => {
         setForcedTutorial(null);
       }
     }
+
+    // --------------------------
 
     if (tutorial.name === "reconcilingNotAcceptedProposal") {
       const reconcilingNotAcceptedProposalIsValid = (node: FullNodeData) =>
@@ -4932,12 +4976,17 @@ const Dashboard = ({}: DashboardProps) => {
       }
     }
 
+    // --------------------------
+
     if (tutorial.name === "searcher") {
       if (openSidebar === "SEARCHER_SIDEBAR") return;
       setTutorial(null);
       setForcedTutorial(null);
     }
+
+    // --------------------------
   }, [
+    buttonsOpen,
     detectAndRemoveTutorial,
     firstLoading,
     graph.nodes,
@@ -5387,15 +5436,14 @@ const Dashboard = ({}: DashboardProps) => {
                   </Box>
                 </Box>
                 <Tooltip title="Scroll to last Selected Node" placement="bottom">
-                  {/* <span> */}
                   <IconButton
+                    id="toolbox-focus-mode"
                     color="secondary"
                     onClick={onScrollToLastNode}
                     disabled={!nodeBookState.selectedNode ? true : false}
                   >
                     <MyLocationIcon sx={{ color: theme => (theme.palette.mode === "dark" ? "#CACACA" : "#667085") }} />
                   </IconButton>
-                  {/* </span> */}
                 </Tooltip>
 
                 <Tooltip
@@ -5408,7 +5456,7 @@ const Dashboard = ({}: DashboardProps) => {
                     },
                   }}
                 >
-                  <IconButton color="secondary" onClick={onRedrawGraph}>
+                  <IconButton id="toolbox-redraw-graph" color="secondary" onClick={onRedrawGraph}>
                     <AutoFixHighIcon sx={{ color: theme => (theme.palette.mode === "dark" ? "#CACACA" : "#667085") }} />
                   </IconButton>
                 </Tooltip>
@@ -5448,6 +5496,7 @@ const Dashboard = ({}: DashboardProps) => {
                   }}
                 >
                   <IconButton
+                    id="toolbox-focus-mode"
                     color="secondary"
                     onClick={() => {
                       setFocusView({ isEnabled: true, selectedNode: nodeBookState.selectedNode || "" });

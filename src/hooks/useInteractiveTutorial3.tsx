@@ -8,7 +8,7 @@ import {
   RECONCILING_NOT_ACCEPTED_PROPOSALS_STEPS_COMPLETE,
 } from "@/lib/utils/tutorials/reconcilingProposalsTutorialSteps";
 import { SEARCHER_STEPS_COMPLETE } from "@/lib/utils/tutorials/searcherTutorialSteps";
-import { TABLE_CONTENT_STEPS_COMPLETE } from "@/lib/utils/tutorials/toolbooxTutorialSteps";
+import { FOCUS_MODE_STEPS, TABLE_CONTENT_STEPS } from "@/lib/utils/tutorials/toolbooxTutorialSteps";
 
 import { User } from "../knowledgeTypes";
 import { devLog } from "../lib/utils/develop.util";
@@ -108,6 +108,7 @@ export const useInteractiveTutorial = ({ user }: useInteractiveTutorialProps) =>
     tmpProposalIdeaChild: { currentStep: -1, done: false, skipped: false },
     tmpProposalCodeChild: { currentStep: -1, done: false, skipped: false },
     tableOfContents: { currentStep: -1, done: false, skipped: false },
+    focusMode: { currentStep: -1, done: false, skipped: false },
   });
 
   // flag for whether tutorial state was loaded
@@ -221,7 +222,15 @@ export const useInteractiveTutorial = ({ user }: useInteractiveTutorialProps) =>
       if (newTutorial === "childCode") {
         newSteps = CHILD_CODE_PROPOSAL_COMPLETE;
       }
+      if (newTutorial === "tableOfContents") {
+        newSteps = TABLE_CONTENT_STEPS;
+      }
+      if (newTutorial === "focusMode") {
+        newSteps = FOCUS_MODE_STEPS;
+      }
+
       //----------------- tmp nodes
+
       if (newTutorial === "tmpEditNode") {
         newSteps = TMP_EDIT_NODE;
       }
@@ -244,9 +253,7 @@ export const useInteractiveTutorial = ({ user }: useInteractiveTutorialProps) =>
       if (newTutorial === "tmpProposalCodeChild") {
         newSteps = TMP_PROPOSE_CHILD_CODE;
       }
-      if (newTutorial === "tableOfContents") {
-        newSteps = TABLE_CONTENT_STEPS_COMPLETE;
-      }
+
       setUserTutorial(prev => ({
         ...prev,
         [newTutorial]: { ...prev[newTutorial], currentStep: /*  initialStep || */ 1 },
