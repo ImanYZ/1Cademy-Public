@@ -2,7 +2,7 @@ import { doc, getDoc, getFirestore } from "firebase/firestore";
 import { ReactNode, useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { NAVIGATION_STEPS_COMPLETE } from "@/lib/utils/tutorials/navigationTutorialSteps";
-import { CLOSE_STEPS_COMPLETE } from "@/lib/utils/tutorials/nodeActionsTutorialStep";
+import { CLOSE_STEPS_COMPLETE, OPEN_STEPS_COMPLETE } from "@/lib/utils/tutorials/nodeActionsTutorialStep";
 import { PROPOSAL_STEPS_COMPLETE } from "@/lib/utils/tutorials/proposalTutorialSteps";
 import {
   RECONCILING_ACCEPTED_PROPOSALS_STEPS_COMPLETE,
@@ -246,6 +246,9 @@ export const useInteractiveTutorial = ({ user }: useInteractiveTutorialProps) =>
       }
       if (newTutorial === "closeNode") {
         newSteps = CLOSE_STEPS_COMPLETE;
+      }
+      if (newTutorial === "openNode") {
+        newSteps = OPEN_STEPS_COMPLETE;
       }
       //----------------- tmp nodes
 

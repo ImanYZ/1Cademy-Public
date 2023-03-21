@@ -1,5 +1,5 @@
 import FullscreenIcon from "@mui/icons-material/Fullscreen";
-import MinimizeIcon from "@mui/icons-material/Minimize";
+import RemoveIcon from "@mui/icons-material/Remove";
 import { IconButton, Stack, Typography } from "@mui/material";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
@@ -203,7 +203,7 @@ const CLOSE_STEPS: TutorialStepConfig[] = [
         <Stack direction={"row"} alignItems="center">
           <Typography>This button</Typography>
           <IconButton>
-            <MinimizeIcon />
+            <RemoveIcon />
           </IconButton>
         </Stack>
         <MarkdownRender text={"Allowed you to close a node so that only the title is displayed."} />
