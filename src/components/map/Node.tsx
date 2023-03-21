@@ -1204,6 +1204,7 @@ const Node = ({
               setOperation={setOperation}
               disabled={disabled}
               enableChildElements={enableChildElements}
+              nodeType={nodeType}
             />
           )}
           {editable && (
@@ -1422,62 +1423,66 @@ const Node = ({
         </>
 
       ) : null} */}
-      <Box
-        id={`${identifier}_childNodes`}
-        sx={{
-          display: !isNew && editable ? "flex" : "none",
-          flexDirection: "column",
-          gap: "10px",
-          position: "absolute",
-          top:
-            (parseFloat(String(document.getElementById(identifier)?.clientHeight)) -
-              parseFloat(String(document.getElementById(identifier + "_" + "childNodes")?.clientHeight))) *
-              0.5 +
-            "px",
-          animation: `${childNodeButtonsAnimation} 1s forwards`,
-        }}
-      >
-        {(Object.keys(proposedChildTypesIcons) as ProposedChildTypesIcons[]).map(
-          (childNodeType: ProposedChildTypesIcons, index: number) => {
-            return (
-              <Tooltip title={`Propose a ${childNodeType} child`} placement="right" key={index}>
-                <Fab
-                  id={`${identifier}-propose-${childNodeType.toLowerCase()}-child`}
-                  disabled={disabled}
-                  color="primary"
-                  sx={{
-                    background: "#1F1F1F",
-                    ":hover": {
-                      background: "#525151",
-                    },
-                  }}
-                  aria-label="add"
-                  onClick={(event: any) => {
-                    return openProposal !== "ProposeNew" + childNodeType + "ChildNode"
-                      ? proposeNewChild(event, childNodeType, setOpenProposal)
-                      : undefined;
-                  }}
-                >
-                  <>
-                    {proposedChildTypesIcons[childNodeType] === "local_library" && (
-                      <LocalLibraryIcon sx={{ color: "white!important" }} />
-                    )}
-                    {proposedChildTypesIcons[childNodeType] === "help_outline" && (
-                      <HelpOutlineIcon sx={{ color: "#fff" }} />
-                    )}
-                    {proposedChildTypesIcons[childNodeType] === "code" && <CodeIcon sx={{ color: "#fff" }} />}
-                    {proposedChildTypesIcons[childNodeType] === "share" && <ShareIcon sx={{ color: "#fff" }} />}
-                    {proposedChildTypesIcons[childNodeType] === "menu_book" && <MenuBookIcon sx={{ color: "#fff" }} />}
-                    {proposedChildTypesIcons[childNodeType] === "emoji_objects" && (
-                      <EmojiObjectsIcon sx={{ color: "#fff" }} />
-                    )}
-                  </>
-                </Fab>
-              </Tooltip>
-            );
-          }
-        )}
-      </Box>
+      {!isNew && nodeType !== "Reference" && editable && (
+        <Box
+          id={`${identifier}_childNodes`}
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            gap: "10px",
+            position: "absolute",
+            top:
+              (parseFloat(String(document.getElementById(identifier)?.clientHeight)) -
+                parseFloat(String(document.getElementById(identifier + "_" + "childNodes")?.clientHeight))) *
+                0.5 +
+              "px",
+            animation: `${childNodeButtonsAnimation} 1s forwards`,
+          }}
+        >
+          {(Object.keys(proposedChildTypesIcons) as ProposedChildTypesIcons[]).map(
+            (childNodeType: ProposedChildTypesIcons, index: number) => {
+              return (
+                <Tooltip title={`Propose a ${childNodeType} child`} placement="right" key={index}>
+                  <Fab
+                    id={`${identifier}-propose-${childNodeType.toLowerCase()}-child`}
+                    disabled={disabled}
+                    color="primary"
+                    sx={{
+                      background: "#1F1F1F",
+                      ":hover": {
+                        background: "#525151",
+                      },
+                    }}
+                    aria-label="add"
+                    onClick={(event: any) => {
+                      return openProposal !== "ProposeNew" + childNodeType + "ChildNode"
+                        ? proposeNewChild(event, childNodeType, setOpenProposal)
+                        : undefined;
+                    }}
+                  >
+                    <>
+                      {proposedChildTypesIcons[childNodeType] === "local_library" && (
+                        <LocalLibraryIcon sx={{ color: "white!important" }} />
+                      )}
+                      {proposedChildTypesIcons[childNodeType] === "help_outline" && (
+                        <HelpOutlineIcon sx={{ color: "#fff" }} />
+                      )}
+                      {proposedChildTypesIcons[childNodeType] === "code" && <CodeIcon sx={{ color: "#fff" }} />}
+                      {proposedChildTypesIcons[childNodeType] === "share" && <ShareIcon sx={{ color: "#fff" }} />}
+                      {proposedChildTypesIcons[childNodeType] === "menu_book" && (
+                        <MenuBookIcon sx={{ color: "#fff" }} />
+                      )}
+                      {proposedChildTypesIcons[childNodeType] === "emoji_objects" && (
+                        <EmojiObjectsIcon sx={{ color: "#fff" }} />
+                      )}
+                    </>
+                  </Fab>
+                </Tooltip>
+              );
+            }
+          )}
+        </Box>
+      )}
     </div>
   );
 };
