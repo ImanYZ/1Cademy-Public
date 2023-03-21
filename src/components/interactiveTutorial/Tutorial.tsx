@@ -133,34 +133,6 @@ export const TooltipTutorial = ({
     targetClientRect.width,
     tutorialStep,
   ]);
-  // const tooltipTaleClientRect = useMemo(() => {
-  //   let top = 0;
-  //   let left = 0;
-
-  //   console.log("TOOLTIP_TALE_CLIENT_RECT", { tutorialStep });
-
-  //   if (!tutorialStep) return { top, left };
-
-  //   const pos = tutorialStep.tooltipPosition;
-  //   if (pos === "top") {
-  //     top = targetClientRect.top - TOOLTIP_OFFSET;
-  //     left = targetClientRect.left + targetClientRect.width / 2 - TOOLTIP_TALE_SIZE / 2;
-  //   }
-  //   if (pos === "bottom") {
-  //     top = targetClientRect.top + targetClientRect.height + TOOLTIP_OFFSET - TOOLTIP_TALE_SIZE;
-  //     left = targetClientRect.left + targetClientRect.width / 2 - TOOLTIP_TALE_SIZE / 2;
-  //   }
-  //   if (pos === "left") {
-  //     top = targetClientRect.top + targetClientRect.height / 2 - TOOLTIP_TALE_SIZE / 2;
-  //     left = targetClientRect.left - TOOLTIP_OFFSET;
-  //   }
-  //   if (pos === "right") {
-  //     top = targetClientRect.top + targetClientRect.height / 2 - TOOLTIP_TALE_SIZE / 2;
-  //     left = targetClientRect.left + targetClientRect.width + TOOLTIP_OFFSET - TOOLTIP_TALE_SIZE;
-  //   }
-
-  //   return { top, left };
-  // }, [targetClientRect.height, targetClientRect.left, targetClientRect.top, targetClientRect.width, tutorialStep]);
 
   const taleRect = useMemo(() => {
     let top = undefined;
@@ -493,39 +465,3 @@ export const TooltipTutorial = ({
     </Box>
   );
 };
-{
-  /* <Box
-        sx={{
-          position: "absolute",
-          border: "solid 10px transparent",
-          top: `${tooltipTaleClientRect.top}px`,
-          left: `${tooltipTaleClientRect.left}px`,
-          transition: "top 750ms ease-out,left 750ms ease-out, border-color 1s linear",
-          zIndex: 99999,
-          //tale onto TOP
-          borderBottomWidth: `${tutorialStep.tooltipPosition === "top" ? 0 : undefined}`,
-          borderTopColor:
-            tutorialStep.tooltipPosition === "top"
-              ? theme => (theme.palette.mode === "dark" ? "#4B535C" : "#C5D0DF")
-              : undefined,
-          //tale onto BOTTOM
-          borderTopWidth: `${tutorialStep.tooltipPosition === "bottom" ? 0 : undefined}`,
-          borderBottomColor:
-            tutorialStep.tooltipPosition === "bottom"
-              ? theme => (theme.palette.mode === "dark" ? "#4B535C" : "#C5D0DF")
-              : undefined,
-          //tale onto LEFT
-          borderRightWidth: `${tutorialStep.tooltipPosition === "left" ? 0 : undefined}`,
-          borderLeftColor:
-            tutorialStep.tooltipPosition === "left"
-              ? theme => (theme.palette.mode === "dark" ? "#4B535C" : "#C5D0DF")
-              : undefined,
-          //tale onto RIGHT
-          borderLeftWidth: `${tutorialStep.tooltipPosition === "right" ? 0 : undefined}`,
-          borderRightColor:
-            tutorialStep.tooltipPosition === "right"
-              ? theme => (theme.palette.mode === "dark" ? "#4B535C" : "#C5D0DF")
-              : undefined,
-        }}
-      ></Box> */
-}
