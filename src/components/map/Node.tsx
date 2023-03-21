@@ -760,35 +760,37 @@ const Node = ({
             {/* CHECK: I commented this */}
 
             {editable && (
-              <Box
-                id={`${identifier}-preview-edit`}
-                sx={{
-                  display: "flex",
-                  justifyContent: "end",
-                  alignItems: "center",
-                  position: "relative",
-                  top: "-5px",
-                }}
-              >
-                <Typography
-                  onClick={() => setOption("PREVIEW")}
-                  sx={{ cursor: "pointer", fontSize: "14px", fontWeight: 490, color: "inherit" }}
+              <Box sx={{ display: "flex", justifyContent: "end" }}>
+                <Box
+                  id={`${identifier}-preview-edit`}
+                  sx={{
+                    display: "flex",
+                    alignItems: "center",
+                    position: "relative",
+                    top: "-5px",
+                    borderRadius: "10px",
+                  }}
                 >
-                  Preview
-                </Typography>
-                <Switch
-                  disabled={disableSwitchPreview}
-                  checked={option === "EDIT"}
-                  onClick={() => onChangeOption(option === "EDIT")}
-                  size="small"
-                  onKeyDown={onKeyEnter}
-                />
-                <Typography
-                  onClick={() => setOption("EDIT")}
-                  sx={{ cursor: "pointer", fontSize: "14px", fontWeight: 490, color: "inherit" }}
-                >
-                  Edit
-                </Typography>
+                  <Typography
+                    onClick={() => setOption("PREVIEW")}
+                    sx={{ cursor: "pointer", fontSize: "14px", fontWeight: 490, color: "inherit" }}
+                  >
+                    Preview
+                  </Typography>
+                  <Switch
+                    disabled={disableSwitchPreview}
+                    checked={option === "EDIT"}
+                    onClick={() => onChangeOption(option === "EDIT")}
+                    size="small"
+                    onKeyDown={onKeyEnter}
+                  />
+                  <Typography
+                    onClick={() => setOption("EDIT")}
+                    sx={{ cursor: "pointer", fontSize: "14px", fontWeight: 490, color: "inherit" }}
+                  >
+                    Edit
+                  </Typography>
+                </Box>
               </Box>
             )}
 
@@ -1257,29 +1259,6 @@ const Node = ({
                 >
                   Propose
                 </Button>
-                {/* <div
-                    id="ProposalButtonsRow"
-                    style={{
-                      border: "solid 0px pink",
-                      display: !isNew && nodeType !== "Reference" ? "flex" : "none",
-                      justifyContent: "space-around",
-                    }}
-                  >
-                    {(Object.keys(proposedChildTypesIcons) as ProposedChildTypesIcons[]).map(
-                      (childNodeType: ProposedChildTypesIcons) => {
-                        return (
-                          <NewChildProposal
-                            key={childNodeType}
-                            childNodeType={childNodeType}
-                            icon={proposedChildTypesIcons[childNodeType]}
-                            openProposal={openProposal}
-                            setOpenProposal={setOpenProposal}
-                            proposeNewChild={proposeNewChild}
-                          />
-                        );
-                      }
-                    )}
-                  </div> */}
               </Box>
             </>
           )}
@@ -1379,59 +1358,9 @@ const Node = ({
           </div>
         </div>
       )}
-      {/* {openSidebar === "PROPOSALS" && !simulated && !isNew && nodeBookState.selectedNode == identifier ? (
-        <>
-          <Box
-            sx={{
-              mx: "10px",
-              borderTop: theme =>
-                theme.palette.mode === "dark" ? `solid 1px ${theme.palette.common.borderColor}` : "solid 1px",
-            }}
-          />
-          <Box sx={{ p: "13px 10px" }}>
-            <Box
-              sx={{
-                display: "flex",
-                alignItems: "center",
-              }}
-            >
-              <EditProposal
-                identifier={identifier}
-                openProposal={openProposal}
-                proposeNodeImprovement={proposeNodeImprovement}
-                selectedNode={nodeBookState.selectedNode}
-              />
-              <div
-                id="ProposalButtonsRow"
-                style={{
-                  border: "solid 0px pink",
-                  display: nodeType !== "Reference" ? "flex" : "none",
-                  justifyContent: "space-around",
-                }}
-              >
-                {(Object.keys(proposedChildTypesIcons) as ProposedChildTypesIcons[]).map(
-                  (childNodeType: ProposedChildTypesIcons) => {
-                    return (
-                      <NewChildProposal
-                        key={childNodeType}
-                        childNodeType={childNodeType}
-                        icon={proposedChildTypesIcons[childNodeType]}
-                        openProposal={openProposal}
-                        setOpenProposal={setOpenProposal}
-                        proposeNewChild={proposeNewChild}
-                      />
-                    );
-                  }
-                )}
-              </div>
-            </Box>
-          </Box>
-        </>
-
-      ) : null} */}
       {!isNew && nodeType !== "Reference" && editable && (
         <Box
-          id={`${identifier}_childNodes`}
+          id={`${identifier}-new-children-nodes-buttons`}
           sx={{
             display: "flex",
             flexDirection: "column",
@@ -1439,10 +1368,11 @@ const Node = ({
             position: "absolute",
             top:
               (parseFloat(String(document.getElementById(identifier)?.clientHeight)) -
-                parseFloat(String(document.getElementById(identifier + "_" + "childNodes")?.clientHeight))) *
+                parseFloat(String(document.getElementById(`${identifier}-new-children-nodes-buttons`)?.clientHeight))) *
                 0.5 +
               "px",
             animation: `${childNodeButtonsAnimation} 1s forwards`,
+            borderRadius: "25px",
           }}
         >
           {(Object.keys(proposedChildTypesIcons) as ProposedChildTypesIcons[]).map(
