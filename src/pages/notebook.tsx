@@ -5565,6 +5565,7 @@ const Dashboard = ({}: DashboardProps) => {
                         onFinalizeTutorial();
                       }
                     }}
+                    disabled={!nodeBookState.selectedNode ? true : false}
                   >
                     <NextImage
                       src={theme.palette.mode === "light" ? focusViewLogo : focusViewDarkLogo}
