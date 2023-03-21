@@ -15,7 +15,7 @@ const TABLE_CONTENT_STEPS_CONFIG: TutorialStepConfig[] = [
     ),
     anchor: "Portal",
     isClickeable: true,
-    targetDelay: 450,
+    targetDelay: 700,
     tooltipPosition: "bottom",
   },
 ];
@@ -33,7 +33,7 @@ const FOCUS_MODE_STEPS_CONFIG: TutorialStepConfig[] = [
     ),
     anchor: "Portal",
     isClickeable: true,
-    targetDelay: 450,
+    targetDelay: 800,
     tooltipPosition: "bottom",
   },
 ];
