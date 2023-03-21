@@ -505,8 +505,8 @@ const Dashboard = ({}: DashboardProps) => {
         const { offsetTop, offsetLeft } = targetElement;
         const { height: childrenHeight, width: childrenWidth } = targetElement.getBoundingClientRect();
 
-        offsetChildTop = offsetTop;
-        offsetChildLeft = offsetLeft;
+        offsetChildTop = offsetTop + currentStep.topOffset;
+        offsetChildLeft = offsetLeft + currentStep.leftOffset;
         height = childrenHeight;
         width = childrenWidth;
       }

@@ -786,39 +786,6 @@ p {
   border-right: 6px solid transparent;
 }
 
-/* TUTORIAL STYLES TOOLTIP */
-.tooltip::after {
-  position: absolute;
-  content: "";
-  border-style: solid;
-  border-width: 10px;
-  border-color: transparent;
-}
-.tooltip-top::after {
-  border-bottom-width: 0px;
-  border-top-color: inherit;
-  bottom: -10px;
-  left: calc(50% - 10px);
-}
-.tooltip-bottom::after {
-  border-top-width: 0px;
-  border-bottom-color: inherit;
-  top: -10px;
-  left: calc(50% - 10px);
-}
-.tooltip-right::after {
-  border-left-width: 0px;
-  border-right-color: inherit;
-  left: -10px;
-  top: calc(50% - 10px);
-}
-.tooltip-left::after {
-  border-right-width: 0px;
-  border-left-color: inherit;
-  right: -10px;
-  top: calc(50% - 10px);
-}
-
 .tutorial-target-shallow {
   animation: tutorial-tt 2s infinite;
   outline: 1px solid #ff6d00;

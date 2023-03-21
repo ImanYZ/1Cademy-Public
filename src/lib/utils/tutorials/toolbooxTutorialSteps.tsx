@@ -15,7 +15,6 @@ const TABLE_CONTENT_STEPS_CONFIG: TutorialStepConfig[] = [
     ),
     anchor: "Portal",
     isClickeable: true,
-    targetDelay: 700,
     tooltipPosition: "bottom",
   },
 ];

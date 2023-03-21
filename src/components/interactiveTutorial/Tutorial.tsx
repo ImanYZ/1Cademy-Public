@@ -1,14 +1,15 @@
 import LiveHelpIcon from "@mui/icons-material/LiveHelp";
 import { Box, Button, Stack, Typography } from "@mui/material";
-import React, { useMemo, useRef } from "react";
+import React, { useCallback, useMemo, useRef } from "react";
 
+import { useWindowSize } from "@/hooks/useWindowSize";
 import { gray50, gray200, gray700, gray800 } from "@/pages/home";
 
 import { TargetClientRect, Tutorial } from "../../hooks/useInteractiveTutorial3";
 import { FullNodeData, TutorialStep } from "../../nodeBookTypes";
 
 const TOOLTIP_OFFSET = 40;
-
+const TOOLTIP_TALE_SIZE = 10;
 type TutorialProps = {
   tutorial: Tutorial;
   tutorialStep: TutorialStep | null;
@@ -36,35 +37,135 @@ export const TooltipTutorial = ({
 }: TutorialProps) => {
   const tooltipRef = useRef<HTMLDivElement | null>(null);
 
-  // console.log({ tutorialStep, tutorial });
-  const tooltipClientRect = useMemo(() => {
-    if (!tooltipRef.current) return { top: 0, left: 0 };
-    if (!tutorialStep) return { top: 0, left: 0 };
+  const { width: windowWidth, height: windowHeight } = useWindowSize();
 
-    const { height: tooltipHeight } = tooltipRef.current.getBoundingClientRect();
+  // console.log({ tutorialStep, tutorial });
+
+  const calcWithExceed = useCallback(
+    (top: number, left: number) => {
+      if (!tooltipRef.current) return { top, left };
+
+      //if the width of tooltip exceeds the winwow heigth
+      const exceedBottom = top + tooltipRef.current.clientHeight - windowHeight;
+      top = exceedBottom > 0 ? top - exceedBottom - 4 : top;
+
+      //if the top of the tooltip is less than - 0
+      top = top < 0 ? 10 : top;
+
+      //if the width of tooltip exceeds the winwow width
+      const exceedRight = left + tooltipRef.current.clientWidth - windowWidth;
+      left = exceedRight > 0 ? left - exceedRight - 4 : left;
+
+      //if the left of the tooltip is less than - 0
+      left = left < 0 ? 10 : left;
+      return { top, left };
+    },
+    [windowHeight, windowWidth]
+  );
+
+  const tooltipRect = useMemo(() => {
     let top = 0;
     let left = 0;
+    let exceedTop = 0;
+    let exceedLeft = 0;
+    console.log("TOOLTIP_CLIENT_RECT", { tutorialStep });
+
+    if (!tooltipRef.current) return { top, left, exceedTop, exceedLeft };
+    if (!tutorialStep) return { top, left, exceedTop, exceedLeft };
+
+    const { height: tooltipHeight } = tooltipRef.current.getBoundingClientRect();
     const pos = tutorialStep.tooltipPosition;
     if (pos === "top") {
       top = targetClientRect.top - tooltipHeight - TOOLTIP_OFFSET;
       left = targetClientRect.left + targetClientRect.width / 2 - tooltipRef.current.clientWidth / 2;
+      if (tutorialStep.anchor === "Portal") {
+        const { top: newTop, left: newLeft } = calcWithExceed(top, left);
+
+        exceedLeft = left - newLeft;
+        exceedTop = top - newTop;
+        top = newTop;
+        left = newLeft;
+      }
     }
     if (pos === "bottom") {
       top = targetClientRect.top + targetClientRect.height + TOOLTIP_OFFSET;
       left = targetClientRect.left + targetClientRect.width / 2 - tooltipRef.current.clientWidth / 2;
+      if (tutorialStep.anchor === "Portal") {
+        const { top: newTop, left: newLeft } = calcWithExceed(top, left);
+        exceedLeft = left - newLeft;
+        exceedTop = top - newTop;
+        top = newTop;
+        left = newLeft;
+      }
     }
     if (pos === "left") {
-      top = targetClientRect.top + targetClientRect.height / 2 - tooltipRef.current.clientHeight / 2;
+      top =
+        targetClientRect.top + targetClientRect.height / 2 - tooltipRef.current.clientHeight / 2 + TOOLTIP_TALE_SIZE;
       left = targetClientRect.left - tooltipRef.current.clientWidth - TOOLTIP_OFFSET;
-    }
-    TooltipTutorial;
-    if (pos === "right") {
-      top = targetClientRect.top + targetClientRect.height / 2 - tooltipRef.current.clientHeight / 2;
-      left = targetClientRect.left + targetClientRect.width + TOOLTIP_OFFSET;
+      if (tutorialStep.anchor === "Portal") {
+        const { top: newTop, left: newLeft } = calcWithExceed(top, left);
+        exceedLeft = left - newLeft;
+        exceedTop = top - newTop;
+        top = newTop;
+        left = newLeft;
+      }
     }
 
-    return { top, left };
-  }, [targetClientRect, tutorialStep]);
+    if (pos === "right") {
+      top =
+        targetClientRect.top + targetClientRect.height / 2 - tooltipRef.current.clientHeight / 2 + TOOLTIP_TALE_SIZE;
+      left = targetClientRect.left + targetClientRect.width + TOOLTIP_OFFSET;
+      if (tutorialStep.anchor === "Portal") {
+        const { top: newTop, left: newLeft } = calcWithExceed(top, left);
+        exceedLeft = left - newLeft;
+        exceedTop = top - newTop;
+        top = newTop;
+        left = newLeft;
+      }
+    }
+
+    return { top, left, exceedTop, exceedLeft };
+  }, [
+    calcWithExceed,
+    targetClientRect.height,
+    targetClientRect.left,
+    targetClientRect.top,
+    targetClientRect.width,
+    tutorialStep,
+  ]);
+
+  const taleRect = useMemo(() => {
+    let top = undefined;
+    let left = undefined;
+    let right = undefined;
+    let bottom = undefined;
+    if (!tooltipRef.current) return { top, left, right, bottom };
+    if (!tutorialStep) return { top, left, right, bottom };
+
+    //keep for recalc memo, otherwise will catch wrong prev  position
+    if (!targetClientRect) return { top, left, right, bottom };
+
+    const pos = tutorialStep.tooltipPosition;
+
+    if (pos === "top") {
+      bottom = -TOOLTIP_TALE_SIZE;
+      left = tooltipRef.current.clientWidth / 2 - TOOLTIP_TALE_SIZE;
+    }
+    if (pos === "bottom") {
+      top = -TOOLTIP_TALE_SIZE;
+      left = tooltipRef.current.clientWidth / 2 - TOOLTIP_TALE_SIZE;
+    }
+    if (pos === "left") {
+      top = tooltipRef.current.clientHeight / 2 - TOOLTIP_TALE_SIZE;
+      right = -TOOLTIP_TALE_SIZE;
+    }
+    if (pos === "right") {
+      top = tooltipRef.current.clientHeight / 2 - TOOLTIP_TALE_SIZE;
+      left = -TOOLTIP_TALE_SIZE;
+    }
+
+    return { top, left, right, bottom };
+  }, [tutorialStep, targetClientRect]);
 
   if (!tutorialStep) return null;
   if (!tutorialStep.currentStepName) return null;
@@ -214,12 +315,11 @@ export const TooltipTutorial = ({
   return (
     <Box
       ref={tooltipRef}
-      className={`tooltip tooltip-${tutorialStep.tooltipPosition}`}
       sx={{
         position: "absolute",
-        top: `${tooltipClientRect.top}px`,
-        left: `${tooltipClientRect.left}px`,
-        transition: "top 1s ease-out,left 1s ease-out",
+        top: `${tooltipRect.top}px`,
+        left: `${tooltipRect.left}px`,
+        transition: "top 750ms ease-out,left 750ms ease-out, border-color 1s linear",
         width: "450px",
         backgroundColor: theme => (theme.palette.mode === "dark" ? "#4B535C" : "#C5D0DF"),
         borderColor: theme => (theme.palette.mode === "dark" ? "#4B535C" : "#C5D0DF") /* this is used in tooltip */,
@@ -227,6 +327,40 @@ export const TooltipTutorial = ({
         borderRadius: "8px",
         color: theme => (theme.palette.mode === "dark" ? gray50 : gray800),
         zIndex: 99999,
+
+        ":after": {
+          position: "absolute",
+          content: "''",
+          border: "solid 10px transparent",
+          //tale onto TOP
+          borderBottomWidth: `${tutorialStep.tooltipPosition === "top" ? 0 : undefined}`,
+          borderTopColor:
+            tutorialStep.tooltipPosition === "top"
+              ? theme => (theme.palette.mode === "dark" ? "#4B535C" : "#C5D0DF")
+              : undefined,
+          //tale onto BOTTOM
+          borderTopWidth: `${tutorialStep.tooltipPosition === "bottom" ? 0 : undefined}`,
+          borderBottomColor:
+            tutorialStep.tooltipPosition === "bottom"
+              ? theme => (theme.palette.mode === "dark" ? "#4B535C" : "#C5D0DF")
+              : undefined,
+          //tale onto LEFT
+          borderRightWidth: `${tutorialStep.tooltipPosition === "left" ? 0 : undefined}`,
+          borderLeftColor:
+            tutorialStep.tooltipPosition === "left"
+              ? theme => (theme.palette.mode === "dark" ? "#4B535C" : "#C5D0DF")
+              : undefined,
+          //tale onto RIGHT
+          borderLeftWidth: `${tutorialStep.tooltipPosition === "right" ? 0 : undefined}`,
+          borderRightColor:
+            tutorialStep.tooltipPosition === "right"
+              ? theme => (theme.palette.mode === "dark" ? "#4B535C" : "#C5D0DF")
+              : undefined,
+          top: taleRect.top ? `${taleRect.top + tooltipRect.exceedTop}px` : undefined,
+          bottom: taleRect.bottom ? `${taleRect.bottom}px` : undefined,
+          left: taleRect.left ? `${taleRect.left + tooltipRect.exceedLeft}px` : undefined,
+          right: taleRect.right ? `${taleRect.right}px` : undefined,
+        },
       }}
     >
       <Stack direction={"row"} justifyContent="space-between" sx={{ mb: "12px" }}>
