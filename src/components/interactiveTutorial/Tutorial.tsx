@@ -101,8 +101,8 @@ export const TooltipTutorial = ({
         top = newTop;
         left = newLeft;
       }
-      console.log(2, { top, left });
     }
+
     if (pos === "right") {
       top = targetClientRect.top + targetClientRect.height / 2 - tooltipRef.current.clientHeight / 2;
       left = targetClientRect.left + targetClientRect.width + TOOLTIP_OFFSET;
@@ -136,12 +136,12 @@ export const TooltipTutorial = ({
       left = targetClientRect.left + targetClientRect.width / 2 - TOOLTIP_TALE_SIZE / 2;
     }
     if (pos === "bottom") {
-      top = targetClientRect.top + targetClientRect.height + TOOLTIP_OFFSET;
+      top = targetClientRect.top + targetClientRect.height + TOOLTIP_OFFSET - TOOLTIP_TALE_SIZE;
       left = targetClientRect.left + targetClientRect.width / 2 - TOOLTIP_TALE_SIZE / 2;
     }
     if (pos === "left") {
       top = targetClientRect.top + targetClientRect.height / 2 - TOOLTIP_TALE_SIZE / 2;
-      left = targetClientRect.left - TOOLTIP_OFFSET;
+      left = targetClientRect.left - TOOLTIP_OFFSET + TOOLTIP_TALE_SIZE;
     }
     if (pos === "right") {
       top = targetClientRect.top + targetClientRect.height / 2 - TOOLTIP_TALE_SIZE / 2;
