@@ -37,7 +37,6 @@ const NODES_STEPS: TutorialStepConfig[] = [
       />
     ),
     outline: "outside",
-    tooltipPosition: "left",
   },
 
   {
@@ -50,7 +49,6 @@ const NODES_STEPS: TutorialStepConfig[] = [
         }
       />
     ),
-    tooltipPosition: "right",
   },
 
   {
@@ -63,7 +61,6 @@ const NODES_STEPS: TutorialStepConfig[] = [
         }
       />
     ),
-    tooltipPosition: "bottom",
   },
 
   {
