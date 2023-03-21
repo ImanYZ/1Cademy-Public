@@ -8,7 +8,7 @@ import {
   RECONCILING_NOT_ACCEPTED_PROPOSALS_STEPS_COMPLETE,
 } from "@/lib/utils/tutorials/reconcilingProposalsTutorialSteps";
 import { SEARCHER_STEPS_COMPLETE } from "@/lib/utils/tutorials/searcherTutorialSteps";
-import { FOCUS_MODE_STEPS, TABLE_CONTENT_STEPS } from "@/lib/utils/tutorials/toolbooxTutorialSteps";
+import { FOCUS_MODE_STEPS, REDRAW_GRAPH_STEPS, TABLE_CONTENT_STEPS } from "@/lib/utils/tutorials/toolbooxTutorialSteps";
 
 import { User } from "../knowledgeTypes";
 import { devLog } from "../lib/utils/develop.util";
@@ -109,6 +109,7 @@ export const useInteractiveTutorial = ({ user }: useInteractiveTutorialProps) =>
     tmpProposalCodeChild: { currentStep: -1, done: false, skipped: false },
     tableOfContents: { currentStep: -1, done: false, skipped: false },
     focusMode: { currentStep: -1, done: false, skipped: false },
+    redrawGraph: { currentStep: -1, done: false, skipped: false },
   });
 
   // flag for whether tutorial state was loaded
@@ -227,6 +228,9 @@ export const useInteractiveTutorial = ({ user }: useInteractiveTutorialProps) =>
       }
       if (newTutorial === "focusMode") {
         newSteps = FOCUS_MODE_STEPS;
+      }
+      if (newTutorial === "redrawGraph") {
+        newSteps = REDRAW_GRAPH_STEPS;
       }
 
       //----------------- tmp nodes
