@@ -56,6 +56,24 @@ const REDRAW_GRAPH_STEPS_CONFIG: TutorialStepConfig[] = [
   },
 ];
 
+const SCROLL_TO_NODE_STEPS_CONFIG: TutorialStepConfig[] = [
+  {
+    title: "Scroll to Node",
+    childTargetId: "toolbox-scroll-to-node",
+    description: (
+      <MarkdownRender
+        text={
+          "If you click this button it will automatically scroll to the last node that you interacted with. This can help you find where you previously where if you get a little lost while navigating around nodes."
+        }
+      />
+    ),
+    anchor: "Portal",
+    isClickeable: true,
+    targetDelay: 800,
+    tooltipPosition: "bottom",
+  },
+];
+
 export const TABLE_CONTENT_STEPS: TutorialStep[] = TABLE_CONTENT_STEPS_CONFIG.map((c, i, s) => {
   return { ...getBaseStepConfig(i + 1, s.length), ...c };
 });
@@ -65,5 +83,9 @@ export const FOCUS_MODE_STEPS: TutorialStep[] = FOCUS_MODE_STEPS_CONFIG.map((c, 
 });
 
 export const REDRAW_GRAPH_STEPS: TutorialStep[] = REDRAW_GRAPH_STEPS_CONFIG.map((c, i, s) => {
+  return { ...getBaseStepConfig(i + 1, s.length), ...c };
+});
+
+export const SCROLL_TO_NODE_STEPS: TutorialStep[] = SCROLL_TO_NODE_STEPS_CONFIG.map((c, i, s) => {
   return { ...getBaseStepConfig(i + 1, s.length), ...c };
 });

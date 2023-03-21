@@ -4256,6 +4256,7 @@ const Dashboard = ({}: DashboardProps) => {
       if (!userTutorialLoaded) return;
       if (firstLoading) return;
       if (tutorial) return;
+      if (focusView.isEnabled) return;
 
       devLog("USE_EFFECT: DETECT_TRIGGER_TUTORIAL", { userTutorial });
 
@@ -4321,6 +4322,8 @@ const Dashboard = ({}: DashboardProps) => {
           (!forcedTutorial && !userTutorial["tableOfContents"].done && !userTutorial["tableOfContents"].skipped) ||
           userTutorial["focusMode"].done ||
           userTutorial["focusMode"].skipped;
+        // if (nodeBookState.selectedNode) return;
+
         if (!shouldIgnore) {
           if (buttonsOpen) return startTutorial("focusMode");
         }
@@ -4349,6 +4352,27 @@ const Dashboard = ({}: DashboardProps) => {
       if (forcedTutorial === "redrawGraph") {
         if (buttonsOpen) {
           return startTutorial("redrawGraph");
+        } else {
+          return setButtonsOpen(true);
+        }
+      }
+
+      // --------------------------
+
+      if (forcedTutorial === "scrollToNode" || !forcedTutorial) {
+        const shouldIgnore =
+          (!forcedTutorial && !userTutorial["redrawGraph"].done && !userTutorial["redrawGraph"].skipped) ||
+          userTutorial["scrollToNode"].done ||
+          userTutorial["scrollToNode"].skipped;
+        // if (nodeBookState.selectedNode) return;
+        if (!shouldIgnore) {
+          if (buttonsOpen) return startTutorial("scrollToNode");
+        }
+      }
+
+      if (forcedTutorial === "scrollToNode") {
+        if (buttonsOpen) {
+          return startTutorial("scrollToNode");
         } else {
           return setButtonsOpen(true);
         }
@@ -4783,11 +4807,11 @@ const Dashboard = ({}: DashboardProps) => {
     detectAndCallTutorial,
     detectAndForceTutorial,
     firstLoading,
+    focusView.isEnabled,
     forcedTutorial,
     graph.nodes,
     nodeBookDispatch,
     openNodeHandler,
-    openProgressBar,
     openSidebar,
     setTargetId,
     startTutorial,
@@ -4800,6 +4824,12 @@ const Dashboard = ({}: DashboardProps) => {
     if (!userTutorialLoaded) return;
     if (firstLoading) return;
     if (!tutorial) return;
+
+    if (focusView.isEnabled) {
+      setTutorial(null);
+      setForcedTutorial(null);
+      return;
+    }
 
     devLog("USE_EFFECT: DETECT_TO_REMOVE_TUTORIAL", tutorial);
 
@@ -4917,14 +4947,23 @@ const Dashboard = ({}: DashboardProps) => {
       tutorial.name === "tmpProposalIdeaChild" ||
       tutorial.name === "tmpProposalCodeChild"
     ) {
-      console.log("aaaaaaaa");
+      // console.log("aaaaaaaa");
       const isValid = (node: FullNodeData) => node && node.open && node.editable && !Boolean(node.isNew);
       const node = graph.nodes[targetId];
       if (!isValid(node)) {
-        console.log("bbbb");
+        // console.log("bbbb");
         setTutorial(null);
         if (node && !node.editable) return;
-        console.log("ccccc");
+        // console.log("ccccc");
+        setForcedTutorial(null);
+      }
+    }
+
+    // --------------------------
+
+    if (tutorial.name === "tableOfContents") {
+      if (!buttonsOpen) {
+        setTutorial(null);
         setForcedTutorial(null);
       }
     }
@@ -4941,6 +4980,15 @@ const Dashboard = ({}: DashboardProps) => {
     // --------------------------
 
     if (tutorial.name === "redrawGraph") {
+      if (!buttonsOpen) {
+        setTutorial(null);
+        setForcedTutorial(null);
+      }
+    }
+
+    // --------------------------
+
+    if (tutorial.name === "scrollToNode") {
       if (!buttonsOpen) {
         setTutorial(null);
         setForcedTutorial(null);
@@ -4990,8 +5038,10 @@ const Dashboard = ({}: DashboardProps) => {
     buttonsOpen,
     detectAndRemoveTutorial,
     firstLoading,
+    focusView.isEnabled,
     graph.nodes,
     nodeBookState.selectedNode,
+    openProgressBar,
     openSidebar,
     setTutorial,
     targetId,
@@ -5510,6 +5560,7 @@ const Dashboard = ({}: DashboardProps) => {
                     color="secondary"
                     onClick={() => {
                       setFocusView({ isEnabled: true, selectedNode: nodeBookState.selectedNode || "" });
+                      setOpenProgressBar(false);
                       if (tutorial?.name === "focusMode") {
                         onFinalizeTutorial();
                       }
