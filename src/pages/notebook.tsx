@@ -2523,6 +2523,7 @@ const Dashboard = ({}: DashboardProps) => {
         return { ...node, correct: !correct, wrong: false, corrects, wrongs, disableVotes: true };
       });
       event.currentTarget.blur();
+      lastNodeOperation.current = { name: "upvote", data: "" };
     },
     [getMapGraph, setNodeParts, setReputationSignal]
   );
@@ -2554,6 +2555,7 @@ const Dashboard = ({}: DashboardProps) => {
         const node = graph.nodes[nodeId];
 
         const willRemoveNode = doNeedToDeleteNode(_corrects, _wrongs, locked);
+        lastNodeOperation.current = { name: "downvote", data: willRemoveNode ? "removed" : "" };
         if (willRemoveNode) {
           if (node?.children.length > 0) {
             window.alert(
@@ -3988,7 +3990,7 @@ const Dashboard = ({}: DashboardProps) => {
     setTutorial(null);
     setTargetId("");
 
-    if (wasForcedTutorial) return setForcedTutorial(null);
+    if (wasForcedTutorial) setForcedTutorial(null);
 
     const tutorialRef = doc(db, "userTutorial", user.uname);
     const tutorialDoc = await getDoc(tutorialRef);
@@ -4056,7 +4058,7 @@ const Dashboard = ({}: DashboardProps) => {
     setUserTutorial(userTutorialUpdated);
     setTargetId("");
 
-    if (wasForcedTutorial) return setForcedTutorial(null);
+    if (wasForcedTutorial) setForcedTutorial(null);
 
     const tutorialRef = doc(db, "userTutorial", user.uname);
     const tutorialDoc = await getDoc(tutorialRef);
@@ -4894,6 +4896,42 @@ const Dashboard = ({}: DashboardProps) => {
 
       // --------------------------
 
+      if (forcedTutorial === "upVote" || !forcedTutorial) {
+        const shouldIgnore =
+          (!forcedTutorial && !userTutorial["nodes"].done && !userTutorial["nodes"].skipped) ||
+          userTutorial["upVote"].done ||
+          userTutorial["upVote"].skipped;
+        if (!shouldIgnore) {
+          const upvoteLaunched = detectAndCallTutorial("upVote", node => node && node.open);
+          if (upvoteLaunched) return;
+        }
+      }
+
+      if (forcedTutorial === "upVote") {
+        const result = detectAndForceTutorial("upVote", "r98BjyFDCe4YyLA3U8ZE", node => node && node.open);
+        if (result) return;
+      }
+
+      // --------------------------
+
+      if (forcedTutorial === "downVote" || !forcedTutorial) {
+        const shouldIgnore =
+          (!forcedTutorial && !userTutorial["nodes"].done && !userTutorial["nodes"].skipped) ||
+          userTutorial["downVote"].done ||
+          userTutorial["downVote"].skipped;
+        if (!shouldIgnore) {
+          const upvoteLaunched = detectAndCallTutorial("downVote", node => node && node.open);
+          if (upvoteLaunched) return;
+        }
+      }
+
+      if (forcedTutorial === "downVote") {
+        const result = detectAndForceTutorial("downVote", "r98BjyFDCe4YyLA3U8ZE", node => node && node.open);
+        if (result) return;
+      }
+
+      // --------------------------
+
       if (forcedTutorial === "searcher" || openSidebar === "SEARCHER_SIDEBAR") {
         const result = detectAndCallSidebarTutorial("searcher", "SEARCHER_SIDEBAR");
         if (result) return;
@@ -5146,6 +5184,28 @@ const Dashboard = ({}: DashboardProps) => {
       const node = graph.nodes[targetId];
       if (!reconcilingNotAcceptedProposalIsValid(node)) {
         setOpenSidebar(null);
+        setTutorial(null);
+        setForcedTutorial(null);
+      }
+    }
+
+    // --------------------------
+
+    if (tutorial.name === "upVote") {
+      const upvoteIsValid = (node: FullNodeData) => node && node.open;
+      const node = graph.nodes[targetId];
+      if (!upvoteIsValid(node)) {
+        setTutorial(null);
+        setForcedTutorial(null);
+      }
+    }
+
+    // --------------------------
+
+    if (tutorial.name === "downVote") {
+      const downvoteIsValid = (node: FullNodeData) => node && node.open;
+      const node = graph.nodes[targetId];
+      if (!downvoteIsValid(node)) {
         setTutorial(null);
         setForcedTutorial(null);
       }

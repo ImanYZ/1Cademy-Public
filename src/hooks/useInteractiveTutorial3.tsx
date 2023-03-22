@@ -28,6 +28,7 @@ import {
   CHILD_REFERENCE_PROPOSAL_COMPLETE,
   CHILD_RELATION_PROPOSAL_COMPLETE,
 } from "../lib/utils/tutorials/childrenProposalTutorialStep";
+import { DOWNVOTE_STEPS_COMPLETE, UPTOVE_STEPS_COMPLETE } from "../lib/utils/tutorials/nodeActionsTutorialStep";
 import { NODE_CODE } from "../lib/utils/tutorials/nodeCodeTutorialSteps";
 import { NODE_CONCEPT } from "../lib/utils/tutorials/nodeConceptTutorialStep";
 import { NODE_IDEA } from "../lib/utils/tutorials/nodeIdeaTutorialSteps";
@@ -120,6 +121,8 @@ export const useInteractiveTutorial = ({ user }: useInteractiveTutorialProps) =>
     scrollToNode: { currentStep: -1, done: false, skipped: false },
     closeNode: { currentStep: -1, done: false, skipped: false },
     expandNode: { currentStep: -1, done: false, skipped: false },
+    upVote: { currentStep: -1, done: false, skipped: false },
+    downVote: { currentStep: -1, done: false, skipped: false },
     hideOffsprings: { currentStep: -1, done: false, skipped: false },
   });
 
@@ -152,10 +155,6 @@ export const useInteractiveTutorial = ({ user }: useInteractiveTutorialProps) =>
   const startTutorial = useCallback((newTutorial: TutorialTypeKeys) => {
     setTutorial(prevTutorial => {
       console.log({ prevTutorial });
-      // // const previousStep = getTutorialStep(prevTutorial);
-      // // if (previousStep?.childTargetId) removeStyleFromTarget(previousStep.childTargetId, previousStep.targetId);
-      // if (!tutorial) return null;
-      // if (!newTutorial) return null;
 
       let newSteps: TutorialStep[] = [];
       if (newTutorial === "navigation") {
@@ -255,6 +254,16 @@ export const useInteractiveTutorial = ({ user }: useInteractiveTutorialProps) =>
 
       if (newTutorial === "hideOffsprings") {
         newSteps = HIDE_OFFSPRING_STEPS_COMPLETE;
+      }
+
+      // node actions
+
+      if (newTutorial === "upVote") {
+        newSteps = UPTOVE_STEPS_COMPLETE;
+      }
+
+      if (newTutorial === "downVote") {
+        newSteps = DOWNVOTE_STEPS_COMPLETE;
       }
 
       //----------------- tmp nodes

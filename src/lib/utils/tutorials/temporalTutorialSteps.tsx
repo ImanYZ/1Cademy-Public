@@ -104,6 +104,7 @@ const TMP_PROPOSE_CHILD_IDEA_CONFIG: TutorialStepConfig[] = [
     topOffset: TMP_OFFSET_TOP_CHILDREN_BUTTON,
   },
 ];
+
 const TMP_PROPOSE_CHILD_CODE_CONFIG: TutorialStepConfig[] = [
   {
     title: "Propose Child - Code",
@@ -120,6 +121,21 @@ const TMP_PROPOSE_CHILD_CODE_CONFIG: TutorialStepConfig[] = [
     topOffset: TMP_OFFSET_TOP_CHILDREN_BUTTON,
   },
 ];
+
+// const TMP_EDIT_NODE_CONFIG: TutorialStepConfig[] = [
+//   {
+//     title: "Upvote Node",
+//     description: (
+//       <MarkdownRender
+//         text={
+//           "Click on check icon to vote as correct on this node"
+//         }
+//       />
+//     ),
+//     childTargetId: "node-footer-propose",
+//     isClickeable: true,
+//   },
+// ];
 
 export const TMP_EDIT_NODE: TutorialStep[] = TMP_EDIT_NODE_CONFIG.map((c, i, s) => {
   return { ...getBaseStepConfig(i + 1, s.length), ...c };

@@ -9,7 +9,14 @@ import {
   CHILD_RELATION_PROPOSAL_COMPLETE,
 } from "./childrenProposalTutorialStep";
 import { NAVIGATION_STEPS_COMPLETE } from "./navigationTutorialSteps";
-import { CLOSE_STEPS_COMPLETE, EXPAND_STEPS_COMPLETE, HIDE_OFFSPRING_STEPS_COMPLETE } from "./nodeActionsTutorialStep";
+import {
+  CLOSE_STEPS_COMPLETE,
+  DOWNVOTE_STEPS_COMPLETE,
+  EXPAND_STEPS_COMPLETE,
+  HIDE_OFFSPRING_STEPS_COMPLETE,
+  UPTOVE_STEPS_COMPLETE,
+} from "./nodeActionsTutorialStep";
+import {} from "./nodeActionsTutorialStep";
 import { NODE_CODE } from "./nodeCodeTutorialSteps";
 import { NODE_CONCEPT } from "./nodeConceptTutorialStep";
 import { NODE_IDEA } from "./nodeIdeaTutorialSteps";
@@ -45,8 +52,27 @@ export const GROUP_TUTORIALS: GroupTutorial[] = [
         tutorials: [],
       },
       {
-        title: "Searcher",
+        title: "Searcher Engine",
         tutorialSteps: { tutorialKey: "searcher", steps: SEARCHER_STEPS_COMPLETE },
+        tutorials: [],
+      },
+    ],
+  },
+  {
+    title: "Learning Pathways",
+    tutorials: [],
+  },
+  {
+    title: "Evaluation",
+    tutorials: [
+      {
+        title: "Upvoting helpful content",
+        tutorialSteps: { tutorialKey: "upVote", steps: UPTOVE_STEPS_COMPLETE },
+        tutorials: [],
+      },
+      {
+        title: "Downvoting to delete content",
+        tutorialSteps: { tutorialKey: "downVote", steps: DOWNVOTE_STEPS_COMPLETE },
         tutorials: [],
       },
     ],
@@ -133,7 +159,7 @@ export const GROUP_TUTORIALS: GroupTutorial[] = [
     ],
   },
   {
-    title: "Edit Node Types",
+    title: "Proposing Edit Nodes",
     tutorials: [
       {
         title: "Edit Concept Node",
@@ -168,8 +194,7 @@ export const GROUP_TUTORIALS: GroupTutorial[] = [
     ],
   },
   {
-    title: "New node types",
-    // tutorialSteps: { tutorialKey: "childProposal", steps: CHILD_PROPOSAL_COMPLETE },
+    title: "Proposing New Nodes",
     tutorials: [
       {
         title: "New Concept Node",
@@ -207,7 +232,7 @@ export const GROUP_TUTORIALS: GroupTutorial[] = [
     title: "Siderbars",
     tutorials: [
       {
-        title: "Searcher",
+        title: "Searcher Engine",
         tutorialSteps: { tutorialKey: "searcher", steps: SEARCHER_STEPS_COMPLETE },
         tutorials: [],
       },

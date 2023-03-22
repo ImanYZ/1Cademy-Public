@@ -167,6 +167,7 @@ export const TooltipTutorial = ({
     return { top, left, right, bottom };
   }, [tutorialStep, targetClientRect]);
 
+  if (!node) return null;
   if (!tutorialStep) return null;
   if (!tutorialStep.currentStepName) return null;
 
