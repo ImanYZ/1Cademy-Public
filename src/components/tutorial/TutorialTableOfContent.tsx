@@ -50,146 +50,6 @@ const TutorialTableOfContent = ({
     []
   );
 
-  const CustomAccordion = ({ tutorials, level = 0 }: { tutorials: GroupTutorial[]; level?: number }) => {
-    return (
-      <>
-        {tutorials.map(currentTutorial => {
-          return (
-            <Accordion
-              key={currentTutorial.title}
-              disableGutters
-              sx={{
-                backgroundColor: "inherit",
-                boxShadow: "none",
-                // border: "none",
-                // background: theme => (theme.palette.mode === "dark" ? "rgb(31,31,31)" : undefined),
-                // border: "solid 1px red",
-                "&:before": {
-                  display: "none",
-                },
-              }}
-              expanded={expanded === currentTutorial.title}
-              onChange={onChangeExpanded(currentTutorial.title)}
-            >
-              <AccordionSummary
-                sx={{
-                  p: "0px",
-                  "& .MuiAccordionSummary-content": { m: "0px" },
-                }}
-              >
-                <Stack
-                  direction={"row"}
-                  alignItems={"center"}
-                  spacing={"10px"}
-                  sx={{
-                    width: "100%",
-                    p: "18px 24px",
-                  }}
-                >
-                  {currentTutorial.tutorialSteps && (
-                    <IconButton
-                      onClick={e => {
-                        e.stopPropagation();
-                        if (currentTutorial.tutorialSteps) {
-                          onStartTutorial(currentTutorial.tutorialSteps.tutorialKey);
-                        }
-                      }}
-                      size={"small"}
-                      sx={{ p: "0px" }}
-                    >
-                      <PlayCircleIcon />
-                    </IconButton>
-                  )}
-                  <Box sx={{ display: "flex", flexGrow: 1, alignItems: "center", justifyContent: "space-between" }}>
-                    <Typography
-                      component={"h4"}
-                      variant={"h4"}
-                      sx={{
-                        cursor: "pointer",
-                        fontSize: level > 0 ? "16px" : undefined,
-                      }}
-                    >
-                      {currentTutorial.title}
-                    </Typography>
-
-                    {currentTutorial.tutorials.length > 0 && (
-                      <ArrowForwardIosSharpIcon
-                        // fontSize="small"
-                        sx={{
-                          transform: `rotate(${expanded === currentTutorial.title ? "-90deg" : "90deg"})`,
-                          transition: "transform 100ms linear",
-                          fontSize: "14px",
-                        }}
-                      />
-                    )}
-
-                    {currentTutorial.tutorialSteps &&
-                      (userTutorialState[currentTutorial.tutorialSteps.tutorialKey].done ||
-                        userTutorialState[currentTutorial.tutorialSteps.tutorialKey].skipped) && (
-                        <CheckCircleIcon fontSize="small" color={"success"} />
-                      )}
-
-                    {/* {((currentTutorial.tutorialSteps && currentTutorial.tutorialSteps.steps.length > 1) ||
-                      (currentTutorial.tutorials && currentTutorial.tutorials.length > 1)) && (
-                      <ArrowForwardIosSharpIcon
-                        fontSize="small"
-                        sx={{
-                          transform: `rotate(${expanded[currentTutorial.title] ? "-90deg" : "90deg"})`,
-                          transition: "transform 100ms linear",
-                        }}
-                      />
-                    )} */}
-                  </Box>
-                </Stack>
-              </AccordionSummary>
-              <AccordionDetails
-                sx={{
-                  p: "0px",
-                  pl: level > 0 ? "12px" : "0px",
-                  // border: "solid 1px blue",
-                  // background: theme => (theme.palette.mode === "dark" ? "rgb(39, 39, 39)" : undefined),
-                }}
-              >
-                {/* {currentTutorial.tutorialSteps &&
-                  currentTutorial.tutorialSteps.steps.length > 1 &&
-                  currentTutorial.tutorialSteps.steps.map((curStep, idx) => (
-                    <Stack
-                      key={`${curStep.title}-${idx}`}
-                      component={"li"}
-                      direction={"row"}
-                      alignItems="center"
-                      spacing={"8px"}
-                      sx={{ p: "12px 24px" }}
-                    >
-                      {currentTutorial.tutorialSteps &&
-                      userTutorialState[currentTutorial.tutorialSteps.tutorialKey].currentStep >= idx + 1 ? (
-                        <CheckCircleIcon fontSize="small" color={"success"} />
-                      ) : (
-                        <Box sx={{ width: "20px", height: "20px" }} />
-                      )}
-                      <Typography
-                        sx={{
-                          display: "inline-block",
-                          border: "solid 1px green",
-                          color: theme => (theme.palette.mode === "light" ? "#1d2229" : "#EAECF0"),
-                          opacity: "0.5",
-                        }}
-                        fontSize={"16px"}
-                      >
-                        {curStep.title}
-                      </Typography>
-                    </Stack>
-                  ))} */}
-
-                <CustomAccordion tutorials={currentTutorial.tutorials} level={level + 1} />
-              </AccordionDetails>
-            </Accordion>
-          );
-        })}
-      </>
-    );
-  };
-
   return (
     <Box
       id="progress-bar"
@@ -198,7 +58,6 @@ const TutorialTableOfContent = ({
         top: "75px",
         display: "grid",
         gridTemplateRows: "auto 1fr",
-        // border: "solid 1px purple",
         background: theme => (theme.palette.mode === "dark" ? "#2f2f2f" : "#f2f4f7"),
         borderRadius: "8px",
         width: "350px",
@@ -223,14 +82,128 @@ const TutorialTableOfContent = ({
         </IconButton>
       </Box>
       <Box className="scroll-styled" sx={{ overflowY: "auto" }}>
-        <CustomAccordion tutorials={groupTutorials} />
+        {groupTutorials.map(currentTutorial => {
+          return (
+            <Accordion
+              key={currentTutorial.title}
+              disableGutters
+              sx={{
+                backgroundColor: "inherit",
+                boxShadow: "none",
+                "&:before": {
+                  display: "none",
+                },
+              }}
+              expanded={expanded === currentTutorial.title}
+              onChange={onChangeExpanded(currentTutorial.title)}
+            >
+              <AccordionSummary
+                sx={{
+                  p: "0px",
+                  "& .MuiAccordionSummary-content": { m: "0px" },
+                }}
+              >
+                <Stack
+                  direction={"row"}
+                  alignItems={"center"}
+                  spacing={"10px"}
+                  sx={{
+                    width: "100%",
+                    p: "18px 24px",
+                  }}
+                >
+                  <Box sx={{ display: "flex", flexGrow: 1, alignItems: "center", justifyContent: "space-between" }}>
+                    <Typography
+                      component={"h4"}
+                      variant={"h4"}
+                      sx={{
+                        cursor: "pointer",
+                      }}
+                    >
+                      {currentTutorial.title}
+                    </Typography>
+
+                    {currentTutorial.tutorials.length > 0 && (
+                      <ArrowForwardIosSharpIcon
+                        sx={{
+                          transform: `rotate(${expanded === currentTutorial.title ? "-90deg" : "90deg"})`,
+                          transition: "transform 100ms linear",
+                          fontSize: "14px",
+                        }}
+                      />
+                    )}
+                  </Box>
+                </Stack>
+              </AccordionSummary>
+              <AccordionDetails
+                sx={{
+                  p: "0px",
+                }}
+              >
+                {currentTutorial.tutorials.map((currentTutorial, idx) => {
+                  return (
+                    <Stack
+                      key={idx}
+                      direction={"row"}
+                      alignItems={"center"}
+                      spacing={"10px"}
+                      sx={{
+                        width: "100%",
+                        p: "18px 24px",
+                      }}
+                    >
+                      {currentTutorial.tutorialSteps && (
+                        <IconButton
+                          onClick={e => {
+                            e.stopPropagation();
+                            if (currentTutorial.tutorialSteps) {
+                              onStartTutorial(currentTutorial.tutorialSteps.tutorialKey);
+                            }
+                          }}
+                          size={"small"}
+                          sx={{ p: "0px" }}
+                        >
+                          <PlayCircleIcon />{" "}
+                          {/* TODO: find a way to change DB also when is forced to have changes in TOC */}
+                        </IconButton>
+                      )}
+                      <Box sx={{ display: "flex", flexGrow: 1, alignItems: "center", justifyContent: "space-between" }}>
+                        <Typography
+                          component={"h4"}
+                          variant={"h4"}
+                          sx={{
+                            cursor: "pointer",
+                          }}
+                        >
+                          {currentTutorial.title}
+                        </Typography>
+
+                        {currentTutorial.tutorials.length > 0 && (
+                          <ArrowForwardIosSharpIcon
+                            sx={{
+                              transform: `rotate(${expanded === currentTutorial.title ? "-90deg" : "90deg"})`,
+                              transition: "transform 100ms linear",
+                              fontSize: "14px",
+                            }}
+                          />
+                        )}
+
+                        {currentTutorial.tutorialSteps &&
+                          (userTutorialState[currentTutorial.tutorialSteps.tutorialKey].done ||
+                            userTutorialState[currentTutorial.tutorialSteps.tutorialKey].skipped) && (
+                            <CheckCircleIcon fontSize="small" color={"success"} />
+                          )}
+                      </Box>
+                    </Stack>
+                  );
+                })}
+              </AccordionDetails>
+            </Accordion>
+          );
+        })}
       </Box>
     </Box>
   );
 };
 
-export const MemoizedTutorialTableOfContent = React.memo(
-  TutorialTableOfContent /* , (prev, next) => {
-  return prev.open === next.open && prev.userTutorialState === next.userTutorialState;
-} */
-);
+export const MemoizedTutorialTableOfContent = React.memo(TutorialTableOfContent);
