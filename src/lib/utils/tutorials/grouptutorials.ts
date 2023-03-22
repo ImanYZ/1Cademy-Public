@@ -49,11 +49,6 @@ export const GROUP_TUTORIALS: GroupTutorial[] = [
         tutorialSteps: { tutorialKey: "searcher", steps: SEARCHER_STEPS_COMPLETE },
         tutorials: [],
       },
-      {
-        title: "Hide offsprings",
-        tutorialSteps: { tutorialKey: "hideOffsprings", steps: HIDE_OFFSPRING_STEPS_COMPLETE },
-        tutorials: [],
-      },
     ],
   },
   {
@@ -87,6 +82,16 @@ export const GROUP_TUTORIALS: GroupTutorial[] = [
       {
         title: "Idea Node",
         tutorialSteps: { tutorialKey: "idea", steps: NODE_IDEA },
+        tutorials: [],
+      },
+    ],
+  },
+  {
+    title: "Node Header",
+    tutorials: [
+      {
+        title: "Hide Offsprings",
+        tutorialSteps: { tutorialKey: "hideOffsprings", steps: HIDE_OFFSPRING_STEPS_COMPLETE },
         tutorials: [],
       },
     ],

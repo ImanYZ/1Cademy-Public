@@ -4352,14 +4352,14 @@ const Dashboard = ({}: DashboardProps) => {
         const shouldIgnore =
           (!forcedTutorial || forcedTutorial !== "hideOffsprings") &&
           (userTutorial["hideOffsprings"].done || userTutorial["hideOffsprings"].skipped);
-        if (shouldIgnore) return;
-
-        const result = detectAndForceTutorial(
-          "hideOffsprings",
-          mosParent.edge || "r98BjyFDCe4YyLA3U8ZE",
-          mosParent.edge ? hideOffspringsTutorialIsValid : hideOffspringsTutorialForcedIsValid
-        );
-        if (result) return;
+        if (!shouldIgnore) {
+          const result = detectAndForceTutorial(
+            "hideOffsprings",
+            mosParent.edge || "r98BjyFDCe4YyLA3U8ZE",
+            mosParent.edge ? hideOffspringsTutorialIsValid : hideOffspringsTutorialForcedIsValid
+          );
+          if (result) return;
+        }
       }
 
       // --------------------------
