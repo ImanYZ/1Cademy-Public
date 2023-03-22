@@ -4102,7 +4102,7 @@ const Dashboard = ({}: DashboardProps) => {
       targetIsValid: (node: FullNodeData) => boolean,
       defaultStates: Partial<FullNodeData> = { open: true }
     ) => {
-      devLog("DETECT_AND_CALL_TUTORIAL", { tutorialName, targetId });
+      devLog("DETECT_AND_FORCE_TUTORIAL", { tutorialName, targetId });
 
       const thisNode = graph.nodes[targetId];
       if (!targetIsValid(thisNode)) {
@@ -4338,15 +4338,29 @@ const Dashboard = ({}: DashboardProps) => {
 
       // --------------------------
 
-      // const hideOffspringsTutorialIsValid = (node: FullNodeData) => node && !node.editable;
-      // const mosParent = parenWithMostChildren();
+      const mosParent = parentWithMostChildren();
+      const hideOffspringsTutorialIsValid = (node: FullNodeData) =>
+        node && !node.editable && parentWithChildren(node.node) >= 1;
+      const hideOffspringsTutorialForcedIsValid = (node: FullNodeData) => node && !node.editable;
 
-      // if (
-      //   mosParent.children >= 3 ||
-      //   (lastNodeOperation.current && lastNodeOperation.current.name === "hideOffsprings")
-      // ) {
-      //   const result = detectAndCallTutorial("hideOffsprings", hideOffspringsTutorialIsValid);
-      // }
+      if (lastNodeOperation.current && lastNodeOperation.current.name === "hideOffsprings") {
+        const result = detectAndCallTutorial("hideOffsprings", hideOffspringsTutorialIsValid);
+        if (result) return;
+      }
+
+      if (forcedTutorial === "hideOffsprings" || mosParent.children >= 2) {
+        const shouldIgnore =
+          (!forcedTutorial || forcedTutorial !== "hideOffsprings") &&
+          (userTutorial["hideOffsprings"].done || userTutorial["hideOffsprings"].skipped);
+        if (shouldIgnore) return;
+
+        const result = detectAndForceTutorial(
+          "hideOffsprings",
+          mosParent.edge || "r98BjyFDCe4YyLA3U8ZE",
+          mosParent.edge ? hideOffspringsTutorialIsValid : hideOffspringsTutorialForcedIsValid
+        );
+        if (result) return;
+      }
 
       // --------------------------
 
