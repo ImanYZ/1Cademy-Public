@@ -9,6 +9,7 @@ import {
   CHILD_RELATION_PROPOSAL_COMPLETE,
 } from "./childrenProposalTutorialStep";
 import { NAVIGATION_STEPS_COMPLETE } from "./navigationTutorialSteps";
+import { HIDE_OFFSPRING_STEPS_COMPLETE } from "./nodeActionsTutorialStep";
 import { NODE_CODE } from "./nodeCodeTutorialSteps";
 import { NODE_CONCEPT } from "./nodeConceptTutorialStep";
 import { NODE_IDEA } from "./nodeIdeaTutorialSteps";
@@ -81,6 +82,16 @@ export const GROUP_TUTORIALS: GroupTutorial[] = [
       {
         title: "Idea Node",
         tutorialSteps: { tutorialKey: "idea", steps: NODE_IDEA },
+        tutorials: [],
+      },
+    ],
+  },
+  {
+    title: "Node Header",
+    tutorials: [
+      {
+        title: "Hide Offsprings",
+        tutorialSteps: { tutorialKey: "hideOffsprings", steps: HIDE_OFFSPRING_STEPS_COMPLETE },
         tutorials: [],
       },
     ],

@@ -471,7 +471,8 @@ export type TutorialTypeKeys =
   | "tableOfContents"
   | "focusMode"
   | "redrawGraph"
-  | "scrollToNode";
+  | "scrollToNode"
+  | "hideOffsprings";
 
 export type UserTutorial = {
   currentStep: number;
