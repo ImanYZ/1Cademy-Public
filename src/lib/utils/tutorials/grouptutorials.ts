@@ -16,7 +16,6 @@ import {
   HIDE_OFFSPRING_STEPS_COMPLETE,
   UPTOVE_STEPS_COMPLETE,
 } from "./nodeActionsTutorialStep";
-import {} from "./nodeActionsTutorialStep";
 import { NODE_CODE } from "./nodeCodeTutorialSteps";
 import { NODE_CONCEPT } from "./nodeConceptTutorialStep";
 import { NODE_IDEA } from "./nodeIdeaTutorialSteps";
