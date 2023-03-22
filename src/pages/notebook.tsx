@@ -4371,14 +4371,6 @@ const Dashboard = ({}: DashboardProps) => {
           }
         }
       }
-      // --------------------------
-
-      const closeOpenNodeTutorialIsValid = (node: FullNodeData) => node && node.open;
-
-      if (forcedTutorial === "closeOpenNode") {
-        const result = detectAndForceTutorial("closeOpenNode", "r98BjyFDCe4YyLA3U8ZE", closeOpenNodeTutorialIsValid);
-        if (result) return;
-      }
 
       // --------------------------
 
@@ -4409,7 +4401,9 @@ const Dashboard = ({}: DashboardProps) => {
       }
 
       if (forcedTutorial === "expandNode") {
-        const result = detectAndForceTutorial("expandNode", "r98BjyFDCe4YyLA3U8ZE", expandNodeTutorialIsValid);
+        const result = detectAndForceTutorial("expandNode", "r98BjyFDCe4YyLA3U8ZE", expandNodeTutorialIsValid, {
+          open: false,
+        });
         if (result) return;
       }
 

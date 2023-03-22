@@ -474,7 +474,6 @@ export type TutorialTypeKeys =
   | "scrollToNode"
   | "closeNode"
   | "expandNode"
-  | "closeOpenNode"
   | "hideOffsprings";
 
 export type UserTutorial = {

@@ -2,11 +2,7 @@ import { doc, getDoc, getFirestore } from "firebase/firestore";
 import { ReactNode, useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { NAVIGATION_STEPS_COMPLETE } from "@/lib/utils/tutorials/navigationTutorialSteps";
-import {
-  CLOSE_OPEN_STEPS_COMPLETE,
-  CLOSE_STEPS_COMPLETE,
-  EXPAND_STEPS_COMPLETE,
-} from "@/lib/utils/tutorials/nodeActionsTutorialStep";
+import { CLOSE_STEPS_COMPLETE, EXPAND_STEPS_COMPLETE } from "@/lib/utils/tutorials/nodeActionsTutorialStep";
 import { HIDE_OFFSPRING_STEPS_COMPLETE } from "@/lib/utils/tutorials/nodeActionsTutorialStep";
 import { PROPOSAL_STEPS_COMPLETE } from "@/lib/utils/tutorials/proposalTutorialSteps";
 import {
@@ -124,7 +120,6 @@ export const useInteractiveTutorial = ({ user }: useInteractiveTutorialProps) =>
     scrollToNode: { currentStep: -1, done: false, skipped: false },
     closeNode: { currentStep: -1, done: false, skipped: false },
     expandNode: { currentStep: -1, done: false, skipped: false },
-    closeOpenNode: { currentStep: -1, done: false, skipped: false },
     hideOffsprings: { currentStep: -1, done: false, skipped: false },
   });
 
@@ -257,9 +252,7 @@ export const useInteractiveTutorial = ({ user }: useInteractiveTutorialProps) =>
       if (newTutorial === "expandNode") {
         newSteps = EXPAND_STEPS_COMPLETE;
       }
-      if (newTutorial === "closeOpenNode") {
-        newSteps = CLOSE_OPEN_STEPS_COMPLETE;
-      }
+
       if (newTutorial === "hideOffsprings") {
         newSteps = HIDE_OFFSPRING_STEPS_COMPLETE;
       }
