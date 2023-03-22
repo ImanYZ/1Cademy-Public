@@ -1714,7 +1714,6 @@ const Dashboard = ({}: DashboardProps) => {
 
           notebookRef.current.selectedNode = nodeId;
           nodeBookDispatch({ type: "setSelectedNode", payload: nodeId });
-          lastNodeOperation.current = { name: "hideOffsprings", data: "" };
 
           const batch = writeBatch(db);
           try {
@@ -4340,13 +4339,8 @@ const Dashboard = ({}: DashboardProps) => {
 
       const mosParent = parentWithMostChildren();
       const hideOffspringsTutorialIsValid = (node: FullNodeData) =>
-        node && !node.editable && parentWithChildren(node.node) >= 1;
+        node && !node.editable && parentWithChildren(node.node) >= 2;
       const hideOffspringsTutorialForcedIsValid = (node: FullNodeData) => node && !node.editable;
-
-      if (lastNodeOperation.current && lastNodeOperation.current.name === "hideOffsprings") {
-        const result = detectAndCallTutorial("hideOffsprings", hideOffspringsTutorialIsValid);
-        if (result) return;
-      }
 
       if (forcedTutorial === "hideOffsprings" || mosParent.children >= 2) {
         const shouldIgnore =
