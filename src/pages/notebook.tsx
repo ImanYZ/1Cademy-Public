@@ -4276,6 +4276,14 @@ const Dashboard = ({}: DashboardProps) => {
     },
     [graph.edges]
   );
+
+  const getGraphOpenedNodes = useCallback(() => {
+    const nodesOpened = Object.values(graph.nodes).reduce((acc: number, node: FullNodeData) => {
+      return node.open ? acc + 1 : acc;
+    }, 0);
+
+    return nodesOpened;
+  }, [graph.nodes]);
   useEffect(() => {
     /**
      * This useEffect with detect conditions to call a tutorial
@@ -4373,17 +4381,20 @@ const Dashboard = ({}: DashboardProps) => {
 
       // --------------------------
 
-      const closeNodeTutorialIsValid = (node: FullNodeData) => Boolean(node);
-
-      if (
-        lastNodeOperation.current &&
-        lastNodeOperation.current.name === "ToggleNode" &&
-        lastNodeOperation.current.data === "closeNode"
-      ) {
-        const result = detectAndCallTutorial("closeNode", closeNodeTutorialIsValid);
+      const closeNodeTutorialIsValid = (node: FullNodeData) => Boolean(node) && node.open;
+      const openedNodes = getGraphOpenedNodes();
+      if (openedNodes >= 2) {
+        const firstOpenedNode = Object.values(graph.nodes).find(node => node.open);
+        const shouldIgnore = userTutorial["closeNode"].skipped || userTutorial["closeNode"].done;
+        if (firstOpenedNode && !shouldIgnore) {
+          const result = detectAndForceTutorial("closeNode", firstOpenedNode.node, closeNodeTutorialIsValid);
+          if (result) return;
+        }
+      }
+      if (forcedTutorial === "closeNode") {
+        const result = detectAndForceTutorial("closeNode", "r98BjyFDCe4YyLA3U8ZE", closeNodeTutorialIsValid);
         if (result) return;
       }
-
       // --------------------------
 
       const openNodeTutorialIsValid = (node: FullNodeData) => Boolean(node);
