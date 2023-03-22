@@ -11,6 +11,7 @@ import { MemoizedFocusedLinkedNodes } from "./FocusedLinkedNodes";
 import { MemoizedFocusedNodeContributors } from "./FocusedNodeContributors";
 import FocusedNodeSkeleton from "./FocusedNodeSkeleton";
 import { MemoizedFocusedReferencesList } from "./FocusedReferencesList";
+import { MemoizedFocusedRelatedNodes } from "./FocusedRelatedNodes";
 import { MemoizedFocusedTagsList } from "./FocusedTagsList";
 
 type FocusedNotebookProps = {
@@ -172,6 +173,13 @@ const FocusedNotebook = ({
                     navigateToNode={navigateToNode}
                     node={currentNode as INode}
                     sx={{ mt: 3 }}
+                  />
+                }
+                relatedNodes={
+                  <MemoizedFocusedRelatedNodes
+                    currentNode={currentNode as INode}
+                    node={currentNode.parents[0] ? (graph.nodes[currentNode.parents[0].node] as INode) : null}
+                    navigateToNode={navigateToNode}
                   />
                 }
                 editable={false}
