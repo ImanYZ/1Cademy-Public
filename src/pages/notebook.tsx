@@ -4949,12 +4949,33 @@ const Dashboard = ({}: DashboardProps) => {
         // console.log("remove node t");
       }
     }
+    // --------------------------
+
+    if (tutorial.name === "closeNode") {
+      const closeNodeTutorialIsValid = (node: FullNodeData) => Boolean(node) && node.open && !node.editable;
+      const node = graph.nodes[targetId];
+      if (!closeNodeTutorialIsValid(node)) {
+        setTutorial(null);
+        setForcedTutorial(null);
+      }
+    }
+    // --------------------------
+
+    if (tutorial.name === "expandNode") {
+      const expandNodeTutorialIsValid = (node: FullNodeData) => Boolean(node) && !node.open && !node.editable;
+      const node = graph.nodes[targetId];
+      if (!expandNodeTutorialIsValid(node)) {
+        setTutorial(null);
+        setForcedTutorial(null);
+      }
+    }
+    // --------------------------
+
     const conceptTutorialIsValid = (thisNode: FullNodeData) =>
       thisNode && thisNode.open && thisNode.nodeType === "Concept";
     detectAndRemoveTutorial("concept", conceptTutorialIsValid);
 
     // --------------------------
-
     const relationTutorialIsValid = (thisNode: FullNodeData) =>
       thisNode && thisNode.open && thisNode.nodeType === "Relation";
     detectAndRemoveTutorial("relation", relationTutorialIsValid);
