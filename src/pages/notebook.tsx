@@ -4989,6 +4989,17 @@ const Dashboard = ({}: DashboardProps) => {
     }
     // --------------------------
 
+    if (tutorial.name === "hideOffsprings") {
+      const hideOffspringsNodeTutorialIsValid = (node: FullNodeData) => Boolean(node) && !node.editable;
+      const node = graph.nodes[targetId];
+      if (!hideOffspringsNodeTutorialIsValid(node)) {
+        setTutorial(null);
+        setForcedTutorial(null);
+      }
+    }
+
+    // --------------------------
+
     if (tutorial.name === "closeNode") {
       const closeNodeTutorialIsValid = (node: FullNodeData) => Boolean(node) && node.open && !node.editable;
       const node = graph.nodes[targetId];
