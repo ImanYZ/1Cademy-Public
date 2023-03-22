@@ -153,6 +153,7 @@ const HIDE_OFFSPRING_STEPS: TutorialStepConfig[] = [
       />
     ),
     isClickeable: true,
+    targetDelay: 500,
   },
 ];
 const CLOSE_OPEN_STEPS: TutorialStepConfig[] = [

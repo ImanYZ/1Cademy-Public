@@ -474,7 +474,8 @@ export type TutorialTypeKeys =
   | "scrollToNode"
   | "closeNode"
   | "openNode"
-  | "closeOpenNode";
+  | "closeOpenNode"
+  | "hideOffsprings";
 
 export type UserTutorial = {
   currentStep: number;

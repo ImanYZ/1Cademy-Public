@@ -7,6 +7,7 @@ import {
   CLOSE_STEPS_COMPLETE,
   OPEN_STEPS_COMPLETE,
 } from "@/lib/utils/tutorials/nodeActionsTutorialStep";
+import { HIDE_OFFSPRING_STEPS_COMPLETE } from "@/lib/utils/tutorials/nodeActionsTutorialStep";
 import { PROPOSAL_STEPS_COMPLETE } from "@/lib/utils/tutorials/proposalTutorialSteps";
 import {
   RECONCILING_ACCEPTED_PROPOSALS_STEPS_COMPLETE,
@@ -124,6 +125,7 @@ export const useInteractiveTutorial = ({ user }: useInteractiveTutorialProps) =>
     closeNode: { currentStep: -1, done: false, skipped: false },
     openNode: { currentStep: -1, done: false, skipped: false },
     closeOpenNode: { currentStep: -1, done: false, skipped: false },
+    hideOffsprings: { currentStep: -1, done: false, skipped: false },
   });
 
   // flag for whether tutorial state was loaded
@@ -258,6 +260,10 @@ export const useInteractiveTutorial = ({ user }: useInteractiveTutorialProps) =>
       if (newTutorial === "closeOpenNode") {
         newSteps = CLOSE_OPEN_STEPS_COMPLETE;
       }
+      if (newTutorial === "hideOffsprings") {
+        newSteps = HIDE_OFFSPRING_STEPS_COMPLETE;
+      }
+
       //----------------- tmp nodes
 
       if (newTutorial === "tmpEditNode") {

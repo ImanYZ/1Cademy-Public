@@ -112,6 +112,17 @@ const PROPOSING_EDITS_STEPS: TutorialStepConfig[] = [
 
     isClickeable: true,
   },
+  {
+    childTargetId: "new-children-nodes-buttons",
+    title: "Propose New Children Node",
+    description: (
+      <MarkdownRender
+        text={
+          "To the right of the node you are proposing an edit to, you will see six circles with icons in them. These give you the option to add a new child node to the node you are proposing, rather than editing it’s content. To add a new child node, you need to click on the icon for the type of new node you would like to create."
+        }
+      />
+    ),
+  },
 ];
 
 export const PROPOSAL_STEPS_COMPLETE: TutorialStep[] = PROPOSING_EDITS_STEPS.map((c, i, s) => {

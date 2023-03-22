@@ -788,13 +788,13 @@ p {
 
 .tutorial-target-shallow {
   animation: tutorial-tt 2s infinite;
-  outline: 1px solid #ff6d00;
+  outline: 3px solid #ff6d00;
   outline-offset: 2px;
 }
 
 .tutorial-target-outside {
   animation: tutorial-tt 2s infinite;
-  outline: 1px solid #ff6d00;
+  outline: 3px solid #ff6d00;
   outline-offset: 5px;
 }
 
@@ -810,7 +810,7 @@ p {
 
 .tutorial-target-inside {
   animation: tutorial-tt 2s infinite;
-  outline: 1px solid #ff6d00;
+  outline: 3px solid #ff6d00;
   outline-offset: -3px;
 }
 @keyframes tutorial-tt {

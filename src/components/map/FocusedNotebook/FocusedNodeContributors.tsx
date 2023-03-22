@@ -5,7 +5,13 @@ import { MemoizedFocusedViewHeadlessLeaderboardChip } from "./HeadlessLeaderboar
 
 const FocusedNodeContributors = ({ contributors, institutions }: any) => {
   return (
-    <Box>
+    <Box
+      sx={{
+        paddingY: "10px",
+        borderTop: theme =>
+          theme.palette.mode === "dark" ? `solid 1px ${theme.palette.common.white}` : "solid 1px #CFCFCF",
+      }}
+    >
       <Typography variant="body2" color="text.secondary" sx={{ mb: "15px" }}>
         Contributors are:
       </Typography>
