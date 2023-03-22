@@ -41,7 +41,14 @@ const TutorialTableOfContent = ({
     },
     [onCancelTutorial, onForceTutorial, reloadPermanentGraph]
   );
-  const [expanded, setExpanded] = useState<{ [key: string]: boolean }>({});
+  const [expanded, setExpanded] = useState<string>("");
+
+  const onChangeExpanded = useCallback(
+    (currentTutorialTitle: string) => (e: any, newExpand: boolean) => {
+      setExpanded(newExpand ? currentTutorialTitle : "");
+    },
+    []
+  );
 
   const CustomAccordion = ({ tutorials, level = 0 }: { tutorials: GroupTutorial[]; level?: number }) => {
     return (
@@ -52,16 +59,17 @@ const TutorialTableOfContent = ({
               key={currentTutorial.title}
               disableGutters
               sx={{
-                border: "none",
-                background: theme => (theme.palette.mode === "dark" ? "rgb(31,31,31)" : "rgb(240,240,240)"),
+                backgroundColor: "inherit",
+                boxShadow: "none",
+                // border: "none",
+                // background: theme => (theme.palette.mode === "dark" ? "rgb(31,31,31)" : undefined),
+                // border: "solid 1px red",
                 "&:before": {
                   display: "none",
                 },
               }}
-              expanded={expanded[currentTutorial.title]}
-              onChange={(e, newExpand) => {
-                setExpanded(expanded => ({ ...expanded, [currentTutorial.title]: newExpand ? true : false }));
-              }}
+              expanded={expanded === currentTutorial.title}
+              onChange={onChangeExpanded(currentTutorial.title)}
             >
               <AccordionSummary
                 sx={{
@@ -103,7 +111,25 @@ const TutorialTableOfContent = ({
                     >
                       {currentTutorial.title}
                     </Typography>
-                    {((currentTutorial.tutorialSteps && currentTutorial.tutorialSteps.steps.length > 1) ||
+
+                    {currentTutorial.tutorials.length > 0 && (
+                      <ArrowForwardIosSharpIcon
+                        // fontSize="small"
+                        sx={{
+                          transform: `rotate(${expanded === currentTutorial.title ? "-90deg" : "90deg"})`,
+                          transition: "transform 100ms linear",
+                          fontSize: "14px",
+                        }}
+                      />
+                    )}
+
+                    {currentTutorial.tutorialSteps &&
+                      (userTutorialState[currentTutorial.tutorialSteps.tutorialKey].done ||
+                        userTutorialState[currentTutorial.tutorialSteps.tutorialKey].skipped) && (
+                        <CheckCircleIcon fontSize="small" color={"success"} />
+                      )}
+
+                    {/* {((currentTutorial.tutorialSteps && currentTutorial.tutorialSteps.steps.length > 1) ||
                       (currentTutorial.tutorials && currentTutorial.tutorials.length > 1)) && (
                       <ArrowForwardIosSharpIcon
                         fontSize="small"
@@ -112,7 +138,7 @@ const TutorialTableOfContent = ({
                           transition: "transform 100ms linear",
                         }}
                       />
-                    )}
+                    )} */}
                   </Box>
                 </Stack>
               </AccordionSummary>
@@ -120,10 +146,11 @@ const TutorialTableOfContent = ({
                 sx={{
                   p: "0px",
                   pl: level > 0 ? "12px" : "0px",
-                  background: theme => (theme.palette.mode === "dark" ? "rgb(39, 39, 39)" : "rgb(230, 230, 230)"),
+                  // border: "solid 1px blue",
+                  // background: theme => (theme.palette.mode === "dark" ? "rgb(39, 39, 39)" : undefined),
                 }}
               >
-                {currentTutorial.tutorialSteps &&
+                {/* {currentTutorial.tutorialSteps &&
                   currentTutorial.tutorialSteps.steps.length > 1 &&
                   currentTutorial.tutorialSteps.steps.map((curStep, idx) => (
                     <Stack
@@ -143,6 +170,7 @@ const TutorialTableOfContent = ({
                       <Typography
                         sx={{
                           display: "inline-block",
+                          border: "solid 1px green",
                           color: theme => (theme.palette.mode === "light" ? "#1d2229" : "#EAECF0"),
                           opacity: "0.5",
                         }}
@@ -151,7 +179,7 @@ const TutorialTableOfContent = ({
                         {curStep.title}
                       </Typography>
                     </Stack>
-                  ))}
+                  ))} */}
 
                 <CustomAccordion tutorials={currentTutorial.tutorials} level={level + 1} />
               </AccordionDetails>
@@ -170,6 +198,7 @@ const TutorialTableOfContent = ({
         top: "75px",
         display: "grid",
         gridTemplateRows: "auto 1fr",
+        // border: "solid 1px purple",
         background: theme => (theme.palette.mode === "dark" ? "#2f2f2f" : "#f2f4f7"),
         borderRadius: "8px",
         width: "350px",
@@ -200,6 +229,8 @@ const TutorialTableOfContent = ({
   );
 };
 
-export const MemoizedTutorialTableOfContent = React.memo(TutorialTableOfContent, (prev, next) => {
+export const MemoizedTutorialTableOfContent = React.memo(
+  TutorialTableOfContent /* , (prev, next) => {
   return prev.open === next.open && prev.userTutorialState === next.userTutorialState;
-});
+} */
+);
