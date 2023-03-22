@@ -164,7 +164,6 @@ const TutorialTableOfContent = ({
                           sx={{ p: "0px" }}
                         >
                           <PlayCircleIcon />
-                          {/* TODO: find a way to change DB also when is forced to have changes in TOC */}
                         </IconButton>
                       )}
                       <Box sx={{ display: "flex", flexGrow: 1, alignItems: "center", justifyContent: "space-between" }}>
