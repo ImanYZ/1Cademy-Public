@@ -117,8 +117,8 @@ export const useInteractiveTutorial = ({ user }: useInteractiveTutorialProps) =>
     focusMode: { currentStep: -1, done: false, skipped: false },
     redrawGraph: { currentStep: -1, done: false, skipped: false },
     scrollToNode: { currentStep: -1, done: false, skipped: false },
-    upVoteTutorial: { currentStep: -1, done: false, skipped: false },
-    downVoteTutorial: { currentStep: -1, done: false, skipped: false },
+    upVote: { currentStep: -1, done: false, skipped: false },
+    downVote: { currentStep: -1, done: false, skipped: false },
   });
 
   // flag for whether tutorial state was loaded
@@ -243,11 +243,11 @@ export const useInteractiveTutorial = ({ user }: useInteractiveTutorialProps) =>
 
       // node actions
 
-      if (newTutorial === "upVoteTutorial") {
+      if (newTutorial === "upVote") {
         newSteps = UPTOVE_STEPS_COMPLETE;
       }
 
-      if (newTutorial === "downVoteTutorial") {
+      if (newTutorial === "downVote") {
         newSteps = DOWNVOTE_STEPS_COMPLETE;
       }
 

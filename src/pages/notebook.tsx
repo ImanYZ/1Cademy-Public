@@ -4799,13 +4799,13 @@ const Dashboard = ({}: DashboardProps) => {
           userTutorial["upVoteTutorial"].done ||
           userTutorial["upVoteTutorial"].skipped;
         if (!shouldIgnore) {
-          const upvoteLaunched = detectAndCallTutorial("upVoteTutorial", node => node && node.open);
+          const upvoteLaunched = detectAndCallTutorial("upVote", node => node && node.open);
           if (upvoteLaunched) return;
         }
       }
 
       if (forcedTutorial === "upVoteTutorial") {
-        const result = detectAndForceTutorial("upVoteTutorial", "r98BjyFDCe4YyLA3U8ZE", node => node && node.open);
+        const result = detectAndForceTutorial("upVote", "r98BjyFDCe4YyLA3U8ZE", node => node && node.open);
         if (result) return;
       }
 
@@ -4817,13 +4817,13 @@ const Dashboard = ({}: DashboardProps) => {
           userTutorial["downVoteTutorial"].done ||
           userTutorial["downVoteTutorial"].skipped;
         if (!shouldIgnore) {
-          const upvoteLaunched = detectAndCallTutorial("downVoteTutorial", node => node && node.open);
+          const upvoteLaunched = detectAndCallTutorial("downVote", node => node && node.open);
           if (upvoteLaunched) return;
         }
       }
 
       if (forcedTutorial === "downVoteTutorial") {
-        const result = detectAndForceTutorial("downVoteTutorial", "r98BjyFDCe4YyLA3U8ZE", node => node && node.open);
+        const result = detectAndForceTutorial("downVote", "r98BjyFDCe4YyLA3U8ZE", node => node && node.open);
         if (result) return;
       }
 

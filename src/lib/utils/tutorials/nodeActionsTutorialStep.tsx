@@ -118,7 +118,7 @@ const UPTOVE_STEPS: TutorialStepConfig[] = [
 ];
 const DOWNVOTE_STEPS: TutorialStepConfig[] = [
   {
-    title: "Dowvoting",
+    title: "Downvoting",
     childTargetId: "node-footer-downvotes",
     description: (node: FullNodeData) => (
       <>

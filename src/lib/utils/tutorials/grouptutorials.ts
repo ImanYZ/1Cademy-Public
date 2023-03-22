@@ -45,33 +45,27 @@ export const GROUP_TUTORIALS: GroupTutorial[] = [
         tutorials: [],
       },
       {
-        title: "Searcher",
+        title: "Searcher Engine",
         tutorialSteps: { tutorialKey: "searcher", steps: SEARCHER_STEPS_COMPLETE },
         tutorials: [],
       },
     ],
   },
   {
+    title: "Learning Pathways",
+    tutorials: [],
+  },
+  {
     title: "Evaluation",
     tutorials: [
       {
         title: "Upvoting helpful content",
-        tutorialSteps: { tutorialKey: "upVoteTutorial", steps: UPTOVE_STEPS_COMPLETE },
+        tutorialSteps: { tutorialKey: "upVote", steps: UPTOVE_STEPS_COMPLETE },
         tutorials: [],
       },
       {
         title: "Downvoting to delete content",
-        tutorialSteps: { tutorialKey: "downVoteTutorial", steps: DOWNVOTE_STEPS_COMPLETE },
-        tutorials: [],
-      },
-    ],
-  },
-  {
-    title: "Learning Pathways",
-    tutorials: [
-      {
-        title: "Upvote",
-        tutorialSteps: { tutorialKey: "upVoteTutorial", steps: UPTOVE_STEPS_COMPLETE },
+        tutorialSteps: { tutorialKey: "downVote", steps: DOWNVOTE_STEPS_COMPLETE },
         tutorials: [],
       },
     ],
@@ -138,7 +132,7 @@ export const GROUP_TUTORIALS: GroupTutorial[] = [
     ],
   },
   {
-    title: "Edit Node Types",
+    title: "Proposing Edit Nodes",
     tutorials: [
       {
         title: "Edit Concept Node",
@@ -173,8 +167,7 @@ export const GROUP_TUTORIALS: GroupTutorial[] = [
     ],
   },
   {
-    title: "New node types",
-    // tutorialSteps: { tutorialKey: "childProposal", steps: CHILD_PROPOSAL_COMPLETE },
+    title: "Proposing New Nodes",
     tutorials: [
       {
         title: "New Concept Node",
@@ -212,7 +205,7 @@ export const GROUP_TUTORIALS: GroupTutorial[] = [
     title: "Siderbars",
     tutorials: [
       {
-        title: "Searcher",
+        title: "Searcher Engine",
         tutorialSteps: { tutorialKey: "searcher", steps: SEARCHER_STEPS_COMPLETE },
         tutorials: [],
       },
