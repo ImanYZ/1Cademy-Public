@@ -4243,6 +4243,24 @@ const Dashboard = ({}: DashboardProps) => {
       userTutorial,
     ]
   );
+
+  const parenWithMostChildren = useCallback(() => {
+    const frequencies = Object.keys(graph.edges)
+      .map(edge => edge.split("-")[0])
+      .reduce((acc: { [key: string]: number }, edge: string) => {
+        acc[edge] = acc[edge] ? acc[edge] + 1 : 1;
+        return acc;
+      }, {});
+    const maxNode = Object.entries(frequencies).reduce(
+      (max: { edge: string; children: number }, [edge, children]: [string, number]) => {
+        return children > max.children ? { edge, children } : max;
+      },
+      { edge: "", children: 0 }
+    );
+
+    return maxNode;
+  }, [graph.edges]);
+
   useEffect(() => {
     /**
      * This useEffect with detect conditions to call a tutorial
@@ -5132,6 +5150,15 @@ const Dashboard = ({}: DashboardProps) => {
                 <Button onClick={() => console.log(graph.nodes)}>nodes</Button>
                 <Button onClick={() => console.log(graph.edges)}>edges</Button>
                 <Button onClick={() => console.log(allTags)}>allTags</Button>
+                <Button
+                  onClick={() => {
+                    const mosParent = parenWithMostChildren();
+
+                    console.log(mosParent);
+                  }}
+                >
+                  allTags
+                </Button>
               </Box>
               <Box>
                 <Button onClick={() => console.log("DAGGER", g)}>Dagre</Button>
