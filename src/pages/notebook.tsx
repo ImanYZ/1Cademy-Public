@@ -4793,13 +4793,23 @@ const Dashboard = ({}: DashboardProps) => {
 
       // --------------------------
 
-      if (
-        (forcedTutorial === "upVoteTutorial" || !forcedTutorial) &&
-        lastNodeOperation.current &&
-        lastNodeOperation.current.name === "upvote"
-      ) {
-        const notAcceptedProposalLaunched = detectAndCallTutorial("upVoteTutorial", node => node && node.open);
-        if (notAcceptedProposalLaunched) return;
+      // if user never upvotes a node and has more than 10 nodes
+      if (forcedTutorial === "upVoteTutorial" || !forcedTutorial) {
+        const shouldIgnore =
+          (!forcedTutorial && !userTutorial["nodes"].done && !userTutorial["nodes"].skipped) ||
+          userTutorial["upVoteTutorial"].done ||
+          userTutorial["upVoteTutorial"].skipped;
+        // console.log("upvote tutorial", shouldIgnore);
+        if (!shouldIgnore) {
+          // console.log(11);
+          const upvoteLaunched = detectAndCallTutorial("upVoteTutorial", node => node && node.open);
+          if (upvoteLaunched) return;
+        }
+      }
+
+      if (forcedTutorial === "upVoteTutorial") {
+        const result = detectAndForceTutorial("upVoteTutorial", "r98BjyFDCe4YyLA3U8ZE", node => node && node.open);
+        if (result) return;
       }
 
       // CHECK: evaluate if is required, because we can't force to the user to make upvote or downvote

@@ -52,6 +52,21 @@ export const GROUP_TUTORIALS: GroupTutorial[] = [
     ],
   },
   {
+    title: "Evaluation",
+    tutorials: [
+      {
+        title: "Upvoting helpful content",
+        tutorialSteps: { tutorialKey: "upVoteTutorial", steps: UPTOVE_STEPS_COMPLETE },
+        tutorials: [],
+      },
+      {
+        title: "Downvoting to delete content",
+        tutorialSteps: { tutorialKey: "upVoteTutorial", steps: UPTOVE_STEPS_COMPLETE },
+        tutorials: [],
+      },
+    ],
+  },
+  {
     title: "Learning Pathways",
     tutorials: [
       {
