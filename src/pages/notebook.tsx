@@ -3989,7 +3989,7 @@ const Dashboard = ({}: DashboardProps) => {
     setTutorial(null);
     setTargetId("");
 
-    if (wasForcedTutorial) return setForcedTutorial(null);
+    if (wasForcedTutorial) setForcedTutorial(null);
 
     const tutorialRef = doc(db, "userTutorial", user.uname);
     const tutorialDoc = await getDoc(tutorialRef);
@@ -4057,7 +4057,7 @@ const Dashboard = ({}: DashboardProps) => {
     setUserTutorial(userTutorialUpdated);
     setTargetId("");
 
-    if (wasForcedTutorial) return setForcedTutorial(null);
+    if (wasForcedTutorial) setForcedTutorial(null);
 
     const tutorialRef = doc(db, "userTutorial", user.uname);
     const tutorialDoc = await getDoc(tutorialRef);
