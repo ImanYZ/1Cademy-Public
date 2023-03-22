@@ -473,7 +473,8 @@ export type TutorialTypeKeys =
   | "redrawGraph"
   | "scrollToNode"
   | "upVote"
-  | "downVote";
+  | "downVote"
+  | "hideOffsprings";
 
 export type UserTutorial = {
   currentStep: number;

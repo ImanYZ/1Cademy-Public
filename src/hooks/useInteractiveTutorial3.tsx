@@ -2,6 +2,7 @@ import { doc, getDoc, getFirestore } from "firebase/firestore";
 import { ReactNode, useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { NAVIGATION_STEPS_COMPLETE } from "@/lib/utils/tutorials/navigationTutorialSteps";
+import { HIDE_OFFSPRING_STEPS_COMPLETE } from "@/lib/utils/tutorials/nodeActionsTutorialStep";
 import { PROPOSAL_STEPS_COMPLETE } from "@/lib/utils/tutorials/proposalTutorialSteps";
 import {
   RECONCILING_ACCEPTED_PROPOSALS_STEPS_COMPLETE,
@@ -119,6 +120,7 @@ export const useInteractiveTutorial = ({ user }: useInteractiveTutorialProps) =>
     scrollToNode: { currentStep: -1, done: false, skipped: false },
     upVote: { currentStep: -1, done: false, skipped: false },
     downVote: { currentStep: -1, done: false, skipped: false },
+    hideOffsprings: { currentStep: -1, done: false, skipped: false },
   });
 
   // flag for whether tutorial state was loaded
@@ -239,6 +241,9 @@ export const useInteractiveTutorial = ({ user }: useInteractiveTutorialProps) =>
       }
       if (newTutorial === "scrollToNode") {
         newSteps = SCROLL_TO_NODE_STEPS;
+      }
+      if (newTutorial === "hideOffsprings") {
+        newSteps = HIDE_OFFSPRING_STEPS_COMPLETE;
       }
 
       // node actions

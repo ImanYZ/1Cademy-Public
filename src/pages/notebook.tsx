@@ -1711,6 +1711,7 @@ const Dashboard = ({}: DashboardProps) => {
         (async () => {
           const updatedNodeIds: string[] = [];
           const offsprings = recursiveOffsprings(nodeId);
+
           notebookRef.current.selectedNode = nodeId;
           nodeBookDispatch({ type: "setSelectedNode", payload: nodeId });
 
@@ -4102,7 +4103,7 @@ const Dashboard = ({}: DashboardProps) => {
       targetIsValid: (node: FullNodeData) => boolean,
       defaultStates: Partial<FullNodeData> = { open: true }
     ) => {
-      devLog("DETECT_AND_CALL_TUTORIAL", { tutorialName, targetId });
+      devLog("DETECT_AND_FORCE_TUTORIAL", { tutorialName, targetId });
 
       const thisNode = graph.nodes[targetId];
       if (!targetIsValid(thisNode)) {
@@ -4245,6 +4246,37 @@ const Dashboard = ({}: DashboardProps) => {
       userTutorial,
     ]
   );
+
+  const parentWithMostChildren = useCallback(() => {
+    const frequencies = Object.keys(graph.edges)
+      .map(edge => edge.split("-")[0])
+      .reduce((acc: { [key: string]: number }, edge: string) => {
+        acc[edge] = acc[edge] ? acc[edge] + 1 : 1;
+        return acc;
+      }, {});
+    const maxNode = Object.entries(frequencies).reduce(
+      (max: { edge: string; children: number }, [edge, children]: [string, number]) => {
+        return children > max.children ? { edge, children } : max;
+      },
+      { edge: "", children: 0 }
+    );
+
+    return maxNode;
+  }, [graph.edges]);
+
+  const parentWithChildren = useCallback(
+    (parentId: string) => {
+      const frequency = Object.keys(graph.edges)
+        .map(edge => edge.split("-")[0])
+        .reduce((acc: number, edge: string) => {
+          console.log({ edge });
+          return edge === parentId ? acc + 1 : acc;
+        }, 0);
+
+      return frequency;
+    },
+    [graph.edges]
+  );
   useEffect(() => {
     /**
      * This useEffect with detect conditions to call a tutorial
@@ -4303,6 +4335,33 @@ const Dashboard = ({}: DashboardProps) => {
         });
 
         return;
+      }
+
+      // --------------------------
+
+      const mosParent = parentWithMostChildren();
+      const hideOffspringsTutorialIsValid = (node: FullNodeData) =>
+        node && !node.editable && parentWithChildren(node.node) >= 2;
+      const hideOffspringsTutorialForcedIsValid = (node: FullNodeData) => node && !node.editable;
+
+      if (forcedTutorial === "hideOffsprings" || mosParent.children >= 2) {
+        const shouldIgnore =
+          (!forcedTutorial || forcedTutorial !== "hideOffsprings") &&
+          (userTutorial["hideOffsprings"].done || userTutorial["hideOffsprings"].skipped);
+        if (!shouldIgnore) {
+          const result = detectAndForceTutorial(
+            "hideOffsprings",
+            mosParent.edge || "r98BjyFDCe4YyLA3U8ZE",
+            mosParent.edge ? hideOffspringsTutorialIsValid : hideOffspringsTutorialForcedIsValid
+          );
+          if (result) {
+            if (!mosParent.edge) {
+              openNodeHandler("LrUBGjpxuEV2W0shSLXf");
+              openNodeHandler("rWYUNisPIVMBoQEYXgNj");
+            }
+            return;
+          }
+        }
       }
 
       // --------------------------
@@ -5171,6 +5230,24 @@ const Dashboard = ({}: DashboardProps) => {
                 <Button onClick={() => console.log(graph.nodes)}>nodes</Button>
                 <Button onClick={() => console.log(graph.edges)}>edges</Button>
                 <Button onClick={() => console.log(allTags)}>allTags</Button>
+                <Button
+                  onClick={() => {
+                    const mosParent = parentWithMostChildren();
+
+                    console.log(mosParent);
+                  }}
+                >
+                  Most Parent
+                </Button>
+                <Button
+                  onClick={() => {
+                    const mosParent = parentWithChildren("r98BjyFDCe4YyLA3U8ZE");
+
+                    console.log(`children :${mosParent}`);
+                  }}
+                >
+                  Children of Parent
+                </Button>
               </Box>
               <Box>
                 <Button onClick={() => console.log("DAGGER", g)}>Dagre</Button>
