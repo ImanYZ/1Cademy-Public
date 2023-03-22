@@ -163,7 +163,7 @@ const TutorialTableOfContent = ({
                           size={"small"}
                           sx={{ p: "0px" }}
                         >
-                          <PlayCircleIcon />{" "}
+                          <PlayCircleIcon />
                           {/* TODO: find a way to change DB also when is forced to have changes in TOC */}
                         </IconButton>
                       )}

@@ -1,6 +1,8 @@
+import CheckIcon from "@mui/icons-material/Check";
+import CloseIcon from "@mui/icons-material/Close";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
-import { TutorialState, TutorialStepConfig } from "src/nodeBookTypes";
+import { FullNodeData, TutorialState, TutorialStep, TutorialStepConfig } from "src/nodeBookTypes";
 
 import MarkdownRender from "@/components/Markdown/MarkdownRender";
 
@@ -100,26 +102,40 @@ const UPTOVE_STEPS: TutorialStepConfig[] = [
   {
     title: "Upvoting",
     childTargetId: "node-footer-upvotes",
-    description: (
-      <MarkdownRender
-        text={
-          "This button allows you to upvote a node. An upvote serves to make a node more permanent. It raises the threshold of net votes a proposal needs to change a node, and makes it so more downvotes are needed to delete the node altogether."
-        }
-      />
+    description: (node: FullNodeData) => (
+      <>
+        {"If this node is helpful, you can vote as correct, for example:"}
+        <br />
+        {`This node has ${node.corrects}`}
+        <CheckIcon fontSize="small" color="success" sx={{ verticalAlign: "middle", mx: "4px" }} />
+        {`upvotes, with your vote will have ${node.corrects + 1}`}
+        <CheckIcon fontSize="small" color="success" sx={{ verticalAlign: "middle", mx: "4px" }} />
+        {"upvotes"}
+      </>
     ),
     isClickeable: true,
   },
 ];
 const DOWNVOTE_STEPS: TutorialStepConfig[] = [
   {
-    title: "Dowvoting",
+    title: "Downvoting",
     childTargetId: "node-footer-downvotes",
-    description: (
-      <MarkdownRender
-        text={
-          "This button allows you to downvote a node. A downvote serves to make a node more easily changed or deleted. It lowers the threshold of net votes a proposal needs to change a node. If there are more downvotes than upvotes on a node, it will be deleted."
-        }
-      />
+    description: (node: FullNodeData) => (
+      <>
+        {"If this note is not helpful, you can vote as wrong, for example:"}
+        <br />
+        {`this node has ${node.wrongs}`}
+        <CloseIcon fontSize="small" color="error" sx={{ verticalAlign: "middle", mx: "4px" }} />
+        {`downvotes with your vote will have ${node.wrongs - 1}`}
+        <CloseIcon fontSize="small" color="error" sx={{ verticalAlign: "middle", mx: "4px" }} />
+        {"downvotes."}
+        <br />
+        <MarkdownRender
+          text={`Only if $\${Upvotes} < {Downvotes}$$ this node will be removed, in this case: $$${node.corrects} < ${
+            node.wrongs
+          }$$, ${node.corrects < node.wrongs ? "this note will be removed." : "this note won't be removed."}`}
+        />
+      </>
     ),
     isClickeable: true,
   },
@@ -175,36 +191,36 @@ const CLOSE_STEPS: TutorialStepConfig[] = [
 ];
 const EXPAND_STEPS: TutorialStepConfig[] = [];
 
-export const PARENT_CHILDREN_STEPS_COMPLETE = PARENT_CHILDREN_STEPS.map((c, i, s) => {
+export const PARENT_CHILDREN_STEPS_COMPLETE: TutorialStep[] = PARENT_CHILDREN_STEPS.map((c, i, s) => {
   return { ...getBaseStepConfig(i + 1, s.length), ...c };
 });
-export const PARENT_STEPS_COMPLETE = PARENT_STEPS.map((c, i, s) => {
+export const PARENT_STEPS_COMPLETE: TutorialStep[] = PARENT_STEPS.map((c, i, s) => {
   return { ...getBaseStepConfig(i + 1, s.length), ...c };
 });
-export const CHILD_STEPS_COMPLETE = CHILD_STEPS.map((c, i, s) => {
+export const CHILD_STEPS_COMPLETE: TutorialStep[] = CHILD_STEPS.map((c, i, s) => {
   return { ...getBaseStepConfig(i + 1, s.length), ...c };
 });
-export const REFERENCES_TAGS_STEPS_COMPLETE = REFERENCES_TAGS_STEPS.map((c, i, s) => {
+export const REFERENCES_TAGS_STEPS_COMPLETE: TutorialStep[] = REFERENCES_TAGS_STEPS.map((c, i, s) => {
   return { ...getBaseStepConfig(i + 1, s.length), ...c };
 });
-export const TAG_NODE_STEPS_COMPLETE = TAG_NODE_STEPS.map((c, i, s) => {
+export const TAG_NODE_STEPS_COMPLETE: TutorialStep[] = TAG_NODE_STEPS.map((c, i, s) => {
   return { ...getBaseStepConfig(i + 1, s.length), ...c };
 });
-export const UPTOVE_STEPS_COMPLETE = UPTOVE_STEPS.map((c, i, s) => {
+export const UPTOVE_STEPS_COMPLETE: TutorialStep[] = UPTOVE_STEPS.map((c, i, s) => {
   return { ...getBaseStepConfig(i + 1, s.length), ...c };
 });
-export const DOWNVOTE_STEPS_COMPLETE = DOWNVOTE_STEPS.map((c, i, s) => {
+export const DOWNVOTE_STEPS_COMPLETE: TutorialStep[] = DOWNVOTE_STEPS.map((c, i, s) => {
   return { ...getBaseStepConfig(i + 1, s.length), ...c };
 });
-export const HIDE_STEPS_COMPLETE = HIDE_STEPS.map((c, i, s) => {
+export const HIDE_STEPS_COMPLETE: TutorialStep[] = HIDE_STEPS.map((c, i, s) => {
   return { ...getBaseStepConfig(i + 1, s.length), ...c };
 });
-export const HIDE_OFFSPRING_STEPS_COMPLETE = HIDE_OFFSPRING_STEPS.map((c, i, s) => {
+export const HIDE_OFFSPRING_STEPS_COMPLETE: TutorialStep[] = HIDE_OFFSPRING_STEPS.map((c, i, s) => {
   return { ...getBaseStepConfig(i + 1, s.length), ...c };
 });
-export const CLOSE_STEPS_COMPLETE = CLOSE_STEPS.map((c, i, s) => {
+export const CLOSE_STEPS_COMPLETE: TutorialStep[] = CLOSE_STEPS.map((c, i, s) => {
   return { ...getBaseStepConfig(i + 1, s.length), ...c };
 });
-export const EXPAND_STEPS_COMPLETE = EXPAND_STEPS.map((c, i, s) => {
+export const EXPAND_STEPS_COMPLETE: TutorialStep[] = EXPAND_STEPS.map((c, i, s) => {
   return { ...getBaseStepConfig(i + 1, s.length), ...c };
 });

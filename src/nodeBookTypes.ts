@@ -472,6 +472,8 @@ export type TutorialTypeKeys =
   | "focusMode"
   | "redrawGraph"
   | "scrollToNode"
+  | "upVote"
+  | "downVote"
   | "hideOffsprings";
 
 export type UserTutorial = {
