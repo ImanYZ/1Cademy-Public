@@ -473,7 +473,7 @@ export type TutorialTypeKeys =
   | "redrawGraph"
   | "scrollToNode"
   | "closeNode"
-  | "openNode"
+  | "expandNode"
   | "closeOpenNode"
   | "hideOffsprings";
 

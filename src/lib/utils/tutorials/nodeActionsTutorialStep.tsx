@@ -174,7 +174,7 @@ const CLOSE_OPEN_STEPS: TutorialStepConfig[] = [
   },
 ];
 
-const OPEN_STEPS: TutorialStepConfig[] = [
+const EXPAND_STEPS: TutorialStepConfig[] = [
   {
     title: "Expanding a Node",
     childTargetId: "open-button",
@@ -228,7 +228,7 @@ export const HIDE_OFFSPRING_STEPS_COMPLETE = HIDE_OFFSPRING_STEPS.map((c, i, s) 
 export const CLOSE_STEPS_COMPLETE = CLOSE_STEPS.map((c, i, s) => {
   return { ...getBaseStepConfig(i + 1, s.length), ...c };
 });
-export const OPEN_STEPS_COMPLETE = OPEN_STEPS.map((c, i, s) => {
+export const EXPAND_STEPS_COMPLETE = EXPAND_STEPS.map((c, i, s) => {
   return { ...getBaseStepConfig(i + 1, s.length), ...c };
 });
 export const CLOSE_OPEN_STEPS_COMPLETE = CLOSE_OPEN_STEPS.map((c, i, s) => {

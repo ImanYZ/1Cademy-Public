@@ -5,7 +5,7 @@ import { NAVIGATION_STEPS_COMPLETE } from "@/lib/utils/tutorials/navigationTutor
 import {
   CLOSE_OPEN_STEPS_COMPLETE,
   CLOSE_STEPS_COMPLETE,
-  OPEN_STEPS_COMPLETE,
+  EXPAND_STEPS_COMPLETE,
 } from "@/lib/utils/tutorials/nodeActionsTutorialStep";
 import { HIDE_OFFSPRING_STEPS_COMPLETE } from "@/lib/utils/tutorials/nodeActionsTutorialStep";
 import { PROPOSAL_STEPS_COMPLETE } from "@/lib/utils/tutorials/proposalTutorialSteps";
@@ -123,7 +123,7 @@ export const useInteractiveTutorial = ({ user }: useInteractiveTutorialProps) =>
     redrawGraph: { currentStep: -1, done: false, skipped: false },
     scrollToNode: { currentStep: -1, done: false, skipped: false },
     closeNode: { currentStep: -1, done: false, skipped: false },
-    openNode: { currentStep: -1, done: false, skipped: false },
+    expandNode: { currentStep: -1, done: false, skipped: false },
     closeOpenNode: { currentStep: -1, done: false, skipped: false },
     hideOffsprings: { currentStep: -1, done: false, skipped: false },
   });
@@ -254,8 +254,8 @@ export const useInteractiveTutorial = ({ user }: useInteractiveTutorialProps) =>
       if (newTutorial === "closeNode") {
         newSteps = CLOSE_STEPS_COMPLETE;
       }
-      if (newTutorial === "openNode") {
-        newSteps = OPEN_STEPS_COMPLETE;
+      if (newTutorial === "expandNode") {
+        newSteps = EXPAND_STEPS_COMPLETE;
       }
       if (newTutorial === "closeOpenNode") {
         newSteps = CLOSE_OPEN_STEPS_COMPLETE;

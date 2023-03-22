@@ -4284,6 +4284,7 @@ const Dashboard = ({}: DashboardProps) => {
 
     return nodesOpened;
   }, [graph.nodes]);
+
   useEffect(() => {
     /**
      * This useEffect with detect conditions to call a tutorial
@@ -4397,14 +4398,18 @@ const Dashboard = ({}: DashboardProps) => {
       }
       // --------------------------
 
-      const openNodeTutorialIsValid = (node: FullNodeData) => Boolean(node);
+      const expandNodeTutorialIsValid = (node: FullNodeData) => Boolean(node) && !node.open;
+      if (Object.keys(graph.nodes).length > openedNodes) {
+        const firstClosedNode = Object.values(graph.nodes).find(node => !node.open);
+        const shouldIgnore = userTutorial["expandNode"].skipped || userTutorial["expandNode"].done;
+        if (firstClosedNode && !shouldIgnore) {
+          const result = detectAndForceTutorial("expandNode", firstClosedNode.node, expandNodeTutorialIsValid);
+          if (result) return;
+        }
+      }
 
-      if (
-        lastNodeOperation.current &&
-        lastNodeOperation.current.name === "ToggleNode" &&
-        lastNodeOperation.current.data === "openNode"
-      ) {
-        const result = detectAndCallTutorial("openNode", openNodeTutorialIsValid);
+      if (forcedTutorial === "expandNode") {
+        const result = detectAndForceTutorial("expandNode", "r98BjyFDCe4YyLA3U8ZE", expandNodeTutorialIsValid);
         if (result) return;
       }
 
@@ -4913,10 +4918,13 @@ const Dashboard = ({}: DashboardProps) => {
     firstLoading,
     focusView.isEnabled,
     forcedTutorial,
+    getGraphOpenedNodes,
     graph.nodes,
     nodeBookDispatch,
     openNodeHandler,
     openSidebar,
+    parentWithChildren,
+    parentWithMostChildren,
     setTargetId,
     startTutorial,
     tutorial,
