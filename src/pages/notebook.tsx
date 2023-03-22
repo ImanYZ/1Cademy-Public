@@ -4793,36 +4793,36 @@ const Dashboard = ({}: DashboardProps) => {
 
       // --------------------------
 
-      if (forcedTutorial === "upVoteTutorial" || !forcedTutorial) {
+      if (forcedTutorial === "upVote" || !forcedTutorial) {
         const shouldIgnore =
           (!forcedTutorial && !userTutorial["nodes"].done && !userTutorial["nodes"].skipped) ||
-          userTutorial["upVoteTutorial"].done ||
-          userTutorial["upVoteTutorial"].skipped;
+          userTutorial["upVote"].done ||
+          userTutorial["upVote"].skipped;
         if (!shouldIgnore) {
           const upvoteLaunched = detectAndCallTutorial("upVote", node => node && node.open);
           if (upvoteLaunched) return;
         }
       }
 
-      if (forcedTutorial === "upVoteTutorial") {
+      if (forcedTutorial === "upVote") {
         const result = detectAndForceTutorial("upVote", "r98BjyFDCe4YyLA3U8ZE", node => node && node.open);
         if (result) return;
       }
 
       // --------------------------
 
-      if (forcedTutorial === "downVoteTutorial" || !forcedTutorial) {
+      if (forcedTutorial === "downVote" || !forcedTutorial) {
         const shouldIgnore =
           (!forcedTutorial && !userTutorial["nodes"].done && !userTutorial["nodes"].skipped) ||
-          userTutorial["downVoteTutorial"].done ||
-          userTutorial["downVoteTutorial"].skipped;
+          userTutorial["downVote"].done ||
+          userTutorial["downVote"].skipped;
         if (!shouldIgnore) {
           const upvoteLaunched = detectAndCallTutorial("downVote", node => node && node.open);
           if (upvoteLaunched) return;
         }
       }
 
-      if (forcedTutorial === "downVoteTutorial") {
+      if (forcedTutorial === "downVote") {
         const result = detectAndForceTutorial("downVote", "r98BjyFDCe4YyLA3U8ZE", node => node && node.open);
         if (result) return;
       }

@@ -129,8 +129,11 @@ const DOWNVOTE_STEPS: TutorialStepConfig[] = [
         {`downvotes with your vote will have ${node.wrongs - 1}`}
         <CloseIcon fontSize="small" color="error" sx={{ verticalAlign: "middle", mx: "4px" }} />
         {"downvotes."}
+        <br />
         <MarkdownRender
-          text={`Only if $\${Upvotes} < {Downvotes}$$, in this case: $$${node.corrects} < ${node.wrongs}$$, this node will be removed`}
+          text={`Only if $\${Upvotes} < {Downvotes}$$ this node will be removed, in this case: $$${node.corrects} < ${
+            node.wrongs
+          }$$, ${node.corrects < node.wrongs ? "this note will be removed." : "this note won't be removed."}`}
         />
       </>
     ),
