@@ -4802,6 +4802,19 @@ const Dashboard = ({}: DashboardProps) => {
         if (notAcceptedProposalLaunched) return;
       }
 
+      // CHECK: evaluate if is required, because we can't force to the user to make upvote or downvote
+      // if we force, 1 node will have many artificial correct points
+      // in downvote, probably the set up node will be removed after some user clicks on downcote
+
+      // if (forcedTutorial === "upVoteTutorial") {
+      //   const result = detectAndForceTutorial(
+      //     "reconcilingNotAcceptedProposal",
+      //     "r98BjyFDCe4YyLA3U8ZE",
+      //     node => node && node.open
+      //   );
+      //   if (result) return;
+      // }
+
       // TODO: setup a prestep to click on upcote
 
       // --------------------------
