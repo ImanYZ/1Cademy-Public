@@ -580,6 +580,11 @@ const Node = ({
   );
 
   useEffect(() => {
+    if (!editable) {
+      if (ableToPropose) {
+        setAbleToPropose(false);
+      }
+    }
     if (editable) {
       setOpenPart("References");
       setReason("");
@@ -590,7 +595,6 @@ const Node = ({
   useEffect(() => {
     if (!editable && !activeNode) {
       setOpenPart(null);
-      setAbleToPropose(false);
     }
   }, [editable, activeNode]);
 
@@ -756,35 +760,37 @@ const Node = ({
             {/* CHECK: I commented this */}
 
             {editable && (
-              <Box
-                id={`${identifier}-preview-edit`}
-                sx={{
-                  display: "flex",
-                  justifyContent: "end",
-                  alignItems: "center",
-                  position: "relative",
-                  top: "-5px",
-                }}
-              >
-                <Typography
-                  onClick={() => setOption("PREVIEW")}
-                  sx={{ cursor: "pointer", fontSize: "14px", fontWeight: 490, color: "inherit" }}
+              <Box sx={{ display: "flex", justifyContent: "end" }}>
+                <Box
+                  id={`${identifier}-preview-edit`}
+                  sx={{
+                    display: "flex",
+                    alignItems: "center",
+                    position: "relative",
+                    top: "-5px",
+                    borderRadius: "10px",
+                  }}
                 >
-                  Preview
-                </Typography>
-                <Switch
-                  disabled={disableSwitchPreview}
-                  checked={option === "EDIT"}
-                  onClick={() => onChangeOption(option === "EDIT")}
-                  size="small"
-                  onKeyDown={onKeyEnter}
-                />
-                <Typography
-                  onClick={() => setOption("EDIT")}
-                  sx={{ cursor: "pointer", fontSize: "14px", fontWeight: 490, color: "inherit" }}
-                >
-                  Edit
-                </Typography>
+                  <Typography
+                    onClick={() => setOption("PREVIEW")}
+                    sx={{ cursor: "pointer", fontSize: "14px", fontWeight: 490, color: "inherit" }}
+                  >
+                    Preview
+                  </Typography>
+                  <Switch
+                    disabled={disableSwitchPreview}
+                    checked={option === "EDIT"}
+                    onClick={() => onChangeOption(option === "EDIT")}
+                    size="small"
+                    onKeyDown={onKeyEnter}
+                  />
+                  <Typography
+                    onClick={() => setOption("EDIT")}
+                    sx={{ cursor: "pointer", fontSize: "14px", fontWeight: 490, color: "inherit" }}
+                  >
+                    Edit
+                  </Typography>
+                </Box>
               </Box>
             )}
 
@@ -822,10 +828,11 @@ const Node = ({
                   <Typography
                     sx={{
                       color: theme => theme.palette.common.white,
+                      fontSize: "17px",
                     }}
                     variant="h4"
                   >
-                    Make sure you are proposing a node different from following:
+                    Make sure the node title you propose is different from the following:
                   </Typography>
                   <Box className="node-suggestions" sx={{ height: "70px", marginTop: "5px", overflowY: "scroll" }}>
                     {searchResults.data.map((resNode, idx) => {
@@ -1171,6 +1178,7 @@ const Node = ({
               setOperation={setOperation}
               disabled={disabled}
               enableChildElements={enableChildElements}
+              setAbleToPropose={setAbleToPropose}
             />
           </div>
           {(openPart === "LinkingWords" || openPart === "Tags" || openPart === "References") && (
@@ -1203,6 +1211,7 @@ const Node = ({
               setOperation={setOperation}
               disabled={disabled}
               enableChildElements={enableChildElements}
+              nodeType={nodeType}
             />
           )}
           {editable && (
@@ -1250,29 +1259,6 @@ const Node = ({
                 >
                   Propose
                 </Button>
-                {/* <div
-                    id="ProposalButtonsRow"
-                    style={{
-                      border: "solid 0px pink",
-                      display: !isNew && nodeType !== "Reference" ? "flex" : "none",
-                      justifyContent: "space-around",
-                    }}
-                  >
-                    {(Object.keys(proposedChildTypesIcons) as ProposedChildTypesIcons[]).map(
-                      (childNodeType: ProposedChildTypesIcons) => {
-                        return (
-                          <NewChildProposal
-                            key={childNodeType}
-                            childNodeType={childNodeType}
-                            icon={proposedChildTypesIcons[childNodeType]}
-                            openProposal={openProposal}
-                            setOpenProposal={setOpenProposal}
-                            proposeNewChild={proposeNewChild}
-                          />
-                        );
-                      }
-                    )}
-                  </div> */}
               </Box>
             </>
           )}
@@ -1367,116 +1353,72 @@ const Node = ({
               proposeNodeImprovement={proposeNodeImprovement}
               setOperation={setOperation}
               disabled={disabled}
+              setAbleToPropose={setAbleToPropose}
             />
           </div>
         </div>
       )}
-      {/* {openSidebar === "PROPOSALS" && !simulated && !isNew && nodeBookState.selectedNode == identifier ? (
-        <>
-          <Box
-            sx={{
-              mx: "10px",
-              borderTop: theme =>
-                theme.palette.mode === "dark" ? `solid 1px ${theme.palette.common.borderColor}` : "solid 1px",
-            }}
-          />
-          <Box sx={{ p: "13px 10px" }}>
-            <Box
-              sx={{
-                display: "flex",
-                alignItems: "center",
-              }}
-            >
-              <EditProposal
-                identifier={identifier}
-                openProposal={openProposal}
-                proposeNodeImprovement={proposeNodeImprovement}
-                selectedNode={nodeBookState.selectedNode}
-              />
-              <div
-                id="ProposalButtonsRow"
-                style={{
-                  border: "solid 0px pink",
-                  display: nodeType !== "Reference" ? "flex" : "none",
-                  justifyContent: "space-around",
-                }}
-              >
-                {(Object.keys(proposedChildTypesIcons) as ProposedChildTypesIcons[]).map(
-                  (childNodeType: ProposedChildTypesIcons) => {
-                    return (
-                      <NewChildProposal
-                        key={childNodeType}
-                        childNodeType={childNodeType}
-                        icon={proposedChildTypesIcons[childNodeType]}
-                        openProposal={openProposal}
-                        setOpenProposal={setOpenProposal}
-                        proposeNewChild={proposeNewChild}
-                      />
-                    );
-                  }
-                )}
-              </div>
-            </Box>
-          </Box>
-        </>
-
-      ) : null} */}
-      <Box
-        id={`${identifier}_childNodes`}
-        sx={{
-          display: !isNew && editable ? "flex" : "none",
-          flexDirection: "column",
-          gap: "10px",
-          position: "absolute",
-          top:
-            (parseFloat(String(document.getElementById(identifier)?.clientHeight)) -
-              parseFloat(String(document.getElementById(identifier + "_" + "childNodes")?.clientHeight))) *
-              0.5 +
-            "px",
-          animation: `${childNodeButtonsAnimation} 1s forwards`,
-        }}
-      >
-        {(Object.keys(proposedChildTypesIcons) as ProposedChildTypesIcons[]).map(
-          (childNodeType: ProposedChildTypesIcons, index: number) => {
-            return (
-              <Tooltip title={`Propose a ${childNodeType} child`} placement="right" key={index}>
-                <Fab
-                  id={`${identifier}-propose-${childNodeType.toLowerCase()}-child`}
-                  disabled={disabled}
-                  color="primary"
-                  sx={{
-                    background: "#1F1F1F",
-                    ":hover": {
-                      background: "#525151",
-                    },
-                  }}
-                  aria-label="add"
-                  onClick={(event: any) => {
-                    return openProposal !== "ProposeNew" + childNodeType + "ChildNode"
-                      ? proposeNewChild(event, childNodeType, setOpenProposal)
-                      : undefined;
-                  }}
-                >
-                  <>
-                    {proposedChildTypesIcons[childNodeType] === "local_library" && (
-                      <LocalLibraryIcon sx={{ color: "white!important" }} />
-                    )}
-                    {proposedChildTypesIcons[childNodeType] === "help_outline" && (
-                      <HelpOutlineIcon sx={{ color: "#fff" }} />
-                    )}
-                    {proposedChildTypesIcons[childNodeType] === "code" && <CodeIcon sx={{ color: "#fff" }} />}
-                    {proposedChildTypesIcons[childNodeType] === "share" && <ShareIcon sx={{ color: "#fff" }} />}
-                    {proposedChildTypesIcons[childNodeType] === "menu_book" && <MenuBookIcon sx={{ color: "#fff" }} />}
-                    {proposedChildTypesIcons[childNodeType] === "emoji_objects" && (
-                      <EmojiObjectsIcon sx={{ color: "#fff" }} />
-                    )}
-                  </>
-                </Fab>
-              </Tooltip>
-            );
-          }
-        )}
-      </Box>
+      {!isNew && nodeType !== "Reference" && editable && (
+        <Box
+          id={`${identifier}-new-children-nodes-buttons`}
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            gap: "10px",
+            position: "absolute",
+            top:
+              (parseFloat(String(document.getElementById(identifier)?.clientHeight)) -
+                parseFloat(String(document.getElementById(`${identifier}-new-children-nodes-buttons`)?.clientHeight))) *
+                0.5 +
+              "px",
+            animation: `${childNodeButtonsAnimation} 1s forwards`,
+            borderRadius: "25px",
+          }}
+        >
+          {(Object.keys(proposedChildTypesIcons) as ProposedChildTypesIcons[]).map(
+            (childNodeType: ProposedChildTypesIcons, index: number) => {
+              return (
+                <Tooltip title={`Propose a ${childNodeType} child`} placement="right" key={index}>
+                  <Fab
+                    id={`${identifier}-propose-${childNodeType.toLowerCase()}-child`}
+                    disabled={disabled}
+                    color="primary"
+                    sx={{
+                      background: "#1F1F1F",
+                      ":hover": {
+                        background: "#525151",
+                      },
+                    }}
+                    aria-label="add"
+                    onClick={(event: any) => {
+                      return openProposal !== "ProposeNew" + childNodeType + "ChildNode"
+                        ? proposeNewChild(event, childNodeType, setOpenProposal)
+                        : undefined;
+                    }}
+                  >
+                    <>
+                      {proposedChildTypesIcons[childNodeType] === "local_library" && (
+                        <LocalLibraryIcon sx={{ color: "white!important" }} />
+                      )}
+                      {proposedChildTypesIcons[childNodeType] === "help_outline" && (
+                        <HelpOutlineIcon sx={{ color: "#fff" }} />
+                      )}
+                      {proposedChildTypesIcons[childNodeType] === "code" && <CodeIcon sx={{ color: "#fff" }} />}
+                      {proposedChildTypesIcons[childNodeType] === "share" && <ShareIcon sx={{ color: "#fff" }} />}
+                      {proposedChildTypesIcons[childNodeType] === "menu_book" && (
+                        <MenuBookIcon sx={{ color: "#fff" }} />
+                      )}
+                      {proposedChildTypesIcons[childNodeType] === "emoji_objects" && (
+                        <EmojiObjectsIcon sx={{ color: "#fff" }} />
+                      )}
+                    </>
+                  </Fab>
+                </Tooltip>
+              );
+            }
+          )}
+        </Box>
+      )}
     </div>
   );
 };

@@ -1,6 +1,9 @@
 import MarkdownRender from "../../../components/Markdown/MarkdownRender";
 import { TutorialStep, TutorialStepConfig } from "../../../nodeBookTypes";
+import { LEFT_OFFSET_NEW_CHILDREN_BUTTON, NODE_WIDTH } from "../Map.utils";
 import { getBaseStepConfig } from "./tutorial.utils";
+
+const TMP_OFFSET_TOP_CHILDREN_BUTTON = 50;
 
 const TMP_EDIT_NODE_CONFIG: TutorialStepConfig[] = [
   {
@@ -29,6 +32,8 @@ const TMP_PROPOSE_CHILD_CONCEPT_CONFIG: TutorialStepConfig[] = [
     ),
     childTargetId: "propose-concept-child",
     isClickeable: true,
+    leftOffset: NODE_WIDTH + LEFT_OFFSET_NEW_CHILDREN_BUTTON,
+    topOffset: TMP_OFFSET_TOP_CHILDREN_BUTTON,
   },
 ];
 
@@ -44,6 +49,8 @@ const TMP_PROPOSE_CHILD_RELATION_CONFIG: TutorialStepConfig[] = [
     ),
     childTargetId: "propose-relation-child",
     isClickeable: true,
+    leftOffset: NODE_WIDTH + LEFT_OFFSET_NEW_CHILDREN_BUTTON,
+    topOffset: TMP_OFFSET_TOP_CHILDREN_BUTTON,
   },
 ];
 
@@ -59,6 +66,8 @@ const TMP_PROPOSE_CHILD_REFERENCE_CONFIG: TutorialStepConfig[] = [
     ),
     childTargetId: "propose-reference-child",
     isClickeable: true,
+    leftOffset: NODE_WIDTH + LEFT_OFFSET_NEW_CHILDREN_BUTTON,
+    topOffset: TMP_OFFSET_TOP_CHILDREN_BUTTON,
   },
 ];
 const TMP_PROPOSE_CHILD_QUESTION_CONFIG: TutorialStepConfig[] = [
@@ -74,6 +83,8 @@ const TMP_PROPOSE_CHILD_QUESTION_CONFIG: TutorialStepConfig[] = [
     childTargetId: "propose-question-child",
     isClickeable: true,
     targetDelay: 500,
+    leftOffset: NODE_WIDTH + LEFT_OFFSET_NEW_CHILDREN_BUTTON,
+    topOffset: TMP_OFFSET_TOP_CHILDREN_BUTTON,
   },
 ];
 
@@ -89,8 +100,11 @@ const TMP_PROPOSE_CHILD_IDEA_CONFIG: TutorialStepConfig[] = [
     ),
     childTargetId: "propose-idea-child",
     isClickeable: true,
+    leftOffset: NODE_WIDTH + LEFT_OFFSET_NEW_CHILDREN_BUTTON,
+    topOffset: TMP_OFFSET_TOP_CHILDREN_BUTTON,
   },
 ];
+
 const TMP_PROPOSE_CHILD_CODE_CONFIG: TutorialStepConfig[] = [
   {
     title: "Propose Child - Code",
@@ -103,8 +117,25 @@ const TMP_PROPOSE_CHILD_CODE_CONFIG: TutorialStepConfig[] = [
     ),
     childTargetId: "propose-code-child",
     isClickeable: true,
+    leftOffset: NODE_WIDTH + LEFT_OFFSET_NEW_CHILDREN_BUTTON,
+    topOffset: TMP_OFFSET_TOP_CHILDREN_BUTTON,
   },
 ];
+
+// const TMP_EDIT_NODE_CONFIG: TutorialStepConfig[] = [
+//   {
+//     title: "Upvote Node",
+//     description: (
+//       <MarkdownRender
+//         text={
+//           "Click on check icon to vote as correct on this node"
+//         }
+//       />
+//     ),
+//     childTargetId: "node-footer-propose",
+//     isClickeable: true,
+//   },
+// ];
 
 export const TMP_EDIT_NODE: TutorialStep[] = TMP_EDIT_NODE_CONFIG.map((c, i, s) => {
   return { ...getBaseStepConfig(i + 1, s.length), ...c };

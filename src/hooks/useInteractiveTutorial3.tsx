@@ -2,13 +2,20 @@ import { doc, getDoc, getFirestore } from "firebase/firestore";
 import { ReactNode, useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { NAVIGATION_STEPS_COMPLETE } from "@/lib/utils/tutorials/navigationTutorialSteps";
+import { CLOSE_STEPS_COMPLETE, EXPAND_STEPS_COMPLETE } from "@/lib/utils/tutorials/nodeActionsTutorialStep";
+import { HIDE_OFFSPRING_STEPS_COMPLETE } from "@/lib/utils/tutorials/nodeActionsTutorialStep";
 import { PROPOSAL_STEPS_COMPLETE } from "@/lib/utils/tutorials/proposalTutorialSteps";
 import {
   RECONCILING_ACCEPTED_PROPOSALS_STEPS_COMPLETE,
   RECONCILING_NOT_ACCEPTED_PROPOSALS_STEPS_COMPLETE,
 } from "@/lib/utils/tutorials/reconcilingProposalsTutorialSteps";
 import { SEARCHER_STEPS_COMPLETE } from "@/lib/utils/tutorials/searcherTutorialSteps";
-import { TABLE_CONTENT_STEPS_COMPLETE } from "@/lib/utils/tutorials/toolbooxTutorialSteps";
+import {
+  FOCUS_MODE_STEPS,
+  REDRAW_GRAPH_STEPS,
+  SCROLL_TO_NODE_STEPS,
+  TABLE_CONTENT_STEPS,
+} from "@/lib/utils/tutorials/toolbooxTutorialSteps";
 
 import { User } from "../knowledgeTypes";
 import { devLog } from "../lib/utils/develop.util";
@@ -21,6 +28,7 @@ import {
   CHILD_REFERENCE_PROPOSAL_COMPLETE,
   CHILD_RELATION_PROPOSAL_COMPLETE,
 } from "../lib/utils/tutorials/childrenProposalTutorialStep";
+import { DOWNVOTE_STEPS_COMPLETE, UPTOVE_STEPS_COMPLETE } from "../lib/utils/tutorials/nodeActionsTutorialStep";
 import { NODE_CODE } from "../lib/utils/tutorials/nodeCodeTutorialSteps";
 import { NODE_CONCEPT } from "../lib/utils/tutorials/nodeConceptTutorialStep";
 import { NODE_IDEA } from "../lib/utils/tutorials/nodeIdeaTutorialSteps";
@@ -44,7 +52,6 @@ import {
   TMP_PROPOSE_CHILD_RELATION,
 } from "../lib/utils/tutorials/temporalTutorialSteps";
 import { TutorialStep, TutorialTypeKeys, UserTutorials } from "../nodeBookTypes";
-import useEventListener from "./useEventListener";
 
 export const DEFAULT_NUMBER_OF_TRIES = 5;
 
@@ -109,6 +116,14 @@ export const useInteractiveTutorial = ({ user }: useInteractiveTutorialProps) =>
     tmpProposalIdeaChild: { currentStep: -1, done: false, skipped: false },
     tmpProposalCodeChild: { currentStep: -1, done: false, skipped: false },
     tableOfContents: { currentStep: -1, done: false, skipped: false },
+    focusMode: { currentStep: -1, done: false, skipped: false },
+    redrawGraph: { currentStep: -1, done: false, skipped: false },
+    scrollToNode: { currentStep: -1, done: false, skipped: false },
+    closeNode: { currentStep: -1, done: false, skipped: false },
+    expandNode: { currentStep: -1, done: false, skipped: false },
+    upVote: { currentStep: -1, done: false, skipped: false },
+    downVote: { currentStep: -1, done: false, skipped: false },
+    hideOffsprings: { currentStep: -1, done: false, skipped: false },
   });
 
   // flag for whether tutorial state was loaded
@@ -140,10 +155,6 @@ export const useInteractiveTutorial = ({ user }: useInteractiveTutorialProps) =>
   const startTutorial = useCallback((newTutorial: TutorialTypeKeys) => {
     setTutorial(prevTutorial => {
       console.log({ prevTutorial });
-      // // const previousStep = getTutorialStep(prevTutorial);
-      // // if (previousStep?.childTargetId) removeStyleFromTarget(previousStep.childTargetId, previousStep.targetId);
-      // if (!tutorial) return null;
-      // if (!newTutorial) return null;
 
       let newSteps: TutorialStep[] = [];
       if (newTutorial === "navigation") {
@@ -222,7 +233,41 @@ export const useInteractiveTutorial = ({ user }: useInteractiveTutorialProps) =>
       if (newTutorial === "childCode") {
         newSteps = CHILD_CODE_PROPOSAL_COMPLETE;
       }
+      if (newTutorial === "tableOfContents") {
+        newSteps = TABLE_CONTENT_STEPS;
+      }
+      if (newTutorial === "focusMode") {
+        newSteps = FOCUS_MODE_STEPS;
+      }
+      if (newTutorial === "redrawGraph") {
+        newSteps = REDRAW_GRAPH_STEPS;
+      }
+      if (newTutorial === "scrollToNode") {
+        newSteps = SCROLL_TO_NODE_STEPS;
+      }
+      if (newTutorial === "closeNode") {
+        newSteps = CLOSE_STEPS_COMPLETE;
+      }
+      if (newTutorial === "expandNode") {
+        newSteps = EXPAND_STEPS_COMPLETE;
+      }
+
+      if (newTutorial === "hideOffsprings") {
+        newSteps = HIDE_OFFSPRING_STEPS_COMPLETE;
+      }
+
+      // node actions
+
+      if (newTutorial === "upVote") {
+        newSteps = UPTOVE_STEPS_COMPLETE;
+      }
+
+      if (newTutorial === "downVote") {
+        newSteps = DOWNVOTE_STEPS_COMPLETE;
+      }
+
       //----------------- tmp nodes
+
       if (newTutorial === "tmpEditNode") {
         newSteps = TMP_EDIT_NODE;
       }
@@ -245,9 +290,7 @@ export const useInteractiveTutorial = ({ user }: useInteractiveTutorialProps) =>
       if (newTutorial === "tmpProposalCodeChild") {
         newSteps = TMP_PROPOSE_CHILD_CODE;
       }
-      if (newTutorial === "tableOfContents") {
-        newSteps = TABLE_CONTENT_STEPS_COMPLETE;
-      }
+
       setUserTutorial(prev => ({
         ...prev,
         [newTutorial]: { ...prev[newTutorial], currentStep: /*  initialStep || */ 1 },
@@ -263,7 +306,7 @@ export const useInteractiveTutorial = ({ user }: useInteractiveTutorialProps) =>
     setTutorial(prevTutorial => {
       if (!prevTutorial) return null;
       if (!currentStep) return null;
-      if (prevTutorial.step >= prevTutorial.steps.length) return null;
+      if (prevTutorial.step >= prevTutorial.steps.length) return prevTutorial;
 
       if (currentStep?.childTargetId) removeStyleFromTarget(currentStep.childTargetId, targetId);
       const newStep = prevTutorial.step + 1;
@@ -291,11 +334,6 @@ export const useInteractiveTutorial = ({ user }: useInteractiveTutorialProps) =>
     });
   }, [currentStep, targetId]);
 
-  useEventListener({
-    stepId: currentStep?.childTargetId ?? currentStep?.targetId,
-    cb: currentStep?.isClickeable ? onNextStep : undefined,
-  });
-
   return {
     startTutorial,
     tutorial,
@@ -309,7 +347,6 @@ export const useInteractiveTutorial = ({ user }: useInteractiveTutorialProps) =>
     userTutorial,
     userTutorialLoaded,
     setUserTutorial,
-    // setInitialStep,
   };
 };
 

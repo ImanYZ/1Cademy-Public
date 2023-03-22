@@ -21,6 +21,8 @@ export const getBaseStepConfig = (step: number, max: number) => {
     tooltipPosition: "top",
     isClickeable: false,
     outline: "shallow",
+    leftOffset: 0,
+    topOffset: 0,
   };
 
   return tt;

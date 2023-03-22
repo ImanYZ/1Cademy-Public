@@ -62,18 +62,16 @@ import { MemoizedSearcherSidebar } from "@/components/map/Sidebar/SidebarV2/Sear
 import { MemoizedUserInfoSidebar } from "@/components/map/Sidebar/SidebarV2/UserInfoSidebar";
 import { MemoizedUserSettingsSidebar } from "@/components/map/Sidebar/SidebarV2/UserSettigsSidebar";
 import { useAuth } from "@/context/AuthContext";
+import useEventListener from "@/hooks/useEventListener";
 import { useTagsTreeView } from "@/hooks/useTagsTreeView";
 import { addSuffixToUrlGMT } from "@/lib/utils/string.utils";
-import {
-  RECONCILING_ACCEPTED_PROPOSALS_STEPS_COMPLETE,
-  RECONCILING_NOT_ACCEPTED_PROPOSALS_STEPS_COMPLETE,
-} from "@/lib/utils/tutorials/reconcilingProposalsTutorialSteps";
 
 import LoadingImg from "../../public/animated-icon-1cademy.gif";
 import focusViewLogo from "../../public/focus.svg";
 import focusViewDarkLogo from "../../public/focus-dark.svg";
 import toolBox from "../../public/toolbox.svg";
 import toolBoxDark from "../../public/toolbox-dark.svg";
+import toolBoxDarkOpen from "../../public/toolbox-dark-open.svg";
 import toolBoxOpen from "../../public/toolbox-open.svg";
 import { TooltipTutorial } from "../components/interactiveTutorial/Tutorial";
 // import nodesData from "../../testUtils/mockCollections/nodes.data";
@@ -84,7 +82,7 @@ import { MemoizedNodeList } from "../components/map/NodesList";
 import { MemoizedToolbarSidebar } from "../components/map/Sidebar/SidebarV2/ToolbarSidebar";
 import { NodeItemDashboard } from "../components/NodeItemDashboard";
 import { Portal } from "../components/Portal";
-import { GroupTutorial, MemoizedTutorialTableOfContent } from "../components/tutorial/TutorialTableOfContent";
+import { MemoizedTutorialTableOfContent } from "../components/tutorial/TutorialTableOfContent";
 import { NodeBookProvider, useNodeBook } from "../context/NodeBookContext";
 import {
   getTutorialStep,
@@ -132,31 +130,7 @@ import {
   getUserNodeChanges,
   mergeAllNodes,
 } from "../lib/utils/nodesSyncronization.utils";
-import {
-  CHILD_CODE_PROPOSAL_COMPLETE,
-  CHILD_CONCEPT_PROPOSAL_COMPLETE,
-  CHILD_IDEA_PROPOSAL_COMPLETE,
-  CHILD_PROPOSAL_COMPLETE,
-  CHILD_QUESTION_PROPOSAL_COMPLETE,
-  CHILD_REFERENCE_PROPOSAL_COMPLETE,
-  CHILD_RELATION_PROPOSAL_COMPLETE,
-} from "../lib/utils/tutorials/childrenProposalTutorialStep";
-import { NAVIGATION_STEPS_COMPLETE } from "../lib/utils/tutorials/navigationTutorialSteps";
-import { NODE_CODE } from "../lib/utils/tutorials/nodeCodeTutorialSteps";
-import { NODE_CONCEPT } from "../lib/utils/tutorials/nodeConceptTutorialStep";
-import { NODE_IDEA } from "../lib/utils/tutorials/nodeIdeaTutorialSteps";
-import { NODE_QUESTION } from "../lib/utils/tutorials/nodeQuestionStepTutorialStep";
-import { NODE_REFERENCE } from "../lib/utils/tutorials/nodeReferenceTutorialSteps";
-import { NODE_RELATION } from "../lib/utils/tutorials/nodeRelationTutorialSteps";
-import { NODES_STEPS_COMPLETE } from "../lib/utils/tutorials/nodeTutorialSteps";
-import { PROPOSING_CODE_EDIT_COMPLETE } from "../lib/utils/tutorials/proposalCodeTutorialStep";
-import { PROPOSING_CONCEPT_EDIT_COMPLETE } from "../lib/utils/tutorials/proposalConceptTutorialStep";
-import { PROPOSING_IDEA_EDIT_COMPLETE } from "../lib/utils/tutorials/proposalIdeaTutorialSteps";
-import { PROPOSING_QUESTION_EDIT_COMPLETE } from "../lib/utils/tutorials/proposalQuestionTutorialSteps";
-import { PROPOSING_REFERENCE_EDIT_COMPLETE } from "../lib/utils/tutorials/proposalReferenceTutorialSteps";
-import { PROPOSING_RELATION_EDIT_COMPLETE } from "../lib/utils/tutorials/proposalRelationTutorialSteps";
-import { PROPOSAL_STEPS_COMPLETE } from "../lib/utils/tutorials/proposalTutorialSteps";
-import { SEARCHER_STEPS_COMPLETE } from "../lib/utils/tutorials/searcherTutorialSteps";
+import { GROUP_TUTORIALS } from "../lib/utils/tutorials/grouptutorials";
 import { gtmEvent, imageLoaded, isValidHttpUrl } from "../lib/utils/utils";
 import {
   ChoosingType,
@@ -428,6 +402,7 @@ const Dashboard = ({}: DashboardProps) => {
 
   useEffect(() => {
     setInnerHeight(window.innerHeight);
+    setButtonsOpen(window.innerHeight > 399 ? true : false);
   }, [user?.uname]);
 
   const scrollToNode = useCallback(
@@ -530,8 +505,8 @@ const Dashboard = ({}: DashboardProps) => {
         const { offsetTop, offsetLeft } = targetElement;
         const { height: childrenHeight, width: childrenWidth } = targetElement.getBoundingClientRect();
 
-        offsetChildTop = offsetTop;
-        offsetChildLeft = offsetLeft;
+        offsetChildTop = offsetTop + currentStep.topOffset;
+        offsetChildLeft = offsetLeft + currentStep.leftOffset;
         height = childrenHeight;
         width = childrenWidth;
       }
@@ -1736,6 +1711,7 @@ const Dashboard = ({}: DashboardProps) => {
         (async () => {
           const updatedNodeIds: string[] = [];
           const offsprings = recursiveOffsprings(nodeId);
+
           notebookRef.current.selectedNode = nodeId;
           nodeBookDispatch({ type: "setSelectedNode", payload: nodeId });
 
@@ -2202,12 +2178,13 @@ const Dashboard = ({}: DashboardProps) => {
 
       notebookRef.current.selectedNode = nodeId;
 
-      lastNodeOperation.current = { name: "ToggleNode", data: "" };
       setGraph(({ nodes: oldNodes, edges }) => {
         const thisNode = oldNodes[nodeId];
 
         notebookRef.current.selectedNode = nodeId;
         nodeBookDispatch({ type: "setSelectedNode", payload: nodeId });
+        lastNodeOperation.current = { name: "ToggleNode", data: thisNode.open ? "closeNode" : "openNode" };
+
         const { nodeRef, userNodeRef } = initNodeStatusChange(nodeId, thisNode.userNodeId);
         const changeNode: any = {
           updatedAt: Timestamp.fromDate(new Date()),
@@ -2546,6 +2523,7 @@ const Dashboard = ({}: DashboardProps) => {
         return { ...node, correct: !correct, wrong: false, corrects, wrongs, disableVotes: true };
       });
       event.currentTarget.blur();
+      lastNodeOperation.current = { name: "upvote", data: "" };
     },
     [getMapGraph, setNodeParts, setReputationSignal]
   );
@@ -2577,6 +2555,7 @@ const Dashboard = ({}: DashboardProps) => {
         const node = graph.nodes[nodeId];
 
         const willRemoveNode = doNeedToDeleteNode(_corrects, _wrongs, locked);
+        lastNodeOperation.current = { name: "downvote", data: willRemoveNode ? "removed" : "" };
         if (willRemoveNode) {
           if (node?.children.length > 0) {
             window.alert(
@@ -4011,7 +3990,7 @@ const Dashboard = ({}: DashboardProps) => {
     setTutorial(null);
     setTargetId("");
 
-    if (wasForcedTutorial) return setForcedTutorial(null);
+    if (wasForcedTutorial) setForcedTutorial(null);
 
     const tutorialRef = doc(db, "userTutorial", user.uname);
     const tutorialDoc = await getDoc(tutorialRef);
@@ -4039,7 +4018,8 @@ const Dashboard = ({}: DashboardProps) => {
     if (!currentStep) return;
     if (!tutorial) return;
 
-    console.log({ childTargetId: currentStep?.childTargetId, targetId });
+    devLog("ON_FINALIZE_TUTORIAL", { childTargetId: currentStep?.childTargetId, targetId });
+
     if (currentStep?.childTargetId) removeStyleFromTarget(currentStep.childTargetId, targetId);
 
     if (tutorial.name === "tmpEditNode") {
@@ -4078,7 +4058,7 @@ const Dashboard = ({}: DashboardProps) => {
     setUserTutorial(userTutorialUpdated);
     setTargetId("");
 
-    if (wasForcedTutorial) return setForcedTutorial(null);
+    if (wasForcedTutorial) setForcedTutorial(null);
 
     const tutorialRef = doc(db, "userTutorial", user.uname);
     const tutorialDoc = await getDoc(tutorialRef);
@@ -4103,6 +4083,15 @@ const Dashboard = ({}: DashboardProps) => {
     userTutorial,
   ]);
 
+  useEventListener({
+    stepId: currentStep?.childTargetId ?? currentStep?.targetId,
+    cb: currentStep?.isClickeable
+      ? tutorial && tutorial.step === tutorial?.steps.length
+        ? onNextStep
+        : onFinalizeTutorial
+      : undefined,
+  });
+
   /**
    * Detect the trigger to call a tutorial
    * if graph is invalid, DB is modified with correct state
@@ -4115,7 +4104,7 @@ const Dashboard = ({}: DashboardProps) => {
       targetIsValid: (node: FullNodeData) => boolean,
       defaultStates: Partial<FullNodeData> = { open: true }
     ) => {
-      devLog("DETECT_AND_CALL_TUTORIAL", { tutorialName, targetId });
+      devLog("DETECT_AND_FORCE_TUTORIAL", { tutorialName, targetId });
 
       const thisNode = graph.nodes[targetId];
       if (!targetIsValid(thisNode)) {
@@ -4258,6 +4247,46 @@ const Dashboard = ({}: DashboardProps) => {
       userTutorial,
     ]
   );
+
+  const parentWithMostChildren = useCallback(() => {
+    const frequencies = Object.keys(graph.edges)
+      .map(edge => edge.split("-")[0])
+      .reduce((acc: { [key: string]: number }, edge: string) => {
+        acc[edge] = acc[edge] ? acc[edge] + 1 : 1;
+        return acc;
+      }, {});
+    const maxNode = Object.entries(frequencies).reduce(
+      (max: { edge: string; children: number }, [edge, children]: [string, number]) => {
+        return children > max.children ? { edge, children } : max;
+      },
+      { edge: "", children: 0 }
+    );
+
+    return maxNode;
+  }, [graph.edges]);
+
+  const parentWithChildren = useCallback(
+    (parentId: string) => {
+      const frequency = Object.keys(graph.edges)
+        .map(edge => edge.split("-")[0])
+        .reduce((acc: number, edge: string) => {
+          console.log({ edge });
+          return edge === parentId ? acc + 1 : acc;
+        }, 0);
+
+      return frequency;
+    },
+    [graph.edges]
+  );
+
+  const getGraphOpenedNodes = useCallback(() => {
+    const nodesOpened = Object.values(graph.nodes).reduce((acc: number, node: FullNodeData) => {
+      return node.open ? acc + 1 : acc;
+    }, 0);
+
+    return nodesOpened;
+  }, [graph.nodes]);
+
   useEffect(() => {
     /**
      * This useEffect with detect conditions to call a tutorial
@@ -4271,6 +4300,7 @@ const Dashboard = ({}: DashboardProps) => {
       if (!userTutorialLoaded) return;
       if (firstLoading) return;
       if (tutorial) return;
+      if (focusView.isEnabled) return;
 
       devLog("USE_EFFECT: DETECT_TRIGGER_TUTORIAL", { userTutorial });
 
@@ -4319,13 +4349,138 @@ const Dashboard = ({}: DashboardProps) => {
 
       // --------------------------
 
-      if (forcedTutorial === "tableOfContents" || userTutorial["nodes"].done || userTutorial["nodes"].skipped) {
-        const shouldIgnore =
-          !forcedTutorial && (userTutorial["tableOfContents"].done || userTutorial["tableOfContents"].skipped);
-        if (shouldIgnore) return;
-        startTutorial("tableOfContents");
+      const mosParent = parentWithMostChildren();
+      const hideOffspringsTutorialIsValid = (node: FullNodeData) =>
+        node && !node.editable && parentWithChildren(node.node) >= 2;
+      const hideOffspringsTutorialForcedIsValid = (node: FullNodeData) => node && !node.editable;
 
-        return;
+      if (forcedTutorial === "hideOffsprings" || mosParent.children >= 2) {
+        const shouldIgnore =
+          (!forcedTutorial || forcedTutorial !== "hideOffsprings") &&
+          (userTutorial["hideOffsprings"].done || userTutorial["hideOffsprings"].skipped);
+        if (!shouldIgnore) {
+          const result = detectAndForceTutorial(
+            "hideOffsprings",
+            mosParent.edge || "r98BjyFDCe4YyLA3U8ZE",
+            mosParent.edge ? hideOffspringsTutorialIsValid : hideOffspringsTutorialForcedIsValid
+          );
+          if (result) {
+            if (!mosParent.edge) {
+              openNodeHandler("LrUBGjpxuEV2W0shSLXf");
+              openNodeHandler("rWYUNisPIVMBoQEYXgNj");
+            }
+            return;
+          }
+        }
+      }
+
+      // --------------------------
+
+      const closeNodeTutorialIsValid = (node: FullNodeData) => Boolean(node) && node.open;
+      const openedNodes = getGraphOpenedNodes();
+      if (openedNodes >= 2) {
+        const firstOpenedNode = Object.values(graph.nodes).find(node => node.open);
+        const shouldIgnore = userTutorial["closeNode"].skipped || userTutorial["closeNode"].done;
+        if (firstOpenedNode && !shouldIgnore) {
+          const result = detectAndForceTutorial("closeNode", firstOpenedNode.node, closeNodeTutorialIsValid);
+          if (result) return;
+        }
+      }
+      if (forcedTutorial === "closeNode") {
+        const result = detectAndForceTutorial("closeNode", "r98BjyFDCe4YyLA3U8ZE", closeNodeTutorialIsValid);
+        if (result) return;
+      }
+      // --------------------------
+
+      const expandNodeTutorialIsValid = (node: FullNodeData) => Boolean(node) && !node.open;
+      if (Object.keys(graph.nodes).length > openedNodes) {
+        const firstClosedNode = Object.values(graph.nodes).find(node => !node.open);
+        const shouldIgnore = userTutorial["expandNode"].skipped || userTutorial["expandNode"].done;
+        if (firstClosedNode && !shouldIgnore) {
+          const result = detectAndForceTutorial("expandNode", firstClosedNode.node, expandNodeTutorialIsValid);
+          if (result) return;
+        }
+      }
+
+      if (forcedTutorial === "expandNode") {
+        const result = detectAndForceTutorial("expandNode", "r98BjyFDCe4YyLA3U8ZE", expandNodeTutorialIsValid, {
+          open: false,
+        });
+        if (result) return;
+      }
+
+      // --------------------------
+      if (forcedTutorial === "tableOfContents" || userTutorial["nodes"].done || userTutorial["nodes"].skipped) {
+        const shouldIgnore = forcedTutorial
+          ? forcedTutorial !== "tableOfContents"
+          : userTutorial["tableOfContents"].done || userTutorial["tableOfContents"].skipped;
+        if (!shouldIgnore) {
+          startTutorial("tableOfContents");
+          return;
+        }
+      }
+
+      // --------------------------
+
+      if (forcedTutorial === "focusMode" || !forcedTutorial) {
+        const shouldIgnore =
+          (!forcedTutorial && !userTutorial["tableOfContents"].done && !userTutorial["tableOfContents"].skipped) ||
+          userTutorial["focusMode"].done ||
+          userTutorial["focusMode"].skipped;
+        // if (nodeBookState.selectedNode) return;
+
+        if (!shouldIgnore) {
+          if (buttonsOpen) return startTutorial("focusMode");
+        }
+      }
+
+      if (forcedTutorial === "focusMode") {
+        if (buttonsOpen) {
+          return startTutorial("focusMode");
+        } else {
+          return setButtonsOpen(true);
+        }
+      }
+
+      // --------------------------
+
+      if (forcedTutorial === "redrawGraph" || !forcedTutorial) {
+        const shouldIgnore =
+          (!forcedTutorial && !userTutorial["focusMode"].done && !userTutorial["focusMode"].skipped) ||
+          userTutorial["redrawGraph"].done ||
+          userTutorial["redrawGraph"].skipped;
+        if (!shouldIgnore) {
+          if (buttonsOpen) return startTutorial("redrawGraph");
+        }
+      }
+
+      if (forcedTutorial === "redrawGraph") {
+        if (buttonsOpen) {
+          return startTutorial("redrawGraph");
+        } else {
+          return setButtonsOpen(true);
+        }
+      }
+
+      // --------------------------
+
+      if (forcedTutorial === "scrollToNode" || !forcedTutorial) {
+        const shouldIgnore =
+          (!forcedTutorial && !userTutorial["redrawGraph"].done && !userTutorial["redrawGraph"].skipped) ||
+          userTutorial["scrollToNode"].done ||
+          userTutorial["scrollToNode"].skipped;
+        // if (nodeBookState.selectedNode) return;
+        if (!shouldIgnore) {
+          if (buttonsOpen) return startTutorial("scrollToNode");
+        }
+      }
+
+      if (forcedTutorial === "scrollToNode") {
+        if (buttonsOpen) {
+          return startTutorial("scrollToNode");
+        } else {
+          return setButtonsOpen(true);
+        }
       }
 
       // --------------------------
@@ -4741,6 +4896,42 @@ const Dashboard = ({}: DashboardProps) => {
 
       // --------------------------
 
+      if (forcedTutorial === "upVote" || !forcedTutorial) {
+        const shouldIgnore =
+          (!forcedTutorial && !userTutorial["nodes"].done && !userTutorial["nodes"].skipped) ||
+          userTutorial["upVote"].done ||
+          userTutorial["upVote"].skipped;
+        if (!shouldIgnore) {
+          const upvoteLaunched = detectAndCallTutorial("upVote", node => node && node.open);
+          if (upvoteLaunched) return;
+        }
+      }
+
+      if (forcedTutorial === "upVote") {
+        const result = detectAndForceTutorial("upVote", "r98BjyFDCe4YyLA3U8ZE", node => node && node.open);
+        if (result) return;
+      }
+
+      // --------------------------
+
+      if (forcedTutorial === "downVote" || !forcedTutorial) {
+        const shouldIgnore =
+          (!forcedTutorial && !userTutorial["nodes"].done && !userTutorial["nodes"].skipped) ||
+          userTutorial["downVote"].done ||
+          userTutorial["downVote"].skipped;
+        if (!shouldIgnore) {
+          const upvoteLaunched = detectAndCallTutorial("downVote", node => node && node.open);
+          if (upvoteLaunched) return;
+        }
+      }
+
+      if (forcedTutorial === "downVote") {
+        const result = detectAndForceTutorial("downVote", "r98BjyFDCe4YyLA3U8ZE", node => node && node.open);
+        if (result) return;
+      }
+
+      // --------------------------
+
       if (forcedTutorial === "searcher" || openSidebar === "SEARCHER_SIDEBAR") {
         const result = detectAndCallSidebarTutorial("searcher", "SEARCHER_SIDEBAR");
         if (result) return;
@@ -4751,17 +4942,21 @@ const Dashboard = ({}: DashboardProps) => {
 
     detectTriggerTutorial();
   }, [
+    buttonsOpen,
     detectAndCallChildTutorial,
     detectAndCallSidebarTutorial,
     detectAndCallTutorial,
     detectAndForceTutorial,
     firstLoading,
+    focusView.isEnabled,
     forcedTutorial,
+    getGraphOpenedNodes,
     graph.nodes,
     nodeBookDispatch,
     openNodeHandler,
-    openProgressBar,
     openSidebar,
+    parentWithChildren,
+    parentWithMostChildren,
     setTargetId,
     startTutorial,
     tutorial,
@@ -4773,6 +4968,12 @@ const Dashboard = ({}: DashboardProps) => {
     if (!userTutorialLoaded) return;
     if (firstLoading) return;
     if (!tutorial) return;
+
+    if (focusView.isEnabled) {
+      setTutorial(null);
+      setForcedTutorial(null);
+      return;
+    }
 
     devLog("USE_EFFECT: DETECT_TO_REMOVE_TUTORIAL", tutorial);
 
@@ -4786,12 +4987,33 @@ const Dashboard = ({}: DashboardProps) => {
         // console.log("remove node t");
       }
     }
+    // --------------------------
+
+    if (tutorial.name === "closeNode") {
+      const closeNodeTutorialIsValid = (node: FullNodeData) => Boolean(node) && node.open && !node.editable;
+      const node = graph.nodes[targetId];
+      if (!closeNodeTutorialIsValid(node)) {
+        setTutorial(null);
+        setForcedTutorial(null);
+      }
+    }
+    // --------------------------
+
+    if (tutorial.name === "expandNode") {
+      const expandNodeTutorialIsValid = (node: FullNodeData) => Boolean(node) && !node.open && !node.editable;
+      const node = graph.nodes[targetId];
+      if (!expandNodeTutorialIsValid(node)) {
+        setTutorial(null);
+        setForcedTutorial(null);
+      }
+    }
+    // --------------------------
+
     const conceptTutorialIsValid = (thisNode: FullNodeData) =>
       thisNode && thisNode.open && thisNode.nodeType === "Concept";
     detectAndRemoveTutorial("concept", conceptTutorialIsValid);
 
     // --------------------------
-
     const relationTutorialIsValid = (thisNode: FullNodeData) =>
       thisNode && thisNode.open && thisNode.nodeType === "Relation";
     detectAndRemoveTutorial("relation", relationTutorialIsValid);
@@ -4811,43 +5033,53 @@ const Dashboard = ({}: DashboardProps) => {
     detectAndRemoveTutorial("idea", ideaTutorialIsValid);
 
     // --------------------------
+
     const codeTutorialIsValid = (thisNode: FullNodeData) => thisNode && thisNode.open && thisNode.nodeType === "Code";
     detectAndRemoveTutorial("code", codeTutorialIsValid);
+
     // --------------------------
+
+    const proposalTutorialIsValid = (thisNode: FullNodeData) => thisNode && thisNode.open && thisNode.editable;
+    detectAndRemoveTutorial("proposal", proposalTutorialIsValid);
+
+    // --------------------------
+
     const conceptProposalTutorialIsValid = (thisNode: FullNodeData) =>
       thisNode && thisNode.open && thisNode.editable && thisNode.nodeType === "Concept";
     detectAndRemoveTutorial("proposalConcept", conceptProposalTutorialIsValid);
+
     // --------------------------
+
     const relationProposalTutorialIsValid = (thisNode: FullNodeData) =>
       thisNode && thisNode.open && thisNode.editable && thisNode.nodeType === "Relation";
     detectAndRemoveTutorial("proposalRelation", relationProposalTutorialIsValid);
+
     // --------------------------
+
     const referenceProposalTutorialIsValid = (thisNode: FullNodeData) =>
       thisNode && thisNode.open && thisNode.editable && thisNode.nodeType === "Reference";
     detectAndRemoveTutorial("proposalReference", referenceProposalTutorialIsValid);
+
     // --------------------------
+
     const questionProposalTutorialIsValid = (thisNode: FullNodeData) =>
       thisNode && thisNode.open && thisNode.editable && thisNode.nodeType === "Question";
     detectAndRemoveTutorial("proposalQuestion", questionProposalTutorialIsValid);
+
     // --------------------------
+
     const ideaProposalTutorialIsValid = (thisNode: FullNodeData) =>
       thisNode && thisNode.open && thisNode.editable && thisNode.nodeType === "Idea";
     detectAndRemoveTutorial("proposalIdea", ideaProposalTutorialIsValid);
+
     // --------------------------
+
     const codeProposalTutorialIsValid = (thisNode: FullNodeData) =>
       thisNode && thisNode.open && thisNode.editable && thisNode.nodeType === "Code";
     detectAndRemoveTutorial("proposalCode", codeProposalTutorialIsValid);
-    // --------------------------
-    // if (tutorial.name === "concept") {
-    //   const node = graph.nodes[targetId];
-    //   if (!conceptTutorialIsValid(node)) {
-    //     setTutorial(null);
-    //     setForcedTutorial(null);
-    //   }
-    // }
-    // --------------------------
 
     // --------------------------
+
     if (tutorial.name === "childConcept") {
       const childConceptProposalIsValid = (node: FullNodeData) =>
         node && Boolean(node.isNew) && node.open && node.editable && node.nodeType === "Concept";
@@ -4858,19 +5090,22 @@ const Dashboard = ({}: DashboardProps) => {
         setForcedTutorial(null);
       }
     }
+
+    // --------------------------
+
     if (tutorial.name === "tmpEditNode") {
-      console.log("111aaa");
       const tmpEditNodeIsValid = (node: FullNodeData) => node && node.open && !node.editable;
       const node = graph.nodes[targetId];
       if (!tmpEditNodeIsValid(node)) {
-        console.log("222aaa");
         setTutorial(null);
         if (node && node.editable) return;
-        console.log("333aaa");
 
         setForcedTutorial(null);
       }
     }
+
+    // --------------------------
+
     if (
       tutorial.name === "tmpProposalConceptChild" ||
       tutorial.name === "tmpProposalQuestionChild" ||
@@ -4879,17 +5114,52 @@ const Dashboard = ({}: DashboardProps) => {
       tutorial.name === "tmpProposalIdeaChild" ||
       tutorial.name === "tmpProposalCodeChild"
     ) {
-      console.log("aaaaaaaa");
       const isValid = (node: FullNodeData) => node && node.open && node.editable && !Boolean(node.isNew);
       const node = graph.nodes[targetId];
       if (!isValid(node)) {
-        console.log("bbbb");
         setTutorial(null);
         if (node && !node.editable) return;
-        console.log("ccccc");
         setForcedTutorial(null);
       }
     }
+
+    // --------------------------
+
+    if (tutorial.name === "tableOfContents") {
+      if (!buttonsOpen) {
+        setTutorial(null);
+        setForcedTutorial(null);
+      }
+    }
+
+    // --------------------------
+
+    if (tutorial.name === "focusMode") {
+      if (!buttonsOpen) {
+        setTutorial(null);
+        setForcedTutorial(null);
+      }
+    }
+
+    // --------------------------
+
+    if (tutorial.name === "redrawGraph") {
+      if (!buttonsOpen) {
+        setTutorial(null);
+        setForcedTutorial(null);
+      }
+    }
+
+    // --------------------------
+
+    if (tutorial.name === "scrollToNode") {
+      if (!buttonsOpen) {
+        setTutorial(null);
+        setForcedTutorial(null);
+      }
+    }
+
+    // --------------------------
 
     if (tutorial.name === "reconcilingAcceptedProposal") {
       const reconcilingAcceptedProposalIsValid = (node: FullNodeData) =>
@@ -4901,6 +5171,8 @@ const Dashboard = ({}: DashboardProps) => {
         setForcedTutorial(null);
       }
     }
+
+    // --------------------------
 
     if (tutorial.name === "reconcilingNotAcceptedProposal") {
       const reconcilingNotAcceptedProposalIsValid = (node: FullNodeData) =>
@@ -4917,16 +5189,45 @@ const Dashboard = ({}: DashboardProps) => {
       }
     }
 
+    // --------------------------
+
+    if (tutorial.name === "upVote") {
+      const upvoteIsValid = (node: FullNodeData) => node && node.open;
+      const node = graph.nodes[targetId];
+      if (!upvoteIsValid(node)) {
+        setTutorial(null);
+        setForcedTutorial(null);
+      }
+    }
+
+    // --------------------------
+
+    if (tutorial.name === "downVote") {
+      const downvoteIsValid = (node: FullNodeData) => node && node.open;
+      const node = graph.nodes[targetId];
+      if (!downvoteIsValid(node)) {
+        setTutorial(null);
+        setForcedTutorial(null);
+      }
+    }
+
+    // --------------------------
+
     if (tutorial.name === "searcher") {
       if (openSidebar === "SEARCHER_SIDEBAR") return;
       setTutorial(null);
       setForcedTutorial(null);
     }
+
+    // --------------------------
   }, [
+    buttonsOpen,
     detectAndRemoveTutorial,
     firstLoading,
+    focusView.isEnabled,
     graph.nodes,
     nodeBookState.selectedNode,
+    openProgressBar,
     openSidebar,
     setTutorial,
     targetId,
@@ -5018,6 +5319,24 @@ const Dashboard = ({}: DashboardProps) => {
                 <Button onClick={() => console.log(graph.nodes)}>nodes</Button>
                 <Button onClick={() => console.log(graph.edges)}>edges</Button>
                 <Button onClick={() => console.log(allTags)}>allTags</Button>
+                <Button
+                  onClick={() => {
+                    const mosParent = parentWithMostChildren();
+
+                    console.log(mosParent);
+                  }}
+                >
+                  Most Parent
+                </Button>
+                <Button
+                  onClick={() => {
+                    const mosParent = parentWithChildren("r98BjyFDCe4YyLA3U8ZE");
+
+                    console.log(`children :${mosParent}`);
+                  }}
+                >
+                  Children of Parent
+                </Button>
               </Box>
               <Box>
                 <Button onClick={() => console.log("DAGGER", g)}>Dagre</Button>
@@ -5095,6 +5414,12 @@ const Dashboard = ({}: DashboardProps) => {
                 </Button>
                 <Button onClick={() => openNodeHandler("r98BjyFDCe4YyLA3U8ZE")}>Open Node Handler</Button>
                 <Button onClick={() => setShowRegion(prev => !prev)}>Show Region</Button>
+              </Box>
+              <Typography>Last Operation:</Typography>
+              <Box>
+                <Button onClick={() => console.log({ lastOperaion: lastNodeOperation.current })}>
+                  lastNodeOperation
+                </Button>
               </Box>
             </Drawer>
           }
@@ -5275,16 +5600,20 @@ const Dashboard = ({}: DashboardProps) => {
                 borderRadius: buttonsOpen ? "0px 8px 8px 0px" : "8px",
                 padding: "10px",
                 zIndex: 1299,
+                boxShadow: theme =>
+                  theme.palette.mode === "dark"
+                    ? "0px 1px 2px rgba(0, 0, 0, 0.06), 0px 1px 3px rgba(0, 0, 0, 0.1)"
+                    : "box-shadow: 0px 1px 2px rgba(0, 0, 0, 0.06), 0px 1px 3px rgba(0, 0, 0, 0.1)",
               }}
-              onClick={() => setButtonsOpen(true)}
+              onClick={() => setButtonsOpen(!buttonsOpen)}
             >
               {isQueueWorking && (
                 <CircularProgress
                   size={46}
                   sx={{
                     position: "absolute",
-                    right: { xs: "-1px", sm: "7px" },
-                    bottom: { xs: "-1px", sm: "7px" },
+                    right: { xs: "1px", sm: "7px" },
+                    bottom: { xs: "0px", sm: "7px" },
                     zIndex: "1300",
                   }}
                 />
@@ -5292,13 +5621,17 @@ const Dashboard = ({}: DashboardProps) => {
               <IconButton
                 color="secondary"
                 sx={{
-                  width: windowWith <= 599 ? "36px" : undefined,
+                  padding: { xs: "0px !important", sm: "8px!important" },
+
+                  width: windowWith <= 599 ? "30px" : undefined,
                   height: windowWith <= 599 ? "25px" : undefined,
                   ":hover": {
-                    width: { xs: "36px", sm: "40px" },
-                    height: { xs: "26px", sm: "40px" },
+                    bottom: windowWith <= 599 ? "2px" : undefined,
+                    width: { xs: "32px", sm: "40px" },
+                    height: { xs: "30px", sm: "40px" },
                     borderRadius: "8px",
-                    background: buttonsOpen ? "#55402B" : "inherit",
+                    background: theme =>
+                      buttonsOpen ? (theme.palette.mode === "dark" ? "#55402B" : "#FDEAD7") : "inherit",
                   },
                 }}
               >
@@ -5306,7 +5639,7 @@ const Dashboard = ({}: DashboardProps) => {
                   src={
                     theme.palette.mode === "dark"
                       ? buttonsOpen
-                        ? toolBoxOpen
+                        ? toolBoxDarkOpen
                         : toolBoxDark
                       : buttonsOpen
                       ? toolBoxOpen
@@ -5364,15 +5697,14 @@ const Dashboard = ({}: DashboardProps) => {
                   </Box>
                 </Box>
                 <Tooltip title="Scroll to last Selected Node" placement="bottom">
-                  {/* <span> */}
                   <IconButton
+                    id="toolbox-scroll-to-node"
                     color="secondary"
                     onClick={onScrollToLastNode}
-                    disabled={["TT"].includes("SCROLL_TO_NODE_BUTTON")}
+                    disabled={!nodeBookState.selectedNode ? true : false}
                   >
                     <MyLocationIcon sx={{ color: theme => (theme.palette.mode === "dark" ? "#CACACA" : "#667085") }} />
                   </IconButton>
-                  {/* </span> */}
                 </Tooltip>
 
                 <Tooltip
@@ -5385,7 +5717,16 @@ const Dashboard = ({}: DashboardProps) => {
                     },
                   }}
                 >
-                  <IconButton color="secondary" onClick={onRedrawGraph}>
+                  <IconButton
+                    id="toolbox-redraw-graph"
+                    color="secondary"
+                    onClick={() => {
+                      onRedrawGraph();
+                      if (tutorial?.name === "redrawGraph") {
+                        onFinalizeTutorial();
+                      }
+                    }}
+                  >
                     <AutoFixHighIcon sx={{ color: theme => (theme.palette.mode === "dark" ? "#CACACA" : "#667085") }} />
                   </IconButton>
                 </Tooltip>
@@ -5402,9 +5743,12 @@ const Dashboard = ({}: DashboardProps) => {
                 >
                   <IconButton
                     id="toolbox-table-of-contents"
-                    color="secondary"
+                    color="error"
                     onClick={() => {
-                      setOpenProgressBar(true);
+                      setOpenProgressBar(prev => !prev);
+                      if (tutorial?.name === "tableOfContents") {
+                        onFinalizeTutorial();
+                      }
                     }}
                   >
                     <HelpIcon sx={{ color: theme => (theme.palette.mode === "dark" ? "#CACACA" : "#667085") }} />
@@ -5422,11 +5766,16 @@ const Dashboard = ({}: DashboardProps) => {
                   }}
                 >
                   <IconButton
+                    id="toolbox-focus-mode"
                     color="secondary"
                     onClick={() => {
                       setFocusView({ isEnabled: true, selectedNode: nodeBookState.selectedNode || "" });
+                      setOpenProgressBar(false);
+                      if (tutorial?.name === "focusMode") {
+                        onFinalizeTutorial();
+                      }
                     }}
-                    disabled={["TT"].includes("FOCUS_MODE_BUTTON")}
+                    disabled={!nodeBookState.selectedNode ? true : false}
                   >
                     <NextImage
                       src={theme.palette.mode === "light" ? focusViewLogo : focusViewDarkLogo}
@@ -5706,7 +6055,7 @@ const Dashboard = ({}: DashboardProps) => {
             open={openProgressBar}
             reloadPermanentGraph={reloadPermanentGraph}
             handleCloseProgressBar={onCloseTableOfContent}
-            groupTutorials={gg}
+            groupTutorials={GROUP_TUTORIALS}
             userTutorialState={userTutorial}
             onCancelTutorial={onCancelTutorial}
             onForceTutorial={setForcedTutorial}
@@ -5726,173 +6075,3 @@ export default withAuthUser({
   shouldRedirectToLogin: true,
   shouldRedirectToHomeIfAuthenticated: false,
 })(NodeBook);
-
-const gg: GroupTutorial[] = [
-  {
-    title: "Basics",
-    tutorials: [
-      {
-        title: "Navigation",
-        tutorialSteps: { tutorialKey: "navigation", steps: NAVIGATION_STEPS_COMPLETE },
-        tutorials: [],
-      },
-      {
-        title: "Nodes",
-        tutorialSteps: { tutorialKey: "nodes", steps: NODES_STEPS_COMPLETE },
-        tutorials: [],
-      },
-      {
-        title: "Searcher",
-        tutorialSteps: { tutorialKey: "searcher", steps: SEARCHER_STEPS_COMPLETE },
-        tutorials: [],
-      },
-    ],
-  },
-  {
-    title: "Node Types",
-    tutorials: [
-      {
-        title: "Concept Node",
-        tutorialSteps: { tutorialKey: "concept", steps: NODE_CONCEPT },
-        tutorials: [],
-      },
-      {
-        title: "Relation Node",
-        tutorialSteps: { tutorialKey: "relation", steps: NODE_RELATION },
-        tutorials: [],
-      },
-      {
-        title: "Reference Node",
-        tutorialSteps: { tutorialKey: "reference", steps: NODE_REFERENCE },
-        tutorials: [],
-      },
-      {
-        title: "Question Node",
-        tutorialSteps: { tutorialKey: "question", steps: NODE_QUESTION },
-        tutorials: [],
-      },
-      {
-        title: "Code Node",
-        tutorialSteps: { tutorialKey: "code", steps: NODE_CODE },
-        tutorials: [],
-      },
-      {
-        title: "Idea Node",
-        tutorialSteps: { tutorialKey: "idea", steps: NODE_IDEA },
-        tutorials: [],
-      },
-    ],
-  },
-  {
-    title: "Proposal",
-    tutorials: [
-      {
-        title: "Proposing Edit",
-        tutorialSteps: { tutorialKey: "proposal", steps: PROPOSAL_STEPS_COMPLETE },
-        tutorials: [],
-      },
-      {
-        title: "Edit Node Types",
-        tutorials: [
-          {
-            title: "Edit Concept Node",
-            tutorialSteps: { tutorialKey: "proposalConcept", steps: PROPOSING_CONCEPT_EDIT_COMPLETE },
-            tutorials: [],
-          },
-          {
-            title: "Edit Relation Node",
-            tutorialSteps: { tutorialKey: "proposalRelation", steps: PROPOSING_RELATION_EDIT_COMPLETE },
-            tutorials: [],
-          },
-          {
-            title: "Edit Reference Node",
-            tutorialSteps: { tutorialKey: "proposalReference", steps: PROPOSING_REFERENCE_EDIT_COMPLETE },
-            tutorials: [],
-          },
-          {
-            title: "Edit Question Node",
-            tutorialSteps: { tutorialKey: "proposalQuestion", steps: PROPOSING_QUESTION_EDIT_COMPLETE },
-            tutorials: [],
-          },
-          {
-            title: "Edit Code Node",
-            tutorials: [],
-            tutorialSteps: { tutorialKey: "proposalCode", steps: PROPOSING_CODE_EDIT_COMPLETE },
-          },
-          {
-            title: "Edit Idea Node",
-            tutorialSteps: { tutorialKey: "proposalIdea", steps: PROPOSING_IDEA_EDIT_COMPLETE },
-            tutorials: [],
-          },
-        ],
-      },
-      {
-        title: "New node types",
-        tutorialSteps: { tutorialKey: "childProposal", steps: CHILD_PROPOSAL_COMPLETE },
-        tutorials: [
-          {
-            title: "New Concept Node",
-            tutorialSteps: { tutorialKey: "childConcept", steps: CHILD_CONCEPT_PROPOSAL_COMPLETE },
-            tutorials: [],
-          },
-          {
-            title: "New Relation Node",
-            tutorialSteps: { tutorialKey: "childRelation", steps: CHILD_RELATION_PROPOSAL_COMPLETE },
-            tutorials: [],
-          },
-          {
-            title: "New Reference Node",
-            tutorialSteps: { tutorialKey: "childReference", steps: CHILD_REFERENCE_PROPOSAL_COMPLETE },
-            tutorials: [],
-          },
-          {
-            title: "New Question Node",
-            tutorialSteps: { tutorialKey: "childQuestion", steps: CHILD_QUESTION_PROPOSAL_COMPLETE },
-            tutorials: [],
-          },
-          {
-            title: "New Code Node",
-            tutorials: [],
-            tutorialSteps: { tutorialKey: "childCode", steps: CHILD_CODE_PROPOSAL_COMPLETE },
-          },
-          {
-            title: "New Idea Node",
-            tutorialSteps: { tutorialKey: "childIdea", steps: CHILD_IDEA_PROPOSAL_COMPLETE },
-            tutorials: [],
-          },
-        ],
-      },
-      {
-        title: "Reconciling",
-        tutorials: [
-          {
-            title: "Reconciling Accepted Proposals",
-            tutorialSteps: {
-              tutorialKey: "reconcilingAcceptedProposal",
-              steps: RECONCILING_ACCEPTED_PROPOSALS_STEPS_COMPLETE,
-            },
-            tutorials: [],
-          },
-          {
-            title: "Reconciling Not Accepted Proposal",
-            tutorialSteps: {
-              tutorialKey: "reconcilingNotAcceptedProposal",
-              steps: RECONCILING_NOT_ACCEPTED_PROPOSALS_STEPS_COMPLETE,
-            },
-            tutorials: [],
-          },
-        ],
-      },
-      {
-        title: "Siderbars",
-        tutorials: [
-          {
-            title: "Searcher",
-            tutorialSteps: { tutorialKey: "searcher", steps: SEARCHER_STEPS_COMPLETE },
-            tutorials: [],
-          },
-        ],
-      },
-    ],
-  },
-];

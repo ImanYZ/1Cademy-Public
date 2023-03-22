@@ -1,11 +1,10 @@
 import LocalOfferIcon from "@mui/icons-material/LocalOffer";
-import { Box, Chip, SxProps, Theme, Typography } from "@mui/material";
+import { Box, Stack, SxProps, Theme, Typography } from "@mui/material";
 import React, { useEffect, useState } from "react";
 import { FullNodesData } from "src/nodeBookTypes";
 import { INode } from "src/types/INode";
 
-import HtmlTooltip from "@/components/HtmlTooltip";
-import MarkdownRender from "@/components/Markdown/MarkdownRender";
+import NodeTypeIcon from "../../NodeTypeIcon2";
 
 type TagsListProp = {
   loadNodeData: (nodeId: string) => Promise<any>;
@@ -15,7 +14,7 @@ type TagsListProp = {
   navigateToNode: (nodeId: string) => void;
 };
 
-const FocusedTagsList = ({ nodes, node, sx, navigateToNode, loadNodeData }: TagsListProp) => {
+const FocusedTagsList = ({ nodes, node, navigateToNode, loadNodeData }: TagsListProp) => {
   const [linkedNodes, setLinkedNodes] = useState<{
     [nodeId: string]: any;
   }>({});
@@ -41,55 +40,119 @@ const FocusedTagsList = ({ nodes, node, sx, navigateToNode, loadNodeData }: Tags
     setLinkedNodes(_nodes);
   }, [node]);
 
-  if (!node.tags.length) return null;
   return (
-    <Box sx={{ ...sx }}>
-      <Box sx={{ display: "flex", alignItems: "center", mb: "15px", mt: "20px" }}>
-        <Typography variant="body2" color="text.secondary" sx={{ mb: "15px", mt: "20px" }}>
-          Tags
-        </Typography>
-        <LocalOfferIcon sx={{ fontSize: "1.5rem", ml: "10px", color: "#ff8a33" }} />
-      </Box>
-      <Box sx={{ display: "flex", flexWrap: "wrap", gap: "10px" }}>
-        {node.tags.map((tag, idx) => {
-          const nodeId = node.tagIds[idx];
-          const nodeImageUrl = linkedNodes[nodeId] ? linkedNodes[nodeId].nodeImage : "";
-          const nodeTitle = linkedNodes[nodeId] ? linkedNodes[nodeId].title : "";
-          return (
-            <HtmlTooltip
-              key={node.tagIds[idx] || tag}
-              title={
-                <Box>
-                  <Typography variant="body2" component="div">
-                    <MarkdownRender text={linkedNodes[nodeId] ? linkedNodes[nodeId].content : ""} />
+    <Box
+      sx={{
+        py: "10px",
+        borderTop: theme =>
+          theme.palette.mode === "dark" ? `solid 1px ${theme.palette.common.white}` : "solid 1px #CFCFCF",
+      }}
+    >
+      <Box sx={{ py: "8px", display: "flex", justifyContent: "space-between" }}>
+        <Box
+          sx={{
+            p: "10px 6px 10px 13px",
+            width: "48%",
+          }}
+        >
+          <Box sx={{ display: "flex", flexDirection: "column", gap: "5px" }}>
+            <strong>References</strong>
+            {node.references.map((reference: any, idx: number) => {
+              return (
+                <Stack
+                  key={idx}
+                  onClick={() => navigateToNode(node.referenceIds[idx])}
+                  direction={"row"}
+                  spacing={2}
+                  sx={{
+                    cursor: "pointer",
+                    padding: "5px 10px 5px 10px",
+                    ":hover": {
+                      background: theme => (theme.palette.mode === "dark" ? "#404040" : "#ECECEC"),
+                    },
+                  }}
+                >
+                  <NodeTypeIcon
+                    nodeType={"Reference"}
+                    sx={{
+                      fontSize: "16px",
+
+                      marginTop: "5px",
+                    }}
+                  />
+                  <Typography
+                    sx={{
+                      color: theme =>
+                        theme.palette.mode === "light"
+                          ? theme.palette.common.darkGrayBackground
+                          : theme.palette.common.white,
+                    }}
+                    fontSize={16}
+                    variant="subtitle1"
+                  >
+                    {reference}
                   </Typography>
-                  {nodeImageUrl && (
-                    <Box>
-                      {/* TODO: change to next Image */}
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img src={nodeImageUrl} alt={nodeTitle} width="100%" height="100%" />
-                    </Box>
-                  )}
-                </Box>
-              }
-              placement="left"
-            >
-              <Chip
-                onClick={() => navigateToNode(node.tagIds[idx])}
-                label={<MarkdownRender text={tag} />}
-                sx={{
-                  p: "20px",
-                  color: "black",
-                  fontSize: "14px",
-                  borderRadius: "20px",
-                  background: theme => (theme.palette.mode === "dark" ? "#232426" : "#D0D5DD"),
-                  border: theme =>
-                    theme.palette.mode === "dark" ? "1px solid #404040!important" : "1px solid #D0D5DD!important",
-                }}
-              />
-            </HtmlTooltip>
-          );
-        })}
+                </Stack>
+              );
+            })}
+          </Box>
+        </Box>
+        <Box
+          sx={{
+            background: theme => (theme.palette.mode === "dark" ? "#404040" : "#D0D5DD"),
+            width: "1px",
+          }}
+        />
+        <Box
+          sx={{
+            p: "10px 6px 10px 13px",
+            width: "48%",
+          }}
+        >
+          <Box sx={{ display: "flex", flexDirection: "column", gap: "5px" }}>
+            <strong>Tags</strong>
+            {node.tags.map((tag: any, idx: number) => {
+              const nodeId = node.tagIds[idx];
+              const nodeTitle = linkedNodes[nodeId] ? linkedNodes[nodeId].title : "";
+              return (
+                <Stack
+                  key={idx}
+                  onClick={() => navigateToNode(nodeId)}
+                  direction={"row"}
+                  spacing={2}
+                  sx={{
+                    cursor: "pointer",
+                    padding: "5px 10px 5px 10px",
+                    ":hover": {
+                      background: theme => (theme.palette.mode === "dark" ? "#404040" : "#ECECEC"),
+                    },
+                  }}
+                >
+                  <LocalOfferIcon
+                    sx={{
+                      marginRight: "5px",
+                      marginTop: "5px",
+                      fontSize: "16px",
+                      color: "#f9a825",
+                    }}
+                  />
+                  <Typography
+                    sx={{
+                      color: theme =>
+                        theme.palette.mode === "light"
+                          ? theme.palette.common.darkGrayBackground
+                          : theme.palette.common.white,
+                    }}
+                    fontSize={16}
+                    variant="subtitle1"
+                  >
+                    {nodeTitle}
+                  </Typography>
+                </Stack>
+              );
+            })}
+          </Box>
+        </Box>
       </Box>
     </Box>
   );

@@ -243,8 +243,9 @@ export type TutorialStepConfig = {
   tooltipPosition?: "top" | "bottom" | "left" | "right" | "topLeft" | "topRight" | "bottomLeft" | "bottomRight";
   targetDelay?: number;
   outline?: "shallow" | "outside" | "inside";
-
   isClickeable?: boolean;
+  leftOffset?: number;
+  topOffset?: number;
 };
 
 export type TutorialStep = {
@@ -260,6 +261,8 @@ export type TutorialStep = {
   targetDelay?: number;
   outline?: "shallow" | "outside" | "inside";
   isClickeable?: boolean;
+  leftOffset: number;
+  topOffset: number;
 };
 
 export type StepReducerPayload = {
@@ -465,7 +468,15 @@ export type TutorialTypeKeys =
   | "tmpProposalReferenceChild"
   | "tmpProposalCodeChild"
   | "tmpProposalIdeaChild"
-  | "tableOfContents";
+  | "tableOfContents"
+  | "focusMode"
+  | "redrawGraph"
+  | "scrollToNode"
+  | "closeNode"
+  | "expandNode"
+  | "upVote"
+  | "downVote"
+  | "hideOffsprings";
 
 export type UserTutorial = {
   currentStep: number;

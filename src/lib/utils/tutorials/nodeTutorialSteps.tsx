@@ -143,7 +143,7 @@ const NODES_STEPS: TutorialStepConfig[] = [
         }
       />
     ),
-    isClickeable: true,
+    // isClickeable: true,
   },
 
   {
@@ -156,7 +156,7 @@ const NODES_STEPS: TutorialStepConfig[] = [
         }
       />
     ),
-    isClickeable: true,
+    // isClickeable: true,
   },
 
   {
@@ -181,7 +181,7 @@ const NODES_STEPS: TutorialStepConfig[] = [
         }
       />
     ),
-    isClickeable: true,
+    // isClickeable: true,
   },
 
   {
@@ -194,7 +194,7 @@ const NODES_STEPS: TutorialStepConfig[] = [
         }
       />
     ),
-    isClickeable: true,
+    // isClickeable: true,
   },
 
   {
@@ -207,7 +207,7 @@ const NODES_STEPS: TutorialStepConfig[] = [
         }
       />
     ),
-    isClickeable: true,
+    // isClickeable: true,
   },
 ];
 

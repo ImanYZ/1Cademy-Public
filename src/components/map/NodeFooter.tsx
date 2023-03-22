@@ -122,6 +122,7 @@ type NodeFooterProps = {
   disabled?: boolean;
   enableChildElements?: string[];
   showProposeTutorial?: boolean;
+  setAbleToPropose: any;
 };
 
 const NodeFooter = ({
@@ -186,6 +187,7 @@ const NodeFooter = ({
   setOperation,
   disabled,
   enableChildElements = [],
+  setAbleToPropose,
 }: NodeFooterProps) => {
   const router = useRouter();
   const db = getFirestore();
@@ -506,6 +508,7 @@ const NodeFooter = ({
                   nodeType={nodeType}
                   disabled={disableNodeTypeSelector}
                   disabledItems={disabled}
+                  setAbleToPropose={setAbleToPropose}
                 />
               ) : (
                 <NodeTypeIcon
@@ -750,77 +753,80 @@ const NodeFooter = ({
                 </>
               ) : (
                 // new Node or unaccepted proposal
+                <>
+                  {nodeType !== "Reference" && editable && (
+                    <Box
+                      id={`${identifier}-node-footer-image-video`}
+                      sx={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "5px",
+                        marginRight: "10px",
+                      }}
+                    >
+                      <ContainedButton
+                        id={`${identifier}-node-footer-image`}
+                        title="Upload an image to better explain this node."
+                        onClick={() => uploadImageClicked()}
+                        tooltipPosition="top"
+                        sx={{
+                          background: (theme: any) =>
+                            theme.palette.mode === "dark"
+                              ? theme.palette.common.darkBackground1
+                              : theme.palette.common.lightBackground1,
+                          color: "inherit",
+                          fontWeight: 400,
+                          height: "28.7px",
+                          ":hover": {
+                            borderWidth: "0px",
+                            background: (theme: any) =>
+                              theme.palette.mode === "dark"
+                                ? theme.palette.common.darkBackground2
+                                : theme.palette.common.lightBackground2,
+                          },
+                        }}
+                        disabled={disabled}
+                      >
+                        <>
+                          <input type="file" ref={inputEl} onChange={uploadNodeImageHandler} hidden />
+                          {isUploading ? (
+                            <span style={{ width: "37px", fontSize: "11px", textAlign: "center" }}>
+                              {percentageUploaded + "%"}
+                            </span>
+                          ) : (
+                            <ImageIcon sx={{ fontSize: "16px" }} />
+                          )}
+                        </>
+                      </ContainedButton>
 
-                <Box
-                  id={`${identifier}-node-footer-image-video`}
-                  sx={{
-                    display: editable ? "flex" : "none",
-                    alignItems: "center",
-                    gap: "5px",
-                    marginRight: "10px",
-                  }}
-                >
-                  <ContainedButton
-                    id={`${identifier}-node-footer-image`}
-                    title="Upload an image to better explain this node."
-                    onClick={() => uploadImageClicked()}
-                    tooltipPosition="top"
-                    sx={{
-                      background: (theme: any) =>
-                        theme.palette.mode === "dark"
-                          ? theme.palette.common.darkBackground1
-                          : theme.palette.common.lightBackground1,
-                      color: "inherit",
-                      fontWeight: 400,
-                      height: "28.7px",
-                      ":hover": {
-                        borderWidth: "0px",
-                        background: (theme: any) =>
-                          theme.palette.mode === "dark"
-                            ? theme.palette.common.darkBackground2
-                            : theme.palette.common.lightBackground2,
-                      },
-                    }}
-                    disabled={disabled}
-                  >
-                    <>
-                      <input type="file" ref={inputEl} onChange={uploadNodeImageHandler} hidden />
-                      {isUploading ? (
-                        <span style={{ width: "37px", fontSize: "11px", textAlign: "center" }}>
-                          {percentageUploaded + "%"}
-                        </span>
-                      ) : (
-                        <ImageIcon sx={{ fontSize: "16px" }} />
-                      )}
-                    </>
-                  </ContainedButton>
-
-                  <ContainedButton
-                    id={`${identifier}-node-footer-video`}
-                    title="Cite a video from Youtube or Vimeo."
-                    onClick={() => setAddVideo(!addVideo)}
-                    tooltipPosition="top"
-                    sx={{
-                      background: (theme: any) =>
-                        theme.palette.mode === "dark"
-                          ? theme.palette.common.darkBackground1
-                          : theme.palette.common.lightBackground1,
-                      color: addVideo ? "#ff8a33" : "inherit",
-                      fontWeight: 400,
-                      height: "28.7px",
-                      ":hover": {
-                        borderWidth: "0px",
-                        background: (theme: any) =>
-                          theme.palette.mode === "dark"
-                            ? theme.palette.common.darkBackground2
-                            : theme.palette.common.lightBackground2,
-                      },
-                    }}
-                    disabled={disabled}
-                  >
-                    <VideoCallIcon sx={{ fontSize: "20px" }} />
-                  </ContainedButton>
-                </Box>
+                      <ContainedButton
+                        id={`${identifier}-node-footer-video`}
+                        title="Cite a video from Youtube or Vimeo."
+                        onClick={() => setAddVideo(!addVideo)}
+                        tooltipPosition="top"
+                        sx={{
+                          background: (theme: any) =>
+                            theme.palette.mode === "dark"
+                              ? theme.palette.common.darkBackground1
+                              : theme.palette.common.lightBackground1,
+                          color: addVideo ? "#ff8a33" : "inherit",
+                          fontWeight: 400,
+                          height: "28.7px",
+                          ":hover": {
+                            borderWidth: "0px",
+                            background: (theme: any) =>
+                              theme.palette.mode === "dark"
+                                ? theme.palette.common.darkBackground2
+                                : theme.palette.common.lightBackground2,
+                          },
+                        }}
+                        disabled={disabled}
+                      >
+                        <VideoCallIcon sx={{ fontSize: "20px" }} />
+                      </ContainedButton>
+                    </Box>
+                  )}
+                </>
               )}
               {!editable && !unaccepted && nodeType === "Reference" ? (
                 <>
