@@ -9,7 +9,7 @@ import {
   CHILD_RELATION_PROPOSAL_COMPLETE,
 } from "./childrenProposalTutorialStep";
 import { NAVIGATION_STEPS_COMPLETE } from "./navigationTutorialSteps";
-import { UPTOVE_STEPS_COMPLETE } from "./nodeActionsTutorialStep";
+import { DOWNVOTE_STEPS_COMPLETE, UPTOVE_STEPS_COMPLETE } from "./nodeActionsTutorialStep";
 import { NODE_CODE } from "./nodeCodeTutorialSteps";
 import { NODE_CONCEPT } from "./nodeConceptTutorialStep";
 import { NODE_IDEA } from "./nodeIdeaTutorialSteps";
@@ -61,7 +61,7 @@ export const GROUP_TUTORIALS: GroupTutorial[] = [
       },
       {
         title: "Downvoting to delete content",
-        tutorialSteps: { tutorialKey: "upVoteTutorial", steps: UPTOVE_STEPS_COMPLETE },
+        tutorialSteps: { tutorialKey: "downVoteTutorial", steps: DOWNVOTE_STEPS_COMPLETE },
         tutorials: [],
       },
     ],

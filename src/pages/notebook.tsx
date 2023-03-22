@@ -4793,15 +4793,12 @@ const Dashboard = ({}: DashboardProps) => {
 
       // --------------------------
 
-      // if user never upvotes a node and has more than 10 nodes
       if (forcedTutorial === "upVoteTutorial" || !forcedTutorial) {
         const shouldIgnore =
           (!forcedTutorial && !userTutorial["nodes"].done && !userTutorial["nodes"].skipped) ||
           userTutorial["upVoteTutorial"].done ||
           userTutorial["upVoteTutorial"].skipped;
-        // console.log("upvote tutorial", shouldIgnore);
         if (!shouldIgnore) {
-          // console.log(11);
           const upvoteLaunched = detectAndCallTutorial("upVoteTutorial", node => node && node.open);
           if (upvoteLaunched) return;
         }
@@ -4812,20 +4809,23 @@ const Dashboard = ({}: DashboardProps) => {
         if (result) return;
       }
 
-      // CHECK: evaluate if is required, because we can't force to the user to make upvote or downvote
-      // if we force, 1 node will have many artificial correct points
-      // in downvote, probably the set up node will be removed after some user clicks on downcote
+      // --------------------------
 
-      // if (forcedTutorial === "upVoteTutorial") {
-      //   const result = detectAndForceTutorial(
-      //     "reconcilingNotAcceptedProposal",
-      //     "r98BjyFDCe4YyLA3U8ZE",
-      //     node => node && node.open
-      //   );
-      //   if (result) return;
-      // }
+      if (forcedTutorial === "downVoteTutorial" || !forcedTutorial) {
+        const shouldIgnore =
+          (!forcedTutorial && !userTutorial["nodes"].done && !userTutorial["nodes"].skipped) ||
+          userTutorial["downVoteTutorial"].done ||
+          userTutorial["downVoteTutorial"].skipped;
+        if (!shouldIgnore) {
+          const upvoteLaunched = detectAndCallTutorial("downVoteTutorial", node => node && node.open);
+          if (upvoteLaunched) return;
+        }
+      }
 
-      // TODO: setup a prestep to click on upcote
+      if (forcedTutorial === "downVoteTutorial") {
+        const result = detectAndForceTutorial("downVoteTutorial", "r98BjyFDCe4YyLA3U8ZE", node => node && node.open);
+        if (result) return;
+      }
 
       // --------------------------
 

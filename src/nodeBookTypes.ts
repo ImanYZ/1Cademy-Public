@@ -468,7 +468,6 @@ export type TutorialTypeKeys =
   | "tmpProposalReferenceChild"
   | "tmpProposalCodeChild"
   | "tmpProposalIdeaChild"
-  | "tmpUpvoteNode"
   | "tableOfContents"
   | "focusMode"
   | "redrawGraph"

@@ -1,6 +1,5 @@
 import CheckIcon from "@mui/icons-material/Check";
 import CloseIcon from "@mui/icons-material/Close";
-import { Stack } from "@mui/material";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import { FullNodeData, TutorialState, TutorialStep, TutorialStepConfig } from "src/nodeBookTypes";
@@ -105,11 +104,13 @@ const UPTOVE_STEPS: TutorialStepConfig[] = [
     childTargetId: "node-footer-upvotes",
     description: (node: FullNodeData) => (
       <>
-        {`If this node is helpful, you can vote as correct, for example this node has ${node.corrects}`}
+        {"If this node is helpful, you can vote as correct, for example:"}
+        <br />
+        {`This node has ${node.corrects}`}
         <CheckIcon fontSize="small" color="success" sx={{ verticalAlign: "middle", mx: "4px" }} />
-        {`correct nodes, with your votes will have ${node.corrects + 1}`}
+        {`upvotes, with your vote will have ${node.corrects + 1}`}
         <CheckIcon fontSize="small" color="success" sx={{ verticalAlign: "middle", mx: "4px" }} />
-        {"correct votes"}
+        {"upvotes"}
       </>
     ),
     isClickeable: true,
@@ -120,17 +121,18 @@ const DOWNVOTE_STEPS: TutorialStepConfig[] = [
     title: "Dowvoting",
     childTargetId: "node-footer-downvotes",
     description: (node: FullNodeData) => (
-      <Stack direction={"row"} alignItems="center">
+      <>
+        {"If this note is not helpful, you can vote as wrong, for example:"}
+        <br />
+        {`this node has ${node.wrongs}`}
+        <CloseIcon fontSize="small" color="error" sx={{ verticalAlign: "middle", mx: "4px" }} />
+        {`downvotes with your vote will have ${node.wrongs - 1}`}
+        <CloseIcon fontSize="small" color="error" sx={{ verticalAlign: "middle", mx: "4px" }} />
+        {"downvotes."}
         <MarkdownRender
-          text={`If this note is not helpful, you can vote as wrong, for example this node has **${node.wrongs}**`}
+          text={`Only if $\${Upvotes} < {Downvotes}$$, in this case: $$${node.corrects} < ${node.wrongs}$$, this node will be removed`}
         />
-        <CloseIcon color="error" />
-        <MarkdownRender text={` wrong votes with your vote will have ${node.wrongs - 1}`} />
-        <CloseIcon color="error" />
-        <MarkdownRender
-          text={` wrongs point, only if $$${node.corrects} < ${node.wrongs}$$, this node will be removed`}
-        />
-      </Stack>
+      </>
     ),
     isClickeable: true,
   },

@@ -26,7 +26,7 @@ import {
   CHILD_REFERENCE_PROPOSAL_COMPLETE,
   CHILD_RELATION_PROPOSAL_COMPLETE,
 } from "../lib/utils/tutorials/childrenProposalTutorialStep";
-import { UPTOVE_STEPS_COMPLETE } from "../lib/utils/tutorials/nodeActionsTutorialStep";
+import { DOWNVOTE_STEPS_COMPLETE, UPTOVE_STEPS_COMPLETE } from "../lib/utils/tutorials/nodeActionsTutorialStep";
 import { NODE_CODE } from "../lib/utils/tutorials/nodeCodeTutorialSteps";
 import { NODE_CONCEPT } from "../lib/utils/tutorials/nodeConceptTutorialStep";
 import { NODE_IDEA } from "../lib/utils/tutorials/nodeIdeaTutorialSteps";
@@ -245,6 +245,10 @@ export const useInteractiveTutorial = ({ user }: useInteractiveTutorialProps) =>
 
       if (newTutorial === "upVoteTutorial") {
         newSteps = UPTOVE_STEPS_COMPLETE;
+      }
+
+      if (newTutorial === "downVoteTutorial") {
+        newSteps = DOWNVOTE_STEPS_COMPLETE;
       }
 
       //----------------- tmp nodes
