@@ -169,27 +169,30 @@ const HIDE_OFFSPRING_STEPS: TutorialStepConfig[] = [
     targetDelay: 500,
   },
 ];
-const CLOSE_STEPS: TutorialStepConfig[] = [
+
+const EXPAND_STEPS: TutorialStepConfig[] = [
   {
-    title: "Closing a Node",
-    childTargetId: "close-button",
-    description: (
-      <MarkdownRender text={"This button allows you to close a node so that only the title is displayed."} />
-    ),
-    isClickeable: true,
-  },
-  {
-    title: "Expanding a node",
+    title: "Expanding a Node",
     childTargetId: "open-button",
     description: (
       <MarkdownRender
-        text={"This button allows you to expand a node that has been closed and seel all of its content."}
+        text={"This button allows you to expand the node that has been closed and see all of its content."}
       />
     ),
     isClickeable: true,
   },
 ];
-const EXPAND_STEPS: TutorialStepConfig[] = [];
+
+const CLOSE_STEPS: TutorialStepConfig[] = [
+  {
+    title: "Closing a node",
+    childTargetId: "close-button",
+    description: (
+      <MarkdownRender text={"this button allowes you to close a node so that only the title is displayed."} />
+    ),
+    isClickeable: true,
+  },
+];
 
 export const PARENT_CHILDREN_STEPS_COMPLETE: TutorialStep[] = PARENT_CHILDREN_STEPS.map((c, i, s) => {
   return { ...getBaseStepConfig(i + 1, s.length), ...c };

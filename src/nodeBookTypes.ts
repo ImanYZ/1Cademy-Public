@@ -472,6 +472,8 @@ export type TutorialTypeKeys =
   | "focusMode"
   | "redrawGraph"
   | "scrollToNode"
+  | "closeNode"
+  | "expandNode"
   | "upVote"
   | "downVote"
   | "hideOffsprings";

@@ -2,6 +2,7 @@ import { doc, getDoc, getFirestore } from "firebase/firestore";
 import { ReactNode, useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { NAVIGATION_STEPS_COMPLETE } from "@/lib/utils/tutorials/navigationTutorialSteps";
+import { CLOSE_STEPS_COMPLETE, EXPAND_STEPS_COMPLETE } from "@/lib/utils/tutorials/nodeActionsTutorialStep";
 import { HIDE_OFFSPRING_STEPS_COMPLETE } from "@/lib/utils/tutorials/nodeActionsTutorialStep";
 import { PROPOSAL_STEPS_COMPLETE } from "@/lib/utils/tutorials/proposalTutorialSteps";
 import {
@@ -118,6 +119,8 @@ export const useInteractiveTutorial = ({ user }: useInteractiveTutorialProps) =>
     focusMode: { currentStep: -1, done: false, skipped: false },
     redrawGraph: { currentStep: -1, done: false, skipped: false },
     scrollToNode: { currentStep: -1, done: false, skipped: false },
+    closeNode: { currentStep: -1, done: false, skipped: false },
+    expandNode: { currentStep: -1, done: false, skipped: false },
     upVote: { currentStep: -1, done: false, skipped: false },
     downVote: { currentStep: -1, done: false, skipped: false },
     hideOffsprings: { currentStep: -1, done: false, skipped: false },
@@ -242,6 +245,13 @@ export const useInteractiveTutorial = ({ user }: useInteractiveTutorialProps) =>
       if (newTutorial === "scrollToNode") {
         newSteps = SCROLL_TO_NODE_STEPS;
       }
+      if (newTutorial === "closeNode") {
+        newSteps = CLOSE_STEPS_COMPLETE;
+      }
+      if (newTutorial === "expandNode") {
+        newSteps = EXPAND_STEPS_COMPLETE;
+      }
+
       if (newTutorial === "hideOffsprings") {
         newSteps = HIDE_OFFSPRING_STEPS_COMPLETE;
       }

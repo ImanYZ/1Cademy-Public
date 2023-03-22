@@ -2178,12 +2178,13 @@ const Dashboard = ({}: DashboardProps) => {
 
       notebookRef.current.selectedNode = nodeId;
 
-      lastNodeOperation.current = { name: "ToggleNode", data: "" };
       setGraph(({ nodes: oldNodes, edges }) => {
         const thisNode = oldNodes[nodeId];
 
         notebookRef.current.selectedNode = nodeId;
         nodeBookDispatch({ type: "setSelectedNode", payload: nodeId });
+        lastNodeOperation.current = { name: "ToggleNode", data: thisNode.open ? "closeNode" : "openNode" };
+
         const { nodeRef, userNodeRef } = initNodeStatusChange(nodeId, thisNode.userNodeId);
         const changeNode: any = {
           updatedAt: Timestamp.fromDate(new Date()),
@@ -4277,6 +4278,15 @@ const Dashboard = ({}: DashboardProps) => {
     },
     [graph.edges]
   );
+
+  const getGraphOpenedNodes = useCallback(() => {
+    const nodesOpened = Object.values(graph.nodes).reduce((acc: number, node: FullNodeData) => {
+      return node.open ? acc + 1 : acc;
+    }, 0);
+
+    return nodesOpened;
+  }, [graph.nodes]);
+
   useEffect(() => {
     /**
      * This useEffect with detect conditions to call a tutorial
@@ -4366,6 +4376,40 @@ const Dashboard = ({}: DashboardProps) => {
 
       // --------------------------
 
+      const closeNodeTutorialIsValid = (node: FullNodeData) => Boolean(node) && node.open;
+      const openedNodes = getGraphOpenedNodes();
+      if (openedNodes >= 2) {
+        const firstOpenedNode = Object.values(graph.nodes).find(node => node.open);
+        const shouldIgnore = userTutorial["closeNode"].skipped || userTutorial["closeNode"].done;
+        if (firstOpenedNode && !shouldIgnore) {
+          const result = detectAndForceTutorial("closeNode", firstOpenedNode.node, closeNodeTutorialIsValid);
+          if (result) return;
+        }
+      }
+      if (forcedTutorial === "closeNode") {
+        const result = detectAndForceTutorial("closeNode", "r98BjyFDCe4YyLA3U8ZE", closeNodeTutorialIsValid);
+        if (result) return;
+      }
+      // --------------------------
+
+      const expandNodeTutorialIsValid = (node: FullNodeData) => Boolean(node) && !node.open;
+      if (Object.keys(graph.nodes).length > openedNodes) {
+        const firstClosedNode = Object.values(graph.nodes).find(node => !node.open);
+        const shouldIgnore = userTutorial["expandNode"].skipped || userTutorial["expandNode"].done;
+        if (firstClosedNode && !shouldIgnore) {
+          const result = detectAndForceTutorial("expandNode", firstClosedNode.node, expandNodeTutorialIsValid);
+          if (result) return;
+        }
+      }
+
+      if (forcedTutorial === "expandNode") {
+        const result = detectAndForceTutorial("expandNode", "r98BjyFDCe4YyLA3U8ZE", expandNodeTutorialIsValid, {
+          open: false,
+        });
+        if (result) return;
+      }
+
+      // --------------------------
       if (forcedTutorial === "tableOfContents" || userTutorial["nodes"].done || userTutorial["nodes"].skipped) {
         const shouldIgnore = forcedTutorial
           ? forcedTutorial !== "tableOfContents"
@@ -4906,6 +4950,7 @@ const Dashboard = ({}: DashboardProps) => {
     firstLoading,
     focusView.isEnabled,
     forcedTutorial,
+    getGraphOpenedNodes,
     graph.nodes,
     nodeBookDispatch,
     openNodeHandler,
@@ -4942,12 +4987,33 @@ const Dashboard = ({}: DashboardProps) => {
         // console.log("remove node t");
       }
     }
+    // --------------------------
+
+    if (tutorial.name === "closeNode") {
+      const closeNodeTutorialIsValid = (node: FullNodeData) => Boolean(node) && node.open && !node.editable;
+      const node = graph.nodes[targetId];
+      if (!closeNodeTutorialIsValid(node)) {
+        setTutorial(null);
+        setForcedTutorial(null);
+      }
+    }
+    // --------------------------
+
+    if (tutorial.name === "expandNode") {
+      const expandNodeTutorialIsValid = (node: FullNodeData) => Boolean(node) && !node.open && !node.editable;
+      const node = graph.nodes[targetId];
+      if (!expandNodeTutorialIsValid(node)) {
+        setTutorial(null);
+        setForcedTutorial(null);
+      }
+    }
+    // --------------------------
+
     const conceptTutorialIsValid = (thisNode: FullNodeData) =>
       thisNode && thisNode.open && thisNode.nodeType === "Concept";
     detectAndRemoveTutorial("concept", conceptTutorialIsValid);
 
     // --------------------------
-
     const relationTutorialIsValid = (thisNode: FullNodeData) =>
       thisNode && thisNode.open && thisNode.nodeType === "Relation";
     detectAndRemoveTutorial("relation", relationTutorialIsValid);
@@ -5348,6 +5414,12 @@ const Dashboard = ({}: DashboardProps) => {
                 </Button>
                 <Button onClick={() => openNodeHandler("r98BjyFDCe4YyLA3U8ZE")}>Open Node Handler</Button>
                 <Button onClick={() => setShowRegion(prev => !prev)}>Show Region</Button>
+              </Box>
+              <Typography>Last Operation:</Typography>
+              <Box>
+                <Button onClick={() => console.log({ lastOperaion: lastNodeOperation.current })}>
+                  lastNodeOperation
+                </Button>
               </Box>
             </Drawer>
           }
