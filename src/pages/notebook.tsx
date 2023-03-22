@@ -4352,7 +4352,13 @@ const Dashboard = ({}: DashboardProps) => {
             mosParent.edge || "r98BjyFDCe4YyLA3U8ZE",
             mosParent.edge ? hideOffspringsTutorialIsValid : hideOffspringsTutorialForcedIsValid
           );
-          if (result) return;
+          if (result) {
+            if (!mosParent.edge) {
+              openNodeHandler("LrUBGjpxuEV2W0shSLXf");
+              openNodeHandler("rWYUNisPIVMBoQEYXgNj");
+            }
+            return;
+          }
         }
       }
 
