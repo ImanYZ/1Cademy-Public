@@ -3989,7 +3989,7 @@ const Dashboard = ({}: DashboardProps) => {
     setTutorial(null);
     setTargetId("");
 
-    if (wasForcedTutorial) return setForcedTutorial(null);
+    if (wasForcedTutorial) setForcedTutorial(null);
 
     const tutorialRef = doc(db, "userTutorial", user.uname);
     const tutorialDoc = await getDoc(tutorialRef);
@@ -4057,7 +4057,7 @@ const Dashboard = ({}: DashboardProps) => {
     setUserTutorial(userTutorialUpdated);
     setTargetId("");
 
-    if (wasForcedTutorial) return setForcedTutorial(null);
+    if (wasForcedTutorial) setForcedTutorial(null);
 
     const tutorialRef = doc(db, "userTutorial", user.uname);
     const tutorialDoc = await getDoc(tutorialRef);
@@ -4910,6 +4910,8 @@ const Dashboard = ({}: DashboardProps) => {
     nodeBookDispatch,
     openNodeHandler,
     openSidebar,
+    parentWithChildren,
+    parentWithMostChildren,
     setTargetId,
     startTutorial,
     tutorial,
@@ -4928,7 +4930,6 @@ const Dashboard = ({}: DashboardProps) => {
       return;
     }
 
-    // HERE we dont need upvote tutorial, if is removed we need to continue displaying tutorial
     devLog("USE_EFFECT: DETECT_TO_REMOVE_TUTORIAL", tutorial);
 
     if (tutorial.name === "nodes") {
@@ -5117,6 +5118,28 @@ const Dashboard = ({}: DashboardProps) => {
       const node = graph.nodes[targetId];
       if (!reconcilingNotAcceptedProposalIsValid(node)) {
         setOpenSidebar(null);
+        setTutorial(null);
+        setForcedTutorial(null);
+      }
+    }
+
+    // --------------------------
+
+    if (tutorial.name === "upVote") {
+      const upvoteIsValid = (node: FullNodeData) => node && node.open;
+      const node = graph.nodes[targetId];
+      if (!upvoteIsValid(node)) {
+        setTutorial(null);
+        setForcedTutorial(null);
+      }
+    }
+
+    // --------------------------
+
+    if (tutorial.name === "downVote") {
+      const downvoteIsValid = (node: FullNodeData) => node && node.open;
+      const node = graph.nodes[targetId];
+      if (!downvoteIsValid(node)) {
         setTutorial(null);
         setForcedTutorial(null);
       }
