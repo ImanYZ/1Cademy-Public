@@ -1711,8 +1711,10 @@ const Dashboard = ({}: DashboardProps) => {
         (async () => {
           const updatedNodeIds: string[] = [];
           const offsprings = recursiveOffsprings(nodeId);
+
           notebookRef.current.selectedNode = nodeId;
           nodeBookDispatch({ type: "setSelectedNode", payload: nodeId });
+          lastNodeOperation.current = { name: "hideOffsprings", data: "" };
 
           const batch = writeBatch(db);
           try {
@@ -4244,7 +4246,7 @@ const Dashboard = ({}: DashboardProps) => {
     ]
   );
 
-  const parenWithMostChildren = useCallback(() => {
+  const parentWithMostChildren = useCallback(() => {
     const frequencies = Object.keys(graph.edges)
       .map(edge => edge.split("-")[0])
       .reduce((acc: { [key: string]: number }, edge: string) => {
@@ -4261,6 +4263,19 @@ const Dashboard = ({}: DashboardProps) => {
     return maxNode;
   }, [graph.edges]);
 
+  const parentWithChildren = useCallback(
+    (parentId: string) => {
+      const frequency = Object.keys(graph.edges)
+        .map(edge => edge.split("-")[0])
+        .reduce((acc: number, edge: string) => {
+          console.log({ edge });
+          return edge === parentId ? acc + 1 : acc;
+        }, 0);
+
+      return frequency;
+    },
+    [graph.edges]
+  );
   useEffect(() => {
     /**
      * This useEffect with detect conditions to call a tutorial
@@ -4320,6 +4335,18 @@ const Dashboard = ({}: DashboardProps) => {
 
         return;
       }
+
+      // --------------------------
+
+      // const hideOffspringsTutorialIsValid = (node: FullNodeData) => node && !node.editable;
+      // const mosParent = parenWithMostChildren();
+
+      // if (
+      //   mosParent.children >= 3 ||
+      //   (lastNodeOperation.current && lastNodeOperation.current.name === "hideOffsprings")
+      // ) {
+      //   const result = detectAndCallTutorial("hideOffsprings", hideOffspringsTutorialIsValid);
+      // }
 
       // --------------------------
 
@@ -5152,12 +5179,21 @@ const Dashboard = ({}: DashboardProps) => {
                 <Button onClick={() => console.log(allTags)}>allTags</Button>
                 <Button
                   onClick={() => {
-                    const mosParent = parenWithMostChildren();
+                    const mosParent = parentWithMostChildren();
 
                     console.log(mosParent);
                   }}
                 >
-                  allTags
+                  Most Parent
+                </Button>
+                <Button
+                  onClick={() => {
+                    const mosParent = parentWithChildren("r98BjyFDCe4YyLA3U8ZE");
+
+                    console.log(`children :${mosParent}`);
+                  }}
+                >
+                  Children of Parent
                 </Button>
               </Box>
               <Box>
