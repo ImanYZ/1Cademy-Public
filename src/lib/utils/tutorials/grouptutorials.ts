@@ -57,10 +57,10 @@ export const GROUP_TUTORIALS: GroupTutorial[] = [
       },
     ],
   },
-  {
-    title: "Learning Pathways",
-    tutorials: [],
-  },
+  // {
+  //   title: "Learning Pathways",
+  //   tutorials: [],
+  // },
   {
     title: "Evaluation",
     tutorials: [
