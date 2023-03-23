@@ -476,7 +476,8 @@ export type TutorialTypeKeys =
   | "expandNode"
   | "upVote"
   | "downVote"
-  | "hideOffsprings";
+  | "hideOffsprings"
+  | "hideNode";
 
 export type UserTutorial = {
   currentStep: number;

@@ -2,7 +2,11 @@ import { doc, getDoc, getFirestore } from "firebase/firestore";
 import { ReactNode, useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { NAVIGATION_STEPS_COMPLETE } from "@/lib/utils/tutorials/navigationTutorialSteps";
-import { CLOSE_STEPS_COMPLETE, EXPAND_STEPS_COMPLETE } from "@/lib/utils/tutorials/nodeActionsTutorialStep";
+import {
+  CLOSE_STEPS_COMPLETE,
+  EXPAND_STEPS_COMPLETE,
+  HIDE_STEPS_COMPLETE,
+} from "@/lib/utils/tutorials/nodeActionsTutorialStep";
 import { HIDE_OFFSPRING_STEPS_COMPLETE } from "@/lib/utils/tutorials/nodeActionsTutorialStep";
 import { PROPOSAL_STEPS_COMPLETE } from "@/lib/utils/tutorials/proposalTutorialSteps";
 import {
@@ -124,6 +128,7 @@ export const useInteractiveTutorial = ({ user }: useInteractiveTutorialProps) =>
     upVote: { currentStep: -1, done: false, skipped: false },
     downVote: { currentStep: -1, done: false, skipped: false },
     hideOffsprings: { currentStep: -1, done: false, skipped: false },
+    hideNode: { currentStep: -1, done: false, skipped: false },
   });
 
   // flag for whether tutorial state was loaded
@@ -264,6 +269,10 @@ export const useInteractiveTutorial = ({ user }: useInteractiveTutorialProps) =>
 
       if (newTutorial === "downVote") {
         newSteps = DOWNVOTE_STEPS_COMPLETE;
+      }
+
+      if (newTutorial === "hideNode") {
+        newSteps = HIDE_STEPS_COMPLETE;
       }
 
       //----------------- tmp nodes

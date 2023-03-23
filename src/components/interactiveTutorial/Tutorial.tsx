@@ -165,9 +165,9 @@ export const TooltipTutorial = ({
     }
 
     return { top, left, right, bottom };
-  }, [tutorialStep, targetClientRect]);
+  }, [targetClientRect, tutorialStep]);
 
-  if (!node) return null;
+  // if (!node) return null;
   if (!tutorialStep) return null;
   if (!tutorialStep.currentStepName) return null;
 
@@ -224,7 +224,11 @@ export const TooltipTutorial = ({
             )}
           </Stack>
 
-          {typeof tutorialStep.description === "function" ? tutorialStep.description(node) : tutorialStep.description}
+          {typeof tutorialStep.description === "function"
+            ? node
+              ? tutorialStep.description(node)
+              : ""
+            : tutorialStep.description}
 
           {/* INFO: reversed used for showing buttons always to right no matter the number of buttons */}
           <Stack direction={"row-reverse"} justifyContent={"space-between"} alignItems={"center"} sx={{ mt: "16px" }}>
@@ -378,7 +382,11 @@ export const TooltipTutorial = ({
         )}
       </Stack>
 
-      {typeof tutorialStep.description === "function" ? tutorialStep.description(node) : tutorialStep.description}
+      {typeof tutorialStep.description === "function"
+        ? node
+          ? tutorialStep.description(node)
+          : ""
+        : tutorialStep.description}
 
       {/* INFO: reversed used for showing buttons always to right no matter the number of elements */}
       <Stack direction={"row-reverse"} justifyContent={"space-between"} alignItems={"center"} sx={{ mt: "16px" }}>
