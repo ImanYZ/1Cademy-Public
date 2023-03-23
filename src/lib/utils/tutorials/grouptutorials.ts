@@ -62,7 +62,7 @@ export const GROUP_TUTORIALS: GroupTutorial[] = [
         tutorials: [],
       },
       {
-        title: "Close a Node",
+        title: "Collapse a Node",
         tutorialSteps: { tutorialKey: "collapseNode", steps: COLLAPSE_STEPS_COMPLETE },
         tutorials: [],
       },
