@@ -8,7 +8,7 @@ const PROPOSE_CONCEPT_NODES_STEPS: TutorialStepConfig[] = [
   {
     title: "To Propose a ",
     description: <MarkdownRender text={"To Propose a concept child node, click on concept icon button"} />,
-    isClickeable: true,
+    isClickable: true,
   },
 ];
 
@@ -22,7 +22,7 @@ const CHILD_PROPOSAL_STEPS: TutorialStepConfig[] = [
         }
       />
     ),
-    isClickeable: true,
+    isClickable: true,
   },
   {
     title: "Proposing Child Nodes",
@@ -33,7 +33,7 @@ const CHILD_PROPOSAL_STEPS: TutorialStepConfig[] = [
         }
       />
     ),
-    isClickeable: true,
+    isClickable: true,
   },
 ];
 
@@ -68,7 +68,7 @@ const CHILD_RELATION_PROPOSAL_STEPS: TutorialStepConfig[] = [
         }
       />
     ),
-    isClickeable: true,
+    isClickable: true,
   },
   {
     title: "Proposing Child Relation Node",
@@ -77,7 +77,7 @@ const CHILD_RELATION_PROPOSAL_STEPS: TutorialStepConfig[] = [
         text={"Before you hit the propose button make sure that you link a reference node as a citation."}
       />
     ),
-    isClickeable: true,
+    isClickable: true,
   },
 ];
 
@@ -114,7 +114,7 @@ const CHILD_QUESTION_PROPOSAL_STEPS: TutorialStepConfig[] = [
         }
       />
     ),
-    isClickeable: true,
+    isClickable: true,
   },
 ];
 
@@ -128,14 +128,14 @@ const CHILD_IDEA_PROPOSAL_STEPS: TutorialStepConfig[] = [
         }
       />
     ),
-    isClickeable: true,
+    isClickable: true,
   },
   {
     title: "Proposing Child Idea Node",
     description: (
       <MarkdownRender text={"Because an idea node contains your own ideas, you do not need to add a citation."} />
     ),
-    isClickeable: true,
+    isClickable: true,
   },
 ];
 
@@ -149,7 +149,7 @@ const CHILD_CODE_PROPOSAL_STEPS: TutorialStepConfig[] = [
         }
       />
     ),
-    isClickeable: true,
+    isClickable: true,
   },
   {
     title: "Proposing Child Code Node",
@@ -158,7 +158,7 @@ const CHILD_CODE_PROPOSAL_STEPS: TutorialStepConfig[] = [
         text={"Before you hit the propose button make sure that you link a reference node as a citation."}
       />
     ),
-    isClickeable: true,
+    isClickable: true,
   },
 ];
 

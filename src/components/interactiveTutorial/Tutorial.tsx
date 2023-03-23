@@ -274,7 +274,7 @@ export const TooltipTutorial = ({
                       backgroundColor: theme => (theme.palette.mode === "dark" ? gray200 : gray700),
                     },
                   }}
-                  disabled={tutorialStep.isClickeable}
+                  disabled={tutorialStep.isClickable}
                 >
                   Next
                 </Button>

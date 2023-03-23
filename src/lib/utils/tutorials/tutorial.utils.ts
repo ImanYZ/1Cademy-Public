@@ -19,7 +19,7 @@ export const getBaseStepConfig = (step: number, max: number) => {
     anchor: "",
     ...getStepsValues(step, max),
     tooltipPosition: "top",
-    isClickeable: false,
+    isClickable: false,
     outline: "shallow",
     leftOffset: 0,
     topOffset: 0,

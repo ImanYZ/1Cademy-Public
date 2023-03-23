@@ -4022,7 +4022,7 @@ const Dashboard = ({}: DashboardProps) => {
     if (currentStep?.childTargetId) removeStyleFromTarget(currentStep.childTargetId, targetId);
 
     if (tutorial.name === "tmpEditNode") {
-      if (currentStep.isClickeable) {
+      if (currentStep.isClickable) {
         proposeNodeImprovement(null, targetId);
       }
       setTutorial(null);
@@ -4038,7 +4038,7 @@ const Dashboard = ({}: DashboardProps) => {
     tmpChildrenMap.set("tmpProposalCodeChild", "Code");
 
     if (tmpChildrenMap.has(tutorial.name)) {
-      if (currentStep.isClickeable) {
+      if (currentStep.isClickable) {
         proposeNewChild(null, tmpChildrenMap.get(tutorial.name) as string);
       }
       return;
@@ -4084,7 +4084,7 @@ const Dashboard = ({}: DashboardProps) => {
 
   useEventListener({
     stepId: currentStep?.childTargetId ?? currentStep?.targetId,
-    cb: currentStep?.isClickeable
+    cb: currentStep?.isClickable
       ? tutorial && tutorial.step === tutorial?.steps.length
         ? onNextStep
         : onFinalizeTutorial

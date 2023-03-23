@@ -57,22 +57,22 @@ export const GROUP_TUTORIALS: GroupTutorial[] = [
         tutorials: [],
       },
       {
-        title: "Hide Offsprings",
+        title: "Hide Offspring",
         tutorialSteps: { tutorialKey: "hideOffsprings", steps: HIDE_OFFSPRING_STEPS_COMPLETE },
         tutorials: [],
       },
       {
-        title: "Collapse a Node",
+        title: "Collapse the Node",
         tutorialSteps: { tutorialKey: "collapseNode", steps: COLLAPSE_STEPS_COMPLETE },
         tutorials: [],
       },
       {
-        title: "Expand a Node",
+        title: "Expand the Node",
         tutorialSteps: { tutorialKey: "expandNode", steps: EXPAND_STEPS_COMPLETE },
         tutorials: [],
       },
       {
-        title: "Hide a Node",
+        title: "Hide the Node",
         tutorialSteps: { tutorialKey: "hideNode", steps: HIDE_STEPS_COMPLETE },
         tutorials: [],
       },
