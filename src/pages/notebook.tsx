@@ -5000,10 +5000,9 @@ const Dashboard = ({}: DashboardProps) => {
       if (!nodesTutorialIsValid(node)) {
         setTutorial(null);
         setForcedTutorial(null);
-        // tutorialStateWasSetUpRef.current = false;
-        // console.log("remove node t");
       }
     }
+
     // --------------------------
 
     if (tutorial.name === "hideOffsprings") {
@@ -5025,6 +5024,7 @@ const Dashboard = ({}: DashboardProps) => {
         setForcedTutorial(null);
       }
     }
+
     // --------------------------
 
     if (tutorial.name === "expandNode") {
@@ -5035,6 +5035,18 @@ const Dashboard = ({}: DashboardProps) => {
         setForcedTutorial(null);
       }
     }
+
+    // --------------------------
+
+    if (tutorial.name === "hideNode") {
+      const HideNodeTutorialIsValid = (node: FullNodeData) => Boolean(node);
+      const node = graph.nodes[targetId];
+      if (!HideNodeTutorialIsValid(node)) {
+        setTutorial(null);
+        setForcedTutorial(null);
+      }
+    }
+
     // --------------------------
 
     const conceptTutorialIsValid = (thisNode: FullNodeData) =>
