@@ -1,5 +1,5 @@
 import LiveHelpIcon from "@mui/icons-material/LiveHelp";
-import { Box, Button, Stack, Typography } from "@mui/material";
+import { Box, Button, Stack, Typography, useMediaQuery } from "@mui/material";
 import React, { useCallback, useMemo, useRef } from "react";
 
 import { useWindowSize } from "@/hooks/useWindowSize";
@@ -21,6 +21,7 @@ type TutorialProps = {
   onFinalize: () => void;
   stepsLength: number;
   node: FullNodeData;
+  isOnPortal?: boolean;
 };
 
 export const TooltipTutorial = ({
@@ -34,10 +35,13 @@ export const TooltipTutorial = ({
   onFinalize,
   stepsLength,
   node,
+  isOnPortal,
 }: TutorialProps) => {
   const tooltipRef = useRef<HTMLDivElement | null>(null);
 
   const { width: windowWidth, height: windowHeight } = useWindowSize();
+
+  const isMobile = useMediaQuery("(max-width:600px)");
 
   // console.log({ tutorialStep, tutorial });
 
@@ -171,12 +175,16 @@ export const TooltipTutorial = ({
   if (!tutorialStep) return null;
   if (!tutorialStep.currentStepName) return null;
 
-  let location = { top: "10px", bottom: "10px", left: "10px", right: "10px" };
+  const OFFSET = isMobile ? "5px" : "10px";
+  let location = { top: OFFSET, bottom: OFFSET, left: OFFSET, right: OFFSET };
 
-  if (tutorialStep.tooltipPosition === "topLeft") location = { ...location, bottom: "", right: "" };
-  else if (tutorialStep.tooltipPosition === "topRight") location = { ...location, bottom: "", left: "" };
-  else if (tutorialStep.tooltipPosition === "bottomLeft") location = { ...location, top: "", right: "" };
-  else if (tutorialStep.tooltipPosition === "bottomRight") location = { ...location, top: "", left: "" };
+  if (tutorialStep.tooltipPosition === "topLeft") location = { ...location, bottom: "", right: isMobile ? "5px" : "" };
+  else if (tutorialStep.tooltipPosition === "topRight")
+    location = { ...location, bottom: "", left: isMobile ? "5px" : "" };
+  else if (tutorialStep.tooltipPosition === "bottomLeft")
+    location = { ...location, top: "", right: isMobile ? "5px" : "" };
+  else if (tutorialStep.tooltipPosition === "bottomRight")
+    location = { ...location, top: "", left: isMobile ? "5px" : "" };
 
   if (
     targetClientRect.top === 0 &&
@@ -185,25 +193,28 @@ export const TooltipTutorial = ({
     targetClientRect.height === 0
   )
     return (
-      <div
-        style={{
+      <Box
+        sx={{
           position: "absolute",
           ...location,
           backgroundColor: "#55555500",
           height: "auto",
+          maxWidth: "450px",
+          width: isOnPortal ? "auto" : "450px",
           transition: "top 1s ease-out,bottom 1s ease-out,left 1s ease-out,rigth 1s ease-out,height 1s ease-out",
           boxSizing: "border-box",
-          display: "grid",
-          placeItems: "center",
+          // display: "grid",
+          // placeItems: "center",
           zIndex: 99999,
         }}
       >
         <Box
           ref={tooltipRef}
           sx={{
+            width: "100%",
             transition: "top 1s ease-out,left 1s ease-out",
-            width: "450px",
-            backgroundColor: theme => (theme.palette.mode === "dark" ? "#4B535C" : "#C5D0DF"),
+            // backgroundColor: theme => (theme.palette.mode === "dark" ? "#4B535C" : "#C5D0DF"),
+            backgroundColor: "blueviolet",
             p: "24px 32px",
             borderRadius: "8px",
             color: theme => (theme.palette.mode === "dark" ? gray50 : gray800),
@@ -314,7 +325,7 @@ export const TooltipTutorial = ({
             )}
           </Stack>
         </Box>
-      </div>
+      </Box>
     );
 
   return (
@@ -325,7 +336,8 @@ export const TooltipTutorial = ({
         top: `${tooltipRect.top}px`,
         left: `${tooltipRect.left}px`,
         transition: "top 750ms ease-out,left 750ms ease-out, border-color 1s linear",
-        width: "450px",
+        maxWidth: "450px",
+        width: isOnPortal ? "100%" : "450px",
         backgroundColor: theme => (theme.palette.mode === "dark" ? "#4B535C" : "#C5D0DF"),
         borderColor: theme => (theme.palette.mode === "dark" ? "#4B535C" : "#C5D0DF") /* this is used in tooltip */,
         p: "24px 32px",

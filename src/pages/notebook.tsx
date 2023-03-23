@@ -5304,6 +5304,7 @@ const Dashboard = ({}: DashboardProps) => {
               onPreviousStep={onPreviousStep}
               stepsLength={tutorial.steps.length}
               node={graph.nodes[targetId]}
+              isOnPortal
             />
           )}
         </Portal>
