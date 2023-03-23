@@ -152,6 +152,7 @@ const HIDE_STEPS: TutorialStepConfig[] = [
       />
     ),
     isClickable: true,
+    outline: "inside",
   },
 ];
 const HIDE_OFFSPRING_STEPS: TutorialStepConfig[] = [
@@ -166,6 +167,7 @@ const HIDE_OFFSPRING_STEPS: TutorialStepConfig[] = [
       />
     ),
     isClickable: true,
+    outline: "inside",
   },
 ];
 
@@ -179,6 +181,7 @@ const EXPAND_STEPS: TutorialStepConfig[] = [
       />
     ),
     isClickable: true,
+    outline: "inside",
   },
 ];
 
@@ -190,6 +193,7 @@ const COLLAPSE_STEPS: TutorialStepConfig[] = [
       <MarkdownRender text={"this button allows you to close a node so that only the title is displayed."} />
     ),
     isClickable: true,
+    outline: "inside",
   },
 ];
 
