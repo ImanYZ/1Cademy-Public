@@ -77,11 +77,12 @@ export const TooltipTutorial = ({
     if (!tooltipRef.current) return { top, left, exceedTop, exceedLeft };
     if (!tutorialStep) return { top, left, exceedTop, exceedLeft };
 
-    const { height: tooltipHeight } = tooltipRef.current.getBoundingClientRect();
+    // const { height: tooltipHeight } = tooltipRef.current.getBoundingClientRect();
     const pos = tutorialStep.tooltipPosition;
     if (pos === "top") {
-      top = targetClientRect.top - tooltipHeight - TOOLTIP_OFFSET;
+      top = targetClientRect.top - tooltipRef.current.clientHeight - TOOLTIP_OFFSET;
       left = targetClientRect.left + targetClientRect.width / 2 - tooltipRef.current.clientWidth / 2;
+
       if (tutorialStep.anchor === "Portal") {
         const { top: newTop, left: newLeft } = calcWithExceed(top, left);
 
@@ -129,14 +130,8 @@ export const TooltipTutorial = ({
     }
 
     return { top, left, exceedTop, exceedLeft };
-  }, [
-    calcWithExceed,
-    targetClientRect.height,
-    targetClientRect.left,
-    targetClientRect.top,
-    targetClientRect.width,
-    tutorialStep,
-  ]);
+    //INFO: Keep targetClientRect, render does not work if we listen to targetClientRect.props
+  }, [calcWithExceed, targetClientRect, tutorialStep]);
 
   const taleRect = useMemo(() => {
     let top = undefined;

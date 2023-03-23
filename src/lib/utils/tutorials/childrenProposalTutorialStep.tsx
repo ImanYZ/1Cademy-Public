@@ -91,7 +91,6 @@ const CHILD_REFERENCE_PROPOSAL_STEPS: TutorialStepConfig[] = [
         }
       />
     ),
-    isClickeable: true,
   },
   {
     title: "Proposing Child Reference Node",
@@ -102,7 +101,6 @@ const CHILD_REFERENCE_PROPOSAL_STEPS: TutorialStepConfig[] = [
         }
       />
     ),
-    isClickeable: true,
   },
 ];
 

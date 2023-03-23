@@ -502,15 +502,14 @@ const Dashboard = ({}: DashboardProps) => {
 
         targetElement.classList.add(`tutorial-target-${currentStep.outline}`);
 
-        const { offsetTop, offsetLeft } = targetElement;
-        const { height: childrenHeight, width: childrenWidth } = targetElement.getBoundingClientRect();
+        const { offsetTop, offsetLeft, clientWidth, clientHeight } = targetElement;
+        // const { height: childrenHeight, width: childrenWidth } = targetElement.getBoundingClientRect();
 
         offsetChildTop = offsetTop + currentStep.topOffset;
         offsetChildLeft = offsetLeft + currentStep.leftOffset;
-        height = childrenHeight;
-        width = childrenWidth;
+        height = clientHeight;
+        width = clientWidth;
       }
-
       setTargetClientRect({
         top: top + offsetChildTop,
         left: left + offsetChildLeft,
@@ -5892,6 +5891,20 @@ const Dashboard = ({}: DashboardProps) => {
                 value={mapInteractionValue}
                 onChange={navigateWhenNotScrolling}
               >
+                <Tooltip title={`(${targetClientRect.left},${targetClientRect.top})`}>
+                  <Box
+                    sx={{
+                      width: "10px",
+                      height: "10px",
+                      borderRadius: "50%",
+                      position: "absolute",
+                      top: targetClientRect.top,
+                      left: targetClientRect.left,
+                      backgroundColor: "red",
+                      zIndex: 999999,
+                    }}
+                  ></Box>
+                </Tooltip>
                 {!currentStep?.anchor && tutorial && (
                   <TooltipTutorial
                     tutorial={tutorial}
