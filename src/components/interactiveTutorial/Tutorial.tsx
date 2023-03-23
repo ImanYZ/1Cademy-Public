@@ -1,4 +1,4 @@
-import LiveHelpIcon from "@mui/icons-material/LiveHelp";
+import HelpIcon from "@mui/icons-material/Help";
 import { Box, Button, Stack, Typography, useMediaQuery } from "@mui/material";
 import React, { useCallback, useMemo, useRef } from "react";
 
@@ -221,7 +221,7 @@ export const TooltipTutorial = ({
               <Typography component={"h2"} sx={{ fontSize: "18px", fontWeight: "bold", display: "inline-block" }}>
                 {tutorialStep.title}
               </Typography>
-              <LiveHelpIcon />
+              <HelpIcon />
             </Stack>
             {stepsLength <= 1 || (
               <Typography sx={{ display: "inline-block", color: "#818181" }}>
@@ -381,7 +381,7 @@ export const TooltipTutorial = ({
           <Typography component={"h2"} sx={{ fontSize: "18px", fontWeight: "bold", display: "inline-block" }}>
             {tutorialStep.title}
           </Typography>
-          <LiveHelpIcon />
+          <HelpIcon />
         </Stack>
         {stepsLength <= 1 || (
           <Typography sx={{ display: "inline-block", color: "inherit" }}>
