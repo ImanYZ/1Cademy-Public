@@ -522,7 +522,7 @@ const Dashboard = ({}: DashboardProps) => {
     let timeoutId: any;
     timeoutId = setTimeout(() => {
       getTooltipClientRect();
-    }, currentStep?.targetDelay || 200);
+    }, currentStep?.targetDelay || 500);
 
     return () => {
       if (timeoutId) clearTimeout(timeoutId);
@@ -4393,6 +4393,7 @@ const Dashboard = ({}: DashboardProps) => {
         const result = detectAndForceTutorial("closeNode", "r98BjyFDCe4YyLA3U8ZE", closeNodeTutorialIsValid);
         if (result) return;
       }
+
       // --------------------------
 
       const expandNodeTutorialIsValid = (node: FullNodeData) => Boolean(node) && !node.open;
@@ -4409,6 +4410,21 @@ const Dashboard = ({}: DashboardProps) => {
         const result = detectAndForceTutorial("expandNode", "r98BjyFDCe4YyLA3U8ZE", expandNodeTutorialIsValid, {
           open: false,
         });
+        if (result) return;
+      }
+
+      // --------------------------
+
+      const hideTutorialIsValid = (node: FullNodeData) => Boolean(node);
+      const hasRequiredNodes = Object.values(graph.nodes).length >= 2;
+      const shouldIgnore = userTutorial["hideNode"].skipped || userTutorial["hideNode"].done;
+      if (hasRequiredNodes && !shouldIgnore) {
+        const result = detectAndCallTutorial("hideNode", hideTutorialIsValid);
+        if (result) return;
+      }
+
+      if (forcedTutorial === "hideNode") {
+        const result = detectAndForceTutorial("hideNode", "r98BjyFDCe4YyLA3U8ZE", hideTutorialIsValid);
         if (result) return;
       }
 
@@ -4987,10 +5003,9 @@ const Dashboard = ({}: DashboardProps) => {
       if (!nodesTutorialIsValid(node)) {
         setTutorial(null);
         setForcedTutorial(null);
-        // tutorialStateWasSetUpRef.current = false;
-        // console.log("remove node t");
       }
     }
+
     // --------------------------
 
     if (tutorial.name === "hideOffsprings") {
@@ -5012,6 +5027,7 @@ const Dashboard = ({}: DashboardProps) => {
         setForcedTutorial(null);
       }
     }
+
     // --------------------------
 
     if (tutorial.name === "expandNode") {
@@ -5022,6 +5038,18 @@ const Dashboard = ({}: DashboardProps) => {
         setForcedTutorial(null);
       }
     }
+
+    // --------------------------
+
+    if (tutorial.name === "hideNode") {
+      const HideNodeTutorialIsValid = (node: FullNodeData) => Boolean(node);
+      const node = graph.nodes[targetId];
+      if (!HideNodeTutorialIsValid(node)) {
+        setTutorial(null);
+        setForcedTutorial(null);
+      }
+    }
+
     // --------------------------
 
     const conceptTutorialIsValid = (thisNode: FullNodeData) =>

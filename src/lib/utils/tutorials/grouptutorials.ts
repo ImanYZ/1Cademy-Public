@@ -14,6 +14,7 @@ import {
   DOWNVOTE_STEPS_COMPLETE,
   EXPAND_STEPS_COMPLETE,
   HIDE_OFFSPRING_STEPS_COMPLETE,
+  HIDE_STEPS_COMPLETE,
   UPTOVE_STEPS_COMPLETE,
 } from "./nodeActionsTutorialStep";
 import { NODE_CODE } from "./nodeCodeTutorialSteps";
@@ -127,6 +128,11 @@ export const GROUP_TUTORIALS: GroupTutorial[] = [
       {
         title: "Expand a Node",
         tutorialSteps: { tutorialKey: "expandNode", steps: EXPAND_STEPS_COMPLETE },
+        tutorials: [],
+      },
+      {
+        title: "Hide a Node",
+        tutorialSteps: { tutorialKey: "hideNode", steps: HIDE_STEPS_COMPLETE },
         tutorials: [],
       },
     ],
