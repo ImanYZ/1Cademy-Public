@@ -4349,23 +4349,26 @@ const Dashboard = ({}: DashboardProps) => {
 
       // --------------------------
 
-      const mosParent = parentWithMostChildren();
+      const mostParent = parentWithMostChildren();
       const hideOffspringsTutorialIsValid = (node: FullNodeData) =>
         node && !node.editable && parentWithChildren(node.node) >= 2;
       const hideOffspringsTutorialForcedIsValid = (node: FullNodeData) => node && !node.editable;
 
-      if (forcedTutorial === "hideOffsprings" || mosParent.children >= 2) {
+      if (forcedTutorial === "hideOffsprings" || mostParent.children >= 2) {
         const shouldIgnore =
           (!forcedTutorial || forcedTutorial !== "hideOffsprings") &&
           (userTutorial["hideOffsprings"].done || userTutorial["hideOffsprings"].skipped);
         if (!shouldIgnore) {
           const result = detectAndForceTutorial(
             "hideOffsprings",
-            mosParent.edge || "r98BjyFDCe4YyLA3U8ZE",
-            mosParent.edge ? hideOffspringsTutorialIsValid : hideOffspringsTutorialForcedIsValid
+            mostParent.edge || "r98BjyFDCe4YyLA3U8ZE",
+            mostParent.edge && mostParent.edge !== "r98BjyFDCe4YyLA3U8ZE"
+              ? hideOffspringsTutorialIsValid
+              : hideOffspringsTutorialForcedIsValid
           );
           if (result) {
-            if (!mosParent.edge) {
+            if (!mostParent.edge || mostParent.edge === "r98BjyFDCe4YyLA3U8ZE") {
+              if (parentWithChildren("r98BjyFDCe4YyLA3U8ZE") >= 2) return;
               openNodeHandler("LrUBGjpxuEV2W0shSLXf");
               openNodeHandler("rWYUNisPIVMBoQEYXgNj");
             }
@@ -4410,6 +4413,7 @@ const Dashboard = ({}: DashboardProps) => {
       }
 
       // --------------------------
+
       if (forcedTutorial === "tableOfContents" || userTutorial["nodes"].done || userTutorial["nodes"].skipped) {
         const shouldIgnore = forcedTutorial
           ? forcedTutorial !== "tableOfContents"
