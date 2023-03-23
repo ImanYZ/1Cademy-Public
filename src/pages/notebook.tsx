@@ -5894,7 +5894,7 @@ const Dashboard = ({}: DashboardProps) => {
                 value={mapInteractionValue}
                 onChange={navigateWhenNotScrolling}
               >
-                <Tooltip title={`(${targetClientRect.left},${targetClientRect.top})`}>
+                {/* <Tooltip title={`(${targetClientRect.left},${targetClientRect.top})`}>
                   <Box
                     sx={{
                       width: "10px",
@@ -5907,7 +5907,7 @@ const Dashboard = ({}: DashboardProps) => {
                       zIndex: 999999,
                     }}
                   ></Box>
-                </Tooltip>
+                </Tooltip> */}
                 {!currentStep?.anchor && tutorial && (
                   <TooltipTutorial
                     tutorial={tutorial}
@@ -5920,11 +5920,6 @@ const Dashboard = ({}: DashboardProps) => {
                     onPreviousStep={onPreviousStep}
                     stepsLength={tutorial.steps.length}
                     node={graph.nodes[targetId]}
-                    // tutorialState={stateNodeTutorial}
-                    // onChangeStep={onChangeStep}
-                    // targetClientRect={targetClientRect}
-                    // handleCloseProgressBarMenu={handleCloseProgressBarMenu}
-                    // onSkipTutorial={onSkipTutorial}
                   />
                 )}
                 {settings.showClusterOptions && settings.showClusters && (
