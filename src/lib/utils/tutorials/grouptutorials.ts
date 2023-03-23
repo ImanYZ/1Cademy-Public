@@ -56,23 +56,24 @@ export const GROUP_TUTORIALS: GroupTutorial[] = [
         tutorialSteps: { tutorialKey: "searcher", steps: SEARCHER_STEPS_COMPLETE },
         tutorials: [],
       },
-    ],
-  },
-  // {
-  //   title: "Learning Pathways",
-  //   tutorials: [],
-  // },
-  {
-    title: "Evaluation",
-    tutorials: [
       {
-        title: "Upvoting helpful content",
-        tutorialSteps: { tutorialKey: "upVote", steps: UPTOVE_STEPS_COMPLETE },
+        title: "Hide Offsprings",
+        tutorialSteps: { tutorialKey: "hideOffsprings", steps: HIDE_OFFSPRING_STEPS_COMPLETE },
         tutorials: [],
       },
       {
-        title: "Downvoting to delete content",
-        tutorialSteps: { tutorialKey: "downVote", steps: DOWNVOTE_STEPS_COMPLETE },
+        title: "Close a Node",
+        tutorialSteps: { tutorialKey: "closeNode", steps: CLOSE_STEPS_COMPLETE },
+        tutorials: [],
+      },
+      {
+        title: "Expand a Node",
+        tutorialSteps: { tutorialKey: "expandNode", steps: EXPAND_STEPS_COMPLETE },
+        tutorials: [],
+      },
+      {
+        title: "Hide a Node",
+        tutorialSteps: { tutorialKey: "hideNode", steps: HIDE_STEPS_COMPLETE },
         tutorials: [],
       },
     ],
@@ -113,35 +114,26 @@ export const GROUP_TUTORIALS: GroupTutorial[] = [
     ],
   },
   {
-    title: "Node Header",
+    title: "Evaluation",
     tutorials: [
       {
-        title: "Hide Offsprings",
-        tutorialSteps: { tutorialKey: "hideOffsprings", steps: HIDE_OFFSPRING_STEPS_COMPLETE },
+        title: "Upvoting helpful content",
+        tutorialSteps: { tutorialKey: "upVote", steps: UPTOVE_STEPS_COMPLETE },
         tutorials: [],
       },
       {
-        title: "Close a Node",
-        tutorialSteps: { tutorialKey: "closeNode", steps: CLOSE_STEPS_COMPLETE },
-        tutorials: [],
-      },
-      {
-        title: "Expand a Node",
-        tutorialSteps: { tutorialKey: "expandNode", steps: EXPAND_STEPS_COMPLETE },
-        tutorials: [],
-      },
-      {
-        title: "Hide a Node",
-        tutorialSteps: { tutorialKey: "hideNode", steps: HIDE_STEPS_COMPLETE },
+        title: "Downvoting to delete content",
+        tutorialSteps: { tutorialKey: "downVote", steps: DOWNVOTE_STEPS_COMPLETE },
         tutorials: [],
       },
     ],
   },
+
   {
-    title: "Proposal",
+    title: "Proposals",
     tutorials: [
       {
-        title: "Proposing Edit",
+        title: "Proposing Edits",
         tutorialSteps: { tutorialKey: "proposal", steps: PROPOSAL_STEPS_COMPLETE },
         tutorials: [],
       },
@@ -164,7 +156,7 @@ export const GROUP_TUTORIALS: GroupTutorial[] = [
     ],
   },
   {
-    title: "Proposing Edit Nodes",
+    title: "Proposing Edits",
     tutorials: [
       {
         title: "Edit Concept Node",
