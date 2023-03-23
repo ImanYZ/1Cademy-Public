@@ -126,14 +126,14 @@ const DOWNVOTE_STEPS: TutorialStepConfig[] = [
         <br />
         {`this node has ${node.wrongs}`}
         <CloseIcon fontSize="small" color="error" sx={{ verticalAlign: "middle", mx: "4px" }} />
-        {`downvotes with your vote will have ${node.wrongs - 1}`}
+        {`downvotes with your vote will have ${node.wrongs + 1}`}
         <CloseIcon fontSize="small" color="error" sx={{ verticalAlign: "middle", mx: "4px" }} />
         {"downvotes."}
         <br />
         <MarkdownRender
           text={`Only if $\${Upvotes} < {Downvotes}$$ this node will be removed, in this case: $$${node.corrects} < ${
-            node.wrongs
-          }$$, ${node.corrects < node.wrongs ? "this note will be removed." : "this note won't be removed."}`}
+            node.wrongs + 1
+          }$$, ${node.corrects < node.wrongs + 1 ? "this note will be removed." : "this note won't be removed."}`}
         />
       </>
     ),
@@ -166,7 +166,6 @@ const HIDE_OFFSPRING_STEPS: TutorialStepConfig[] = [
       />
     ),
     isClickeable: true,
-    targetDelay: 500,
   },
 ];
 
