@@ -182,7 +182,7 @@ const EXPAND_STEPS: TutorialStepConfig[] = [
   },
 ];
 
-const CLOSE_STEPS: TutorialStepConfig[] = [
+const COLLAPSE_STEPS: TutorialStepConfig[] = [
   {
     title: "Closing a node",
     childTargetId: "close-button",
@@ -220,7 +220,7 @@ export const HIDE_STEPS_COMPLETE: TutorialStep[] = HIDE_STEPS.map((c, i, s) => {
 export const HIDE_OFFSPRING_STEPS_COMPLETE: TutorialStep[] = HIDE_OFFSPRING_STEPS.map((c, i, s) => {
   return { ...getBaseStepConfig(i + 1, s.length), ...c };
 });
-export const CLOSE_STEPS_COMPLETE: TutorialStep[] = CLOSE_STEPS.map((c, i, s) => {
+export const COLLAPSE_STEPS_COMPLETE: TutorialStep[] = COLLAPSE_STEPS.map((c, i, s) => {
   return { ...getBaseStepConfig(i + 1, s.length), ...c };
 });
 export const EXPAND_STEPS_COMPLETE: TutorialStep[] = EXPAND_STEPS.map((c, i, s) => {

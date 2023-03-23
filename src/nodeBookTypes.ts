@@ -472,7 +472,7 @@ export type TutorialTypeKeys =
   | "focusMode"
   | "redrawGraph"
   | "scrollToNode"
-  | "closeNode"
+  | "collapseNode"
   | "expandNode"
   | "upVote"
   | "downVote"

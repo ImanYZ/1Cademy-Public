@@ -4382,14 +4382,14 @@ const Dashboard = ({}: DashboardProps) => {
       const openedNodes = getGraphOpenedNodes();
       if (openedNodes >= 2) {
         const firstOpenedNode = Object.values(graph.nodes).find(node => node.open);
-        const shouldIgnore = userTutorial["closeNode"].skipped || userTutorial["closeNode"].done;
+        const shouldIgnore = userTutorial["collapseNode"].skipped || userTutorial["collapseNode"].done;
         if (firstOpenedNode && !shouldIgnore) {
-          const result = detectAndForceTutorial("closeNode", firstOpenedNode.node, closeNodeTutorialIsValid);
+          const result = detectAndForceTutorial("collapseNode", firstOpenedNode.node, closeNodeTutorialIsValid);
           if (result) return;
         }
       }
-      if (forcedTutorial === "closeNode") {
-        const result = detectAndForceTutorial("closeNode", "r98BjyFDCe4YyLA3U8ZE", closeNodeTutorialIsValid);
+      if (forcedTutorial === "collapseNode") {
+        const result = detectAndForceTutorial("collapseNode", "r98BjyFDCe4YyLA3U8ZE", closeNodeTutorialIsValid);
         if (result) return;
       }
 
@@ -5018,7 +5018,7 @@ const Dashboard = ({}: DashboardProps) => {
 
     // --------------------------
 
-    if (tutorial.name === "closeNode") {
+    if (tutorial.name === "expandNode") {
       const closeNodeTutorialIsValid = (node: FullNodeData) => Boolean(node) && node.open && !node.editable;
       const node = graph.nodes[targetId];
       if (!closeNodeTutorialIsValid(node)) {

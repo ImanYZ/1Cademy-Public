@@ -10,7 +10,7 @@ import {
 } from "./childrenProposalTutorialStep";
 import { NAVIGATION_STEPS_COMPLETE } from "./navigationTutorialSteps";
 import {
-  CLOSE_STEPS_COMPLETE,
+  COLLAPSE_STEPS_COMPLETE,
   DOWNVOTE_STEPS_COMPLETE,
   EXPAND_STEPS_COMPLETE,
   HIDE_OFFSPRING_STEPS_COMPLETE,
@@ -63,7 +63,7 @@ export const GROUP_TUTORIALS: GroupTutorial[] = [
       },
       {
         title: "Close a Node",
-        tutorialSteps: { tutorialKey: "closeNode", steps: CLOSE_STEPS_COMPLETE },
+        tutorialSteps: { tutorialKey: "collapseNode", steps: COLLAPSE_STEPS_COMPLETE },
         tutorials: [],
       },
       {
