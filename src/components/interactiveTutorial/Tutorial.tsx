@@ -8,7 +8,7 @@ import { gray50, gray200, gray700, gray800 } from "@/pages/home";
 import { TargetClientRect, Tutorial } from "../../hooks/useInteractiveTutorial3";
 import { FullNodeData, TutorialStep } from "../../nodeBookTypes";
 
-const TOOLTIP_OFFSET = 40;
+const TOOLTIP_OFFSET = 20;
 const TOOLTIP_TALE_SIZE = 10;
 type TutorialProps = {
   tutorial: Tutorial;
