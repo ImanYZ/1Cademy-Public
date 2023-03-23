@@ -4390,6 +4390,7 @@ const Dashboard = ({}: DashboardProps) => {
         const result = detectAndForceTutorial("closeNode", "r98BjyFDCe4YyLA3U8ZE", closeNodeTutorialIsValid);
         if (result) return;
       }
+
       // --------------------------
 
       const expandNodeTutorialIsValid = (node: FullNodeData) => Boolean(node) && !node.open;
@@ -4410,6 +4411,22 @@ const Dashboard = ({}: DashboardProps) => {
       }
 
       // --------------------------
+
+      const hideTutorialIsValid = (node: FullNodeData) => Boolean(node);
+      const hasRequiredNodes = Object.values(graph.nodes).length >= 2;
+      const shouldIgnore = userTutorial["hideNode"].skipped || userTutorial["hideNode"].done;
+      if (hasRequiredNodes && !shouldIgnore) {
+        const result = detectAndCallTutorial("hideNode", hideTutorialIsValid);
+        if (result) return;
+      }
+
+      if (forcedTutorial === "hideNode") {
+        const result = detectAndForceTutorial("hideNode", "r98BjyFDCe4YyLA3U8ZE", hideTutorialIsValid);
+        if (result) return;
+      }
+
+      // --------------------------
+
       if (forcedTutorial === "tableOfContents" || userTutorial["nodes"].done || userTutorial["nodes"].skipped) {
         const shouldIgnore = forcedTutorial
           ? forcedTutorial !== "tableOfContents"

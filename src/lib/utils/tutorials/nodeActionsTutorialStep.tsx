@@ -143,7 +143,7 @@ const DOWNVOTE_STEPS: TutorialStepConfig[] = [
 const HIDE_STEPS: TutorialStepConfig[] = [
   {
     title: "Hiding a Node",
-    childTargetId: "hide-button",
+    childTargetId: "hiden-button",
     description: (
       <MarkdownRender
         text={
