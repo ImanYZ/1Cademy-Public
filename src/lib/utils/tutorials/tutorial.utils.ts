@@ -5,7 +5,7 @@ export const getStepsValues = (step: number, max: number) => {
   return {
     currentStepName: step,
     nextStepName: step === max ? 0 : step + 1,
-    previosStepName: step === 1 ? 1 : step - 1,
+    previousStepName: step === 1 ? 1 : step - 1,
   };
 };
 
