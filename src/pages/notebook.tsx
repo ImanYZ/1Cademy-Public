@@ -4981,6 +4981,7 @@ const Dashboard = ({}: DashboardProps) => {
     getGraphOpenedNodes,
     graph.nodes,
     nodeBookDispatch,
+    nodeBookState.selectedNode,
     openNodeHandler,
     openSidebar,
     parentWithChildren,
