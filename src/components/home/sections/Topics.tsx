@@ -29,7 +29,7 @@ const TOPICS_ITEMS = [
     title: "Disability Studies",
     // image: "home/communities/04-disability-studies.jpg",
     image: "/static/Communities/Disability_Studies.jpg",
-    link: "/community/disability_studies",
+    link: "/community/disability-studies",
   },
   {
     id: "social-psychology",

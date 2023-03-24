@@ -274,7 +274,7 @@ export const allCommunities = [
     ],
   },
   {
-    id: "disability_studies",
+    id: "disability-studies",
     tags: [
       {
         title: "Disability Studies",
@@ -752,7 +752,7 @@ export const allCommunities = [
   //     `Join our weekly meeting, and present your summarized nodes during meeting. You are also welcome to present any other summarization on graph neural network that interest you.`,
   //     `If you're invited to our research team, you also need to collaborate with other team members and finished your part of research work on time.`,
   //     `All interactions, task fulfillment, and communications will be remote.`
-  //   ]
+  //   ]UX_Research_in_Online_Communities
   // },
   // {
   //   id: "Financial_Technology",
