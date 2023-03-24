@@ -20,7 +20,7 @@ const NODE_RELATION_STEPS_CONFIG: TutorialStepConfig[] = [
         />
       </Stack>
     ),
-    isClickeable: true,
+    isClickable: true,
   },
   {
     title: "Concept Node vs Relation Node",
@@ -37,7 +37,7 @@ const NODE_RELATION_STEPS_CONFIG: TutorialStepConfig[] = [
         />
       </>
     ),
-    isClickeable: true,
+    isClickable: true,
   },
 ];
 

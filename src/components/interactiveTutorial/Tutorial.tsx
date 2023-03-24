@@ -131,7 +131,14 @@ export const TooltipTutorial = ({
 
     return { top, left, exceedTop, exceedLeft };
     //INFO: Keep targetClientRect, render does not work if we listen to targetClientRect.props
-  }, [calcWithExceed, targetClientRect, tutorialStep]);
+  }, [
+    calcWithExceed,
+    targetClientRect.height,
+    targetClientRect.left,
+    targetClientRect.top,
+    targetClientRect.width,
+    tutorialStep,
+  ]);
 
   const taleRect = useMemo(() => {
     let top = undefined;
@@ -273,7 +280,7 @@ export const TooltipTutorial = ({
                       backgroundColor: theme => (theme.palette.mode === "dark" ? gray200 : gray700),
                     },
                   }}
-                  disabled={tutorialStep.isClickeable}
+                  disabled={tutorialStep.isClickable}
                 >
                   Next
                 </Button>

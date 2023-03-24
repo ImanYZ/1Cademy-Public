@@ -97,7 +97,7 @@ const PROPOSING_EDITS_STEPS: TutorialStepConfig[] = [
       />
     ),
 
-    isClickeable: true,
+    isClickable: true,
   },
   {
     childTargetId: "button-propose-proposal",
@@ -110,7 +110,7 @@ const PROPOSING_EDITS_STEPS: TutorialStepConfig[] = [
       />
     ),
 
-    isClickeable: true,
+    isClickable: true,
   },
   {
     childTargetId: "new-children-nodes-buttons",

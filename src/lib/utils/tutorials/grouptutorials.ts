@@ -10,7 +10,7 @@ import {
 } from "./childrenProposalTutorialStep";
 import { NAVIGATION_STEPS_COMPLETE } from "./navigationTutorialSteps";
 import {
-  CLOSE_STEPS_COMPLETE,
+  COLLAPSE_STEPS_COMPLETE,
   DOWNVOTE_STEPS_COMPLETE,
   EXPAND_STEPS_COMPLETE,
   HIDE_OFFSPRING_STEPS_COMPLETE,
@@ -57,22 +57,22 @@ export const GROUP_TUTORIALS: GroupTutorial[] = [
         tutorials: [],
       },
       {
-        title: "Hide Offsprings",
+        title: "Hide Offspring",
         tutorialSteps: { tutorialKey: "hideOffsprings", steps: HIDE_OFFSPRING_STEPS_COMPLETE },
         tutorials: [],
       },
       {
-        title: "Close a Node",
-        tutorialSteps: { tutorialKey: "closeNode", steps: CLOSE_STEPS_COMPLETE },
+        title: "Collapse the Node",
+        tutorialSteps: { tutorialKey: "collapseNode", steps: COLLAPSE_STEPS_COMPLETE },
         tutorials: [],
       },
       {
-        title: "Expand a Node",
+        title: "Expand the Node",
         tutorialSteps: { tutorialKey: "expandNode", steps: EXPAND_STEPS_COMPLETE },
         tutorials: [],
       },
       {
-        title: "Hide a Node",
+        title: "Hide the Node",
         tutorialSteps: { tutorialKey: "hideNode", steps: HIDE_STEPS_COMPLETE },
         tutorials: [],
       },

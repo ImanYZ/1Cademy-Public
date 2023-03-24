@@ -3,7 +3,7 @@ import { ReactNode, useCallback, useEffect, useMemo, useRef, useState } from "re
 
 import { NAVIGATION_STEPS_COMPLETE } from "@/lib/utils/tutorials/navigationTutorialSteps";
 import {
-  CLOSE_STEPS_COMPLETE,
+  COLLAPSE_STEPS_COMPLETE,
   EXPAND_STEPS_COMPLETE,
   HIDE_STEPS_COMPLETE,
 } from "@/lib/utils/tutorials/nodeActionsTutorialStep";
@@ -123,7 +123,7 @@ export const useInteractiveTutorial = ({ user }: useInteractiveTutorialProps) =>
     focusMode: { currentStep: -1, done: false, skipped: false },
     redrawGraph: { currentStep: -1, done: false, skipped: false },
     scrollToNode: { currentStep: -1, done: false, skipped: false },
-    closeNode: { currentStep: -1, done: false, skipped: false },
+    collapseNode: { currentStep: -1, done: false, skipped: false },
     expandNode: { currentStep: -1, done: false, skipped: false },
     upVote: { currentStep: -1, done: false, skipped: false },
     downVote: { currentStep: -1, done: false, skipped: false },
@@ -250,8 +250,8 @@ export const useInteractiveTutorial = ({ user }: useInteractiveTutorialProps) =>
       if (newTutorial === "scrollToNode") {
         newSteps = SCROLL_TO_NODE_STEPS;
       }
-      if (newTutorial === "closeNode") {
-        newSteps = CLOSE_STEPS_COMPLETE;
+      if (newTutorial === "collapseNode") {
+        newSteps = COLLAPSE_STEPS_COMPLETE;
       }
       if (newTutorial === "expandNode") {
         newSteps = EXPAND_STEPS_COMPLETE;

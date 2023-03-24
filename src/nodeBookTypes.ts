@@ -207,7 +207,7 @@ export type StepTutorialConfig = {
   description: React.ReactNode;
   disabledElements?: string[];
   enableChildElements?: string[];
-  isClickeable?: boolean;
+  isClickable?: boolean;
   forceScrollToNode?: boolean;
   targetDefaultProperties?: Partial<FullNodeData>;
   tooltipPosition?: "top" | "bottom" | "left" | "right" | "topLeft";
@@ -225,9 +225,9 @@ export interface NodeTutorialState {
   anchor: string;
   currentStepName: number;
   nextStepName: number;
-  previosStepName: number;
+  previousStepName: number;
   tooltipPosition: "top" | "bottom" | "left" | "right" | "topLeft";
-  isClickeable: boolean;
+  isClickable: boolean;
   targetDelay?: number;
   forceScrollToNode?: boolean;
   targetDefaultProperties?: Partial<FullNodeData>;
@@ -243,7 +243,7 @@ export type TutorialStepConfig = {
   tooltipPosition?: "top" | "bottom" | "left" | "right" | "topLeft" | "topRight" | "bottomLeft" | "bottomRight";
   targetDelay?: number;
   outline?: "shallow" | "outside" | "inside";
-  isClickeable?: boolean;
+  isClickable?: boolean;
   leftOffset?: number;
   topOffset?: number;
 };
@@ -256,11 +256,11 @@ export type TutorialStep = {
   anchor: string;
   currentStepName: number;
   nextStepName: number;
-  previosStepName: number;
+  previousStepName: number;
   tooltipPosition: "top" | "bottom" | "left" | "right" | "topLeft" | "topRight" | "bottomLeft" | "bottomRight";
   targetDelay?: number;
   outline?: "shallow" | "outside" | "inside";
-  isClickeable?: boolean;
+  isClickable?: boolean;
   leftOffset: number;
   topOffset: number;
 };
@@ -472,7 +472,7 @@ export type TutorialTypeKeys =
   | "focusMode"
   | "redrawGraph"
   | "scrollToNode"
-  | "closeNode"
+  | "collapseNode"
   | "expandNode"
   | "upVote"
   | "downVote"
