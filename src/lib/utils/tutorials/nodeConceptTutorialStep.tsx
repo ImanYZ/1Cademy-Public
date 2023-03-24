@@ -4,7 +4,7 @@ import { Stack } from "@mui/material";
 
 import MarkdownRender from "../../../components/Markdown/MarkdownRender";
 import { TutorialStep, TutorialStepConfig } from "../../../nodeBookTypes";
-import { NodeTypeIcon } from "./nodeTutorialSteps";
+import { NodeTypeIconButton } from "./nodeTutorialSteps";
 import { getBaseStepConfig } from "./tutorial.utils";
 
 const NODE_CONCEPT_STEPS_CONFIG: TutorialStepConfig[] = [
@@ -13,9 +13,9 @@ const NODE_CONCEPT_STEPS_CONFIG: TutorialStepConfig[] = [
     description: (
       <Stack>
         <MarkdownRender text={"This is a **Concept** node. It can be distinguished by this icon here."} />
-        <NodeTypeIcon sx={{ mb: "4px", alignSelf: "center" }}>
+        <NodeTypeIconButton sx={{ mb: "4px", alignSelf: "center" }}>
           <LocalLibraryIcon fontSize="small" />
-        </NodeTypeIcon>
+        </NodeTypeIconButton>
         <MarkdownRender text={"Concept nodes describe a single, discrete concept"} />
       </Stack>
     ),
@@ -31,12 +31,12 @@ const NODE_CONCEPT_STEPS_CONFIG: TutorialStepConfig[] = [
           }
         />
         <Stack direction={"row"} justifyContent={"center"} alignItems={"center"} spacing="24px" mt="4px">
-          <NodeTypeIcon>
+          <NodeTypeIconButton>
             <LocalLibraryIcon fontSize="small" />
-          </NodeTypeIcon>
-          <NodeTypeIcon>
+          </NodeTypeIconButton>
+          <NodeTypeIconButton>
             <ShareIcon fontSize="small" />
-          </NodeTypeIcon>
+          </NodeTypeIconButton>
         </Stack>
       </>
     ),

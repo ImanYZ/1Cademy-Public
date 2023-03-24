@@ -3,6 +3,7 @@ import { Stack } from "@mui/material";
 
 import MarkdownRender from "../../../components/Markdown/MarkdownRender";
 import { TutorialStep, TutorialStepConfig } from "../../../nodeBookTypes";
+import { NodeTypeIconButton } from "./nodeTutorialSteps";
 import { getBaseStepConfig } from "./tutorial.utils";
 
 const NODE_CODE_STEPS_CONFIG: TutorialStepConfig[] = [
@@ -11,7 +12,9 @@ const NODE_CODE_STEPS_CONFIG: TutorialStepConfig[] = [
     description: (
       <Stack>
         <MarkdownRender text={"This is a **Code** node. It can be identified by this icon."} />
-        <CodeIcon sx={{ alignSelf: "center" }} />
+        <NodeTypeIconButton sx={{ mb: "4px", alignSelf: "center" }}>
+          <CodeIcon fontSize="small" />
+        </NodeTypeIconButton>
         <MarkdownRender
           text={
             "Code nodes contain code snippets from a programming language including Python, R, HTML, and JavaScript."

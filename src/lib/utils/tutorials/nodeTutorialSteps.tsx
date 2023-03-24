@@ -16,12 +16,12 @@ import { getBaseStepConfig } from "./tutorial.utils";
 
 export const INITIAL_NODE_TUTORIAL_STATE: TutorialState = null;
 
-type NodeTypeIconProps = {
+type NodeTypeIconButtonProps = {
   children: ReactNode;
   sx?: SxProps<Theme> | undefined;
 };
 
-export const NodeTypeIcon = ({ children, sx }: NodeTypeIconProps) => {
+export const NodeTypeIconButton = ({ children, sx }: NodeTypeIconButtonProps) => {
   return (
     <Box
       sx={{
@@ -103,27 +103,27 @@ const NODES_STEPS: TutorialStepConfig[] = [
           sx={{ mt: "10px", fontSize: "14px" }}
         >
           <Stack alignItems={"center"} flexGrow={"1"}>
-            <NodeTypeIcon>
+            <NodeTypeIconButton>
               <LocalLibraryIcon color="inherit" fontSize="small" />
-            </NodeTypeIcon>
+            </NodeTypeIconButton>
             <Typography fontSize={"inherit"}>Concept</Typography>
           </Stack>
           <Stack alignItems={"center"} flexGrow={"1"}>
-            <NodeTypeIcon>
+            <NodeTypeIconButton>
               <ShareIcon color="inherit" fontSize="small" />
-            </NodeTypeIcon>
+            </NodeTypeIconButton>
             <Typography fontSize={"inherit"}>Relation</Typography>
           </Stack>
           <Stack alignItems={"center"} flexGrow={"1"}>
-            <NodeTypeIcon>
+            <NodeTypeIconButton>
               <MenuBookIcon color="inherit" fontSize="small" />
-            </NodeTypeIcon>
+            </NodeTypeIconButton>
             <Typography fontSize={"inherit"}>Reference</Typography>
           </Stack>
           <Stack alignItems={"center"} flexGrow={"1"}>
-            <NodeTypeIcon>
+            <NodeTypeIconButton>
               <HelpOutlineIcon color="inherit" fontSize="small" />
-            </NodeTypeIcon>
+            </NodeTypeIconButton>
             <Typography fontSize={"inherit"}>Question</Typography>
           </Stack>
         </Stack>
@@ -135,21 +135,21 @@ const NODES_STEPS: TutorialStepConfig[] = [
           sx={{ mt: "10px", fontSize: "14px" }}
         >
           <Stack alignItems={"center"} flexGrow={"1"}>
-            <NodeTypeIcon>
+            <NodeTypeIconButton>
               <CodeIcon color="inherit" fontSize="small" />
-            </NodeTypeIcon>
+            </NodeTypeIconButton>
             <Typography fontSize={"inherit"}>Code</Typography>
           </Stack>
           <Stack alignItems={"center"} flexGrow={"1"}>
-            <NodeTypeIcon>
+            <NodeTypeIconButton>
               <EmojiObjectsIcon color="inherit" fontSize="small" />
-            </NodeTypeIcon>
+            </NodeTypeIconButton>
             <Typography fontSize={"inherit"}>Idea</Typography>
           </Stack>
           <Stack alignItems={"center"} flexGrow={"1"}>
-            <NodeTypeIcon>
+            <NodeTypeIconButton>
               <LockIcon color="inherit" fontSize="small" />
-            </NodeTypeIcon>
+            </NodeTypeIconButton>
             <Typography fontSize={"inherit"}>Lock</Typography>
           </Stack>
         </Stack>
