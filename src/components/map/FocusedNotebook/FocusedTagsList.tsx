@@ -46,47 +46,55 @@ const FocusedTagsList = ({ nodes, node, navigateToNode, loadNodeData }: TagsList
   }, [node]);
   if (isMobile) {
     return (
-      <Box sx={{ display: "flex", flexDirection: "column", gap: "5px" }}>
-        {node.tags.map((tag: any, idx: number) => {
-          const nodeId = node.tagIds[idx];
-          const nodeTitle = linkedNodes[nodeId] ? linkedNodes[nodeId].title : "";
-          return (
-            <Stack
-              key={idx}
-              onClick={() => navigateToNode(nodeId)}
-              direction={"row"}
-              spacing={2}
-              sx={{
-                cursor: "pointer",
-                padding: "5px 10px 5px 10px",
-                ":hover": {
-                  background: theme => (theme.palette.mode === "dark" ? "#404040" : "#ECECEC"),
-                },
-              }}
-            >
-              <LocalOfferIcon
+      <Box
+        sx={{
+          borderTop: theme =>
+            theme.palette.mode === "dark" ? `solid 2px ${theme.palette.common.white}` : "solid 2px #CFCFCF",
+          marginTop: "-2px",
+        }}
+      >
+        <Box sx={{ display: "flex", flexDirection: "column", gap: "5px" }}>
+          {node.tags.map((tag: any, idx: number) => {
+            const nodeId = node.tagIds[idx];
+            const nodeTitle = linkedNodes[nodeId] ? linkedNodes[nodeId].title : "";
+            return (
+              <Stack
+                key={idx}
+                onClick={() => navigateToNode(nodeId)}
+                direction={"row"}
+                spacing={2}
                 sx={{
-                  marginRight: "5px",
-                  marginTop: "5px",
-                  fontSize: "16px",
-                  color: "#f9a825",
+                  cursor: "pointer",
+                  padding: "5px 10px 5px 10px",
+                  ":hover": {
+                    background: theme => (theme.palette.mode === "dark" ? "#404040" : "#ECECEC"),
+                  },
                 }}
-              />
-              <Typography
-                sx={{
-                  color: theme =>
-                    theme.palette.mode === "light"
-                      ? theme.palette.common.darkGrayBackground
-                      : theme.palette.common.white,
-                }}
-                fontSize={16}
-                variant="subtitle1"
               >
-                {nodeTitle}
-              </Typography>
-            </Stack>
-          );
-        })}
+                <LocalOfferIcon
+                  sx={{
+                    marginRight: "5px",
+                    marginTop: "5px",
+                    fontSize: "16px",
+                    color: "#f9a825",
+                  }}
+                />
+                <Typography
+                  sx={{
+                    color: theme =>
+                      theme.palette.mode === "light"
+                        ? theme.palette.common.darkGrayBackground
+                        : theme.palette.common.white,
+                  }}
+                  fontSize={16}
+                  variant="subtitle1"
+                >
+                  {nodeTitle}
+                </Typography>
+              </Stack>
+            );
+          })}
+        </Box>
       </Box>
     );
   }
@@ -95,7 +103,8 @@ const FocusedTagsList = ({ nodes, node, navigateToNode, loadNodeData }: TagsList
       sx={{
         py: "10px",
         borderTop: theme =>
-          theme.palette.mode === "dark" ? `solid 1px ${theme.palette.common.white}` : "solid 1px #CFCFCF",
+          theme.palette.mode === "dark" ? `solid 2px ${theme.palette.common.white}` : "solid 2px #CFCFCF",
+        marginTop: "-2px",
       }}
     >
       <Box sx={{ py: "8px", display: "flex", justifyContent: "space-between" }}>

@@ -2814,6 +2814,10 @@ right: 5px; */
   height: 28.7px;
 }
 
+#focused-tabs .MuiTabs-indicator {
+  z-index: 9999;
+}
+
 .node-footer-buttons-margin {
   margin-bottom: 10px;
 }
