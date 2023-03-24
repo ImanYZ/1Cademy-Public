@@ -56,7 +56,6 @@ const JoinUs = (props: JoinUsProps) => {
     if (!needsUpdate) return;
     let childWindo: any = document.getElementById("1cademy.usIframe");
     const childWindow = childWindo?.contentWindow;
-    console.log("childWindow :: :: ", childWindow);
     childWindow.postMessage({ communityId: props.community.id }, "*");
     setNeedsUpdate(false);
   }, [needsUpdate, props.community]);
@@ -66,9 +65,7 @@ const JoinUs = (props: JoinUsProps) => {
   };
   useEffect(() => {
     const childResponse = (event: any) => {
-      console.log("event", event.origin);
       if (!event.origin.startsWith("https://1cademy.us")) return;
-      console.log("event", event?.data);
       if (event?.data) {
         const {
           completedExperiment,
@@ -132,6 +129,7 @@ const JoinUs = (props: JoinUsProps) => {
   useEffect(() => {
     if (needsUpdate) {
       if (!props.community) return;
+      if (!applicationProcess) return;
       let stepsIdx = 0;
       const commTestEnded = props.community.id in communiTestsEnded && communiTestsEnded[props.community.id];
       if (applicationProcess["courseraUrl"] && applicationProcess["portfolioUrl"] && commTestEnded) {
