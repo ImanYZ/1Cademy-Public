@@ -208,8 +208,7 @@ export const TooltipTutorial = ({
           sx={{
             width: "100%",
             transition: "top 1s ease-out,left 1s ease-out",
-            // backgroundColor: theme => (theme.palette.mode === "dark" ? "#4B535C" : "#C5D0DF"),
-            backgroundColor: "blueviolet",
+            backgroundColor: theme => (theme.palette.mode === "dark" ? "#4B535C" : "#C5D0DF"),
             p: "24px 32px",
             borderRadius: "8px",
             color: theme => (theme.palette.mode === "dark" ? gray50 : gray800),
