@@ -12,7 +12,7 @@ import relativeTime from "dayjs/plugin/relativeTime";
 import NextImage from "next/image";
 import Image from "next/image";
 import { useRouter } from "next/router";
-import React, { FC, ReactNode, useState } from "react";
+import React, { FC, ReactNode, useEffect, useState } from "react";
 
 import ROUTES from "@/lib/utils/routes";
 import { getNodePageWithDomain } from "@/lib/utils/utils";
@@ -195,9 +195,25 @@ export const FocusedNodeItemFull: FC<FocusedNodeProps> = ({
   node,
   contributors,
   tags,
+  references,
   relatedNodes,
   editable = true,
 }) => {
+  const desktopTabs = [
+    {
+      title: "Contributors",
+      content: <Box>{contributors}</Box>,
+    },
+
+    {
+      title: "Refs & Tags",
+      content: <Box>{tags}</Box>,
+    },
+    {
+      title: "Related Nodes",
+      content: <Box>{relatedNodes}</Box>,
+    },
+  ];
   const router = useRouter();
   const theme = useTheme();
   const [imageFullScreen, setImageFullScreen] = useState(false);
@@ -208,6 +224,7 @@ export const FocusedNodeItemFull: FC<FocusedNodeProps> = ({
   const [paddingTop, setPaddingTop] = useState("0");
   const [value, setValue] = useState(0);
   const [isSpeaking, setIsSpeaking] = useState(false);
+  const [tabsItems, setTabsItems] = useState(desktopTabs);
   const handleChange = (event: React.SyntheticEvent, newValue: number) => {
     setValue(newValue);
   };
@@ -232,21 +249,27 @@ export const FocusedNodeItemFull: FC<FocusedNodeProps> = ({
     }
   };
 
-  const tabsItems = [
-    {
-      title: "Contributors",
-      content: <Box>{contributors}</Box>,
-    },
+  useEffect(() => {
+    if (window.innerWidth <= 599) {
+      setTabsItems([
+        {
+          title: "Contributors",
+          content: <Box>{contributors}</Box>,
+        },
 
-    {
-      title: "Refs & Tags",
-      content: <Box>{tags}</Box>,
-    },
-    {
-      title: "Related Nodes",
-      content: <Box>{relatedNodes}</Box>,
-    },
-  ];
+        {
+          title: "References",
+          content: <Box>{references}</Box>,
+        },
+        {
+          title: "Tags",
+          content: <Box>{tags}</Box>,
+        },
+      ]);
+    } else if (window.innerWidth > 599) {
+      setTabsItems(desktopTabs);
+    }
+  }, [window.innerWidth, node]);
 
   return (
     <>
@@ -348,7 +371,7 @@ export const FocusedNodeItemFull: FC<FocusedNodeProps> = ({
                 )}
               </Box>
 
-              <Stack spacing={{ md: "16px" }} direction={"row"}>
+              <Stack spacing={{ xs: 2, md: 3 }} direction={"row"}>
                 {(!showShareButtons || window.innerWidth > 1280) && (
                   <FocusedViewNodeVotes
                     correct={node.correct}
@@ -357,30 +380,32 @@ export const FocusedNodeItemFull: FC<FocusedNodeProps> = ({
                     wrongs={node.wrongs}
                   />
                 )}
-                <Button
-                  onClick={() => narrateNode(node.title, node.content)}
-                  sx={{
-                    background: theme => (theme.palette.mode === "dark" ? "#565757" : "#EAECF0"),
-                    width: "40px",
-                    height: "40px",
-                    minWidth: "40px",
-                    borderRadius: "50%",
-
-                    color: theme => (showShareButtons ? theme.palette.common.orange : theme.palette.grey[600]),
-                  }}
-                >
-                  {/* <ReplyIcon sx={{ ml: "10px", transform: "scale(-1,1)" }} /> */}
-                  <NextImage
-                    src={
-                      isSpeaking
-                        ? NarrateNodeSpeak
-                        : theme.palette.mode === "dark"
-                        ? NarrateNodeStopDark
-                        : NarrateNodeStopLight
-                    }
-                    alt="logo 1cademy"
-                  />
-                </Button>
+                {(!showShareButtons || window.innerWidth > 1280) && (
+                  <Button
+                    onClick={() => narrateNode(node.title, node.content)}
+                    sx={{
+                      background: theme => (theme.palette.mode === "dark" ? "#565757" : "#EAECF0"),
+                      width: "40px",
+                      height: "40px",
+                      minWidth: "40px",
+                      borderRadius: "50%",
+                      border: isSpeaking ? "solid 1px #FF8134" : undefined,
+                      color: theme => (showShareButtons ? theme.palette.common.orange : theme.palette.grey[600]),
+                    }}
+                  >
+                    {/* <ReplyIcon sx={{ ml: "10px", transform: "scale(-1,1)" }} /> */}
+                    <NextImage
+                      src={
+                        isSpeaking
+                          ? NarrateNodeSpeak
+                          : theme.palette.mode === "dark"
+                          ? NarrateNodeStopDark
+                          : NarrateNodeStopLight
+                      }
+                      alt="logo 1cademy"
+                    />
+                  </Button>
+                )}
                 <Button
                   onClick={() => setShowShareButtons(!showShareButtons)}
                   sx={{
@@ -389,7 +414,6 @@ export const FocusedNodeItemFull: FC<FocusedNodeProps> = ({
                     height: "40px",
                     minWidth: "40px",
                     borderRadius: "50%",
-
                     color: theme => (showShareButtons ? theme.palette.common.orange : theme.palette.grey[600]),
                   }}
                 >
@@ -415,11 +439,17 @@ export const FocusedNodeItemFull: FC<FocusedNodeProps> = ({
         }}
       >
         <CardContent>
-          <Tabs variant="fullWidth" value={value} onChange={handleChange} aria-label={"Bookmarks Tabs"}>
+          <Tabs
+            id="focused-tabs"
+            variant="fullWidth"
+            value={value}
+            onChange={handleChange}
+            aria-label={"Bookmarks Tabs"}
+          >
             {tabsItems.map((tabItem: any, idx: number) => (
               <Tab
                 sx={{
-                  fontSize: "20px",
+                  fontSize: { xs: "15px", sm: "20px" },
                   fontWeight: "400",
                 }}
                 key={tabItem.title}

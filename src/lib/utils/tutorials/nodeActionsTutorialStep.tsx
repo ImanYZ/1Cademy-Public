@@ -42,7 +42,7 @@ const PARENT_STEPS: TutorialStepConfig[] = [
         text={"This is a parent node. It is a node containing information superordinate to the previous node."}
       />
     ),
-    isClickeable: true,
+    isClickable: true,
   },
 ];
 const CHILD_STEPS: TutorialStepConfig[] = [
@@ -55,7 +55,7 @@ const CHILD_STEPS: TutorialStepConfig[] = [
         }
       />
     ),
-    isClickeable: true,
+    isClickable: true,
   },
 ];
 const REFERENCES_TAGS_STEPS: TutorialStepConfig[] = [
@@ -69,7 +69,7 @@ const REFERENCES_TAGS_STEPS: TutorialStepConfig[] = [
         }
       />
     ),
-    isClickeable: true,
+    isClickable: true,
   },
   {
     title: "List of Tags",
@@ -81,7 +81,7 @@ const REFERENCES_TAGS_STEPS: TutorialStepConfig[] = [
         }
       />
     ),
-    isClickeable: true,
+    isClickable: true,
   },
 ];
 const TAG_NODE_STEPS: TutorialStepConfig[] = [
@@ -95,7 +95,7 @@ const TAG_NODE_STEPS: TutorialStepConfig[] = [
         }
       />
     ),
-    isClickeable: true,
+    isClickable: true,
   },
 ];
 const UPTOVE_STEPS: TutorialStepConfig[] = [
@@ -113,7 +113,7 @@ const UPTOVE_STEPS: TutorialStepConfig[] = [
         {"upvotes"}
       </>
     ),
-    isClickeable: true,
+    isClickable: true,
   },
 ];
 const DOWNVOTE_STEPS: TutorialStepConfig[] = [
@@ -137,13 +137,13 @@ const DOWNVOTE_STEPS: TutorialStepConfig[] = [
         />
       </>
     ),
-    isClickeable: true,
+    isClickable: true,
   },
 ];
 const HIDE_STEPS: TutorialStepConfig[] = [
   {
     title: "Hiding a Node",
-    childTargetId: "hiden-button",
+    childTargetId: "hidden-button",
     description: (
       <MarkdownRender
         text={
@@ -151,7 +151,8 @@ const HIDE_STEPS: TutorialStepConfig[] = [
         }
       />
     ),
-    isClickeable: true,
+    isClickable: true,
+    outline: "inside",
   },
 ];
 const HIDE_OFFSPRING_STEPS: TutorialStepConfig[] = [
@@ -165,31 +166,34 @@ const HIDE_OFFSPRING_STEPS: TutorialStepConfig[] = [
         }
       />
     ),
-    isClickeable: true,
+    isClickable: true,
+    outline: "inside",
   },
 ];
 
 const EXPAND_STEPS: TutorialStepConfig[] = [
   {
-    title: "Expanding a Node",
+    title: "Expanding the Node",
     childTargetId: "open-button",
     description: (
       <MarkdownRender
         text={"This button allows you to expand the node that has been closed and see all of its content."}
       />
     ),
-    isClickeable: true,
+    isClickable: true,
+    outline: "inside",
   },
 ];
 
-const CLOSE_STEPS: TutorialStepConfig[] = [
+const COLLAPSE_STEPS: TutorialStepConfig[] = [
   {
-    title: "Closing a node",
+    title: "Collapsing the Node",
     childTargetId: "close-button",
     description: (
-      <MarkdownRender text={"this button allowes you to close a node so that only the title is displayed."} />
+      <MarkdownRender text={"this button allows you to close a node so that only the title is displayed."} />
     ),
-    isClickeable: true,
+    isClickable: true,
+    outline: "inside",
   },
 ];
 
@@ -220,7 +224,7 @@ export const HIDE_STEPS_COMPLETE: TutorialStep[] = HIDE_STEPS.map((c, i, s) => {
 export const HIDE_OFFSPRING_STEPS_COMPLETE: TutorialStep[] = HIDE_OFFSPRING_STEPS.map((c, i, s) => {
   return { ...getBaseStepConfig(i + 1, s.length), ...c };
 });
-export const CLOSE_STEPS_COMPLETE: TutorialStep[] = CLOSE_STEPS.map((c, i, s) => {
+export const COLLAPSE_STEPS_COMPLETE: TutorialStep[] = COLLAPSE_STEPS.map((c, i, s) => {
   return { ...getBaseStepConfig(i + 1, s.length), ...c };
 });
 export const EXPAND_STEPS_COMPLETE: TutorialStep[] = EXPAND_STEPS.map((c, i, s) => {

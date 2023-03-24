@@ -17,7 +17,7 @@ const NODE_QUESTION_STEPS_CONFIG: TutorialStepConfig[] = [
         />
       </Stack>
     ),
-    isClickeable: true,
+    isClickable: true,
   },
 ];
 

@@ -16,7 +16,7 @@ const NODE_CONCEPT_STEPS_CONFIG: TutorialStepConfig[] = [
         <MarkdownRender text={"Concept nodes describe a single, discrete concept"} />
       </Stack>
     ),
-    isClickeable: true,
+    isClickable: true,
   },
   {
     title: "Concept Node vs Relation Node",
@@ -33,7 +33,7 @@ const NODE_CONCEPT_STEPS_CONFIG: TutorialStepConfig[] = [
         </Stack>
       </>
     ),
-    isClickeable: true,
+    isClickable: true,
   },
 ];
 

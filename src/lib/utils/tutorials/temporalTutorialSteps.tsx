@@ -16,7 +16,7 @@ const TMP_EDIT_NODE_CONFIG: TutorialStepConfig[] = [
       />
     ),
     childTargetId: "node-footer-propose",
-    isClickeable: true,
+    isClickable: true,
   },
 ];
 
@@ -31,7 +31,7 @@ const TMP_PROPOSE_CHILD_CONCEPT_CONFIG: TutorialStepConfig[] = [
       />
     ),
     childTargetId: "propose-concept-child",
-    isClickeable: true,
+    isClickable: true,
     leftOffset: NODE_WIDTH + LEFT_OFFSET_NEW_CHILDREN_BUTTON,
     topOffset: TMP_OFFSET_TOP_CHILDREN_BUTTON,
   },
@@ -48,7 +48,7 @@ const TMP_PROPOSE_CHILD_RELATION_CONFIG: TutorialStepConfig[] = [
       />
     ),
     childTargetId: "propose-relation-child",
-    isClickeable: true,
+    isClickable: true,
     leftOffset: NODE_WIDTH + LEFT_OFFSET_NEW_CHILDREN_BUTTON,
     topOffset: TMP_OFFSET_TOP_CHILDREN_BUTTON,
   },
@@ -65,7 +65,7 @@ const TMP_PROPOSE_CHILD_REFERENCE_CONFIG: TutorialStepConfig[] = [
       />
     ),
     childTargetId: "propose-reference-child",
-    isClickeable: true,
+    isClickable: true,
     leftOffset: NODE_WIDTH + LEFT_OFFSET_NEW_CHILDREN_BUTTON,
     topOffset: TMP_OFFSET_TOP_CHILDREN_BUTTON,
   },
@@ -81,7 +81,7 @@ const TMP_PROPOSE_CHILD_QUESTION_CONFIG: TutorialStepConfig[] = [
       />
     ),
     childTargetId: "propose-question-child",
-    isClickeable: true,
+    isClickable: true,
     targetDelay: 500,
     leftOffset: NODE_WIDTH + LEFT_OFFSET_NEW_CHILDREN_BUTTON,
     topOffset: TMP_OFFSET_TOP_CHILDREN_BUTTON,
@@ -99,7 +99,7 @@ const TMP_PROPOSE_CHILD_IDEA_CONFIG: TutorialStepConfig[] = [
       />
     ),
     childTargetId: "propose-idea-child",
-    isClickeable: true,
+    isClickable: true,
     leftOffset: NODE_WIDTH + LEFT_OFFSET_NEW_CHILDREN_BUTTON,
     topOffset: TMP_OFFSET_TOP_CHILDREN_BUTTON,
   },
@@ -116,7 +116,7 @@ const TMP_PROPOSE_CHILD_CODE_CONFIG: TutorialStepConfig[] = [
       />
     ),
     childTargetId: "propose-code-child",
-    isClickeable: true,
+    isClickable: true,
     leftOffset: NODE_WIDTH + LEFT_OFFSET_NEW_CHILDREN_BUTTON,
     topOffset: TMP_OFFSET_TOP_CHILDREN_BUTTON,
   },

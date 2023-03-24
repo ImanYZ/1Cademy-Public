@@ -14,7 +14,7 @@ const TABLE_CONTENT_STEPS_CONFIG: TutorialStepConfig[] = [
       />
     ),
     anchor: "Portal",
-    isClickeable: true,
+    isClickable: true,
     tooltipPosition: "bottom",
   },
 ];
@@ -31,7 +31,7 @@ const FOCUS_MODE_STEPS_CONFIG: TutorialStepConfig[] = [
       />
     ),
     anchor: "Portal",
-    isClickeable: true,
+    isClickable: true,
     targetDelay: 800,
     tooltipPosition: "bottom",
   },
@@ -49,7 +49,7 @@ const REDRAW_GRAPH_STEPS_CONFIG: TutorialStepConfig[] = [
       />
     ),
     anchor: "Portal",
-    isClickeable: true,
+    isClickable: true,
     targetDelay: 800,
     tooltipPosition: "bottom",
   },
@@ -67,7 +67,7 @@ const SCROLL_TO_NODE_STEPS_CONFIG: TutorialStepConfig[] = [
       />
     ),
     anchor: "Portal",
-    isClickeable: true,
+    isClickable: true,
     targetDelay: 800,
     tooltipPosition: "bottom",
   },

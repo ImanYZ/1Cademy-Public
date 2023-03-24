@@ -42,7 +42,7 @@ const NODES_STEPS: TutorialStepConfig[] = [
     title: "How to search",
     description: <MarkdownRender text={"**Click** on this search icon."} />,
     tooltipPosition: "bottom",
-    isClickeable: true,
+    isClickable: true,
     anchor: "Portal",
   },
   {

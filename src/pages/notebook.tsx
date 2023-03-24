@@ -502,15 +502,14 @@ const Dashboard = ({}: DashboardProps) => {
 
         targetElement.classList.add(`tutorial-target-${currentStep.outline}`);
 
-        const { offsetTop, offsetLeft } = targetElement;
-        const { height: childrenHeight, width: childrenWidth } = targetElement.getBoundingClientRect();
+        const { offsetTop, offsetLeft, clientWidth, clientHeight } = targetElement;
+        // const { height: childrenHeight, width: childrenWidth } = targetElement.getBoundingClientRect();
 
         offsetChildTop = offsetTop + currentStep.topOffset;
         offsetChildLeft = offsetLeft + currentStep.leftOffset;
-        height = childrenHeight;
-        width = childrenWidth;
+        height = clientHeight;
+        width = clientWidth;
       }
-
       setTargetClientRect({
         top: top + offsetChildTop,
         left: left + offsetChildLeft,
@@ -4023,7 +4022,7 @@ const Dashboard = ({}: DashboardProps) => {
     if (currentStep?.childTargetId) removeStyleFromTarget(currentStep.childTargetId, targetId);
 
     if (tutorial.name === "tmpEditNode") {
-      if (currentStep.isClickeable) {
+      if (currentStep.isClickable) {
         proposeNodeImprovement(null, targetId);
       }
       setTutorial(null);
@@ -4039,7 +4038,7 @@ const Dashboard = ({}: DashboardProps) => {
     tmpChildrenMap.set("tmpProposalCodeChild", "Code");
 
     if (tmpChildrenMap.has(tutorial.name)) {
-      if (currentStep.isClickeable) {
+      if (currentStep.isClickable) {
         proposeNewChild(null, tmpChildrenMap.get(tutorial.name) as string);
       }
       return;
@@ -4085,7 +4084,7 @@ const Dashboard = ({}: DashboardProps) => {
 
   useEventListener({
     stepId: currentStep?.childTargetId ?? currentStep?.targetId,
-    cb: currentStep?.isClickeable
+    cb: currentStep?.isClickable
       ? tutorial && tutorial.step === tutorial?.steps.length
         ? onNextStep
         : onFinalizeTutorial
@@ -4130,6 +4129,7 @@ const Dashboard = ({}: DashboardProps) => {
 
       return true;
     },
+
     [graph.nodes, nodeBookDispatch, openNodeHandler, scrollToNode, setTargetId, startTutorial]
   );
 
@@ -4345,84 +4345,6 @@ const Dashboard = ({}: DashboardProps) => {
         });
 
         return;
-      }
-
-      // --------------------------
-
-      const mosParent = parentWithMostChildren();
-      const hideOffspringsTutorialIsValid = (node: FullNodeData) =>
-        node && !node.editable && parentWithChildren(node.node) >= 2;
-      const hideOffspringsTutorialForcedIsValid = (node: FullNodeData) => node && !node.editable;
-
-      if (forcedTutorial === "hideOffsprings" || mosParent.children >= 2) {
-        const shouldIgnore =
-          (!forcedTutorial || forcedTutorial !== "hideOffsprings") &&
-          (userTutorial["hideOffsprings"].done || userTutorial["hideOffsprings"].skipped);
-        if (!shouldIgnore) {
-          const result = detectAndForceTutorial(
-            "hideOffsprings",
-            mosParent.edge || "r98BjyFDCe4YyLA3U8ZE",
-            mosParent.edge ? hideOffspringsTutorialIsValid : hideOffspringsTutorialForcedIsValid
-          );
-          if (result) {
-            if (!mosParent.edge) {
-              openNodeHandler("LrUBGjpxuEV2W0shSLXf");
-              openNodeHandler("rWYUNisPIVMBoQEYXgNj");
-            }
-            return;
-          }
-        }
-      }
-
-      // --------------------------
-
-      const closeNodeTutorialIsValid = (node: FullNodeData) => Boolean(node) && node.open;
-      const openedNodes = getGraphOpenedNodes();
-      if (openedNodes >= 2) {
-        const firstOpenedNode = Object.values(graph.nodes).find(node => node.open);
-        const shouldIgnore = userTutorial["closeNode"].skipped || userTutorial["closeNode"].done;
-        if (firstOpenedNode && !shouldIgnore) {
-          const result = detectAndForceTutorial("closeNode", firstOpenedNode.node, closeNodeTutorialIsValid);
-          if (result) return;
-        }
-      }
-      if (forcedTutorial === "closeNode") {
-        const result = detectAndForceTutorial("closeNode", "r98BjyFDCe4YyLA3U8ZE", closeNodeTutorialIsValid);
-        if (result) return;
-      }
-
-      // --------------------------
-
-      const expandNodeTutorialIsValid = (node: FullNodeData) => Boolean(node) && !node.open;
-      if (Object.keys(graph.nodes).length > openedNodes) {
-        const firstClosedNode = Object.values(graph.nodes).find(node => !node.open);
-        const shouldIgnore = userTutorial["expandNode"].skipped || userTutorial["expandNode"].done;
-        if (firstClosedNode && !shouldIgnore) {
-          const result = detectAndForceTutorial("expandNode", firstClosedNode.node, expandNodeTutorialIsValid);
-          if (result) return;
-        }
-      }
-
-      if (forcedTutorial === "expandNode") {
-        const result = detectAndForceTutorial("expandNode", "r98BjyFDCe4YyLA3U8ZE", expandNodeTutorialIsValid, {
-          open: false,
-        });
-        if (result) return;
-      }
-
-      // --------------------------
-
-      const hideTutorialIsValid = (node: FullNodeData) => Boolean(node);
-      const hasRequiredNodes = Object.values(graph.nodes).length >= 2;
-      const shouldIgnore = userTutorial["hideNode"].skipped || userTutorial["hideNode"].done;
-      if (hasRequiredNodes && !shouldIgnore) {
-        const result = detectAndCallTutorial("hideNode", hideTutorialIsValid);
-        if (result) return;
-      }
-
-      if (forcedTutorial === "hideNode") {
-        const result = detectAndForceTutorial("hideNode", "r98BjyFDCe4YyLA3U8ZE", hideTutorialIsValid);
-        if (result) return;
       }
 
       // --------------------------
@@ -4955,6 +4877,95 @@ const Dashboard = ({}: DashboardProps) => {
       }
 
       // --------------------------
+
+      const nodesTaken = userTutorial["nodes"].done || userTutorial["nodes"].skipped;
+
+      const mostParent = parentWithMostChildren();
+      const hideOffspringsTutorialIsValid = (node: FullNodeData) =>
+        node && !node.editable && parentWithChildren(node.node) >= 2;
+      const hideOffspringsTutorialForcedIsValid = (node: FullNodeData) => node && !node.editable;
+
+      if ((!forcedTutorial && mostParent.children >= 2) || forcedTutorial === "hideOffsprings") {
+        const hideOffspringTaken = userTutorial["hideOffsprings"].done || userTutorial["hideOffsprings"].skipped;
+
+        const shouldIgnore = hideOffspringTaken || !nodesTaken;
+
+        if (!shouldIgnore || forcedTutorial) {
+          const result = detectAndForceTutorial(
+            "hideOffsprings",
+            mostParent.edge || "r98BjyFDCe4YyLA3U8ZE",
+            mostParent.edge && mostParent.edge !== "r98BjyFDCe4YyLA3U8ZE"
+              ? hideOffspringsTutorialIsValid
+              : hideOffspringsTutorialForcedIsValid
+          );
+          if (result) {
+            if (!mostParent.edge || mostParent.edge === "r98BjyFDCe4YyLA3U8ZE") {
+              if (parentWithChildren("r98BjyFDCe4YyLA3U8ZE") >= 2) return;
+              openNodeHandler("LrUBGjpxuEV2W0shSLXf");
+              openNodeHandler("rWYUNisPIVMBoQEYXgNj");
+            }
+            return;
+          }
+        }
+      }
+
+      // --------------------------
+
+      const closeNodeTutorialIsValid = (node: FullNodeData) => Boolean(node) && node.open;
+      const openedNodes = getGraphOpenedNodes();
+      if (openedNodes >= 2 && !forcedTutorial) {
+        const firstOpenedNode = Object.values(graph.nodes).find(node => node.open);
+        const collapseNodeTaken = userTutorial["collapseNode"].skipped || userTutorial["collapseNode"].done;
+        const shouldIgnore = collapseNodeTaken || !nodesTaken;
+        if (firstOpenedNode && !shouldIgnore) {
+          const takeOver = nodeBookState.selectedNode ?? firstOpenedNode.node;
+          const result = detectAndForceTutorial("collapseNode", takeOver, closeNodeTutorialIsValid);
+          if (result) return;
+        }
+      }
+      if (forcedTutorial === "collapseNode") {
+        const result = detectAndForceTutorial("collapseNode", "r98BjyFDCe4YyLA3U8ZE", closeNodeTutorialIsValid);
+        if (result) return;
+      }
+
+      // --------------------------
+
+      const expandNodeTutorialIsValid = (node: FullNodeData) => Boolean(node) && !node.open;
+      if (Object.keys(graph.nodes).length > openedNodes && !forcedTutorial) {
+        const firstClosedNode = Object.values(graph.nodes).find(node => !node.open);
+        const expandNodeTaken = userTutorial["expandNode"].skipped || userTutorial["expandNode"].done;
+        const shouldIgnore = expandNodeTaken || !nodesTaken;
+        if (firstClosedNode && !shouldIgnore) {
+          const takeOver = nodeBookState.selectedNode ?? firstClosedNode.node;
+          const result = detectAndForceTutorial("expandNode", takeOver, expandNodeTutorialIsValid);
+          if (result) return;
+        }
+      }
+
+      if (forcedTutorial === "expandNode") {
+        const result = detectAndForceTutorial("expandNode", "r98BjyFDCe4YyLA3U8ZE", expandNodeTutorialIsValid, {
+          open: false,
+        });
+        if (result) return;
+      }
+
+      // --------------------------
+
+      const hideTutorialIsValid = (node: FullNodeData) => Boolean(node);
+      const hasRequiredNodes = Object.values(graph.nodes).length >= 2;
+      const shouldIgnore =
+        userTutorial["hideNode"].skipped ||
+        userTutorial["hideNode"].done ||
+        (!userTutorial["nodes"].done && !userTutorial["nodes"].skipped);
+      if (hasRequiredNodes && !shouldIgnore) {
+        const result = detectAndCallTutorial("hideNode", hideTutorialIsValid);
+        if (result) return;
+      }
+
+      if (forcedTutorial === "hideNode") {
+        const result = detectAndForceTutorial("hideNode", "r98BjyFDCe4YyLA3U8ZE", hideTutorialIsValid);
+        if (result) return;
+      }
     };
 
     detectTriggerTutorial();
@@ -5016,10 +5027,10 @@ const Dashboard = ({}: DashboardProps) => {
 
     // --------------------------
 
-    if (tutorial.name === "closeNode") {
-      const closeNodeTutorialIsValid = (node: FullNodeData) => Boolean(node) && node.open && !node.editable;
+    if (tutorial.name === "collapseNode") {
+      const collapseNodeTutorialIsValid = (node: FullNodeData) => Boolean(node) && node.open && !node.editable;
       const node = graph.nodes[targetId];
-      if (!closeNodeTutorialIsValid(node)) {
+      if (!collapseNodeTutorialIsValid(node)) {
         setTutorial(null);
         setForcedTutorial(null);
       }
@@ -5304,6 +5315,7 @@ const Dashboard = ({}: DashboardProps) => {
               onPreviousStep={onPreviousStep}
               stepsLength={tutorial.steps.length}
               node={graph.nodes[targetId]}
+              isOnPortal
             />
           )}
         </Portal>
@@ -5891,6 +5903,20 @@ const Dashboard = ({}: DashboardProps) => {
                 value={mapInteractionValue}
                 onChange={navigateWhenNotScrolling}
               >
+                {/* <Tooltip title={`(${targetClientRect.left},${targetClientRect.top})`}>
+                  <Box
+                    sx={{
+                      width: "10px",
+                      height: "10px",
+                      borderRadius: "50%",
+                      position: "absolute",
+                      top: targetClientRect.top,
+                      left: targetClientRect.left,
+                      backgroundColor: "red",
+                      zIndex: 999999,
+                    }}
+                  ></Box>
+                </Tooltip> */}
                 {!currentStep?.anchor && tutorial && (
                   <TooltipTutorial
                     tutorial={tutorial}
@@ -5903,11 +5929,6 @@ const Dashboard = ({}: DashboardProps) => {
                     onPreviousStep={onPreviousStep}
                     stepsLength={tutorial.steps.length}
                     node={graph.nodes[targetId]}
-                    // tutorialState={stateNodeTutorial}
-                    // onChangeStep={onChangeStep}
-                    // targetClientRect={targetClientRect}
-                    // handleCloseProgressBarMenu={handleCloseProgressBarMenu}
-                    // onSkipTutorial={onSkipTutorial}
                   />
                 )}
                 {settings.showClusterOptions && settings.showClusters && (

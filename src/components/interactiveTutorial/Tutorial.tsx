@@ -1,5 +1,5 @@
-import LiveHelpIcon from "@mui/icons-material/LiveHelp";
-import { Box, Button, Stack, Typography } from "@mui/material";
+import HelpIcon from "@mui/icons-material/Help";
+import { Box, Button, Stack, Typography, useMediaQuery } from "@mui/material";
 import React, { useCallback, useMemo, useRef } from "react";
 
 import { useWindowSize } from "@/hooks/useWindowSize";
@@ -8,7 +8,7 @@ import { gray50, gray200, gray700, gray800 } from "@/pages/home";
 import { TargetClientRect, Tutorial } from "../../hooks/useInteractiveTutorial3";
 import { FullNodeData, TutorialStep } from "../../nodeBookTypes";
 
-const TOOLTIP_OFFSET = 40;
+const TOOLTIP_OFFSET = 20;
 const TOOLTIP_TALE_SIZE = 10;
 type TutorialProps = {
   tutorial: Tutorial;
@@ -21,6 +21,7 @@ type TutorialProps = {
   onFinalize: () => void;
   stepsLength: number;
   node: FullNodeData;
+  isOnPortal?: boolean;
 };
 
 export const TooltipTutorial = ({
@@ -34,10 +35,13 @@ export const TooltipTutorial = ({
   onFinalize,
   stepsLength,
   node,
+  isOnPortal,
 }: TutorialProps) => {
   const tooltipRef = useRef<HTMLDivElement | null>(null);
 
   const { width: windowWidth, height: windowHeight } = useWindowSize();
+
+  const isMobile = useMediaQuery("(max-width:600px)");
 
   // console.log({ tutorialStep, tutorial });
 
@@ -73,11 +77,12 @@ export const TooltipTutorial = ({
     if (!tooltipRef.current) return { top, left, exceedTop, exceedLeft };
     if (!tutorialStep) return { top, left, exceedTop, exceedLeft };
 
-    const { height: tooltipHeight } = tooltipRef.current.getBoundingClientRect();
+    // const { height: tooltipHeight } = tooltipRef.current.getBoundingClientRect();
     const pos = tutorialStep.tooltipPosition;
     if (pos === "top") {
-      top = targetClientRect.top - tooltipHeight - TOOLTIP_OFFSET;
+      top = targetClientRect.top - tooltipRef.current.clientHeight - TOOLTIP_OFFSET;
       left = targetClientRect.left + targetClientRect.width / 2 - tooltipRef.current.clientWidth / 2;
+
       if (tutorialStep.anchor === "Portal") {
         const { top: newTop, left: newLeft } = calcWithExceed(top, left);
 
@@ -125,6 +130,7 @@ export const TooltipTutorial = ({
     }
 
     return { top, left, exceedTop, exceedLeft };
+    //INFO: Keep targetClientRect, render does not work if we listen to targetClientRect.props
   }, [
     calcWithExceed,
     targetClientRect.height,
@@ -171,12 +177,16 @@ export const TooltipTutorial = ({
   if (!tutorialStep) return null;
   if (!tutorialStep.currentStepName) return null;
 
-  let location = { top: "10px", bottom: "10px", left: "10px", right: "10px" };
+  const OFFSET = isMobile ? "5px" : "10px";
+  let location = { top: OFFSET, bottom: OFFSET, left: OFFSET, right: OFFSET };
 
-  if (tutorialStep.tooltipPosition === "topLeft") location = { ...location, bottom: "", right: "" };
-  else if (tutorialStep.tooltipPosition === "topRight") location = { ...location, bottom: "", left: "" };
-  else if (tutorialStep.tooltipPosition === "bottomLeft") location = { ...location, top: "", right: "" };
-  else if (tutorialStep.tooltipPosition === "bottomRight") location = { ...location, top: "", left: "" };
+  if (tutorialStep.tooltipPosition === "topLeft") location = { ...location, bottom: "", right: isMobile ? "5px" : "" };
+  else if (tutorialStep.tooltipPosition === "topRight")
+    location = { ...location, bottom: "", left: isMobile ? "5px" : "" };
+  else if (tutorialStep.tooltipPosition === "bottomLeft")
+    location = { ...location, top: "", right: isMobile ? "5px" : "" };
+  else if (tutorialStep.tooltipPosition === "bottomRight")
+    location = { ...location, top: "", left: isMobile ? "5px" : "" };
 
   if (
     targetClientRect.top === 0 &&
@@ -185,24 +195,26 @@ export const TooltipTutorial = ({
     targetClientRect.height === 0
   )
     return (
-      <div
-        style={{
+      <Box
+        sx={{
           position: "absolute",
           ...location,
           backgroundColor: "#55555500",
           height: "auto",
+          maxWidth: "450px",
+          width: isOnPortal ? "auto" : "450px",
           transition: "top 1s ease-out,bottom 1s ease-out,left 1s ease-out,rigth 1s ease-out,height 1s ease-out",
           boxSizing: "border-box",
-          display: "grid",
-          placeItems: "center",
+          // display: "grid",
+          // placeItems: "center",
           zIndex: 99999,
         }}
       >
         <Box
           ref={tooltipRef}
           sx={{
+            width: "100%",
             transition: "top 1s ease-out,left 1s ease-out",
-            width: "450px",
             backgroundColor: theme => (theme.palette.mode === "dark" ? "#4B535C" : "#C5D0DF"),
             p: "24px 32px",
             borderRadius: "8px",
@@ -215,7 +227,7 @@ export const TooltipTutorial = ({
               <Typography component={"h2"} sx={{ fontSize: "18px", fontWeight: "bold", display: "inline-block" }}>
                 {tutorialStep.title}
               </Typography>
-              <LiveHelpIcon />
+              <HelpIcon />
             </Stack>
             {stepsLength <= 1 || (
               <Typography sx={{ display: "inline-block", color: "#818181" }}>
@@ -268,7 +280,7 @@ export const TooltipTutorial = ({
                       backgroundColor: theme => (theme.palette.mode === "dark" ? gray200 : gray700),
                     },
                   }}
-                  disabled={tutorialStep.isClickeable}
+                  disabled={tutorialStep.isClickable}
                 >
                   Next
                 </Button>
@@ -314,7 +326,7 @@ export const TooltipTutorial = ({
             )}
           </Stack>
         </Box>
-      </div>
+      </Box>
     );
 
   return (
@@ -324,8 +336,10 @@ export const TooltipTutorial = ({
         position: "absolute",
         top: `${tooltipRect.top}px`,
         left: `${tooltipRect.left}px`,
+        right: isMobile ? "5px" : undefined,
         transition: "top 750ms ease-out,left 750ms ease-out, border-color 1s linear",
-        width: "450px",
+        maxWidth: "450px",
+        width: isOnPortal ? (isMobile ? "auto" : "100%") : "450px",
         backgroundColor: theme => (theme.palette.mode === "dark" ? "#4B535C" : "#C5D0DF"),
         borderColor: theme => (theme.palette.mode === "dark" ? "#4B535C" : "#C5D0DF") /* this is used in tooltip */,
         p: "24px 32px",
@@ -373,7 +387,7 @@ export const TooltipTutorial = ({
           <Typography component={"h2"} sx={{ fontSize: "18px", fontWeight: "bold", display: "inline-block" }}>
             {tutorialStep.title}
           </Typography>
-          <LiveHelpIcon />
+          <HelpIcon />
         </Stack>
         {stepsLength <= 1 || (
           <Typography sx={{ display: "inline-block", color: "inherit" }}>

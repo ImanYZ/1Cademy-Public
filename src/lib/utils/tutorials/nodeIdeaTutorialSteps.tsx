@@ -19,7 +19,7 @@ const NODE_IDEA_STEPS_CONFIG: TutorialStepConfig[] = [
         />
       </Stack>
     ),
-    isClickeable: true,
+    isClickable: true,
   },
 ];
 

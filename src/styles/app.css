@@ -804,7 +804,7 @@ p {
   height: 8px;
 }
 .node-suggestions::-webkit-scrollbar-thumb {
-  background: #ffffff;
+  background: #818181;
   border-radius: 10px;
 }
 
