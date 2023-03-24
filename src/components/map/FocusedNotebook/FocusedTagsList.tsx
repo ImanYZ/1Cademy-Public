@@ -95,7 +95,8 @@ const FocusedTagsList = ({ nodes, node, navigateToNode, loadNodeData }: TagsList
       sx={{
         py: "10px",
         borderTop: theme =>
-          theme.palette.mode === "dark" ? `solid 1px ${theme.palette.common.white}` : "solid 1px #CFCFCF",
+          theme.palette.mode === "dark" ? `solid 2px ${theme.palette.common.white}` : "solid 2px #CFCFCF",
+        marginTop: "-2px",
       }}
     >
       <Box sx={{ py: "8px", display: "flex", justifyContent: "space-between" }}>

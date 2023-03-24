@@ -35,6 +35,7 @@ const FocusedNotebook = ({
   db,
 }: FocusedNotebookProps) => {
   const [selectedNodeId, setSelectedNodeId] = useState("");
+  const [relatedNodes, setRelatedNodes] = useState<INodeLink[]>([]);
   const [institutionLogos, setInstitutionLogos] = useState<{
     [institutionName: string]: string;
   }>({});
@@ -69,6 +70,20 @@ const FocusedNotebook = ({
   const currentNode = useMemo(() => {
     return (graph && graph.nodes[selectedNodeId]) || {};
   }, [graph, selectedNodeId]);
+
+  useEffect(() => {
+    if (window.innerWidth <= 500) {
+      if (currentNode.parents) {
+        setRelatedNodes(
+          currentNode.parents.length > 0
+            ? (graph.nodes[currentNode.parents[0].node].children.filter(
+                (child: any) => child.title !== currentNode.title
+              ) as INodeLink[])
+            : []
+        );
+      }
+    }
+  }, [currentNode, window.innerWidth]);
 
   const { parents, contributors, institutions, children } = currentNode || {};
 
@@ -119,7 +134,7 @@ const FocusedNotebook = ({
           width: "100%",
           height: "100%",
           zIndex: 1399,
-          padding: "50px 10px",
+          padding: { xs: "50px 5px", sm: "50px 10px" },
           overflow: "auto",
         }}
       >
@@ -160,11 +175,7 @@ const FocusedNotebook = ({
                   />
                 }
                 references={
-                  <MemoizedFocusedReferencesList
-                    navigateToNode={navigateToNode}
-                    node={currentNode as INode}
-                    sx={{ mt: 3 }}
-                  />
+                  <MemoizedFocusedReferencesList navigateToNode={navigateToNode} node={currentNode as INode} />
                 }
                 tags={
                   <MemoizedFocusedTagsList
@@ -184,6 +195,27 @@ const FocusedNotebook = ({
                 }
                 editable={false}
               />
+            </Grid>
+            <Grid
+              sx={{
+                display: {
+                  xs: "block",
+                  sm: "none",
+                },
+              }}
+              item
+              xs={12}
+            >
+              {relatedNodes.length > 0 && (
+                <MemoizedFocusedLinkedNodes
+                  loadNodeData={loadNodeData}
+                  nodes={graph.nodes}
+                  navigateToNode={navigateToNode}
+                  nodeLinks={relatedNodes}
+                  header="Related Nodes"
+                  width={window.innerWidth}
+                />
+              )}
             </Grid>
             <Grid item xs={12} sm={12} md={3}>
               {children && children?.length > 0 && (

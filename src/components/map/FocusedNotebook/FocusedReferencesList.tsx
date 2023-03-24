@@ -10,11 +10,16 @@ type ReferencesListProps = {
   sx?: SxProps<Theme>;
 };
 
-const FocusedReferencesList = ({ node, sx, navigateToNode }: ReferencesListProps) => {
-  if (!node.references.length) return null;
-
+const FocusedReferencesList = ({ node, navigateToNode }: ReferencesListProps) => {
   return (
-    <Box sx={{ ...sx }}>
+    <Box
+      sx={{
+        py: "10px",
+        borderTop: theme =>
+          theme.palette.mode === "dark" ? `solid 2px ${theme.palette.common.white}` : "solid 2px #CFCFCF",
+        marginTop: "-2px",
+      }}
+    >
       <Box sx={{ display: "flex", flexWrap: "wrap", gap: "10px" }}>
         {node.references.map((reference: any, idx: number) => {
           return (
