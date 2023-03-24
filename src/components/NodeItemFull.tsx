@@ -12,7 +12,7 @@ import relativeTime from "dayjs/plugin/relativeTime";
 import NextImage from "next/image";
 import Image from "next/image";
 import { useRouter } from "next/router";
-import React, { FC, ReactNode, useState } from "react";
+import React, { FC, ReactNode, useEffect, useState } from "react";
 
 import ROUTES from "@/lib/utils/routes";
 import { getNodePageWithDomain } from "@/lib/utils/utils";
@@ -195,9 +195,25 @@ export const FocusedNodeItemFull: FC<FocusedNodeProps> = ({
   node,
   contributors,
   tags,
+  references,
   relatedNodes,
   editable = true,
 }) => {
+  const desktopTabs = [
+    {
+      title: "Contributors",
+      content: <Box>{contributors}</Box>,
+    },
+
+    {
+      title: "Refs & Tags",
+      content: <Box>{tags}</Box>,
+    },
+    {
+      title: "Related Nodes",
+      content: <Box>{relatedNodes}</Box>,
+    },
+  ];
   const router = useRouter();
   const theme = useTheme();
   const [imageFullScreen, setImageFullScreen] = useState(false);
@@ -208,6 +224,7 @@ export const FocusedNodeItemFull: FC<FocusedNodeProps> = ({
   const [paddingTop, setPaddingTop] = useState("0");
   const [value, setValue] = useState(0);
   const [isSpeaking, setIsSpeaking] = useState(false);
+  const [tabsItems, setTabsItems] = useState(desktopTabs);
   const handleChange = (event: React.SyntheticEvent, newValue: number) => {
     setValue(newValue);
   };
@@ -232,21 +249,28 @@ export const FocusedNodeItemFull: FC<FocusedNodeProps> = ({
     }
   };
 
-  const tabsItems = [
-    {
-      title: "Contributors",
-      content: <Box>{contributors}</Box>,
-    },
+  useEffect(() => {
+    console.log(window.innerWidth, "window.innerWidth");
+    if (window.innerWidth <= 599) {
+      setTabsItems([
+        {
+          title: "Contributors",
+          content: <Box>{contributors}</Box>,
+        },
 
-    {
-      title: "Refs & Tags",
-      content: <Box>{tags}</Box>,
-    },
-    {
-      title: "Related Nodes",
-      content: <Box>{relatedNodes}</Box>,
-    },
-  ];
+        {
+          title: "References",
+          content: <Box>{references}</Box>,
+        },
+        {
+          title: "Tags",
+          content: <Box>{tags}</Box>,
+        },
+      ]);
+    } else if (window.innerWidth > 599) {
+      setTabsItems(desktopTabs);
+    }
+  }, [window.innerWidth, node]);
 
   return (
     <>
@@ -419,7 +443,7 @@ export const FocusedNodeItemFull: FC<FocusedNodeProps> = ({
             {tabsItems.map((tabItem: any, idx: number) => (
               <Tab
                 sx={{
-                  fontSize: "20px",
+                  fontSize: { xs: "15px", sm: "20px" },
                   fontWeight: "400",
                 }}
                 key={tabItem.title}
