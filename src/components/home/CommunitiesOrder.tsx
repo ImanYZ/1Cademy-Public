@@ -148,7 +148,7 @@ export const allCommunities = [
   },
 
   {
-    id: "Clinical_Psychology",
+    id: "clinical-psychology",
     tags: [
       {
         title: "Clinical Psychology",
@@ -209,7 +209,7 @@ export const allCommunities = [
     ],
   },
   {
-    id: "Health_Psychology",
+    id: "health-psychology",
     tags: [
       {
         title: "Psychology",
@@ -274,7 +274,7 @@ export const allCommunities = [
     ],
   },
   {
-    id: "Disability_Studies",
+    id: "disability_studies",
     tags: [
       {
         title: "Disability Studies",
@@ -348,7 +348,7 @@ export const allCommunities = [
     ],
   },
   {
-    id: "Social_Psychology",
+    id: "social-psychology",
     tags: [
       {
         title: "Social psychology",
@@ -416,7 +416,7 @@ export const allCommunities = [
   },
 
   {
-    id: "Deep_Learning",
+    id: "deep-learning",
     tags: [
       {
         title: "Data Science",
@@ -528,7 +528,7 @@ export const allCommunities = [
     ],
   },
   {
-    id: "UX_Research_in_Online_Communities",
+    id: "ux-research-in-online-communities",
     tags: [
       {
         title: "Online Communities",
@@ -909,7 +909,7 @@ export const allCommunities = [
   //   ]
   // },
   {
-    id: "Liaison_Librarians",
+    id: "liaison-librarians",
     tags: [
       {
         title: "Library Science",
