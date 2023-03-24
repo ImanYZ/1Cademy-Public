@@ -91,6 +91,7 @@ const AppHeader = forwardRef(({ page, sections, selectedSectionId, onSwitchSecti
       postWithToken("/assignCourseToUser", { course: router.query?.course });
     }
   }, [isAuthenticated]);
+
   const renderProfileMenu = (
     <Menu id="ProfileMenu" anchorEl={profileMenuOpen} open={isProfileMenuOpen} onClose={handleProfileMenuClose}>
       {isAuthenticated && user && (

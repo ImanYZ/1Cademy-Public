@@ -3,7 +3,7 @@ import React from "react";
 
 export const allCommunities = [
   {
-    id: "ux-research-in-Cognitive-psychology-of-Learning",
+    id: "ux-research-in-cognitive-psychology-of-Learning",
     tags: [
       {
         title: "Cognitive Psychology",
@@ -416,7 +416,7 @@ export const allCommunities = [
   },
 
   {
-    id: "deep-learning",
+    id: "natural-language-processing",
     tags: [
       {
         title: "Data Science",
@@ -433,7 +433,7 @@ export const allCommunities = [
     ],
     allTime: [],
     weekly: [],
-    url: "/static/Communities/Deep_Learning.jpg",
+    url: "/static/Communities/Natural_Language_Processing.jpg",
     title: "Natural Language Processing",
     width: "34%",
     leaders: [

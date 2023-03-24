@@ -8,7 +8,7 @@ const TOPICS_ITEMS = [
     title: "UX Research in Congnitive Psychology of Learning",
     // image: "home/communities/01-ux-research-psychology-of-learning.jpg",
     image: "/static/Communities/Cognitive_Psychology.jpeg",
-    link: "/community/ux-research-in-Cognitive-psychology-of-Learning",
+    link: "/community/ux-research-in-cognitive-psychology-of-Learning",
   },
   {
     id: "clinical-psychology",
@@ -42,8 +42,8 @@ const TOPICS_ITEMS = [
     id: "natural-language-processing",
     title: "Natural Language Processing",
     // image: "home/communities/06-natural-language-processing.jpg",
-    image: "/static/Communities/Deep_Learning.jpg",
-    link: "/community/deep-learning",
+    image: "/static/Communities/Natural_Language_Processing.jpg",
+    link: "/community/natural-language-processing",
   },
   {
     id: "ux-research-communities",
