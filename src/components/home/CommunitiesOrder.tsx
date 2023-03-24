@@ -3,7 +3,7 @@ import React from "react";
 
 export const allCommunities = [
   {
-    id: "Cognitive_Psychology",
+    id: "ux-research-in-cognitive-psychology-of-Learning",
     tags: [
       {
         title: "Cognitive Psychology",
@@ -148,7 +148,7 @@ export const allCommunities = [
   },
 
   {
-    id: "Clinical_Psychology",
+    id: "clinical-psychology",
     tags: [
       {
         title: "Clinical Psychology",
@@ -209,7 +209,7 @@ export const allCommunities = [
     ],
   },
   {
-    id: "Health_Psychology",
+    id: "health-psychology",
     tags: [
       {
         title: "Psychology",
@@ -274,7 +274,7 @@ export const allCommunities = [
     ],
   },
   {
-    id: "Disability_Studies",
+    id: "disability-studies",
     tags: [
       {
         title: "Disability Studies",
@@ -348,7 +348,7 @@ export const allCommunities = [
     ],
   },
   {
-    id: "Social_Psychology",
+    id: "social-psychology",
     tags: [
       {
         title: "Social psychology",
@@ -416,7 +416,7 @@ export const allCommunities = [
   },
 
   {
-    id: "Deep_Learning",
+    id: "natural-language-processing",
     tags: [
       {
         title: "Data Science",
@@ -433,7 +433,7 @@ export const allCommunities = [
     ],
     allTime: [],
     weekly: [],
-    url: "/static/Communities/Deep_Learning.jpg",
+    url: "/static/Communities/Natural_Language_Processing.jpg",
     title: "Natural Language Processing",
     width: "34%",
     leaders: [
@@ -528,7 +528,7 @@ export const allCommunities = [
     ],
   },
   {
-    id: "UX_Research_in_Online_Communities",
+    id: "ux-research-in-online-communities",
     tags: [
       {
         title: "Online Communities",
@@ -909,7 +909,7 @@ export const allCommunities = [
   //   ]
   // },
   {
-    id: "Liaison_Librarians",
+    id: "liaison-librarians",
     tags: [
       {
         title: "Library Science",
