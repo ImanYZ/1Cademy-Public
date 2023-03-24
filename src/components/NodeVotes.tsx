@@ -59,12 +59,14 @@ export const FocusedViewNodeVotes: FC<Props> = ({ corrects = 0, wrongs = 0, corr
     <Box
       className="tab-double-button-node-footer"
       sx={{
-        width: "116px",
+        width: "110px",
         height: "40px",
         display: "flex",
         flexDirection: "row",
         background: theme => (theme.palette.mode === "dark" ? "#565757" : "#EAECF0"),
         justifyContent: "space-around",
+        paddingX: "5px",
+        marginRight: "0px",
       }}
     >
       <Tooltip
@@ -75,8 +77,6 @@ export const FocusedViewNodeVotes: FC<Props> = ({ corrects = 0, wrongs = 0, corr
             display: "flex",
             flexDirection: "row",
             alignItems: "center",
-            mr: 1,
-            ml: 1,
           }}
         >
           <CloseIcon
@@ -106,8 +106,6 @@ export const FocusedViewNodeVotes: FC<Props> = ({ corrects = 0, wrongs = 0, corr
             display: "flex",
             flexDirection: "row",
             alignItems: "center",
-            mr: 1,
-            ml: 1,
           }}
         >
           <CheckIcon

@@ -4,22 +4,36 @@ import AddIcon from "@mui/icons-material/Add";
 import CodeIcon from "@mui/icons-material/Code";
 import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
 import EmojiObjectsIcon from "@mui/icons-material/EmojiObjects";
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import HelpOutlineIcon from "@mui/icons-material/HelpOutline";
 import LocalLibraryIcon from "@mui/icons-material/LocalLibrary";
 import MenuBookIcon from "@mui/icons-material/MenuBook";
-import SearchIcon from "@mui/icons-material/Search";
 import ShareIcon from "@mui/icons-material/Share";
-import { Box, Button, Fab, Stack, Switch, TextField, Tooltip, Typography } from "@mui/material";
+import {
+  Accordion,
+  AccordionDetails,
+  AccordionSummary,
+  Box,
+  Button,
+  CircularProgress,
+  Fab,
+  Paper,
+  Switch,
+  TextField,
+  Tooltip,
+  Typography,
+} from "@mui/material";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { TimePicker } from "@mui/x-date-pickers/TimePicker";
+import dayjs from "dayjs";
+import relativeTime from "dayjs/plugin/relativeTime";
 import moment from "moment";
 import React, { MutableRefObject, useCallback, useEffect, useMemo, useRef, useState, useTransition } from "react";
 import { DispatchNodeBookActions, FullNodeData, OpenPart, TNodeUpdates } from "src/nodeBookTypes";
 
 import { useNodeBook } from "@/context/NodeBookContext";
-import { getSearchAutocomplete } from "@/lib/knowledgeApi";
 import { Post } from "@/lib/mapApi";
-import { findDiff, getVideoDataByUrl, momentDateToSeconds } from "@/lib/utils/utils";
+import { getVideoDataByUrl, momentDateToSeconds } from "@/lib/utils/utils";
 import { OpenSidebar } from "@/pages/notebook";
 
 import { useAuth } from "../../context/AuthContext";
@@ -29,8 +43,6 @@ import { TNodeBookState } from "../../nodeBookTypes";
 import { NodeType } from "../../types";
 // import { FullNodeData } from "../../noteBookTypes";
 import { Editor } from "../Editor";
-import HtmlTooltip from "../HtmlTooltip";
-import MarkdownRender from "../Markdown/MarkdownRender";
 import NodeTypeIcon from "../NodeTypeIcon2";
 // import LeaderboardChip from "../LeaderboardChip";
 // import NodeTypeIcon from "../NodeTypeIcon";
@@ -42,6 +54,7 @@ import { MemoizedNodeFooter } from "./NodeFooter";
 import { MemoizedNodeHeader } from "./NodeHeader";
 import QuestionChoices from "./QuestionChoices";
 
+dayjs.extend(relativeTime);
 // CHECK: Improve this passing Full Node Data
 // this Node need to become testeable
 // also split the in (Node and FormNode) to reduce the complexity
@@ -274,10 +287,11 @@ const Node = ({
   const [{ user }] = useAuth();
   const { nodeBookState } = useNodeBook();
   const [option, setOption] = useState<EditorOptions>("EDIT");
-
+  const [showSimilarNodes, setShowSimilarNodes] = useState(true);
   const [openPart, setOpenPart] = useState<OpenPart>(null);
   const [isHiding, setIsHiding] = useState(false);
   const [imageLoaded, setImageLoaded] = useState(false);
+  const [isFetching, setIsFetching] = useState<boolean>(false);
   const [reason, setReason] = useState("");
   const [addVideo, setAddVideo] = useState(!!nodeVideo);
   const [videoUrl, setVideoUrl] = useState(nodeVideo);
@@ -295,13 +309,11 @@ const Node = ({
     totalPage: 0,
     totalResults: 0,
   });
-  const [nodeTitleHasIssue, setNodeTitleHasIssue] = useState<boolean>(false);
-  const [explainationDesc, setExplainationDesc] = useState<boolean>(false);
+
   const [openProposal, setOpenProposal] = useState<any>(false);
   const [startTimeValue, setStartTimeValue] = React.useState<any>(moment.utc(nodeVideoStartTime * 1000));
   const [endTimeValue, setEndTimeValue] = React.useState<any>(moment.utc(nodeVideoEndTime * 1000));
   const [timePickerError, setTimePickerError] = React.useState<any>(false);
-  const [error, setError] = useState<any>(null);
   const [contentCopy, setContentCopy] = useState(content);
   const [isLoading, startTransition] = useTransition();
   const childNodeButtonsAnimation = keyframes({
@@ -533,7 +545,6 @@ const Node = ({
   const proposalSubmit = useCallback(
     () => {
       // here disable button
-      setAbleToPropose(false);
       setTimeout(() => {
         const firstParentId: any = parents[0];
 
@@ -562,7 +573,6 @@ const Node = ({
     const firstParentId: any = parents[0];
     const scrollTo = isNew ? firstParentId.node ?? undefined : identifier;
     if (!scrollTo) return;
-    setAbleToPropose(false);
     notebookRef.current.selectedNode = scrollTo;
     nodeBookDispatch({ type: "setSelectedNode", payload: scrollTo });
     setOperation("CancelProposals");
@@ -581,6 +591,9 @@ const Node = ({
 
   useEffect(() => {
     if (!editable) {
+      if (searchResults.data.length > 0) {
+        setSearchResults({ data: [], lastPageLoaded: 0, totalPage: 0, totalResults: 0 });
+      }
       if (ableToPropose) {
         setAbleToPropose(false);
       }
@@ -606,27 +619,9 @@ const Node = ({
     async (newTitle: string) => {
       setNodeParts(identifier, thisNode => ({ ...thisNode, title: newTitle }));
       if (titleUpdated && newTitle.trim().length > 0) {
-        notebookRef.current.searchByTitleOnly = true;
         nodeBookDispatch({ type: "setSearchByTitleOnly", payload: true });
-        let nodes: any = await getSearchAutocomplete(newTitle);
-        let exactMatchingNode = nodes.results.filter((title: any) => title === newTitle);
-        let diff = findDiff(nodes.results[0] ?? "", newTitle);
-        if (!explainationDesc) {
-          if (exactMatchingNode.length > 0 || diff.length <= 1) {
-            onSearch(1, newTitle.trim());
-            setNodeTitleHasIssue(true);
-            setAbleToPropose(false);
-          } else {
-            setSearchResults({
-              data: [],
-              lastPageLoaded: 0,
-              totalPage: 0,
-              totalResults: 0,
-            });
-            setError(null);
-            if (contentCopy.trim().length > 0 || imageLoaded) setAbleToPropose(true);
-          }
-        }
+        notebookRef.current.searchByTitleOnly = true;
+        onSearch(1, newTitle.trim());
         setTitleUpdated(false);
       }
       notebookRef.current.nodeTitleBlured = true;
@@ -649,6 +644,7 @@ const Node = ({
           totalResults: 0,
         });
       }
+      setIsFetching(true);
       const data: SearchNodesResponse = await Post<SearchNodesResponse>("/searchNodesInNotebook", {
         q,
         nodeTypes: NODE_TYPES_ARRAY,
@@ -667,30 +663,15 @@ const Node = ({
         totalPage: Math.ceil((data.numResults || 0) / (data.perPage || 10)),
         totalResults: data.numResults,
       });
+      setAbleToPropose(true);
+      if (newData.filter(data => data.title === q).length > 0) {
+        setAbleToPropose(false);
+      }
+      setIsFetching(false);
     } catch (err) {
       console.error(err);
     }
   }, []);
-
-  const onBlurExplainDesc = useCallback(
-    async (text: string) => {
-      setExplainationDesc(true);
-      if (nodeTitleHasIssue) {
-        if (text.trim().length > 0) {
-          if (!ableToPropose && (imageLoaded || contentCopy.trim().length > 0)) {
-            setAbleToPropose(true);
-          }
-          setError(null);
-        } else {
-          setAbleToPropose(false);
-          setError(
-            "This title is too close to another node's title shown in the search results on the left. Please differentiate this from other node titles by making it more specific, or in the reasoning section below carefully explain why the title should be as you entered."
-          );
-        }
-      }
-    },
-    [ableToPropose]
-  );
 
   const onChangeOption = useCallback(
     (newOption: boolean) => {
@@ -738,25 +719,7 @@ const Node = ({
         <>
           <div className="card-content">
             {/* <div className="card-title" data-hoverable={true}> */}
-            {editable && isNew && (
-              <>
-                {/* New Node with inputs */}
-                <p className="NewChildProposalWarning" style={{ display: "flex", alignItems: "center" }}>
-                  <span> Before proposing, search </span>
-                  <SearchIcon sx={{ color: "orange", mx: "5px", fontSize: "16px" }} />
-                  <span> to ensure the node does not exist.</span>
-                </p>
-                {(nodeType === "Concept" ||
-                  nodeType === "Relation" ||
-                  nodeType === "Question" ||
-                  nodeType === "News") &&
-                  references.length === 0 && (
-                    <p className="NewChildProposalWarning">
-                      - Make the reference nodes that you'd like to cite, visible on your map view.
-                    </p>
-                  )}
-              </>
-            )}
+
             {/* CHECK: I commented this */}
 
             {editable && (
@@ -817,61 +780,120 @@ const Node = ({
                 onBlurCallback={onBlurNodeTitle}
                 readOnly={!editable}
                 sxPreview={{ fontSize: "25px", fontWeight: 300 }}
-                error={error ? true : false}
-                helperText={error ? error : ""}
                 showEditPreviewSection={false}
                 editOption={option}
                 disabled={disableTitle}
               />
               {editable && searchResults.data.length > 0 && (
-                <Box sx={{ background: "#183658", mb: "12px", padding: "5px 0px 0px 15px" }}>
-                  <Typography
-                    sx={{
-                      color: theme => theme.palette.common.white,
-                      fontSize: "17px",
-                    }}
-                    variant="h4"
-                  >
-                    Make sure the node title you propose is different from the following:
-                  </Typography>
-                  <Box className="node-suggestions" sx={{ height: "70px", marginTop: "5px", overflowY: "scroll" }}>
-                    {searchResults.data.map((resNode, idx) => {
-                      return (
-                        <Box key={idx}>
-                          <HtmlTooltip
-                            title={
-                              <Typography variant="body2" component="div">
-                                <MarkdownRender text={resNode.content} />
-                              </Typography>
-                            }
-                            placement={"right"}
-                          >
-                            <Button
-                              onClick={() => openLinkedNode(resNode.id, "Searcher")}
-                              sx={{
-                                ":hover": {
-                                  background: "transparent",
-                                },
-                              }}
-                            >
-                              <Stack direction={"row"} spacing={2}>
-                                <NodeTypeIcon nodeType={resNode.nodeType} fontSize="inherit" />
-                                <Typography
+                <Box sx={{ marginTop: "5px" }}>
+                  {!isFetching ? (
+                    <Accordion
+                      sx={{ background: "transparent" }}
+                      expanded={showSimilarNodes}
+                      onChange={() => setShowSimilarNodes(!showSimilarNodes)}
+                    >
+                      <AccordionSummary
+                        expandIcon={<ExpandMoreIcon />}
+                        aria-controls="panel1d-content"
+                        id="panel1d-header"
+                        sx={{
+                          border: theme => (theme.palette.mode === "dark" ? "solid 1px #404040" : "solid 1px #D0D5DD"),
+                          minHeight: "50px!important",
+                          height: "50px",
+                        }}
+                      >
+                        <Typography>Similar Nodes</Typography>
+                      </AccordionSummary>
+                      <AccordionDetails
+                        sx={{
+                          borderWidth: "0px 1px 1px 1px",
+                          borderStyle: "solid",
+                          borderColor: theme => (theme.palette.mode === "dark" ? "#404040" : "#D0D5DD"),
+                        }}
+                      >
+                        <Typography
+                          sx={{
+                            color: theme =>
+                              theme.palette.mode === "dark" ? theme.palette.common.white : theme.palette.common.black,
+                            fontSize: "17px",
+                            marginY: "5px",
+                          }}
+                          variant="h4"
+                        >
+                          Make sure the node title you propose is different from the following:
+                        </Typography>
+                        <Box
+                          className="node-suggestions"
+                          sx={{
+                            height: "150px",
+                            overflowY: "scroll",
+                          }}
+                        >
+                          {searchResults.data.map((resNode, idx) => {
+                            return (
+                              <Paper
+                                elevation={3}
+                                key={`resNode${idx}`}
+                                onClick={() => {
+                                  openLinkedNode(resNode.id, "Searcher");
+                                }}
+                                sx={{
+                                  listStyle: "none",
+                                  padding: "10px",
+                                  borderLeft:
+                                    "studied" in resNode && resNode.studied ? "solid 6px #EAAA08" : "solid 6px #FD7373",
+                                  cursor: "pointer",
+                                  opacity: "1",
+                                  borderRadius: "8px",
+                                  margin: "5px 2px 0px 0px",
+                                  background: theme => (theme.palette.mode === "dark" ? "#2F2F2F" : "#F2F4F7"),
+                                }}
+                              >
+                                <Box
                                   sx={{
-                                    color: theme => theme.palette.common.white,
+                                    display: "flex",
+                                    justifyContent: "space-between",
                                   }}
-                                  fontSize={13}
-                                  variant="subtitle1"
+                                  className="SearchResultTitle"
                                 >
-                                  {resNode.title}
-                                </Typography>
-                              </Stack>
-                            </Button>
-                          </HtmlTooltip>
+                                  {/* CHECK: here is causing problems to hide scroll */}
+                                  <Editor
+                                    sxPreview={{
+                                      fontSize: {
+                                        xs: "14px",
+                                        sm: "16px",
+                                      },
+                                    }}
+                                    label=""
+                                    readOnly={true}
+                                    setValue={() => {}}
+                                    value={resNode.title}
+                                  />
+                                  <Box
+                                    sx={{
+                                      width: "25px",
+                                      height: "25px",
+                                      borderRadius: "50%",
+                                      background: theme => (theme.palette.mode === "dark" ? "#404040" : "#EAECF0"),
+                                      display: "flex",
+                                      justifyContent: "center",
+                                      alignItems: "center",
+                                    }}
+                                  >
+                                    <NodeTypeIcon nodeType={resNode.nodeType} fontSize="inherit" />
+                                  </Box>
+                                </Box>
+                              </Paper>
+                            );
+                          })}
                         </Box>
-                      );
-                    })}
-                  </Box>
+                      </AccordionDetails>
+                    </Accordion>
+                  ) : (
+                    <Box sx={{ marginTop: "20px", textAlign: "center" }}>
+                      <CircularProgress />
+                    </Box>
+                  )}
                 </Box>
               )}
               {/* </div> */}
@@ -976,7 +998,6 @@ const Node = ({
                     value={reason}
                     setValue={setReason}
                     readOnly={false}
-                    onBlurCallback={onBlurExplainDesc}
                     showEditPreviewSection={false}
                     editOption={option}
                     disabled={disableWhy}
@@ -1366,11 +1387,7 @@ const Node = ({
             flexDirection: "column",
             gap: "10px",
             position: "absolute",
-            top:
-              (parseFloat(String(document.getElementById(identifier)?.clientHeight)) -
-                parseFloat(String(document.getElementById(`${identifier}-new-children-nodes-buttons`)?.clientHeight))) *
-                0.5 +
-              "px",
+            top: (parseFloat(String(document.getElementById(identifier)?.clientHeight)) - 396) * 0.5 + "px",
             animation: `${childNodeButtonsAnimation} 1s forwards`,
             borderRadius: "25px",
           }}
