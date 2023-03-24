@@ -4878,13 +4878,14 @@ const Dashboard = ({}: DashboardProps) => {
 
       // --------------------------
 
+      const nodesTaken = userTutorial["nodes"].done || userTutorial["nodes"].skipped;
+
       const mostParent = parentWithMostChildren();
       const hideOffspringsTutorialIsValid = (node: FullNodeData) =>
         node && !node.editable && parentWithChildren(node.node) >= 2;
       const hideOffspringsTutorialForcedIsValid = (node: FullNodeData) => node && !node.editable;
 
       if ((!forcedTutorial && mostParent.children >= 2) || forcedTutorial === "hideOffsprings") {
-        const nodesTaken = userTutorial["nodes"].done || userTutorial["nodes"].skipped;
         const hideOffspringTaken = userTutorial["hideOffsprings"].done || userTutorial["hideOffsprings"].skipped;
 
         const shouldIgnore = hideOffspringTaken || !nodesTaken;
@@ -4912,14 +4913,13 @@ const Dashboard = ({}: DashboardProps) => {
 
       const closeNodeTutorialIsValid = (node: FullNodeData) => Boolean(node) && node.open;
       const openedNodes = getGraphOpenedNodes();
-      if (openedNodes >= 2) {
+      if (openedNodes >= 2 && !forcedTutorial) {
         const firstOpenedNode = Object.values(graph.nodes).find(node => node.open);
-        const shouldIgnore =
-          userTutorial["collapseNode"].skipped ||
-          userTutorial["collapseNode"].done ||
-          (!userTutorial["nodes"].done && !userTutorial["nodes"].skipped);
+        const collapseNodeTaken = userTutorial["collapseNode"].skipped || userTutorial["collapseNode"].done;
+        const shouldIgnore = collapseNodeTaken || !nodesTaken;
         if (firstOpenedNode && !shouldIgnore) {
-          const result = detectAndForceTutorial("collapseNode", firstOpenedNode.node, closeNodeTutorialIsValid);
+          const takeOver = nodeBookState.selectedNode ?? firstOpenedNode.node;
+          const result = detectAndForceTutorial("collapseNode", takeOver, closeNodeTutorialIsValid);
           if (result) return;
         }
       }
@@ -4931,14 +4931,13 @@ const Dashboard = ({}: DashboardProps) => {
       // --------------------------
 
       const expandNodeTutorialIsValid = (node: FullNodeData) => Boolean(node) && !node.open;
-      if (Object.keys(graph.nodes).length > openedNodes) {
+      if (Object.keys(graph.nodes).length > openedNodes && !forcedTutorial) {
         const firstClosedNode = Object.values(graph.nodes).find(node => !node.open);
-        const shouldIgnore =
-          userTutorial["expandNode"].skipped ||
-          userTutorial["expandNode"].done ||
-          (!userTutorial["nodes"].done && !userTutorial["nodes"].skipped);
+        const expandNodeTaken = userTutorial["expandNode"].skipped || userTutorial["expandNode"].done;
+        const shouldIgnore = expandNodeTaken || !nodesTaken;
         if (firstClosedNode && !shouldIgnore) {
-          const result = detectAndForceTutorial("expandNode", firstClosedNode.node, expandNodeTutorialIsValid);
+          const takeOver = nodeBookState.selectedNode ?? firstClosedNode.node;
+          const result = detectAndForceTutorial("expandNode", takeOver, expandNodeTutorialIsValid);
           if (result) return;
         }
       }
