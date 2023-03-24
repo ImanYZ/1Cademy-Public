@@ -1,8 +1,6 @@
 import AdapterMomentJs from "@date-io/moment";
 import { keyframes } from "@emotion/react";
 import AddIcon from "@mui/icons-material/Add";
-import CheckIcon from "@mui/icons-material/Check";
-import CloseIcon from "@mui/icons-material/Close";
 import CodeIcon from "@mui/icons-material/Code";
 import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
 import EmojiObjectsIcon from "@mui/icons-material/EmojiObjects";
@@ -17,7 +15,7 @@ import {
   AccordionSummary,
   Box,
   Button,
-  Divider,
+  CircularProgress,
   Fab,
   Paper,
   Switch,
@@ -293,6 +291,7 @@ const Node = ({
   const [openPart, setOpenPart] = useState<OpenPart>(null);
   const [isHiding, setIsHiding] = useState(false);
   const [imageLoaded, setImageLoaded] = useState(false);
+  const [isFetching, setIsFetching] = useState<boolean>(false);
   const [reason, setReason] = useState("");
   const [addVideo, setAddVideo] = useState(!!nodeVideo);
   const [videoUrl, setVideoUrl] = useState(nodeVideo);
@@ -620,6 +619,7 @@ const Node = ({
     async (newTitle: string) => {
       setNodeParts(identifier, thisNode => ({ ...thisNode, title: newTitle }));
       if (titleUpdated && newTitle.trim().length > 0) {
+        nodeBookDispatch({ type: "setSearchByTitleOnly", payload: true });
         notebookRef.current.searchByTitleOnly = true;
         onSearch(1, newTitle.trim());
         setTitleUpdated(false);
@@ -644,6 +644,7 @@ const Node = ({
           totalResults: 0,
         });
       }
+      setIsFetching(true);
       const data: SearchNodesResponse = await Post<SearchNodesResponse>("/searchNodesInNotebook", {
         q,
         nodeTypes: NODE_TYPES_ARRAY,
@@ -666,6 +667,7 @@ const Node = ({
       if (newData.filter(data => data.title === q).length > 0) {
         setAbleToPropose(false);
       }
+      setIsFetching(false);
     } catch (err) {
       console.error(err);
     }
@@ -784,100 +786,89 @@ const Node = ({
               />
               {editable && searchResults.data.length > 0 && (
                 <Box sx={{ marginTop: "5px" }}>
-                  <Accordion
-                    sx={{ background: "transparent" }}
-                    expanded={showSimilarNodes}
-                    onChange={() => setShowSimilarNodes(!showSimilarNodes)}
-                  >
-                    <AccordionSummary
-                      expandIcon={<ExpandMoreIcon />}
-                      aria-controls="panel1d-content"
-                      id="panel1d-header"
-                      sx={{
-                        border: theme => (theme.palette.mode === "dark" ? "solid 1px #404040" : "solid 1px #D0D5DD"),
-                        minHeight: "50px!important",
-                        height: "50px",
-                      }}
+                  {!isFetching ? (
+                    <Accordion
+                      sx={{ background: "transparent" }}
+                      expanded={showSimilarNodes}
+                      onChange={() => setShowSimilarNodes(!showSimilarNodes)}
                     >
-                      <Typography>Similar Nodes</Typography>
-                    </AccordionSummary>
-                    <AccordionDetails
-                      sx={{
-                        borderWidth: "0px 1px 1px 1px",
-                        borderStyle: "solid",
-                        borderColor: theme => (theme.palette.mode === "dark" ? "#404040" : "#D0D5DD"),
-                      }}
-                    >
-                      <Typography
+                      <AccordionSummary
+                        expandIcon={<ExpandMoreIcon />}
+                        aria-controls="panel1d-content"
+                        id="panel1d-header"
                         sx={{
-                          color: theme =>
-                            theme.palette.mode === "dark" ? theme.palette.common.white : theme.palette.common.black,
-                          fontSize: "17px",
-                          marginY: "5px",
-                        }}
-                        variant="h4"
-                      >
-                        Make sure the node title you propose is different from the following:
-                      </Typography>
-                      <Box
-                        className="node-suggestions"
-                        sx={{
-                          height: "200px",
-                          overflowY: "scroll",
+                          border: theme => (theme.palette.mode === "dark" ? "solid 1px #404040" : "solid 1px #D0D5DD"),
+                          minHeight: "50px!important",
+                          height: "50px",
                         }}
                       >
-                        {searchResults.data.map((resNode, idx) => {
-                          return (
-                            <Paper
-                              elevation={3}
-                              key={`resNode${idx}`}
-                              onClick={() => {
-                                openLinkedNode(resNode.id, "Searcher");
-                              }}
-                              sx={{
-                                listStyle: "none",
-                                padding: "10px",
-                                borderLeft: "solid 6px #FD7373",
-                                cursor: "pointer",
-                                opacity: "1",
-                                borderRadius: "8px",
-                                margin: "5px 2px 0px 0px",
-                                background: theme => (theme.palette.mode === "dark" ? "#2F2F2F" : "#F2F4F7"),
-                              }}
-                            >
-                              <Box className="SearchResultTitle">
-                                {/* CHECK: here is causing problems to hide scroll */}
-                                <Editor
-                                  sxPreview={{
-                                    fontSize: {
-                                      xs: "14px",
-                                      sm: "16px",
-                                    },
-                                  }}
-                                  label=""
-                                  readOnly={true}
-                                  setValue={() => {}}
-                                  value={resNode.title}
-                                />
-                              </Box>
-
-                              <Box
-                                className="SidebarNodeTypeIcon"
+                        <Typography>Similar Nodes</Typography>
+                      </AccordionSummary>
+                      <AccordionDetails
+                        sx={{
+                          borderWidth: "0px 1px 1px 1px",
+                          borderStyle: "solid",
+                          borderColor: theme => (theme.palette.mode === "dark" ? "#404040" : "#D0D5DD"),
+                        }}
+                      >
+                        <Typography
+                          sx={{
+                            color: theme =>
+                              theme.palette.mode === "dark" ? theme.palette.common.white : theme.palette.common.black,
+                            fontSize: "17px",
+                            marginY: "5px",
+                          }}
+                          variant="h4"
+                        >
+                          Make sure the node title you propose is different from the following:
+                        </Typography>
+                        <Box
+                          className="node-suggestions"
+                          sx={{
+                            height: "150px",
+                            overflowY: "scroll",
+                          }}
+                        >
+                          {searchResults.data.map((resNode, idx) => {
+                            return (
+                              <Paper
+                                elevation={3}
+                                key={`resNode${idx}`}
+                                onClick={() => {
+                                  openLinkedNode(resNode.id, "Searcher");
+                                }}
                                 sx={{
-                                  display: "flex",
-                                  justifyContent: "space-between",
-                                  fontSize: "16px",
-                                  marginTop: "10px",
-                                  alignItems: "center",
+                                  listStyle: "none",
+                                  padding: "10px",
+                                  borderLeft:
+                                    "studied" in resNode && resNode.studied ? "solid 6px #EAAA08" : "solid 6px #FD7373",
+                                  cursor: "pointer",
+                                  opacity: "1",
+                                  borderRadius: "8px",
+                                  margin: "5px 2px 0px 0px",
+                                  background: theme => (theme.palette.mode === "dark" ? "#2F2F2F" : "#F2F4F7"),
                                 }}
                               >
                                 <Box
                                   sx={{
                                     display: "flex",
                                     justifyContent: "space-between",
-                                    fontSize: "inherit",
                                   }}
+                                  className="SearchResultTitle"
                                 >
+                                  {/* CHECK: here is causing problems to hide scroll */}
+                                  <Editor
+                                    sxPreview={{
+                                      fontSize: {
+                                        xs: "14px",
+                                        sm: "16px",
+                                      },
+                                    }}
+                                    label=""
+                                    readOnly={true}
+                                    setValue={() => {}}
+                                    value={resNode.title}
+                                  />
                                   <Box
                                     sx={{
                                       width: "25px",
@@ -891,92 +882,18 @@ const Node = ({
                                   >
                                     <NodeTypeIcon nodeType={resNode.nodeType} fontSize="inherit" />
                                   </Box>
-                                  <span
-                                    id={`${identifier}-node-footer-timestamp`}
-                                    style={{
-                                      marginLeft: "10px",
-                                      color: "#A4A4A4",
-                                      lineHeight: "normal",
-                                    }}
-                                  >
-                                    {dayjs(new Date(resNode.changedAt)).fromNow().includes("NaN")
-                                      ? "a few minutes ago"
-                                      : `${dayjs(new Date(resNode.changedAt)).fromNow()}`}
-                                  </span>
                                 </Box>
-                                <Box>
-                                  <Box
-                                    className="tab-double-button-node-footer"
-                                    sx={{
-                                      width: "105px",
-                                      height: "25px",
-                                      display: "flex",
-                                      flexDirection: "row",
-                                      background: theme => (theme.palette.mode === "dark" ? "#565757" : "#EAECF0"),
-                                      justifyContent: "space-around",
-                                      paddingX: "5px",
-                                      fontSize: "14px",
-                                    }}
-                                  >
-                                    <Tooltip
-                                      title={`${resNode.wrongs}  people found this node unhelpful and voted to delete it. To vote, you should create an account.`}
-                                    >
-                                      <Box
-                                        sx={{
-                                          display: "flex",
-                                          flexDirection: "row",
-                                          alignItems: "center",
-                                        }}
-                                      >
-                                        <CloseIcon
-                                          fontSize="small"
-                                          sx={{
-                                            color: "inherit",
-                                          }}
-                                        />
-                                        <Typography sx={{ ml: 1, color: "inherit" }} color="disabled">
-                                          {resNode.wrongs}
-                                        </Typography>
-                                      </Box>
-                                    </Tooltip>
-                                    <Divider
-                                      orientation="vertical"
-                                      variant="middle"
-                                      flexItem
-                                      sx={{
-                                        borderColor: theme => (theme.palette.mode === "dark" ? "#D3D3D3" : "inherit"),
-                                      }}
-                                    />
-                                    <Tooltip
-                                      title={`${resNode.corrects} people found this node helpful and voted to prevent further changes. To vote, you should create an account.`}
-                                    >
-                                      <Box
-                                        sx={{
-                                          display: "flex",
-                                          flexDirection: "row",
-                                          alignItems: "center",
-                                        }}
-                                      >
-                                        <CheckIcon
-                                          fontSize="small"
-                                          sx={{
-                                            color: "inherit",
-                                          }}
-                                        />
-                                        <Typography sx={{ ml: 1, color: "inherit" }} color="disabled">
-                                          {resNode.corrects}
-                                        </Typography>
-                                      </Box>
-                                    </Tooltip>
-                                  </Box>
-                                </Box>
-                              </Box>
-                            </Paper>
-                          );
-                        })}
-                      </Box>
-                    </AccordionDetails>
-                  </Accordion>
+                              </Paper>
+                            );
+                          })}
+                        </Box>
+                      </AccordionDetails>
+                    </Accordion>
+                  ) : (
+                    <Box sx={{ marginTop: "20px", textAlign: "center" }}>
+                      <CircularProgress />
+                    </Box>
+                  )}
                 </Box>
               )}
               {/* </div> */}
