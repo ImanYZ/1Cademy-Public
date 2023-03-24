@@ -3,7 +3,7 @@ import React from "react";
 
 export const allCommunities = [
   {
-    id: "Cognitive_Psychology",
+    id: "ux-research-in-Cognitive-psychology-of-Learning",
     tags: [
       {
         title: "Cognitive Psychology",
