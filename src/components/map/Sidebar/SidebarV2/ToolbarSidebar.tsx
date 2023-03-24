@@ -2,7 +2,7 @@ import KeyboardArrowLeftIcon from "@mui/icons-material/KeyboardArrowLeft";
 import MenuIcon from "@mui/icons-material/Menu";
 import { Badge, Box, Button, IconButton, Menu, MenuItem, Stack, Tooltip } from "@mui/material";
 import { addDoc, collection, doc, getFirestore, setDoc, Timestamp } from "firebase/firestore";
-import React, { Dispatch, SetStateAction, useCallback, useMemo, useState } from "react";
+import React, { useCallback, useMemo, useState } from "react";
 
 import { useNodeBook } from "@/context/NodeBookContext";
 
@@ -10,7 +10,7 @@ import LogoDarkMode from "../../../../../public/LogoDarkMode.svg";
 import LogoLightMode from "../../../../../public/LogoLightMode.svg";
 import { Reputation, ReputationSignal, User, UserTheme } from "../../../../knowledgeTypes";
 import { UsersStatus, UserTutorials } from "../../../../nodeBookTypes";
-import { OpenSidebar, TutorialType } from "../../../../pages/notebook";
+import { OpenSidebar } from "../../../../pages/notebook";
 import { MemoizedMetaButton } from "../../MetaButton";
 import { MemoizedUserStatusSettings } from "../../UserStatusSettings";
 import UsersStatusList from "../UsersStatusList";
@@ -39,7 +39,7 @@ type MainSidebarProps = {
   disableToolbar?: boolean;
   enabledToolbarElements?: string[];
   userTutorial: UserTutorials;
-  setCurrentTutorial: Dispatch<SetStateAction<TutorialType>>;
+  // setCurrentTutorial: Dispatch<SetStateAction<TutorialKeys>>;
 };
 
 export const ToolbarSidebar = ({
@@ -61,8 +61,8 @@ export const ToolbarSidebar = ({
   usersOnlineStatusLoaded,
   disableToolbar = false,
   userTutorial,
-  setCurrentTutorial,
-}: // enabledToolbarElements = [],
+}: // setCurrentTutorial,
+// enabledToolbarElements = [],
 MainSidebarProps) => {
   const { nodeBookState, nodeBookDispatch } = useNodeBook();
   const isMenuOpen = nodeBookState.isMenuOpen;
@@ -642,9 +642,6 @@ MainSidebarProps) => {
     setOpenSideBar,
     reputationSignal,
     disableUserStatusList,
-    userTutorial.searcher.done,
-    userTutorial.searcher.skipped,
-    setCurrentTutorial,
     onOpenSidebar,
     setIsMenuOpen,
   ]);

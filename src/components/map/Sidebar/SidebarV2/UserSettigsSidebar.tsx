@@ -3,6 +3,7 @@ import CodeIcon from "@mui/icons-material/Code";
 import DoneIcon from "@mui/icons-material/Done";
 import EmojiObjectsIcon from "@mui/icons-material/EmojiObjects";
 import ExitToAppIcon from "@mui/icons-material/ExitToApp";
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import HelpOutlineIcon from "@mui/icons-material/HelpOutline";
 import LocalLibraryIcon from "@mui/icons-material/LocalLibrary";
 import LocalOfferIcon from "@mui/icons-material/LocalOffer";
@@ -49,12 +50,15 @@ import { useTagsTreeView } from "@/hooks/useTagsTreeView";
 import { retrieveAuthenticatedUser } from "@/lib/firestoreClient/auth";
 import { Post } from "@/lib/mapApi";
 import { ETHNICITY_VALUES, FOUND_FROM_VALUES, GENDER_VALUES } from "@/lib/utils/constants";
+import { getTypedCollections } from "@/lib/utils/getTypedCollections";
+import { justADate } from "@/lib/utils/justADate";
 import shortenNumber from "@/lib/utils/shortenNumber";
 import { ToUpperCaseEveryWord } from "@/lib/utils/utils";
 
 import { MemoizedInputSave } from "../../InputSave";
 import { MemoizedMetaButton } from "../../MetaButton";
 import Modal from "../../Modal/Modal";
+import ProposalItem from "../../ProposalsList/ProposalItem/ProposalItem";
 import ProfileAvatar from "../ProfileAvatar";
 import { UserSettingsProfessionalInfo } from "../UserSettingsProfessionalInfo";
 import { SidebarWrapper } from "./SidebarWrapper";
@@ -64,6 +68,7 @@ dayjs.extend(relativeTime);
 type UserSettingsSidebarProps = {
   notebookRef: MutableRefObject<TNodeBookState>;
   open: boolean;
+  openLinkedNode: any;
   onClose: () => void;
   theme: UserTheme;
   user: User;
@@ -75,10 +80,11 @@ type UserSettingsSidebarProps = {
   scrollToNode: (nodeId: string) => void;
 };
 
-export const NODE_TYPE_OPTIONS: NodeType[] = ["Code", "Concept", "Idea", "Question", "Reference", "Relation"];
+export const NODE_TYPE_OPTIONS: NodeType[] = ["Code", "Concept", "Idea", "Question", "Reference", "Relation", "News"];
 
 const UserSettigsSidebar = ({
   notebookRef,
+  openLinkedNode,
   open,
   onClose,
   user,
@@ -90,18 +96,18 @@ const UserSettigsSidebar = ({
   scrollToNode,
 }: UserSettingsSidebarProps) => {
   const db = getFirestore();
+  const ELEMENTS_PER_PAGE: number = 13;
   const { allTags, setAllTags } = useTagsTreeView(user.tagId ? [user.tagId] : []);
   const [languages, setLanguages] = useState<string[]>([]);
   const [countries, setCountries] = useState<ICountry[]>([]);
   const [states, setStates] = useState<IState[]>([]);
   const [cities, setCities] = useState<ICity[]>([]);
-
   const [instlogoURL, setInstlogoURL] = useState("");
   const [totalPoints, setTotalPoints] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
-
+  const [proposals, setProposals] = useState<any[]>([]);
+  const [lastIndex, setLastIndex] = useState(ELEMENTS_PER_PAGE);
   const [value, setValue] = React.useState(0);
-
   const isInEthnicityValues = (ethnicityItem: string) => ETHNICITY_VALUES.includes(ethnicityItem);
   const getOtherValue = (userValues: string[], defaultValue: string, userValue?: string) => {
     if (!userValue) return "";
@@ -291,6 +297,96 @@ const UserSettigsSidebar = ({
     userReputation.sInst,
     userReputation.sWrongs,
   ]);
+
+  const fetchProposals = useCallback(async () => {
+    const versions: { [key: string]: any } = {};
+    for (let nodeType of NODE_TYPE_OPTIONS) {
+      const { versionsColl, userVersionsColl } = getTypedCollections(db, nodeType);
+
+      if (!versionsColl || !userVersionsColl) continue;
+
+      const versionCollectionRef = query(
+        versionsColl,
+        where("proposer", "==", user.uname),
+        where("deleted", "==", false)
+      );
+
+      const versionsData = await getDocs(versionCollectionRef);
+      let versionId;
+      const userVersionsRefs: any[] = [];
+      versionsData.forEach(versionDoc => {
+        const versionData = versionDoc.data();
+
+        versions[versionDoc.id] = {
+          ...versionData,
+          id: versionDoc.id,
+          createdAt: versionData.createdAt.toDate(),
+          award: false,
+          correct: false,
+          wrong: false,
+        };
+        delete versions[versionDoc.id].deleted;
+        delete versions[versionDoc.id].updatedAt;
+        const userVersionCollectionRef = query(
+          userVersionsColl,
+          where("version", "==", versionDoc.id),
+          where("user", "==", user.uname)
+        );
+        userVersionsRefs.push(userVersionCollectionRef);
+      });
+
+      if (userVersionsRefs.length > 0) {
+        await Promise.all(
+          userVersionsRefs.map(async userVersionsRef => {
+            const userVersionsDocs = await getDocs(userVersionsRef);
+            userVersionsDocs.forEach((userVersionsDoc: any) => {
+              const userVersion = userVersionsDoc.data();
+              versionId = userVersion.version;
+              delete userVersion.version;
+              delete userVersion.updatedAt;
+              delete userVersion.createdAt;
+              delete userVersion.user;
+              versions[versionId] = {
+                ...versions[versionId],
+                ...userVersion,
+              };
+            });
+          })
+        );
+      }
+    }
+
+    const orderredProposals = Object.values(versions).sort(
+      (a, b) => Number(new Date(b.createdAt)) - Number(new Date(a.createdAt))
+    );
+    const proposalsPerDayDict: { [key: string]: any } = {};
+    for (let propo of orderredProposals) {
+      let dateValue = justADate(new Date(propo.createdAt)).toISOString();
+      if (dateValue in proposalsPerDayDict) {
+        proposalsPerDayDict[dateValue].num++;
+        proposalsPerDayDict[dateValue].netVotes += propo.corrects - propo.wrongs;
+      } else {
+        proposalsPerDayDict[dateValue] = {
+          num: 1,
+          netVotes: propo.corrects - propo.wrongs,
+        };
+      }
+    }
+    const proposalsPerDayList = [];
+    for (let dateValue of Object.keys(proposalsPerDayDict)) {
+      proposalsPerDayList.push({
+        date: new Date(dateValue),
+        num: proposalsPerDayDict[dateValue].num,
+        netVotes: proposalsPerDayDict[dateValue].netVotes,
+        averageVotes: proposalsPerDayDict[dateValue].netVotes / proposalsPerDayDict[dateValue].num,
+      });
+    }
+    setProposals(orderredProposals);
+  }, [db, user]);
+
+  useEffect(() => {
+    fetchProposals();
+  }, [fetchProposals]);
 
   useEffect(() => {
     // get institutions and update instLogo from setSUserObj
@@ -659,6 +755,12 @@ const UserSettigsSidebar = ({
       await batch.commit();
     }
   };
+
+  const loadOlderProposalsClick = useCallback(() => {
+    if (lastIndex >= proposals.length) return;
+    setLastIndex(lastIndex + ELEMENTS_PER_PAGE);
+  }, [lastIndex, proposals.length]);
+
   const tabsItems = useMemo(() => {
     return [
       {
@@ -886,6 +988,32 @@ const UserSettigsSidebar = ({
           </div>
         ),
       },
+      {
+        title: "Proposals",
+        content: (
+          <Box sx={{ display: "flex", flexDirection: "column", gap: "4px" }}>
+            <div className="ChartTitle">Proposals in chronological order</div>
+            {proposals.slice(0, lastIndex).map((proposal, idx) => {
+              return (
+                proposal.title && (
+                  <ProposalItem key={idx} proposal={proposal} openLinkedNode={openLinkedNode} showTitle={true} />
+                )
+              );
+            })}
+            {proposals.length > lastIndex && (
+              <div id="ContinueButton" style={{ padding: "10px 0px" }}>
+                <MemoizedMetaButton onClick={loadOlderProposalsClick}>
+                  <>
+                    <ExpandMoreIcon className="material-icons grey-text" />
+                    Older Proposals
+                    <ExpandMoreIcon className="material-icons grey-text" />
+                  </>
+                </MemoizedMetaButton>
+              </div>
+            )}
+          </Box>
+        ),
+      },
     ];
   }, [
     canShowOtherEthnicityInput,
@@ -915,6 +1043,8 @@ const UserSettigsSidebar = ({
     settings.view,
     states,
     user,
+    lastIndex,
+    loadOlderProposalsClick,
   ]);
   const setUserImage = useCallback(
     (newImage: string) => {

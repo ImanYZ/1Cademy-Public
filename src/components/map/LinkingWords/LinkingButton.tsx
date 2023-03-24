@@ -17,7 +17,7 @@ type LinkingButtonProps = {
   // nodeID: any,
   linkedNodeID: any;
   linkedNodeTitle: string;
-  linkedNodeType: "child" | "children" | "tag" | "parent" | "reference";
+  linkedNodeType: "child" | "children" | "tag" | "parent" | "parents" | "reference";
   nodeType?: NodeType;
   visible?: boolean;
   iClassName?: string;
@@ -44,7 +44,9 @@ const LinkingButton = ({ disabled = false, id, ...props }: LinkingButtonProps) =
       id={id}
       onClick={linkedNodeClick}
       tooltip={`${props.visible ? "Navigate to" : "Open"} ${
-        props.linkedNodeType === "children" ? " all the children." : " this " + props.linkedNodeType + " node."
+        props.linkedNodeType === "children" || props.linkedNodeType === "parent"
+          ? ` all the ${props.linkedNodeType}.`
+          : " this " + props.linkedNodeType + " node."
       }`}
       tooltipPosition={
         props.linkedNodeType === "child" || props.linkedNodeType === "children" || props.linkedNodeType === "tag"
@@ -80,7 +82,12 @@ const LinkingButton = ({ disabled = false, id, ...props }: LinkingButtonProps) =
           fontSize={"inherit"}
           sx={{
             marginRight: "4px",
-            color: props.linkedNodeType !== "children" ? (props.visible ? "#00E676" : "#f9a825") : "gray",
+            color:
+              props.linkedNodeType !== "children" && props.linkedNodeType !== "parents"
+                ? props.visible
+                  ? "#00E676"
+                  : "#f9a825"
+                : "gray",
           }}
         />
         <Editor

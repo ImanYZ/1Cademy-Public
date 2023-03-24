@@ -1,6 +1,7 @@
 body {
   background-image: none;
   background-color: #121212;
+  overflow: hidden;
 }
 body.Image {
   background-image: url(../../public/darkModeLibraryBackground.jpg);
@@ -785,51 +786,33 @@ p {
   border-right: 6px solid transparent;
 }
 
-/* TUTORIAL STYLES TOOLTIP */
-.tooltip::after {
-  position: absolute;
-  content: "";
-  border-style: solid;
-  border-width: 10px;
-  border-color: transparent;
-}
-.tooltip-top::after {
-  border-bottom-width: 0px;
-  border-top-color: inherit;
-  bottom: -10px;
-  left: calc(50% - 10px);
-}
-.tooltip-bottom::after {
-  border-top-width: 0px;
-  border-bottom-color: inherit;
-  top: -10px;
-  left: calc(50% - 10px);
-}
-.tooltip-right::after {
-  border-left-width: 0px;
-  border-right-color: inherit;
-  left: -10px;
-  top: calc(50% - 10px);
-}
-.tooltip-left::after {
-  border-right-width: 0px;
-  border-left-color: inherit;
-  right: -10px;
-  top: calc(50% - 10px);
-}
-
-.tutorial-target {
+.tutorial-target-shallow {
   animation: tutorial-tt 2s infinite;
-  outline: 1px solid #ff6d00;
+  outline: 3px solid #ff6d00;
   outline-offset: 2px;
 }
 
-.tutorial-target-large {
+.tutorial-target-outside {
   animation: tutorial-tt 2s infinite;
-  outline: 1px solid #ff6d00;
+  outline: 3px solid #ff6d00;
   outline-offset: 5px;
 }
 
+.node-suggestions::-webkit-scrollbar {
+  /* CHECK: I add this to hide scroll and have functionality */
+  width: 6px;
+  height: 8px;
+}
+.node-suggestions::-webkit-scrollbar-thumb {
+  background: #818181;
+  border-radius: 10px;
+}
+
+.tutorial-target-inside {
+  animation: tutorial-tt 2s infinite;
+  outline: 3px solid #ff6d00;
+  outline-offset: -3px;
+}
 @keyframes tutorial-tt {
   0% {
     outline: 3px solid #ff6d00;

@@ -1,16 +1,18 @@
-import LiveHelpIcon from "@mui/icons-material/LiveHelp";
-import { Box, Button, Stack, Typography } from "@mui/material";
-import React, { useMemo, useRef } from "react";
+import HelpIcon from "@mui/icons-material/Help";
+import { Box, Button, Stack, Typography, useMediaQuery } from "@mui/material";
+import React, { useCallback, useMemo, useRef } from "react";
 
+import { useWindowSize } from "@/hooks/useWindowSize";
 import { gray50, gray200, gray700, gray800 } from "@/pages/home";
 
-import { TargetClientRect } from "../../hooks/useInteractiveTutorial";
+import { TargetClientRect, Tutorial } from "../../hooks/useInteractiveTutorial3";
 import { FullNodeData, TutorialStep } from "../../nodeBookTypes";
 
-const TOOLTIP_OFFSET = 40;
-
+const TOOLTIP_OFFSET = 20;
+const TOOLTIP_TALE_SIZE = 10;
 type TutorialProps = {
-  tutorialState: TutorialStep | null;
+  tutorial: Tutorial;
+  tutorialStep: TutorialStep | null;
   onNextStep: () => void;
   onPreviousStep: () => void;
   targetClientRect: TargetClientRect;
@@ -19,10 +21,12 @@ type TutorialProps = {
   onFinalize: () => void;
   stepsLength: number;
   node: FullNodeData;
+  isOnPortal?: boolean;
 };
 
-export const Tutorial = ({
-  tutorialState,
+export const TooltipTutorial = ({
+  // tutorial,// TODO: remove
+  tutorialStep,
   targetClientRect,
   onNextStep,
   onPreviousStep,
@@ -31,46 +35,151 @@ export const Tutorial = ({
   onFinalize,
   stepsLength,
   node,
+  isOnPortal,
 }: TutorialProps) => {
   const tooltipRef = useRef<HTMLDivElement | null>(null);
 
-  const tooltipClientRect = useMemo(() => {
-    if (!tooltipRef.current) return { top: 0, left: 0 };
-    if (!tutorialState) return { top: 0, left: 0 };
+  const { width: windowWidth, height: windowHeight } = useWindowSize();
 
-    const { height: tooltipHeight } = tooltipRef.current.getBoundingClientRect();
+  const isMobile = useMediaQuery("(max-width:600px)");
+
+  // console.log({ tutorialStep, tutorial });
+
+  const calcWithExceed = useCallback(
+    (top: number, left: number) => {
+      if (!tooltipRef.current) return { top, left };
+
+      //if the width of tooltip exceeds the winwow heigth
+      const exceedBottom = top + tooltipRef.current.clientHeight - windowHeight;
+      top = exceedBottom > 0 ? top - exceedBottom - 4 : top;
+
+      //if the top of the tooltip is less than - 0
+      top = top < 0 ? 10 : top;
+
+      //if the width of tooltip exceeds the winwow width
+      const exceedRight = left + tooltipRef.current.clientWidth - windowWidth;
+      left = exceedRight > 0 ? left - exceedRight - 4 : left;
+
+      //if the left of the tooltip is less than - 0
+      left = left < 0 ? 10 : left;
+      return { top, left };
+    },
+    [windowHeight, windowWidth]
+  );
+
+  const tooltipRect = useMemo(() => {
     let top = 0;
     let left = 0;
-    const pos = tutorialState.tooltipPosition;
+    let exceedTop = 0;
+    let exceedLeft = 0;
+    console.log("TOOLTIP_CLIENT_RECT", { tutorialStep });
+
+    if (!tooltipRef.current) return { top, left, exceedTop, exceedLeft };
+    if (!tutorialStep) return { top, left, exceedTop, exceedLeft };
+
+    // const { height: tooltipHeight } = tooltipRef.current.getBoundingClientRect();
+    const pos = tutorialStep.tooltipPosition;
     if (pos === "top") {
-      top = targetClientRect.top - tooltipHeight - TOOLTIP_OFFSET;
+      top = targetClientRect.top - tooltipRef.current.clientHeight - TOOLTIP_OFFSET;
       left = targetClientRect.left + targetClientRect.width / 2 - tooltipRef.current.clientWidth / 2;
+
+      if (tutorialStep.anchor === "Portal") {
+        const { top: newTop, left: newLeft } = calcWithExceed(top, left);
+
+        exceedLeft = left - newLeft;
+        exceedTop = top - newTop;
+        top = newTop;
+        left = newLeft;
+      }
     }
     if (pos === "bottom") {
       top = targetClientRect.top + targetClientRect.height + TOOLTIP_OFFSET;
       left = targetClientRect.left + targetClientRect.width / 2 - tooltipRef.current.clientWidth / 2;
+      if (tutorialStep.anchor === "Portal") {
+        const { top: newTop, left: newLeft } = calcWithExceed(top, left);
+        exceedLeft = left - newLeft;
+        exceedTop = top - newTop;
+        top = newTop;
+        left = newLeft;
+      }
     }
     if (pos === "left") {
-      top = targetClientRect.height + targetClientRect.height / 2 - tooltipRef.current.clientHeight / 2;
+      top =
+        targetClientRect.top + targetClientRect.height / 2 - tooltipRef.current.clientHeight / 2 + TOOLTIP_TALE_SIZE;
       left = targetClientRect.left - tooltipRef.current.clientWidth - TOOLTIP_OFFSET;
+      if (tutorialStep.anchor === "Portal") {
+        const { top: newTop, left: newLeft } = calcWithExceed(top, left);
+        exceedLeft = left - newLeft;
+        exceedTop = top - newTop;
+        top = newTop;
+        left = newLeft;
+      }
+    }
+
+    if (pos === "right") {
+      top =
+        targetClientRect.top + targetClientRect.height / 2 - tooltipRef.current.clientHeight / 2 + TOOLTIP_TALE_SIZE;
+      left = targetClientRect.left + targetClientRect.width + TOOLTIP_OFFSET;
+      if (tutorialStep.anchor === "Portal") {
+        const { top: newTop, left: newLeft } = calcWithExceed(top, left);
+        exceedLeft = left - newLeft;
+        exceedTop = top - newTop;
+        top = newTop;
+        left = newLeft;
+      }
+    }
+
+    return { top, left, exceedTop, exceedLeft };
+    //INFO: Keep targetClientRect, render does not work if we listen to targetClientRect.props
+  }, [calcWithExceed, targetClientRect, tutorialStep]);
+
+  const taleRect = useMemo(() => {
+    let top = undefined;
+    let left = undefined;
+    let right = undefined;
+    let bottom = undefined;
+    if (!tooltipRef.current) return { top, left, right, bottom };
+    if (!tutorialStep) return { top, left, right, bottom };
+
+    //keep for recalc memo, otherwise will catch wrong prev  position
+    if (!targetClientRect) return { top, left, right, bottom };
+
+    const pos = tutorialStep.tooltipPosition;
+
+    if (pos === "top") {
+      bottom = -TOOLTIP_TALE_SIZE;
+      left = tooltipRef.current.clientWidth / 2 - TOOLTIP_TALE_SIZE;
+    }
+    if (pos === "bottom") {
+      top = -TOOLTIP_TALE_SIZE;
+      left = tooltipRef.current.clientWidth / 2 - TOOLTIP_TALE_SIZE;
+    }
+    if (pos === "left") {
+      top = tooltipRef.current.clientHeight / 2 - TOOLTIP_TALE_SIZE;
+      right = -TOOLTIP_TALE_SIZE;
     }
     if (pos === "right") {
-      top = targetClientRect.top + targetClientRect.height / 2 - tooltipRef.current.clientHeight / 2;
-      left = targetClientRect.left + targetClientRect.width + TOOLTIP_OFFSET;
+      top = tooltipRef.current.clientHeight / 2 - TOOLTIP_TALE_SIZE;
+      left = -TOOLTIP_TALE_SIZE;
     }
 
-    return { top, left };
-  }, [targetClientRect, tutorialState]);
+    return { top, left, right, bottom };
+  }, [targetClientRect, tutorialStep]);
 
-  if (!tutorialState) return null;
-  if (!tutorialState.currentStepName) return null;
+  // if (!node) return null;
+  if (!tutorialStep) return null;
+  if (!tutorialStep.currentStepName) return null;
 
-  let location = { top: "10px", bottom: "10px", left: "10px", right: "10px" };
+  const OFFSET = isMobile ? "5px" : "10px";
+  let location = { top: OFFSET, bottom: OFFSET, left: OFFSET, right: OFFSET };
 
-  if (tutorialState.tooltipPosition === "topLeft") location = { ...location, bottom: "", right: "" };
-  else if (tutorialState.tooltipPosition === "topRight") location = { ...location, bottom: "", left: "" };
-  else if (tutorialState.tooltipPosition === "bottomLeft") location = { ...location, top: "", right: "" };
-  else if (tutorialState.tooltipPosition === "bottomRight") location = { ...location, top: "", left: "" };
+  if (tutorialStep.tooltipPosition === "topLeft") location = { ...location, bottom: "", right: isMobile ? "5px" : "" };
+  else if (tutorialStep.tooltipPosition === "topRight")
+    location = { ...location, bottom: "", left: isMobile ? "5px" : "" };
+  else if (tutorialStep.tooltipPosition === "bottomLeft")
+    location = { ...location, top: "", right: isMobile ? "5px" : "" };
+  else if (tutorialStep.tooltipPosition === "bottomRight")
+    location = { ...location, top: "", left: isMobile ? "5px" : "" };
 
   if (
     targetClientRect.top === 0 &&
@@ -79,25 +188,28 @@ export const Tutorial = ({
     targetClientRect.height === 0
   )
     return (
-      <div
-        style={{
+      <Box
+        sx={{
           position: "absolute",
           ...location,
           backgroundColor: "#55555500",
           height: "auto",
+          maxWidth: "450px",
+          width: isOnPortal ? "auto" : "450px",
           transition: "top 1s ease-out,bottom 1s ease-out,left 1s ease-out,rigth 1s ease-out,height 1s ease-out",
           boxSizing: "border-box",
-          display: "grid",
-          placeItems: "center",
+          // display: "grid",
+          // placeItems: "center",
           zIndex: 99999,
         }}
       >
         <Box
           ref={tooltipRef}
           sx={{
+            width: "100%",
             transition: "top 1s ease-out,left 1s ease-out",
-            width: "450px",
-            backgroundColor: theme => (theme.palette.mode === "dark" ? "#4B535C" : "#C5D0DF"),
+            // backgroundColor: theme => (theme.palette.mode === "dark" ? "#4B535C" : "#C5D0DF"),
+            backgroundColor: "blueviolet",
             p: "24px 32px",
             borderRadius: "8px",
             color: theme => (theme.palette.mode === "dark" ? gray50 : gray800),
@@ -107,25 +219,27 @@ export const Tutorial = ({
           <Stack direction={"row"} justifyContent="space-between" sx={{ mb: "12px" }}>
             <Stack direction={"row"} alignItems="center" spacing={"8px"}>
               <Typography component={"h2"} sx={{ fontSize: "18px", fontWeight: "bold", display: "inline-block" }}>
-                {tutorialState.title}
+                {tutorialStep.title}
               </Typography>
-              <LiveHelpIcon />
+              <HelpIcon />
             </Stack>
             {stepsLength <= 1 || (
               <Typography sx={{ display: "inline-block", color: "#818181" }}>
-                {tutorialState.currentStepName} / {stepsLength}
+                {tutorialStep.currentStepName} / {stepsLength}
               </Typography>
             )}
           </Stack>
 
-          {typeof tutorialState.description === "function"
-            ? tutorialState.description(node)
-            : tutorialState.description}
+          {typeof tutorialStep.description === "function"
+            ? node
+              ? tutorialStep.description(node)
+              : ""
+            : tutorialStep.description}
 
           {/* INFO: reversed used for showing buttons always to right no matter the number of buttons */}
           <Stack direction={"row-reverse"} justifyContent={"space-between"} alignItems={"center"} sx={{ mt: "16px" }}>
             <Box>
-              {tutorialState.currentStepName > 1 && (
+              {tutorialStep.currentStepName > 1 && (
                 <Button
                   variant="outlined"
                   onClick={onPreviousStep}
@@ -146,7 +260,7 @@ export const Tutorial = ({
                 </Button>
               )}
 
-              {tutorialState.currentStepName < stepsLength && (
+              {tutorialStep.currentStepName < stepsLength && (
                 <Button
                   variant="contained"
                   onClick={onNextStep}
@@ -160,12 +274,12 @@ export const Tutorial = ({
                       backgroundColor: theme => (theme.palette.mode === "dark" ? gray200 : gray700),
                     },
                   }}
-                  disabled={tutorialState.isClickeable}
+                  disabled={tutorialStep.isClickeable}
                 >
                   Next
                 </Button>
               )}
-              {tutorialState.currentStepName === stepsLength && (
+              {tutorialStep.currentStepName === stepsLength && (
                 <Button
                   variant="contained"
                   onClick={() => {
@@ -186,7 +300,7 @@ export const Tutorial = ({
                 </Button>
               )}
             </Box>
-            {tutorialState.currentStepName !== stepsLength && (
+            {tutorialStep.currentStepName !== stepsLength && (
               <Button
                 variant="text"
                 onClick={() => {
@@ -206,47 +320,86 @@ export const Tutorial = ({
             )}
           </Stack>
         </Box>
-      </div>
+      </Box>
     );
 
   return (
     <Box
       ref={tooltipRef}
-      className={`tooltip tooltip-${tutorialState.tooltipPosition}`}
       sx={{
         position: "absolute",
-        top: `${tooltipClientRect.top}px`,
-        left: `${tooltipClientRect.left}px`,
-        transition: "top 1s ease-out,left 1s ease-out",
-        width: "450px",
+        top: `${tooltipRect.top}px`,
+        left: `${tooltipRect.left}px`,
+        right: isMobile ? "5px" : undefined,
+        transition: "top 750ms ease-out,left 750ms ease-out, border-color 1s linear",
+        maxWidth: "450px",
+        width: isOnPortal ? (isMobile ? "auto" : "100%") : "450px",
         backgroundColor: theme => (theme.palette.mode === "dark" ? "#4B535C" : "#C5D0DF"),
         borderColor: theme => (theme.palette.mode === "dark" ? "#4B535C" : "#C5D0DF") /* this is used in tooltip */,
         p: "24px 32px",
         borderRadius: "8px",
         color: theme => (theme.palette.mode === "dark" ? gray50 : gray800),
         zIndex: 99999,
+
+        ":after": {
+          position: "absolute",
+          content: "''",
+          border: "solid 10px transparent",
+          //tale onto TOP
+          borderBottomWidth: `${tutorialStep.tooltipPosition === "top" ? 0 : undefined}`,
+          borderTopColor:
+            tutorialStep.tooltipPosition === "top"
+              ? theme => (theme.palette.mode === "dark" ? "#4B535C" : "#C5D0DF")
+              : undefined,
+          //tale onto BOTTOM
+          borderTopWidth: `${tutorialStep.tooltipPosition === "bottom" ? 0 : undefined}`,
+          borderBottomColor:
+            tutorialStep.tooltipPosition === "bottom"
+              ? theme => (theme.palette.mode === "dark" ? "#4B535C" : "#C5D0DF")
+              : undefined,
+          //tale onto LEFT
+          borderRightWidth: `${tutorialStep.tooltipPosition === "left" ? 0 : undefined}`,
+          borderLeftColor:
+            tutorialStep.tooltipPosition === "left"
+              ? theme => (theme.palette.mode === "dark" ? "#4B535C" : "#C5D0DF")
+              : undefined,
+          //tale onto RIGHT
+          borderLeftWidth: `${tutorialStep.tooltipPosition === "right" ? 0 : undefined}`,
+          borderRightColor:
+            tutorialStep.tooltipPosition === "right"
+              ? theme => (theme.palette.mode === "dark" ? "#4B535C" : "#C5D0DF")
+              : undefined,
+          top: taleRect.top ? `${taleRect.top + tooltipRect.exceedTop}px` : undefined,
+          bottom: taleRect.bottom ? `${taleRect.bottom}px` : undefined,
+          left: taleRect.left ? `${taleRect.left + tooltipRect.exceedLeft}px` : undefined,
+          right: taleRect.right ? `${taleRect.right}px` : undefined,
+        },
       }}
     >
       <Stack direction={"row"} justifyContent="space-between" sx={{ mb: "12px" }}>
         <Stack direction={"row"} alignItems="center" spacing={"8px"}>
           <Typography component={"h2"} sx={{ fontSize: "18px", fontWeight: "bold", display: "inline-block" }}>
-            {tutorialState.title}
+            {tutorialStep.title}
           </Typography>
-          <LiveHelpIcon />
+          <HelpIcon />
         </Stack>
         {stepsLength <= 1 || (
           <Typography sx={{ display: "inline-block", color: "inherit" }}>
-            {tutorialState.currentStepName} / {stepsLength}
+            {tutorialStep.currentStepName} / {stepsLength}
           </Typography>
         )}
       </Stack>
 
-      {typeof tutorialState.description === "function" ? tutorialState.description(node) : tutorialState.description}
+      {typeof tutorialStep.description === "function"
+        ? node
+          ? tutorialStep.description(node)
+          : ""
+        : tutorialStep.description}
 
       {/* INFO: reversed used for showing buttons always to right no matter the number of elements */}
       <Stack direction={"row-reverse"} justifyContent={"space-between"} alignItems={"center"} sx={{ mt: "16px" }}>
         <Box>
-          {tutorialState.currentStepName > 1 && (
+          {tutorialStep.currentStepName > 1 && (
             <Button
               variant="outlined"
               onClick={onPreviousStep}
@@ -267,7 +420,7 @@ export const Tutorial = ({
             </Button>
           )}
 
-          {tutorialState.currentStepName < stepsLength && (
+          {tutorialStep.currentStepName < stepsLength && (
             <Button
               variant="contained"
               onClick={onNextStep}
@@ -285,7 +438,7 @@ export const Tutorial = ({
               Next
             </Button>
           )}
-          {tutorialState.currentStepName === stepsLength && (
+          {tutorialStep.currentStepName === stepsLength && (
             <Button
               variant="contained"
               onClick={() => {
@@ -307,7 +460,7 @@ export const Tutorial = ({
             </Button>
           )}
         </Box>
-        {tutorialState.currentStepName !== stepsLength && (
+        {tutorialStep.currentStepName !== stepsLength && (
           <Button
             variant="text"
             onClick={() => {

@@ -2,8 +2,8 @@ import React, { MutableRefObject } from "react";
 import { FullNodeData, TNodeBookState, TNodeUpdates } from "src/nodeBookTypes";
 
 import { useNodeBook } from "@/context/NodeBookContext";
-import { compareNodes, NODE_WIDTH } from "@/lib/utils/Map.utils";
-import { OpenSidebar, TutorialType } from "@/pages/notebook";
+import { NODE_WIDTH } from "@/lib/utils/Map.utils";
+import { OpenSidebar } from "@/pages/notebook";
 
 import { MemoizedNode } from "./Node";
 
@@ -20,6 +20,7 @@ type NodeListProps = {
   deleteLink: any;
   openLinkedNode: any;
   openAllChildren: any;
+  openAllParent: any;
   hideNodeHandler: any;
   hideOffsprings: any;
   toggleNode: (event: any, id: string) => void;
@@ -56,8 +57,10 @@ type NodeListProps = {
   openUserInfoSidebar: (uname: string, imageUrl: string, fullName: string, chooseUname: string) => void;
   disabledNodes: string[];
   enableChildElements: string[];
-  showProposeTutorial?: boolean; // this flag is to enable tutorial first time user click in pencil
-  setCurrentTutorial: (newValue: TutorialType) => void;
+  // showProposeTutorial?: boolean; // this flag is to enable tutorial first time user click in pencil
+  // setCurrentTutorial: (newValue: TutorialType) => void;
+  ableToPropose: boolean;
+  setAbleToPropose: (newValue: boolean) => void;
 };
 
 const NodesList = ({
@@ -73,6 +76,7 @@ const NodesList = ({
   deleteLink,
   openLinkedNode,
   openAllChildren,
+  openAllParent,
   hideOffsprings,
   hideNodeHandler,
   toggleNode,
@@ -109,8 +113,10 @@ const NodesList = ({
   openUserInfoSidebar,
   disabledNodes = [],
   enableChildElements = [],
-  showProposeTutorial = false,
-  setCurrentTutorial,
+  // showProposeTutorial = false,
+  // setCurrentTutorial,
+  ableToPropose,
+  setAbleToPropose,
 }: NodeListProps) => {
   /* eslint-disable-next-line @typescript-eslint/no-unused-vars */
   const { nodeBookDispatch } = useNodeBook();
@@ -219,6 +225,7 @@ const NodesList = ({
             deleteLink={deleteLink}
             openLinkedNode={openLinkedNode}
             openAllChildren={openAllChildren}
+            openAllParent={openAllParent}
             onHideNode={hideNodeHandler}
             hideOffsprings={hideOffsprings}
             toggleNode={toggleNode}
@@ -258,9 +265,11 @@ const NodesList = ({
             openUserInfoSidebar={openUserInfoSidebar}
             disabled={disabledNodes.includes(nId)}
             enableChildElements={enableChildElements}
-            defaultOpenPart={nodes[nId].defaultOpenPart}
-            showProposeTutorial={showProposeTutorial}
-            setCurrentTutorial={setCurrentTutorial}
+            // defaultOpenPart={nodes[nId].defaultOpenPart}
+            // showProposeTutorial={showProposeTutorial}
+            // setCurrentTutorial={setCurrentTutorial}
+            ableToPropose={ableToPropose}
+            setAbleToPropose={setAbleToPropose}
           />
         );
       })}
@@ -284,8 +293,7 @@ export const MemoizedNodeList = React.memo(NodesList, (prev, next) => {
   };
 
   return (
-    (prev.nodeUpdates.updatedAt === next.nodeUpdates.updatedAt ||
-      (!!next.showProposeTutorial && compareNodes(prev.nodes, next.nodes))) &&
+    prev.nodeUpdates.updatedAt === next.nodeUpdates.updatedAt &&
     prev.bookmark === next.bookmark &&
     prev.markStudied === next.markStudied &&
     prev.chosenNodeChanged === next.chosenNodeChanged &&
@@ -293,6 +301,7 @@ export const MemoizedNodeList = React.memo(NodesList, (prev, next) => {
     prev.deleteLink === next.deleteLink &&
     prev.openLinkedNode === next.openLinkedNode &&
     prev.openAllChildren === next.openAllChildren &&
+    prev.openAllParent === next.openAllParent &&
     prev.hideNodeHandler === next.hideNodeHandler &&
     prev.hideOffsprings === next.hideOffsprings &&
     prev.toggleNode === next.toggleNode &&
@@ -313,7 +322,8 @@ export const MemoizedNodeList = React.memo(NodesList, (prev, next) => {
     prev.closeSideBar === next.closeSideBar &&
     prev.reloadPermanentGrpah === next.reloadPermanentGrpah &&
     prev.openSidebar === prev.openSidebar && // TODO: check this
-    prev.showProposeTutorial === next.showProposeTutorial &&
+    // prev.showProposeTutorial === next.showProposeTutorial &&
+    prev.ableToPropose === next.ableToPropose &&
     validateTutorialProps()
   );
 });

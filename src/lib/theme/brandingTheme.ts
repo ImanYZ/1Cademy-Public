@@ -11,6 +11,7 @@ declare module "@mui/material/styles/createPalette" {
     orangeLight: string;
     orangeDark: string;
     darkGrayBackground: string;
+    lightGrayBackground: string;
     gray: string;
     borderColor: string;
     darkBackground1: string;
@@ -26,6 +27,7 @@ const common = {
   orange: "#ff8a33",
   orangeLight: "#f9e2d1",
   orangeDark: "#ff6d00",
+  lightGrayBackground: "#E9E9E9",
   darkGrayBackground: "#28282A",
   gray: "#D3D3D3",
   borderColor: "#585858",
