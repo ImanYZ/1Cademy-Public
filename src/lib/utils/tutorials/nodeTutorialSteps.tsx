@@ -5,7 +5,7 @@ import LocalLibraryIcon from "@mui/icons-material/LocalLibrary";
 import LockIcon from "@mui/icons-material/Lock";
 import MenuBookIcon from "@mui/icons-material/MenuBook";
 import ShareIcon from "@mui/icons-material/Share";
-import { Box, Stack, Typography } from "@mui/material";
+import { Box, Stack, SxProps, Theme, Typography } from "@mui/material";
 import { ReactNode } from "react";
 
 import MarkdownRender from "@/components/Markdown/MarkdownRender";
@@ -16,11 +16,12 @@ import { getBaseStepConfig } from "./tutorial.utils";
 
 export const INITIAL_NODE_TUTORIAL_STATE: TutorialState = null;
 
-type NodeTypeButton = {
+type NodeTypeIconProps = {
   children: ReactNode;
+  sx?: SxProps<Theme> | undefined;
 };
 
-const NodeType = ({ children }: NodeTypeButton) => {
+export const NodeTypeIcon = ({ children, sx }: NodeTypeIconProps) => {
   return (
     <Box
       sx={{
@@ -31,6 +32,7 @@ const NodeType = ({ children }: NodeTypeButton) => {
         borderRadius: "50%",
         backgroundColor: theme => (theme.palette.mode === "dark" ? "#F2F4F71A" : "#3440541A"),
         color: theme => (theme.palette.mode === "dark" ? gray100 : gray700),
+        ...sx,
       }}
     >
       {children}
@@ -39,53 +41,53 @@ const NodeType = ({ children }: NodeTypeButton) => {
 };
 
 const NODES_STEPS: TutorialStepConfig[] = [
-  // {
-  //   title: "What is a Node",
-  //   description: (
-  //     <MarkdownRender
-  //       text={
-  //         "This is a node. It is the most fundamental unit of knowledge on 1Cademy. Each node contains a granular piece of information. Nodes are linked to other nodes allowing us to follow related concepts."
-  //       }
-  //     />
-  //   ),
-  // },
+  {
+    title: "What is a Node",
+    description: (
+      <MarkdownRender
+        text={
+          "This is a node. It is the most fundamental unit of knowledge on 1Cademy. Each node contains a granular piece of information. Nodes are linked to other nodes allowing us to follow related concepts."
+        }
+      />
+    ),
+  },
 
-  // {
-  //   childTargetId: "node-title",
-  //   title: "Node Title",
-  //   description: (
-  //     <MarkdownRender
-  //       text={
-  //         "Each node has a title. It accurately and concisely introduces the idea that is described in a node. Node titles need to be unique, this means that you need to make one that is specific to the idea being discussed and that cannot be confused with another node."
-  //       }
-  //     />
-  //   ),
-  //   outline: "outside",
-  // },
+  {
+    childTargetId: "node-title",
+    title: "Node Title",
+    description: (
+      <MarkdownRender
+        text={
+          "Each node has a title. It accurately and concisely introduces the idea that is described in a node. Node titles need to be unique, this means that you need to make one that is specific to the idea being discussed and that cannot be confused with another node."
+        }
+      />
+    ),
+    outline: "outside",
+  },
 
-  // {
-  //   childTargetId: "node-content",
-  //   title: "Node Content",
-  //   description: (
-  //     <MarkdownRender
-  //       text={
-  //         "Here is the content of a node. It describes the idea stated in the title. It needs to be descriptive and concise. You can also include images or video in a node’s content."
-  //       }
-  //     />
-  //   ),
-  // },
+  {
+    childTargetId: "node-content",
+    title: "Node Content",
+    description: (
+      <MarkdownRender
+        text={
+          "Here is the content of a node. It describes the idea stated in the title. It needs to be descriptive and concise. You can also include images or video in a node’s content."
+        }
+      />
+    ),
+  },
 
-  // {
-  //   childTargetId: "node-footer-user",
-  //   title: "Node Contributor",
-  //   description: (
-  //     <MarkdownRender
-  //       text={
-  //         "Here you can see the top contributor to a node. 1Cademy is a collaborative platform, many people contribute to the content. However, the system identifies who contributes most to a node and they’re profile is displayed on the node."
-  //       }
-  //     />
-  //   ),
-  // },
+  {
+    childTargetId: "node-footer-user",
+    title: "Node Contributor",
+    description: (
+      <MarkdownRender
+        text={
+          "Here you can see the top contributor to a node. 1Cademy is a collaborative platform, many people contribute to the content. However, the system identifies who contributes most to a node and they’re profile is displayed on the node."
+        }
+      />
+    ),
+  },
 
   {
     childTargetId: "node-footer-type",
@@ -101,27 +103,27 @@ const NODES_STEPS: TutorialStepConfig[] = [
           sx={{ mt: "10px", fontSize: "14px" }}
         >
           <Stack alignItems={"center"} flexGrow={"1"}>
-            <NodeType>
+            <NodeTypeIcon>
               <LocalLibraryIcon color="inherit" fontSize="small" />
-            </NodeType>
+            </NodeTypeIcon>
             <Typography fontSize={"inherit"}>Concept</Typography>
           </Stack>
           <Stack alignItems={"center"} flexGrow={"1"}>
-            <NodeType>
+            <NodeTypeIcon>
               <ShareIcon color="inherit" fontSize="small" />
-            </NodeType>
+            </NodeTypeIcon>
             <Typography fontSize={"inherit"}>Relation</Typography>
           </Stack>
           <Stack alignItems={"center"} flexGrow={"1"}>
-            <NodeType>
+            <NodeTypeIcon>
               <MenuBookIcon color="inherit" fontSize="small" />
-            </NodeType>
+            </NodeTypeIcon>
             <Typography fontSize={"inherit"}>Reference</Typography>
           </Stack>
           <Stack alignItems={"center"} flexGrow={"1"}>
-            <NodeType>
+            <NodeTypeIcon>
               <HelpOutlineIcon color="inherit" fontSize="small" />
-            </NodeType>
+            </NodeTypeIcon>
             <Typography fontSize={"inherit"}>Question</Typography>
           </Stack>
         </Stack>
@@ -133,21 +135,21 @@ const NODES_STEPS: TutorialStepConfig[] = [
           sx={{ mt: "10px", fontSize: "14px" }}
         >
           <Stack alignItems={"center"} flexGrow={"1"}>
-            <NodeType>
+            <NodeTypeIcon>
               <CodeIcon color="inherit" fontSize="small" />
-            </NodeType>
+            </NodeTypeIcon>
             <Typography fontSize={"inherit"}>Code</Typography>
           </Stack>
           <Stack alignItems={"center"} flexGrow={"1"}>
-            <NodeType>
+            <NodeTypeIcon>
               <EmojiObjectsIcon color="inherit" fontSize="small" />
-            </NodeType>
+            </NodeTypeIcon>
             <Typography fontSize={"inherit"}>Idea</Typography>
           </Stack>
           <Stack alignItems={"center"} flexGrow={"1"}>
-            <NodeType>
+            <NodeTypeIcon>
               <LockIcon color="inherit" fontSize="small" />
-            </NodeType>
+            </NodeTypeIcon>
             <Typography fontSize={"inherit"}>Lock</Typography>
           </Stack>
         </Stack>

@@ -131,14 +131,7 @@ export const TooltipTutorial = ({
 
     return { top, left, exceedTop, exceedLeft };
     //INFO: Keep targetClientRect, render does not work if we listen to targetClientRect.props
-  }, [
-    calcWithExceed,
-    targetClientRect.height,
-    targetClientRect.left,
-    targetClientRect.top,
-    targetClientRect.width,
-    tutorialStep,
-  ]);
+  }, [calcWithExceed, targetClientRect, tutorialStep]);
 
   const taleRect = useMemo(() => {
     let top = undefined;
