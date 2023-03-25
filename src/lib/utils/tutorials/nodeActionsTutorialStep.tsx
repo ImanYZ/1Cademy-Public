@@ -110,7 +110,8 @@ const UPTOVE_STEPS: TutorialStepConfig[] = [
           You can <b>upvote</b> if this node is helpful, the node currently has {node.corrects}
           <CheckIcon fontSize="small" color="success" sx={{ verticalAlign: "text-top" }} />. Upvoting will increase the
           count to {node.corrects + 1}
-          <CheckIcon fontSize="small" color="success" sx={{ verticalAlign: "text-top" }} />.
+          <CheckIcon fontSize="small" color="success" sx={{ verticalAlign: "text-top" }} />, ensuring the quality of the
+          node.
         </Typography>
       </Stack>
     ),
