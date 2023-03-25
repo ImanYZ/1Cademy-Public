@@ -105,15 +105,14 @@ const UPTOVE_STEPS: TutorialStepConfig[] = [
     title: "Upvoting",
     childTargetId: "node-footer-upvotes",
     description: (node: FullNodeData) => (
-      <>
-        {"If this node is helpful, you can vote as correct, for example:"}
-        <br />
-        {`This node has ${node.corrects}`}
-        <CheckIcon fontSize="small" color="success" sx={{ verticalAlign: "middle", mx: "4px" }} />
-        {`upvotes, with your vote will have ${node.corrects + 1}`}
-        <CheckIcon fontSize="small" color="success" sx={{ verticalAlign: "middle", mx: "4px" }} />
-        {"upvotes"}
-      </>
+      <Stack>
+        <Typography>
+          You can <b>upvote</b> if this node is helpful, the node currently has {node.corrects}
+          <CheckIcon fontSize="small" color="success" sx={{ verticalAlign: "text-top" }} />. Upvoting will increase the
+          count to {node.corrects + 1}
+          <CheckIcon fontSize="small" color="success" sx={{ verticalAlign: "text-top" }} />.
+        </Typography>
+      </Stack>
     ),
     isClickable: true,
   },
