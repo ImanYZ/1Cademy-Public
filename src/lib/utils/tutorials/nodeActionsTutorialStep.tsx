@@ -125,8 +125,8 @@ const DOWNVOTE_STEPS: TutorialStepConfig[] = [
       <Stack>
         <Typography>
           You can downvote if this node is unhelpful, the node currently has {node.wrongs}
-          <CloseIcon fontSize="small" color="error" sx={{ verticalAlign: "text-top" }} />. Downvoting will increase the
-          count to {node.wrongs + 1}
+          <CloseIcon fontSize="small" color="error" sx={{ verticalAlign: "text-top" }} /> downvotes. your downvote will
+          increase the count to {node.wrongs + 1}
           <CloseIcon fontSize="small" color="error" sx={{ verticalAlign: "text-top" }} />.
         </Typography>
         <Typography>The node will be removed if:</Typography>
