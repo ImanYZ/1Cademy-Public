@@ -1,5 +1,7 @@
 import CheckIcon from "@mui/icons-material/Check";
 import CloseIcon from "@mui/icons-material/Close";
+import { Typography } from "@mui/material";
+import { Stack } from "@mui/system";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import { FullNodeData, TutorialState, TutorialStep, TutorialStepConfig } from "src/nodeBookTypes";
@@ -121,21 +123,32 @@ const DOWNVOTE_STEPS: TutorialStepConfig[] = [
     title: "Downvoting",
     childTargetId: "node-footer-downvotes",
     description: (node: FullNodeData) => (
-      <>
-        {"If this note is not helpful, you can vote as wrong, for example:"}
-        <br />
-        {`this node has ${node.wrongs}`}
-        <CloseIcon fontSize="small" color="error" sx={{ verticalAlign: "middle", mx: "4px" }} />
-        {`downvotes with your vote will have ${node.wrongs + 1}`}
-        <CloseIcon fontSize="small" color="error" sx={{ verticalAlign: "middle", mx: "4px" }} />
-        {"downvotes."}
-        <br />
+      <Stack>
+        <Typography>
+          You can downvote if this node is unhelpful, the node currently has {node.wrongs}
+          <CloseIcon fontSize="small" color="error" sx={{ verticalAlign: "text-top" }} />. Downvoting will increase the
+          count to {node.wrongs + 1}
+          <CloseIcon fontSize="small" color="error" sx={{ verticalAlign: "text-top" }} />.
+        </Typography>
+        <Typography>The node will be removed if:</Typography>
+
         <MarkdownRender
-          text={`Only if $\${Upvotes} < {Downvotes}$$ this node will be removed, in this case: $$${node.corrects} < ${
-            node.wrongs + 1
-          }$$, ${node.corrects < node.wrongs + 1 ? "this note will be removed." : "this note won't be removed."}`}
+          text={`${String.raw`$$\text{Downvotes} > \text{Upvotes}$$`}`}
+          sx={{ my: "4px", alignSelf: "center" }}
         />
-      </>
+        <Typography>In this case:</Typography>
+        <MarkdownRender
+          text={`$$${String.raw`\text{${node.wrongs + 1}}`}${
+            node.wrongs + 1 > node.corrects ? " > " : " < "
+          }${String.raw`\text{${node.corrects}}`}$$`}
+          sx={{ alignSelf: "center" }}
+        />
+        <Typography>
+          {node.wrongs + 1 > node.corrects
+            ? "The node will be removed from the map."
+            : "The node won't be removed from the map."}
+        </Typography>
+      </Stack>
     ),
     isClickable: true,
   },

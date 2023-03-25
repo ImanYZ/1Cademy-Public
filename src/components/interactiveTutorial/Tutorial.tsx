@@ -385,7 +385,7 @@ export const TooltipTutorial = ({
             borderRadius: "50px",
             mb: "16px",
             backgroundColor: theme => (theme.palette.mode === "dark" ? "#D0D5DD4D" : "#6C74824D"),
-            height: "6px",
+            height: "5px",
             "& .MuiLinearProgress-bar1Determinate": {
               backgroundColor: theme => (theme.palette.mode === "dark" ? "#A4FD96" : "#52AE43"),
               borderRadius: "50px",
