@@ -12,7 +12,7 @@ dayjs.extend(relativeTime);
 
 const PENDING_PROPOSALS_STEPS: TutorialStepConfig[] = [
   {
-    childTargetId: "PendingProposalsContainer",
+    childTargetId: "sidebar-wrapper-pending-list-content",
     title: "Pending Proposals",
     description: (
       <MarkdownRender
@@ -23,10 +23,10 @@ const PENDING_PROPOSALS_STEPS: TutorialStepConfig[] = [
     ),
     tooltipPosition: "right",
     anchor: "Portal",
-    outline: "shallow",
+    outline: "inside",
   },
   {
-    childTargetId: "PendingProposalsContainer",
+    childTargetId: "sidebar-wrapper-pending-list-content",
     title: "Pending Proposals",
     description: (
       <MarkdownRender
@@ -37,7 +37,7 @@ const PENDING_PROPOSALS_STEPS: TutorialStepConfig[] = [
     ),
     tooltipPosition: "right",
     anchor: "Portal",
-    outline: "shallow",
+    outline: "inside",
   },
 ];
 
