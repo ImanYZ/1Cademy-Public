@@ -23,6 +23,7 @@ import {
 
 import { User } from "../knowledgeTypes";
 import { devLog } from "../lib/utils/develop.util";
+import { BOOKMARKS_STEPS } from "../lib/utils/tutorials/bookmarksTutorialSteps";
 import {
   CHILD_CODE_PROPOSAL_COMPLETE,
   CHILD_CONCEPT_PROPOSAL_COMPLETE,
@@ -131,6 +132,7 @@ export const useInteractiveTutorial = ({ user }: useInteractiveTutorialProps) =>
     hideDescendants: { currentStep: -1, done: false, skipped: false },
     hideNode: { currentStep: -1, done: false, skipped: false },
     notifications: { currentStep: -1, done: false, skipped: false },
+    bookmarks: { currentStep: -1, done: false, skipped: false },
   });
 
   // flag for whether tutorial state was loaded
@@ -268,6 +270,10 @@ export const useInteractiveTutorial = ({ user }: useInteractiveTutorialProps) =>
 
       if (newTutorial === "notifications") {
         newSteps = NOTIFICATION_STEPS;
+      }
+
+      if (newTutorial === "bookmarks") {
+        newSteps = BOOKMARKS_STEPS;
       }
 
       // node actions
