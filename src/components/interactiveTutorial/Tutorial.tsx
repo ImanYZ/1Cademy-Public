@@ -325,7 +325,7 @@ export const TooltipTutorial = ({
                   ":hover": { backgroundColor: theme => (theme.palette.mode === "dark" ? "#575f68" : "#d7dee6") },
                 }}
               >
-                Cancel
+                Close
               </Button>
             )}
           </Stack>
