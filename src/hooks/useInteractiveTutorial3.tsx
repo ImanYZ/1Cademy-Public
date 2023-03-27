@@ -127,7 +127,7 @@ export const useInteractiveTutorial = ({ user }: useInteractiveTutorialProps) =>
     expandNode: { currentStep: -1, done: false, skipped: false },
     upVote: { currentStep: -1, done: false, skipped: false },
     downVote: { currentStep: -1, done: false, skipped: false },
-    hideOffsprings: { currentStep: -1, done: false, skipped: false },
+    hideDescendants: { currentStep: -1, done: false, skipped: false },
     hideNode: { currentStep: -1, done: false, skipped: false },
   });
 
@@ -257,7 +257,7 @@ export const useInteractiveTutorial = ({ user }: useInteractiveTutorialProps) =>
         newSteps = EXPAND_STEPS_COMPLETE;
       }
 
-      if (newTutorial === "hideOffsprings") {
+      if (newTutorial === "hideDescendants") {
         newSteps = HIDE_OFFSPRING_STEPS_COMPLETE;
       }
 

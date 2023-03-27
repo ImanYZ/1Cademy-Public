@@ -22,7 +22,7 @@ type NodeListProps = {
   openAllChildren: any;
   openAllParent: any;
   hideNodeHandler: any;
-  hideOffsprings: any;
+  hideDescendants: any;
   toggleNode: (event: any, id: string) => void;
   openNodePart: any;
   onNodeShare: (nodeId: string, platform: string) => void;
@@ -77,7 +77,7 @@ const NodesList = ({
   openLinkedNode,
   openAllChildren,
   openAllParent,
-  hideOffsprings,
+  hideDescendants,
   hideNodeHandler,
   toggleNode,
   openNodePart,
@@ -227,7 +227,7 @@ const NodesList = ({
             openAllChildren={openAllChildren}
             openAllParent={openAllParent}
             onHideNode={hideNodeHandler}
-            hideOffsprings={hideOffsprings}
+            hideDescendants={hideDescendants}
             toggleNode={toggleNode}
             openNodePart={openNodePart}
             onNodeShare={onNodeShare}
@@ -303,7 +303,7 @@ export const MemoizedNodeList = React.memo(NodesList, (prev, next) => {
     prev.openAllChildren === next.openAllChildren &&
     prev.openAllParent === next.openAllParent &&
     prev.hideNodeHandler === next.hideNodeHandler &&
-    prev.hideOffsprings === next.hideOffsprings &&
+    prev.hideDescendants === next.hideDescendants &&
     prev.toggleNode === next.toggleNode &&
     prev.openNodePart === next.openNodePart &&
     prev.selectNode === next.selectNode &&
