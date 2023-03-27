@@ -10,6 +10,7 @@ import {
   CHILD_RELATION_PROPOSAL_COMPLETE,
 } from "./childrenProposalTutorialStep";
 import { LEADER_BOARD_STEPS } from "./leaderBoardTutorialSteps";
+import { INTERACTION_LIVENESS_BAR_STEPS, REPUTATION_LIVENESS_BAR_STEPS } from "./livenessBarTutorialSteps";
 import { NAVIGATION_STEPS_COMPLETE } from "./navigationTutorialSteps";
 import {
   COLLAPSE_STEPS_COMPLETE,
@@ -42,7 +43,13 @@ import {
 import { SEARCHER_STEPS_COMPLETE } from "./searcherTutorialSteps";
 import { USER_SETTINGS_STEPS_COMPLETE } from "./userSettingsTutorialSteps";
 
-export const GROUP_TUTORIALS: GroupTutorial[] = [
+export type LivelinessBar = "interaction" | "reputation" | null;
+
+type GetGroupTutorialsInput = {
+  livelinessBar: LivelinessBar;
+};
+
+export const getGroupTutorials = ({ livelinessBar }: GetGroupTutorialsInput): GroupTutorial[] => [
   {
     title: "Basics",
     tutorials: [
@@ -269,6 +276,29 @@ export const GROUP_TUTORIALS: GroupTutorial[] = [
         tutorialSteps: { tutorialKey: "leaderBoard", steps: LEADER_BOARD_STEPS },
         tutorials: [],
       },
+      ...getLivelinessBar(livelinessBar),
     ],
   },
 ];
+
+const getLivelinessBar = (livelinessBar: LivelinessBar): GroupTutorial[] => {
+  if (livelinessBar === "reputation")
+    return [
+      {
+        title: "Reputation Liveliness Bar",
+        tutorialSteps: { tutorialKey: "reputationLivenessBar", steps: REPUTATION_LIVENESS_BAR_STEPS },
+        tutorials: [],
+      },
+    ];
+
+  if (livelinessBar === "interaction")
+    return [
+      {
+        title: "Interaction Liveliness Bar",
+        tutorialSteps: { tutorialKey: "interactionLivenessBar", steps: INTERACTION_LIVENESS_BAR_STEPS },
+        tutorials: [],
+      },
+    ];
+
+  return [];
+};

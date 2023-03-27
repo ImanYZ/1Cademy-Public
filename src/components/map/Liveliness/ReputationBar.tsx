@@ -13,6 +13,8 @@ type ILivelinessBarProps = {
   openUserInfoSidebar: (uname: string, imageUrl: string, fullName: string, chooseUname: string) => void;
   authEmail: string | undefined;
   user: any;
+  open: boolean;
+  setOpen: (newOpen: boolean) => void;
   disabled?: boolean;
 };
 
@@ -24,9 +26,9 @@ type UserInteractions = {
   };
 };
 
-const ReputationlinessBar = (props: ILivelinessBarProps) => {
+const ReputationlinessBar = ({ open, setOpen, ...props }: ILivelinessBarProps) => {
   const { db, onlineUsers, openUserInfoSidebar, authEmail, user, disabled = false } = props;
-  const [open, setOpen] = useState(false);
+  // const [open, setOpen] = useState(false);
   const [usersInteractions, setUsersInteractions] = useState<UserInteractions>({});
   const [users, setUsers] = useState<any>({});
   const [barHeight, setBarHeight] = useState<number>(0);
@@ -190,7 +192,7 @@ const ReputationlinessBar = (props: ILivelinessBarProps) => {
         }}
       >
         <Box
-          id="livebar"
+          id="live-bar-reputation"
           sx={{
             opacity: disabled ? 0.8 : 1,
             width: "56px",

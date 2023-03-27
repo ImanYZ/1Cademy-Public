@@ -1,9 +1,7 @@
 import MarkdownRender from "@/components/Markdown/MarkdownRender";
 
-import { TutorialState, TutorialStep, TutorialStepConfig } from "../../../nodeBookTypes";
+import { TutorialStep, TutorialStepConfig } from "../../../nodeBookTypes";
 import { getBaseStepConfig } from "./tutorial.utils";
-
-export const INITIAL_NODE_TUTORIAL_STATE: TutorialState = null;
 
 const LEADER_BOARD_STEPS_CONFIG: TutorialStepConfig[] = [
   {
