@@ -37,7 +37,7 @@ const USER_SETTINGS_STEPS: TutorialStepConfig[] = [
 
     tooltipPosition: "right",
     anchor: "Portal",
-    outline: "inside",
+    outline: "shallow",
   },
   {
     childTargetId: "user-settings-community-tag",
@@ -61,7 +61,7 @@ const USER_SETTINGS_STEPS: TutorialStepConfig[] = [
 
     tooltipPosition: "right",
     anchor: "Portal",
-    outline: "inside",
+    outline: "shallow",
   },
   {
     childTargetId: "user-settings-statistics",
@@ -74,7 +74,7 @@ const USER_SETTINGS_STEPS: TutorialStepConfig[] = [
 
     tooltipPosition: "right",
     anchor: "Portal",
-    outline: "inside",
+    outline: "outside",
   },
   {
     childTargetId: "user-settings-node-types",

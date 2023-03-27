@@ -158,6 +158,7 @@ const ProfileAvatar = ({ id, userId, userImage, setUserImage, userFullName }: Pr
         flexDirection: "column",
         justifyContent: "center",
         alignItems: "center",
+        borderRadius: "6px",
       }}
     >
       <input type="file" ref={inputEl} onChange={handleImageChange} accept="image/png, image/jpg, image/jpeg" hidden />

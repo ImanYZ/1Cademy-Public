@@ -1093,7 +1093,9 @@ const UserSettigsSidebar = ({
           />
 
           <div id="MiniUserPrifileIdentity" className="MiniUserPrifileIdentityMobile">
-            <div id="MiniUserPrifileName">{user.chooseUname ? user.uname : `${user.fName} ${user.lName}`}</div>
+            <Box id="MiniUserPrifileName" sx={{ borderRadius: "6px" }}>
+              {user.chooseUname ? user.uname : `${user.fName} ${user.lName}`}
+            </Box>
             <div id="MiniUserPrifileTag">
               <MemoizedMetaButton
                 id="user-settings-community-tag"
@@ -1132,7 +1134,7 @@ const UserSettigsSidebar = ({
                 </Suspense>
               )}
             </div>
-            <div id="MiniUserPrifileInstitution" style={{ display: "flex", gap: "12px" }}>
+            <div id="MiniUserPrifileInstitution" style={{ display: "flex", gap: "12px", borderRadius: "6px" }}>
               <OptimizedAvatar
                 imageUrl={instlogoURL}
                 name={user.deInstit + " logo"}
@@ -1145,10 +1147,10 @@ const UserSettigsSidebar = ({
               />
               <span>{user.deInstit}</span>
             </div>
-            <div id="user-settings-statistics">
+            <Box id="user-settings-statistics" sx={{ borderRadius: "6px" }}>
               <DoneIcon className="material-icons DoneIcon green-text" sx={{ mr: "12px" }} />
               <span>{shortenNumber(totalPoints, 2, false)}</span>
-            </div>
+            </Box>
           </div>
         </div>
         <div
@@ -1200,6 +1202,7 @@ const UserSettigsSidebar = ({
               key={tabItem.title}
               label={tabItem.title}
               {...a11yProps(idx)}
+              sx={{ borderRadius: "6px" }}
             />
           ))}
         </Tabs>
