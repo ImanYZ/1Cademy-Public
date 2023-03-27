@@ -490,6 +490,7 @@ MainSidebarProps) => {
           {user?.tag && (
             <>
               <MemoizedMetaButton
+                id="toolbar-leaderboard-button"
                 onClick={(e: any) => onOpenLeaderboardOptions(e)}
                 disabled={disabledLeaderboardButton}
               >

@@ -480,7 +480,8 @@ export type TutorialTypeKeys =
   | "hideDescendants"
   | "hideNode"
   | "notifications"
-  | "bookmarks";
+  | "bookmarks"
+  | "leaderBoard";
 
 export type UserTutorial = {
   currentStep: number;

@@ -4999,6 +4999,16 @@ const Dashboard = ({}: DashboardProps) => {
         const result = detectAndForceTutorial("hideNode", "r98BjyFDCe4YyLA3U8ZE", hideTutorialIsValid);
         if (result) return;
       }
+
+      // --------------------------
+
+      const proposalNodesTaken = userTutorial["proposal"].done || userTutorial["proposal"].skipped;
+      const isNotProposingNodes = tempNodes.size + Object.keys(changedNodes).length === 0;
+
+      if (forcedTutorial === "leaderBoard" || (proposalNodesTaken && isNotProposingNodes && openSidebar === null)) {
+        const result = detectAndCallSidebarTutorial("leaderBoard", null);
+        if (result) return;
+      }
     };
 
     detectTriggerTutorial();
@@ -5327,6 +5337,15 @@ const Dashboard = ({}: DashboardProps) => {
 
     if (tutorial.name === "bookmarks") {
       if (openSidebar === "BOOKMARKS_SIDEBAR") return;
+      setTutorial(null);
+      setForcedTutorial(null);
+      if (currentStep?.childTargetId) removeStyleFromTarget(currentStep.childTargetId, targetId);
+    }
+
+    // --------------------------
+
+    if (tutorial.name === "leaderBoard") {
+      if (openSidebar === null) return;
       setTutorial(null);
       setForcedTutorial(null);
       if (currentStep?.childTargetId) removeStyleFromTarget(currentStep.childTargetId, targetId);
