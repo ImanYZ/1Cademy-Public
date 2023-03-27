@@ -481,6 +481,7 @@ export type TutorialTypeKeys =
   | "hideNode"
   | "notifications"
   | "bookmarks"
+  | "userInfo"
   | "leaderBoard"
   | "pendingProposals"
   | "interactionLivenessBar"
