@@ -4891,6 +4891,10 @@ const Dashboard = ({}: DashboardProps) => {
         if (result) return;
       }
 
+      if (forcedTutorial === "userSettings" || openSidebar === "USER_SETTINGS") {
+        const result = detectAndCallSidebarTutorial("userSettings", "USER_SETTINGS");
+        if (result) return;
+      }
       // --------------------------
 
       const nodesTaken = userTutorial["nodes"].done || userTutorial["nodes"].skipped;

@@ -438,6 +438,7 @@ export type UsersStatus = "All Time" | "Monthly" | "Weekly" | "Others Votes" | "
 export type TutorialTypeKeys =
   | "nodes"
   | "searcher"
+  | "userSettings"
   | "proposal"
   | "navigation"
   | "concept"

@@ -20,6 +20,7 @@ import {
   SCROLL_TO_NODE_STEPS,
   TABLE_CONTENT_STEPS,
 } from "@/lib/utils/tutorials/toolbooxTutorialSteps";
+import { USER_SETTINGS_STEPS_COMPLETE } from "@/lib/utils/tutorials/userSettingsTutorialSteps";
 
 import { User } from "../knowledgeTypes";
 import { devLog } from "../lib/utils/develop.util";
@@ -129,6 +130,7 @@ export const useInteractiveTutorial = ({ user }: useInteractiveTutorialProps) =>
     downVote: { currentStep: -1, done: false, skipped: false },
     hideDescendants: { currentStep: -1, done: false, skipped: false },
     hideNode: { currentStep: -1, done: false, skipped: false },
+    userSettings: { currentStep: -1, done: false, skipped: false },
   });
 
   // flag for whether tutorial state was loaded
@@ -171,6 +173,9 @@ export const useInteractiveTutorial = ({ user }: useInteractiveTutorialProps) =>
       if (newTutorial === "searcher") {
         newSteps = SEARCHER_STEPS_COMPLETE;
         setTargetId("");
+      }
+      if (newTutorial === "userSettings") {
+        newSteps = USER_SETTINGS_STEPS_COMPLETE;
       }
       if (newTutorial === "concept") {
         newSteps = NODE_CONCEPT;
