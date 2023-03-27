@@ -4891,6 +4891,10 @@ const Dashboard = ({}: DashboardProps) => {
         if (result) return;
       }
 
+      if (forcedTutorial === "userSettings" || openSidebar === "USER_SETTINGS") {
+        const result = detectAndCallSidebarTutorial("userSettings", "USER_SETTINGS");
+        if (result) return;
+      }
       // --------------------------
 
       if (forcedTutorial === "notifications" || openSidebar === "NOTIFICATION_SIDEBAR") {
@@ -5284,6 +5288,14 @@ const Dashboard = ({}: DashboardProps) => {
         setTutorial(null);
         setForcedTutorial(null);
       }
+    }
+    // --------------------------
+
+    if (tutorial.name === "userSettings") {
+      if (openSidebar === "USER_SETTINGS") return;
+      setTutorial(null);
+      setForcedTutorial(null);
+      if (currentStep?.childTargetId) removeStyleFromTarget(currentStep.childTargetId, targetId);
     }
 
     // --------------------------
