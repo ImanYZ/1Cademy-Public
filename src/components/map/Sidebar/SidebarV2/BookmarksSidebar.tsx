@@ -94,7 +94,6 @@ export const BookmarksSidebar = ({
 
   const a11yProps = (index: number) => {
     return {
-      id: `simple-tab-${index}`,
       "aria-controls": `simple-tabpanel-${index}`,
     };
   };
@@ -123,7 +122,12 @@ export const BookmarksSidebar = ({
         >
           <Tabs value={value} onChange={handleChange} aria-label={"Bookmarks Tabs"}>
             {[{ title: "Updated" }, { title: "Studied" }].map((tabItem: any, idx: number) => (
-              <Tab key={tabItem.title} label={tabItem.title} {...a11yProps(idx)} />
+              <Tab
+                key={tabItem.title}
+                id={`bookmarks-tab-${tabItem.title.toLowerCase()}`}
+                label={tabItem.title}
+                {...a11yProps(idx)}
+              />
             ))}
           </Tabs>
         </Box>

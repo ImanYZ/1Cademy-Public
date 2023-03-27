@@ -479,7 +479,8 @@ export type TutorialTypeKeys =
   | "downVote"
   | "hideDescendants"
   | "hideNode"
-  | "notifications";
+  | "notifications"
+  | "bookmarks";
 
 export type UserTutorial = {
   currentStep: number;
