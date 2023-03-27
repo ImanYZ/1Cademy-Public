@@ -37,6 +37,10 @@ import {
   CHILD_RELATION_PROPOSAL_COMPLETE,
 } from "../lib/utils/tutorials/childrenProposalTutorialStep";
 import { LEADER_BOARD_STEPS } from "../lib/utils/tutorials/leaderBoardTutorialSteps";
+import {
+  INTERACTION_LIVENESS_BAR_STEPS,
+  REPUTATION_LIVENESS_BAR_STEPS,
+} from "../lib/utils/tutorials/livenessBarTutorialSteps";
 import { DOWNVOTE_STEPS_COMPLETE, UPTOVE_STEPS_COMPLETE } from "../lib/utils/tutorials/nodeActionsTutorialStep";
 import { NODE_CODE } from "../lib/utils/tutorials/nodeCodeTutorialSteps";
 import { NODE_CONCEPT } from "../lib/utils/tutorials/nodeConceptTutorialStep";
@@ -140,6 +144,8 @@ export const useInteractiveTutorial = ({ user }: useInteractiveTutorialProps) =>
     bookmarks: { currentStep: -1, done: false, skipped: false },
     leaderBoard: { currentStep: -1, done: false, skipped: false },
     pendingProposals: { currentStep: -1, done: false, skipped: false },
+    reputationLivenessBar: { currentStep: -1, done: false, skipped: false },
+    interactionLivenessBar: { currentStep: -1, done: false, skipped: false },
     userInfo: { currentStep: -1, done: false, skipped: false },
   });
 
@@ -336,6 +342,14 @@ export const useInteractiveTutorial = ({ user }: useInteractiveTutorialProps) =>
       // others
       if (newTutorial === "leaderBoard") {
         newSteps = LEADER_BOARD_STEPS;
+      }
+
+      if (newTutorial === "interactionLivenessBar") {
+        newSteps = INTERACTION_LIVENESS_BAR_STEPS;
+      }
+
+      if (newTutorial === "reputationLivenessBar") {
+        newSteps = REPUTATION_LIVENESS_BAR_STEPS;
       }
 
       setUserTutorial(prev => ({

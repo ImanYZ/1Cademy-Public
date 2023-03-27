@@ -14,6 +14,8 @@ type ILivelinessBarProps = {
   onlineUsers: string[];
   openUserInfoSidebar: (uname: string, imageUrl: string, fullName: string, chooseUname: string) => void;
   authEmail: string | undefined;
+  open: boolean;
+  setOpen: (newOpen: boolean) => void;
   disabled?: boolean;
 };
 
@@ -29,9 +31,9 @@ type UserInteractions = {
   };
 };
 
-const LivelinessBar = ({ disabled = false, ...props }: ILivelinessBarProps) => {
+const LivelinessBar = ({ open, setOpen, disabled = false, ...props }: ILivelinessBarProps) => {
   const { db, onlineUsers, openUserInfoSidebar, authEmail } = props;
-  const [open, setOpen] = useState(false);
+  // const [open, setOpen] = useState(false);
   const [isInitialized, setIsInitialized] = useState(false);
   const [usersInteractions, setUsersInteractions] = useState<UserInteractions>({});
   const [barHeight, setBarHeight] = useState<number>(0);
@@ -188,7 +190,7 @@ const LivelinessBar = ({ disabled = false, ...props }: ILivelinessBarProps) => {
         }}
       >
         <Box
-          id="livebar"
+          id="live-bar-interaction"
           sx={{
             opacity: disabled ? 0.8 : 1,
             width: "56px",

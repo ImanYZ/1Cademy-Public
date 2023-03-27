@@ -483,7 +483,9 @@ export type TutorialTypeKeys =
   | "bookmarks"
   | "userInfo"
   | "leaderBoard"
-  | "pendingProposals";
+  | "pendingProposals"
+  | "interactionLivenessBar"
+  | "reputationLivenessBar";
 
 export type UserTutorial = {
   currentStep: number;

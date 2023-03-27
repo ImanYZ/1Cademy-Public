@@ -130,7 +130,7 @@ import {
   getUserNodeChanges,
   mergeAllNodes,
 } from "../lib/utils/nodesSyncronization.utils";
-import { GROUP_TUTORIALS } from "../lib/utils/tutorials/grouptutorials";
+import { getGroupTutorials, LivelinessBar } from "../lib/utils/tutorials/grouptutorials";
 import { gtmEvent, imageLoaded, isValidHttpUrl } from "../lib/utils/utils";
 import {
   ChoosingType,
@@ -336,6 +336,8 @@ const Dashboard = ({}: DashboardProps) => {
     selectedNode: "",
     isEnabled: false,
   });
+
+  const [openLivelinessBar, setOpenLivelinessBar] = useState(false);
 
   const {
     startTutorial,
@@ -5031,9 +5033,44 @@ const Dashboard = ({}: DashboardProps) => {
       const proposalNodesTaken = userTutorial["proposal"].done || userTutorial["proposal"].skipped;
       const isNotProposingNodes = tempNodes.size + Object.keys(changedNodes).length === 0;
 
+      // --------------------------
+
       if (forcedTutorial === "leaderBoard" || (proposalNodesTaken && isNotProposingNodes && openSidebar === null)) {
         const result = detectAndCallSidebarTutorial("leaderBoard", null);
         if (result) return;
+      }
+
+      // --------------------------
+
+      if (
+        user?.livelinessBar === "reputation" &&
+        (forcedTutorial === "reputationLivenessBar" || (proposalNodesTaken && isNotProposingNodes && openLivelinessBar))
+      ) {
+        const shouldIgnore = forcedTutorial
+          ? forcedTutorial !== "reputationLivenessBar"
+          : userTutorial["reputationLivenessBar"].done || userTutorial["reputationLivenessBar"].skipped;
+        if (!shouldIgnore) {
+          if (!openLivelinessBar) setOpenLivelinessBar(true);
+          startTutorial("reputationLivenessBar");
+          return;
+        }
+      }
+
+      // --------------------------
+
+      if (
+        user?.livelinessBar === "interaction" &&
+        (forcedTutorial === "interactionLivenessBar" ||
+          (proposalNodesTaken && isNotProposingNodes && openLivelinessBar))
+      ) {
+        const shouldIgnore = forcedTutorial
+          ? forcedTutorial !== "interactionLivenessBar"
+          : userTutorial["interactionLivenessBar"].done || userTutorial["interactionLivenessBar"].skipped;
+        if (!shouldIgnore) {
+          if (!openLivelinessBar) setOpenLivelinessBar(true);
+          startTutorial("interactionLivenessBar");
+          return;
+        }
       }
     };
 
@@ -5051,6 +5088,7 @@ const Dashboard = ({}: DashboardProps) => {
     graph.nodes,
     nodeBookDispatch,
     nodeBookState.selectedNode,
+    openLivelinessBar,
     openNodeHandler,
     openSidebar,
     parentWithChildren,
@@ -5058,6 +5096,7 @@ const Dashboard = ({}: DashboardProps) => {
     setTargetId,
     startTutorial,
     tutorial,
+    user?.livelinessBar,
     userTutorial,
     userTutorialLoaded,
   ]);
@@ -5370,8 +5409,8 @@ const Dashboard = ({}: DashboardProps) => {
 
     // --------------------------
 
-    if (tutorial.name === "leaderBoard") {
-      if (openSidebar === null) return;
+    if (tutorial.name === "pendingProposals") {
+      if (openSidebar === "PENDING_PROPOSALS") return;
       setTutorial(null);
       setForcedTutorial(null);
       if (currentStep?.childTargetId) removeStyleFromTarget(currentStep.childTargetId, targetId);
@@ -5379,8 +5418,17 @@ const Dashboard = ({}: DashboardProps) => {
 
     // --------------------------
 
-    if (tutorial.name === "pendingProposals") {
-      if (openSidebar === "PENDING_PROPOSALS") return;
+    if (tutorial.name === "reputationLivenessBar") {
+      if (openLivelinessBar) return;
+      setTutorial(null);
+      setForcedTutorial(null);
+      if (currentStep?.childTargetId) removeStyleFromTarget(currentStep.childTargetId, targetId);
+    }
+
+    // --------------------------
+
+    if (tutorial.name === "interactionLivenessBar") {
+      if (openLivelinessBar) return;
       setTutorial(null);
       setForcedTutorial(null);
       if (currentStep?.childTargetId) removeStyleFromTarget(currentStep.childTargetId, targetId);
@@ -5402,6 +5450,7 @@ const Dashboard = ({}: DashboardProps) => {
     focusView.isEnabled,
     graph.nodes,
     nodeBookState.selectedNode,
+    openLivelinessBar,
     openProgressBar,
     openSidebar,
     setTutorial,
@@ -6000,6 +6049,8 @@ const Dashboard = ({}: DashboardProps) => {
               openUserInfoSidebar={openUserInfoSidebar}
               onlineUsers={onlineUsers}
               db={db}
+              open={openLivelinessBar}
+              setOpen={setOpenLivelinessBar}
             />
           )}
 
@@ -6010,6 +6061,8 @@ const Dashboard = ({}: DashboardProps) => {
               onlineUsers={onlineUsers}
               db={db}
               user={user}
+              open={openLivelinessBar}
+              setOpen={setOpenLivelinessBar}
             />
           )}
 
@@ -6251,7 +6304,7 @@ const Dashboard = ({}: DashboardProps) => {
             open={openProgressBar}
             reloadPermanentGraph={reloadPermanentGraph}
             handleCloseProgressBar={onCloseTableOfContent}
-            groupTutorials={GROUP_TUTORIALS}
+            groupTutorials={getGroupTutorials({ livelinessBar: (user?.livelinessBar as LivelinessBar) ?? null })}
             userTutorialState={userTutorial}
             onCancelTutorial={onCancelTutorial}
             onForceTutorial={setForcedTutorial}
