@@ -11,7 +11,7 @@ dayjs.extend(relativeTime);
 const NOTIFICATIONS_STEPS_CONFIG: TutorialStepConfig[] = [
   {
     // targetId: "notifications-tab-read",
-    childTargetId: "notifications-tab-read",
+    childTargetId: "notifications-tab-unread",
     title: "Unread Notifications",
     description: (
       <MarkdownRender
@@ -20,11 +20,9 @@ const NOTIFICATIONS_STEPS_CONFIG: TutorialStepConfig[] = [
         }
       />
     ),
-
-    tooltipPosition: "right",
-    targetDelay: 450,
+    tooltipPosition: "bottom",
     anchor: "Portal",
-    // outline: "inside",
+    outline: "inside",
   },
   {
     // targetId: "sidebar-wrapper-searcher",
@@ -39,6 +37,7 @@ const NOTIFICATIONS_STEPS_CONFIG: TutorialStepConfig[] = [
     ),
     tooltipPosition: "bottom",
     anchor: "Portal",
+    outline: "inside",
   },
 ];
 

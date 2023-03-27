@@ -4168,9 +4168,7 @@ const Dashboard = ({}: DashboardProps) => {
       if (shouldIgnore) return false;
 
       devLog("DETECT_AND_CALL_SIDEBAR_TUTORIAL", { tutorialName, node: nodeBookState.selectedNode });
-      if (openSidebar !== sidebar) {
-        setOpenSidebar(sidebar);
-      }
+      if (openSidebar !== sidebar) setOpenSidebar(sidebar);
       startTutorial(tutorialName);
       return true;
     },
@@ -4893,6 +4891,13 @@ const Dashboard = ({}: DashboardProps) => {
 
       // --------------------------
 
+      if (forcedTutorial === "notifications" || openSidebar === "NOTIFICATION_SIDEBAR") {
+        const result = detectAndCallSidebarTutorial("notifications", "NOTIFICATION_SIDEBAR");
+        if (result) return;
+      }
+
+      // --------------------------
+
       const nodesTaken = userTutorial["nodes"].done || userTutorial["nodes"].skipped;
 
       const mostParent = parentWithMostChildren();
@@ -5012,6 +5017,7 @@ const Dashboard = ({}: DashboardProps) => {
     if (!userTutorialLoaded) return;
     if (firstLoading) return;
     if (!tutorial) return;
+    if (!currentStep) return;
 
     if (focusView.isEnabled) {
       setTutorial(null);
@@ -5287,8 +5293,18 @@ const Dashboard = ({}: DashboardProps) => {
     }
 
     // --------------------------
+
+    if (tutorial.name === "notifications") {
+      if (openSidebar === "NOTIFICATION_SIDEBAR") return;
+      setTutorial(null);
+      setForcedTutorial(null);
+      if (currentStep?.childTargetId) removeStyleFromTarget(currentStep.childTargetId, targetId);
+    }
+
+    // --------------------------
   }, [
     buttonsOpen,
+    currentStep,
     detectAndRemoveTutorial,
     firstLoading,
     focusView.isEnabled,
