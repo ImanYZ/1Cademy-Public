@@ -4164,7 +4164,9 @@ const Dashboard = ({}: DashboardProps) => {
 
   const detectAndCallSidebarTutorial = useCallback(
     (tutorialName: TutorialTypeKeys, sidebar: OpenSidebar) => {
-      const shouldIgnore = !forcedTutorial && (userTutorial[tutorialName].done || userTutorial[tutorialName].skipped);
+      const shouldIgnore = forcedTutorial
+        ? forcedTutorial !== tutorialName
+        : userTutorial[tutorialName].done || userTutorial[tutorialName].skipped;
       if (shouldIgnore) return false;
 
       devLog("DETECT_AND_CALL_SIDEBAR_TUTORIAL", { tutorialName, node: nodeBookState.selectedNode });
@@ -5290,6 +5292,7 @@ const Dashboard = ({}: DashboardProps) => {
       if (openSidebar === "SEARCHER_SIDEBAR") return;
       setTutorial(null);
       setForcedTutorial(null);
+      if (currentStep?.childTargetId) removeStyleFromTarget(currentStep.childTargetId, targetId);
     }
 
     // --------------------------
