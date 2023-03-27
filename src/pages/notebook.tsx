@@ -5757,6 +5757,7 @@ const Dashboard = ({}: DashboardProps) => {
                     disabled={!nodeBookState.selectedNode ? true : false}
                     sx={{
                       opacity: !nodeBookState.selectedNode ? 0.5 : undefined,
+                      padding: { xs: "2px", sm: "8px" },
                     }}
                   >
                     <MyLocationIcon sx={{ color: theme => (theme.palette.mode === "dark" ? "#CACACA" : "#667085") }} />
