@@ -4904,6 +4904,13 @@ const Dashboard = ({}: DashboardProps) => {
 
       // --------------------------
 
+      if (forcedTutorial === "bookmarks" || openSidebar === "BOOKMARKS_SIDEBAR") {
+        const result = detectAndCallSidebarTutorial("bookmarks", "BOOKMARKS_SIDEBAR");
+        if (result) return;
+      }
+
+      // --------------------------
+
       const nodesTaken = userTutorial["nodes"].done || userTutorial["nodes"].skipped;
 
       const mostParent = parentWithMostChildren();
@@ -5317,6 +5324,13 @@ const Dashboard = ({}: DashboardProps) => {
     }
 
     // --------------------------
+
+    if (tutorial.name === "bookmarks") {
+      if (openSidebar === "BOOKMARKS_SIDEBAR") return;
+      setTutorial(null);
+      setForcedTutorial(null);
+      if (currentStep?.childTargetId) removeStyleFromTarget(currentStep.childTargetId, targetId);
+    }
   }, [
     buttonsOpen,
     currentStep,

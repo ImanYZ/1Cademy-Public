@@ -1,4 +1,5 @@
 import { GroupTutorial } from "../../../components/tutorial/TutorialTableOfContent";
+import { BOOKMARKS_STEPS } from "./bookmarksTutorialSteps";
 import {
   CHILD_CODE_PROPOSAL_COMPLETE,
   CHILD_CONCEPT_PROPOSAL_COMPLETE,
@@ -244,6 +245,11 @@ export const GROUP_TUTORIALS: GroupTutorial[] = [
       {
         title: "Notifications",
         tutorialSteps: { tutorialKey: "notifications", steps: NOTIFICATION_STEPS },
+        tutorials: [],
+      },
+      {
+        title: "Bookmarks",
+        tutorialSteps: { tutorialKey: "bookmarks", steps: BOOKMARKS_STEPS },
         tutorials: [],
       },
     ],
