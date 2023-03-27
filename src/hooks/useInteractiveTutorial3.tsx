@@ -8,6 +8,7 @@ import {
   HIDE_STEPS_COMPLETE,
 } from "@/lib/utils/tutorials/nodeActionsTutorialStep";
 import { HIDE_OFFSPRING_STEPS_COMPLETE } from "@/lib/utils/tutorials/nodeActionsTutorialStep";
+import { PENDING_PROPOSALS_STEPS_COMPLETE } from "@/lib/utils/tutorials/pendingProposalsTutorial";
 import { PROPOSAL_STEPS_COMPLETE } from "@/lib/utils/tutorials/proposalTutorialSteps";
 import {
   RECONCILING_ACCEPTED_PROPOSALS_STEPS_COMPLETE,
@@ -137,6 +138,7 @@ export const useInteractiveTutorial = ({ user }: useInteractiveTutorialProps) =>
     notifications: { currentStep: -1, done: false, skipped: false },
     bookmarks: { currentStep: -1, done: false, skipped: false },
     leaderBoard: { currentStep: -1, done: false, skipped: false },
+    pendingProposals: { currentStep: -1, done: false, skipped: false },
   });
 
   // flag for whether tutorial state was loaded
@@ -175,13 +177,6 @@ export const useInteractiveTutorial = ({ user }: useInteractiveTutorialProps) =>
       }
       if (newTutorial === "nodes") {
         newSteps = NODES_STEPS_COMPLETE;
-      }
-      if (newTutorial === "searcher") {
-        newSteps = SEARCHER_STEPS_COMPLETE;
-        setTargetId("");
-      }
-      if (newTutorial === "userSettings") {
-        newSteps = USER_SETTINGS_STEPS_COMPLETE;
       }
       if (newTutorial === "concept") {
         newSteps = NODE_CONCEPT;
@@ -278,6 +273,9 @@ export const useInteractiveTutorial = ({ user }: useInteractiveTutorialProps) =>
         newSteps = SEARCHER_STEPS_COMPLETE;
         setTargetId("");
       }
+      if (newTutorial === "userSettings") {
+        newSteps = USER_SETTINGS_STEPS_COMPLETE;
+      }
 
       if (newTutorial === "notifications") {
         newSteps = NOTIFICATION_STEPS;
@@ -285,6 +283,10 @@ export const useInteractiveTutorial = ({ user }: useInteractiveTutorialProps) =>
 
       if (newTutorial === "bookmarks") {
         newSteps = BOOKMARKS_STEPS;
+      }
+
+      if (newTutorial === "pendingProposals") {
+        newSteps = PENDING_PROPOSALS_STEPS_COMPLETE;
       }
 
       // node actions

@@ -481,7 +481,8 @@ export type TutorialTypeKeys =
   | "hideNode"
   | "notifications"
   | "bookmarks"
-  | "leaderBoard";
+  | "leaderBoard"
+  | "pendingProposals";
 
 export type UserTutorial = {
   currentStep: number;

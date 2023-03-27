@@ -169,6 +169,7 @@ export const SidebarWrapper = ({
             borderRadius: "4px",
           },
           "::-webkit-scrollbar ": { width: "4px", height: "4px" },
+          borderRadius: "6px",
         }}
       >
         {sidebarContent}
