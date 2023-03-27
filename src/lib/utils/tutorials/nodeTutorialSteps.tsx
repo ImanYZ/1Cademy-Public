@@ -5,14 +5,40 @@ import LocalLibraryIcon from "@mui/icons-material/LocalLibrary";
 import LockIcon from "@mui/icons-material/Lock";
 import MenuBookIcon from "@mui/icons-material/MenuBook";
 import ShareIcon from "@mui/icons-material/Share";
-import { Box, Stack, Typography } from "@mui/material";
+import { Box, Stack, SxProps, Theme, Typography } from "@mui/material";
+import { ReactNode } from "react";
 
 import MarkdownRender from "@/components/Markdown/MarkdownRender";
+import { gray100, gray700 } from "@/pages/home";
 
 import { TutorialState, TutorialStep, TutorialStepConfig } from "../../../nodeBookTypes";
 import { getBaseStepConfig } from "./tutorial.utils";
 
 export const INITIAL_NODE_TUTORIAL_STATE: TutorialState = null;
+
+type NodeTypeIconButtonProps = {
+  children: ReactNode;
+  sx?: SxProps<Theme> | undefined;
+};
+
+export const NodeTypeIconButton = ({ children, sx }: NodeTypeIconButtonProps) => {
+  return (
+    <Box
+      sx={{
+        width: "32px",
+        height: "32px",
+        display: "grid",
+        placeItems: "center",
+        borderRadius: "50%",
+        backgroundColor: theme => (theme.palette.mode === "dark" ? "#F2F4F71A" : "#3440541A"),
+        color: theme => (theme.palette.mode === "dark" ? gray100 : gray700),
+        ...sx,
+      }}
+    >
+      {children}
+    </Box>
+  );
+};
 
 const NODES_STEPS: TutorialStepConfig[] = [
   {
@@ -69,36 +95,64 @@ const NODES_STEPS: TutorialStepConfig[] = [
     description: (
       <>
         <MarkdownRender text={"This indicates what type of node this is. There are six types of nodes on 1Cademy."} />
-        <Box sx={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr 1fr", mt: "10px" }}>
+        <Stack
+          direction="row"
+          flexWrap="wrap"
+          justifyContent={"space-around"}
+          alignItems="center"
+          sx={{ mt: "10px", fontSize: "14px" }}
+        >
           <Stack alignItems={"center"}>
-            <LocalLibraryIcon color="primary" />
-            <Typography>Concept</Typography>
+            <NodeTypeIconButton>
+              <LocalLibraryIcon color="inherit" fontSize="small" />
+            </NodeTypeIconButton>
+            <Typography fontSize={"inherit"}>Concept</Typography>
           </Stack>
           <Stack alignItems={"center"}>
-            <ShareIcon color="primary" />
-            <Typography>Relation</Typography>
+            <NodeTypeIconButton>
+              <ShareIcon color="inherit" fontSize="small" />
+            </NodeTypeIconButton>
+            <Typography fontSize={"inherit"}>Relation</Typography>
           </Stack>
           <Stack alignItems={"center"}>
-            <MenuBookIcon color="primary" />
-            <Typography>Reference</Typography>
+            <NodeTypeIconButton>
+              <MenuBookIcon color="inherit" fontSize="small" />
+            </NodeTypeIconButton>
+            <Typography fontSize={"inherit"}>Reference</Typography>
           </Stack>
           <Stack alignItems={"center"}>
-            <HelpOutlineIcon color="primary" />
-            <Typography>Question</Typography>
+            <NodeTypeIconButton>
+              <HelpOutlineIcon color="inherit" fontSize="small" />
+            </NodeTypeIconButton>
+            <Typography fontSize={"inherit"}>Question</Typography>
+          </Stack>
+        </Stack>
+        <Stack
+          direction="row"
+          flexWrap="wrap"
+          justifyContent={"space-evenly"}
+          alignItems="center"
+          sx={{ mt: "10px", fontSize: "14px", px: "16px" }}
+        >
+          <Stack alignItems={"center"}>
+            <NodeTypeIconButton>
+              <CodeIcon color="inherit" fontSize="small" />
+            </NodeTypeIconButton>
+            <Typography fontSize={"inherit"}>Code</Typography>
           </Stack>
           <Stack alignItems={"center"}>
-            <CodeIcon color="primary" />
-            <Typography>Code</Typography>
+            <NodeTypeIconButton>
+              <EmojiObjectsIcon color="inherit" fontSize="small" />
+            </NodeTypeIconButton>
+            <Typography fontSize={"inherit"}>Idea</Typography>
           </Stack>
           <Stack alignItems={"center"}>
-            <EmojiObjectsIcon color="primary" />
-            <Typography>Idea</Typography>
+            <NodeTypeIconButton>
+              <LockIcon color="inherit" fontSize="small" />
+            </NodeTypeIconButton>
+            <Typography fontSize={"inherit"}>Lock</Typography>
           </Stack>
-          <Stack alignItems={"center"}>
-            <LockIcon color="primary" />
-            <Typography>Lock</Typography>
-          </Stack>
-        </Box>
+        </Stack>
       </>
     ),
   },
@@ -163,11 +217,17 @@ const NODES_STEPS: TutorialStepConfig[] = [
     childTargetId: "node-footer-votes",
     title: "Netvotes",
     description: (
-      <MarkdownRender
-        text={
-          "The number of upvotes minus downvotes, called netvotes, determines how many or few approving votes a proposal needs in order to make the proposed changes to the node. This will be discussed further later on."
-        }
-      />
+      <Stack>
+        <Typography>
+          Netvotes determines how many or few approving votes a proposal needs in order to make the proposed changes to
+          the node.
+        </Typography>
+        <MarkdownRender
+          text="$$ \text{Netvotes} = \text{Upvotes} - \text{Downvotes}$$"
+          sx={{ alignSelf: "center", my: "8px" }}
+        />
+        <Typography>This will be discussed further later on.</Typography>
+      </Stack>
     ),
   },
 
