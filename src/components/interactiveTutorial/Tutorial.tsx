@@ -190,16 +190,15 @@ export const TooltipTutorial = ({
     return (
       <Box
         sx={{
+          boxSizing: "border-box",
           position: "absolute",
           ...location,
-          backgroundColor: "#55555500",
+          width: isOnPortal ? "auto" : "450px",
           height: "auto",
           maxWidth: "450px",
-          width: isOnPortal ? "auto" : "450px",
+          backgroundColor: "#55555500",
+
           transition: "top 1s ease-out,bottom 1s ease-out,left 1s ease-out,rigth 1s ease-out,height 1s ease-out",
-          boxSizing: "border-box",
-          // display: "grid",
-          // placeItems: "center",
           zIndex: 99999,
         }}
       >
@@ -207,26 +206,38 @@ export const TooltipTutorial = ({
           ref={tooltipRef}
           sx={{
             width: "100%",
-            transition: "top 1s ease-out,left 1s ease-out",
-            backgroundColor: theme => (theme.palette.mode === "dark" ? gray500 : "#C5D0DF"),
             p: "24px 32px",
-            borderRadius: "8px",
+            backgroundColor: theme => (theme.palette.mode === "dark" ? gray500 : "#C5D0DF"),
+            border: theme => `2px solid ${theme.palette.mode === "dark" ? "#667085" : gray400}`,
             color: theme => (theme.palette.mode === "dark" ? gray50 : gray800),
+            borderRadius: "12px",
+
+            transition: "top 1s ease-out,left 1s ease-out",
             zIndex: 99999,
           }}
         >
+          {stepsLength > 1 && (
+            <LinearProgress
+              variant="determinate"
+              value={(tutorialStep.currentStepName * 100) / stepsLength}
+              color={"success"}
+              sx={{
+                borderRadius: "50px",
+                mb: "16px",
+                backgroundColor: theme => (theme.palette.mode === "dark" ? "#D0D5DD4D" : "#6C74824D"),
+                height: "5px",
+                "& .MuiLinearProgress-bar1Determinate": {
+                  backgroundColor: theme => (theme.palette.mode === "dark" ? "#A4FD96" : "#52AE43"),
+                  borderRadius: "50px",
+                },
+              }}
+            />
+          )}
           <Stack direction={"row"} justifyContent="space-between" sx={{ mb: "12px" }}>
-            <Stack direction={"row"} alignItems="center" spacing={"8px"}>
-              <Typography component={"h2"} sx={{ fontSize: "18px", fontWeight: "bold", display: "inline-block" }}>
-                {tutorialStep.title}
-              </Typography>
-              <HelpIcon />
-            </Stack>
-            {stepsLength <= 1 || (
-              <Typography sx={{ display: "inline-block", color: "#818181" }}>
-                {tutorialStep.currentStepName} / {stepsLength}
-              </Typography>
-            )}
+            <Typography component={"h2"} sx={{ fontSize: "18px", fontWeight: "bold", display: "inline-block" }}>
+              {tutorialStep.title}
+            </Typography>
+            <HelpIcon />
           </Stack>
 
           {typeof tutorialStep.description === "function"
@@ -334,7 +345,6 @@ export const TooltipTutorial = ({
         maxWidth: "450px",
         width: isOnPortal ? (isMobile ? "auto" : "100%") : "450px",
         backgroundColor: theme => (theme.palette.mode === "dark" ? gray500 : "#C5D0DF"),
-        borderColor: theme => (theme.palette.mode === "dark" ? gray500 : "#C5D0DF") /* this is used in tooltip */,
         p: "24px 32px",
         borderRadius: "12px",
         border: theme => `2px solid ${theme.palette.mode === "dark" ? "#667085" : gray400}`,
