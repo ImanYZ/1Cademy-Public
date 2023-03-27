@@ -5289,6 +5289,14 @@ const Dashboard = ({}: DashboardProps) => {
         setForcedTutorial(null);
       }
     }
+    // --------------------------
+
+    if (tutorial.name === "userSettings") {
+      if (openSidebar === "USER_SETTINGS") return;
+      setTutorial(null);
+      setForcedTutorial(null);
+      if (currentStep?.childTargetId) removeStyleFromTarget(currentStep.childTargetId, targetId);
+    }
 
     // --------------------------
 

@@ -1351,7 +1351,7 @@ button.MuiTab-textColorInherit:focus {
   display: grid;
   grid-template-columns: auto auto auto;
   grid-template-rows: 40px 40px;
-  margin: 25px 10px 19px 10px;
+  margin: 25px 0 19px 0;
   border-radius: 6px;
 }
 
