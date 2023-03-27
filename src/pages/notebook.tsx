@@ -1688,7 +1688,7 @@ const Dashboard = ({}: DashboardProps) => {
     processHeightChange(nodeId);
   }, []);
 
-  const recursiveOffsprings = useCallback((nodeId: string): any[] => {
+  const recursiveDescendants = useCallback((nodeId: string): any[] => {
     // CHECK: this could be improve changing recursive function to iterative
     // because the recursive has a limit of call in stack memory
     // TODO: check type of children
@@ -1696,20 +1696,20 @@ const Dashboard = ({}: DashboardProps) => {
     let descendants: any[] = [];
     if (children && children.length > 0) {
       for (let child of children) {
-        descendants = [...descendants, child, ...recursiveOffsprings(child)];
+        descendants = [...descendants, child, ...recursiveDescendants(child)];
       }
     }
     return descendants;
   }, []);
 
-  const hideOffsprings = useMemoizedCallback(
+  const hideDescendants = useMemoizedCallback(
     nodeId => {
       if (notebookRef.current.choosingNode || !user) return;
 
       setGraph(graph => {
         (async () => {
           const updatedNodeIds: string[] = [];
-          const descendants = recursiveOffsprings(nodeId);
+          const descendants = recursiveDescendants(nodeId);
 
           notebookRef.current.selectedNode = nodeId;
           nodeBookDispatch({ type: "setSelectedNode", payload: nodeId });
@@ -1776,7 +1776,7 @@ const Dashboard = ({}: DashboardProps) => {
         return graph;
       });
     },
-    [recursiveOffsprings, isPlayingTheTutorialRef]
+    [recursiveDescendants, isPlayingTheTutorialRef]
   );
 
   const openLinkedNode = useCallback(
@@ -4881,22 +4881,22 @@ const Dashboard = ({}: DashboardProps) => {
       const nodesTaken = userTutorial["nodes"].done || userTutorial["nodes"].skipped;
 
       const mostParent = parentWithMostChildren();
-      const hideOffspringsTutorialIsValid = (node: FullNodeData) =>
+      const hideDescendantsTutorialIsValid = (node: FullNodeData) =>
         node && !node.editable && parentWithChildren(node.node) >= 2;
-      const hideOffspringsTutorialForcedIsValid = (node: FullNodeData) => node && !node.editable;
+      const hideDescendantsTutorialForcedIsValid = (node: FullNodeData) => node && !node.editable;
 
-      if ((!forcedTutorial && mostParent.children >= 2) || forcedTutorial === "hideOffsprings") {
-        const hideOffspringTaken = userTutorial["hideOffsprings"].done || userTutorial["hideOffsprings"].skipped;
+      if ((!forcedTutorial && mostParent.children >= 2) || forcedTutorial === "hideDescendants") {
+        const hideDescendantTaken = userTutorial["hideDescendants"].done || userTutorial["hideDescendants"].skipped;
 
-        const shouldIgnore = hideOffspringTaken || !nodesTaken;
+        const shouldIgnore = hideDescendantTaken || !nodesTaken;
 
         if (!shouldIgnore || forcedTutorial) {
           const result = detectAndForceTutorial(
-            "hideOffsprings",
+            "hideDescendants",
             mostParent.edge || "r98BjyFDCe4YyLA3U8ZE",
             mostParent.edge && mostParent.edge !== "r98BjyFDCe4YyLA3U8ZE"
-              ? hideOffspringsTutorialIsValid
-              : hideOffspringsTutorialForcedIsValid
+              ? hideDescendantsTutorialIsValid
+              : hideDescendantsTutorialForcedIsValid
           );
           if (result) {
             if (!mostParent.edge || mostParent.edge === "r98BjyFDCe4YyLA3U8ZE") {
@@ -4981,6 +4981,7 @@ const Dashboard = ({}: DashboardProps) => {
     getGraphOpenedNodes,
     graph.nodes,
     nodeBookDispatch,
+    nodeBookState.selectedNode,
     openNodeHandler,
     openSidebar,
     parentWithChildren,
@@ -5016,10 +5017,10 @@ const Dashboard = ({}: DashboardProps) => {
 
     // --------------------------
 
-    if (tutorial.name === "hideOffsprings") {
-      const hideOffspringsNodeTutorialIsValid = (node: FullNodeData) => Boolean(node) && !node.editable;
+    if (tutorial.name === "hideDescendants") {
+      const hideDescendantsNodeTutorialIsValid = (node: FullNodeData) => Boolean(node) && !node.editable;
       const node = graph.nodes[targetId];
-      if (!hideOffspringsNodeTutorialIsValid(node)) {
+      if (!hideDescendantsNodeTutorialIsValid(node)) {
         setTutorial(null);
         setForcedTutorial(null);
       }
@@ -5957,7 +5958,7 @@ const Dashboard = ({}: DashboardProps) => {
                   openAllChildren={openAllChildren}
                   openAllParent={openAllParent}
                   hideNodeHandler={hideNodeHandler}
-                  hideOffsprings={hideOffsprings}
+                  hideDescendants={hideDescendants}
                   toggleNode={toggleNode}
                   openNodePart={openNodePart}
                   onNodeShare={onNodeShare}

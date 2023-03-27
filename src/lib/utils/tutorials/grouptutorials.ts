@@ -58,7 +58,7 @@ export const GROUP_TUTORIALS: GroupTutorial[] = [
       },
       {
         title: "Hide Descendants",
-        tutorialSteps: { tutorialKey: "hideOffsprings", steps: HIDE_OFFSPRING_STEPS_COMPLETE },
+        tutorialSteps: { tutorialKey: "hideDescendants", steps: HIDE_OFFSPRING_STEPS_COMPLETE },
         tutorials: [],
       },
       {

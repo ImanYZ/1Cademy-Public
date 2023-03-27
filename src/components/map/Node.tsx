@@ -122,7 +122,7 @@ type NodeProps = {
   openAllChildren: any;
   openAllParent: any;
   onHideNode: any;
-  hideOffsprings: any;
+  hideDescendants: any;
   toggleNode: (event: any, id: string) => void;
   openNodePart: (event: any, id: string, partType: any, openPart: any, setOpenPart: any, tags: any) => void; //
   onNodeShare: (nodeId: string, platform: string) => void;
@@ -242,7 +242,7 @@ const Node = ({
   openAllChildren,
   openAllParent,
   onHideNode,
-  hideOffsprings: onHideOffsprings,
+  hideDescendants: onHideDescendants,
   toggleNode,
   openNodePart,
   onNodeShare,
@@ -470,7 +470,7 @@ const Node = ({
       }
     }
   };
-  const hideOffspringsHandler = useCallback(() => onHideOffsprings(identifier), [onHideOffsprings, identifier]);
+  const hideDescendantsHandler = useCallback(() => onHideDescendants(identifier), [onHideDescendants, identifier]);
 
   const toggleNodeHandler = useCallback(
     (event: any) => {
@@ -762,7 +762,7 @@ const Node = ({
                 id={identifier}
                 open={open}
                 onToggleNode={toggleNodeHandler}
-                onHideOffsprings={hideOffspringsHandler}
+                onHideDescendants={hideDescendantsHandler}
                 onHideNodeHandler={hideNodeHandler}
                 disabled={disabled}
                 enableChildElements={enableChildElements}
@@ -1294,7 +1294,7 @@ const Node = ({
               // setFocusView={() => setFocusView({ isEnabled: true, selectedNode: identifier })}
               open={open}
               onToggleNode={toggleNodeHandler}
-              onHideOffsprings={hideOffspringsHandler}
+              onHideDescendants={hideDescendantsHandler}
               onHideNodeHandler={hideNodeHandler}
               disabled={disabled}
               enableChildElements={enableChildElements}
