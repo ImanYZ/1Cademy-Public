@@ -128,7 +128,6 @@ export const TooltipTutorial = ({
         left = newLeft;
       }
     }
-
     return { top, left, exceedTop, exceedLeft };
     //INFO: Keep targetClientRect, render does not work if we listen to targetClientRect.props
   }, [calcWithExceed, targetClientRect, tutorialStep]);

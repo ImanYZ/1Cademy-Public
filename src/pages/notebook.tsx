@@ -4908,7 +4908,12 @@ const Dashboard = ({}: DashboardProps) => {
         const result = detectAndCallSidebarTutorial("bookmarks", "BOOKMARKS_SIDEBAR");
         if (result) return;
       }
+      // --------------------------
 
+      if (forcedTutorial === "pendingProposals" || openSidebar === "PENDING_PROPOSALS") {
+        const result = detectAndCallSidebarTutorial("pendingProposals", "PENDING_PROPOSALS");
+        if (result) return;
+      }
       // --------------------------
 
       const nodesTaken = userTutorial["nodes"].done || userTutorial["nodes"].skipped;
@@ -5327,6 +5332,15 @@ const Dashboard = ({}: DashboardProps) => {
 
     if (tutorial.name === "bookmarks") {
       if (openSidebar === "BOOKMARKS_SIDEBAR") return;
+      setTutorial(null);
+      setForcedTutorial(null);
+      if (currentStep?.childTargetId) removeStyleFromTarget(currentStep.childTargetId, targetId);
+    }
+
+    // --------------------------
+
+    if (tutorial.name === "pendingProposals") {
+      if (openSidebar === "PENDING_PROPOSALS") return;
       setTutorial(null);
       setForcedTutorial(null);
       if (currentStep?.childTargetId) removeStyleFromTarget(currentStep.childTargetId, targetId);
