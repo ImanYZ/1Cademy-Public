@@ -2686,6 +2686,9 @@ const Dashboard = ({}: DashboardProps) => {
         thisNode.choices = choices;
         return { ...thisNode };
       });
+      if (!ableToPropose) {
+        setAbleToPropose(true);
+      }
     },
     [setNodeParts]
   );
@@ -2704,6 +2707,9 @@ const Dashboard = ({}: DashboardProps) => {
         thisNode.choices = choices;
         return { ...thisNode };
       });
+      if (!ableToPropose) {
+        setAbleToPropose(true);
+      }
     },
     [setNodeParts]
   );
