@@ -5755,6 +5755,9 @@ const Dashboard = ({}: DashboardProps) => {
                     color="secondary"
                     onClick={onScrollToLastNode}
                     disabled={!nodeBookState.selectedNode ? true : false}
+                    sx={{
+                      opacity: !nodeBookState.selectedNode ? 0.5 : undefined,
+                    }}
                   >
                     <MyLocationIcon sx={{ color: theme => (theme.palette.mode === "dark" ? "#CACACA" : "#667085") }} />
                   </IconButton>
@@ -5829,6 +5832,9 @@ const Dashboard = ({}: DashboardProps) => {
                       }
                     }}
                     disabled={!nodeBookState.selectedNode ? true : false}
+                    sx={{
+                      opacity: !nodeBookState.selectedNode ? 0.5 : undefined,
+                    }}
                   >
                     <NextImage
                       src={theme.palette.mode === "light" ? focusViewLogo : focusViewDarkLogo}
