@@ -4916,6 +4916,13 @@ const Dashboard = ({}: DashboardProps) => {
       }
       // --------------------------
 
+      if (forcedTutorial === "" || openSidebar === "PENDING_PROPOSALS") {
+        const result = detectAndCallSidebarTutorial("pendingProposals", "PENDING_PROPOSALS");
+        if (result) return;
+      }
+
+      // --------------------------
+
       const nodesTaken = userTutorial["nodes"].done || userTutorial["nodes"].skipped;
 
       const mostParent = parentWithMostChildren();

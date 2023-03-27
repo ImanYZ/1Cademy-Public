@@ -137,6 +137,7 @@ export const useInteractiveTutorial = ({ user }: useInteractiveTutorialProps) =>
     notifications: { currentStep: -1, done: false, skipped: false },
     bookmarks: { currentStep: -1, done: false, skipped: false },
     pendingProposals: { currentStep: -1, done: false, skipped: false },
+    userInfo: { currentStep: -1, done: false, skipped: false },
   });
 
   // flag for whether tutorial state was loaded
@@ -284,6 +285,9 @@ export const useInteractiveTutorial = ({ user }: useInteractiveTutorialProps) =>
       }
 
       if (newTutorial === "pendingProposals") {
+        newSteps = PENDING_PROPOSALS_STEPS_COMPLETE;
+      }
+      if (newTutorial === "userInfo") {
         newSteps = PENDING_PROPOSALS_STEPS_COMPLETE;
       }
 
