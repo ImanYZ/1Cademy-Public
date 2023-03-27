@@ -1693,13 +1693,13 @@ const Dashboard = ({}: DashboardProps) => {
     // because the recursive has a limit of call in stack memory
     // TODO: check type of children
     const children: any = g.current.successors(nodeId);
-    let offsprings: any[] = [];
+    let descendants: any[] = [];
     if (children && children.length > 0) {
       for (let child of children) {
-        offsprings = [...offsprings, child, ...recursiveOffsprings(child)];
+        descendants = [...descendants, child, ...recursiveOffsprings(child)];
       }
     }
-    return offsprings;
+    return descendants;
   }, []);
 
   const hideOffsprings = useMemoizedCallback(
@@ -1709,16 +1709,16 @@ const Dashboard = ({}: DashboardProps) => {
       setGraph(graph => {
         (async () => {
           const updatedNodeIds: string[] = [];
-          const offsprings = recursiveOffsprings(nodeId);
+          const descendants = recursiveOffsprings(nodeId);
 
           notebookRef.current.selectedNode = nodeId;
           nodeBookDispatch({ type: "setSelectedNode", payload: nodeId });
 
           const batch = writeBatch(db);
           try {
-            for (let offspring of offsprings) {
-              const thisNode = graph.nodes[offspring];
-              const { nodeRef, userNodeRef } = initNodeStatusChange(offspring, thisNode.userNodeId);
+            for (let descendant of descendants) {
+              const thisNode = graph.nodes[descendant];
+              const { nodeRef, userNodeRef } = initNodeStatusChange(descendant, thisNode.userNodeId);
               const userNodeData = {
                 changed: thisNode.changed,
                 correct: thisNode.correct,
@@ -1727,7 +1727,7 @@ const Dashboard = ({}: DashboardProps) => {
                 deleted: false,
                 isStudied: thisNode.isStudied,
                 bookmarked: "bookmarked" in thisNode ? thisNode.bookmarked : false,
-                node: offspring,
+                node: descendant,
                 open: thisNode.open,
                 user: user.uname,
                 visible: false,
@@ -1761,8 +1761,8 @@ const Dashboard = ({}: DashboardProps) => {
             // TODO: need to discuss about these
             let oldNodes = { ...graph.nodes };
             let oldEdges = { ...graph.edges };
-            for (let offspring of offsprings) {
-              ({ oldNodes, oldEdges } = hideNodeAndItsLinks(g.current, offspring, oldNodes, oldEdges, updatedNodeIds));
+            for (let descendant of descendants) {
+              ({ oldNodes, oldEdges } = hideNodeAndItsLinks(g.current, descendant, oldNodes, oldEdges, updatedNodeIds));
             }
             setNodeUpdates({
               nodeIds: updatedNodeIds,

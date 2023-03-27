@@ -30,7 +30,7 @@ const NodeHeader = ({
 }: NodeHeaderProps) => {
   const closeButtonId = `${id}-close-button`;
   const openButtonId = `${id}-open-button`;
-  const hideOffspringsButtonId = `${id}-hide-offsprings-button`;
+  const hideOffspringsButtonId = `${id}-hide-descendants-button`;
   const hideButtonId = `${id}-hidden-button`;
 
   // this will execute the includes operation only when disable is TRUE (in tutorial)
@@ -84,7 +84,7 @@ const NodeHeader = ({
         <span>
           <IconButton
             disabled={disableHideOffspringsButton}
-            id={`${id}-hide-offsprings-button`}
+            id={hideOffspringsButtonId}
             color="inherit"
             onClick={onHideOffsprings}
             aria-label="delete"
