@@ -41,53 +41,53 @@ export const NodeTypeIconButton = ({ children, sx }: NodeTypeIconButtonProps) =>
 };
 
 const NODES_STEPS: TutorialStepConfig[] = [
-  {
-    title: "What is a Node",
-    description: (
-      <MarkdownRender
-        text={
-          "This is a node. It is the most fundamental unit of knowledge on 1Cademy. Each node contains a granular piece of information. Nodes are linked to other nodes allowing us to follow related concepts."
-        }
-      />
-    ),
-  },
+  // {
+  //   title: "What is a Node",
+  //   description: (
+  //     <MarkdownRender
+  //       text={
+  //         "This is a node. It is the most fundamental unit of knowledge on 1Cademy. Each node contains a granular piece of information. Nodes are linked to other nodes allowing us to follow related concepts."
+  //       }
+  //     />
+  //   ),
+  // },
 
-  {
-    childTargetId: "node-title",
-    title: "Node Title",
-    description: (
-      <MarkdownRender
-        text={
-          "Each node has a title. It accurately and concisely introduces the idea that is described in a node. Node titles need to be unique, this means that you need to make one that is specific to the idea being discussed and that cannot be confused with another node."
-        }
-      />
-    ),
-    outline: "outside",
-  },
+  // {
+  //   childTargetId: "node-title",
+  //   title: "Node Title",
+  //   description: (
+  //     <MarkdownRender
+  //       text={
+  //         "Each node has a title. It accurately and concisely introduces the idea that is described in a node. Node titles need to be unique, this means that you need to make one that is specific to the idea being discussed and that cannot be confused with another node."
+  //       }
+  //     />
+  //   ),
+  //   outline: "outside",
+  // },
 
-  {
-    childTargetId: "node-content",
-    title: "Node Content",
-    description: (
-      <MarkdownRender
-        text={
-          "Here is the content of a node. It describes the idea stated in the title. It needs to be descriptive and concise. You can also include images or video in a node’s content."
-        }
-      />
-    ),
-  },
+  // {
+  //   childTargetId: "node-content",
+  //   title: "Node Content",
+  //   description: (
+  //     <MarkdownRender
+  //       text={
+  //         "Here is the content of a node. It describes the idea stated in the title. It needs to be descriptive and concise. You can also include images or video in a node’s content."
+  //       }
+  //     />
+  //   ),
+  // },
 
-  {
-    childTargetId: "node-footer-user",
-    title: "Node Contributor",
-    description: (
-      <MarkdownRender
-        text={
-          "Here you can see the top contributor to a node. 1Cademy is a collaborative platform, many people contribute to the content. However, the system identifies who contributes most to a node and they’re profile is displayed on the node."
-        }
-      />
-    ),
-  },
+  // {
+  //   childTargetId: "node-footer-user",
+  //   title: "Node Contributor",
+  //   description: (
+  //     <MarkdownRender
+  //       text={
+  //         "Here you can see the top contributor to a node. 1Cademy is a collaborative platform, many people contribute to the content. However, the system identifies who contributes most to a node and they’re profile is displayed on the node."
+  //       }
+  //     />
+  //   ),
+  // },
 
   {
     childTargetId: "node-footer-type",
@@ -98,29 +98,29 @@ const NODES_STEPS: TutorialStepConfig[] = [
         <Stack
           direction="row"
           flexWrap="wrap"
-          justifyContent={"space-between"}
+          justifyContent={"space-around"}
           alignItems="center"
           sx={{ mt: "10px", fontSize: "14px" }}
         >
-          <Stack alignItems={"center"} flexGrow={"1"}>
+          <Stack alignItems={"center"}>
             <NodeTypeIconButton>
               <LocalLibraryIcon color="inherit" fontSize="small" />
             </NodeTypeIconButton>
             <Typography fontSize={"inherit"}>Concept</Typography>
           </Stack>
-          <Stack alignItems={"center"} flexGrow={"1"}>
+          <Stack alignItems={"center"}>
             <NodeTypeIconButton>
               <ShareIcon color="inherit" fontSize="small" />
             </NodeTypeIconButton>
             <Typography fontSize={"inherit"}>Relation</Typography>
           </Stack>
-          <Stack alignItems={"center"} flexGrow={"1"}>
+          <Stack alignItems={"center"}>
             <NodeTypeIconButton>
               <MenuBookIcon color="inherit" fontSize="small" />
             </NodeTypeIconButton>
             <Typography fontSize={"inherit"}>Reference</Typography>
           </Stack>
-          <Stack alignItems={"center"} flexGrow={"1"}>
+          <Stack alignItems={"center"}>
             <NodeTypeIconButton>
               <HelpOutlineIcon color="inherit" fontSize="small" />
             </NodeTypeIconButton>
@@ -132,21 +132,21 @@ const NODES_STEPS: TutorialStepConfig[] = [
           flexWrap="wrap"
           justifyContent={"space-evenly"}
           alignItems="center"
-          sx={{ mt: "10px", fontSize: "14px" }}
+          sx={{ mt: "10px", fontSize: "14px", px: "16px" }}
         >
-          <Stack alignItems={"center"} flexGrow={"1"}>
+          <Stack alignItems={"center"}>
             <NodeTypeIconButton>
               <CodeIcon color="inherit" fontSize="small" />
             </NodeTypeIconButton>
             <Typography fontSize={"inherit"}>Code</Typography>
           </Stack>
-          <Stack alignItems={"center"} flexGrow={"1"}>
+          <Stack alignItems={"center"}>
             <NodeTypeIconButton>
               <EmojiObjectsIcon color="inherit" fontSize="small" />
             </NodeTypeIconButton>
             <Typography fontSize={"inherit"}>Idea</Typography>
           </Stack>
-          <Stack alignItems={"center"} flexGrow={"1"}>
+          <Stack alignItems={"center"}>
             <NodeTypeIconButton>
               <LockIcon color="inherit" fontSize="small" />
             </NodeTypeIconButton>
