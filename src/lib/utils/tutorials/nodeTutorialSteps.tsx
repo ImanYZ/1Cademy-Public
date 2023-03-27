@@ -217,11 +217,17 @@ const NODES_STEPS: TutorialStepConfig[] = [
     childTargetId: "node-footer-votes",
     title: "Netvotes",
     description: (
-      <MarkdownRender
-        text={
-          "The number of upvotes minus downvotes, called netvotes, determines how many or few approving votes a proposal needs in order to make the proposed changes to the node. This will be discussed further later on."
-        }
-      />
+      <Stack>
+        <Typography>
+          Netvotes determines how many or few approving votes a proposal needs in order to make the proposed changes to
+          the node.
+        </Typography>
+        <MarkdownRender
+          text="$$ \text{Netvotes} = \text{Upvotes} - \text{Downvotes}$$"
+          sx={{ alignSelf: "center", my: "8px" }}
+        />
+        <Typography>This will be discussed further later on.</Typography>
+      </Stack>
     ),
   },
 
