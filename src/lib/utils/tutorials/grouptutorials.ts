@@ -24,6 +24,7 @@ import { NODE_QUESTION } from "./nodeQuestionStepTutorialStep";
 import { NODE_REFERENCE } from "./nodeReferenceTutorialSteps";
 import { NODE_RELATION } from "./nodeRelationTutorialSteps";
 import { NODES_STEPS_COMPLETE } from "./nodeTutorialSteps";
+import { NOTIFICATION_STEPS } from "./notificationsTutorialSteps";
 import { PROPOSING_CODE_EDIT_COMPLETE } from "./proposalCodeTutorialStep";
 import { PROPOSING_CONCEPT_EDIT_COMPLETE } from "./proposalConceptTutorialStep";
 import { PROPOSING_IDEA_EDIT_COMPLETE } from "./proposalIdeaTutorialSteps";
@@ -231,6 +232,11 @@ export const GROUP_TUTORIALS: GroupTutorial[] = [
       {
         title: "Search Engine",
         tutorialSteps: { tutorialKey: "searcher", steps: SEARCHER_STEPS_COMPLETE },
+        tutorials: [],
+      },
+      {
+        title: "Notifications",
+        tutorialSteps: { tutorialKey: "notifications", steps: NOTIFICATION_STEPS },
         tutorials: [],
       },
     ],

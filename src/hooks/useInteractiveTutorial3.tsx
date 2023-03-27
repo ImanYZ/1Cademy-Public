@@ -20,6 +20,7 @@ import {
   SCROLL_TO_NODE_STEPS,
   TABLE_CONTENT_STEPS,
 } from "@/lib/utils/tutorials/toolbooxTutorialSteps";
+import { USER_SETTINGS_STEPS_COMPLETE } from "@/lib/utils/tutorials/userSettingsTutorialSteps";
 
 import { User } from "../knowledgeTypes";
 import { devLog } from "../lib/utils/develop.util";
@@ -40,6 +41,7 @@ import { NODE_QUESTION } from "../lib/utils/tutorials/nodeQuestionStepTutorialSt
 import { NODE_REFERENCE } from "../lib/utils/tutorials/nodeReferenceTutorialSteps";
 import { NODE_RELATION } from "../lib/utils/tutorials/nodeRelationTutorialSteps";
 import { NODES_STEPS_COMPLETE } from "../lib/utils/tutorials/nodeTutorialSteps";
+import { NOTIFICATION_STEPS } from "../lib/utils/tutorials/notificationsTutorialSteps";
 import { PROPOSING_CODE_EDIT_COMPLETE } from "../lib/utils/tutorials/proposalCodeTutorialStep";
 import { PROPOSING_CONCEPT_EDIT_COMPLETE } from "../lib/utils/tutorials/proposalConceptTutorialStep";
 import { PROPOSING_IDEA_EDIT_COMPLETE } from "../lib/utils/tutorials/proposalIdeaTutorialSteps";
@@ -129,6 +131,8 @@ export const useInteractiveTutorial = ({ user }: useInteractiveTutorialProps) =>
     downVote: { currentStep: -1, done: false, skipped: false },
     hideDescendants: { currentStep: -1, done: false, skipped: false },
     hideNode: { currentStep: -1, done: false, skipped: false },
+    userSettings: { currentStep: -1, done: false, skipped: false },
+    notifications: { currentStep: -1, done: false, skipped: false },
   });
 
   // flag for whether tutorial state was loaded
@@ -171,6 +175,9 @@ export const useInteractiveTutorial = ({ user }: useInteractiveTutorialProps) =>
       if (newTutorial === "searcher") {
         newSteps = SEARCHER_STEPS_COMPLETE;
         setTargetId("");
+      }
+      if (newTutorial === "userSettings") {
+        newSteps = USER_SETTINGS_STEPS_COMPLETE;
       }
       if (newTutorial === "concept") {
         newSteps = NODE_CONCEPT;
@@ -259,6 +266,17 @@ export const useInteractiveTutorial = ({ user }: useInteractiveTutorialProps) =>
 
       if (newTutorial === "hideDescendants") {
         newSteps = HIDE_OFFSPRING_STEPS_COMPLETE;
+      }
+
+      // sidebars
+
+      if (newTutorial === "searcher") {
+        newSteps = SEARCHER_STEPS_COMPLETE;
+        setTargetId("");
+      }
+
+      if (newTutorial === "notifications") {
+        newSteps = NOTIFICATION_STEPS;
       }
 
       // node actions

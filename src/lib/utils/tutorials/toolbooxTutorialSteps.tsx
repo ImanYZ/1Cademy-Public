@@ -26,7 +26,7 @@ const FOCUS_MODE_STEPS_CONFIG: TutorialStepConfig[] = [
     description: (
       <MarkdownRender
         text={
-          "If you click this button it will change the presentation format. Rather than looking at a full graph of the nodes you have open, it will focus on one node at a time and prived a linear route of going to parent or child nodes one at a time."
+          "If you click this button it will change the presentation format. Rather than looking at a full graph of the nodes you have open, it will focus on one node at a time and provide a linear route of going to parent or child nodes one at a time."
         }
       />
     ),
@@ -62,7 +62,7 @@ const SCROLL_TO_NODE_STEPS_CONFIG: TutorialStepConfig[] = [
     description: (
       <MarkdownRender
         text={
-          "If you click this button it will automatically scroll to the last node that you interacted with. This can help you find where you previously where if you get a little lost while navigating around nodes."
+          "If you click this button it will automatically scroll to the last node that you interacted with. This can help you find where you previously were if you get a little lost while navigating around nodes."
         }
       />
     ),

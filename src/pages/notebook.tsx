@@ -2641,6 +2641,9 @@ const Dashboard = ({}: DashboardProps) => {
         thisNode.choices = choices;
         return { ...thisNode };
       });
+      if (!ableToPropose) {
+        setAbleToPropose(true);
+      }
     },
     [setNodeParts]
   );
@@ -2656,6 +2659,9 @@ const Dashboard = ({}: DashboardProps) => {
         thisNode.choices = choices;
         return { ...thisNode };
       });
+      if (!ableToPropose) {
+        setAbleToPropose(true);
+      }
     },
     [setNodeParts]
   );
@@ -2672,6 +2678,9 @@ const Dashboard = ({}: DashboardProps) => {
         thisNode.choices = choices;
         return { ...thisNode };
       });
+      if (!ableToPropose) {
+        setAbleToPropose(true);
+      }
     },
     [setNodeParts]
   );
@@ -2686,6 +2695,9 @@ const Dashboard = ({}: DashboardProps) => {
         thisNode.choices = choices;
         return { ...thisNode };
       });
+      if (!ableToPropose) {
+        setAbleToPropose(true);
+      }
     },
     [setNodeParts]
   );
@@ -2704,6 +2716,9 @@ const Dashboard = ({}: DashboardProps) => {
         thisNode.choices = choices;
         return { ...thisNode };
       });
+      if (!ableToPropose) {
+        setAbleToPropose(true);
+      }
     },
     [setNodeParts]
   );
@@ -4149,13 +4164,13 @@ const Dashboard = ({}: DashboardProps) => {
 
   const detectAndCallSidebarTutorial = useCallback(
     (tutorialName: TutorialTypeKeys, sidebar: OpenSidebar) => {
-      const shouldIgnore = !forcedTutorial && (userTutorial[tutorialName].done || userTutorial[tutorialName].skipped);
+      const shouldIgnore = forcedTutorial
+        ? forcedTutorial !== tutorialName
+        : userTutorial[tutorialName].done || userTutorial[tutorialName].skipped;
       if (shouldIgnore) return false;
 
       devLog("DETECT_AND_CALL_SIDEBAR_TUTORIAL", { tutorialName, node: nodeBookState.selectedNode });
-      if (openSidebar !== sidebar) {
-        setOpenSidebar(sidebar);
-      }
+      if (openSidebar !== sidebar) setOpenSidebar(sidebar);
       startTutorial(tutorialName);
       return true;
     },
@@ -4876,6 +4891,17 @@ const Dashboard = ({}: DashboardProps) => {
         if (result) return;
       }
 
+      if (forcedTutorial === "userSettings" || openSidebar === "USER_SETTINGS") {
+        const result = detectAndCallSidebarTutorial("userSettings", "USER_SETTINGS");
+        if (result) return;
+      }
+      // --------------------------
+
+      if (forcedTutorial === "notifications" || openSidebar === "NOTIFICATION_SIDEBAR") {
+        const result = detectAndCallSidebarTutorial("notifications", "NOTIFICATION_SIDEBAR");
+        if (result) return;
+      }
+
       // --------------------------
 
       const nodesTaken = userTutorial["nodes"].done || userTutorial["nodes"].skipped;
@@ -4997,6 +5023,7 @@ const Dashboard = ({}: DashboardProps) => {
     if (!userTutorialLoaded) return;
     if (firstLoading) return;
     if (!tutorial) return;
+    if (!currentStep) return;
 
     if (focusView.isEnabled) {
       setTutorial(null);
@@ -5262,6 +5289,14 @@ const Dashboard = ({}: DashboardProps) => {
         setForcedTutorial(null);
       }
     }
+    // --------------------------
+
+    if (tutorial.name === "userSettings") {
+      if (openSidebar === "USER_SETTINGS") return;
+      setTutorial(null);
+      setForcedTutorial(null);
+      if (currentStep?.childTargetId) removeStyleFromTarget(currentStep.childTargetId, targetId);
+    }
 
     // --------------------------
 
@@ -5269,11 +5304,22 @@ const Dashboard = ({}: DashboardProps) => {
       if (openSidebar === "SEARCHER_SIDEBAR") return;
       setTutorial(null);
       setForcedTutorial(null);
+      if (currentStep?.childTargetId) removeStyleFromTarget(currentStep.childTargetId, targetId);
+    }
+
+    // --------------------------
+
+    if (tutorial.name === "notifications") {
+      if (openSidebar === "NOTIFICATION_SIDEBAR") return;
+      setTutorial(null);
+      setForcedTutorial(null);
+      if (currentStep?.childTargetId) removeStyleFromTarget(currentStep.childTargetId, targetId);
     }
 
     // --------------------------
   }, [
     buttonsOpen,
+    currentStep,
     detectAndRemoveTutorial,
     firstLoading,
     focusView.isEnabled,
@@ -5718,7 +5764,7 @@ const Dashboard = ({}: DashboardProps) => {
                 sx={{
                   width: "100%",
                   display: "flex",
-                  justifyContent: "flex-start",
+                  justifyContent: "space-evenly",
                   alignItems: "center",
                   gap: {
                     xs: "5px",
@@ -5757,6 +5803,7 @@ const Dashboard = ({}: DashboardProps) => {
                     disabled={!nodeBookState.selectedNode ? true : false}
                     sx={{
                       opacity: !nodeBookState.selectedNode ? 0.5 : undefined,
+                      padding: { xs: "2px", sm: "8px" },
                     }}
                   >
                     <MyLocationIcon sx={{ color: theme => (theme.palette.mode === "dark" ? "#CACACA" : "#667085") }} />
@@ -5771,6 +5818,7 @@ const Dashboard = ({}: DashboardProps) => {
                       background: theme.palette.mode === "dark" ? "#404040" : "#EAECF0",
                       borderRadius: "8px",
                     },
+                    padding: { xs: "2px", sm: "8px" },
                   }}
                 >
                   <IconButton
@@ -5795,6 +5843,7 @@ const Dashboard = ({}: DashboardProps) => {
                       background: theme.palette.mode === "dark" ? "#404040" : "#EAECF0",
                       borderRadius: "8px",
                     },
+                    padding: { xs: "2px", sm: "8px" },
                   }}
                 >
                   <IconButton
@@ -5819,6 +5868,7 @@ const Dashboard = ({}: DashboardProps) => {
                       background: theme.palette.mode === "dark" ? "#404040" : "#EAECF0",
                       borderRadius: "8px",
                     },
+                    padding: { xs: "2px", sm: "8px" },
                   }}
                 >
                   <IconButton
@@ -5853,6 +5903,7 @@ const Dashboard = ({}: DashboardProps) => {
                         background: theme.palette.mode === "dark" ? "#404040" : "#EAECF0",
                         borderRadius: "8px",
                       },
+                      padding: { xs: "2px", sm: "8px" },
                     }}
                   >
                     {/* DEVTOOLS */}
