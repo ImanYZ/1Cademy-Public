@@ -5718,7 +5718,7 @@ const Dashboard = ({}: DashboardProps) => {
                 sx={{
                   width: "100%",
                   display: "flex",
-                  justifyContent: "flex-start",
+                  justifyContent: "space-evenly",
                   alignItems: "center",
                   gap: {
                     xs: "5px",
@@ -5772,6 +5772,7 @@ const Dashboard = ({}: DashboardProps) => {
                       background: theme.palette.mode === "dark" ? "#404040" : "#EAECF0",
                       borderRadius: "8px",
                     },
+                    padding: { xs: "2px", sm: "8px" },
                   }}
                 >
                   <IconButton
@@ -5796,6 +5797,7 @@ const Dashboard = ({}: DashboardProps) => {
                       background: theme.palette.mode === "dark" ? "#404040" : "#EAECF0",
                       borderRadius: "8px",
                     },
+                    padding: { xs: "2px", sm: "8px" },
                   }}
                 >
                   <IconButton
@@ -5820,6 +5822,7 @@ const Dashboard = ({}: DashboardProps) => {
                       background: theme.palette.mode === "dark" ? "#404040" : "#EAECF0",
                       borderRadius: "8px",
                     },
+                    padding: { xs: "2px", sm: "8px" },
                   }}
                 >
                   <IconButton
@@ -5854,6 +5857,7 @@ const Dashboard = ({}: DashboardProps) => {
                         background: theme.palette.mode === "dark" ? "#404040" : "#EAECF0",
                         borderRadius: "8px",
                       },
+                      padding: { xs: "2px", sm: "8px" },
                     }}
                   >
                     {/* DEVTOOLS */}
