@@ -1,4 +1,4 @@
-import { ExpandLess,ExpandMore } from "@mui/icons-material";
+import { ExpandLess, ExpandMore } from "@mui/icons-material";
 import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
 import { Box } from "@mui/material";
 import { getFirestore } from "firebase/firestore";
@@ -192,7 +192,7 @@ const CommunityLeaderboard = ({ userTagId, pendingProposalsLoaded, disabled = fa
     <Box
       id="ComLeaderboardMain"
       className={comLeaderboardOpen ? undefined : "Minimized"}
-      sx={{ width: { xs: "100%", sm: "70%", md: "90%" }, opacity: disabled ? 0.8 : 1 }}
+      sx={{ width: { xs: "100%", sm: "88%" }, opacity: disabled ? 0.8 : 1 }}
     >
       <Box id="ComLeaderboardMinimizer">
         <Box
@@ -236,7 +236,7 @@ const CommunityLeaderboard = ({ userTagId, pendingProposalsLoaded, disabled = fa
             display: "flex",
             cursor: "pointer",
             alignItems: "center",
-            marginLeft: { xs: "0px", sm: "10px" },
+            marginLeft: "10px",
           }}
           id="ComLeaderbaordChanger"
           onClick={openComLeaderboardTypes}
