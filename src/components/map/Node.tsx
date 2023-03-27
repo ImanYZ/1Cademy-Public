@@ -636,6 +636,7 @@ const Node = ({
 
   const onSearch = useCallback(async (page: number, q: string) => {
     try {
+      setIsFetching(true);
       if (page < 1) {
         setSearchResults({
           data: [],
@@ -644,7 +645,6 @@ const Node = ({
           totalResults: 0,
         });
       }
-      setIsFetching(true);
       const data: SearchNodesResponse = await Post<SearchNodesResponse>("/searchNodesInNotebook", {
         q,
         nodeTypes: NODE_TYPES_ARRAY,
@@ -784,9 +784,9 @@ const Node = ({
                 editOption={option}
                 disabled={disableTitle}
               />
-              {editable && searchResults.data.length > 0 && (
+              {editable && (
                 <Box sx={{ marginTop: "5px" }}>
-                  {!isFetching ? (
+                  {!isFetching && searchResults.data.length > 0 && (
                     <Accordion
                       sx={{ background: "transparent" }}
                       expanded={showSimilarNodes}
@@ -889,7 +889,9 @@ const Node = ({
                         </Box>
                       </AccordionDetails>
                     </Accordion>
-                  ) : (
+                  )}
+
+                  {isFetching && (
                     <Box sx={{ marginTop: "20px", textAlign: "center" }}>
                       <CircularProgress />
                     </Box>

@@ -1,12 +1,11 @@
-import ArrowBackIcon from "@mui/icons-material/ArrowBack";
-import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
+import { ExpandLess,ExpandMore } from "@mui/icons-material";
+import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
 import { Box } from "@mui/material";
 import { getFirestore } from "firebase/firestore";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 
 import { loadReputationsData } from "@/lib/utils/Map.utils";
 
-import { MemoizedMetaButton } from "../MetaButton";
 import MultipleChoiceBtn from "../Sidebar/MultipleChoiceBtn";
 import { MemoizedComLeaderboardChip } from "./ComLeaderboardChip/ComLeaderboardChip";
 
@@ -196,12 +195,28 @@ const CommunityLeaderboard = ({ userTagId, pendingProposalsLoaded, disabled = fa
       sx={{ width: { xs: "100%", sm: "70%", md: "90%" }, opacity: disabled ? 0.8 : 1 }}
     >
       <Box id="ComLeaderboardMinimizer">
-        <MemoizedMetaButton onClick={openComLeaderboard} disabled={disabled}>
-          <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "8px" }}>
-            <Box sx={{ color: "ButtonHighlight", fontSize: "18px" }}>🏆</Box>
-            <Box sx={{}}>{comLeaderboardOpen ? <ArrowForwardIcon /> : <ArrowBackIcon />}</Box>
+        <Box
+          onClick={openComLeaderboard}
+          sx={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "8px" }}
+        >
+          <Box sx={{ color: "ButtonHighlight", fontSize: "18px" }}>🏆</Box>
+          <Box>
+            {comLeaderboardOpen ? (
+              <ArrowForwardIosIcon
+                sx={{
+                  color: theme => (theme.palette.mode === "dark" ? "#CACACA" : "#98A2B3"),
+                }}
+              />
+            ) : (
+              <ArrowForwardIosIcon
+                sx={{
+                  transform: "rotate(180deg)",
+                  color: theme => (theme.palette.mode === "dark" ? "#CACACA" : "#98A2B3"),
+                }}
+              />
+            )}
           </Box>
-        </MemoizedMetaButton>
+        </Box>
       </Box>
       <Box
         id="ComLeaderboardContainer"
@@ -216,22 +231,31 @@ const CommunityLeaderboard = ({ userTagId, pendingProposalsLoaded, disabled = fa
         }
         sx={{ display: "flex", alignItems: "center", justifyContent: "flex-start", gap: { xs: "5px", md: "16px" } }}
       >
-        <div id="ComLeaderbaordChanger">
-          <MemoizedMetaButton onClick={openComLeaderboardTypes}>
-            <Box
+        <Box
+          sx={{
+            display: "flex",
+            cursor: "pointer",
+            alignItems: "center",
+            marginLeft: { xs: "0px", sm: "10px" },
+          }}
+          id="ComLeaderbaordChanger"
+          onClick={openComLeaderboardTypes}
+        >
+          <div id="ComLeaderbaordChangerText">{comLeaderboardType}</div>
+          {comLeaderboardTypeOpen ? (
+            <ExpandMore
               sx={{
-                display: "flex",
-                flexDirection: { xs: "column", md: "row" },
-                gap: { xs: "0px", md: "0px", lg: "10px", xl: "10px" },
-                alignItems: "center",
-                paddingY: "5px",
-                paddingLeft: "5px",
+                color: theme => (theme.palette.mode === "dark" ? "#eaecf0" : "#475467"),
               }}
-            >
-              <div id="ComLeaderbaordChangerText">{comLeaderboardType}</div>
-            </Box>
-          </MemoizedMetaButton>
-        </div>
+            />
+          ) : (
+            <ExpandLess
+              sx={{
+                color: theme => (theme.palette.mode === "dark" ? "#eaecf0" : "#475467"),
+              }}
+            />
+          )}
+        </Box>
         <Box
           className="ComLeaderbaordItems"
           sx={{
@@ -240,12 +264,17 @@ const CommunityLeaderboard = ({ userTagId, pendingProposalsLoaded, disabled = fa
             display: "flex",
             justifyContent: "flex-start",
             alignItems: "center",
-            // flexWrap: "wrap",
             gap: "10px",
             height: "inherit",
           }}
         >
-          {comLeaderboardTypeOpen && <MultipleChoiceBtn choices={choices} onClose={openComLeaderboardTypes} />}
+          {comLeaderboardTypeOpen && (
+            <MultipleChoiceBtn
+              choices={choices}
+              onClose={openComLeaderboardTypes}
+              comLeaderboardType={comLeaderboardType}
+            />
+          )}
           {!comPoints.length && <p>There are no points yet</p>}
           {comPoints.map((comObj, idx) => {
             return (
