@@ -1076,7 +1076,7 @@ export const compare2Nodes = (node1: any, node2: any) => {
     node1.openLinkedNode !== node2.openLinkedNode ||
     node1.openAllChildren !== node2.openAllChildren ||
     node1.hideNodeHandler !== node2.hideNodeHandler ||
-    node1.hideOffsprings !== node2.hideOffsprings ||
+    node1.hideDescendants !== node2.hideDescendants ||
     node1.toggleNode !== node2.toggleNode ||
     node1.openNodePart !== node2.openNodePart ||
     node1.selectNode !== node2.selectNode ||

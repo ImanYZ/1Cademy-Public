@@ -476,7 +476,7 @@ export type TutorialTypeKeys =
   | "expandNode"
   | "upVote"
   | "downVote"
-  | "hideOffsprings"
+  | "hideDescendants"
   | "hideNode";
 
 export type UserTutorial = {

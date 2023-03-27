@@ -28,7 +28,7 @@ EX: for notebook sections
 Ex for Node id elements to disable
   "01-close-button",
   "01-open-button",
-  "01-hide-offsprings-button",
+  "01-hide-descendants-button",
   "01-hide-button",
   "01-node-footer-user",
   "01-node-footer-propose",

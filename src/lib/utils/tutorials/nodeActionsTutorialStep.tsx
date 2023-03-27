@@ -157,8 +157,8 @@ const HIDE_STEPS: TutorialStepConfig[] = [
 ];
 const HIDE_OFFSPRING_STEPS: TutorialStepConfig[] = [
   {
-    title: "Hiding offspring",
-    childTargetId: "hide-offsprings-button",
+    title: "Hiding descendants",
+    childTargetId: "hide-descendants-button",
     description: (
       <MarkdownRender
         text={
