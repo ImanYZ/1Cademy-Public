@@ -39,7 +39,7 @@ import {
   where,
   writeBatch,
 } from "firebase/firestore";
-import React, { MutableRefObject, Suspense, useCallback, useEffect, useMemo, useState } from "react";
+import React, { MutableRefObject, ReactNode, Suspense, useCallback, useEffect, useMemo, useState } from "react";
 import { DispatchAuthActions, Reputation, User, UserSettings, UserTheme } from "src/knowledgeTypes";
 import { DispatchNodeBookActions, NodeBookState, TNodeBookState } from "src/nodeBookTypes";
 import { NodeType } from "src/types";
@@ -78,6 +78,11 @@ type UserSettingsSidebarProps = {
   nodeBookDispatch: React.Dispatch<DispatchNodeBookActions>;
   nodeBookState: NodeBookState;
   scrollToNode: (nodeId: string) => void;
+};
+
+type UserSettingsTabs = {
+  title: string;
+  content: ReactNode;
 };
 
 export const NODE_TYPE_OPTIONS: NodeType[] = ["Code", "Concept", "Idea", "Question", "Reference", "Relation", "News"];
@@ -761,7 +766,7 @@ const UserSettigsSidebar = ({
     setLastIndex(lastIndex + ELEMENTS_PER_PAGE);
   }, [lastIndex, proposals.length]);
 
-  const tabsItems = useMemo(() => {
+  const tabsItems: UserSettingsTabs[] = useMemo(() => {
     return [
       {
         title: "Account",
@@ -1055,7 +1060,7 @@ const UserSettigsSidebar = ({
 
   const a11yProps = (index: number) => {
     return {
-      id: `simple-tab-${index}`,
+      // id: `simple-tab-${index}`,
       "aria-controls": `simple-tabpanel-${index}`,
     };
   };
@@ -1088,7 +1093,9 @@ const UserSettigsSidebar = ({
           />
 
           <div id="MiniUserPrifileIdentity" className="MiniUserPrifileIdentityMobile">
-            <div id="MiniUserPrifileName">{user.chooseUname ? user.uname : `${user.fName} ${user.lName}`}</div>
+            <Box id="MiniUserPrifileName" sx={{ borderRadius: "6px" }}>
+              {user.chooseUname ? user.uname : `${user.fName} ${user.lName}`}
+            </Box>
             <div id="MiniUserPrifileTag">
               <MemoizedMetaButton
                 id="user-settings-community-tag"
@@ -1127,7 +1134,7 @@ const UserSettigsSidebar = ({
                 </Suspense>
               )}
             </div>
-            <div id="MiniUserPrifileInstitution" style={{ display: "flex", gap: "12px" }}>
+            <div id="MiniUserPrifileInstitution" style={{ display: "flex", gap: "12px", borderRadius: "6px" }}>
               <OptimizedAvatar
                 imageUrl={instlogoURL}
                 name={user.deInstit + " logo"}
@@ -1140,10 +1147,10 @@ const UserSettigsSidebar = ({
               />
               <span>{user.deInstit}</span>
             </div>
-            <div id="user-settings-statistics">
+            <Box id="user-settings-statistics" sx={{ borderRadius: "6px" }}>
               <DoneIcon className="material-icons DoneIcon green-text" sx={{ mr: "12px" }} />
               <span>{shortenNumber(totalPoints, 2, false)}</span>
-            </div>
+            </Box>
           </div>
         </div>
         <div
@@ -1189,8 +1196,14 @@ const UserSettigsSidebar = ({
           </div>
         </div>
         <Tabs id="user-settings-personalization" value={value} onChange={handleTabChange} aria-label={"Bookmarks Tabs"}>
-          {tabsItems.map((tabItem: any, idx: number) => (
-            <Tab key={tabItem.title} label={tabItem.title} {...a11yProps(idx)} />
+          {tabsItems.map((tabItem: UserSettingsTabs, idx: number) => (
+            <Tab
+              id={`user-settings-${tabItem.title.toLowerCase()}`}
+              key={tabItem.title}
+              label={tabItem.title}
+              {...a11yProps(idx)}
+              sx={{ borderRadius: "6px" }}
+            />
           ))}
         </Tabs>
       </Box>
