@@ -376,19 +376,19 @@ const UserInfoSidebar = ({ open, onClose, theme, openLinkedNode, username }: Use
             )}
           </div>
 
-          {!isRetrieving && (
-            <Tabs value={value} onChange={handleChange} aria-label={"Bookmarks Tabs"}>
-              {tabsItems.map((tabItem: UserInfoTabs, idx: number) => (
-                <Tab
-                  id={`user-info-${tabItem.title.toLowerCase()}`}
-                  key={tabItem.title}
-                  label={tabItem.title}
-                  {...a11yProps(idx)}
-                  sx={{ borderRadius: "6px" }}
-                />
-              ))}
-            </Tabs>
-          )}
+          <Tabs value={value} onChange={handleChange} aria-label={"Bookmarks Tabs"}>
+            {tabsItems.map((tabItem: UserInfoTabs, idx: number) => (
+              <Tab
+                id={`user-info-${tabItem.title.toLowerCase()}`}
+                key={tabItem.title}
+                label={tabItem.title}
+                {...a11yProps(idx)}
+                sx={{ borderRadius: "6px" }}
+              />
+            ))}
+          </Tabs>
+          {/* {!isRetrieving && (
+          )} */}
         </Box>
       }
       contentSignalState={contentSignalState}

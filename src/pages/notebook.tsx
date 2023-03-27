@@ -4916,8 +4916,8 @@ const Dashboard = ({}: DashboardProps) => {
       }
       // --------------------------
 
-      if (forcedTutorial === "" || openSidebar === "PENDING_PROPOSALS") {
-        const result = detectAndCallSidebarTutorial("pendingProposals", "PENDING_PROPOSALS");
+      if (forcedTutorial === "userInfo" || openSidebar === "USER_INFO") {
+        const result = detectAndCallSidebarTutorial("userInfo", "USER_INFO");
         if (result) return;
       }
 
@@ -5348,6 +5348,15 @@ const Dashboard = ({}: DashboardProps) => {
 
     if (tutorial.name === "pendingProposals") {
       if (openSidebar === "PENDING_PROPOSALS") return;
+      setTutorial(null);
+      setForcedTutorial(null);
+      if (currentStep?.childTargetId) removeStyleFromTarget(currentStep.childTargetId, targetId);
+    }
+
+    // --------------------------
+
+    if (tutorial.name === "userInfo") {
+      if (openSidebar === "USER_INFO") return;
       setTutorial(null);
       setForcedTutorial(null);
       if (currentStep?.childTargetId) removeStyleFromTarget(currentStep.childTargetId, targetId);

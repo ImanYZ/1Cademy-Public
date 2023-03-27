@@ -21,6 +21,7 @@ import {
   SCROLL_TO_NODE_STEPS,
   TABLE_CONTENT_STEPS,
 } from "@/lib/utils/tutorials/toolbooxTutorialSteps";
+import { USER_INFO_STEPS_COMPLETE } from "@/lib/utils/tutorials/userInfoTutorialSteps";
 import { USER_SETTINGS_STEPS_COMPLETE } from "@/lib/utils/tutorials/userSettingsTutorialSteps";
 
 import { User } from "../knowledgeTypes";
@@ -288,7 +289,7 @@ export const useInteractiveTutorial = ({ user }: useInteractiveTutorialProps) =>
         newSteps = PENDING_PROPOSALS_STEPS_COMPLETE;
       }
       if (newTutorial === "userInfo") {
-        newSteps = PENDING_PROPOSALS_STEPS_COMPLETE;
+        newSteps = USER_INFO_STEPS_COMPLETE;
       }
 
       // node actions

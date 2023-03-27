@@ -10,7 +10,7 @@ export const INITIAL_NODE_TUTORIAL_STATE: TutorialState = null;
 
 dayjs.extend(relativeTime);
 
-const USER_SETTINGS_STEPS: TutorialStepConfig[] = [
+const USER_INFO_STEPS: TutorialStepConfig[] = [
   {
     childTargetId: "user-info-nodes",
     title: "Nodes",
@@ -24,10 +24,10 @@ const USER_SETTINGS_STEPS: TutorialStepConfig[] = [
     tooltipPosition: "right",
     targetDelay: 450,
     anchor: "Portal",
-    outline: "shallow",
+    outline: "inside",
   },
   {
-    childTargetId: "user-settings-proposals",
+    childTargetId: "user-info-proposals",
     title: "Proposals",
     description: (
       <MarkdownRender
@@ -37,11 +37,11 @@ const USER_SETTINGS_STEPS: TutorialStepConfig[] = [
     tooltipPosition: "right",
     targetDelay: 450,
     anchor: "Portal",
-    outline: "shallow",
+    outline: "inside",
   },
 ];
 
-export const USER_SETTINGS_STEPS_COMPLETE: TutorialStep[] = USER_SETTINGS_STEPS.map((c, i, s) => {
+export const USER_INFO_STEPS_COMPLETE: TutorialStep[] = USER_INFO_STEPS.map((c, i, s) => {
   return {
     ...getBaseStepConfig(i + 1, s.length),
     ...c,
