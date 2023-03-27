@@ -1,4 +1,4 @@
-import HelpIcon from "@mui/icons-material/Help";
+import HelpCenterIcon from "@mui/icons-material/HelpCenter";
 import { Box, Button, LinearProgress, Stack, Typography, useMediaQuery } from "@mui/material";
 import React, { useCallback, useMemo, useRef } from "react";
 
@@ -237,7 +237,7 @@ export const TooltipTutorial = ({
             <Typography component={"h2"} sx={{ fontSize: "18px", fontWeight: "bold", display: "inline-block" }}>
               {tutorialStep.title}
             </Typography>
-            <HelpIcon />
+            <HelpCenterIcon sx={{ color: theme => (theme.palette.mode === "dark" ? "#D0D5DD" : gray700) }} />
           </Stack>
 
           {typeof tutorialStep.description === "function"
@@ -325,7 +325,7 @@ export const TooltipTutorial = ({
                   ":hover": { backgroundColor: theme => (theme.palette.mode === "dark" ? "#575f68" : "#d7dee6") },
                 }}
               >
-                Skip
+                Cancel
               </Button>
             )}
           </Stack>
@@ -407,7 +407,7 @@ export const TooltipTutorial = ({
         <Typography component={"h2"} sx={{ fontSize: "18px", fontWeight: "bold", display: "inline-block" }}>
           {tutorialStep.title}
         </Typography>
-        <HelpIcon sx={{ color: theme => (theme.palette.mode === "dark" ? "#D0D5DD" : gray700) }} />
+        <HelpCenterIcon sx={{ color: theme => (theme.palette.mode === "dark" ? "#D0D5DD" : gray700) }} />
       </Stack>
 
       <Box sx={{ fontSize: "14px" }}>

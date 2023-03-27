@@ -1,6 +1,7 @@
 import ArrowForwardIosSharpIcon from "@mui/icons-material/ArrowForwardIosSharp";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import CloseIcon from "@mui/icons-material/Close";
+import HelpCenterIcon from "@mui/icons-material/HelpCenter";
 import PlayCircleIcon from "@mui/icons-material/PlayCircle";
 import { Accordion, AccordionDetails, AccordionSummary, Box, IconButton, Typography } from "@mui/material";
 import { Stack } from "@mui/system";
@@ -76,7 +77,10 @@ const TutorialTableOfContent = ({
           alignItems: "center",
         }}
       >
-        <Typography fontSize={"24px"}>Notebook Tutorial</Typography>
+        <Stack direction="row" alignItems="center" spacing="6px">
+          <Typography fontSize={"24px"}>Notebook Tutorial</Typography>
+          <HelpCenterIcon fontSize="medium" />
+        </Stack>
         <IconButton onClick={handleCloseProgressBar} size={"small"}>
           <CloseIcon fontSize="medium" />
         </IconButton>
