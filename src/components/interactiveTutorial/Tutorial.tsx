@@ -1,9 +1,9 @@
-import HelpIcon from "@mui/icons-material/Help";
-import { Box, Button, Stack, Typography, useMediaQuery } from "@mui/material";
+import HelpCenterIcon from "@mui/icons-material/HelpCenter";
+import { Box, Button, LinearProgress, Stack, Typography, useMediaQuery } from "@mui/material";
 import React, { useCallback, useMemo, useRef } from "react";
 
 import { useWindowSize } from "@/hooks/useWindowSize";
-import { gray50, gray200, gray700, gray800 } from "@/pages/home";
+import { gray50, gray200, gray400, gray500, gray700, gray800 } from "@/pages/home";
 
 import { TargetClientRect, Tutorial } from "../../hooks/useInteractiveTutorial3";
 import { FullNodeData, TutorialStep } from "../../nodeBookTypes";
@@ -131,14 +131,7 @@ export const TooltipTutorial = ({
 
     return { top, left, exceedTop, exceedLeft };
     //INFO: Keep targetClientRect, render does not work if we listen to targetClientRect.props
-  }, [
-    calcWithExceed,
-    targetClientRect.height,
-    targetClientRect.left,
-    targetClientRect.top,
-    targetClientRect.width,
-    tutorialStep,
-  ]);
+  }, [calcWithExceed, targetClientRect, tutorialStep]);
 
   const taleRect = useMemo(() => {
     let top = undefined;
@@ -197,16 +190,15 @@ export const TooltipTutorial = ({
     return (
       <Box
         sx={{
+          boxSizing: "border-box",
           position: "absolute",
           ...location,
-          backgroundColor: "#55555500",
+          width: isOnPortal ? "auto" : "450px",
           height: "auto",
           maxWidth: "450px",
-          width: isOnPortal ? "auto" : "450px",
+          backgroundColor: "#55555500",
+
           transition: "top 1s ease-out,bottom 1s ease-out,left 1s ease-out,rigth 1s ease-out,height 1s ease-out",
-          boxSizing: "border-box",
-          // display: "grid",
-          // placeItems: "center",
           zIndex: 99999,
         }}
       >
@@ -214,26 +206,38 @@ export const TooltipTutorial = ({
           ref={tooltipRef}
           sx={{
             width: "100%",
-            transition: "top 1s ease-out,left 1s ease-out",
-            backgroundColor: theme => (theme.palette.mode === "dark" ? "#4B535C" : "#C5D0DF"),
             p: "24px 32px",
-            borderRadius: "8px",
+            backgroundColor: theme => (theme.palette.mode === "dark" ? gray500 : "#C5D0DF"),
+            border: theme => `2px solid ${theme.palette.mode === "dark" ? "#667085" : gray400}`,
             color: theme => (theme.palette.mode === "dark" ? gray50 : gray800),
+            borderRadius: "12px",
+
+            transition: "top 1s ease-out,left 1s ease-out",
             zIndex: 99999,
           }}
         >
+          {stepsLength > 1 && (
+            <LinearProgress
+              variant="determinate"
+              value={(tutorialStep.currentStepName * 100) / stepsLength}
+              color={"success"}
+              sx={{
+                borderRadius: "50px",
+                mb: "16px",
+                backgroundColor: theme => (theme.palette.mode === "dark" ? "#D0D5DD4D" : "#6C74824D"),
+                height: "5px",
+                "& .MuiLinearProgress-bar1Determinate": {
+                  backgroundColor: theme => (theme.palette.mode === "dark" ? "#A4FD96" : "#52AE43"),
+                  borderRadius: "50px",
+                },
+              }}
+            />
+          )}
           <Stack direction={"row"} justifyContent="space-between" sx={{ mb: "12px" }}>
-            <Stack direction={"row"} alignItems="center" spacing={"8px"}>
-              <Typography component={"h2"} sx={{ fontSize: "18px", fontWeight: "bold", display: "inline-block" }}>
-                {tutorialStep.title}
-              </Typography>
-              <HelpIcon />
-            </Stack>
-            {stepsLength <= 1 || (
-              <Typography sx={{ display: "inline-block", color: "#818181" }}>
-                {tutorialStep.currentStepName} / {stepsLength}
-              </Typography>
-            )}
+            <Typography component={"h2"} sx={{ fontSize: "18px", fontWeight: "bold", display: "inline-block" }}>
+              {tutorialStep.title}
+            </Typography>
+            <HelpCenterIcon sx={{ color: theme => (theme.palette.mode === "dark" ? "#D0D5DD" : gray700) }} />
           </Stack>
 
           {typeof tutorialStep.description === "function"
@@ -321,7 +325,7 @@ export const TooltipTutorial = ({
                   ":hover": { backgroundColor: theme => (theme.palette.mode === "dark" ? "#575f68" : "#d7dee6") },
                 }}
               >
-                Skip
+                Close
               </Button>
             )}
           </Stack>
@@ -340,10 +344,10 @@ export const TooltipTutorial = ({
         transition: "top 750ms ease-out,left 750ms ease-out, border-color 1s linear",
         maxWidth: "450px",
         width: isOnPortal ? (isMobile ? "auto" : "100%") : "450px",
-        backgroundColor: theme => (theme.palette.mode === "dark" ? "#4B535C" : "#C5D0DF"),
-        borderColor: theme => (theme.palette.mode === "dark" ? "#4B535C" : "#C5D0DF") /* this is used in tooltip */,
+        backgroundColor: theme => (theme.palette.mode === "dark" ? gray500 : "#C5D0DF"),
         p: "24px 32px",
-        borderRadius: "8px",
+        borderRadius: "12px",
+        border: theme => `2px solid ${theme.palette.mode === "dark" ? "#667085" : gray400}`,
         color: theme => (theme.palette.mode === "dark" ? gray50 : gray800),
         zIndex: 99999,
 
@@ -355,25 +359,25 @@ export const TooltipTutorial = ({
           borderBottomWidth: `${tutorialStep.tooltipPosition === "top" ? 0 : undefined}`,
           borderTopColor:
             tutorialStep.tooltipPosition === "top"
-              ? theme => (theme.palette.mode === "dark" ? "#4B535C" : "#C5D0DF")
+              ? theme => (theme.palette.mode === "dark" ? "#667085" : gray400)
               : undefined,
           //tale onto BOTTOM
           borderTopWidth: `${tutorialStep.tooltipPosition === "bottom" ? 0 : undefined}`,
           borderBottomColor:
             tutorialStep.tooltipPosition === "bottom"
-              ? theme => (theme.palette.mode === "dark" ? "#4B535C" : "#C5D0DF")
+              ? theme => (theme.palette.mode === "dark" ? "#667085" : gray400)
               : undefined,
           //tale onto LEFT
           borderRightWidth: `${tutorialStep.tooltipPosition === "left" ? 0 : undefined}`,
           borderLeftColor:
             tutorialStep.tooltipPosition === "left"
-              ? theme => (theme.palette.mode === "dark" ? "#4B535C" : "#C5D0DF")
+              ? theme => (theme.palette.mode === "dark" ? "#667085" : gray400)
               : undefined,
           //tale onto RIGHT
           borderLeftWidth: `${tutorialStep.tooltipPosition === "right" ? 0 : undefined}`,
           borderRightColor:
             tutorialStep.tooltipPosition === "right"
-              ? theme => (theme.palette.mode === "dark" ? "#4B535C" : "#C5D0DF")
+              ? theme => (theme.palette.mode === "dark" ? "#667085" : gray400)
               : undefined,
           top: taleRect.top ? `${taleRect.top + tooltipRect.exceedTop}px` : undefined,
           bottom: taleRect.bottom ? `${taleRect.bottom}px` : undefined,
@@ -382,25 +386,37 @@ export const TooltipTutorial = ({
         },
       }}
     >
-      <Stack direction={"row"} justifyContent="space-between" sx={{ mb: "12px" }}>
-        <Stack direction={"row"} alignItems="center" spacing={"8px"}>
-          <Typography component={"h2"} sx={{ fontSize: "18px", fontWeight: "bold", display: "inline-block" }}>
-            {tutorialStep.title}
-          </Typography>
-          <HelpIcon />
-        </Stack>
-        {stepsLength <= 1 || (
-          <Typography sx={{ display: "inline-block", color: "inherit" }}>
-            {tutorialStep.currentStepName} / {stepsLength}
-          </Typography>
-        )}
+      {stepsLength > 1 && (
+        <LinearProgress
+          variant="determinate"
+          value={(tutorialStep.currentStepName * 100) / stepsLength}
+          color={"success"}
+          sx={{
+            borderRadius: "50px",
+            mb: "16px",
+            backgroundColor: theme => (theme.palette.mode === "dark" ? "#D0D5DD4D" : "#6C74824D"),
+            height: "5px",
+            "& .MuiLinearProgress-bar1Determinate": {
+              backgroundColor: theme => (theme.palette.mode === "dark" ? "#A4FD96" : "#52AE43"),
+              borderRadius: "50px",
+            },
+          }}
+        />
+      )}
+      <Stack direction={"row"} alignItems="center" justifyContent="space-between" mb="16px">
+        <Typography component={"h2"} sx={{ fontSize: "18px", fontWeight: "bold", display: "inline-block" }}>
+          {tutorialStep.title}
+        </Typography>
+        <HelpCenterIcon sx={{ color: theme => (theme.palette.mode === "dark" ? "#D0D5DD" : gray700) }} />
       </Stack>
 
-      {typeof tutorialStep.description === "function"
-        ? node
-          ? tutorialStep.description(node)
-          : ""
-        : tutorialStep.description}
+      <Box sx={{ fontSize: "14px" }}>
+        {typeof tutorialStep.description === "function"
+          ? node
+            ? tutorialStep.description(node)
+            : ""
+          : tutorialStep.description}
+      </Box>
 
       {/* INFO: reversed used for showing buttons always to right no matter the number of elements */}
       <Stack direction={"row-reverse"} justifyContent={"space-between"} alignItems={"center"} sx={{ mt: "16px" }}>
@@ -481,7 +497,7 @@ export const TooltipTutorial = ({
               ":hover": { backgroundColor: theme => (theme.palette.mode === "dark" ? "#575f68" : "#d7dee6") },
             }}
           >
-            Skip
+            Close
           </Button>
         )}
       </Stack>
