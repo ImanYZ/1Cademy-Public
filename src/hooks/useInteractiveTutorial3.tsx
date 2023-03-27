@@ -35,6 +35,7 @@ import {
   CHILD_REFERENCE_PROPOSAL_COMPLETE,
   CHILD_RELATION_PROPOSAL_COMPLETE,
 } from "../lib/utils/tutorials/childrenProposalTutorialStep";
+import { LEADER_BOARD_STEPS } from "../lib/utils/tutorials/leaderBoardTutorialSteps";
 import { DOWNVOTE_STEPS_COMPLETE, UPTOVE_STEPS_COMPLETE } from "../lib/utils/tutorials/nodeActionsTutorialStep";
 import { NODE_CODE } from "../lib/utils/tutorials/nodeCodeTutorialSteps";
 import { NODE_CONCEPT } from "../lib/utils/tutorials/nodeConceptTutorialStep";
@@ -136,6 +137,7 @@ export const useInteractiveTutorial = ({ user }: useInteractiveTutorialProps) =>
     userSettings: { currentStep: -1, done: false, skipped: false },
     notifications: { currentStep: -1, done: false, skipped: false },
     bookmarks: { currentStep: -1, done: false, skipped: false },
+    leaderBoard: { currentStep: -1, done: false, skipped: false },
     pendingProposals: { currentStep: -1, done: false, skipped: false },
   });
 
@@ -324,6 +326,11 @@ export const useInteractiveTutorial = ({ user }: useInteractiveTutorialProps) =>
       }
       if (newTutorial === "tmpProposalCodeChild") {
         newSteps = TMP_PROPOSE_CHILD_CODE;
+      }
+
+      // others
+      if (newTutorial === "leaderBoard") {
+        newSteps = LEADER_BOARD_STEPS;
       }
 
       setUserTutorial(prev => ({

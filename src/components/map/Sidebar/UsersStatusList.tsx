@@ -418,6 +418,7 @@ const UsersStatusList = ({ nodeBookDispatch, disabled = false, ...props }: Users
 
   return (
     <Stack
+      id="user-status-list"
       className="scroll-styled list-tmp"
       direction="column"
       alignItems={"center"} // this value is modified by parent in toolbar sidebar when isMenuOpen

@@ -481,6 +481,7 @@ export type TutorialTypeKeys =
   | "hideNode"
   | "notifications"
   | "bookmarks"
+  | "leaderBoard"
   | "pendingProposals";
 
 export type UserTutorial = {
