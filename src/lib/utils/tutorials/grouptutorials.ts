@@ -52,7 +52,7 @@ export const GROUP_TUTORIALS: GroupTutorial[] = [
         tutorials: [],
       },
       {
-        title: "Searcher Engine",
+        title: "Search Engine",
         tutorialSteps: { tutorialKey: "searcher", steps: SEARCHER_STEPS_COMPLETE },
         tutorials: [],
       },
@@ -229,7 +229,7 @@ export const GROUP_TUTORIALS: GroupTutorial[] = [
     title: "Siderbars",
     tutorials: [
       {
-        title: "Searcher Engine",
+        title: "Search Engine",
         tutorialSteps: { tutorialKey: "searcher", steps: SEARCHER_STEPS_COMPLETE },
         tutorials: [],
       },
