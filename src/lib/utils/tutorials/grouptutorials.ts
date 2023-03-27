@@ -37,6 +37,7 @@ import {
   RECONCILING_NOT_ACCEPTED_PROPOSALS_STEPS_COMPLETE,
 } from "./reconcilingProposalsTutorialSteps";
 import { SEARCHER_STEPS_COMPLETE } from "./searcherTutorialSteps";
+import { USER_SETTINGS_STEPS_COMPLETE } from "./userSettingsTutorialSteps";
 
 export const GROUP_TUTORIALS: GroupTutorial[] = [
   {
@@ -229,6 +230,12 @@ export const GROUP_TUTORIALS: GroupTutorial[] = [
   {
     title: "Siderbars",
     tutorials: [
+      {
+        title: "User Settings",
+        tutorialSteps: { tutorialKey: "userSettings", steps: USER_SETTINGS_STEPS_COMPLETE },
+        tutorials: [],
+      },
+
       {
         title: "Search Engine",
         tutorialSteps: { tutorialKey: "searcher", steps: SEARCHER_STEPS_COMPLETE },
