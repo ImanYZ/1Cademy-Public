@@ -85,9 +85,7 @@ export const TooltipTutorial = ({
 
       if (tutorialStep.anchor === "Portal") {
         const { top: newTop, left: newLeft } = calcWithExceed(top, left);
-
         exceedLeft = left - newLeft;
-        exceedTop = top - newTop;
         top = newTop;
         left = newLeft;
       }
@@ -98,7 +96,6 @@ export const TooltipTutorial = ({
       if (tutorialStep.anchor === "Portal") {
         const { top: newTop, left: newLeft } = calcWithExceed(top, left);
         exceedLeft = left - newLeft;
-        exceedTop = top - newTop;
         top = newTop;
         left = newLeft;
       }
@@ -109,7 +106,6 @@ export const TooltipTutorial = ({
       left = targetClientRect.left - tooltipRef.current.clientWidth - TOOLTIP_OFFSET;
       if (tutorialStep.anchor === "Portal") {
         const { top: newTop, left: newLeft } = calcWithExceed(top, left);
-        exceedLeft = left - newLeft;
         exceedTop = top - newTop;
         top = newTop;
         left = newLeft;
@@ -122,7 +118,6 @@ export const TooltipTutorial = ({
       left = targetClientRect.left + targetClientRect.width + TOOLTIP_OFFSET;
       if (tutorialStep.anchor === "Portal") {
         const { top: newTop, left: newLeft } = calcWithExceed(top, left);
-        exceedLeft = left - newLeft;
         exceedTop = top - newTop;
         top = newTop;
         left = newLeft;
