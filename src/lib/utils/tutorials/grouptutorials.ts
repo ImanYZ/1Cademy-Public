@@ -9,6 +9,7 @@ import {
   CHILD_REFERENCE_PROPOSAL_COMPLETE,
   CHILD_RELATION_PROPOSAL_COMPLETE,
 } from "./childrenProposalTutorialStep";
+import { LEADER_BOARD_STEPS } from "./leaderBoardTutorialSteps";
 import { NAVIGATION_STEPS_COMPLETE } from "./navigationTutorialSteps";
 import {
   COLLAPSE_STEPS_COMPLETE,
@@ -238,7 +239,6 @@ export const GROUP_TUTORIALS: GroupTutorial[] = [
         tutorialSteps: { tutorialKey: "userSettings", steps: USER_SETTINGS_STEPS_COMPLETE },
         tutorials: [],
       },
-
       {
         title: "Search Engine",
         tutorialSteps: { tutorialKey: "searcher", steps: SEARCHER_STEPS_COMPLETE },
@@ -263,6 +263,16 @@ export const GROUP_TUTORIALS: GroupTutorial[] = [
       {
         title: "User Information",
         tutorialSteps: { tutorialKey: "userInfo", steps: USER_INFO_STEPS_COMPLETE },
+        tutorials: [],
+      },
+    ],
+  },
+  {
+    title: "Building Reputation",
+    tutorials: [
+      {
+        title: "Leader board",
+        tutorialSteps: { tutorialKey: "leaderBoard", steps: LEADER_BOARD_STEPS },
         tutorials: [],
       },
     ],
