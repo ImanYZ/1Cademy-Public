@@ -21,6 +21,7 @@ import {
   SCROLL_TO_NODE_STEPS,
   TABLE_CONTENT_STEPS,
 } from "@/lib/utils/tutorials/toolbooxTutorialSteps";
+import { USER_INFO_STEPS_COMPLETE } from "@/lib/utils/tutorials/userInfoTutorialSteps";
 import { USER_SETTINGS_STEPS_COMPLETE } from "@/lib/utils/tutorials/userSettingsTutorialSteps";
 
 import { User } from "../knowledgeTypes";
@@ -139,6 +140,7 @@ export const useInteractiveTutorial = ({ user }: useInteractiveTutorialProps) =>
     bookmarks: { currentStep: -1, done: false, skipped: false },
     leaderBoard: { currentStep: -1, done: false, skipped: false },
     pendingProposals: { currentStep: -1, done: false, skipped: false },
+    userInfo: { currentStep: -1, done: false, skipped: false },
   });
 
   // flag for whether tutorial state was loaded
@@ -287,6 +289,9 @@ export const useInteractiveTutorial = ({ user }: useInteractiveTutorialProps) =>
 
       if (newTutorial === "pendingProposals") {
         newSteps = PENDING_PROPOSALS_STEPS_COMPLETE;
+      }
+      if (newTutorial === "userInfo") {
+        newSteps = USER_INFO_STEPS_COMPLETE;
       }
 
       // node actions

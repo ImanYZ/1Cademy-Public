@@ -40,6 +40,7 @@ import {
   RECONCILING_NOT_ACCEPTED_PROPOSALS_STEPS_COMPLETE,
 } from "./reconcilingProposalsTutorialSteps";
 import { SEARCHER_STEPS_COMPLETE } from "./searcherTutorialSteps";
+import { USER_INFO_STEPS_COMPLETE } from "./userInfoTutorialSteps";
 import { USER_SETTINGS_STEPS_COMPLETE } from "./userSettingsTutorialSteps";
 
 export const GROUP_TUTORIALS: GroupTutorial[] = [
@@ -257,6 +258,11 @@ export const GROUP_TUTORIALS: GroupTutorial[] = [
       {
         title: "Pending Proposals",
         tutorialSteps: { tutorialKey: "pendingProposals", steps: PENDING_PROPOSALS_STEPS_COMPLETE },
+        tutorials: [],
+      },
+      {
+        title: "User Information",
+        tutorialSteps: { tutorialKey: "userInfo", steps: USER_INFO_STEPS_COMPLETE },
         tutorials: [],
       },
     ],
