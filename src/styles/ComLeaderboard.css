@@ -24,7 +24,6 @@
   width: 30px;
   height: 65px;
   padding-right: 10px;
-  border-radius: 10px 0px 0px 10px;
   border-right: solid 1px #575757;
 }
 
@@ -49,6 +48,7 @@
   overflow-x: hidden;
   overflow-y: hidden;
   padding-left: 0px;
+  border-radius: 8px 0px 0px 8px;
 }
 
 #ComLeaderboardMain {

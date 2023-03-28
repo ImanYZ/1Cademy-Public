@@ -4,6 +4,7 @@ export const INITIAL_STATE: NodeBookState = {
   sNode: null,
   isSubmitting: false,
   choosingNode: null,
+  previousNode: null,
   chosenNode: null,
   initialProposal: null,
   selectedNode: null,
@@ -30,6 +31,8 @@ function nodeBookReducer(state: NodeBookState, action: DispatchNodeBookActions):
       return { ...state, isSubmitting: action.payload };
     case "setChoosingNode":
       return { ...state, choosingNode: action.payload };
+    case "setPreviousNode":
+      return { ...state, previousNode: action.payload };
     case "setChosenNode":
       return { ...state, chosenNode: action.payload };
     case "setSelectedNode":
