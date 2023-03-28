@@ -5748,7 +5748,7 @@ const Dashboard = ({}: DashboardProps) => {
                 onClose={() => onCloseSidebar()}
                 sidebarWidth={sidebarWidth()}
                 innerHeight={innerHeight}
-                innerWidth={windowWith}
+                // innerWidth={windowWith}
               />
               <MemoizedUserInfoSidebar
                 theme={settings.theme}

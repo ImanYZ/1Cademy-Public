@@ -103,7 +103,7 @@ const NODES_STEPS: TutorialStepConfig[] = [
         }
       />
     ),
-    tooltipPosition: "right",
+    tooltipPosition: "top",
     anchor: "Portal",
     outline: "inside",
   },

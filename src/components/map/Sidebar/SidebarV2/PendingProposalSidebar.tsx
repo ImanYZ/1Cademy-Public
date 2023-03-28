@@ -20,7 +20,7 @@ type PendingProposalSidebarProps = {
   tagId: string | undefined;
   sidebarWidth: number;
   innerHeight?: number;
-  innerWidth: number;
+  // innerWidth: number;
 };
 const NODE_TYPES_ARRAY: NodeType[] = ["Concept", "Code", "Reference", "Relation", "Question", "Idea"];
 
@@ -33,8 +33,8 @@ const PendingProposalSidebar = ({
   tagId,
   sidebarWidth,
   innerHeight,
-  innerWidth,
-}: PendingProposalSidebarProps) => {
+}: // innerWidth,
+PendingProposalSidebarProps) => {
   const [proposals, setProposals] = useState<any[]>([]);
   const db = getFirestore();
 
@@ -125,7 +125,7 @@ const PendingProposalSidebar = ({
       open={open}
       onClose={onClose}
       width={sidebarWidth}
-      height={innerWidth > 599 ? 100 : 35}
+      // height={innerWidth > 599 ? 100 : 35}
       innerHeight={innerHeight}
       contentSignalState={proposals}
       SidebarContent={
