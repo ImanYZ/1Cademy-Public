@@ -1,5 +1,4 @@
-import HelpCenterIcon from "@mui/icons-material/HelpCenter";
-import { Box, Button, LinearProgress, Stack, Typography, useMediaQuery } from "@mui/material";
+import { Box, Button, Stack, Typography, useMediaQuery } from "@mui/material";
 import React, { useCallback, useMemo, useRef } from "react";
 
 import { useWindowSize } from "@/hooks/useWindowSize";
@@ -210,28 +209,15 @@ export const TooltipTutorial = ({
             zIndex: 99999,
           }}
         >
-          {stepsLength > 1 && (
-            <LinearProgress
-              variant="determinate"
-              value={(tutorialStep.currentStepName * 100) / stepsLength}
-              color={"success"}
-              sx={{
-                borderRadius: "50px",
-                mb: "16px",
-                backgroundColor: theme => (theme.palette.mode === "dark" ? "#D0D5DD4D" : "#6C74824D"),
-                height: "5px",
-                "& .MuiLinearProgress-bar1Determinate": {
-                  backgroundColor: theme => (theme.palette.mode === "dark" ? "#A4FD96" : "#52AE43"),
-                  borderRadius: "50px",
-                },
-              }}
-            />
-          )}
           <Stack direction={"row"} justifyContent="space-between" sx={{ mb: "12px" }}>
             <Typography component={"h2"} sx={{ fontSize: "18px", fontWeight: "bold", display: "inline-block" }}>
               {tutorialStep.title}
             </Typography>
-            <HelpCenterIcon sx={{ color: theme => (theme.palette.mode === "dark" ? "#D0D5DD" : gray700) }} />
+            {stepsLength <= 1 || (
+              <Typography sx={{ display: "inline-block", color: "inherit" }}>
+                {tutorialStep.currentStepName} / {stepsLength}
+              </Typography>
+            )}
           </Stack>
 
           {typeof tutorialStep.description === "function"
@@ -380,28 +366,15 @@ export const TooltipTutorial = ({
         },
       }}
     >
-      {stepsLength > 1 && (
-        <LinearProgress
-          variant="determinate"
-          value={(tutorialStep.currentStepName * 100) / stepsLength}
-          color={"success"}
-          sx={{
-            borderRadius: "50px",
-            mb: "16px",
-            backgroundColor: theme => (theme.palette.mode === "dark" ? "#D0D5DD4D" : "#6C74824D"),
-            height: "5px",
-            "& .MuiLinearProgress-bar1Determinate": {
-              backgroundColor: theme => (theme.palette.mode === "dark" ? "#A4FD96" : "#52AE43"),
-              borderRadius: "50px",
-            },
-          }}
-        />
-      )}
       <Stack direction={"row"} alignItems="center" justifyContent="space-between" mb="16px">
         <Typography component={"h2"} sx={{ fontSize: "18px", fontWeight: "bold", display: "inline-block" }}>
           {tutorialStep.title}
         </Typography>
-        <HelpCenterIcon sx={{ color: theme => (theme.palette.mode === "dark" ? "#D0D5DD" : gray700) }} />
+        {stepsLength <= 1 || (
+          <Typography sx={{ display: "inline-block", color: "inherit" }}>
+            {tutorialStep.currentStepName} / {stepsLength}
+          </Typography>
+        )}
       </Stack>
 
       <Box sx={{ fontSize: "14px" }}>
