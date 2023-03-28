@@ -14,10 +14,18 @@ const comLBTypes = ["Weekly", "Monthly", "All Time", "Self-votes", "Others' Vote
 type CommunityLeaderboardProps = {
   userTagId: string;
   pendingProposalsLoaded: boolean;
+  comLeaderboardOpen: boolean;
+  setComLeaderboardOpen: React.Dispatch<React.SetStateAction<boolean>>;
   disabled?: boolean;
 };
 
-const CommunityLeaderboard = ({ userTagId, pendingProposalsLoaded, disabled = false }: CommunityLeaderboardProps) => {
+const CommunityLeaderboard = ({
+  userTagId,
+  pendingProposalsLoaded,
+  comLeaderboardOpen,
+  setComLeaderboardOpen,
+  disabled = false,
+}: CommunityLeaderboardProps) => {
   //object of all users' community Points
   // object of all users' weekly community Points
   const [comPointsWeeklyDict, setComPointsWeeklyDict] = useState({});
@@ -33,7 +41,7 @@ const CommunityLeaderboard = ({ userTagId, pendingProposalsLoaded, disabled = fa
   const [comPoints, setComPoints] = useState<any[]>([]);
   const [comLeaderboardType, setComLeaderboardType] = useState("Weekly");
   const [comLeaderboardTypeOpen, setComLeaderboardTypeOpen] = useState(false);
-  const [comLeaderboardOpen, setComLeaderboardOpen] = useState(false);
+  // const [comLeaderboardOpen, setComLeaderboardOpen] = useState(false);
 
   // const [pendingProposalsLoaded /*setPendingProposalsLoaded*/] = useState(true);
   const [comPointsLoaded, setComPointsLoaded] = useState(false);

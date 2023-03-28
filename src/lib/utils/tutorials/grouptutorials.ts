@@ -9,6 +9,7 @@ import {
   CHILD_REFERENCE_PROPOSAL_COMPLETE,
   CHILD_RELATION_PROPOSAL_COMPLETE,
 } from "./childrenProposalTutorialStep";
+import { COMMUNITY_LEADER_BOARD_STEPS } from "./communityLeaderBoardTutorialSteps";
 import { LEADER_BOARD_STEPS } from "./leaderBoardTutorialSteps";
 import { INTERACTION_LIVENESS_BAR_STEPS, REPUTATION_LIVENESS_BAR_STEPS } from "./livenessBarTutorialSteps";
 import { NAVIGATION_STEPS_COMPLETE } from "./navigationTutorialSteps";
@@ -283,6 +284,11 @@ export const getGroupTutorials = ({ livelinessBar }: GetGroupTutorialsInput): Gr
         tutorials: [],
       },
       ...getLivelinessBar(livelinessBar),
+      {
+        title: "Community Leader Board",
+        tutorialSteps: { tutorialKey: "communityLeaderBoard", steps: COMMUNITY_LEADER_BOARD_STEPS },
+        tutorials: [],
+      },
     ],
   },
 ];
