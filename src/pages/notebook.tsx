@@ -4172,12 +4172,18 @@ const Dashboard = ({}: DashboardProps) => {
         : userTutorial[tutorialName].done || userTutorial[tutorialName].skipped;
       if (shouldIgnore) return false;
 
-      devLog("DETECT_AND_CALL_SIDEBAR_TUTORIAL", { tutorialName, node: nodeBookState.selectedNode });
-      if (openSidebar !== sidebar) setOpenSidebar(sidebar);
+      devLog("DETECT_AND_CALL_SIDEBAR_TUTORIAL", { tutorialName, sidebar, node: nodeBookState.selectedNode });
+      if (openSidebar !== sidebar) {
+        setOpenSidebar(sidebar);
+      }
+
+      if (sidebar === null) {
+        nodeBookDispatch({ type: "setIsMenuOpen", payload: true });
+      }
       startTutorial(tutorialName);
       return true;
     },
-    [forcedTutorial, nodeBookState.selectedNode, openSidebar, startTutorial, userTutorial]
+    [forcedTutorial, nodeBookDispatch, nodeBookState.selectedNode, openSidebar, startTutorial, userTutorial]
   );
 
   const detectAndCallTutorial = useCallback(
@@ -5429,6 +5435,15 @@ const Dashboard = ({}: DashboardProps) => {
 
     if (tutorial.name === "pendingProposals") {
       if (openSidebar === "PENDING_PROPOSALS") return;
+      setTutorial(null);
+      setForcedTutorial(null);
+      if (currentStep?.childTargetId) removeStyleFromTarget(currentStep.childTargetId, targetId);
+    }
+
+    // --------------------------
+
+    if (tutorial.name === "leaderBoard") {
+      if (openSidebar === null) return;
       setTutorial(null);
       setForcedTutorial(null);
       if (currentStep?.childTargetId) removeStyleFromTarget(currentStep.childTargetId, targetId);
