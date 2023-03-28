@@ -338,6 +338,7 @@ const Dashboard = ({}: DashboardProps) => {
   });
 
   const [openLivelinessBar, setOpenLivelinessBar] = useState(false);
+  const [comLeaderboardOpen, setComLeaderboardOpen] = useState(false);
 
   const {
     startTutorial,
@@ -5072,11 +5073,28 @@ const Dashboard = ({}: DashboardProps) => {
           return;
         }
       }
+
+      // --------------------------
+
+      if (
+        forcedTutorial === "communityLeaderBoard" ||
+        (proposalNodesTaken && isNotProposingNodes && comLeaderboardOpen)
+      ) {
+        const shouldIgnore = forcedTutorial
+          ? forcedTutorial !== "communityLeaderBoard"
+          : userTutorial["communityLeaderBoard"].done || userTutorial["communityLeaderBoard"].skipped;
+        if (!shouldIgnore) {
+          if (!comLeaderboardOpen) setComLeaderboardOpen(true);
+          startTutorial("communityLeaderBoard");
+          return;
+        }
+      }
     };
 
     detectTriggerTutorial();
   }, [
     buttonsOpen,
+    comLeaderboardOpen,
     detectAndCallChildTutorial,
     detectAndCallSidebarTutorial,
     detectAndCallTutorial,
@@ -5436,6 +5454,15 @@ const Dashboard = ({}: DashboardProps) => {
 
     // --------------------------
 
+    if (tutorial.name === "communityLeaderBoard") {
+      if (comLeaderboardOpen) return;
+      setTutorial(null);
+      setForcedTutorial(null);
+      if (currentStep?.childTargetId) removeStyleFromTarget(currentStep.childTargetId, targetId);
+    }
+
+    // --------------------------
+
     if (tutorial.name === "userInfo") {
       if (openSidebar === "USER_INFO") return;
       setTutorial(null);
@@ -5444,6 +5471,7 @@ const Dashboard = ({}: DashboardProps) => {
     }
   }, [
     buttonsOpen,
+    comLeaderboardOpen,
     currentStep,
     detectAndRemoveTutorial,
     firstLoading,
@@ -5783,7 +5811,8 @@ const Dashboard = ({}: DashboardProps) => {
           <MemoizedCommunityLeaderboard
             userTagId={user?.tagId ?? ""}
             pendingProposalsLoaded={pendingProposalsLoaded}
-            disabled={Boolean(["TT"].includes("COMMUNITY_LEADERBOARD"))}
+            comLeaderboardOpen={comLeaderboardOpen}
+            setComLeaderboardOpen={setComLeaderboardOpen}
           />
 
           <Box

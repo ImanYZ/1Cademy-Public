@@ -36,6 +36,7 @@ import {
   CHILD_REFERENCE_PROPOSAL_COMPLETE,
   CHILD_RELATION_PROPOSAL_COMPLETE,
 } from "../lib/utils/tutorials/childrenProposalTutorialStep";
+import { COMMUNITY_LEADER_BOARD_STEPS } from "../lib/utils/tutorials/communityLeaderBoardTutorialSteps";
 import { LEADER_BOARD_STEPS } from "../lib/utils/tutorials/leaderBoardTutorialSteps";
 import {
   INTERACTION_LIVENESS_BAR_STEPS,
@@ -147,6 +148,7 @@ export const useInteractiveTutorial = ({ user }: useInteractiveTutorialProps) =>
     reputationLivenessBar: { currentStep: -1, done: false, skipped: false },
     interactionLivenessBar: { currentStep: -1, done: false, skipped: false },
     userInfo: { currentStep: -1, done: false, skipped: false },
+    communityLeaderBoard: { currentStep: -1, done: false, skipped: false },
   });
 
   // flag for whether tutorial state was loaded
@@ -352,12 +354,16 @@ export const useInteractiveTutorial = ({ user }: useInteractiveTutorialProps) =>
         newSteps = REPUTATION_LIVENESS_BAR_STEPS;
       }
 
+      if (newTutorial === "communityLeaderBoard") {
+        newSteps = COMMUNITY_LEADER_BOARD_STEPS;
+      }
+
       setUserTutorial(prev => ({
         ...prev,
-        [newTutorial]: { ...prev[newTutorial], currentStep: /*  initialStep || */ 1 },
+        [newTutorial]: { ...prev[newTutorial], currentStep: 1 },
       }));
 
-      return { name: newTutorial, steps: newSteps, step: /*  initialStep || */ 1 };
+      return { name: newTutorial, steps: newSteps, step: 1 };
     });
   }, []);
 
