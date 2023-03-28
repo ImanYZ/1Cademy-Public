@@ -21,7 +21,7 @@ const PENDING_PROPOSALS_STEPS: TutorialStepConfig[] = [
         }
       />
     ),
-    tooltipPosition: "right",
+    tooltipPosition: "bottom",
     anchor: "Portal",
     outline: "inside",
   },
@@ -35,7 +35,7 @@ const PENDING_PROPOSALS_STEPS: TutorialStepConfig[] = [
         }
       />
     ),
-    tooltipPosition: "right",
+    tooltipPosition: "bottom",
     anchor: "Portal",
     outline: "inside",
   },
