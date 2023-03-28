@@ -254,7 +254,6 @@ export type TutorialStepConfig = {
   isClickable?: boolean;
   leftOffset?: number;
   topOffset?: number;
-  isNextTutorial?: boolean;
 };
 
 export type TutorialStep = {
@@ -272,7 +271,6 @@ export type TutorialStep = {
   isClickable?: boolean;
   leftOffset: number;
   topOffset: number;
-  isNextTutorial?: boolean;
 };
 
 export type StepReducerPayload = {
