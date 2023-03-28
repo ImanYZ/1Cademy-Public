@@ -61,6 +61,7 @@ import { MemoizedProposalsSidebar } from "@/components/map/Sidebar/SidebarV2/Pro
 import { MemoizedSearcherSidebar } from "@/components/map/Sidebar/SidebarV2/SearcherSidebar";
 import { MemoizedUserInfoSidebar } from "@/components/map/Sidebar/SidebarV2/UserInfoSidebar";
 import { MemoizedUserSettingsSidebar } from "@/components/map/Sidebar/SidebarV2/UserSettigsSidebar";
+import { MemoizedProgressBarMenu } from "@/components/tutorial/ProgressBarMenu";
 import { useAuth } from "@/context/AuthContext";
 import useEventListener from "@/hooks/useEventListener";
 import { useTagsTreeView } from "@/hooks/useTagsTreeView";
@@ -6449,11 +6450,7 @@ const Dashboard = ({}: DashboardProps) => {
               </Suspense>
             </Box>
           )}
-          {/* <MemoizedProgressBarMenu
-            open={openProgressBarMenu}
-            handleOpenProgressBar={handleOpenProgressBar}
-            currentStep={stateNodeTutorial?.currentStepName ?? 0}
-          /> */}
+          <MemoizedProgressBarMenu />
           <MemoizedTutorialTableOfContent
             open={openProgressBar}
             reloadPermanentGraph={reloadPermanentGraph}
