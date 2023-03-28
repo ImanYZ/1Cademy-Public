@@ -1,6 +1,7 @@
 import ListIcon from "@mui/icons-material/List";
 import { Box, Divider, IconButton, LinearProgress, Stack, styled, Typography } from "@mui/material";
-import React from "react";
+import React, { useMemo } from "react";
+import { UserTutorials } from "src/nodeBookTypes";
 
 import { gray50, gray200 } from "@/pages/home";
 
@@ -8,15 +9,23 @@ const DividerStyled = styled(props => <Divider {...props} />)(({ theme }) => ({
   borderColor: theme.palette.mode === "dark" ? "#3b3b3b" : gray200,
 }));
 
-// type ProgressBarMenuProps = {
-//   currentStep: number;
-//   open: boolean;
-//   handleOpenProgressBar: () => void;
-// };
+type ProgressBarMenuProps = {
+  userTutorial: UserTutorials;
+};
 
 // const counterStep = (nodeTutorialReducer.toString().match(/case\s+\d+/g) || []).length;
 
-const ProgressBarMenu = () => {
+const ProgressBarMenu = ({ userTutorial }: ProgressBarMenuProps) => {
+  const tutorialsTaken = useMemo(() => {
+    const { ...userTutorialF } = userTutorial;
+
+    return Object.values(userTutorialF).filter(tutorial => tutorial.done || tutorial.skipped).length;
+  }, [userTutorial]);
+
+  const tutorialsAmount = useMemo(() => {
+    return Object.keys(userTutorial).length;
+  }, [userTutorial]);
+
   return (
     <Box
       sx={{
@@ -42,12 +51,12 @@ const ProgressBarMenu = () => {
       <Stack direction={"row"} alignItems="center" justifyContent={"space-between"} my="10px">
         <Typography fontSize={"12px"}>Tutorials</Typography>
         <Typography fontSize={"12px"}>
-          {20} / {100}
+          {tutorialsTaken} / {tutorialsAmount}
         </Typography>
       </Stack>
       <LinearProgress
         variant="determinate"
-        value={(30 * 100) / 100}
+        value={(tutorialsTaken * 100) / tutorialsAmount}
         color={"success"}
         sx={{
           borderRadius: "50px",
