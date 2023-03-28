@@ -59,10 +59,8 @@ export const TooltipTutorial = ({
         return [...acu, { title: cur.title, key: cur.tutorialSteps.tutorialKey }];
       }, []);
 
-    console.log({ tutorialsSorted });
     const idx = tutorialsSorted.findIndex(cur => cur.key === forcedTutorial);
     const res = tutorialsSorted[idx + 1];
-    console.log({ res });
     return res;
   }, [forcedTutorial, groupTutorials]);
 
@@ -98,7 +96,6 @@ export const TooltipTutorial = ({
     if (!tooltipRef.current) return { top, left, exceedTop, exceedLeft };
     if (!tutorialStep) return { top, left, exceedTop, exceedLeft };
 
-    // const { height: tooltipHeight } = tooltipRef.current.getBoundingClientRect();
     const pos = tutorialStep.tooltipPosition;
     if (pos === "top") {
       top = targetClientRect.top - tooltipRef.current.clientHeight - TOOLTIP_OFFSET;
@@ -405,25 +402,30 @@ export const TooltipTutorial = ({
     >
       {showNextTutorialStep && nextTutorial && !currentTutorialIsTemporal && (
         <Stack alignItems={"center"}>
-          <HelpIcon />
-          <Typography component={"h2"} sx={{ fontSize: "18px", fontWeight: "bold", display: "inline-block" }}>
+          <HelpIcon sx={{ mb: "12px", fontSize: "32px" }} />
+          <Typography
+            component={"h2"}
+            sx={{ fontSize: "18px", fontWeight: "bold", display: "inline-block", mb: "8px" }}
+          >
             {"Would you like to proceed to the next tutorial?"}
           </Typography>
-          <Typography component={"h2"} sx={{ fontSize: "18px", fontWeight: "bold", display: "inline-block" }}>
-            {`Next tutorial: ${nextTutorial.title}`}
-          </Typography>
-          <Stack direction={"row"}>
+          <Typography sx={{ mb: "16px" }}>{`Next tutorial: ${nextTutorial.title}`}</Typography>
+          <Stack direction={"row"} spacing="8px">
             <Button
-              variant="text"
+              variant="outlined"
               onClick={() => {
                 handleCloseProgressBarMenu();
                 onFinalize();
                 setShowNextTutorialStep(false);
               }}
               sx={{
+                borderRadius: "32px",
+                borderColor: theme => (theme.palette.mode === "dark" ? gray50 : gray800),
+                p: "8px 32px",
                 color: "inherit",
-                p: "8px 0px",
-                ":hover": { backgroundColor: theme => (theme.palette.mode === "dark" ? "#575f68" : "#d7dee6") },
+                ":hover": {
+                  borderColor: theme => (theme.palette.mode === "dark" ? gray50 : gray800),
+                },
               }}
             >
               Close
