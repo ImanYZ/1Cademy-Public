@@ -4206,7 +4206,7 @@ const Dashboard = ({}: DashboardProps) => {
       if (!thisNode) return false;
       if (!targetIsValid(thisNode)) return false;
 
-      startTutorial(tutorialName, Boolean(forcedTutorial));
+      startTutorial(tutorialName);
       setTargetId(newTargetId);
       if (forcedTutorial) {
         nodeBookDispatch({ type: "setSelectedNode", payload: newTargetId });
