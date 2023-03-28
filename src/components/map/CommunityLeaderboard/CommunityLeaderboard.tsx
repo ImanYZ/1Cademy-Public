@@ -237,7 +237,14 @@ const CommunityLeaderboard = ({
             ? "ComLeaderboardContainerOthersMonthly"
             : ""
         }
-        sx={{ display: "flex", alignItems: "center", justifyContent: "flex-start", gap: { xs: "5px", md: "16px" } }}
+        sx={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "flex-start",
+          gap: { xs: "5px", md: "16px" },
+          background: theme =>
+            theme.palette.mode === "dark" ? theme.palette.common.darkBackground : theme.palette.common.lightBackground,
+        }}
       >
         <Box
           sx={{
