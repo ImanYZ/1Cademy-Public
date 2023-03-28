@@ -25,12 +25,10 @@
   height: 65px;
   padding-right: 10px;
   border-radius: 10px 0px 0px 10px;
-  background-color: #2f2f2f;
   border-right: solid 1px #575757;
 }
 
 .LightMode #RightButtonsMinimizer {
-  background-color: #f2f4f7;
   border-right: solid 1px #d0d5dd;
 }
 
@@ -41,11 +39,9 @@
   height: 100%;
   width: 100%;
   cursor: auto;
-  background-color: #2f2f2f;
   border-right: solid 1px #575757;
 }
 .LightMode #RightButtonsContainer {
-  background-color: #f2f4f7;
   border-right: solid 1px #d0d5dd;
 }
 
@@ -79,10 +75,6 @@
   height: 100%;
   width: 100%;
   /* padding-left: 70px; */
-  background-color: #1b1a1a;
-}
-.LightMode #ComLeaderboardContainer {
-  background-color: #f9fafb;
 }
 
 #ComLeaderboardMinimizer {
