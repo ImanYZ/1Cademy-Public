@@ -69,6 +69,8 @@ import { addSuffixToUrlGMT } from "@/lib/utils/string.utils";
 import LoadingImg from "../../public/animated-icon-1cademy.gif";
 import focusViewLogo from "../../public/focus.svg";
 import focusViewDarkLogo from "../../public/focus-dark.svg";
+import PrevNodeIcon from "../../public/prev-node.svg";
+import PrevNodeLightIcon from "../../public/prev-node-light.svg";
 import toolBox from "../../public/toolbox.svg";
 import toolBoxDark from "../../public/toolbox-dark.svg";
 import toolBoxDarkOpen from "../../public/toolbox-dark-open.svg";
@@ -233,6 +235,7 @@ const Dashboard = ({}: DashboardProps) => {
     sNode: null,
     isSubmitting: false,
     choosingNode: null,
+    previousNode: null,
     chosenNode: null,
     initialProposal: null,
     selectedNode: null,
@@ -1825,12 +1828,14 @@ const Dashboard = ({}: DashboardProps) => {
       }
 
       if (linkedNode) {
+        nodeBookDispatch({ type: "setPreviousNode", payload: notebookRef.current.selectedNode });
         notebookRef.current.selectedNode = linkedNodeID;
         nodeBookDispatch({ type: "setSelectedNode", payload: linkedNodeID });
         setTimeout(() => {
           scrollToNode(linkedNodeID);
         }, 1500);
       } else {
+        nodeBookDispatch({ type: "setPreviousNode", payload: notebookRef.current.selectedNode });
         openNodeHandler(linkedNodeID, isInitialProposal ? typeOperation : "Searcher");
       }
 
@@ -5556,6 +5561,91 @@ const Dashboard = ({}: DashboardProps) => {
               <CloseIcon fontSize="large" />
             </Button>
           </div>
+        )}
+
+        {nodeBookState.previousNode && (
+          <Box
+            sx={{
+              position: "absolute",
+              width: "auto",
+              left: "50%",
+              transform: "translateX(-50%)",
+              bottom: "35px",
+              background: theme => (theme.palette.mode === "dark" ? "#1F1F1F" : "#F9FAFB"),
+              fontFamily: "Roboto",
+              fontStyle: "normal",
+              fontWeight: "normal",
+              fontSize: "25px",
+              lineHeight: "28px",
+              color: "#e5e5e5",
+              zIndex: "4",
+              textAlign: "center",
+              overflow: "hidden",
+              display: "flex",
+              height: "40px",
+            }}
+          >
+            <Box
+              sx={{
+                paddingTop: "3px",
+                borderRight: "solid 1px #98A2B3",
+                paddingX: "5px",
+                ":hover": {
+                  background: theme => (theme.palette.mode === "dark" ? "#2F2F2F" : "#EAECF0"),
+                },
+              }}
+            >
+              <Button
+                onClick={() => {
+                  notebookRef.current.selectedNode = nodeBookState.previousNode;
+                  nodeBookDispatch({ type: "setSelectedNode", payload: nodeBookState.previousNode });
+                  setTimeout(() => {
+                    scrollToNode(nodeBookState.previousNode);
+                  }, 1500);
+                  nodeBookDispatch({ type: "setPreviousNode", payload: null });
+                }}
+                sx={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "10px",
+                  ":hover": {
+                    background: "transparent",
+                  },
+                }}
+              >
+                <NextImage
+                  width={"20px"}
+                  src={theme.palette.mode === "dark" ? PrevNodeIcon : PrevNodeLightIcon}
+                  alt="logo 1cademy"
+                />
+                <Typography
+                  sx={{
+                    color: theme => (theme.palette.mode === "dark" ? "#FCFCFD" : "#1D2939"),
+                  }}
+                >
+                  Return to previous node
+                </Typography>
+              </Button>
+            </Box>
+            <Button
+              sx={{
+                minWidth: "30px!important",
+                ":hover": {
+                  background: theme => (theme.palette.mode === "dark" ? "#2F2F2F" : "#EAECF0"),
+                },
+              }}
+              onClick={() => {
+                nodeBookDispatch({ type: "setPreviousNode", payload: null });
+              }}
+            >
+              <CloseIcon
+                fontSize="small"
+                sx={{
+                  color: theme => (theme.palette.mode === "dark" ? "#A4A4A4" : "#98A2B3"),
+                }}
+              />
+            </Button>
+          </Box>
         )}
         <Box sx={{ width: "100vw", height: "100vh", overflow: "hidden" }}>
           {
