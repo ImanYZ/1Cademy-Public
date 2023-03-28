@@ -40,7 +40,7 @@ import {
 import { getDownloadURL, getStorage, ref, uploadBytesResumable } from "firebase/storage";
 import Image from "next/image";
 import NextImage from "next/image";
-import { Suspense, useCallback, useEffect, useRef, useState } from "react";
+import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
 /* eslint-disable */ //This wrapper comments it to use react-map-interaction without types
 // @ts-ignore
 import { MapInteractionCSS } from "react-map-interaction";
@@ -4206,7 +4206,7 @@ const Dashboard = ({}: DashboardProps) => {
       if (!thisNode) return false;
       if (!targetIsValid(thisNode)) return false;
 
-      startTutorial(tutorialName);
+      startTutorial(tutorialName, Boolean(forcedTutorial));
       setTargetId(newTargetId);
       if (forcedTutorial) {
         nodeBookDispatch({ type: "setSelectedNode", payload: newTargetId });
@@ -5521,6 +5521,10 @@ const Dashboard = ({}: DashboardProps) => {
     }
   }, [graph.nodes, setTargetId, targetId, tutorial]);
 
+  const tutorialGroup = useMemo(() => {
+    return getGroupTutorials({ livelinessBar: (user?.livelinessBar as LivelinessBar) ?? null });
+  }, [user?.livelinessBar]);
+
   return (
     <div className="MapContainer" style={{ overflow: "hidden" }}>
       {currentStep?.anchor && (
@@ -5537,6 +5541,7 @@ const Dashboard = ({}: DashboardProps) => {
               onPreviousStep={onPreviousStep}
               stepsLength={tutorial.steps.length}
               node={graph.nodes[targetId]}
+              forcedTutorial={Boolean(forcedTutorial)}
               isOnPortal
             />
           )}
@@ -6271,6 +6276,7 @@ const Dashboard = ({}: DashboardProps) => {
                     onPreviousStep={onPreviousStep}
                     stepsLength={tutorial.steps.length}
                     node={graph.nodes[targetId]}
+                    forcedTutorial={Boolean(forcedTutorial)}
                   />
                 )}
                 {settings.showClusterOptions && settings.showClusters && (
@@ -6454,7 +6460,7 @@ const Dashboard = ({}: DashboardProps) => {
             open={openProgressBar}
             reloadPermanentGraph={reloadPermanentGraph}
             handleCloseProgressBar={onCloseTableOfContent}
-            groupTutorials={getGroupTutorials({ livelinessBar: (user?.livelinessBar as LivelinessBar) ?? null })}
+            groupTutorials={tutorialGroup}
             userTutorialState={userTutorial}
             onCancelTutorial={onCancelTutorial}
             onForceTutorial={setForcedTutorial}
