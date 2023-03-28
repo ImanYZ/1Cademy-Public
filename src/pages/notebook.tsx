@@ -4456,7 +4456,8 @@ const Dashboard = ({}: DashboardProps) => {
       if (forcedTutorial === "proposal" || !forcedTutorial) {
         const result = detectAndCallTutorial(
           "proposal",
-          thisNode => thisNode && thisNode.open && thisNode.editable && !thisNode.isNew
+          thisNode =>
+            thisNode && thisNode.open && thisNode.editable && !thisNode.isNew && thisNode.nodeType !== "Reference"
         );
         if (result) return;
       }
