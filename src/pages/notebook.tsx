@@ -5289,6 +5289,7 @@ const Dashboard = ({}: DashboardProps) => {
       const node = graph.nodes[targetId];
       if (!tmpEditNodeIsValid(node)) {
         setTutorial(null);
+        if (currentStep?.childTargetId) removeStyleFromTarget(currentStep.childTargetId, targetId);
         if (node && node.editable) return;
 
         setForcedTutorial(null);
