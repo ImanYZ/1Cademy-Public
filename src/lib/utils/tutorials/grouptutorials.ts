@@ -279,13 +279,13 @@ export const getGroupTutorials = ({ livelinessBar }: GetGroupTutorialsInput): Gr
     title: "Building Reputation",
     tutorials: [
       {
-        title: "Leader board",
+        title: "Leaderboard",
         tutorialSteps: { tutorialKey: "leaderBoard", steps: LEADER_BOARD_STEPS },
         tutorials: [],
       },
       ...getLivelinessBar(livelinessBar),
       {
-        title: "Community Leader Board",
+        title: "Community Leaderboard",
         tutorialSteps: { tutorialKey: "communityLeaderBoard", steps: COMMUNITY_LEADER_BOARD_STEPS },
         tutorials: [],
       },
