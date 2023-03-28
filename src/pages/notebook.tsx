@@ -338,6 +338,7 @@ const Dashboard = ({}: DashboardProps) => {
   });
 
   const [openLivelinessBar, setOpenLivelinessBar] = useState(false);
+  const [comLeaderboardOpen, setComLeaderboardOpen] = useState(false);
 
   const {
     startTutorial,
@@ -5072,11 +5073,28 @@ const Dashboard = ({}: DashboardProps) => {
           return;
         }
       }
+
+      // --------------------------
+
+      if (
+        forcedTutorial === "communityLeaderBoard" ||
+        (proposalNodesTaken && isNotProposingNodes && comLeaderboardOpen)
+      ) {
+        const shouldIgnore = forcedTutorial
+          ? forcedTutorial !== "communityLeaderBoard"
+          : userTutorial["communityLeaderBoard"].done || userTutorial["communityLeaderBoard"].skipped;
+        if (!shouldIgnore) {
+          if (!comLeaderboardOpen) setComLeaderboardOpen(true);
+          startTutorial("communityLeaderBoard");
+          return;
+        }
+      }
     };
 
     detectTriggerTutorial();
   }, [
     buttonsOpen,
+    comLeaderboardOpen,
     detectAndCallChildTutorial,
     detectAndCallSidebarTutorial,
     detectAndCallTutorial,
@@ -5436,6 +5454,15 @@ const Dashboard = ({}: DashboardProps) => {
 
     // --------------------------
 
+    if (tutorial.name === "communityLeaderBoard") {
+      if (comLeaderboardOpen) return;
+      setTutorial(null);
+      setForcedTutorial(null);
+      if (currentStep?.childTargetId) removeStyleFromTarget(currentStep.childTargetId, targetId);
+    }
+
+    // --------------------------
+
     if (tutorial.name === "userInfo") {
       if (openSidebar === "USER_INFO") return;
       setTutorial(null);
@@ -5444,6 +5471,7 @@ const Dashboard = ({}: DashboardProps) => {
     }
   }, [
     buttonsOpen,
+    comLeaderboardOpen,
     currentStep,
     detectAndRemoveTutorial,
     firstLoading,
@@ -5783,7 +5811,8 @@ const Dashboard = ({}: DashboardProps) => {
           <MemoizedCommunityLeaderboard
             userTagId={user?.tagId ?? ""}
             pendingProposalsLoaded={pendingProposalsLoaded}
-            disabled={Boolean(["TT"].includes("COMMUNITY_LEADERBOARD"))}
+            comLeaderboardOpen={comLeaderboardOpen}
+            setComLeaderboardOpen={setComLeaderboardOpen}
           />
 
           <Box
@@ -5820,7 +5849,6 @@ const Dashboard = ({}: DashboardProps) => {
                 position: "fixed",
                 width: { xs: "50px", sm: "60px" },
                 right: "8px",
-                background: theme => (theme.palette.mode === "dark" ? "#2F2F2F" : "#f2f4f7"),
                 height: { xs: "44px", sm: "60px" },
                 borderRadius: buttonsOpen ? "0px 8px 8px 0px" : "8px",
                 padding: "10px",
@@ -5829,6 +5857,10 @@ const Dashboard = ({}: DashboardProps) => {
                   theme.palette.mode === "dark"
                     ? "0px 1px 2px rgba(0, 0, 0, 0.06), 0px 1px 3px rgba(0, 0, 0, 0.1)"
                     : "box-shadow: 0px 1px 2px rgba(0, 0, 0, 0.06), 0px 1px 3px rgba(0, 0, 0, 0.1)",
+                background: theme =>
+                  theme.palette.mode === "dark"
+                    ? theme.palette.common.darkBackground
+                    : theme.palette.common.lightBackground,
               }}
               onClick={() => setButtonsOpen(!buttonsOpen)}
             >
@@ -5883,6 +5915,10 @@ const Dashboard = ({}: DashboardProps) => {
                 alignItems: "center",
                 justifyContent: "flex-start",
                 gap: { xs: "5px", md: "16px" },
+                background: theme =>
+                  theme.palette.mode === "dark"
+                    ? theme.palette.common.darkBackground
+                    : theme.palette.common.lightBackground,
               }}
             >
               <Box
@@ -5897,9 +5933,21 @@ const Dashboard = ({}: DashboardProps) => {
                     md: "10px",
                   },
                   height: "inherit",
+                  background: theme =>
+                    theme.palette.mode === "dark"
+                      ? theme.palette.common.darkBackground
+                      : theme.palette.common.lightBackground,
                 }}
               >
-                <Box id="RightButtonsMinimizer">
+                <Box
+                  id="RightButtonsMinimizer"
+                  sx={{
+                    background: theme =>
+                      theme.palette.mode === "dark"
+                        ? theme.palette.common.darkBackground
+                        : theme.palette.common.lightBackground,
+                  }}
+                >
                   <Box
                     onClick={() => setButtonsOpen(false)}
                     sx={{

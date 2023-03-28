@@ -195,7 +195,9 @@ const LivelinessBar = ({ open, setOpen, disabled = false, ...props }: ILivelines
             opacity: disabled ? 0.8 : 1,
             width: "56px",
             background: theme =>
-              theme.palette.mode === "dark" ? (disabled ? "#383838ff" : "#2F2F2F") : disabled ? "#b9b9b9" : "#F2F4F7",
+              theme.palette.mode === "dark"
+                ? theme.palette.common.darkBackground
+                : theme.palette.common.lightBackground,
             borderRadius: "10px 0px 0px 10px",
             right: 0,
             top: 0,
@@ -364,7 +366,10 @@ const LivelinessBar = ({ open, setOpen, disabled = false, ...props }: ILivelines
           </Box>
           <Box
             sx={{
-              background: theme => (theme.palette.mode === "dark" ? "#2F2F2F" : "#F2F4F7"),
+              background: theme =>
+                theme.palette.mode === "dark"
+                  ? theme.palette.common.darkBackground
+                  : theme.palette.common.lightBackground,
               display: "flex",
               top: "50%",
               transform: "translate(0px, -50%)",
