@@ -333,7 +333,7 @@ export const TooltipTutorial = ({
       sx={{
         position: "absolute",
         top: `${tooltipRect.top}px`,
-        left: `${tooltipRect.left}px`,
+        left: isOnPortal && isMobile ? "5px" : `${tooltipRect.left}px`,
         right: isMobile ? "5px" : undefined,
         transition: "top 750ms ease-out,left 750ms ease-out, border-color 1s linear",
         maxWidth: "450px",

@@ -14,7 +14,7 @@ const LEADER_BOARD_STEPS_CONFIG: TutorialStepConfig[] = [
         }
       />
     ),
-    tooltipPosition: "right",
+    tooltipPosition: "top",
     targetDelay: 450,
     anchor: "Portal",
     outline: "inside",
@@ -27,7 +27,7 @@ const LEADER_BOARD_STEPS_CONFIG: TutorialStepConfig[] = [
         text={"Here you can see top users sorted by points, including information about their current online status."}
       />
     ),
-    tooltipPosition: "right",
+    tooltipPosition: "top",
     targetDelay: 450,
     anchor: "Portal",
     outline: "inside",

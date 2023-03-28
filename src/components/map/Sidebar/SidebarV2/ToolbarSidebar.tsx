@@ -1,6 +1,6 @@
 import KeyboardArrowLeftIcon from "@mui/icons-material/KeyboardArrowLeft";
 import MenuIcon from "@mui/icons-material/Menu";
-import { Badge, Box, Button, IconButton, Menu, MenuItem, Stack, Tooltip } from "@mui/material";
+import { Badge, Box, Button, IconButton, Menu, MenuItem, Stack, Tooltip, useMediaQuery, useTheme } from "@mui/material";
 import { addDoc, collection, doc, getFirestore, setDoc, Timestamp } from "firebase/firestore";
 import React, { useCallback, useMemo, useState } from "react";
 
@@ -48,7 +48,7 @@ export const ToolbarSidebar = ({
   reloadPermanentGrpah,
   user,
   reputation,
-  theme,
+  theme: userTheme,
   setOpenSideBar,
   selectedUser,
   uncheckedNotificationsNum,
@@ -65,7 +65,9 @@ export const ToolbarSidebar = ({
 // enabledToolbarElements = [],
 MainSidebarProps) => {
   const { nodeBookState, nodeBookDispatch } = useNodeBook();
-  const isMenuOpen = nodeBookState.isMenuOpen;
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
+  const isMenuOpen = isMobile && nodeBookState.isMenuOpen;
 
   const db = getFirestore();
 
@@ -189,7 +191,7 @@ MainSidebarProps) => {
             <MemoizedMetaButton>
               <Box sx={{ display: "grid", placeItems: "center" }}>
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={theme === "Light" ? LogoLightMode.src : LogoDarkMode.src} alt="1Logo" width="61px" />
+                <img src={userTheme === "Light" ? LogoLightMode.src : LogoDarkMode.src} alt="1Logo" width="61px" />
               </Box>
             </MemoizedMetaButton>
           </Box>
@@ -615,7 +617,7 @@ MainSidebarProps) => {
   }, [
     isMenuOpen,
     firstBoxHeight,
-    theme,
+    userTheme,
     user,
     reputation?.totalPoints,
     reputation?.positives,
