@@ -98,7 +98,7 @@ const NodeHeader = ({
         <span>
           <IconButton
             disabled={disableHideButton}
-            id={`${id}-hiden-button`}
+            id={hideButtonId}
             color="inherit"
             onClick={e => onHideNodeHandler(e)}
             aria-label="delete"
