@@ -50,7 +50,7 @@ const NODES_STEPS: TutorialStepConfig[] = [
     childTargetId: "searcher-sidebar-options",
     title: "Options",
     description: <MarkdownRender text={"Beyond searching terms there are a number of ways to refine your search."} />,
-    tooltipPosition: "right",
+    tooltipPosition: "bottom",
     anchor: "Portal",
     outline: "inside",
   },
@@ -65,7 +65,7 @@ const NODES_STEPS: TutorialStepConfig[] = [
         }
       />
     ),
-    tooltipPosition: "right",
+    tooltipPosition: "bottom",
     anchor: "Portal",
   },
   {
@@ -75,7 +75,7 @@ const NODES_STEPS: TutorialStepConfig[] = [
     description: (
       <MarkdownRender text={"You can also refine your search by how recently nodes were created or edited."} />
     ),
-    tooltipPosition: "right",
+    tooltipPosition: "bottom",
     anchor: "Portal",
   },
   {
@@ -89,7 +89,7 @@ const NODES_STEPS: TutorialStepConfig[] = [
         }
       />
     ),
-    tooltipPosition: "right",
+    tooltipPosition: "bottom",
     anchor: "Portal",
   },
   {
