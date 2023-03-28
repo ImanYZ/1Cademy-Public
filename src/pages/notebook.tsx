@@ -5541,7 +5541,9 @@ const Dashboard = ({}: DashboardProps) => {
               onPreviousStep={onPreviousStep}
               stepsLength={tutorial.steps.length}
               node={graph.nodes[targetId]}
-              forcedTutorial={Boolean(forcedTutorial)}
+              forcedTutorial={forcedTutorial}
+              groupTutorials={tutorialGroup}
+              onForceTutorial={setForcedTutorial}
               isOnPortal
             />
           )}
@@ -6276,7 +6278,9 @@ const Dashboard = ({}: DashboardProps) => {
                     onPreviousStep={onPreviousStep}
                     stepsLength={tutorial.steps.length}
                     node={graph.nodes[targetId]}
-                    forcedTutorial={Boolean(forcedTutorial)}
+                    forcedTutorial={forcedTutorial}
+                    groupTutorials={tutorialGroup}
+                    onForceTutorial={setForcedTutorial}
                   />
                 )}
                 {settings.showClusterOptions && settings.showClusters && (

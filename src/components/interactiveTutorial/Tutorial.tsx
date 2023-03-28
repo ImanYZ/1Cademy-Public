@@ -24,11 +24,12 @@ type TutorialProps = {
   node: FullNodeData;
   forcedTutorial: TutorialTypeKeys | null;
   groupTutorials: GroupTutorial[];
+  onForceTutorial: (keyTutorial: TutorialTypeKeys) => void;
   isOnPortal?: boolean;
 };
 
 export const TooltipTutorial = ({
-  // tutorial,// TODO: remove
+  tutorial, // TODO: remove
   tutorialStep,
   targetClientRect,
   onNextStep,
@@ -39,8 +40,9 @@ export const TooltipTutorial = ({
   stepsLength,
   node,
   forcedTutorial: forcedTutorial,
-  // groupTutorials,
+  groupTutorials,
   isOnPortal,
+  onForceTutorial,
 }: TutorialProps) => {
   const tooltipRef = useRef<HTMLDivElement | null>(null);
 
@@ -49,15 +51,20 @@ export const TooltipTutorial = ({
   const isMobile = useMediaQuery("(max-width:600px)");
   const [showNextTutorialStep, setShowNextTutorialStep] = useState(false);
 
-  // const getNextTutorial = useMemo(() => {
-  //   const tutorialsSorted = groupTutorials
-  //     .flatMap(cur => cur.tutorials) //[{t:[]},{t:[]}]
-  //     .reduce((acu: { title: string; key: string }[], cur) => {
-  //       if (!cur.tutorialSteps?.tutorialKey) return acu;
-  //       return [...acu, { title: cur.title, key: cur.tutorialSteps.tutorialKey }];
-  //     }, []);
-  //   tutorialsSorted.findIndex(cur => cur.key === forcedT);
-  // }, [groupTutorials]);
+  const nextTutorial = useMemo(() => {
+    const tutorialsSorted = groupTutorials
+      .flatMap(cur => cur.tutorials)
+      .reduce((acu: { title: string; key: TutorialTypeKeys }[], cur) => {
+        if (!cur.tutorialSteps?.tutorialKey) return acu;
+        return [...acu, { title: cur.title, key: cur.tutorialSteps.tutorialKey }];
+      }, []);
+
+    console.log({ tutorialsSorted });
+    const idx = tutorialsSorted.findIndex(cur => cur.key === forcedTutorial);
+    const res = tutorialsSorted[idx + 1];
+    console.log({ res });
+    return res;
+  }, [forcedTutorial, groupTutorials]);
 
   const calcWithExceed = useCallback(
     (top: number, left: number) => {
@@ -140,6 +147,21 @@ export const TooltipTutorial = ({
     return { top, left, exceedTop, exceedLeft };
     //INFO: Keep targetClientRect, render does not work if we listen to targetClientRect.props
   }, [calcWithExceed, targetClientRect, tutorialStep]);
+
+  const currentTutorialIsTemporal = useMemo(() => {
+    const temporalTutorials: TutorialTypeKeys[] = [
+      "tmpEditNode",
+      "tmpProposalConceptChild",
+      "tmpProposalQuestionChild",
+      "tmpProposalRelationChild",
+      "tmpProposalReferenceChild",
+      "tmpProposalIdeaChild",
+      "tmpProposalCodeChild",
+    ];
+    const currentTutorialName = tutorial?.name;
+    if (!currentTutorialName) return false;
+    return temporalTutorials.includes(currentTutorialName);
+  }, [tutorial?.name]);
 
   const taleRect = useMemo(() => {
     let top = undefined;
@@ -381,14 +403,14 @@ export const TooltipTutorial = ({
         },
       }}
     >
-      {showNextTutorialStep && (
+      {showNextTutorialStep && nextTutorial && !currentTutorialIsTemporal && (
         <Stack alignItems={"center"}>
           <HelpIcon />
           <Typography component={"h2"} sx={{ fontSize: "18px", fontWeight: "bold", display: "inline-block" }}>
             {"Would you like to proceed to the next tutorial?"}
           </Typography>
           <Typography component={"h2"} sx={{ fontSize: "18px", fontWeight: "bold", display: "inline-block" }}>
-            {`${""}`}
+            {`Next tutorial: ${nextTutorial.title}`}
           </Typography>
           <Stack direction={"row"}>
             <Button
@@ -412,7 +434,7 @@ export const TooltipTutorial = ({
                 handleCloseProgressBarMenu();
                 onFinalize();
                 setShowNextTutorialStep(false);
-                // nextTutorial()
+                onForceTutorial(nextTutorial.key);
               }}
               sx={{
                 borderRadius: "32px",
@@ -429,7 +451,7 @@ export const TooltipTutorial = ({
           </Stack>
         </Stack>
       )}
-      {!showNextTutorialStep && (
+      {(!showNextTutorialStep || !nextTutorial) && (
         <>
           {" "}
           <Stack direction={"row"} alignItems="center" justifyContent="space-between" mb="16px">
@@ -498,7 +520,9 @@ export const TooltipTutorial = ({
                     handleCloseProgressBarMenu();
                     // onNextStep();
                     // ;
-                    forcedTutorial ? setShowNextTutorialStep(true) : onFinalize();
+                    forcedTutorial && nextTutorial && !currentTutorialIsTemporal
+                      ? setShowNextTutorialStep(true)
+                      : onFinalize();
                   }}
                   sx={{
                     borderRadius: "32px",

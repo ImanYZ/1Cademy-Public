@@ -247,11 +247,12 @@ export const getGroupTutorials = ({ livelinessBar }: GetGroupTutorialsInput): Gr
         tutorialSteps: { tutorialKey: "userSettings", steps: USER_SETTINGS_STEPS_COMPLETE },
         tutorials: [],
       },
-      {
-        title: "Search Engine",
-        tutorialSteps: { tutorialKey: "searcher", steps: SEARCHER_STEPS_COMPLETE },
-        tutorials: [],
-      },
+      // CHECK: if is required to have search engine in 2 places, add a key to differentiate them
+      // {
+      //   title: "Search Engine",
+      //   tutorialSteps: { tutorialKey: "searcher", steps: SEARCHER_STEPS_COMPLETE },
+      //   tutorials: [],
+      // },
       {
         title: "Notifications",
         tutorialSteps: { tutorialKey: "notifications", steps: NOTIFICATION_STEPS },
