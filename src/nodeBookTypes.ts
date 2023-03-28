@@ -44,6 +44,7 @@ export interface NodeBookState {
   readonly sNode: string | null;
   readonly isSubmitting: boolean;
   readonly choosingNode: ChoosingNode | null;
+  readonly previousNode: any;
   readonly chosenNode: ChosenNode | null;
   readonly selectedNode: string | null;
   readonly initialProposal: string | null;
@@ -66,6 +67,7 @@ export type TNodeBookState = {
   sNode: string | null;
   isSubmitting: boolean;
   choosingNode: ChoosingNode | null;
+  previousNode: any;
   chosenNode: ChosenNode | null;
   selectedNode: string | null;
   initialProposal: string | null;
@@ -97,6 +99,11 @@ export type SetIsSubmittingAction = {
 export type SetChoosingNodeAction = {
   type: "setChoosingNode";
   payload: ChoosingNode | null;
+};
+
+export type SetPreviousNode = {
+  type: "setPreviousNode";
+  payload: any;
 };
 
 export type SetChosenNodeAction = {
@@ -176,6 +183,7 @@ export type DispatchNodeBookActions =
   | SetSNodeAction
   | SetIsSubmittingAction
   | SetChoosingNodeAction
+  | SetPreviousNode
   | SetChosenNodeAction
   | SetSelectedNodeAction
   | SetSelectionTypeAction
