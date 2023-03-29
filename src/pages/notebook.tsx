@@ -422,12 +422,12 @@ const Dashboard = ({}: DashboardProps) => {
     }, {});
 
     const pathways = edgeObjects.reduce(
-      (acu, cur) => {
+      (acu: { node: string; parent: string; child: string }, cur) => {
         if (acu.node) return acu;
-        if (parents[cur.child]) return { node: cur.child };
+        if (parents[cur.child]) return { parent: cur.parent, node: cur.child, child: parents[cur.child][0] };
         return acu;
       },
-      { node: "" }
+      { node: "", parent: "", child: "" }
     );
     return pathways;
   }, [graph.edges]);
@@ -6439,6 +6439,8 @@ const Dashboard = ({}: DashboardProps) => {
                     forcedTutorial={forcedTutorial}
                     groupTutorials={tutorialGroup}
                     onForceTutorial={setForcedTutorial}
+                    parent={graph.nodes[pathway.parent]}
+                    child={graph.nodes[pathway.child]}
                   />
                 )}
                 {settings.showClusterOptions && settings.showClusters && (

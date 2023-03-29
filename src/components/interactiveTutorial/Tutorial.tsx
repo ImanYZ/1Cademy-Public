@@ -26,6 +26,8 @@ type TutorialProps = {
   groupTutorials: GroupTutorial[];
   onForceTutorial: (keyTutorial: TutorialTypeKeys) => void;
   isOnPortal?: boolean;
+  parent?: FullNodeData;
+  child?: FullNodeData;
 };
 
 export const TooltipTutorial = ({
@@ -43,6 +45,8 @@ export const TooltipTutorial = ({
   groupTutorials,
   isOnPortal,
   onForceTutorial,
+  parent,
+  child,
 }: TutorialProps) => {
   const tooltipRef = useRef<HTMLDivElement | null>(null);
 
@@ -380,7 +384,7 @@ export const TooltipTutorial = ({
           <Box sx={{ fontSize: "14px" }}>
             {typeof tutorialStep.description === "function"
               ? node
-                ? tutorialStep.description(node)
+                ? tutorialStep.description(node, parent, child)
                 : ""
               : tutorialStep.description}
           </Box>

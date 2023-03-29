@@ -20,10 +20,44 @@ const PATHWAYS_STEPS_CONFIG: TutorialStepConfig[] = [
   },
   {
     title: "Pathways",
-    description: node => (
+    description: (node, nodeParent) => (
       <Typography>
-        This is the {node.title} node. In order to understand it, you need to understand what 1Cademy is. You can open
-        the 1Cademy node to get the foundational information.
+        This is the{" "}
+        <Typography component={"b"} fontWeight="bold">
+          {node.title}
+        </Typography>{" "}
+        node. In order to understand it, you need to understand what{" "}
+        <Typography component={"b"} fontWeight="bold">
+          {nodeParent ? nodeParent.title : "the Parent"}
+        </Typography>{" "}
+        is.
+        {/* You can open the {nodeParent?.title} node to get the foundational information. */}
+      </Typography>
+    ),
+    tooltipPosition: "top",
+    outline: "inside",
+  },
+  // {
+  //   title: "Pathways",
+  //   description: node => (
+  //     <Typography>You can also open a child node of {node.title}. Lets open one child node.</Typography>
+  //   ),
+  //   tooltipPosition: "top",
+  //   outline: "inside",
+  // },
+  {
+    title: "Pathways",
+    description: (node, parent, child) => (
+      <Typography>
+        A child node is a more specific node. The reader needs to understand{" "}
+        <Typography component={"b"} fontWeight="bold">
+          {node.title}
+        </Typography>{" "}
+        to understand the{" "}
+        <Typography component={"b"} fontWeight="bold">
+          {child ? child.title : "the Child"}
+        </Typography>{" "}
+        node.
       </Typography>
     ),
     tooltipPosition: "top",
@@ -31,30 +65,22 @@ const PATHWAYS_STEPS_CONFIG: TutorialStepConfig[] = [
   },
   {
     title: "Pathways",
-    description: node => (
-      <Typography>You can also open a child node of {node.title}. Lets open one child node.</Typography>
-    ),
-    tooltipPosition: "top",
-    outline: "inside",
-  },
-  {
-    title: "Pathways",
-    description: node => (
+    description: (node, parent, child) => (
       <Typography>
-        This is a more specific node. The reader needs to understand {node.title} to understand the opened child node.
-        Links.
-      </Typography>
-    ),
-    tooltipPosition: "top",
-    outline: "inside",
-  },
-  {
-    title: "Pathways",
-    description: node => (
-      <Typography>
-        These nodes are in an ordered series where they flow from broad to specific. The reader can start with 1Cademy
-        and have the requisite knowledge to understand {node.title}, and then, in turn, they have enough knowledge to
-        understand advanced knowledge. This ordered series is a learning pathway.
+        These nodes are in an ordered series where they flow from broad to specific. The reader can start with{" "}
+        <Typography component={"b"} fontWeight="bold">
+          {" "}
+          {parent ? parent.title : "the Parent"}
+        </Typography>{" "}
+        and have the requisite knowledge to understand{" "}
+        <Typography component={"b"} fontWeight="bold">
+          {node.title}
+        </Typography>
+        , and then, in turn, they have enough knowledge to understand{" "}
+        <Typography component={"b"} fontWeight="bold">
+          {child ? child.title : "the Child"}
+        </Typography>
+        . This ordered series is a learning pathway.
       </Typography>
     ),
     tooltipPosition: "top",
