@@ -4419,7 +4419,7 @@ const Dashboard = ({}: DashboardProps) => {
         const result = detectAndForceTutorial(
           "tmpParentsChildrenList",
           "r98BjyFDCe4YyLA3U8ZE",
-          (node: FullNodeData) => node && node.open && !node.editable
+          (node: FullNodeData) => node && node.open && !node.editable && node.localLinkingWords !== "LinkingWords"
         );
         console.log(33, result);
         if (result) return; /* (lastNodeOperation.current?.name = "LinkingWords"); */
@@ -5195,7 +5195,19 @@ const Dashboard = ({}: DashboardProps) => {
     devLog("USE_EFFECT: DETECT_TO_REMOVE_TUTORIAL", tutorial);
 
     if (tutorial.name === "nodes") {
-      const nodesTutorialIsValid = (node: FullNodeData) => node && node.open;
+      const nodesTutorialIsValid = (node: FullNodeData) => node && node.open; // TODO: add other validations check parentsChildrenList
+      const node = graph.nodes[targetId];
+      if (!nodesTutorialIsValid(node)) {
+        setTutorial(null);
+        setForcedTutorial(null);
+      }
+    }
+
+    // --------------------------
+
+    if (tutorial.name === "parentsChildrenList") {
+      const nodesTutorialIsValid = (node: FullNodeData) =>
+        node && node.open && !node.editable && !node.isNew && node.localLinkingWords === "LinkingWords";
       const node = graph.nodes[targetId];
       if (!nodesTutorialIsValid(node)) {
         setTutorial(null);
@@ -5361,6 +5373,23 @@ const Dashboard = ({}: DashboardProps) => {
         setTutorial(null);
         if (node && !node.editable) return;
         setForcedTutorial(null);
+      }
+    }
+
+    // --------------------------
+
+    if (tutorial.name === "tmpParentsChildrenList") {
+      const isValid = (node: FullNodeData) =>
+        node && node.open && !node.editable && !Boolean(node.isNew) && node.localLinkingWords !== "LinkingWords";
+      const node = graph.nodes[targetId];
+      console.log(11, node);
+      if (!isValid(node)) {
+        setTutorial(null);
+        console.log(22);
+        if (node && node.localLinkingWords === "LinkingWords") return;
+        console.log(33);
+        setForcedTutorial(null);
+        if (currentStep?.childTargetId) removeStyleFromTarget(currentStep.childTargetId, targetId);
       }
     }
 
