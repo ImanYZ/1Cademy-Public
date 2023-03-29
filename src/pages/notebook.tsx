@@ -5199,13 +5199,16 @@ const Dashboard = ({}: DashboardProps) => {
       // --------------------------
 
       if (forcedTutorial === "pathways" || proposalNodesTaken) {
-        // blink arrows
         const shouldIgnore = forcedTutorial
           ? forcedTutorial !== "pathways"
           : userTutorial["pathways"].done || userTutorial["pathways"].skipped;
         if (!shouldIgnore) {
           console.log({ pathway });
           if (pathway.node) {
+            setTargetId(pathway.node);
+            nodeBookDispatch({ type: "setSelectedNode", payload: pathway.node });
+            notebookRef.current.selectedNode = pathway.node;
+            scrollToNode(pathway.node);
             startTutorial("pathways");
             return;
           }
@@ -5234,6 +5237,7 @@ const Dashboard = ({}: DashboardProps) => {
     parentWithChildren,
     parentWithMostChildren,
     pathway,
+    scrollToNode,
     setTargetId,
     startTutorial,
     tutorial,
