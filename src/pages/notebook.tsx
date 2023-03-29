@@ -2304,11 +2304,14 @@ const Dashboard = ({}: DashboardProps) => {
     [user /*selectionType*/, processHeightChange]
   );
 
-  const onChangeNodePart = (nodeId: string, newOpenPart: OpenPart) => {
-    setNodeParts(nodeId, node => {
-      return { ...node, localLinkingWords: newOpenPart };
-    });
-  };
+  const onChangeNodePart = useCallback(
+    (nodeId: string, newOpenPart: OpenPart) => {
+      setNodeParts(nodeId, node => {
+        return { ...node, localLinkingWords: newOpenPart };
+      });
+    },
+    [setNodeParts]
+  );
 
   const onNodeShare = useCallback(
     (nodeId: string, platform: string) => {
@@ -4076,6 +4079,7 @@ const Dashboard = ({}: DashboardProps) => {
 
     const tmpOpenPartMap = new Map<TutorialTypeKeys, OpenPart>();
     tmpOpenPartMap.set("tmpParentsChildrenList", "LinkingWords");
+    tmpOpenPartMap.set("tmpTagsReferences", "References");
 
     if (tmpOpenPartMap.has(tutorial.name)) {
       if (currentStep.isClickable) {
@@ -4114,6 +4118,7 @@ const Dashboard = ({}: DashboardProps) => {
     currentStep,
     db,
     forcedTutorial,
+    onChangeNodePart,
     proposeNewChild,
     proposeNodeImprovement,
     setTargetId,
@@ -4402,6 +4407,26 @@ const Dashboard = ({}: DashboardProps) => {
         return;
       }
 
+      // --------------------------
+
+      if (!forcedTutorial || forcedTutorial === "tagsReferences") {
+        const result = detectAndCallTutorial(
+          "tagsReferences",
+          node => node && node.open && !node.editable && node.localLinkingWords === "References"
+        );
+        if (result) return;
+      }
+
+      // ------------------------
+
+      if (forcedTutorial === "tagsReferences") {
+        const result = detectAndForceTutorial(
+          "tmpTagsReferences",
+          "r98BjyFDCe4YyLA3U8ZE",
+          node => node && node.open && !node.editable && node.localLinkingWords !== "References"
+        );
+        if (result) return;
+      }
       // --------------------------
 
       const parentsChildrenListTutorialIsValid = (node: FullNodeData) =>
@@ -4950,31 +4975,6 @@ const Dashboard = ({}: DashboardProps) => {
 
       // --------------------------
 
-      if (
-        !forcedTutorial ||
-        forcedTutorial === "tagsReferences" ||
-        (lastNodeOperation.current && lastNodeOperation.current.name === "References")
-      ) {
-        const tagsReferencesLaunched = detectAndCallTutorial(
-          "tagsReferences",
-          node => node && node.open && !node.editable
-        );
-
-        if (tagsReferencesLaunched) return;
-      }
-
-      // ------------------------
-
-      if (forcedTutorial && forcedTutorial === "tagsReferences") {
-        const result = detectAndForceTutorial(
-          "tmpTagsReferences",
-          "r98BjyFDCe4YyLA3U8ZE",
-          node => node && node.open && !node.editable && !Boolean(node.isNew)
-        );
-        if (result) return;
-      }
-      // --------------------------
-
       if (forcedTutorial === "searcher" || openSidebar === "SEARCHER_SIDEBAR") {
         const result = detectAndCallSidebarTutorial("searcher", "SEARCHER_SIDEBAR");
         if (result) return;
@@ -5413,6 +5413,19 @@ const Dashboard = ({}: DashboardProps) => {
         console.log(22);
         if (node && node.localLinkingWords === "LinkingWords") return;
         console.log(33);
+        setForcedTutorial(null);
+        if (currentStep?.childTargetId) removeStyleFromTarget(currentStep.childTargetId, targetId);
+      }
+    }
+    // --------------------------
+
+    if (tutorial.name === "tmpTagsReferences") {
+      const isValid = (node: FullNodeData) =>
+        node && node.open && !node.editable && !Boolean(node.isNew) && node.localLinkingWords !== "References";
+      const node = graph.nodes[targetId];
+      if (!isValid(node)) {
+        setTutorial(null);
+        if (node && node.localLinkingWords === "References") return;
         setForcedTutorial(null);
         if (currentStep?.childTargetId) removeStyleFromTarget(currentStep.childTargetId, targetId);
       }
