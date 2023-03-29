@@ -403,7 +403,7 @@ export type FullNodeData = Omit<UserNodesData, "changedAt" | "createdAt" | "upda
     // top: number;
     x?: number;
     y?: number;
-    localLinkingWords: OpenPart;
+    localLinkingWords?: OpenPart;
   };
 
 export type EdgeData = {
@@ -478,6 +478,7 @@ export type TutorialTypeKeys =
   | "tmpProposalReferenceChild"
   | "tmpProposalCodeChild"
   | "tmpProposalIdeaChild"
+  | "tmpTagsReferences"
   | "tmpParentsChildrenList"
   | "tableOfContents"
   | "focusMode"
@@ -497,6 +498,7 @@ export type TutorialTypeKeys =
   | "interactionLivenessBar"
   | "reputationLivenessBar"
   | "communityLeaderBoard"
+  | "tagsReferences"
   | "parentsChildrenList";
 
 export type UserTutorial = {

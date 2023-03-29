@@ -155,6 +155,7 @@ export const TooltipTutorial = ({
       "tmpProposalReferenceChild",
       "tmpProposalIdeaChild",
       "tmpProposalCodeChild",
+      "tmpTagsReferences",
     ];
     const currentTutorialName = tutorial?.name;
     if (!currentTutorialName) return false;

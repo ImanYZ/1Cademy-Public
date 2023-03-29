@@ -210,6 +210,35 @@ const COLLAPSE_STEPS: TutorialStepConfig[] = [
   },
 ];
 
+const TAGS_REFERENCES_STEPS: TutorialStepConfig[] = [
+  {
+    title: "List of References",
+    childTargetId: "node-references",
+    description: (
+      <MarkdownRender
+        text={
+          "This is the list of references for this node. This displays the reference nodes (which contain information about source material) used to create this node."
+        }
+      />
+    ),
+    isClickable: true,
+    outline: "shallow",
+  },
+  {
+    title: "List of Tags",
+    childTargetId: "node-tags",
+    description: (
+      <MarkdownRender
+        text={
+          "This is the list of tags for this node. Default tags correspond with the community tag of the node creator by default. They show the various subject areas covered by a node."
+        }
+      />
+    ),
+    isClickable: true,
+    outline: "shallow",
+  },
+];
+
 export const PARENT_CHILDREN_STEPS_COMPLETE: TutorialStep[] = PARENT_CHILDREN_STEPS.map((c, i, s) => {
   return { ...getBaseStepConfig(i + 1, s.length), ...c };
 });
@@ -241,5 +270,8 @@ export const COLLAPSE_STEPS_COMPLETE: TutorialStep[] = COLLAPSE_STEPS.map((c, i,
   return { ...getBaseStepConfig(i + 1, s.length), ...c };
 });
 export const EXPAND_STEPS_COMPLETE: TutorialStep[] = EXPAND_STEPS.map((c, i, s) => {
+  return { ...getBaseStepConfig(i + 1, s.length), ...c };
+});
+export const TAGS_REFERENCES_STEPS_COMPLETE: TutorialStep[] = TAGS_REFERENCES_STEPS.map((c, i, s) => {
   return { ...getBaseStepConfig(i + 1, s.length), ...c };
 });

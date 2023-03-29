@@ -839,6 +839,7 @@ const NodeFooter = ({
                     }}
                   >
                     <ContainedButton
+                      id={`${identifier}-node-footer-tags-referecnes`}
                       title="View nodes that have cited this node."
                       onClick={selectCitations}
                       tooltipPosition="top"
