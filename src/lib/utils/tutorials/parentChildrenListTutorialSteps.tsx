@@ -15,7 +15,7 @@ const PARENTS_CHILDREN_LIST_STEPS_CONFIG: TutorialStepConfig[] = [
       />
     ),
     tooltipPosition: "top",
-    anchor: "Portal",
+    // anchor: "Portal",
     outline: "inside",
   },
   {
@@ -27,7 +27,7 @@ const PARENTS_CHILDREN_LIST_STEPS_CONFIG: TutorialStepConfig[] = [
       />
     ),
     tooltipPosition: "top",
-    anchor: "Portal",
+    // anchor: "Portal",
     outline: "inside",
   },
 ];

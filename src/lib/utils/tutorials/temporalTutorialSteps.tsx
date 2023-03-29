@@ -131,21 +131,6 @@ const TMP_PROPOSE_CHILD_CODE_CONFIG: TutorialStepConfig[] = [
   },
 ];
 
-// const TMP_EDIT_NODE_CONFIG: TutorialStepConfig[] = [
-//   {
-//     title: "Upvote Node",
-//     description: (
-//       <MarkdownRender
-//         text={
-//           "Click on check icon to vote as correct on this node"
-//         }
-//       />
-//     ),
-//     childTargetId: "node-footer-propose",
-//     isClickeable: true,
-//   },
-// ];
-
 export const TMP_OPEN_PARENT_CHILDREN: TutorialStep[] = TMP_OPEN_PARENT_CHILDREN_CONFIG.map((c, i, s) => {
   return { ...getBaseStepConfig(i + 1, s.length), ...c };
 });

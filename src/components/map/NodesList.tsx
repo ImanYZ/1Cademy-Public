@@ -1,5 +1,5 @@
-import React, { MutableRefObject } from "react";
-import { FullNodeData, TNodeBookState, TNodeUpdates } from "src/nodeBookTypes";
+import React, { MutableRefObject, useCallback } from "react";
+import { FullNodeData, OpenPart, TNodeBookState, TNodeUpdates } from "src/nodeBookTypes";
 
 import { useNodeBook } from "@/context/NodeBookContext";
 import { NODE_WIDTH } from "@/lib/utils/Map.utils";
@@ -61,6 +61,7 @@ type NodeListProps = {
   // setCurrentTutorial: (newValue: TutorialType) => void;
   ableToPropose: boolean;
   setAbleToPropose: (newValue: boolean) => void;
+  setOpenPart: (nodeId: string, newOpenPart: OpenPart) => void;
 };
 
 const NodesList = ({
@@ -117,9 +118,15 @@ const NodesList = ({
   // setCurrentTutorial,
   ableToPropose,
   setAbleToPropose,
+  setOpenPart,
 }: NodeListProps) => {
   /* eslint-disable-next-line @typescript-eslint/no-unused-vars */
   const { nodeBookDispatch } = useNodeBook();
+
+  const setOpenPartNode = useCallback(
+    (nodeId: string) => (newOpenPart: OpenPart) => setOpenPart(nodeId, newOpenPart),
+    [setOpenPart]
+  );
 
   return (
     <>
@@ -270,6 +277,8 @@ const NodesList = ({
             // setCurrentTutorial={setCurrentTutorial}
             ableToPropose={ableToPropose}
             setAbleToPropose={setAbleToPropose}
+            openPart={nodes[nId].localLinkingWords}
+            setOpenPart={setOpenPartNode(nId)}
           />
         );
       })}
@@ -321,6 +330,7 @@ export const MemoizedNodeList = React.memo(NodesList, (prev, next) => {
     prev.saveProposedImprovement === next.saveProposedImprovement &&
     prev.closeSideBar === next.closeSideBar &&
     prev.reloadPermanentGrpah === next.reloadPermanentGrpah &&
+    prev.setOpenPart === next.setOpenPart &&
     prev.openSidebar === prev.openSidebar && // TODO: check this
     // prev.showProposeTutorial === next.showProposeTutorial &&
     prev.ableToPropose === next.ableToPropose &&

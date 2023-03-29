@@ -165,6 +165,8 @@ type NodeProps = {
   // setCurrentTutorial: (newValue: TutorialType) => void;
   ableToPropose: boolean;
   setAbleToPropose: (newValue: boolean) => void;
+  openPart: OpenPart;
+  setOpenPart: (newOpenPart: OpenPart) => void;
 };
 
 const proposedChildTypesIcons: { [key in ProposedChildTypesIcons]: string } = {
@@ -283,12 +285,14 @@ const Node = ({
   // setCurrentTutorial,
   ableToPropose,
   setAbleToPropose,
+  openPart,
+  setOpenPart,
 }: NodeProps) => {
   const [{ user }] = useAuth();
   const { nodeBookState } = useNodeBook();
   const [option, setOption] = useState<EditorOptions>("EDIT");
   const [showSimilarNodes, setShowSimilarNodes] = useState(true);
-  const [openPart, setOpenPart] = useState<OpenPart>(null);
+  // const [openPart, setOpenPart] = useState<OpenPart>(null);
   const [isHiding, setIsHiding] = useState(false);
   const [imageLoaded, setImageLoaded] = useState(false);
   const [isFetching, setIsFetching] = useState<boolean>(false);
@@ -607,7 +611,7 @@ const Node = ({
 
   useEffect(() => {
     if (!editable && !activeNode) {
-      setOpenPart(null);
+      setOpenPart(undefined);
     }
   }, [editable, activeNode]);
 
@@ -1452,6 +1456,7 @@ export const MemoizedNode = React.memo(Node, (prev, next) => {
     prev.commentsSelected === next.commentsSelected &&
     prev.unaccepted === next.unaccepted &&
     prev.disableVotes === next.disableVotes &&
+    prev.openPart === next.openPart &&
     (!next.activeNode || prev.ableToPropose === next.ableToPropose);
   if (
     !basicChanges ||

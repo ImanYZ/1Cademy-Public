@@ -139,6 +139,7 @@ import {
   EdgesData,
   FullNodeData,
   FullNodesData,
+  OpenPart,
   // NodeTutorialState,
   TNodeBookState,
   TNodeUpdates,
@@ -2303,6 +2304,12 @@ const Dashboard = ({}: DashboardProps) => {
     [user /*selectionType*/, processHeightChange]
   );
 
+  const onChangeNodePart = (nodeId: string, newOpenPart: OpenPart) => {
+    setNodeParts(nodeId, node => {
+      return { ...node, localLinkingWords: newOpenPart };
+    });
+  };
+
   const onNodeShare = useCallback(
     (nodeId: string, platform: string) => {
       gtmEvent("Interaction", {
@@ -4067,6 +4074,19 @@ const Dashboard = ({}: DashboardProps) => {
       return;
     }
 
+    const tmpOpenPartMap = new Map<TutorialTypeKeys, OpenPart>();
+    tmpOpenPartMap.set("tmpParentsChildrenList", "LinkingWords");
+
+    if (tmpOpenPartMap.has(tutorial.name)) {
+      if (currentStep.isClickable) {
+        const selectedNodeId = notebookRef.current.selectedNode!;
+        if (!selectedNodeId) return;
+
+        onChangeNodePart(selectedNodeId, tmpOpenPartMap.get(tutorial.name));
+        return;
+      }
+    }
+
     const tutorialUpdated: UserTutorial = {
       ...userTutorial[tutorial.name],
       currentStep: currentStep.currentStepName,
@@ -4385,7 +4405,7 @@ const Dashboard = ({}: DashboardProps) => {
       // --------------------------
 
       const parentsChildrenListTutorialIsValid = (node: FullNodeData) =>
-        node && node.open && !node.editable && !node.isNew && lastNodeOperation.current?.name === "LinkingWords";
+        node && node.open && !node.editable && !node.isNew && node.localLinkingWords === "LinkingWords";
 
       console.log(11, lastNodeOperation.current?.name);
       if (forcedTutorial === "parentsChildrenList" || !forcedTutorial) {
@@ -6373,6 +6393,7 @@ const Dashboard = ({}: DashboardProps) => {
                   // setCurrentTutorial={setCurrentTutorial}
                   ableToPropose={ableToPropose}
                   setAbleToPropose={setAbleToPropose}
+                  setOpenPart={onChangeNodePart}
                 />
               </MapInteractionCSS>
               {showRegion && (
