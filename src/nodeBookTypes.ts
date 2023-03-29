@@ -499,7 +499,8 @@ export type TutorialTypeKeys =
   | "reputationLivenessBar"
   | "communityLeaderBoard"
   | "tagsReferences"
-  | "parentsChildrenList";
+  | "parentsChildrenList"
+  | "pathways";
 
 export type UserTutorial = {
   currentStep: number;

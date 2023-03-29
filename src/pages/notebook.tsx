@@ -412,6 +412,26 @@ const Dashboard = ({}: DashboardProps) => {
     setButtonsOpen(window.innerHeight > 399 ? true : false);
   }, [user?.uname]);
 
+  const pathway = useMemo(() => {
+    const edgeObjects: { parent: string; child: string }[] = Object.keys(graph.edges).map(cur => {
+      const [parent, child] = cur.split("-");
+      return { parent, child };
+    });
+    const parents = edgeObjects.reduce((acu: { [key: string]: string[] }, cur) => {
+      return { ...acu, [cur.parent]: acu[cur.parent] ? [...acu[cur.parent], cur.child] : [cur.child] };
+    }, {});
+
+    const pathways = edgeObjects.reduce(
+      (acu, cur) => {
+        if (acu.node) return acu;
+        if (parents[cur.child]) return { node: cur.child };
+        return acu;
+      },
+      { node: "" }
+    );
+    return pathways;
+  }, [graph.edges]);
+
   const scrollToNode = useCallback(
     (nodeId: string, tries = 0) => {
       if (tries === 10) return;
@@ -5175,6 +5195,22 @@ const Dashboard = ({}: DashboardProps) => {
           return;
         }
       }
+
+      // --------------------------
+
+      if (forcedTutorial === "pathways" || proposalNodesTaken) {
+        // blink arrows
+        const shouldIgnore = forcedTutorial
+          ? forcedTutorial !== "pathways"
+          : userTutorial["pathways"].done || userTutorial["pathways"].skipped;
+        if (!shouldIgnore) {
+          console.log({ pathway });
+          if (pathway.node) {
+            startTutorial("pathways");
+            return;
+          }
+        }
+      }
     };
 
     detectTriggerTutorial();
@@ -5197,6 +5233,7 @@ const Dashboard = ({}: DashboardProps) => {
     openSidebar,
     parentWithChildren,
     parentWithMostChildren,
+    pathway,
     setTargetId,
     startTutorial,
     tutorial,

@@ -31,6 +31,7 @@ import { NODE_RELATION } from "./nodeRelationTutorialSteps";
 import { NODES_STEPS_COMPLETE } from "./nodeTutorialSteps";
 import { NOTIFICATION_STEPS } from "./notificationsTutorialSteps";
 import { PARENTS_CHILDREN_LIST_STEPS } from "./parentChildrenListTutorialSteps";
+import { PATHWAYS_STEPS } from "./pathwaysTutorialSteps";
 import { PENDING_PROPOSALS_STEPS_COMPLETE } from "./pendingProposalsTutorial";
 import { PROPOSING_CODE_EDIT_COMPLETE } from "./proposalCodeTutorialStep";
 import { PROPOSING_CONCEPT_EDIT_COMPLETE } from "./proposalConceptTutorialStep";
@@ -105,6 +106,11 @@ export const getGroupTutorials = ({ livelinessBar }: GetGroupTutorialsInput): Gr
       {
         title: "Tags and References",
         tutorialSteps: { tutorialKey: "tagsReferences", steps: TAGS_REFERENCES_STEPS_COMPLETE },
+        tutorials: [],
+      },
+      {
+        title: "Pathways",
+        tutorialSteps: { tutorialKey: "pathways", steps: PATHWAYS_STEPS },
         tutorials: [],
       },
     ],

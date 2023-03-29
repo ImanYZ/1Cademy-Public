@@ -53,6 +53,7 @@ import { NODE_RELATION } from "../lib/utils/tutorials/nodeRelationTutorialSteps"
 import { NODES_STEPS_COMPLETE } from "../lib/utils/tutorials/nodeTutorialSteps";
 import { NOTIFICATION_STEPS } from "../lib/utils/tutorials/notificationsTutorialSteps";
 import { PARENTS_CHILDREN_LIST_STEPS } from "../lib/utils/tutorials/parentChildrenListTutorialSteps";
+import { PATHWAYS_STEPS } from "../lib/utils/tutorials/pathwaysTutorialSteps";
 import { PROPOSING_CODE_EDIT_COMPLETE } from "../lib/utils/tutorials/proposalCodeTutorialStep";
 import { PROPOSING_CONCEPT_EDIT_COMPLETE } from "../lib/utils/tutorials/proposalConceptTutorialStep";
 import { PROPOSING_IDEA_EDIT_COMPLETE } from "../lib/utils/tutorials/proposalIdeaTutorialSteps";
@@ -157,6 +158,7 @@ export const useInteractiveTutorial = ({ user }: useInteractiveTutorialProps) =>
     communityLeaderBoard: { currentStep: -1, done: false, skipped: false },
     tagsReferences: { currentStep: -1, done: false, skipped: false },
     parentsChildrenList: { currentStep: -1, done: false, skipped: false },
+    pathways: { currentStep: -1, done: false, skipped: false },
   });
 
   // flag for whether tutorial state was loaded
@@ -380,6 +382,10 @@ export const useInteractiveTutorial = ({ user }: useInteractiveTutorialProps) =>
 
       if (newTutorial === "parentsChildrenList") {
         newSteps = PARENTS_CHILDREN_LIST_STEPS;
+      }
+
+      if (newTutorial === "pathways") {
+        newSteps = PATHWAYS_STEPS;
       }
 
       setUserTutorial(prev => ({
