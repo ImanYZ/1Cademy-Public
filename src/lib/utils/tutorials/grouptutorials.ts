@@ -92,11 +92,6 @@ export const getGroupTutorials = ({ livelinessBar }: GetGroupTutorialsInput): Gr
         tutorialSteps: { tutorialKey: "hideNode", steps: HIDE_STEPS_COMPLETE },
         tutorials: [],
       },
-      {
-        title: "Tags and References",
-        tutorialSteps: { tutorialKey: "tagsReferences", steps: TAGS_REFERENCES_STEPS_COMPLETE },
-        tutorials: [],
-      },
     ],
   },
   {
@@ -107,11 +102,11 @@ export const getGroupTutorials = ({ livelinessBar }: GetGroupTutorialsInput): Gr
         tutorialSteps: { tutorialKey: "parentsChildrenList", steps: PARENTS_CHILDREN_LIST_STEPS },
         tutorials: [],
       },
-      // {
-      //   title: "Nodes",
-      //   tutorialSteps: { tutorialKey: "nodes", steps: NODES_STEPS_COMPLETE },
-      //   tutorials: [],
-      // },
+      {
+        title: "Tags and References",
+        tutorialSteps: { tutorialKey: "tagsReferences", steps: TAGS_REFERENCES_STEPS_COMPLETE },
+        tutorials: [],
+      },
     ],
   },
   {
