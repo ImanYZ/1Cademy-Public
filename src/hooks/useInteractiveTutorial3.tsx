@@ -6,6 +6,7 @@ import {
   COLLAPSE_STEPS_COMPLETE,
   EXPAND_STEPS_COMPLETE,
   HIDE_STEPS_COMPLETE,
+  TAGS_REFERENCES_STEPS_COMPLETE,
 } from "@/lib/utils/tutorials/nodeActionsTutorialStep";
 import { HIDE_OFFSPRING_STEPS_COMPLETE } from "@/lib/utils/tutorials/nodeActionsTutorialStep";
 import { PENDING_PROPOSALS_STEPS_COMPLETE } from "@/lib/utils/tutorials/pendingProposalsTutorial";
@@ -65,6 +66,7 @@ import {
   TMP_PROPOSE_CHILD_QUESTION,
   TMP_PROPOSE_CHILD_REFERENCE,
   TMP_PROPOSE_CHILD_RELATION,
+  TMP_TAGS_REFERENCES,
 } from "../lib/utils/tutorials/temporalTutorialSteps";
 import { TutorialStep, TutorialTypeKeys, UserTutorials } from "../nodeBookTypes";
 
@@ -130,6 +132,7 @@ export const useInteractiveTutorial = ({ user }: useInteractiveTutorialProps) =>
     tmpProposalQuestionChild: { currentStep: -1, done: false, skipped: false },
     tmpProposalIdeaChild: { currentStep: -1, done: false, skipped: false },
     tmpProposalCodeChild: { currentStep: -1, done: false, skipped: false },
+    tmpTagsReferences: { currentStep: -1, done: false, skipped: false },
     tableOfContents: { currentStep: -1, done: false, skipped: false },
     focusMode: { currentStep: -1, done: false, skipped: false },
     redrawGraph: { currentStep: -1, done: false, skipped: false },
@@ -149,6 +152,7 @@ export const useInteractiveTutorial = ({ user }: useInteractiveTutorialProps) =>
     interactionLivenessBar: { currentStep: -1, done: false, skipped: false },
     userInfo: { currentStep: -1, done: false, skipped: false },
     communityLeaderBoard: { currentStep: -1, done: false, skipped: false },
+    tagsReferences: { currentStep: -1, done: false, skipped: false },
   });
 
   // flag for whether tutorial state was loaded
@@ -315,7 +319,15 @@ export const useInteractiveTutorial = ({ user }: useInteractiveTutorialProps) =>
       if (newTutorial === "hideNode") {
         newSteps = HIDE_STEPS_COMPLETE;
       }
+      // node footer actions
 
+      if (newTutorial === "tagsReferences") {
+        newSteps = TAGS_REFERENCES_STEPS_COMPLETE;
+      }
+
+      if (newTutorial === "tmpTagsReferences") {
+        newSteps = TMP_TAGS_REFERENCES;
+      }
       //----------------- tmp nodes
 
       if (newTutorial === "tmpEditNode") {

@@ -19,6 +19,7 @@ import {
   EXPAND_STEPS_COMPLETE,
   HIDE_OFFSPRING_STEPS_COMPLETE,
   HIDE_STEPS_COMPLETE,
+  TAGS_REFERENCES_STEPS_COMPLETE,
   UPTOVE_STEPS_COMPLETE,
 } from "./nodeActionsTutorialStep";
 import { NODE_CODE } from "./nodeCodeTutorialSteps";
@@ -88,6 +89,11 @@ export const getGroupTutorials = ({ livelinessBar }: GetGroupTutorialsInput): Gr
       {
         title: "Hide the Node",
         tutorialSteps: { tutorialKey: "hideNode", steps: HIDE_STEPS_COMPLETE },
+        tutorials: [],
+      },
+      {
+        title: "Tags and References",
+        tutorialSteps: { tutorialKey: "tagsReferences", steps: TAGS_REFERENCES_STEPS_COMPLETE },
         tutorials: [],
       },
     ],

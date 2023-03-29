@@ -477,6 +477,7 @@ export type TutorialTypeKeys =
   | "tmpProposalReferenceChild"
   | "tmpProposalCodeChild"
   | "tmpProposalIdeaChild"
+  | "tmpTagsReferences"
   | "tableOfContents"
   | "focusMode"
   | "redrawGraph"
@@ -494,7 +495,8 @@ export type TutorialTypeKeys =
   | "pendingProposals"
   | "interactionLivenessBar"
   | "reputationLivenessBar"
-  | "communityLeaderBoard";
+  | "communityLeaderBoard"
+  | "tagsReferences";
 
 export type UserTutorial = {
   currentStep: number;

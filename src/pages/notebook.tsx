@@ -4901,6 +4901,31 @@ const Dashboard = ({}: DashboardProps) => {
 
       // --------------------------
 
+      if (
+        !forcedTutorial ||
+        forcedTutorial === "tagsReferences" ||
+        (lastNodeOperation.current && lastNodeOperation.current.name === "References")
+      ) {
+        const tagsReferencesLaunched = detectAndCallTutorial(
+          "tagsReferences",
+          node => node && node.open && !node.editable
+        );
+
+        if (tagsReferencesLaunched) return;
+      }
+
+      // ------------------------
+
+      if (forcedTutorial && forcedTutorial === "tagsReferences") {
+        const result = detectAndForceTutorial(
+          "tmpTagsReferences",
+          "r98BjyFDCe4YyLA3U8ZE",
+          node => node && node.open && !node.editable && !Boolean(node.isNew)
+        );
+        if (result) return;
+      }
+      // --------------------------
+
       if (forcedTutorial === "searcher" || openSidebar === "SEARCHER_SIDEBAR") {
         const result = detectAndCallSidebarTutorial("searcher", "SEARCHER_SIDEBAR");
         if (result) return;
