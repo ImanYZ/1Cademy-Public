@@ -344,6 +344,7 @@ const Dashboard = ({}: DashboardProps) => {
   const [openLivelinessBar, setOpenLivelinessBar] = useState(false);
   const [comLeaderboardOpen, setComLeaderboardOpen] = useState(false);
 
+  //TUTORIAL STATES
   const {
     startTutorial,
     tutorial,
@@ -358,6 +359,8 @@ const Dashboard = ({}: DashboardProps) => {
     setUserTutorial,
     userTutorial,
   } = useInteractiveTutorial({ user });
+
+  const pathwayRef = useRef({ node: "", parent: "", child: "" });
 
   const onNodeInViewport = useCallback(
     (nodeId: string) => {
@@ -420,7 +423,7 @@ const Dashboard = ({}: DashboardProps) => {
     const parents = edgeObjects.reduce((acu: { [key: string]: string[] }, cur) => {
       return { ...acu, [cur.parent]: acu[cur.parent] ? [...acu[cur.parent], cur.child] : [cur.child] };
     }, {});
-
+    console.log({ pathway });
     const pathways = edgeObjects.reduce(
       (acu: { node: string; parent: string; child: string }, cur) => {
         if (acu.node) return acu;
@@ -429,6 +432,11 @@ const Dashboard = ({}: DashboardProps) => {
       },
       { node: "", parent: "", child: "" }
     );
+    if (pathwayRef.current.node !== pathways.node && pathwayRef.current.node) {
+      return { node: "", parent: "", child: "" };
+    }
+
+    pathwayRef.current = pathways;
     return pathways;
   }, [graph.edges]);
 
@@ -5471,7 +5479,19 @@ const Dashboard = ({}: DashboardProps) => {
         if (currentStep?.childTargetId) removeStyleFromTarget(currentStep.childTargetId, targetId);
       }
     }
+    // --------------------------
 
+    if (tutorial.name === "pathways") {
+      const isValid = (node: FullNodeData) =>
+        node && !node.editable && !Boolean(node.isNew) && pathway.child && pathway.parent;
+      const node = graph.nodes[targetId];
+      if (!isValid(node)) {
+        setTutorial(null);
+        setForcedTutorial(null);
+        pathwayRef.current = { node: "", parent: "", child: "" };
+        if (currentStep?.childTargetId) removeStyleFromTarget(currentStep.childTargetId, targetId);
+      }
+    }
     // --------------------------
 
     if (tutorial.name === "tableOfContents") {
@@ -5660,6 +5680,7 @@ const Dashboard = ({}: DashboardProps) => {
     openLivelinessBar,
     openProgressBar,
     openSidebar,
+    pathway,
     setTutorial,
     targetId,
     tutorial,
