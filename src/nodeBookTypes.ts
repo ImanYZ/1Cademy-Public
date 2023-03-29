@@ -403,7 +403,7 @@ export type FullNodeData = Omit<UserNodesData, "changedAt" | "createdAt" | "upda
     // top: number;
     x?: number;
     y?: number;
-    localLinkingWords: OpenPart;
+    localLinkingWords?: OpenPart;
   };
 
 export type EdgeData = {
