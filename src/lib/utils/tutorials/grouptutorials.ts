@@ -30,6 +30,7 @@ import { NODE_REFERENCE } from "./nodeReferenceTutorialSteps";
 import { NODE_RELATION } from "./nodeRelationTutorialSteps";
 import { NODES_STEPS_COMPLETE } from "./nodeTutorialSteps";
 import { NOTIFICATION_STEPS } from "./notificationsTutorialSteps";
+import { PARENTS_CHILDREN_LIST_STEPS } from "./parentChildrenListTutorialSteps";
 import { PENDING_PROPOSALS_STEPS_COMPLETE } from "./pendingProposalsTutorial";
 import { PROPOSING_CODE_EDIT_COMPLETE } from "./proposalCodeTutorialStep";
 import { PROPOSING_CONCEPT_EDIT_COMPLETE } from "./proposalConceptTutorialStep";
@@ -96,6 +97,21 @@ export const getGroupTutorials = ({ livelinessBar }: GetGroupTutorialsInput): Gr
         tutorialSteps: { tutorialKey: "tagsReferences", steps: TAGS_REFERENCES_STEPS_COMPLETE },
         tutorials: [],
       },
+    ],
+  },
+  {
+    title: "Learning Pathways",
+    tutorials: [
+      {
+        title: "Parent/Children Nodes",
+        tutorialSteps: { tutorialKey: "parentsChildrenList", steps: PARENTS_CHILDREN_LIST_STEPS },
+        tutorials: [],
+      },
+      // {
+      //   title: "Nodes",
+      //   tutorialSteps: { tutorialKey: "nodes", steps: NODES_STEPS_COMPLETE },
+      //   tutorials: [],
+      // },
     ],
   },
   {

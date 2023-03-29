@@ -147,6 +147,7 @@ export const TooltipTutorial = ({
 
   const currentTutorialIsTemporal = useMemo(() => {
     const temporalTutorials: TutorialTypeKeys[] = [
+      "tmpParentsChildrenList",
       "tmpEditNode",
       "tmpProposalConceptChild",
       "tmpProposalQuestionChild",

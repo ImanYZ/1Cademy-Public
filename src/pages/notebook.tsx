@@ -139,6 +139,7 @@ import {
   EdgesData,
   FullNodeData,
   FullNodesData,
+  OpenPart,
   // NodeTutorialState,
   TNodeBookState,
   TNodeUpdates,
@@ -2303,6 +2304,12 @@ const Dashboard = ({}: DashboardProps) => {
     [user /*selectionType*/, processHeightChange]
   );
 
+  const onChangeNodePart = (nodeId: string, newOpenPart: OpenPart) => {
+    setNodeParts(nodeId, node => {
+      return { ...node, localLinkingWords: newOpenPart };
+    });
+  };
+
   const onNodeShare = useCallback(
     (nodeId: string, platform: string) => {
       gtmEvent("Interaction", {
@@ -4067,6 +4074,19 @@ const Dashboard = ({}: DashboardProps) => {
       return;
     }
 
+    const tmpOpenPartMap = new Map<TutorialTypeKeys, OpenPart>();
+    tmpOpenPartMap.set("tmpParentsChildrenList", "LinkingWords");
+
+    if (tmpOpenPartMap.has(tutorial.name)) {
+      if (currentStep.isClickable) {
+        const selectedNodeId = notebookRef.current.selectedNode!;
+        if (!selectedNodeId) return;
+
+        onChangeNodePart(selectedNodeId, tmpOpenPartMap.get(tutorial.name));
+        return;
+      }
+    }
+
     const tutorialUpdated: UserTutorial = {
       ...userTutorial[tutorial.name],
       currentStep: currentStep.currentStepName,
@@ -4198,14 +4218,17 @@ const Dashboard = ({}: DashboardProps) => {
 
       devLog("DETECT_AND_CALL_TUTORIAL", { tutorialName, node: nodeBookState.selectedNode });
 
+      console.log("aa");
       const newTargetId = nodeBookState.selectedNode ?? "";
       if (!newTargetId) return false;
 
+      console.log("bb");
       const thisNode = graph.nodes[newTargetId];
 
       if (!thisNode) return false;
       if (!targetIsValid(thisNode)) return false;
 
+      console.log("cc");
       startTutorial(tutorialName);
       setTargetId(newTargetId);
       if (forcedTutorial) {
@@ -4345,7 +4368,10 @@ const Dashboard = ({}: DashboardProps) => {
 
       const nodesTutorialIsValid = (node: FullNodeData) => node && node.open && !node.editable && !node.isNew;
 
-      if (forcedTutorial === "nodes" || !forcedTutorial) {
+      if (
+        forcedTutorial === "nodes" ||
+        (!forcedTutorial && (userTutorial["nodes"].done || userTutorial["nodes"].skipped))
+      ) {
         const result = detectAndCallTutorial("nodes", nodesTutorialIsValid);
         if (result) return;
       }
@@ -4374,6 +4400,29 @@ const Dashboard = ({}: DashboardProps) => {
         });
 
         return;
+      }
+
+      // --------------------------
+
+      const parentsChildrenListTutorialIsValid = (node: FullNodeData) =>
+        node && node.open && !node.editable && !node.isNew && node.localLinkingWords === "LinkingWords";
+
+      console.log(11, lastNodeOperation.current?.name);
+      if (forcedTutorial === "parentsChildrenList" || !forcedTutorial) {
+        const result = detectAndCallTutorial("parentsChildrenList", parentsChildrenListTutorialIsValid);
+        if (result) return;
+      }
+
+      console.log(22);
+
+      if (forcedTutorial === "parentsChildrenList") {
+        const result = detectAndForceTutorial(
+          "tmpParentsChildrenList",
+          "r98BjyFDCe4YyLA3U8ZE",
+          (node: FullNodeData) => node && node.open && !node.editable && node.localLinkingWords !== "LinkingWords"
+        );
+        console.log(33, result);
+        if (result) return; /* (lastNodeOperation.current?.name = "LinkingWords"); */
       }
 
       // --------------------------
@@ -5171,7 +5220,19 @@ const Dashboard = ({}: DashboardProps) => {
     devLog("USE_EFFECT: DETECT_TO_REMOVE_TUTORIAL", tutorial);
 
     if (tutorial.name === "nodes") {
-      const nodesTutorialIsValid = (node: FullNodeData) => node && node.open;
+      const nodesTutorialIsValid = (node: FullNodeData) => node && node.open; // TODO: add other validations check parentsChildrenList
+      const node = graph.nodes[targetId];
+      if (!nodesTutorialIsValid(node)) {
+        setTutorial(null);
+        setForcedTutorial(null);
+      }
+    }
+
+    // --------------------------
+
+    if (tutorial.name === "parentsChildrenList") {
+      const nodesTutorialIsValid = (node: FullNodeData) =>
+        node && node.open && !node.editable && !node.isNew && node.localLinkingWords === "LinkingWords";
       const node = graph.nodes[targetId];
       if (!nodesTutorialIsValid(node)) {
         setTutorial(null);
@@ -5337,6 +5398,23 @@ const Dashboard = ({}: DashboardProps) => {
         setTutorial(null);
         if (node && !node.editable) return;
         setForcedTutorial(null);
+      }
+    }
+
+    // --------------------------
+
+    if (tutorial.name === "tmpParentsChildrenList") {
+      const isValid = (node: FullNodeData) =>
+        node && node.open && !node.editable && !Boolean(node.isNew) && node.localLinkingWords !== "LinkingWords";
+      const node = graph.nodes[targetId];
+      console.log(11, node);
+      if (!isValid(node)) {
+        setTutorial(null);
+        console.log(22);
+        if (node && node.localLinkingWords === "LinkingWords") return;
+        console.log(33);
+        setForcedTutorial(null);
+        if (currentStep?.childTargetId) removeStyleFromTarget(currentStep.childTargetId, targetId);
       }
     }
 
@@ -6369,6 +6447,7 @@ const Dashboard = ({}: DashboardProps) => {
                   // setCurrentTutorial={setCurrentTutorial}
                   ableToPropose={ableToPropose}
                   setAbleToPropose={setAbleToPropose}
+                  setOpenPart={onChangeNodePart}
                 />
               </MapInteractionCSS>
               {showRegion && (

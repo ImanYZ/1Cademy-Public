@@ -5,6 +5,15 @@ import { getBaseStepConfig } from "./tutorial.utils";
 
 const TMP_OFFSET_TOP_CHILDREN_BUTTON = 50;
 
+const TMP_OPEN_PARENT_CHILDREN_CONFIG: TutorialStepConfig[] = [
+  {
+    title: "Parents/Children List",
+    description: <MarkdownRender text={"This button allows you to open parents and children list."} />,
+    childTargetId: "button-parent-children",
+    isClickable: true,
+  },
+];
+
 const TMP_EDIT_NODE_CONFIG: TutorialStepConfig[] = [
   {
     title: "Propose Node - Edit Node",
@@ -143,6 +152,10 @@ const TMP_OPEN_TAGS_REFERENCES_CONFIG: TutorialStepConfig[] = [
 //     isClickeable: true,
 //   },
 // ];
+
+export const TMP_OPEN_PARENT_CHILDREN: TutorialStep[] = TMP_OPEN_PARENT_CHILDREN_CONFIG.map((c, i, s) => {
+  return { ...getBaseStepConfig(i + 1, s.length), ...c };
+});
 
 export const TMP_EDIT_NODE: TutorialStep[] = TMP_EDIT_NODE_CONFIG.map((c, i, s) => {
   return { ...getBaseStepConfig(i + 1, s.length), ...c };
