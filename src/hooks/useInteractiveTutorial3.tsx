@@ -51,6 +51,7 @@ import { NODE_REFERENCE } from "../lib/utils/tutorials/nodeReferenceTutorialStep
 import { NODE_RELATION } from "../lib/utils/tutorials/nodeRelationTutorialSteps";
 import { NODES_STEPS_COMPLETE } from "../lib/utils/tutorials/nodeTutorialSteps";
 import { NOTIFICATION_STEPS } from "../lib/utils/tutorials/notificationsTutorialSteps";
+import { PARENTS_CHILDREN_LIST_STEPS } from "../lib/utils/tutorials/parentChildrenListTutorialSteps";
 import { PROPOSING_CODE_EDIT_COMPLETE } from "../lib/utils/tutorials/proposalCodeTutorialStep";
 import { PROPOSING_CONCEPT_EDIT_COMPLETE } from "../lib/utils/tutorials/proposalConceptTutorialStep";
 import { PROPOSING_IDEA_EDIT_COMPLETE } from "../lib/utils/tutorials/proposalIdeaTutorialSteps";
@@ -59,6 +60,7 @@ import { PROPOSING_REFERENCE_EDIT_COMPLETE } from "../lib/utils/tutorials/propos
 import { PROPOSING_RELATION_EDIT_COMPLETE } from "../lib/utils/tutorials/proposalRelationTutorialSteps";
 import {
   TMP_EDIT_NODE,
+  TMP_OPEN_PARENT_CHILDREN,
   TMP_PROPOSE_CHILD_CODE,
   TMP_PROPOSE_CHILD_CONCEPT,
   TMP_PROPOSE_CHILD_IDEA,
@@ -130,6 +132,7 @@ export const useInteractiveTutorial = ({ user }: useInteractiveTutorialProps) =>
     tmpProposalQuestionChild: { currentStep: -1, done: false, skipped: false },
     tmpProposalIdeaChild: { currentStep: -1, done: false, skipped: false },
     tmpProposalCodeChild: { currentStep: -1, done: false, skipped: false },
+    tmpParentsChildrenList: { currentStep: -1, done: false, skipped: false },
     tableOfContents: { currentStep: -1, done: false, skipped: false },
     focusMode: { currentStep: -1, done: false, skipped: false },
     redrawGraph: { currentStep: -1, done: false, skipped: false },
@@ -149,6 +152,7 @@ export const useInteractiveTutorial = ({ user }: useInteractiveTutorialProps) =>
     interactionLivenessBar: { currentStep: -1, done: false, skipped: false },
     userInfo: { currentStep: -1, done: false, skipped: false },
     communityLeaderBoard: { currentStep: -1, done: false, skipped: false },
+    parentsChildrenList: { currentStep: -1, done: false, skipped: false },
   });
 
   // flag for whether tutorial state was loaded
@@ -340,6 +344,10 @@ export const useInteractiveTutorial = ({ user }: useInteractiveTutorialProps) =>
       if (newTutorial === "tmpProposalCodeChild") {
         newSteps = TMP_PROPOSE_CHILD_CODE;
       }
+      if (newTutorial === "tmpParentsChildrenList") {
+        console.log("tmpParentsChildrenList");
+        newSteps = TMP_OPEN_PARENT_CHILDREN;
+      }
 
       // others
       if (newTutorial === "leaderBoard") {
@@ -356,6 +364,10 @@ export const useInteractiveTutorial = ({ user }: useInteractiveTutorialProps) =>
 
       if (newTutorial === "communityLeaderBoard") {
         newSteps = COMMUNITY_LEADER_BOARD_STEPS;
+      }
+
+      if (newTutorial === "parentsChildrenList") {
+        newSteps = PARENTS_CHILDREN_LIST_STEPS;
       }
 
       setUserTutorial(prev => ({

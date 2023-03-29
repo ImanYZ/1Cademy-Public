@@ -4198,14 +4198,17 @@ const Dashboard = ({}: DashboardProps) => {
 
       devLog("DETECT_AND_CALL_TUTORIAL", { tutorialName, node: nodeBookState.selectedNode });
 
+      console.log("aa");
       const newTargetId = nodeBookState.selectedNode ?? "";
       if (!newTargetId) return false;
 
+      console.log("bb");
       const thisNode = graph.nodes[newTargetId];
 
       if (!thisNode) return false;
       if (!targetIsValid(thisNode)) return false;
 
+      console.log("cc");
       startTutorial(tutorialName);
       setTargetId(newTargetId);
       if (forcedTutorial) {
@@ -4345,7 +4348,10 @@ const Dashboard = ({}: DashboardProps) => {
 
       const nodesTutorialIsValid = (node: FullNodeData) => node && node.open && !node.editable && !node.isNew;
 
-      if (forcedTutorial === "nodes" || !forcedTutorial) {
+      if (
+        forcedTutorial === "nodes" ||
+        (!forcedTutorial && (userTutorial["nodes"].done || userTutorial["nodes"].skipped))
+      ) {
         const result = detectAndCallTutorial("nodes", nodesTutorialIsValid);
         if (result) return;
       }
@@ -4374,6 +4380,29 @@ const Dashboard = ({}: DashboardProps) => {
         });
 
         return;
+      }
+
+      // --------------------------
+
+      const parentsChildrenListTutorialIsValid = (node: FullNodeData) =>
+        node && node.open && !node.editable && !node.isNew && lastNodeOperation.current?.name === "LinkingWords";
+
+      console.log(11, lastNodeOperation.current?.name);
+      if (forcedTutorial === "parentsChildrenList" || !forcedTutorial) {
+        const result = detectAndCallTutorial("parentsChildrenList", parentsChildrenListTutorialIsValid);
+        if (result) return;
+      }
+
+      console.log(22);
+
+      if (forcedTutorial === "parentsChildrenList") {
+        const result = detectAndForceTutorial(
+          "tmpParentsChildrenList",
+          "r98BjyFDCe4YyLA3U8ZE",
+          (node: FullNodeData) => node && node.open && !node.editable
+        );
+        console.log(33, result);
+        if (result) return; /* (lastNodeOperation.current?.name = "LinkingWords"); */
       }
 
       // --------------------------
