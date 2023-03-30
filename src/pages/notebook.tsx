@@ -4260,17 +4260,14 @@ const Dashboard = ({}: DashboardProps) => {
 
       devLog("DETECT_AND_CALL_TUTORIAL", { tutorialName, node: nodeBookState.selectedNode });
 
-      console.log("aa");
       const newTargetId = nodeBookState.selectedNode ?? "";
       if (!newTargetId) return false;
 
-      console.log("bb");
       const thisNode = graph.nodes[newTargetId];
 
       if (!thisNode) return false;
       if (!targetIsValid(thisNode)) return false;
 
-      console.log("cc");
       startTutorial(tutorialName);
       setTargetId(newTargetId);
       if (forcedTutorial) {
@@ -4364,7 +4361,6 @@ const Dashboard = ({}: DashboardProps) => {
       const frequency = Object.keys(graph.edges)
         .map(edge => edge.split("-")[0])
         .reduce((acc: number, edge: string) => {
-          console.log({ edge });
           return edge === parentId ? acc + 1 : acc;
         }, 0);
 
@@ -4390,7 +4386,6 @@ const Dashboard = ({}: DashboardProps) => {
      * 2. second time will run tutorial
      */
     const detectTriggerTutorial = () => {
-      console.log({ userTutorialLoaded, firstLoading, tutorial });
       if (!userTutorialLoaded) return;
       if (firstLoading) return;
       if (tutorial) return;
@@ -4469,13 +4464,10 @@ const Dashboard = ({}: DashboardProps) => {
       const parentsChildrenListTutorialIsValid = (node: FullNodeData) =>
         node && node.open && !node.editable && !node.isNew && node.localLinkingWords === "LinkingWords";
 
-      console.log(11, lastNodeOperation.current?.name);
       if (forcedTutorial === "parentsChildrenList" || !forcedTutorial) {
         const result = detectAndCallTutorial("parentsChildrenList", parentsChildrenListTutorialIsValid);
         if (result) return;
       }
-
-      console.log(22);
 
       if (forcedTutorial === "parentsChildrenList") {
         const result = detectAndForceTutorial(
@@ -4483,7 +4475,6 @@ const Dashboard = ({}: DashboardProps) => {
           "r98BjyFDCe4YyLA3U8ZE",
           (node: FullNodeData) => node && node.open && !node.editable && node.localLinkingWords !== "LinkingWords"
         );
-        console.log(33, result);
         if (result) return; /* (lastNodeOperation.current?.name = "LinkingWords"); */
       }
 
@@ -5468,12 +5459,9 @@ const Dashboard = ({}: DashboardProps) => {
       const isValid = (node: FullNodeData) =>
         node && node.open && !node.editable && !Boolean(node.isNew) && node.localLinkingWords !== "LinkingWords";
       const node = graph.nodes[targetId];
-      console.log(11, node);
       if (!isValid(node)) {
         setTutorial(null);
-        console.log(22);
         if (node && node.localLinkingWords === "LinkingWords") return;
-        console.log(33);
         setForcedTutorial(null);
         if (currentStep?.childTargetId) removeStyleFromTarget(currentStep.childTargetId, targetId);
       }
