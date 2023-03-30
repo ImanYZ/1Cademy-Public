@@ -16,6 +16,8 @@ import {
 import { Stack } from "@mui/system";
 import React, { useCallback, useState } from "react";
 
+import { gray50 } from "@/pages/home";
+
 import { TutorialStep, TutorialTypeKeys, UserTutorials } from "../../nodeBookTypes";
 
 export type GroupTutorial = {
@@ -74,7 +76,7 @@ const TutorialTableOfContent = ({
         top: "75px",
         display: "grid",
         gridTemplateRows: "auto 1fr",
-        background: theme => (theme.palette.mode === "dark" ? "#2f2f2f" : "#f2f4f7"),
+        background: theme => (theme.palette.mode === "dark" ? "#1B1A1A" : gray50),
         borderRadius: "8px",
         width: "350px",
         bottom: "7px",
