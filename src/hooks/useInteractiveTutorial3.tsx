@@ -63,6 +63,7 @@ import { PROPOSING_RELATION_EDIT_COMPLETE } from "../lib/utils/tutorials/proposa
 import {
   TMP_EDIT_NODE,
   TMP_OPEN_PARENT_CHILDREN,
+  TMP_PATHWAYS,
   TMP_PROPOSE_CHILD_CODE,
   TMP_PROPOSE_CHILD_CONCEPT,
   TMP_PROPOSE_CHILD_IDEA,
@@ -137,6 +138,7 @@ export const useInteractiveTutorial = ({ user }: useInteractiveTutorialProps) =>
     tmpProposalCodeChild: { currentStep: -1, done: false, skipped: false },
     tmpTagsReferences: { currentStep: -1, done: false, skipped: false },
     tmpParentsChildrenList: { currentStep: -1, done: false, skipped: false },
+    tmpPathways: { currentStep: -1, done: false, skipped: false },
     tableOfContents: { currentStep: -1, done: false, skipped: false },
     focusMode: { currentStep: -1, done: false, skipped: false },
     redrawGraph: { currentStep: -1, done: false, skipped: false },
@@ -359,10 +361,11 @@ export const useInteractiveTutorial = ({ user }: useInteractiveTutorialProps) =>
         newSteps = TMP_PROPOSE_CHILD_CODE;
       }
       if (newTutorial === "tmpParentsChildrenList") {
-        console.log("tmpParentsChildrenList");
         newSteps = TMP_OPEN_PARENT_CHILDREN;
       }
-
+      if (newTutorial === "tmpPathways") {
+        newSteps = TMP_PATHWAYS;
+      }
       // others
       if (newTutorial === "leaderBoard") {
         newSteps = LEADER_BOARD_STEPS;

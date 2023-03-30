@@ -484,6 +484,7 @@ export type TutorialTypeKeys =
   | "tmpProposalIdeaChild"
   | "tmpTagsReferences"
   | "tmpParentsChildrenList"
+  | "tmpPathways"
   | "tableOfContents"
   | "focusMode"
   | "redrawGraph"

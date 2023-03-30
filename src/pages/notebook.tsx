@@ -4119,6 +4119,14 @@ const Dashboard = ({}: DashboardProps) => {
       }
     }
 
+    if (tutorial.name === "tmpPathways") {
+      if (currentStep.isClickable) {
+        openNodeHandler("r98BjyFDCe4YyLA3U8ZE");
+        openNodeHandler("sKukyeN58Wj1jfzuqnZJ");
+      }
+      return;
+    }
+
     const tutorialUpdated: UserTutorial = {
       ...userTutorial[tutorial.name],
       currentStep: currentStep.currentStepName,
@@ -4147,6 +4155,7 @@ const Dashboard = ({}: DashboardProps) => {
     db,
     forcedTutorial,
     onChangeNodePart,
+    openNodeHandler,
     proposeNewChild,
     proposeNodeImprovement,
     setTargetId,
@@ -5211,7 +5220,6 @@ const Dashboard = ({}: DashboardProps) => {
           ? forcedTutorial !== "pathways"
           : userTutorial["pathways"].done || userTutorial["pathways"].skipped;
         if (!shouldIgnore) {
-          console.log({ pathway });
           if (pathway.node) {
             setTargetId(pathway.node);
             nodeBookDispatch({ type: "setSelectedNode", payload: pathway.node });
@@ -5221,6 +5229,10 @@ const Dashboard = ({}: DashboardProps) => {
             return;
           }
         }
+      }
+      if (forcedTutorial === "pathways") {
+        const result = detectAndForceTutorial("tmpPathways", "rWYUNisPIVMBoQEYXgNj", node => node && node.open);
+        if (result) return;
       }
     };
 
@@ -5474,6 +5486,7 @@ const Dashboard = ({}: DashboardProps) => {
       const node = graph.nodes[targetId];
       if (!isValid(node)) {
         setTutorial(null);
+
         if (node && node.localLinkingWords === "References") return;
         setForcedTutorial(null);
         if (currentStep?.childTargetId) removeStyleFromTarget(currentStep.childTargetId, targetId);
@@ -5490,6 +5503,16 @@ const Dashboard = ({}: DashboardProps) => {
         setForcedTutorial(null);
         pathwayRef.current = { node: "", parent: "", child: "" };
         if (currentStep?.childTargetId) removeStyleFromTarget(currentStep.childTargetId, targetId);
+      }
+    }
+    // --------------------------
+
+    if (tutorial.name === "tmpPathways") {
+      const isValid = (node: FullNodeData) =>
+        node && !node.editable && !Boolean(node.isNew) && !pathway.child && !pathway.parent;
+      const node = graph.nodes[targetId];
+      if (!isValid(node)) {
+        setTutorial(null);
       }
     }
     // --------------------------
