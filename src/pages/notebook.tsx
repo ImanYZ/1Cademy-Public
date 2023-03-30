@@ -5727,6 +5727,18 @@ const Dashboard = ({}: DashboardProps) => {
     return getGroupTutorials({ livelinessBar: (user?.livelinessBar as LivelinessBar) ?? null });
   }, [user?.livelinessBar]);
 
+  const tutorialProgress = useMemo(() => {
+    const tutorialsOfTOC = tutorialGroup.flatMap(cur => cur.tutorials);
+    let tutorialsComplete = 0;
+    tutorialsOfTOC.forEach(cur => {
+      const tutorialKey = cur.tutorialSteps?.tutorialKey;
+      if (!tutorialKey) return;
+      const tutorialComplete = userTutorial[tutorialKey].done || userTutorial[tutorialKey].skipped;
+      tutorialsComplete += tutorialComplete ? 1 : 0;
+    });
+    return { tutorialsComplete, totalTutorials: tutorialsOfTOC.length };
+  }, [tutorialGroup, userTutorial]);
+
   return (
     <div className="MapContainer" style={{ overflow: "hidden" }}>
       {currentStep?.anchor && (
@@ -5746,6 +5758,7 @@ const Dashboard = ({}: DashboardProps) => {
               forcedTutorial={forcedTutorial}
               groupTutorials={tutorialGroup}
               onForceTutorial={setForcedTutorial}
+              tutorialProgress={tutorialProgress}
               isOnPortal
             />
           )}
@@ -6485,6 +6498,7 @@ const Dashboard = ({}: DashboardProps) => {
                     onForceTutorial={setForcedTutorial}
                     parent={graph.nodes[pathway.parent]}
                     child={graph.nodes[pathway.child]}
+                    tutorialProgress={tutorialProgress}
                   />
                 )}
                 {settings.showClusterOptions && settings.showClusters && (
