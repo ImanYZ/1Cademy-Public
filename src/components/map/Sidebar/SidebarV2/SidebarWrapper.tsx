@@ -12,12 +12,12 @@ type SidebarWrapperProps = {
   open: boolean;
   onClose: () => void;
   SidebarContent: ReactNode;
-  width: number;
+  width: any;
   height?: number;
   SidebarOptions?: ReactNode;
   anchor?: DrawerProps["anchor"];
   headerImage?: StaticImageData;
-  hoverWidth?: number;
+  hoverWidth?: any;
   showCloseButton?: boolean;
   showScrollUpButton?: boolean;
   isMenuOpen?: boolean;

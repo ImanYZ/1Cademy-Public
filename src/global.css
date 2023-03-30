@@ -535,12 +535,12 @@
   height: 13px;
   width: 13px;
   border-radius: 50%;
-  background-color: greenyellow;
+  background-color: #12b76a;
   overflow: hidden;
 }
 
 .Lightmode .UserStatusOnlineIcon {
-  background-color: rgb(99, 165, 0);
+  background-color: #12b76a;
 }
 
 .UserStatusOfflineIcon {
@@ -2694,6 +2694,18 @@ right: 5px; */
   align-items: center;
 }
 
+.customUserTotalPoints {
+  display: none;
+}
+
+.toolbar-opened .customUserTotalPoints {
+  display: flex;
+}
+
+#SidebarButtonsContainer:hover .customUserTotalPoints {
+  display: flex;
+}
+
 /* --- */
 #SearchQuery {
   padding: 9.5px 14px;
@@ -2740,6 +2752,24 @@ right: 5px; */
 .toolbar:hover .customUserStatusTotalPoints {
   display: flex;
   align-items: center;
+}
+
+.toolbar:focus .customUserTotalPoints,
+.toolbar:hover .customUserTotalPoints {
+  display: flex;
+}
+
+.toolbar:hover .show-on-hover {
+  display: flex !important;
+}
+
+.toolbar:hover .hide-on-hover {
+  display: none !important;
+}
+
+.toolbar:focus .user-status-section,
+.toolbar:hover .user-status-section {
+  margin-top: 140px !important;
 }
 
 .scroll-styled::-webkit-scrollbar {

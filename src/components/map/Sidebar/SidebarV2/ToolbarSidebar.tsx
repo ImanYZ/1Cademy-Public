@@ -1,24 +1,37 @@
+import { ExpandLess, ExpandMore } from "@mui/icons-material";
 import KeyboardArrowLeftIcon from "@mui/icons-material/KeyboardArrowLeft";
 import MenuIcon from "@mui/icons-material/Menu";
-import { Badge, Box, Button, IconButton, Menu, MenuItem, Stack, Tooltip } from "@mui/material";
+import { Box, Button, IconButton, Stack, Tooltip, Typography } from "@mui/material";
 import { addDoc, collection, doc, getFirestore, setDoc, Timestamp } from "firebase/firestore";
-import React, { useCallback, useMemo, useState } from "react";
+import NextImage from "next/image";
+import React, { Suspense, useCallback, useMemo, useState } from "react";
 
+import { ChosenTag, MemoizedTagsSearcher } from "@/components/TagsSearcher";
 import { useNodeBook } from "@/context/NodeBookContext";
+import { useTagsTreeView } from "@/hooks/useTagsTreeView";
 
+import BookmarkIcon from "../../../../../public/bookmark.svg";
+import EditIcon from "../../../../../public/edit.svg";
+import GraduatedIcon from "../../../../../public/graduated.svg";
 import LogoDarkMode from "../../../../../public/LogoDarkMode.svg";
 import LogoLightMode from "../../../../../public/LogoLightMode.svg";
+import NotificationIcon from "../../../../../public/notification.svg";
+import SearchIcon from "../../../../../public/search.svg";
+import TagIcon from "../../../../../public/tag.svg";
 import { Reputation, ReputationSignal, User, UserTheme } from "../../../../knowledgeTypes";
 import { UsersStatus, UserTutorials } from "../../../../nodeBookTypes";
 import { OpenSidebar } from "../../../../pages/notebook";
 import { MemoizedMetaButton } from "../../MetaButton";
+import Modal from "../../Modal/Modal";
 import { MemoizedUserStatusSettings } from "../../UserStatusSettings";
+import MultipleChoiceBtn from "../MultipleChoiceBtn";
 import UsersStatusList from "../UsersStatusList";
 import { SidebarWrapper } from "./SidebarWrapper";
 
 const lBTypes = ["Weekly", "Monthly", "All Time", "Others Votes", "Others Monthly"];
 
 type MainSidebarProps = {
+  notebookRef: any;
   open: boolean;
   onClose: () => void;
   reloadPermanentGrpah: any;
@@ -43,6 +56,7 @@ type MainSidebarProps = {
 };
 
 export const ToolbarSidebar = ({
+  notebookRef,
   open,
   onClose,
   reloadPermanentGrpah,
@@ -66,9 +80,10 @@ export const ToolbarSidebar = ({
 MainSidebarProps) => {
   const { nodeBookState, nodeBookDispatch } = useNodeBook();
   const isMenuOpen = nodeBookState.isMenuOpen;
-
   const db = getFirestore();
-
+  const [chosenTags, setChosenTags] = useState<ChosenTag[]>([]);
+  const { allTags, setAllTags } = useTagsTreeView(user.tagId ? [user.tagId] : []);
+  const [leaderboardTypeOpen, setLeaderboardTypeOpen] = useState<boolean>(false);
   const onOpenSidebarLog = useCallback(
     async (sidebarType: string) => {
       const userOpenSidebarLogObj: any = {
@@ -84,6 +99,21 @@ MainSidebarProps) => {
     },
     [db, selectedUser, user.uname]
   );
+
+  const choosingNodeClick = useCallback(
+    (choosingNodeTag: string) => {
+      notebookRef.current.choosingNode = { id: choosingNodeTag, type: null };
+      nodeBookDispatch({ type: "setChoosingNode", payload: { id: choosingNodeTag, type: null } });
+    },
+    [nodeBookDispatch]
+  );
+
+  const closeTagSelector = useCallback(() => {
+    notebookRef.current.chosenNode = null;
+    notebookRef.current.choosingNode = null;
+    nodeBookDispatch({ type: "setChosenNode", payload: null });
+    nodeBookDispatch({ type: "setChoosingNode", payload: null });
+  }, [nodeBookDispatch]);
 
   const onOpenUserSettingsSidebar = useCallback(() => {
     const userUserInfoCollection = collection(db, "userUserInfoLog");
@@ -104,17 +134,7 @@ MainSidebarProps) => {
     [setOpenSideBar, onOpenSidebarLog]
   );
 
-  const [anchorEl, setAnchorEl] = useState<any>(null);
-
   const [pendingProposalsLoaded /* setPendingProposalsLoaded */] = useState(true);
-
-  const onOpenLeaderboardOptions = (event: React.MouseEvent<any>) => {
-    setAnchorEl(event.target);
-  };
-
-  const onCloseLeaderBoardOptions = () => {
-    setAnchorEl(null);
-  };
 
   const instructorsButtonHeight = user.role === "INSTRUCTOR" || user.role === "STUDENT" ? 40 : 0;
 
@@ -125,13 +145,13 @@ MainSidebarProps) => {
   const changeLeaderBoard = useCallback(
     async (lBType: any, username: string) => {
       setLeaderBoardType(lBType);
-      setAnchorEl(null);
 
       await addDoc(collection(db, "userLeaderboardLog"), {
         uname: username,
         type: lBType,
         createdAt: Timestamp.fromDate(new Date()),
       });
+      setLeaderboardTypeOpen(false);
     },
     [db]
   );
@@ -151,6 +171,14 @@ MainSidebarProps) => {
     [nodeBookDispatch]
   );
 
+  const openLeaderboardTypes = useCallback(() => {
+    setLeaderboardTypeOpen(oldCLT => !oldCLT);
+  }, [setLeaderboardTypeOpen]);
+
+  const shouldShowTagSearcher = useMemo(() => {
+    return nodeBookState?.choosingNode?.id === "Tag";
+  }, [nodeBookState?.choosingNode?.id]);
+
   const disableUserStatusButton = disableToolbar; /* || ![].includes(c=>c==="userStatusIconc") */
   const disableSearchButton = disableToolbar;
   const disabledNotificationButton = disableToolbar;
@@ -166,6 +194,8 @@ MainSidebarProps) => {
         className={`toolbar ${isMenuOpen ? "toolbar-opened" : ""}`}
         sx={{
           overflow: "hidden",
+          background: theme =>
+            theme.palette.mode === "dark" ? theme.palette.common.darkBackground : theme.palette.common.lightBackground,
           display: { xs: isMenuOpen ? "block" : "none", sm: "block" },
           "& .list-tmp": {
             alignItems: isMenuOpen ? "flex-start" : undefined,
@@ -178,14 +208,13 @@ MainSidebarProps) => {
         }}
       >
         <Stack
-          spacing={"10px"}
           alignItems="center"
           direction="column"
           sx={{
             height: firstBoxHeight,
           }}
         >
-          <Box sx={{ marginTop: "10px" }}>
+          <Box sx={{ marginTop: "10px", marginBottom: "15px" }}>
             <MemoizedMetaButton>
               <Box sx={{ display: "grid", placeItems: "center" }}>
                 {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -223,14 +252,12 @@ MainSidebarProps) => {
             }}
             disabled={disableSearchButton}
             sx={{
-              width: "100%",
-              borderRadius: "0px 50px 50px 0px",
+              marginTop: "15px",
+              width: "90%",
+              marginLeft: "5%!important",
+              borderRadius: "16px",
               backgroundColor: theme =>
-                disableSearchButton
-                  ? theme.palette.mode === "dark"
-                    ? "#383838ff"
-                    : "#bdbdbdff"
-                  : "rgba(255, 152, 0, 1)",
+                disableSearchButton ? (theme.palette.mode === "dark" ? "#383838ff" : "#bdbdbdff") : "#F38744",
               color: "white",
               lineHeight: "19px",
               height: "40px",
@@ -238,10 +265,17 @@ MainSidebarProps) => {
               alignSelf: "flex-start",
               display: "flex",
               gap: isMenuOpen ? "6px" : "6px",
-              padding: "6px 0px",
-              paddingLeft: isMenuOpen ? "20px" : "0px",
+              padding: "12px 0px 12px 12px",
+              justifyContent: "start",
               ":hover": {
-                backgroundColor: disableToolbar ? "#747474ff" : "rgba(255, 152, 0, 1)",
+                backgroundColor: theme =>
+                  disableSearchButton
+                    ? theme.palette.mode === "dark"
+                      ? "#383838ff"
+                      : "#bdbdbdff"
+                    : theme.palette.mode === "dark"
+                    ? "#F38744"
+                    : "#FF914E",
               },
             }}
           >
@@ -250,11 +284,11 @@ MainSidebarProps) => {
               sx={{
                 display: "flex",
                 alignItems: "center",
-                justifyContent: "center",
                 fontSize: "19px",
+                marginLeft: !isMenuOpen ? "10px" : undefined,
               }}
             >
-              🔍
+              <NextImage width={"20px"} src={SearchIcon} alt="previous node icon" />
             </Box>
 
             <Box
@@ -262,8 +296,6 @@ MainSidebarProps) => {
               className="toolbarDescription"
               sx={{
                 fontSize: "15px",
-                lineHeight: isMenuOpen ? "16px" : "0",
-                height: isMenuOpen ? "24px" : "0",
                 overflow: "hidden",
                 visibility: isMenuOpen ? "visible" : "hidden",
                 transition: isMenuOpen
@@ -273,6 +305,7 @@ MainSidebarProps) => {
                 display: isMenuOpen ? "flex" : "block",
                 alignItems: "center",
                 textAlign: "center",
+                color: theme => (theme.palette.mode === "dark" ? "#EAECF0" : "#1D2939"),
               }}
             >
               Search
@@ -280,44 +313,38 @@ MainSidebarProps) => {
           </Button>
 
           {/* Notifications button */}
-          <MemoizedMetaButton
+          <Button
             id="toolbar-bookmarks-button"
             onClick={() => {
               onOpenSidebar("NOTIFICATION_SIDEBAR", "Notifications");
               setIsMenuOpen(false);
             }}
             disabled={disabledNotificationButton}
+            sx={{
+              width: "90%",
+
+              borderRadius: "16px",
+              padding: "12px 0px 12px 12px",
+              justifyContent: "start",
+              ":hover": {
+                background: theme => (theme.palette.mode === "dark" ? "#55402B" : "#FFE2D0"),
+              },
+            }}
           >
             <Box
               sx={{
                 display: "flex",
                 alignItems: "center",
-                justifyContent: "center",
                 gap: "5px",
-                height: "30px",
+                marginLeft: !isMenuOpen ? "10px" : undefined,
               }}
             >
-              <Badge
-                className="toolbarBadge"
-                badgeContent={uncheckedNotificationsNum ?? 0}
-                color="error"
-                anchorOrigin={{ vertical: "top", horizontal: "left" }}
-                sx={{
-                  wordBreak: "normal",
-                  padding: "1px",
-                  marginLeft: isMenuOpen ? "20px" : "0px",
-                  color: "ButtonHighlight",
-                }}
-              >
-                🔔
-              </Badge>
+              <NextImage width={"20px"} src={NotificationIcon} alt="previous node icon" />
               <Box
                 component="span"
                 className="toolbarDescription"
                 sx={{
                   fontSize: "15px",
-                  lineHeight: isMenuOpen ? "16px" : "0",
-                  height: isMenuOpen ? "24px" : "0",
                   overflow: "hidden",
                   visibility: isMenuOpen ? "visible" : "hidden",
                   transition: isMenuOpen
@@ -326,43 +353,64 @@ MainSidebarProps) => {
                   width: isMenuOpen ? "100px" : "0",
                   display: isMenuOpen ? "flex" : "block",
                   alignItems: "center",
+                  color: theme => (theme.palette.mode === "dark" ? "#EAECF0" : "#1D2939"),
                 }}
               >
                 Notifications
               </Box>
+              {(uncheckedNotificationsNum ?? 0) > 0 && (
+                <Box
+                  className={window.innerWidth >= 500 ? "show-on-hover" : ""}
+                  sx={{
+                    width: "35px",
+                    height: "35px",
+                    borderRadius: "40%",
+                    background: "#E34848",
+                    color: "white",
+                    display: window.innerWidth >= 500 ? "none" : "flex",
+                    justifyContent: "center",
+                    alignItems: "center",
+                    position: "absolute",
+                    right: "15px",
+                  }}
+                >
+                  {uncheckedNotificationsNum ?? 0}
+                </Box>
+              )}
             </Box>
-          </MemoizedMetaButton>
+          </Button>
 
           {/* Bookmarks button */}
-          <MemoizedMetaButton
+          <Button
             onClick={() => {
               onOpenSidebar("BOOKMARKS_SIDEBAR", "Bookmarks");
               setIsMenuOpen(false);
             }}
             disabled={disabledBookmarksButton}
+            sx={{
+              width: "90%",
+              borderRadius: "16px",
+              padding: "12px 0px 12px 12px",
+              justifyContent: "start",
+              ":hover": {
+                background: theme => (theme.palette.mode === "dark" ? "#55402B" : "#FFE2D0"),
+              },
+            }}
           >
-            <Box sx={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "5px", height: "30px" }}>
-              <Badge
-                className="toolbarBadge"
-                badgeContent={bookmarkUpdatesNum ?? 0}
-                color="error"
-                anchorOrigin={{ vertical: "top", horizontal: "left" }}
-                sx={{
-                  wordBreak: "normal",
-                  padding: "1px",
-                  marginLeft: isMenuOpen ? "20px" : "0px",
-                  color: "ButtonHighlight",
-                }}
-              >
-                🔖
-              </Badge>
+            <Box
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                gap: "5px",
+                marginLeft: !isMenuOpen ? "10px" : undefined,
+              }}
+            >
+              <NextImage width={"20px"} src={BookmarkIcon} alt="previous node icon" />
               <Box
                 component="span"
                 className="toolbarDescription"
                 sx={{
                   fontSize: "15px",
-                  lineHeight: isMenuOpen ? "16px" : "0",
-                  height: isMenuOpen ? "24px" : "0",
                   overflow: "hidden",
                   visibility: isMenuOpen ? "visible" : "hidden",
                   transition: isMenuOpen
@@ -371,44 +419,64 @@ MainSidebarProps) => {
                   width: isMenuOpen ? "100px" : "0",
                   display: isMenuOpen ? "flex" : "block",
                   alignItems: "center",
+                  color: theme => (theme.palette.mode === "dark" ? "#EAECF0" : "#1D2939"),
                 }}
               >
                 Bookmarks
               </Box>
-            </Box>
-          </MemoizedMetaButton>
 
-          {/* Pending proposal sidebar */}
-          <MemoizedMetaButton
-            id="toolbar-pending-list"
+              {(bookmarkUpdatesNum ?? 0) > 0 && (
+                <Box
+                  className={window.innerWidth >= 500 ? "show-on-hover" : ""}
+                  sx={{
+                    width: "35px",
+                    height: "35px",
+                    borderRadius: "40%",
+                    background: "#E34848",
+                    color: "white",
+                    display: window.innerWidth >= 500 ? "none" : "flex",
+                    justifyContent: "center",
+                    alignItems: "center",
+                    position: "absolute",
+                    right: "15px",
+                  }}
+                >
+                  {bookmarkUpdatesNum ?? 0}
+                </Box>
+              )}
+            </Box>
+          </Button>
+
+          <Button
             onClick={() => {
               onOpenSidebar("PENDING_PROPOSALS", "PendingProposals");
               setIsMenuOpen(false);
             }}
-            disabled={disabledPendingProposalButton}
+            disabled={disabledBookmarksButton}
+            sx={{
+              width: "90%",
+              borderRadius: "16px",
+              padding: "12px 0px 12px 12px",
+              justifyContent: "start",
+              ":hover": {
+                background: theme => (theme.palette.mode === "dark" ? "#55402B" : "#FFE2D0"),
+              },
+            }}
           >
-            <Box sx={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "5px", height: "30px" }}>
-              <Badge
-                className="toolbarBadge"
-                badgeContent={pendingProposalsLoaded ? pendingProposalsNum ?? 0 : 0}
-                color="error"
-                anchorOrigin={{ vertical: "top", horizontal: "left" }}
-                sx={{
-                  padding: "1px",
-                  wordBreak: "normal",
-                  marginLeft: isMenuOpen ? "20px" : "0px",
-                  color: "ButtonHighlight",
-                }}
-              >
-                ✏️
-              </Badge>
+            <Box
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                gap: "5px",
+                marginLeft: !isMenuOpen ? "10px" : undefined,
+              }}
+            >
+              <NextImage width={"20px"} src={EditIcon} alt="previous node icon" />
               <Box
                 component="span"
                 className="toolbarDescription"
                 sx={{
                   fontSize: "15px",
-                  lineHeight: isMenuOpen ? "16px" : "0",
-                  height: isMenuOpen ? "24px" : "0",
                   overflow: "hidden",
                   visibility: isMenuOpen ? "visible" : "hidden",
                   transition: isMenuOpen
@@ -417,12 +485,45 @@ MainSidebarProps) => {
                   width: isMenuOpen ? "100px" : "0",
                   display: isMenuOpen ? "flex" : "block",
                   alignItems: "center",
+                  color: theme => (theme.palette.mode === "dark" ? "#EAECF0" : "#1D2939"),
                 }}
               >
-                Pending List
+                <Typography
+                  sx={{
+                    textOverflow: "ellipsis",
+                    overflow: "hidden",
+                    maxWidth: "90px",
+                    whiteSpace: "nowrap",
+                  }}
+                >
+                  Pending List
+                </Typography>
               </Box>
+
+              {(pendingProposalsNum ?? 0) > 0 && (
+                <Box
+                  className={window.innerWidth >= 500 ? "show-on-hover" : ""}
+                  sx={{
+                    width: "35px",
+                    height: "35px",
+                    borderRadius: "40%",
+                    background: "#E34848",
+                    color: "white",
+                    display: window.innerWidth >= 500 ? "none" : "flex",
+                    justifyContent: "center",
+                    alignItems: "center",
+                    position: "absolute",
+                    right: "15px",
+                  }}
+                >
+                  {pendingProposalsLoaded ? pendingProposalsNum ?? 0 : 0}
+                </Box>
+              )}
             </Box>
-          </MemoizedMetaButton>
+          </Button>
+
+          {/* Pending proposal sidebar */}
+
           {["INSTRUCTOR", "STUDENT"].includes(user.role ?? "") && (
             <MemoizedMetaButton
               onClick={() => {
@@ -435,23 +536,13 @@ MainSidebarProps) => {
                 sx={{
                   display: "flex",
                   alignItems: "center",
-                  justifyContent: "center",
+                  padding: "6px 0px 6px 6px",
+                  justifyContent: "start",
                   gap: "5px",
                   height: "30px",
                 }}
               >
-                <Box
-                  className="LeaderbaordIcon toolbarBadge"
-                  sx={{
-                    fontSize: "20px",
-                    padding: "1px",
-                    wordBreak: "normal",
-                    marginLeft: isMenuOpen ? "20px" : "0px",
-                    color: "ButtonHighlight",
-                  }}
-                >
-                  🎓
-                </Box>
+                <NextImage width={"20px"} src={GraduatedIcon} alt="previous node icon" />
 
                 <Box
                   component="span"
@@ -487,107 +578,166 @@ MainSidebarProps) => {
               </Box>
             </MemoizedMetaButton>
           )}
-          {user?.tag && (
-            <>
-              <MemoizedMetaButton
-                id="toolbar-leaderboard-button"
-                onClick={(e: any) => onOpenLeaderboardOptions(e)}
-                disabled={disabledLeaderboardButton}
-              >
-                <Box
-                  sx={{
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    gap: "5px",
-                    height: "30px",
-                  }}
-                >
-                  <Box
-                    className="LeaderbaordIcon toolbarBadge"
-                    sx={{
-                      fontSize: "20px",
-                      padding: "1px",
-                      wordBreak: "normal",
-                      marginLeft: isMenuOpen ? "20px" : "0px",
-                      color: "ButtonHighlight",
-                    }}
-                  >
-                    🏆
-                  </Box>
 
-                  <Box
-                    component="span"
-                    className="toolbarButtonDescription"
-                    sx={{
-                      fontSize: "15px",
-                      lineHeight: isMenuOpen ? "16px" : "0",
-                      height: isMenuOpen ? "41px" : "0",
-                      width: isMenuOpen ? "100px" : "0",
-                      overflow: "hidden",
-                      visibility: isMenuOpen ? "visible" : "hidden",
-                      transition: isMenuOpen
-                        ? "visibility 1s, line-height 1s, height 1s;"
-                        : "visibility 0s, line-height 0s, height 0s",
-                      display: "flex",
-                      justifyContent: "center",
-                      alignItems: "flex-start",
-                      flexDirection: "column",
-                    }}
-                  >
-                    <div
-                      id=""
-                      style={{
-                        textOverflow: "ellipsis",
-                        overflow: "hidden",
-                        maxWidth: "90px",
-                        whiteSpace: "nowrap",
-                      }}
-                    >
-                      {user.tag}
-                    </div>
-                    <div
-                      id=""
-                      style={{
-                        fontSize: "12px",
-                        maxWidth: "90px",
-                        textOverflow: "ellipsis",
-                        overflow: "hidden",
-                        whiteSpace: "nowrap",
-                      }}
-                    >
-                      {leaderBoardType ? leaderBoardType : "Leaderboard"}
-                    </div>
-                  </Box>
-                </Box>
-              </MemoizedMetaButton>
-              {
-                <Menu
-                  id="basic-menu"
-                  anchorEl={anchorEl}
-                  open={Boolean(anchorEl)}
-                  onClose={onCloseLeaderBoardOptions}
-                  MenuListProps={{
-                    "aria-labelledby": "basic-button",
+          <Box
+            className={window.innerWidth >= 500 ? "show-on-hover" : ""}
+            sx={{
+              background: theme => (theme.palette.mode === "dark" ? "#242425" : "#F2F4F7"),
+              width: "100%",
+              display: window.innerWidth <= 500 ? "flex" : "none",
+              justifyContent: "center",
+              border: theme => (theme.palette.mode === "dark" ? "solid 1px #303134" : "solid 1px #EAECF0"),
+            }}
+          >
+            <Button
+              sx={{
+                padding: "10px",
+                width: "100%",
+                height: "100%",
+                ":hover": {
+                  background: theme => (theme.palette.mode === "dark" ? "#55402B" : "#FFE2D0"),
+                },
+              }}
+              onClick={() => choosingNodeClick("Tag")}
+            >
+              <Box
+                sx={{
+                  display: "flex",
+                  width: "94%",
+                }}
+              >
+                <NextImage width={"25px"} src={TagIcon} alt="tag icon" />
+
+                <Typography
+                  sx={{
+                    marginLeft: "4px",
+                    color: theme => (theme.palette.mode === "dark" ? "#EAECF0" : "#1D2939"),
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                    whiteSpace: "nowrap",
+                    display: "inline-block",
                   }}
                 >
-                  {choices.map(choice => {
-                    return (
-                      <MenuItem key={choice.label} onClick={choice.choose}>
-                        {choice.label}
-                      </MenuItem>
-                    );
-                  })}
-                </Menu>
-              }
-            </>
-          )}
+                  {user.tag}
+                </Typography>
+              </Box>
+            </Button>
+            {shouldShowTagSearcher && (
+              <Suspense fallback={<div></div>}>
+                <Box id="tagModal">
+                  <Modal
+                    className="tagSelectorModalUserSetting"
+                    onClick={closeTagSelector}
+                    returnLeft={true}
+                    noBackground={true}
+                  >
+                    <MemoizedTagsSearcher
+                      id="user-settings-tag-searcher"
+                      setChosenTags={setChosenTags}
+                      chosenTags={chosenTags}
+                      allTags={allTags}
+                      setAllTags={setAllTags}
+                      sx={{ maxHeight: "235px", height: "235px" }}
+                    />
+                  </Modal>
+                </Box>
+              </Suspense>
+            )}
+          </Box>
+
+          <Box
+            className={window.innerWidth >= 500 ? "show-on-hover" : ""}
+            sx={{
+              width: "100%",
+              display: window.innerWidth <= 500 ? "flex" : "none",
+              justifyContent: "center",
+              cursor: "pointer",
+            }}
+          >
+            <Button
+              sx={{
+                display: "flex",
+                justifyContent: "space-between",
+                paddingY: "10px",
+                paddingX: "20px",
+                width: "100%",
+                height: "100%",
+                ":hover": {
+                  background: theme => (theme.palette.mode === "dark" ? "#55402B" : "#FFE2D0"),
+                },
+              }}
+              onClick={openLeaderboardTypes}
+            >
+              <Box
+                sx={{
+                  overflow: "hidden",
+                  textOverflow: "ellipsis",
+                  whiteSpace: "nowrap",
+                  display: "inline-block",
+                  color: theme => (theme.palette.mode === "dark" ? "#eaecf0" : "#475467"),
+                }}
+              >
+                {leaderBoardType ? leaderBoardType : "Leaderboard"}
+              </Box>
+              {leaderboardTypeOpen ? (
+                <ExpandMore
+                  sx={{
+                    color: theme => (theme.palette.mode === "dark" ? "#eaecf0" : "#475467"),
+                  }}
+                />
+              ) : (
+                <ExpandLess
+                  sx={{
+                    color: theme => (theme.palette.mode === "dark" ? "#eaecf0" : "#475467"),
+                  }}
+                />
+              )}
+            </Button>
+          </Box>
+          <Box
+            className="show-on-hover"
+            sx={{
+              width: "100%",
+              display: "none",
+              justifyContent: "flex-start",
+              alignItems: "center",
+              gap: "10px",
+              height: "inherit",
+            }}
+          >
+            {leaderboardTypeOpen && (
+              <MultipleChoiceBtn
+                sx={{
+                  bottom: window.innerWidth <= 500 ? "170px" : "230px",
+                  zIndex: 999,
+                  width: "90%",
+                  marginX: "auto",
+                  left: "5%",
+                }}
+                choices={choices}
+                onClose={openLeaderboardTypes}
+                comLeaderboardType={leaderBoardType ? leaderBoardType : "Leaderboard"}
+              />
+            )}
+          </Box>
+          <Box
+            className="hide-on-hover"
+            sx={{
+              display: window.innerWidth <= 500 ? "none" : "block",
+              width: "50%",
+              margin: "auto",
+              marginTop: "5px",
+              borderTop: theme => (theme.palette.mode === "dark" ? "solid 1px #303134" : "solid 1px #EAECF0"),
+            }}
+          />
         </Stack>
 
         <Stack
+          className="user-status-section"
           spacing={"10px"}
           direction="column"
           sx={{
+            marginTop: window.innerWidth <= 500 ? "140px" : "20px",
             height: `calc(${windowHeight}px - ${firstBoxHeight}px)`,
             paddingBottom: "20px",
           }}
@@ -634,7 +784,6 @@ MainSidebarProps) => {
     disabledIntructorButton,
     disabledLeaderboardButton,
     leaderBoardType,
-    anchorEl,
     choices,
     windowHeight,
     onlineUsers,
@@ -645,6 +794,7 @@ MainSidebarProps) => {
     disableUserStatusList,
     onOpenSidebar,
     setIsMenuOpen,
+    leaderboardTypeOpen,
   ]);
 
   const contentSignalState = useMemo(() => {
@@ -658,7 +808,6 @@ MainSidebarProps) => {
     pendingProposalsNum,
     reputation,
     windowHeight,
-    anchorEl,
     reputationSignal,
     onlineUsers,
     usersOnlineStatusLoaded,
@@ -672,6 +821,8 @@ MainSidebarProps) => {
     disabledLeaderboardButton,
     userTutorial.searcher.done,
     userTutorial.searcher.skipped,
+    leaderboardTypeOpen,
+    leaderBoardType,
   ]);
 
   return (
@@ -704,8 +855,8 @@ MainSidebarProps) => {
         title=""
         open={open}
         onClose={onClose}
-        width={isMenuOpen ? 150 : 80}
-        hoverWidth={168}
+        width={window.innerWidth <= 500 ? "100%" : isMenuOpen ? "100%" : 80}
+        hoverWidth={window.innerWidth <= 500 ? "100%" : 250}
         showCloseButton={false}
         showScrollUpButton={false}
         isMenuOpen={isMenuOpen}

@@ -5616,7 +5616,7 @@ const Dashboard = ({}: DashboardProps) => {
                 <NextImage
                   width={"20px"}
                   src={theme.palette.mode === "dark" ? PrevNodeIcon : PrevNodeLightIcon}
-                  alt="logo 1cademy"
+                  alt="previous node icon"
                 />
                 <Typography
                   sx={{
@@ -5775,6 +5775,7 @@ const Dashboard = ({}: DashboardProps) => {
               }}
             >
               <MemoizedToolbarSidebar
+                notebookRef={notebookRef}
                 open={true}
                 onClose={() => setOpenSidebar(null)}
                 reloadPermanentGrpah={reloadPermanentGraph}
