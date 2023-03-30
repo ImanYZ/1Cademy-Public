@@ -333,7 +333,10 @@ export const TooltipTutorial = ({
               display: "grid",
               placeContent: "center",
               borderRadius: "50%",
-              background: `conic-gradient(#A4FD96, ${(tutorialsCompletePercentage * 360) / 100}deg, #868686 0deg)`,
+              background: theme =>
+                `conic-gradient(${theme.palette.mode === "dark" ? "#A4FD96" : "#52AE43"}, ${
+                  (tutorialsCompletePercentage * 360) / 100
+                }deg, ${theme.palette.mode === "dark" ? "#868686" : "#6C74824D"} 0deg)`,
             }}
           >
             <Box
@@ -343,7 +346,7 @@ export const TooltipTutorial = ({
                 display: "grid",
                 placeContent: "center",
                 borderRadius: "50%",
-                background: "#4B535C",
+                background: theme => (theme.palette.mode === "dark" ? gray500 : "#C5D0DF"),
               }}
             >
               <Typography>{`${tutorialsCompletePercentage}%`}</Typography>

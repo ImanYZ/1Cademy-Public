@@ -15,7 +15,7 @@ import {
 import { Stack } from "@mui/system";
 import React, { useCallback, useState } from "react";
 
-import { gray50, gray200, gray300, gray600, gray700 } from "@/pages/home";
+import { gray50, gray100, gray200, gray300, gray500, gray600, gray700 } from "@/pages/home";
 
 import { TutorialStep, TutorialTypeKeys, UserTutorials } from "../../nodeBookTypes";
 
@@ -93,7 +93,7 @@ const TutorialTableOfContent = ({
       <Box
         sx={{
           p: "32px 24px",
-          backgroundColor: "#1F1F1F",
+          backgroundColor: theme => (theme.palette.mode === "dark" ? "#1F1F1F" : gray100),
         }}
       >
         <Box
@@ -115,19 +115,32 @@ const TutorialTableOfContent = ({
         </Box>
 
         <Box>
-          <Stack direction="row" alignItems="center" justifyContent={"space-between"} spacing="6px">
+          <Stack
+            direction="row"
+            alignItems="center"
+            justifyContent={"space-between"}
+            spacing="6px"
+            sx={{ color: theme => (theme.palette.mode === "dark" ? gray300 : gray500) }}
+          >
             <Typography>Tutorials</Typography>
             <Typography>
               {tutorialProgress.tutorialsComplete}/{tutorialProgress.totalTutorials}
             </Typography>
           </Stack>
-          <Box sx={{ height: "4px", width: "100%", borderRadius: "3px", backgroundColor: "rgba(208, 213, 221, 0.3);" }}>
+          <Box
+            sx={{
+              height: "4px",
+              width: "100%",
+              borderRadius: "3px",
+              backgroundColor: theme => (theme.palette.mode === "dark" ? "rgba(208, 213, 221, 0.3)" : "#6C74824D"),
+            }}
+          >
             <Box
               sx={{
                 height: "4px",
                 width: `${tutorialsCompletePercentage}%`,
                 borderRadius: "3px",
-                backgroundColor: "#A4FD96",
+                backgroundColor: theme => (theme.palette.mode === "dark" ? "#A4FD96" : "#52AE43"),
               }}
             ></Box>
           </Box>
