@@ -2,7 +2,7 @@ import ArrowForwardIosSharpIcon from "@mui/icons-material/ArrowForwardIosSharp";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import CloseIcon from "@mui/icons-material/Close";
 import HelpCenterIcon from "@mui/icons-material/HelpCenter";
-import PlayCircleIcon from "@mui/icons-material/PlayCircle";
+import PlayCircleRoundedIcon from "@mui/icons-material/PlayCircleRounded";
 import {
   Accordion,
   AccordionDetails,
@@ -16,7 +16,7 @@ import {
 import { Stack } from "@mui/system";
 import React, { useCallback, useState } from "react";
 
-import { gray50 } from "@/pages/home";
+import { gray50, gray300, gray600 } from "@/pages/home";
 
 import { TutorialStep, TutorialTypeKeys, UserTutorials } from "../../nodeBookTypes";
 
@@ -95,7 +95,9 @@ const TutorialTableOfContent = ({
         }}
       >
         <Stack direction="row" alignItems="center" spacing="6px">
-          <Typography fontSize={"24px"}>Notebook Tutorial</Typography>
+          <Typography fontSize={"24px"} fontWeight="600">
+            Notebook Tutorial
+          </Typography>
           <HelpCenterIcon fontSize="medium" />
         </Stack>
         <IconButton onClick={handleCloseProgressBar} size={"small"}>
@@ -139,6 +141,7 @@ const TutorialTableOfContent = ({
                       variant={"h4"}
                       sx={{
                         cursor: "pointer",
+                        fontWeight: "600",
                       }}
                     >
                       {currentTutorial.title}
@@ -184,7 +187,9 @@ const TutorialTableOfContent = ({
                           size={"small"}
                           sx={{ p: "0px" }}
                         >
-                          <PlayCircleIcon />
+                          <PlayCircleRoundedIcon
+                            sx={{ color: theme => (theme.palette.mode === "dark" ? gray300 : gray600) }}
+                          />
                         </IconButton>
                       )}
                       <Box
