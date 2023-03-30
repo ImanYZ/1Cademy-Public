@@ -1,4 +1,3 @@
-import HelpIcon from "@mui/icons-material/Help";
 import { Box, Button, Stack, Typography, useMediaQuery } from "@mui/material";
 import React, { ReactNode, useCallback, useMemo, useRef, useState } from "react";
 
@@ -25,6 +24,7 @@ type TutorialProps = {
   forcedTutorial: TutorialTypeKeys | null;
   groupTutorials: GroupTutorial[];
   onForceTutorial: (keyTutorial: TutorialTypeKeys) => void;
+  tutorialProgress: { tutorialsComplete: number; totalTutorials: number };
   isOnPortal?: boolean;
   parent?: FullNodeData;
   child?: FullNodeData;
@@ -45,6 +45,7 @@ export const TooltipTutorial = ({
   groupTutorials,
   isOnPortal,
   onForceTutorial,
+  tutorialProgress,
   parent,
   child,
 }: TutorialProps) => {
@@ -215,6 +216,10 @@ export const TooltipTutorial = ({
   else if (tutorialStep.tooltipPosition === "bottomRight")
     location = { ...location, top: "", left: isMobile ? "5px" : "" };
 
+  const tutorialsCompletePercentage = Math.round(
+    (tutorialProgress.tutorialsComplete * 100) / tutorialProgress.totalTutorials
+  );
+
   const wrapper = (children: ReactNode) => {
     if (
       targetClientRect.top === 0 &&
@@ -318,14 +323,50 @@ export const TooltipTutorial = ({
     <>
       {showNextTutorialStep && nextTutorial && !currentTutorialIsTemporal && (
         <Stack alignItems={"center"}>
-          <HelpIcon sx={{ mb: "12px", fontSize: "32px" }} />
+          {/* <HelpIcon sx={{ mb: "12px", fontSize: "32px" }} /> */}
+
+          <Box
+            sx={{
+              width: "60px",
+              height: "60px",
+              mb: "12px",
+              display: "grid",
+              placeContent: "center",
+              borderRadius: "50%",
+              background: theme =>
+                `conic-gradient(${theme.palette.mode === "dark" ? "#A4FD96" : "#52AE43"}, ${
+                  (tutorialsCompletePercentage * 360) / 100
+                }deg, ${theme.palette.mode === "dark" ? "#868686" : "#6C74824D"} 0deg)`,
+            }}
+          >
+            <Box
+              sx={{
+                width: "45px",
+                height: "45px",
+                display: "grid",
+                placeContent: "center",
+                borderRadius: "50%",
+                background: theme => (theme.palette.mode === "dark" ? gray500 : "#C5D0DF"),
+              }}
+            >
+              <Typography>{`${tutorialsCompletePercentage}%`}</Typography>
+            </Box>
+          </Box>
+
           <Typography
             component={"h2"}
-            sx={{ fontSize: "18px", fontWeight: "bold", display: "inline-block", mb: "8px" }}
+            sx={{ fontSize: "18px", fontWeight: "bold", display: "inline-block", mb: "10px" }}
           >
-            {"Would you like to proceed to the next tutorial?"}
+            {`You have completed ${tutorialProgress.tutorialsComplete} out ${tutorialProgress.totalTutorials} tutorials!`}
           </Typography>
-          <Typography sx={{ mb: "16px" }}>{`Next tutorial: ${nextTutorial.title}`}</Typography>
+          <Typography>{`Would you like to proceed to the next tutorial?`}</Typography>
+          <Typography sx={{ mb: "16px" }}>
+            Next tutorial:{" "}
+            <Typography component={"b"} sx={{ fontWeight: "bold" }}>
+              {nextTutorial.title}
+            </Typography>
+          </Typography>
+
           <Stack direction={"row"} spacing="8px">
             <Button
               variant="outlined"
@@ -460,8 +501,6 @@ export const TooltipTutorial = ({
                 variant="text"
                 onClick={() => {
                   handleCloseProgressBarMenu();
-                  // onChangeStep(null);
-                  // onUpdateNode("nodes", tutorialState.currentStepName, {});
                   onSkip();
                 }}
                 sx={{
