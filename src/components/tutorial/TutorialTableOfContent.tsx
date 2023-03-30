@@ -1,7 +1,6 @@
 import ArrowForwardIosSharpIcon from "@mui/icons-material/ArrowForwardIosSharp";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import CloseIcon from "@mui/icons-material/Close";
-import HelpCenterIcon from "@mui/icons-material/HelpCenter";
 import PlayCircleRoundedIcon from "@mui/icons-material/PlayCircleRounded";
 import {
   Accordion,
@@ -75,7 +74,7 @@ const TutorialTableOfContent = ({
         position: "fixed",
         top: "75px",
         display: "grid",
-        gridTemplateRows: "auto 1fr",
+        gridTemplateRows: "auto auto 1fr",
         background: theme => (theme.palette.mode === "dark" ? "#1B1A1A" : gray50),
         borderRadius: "8px",
         width: "350px",
@@ -88,22 +87,38 @@ const TutorialTableOfContent = ({
       <Box
         sx={{
           p: "32px 24px",
-          position: "relative",
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
+          backgroundColor: "#1F1F1F",
         }}
       >
-        <Stack direction="row" alignItems="center" spacing="6px">
-          <Typography fontSize={"24px"} fontWeight="600">
-            Notebook Tutorial
-          </Typography>
-          <HelpCenterIcon fontSize="medium" />
-        </Stack>
-        <IconButton onClick={handleCloseProgressBar} size={"small"}>
-          <CloseIcon fontSize="medium" />
-        </IconButton>
+        <Box
+          sx={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            mb: "18px",
+          }}
+        >
+          <Stack direction="row" alignItems="center" spacing="6px">
+            <Typography fontSize={"24px"} fontWeight="600">
+              Notebook Tutorial
+            </Typography>
+          </Stack>
+          <IconButton onClick={handleCloseProgressBar} size={"small"}>
+            <CloseIcon fontSize="medium" />
+          </IconButton>
+        </Box>
+
+        <Box>
+          <Stack direction="row" alignItems="center" justifyContent={"space-between"} spacing="6px">
+            <Typography>Tutorials</Typography>
+            <Typography>10/20</Typography>
+          </Stack>
+          <Box sx={{ height: "4px", width: "100%", borderRadius: "3px", backgroundColor: "rgba(208, 213, 221, 0.3);" }}>
+            <Box sx={{ height: "4px", width: "50%", borderRadius: "3px", backgroundColor: "#A4FD96" }}></Box>
+          </Box>
+        </Box>
       </Box>
+
       <Box className="scroll-styled" sx={{ overflowY: "auto" }}>
         {groupTutorials.map(currentTutorial => {
           return (
