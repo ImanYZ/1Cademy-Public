@@ -187,7 +187,15 @@ const TutorialTableOfContent = ({
                           <PlayCircleIcon />
                         </IconButton>
                       )}
-                      <Box sx={{ display: "flex", flexGrow: 1, alignItems: "center", justifyContent: "space-between" }}>
+                      <Box
+                        onClick={e => {
+                          e.stopPropagation();
+                          if (currentTutorial.tutorialSteps) {
+                            onStartTutorial(currentTutorial.tutorialSteps.tutorialKey);
+                          }
+                        }}
+                        sx={{ display: "flex", flexGrow: 1, alignItems: "center", justifyContent: "space-between" }}
+                      >
                         <Typography
                           component={"h4"}
                           variant={"h4"}
