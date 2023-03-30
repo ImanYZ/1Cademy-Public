@@ -352,7 +352,7 @@ export const TooltipTutorial = ({
 
           <Typography
             component={"h2"}
-            sx={{ fontSize: "18px", fontWeight: "bold", display: "inline-block", mb: "8px" }}
+            sx={{ fontSize: "18px", fontWeight: "bold", display: "inline-block", mb: "10px" }}
           >
             {`You have completed ${tutorialProgress.tutorialsComplete} out ${tutorialProgress.totalTutorials} tutorials!`}
           </Typography>
