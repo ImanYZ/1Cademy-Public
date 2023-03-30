@@ -2,7 +2,7 @@ import ArrowForwardIosSharpIcon from "@mui/icons-material/ArrowForwardIosSharp";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import CloseIcon from "@mui/icons-material/Close";
 import HelpCenterIcon from "@mui/icons-material/HelpCenter";
-import PlayCircleIcon from "@mui/icons-material/PlayCircle";
+import PlayCircleRoundedIcon from "@mui/icons-material/PlayCircleRounded";
 import {
   Accordion,
   AccordionDetails,
@@ -15,6 +15,8 @@ import {
 } from "@mui/material";
 import { Stack } from "@mui/system";
 import React, { useCallback, useState } from "react";
+
+import { gray50, gray200, gray300, gray600, gray700 } from "@/pages/home";
 
 import { TutorialStep, TutorialTypeKeys, UserTutorials } from "../../nodeBookTypes";
 
@@ -74,7 +76,7 @@ const TutorialTableOfContent = ({
         top: "75px",
         display: "grid",
         gridTemplateRows: "auto 1fr",
-        background: theme => (theme.palette.mode === "dark" ? "#2f2f2f" : "#f2f4f7"),
+        background: theme => (theme.palette.mode === "dark" ? "#1B1A1A" : gray50),
         borderRadius: "8px",
         width: "350px",
         bottom: "7px",
@@ -93,7 +95,9 @@ const TutorialTableOfContent = ({
         }}
       >
         <Stack direction="row" alignItems="center" spacing="6px">
-          <Typography fontSize={"24px"}>Notebook Tutorial</Typography>
+          <Typography fontSize={"24px"} fontWeight="600">
+            Notebook Tutorial
+          </Typography>
           <HelpCenterIcon fontSize="medium" />
         </Stack>
         <IconButton onClick={handleCloseProgressBar} size={"small"}>
@@ -136,6 +140,8 @@ const TutorialTableOfContent = ({
                       component={"h4"}
                       variant={"h4"}
                       sx={{
+                        fontWeight: "600",
+                        fontSize: "18px",
                         cursor: "pointer",
                       }}
                     >
@@ -182,15 +188,27 @@ const TutorialTableOfContent = ({
                           size={"small"}
                           sx={{ p: "0px" }}
                         >
-                          <PlayCircleIcon />
+                          <PlayCircleRoundedIcon
+                            sx={{ color: theme => (theme.palette.mode === "dark" ? gray300 : gray600) }}
+                          />
                         </IconButton>
                       )}
-                      <Box sx={{ display: "flex", flexGrow: 1, alignItems: "center", justifyContent: "space-between" }}>
+                      <Box
+                        onClick={e => {
+                          e.stopPropagation();
+                          if (currentTutorial.tutorialSteps) {
+                            onStartTutorial(currentTutorial.tutorialSteps.tutorialKey);
+                          }
+                        }}
+                        sx={{ display: "flex", flexGrow: 1, alignItems: "center", justifyContent: "space-between" }}
+                      >
                         <Typography
                           component={"h4"}
                           variant={"h4"}
                           sx={{
+                            fontSize: "18px",
                             cursor: "pointer",
+                            color: theme => (theme.palette.mode === "dark" ? gray200 : gray700),
                           }}
                         >
                           {currentTutorial.title}
