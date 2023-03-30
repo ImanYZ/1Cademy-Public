@@ -344,6 +344,7 @@ const Dashboard = ({}: DashboardProps) => {
   const [openLivelinessBar, setOpenLivelinessBar] = useState(false);
   const [comLeaderboardOpen, setComLeaderboardOpen] = useState(false);
 
+  //TUTORIAL STATES
   const {
     startTutorial,
     tutorial,
@@ -358,6 +359,8 @@ const Dashboard = ({}: DashboardProps) => {
     setUserTutorial,
     userTutorial,
   } = useInteractiveTutorial({ user });
+
+  const pathwayRef = useRef({ node: "", parent: "", child: "" });
 
   const onNodeInViewport = useCallback(
     (nodeId: string) => {
@@ -411,6 +414,31 @@ const Dashboard = ({}: DashboardProps) => {
     setInnerHeight(window.innerHeight);
     setButtonsOpen(window.innerHeight > 399 ? true : false);
   }, [user?.uname]);
+
+  const pathway = useMemo(() => {
+    const edgeObjects: { parent: string; child: string }[] = Object.keys(graph.edges).map(cur => {
+      const [parent, child] = cur.split("-");
+      return { parent, child };
+    });
+    const parents = edgeObjects.reduce((acu: { [key: string]: string[] }, cur) => {
+      return { ...acu, [cur.parent]: acu[cur.parent] ? [...acu[cur.parent], cur.child] : [cur.child] };
+    }, {});
+    console.log({ pathway });
+    const pathways = edgeObjects.reduce(
+      (acu: { node: string; parent: string; child: string }, cur) => {
+        if (acu.node) return acu;
+        if (parents[cur.child]) return { parent: cur.parent, node: cur.child, child: parents[cur.child][0] };
+        return acu;
+      },
+      { node: "", parent: "", child: "" }
+    );
+    if (pathwayRef.current.node !== pathways.node && pathwayRef.current.node) {
+      return { node: "", parent: "", child: "" };
+    }
+
+    pathwayRef.current = pathways;
+    return pathways;
+  }, [graph.edges]);
 
   const scrollToNode = useCallback(
     (nodeId: string, tries = 0) => {
@@ -4091,6 +4119,14 @@ const Dashboard = ({}: DashboardProps) => {
       }
     }
 
+    if (tutorial.name === "tmpPathways") {
+      if (currentStep.isClickable) {
+        openNodeHandler("r98BjyFDCe4YyLA3U8ZE");
+        openNodeHandler("sKukyeN58Wj1jfzuqnZJ");
+      }
+      return;
+    }
+
     const tutorialUpdated: UserTutorial = {
       ...userTutorial[tutorial.name],
       currentStep: currentStep.currentStepName,
@@ -4119,6 +4155,7 @@ const Dashboard = ({}: DashboardProps) => {
     db,
     forcedTutorial,
     onChangeNodePart,
+    openNodeHandler,
     proposeNewChild,
     proposeNodeImprovement,
     setTargetId,
@@ -5175,6 +5212,28 @@ const Dashboard = ({}: DashboardProps) => {
           return;
         }
       }
+
+      // --------------------------
+
+      if (forcedTutorial === "pathways" || proposalNodesTaken) {
+        const shouldIgnore = forcedTutorial
+          ? forcedTutorial !== "pathways"
+          : userTutorial["pathways"].done || userTutorial["pathways"].skipped;
+        if (!shouldIgnore) {
+          if (pathway.node) {
+            setTargetId(pathway.node);
+            nodeBookDispatch({ type: "setSelectedNode", payload: pathway.node });
+            notebookRef.current.selectedNode = pathway.node;
+            scrollToNode(pathway.node);
+            startTutorial("pathways");
+            return;
+          }
+        }
+      }
+      if (forcedTutorial === "pathways") {
+        const result = detectAndForceTutorial("tmpPathways", "rWYUNisPIVMBoQEYXgNj", node => node && node.open);
+        if (result) return;
+      }
     };
 
     detectTriggerTutorial();
@@ -5197,6 +5256,8 @@ const Dashboard = ({}: DashboardProps) => {
     openSidebar,
     parentWithChildren,
     parentWithMostChildren,
+    pathway,
+    scrollToNode,
     setTargetId,
     startTutorial,
     tutorial,
@@ -5425,12 +5486,35 @@ const Dashboard = ({}: DashboardProps) => {
       const node = graph.nodes[targetId];
       if (!isValid(node)) {
         setTutorial(null);
+
         if (node && node.localLinkingWords === "References") return;
         setForcedTutorial(null);
         if (currentStep?.childTargetId) removeStyleFromTarget(currentStep.childTargetId, targetId);
       }
     }
+    // --------------------------
 
+    if (tutorial.name === "pathways") {
+      const isValid = (node: FullNodeData) =>
+        node && !node.editable && !Boolean(node.isNew) && pathway.child && pathway.parent;
+      const node = graph.nodes[targetId];
+      if (!isValid(node)) {
+        setTutorial(null);
+        setForcedTutorial(null);
+        pathwayRef.current = { node: "", parent: "", child: "" };
+        if (currentStep?.childTargetId) removeStyleFromTarget(currentStep.childTargetId, targetId);
+      }
+    }
+    // --------------------------
+
+    if (tutorial.name === "tmpPathways") {
+      const isValid = (node: FullNodeData) =>
+        node && !node.editable && !Boolean(node.isNew) && !pathway.child && !pathway.parent;
+      const node = graph.nodes[targetId];
+      if (!isValid(node)) {
+        setTutorial(null);
+      }
+    }
     // --------------------------
 
     if (tutorial.name === "tableOfContents") {
@@ -5619,6 +5703,7 @@ const Dashboard = ({}: DashboardProps) => {
     openLivelinessBar,
     openProgressBar,
     openSidebar,
+    pathway,
     setTutorial,
     targetId,
     tutorial,
@@ -6398,6 +6483,8 @@ const Dashboard = ({}: DashboardProps) => {
                     forcedTutorial={forcedTutorial}
                     groupTutorials={tutorialGroup}
                     onForceTutorial={setForcedTutorial}
+                    parent={graph.nodes[pathway.parent]}
+                    child={graph.nodes[pathway.child]}
                   />
                 )}
                 {settings.showClusterOptions && settings.showClusters && (

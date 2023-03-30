@@ -138,20 +138,14 @@ const TMP_OPEN_TAGS_REFERENCES_CONFIG: TutorialStepConfig[] = [
     isClickable: true,
   },
 ];
-// const TMP_EDIT_NODE_CONFIG: TutorialStepConfig[] = [
-//   {
-//     title: "Upvote Node",
-//     description: (
-//       <MarkdownRender
-//         text={
-//           "Click on check icon to vote as correct on this node"
-//         }
-//       />
-//     ),
-//     childTargetId: "node-footer-propose",
-//     isClickeable: true,
-//   },
-// ];
+
+const TMP_PATHWAYS_CONFIG: TutorialStepConfig[] = [
+  {
+    title: "Learning Pathways",
+    description: <MarkdownRender text={"For defining a pathway you may want to open Parents o Children"} />,
+    isClickable: true,
+  },
+];
 
 export const TMP_OPEN_PARENT_CHILDREN: TutorialStep[] = TMP_OPEN_PARENT_CHILDREN_CONFIG.map((c, i, s) => {
   return { ...getBaseStepConfig(i + 1, s.length), ...c };
@@ -186,5 +180,8 @@ export const TMP_PROPOSE_CHILD_IDEA: TutorialStep[] = TMP_PROPOSE_CHILD_IDEA_CON
 });
 
 export const TMP_TAGS_REFERENCES: TutorialStep[] = TMP_OPEN_TAGS_REFERENCES_CONFIG.map((c, i, s) => {
+  return { ...getBaseStepConfig(i + 1, s.length), ...c };
+});
+export const TMP_PATHWAYS: TutorialStep[] = TMP_PATHWAYS_CONFIG.map((c, i, s) => {
   return { ...getBaseStepConfig(i + 1, s.length), ...c };
 });

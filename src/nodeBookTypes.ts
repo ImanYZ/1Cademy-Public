@@ -246,7 +246,9 @@ export type TutorialStepConfig = {
   targetId?: string;
   childTargetId?: string;
   title: string;
-  description: React.ReactNode | ((node: FullNodeData) => React.ReactNode);
+  description:
+    | React.ReactNode
+    | ((node: FullNodeData, nodeParent?: FullNodeData, nodeChild?: FullNodeData) => React.ReactNode);
   anchor?: string;
   tooltipPosition?: "top" | "bottom" | "left" | "right" | "topLeft" | "topRight" | "bottomLeft" | "bottomRight";
   targetDelay?: number;
@@ -260,7 +262,9 @@ export type TutorialStep = {
   targetId: string;
   childTargetId?: string;
   title: string;
-  description: React.ReactNode | ((node: FullNodeData) => React.ReactNode);
+  description:
+    | React.ReactNode
+    | ((node: FullNodeData, nodeParent?: FullNodeData, nodeChild?: FullNodeData) => React.ReactNode);
   anchor: string;
   currentStepName: number;
   nextStepName: number;
@@ -480,6 +484,7 @@ export type TutorialTypeKeys =
   | "tmpProposalIdeaChild"
   | "tmpTagsReferences"
   | "tmpParentsChildrenList"
+  | "tmpPathways"
   | "tableOfContents"
   | "focusMode"
   | "redrawGraph"
@@ -499,7 +504,8 @@ export type TutorialTypeKeys =
   | "reputationLivenessBar"
   | "communityLeaderBoard"
   | "tagsReferences"
-  | "parentsChildrenList";
+  | "parentsChildrenList"
+  | "pathways";
 
 export type UserTutorial = {
   currentStep: number;
