@@ -6666,7 +6666,6 @@ const Dashboard = ({}: DashboardProps) => {
               </Suspense>
             </Box>
           )}
-          {/* <MemoizedProgressBarMenu userTutorial={userTutorial} /> */}
           <MemoizedTutorialTableOfContent
             open={openProgressBar}
             reloadPermanentGraph={reloadPermanentGraph}
