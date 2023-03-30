@@ -6675,6 +6675,7 @@ const Dashboard = ({}: DashboardProps) => {
             userTutorialState={userTutorial}
             onCancelTutorial={onCancelTutorial}
             onForceTutorial={setForcedTutorial}
+            tutorialProgress={tutorialProgress}
           />
         </Box>
       </Box>

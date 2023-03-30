@@ -33,6 +33,7 @@ type TutorialTableOfContentProps = {
   onCancelTutorial: () => void;
   onForceTutorial: (keyTutorial: TutorialTypeKeys) => void;
   reloadPermanentGraph: () => void;
+  tutorialProgress: { tutorialsComplete: number; totalTutorials: number };
 };
 
 const TutorialTableOfContent = ({
@@ -43,6 +44,7 @@ const TutorialTableOfContent = ({
   onCancelTutorial,
   onForceTutorial,
   reloadPermanentGraph,
+  tutorialProgress,
 }: TutorialTableOfContentProps) => {
   const theme = useTheme();
   const onlySmallScreen = useMediaQuery(theme.breakpoints.down("md"));
@@ -65,6 +67,10 @@ const TutorialTableOfContent = ({
       setExpanded(newExpand ? currentTutorialTitle : "");
     },
     []
+  );
+
+  const tutorialsCompletePercentage = Math.round(
+    (tutorialProgress.tutorialsComplete * 100) / tutorialProgress.totalTutorials
   );
 
   return (
@@ -111,10 +117,19 @@ const TutorialTableOfContent = ({
         <Box>
           <Stack direction="row" alignItems="center" justifyContent={"space-between"} spacing="6px">
             <Typography>Tutorials</Typography>
-            <Typography>10/20</Typography>
+            <Typography>
+              {tutorialProgress.tutorialsComplete}/{tutorialProgress.totalTutorials}
+            </Typography>
           </Stack>
           <Box sx={{ height: "4px", width: "100%", borderRadius: "3px", backgroundColor: "rgba(208, 213, 221, 0.3);" }}>
-            <Box sx={{ height: "4px", width: "50%", borderRadius: "3px", backgroundColor: "#A4FD96" }}></Box>
+            <Box
+              sx={{
+                height: "4px",
+                width: `${tutorialsCompletePercentage}%`,
+                borderRadius: "3px",
+                backgroundColor: "#A4FD96",
+              }}
+            ></Box>
           </Box>
         </Box>
       </Box>
