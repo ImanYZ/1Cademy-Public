@@ -16,7 +16,7 @@ import {
 import { Stack } from "@mui/system";
 import React, { useCallback, useState } from "react";
 
-import { gray50, gray300, gray600 } from "@/pages/home";
+import { gray50, gray200, gray300, gray600, gray700 } from "@/pages/home";
 
 import { TutorialStep, TutorialTypeKeys, UserTutorials } from "../../nodeBookTypes";
 
@@ -140,8 +140,9 @@ const TutorialTableOfContent = ({
                       component={"h4"}
                       variant={"h4"}
                       sx={{
-                        cursor: "pointer",
                         fontWeight: "600",
+                        fontSize: "18px",
+                        cursor: "pointer",
                       }}
                     >
                       {currentTutorial.title}
@@ -205,7 +206,9 @@ const TutorialTableOfContent = ({
                           component={"h4"}
                           variant={"h4"}
                           sx={{
+                            fontSize: "18px",
                             cursor: "pointer",
+                            color: theme => (theme.palette.mode === "dark" ? gray200 : gray700),
                           }}
                         >
                           {currentTutorial.title}
