@@ -10,7 +10,7 @@ type NodeHeaderProps = {
   id: string;
   open: boolean;
   onToggleNode: any;
-  onHideOffsprings: any;
+  onHideDescendants: any;
   onHideNodeHandler: any;
   sx?: SxProps<Theme>;
   disabled?: boolean;
@@ -21,7 +21,7 @@ const NodeHeader = ({
   id,
   open,
   onToggleNode,
-  onHideOffsprings,
+  onHideDescendants,
   onHideNodeHandler,
   sx,
   // setFocusView,
@@ -30,13 +30,13 @@ const NodeHeader = ({
 }: NodeHeaderProps) => {
   const closeButtonId = `${id}-close-button`;
   const openButtonId = `${id}-open-button`;
-  const hideOffspringsButtonId = `${id}-hide-offsprings-button`;
+  const hideDescendantsButtonId = `${id}-hide-descendants-button`;
   const hideButtonId = `${id}-hidden-button`;
 
   // this will execute the includes operation only when disable is TRUE (in tutorial)
   const disableCloseButton = disabled && !enableChildElements.includes(closeButtonId);
   const disableOpenButton = disabled && !enableChildElements.includes(openButtonId);
-  const disableHideOffspringsButton = disabled && !enableChildElements.includes(hideOffspringsButtonId);
+  const disableHideDescendantsButton = disabled && !enableChildElements.includes(hideDescendantsButtonId);
   const disableHideButton = disabled && !enableChildElements.includes(hideButtonId);
 
   return (
@@ -83,10 +83,10 @@ const NodeHeader = ({
       <Tooltip title="Hide all the descendants of this node.">
         <span>
           <IconButton
-            disabled={disableHideOffspringsButton}
-            id={`${id}-hide-offsprings-button`}
+            disabled={disableHideDescendantsButton}
+            id={hideDescendantsButtonId}
             color="inherit"
-            onClick={onHideOffsprings}
+            onClick={onHideDescendants}
             aria-label="delete"
             size="small"
           >
@@ -98,7 +98,7 @@ const NodeHeader = ({
         <span>
           <IconButton
             disabled={disableHideButton}
-            id={`${id}-hiden-button`}
+            id={hideButtonId}
             color="inherit"
             onClick={e => onHideNodeHandler(e)}
             aria-label="delete"

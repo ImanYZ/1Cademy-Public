@@ -192,7 +192,6 @@ const NotificationSidebar = ({
   };
   const a11yProps = (index: number) => {
     return {
-      id: `simple-tab-${index}`,
       "aria-controls": `simple-tabpanel-${index}`,
     };
   };
@@ -220,8 +219,13 @@ const NotificationSidebar = ({
           }}
         >
           <Tabs value={value} onChange={handleChange} aria-label={"Notification Tabs"}>
-            {[{ title: "Unread" }, { title: "Read" }].map((tabItem: any, idx: number) => (
-              <Tab key={tabItem.title} label={tabItem.title} {...a11yProps(idx)} />
+            {[{ title: "Unread" }, { title: "Read" }].map((tabItem, idx: number) => (
+              <Tab
+                key={tabItem.title}
+                id={`notifications-tab-${tabItem.title.toLowerCase()}`}
+                label={tabItem.title}
+                {...a11yProps(idx)}
+              />
             ))}
           </Tabs>
         </Box>
@@ -266,7 +270,7 @@ const NotificationSidebar = ({
           )}
         </Box>
       }
-    ></SidebarWrapper>
+    />
   );
 };
 export const MemoizedNotificationSidebar = React.memo(NotificationSidebar);

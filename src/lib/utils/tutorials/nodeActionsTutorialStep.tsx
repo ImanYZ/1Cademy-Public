@@ -1,5 +1,7 @@
 import CheckIcon from "@mui/icons-material/Check";
 import CloseIcon from "@mui/icons-material/Close";
+import { Typography } from "@mui/material";
+import { Stack } from "@mui/system";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import { FullNodeData, TutorialState, TutorialStep, TutorialStepConfig } from "src/nodeBookTypes";
@@ -103,15 +105,15 @@ const UPTOVE_STEPS: TutorialStepConfig[] = [
     title: "Upvoting",
     childTargetId: "node-footer-upvotes",
     description: (node: FullNodeData) => (
-      <>
-        {"If this node is helpful, you can vote as correct, for example:"}
-        <br />
-        {`This node has ${node.corrects}`}
-        <CheckIcon fontSize="small" color="success" sx={{ verticalAlign: "middle", mx: "4px" }} />
-        {`upvotes, with your vote will have ${node.corrects + 1}`}
-        <CheckIcon fontSize="small" color="success" sx={{ verticalAlign: "middle", mx: "4px" }} />
-        {"upvotes"}
-      </>
+      <Stack>
+        <Typography>
+          You can <b>upvote</b> if this node is helpful, the node currently has {node.corrects}
+          <CheckIcon fontSize="small" color="success" sx={{ verticalAlign: "text-top" }} />. Upvoting will increase the
+          count to {node.corrects + 1}
+          <CheckIcon fontSize="small" color="success" sx={{ verticalAlign: "text-top" }} />, ensuring the quality of the
+          node.
+        </Typography>
+      </Stack>
     ),
     isClickable: true,
   },
@@ -121,21 +123,32 @@ const DOWNVOTE_STEPS: TutorialStepConfig[] = [
     title: "Downvoting",
     childTargetId: "node-footer-downvotes",
     description: (node: FullNodeData) => (
-      <>
-        {"If this note is not helpful, you can vote as wrong, for example:"}
-        <br />
-        {`this node has ${node.wrongs}`}
-        <CloseIcon fontSize="small" color="error" sx={{ verticalAlign: "middle", mx: "4px" }} />
-        {`downvotes with your vote will have ${node.wrongs + 1}`}
-        <CloseIcon fontSize="small" color="error" sx={{ verticalAlign: "middle", mx: "4px" }} />
-        {"downvotes."}
-        <br />
+      <Stack>
+        <Typography>
+          You can downvote if this node is unhelpful, the node currently has {node.wrongs}
+          <CloseIcon fontSize="small" color="error" sx={{ verticalAlign: "text-top" }} /> downvotes. your downvote will
+          increase the count to {node.wrongs + 1}
+          <CloseIcon fontSize="small" color="error" sx={{ verticalAlign: "text-top" }} />.
+        </Typography>
+        <Typography>The node will be removed if:</Typography>
+
         <MarkdownRender
-          text={`Only if $\${Upvotes} < {Downvotes}$$ this node will be removed, in this case: $$${node.corrects} < ${
-            node.wrongs + 1
-          }$$, ${node.corrects < node.wrongs + 1 ? "this note will be removed." : "this note won't be removed."}`}
+          text={`${String.raw`$$\text{Downvotes} > \text{Upvotes}$$`}`}
+          sx={{ my: "4px", alignSelf: "center" }}
         />
-      </>
+        <Typography>In this case:</Typography>
+        <MarkdownRender
+          text={`$$${String.raw`\text{${node.wrongs + 1}}`}${
+            node.wrongs + 1 > node.corrects ? " > " : " < "
+          }${String.raw`\text{${node.corrects}}`}$$`}
+          sx={{ alignSelf: "center" }}
+        />
+        <Typography>
+          {node.wrongs + 1 > node.corrects
+            ? "The node will be removed from the map."
+            : "The node won't be removed from the map."}
+        </Typography>
+      </Stack>
     ),
     isClickable: true,
   },
@@ -157,8 +170,8 @@ const HIDE_STEPS: TutorialStepConfig[] = [
 ];
 const HIDE_OFFSPRING_STEPS: TutorialStepConfig[] = [
   {
-    title: "Hiding offspring",
-    childTargetId: "hide-offsprings-button",
+    title: "Hiding descendants",
+    childTargetId: "hide-descendants-button",
     description: (
       <MarkdownRender
         text={
@@ -197,6 +210,35 @@ const COLLAPSE_STEPS: TutorialStepConfig[] = [
   },
 ];
 
+const TAGS_REFERENCES_STEPS: TutorialStepConfig[] = [
+  {
+    title: "List of References",
+    childTargetId: "node-references",
+    description: (
+      <MarkdownRender
+        text={
+          "This is the list of references for this node. This displays the reference nodes (which contain information about source material) used to create this node."
+        }
+      />
+    ),
+    isClickable: true,
+    outline: "shallow",
+  },
+  {
+    title: "List of Tags",
+    childTargetId: "node-tags",
+    description: (
+      <MarkdownRender
+        text={
+          "This is the list of tags for this node. Default tags correspond with the community tag of the node creator by default. They show the various subject areas covered by a node."
+        }
+      />
+    ),
+    isClickable: true,
+    outline: "shallow",
+  },
+];
+
 export const PARENT_CHILDREN_STEPS_COMPLETE: TutorialStep[] = PARENT_CHILDREN_STEPS.map((c, i, s) => {
   return { ...getBaseStepConfig(i + 1, s.length), ...c };
 });
@@ -228,5 +270,8 @@ export const COLLAPSE_STEPS_COMPLETE: TutorialStep[] = COLLAPSE_STEPS.map((c, i,
   return { ...getBaseStepConfig(i + 1, s.length), ...c };
 });
 export const EXPAND_STEPS_COMPLETE: TutorialStep[] = EXPAND_STEPS.map((c, i, s) => {
+  return { ...getBaseStepConfig(i + 1, s.length), ...c };
+});
+export const TAGS_REFERENCES_STEPS_COMPLETE: TutorialStep[] = TAGS_REFERENCES_STEPS.map((c, i, s) => {
   return { ...getBaseStepConfig(i + 1, s.length), ...c };
 });

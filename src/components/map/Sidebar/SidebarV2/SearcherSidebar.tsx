@@ -3,7 +3,6 @@ import ControlPointIcon from "@mui/icons-material/ControlPoint";
 import CreateIcon from "@mui/icons-material/Create";
 import DoneIcon from "@mui/icons-material/Done";
 import EventAvailableIcon from "@mui/icons-material/EventAvailable";
-import FilterListIcon from "@mui/icons-material/FilterList";
 import SearchIcon from "@mui/icons-material/Search";
 import {
   Checkbox,
@@ -93,7 +92,6 @@ const SearcherSidebar = ({
   const [sortDirection, setSortDirection] = useState<SortDirection>("DESCENDING");
   const [chosenTags, setChosenTags] = useState<ChosenTag[]>([]);
   const [search, setSearch] = useState<string>(nodeBookState.searchQuery);
-  const [openSortOptions, setOpenSortOptions] = useState<boolean>(false);
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [isPending, startTransition] = useTransition();
 
@@ -147,7 +145,6 @@ const SearcherSidebar = ({
           totalPage: Math.ceil((data.numResults || 0) / (data.perPage || 10)),
           totalResults: data.numResults,
         });
-        // };
         setIsRetrieving(false);
       } catch (err) {
         console.error(err);
@@ -178,7 +175,7 @@ const SearcherSidebar = ({
     (inputTitle: HTMLElement) => {
       if (!open) return;
       if (!inputTitle) return;
-      //inputTitle.focus();
+      inputTitle.focus();
     },
     [open]
   );
@@ -395,25 +392,6 @@ const SearcherSidebar = ({
               fontWeight: "none",
             }}
           />
-
-          <FilterListIcon
-            onClick={() => setOpenSortOptions(!openSortOptions)}
-            sx={{
-              display: theme => (innerWidth < theme.breakpoints.values.sm ? "block" : "none"),
-              zIndex: 1,
-              cursor: "pointer",
-              color: "rgba(88, 88, 88,1)",
-              fontWeight: "none",
-            }}
-          />
-
-          {/* {onlyTags ? (
-              ""
-            ) : (
-              <span className="tagText recoverDefaultTags" onClick={setRecoverDefaultTags}>
-                Recover Default Tag(s)
-              </span>
-            )} */}
         </Box>
 
         {((isMovil && !showTagSelector) || !isMovil) && (
@@ -476,22 +454,11 @@ const SearcherSidebar = ({
                               fontSize: "12px",
                             }}
                           >
-                            <Checkbox
-                              // className={"searchCheckbox " + (nodeTypes.includes(nodeType) ? "selected" : "")}
-                              checked={nodeTypes.includes(nodeType)}
-                              // sx={{}}
-                            />
+                            <Checkbox checked={nodeTypes.includes(nodeType)} />
                             <ListItemIcon>
-                              <NodeTypeIcon
-                                // className={nodeTypes.includes(nodeType) ? "selected" : ""}
-                                nodeType={nodeType}
-                              />
+                              <NodeTypeIcon nodeType={nodeType} />
                             </ListItemIcon>
-                            <ListItemText
-                              // className={nodeTypes.includes(nodeType) ? "selected" : ""}
-                              primary={nodeType}
-                              sx={{ fontSize: "12px" }}
-                            />
+                            <ListItemText primary={nodeType} sx={{ fontSize: "12px" }} />
                           </MenuItem>
                         ))}
                       </Select>
@@ -547,14 +514,13 @@ const SearcherSidebar = ({
             <Box
               id="nodesUpdatedSinceContainer"
               style={{
-                display: innerWidth > theme.breakpoints.values.sm || openSortOptions ? "flex" : "none",
+                display: "flex",
                 justifyContent: "space-between",
                 alignItems: "center",
                 fontSize: innerWidth > 410 ? "14px" : "11px",
                 flexWrap: "wrap",
                 gap: "10px",
                 paddingTop: "13px",
-                // marginTop: "13px",
               }}
             >
               <RecentNodesList
@@ -638,7 +604,6 @@ const SearcherSidebar = ({
     onFocusSearcherInput,
     innerWidth,
     theme.breakpoints.values.sm,
-    openSortOptions,
     searchResults,
     onlyTags,
     disableRecentNodeList,
@@ -662,9 +627,7 @@ const SearcherSidebar = ({
       open={open}
       onClose={onClose}
       width={sidebarWidth}
-      height={innerWidth >= theme.breakpoints.values.sm ? 100 : 25}
       innerHeight={innerHeight}
-      // anchor="right"
       SidebarOptions={searcherOptionsMemoized}
       contentSignalState={contentSignalState}
       disabled={disableSearcher}

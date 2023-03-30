@@ -24,13 +24,10 @@
   width: 30px;
   height: 65px;
   padding-right: 10px;
-  border-radius: 10px 0px 0px 10px;
-  background-color: #2f2f2f;
   border-right: solid 1px #575757;
 }
 
 .LightMode #RightButtonsMinimizer {
-  background-color: #f2f4f7;
   border-right: solid 1px #d0d5dd;
 }
 
@@ -41,11 +38,9 @@
   height: 100%;
   width: 100%;
   cursor: auto;
-  background-color: #2f2f2f;
   border-right: solid 1px #575757;
 }
 .LightMode #RightButtonsContainer {
-  background-color: #f2f4f7;
   border-right: solid 1px #d0d5dd;
 }
 
@@ -53,6 +48,7 @@
   overflow-x: hidden;
   overflow-y: hidden;
   padding-left: 0px;
+  border-radius: 8px 0px 0px 8px;
 }
 
 #ComLeaderboardMain {
@@ -72,17 +68,13 @@
 }
 
 #ComLeaderboardMain.Minimized {
-  width: 35px;
+  width: 45px;
 }
 
 #ComLeaderboardContainer {
   height: 100%;
   width: 100%;
   /* padding-left: 70px; */
-  background-color: rgb(31, 31, 31);
-}
-.LightMode #ComLeaderboardContainer {
-  background-color: #f0f0f0;
 }
 
 #ComLeaderboardMinimizer {
@@ -91,12 +83,14 @@
   top: 0;
   width: 50px;
   height: 86px;
-  padding-right: 10px;
-  border-radius: 10px 0px 0px 10px;
-  background-color: rgb(31, 31, 31);
+  padding: 12px 8px;
+  border-radius: 8px 0px 0px 8px;
+  background-color: #1b1a1a;
+  cursor: pointer;
 }
 .LightMode #ComLeaderboardMinimizer {
-  background-color: #f0f0f0;
+  background-color: #f9fafb;
+  box-shadow: 0px 1px 2px rgba(0, 0, 0, 0.06), 0px 1px 3px rgba(0, 0, 0, 0.1);
 }
 
 #ComLeaderboardMinimizer .MetaButton {
@@ -109,28 +103,21 @@
 }
 
 #ComLeaderbaordChangerText {
-  color: #dcdcdc;
+  color: #eaecf0;
   font-size: 16px;
-  width: 63px;
-  text-align: center;
-  font-weight: bold;
+  width: 130px;
+  font-weight: 500;
   /* margin-bottom: 4px; */
 }
+
+.LightMode #ComLeaderbaordChangerText {
+  color: #475467;
+}
+
 @media screen and (max-width: 600px) and (min-width: 10px) {
   #ComLeaderbaordChangerText {
-    color: #dcdcdc;
-    font-size: 12px;
-    width: fit-content;
-    text-align: center;
-    font-weight: normal;
-    word-break: keep-all;
+    width: 115px;
   }
-  #ComLeaderbaordChangerIcon {
-    font-size: 22px !important;
-  }
-}
-.LightMode #ComLeaderbaordChangerText {
-  color: #454545;
 }
 
 #ComLeaderbaordChangerIcon {

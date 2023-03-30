@@ -13,6 +13,8 @@ type ILivelinessBarProps = {
   openUserInfoSidebar: (uname: string, imageUrl: string, fullName: string, chooseUname: string) => void;
   authEmail: string | undefined;
   user: any;
+  open: boolean;
+  setOpen: (newOpen: boolean) => void;
   disabled?: boolean;
 };
 
@@ -24,9 +26,9 @@ type UserInteractions = {
   };
 };
 
-const ReputationlinessBar = (props: ILivelinessBarProps) => {
+const ReputationlinessBar = ({ open, setOpen, ...props }: ILivelinessBarProps) => {
   const { db, onlineUsers, openUserInfoSidebar, authEmail, user, disabled = false } = props;
-  const [open, setOpen] = useState(false);
+  // const [open, setOpen] = useState(false);
   const [usersInteractions, setUsersInteractions] = useState<UserInteractions>({});
   const [users, setUsers] = useState<any>({});
   const [barHeight, setBarHeight] = useState<number>(0);
@@ -190,11 +192,14 @@ const ReputationlinessBar = (props: ILivelinessBarProps) => {
         }}
       >
         <Box
-          id="livebar"
+          id="live-bar-reputation"
           sx={{
             opacity: disabled ? 0.8 : 1,
             width: "56px",
-            background: theme => (theme.palette.mode === "dark" ? "#2F2F2F" : "#F2F4F7"),
+            background: theme =>
+              theme.palette.mode === "dark"
+                ? theme.palette.common.darkBackground
+                : theme.palette.common.lightBackground,
             borderRadius: "10px 0px 0px 10px",
             right: 0,
             top: 0,
@@ -355,7 +360,10 @@ const ReputationlinessBar = (props: ILivelinessBarProps) => {
           </Box>
           <Box
             sx={{
-              background: theme => (theme.palette.mode === "dark" ? "#2F2F2F" : "#F2F4F7"),
+              background: theme =>
+                theme.palette.mode === "dark"
+                  ? theme.palette.common.darkBackground
+                  : theme.palette.common.lightBackground,
               display: "flex",
               top: "50%",
               transform: "translate(0px, -50%)",

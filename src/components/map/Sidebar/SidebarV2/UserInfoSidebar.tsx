@@ -9,7 +9,7 @@ import MenuBookIcon from "@mui/icons-material/MenuBook";
 import ShareIcon from "@mui/icons-material/Share";
 import { Box, CircularProgress, Tab, Tabs } from "@mui/material";
 import { collection, doc, getDoc, getDocs, getFirestore, limit, query, where } from "firebase/firestore";
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, { ReactNode, useCallback, useEffect, useMemo, useState } from "react";
 import { UserTheme } from "src/knowledgeTypes";
 import { NodeType } from "src/types";
 
@@ -32,6 +32,12 @@ type UserInfoSidebarProps = {
   openLinkedNode: any;
   username: string;
 };
+
+type UserInfoTabs = {
+  title: string;
+  content: ReactNode;
+};
+
 const NODE_TYPE_ARRAY: NodeType[] = ["Concept", "Code", "Relation", "Question", "Reference", "News", "Idea"];
 const ELEMENTS_PER_PAGE = 13;
 const UserInfoSidebar = ({ open, onClose, theme, openLinkedNode, username }: UserInfoSidebarProps) => {
@@ -210,11 +216,11 @@ const UserInfoSidebar = ({ open, onClose, theme, openLinkedNode, username }: Use
   };
   const a11yProps = (index: number) => {
     return {
-      id: `simple-tab-${index}`,
+      // id: `simple-tab-${index}`,
       "aria-controls": `simple-tabpanel-${index}`,
     };
   };
-  const tabsItems = useMemo(() => {
+  const tabsItems: UserInfoTabs[] = useMemo(() => {
     return !username
       ? []
       : [
@@ -370,13 +376,19 @@ const UserInfoSidebar = ({ open, onClose, theme, openLinkedNode, username }: Use
             )}
           </div>
 
-          {!isRetrieving && (
-            <Tabs value={value} onChange={handleChange} aria-label={"Bookmarks Tabs"}>
-              {tabsItems.map((tabItem: any, idx: number) => (
-                <Tab key={tabItem.title} label={tabItem.title} {...a11yProps(idx)} />
-              ))}
-            </Tabs>
-          )}
+          <Tabs value={value} onChange={handleChange} aria-label={"Bookmarks Tabs"}>
+            {tabsItems.map((tabItem: UserInfoTabs, idx: number) => (
+              <Tab
+                id={`user-info-${tabItem.title.toLowerCase()}`}
+                key={tabItem.title}
+                label={tabItem.title}
+                {...a11yProps(idx)}
+                sx={{ borderRadius: "6px" }}
+              />
+            ))}
+          </Tabs>
+          {/* {!isRetrieving && (
+          )} */}
         </Box>
       }
       contentSignalState={contentSignalState}

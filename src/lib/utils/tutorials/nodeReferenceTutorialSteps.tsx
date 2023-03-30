@@ -3,6 +3,7 @@ import { Stack } from "@mui/material";
 
 import MarkdownRender from "../../../components/Markdown/MarkdownRender";
 import { TutorialStep, TutorialStepConfig } from "../../../nodeBookTypes";
+import { NodeTypeIconButton } from "./nodeTutorialSteps";
 import { getBaseStepConfig } from "./tutorial.utils";
 
 const NODE_REFERENCE_STEPS_CONFIG: TutorialStepConfig[] = [
@@ -11,7 +12,9 @@ const NODE_REFERENCE_STEPS_CONFIG: TutorialStepConfig[] = [
     description: (
       <Stack>
         <MarkdownRender text={"This is a **Reference** node. It can be identified by this icon. "} />
-        <MenuBookIcon sx={{ alignSelf: "center" }} />
+        <NodeTypeIconButton sx={{ alignSelf: "center", my: "4px" }}>
+          <MenuBookIcon fontSize="small" />
+        </NodeTypeIconButton>
         <MarkdownRender
           text={
             "Reference nodes are used to link as a citation to other nodes. They contain the title of a source in the title and the full APA citation in the content. Do no include page number, time stamp, or URLs in reference nodes, these go in the citation of a node."

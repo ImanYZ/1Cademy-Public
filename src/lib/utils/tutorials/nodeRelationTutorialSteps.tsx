@@ -4,6 +4,7 @@ import { Stack } from "@mui/material";
 
 import MarkdownRender from "../../../components/Markdown/MarkdownRender";
 import { TutorialStep, TutorialStepConfig } from "../../../nodeBookTypes";
+import { NodeTypeIconButton } from "./nodeTutorialSteps";
 import { getBaseStepConfig } from "./tutorial.utils";
 
 const NODE_RELATION_STEPS_CONFIG: TutorialStepConfig[] = [
@@ -12,7 +13,9 @@ const NODE_RELATION_STEPS_CONFIG: TutorialStepConfig[] = [
     description: (
       <Stack>
         <MarkdownRender text={"This is a **Relation** node. It can be identified by this icon."} />
-        <ShareIcon sx={{ alignSelf: "center" }} />
+        <NodeTypeIconButton sx={{ alignSelf: "center", my: "4px" }}>
+          <ShareIcon fontSize="small" />
+        </NodeTypeIconButton>
         <MarkdownRender
           text={
             "A Relation explains the relationship between different Concept nodes, without defining/explaining any of them. For example, you can list a number of node titles to group them in a Relation node. Another example is a Relation node that compared/contrasts two or more nodes."
@@ -26,9 +29,13 @@ const NODE_RELATION_STEPS_CONFIG: TutorialStepConfig[] = [
     title: "Concept Node vs Relation Node",
     description: (
       <>
-        <Stack direction={"row"} justifyContent={"center"} alignItems={"center"} spacing="32px">
-          <LocalLibraryIcon />
-          <ShareIcon />
+        <Stack direction={"row"} justifyContent={"center"} alignItems={"center"} spacing="24px" mt="4px">
+          <NodeTypeIconButton>
+            <LocalLibraryIcon fontSize="small" />
+          </NodeTypeIconButton>
+          <NodeTypeIconButton>
+            <ShareIcon fontSize="small" />
+          </NodeTypeIconButton>
         </Stack>
         <MarkdownRender
           text={

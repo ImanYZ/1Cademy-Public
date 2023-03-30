@@ -12,27 +12,6 @@ import { getBaseStepConfig } from "./tutorial.utils";
 export const INITIAL_NODE_TUTORIAL_STATE: TutorialState = null;
 
 dayjs.extend(relativeTime);
-// const STEPS_LENGHT = 47; // 65
-
-/**
-EX: for notebook sections
- "TOOLBAR", "01", "LIVENESS_BAR", "COMMUNITY_LEADERBOARD", "SCROLL_TO_NODE_BUTTON", "FOCUS_MODE_BUTTON"
-Ex for Node id elements to disable
-  "01-close-button",
-  "01-open-button",
-  "01-hide-offsprings-button",
-  "01-hide-button",
-  "01-node-footer-user",
-  "01-node-footer-propose",
-  "01-node-footer-downvotes",
-  "01-node-footer-upvotes",
-  "01-node-footer-tags-citations",
-  "01-button-parent-children",
-  "01-node-footer-ellipsis",
-  "01-reference-button-0"
-  "01-tag-button-0"
-  "01-node-footer-menu"
- */
 
 const RECONCILING_ACCEPTED_PROPOSALS_STEPS: TutorialStepConfig[] = [
   {
@@ -99,7 +78,7 @@ const RECONCILING_NOT_ACCEPTED_PROPOSALS_STEPS: TutorialStepConfig[] = [
       />
     ),
     anchor: "Portal",
-    tooltipPosition: "right",
+    tooltipPosition: "bottom",
     targetDelay: 300,
   },
 
@@ -167,7 +146,7 @@ const RECONCILING_NOT_ACCEPTED_PROPOSALS_STEPS: TutorialStepConfig[] = [
       </Stack>
     ),
     anchor: "Portal",
-    tooltipPosition: "right",
+    tooltipPosition: "bottom",
     targetDelay: 300,
   },
   {
@@ -186,7 +165,7 @@ const RECONCILING_NOT_ACCEPTED_PROPOSALS_STEPS: TutorialStepConfig[] = [
         />
       </Stack>
     ),
-    tooltipPosition: "right",
+    tooltipPosition: "bottom",
 
     anchor: "Portal",
     targetDelay: 300,

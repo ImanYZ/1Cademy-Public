@@ -1,4 +1,5 @@
 import { GroupTutorial } from "../../../components/tutorial/TutorialTableOfContent";
+import { BOOKMARKS_STEPS } from "./bookmarksTutorialSteps";
 import {
   CHILD_CODE_PROPOSAL_COMPLETE,
   CHILD_CONCEPT_PROPOSAL_COMPLETE,
@@ -8,6 +9,9 @@ import {
   CHILD_REFERENCE_PROPOSAL_COMPLETE,
   CHILD_RELATION_PROPOSAL_COMPLETE,
 } from "./childrenProposalTutorialStep";
+import { COMMUNITY_LEADER_BOARD_STEPS } from "./communityLeaderBoardTutorialSteps";
+import { LEADER_BOARD_STEPS } from "./leaderBoardTutorialSteps";
+import { INTERACTION_LIVENESS_BAR_STEPS, REPUTATION_LIVENESS_BAR_STEPS } from "./livenessBarTutorialSteps";
 import { NAVIGATION_STEPS_COMPLETE } from "./navigationTutorialSteps";
 import {
   COLLAPSE_STEPS_COMPLETE,
@@ -15,6 +19,7 @@ import {
   EXPAND_STEPS_COMPLETE,
   HIDE_OFFSPRING_STEPS_COMPLETE,
   HIDE_STEPS_COMPLETE,
+  TAGS_REFERENCES_STEPS_COMPLETE,
   UPTOVE_STEPS_COMPLETE,
 } from "./nodeActionsTutorialStep";
 import { NODE_CODE } from "./nodeCodeTutorialSteps";
@@ -24,6 +29,10 @@ import { NODE_QUESTION } from "./nodeQuestionStepTutorialStep";
 import { NODE_REFERENCE } from "./nodeReferenceTutorialSteps";
 import { NODE_RELATION } from "./nodeRelationTutorialSteps";
 import { NODES_STEPS_COMPLETE } from "./nodeTutorialSteps";
+import { NOTIFICATION_STEPS } from "./notificationsTutorialSteps";
+import { PARENTS_CHILDREN_LIST_STEPS } from "./parentChildrenListTutorialSteps";
+import { PATHWAYS_STEPS } from "./pathwaysTutorialSteps";
+import { PENDING_PROPOSALS_STEPS_COMPLETE } from "./pendingProposalsTutorial";
 import { PROPOSING_CODE_EDIT_COMPLETE } from "./proposalCodeTutorialStep";
 import { PROPOSING_CONCEPT_EDIT_COMPLETE } from "./proposalConceptTutorialStep";
 import { PROPOSING_IDEA_EDIT_COMPLETE } from "./proposalIdeaTutorialSteps";
@@ -36,8 +45,16 @@ import {
   RECONCILING_NOT_ACCEPTED_PROPOSALS_STEPS_COMPLETE,
 } from "./reconcilingProposalsTutorialSteps";
 import { SEARCHER_STEPS_COMPLETE } from "./searcherTutorialSteps";
+import { USER_INFO_STEPS_COMPLETE } from "./userInfoTutorialSteps";
+import { USER_SETTINGS_STEPS_COMPLETE } from "./userSettingsTutorialSteps";
 
-export const GROUP_TUTORIALS: GroupTutorial[] = [
+export type LivelinessBar = "interaction" | "reputation" | null;
+
+type GetGroupTutorialsInput = {
+  livelinessBar: LivelinessBar;
+};
+
+export const getGroupTutorials = ({ livelinessBar }: GetGroupTutorialsInput): GroupTutorial[] => [
   {
     title: "Basics",
     tutorials: [
@@ -52,13 +69,13 @@ export const GROUP_TUTORIALS: GroupTutorial[] = [
         tutorials: [],
       },
       {
-        title: "Searcher Engine",
+        title: "Search Engine",
         tutorialSteps: { tutorialKey: "searcher", steps: SEARCHER_STEPS_COMPLETE },
         tutorials: [],
       },
       {
-        title: "Hide Offspring",
-        tutorialSteps: { tutorialKey: "hideOffsprings", steps: HIDE_OFFSPRING_STEPS_COMPLETE },
+        title: "Hide Descendants",
+        tutorialSteps: { tutorialKey: "hideDescendants", steps: HIDE_OFFSPRING_STEPS_COMPLETE },
         tutorials: [],
       },
       {
@@ -74,6 +91,26 @@ export const GROUP_TUTORIALS: GroupTutorial[] = [
       {
         title: "Hide the Node",
         tutorialSteps: { tutorialKey: "hideNode", steps: HIDE_STEPS_COMPLETE },
+        tutorials: [],
+      },
+    ],
+  },
+  {
+    title: "Learning Pathways",
+    tutorials: [
+      {
+        title: "Parent/Children Nodes",
+        tutorialSteps: { tutorialKey: "parentsChildrenList", steps: PARENTS_CHILDREN_LIST_STEPS },
+        tutorials: [],
+      },
+      {
+        title: "Tags and References",
+        tutorialSteps: { tutorialKey: "tagsReferences", steps: TAGS_REFERENCES_STEPS_COMPLETE },
+        tutorials: [],
+      },
+      {
+        title: "Pathways",
+        tutorialSteps: { tutorialKey: "pathways", steps: PATHWAYS_STEPS },
         tutorials: [],
       },
     ],
@@ -229,10 +266,75 @@ export const GROUP_TUTORIALS: GroupTutorial[] = [
     title: "Siderbars",
     tutorials: [
       {
-        title: "Searcher Engine",
-        tutorialSteps: { tutorialKey: "searcher", steps: SEARCHER_STEPS_COMPLETE },
+        title: "User Settings",
+        tutorialSteps: { tutorialKey: "userSettings", steps: USER_SETTINGS_STEPS_COMPLETE },
+        tutorials: [],
+      },
+      // CHECK: if is required to have search engine in 2 places, add a key to differentiate them
+      // {
+      //   title: "Search Engine",
+      //   tutorialSteps: { tutorialKey: "searcher", steps: SEARCHER_STEPS_COMPLETE },
+      //   tutorials: [],
+      // },
+      {
+        title: "Notifications",
+        tutorialSteps: { tutorialKey: "notifications", steps: NOTIFICATION_STEPS },
+        tutorials: [],
+      },
+      {
+        title: "Bookmarks",
+        tutorialSteps: { tutorialKey: "bookmarks", steps: BOOKMARKS_STEPS },
+        tutorials: [],
+      },
+
+      {
+        title: "Pending Proposals",
+        tutorialSteps: { tutorialKey: "pendingProposals", steps: PENDING_PROPOSALS_STEPS_COMPLETE },
+        tutorials: [],
+      },
+      {
+        title: "User Information",
+        tutorialSteps: { tutorialKey: "userInfo", steps: USER_INFO_STEPS_COMPLETE },
+        tutorials: [],
+      },
+    ],
+  },
+  {
+    title: "Building Reputation",
+    tutorials: [
+      {
+        title: "Leaderboard",
+        tutorialSteps: { tutorialKey: "leaderBoard", steps: LEADER_BOARD_STEPS },
+        tutorials: [],
+      },
+      ...getLivelinessBar(livelinessBar),
+      {
+        title: "Community Leaderboard",
+        tutorialSteps: { tutorialKey: "communityLeaderBoard", steps: COMMUNITY_LEADER_BOARD_STEPS },
         tutorials: [],
       },
     ],
   },
 ];
+
+const getLivelinessBar = (livelinessBar: LivelinessBar): GroupTutorial[] => {
+  if (livelinessBar === "reputation")
+    return [
+      {
+        title: "Reputation Liveliness Bar",
+        tutorialSteps: { tutorialKey: "reputationLivenessBar", steps: REPUTATION_LIVENESS_BAR_STEPS },
+        tutorials: [],
+      },
+    ];
+
+  if (livelinessBar === "interaction")
+    return [
+      {
+        title: "Interaction Liveliness Bar",
+        tutorialSteps: { tutorialKey: "interactionLivenessBar", steps: INTERACTION_LIVENESS_BAR_STEPS },
+        tutorials: [],
+      },
+    ];
+
+  return [];
+};

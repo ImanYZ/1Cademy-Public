@@ -122,7 +122,7 @@ type NodeProps = {
   openAllChildren: any;
   openAllParent: any;
   onHideNode: any;
-  hideOffsprings: any;
+  hideDescendants: any;
   toggleNode: (event: any, id: string) => void;
   openNodePart: (event: any, id: string, partType: any, openPart: any, setOpenPart: any, tags: any) => void; //
   onNodeShare: (nodeId: string, platform: string) => void;
@@ -165,6 +165,8 @@ type NodeProps = {
   // setCurrentTutorial: (newValue: TutorialType) => void;
   ableToPropose: boolean;
   setAbleToPropose: (newValue: boolean) => void;
+  openPart: OpenPart;
+  setOpenPart: (newOpenPart: OpenPart) => void;
 };
 
 const proposedChildTypesIcons: { [key in ProposedChildTypesIcons]: string } = {
@@ -242,7 +244,7 @@ const Node = ({
   openAllChildren,
   openAllParent,
   onHideNode,
-  hideOffsprings: onHideOffsprings,
+  hideDescendants: onHideDescendants,
   toggleNode,
   openNodePart,
   onNodeShare,
@@ -283,12 +285,14 @@ const Node = ({
   // setCurrentTutorial,
   ableToPropose,
   setAbleToPropose,
+  openPart,
+  setOpenPart,
 }: NodeProps) => {
   const [{ user }] = useAuth();
   const { nodeBookState } = useNodeBook();
   const [option, setOption] = useState<EditorOptions>("EDIT");
   const [showSimilarNodes, setShowSimilarNodes] = useState(true);
-  const [openPart, setOpenPart] = useState<OpenPart>(null);
+  // const [openPart, setOpenPart] = useState<OpenPart>(null);
   const [isHiding, setIsHiding] = useState(false);
   const [imageLoaded, setImageLoaded] = useState(false);
   const [isFetching, setIsFetching] = useState<boolean>(false);
@@ -470,7 +474,7 @@ const Node = ({
       }
     }
   };
-  const hideOffspringsHandler = useCallback(() => onHideOffsprings(identifier), [onHideOffsprings, identifier]);
+  const hideDescendantsHandler = useCallback(() => onHideDescendants(identifier), [onHideDescendants, identifier]);
 
   const toggleNodeHandler = useCallback(
     (event: any) => {
@@ -607,7 +611,7 @@ const Node = ({
 
   useEffect(() => {
     if (!editable && !activeNode) {
-      setOpenPart(null);
+      setOpenPart(undefined);
     }
   }, [editable, activeNode]);
 
@@ -636,6 +640,7 @@ const Node = ({
 
   const onSearch = useCallback(async (page: number, q: string) => {
     try {
+      setIsFetching(true);
       if (page < 1) {
         setSearchResults({
           data: [],
@@ -644,7 +649,6 @@ const Node = ({
           totalResults: 0,
         });
       }
-      setIsFetching(true);
       const data: SearchNodesResponse = await Post<SearchNodesResponse>("/searchNodesInNotebook", {
         q,
         nodeTypes: NODE_TYPES_ARRAY,
@@ -762,7 +766,7 @@ const Node = ({
                 id={identifier}
                 open={open}
                 onToggleNode={toggleNodeHandler}
-                onHideOffsprings={hideOffspringsHandler}
+                onHideDescendants={hideDescendantsHandler}
                 onHideNodeHandler={hideNodeHandler}
                 disabled={disabled}
                 enableChildElements={enableChildElements}
@@ -784,9 +788,9 @@ const Node = ({
                 editOption={option}
                 disabled={disableTitle}
               />
-              {editable && searchResults.data.length > 0 && (
+              {editable && (
                 <Box sx={{ marginTop: "5px" }}>
-                  {!isFetching ? (
+                  {!isFetching && searchResults.data.length > 0 && (
                     <Accordion
                       sx={{ background: "transparent" }}
                       expanded={showSimilarNodes}
@@ -889,7 +893,9 @@ const Node = ({
                         </Box>
                       </AccordionDetails>
                     </Accordion>
-                  ) : (
+                  )}
+
+                  {isFetching && (
                     <Box sx={{ marginTop: "20px", textAlign: "center" }}>
                       <CircularProgress />
                     </Box>
@@ -1292,7 +1298,7 @@ const Node = ({
               // setFocusView={() => setFocusView({ isEnabled: true, selectedNode: identifier })}
               open={open}
               onToggleNode={toggleNodeHandler}
-              onHideOffsprings={hideOffspringsHandler}
+              onHideDescendants={hideDescendantsHandler}
               onHideNodeHandler={hideNodeHandler}
               disabled={disabled}
               enableChildElements={enableChildElements}
@@ -1450,6 +1456,7 @@ export const MemoizedNode = React.memo(Node, (prev, next) => {
     prev.commentsSelected === next.commentsSelected &&
     prev.unaccepted === next.unaccepted &&
     prev.disableVotes === next.disableVotes &&
+    prev.openPart === next.openPart &&
     (!next.activeNode || prev.ableToPropose === next.ableToPropose);
   if (
     !basicChanges ||

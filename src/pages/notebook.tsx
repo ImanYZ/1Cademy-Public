@@ -2,7 +2,7 @@ import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
 import AutoFixHighIcon from "@mui/icons-material/AutoFixHigh";
 import CloseIcon from "@mui/icons-material/Close";
 import CodeIcon from "@mui/icons-material/Code";
-import HelpIcon from "@mui/icons-material/Help";
+import HelpCenterIcon from "@mui/icons-material/HelpCenter";
 import MyLocationIcon from "@mui/icons-material/MyLocation";
 import { Masonry } from "@mui/lab";
 import {
@@ -40,7 +40,7 @@ import {
 import { getDownloadURL, getStorage, ref, uploadBytesResumable } from "firebase/storage";
 import Image from "next/image";
 import NextImage from "next/image";
-import { Suspense, useCallback, useEffect, useRef, useState } from "react";
+import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
 /* eslint-disable */ //This wrapper comments it to use react-map-interaction without types
 // @ts-ignore
 import { MapInteractionCSS } from "react-map-interaction";
@@ -69,6 +69,8 @@ import { addSuffixToUrlGMT } from "@/lib/utils/string.utils";
 import LoadingImg from "../../public/animated-icon-1cademy.gif";
 import focusViewLogo from "../../public/focus.svg";
 import focusViewDarkLogo from "../../public/focus-dark.svg";
+import PrevNodeIcon from "../../public/prev-node.svg";
+import PrevNodeLightIcon from "../../public/prev-node-light.svg";
 import toolBox from "../../public/toolbox.svg";
 import toolBoxDark from "../../public/toolbox-dark.svg";
 import toolBoxDarkOpen from "../../public/toolbox-dark-open.svg";
@@ -130,13 +132,14 @@ import {
   getUserNodeChanges,
   mergeAllNodes,
 } from "../lib/utils/nodesSyncronization.utils";
-import { GROUP_TUTORIALS } from "../lib/utils/tutorials/grouptutorials";
+import { getGroupTutorials, LivelinessBar } from "../lib/utils/tutorials/grouptutorials";
 import { gtmEvent, imageLoaded, isValidHttpUrl } from "../lib/utils/utils";
 import {
   ChoosingType,
   EdgesData,
   FullNodeData,
   FullNodesData,
+  OpenPart,
   // NodeTutorialState,
   TNodeBookState,
   TNodeUpdates,
@@ -233,6 +236,7 @@ const Dashboard = ({}: DashboardProps) => {
     sNode: null,
     isSubmitting: false,
     choosingNode: null,
+    previousNode: null,
     chosenNode: null,
     initialProposal: null,
     selectedNode: null,
@@ -337,6 +341,10 @@ const Dashboard = ({}: DashboardProps) => {
     isEnabled: false,
   });
 
+  const [openLivelinessBar, setOpenLivelinessBar] = useState(false);
+  const [comLeaderboardOpen, setComLeaderboardOpen] = useState(false);
+
+  //TUTORIAL STATES
   const {
     startTutorial,
     tutorial,
@@ -351,6 +359,8 @@ const Dashboard = ({}: DashboardProps) => {
     setUserTutorial,
     userTutorial,
   } = useInteractiveTutorial({ user });
+
+  const pathwayRef = useRef({ node: "", parent: "", child: "" });
 
   const onNodeInViewport = useCallback(
     (nodeId: string) => {
@@ -404,6 +414,31 @@ const Dashboard = ({}: DashboardProps) => {
     setInnerHeight(window.innerHeight);
     setButtonsOpen(window.innerHeight > 399 ? true : false);
   }, [user?.uname]);
+
+  const pathway = useMemo(() => {
+    const edgeObjects: { parent: string; child: string }[] = Object.keys(graph.edges).map(cur => {
+      const [parent, child] = cur.split("-");
+      return { parent, child };
+    });
+    const parents = edgeObjects.reduce((acu: { [key: string]: string[] }, cur) => {
+      return { ...acu, [cur.parent]: acu[cur.parent] ? [...acu[cur.parent], cur.child] : [cur.child] };
+    }, {});
+    console.log({ pathway });
+    const pathways = edgeObjects.reduce(
+      (acu: { node: string; parent: string; child: string }, cur) => {
+        if (acu.node) return acu;
+        if (parents[cur.child]) return { parent: cur.parent, node: cur.child, child: parents[cur.child][0] };
+        return acu;
+      },
+      { node: "", parent: "", child: "" }
+    );
+    if (pathwayRef.current.node !== pathways.node && pathwayRef.current.node) {
+      return { node: "", parent: "", child: "" };
+    }
+
+    pathwayRef.current = pathways;
+    return pathways;
+  }, [graph.edges]);
 
   const scrollToNode = useCallback(
     (nodeId: string, tries = 0) => {
@@ -1688,37 +1723,37 @@ const Dashboard = ({}: DashboardProps) => {
     processHeightChange(nodeId);
   }, []);
 
-  const recursiveOffsprings = useCallback((nodeId: string): any[] => {
+  const recursiveDescendants = useCallback((nodeId: string): any[] => {
     // CHECK: this could be improve changing recursive function to iterative
     // because the recursive has a limit of call in stack memory
     // TODO: check type of children
     const children: any = g.current.successors(nodeId);
-    let offsprings: any[] = [];
+    let descendants: any[] = [];
     if (children && children.length > 0) {
       for (let child of children) {
-        offsprings = [...offsprings, child, ...recursiveOffsprings(child)];
+        descendants = [...descendants, child, ...recursiveDescendants(child)];
       }
     }
-    return offsprings;
+    return descendants;
   }, []);
 
-  const hideOffsprings = useMemoizedCallback(
+  const hideDescendants = useMemoizedCallback(
     nodeId => {
       if (notebookRef.current.choosingNode || !user) return;
 
       setGraph(graph => {
         (async () => {
           const updatedNodeIds: string[] = [];
-          const offsprings = recursiveOffsprings(nodeId);
+          const descendants = recursiveDescendants(nodeId);
 
           notebookRef.current.selectedNode = nodeId;
           nodeBookDispatch({ type: "setSelectedNode", payload: nodeId });
 
           const batch = writeBatch(db);
           try {
-            for (let offspring of offsprings) {
-              const thisNode = graph.nodes[offspring];
-              const { nodeRef, userNodeRef } = initNodeStatusChange(offspring, thisNode.userNodeId);
+            for (let descendant of descendants) {
+              const thisNode = graph.nodes[descendant];
+              const { nodeRef, userNodeRef } = initNodeStatusChange(descendant, thisNode.userNodeId);
               const userNodeData = {
                 changed: thisNode.changed,
                 correct: thisNode.correct,
@@ -1727,7 +1762,7 @@ const Dashboard = ({}: DashboardProps) => {
                 deleted: false,
                 isStudied: thisNode.isStudied,
                 bookmarked: "bookmarked" in thisNode ? thisNode.bookmarked : false,
-                node: offspring,
+                node: descendant,
                 open: thisNode.open,
                 user: user.uname,
                 visible: false,
@@ -1761,8 +1796,8 @@ const Dashboard = ({}: DashboardProps) => {
             // TODO: need to discuss about these
             let oldNodes = { ...graph.nodes };
             let oldEdges = { ...graph.edges };
-            for (let offspring of offsprings) {
-              ({ oldNodes, oldEdges } = hideNodeAndItsLinks(g.current, offspring, oldNodes, oldEdges, updatedNodeIds));
+            for (let descendant of descendants) {
+              ({ oldNodes, oldEdges } = hideNodeAndItsLinks(g.current, descendant, oldNodes, oldEdges, updatedNodeIds));
             }
             setNodeUpdates({
               nodeIds: updatedNodeIds,
@@ -1776,7 +1811,7 @@ const Dashboard = ({}: DashboardProps) => {
         return graph;
       });
     },
-    [recursiveOffsprings, isPlayingTheTutorialRef]
+    [recursiveDescendants, isPlayingTheTutorialRef]
   );
 
   const openLinkedNode = useCallback(
@@ -1822,12 +1857,14 @@ const Dashboard = ({}: DashboardProps) => {
       }
 
       if (linkedNode) {
+        nodeBookDispatch({ type: "setPreviousNode", payload: notebookRef.current.selectedNode });
         notebookRef.current.selectedNode = linkedNodeID;
         nodeBookDispatch({ type: "setSelectedNode", payload: linkedNodeID });
         setTimeout(() => {
           scrollToNode(linkedNodeID);
         }, 1500);
       } else {
+        nodeBookDispatch({ type: "setPreviousNode", payload: notebookRef.current.selectedNode });
         openNodeHandler(linkedNodeID, isInitialProposal ? typeOperation : "Searcher");
       }
 
@@ -2295,6 +2332,15 @@ const Dashboard = ({}: DashboardProps) => {
     [user /*selectionType*/, processHeightChange]
   );
 
+  const onChangeNodePart = useCallback(
+    (nodeId: string, newOpenPart: OpenPart) => {
+      setNodeParts(nodeId, node => {
+        return { ...node, localLinkingWords: newOpenPart };
+      });
+    },
+    [setNodeParts]
+  );
+
   const onNodeShare = useCallback(
     (nodeId: string, platform: string) => {
       gtmEvent("Interaction", {
@@ -2641,6 +2687,9 @@ const Dashboard = ({}: DashboardProps) => {
         thisNode.choices = choices;
         return { ...thisNode };
       });
+      if (!ableToPropose) {
+        setAbleToPropose(true);
+      }
     },
     [setNodeParts]
   );
@@ -2656,6 +2705,9 @@ const Dashboard = ({}: DashboardProps) => {
         thisNode.choices = choices;
         return { ...thisNode };
       });
+      if (!ableToPropose) {
+        setAbleToPropose(true);
+      }
     },
     [setNodeParts]
   );
@@ -2672,6 +2724,9 @@ const Dashboard = ({}: DashboardProps) => {
         thisNode.choices = choices;
         return { ...thisNode };
       });
+      if (!ableToPropose) {
+        setAbleToPropose(true);
+      }
     },
     [setNodeParts]
   );
@@ -2686,6 +2741,9 @@ const Dashboard = ({}: DashboardProps) => {
         thisNode.choices = choices;
         return { ...thisNode };
       });
+      if (!ableToPropose) {
+        setAbleToPropose(true);
+      }
     },
     [setNodeParts]
   );
@@ -2704,6 +2762,9 @@ const Dashboard = ({}: DashboardProps) => {
         thisNode.choices = choices;
         return { ...thisNode };
       });
+      if (!ableToPropose) {
+        setAbleToPropose(true);
+      }
     },
     [setNodeParts]
   );
@@ -4044,6 +4105,28 @@ const Dashboard = ({}: DashboardProps) => {
       return;
     }
 
+    const tmpOpenPartMap = new Map<TutorialTypeKeys, OpenPart>();
+    tmpOpenPartMap.set("tmpParentsChildrenList", "LinkingWords");
+    tmpOpenPartMap.set("tmpTagsReferences", "References");
+
+    if (tmpOpenPartMap.has(tutorial.name)) {
+      if (currentStep.isClickable) {
+        const selectedNodeId = notebookRef.current.selectedNode!;
+        if (!selectedNodeId) return;
+
+        onChangeNodePart(selectedNodeId, tmpOpenPartMap.get(tutorial.name));
+        return;
+      }
+    }
+
+    if (tutorial.name === "tmpPathways") {
+      if (currentStep.isClickable) {
+        openNodeHandler("r98BjyFDCe4YyLA3U8ZE");
+        openNodeHandler("sKukyeN58Wj1jfzuqnZJ");
+      }
+      return;
+    }
+
     const tutorialUpdated: UserTutorial = {
       ...userTutorial[tutorial.name],
       currentStep: currentStep.currentStepName,
@@ -4071,6 +4154,8 @@ const Dashboard = ({}: DashboardProps) => {
     currentStep,
     db,
     forcedTutorial,
+    onChangeNodePart,
+    openNodeHandler,
     proposeNewChild,
     proposeNodeImprovement,
     setTargetId,
@@ -4149,17 +4234,23 @@ const Dashboard = ({}: DashboardProps) => {
 
   const detectAndCallSidebarTutorial = useCallback(
     (tutorialName: TutorialTypeKeys, sidebar: OpenSidebar) => {
-      const shouldIgnore = !forcedTutorial && (userTutorial[tutorialName].done || userTutorial[tutorialName].skipped);
+      const shouldIgnore = forcedTutorial
+        ? forcedTutorial !== tutorialName
+        : userTutorial[tutorialName].done || userTutorial[tutorialName].skipped;
       if (shouldIgnore) return false;
 
-      devLog("DETECT_AND_CALL_SIDEBAR_TUTORIAL", { tutorialName, node: nodeBookState.selectedNode });
+      devLog("DETECT_AND_CALL_SIDEBAR_TUTORIAL", { tutorialName, sidebar, node: nodeBookState.selectedNode });
       if (openSidebar !== sidebar) {
         setOpenSidebar(sidebar);
+      }
+
+      if (sidebar === null) {
+        nodeBookDispatch({ type: "setIsMenuOpen", payload: true });
       }
       startTutorial(tutorialName);
       return true;
     },
-    [forcedTutorial, nodeBookState.selectedNode, openSidebar, startTutorial, userTutorial]
+    [forcedTutorial, nodeBookDispatch, nodeBookState.selectedNode, openSidebar, startTutorial, userTutorial]
   );
 
   const detectAndCallTutorial = useCallback(
@@ -4169,14 +4260,17 @@ const Dashboard = ({}: DashboardProps) => {
 
       devLog("DETECT_AND_CALL_TUTORIAL", { tutorialName, node: nodeBookState.selectedNode });
 
+      console.log("aa");
       const newTargetId = nodeBookState.selectedNode ?? "";
       if (!newTargetId) return false;
 
+      console.log("bb");
       const thisNode = graph.nodes[newTargetId];
 
       if (!thisNode) return false;
       if (!targetIsValid(thisNode)) return false;
 
+      console.log("cc");
       startTutorial(tutorialName);
       setTargetId(newTargetId);
       if (forcedTutorial) {
@@ -4316,7 +4410,10 @@ const Dashboard = ({}: DashboardProps) => {
 
       const nodesTutorialIsValid = (node: FullNodeData) => node && node.open && !node.editable && !node.isNew;
 
-      if (forcedTutorial === "nodes" || !forcedTutorial) {
+      if (
+        forcedTutorial === "nodes" ||
+        (!forcedTutorial && (userTutorial["nodes"].done || userTutorial["nodes"].skipped))
+      ) {
         const result = detectAndCallTutorial("nodes", nodesTutorialIsValid);
         if (result) return;
       }
@@ -4345,6 +4442,49 @@ const Dashboard = ({}: DashboardProps) => {
         });
 
         return;
+      }
+
+      // --------------------------
+
+      if (!forcedTutorial || forcedTutorial === "tagsReferences") {
+        const result = detectAndCallTutorial(
+          "tagsReferences",
+          node => node && node.open && !node.editable && node.localLinkingWords === "References"
+        );
+        if (result) return;
+      }
+
+      // ------------------------
+
+      if (forcedTutorial === "tagsReferences") {
+        const result = detectAndForceTutorial(
+          "tmpTagsReferences",
+          "r98BjyFDCe4YyLA3U8ZE",
+          node => node && node.open && !node.editable && node.localLinkingWords !== "References"
+        );
+        if (result) return;
+      }
+      // --------------------------
+
+      const parentsChildrenListTutorialIsValid = (node: FullNodeData) =>
+        node && node.open && !node.editable && !node.isNew && node.localLinkingWords === "LinkingWords";
+
+      console.log(11, lastNodeOperation.current?.name);
+      if (forcedTutorial === "parentsChildrenList" || !forcedTutorial) {
+        const result = detectAndCallTutorial("parentsChildrenList", parentsChildrenListTutorialIsValid);
+        if (result) return;
+      }
+
+      console.log(22);
+
+      if (forcedTutorial === "parentsChildrenList") {
+        const result = detectAndForceTutorial(
+          "tmpParentsChildrenList",
+          "r98BjyFDCe4YyLA3U8ZE",
+          (node: FullNodeData) => node && node.open && !node.editable && node.localLinkingWords !== "LinkingWords"
+        );
+        console.log(33, result);
+        if (result) return; /* (lastNodeOperation.current?.name = "LinkingWords"); */
       }
 
       // --------------------------
@@ -4427,7 +4567,8 @@ const Dashboard = ({}: DashboardProps) => {
       if (forcedTutorial === "proposal" || !forcedTutorial) {
         const result = detectAndCallTutorial(
           "proposal",
-          thisNode => thisNode && thisNode.open && thisNode.editable && !thisNode.isNew
+          thisNode =>
+            thisNode && thisNode.open && thisNode.editable && !thisNode.isNew && thisNode.nodeType !== "Reference"
         );
         if (result) return;
       }
@@ -4876,27 +5017,71 @@ const Dashboard = ({}: DashboardProps) => {
         if (result) return;
       }
 
+      if (forcedTutorial === "userSettings" || openSidebar === "USER_SETTINGS") {
+        const result = detectAndCallSidebarTutorial("userSettings", "USER_SETTINGS");
+        if (result) return;
+      }
+      // --------------------------
+
+      if (forcedTutorial === "notifications" || openSidebar === "NOTIFICATION_SIDEBAR") {
+        const result = detectAndCallSidebarTutorial("notifications", "NOTIFICATION_SIDEBAR");
+        if (result) return;
+      }
+
+      // --------------------------
+
+      if (forcedTutorial === "bookmarks" || openSidebar === "BOOKMARKS_SIDEBAR") {
+        const result = detectAndCallSidebarTutorial("bookmarks", "BOOKMARKS_SIDEBAR");
+        if (result) return;
+      }
+      // --------------------------
+
+      if (forcedTutorial === "pendingProposals" || openSidebar === "PENDING_PROPOSALS") {
+        const result = detectAndCallSidebarTutorial("pendingProposals", "PENDING_PROPOSALS");
+        if (result) return;
+      }
+      // --------------------------
+
+      if (openSidebar === "USER_INFO") {
+        const result = detectAndCallSidebarTutorial("userInfo", "USER_INFO");
+        if (result) return;
+      }
+      if (forcedTutorial === "userInfo") {
+        nodeBookDispatch({
+          type: "setSelectedUser",
+          payload: {
+            username: "1man",
+            chooseUname: "true",
+            fullName: "Iman",
+            imageUrl:
+              "https://firebasestorage.googleapis.com/v0/b/onecademy-1.appspot.com/o/ProfilePictures%2F1man_Thu%2C%2006%20Feb%202020%2016%3A26%3A40%20GMT.png?alt=media&token=94459dbb-81f9-462a-83ef-62d1129f5851",
+          },
+        });
+        const result = detectAndCallSidebarTutorial("userInfo", "USER_INFO");
+        if (result) return;
+      }
+
       // --------------------------
 
       const nodesTaken = userTutorial["nodes"].done || userTutorial["nodes"].skipped;
 
       const mostParent = parentWithMostChildren();
-      const hideOffspringsTutorialIsValid = (node: FullNodeData) =>
+      const hideDescendantsTutorialIsValid = (node: FullNodeData) =>
         node && !node.editable && parentWithChildren(node.node) >= 2;
-      const hideOffspringsTutorialForcedIsValid = (node: FullNodeData) => node && !node.editable;
+      const hideDescendantsTutorialForcedIsValid = (node: FullNodeData) => node && !node.editable;
 
-      if ((!forcedTutorial && mostParent.children >= 2) || forcedTutorial === "hideOffsprings") {
-        const hideOffspringTaken = userTutorial["hideOffsprings"].done || userTutorial["hideOffsprings"].skipped;
+      if ((!forcedTutorial && mostParent.children >= 2) || forcedTutorial === "hideDescendants") {
+        const hideDescendantTaken = userTutorial["hideDescendants"].done || userTutorial["hideDescendants"].skipped;
 
-        const shouldIgnore = hideOffspringTaken || !nodesTaken;
+        const shouldIgnore = hideDescendantTaken || !nodesTaken;
 
         if (!shouldIgnore || forcedTutorial) {
           const result = detectAndForceTutorial(
-            "hideOffsprings",
+            "hideDescendants",
             mostParent.edge || "r98BjyFDCe4YyLA3U8ZE",
             mostParent.edge && mostParent.edge !== "r98BjyFDCe4YyLA3U8ZE"
-              ? hideOffspringsTutorialIsValid
-              : hideOffspringsTutorialForcedIsValid
+              ? hideDescendantsTutorialIsValid
+              : hideDescendantsTutorialForcedIsValid
           );
           if (result) {
             if (!mostParent.edge || mostParent.edge === "r98BjyFDCe4YyLA3U8ZE") {
@@ -4966,11 +5151,95 @@ const Dashboard = ({}: DashboardProps) => {
         const result = detectAndForceTutorial("hideNode", "r98BjyFDCe4YyLA3U8ZE", hideTutorialIsValid);
         if (result) return;
       }
+
+      // --------------------------
+
+      const proposalNodesTaken = userTutorial["proposal"].done || userTutorial["proposal"].skipped;
+      const isNotProposingNodes = tempNodes.size + Object.keys(changedNodes).length === 0;
+
+      // --------------------------
+
+      if (forcedTutorial === "leaderBoard" || (proposalNodesTaken && isNotProposingNodes && openSidebar === null)) {
+        const result = detectAndCallSidebarTutorial("leaderBoard", null);
+        if (result) return;
+      }
+
+      // --------------------------
+
+      if (
+        user?.livelinessBar === "reputation" &&
+        (forcedTutorial === "reputationLivenessBar" || (proposalNodesTaken && isNotProposingNodes && openLivelinessBar))
+      ) {
+        const shouldIgnore = forcedTutorial
+          ? forcedTutorial !== "reputationLivenessBar"
+          : userTutorial["reputationLivenessBar"].done || userTutorial["reputationLivenessBar"].skipped;
+        if (!shouldIgnore) {
+          if (!openLivelinessBar) setOpenLivelinessBar(true);
+          startTutorial("reputationLivenessBar");
+          return;
+        }
+      }
+
+      // --------------------------
+
+      if (
+        user?.livelinessBar === "interaction" &&
+        (forcedTutorial === "interactionLivenessBar" ||
+          (proposalNodesTaken && isNotProposingNodes && openLivelinessBar))
+      ) {
+        const shouldIgnore = forcedTutorial
+          ? forcedTutorial !== "interactionLivenessBar"
+          : userTutorial["interactionLivenessBar"].done || userTutorial["interactionLivenessBar"].skipped;
+        if (!shouldIgnore) {
+          if (!openLivelinessBar) setOpenLivelinessBar(true);
+          startTutorial("interactionLivenessBar");
+          return;
+        }
+      }
+
+      // --------------------------
+
+      if (
+        forcedTutorial === "communityLeaderBoard" ||
+        (proposalNodesTaken && isNotProposingNodes && comLeaderboardOpen)
+      ) {
+        const shouldIgnore = forcedTutorial
+          ? forcedTutorial !== "communityLeaderBoard"
+          : userTutorial["communityLeaderBoard"].done || userTutorial["communityLeaderBoard"].skipped;
+        if (!shouldIgnore) {
+          if (!comLeaderboardOpen) setComLeaderboardOpen(true);
+          startTutorial("communityLeaderBoard");
+          return;
+        }
+      }
+
+      // --------------------------
+
+      if (forcedTutorial === "pathways" || proposalNodesTaken) {
+        const shouldIgnore = forcedTutorial
+          ? forcedTutorial !== "pathways"
+          : userTutorial["pathways"].done || userTutorial["pathways"].skipped;
+        if (!shouldIgnore) {
+          if (pathway.node) {
+            setTargetId(pathway.node);
+            nodeBookDispatch({ type: "setSelectedNode", payload: pathway.node });
+            notebookRef.current.selectedNode = pathway.node;
+            scrollToNode(pathway.node);
+            startTutorial("pathways");
+            return;
+          }
+        }
+      }
+      if (forcedTutorial === "pathways") {
+        const result = detectAndForceTutorial("tmpPathways", "rWYUNisPIVMBoQEYXgNj", node => node && node.open);
+        if (result) return;
+      }
     };
 
     detectTriggerTutorial();
   }, [
     buttonsOpen,
+    comLeaderboardOpen,
     detectAndCallChildTutorial,
     detectAndCallSidebarTutorial,
     detectAndCallTutorial,
@@ -4981,13 +5250,18 @@ const Dashboard = ({}: DashboardProps) => {
     getGraphOpenedNodes,
     graph.nodes,
     nodeBookDispatch,
+    nodeBookState.selectedNode,
+    openLivelinessBar,
     openNodeHandler,
     openSidebar,
     parentWithChildren,
     parentWithMostChildren,
+    pathway,
+    scrollToNode,
     setTargetId,
     startTutorial,
     tutorial,
+    user?.livelinessBar,
     userTutorial,
     userTutorialLoaded,
   ]);
@@ -4996,6 +5270,7 @@ const Dashboard = ({}: DashboardProps) => {
     if (!userTutorialLoaded) return;
     if (firstLoading) return;
     if (!tutorial) return;
+    if (!currentStep) return;
 
     if (focusView.isEnabled) {
       setTutorial(null);
@@ -5006,7 +5281,7 @@ const Dashboard = ({}: DashboardProps) => {
     devLog("USE_EFFECT: DETECT_TO_REMOVE_TUTORIAL", tutorial);
 
     if (tutorial.name === "nodes") {
-      const nodesTutorialIsValid = (node: FullNodeData) => node && node.open;
+      const nodesTutorialIsValid = (node: FullNodeData) => node && node.open; // TODO: add other validations check parentsChildrenList
       const node = graph.nodes[targetId];
       if (!nodesTutorialIsValid(node)) {
         setTutorial(null);
@@ -5016,10 +5291,22 @@ const Dashboard = ({}: DashboardProps) => {
 
     // --------------------------
 
-    if (tutorial.name === "hideOffsprings") {
-      const hideOffspringsNodeTutorialIsValid = (node: FullNodeData) => Boolean(node) && !node.editable;
+    if (tutorial.name === "parentsChildrenList") {
+      const nodesTutorialIsValid = (node: FullNodeData) =>
+        node && node.open && !node.editable && !node.isNew && node.localLinkingWords === "LinkingWords";
       const node = graph.nodes[targetId];
-      if (!hideOffspringsNodeTutorialIsValid(node)) {
+      if (!nodesTutorialIsValid(node)) {
+        setTutorial(null);
+        setForcedTutorial(null);
+      }
+    }
+
+    // --------------------------
+
+    if (tutorial.name === "hideDescendants") {
+      const hideDescendantsNodeTutorialIsValid = (node: FullNodeData) => Boolean(node) && !node.editable;
+      const node = graph.nodes[targetId];
+      if (!hideDescendantsNodeTutorialIsValid(node)) {
         setTutorial(null);
         setForcedTutorial(null);
       }
@@ -5149,6 +5436,7 @@ const Dashboard = ({}: DashboardProps) => {
       const node = graph.nodes[targetId];
       if (!tmpEditNodeIsValid(node)) {
         setTutorial(null);
+        if (currentStep?.childTargetId) removeStyleFromTarget(currentStep.childTargetId, targetId);
         if (node && node.editable) return;
 
         setForcedTutorial(null);
@@ -5174,6 +5462,59 @@ const Dashboard = ({}: DashboardProps) => {
       }
     }
 
+    // --------------------------
+
+    if (tutorial.name === "tmpParentsChildrenList") {
+      const isValid = (node: FullNodeData) =>
+        node && node.open && !node.editable && !Boolean(node.isNew) && node.localLinkingWords !== "LinkingWords";
+      const node = graph.nodes[targetId];
+      console.log(11, node);
+      if (!isValid(node)) {
+        setTutorial(null);
+        console.log(22);
+        if (node && node.localLinkingWords === "LinkingWords") return;
+        console.log(33);
+        setForcedTutorial(null);
+        if (currentStep?.childTargetId) removeStyleFromTarget(currentStep.childTargetId, targetId);
+      }
+    }
+    // --------------------------
+
+    if (tutorial.name === "tmpTagsReferences") {
+      const isValid = (node: FullNodeData) =>
+        node && node.open && !node.editable && !Boolean(node.isNew) && node.localLinkingWords !== "References";
+      const node = graph.nodes[targetId];
+      if (!isValid(node)) {
+        setTutorial(null);
+
+        if (node && node.localLinkingWords === "References") return;
+        setForcedTutorial(null);
+        if (currentStep?.childTargetId) removeStyleFromTarget(currentStep.childTargetId, targetId);
+      }
+    }
+    // --------------------------
+
+    if (tutorial.name === "pathways") {
+      const isValid = (node: FullNodeData) =>
+        node && !node.editable && !Boolean(node.isNew) && pathway.child && pathway.parent;
+      const node = graph.nodes[targetId];
+      if (!isValid(node)) {
+        setTutorial(null);
+        setForcedTutorial(null);
+        pathwayRef.current = { node: "", parent: "", child: "" };
+        if (currentStep?.childTargetId) removeStyleFromTarget(currentStep.childTargetId, targetId);
+      }
+    }
+    // --------------------------
+
+    if (tutorial.name === "tmpPathways") {
+      const isValid = (node: FullNodeData) =>
+        node && !node.editable && !Boolean(node.isNew) && !pathway.child && !pathway.parent;
+      const node = graph.nodes[targetId];
+      if (!isValid(node)) {
+        setTutorial(null);
+      }
+    }
     // --------------------------
 
     if (tutorial.name === "tableOfContents") {
@@ -5261,6 +5602,14 @@ const Dashboard = ({}: DashboardProps) => {
         setForcedTutorial(null);
       }
     }
+    // --------------------------
+
+    if (tutorial.name === "userSettings") {
+      if (openSidebar === "USER_SETTINGS") return;
+      setTutorial(null);
+      setForcedTutorial(null);
+      if (currentStep?.childTargetId) removeStyleFromTarget(currentStep.childTargetId, targetId);
+    }
 
     // --------------------------
 
@@ -5268,18 +5617,93 @@ const Dashboard = ({}: DashboardProps) => {
       if (openSidebar === "SEARCHER_SIDEBAR") return;
       setTutorial(null);
       setForcedTutorial(null);
+      if (currentStep?.childTargetId) removeStyleFromTarget(currentStep.childTargetId, targetId);
     }
 
     // --------------------------
+
+    if (tutorial.name === "notifications") {
+      if (openSidebar === "NOTIFICATION_SIDEBAR") return;
+      setTutorial(null);
+      setForcedTutorial(null);
+      if (currentStep?.childTargetId) removeStyleFromTarget(currentStep.childTargetId, targetId);
+    }
+
+    // --------------------------
+
+    if (tutorial.name === "bookmarks") {
+      if (openSidebar === "BOOKMARKS_SIDEBAR") return;
+      setTutorial(null);
+      setForcedTutorial(null);
+      if (currentStep?.childTargetId) removeStyleFromTarget(currentStep.childTargetId, targetId);
+    }
+
+    // --------------------------
+
+    if (tutorial.name === "pendingProposals") {
+      if (openSidebar === "PENDING_PROPOSALS") return;
+      setTutorial(null);
+      setForcedTutorial(null);
+      if (currentStep?.childTargetId) removeStyleFromTarget(currentStep.childTargetId, targetId);
+    }
+
+    // --------------------------
+
+    if (tutorial.name === "leaderBoard") {
+      if (openSidebar === null) return;
+      setTutorial(null);
+      setForcedTutorial(null);
+      if (currentStep?.childTargetId) removeStyleFromTarget(currentStep.childTargetId, targetId);
+    }
+
+    // --------------------------
+
+    if (tutorial.name === "reputationLivenessBar") {
+      if (openLivelinessBar) return;
+      setTutorial(null);
+      setForcedTutorial(null);
+      if (currentStep?.childTargetId) removeStyleFromTarget(currentStep.childTargetId, targetId);
+    }
+
+    // --------------------------
+
+    if (tutorial.name === "interactionLivenessBar") {
+      if (openLivelinessBar) return;
+      setTutorial(null);
+      setForcedTutorial(null);
+      if (currentStep?.childTargetId) removeStyleFromTarget(currentStep.childTargetId, targetId);
+    }
+
+    // --------------------------
+
+    if (tutorial.name === "communityLeaderBoard") {
+      if (comLeaderboardOpen) return;
+      setTutorial(null);
+      setForcedTutorial(null);
+      if (currentStep?.childTargetId) removeStyleFromTarget(currentStep.childTargetId, targetId);
+    }
+
+    // --------------------------
+
+    if (tutorial.name === "userInfo") {
+      if (openSidebar === "USER_INFO") return;
+      setTutorial(null);
+      setForcedTutorial(null);
+      if (currentStep?.childTargetId) removeStyleFromTarget(currentStep.childTargetId, targetId);
+    }
   }, [
     buttonsOpen,
+    comLeaderboardOpen,
+    currentStep,
     detectAndRemoveTutorial,
     firstLoading,
     focusView.isEnabled,
     graph.nodes,
     nodeBookState.selectedNode,
+    openLivelinessBar,
     openProgressBar,
     openSidebar,
+    pathway,
     setTutorial,
     targetId,
     tutorial,
@@ -5299,6 +5723,10 @@ const Dashboard = ({}: DashboardProps) => {
     }
   }, [graph.nodes, setTargetId, targetId, tutorial]);
 
+  const tutorialGroup = useMemo(() => {
+    return getGroupTutorials({ livelinessBar: (user?.livelinessBar as LivelinessBar) ?? null });
+  }, [user?.livelinessBar]);
+
   return (
     <div className="MapContainer" style={{ overflow: "hidden" }}>
       {currentStep?.anchor && (
@@ -5315,6 +5743,9 @@ const Dashboard = ({}: DashboardProps) => {
               onPreviousStep={onPreviousStep}
               stepsLength={tutorial.steps.length}
               node={graph.nodes[targetId]}
+              forcedTutorial={forcedTutorial}
+              groupTutorials={tutorialGroup}
+              onForceTutorial={setForcedTutorial}
               isOnPortal
             />
           )}
@@ -5355,6 +5786,91 @@ const Dashboard = ({}: DashboardProps) => {
               <CloseIcon fontSize="large" />
             </Button>
           </div>
+        )}
+
+        {nodeBookState.previousNode && (
+          <Box
+            sx={{
+              position: "absolute",
+              width: "auto",
+              left: "50%",
+              transform: "translateX(-50%)",
+              bottom: "35px",
+              background: theme => (theme.palette.mode === "dark" ? "#1F1F1F" : "#F9FAFB"),
+              fontFamily: "Roboto",
+              fontStyle: "normal",
+              fontWeight: "normal",
+              fontSize: "25px",
+              lineHeight: "28px",
+              color: "#e5e5e5",
+              zIndex: "4",
+              textAlign: "center",
+              overflow: "hidden",
+              display: "flex",
+              height: "40px",
+            }}
+          >
+            <Box
+              sx={{
+                paddingTop: "3px",
+                borderRight: "solid 1px #98A2B3",
+                paddingX: "5px",
+                ":hover": {
+                  background: theme => (theme.palette.mode === "dark" ? "#2F2F2F" : "#EAECF0"),
+                },
+              }}
+            >
+              <Button
+                onClick={() => {
+                  notebookRef.current.selectedNode = nodeBookState.previousNode;
+                  nodeBookDispatch({ type: "setSelectedNode", payload: nodeBookState.previousNode });
+                  setTimeout(() => {
+                    scrollToNode(nodeBookState.previousNode);
+                  }, 1500);
+                  nodeBookDispatch({ type: "setPreviousNode", payload: null });
+                }}
+                sx={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "10px",
+                  ":hover": {
+                    background: "transparent",
+                  },
+                }}
+              >
+                <NextImage
+                  width={"20px"}
+                  src={theme.palette.mode === "dark" ? PrevNodeIcon : PrevNodeLightIcon}
+                  alt="logo 1cademy"
+                />
+                <Typography
+                  sx={{
+                    color: theme => (theme.palette.mode === "dark" ? "#FCFCFD" : "#1D2939"),
+                  }}
+                >
+                  Return to previous node
+                </Typography>
+              </Button>
+            </Box>
+            <Button
+              sx={{
+                minWidth: "30px!important",
+                ":hover": {
+                  background: theme => (theme.palette.mode === "dark" ? "#2F2F2F" : "#EAECF0"),
+                },
+              }}
+              onClick={() => {
+                nodeBookDispatch({ type: "setPreviousNode", payload: null });
+              }}
+            >
+              <CloseIcon
+                fontSize="small"
+                sx={{
+                  color: theme => (theme.palette.mode === "dark" ? "#A4A4A4" : "#98A2B3"),
+                }}
+              />
+            </Button>
+          </Box>
         )}
         <Box sx={{ width: "100vw", height: "100vh", overflow: "hidden" }}>
           {
@@ -5547,7 +6063,7 @@ const Dashboard = ({}: DashboardProps) => {
                 onClose={() => onCloseSidebar()}
                 sidebarWidth={sidebarWidth()}
                 innerHeight={innerHeight}
-                innerWidth={windowWith}
+                // innerWidth={windowWith}
               />
               <MemoizedUserInfoSidebar
                 theme={settings.theme}
@@ -5610,7 +6126,8 @@ const Dashboard = ({}: DashboardProps) => {
           <MemoizedCommunityLeaderboard
             userTagId={user?.tagId ?? ""}
             pendingProposalsLoaded={pendingProposalsLoaded}
-            disabled={Boolean(["TT"].includes("COMMUNITY_LEADERBOARD"))}
+            comLeaderboardOpen={comLeaderboardOpen}
+            setComLeaderboardOpen={setComLeaderboardOpen}
           />
 
           <Box
@@ -5647,7 +6164,6 @@ const Dashboard = ({}: DashboardProps) => {
                 position: "fixed",
                 width: { xs: "50px", sm: "60px" },
                 right: "8px",
-                background: theme => (theme.palette.mode === "dark" ? "#2F2F2F" : "#f2f4f7"),
                 height: { xs: "44px", sm: "60px" },
                 borderRadius: buttonsOpen ? "0px 8px 8px 0px" : "8px",
                 padding: "10px",
@@ -5656,6 +6172,10 @@ const Dashboard = ({}: DashboardProps) => {
                   theme.palette.mode === "dark"
                     ? "0px 1px 2px rgba(0, 0, 0, 0.06), 0px 1px 3px rgba(0, 0, 0, 0.1)"
                     : "box-shadow: 0px 1px 2px rgba(0, 0, 0, 0.06), 0px 1px 3px rgba(0, 0, 0, 0.1)",
+                background: theme =>
+                  theme.palette.mode === "dark"
+                    ? theme.palette.common.darkBackground
+                    : theme.palette.common.lightBackground,
               }}
               onClick={() => setButtonsOpen(!buttonsOpen)}
             >
@@ -5710,6 +6230,10 @@ const Dashboard = ({}: DashboardProps) => {
                 alignItems: "center",
                 justifyContent: "flex-start",
                 gap: { xs: "5px", md: "16px" },
+                background: theme =>
+                  theme.palette.mode === "dark"
+                    ? theme.palette.common.darkBackground
+                    : theme.palette.common.lightBackground,
               }}
             >
               <Box
@@ -5717,16 +6241,28 @@ const Dashboard = ({}: DashboardProps) => {
                 sx={{
                   width: "100%",
                   display: "flex",
-                  justifyContent: "flex-start",
+                  justifyContent: "space-evenly",
                   alignItems: "center",
                   gap: {
                     xs: "5px",
                     md: "10px",
                   },
                   height: "inherit",
+                  background: theme =>
+                    theme.palette.mode === "dark"
+                      ? theme.palette.common.darkBackground
+                      : theme.palette.common.lightBackground,
                 }}
               >
-                <Box id="RightButtonsMinimizer">
+                <Box
+                  id="RightButtonsMinimizer"
+                  sx={{
+                    background: theme =>
+                      theme.palette.mode === "dark"
+                        ? theme.palette.common.darkBackground
+                        : theme.palette.common.lightBackground,
+                  }}
+                >
                   <Box
                     onClick={() => setButtonsOpen(false)}
                     sx={{
@@ -5754,6 +6290,10 @@ const Dashboard = ({}: DashboardProps) => {
                     color="secondary"
                     onClick={onScrollToLastNode}
                     disabled={!nodeBookState.selectedNode ? true : false}
+                    sx={{
+                      opacity: !nodeBookState.selectedNode ? 0.5 : undefined,
+                      padding: { xs: "2px", sm: "8px" },
+                    }}
                   >
                     <MyLocationIcon sx={{ color: theme => (theme.palette.mode === "dark" ? "#CACACA" : "#667085") }} />
                   </IconButton>
@@ -5767,6 +6307,7 @@ const Dashboard = ({}: DashboardProps) => {
                       background: theme.palette.mode === "dark" ? "#404040" : "#EAECF0",
                       borderRadius: "8px",
                     },
+                    padding: { xs: "2px", sm: "8px" },
                   }}
                 >
                   <IconButton
@@ -5791,6 +6332,7 @@ const Dashboard = ({}: DashboardProps) => {
                       background: theme.palette.mode === "dark" ? "#404040" : "#EAECF0",
                       borderRadius: "8px",
                     },
+                    padding: { xs: "2px", sm: "8px" },
                   }}
                 >
                   <IconButton
@@ -5803,7 +6345,7 @@ const Dashboard = ({}: DashboardProps) => {
                       }
                     }}
                   >
-                    <HelpIcon sx={{ color: theme => (theme.palette.mode === "dark" ? "#CACACA" : "#667085") }} />
+                    <HelpCenterIcon sx={{ color: theme => (theme.palette.mode === "dark" ? "#CACACA" : "#667085") }} />
                   </IconButton>
                 </Tooltip>
 
@@ -5815,6 +6357,7 @@ const Dashboard = ({}: DashboardProps) => {
                       background: theme.palette.mode === "dark" ? "#404040" : "#EAECF0",
                       borderRadius: "8px",
                     },
+                    padding: { xs: "2px", sm: "8px" },
                   }}
                 >
                   <IconButton
@@ -5828,6 +6371,9 @@ const Dashboard = ({}: DashboardProps) => {
                       }
                     }}
                     disabled={!nodeBookState.selectedNode ? true : false}
+                    sx={{
+                      opacity: !nodeBookState.selectedNode ? 0.5 : undefined,
+                    }}
                   >
                     <NextImage
                       src={theme.palette.mode === "light" ? focusViewLogo : focusViewDarkLogo}
@@ -5846,6 +6392,7 @@ const Dashboard = ({}: DashboardProps) => {
                         background: theme.palette.mode === "dark" ? "#404040" : "#EAECF0",
                         borderRadius: "8px",
                       },
+                      padding: { xs: "2px", sm: "8px" },
                     }}
                   >
                     {/* DEVTOOLS */}
@@ -5865,6 +6412,8 @@ const Dashboard = ({}: DashboardProps) => {
               openUserInfoSidebar={openUserInfoSidebar}
               onlineUsers={onlineUsers}
               db={db}
+              open={openLivelinessBar}
+              setOpen={setOpenLivelinessBar}
             />
           )}
 
@@ -5875,6 +6424,8 @@ const Dashboard = ({}: DashboardProps) => {
               onlineUsers={onlineUsers}
               db={db}
               user={user}
+              open={openLivelinessBar}
+              setOpen={setOpenLivelinessBar}
             />
           )}
 
@@ -5929,6 +6480,11 @@ const Dashboard = ({}: DashboardProps) => {
                     onPreviousStep={onPreviousStep}
                     stepsLength={tutorial.steps.length}
                     node={graph.nodes[targetId]}
+                    forcedTutorial={forcedTutorial}
+                    groupTutorials={tutorialGroup}
+                    onForceTutorial={setForcedTutorial}
+                    parent={graph.nodes[pathway.parent]}
+                    child={graph.nodes[pathway.child]}
                   />
                 )}
                 {settings.showClusterOptions && settings.showClusters && (
@@ -5951,7 +6507,7 @@ const Dashboard = ({}: DashboardProps) => {
                   openAllChildren={openAllChildren}
                   openAllParent={openAllParent}
                   hideNodeHandler={hideNodeHandler}
-                  hideOffsprings={hideOffsprings}
+                  hideDescendants={hideDescendants}
                   toggleNode={toggleNode}
                   openNodePart={openNodePart}
                   onNodeShare={onNodeShare}
@@ -5991,6 +6547,7 @@ const Dashboard = ({}: DashboardProps) => {
                   // setCurrentTutorial={setCurrentTutorial}
                   ableToPropose={ableToPropose}
                   setAbleToPropose={setAbleToPropose}
+                  setOpenPart={onChangeNodePart}
                 />
               </MapInteractionCSS>
               {showRegion && (
@@ -6107,16 +6664,12 @@ const Dashboard = ({}: DashboardProps) => {
               </Suspense>
             </Box>
           )}
-          {/* <MemoizedProgressBarMenu
-            open={openProgressBarMenu}
-            handleOpenProgressBar={handleOpenProgressBar}
-            currentStep={stateNodeTutorial?.currentStepName ?? 0}
-          /> */}
+          {/* <MemoizedProgressBarMenu userTutorial={userTutorial} /> */}
           <MemoizedTutorialTableOfContent
             open={openProgressBar}
             reloadPermanentGraph={reloadPermanentGraph}
             handleCloseProgressBar={onCloseTableOfContent}
-            groupTutorials={GROUP_TUTORIALS}
+            groupTutorials={tutorialGroup}
             userTutorialState={userTutorial}
             onCancelTutorial={onCancelTutorial}
             onForceTutorial={setForcedTutorial}
