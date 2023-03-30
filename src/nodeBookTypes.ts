@@ -517,3 +517,18 @@ export type UserTutorial = {
 export type UserTutorials = {
   [key in TutorialTypeKeys]: UserTutorial;
 };
+
+type NotebookNode = {
+  open: true;
+  visible: false;
+};
+
+export type Notebook = {
+  id: string;
+  nodes: { [key: string]: NotebookNode };
+  user: string;
+  createdAt: string;
+  updatedAt: string;
+  deleted: boolean;
+  title: string;
+};

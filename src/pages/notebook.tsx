@@ -139,6 +139,7 @@ import {
   EdgesData,
   FullNodeData,
   FullNodesData,
+  Notebook,
   OpenPart,
   // NodeTutorialState,
   TNodeBookState,
@@ -361,6 +362,11 @@ const Dashboard = ({}: DashboardProps) => {
   } = useInteractiveTutorial({ user });
 
   const pathwayRef = useRef({ node: "", parent: "", child: "" });
+
+  // notebooks
+
+  const [selectedUserNotebook, setSelectedUserNotebook] = useState<Notebook | null>(null);
+  const [, /* nodesFromNotebook */ setNodesFromNotebook] = useState<FullNodesData>({});
 
   const onNodeInViewport = useCallback(
     (nodeId: string) => {
@@ -5726,6 +5732,127 @@ const Dashboard = ({}: DashboardProps) => {
     });
     return { tutorialsComplete, totalTutorials: tutorialsOfTOC.length };
   }, [tutorialGroup, userTutorial]);
+
+  useEffect(() => {
+    const selectedNotebookName = localStorage.getItem("selected-notebook");
+    if (selectedNotebookName) return; // TODO: set set default notebook as selected
+    // TODO: call DB
+    setSelectedUserNotebook({
+      id: "01",
+      createdAt: "",
+      deleted: false,
+      nodes: {},
+      title: "temporal notebook",
+      updatedAt: "",
+      user: "u1",
+    });
+  }, []);
+
+  const userNodesFromNotebookSnapshot = useCallback(
+    (q: Query<DocumentData>) => {
+      const userNodesSnapshot = onSnapshot(
+        q,
+        async snapshot => {
+          const docChanges = snapshot.docChanges();
+
+          // if (!docChanges.length) {
+          //   setIsSubmitting(false);
+          //   setFirstLoading(false);
+          //   setNoNodesFoundMessage(true);
+          //   return null;
+          // }
+
+          // setNoNodesFoundMessage(false);
+          const userNodeChanges = getUserNodeChanges(docChanges);
+          devLog("1:USER_NODES_SNAPSHOT:USER_NODES", userNodeChanges);
+          const nodeIds = userNodeChanges.map(cur => cur.uNodeData.node);
+          const nodesData = await getNodes(db, nodeIds);
+          devLog("1:USER_NODES_SNAPSHOT:NODES_DATA", nodesData);
+          const fullNodes = buildFullNodes(userNodeChanges, nodesData);
+          devLog("1:USER_NODES_SNAPSHOT:FULL_NODES", fullNodes);
+          // const visibleFullNodes = fullNodes.filter(cur => cur.visible || cur.nodeChangeType === "modified");
+          // setAllNodes(oldAllNodes => mergeAllNodes(fullNodes, oldAllNodes));
+
+          setNodesFromNotebook(nodes => {
+            const proccessFullNodesMerged = fullNodes.map(cur => {
+              const tmpNode = nodes[cur.node];
+              if (tmpNode) {
+                if (tmpNode.hasOwnProperty("simulated")) {
+                  delete tmpNode["simulated"];
+                }
+                if (tmpNode.hasOwnProperty("isNew")) {
+                  delete tmpNode["isNew"];
+                }
+              }
+
+              const hasParent = cur.parents.length;
+              // IMPROVE: we need to pass the parent which open the node
+              // to use his current position
+              // in this case we are checking first parent
+              // if this doesn't exist will set top:0 and left: 0 + NODE_WIDTH + COLUMN_GAP
+              const nodeParent = hasParent ? nodes[cur.parents[0].node] : null;
+              const topParent = nodeParent?.top ?? 0;
+              const leftParent = nodeParent?.left ?? 0;
+
+              return {
+                ...cur,
+                left: tmpNode?.left ?? leftParent + NODE_WIDTH + COLUMN_GAP,
+                top: tmpNode?.top ?? topParent,
+              };
+            });
+
+            devLog("5:user Nodes Snapshot:visible Full Nodes Merged", proccessFullNodesMerged);
+            // const updatedNodeIds: string[] = [];
+
+            // setNodeUpdates({
+            //   nodeIds: updatedNodeIds,
+            //   updatedAt: new Date(),
+            // });
+            return proccessFullNodesMerged.reduce((acu: FullNodesData, cur) => {
+              return { [cur.node]: cur };
+            }, {});
+          });
+        },
+        error => console.error(error)
+      );
+      return () => userNodesSnapshot();
+    },
+    [db]
+  );
+
+  useEffect(() => {
+    if (!db) return;
+    if (!user?.uname) return;
+    if (!allTagsLoaded) return;
+    if (!userTutorialLoaded) return;
+    if (!selectedUserNotebook) return;
+
+    const nodesOfNotebook = Object.keys(selectedUserNotebook.nodes); // TODO: filter only visible
+    devLog("USE_EFFECT", "nodes synchronization");
+
+    const userNodesRef = collection(db, "userNodes");
+    const q = query(
+      userNodesRef,
+      where("user", "==", user.uname),
+      where("deleted", "==", false),
+      where("node", "in", nodesOfNotebook)
+    );
+    //const q = query(citiesRef, where('country', 'in', ['USA', 'Japan']));
+
+    const killSnapshot = userNodesFromNotebookSnapshot(q);
+    return () => {
+      killSnapshot();
+    };
+    //IMPORTANT: notebookChanged used in dependecies because of the redraw graph (magic wand button)
+  }, [
+    allTagsLoaded,
+    db,
+    selectedUserNotebook,
+    user.uname,
+    userNodesFromNotebookSnapshot,
+    userTutorialLoaded,
+    notebookChanged,
+  ]);
 
   return (
     <div className="MapContainer" style={{ overflow: "hidden" }}>
