@@ -264,7 +264,7 @@ MainSidebarProps) => {
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   className="hide-on-hover"
-                  src={theme === "Light" ? LogoLightMode.src : LogoDarkMode.src}
+                  src={theme.palette.mode === "light" ? LogoLightMode.src : LogoDarkMode.src}
                   alt="1Logo"
                   width="61px"
                 />
