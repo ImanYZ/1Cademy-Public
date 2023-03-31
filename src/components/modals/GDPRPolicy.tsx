@@ -36,7 +36,7 @@ export default GDPRPolicy;
 
 const GDPRPolicyContent = () => {
   return (
-    <Box>
+    <Box className="policy-content">
       <h1>1Cademy General Data Protection Regulation (GDPR) Policy</h1>
       <h2>Introduction</h2>
       <p>
