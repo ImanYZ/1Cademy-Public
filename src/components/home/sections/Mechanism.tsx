@@ -31,7 +31,7 @@ export const MECHANISM_ITEMS: TMechanisms[] = [
     id: "linking",
     title: "Linking",
     description:
-      "Our notes, which are organized in granular pieces, can be transformed into a knowledge graph that visually illustrates the hierarchical relationships between concepts. The linking of concepts is beneficial as it helps us understand how concepts relate to one another and their place in broader topics, fields, or disciplines. ",
+      "To facilitate efficient learning we need to develop progressive learning content, but the representation of the granular notes should not be combined into multiple larger constructs, such as books or collections. Doing so perpetuates the issue of overlapping content and knowledge overload because larger constructs require contextual knowledge that are also covered in other large constructs. While they provide progressive learning content, in the aggregate they create a surplus of overlapping knowledge and defeat the purpose of efficient learning. Instead, we need to develop a single, comprehensive “prerequisite knowledge graph” of the granular notes.",
     animation: {
       src: "rive/notebook.riv",
       artboard: "artboard-4",
@@ -41,7 +41,7 @@ export const MECHANISM_ITEMS: TMechanisms[] = [
     id: "Evaluating",
     title: "Voting",
     description:
-      "To ensure the quality of the knowledge graph on 1Cademy, we have implemented a peer-review process. Each individual concept, represented as a node, can be voted on by members of the community, and the score of the node will determine its level of modification or the possibility of deletion.",
+      "To ensure the quality of the knowledge graph on 1Cademy, we have implemented an AI-enhanced peer-review process. Each individual concept, represented as a node, is evaluated through a collaboration of AI and members of the community, and the score of the node will determine its level of modification or the possibility of deletion.",
     animation: {
       src: "rive/notebook.riv",
       artboard: "artboard-5",
@@ -51,7 +51,7 @@ export const MECHANISM_ITEMS: TMechanisms[] = [
     id: "improving",
     title: "Improving",
     description:
-      "We work together to improve the knowledge presented by continually updating and refining concepts. For each node, there are multiple versions proposed by different people.",
+      "We collaborate with each other and get AI assistance to improve the knowledge presented by continually updating and refining concepts. For each node, there are multiple versions proposed by different people which cover different perspectives and use-cases for each concept. 1Cademy visualizes these side-by-side to optimize learning.",
     animation: {
       src: "rive/notebook.riv",
       artboard: "artboard-6",
