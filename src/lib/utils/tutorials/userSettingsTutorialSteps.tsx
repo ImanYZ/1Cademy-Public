@@ -21,7 +21,7 @@ const USER_SETTINGS_STEPS: TutorialStepConfig[] = [
         }
       />
     ),
-    tooltipPosition: "right",
+    tooltipPosition: "bottom",
     targetDelay: 450,
     anchor: "Portal",
     outline: "shallow",
@@ -35,7 +35,7 @@ const USER_SETTINGS_STEPS: TutorialStepConfig[] = [
       />
     ),
 
-    tooltipPosition: "right",
+    tooltipPosition: "bottom",
     anchor: "Portal",
     outline: "shallow",
   },
@@ -50,7 +50,7 @@ const USER_SETTINGS_STEPS: TutorialStepConfig[] = [
       />
     ),
 
-    tooltipPosition: "right",
+    tooltipPosition: "bottom",
     anchor: "Portal",
     outline: "shallow",
   },
@@ -59,7 +59,7 @@ const USER_SETTINGS_STEPS: TutorialStepConfig[] = [
     title: "Univercity",
     description: <MarkdownRender text={"This displays the university that you are enrolled at."} />,
 
-    tooltipPosition: "right",
+    tooltipPosition: "bottom",
     anchor: "Portal",
     outline: "shallow",
   },
@@ -72,7 +72,7 @@ const USER_SETTINGS_STEPS: TutorialStepConfig[] = [
       />
     ),
 
-    tooltipPosition: "right",
+    tooltipPosition: "bottom",
     anchor: "Portal",
     outline: "outside",
   },
@@ -85,7 +85,7 @@ const USER_SETTINGS_STEPS: TutorialStepConfig[] = [
       />
     ),
 
-    tooltipPosition: "right",
+    tooltipPosition: "bottom",
     anchor: "Portal",
     outline: "inside",
   },
@@ -100,7 +100,7 @@ const USER_SETTINGS_STEPS: TutorialStepConfig[] = [
       />
     ),
 
-    tooltipPosition: "right",
+    tooltipPosition: "top",
     anchor: "Portal",
     outline: "inside",
   },
@@ -109,7 +109,7 @@ const USER_SETTINGS_STEPS: TutorialStepConfig[] = [
     title: "Personal",
     description: <MarkdownRender text={"Personal tab is where you can update your personal information."} />,
 
-    tooltipPosition: "right",
+    tooltipPosition: "top",
     anchor: "Portal",
     outline: "inside",
   },
@@ -120,7 +120,7 @@ const USER_SETTINGS_STEPS: TutorialStepConfig[] = [
       <MarkdownRender text={"The professional tab lets you update information about your occupation and education."} />
     ),
 
-    tooltipPosition: "right",
+    tooltipPosition: "top",
     anchor: "Portal",
     outline: "inside",
   },
@@ -129,7 +129,7 @@ const USER_SETTINGS_STEPS: TutorialStepConfig[] = [
     title: "Proposals",
     description: <MarkdownRender text={"The proposals tab displays all the proposals that you have made."} />,
 
-    tooltipPosition: "right",
+    tooltipPosition: "top",
     anchor: "Portal",
     outline: "inside",
   },

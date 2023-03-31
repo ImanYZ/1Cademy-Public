@@ -1,8 +1,7 @@
 import ArrowForwardIosSharpIcon from "@mui/icons-material/ArrowForwardIosSharp";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import CloseIcon from "@mui/icons-material/Close";
-import HelpCenterIcon from "@mui/icons-material/HelpCenter";
-import PlayCircleIcon from "@mui/icons-material/PlayCircle";
+import PlayCircleRoundedIcon from "@mui/icons-material/PlayCircleRounded";
 import {
   Accordion,
   AccordionDetails,
@@ -15,6 +14,8 @@ import {
 } from "@mui/material";
 import { Stack } from "@mui/system";
 import React, { useCallback, useState } from "react";
+
+import { gray50, gray100, gray200, gray300, gray500, gray600, gray700 } from "@/pages/home";
 
 import { TutorialStep, TutorialTypeKeys, UserTutorials } from "../../nodeBookTypes";
 
@@ -32,6 +33,7 @@ type TutorialTableOfContentProps = {
   onCancelTutorial: () => void;
   onForceTutorial: (keyTutorial: TutorialTypeKeys) => void;
   reloadPermanentGraph: () => void;
+  tutorialProgress: { tutorialsComplete: number; totalTutorials: number };
 };
 
 const TutorialTableOfContent = ({
@@ -42,6 +44,7 @@ const TutorialTableOfContent = ({
   onCancelTutorial,
   onForceTutorial,
   reloadPermanentGraph,
+  tutorialProgress,
 }: TutorialTableOfContentProps) => {
   const theme = useTheme();
   const onlySmallScreen = useMediaQuery(theme.breakpoints.down("md"));
@@ -66,6 +69,10 @@ const TutorialTableOfContent = ({
     []
   );
 
+  const tutorialsCompletePercentage = Math.round(
+    (tutorialProgress.tutorialsComplete * 100) / tutorialProgress.totalTutorials
+  );
+
   return (
     <Box
       id="progress-bar"
@@ -73,8 +80,8 @@ const TutorialTableOfContent = ({
         position: "fixed",
         top: "75px",
         display: "grid",
-        gridTemplateRows: "auto 1fr",
-        background: theme => (theme.palette.mode === "dark" ? "#2f2f2f" : "#f2f4f7"),
+        gridTemplateRows: "auto auto 1fr",
+        background: theme => (theme.palette.mode === "dark" ? "#1B1A1A" : gray50),
         borderRadius: "8px",
         width: "350px",
         bottom: "7px",
@@ -86,20 +93,60 @@ const TutorialTableOfContent = ({
       <Box
         sx={{
           p: "32px 24px",
-          position: "relative",
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
+          backgroundColor: theme => (theme.palette.mode === "dark" ? "#1F1F1F" : gray100),
         }}
       >
-        <Stack direction="row" alignItems="center" spacing="6px">
-          <Typography fontSize={"24px"}>Notebook Tutorial</Typography>
-          <HelpCenterIcon fontSize="medium" />
-        </Stack>
-        <IconButton onClick={handleCloseProgressBar} size={"small"}>
-          <CloseIcon fontSize="medium" />
-        </IconButton>
+        <Box
+          sx={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            mb: "18px",
+          }}
+        >
+          <Stack direction="row" alignItems="center" spacing="6px">
+            <Typography fontSize={"24px"} fontWeight="600">
+              Notebook Tutorial
+            </Typography>
+          </Stack>
+          <IconButton onClick={handleCloseProgressBar} size={"small"}>
+            <CloseIcon fontSize="medium" />
+          </IconButton>
+        </Box>
+
+        <Box>
+          <Stack
+            direction="row"
+            alignItems="center"
+            justifyContent={"space-between"}
+            spacing="6px"
+            sx={{ color: theme => (theme.palette.mode === "dark" ? gray300 : gray500) }}
+          >
+            <Typography>Tutorials</Typography>
+            <Typography>
+              {tutorialProgress.tutorialsComplete}/{tutorialProgress.totalTutorials}
+            </Typography>
+          </Stack>
+          <Box
+            sx={{
+              height: "4px",
+              width: "100%",
+              borderRadius: "3px",
+              backgroundColor: theme => (theme.palette.mode === "dark" ? "rgba(208, 213, 221, 0.3)" : "#6C74824D"),
+            }}
+          >
+            <Box
+              sx={{
+                height: "4px",
+                width: `${tutorialsCompletePercentage}%`,
+                borderRadius: "3px",
+                backgroundColor: theme => (theme.palette.mode === "dark" ? "#A4FD96" : "#52AE43"),
+              }}
+            ></Box>
+          </Box>
+        </Box>
       </Box>
+
       <Box className="scroll-styled" sx={{ overflowY: "auto" }}>
         {groupTutorials.map(currentTutorial => {
           return (
@@ -136,6 +183,8 @@ const TutorialTableOfContent = ({
                       component={"h4"}
                       variant={"h4"}
                       sx={{
+                        fontWeight: "600",
+                        fontSize: "18px",
                         cursor: "pointer",
                       }}
                     >
@@ -182,15 +231,27 @@ const TutorialTableOfContent = ({
                           size={"small"}
                           sx={{ p: "0px" }}
                         >
-                          <PlayCircleIcon />
+                          <PlayCircleRoundedIcon
+                            sx={{ color: theme => (theme.palette.mode === "dark" ? gray300 : gray600) }}
+                          />
                         </IconButton>
                       )}
-                      <Box sx={{ display: "flex", flexGrow: 1, alignItems: "center", justifyContent: "space-between" }}>
+                      <Box
+                        onClick={e => {
+                          e.stopPropagation();
+                          if (currentTutorial.tutorialSteps) {
+                            onStartTutorial(currentTutorial.tutorialSteps.tutorialKey);
+                          }
+                        }}
+                        sx={{ display: "flex", flexGrow: 1, alignItems: "center", justifyContent: "space-between" }}
+                      >
                         <Typography
                           component={"h4"}
                           variant={"h4"}
                           sx={{
+                            fontSize: "18px",
                             cursor: "pointer",
+                            color: theme => (theme.palette.mode === "dark" ? gray200 : gray700),
                           }}
                         >
                           {currentTutorial.title}

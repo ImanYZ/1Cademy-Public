@@ -40,7 +40,7 @@ import {
 import { getDownloadURL, getStorage, ref, uploadBytesResumable } from "firebase/storage";
 import Image from "next/image";
 import NextImage from "next/image";
-import { Suspense, useCallback, useEffect, useRef, useState } from "react";
+import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
 /* eslint-disable */ //This wrapper comments it to use react-map-interaction without types
 // @ts-ignore
 import { MapInteractionCSS } from "react-map-interaction";
@@ -139,6 +139,7 @@ import {
   EdgesData,
   FullNodeData,
   FullNodesData,
+  OpenPart,
   // NodeTutorialState,
   TNodeBookState,
   TNodeUpdates,
@@ -343,6 +344,7 @@ const Dashboard = ({}: DashboardProps) => {
   const [openLivelinessBar, setOpenLivelinessBar] = useState(false);
   const [comLeaderboardOpen, setComLeaderboardOpen] = useState(false);
 
+  //TUTORIAL STATES
   const {
     startTutorial,
     tutorial,
@@ -357,6 +359,8 @@ const Dashboard = ({}: DashboardProps) => {
     setUserTutorial,
     userTutorial,
   } = useInteractiveTutorial({ user });
+
+  const pathwayRef = useRef({ node: "", parent: "", child: "" });
 
   const onNodeInViewport = useCallback(
     (nodeId: string) => {
@@ -410,6 +414,31 @@ const Dashboard = ({}: DashboardProps) => {
     setInnerHeight(window.innerHeight);
     setButtonsOpen(window.innerHeight > 399 ? true : false);
   }, [user?.uname]);
+
+  const pathway = useMemo(() => {
+    const edgeObjects: { parent: string; child: string }[] = Object.keys(graph.edges).map(cur => {
+      const [parent, child] = cur.split("-");
+      return { parent, child };
+    });
+    const parents = edgeObjects.reduce((acu: { [key: string]: string[] }, cur) => {
+      return { ...acu, [cur.parent]: acu[cur.parent] ? [...acu[cur.parent], cur.child] : [cur.child] };
+    }, {});
+    console.log({ pathway });
+    const pathways = edgeObjects.reduce(
+      (acu: { node: string; parent: string; child: string }, cur) => {
+        if (acu.node) return acu;
+        if (parents[cur.child]) return { parent: cur.parent, node: cur.child, child: parents[cur.child][0] };
+        return acu;
+      },
+      { node: "", parent: "", child: "" }
+    );
+    if (pathwayRef.current.node !== pathways.node && pathwayRef.current.node) {
+      return { node: "", parent: "", child: "" };
+    }
+
+    pathwayRef.current = pathways;
+    return pathways;
+  }, [graph.edges]);
 
   const scrollToNode = useCallback(
     (nodeId: string, tries = 0) => {
@@ -2303,6 +2332,15 @@ const Dashboard = ({}: DashboardProps) => {
     [user /*selectionType*/, processHeightChange]
   );
 
+  const onChangeNodePart = useCallback(
+    (nodeId: string, newOpenPart: OpenPart) => {
+      setNodeParts(nodeId, node => {
+        return { ...node, localLinkingWords: newOpenPart };
+      });
+    },
+    [setNodeParts]
+  );
+
   const onNodeShare = useCallback(
     (nodeId: string, platform: string) => {
       gtmEvent("Interaction", {
@@ -4067,6 +4105,28 @@ const Dashboard = ({}: DashboardProps) => {
       return;
     }
 
+    const tmpOpenPartMap = new Map<TutorialTypeKeys, OpenPart>();
+    tmpOpenPartMap.set("tmpParentsChildrenList", "LinkingWords");
+    tmpOpenPartMap.set("tmpTagsReferences", "References");
+
+    if (tmpOpenPartMap.has(tutorial.name)) {
+      if (currentStep.isClickable) {
+        const selectedNodeId = notebookRef.current.selectedNode!;
+        if (!selectedNodeId) return;
+
+        onChangeNodePart(selectedNodeId, tmpOpenPartMap.get(tutorial.name));
+        return;
+      }
+    }
+
+    if (tutorial.name === "tmpPathways") {
+      if (currentStep.isClickable) {
+        openNodeHandler("r98BjyFDCe4YyLA3U8ZE");
+        openNodeHandler("sKukyeN58Wj1jfzuqnZJ");
+      }
+      return;
+    }
+
     const tutorialUpdated: UserTutorial = {
       ...userTutorial[tutorial.name],
       currentStep: currentStep.currentStepName,
@@ -4094,6 +4154,8 @@ const Dashboard = ({}: DashboardProps) => {
     currentStep,
     db,
     forcedTutorial,
+    onChangeNodePart,
+    openNodeHandler,
     proposeNewChild,
     proposeNodeImprovement,
     setTargetId,
@@ -4177,12 +4239,18 @@ const Dashboard = ({}: DashboardProps) => {
         : userTutorial[tutorialName].done || userTutorial[tutorialName].skipped;
       if (shouldIgnore) return false;
 
-      devLog("DETECT_AND_CALL_SIDEBAR_TUTORIAL", { tutorialName, node: nodeBookState.selectedNode });
-      if (openSidebar !== sidebar) setOpenSidebar(sidebar);
+      devLog("DETECT_AND_CALL_SIDEBAR_TUTORIAL", { tutorialName, sidebar, node: nodeBookState.selectedNode });
+      if (openSidebar !== sidebar) {
+        setOpenSidebar(sidebar);
+      }
+
+      if (sidebar === null) {
+        nodeBookDispatch({ type: "setIsMenuOpen", payload: true });
+      }
       startTutorial(tutorialName);
       return true;
     },
-    [forcedTutorial, nodeBookState.selectedNode, openSidebar, startTutorial, userTutorial]
+    [forcedTutorial, nodeBookDispatch, nodeBookState.selectedNode, openSidebar, startTutorial, userTutorial]
   );
 
   const detectAndCallTutorial = useCallback(
@@ -4293,7 +4361,6 @@ const Dashboard = ({}: DashboardProps) => {
       const frequency = Object.keys(graph.edges)
         .map(edge => edge.split("-")[0])
         .reduce((acc: number, edge: string) => {
-          console.log({ edge });
           return edge === parentId ? acc + 1 : acc;
         }, 0);
 
@@ -4319,7 +4386,6 @@ const Dashboard = ({}: DashboardProps) => {
      * 2. second time will run tutorial
      */
     const detectTriggerTutorial = () => {
-      console.log({ userTutorialLoaded, firstLoading, tutorial });
       if (!userTutorialLoaded) return;
       if (firstLoading) return;
       if (tutorial) return;
@@ -4339,7 +4405,10 @@ const Dashboard = ({}: DashboardProps) => {
 
       const nodesTutorialIsValid = (node: FullNodeData) => node && node.open && !node.editable && !node.isNew;
 
-      if (forcedTutorial === "nodes" || !forcedTutorial) {
+      if (
+        forcedTutorial === "nodes" ||
+        (!forcedTutorial && (userTutorial["nodes"].done || userTutorial["nodes"].skipped))
+      ) {
         const result = detectAndCallTutorial("nodes", nodesTutorialIsValid);
         if (result) return;
       }
@@ -4368,6 +4437,45 @@ const Dashboard = ({}: DashboardProps) => {
         });
 
         return;
+      }
+
+      // --------------------------
+
+      if (!forcedTutorial || forcedTutorial === "tagsReferences") {
+        const result = detectAndCallTutorial(
+          "tagsReferences",
+          node => node && node.open && !node.editable && node.localLinkingWords === "References"
+        );
+        if (result) return;
+      }
+
+      // ------------------------
+
+      if (forcedTutorial === "tagsReferences") {
+        const result = detectAndForceTutorial(
+          "tmpTagsReferences",
+          "r98BjyFDCe4YyLA3U8ZE",
+          node => node && node.open && !node.editable && node.localLinkingWords !== "References"
+        );
+        if (result) return;
+      }
+      // --------------------------
+
+      const parentsChildrenListTutorialIsValid = (node: FullNodeData) =>
+        node && node.open && !node.editable && !node.isNew && node.localLinkingWords === "LinkingWords";
+
+      if (forcedTutorial === "parentsChildrenList" || !forcedTutorial) {
+        const result = detectAndCallTutorial("parentsChildrenList", parentsChildrenListTutorialIsValid);
+        if (result) return;
+      }
+
+      if (forcedTutorial === "parentsChildrenList") {
+        const result = detectAndForceTutorial(
+          "tmpParentsChildrenList",
+          "r98BjyFDCe4YyLA3U8ZE",
+          (node: FullNodeData) => node && node.open && !node.editable && node.localLinkingWords !== "LinkingWords"
+        );
+        if (result) return; /* (lastNodeOperation.current?.name = "LinkingWords"); */
       }
 
       // --------------------------
@@ -4450,7 +4558,8 @@ const Dashboard = ({}: DashboardProps) => {
       if (forcedTutorial === "proposal" || !forcedTutorial) {
         const result = detectAndCallTutorial(
           "proposal",
-          thisNode => thisNode && thisNode.open && thisNode.editable && !thisNode.isNew
+          thisNode =>
+            thisNode && thisNode.open && thisNode.editable && !thisNode.isNew && thisNode.nodeType !== "Reference"
         );
         if (result) return;
       }
@@ -5094,6 +5203,28 @@ const Dashboard = ({}: DashboardProps) => {
           return;
         }
       }
+
+      // --------------------------
+
+      if (forcedTutorial === "pathways" || proposalNodesTaken) {
+        const shouldIgnore = forcedTutorial
+          ? forcedTutorial !== "pathways"
+          : userTutorial["pathways"].done || userTutorial["pathways"].skipped;
+        if (!shouldIgnore) {
+          if (pathway.node) {
+            setTargetId(pathway.node);
+            nodeBookDispatch({ type: "setSelectedNode", payload: pathway.node });
+            notebookRef.current.selectedNode = pathway.node;
+            scrollToNode(pathway.node);
+            startTutorial("pathways");
+            return;
+          }
+        }
+      }
+      if (forcedTutorial === "pathways") {
+        const result = detectAndForceTutorial("tmpPathways", "rWYUNisPIVMBoQEYXgNj", node => node && node.open);
+        if (result) return;
+      }
     };
 
     detectTriggerTutorial();
@@ -5116,6 +5247,8 @@ const Dashboard = ({}: DashboardProps) => {
     openSidebar,
     parentWithChildren,
     parentWithMostChildren,
+    pathway,
+    scrollToNode,
     setTargetId,
     startTutorial,
     tutorial,
@@ -5139,7 +5272,19 @@ const Dashboard = ({}: DashboardProps) => {
     devLog("USE_EFFECT: DETECT_TO_REMOVE_TUTORIAL", tutorial);
 
     if (tutorial.name === "nodes") {
-      const nodesTutorialIsValid = (node: FullNodeData) => node && node.open;
+      const nodesTutorialIsValid = (node: FullNodeData) => node && node.open; // TODO: add other validations check parentsChildrenList
+      const node = graph.nodes[targetId];
+      if (!nodesTutorialIsValid(node)) {
+        setTutorial(null);
+        setForcedTutorial(null);
+      }
+    }
+
+    // --------------------------
+
+    if (tutorial.name === "parentsChildrenList") {
+      const nodesTutorialIsValid = (node: FullNodeData) =>
+        node && node.open && !node.editable && !node.isNew && node.localLinkingWords === "LinkingWords";
       const node = graph.nodes[targetId];
       if (!nodesTutorialIsValid(node)) {
         setTutorial(null);
@@ -5282,6 +5427,7 @@ const Dashboard = ({}: DashboardProps) => {
       const node = graph.nodes[targetId];
       if (!tmpEditNodeIsValid(node)) {
         setTutorial(null);
+        if (currentStep?.childTargetId) removeStyleFromTarget(currentStep.childTargetId, targetId);
         if (node && node.editable) return;
 
         setForcedTutorial(null);
@@ -5307,6 +5453,56 @@ const Dashboard = ({}: DashboardProps) => {
       }
     }
 
+    // --------------------------
+
+    if (tutorial.name === "tmpParentsChildrenList") {
+      const isValid = (node: FullNodeData) =>
+        node && node.open && !node.editable && !Boolean(node.isNew) && node.localLinkingWords !== "LinkingWords";
+      const node = graph.nodes[targetId];
+      if (!isValid(node)) {
+        setTutorial(null);
+        if (node && node.localLinkingWords === "LinkingWords") return;
+        setForcedTutorial(null);
+        if (currentStep?.childTargetId) removeStyleFromTarget(currentStep.childTargetId, targetId);
+      }
+    }
+    // --------------------------
+
+    if (tutorial.name === "tmpTagsReferences") {
+      const isValid = (node: FullNodeData) =>
+        node && node.open && !node.editable && !Boolean(node.isNew) && node.localLinkingWords !== "References";
+      const node = graph.nodes[targetId];
+      if (!isValid(node)) {
+        setTutorial(null);
+
+        if (node && node.localLinkingWords === "References") return;
+        setForcedTutorial(null);
+        if (currentStep?.childTargetId) removeStyleFromTarget(currentStep.childTargetId, targetId);
+      }
+    }
+    // --------------------------
+
+    if (tutorial.name === "pathways") {
+      const isValid = (node: FullNodeData) =>
+        node && !node.editable && !Boolean(node.isNew) && pathway.child && pathway.parent;
+      const node = graph.nodes[targetId];
+      if (!isValid(node)) {
+        setTutorial(null);
+        setForcedTutorial(null);
+        pathwayRef.current = { node: "", parent: "", child: "" };
+        if (currentStep?.childTargetId) removeStyleFromTarget(currentStep.childTargetId, targetId);
+      }
+    }
+    // --------------------------
+
+    if (tutorial.name === "tmpPathways") {
+      const isValid = (node: FullNodeData) =>
+        node && !node.editable && !Boolean(node.isNew) && !pathway.child && !pathway.parent;
+      const node = graph.nodes[targetId];
+      if (!isValid(node)) {
+        setTutorial(null);
+      }
+    }
     // --------------------------
 
     if (tutorial.name === "tableOfContents") {
@@ -5441,6 +5637,15 @@ const Dashboard = ({}: DashboardProps) => {
 
     // --------------------------
 
+    if (tutorial.name === "leaderBoard") {
+      if (openSidebar === null) return;
+      setTutorial(null);
+      setForcedTutorial(null);
+      if (currentStep?.childTargetId) removeStyleFromTarget(currentStep.childTargetId, targetId);
+    }
+
+    // --------------------------
+
     if (tutorial.name === "reputationLivenessBar") {
       if (openLivelinessBar) return;
       setTutorial(null);
@@ -5486,6 +5691,7 @@ const Dashboard = ({}: DashboardProps) => {
     openLivelinessBar,
     openProgressBar,
     openSidebar,
+    pathway,
     setTutorial,
     targetId,
     tutorial,
@@ -5505,6 +5711,22 @@ const Dashboard = ({}: DashboardProps) => {
     }
   }, [graph.nodes, setTargetId, targetId, tutorial]);
 
+  const tutorialGroup = useMemo(() => {
+    return getGroupTutorials({ livelinessBar: (user?.livelinessBar as LivelinessBar) ?? null });
+  }, [user?.livelinessBar]);
+
+  const tutorialProgress = useMemo(() => {
+    const tutorialsOfTOC = tutorialGroup.flatMap(cur => cur.tutorials);
+    let tutorialsComplete = 0;
+    tutorialsOfTOC.forEach(cur => {
+      const tutorialKey = cur.tutorialSteps?.tutorialKey;
+      if (!tutorialKey) return;
+      const tutorialComplete = userTutorial[tutorialKey].done || userTutorial[tutorialKey].skipped;
+      tutorialsComplete += tutorialComplete ? 1 : 0;
+    });
+    return { tutorialsComplete, totalTutorials: tutorialsOfTOC.length };
+  }, [tutorialGroup, userTutorial]);
+
   return (
     <div className="MapContainer" style={{ overflow: "hidden" }}>
       {currentStep?.anchor && (
@@ -5521,6 +5743,10 @@ const Dashboard = ({}: DashboardProps) => {
               onPreviousStep={onPreviousStep}
               stepsLength={tutorial.steps.length}
               node={graph.nodes[targetId]}
+              forcedTutorial={forcedTutorial}
+              groupTutorials={tutorialGroup}
+              onForceTutorial={setForcedTutorial}
+              tutorialProgress={tutorialProgress}
               isOnPortal
             />
           )}
@@ -5839,7 +6065,7 @@ const Dashboard = ({}: DashboardProps) => {
                 onClose={() => onCloseSidebar()}
                 sidebarWidth={sidebarWidth()}
                 innerHeight={innerHeight}
-                innerWidth={windowWith}
+                // innerWidth={windowWith}
               />
               <MemoizedUserInfoSidebar
                 theme={settings.theme}
@@ -6256,6 +6482,12 @@ const Dashboard = ({}: DashboardProps) => {
                     onPreviousStep={onPreviousStep}
                     stepsLength={tutorial.steps.length}
                     node={graph.nodes[targetId]}
+                    forcedTutorial={forcedTutorial}
+                    groupTutorials={tutorialGroup}
+                    onForceTutorial={setForcedTutorial}
+                    parent={graph.nodes[pathway.parent]}
+                    child={graph.nodes[pathway.child]}
+                    tutorialProgress={tutorialProgress}
                   />
                 )}
                 {settings.showClusterOptions && settings.showClusters && (
@@ -6318,6 +6550,7 @@ const Dashboard = ({}: DashboardProps) => {
                   // setCurrentTutorial={setCurrentTutorial}
                   ableToPropose={ableToPropose}
                   setAbleToPropose={setAbleToPropose}
+                  setOpenPart={onChangeNodePart}
                 />
               </MapInteractionCSS>
               {showRegion && (
@@ -6434,19 +6667,15 @@ const Dashboard = ({}: DashboardProps) => {
               </Suspense>
             </Box>
           )}
-          {/* <MemoizedProgressBarMenu
-            open={openProgressBarMenu}
-            handleOpenProgressBar={handleOpenProgressBar}
-            currentStep={stateNodeTutorial?.currentStepName ?? 0}
-          /> */}
           <MemoizedTutorialTableOfContent
             open={openProgressBar}
             reloadPermanentGraph={reloadPermanentGraph}
             handleCloseProgressBar={onCloseTableOfContent}
-            groupTutorials={getGroupTutorials({ livelinessBar: (user?.livelinessBar as LivelinessBar) ?? null })}
+            groupTutorials={tutorialGroup}
             userTutorialState={userTutorial}
             onCancelTutorial={onCancelTutorial}
             onForceTutorial={setForcedTutorial}
+            tutorialProgress={tutorialProgress}
           />
         </Box>
       </Box>

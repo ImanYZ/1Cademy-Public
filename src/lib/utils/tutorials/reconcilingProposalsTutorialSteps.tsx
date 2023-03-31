@@ -78,7 +78,7 @@ const RECONCILING_NOT_ACCEPTED_PROPOSALS_STEPS: TutorialStepConfig[] = [
       />
     ),
     anchor: "Portal",
-    tooltipPosition: "right",
+    tooltipPosition: "bottom",
     targetDelay: 300,
   },
 
@@ -146,7 +146,7 @@ const RECONCILING_NOT_ACCEPTED_PROPOSALS_STEPS: TutorialStepConfig[] = [
       </Stack>
     ),
     anchor: "Portal",
-    tooltipPosition: "right",
+    tooltipPosition: "bottom",
     targetDelay: 300,
   },
   {
@@ -165,7 +165,7 @@ const RECONCILING_NOT_ACCEPTED_PROPOSALS_STEPS: TutorialStepConfig[] = [
         />
       </Stack>
     ),
-    tooltipPosition: "right",
+    tooltipPosition: "bottom",
 
     anchor: "Portal",
     targetDelay: 300,

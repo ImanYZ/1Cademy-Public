@@ -6,7 +6,7 @@ import { getBaseStepConfig } from "./tutorial.utils";
 const LEADER_BOARD_STEPS_CONFIG: TutorialStepConfig[] = [
   {
     childTargetId: "toolbar-leaderboard-button",
-    title: "Leader Board",
+    title: "Leaderboard",
     description: (
       <MarkdownRender
         text={
@@ -14,20 +14,20 @@ const LEADER_BOARD_STEPS_CONFIG: TutorialStepConfig[] = [
         }
       />
     ),
-    tooltipPosition: "right",
+    tooltipPosition: "top",
     targetDelay: 450,
     anchor: "Portal",
     outline: "inside",
   },
   {
     childTargetId: "user-status-list",
-    title: "Leader Board Result",
+    title: "Leaderboard Result",
     description: (
       <MarkdownRender
         text={"Here you can see top users sorted by points, including information about their current online status."}
       />
     ),
-    tooltipPosition: "right",
+    tooltipPosition: "top",
     targetDelay: 450,
     anchor: "Portal",
     outline: "inside",

@@ -13,7 +13,7 @@ dayjs.extend(relativeTime);
 const USER_INFO_STEPS: TutorialStepConfig[] = [
   {
     childTargetId: "user-info-nodes",
-    title: "Nodes",
+    title: "User Information",
     description: (
       <MarkdownRender
         text={
@@ -21,8 +21,7 @@ const USER_INFO_STEPS: TutorialStepConfig[] = [
         }
       />
     ),
-    tooltipPosition: "right",
-    targetDelay: 450,
+    tooltipPosition: "top",
     anchor: "Portal",
     outline: "inside",
   },
@@ -34,8 +33,7 @@ const USER_INFO_STEPS: TutorialStepConfig[] = [
         text={"On this page you can click the proposals tab and view all their currently pending proposals."}
       />
     ),
-    tooltipPosition: "right",
-    targetDelay: 450,
+    tooltipPosition: "top",
     anchor: "Portal",
     outline: "inside",
   },

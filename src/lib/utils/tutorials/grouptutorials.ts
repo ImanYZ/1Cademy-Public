@@ -19,6 +19,7 @@ import {
   EXPAND_STEPS_COMPLETE,
   HIDE_OFFSPRING_STEPS_COMPLETE,
   HIDE_STEPS_COMPLETE,
+  TAGS_REFERENCES_STEPS_COMPLETE,
   UPTOVE_STEPS_COMPLETE,
 } from "./nodeActionsTutorialStep";
 import { NODE_CODE } from "./nodeCodeTutorialSteps";
@@ -29,6 +30,8 @@ import { NODE_REFERENCE } from "./nodeReferenceTutorialSteps";
 import { NODE_RELATION } from "./nodeRelationTutorialSteps";
 import { NODES_STEPS_COMPLETE } from "./nodeTutorialSteps";
 import { NOTIFICATION_STEPS } from "./notificationsTutorialSteps";
+import { PARENTS_CHILDREN_LIST_STEPS } from "./parentChildrenListTutorialSteps";
+import { PATHWAYS_STEPS } from "./pathwaysTutorialSteps";
 import { PENDING_PROPOSALS_STEPS_COMPLETE } from "./pendingProposalsTutorial";
 import { PROPOSING_CODE_EDIT_COMPLETE } from "./proposalCodeTutorialStep";
 import { PROPOSING_CONCEPT_EDIT_COMPLETE } from "./proposalConceptTutorialStep";
@@ -88,6 +91,26 @@ export const getGroupTutorials = ({ livelinessBar }: GetGroupTutorialsInput): Gr
       {
         title: "Hide the Node",
         tutorialSteps: { tutorialKey: "hideNode", steps: HIDE_STEPS_COMPLETE },
+        tutorials: [],
+      },
+    ],
+  },
+  {
+    title: "Learning Pathways",
+    tutorials: [
+      {
+        title: "Parent/Children Nodes",
+        tutorialSteps: { tutorialKey: "parentsChildrenList", steps: PARENTS_CHILDREN_LIST_STEPS },
+        tutorials: [],
+      },
+      {
+        title: "Tags and References",
+        tutorialSteps: { tutorialKey: "tagsReferences", steps: TAGS_REFERENCES_STEPS_COMPLETE },
+        tutorials: [],
+      },
+      {
+        title: "Pathways",
+        tutorialSteps: { tutorialKey: "pathways", steps: PATHWAYS_STEPS },
         tutorials: [],
       },
     ],
@@ -247,11 +270,12 @@ export const getGroupTutorials = ({ livelinessBar }: GetGroupTutorialsInput): Gr
         tutorialSteps: { tutorialKey: "userSettings", steps: USER_SETTINGS_STEPS_COMPLETE },
         tutorials: [],
       },
-      {
-        title: "Search Engine",
-        tutorialSteps: { tutorialKey: "searcher", steps: SEARCHER_STEPS_COMPLETE },
-        tutorials: [],
-      },
+      // CHECK: if is required to have search engine in 2 places, add a key to differentiate them
+      // {
+      //   title: "Search Engine",
+      //   tutorialSteps: { tutorialKey: "searcher", steps: SEARCHER_STEPS_COMPLETE },
+      //   tutorials: [],
+      // },
       {
         title: "Notifications",
         tutorialSteps: { tutorialKey: "notifications", steps: NOTIFICATION_STEPS },
@@ -279,13 +303,13 @@ export const getGroupTutorials = ({ livelinessBar }: GetGroupTutorialsInput): Gr
     title: "Building Reputation",
     tutorials: [
       {
-        title: "Leader board",
+        title: "Leaderboard",
         tutorialSteps: { tutorialKey: "leaderBoard", steps: LEADER_BOARD_STEPS },
         tutorials: [],
       },
       ...getLivelinessBar(livelinessBar),
       {
-        title: "Community Leader Board",
+        title: "Community Leaderboard",
         tutorialSteps: { tutorialKey: "communityLeaderBoard", steps: COMMUNITY_LEADER_BOARD_STEPS },
         tutorials: [],
       },

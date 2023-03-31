@@ -6,6 +6,7 @@ import {
   COLLAPSE_STEPS_COMPLETE,
   EXPAND_STEPS_COMPLETE,
   HIDE_STEPS_COMPLETE,
+  TAGS_REFERENCES_STEPS_COMPLETE,
 } from "@/lib/utils/tutorials/nodeActionsTutorialStep";
 import { HIDE_OFFSPRING_STEPS_COMPLETE } from "@/lib/utils/tutorials/nodeActionsTutorialStep";
 import { PENDING_PROPOSALS_STEPS_COMPLETE } from "@/lib/utils/tutorials/pendingProposalsTutorial";
@@ -51,6 +52,8 @@ import { NODE_REFERENCE } from "../lib/utils/tutorials/nodeReferenceTutorialStep
 import { NODE_RELATION } from "../lib/utils/tutorials/nodeRelationTutorialSteps";
 import { NODES_STEPS_COMPLETE } from "../lib/utils/tutorials/nodeTutorialSteps";
 import { NOTIFICATION_STEPS } from "../lib/utils/tutorials/notificationsTutorialSteps";
+import { PARENTS_CHILDREN_LIST_STEPS } from "../lib/utils/tutorials/parentChildrenListTutorialSteps";
+import { PATHWAYS_STEPS } from "../lib/utils/tutorials/pathwaysTutorialSteps";
 import { PROPOSING_CODE_EDIT_COMPLETE } from "../lib/utils/tutorials/proposalCodeTutorialStep";
 import { PROPOSING_CONCEPT_EDIT_COMPLETE } from "../lib/utils/tutorials/proposalConceptTutorialStep";
 import { PROPOSING_IDEA_EDIT_COMPLETE } from "../lib/utils/tutorials/proposalIdeaTutorialSteps";
@@ -59,12 +62,15 @@ import { PROPOSING_REFERENCE_EDIT_COMPLETE } from "../lib/utils/tutorials/propos
 import { PROPOSING_RELATION_EDIT_COMPLETE } from "../lib/utils/tutorials/proposalRelationTutorialSteps";
 import {
   TMP_EDIT_NODE,
+  TMP_OPEN_PARENT_CHILDREN,
+  TMP_PATHWAYS,
   TMP_PROPOSE_CHILD_CODE,
   TMP_PROPOSE_CHILD_CONCEPT,
   TMP_PROPOSE_CHILD_IDEA,
   TMP_PROPOSE_CHILD_QUESTION,
   TMP_PROPOSE_CHILD_REFERENCE,
   TMP_PROPOSE_CHILD_RELATION,
+  TMP_TAGS_REFERENCES,
 } from "../lib/utils/tutorials/temporalTutorialSteps";
 import { TutorialStep, TutorialTypeKeys, UserTutorials } from "../nodeBookTypes";
 
@@ -130,6 +136,9 @@ export const useInteractiveTutorial = ({ user }: useInteractiveTutorialProps) =>
     tmpProposalQuestionChild: { currentStep: -1, done: false, skipped: false },
     tmpProposalIdeaChild: { currentStep: -1, done: false, skipped: false },
     tmpProposalCodeChild: { currentStep: -1, done: false, skipped: false },
+    tmpTagsReferences: { currentStep: -1, done: false, skipped: false },
+    tmpParentsChildrenList: { currentStep: -1, done: false, skipped: false },
+    tmpPathways: { currentStep: -1, done: false, skipped: false },
     tableOfContents: { currentStep: -1, done: false, skipped: false },
     focusMode: { currentStep: -1, done: false, skipped: false },
     redrawGraph: { currentStep: -1, done: false, skipped: false },
@@ -149,6 +158,9 @@ export const useInteractiveTutorial = ({ user }: useInteractiveTutorialProps) =>
     interactionLivenessBar: { currentStep: -1, done: false, skipped: false },
     userInfo: { currentStep: -1, done: false, skipped: false },
     communityLeaderBoard: { currentStep: -1, done: false, skipped: false },
+    tagsReferences: { currentStep: -1, done: false, skipped: false },
+    parentsChildrenList: { currentStep: -1, done: false, skipped: false },
+    pathways: { currentStep: -1, done: false, skipped: false },
   });
 
   // flag for whether tutorial state was loaded
@@ -315,7 +327,15 @@ export const useInteractiveTutorial = ({ user }: useInteractiveTutorialProps) =>
       if (newTutorial === "hideNode") {
         newSteps = HIDE_STEPS_COMPLETE;
       }
+      // node footer actions
 
+      if (newTutorial === "tagsReferences") {
+        newSteps = TAGS_REFERENCES_STEPS_COMPLETE;
+      }
+
+      if (newTutorial === "tmpTagsReferences") {
+        newSteps = TMP_TAGS_REFERENCES;
+      }
       //----------------- tmp nodes
 
       if (newTutorial === "tmpEditNode") {
@@ -340,7 +360,12 @@ export const useInteractiveTutorial = ({ user }: useInteractiveTutorialProps) =>
       if (newTutorial === "tmpProposalCodeChild") {
         newSteps = TMP_PROPOSE_CHILD_CODE;
       }
-
+      if (newTutorial === "tmpParentsChildrenList") {
+        newSteps = TMP_OPEN_PARENT_CHILDREN;
+      }
+      if (newTutorial === "tmpPathways") {
+        newSteps = TMP_PATHWAYS;
+      }
       // others
       if (newTutorial === "leaderBoard") {
         newSteps = LEADER_BOARD_STEPS;
@@ -356,6 +381,14 @@ export const useInteractiveTutorial = ({ user }: useInteractiveTutorialProps) =>
 
       if (newTutorial === "communityLeaderBoard") {
         newSteps = COMMUNITY_LEADER_BOARD_STEPS;
+      }
+
+      if (newTutorial === "parentsChildrenList") {
+        newSteps = PARENTS_CHILDREN_LIST_STEPS;
+      }
+
+      if (newTutorial === "pathways") {
+        newSteps = PATHWAYS_STEPS;
       }
 
       setUserTutorial(prev => ({

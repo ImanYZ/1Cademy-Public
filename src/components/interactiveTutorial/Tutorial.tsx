@@ -1,12 +1,12 @@
-import HelpCenterIcon from "@mui/icons-material/HelpCenter";
-import { Box, Button, LinearProgress, Stack, Typography, useMediaQuery } from "@mui/material";
-import React, { useCallback, useMemo, useRef } from "react";
+import { Box, Button, Stack, Typography, useMediaQuery } from "@mui/material";
+import React, { ReactNode, useCallback, useMemo, useRef, useState } from "react";
 
 import { useWindowSize } from "@/hooks/useWindowSize";
 import { gray50, gray200, gray400, gray500, gray700, gray800 } from "@/pages/home";
 
 import { TargetClientRect, Tutorial } from "../../hooks/useInteractiveTutorial3";
-import { FullNodeData, TutorialStep } from "../../nodeBookTypes";
+import { FullNodeData, TutorialStep, TutorialTypeKeys } from "../../nodeBookTypes";
+import { GroupTutorial } from "../tutorial/TutorialTableOfContent";
 
 const TOOLTIP_OFFSET = 20;
 const TOOLTIP_TALE_SIZE = 10;
@@ -21,11 +21,17 @@ type TutorialProps = {
   onFinalize: () => void;
   stepsLength: number;
   node: FullNodeData;
+  forcedTutorial: TutorialTypeKeys | null;
+  groupTutorials: GroupTutorial[];
+  onForceTutorial: (keyTutorial: TutorialTypeKeys) => void;
+  tutorialProgress: { tutorialsComplete: number; totalTutorials: number };
   isOnPortal?: boolean;
+  parent?: FullNodeData;
+  child?: FullNodeData;
 };
 
 export const TooltipTutorial = ({
-  // tutorial,// TODO: remove
+  tutorial, // TODO: remove
   tutorialStep,
   targetClientRect,
   onNextStep,
@@ -35,15 +41,33 @@ export const TooltipTutorial = ({
   onFinalize,
   stepsLength,
   node,
+  forcedTutorial: forcedTutorial,
+  groupTutorials,
   isOnPortal,
+  onForceTutorial,
+  tutorialProgress,
+  parent,
+  child,
 }: TutorialProps) => {
   const tooltipRef = useRef<HTMLDivElement | null>(null);
 
   const { width: windowWidth, height: windowHeight } = useWindowSize();
 
   const isMobile = useMediaQuery("(max-width:600px)");
+  const [showNextTutorialStep, setShowNextTutorialStep] = useState(false);
 
-  // console.log({ tutorialStep, tutorial });
+  const nextTutorial = useMemo(() => {
+    const tutorialsSorted = groupTutorials
+      .flatMap(cur => cur.tutorials)
+      .reduce((acu: { title: string; key: TutorialTypeKeys }[], cur) => {
+        if (!cur.tutorialSteps?.tutorialKey) return acu;
+        return [...acu, { title: cur.title, key: cur.tutorialSteps.tutorialKey }];
+      }, []);
+
+    const idx = tutorialsSorted.findIndex(cur => cur.key === forcedTutorial);
+    const res = tutorialsSorted[idx + 1];
+    return res;
+  }, [forcedTutorial, groupTutorials]);
 
   const calcWithExceed = useCallback(
     (top: number, left: number) => {
@@ -77,7 +101,6 @@ export const TooltipTutorial = ({
     if (!tooltipRef.current) return { top, left, exceedTop, exceedLeft };
     if (!tutorialStep) return { top, left, exceedTop, exceedLeft };
 
-    // const { height: tooltipHeight } = tooltipRef.current.getBoundingClientRect();
     const pos = tutorialStep.tooltipPosition;
     if (pos === "top") {
       top = targetClientRect.top - tooltipRef.current.clientHeight - TOOLTIP_OFFSET;
@@ -127,6 +150,24 @@ export const TooltipTutorial = ({
     //INFO: Keep targetClientRect, render does not work if we listen to targetClientRect.props
   }, [calcWithExceed, targetClientRect, tutorialStep]);
 
+  const currentTutorialIsTemporal = useMemo(() => {
+    const temporalTutorials: TutorialTypeKeys[] = [
+      "tmpParentsChildrenList",
+      "tmpEditNode",
+      "tmpProposalConceptChild",
+      "tmpProposalQuestionChild",
+      "tmpProposalRelationChild",
+      "tmpProposalReferenceChild",
+      "tmpProposalIdeaChild",
+      "tmpProposalCodeChild",
+      "tmpTagsReferences",
+      "tmpPathways",
+    ];
+    const currentTutorialName = tutorial?.name;
+    if (!currentTutorialName) return false;
+    return temporalTutorials.includes(currentTutorialName);
+  }, [tutorial?.name]);
+
   const taleRect = useMemo(() => {
     let top = undefined;
     let left = undefined;
@@ -175,72 +216,221 @@ export const TooltipTutorial = ({
   else if (tutorialStep.tooltipPosition === "bottomRight")
     location = { ...location, top: "", left: isMobile ? "5px" : "" };
 
-  if (
-    targetClientRect.top === 0 &&
-    targetClientRect.left === 0 &&
-    targetClientRect.width === 0 &&
-    targetClientRect.height === 0
-  )
-    return (
-      <Box
-        sx={{
-          boxSizing: "border-box",
-          position: "absolute",
-          ...location,
-          width: isOnPortal ? "auto" : "450px",
-          height: "auto",
-          maxWidth: "450px",
-          backgroundColor: "#55555500",
+  const tutorialsCompletePercentage = Math.round(
+    (tutorialProgress.tutorialsComplete * 100) / tutorialProgress.totalTutorials
+  );
 
-          transition: "top 1s ease-out,bottom 1s ease-out,left 1s ease-out,rigth 1s ease-out,height 1s ease-out",
-          zIndex: 99999,
-        }}
-      >
+  const wrapper = (children: ReactNode) => {
+    if (
+      targetClientRect.top === 0 &&
+      targetClientRect.left === 0 &&
+      targetClientRect.width === 0 &&
+      targetClientRect.height === 0
+    )
+      return (
         <Box
-          ref={tooltipRef}
           sx={{
-            width: "100%",
-            p: "24px 32px",
-            backgroundColor: theme => (theme.palette.mode === "dark" ? gray500 : "#C5D0DF"),
-            border: theme => `2px solid ${theme.palette.mode === "dark" ? "#667085" : gray400}`,
-            color: theme => (theme.palette.mode === "dark" ? gray50 : gray800),
-            borderRadius: "12px",
+            boxSizing: "border-box",
+            position: "absolute",
+            ...location,
+            width: isOnPortal ? "auto" : "450px",
+            height: "auto",
+            maxWidth: "450px",
+            backgroundColor: "#55555500",
 
-            transition: "top 1s ease-out,left 1s ease-out",
+            transition: "top 1s ease-out,bottom 1s ease-out,left 1s ease-out,rigth 1s ease-out,height 1s ease-out",
             zIndex: 99999,
           }}
         >
-          {stepsLength > 1 && (
-            <LinearProgress
-              variant="determinate"
-              value={(tutorialStep.currentStepName * 100) / stepsLength}
-              color={"success"}
+          <Box
+            ref={tooltipRef}
+            sx={{
+              width: "100%",
+              p: "24px 32px",
+              backgroundColor: theme => (theme.palette.mode === "dark" ? gray500 : "#C5D0DF"),
+              border: theme => `2px solid ${theme.palette.mode === "dark" ? "#667085" : gray400}`,
+              color: theme => (theme.palette.mode === "dark" ? gray50 : gray800),
+              borderRadius: "12px",
+
+              transition: "top 1s ease-out,left 1s ease-out",
+              zIndex: 99999,
+            }}
+          >
+            {children}
+          </Box>
+        </Box>
+      );
+
+    return (
+      <Box
+        ref={tooltipRef}
+        sx={{
+          position: "absolute",
+          top: `${tooltipRect.top}px`,
+          left: isOnPortal && isMobile ? "5px" : `${tooltipRect.left}px`,
+          right: isMobile ? "5px" : undefined,
+          transition: "top 750ms ease-out,left 750ms ease-out, border-color 1s linear",
+          maxWidth: "450px",
+          width: isOnPortal ? (isMobile ? "auto" : "100%") : "450px",
+          backgroundColor: theme => (theme.palette.mode === "dark" ? gray500 : "#C5D0DF"),
+          p: "24px 32px",
+          borderRadius: "12px",
+          border: theme => `2px solid ${theme.palette.mode === "dark" ? "#667085" : gray400}`,
+          color: theme => (theme.palette.mode === "dark" ? gray50 : gray800),
+          zIndex: 99999,
+
+          ":after": {
+            position: "absolute",
+            content: "''",
+            border: "solid 10px transparent",
+            //tale onto TOP
+            borderBottomWidth: `${tutorialStep.tooltipPosition === "top" ? 0 : undefined}`,
+            borderTopColor:
+              tutorialStep.tooltipPosition === "top"
+                ? theme => (theme.palette.mode === "dark" ? "#667085" : gray400)
+                : undefined,
+            //tale onto BOTTOM
+            borderTopWidth: `${tutorialStep.tooltipPosition === "bottom" ? 0 : undefined}`,
+            borderBottomColor:
+              tutorialStep.tooltipPosition === "bottom"
+                ? theme => (theme.palette.mode === "dark" ? "#667085" : gray400)
+                : undefined,
+            //tale onto LEFT
+            borderRightWidth: `${tutorialStep.tooltipPosition === "left" ? 0 : undefined}`,
+            borderLeftColor:
+              tutorialStep.tooltipPosition === "left"
+                ? theme => (theme.palette.mode === "dark" ? "#667085" : gray400)
+                : undefined,
+            //tale onto RIGHT
+            borderLeftWidth: `${tutorialStep.tooltipPosition === "right" ? 0 : undefined}`,
+            borderRightColor:
+              tutorialStep.tooltipPosition === "right"
+                ? theme => (theme.palette.mode === "dark" ? "#667085" : gray400)
+                : undefined,
+            top: taleRect.top ? `${taleRect.top + tooltipRect.exceedTop}px` : undefined,
+            bottom: taleRect.bottom ? `${taleRect.bottom}px` : undefined,
+            left: taleRect.left ? `${taleRect.left + tooltipRect.exceedLeft}px` : undefined,
+            right: taleRect.right ? `${taleRect.right}px` : undefined,
+          },
+        }}
+      >
+        {children}
+      </Box>
+    );
+  };
+
+  return wrapper(
+    <>
+      {showNextTutorialStep && nextTutorial && !currentTutorialIsTemporal && (
+        <Stack alignItems={"center"}>
+          {/* <HelpIcon sx={{ mb: "12px", fontSize: "32px" }} /> */}
+
+          <Box
+            sx={{
+              width: "60px",
+              height: "60px",
+              mb: "12px",
+              display: "grid",
+              placeContent: "center",
+              borderRadius: "50%",
+              background: theme =>
+                `conic-gradient(${theme.palette.mode === "dark" ? "#A4FD96" : "#52AE43"}, ${
+                  (tutorialsCompletePercentage * 360) / 100
+                }deg, ${theme.palette.mode === "dark" ? "#868686" : "#6C74824D"} 0deg)`,
+            }}
+          >
+            <Box
               sx={{
-                borderRadius: "50px",
-                mb: "16px",
-                backgroundColor: theme => (theme.palette.mode === "dark" ? "#D0D5DD4D" : "#6C74824D"),
-                height: "5px",
-                "& .MuiLinearProgress-bar1Determinate": {
-                  backgroundColor: theme => (theme.palette.mode === "dark" ? "#A4FD96" : "#52AE43"),
-                  borderRadius: "50px",
+                width: "45px",
+                height: "45px",
+                display: "grid",
+                placeContent: "center",
+                borderRadius: "50%",
+                background: theme => (theme.palette.mode === "dark" ? gray500 : "#C5D0DF"),
+              }}
+            >
+              <Typography>{`${tutorialsCompletePercentage}%`}</Typography>
+            </Box>
+          </Box>
+
+          <Typography
+            component={"h2"}
+            sx={{ fontSize: "18px", fontWeight: "bold", display: "inline-block", mb: "10px" }}
+          >
+            {`You have completed ${tutorialProgress.tutorialsComplete} out ${tutorialProgress.totalTutorials} tutorials!`}
+          </Typography>
+          <Typography>{`Would you like to proceed to the next tutorial?`}</Typography>
+          <Typography sx={{ mb: "16px" }}>
+            Next tutorial:{" "}
+            <Typography component={"b"} sx={{ fontWeight: "bold" }}>
+              {nextTutorial.title}
+            </Typography>
+          </Typography>
+
+          <Stack direction={"row"} spacing="8px">
+            <Button
+              variant="outlined"
+              onClick={() => {
+                handleCloseProgressBarMenu();
+                onFinalize();
+                setShowNextTutorialStep(false);
+              }}
+              sx={{
+                borderRadius: "32px",
+                borderColor: theme => (theme.palette.mode === "dark" ? gray50 : gray800),
+                p: "8px 32px",
+                color: "inherit",
+                ":hover": {
+                  borderColor: theme => (theme.palette.mode === "dark" ? gray50 : gray800),
                 },
               }}
-            />
-          )}
-          <Stack direction={"row"} justifyContent="space-between" sx={{ mb: "12px" }}>
+            >
+              Close
+            </Button>
+            <Button
+              variant="contained"
+              onClick={() => {
+                handleCloseProgressBarMenu();
+                onFinalize();
+                setShowNextTutorialStep(false);
+                onForceTutorial(nextTutorial.key);
+              }}
+              sx={{
+                borderRadius: "32px",
+                p: "8px 32px",
+                color: theme => (theme.palette.mode === "dark" ? gray800 : gray50),
+                backgroundColor: theme => (theme.palette.mode === "dark" ? gray50 : gray800),
+                ":hover": {
+                  backgroundColor: theme => (theme.palette.mode === "dark" ? gray200 : gray700),
+                },
+              }}
+            >
+              Proceed
+            </Button>
+          </Stack>
+        </Stack>
+      )}
+      {(!showNextTutorialStep || !nextTutorial) && (
+        <>
+          {" "}
+          <Stack direction={"row"} alignItems="center" justifyContent="space-between" mb="16px">
             <Typography component={"h2"} sx={{ fontSize: "18px", fontWeight: "bold", display: "inline-block" }}>
               {tutorialStep.title}
             </Typography>
-            <HelpCenterIcon sx={{ color: theme => (theme.palette.mode === "dark" ? "#D0D5DD" : gray700) }} />
+            {stepsLength <= 1 || (
+              <Typography sx={{ display: "inline-block", color: "inherit" }}>
+                {tutorialStep.currentStepName} / {stepsLength}
+              </Typography>
+            )}
           </Stack>
-
-          {typeof tutorialStep.description === "function"
-            ? node
-              ? tutorialStep.description(node)
-              : ""
-            : tutorialStep.description}
-
-          {/* INFO: reversed used for showing buttons always to right no matter the number of buttons */}
+          <Box sx={{ fontSize: "14px" }}>
+            {typeof tutorialStep.description === "function"
+              ? node
+                ? tutorialStep.description(node, parent, child)
+                : ""
+              : tutorialStep.description}
+          </Box>
+          {/* INFO: reversed used for showing buttons always to right no matter the number of elements */}
           <Stack direction={"row-reverse"} justifyContent={"space-between"} alignItems={"center"} sx={{ mt: "16px" }}>
             <Box>
               {tutorialStep.currentStepName > 1 && (
@@ -263,7 +453,6 @@ export const TooltipTutorial = ({
                   Prev
                 </Button>
               )}
-
               {tutorialStep.currentStepName < stepsLength && (
                 <Button
                   variant="contained"
@@ -278,7 +467,6 @@ export const TooltipTutorial = ({
                       backgroundColor: theme => (theme.palette.mode === "dark" ? gray200 : gray700),
                     },
                   }}
-                  disabled={tutorialStep.isClickable}
                 >
                   Next
                 </Button>
@@ -288,7 +476,11 @@ export const TooltipTutorial = ({
                   variant="contained"
                   onClick={() => {
                     handleCloseProgressBarMenu();
-                    onFinalize();
+                    // onNextStep();
+                    // ;
+                    forcedTutorial && nextTutorial && !currentTutorialIsTemporal
+                      ? setShowNextTutorialStep(true)
+                      : onFinalize();
                   }}
                   sx={{
                     borderRadius: "32px",
@@ -300,7 +492,7 @@ export const TooltipTutorial = ({
                     },
                   }}
                 >
-                  Got It
+                  Got it
                 </Button>
               )}
             </Box>
@@ -309,8 +501,6 @@ export const TooltipTutorial = ({
                 variant="text"
                 onClick={() => {
                   handleCloseProgressBarMenu();
-                  // onChangeStep(null);
-                  // onUpdateNode("nodes", tutorialState.currentStepName, {});
                   onSkip();
                 }}
                 sx={{
@@ -323,178 +513,8 @@ export const TooltipTutorial = ({
               </Button>
             )}
           </Stack>
-        </Box>
-      </Box>
-    );
-
-  return (
-    <Box
-      ref={tooltipRef}
-      sx={{
-        position: "absolute",
-        top: `${tooltipRect.top}px`,
-        left: `${tooltipRect.left}px`,
-        right: isMobile ? "5px" : undefined,
-        transition: "top 750ms ease-out,left 750ms ease-out, border-color 1s linear",
-        maxWidth: "450px",
-        width: isOnPortal ? (isMobile ? "auto" : "100%") : "450px",
-        backgroundColor: theme => (theme.palette.mode === "dark" ? gray500 : "#C5D0DF"),
-        p: "24px 32px",
-        borderRadius: "12px",
-        border: theme => `2px solid ${theme.palette.mode === "dark" ? "#667085" : gray400}`,
-        color: theme => (theme.palette.mode === "dark" ? gray50 : gray800),
-        zIndex: 99999,
-
-        ":after": {
-          position: "absolute",
-          content: "''",
-          border: "solid 10px transparent",
-          //tale onto TOP
-          borderBottomWidth: `${tutorialStep.tooltipPosition === "top" ? 0 : undefined}`,
-          borderTopColor:
-            tutorialStep.tooltipPosition === "top"
-              ? theme => (theme.palette.mode === "dark" ? "#667085" : gray400)
-              : undefined,
-          //tale onto BOTTOM
-          borderTopWidth: `${tutorialStep.tooltipPosition === "bottom" ? 0 : undefined}`,
-          borderBottomColor:
-            tutorialStep.tooltipPosition === "bottom"
-              ? theme => (theme.palette.mode === "dark" ? "#667085" : gray400)
-              : undefined,
-          //tale onto LEFT
-          borderRightWidth: `${tutorialStep.tooltipPosition === "left" ? 0 : undefined}`,
-          borderLeftColor:
-            tutorialStep.tooltipPosition === "left"
-              ? theme => (theme.palette.mode === "dark" ? "#667085" : gray400)
-              : undefined,
-          //tale onto RIGHT
-          borderLeftWidth: `${tutorialStep.tooltipPosition === "right" ? 0 : undefined}`,
-          borderRightColor:
-            tutorialStep.tooltipPosition === "right"
-              ? theme => (theme.palette.mode === "dark" ? "#667085" : gray400)
-              : undefined,
-          top: taleRect.top ? `${taleRect.top + tooltipRect.exceedTop}px` : undefined,
-          bottom: taleRect.bottom ? `${taleRect.bottom}px` : undefined,
-          left: taleRect.left ? `${taleRect.left + tooltipRect.exceedLeft}px` : undefined,
-          right: taleRect.right ? `${taleRect.right}px` : undefined,
-        },
-      }}
-    >
-      {stepsLength > 1 && (
-        <LinearProgress
-          variant="determinate"
-          value={(tutorialStep.currentStepName * 100) / stepsLength}
-          color={"success"}
-          sx={{
-            borderRadius: "50px",
-            mb: "16px",
-            backgroundColor: theme => (theme.palette.mode === "dark" ? "#D0D5DD4D" : "#6C74824D"),
-            height: "5px",
-            "& .MuiLinearProgress-bar1Determinate": {
-              backgroundColor: theme => (theme.palette.mode === "dark" ? "#A4FD96" : "#52AE43"),
-              borderRadius: "50px",
-            },
-          }}
-        />
+        </>
       )}
-      <Stack direction={"row"} alignItems="center" justifyContent="space-between" mb="16px">
-        <Typography component={"h2"} sx={{ fontSize: "18px", fontWeight: "bold", display: "inline-block" }}>
-          {tutorialStep.title}
-        </Typography>
-        <HelpCenterIcon sx={{ color: theme => (theme.palette.mode === "dark" ? "#D0D5DD" : gray700) }} />
-      </Stack>
-
-      <Box sx={{ fontSize: "14px" }}>
-        {typeof tutorialStep.description === "function"
-          ? node
-            ? tutorialStep.description(node)
-            : ""
-          : tutorialStep.description}
-      </Box>
-
-      {/* INFO: reversed used for showing buttons always to right no matter the number of elements */}
-      <Stack direction={"row-reverse"} justifyContent={"space-between"} alignItems={"center"} sx={{ mt: "16px" }}>
-        <Box>
-          {tutorialStep.currentStepName > 1 && (
-            <Button
-              variant="outlined"
-              onClick={onPreviousStep}
-              sx={{
-                borderRadius: "32px",
-                mr: "16px",
-                p: "8px 32px",
-                color: "inherit",
-                borderColor: theme => (theme.palette.mode === "dark" ? gray50 : gray800),
-                ":hover": {
-                  borderColor: "inherit",
-                  color: "inherit",
-                  backgroundColor: theme => (theme.palette.mode === "dark" ? "#575f68" : "#d7dee6"),
-                },
-              }}
-            >
-              Prev
-            </Button>
-          )}
-
-          {tutorialStep.currentStepName < stepsLength && (
-            <Button
-              variant="contained"
-              onClick={onNextStep}
-              style={{ zIndex: 898999 }}
-              sx={{
-                borderRadius: "32px",
-                p: "8px 32px",
-                color: theme => (theme.palette.mode === "dark" ? gray800 : gray50),
-                backgroundColor: theme => (theme.palette.mode === "dark" ? gray50 : gray800),
-                ":hover": {
-                  backgroundColor: theme => (theme.palette.mode === "dark" ? gray200 : gray700),
-                },
-              }}
-            >
-              Next
-            </Button>
-          )}
-          {tutorialStep.currentStepName === stepsLength && (
-            <Button
-              variant="contained"
-              onClick={() => {
-                handleCloseProgressBarMenu();
-                // onNextStep();
-                onFinalize();
-              }}
-              sx={{
-                borderRadius: "32px",
-                p: "8px 32px",
-                color: theme => (theme.palette.mode === "dark" ? gray800 : gray50),
-                backgroundColor: theme => (theme.palette.mode === "dark" ? gray50 : gray800),
-                ":hover": {
-                  backgroundColor: theme => (theme.palette.mode === "dark" ? gray200 : gray700),
-                },
-              }}
-            >
-              Got it
-            </Button>
-          )}
-        </Box>
-        {tutorialStep.currentStepName !== stepsLength && (
-          <Button
-            variant="text"
-            onClick={() => {
-              handleCloseProgressBarMenu();
-              // onChangeStep(null);
-              // onUpdateNode("nodes", tutorialState.currentStepName, {});
-              onSkip();
-            }}
-            sx={{
-              color: "inherit",
-              p: "8px 0px",
-              ":hover": { backgroundColor: theme => (theme.palette.mode === "dark" ? "#575f68" : "#d7dee6") },
-            }}
-          >
-            Close
-          </Button>
-        )}
-      </Stack>
-    </Box>
+    </>
   );
 };

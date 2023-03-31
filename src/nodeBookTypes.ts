@@ -4,7 +4,7 @@ import React, { Dispatch } from "react";
 import { KnowledgeChoice } from "./knowledgeTypes";
 import { NodeType } from "./types";
 
-export type OpenPart = "LinkingWords" | "Tags" | "References" | null;
+export type OpenPart = "LinkingWords" | "Tags" | "References" | undefined;
 
 export type ChoosingType = "Reference" | "Tag" | "Parent" | "Child" | null;
 
@@ -246,7 +246,9 @@ export type TutorialStepConfig = {
   targetId?: string;
   childTargetId?: string;
   title: string;
-  description: React.ReactNode | ((node: FullNodeData) => React.ReactNode);
+  description:
+    | React.ReactNode
+    | ((node: FullNodeData, nodeParent?: FullNodeData, nodeChild?: FullNodeData) => React.ReactNode);
   anchor?: string;
   tooltipPosition?: "top" | "bottom" | "left" | "right" | "topLeft" | "topRight" | "bottomLeft" | "bottomRight";
   targetDelay?: number;
@@ -260,7 +262,9 @@ export type TutorialStep = {
   targetId: string;
   childTargetId?: string;
   title: string;
-  description: React.ReactNode | ((node: FullNodeData) => React.ReactNode);
+  description:
+    | React.ReactNode
+    | ((node: FullNodeData, nodeParent?: FullNodeData, nodeChild?: FullNodeData) => React.ReactNode);
   anchor: string;
   currentStepName: number;
   nextStepName: number;
@@ -403,6 +407,7 @@ export type FullNodeData = Omit<UserNodesData, "changedAt" | "createdAt" | "upda
     // top: number;
     x?: number;
     y?: number;
+    localLinkingWords?: OpenPart;
   };
 
 export type EdgeData = {
@@ -477,6 +482,9 @@ export type TutorialTypeKeys =
   | "tmpProposalReferenceChild"
   | "tmpProposalCodeChild"
   | "tmpProposalIdeaChild"
+  | "tmpTagsReferences"
+  | "tmpParentsChildrenList"
+  | "tmpPathways"
   | "tableOfContents"
   | "focusMode"
   | "redrawGraph"
@@ -494,7 +502,10 @@ export type TutorialTypeKeys =
   | "pendingProposals"
   | "interactionLivenessBar"
   | "reputationLivenessBar"
-  | "communityLeaderBoard";
+  | "communityLeaderBoard"
+  | "tagsReferences"
+  | "parentsChildrenList"
+  | "pathways";
 
 export type UserTutorial = {
   currentStep: number;

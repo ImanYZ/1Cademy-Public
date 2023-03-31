@@ -1,7 +1,7 @@
 import { ExpandLess, ExpandMore } from "@mui/icons-material";
 import KeyboardArrowLeftIcon from "@mui/icons-material/KeyboardArrowLeft";
 import MenuIcon from "@mui/icons-material/Menu";
-import { Box, Button, IconButton, Stack, Tooltip, Typography } from "@mui/material";
+import { Box, Button, IconButton, Stack, Tooltip, Typography, useMediaQuery, useTheme } from "@mui/material";
 import { addDoc, collection, doc, getFirestore, setDoc, Timestamp } from "firebase/firestore";
 import NextImage from "next/image";
 import React, { Suspense, useCallback, useMemo, useState } from "react";
@@ -62,7 +62,7 @@ export const ToolbarSidebar = ({
   reloadPermanentGrpah,
   user,
   reputation,
-  theme,
+  theme: userTheme,
   setOpenSideBar,
   selectedUser,
   uncheckedNotificationsNum,
@@ -79,7 +79,10 @@ export const ToolbarSidebar = ({
 // enabledToolbarElements = [],
 MainSidebarProps) => {
   const { nodeBookState, nodeBookDispatch } = useNodeBook();
-  const isMenuOpen = nodeBookState.isMenuOpen;
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
+  const isMenuOpen = isMobile && nodeBookState.isMenuOpen;
+
   const db = getFirestore();
   const [chosenTags, setChosenTags] = useState<ChosenTag[]>([]);
   const { allTags, setAllTags } = useTagsTreeView(user.tagId ? [user.tagId] : []);
@@ -218,7 +221,7 @@ MainSidebarProps) => {
             <MemoizedMetaButton>
               <Box sx={{ display: "grid", placeItems: "center" }}>
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={theme === "Light" ? LogoLightMode.src : LogoDarkMode.src} alt="1Logo" width="61px" />
+                <img src={userTheme === "Light" ? LogoLightMode.src : LogoDarkMode.src} alt="1Logo" width="61px" />
               </Box>
             </MemoizedMetaButton>
           </Box>
@@ -765,7 +768,7 @@ MainSidebarProps) => {
   }, [
     isMenuOpen,
     firstBoxHeight,
-    theme,
+    userTheme,
     user,
     reputation?.totalPoints,
     reputation?.positives,
