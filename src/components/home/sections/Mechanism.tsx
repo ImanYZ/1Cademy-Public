@@ -21,7 +21,7 @@ export const MECHANISM_ITEMS: TMechanisms[] = [
     id: "summarizing",
     title: "Summarizing",
     description:
-      "We gather valuable information from various sources such as books, articles, and videos, and divide it into granular pieces. We then combine these pieces into concise notes that focus on a single concept.\nTraditional note-taking methods often only benefit the individual for a short period of time, typically for a semester or two. 1Cademy's collaborative note-taking approach ensures that the notes are useful and usable for multiple students studying the same topics.",
+      "Through a human-AI collaboration, we gather valuable information from various sources such as books, articles, and videos, divide it into granular pieces, and identify the overlapping pieces. We then combine them into concise notes, each focusing on a single concept. Traditional note-taking methods often only benefit the individual for a short period of time, typically for a semester or two. 1Cademy's human-AI collaborative note-taking approach ensures that the notes are useful and usable for multiple students studying the same topics.",
     animation: {
       src: "rive/notebook.riv",
       artboard: "artboard-3",
