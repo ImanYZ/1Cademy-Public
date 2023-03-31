@@ -4,21 +4,24 @@ import MenuIcon from "@mui/icons-material/Menu";
 import { Box, Button, IconButton, Stack, Tooltip, Typography, useMediaQuery, useTheme } from "@mui/material";
 import { addDoc, collection, doc, getFirestore, setDoc, Timestamp } from "firebase/firestore";
 import NextImage from "next/image";
-import React, { Suspense, useCallback, useMemo, useState } from "react";
+import React, { Suspense, useCallback, useEffect, useMemo, useState } from "react";
 
 import { ChosenTag, MemoizedTagsSearcher } from "@/components/TagsSearcher";
 import { useNodeBook } from "@/context/NodeBookContext";
 import { useTagsTreeView } from "@/hooks/useTagsTreeView";
+import { retrieveAuthenticatedUser } from "@/lib/firestoreClient/auth";
+import { Post } from "@/lib/mapApi";
 
 import BookmarkIcon from "../../../../../public/bookmark.svg";
 import EditIcon from "../../../../../public/edit.svg";
+import LogoExtended from "../../../../../public/full-logo.svg";
 import GraduatedIcon from "../../../../../public/graduated.svg";
 import LogoDarkMode from "../../../../../public/LogoDarkMode.svg";
 import LogoLightMode from "../../../../../public/LogoLightMode.svg";
 import NotificationIcon from "../../../../../public/notification.svg";
 import SearchIcon from "../../../../../public/search.svg";
 import TagIcon from "../../../../../public/tag.svg";
-import { Reputation, ReputationSignal, User, UserTheme } from "../../../../knowledgeTypes";
+import { DispatchAuthActions, Reputation, ReputationSignal, User, UserTheme } from "../../../../knowledgeTypes";
 import { UsersStatus, UserTutorials } from "../../../../nodeBookTypes";
 import { OpenSidebar } from "../../../../pages/notebook";
 import { MemoizedMetaButton } from "../../MetaButton";
@@ -52,6 +55,7 @@ type MainSidebarProps = {
   disableToolbar?: boolean;
   enabledToolbarElements?: string[];
   userTutorial: UserTutorials;
+  dispatch: React.Dispatch<DispatchAuthActions>;
   // setCurrentTutorial: Dispatch<SetStateAction<TutorialKeys>>;
 };
 
@@ -75,6 +79,7 @@ export const ToolbarSidebar = ({
   usersOnlineStatusLoaded,
   disableToolbar = false,
   userTutorial,
+  dispatch,
 }: // setCurrentTutorial,
 // enabledToolbarElements = [],
 MainSidebarProps) => {
@@ -87,6 +92,43 @@ MainSidebarProps) => {
   const [chosenTags, setChosenTags] = useState<ChosenTag[]>([]);
   const { allTags, setAllTags } = useTagsTreeView(user.tagId ? [user.tagId] : []);
   const [leaderboardTypeOpen, setLeaderboardTypeOpen] = useState<boolean>(false);
+  const [shouldShowTagSearcher, setShouldShowTagSearcher] = useState<boolean>(false);
+  useEffect(() => {
+    if (chosenTags.length > 0 && chosenTags[0].id in allTags) {
+      notebookRef.current.chosenNode = { id: chosenTags[0].id, title: chosenTags[0].title };
+      nodeBookDispatch({ type: "setChosenNode", payload: { id: chosenTags[0].id, title: chosenTags[0].title } });
+      setShouldShowTagSearcher(false);
+    }
+  }, [allTags, chosenTags, nodeBookDispatch]);
+
+  // this useEffect updated the defaultTag when chosen node change
+  useEffect(() => {
+    const setDefaultTag = async () => {
+      if (nodeBookState.choosingNode?.id === "ToolbarTag" && nodeBookState.chosenNode) {
+        const { id: nodeId, title: nodeTitle } = nodeBookState.chosenNode;
+        notebookRef.current.choosingNode = null;
+        notebookRef.current.chosenNode = null;
+        nodeBookDispatch({ type: "setChoosingNode", payload: null });
+        nodeBookDispatch({ type: "setChosenNode", payload: null });
+        try {
+          dispatch({
+            type: "setAuthUser",
+            payload: { ...user, tagId: nodeId, tag: nodeTitle },
+          });
+          await Post(`/changeDefaultTag/${nodeId}`);
+          let { reputation, user: userUpdated } = await retrieveAuthenticatedUser(user.userId, user.role);
+          if (!reputation) throw Error("Cant find Reputation");
+          if (!userUpdated) throw Error("Cant find User");
+
+          dispatch({ type: "setReputation", payload: reputation });
+          dispatch({ type: "setAuthUser", payload: userUpdated });
+        } catch (err) {
+          console.error(err);
+        }
+      }
+    };
+    setDefaultTag();
+  }, [dispatch, nodeBookDispatch, nodeBookState.chosenNode, user]);
   const onOpenSidebarLog = useCallback(
     async (sidebarType: string) => {
       const userOpenSidebarLogObj: any = {
@@ -116,6 +158,7 @@ MainSidebarProps) => {
     notebookRef.current.choosingNode = null;
     nodeBookDispatch({ type: "setChosenNode", payload: null });
     nodeBookDispatch({ type: "setChoosingNode", payload: null });
+    setShouldShowTagSearcher(false);
   }, [nodeBookDispatch]);
 
   const onOpenUserSettingsSidebar = useCallback(() => {
@@ -178,10 +221,6 @@ MainSidebarProps) => {
     setLeaderboardTypeOpen(oldCLT => !oldCLT);
   }, [setLeaderboardTypeOpen]);
 
-  const shouldShowTagSearcher = useMemo(() => {
-    return nodeBookState?.choosingNode?.id === "Tag";
-  }, [nodeBookState?.choosingNode?.id]);
-
   const disableUserStatusButton = disableToolbar; /* || ![].includes(c=>c==="userStatusIconc") */
   const disableSearchButton = disableToolbar;
   const disabledNotificationButton = disableToolbar;
@@ -197,6 +236,7 @@ MainSidebarProps) => {
         className={`toolbar ${isMenuOpen ? "toolbar-opened" : ""}`}
         sx={{
           overflow: "hidden",
+          paddingX: "5px",
           background: theme =>
             theme.palette.mode === "dark" ? theme.palette.common.darkBackground : theme.palette.common.lightBackground,
           display: { xs: isMenuOpen ? "block" : "none", sm: "block" },
@@ -211,6 +251,7 @@ MainSidebarProps) => {
         }}
       >
         <Stack
+          gap={"3px"}
           alignItems="center"
           direction="column"
           sx={{
@@ -221,7 +262,21 @@ MainSidebarProps) => {
             <MemoizedMetaButton>
               <Box sx={{ display: "grid", placeItems: "center" }}>
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={userTheme === "Light" ? LogoLightMode.src : LogoDarkMode.src} alt="1Logo" width="61px" />
+                <img
+                  className="hide-on-hover"
+                  src={theme === "Light" ? LogoLightMode.src : LogoDarkMode.src}
+                  alt="1Logo"
+                  width="61px"
+                />
+                <img
+                  style={{
+                    display: "none",
+                  }}
+                  className="show-on-hover"
+                  src={LogoExtended.src}
+                  alt="1Logo"
+                  width={"100%"}
+                />
               </Box>
             </MemoizedMetaButton>
           </Box>
@@ -291,7 +346,7 @@ MainSidebarProps) => {
                 marginLeft: !isMenuOpen ? "10px" : undefined,
               }}
             >
-              <NextImage width={"20px"} src={SearchIcon} alt="previous node icon" />
+              <NextImage width={"22px"} src={SearchIcon} alt="previous node icon" />
             </Box>
 
             <Box
@@ -311,7 +366,17 @@ MainSidebarProps) => {
                 color: theme => (theme.palette.mode === "dark" ? "#EAECF0" : "#1D2939"),
               }}
             >
-              Search
+              <Typography
+                sx={{
+                  textOverflow: "ellipsis",
+                  overflow: "hidden",
+                  maxWidth: "90px",
+                  whiteSpace: "nowrap",
+                  fontWeight: "400",
+                }}
+              >
+                Search
+              </Typography>
             </Box>
           </Button>
 
@@ -327,7 +392,7 @@ MainSidebarProps) => {
               width: "90%",
 
               borderRadius: "16px",
-              padding: "12px 0px 12px 12px",
+              padding: "10px 0px 10px 12px",
               justifyContent: "start",
               ":hover": {
                 background: theme => (theme.palette.mode === "dark" ? "#55402B" : "#FFE2D0"),
@@ -342,7 +407,7 @@ MainSidebarProps) => {
                 marginLeft: !isMenuOpen ? "10px" : undefined,
               }}
             >
-              <NextImage width={"20px"} src={NotificationIcon} alt="previous node icon" />
+              <NextImage width={"22px"} src={NotificationIcon} alt="previous node icon" />
               <Box
                 component="span"
                 className="toolbarDescription"
@@ -359,7 +424,17 @@ MainSidebarProps) => {
                   color: theme => (theme.palette.mode === "dark" ? "#EAECF0" : "#1D2939"),
                 }}
               >
-                Notifications
+                <Typography
+                  sx={{
+                    textOverflow: "ellipsis",
+
+                    maxWidth: "90px",
+                    whiteSpace: "nowrap",
+                    fontWeight: "400",
+                  }}
+                >
+                  Notifications
+                </Typography>
               </Box>
               {(uncheckedNotificationsNum ?? 0) > 0 && (
                 <Box
@@ -393,7 +468,7 @@ MainSidebarProps) => {
             sx={{
               width: "90%",
               borderRadius: "16px",
-              padding: "12px 0px 12px 12px",
+              padding: "10px 0px 10px 12px",
               justifyContent: "start",
               ":hover": {
                 background: theme => (theme.palette.mode === "dark" ? "#55402B" : "#FFE2D0"),
@@ -408,9 +483,8 @@ MainSidebarProps) => {
                 marginLeft: !isMenuOpen ? "10px" : undefined,
               }}
             >
-              <NextImage width={"20px"} src={BookmarkIcon} alt="previous node icon" />
+              <NextImage width={"22px"} src={BookmarkIcon} alt="previous node icon" />
               <Box
-                component="span"
                 className="toolbarDescription"
                 sx={{
                   fontSize: "15px",
@@ -425,7 +499,17 @@ MainSidebarProps) => {
                   color: theme => (theme.palette.mode === "dark" ? "#EAECF0" : "#1D2939"),
                 }}
               >
-                Bookmarks
+                <Typography
+                  sx={{
+                    textOverflow: "ellipsis",
+                    overflow: "hidden",
+                    maxWidth: "90px",
+                    whiteSpace: "nowrap",
+                    fontWeight: "400",
+                  }}
+                >
+                  Bookmarks
+                </Typography>
               </Box>
 
               {(bookmarkUpdatesNum ?? 0) > 0 && (
@@ -459,7 +543,7 @@ MainSidebarProps) => {
             sx={{
               width: "90%",
               borderRadius: "16px",
-              padding: "12px 0px 12px 12px",
+              padding: "10px 0px 10px 12px",
               justifyContent: "start",
               ":hover": {
                 background: theme => (theme.palette.mode === "dark" ? "#55402B" : "#FFE2D0"),
@@ -474,9 +558,8 @@ MainSidebarProps) => {
                 marginLeft: !isMenuOpen ? "10px" : undefined,
               }}
             >
-              <NextImage width={"20px"} src={EditIcon} alt="previous node icon" />
+              <NextImage width={"22px"} src={EditIcon} alt="previous node icon" />
               <Box
-                component="span"
                 className="toolbarDescription"
                 sx={{
                   fontSize: "15px",
@@ -497,6 +580,7 @@ MainSidebarProps) => {
                     overflow: "hidden",
                     maxWidth: "90px",
                     whiteSpace: "nowrap",
+                    fontWeight: "400",
                   }}
                 >
                   Pending List
@@ -507,8 +591,8 @@ MainSidebarProps) => {
                 <Box
                   className={window.innerWidth >= 500 ? "show-on-hover" : ""}
                   sx={{
-                    width: "35px",
-                    height: "35px",
+                    width: "32px",
+                    height: "32px",
                     borderRadius: "40%",
                     background: "#E34848",
                     color: "white",
@@ -516,7 +600,7 @@ MainSidebarProps) => {
                     justifyContent: "center",
                     alignItems: "center",
                     position: "absolute",
-                    right: "15px",
+                    right: "20px",
                   }}
                 >
                   {pendingProposalsLoaded ? pendingProposalsNum ?? 0 : 0}
@@ -528,58 +612,60 @@ MainSidebarProps) => {
           {/* Pending proposal sidebar */}
 
           {["INSTRUCTOR", "STUDENT"].includes(user.role ?? "") && (
-            <MemoizedMetaButton
+            <Button
               onClick={() => {
                 if (user.role === "INSTRUCTOR") return window.open("/instructors/dashboard", "_blank");
                 if (user.role === "STUDENT") return window.open(`/instructors/dashboard/${user.uname}`, "_blank");
               }}
               disabled={disabledIntructorButton}
+              sx={{
+                width: "90%",
+                borderRadius: "16px",
+                padding: "10px 0px 10px 12px",
+                justifyContent: "start",
+                ":hover": {
+                  background: theme => (theme.palette.mode === "dark" ? "#55402B" : "#FFE2D0"),
+                },
+              }}
             >
               <Box
                 sx={{
                   display: "flex",
                   alignItems: "center",
-                  padding: "6px 0px 6px 6px",
-                  justifyContent: "start",
                   gap: "5px",
-                  height: "30px",
+                  marginLeft: !isMenuOpen ? "10px" : undefined,
                 }}
               >
-                <NextImage width={"20px"} src={GraduatedIcon} alt="previous node icon" />
-
+                <NextImage width={"22px"} src={GraduatedIcon} alt="previous node icon" />
                 <Box
-                  component="span"
-                  className="toolbarButtonDescription"
+                  className="toolbarDescription"
                   sx={{
                     fontSize: "15px",
-                    lineHeight: isMenuOpen ? "16px" : "0",
-                    height: isMenuOpen ? "41px" : "0",
-                    width: isMenuOpen ? "100px" : "0",
                     overflow: "hidden",
                     visibility: isMenuOpen ? "visible" : "hidden",
                     transition: isMenuOpen
-                      ? "visibility 1s, line-height 1s, height 1s;"
+                      ? "visibility 1s, line-height 1s, height 1s"
                       : "visibility 0s, line-height 0s, height 0s",
-                    display: "flex",
-                    justifyContent: "center",
-                    alignItems: "flex-start",
-                    flexDirection: "column",
+                    width: isMenuOpen ? "100px" : "0",
+                    display: isMenuOpen ? "flex" : "block",
+                    alignItems: "center",
+                    color: theme => (theme.palette.mode === "dark" ? "#EAECF0" : "#1D2939"),
                   }}
                 >
-                  <div
-                    id=""
-                    style={{
+                  <Typography
+                    sx={{
                       textOverflow: "ellipsis",
                       overflow: "hidden",
                       maxWidth: "90px",
                       whiteSpace: "nowrap",
+                      fontWeight: "400",
                     }}
                   >
                     Dashboard
-                  </div>
+                  </Typography>
                 </Box>
               </Box>
-            </MemoizedMetaButton>
+            </Button>
           )}
 
           <Box
@@ -601,7 +687,10 @@ MainSidebarProps) => {
                   background: theme => (theme.palette.mode === "dark" ? "#55402B" : "#FFE2D0"),
                 },
               }}
-              onClick={() => choosingNodeClick("Tag")}
+              onClick={() => {
+                setShouldShowTagSearcher(true);
+                choosingNodeClick("ToolbarTag");
+              }}
             >
               <Box
                 sx={{
@@ -625,28 +714,43 @@ MainSidebarProps) => {
                 </Typography>
               </Box>
             </Button>
-            {shouldShowTagSearcher && (
-              <Suspense fallback={<div></div>}>
-                <Box id="tagModal">
-                  <Modal
-                    className="tagSelectorModalUserSetting"
-                    onClick={closeTagSelector}
-                    returnLeft={true}
-                    noBackground={true}
-                  >
-                    <MemoizedTagsSearcher
-                      id="user-settings-tag-searcher"
-                      setChosenTags={setChosenTags}
-                      chosenTags={chosenTags}
-                      allTags={allTags}
-                      setAllTags={setAllTags}
-                      sx={{ maxHeight: "235px", height: "235px" }}
-                    />
-                  </Modal>
-                </Box>
-              </Suspense>
-            )}
           </Box>
+          {shouldShowTagSearcher && (
+            <Suspense fallback={<div></div>}>
+              <Box
+                id="tagModal"
+                sx={{
+                  background: "#1B1A1A",
+                  paddingX: "10px",
+                }}
+              >
+                <Modal
+                  className="tagSelectorModalUserSetting"
+                  onClick={closeTagSelector}
+                  returnDown={false}
+                  noBackground={true}
+                  style={{
+                    width: "441px",
+                    height: "495px",
+                    left: window.innerWidth <= 500 ? "28px" : "270px",
+                    top: "114px",
+                  }}
+                  contentStyle={{
+                    height: "500px",
+                  }}
+                >
+                  <MemoizedTagsSearcher
+                    id="user-settings-tag-searcher"
+                    setChosenTags={setChosenTags}
+                    chosenTags={chosenTags}
+                    allTags={allTags}
+                    setAllTags={setAllTags}
+                    sx={{ maxHeight: "339px", height: "339px" }}
+                  />
+                </Modal>
+              </Box>
+            </Suspense>
+          )}
 
           <Box
             className={window.innerWidth >= 500 ? "show-on-hover" : ""}
@@ -706,16 +810,19 @@ MainSidebarProps) => {
               alignItems: "center",
               gap: "10px",
               height: "inherit",
+              position: "relative",
             }}
           >
             {leaderboardTypeOpen && (
               <MultipleChoiceBtn
                 sx={{
-                  bottom: window.innerWidth <= 500 ? "170px" : "230px",
                   zIndex: 999,
                   width: "90%",
                   marginX: "auto",
                   left: "5%",
+                  top: window.innerHeight >= 500 ? "0px" : undefined,
+                  bottom: window.innerHeight <= 500 ? "50px" : undefined,
+                  height: "173px",
                 }}
                 choices={choices}
                 onClose={openLeaderboardTypes}
@@ -740,8 +847,8 @@ MainSidebarProps) => {
           spacing={"10px"}
           direction="column"
           sx={{
-            marginTop: window.innerWidth <= 500 ? "140px" : "20px",
-            height: `calc(${windowHeight}px - ${firstBoxHeight}px)`,
+            marginTop: window.innerWidth <= 500 ? "110px" : "40px",
+            height: window.innerHeight >= 500 ? `calc(${windowHeight}px - ${firstBoxHeight}px)` : undefined,
             paddingBottom: "20px",
           }}
         >
@@ -798,6 +905,9 @@ MainSidebarProps) => {
     onOpenSidebar,
     setIsMenuOpen,
     leaderboardTypeOpen,
+    shouldShowTagSearcher,
+    setChosenTags,
+    chosenTags,
   ]);
 
   const contentSignalState = useMemo(() => {
@@ -826,6 +936,9 @@ MainSidebarProps) => {
     userTutorial.searcher.skipped,
     leaderboardTypeOpen,
     leaderBoardType,
+    shouldShowTagSearcher,
+    setChosenTags,
+    chosenTags,
   ]);
 
   return (
@@ -866,6 +979,9 @@ MainSidebarProps) => {
         openSidebar={openSidebar}
         contentSignalState={contentSignalState}
         SidebarContent={toolbarContentMemoized}
+        sx={{
+          boxShadow: undefined,
+        }}
       />
     </>
   );

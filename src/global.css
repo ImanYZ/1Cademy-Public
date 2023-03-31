@@ -60,16 +60,15 @@
 #ChoosingNodeMessage {
   position: absolute;
   width: auto;
-  left: 490px;
-  top: 25px;
+  left: 310px;
+  top: 30px;
   padding: 13px;
-  background: #434343;
-  box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.4);
+  background: #1b1a1a;
   border-radius: 5px;
   font-family: Roboto;
   font-style: normal;
   font-weight: normal;
-  font-size: 25px;
+  font-size: 16px;
   line-height: 28px;
   color: #e5e5e5;
   z-index: 4;
@@ -77,6 +76,9 @@
   overflow: hidden;
 }
 
+.LightMode #ChoosingNodeMessage {
+  background: #f2f4f7;
+}
 @media screen and (max-width: 800px) and (min-width: 601px) {
   #ChoosingNodeMessage {
     width: auto;
@@ -2259,7 +2261,7 @@ button.MuiTab-textColorInherit:focus {
 
 #ModalReturnButton {
   position: absolute;
-  left: 4px;
+  left: 90%;
   top: 10px;
 }
 
@@ -2769,7 +2771,7 @@ right: 5px; */
 
 .toolbar:focus .user-status-section,
 .toolbar:hover .user-status-section {
-  margin-top: 140px !important;
+  margin-top: 110px !important;
 }
 
 .scroll-styled::-webkit-scrollbar {
@@ -2863,4 +2865,13 @@ right: 5px; */
 .tab-button-node-footer:active {
   padding: 5px;
   border-radius: 52px !important;
+}
+
+.LightMode .policy-content h1,
+.LightMode .policy-content h2,
+.LightMode .policy-content h3,
+.LightMode .policy-content h4,
+.LightMode .policy-content li,
+.LightMode .policy-content p {
+  color: black;
 }
