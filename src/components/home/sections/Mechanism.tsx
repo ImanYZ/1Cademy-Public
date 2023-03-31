@@ -21,7 +21,7 @@ export const MECHANISM_ITEMS: TMechanisms[] = [
     id: "summarizing",
     title: "Summarizing",
     description:
-      "Through a human-AI collaboration, we gather valuable information from various sources such as books, articles, and videos, divide it into granular pieces, and identify the overlapping pieces. We then combine them into concise notes, each focusing on a single concept. Traditional note-taking methods often only benefit the individual for a short period of time, typically for a semester or two. 1Cademy's human-AI collaborative note-taking approach ensures that the notes are useful and usable for multiple students studying the same topics.",
+      "1Cademy aims to convert human knowledge into an easily digestible presentation and representation that facilitates efficient learning. The issue of “knowledge overload” arises from the redundancy of the same topics being covered in numerous books, websites, and videos. This is exacerbated by mass generation of content by large language models. To maximize our learning potential, we must eliminate overlapping content and merge all available explanations for a particular subject into a single comprehensive chunk. This chunk should encompass various perspectives and use-cases side-by-side, allowing learners to refer to it as the sole source for complete mastery of the topic. Conventional knowledge structures organized in pages, whether in books or on websites, do not serve this purpose. Instead, we must divide the content into smaller chunks, each dedicated to a single topic.\nThrough a human-AI collaboration, we gather valuable information from various sources such as books, articles, and videos, divide it into granular pieces, and identify the overlapping pieces. We then combine them into concise notes, each focusing on a single concept. Traditional note-taking methods often only benefit the individual for a short period of time, typically for a semester or two. 1Cademy's human-AI collaborative note-taking approach ensures that the notes are useful and usable for multiple students studying the same topics.",
     animation: {
       src: "rive/notebook.riv",
       artboard: "artboard-3",
@@ -94,7 +94,20 @@ const Mechanism = ({ mechanisms }: IMechanism) => {
             <Typography component={"h3"} sx={{ fontSize: "30px", fontWeight: "600px", mb: "16px" }}>
               {cur.title}
             </Typography>
-            <Typography sx={{ color: theme.palette.mode === "dark" ? gray200 : gray600 }}>{cur.description}</Typography>
+            {cur.description.split("\n").map((paragraph: string, idx: number) => (
+              <Typography key={idx} sx={{ color: theme.palette.mode === "dark" ? gray200 : gray600, mb: "8px" }}>
+                {paragraph}
+              </Typography>
+              // <Typography
+              //   key={idx}
+              //   fontSize={"16px"}
+              //   color={theme.palette.mode === "light" ? "#475467" : "#EAECF0"}
+              //   sx={{ p: "8px", pt: "0" }}
+              // >
+              //   {wrapStringWithBoldTag(paragraph, RE_DETECT_NUMBERS_WITH_COMMAS)}
+              // </Typography>
+            ))}
+            {/* <Typography sx={{ color: theme.palette.mode === "dark" ? gray200 : gray600 }}>{cur.description}</Typography> */}
           </Box>
           <Box sx={{ width: canvasDimensions.width, height: canvasDimensions.height }}>
             <RiveComponentMemoized
