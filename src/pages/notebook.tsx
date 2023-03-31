@@ -363,6 +363,8 @@ const Dashboard = ({}: DashboardProps) => {
 
   const pathwayRef = useRef({ node: "", parent: "", child: "" });
 
+  const [selectedNotebookId /* ,setSelectedNotebookId */] = useState("01");
+
   const onNodeInViewport = useCallback(
     (nodeId: string) => {
       const originalNode = document.getElementById(nodeId);
@@ -716,11 +718,14 @@ const Dashboard = ({}: DashboardProps) => {
             userNodeId = userNodeDoc.docs[0].id;
             const userNodeRef = doc(db, "userNodes", userNodeId);
             const userNodeDataTmp = userNodeDoc.docs[0].data() as UserNodesData;
+
+            console.log({ userNodeData });
             userNodeData = {
               ...userNodeDataTmp,
               ...openWithDefaultValues,
             };
-            userNodeData.visible = true;
+            userNodeData.notebooks = [...userNodeData.notebooks, selectedNotebookId];
+            userNodeData.expands = [...userNodeData.expands, true];
             userNodeData.updatedAt = Timestamp.fromDate(new Date());
             batch.update(userNodeRef, userNodeData);
           } else {
@@ -737,10 +742,10 @@ const Dashboard = ({}: DashboardProps) => {
               isStudied: false,
               bookmarked: false,
               node: nodeId,
-              open: true,
               user: user.uname,
-              visible: true,
               wrong: false,
+              notebooks: [selectedNotebookId],
+              expands: [true],
             };
             batch.set(doc(userNodeRef), userNodeData);
           }
@@ -760,9 +765,6 @@ const Dashboard = ({}: DashboardProps) => {
 
           notebookRef.current.selectedNode = nodeId; // CHECK: THIS DOESN'T GUARANTY CORRECT SELECTED NODE, WE NEED TO DETECT WHEN GRAPH UPDATE HIS VALUES
           nodeBookDispatch({ type: "setSelectedNode", payload: nodeId }); // CHECK: SAME FOR THIS
-          /* setTimeout(() => {
-            scrollToNode(nodeId);
-          }, 2000); */
         } catch (err) {
           console.error(err);
         }
@@ -973,12 +975,13 @@ const Dashboard = ({}: DashboardProps) => {
           const fullNodes = buildFullNodes(userNodeChanges, nodesData);
           devLog("4:user Nodes Snapshot:Full nodes", fullNodes);
 
-          const visibleFullNodes = fullNodes.filter(cur => cur.visible || cur.nodeChangeType === "modified");
+          // const visibleFullNodes = fullNodes.filter(cur => cur.visible || cur.nodeChangeType === "modified");
 
           setAllNodes(oldAllNodes => mergeAllNodes(fullNodes, oldAllNodes));
 
           setGraph(({ nodes, edges }) => {
-            const visibleFullNodesMerged = visibleFullNodes.map(cur => {
+            // const visibleFullNodesMerged = visibleFullNodes.map(cur => {
+            const visibleFullNodesMerged = fullNodes.map(cur => {
               const tmpNode = nodes[cur.node];
               if (tmpNode) {
                 if (tmpNode.hasOwnProperty("simulated")) {
@@ -1033,7 +1036,7 @@ const Dashboard = ({}: DashboardProps) => {
             nodeIds,
             nodesData,
             fullNodes,
-            visibleFullNodes,
+            // visibleFullNodes,
           });
           setUserNodesLoaded(true);
         },
@@ -1064,11 +1067,13 @@ const Dashboard = ({}: DashboardProps) => {
 
     devLog("USE_EFFECT", "nodes synchronization");
 
+    // db.collection("cities").where("regions", "array-contains", "west_coast").where("population", ">", 1000000).where("area", ">", 1000000)
     const userNodesRef = collection(db, "userNodes");
     const q = query(
       userNodesRef,
       where("user", "==", user.uname),
-      where("visible", "==", true),
+      where("notebooks", "array-contains", selectedNotebookId),
+      // where("visible", "==", true),
       where("deleted", "==", false)
     );
 
@@ -1077,7 +1082,7 @@ const Dashboard = ({}: DashboardProps) => {
       killSnapshot();
     };
     //IMPORTANT: notebookChanged used in dependecies because of the redraw graph (magic wand button)
-  }, [allTagsLoaded, db, snapshot, user, userTutorialLoaded, notebookChanged]);
+  }, [allTagsLoaded, db, snapshot, user, userTutorialLoaded, notebookChanged, selectedNotebookId]);
 
   useEffect(() => {
     if (!db) return;
@@ -1866,7 +1871,8 @@ const Dashboard = ({}: DashboardProps) => {
         }, 1500);
       } else {
         nodeBookDispatch({ type: "setPreviousNode", payload: notebookRef.current.selectedNode });
-        openNodeHandler(linkedNodeID, isInitialProposal ? typeOperation : "Searcher");
+        // openNodeHandler(linkedNodeID, isInitialProposal ? typeOperation : "Searcher");
+        openNodeHandler(linkedNodeID);
       }
 
       if (typeOperation === "CitationSidebar") {
