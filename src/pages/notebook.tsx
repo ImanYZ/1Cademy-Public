@@ -5825,10 +5825,46 @@ const Dashboard = ({}: DashboardProps) => {
     if (!user?.uname) return;
     if (!allTagsLoaded) return;
     if (!userTutorialLoaded) return;
+    // if (!selectedUserNotebook) return;
+
+    // const nodesOfNotebook = Object.keys(selectedUserNotebook.nodes); // TODO: filter only visible
+    devLog("NOTEBOOK_SYNCHRONIZATION");
+    // TODO get Selected or default ud
+    const selectedId = localStorage.getItem("selected-notebook") ?? ""; // TODO: get notebooks from user
+
+    const killSnapshot = onSnapshot(doc(db, "notebooks", selectedId), doc => {
+      // const source = doc.metadata.hasPendingWrites ? "Local" : "Server";
+      // console.log(source, " data: ", );
+      if (!doc.exists()) return;
+      const notebook = doc.data() as Notebook;
+      // const notebookNodes = Object.values(notebook.nodes);
+
+      setSelectedUserNotebook(notebook);
+    });
+
+    // const docRef = doc(db, "notebooks", selectedId);
+
+    // const userNodesRef = collection(db, "notebooks");
+    // const q = query(
+    //   userNodesRef,
+    // );
+    // //const q = query(citiesRef, where('country', 'in', ['USA', 'Japan']));
+
+    // const killSnapshot = userNodesFromNotebookSnapshot(q);
+    return () => {
+      killSnapshot();
+    };
+  }, [allTagsLoaded, db, user?.uname, userTutorialLoaded]);
+
+  useEffect(() => {
+    if (!db) return;
+    if (!user?.uname) return;
+    if (!allTagsLoaded) return;
+    if (!userTutorialLoaded) return;
     if (!selectedUserNotebook) return;
 
     const nodesOfNotebook = Object.keys(selectedUserNotebook.nodes); // TODO: filter only visible
-    devLog("USE_EFFECT", "nodes synchronization");
+    devLog("USER_NODES_SYNCHRONIZATION");
 
     const userNodesRef = collection(db, "userNodes");
     const q = query(
@@ -5848,7 +5884,7 @@ const Dashboard = ({}: DashboardProps) => {
     allTagsLoaded,
     db,
     selectedUserNotebook,
-    user.uname,
+    user?.uname,
     userNodesFromNotebookSnapshot,
     userTutorialLoaded,
     notebookChanged,

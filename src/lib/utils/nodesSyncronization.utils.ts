@@ -7,6 +7,7 @@ import {
   FullNodesData,
   NodeFireStore,
   NodesData,
+  Notebook,
   UserNodeChanges,
   UserNodesData,
 } from "../../nodeBookTypes";
@@ -138,6 +139,94 @@ export const fillDagre = (
   allTags: AllTagsTreeView,
   updatedNodeIds: string[]
 ) => {
+  return fullNodes.reduce(
+    (acu: { newNodes: { [key: string]: any }; newEdges: { [key: string]: any } }, cur) => {
+      let tmpNodes = {};
+      let tmpEdges = {};
+
+      if (cur.nodeChangeType === "added") {
+        const { uNodeData, oldNodes, oldEdges } = makeNodeVisibleInItsLinks(cur, acu.newNodes, acu.newEdges);
+
+        updatedNodeIds.push(cur.node);
+        const res = createOrUpdateNode(g, uNodeData, cur.node, oldNodes, oldEdges, allTags, withClusters);
+
+        tmpNodes = res.oldNodes;
+        tmpEdges = res.oldEdges;
+      }
+      if (cur.nodeChangeType === "modified" && cur.visible) {
+        const node = acu.newNodes[cur.node];
+        if (!node) {
+          updatedNodeIds.push(cur.node);
+          const res = createOrUpdateNode(g, cur, cur.node, acu.newNodes, acu.newEdges, allTags, withClusters);
+          tmpNodes = res.oldNodes;
+          tmpEdges = res.oldEdges;
+        } else {
+          const currentNode: FullNodeData = {
+            ...cur,
+            left: node.left,
+            top: node.top,
+          }; // <----- IMPORTANT: Add positions data from node into cur.node to not set default position into center of screen
+
+          if (!compare2Nodes(cur, node)) {
+            updatedNodeIds.push(cur.node);
+            const res = createOrUpdateNode(g, currentNode, cur.node, acu.newNodes, acu.newEdges, allTags, withClusters);
+            tmpNodes = res.oldNodes;
+            tmpEdges = res.oldEdges;
+          }
+        }
+      }
+      // so the NO visible nodes will come as modified and !visible
+      if (cur.nodeChangeType === "removed" || (cur.nodeChangeType === "modified" && !cur.visible)) {
+        updatedNodeIds.push(cur.node);
+        if (g.hasNode(cur.node)) {
+          // g.nodes().forEach(function () {});
+          // g.edges().forEach(function () {});
+          // PROBABLY you need to add hideNodeAndItsLinks, to update children and parents nodes
+
+          // !IMPORTANT, Don't change the order, first remove edges then nodes
+          tmpEdges = removeDagAllEdges(g, cur.node, acu.newEdges, updatedNodeIds);
+          tmpNodes = removeDagNode(g, cur.node, acu.newNodes);
+        } else {
+          // remove edges
+          const oldEdges = { ...acu.newEdges };
+
+          Object.keys(oldEdges).forEach(key => {
+            if (key.includes(cur.node)) {
+              delete oldEdges[key];
+            }
+          });
+
+          tmpEdges = oldEdges;
+          // remove node
+          const oldNodes = acu.newNodes;
+          if (cur.node in oldNodes) {
+            delete oldNodes[cur.node];
+          }
+          // tmpEdges = {acu.newEdges,}
+          tmpNodes = { ...oldNodes };
+        }
+      }
+
+      return {
+        newNodes: { ...tmpNodes },
+        newEdges: { ...tmpEdges },
+      };
+    },
+    { newNodes: { ...currentNodes }, newEdges: { ...currentEdges } }
+  );
+};
+
+export const fillDagre2 = (
+  g: dagre.graphlib.Graph<{}>,
+  notebook: Notebook,
+  fullNodes: FullNodeData[],
+  currentNodes: any,
+  currentEdges: any,
+  withClusters: boolean,
+  allTags: AllTagsTreeView,
+  updatedNodeIds: string[]
+) => {
+  Object.values(notebook.nodes).re;
   return fullNodes.reduce(
     (acu: { newNodes: { [key: string]: any }; newEdges: { [key: string]: any } }, cur) => {
       let tmpNodes = {};
