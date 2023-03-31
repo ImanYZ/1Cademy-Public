@@ -69,6 +69,7 @@ import { addSuffixToUrlGMT } from "@/lib/utils/string.utils";
 import LoadingImg from "../../public/animated-icon-1cademy.gif";
 import focusViewLogo from "../../public/focus.svg";
 import focusViewDarkLogo from "../../public/focus-dark.svg";
+import IdeaIcon from "../../public/idea.svg";
 import PrevNodeIcon from "../../public/prev-node.svg";
 import PrevNodeLightIcon from "../../public/prev-node-light.svg";
 import toolBox from "../../public/toolbox.svg";
@@ -5772,8 +5773,24 @@ const Dashboard = ({}: DashboardProps) => {
         }}
       >
         {nodeBookState.choosingNode && (
-          <div id="ChoosingNodeMessage">
-            Click the node you'd like to link to...{" "}
+          <Box
+            id="ChoosingNodeMessage"
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              left: nodeBookState.choosingNode.id === "ToolbarTag" ? "310px" : "50%!important",
+              transform: nodeBookState.choosingNode.id !== "ToolbarTag" ? "translateX(-50%)" : undefined,
+            }}
+          >
+            <NextImage width={"20px"} src={IdeaIcon} alt="previous node icon" />
+            <Typography
+              sx={{
+                marginLeft: "10px",
+              }}
+              fontSize={"inherit"}
+            >
+              Click the node you'd like to link to...
+            </Typography>
             <Button
               onClick={() => {
                 notebookRef.current.choosingNode = null;
@@ -5784,9 +5801,14 @@ const Dashboard = ({}: DashboardProps) => {
                 nodeBookDispatch({ type: "setChosenNode", payload: null });
               }}
             >
-              <CloseIcon fontSize="large" />
+              <CloseIcon
+                sx={{
+                  color: "#A4A4A4",
+                }}
+                fontSize="small"
+              />
             </Button>
-          </div>
+          </Box>
         )}
 
         {nodeBookState.previousNode && (
@@ -5842,7 +5864,7 @@ const Dashboard = ({}: DashboardProps) => {
                 <NextImage
                   width={"20px"}
                   src={theme.palette.mode === "dark" ? PrevNodeIcon : PrevNodeLightIcon}
-                  alt="logo 1cademy"
+                  alt="previous node icon"
                 />
                 <Typography
                   sx={{
@@ -6001,6 +6023,7 @@ const Dashboard = ({}: DashboardProps) => {
               }}
             >
               <MemoizedToolbarSidebar
+                notebookRef={notebookRef}
                 open={true}
                 onClose={() => setOpenSidebar(null)}
                 reloadPermanentGrpah={reloadPermanentGraph}
@@ -6021,6 +6044,7 @@ const Dashboard = ({}: DashboardProps) => {
                 disableToolbar={Boolean(["TutorialStep"].includes("TOOLBAR"))}
                 // setCurrentTutorial={setCurrentTutorial}
                 userTutorial={userTutorial}
+                dispatch={dispatch}
               />
 
               <MemoizedBookmarksSidebar

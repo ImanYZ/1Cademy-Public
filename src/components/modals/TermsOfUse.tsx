@@ -36,7 +36,7 @@ export default TermsOfUse;
 
 const TermsOfUseContent = () => {
   return (
-    <Box>
+    <Box className="policy-content">
       <h3>Introduction</h3>
       <p>
         By retrieving any data from 1Cademy, through an Internet browser, API, or any other means, you guarantee and
