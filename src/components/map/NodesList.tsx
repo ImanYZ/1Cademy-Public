@@ -62,6 +62,7 @@ type NodeListProps = {
   ableToPropose: boolean;
   setAbleToPropose: (newValue: boolean) => void;
   setOpenPart: (nodeId: string, newOpenPart: OpenPart) => void;
+  selectedNotebookId: string;
 };
 
 const NodesList = ({
@@ -119,6 +120,7 @@ const NodesList = ({
   ableToPropose,
   setAbleToPropose,
   setOpenPart,
+  selectedNotebookId,
 }: NodeListProps) => {
   /* eslint-disable-next-line @typescript-eslint/no-unused-vars */
   const { nodeBookDispatch } = useNodeBook();
@@ -178,7 +180,6 @@ const NodesList = ({
             proposalsSelected={proposalsSelected}
             acceptedProposalsSelected={acceptedProposalsSelected}
             commentsSelected={commentsSelected}
-            open={nodes[nId].open}
             left={nodes[nId].left}
             top={nodes[nId].top}
             width={NODE_WIDTH}
@@ -279,6 +280,9 @@ const NodesList = ({
             setAbleToPropose={setAbleToPropose}
             openPart={nodes[nId].localLinkingWords}
             setOpenPart={setOpenPartNode(nId)}
+            selectedNotebookId={selectedNotebookId}
+            expands={nodes[nId].expands}
+            notebooks={nodes[nId].notebooks}
           />
         );
       })}
@@ -334,6 +338,7 @@ export const MemoizedNodeList = React.memo(NodesList, (prev, next) => {
     prev.openSidebar === prev.openSidebar && // TODO: check this
     // prev.showProposeTutorial === next.showProposeTutorial &&
     prev.ableToPropose === next.ableToPropose &&
+    prev.selectedNotebookId === next.selectedNotebookId &&
     validateTutorialProps()
   );
 });

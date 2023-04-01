@@ -1081,7 +1081,7 @@ const Dashboard = ({}: DashboardProps) => {
     return () => {
       killSnapshot();
     };
-    //IMPORTANT: notebookChanged used in dependecies because of the redraw graph (magic wand button)
+    //ANT: notebookChanged used in dependecies because of the redraw graph (magic wand button)
   }, [allTagsLoaded, db, snapshot, user, userTutorialLoaded, notebookChanged, selectedNotebookId]);
 
   useEffect(() => {
@@ -6580,6 +6580,7 @@ const Dashboard = ({}: DashboardProps) => {
                   ableToPropose={ableToPropose}
                   setAbleToPropose={setAbleToPropose}
                   setOpenPart={onChangeNodePart}
+                  selectedNotebookId={selectedNotebookId}
                 />
               </MapInteractionCSS>
               {showRegion && (

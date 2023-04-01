@@ -73,7 +73,6 @@ type NodeProps = {
   proposalsSelected: any;
   acceptedProposalsSelected: any;
   commentsSelected: any;
-  open: boolean;
   left: number;
   top: number;
   width: number;
@@ -167,6 +166,9 @@ type NodeProps = {
   setAbleToPropose: (newValue: boolean) => void;
   openPart: OpenPart;
   setOpenPart: (newOpenPart: OpenPart) => void;
+  notebooks: string[];
+  expands: boolean[];
+  selectedNotebookId: string;
 };
 
 const proposedChildTypesIcons: { [key in ProposedChildTypesIcons]: string } = {
@@ -197,7 +199,6 @@ const Node = ({
   proposalsSelected,
   acceptedProposalsSelected,
   commentsSelected,
-  open,
   left,
   top,
   width,
@@ -287,6 +288,9 @@ const Node = ({
   setAbleToPropose,
   openPart,
   setOpenPart,
+  notebooks,
+  expands,
+  selectedNotebookId: selectedNotebook,
 }: NodeProps) => {
   const [{ user }] = useAuth();
   const { nodeBookState } = useNodeBook();
@@ -475,6 +479,12 @@ const Node = ({
     }
   };
   const hideDescendantsHandler = useCallback(() => onHideDescendants(identifier), [onHideDescendants, identifier]);
+
+  const open = useMemo(() => {
+    const idx = notebooks.findIndex(notebook => notebook === selectedNotebook);
+    console.log({ idx, notebooks, selectedNotebook });
+    return expands[idx];
+  }, [expands, notebooks, selectedNotebook]);
 
   const toggleNodeHandler = useCallback(
     (event: any) => {
@@ -1457,6 +1467,9 @@ export const MemoizedNode = React.memo(Node, (prev, next) => {
     prev.unaccepted === next.unaccepted &&
     prev.disableVotes === next.disableVotes &&
     prev.openPart === next.openPart &&
+    prev.notebooks === next.notebooks &&
+    prev.expands === next.expands &&
+    prev.selectedNotebookId === next.selectedNotebookId &&
     (!next.activeNode || prev.ableToPropose === next.ableToPropose);
   if (
     !basicChanges ||
