@@ -2,9 +2,12 @@ import { getAnalytics } from "firebase/analytics";
 import { getApps, initializeApp } from "firebase/app";
 import { connectAuthEmulator, getAuth } from "firebase/auth";
 import { connectFirestoreEmulator, getFirestore } from "firebase/firestore";
+let appExp: any;
+let dbExp: any;
+let auth: any;
 
 export const initFirebaseClientSDK = () => {
-  if (getApps().length <= 0) {
+  if (!getApps().filter(app => app.name === "[DEFAULT]").length) {
     if (process.env.NODE_ENV === "test") {
       const app = initializeApp({
         projectId: "test",
@@ -31,8 +34,27 @@ export const initFirebaseClientSDK = () => {
       getAnalytics();
     }
   }
+
+  if (!getApps().filter(app => app.name === "visualexp").length) {
+    appExp = initializeApp(
+      {
+        apiKey: process.env.VISUALEXP_API_KEY,
+        authDomain: process.env.VISUALEXP_AUTH_DOMAIN,
+        projectId: process.env.VISUALEXP_PROJECT_ID,
+        storageBucket: process.env.VISUALEXP_STORAGE_BUCKET,
+        messagingSenderId: process.env.VISUALEXP_MESSAGING_SENDER_ID,
+        appId: process.env.VISUALEXP_PUBLIC_APP_ID,
+        measurementId: process.env.VISUALEXP_MEASUREMENT_ID,
+      },
+      "visualexp"
+    );
+  }
+  dbExp = getFirestore(appExp);
+  auth = getAuth(appExp);
 };
 
 export const getFirebaseApp = () => {
   return getApps()[0];
 };
+
+export { dbExp, auth, appExp };

@@ -4,6 +4,7 @@ import React from "react";
 export const allCommunities = [
   {
     id: "ux-research-in-cognitive-psychology-of-Learning",
+    name: "Cognitive_Psychology",
     tags: [
       {
         title: "Cognitive Psychology",
@@ -149,6 +150,7 @@ export const allCommunities = [
 
   {
     id: "clinical-psychology",
+    name: "Clinical_Psychology",
     tags: [
       {
         title: "Clinical Psychology",
@@ -210,6 +212,7 @@ export const allCommunities = [
   },
   {
     id: "health-psychology",
+    name: "Health_Psychology",
     tags: [
       {
         title: "Psychology",
@@ -275,6 +278,7 @@ export const allCommunities = [
   },
   {
     id: "disability-studies",
+    name: "Disability_Studies",
     tags: [
       {
         title: "Disability Studies",
@@ -349,6 +353,7 @@ export const allCommunities = [
   },
   {
     id: "social-psychology",
+    name: "Social_Psychology",
     tags: [
       {
         title: "Social psychology",
@@ -417,6 +422,7 @@ export const allCommunities = [
 
   {
     id: "natural-language-processing",
+    name: "Deep_Learning",
     tags: [
       {
         title: "Data Science",
@@ -529,6 +535,7 @@ export const allCommunities = [
   },
   {
     id: "ux-research-in-online-communities",
+    name: "UX_Research_in_Online_Communities",
     tags: [
       {
         title: "Online Communities",
@@ -910,6 +917,7 @@ export const allCommunities = [
   // },
   {
     id: "liaison-librarians",
+    name: "Liaison_Librarians",
     tags: [
       {
         title: "Library Science",
