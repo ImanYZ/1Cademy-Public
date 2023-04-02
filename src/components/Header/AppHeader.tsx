@@ -49,485 +49,492 @@ type AppHeaderProps = {
   sections: HomepageSection[];
   selectedSectionId: string;
   onSwitchSection: (sectionId: string) => void;
-  fullnameExp: string;
-  setFullnameExp: (fullname: string) => void;
   // preUrl?: string;
 };
 
-const AppHeader = forwardRef(
-  ({ page, sections, selectedSectionId, onSwitchSection, fullnameExp, setFullnameExp }: AppHeaderProps, ref) => {
-    const [openSearch, setOpenSearch] = useState(false);
-    const [{ isAuthenticated, user }] = useAuth();
-    const [handleThemeSwitch] = useThemeChange();
-    const theme = useTheme();
-    const router = useRouter();
-    const isMobile = useMediaQuery("(max-width:599px)");
+const AppHeader = forwardRef(({ page, sections, selectedSectionId, onSwitchSection }: AppHeaderProps, ref) => {
+  const [openSearch, setOpenSearch] = useState(false);
+  const [{ isAuthenticated, user }] = useAuth();
+  const [emailExp, setEmailExp] = useState("");
+  const [nameExp, setNameExp] = useState("");
+  const [handleThemeSwitch] = useThemeChange();
+  const theme = useTheme();
+  const router = useRouter();
+  const isMobile = useMediaQuery("(max-width:599px)");
 
-    const [profileMenuOpen, setProfileMenuOpen] = useState(null);
-    const isProfileMenuOpen = Boolean(profileMenuOpen);
-    const [openMenu, setOpenMenu] = useState(false);
-    const [openForm, setOpenForm] = useState(false);
-    const [idxOptionVisible, setIdxOptionVisible] = useState(-1);
+  const [profileMenuOpen, setProfileMenuOpen] = useState(null);
+  const isProfileMenuOpen = Boolean(profileMenuOpen);
+  const [openMenu, setOpenMenu] = useState(false);
+  const [openForm, setOpenForm] = useState(false);
+  const [idxOptionVisible, setIdxOptionVisible] = useState(-1);
 
-    const signOut = async () => {
-      router.push(ROUTES.home);
-      getAuth().signOut();
-    };
+  const signOut = async () => {
+    router.push(ROUTES.home);
+    getAuth().signOut();
+  };
 
-    const handleProfileMenuOpen = (event: any) => {
-      setProfileMenuOpen(event.currentTarget);
-    };
+  const handleProfileMenuOpen = (event: any) => {
+    setProfileMenuOpen(event.currentTarget);
+  };
 
-    const handleProfileMenuClose = () => {
-      setProfileMenuOpen(null);
-    };
+  const handleProfileMenuClose = () => {
+    setProfileMenuOpen(null);
+  };
 
-    const onCloseMenu = () => {
-      setOpenMenu(false);
-      // onSwitchSection(id);
-    };
+  const onCloseMenu = () => {
+    setOpenMenu(false);
+    // onSwitchSection(id);
+  };
 
-    const onSwitchSectionByMenu = (id: string) => {
-      onSwitchSection(id);
-      setOpenMenu(false);
-    };
+  const onSwitchSectionByMenu = (id: string) => {
+    onSwitchSection(id);
+    setOpenMenu(false);
+  };
 
-    useEffect(() => {
-      if (isAuthenticated && router.query?.course) {
-        postWithToken("/assignCourseToUser", { course: router.query?.course });
+  useEffect(() => {
+    if (isAuthenticated && router.query?.course) {
+      postWithToken("/assignCourseToUser", { course: router.query?.course });
+    }
+  }, [isAuthenticated, router.query?.course]);
+
+  useEffect(() => {
+    return auth.onAuthStateChanged(async (user: any) => {
+      if (user) {
+        setEmailExp(user.email.toLowerCase());
+        setNameExp(user.displayName);
+      } else {
+        setEmailExp("");
+        setNameExp("");
       }
-    }, [isAuthenticated, router.query?.course]);
+    });
+  }, []);
 
-    const renderProfileMenu = (
-      <Menu id="ProfileMenu" anchorEl={profileMenuOpen} open={isProfileMenuOpen} onClose={handleProfileMenuClose}>
-        {isAuthenticated && user && (
-          <Typography sx={{ p: "6px 16px" }}>
-            {capitalizeString(user.chooseUname ? user.uname : user.fName ?? "")}
-          </Typography>
-        )}
-        {isAuthenticated && user && (
-          <MenuItem sx={{ flexGrow: 3 }} onClick={signOut}>
-            <LogoutIcon /> <span id="LogoutText">Logout</span>
-          </MenuItem>
-        )}
-      </Menu>
-    );
+  const renderProfileMenu = (
+    <Menu id="ProfileMenu" anchorEl={profileMenuOpen} open={isProfileMenuOpen} onClose={handleProfileMenuClose}>
+      {isAuthenticated && user && (
+        <Typography sx={{ p: "6px 16px" }}>
+          {capitalizeString(user.chooseUname ? user.uname : user.fName ?? "")}
+        </Typography>
+      )}
+      {isAuthenticated && user && (
+        <MenuItem sx={{ flexGrow: 3 }} onClick={signOut}>
+          <LogoutIcon /> <span id="LogoutText">Logout</span>
+        </MenuItem>
+      )}
+    </Menu>
+  );
 
-    const signUpHandler = () => {
-      router.push(ROUTES.signIn);
-    };
-    const signUpHandlerExp = () => {
-      router.push(ROUTES.signUpExp);
-    };
-    const signOut1 = async () => {
-      console.log("Signing out!");
-      await auth.signOut();
-      setFullnameExp("");
-    };
-    const renderProfileMenuExp = (
-      <Menu id="ProfileMenu" anchorEl={profileMenuOpen} open={isProfileMenuOpen} onClose={handleProfileMenuClose}>
-        {fullnameExp && <Typography sx={{ p: "6px 16px" }}>{capitalizeString(fullnameExp)}</Typography>}
-        {fullnameExp && (
-          <>
-            <MenuItem
-              sx={{ flexGrow: 3 }}
-              onClick={() => {
-                window.open("https://1cademy.us/Activities", "_blank");
-              }}
-            >
-              <BiotechIcon /> <span id="ExperimentActivities">Experiment Activities</span>
-            </MenuItem>
-            <MenuItem sx={{ flexGrow: 3 }} onClick={signOut1}>
-              <LogoutIcon /> <span id="LogoutText">Logout</span>
-            </MenuItem>
-          </>
-        )}
-      </Menu>
-    );
-    return (
-      <>
-        <Box
-          ref={ref}
-          sx={{
-            background: theme => (theme.palette.mode === "dark" ? "rgba(0,0,0,.72)" : "#f8f8f894"),
-            backdropFilter: "saturate(180%) blur(20px)",
-            position: "sticky",
-            top: "0",
-            zIndex: "22",
-          }}
-        >
-          {/* Navbar Left Options */}
-          <Stack
-            direction={"row"}
-            justifyContent="space-between"
-            alignItems="center"
-            spacing={{ xs: "2px", sm: "8px", md: "16px" }}
-            sx={{
-              px: { xs: "16px", sm: "32px" },
-              maxWidth: "1280px",
-              margin: "auto",
-              height: { xs: `${HEADER_HEIGHT_MOBILE}px`, md: `${HEADER_HEIGHT}px` },
+  const signUpHandler = () => {
+    router.push(ROUTES.signIn);
+  };
+  const signUpHandlerExp = () => {
+    router.push(ROUTES.signUpExp);
+  };
+  const signOut1 = async () => {
+    console.log("Signing out!");
+    await auth.signOut();
+  };
+  const renderProfileMenuExp = (
+    <Menu id="ProfileMenu" anchorEl={profileMenuOpen} open={isProfileMenuOpen} onClose={handleProfileMenuClose}>
+      {emailExp && <Typography sx={{ p: "6px 16px" }}>{capitalizeString(nameExp)}</Typography>}
+      {emailExp && (
+        <>
+          <MenuItem
+            sx={{ flexGrow: 3 }}
+            onClick={() => {
+              window.open("https://1cademy.us/Activities", "_blank");
             }}
           >
-            <Stack direction={"row"} alignItems="center" spacing={"16px"}>
-              <Tooltip title="1Cademy's Landing Page">
-                <Image
-                  src={isMobile ? oneCademyLogoExtended.src : oneCademyLogo.src}
-                  alt="logo"
-                  width={isMobile ? "149px" : "60px"}
-                  height={isMobile ? "40px" : "64px"}
-                  style={{ cursor: "pointer" }}
-                  onClick={() => router.push(ROUTES.home)}
-                />
-              </Tooltip>
+            <BiotechIcon /> <span id="ExperimentActivities">Experiment Activities</span>
+          </MenuItem>
+          <MenuItem sx={{ flexGrow: 3 }} onClick={signOut1}>
+            <LogoutIcon /> <span id="LogoutText">Logout</span>
+          </MenuItem>
+        </>
+      )}
+    </Menu>
+  );
+  console.log("userExp :: :: ", emailExp);
+  return (
+    <>
+      <Box
+        ref={ref}
+        sx={{
+          background: theme => (theme.palette.mode === "dark" ? "rgba(0,0,0,.72)" : "#f8f8f894"),
+          backdropFilter: "saturate(180%) blur(20px)",
+          position: "sticky",
+          top: "0",
+          zIndex: "22",
+        }}
+      >
+        {/* Navbar Left Options */}
+        <Stack
+          direction={"row"}
+          justifyContent="space-between"
+          alignItems="center"
+          spacing={{ xs: "2px", sm: "8px", md: "16px" }}
+          sx={{
+            px: { xs: "16px", sm: "32px" },
+            maxWidth: "1280px",
+            margin: "auto",
+            height: { xs: `${HEADER_HEIGHT_MOBILE}px`, md: `${HEADER_HEIGHT}px` },
+          }}
+        >
+          <Stack direction={"row"} alignItems="center" spacing={"16px"}>
+            <Tooltip title="1Cademy's Landing Page">
+              <Image
+                src={isMobile ? oneCademyLogoExtended.src : oneCademyLogo.src}
+                alt="logo"
+                width={isMobile ? "149px" : "60px"}
+                height={isMobile ? "40px" : "64px"}
+                style={{ cursor: "pointer" }}
+                onClick={() => router.push(ROUTES.home)}
+              />
+            </Tooltip>
 
-              <Stack
-                direction={"row"}
-                aria-label="navigation bar"
-                spacing={{ xs: "16px", lg: "24px" }}
-                alignItems={"center"}
-                justifyContent={"space-between"}
-                sx={{
-                  display: {
-                    xs: "none",
-                    md: "flex",
-                  },
-                }}
-              >
-                {sections.slice(1).map((cur, idx) =>
-                  cur.options?.length ? (
-                    <Box key={cur.id} sx={{ display: "flex" }}>
-                      <Box onMouseEnter={() => setIdxOptionVisible(prev => (prev === idx ? -1 : idx))}>
-                        <ActiveLink
-                          section={cur}
-                          selectedSectionId={selectedSectionId}
-                          onSwitchSection={onSwitchSection}
-                        />
-                      </Box>
-                      <IconButton
-                        onClick={() => setIdxOptionVisible(prev => (prev === idx ? -1 : idx))}
-                        size="small"
-                        sx={{ p: "0px", ml: { xs: "4px", lg: "13px" } }}
-                      >
-                        {idxOptionVisible === idx ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
-                      </IconButton>
+            <Stack
+              direction={"row"}
+              aria-label="navigation bar"
+              spacing={{ xs: "16px", lg: "24px" }}
+              alignItems={"center"}
+              justifyContent={"space-between"}
+              sx={{
+                display: {
+                  xs: "none",
+                  md: "flex",
+                },
+              }}
+            >
+              {sections.slice(1).map((cur, idx) =>
+                cur.options?.length ? (
+                  <Box key={cur.id} sx={{ display: "flex" }}>
+                    <Box onMouseEnter={() => setIdxOptionVisible(prev => (prev === idx ? -1 : idx))}>
+                      <ActiveLink
+                        section={cur}
+                        selectedSectionId={selectedSectionId}
+                        onSwitchSection={onSwitchSection}
+                      />
                     </Box>
-                  ) : (
-                    <ActiveLink
-                      key={cur.id}
-                      section={cur}
-                      selectedSectionId={selectedSectionId}
-                      onSwitchSection={onSwitchSection}
-                    />
-                  )
-                )}
-              </Stack>
+                    <IconButton
+                      onClick={() => setIdxOptionVisible(prev => (prev === idx ? -1 : idx))}
+                      size="small"
+                      sx={{ p: "0px", ml: { xs: "4px", lg: "13px" } }}
+                    >
+                      {idxOptionVisible === idx ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
+                    </IconButton>
+                  </Box>
+                ) : (
+                  <ActiveLink
+                    key={cur.id}
+                    section={cur}
+                    selectedSectionId={selectedSectionId}
+                    onSwitchSection={onSwitchSection}
+                  />
+                )
+              )}
             </Stack>
+          </Stack>
 
-            {/* Navbar Right Options */}
-            <Stack direction={"row"} justifyContent="flex-end" alignItems="center" spacing={"8px"}>
-              <Box
-                sx={{
-                  width: "100%",
-                  maxWidth: "240px",
-                  display: {
-                    xs: isAuthenticated ? "block" : "none",
-                    sm: "block",
-                    md: isAuthenticated ? "block" : "none",
-                    lg: "block",
-                  },
-                }}
-              >
-                <AppHeaderSearchBar />
-              </Box>
+          {/* Navbar Right Options */}
+          <Stack direction={"row"} justifyContent="flex-end" alignItems="center" spacing={"8px"}>
+            <Box
+              sx={{
+                width: "100%",
+                maxWidth: "240px",
+                display: {
+                  xs: isAuthenticated ? "block" : "none",
+                  sm: "block",
+                  md: isAuthenticated ? "block" : "none",
+                  lg: "block",
+                },
+              }}
+            >
+              <AppHeaderSearchBar />
+            </Box>
 
-              {true && (
-                <Tooltip title="Open Searcher">
-                  <IconButton
-                    onClick={() => setOpenSearch(true)}
+            {true && (
+              <Tooltip title="Open Searcher">
+                <IconButton
+                  onClick={() => setOpenSearch(true)}
+                  sx={{
+                    display: {
+                      xs: !isAuthenticated ? undefined : "none",
+                      sm: "none",
+                      md: "flex",
+                      lg: "none",
+                    },
+                  }}
+                  size="small"
+                >
+                  <SearchIcon />
+                </IconButton>
+              </Tooltip>
+            )}
+
+            <Tooltip title="Change theme">
+              <IconButton onClick={handleThemeSwitch} size="small">
+                {theme.palette.mode === "dark" ? <LightModeIcon /> : <DarkModeIcon />}
+              </IconButton>
+            </Tooltip>
+
+            <Stack display={"flex"} direction={"row"} justifyContent="flex-end" alignItems="center" spacing={"8px"}>
+              {page === "ONE_CADEMY" && !isAuthenticated && (
+                <Tooltip title="Apply to join 1Cademy">
+                  <Button
+                    variant="contained"
+                    onClick={() => window?.open(ROUTES.apply, "_blank")}
                     sx={{
-                      display: {
-                        xs: !isAuthenticated ? undefined : "none",
-                        sm: "none",
-                        md: "flex",
-                        lg: "none",
+                      display: { xs: "none", sm: "flex" },
+                      p: { xs: "6px 10px", lg: undefined },
+                      minWidth: "54px",
+                      background: orangeDark,
+                      fontSize: 16,
+                      borderRadius: 40,
+                      height: "25px",
+                      // width: "60px",
+                      textTransform: "capitalize",
+                      ":hover": {
+                        background: orange900,
                       },
                     }}
-                    size="small"
                   >
-                    <SearchIcon />
+                    Apply
+                  </Button>
+                </Tooltip>
+              )}
+
+              {page === "ONE_CADEMY" && isAuthenticated && user && (
+                <Tooltip title={capitalizeString(user.chooseUname ? user.uname : user.fName ?? "")}>
+                  <IconButton onClick={handleProfileMenuOpen}>
+                    <Box
+                      sx={{
+                        width: "26px",
+                        height: "26px",
+                        borderRadius: "30px",
+                        color: theme => theme.palette.common.gray,
+                      }}
+                      aria-haspopup="true"
+                      aria-controls="lock-menu"
+                      aria-label={`${user.fName}'s Account`}
+                      aria-expanded={isProfileMenuOpen ? "true" : undefined}
+                    >
+                      <Image
+                        src={user.imageUrl || ""}
+                        alt={user.fName}
+                        width="26px"
+                        height="26px"
+                        quality={40}
+                        objectFit="cover"
+                        style={{
+                          borderRadius: "30px",
+                        }}
+                      />
+                    </Box>
                   </IconButton>
                 </Tooltip>
               )}
 
-              <Tooltip title="Change theme">
-                <IconButton onClick={handleThemeSwitch} size="small">
-                  {theme.palette.mode === "dark" ? <LightModeIcon /> : <DarkModeIcon />}
-                </IconButton>
-              </Tooltip>
+              {emailExp && page === "COMMUNITIES" && (
+                <Tooltip title="Account">
+                  <IconButton
+                    size="large"
+                    edge="end"
+                    aria-haspopup="true"
+                    aria-controls="lock-menu"
+                    aria-label={`${emailExp}'s Account`}
+                    aria-expanded={isProfileMenuOpen ? "true" : undefined}
+                    onClick={handleProfileMenuOpen}
+                    color="inherit"
+                  >
+                    <AccountCircle />
+                  </IconButton>
+                </Tooltip>
+              )}
+              {page === "COMMUNITIES" && !emailExp && (
+                <Tooltip title="SIGN IN/UP">
+                  <Button
+                    variant="contained"
+                    color="secondary"
+                    onClick={signUpHandlerExp}
+                    sx={{
+                      display: { xs: "none", sm: "flex" },
+                      p: { xs: "6px 10px", lg: undefined },
+                      minWidth: "95px",
+                      fontSize: 16,
+                      backgroundColor: theme.palette.mode === "dark" ? "#303030" : "#e4e4e4",
+                      color: theme.palette.mode === "dark" ? theme.palette.common.white : theme.palette.common.black,
+                      borderRadius: 40,
+                      height: "25px",
+                      textTransform: "capitalize",
+                      ":hover": {
+                        backgroundColor: theme.palette.mode === "dark" ? "#444444" : "#cacaca",
+                      },
+                    }}
+                  >
+                    Sign In/Up
+                  </Button>
+                </Tooltip>
+              )}
 
-              <Stack display={"flex"} direction={"row"} justifyContent="flex-end" alignItems="center" spacing={"8px"}>
-                {page === "ONE_CADEMY" && !isAuthenticated && (
-                  <Tooltip title="Apply to join 1Cademy">
-                    <Button
-                      variant="contained"
-                      onClick={() => window?.open(ROUTES.apply, "_blank")}
-                      sx={{
-                        display: { xs: "none", sm: "flex" },
-                        p: { xs: "6px 10px", lg: undefined },
-                        minWidth: "54px",
-                        background: orangeDark,
-                        fontSize: 16,
-                        borderRadius: 40,
-                        height: "25px",
-                        // width: "60px",
-                        textTransform: "capitalize",
-                        ":hover": {
-                          background: orange900,
-                        },
-                      }}
-                    >
-                      Apply
-                    </Button>
-                  </Tooltip>
-                )}
-
-                {page === "ONE_CADEMY" && isAuthenticated && user && (
-                  <Tooltip title={capitalizeString(user.chooseUname ? user.uname : user.fName ?? "")}>
-                    <IconButton onClick={handleProfileMenuOpen}>
-                      <Box
-                        sx={{
-                          width: "26px",
-                          height: "26px",
-                          borderRadius: "30px",
-                          color: theme => theme.palette.common.gray,
-                        }}
-                        aria-haspopup="true"
-                        aria-controls="lock-menu"
-                        aria-label={`${user.fName}'s Account`}
-                        aria-expanded={isProfileMenuOpen ? "true" : undefined}
-                      >
-                        <Image
-                          src={user.imageUrl || ""}
-                          alt={user.fName}
-                          width="26px"
-                          height="26px"
-                          quality={40}
-                          objectFit="cover"
-                          style={{
-                            borderRadius: "30px",
-                          }}
-                        />
-                      </Box>
-                    </IconButton>
-                  </Tooltip>
-                )}
-
-                {fullnameExp && page === "COMMUNITIES" && (
-                  <Tooltip title="Account">
-                    <IconButton
-                      size="large"
-                      edge="end"
-                      aria-haspopup="true"
-                      aria-controls="lock-menu"
-                      aria-label={`${fullnameExp}'s Account`}
-                      aria-expanded={isProfileMenuOpen ? "true" : undefined}
-                      onClick={handleProfileMenuOpen}
-                      color="inherit"
-                    >
-                      <AccountCircle />
-                    </IconButton>
-                  </Tooltip>
-                )}
-                {page === "COMMUNITIES" && !fullnameExp && (
-                  <Tooltip title="SIGN IN/UP">
-                    <Button
-                      variant="contained"
-                      color="secondary"
-                      onClick={signUpHandlerExp}
-                      sx={{
-                        display: { xs: "none", sm: "flex" },
-                        p: { xs: "6px 10px", lg: undefined },
-                        minWidth: "95px",
-                        fontSize: 16,
-                        backgroundColor: theme.palette.mode === "dark" ? "#303030" : "#e4e4e4",
-                        color: theme.palette.mode === "dark" ? theme.palette.common.white : theme.palette.common.black,
-                        borderRadius: 40,
-                        height: "25px",
-                        textTransform: "capitalize",
-                        ":hover": {
-                          backgroundColor: theme.palette.mode === "dark" ? "#444444" : "#cacaca",
-                        },
-                      }}
-                    >
-                      Sign In/Up
-                    </Button>
-                  </Tooltip>
-                )}
-
-                {!isAuthenticated && page !== "COMMUNITIES" && (
-                  <Tooltip title="SIGN IN/UP">
-                    <Button
-                      variant="contained"
-                      color="secondary"
-                      onClick={page === "ONE_CADEMY" ? signUpHandler : () => setOpenForm(true)}
-                      sx={{
-                        display: { xs: "none", sm: "flex" },
-                        p: { xs: "6px 10px", lg: undefined },
-                        minWidth: "95px",
-                        fontSize: 16,
-                        backgroundColor: theme.palette.mode === "dark" ? "#303030" : "#e4e4e4",
-                        color: theme.palette.mode === "dark" ? theme.palette.common.white : theme.palette.common.black,
-                        borderRadius: 40,
-                        height: "25px",
-                        textTransform: "capitalize",
-                        ":hover": {
-                          backgroundColor: theme.palette.mode === "dark" ? "#444444" : "#cacaca",
-                        },
-                      }}
-                    >
-                      Sign In/Up
-                    </Button>
-                  </Tooltip>
-                )}
-              </Stack>
-
-              <IconButton
-                onClick={() => setOpenMenu(prev => !prev)}
-                sx={{ display: { xs: "flex", md: "none" }, alignSelf: "center" }}
-                size="small"
-              >
-                {openMenu ? <CloseIcon /> : <MenuIcon />}
-              </IconButton>
+              {!isAuthenticated && page !== "COMMUNITIES" && (
+                <Tooltip title="SIGN IN/UP">
+                  <Button
+                    variant="contained"
+                    color="secondary"
+                    onClick={page === "ONE_CADEMY" ? signUpHandler : () => setOpenForm(true)}
+                    sx={{
+                      display: { xs: "none", sm: "flex" },
+                      p: { xs: "6px 10px", lg: undefined },
+                      minWidth: "95px",
+                      fontSize: 16,
+                      backgroundColor: theme.palette.mode === "dark" ? "#303030" : "#e4e4e4",
+                      color: theme.palette.mode === "dark" ? theme.palette.common.white : theme.palette.common.black,
+                      borderRadius: 40,
+                      height: "25px",
+                      textTransform: "capitalize",
+                      ":hover": {
+                        backgroundColor: theme.palette.mode === "dark" ? "#444444" : "#cacaca",
+                      },
+                    }}
+                  >
+                    Sign In/Up
+                  </Button>
+                </Tooltip>
+              )}
             </Stack>
+
+            <IconButton
+              onClick={() => setOpenMenu(prev => !prev)}
+              sx={{ display: { xs: "flex", md: "none" }, alignSelf: "center" }}
+              size="small"
+            >
+              {openMenu ? <CloseIcon /> : <MenuIcon />}
+            </IconButton>
           </Stack>
-          {fullnameExp && renderProfileMenuExp}
-          {isAuthenticated && user && renderProfileMenu}
+        </Stack>
+        {emailExp && renderProfileMenuExp}
+        {isAuthenticated && user && renderProfileMenu}
 
-          <Modal
-            open={openMenu}
-            onClose={() => setOpenMenu(false)}
-            aria-labelledby="Menu"
-            aria-describedby="Navigate through sections"
-            sx={{ display: { md: "none" } }}
-          >
-            <MenuHeader
-              page={page}
-              items={sections.slice(1)}
-              onCloseMenu={onCloseMenu}
-              selectedSectionId={selectedSectionId}
-              onSwitchSection={onSwitchSectionByMenu}
-              otherOptions={
-                page === "ONE_ASSISTANT" ? (
-                  <Button
-                    variant="contained"
-                    color="secondary"
-                    onClick={() => setOpenForm(true)}
-                    sx={{
-                      display: { xs: "flex", sm: "none" },
-                      fontSize: 16,
-                      backgroundColor: theme => (theme.palette.mode === "dark" ? "#303030" : "#e4e4e4"),
-                      color: theme =>
-                        theme.palette.mode === "dark" ? theme.palette.common.white : theme.palette.common.black,
-                      borderRadius: 40,
-                      // height: "25px",
-                      textTransform: "capitalize",
-                      ":hover": {
-                        backgroundColor: theme => (theme.palette.mode === "dark" ? "#444444" : "#cacaca"),
-                      },
-                    }}
-                  >
-                    Sign In/Up
-                  </Button>
-                ) : page === "COMMUNITIES" ? (
-                  <Button
-                    variant="contained"
-                    color="secondary"
-                    onClick={() => window.open("https://1cademy.us/auth", "_blank")}
-                    sx={{
-                      display: { xs: "flex", sm: "none" },
-                      fontSize: 16,
-                      backgroundColor: theme => (theme.palette.mode === "dark" ? "#303030" : "#e4e4e4"),
-                      color: theme =>
-                        theme.palette.mode === "dark" ? theme.palette.common.white : theme.palette.common.black,
-                      borderRadius: 40,
-                      // height: "25px",
-                      textTransform: "capitalize",
-                      ":hover": {
-                        backgroundColor: theme => (theme.palette.mode === "dark" ? "#444444" : "#cacaca"),
-                      },
-                    }}
-                  >
-                    Sign In/Up
-                  </Button>
-                ) : null
-              }
-            />
-          </Modal>
-
-          <Box
-            sx={{
-              position: "absolute",
-              top: "80px",
-              left: "0px",
-              right: "0px",
-              background: theme => (theme.palette.mode === "dark" ? "#000000ff" : "#ffffff"),
-            }}
-          >
-            <SubMenu
-              onCloseSubMenu={() => setIdxOptionVisible(-1)}
-              sectionVisible={sections.slice(1)[idxOptionVisible]}
-            />
-          </Box>
-
-          {page === "ONE_ASSISTANT" && (
-            <Modal open={openForm} onClose={() => setOpenForm(false)}>
-              <Box
-                sx={{
-                  width: "100%",
-                  height: "100%",
-                  bgcolor: theme => (theme.palette.mode === "dark" ? "#28282ad3" : "#f8f8f8e3"),
-                  backdropFilter: "blur(4px)",
-                  display: "flex",
-                  justifyContent: "center",
-                  alignItems: { sx: "flex-start", sm: "center" },
-                }}
-              >
-                <Box
+        <Modal
+          open={openMenu}
+          onClose={() => setOpenMenu(false)}
+          aria-labelledby="Menu"
+          aria-describedby="Navigate through sections"
+          sx={{ display: { md: "none" } }}
+        >
+          <MenuHeader
+            page={page}
+            items={sections.slice(1)}
+            onCloseMenu={onCloseMenu}
+            selectedSectionId={selectedSectionId}
+            onSwitchSection={onSwitchSectionByMenu}
+            otherOptions={
+              page === "ONE_ASSISTANT" ? (
+                <Button
+                  variant="contained"
+                  color="secondary"
+                  onClick={() => setOpenForm(true)}
                   sx={{
-                    position: "relative",
-                    maxWidth: "900px",
-                    overflowY: "auto",
+                    display: { xs: "flex", sm: "none" },
+                    fontSize: 16,
+                    backgroundColor: theme => (theme.palette.mode === "dark" ? "#303030" : "#e4e4e4"),
+                    color: theme =>
+                      theme.palette.mode === "dark" ? theme.palette.common.white : theme.palette.common.black,
+                    borderRadius: 40,
+                    // height: "25px",
+                    textTransform: "capitalize",
+                    ":hover": {
+                      backgroundColor: theme => (theme.palette.mode === "dark" ? "#444444" : "#cacaca"),
+                    },
                   }}
                 >
-                  <IconButton
-                    onClick={() => setOpenForm(false)}
-                    sx={{ position: "absolute", top: "0px", right: "0px" }}
-                  >
-                    <CloseIcon />
-                  </IconButton>
-                  <Box>
-                    <AssistantForm onSuccessFeedback={() => setOpenForm(false)} />
-                  </Box>
+                  Sign In/Up
+                </Button>
+              ) : page === "COMMUNITIES" ? (
+                <Button
+                  variant="contained"
+                  color="secondary"
+                  onClick={() => window.open("https://1cademy.us/auth", "_blank")}
+                  sx={{
+                    display: { xs: "flex", sm: "none" },
+                    fontSize: 16,
+                    backgroundColor: theme => (theme.palette.mode === "dark" ? "#303030" : "#e4e4e4"),
+                    color: theme =>
+                      theme.palette.mode === "dark" ? theme.palette.common.white : theme.palette.common.black,
+                    borderRadius: 40,
+                    // height: "25px",
+                    textTransform: "capitalize",
+                    ":hover": {
+                      backgroundColor: theme => (theme.palette.mode === "dark" ? "#444444" : "#cacaca"),
+                    },
+                  }}
+                >
+                  Sign In/Up
+                </Button>
+              ) : null
+            }
+          />
+        </Modal>
+
+        <Box
+          sx={{
+            position: "absolute",
+            top: "80px",
+            left: "0px",
+            right: "0px",
+            background: theme => (theme.palette.mode === "dark" ? "#000000ff" : "#ffffff"),
+          }}
+        >
+          <SubMenu
+            onCloseSubMenu={() => setIdxOptionVisible(-1)}
+            sectionVisible={sections.slice(1)[idxOptionVisible]}
+          />
+        </Box>
+
+        {page === "ONE_ASSISTANT" && (
+          <Modal open={openForm} onClose={() => setOpenForm(false)}>
+            <Box
+              sx={{
+                width: "100%",
+                height: "100%",
+                bgcolor: theme => (theme.palette.mode === "dark" ? "#28282ad3" : "#f8f8f8e3"),
+                backdropFilter: "blur(4px)",
+                display: "flex",
+                justifyContent: "center",
+                alignItems: { sx: "flex-start", sm: "center" },
+              }}
+            >
+              <Box
+                sx={{
+                  position: "relative",
+                  maxWidth: "900px",
+                  overflowY: "auto",
+                }}
+              >
+                <IconButton onClick={() => setOpenForm(false)} sx={{ position: "absolute", top: "0px", right: "0px" }}>
+                  <CloseIcon />
+                </IconButton>
+                <Box>
+                  <AssistantForm onSuccessFeedback={() => setOpenForm(false)} />
                 </Box>
               </Box>
-            </Modal>
-          )}
+            </Box>
+          </Modal>
+        )}
+      </Box>
+      <Modal
+        open={openSearch}
+        onClose={() => setOpenSearch(false)}
+        aria-labelledby="searcher"
+        aria-describedby="search nodes"
+      >
+        <Box>
+          <SearcherPupUp onClose={() => setOpenSearch(false)} />
         </Box>
-        <Modal
-          open={openSearch}
-          onClose={() => setOpenSearch(false)}
-          aria-labelledby="searcher"
-          aria-describedby="search nodes"
-        >
-          <Box>
-            <SearcherPupUp onClose={() => setOpenSearch(false)} />
-          </Box>
-        </Modal>
-      </>
-    );
-  }
-);
+      </Modal>
+    </>
+  );
+});
 
 AppHeader.displayName = "AppHeader";
 

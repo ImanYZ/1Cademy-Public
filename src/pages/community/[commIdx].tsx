@@ -8,7 +8,6 @@ import Avatar from "@mui/material/Avatar";
 import Box from "@mui/material/Box";
 import IconButton from "@mui/material/IconButton";
 import { Stack } from "@mui/system";
-import { collection, getDocs, query, where } from "firebase/firestore";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/router";
@@ -22,7 +21,6 @@ import { ONE_CADEMY_SECTIONS } from "@/components/home/SectionsItems";
 import ROUTES from "@/lib/utils/routes";
 
 import JoinUs from "../../components/community/JoinUs";
-import { auth, dbExp } from "../../lib/firestoreClient/firestoreClient.config";
 // import { ONE_CADEMY_SECTIONS } from "@/components/home/SectionsItems";
 import {
   darkBase,
@@ -126,7 +124,6 @@ const DividerStyled = styled(props => <Divider {...props} />)(({ theme }) => ({
 const Communities = () => {
   const router = useRouter();
   const { commIdx } = router.query;
-  const [fullnameExp, setFullnameExp] = useState("");
   // const [reputationsChanges, setReputationsChanges] = useState([]);
   // const [reputations, setReputations] = useState({});
   // const [reputationsLoaded, setReputationsLoaded] = useState(false);
@@ -259,17 +256,6 @@ const Communities = () => {
   const onSwitchSection = (sectionId: string) => {
     window.location.href = `/#${sectionId}`;
   };
-  useEffect(() => {
-    return auth.onAuthStateChanged(async (user: any) => {
-      if (user) {
-        const uEmail = user.email.toLowerCase();
-        const userDocs = await getDocs(query(collection(dbExp, "users"), where("email", "==", uEmail)));
-        if (userDocs.docs.length > 0) {
-          setFullnameExp(userDocs.docs[0].id);
-        }
-      }
-    });
-  }, []);
   return (
     <Box
       id="ScrollableContainer"
@@ -286,8 +272,6 @@ const Communities = () => {
         sections={ONE_CADEMY_SECTIONS}
         onSwitchSection={onSwitchSection}
         selectedSectionId={""}
-        fullnameExp={fullnameExp}
-        setFullnameExp={setFullnameExp}
         page="COMMUNITIES"
       />
       <Box

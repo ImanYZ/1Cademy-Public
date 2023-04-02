@@ -84,7 +84,7 @@ interface TWriteOperation {
 const writeTransaction = async (tWriteOperations: TWriteOperation[]) => {
   const chunked = arrayToChunks(tWriteOperations);
 
-  await db.runTransaction(async t => {
+  await db.runTransaction(async (t: any) => {
     for (let chunk of chunked) {
       for (let op of chunk) {
         const { operationType, objRef, data } = op;
