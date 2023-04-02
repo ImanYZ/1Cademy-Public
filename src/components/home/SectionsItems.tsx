@@ -78,12 +78,6 @@ export const ONE_CADEMY_SECTIONS: HomepageSection[] = [
         link: "https://1cademy.us/community/social-psychology",
       },
       {
-        title: "Natural Language Processing",
-        description:
-          "Welcome to the Deep Learning Community! Our community predominantly contributes to the nlp area on 1Cademy, our collaborative research platform. This semester, we will explore different deep learning topics , mainly NLP topics, by going through selected papers every week. Our team members will dive into these papers and present what they've been learning throughout each week by walking us through the nodes they have designed during our weekly team meetings. We also encourage our interns to work on a specific topic together as a team so that they may write a survey paper together before finishing the internship. After meeting certain requirements, you will be invited to join our small research group to work on concrete research ideas.",
-        link: "https://1cademy.us/community/natural-language-processing",
-      },
-      {
         title: "UX Research in Cognitive Psychology of Learning",
         description: `We study the UX Research and Cognitive Psychology literature on learning and memorizing. Using 1Cademy, we break down articles into granular knowledge pieces, connect them within a larger context of research, communicate our findings to other community members, and utilize our knowledge to conduct research. We conduct online controlled experiments using our research pipeline and co-author research papers to submit to reputable journals and conferences.`,
         link: "https://1cademy.us/community/ux-research-in-cognitive-psychology-of-Learning",
