@@ -727,6 +727,8 @@ const Dashboard = ({}: DashboardProps) => {
             userNodeData.notebooks = [...(userNodeData.notebooks ?? []), selectedNotebookId];
             userNodeData.expands = [...(userNodeData.expands ?? []), true];
             userNodeData.updatedAt = Timestamp.fromDate(new Date());
+            delete userNodeData?.visible;
+            delete userNodeData?.open;
             batch.update(userNodeRef, userNodeData);
           } else {
             // if NOT exist documents create a document
