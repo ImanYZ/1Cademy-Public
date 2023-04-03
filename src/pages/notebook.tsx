@@ -1760,6 +1760,10 @@ const Dashboard = ({}: DashboardProps) => {
             for (let descendant of descendants) {
               const thisNode = graph.nodes[descendant];
               const { nodeRef, userNodeRef } = initNodeStatusChange(descendant, thisNode.userNodeId);
+              const notebookIdx = thisNode.notebooks.findIndex(cur => cur === selectedNotebookId);
+              if (notebookIdx < 0) return console.error("notebook property has invalid values");
+
+              const newExpands = thisNode.expands.filter((c, idx) => idx !== notebookIdx);
               const userNodeData = {
                 changed: thisNode.changed,
                 correct: thisNode.correct,
@@ -1769,9 +1773,11 @@ const Dashboard = ({}: DashboardProps) => {
                 isStudied: thisNode.isStudied,
                 bookmarked: "bookmarked" in thisNode ? thisNode.bookmarked : false,
                 node: descendant,
-                open: thisNode.open,
+                notebooks: thisNode.notebooks.filter(cur => cur !== selectedNotebookId),
+                expands: newExpands,
+                // open: thisNode.open,
                 user: user.uname,
-                visible: false,
+                // visible: false,
                 wrong: thisNode.wrong,
               };
 
@@ -1784,13 +1790,14 @@ const Dashboard = ({}: DashboardProps) => {
                 viewers: (thisNode.viewers || 0) - 1, // CHECK I add 0
                 updatedAt: Timestamp.fromDate(new Date()),
               };
-              if (userNodeData.open && "openHeight" in thisNode) {
-                changeNode.height = thisNode.openHeight;
-                userNodeLogData.height = thisNode.openHeight;
-              } else if ("closedHeight" in thisNode) {
-                changeNode.closedHeight = thisNode.closedHeight;
-                userNodeLogData.closedHeight = thisNode.closedHeight;
-              }
+              // INFO: this was commented because is not used
+              // if (userNodeData.open && "openHeight" in thisNode) {
+              //   changeNode.height = thisNode.openHeight;
+              //   userNodeLogData.height = thisNode.openHeight;
+              // } else if ("closedHeight" in thisNode) {
+              //   changeNode.closedHeight = thisNode.closedHeight;
+              //   userNodeLogData.closedHeight = thisNode.closedHeight;
+              // }
               batch.update(nodeRef, changeNode);
 
               const userNodeLogRef = collection(db, "userNodesLog");
@@ -1817,7 +1824,7 @@ const Dashboard = ({}: DashboardProps) => {
         return graph;
       });
     },
-    [recursiveDescendants, isPlayingTheTutorialRef]
+    [recursiveDescendants]
   );
 
   const openLinkedNode = useCallback(

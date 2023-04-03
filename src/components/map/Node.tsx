@@ -288,10 +288,10 @@ const Node = ({
   setAbleToPropose,
   openPart,
   setOpenPart,
-  notebooks,
-  expands,
-  selectedNotebookId: selectedNotebook,
-}: NodeProps) => {
+}: // notebooks,
+// expands,
+// selectedNotebookId: selectedNotebook,
+NodeProps) => {
   const [{ user }] = useAuth();
   const { nodeBookState } = useNodeBook();
   const [option, setOption] = useState<EditorOptions>("EDIT");
@@ -335,6 +335,8 @@ const Node = ({
   const disableSwitchPreview = disabled;
   const disableProposeButton = disabled && !enableChildElements.includes(`${identifier}-button-propose-proposal`);
   const disableCancelButton = disabled && !enableChildElements.includes(`${identifier}-button-cancel-proposal`);
+
+  const [open /* setOpen */] = useState(true);
 
   useEffect(() => {
     setTitleCopy(title);
@@ -480,11 +482,11 @@ const Node = ({
   };
   const hideDescendantsHandler = useCallback(() => onHideDescendants(identifier), [onHideDescendants, identifier]);
 
-  const open = useMemo(() => {
-    const idx = notebooks.findIndex(notebook => notebook === selectedNotebook);
-    console.log({ idx, notebooks, selectedNotebook });
-    return expands[idx];
-  }, [expands, notebooks, selectedNotebook]);
+  // const open = useMemo(() => {
+  //   const idx = notebooks.findIndex(notebook => notebook === selectedNotebook);
+  //   console.log({ idx, notebooks, selectedNotebook });
+  //   return expands[idx];
+  // }, [expands, notebooks, selectedNotebook]);
 
   const toggleNodeHandler = useCallback(
     (event: any) => {
