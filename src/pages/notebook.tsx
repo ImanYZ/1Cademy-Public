@@ -2101,6 +2101,8 @@ const Dashboard = ({}: DashboardProps) => {
                 userNodeData.notebooks = [...(userNodeData.notebooks ?? []), selectedNotebookId];
                 userNodeData.expands = [...(userNodeData.expands ?? []), true];
                 userNodeData.updatedAt = Timestamp.fromDate(new Date());
+                delete userNodeData?.visible;
+                delete userNodeData?.open;
                 batch.update(userNodeRef, userNodeData);
               } else {
                 // if NOT exist documents create a document
@@ -2206,6 +2208,8 @@ const Dashboard = ({}: DashboardProps) => {
                 userNodeData.expands = [...(userNodeData.expands ?? []), true];
                 userNodeData.updatedAt = Timestamp.fromDate(new Date());
                 batch.update(userNodeRef, userNodeData);
+                delete userNodeData?.visible;
+                delete userNodeData?.open;
               } else {
                 // if NOT exist documents create a document
                 userNodeData = {
