@@ -123,10 +123,7 @@ async function main() {
     const contentNodes = await db
       .collection("nodes")
       .where("deleted", "==", false)
-      .where("tags", "array-contains", {
-        node: community.id,
-        title: community.title,
-      })
+      .where("tagIds", "array-contains", community.id)
       .get();
 
     // individual nodes in this community
