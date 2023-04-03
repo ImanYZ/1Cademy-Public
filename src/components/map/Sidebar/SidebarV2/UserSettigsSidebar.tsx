@@ -1118,8 +1118,16 @@ const UserSettigsSidebar = ({
                     <Modal
                       className="tagSelectorModalUserSetting"
                       onClick={closeTagSelector}
-                      returnLeft={true}
+                      returnDown={false}
                       noBackground={true}
+                      style={{
+                        width: "441px",
+                        height: "495px",
+                        left: window.innerWidth <= 500 ? "28px" : "420px",
+                      }}
+                      contentStyle={{
+                        height: "500px",
+                      }}
                     >
                       <MemoizedTagsSearcher
                         id="user-settings-tag-searcher"
@@ -1127,7 +1135,7 @@ const UserSettigsSidebar = ({
                         chosenTags={chosenTags}
                         allTags={allTags}
                         setAllTags={setAllTags}
-                        sx={{ maxHeight: "235px", height: "235px" }}
+                        sx={{ maxHeight: "339px", height: "339px" }}
                       />
                     </Modal>
                   </div>

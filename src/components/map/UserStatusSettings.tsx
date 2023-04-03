@@ -1,6 +1,6 @@
 import CloseIcon from "@mui/icons-material/Close";
 import DoneIcon from "@mui/icons-material/Done";
-import { Box, SxProps, Theme, Tooltip } from "@mui/material";
+import { Box, SxProps, Theme, Tooltip, Typography } from "@mui/material";
 import React, { useEffect, useState } from "react";
 import { User } from "src/knowledgeTypes";
 
@@ -141,8 +141,13 @@ const UserStatusSettings = (props: UserStatusSettingsProps) => {
           alignItems: "center",
           justifyContent: "flex-start",
           gap: "5px",
-          padding: "5px 0px",
           cursor: "pointer",
+          background: theme => (theme.palette.mode === "dark" ? "#242425" : "#F2F4F7"),
+          paddingY: "10px",
+          paddingX: "5px",
+          border: theme => (theme.palette.mode === "dark" ? "solid 1px #303134" : "solid 1px #D0D5DD"),
+          borderRadius: "16px",
+          width: "90%",
         }}
       >
         <div className={(pointsGained ? "GainedPoint" : "") + (pointsLost ? "LostPoint" : "")}>
@@ -150,16 +155,58 @@ const UserStatusSettings = (props: UserStatusSettingsProps) => {
             imageUrl={props.imageUrl}
             renderAsAvatar={true}
             contained={false}
-            sx={{ border: "none", width: "28px", height: "28px", position: "static" }}
+            sx={{ border: "none", width: "48px", height: "48px", position: "static" }}
           />
-          <div className={props.online ? "UserStatusOnlineIcon" : "UserStatusOfflineIcon"}></div>
         </div>
         {
           // className={"UserStatusTotalPoints" + (props.inUserBar ? " inUserBar" : "")}
           <Box className={"customUserStatusTotalPoints"} sx={{ ...props.sx }}>
-            <DoneIcon className="material-icons DoneIcon green-text" sx={{ fontSize: "16px" }} />
-            <span style={{ fontSize: "14px", paddingLeft: "4px" }}>{shortenNumber(props.totalPoints, 2, false)}</span>
-            {/* {props.user.tag && <div id="UserProfileButtonDefaultTag">{props.user.tag}</div>} */}
+            <Box
+              sx={{
+                display: "flex",
+                flexDirection: "column",
+              }}
+            >
+              <Typography
+                sx={{
+                  overflow: "hidden",
+                  textOverflow: "ellipsis",
+                  whiteSpace: "nowrap",
+                  display: "inline-block",
+                }}
+              >{`${props.user.fName} ${props.user.lName}`}</Typography>
+              <Box
+                sx={{
+                  display: "flex",
+                  gap: "10px",
+                }}
+              >
+                <Box
+                  sx={{
+                    display: "flex",
+                    alignItems: "center",
+                  }}
+                >
+                  <DoneIcon className="material-icons DoneIcon green-text" sx={{ fontSize: "16px" }} />
+                  <span style={{ fontSize: "14px", paddingLeft: "4px" }}>
+                    {shortenNumber(props.totalPositives, 2, false)}
+                  </span>
+                  {/* {props.user.tag && <div id="UserProfileButtonDefaultTag">{props.user.tag}</div>} */}
+                </Box>
+                <Box
+                  sx={{
+                    display: "flex",
+                    alignItems: "center",
+                  }}
+                >
+                  <CloseIcon className="material-icons red-text" sx={{ fontSize: "16px" }} />
+                  <span style={{ fontSize: "14px", paddingLeft: "4px" }}>
+                    {shortenNumber(props.totalNegatives, 2, false)}
+                  </span>
+                  {/* {props.user.tag && <div id="UserProfileButtonDefaultTag">{props.user.tag}</div>} */}
+                </Box>
+              </Box>
+            </Box>
           </Box>
         }
       </Box>

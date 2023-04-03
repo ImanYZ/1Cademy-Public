@@ -1,6 +1,7 @@
 import ArrowDownwardIcon from "@mui/icons-material/ArrowDownward";
 import CloseIcon from "@mui/icons-material/Close";
 import WestIcon from "@mui/icons-material/West";
+import { Typography } from "@mui/material";
 // import "./Modal.css";
 import React, { useCallback } from "react";
 
@@ -16,6 +17,7 @@ type ModalProps = {
   onClick: any;
   noBackground?: any;
   style?: any;
+  contentStyle?: any;
   className?: string;
 };
 
@@ -30,10 +32,24 @@ const Modal = ({ onClick, ...props }: ModalProps) => {
   const ModalBody = () => {
     return (
       <div id="ModalBody" className={props.className} style={props.style}>
-        <div id="ModalContent" className={props.returnLeft || props.returnDown ? "ModalWithReturnContent" : undefined}>
+        <div
+          id="ModalContent"
+          style={props.contentStyle}
+          className={props.returnLeft || props.returnDown ? "ModalWithReturnContent" : "ModalWithReturnContent"}
+        >
+          <Typography
+            sx={{
+              position: "absolute",
+              left: "50%",
+              top: "15px",
+              transform: "translateX(-50%)",
+            }}
+          >
+            Search for tags
+          </Typography>
           {props.children}
 
-          <div id={props.returnLeft || props.returnDown ? "ModalReturnButton" : "ModalCloseButton"}>
+          <div id={props.returnLeft || props.returnDown ? "ModalReturnButton" : "ModalReturnButton"}>
             <MemoizedMetaButton onClick={closeModal} tooltip="Close the window." tooltipPosition="left">
               <div className="CloseButton">
                 {props.returnLeft && <WestIcon className="material-icons grey-text" />}

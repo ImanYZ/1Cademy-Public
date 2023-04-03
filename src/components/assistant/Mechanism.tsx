@@ -15,48 +15,48 @@ export type TMechanisms = {
     artboard: string;
   };
 };
-export const MECHANISM_ITEMS: TMechanisms[] = [
-  {
-    id: "summarizing",
-    title: "Summarizing",
-    description:
-      "We gather valuable information from various sources such as books, articles, and videos, and divide it into granular pieces. We then combine these pieces into concise notes that focus on a single concept.\nTraditional note-taking methods often only benefit the individual for a short period of time, typically for a semester or two. 1Cademy's collaborative note-taking approach ensures that the notes are useful and usable for multiple students studying the same topics.",
-    animation: {
-      src: "rive/notebook.riv",
-      artboard: "artboard-3",
-    },
-  },
-  {
-    id: "linking",
-    title: "Linking",
-    description:
-      "Our notes, which are organized in granular pieces, can be transformed into a knowledge graph that visually illustrates the hierarchical relationships between concepts. The linking of concepts is beneficial as it helps us understand how concepts relate to one another and their place in broader topics, fields, or disciplines. ",
-    animation: {
-      src: "rive/notebook.riv",
-      artboard: "artboard-4",
-    },
-  },
-  {
-    id: "Evaluating",
-    title: "Voting",
-    description:
-      "To ensure the quality of the knowledge graph on 1Cademy, we have implemented a peer-review process. Each individual concept, represented as a node, can be voted on by members of the community, and the score of the node will determine its level of modification or the possibility of deletion.",
-    animation: {
-      src: "rive/notebook.riv",
-      artboard: "artboard-5",
-    },
-  },
-  {
-    id: "improving",
-    title: "Improving",
-    description:
-      "We work together to improve the knowledge presented by continually updating and refining concepts. For each node, there are multiple versions proposed by different people.",
-    animation: {
-      src: "rive/notebook.riv",
-      artboard: "artboard-6",
-    },
-  },
-];
+// const MECHANISM_ITEMS: TMechanisms[] = [
+//   {
+//     id: "summarizing",
+//     title: "Summarizing",
+//     description:
+//       "1Cademy aims to convert human knowledge into an easily digestible presentation and representation that facilitates efficient learning. The issue of “knowledge overload” arises from the redundancy of the same topics being covered in numerous books, websites, and videos. This is exacerbated by mass generation of content by large language models. To maximize our learning potential, we must eliminate overlapping content and merge all available explanations for a particular subject into a single comprehensive chunk. This chunk should encompass various perspectives and use-cases side-by-side, allowing learners to refer to it as the sole source for complete mastery of the topic. Conventional knowledge structures organized in pages, whether in books or on websites, do not serve this purpose. Instead, we must divide the content into smaller chunks, each dedicated to a single topic.\nThrough a human-AI collaboration, we gather valuable information from various sources such as books, articles, and videos, divide it into granular pieces, and identify the overlapping pieces. We then combine them into concise notes, each focusing on a single concept. Traditional note-taking methods often only benefit the individual for a short period of time, typically for a semester or two. 1Cademy's human-AI collaborative note-taking approach ensures that the notes are useful and usable for multiple students studying the same topics.",
+//     animation: {
+//       src: "rive/notebook.riv",
+//       artboard: "artboard-3",
+//     },
+//   },
+//   {
+//     id: "linking",
+//     title: "Linking",
+//     description:
+//       "Our notes, which are organized in granular pieces, can be transformed into a knowledge graph that visually illustrates the hierarchical relationships between concepts. The linking of concepts is beneficial as it helps us understand how concepts relate to one another and their place in broader topics, fields, or disciplines. ",
+//     animation: {
+//       src: "rive/notebook.riv",
+//       artboard: "artboard-4",
+//     },
+//   },
+//   {
+//     id: "Evaluating",
+//     title: "Voting",
+//     description:
+//       "To ensure the quality of the knowledge graph on 1Cademy, we have implemented a peer-review process. Each individual concept, represented as a node, can be voted on by members of the community, and the score of the node will determine its level of modification or the possibility of deletion.",
+//     animation: {
+//       src: "rive/notebook.riv",
+//       artboard: "artboard-5",
+//     },
+//   },
+//   {
+//     id: "improving",
+//     title: "Improving",
+//     description:
+//       "We work together to improve the knowledge presented by continually updating and refining concepts. For each node, there are multiple versions proposed by different people.",
+//     animation: {
+//       src: "rive/notebook.riv",
+//       artboard: "artboard-6",
+//     },
+//   },
+// ];
 
 export interface IMechanism {
   mechanisms: TMechanisms[];

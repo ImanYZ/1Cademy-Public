@@ -20,7 +20,7 @@ export const ONE_CADEMY_SECTIONS: HomepageSection[] = [
     id: "mechanism",
     title: "Mechanism",
     label: "Mechanism",
-    description: "We collaboratively summarize, link, evaluate, and improve science on 1Cademy.",
+    description: "Through human-AI collaboration, we summarize, link, evaluate, and improve science on 1Cademy.",
     options: [],
   },
   {
@@ -76,12 +76,6 @@ export const ONE_CADEMY_SECTIONS: HomepageSection[] = [
         description:
           "The Social Psychology community explores published research in the field and conducts relevant studies. Interns are responsible for aiding in the ideation and completion of studies. They also summarize research articles and present their findings with the rest of the group. By using 1Cademy, interns learn how to break down articles into granular and connected concepts to best communicate their findings to other community members. We value collaborative learning and expect interns to participate in group discussions to dive deeper into the content. Topics that the community will explore in a research setting include the effects of achievement/effort on performance, ways to increase motivation, and ways to diminish misinformation. While some initial work has been made, interns are welcome to join as soon as possible to receive the necessary training and begin collaborating with us.",
         link: "https://1cademy.us/community/social-psychology",
-      },
-      {
-        title: "Natural Language Processing",
-        description:
-          "Welcome to the Deep Learning Community! Our community predominantly contributes to the nlp area on 1Cademy, our collaborative research platform. This semester, we will explore different deep learning topics , mainly NLP topics, by going through selected papers every week. Our team members will dive into these papers and present what they've been learning throughout each week by walking us through the nodes they have designed during our weekly team meetings. We also encourage our interns to work on a specific topic together as a team so that they may write a survey paper together before finishing the internship. After meeting certain requirements, you will be invited to join our small research group to work on concrete research ideas.",
-        link: "https://1cademy.us/community/natural-language-processing",
       },
       {
         title: "UX Research in Cognitive Psychology of Learning",

@@ -1,6 +1,6 @@
 import CloseIcon from "@mui/icons-material/Close";
 import DoneIcon from "@mui/icons-material/Done";
-import { Box, SxProps, Theme, Tooltip } from "@mui/material";
+import { Box, SxProps, Theme, Tooltip, Typography } from "@mui/material";
 import { addDoc, collection, getFirestore, Timestamp } from "firebase/firestore";
 import React, { useCallback, useEffect, useState } from "react";
 import { DispatchNodeBookActions } from "src/nodeBookTypes";
@@ -216,18 +216,60 @@ const UserStatusIcon = ({ nodeBookDispatch, disabled = false, ...props }: UserSt
             imageUrl={props.imageUrl}
             renderAsAvatar={true}
             contained={false}
-            sx={{ border: "none", width: "28px", height: "28px", position: "static", cursor: "pointer" }}
+            sx={{ border: "none", width: "38px", height: "38px", position: "static", cursor: "pointer" }}
           />
-          {!props.inNodeFooter && (
-            <div className={props.online ? "UserStatusOnlineIcon" : "UserStatusOfflineIcon"}></div>
-          )}
+          {!props.inNodeFooter && <>{props.online && <Box className={"UserStatusOnlineIcon"}></Box>}</>}
         </div>
         {!props.inNodeFooter && (
           // className={"UserStatusTotalPoints" + (props.inUserBar ? " inUserBar" : "")}
-          <Box className="customUserStatusTotalPoints fromSideBar">
-            <DoneIcon className="material-icons DoneIcon green-text" sx={{ fontSize: "16px" }} />
-            <span style={{ fontSize: "14px", paddingLeft: "4px" }}>{shortenNumber(props.totalPoints, 2, false)}</span>
-            {props.inUserBar && props.tagTitle && <div id="UserProfileButtonDefaultTag">{props.tagTitle}</div>}
+          <Box
+            className="customUserTotalPoints fromSideBar"
+            sx={{
+              flexDirection: "column",
+            }}
+          >
+            <Typography
+              sx={{
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+                whiteSpace: "nowrap",
+                display: "inline-block",
+                fontSize: "13px",
+              }}
+            >
+              {props.fullname}
+            </Typography>
+            <Box
+              sx={{
+                display: "flex",
+                gap: "10px",
+              }}
+            >
+              <Box
+                sx={{
+                  display: "flex",
+                  alignItems: "center",
+                }}
+              >
+                <DoneIcon className=" DoneIcon green-text" sx={{ fontSize: "14px" }} />
+                <span style={{ fontSize: "14px", paddingLeft: "4px" }}>
+                  {shortenNumber(props.totalPositives, 2, false)}
+                </span>
+                {/* {props.user.tag && <div id="UserProfileButtonDefaultTag">{props.user.tag}</div>} */}
+              </Box>
+              <Box
+                sx={{
+                  display: "flex",
+                  alignItems: "center",
+                }}
+              >
+                <CloseIcon className="material-icons red-text" sx={{ fontSize: "14px" }} />
+                <span style={{ fontSize: "14px", paddingLeft: "4px" }}>
+                  {shortenNumber(props.totalNegatives, 2, false)}
+                </span>
+                {/* {props.user.tag && <div id="UserProfileButtonDefaultTag">{props.user.tag}</div>} */}
+              </Box>
+            </Box>
           </Box>
         )}
       </Box>

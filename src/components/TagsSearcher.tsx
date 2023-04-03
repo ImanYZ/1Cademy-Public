@@ -51,7 +51,7 @@ const TagsSearcher = ({
   sx,
 }: TagsExploratorySearcherProps) => {
   // const [chosenTags, setChosenTags] = useState<{ id: string; title: string }[]>([]);
-  const setAutocompleteInput = useCallback((params: any) => <TextField label="Search for Tags" {...params} />, []);
+  const setAutocompleteInput = useCallback((params: any) => <TextField label="Search on 1cademy" {...params} />, []);
 
   const setAutocompleteOptions = useCallback(
     (props: React.HTMLAttributes<HTMLLIElement>, option: TagTreeView, { selected }: AutocompleteRenderOptionState) => {
@@ -250,13 +250,13 @@ const TagsSearcher = ({
           defaultExpandIcon={<ChevronRightIcon />}
           multiSelect
           sx={{
+            marginTop: "15px",
             overflowY: "auto",
             borderColor: theme =>
               theme.palette.mode === "light" ? "rgba(0, 0, 0, 0.23)" : "rgba(255, 255, 255, 0.23)",
             borderWidth: "1px",
             borderStyle: "solid",
             borderRadius: theme => `${theme.shape.borderRadius}px`,
-            borderTopWidth: "0px",
             ...sx,
           }}
         >

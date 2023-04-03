@@ -36,7 +36,7 @@ export default PrivacyPolicy;
 
 const PrivacyPolicyContent = () => {
   return (
-    <Box>
+    <Box className="policy-content">
       <p>
         <b>
           1Cademy reserves the right to retrieve, analyze, store, and mine your interaction data with the provided

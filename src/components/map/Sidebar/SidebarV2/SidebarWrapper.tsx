@@ -1,7 +1,8 @@
+import { Theme } from "@emotion/react";
 import ArrowUpwardIcon from "@mui/icons-material/ArrowUpward";
 import CloseIcon from "@mui/icons-material/Close";
 import { Drawer, DrawerProps, IconButton, Tooltip, Typography, useMediaQuery, useTheme } from "@mui/material";
-import { Box } from "@mui/system";
+import { Box, SxProps } from "@mui/system";
 import Image, { StaticImageData } from "next/image";
 import React, { ReactNode, useCallback, useMemo, useRef } from "react";
 import { OpenSidebar } from "src/pages/notebook";
@@ -12,12 +13,12 @@ type SidebarWrapperProps = {
   open: boolean;
   onClose: () => void;
   SidebarContent: ReactNode;
-  width: number;
+  width: any;
   height?: number;
   SidebarOptions?: ReactNode;
   anchor?: DrawerProps["anchor"];
   headerImage?: StaticImageData;
-  hoverWidth?: number;
+  hoverWidth?: any;
   showCloseButton?: boolean;
   showScrollUpButton?: boolean;
   isMenuOpen?: boolean;
@@ -25,6 +26,7 @@ type SidebarWrapperProps = {
   openSidebar?: OpenSidebar;
   innerHeight?: number;
   disabled?: boolean;
+  sx?: SxProps<Theme>;
 };
 /**
  * Only Sidebar content should be scrollable
@@ -48,6 +50,7 @@ export const SidebarWrapper = ({
   innerHeight,
   openSidebar,
   disabled,
+  sx,
 }: SidebarWrapperProps) => {
   const sidebarContentRef = useRef<any>(null);
   const theme = useTheme();
@@ -106,6 +109,7 @@ export const SidebarWrapper = ({
             width: hoverWidth ? hoverWidth : undefined,
           },
           transition: "0.5s cubic-bezier(0.4, 0, 0.2, 1) !important",
+          ...sx,
         },
       }}
     >
