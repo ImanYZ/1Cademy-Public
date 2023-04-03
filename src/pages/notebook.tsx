@@ -724,8 +724,8 @@ const Dashboard = ({}: DashboardProps) => {
               ...userNodeDataTmp,
               ...openWithDefaultValues,
             };
-            userNodeData.notebooks = [...userNodeData.notebooks, selectedNotebookId];
-            userNodeData.expands = [...userNodeData.expands, true];
+            userNodeData.notebooks = [...(userNodeData.notebooks ?? []), selectedNotebookId];
+            userNodeData.expands = [...(userNodeData.expands ?? []), true];
             userNodeData.updatedAt = Timestamp.fromDate(new Date());
             batch.update(userNodeRef, userNodeData);
           } else {
