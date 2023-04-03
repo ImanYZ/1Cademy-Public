@@ -1,4 +1,5 @@
 import { ExpandLess, ExpandMore } from "@mui/icons-material";
+import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import KeyboardArrowLeftIcon from "@mui/icons-material/KeyboardArrowLeft";
 import MenuIcon from "@mui/icons-material/Menu";
 import { Box, Button, IconButton, Stack, Tooltip, Typography, useMediaQuery, useTheme } from "@mui/material";
@@ -18,6 +19,7 @@ import LogoExtended from "../../../../../public/full-logo.svg";
 import GraduatedIcon from "../../../../../public/graduated.svg";
 import LogoDarkMode from "../../../../../public/LogoDarkMode.svg";
 import LogoLightMode from "../../../../../public/LogoLightMode.svg";
+import NotebookIcon from "../../../../../public/notebooks.svg";
 import NotificationIcon from "../../../../../public/notification.svg";
 import SearchIcon from "../../../../../public/search.svg";
 import TagIcon from "../../../../../public/tag.svg";
@@ -66,7 +68,7 @@ export const ToolbarSidebar = ({
   reloadPermanentGrpah,
   user,
   reputation,
-  theme: userTheme,
+  // theme,
   setOpenSideBar,
   selectedUser,
   uncheckedNotificationsNum,
@@ -93,6 +95,8 @@ MainSidebarProps) => {
   const { allTags, setAllTags } = useTagsTreeView(user.tagId ? [user.tagId] : []);
   const [leaderboardTypeOpen, setLeaderboardTypeOpen] = useState<boolean>(false);
   const [shouldShowTagSearcher, setShouldShowTagSearcher] = useState<boolean>(false);
+  const [displayNotebooks, setDisplayNotebooks] = useState(true);
+
   useEffect(() => {
     if (chosenTags.length > 0 && chosenTags[0].id in allTags) {
       notebookRef.current.chosenNode = { id: chosenTags[0].id, title: chosenTags[0].title };
@@ -668,6 +672,71 @@ MainSidebarProps) => {
             </Button>
           )}
 
+          {/* notebooks */}
+
+          <Button
+            onClick={() => {
+              console.log("diplay", displayNotebooks);
+              setDisplayNotebooks(!displayNotebooks);
+            }}
+            // disabled={disabledBookmarksButton}
+            sx={{
+              width: "90%",
+              borderRadius: "16px",
+              padding: "10px 0px 10px 12px",
+              justifyContent: "start",
+              ":hover": {
+                background: theme => (theme.palette.mode === "dark" ? "#55402B" : "#FFE2D0"),
+              },
+            }}
+          >
+            <Box
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                gap: "5px",
+                marginLeft: !isMenuOpen ? "10px" : undefined,
+              }}
+            >
+              <NextImage width={"22px"} src={NotebookIcon} alt="Notebooks" />
+              <Box
+                className="toolbarDescription"
+                sx={{
+                  fontSize: "15px",
+                  overflow: "hidden",
+                  visibility: isMenuOpen ? "visible" : "hidden",
+                  transition: isMenuOpen
+                    ? "visibility 1s, line-height 1s, height 1s"
+                    : "visibility 0s, line-height 0s, height 0s",
+                  width: isMenuOpen ? "100px" : "0",
+                  display: isMenuOpen ? "flex" : "block",
+                  alignItems: "center",
+                  color: theme => (theme.palette.mode === "dark" ? "#EAECF0" : "#1D2939"),
+                }}
+              >
+                <Typography
+                  sx={{
+                    textOverflow: "ellipsis",
+                    overflow: "hidden",
+                    maxWidth: "90px",
+                    whiteSpace: "nowrap",
+                    fontWeight: "400",
+                  }}
+                >
+                  Notebooks
+                </Typography>
+              </Box>
+
+              <KeyboardArrowDownIcon sx={{ transition: ".5s", rotate: displayNotebooks ? "0deg" : "180deg" }} />
+            </Box>
+          </Button>
+
+          {displayNotebooks && (
+            <Box>
+              <Button variant="text">tergdgf</Button>
+            </Box>
+          )}
+
           <Box
             className={window.innerWidth >= 500 ? "show-on-hover" : ""}
             sx={{
@@ -875,7 +944,7 @@ MainSidebarProps) => {
   }, [
     isMenuOpen,
     firstBoxHeight,
-    userTheme,
+    theme.palette.mode,
     user,
     reputation?.totalPoints,
     reputation?.positives,
@@ -883,31 +952,34 @@ MainSidebarProps) => {
     onOpenUserSettingsSidebar,
     disableUserStatusButton,
     disableSearchButton,
-    disableToolbar,
     disabledNotificationButton,
     uncheckedNotificationsNum,
     disabledBookmarksButton,
     bookmarkUpdatesNum,
-    disabledPendingProposalButton,
-    pendingProposalsLoaded,
     pendingProposalsNum,
+    pendingProposalsLoaded,
     disabledIntructorButton,
-    disabledLeaderboardButton,
+    displayNotebooks,
+    shouldShowTagSearcher,
+    closeTagSelector,
+    chosenTags,
+    allTags,
+    setAllTags,
+    openLeaderboardTypes,
     leaderBoardType,
+    leaderboardTypeOpen,
     choices,
     windowHeight,
     onlineUsers,
     usersOnlineStatusLoaded,
+    nodeBookDispatch,
     reloadPermanentGrpah,
     setOpenSideBar,
     reputationSignal,
     disableUserStatusList,
     onOpenSidebar,
     setIsMenuOpen,
-    leaderboardTypeOpen,
-    shouldShowTagSearcher,
-    setChosenTags,
-    chosenTags,
+    choosingNodeClick,
   ]);
 
   const contentSignalState = useMemo(() => {
@@ -939,6 +1011,7 @@ MainSidebarProps) => {
     shouldShowTagSearcher,
     setChosenTags,
     chosenTags,
+    displayNotebooks,
   ]);
 
   return (
