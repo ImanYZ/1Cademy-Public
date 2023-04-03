@@ -1760,10 +1760,10 @@ const Dashboard = ({}: DashboardProps) => {
             for (let descendant of descendants) {
               const thisNode = graph.nodes[descendant];
               const { nodeRef, userNodeRef } = initNodeStatusChange(descendant, thisNode.userNodeId);
-              const notebookIdx = thisNode.notebooks.findIndex(cur => cur === selectedNotebookId);
+              const notebookIdx = (thisNode.notebooks ?? []).findIndex(cur => cur === selectedNotebookId);
               if (notebookIdx < 0) return console.error("notebook property has invalid values");
 
-              const newExpands = thisNode.expands.filter((c, idx) => idx !== notebookIdx);
+              const newExpands = (thisNode.expands ?? []).filter((c, idx) => idx !== notebookIdx);
               const userNodeData = {
                 changed: thisNode.changed,
                 correct: thisNode.correct,
@@ -1773,7 +1773,7 @@ const Dashboard = ({}: DashboardProps) => {
                 isStudied: thisNode.isStudied,
                 bookmarked: "bookmarked" in thisNode ? thisNode.bookmarked : false,
                 node: descendant,
-                notebooks: thisNode.notebooks.filter(cur => cur !== selectedNotebookId),
+                notebooks: (thisNode.notebooks ?? []).filter(cur => cur !== selectedNotebookId),
                 expands: newExpands,
                 // open: thisNode.open,
                 user: user.uname,
@@ -1956,6 +1956,10 @@ const Dashboard = ({}: DashboardProps) => {
           if (notebookRef.current.choosingNode) return;
           if (!username) return;
 
+          const notebookIdx = (thisNode.notebooks ?? []).findIndex(cur => cur === selectedNotebookId);
+          if (notebookIdx < 0) return console.error("notebook property has invalid values");
+          const newExpands = (thisNode.expands ?? []).filter((c, idx) => idx !== notebookIdx);
+
           const userNodeData = {
             changed: thisNode.changed || false,
             correct: thisNode.correct,
@@ -1965,7 +1969,9 @@ const Dashboard = ({}: DashboardProps) => {
             isStudied: thisNode.isStudied,
             bookmarked: "bookmarked" in thisNode ? thisNode.bookmarked : false,
             node: nodeId,
-            open: thisNode.open,
+            // open: thisNode.open,
+            notebooks: (thisNode.notebooks ?? []).filter(cur => cur !== selectedNotebookId),
+            expands: newExpands,
             user: username,
             visible: false,
             wrong: thisNode.wrong,
@@ -1982,13 +1988,14 @@ const Dashboard = ({}: DashboardProps) => {
             viewers: thisNode.viewers - 1,
             updatedAt: Timestamp.fromDate(new Date()),
           };
-          if (userNodeData.open && "openHeight" in thisNode) {
-            changeNode.height = thisNode.openHeight;
-            userNodeLogData.height = thisNode.openHeight;
-          } else if ("closedHeight" in thisNode) {
-            changeNode.closedHeight = thisNode.closedHeight;
-            userNodeLogData.closedHeight = thisNode.closedHeight;
-          }
+          // INFO: this is not used
+          // if (userNodeData.open && "openHeight" in thisNode) {
+          //   changeNode.height = thisNode.openHeight;
+          //   userNodeLogData.height = thisNode.openHeight;
+          // } else if ("closedHeight" in thisNode) {
+          //   changeNode.closedHeight = thisNode.closedHeight;
+          //   userNodeLogData.closedHeight = thisNode.closedHeight;
+          // }
 
           batch.update(nodeRef, changeNode);
           const userNodeLogRef = collection(db, "userNodesLog");
@@ -2029,6 +2036,7 @@ const Dashboard = ({}: DashboardProps) => {
       user?.imageUrl,
       initNodeStatusChange,
       nodeBookDispatch,
+      selectedNotebookId,
     ]
   );
 
