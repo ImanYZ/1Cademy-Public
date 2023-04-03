@@ -151,7 +151,7 @@ import {
   UserTutorial,
   UserTutorials,
 } from "../nodeBookTypes";
-import { NodeType, SimpleNode2 } from "../types";
+import { NodeType, Notebook, SimpleNode2 } from "../types";
 import { doNeedToDeleteNode, getNodeTypesFromNode, isVersionApproved } from "../utils/helpers";
 
 // export type TutorialKeys = TutorialTypeKeys | null;
@@ -363,6 +363,8 @@ const Dashboard = ({}: DashboardProps) => {
 
   const pathwayRef = useRef({ node: "", parent: "", child: "" });
 
+  const [, /* notebooks */ setNotebooks] = useState<Notebook[]>([]);
+  const [notebooksLoaded, setNotebooksLoaded] = useState(false);
   const [selectedNotebookId /* ,setSelectedNotebookId */] = useState("01");
 
   const onNodeInViewport = useCallback(
@@ -1065,12 +1067,48 @@ const Dashboard = ({}: DashboardProps) => {
 
   useEffect(() => {
     if (!db) return;
+    if (!user?.uname) return;
+    if (!allTagsLoaded) return;
+    if (!userTutorialLoaded) return;
+    if (notebooksLoaded) return;
+
+    devLog("NOTEBOOKS", { uname: user?.uname });
+
+    const notebooksRef = collection(db, "notebooks");
+    const q = query(notebooksRef, where("owner", "==", user.uname));
+
+    console.log(11);
+    const killSnapshot = onSnapshot(q, snapshot => {
+      console.log(22);
+      const docChanges = snapshot.docChanges();
+
+      const newNotebooks = docChanges.map(change => {
+        const userNodeData = change.doc.data() as Notebook;
+        return { type: change.type, id: change.doc.id, data: userNodeData };
+      });
+
+      const notesBooksMerged = newNotebooks.reduce((acu: Notebook[], cur) => {
+        if (cur.type === "added") return [...acu, { ...cur.data, id: cur.id }];
+        if (cur.type === "modified") return acu.map(c => (c.id === cur.id ? { ...cur.data, id: cur.id } : c));
+        return acu.filter(c => c.id !== cur.id);
+      }, []);
+      console.log({ notesBooksMerged });
+      setNotebooks(notesBooksMerged);
+      setNotebooksLoaded(true);
+    });
+
+    return () => killSnapshot();
+  }, [allTagsLoaded, db, notebooksLoaded, user?.uname, userTutorialLoaded]);
+
+  useEffect(() => {
+    if (!db) return;
     if (!user) return;
     if (!user.uname) return;
     if (!allTagsLoaded) return;
     if (!userTutorialLoaded) return;
+    if (!notebooksLoaded) return;
 
-    devLog("USE_EFFECT", "nodes synchronization");
+    devLog("SYNCHRONIZATION");
 
     // db.collection("cities").where("regions", "array-contains", "west_coast").where("population", ">", 1000000).where("area", ">", 1000000)
     const userNodesRef = collection(db, "userNodes");
@@ -1086,8 +1124,8 @@ const Dashboard = ({}: DashboardProps) => {
     return () => {
       killSnapshot();
     };
-    //ANT: notebookChanged used in dependecies because of the redraw graph (magic wand button)
-  }, [allTagsLoaded, db, snapshot, user, userTutorialLoaded, notebookChanged, selectedNotebookId]);
+    // INFO: notebookChanged used in dependecies because of the redraw graph (magic wand button)
+  }, [allTagsLoaded, db, snapshot, user, userTutorialLoaded, notebookChanged, selectedNotebookId, notebooksLoaded]);
 
   useEffect(() => {
     if (!db) return;

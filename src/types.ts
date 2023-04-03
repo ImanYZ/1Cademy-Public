@@ -28,3 +28,14 @@ export type SimpleNode2 = {
   versions: number;
   studied?: boolean;
 };
+
+export type Notebook = {
+  id: string;
+  owner: string;
+  title: string;
+  isPublic: "visible" | "editable" | "none";
+  users: string[];
+  roles: {
+    [key: string]: "viewer" | "editor";
+  };
+};
