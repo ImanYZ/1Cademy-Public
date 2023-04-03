@@ -1001,11 +1001,14 @@ const Dashboard = ({}: DashboardProps) => {
               const topParent = nodeParent?.top ?? 0;
 
               const leftParent = nodeParent?.left ?? 0;
+              const notebookIdx = (cur?.notebooks ?? []).findIndex(c => c === selectedNotebookId);
 
               return {
                 ...cur,
                 left: tmpNode?.left ?? leftParent + NODE_WIDTH + COLUMN_GAP,
                 top: tmpNode?.top ?? topParent,
+                visible: Boolean((cur.notebooks ?? [])[notebookIdx]),
+                open: Boolean((cur.expands ?? [])[notebookIdx]),
               };
             });
 
@@ -2261,22 +2264,30 @@ const Dashboard = ({}: DashboardProps) => {
 
         notebookRef.current.selectedNode = nodeId;
         nodeBookDispatch({ type: "setSelectedNode", payload: nodeId });
-        lastNodeOperation.current = { name: "ToggleNode", data: thisNode.open ? "closeNode" : "openNode" };
+        // lastNodeOperation.current = { name: "ToggleNode", data: thisNode.open ? "closeNode" : "openNode" };
 
         const { nodeRef, userNodeRef } = initNodeStatusChange(nodeId, thisNode.userNodeId);
         const changeNode: any = {
           updatedAt: Timestamp.fromDate(new Date()),
         };
-        if (thisNode.open && "openHeight" in thisNode) {
-          changeNode.height = thisNode.openHeight;
-        } else if ("closedHeight" in thisNode) {
-          changeNode.closedHeight = thisNode.closedHeight;
+        // INFO: this is commented because is not used
+        // if (thisNode.open && "openHeight" in thisNode) {
+        //   changeNode.height = thisNode.openHeight;
+        // } else if ("closedHeight" in thisNode) {
+        //   changeNode.closedHeight = thisNode.closedHeight;
+        // }
+
+        const notebookIdx = (thisNode.notebooks ?? []).findIndex(cur => cur === selectedNotebookId);
+        if (notebookIdx < 0) {
+          console.error("notebook property has invalid values");
+          return { nodes: oldNodes, edges };
         }
 
         updateDoc(nodeRef, changeNode);
 
         updateDoc(userNodeRef, {
-          open: !thisNode.open,
+          // open: !thisNode.open,
+          expands: (thisNode.expands ?? []).map((cur, idx) => (idx === notebookIdx ? !cur : cur)),
           updatedAt: Timestamp.fromDate(new Date()),
         });
         const userNodeLogRef = collection(db, "userNodesLog");
@@ -2289,7 +2300,7 @@ const Dashboard = ({}: DashboardProps) => {
           isStudied: thisNode.isStudied,
           bookmarked: "bookmarked" in thisNode ? thisNode.bookmarked : false,
           node: nodeId,
-          open: !thisNode.open,
+          open: !Boolean((thisNode.expands ?? []).filter((cur, idx) => idx === notebookIdx)),
           user: user?.uname,
           visible: true,
           wrong: thisNode.wrong,
@@ -6615,7 +6626,7 @@ const Dashboard = ({}: DashboardProps) => {
                   ableToPropose={ableToPropose}
                   setAbleToPropose={setAbleToPropose}
                   setOpenPart={onChangeNodePart}
-                  selectedNotebookId={selectedNotebookId}
+                  // selectedNotebookId={selectedNotebookId}
                 />
               </MapInteractionCSS>
               {showRegion && (

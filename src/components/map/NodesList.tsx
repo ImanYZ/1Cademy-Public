@@ -62,7 +62,7 @@ type NodeListProps = {
   ableToPropose: boolean;
   setAbleToPropose: (newValue: boolean) => void;
   setOpenPart: (nodeId: string, newOpenPart: OpenPart) => void;
-  selectedNotebookId: string;
+  // selectedNotebookId: string;
 };
 
 const NodesList = ({
@@ -120,8 +120,8 @@ const NodesList = ({
   ableToPropose,
   setAbleToPropose,
   setOpenPart,
-  selectedNotebookId,
-}: NodeListProps) => {
+}: // selectedNotebookId,
+NodeListProps) => {
   /* eslint-disable-next-line @typescript-eslint/no-unused-vars */
   const { nodeBookDispatch } = useNodeBook();
 
@@ -165,6 +165,12 @@ const NodesList = ({
         if (notebookRef.current.selectedNode === nId && notebookRef.current.selectionType === "Comments") {
           commentsSelected = true;
         }
+
+        // const notebookIdx = (nodes[nId].notebooks ?? []).findIndex((cur: string) => cur === selectedNotebookId);
+        // if (notebookIdx < 0) return null;
+
+        // const open = (nodes[nId].expands ?? [])[notebookIdx];
+        // if (open === undefined) return null;
 
         return (
           <MemoizedNode
@@ -280,9 +286,10 @@ const NodesList = ({
             setAbleToPropose={setAbleToPropose}
             openPart={nodes[nId].localLinkingWords}
             setOpenPart={setOpenPartNode(nId)}
-            selectedNotebookId={selectedNotebookId}
-            expands={nodes[nId].expands}
-            notebooks={nodes[nId].notebooks}
+            // selectedNotebookId={selectedNotebookId}
+            // expands={nodes[nId].expands}
+            // notebooks={nodes[nId].notebooks}
+            open={nodes[nId].open}
           />
         );
       })}
@@ -338,7 +345,7 @@ export const MemoizedNodeList = React.memo(NodesList, (prev, next) => {
     prev.openSidebar === prev.openSidebar && // TODO: check this
     // prev.showProposeTutorial === next.showProposeTutorial &&
     prev.ableToPropose === next.ableToPropose &&
-    prev.selectedNotebookId === next.selectedNotebookId &&
+    // prev.selectedNotebookId === next.selectedNotebookId &&
     validateTutorialProps()
   );
 });

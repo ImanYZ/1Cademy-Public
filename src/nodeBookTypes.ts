@@ -286,12 +286,12 @@ export type UserNodesData = {
   // "lastVisit": Timestamp,//CHECK
   // "userNodeId": string,//CHECK
   updatedAt: Timestamp;
-  // open: boolean;
+  open: boolean;
   deleted: boolean;
   wrong: boolean;
   bookmarked: boolean;
   isStudied: boolean;
-  // visible: boolean;
+  visible: boolean;
   createdAt: Timestamp;
   correct: boolean;
   user: string;

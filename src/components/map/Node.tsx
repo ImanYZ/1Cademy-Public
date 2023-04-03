@@ -166,9 +166,10 @@ type NodeProps = {
   setAbleToPropose: (newValue: boolean) => void;
   openPart: OpenPart;
   setOpenPart: (newOpenPart: OpenPart) => void;
-  notebooks: string[];
-  expands: boolean[];
-  selectedNotebookId: string;
+  // notebooks: string[];
+  // expands: boolean[];
+  // selectedNotebookId: string;
+  open: boolean;
 };
 
 const proposedChildTypesIcons: { [key in ProposedChildTypesIcons]: string } = {
@@ -281,6 +282,7 @@ const Node = ({
   openUserInfoSidebar,
   disabled = false,
   enableChildElements = [],
+  open,
   // defaultOpenPart: defaultOpenPartByTutorial = "LinkingWords",
   // showProposeTutorial = false,
   // setCurrentTutorial,
@@ -335,8 +337,6 @@ NodeProps) => {
   const disableSwitchPreview = disabled;
   const disableProposeButton = disabled && !enableChildElements.includes(`${identifier}-button-propose-proposal`);
   const disableCancelButton = disabled && !enableChildElements.includes(`${identifier}-button-cancel-proposal`);
-
-  const [open /* setOpen */] = useState(true);
 
   useEffect(() => {
     setTitleCopy(title);
@@ -1469,9 +1469,9 @@ export const MemoizedNode = React.memo(Node, (prev, next) => {
     prev.unaccepted === next.unaccepted &&
     prev.disableVotes === next.disableVotes &&
     prev.openPart === next.openPart &&
-    prev.notebooks === next.notebooks &&
-    prev.expands === next.expands &&
-    prev.selectedNotebookId === next.selectedNotebookId &&
+    // prev.notebooks === next.notebooks &&
+    // prev.expands === next.expands &&
+    // prev.selectedNotebookId === next.selectedNotebookId &&
     (!next.activeNode || prev.ableToPropose === next.ableToPropose);
   if (
     !basicChanges ||
