@@ -39,13 +39,6 @@ const TOPICS_ITEMS = [
     link: "/community/social-psychology",
   },
   {
-    id: "natural-language-processing",
-    title: "Natural Language Processing",
-    // image: "home/communities/06-natural-language-processing.jpg",
-    image: "/static/Communities/Natural_Language_Processing.jpg",
-    link: "/community/natural-language-processing",
-  },
-  {
     id: "ux-research-communities",
     title: "UX Research in Online Communities",
     // image: "home/communities/07-ux-research-communities.jpg",
