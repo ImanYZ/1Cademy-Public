@@ -139,7 +139,14 @@ export const getStaticProps: GetStaticProps<Props, Params> = ({ params }) => {
 };
 
 export const getStaticPaths: GetStaticPaths<Params> = async () => {
-  return { paths: [], fallback: "blocking" };
+  return {
+    paths: allCommunities.map(community => ({
+      params: {
+        commIdx: community.id,
+      },
+    })),
+    fallback: "blocking",
+  };
 };
 
 const Communities = (props: Props) => {
