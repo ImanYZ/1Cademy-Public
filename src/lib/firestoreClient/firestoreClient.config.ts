@@ -38,13 +38,13 @@ export const initFirebaseClientSDK = () => {
   if (!getApps().filter(app => app.name === "visualexp").length) {
     appExp = initializeApp(
       {
-        apiKey: process.env.VISUALEXP_API_KEY,
-        authDomain: process.env.VISUALEXP_AUTH_DOMAIN,
-        projectId: process.env.VISUALEXP_PROJECT_ID,
-        storageBucket: process.env.VISUALEXP_STORAGE_BUCKET,
-        messagingSenderId: process.env.VISUALEXP_MESSAGING_SENDER_ID,
-        appId: process.env.VISUALEXP_PUBLIC_APP_ID,
-        measurementId: process.env.VISUALEXP_MEASUREMENT_ID,
+        apiKey: process.env.NEXT_PUBLIC_VISUALEXP_API_KEY,
+        authDomain: process.env.NEXT_PUBLIC_VISUALEXP_AUTH_DOMAIN,
+        projectId: process.env.NEXT_PUBLIC_VISUALEXP_PROJECT_ID,
+        storageBucket: process.env.NEXT_PUBLIC_VISUALEXP_STORAGE_BUCKET,
+        messagingSenderId: process.env.NEXT_PUBLIC_VISUALEXP_MESSAGING_SENDER_ID,
+        appId: process.env.NEXT_PUBLIC_VISUALEXP_PUBLIC_APP_ID,
+        measurementId: process.env.NEXT_PUBLIC_VISUALEXP_MEASUREMENT_ID,
       },
       "visualexp"
     );
