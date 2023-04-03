@@ -6439,6 +6439,7 @@ const Dashboard = ({}: DashboardProps) => {
               db={db}
               open={openLivelinessBar}
               setOpen={setOpenLivelinessBar}
+              windowHeight={windowHeight}
             />
           )}
 
@@ -6451,6 +6452,7 @@ const Dashboard = ({}: DashboardProps) => {
               user={user}
               open={openLivelinessBar}
               setOpen={setOpenLivelinessBar}
+              windowHeight={windowHeight}
             />
           )}
 
