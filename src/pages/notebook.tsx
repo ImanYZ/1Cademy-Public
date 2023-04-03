@@ -719,7 +719,7 @@ const Dashboard = ({}: DashboardProps) => {
             const userNodeRef = doc(db, "userNodes", userNodeId);
             const userNodeDataTmp = userNodeDoc.docs[0].data() as UserNodesData;
 
-            console.log({ userNodeData });
+            // console.log({ userNodeData });
             userNodeData = {
               ...userNodeDataTmp,
               ...openWithDefaultValues,
@@ -2040,100 +2040,111 @@ const Dashboard = ({}: DashboardProps) => {
     ]
   );
 
-  const openAllChildren = useCallback((nodeId: string) => {
-    if (notebookRef.current.choosingNode || !user) return;
+  const openAllChildren = useCallback(
+    (nodeId: string) => {
+      if (notebookRef.current.choosingNode || !user) return;
 
-    let linkedNode = null;
-    let linkedNodeId = null;
-    let linkedNodeRef = null;
-    let userNodeRef = null;
-    let userNodeData = null;
-    const batch = writeBatch(db);
+      devLog("OPEN_ALL_CHILDREN", { nodeId });
 
-    setGraph(graph => {
-      const thisNode = graph.nodes[nodeId];
+      let linkedNode = null;
+      let linkedNodeId = null;
+      let linkedNodeRef = null;
+      let userNodeRef = null;
+      let userNodeData = null;
+      const batch = writeBatch(db);
 
-      (async () => {
-        try {
-          for (const child of thisNode.children) {
-            linkedNodeId = child.node as string;
-            linkedNode = document.getElementById(linkedNodeId);
-            if (linkedNode) continue;
+      setGraph(graph => {
+        const thisNode = graph.nodes[nodeId];
 
-            const nodeRef = doc(db, "nodes", linkedNodeId);
-            const nodeDoc = await getDoc(nodeRef);
+        (async () => {
+          try {
+            for (const child of thisNode.children) {
+              linkedNodeId = child.node as string;
+              linkedNode = document.getElementById(linkedNodeId);
+              if (linkedNode) continue;
 
-            if (!nodeDoc.exists()) continue;
-            const thisNode: any = { ...nodeDoc.data(), id: linkedNodeId };
+              const nodeRef = doc(db, "nodes", linkedNodeId);
+              const nodeDoc = await getDoc(nodeRef);
 
-            for (let chi of thisNode.children) {
-              linkedNodeRef = doc(db, "nodes", chi.node);
-              batch.update(linkedNodeRef, { updatedAt: Timestamp.fromDate(new Date()) });
-            }
+              if (!nodeDoc.exists()) continue;
+              const thisNode: any = { ...nodeDoc.data(), id: linkedNodeId };
 
-            for (let parent of thisNode.parents) {
-              linkedNodeRef = doc(db, "nodes", parent.node);
-              batch.update(linkedNodeRef, { updatedAt: Timestamp.fromDate(new Date()) });
-            }
+              for (let chi of thisNode.children) {
+                linkedNodeRef = doc(db, "nodes", chi.node);
+                batch.update(linkedNodeRef, { updatedAt: Timestamp.fromDate(new Date()) });
+              }
 
-            const userNodesRef = collection(db, "userNodes");
-            const userNodeQuery = query(
-              userNodesRef,
-              where("node", "==", linkedNodeId),
-              where("user", "==", user.uname),
-              limit(1)
-            );
-            const userNodeDoc = await getDocs(userNodeQuery);
+              for (let parent of thisNode.parents) {
+                linkedNodeRef = doc(db, "nodes", parent.node);
+                batch.update(linkedNodeRef, { updatedAt: Timestamp.fromDate(new Date()) });
+              }
 
-            if (userNodeDoc.docs.length > 0) {
-              userNodeRef = doc(db, "userNodes", userNodeDoc.docs[0].id);
-              userNodeData = userNodeDoc.docs[0].data();
-              userNodeData.visible = true;
-              userNodeData.updatedAt = Timestamp.fromDate(new Date());
-              batch.update(userNodeRef, userNodeData);
-            } else {
-              userNodeData = {
-                changed: true,
-                correct: false,
-                createdAt: Timestamp.fromDate(new Date()),
+              const userNodesRef = collection(db, "userNodes");
+              const userNodeQuery = query(
+                userNodesRef,
+                where("node", "==", linkedNodeId),
+                where("user", "==", user.uname),
+                limit(1)
+              );
+              const userNodeDoc = await getDocs(userNodeQuery);
+
+              if (userNodeDoc.docs.length > 0) {
+                // if exist documents update the first
+                userNodeRef = doc(db, "userNodes", userNodeDoc.docs[0].id);
+                userNodeData = userNodeDoc.docs[0].data();
+                // userNodeData.visible = true;
+                userNodeData.notebooks = [...(userNodeData.notebooks ?? []), selectedNotebookId];
+                userNodeData.expands = [...(userNodeData.expands ?? []), true];
+                userNodeData.updatedAt = Timestamp.fromDate(new Date());
+                batch.update(userNodeRef, userNodeData);
+              } else {
+                // if NOT exist documents create a document
+                userNodeData = {
+                  changed: true,
+                  correct: false,
+                  createdAt: Timestamp.fromDate(new Date()),
+                  updatedAt: Timestamp.fromDate(new Date()),
+                  deleted: false,
+                  isStudied: false,
+                  bookmarked: false,
+                  node: linkedNodeId,
+                  // open: true,
+                  user: user.uname,
+                  // visible: true,
+                  wrong: false,
+                  notebooks: [selectedNotebookId],
+                  expands: [true],
+                };
+                userNodeRef = await addDoc(collection(db, "userNodes"), userNodeData);
+              }
+
+              batch.update(nodeRef, {
+                viewers: thisNode.viewers + 1,
                 updatedAt: Timestamp.fromDate(new Date()),
-                deleted: false,
-                isStudied: false,
-                bookmarked: false,
-                node: linkedNodeId,
-                open: true,
-                user: user.uname,
-                visible: true,
-                wrong: false,
+              });
+              const userNodeLogRef = collection(db, "userNodesLog");
+              const userNodeLogData = {
+                ...userNodeData,
+                createdAt: Timestamp.fromDate(new Date()),
               };
-              userNodeRef = await addDoc(collection(db, "userNodes"), userNodeData);
+
+              batch.set(doc(userNodeLogRef), userNodeLogData);
             }
 
-            batch.update(nodeRef, {
-              viewers: thisNode.viewers + 1,
-              updatedAt: Timestamp.fromDate(new Date()),
-            });
-            const userNodeLogRef = collection(db, "userNodesLog");
-            const userNodeLogData = {
-              ...userNodeData,
-              createdAt: Timestamp.fromDate(new Date()),
-            };
-
-            batch.set(doc(userNodeLogRef), userNodeLogData);
+            notebookRef.current.selectedNode = nodeId;
+            nodeBookDispatch({ type: "setSelectedNode", payload: nodeId });
+            await batch.commit();
+          } catch (err) {
+            console.error(err);
           }
+        })();
 
-          notebookRef.current.selectedNode = nodeId;
-          nodeBookDispatch({ type: "setSelectedNode", payload: nodeId });
-          await batch.commit();
-        } catch (err) {
-          console.error(err);
-        }
-      })();
-
-      return graph;
-    });
-    lastNodeOperation.current = { name: "OpenAllChildren", data: "" };
-  }, []);
+        return graph;
+      });
+      lastNodeOperation.current = { name: "OpenAllChildren", data: "" };
+    },
+    [db, nodeBookDispatch, selectedNotebookId, user]
+  );
 
   const openAllParent = useCallback((nodeId: string) => {
     if (notebookRef.current.choosingNode || !user) return;
