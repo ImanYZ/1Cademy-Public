@@ -1,10 +1,12 @@
 import { Box } from "@mui/material";
+import Head from "next/head";
 import React from "react";
 
 // import { useQuery } from "react-query";
 import AppFooter from "@/components/AppFooter";
 import JoinUs from "@/components/community/JoinUs";
 import Benefits from "@/components/home/sections/Benefits";
+import { ONECADEMY_DOMAIN } from "@/lib/utils/1cademyConfig";
 
 import { HEADER_HEIGHT, HEADER_HEIGHT_MOBILE } from "../components/Header/AppHeader";
 import UniversitiesMap from "../components/home/components/UniversitiesMap/UniversitiesMap";
@@ -56,50 +58,56 @@ export const orange200 = "#FFC29C";
 
 export const Home = () => {
   return (
-    <Box
-      id="ScrollableContainer"
-      sx={{
-        height: "100vh",
-        overflowY: "auto",
-        overflowX: "hidden",
-        position: "relative",
-        scrollBehavior: "smooth",
-        backgroundColor: theme => (theme.palette.mode === "dark" ? darkBase : "#FFFFFF"),
-      }}
-    >
-      <HomeWrapper
-        heroSectionChildren={<HeroMemoized headerHeight={HEADER_HEIGHT} headerHeightMobile={HEADER_HEIGHT_MOBILE} />}
-        mechanismSectionChildren={<Mechanism mechanisms={MECHANISM_ITEMS} />}
-        magnitudeSectionChildren={
-          <>
-            <Magnitude />
-            <UniversitiesMap theme={"Dark"} />
-          </>
-        }
-        benefitSectionChildren={<Benefits />}
-        topicsSectionChildren={<Topics />}
-        systemSectionChildren={<Systems />}
-        aboutSectionChildren={
-          <>
-            <About />
-            <Papers />
-          </>
-        }
-      />
-
-      <Box sx={{ py: { xs: "64px", sm: "96px" }, maxWidth: "1216px", m: "auto" }}>
-        <JoinUs community={null} themeName="dark" />
-      </Box>
-
-      <AppFooter />
-      <style>
-        {`
-          body{
-            overflow:hidden;
+    <>
+      <Head>
+        <link rel="canonical" href={`${ONECADEMY_DOMAIN}`} key="canonical" />
+        <title>1Cademy</title>
+      </Head>
+      <Box
+        id="ScrollableContainer"
+        sx={{
+          height: "100vh",
+          overflowY: "auto",
+          overflowX: "hidden",
+          position: "relative",
+          scrollBehavior: "smooth",
+          backgroundColor: theme => (theme.palette.mode === "dark" ? darkBase : "#FFFFFF"),
+        }}
+      >
+        <HomeWrapper
+          heroSectionChildren={<HeroMemoized headerHeight={HEADER_HEIGHT} headerHeightMobile={HEADER_HEIGHT_MOBILE} />}
+          mechanismSectionChildren={<Mechanism mechanisms={MECHANISM_ITEMS} />}
+          magnitudeSectionChildren={
+            <>
+              <Magnitude />
+              <UniversitiesMap theme={"Dark"} />
+            </>
           }
-        `}
-      </style>
-    </Box>
+          benefitSectionChildren={<Benefits />}
+          topicsSectionChildren={<Topics />}
+          systemSectionChildren={<Systems />}
+          aboutSectionChildren={
+            <>
+              <About />
+              <Papers />
+            </>
+          }
+        />
+
+        <Box sx={{ py: { xs: "64px", sm: "96px" }, maxWidth: "1216px", m: "auto" }}>
+          <JoinUs community={null} themeName="dark" />
+        </Box>
+
+        <AppFooter />
+        <style>
+          {`
+            body{
+              overflow:hidden;
+            }
+          `}
+        </style>
+      </Box>
+    </>
   );
 };
 
