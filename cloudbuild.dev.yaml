@@ -7,6 +7,7 @@ steps:
         "-c",
         'docker build -t gcr.io/visualexp-a7d2c/knowledge-dev
         --build-arg=NEXT_PUBLIC_PROJECT_ID="$${NEXT_PUBLIC_PROJECT_ID}"
+        --build-arg=ONECADEMYCRED_TYPE="$${ONECADEMYCRED_TYPE}"
         --build-arg=ONECADEMYCRED_PRIVATE_KEY_ID="$${ONECADEMYCRED_PRIVATE_KEY_ID}"
         --build-arg=ONECADEMYCRED_PRIVATE_KEY="$${ONECADEMYCRED_PRIVATE_KEY}"
         --build-arg=ONECADEMYCRED_CLIENT_EMAIL="$${ONECADEMYCRED_CLIENT_EMAIL}"
