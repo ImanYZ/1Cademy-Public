@@ -369,12 +369,7 @@ const Dashboard = ({}: DashboardProps) => {
       if (!originalNode) {
         return false;
       }
-      var bounding = originalNode.getBoundingClientRect();
-
-      const nodeLeft = bounding.left;
-      const nodeTop = bounding.top;
-      const nodeWidth = bounding.width;
-      const nodeHeight = bounding.height;
+      var { left: nodeLeft, top: nodeTop, width: nodeWidth, height: nodeHeight } = originalNode.getBoundingClientRect();
       const regionWidth = windowWith - windowInnerLeft - windowInnerRight;
       const regionHeight = windowHeight - windowInnerTop - windowInnerBottom;
       const collition =
