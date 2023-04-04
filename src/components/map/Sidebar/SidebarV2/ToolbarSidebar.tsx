@@ -1,6 +1,9 @@
+import AddIcon from "@mui/icons-material/Add";
+import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import KeyboardArrowLeftIcon from "@mui/icons-material/KeyboardArrowLeft";
 import MenuIcon from "@mui/icons-material/Menu";
-import { Box, Button, IconButton, Stack, Tooltip, Typography, useMediaQuery, useTheme } from "@mui/material";
+import MoreVertIcon from "@mui/icons-material/MoreVert";
+import { Box, Button, Divider, IconButton, Stack, Tooltip, Typography, useMediaQuery, useTheme } from "@mui/material";
 import { addDoc, collection, doc, getFirestore, setDoc, Timestamp } from "firebase/firestore";
 import NextImage from "next/image";
 import React, { Suspense, useCallback, useEffect, useMemo, useState } from "react";
@@ -24,6 +27,7 @@ import TagIcon from "../../../../../public/tag.svg";
 import { DispatchAuthActions, Reputation, ReputationSignal, User, UserTheme } from "../../../../knowledgeTypes";
 import { UsersStatus, UserTutorials } from "../../../../nodeBookTypes";
 import { OpenSidebar } from "../../../../pages/notebook";
+import { Notebook } from "../../../../types";
 import Modal from "../../Modal/Modal";
 import { SidebarButton } from "../../SidebarButtons";
 import { MemoizedUserStatusSettings } from "../../UserStatusSettings2";
@@ -56,6 +60,7 @@ type MainSidebarProps = {
   enabledToolbarElements?: string[];
   userTutorial: UserTutorials;
   dispatch: React.Dispatch<DispatchAuthActions>;
+  notebooks: Notebook[];
   // setCurrentTutorial: Dispatch<SetStateAction<TutorialKeys>>;
 };
 
@@ -80,6 +85,7 @@ export const ToolbarSidebar = ({
   disableToolbar = false,
   userTutorial,
   dispatch,
+  notebooks,
 }: // setCurrentTutorial,
 // enabledToolbarElements = [],
 MainSidebarProps) => {
@@ -93,7 +99,7 @@ MainSidebarProps) => {
   const { allTags, setAllTags } = useTagsTreeView(user.tagId ? [user.tagId] : []);
   const [leaderboardTypeOpen, setLeaderboardTypeOpen] = useState<boolean>(false);
   const [shouldShowTagSearcher, setShouldShowTagSearcher] = useState<boolean>(false);
-  const [displayNotebooks, setDisplayNotebooks] = useState(true);
+  const [displayNotebooks, setDisplayNotebooks] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
 
   useEffect(() => {
@@ -223,6 +229,7 @@ MainSidebarProps) => {
 
   const openLeaderboardTypes = useCallback(() => {
     setLeaderboardTypeOpen(oldCLT => !oldCLT);
+    setIsHovered(false);
   }, [setLeaderboardTypeOpen]);
 
   const disableUserStatusButton = disableToolbar; /* || ![].includes(c=>c==="userStatusIconc") */
@@ -262,15 +269,15 @@ MainSidebarProps) => {
           width: "inherit",
           overflow: "hidden",
           display: { xs: isMenuOpen ? "grid" : "none", sm: "grid" },
-          gridTemplateRows: "auto auto 1fr",
+          gridTemplateRows: "auto auto  1fr",
           // paddingX: "5px",
           background: theme =>
             theme.palette.mode === "dark" ? theme.palette.common.darkBackground : theme.palette.common.lightBackground,
-          "& .list-tmp": { alignItems: isMenuOpen ? "flex-start" : undefined },
-          ":hover": {
-            "& .list-tmp": { alignItems: "flex-start" },
-            // "& .user-settings-button":{}
-          },
+          // "& .list-tmp": { alignItems: isMenuOpen ? "flex-start" : undefined },
+          // ":hover": {
+          //   "& .list-tmp": { alignItems: "flex-start" },
+          //   // "& .user-settings-button":{}
+          // },
         }}
       >
         <Stack
@@ -735,6 +742,9 @@ MainSidebarProps) => {
             }}
             text="Notebooks"
             toolbarIsOpen={isHovered}
+            rightOption={
+              <KeyboardArrowDownIcon sx={{ transition: ".3s", rotate: displayNotebooks ? "180deg" : "0deg" }} />
+            }
           />
           {/* <Button
             onClick={() => {
@@ -793,11 +803,65 @@ MainSidebarProps) => {
             </Box>
           </Button> */}
 
-          {/* {displayNotebooks && (
-            <Box>
-              <Button variant="text">tergdgf</Button>
+          {displayNotebooks && isHovered && (
+            <Box sx={{ border: "solid 1px red", width: "100%" }}>
+              <Stack sx={{ width: "100%", maxHeight: "126px", overflowY: "auto" }}>
+                {notebooks.map((cur, idx) => (
+                  <Box
+                    key={idx}
+                    sx={{ p: "10px 16px", display: "flex", alignItems: "center", justifyContent: "space-between" }}
+                  >
+                    {/* min-width is making ellipsis works correctly */}
+                    <Box sx={{ minWidth: "0px", display: "flex", alignItems: "center" }}>
+                      <Box sx={{ minWidth: "0px", display: "flex", alignItems: "center" }}>
+                        <Box
+                          sx={{
+                            background: "#12B76A",
+                            minWidth: "10px",
+                            width: "10px",
+                            height: "10px",
+                            borderRadius: "50%",
+                            mr: "10px",
+                          }}
+                        />
+                        <Typography
+                          sx={{
+                            overflow: "hidden",
+                            textOverflow: "ellipsis",
+                            whiteSpace: "nowrap",
+                          }}
+                        >
+                          {cur.title}
+                        </Typography>
+                      </Box>
+                    </Box>
+                    <IconButton sx={{ p: "0px" }}>
+                      <MoreVertIcon />
+                    </IconButton>
+                  </Box>
+                ))}
+              </Stack>
+
+              <Divider />
+
+              <Box sx={{ p: "10px 16px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                <Box sx={{ display: "flex", alignItems: "center" }}>
+                  <Box sx={{ display: "flex", alignItems: "center" }}>
+                    <Typography
+                      sx={{
+                        ml: "20px",
+                      }}
+                    >
+                      Create New
+                    </Typography>
+                  </Box>
+                </Box>
+                <IconButton sx={{ p: "0px" }}>
+                  <AddIcon />
+                </IconButton>
+              </Box>
             </Box>
-          )} */}
+          )}
 
           {/* <Box
             className={window.innerWidth >= 500 ? "show-on-hover" : ""}
@@ -850,19 +914,12 @@ MainSidebarProps) => {
           </Box> */}
         </Stack>
 
-        <Box
-          className={window.innerWidth >= 500 ? "show-on-hover" : ""}
-          sx={{
-            background: theme => (theme.palette.mode === "dark" ? "#242425" : "#F2F4F7"),
-            width: "100%",
-            display: window.innerWidth <= 500 ? "flex" : "none",
-            justifyContent: "center",
-            border: theme => (theme.palette.mode === "dark" ? "solid 1px #303134" : "solid 1px #EAECF0"),
-          }}
-        >
+        {/* --------------- */}
+
+        {isHovered && (
           <Button
             sx={{
-              padding: "10px",
+              p: "11px 16px",
               width: "100%",
               height: "100%",
               ":hover": {
@@ -876,49 +933,47 @@ MainSidebarProps) => {
           >
             <Box
               sx={{
+                minWidth: "0px",
                 display: "flex",
-                width: "94%",
+                width: "100%",
               }}
             >
               <NextImage width={"25px"} src={TagIcon} alt="tag icon" />
 
               <Typography
                 sx={{
+                  minWidth: "0px",
                   marginLeft: "4px",
                   color: theme => (theme.palette.mode === "dark" ? "#EAECF0" : "#1D2939"),
                   overflow: "hidden",
                   textOverflow: "ellipsis",
                   whiteSpace: "nowrap",
-                  display: "inline-block",
                 }}
               >
                 {user.tag}
               </Typography>
             </Box>
           </Button>
-        </Box>
-
-        {/* --------------- */}
+        )}
 
         {shouldShowTagSearcher && (
-          <Suspense fallback={<div></div>}>
+          <Suspense fallback={<div>loading...</div>}>
             <Box
-              id="tagModal"
+              // id="tagModal"
               sx={{
-                background: "#1B1A1A",
-                paddingX: "10px",
+                position: "fixed",
+                left: "270px",
+                top: "114px",
               }}
             >
               <Modal
-                className="tagSelectorModalUserSetting"
+                className="tagSelectorModalUserSetting ModalBody"
                 onClick={closeTagSelector}
                 returnDown={false}
                 noBackground={true}
                 style={{
                   width: "441px",
                   height: "495px",
-                  left: window.innerWidth <= 500 ? "28px" : "270px",
-                  top: "114px",
                 }}
                 contentStyle={{
                   height: "500px",
@@ -936,50 +991,94 @@ MainSidebarProps) => {
             </Box>
           </Suspense>
         )}
-        <Box
-          className="hide-on-hover"
-          sx={{
-            display: window.innerWidth <= 500 ? "none" : "block",
-            width: "50%",
-            margin: "auto",
-            marginTop: "10px",
-            marginBottom: "14px",
-            borderTop: theme => (theme.palette.mode === "dark" ? "solid 1px #303134" : "solid 1px #EAECF0"),
-          }}
-        />
 
         {/* --------------- */}
 
-        <Stack spacing={"10px"} direction="column" sx={{ paddingBottom: "20px" }}>
+        {!isHovered && (
           <Box
-            className="show-on-hover"
             sx={{
-              width: "100%",
-              display: "none",
-              justifyContent: "flex-start",
-              alignItems: "center",
-              gap: "10px",
-              height: "inherit",
-              position: "relative",
+              display: window.innerWidth <= 500 ? "none" : "block",
+              width: "50%",
+              margin: "auto",
+              marginTop: "10px",
+              marginBottom: "14px",
+              borderTop: theme => (theme.palette.mode === "dark" ? "solid 1px #303134" : "solid 1px #EAECF0"),
             }}
-          >
-            {leaderboardTypeOpen && (
-              <MultipleChoiceBtn
+          />
+        )}
+
+        {/* --------------- */}
+
+        <Stack
+          spacing={"10px"}
+          direction="column"
+          sx={{
+            paddingBottom: "20px",
+            position: "relative",
+            border: "dashed 1px royalBlue",
+            height: "100%",
+            width: "inherit",
+          }}
+        >
+          {isHovered && (
+            <>
+              <Button
+                // variant="text"
                 sx={{
-                  zIndex: 999,
-                  width: "90%",
-                  marginX: "auto",
-                  left: "5%",
-                  top: window.innerHeight >= 500 ? "0px" : undefined,
-                  bottom: window.innerHeight <= 500 ? "50px" : undefined,
-                  height: "173px",
+                  mx: "16px",
+                  display: "flex",
+                  justifyContent: "space-between",
+                  ":hover": {
+                    background: theme => (theme.palette.mode === "dark" ? "#55402B" : "#FFE2D0"),
+                  },
                 }}
-                choices={choices}
-                onClose={openLeaderboardTypes}
-                comLeaderboardType={leaderBoardType ? leaderBoardType : "Leaderboard"}
-              />
-            )}
-          </Box>
+                onClick={openLeaderboardTypes}
+              >
+                <Box
+                  sx={{
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                    whiteSpace: "nowrap",
+                    display: "inline-block",
+                    color: theme => (theme.palette.mode === "dark" ? "#eaecf0" : "#475467"),
+                  }}
+                >
+                  {leaderBoardType ? leaderBoardType : "Leaderboard"}
+                </Box>
+                <KeyboardArrowDownIcon sx={{ transition: ".3s", rotate: leaderboardTypeOpen ? "180deg" : "0deg" }} />
+              </Button>
+              {leaderboardTypeOpen && (
+                <MultipleChoiceBtn
+                  sx={{
+                    zIndex: 999,
+                    width: "86%",
+                    marginX: "auto",
+                    left: "7%",
+                    top: "38px",
+                    // top: window.innerHeight >= 500 ? "0px" : undefined,
+                    // bottom: window.innerHeight <= 500 ? "50px" : undefined,
+                    height: "173px",
+                  }}
+                  choices={choices}
+                  onClose={openLeaderboardTypes}
+                  comLeaderboardType={leaderBoardType ? leaderBoardType : "Leaderboard"}
+                />
+              )}
+              {/* <Box
+                sx={{
+                  width: "100%",
+                  justifyContent: "flex-start",
+                  alignItems: "center",
+                  gap: "10px",
+                  height: "inherit",
+                  position: "relative",
+                  border: "solid 2px red",
+                }}
+              >
+                
+              </Box> */}
+            </>
+          )}
           {user?.tag && leaderBoardType && (
             <UsersStatusList
               onlineUsers={onlineUsers}
@@ -989,12 +1088,15 @@ MainSidebarProps) => {
               reloadPermanentGraph={reloadPermanentGrpah}
               setOpenSideBar={setOpenSideBar}
               reputationSignal={reputationSignal}
-              sx={{
+              sx={{ px: "16px", border: "dashed 1px red" }}
+              sxUserStatus={{
                 // display: isMenuOpen ? "flex" : "flex",
                 justifyContent: "flex-start",
                 alignItems: "center",
+                width: "100%",
               }}
               disabled={disableUserStatusList}
+              isSmaller={!isHovered}
             />
           )}
         </Stack>
@@ -1003,6 +1105,7 @@ MainSidebarProps) => {
   }, [
     isMenuOpen,
     onMouseHover,
+    onMouseOut,
     theme.palette.mode,
     user,
     reputation?.totalPoints,
@@ -1010,16 +1113,17 @@ MainSidebarProps) => {
     reputation?.negatives,
     onOpenUserSettingsSidebar,
     isHovered,
-    disableSearchButton,
+    displayNotebooks,
+    notebooks,
     shouldShowTagSearcher,
     closeTagSelector,
     chosenTags,
     allTags,
     setAllTags,
-    leaderboardTypeOpen,
-    choices,
     openLeaderboardTypes,
     leaderBoardType,
+    leaderboardTypeOpen,
+    choices,
     onlineUsers,
     usersOnlineStatusLoaded,
     nodeBookDispatch,

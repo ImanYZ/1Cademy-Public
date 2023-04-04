@@ -333,7 +333,7 @@ const SearcherSidebar = ({
       >
         {!isMovil && showTagSelector && (
           <div id="tagModal">
-            <Modal onClick={setShowTagSelectorClick} returnLeft={true} noBackground={true}>
+            <Modal onClick={setShowTagSelectorClick} returnLeft={true} noBackground={true} className="ModalBody">
               <MemoizedTagsSearcher
                 allTags={allTags}
                 setAllTags={setAllTags}

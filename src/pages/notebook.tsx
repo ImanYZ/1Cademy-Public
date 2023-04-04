@@ -363,7 +363,7 @@ const Dashboard = ({}: DashboardProps) => {
 
   const pathwayRef = useRef({ node: "", parent: "", child: "" });
 
-  const [, /* notebooks */ setNotebooks] = useState<Notebook[]>([]);
+  const [notebooks, setNotebooks] = useState<Notebook[]>([]);
   const [notebooksLoaded, setNotebooksLoaded] = useState(false);
   const [selectedNotebookId /* ,setSelectedNotebookId */] = useState("01");
 
@@ -6141,6 +6141,7 @@ const Dashboard = ({}: DashboardProps) => {
                 // setCurrentTutorial={setCurrentTutorial}
                 userTutorial={userTutorial}
                 dispatch={dispatch}
+                notebooks={notebooks}
               />
 
               <MemoizedBookmarksSidebar

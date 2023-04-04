@@ -2196,7 +2196,7 @@ button.MuiTab-textColorInherit:focus {
 /* The Modal (background) */
 #Modal {
   position: fixed; /* Stay in place */
-  z-index: 7; /* Sit on top */
+  z-index: 20; /* Sit on top */
   left: 0;
   top: 0;
   width: 100%; /* Full width */
@@ -2214,7 +2214,7 @@ button.MuiTab-textColorInherit:focus {
 }
 
 /* Modal Content/Box */
-#ModalBody {
+.ModalBody {
   position: absolute;
   top: 4%;
   left: 4%;
@@ -2230,7 +2230,7 @@ button.MuiTab-textColorInherit:focus {
   z-index: 7; /* Sit on top */
 }
 
-.LightMode #ModalBody {
+.LightMode .ModalBody {
   background: #f0f0f0;
 }
 
