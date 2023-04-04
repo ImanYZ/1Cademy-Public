@@ -56,7 +56,7 @@ const USER_SETTINGS_STEPS: TutorialStepConfig[] = [
   },
   {
     childTargetId: "MiniUserPrifileInstitution",
-    title: "Univercity",
+    title: "University",
     description: <MarkdownRender text={"This displays the university that you are enrolled at."} />,
 
     tooltipPosition: "bottom",
