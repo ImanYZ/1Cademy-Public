@@ -1924,8 +1924,8 @@ const NodeFooter = ({
         </Box>
       </Box>
       {openSidebar === "USER_INFO" &&
-        notebookRef.current.showContributors &&
-        notebookRef.current.contributorsNodeId === identifier &&
+        notebookRef.current.contributorsNodeId.showContributors &&
+        notebookRef.current.contributorsNodeId.nodeId === identifier &&
         contributors &&
         Object.keys(contributors).length > 0 && (
           <Box sx={{ paddingY: "10px" }}>
