@@ -32,7 +32,18 @@ steps:
         "ONECADEMYCRED_CLIENT_ID_DEV",
         "ONECADEMYCRED_CLIENT_X509_CERT_URL_DEV",
         "ONECADEMYCRED_PRIVATE_KEY_DEV",
-        "ONECADEMYCRED_PRIVATE_KEY_ID_DEV"
+        "ONECADEMYCRED_PRIVATE_KEY_ID_DEV",
+        "VISUALEXPCRED_TYPE",
+        "VISUALEXP_PROJECT_ID",
+        "VISUALEXPCRED_PRIVATE_KEY_ID",
+        "VISUALEXPCRED_PRIVATE_KEY",
+        "VISUALEXPCRED_CLIENT_EMAIL",
+        "VISUALEXPCRED_CLIENT_ID",
+        "VISUALEXPCRED_AUTH_URI",
+        "VISUALEXPCRED_TOKEN_URI",
+        "VISUALEXPCRED_AUTH_PROVIDER_X509_CERT_URL",
+        "VISUALEXP_STORAGE_BUCKET",
+        "VISUALEXPCRED_CLIENT_X509_CERT_URL"
       ]
   # Push the NextJS container image to Container Registry
   - name: "gcr.io/cloud-builders/docker"
@@ -66,4 +77,26 @@ availableSecrets:
       env: "ONECADEMYCRED_PRIVATE_KEY_DEV"
     - versionName: projects/141114383555/secrets/ONECADEMYCRED_PRIVATE_KEY_ID_DEV/versions/1
       env: "ONECADEMYCRED_PRIVATE_KEY_ID_DEV"
+    - versionName: projects/141114383555/secrets/VISUALEXPCRED_TYPE/versions/1
+      env: "VISUALEXPCRED_TYPE"
+    - versionName: projects/141114383555/secrets/VISUALEXP_PROJECT_ID_DEV/versions/1
+      env: "VISUALEXP_PROJECT_ID"
+    - versionName: projects/141114383555/secrets/VISUALEXPCRED_PRIVATE_KEY_ID_DEV/versions/1
+      env: "VISUALEXPCRED_PRIVATE_KEY_ID"
+    - versionName: projects/141114383555/secrets/VISUALEXPCRED_PRIVATE_KEY_DEV/versions/1
+      env: "VISUALEXPCRED_PRIVATE_KEY"
+    - versionName: projects/141114383555/secrets/VISUALEXPCRED_CLIENT_EMAIL_DEV/versions/1
+      env: "VISUALEXPCRED_CLIENT_EMAIL"
+    - versionName: projects/141114383555/secrets/VISUALEXPCRED_CLIENT_ID_DEV/versions/1
+      env: "VISUALEXPCRED_CLIENT_ID"
+    - versionName: projects/141114383555/secrets/VISUALEXPCRED_AUTH_URI_DEV/versions/1
+      env: "VISUALEXPCRED_AUTH_URI"
+    - versionName: projects/141114383555/secrets/VISUALEXPCRED_TOKEN_URI_DEV/versions/1
+      env: "VISUALEXPCRED_TOKEN_URI"
+    - versionName: projects/141114383555/secrets/VISUALEXPCRED_AUTH_PROVIDER_X509_CERT_URL_DEV/versions/1
+      env: "VISUALEXPCRED_AUTH_PROVIDER_X509_CERT_URL"
+    - versionName: projects/141114383555/secrets/VISUALEXP_STORAGE_BUCKET_DEV/versions/1
+      env: "VISUALEXP_STORAGE_BUCKET"
+    - versionName: projects/141114383555/secrets/VISUALEXPCRED_CLIENT_X509_CERT_URL_DEV/versions/1
+      env: "VISUALEXPCRED_CLIENT_X509_CERT_URL"
 timeout: 2000s
