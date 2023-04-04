@@ -30,9 +30,11 @@ const LeaderboardChip: FC<Props> = ({
       component="a"
       sx={{
         height: 60,
-        borderRadius: 28,
+        borderRadius: "8px",
+        background: theme => (theme.palette.mode === "dark" ? "#242425" : "#EAECF0"),
         padding: "6px",
-        cursor: "pointer",
+        border: theme =>
+          theme.palette.mode === "dark" ? "1px solid #2F2F2F!important" : "1px solid #D0D5DD!important",
         ":hover": {
           background: "rgba(255, 255, 255, 0.08)",
         },
@@ -41,10 +43,22 @@ const LeaderboardChip: FC<Props> = ({
       variant="outlined"
       label={
         <Box sx={{ my: 1 }}>
-          <Typography variant="body2" component="div">
+          <Typography
+            variant="body2"
+            component="div"
+            sx={{
+              fontSize: "15px",
+            }}
+          >
             {name}
           </Typography>
-          <Typography variant="body2" component="div">
+          <Typography
+            variant="body2"
+            component="div"
+            sx={{
+              fontSize: "15px",
+            }}
+          >
             {isChamp ? "🏆" : "✔️"}
             {" " + Math.round((reputation + Number.EPSILON) * 100) / 100}
           </Typography>

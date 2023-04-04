@@ -1928,21 +1928,48 @@ const NodeFooter = ({
         notebookRef.current.contributorsNodeId.nodeId === identifier &&
         contributors &&
         Object.keys(contributors).length > 0 && (
-          <Box sx={{ paddingY: "10px" }}>
-            <Grid container spacing={1} sx={{ mt: 0 }}>
-              {renderContributors()}
-            </Grid>
+          <>
             <Box
               sx={{
                 marginTop: "10px",
-                borderTop: theme =>
-                  theme.palette.mode === "dark" ? `solid 1px ${theme.palette.common.borderColor}` : "solid 1px",
+                borderTop: theme => (theme.palette.mode === "dark" ? "1px solid #404040" : "solid 1px #D0D5DD"),
               }}
             />
-            <Grid container spacing={1} sx={{ mt: "5px" }}>
-              {renderInstitutions()}
-            </Grid>
-          </Box>
+            <Box sx={{ paddingX: "10px", mt: "5px" }}>
+              <Box
+                sx={{
+                  py: "5px",
+                }}
+              >
+                <Typography
+                  sx={{
+                    fontWeight: "500",
+                  }}
+                >
+                  Contributors are:
+                </Typography>
+                <Grid container spacing={1} sx={{ mt: "5px" }}>
+                  {renderContributors()}
+                </Grid>
+              </Box>
+              <Box
+                sx={{
+                  py: "5px",
+                }}
+              >
+                <Typography
+                  sx={{
+                    fontWeight: "500",
+                  }}
+                >
+                  Who are from:
+                </Typography>
+                <Grid container spacing={1} sx={{ mt: "5px" }}>
+                  {renderInstitutions()}
+                </Grid>
+              </Box>
+            </Box>
+          </>
         )}
     </>
   );
