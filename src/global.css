@@ -162,7 +162,7 @@
   color: rgb(220, 220, 220);
 }
 .LightMode .Node {
-  background-color: #f0f0f0;
+  background-color: #f2f4f7;
   color: #454545;
   font-weight: 490;
   border-width: 4px;
@@ -2829,17 +2829,18 @@ right: 5px; */
 } */
 
 .select-tab-button-node-footer {
-  margin-bottom: -1px;
-  height: 39px;
+  margin-bottom: -2px;
+  height: 48px;
   margin-right: 10px;
-  border-top-left-radius: 8px;
-  border-top-right-radius: 8px;
+  border-top-left-radius: 16px;
+  border-top-right-radius: 16px;
   display: flex;
   border: solid 1px #585858;
   border-bottom: none;
   align-items: center;
   padding: 0px 6px;
   font-weight: 400;
+  padding: "0px 10px 0px 10px";
 }
 
 .tab-double-button-node-footer {
