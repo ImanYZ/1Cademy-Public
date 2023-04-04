@@ -2769,10 +2769,10 @@ right: 5px; */
   display: none !important;
 }
 
-.toolbar:focus .user-status-section,
+/* .toolbar:focus .user-status-section,
 .toolbar:hover .user-status-section {
   margin-top: 110px !important;
-}
+} */
 
 .scroll-styled::-webkit-scrollbar {
   /* CHECK: I add this to hide scroll and have functionality */

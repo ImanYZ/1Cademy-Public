@@ -1,5 +1,3 @@
-import { ExpandLess, ExpandMore } from "@mui/icons-material";
-import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import KeyboardArrowLeftIcon from "@mui/icons-material/KeyboardArrowLeft";
 import MenuIcon from "@mui/icons-material/Menu";
 import { Box, Button, IconButton, Stack, Tooltip, Typography, useMediaQuery, useTheme } from "@mui/material";
@@ -26,9 +24,9 @@ import TagIcon from "../../../../../public/tag.svg";
 import { DispatchAuthActions, Reputation, ReputationSignal, User, UserTheme } from "../../../../knowledgeTypes";
 import { UsersStatus, UserTutorials } from "../../../../nodeBookTypes";
 import { OpenSidebar } from "../../../../pages/notebook";
-import { MemoizedMetaButton } from "../../MetaButton";
 import Modal from "../../Modal/Modal";
-import { MemoizedUserStatusSettings } from "../../UserStatusSettings";
+import { SidebarButton } from "../../SidebarButtons";
+import { MemoizedUserStatusSettings } from "../../UserStatusSettings2";
 import MultipleChoiceBtn from "../MultipleChoiceBtn";
 import UsersStatusList from "../UsersStatusList";
 import { SidebarWrapper } from "./SidebarWrapper";
@@ -96,6 +94,7 @@ MainSidebarProps) => {
   const [leaderboardTypeOpen, setLeaderboardTypeOpen] = useState<boolean>(false);
   const [shouldShowTagSearcher, setShouldShowTagSearcher] = useState<boolean>(false);
   const [displayNotebooks, setDisplayNotebooks] = useState(true);
+  const [isHovered, setIsHovered] = useState(false);
 
   useEffect(() => {
     if (chosenTags.length > 0 && chosenTags[0].id in allTags) {
@@ -133,6 +132,7 @@ MainSidebarProps) => {
     };
     setDefaultTag();
   }, [dispatch, nodeBookDispatch, nodeBookState.chosenNode, user]);
+
   const onOpenSidebarLog = useCallback(
     async (sidebarType: string) => {
       const userOpenSidebarLogObj: any = {
@@ -184,11 +184,11 @@ MainSidebarProps) => {
     [setOpenSideBar, onOpenSidebarLog]
   );
 
-  const [pendingProposalsLoaded /* setPendingProposalsLoaded */] = useState(true);
+  // const [pendingProposalsLoaded /* setPendingProposalsLoaded */] = useState(true);
 
-  const instructorsButtonHeight = user.role === "INSTRUCTOR" || user.role === "STUDENT" ? 40 : 0;
+  // const instructorsButtonHeight = user.role === "INSTRUCTOR" || user.role === "STUDENT" ? 40 : 0;
 
-  const firstBoxHeight = 375 + instructorsButtonHeight;
+  // const firstBoxHeight = 375 + instructorsButtonHeight;
 
   const [leaderBoardType, setLeaderBoardType] = useState<UsersStatus>("Weekly");
 
@@ -234,101 +234,127 @@ MainSidebarProps) => {
   const disabledLeaderboardButton = disableToolbar;
   const disableUserStatusList = disableToolbar;
 
+  const onMouseHover = useCallback((event: any) => {
+    // console.log(event.currentTarget.getAttribute("id"));
+    if (event.currentTarget.getAttribute("id") === "toolbar") {
+      setIsHovered(true);
+    }
+  }, []);
+
+  const onMouseOut = useCallback((event: any) => {
+    // console.log("out", event.currentTarget.getAttribute("id"));
+    if (event.currentTarget.getAttribute("id") === "toolbar") {
+      setIsHovered(false);
+    }
+  }, []);
+
   const toolbarContentMemoized = useMemo(() => {
     return (
       <Box
+        id="toolbar"
         className={`toolbar ${isMenuOpen ? "toolbar-opened" : ""}`}
+        onMouseOver={onMouseHover}
+        onTouchStart={onMouseHover}
+        onMouseOut={onMouseOut}
         sx={{
+          border: "solid 1px pink",
+          height: "100%",
+          width: "inherit",
           overflow: "hidden",
-          paddingX: "5px",
+          display: { xs: isMenuOpen ? "grid" : "none", sm: "grid" },
+          gridTemplateRows: "auto auto 1fr",
+          // paddingX: "5px",
           background: theme =>
             theme.palette.mode === "dark" ? theme.palette.common.darkBackground : theme.palette.common.lightBackground,
-          display: { xs: isMenuOpen ? "block" : "none", sm: "block" },
-          "& .list-tmp": {
-            alignItems: isMenuOpen ? "flex-start" : undefined,
-          },
+          "& .list-tmp": { alignItems: isMenuOpen ? "flex-start" : undefined },
           ":hover": {
-            "& .list-tmp": {
-              alignItems: "flex-start",
-            },
+            "& .list-tmp": { alignItems: "flex-start" },
+            // "& .user-settings-button":{}
           },
         }}
       >
         <Stack
-          gap={"3px"}
+          // gap={"3px"}
           alignItems="center"
           direction="column"
-          sx={{
-            height: firstBoxHeight,
-          }}
+          spacing={"4px"}
+          sx={{ width: "inherit", border: "solid 1px royalBlue", px: "14px" }}
+          // sx={{height: firstBoxHeight}}
         >
           <Box sx={{ marginTop: "10px", marginBottom: "15px" }}>
-            <MemoizedMetaButton>
-              <Box sx={{ display: "grid", placeItems: "center" }}>
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  className="hide-on-hover"
-                  src={theme.palette.mode === "light" ? LogoLightMode.src : LogoDarkMode.src}
-                  alt="1Logo"
-                  width="61px"
-                />
-                <img
-                  style={{
-                    display: "none",
-                  }}
-                  className="show-on-hover"
-                  src={LogoExtended.src}
-                  alt="1Logo"
-                  width={"100%"}
-                />
-              </Box>
-            </MemoizedMetaButton>
+            {/* <MemoizedMetaButton> */}
+            <Box sx={{ display: "grid", placeItems: "center" }}>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                className="hide-on-hover"
+                src={theme.palette.mode === "light" ? LogoLightMode.src : LogoDarkMode.src}
+                alt="1Logo"
+                width="61px"
+              />
+              <img
+                style={{
+                  display: "none",
+                }}
+                className="show-on-hover"
+                src={LogoExtended.src}
+                alt="1Logo"
+                width={"100%"}
+              />
+            </Box>
+            {/* </MemoizedMetaButton> */}
           </Box>
 
           {/* User info button */}
 
           <MemoizedUserStatusSettings
-            id="toolbar-profile-button"
+            // id="toolbar-profile-button"
             user={user}
             totalPoints={reputation?.totalPoints || 0}
             totalPositives={reputation?.positives || 0}
             totalNegatives={reputation?.negatives || 0}
             imageUrl={user.imageUrl || ""}
             online={true} // TODO: get online state from useUserState useEffect
-            sx={{ display: isMenuOpen ? "flex" : "", alignItems: "center" }}
+            // sx={{ display: isMenuOpen ? "flex" : "", alignItems: "center" }}
             onClick={onOpenUserSettingsSidebar}
-            isDisabled={disableUserStatusButton}
+            smallVersion={!isHovered}
+            // isDisabled={disableUserStatusButton}
           />
 
           {/* Searcher button */}
 
-          <Button
-            // className="SearchBarIconToolbar"
+          <SidebarButton
+            id="toolbar-search-button"
+            iconSrc={SearchIcon}
+            onClick={() => {
+              onOpenSidebar("SEARCHER_SIDEBAR", "Search");
+              setIsMenuOpen(false);
+            }}
+            text="Search"
+            toolbarIsOpen={isHovered}
+            variant="fill"
+          />
+          {/* <Button
             id="toolbar-search-button"
             onClick={() => {
-              // const searcherTutorialFinalized = userTutorial.searcher.done || userTutorial.searcher.skipped;
-              // if (!searcherTutorialFinalized) setCurrentTutorial("SEARCHER");
-
               onOpenSidebar("SEARCHER_SIDEBAR", "Search");
               setIsMenuOpen(false);
             }}
             disabled={disableSearchButton}
             sx={{
               marginTop: "15px",
-              width: "90%",
-              marginLeft: "5%!important",
+              marginBottom: "4px",
+              minWidth: "52px",
+              width: "100%",
+              height: "40px",
               borderRadius: "16px",
               backgroundColor: theme =>
                 disableSearchButton ? (theme.palette.mode === "dark" ? "#383838ff" : "#bdbdbdff") : "#F38744",
               color: "white",
               lineHeight: "19px",
-              height: "40px",
-              textAlign: "left",
-              alignSelf: "flex-start",
               display: "flex",
               gap: isMenuOpen ? "6px" : "6px",
-              padding: "12px 0px 12px 12px",
-              justifyContent: "start",
+              p: "10px 16px",
+              justifyContent: isHovered ? "left" : "center",
               ":hover": {
                 backgroundColor: theme =>
                   disableSearchButton
@@ -342,50 +368,45 @@ MainSidebarProps) => {
             }}
           >
             <Box
-              className="toolbarBadge"
               sx={{
                 display: "flex",
                 alignItems: "center",
                 fontSize: "19px",
-                marginLeft: !isMenuOpen ? "10px" : undefined,
               }}
             >
-              <NextImage width={"22px"} src={SearchIcon} alt="previous node icon" />
+              <NextImage width={"22px"} src={SearchIcon} alt="search icon" />
+              {isHovered && (
+                <Typography
+                  className="toolbarDescription"
+                  sx={{
+                    textOverflow: "ellipsis",
+                    overflow: "hidden",
+                    maxWidth: "90px",
+                    whiteSpace: "nowrap",
+                    fontWeight: "400",
+                    fontSize: "15px",
+                    color: theme => (theme.palette.mode === "dark" ? "#EAECF0" : "#1D2939"),
+                  }}
+                >
+                  Search
+                </Typography>
+              )}
             </Box>
-
-            <Box
-              component="span"
-              className="toolbarDescription"
-              sx={{
-                fontSize: "15px",
-                overflow: "hidden",
-                visibility: isMenuOpen ? "visible" : "hidden",
-                transition: isMenuOpen
-                  ? "visibility 1s, line-height 1s, height 1s"
-                  : "visibility 0s, line-height 0s, height 0s",
-                width: isMenuOpen ? "100px" : "0",
-                display: isMenuOpen ? "flex" : "block",
-                alignItems: "center",
-                textAlign: "center",
-                color: theme => (theme.palette.mode === "dark" ? "#EAECF0" : "#1D2939"),
-              }}
-            >
-              <Typography
-                sx={{
-                  textOverflow: "ellipsis",
-                  overflow: "hidden",
-                  maxWidth: "90px",
-                  whiteSpace: "nowrap",
-                  fontWeight: "400",
-                }}
-              >
-                Search
-              </Typography>
-            </Box>
-          </Button>
+          </Button> */}
 
           {/* Notifications button */}
-          <Button
+
+          <SidebarButton
+            id="toolbar-notifications-button"
+            iconSrc={NotificationIcon}
+            onClick={() => {
+              onOpenSidebar("NOTIFICATION_SIDEBAR", "Notifications");
+              setIsMenuOpen(false);
+            }}
+            text="Notifications"
+            toolbarIsOpen={isHovered}
+          />
+          {/* <Button
             id="toolbar-bookmarks-button"
             onClick={() => {
               onOpenSidebar("NOTIFICATION_SIDEBAR", "Notifications");
@@ -460,10 +481,20 @@ MainSidebarProps) => {
                 </Box>
               )}
             </Box>
-          </Button>
+          </Button> */}
 
           {/* Bookmarks button */}
-          <Button
+          <SidebarButton
+            id="toolbar-bookmarks-button"
+            iconSrc={BookmarkIcon}
+            onClick={() => {
+              onOpenSidebar("BOOKMARKS_SIDEBAR", "Bookmarks");
+              setIsMenuOpen(false);
+            }}
+            text="Bookmarks"
+            toolbarIsOpen={isHovered}
+          />
+          {/* <Button
             onClick={() => {
               onOpenSidebar("BOOKMARKS_SIDEBAR", "Bookmarks");
               setIsMenuOpen(false);
@@ -536,9 +567,20 @@ MainSidebarProps) => {
                 </Box>
               )}
             </Box>
-          </Button>
+          </Button> */}
 
-          <Button
+          {/* Pending proposal sidebar */}
+          <SidebarButton
+            id="toolbar-pending-proposal-button"
+            iconSrc={EditIcon}
+            onClick={() => {
+              onOpenSidebar("PENDING_PROPOSALS", "PendingProposals");
+              setIsMenuOpen(false);
+            }}
+            text="Pending List"
+            toolbarIsOpen={isHovered}
+          />
+          {/* <Button
             onClick={() => {
               onOpenSidebar("PENDING_PROPOSALS", "PendingProposals");
               setIsMenuOpen(false);
@@ -611,11 +653,22 @@ MainSidebarProps) => {
                 </Box>
               )}
             </Box>
-          </Button>
+          </Button> */}
 
-          {/* Pending proposal sidebar */}
-
+          {/* dashboard */}
           {["INSTRUCTOR", "STUDENT"].includes(user.role ?? "") && (
+            <SidebarButton
+              id="toolbar-dashboard-button"
+              iconSrc={GraduatedIcon}
+              onClick={() => {
+                if (user.role === "INSTRUCTOR") return window.open("/instructors/dashboard", "_blank");
+                if (user.role === "STUDENT") return window.open(`/instructors/dashboard/${user.uname}`, "_blank");
+              }}
+              text="Dashboard"
+              toolbarIsOpen={isHovered}
+            />
+          )}
+          {/* {["INSTRUCTOR", "STUDENT"].includes(user.role ?? "") && (
             <Button
               onClick={() => {
                 if (user.role === "INSTRUCTOR") return window.open("/instructors/dashboard", "_blank");
@@ -670,11 +723,20 @@ MainSidebarProps) => {
                 </Box>
               </Box>
             </Button>
-          )}
+          )} */}
 
           {/* notebooks */}
-
-          <Button
+          <SidebarButton
+            id="toolbar-notebooks-button"
+            iconSrc={NotebookIcon}
+            onClick={() => {
+              console.log("diplay", displayNotebooks);
+              setDisplayNotebooks(!displayNotebooks);
+            }}
+            text="Notebooks"
+            toolbarIsOpen={isHovered}
+          />
+          {/* <Button
             onClick={() => {
               console.log("diplay", displayNotebooks);
               setDisplayNotebooks(!displayNotebooks);
@@ -729,99 +791,15 @@ MainSidebarProps) => {
 
               <KeyboardArrowDownIcon sx={{ transition: ".5s", rotate: displayNotebooks ? "0deg" : "180deg" }} />
             </Box>
-          </Button>
+          </Button> */}
 
-          {displayNotebooks && (
+          {/* {displayNotebooks && (
             <Box>
               <Button variant="text">tergdgf</Button>
             </Box>
-          )}
+          )} */}
 
-          <Box
-            className={window.innerWidth >= 500 ? "show-on-hover" : ""}
-            sx={{
-              background: theme => (theme.palette.mode === "dark" ? "#242425" : "#F2F4F7"),
-              width: "100%",
-              display: window.innerWidth <= 500 ? "flex" : "none",
-              justifyContent: "center",
-              border: theme => (theme.palette.mode === "dark" ? "solid 1px #303134" : "solid 1px #EAECF0"),
-            }}
-          >
-            <Button
-              sx={{
-                padding: "10px",
-                width: "100%",
-                height: "100%",
-                ":hover": {
-                  background: theme => (theme.palette.mode === "dark" ? "#55402B" : "#FFE2D0"),
-                },
-              }}
-              onClick={() => {
-                setShouldShowTagSearcher(true);
-                choosingNodeClick("ToolbarTag");
-              }}
-            >
-              <Box
-                sx={{
-                  display: "flex",
-                  width: "94%",
-                }}
-              >
-                <NextImage width={"25px"} src={TagIcon} alt="tag icon" />
-
-                <Typography
-                  sx={{
-                    marginLeft: "4px",
-                    color: theme => (theme.palette.mode === "dark" ? "#EAECF0" : "#1D2939"),
-                    overflow: "hidden",
-                    textOverflow: "ellipsis",
-                    whiteSpace: "nowrap",
-                    display: "inline-block",
-                  }}
-                >
-                  {user.tag}
-                </Typography>
-              </Box>
-            </Button>
-          </Box>
-          {shouldShowTagSearcher && (
-            <Suspense fallback={<div></div>}>
-              <Box
-                id="tagModal"
-                sx={{
-                  background: "#1B1A1A",
-                  paddingX: "10px",
-                }}
-              >
-                <Modal
-                  className="tagSelectorModalUserSetting"
-                  onClick={closeTagSelector}
-                  returnDown={false}
-                  noBackground={true}
-                  style={{
-                    width: "441px",
-                    height: "495px",
-                    left: window.innerWidth <= 500 ? "28px" : "270px",
-                    top: "114px",
-                  }}
-                  contentStyle={{
-                    height: "500px",
-                  }}
-                >
-                  <MemoizedTagsSearcher
-                    id="user-settings-tag-searcher"
-                    setChosenTags={setChosenTags}
-                    chosenTags={chosenTags}
-                    allTags={allTags}
-                    setAllTags={setAllTags}
-                    sx={{ maxHeight: "339px", height: "339px" }}
-                  />
-                </Modal>
-              </Box>
-            </Suspense>
-          )}
-
-          <Box
+          {/* <Box
             className={window.innerWidth >= 500 ? "show-on-hover" : ""}
             sx={{
               width: "100%",
@@ -869,7 +847,110 @@ MainSidebarProps) => {
                 />
               )}
             </Button>
-          </Box>
+          </Box> */}
+        </Stack>
+
+        <Box
+          className={window.innerWidth >= 500 ? "show-on-hover" : ""}
+          sx={{
+            background: theme => (theme.palette.mode === "dark" ? "#242425" : "#F2F4F7"),
+            width: "100%",
+            display: window.innerWidth <= 500 ? "flex" : "none",
+            justifyContent: "center",
+            border: theme => (theme.palette.mode === "dark" ? "solid 1px #303134" : "solid 1px #EAECF0"),
+          }}
+        >
+          <Button
+            sx={{
+              padding: "10px",
+              width: "100%",
+              height: "100%",
+              ":hover": {
+                background: theme => (theme.palette.mode === "dark" ? "#55402B" : "#FFE2D0"),
+              },
+            }}
+            onClick={() => {
+              setShouldShowTagSearcher(true);
+              choosingNodeClick("ToolbarTag");
+            }}
+          >
+            <Box
+              sx={{
+                display: "flex",
+                width: "94%",
+              }}
+            >
+              <NextImage width={"25px"} src={TagIcon} alt="tag icon" />
+
+              <Typography
+                sx={{
+                  marginLeft: "4px",
+                  color: theme => (theme.palette.mode === "dark" ? "#EAECF0" : "#1D2939"),
+                  overflow: "hidden",
+                  textOverflow: "ellipsis",
+                  whiteSpace: "nowrap",
+                  display: "inline-block",
+                }}
+              >
+                {user.tag}
+              </Typography>
+            </Box>
+          </Button>
+        </Box>
+
+        {/* --------------- */}
+
+        {shouldShowTagSearcher && (
+          <Suspense fallback={<div></div>}>
+            <Box
+              id="tagModal"
+              sx={{
+                background: "#1B1A1A",
+                paddingX: "10px",
+              }}
+            >
+              <Modal
+                className="tagSelectorModalUserSetting"
+                onClick={closeTagSelector}
+                returnDown={false}
+                noBackground={true}
+                style={{
+                  width: "441px",
+                  height: "495px",
+                  left: window.innerWidth <= 500 ? "28px" : "270px",
+                  top: "114px",
+                }}
+                contentStyle={{
+                  height: "500px",
+                }}
+              >
+                <MemoizedTagsSearcher
+                  id="user-settings-tag-searcher"
+                  setChosenTags={setChosenTags}
+                  chosenTags={chosenTags}
+                  allTags={allTags}
+                  setAllTags={setAllTags}
+                  sx={{ maxHeight: "339px", height: "339px" }}
+                />
+              </Modal>
+            </Box>
+          </Suspense>
+        )}
+        <Box
+          className="hide-on-hover"
+          sx={{
+            display: window.innerWidth <= 500 ? "none" : "block",
+            width: "50%",
+            margin: "auto",
+            marginTop: "10px",
+            marginBottom: "14px",
+            borderTop: theme => (theme.palette.mode === "dark" ? "solid 1px #303134" : "solid 1px #EAECF0"),
+          }}
+        />
+
+        {/* --------------- */}
+
+        <Stack spacing={"10px"} direction="column" sx={{ paddingBottom: "20px" }}>
           <Box
             className="show-on-hover"
             sx={{
@@ -899,28 +980,6 @@ MainSidebarProps) => {
               />
             )}
           </Box>
-          <Box
-            className="hide-on-hover"
-            sx={{
-              display: window.innerWidth <= 500 ? "none" : "block",
-              width: "50%",
-              margin: "auto",
-              marginTop: "5px",
-              borderTop: theme => (theme.palette.mode === "dark" ? "solid 1px #303134" : "solid 1px #EAECF0"),
-            }}
-          />
-        </Stack>
-
-        <Stack
-          className="user-status-section"
-          spacing={"10px"}
-          direction="column"
-          sx={{
-            marginTop: window.innerWidth <= 500 ? "110px" : "40px",
-            height: window.innerHeight >= 500 ? `calc(${windowHeight}px - ${firstBoxHeight}px)` : undefined,
-            paddingBottom: "20px",
-          }}
-        >
           {user?.tag && leaderBoardType && (
             <UsersStatusList
               onlineUsers={onlineUsers}
@@ -943,33 +1002,24 @@ MainSidebarProps) => {
     );
   }, [
     isMenuOpen,
-    firstBoxHeight,
+    onMouseHover,
     theme.palette.mode,
     user,
     reputation?.totalPoints,
     reputation?.positives,
     reputation?.negatives,
     onOpenUserSettingsSidebar,
-    disableUserStatusButton,
+    isHovered,
     disableSearchButton,
-    disabledNotificationButton,
-    uncheckedNotificationsNum,
-    disabledBookmarksButton,
-    bookmarkUpdatesNum,
-    pendingProposalsNum,
-    pendingProposalsLoaded,
-    disabledIntructorButton,
-    displayNotebooks,
     shouldShowTagSearcher,
     closeTagSelector,
     chosenTags,
     allTags,
     setAllTags,
-    openLeaderboardTypes,
-    leaderBoardType,
     leaderboardTypeOpen,
     choices,
-    windowHeight,
+    openLeaderboardTypes,
+    leaderBoardType,
     onlineUsers,
     usersOnlineStatusLoaded,
     nodeBookDispatch,
@@ -1012,6 +1062,7 @@ MainSidebarProps) => {
     setChosenTags,
     chosenTags,
     displayNotebooks,
+    isHovered,
   ]);
 
   return (
@@ -1052,9 +1103,8 @@ MainSidebarProps) => {
         openSidebar={openSidebar}
         contentSignalState={contentSignalState}
         SidebarContent={toolbarContentMemoized}
-        sx={{
-          boxShadow: undefined,
-        }}
+        sx={{ boxShadow: undefined }}
+        sxContentWrapper={{ width: "inherit" }}
       />
     </>
   );

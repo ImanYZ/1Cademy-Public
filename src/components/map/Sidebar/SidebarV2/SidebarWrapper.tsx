@@ -27,6 +27,7 @@ type SidebarWrapperProps = {
   innerHeight?: number;
   disabled?: boolean;
   sx?: SxProps<Theme>;
+  sxContentWrapper?: SxProps<Theme>;
 };
 /**
  * Only Sidebar content should be scrollable
@@ -51,6 +52,7 @@ export const SidebarWrapper = ({
   openSidebar,
   disabled,
   sx,
+  sxContentWrapper,
 }: SidebarWrapperProps) => {
   const sidebarContentRef = useRef<any>(null);
   const theme = useTheme();
@@ -174,6 +176,7 @@ export const SidebarWrapper = ({
           },
           "::-webkit-scrollbar ": { width: "4px", height: "4px" },
           borderRadius: "6px",
+          ...sxContentWrapper,
         }}
       >
         {sidebarContent}
@@ -183,10 +186,7 @@ export const SidebarWrapper = ({
         <Box
           sx={{
             position: "absolute",
-            top: {
-              xs: "0px",
-              sm: "10px",
-            },
+            top: { xs: "0px", sm: "10px" },
             right: "10px",
           }}
         >
