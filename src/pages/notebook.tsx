@@ -372,41 +372,18 @@ const Dashboard = ({}: DashboardProps) => {
       var bounding = originalNode.getBoundingClientRect();
 
       const nodeLeft = bounding.left;
-      const nodeRight = bounding.right;
-      const nodeBottom = bounding.bottom;
       const nodeTop = bounding.top;
-      const nodeCenterX = bounding.left + bounding.width / 2;
-      const nodeCenterY = bounding.top + bounding.height / 2;
+      const nodeWidth = bounding.width;
+      const nodeHeight = bounding.height;
+      const regionWidth = windowWith - windowInnerLeft - windowInnerRight;
+      const regionHeight = windowHeight - windowInnerTop - windowInnerBottom;
+      const collition =
+        nodeLeft + nodeWidth >= windowInnerLeft &&
+        nodeLeft <= windowInnerLeft + regionWidth &&
+        nodeTop + nodeHeight >= windowInnerTop &&
+        nodeTop <= windowInnerTop + regionHeight;
 
-      const BL =
-        nodeLeft >= windowInnerLeft &&
-        nodeLeft <= windowWith - windowInnerRight &&
-        nodeBottom >= windowInnerTop &&
-        nodeBottom <= windowHeight - windowInnerBottom;
-      const BR =
-        nodeRight >= windowInnerLeft &&
-        nodeRight <= windowWith - windowInnerRight &&
-        nodeBottom >= windowInnerTop &&
-        nodeBottom <= windowHeight - windowInnerBottom;
-      const TL =
-        nodeLeft >= windowInnerLeft &&
-        nodeLeft <= windowWith - windowInnerRight &&
-        nodeTop >= windowInnerTop &&
-        nodeTop <= windowHeight - windowInnerBottom;
-      const TR =
-        nodeRight >= windowInnerLeft &&
-        nodeRight <= windowWith - windowInnerRight &&
-        nodeTop >= windowInnerTop &&
-        nodeTop <= windowHeight - windowInnerBottom;
-      const Inside =
-        nodeCenterX >= windowInnerLeft &&
-        nodeCenterX <= windowWith - windowInnerRight &&
-        nodeCenterY >= windowInnerTop &&
-        nodeCenterY <= windowHeight - windowInnerBottom;
-
-      const isInViewport = BL || BR || TL || TR || Inside;
-
-      return isInViewport;
+      return collition;
     },
     [windowHeight, windowInnerLeft, windowInnerRight, windowInnerTop, windowWith]
   );
@@ -6583,6 +6560,7 @@ const Dashboard = ({}: DashboardProps) => {
               </MapInteractionCSS>
               {showRegion && (
                 <Box
+                  id="region-stn"
                   sx={{
                     position: "absolute",
                     top: windowInnerTop,
