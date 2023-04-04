@@ -1,13 +1,13 @@
-import LocalOfferIcon from "@mui/icons-material/LocalOffer";
-import MenuBookIcon from "@mui/icons-material/MenuBook";
-import { Box } from "@mui/material";
+import { Box, Button, Tooltip } from "@mui/material";
+import NextImage from "next/image";
 import React, { useCallback } from "react";
 
 import { Editor } from "@/components/Editor";
 
+import ReferenceYellowIcon from "../../../../public/reference-yellow.svg";
+import TagYellowIcon from "../../../../public/tag-yellow.svg";
 import { NodeType } from "../../../types";
 import NodeTypeIcon from "../../NodeTypeIcon2";
-import { MemoizedMetaButton } from "../MetaButton";
 
 const doNothing = () => {};
 
@@ -40,72 +40,70 @@ const LinkingButton = ({ disabled = false, id, ...props }: LinkingButtonProps) =
   //   iClassName += "gray-text";
   // }
   return (
-    <MemoizedMetaButton
-      id={id}
-      onClick={linkedNodeClick}
-      tooltip={`${props.visible ? "Navigate to" : "Open"} ${
+    <Tooltip
+      title={`${props.visible ? "Navigate to" : "Open"} ${
         props.linkedNodeType === "children" || props.linkedNodeType === "parent"
           ? ` all the ${props.linkedNodeType}.`
           : " this " + props.linkedNodeType + " node."
       }`}
-      tooltipPosition={
+      placement={
         props.linkedNodeType === "child" || props.linkedNodeType === "children" || props.linkedNodeType === "tag"
           ? "right"
           : "left"
       }
-      style={{ padding: "0px" }}
-      disabled={disabled}
+      disableInteractive
     >
-      <Box sx={{ display: "flex", alignItems: "center", fontSize: "16px" }}>
-        {props.iClassName == "local_offer" ? (
-          <LocalOfferIcon
+      <Button
+        id={id}
+        onClick={linkedNodeClick}
+        sx={{
+          justifyContent: "stretch",
+          textAlign: "inherit",
+          padding: "5px",
+          ":hover": {
+            background: theme => (theme.palette.mode === "dark" ? "#404040" : "#D0D5DD"),
+          },
+        }}
+        disabled={disabled}
+      >
+        <Box sx={{ display: "flex", alignItems: "center", fontSize: "16px", justifyContent: "space-between" }}>
+          {props.iClassName == "local_offer" ? (
+            <NextImage height={"20px"} width={"22px"} src={TagYellowIcon} alt="tag icon" />
+          ) : props.iClassName == "menu_book" ? (
+            <NextImage width={"22px"} src={ReferenceYellowIcon} alt="reference icon" />
+          ) : (
+            ""
+          )}
+          <NodeTypeIcon
+            nodeType={props.nodeType}
+            tooltipPlacement={"left"}
+            fontSize={"inherit"}
             sx={{
               marginRight: "4px",
-              fontSize: "16px",
-              color: props.linkedNodeType !== "children" ? (props.visible ? "#00E676" : "#f9a825") : "gray",
+              color:
+                props.linkedNodeType !== "children" && props.linkedNodeType !== "parents"
+                  ? props.visible
+                    ? "#00E676"
+                    : "#f9a825"
+                  : "gray",
             }}
           />
-        ) : props.iClassName == "menu_book" ? (
-          <MenuBookIcon
-            sx={{
-              marginRight: "4px",
-              fontSize: "16px",
-              color: props.linkedNodeType !== "children" ? (props.visible ? "#00E676" : "#f9a825") : "gray",
-            }}
+          <Editor
+            readOnly={true}
+            setValue={doNothing}
+            label={""}
+            value={props.linkedNodeTitle}
+            disabled={disabled}
+            sxPreview={{ fontSize: "14px", lineHeight: "1.5", marginLeft: "8px" }}
           />
-        ) : (
-          ""
-        )}
-        <NodeTypeIcon
-          nodeType={props.nodeType}
-          tooltipPlacement={"left"}
-          fontSize={"inherit"}
-          sx={{
-            marginRight: "4px",
-            color:
-              props.linkedNodeType !== "children" && props.linkedNodeType !== "parents"
-                ? props.visible
-                  ? "#00E676"
-                  : "#f9a825"
-                : "gray",
-          }}
-        />
-        <Editor
-          readOnly={true}
-          setValue={doNothing}
-          label={""}
-          value={props.linkedNodeTitle}
-          disabled={disabled}
-          sxPreview={{ fontSize: "14px", lineHeight: "1.5" }}
-        />
-        {/* CHECK: I commented this, please uncomment this */}
-        {/* <HyperEditor readOnly={true} onChange={doNothing} content={props.linkedNodeTitle} /> */}
-        {/* <HyperEditor
+          {/* CHECK: I commented this, please uncomment this */}
+          {/* <HyperEditor readOnly={true} onChange={doNothing} content={props.linkedNodeTitle} /> */}
+          {/* <HyperEditor
         readOnly={true}
         onChange={doNothing}
         content={props.linkedNodeTitle}
       /> */}
-        {/* {props.nodeLoading == props.nodeID + "LinkTo" + props.linkedNodeID && (
+          {/* {props.nodeLoading == props.nodeID + "LinkTo" + props.linkedNodeID && (
         <div c<Editor readOnly={true} setValue={doNothing} label={""} value={props.linkedNodeTlassName="preloader-wrapper active small right">
           <div className="spinner-layer spinner-yellow-only">
             <div className="circle-clipper left">
@@ -114,8 +112,9 @@ const LinkingButton = ({ disabled = false, id, ...props }: LinkingButtonProps) =
           </div>
         </div>
       )} */}
-      </Box>
-    </MemoizedMetaButton>
+        </Box>
+      </Button>
+    </Tooltip>
   );
 };
 
