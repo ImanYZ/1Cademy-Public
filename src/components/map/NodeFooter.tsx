@@ -124,7 +124,6 @@ type NodeFooterProps = {
   institutions: any;
   openUserInfoSidebar: (uname: string, imageUrl: string, fullName: string, chooseUname: string) => void;
   proposeNodeImprovement: any;
-  setOperation: any;
   disabled?: boolean;
   enableChildElements?: string[];
   showProposeTutorial?: boolean;
@@ -190,7 +189,6 @@ const NodeFooter = ({
   institutions,
   openUserInfoSidebar,
   proposeNodeImprovement,
-  setOperation,
   disabled,
   enableChildElements = [],
   setAbleToPropose,
@@ -430,12 +428,11 @@ const NodeFooter = ({
   const proposeNodeImprovementClick = useCallback(
     (event: any) => {
       selectPendingProposals(event);
-      setOperation("CancelProposals");
       notebookRef.current.selectedNode = identifier;
       nodeBookDispatch({ type: "setSelectedNode", payload: identifier });
       proposeNodeImprovement(event, identifier);
     },
-    [identifier, nodeBookDispatch, proposeNodeImprovement, selectPendingProposals, setOperation]
+    [identifier, nodeBookDispatch, notebookRef, proposeNodeImprovement, selectPendingProposals]
   );
 
   return (

@@ -1202,7 +1202,6 @@ const Node = ({
               institutions={institutions}
               openUserInfoSidebar={openUserInfoSidebar}
               proposeNodeImprovement={proposeNodeImprovementHandler}
-              setOperation={setOperation}
               disabled={disabled}
               enableChildElements={enableChildElements}
               setAbleToPropose={setAbleToPropose}
@@ -1378,7 +1377,6 @@ const Node = ({
               institutions={institutions}
               openUserInfoSidebar={openUserInfoSidebar}
               proposeNodeImprovement={proposeNodeImprovement}
-              setOperation={setOperation}
               disabled={disabled}
               setAbleToPropose={setAbleToPropose}
             />
