@@ -7,6 +7,7 @@ steps:
         "-c",
         'docker build -t gcr.io/visualexp-a7d2c/knowledge
         --build-arg=NEXT_PUBLIC_PROJECT_ID="$${NEXT_PUBLIC_PROJECT_ID}"
+        --build-arg=ONECADEMYCRED_TYPE="$${ONECADEMYCRED_TYPE}"
         --build-arg=ONECADEMYCRED_PRIVATE_KEY_ID="$${ONECADEMYCRED_PRIVATE_KEY_ID}"
         --build-arg=ONECADEMYCRED_PRIVATE_KEY="$${ONECADEMYCRED_PRIVATE_KEY}"
         --build-arg=ONECADEMYCRED_CLIENT_EMAIL="$${ONECADEMYCRED_CLIENT_EMAIL}"
@@ -61,6 +62,7 @@ steps:
       - "NEXT_PUBLIC_VISUALEXP_MEASUREMENT_ID=${_NEXT_PUBLIC_VISUALEXP_MEASUREMENT_ID}"
     secretEnv:
       [
+        "ONECADEMYCRED_TYPE",
         "ONECADEMYCRED_CLIENT_EMAIL",
         "ONECADEMYCRED_CLIENT_ID",
         "ONECADEMYCRED_CLIENT_X509_CERT_URL",
@@ -100,6 +102,8 @@ images:
   - gcr.io/visualexp-a7d2c/knowledge
 availableSecrets:
   secretManager:
+    - versionName: "projects/141114383555/secrets/ONECADEMYCRED_TYPE/versions/1"
+      env: "ONECADEMYCRED_TYPE"
     - versionName: projects/141114383555/secrets/ONECADEMYCRED_CLIENT_EMAIL/versions/1
       env: "ONECADEMYCRED_CLIENT_EMAIL"
     - versionName: projects/141114383555/secrets/ONECADEMYCRED_CLIENT_ID/versions/1
