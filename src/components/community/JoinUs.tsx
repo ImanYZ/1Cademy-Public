@@ -8,8 +8,11 @@ import Stepper from "@mui/material/Stepper";
 import TextareaAutosize from "@mui/material/TextareaAutosize";
 import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
+import { collection, doc, getDoc, getDocs, query, setDoc, Timestamp, updateDoc, where } from "firebase/firestore";
+import { useRouter } from "next/router";
 import React, { useEffect, useState } from "react";
 
+import ROUTES from "@/lib/utils/routes";
 import {
   gray200,
   gray300,
@@ -24,6 +27,7 @@ import {
   yellow100,
 } from "@/pages/home";
 
+import { auth, dbExp } from "../../lib/firestoreClient/firestoreClient.config";
 import Button from "../home/components/Button";
 import UploadButton from "./UploadButton";
 type JoinUsProps = {
@@ -49,49 +53,66 @@ const JoinUs = (props: JoinUsProps) => {
   const [portfolioUrlError, setPortfolioUrlError] = useState(false);
   const [fullname, setFullname] = useState("");
   const [needsUpdate, setNeedsUpdate] = useState(true);
-  const [applicationProcess, setApplicationProcess] = useState<any>({});
-  const [uploadError, setUploadError] = useState(false);
-
+  const [email, setEmail] = useState("");
+  const router = useRouter();
   useEffect(() => {
-    if (!needsUpdate) return;
-    let childWindo: any = document.getElementById("1cademy.usIframe");
-    const childWindow = childWindo?.contentWindow;
-    childWindow.postMessage({ communityId: props.community.id }, "*");
-    setNeedsUpdate(false);
-  }, [needsUpdate, props.community]);
-
-  const applyButton = () => {
-    window.open("https://1cademy.us/Activities/experiment", "popup");
-  };
-  useEffect(() => {
-    const childResponse = (event: any) => {
-      if (!event.origin.startsWith("https://1cademy.us")) return;
-      if (event?.data) {
-        const {
-          completedExperiment,
-          applicationsSubmitted,
-          hasScheduled,
-          resumeUrl,
-          transcriptUrl,
-          fullname,
-          applicationProcess,
-          uploadError,
-        } = event.data;
-        setCompletedExperiment(completedExperiment);
-        setApplicationsSubmitted(applicationsSubmitted);
-        setHasScheduled(hasScheduled);
-        setResumeUrl(resumeUrl);
-        setTranscriptUrl(transcriptUrl);
-        setFullname(fullname);
-        setApplicationProcess(applicationProcess);
-        setNeedsUpdate(true);
-        setUploadError(uploadError);
+    return auth.onAuthStateChanged(async (user: any) => {
+      if (user) {
+        const uEmail = user.email.toLowerCase();
+        console.log("user", uEmail);
+        const userDocs = await getDocs(query(collection(dbExp, "users"), where("email", "==", uEmail)));
+        if (userDocs.docs.length > 0) {
+          setEmail(uEmail.toLowerCase());
+          const userData = userDocs.docs[0].data();
+          if (!userData.firstname || !userData.lastname) {
+            window.location.href = "/";
+          }
+          setFullname(userDocs.docs[0].id);
+          if (userData.applicationsSubmitted) {
+            setApplicationsSubmitted(userData.applicationsSubmitted);
+          }
+          if ("Resume" in userData) {
+            setResumeUrl(userData["Resume"]);
+          }
+          if ("Transcript" in userData) {
+            setTranscriptUrl(userData["Transcript"]);
+          }
+          if ("projectDone" in userData && userData.projectDone) {
+            setHasScheduled(true);
+            setCompletedExperiment(true);
+          } else {
+            const scheduleDocs = await getDocs(query(collection(dbExp, "schedule"), where("email", "==", uEmail)));
+            const nowTimestamp = Timestamp.fromDate(new Date());
+            let allPassed = true;
+            if (scheduleDocs.docs.length >= 3) {
+              let scheduledSessions = 0;
+              for (let scheduleDoc of scheduleDocs.docs) {
+                const scheduleData = scheduleDoc.data();
+                if (scheduleData.order) {
+                  scheduledSessions += 1;
+                  if (scheduleData.session >= nowTimestamp) {
+                    allPassed = false;
+                  }
+                }
+              }
+              if (scheduledSessions >= 3) {
+                setHasScheduled(true);
+                if (allPassed) {
+                  setCompletedExperiment(true);
+                }
+              }
+            }
+          }
+        }
+      } else {
+        console.log("Signing out!");
+        setFullname("");
+        setEmail("");
+        setHasScheduled(false);
+        setCompletedExperiment(false);
+        setApplicationsSubmitted({});
       }
-    };
-    window.addEventListener("message", childResponse);
-    return () => {
-      window.removeEventListener("message", childResponse);
-    };
+    });
   }, []);
 
   useEffect(() => {
@@ -100,8 +121,8 @@ const JoinUs = (props: JoinUsProps) => {
       Object.keys(applicationsSubmitted).length > 0 &&
       "community" in props &&
       props.community &&
-      props.community.id &&
-      applicationsSubmitted[props.community.id]
+      props.community.name &&
+      applicationsSubmitted[props.community.name]
     ) {
       setActiveStep(3);
     } else if (completedExperiment) {
@@ -129,20 +150,15 @@ const JoinUs = (props: JoinUsProps) => {
   useEffect(() => {
     if (needsUpdate) {
       if (!props.community) return;
-      if (!applicationProcess) return;
       let stepsIdx = 0;
-      const commTestEnded = props.community.id in communiTestsEnded && communiTestsEnded[props.community.id];
-      if (applicationProcess["courseraUrl"] && applicationProcess["portfolioUrl"] && commTestEnded) {
+      const commTestEnded = props.community.name in communiTestsEnded && communiTestsEnded[props.community.name];
+      if (courseraUrl && portfolioUrl && commTestEnded) {
         stepsIdx = 6;
-      } else if (
-        (applicationProcess["courseraUrl"] && applicationProcess["portfolioUrl"]) ||
-        (applicationProcess["courseraUrl"] && commTestEnded) ||
-        (applicationProcess["portfolioUrl"] && commTestEnded)
-      ) {
+      } else if ((courseraUrl && portfolioUrl) || (courseraUrl && commTestEnded) || (portfolioUrl && commTestEnded)) {
         stepsIdx = 5;
-      } else if (applicationProcess["courseraUrl"] || commTestEnded || applicationProcess["portfolioUrl"]) {
+      } else if (courseraUrl || commTestEnded || portfolioUrl) {
         stepsIdx = 4;
-      } else if (applicationProcess["explanation"]) {
+      } else if (explanation) {
         stepsIdx = 3;
       } else if (transcriptUrl) {
         stepsIdx = 2;
@@ -153,67 +169,74 @@ const JoinUs = (props: JoinUsProps) => {
       setActiveInnerStep(stepsIdx);
       setNeedsUpdate(false);
     }
-  }, [needsUpdate, applicationProcess, props.community]);
+  }, [
+    needsUpdate,
+    resumeUrl,
+    transcriptUrl,
+    explanation,
+    courseraUrl,
+    portfolioUrl,
+    communiTestsEnded,
+    props.community,
+  ]);
 
-  useEffect(() => {
-    let childWindo: any = document.getElementById("1cademy.usIframe");
-    const childWindow = childWindo?.contentWindow;
-    childWindow.postMessage({ communityId: props.community.id, function: "applications" }, "*");
-  }, [activeStep, props.community]);
+  console.log(props.community);
 
   useEffect(() => {
     const loadExistingApplication = async () => {
       if (!props.community) return;
-      if (!applicationProcess) {
+      const applRef = doc(dbExp, "applications", fullname + "_" + props.community.name);
+      const applDoc = await getDoc(applRef);
+      if (applDoc.exists()) {
+        const applData = applDoc.data();
+        if ("explanation" in applData && applData.explanation) {
+          setExplanation(applData["explanation"]);
+        } else {
+          setExplanation("");
+        }
+        if ("courseraUrl" in applData && applData.courseraUrl) {
+          setCourseraUrl(applData["courseraUrl"]);
+        } else {
+          setCourseraUrl("");
+        }
+        if ("portfolioUrl" in applData && applData.portfolioUrl) {
+          setPortfolioUrl(applData["portfolioUrl"]);
+        } else {
+          setPortfolioUrl("");
+        }
+        if ("ended" in applData && applData.ended) {
+          setCommuniTestsEnded((oldObj: any) => {
+            return {
+              ...oldObj,
+              [props.community.name]: true,
+            };
+          });
+        } else {
+          setCommuniTestsEnded((oldObj: any) => {
+            return {
+              ...oldObj,
+              [props.community.name]: false,
+            };
+          });
+        }
+      } else {
         setCommuniTestsEnded((oldObj: any) => {
           return {
             ...oldObj,
-            [props.community.id]: false,
+            [props.community.name]: false,
           };
         });
         setExplanation("");
         setCourseraUrl("");
         setPortfolioUrl("");
-      } else {
-        if ("explanation" in applicationProcess && applicationProcess.explanation) {
-          setExplanation(applicationProcess["explanation"]);
-          setNeedsUpdate(true);
-        } else {
-          setExplanation("");
-        }
-        if ("courseraUrl" in applicationProcess && applicationProcess.courseraUrl) {
-          setCourseraUrl(applicationProcess["courseraUrl"]);
-        } else {
-          setCourseraUrl("");
-        }
-        if ("portfolioUrl" in applicationProcess && applicationProcess.portfolioUrl) {
-          setPortfolioUrl(applicationProcess["portfolioUrl"]);
-        } else {
-          setPortfolioUrl("");
-        }
-        if ("ended" in applicationProcess && applicationProcess.ended) {
-          setCommuniTestsEnded((oldObj: any) => {
-            return {
-              ...oldObj,
-              [props.community.id]: true,
-            };
-          });
-        } else {
-          setCommuniTestsEnded((oldObj: any) => {
-            return {
-              ...oldObj,
-              [props.community.id]: false,
-            };
-          });
-        }
       }
+      setNeedsUpdate(true);
     };
-
-    if (applicationProcess) {
+    if (fullname && props.community) {
       loadExistingApplication();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [applicationProcess]);
+  }, [fullname, props.community, props.community]);
 
   const changeExplanation = (event: any) => {
     setExplanation(event.target.value);
@@ -239,24 +262,52 @@ const JoinUs = (props: JoinUsProps) => {
 
   const submitExplanation = async () => {
     if (explanation) {
-      let childWindo: any = document.getElementById("1cademy.usIframe");
-      childWindo.contentWindow.postMessage(
-        { fullname, communityId: props.community.id, explanation, function: "explanation" },
-        "*"
-      );
+      const applRef = doc(dbExp, "applications", fullname + "_" + props.community.name);
+      const applDoc = await getDoc(applRef);
+      if (applDoc.exists()) {
+        await updateDoc(applRef, {
+          explanation,
+          updatedAt: Timestamp.fromDate(new Date()),
+        });
+      } else {
+        await setDoc(applRef, {
+          fullname,
+          email,
+          communiId: props.community.name,
+          explanation,
+          createdAt: Timestamp.fromDate(new Date()),
+        });
+      }
+      if (!props.community.coursera && !props.community.portfolio && !props.community.hasTest) {
+        setApplicationsSubmitted((oldApplicatonsSubmitted: any) => {
+          return { ...oldApplicatonsSubmitted, [props.community.name]: true };
+        });
+      }
+      setNeedsUpdate(true);
     }
   };
 
   const submitCourseraUrl = async () => {
     if (courseraUrl && !courseraUrlError) {
-      let childWindo: any = document.getElementById("1cademy.usIframe");
-      childWindo.contentWindow.postMessage(
-        { communityId: props.community.id, courseraUrl, function: "courseraUrl" },
-        "*"
-      );
+      const applRef = doc(dbExp, "applications", fullname + "_" + props.community.name);
+      const applDoc = await getDoc(applRef);
+      if (applDoc.exists()) {
+        await updateDoc(applRef, {
+          courseraUrl,
+          updatedAt: Timestamp.fromDate(new Date()),
+        });
+      } else {
+        await setDoc(applRef, {
+          fullname,
+          email,
+          communiId: props.community.name,
+          courseraUrl,
+          createdAt: Timestamp.fromDate(new Date()),
+        });
+      }
       if (!props.community.portfolio && !props.community.hasTest) {
         setApplicationsSubmitted((oldApplicatonsSubmitted: any) => {
-          return { ...oldApplicatonsSubmitted, [props.community.id]: true };
+          return { ...oldApplicatonsSubmitted, [props.community.name]: true };
         });
       }
       setNeedsUpdate(true);
@@ -265,14 +316,25 @@ const JoinUs = (props: JoinUsProps) => {
 
   const submitPortfolioUrl = async () => {
     if (portfolioUrl && !portfolioUrlError) {
-      let childWindo: any = document.getElementById("1cademy.usIframe");
-      childWindo.contentWindow.postMessage(
-        { communityId: props.community.id, portfolioUrl, function: "portfolioUrl" },
-        "*"
-      );
+      const applRef = doc(dbExp, "applications", fullname + "_" + props.community.name);
+      const applDoc = await getDoc(applRef);
+      if (applDoc.exists()) {
+        await updateDoc(applRef, {
+          portfolioUrl,
+          updatedAt: Timestamp.fromDate(new Date()),
+        });
+      } else {
+        await setDoc(applRef, {
+          fullname,
+          email,
+          communiId: props.community.name,
+          portfolioUrl,
+          createdAt: Timestamp.fromDate(new Date()),
+        });
+      }
       if (!props.community.hasTest) {
         setApplicationsSubmitted((oldApplicatonsSubmitted: any) => {
-          return { ...oldApplicatonsSubmitted, [props.community.id]: true };
+          return { ...oldApplicatonsSubmitted, [props.community.name]: true };
         });
       }
       setNeedsUpdate(true);
@@ -285,6 +347,27 @@ const JoinUs = (props: JoinUsProps) => {
     }
   };
 
+  const setFileUrl = (setUrl: any) => async (name: string, generatedUrl: string) => {
+    if (fullname) {
+      const userRef = doc(dbExp, "users", fullname);
+      const userDoc = await getDoc(userRef);
+      if (userDoc.exists()) {
+        await updateDoc(userRef, {
+          [name]: generatedUrl,
+          updatedAt: Timestamp.fromDate(new Date()),
+        });
+      }
+      setUrl(generatedUrl);
+      setNeedsUpdate(true);
+    }
+  };
+  const applyButton = () => {
+    if (!email) {
+      router.push(ROUTES.signUpExp);
+    } else {
+      window.open("https://1cademy.us/Activities", "_blank");
+    }
+  };
   return (
     <Box
       id="JoinUsSection"
@@ -393,7 +476,6 @@ const JoinUs = (props: JoinUsProps) => {
         }}
       >
         <Step>
-          <iframe id="1cademy.usIframe" src="https://1cademy.us/JoinUsIframe" style={{ display: "none" }} />
           <StepLabel>Create an account and Schedule for our knowledge representation test.</StepLabel>
           <StepContent>
             <Typography
@@ -496,20 +578,15 @@ const JoinUs = (props: JoinUsProps) => {
                   <StepContent>
                     <UploadButton
                       name="Resume"
-                      communiId={props.community.id}
+                      communiId={props.community.name}
                       mimeTypes={["application/pdf"]} // Alternatively "image/png, image/gif, image/jpeg"
                       typeErrorMessage="We only accept a file with PDF format. Please upload another file."
                       sizeErrorMessage="We only accept file sizes less than 10MB. Please upload another file."
                       maxSize={10}
                       storageBucket="visualexp-a7d2c"
                       storageFolder="Resumes/"
-                      nameFeild="Resume"
                       fileUrl={resumeUrl}
-                      setResumeUrl={setResumeUrl}
-                      fullname={fullname}
-                      setNeedsUpdate={setNeedsUpdate}
-                      needsUpdate={needsUpdate}
-                      uploadError={uploadError}
+                      setFileUrl={setFileUrl(setResumeUrl)}
                     />
                   </StepContent>
                 </Step>
@@ -532,20 +609,15 @@ const JoinUs = (props: JoinUsProps) => {
                   <StepContent>
                     <UploadButton
                       name="Transcript"
-                      communiId={props.community.id}
+                      communiId={props.community.name}
                       mimeTypes={["application/pdf"]}
                       typeErrorMessage="We only accept a file with PDF format. Please upload another file."
                       sizeErrorMessage="We only accept file sizes less than 10MB. Please upload another file."
                       maxSize={10}
                       storageBucket="visualexp-a7d2c"
                       storageFolder="Transcripts/"
-                      nameFeild="Transcript"
                       fileUrl={transcriptUrl}
-                      setTranscriptUrl={setTranscriptUrl}
-                      fullname={fullname}
-                      setNeedsUpdate={setNeedsUpdate}
-                      needsUpdate={needsUpdate}
-                      uploadError={uploadError}
+                      setFileUrl={setFileUrl(setTranscriptUrl)}
                     />
                   </StepContent>
                 </Step>
@@ -752,7 +824,7 @@ const JoinUs = (props: JoinUsProps) => {
                       <Button
                         variant="contained"
                         component="a"
-                        href={"https://1cademy.us/paperTest/" + props.community.id}
+                        href={"https://1cademy.us/paperTest/" + props.community.name}
                         target="_blank"
                         style={{ mt: 1, mr: 1, color: "white", backgroundColor: orangeDark }}
                       >
@@ -775,7 +847,7 @@ const JoinUs = (props: JoinUsProps) => {
                     <Button
                       variant="contained"
                       component="a"
-                      href="/communities"
+                      href="community/*"
                       target="_blank"
                       style={{ mt: 1, mr: 1, color: "white", backgroundColor: orangeDark }}
                     >
@@ -791,7 +863,7 @@ const JoinUs = (props: JoinUsProps) => {
                     <Button
                       variant="contained"
                       component="a"
-                      href="/tutorial"
+                      href="https://1cademy.us/tutorial"
                       target="_blank"
                       style={{ mt: 1, mr: 1, color: "white", backgroundColor: orangeDark }}
                     >

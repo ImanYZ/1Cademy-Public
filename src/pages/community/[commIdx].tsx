@@ -10,6 +10,7 @@ import IconButton from "@mui/material/IconButton";
 import { Stack } from "@mui/system";
 import { GetStaticPaths, GetStaticProps } from "next";
 import Head from "next/head";
+import Image from "next/image";
 import Link from "next/link";
 import React, { useMemo, useRef, useState } from "react";
 
@@ -616,7 +617,7 @@ const Communities = (props: Props) => {
                   {subSection.component(community)}
                 </Box>
                 <Box sx={{ width: { sm: "250px", lg: "300px" }, height: { sm: "250px", lg: "300px" } }}>
-                  <img src={subSection.image} alt={subSection.title} style={{ width: "100%", height: "100%" }} />
+                  <Image src={subSection.image} alt={subSection.title} width="100%" height="100%" />
                 </Box>
               </Stack>
             ))}

@@ -89,7 +89,7 @@ const Hero = ({ headerHeight, headerHeightMobile }: HeroProps) => {
         variant="contained"
         component="a"
         target="_blank"
-        href="https://1cademy.us/#JoinUsSection"
+        href="/#JoinUsSection"
         sx={{
           textTransform: "capitalize",
           bottom: `${getVirtualHeight}px`,
