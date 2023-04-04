@@ -10,7 +10,7 @@ const LEADER_BOARD_STEPS_CONFIG: TutorialStepConfig[] = [
     description: (
       <MarkdownRender
         text={
-          "This is the button for the leader board. Here you can filter how the leader board is displayed. You can choose to see the list weekly, monthly, or all time. You can also choose to see this list by all time or monthly, just based on other’s votes."
+          "This is the button for the Leaderboard. Here you can filter how the Leaderboard is displayed. You can choose to see the list weekly, monthly, or all time. You can also choose to see this list by all time or monthly, just based on other’s votes."
         }
       />
     ),

@@ -64,7 +64,7 @@ const CHILD_RELATION_PROPOSAL_STEPS: TutorialStepConfig[] = [
     description: (
       <MarkdownRender
         text={
-          "In this form you can create a relation node. It has all the same fields as editing a node. Relation nodes should contain multiple concepts, but they are not defined. A common arrangement of concepts is a concept node then a relation node covering a selection of specific concepts related to the first concept, and then each of those concepts defined in concept nodes coming off of the relation node."
+          "In this form you can create a relation node. It has all the same fields as editing a node. Relation nodes should contain multiple concepts, but they are not defined. A common arrangement of nodes is a concept node then a relation node covering a selection of specific concepts related to the first concept, and then each of those concepts defined in concept nodes coming off of the relation node."
         }
       />
     ),
