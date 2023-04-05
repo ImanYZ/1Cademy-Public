@@ -416,8 +416,10 @@ const Node = ({
 
   const nodeClickHandler = useCallback(
     (event: any) => {
+      let operation = "selectNode";
       if (notebookRef.current.choosingNode && notebookRef.current.choosingNode.id !== identifier) {
         // The first Nodes exist, Now is clicking the Chosen Node
+        console.log("OPERATION 1");
         notebookRef.current.chosenNode = {
           id: identifier,
           title,
@@ -426,6 +428,7 @@ const Node = ({
         chosenNodeChanged(notebookRef.current.choosingNode.id);
         setAbleToPropose(true);
         scrollToNode(notebookRef.current.selectedNode);
+        operation = "chooseNode";
       } else if (
         "activeElement" in event.currentTarget &&
         "nodeName" in event.currentTarget.activeElement &&
@@ -435,28 +438,21 @@ const Node = ({
         nodeClicked(event, identifier, nodeType, setOpenPart);
       }
 
-      if (!notebookRef.current.choosingNode && notebookRef.current.selectedNode !== identifier) {
+      if (
+        !notebookRef.current.choosingNode &&
+        notebookRef.current.selectedNode !== identifier &&
+        operation === "selectNode"
+      ) {
         const updatedNodeIds: string[] = [notebookRef.current.selectedNode!, identifier];
-
+        notebookRef.current.selectedNode = identifier;
+        nodeBookDispatch({ type: "setSelectedNode", payload: identifier });
         setNodeUpdates({
           nodeIds: updatedNodeIds,
           updatedAt: new Date(),
         });
       }
     },
-    [
-      notebookRef,
-      identifier,
-      title,
-      nodeBookDispatch,
-      chosenNodeChanged,
-      setAbleToPropose,
-      scrollToNode,
-      nodeClicked,
-      nodeType,
-      setOpenPart,
-      setNodeUpdates,
-    ]
+    [identifier, title, nodeClicked, nodeType]
   );
 
   const hideNodeHandler = useCallback(
