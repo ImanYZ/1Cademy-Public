@@ -243,7 +243,7 @@ MainSidebarProps) => {
     }
   }, [isHovered]);
 
-  console.log({ uncheckedNotificationsNum });
+  // console.log({ uncheckedNotificationsNum });
   const toolbarContentMemoized = useMemo(() => {
     return (
       <Box
@@ -710,14 +710,19 @@ MainSidebarProps) => {
         open={open}
         onClose={onClose}
         width={window.innerWidth <= 500 ? "100%" : isMenuOpen ? "100%" : 80}
-        hoverWidth={window.innerWidth <= 500 ? "100%" : 250}
         showCloseButton={false}
         showScrollUpButton={false}
         isMenuOpen={isMenuOpen}
         openSidebar={openSidebar}
         contentSignalState={contentSignalState}
         SidebarContent={toolbarContentMemoized}
-        sx={{ boxShadow: undefined }}
+        sx={{
+          boxShadow: undefined,
+          ":hover": {
+            width: "250px",
+            maxWidth: "250px",
+          },
+        }}
         sxContentWrapper={{ width: "inherit" }}
       />
     </>

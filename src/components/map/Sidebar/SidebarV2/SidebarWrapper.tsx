@@ -18,7 +18,6 @@ type SidebarWrapperProps = {
   SidebarOptions?: ReactNode;
   anchor?: DrawerProps["anchor"];
   headerImage?: StaticImageData;
-  hoverWidth?: any;
   showCloseButton?: boolean;
   showScrollUpButton?: boolean;
   isMenuOpen?: boolean;
@@ -45,7 +44,6 @@ export const SidebarWrapper = ({
   SidebarContent,
   showCloseButton = true,
   showScrollUpButton = true,
-  hoverWidth,
   isMenuOpen,
   contentSignalState,
   innerHeight,
@@ -105,11 +103,6 @@ export const SidebarWrapper = ({
                     ? "-1px 0px 10px 4px rgba(190, 190, 190, 1)"
                     : "-1px 0px 10px 4px #3b3b3b"
               : "",
-          // left: open ? "0" : `${-width - 20}px`,
-          ":hover": {
-            maxWidth: { xs: width, sm: "50vw" },
-            width: hoverWidth ? hoverWidth : undefined,
-          },
           transition: "0.5s cubic-bezier(0.4, 0, 0.2, 1) !important",
           ...sx,
         },
