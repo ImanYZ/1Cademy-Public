@@ -447,6 +447,7 @@ const NodeFooter = ({
           alignItems: "center",
           justifyContent: "space-between",
           mt: "10px",
+          color: theme => (theme.palette.mode === "dark" ? "#F9FAFB" : "#475467"),
         }}
       >
         <Box className="NodeFooter Left" sx={{ display: "flex", alignItems: "center", gap: "10px" }}>
@@ -601,7 +602,7 @@ const NodeFooter = ({
                       }),
                     }}
                   >
-                    <Tooltip title={"Vote to delete node."} placement={"top"}>
+                    <Tooltip title={"Vote to prevent further changes."} placement={"top"}>
                       <span>
                         <Button
                           onClick={wrongNode}
@@ -626,14 +627,8 @@ const NodeFooter = ({
                               alignItems: "center",
                             }}
                           >
-                            <span>{shortenNumber(wrongNum, 2, false)}</span>
-                            <CloseIcon
-                              sx={{
-                                fontSize: "16px",
-                                color: markedWrong ? "red" : "inherit",
-                                marginLeft: "1px",
-                              }}
-                            />
+                            <DoneIcon sx={{ fontSize: "18px", color: markedCorrect ? "#00E676" : "inherit" }} />
+                            <span style={{ marginLeft: "2px" }}>{shortenNumber(correctNum, 2, false)}</span>
                           </Box>
                         </Button>
                       </span>
@@ -652,7 +647,7 @@ const NodeFooter = ({
                   <Box
                     id={upvoteButtonId}
                     sx={{
-                      padding: "2px 5px 2px 5px",
+                      padding: "2px 5px 2px 0px",
                       borderRadius: "0px 52px 52px 0px",
                       ...(!disabled && {
                         ":hover": {
@@ -664,7 +659,7 @@ const NodeFooter = ({
                       }),
                     }}
                   >
-                    <Tooltip title={"Vote to prevent further changes."} placement={"top"}>
+                    <Tooltip title={"Vote to delete node."} placement={"top"}>
                       <span>
                         <Button
                           onClick={correctNode}
@@ -689,10 +684,13 @@ const NodeFooter = ({
                               alignItems: "center",
                             }}
                           >
-                            <span>{shortenNumber(correctNum, 2, false)}</span>
-                            <DoneIcon
-                              sx={{ fontSize: "16px", color: markedCorrect ? "#00E676" : "inherit", marginLeft: "1px" }}
+                            <CloseIcon
+                              sx={{
+                                fontSize: "18px",
+                                color: markedWrong ? "red" : "inherit",
+                              }}
                             />
+                            <span style={{ marginLeft: "2px" }}>{shortenNumber(wrongNum, 2, false)}</span>
                           </Box>
                         </Button>
                       </span>
@@ -1858,67 +1856,132 @@ const NodeFooter = ({
                 marginBottom: "4px",
               }}
             >
-              <MemoizedMetaButton
-                disabled={disabled}
-                tooltip={
-                  shortenNumber(correctNum, 2, false) +
-                  " 1Cademist" +
-                  (correctNum === 1 ? " has" : "s have") +
-                  " found this node helpful and " +
-                  shortenNumber(wrongNum, 2, false) +
-                  " found it unhelpful."
-                }
+              <Box
+                id={`${identifier}-node-footer-votes`}
+                className="tab-double-button-node-footer"
+                sx={{
+                  background: (theme: any) => (theme.palette.mode === "dark" ? "#404040" : "#EAECF0"),
+                  display: "flex",
+                  alignItems: "center",
+                  marginRight: "0px",
+                }}
               >
-                <Box sx={{ display: "flex", alignItems: "center", gap: "5px" }}>
-                  <Box sx={{ display: "flex", alignItems: "center" }}>
-                    <CloseIcon sx={{ fontSize: "16px", color: markedWrong ? "red" : "inherit" }} />
-                    <span>{shortenNumber(wrongNum, 2, false)}</span>
-                  </Box>
-                  <Box sx={{ display: "flex", alignItems: "center" }}>
-                    <DoneIcon sx={{ fontSize: "16px", color: markedCorrect ? "#00E676" : "inherit" }} />
-                    <span>{shortenNumber(correctNum, 2, false)}</span>
-                  </Box>
+                <Box
+                  id={downvoteButtonId}
+                  sx={{
+                    padding: "2px 10px 2px 10px",
+                    borderRadius: "52px 0px 0px 52px",
+                  }}
+                >
+                  <Tooltip title={"Correct votes"} placement={"top"}>
+                    <Box
+                      sx={{
+                        display: "flex",
+                        fontSize: "14px",
+                        alignItems: "center",
+                      }}
+                    >
+                      <DoneIcon sx={{ fontSize: "18px", color: markedCorrect ? "#00E676" : "inherit" }} />
+                      <span>{shortenNumber(correctNum, 2, false)}</span>
+                    </Box>
+                  </Tooltip>
                 </Box>
-              </MemoizedMetaButton>
-              <MemoizedMetaButton
-                disabled={disabled}
-                tooltip={
+                <Divider
+                  orientation="vertical"
+                  variant="middle"
+                  flexItem
+                  sx={{
+                    borderColor: disableVotes
+                      ? "#6A6A6A"
+                      : theme => (theme.palette.mode === "dark" ? "#D3D3D3" : "inherit"),
+                  }}
+                />
+                <Box
+                  id={upvoteButtonId}
+                  sx={{
+                    padding: "2px 10px 2px 10px",
+                    borderRadius: "0px 52px 52px 0px",
+                  }}
+                >
+                  <Tooltip title={"Wrong votes"} placement={"top"}>
+                    <Box
+                      sx={{
+                        display: "flex",
+                        fontSize: "14px",
+                        alignItems: "center",
+                      }}
+                    >
+                      <CloseIcon
+                        sx={{
+                          fontSize: "18px",
+                          color: markedWrong ? "red" : "inherit",
+                        }}
+                      />
+                      <span>{shortenNumber(wrongNum, 2, false)}</span>
+                    </Box>
+                  </Tooltip>
+                </Box>
+              </Box>
+
+              <ContainedButton
+                id={proposeButtonId}
+                title={
                   `You've ${!bookmarked ? "not " : ""}bookmarked this node. ` +
                   shortenNumber(bookmarks, 2, false) +
                   " 1Cademist" +
                   (bookmarks === 1 ? " has" : "s have") +
                   " bookmarked this node."
                 }
+                onClick={() => {}}
+                tooltipPosition="top"
+                sx={{
+                  background: (theme: any) => (theme.palette.mode === "dark" ? "#404040" : "#EAECF0"),
+                  fontWeight: 400,
+                  color: "inherit",
+                  ":hover": {
+                    borderWidth: "0px",
+                    background: (theme: any) => (theme.palette.mode === "dark" ? "#404040" : "#EAECF0"),
+                    cursor: "auto",
+                  },
+                  padding: "7px 7px",
+                  minWidth: "30px",
+                  height: "30px",
+                }}
+                disabled={disableProposeButton}
               >
-                <Box sx={{ display: "flex", alignItems: "center" }}>
+                <Box sx={{ display: "flex", alignItems: "center", gap: "4px", fill: "inherit" }}>
                   {bookmarked ? (
-                    <BookmarkIcon color={"primary"} sx={{ fontSize: "16px" }} />
+                    <BookmarkIcon
+                      sx={{ fontSize: "18px", color: theme => (theme.palette.mode === "dark" ? "#FF6D00" : "#FF8134") }}
+                    />
                   ) : (
-                    <BookmarkBorderIcon color={"inherit"} sx={{ fontSize: "16px" }} />
+                    <BookmarkIcon color={"inherit"} sx={{ fontSize: "16px" }} />
                   )}
-                  <span>{shortenNumber(bookmarks, 2, false)}</span>
                 </Box>
-              </MemoizedMetaButton>
-
-              <MemoizedMetaButton
-                disabled={disabled}
-                tooltip={
-                  "This node has " +
-                  shortenNumber(parents.length, 2, false) +
-                  " parent node" +
-                  (parents.length === 1 ? "" : "s") +
-                  " and " +
-                  shortenNumber(nodesChildren.length, 2, false) +
-                  " child node" +
-                  (nodesChildren.length === 1 ? "." : "s.")
-                }
+              </ContainedButton>
+              <ContainedButton
+                id={parentChildrenButtonId}
+                title="Parent and child nodes."
+                onClick={() => {}}
+                tooltipPosition="top"
+                sx={{
+                  background: (theme: any) => (theme.palette.mode === "dark" ? "#404040" : "#EAECF0"),
+                  color: "inherit",
+                  fontWeight: 400,
+                  ":hover": {
+                    borderWidth: "0px",
+                    background: (theme: any) => (theme.palette.mode === "dark" ? "#404040" : "#EAECF0"),
+                    cursor: "auto",
+                  },
+                }}
+                disabled={disableParentChildrenButton}
               >
-                <Box sx={{ display: "flex", alignItems: "center", gap: "2px" }}>
-                  <span /*className="FooterParentNodesClosed"*/>{shortenNumber(parents.length, 2, false)}</span>
-                  <SwapHorizIcon sx={{ fontSize: "16px" }} />
+                <Box sx={{ display: "flex", alignItems: "center", gap: "4px", fill: "inherit" }}>
+                  <span className="FooterParentNodesOpen">{shortenNumber(parents.length, 2, false)}</span>
+                  <SwapHorizIcon sx={{ fontSize: "16px" }} color={"inherit"} />
                   <span>{shortenNumber(nodesChildren.length, 2, false)}</span>
                 </Box>
-              </MemoizedMetaButton>
+              </ContainedButton>
             </Box>
           )}
         </Box>
