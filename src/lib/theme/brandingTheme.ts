@@ -316,3 +316,156 @@ const lightTheme = createTheme(getDesignTokens("light"));
 
 export const brandingDarkTheme = deepmerge(darkTheme, getThemedComponents(darkTheme));
 export const brandingLightTheme = deepmerge(lightTheme, getThemedComponents(lightTheme));
+
+export type Colors = {
+  base: { white: string; black: string; graphit: string };
+  gray: {
+    25: string;
+    50: string;
+    100: string;
+    200: string;
+    250: string;
+    300: string;
+    400: string;
+    500: string;
+    600: string;
+    700: string;
+    800: string;
+    850: string;
+    900: string;
+  };
+  primary: {
+    25: string;
+    50: string;
+    100: string;
+    200: string;
+    300: string;
+    400: string;
+    500: string;
+    600: string;
+    700: string;
+    800: string;
+    900: string;
+  };
+  success: {
+    25: string;
+    50: string;
+    100: string;
+    200: string;
+    300: string;
+    400: string;
+    500: string;
+    600: string;
+    700: string;
+    800: string;
+    1000: string;
+  };
+  notebook: {
+    base: { bl1: string; bd1: string; mainBlack: string };
+    gray: {
+      g50: string;
+      g75: string;
+      g100: string;
+      g200: string;
+      g300: string;
+      g400: string;
+      g450: string;
+      g500: string;
+      g600: string;
+      g700: string;
+      g800: string;
+      g900: string;
+    };
+    secondary: {
+      o100: string;
+      g100: string;
+      o800: string;
+      o900: string;
+      pink: string;
+      scarlet: string;
+      red: string;
+    };
+  };
+  secondary: {
+    blue: {
+      25: string;
+      50: string;
+      100: string;
+      200: string;
+      300: string;
+      400: string;
+      500: string;
+      600: string;
+      700: string;
+      800: string;
+      900: string;
+    };
+    indigo: {
+      25: string;
+      50: string;
+      100: string;
+      200: string;
+      300: string;
+      400: string;
+      500: string;
+      600: string;
+      700: string;
+      800: string;
+      900: string;
+    };
+    teal: {
+      25: string;
+      50: string;
+      100: string;
+      200: string;
+      300: string;
+      400: string;
+      500: string;
+      600: string;
+      700: string;
+      800: string;
+      900: string;
+    };
+    blueLight: {
+      25: string;
+      50: string;
+      100: string;
+      200: string;
+      300: string;
+      400: string;
+      500: string;
+      600: string;
+      700: string;
+      800: string;
+      900: string;
+    };
+    orange: {
+      25: string;
+      50: string;
+      100: string;
+      200: string;
+      250: string;
+      300: string;
+      400: string;
+      500: string;
+      600: string;
+      700: string;
+      800: string;
+      900: string;
+    };
+    yellow: {
+      25: string;
+      50: string;
+      100: string;
+      200: string;
+      300: string;
+      400: string;
+      500: string;
+      600: string;
+      700: string;
+      800: string;
+      900: string;
+      1000: string;
+    };
+  };
+};
