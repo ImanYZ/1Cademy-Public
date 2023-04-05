@@ -4,6 +4,7 @@ import React from "react";
 
 // import { useQuery } from "react-query";
 import AppFooter from "@/components/AppFooter";
+import JoinUs from "@/components/community/JoinUs";
 import Benefits from "@/components/home/sections/Benefits";
 import { ONECADEMY_DOMAIN } from "@/lib/utils/1cademyConfig";
 
@@ -12,7 +13,6 @@ import UniversitiesMap from "../components/home/components/UniversitiesMap/Unive
 import HomeWrapper from "../components/home/HomeWrapper";
 import About from "../components/home/sections/About";
 import { HeroMemoized } from "../components/home/sections/Hero";
-import Join from "../components/home/sections/Join";
 import Magnitude from "../components/home/sections/Magnitude";
 import Mechanism, { MECHANISM_ITEMS } from "../components/home/sections/Mechanism";
 import Papers from "../components/home/sections/Papers";
@@ -95,7 +95,7 @@ export const Home = () => {
         />
 
         <Box sx={{ py: { xs: "64px", sm: "96px" }, maxWidth: "1216px", m: "auto" }}>
-          <Join />
+          <JoinUs community={null} themeName="dark" />
         </Box>
 
         <AppFooter />

@@ -139,3 +139,8 @@ export const signIn = async (): Promise<void> => {
   const res = await API.post("/api/signin");
   return res.data;
 };
+
+export const signUpExp = async (user: any): Promise<User> => {
+  const res = await API.post<User>("/api/signUpExp", { data: user });
+  return res.data;
+};

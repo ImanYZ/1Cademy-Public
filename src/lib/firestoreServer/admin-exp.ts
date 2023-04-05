@@ -1,5 +1,5 @@
 import admin from "firebase-admin";
-import { App, cert, initializeApp } from "firebase-admin/app";
+import { App, cert, getApp, initializeApp } from "firebase-admin/app";
 import { DocumentReference, getFirestore, WriteBatch } from "firebase-admin/firestore";
 
 import { arrayToChunks } from "../../utils";
@@ -10,21 +10,21 @@ export const publicStorageBucket = process.env.ONECADEMYCRED_STORAGE_BUCKET;
 require("dotenv").config();
 
 let app: App;
-if (!admin.apps.filter((a: any) => a.name === "[DEFAULT]").length) {
+let db: any;
+if (!admin.apps.filter((a: any) => a.name === "exp").length) {
   let initializationConfigs: any = {
     credential: cert({
-      type: process.env.ONECADEMYCRED_TYPE,
-      project_id: process.env.NEXT_PUBLIC_PROJECT_ID,
-      private_key_id: process.env.ONECADEMYCRED_PRIVATE_KEY_ID,
-      private_key: process.env.ONECADEMYCRED_PRIVATE_KEY?.replace(/\\n/g, "\n"),
-      client_email: process.env.ONECADEMYCRED_CLIENT_EMAIL,
-      client_id: process.env.ONECADEMYCRED_CLIENT_ID,
-      auth_uri: process.env.ONECADEMYCRED_AUTH_URI,
-      token_uri: process.env.ONECADEMYCRED_TOKEN_URI,
-      auth_provider_x509_cert_url: process.env.ONECADEMYCRED_AUTH_PROVIDER_X509_CERT_URL,
-      client_x509_cert_url: process.env.ONECADEMYCRED_CLIENT_X509_CERT_URL,
-      storageBucket: process.env.NEXT_PUBLIC_STORAGE_BUCKET,
-      databaseURL: process.env.NEXT_PUBLIC_DATA_BASE_URL,
+      type: process.env.VISUALEXPCRED_TYPE,
+      project_id: process.env.VISUALEXP_PROJECT_ID,
+      private_key_id: process.env.VISUALEXPCRED_PRIVATE_KEY_ID,
+      private_key: process.env.VISUALEXPCRED_PRIVATE_KEY?.replace(/\\n/g, "\n"),
+      client_email: process.env.VISUALEXPCRED_CLIENT_EMAIL,
+      client_id: process.env.VISUALEXPCRED_CLIENT_ID,
+      auth_uri: process.env.VISUALEXPCRED_AUTH_URI,
+      token_uri: process.env.VISUALEXPCRED_TOKEN_URI,
+      auth_provider_x509_cert_url: process.env.VISUALEXPCRED_AUTH_PROVIDER_X509_CERT_URL,
+      client_x509_cert_url: process.env.VISUALEXPCRED_CLIENT_X509_CERT_URL,
+      storageBucket: process.env.VISUALEXP_STORAGE_BUCKET,
     } as any),
   };
 
@@ -34,11 +34,10 @@ if (!admin.apps.filter((a: any) => a.name === "[DEFAULT]").length) {
       credential: admin.credential.applicationDefault(),
     };
   }
-  app = initializeApp(initializationConfigs);
-  getFirestore().settings({ ignoreUndefinedProperties: true });
+  app = initializeApp(initializationConfigs, "exp");
 }
+db = getFirestore(getApp("exp"));
 export const MAX_TRANSACTION_WRITES = 499;
-const db = getFirestore();
 
 const makeCommitBatch = async (batch: WriteBatch): Promise<[WriteBatch, number]> => {
   await batch.commit();
@@ -85,7 +84,7 @@ interface TWriteOperation {
 const writeTransaction = async (tWriteOperations: TWriteOperation[]) => {
   const chunked = arrayToChunks(tWriteOperations);
 
-  await db.runTransaction(async t => {
+  await db.runTransaction(async (t: any) => {
     for (let chunk of chunked) {
       for (let op of chunk) {
         const { operationType, objRef, data } = op;

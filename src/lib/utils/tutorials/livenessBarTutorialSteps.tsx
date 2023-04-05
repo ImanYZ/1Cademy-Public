@@ -10,7 +10,7 @@ const INTERACTION_LIVENESS_BAR_STEPS_CONFIG: TutorialStepConfig[] = [
     description: (
       <MarkdownRender
         text={
-          "This is the liveness bar. This displays everyone that has received **points** on 1Cademy in the past 24 hours. It ranks people by the most points they have received in that time period."
+          "Displays everyone that has received **points** on 1Cademy in the past 24 hours. It ranks people by the most points they have received in that time period."
         }
       />
     ),
@@ -28,11 +28,11 @@ const REPUTATION_LIVENESS_BAR_STEPS_CONFIG: TutorialStepConfig[] = [
     description: (
       <MarkdownRender
         text={
-          "This is the liveness bar. This displays everyone that has received **reputation** on 1Cademy in the past 24 hours. It ranks people by the most points they have received in that time period."
+          "Displays everyone that has received **reputation** on 1Cademy in the past 24 hours. It ranks people by the most points they have received in that time period."
         }
       />
     ),
-    tooltipPosition: "left",
+    tooltipPosition: "top",
     targetDelay: 450,
     anchor: "Portal",
     outline: "inside",

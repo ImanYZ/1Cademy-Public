@@ -143,7 +143,7 @@ const UserStatusSettings = (props: UserStatusSettingsProps) => {
           gap: "5px",
           cursor: "pointer",
           background: theme => (theme.palette.mode === "dark" ? "#242425" : "#F2F4F7"),
-          paddingY: "10px",
+          paddingY: "5px",
           paddingX: "5px",
           border: theme => (theme.palette.mode === "dark" ? "solid 1px #303134" : "solid 1px #D0D5DD"),
           borderRadius: "16px",

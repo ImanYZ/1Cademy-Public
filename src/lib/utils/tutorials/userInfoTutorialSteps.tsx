@@ -17,7 +17,7 @@ const USER_INFO_STEPS: TutorialStepConfig[] = [
     description: (
       <MarkdownRender
         text={
-          "Here you can see the number and which types of nodes that the user has made. This includes a graph of their proposals over time."
+          "Here you can see the number and which types of nodes another user you have selected has made. This includes a graph of their proposals over time."
         }
       />
     ),

@@ -1,3 +1,5 @@
+import AccountCircle from "@mui/icons-material/AccountCircle";
+import BiotechIcon from "@mui/icons-material/Biotech";
 import CloseIcon from "@mui/icons-material/Close";
 import DarkModeIcon from "@mui/icons-material/DarkMode";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
@@ -25,6 +27,7 @@ import { orange900, orangeDark } from "@/pages/home";
 import oneCademyLogo from "../../../public/DarkmodeLogo.png";
 import oneCademyLogoExtended from "../../../public/logo-extended.png";
 import { useAuth } from "../../context/AuthContext";
+import { auth } from "../../lib/firestoreClient/firestoreClient.config";
 import { postWithToken } from "../../lib/mapApi";
 import ROUTES from "../../lib/utils/routes";
 import { capitalizeString } from "../../lib/utils/string.utils";
@@ -52,6 +55,8 @@ type AppHeaderProps = {
 const AppHeader = forwardRef(({ page, sections, selectedSectionId, onSwitchSection }: AppHeaderProps, ref) => {
   const [openSearch, setOpenSearch] = useState(false);
   const [{ isAuthenticated, user }] = useAuth();
+  const [emailExp, setEmailExp] = useState("");
+  const [nameExp, setNameExp] = useState("");
   const [handleThemeSwitch] = useThemeChange();
   const theme = useTheme();
   const router = useRouter();
@@ -90,7 +95,19 @@ const AppHeader = forwardRef(({ page, sections, selectedSectionId, onSwitchSecti
     if (isAuthenticated && router.query?.course) {
       postWithToken("/assignCourseToUser", { course: router.query?.course });
     }
-  }, [isAuthenticated]);
+  }, [isAuthenticated, router.query?.course]);
+
+  useEffect(() => {
+    return auth.onAuthStateChanged(async (user: any) => {
+      if (user) {
+        setEmailExp(user.email.toLowerCase());
+        setNameExp(user.displayName);
+      } else {
+        setEmailExp("");
+        setNameExp("");
+      }
+    });
+  }, []);
 
   const renderProfileMenu = (
     <Menu id="ProfileMenu" anchorEl={profileMenuOpen} open={isProfileMenuOpen} onClose={handleProfileMenuClose}>
@@ -110,7 +127,34 @@ const AppHeader = forwardRef(({ page, sections, selectedSectionId, onSwitchSecti
   const signUpHandler = () => {
     router.push(ROUTES.signIn);
   };
-
+  const signUpHandlerExp = () => {
+    router.push(ROUTES.signUpExp);
+  };
+  const signOut1 = async () => {
+    console.log("Signing out!");
+    await auth.signOut();
+  };
+  const renderProfileMenuExp = (
+    <Menu id="ProfileMenu" anchorEl={profileMenuOpen} open={isProfileMenuOpen} onClose={handleProfileMenuClose}>
+      {emailExp && <Typography sx={{ p: "6px 16px" }}>{capitalizeString(nameExp)}</Typography>}
+      {emailExp && (
+        <>
+          <MenuItem
+            sx={{ flexGrow: 3 }}
+            onClick={() => {
+              window.open("https://1cademy.us/Activities", "_blank");
+            }}
+          >
+            <BiotechIcon /> <span id="ExperimentActivities">Experiment Activities</span>
+          </MenuItem>
+          <MenuItem sx={{ flexGrow: 3 }} onClick={signOut1}>
+            <LogoutIcon /> <span id="LogoutText">Logout</span>
+          </MenuItem>
+        </>
+      )}
+    </Menu>
+  );
+  console.log("userExp :: :: ", emailExp);
   return (
     <>
       <Box
@@ -138,7 +182,7 @@ const AppHeader = forwardRef(({ page, sections, selectedSectionId, onSwitchSecti
         >
           <Stack direction={"row"} alignItems="center" spacing={"16px"}>
             <Tooltip title="1Cademy's Landing Page">
-              <img
+              <Image
                 src={isMobile ? oneCademyLogoExtended.src : oneCademyLogo.src}
                 alt="logo"
                 width={isMobile ? "149px" : "60px"}
@@ -290,18 +334,54 @@ const AppHeader = forwardRef(({ page, sections, selectedSectionId, onSwitchSecti
                 </Tooltip>
               )}
 
-              {(!isAuthenticated || page !== "ONE_CADEMY") && (
+              {emailExp && page === "COMMUNITIES" && (
+                <Tooltip title="Account">
+                  <IconButton
+                    size="large"
+                    edge="end"
+                    aria-haspopup="true"
+                    aria-controls="lock-menu"
+                    aria-label={`${emailExp}'s Account`}
+                    aria-expanded={isProfileMenuOpen ? "true" : undefined}
+                    onClick={handleProfileMenuOpen}
+                    color="inherit"
+                  >
+                    <AccountCircle />
+                  </IconButton>
+                </Tooltip>
+              )}
+              {page === "COMMUNITIES" && !emailExp && (
                 <Tooltip title="SIGN IN/UP">
                   <Button
                     variant="contained"
                     color="secondary"
-                    onClick={
-                      page === "ONE_CADEMY"
-                        ? signUpHandler
-                        : page === "COMMUNITIES"
-                        ? () => window.open("https://1cademy.us/auth", "_blank")
-                        : () => setOpenForm(true)
-                    }
+                    onClick={signUpHandlerExp}
+                    sx={{
+                      display: { xs: "none", sm: "flex" },
+                      p: { xs: "6px 10px", lg: undefined },
+                      minWidth: "95px",
+                      fontSize: 16,
+                      backgroundColor: theme.palette.mode === "dark" ? "#303030" : "#e4e4e4",
+                      color: theme.palette.mode === "dark" ? theme.palette.common.white : theme.palette.common.black,
+                      borderRadius: 40,
+                      height: "25px",
+                      textTransform: "capitalize",
+                      ":hover": {
+                        backgroundColor: theme.palette.mode === "dark" ? "#444444" : "#cacaca",
+                      },
+                    }}
+                  >
+                    Sign In/Up
+                  </Button>
+                </Tooltip>
+              )}
+
+              {!isAuthenticated && page !== "COMMUNITIES" && (
+                <Tooltip title="SIGN IN/UP">
+                  <Button
+                    variant="contained"
+                    color="secondary"
+                    onClick={page === "ONE_CADEMY" ? signUpHandler : () => setOpenForm(true)}
                     sx={{
                       display: { xs: "none", sm: "flex" },
                       p: { xs: "6px 10px", lg: undefined },
@@ -332,7 +412,7 @@ const AppHeader = forwardRef(({ page, sections, selectedSectionId, onSwitchSecti
             </IconButton>
           </Stack>
         </Stack>
-
+        {emailExp && renderProfileMenuExp}
         {isAuthenticated && user && renderProfileMenu}
 
         <Modal
