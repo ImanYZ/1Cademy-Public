@@ -365,7 +365,7 @@ const JoinUs = (props: JoinUsProps) => {
     if (!email) {
       router.push(ROUTES.signUpExp);
     } else {
-      window.open("https://1cademy.us/Activities", "_blank");
+      window.open("https://1cademy.us/Activities/experiment", "_blank");
     }
   };
   return (
