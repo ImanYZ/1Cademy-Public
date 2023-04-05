@@ -414,7 +414,7 @@ const Dashboard = ({}: DashboardProps) => {
   }, [graph.edges]);
 
   const scrollToNode = useCallback(
-    (nodeId: string, tries = 0) => {
+    (nodeId: string, regardless = false, tries = 0) => {
       if (tries === 10) return;
 
       if (!scrollToNodeInitialized.current) {
@@ -423,13 +423,9 @@ const Dashboard = ({}: DashboardProps) => {
           if (!originalNode) {
             return;
           }
-          const isSearcher = lastNodeOperation.current ? ["Searcher"].includes(lastNodeOperation.current.name) : false;
-          if (isSearcher) {
-            lastNodeOperation.current = null;
-          }
+          // const scrollToSelectedNode = lastNodeOperation.current ? ["scrollToSelectedNode"].includes(lastNodeOperation.current.name) : false;
 
-          if (onNodeInViewport(nodeId) && !isSearcher && !forcedTutorial) return;
-          devLog("scroll To Node", { nodeId, tries });
+          if (!regardless && onNodeInViewport(nodeId) && !forcedTutorial) return;
 
           if (
             originalNode &&
@@ -465,7 +461,7 @@ const Dashboard = ({}: DashboardProps) => {
               };
             });
           } else {
-            scrollToNode(nodeId, tries + 1);
+            scrollToNode(nodeId, regardless, tries + 1);
           }
         }, 400);
       }
@@ -3951,7 +3947,7 @@ const Dashboard = ({}: DashboardProps) => {
 
   const onScrollToLastNode = () => {
     if (!nodeBookState.selectedNode) return;
-    scrollToNode(nodeBookState.selectedNode);
+    scrollToNode(nodeBookState.selectedNode, false);
   };
 
   const onCloseSidebar = useCallback(() => {
