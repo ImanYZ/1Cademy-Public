@@ -3947,7 +3947,7 @@ const Dashboard = ({}: DashboardProps) => {
 
   const onScrollToLastNode = () => {
     if (!nodeBookState.selectedNode) return;
-    scrollToNode(nodeBookState.selectedNode, false);
+    scrollToNode(nodeBookState.selectedNode, true);
   };
 
   const onCloseSidebar = useCallback(() => {
