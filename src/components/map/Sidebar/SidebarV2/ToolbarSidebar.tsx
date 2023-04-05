@@ -6,7 +6,7 @@ import MoreVertIcon from "@mui/icons-material/MoreVert";
 import { Box, Button, Divider, IconButton, Stack, Tooltip, Typography, useMediaQuery, useTheme } from "@mui/material";
 import { addDoc, collection, doc, getFirestore, setDoc, Timestamp } from "firebase/firestore";
 import NextImage from "next/image";
-import React, { Suspense, useCallback, useEffect, useMemo, useState } from "react";
+import React, { Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { ChosenTag, MemoizedTagsSearcher } from "@/components/TagsSearcher";
 import { useNodeBook } from "@/context/NodeBookContext";
@@ -100,9 +100,7 @@ MainSidebarProps) => {
   const [leaderboardTypeOpen, setLeaderboardTypeOpen] = useState<boolean>(false);
   const [shouldShowTagSearcher, setShouldShowTagSearcher] = useState<boolean>(false);
   const [displayNotebooks, setDisplayNotebooks] = useState(false);
-  const [isHovered, setIsHovered] = useState(false);
-
-  console.log({ isHovered });
+  // const [isHovered, setIsHovered] = useState(false);
 
   useEffect(() => {
     if (chosenTags.length > 0 && chosenTags[0].id in allTags) {
@@ -242,33 +240,48 @@ MainSidebarProps) => {
   const disabledLeaderboardButton = disableToolbar;
   const disableUserStatusList = disableToolbar;
 
-  const onMouseHover = useCallback((event: any) => {
-    // console.log(event.currentTarget.getAttribute("id"));
-    if (event.currentTarget.getAttribute("id") === "toolbar") {
-      setIsHovered(true);
-    }
-  }, []);
+  // const onMouseHover = useCallback((event: any) => {
+  //   // if (isHovered) return;
+  //   console.log(event.currentTarget.getAttribute("id") ?? "none");
+  //   if (event.currentTarget.getAttribute("id") === "toolbar") {
+  //     setIsHovered(true);
+  //   }
+  // }, []);
 
-  const onMouseOut = useCallback((event: any) => {
-    // console.log("out", event.currentTarget.getAttribute("id"));
-    if (event.currentTarget.getAttribute("id") === "toolbar") {
-      setIsHovered(false);
-      setLeaderboardTypeOpen(false);
+  // const onMouseOut = useCallback((event: any) => {
+  //   console.log("out", event.currentTarget.getAttribute("id"), event.target.getAttribute("id"));
+  //   // if (!isHovered) return;
+  //   if (event.currentTarget.getAttribute("id") === "toolbar" && event.target.getAttribute("id") === "toolbar") {
+  //     setIsHovered(false);
+  //     setLeaderboardTypeOpen(false);
+  //     setDisplayNotebooks(false);
+  //     console.log("onMouseOut", event.target.getAttribute("id"));
+  //   }
+  // }, []);
+
+  const { ref, isHovered } = useHover();
+  // console.log({ isHovered, leaderboardTypeOpen });
+
+  useEffect(() => {
+    if (!isHovered) {
       setDisplayNotebooks(false);
+      setLeaderboardTypeOpen(false);
     }
-  }, []);
+  }, [isHovered]);
 
   const toolbarContentMemoized = useMemo(() => {
     return (
       <Box
         id="toolbar"
         className={`toolbar ${isMenuOpen ? "toolbar-opened" : ""}`}
-        onMouseOver={onMouseHover}
-        onTouchStart={onMouseHover}
-        onMouseOut={onMouseOut}
+        ref={ref}
+        // onMouseOver={onMouseHover}
+        // onTouchStart={onMouseHover}
+        // onMouseOut={onMouseOut}
         sx={{
-          border: "solid 1px pink",
-          height: "100%",
+          // border: "solid 4px #521e83",
+          minHeight: "100%",
+          // height: "100%",
           width: "inherit",
           overflow: "hidden",
           display: { xs: isMenuOpen ? "grid" : "none", sm: "grid" },
@@ -288,7 +301,7 @@ MainSidebarProps) => {
           alignItems="center"
           direction="column"
           spacing={"4px"}
-          sx={{ width: "inherit" /* , minHeight: "266px" */, border: "solid 1px royalBlue", px: "14px" }}
+          sx={{ width: "inherit" /* , minHeight: "266px" */ /* , border: "solid 1px royalBlue" */, px: "14px" }}
           // sx={{height: firstBoxHeight}}
         >
           <Box sx={{ marginTop: "10px", marginBottom: "15px" }}>
@@ -739,8 +752,9 @@ MainSidebarProps) => {
           <SidebarButton
             id="toolbar-notebooks-button"
             iconSrc={NotebookIcon}
-            onClick={() => {
-              console.log("diplay", displayNotebooks);
+            onClick={e => {
+              e.preventDefault();
+              // console.log("diplay", displayNotebooks);
               setDisplayNotebooks(!displayNotebooks);
             }}
             text="Notebooks"
@@ -807,7 +821,7 @@ MainSidebarProps) => {
           </Button> */}
 
           {displayNotebooks && isHovered && (
-            <Box sx={{ border: "solid 1px red", width: "100%" }}>
+            <Box sx={{ /* border: "solid 1px red", */ width: "100%" }}>
               <Stack sx={{ width: "100%", maxHeight: "126px", overflowY: "auto" }}>
                 {notebooks.map((cur, idx) => (
                   <Box
@@ -1018,9 +1032,11 @@ MainSidebarProps) => {
           sx={{
             paddingBottom: "20px",
             position: "relative",
-            border: "dashed 1px royalBlue",
+            // border: "dashed 1px royalBlue",
             height: "100%",
-            minHeight: "266px",
+            // minHeight: "0px",
+            // minHeight: "266px",
+            // maxHeight: "266px",
             width: "inherit",
           }}
         >
@@ -1058,7 +1074,7 @@ MainSidebarProps) => {
                     width: "86%",
                     marginX: "auto",
                     left: "7%",
-                    top: "38px",
+                    top: "25px",
                     // top: window.innerHeight >= 500 ? "0px" : undefined,
                     // bottom: window.innerHeight <= 500 ? "50px" : undefined,
                     height: "173px",
@@ -1092,7 +1108,7 @@ MainSidebarProps) => {
               reloadPermanentGraph={reloadPermanentGrpah}
               setOpenSideBar={setOpenSideBar}
               reputationSignal={reputationSignal}
-              sx={{ px: "16px", border: "dashed 1px red" }}
+              sx={{ px: "16px" /* maxHeight: "266px" */ /* minHeight: "266px" */ }}
               sxUserStatus={{
                 // display: isMenuOpen ? "flex" : "flex",
                 justifyContent: "flex-start",
@@ -1108,8 +1124,7 @@ MainSidebarProps) => {
     );
   }, [
     isMenuOpen,
-    onMouseHover,
-    onMouseOut,
+    ref,
     theme.palette.mode,
     user,
     reputation?.totalPoints,
@@ -1219,3 +1234,38 @@ MainSidebarProps) => {
 };
 
 export const MemoizedToolbarSidebar = React.memo(ToolbarSidebar);
+
+const useHover = <T extends HTMLElement>() => {
+  const [isHovered, setIsHovered] = useState(false);
+
+  // Wrap in useCallback so we can use in dependencies below
+  const handleMouseEnter = useCallback(() => setIsHovered(true), []);
+  const handleMouseLeave = useCallback(() => setIsHovered(false), []);
+
+  // Keep track of the last node passed to callbackRef
+  // so we can remove its event listeners.
+  const refElement = useRef<T>();
+
+  // Use a callback refElement instead of useEffect so that event listeners
+  // get changed in the case that the returned refElement gets added to
+  // a different element later. With useEffect, changes to refElement.current
+  // wouldn't cause a rerender and thus the effect would run again.
+  const ref = useCallback<(node?: null | T) => void>(
+    node => {
+      if (refElement.current) {
+        refElement.current.removeEventListener("mouseenter", handleMouseEnter);
+        refElement.current.removeEventListener("mouseleave", handleMouseLeave);
+      }
+
+      refElement.current = node || undefined;
+
+      if (refElement.current) {
+        refElement.current.addEventListener("mouseenter", handleMouseEnter);
+        refElement.current.addEventListener("mouseleave", handleMouseLeave);
+      }
+    },
+    [handleMouseEnter, handleMouseLeave]
+  );
+
+  return { ref, isHovered };
+};

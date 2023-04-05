@@ -428,7 +428,7 @@ const UsersStatusList = ({ nodeBookDispatch, isSmaller = true, disabled = false,
         // display: "flex",
         // flexDirection: "column",
         // alignItems: "center",
-        overflowY: "auto",
+        // overflowY: "auto",
         // px: "20px",
         ...props.sx,
       }}

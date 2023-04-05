@@ -168,6 +168,7 @@ export const SidebarWrapper = ({
         ref={sidebarContentRef}
         sx={{
           height: "100%",
+          overflowX: "hidden",
           overflowY: "auto",
           scrollBehavior: "smooth",
           "::-webkit-scrollbar-thumb": {

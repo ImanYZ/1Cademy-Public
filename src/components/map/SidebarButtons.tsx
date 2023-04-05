@@ -5,7 +5,7 @@ import React, { ReactNode } from "react";
 
 type SidebarButtonsProps = {
   id: string;
-  onClick: () => void;
+  onClick: (e: any) => void;
   iconSrc: any;
   text: string;
   toolbarIsOpen: boolean;
@@ -51,7 +51,7 @@ export const SidebarButton = ({
     >
       <Box
         sx={{
-          border: "solid 1px royalBlue",
+          // border: "solid 1px royalBlue",
           display: "flex",
           alignItems: "center",
           fontSize: "19px",
