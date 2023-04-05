@@ -6,7 +6,7 @@ import MoreVertIcon from "@mui/icons-material/MoreVert";
 import { Box, Button, Divider, IconButton, Stack, Tooltip, Typography, useMediaQuery, useTheme } from "@mui/material";
 import { addDoc, collection, doc, getFirestore, setDoc, Timestamp } from "firebase/firestore";
 import NextImage from "next/image";
-import React, { Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import React, { Suspense, useCallback, useEffect, useMemo, useState } from "react";
 
 import { ChosenTag, MemoizedTagsSearcher } from "@/components/TagsSearcher";
 import { useNodeBook } from "@/context/NodeBookContext";
@@ -24,6 +24,7 @@ import NotebookIcon from "../../../../../public/notebooks.svg";
 import NotificationIcon from "../../../../../public/notification.svg";
 import SearchIcon from "../../../../../public/search.svg";
 import TagIcon from "../../../../../public/tag.svg";
+import { useHover } from "../../../../hooks/userHover";
 import { DispatchAuthActions, Reputation, ReputationSignal, User, UserTheme } from "../../../../knowledgeTypes";
 import { UsersStatus, UserTutorials } from "../../../../nodeBookTypes";
 import { OpenSidebar } from "../../../../pages/notebook";
@@ -101,7 +102,7 @@ MainSidebarProps) => {
   const [leaderboardTypeOpen, setLeaderboardTypeOpen] = useState<boolean>(false);
   const [shouldShowTagSearcher, setShouldShowTagSearcher] = useState<boolean>(false);
   const [displayNotebooks, setDisplayNotebooks] = useState(false);
-  // const [isHovered, setIsHovered] = useState(false);
+  const { ref, isHovered } = useHover();
 
   useEffect(() => {
     if (chosenTags.length > 0 && chosenTags[0].id in allTags) {
@@ -191,12 +192,6 @@ MainSidebarProps) => {
     [setOpenSideBar, onOpenSidebarLog]
   );
 
-  // const [pendingProposalsLoaded /* setPendingProposalsLoaded */] = useState(true);
-
-  // const instructorsButtonHeight = user.role === "INSTRUCTOR" || user.role === "STUDENT" ? 40 : 0;
-
-  // const firstBoxHeight = 375 + instructorsButtonHeight;
-
   const [leaderBoardType, setLeaderBoardType] = useState<UsersStatus>("Weekly");
 
   const changeLeaderBoard = useCallback(
@@ -240,28 +235,6 @@ MainSidebarProps) => {
   const disabledIntructorButton = disableToolbar;
   const disabledLeaderboardButton = disableToolbar;
   const disableUserStatusList = disableToolbar;
-
-  // const onMouseHover = useCallback((event: any) => {
-  //   // if (isHovered) return;
-  //   console.log(event.currentTarget.getAttribute("id") ?? "none");
-  //   if (event.currentTarget.getAttribute("id") === "toolbar") {
-  //     setIsHovered(true);
-  //   }
-  // }, []);
-
-  // const onMouseOut = useCallback((event: any) => {
-  //   console.log("out", event.currentTarget.getAttribute("id"), event.target.getAttribute("id"));
-  //   // if (!isHovered) return;
-  //   if (event.currentTarget.getAttribute("id") === "toolbar" && event.target.getAttribute("id") === "toolbar") {
-  //     setIsHovered(false);
-  //     setLeaderboardTypeOpen(false);
-  //     setDisplayNotebooks(false);
-  //     console.log("onMouseOut", event.target.getAttribute("id"));
-  //   }
-  // }, []);
-
-  const { ref, isHovered } = useHover();
-  // console.log({ isHovered, leaderboardTypeOpen });
 
   useEffect(() => {
     if (!isHovered) {
@@ -752,38 +725,3 @@ MainSidebarProps) => {
 };
 
 export const MemoizedToolbarSidebar = React.memo(ToolbarSidebar);
-
-const useHover = <T extends HTMLElement>() => {
-  const [isHovered, setIsHovered] = useState(false);
-
-  // Wrap in useCallback so we can use in dependencies below
-  const handleMouseEnter = useCallback(() => setIsHovered(true), []);
-  const handleMouseLeave = useCallback(() => setIsHovered(false), []);
-
-  // Keep track of the last node passed to callbackRef
-  // so we can remove its event listeners.
-  const refElement = useRef<T>();
-
-  // Use a callback refElement instead of useEffect so that event listeners
-  // get changed in the case that the returned refElement gets added to
-  // a different element later. With useEffect, changes to refElement.current
-  // wouldn't cause a rerender and thus the effect would run again.
-  const ref = useCallback<(node?: null | T) => void>(
-    node => {
-      if (refElement.current) {
-        refElement.current.removeEventListener("mouseenter", handleMouseEnter);
-        refElement.current.removeEventListener("mouseleave", handleMouseLeave);
-      }
-
-      refElement.current = node || undefined;
-
-      if (refElement.current) {
-        refElement.current.addEventListener("mouseenter", handleMouseEnter);
-        refElement.current.addEventListener("mouseleave", handleMouseLeave);
-      }
-    },
-    [handleMouseEnter, handleMouseLeave]
-  );
-
-  return { ref, isHovered };
-};
