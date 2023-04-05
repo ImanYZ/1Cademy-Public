@@ -28,6 +28,7 @@ import { DispatchAuthActions, Reputation, ReputationSignal, User, UserTheme } fr
 import { UsersStatus, UserTutorials } from "../../../../nodeBookTypes";
 import { OpenSidebar } from "../../../../pages/notebook";
 import { Notebook } from "../../../../types";
+import { CustomBadge } from "../../CustomBudge";
 import Modal from "../../Modal/Modal";
 import { SidebarButton } from "../../SidebarButtons";
 import { MemoizedUserStatusSettings } from "../../UserStatusSettings2";
@@ -74,9 +75,9 @@ export const ToolbarSidebar = ({
   // theme,
   setOpenSideBar,
   selectedUser,
-  uncheckedNotificationsNum,
-  bookmarkUpdatesNum,
-  pendingProposalsNum,
+  uncheckedNotificationsNum = 0,
+  bookmarkUpdatesNum = 0,
+  pendingProposalsNum = 0,
   openSidebar,
   windowHeight,
   reputationSignal,
@@ -269,6 +270,7 @@ MainSidebarProps) => {
     }
   }, [isHovered]);
 
+  console.log({ uncheckedNotificationsNum });
   const toolbarContentMemoized = useMemo(() => {
     return (
       <Box
@@ -428,6 +430,7 @@ MainSidebarProps) => {
             }}
             text="Notifications"
             toolbarIsOpen={isHovered}
+            rightOption={<CustomBadge value={uncheckedNotificationsNum} />}
           />
           {/* <Button
             id="toolbar-bookmarks-button"
@@ -516,6 +519,7 @@ MainSidebarProps) => {
             }}
             text="Bookmarks"
             toolbarIsOpen={isHovered}
+            rightOption={<CustomBadge value={bookmarkUpdatesNum} />}
           />
           {/* <Button
             onClick={() => {
@@ -602,6 +606,7 @@ MainSidebarProps) => {
             }}
             text="Pending List"
             toolbarIsOpen={isHovered}
+            rightOption={<CustomBadge value={pendingProposalsNum} />}
           />
           {/* <Button
             onClick={() => {
@@ -1132,6 +1137,9 @@ MainSidebarProps) => {
     reputation?.negatives,
     onOpenUserSettingsSidebar,
     isHovered,
+    uncheckedNotificationsNum,
+    bookmarkUpdatesNum,
+    pendingProposalsNum,
     displayNotebooks,
     notebooks,
     shouldShowTagSearcher,
