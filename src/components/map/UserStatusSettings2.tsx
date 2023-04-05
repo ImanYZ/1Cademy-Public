@@ -1,6 +1,6 @@
 import CloseIcon from "@mui/icons-material/Close";
 import DoneIcon from "@mui/icons-material/Done";
-import { Box, Tooltip, Typography } from "@mui/material";
+import { Box, SxProps, Theme, Tooltip, Typography } from "@mui/material";
 import React, { useEffect, useState } from "react";
 import { User } from "src/knowledgeTypes";
 
@@ -17,9 +17,10 @@ type UserStatusSettingsProps = {
   totalPoints?: any;
   smallVersion?: boolean;
   user: User;
+  sx: SxProps<Theme>;
 };
 
-const UserStatusSettings = ({ onClick, smallVersion = true, ...props }: UserStatusSettingsProps) => {
+const UserStatusSettings = ({ onClick, smallVersion = true, sx, ...props }: UserStatusSettingsProps) => {
   const [pointsGained, setPointsGained] = useState(false);
   const [pointsLost, setPointsLost] = useState(false);
 
@@ -100,6 +101,7 @@ const UserStatusSettings = ({ onClick, smallVersion = true, ...props }: UserStat
           border: theme => (theme.palette.mode === "dark" ? "solid 1px #303134" : "solid 1px #D0D5DD"),
           borderRadius: "16px",
           // width: "90%",
+          ...sx,
         }}
       >
         <div className={(pointsGained ? "GainedPoint" : "") + (pointsLost ? "LostPoint" : "")}>

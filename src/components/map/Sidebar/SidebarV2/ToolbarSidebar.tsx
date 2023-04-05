@@ -104,6 +104,8 @@ MainSidebarProps) => {
   const [displayNotebooks, setDisplayNotebooks] = useState(false);
   const { ref, isHovered } = useHover();
 
+  const displayLargeToolbar = useMemo(() => isHovered || isMenuOpen, [isHovered, isMenuOpen]);
+
   useEffect(() => {
     if (chosenTags.length > 0 && chosenTags[0].id in allTags) {
       notebookRef.current.chosenNode = { id: chosenTags[0].id, title: chosenTags[0].title };
@@ -237,11 +239,11 @@ MainSidebarProps) => {
   const disableUserStatusList = disableToolbar;
 
   useEffect(() => {
-    if (!isHovered) {
+    if (!displayLargeToolbar) {
       setDisplayNotebooks(false);
       setLeaderboardTypeOpen(false);
     }
-  }, [isHovered]);
+  }, [displayLargeToolbar]);
 
   // console.log({ uncheckedNotificationsNum });
   const toolbarContentMemoized = useMemo(() => {
@@ -293,7 +295,8 @@ MainSidebarProps) => {
             imageUrl={user.imageUrl || ""}
             online={true} // TODO: get online state from useUserState useEffect
             onClick={onOpenUserSettingsSidebar}
-            smallVersion={!isHovered}
+            smallVersion={!displayLargeToolbar}
+            sx={{ width: { xs: "100%", sm: "auto" } }}
           />
 
           {/* Searcher button */}
@@ -306,7 +309,7 @@ MainSidebarProps) => {
               setIsMenuOpen(false);
             }}
             text="Search"
-            toolbarIsOpen={isHovered}
+            toolbarIsOpen={displayLargeToolbar}
             variant="fill"
           />
 
@@ -320,7 +323,7 @@ MainSidebarProps) => {
               setIsMenuOpen(false);
             }}
             text="Notifications"
-            toolbarIsOpen={isHovered}
+            toolbarIsOpen={displayLargeToolbar}
             rightOption={<CustomBadge value={uncheckedNotificationsNum} />}
           />
 
@@ -333,7 +336,7 @@ MainSidebarProps) => {
               setIsMenuOpen(false);
             }}
             text="Bookmarks"
-            toolbarIsOpen={isHovered}
+            toolbarIsOpen={displayLargeToolbar}
             rightOption={<CustomBadge value={bookmarkUpdatesNum} />}
           />
 
@@ -346,7 +349,7 @@ MainSidebarProps) => {
               setIsMenuOpen(false);
             }}
             text="Pending List"
-            toolbarIsOpen={isHovered}
+            toolbarIsOpen={displayLargeToolbar}
             rightOption={<CustomBadge value={pendingProposalsNum} />}
           />
 
@@ -360,7 +363,7 @@ MainSidebarProps) => {
                 if (user.role === "STUDENT") return window.open(`/instructors/dashboard/${user.uname}`, "_blank");
               }}
               text="Dashboard"
-              toolbarIsOpen={isHovered}
+              toolbarIsOpen={displayLargeToolbar}
             />
           )}
 
@@ -373,15 +376,15 @@ MainSidebarProps) => {
               setDisplayNotebooks(!displayNotebooks);
             }}
             text="Notebooks"
-            toolbarIsOpen={isHovered}
+            toolbarIsOpen={displayLargeToolbar}
             rightOption={
               <KeyboardArrowDownIcon sx={{ transition: ".3s", rotate: displayNotebooks ? "180deg" : "0deg" }} />
             }
           />
 
-          {displayNotebooks && isHovered && (
-            <Box sx={{ /* border: "solid 1px red", */ width: "100%" }}>
-              <Stack sx={{ width: "100%", maxHeight: "126px", overflowY: "auto" }}>
+          {displayNotebooks && displayLargeToolbar && (
+            <Box sx={{ width: "100%" }}>
+              <Stack className="scroll-styled" sx={{ width: "100%", maxHeight: "126px", overflowY: "auto" }}>
                 {notebooks.map((cur, idx) => (
                   <Box
                     key={idx}
@@ -442,7 +445,7 @@ MainSidebarProps) => {
 
         {/* --------------- */}
 
-        {isHovered && (
+        {displayLargeToolbar && (
           <Button
             sx={{
               p: "11px 16px",
@@ -520,7 +523,7 @@ MainSidebarProps) => {
 
         {/* --------------- */}
 
-        {!isHovered && (
+        {!displayLargeToolbar && (
           <Box
             sx={{
               display: window.innerWidth <= 500 ? "none" : "block",
@@ -545,7 +548,7 @@ MainSidebarProps) => {
             width: "inherit",
           }}
         >
-          {isHovered && (
+          {displayLargeToolbar && (
             <>
               <Button
                 sx={{
@@ -604,7 +607,7 @@ MainSidebarProps) => {
                 width: "100%",
               }}
               disabled={disableUserStatusList}
-              isSmaller={!isHovered}
+              isSmaller={!displayLargeToolbar}
             />
           )}
         </Stack>
@@ -619,7 +622,7 @@ MainSidebarProps) => {
     reputation?.positives,
     reputation?.negatives,
     onOpenUserSettingsSidebar,
-    isHovered,
+    displayLargeToolbar,
     uncheckedNotificationsNum,
     bookmarkUpdatesNum,
     pendingProposalsNum,
@@ -676,7 +679,7 @@ MainSidebarProps) => {
     setChosenTags,
     chosenTags,
     displayNotebooks,
-    isHovered,
+    displayLargeToolbar,
   ]);
 
   return (
