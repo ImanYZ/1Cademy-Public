@@ -102,6 +102,8 @@ MainSidebarProps) => {
   const [displayNotebooks, setDisplayNotebooks] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
 
+  console.log({ isHovered });
+
   useEffect(() => {
     if (chosenTags.length > 0 && chosenTags[0].id in allTags) {
       notebookRef.current.chosenNode = { id: chosenTags[0].id, title: chosenTags[0].title };
@@ -249,6 +251,7 @@ MainSidebarProps) => {
   }, []);
 
   const onMouseOut = useCallback((event: any) => {
+    console.log({ outTarget: event.currentTarget });
     // console.log("out", event.currentTarget.getAttribute("id"));
     if (event.currentTarget.getAttribute("id") === "toolbar") {
       setIsHovered(false);
@@ -285,7 +288,7 @@ MainSidebarProps) => {
           alignItems="center"
           direction="column"
           spacing={"4px"}
-          sx={{ width: "inherit", border: "solid 1px royalBlue", px: "14px" }}
+          sx={{ width: "inherit" /* , minHeight: "266px" */, border: "solid 1px royalBlue", px: "14px" }}
           // sx={{height: firstBoxHeight}}
         >
           <Box sx={{ marginTop: "10px", marginBottom: "15px" }}>
@@ -1017,6 +1020,7 @@ MainSidebarProps) => {
             position: "relative",
             border: "dashed 1px royalBlue",
             height: "100%",
+            minHeight: "266px",
             width: "inherit",
           }}
         >
