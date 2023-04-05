@@ -262,18 +262,17 @@ MainSidebarProps) => {
         }}
       >
         <Stack alignItems="center" direction="column" spacing={"4px"} sx={{ width: "inherit", px: "14px" }}>
-          <Box sx={{ marginTop: "10px", marginBottom: "15px" }}>
-            <Box sx={{ display: "grid", placeItems: "center" }}>
-              {displayLargeToolbar ? (
-                <img src={LogoExtended.src} alt="1Logo" width={"100%"} />
-              ) : (
-                <img
-                  src={theme.palette.mode === "light" ? LogoLightMode.src : LogoDarkMode.src}
-                  alt="1Logo"
-                  width="61px"
-                />
-              )}
-            </Box>
+          <Box sx={{ marginTop: "10px", marginBottom: "15px", display: "grid", placeItems: "center" }}>
+            {displayLargeToolbar ? (
+              <img src={LogoExtended.src} alt="1Logo" width={"100%"} height={"64px"} />
+            ) : (
+              <img
+                src={theme.palette.mode === "light" ? LogoLightMode.src : LogoDarkMode.src}
+                alt="1Logo"
+                width="61px"
+                height={"64px"}
+              />
+            )}
           </Box>
 
           {/* User info button */}
