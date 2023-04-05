@@ -364,8 +364,8 @@ const Dashboard = ({}: DashboardProps) => {
   const pathwayRef = useRef({ node: "", parent: "", child: "" });
 
   const [notebooks, setNotebooks] = useState<Notebook[]>([]);
-  const [notebooksLoaded, setNotebooksLoaded] = useState(false);
-  const [selectedNotebookId /* ,setSelectedNotebookId */] = useState("01");
+  const [selectedNotebookId, setSelectedNotebookId] = useState("");
+  const selectedPreviousNotebookIdRef = useRef("");
 
   const onNodeInViewport = useCallback(
     (nodeId: string) => {
@@ -774,7 +774,7 @@ const Dashboard = ({}: DashboardProps) => {
         }
       }
     },
-    [user, allTags]
+    [user, allTags, selectedNotebookId]
   );
 
   const setNodeParts = useCallback((nodeId: string, innerFunc: (thisNode: FullNodeData) => FullNodeData) => {
@@ -971,13 +971,14 @@ const Dashboard = ({}: DashboardProps) => {
 
           setNoNodesFoundMessage(false);
           const userNodeChanges = getUserNodeChanges(docChanges);
+          devLog("2:Snapshot:Nodes Data", userNodeChanges);
 
           const nodeIds = userNodeChanges.map(cur => cur.uNodeData.node);
           const nodesData = await getNodes(db, nodeIds);
-          devLog("3:user Nodes Snapshot:Nodes Data", nodesData);
+          devLog("3:Snapshot:Nodes Data", nodesData);
 
           const fullNodes = buildFullNodes(userNodeChanges, nodesData);
-          devLog("4:user Nodes Snapshot:Full nodes", fullNodes);
+          devLog("4:Snapshot:Full nodes", fullNodes);
 
           // const visibleFullNodes = fullNodes.filter(cur => cur.visible || cur.nodeChangeType === "modified");
 
@@ -1052,7 +1053,7 @@ const Dashboard = ({}: DashboardProps) => {
 
       return () => userNodesSnapshot();
     },
-    [allTags, db, settings.showClusterOptions]
+    [allTags, db, selectedNotebookId, settings.showClusterOptions]
   );
 
   // this useEffect manage states when sidebar is opened or closed
@@ -1070,7 +1071,7 @@ const Dashboard = ({}: DashboardProps) => {
     if (!user?.uname) return;
     if (!allTagsLoaded) return;
     if (!userTutorialLoaded) return;
-    if (notebooksLoaded) return;
+    // if (notebooksLoaded) return;
 
     devLog("NOTEBOOKS", { uname: user?.uname });
 
@@ -1079,7 +1080,7 @@ const Dashboard = ({}: DashboardProps) => {
 
     console.log(11);
     const killSnapshot = onSnapshot(q, snapshot => {
-      console.log(22);
+      console.log("NOTEBOOKS fired", 22);
       const docChanges = snapshot.docChanges();
 
       const newNotebooks = docChanges.map(change => {
@@ -1087,18 +1088,33 @@ const Dashboard = ({}: DashboardProps) => {
         return { type: change.type, id: change.doc.id, data: userNodeData };
       });
 
-      const notesBooksMerged = newNotebooks.reduce((acu: Notebook[], cur) => {
-        if (cur.type === "added") return [...acu, { ...cur.data, id: cur.id }];
-        if (cur.type === "modified") return acu.map(c => (c.id === cur.id ? { ...cur.data, id: cur.id } : c));
-        return acu.filter(c => c.id !== cur.id);
-      }, []);
-      console.log({ notesBooksMerged });
-      setNotebooks(notesBooksMerged);
-      setNotebooksLoaded(true);
+      console.log("NOTEBOOKS", { newNotebooks });
+
+      setNotebooks(prevNotebooks => {
+        const notesBooksMerged = newNotebooks.reduce((acu: Notebook[], cur) => {
+          if (cur.type === "added") return [...acu, { ...cur.data, id: cur.id }];
+          if (cur.type === "modified") return acu.map(c => (c.id === cur.id ? { ...cur.data, id: cur.id } : c));
+          return acu.filter(c => c.id !== cur.id);
+        }, prevNotebooks);
+        return notesBooksMerged;
+      });
     });
 
-    return () => killSnapshot();
-  }, [allTagsLoaded, db, notebooksLoaded, user?.uname, userTutorialLoaded]);
+    return () => {
+      console.log("kill NOTEBOOKS snapshot");
+      killSnapshot();
+    };
+  }, [allTagsLoaded, db, user?.uname, userTutorialLoaded]);
+
+  useEffect(() => {
+    if (selectedNotebookId) return;
+    if (!notebooks[0]) return;
+
+    // first time we set as default the first notebook
+    const firstNotebook = notebooks[0].id;
+    setSelectedNotebookId(firstNotebook);
+    // selectedPreviousNotebookIdRef.current = firstNotebook;
+  }, [notebooks, selectedNotebookId]);
 
   useEffect(() => {
     if (!db) return;
@@ -1106,7 +1122,7 @@ const Dashboard = ({}: DashboardProps) => {
     if (!user.uname) return;
     if (!allTagsLoaded) return;
     if (!userTutorialLoaded) return;
-    if (!notebooksLoaded) return;
+    if (!selectedNotebookId) return;
 
     devLog("SYNCHRONIZATION");
 
@@ -1115,17 +1131,32 @@ const Dashboard = ({}: DashboardProps) => {
     const q = query(
       userNodesRef,
       where("user", "==", user.uname),
-      where("notebooks", "array-contains", selectedNotebookId),
+      where("notebooks", "array-contains", selectedNotebookId)
       // where("visible", "==", true),
-      where("deleted", "==", false)
+      // where("deleted", "==", false)
     );
 
     const killSnapshot = snapshot(q);
     return () => {
+      console.log("reset: kill userNodes", {
+        selectedNotebookId,
+        selectedPreviousNotebookIdRef: selectedPreviousNotebookIdRef.current,
+      });
+      if (selectedPreviousNotebookIdRef.current !== selectedNotebookId) {
+        // if we change notebook, we need to clean graph
+        selectedPreviousNotebookIdRef.current = selectedNotebookId;
+        console.log("reset");
+        g.current = createGraph();
+        setGraph({ nodes: {}, edges: {} });
+        setNodeUpdates({
+          nodeIds: [],
+          updatedAt: new Date(),
+        });
+      }
       killSnapshot();
     };
     // INFO: notebookChanged used in dependecies because of the redraw graph (magic wand button)
-  }, [allTagsLoaded, db, snapshot, user, userTutorialLoaded, notebookChanged, selectedNotebookId, notebooksLoaded]);
+  }, [allTagsLoaded, db, snapshot, user, userTutorialLoaded, notebookChanged, selectedNotebookId]);
 
   useEffect(() => {
     if (!db) return;
@@ -5824,6 +5855,10 @@ const Dashboard = ({}: DashboardProps) => {
     return { tutorialsComplete, totalTutorials: tutorialsOfTOC.length };
   }, [tutorialGroup, userTutorial]);
 
+  const onChangeNotebook = useCallback((notebookId: string) => {
+    setSelectedNotebookId(notebookId);
+  }, []);
+
   return (
     <div className="MapContainer" style={{ overflow: "hidden" }}>
       {currentStep?.anchor && (
@@ -5993,10 +6028,16 @@ const Dashboard = ({}: DashboardProps) => {
         )}
         <Box sx={{ width: "100vw", height: "100vh", overflow: "hidden" }}>
           {
-            <Drawer anchor={"right"} open={openDeveloperMenu} onClose={() => setOpenDeveloperMenu(false)}>
+            <Drawer
+              anchor={"right"}
+              open={openDeveloperMenu}
+              onClose={() => setOpenDeveloperMenu(false)}
+              PaperProps={{ sx: { maxWidth: "300px", p: "10px" } }}
+            >
               {/* Data from map, don't REMOVE */}
               <Box>
-                Interaction map from '{user?.uname}' with [{Object.entries(graph.nodes).length}] Nodes
+                Interaction map from '{user?.uname}' with [{Object.entries(graph.nodes).length}] Nodes in Notebook:
+                {notebooks.find(c => c.id === selectedNotebookId)?.title ?? "--"} with Id: {selectedNotebookId}
               </Box>
 
               <Divider />
@@ -6025,13 +6066,29 @@ const Dashboard = ({}: DashboardProps) => {
                   Children of Parent
                 </Button>
               </Box>
+
+              <Divider />
+
+              <Typography>Notebooks:</Typography>
+              <Box>
+                <Button onClick={() => console.log(selectedNotebookId)}>selectedNotebookId</Button>
+                <Button onClick={() => console.log(selectedPreviousNotebookIdRef.current)}>
+                  selectedPreviousNotebookIdRef
+                </Button>
+              </Box>
+
+              <Divider />
+
+              <Typography>...</Typography>
               <Box>
                 <Button onClick={() => console.log("DAGGER", g)}>Dagre</Button>
                 <Button onClick={() => console.log(nodeBookState)}>nodeBookState</Button>
                 <Button onClick={() => console.log(notebookRef)}>notebookRef</Button>
+                <Divider />
                 <Button onClick={() => console.log(user)}>user</Button>
                 <Button onClick={() => console.log(settings)}>setting</Button>
                 <Button onClick={() => console.log(reputation)}>reputation</Button>
+                <Divider />
                 <Button onClick={() => console.log(openSidebar)}>open sidebar</Button>
               </Box>
               <Box>
@@ -6039,6 +6096,9 @@ const Dashboard = ({}: DashboardProps) => {
                 <Button onClick={() => console.log(mapRendered)}>map rendered</Button>
                 <Button onClick={() => console.log(userNodeChanges)}>user node changes</Button>
                 <Button onClick={() => console.log(nodeBookState)}>show global state</Button>
+
+                <Divider />
+
                 <Button
                   onClick={() =>
                     setReputationSignal([
@@ -6142,6 +6202,8 @@ const Dashboard = ({}: DashboardProps) => {
                 userTutorial={userTutorial}
                 dispatch={dispatch}
                 notebooks={notebooks}
+                onChangeNotebook={onChangeNotebook}
+                selectedNotebook={selectedNotebookId}
               />
 
               <MemoizedBookmarksSidebar

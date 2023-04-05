@@ -63,6 +63,8 @@ type MainSidebarProps = {
   userTutorial: UserTutorials;
   dispatch: React.Dispatch<DispatchAuthActions>;
   notebooks: Notebook[];
+  onChangeNotebook: (notebookId: string) => void;
+  selectedNotebook: string;
   // setCurrentTutorial: Dispatch<SetStateAction<TutorialKeys>>;
 };
 
@@ -88,6 +90,8 @@ export const ToolbarSidebar = ({
   userTutorial,
   dispatch,
   notebooks,
+  onChangeNotebook,
+  selectedNotebook,
 }: // setCurrentTutorial,
 // enabledToolbarElements = [],
 MainSidebarProps) => {
@@ -105,6 +109,7 @@ MainSidebarProps) => {
   const { ref, isHovered } = useHover();
 
   const displayLargeToolbar = useMemo(() => isHovered || isMenuOpen, [isHovered, isMenuOpen]);
+  // console.log({ displayLargeToolbar, isHovered, isMenuOpen });
 
   useEffect(() => {
     if (chosenTags.length > 0 && chosenTags[0].id in allTags) {
@@ -379,14 +384,21 @@ MainSidebarProps) => {
                 {notebooks.map((cur, idx) => (
                   <Box
                     key={idx}
-                    sx={{ p: "10px 16px", display: "flex", alignItems: "center", justifyContent: "space-between" }}
+                    onClick={() => onChangeNotebook(cur.id)}
+                    sx={{
+                      p: "10px 16px",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "space-between",
+                      cursor: "pointer",
+                    }}
                   >
                     {/* min-width is making ellipsis works correctly */}
                     <Box sx={{ minWidth: "0px", display: "flex", alignItems: "center" }}>
                       <Box sx={{ minWidth: "0px", display: "flex", alignItems: "center" }}>
                         <Box
                           sx={{
-                            background: "#12B76A",
+                            background: selectedNotebook === cur.id ? "#12B76A" : "none",
                             minWidth: "10px",
                             width: "10px",
                             height: "10px",
@@ -607,13 +619,13 @@ MainSidebarProps) => {
   }, [
     isMenuOpen,
     ref,
+    displayLargeToolbar,
     theme.palette.mode,
     user,
     reputation?.totalPoints,
     reputation?.positives,
     reputation?.negatives,
     onOpenUserSettingsSidebar,
-    displayLargeToolbar,
     uncheckedNotificationsNum,
     bookmarkUpdatesNum,
     pendingProposalsNum,
@@ -637,6 +649,8 @@ MainSidebarProps) => {
     disableUserStatusList,
     onOpenSidebar,
     setIsMenuOpen,
+    selectedNotebook,
+    onChangeNotebook,
     choosingNodeClick,
   ]);
 
@@ -671,6 +685,8 @@ MainSidebarProps) => {
     chosenTags,
     displayNotebooks,
     displayLargeToolbar,
+    notebooks,
+    selectedNotebook,
   ]);
 
   return (
