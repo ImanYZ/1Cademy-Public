@@ -231,7 +231,6 @@ MainSidebarProps) => {
 
   const openLeaderboardTypes = useCallback(() => {
     setLeaderboardTypeOpen(oldCLT => !oldCLT);
-    setIsHovered(false);
   }, [setLeaderboardTypeOpen]);
 
   const disableUserStatusButton = disableToolbar; /* || ![].includes(c=>c==="userStatusIconc") */
@@ -251,10 +250,11 @@ MainSidebarProps) => {
   }, []);
 
   const onMouseOut = useCallback((event: any) => {
-    console.log({ outTarget: event.currentTarget });
     // console.log("out", event.currentTarget.getAttribute("id"));
     if (event.currentTarget.getAttribute("id") === "toolbar") {
       setIsHovered(false);
+      setLeaderboardTypeOpen(false);
+      setDisplayNotebooks(false);
     }
   }, []);
 
