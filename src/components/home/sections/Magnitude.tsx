@@ -30,13 +30,13 @@ const MAGNITUDE_ITEMS: MagnitudeItem[] = [
   },
   {
     id: "nodes",
-    value: "44_665",
+    value: "44,665",
     title: "Nodes",
     description: "Are generated through this large-scale collaboration.",
   },
   {
     id: "links",
-    value: "235_674",
+    value: "235,674",
     title: "Prerequisite links",
     description: "Are connected between nodes.",
   },
@@ -47,8 +47,6 @@ const Magnitude = () => {
   const [items, setItems] = useState<MagnitudeItem[]>(MAGNITUDE_ITEMS);
 
   useEffect(() => {
-    if (!db) return;
-
     const statsRef = collection(db, "stats");
     const q = query(statsRef, orderBy("createdAt", "desc"), limit(1));
     const unsub = onSnapshot(q, snapshot => {
