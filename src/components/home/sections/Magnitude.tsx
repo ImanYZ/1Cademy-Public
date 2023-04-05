@@ -55,8 +55,8 @@ const Magnitude = () => {
       const stats = snapshot.docs[0].data();
       setItems(prevItems => {
         return prevItems.reduce((acc, item) => {
-          item.value = stats[item.id] ?? item.value;
-          return [...acc, item];
+          const newValue = stats[item.id] ?? item.value;
+          return [...acc, { ...item, value: newValue }];
         }, [] as MagnitudeItem[]);
       });
     });
