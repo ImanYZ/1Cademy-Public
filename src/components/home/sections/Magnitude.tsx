@@ -1,22 +1,21 @@
 import { Typography } from "@mui/material";
 import { Box, Stack } from "@mui/system";
-import React, { useMemo } from "react";
-import { useQuery } from "react-query";
+import { collection, getFirestore, limit, onSnapshot, orderBy, query } from "firebase/firestore";
+import React, { useEffect, useState } from "react";
 import { StatsSchema } from "src/knowledgeTypes";
 
-import { getStats } from "@/lib/knowledgeApi";
 import { orangeDark } from "@/pages/home";
 
 // import { useWindowSize } from "../../../hooks/useWindowSize";
 
-export type TMagnitudeItem = {
+export type MagnitudeItem = {
   id: keyof StatsSchema;
   value: string;
   title: string;
   description: string;
 };
 
-const MAGNITUDE_ITEMS: TMagnitudeItem[] = [
+const MAGNITUDE_ITEMS: MagnitudeItem[] = [
   {
     id: "users",
     value: "1529",
@@ -31,30 +30,38 @@ const MAGNITUDE_ITEMS: TMagnitudeItem[] = [
   },
   {
     id: "nodes",
-    value: "44_665",
+    value: "44,665",
     title: "Nodes",
     description: "Are generated through this large-scale collaboration.",
   },
   {
     id: "links",
-    value: "235_674",
+    value: "235,674",
     title: "Prerequisite links",
     description: "Are connected between nodes.",
   },
 ];
 
 const Magnitude = () => {
-  const { data: stats } = useQuery("stats", getStats);
+  const db = getFirestore();
+  const [items, setItems] = useState<MagnitudeItem[]>(MAGNITUDE_ITEMS);
 
-  const MAGNITUDE_ITEMS_Memo = useMemo(() => {
-    if (!stats) return MAGNITUDE_ITEMS;
+  useEffect(() => {
+    const statsRef = collection(db, "stats");
+    const q = query(statsRef, orderBy("createdAt", "desc"), limit(1));
+    const unsub = onSnapshot(q, snapshot => {
+      if (!snapshot.docs.length) return;
 
-    const x = MAGNITUDE_ITEMS.reduce((acc, item) => {
-      item.value = stats[item.id] ?? item.value;
-      return [...acc, item];
-    }, [] as TMagnitudeItem[]);
-    return x;
-  }, [stats]);
+      const stats = snapshot.docs[0].data();
+      setItems(prevItems => {
+        return prevItems.reduce((acc, item) => {
+          const newValue = stats[item.id] ?? item.value;
+          return [...acc, { ...item, value: newValue }];
+        }, [] as MagnitudeItem[]);
+      });
+    });
+    return () => unsub();
+  }, [db]);
 
   return (
     <Stack direction={{ sx: "column-reverse", md: "row" }} alignItems={"center"} spacing={"96px"}>
@@ -67,7 +74,7 @@ const Magnitude = () => {
           columnGap: "32px",
         }}
       >
-        {MAGNITUDE_ITEMS_Memo.map(cur => (
+        {items.map(cur => (
           <Box key={cur.id} sx={{ textAlign: "center", maxWidth: "264px" }}>
             <Typography sx={{ fontSize: { xs: "48px", md: "60px" }, mb: "12px", color: orangeDark, fontWeight: 600 }}>
               {cur.value.toLocaleString()}

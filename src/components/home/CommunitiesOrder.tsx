@@ -4,6 +4,7 @@ import React from "react";
 export const allCommunities = [
   {
     id: "ux-research-in-cognitive-psychology-of-Learning",
+    name: "Cognitive_Psychology",
     tags: [
       {
         title: "Cognitive Psychology",
@@ -149,6 +150,7 @@ export const allCommunities = [
 
   {
     id: "clinical-psychology",
+    name: "Clinical_Psychology",
     tags: [
       {
         title: "Clinical Psychology",
@@ -210,6 +212,7 @@ export const allCommunities = [
   },
   {
     id: "health-psychology",
+    name: "Health_Psychology",
     tags: [
       {
         title: "Psychology",
@@ -275,6 +278,7 @@ export const allCommunities = [
   },
   {
     id: "disability-studies",
+    name: "Disability_Studies",
     tags: [
       {
         title: "Disability Studies",
@@ -349,6 +353,7 @@ export const allCommunities = [
   },
   {
     id: "social-psychology",
+    name: "Social_Psychology",
     tags: [
       {
         title: "Social psychology",
@@ -414,121 +419,9 @@ export const allCommunities = [
       `Co-author the final research paper to submit to reputable conferences/journals.`,
     ],
   },
-
-  {
-    id: "natural-language-processing",
-    tags: [
-      {
-        title: "Data Science",
-        node: "FJfzAX7zbgQS8jU5XcEk",
-      },
-      {
-        title: "Deep Learning (in Machine learning)",
-        node: "DkS1Gz9mxKBbvZ5bs6he",
-      },
-      {
-        title: "Natural language processing",
-        node: "khCWqIXa9xQiojnEqHCT",
-      },
-    ],
-    allTime: [],
-    weekly: [],
-    url: "/static/Communities/Natural_Language_Processing.jpg",
-    title: "Natural Language Processing",
-    width: "34%",
-    leaders: [
-      {
-        name: "Ge Zhang",
-        image: "Ge_Zhang.jpeg",
-        about: `I'm Ge Zhang, a second year dual master of Umich, majoring in data science and ece tracking in information system. My research interest focus on natural language processing and information retrieval, especially using lexical information or other structured expert knowledge to accelerate or help the training procedure of word or knowledge representation. I'm actively seeking for a phd position starting from 2022 fall or 2023 spring.`,
-        websites: [
-          {
-            name: "LinkedIn",
-            url: "https://www.linkedin.com/in/ge-zhang-792797169/",
-          },
-        ],
-      },
-    ],
-    YouTube: "W07nvZ2wcX0",
-    description: `Welcome to the Deep Learning Community! Our community predominantly contributes to the nlp area on 1Cademy, our collaborative research platform. This semester, we will explore different deep learning topics , mainly NLP topics, by going through selected papers every week. Our team members will dive into these papers and present what they've been learning throughout each week by walking us through the nodes they have designed during our weekly team meetings. We also encourage our interns to work on a specific topic together as a team so that they may write a survey paper together before finishing the internship. After meeting certain requirements, you will be invited to join our small research group to work on concrete research ideas.`,
-    accomplishments: (
-      <div>
-        We have recently published:{" "}
-        <ul>
-          <li>
-            <a href="https://arxiv.org/pdf/2206.03702.pdf">
-              Wang Z, Zhang G, Lashkarashvili N. 1Cademy at Semeval-2022 Task 1: Investigating the Effectiveness of
-              Multilingual, Multitask, and Language-Agnostic Tricks for the Reverse Dictionary Task[J]. arXiv preprint
-              arXiv:2206.03702, 2022.
-            </a>{" "}
-            Will appear on Semeval 2022.
-          </li>
-          <li>
-            <a>
-              Liu, R., Jia, C., Zhang, G., Zhuang, Z., Liu, T. X., & Vosoughi, S.{" "}
-              <a href="https://openreview.net/forum?id=u6OfmaGIya1">
-                Second Thoughts are Best: Learning to Re-Align With Human Values from Text Edits.
-              </a>{" "}
-              In Advances in Neural Information Processing Systems.
-            </a>{" "}
-          </li>
-          <li>
-            Ruibo Liu, Ge Zhang, Xinyu Feng, and Soroush Vosoughi. 2022.
-            <a href="https://aclanthology.org/2022.findings-naacl.18/">
-              Aligning Generative Language Models with Human Values.
-            </a>{" "}
-            In Findings of the Association for Computational Linguistics: NAACL 2022, pages 241–252, Seattle, United
-            States. Association for Computational Linguistics.
-          </li>
-          <li>
-            Yizhi Li, Ge Zhang, Bohao Yang, Chenghua Lin, Anton Ragni, Shi Wang, and Jie Fu. 2022.{" "}
-            <a href="https://aclanthology.org/2022.findings-aacl.32/">
-              HERB: Measuring Hierarchical Regional Bias in Pre-trained Language Models.
-            </a>{" "}
-            In Findings of the Association for Computational Linguistics: AACL-IJCNLP 2022.
-          </li>
-          <li>
-            Zhiyong Wang, Ge Zhang, and Nineli Lashkarashvili. 2022.
-            <a href="https://aclanthology.org/2022.semeval-1.2/">
-              1Cademy at Semeval-2022 Task 1: Investigating the Effectiveness of Multilingual, Multitask, and
-              Language-Agnostic Tricks for the Reverse Dictionary Task.
-            </a>{" "}
-            In Proceedings of the 16th International Workshop on Semantic Evaluation (SemEval-2022), pages 15–22,
-            Seattle, United States. Association for Computational Linguistics.
-          </li>
-        </ul>
-      </div>
-    ),
-    gains: [
-      `You will spend the majority of the fall semester going through different high quality papers to deeply learn about natural language processing. No prior experience is required. `,
-      `You'll gain experience using crucial skills in research (paper analysis, summarization, making connections between disciplines). `,
-      `Top contributors to our community would have the opportunity to co-author research papers in the field. `,
-      `All interactions, task fulfillment, and communications will be online. `,
-      `We do not have a strict deadline for this position, and you can apply to join our team at any point in your program. `,
-    ],
-    requirements: `In addition to the 1Cademy general application process, we require our interns to submit both their most current resume and unofficial transcripts, with GPA included on those transcripts. We require our interns to have a minimum of a 3.5/4.0 GPA to apply for this position. Interns are required to have a degree path in computer science, statistics, economics, math, or a related field.`,
-    hasTest: true,
-    qualifications: [
-      `Knowledge and enthusiasm for topics related to machine learning and deep learning. `,
-      `Proficiency in Python and linear algebra. `,
-      `Displayed interest in machine learning through university-level coursework. `,
-      `Basic Knowledge of coding in Pytorch.`,
-      `(Preferred)Familiar with Huggingface/Fairseq.`,
-      `(Preferred)Previous research experience, or other relevant involvement. `,
-      `(Preferred)Completion of Coursera Deep Learning Specialization (https://www.coursera.org/specializations/deep-learning) or an equivalent on the topics of primarily deep learning but also machine learning or statistical learning. `,
-      `(Preferred) Background in Natural Language Processing (NLP) `,
-      `(Preferred) Background in Linguistics `,
-    ],
-    responsibilities: [
-      `Constantly study a specific Natural Language Processing/Computational Social Science/AI for Science topic. `,
-      `Attend weekly team meetings to discuss the research and present your efforts throughout the week.(Both Reading Assignment and Optional Research Project) `,
-      `Must be prepared and excited to collaborate with our already established team of computer scientists, information scientists, and statisticians. `,
-      `All interactions, task fulfillment, and communications will be remote. `,
-      `Enthusiastically participate in the research assignments if needed. `,
-    ],
-  },
   {
     id: "ux-research-in-online-communities",
+    name: "UX_Research_in_Online_Communities",
     tags: [
       {
         title: "Online Communities",
@@ -910,6 +803,7 @@ export const allCommunities = [
   // },
   {
     id: "liaison-librarians",
+    name: "Liaison_Librarians",
     tags: [
       {
         title: "Library Science",

@@ -7,7 +7,7 @@ import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
 import LaunchIcon from "@mui/icons-material/Launch";
 import LocalOfferIcon from "@mui/icons-material/LocalOffer";
 import MenuBookIcon from "@mui/icons-material/MenuBook";
-import { Box, IconButton, Link, Tooltip } from "@mui/material";
+import { Box, Button, IconButton, Link, Tooltip } from "@mui/material";
 import React, { MutableRefObject, useCallback } from "react";
 import { DispatchNodeBookActions, TNodeBookState } from "src/nodeBookTypes";
 
@@ -169,16 +169,22 @@ const LinkingWords = ({
 
   return props.openPart === "LinkingWords" || props.openPart === "Tags" || props.openPart === "References" ? (
     <Box id={`${props.identifier}-linking-words`}>
-      <Box
+      {/* <Box
         sx={{
           mx: "10px",
+
           borderTop: theme =>
             theme.palette.mode === "dark" ? `solid 1px ${theme.palette.common.borderColor}` : "solid 1px",
         }}
-      />
+      /> */}
       <Box
         // className="LinkingWordsContainer card-action"
-        sx={{ py: "8px", display: "grid", gridTemplateColumns: "1fr 1fr" }}
+        sx={{
+          py: "8px",
+          display: "grid",
+          gridTemplateColumns: "1fr 1fr",
+          background: theme => (theme.palette.mode === "dark" ? "#303134" : "#EAECF0"),
+        }}
       >
         <Box
           className="LearnBefore"
@@ -230,18 +236,20 @@ const LinkingWords = ({
                   </Box>
                 );
               })}
-
-              <LinkingButton
-                key={props.identifier + "LinkToAllParent"}
-                onClick={props.openAllParent}
-                // nodeID={props.identifier}
-                linkedNodeID={props.identifier}
-                linkedNodeTitle={"All Parents"}
-                linkedNodeType="parents"
-                nodeType={"Relation"}
-                visible={false}
-                disabled={disabled}
-              />
+              {props.parents.length > 0 && !props.isNew && (
+                <Button
+                  onClick={() => props.openAllParent(props.identifier)}
+                  sx={{
+                    justifyContent: "stretch",
+                    textAlign: "left",
+                    ":hover": {
+                      background: "transparent",
+                    },
+                  }}
+                >
+                  Open All Parents
+                </Button>
+              )}
 
               {props.editable && !props.isNew && notebookRef.current.selectedNode === props.identifier && (
                 <MemoizedMetaButton
@@ -379,8 +387,7 @@ const LinkingWords = ({
         <Box
           className="LearnAfter"
           sx={{
-            borderLeft: theme =>
-              theme.palette.mode === "dark" ? `solid 1px ${theme.palette.common.borderColor}` : "solid 1px",
+            borderLeft: theme => (theme.palette.mode === "dark" ? `solid 1px #404040` : "solid 1px #D0D5DD"),
             // border: "solid 1px royalBlue",
             p: "10px 13px 10px 13px",
           }}
@@ -396,8 +403,10 @@ const LinkingWords = ({
                 return (
                   <Box
                     sx={{
-                      display: "grid",
-                      gridTemplateColumns: props.editable && props.tags.length ? "1fr 32px" : "1fr",
+                      display: "flex",
+                      //gridTemplateColumns: props.editable && props.tags.length ? "1fr 32px" : "1fr",
+                      alignItems: "center",
+                      justifyContent: "space-between",
                     }}
                     key={props.identifier + "LinkTo" + tag.node + "DIV"}
                   >
@@ -534,17 +543,20 @@ const LinkingWords = ({
                   </Box>
                 );
               })}
-              <LinkingButton
-                key={props.identifier + "LinkToAllChildren"}
-                onClick={props.openAllChildren}
-                // nodeID={props.identifier}
-                linkedNodeID={props.identifier}
-                linkedNodeTitle={"All Children"}
-                linkedNodeType="children"
-                nodeType={"Relation"}
-                visible={false}
-                disabled={disabled}
-              />
+              {props.nodesChildren.length > 0 && !props.isNew && (
+                <Button
+                  onClick={() => props.openAllChildren(props.identifier)}
+                  sx={{
+                    justifyContent: "stretch",
+                    textAlign: "left",
+                    ":hover": {
+                      background: "transparent",
+                    },
+                  }}
+                >
+                  Open All Children
+                </Button>
+              )}
               {props.editable &&
                 !props.isNew &&
                 props.nodeType !== "Reference" &&

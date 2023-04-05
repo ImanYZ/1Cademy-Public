@@ -5950,7 +5950,10 @@ const Dashboard = ({}: DashboardProps) => {
               left: "50%",
               transform: "translateX(-50%)",
               bottom: "35px",
-              background: theme => (theme.palette.mode === "dark" ? "#1F1F1F" : "#F9FAFB"),
+              background: theme =>
+                theme.palette.mode === "dark"
+                  ? theme.palette.common.darkBackground
+                  : theme.palette.common.lightBackground,
               fontFamily: "Roboto",
               fontStyle: "normal",
               fontWeight: "normal",
@@ -6598,6 +6601,7 @@ const Dashboard = ({}: DashboardProps) => {
               db={db}
               open={openLivelinessBar}
               setOpen={setOpenLivelinessBar}
+              windowHeight={windowHeight}
             />
           )}
 
@@ -6610,6 +6614,7 @@ const Dashboard = ({}: DashboardProps) => {
               user={user}
               open={openLivelinessBar}
               setOpen={setOpenLivelinessBar}
+              windowHeight={windowHeight}
             />
           )}
 

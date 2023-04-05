@@ -9,9 +9,7 @@ import FacebookRoundedIcon from "@mui/icons-material/FacebookRounded";
 import ImageIcon from "@mui/icons-material/Image";
 import LinkIcon from "@mui/icons-material/Link";
 import LinkedInIcon from "@mui/icons-material/LinkedIn";
-import LocalOfferIcon from "@mui/icons-material/LocalOffer";
 import MailIcon from "@mui/icons-material/Mail";
-import MenuBookIcon from "@mui/icons-material/MenuBook";
 import MoreHorizIcon from "@mui/icons-material/MoreHoriz";
 import RecordVoiceOverIcon from "@mui/icons-material/RecordVoiceOver";
 import RedditIcon from "@mui/icons-material/Reddit";
@@ -33,17 +31,25 @@ import {
   styled,
   Tooltip,
   Typography,
+  useTheme,
 } from "@mui/material";
 import IconButton from "@mui/material/IconButton";
 import { Box } from "@mui/system";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import { collection, getDocs, getFirestore, query, where } from "firebase/firestore";
+import NextImage from "next/image";
 import { useRouter } from "next/router";
 import React, { MutableRefObject, ReactNode, useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { OpenSidebar } from "@/pages/notebook";
 
+import ReferenceIcon from "../../../public/reference.svg";
+import ReferenceDarkIcon from "../../../public/reference-dark.svg";
+import ReferenceLightIcon from "../../../public/reference-light.svg";
+import TagIcon from "../../../public/tag.svg";
+import TagDarkIcon from "../../../public/tag-dark.svg";
+import TagLightIcon from "../../../public/tag-light.svg";
 import { User } from "../../knowledgeTypes";
 import shortenNumber from "../../lib/utils/shortenNumber";
 import { DispatchNodeBookActions, FullNodeData, OpenPart, TNodeBookState } from "../../nodeBookTypes";
@@ -191,6 +197,7 @@ const NodeFooter = ({
 }: NodeFooterProps) => {
   const router = useRouter();
   const db = getFirestore();
+  const theme = useTheme();
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const [percentageUploaded, setPercentageUploaded] = useState(0);
@@ -440,6 +447,7 @@ const NodeFooter = ({
           alignItems: "center",
           justifyContent: "space-between",
           mt: "10px",
+          color: theme => (theme.palette.mode === "dark" ? "#F9FAFB" : "#475467"),
         }}
       >
         <Box className="NodeFooter Left" sx={{ display: "flex", alignItems: "center", gap: "10px" }}>
@@ -548,10 +556,7 @@ const NodeFooter = ({
                   onClick={proposeNodeImprovementClick}
                   tooltipPosition="top"
                   sx={{
-                    background: (theme: any) =>
-                      theme.palette.mode === "dark"
-                        ? theme.palette.common.darkBackground1
-                        : theme.palette.common.lightBackground1,
+                    background: (theme: any) => (theme.palette.mode === "dark" ? "#404040" : "#EAECF0"),
                     fontWeight: 400,
                     color: "inherit",
                     ":hover": {
@@ -576,10 +581,7 @@ const NodeFooter = ({
                   id={`${identifier}-node-footer-votes`}
                   className="tab-double-button-node-footer"
                   sx={{
-                    background: theme =>
-                      theme.palette.mode === "dark"
-                        ? theme.palette.common.darkBackground1
-                        : theme.palette.common.lightBackground1,
+                    background: (theme: any) => (theme.palette.mode === "dark" ? "#404040" : "#EAECF0"),
                     display: "flex",
                     alignItems: "center",
                     marginLeft: "10px",
@@ -600,7 +602,7 @@ const NodeFooter = ({
                       }),
                     }}
                   >
-                    <Tooltip title={"Vote to delete node."} placement={"top"}>
+                    <Tooltip title={"Vote to prevent further changes."} placement={"top"}>
                       <span>
                         <Button
                           onClick={wrongNode}
@@ -625,14 +627,8 @@ const NodeFooter = ({
                               alignItems: "center",
                             }}
                           >
-                            <span>{shortenNumber(wrongNum, 2, false)}</span>
-                            <CloseIcon
-                              sx={{
-                                fontSize: "16px",
-                                color: markedWrong ? "red" : "inherit",
-                                marginLeft: "1px",
-                              }}
-                            />
+                            <DoneIcon sx={{ fontSize: "18px", color: markedCorrect ? "#00E676" : "inherit" }} />
+                            <span style={{ marginLeft: "2px" }}>{shortenNumber(correctNum, 2, false)}</span>
                           </Box>
                         </Button>
                       </span>
@@ -651,7 +647,7 @@ const NodeFooter = ({
                   <Box
                     id={upvoteButtonId}
                     sx={{
-                      padding: "2px 5px 2px 5px",
+                      padding: "2px 5px 2px 0px",
                       borderRadius: "0px 52px 52px 0px",
                       ...(!disabled && {
                         ":hover": {
@@ -663,7 +659,7 @@ const NodeFooter = ({
                       }),
                     }}
                   >
-                    <Tooltip title={"Vote to prevent further changes."} placement={"top"}>
+                    <Tooltip title={"Vote to delete node."} placement={"top"}>
                       <span>
                         <Button
                           onClick={correctNode}
@@ -688,10 +684,13 @@ const NodeFooter = ({
                               alignItems: "center",
                             }}
                           >
-                            <span>{shortenNumber(correctNum, 2, false)}</span>
-                            <DoneIcon
-                              sx={{ fontSize: "16px", color: markedCorrect ? "#00E676" : "inherit", marginLeft: "1px" }}
+                            <CloseIcon
+                              sx={{
+                                fontSize: "18px",
+                                color: markedWrong ? "red" : "inherit",
+                              }}
                             />
+                            <span style={{ marginLeft: "2px" }}>{shortenNumber(wrongNum, 2, false)}</span>
                           </Box>
                         </Button>
                       </span>
@@ -770,10 +769,7 @@ const NodeFooter = ({
                         onClick={() => uploadImageClicked()}
                         tooltipPosition="top"
                         sx={{
-                          background: (theme: any) =>
-                            theme.palette.mode === "dark"
-                              ? theme.palette.common.darkBackground1
-                              : theme.palette.common.lightBackground1,
+                          background: (theme: any) => (theme.palette.mode === "dark" ? "#404040" : "#EAECF0"),
                           color: "inherit",
                           fontWeight: 400,
                           height: "28.7px",
@@ -805,10 +801,7 @@ const NodeFooter = ({
                         onClick={() => setAddVideo(!addVideo)}
                         tooltipPosition="top"
                         sx={{
-                          background: (theme: any) =>
-                            theme.palette.mode === "dark"
-                              ? theme.palette.common.darkBackground1
-                              : theme.palette.common.lightBackground1,
+                          background: (theme: any) => (theme.palette.mode === "dark" ? "#404040" : "#EAECF0"),
                           color: addVideo ? "#ff8a33" : "inherit",
                           fontWeight: 400,
                           height: "28.7px",
@@ -844,10 +837,7 @@ const NodeFooter = ({
                       onClick={selectCitations}
                       tooltipPosition="top"
                       sx={{
-                        background: (theme: any) =>
-                          theme.palette.mode === "dark"
-                            ? theme.palette.common.darkBackground1
-                            : theme.palette.common.lightBackground1,
+                        background: (theme: any) => (theme.palette.mode === "dark" ? "#404040" : "#EAECF0"),
                         color:
                           openSidebar === "CITATIONS" && notebookRef.current.selectedNode === identifier
                             ? theme => theme.palette.common.orange
@@ -865,7 +855,11 @@ const NodeFooter = ({
                     >
                       <Box sx={{ display: "flex", alignItems: "center", gap: "4px", fill: "inherit", height: "23px" }}>
                         <ArrowForwardIcon sx={{ fontSize: "16px" }} />
-                        <MenuBookIcon sx={{ fontSize: "16px" }} />
+                        <NextImage
+                          width={"22px"}
+                          src={theme.palette.mode === "dark" ? ReferenceLightIcon : ReferenceDarkIcon}
+                          alt="tag icon"
+                        />
                       </Box>
                     </ContainedButton>
                   </Box>
@@ -875,17 +869,13 @@ const NodeFooter = ({
                       onClick={selectTags}
                       className={"select-tab-button-node-footer"}
                       sx={{
-                        background: theme =>
-                          theme.palette.mode === "dark" ? theme.palette.common.darkBackground1 : "#DCDCDC",
+                        background: theme => (theme.palette.mode === "dark" ? "#303134" : "#EAECF0"),
+                        border: "none",
                         cursor: "pointer",
                       }}
                     >
                       <>
-                        <LocalOfferIcon
-                          // className={openPart === "Tags" ? "orange-text" : "grey-text"}
-
-                          sx={{ fontSize: "16px" }}
-                        />
+                        <NextImage width={"22px"} src={TagIcon} alt="tag icon" />
                         <span>{shortenNumber(tags.length, 2, false)}</span>
                       </>
                     </Box>
@@ -904,10 +894,7 @@ const NodeFooter = ({
                         onClick={(e: any) => selectTags(e)}
                         tooltipPosition="top"
                         sx={{
-                          background: (theme: any) =>
-                            theme.palette.mode === "dark"
-                              ? theme.palette.common.darkBackground1
-                              : theme.palette.common.lightBackground1,
+                          background: (theme: any) => (theme.palette.mode === "dark" ? "#404040" : "#EAECF0"),
                           color: "inherit",
                           fontWeight: 400,
                           ":hover": {
@@ -923,10 +910,10 @@ const NodeFooter = ({
                         <Box
                           sx={{ display: "flex", alignItems: "center", gap: "4px", fill: "inherit", height: "23px" }}
                         >
-                          <LocalOfferIcon
-                            // className={openPart === "Tags" ? "orange-text" : "grey-text"}
-
-                            sx={{ fontSize: "16px" }}
+                          <NextImage
+                            width={"22px"}
+                            src={theme.palette.mode === "dark" ? TagLightIcon : TagDarkIcon}
+                            alt="tag icon"
                           />
                           <span>{shortenNumber(tags.length, 2, false)}</span>
                         </Box>
@@ -942,8 +929,8 @@ const NodeFooter = ({
                       onClick={disableTagsCitationsButton ? undefined : selectReferences}
                       className={"select-tab-button-node-footer"}
                       sx={{
-                        background: theme =>
-                          theme.palette.mode === "dark" ? theme.palette.common.darkBackground1 : "#DCDCDC",
+                        background: theme => (theme.palette.mode === "dark" ? "#303134" : "#EAECF0"),
+                        border: "none",
                         cursor: disableTagsCitationsButton ? "not-allowed" : "pointer",
                       }}
                     >
@@ -956,12 +943,10 @@ const NodeFooter = ({
                           sx={{
                             display: "flex",
                             alignItems: "center",
+                            justifyContent: "space-between",
                           }}
                         >
-                          <MenuBookIcon
-                            color={openPart === "References" ? "primary" : "inherit"}
-                            sx={{ fontSize: "16px", marginRight: "2px" }}
-                          />
+                          <NextImage width={"22px"} src={ReferenceIcon} alt="tag icon" style={{ marginRight: "2px" }} />
                           <span className="CitationsSpanBeforeTagIcon">
                             {shortenNumber(references.length, 2, false)}
                           </span>
@@ -973,9 +958,10 @@ const NodeFooter = ({
                           sx={{
                             display: "flex",
                             alignItems: "center",
+                            justifyContent: "space-between",
                           }}
                         >
-                          <LocalOfferIcon color={"primary"} sx={{ fontSize: "16px", marginRight: "2px" }} />
+                          <NextImage width={"22px"} src={TagIcon} alt="tag icon" />
                           <span>{shortenNumber(tags.length, 2, false)}</span>
                         </Box>
                       </Box>
@@ -995,10 +981,7 @@ const NodeFooter = ({
                         onClick={selectReferences}
                         tooltipPosition="top"
                         sx={{
-                          background: (theme: any) =>
-                            theme.palette.mode === "dark"
-                              ? theme.palette.common.darkBackground1
-                              : theme.palette.common.lightBackground1,
+                          background: (theme: any) => (theme.palette.mode === "dark" ? "#404040" : "#EAECF0"),
                           color: "inherit",
                           fontWeight: 400,
                           height: "28.7px",
@@ -1022,12 +1005,13 @@ const NodeFooter = ({
                             sx={{
                               display: "flex",
                               alignItems: "center",
+                              justifyContent: "space-between",
                             }}
                           >
-                            <MenuBookIcon
-                              // className={openPart === "References" ? "orange-text" : "grey-text"}
-                              color={"inherit"}
-                              sx={{ fontSize: "16px", marginRight: "2px" }}
+                            <NextImage
+                              width={"22px"}
+                              src={theme.palette.mode === "dark" ? ReferenceLightIcon : ReferenceDarkIcon}
+                              alt="tag icon"
                             />
 
                             <span className="CitationsSpanBeforeTagIcon" style={{ marginTop: "3px" }}>
@@ -1044,11 +1028,13 @@ const NodeFooter = ({
                             sx={{
                               display: "flex",
                               alignItems: "center",
+                              justifyContent: "space-between",
                             }}
                           >
-                            <LocalOfferIcon
-                              color={openPart === "Tags" ? "primary" : "inherit"}
-                              sx={{ fontSize: "16px", marginRight: "2px" }}
+                            <NextImage
+                              width={"22px"}
+                              src={theme.palette.mode === "dark" ? TagLightIcon : TagDarkIcon}
+                              alt="tag icon"
                             />
                             <span style={{ marginTop: "3px" }}>{shortenNumber(tags.length, 2, false)}</span>
                           </Box>
@@ -1155,14 +1141,14 @@ const NodeFooter = ({
                   className={"select-tab-button-node-footer"}
                   sx={{
                     position: "relative",
-                    background: theme =>
-                      theme.palette.mode === "dark" ? theme.palette.common.darkBackground1 : "#DCDCDC",
+                    background: theme => (theme.palette.mode === "dark" ? "#303134" : "#EAECF0"),
+                    border: "none",
                     cursor: disableParentChildrenButton ? "not-allowed" : "pointer",
                   }}
                 >
                   <span className="FooterParentNodesOpen">{shortenNumber(parents.length, 2, false)}</span>
                   <SwapHorizIcon
-                    sx={{ fontSize: "16px" }}
+                    sx={{ fontSize: "20px" }}
                     color={openPart === "LinkingWords" ? "primary" : "inherit"}
                   />
                   <span>{shortenNumber(nodesChildren.length, 2, false)}</span>
@@ -1182,10 +1168,7 @@ const NodeFooter = ({
                     onClick={selectLinkingWords}
                     tooltipPosition="top"
                     sx={{
-                      background: (theme: any) =>
-                        theme.palette.mode === "dark"
-                          ? theme.palette.common.darkBackground1
-                          : theme.palette.common.lightBackground1,
+                      background: (theme: any) => (theme.palette.mode === "dark" ? "#404040" : "#EAECF0"),
                       color: "inherit",
                       fontWeight: 400,
                       ":hover": {
@@ -1217,10 +1200,7 @@ const NodeFooter = ({
                 disabled={disableMoreOptionsButton}
                 sx={{
                   display: simulated ? "none" : "flex",
-                  background: theme =>
-                    theme.palette.mode === "dark"
-                      ? theme.palette.common.darkBackground1
-                      : theme.palette.common.lightBackground1,
+                  background: (theme: any) => (theme.palette.mode === "dark" ? "#404040" : "#EAECF0"),
                   padding: "3px",
                   ":hover": {
                     background: (theme: any) =>
@@ -1876,91 +1856,183 @@ const NodeFooter = ({
                 marginBottom: "4px",
               }}
             >
-              <MemoizedMetaButton
-                disabled={disabled}
-                tooltip={
-                  shortenNumber(correctNum, 2, false) +
-                  " 1Cademist" +
-                  (correctNum === 1 ? " has" : "s have") +
-                  " found this node helpful and " +
-                  shortenNumber(wrongNum, 2, false) +
-                  " found it unhelpful."
-                }
+              <Box
+                id={`${identifier}-node-footer-votes`}
+                className="tab-double-button-node-footer"
+                sx={{
+                  background: (theme: any) => (theme.palette.mode === "dark" ? "#404040" : "#EAECF0"),
+                  display: "flex",
+                  alignItems: "center",
+                  marginRight: "0px",
+                }}
               >
-                <Box sx={{ display: "flex", alignItems: "center", gap: "5px" }}>
-                  <Box sx={{ display: "flex", alignItems: "center" }}>
-                    <CloseIcon sx={{ fontSize: "16px", color: markedWrong ? "red" : "inherit" }} />
-                    <span>{shortenNumber(wrongNum, 2, false)}</span>
-                  </Box>
-                  <Box sx={{ display: "flex", alignItems: "center" }}>
-                    <DoneIcon sx={{ fontSize: "16px", color: markedCorrect ? "#00E676" : "inherit" }} />
-                    <span>{shortenNumber(correctNum, 2, false)}</span>
-                  </Box>
+                <Box
+                  id={downvoteButtonId}
+                  sx={{
+                    padding: "2px 10px 2px 10px",
+                    borderRadius: "52px 0px 0px 52px",
+                  }}
+                >
+                  <Tooltip title={"Correct votes"} placement={"top"}>
+                    <Box
+                      sx={{
+                        display: "flex",
+                        fontSize: "14px",
+                        alignItems: "center",
+                      }}
+                    >
+                      <DoneIcon sx={{ fontSize: "18px", color: markedCorrect ? "#00E676" : "inherit" }} />
+                      <span>{shortenNumber(correctNum, 2, false)}</span>
+                    </Box>
+                  </Tooltip>
                 </Box>
-              </MemoizedMetaButton>
-              <MemoizedMetaButton
-                disabled={disabled}
-                tooltip={
+                <Divider
+                  orientation="vertical"
+                  variant="middle"
+                  flexItem
+                  sx={{
+                    borderColor: disableVotes
+                      ? "#6A6A6A"
+                      : theme => (theme.palette.mode === "dark" ? "#D3D3D3" : "inherit"),
+                  }}
+                />
+                <Box
+                  id={upvoteButtonId}
+                  sx={{
+                    padding: "2px 10px 2px 10px",
+                    borderRadius: "0px 52px 52px 0px",
+                  }}
+                >
+                  <Tooltip title={"Wrong votes"} placement={"top"}>
+                    <Box
+                      sx={{
+                        display: "flex",
+                        fontSize: "14px",
+                        alignItems: "center",
+                      }}
+                    >
+                      <CloseIcon
+                        sx={{
+                          fontSize: "18px",
+                          color: markedWrong ? "red" : "inherit",
+                        }}
+                      />
+                      <span>{shortenNumber(wrongNum, 2, false)}</span>
+                    </Box>
+                  </Tooltip>
+                </Box>
+              </Box>
+
+              <ContainedButton
+                id={proposeButtonId}
+                title={
                   `You've ${!bookmarked ? "not " : ""}bookmarked this node. ` +
                   shortenNumber(bookmarks, 2, false) +
                   " 1Cademist" +
                   (bookmarks === 1 ? " has" : "s have") +
                   " bookmarked this node."
                 }
+                onClick={() => {}}
+                tooltipPosition="top"
+                sx={{
+                  background: (theme: any) => (theme.palette.mode === "dark" ? "#404040" : "#EAECF0"),
+                  fontWeight: 400,
+                  color: "inherit",
+                  ":hover": {
+                    borderWidth: "0px",
+                    background: (theme: any) => (theme.palette.mode === "dark" ? "#404040" : "#EAECF0"),
+                    cursor: "auto",
+                  },
+                  padding: "7px 7px",
+                  minWidth: "30px",
+                  height: "30px",
+                }}
+                disabled={disableProposeButton}
               >
-                <Box sx={{ display: "flex", alignItems: "center" }}>
+                <Box sx={{ display: "flex", alignItems: "center", gap: "4px", fill: "inherit" }}>
                   {bookmarked ? (
-                    <BookmarkIcon color={"primary"} sx={{ fontSize: "16px" }} />
+                    <BookmarkIcon
+                      sx={{ fontSize: "18px", color: theme => (theme.palette.mode === "dark" ? "#FF6D00" : "#FF8134") }}
+                    />
                   ) : (
-                    <BookmarkBorderIcon color={"inherit"} sx={{ fontSize: "16px" }} />
+                    <BookmarkIcon color={"inherit"} sx={{ fontSize: "16px" }} />
                   )}
-                  <span>{shortenNumber(bookmarks, 2, false)}</span>
                 </Box>
-              </MemoizedMetaButton>
-
-              <MemoizedMetaButton
-                disabled={disabled}
-                tooltip={
-                  "This node has " +
-                  shortenNumber(parents.length, 2, false) +
-                  " parent node" +
-                  (parents.length === 1 ? "" : "s") +
-                  " and " +
-                  shortenNumber(nodesChildren.length, 2, false) +
-                  " child node" +
-                  (nodesChildren.length === 1 ? "." : "s.")
-                }
+              </ContainedButton>
+              <ContainedButton
+                id={parentChildrenButtonId}
+                title="Parent and child nodes."
+                onClick={() => {}}
+                tooltipPosition="top"
+                sx={{
+                  background: (theme: any) => (theme.palette.mode === "dark" ? "#404040" : "#EAECF0"),
+                  color: "inherit",
+                  fontWeight: 400,
+                  ":hover": {
+                    borderWidth: "0px",
+                    background: (theme: any) => (theme.palette.mode === "dark" ? "#404040" : "#EAECF0"),
+                    cursor: "auto",
+                  },
+                }}
+                disabled={disableParentChildrenButton}
               >
-                <Box sx={{ display: "flex", alignItems: "center", gap: "2px" }}>
-                  <span /*className="FooterParentNodesClosed"*/>{shortenNumber(parents.length, 2, false)}</span>
-                  <SwapHorizIcon sx={{ fontSize: "16px" }} />
+                <Box sx={{ display: "flex", alignItems: "center", gap: "4px", fill: "inherit" }}>
+                  <span className="FooterParentNodesOpen">{shortenNumber(parents.length, 2, false)}</span>
+                  <SwapHorizIcon sx={{ fontSize: "16px" }} color={"inherit"} />
                   <span>{shortenNumber(nodesChildren.length, 2, false)}</span>
                 </Box>
-              </MemoizedMetaButton>
+              </ContainedButton>
             </Box>
           )}
         </Box>
       </Box>
       {openSidebar === "USER_INFO" &&
-        notebookRef.current.showContributors &&
-        notebookRef.current.contributorsNodeId === identifier &&
+        notebookRef.current.contributorsNodeId.showContributors &&
+        notebookRef.current.contributorsNodeId.nodeId === identifier &&
         contributors &&
         Object.keys(contributors).length > 0 && (
-          <Box sx={{ paddingY: "10px" }}>
-            <Grid container spacing={1} sx={{ mt: 0 }}>
-              {renderContributors()}
-            </Grid>
+          <>
             <Box
               sx={{
                 marginTop: "10px",
-                borderTop: theme =>
-                  theme.palette.mode === "dark" ? `solid 1px ${theme.palette.common.borderColor}` : "solid 1px",
+                borderTop: theme => (theme.palette.mode === "dark" ? "1px solid #404040" : "solid 1px #D0D5DD"),
               }}
             />
-            <Grid container spacing={1} sx={{ mt: "5px" }}>
-              {renderInstitutions()}
-            </Grid>
-          </Box>
+            <Box sx={{ paddingX: "10px", mt: "5px" }}>
+              <Box
+                sx={{
+                  py: "5px",
+                }}
+              >
+                <Typography
+                  sx={{
+                    fontWeight: "500",
+                  }}
+                >
+                  Contributors are:
+                </Typography>
+                <Grid container spacing={1} sx={{ mt: "5px" }}>
+                  {renderContributors()}
+                </Grid>
+              </Box>
+              <Box
+                sx={{
+                  py: "5px",
+                }}
+              >
+                <Typography
+                  sx={{
+                    fontWeight: "500",
+                  }}
+                >
+                  Who are from:
+                </Typography>
+                <Grid container spacing={1} sx={{ mt: "5px" }}>
+                  {renderInstitutions()}
+                </Grid>
+              </Box>
+            </Box>
+          </>
         )}
     </>
   );

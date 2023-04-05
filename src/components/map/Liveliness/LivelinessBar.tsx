@@ -17,6 +17,7 @@ type ILivelinessBarProps = {
   open: boolean;
   setOpen: (newOpen: boolean) => void;
   disabled?: boolean;
+  windowHeight: number;
 };
 
 type UserInteractions = {
@@ -32,7 +33,7 @@ type UserInteractions = {
 };
 
 const LivelinessBar = ({ open, setOpen, disabled = false, ...props }: ILivelinessBarProps) => {
-  const { db, onlineUsers, openUserInfoSidebar, authEmail } = props;
+  const { db, onlineUsers, openUserInfoSidebar, authEmail, windowHeight } = props;
   // const [open, setOpen] = useState(false);
   const [isInitialized, setIsInitialized] = useState(false);
   const [usersInteractions, setUsersInteractions] = useState<UserInteractions>({});
@@ -152,7 +153,7 @@ const LivelinessBar = ({ open, setOpen, disabled = false, ...props }: ILivelines
 
   useEffect(() => {
     setBarHeight(parseFloat(String(document.getElementById("liveliness-seekbar")?.clientHeight)));
-  }, []);
+  }, [windowHeight]);
 
   const unames = useMemo(() => {
     return Object.keys(usersInteractions);
@@ -177,12 +178,12 @@ const LivelinessBar = ({ open, setOpen, disabled = false, ...props }: ILivelines
       )
     );
   }, [usersInteractions, minActions]);
-
   return (
     <>
       <Box
         sx={{
-          top: window.innerHeight > 799 ? "180px" : "165px",
+          top: "50%",
+          transform: "translateY(-50%)",
           right: "0px",
           zIndex: 1199,
           position: "absolute",

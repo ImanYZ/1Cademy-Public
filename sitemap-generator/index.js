@@ -39,7 +39,7 @@ const storage = new Storage({
 const bucket = storage.bucket(process.env.STATIC_STORAGE_BUCKET);
 
 function generateAlias(name) {
-  const alias = String(name)
+  let alias = String(name)
     .toLowerCase()
     .replace(/[^a-z- ]/g, "")
     .trim()
@@ -51,6 +51,9 @@ function generateAlias(name) {
     .splice(0, 20)
     .join("-");
   if (!alias.length) return "-";
+  if (alias.length > 100) {
+    return alias.substring(0, 100);
+  }
   return alias;
 }
 
@@ -123,10 +126,7 @@ async function main() {
     const contentNodes = await db
       .collection("nodes")
       .where("deleted", "==", false)
-      .where("tags", "array-contains", {
-        node: community.id,
-        title: community.title,
-      })
+      .where("tagIds", "array-contains", community.id)
       .get();
 
     // individual nodes in this community
