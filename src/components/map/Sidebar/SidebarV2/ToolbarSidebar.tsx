@@ -277,37 +277,18 @@ MainSidebarProps) => {
         id="toolbar"
         className={`toolbar ${isMenuOpen ? "toolbar-opened" : ""}`}
         ref={ref}
-        // onMouseOver={onMouseHover}
-        // onTouchStart={onMouseHover}
-        // onMouseOut={onMouseOut}
         sx={{
-          // border: "solid 4px #521e83",
           minHeight: "100%",
-          // height: "100%",
           width: "inherit",
           overflow: "hidden",
           display: { xs: isMenuOpen ? "grid" : "none", sm: "grid" },
           gridTemplateRows: "auto auto  1fr",
-          // paddingX: "5px",
           background: theme =>
             theme.palette.mode === "dark" ? theme.palette.common.darkBackground : theme.palette.common.lightBackground,
-          // "& .list-tmp": { alignItems: isMenuOpen ? "flex-start" : undefined },
-          // ":hover": {
-          //   "& .list-tmp": { alignItems: "flex-start" },
-          //   // "& .user-settings-button":{}
-          // },
         }}
       >
-        <Stack
-          // gap={"3px"}
-          alignItems="center"
-          direction="column"
-          spacing={"4px"}
-          sx={{ width: "inherit" /* , minHeight: "266px" */ /* , border: "solid 1px royalBlue" */, px: "14px" }}
-          // sx={{height: firstBoxHeight}}
-        >
+        <Stack alignItems="center" direction="column" spacing={"4px"} sx={{ width: "inherit", px: "14px" }}>
           <Box sx={{ marginTop: "10px", marginBottom: "15px" }}>
-            {/* <MemoizedMetaButton> */}
             <Box sx={{ display: "grid", placeItems: "center" }}>
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
@@ -326,7 +307,6 @@ MainSidebarProps) => {
                 width={"100%"}
               />
             </Box>
-            {/* </MemoizedMetaButton> */}
           </Box>
 
           {/* User info button */}
@@ -339,10 +319,8 @@ MainSidebarProps) => {
             totalNegatives={reputation?.negatives || 0}
             imageUrl={user.imageUrl || ""}
             online={true} // TODO: get online state from useUserState useEffect
-            // sx={{ display: isMenuOpen ? "flex" : "", alignItems: "center" }}
             onClick={onOpenUserSettingsSidebar}
             smallVersion={!isHovered}
-            // isDisabled={disableUserStatusButton}
           />
 
           {/* Searcher button */}
@@ -358,66 +336,6 @@ MainSidebarProps) => {
             toolbarIsOpen={isHovered}
             variant="fill"
           />
-          {/* <Button
-            id="toolbar-search-button"
-            onClick={() => {
-              onOpenSidebar("SEARCHER_SIDEBAR", "Search");
-              setIsMenuOpen(false);
-            }}
-            disabled={disableSearchButton}
-            sx={{
-              marginTop: "15px",
-              marginBottom: "4px",
-              minWidth: "52px",
-              width: "100%",
-              height: "40px",
-              borderRadius: "16px",
-              backgroundColor: theme =>
-                disableSearchButton ? (theme.palette.mode === "dark" ? "#383838ff" : "#bdbdbdff") : "#F38744",
-              color: "white",
-              lineHeight: "19px",
-              display: "flex",
-              gap: isMenuOpen ? "6px" : "6px",
-              p: "10px 16px",
-              justifyContent: isHovered ? "left" : "center",
-              ":hover": {
-                backgroundColor: theme =>
-                  disableSearchButton
-                    ? theme.palette.mode === "dark"
-                      ? "#383838ff"
-                      : "#bdbdbdff"
-                    : theme.palette.mode === "dark"
-                    ? "#F38744"
-                    : "#FF914E",
-              },
-            }}
-          >
-            <Box
-              sx={{
-                display: "flex",
-                alignItems: "center",
-                fontSize: "19px",
-              }}
-            >
-              <NextImage width={"22px"} src={SearchIcon} alt="search icon" />
-              {isHovered && (
-                <Typography
-                  className="toolbarDescription"
-                  sx={{
-                    textOverflow: "ellipsis",
-                    overflow: "hidden",
-                    maxWidth: "90px",
-                    whiteSpace: "nowrap",
-                    fontWeight: "400",
-                    fontSize: "15px",
-                    color: theme => (theme.palette.mode === "dark" ? "#EAECF0" : "#1D2939"),
-                  }}
-                >
-                  Search
-                </Typography>
-              )}
-            </Box>
-          </Button> */}
 
           {/* Notifications button */}
 
@@ -432,82 +350,6 @@ MainSidebarProps) => {
             toolbarIsOpen={isHovered}
             rightOption={<CustomBadge value={uncheckedNotificationsNum} />}
           />
-          {/* <Button
-            id="toolbar-bookmarks-button"
-            onClick={() => {
-              onOpenSidebar("NOTIFICATION_SIDEBAR", "Notifications");
-              setIsMenuOpen(false);
-            }}
-            disabled={disabledNotificationButton}
-            sx={{
-              width: "90%",
-
-              borderRadius: "16px",
-              padding: "10px 0px 10px 12px",
-              justifyContent: "start",
-              ":hover": {
-                background: theme => (theme.palette.mode === "dark" ? "#55402B" : "#FFE2D0"),
-              },
-            }}
-          >
-            <Box
-              sx={{
-                display: "flex",
-                alignItems: "center",
-                gap: "5px",
-                marginLeft: !isMenuOpen ? "10px" : undefined,
-              }}
-            >
-              <NextImage width={"22px"} src={NotificationIcon} alt="previous node icon" />
-              <Box
-                component="span"
-                className="toolbarDescription"
-                sx={{
-                  fontSize: "15px",
-                  overflow: "hidden",
-                  visibility: isMenuOpen ? "visible" : "hidden",
-                  transition: isMenuOpen
-                    ? "visibility 1s, line-height 1s, height 1s"
-                    : "visibility 0s, line-height 0s, height 0s",
-                  width: isMenuOpen ? "100px" : "0",
-                  display: isMenuOpen ? "flex" : "block",
-                  alignItems: "center",
-                  color: theme => (theme.palette.mode === "dark" ? "#EAECF0" : "#1D2939"),
-                }}
-              >
-                <Typography
-                  sx={{
-                    textOverflow: "ellipsis",
-
-                    maxWidth: "90px",
-                    whiteSpace: "nowrap",
-                    fontWeight: "400",
-                  }}
-                >
-                  Notifications
-                </Typography>
-              </Box>
-              {(uncheckedNotificationsNum ?? 0) > 0 && (
-                <Box
-                  className={window.innerWidth >= 500 ? "show-on-hover" : ""}
-                  sx={{
-                    width: "35px",
-                    height: "35px",
-                    borderRadius: "40%",
-                    background: "#E34848",
-                    color: "white",
-                    display: window.innerWidth >= 500 ? "none" : "flex",
-                    justifyContent: "center",
-                    alignItems: "center",
-                    position: "absolute",
-                    right: "15px",
-                  }}
-                >
-                  {uncheckedNotificationsNum ?? 0}
-                </Box>
-              )}
-            </Box>
-          </Button> */}
 
           {/* Bookmarks button */}
           <SidebarButton
@@ -521,80 +363,6 @@ MainSidebarProps) => {
             toolbarIsOpen={isHovered}
             rightOption={<CustomBadge value={bookmarkUpdatesNum} />}
           />
-          {/* <Button
-            onClick={() => {
-              onOpenSidebar("BOOKMARKS_SIDEBAR", "Bookmarks");
-              setIsMenuOpen(false);
-            }}
-            disabled={disabledBookmarksButton}
-            sx={{
-              width: "90%",
-              borderRadius: "16px",
-              padding: "10px 0px 10px 12px",
-              justifyContent: "start",
-              ":hover": {
-                background: theme => (theme.palette.mode === "dark" ? "#55402B" : "#FFE2D0"),
-              },
-            }}
-          >
-            <Box
-              sx={{
-                display: "flex",
-                alignItems: "center",
-                gap: "5px",
-                marginLeft: !isMenuOpen ? "10px" : undefined,
-              }}
-            >
-              <NextImage width={"22px"} src={BookmarkIcon} alt="previous node icon" />
-              <Box
-                className="toolbarDescription"
-                sx={{
-                  fontSize: "15px",
-                  overflow: "hidden",
-                  visibility: isMenuOpen ? "visible" : "hidden",
-                  transition: isMenuOpen
-                    ? "visibility 1s, line-height 1s, height 1s"
-                    : "visibility 0s, line-height 0s, height 0s",
-                  width: isMenuOpen ? "100px" : "0",
-                  display: isMenuOpen ? "flex" : "block",
-                  alignItems: "center",
-                  color: theme => (theme.palette.mode === "dark" ? "#EAECF0" : "#1D2939"),
-                }}
-              >
-                <Typography
-                  sx={{
-                    textOverflow: "ellipsis",
-                    overflow: "hidden",
-                    maxWidth: "90px",
-                    whiteSpace: "nowrap",
-                    fontWeight: "400",
-                  }}
-                >
-                  Bookmarks
-                </Typography>
-              </Box>
-
-              {(bookmarkUpdatesNum ?? 0) > 0 && (
-                <Box
-                  className={window.innerWidth >= 500 ? "show-on-hover" : ""}
-                  sx={{
-                    width: "35px",
-                    height: "35px",
-                    borderRadius: "40%",
-                    background: "#E34848",
-                    color: "white",
-                    display: window.innerWidth >= 500 ? "none" : "flex",
-                    justifyContent: "center",
-                    alignItems: "center",
-                    position: "absolute",
-                    right: "15px",
-                  }}
-                >
-                  {bookmarkUpdatesNum ?? 0}
-                </Box>
-              )}
-            </Box>
-          </Button> */}
 
           {/* Pending proposal sidebar */}
           <SidebarButton
@@ -608,80 +376,6 @@ MainSidebarProps) => {
             toolbarIsOpen={isHovered}
             rightOption={<CustomBadge value={pendingProposalsNum} />}
           />
-          {/* <Button
-            onClick={() => {
-              onOpenSidebar("PENDING_PROPOSALS", "PendingProposals");
-              setIsMenuOpen(false);
-            }}
-            disabled={disabledBookmarksButton}
-            sx={{
-              width: "90%",
-              borderRadius: "16px",
-              padding: "10px 0px 10px 12px",
-              justifyContent: "start",
-              ":hover": {
-                background: theme => (theme.palette.mode === "dark" ? "#55402B" : "#FFE2D0"),
-              },
-            }}
-          >
-            <Box
-              sx={{
-                display: "flex",
-                alignItems: "center",
-                gap: "5px",
-                marginLeft: !isMenuOpen ? "10px" : undefined,
-              }}
-            >
-              <NextImage width={"22px"} src={EditIcon} alt="previous node icon" />
-              <Box
-                className="toolbarDescription"
-                sx={{
-                  fontSize: "15px",
-                  overflow: "hidden",
-                  visibility: isMenuOpen ? "visible" : "hidden",
-                  transition: isMenuOpen
-                    ? "visibility 1s, line-height 1s, height 1s"
-                    : "visibility 0s, line-height 0s, height 0s",
-                  width: isMenuOpen ? "100px" : "0",
-                  display: isMenuOpen ? "flex" : "block",
-                  alignItems: "center",
-                  color: theme => (theme.palette.mode === "dark" ? "#EAECF0" : "#1D2939"),
-                }}
-              >
-                <Typography
-                  sx={{
-                    textOverflow: "ellipsis",
-                    overflow: "hidden",
-                    maxWidth: "90px",
-                    whiteSpace: "nowrap",
-                    fontWeight: "400",
-                  }}
-                >
-                  Pending List
-                </Typography>
-              </Box>
-
-              {(pendingProposalsNum ?? 0) > 0 && (
-                <Box
-                  className={window.innerWidth >= 500 ? "show-on-hover" : ""}
-                  sx={{
-                    width: "32px",
-                    height: "32px",
-                    borderRadius: "40%",
-                    background: "#E34848",
-                    color: "white",
-                    display: window.innerWidth >= 500 ? "none" : "flex",
-                    justifyContent: "center",
-                    alignItems: "center",
-                    position: "absolute",
-                    right: "20px",
-                  }}
-                >
-                  {pendingProposalsLoaded ? pendingProposalsNum ?? 0 : 0}
-                </Box>
-              )}
-            </Box>
-          </Button> */}
 
           {/* dashboard */}
           {["INSTRUCTOR", "STUDENT"].includes(user.role ?? "") && (
@@ -696,62 +390,6 @@ MainSidebarProps) => {
               toolbarIsOpen={isHovered}
             />
           )}
-          {/* {["INSTRUCTOR", "STUDENT"].includes(user.role ?? "") && (
-            <Button
-              onClick={() => {
-                if (user.role === "INSTRUCTOR") return window.open("/instructors/dashboard", "_blank");
-                if (user.role === "STUDENT") return window.open(`/instructors/dashboard/${user.uname}`, "_blank");
-              }}
-              disabled={disabledIntructorButton}
-              sx={{
-                width: "90%",
-                borderRadius: "16px",
-                padding: "10px 0px 10px 12px",
-                justifyContent: "start",
-                ":hover": {
-                  background: theme => (theme.palette.mode === "dark" ? "#55402B" : "#FFE2D0"),
-                },
-              }}
-            >
-              <Box
-                sx={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "5px",
-                  marginLeft: !isMenuOpen ? "10px" : undefined,
-                }}
-              >
-                <NextImage width={"22px"} src={GraduatedIcon} alt="previous node icon" />
-                <Box
-                  className="toolbarDescription"
-                  sx={{
-                    fontSize: "15px",
-                    overflow: "hidden",
-                    visibility: isMenuOpen ? "visible" : "hidden",
-                    transition: isMenuOpen
-                      ? "visibility 1s, line-height 1s, height 1s"
-                      : "visibility 0s, line-height 0s, height 0s",
-                    width: isMenuOpen ? "100px" : "0",
-                    display: isMenuOpen ? "flex" : "block",
-                    alignItems: "center",
-                    color: theme => (theme.palette.mode === "dark" ? "#EAECF0" : "#1D2939"),
-                  }}
-                >
-                  <Typography
-                    sx={{
-                      textOverflow: "ellipsis",
-                      overflow: "hidden",
-                      maxWidth: "90px",
-                      whiteSpace: "nowrap",
-                      fontWeight: "400",
-                    }}
-                  >
-                    Dashboard
-                  </Typography>
-                </Box>
-              </Box>
-            </Button>
-          )} */}
 
           {/* notebooks */}
           <SidebarButton
@@ -759,7 +397,6 @@ MainSidebarProps) => {
             iconSrc={NotebookIcon}
             onClick={e => {
               e.preventDefault();
-              // console.log("diplay", displayNotebooks);
               setDisplayNotebooks(!displayNotebooks);
             }}
             text="Notebooks"
@@ -768,62 +405,6 @@ MainSidebarProps) => {
               <KeyboardArrowDownIcon sx={{ transition: ".3s", rotate: displayNotebooks ? "180deg" : "0deg" }} />
             }
           />
-          {/* <Button
-            onClick={() => {
-              console.log("diplay", displayNotebooks);
-              setDisplayNotebooks(!displayNotebooks);
-            }}
-            // disabled={disabledBookmarksButton}
-            sx={{
-              width: "90%",
-              borderRadius: "16px",
-              padding: "10px 0px 10px 12px",
-              justifyContent: "start",
-              ":hover": {
-                background: theme => (theme.palette.mode === "dark" ? "#55402B" : "#FFE2D0"),
-              },
-            }}
-          >
-            <Box
-              sx={{
-                display: "flex",
-                alignItems: "center",
-                gap: "5px",
-                marginLeft: !isMenuOpen ? "10px" : undefined,
-              }}
-            >
-              <NextImage width={"22px"} src={NotebookIcon} alt="Notebooks" />
-              <Box
-                className="toolbarDescription"
-                sx={{
-                  fontSize: "15px",
-                  overflow: "hidden",
-                  visibility: isMenuOpen ? "visible" : "hidden",
-                  transition: isMenuOpen
-                    ? "visibility 1s, line-height 1s, height 1s"
-                    : "visibility 0s, line-height 0s, height 0s",
-                  width: isMenuOpen ? "100px" : "0",
-                  display: isMenuOpen ? "flex" : "block",
-                  alignItems: "center",
-                  color: theme => (theme.palette.mode === "dark" ? "#EAECF0" : "#1D2939"),
-                }}
-              >
-                <Typography
-                  sx={{
-                    textOverflow: "ellipsis",
-                    overflow: "hidden",
-                    maxWidth: "90px",
-                    whiteSpace: "nowrap",
-                    fontWeight: "400",
-                  }}
-                >
-                  Notebooks
-                </Typography>
-              </Box>
-
-              <KeyboardArrowDownIcon sx={{ transition: ".5s", rotate: displayNotebooks ? "0deg" : "180deg" }} />
-            </Box>
-          </Button> */}
 
           {displayNotebooks && isHovered && (
             <Box sx={{ /* border: "solid 1px red", */ width: "100%" }}>
@@ -884,56 +465,6 @@ MainSidebarProps) => {
               </Box>
             </Box>
           )}
-
-          {/* <Box
-            className={window.innerWidth >= 500 ? "show-on-hover" : ""}
-            sx={{
-              width: "100%",
-              display: window.innerWidth <= 500 ? "flex" : "none",
-              justifyContent: "center",
-              cursor: "pointer",
-            }}
-          >
-            <Button
-              sx={{
-                display: "flex",
-                justifyContent: "space-between",
-                paddingY: "10px",
-                paddingX: "20px",
-                width: "100%",
-                height: "100%",
-                ":hover": {
-                  background: theme => (theme.palette.mode === "dark" ? "#55402B" : "#FFE2D0"),
-                },
-              }}
-              onClick={openLeaderboardTypes}
-            >
-              <Box
-                sx={{
-                  overflow: "hidden",
-                  textOverflow: "ellipsis",
-                  whiteSpace: "nowrap",
-                  display: "inline-block",
-                  color: theme => (theme.palette.mode === "dark" ? "#eaecf0" : "#475467"),
-                }}
-              >
-                {leaderBoardType ? leaderBoardType : "Leaderboard"}
-              </Box>
-              {leaderboardTypeOpen ? (
-                <ExpandMore
-                  sx={{
-                    color: theme => (theme.palette.mode === "dark" ? "#eaecf0" : "#475467"),
-                  }}
-                />
-              ) : (
-                <ExpandLess
-                  sx={{
-                    color: theme => (theme.palette.mode === "dark" ? "#eaecf0" : "#475467"),
-                  }}
-                />
-              )}
-            </Button>
-          </Box> */}
         </Stack>
 
         {/* --------------- */}
@@ -1037,18 +568,13 @@ MainSidebarProps) => {
           sx={{
             paddingBottom: "20px",
             position: "relative",
-            // border: "dashed 1px royalBlue",
             height: "100%",
-            // minHeight: "0px",
-            // minHeight: "266px",
-            // maxHeight: "266px",
             width: "inherit",
           }}
         >
           {isHovered && (
             <>
               <Button
-                // variant="text"
                 sx={{
                   mx: "16px",
                   display: "flex",
@@ -1080,8 +606,6 @@ MainSidebarProps) => {
                     marginX: "auto",
                     left: "7%",
                     top: "25px",
-                    // top: window.innerHeight >= 500 ? "0px" : undefined,
-                    // bottom: window.innerHeight <= 500 ? "50px" : undefined,
                     height: "173px",
                   }}
                   choices={choices}
@@ -1089,19 +613,6 @@ MainSidebarProps) => {
                   comLeaderboardType={leaderBoardType ? leaderBoardType : "Leaderboard"}
                 />
               )}
-              {/* <Box
-                sx={{
-                  width: "100%",
-                  justifyContent: "flex-start",
-                  alignItems: "center",
-                  gap: "10px",
-                  height: "inherit",
-                  position: "relative",
-                  border: "solid 2px red",
-                }}
-              >
-                
-              </Box> */}
             </>
           )}
           {user?.tag && leaderBoardType && (
@@ -1113,9 +624,8 @@ MainSidebarProps) => {
               reloadPermanentGraph={reloadPermanentGrpah}
               setOpenSideBar={setOpenSideBar}
               reputationSignal={reputationSignal}
-              sx={{ px: "16px" /* maxHeight: "266px" */ /* minHeight: "266px" */ }}
+              sx={{ px: "16px" }}
               sxUserStatus={{
-                // display: isMenuOpen ? "flex" : "flex",
                 justifyContent: "flex-start",
                 alignItems: "center",
                 width: "100%",
