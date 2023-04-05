@@ -7,6 +7,8 @@ import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import React, { useCallback } from "react";
 
+import NodeTypeIcon from "@/components/NodeTypeIcon2";
+
 import { proposalSummariesGenerator } from "../../../../lib/utils/proposalSummariesGenerator";
 import shortenNumber from "../../../../lib/utils/shortenNumber";
 import { Editor } from "../../../Editor";
@@ -59,43 +61,10 @@ const ProposalItem = (props: any) => {
           xs: "5px 10px",
           sm: "10px 20px",
         },
+        background: "#242425",
       }}
     >
       {/* <h6>{props.proposal.newNodeId}</h6> */}
-      <div style={{ display: "flex", justifyContent: "space-between" }}>
-        <div className="title Time" style={{ fontSize: "12px" }}>
-          {dayjs(props.proposal.createdAt).fromNow()}
-        </div>
-        <div
-          className="secondary-content"
-          style={{ display: "flex", alignItems: "center", gap: "10px", fontSize: "16px" }}
-        >
-          <MemoizedMetaButton
-            tooltip="# of 1Cademists who have found this proposal unhelpful."
-            tooltipPosition="bottom-start"
-          >
-            <div style={{ display: "flex", alignItems: "center", gap: "4px", fontSize: "16px" }}>
-              <CloseIcon className={props.proposal.wrong ? "red-text" : "grey-text"} sx={{ fontSize: "inherit" }} />
-              <span>{shortenNumber(props.proposal.wrongs, 2, false)}</span>
-            </div>
-          </MemoizedMetaButton>
-          <MemoizedMetaButton
-            tooltip="# of 1Cademists who have found this proposal helpful."
-            tooltipPosition="bottom-start"
-          >
-            <div style={{ display: "flex", alignItems: "center", gap: "4px", fontSize: "16px" }}>
-              <DoneIcon className={props.proposal.correct ? "green-text" : "grey-text"} sx={{ fontSize: "inherit" }} />
-              <span>{shortenNumber(props.proposal.corrects, 2, false)}</span>
-            </div>
-          </MemoizedMetaButton>
-          <MemoizedMetaButton tooltip="# of 1Admins who have awarded this proposal." tooltipPosition="bottom-start">
-            <div style={{ display: "flex", alignItems: "center", gap: "4px", fontSize: "16px" }}>
-              <GradeIcon className={props.proposal.award ? "amber-text" : "grey-text"} sx={{ fontSize: "inherit" }} />
-              <span>{shortenNumber(props.proposal.awards, 2, false)}</span>
-            </div>
-          </MemoizedMetaButton>
-        </div>
-      </div>
       <div>
         <div className="ProposalTitle">
           {props.showTitle && <Editor label="" readOnly setValue={doNothing} value={props.proposal.title} />}
@@ -120,6 +89,68 @@ const ProposalItem = (props: any) => {
                 <Editor label="" readOnly setValue={doNothing} value={props.proposal.summary} />
               )}
         </div>
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+          }}
+        >
+          <Box
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+            }}
+          >
+            <Box
+              sx={{
+                width: "25px",
+                height: "25px",
+                borderRadius: "50%",
+                background: theme => (theme.palette.mode === "dark" ? "#404040" : "#EAECF0"),
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+              }}
+            >
+              <NodeTypeIcon nodeType={props.proposal.nodeType || ""} fontSize="inherit" />
+            </Box>
+            <Box style={{ fontSize: "12px", marginLeft: "5px" }}>{dayjs(props.proposal.createdAt).fromNow()}</Box>
+          </Box>
+          <div
+            className="secondary-content"
+            style={{ display: "flex", alignItems: "center", gap: "10px", fontSize: "16px" }}
+          >
+            <MemoizedMetaButton
+              tooltip="# of 1Cademists who have found this proposal unhelpful."
+              tooltipPosition="bottom-start"
+            >
+              <div style={{ display: "flex", alignItems: "center", gap: "4px", fontSize: "16px" }}>
+                <CloseIcon className={props.proposal.wrong ? "red-text" : "grey-text"} sx={{ fontSize: "inherit" }} />
+                <span>{shortenNumber(props.proposal.wrongs, 2, false)}</span>
+              </div>
+            </MemoizedMetaButton>
+            <MemoizedMetaButton
+              tooltip="# of 1Cademists who have found this proposal helpful."
+              tooltipPosition="bottom-start"
+            >
+              <div style={{ display: "flex", alignItems: "center", gap: "4px", fontSize: "16px" }}>
+                <DoneIcon
+                  className={props.proposal.correct ? "green-text" : "grey-text"}
+                  sx={{ fontSize: "inherit" }}
+                />
+                <span>{shortenNumber(props.proposal.corrects, 2, false)}</span>
+              </div>
+            </MemoizedMetaButton>
+            <MemoizedMetaButton tooltip="# of 1Admins who have awarded this proposal." tooltipPosition="bottom-start">
+              <div style={{ display: "flex", alignItems: "center", gap: "4px", fontSize: "16px" }}>
+                <GradeIcon className={props.proposal.award ? "amber-text" : "grey-text"} sx={{ fontSize: "inherit" }} />
+                <span>{shortenNumber(props.proposal.awards, 2, false)}</span>
+              </div>
+            </MemoizedMetaButton>
+          </div>
+        </Box>
       </div>
     </Paper>
   );

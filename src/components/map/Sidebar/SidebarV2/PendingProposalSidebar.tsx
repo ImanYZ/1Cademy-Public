@@ -97,6 +97,7 @@ PendingProposalSidebarProps) => {
                 };
               }
             }
+            versions[versionId]["nodeType"] = nodeType;
           }
 
           const pendingProposals = { ...versions };
