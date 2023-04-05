@@ -245,7 +245,6 @@ MainSidebarProps) => {
     }
   }, [displayLargeToolbar]);
 
-  // console.log({ uncheckedNotificationsNum });
   const toolbarContentMemoized = useMemo(() => {
     return (
       <Box
@@ -265,22 +264,15 @@ MainSidebarProps) => {
         <Stack alignItems="center" direction="column" spacing={"4px"} sx={{ width: "inherit", px: "14px" }}>
           <Box sx={{ marginTop: "10px", marginBottom: "15px" }}>
             <Box sx={{ display: "grid", placeItems: "center" }}>
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                className="hide-on-hover"
-                src={theme.palette.mode === "light" ? LogoLightMode.src : LogoDarkMode.src}
-                alt="1Logo"
-                width="61px"
-              />
-              <img
-                style={{
-                  display: "none",
-                }}
-                className="show-on-hover"
-                src={LogoExtended.src}
-                alt="1Logo"
-                width={"100%"}
-              />
+              {displayLargeToolbar ? (
+                <img src={LogoExtended.src} alt="1Logo" width={"100%"} />
+              ) : (
+                <img
+                  src={theme.palette.mode === "light" ? LogoLightMode.src : LogoDarkMode.src}
+                  alt="1Logo"
+                  width="61px"
+                />
+              )}
             </Box>
           </Box>
 
@@ -712,7 +704,8 @@ MainSidebarProps) => {
         title=""
         open={open}
         onClose={onClose}
-        width={window.innerWidth <= 500 ? "100%" : isMenuOpen ? "100%" : 80}
+        width={80}
+        // width={window.innerWidth <= 500 ? "100%" : isMenuOpen ? "100%" : 80}
         showCloseButton={false}
         showScrollUpButton={false}
         isMenuOpen={isMenuOpen}
@@ -721,12 +714,25 @@ MainSidebarProps) => {
         SidebarContent={toolbarContentMemoized}
         sx={{
           boxShadow: undefined,
+          // overflow: "hidden",
+          width: { sm: isHovered ? "250px" : "80px" },
+          ...(isMenuOpen && { width: "100%" }),
+
+          // width: { xs: displayLargeToolbar ? "100%" : "80px", sm: "80px" },
+          // maxWidth: { xs: displayLargeToolbar ? "100%" : "80px", sm: "80px" },
+          // ":hover": {
+          //   width: { xs: isMenuOpen ? "100%" : "80px", sm: "250px" },
+          // maxWidth: { xs: isMenuOpen ? "100%" : "80px", sm: "250px" },
+          // },
+        }}
+        sxContentWrapper={{
+          width: "inherit",
+          overflow: "hidden",
+          overflowY: isMenuOpen ? "auto" : "hidden",
           ":hover": {
-            width: "250px",
-            maxWidth: "250px",
+            overflowY: "auto",
           },
         }}
-        sxContentWrapper={{ width: "inherit" }}
       />
     </>
   );

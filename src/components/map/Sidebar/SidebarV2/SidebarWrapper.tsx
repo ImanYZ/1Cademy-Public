@@ -13,7 +13,7 @@ type SidebarWrapperProps = {
   open: boolean;
   onClose: () => void;
   SidebarContent: ReactNode;
-  width: any;
+  width: number;
   height?: number;
   SidebarOptions?: ReactNode;
   anchor?: DrawerProps["anchor"];
@@ -76,9 +76,9 @@ export const SidebarWrapper = ({
       PaperProps={{
         id,
         sx: {
-          minWidth: { xs: "0px", sm: width },
-          width: { xs: isMenuOpen ? "100%" : "auto", sm: width },
-          maxWidth: { xs: width, sm: "80px" },
+          // minWidth: { xs: "0px", sm: width },
+          width: { xs: "100%", sm: width },
+          // maxWidth: { xs: width, sm: "80px" },
           height: height < 100 && innerHeight ? `${(height / 100) * innerHeight}px` : `${height}%`,
           borderRight: "none",
           background: theme => (theme.palette.mode === "dark" ? "rgb(31,31,31)" : "rgb(240,240,240)"),

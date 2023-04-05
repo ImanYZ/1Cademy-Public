@@ -2761,13 +2761,13 @@ right: 5px; */
   display: flex;
 }
 
-.toolbar:hover .show-on-hover {
+/* .toolbar:hover .show-on-hover {
   display: flex !important;
 }
 
 .toolbar:hover .hide-on-hover {
   display: none !important;
-}
+} */
 
 /* .toolbar:focus .user-status-section,
 .toolbar:hover .user-status-section {
