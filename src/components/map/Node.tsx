@@ -437,15 +437,26 @@ const Node = ({
 
       if (!notebookRef.current.choosingNode && notebookRef.current.selectedNode !== identifier) {
         const updatedNodeIds: string[] = [notebookRef.current.selectedNode!, identifier];
-        notebookRef.current.selectedNode = identifier;
-        nodeBookDispatch({ type: "setSelectedNode", payload: identifier });
+
         setNodeUpdates({
           nodeIds: updatedNodeIds,
           updatedAt: new Date(),
         });
       }
     },
-    [identifier, title, nodeClicked, nodeType]
+    [
+      notebookRef,
+      identifier,
+      title,
+      nodeBookDispatch,
+      chosenNodeChanged,
+      setAbleToPropose,
+      scrollToNode,
+      nodeClicked,
+      nodeType,
+      setOpenPart,
+      setNodeUpdates,
+    ]
   );
 
   const hideNodeHandler = useCallback(
