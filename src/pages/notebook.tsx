@@ -69,7 +69,6 @@ import { addSuffixToUrlGMT } from "@/lib/utils/string.utils";
 import LoadingImg from "../../public/animated-icon-1cademy.gif";
 import focusViewLogo from "../../public/focus.svg";
 import focusViewDarkLogo from "../../public/focus-dark.svg";
-import IdeaIcon from "../../public/idea.svg";
 import PrevNodeIcon from "../../public/prev-node.svg";
 import PrevNodeLightIcon from "../../public/prev-node-light.svg";
 import toolBox from "../../public/toolbox.svg";
@@ -82,6 +81,7 @@ import { TooltipTutorial } from "../components/interactiveTutorial/Tutorial";
 import { MemoizedClustersList } from "../components/map/ClustersList";
 import { MemoizedLinksList } from "../components/map/LinksList";
 import { MemoizedNodeList } from "../components/map/NodesList";
+import { NotebookPopup } from "../components/map/Popup";
 import { MemoizedToolbarSidebar } from "../components/map/Sidebar/SidebarV2/ToolbarSidebar";
 import { NodeItemDashboard } from "../components/NodeItemDashboard";
 import { Portal } from "../components/Portal";
@@ -5903,7 +5903,7 @@ const Dashboard = ({}: DashboardProps) => {
               : undefined,
         }}
       >
-        {nodeBookState.choosingNode && (
+        {/* {nodeBookState.choosingNode && (
           <Box
             id="ChoosingNodeMessage"
             sx={{
@@ -5940,6 +5940,23 @@ const Dashboard = ({}: DashboardProps) => {
               />
             </Button>
           </Box>
+        )} */}
+
+        {nodeBookState.choosingNode && (
+          <NotebookPopup
+            onClose={() => {
+              notebookRef.current.choosingNode = null;
+              notebookRef.current.selectedNode = null;
+              notebookRef.current.chosenNode = null;
+              nodeBookDispatch({ type: "setChoosingNode", payload: null });
+              nodeBookDispatch({ type: "setSelectedNode", payload: null });
+              nodeBookDispatch({ type: "setChosenNode", payload: null });
+            }}
+            sx={{
+              left: nodeBookState.choosingNode.id === "ToolbarTag" ? "310px" : "50%!important",
+              transform: nodeBookState.choosingNode.id !== "ToolbarTag" ? "translateX(-50%)" : undefined,
+            }}
+          />
         )}
 
         {nodeBookState.previousNode && (
