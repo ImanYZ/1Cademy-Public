@@ -5903,44 +5903,9 @@ const Dashboard = ({}: DashboardProps) => {
               : undefined,
         }}
       >
-        {/* {nodeBookState.choosingNode && (
-          <Box
-            id="ChoosingNodeMessage"
-            sx={{
-              display: "flex",
-              alignItems: "center",
-              left: nodeBookState.choosingNode.id === "ToolbarTag" ? "310px" : "50%!important",
-              transform: nodeBookState.choosingNode.id !== "ToolbarTag" ? "translateX(-50%)" : undefined,
-            }}
-          >
-            <NextImage width={"20px"} src={IdeaIcon} alt="previous node icon" />
-            <Typography
-              sx={{
-                marginLeft: "10px",
-              }}
-              fontSize={"inherit"}
-            >
-              Click the node you'd like to link to...
-            </Typography>
-            <Button
-              onClick={() => {
-                notebookRef.current.choosingNode = null;
-                notebookRef.current.selectedNode = null;
-                notebookRef.current.chosenNode = null;
-                nodeBookDispatch({ type: "setChoosingNode", payload: null });
-                nodeBookDispatch({ type: "setSelectedNode", payload: null });
-                nodeBookDispatch({ type: "setChosenNode", payload: null });
-              }}
-            >
-              <CloseIcon
-                sx={{
-                  color: "#A4A4A4",
-                }}
-                fontSize="small"
-              />
-            </Button>
-          </Box>
-        )} */}
+        {Object.keys(graph.nodes).length === 0 && (
+          <NotebookPopup showIcon={false}>This Notebook does not contain node</NotebookPopup>
+        )}
 
         {nodeBookState.choosingNode && (
           <NotebookPopup
@@ -5956,7 +5921,9 @@ const Dashboard = ({}: DashboardProps) => {
               left: nodeBookState.choosingNode.id === "ToolbarTag" ? "310px" : "50%!important",
               transform: nodeBookState.choosingNode.id !== "ToolbarTag" ? "translateX(-50%)" : undefined,
             }}
-          />
+          >
+            Click the node you'd like to link to...
+          </NotebookPopup>
         )}
 
         {nodeBookState.previousNode && (

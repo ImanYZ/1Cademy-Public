@@ -3,31 +3,35 @@ import { IconButton, Typography } from "@mui/material";
 import { Box, SxProps, Theme } from "@mui/system";
 import NextImage from "next/image";
 import IdeaIcon from "public/idea.svg";
-import React from "react";
+import React, { ReactNode } from "react";
 
 type NotebookPopupProps = {
+  children: ReactNode;
+  showIcon?: boolean;
   onClose?: () => void;
   sx?: SxProps<Theme>;
 };
 
-export const NotebookPopup = ({ onClose, sx }: NotebookPopupProps) => {
+export const NotebookPopup = ({ children, showIcon = true, onClose, sx }: NotebookPopupProps) => {
   return (
     <Box
       id="ChoosingNodeMessage"
       sx={{
         display: "flex",
         alignItems: "center",
+        left: "50%",
+        transform: "translateX(-50%)",
         ...sx,
       }}
     >
-      <NextImage width={"20px"} src={IdeaIcon} alt="previous node icon" />
+      {showIcon && <NextImage width={"20px"} src={IdeaIcon} alt="previous node icon" />}
       <Typography
         sx={{
           marginX: "10px",
         }}
         fontSize={"inherit"}
       >
-        Click the node you'd like to link to...
+        {children}
       </Typography>
       {onClose && (
         <IconButton onClick={onClose}>
