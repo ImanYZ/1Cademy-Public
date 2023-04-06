@@ -6,6 +6,7 @@ import MoreVertIcon from "@mui/icons-material/MoreVert";
 import {
   Box,
   Button,
+  ClickAwayListener,
   Divider,
   IconButton,
   List,
@@ -19,7 +20,7 @@ import {
   useMediaQuery,
   useTheme,
 } from "@mui/material";
-import { addDoc, collection, doc, getFirestore, setDoc, Timestamp } from "firebase/firestore";
+import { addDoc, collection, deleteDoc, doc, getFirestore, setDoc, Timestamp, updateDoc } from "firebase/firestore";
 import NextImage from "next/image";
 import React, { Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
 
@@ -82,6 +83,7 @@ type MainSidebarProps = {
   notebooks: Notebook[];
   onChangeNotebook: (notebookId: string) => void;
   selectedNotebook: string;
+  // setSelectedNtoebook
   // setCurrentTutorial: Dispatch<SetStateAction<TutorialKeys>>;
 };
 
@@ -125,7 +127,7 @@ MainSidebarProps) => {
   const [displayNotebooks, setDisplayNotebooks] = useState(false);
   const { ref, isHovered } = useHover();
   const [isCreatingNotebook, setIsCreatingNotebook] = useState(false);
-  const [notebookEditableId, setNotebookEditableId] = useState("");
+  const [editableNotebook, setEditableNotebook] = useState<Notebook | null>(null);
   const createNotebookButtonRef = useRef<any>(null);
   const { height } = useWindowSize();
 
@@ -276,13 +278,62 @@ MainSidebarProps) => {
       };
       const notebooksRef = collection(db, "notebooks");
       const docRef = await addDoc(notebooksRef, newNotebook);
-      setNotebookEditableId(docRef.id);
+      setEditableNotebook({ ...newNotebook, id: docRef.id });
+      onChangeNotebook(docRef.id);
     } catch (error) {
       console.error("Cant create a notebook", error);
     } finally {
       setIsCreatingNotebook(false);
     }
-  }, [db, notebooks.length, user.uname]);
+  }, [db, notebooks.length, onChangeNotebook, user.uname]);
+
+  const onUpdateNotebookTitle = useCallback(async () => {
+    try {
+      if (!editableNotebook) return;
+      const notebooksRef = doc(db, "notebooks", editableNotebook.id);
+      await updateDoc(notebooksRef, { title: editableNotebook.title });
+      setEditableNotebook(null);
+    } catch (err) {}
+  }, [db, editableNotebook]);
+
+  const onDuplicateNotebook = useCallback(async () => {
+    try {
+      if (!editableNotebook) return;
+      setIsCreatingNotebook(true);
+
+      const copyNotebook: Omit<Notebook, "id"> = {
+        owner: editableNotebook.owner,
+        title: `${editableNotebook.title} copy`,
+        isPublic: editableNotebook.isPublic,
+        users: editableNotebook.users,
+        roles: editableNotebook.roles,
+      };
+      const notebooksRef = collection(db, "notebooks");
+      const docRef = await addDoc(notebooksRef, copyNotebook);
+      setEditableNotebook({ ...copyNotebook, id: docRef.id });
+      onChangeNotebook(docRef.id);
+    } catch (error) {
+      console.error("Cant duplicate a notebook", error);
+    } finally {
+      setIsCreatingNotebook(false);
+    }
+  }, [db, editableNotebook, onChangeNotebook]);
+
+  const onDeleteNotebook = useCallback(async () => {
+    try {
+      // TODO: show confirm message
+      if (!editableNotebook) return;
+      const notebooksRef = doc(db, "notebooks", editableNotebook.id);
+      await deleteDoc(notebooksRef);
+      // call DB
+      setEditableNotebook(null);
+      onChangeNotebook("");
+    } catch (error) {
+      console.error("Cant remove notebook", error);
+    } finally {
+      setIsCreatingNotebook(false);
+    }
+  }, [db, editableNotebook, onChangeNotebook]);
 
   useEffect(() => {
     if (!displayLargeToolbar) {
@@ -460,13 +511,7 @@ MainSidebarProps) => {
                         </Typography>
                       </Box>
                     </Box>
-                    <IconButton
-                      onClick={() => {
-                        console.log({ id: cur.id });
-                        setNotebookEditableId(cur.id);
-                      }}
-                      sx={{ p: "0px" }}
-                    >
+                    <IconButton onClick={() => setEditableNotebook(cur)} sx={{ p: "0px" }}>
                       <MoreVertIcon />
                     </IconButton>
                   </Box>
@@ -481,7 +526,7 @@ MainSidebarProps) => {
                     <Typography>Creating...</Typography>
                   </Box>
                 ) : (
-                  <Box onClick={onCreateNotebook} sx={{ display: "flex", alignItems: "center" }}>
+                  <Box onClick={onCreateNotebook} sx={{ display: "flex", alignItems: "center", cursor: "pointer" }}>
                     <Box
                       sx={{
                         p: "0px",
@@ -570,71 +615,84 @@ MainSidebarProps) => {
         </Popover> */}
 
         <Portal anchor="portal">
-          {notebookEditableId && (
-            <Box
-              sx={{
-                width: "263px",
-                position: "absolute",
-                top: `${height / 2 - 200}px`,
-                left: "255px",
-                zIndex: 10000,
-                backgroundColor: theme =>
-                  theme.palette.mode === "dark" ? theme.palette.common.notebookMainBlack : theme.palette.common.gray50,
-              }}
-            >
-              <Box sx={{ p: "14px 12px" }}>
-                <TextField
-                  id="notebook-title"
-                  label=""
-                  variant="outlined"
-                  InputProps={{ sx: { p: "10px 14px", fontSize: "12px" } }}
-                  inputProps={{ sx: {} }}
-                  sx={{
-                    "& .Mui-focused .MuiOutlinedInput-notchedOutline": {
-                      borderColor: theme =>
-                        theme.palette.mode === "dark"
-                          ? theme.palette.common.primary600
-                          : theme.palette.common.primary600,
-                      boxShadow: theme =>
-                        theme.palette.mode === "dark"
-                          ? "0px 1px 2px rgba(16, 24, 40, 0.05), 0px 0px 0px 4px #62544B"
-                          : "0px 1px 2px rgba(16, 24, 40, 0.05), 0px 0px 0px 4px #ECCFBD",
-                    },
-                    "& .MuiOutlinedInput-notchedOutline": {
-                      borderWidth: "0px",
-                    },
-                  }}
-                  multiline
-                  fullWidth
-                />
-              </Box>
-              <Divider />
-              <List sx={{ p: "0px", "& .MuiTypography-body1": { fontSize: "12px" } }}>
-                <ListItem disablePadding>
-                  <ListItemButton sx={{ p: "12px 14px" }}>
-                    <ListItemText primary="Rename" />
-                  </ListItemButton>
-                </ListItem>
-                <ListItem disablePadding>
-                  <ListItemButton sx={{ p: "12px 14px" }}>
-                    <ListItemText primary="Duplicate" />
-                  </ListItemButton>
-                </ListItem>
-                <ListItem disablePadding>
-                  <ListItemButton sx={{ p: "12px 14px" }}>
-                    <ListItemText primary="Copy link to page" />
-                  </ListItemButton>
-                </ListItem>
-                <ListItem disablePadding>
-                  <ListItemButton sx={{ p: "12px 14px" }}>
-                    <ListItemText primary="Delete" />
-                  </ListItemButton>
-                </ListItem>
-              </List>
-              {/* <Typography id="modal-modal-title" variant="h6" component="h2">
+          {editableNotebook && (
+            <ClickAwayListener onClickAway={onUpdateNotebookTitle}>
+              <Box
+                sx={{
+                  width: "263px",
+                  position: "absolute",
+                  top: `${height / 2 - 200}px`,
+                  left: "255px",
+                  zIndex: 10000,
+                  backgroundColor: theme =>
+                    theme.palette.mode === "dark"
+                      ? theme.palette.common.notebookMainBlack
+                      : theme.palette.common.gray50,
+                }}
+              >
+                <Box sx={{ p: "14px 12px" }}>
+                  <TextField
+                    id="notebook-title"
+                    label=""
+                    variant="outlined"
+                    // onKeyDown={e => {
+                    //   console.log({ e });
+                    //   onUpdateNotebookTitle();
+                    //   if (e.code === "Enter" || e.keyCode === 13) {
+                    //     e.stopPropagation();
+                    //   }
+                    // }}
+                    value={editableNotebook.title}
+                    onChange={e => setEditableNotebook(prev => (prev ? { ...prev, title: e.target.value } : null))}
+                    InputProps={{ sx: { p: "10px 14px", fontSize: "12px" } }}
+                    inputProps={{ sx: {} }}
+                    sx={{
+                      "& .Mui-focused .MuiOutlinedInput-notchedOutline": {
+                        borderColor: theme =>
+                          theme.palette.mode === "dark"
+                            ? theme.palette.common.primary600
+                            : theme.palette.common.primary600,
+                        boxShadow: theme =>
+                          theme.palette.mode === "dark"
+                            ? "0px 1px 2px rgba(16, 24, 40, 0.05), 0px 0px 0px 4px #62544B"
+                            : "0px 1px 2px rgba(16, 24, 40, 0.05), 0px 0px 0px 4px #ECCFBD",
+                      },
+                      "& .MuiOutlinedInput-notchedOutline": {
+                        borderWidth: "0px",
+                      },
+                    }}
+                    multiline
+                    fullWidth
+                  />
+                </Box>
+                <Divider />
+                <List sx={{ p: "0px", "& .MuiTypography-body1": { fontSize: "12px" } }}>
+                  {/* <ListItem disablePadding>
+                    <ListItemButton sx={{ p: "12px 14px" }}>
+                      <ListItemText primary="Rename" />
+                    </ListItemButton>
+                  </ListItem> */}
+                  <ListItem disablePadding>
+                    <ListItemButton onClick={onDuplicateNotebook} sx={{ p: "12px 14px" }}>
+                      <ListItemText primary="Duplicate" />
+                    </ListItemButton>
+                  </ListItem>
+                  <ListItem disablePadding>
+                    <ListItemButton sx={{ p: "12px 14px" }}>
+                      <ListItemText primary="Copy link to page" />
+                    </ListItemButton>
+                  </ListItem>
+                  <ListItem disablePadding>
+                    <ListItemButton onClick={onDeleteNotebook} sx={{ p: "12px 14px" }}>
+                      <ListItemText primary="Delete" />
+                    </ListItemButton>
+                  </ListItem>
+                </List>
+                {/* <Typography id="modal-modal-title" variant="h6" component="h2">
                 {notebooks.find(cur => cur.id === notebookEditableId)?.title ?? ""}
               </Typography> */}
-            </Box>
+              </Box>
+            </ClickAwayListener>
           )}
         </Portal>
 
@@ -796,7 +854,7 @@ MainSidebarProps) => {
     notebooks,
     isCreatingNotebook,
     onCreateNotebook,
-    notebookEditableId,
+    editableNotebook,
     height,
     shouldShowTagSearcher,
     closeTagSelector,
@@ -855,7 +913,7 @@ MainSidebarProps) => {
     notebooks,
     selectedNotebook,
     isCreatingNotebook,
-    notebookEditableId,
+    editableNotebook,
   ]);
 
   return (
