@@ -367,6 +367,7 @@ const Dashboard = ({}: DashboardProps) => {
     (nodeId: string) => {
       const originalNode = document.getElementById(nodeId);
       const origin = document.getElementById("map-interaction-origin");
+
       const thisNode = graph.nodes[nodeId];
 
       if (!originalNode) return false;
@@ -380,12 +381,12 @@ const Dashboard = ({}: DashboardProps) => {
       let nodeLeft = originLeft + thisNode.left * mapInteractionValue.scale;
       const regionWidth = windowWith - windowInnerLeft - windowInnerRight;
       const regionHeight = windowHeight - windowInnerTop - windowInnerBottom;
-      const collition =
+      const collide =
         nodeLeft + nodeWidth >= windowInnerLeft &&
         nodeLeft <= windowInnerLeft + regionWidth &&
         nodeTop + nodeHeight >= windowInnerTop &&
         nodeTop <= windowInnerTop + regionHeight;
-      return collition;
+      return collide;
     },
     [
       graph.nodes,
@@ -434,6 +435,7 @@ const Dashboard = ({}: DashboardProps) => {
       console.log("STN");
       if (!scrollToNodeInitialized.current) {
         const nodeInViewport = onNodeInViewport(nodeId);
+        console.log("nodeInViewporttt", nodeInViewport);
         let timeout = 400;
         if (nodeInViewport) {
           tries = 10;
@@ -556,9 +558,13 @@ const Dashboard = ({}: DashboardProps) => {
 
   const onCompleteWorker = useCallback(() => {
     if (!nodeBookState.selectedNode) return;
+    const timeout = onNodeInViewport(nodeBookState.selectedNode) ? 300 : 1300;
+    setTimeout(() => {
+      if (!nodeBookState.selectedNode) return;
 
-    scrollToNode(nodeBookState.selectedNode);
-  }, [nodeBookState.selectedNode, scrollToNode]);
+      scrollToNode(nodeBookState.selectedNode);
+    }, timeout);
+  }, [nodeBookState.selectedNode, onNodeInViewport, scrollToNode]);
 
   const setOperation = useCallback((operation: string) => {
     lastNodeOperation.current = { name: operation, data: "" };
