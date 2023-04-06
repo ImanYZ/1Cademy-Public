@@ -366,10 +366,18 @@ const Dashboard = ({}: DashboardProps) => {
   const onNodeInViewport = useCallback(
     (nodeId: string) => {
       const originalNode = document.getElementById(nodeId);
-      if (!originalNode) {
-        return false;
-      }
-      var { left: nodeLeft, top: nodeTop, width: nodeWidth, height: nodeHeight } = originalNode.getBoundingClientRect();
+      const origin = document.getElementById("map-interaction-origin");
+      const thisNode = graph.nodes[nodeId];
+
+      if (!originalNode) return false;
+      if (!origin) return false;
+      if (!thisNode) return false;
+
+      const { width: nodeWidth, height: nodeHeight } = originalNode.getBoundingClientRect();
+      const { top: originTop, left: originLeft } = origin.getBoundingClientRect();
+
+      let nodeTop = originTop + thisNode.top * mapInteractionValue.scale;
+      let nodeLeft = originLeft + thisNode.left * mapInteractionValue.scale;
       const regionWidth = windowWith - windowInnerLeft - windowInnerRight;
       const regionHeight = windowHeight - windowInnerTop - windowInnerBottom;
       const collition =
@@ -377,10 +385,17 @@ const Dashboard = ({}: DashboardProps) => {
         nodeLeft <= windowInnerLeft + regionWidth &&
         nodeTop + nodeHeight >= windowInnerTop &&
         nodeTop <= windowInnerTop + regionHeight;
-
       return collition;
     },
-    [windowHeight, windowInnerLeft, windowInnerRight, windowInnerTop, windowWith]
+    [
+      graph.nodes,
+      mapInteractionValue.scale,
+      windowHeight,
+      windowInnerLeft,
+      windowInnerRight,
+      windowInnerTop,
+      windowWith,
+    ]
   );
 
   useEffect(() => {
@@ -416,8 +431,15 @@ const Dashboard = ({}: DashboardProps) => {
   const scrollToNode = useCallback(
     (nodeId: string, regardless = false, tries = 0) => {
       if (tries === 10) return;
-
+      console.log("STN");
       if (!scrollToNodeInitialized.current) {
+        const nodeInViewport = onNodeInViewport(nodeId);
+        let timeout = 400;
+        if (nodeInViewport) {
+          tries = 10;
+          timeout = 0;
+        }
+        console.log("STN:", { tries, timeout, nodeInViewport });
         setTimeout(() => {
           const originalNode = document.getElementById(nodeId);
           if (!originalNode) {
@@ -425,7 +447,7 @@ const Dashboard = ({}: DashboardProps) => {
           }
           // const scrollToSelectedNode = lastNodeOperation.current ? ["scrollToSelectedNode"].includes(lastNodeOperation.current.name) : false;
 
-          if (!regardless && onNodeInViewport(nodeId) && !forcedTutorial) return;
+          if (!regardless && nodeInViewport && !forcedTutorial) return;
 
           if (
             originalNode &&
@@ -463,7 +485,7 @@ const Dashboard = ({}: DashboardProps) => {
           } else {
             scrollToNode(nodeId, regardless, tries + 1);
           }
-        }, 400);
+        }, timeout);
       }
     },
     [forcedTutorial, onNodeInViewport]
@@ -6452,20 +6474,16 @@ const Dashboard = ({}: DashboardProps) => {
                 value={mapInteractionValue}
                 onChange={navigateWhenNotScrolling}
               >
-                {/* <Tooltip title={`(${targetClientRect.left},${targetClientRect.top})`}>
-                  <Box
-                    sx={{
-                      width: "10px",
-                      height: "10px",
-                      borderRadius: "50%",
-                      position: "absolute",
-                      top: targetClientRect.top,
-                      left: targetClientRect.left,
-                      backgroundColor: "red",
-                      zIndex: 999999,
-                    }}
-                  ></Box>
-                </Tooltip> */}
+                {/* origin used to measure the the relative position of each node to the ViewPort */}
+                {/* used in onNodeInViewport Callback */}
+                <Box
+                  id="map-interaction-origin"
+                  sx={{
+                    position: "absolute",
+                    top: 0,
+                    left: 0,
+                  }}
+                ></Box>
                 {!currentStep?.anchor && tutorial && (
                   <TooltipTutorial
                     tutorial={tutorial}
@@ -6549,6 +6567,7 @@ const Dashboard = ({}: DashboardProps) => {
                   setOpenPart={onChangeNodePart}
                 />
               </MapInteractionCSS>
+
               {showRegion && (
                 <Box
                   id="region-stn"

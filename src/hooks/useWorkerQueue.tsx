@@ -26,7 +26,7 @@ type UseWorkerQueueProps = {
   mapWidth: number;
   mapHeight: number;
   allTags: AllTagsTreeView;
-  onComplete: () => void;
+  onComplete: (runTime: number) => void;
   setClusterNodes: any;
   withClusters: boolean;
 };
@@ -74,6 +74,7 @@ export const useWorkerQueue = ({
         setIsWorking(false);
       };
       worker.onmessage = e => {
+        const startTime = performance.now();
         const { oldMapWidth, oldMapHeight, oldNodes, oldEdges, graph, oldClusterNodes } = e.data;
 
         // console.log("WORKER RESULT", { oldNodes, oldEdges });
@@ -153,9 +154,11 @@ export const useWorkerQueue = ({
         });
 
         setIsWorking(false);
+        const endTime = performance.now();
+        const runTime = endTime - startTime;
         setTimeout(() => {
-          onComplete();
-        }, 1500);
+          onComplete(runTime);
+        }, runTime);
       };
     },
     [allTags, g, mapHeight, mapWidth, onComplete, setClusterNodes, setGraph, setMapHeight, setMapWidth, withClusters]

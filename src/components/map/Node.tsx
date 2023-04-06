@@ -271,7 +271,6 @@ const Node = ({
   proposeNodeImprovement,
   proposeNewChild,
   cleanEditorLink,
-  scrollToNode,
   openSidebar,
   locked,
   setOperation,
@@ -427,7 +426,7 @@ const Node = ({
         nodeBookDispatch({ type: "setChosenNode", payload: { id: identifier, title } });
         chosenNodeChanged(notebookRef.current.choosingNode.id);
         setAbleToPropose(true);
-        scrollToNode(notebookRef.current.selectedNode);
+        // scrollToNode(notebookRef.current.selectedNode);
         operation = "chooseNode";
       } else if (
         "activeElement" in event.currentTarget &&
