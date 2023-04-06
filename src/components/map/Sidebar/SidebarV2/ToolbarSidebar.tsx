@@ -3,10 +3,25 @@ import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import KeyboardArrowLeftIcon from "@mui/icons-material/KeyboardArrowLeft";
 import MenuIcon from "@mui/icons-material/Menu";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
-import { Box, Button, Divider, IconButton, Stack, Tooltip, Typography, useMediaQuery, useTheme } from "@mui/material";
+import {
+  Box,
+  Button,
+  Divider,
+  IconButton,
+  List,
+  ListItem,
+  ListItemButton,
+  ListItemText,
+  Stack,
+  TextField,
+  Tooltip,
+  Typography,
+  useMediaQuery,
+  useTheme,
+} from "@mui/material";
 import { addDoc, collection, doc, getFirestore, setDoc, Timestamp } from "firebase/firestore";
 import NextImage from "next/image";
-import React, { Suspense, useCallback, useEffect, useMemo, useState } from "react";
+import React, { Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { ChosenTag, MemoizedTagsSearcher } from "@/components/TagsSearcher";
 import { useNodeBook } from "@/context/NodeBookContext";
@@ -25,12 +40,14 @@ import NotificationIcon from "../../../../../public/notification.svg";
 import SearchIcon from "../../../../../public/search.svg";
 import TagIcon from "../../../../../public/tag.svg";
 import { useHover } from "../../../../hooks/userHover";
+import { useWindowSize } from "../../../../hooks/useWindowSize";
 import { DispatchAuthActions, Reputation, ReputationSignal, User, UserTheme } from "../../../../knowledgeTypes";
 import { UsersStatus, UserTutorials } from "../../../../nodeBookTypes";
 import { OpenSidebar } from "../../../../pages/notebook";
 import { Notebook } from "../../../../types";
+import { Portal } from "../../../Portal";
 import { CustomBadge } from "../../CustomBudge";
-import Modal from "../../Modal/Modal";
+import CustomModal from "../../Modal/Modal";
 import { SidebarButton } from "../../SidebarButtons";
 import { MemoizedUserStatusSettings } from "../../UserStatusSettings2";
 import MultipleChoiceBtn from "../MultipleChoiceBtn";
@@ -107,6 +124,10 @@ MainSidebarProps) => {
   const [shouldShowTagSearcher, setShouldShowTagSearcher] = useState<boolean>(false);
   const [displayNotebooks, setDisplayNotebooks] = useState(false);
   const { ref, isHovered } = useHover();
+  const [isCreatingNotebook, setIsCreatingNotebook] = useState(false);
+  const [notebookEditableId, setNotebookEditableId] = useState("");
+  const createNotebookButtonRef = useRef<any>(null);
+  const { height } = useWindowSize();
 
   const displayLargeToolbar = useMemo(() => isHovered || isMenuOpen, [isHovered, isMenuOpen]);
   // console.log({ displayLargeToolbar, isHovered, isMenuOpen });
@@ -242,6 +263,26 @@ MainSidebarProps) => {
   const disabledIntructorButton = disableToolbar;
   const disabledLeaderboardButton = disableToolbar;
   const disableUserStatusList = disableToolbar;
+
+  const onCreateNotebook = useCallback(async () => {
+    try {
+      setIsCreatingNotebook(true);
+      const newNotebook: Omit<Notebook, "id"> = {
+        owner: user.uname,
+        title: `notebook ${notebooks.length + 1}`,
+        isPublic: "none",
+        users: [],
+        roles: {},
+      };
+      const notebooksRef = collection(db, "notebooks");
+      const docRef = await addDoc(notebooksRef, newNotebook);
+      setNotebookEditableId(docRef.id);
+    } catch (error) {
+      console.error("Cant create a notebook", error);
+    } finally {
+      setIsCreatingNotebook(false);
+    }
+  }, [db, notebooks.length, user.uname]);
 
   useEffect(() => {
     if (!displayLargeToolbar) {
@@ -384,7 +425,6 @@ MainSidebarProps) => {
                 {notebooks.map((cur, idx) => (
                   <Box
                     key={idx}
-                    onClick={() => onChangeNotebook(cur.id)}
                     sx={{
                       p: "10px 16px",
                       display: "flex",
@@ -394,7 +434,10 @@ MainSidebarProps) => {
                     }}
                   >
                     {/* min-width is making ellipsis works correctly */}
-                    <Box sx={{ minWidth: "0px", display: "flex", alignItems: "center" }}>
+                    <Box
+                      onClick={() => onChangeNotebook(cur.id)}
+                      sx={{ minWidth: "0px", display: "flex", alignItems: "center" }}
+                    >
                       <Box sx={{ minWidth: "0px", display: "flex", alignItems: "center" }}>
                         <Box
                           sx={{
@@ -417,30 +460,55 @@ MainSidebarProps) => {
                         </Typography>
                       </Box>
                     </Box>
-                    <IconButton sx={{ p: "0px" }}>
+                    <IconButton
+                      onClick={() => {
+                        console.log({ id: cur.id });
+                        setNotebookEditableId(cur.id);
+                      }}
+                      sx={{ p: "0px" }}
+                    >
                       <MoreVertIcon />
                     </IconButton>
                   </Box>
                 ))}
               </Stack>
 
-              <Divider />
+              <Divider ref={createNotebookButtonRef} />
 
               <Box sx={{ p: "10px 16px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                <Box sx={{ display: "flex", alignItems: "center" }}>
-                  <IconButton sx={{ p: "0px", borderRadius: "5px" }}>
-                    <AddIcon />
-                  </IconButton>
-                  <Box sx={{ display: "flex", alignItems: "center" }}>
-                    <Typography
+                {isCreatingNotebook ? (
+                  <Box>
+                    <Typography>Creating...</Typography>
+                  </Box>
+                ) : (
+                  <Box onClick={onCreateNotebook} sx={{ display: "flex", alignItems: "center" }}>
+                    <Box
                       sx={{
-                        ml: "20px",
+                        p: "0px",
+                        borderRadius: "5px",
+                        backgroundColor: ({ palette }) => (palette.mode === "dark" ? "#55402B66" : "#E7724033"),
+                        display: "grid",
+                        placeItems: "center",
                       }}
                     >
-                      Create New
-                    </Typography>
+                      <AddIcon
+                        sx={{
+                          color: ({ palette }) =>
+                            palette.mode === "dark" ? palette.common.primary800 : palette.common.orange400,
+                        }}
+                      />
+                    </Box>
+                    <Box sx={{ display: "flex", alignItems: "center" }}>
+                      <Typography
+                        sx={{
+                          ml: "20px",
+                        }}
+                      >
+                        Create New
+                      </Typography>
+                    </Box>
                   </Box>
-                </Box>
+                )}
               </Box>
             </Box>
           )}
@@ -488,17 +556,112 @@ MainSidebarProps) => {
           </Button>
         )}
 
+        {/* <Popover
+          id={"pp"}
+          open={Boolean(notebookEditableId)}
+          anchorEl={createNotebookButtonRef}
+          onClose={() => setNotebookEditableId("")}
+          anchorOrigin={{
+            vertical: "center",
+            horizontal: "left",
+          }}
+        >
+          <Typography sx={{ p: 2 }}>The content of the Popover.</Typography>
+        </Popover> */}
+
+        <Portal anchor="portal">
+          {notebookEditableId && (
+            <Box
+              sx={{
+                width: "263px",
+                position: "absolute",
+                top: `${height / 2 - 200}px`,
+                left: "255px",
+                zIndex: 10000,
+                backgroundColor: theme =>
+                  theme.palette.mode === "dark" ? theme.palette.common.notebookMainBlack : theme.palette.common.gray50,
+              }}
+            >
+              <Box sx={{ p: "14px 12px" }}>
+                <TextField
+                  id="notebook-title"
+                  label=""
+                  variant="outlined"
+                  InputProps={{ sx: { p: "10px 14px", fontSize: "12px" } }}
+                  inputProps={{ sx: {} }}
+                  sx={{
+                    "& .Mui-focused .MuiOutlinedInput-notchedOutline": {
+                      borderColor: theme =>
+                        theme.palette.mode === "dark"
+                          ? theme.palette.common.primary600
+                          : theme.palette.common.primary600,
+                      boxShadow: theme =>
+                        theme.palette.mode === "dark"
+                          ? "0px 1px 2px rgba(16, 24, 40, 0.05), 0px 0px 0px 4px #62544B"
+                          : "0px 1px 2px rgba(16, 24, 40, 0.05), 0px 0px 0px 4px #ECCFBD",
+                    },
+                    "& .MuiOutlinedInput-notchedOutline": {
+                      borderWidth: "0px",
+                    },
+                  }}
+                  multiline
+                  fullWidth
+                />
+              </Box>
+              <Divider />
+              <List sx={{ p: "0px", "& .MuiTypography-body1": { fontSize: "12px" } }}>
+                <ListItem disablePadding>
+                  <ListItemButton sx={{ p: "12px 14px" }}>
+                    <ListItemText primary="Rename" />
+                  </ListItemButton>
+                </ListItem>
+                <ListItem disablePadding>
+                  <ListItemButton sx={{ p: "12px 14px" }}>
+                    <ListItemText primary="Duplicate" />
+                  </ListItemButton>
+                </ListItem>
+                <ListItem disablePadding>
+                  <ListItemButton sx={{ p: "12px 14px" }}>
+                    <ListItemText primary="Copy link to page" />
+                  </ListItemButton>
+                </ListItem>
+                <ListItem disablePadding>
+                  <ListItemButton sx={{ p: "12px 14px" }}>
+                    <ListItemText primary="Delete" />
+                  </ListItemButton>
+                </ListItem>
+              </List>
+              {/* <Typography id="modal-modal-title" variant="h6" component="h2">
+                {notebooks.find(cur => cur.id === notebookEditableId)?.title ?? ""}
+              </Typography> */}
+            </Box>
+          )}
+        </Portal>
+
+        {/* {notebookEditableId && (
+          
+          // <Modal open={open} onClose={() => setNotebookEditableId("")} aria-labelledby="Edit notebook">
+          //   <Box sx={{}}>
+          //     <Typography id="modal-modal-title" variant="h6" component="h2">
+          //       {notebooks.find(cur => cur.id === notebookEditableId)?.title ?? ""}
+          //     </Typography>
+          //     <Typography id="modal-modal-description" sx={{ mt: 2 }}>
+          //       Duis mollis, est non commodo luctus, nisi erat porttitor ligula.
+          //     </Typography>
+          //   </Box>
+          // </Modal>
+        )} */}
+
         {shouldShowTagSearcher && (
           <Suspense fallback={<div>loading...</div>}>
             <Box
-              // id="tagModal"
               sx={{
                 position: "fixed",
                 left: "270px",
                 top: "114px",
               }}
             >
-              <Modal
+              <CustomModal
                 className="tagSelectorModalUserSetting ModalBody"
                 onClick={closeTagSelector}
                 returnDown={false}
@@ -519,7 +682,7 @@ MainSidebarProps) => {
                   setAllTags={setAllTags}
                   sx={{ maxHeight: "339px", height: "339px" }}
                 />
-              </Modal>
+              </CustomModal>
             </Box>
           </Suspense>
         )}
@@ -631,6 +794,10 @@ MainSidebarProps) => {
     pendingProposalsNum,
     displayNotebooks,
     notebooks,
+    isCreatingNotebook,
+    onCreateNotebook,
+    notebookEditableId,
+    height,
     shouldShowTagSearcher,
     closeTagSelector,
     chosenTags,
@@ -687,6 +854,8 @@ MainSidebarProps) => {
     displayLargeToolbar,
     notebooks,
     selectedNotebook,
+    isCreatingNotebook,
+    notebookEditableId,
   ]);
 
   return (
