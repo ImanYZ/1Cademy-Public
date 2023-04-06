@@ -1,13 +1,7 @@
-import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
-import CloseIcon from "@mui/icons-material/Close";
-import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
-import DoneIcon from "@mui/icons-material/Done";
-import DoneAllIcon from "@mui/icons-material/DoneAll";
-import EditIcon from "@mui/icons-material/Edit";
-import EmojiEventsIcon from "@mui/icons-material/EmojiEvents";
+import CheckBoxIcon from "@mui/icons-material/CheckBox";
+import CheckBoxOutlineBlankIcon from "@mui/icons-material/CheckBoxOutlineBlank";
 import LinkIcon from "@mui/icons-material/Link";
-import RadioButtonUncheckedIcon from "@mui/icons-material/RadioButtonUnchecked";
-import { Box, IconButton, Paper, Tooltip } from "@mui/material";
+import { Box, Button, IconButton, Paper, Tooltip, Typography } from "@mui/material";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import { collection, doc, getDocs, getFirestore, increment, limit, query, where, writeBatch } from "firebase/firestore";
@@ -15,12 +9,7 @@ import React, { useCallback, useEffect, useState } from "react";
 
 import { useAuth } from "../../../context/AuthContext";
 import { useInView } from "../../../hooks/useObserver";
-import { Editor } from "../../Editor";
-import { MemoizedMetaButton } from "../MetaButton";
-
 const NOTIFICATIONS_PER_PAGE = 13;
-
-const doNothing = () => {};
 
 // CHECK: I comented this unnused variable
 // const improvementTypes = [
@@ -150,43 +139,18 @@ const NotificationsList = (props: NotificationsListProps) => {
             key={`Notification${notification.id}`}
             sx={{
               // border: "solid 2px royalBlue",
+              background: theme => (theme.palette.mode === "dark" ? "#242425" : "#F2F4F7"),
               listStyle: "none",
-              px: "10px",
+              p: "10px",
               fontSize: "16px",
+              boxShadow: theme =>
+                theme.palette.mode === "light"
+                  ? "0px 1px 2px rgba(0, 0, 0, 0.06), 0px 1px 3px rgba(0, 0, 0, 0.1)"
+                  : undefined,
             }}
           >
             <div className="NotificationBody">
-              <Box
-                sx={{
-                  display: "grid",
-                  gridTemplateColumns: "20px 1fr 72px",
-                  gap: "8px",
-                  marginTop: "8px",
-                }}
-              >
-                <Box component="span" className="NotificationAction" style={{ fontSize: "20px", width: "20px" }}>
-                  {notification.oType === "Propo" ? (
-                    <EditIcon className="amber-text" fontSize="inherit" />
-                  ) : notification.oType === "PropoAccept" ? (
-                    <EditIcon className="DoneIcon green-text" fontSize="inherit" />
-                  ) : notification.aType === "Correct" ? (
-                    <DoneIcon className="DoneIcon green-text" fontSize="inherit" />
-                  ) : notification.aType === "CorrectRM" ? (
-                    <DoneIcon className="DoneIcon green-text Striked" fontSize="inherit" />
-                  ) : notification.aType === "Wrong" ? (
-                    <CloseIcon className="red-text" fontSize="inherit" />
-                  ) : notification.aType === "WrongRM" ? (
-                    <CloseIcon className="red-text Striked" fontSize="inherit" />
-                  ) : notification.aType === "Award" ? (
-                    <EmojiEventsIcon className="amber-text" fontSize="inherit" />
-                  ) : notification.aType === "AwardRM" ? (
-                    <EmojiEventsIcon className="amber-text Striked" fontSize="inherit" />
-                  ) : notification.aType === "Accepted" ? (
-                    <DoneAllIcon className="amber-text" fontSize="inherit" />
-                  ) : (
-                    notification.aType === "Delete" && <DeleteForeverIcon className="red-text" />
-                  )}
-                </Box>
+              <Box>
                 <span style={{ lineHeight: "20px" }}>
                   {notification.oType === "Proposal"
                     ? " Your pending proposal "
@@ -204,37 +168,73 @@ const NotificationsList = (props: NotificationsListProps) => {
                               <p>- {pType.replace(/([a-z])([A-Z])/g, "$1 $2")}</p>;
                             }))}
                 </span>
-
-                <Box className="title Time" sx={{ fontSize: "12px", justifySelf: "right" }}>
-                  {dayjs(notification.createdAt).fromNow()}
-                </Box>
               </Box>
               <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: "5px" }}>
-                <MemoizedMetaButton
-                  onClick={() => openLinkedNodeClick(notification)}
-                  tooltip={
+                <Tooltip
+                  title={
                     notification.aType === "Delete" ? "The node is deleted." : "Click to go to the corresponding node."
                   }
-                  tooltipPosition="right"
+                  placement={"right"}
                 >
-                  <Box
-                    className="NotificationNodeLink"
-                    sx={{ display: "flex", alignItems: "center", gap: "5px", paddingY: "10px" }}
+                  <Button
+                    onClick={() => openLinkedNodeClick(notification)}
+                    sx={{
+                      justifyContent: "stretch",
+                      textAlign: "inherit",
+                      ":hover": {
+                        background: "transparent",
+                      },
+                    }}
                   >
-                    <LinkIcon className="grey-text" fontSize="inherit" />
-                    <Editor
-                      value={notification.title ?? "Notification"}
-                      readOnly={true}
-                      setValue={doNothing}
-                      label=""
-                    />
-                  </Box>
-                </MemoizedMetaButton>
+                    <Box
+                      className="NotificationNodeLink"
+                      sx={{ display: "flex", alignItems: "center", gap: "5px", paddingY: "10px" }}
+                    >
+                      <Box
+                        sx={{
+                          height: "30px",
+                          width: "30px",
+                          borderRadius: "50%",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          background: theme => (theme.palette.mode === "dark" ? "#575757" : "#ECECEC"),
+                          position: "absolute",
+                        }}
+                      >
+                        <LinkIcon
+                          className="grey-text"
+                          fontSize="inherit"
+                          sx={{
+                            color: theme => (theme.palette.mode === "dark" ? "#FF8134" : "#FF8134"),
+                          }}
+                        />
+                      </Box>
+                      <Typography sx={{ marginLeft: "38px", fontWeight: "500" }}>
+                        {notification.title ?? "Notification"}
+                      </Typography>
+                    </Box>
+                  </Button>
+                </Tooltip>
                 <Tooltip title={`Click to ${props.checked ? "check" : "uncheck"} this notification.`}>
                   <IconButton onClick={() => checkNotification(notification.id, !props.checked)}>
-                    {props.checked ? <CheckCircleOutlineIcon /> : <RadioButtonUncheckedIcon />}
+                    {props.checked ? (
+                      <CheckBoxIcon />
+                    ) : (
+                      <CheckBoxOutlineBlankIcon
+                        sx={{
+                          color: theme => (theme.palette.mode === "dark" ? "#C5CBD5" : "#C5CBD5"),
+                        }}
+                      />
+                    )}
                   </IconButton>
                 </Tooltip>
+              </Box>
+              <Box
+                className=" Time"
+                sx={{ fontSize: "12px", color: theme => (theme.palette.mode === "dark" ? "#A4A4A4" : "#818181") }}
+              >
+                {dayjs(notification.createdAt).fromNow()}
               </Box>
             </div>
           </Paper>

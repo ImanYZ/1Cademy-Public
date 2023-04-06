@@ -1,5 +1,5 @@
 import DoneAllIcon from "@mui/icons-material/DoneAll";
-import { Box, Tab, Tabs } from "@mui/material";
+import { Box, Button, MenuItem, Select, Tab, Tabs, Typography } from "@mui/material";
 import {
   collection,
   doc,
@@ -13,12 +13,11 @@ import {
   where,
   writeBatch,
 } from "firebase/firestore";
+import NextImage from "next/image";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { UserTheme } from "src/knowledgeTypes";
 
-import notificationsDarkTheme from "../../../../../public/notifications-dark-theme.jpg";
-import notificationsLightTheme from "../../../../../public/notifications-light-theme.jpg";
-import { MemoizedMetaButton } from "../../MetaButton";
+import NoNotificationIcon from "../../../../../public/no-notification-dark.svg";
 import NotificationsList from "../NotificationsList";
 import { SidebarWrapper } from "./SidebarWrapper";
 
@@ -204,35 +203,50 @@ const NotificationSidebar = ({
     <SidebarWrapper
       open={open}
       title="Notifications"
-      headerImage={theme === "Dark" ? notificationsDarkTheme : notificationsLightTheme}
       width={sidebarWidth}
       height={innerWidth > 599 ? 100 : 35}
       innerHeight={innerHeight}
       // anchor="right"
       onClose={onClose}
       SidebarOptions={
-        <Box
-          sx={{
-            borderBottom: 1,
-            borderColor: theme => (theme.palette.mode === "dark" ? "black" : "divider"),
-            width: "100%",
-          }}
-        >
-          <Tabs value={value} onChange={handleChange} aria-label={"Notification Tabs"}>
-            {[{ title: "Unread" }, { title: "Read" }].map((tabItem, idx: number) => (
-              <Tab
-                key={tabItem.title}
-                id={`notifications-tab-${tabItem.title.toLowerCase()}`}
-                label={tabItem.title}
-                {...a11yProps(idx)}
-              />
-            ))}
-          </Tabs>
-        </Box>
+        <>
+          <Typography
+            component={"h2"}
+            sx={{
+              width: "100%",
+              marginTop: "10px",
+              paddingLeft: "13px",
+              fontSize: { xs: "24px", sm: "40px" },
+
+              fontWeight: "500",
+            }}
+          >
+            Notifications
+          </Typography>
+          <Box
+            sx={{
+              marginTop: "25px",
+              borderBottom: 1,
+              borderColor: theme => (theme.palette.mode === "dark" ? "black" : "divider"),
+              width: "100%",
+            }}
+          >
+            <Tabs value={value} onChange={handleChange} aria-label={"Notification Tabs"} variant="fullWidth">
+              {[{ title: "Unread" }, { title: "Read" }].map((tabItem, idx: number) => (
+                <Tab
+                  key={tabItem.title}
+                  id={`notifications-tab-${tabItem.title.toLowerCase()}`}
+                  label={tabItem.title}
+                  {...a11yProps(idx)}
+                />
+              ))}
+            </Tabs>
+          </Box>
+        </>
       }
       contentSignalState={contentSignalState}
       SidebarContent={
-        <Box sx={{ display: "flex", flexDirection: "column", p: "2px 4px" }}>
+        <Box sx={{ display: "flex", flexDirection: "column", padding: "10px" }}>
           {((!uncheckedNotifications.length && value === 0) || (!checkedNotifications.length && value === 1)) && (
             <Box
               sx={{
@@ -240,22 +254,78 @@ const NotificationSidebar = ({
                 flexDirection: "column",
                 alignItems: "center",
                 justifyContent: "center",
+                marginTop: "50%",
+                textAlign: "center",
               }}
             >
-              <h3>You don't have notifications</h3>
+              <NextImage src={theme === "Dark" ? NoNotificationIcon : NoNotificationIcon} alt="Notification icon" />
+              <Typography
+                sx={{
+                  fontSize: "20px",
+                  width: "240px",
+                  fontWeight: "500",
+                }}
+              >
+                You've not checked off any notifications
+              </Typography>
+              <Typography
+                variant="body1"
+                sx={{
+                  width: "355px",
+                  color: theme => (theme.palette.mode === "dark" ? "#AEAEAE" : "#344054"),
+                }}
+              >
+                If you mark your notifications as read, they'll show up in this list.
+              </Typography>
             </Box>
           )}
           {uncheckedNotifications.length > 0 && value === 0 && (
             <Box sx={{ display: "flex", flexDirection: "column", gap: "4px" }}>
-              <div id="MarkAllRead">
-                <MemoizedMetaButton onClick={() => checkAllNotification()}>
-                  <div id="MarkAllReadButton">
-                    {/* <i className="material-icons DoneIcon green-text">done_all</i> */}
-                    <DoneAllIcon className="material-icons DoneIcon green-text" />
-                    <span>Mark All Read</span>
-                  </div>
-                </MemoizedMetaButton>
-              </div>
+              <Box
+                sx={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                }}
+              >
+                <Box
+                  sx={{
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "space-between",
+                  }}
+                >
+                  <Typography>Show</Typography>
+                  <Select
+                    sx={{
+                      marginLeft: "10px",
+                      height: "30px",
+                      width: "90px",
+                    }}
+                    labelId="demo-select-small"
+                    id="demo-select-small"
+                    value={10}
+                    onChange={() => {}}
+                  >
+                    <MenuItem value={10}>All</MenuItem>
+                    <MenuItem value={20}>Twenty</MenuItem>
+                    <MenuItem value={30}>Thirty</MenuItem>
+                  </Select>
+                </Box>
+
+                <Button
+                  sx={{
+                    ":hover": {
+                      background: "transparent",
+                    },
+                  }}
+                  onClick={() => checkAllNotification()}
+                >
+                  {/* <i className="material-icons DoneIcon green-text">done_all</i> */}
+                  <DoneAllIcon className="material-icons DoneIcon" sx={{ marginRight: "10px" }} />
+                  <span>Mark All Read</span>
+                </Button>
+              </Box>
               <NotificationsList
                 notifications={uncheckedNotifications}
                 openLinkedNode={openLinkedNode}

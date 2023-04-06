@@ -81,7 +81,8 @@ export const SidebarWrapper = ({
           maxWidth: { xs: width, sm: "80px" },
           height: height < 100 && innerHeight ? `${(height / 100) * innerHeight}px` : `${height}%`,
           borderRight: "none",
-          background: theme => (theme.palette.mode === "dark" ? "rgb(31,31,31)" : "rgb(240,240,240)"),
+          background: theme =>
+            theme.palette.mode === "dark" ? theme.palette.common.darkBackground : theme.palette.common.lightBackground,
           boxShadow:
             !isMobile || isMenuOpen || openSidebar !== null
               ? theme =>
