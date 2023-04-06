@@ -15,11 +15,21 @@ type NotebookPopupProps = {
 export const NotebookPopup = ({ children, showIcon = true, onClose, sx }: NotebookPopupProps) => {
   return (
     <Box
-      id="ChoosingNodeMessage"
       sx={{
+        position: "absolute",
+        width: "auto",
+        top: "30px",
+        left: "50%",
+        padding: "13px",
+        background: ({ palette }) =>
+          palette.mode === "dark" ? palette.common.notebookMainBlack : palette.common.gray50,
+        borderRadius: "5px",
+        color: "#e5e5e5",
+        zIndex: 4,
+        textAlign: "center",
+        overflow: "hidden",
         display: "flex",
         alignItems: "center",
-        left: "50%",
         transform: "translateX(-50%)",
         ...sx,
       }}

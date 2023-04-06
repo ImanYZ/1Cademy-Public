@@ -57,7 +57,7 @@
   -webkit-transition: transform 1s linear; /*safari and chrome */
 }
 
-#ChoosingNodeMessage {
+/* #ChoosingNodeMessage {
   position: absolute;
   width: auto;
   left: 310px;
@@ -78,8 +78,8 @@
 
 .LightMode #ChoosingNodeMessage {
   background: #f2f4f7;
-}
-@media screen and (max-width: 800px) and (min-width: 601px) {
+} */
+/* @media screen and (max-width: 800px) and (min-width: 601px) {
   #ChoosingNodeMessage {
     width: auto;
     left: 430px;
@@ -92,7 +92,7 @@
   #ChoosingNodeMessage {
     display: none;
   }
-}
+} */
 
 .spinner-white,
 .spinner-white-only {
