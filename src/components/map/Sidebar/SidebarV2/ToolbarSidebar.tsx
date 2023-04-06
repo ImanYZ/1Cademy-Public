@@ -262,8 +262,8 @@ MainSidebarProps) => {
           overflow: "hidden",
           display: { xs: isMenuOpen ? "grid" : "none", sm: "grid" },
           gridTemplateRows: "auto auto  1fr",
-          background: theme =>
-            theme.palette.mode === "dark" ? theme.palette.common.darkBackground : theme.palette.common.lightBackground,
+          background: ({ palette }) =>
+            palette.mode === "dark" ? palette.common.notebookMainBlack : palette.common.gray50,
         }}
       >
         <Stack alignItems="center" direction="column" spacing={"4px"} sx={{ width: "inherit", px: "14px" }}>
