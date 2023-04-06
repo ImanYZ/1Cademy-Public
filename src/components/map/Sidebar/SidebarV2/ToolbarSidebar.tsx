@@ -237,8 +237,8 @@ MainSidebarProps) => {
         sx={{
           overflow: "hidden",
           paddingX: "5px",
-          background: theme =>
-            theme.palette.mode === "dark" ? theme.palette.common.darkBackground : theme.palette.common.lightBackground,
+          background: ({ palette }) =>
+            palette.mode === "dark" ? palette.common.notebookMainBlack : palette.common.gray50,
           display: { xs: isMenuOpen ? "block" : "none", sm: "block" },
           "& .list-tmp": {
             alignItems: isMenuOpen ? "flex-start" : undefined,
