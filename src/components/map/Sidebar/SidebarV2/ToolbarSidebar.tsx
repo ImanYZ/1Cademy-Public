@@ -428,6 +428,9 @@ MainSidebarProps) => {
 
               <Box sx={{ p: "10px 16px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
                 <Box sx={{ display: "flex", alignItems: "center" }}>
+                  <IconButton sx={{ p: "0px", borderRadius: "5px" }}>
+                    <AddIcon />
+                  </IconButton>
                   <Box sx={{ display: "flex", alignItems: "center" }}>
                     <Typography
                       sx={{
@@ -438,9 +441,6 @@ MainSidebarProps) => {
                     </Typography>
                   </Box>
                 </Box>
-                <IconButton sx={{ p: "0px" }}>
-                  <AddIcon />
-                </IconButton>
               </Box>
             </Box>
           )}
