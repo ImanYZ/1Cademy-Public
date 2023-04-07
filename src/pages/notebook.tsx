@@ -233,6 +233,8 @@ const Dashboard = ({}: DashboardProps) => {
   // mapRendered: flag for first time map is rendered (set to true after first time)
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [mapRendered, setMapRendered] = useState(false);
+  // const [isWritingOnDB, setIsWritingOnDB] = useState(false);
+  const isWritingOnDBRef = useRef(false);
 
   const notebookRef = useRef<TNodeBookState>({
     sNode: null,
@@ -2120,9 +2122,10 @@ const Dashboard = ({}: DashboardProps) => {
 
   const openAllChildren = useCallback(
     (nodeId: string) => {
+      if (isWritingOnDBRef.current) return;
       if (notebookRef.current.choosingNode || !user) return;
 
-      devLog("OPEN_ALL_CHILDREN", { nodeId });
+      devLog("OPEN_ALL_CHILDREN", { nodeId, isWritingOnDB: isWritingOnDBRef.current });
 
       // let linkedNode = null;
       let linkedNodeId = null;
@@ -2147,7 +2150,7 @@ const Dashboard = ({}: DashboardProps) => {
               console.log({ child });
               if (!document.getElementById(child.node)) childrenNotInNotebook.push(child);
             });
-
+            isWritingOnDBRef.current = true;
             console.log({ childrenNotInNotebook });
             // for (const child of thisNode.children) {
             for (const child of childrenNotInNotebook) {
@@ -2230,6 +2233,7 @@ const Dashboard = ({}: DashboardProps) => {
             await batch.commit();
             const res = await detectElements({ ids: childrenNotInNotebook.map(c => c.node) });
             console.log({ res });
+            isWritingOnDBRef.current = false;
           } catch (err) {
             console.error(err);
           }
@@ -5923,6 +5927,7 @@ const Dashboard = ({}: DashboardProps) => {
               : undefined,
         }}
       >
+        {/* {isWritingOnDB && <NotebookPopup showIcon={false}>Writing DB</NotebookPopup>} */}
         {Object.keys(graph.nodes).length === 0 && (
           <NotebookPopup showIcon={false}>This Notebook does not contain node</NotebookPopup>
         )}
