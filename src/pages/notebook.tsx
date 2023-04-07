@@ -2128,7 +2128,6 @@ const Dashboard = ({}: DashboardProps) => {
 
       devLog("OPEN_ALL_CHILDREN", { nodeId, isWritingOnDB: isWritingOnDBRef.current });
 
-      // let linkedNode = null;
       let linkedNodeId = null;
       let linkedNodeRef = null;
       let userNodeRef = null;
@@ -2140,6 +2139,7 @@ const Dashboard = ({}: DashboardProps) => {
 
         (async () => {
           try {
+            isWritingOnDBRef.current = true;
             let childrenNotInNotebook: {
               node: string;
               label: string;
@@ -2151,7 +2151,6 @@ const Dashboard = ({}: DashboardProps) => {
               console.log({ child });
               if (!document.getElementById(child.node)) childrenNotInNotebook.push(child);
             });
-            isWritingOnDBRef.current = true;
             console.log({ childrenNotInNotebook });
             // for (const child of thisNode.children) {
             for (const child of childrenNotInNotebook) {
@@ -2232,8 +2231,7 @@ const Dashboard = ({}: DashboardProps) => {
             notebookRef.current.selectedNode = nodeId;
             nodeBookDispatch({ type: "setSelectedNode", payload: nodeId });
             await batch.commit();
-            const res = await detectElements({ ids: childrenNotInNotebook.map(c => c.node) });
-            console.log({ res });
+            await detectElements({ ids: childrenNotInNotebook.map(c => c.node) });
             isWritingOnDBRef.current = false;
           } catch (err) {
             console.error(err);
@@ -2249,9 +2247,11 @@ const Dashboard = ({}: DashboardProps) => {
 
   const openAllParent = useCallback(
     (nodeId: string) => {
+      if (isWritingOnDBRef.current) return;
       if (notebookRef.current.choosingNode || !user) return;
 
-      let linkedNode = null;
+      devLog("OPEN_ALL_PARENTS", { nodeId, isWritingOnDB: isWritingOnDBRef.current });
+
       let linkedNodeId = null;
       let linkedNodeRef = null;
       let userNodeRef = null;
@@ -2263,10 +2263,21 @@ const Dashboard = ({}: DashboardProps) => {
 
         (async () => {
           try {
-            for (const parent of thisNode.parents) {
+            isWritingOnDBRef.current = true;
+            let parentsNotInNotebook: {
+              node: string;
+              label: string;
+              title: string;
+              type: string;
+              visible?: boolean | undefined;
+            }[] = [];
+            thisNode.parents.forEach(parent => {
+              if (!document.getElementById(parent.node)) parentsNotInNotebook.push(parent);
+            });
+            for (const parent of parentsNotInNotebook) {
               linkedNodeId = parent.node as string;
-              linkedNode = document.getElementById(linkedNodeId);
-              if (linkedNode) continue;
+              // linkedNode = document.getElementById(linkedNodeId);
+              // if (linkedNode) continue;
 
               const nodeRef = doc(db, "nodes", linkedNodeId);
               const nodeDoc = await getDoc(nodeRef);
@@ -2341,6 +2352,8 @@ const Dashboard = ({}: DashboardProps) => {
             notebookRef.current.selectedNode = nodeId;
             nodeBookDispatch({ type: "setSelectedNode", payload: nodeId });
             await batch.commit();
+            await detectElements({ ids: parentsNotInNotebook.map(c => c.node) });
+            isWritingOnDBRef.current = false;
           } catch (err) {
             console.error(err);
           }
