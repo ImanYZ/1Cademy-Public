@@ -170,7 +170,7 @@ export type OpenSidebar =
   | "CITATIONS"
   | null;
 
-type Graph = { nodes: FullNodesData; edges: EdgesData };
+export type Graph = { nodes: FullNodesData; edges: EdgesData };
 /**
  * 1. NODES CHANGES - LISTENER with SNAPSHOT
  *      Type: useEffect

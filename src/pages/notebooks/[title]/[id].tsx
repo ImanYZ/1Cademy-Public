@@ -14,7 +14,9 @@ import { MapInteractionCSS } from "react-map-interaction";
 /* eslint-enable */
 import NodeItemFullSkeleton from "@/components/NodeItemFullSkeleton";
 
+import { MemoizedBasicNode } from "../../../components/map/BasicNode";
 import { MemoizedLinksList } from "../../../components/map/LinksList";
+import { useWorkerQueue } from "../../../hooks/useWorkerQueue";
 import { getNotebookById } from "../../../lib/firestoreServer/notebooks";
 import { brandingLightTheme } from "../../../lib/theme/brandingTheme";
 import { dagreUtils } from "../../../lib/utils/dagre.util";
@@ -77,9 +79,16 @@ const NodePage: NextPage<Props> = ({ notebook }) => {
     translation: { x: 0, y: 0 },
   });
 
+  // as map grows, width and height grows based on the nodes shown on the map
+  const [mapWidth, setMapWidth] = useState(700);
+  const [mapHeight, setMapHeight] = useState(400);
+
   const [mapHovered, setMapHovered] = useState(false);
   //   const [openSearch, setOpenSearch] = useState(false);
   //   const isMobile = useMediaQuery("(max-width:600px)");
+
+  // object of cluster boundaries
+  const [, /* clusterNodes */ setClusterNodes] = useState({});
 
   // flag for whether media is full-screen
   const [openMedia, setOpenMedia] = useState<string | boolean>(false);
@@ -93,6 +102,21 @@ const NodePage: NextPage<Props> = ({ notebook }) => {
   const [, /* nodeUpdates */ setNodeUpdates] = useState<TNodeUpdates>({
     nodeIds: [],
     updatedAt: new Date(),
+  });
+
+  const { addTask /* isQueueWorking, queueFinished */ } = useWorkerQueue({
+    setNodeUpdates,
+    g,
+    graph,
+    setGraph,
+    setMapWidth,
+    setMapHeight,
+    mapWidth,
+    mapHeight,
+    allTags: {},
+    onComplete: () => console.log("onComplete worker"),
+    setClusterNodes,
+    withClusters: false,
   });
 
   //   ------------------------------ functions
@@ -220,6 +244,17 @@ const NodePage: NextPage<Props> = ({ notebook }) => {
     [db, notebook.id]
   );
 
+  /**
+   * This function is called only when NODE HIGHT was changed
+   */
+  const changeNodeHight = useCallback(
+    (nodeId: string, height: number) => {
+      devLog("CHANGE 🚀", `H:${height.toFixed(1)}, nId:${nodeId}`);
+      addTask({ id: nodeId, height });
+    },
+    [addTask]
+  );
+
   //   ------------------------------ useEffect
 
   useEffect(() => {
@@ -243,7 +278,7 @@ const NodePage: NextPage<Props> = ({ notebook }) => {
     // if (!userTutorialLoaded) return;
     // if (!selectedNotebookId) return;
 
-    devLog("SYNCHRONIZATION");
+    devLog("SYNCHRONIZATION", { owner: notebook.owner, notebookId: notebook.id });
 
     const userNodesRef = collection(db, "userNodes");
     const q = query(
@@ -303,63 +338,28 @@ const NodePage: NextPage<Props> = ({ notebook }) => {
               onChange={navigateWhenNotScrolling}
             >
               <MemoizedLinksList edgeIds={edgeIds} edges={graph.edges} />
-              {/* <MemoizedNodeList
-                nodeUpdates={nodeUpdates}
-                notebookRef={notebookRef}
-                setNodeUpdates={setNodeUpdates}
-                setFocusView={setFocusView}
-                nodes={graph.nodes}
-                bookmark={bookmark}
-                markStudied={markStudied}
-                chosenNodeChanged={chosenNodeChanged}
-                referenceLabelChange={referenceLabelChange}
-                deleteLink={deleteLink}
-                cleanEditorLink={cleanEditorLink}
-                openLinkedNode={openLinkedNode}
-                openAllChildren={openAllChildren}
-                openAllParent={openAllParent}
-                hideNodeHandler={hideNodeHandler}
-                hideDescendants={hideDescendants}
-                toggleNode={toggleNode}
-                openNodePart={openNodePart}
-                onNodeShare={onNodeShare}
-                selectNode={selectNode}
-                nodeClicked={nodeClicked} // CHECK when is used
-                correctNode={correctNode}
-                wrongNode={wrongNode}
-                uploadNodeImage={uploadNodeImage}
-                removeImage={removeImage}
-                setOpenMedia={(imgUrl: string | boolean) => setOpenMedia(imgUrl)}}
-                changeNodeHight={changeNodeHight}
-                changeChoice={changeChoice}
-                changeFeedback={changeFeedback}
-                switchChoice={switchChoice}
-                deleteChoice={deleteChoice}
-                addChoice={addChoice}
-                onNodeTitleBlur={onNodeTitleBlur}
-                setOpenSearch={setOpenSearch}
-                saveProposedChildNode={saveProposedChildNode}
-                saveProposedImprovement={saveProposedImprovement}
-                closeSideBar={closeSideBar}
-                reloadPermanentGrpah={reloadPermanentGraph}
-                setNodeParts={setNodeParts}
-                citations={citations}
-                setOpenSideBar={setOpenSidebar}
-                proposeNodeImprovement={proposeNodeImprovement}
-                proposeNewChild={proposeNewChild}
-                scrollToNode={scrollToNode}
-                openSidebar={openSidebar}
-                setOperation={setOperation}
-                openUserInfoSidebar={openUserInfoSidebar}
-                disabledNodes={[]}
-                enableChildElements={[]}
-                // showProposeTutorial={!(userTutorial.proposal.done || userTutorial.proposal.skipped)}
-                // setCurrentTutorial={setCurrentTutorial}
-                ableToPropose={ableToPropose}
-                setAbleToPropose={setAbleToPropose}
-                setOpenPart={onChangeNodePart}
-                // selectedNotebookId={selectedNotebookId}
-              /> */}
+              {Object.keys(graph.nodes)
+                .map(nId => graph.nodes[nId])
+                .map(cur => (
+                  <MemoizedBasicNode
+                    key={cur.node}
+                    changeNodeHight={changeNodeHight}
+                    choices={cur.choices}
+                    content={cur.content}
+                    identifier={cur.node}
+                    left={cur.left}
+                    nodeImage={cur.nodeImage}
+                    nodeType={cur.nodeType}
+                    nodeVideo={cur.nodeVideo ?? ""}
+                    nodeVideoEndTime={cur.nodeVideoEndTime || 0}
+                    nodeVideoStartTime={cur.nodeVideoStartTime || 0}
+                    open={cur.open}
+                    setOpenMedia={setOpenMedia}
+                    title={cur.title}
+                    top={cur.top}
+                    width={NODE_WIDTH}
+                  />
+                ))}
             </MapInteractionCSS>
 
             <Suspense fallback={<div></div>}>

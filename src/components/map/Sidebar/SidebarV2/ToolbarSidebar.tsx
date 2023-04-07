@@ -312,6 +312,7 @@ MainSidebarProps) => {
       const docRef = await addDoc(notebooksRef, copyNotebook);
       setEditableNotebook({ ...copyNotebook, id: docRef.id });
       onChangeNotebook(docRef.id);
+      // TODO: duplicated users nodes
     } catch (error) {
       console.error("Cant duplicate a notebook", error);
     } finally {
