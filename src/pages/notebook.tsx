@@ -87,6 +87,7 @@ import { NodeItemDashboard } from "../components/NodeItemDashboard";
 import { Portal } from "../components/Portal";
 import { MemoizedTutorialTableOfContent } from "../components/tutorial/TutorialTableOfContent";
 import { NodeBookProvider, useNodeBook } from "../context/NodeBookContext";
+import { detectElements } from "../hooks/detectElements";
 import {
   getTutorialStep,
   removeStyleFromTarget,
@@ -232,6 +233,8 @@ const Dashboard = ({}: DashboardProps) => {
   // mapRendered: flag for first time map is rendered (set to true after first time)
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [mapRendered, setMapRendered] = useState(false);
+  // const [isWritingOnDB, setIsWritingOnDB] = useState(false);
+  const isWritingOnDBRef = useRef(false);
 
   const notebookRef = useRef<TNodeBookState>({
     sNode: null,
@@ -272,8 +275,8 @@ const Dashboard = ({}: DashboardProps) => {
   // flag for when scrollToNode is called
   const scrollToNodeInitialized = useRef(false);
 
-  // link that is currently selected
-  const [selectedRelation, setSelectedRelation] = useState<string | null>(null);
+  // // link that is currently selected
+  // const [selectedRelation, setSelectedRelation] = useState<string | null>(null);
 
   // node type that is currently selected
   const [selectedNodeType, setSelectedNodeType] = useState<NodeType | null>(null);
@@ -726,8 +729,11 @@ const Dashboard = ({}: DashboardProps) => {
               ...userNodeDataTmp,
               ...openWithDefaultValues,
             };
-            userNodeData.notebooks = [...(userNodeData.notebooks ?? []), selectedNotebookId];
-            userNodeData.expands = [...(userNodeData.expands ?? []), true];
+            const existNotebooks = (userNodeData.notebooks ?? []).find(c => c === selectedNotebookId);
+            if (!existNotebooks) {
+              userNodeData.notebooks = [...(userNodeData.notebooks ?? []), selectedNotebookId];
+              userNodeData.expands = [...(userNodeData.expands ?? []), true];
+            }
             userNodeData.updatedAt = Timestamp.fromDate(new Date());
             delete userNodeData?.visible;
             delete userNodeData?.open;
@@ -1475,7 +1481,7 @@ const Dashboard = ({}: DashboardProps) => {
       if (reputation) {
         dispatch({ type: "setReputation", payload: reputation });
       }
-      setSelectedRelation(null);
+      // setSelectedRelation(null);
       resetAddedRemovedParentsChildren();
       setIsSubmitting(false);
     },
@@ -1838,6 +1844,7 @@ const Dashboard = ({}: DashboardProps) => {
               if (notebookIdx < 0) return console.error("notebook property has invalid values");
 
               const newExpands = (thisNode.expands ?? []).filter((c, idx) => idx !== notebookIdx);
+              const newNotebooks = (thisNode.notebooks ?? []).filter((c, idx) => idx !== notebookIdx);
               const userNodeData = {
                 changed: thisNode.changed,
                 correct: thisNode.correct,
@@ -1847,7 +1854,7 @@ const Dashboard = ({}: DashboardProps) => {
                 isStudied: thisNode.isStudied,
                 bookmarked: "bookmarked" in thisNode ? thisNode.bookmarked : false,
                 node: descendant,
-                notebooks: (thisNode.notebooks ?? []).filter(cur => cur !== selectedNotebookId),
+                notebooks: newNotebooks,
                 expands: newExpands,
                 // open: thisNode.open,
                 user: user.uname,
@@ -1898,7 +1905,7 @@ const Dashboard = ({}: DashboardProps) => {
         return graph;
       });
     },
-    [recursiveDescendants]
+    [recursiveDescendants, selectedNotebookId]
   );
 
   const openLinkedNode = useCallback(
@@ -2116,11 +2123,11 @@ const Dashboard = ({}: DashboardProps) => {
 
   const openAllChildren = useCallback(
     (nodeId: string) => {
+      if (isWritingOnDBRef.current) return;
       if (notebookRef.current.choosingNode || !user) return;
 
-      devLog("OPEN_ALL_CHILDREN", { nodeId });
+      devLog("OPEN_ALL_CHILDREN", { nodeId, isWritingOnDB: isWritingOnDBRef.current });
 
-      let linkedNode = null;
       let linkedNodeId = null;
       let linkedNodeRef = null;
       let userNodeRef = null;
@@ -2132,10 +2139,24 @@ const Dashboard = ({}: DashboardProps) => {
 
         (async () => {
           try {
-            for (const child of thisNode.children) {
+            isWritingOnDBRef.current = true;
+            let childrenNotInNotebook: {
+              node: string;
+              label: string;
+              title: string;
+              type: string;
+              visible?: boolean | undefined;
+            }[] = [];
+            thisNode.children.forEach(child => {
+              console.log({ child });
+              if (!document.getElementById(child.node)) childrenNotInNotebook.push(child);
+            });
+            console.log({ childrenNotInNotebook });
+            // for (const child of thisNode.children) {
+            for (const child of childrenNotInNotebook) {
               linkedNodeId = child.node as string;
-              linkedNode = document.getElementById(linkedNodeId);
-              if (linkedNode) continue;
+              // linkedNode = document.getElementById(linkedNodeId);
+              // if (linkedNode) continue;
 
               const nodeRef = doc(db, "nodes", linkedNodeId);
               const nodeDoc = await getDoc(nodeRef);
@@ -2210,6 +2231,8 @@ const Dashboard = ({}: DashboardProps) => {
             notebookRef.current.selectedNode = nodeId;
             nodeBookDispatch({ type: "setSelectedNode", payload: nodeId });
             await batch.commit();
+            await detectElements({ ids: childrenNotInNotebook.map(c => c.node) });
+            isWritingOnDBRef.current = false;
           } catch (err) {
             console.error(err);
           }
@@ -2224,9 +2247,11 @@ const Dashboard = ({}: DashboardProps) => {
 
   const openAllParent = useCallback(
     (nodeId: string) => {
+      if (isWritingOnDBRef.current) return;
       if (notebookRef.current.choosingNode || !user) return;
 
-      let linkedNode = null;
+      devLog("OPEN_ALL_PARENTS", { nodeId, isWritingOnDB: isWritingOnDBRef.current });
+
       let linkedNodeId = null;
       let linkedNodeRef = null;
       let userNodeRef = null;
@@ -2238,10 +2263,21 @@ const Dashboard = ({}: DashboardProps) => {
 
         (async () => {
           try {
-            for (const parent of thisNode.parents) {
+            isWritingOnDBRef.current = true;
+            let parentsNotInNotebook: {
+              node: string;
+              label: string;
+              title: string;
+              type: string;
+              visible?: boolean | undefined;
+            }[] = [];
+            thisNode.parents.forEach(parent => {
+              if (!document.getElementById(parent.node)) parentsNotInNotebook.push(parent);
+            });
+            for (const parent of parentsNotInNotebook) {
               linkedNodeId = parent.node as string;
-              linkedNode = document.getElementById(linkedNodeId);
-              if (linkedNode) continue;
+              // linkedNode = document.getElementById(linkedNodeId);
+              // if (linkedNode) continue;
 
               const nodeRef = doc(db, "nodes", linkedNodeId);
               const nodeDoc = await getDoc(nodeRef);
@@ -2316,6 +2352,8 @@ const Dashboard = ({}: DashboardProps) => {
             notebookRef.current.selectedNode = nodeId;
             nodeBookDispatch({ type: "setSelectedNode", payload: nodeId });
             await batch.commit();
+            await detectElements({ ids: parentsNotInNotebook.map(c => c.node) });
+            isWritingOnDBRef.current = false;
           } catch (err) {
             console.error(err);
           }
@@ -5903,6 +5941,7 @@ const Dashboard = ({}: DashboardProps) => {
               : undefined,
         }}
       >
+        {/* {isWritingOnDB && <NotebookPopup showIcon={false}>Writing DB</NotebookPopup>} */}
         {Object.keys(graph.nodes).length === 0 && (
           <NotebookPopup showIcon={false}>This Notebook does not contain node</NotebookPopup>
         )}
@@ -6664,7 +6703,7 @@ const Dashboard = ({}: DashboardProps) => {
                 {settings.showClusterOptions && settings.showClusters && (
                   <MemoizedClustersList clusterNodes={clusterNodes} />
                 )}
-                <MemoizedLinksList edgeIds={edgeIds} edges={graph.edges} selectedRelation={selectedRelation} />
+                <MemoizedLinksList edgeIds={edgeIds} edges={graph.edges} />
                 <MemoizedNodeList
                   nodeUpdates={nodeUpdates}
                   notebookRef={notebookRef}
