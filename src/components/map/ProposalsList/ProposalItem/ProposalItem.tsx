@@ -2,7 +2,7 @@
 import CloseIcon from "@mui/icons-material/Close";
 import DoneIcon from "@mui/icons-material/Done";
 import GradeIcon from "@mui/icons-material/Grade";
-import { Box, Paper } from "@mui/material";
+import { Box, Button, Divider, Paper, Tooltip, Typography } from "@mui/material";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import React, { useCallback } from "react";
@@ -12,7 +12,6 @@ import NodeTypeIcon from "@/components/NodeTypeIcon2";
 import { proposalSummariesGenerator } from "../../../../lib/utils/proposalSummariesGenerator";
 import shortenNumber from "../../../../lib/utils/shortenNumber";
 import { Editor } from "../../../Editor";
-import { MemoizedMetaButton } from "../../MetaButton";
 
 // import shortenNumber from "../../../../../../utils/shortenNumber";
 // import HyperEditor from "../../../../../Editor/HyperEditor/HyperEditor";
@@ -52,43 +51,64 @@ const ProposalItem = (props: any) => {
       onClick={openLinkedNodeClick(props.proposal)}
       sx={{
         ":hover": {
-          border: "2px solid #ff8a33",
+          background: theme => (theme.palette.mode === "dark" ? "#2F2F2F" : "#EAECF0"),
         },
-        border: "2px solid transparent",
+
         display: "flex",
         flexDirection: "column",
         padding: {
           xs: "5px 10px",
-          sm: "10px 20px",
+          sm: "15px",
         },
-        background: "#242425",
+        borderRadius: "8px",
+        boxShadow: theme =>
+          theme.palette.mode === "light"
+            ? "0px 1px 2px rgba(0, 0, 0, 0.06), 0px 1px 3px rgba(0, 0, 0, 0.1)"
+            : undefined,
+        background: theme => (theme.palette.mode === "dark" ? "#242425" : "#F2F4F7"),
       }}
     >
       {/* <h6>{props.proposal.newNodeId}</h6> */}
-      <div>
-        <div className="ProposalTitle">
-          {props.showTitle && <Editor label="" readOnly setValue={doNothing} value={props.proposal.title} />}
+      <Box>
+        <Box>
+          {props.showTitle && (
+            <Typography
+              sx={{
+                fontSize: "16px",
+                fontWeight: "500",
+                lineHeight: "24px",
+              }}
+            >
+              {props.proposal.title}
+            </Typography>
+          )}
           {/* <p>Proposal Summary:</p> */}
-          {proposalSummaries.length > 0
-            ? proposalSummaries.map((prSummary: string, prSummaryIdx: number) => {
-                return (
-                  <Box
-                    component="p"
-                    sx={{
-                      margin: "0px",
-                      color: theme =>
-                        theme.palette.mode === "light" ? theme.palette.common.black : theme.palette.common.white,
-                    }}
-                    key={"Summary" + props.proposal.id + prSummaryIdx}
-                  >
-                    {prSummary}
-                  </Box>
-                );
-              })
-            : props.proposal.summary && (
-                <Editor label="" readOnly setValue={doNothing} value={props.proposal.summary} />
-              )}
-        </div>
+          <Box
+            sx={{
+              paddingY: "10px",
+            }}
+          >
+            {proposalSummaries.length > 0
+              ? proposalSummaries.map((prSummary: string, prSummaryIdx: number) => {
+                  return (
+                    <Box
+                      component="p"
+                      sx={{
+                        margin: "0px",
+                        color: theme =>
+                          theme.palette.mode === "light" ? theme.palette.common.black : theme.palette.common.white,
+                      }}
+                      key={"Summary" + props.proposal.id + prSummaryIdx}
+                    >
+                      {prSummary}
+                    </Box>
+                  );
+                })
+              : props.proposal.summary && (
+                  <Editor label="" readOnly setValue={doNothing} value={props.proposal.summary} />
+                )}
+          </Box>
+        </Box>
         <Box
           sx={{
             display: "flex",
@@ -105,8 +125,8 @@ const ProposalItem = (props: any) => {
           >
             <Box
               sx={{
-                width: "25px",
-                height: "25px",
+                width: "28px",
+                height: "28px",
                 borderRadius: "50%",
                 background: theme => (theme.palette.mode === "dark" ? "#404040" : "#EAECF0"),
                 display: "flex",
@@ -116,42 +136,120 @@ const ProposalItem = (props: any) => {
             >
               <NodeTypeIcon nodeType={props.proposal.nodeType || ""} fontSize="inherit" />
             </Box>
-            <Box style={{ fontSize: "12px", marginLeft: "5px" }}>{dayjs(props.proposal.createdAt).fromNow()}</Box>
+            <Box
+              sx={{
+                fontSize: "12px",
+                marginLeft: "5px",
+                color: theme => (theme.palette.mode === "dark" ? "#A4A4A4" : "#667085"),
+              }}
+            >
+              {dayjs(props.proposal.createdAt).fromNow()}
+            </Box>
           </Box>
-          <div
-            className="secondary-content"
-            style={{ display: "flex", alignItems: "center", gap: "10px", fontSize: "16px" }}
+          <Box
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: "10px",
+              fontSize: "16px",
+              marginRight: "9px",
+            }}
           >
-            <MemoizedMetaButton
-              tooltip="# of 1Cademists who have found this proposal unhelpful."
-              tooltipPosition="bottom-start"
-            >
-              <div style={{ display: "flex", alignItems: "center", gap: "4px", fontSize: "16px" }}>
-                <CloseIcon className={props.proposal.wrong ? "red-text" : "grey-text"} sx={{ fontSize: "inherit" }} />
-                <span>{shortenNumber(props.proposal.wrongs, 2, false)}</span>
-              </div>
-            </MemoizedMetaButton>
-            <MemoizedMetaButton
-              tooltip="# of 1Cademists who have found this proposal helpful."
-              tooltipPosition="bottom-start"
-            >
-              <div style={{ display: "flex", alignItems: "center", gap: "4px", fontSize: "16px" }}>
-                <DoneIcon
-                  className={props.proposal.correct ? "green-text" : "grey-text"}
-                  sx={{ fontSize: "inherit" }}
-                />
-                <span>{shortenNumber(props.proposal.corrects, 2, false)}</span>
-              </div>
-            </MemoizedMetaButton>
-            <MemoizedMetaButton tooltip="# of 1Admins who have awarded this proposal." tooltipPosition="bottom-start">
-              <div style={{ display: "flex", alignItems: "center", gap: "4px", fontSize: "16px" }}>
-                <GradeIcon className={props.proposal.award ? "amber-text" : "grey-text"} sx={{ fontSize: "inherit" }} />
-                <span>{shortenNumber(props.proposal.awards, 2, false)}</span>
-              </div>
-            </MemoizedMetaButton>
-          </div>
+            <Tooltip title="# of 1Cademists who have found this proposal helpful." placement="bottom-start">
+              <Button
+                sx={{
+                  padding: "0",
+                  minWidth: "0",
+                  ":hover": {
+                    background: "transparent",
+                  },
+                }}
+              >
+                <Box style={{ display: "flex", alignItems: "center", gap: "4px", fontSize: "16px" }}>
+                  <DoneIcon
+                    className={props.proposal.correct ? "green-text" : "grey-text"}
+                    sx={{ fontSize: "19px", color: theme => (theme.palette.mode === "dark" ? "#F9FAFB" : "#475467") }}
+                  />
+                  <Typography
+                    sx={{
+                      color: theme => (theme.palette.mode === "dark" ? "#F9FAFB" : "#475467"),
+                      mt: "3px",
+                    }}
+                  >
+                    {shortenNumber(props.proposal.corrects, 2, false)}
+                  </Typography>
+                </Box>
+              </Button>
+            </Tooltip>
+            <Divider
+              orientation="vertical"
+              variant="middle"
+              flexItem
+              sx={{ borderColor: theme => (theme.palette.mode === "dark" ? "#D3D3D3" : "inherit") }}
+            />
+            <Tooltip title="# of 1Cademists who have found this proposal unhelpful." placement="bottom-start">
+              <Button
+                sx={{
+                  padding: "0",
+                  minWidth: "0",
+                  ":hover": {
+                    background: "transparent",
+                  },
+                }}
+              >
+                <Box style={{ display: "flex", alignItems: "center", gap: "4px", fontSize: "16px" }}>
+                  <CloseIcon
+                    className={props.proposal.wrong ? "red-text" : "grey-text"}
+                    sx={{ fontSize: "19px", color: theme => (theme.palette.mode === "dark" ? "#F9FAFB" : "#475467") }}
+                  />
+                  <Typography
+                    sx={{
+                      color: theme => (theme.palette.mode === "dark" ? "#F9FAFB" : "#475467"),
+                      mt: "3px",
+                    }}
+                  >
+                    {shortenNumber(props.proposal.wrongs, 2, false)}
+                  </Typography>
+                </Box>
+              </Button>
+            </Tooltip>
+
+            <Divider
+              orientation="vertical"
+              variant="middle"
+              flexItem
+              sx={{ borderColor: theme => (theme.palette.mode === "dark" ? "#D3D3D3" : "inherit") }}
+            />
+
+            <Tooltip title="# of 1Admins who have awarded this proposal." placement="bottom-start">
+              <Button
+                sx={{
+                  padding: "0",
+                  minWidth: "0",
+                  ":hover": {
+                    background: "transparent",
+                  },
+                }}
+              >
+                <Box style={{ display: "flex", alignItems: "center", gap: "4px", fontSize: "16px" }}>
+                  <GradeIcon
+                    className={props.proposal.award ? "amber-text" : "grey-text"}
+                    sx={{ fontSize: "19px", color: theme => (theme.palette.mode === "dark" ? "#F9FAFB" : "#475467") }}
+                  />
+                  <Typography
+                    sx={{
+                      color: theme => (theme.palette.mode === "dark" ? "#F9FAFB" : "#475467"),
+                      mt: "3px",
+                    }}
+                  >
+                    {shortenNumber(props.proposal.awards, 2, false)}
+                  </Typography>
+                </Box>
+              </Button>
+            </Tooltip>
+          </Box>
         </Box>
-      </div>
+      </Box>
     </Paper>
   );
 };
