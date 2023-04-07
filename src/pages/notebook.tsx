@@ -275,8 +275,8 @@ const Dashboard = ({}: DashboardProps) => {
   // flag for when scrollToNode is called
   const scrollToNodeInitialized = useRef(false);
 
-  // link that is currently selected
-  const [selectedRelation, setSelectedRelation] = useState<string | null>(null);
+  // // link that is currently selected
+  // const [selectedRelation, setSelectedRelation] = useState<string | null>(null);
 
   // node type that is currently selected
   const [selectedNodeType, setSelectedNodeType] = useState<NodeType | null>(null);
@@ -1481,7 +1481,7 @@ const Dashboard = ({}: DashboardProps) => {
       if (reputation) {
         dispatch({ type: "setReputation", payload: reputation });
       }
-      setSelectedRelation(null);
+      // setSelectedRelation(null);
       resetAddedRemovedParentsChildren();
       setIsSubmitting(false);
     },
@@ -6703,7 +6703,7 @@ const Dashboard = ({}: DashboardProps) => {
                 {settings.showClusterOptions && settings.showClusters && (
                   <MemoizedClustersList clusterNodes={clusterNodes} />
                 )}
-                <MemoizedLinksList edgeIds={edgeIds} edges={graph.edges} selectedRelation={selectedRelation} />
+                <MemoizedLinksList edgeIds={edgeIds} edges={graph.edges} />
                 <MemoizedNodeList
                   nodeUpdates={nodeUpdates}
                   notebookRef={notebookRef}

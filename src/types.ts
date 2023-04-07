@@ -29,8 +29,7 @@ export type SimpleNode2 = {
   studied?: boolean;
 };
 
-export type Notebook = {
-  id: string;
+export type NotebookDocument = {
   owner: string;
   title: string;
   isPublic: "visible" | "editable" | "none";
@@ -38,4 +37,7 @@ export type Notebook = {
   roles: {
     [key: string]: "viewer" | "editor";
   };
+};
+export type Notebook = NotebookDocument & {
+  id: string;
 };
