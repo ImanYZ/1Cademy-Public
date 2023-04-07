@@ -31,8 +31,6 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       throw new Error("Notebook doesn't exists");
     }
 
-    const notebookRef = db.collection("notebooks").doc(notebook.id);
-
     // checking role of current user
     const notebookData = notebook.data() as INotebook;
     if (notebookData.owner !== uname && notebookData.roles?.[uname] !== "editor") {
@@ -42,6 +40,11 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
     const users: string[] = notebookData.users;
     if (users.indexOf(uname) === -1) {
       users.push(uname);
+    }
+
+    // pushing owner to create user node
+    if (users.indexOf(notebookData.owner) === -1) {
+      users.push(notebookData.owner);
     }
 
     // updating user nodes
