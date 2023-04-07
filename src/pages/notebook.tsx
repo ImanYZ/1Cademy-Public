@@ -1844,6 +1844,7 @@ const Dashboard = ({}: DashboardProps) => {
               if (notebookIdx < 0) return console.error("notebook property has invalid values");
 
               const newExpands = (thisNode.expands ?? []).filter((c, idx) => idx !== notebookIdx);
+              const newNotebooks = (thisNode.notebooks ?? []).filter((c, idx) => idx !== notebookIdx);
               const userNodeData = {
                 changed: thisNode.changed,
                 correct: thisNode.correct,
@@ -1853,7 +1854,7 @@ const Dashboard = ({}: DashboardProps) => {
                 isStudied: thisNode.isStudied,
                 bookmarked: "bookmarked" in thisNode ? thisNode.bookmarked : false,
                 node: descendant,
-                notebooks: (thisNode.notebooks ?? []).filter(cur => cur !== selectedNotebookId),
+                notebooks: newNotebooks,
                 expands: newExpands,
                 // open: thisNode.open,
                 user: user.uname,
