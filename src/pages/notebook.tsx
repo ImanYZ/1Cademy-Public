@@ -87,6 +87,7 @@ import { NodeItemDashboard } from "../components/NodeItemDashboard";
 import { Portal } from "../components/Portal";
 import { MemoizedTutorialTableOfContent } from "../components/tutorial/TutorialTableOfContent";
 import { NodeBookProvider, useNodeBook } from "../context/NodeBookContext";
+import { detectElements } from "../hooks/detectElements";
 import {
   getTutorialStep,
   removeStyleFromTarget,
@@ -726,8 +727,11 @@ const Dashboard = ({}: DashboardProps) => {
               ...userNodeDataTmp,
               ...openWithDefaultValues,
             };
-            userNodeData.notebooks = [...(userNodeData.notebooks ?? []), selectedNotebookId];
-            userNodeData.expands = [...(userNodeData.expands ?? []), true];
+            const existNotebooks = (userNodeData.notebooks ?? []).find(c => c === selectedNotebookId);
+            if (!existNotebooks) {
+              userNodeData.notebooks = [...(userNodeData.notebooks ?? []), selectedNotebookId];
+              userNodeData.expands = [...(userNodeData.expands ?? []), true];
+            }
             userNodeData.updatedAt = Timestamp.fromDate(new Date());
             delete userNodeData?.visible;
             delete userNodeData?.open;
@@ -1898,7 +1902,7 @@ const Dashboard = ({}: DashboardProps) => {
         return graph;
       });
     },
-    [recursiveDescendants]
+    [recursiveDescendants, selectedNotebookId]
   );
 
   const openLinkedNode = useCallback(
@@ -2120,7 +2124,7 @@ const Dashboard = ({}: DashboardProps) => {
 
       devLog("OPEN_ALL_CHILDREN", { nodeId });
 
-      let linkedNode = null;
+      // let linkedNode = null;
       let linkedNodeId = null;
       let linkedNodeRef = null;
       let userNodeRef = null;
@@ -2132,10 +2136,24 @@ const Dashboard = ({}: DashboardProps) => {
 
         (async () => {
           try {
-            for (const child of thisNode.children) {
+            let childrenNotInNotebook: {
+              node: string;
+              label: string;
+              title: string;
+              type: string;
+              visible?: boolean | undefined;
+            }[] = [];
+            thisNode.children.forEach(child => {
+              console.log({ child });
+              if (!document.getElementById(child.node)) childrenNotInNotebook.push(child);
+            });
+
+            console.log({ childrenNotInNotebook });
+            // for (const child of thisNode.children) {
+            for (const child of childrenNotInNotebook) {
               linkedNodeId = child.node as string;
-              linkedNode = document.getElementById(linkedNodeId);
-              if (linkedNode) continue;
+              // linkedNode = document.getElementById(linkedNodeId);
+              // if (linkedNode) continue;
 
               const nodeRef = doc(db, "nodes", linkedNodeId);
               const nodeDoc = await getDoc(nodeRef);
@@ -2210,6 +2228,8 @@ const Dashboard = ({}: DashboardProps) => {
             notebookRef.current.selectedNode = nodeId;
             nodeBookDispatch({ type: "setSelectedNode", payload: nodeId });
             await batch.commit();
+            const res = await detectElements({ ids: childrenNotInNotebook.map(c => c.node) });
+            console.log({ res });
           } catch (err) {
             console.error(err);
           }
