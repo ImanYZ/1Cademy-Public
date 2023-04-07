@@ -267,6 +267,7 @@ MainSidebarProps) => {
                   src={theme.palette.mode === "light" ? LogoLightMode.src : LogoDarkMode.src}
                   alt="1Logo"
                   width="61px"
+                  height={"83px"}
                 />
                 <img
                   style={{
@@ -276,6 +277,7 @@ MainSidebarProps) => {
                   src={LogoExtended.src}
                   alt="1Logo"
                   width={"100%"}
+                  height={"83px"}
                 />
               </Box>
             </MemoizedMetaButton>
@@ -407,6 +409,20 @@ MainSidebarProps) => {
                 marginLeft: !isMenuOpen ? "10px" : undefined,
               }}
             >
+              {(uncheckedNotificationsNum ?? 0) > 0 && (
+                <Box
+                  className={window.innerWidth >= 500 ? "hide-on-hover" : ""}
+                  sx={{
+                    position: "absolute",
+                    width: "6px",
+                    height: "6px",
+                    borderRadius: "50%",
+                    background: "#E34848",
+                    top: "8px",
+                    left: "41px",
+                  }}
+                />
+              )}
               <NextImage width={"22px"} src={NotificationIcon} alt="previous node icon" />
               <Box
                 component="span"
@@ -440,8 +456,8 @@ MainSidebarProps) => {
                 <Box
                   className={window.innerWidth >= 500 ? "show-on-hover" : ""}
                   sx={{
-                    width: "35px",
-                    height: "35px",
+                    width: "32px",
+                    height: "32px",
                     borderRadius: "40%",
                     background: "#E34848",
                     color: "white",
@@ -449,10 +465,10 @@ MainSidebarProps) => {
                     justifyContent: "center",
                     alignItems: "center",
                     position: "absolute",
-                    right: "15px",
+                    right: "20px",
                   }}
                 >
-                  {uncheckedNotificationsNum ?? 0}
+                  {uncheckedNotificationsNum > 100 ? "+99" : uncheckedNotificationsNum}
                 </Box>
               )}
             </Box>
@@ -483,6 +499,20 @@ MainSidebarProps) => {
                 marginLeft: !isMenuOpen ? "10px" : undefined,
               }}
             >
+              {(bookmarkUpdatesNum ?? 0) > 0 && (
+                <Box
+                  className={window.innerWidth >= 500 ? "hide-on-hover" : ""}
+                  sx={{
+                    position: "absolute",
+                    width: "6px",
+                    height: "6px",
+                    borderRadius: "50%",
+                    background: "#E34848",
+                    top: "8px",
+                    left: "41px",
+                  }}
+                />
+              )}
               <NextImage width={"22px"} src={BookmarkIcon} alt="previous node icon" />
               <Box
                 className="toolbarDescription"
@@ -516,8 +546,8 @@ MainSidebarProps) => {
                 <Box
                   className={window.innerWidth >= 500 ? "show-on-hover" : ""}
                   sx={{
-                    width: "35px",
-                    height: "35px",
+                    width: "32px",
+                    height: "32px",
                     borderRadius: "40%",
                     background: "#E34848",
                     color: "white",
@@ -525,10 +555,10 @@ MainSidebarProps) => {
                     justifyContent: "center",
                     alignItems: "center",
                     position: "absolute",
-                    right: "15px",
+                    right: "20px",
                   }}
                 >
-                  {bookmarkUpdatesNum ?? 0}
+                  {bookmarkUpdatesNum > 100 ? "+99" : bookmarkUpdatesNum}
                 </Box>
               )}
             </Box>
@@ -558,6 +588,20 @@ MainSidebarProps) => {
                 marginLeft: !isMenuOpen ? "10px" : undefined,
               }}
             >
+              {(pendingProposalsNum ?? 0) > 0 && (
+                <Box
+                  className={window.innerWidth >= 500 ? "hide-on-hover" : ""}
+                  sx={{
+                    position: "absolute",
+                    width: "6px",
+                    height: "6px",
+                    borderRadius: "50%",
+                    background: "#E34848",
+                    top: "8px",
+                    left: "41px",
+                  }}
+                />
+              )}
               <NextImage width={"22px"} src={EditIcon} alt="previous node icon" />
               <Box
                 className="toolbarDescription"
@@ -603,7 +647,7 @@ MainSidebarProps) => {
                     right: "20px",
                   }}
                 >
-                  {pendingProposalsLoaded ? pendingProposalsNum ?? 0 : 0}
+                  {pendingProposalsNum > 100 ? "+99" : pendingProposalsNum}
                 </Box>
               )}
             </Box>
@@ -847,7 +891,12 @@ MainSidebarProps) => {
           spacing={"10px"}
           direction="column"
           sx={{
-            marginTop: window.innerWidth <= 500 ? "110px" : "40px",
+            marginTop:
+              window.innerWidth <= 500
+                ? "110px"
+                : ["INSTRUCTOR", "STUDENT"].includes(user.role ?? "")
+                ? "30px"
+                : "20px",
             height: window.innerHeight >= 500 ? `calc(${windowHeight}px - ${firstBoxHeight}px)` : undefined,
             paddingBottom: "20px",
           }}

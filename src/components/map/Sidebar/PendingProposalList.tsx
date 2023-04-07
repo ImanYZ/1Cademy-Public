@@ -1,8 +1,11 @@
-import { Box } from "@mui/material";
+import { Box, Typography, useTheme } from "@mui/material";
+import NextImage from "next/image";
 import React, { useCallback, useEffect, useState } from "react";
 
 import { useInView } from "@/hooks/useObserver";
 
+import NoProposalDarkIcon from "../../../../public/no-proposals-dark-mode.svg";
+import NoProposalLightIcon from "../../../../public/no-proposals-light-mode.svg";
 import ProposalItem from "../ProposalsList/ProposalItem/ProposalItem";
 
 const ELEMENTS_PER_PAGE = 13;
@@ -14,6 +17,7 @@ type PendingProposalListProps = {
 };
 
 const PendingProposalList = (props: PendingProposalListProps) => {
+  const theme = useTheme();
   // const [{ user }] = useAuth();
   // const db = getFirestore();
   const [isRetrieving, setIsRetrieving] = useState(false);
@@ -150,7 +154,7 @@ const PendingProposalList = (props: PendingProposalListProps) => {
   }, [inViewInfinityLoaderTrigger, isRetrieving, loadOlderProposalsClick]);
 
   return (
-    <div id="PendingProposalsContainer">
+    <Box id="PendingProposalsContainer">
       {!props.proposals.length && (
         <Box
           sx={{
@@ -158,9 +162,22 @@ const PendingProposalList = (props: PendingProposalListProps) => {
             flexDirection: "column",
             alignItems: "center",
             justifyContent: "center",
+            marginTop: "40%",
           }}
         >
-          <h3>You don't have Pending Proposals</h3>
+          <NextImage
+            src={theme.palette.mode === "dark" ? NoProposalDarkIcon : NoProposalLightIcon}
+            alt="Notification icon"
+          />
+          <Typography
+            sx={{
+              fontSize: "20px",
+
+              fontWeight: "500",
+            }}
+          >
+            You've not checked off any notifications
+          </Typography>
         </Box>
       )}
 
@@ -182,7 +199,7 @@ const PendingProposalList = (props: PendingProposalListProps) => {
           {props.proposals.length > lastIndex && <Box id="ContinueButton" ref={refInfinityLoaderTrigger}></Box>}
         </ul>
       )}
-    </div>
+    </Box>
   );
 };
 

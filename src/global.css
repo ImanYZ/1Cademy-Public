@@ -2771,7 +2771,7 @@ right: 5px; */
 
 .toolbar:focus .user-status-section,
 .toolbar:hover .user-status-section {
-  margin-top: 110px !important;
+  margin-top: 95px !important;
 }
 
 .scroll-styled::-webkit-scrollbar {
