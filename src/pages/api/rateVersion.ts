@@ -4,11 +4,18 @@ import { INode } from "src/types/INode";
 import { INodeType } from "src/types/INodeType";
 import { INodeVersion } from "src/types/INodeVersion";
 import { IUser } from "src/types/IUser";
+import { IUserNode } from "src/types/IUserNode";
 import { updateStatsOnVersionVote } from "src/utils/course-helpers";
 import { detach, isVersionApproved } from "src/utils/helpers";
 import { signalNodeToTypesense, updateNodeContributions } from "src/utils/version-helpers";
 
-import { admin, db, MAX_TRANSACTION_WRITES } from "../../lib/firestoreServer/admin";
+import {
+  admin,
+  commitBatch,
+  db,
+  MAX_TRANSACTION_WRITES,
+  checkRestartBatchWriteCounts,
+} from "../../lib/firestoreServer/admin";
 import fbAuth from "../../middlewares/fbAuth";
 import {
   addToPendingPropsNumsExcludingVoters,
@@ -61,6 +68,7 @@ import {
 export type IRateVersionPayload = {
   nodeId: string;
   versionNodeId?: string;
+  notebookId?: string;
   versionId: string;
   nodeType: INodeType;
   uname?: string; // its removed from req as its coming from auth now
@@ -111,6 +119,8 @@ export type IRateVersionPayload = {
 async function handler(req: NextApiRequest, res: NextApiResponse) {
   try {
     const { uname } = req.body?.data?.user?.userData;
+    const payload = req.body as IRateVersionPayload;
+
     const tWriteOperations: { objRef: any; data: any; operationType: string }[] = [];
 
     let writeCounts = 0;
@@ -213,6 +223,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       //  if user already has an interaction with the version
       await versionCreateUpdate({
         versionNodeId: req.body.versionNodeId,
+        notebookId: payload.notebookId,
         nodeId: req.body.nodeId,
         nodeData,
         nodeRef,
@@ -405,6 +416,50 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         nodeId: versionData.childType && isAccepted ? newUpdates.nodeId : versionData.node,
         receivers: [versionData.proposer],
       } as IActionTrack);
+    });
+
+    // TODO: move these to queue
+    await detach(async () => {
+      if (!payload.notebookId) return;
+
+      const justApproved = accepted === false && isApproved;
+      if (!justApproved) return;
+
+      let batch = db.batch();
+      let writeCounts = 0;
+      const nodesUserNodes = await db
+        .collection("userNodes")
+        .where("node", "==", payload.nodeId)
+        .where("notebooks", "array-contains", payload.notebookId)
+        .get();
+      for (const userNode of nodesUserNodes.docs) {
+        const userNodeData = userNode.data() as IUserNode;
+        if (userNodeData.user === uname || userNodeData.deleted) {
+          continue;
+        }
+        const userNodeRef = db.collection("userNodes").doc();
+        const newUserNode = {
+          createdAt: currentTimestamp,
+          updatedAt: currentTimestamp,
+          deleted: false,
+          isStudied: false,
+          bookmarked: false,
+          changed: false,
+          node: newUpdates.nodeId,
+          open: true,
+          user: userNodeData.user,
+          visible: true,
+          correct: false,
+          wrong: false,
+          nodeChanges: {},
+          notebooks: [payload.notebookId],
+          expands: [true],
+        };
+        batch.set(userNodeRef, newUserNode);
+        [batch, writeCounts] = await checkRestartBatchWriteCounts(batch, writeCounts);
+      }
+
+      await commitBatch(batch);
     });
 
     // TODO: move these to queue

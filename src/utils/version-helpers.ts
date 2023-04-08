@@ -1691,6 +1691,7 @@ export const transferUserVersionsToNewNode = async ({
 
 export const versionCreateUpdate = async ({
   versionNodeId,
+  notebookId, // optional string
   batch,
   nodeId,
   nodeData,
@@ -2194,6 +2195,12 @@ export const versionCreateUpdate = async ({
             visible: true,
             wrong: wrong === 1,
           };
+
+          if (notebookId) {
+            newUserNodeObj.notebooks = [notebookId];
+            newUserNodeObj.expands = [true];
+          }
+
           const userNodeRef = db.collection("userNodes").doc();
           if (t) {
             tWriteOperations.push({

@@ -22,6 +22,8 @@ export type IUserNode = {
   node: string;
   user: string;
   visible: boolean;
+  notebooks?: string[];
+  expands?: boolean[];
   correct: boolean;
   wrong: boolean;
   isStudied: boolean;
