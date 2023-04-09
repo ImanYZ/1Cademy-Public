@@ -139,25 +139,28 @@ const UserStatusSettings = (props: UserStatusSettingsProps) => {
           // border: "dashed 2px pink",
           display: "flex",
           alignItems: "center",
-          justifyContent: "flex-start",
           gap: "5px",
           cursor: "pointer",
           background: theme => (theme.palette.mode === "dark" ? "#242425" : "#F2F4F7"),
-          paddingY: "5px",
-          paddingX: "5px",
+          padding: "6px",
           border: theme => (theme.palette.mode === "dark" ? "solid 1px #303134" : "solid 1px #D0D5DD"),
           borderRadius: "16px",
           width: "90%",
         }}
       >
-        <div className={(pointsGained ? "GainedPoint" : "") + (pointsLost ? "LostPoint" : "")}>
+        <Box
+          className={(pointsGained ? "GainedPoint" : "") + (pointsLost ? "LostPoint" : "")}
+          sx={{
+            marginLeft: "1px",
+          }}
+        >
           <OptimizedAvatar
             imageUrl={props.imageUrl}
             renderAsAvatar={true}
             contained={false}
             sx={{ border: "none", width: "48px", height: "48px", position: "static" }}
           />
-        </div>
+        </Box>
         {
           // className={"UserStatusTotalPoints" + (props.inUserBar ? " inUserBar" : "")}
           <Box className={"customUserStatusTotalPoints"} sx={{ ...props.sx }}>
