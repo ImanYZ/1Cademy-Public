@@ -2725,8 +2725,6 @@ right: 5px; */
   display: flex;
   align-items: center;
   visibility: visible;
-  line-height: 16px;
-  height: 24px;
   /* height: auto; */
   transition: visibility 1s, line-height 1s, height 1s; /* vendorless fallback */
   -o-transition: visibility 1s, line-height 1s, height 1s; /* opera */
