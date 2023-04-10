@@ -328,7 +328,7 @@ const Dashboard = ({}: DashboardProps) => {
   // Scroll to node configs
 
   const { width: windowWith, height: windowHeight } = useWindowSize();
-  const windowInnerTop = windowWith < 899 ? 360 : 50;
+  const windowInnerTop = windowWith < 899 ? (openSidebar ? 350 : 50) : 50;
   const windowInnerLeft = (windowWith * 10) / 100 + (windowWith > 899 ? (openSidebar ? 430 : 80) : 10);
   const windowInnerRight = (windowWith * 10) / 100;
   const windowInnerBottom = 50;
