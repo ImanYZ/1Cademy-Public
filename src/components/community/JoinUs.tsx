@@ -365,7 +365,7 @@ const JoinUs = (props: JoinUsProps) => {
     if (!email) {
       router.push(ROUTES.signUpExp);
     } else {
-      window.open("https://1cademy.us/Activities", "_blank");
+      window.open("https://1cademy.us/Activities/experiment", "_blank");
     }
   };
   return (
@@ -824,7 +824,7 @@ const JoinUs = (props: JoinUsProps) => {
                       <Button
                         variant="contained"
                         component="a"
-                        href={"https://1cademy.us/paperTest/" + props.community.name}
+                        href={"https://1cademy.us/paperTest/" + props.community.id}
                         target="_blank"
                         style={{ mt: 1, mr: 1, color: "white", backgroundColor: orangeDark }}
                       >

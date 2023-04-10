@@ -81,7 +81,7 @@ export const SidebarWrapper = ({
           maxWidth: { xs: width, sm: "80px" },
           height: height < 100 && innerHeight ? `${(height / 100) * innerHeight}px` : `${height}%`,
           borderRight: "none",
-          background: theme => (theme.palette.mode === "dark" ? "rgb(31,31,31)" : "rgb(240,240,240)"),
+          background: theme => (theme.palette.mode === "dark" ? "#1B1A1A" : "#F9FAFB"),
           boxShadow:
             !isMobile || isMenuOpen || openSidebar !== null
               ? theme =>
@@ -113,12 +113,12 @@ export const SidebarWrapper = ({
         },
       }}
     >
-      {headerImage && (
+      {title && (
         <Box sx={{ width }}>
           <Box>
             {!innerHeight || (height > 50 && innerHeight > 600) ? (
-              <Box sx={{ position: "relative", height: "127px", width }}>
-                <Image src={headerImage} alt="header image" width={width} height={127} />
+              <Box sx={{ position: "relative", height: headerImage ? "127px" : "65px", width }}>
+                {headerImage && <Image src={headerImage} alt="header image" width={width} height={127} />}
                 <Typography
                   component={"h2"}
                   sx={{
@@ -127,10 +127,8 @@ export const SidebarWrapper = ({
                     bottom: 0,
                     paddingLeft: "13px",
                     fontSize: { xs: "24px", sm: "40px" },
-                    background: theme =>
-                      theme.palette.mode === "dark"
-                        ? "linear-gradient(0deg, rgba(31, 31, 31, 1) 0%, rgba(31, 31, 31, 0) 100%)"
-                        : "linear-gradient(0deg, rgb(255, 255, 255) 0%, rgba(255, 255, 255, 0) 100%)",
+                    fontWeight: "700",
+                    lineHeight: "29.05px",
                   }}
                 >
                   {title}
@@ -143,7 +141,6 @@ export const SidebarWrapper = ({
                     component={"h2"}
                     sx={{
                       width: "100%",
-                      marginTop: "10px",
                       paddingLeft: "13px",
                       fontSize: { xs: "24px", sm: "40px" },
                       background: theme =>
@@ -160,6 +157,7 @@ export const SidebarWrapper = ({
           </Box>
         </Box>
       )}
+
       <Box>{SidebarOptions}</Box>
       <Box
         id={`${id}-content`}
@@ -185,7 +183,7 @@ export const SidebarWrapper = ({
             position: "absolute",
             top: {
               xs: "0px",
-              sm: "10px",
+              sm: "30px",
             },
             right: "10px",
           }}
@@ -195,7 +193,6 @@ export const SidebarWrapper = ({
               disabled={disabled}
               onClick={onClose}
               sx={{
-                background: theme => (theme.palette.mode === "light" ? "rgb(240,240,240)" : "rgb(31,31,31)"),
                 ":hover": {
                   background: theme =>
                     theme.palette.mode === "light" ? "rgba(240,240,240,0.7)" : "rgba(31,31,31,0.7)",

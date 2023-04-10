@@ -236,19 +236,20 @@ const LinkingWords = ({
                   </Box>
                 );
               })}
-
-              <Button
-                onClick={() => props.openAllParent(props.identifier)}
-                sx={{
-                  justifyContent: "stretch",
-                  textAlign: "left",
-                  ":hover": {
-                    background: "transparent",
-                  },
-                }}
-              >
-                Open All Parents
-              </Button>
+              {props.parents.length > 0 && !props.isNew && (
+                <Button
+                  onClick={() => props.openAllParent(props.identifier)}
+                  sx={{
+                    justifyContent: "stretch",
+                    textAlign: "left",
+                    ":hover": {
+                      background: "transparent",
+                    },
+                  }}
+                >
+                  Open All Parents
+                </Button>
+              )}
 
               {props.editable && !props.isNew && notebookRef.current.selectedNode === props.identifier && (
                 <MemoizedMetaButton
@@ -542,18 +543,20 @@ const LinkingWords = ({
                   </Box>
                 );
               })}
-              <Button
-                onClick={() => props.openAllChildren(props.identifier)}
-                sx={{
-                  justifyContent: "stretch",
-                  textAlign: "left",
-                  ":hover": {
-                    background: "transparent",
-                  },
-                }}
-              >
-                Open All Children
-              </Button>
+              {props.nodesChildren.length > 0 && !props.isNew && (
+                <Button
+                  onClick={() => props.openAllChildren(props.identifier)}
+                  sx={{
+                    justifyContent: "stretch",
+                    textAlign: "left",
+                    ":hover": {
+                      background: "transparent",
+                    },
+                  }}
+                >
+                  Open All Children
+                </Button>
+              )}
               {props.editable &&
                 !props.isNew &&
                 props.nodeType !== "Reference" &&

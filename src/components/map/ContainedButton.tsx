@@ -38,7 +38,6 @@ export const ContainedButton = ({
         <Button
           id={id}
           onClick={disabled ? undefined : onClick}
-          disabled={disabled}
           variant="outlined"
           size="small"
           sx={{
@@ -48,7 +47,7 @@ export const ContainedButton = ({
             background: theme => (theme.palette.mode === "dark" ? "#4f5154" : "#dbd9d9"),
             color: theme => getColorText(disabled, theme.palette.mode === "dark" ? "Dark" : "Light"),
             fill: theme => getColorText(disabled, theme.palette.mode === "dark" ? "Dark" : "Light"),
-            cursor: disabled ? "none" : "cursor",
+            cursor: disabled ? "auto" : "cursor",
             ":hover": {
               borderWidth: "0px",
               background: theme => (theme.palette.mode === "dark" ? "#65696d" : "#b7b3b3"),
