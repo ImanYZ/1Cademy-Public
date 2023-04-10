@@ -364,15 +364,15 @@ const Dashboard = ({}: DashboardProps) => {
   const pathwayRef = useRef({ node: "", parent: "", child: "" });
 
   const onNodeInViewport = useCallback(
-    (nodeId: string) => {
+    (nodeId: string, nodes: FullNodesData) => {
       const originalNode = document.getElementById(nodeId);
       const origin = document.getElementById("map-interaction-origin");
 
-      const thisNode = graph.nodes[nodeId];
+      const thisNode = nodes[nodeId];
       if (!originalNode) return false;
       if (!origin) return false;
       if (!thisNode) return false;
-
+      console.log({ thisNode });
       const { width: nodeWidth, height: nodeHeight } = originalNode.getBoundingClientRect();
       const { top: originTop, left: originLeft } = origin.getBoundingClientRect();
 
@@ -387,15 +387,7 @@ const Dashboard = ({}: DashboardProps) => {
         nodeTop <= windowInnerTop + regionHeight;
       return collide;
     },
-    [
-      graph.nodes,
-      mapInteractionValue.scale,
-      windowHeight,
-      windowInnerLeft,
-      windowInnerRight,
-      windowInnerTop,
-      windowWith,
-    ]
+    [mapInteractionValue.scale, windowHeight, windowInnerLeft, windowInnerRight, windowInnerTop, windowWith]
   );
 
   useEffect(() => {
@@ -434,59 +426,61 @@ const Dashboard = ({}: DashboardProps) => {
       console.log("STN");
       if (!scrollToNodeInitialized.current) {
         setTimeout(() => {
-          const originalNode = document.getElementById(nodeId);
-          if (!originalNode) {
-            return;
-          }
-          // const scrollToSele tedNode = lastNodeOperation.current ? ["scrollToSelectedNode"].includes(lastNodeOperation.current.name) : false;
+          setGraph(graph => {
+            const originalNode = document.getElementById(nodeId);
+            const thisNode = graph.nodes[nodeId];
+            if (!originalNode) return graph;
+            if (!thisNode) return graph;
 
-          const nodeInViewport = onNodeInViewport(nodeId);
-          if (!regardless && nodeInViewport && !forcedTutorial) return;
+            const nodeInViewport = onNodeInViewport(nodeId, graph.nodes);
+            if (!regardless && nodeInViewport && !forcedTutorial) return graph;
 
-          if (
-            originalNode &&
-            "offsetLeft" in originalNode &&
-            originalNode.offsetLeft !== 0 &&
-            "offsetTop" in originalNode &&
-            originalNode.offsetTop !== 0
-          ) {
-            scrollToNodeInitialized.current = true;
-            setTimeout(() => {
-              scrollToNodeInitialized.current = false;
-            }, 1300);
+            if (
+              originalNode &&
+              "offsetLeft" in originalNode &&
+              originalNode.offsetLeft !== 0 &&
+              "offsetTop" in originalNode &&
+              originalNode.offsetTop !== 0
+            ) {
+              scrollToNodeInitialized.current = true;
+              setTimeout(() => {
+                scrollToNodeInitialized.current = false;
+              }, 1300);
 
-            setMapInteractionValue(() => {
-              const windowSize = window.innerWidth;
-              let defaultScale;
-              if (windowSize < 400) {
-                defaultScale = 0.45;
-              } else if (windowSize < 600) {
-                defaultScale = 0.575;
-              } else if (windowSize < 1260) {
-                defaultScale = 0.8;
-              } else {
-                defaultScale = 0.92;
-              }
-              const regionWidth = windowWith - windowInnerLeft - windowInnerRight;
-              const regionHeight = windowHeight - windowInnerTop - windowInnerBottom;
+              setMapInteractionValue(() => {
+                const windowSize = window.innerWidth;
+                let defaultScale;
+                if (windowSize < 400) {
+                  defaultScale = 0.45;
+                } else if (windowSize < 600) {
+                  defaultScale = 0.575;
+                } else if (windowSize < 1260) {
+                  defaultScale = 0.8;
+                } else {
+                  defaultScale = 0.92;
+                }
+                const regionWidth = windowWith - windowInnerLeft - windowInnerRight;
+                const regionHeight = windowHeight - windowInnerTop - windowInnerBottom;
 
-              return {
-                scale: defaultScale,
-                translation: {
-                  x:
-                    windowInnerLeft +
-                    regionWidth / 2 -
-                    (originalNode.offsetLeft + originalNode.offsetWidth / 2) * defaultScale,
-                  y:
-                    windowInnerTop +
-                    regionHeight / 2 -
-                    (originalNode.offsetTop + originalNode.offsetHeight / 2) * defaultScale,
-                },
-              };
-            });
-          } else {
-            scrollToNode(nodeId, regardless, tries + 1);
-          }
+                return {
+                  scale: defaultScale,
+                  translation: {
+                    x:
+                      windowInnerLeft +
+                      regionWidth / 2 -
+                      (originalNode.offsetLeft + originalNode.offsetWidth / 2) * defaultScale,
+                    y:
+                      windowInnerTop +
+                      regionHeight / 2 -
+                      (originalNode.offsetTop + (thisNode.height ?? 0) / 2) * defaultScale,
+                  },
+                };
+              });
+            } else {
+              scrollToNode(nodeId, regardless, tries + 1);
+            }
+            return graph;
+          });
         }, 400);
       }
     },
@@ -557,14 +551,17 @@ const Dashboard = ({}: DashboardProps) => {
   }, [currentStep, graph.nodes, setTargetClientRect, nodeBookState.selectedNode, targetId]);
 
   const onCompleteWorker = useCallback(() => {
-    if (!nodeBookState.selectedNode) return;
+    setGraph(graph => {
+      if (!nodeBookState.selectedNode) return graph;
 
-    const timeout = onNodeInViewport(nodeBookState.selectedNode) ? 0 : 1300;
-    setTimeout(() => {
-      if (!nodeBookState.selectedNode) return;
+      const timeout = onNodeInViewport(nodeBookState.selectedNode, graph.nodes) ? 0 : 300;
+      setTimeout(() => {
+        if (!nodeBookState.selectedNode) return graph;
 
-      scrollToNode(nodeBookState.selectedNode);
-    }, timeout);
+        scrollToNode(nodeBookState.selectedNode);
+      }, timeout);
+      return graph;
+    });
   }, [nodeBookState.selectedNode, onNodeInViewport, scrollToNode]);
 
   const setOperation = useCallback((operation: string) => {

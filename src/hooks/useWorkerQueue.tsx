@@ -154,6 +154,7 @@ export const useWorkerQueue = ({
         });
 
         setIsWorking(false);
+
         onComplete();
       };
     },
