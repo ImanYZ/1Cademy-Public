@@ -467,12 +467,20 @@ const Dashboard = ({}: DashboardProps) => {
               } else {
                 defaultScale = 0.92;
               }
+              const regionWidth = windowWith - windowInnerLeft - windowInnerRight;
+              const regionHeight = windowHeight - windowInnerTop - windowInnerBottom;
 
               return {
                 scale: defaultScale,
                 translation: {
-                  x: (window.innerWidth / 2.6 - originalNode.offsetLeft) * defaultScale,
-                  y: (window.innerHeight / 3.4 - originalNode.offsetTop) * defaultScale,
+                  x:
+                    windowInnerLeft +
+                    regionWidth / 2 -
+                    (originalNode.offsetLeft + originalNode.offsetWidth / 2) * defaultScale,
+                  y:
+                    windowInnerTop +
+                    regionHeight / 2 -
+                    (originalNode.offsetTop + originalNode.offsetHeight / 2) * defaultScale,
                 },
               };
             });
@@ -482,7 +490,7 @@ const Dashboard = ({}: DashboardProps) => {
         }, 400);
       }
     },
-    [forcedTutorial, onNodeInViewport]
+    [forcedTutorial, onNodeInViewport, windowHeight, windowInnerLeft, windowInnerRight, windowInnerTop, windowWith]
   );
 
   useEffect(() => {
