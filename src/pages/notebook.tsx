@@ -369,7 +369,7 @@ const Dashboard = ({}: DashboardProps) => {
       const origin = document.getElementById("map-interaction-origin");
 
       const thisNode = graph.nodes[nodeId];
-
+      console.log({ thisNode });
       if (!originalNode) return false;
       if (!origin) return false;
       if (!thisNode) return false;
@@ -439,7 +439,6 @@ const Dashboard = ({}: DashboardProps) => {
         let timeout = 400;
         if (nodeInViewport) {
           tries = 10;
-          timeout = 0;
         }
         console.log("STN:", { tries, timeout, nodeInViewport });
         setTimeout(() => {
@@ -447,7 +446,7 @@ const Dashboard = ({}: DashboardProps) => {
           if (!originalNode) {
             return;
           }
-          // const scrollToSelectedNode = lastNodeOperation.current ? ["scrollToSelectedNode"].includes(lastNodeOperation.current.name) : false;
+          // const scrollToSele tedNode = lastNodeOperation.current ? ["scrollToSelectedNode"].includes(lastNodeOperation.current.name) : false;
 
           if (!regardless && nodeInViewport && !forcedTutorial) return;
 
@@ -558,7 +557,8 @@ const Dashboard = ({}: DashboardProps) => {
 
   const onCompleteWorker = useCallback(() => {
     if (!nodeBookState.selectedNode) return;
-    const timeout = onNodeInViewport(nodeBookState.selectedNode) ? 300 : 1300;
+
+    const timeout = onNodeInViewport(nodeBookState.selectedNode) ? 0 : 1300;
     setTimeout(() => {
       if (!nodeBookState.selectedNode) return;
 
@@ -5980,6 +5980,7 @@ const Dashboard = ({}: DashboardProps) => {
                 <Button onClick={() => console.log(allNodes)}>All Nodes</Button>
                 <Button onClick={() => console.log(citations)}>citations</Button>
                 <Button onClick={() => console.log(clusterNodes)}>clusterNodes</Button>
+                <Button onClick={() => console.log(graph.nodes[nodeBookState.selectedNode ?? ""])}>SelectedNode</Button>
               </Box>
 
               <Divider />

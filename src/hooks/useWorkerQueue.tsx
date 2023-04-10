@@ -148,7 +148,6 @@ export const useWorkerQueue = ({
             nodeIds: updatedNodeIds,
             updatedAt: new Date(),
           });
-          // console.log("WORKER Result Merged", { nodes: nodesCopy, edges: edgesCopy });
           console.log({ nodesCopy });
 
           return { nodes: nodesCopy, edges: edgesCopy };
