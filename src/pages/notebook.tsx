@@ -2909,16 +2909,13 @@ const Dashboard = ({}: DashboardProps) => {
       }
 
       if (chosenType === "Proposals") {
-        if (openSidebar === "PROPOSALS" && nodeId === notebookRef.current.selectedNode) {
-          setOpenSidebar(null);
-        } else {
-          setOpenSidebar("PROPOSALS");
-          setSelectedNodeType(nodeType);
-          notebookRef.current.selectionType = chosenType;
-          notebookRef.current.selectedNode = nodeId;
-          nodeBookDispatch({ type: "setSelectionType", payload: chosenType });
-          nodeBookDispatch({ type: "setSelectedNode", payload: nodeId });
-        }
+        setOpenSidebar("PROPOSALS");
+        setSelectedNodeType(nodeType);
+        notebookRef.current.selectionType = chosenType;
+        notebookRef.current.selectedNode = nodeId;
+        nodeBookDispatch({ type: "setSelectionType", payload: chosenType });
+        nodeBookDispatch({ type: "setSelectedNode", payload: nodeId });
+
         return;
       }
 
@@ -2961,7 +2958,7 @@ const Dashboard = ({}: DashboardProps) => {
         nodeBookDispatch({ type: "setSelectedNode", payload: nodeId });
       }
     },
-    [reloadPermanentGraph, openSidebar, resetAddedRemovedParentsChildren]
+    [openSidebar, reloadPermanentGraph, nodeBookDispatch, resetAddedRemovedParentsChildren]
   );
 
   const saveProposedImprovement = useCallback(
@@ -6008,6 +6005,7 @@ const Dashboard = ({}: DashboardProps) => {
                 </Button>
                 <Button onClick={() => openNodeHandler("r98BjyFDCe4YyLA3U8ZE")}>Open Node Handler</Button>
                 <Button onClick={() => setShowRegion(prev => !prev)}>Show Region</Button>
+                <Button onClick={() => console.log({ openSidebar })}>Open Sidebar</Button>
               </Box>
               <Typography>Last Operation:</Typography>
               <Box>
