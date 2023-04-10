@@ -1,37 +1,19 @@
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import BookmarkIcon from "@mui/icons-material/Bookmark";
-import BookmarkBorderIcon from "@mui/icons-material/BookmarkBorder";
 import CloseIcon from "@mui/icons-material/Close";
 import CreateIcon from "@mui/icons-material/Create";
 import DoneIcon from "@mui/icons-material/Done";
-import DraftsIcon from "@mui/icons-material/Drafts";
 import FacebookRoundedIcon from "@mui/icons-material/FacebookRounded";
-import ImageIcon from "@mui/icons-material/Image";
 import LinkIcon from "@mui/icons-material/Link";
 import LinkedInIcon from "@mui/icons-material/LinkedIn";
-import MailIcon from "@mui/icons-material/Mail";
 import MoreHorizIcon from "@mui/icons-material/MoreHoriz";
 import RecordVoiceOverIcon from "@mui/icons-material/RecordVoiceOver";
 import RedditIcon from "@mui/icons-material/Reddit";
 import ShareIcon from "@mui/icons-material/Share";
 import SwapHorizIcon from "@mui/icons-material/SwapHoriz";
 import TwitterIcon from "@mui/icons-material/Twitter";
-import VideoCallIcon from "@mui/icons-material/VideoCall";
 import VoiceOverOffIcon from "@mui/icons-material/VoiceOverOff";
-import {
-  Badge,
-  Button,
-  ClickAwayListener,
-  Divider,
-  MenuItem,
-  MenuItemProps,
-  MenuList,
-  Paper,
-  styled,
-  Tooltip,
-  Typography,
-  useTheme,
-} from "@mui/material";
+import { Button, ClickAwayListener, Divider, MenuItem, MenuList, Paper, Tooltip, useTheme } from "@mui/material";
 import IconButton from "@mui/material/IconButton";
 import { Box } from "@mui/system";
 import dayjs from "dayjs";
@@ -39,9 +21,7 @@ import relativeTime from "dayjs/plugin/relativeTime";
 // import { getFirestore } from "firebase/firestore";
 import NextImage from "next/image";
 import { useRouter } from "next/router";
-import React, { MutableRefObject, ReactNode, useCallback, useEffect, useRef, useState } from "react";
-
-import { OpenSidebar } from "@/pages/notebook";
+import React, { useCallback, useEffect, useState } from "react";
 
 import ReferenceIcon from "../../../public/reference.svg";
 import ReferenceDarkIcon from "../../../public/reference-dark.svg";
@@ -49,41 +29,25 @@ import ReferenceLightIcon from "../../../public/reference-light.svg";
 import TagIcon from "../../../public/tag.svg";
 import TagDarkIcon from "../../../public/tag-dark.svg";
 import TagLightIcon from "../../../public/tag-light.svg";
-import { User } from "../../knowledgeTypes";
 import shortenNumber from "../../lib/utils/shortenNumber";
-import { DispatchNodeBookActions, FullNodeData, OpenPart, TNodeBookState } from "../../nodeBookTypes";
+import { OpenPart } from "../../nodeBookTypes";
 import NodeTypeIcon from "../NodeTypeIcon";
+import OptimizedAvatar from "../OptimizedAvatar";
 import { ContainedButton } from "./ContainedButton";
 import { MemoizedMetaButton } from "./MetaButton";
-import { MemoizedNodeTypeSelector } from "./Node/NodeTypeSelector";
-import { MemoizedUserStatusIcon } from "./UserStatusIcon";
+import { CustomMenuItem } from "./NodeFooter";
 
 dayjs.extend(relativeTime);
 
-type NodeFooterProps = {
+type BasicNodeFooterProps = {
   open: boolean;
-  addVideo: boolean;
-  setAddVideo: (addVideo: boolean) => void;
   identifier: any;
-  notebookRef: MutableRefObject<TNodeBookState>;
-  nodeBookDispatch: React.Dispatch<DispatchNodeBookActions>;
-  activeNode: any;
-  citationsSelected: any;
-  proposalsSelected: any;
-  acceptedProposalsSelected: any;
-  commentsSelected: any;
-  editable: any;
-  setNodeParts: (nodeId: string, callback: (thisNode: FullNodeData) => FullNodeData) => void;
+  // notebookRef: MutableRefObject<TNodeBookState>;
   title: any;
   content: any;
-  unaccepted: any;
   openPart: OpenPart;
   nodeType: any;
-  isNew: any;
-  admin: any;
   aImgUrl: any;
-  aFullname: any;
-  aChooseUname: any;
   viewers: any;
   correctNum: any;
   markedCorrect: any;
@@ -93,65 +57,28 @@ type NodeFooterProps = {
   tags: any;
   parents: any;
   nodesChildren: any;
-  commentsNum: any;
-  proposalsNum: any;
-  studied: any;
-  isStudied: any;
-  changed: any;
   changedAt: any;
-  simulated?: boolean;
   bookmarked: any;
   bookmarks: any;
-  reloadPermanentGrpah: any;
-  onNodeShare: (nodeId: string, platform: string) => void;
-  markStudied: any;
-  bookmark: any;
+  // onNodeShare: (nodeId: string, platform: string) => void;
   openNodePart: any;
   selectNode: any;
-  correctNode: any;
-  wrongNode: any;
-  disableVotes: boolean;
-  uploadNodeImage: any;
-  user: User;
-  citations: { [key: string]: Set<string> };
-  setOpenSideBar: (sidebar: OpenSidebar) => void;
+  // correctNode: any;
   locked: boolean;
-  openSidebar: any;
-  // contributors: any;
-  // institutions: any;
-  // openUserInfoSidebar: (uname: string, imageUrl: string, fullName: string, chooseUname: string) => void;
-  proposeNodeImprovement: any;
-  setOperation: any;
   disabled?: boolean;
   enableChildElements?: string[];
   showProposeTutorial?: boolean;
-  setAbleToPropose: any;
 };
 
-const NodeFooter = ({
+const BasicNodeFooter = ({
   open,
-  addVideo,
-  setAddVideo,
   identifier,
-  notebookRef,
-  nodeBookDispatch,
-  // activeNode,
-  // proposalsSelected,
-  // acceptedProposalsSelected,
-  // commentsSelected,
-  editable,
-  setNodeParts,
+  // notebookRef,
   title,
   content,
-  unaccepted,
   openPart,
   nodeType,
-  isNew,
-  admin,
   aImgUrl,
-  aFullname,
-  aChooseUname,
-  // viewers,
   correctNum,
   markedCorrect,
   wrongNum,
@@ -160,63 +87,43 @@ const NodeFooter = ({
   tags,
   parents,
   nodesChildren,
-  // commentsNum,
-  // proposalsNum,
-  studied,
-  isStudied,
-  // changed,
   changedAt,
-  simulated,
   bookmarked,
   bookmarks,
-  reloadPermanentGrpah,
-  onNodeShare,
-  markStudied,
-  bookmark,
+  // onNodeShare,
   openNodePart,
   selectNode,
-  correctNode,
-  wrongNode,
-  disableVotes,
-  uploadNodeImage,
-  user,
-  setOpenSideBar,
+  // correctNode,
   locked,
-  openSidebar,
-  // contributors,
-  // institutions,
-  // openUserInfoSidebar,
-  proposeNodeImprovement,
-  setOperation,
   disabled,
   enableChildElements = [],
-  setAbleToPropose,
-}: NodeFooterProps) => {
+}: // setAbleToPropose,
+BasicNodeFooterProps) => {
   const router = useRouter();
   // const db = getFirestore();
   const theme = useTheme();
   const [isSpeaking, setIsSpeaking] = useState(false);
-  const [isUploading, setIsUploading] = useState(false);
-  const [percentageUploaded, setPercentageUploaded] = useState(0);
+  // const [isUploading, setIsUploading] = useState(false);
+  // const [percentageUploaded, setPercentageUploaded] = useState(0);
   const [url, setUrl] = useState("");
-  const inputEl = useRef<HTMLInputElement>(null);
+  // const inputEl = useRef<HTMLInputElement>(null);
   const [openMenu, setOpenMenu] = useState(false);
   // const [openSocialMenu, setOpenSocialMenu] = useState(false);
   // const [institutionLogos, setInstitutionLogos] = useState<{
   //   [institutionName: string]: string;
   // }>({});
 
-  const userPictureId = `${identifier}-node-footer-user`;
+  // const userPictureId = `${identifier}-node-footer-user`;
   const proposeButtonId = `${identifier}-node-footer-propose`;
   const downvoteButtonId = `${identifier}-node-footer-downvotes`;
   const upvoteButtonId = `${identifier}-node-footer-upvotes`;
   const tagsCitationsButtonId = `${identifier}-node-footer-tags-citations`;
   const parentChildrenButtonId = `${identifier}-button-parent-children`;
   const moreOptionsButtonId = `${identifier}-node-footer-ellipsis`;
-  const nodeTypeSelectorId = `${identifier}-node-type-selector`;
+  // const nodeTypeSelectorId = `${identifier}-node-type-selector`;
 
   // this will execute the includes operation only when disable is TRUE (in tutorial)
-  const disableUserPicture = disabled && !enableChildElements.includes(userPictureId);
+  // const disableUserPicture = disabled && !enableChildElements.includes(userPictureId);
   const disableProposeButton = disabled && !enableChildElements.includes(proposeButtonId);
   const disableDownvoteButton = disabled && !enableChildElements.includes(downvoteButtonId);
   const disableUpvoteButton = disabled && !enableChildElements.includes(upvoteButtonId);
@@ -224,7 +131,7 @@ const NodeFooter = ({
   const disableParentChildrenButton = disabled && !enableChildElements.includes(parentChildrenButtonId);
   const disableMoreOptionsButton = disabled && !enableChildElements.includes(moreOptionsButtonId);
   const disableFooterMenuOptions = enableChildElements.includes(moreOptionsButtonId);
-  const disableNodeTypeSelector = disabled && !enableChildElements.includes(nodeTypeSelectorId);
+  // const disableNodeTypeSelector = disabled && !enableChildElements.includes(nodeTypeSelectorId);
 
   const messageTwitter = () => {
     return `1Cademy - Collaboratively Designing Learning Pathways
@@ -253,8 +160,7 @@ const NodeFooter = ({
     let url: any = protocol + "//" + hostName + "/n/" + identifier;
     navigator.clipboard.writeText(url);
     setOpenMenu(false);
-    // setOpenSocialMenu(false);
-    onNodeShare(identifier, "copy-link");
+    // onNodeShare(identifier, "copy-link");
   };
 
   const selectReferences = useCallback(
@@ -269,38 +175,41 @@ const NodeFooter = ({
     },
     [openNodePart]
   );
-  const selectPendingProposals = useCallback(
-    (event: any) => {
-      // if (nodeBookState.selectedNode === identifier) {
-      //   console.log("this is selected");
-      // }
-      // TODO: remove openEditButton and nodeId global states
-      // openNodePart(event, "PendingProposals");
-      // if (nodeBookState.nodeId != identifier) {
-      //   nodeBookDispatch({
-      //     type: "setOpenEditButton",
-      //     payload: { status: true, nodeId: identifier },
-      //   });
-      // } else {
-      //   nodeBookDispatch({
-      //     type: "setOpenEditButton",
-      //     payload: { status: !nodeBookState.openEditButton, nodeId: identifier },
-      //   });
-      // }
-      selectNode(event, "Proposals"); // Pass correct data
-    },
-    [selectNode]
-  );
-  const uploadNodeImageHandler = useCallback(
-    (event: any) => uploadNodeImage(event, isUploading, setIsUploading, setPercentageUploaded),
-    [uploadNodeImage, isUploading]
-  );
+
+  // const selectPendingProposals = useCallback(
+  //   (event: any) => {
+  //     // if (nodeBookState.selectedNode === identifier) {
+  //     //   console.log("this is selected");
+  //     // }
+  //     // TODO: remove openEditButton and nodeId global states
+  //     // openNodePart(event, "PendingProposals");
+  //     // if (nodeBookState.nodeId != identifier) {
+  //     //   nodeBookDispatch({
+  //     //     type: "setOpenEditButton",
+  //     //     payload: { status: true, nodeId: identifier },
+  //     //   });
+  //     // } else {
+  //     //   nodeBookDispatch({
+  //     //     type: "setOpenEditButton",
+  //     //     payload: { status: !nodeBookState.openEditButton, nodeId: identifier },
+  //     //   });
+  //     // }
+  //     selectNode(event, "Proposals"); // Pass correct data
+  //   },
+  //   [selectNode]
+  // );
+  // const uploadNodeImageHandler = useCallback(
+  //   (event: any) => uploadNodeImage(event, isUploading, setIsUploading, setPercentageUploaded),
+  //   [uploadNodeImage, isUploading]
+  // );
+
   const selectLinkingWords = useCallback(
     (event: any) => {
       openNodePart(event, "LinkingWords");
     },
     [openNodePart]
   );
+
   const narrateNode = useCallback(() => {
     if (!window.speechSynthesis.speaking) {
       const msg = new SpeechSynthesisUtterance("Node title: " + title + " \n " + "Node content: " + content);
@@ -314,9 +223,9 @@ const NodeFooter = ({
       setIsSpeaking(false);
     }
   }, [title, content]);
-  const uploadImageClicked = useCallback(() => {
-    inputEl?.current?.click();
-  }, [inputEl]);
+  // const uploadImageClicked = useCallback(() => {
+  //   inputEl?.current?.click();
+  // }, [inputEl]);
 
   const selectCitations = useCallback(
     (event: any) => {
@@ -405,35 +314,35 @@ const NodeFooter = ({
   //   ));
   // }, [_institutions]);
 
-  const openContributorsSection = useCallback(() => {
-    if (notebookRef.current.contributorsNodeId != identifier) {
-      notebookRef.current.contributorsNodeId = { nodeId: identifier, showContributors: true };
-      nodeBookDispatch({
-        type: "setContributorsNodeId",
-        payload: { nodeId: identifier, showContributors: true },
-      });
-    } else {
-      notebookRef.current.contributorsNodeId = {
-        nodeId: identifier,
-        showContributors: !notebookRef.current.showContributors,
-      };
-      nodeBookDispatch({
-        type: "setContributorsNodeId",
-        payload: { nodeId: identifier, showContributors: !notebookRef.current.showContributors },
-      });
-    }
-  }, [nodeBookDispatch]);
+  // const openContributorsSection = useCallback(() => {
+  //   if (notebookRef.current.contributorsNodeId != identifier) {
+  //     notebookRef.current.contributorsNodeId = { nodeId: identifier, showContributors: true };
+  //     nodeBookDispatch({
+  //       type: "setContributorsNodeId",
+  //       payload: { nodeId: identifier, showContributors: true },
+  //     });
+  //   } else {
+  //     notebookRef.current.contributorsNodeId = {
+  //       nodeId: identifier,
+  //       showContributors: !notebookRef.current.showContributors,
+  //     };
+  //     nodeBookDispatch({
+  //       type: "setContributorsNodeId",
+  //       payload: { nodeId: identifier, showContributors: !notebookRef.current.showContributors },
+  //     });
+  //   }
+  // }, [nodeBookDispatch]);
 
-  const proposeNodeImprovementClick = useCallback(
-    (event: any) => {
-      selectPendingProposals(event);
-      setOperation("CancelProposals");
-      notebookRef.current.selectedNode = identifier;
-      nodeBookDispatch({ type: "setSelectedNode", payload: identifier });
-      proposeNodeImprovement(event, identifier);
-    },
-    [identifier, nodeBookDispatch, proposeNodeImprovement, selectPendingProposals, setOperation]
-  );
+  // const proposeNodeImprovementClick = useCallback(
+  //   (event: any) => {
+  //     selectPendingProposals(event);
+  //     setOperation("CancelProposals");
+  //     notebookRef.current.selectedNode = identifier;
+  //     nodeBookDispatch({ type: "setSelectedNode", payload: identifier });
+  //     proposeNodeImprovement(event, identifier);
+  //   },
+  //   [identifier, nodeBookDispatch, proposeNodeImprovement, selectPendingProposals, setOperation]
+  // );
 
   return (
     <>
@@ -448,54 +357,20 @@ const NodeFooter = ({
         }}
       >
         <Box className="NodeFooter Left" sx={{ display: "flex", alignItems: "center", gap: "10px" }}>
-          {open &&
-            (isNew ? (
-              <Box onClick={openContributorsSection}>
-                <MemoizedUserStatusIcon
-                  id={userPictureId}
-                  nodeBookDispatch={nodeBookDispatch}
-                  uname={user.uname}
-                  imageUrl={user.imageUrl || ""}
-                  fullname={user.fName + " " + user.lName}
-                  chooseUname={user.chooseUname}
-                  online={false}
-                  inUserBar={false}
-                  inNodeFooter={true}
-                  reloadPermanentGrpah={reloadPermanentGrpah}
-                  setOpenSideBar={setOpenSideBar}
-                  disabled={disableUserPicture}
-                />
-              </Box>
-            ) : (
-              <Box onClick={openContributorsSection}>
-                <MemoizedUserStatusIcon
-                  id={userPictureId}
-                  nodeBookDispatch={nodeBookDispatch}
-                  uname={admin}
-                  imageUrl={aImgUrl}
-                  fullname={aFullname}
-                  chooseUname={aChooseUname}
-                  online={false}
-                  inUserBar={false}
-                  inNodeFooter={true}
-                  reloadPermanentGrpah={reloadPermanentGrpah}
-                  setOpenSideBar={setOpenSideBar}
-                  disabled={disableUserPicture}
-                />
-              </Box>
-            ))}
-          {/* {open && disableUserPicture && (
-            <Box
-              id={userPictureId}
-              sx={{ width: "28px", height: "28px", backgroundColor: "gray", borderRadius: "50%" }}
-            />
-          )} */}
+          {open && (
+            <Box>
+              <OptimizedAvatar
+                imageUrl={aImgUrl}
+                renderAsAvatar={true}
+                contained={false}
+                sx={{ border: "none", width: "38px", height: "38px", position: "static", cursor: "pointer" }}
+              />
+            </Box>
+          )}
           <div
             className={open ? "NodeTypeIconOpen Tooltip" : "NodeTypeIconClosed Tooltip"}
-            style={{ display: "flex", alignItems: "center", fontSize: "16px" }} // font size refL Map.css ln 71
+            style={{ display: "flex", alignItems: "center", fontSize: "16px" }}
           >
-            {/* <NodeTypeIcon nodeType={nodeType} /> */}
-
             {locked && (
               <NodeTypeIcon
                 id={identifier}
@@ -505,25 +380,15 @@ const NodeFooter = ({
                 // disabled={disabled}
               />
             )}
-            {!locked &&
-              (editable ? (
-                <MemoizedNodeTypeSelector
-                  nodeId={identifier}
-                  setNodeParts={setNodeParts}
-                  nodeType={nodeType}
-                  disabled={disableNodeTypeSelector}
-                  disabledItems={disabled}
-                  setAbleToPropose={setAbleToPropose}
-                />
-              ) : (
-                <NodeTypeIcon
-                  id={identifier}
-                  nodeType={nodeType}
-                  tooltipPlacement={"top"}
-                  fontSize={"inherit"}
-                  // disabled={disabled}
-                />
-              ))}
+            {!locked && (
+              <NodeTypeIcon
+                id={identifier}
+                nodeType={nodeType}
+                tooltipPlacement={"top"}
+                fontSize={"inherit"}
+                // disabled={disabled}
+              />
+            )}
             <Tooltip
               title={`This node was last edited at ${dayjs(new Date(changedAt)).hour()}:${dayjs(
                 new Date(changedAt)
@@ -536,7 +401,7 @@ const NodeFooter = ({
                 id={`${identifier}-node-footer-timestamp`}
                 style={{
                   marginLeft: "10px",
-                  display: editable ? "none" : "block",
+                  display: "block",
                   lineHeight: "normal",
                 }}
               >
@@ -546,11 +411,11 @@ const NodeFooter = ({
               </span>
             </Tooltip>
             {open && (
-              <Box sx={{ display: editable || simulated ? "none" : "flex", alignItems: "center", marginLeft: "10px" }}>
+              <Box sx={{ display: "flex", alignItems: "center", marginLeft: "10px" }}>
                 <ContainedButton
                   id={proposeButtonId}
                   title="Propose/evaluate versions of this node."
-                  onClick={proposeNodeImprovementClick}
+                  onClick={undefined}
                   tooltipPosition="top"
                   sx={{
                     background: (theme: any) => (theme.palette.mode === "dark" ? "#404040" : "#EAECF0"),
@@ -602,8 +467,8 @@ const NodeFooter = ({
                     <Tooltip title={"Vote to prevent further changes."} placement={"top"}>
                       <span>
                         <Button
-                          onClick={wrongNode}
-                          disabled={disableVotes || disableDownvoteButton}
+                          // onClick={wrongNode}
+                          disabled={disableDownvoteButton}
                           sx={{
                             padding: "0",
                             color: "inherit",
@@ -635,11 +500,12 @@ const NodeFooter = ({
                     orientation="vertical"
                     variant="middle"
                     flexItem
-                    sx={{
-                      borderColor: disableVotes
-                        ? "#6A6A6A"
-                        : theme => (theme.palette.mode === "dark" ? "#D3D3D3" : "inherit"),
-                    }}
+                    sx={{ borderColor: "#6A6A6A" }}
+                    // sx={{
+                    //   borderColor: disableVotes
+                    //     ? "#6A6A6A"
+                    //     : theme => (theme.palette.mode === "dark" ? "#D3D3D3" : "inherit"),
+                    // }}
                   />
                   <Box
                     id={upvoteButtonId}
@@ -659,8 +525,8 @@ const NodeFooter = ({
                     <Tooltip title={"Vote to delete node."} placement={"top"}>
                       <span>
                         <Button
-                          onClick={correctNode}
-                          disabled={disableVotes || disableUpvoteButton}
+                          // onClick={correctNode}
+                          disabled={true}
                           sx={{
                             padding: "0",
                             color: "inherit",
@@ -696,129 +562,13 @@ const NodeFooter = ({
                 </Box>
               </Box>
             )}
-            {/* <span
-            className={"TooltipText " + (open ? "Top" : "Bottom")}
-            onClick={preventEventPropagation}
-          >
-            This is{" "}
-            {nodeType[0] == "A" ||
-              nodeType[0] == "E" ||
-              nodeType[0] == "I" ||
-              nodeType[0] == "O" ||
-              nodeType[0] == "U"
-              ? "an"
-              : "a"}{" "}
-            "{nodeType}" node.
-          </span> */}
           </div>
         </Box>
-        <Box className="NodeFooter Right" sx={{ display: simulated ? "none" : "flex", alignItems: "center" }}>
+
+        <Box className="NodeFooter Right" sx={{ display: "flex", alignItems: "center" }}>
           {open ? (
-            // REF: Node.css ln 122
             <Box sx={{ display: "flex", alignItems: "center", fontSize: "13px" }}>
-              {!editable && !unaccepted ? (
-                // Accepted nodes
-                <>
-                  {/* <MemoizedMetaButton
-                  onClick={narrateNode}
-                  tooltip={isSpeaking ? "Stop narration." : "Narrate the node."}
-                  tooltipPosition="top"
-                >
-                  {isSpeaking ? (
-                    <VoiceOverOffIcon sx={{ fontSize: "16px" }} />
-                  ) : (
-                    <RecordVoiceOverIcon sx={{ fontSize: "16px" }} />
-                  )}
-                </MemoizedMetaButton> */}
-
-                  {/* <MemoizedMetaButton
-                  onClick={selectAcceptedProposals}
-                  tooltip="See version history."
-                  tooltipPosition="Top"
-                >
-                  <i
-                    className={
-                      "material-icons SeparateIcon " +
-                      (acceptedProposalsSelected ? "orange-text" : "grey-text")
-                    }
-                  >
-                    event_Citing Nodesavailable
-                  </i>
-                  <span>{dayjs(changedAt).fromNow()}</span>
-                </MemoizedMetaButton> */}
-                </>
-              ) : (
-                // new Node or unaccepted proposal
-                <>
-                  {nodeType !== "Reference" && editable && (
-                    <Box
-                      id={`${identifier}-node-footer-image-video`}
-                      sx={{
-                        display: "flex",
-                        alignItems: "center",
-                        gap: "5px",
-                        marginRight: "10px",
-                      }}
-                    >
-                      <ContainedButton
-                        id={`${identifier}-node-footer-image`}
-                        title="Upload an image to better explain this node."
-                        onClick={() => uploadImageClicked()}
-                        tooltipPosition="top"
-                        sx={{
-                          background: (theme: any) => (theme.palette.mode === "dark" ? "#404040" : "#EAECF0"),
-                          color: "inherit",
-                          fontWeight: 400,
-                          height: "28.7px",
-                          ":hover": {
-                            borderWidth: "0px",
-                            background: (theme: any) =>
-                              theme.palette.mode === "dark"
-                                ? theme.palette.common.darkBackground2
-                                : theme.palette.common.lightBackground2,
-                          },
-                        }}
-                        disabled={disabled}
-                      >
-                        <>
-                          <input type="file" ref={inputEl} onChange={uploadNodeImageHandler} hidden />
-                          {isUploading ? (
-                            <span style={{ width: "37px", fontSize: "11px", textAlign: "center" }}>
-                              {percentageUploaded + "%"}
-                            </span>
-                          ) : (
-                            <ImageIcon sx={{ fontSize: "16px" }} />
-                          )}
-                        </>
-                      </ContainedButton>
-
-                      <ContainedButton
-                        id={`${identifier}-node-footer-video`}
-                        title="Cite a video from Youtube or Vimeo."
-                        onClick={() => setAddVideo(!addVideo)}
-                        tooltipPosition="top"
-                        sx={{
-                          background: (theme: any) => (theme.palette.mode === "dark" ? "#404040" : "#EAECF0"),
-                          color: addVideo ? "#ff8a33" : "inherit",
-                          fontWeight: 400,
-                          height: "28.7px",
-                          ":hover": {
-                            borderWidth: "0px",
-                            background: (theme: any) =>
-                              theme.palette.mode === "dark"
-                                ? theme.palette.common.darkBackground2
-                                : theme.palette.common.lightBackground2,
-                          },
-                        }}
-                        disabled={disabled}
-                      >
-                        <VideoCallIcon sx={{ fontSize: "20px" }} />
-                      </ContainedButton>
-                    </Box>
-                  )}
-                </>
-              )}
-              {!editable && !unaccepted && nodeType === "Reference" ? (
+              {nodeType === "Reference" ? (
                 <>
                   <Box
                     sx={{
@@ -835,10 +585,11 @@ const NodeFooter = ({
                       tooltipPosition="top"
                       sx={{
                         background: (theme: any) => (theme.palette.mode === "dark" ? "#404040" : "#EAECF0"),
-                        color:
-                          openSidebar === "CITATIONS" && notebookRef.current.selectedNode === identifier
-                            ? theme => theme.palette.common.orange
-                            : "inherit",
+                        // color:
+                        //   notebookRef.current.selectedNode === identifier
+                        //     ? theme => theme.palette.common.orange
+                        //     : "inherit",
+                        color: "inherit",
                         fontWeight: 400,
                         ":hover": {
                           borderWidth: "0px",
@@ -1041,96 +792,7 @@ const NodeFooter = ({
                   )}
                 </>
               )}
-              {!editable && !unaccepted && (
-                <>
-                  {/* <MemoizedMetaButton
-                  onClick={bookmark}
-                  tooltip="Bookmark this node."
-                  // {
-                  //   `You've ${
-                  //     !bookmarked ? "not " : ""
-                  //   }bookmarked this node. ` +
-                  //   shortenNumber(bookmarks, 2, false) +
-                  //   " 1Cademist" +
-                  //   (bookmarks === 1 ? " has" : " have") +
-                  //   " bookmarked this node."
-                  // }
-                  tooltipPosition="top"
-                >
-                  <>
-                    {bookmarked ? (
-                      <BookmarkIcon color={bookmarked ? "primary" : "inherit"} sx={{ fontSize: "16px" }} />
-                    ) : (
-                      <BookmarkBorderIcon
-                        // color={bookmarked ? "orange-text" : "grey-text"}
-                        // className={bookmarked ? "orange-text" : "grey-text"}
-                        color={bookmarked ? "primary" : "inherit"}
-                        sx={{ fontSize: "16px" }}
-                      />
-                    )}
-                    <span>{shortenNumber(bookmarks, 2, false)}</span>
-                  </>
-                </MemoizedMetaButton>
-                <MemoizedMetaButton
-                  onClick={markStudied}
-                  tooltip={!isStudied ? 'Mark this node as "studied."' : 'Mark this node as "not studied."'}
-                  // {
-                  //   (!isStudied
-                  //     ? "You've not marked this node as Studied. "
-                  //     : `This node is ${
-                  //         changed ? "changed" : "not chagned"
-                  //       } since the last time you marked it as Studied. `) +
-                  //   shortenNumber(studied, 2, false) +
-                  //   " 1Cademist" +
-                  //   (studied === 1 ? " has" : "s have") +
-                  //   " studied this node."
-                  // }
-                  tooltipPosition="top"
-                >
-                  <>
-                    {isStudied ? <DraftsIcon sx={{ fontSize: "16px" }} /> : <MailIcon sx={{ fontSize: "16px" }} />}
-                    <span>{shortenNumber(studied, 2, false)}</span>
-                  </>
-                </MemoizedMetaButton> */}
-                  {/* <MemoizedMetaButton
-                  onClick={event => {}}
-                  tooltip="# of comments and Q&amp;As about this node."
-                    tooltipPosition="Top"
-                >
-                  <i
-                    className={
-                      "material-icons " +
-                      (activeNode &&
-                      commentsSelected
-                        ? "orange-text"
-                        : "grey-text"
-                      )}
-                  >forum</i>
-                  <span>{shortenNumber(commentsNum, 2, false)}</span>
-                </MemoizedMetaButton> */}
-                  {/* <MemoizedMetaButton
-                    tooltip="# of 1Admins who have awarded this node."
-                    tooltipPosition="Top"
-                  >
-                  <i
-                    className={"material-icons "
-                      (markedAdmired
-                        ? "amber-text"
-                        : "amber-text text-lighten-3")
-                    }
-                  >grade</i>
-                  <span>{shortenNumber(admiredNum, 2, false)}</span>
-                </MemoizedMetaButton> */}
 
-                  {/* <MemoizedMetaButton
-                    tooltip="# of 1Cademists who have this node visible on their map."
-                    tooltipPosition="Top"
-                  >
-                  <i className="material-icons grey-text">visibility</i>
-                  <span>{shortenNumber(viewers, 2, false)}</span>
-                </MemoizedMetaButton> */}
-                </>
-              )}
               {openPart === "LinkingWords" ? (
                 <Box
                   id={parentChildrenButtonId}
@@ -1196,7 +858,7 @@ const NodeFooter = ({
                 onClick={handleClick}
                 disabled={disableMoreOptionsButton}
                 sx={{
-                  display: simulated ? "none" : "flex",
+                  display: "flex",
                   background: (theme: any) => (theme.palette.mode === "dark" ? "#404040" : "#EAECF0"),
                   padding: "3px",
                   ":hover": {
@@ -1230,8 +892,8 @@ const NodeFooter = ({
                       <MenuList>
                         {/* ----------------------- */}
 
-                        <CustomMenuItem
-                          menuItemProps={{ disabled: disableFooterMenuOptions, onClick: markStudied }}
+                        {/* <CustomMenuItem
+                          menuItemProps={{ disabled: disableFooterMenuOptions }}
                           tooltipText={!isStudied ? 'Mark this node as "studied."' : 'Mark this node as "not studied."'}
                           icon={
                             isStudied ? (
@@ -1242,51 +904,9 @@ const NodeFooter = ({
                           }
                           badgeContent={shortenNumber(studied, 2, false) ?? 0}
                           text="Mark as studied"
-                        />
+                        /> */}
 
-                        {/* <MenuItem
-                          disabled={disableFooterMenuOptions}
-                          sx={{ cursor: disableFooterMenuOptions ? "not-allowed" : undefined }}
-                        >
-                          <MemoizedMetaButton
-                            id={`${identifier}-node-footer-studied`}
-                            tooltip={!isStudied ? 'Mark this node as "studied."' : 'Mark this node as "not studied."'}
-                            style={{ padding: "0" }}
-                            tooltipPosition="top"
-                            disabled={disabled}
-                            onClick={markStudied}
-                          >
-                            {disableFooterMenuOptions ? (
-                              // is required to remove badge because content is blurred when is disabled
-                              <Box sx={{ display: "flex", alignItems: "center" }}>
-                                {isStudied ? (
-                                  <DraftsIcon sx={{ fontSize: "16px" }} />
-                                ) : (
-                                  <MailIcon sx={{ fontSize: "16px" }} />
-                                )}
-                                <Typography sx={{ ml: "8px" }}>Mark as studied</Typography>
-                              </Box>
-                            ) : (
-                              <Box>
-                                <Badge
-                                  badgeContent={shortenNumber(studied, 2, false) ?? 0}
-                                  color="error"
-                                  anchorOrigin={{ vertical: "top", horizontal: "left" }}
-                                  sx={{ wordBreak: "normal", padding: "1px" }}
-                                >
-                                  {isStudied ? (
-                                    <DraftsIcon sx={{ fontSize: "16px" }} />
-                                  ) : (
-                                    <MailIcon sx={{ fontSize: "16px" }} />
-                                  )}
-                                </Badge>
-                                <Typography sx={{ ml: "8px" }}>Mark as studied</Typography>
-                              </Box>
-                            )}
-                          </MemoizedMetaButton>
-                        </MenuItem> */}
-
-                        <CustomMenuItem
+                        {/* <CustomMenuItem
                           menuItemProps={{ disabled: disableFooterMenuOptions, onClick: bookmark }}
                           tooltipText={"Bookmark this node."}
                           icon={
@@ -1301,42 +921,7 @@ const NodeFooter = ({
                           }
                           badgeContent={shortenNumber(bookmarks, 2, false) ?? 0}
                           text="Bookmark"
-                        />
-
-                        {/* <MenuItem disabled={disableFooterMenuOptions}>
-                          <MemoizedMetaButton
-                            tooltip="Bookmark this node."
-                            tooltipPosition="top"
-                            style={{ padding: "0" }}
-                            disabled={disabled}
-                          >
-                            <Box sx={{ display: "flex", alignItems: "center" }} onClick={bookmark}>
-                              <Badge
-                                className="toolbarBadge"
-                                badgeContent={shortenNumber(bookmarks, 2, false) ?? 0}
-                                color="error"
-                                anchorOrigin={{ vertical: "top", horizontal: "left" }}
-                                sx={{ wordBreak: "normal", padding: "1px" }}
-                              >
-                                {bookmarked ? (
-                                  <BookmarkIcon
-                                    color={bookmarked ? "primary" : "secondary"}
-                                    sx={{ fontSize: "16px" }}
-                                  />
-                                ) : (
-                                  <BookmarkBorderIcon
-                                    color={bookmarked ? "primary" : "secondary"}
-                                    sx={{ fontSize: "16px" }}
-                                  />
-                                )}
-                              </Badge>
-
-                              <Box component="span" sx={{ marginLeft: "10px" }}>
-                                Bookmark
-                              </Box>
-                            </Box>
-                          </MemoizedMetaButton>
-                        </MenuItem> */}
+                        /> */}
 
                         <CustomMenuItem
                           menuItemProps={{ onClick: narrateNode }}
@@ -1352,35 +937,8 @@ const NodeFooter = ({
                           text="Narrate Node"
                         />
 
-                        {/* <MenuItem>
-                          <MemoizedMetaButton
-                            tooltip={isSpeaking ? "Stop narration." : "Narrate the node."}
-                            tooltipPosition="top"
-                            style={{ padding: "0" }}
-                          >
-                            <Box sx={{ display: "flex", alignItems: "center" }} onClick={narrateNode}>
-                              {isSpeaking ? (
-                                <VoiceOverOffIcon sx={{ fontSize: "16px" }} />
-                              ) : (
-                                <RecordVoiceOverIcon sx={{ fontSize: "16px" }} />
-                              )}
-                              <Box component="span" sx={{ marginLeft: "10px" }}>
-                                Narrate Node
-                              </Box>
-                            </Box>
-                          </MemoizedMetaButton>
-                        </MenuItem> */}
-
                         <CustomMenuItem
-                          menuItemProps={
-                            {
-                              // onMouseOver: () => {
-                              //   console.log("onMouseOver");
-                              //   setOpenSocialMenu(true);
-                              // },
-                              // onMouseOut: () => setOpenSocialMenu(false),
-                            }
-                          }
+                          menuItemProps={{}}
                           tooltipText={""}
                           icon={<ShareIcon sx={{ fontSize: "16px" }} />}
                           badgeContent={null}
@@ -1403,7 +961,7 @@ const NodeFooter = ({
                                     <MemoizedMetaButton>
                                       <Box sx={{ display: "flex", alignItems: "center" }}>
                                         <IconButton
-                                          onClick={() => onNodeShare(identifier, "twitter")}
+                                          // onClick={() => onNodeShare(identifier, "twitter")}
                                           href={`https://twitter.com/intent/tweet?text=${messageTwitter()}`}
                                           sx={{
                                             color: "#BDBDBD",
@@ -1447,7 +1005,7 @@ const NodeFooter = ({
                                     <MemoizedMetaButton>
                                       <Box sx={{ display: "flex", alignItems: "center" }}>
                                         <IconButton
-                                          onClick={() => onNodeShare(identifier, "reddit")}
+                                          // onClick={() => onNodeShare(identifier, "reddit")}
                                           href={`http://www.reddit.com/submit?url=${url}`}
                                           sx={{
                                             color: "#BDBDBD",
@@ -1491,7 +1049,7 @@ const NodeFooter = ({
                                     <MemoizedMetaButton>
                                       <Box sx={{ display: "flex", alignItems: "center" }}>
                                         <IconButton
-                                          onClick={() => onNodeShare(identifier, "facebook")}
+                                          // onClick={() => onNodeShare(identifier, "facebook")}
                                           href={`https://www.facebook.com/sharer/sharer.php?u=${url}`}
                                           sx={{
                                             color: "#BDBDBD",
@@ -1535,7 +1093,7 @@ const NodeFooter = ({
                                     <MemoizedMetaButton>
                                       <Box sx={{ display: "flex", alignItems: "center" }}>
                                         <IconButton
-                                          onClick={() => onNodeShare(identifier, "linkedin")}
+                                          // onClick={() => onNodeShare(identifier, "linkedin")}
                                           href={`https://www.linkedin.com/shareArticle?mini=true&url=${url}`}
                                           sx={{
                                             color: "#BDBDBD",
@@ -1758,70 +1316,4 @@ const NodeFooter = ({
   );
 };
 
-export const MemoizedNodeFooter = React.memo(NodeFooter);
-
-type CustomMenuItemProps = {
-  menuItemProps: MenuItemProps;
-  icon: ReactNode;
-  text: string;
-  tooltipText: string;
-  badgeContent: ReactNode;
-  children?: ReactNode;
-};
-
-const CustomMenuItem = ({
-  menuItemProps,
-  icon,
-  text,
-  tooltipText,
-  badgeContent,
-  children = null,
-}: CustomMenuItemProps) => {
-  const [showMenu, setShowMenu] = useState(false);
-  return (
-    <StyledMenuItem
-      // disabled={menuItemProps.disabled}
-      {...menuItemProps}
-      onMouseOver={() => {
-        console.log("onMouseOver");
-        setShowMenu(true);
-      }}
-      onMouseOut={() => setShowMenu(false)}
-    >
-      {menuItemProps.disabled ? (
-        <Box sx={{ display: "flex", alignItems: "center" }}>
-          {icon}
-          <Typography sx={{ ml: "8px" }}>{text}</Typography>
-        </Box>
-      ) : (
-        <Tooltip title={tooltipText} placement="right">
-          <Box
-            sx={{ display: "flex", alignItems: "center" }}
-            // onMouseOver={() => {
-            //   console.log("onMouseOver");
-            //   setShowMenu(true);
-            // }}
-            // onMouseOut={() => setShowMenu(false)}
-          >
-            <Badge
-              badgeContent={badgeContent}
-              color="error"
-              anchorOrigin={{ vertical: "top", horizontal: "left" }}
-              sx={{ wordBreak: "normal", padding: "1px" }}
-            >
-              {icon}
-            </Badge>
-            <Typography sx={{ ml: "8px" }}>{text}</Typography>
-          </Box>
-        </Tooltip>
-      )}
-      {showMenu && children}
-    </StyledMenuItem>
-  );
-};
-
-const StyledMenuItem = styled(MenuItem)<MenuItemProps>(({}) => ({
-  "& .Mui-disabled": {
-    cursor: "not-allowed",
-  },
-}));
+export const MemoizedBasicNodeFooter = React.memo(BasicNodeFooter);

@@ -21,9 +21,9 @@ import { getNotebookById } from "../../../lib/firestoreServer/notebooks";
 import { brandingLightTheme } from "../../../lib/theme/brandingTheme";
 import { dagreUtils } from "../../../lib/utils/dagre.util";
 import { devLog } from "../../../lib/utils/develop.util";
-import { COLUMN_GAP, NODE_WIDTH } from "../../../lib/utils/Map.utils";
+import { COLUMN_GAP, copyNode, NODE_WIDTH } from "../../../lib/utils/Map.utils";
 import { buildFullNodes, fillDagre, getNodes, getUserNodeChanges } from "../../../lib/utils/nodesSyncronization.utils";
-import { TNodeUpdates } from "../../../nodeBookTypes";
+import { FullNodesData, OpenPart, TNodeUpdates } from "../../../nodeBookTypes";
 import { Notebook } from "../../../types";
 import { Graph } from "../../notebook";
 
@@ -120,6 +120,19 @@ const NodePage: NextPage<Props> = ({ notebook }) => {
   });
 
   //   ------------------------------ functions
+
+  const setNodeParts = useCallback((nodeId: string, innerFunc: (thisNode: FullNodeData) => FullNodeData) => {
+    setGraph(({ nodes: oldNodes, edges }) => {
+      setSelectedNodeType(oldNodes[nodeId].nodeType);
+      const thisNode = { ...oldNodes[nodeId] };
+      const newNode = { ...oldNodes, [nodeId]: innerFunc(thisNode) };
+      return { nodes: newNode, edges };
+    });
+    setNodeUpdates({
+      nodeIds: [nodeId],
+      updatedAt: new Date(),
+    });
+  }, []);
 
   const onMouseClick = useCallback((e: any) => {
     if (e.button !== 1) return; // is not mouse well
@@ -255,6 +268,225 @@ const NodePage: NextPage<Props> = ({ notebook }) => {
     [addTask]
   );
 
+  // const onNodeShare = useCallback(
+  //   (nodeId: string, platform: string) => {
+  //     gtmEvent("Interaction", {
+  //       customType: "NodeShare",
+  //     });
+
+  //     createActionTrack(
+  //       db,
+  //       "NodeShare",
+  //       platform,
+  //       {
+  //         fullname: `${user?.fName} ${user?.lName}`,
+  //         chooseUname: !!user?.chooseUname,
+  //         uname: String(user?.uname),
+  //         imageUrl: String(user?.imageUrl),
+  //       },
+  //       nodeId,
+  //       []
+  //     );
+  //   },
+  //   [user]
+  // );
+
+  const getColumnRows = useCallback((nodes: FullNodesData, column: number) => {
+    let rows: string[] = [];
+    for (const nodeId in nodes) {
+      const node = nodes[nodeId];
+      if (node.left === column) {
+        rows.push(nodeId);
+      }
+    }
+    rows.sort((n1, n2) => (nodes[n1]!.top < nodes[n2]!.top ? -1 : 1));
+    return rows;
+  }, []);
+
+  const processHeightChange = useCallback(
+    (nodeId: string) => {
+      setTimeout(() => {
+        setGraph(graph => {
+          const updatedNodeIds: string[] = [];
+          const nodes = { ...graph.nodes };
+          const nodeEl = document.getElementById(nodeId)! as HTMLElement;
+          let height: number = nodeEl.clientHeight;
+          if (isNaN(height)) {
+            height = nodes[nodeId]!.height ?? 0; //take a look with Ameer Hamza
+          }
+
+          let nodesUpdated = false;
+          const nodeData = nodes[nodeId]!;
+          const column = nodeData.left;
+          const rows = getColumnRows(nodes, column);
+          if (rows) {
+            const nodeIdx = rows.indexOf(nodeId);
+            const heightDiff = height - (nodes[nodeId]!.height ?? 0); //take a look with Ameer Hamza
+
+            let lastHeight = height;
+            let lastTop = nodes[nodeId]!.top;
+
+            // below of bound
+            for (let idx = nodeIdx + 1; idx < rows.length; idx++) {
+              const _nodeId = rows[idx];
+              const _nodeData = copyNode(nodes[_nodeId]);
+
+              // if next node doesn't need to move on graph
+              if (_nodeData.top > lastHeight + lastTop) {
+                break;
+              }
+
+              _nodeData.top += heightDiff;
+
+              lastHeight = _nodeData.height ?? 0; //take a look with Ameer Hamza
+              lastTop = _nodeData.top;
+
+              nodesUpdated = true;
+              updatedNodeIds.push(_nodeId);
+              nodes[_nodeId] = _nodeData;
+            }
+          }
+
+          if (!nodesUpdated) {
+            return graph;
+          }
+
+          setTimeout(() => {
+            setNodeUpdates({
+              nodeIds: updatedNodeIds,
+              updatedAt: new Date(),
+            });
+          }, 100);
+          return {
+            nodes: { ...nodes },
+            edges: graph.edges,
+          };
+        });
+      }, 200);
+    },
+    [setGraph, getColumnRows]
+  );
+
+  const openNodePart = useCallback(
+    (event: any, nodeId: string, partType: any, openPart: any, setOpenPart: any) => {
+      // lastNodeOperation.current = { name: partType, data: "" };
+      // if (notebookRef.current.choosingNode) return;
+
+      if (partType === "PendingProposals") {
+        // TODO: refactor to use only one state to open node options
+        return; // HERE we are breakin the code, for now this part is manage by setOpenEditButton, change after refactor
+      }
+      if (openPart === partType) {
+        // is opened, so will close
+        setOpenPart(null);
+        event.currentTarget.blur();
+      } else {
+        setOpenPart(partType);
+        // if (user) {
+        //   const userNodePartsLogRef = collection(db, "userNodePartsLog");
+        //   setDoc(doc(userNodePartsLogRef), {
+        //     nodeId,
+        //     uname: user?.uname,
+        //     partType,
+        //     createdAt: Timestamp.fromDate(new Date()),
+        //   });
+        // }
+        // if (
+        //   partType === "Tags" &&
+        //   notebookRef.current.selectionType !== "AcceptedProposals" &&
+        //   notebookRef.current.selectionType !== "Proposals"
+        // ) {
+        //   // tags;
+        //   setOpenRecentNodes(true);
+        // }
+      }
+
+      processHeightChange(nodeId);
+      // nodeBookDispatch({ type: "setSelectedNode", payload: nodeId });
+      // notebookRef.current.selectedNode = nodeId;
+    },
+    [processHeightChange]
+  );
+
+  const selectNode = useCallback((event: any, nodeId: string, chosenType: any, nodeType: any) => {
+    devLog("SELECT_NODE", {
+      // choosingNode: notebookRef.current.choosingNode,
+      nodeId,
+      chosenType,
+      nodeType,
+    });
+    // if (notebookRef.current.choosingNode) return;
+
+    // if (
+    //   notebookRef.current.selectionType === "AcceptedProposals" ||
+    //   notebookRef.current.selectionType === "Proposals"
+    // ) {
+    //   reloadPermanentGraph();
+    // }
+
+    // if (chosenType === "Proposals") {
+    //   if (openSidebar === "PROPOSALS" && nodeId === notebookRef.current.selectedNode) {
+    //     setOpenSidebar(null);
+    //   } else {
+    //     setOpenSidebar("PROPOSALS");
+    //     setSelectedNodeType(nodeType);
+    //     notebookRef.current.selectionType = chosenType;
+    //     notebookRef.current.selectedNode = nodeId;
+    //     nodeBookDispatch({ type: "setSelectionType", payload: chosenType });
+    //     nodeBookDispatch({ type: "setSelectedNode", payload: nodeId });
+    //   }
+    //   return;
+    // }
+
+    // if (chosenType === "Citations") {
+    //   if (openSidebar === "CITATIONS") {
+    //     setOpenSidebar(null);
+    //     return;
+    //   }
+    //   setOpenSidebar("CITATIONS");
+    //   setSelectedNodeType(nodeType);
+    //   notebookRef.current.selectionType = chosenType;
+    //   notebookRef.current.selectedNode = nodeId;
+    //   nodeBookDispatch({ type: "setSelectionType", payload: chosenType });
+    //   nodeBookDispatch({ type: "setSelectedNode", payload: nodeId });
+    //   return;
+    // }
+
+    // if (notebookRef.current.selectedNode === nodeId && notebookRef.current.selectionType === chosenType) {
+    //   notebookRef.current.selectionType = null;
+    //   nodeBookDispatch({ type: "setSelectionType", payload: null });
+    //   setSelectedNodeType(null);
+    //   setOpenPendingProposals(false);
+    //   setOpenChat(false);
+    //   setOpenNotifications(false);
+    //   notebookRef.current.openToolbar = false;
+    //   nodeBookDispatch({ type: "setOpenToolbar", payload: false });
+    //   setOpenSearch(false);
+    //   setOpenRecentNodes(false);
+    //   setOpenTrends(false);
+    //   setOpenMedia(false);
+    //   resetAddedRemovedParentsChildren();
+    //   setOpenSidebar(null);
+    //   event.currentTarget.blur();
+    // } else {
+    //   setOpenSidebar("PROPOSALS");
+    //   setSelectedNodeType(nodeType);
+    //   notebookRef.current.selectionType = chosenType;
+    //   notebookRef.current.selectedNode = nodeId;
+    //   nodeBookDispatch({ type: "setSelectionType", payload: chosenType });
+    //   nodeBookDispatch({ type: "setSelectedNode", payload: nodeId });
+    // }
+  }, []);
+
+  const onChangeNodePart = useCallback(
+    (nodeId: string, newOpenPart: OpenPart) => {
+      setNodeParts(nodeId, node => {
+        return { ...node, localLinkingWords: newOpenPart };
+      });
+    },
+    [setNodeParts]
+  );
+
   //   ------------------------------ useEffect
 
   useEffect(() => {
@@ -348,16 +580,43 @@ const NodePage: NextPage<Props> = ({ notebook }) => {
                     content={cur.content}
                     identifier={cur.node}
                     left={cur.left}
-                    nodeImage={cur.nodeImage}
+                    nodeImage={cur.nodeImage ?? ""}
                     nodeType={cur.nodeType}
                     nodeVideo={cur.nodeVideo ?? ""}
                     nodeVideoEndTime={cur.nodeVideoEndTime || 0}
                     nodeVideoStartTime={cur.nodeVideoStartTime || 0}
-                    open={cur.open}
+                    open={Boolean(cur.open)}
                     setOpenMedia={setOpenMedia}
                     title={cur.title}
                     top={cur.top}
                     width={NODE_WIDTH}
+                    aImgUrl={cur.aImgUrl ?? ""}
+                    bookmarked={cur.bookmarked}
+                    bookmarks={cur.bookmarks}
+                    changedAt={cur.changedAt as string}
+                    correctNum={cur.corrects}
+                    locked={Boolean(cur.locked)}
+                    markedCorrect={cur.correct}
+                    markedWrong={cur.wrong}
+                    nodesChildren={cur.children}
+                    notebookRef={null}
+                    // onNodeShare={onNodeShare}
+                    openNodePart={openNodePart}
+                    openPart={cur.localLinkingWords}
+                    parents={cur.parents}
+                    references={cur.references.map((c: string, idx: number) => ({
+                      title: c,
+                      node: cur.referenceIds[idx],
+                      label: cur.referenceLabels[idx],
+                    }))}
+                    selectNode={selectNode}
+                    setOpenPart={onChangeNodePart}
+                    tags={cur.tags.map((c: string, idx: number) => ({
+                      node: cur.tagIds[idx],
+                      title: c,
+                    }))}
+                    viewers={cur.viewers}
+                    wrongNum={cur.wrongs}
                   />
                 ))}
             </MapInteractionCSS>

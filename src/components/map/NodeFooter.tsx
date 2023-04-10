@@ -2049,7 +2049,7 @@ type CustomMenuItemProps = {
   children?: ReactNode;
 };
 
-const CustomMenuItem = ({
+export const CustomMenuItem = ({
   menuItemProps,
   icon,
   text,

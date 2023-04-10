@@ -11,7 +11,9 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { useAuth } from "../../context/AuthContext";
 import { KnowledgeChoice } from "../../knowledgeTypes";
 import { getVideoDataByUrl } from "../../lib/utils/utils";
+import { OpenPart } from "../../nodeBookTypes";
 import MarkdownRender from "../Markdown/MarkdownRender";
+import { MemoizedBasicNodeFooter } from "./BasicNodeFooter";
 import { MemoizedBasicQuestionChoices } from "./BasicQuestionChoices";
 import { MemoizedNodeVideo } from "./Node/NodeVideo";
 // import { MemoizedNodeFooter } from "./NodeFooter";
@@ -33,6 +35,33 @@ type BasicNodeProps = {
   changeNodeHight: any;
   setOpenMedia: (imagUrl: string) => void;
   open: boolean;
+  // bookmark: any;
+  bookmarked: boolean;
+  bookmarks: any;
+  changedAt: string;
+  // correctNode: any;
+  correctNum: any;
+  aImgUrl: string;
+  // notebookRef: MutableRefObject<TNodeBookState>;
+  openPart: OpenPart;
+  viewers: number;
+  markedCorrect: any;
+  wrongNum: any;
+  markedWrong: any;
+  references: { title: string; node: string; label: string }[];
+  tags: { node: string; title?: string; label?: string }[];
+  parents: string[];
+  nodesChildren: string[] | { node: string; title?: string; label?: string }[];
+  setOpenPart: (newOpenPart: OpenPart) => void;
+  locked: boolean;
+  openNodePart: (event: any, id: string, partType: any, openPart: any, setOpenPart: any, tags: any) => void; //
+  // onNodeShare: (nodeId: string, platform: string) => void;
+  selectNode: any;
+  // proposalsNum: number;
+  // studied: number;
+  // isStudied: boolean;
+  // markStudied: any;
+  // wrongNode: any;
 };
 
 const BasicNode = ({
@@ -50,10 +79,37 @@ const BasicNode = ({
   choices,
   changeNodeHight,
   setOpenMedia,
-  // disabled = false,
-  // enableChildElements = [],
   open,
-}: BasicNodeProps) => {
+  // bookmark,
+  bookmarked,
+  bookmarks,
+  changedAt,
+  // correctNode,
+  correctNum,
+  aImgUrl,
+  // notebookRef,
+  openPart,
+  viewers,
+  markedCorrect,
+  wrongNum,
+  markedWrong,
+  references,
+  tags,
+  parents,
+  nodesChildren,
+  setOpenPart,
+  locked,
+
+  // studied,
+  // isStudied,
+  // markStudied,
+  openNodePart,
+  // onNodeShare,
+  selectNode,
+}: // wrongNode,
+// disabled = false,
+// enableChildElements = [],
+BasicNodeProps) => {
   const [{ user }] = useAuth();
   const [videoUrl, setVideoUrl] = useState(nodeVideo);
   const [videoStartTime, setVideoStartTime] = useState<any>(nodeVideoStartTime ? nodeVideoStartTime : 0);
@@ -72,6 +128,19 @@ const BasicNode = ({
   //   const disableSwitchPreview = disabled;
   //   const disableProposeButton = disabled && !enableChildElements.includes(`${identifier}-button-propose-proposal`);
   //   const disableCancelButton = disabled && !enableChildElements.includes(`${identifier}-button-cancel-proposal`);
+
+  const openNodePartHandler = useCallback(
+    (event: any, partType: any) => {
+      openNodePart(event, identifier, partType, openPart, setOpenPart, tags);
+    },
+
+    [identifier, openPart, tags]
+  );
+
+  const selectNodeHandler = useCallback(
+    (event: any, chosenType: any) => selectNode(event, identifier, chosenType, nodeType),
+    [selectNode, identifier, nodeType]
+  );
 
   useEffect(() => {
     setVideoUrl(videoUrl => {
@@ -271,6 +340,36 @@ const BasicNode = ({
           {/* TODO: ADD Disable Footer */}
         </div>
       )}
+
+      <MemoizedBasicNodeFooter
+        aImgUrl={aImgUrl}
+        bookmarked={bookmarked}
+        bookmarks={bookmarks}
+        changedAt={changedAt}
+        content={content}
+        // correctNode={correctNode}
+        correctNum={correctNum}
+        open={true}
+        identifier={identifier}
+        // notebookRef={notebookRef}
+        title={title}
+        openPart={openPart}
+        nodeType={nodeType}
+        viewers={viewers}
+        markedCorrect={markedCorrect}
+        wrongNum={wrongNum}
+        markedWrong={markedWrong}
+        references={references}
+        tags={tags}
+        parents={parents}
+        nodesChildren={nodesChildren}
+        // onNodeShare={onNodeShare}
+        openNodePart={openNodePartHandler}
+        selectNode={selectNodeHandler}
+        locked={locked}
+        // disabled={disabled}
+        // enableChildElements={enableChildElements}
+      />
     </Box>
   );
 };
