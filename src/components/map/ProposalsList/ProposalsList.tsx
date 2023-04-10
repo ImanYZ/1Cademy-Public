@@ -1,14 +1,14 @@
 import CloseIcon from "@mui/icons-material/Close";
-import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
 import DoneIcon from "@mui/icons-material/Done";
 import GradeIcon from "@mui/icons-material/Grade";
-import { CircularProgress, Paper } from "@mui/material";
+import { Divider, Paper, Typography } from "@mui/material";
 import { Box } from "@mui/system";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
-import React, { useCallback, useState } from "react";
+import React, { useCallback } from "react";
 
 import { Editor } from "@/components/Editor";
+import NodeTypeIcon from "@/components/NodeTypeIcon2";
 
 import { proposalSummariesGenerator } from "../../../lib/utils/proposalSummariesGenerator";
 import shortenNumber from "../../../lib/utils/shortenNumber";
@@ -34,7 +34,6 @@ type ProposalsListProps = {
 };
 
 const ProposalsList = ({ username, ...props }: ProposalsListProps) => {
-  const [isDeleting, setIsDeleting] = useState<boolean>(false);
   const rateProposalClick = useCallback(
     (e: any, proposal: any, proposalIdx: any, correct: any, wrong: any, award: any) => {
       return props.rateProposal(
@@ -52,20 +51,20 @@ const ProposalsList = ({ username, ...props }: ProposalsListProps) => {
     [props]
   );
 
-  const deleteProposalClick = useCallback(
-    async (proposal: any, proposalIdx: any) => {
-      let deleteOK = false;
-      deleteOK = window.confirm("You are going to permanently delete this proposal. Are you sure?");
-      if (!deleteOK) return;
+  // const deleteProposalClick = useCallback(
+  //   async (proposal: any, proposalIdx: any) => {
+  //     let deleteOK = false;
+  //     deleteOK = window.confirm("You are going to permanently delete this proposal. Are you sure?");
+  //     if (!deleteOK) return;
 
-      setIsDeleting(true);
-      await props.deleteProposal(event, props.proposals, props.setProposals, proposal.id, proposalIdx);
-      setIsDeleting(false);
-    },
-    // TODO: >heck dependencies to remove eslint-disable-next-line
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [props.deleteProposal, props.proposals]
-  );
+  //     setIsDeleting(true);
+  //     await props.deleteProposal(event, props.proposals, props.setProposals, proposal.id, proposalIdx);
+  //     setIsDeleting(false);
+  //   },
+  //   // TODO: >heck dependencies to remove eslint-disable-next-line
+  //   // eslint-disable-next-line react-hooks/exhaustive-deps
+  //   [props.deleteProposal, props.proposals]
+  // );
 
   const shouldDisableButton = (proposal: any, isAdmin: boolean, username: string) => {
     return !isAdmin || proposal.proposer === username;
@@ -97,117 +96,36 @@ const ProposalsList = ({ username, ...props }: ProposalsListProps) => {
                   elevation={3}
                   sx={{
                     display: "flex",
-                    padding: "10px 20px",
+                    padding: "15px",
                     flexDirection: "column",
                     position: "relative",
                     border: "2px solid #ff8a33",
                     ":hover": {
-                      boxShadow: "1px 0px 4px 2px rgb(190 190 190)",
+                      boxShadow: theme =>
+                        theme.palette.mode === "dark"
+                          ? "0px 1px 2px rgba(16, 24, 40, 0.05), 0px 0px 0px 4px #62544B"
+                          : "0px 1px 2px rgba(16, 24, 40, 0.05), 0px 0px 0px 4px #ECCFBD",
                     },
+                    background: theme => (theme.palette.mode === "dark" ? "#242425" : "#F2F4F7"),
                   }}
                 >
-                  <Box
-                    sx={{
-                      display: "flex",
-                      justifyContent: "space-between",
-                      gap: "5px",
-                    }}
-                  >
-                    <div className="title Time" style={{ fontSize: "12px" }}>
-                      {dayjs(proposal.createdAt).fromNow()}
-                    </div>
+                  <Box sx={{ display: "flex", flexDirection: "column", flexGrow: "1" }}>
+                    <Box className="title Time" sx={{ fontSize: "12px" }}>
+                      <Typography
+                        sx={{
+                          fontSize: "16px",
+                          fontWeight: "500",
+                          lineHeight: "24px",
+                        }}
+                      >
+                        {proposal.title}
+                      </Typography>
+                    </Box>
                     <Box
                       sx={{
-                        display: "flex",
-                        alignItems: "center",
-                        gap: "5px",
+                        paddingY: "10px",
                       }}
                     >
-                      <ContainedButton
-                        title="Click if you find this proposal Unhelpful."
-                        onClick={(e: any) => {
-                          e.stopPropagation();
-                          rateProposalClick(e, proposal, proposalIdx, false, true, false);
-                        }}
-                        disabled={isDeleting}
-                      >
-                        <Box sx={{ display: "flex", alignItems: "center", gap: "4px", fill: "inherit" }}>
-                          <CloseIcon
-                            fontSize="inherit"
-                            sx={{ fill: proposal.wrong ? "rgb(255, 29, 29)" : "inherit" }}
-                          />
-                          <span style={{ color: "inherit" }}>{shortenNumber(proposal.wrongs, 2, false)}</span>
-                        </Box>
-                      </ContainedButton>
-
-                      <ContainedButton
-                        title="Click if you find this proposal helpful."
-                        onClick={(e: any) => {
-                          e.stopPropagation();
-                          rateProposalClick(e, proposal, proposalIdx, true, false, false);
-                        }}
-                        disabled={isDeleting}
-                      >
-                        <Box sx={{ display: "flex", alignItems: "center", gap: "4px", fill: "inherit" }}>
-                          <DoneIcon
-                            fontSize="inherit"
-                            sx={{ fill: proposal.correct ? "rgb(0, 211, 105)" : "inherit" }}
-                          />
-                          <span style={{ color: "inherit" }}>{shortenNumber(proposal.corrects, 2, false)}</span>
-                        </Box>
-                      </ContainedButton>
-
-                      <ContainedButton
-                        title={adminTooltip}
-                        onClick={(e: any) => {
-                          e.stopPropagation();
-                          !props.isAdmin || proposal.proposer === username
-                            ? false
-                            : rateProposalClick(e, proposal, proposalIdx, false, false, true);
-                        }}
-                        disabled={isDisabled}
-                      >
-                        <Box sx={{ display: "flex", alignItems: "center", gap: "4px", fill: "inherit" }}>
-                          <GradeIcon
-                            fontSize="inherit"
-                            sx={{ fill: proposal.award ? "rgb(255, 166, 0)" : "inherit" }}
-                          />
-                          <span style={{ color: "inherit" }}>{shortenNumber(proposal.awards, 2, false)}</span>
-                        </Box>
-                      </ContainedButton>
-                      {isDeleting && (
-                        <Box
-                          sx={{
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent: "center",
-                            width: "50px",
-                          }}
-                        >
-                          <CircularProgress size={24} />
-                        </Box>
-                      )}
-                      {!isDeleting && !proposal.accepted && proposal.proposer === username && (
-                        <ContainedButton
-                          title={"Delete your proposal"}
-                          onClick={() => deleteProposalClick(proposal, proposalIdx)}
-                        >
-                          <Box
-                            sx={{ display: "flex", alignItems: "center", gap: "4px", fill: "inherit", paddingY: "5px" }}
-                          >
-                            <DeleteForeverIcon fontSize="inherit" sx={{ fill: "inherit" }} />
-                          </Box>
-                        </ContainedButton>
-                      )}
-                    </Box>
-                  </Box>
-                  <Box sx={{ display: "flex", flexDirection: "column", flexGrow: "1" }}>
-                    <div className="title Time" style={{ fontSize: "12px" }}>
-                      <div className="ProposalTitle" style={{ fontSize: "16px", fontWeight: "400" }}>
-                        {proposal.title}
-                      </div>
-                    </div>
-                    <div className="ProposalTitle">
                       {proposalSummaries.length > 0 ? (
                         proposalSummaries.map((prSummary: any, sIdx: number) => {
                           return (
@@ -229,10 +147,166 @@ const ProposalsList = ({ username, ...props }: ProposalsListProps) => {
                       ) : (
                         <Editor label="" readOnly value={proposal.summary} setValue={() => {}}></Editor>
                       )}
-                    </div>
-                    <div className="ProposalBody">
+                    </Box>
+                    <Box className="ProposalBody">
                       <Editor label="" readOnly value={proposal.proposal} setValue={() => {}}></Editor>
-                    </div>
+                    </Box>
+                  </Box>
+                  <Box
+                    sx={{
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "space-between",
+                    }}
+                  >
+                    <Box
+                      sx={{
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "space-between",
+                      }}
+                    >
+                      <Box
+                        sx={{
+                          width: "28px",
+                          height: "28px",
+                          borderRadius: "50%",
+                          background: theme => (theme.palette.mode === "dark" ? "#404040" : "#EAECF0"),
+                          display: "flex",
+                          justifyContent: "center",
+                          alignItems: "center",
+                        }}
+                      >
+                        <NodeTypeIcon nodeType={proposal.nodeType || ""} fontSize="inherit" />
+                      </Box>
+                      <Box
+                        sx={{
+                          fontSize: "12px",
+                          marginLeft: "5px",
+                          color: theme => (theme.palette.mode === "dark" ? "#A4A4A4" : "#667085"),
+                        }}
+                      >
+                        {dayjs(proposal.createdAt).fromNow()}
+                      </Box>
+                    </Box>
+                    <Box>
+                      <Box
+                        sx={{
+                          display: "flex",
+                          alignItems: "center",
+                          background: theme => (theme.palette.mode === "dark" ? "#404040" : "#E1E4E9"),
+                          borderRadius: "52px",
+                          marginLeft: "15px",
+                        }}
+                      >
+                        <ContainedButton
+                          title="Click if you find this proposal Unhelpful."
+                          onClick={(e: any) => {
+                            e.stopPropagation();
+                            rateProposalClick(e, proposal, proposalIdx, false, true, false);
+                          }}
+                          sx={{
+                            borderRadius: "52px 0px 0px 52px",
+                            background: theme => (theme.palette.mode === "dark" ? "#404040" : "#E1E4E9"),
+                            ":hover": {
+                              borderWidth: "0px",
+                              background: theme => (theme.palette.mode === "dark" ? "#4E4D4D" : "#D0D5DD"),
+                            },
+                          }}
+                        >
+                          <Box sx={{ display: "flex", alignItems: "center", gap: "4px", fill: "inherit" }}>
+                            <DoneIcon
+                              sx={{ fill: proposal.correct ? "rgb(0, 211, 105)" : "inherit", fontSize: "19px" }}
+                            />
+                            <Typography
+                              sx={{
+                                color: theme => (theme.palette.mode === "dark" ? "#F9FAFB" : "#475467"),
+                                mt: "3px",
+                              }}
+                            >
+                              {shortenNumber(proposal.corrects, 2, false)}
+                            </Typography>
+                          </Box>
+                        </ContainedButton>
+                        <Divider
+                          orientation="vertical"
+                          variant="middle"
+                          flexItem
+                          sx={{ borderColor: theme => (theme.palette.mode === "dark" ? "#D3D3D3" : "inherit") }}
+                        />
+                        <ContainedButton
+                          title="Click if you find this proposal helpful."
+                          onClick={(e: any) => {
+                            e.stopPropagation();
+                            rateProposalClick(e, proposal, proposalIdx, true, false, false);
+                          }}
+                          sx={{
+                            borderRadius: "0px",
+                            background: theme => (theme.palette.mode === "dark" ? "#404040" : "#E1E4E9"),
+                            ":hover": {
+                              borderWidth: "0px",
+                              background: theme => (theme.palette.mode === "dark" ? "#4E4D4D" : "#D0D5DD"),
+                            },
+                          }}
+                        >
+                          <Box sx={{ display: "flex", alignItems: "center", gap: "4px", fill: "inherit" }}>
+                            <CloseIcon
+                              sx={{
+                                fill: proposal.wrong ? "rgb(255, 29, 29)" : "inherit",
+                                fontSize: "19px",
+                                color: theme => (theme.palette.mode === "dark" ? "#F9FAFB" : "#475467"),
+                              }}
+                            />
+                            <Typography
+                              sx={{
+                                color: theme => (theme.palette.mode === "dark" ? "#F9FAFB" : "#475467"),
+                                mt: "3px",
+                              }}
+                            >
+                              {shortenNumber(proposal.wrongs, 2, false)}
+                            </Typography>
+                          </Box>
+                        </ContainedButton>
+                        <Divider
+                          orientation="vertical"
+                          variant="middle"
+                          flexItem
+                          sx={{ borderColor: theme => (theme.palette.mode === "dark" ? "#D3D3D3" : "inherit") }}
+                        />
+                        <ContainedButton
+                          title={adminTooltip}
+                          onClick={(e: any) => {
+                            e.stopPropagation();
+                            !props.isAdmin || proposal.proposer === username
+                              ? false
+                              : rateProposalClick(e, proposal, proposalIdx, false, false, true);
+                          }}
+                          disabled={isDisabled}
+                          sx={{
+                            borderRadius: "0px 52px 52px 0px",
+                            background: theme => (theme.palette.mode === "dark" ? "#404040" : "#E1E4E9"),
+                            ":hover": {
+                              borderWidth: "0px",
+                              background: theme => (theme.palette.mode === "dark" ? "#4E4D4D" : "#D0D5DD"),
+                            },
+                          }}
+                        >
+                          <Box sx={{ display: "flex", alignItems: "center", gap: "4px", fill: "inherit" }}>
+                            <GradeIcon
+                              sx={{ fill: proposal.award ? "rgb(255, 166, 0)" : "inherit", fontSize: "19px" }}
+                            />
+                            <Typography
+                              sx={{
+                                color: theme => (theme.palette.mode === "dark" ? "#F9FAFB" : "#475467"),
+                                mt: "3px",
+                              }}
+                            >
+                              {shortenNumber(proposal.awards, 2, false)}
+                            </Typography>
+                          </Box>
+                        </ContainedButton>
+                      </Box>
+                    </Box>
                   </Box>
                 </Paper>
               </li>
