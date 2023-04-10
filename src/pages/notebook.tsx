@@ -369,7 +369,6 @@ const Dashboard = ({}: DashboardProps) => {
       const origin = document.getElementById("map-interaction-origin");
 
       const thisNode = graph.nodes[nodeId];
-      console.log({ thisNode });
       if (!originalNode) return false;
       if (!origin) return false;
       if (!thisNode) return false;
@@ -434,13 +433,6 @@ const Dashboard = ({}: DashboardProps) => {
       if (tries === 10) return;
       console.log("STN");
       if (!scrollToNodeInitialized.current) {
-        const nodeInViewport = onNodeInViewport(nodeId);
-        console.log("nodeInViewporttt", nodeInViewport);
-        let timeout = 400;
-        if (nodeInViewport) {
-          tries = 10;
-        }
-        console.log("STN:", { tries, timeout, nodeInViewport });
         setTimeout(() => {
           const originalNode = document.getElementById(nodeId);
           if (!originalNode) {
@@ -448,6 +440,7 @@ const Dashboard = ({}: DashboardProps) => {
           }
           // const scrollToSele tedNode = lastNodeOperation.current ? ["scrollToSelectedNode"].includes(lastNodeOperation.current.name) : false;
 
+          const nodeInViewport = onNodeInViewport(nodeId);
           if (!regardless && nodeInViewport && !forcedTutorial) return;
 
           if (
@@ -486,7 +479,7 @@ const Dashboard = ({}: DashboardProps) => {
           } else {
             scrollToNode(nodeId, regardless, tries + 1);
           }
-        }, timeout);
+        }, 400);
       }
     },
     [forcedTutorial, onNodeInViewport]

@@ -418,7 +418,7 @@ const Node = ({
       let operation = "selectNode";
       if (notebookRef.current.choosingNode && notebookRef.current.choosingNode.id !== identifier) {
         // The first Nodes exist, Now is clicking the Chosen Node
-        console.log("OPERATION 1");
+
         notebookRef.current.chosenNode = {
           id: identifier,
           title,
