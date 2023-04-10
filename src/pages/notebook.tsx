@@ -372,7 +372,7 @@ const Dashboard = ({}: DashboardProps) => {
       if (!originalNode) return false;
       if (!origin) return false;
       if (!thisNode) return false;
-      console.log({ thisNode });
+
       const { width: nodeWidth, height: nodeHeight } = originalNode.getBoundingClientRect();
       const { top: originTop, left: originLeft } = origin.getBoundingClientRect();
 
@@ -466,13 +466,8 @@ const Dashboard = ({}: DashboardProps) => {
                   scale: defaultScale,
                   translation: {
                     x:
-                      windowInnerLeft +
-                      regionWidth / 2 -
-                      (originalNode.offsetLeft + originalNode.offsetWidth / 2) * defaultScale,
-                    y:
-                      windowInnerTop +
-                      regionHeight / 2 -
-                      (originalNode.offsetTop + (thisNode.height ?? 0) / 2) * defaultScale,
+                      windowInnerLeft + regionWidth / 2 - (thisNode.left + originalNode.offsetWidth / 2) * defaultScale,
+                    y: windowInnerTop + regionHeight / 2 - (thisNode.top + (thisNode.height ?? 0) / 2) * defaultScale,
                   },
                 };
               });
@@ -554,7 +549,7 @@ const Dashboard = ({}: DashboardProps) => {
     setGraph(graph => {
       if (!nodeBookState.selectedNode) return graph;
 
-      const timeout = onNodeInViewport(nodeBookState.selectedNode, graph.nodes) ? 0 : 300;
+      const timeout = onNodeInViewport(nodeBookState.selectedNode, graph.nodes) ? 0 : 0;
       setTimeout(() => {
         if (!nodeBookState.selectedNode) return graph;
 
