@@ -223,6 +223,7 @@ BasicNodeProps) => {
       id={identifier}
       ref={nodeRef}
       className={"Node card"}
+      sx={{ borderColor: "#fd7373" }}
       //   className={
       //     "Node card" +
       //     (activeNode ? " active" : "") +
@@ -367,7 +368,7 @@ BasicNodeProps) => {
         openNodePart={openNodePartHandler}
         selectNode={selectNodeHandler}
         locked={locked}
-        // disabled={disabled}
+        disabled={true}
         // enableChildElements={enableChildElements}
       />
     </Box>

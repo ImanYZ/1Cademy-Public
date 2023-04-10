@@ -224,9 +224,7 @@ export function getThemedComponents(theme: Theme): {
       MuiDivider: {
         styleOverrides: {
           root: {
-            "&": {
-              borderColor: theme.palette.mode === "light" ? "#EAECF0" : "#2F2F2F",
-            },
+            borderColor: theme.palette.mode === "light" ? "#EAECF0" : "#2F2F2F",
           },
         },
       },
