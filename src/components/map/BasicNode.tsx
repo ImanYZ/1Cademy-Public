@@ -187,42 +187,18 @@ const BasicNode = ({
         }}
       >
         {open ? (
-          <IconButton
-            // disabled={disableCloseButton}
-            // id={closeButtonId}
-            color="inherit"
-            aria-label="Close the node"
-            size="small"
-          >
+          <IconButton color="inherit" aria-label="Close the node" size="small">
             <RemoveIcon fontSize="inherit" />
           </IconButton>
         ) : (
-          <IconButton
-            // disabled={disableOpenButton}
-            // id={openButtonId}
-            color="inherit"
-            aria-label="open the node"
-            size="small"
-          >
+          <IconButton color="inherit" aria-label="open the node" size="small">
             <FullscreenIcon fontSize="inherit" />
           </IconButton>
         )}
-        <IconButton
-          // disabled={disableHideDescendantsButton}
-          // id={hideDescendantsButtonId}
-          color="inherit"
-          aria-label="delete"
-          size="small"
-        >
+        <IconButton disabled={true} color="inherit" aria-label="delete" size="small">
           <KeyboardTabIcon fontSize="inherit" sx={{ transform: "scaleX(-1)" }} />
         </IconButton>
-        <IconButton
-          // disabled={disableHideButton}
-          // id={hideButtonId}
-          color="inherit"
-          aria-label="delete"
-          size="small"
-        >
+        <IconButton disabled={true} color="inherit" aria-label="delete" size="small">
           <CloseIcon fontSize="inherit" />
         </IconButton>
       </Box>
@@ -234,14 +210,14 @@ const BasicNode = ({
               <MarkdownRender
                 text={title}
                 customClass={"custom-react-markdown"}
-                sx={{ fontWeight: 400, letterSpacing: "inherit" }}
+                sx={{ fontSize: "25px", fontWeight: 300, letterSpacing: "inherit" }}
               />
 
               <Box id={`${identifier}-node-content`}>
                 <MarkdownRender
                   text={content}
                   customClass={"custom-react-markdown"}
-                  sx={{ fontWeight: 400, letterSpacing: "inherit" }}
+                  sx={{ marginTop: "13px", fontWeight: 400, letterSpacing: "inherit" }}
                 />
 
                 <div id={`${identifier}-node-content-media`}>
