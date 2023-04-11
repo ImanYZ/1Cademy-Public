@@ -3523,8 +3523,9 @@ const Dashboard = ({}: DashboardProps) => {
 
   const saveProposedChildNode = useCallback(
     (newNodeId: string, summary: string, reason: string, onComplete: () => void) => {
-      devLog("save Proposed Child Node", { newNodeId, summary, reason });
+      if (!selectedNotebookId) return;
 
+      devLog("SAVE_PROPOSED_CHILD_NODE", { selectedNotebookId, newNodeId, summary, reason });
       notebookRef.current.choosingNode = null;
       notebookRef.current.chosenNode = null;
       nodeBookDispatch({ type: "setChoosingNode", payload: null });
@@ -3591,6 +3592,7 @@ const Dashboard = ({}: DashboardProps) => {
           summary: summary,
           proposal: reason,
           versionNodeId: newNodeId,
+          notebookId: selectedNotebookId,
         };
         delete postData.isStudied;
         delete postData.bookmarked;
@@ -3650,7 +3652,7 @@ const Dashboard = ({}: DashboardProps) => {
         return { nodes, edges };
       });
     },
-    [setGraph, getMapGraph]
+    [selectedNotebookId, nodeBookDispatch, getMapGraph, scrollToNode]
   );
 
   const fetchProposals = useCallback(
@@ -4111,9 +4113,10 @@ const Dashboard = ({}: DashboardProps) => {
       award: any,
       newNodeId: string
     ) => {
-      devLog("RATE PROPOSAL", { proposals, setProposals, proposalId, proposalIdx, correct, wrong, award, newNodeId });
-
+      if (!selectedNotebookId) return;
       if (!user) return;
+
+      devLog("RATE_PROPOSAL", { proposals, setProposals, proposalId, proposalIdx, correct, wrong, award, newNodeId });
 
       if (!nodeBookState.choosingNode) {
         const proposalsTemp = [...proposals];
@@ -4168,6 +4171,7 @@ const Dashboard = ({}: DashboardProps) => {
           award,
           uname: user.uname,
           versionNodeId: newNodeId,
+          notebookId: selectedNotebookId,
         };
         try {
           Post("/rateVersion", postData);
@@ -4204,9 +4208,8 @@ const Dashboard = ({}: DashboardProps) => {
         });
       }
     },
-    // TODO: CHECK dependencies
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [user, nodeBookState, selectedNodeType, reloadPermanentGraph]
+    [selectedNotebookId, user, nodeBookState, selectedNodeType]
+    // [user, nodeBookState, selectedNodeType, reloadPermanentGraph]
   );
   const removeImage = useCallback(
     (nodeRef: any, nodeId: string) => {
