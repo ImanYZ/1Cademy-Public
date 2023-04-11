@@ -328,7 +328,7 @@ const Dashboard = ({}: DashboardProps) => {
   // Scroll to node configs
 
   const { width: windowWith, height: windowHeight } = useWindowSize();
-  const windowInnerTop = windowWith < 899 ? 360 : 50;
+  const windowInnerTop = windowWith < 899 ? (openSidebar ? 350 : 50) : 50;
   const windowInnerLeft = (windowWith * 10) / 100 + (windowWith > 899 ? (openSidebar ? 430 : 80) : 10);
   const windowInnerRight = (windowWith * 10) / 100;
   const windowInnerBottom = 50;
@@ -364,51 +364,30 @@ const Dashboard = ({}: DashboardProps) => {
   const pathwayRef = useRef({ node: "", parent: "", child: "" });
 
   const onNodeInViewport = useCallback(
-    (nodeId: string) => {
+    (nodeId: string, nodes: FullNodesData) => {
       const originalNode = document.getElementById(nodeId);
-      if (!originalNode) {
-        return false;
-      }
-      var bounding = originalNode.getBoundingClientRect();
+      const origin = document.getElementById("map-interaction-origin");
 
-      const nodeLeft = bounding.left;
-      const nodeRight = bounding.right;
-      const nodeBottom = bounding.bottom;
-      const nodeTop = bounding.top;
-      const nodeCenterX = bounding.left + bounding.width / 2;
-      const nodeCenterY = bounding.top + bounding.height / 2;
+      const thisNode = nodes[nodeId];
+      if (!originalNode) return false;
+      if (!origin) return false;
+      if (!thisNode) return false;
 
-      const BL =
-        nodeLeft >= windowInnerLeft &&
-        nodeLeft <= windowWith - windowInnerRight &&
-        nodeBottom >= windowInnerTop &&
-        nodeBottom <= windowHeight - windowInnerBottom;
-      const BR =
-        nodeRight >= windowInnerLeft &&
-        nodeRight <= windowWith - windowInnerRight &&
-        nodeBottom >= windowInnerTop &&
-        nodeBottom <= windowHeight - windowInnerBottom;
-      const TL =
-        nodeLeft >= windowInnerLeft &&
-        nodeLeft <= windowWith - windowInnerRight &&
-        nodeTop >= windowInnerTop &&
-        nodeTop <= windowHeight - windowInnerBottom;
-      const TR =
-        nodeRight >= windowInnerLeft &&
-        nodeRight <= windowWith - windowInnerRight &&
-        nodeTop >= windowInnerTop &&
-        nodeTop <= windowHeight - windowInnerBottom;
-      const Inside =
-        nodeCenterX >= windowInnerLeft &&
-        nodeCenterX <= windowWith - windowInnerRight &&
-        nodeCenterY >= windowInnerTop &&
-        nodeCenterY <= windowHeight - windowInnerBottom;
+      const { width: nodeWidth, height: nodeHeight } = originalNode.getBoundingClientRect();
+      const { top: originTop, left: originLeft } = origin.getBoundingClientRect();
 
-      const isInViewport = BL || BR || TL || TR || Inside;
-
-      return isInViewport;
+      let nodeTop = originTop + thisNode.top * mapInteractionValue.scale;
+      let nodeLeft = originLeft + thisNode.left * mapInteractionValue.scale;
+      const regionWidth = windowWith - windowInnerLeft - windowInnerRight;
+      const regionHeight = windowHeight - windowInnerTop - windowInnerBottom;
+      const collide =
+        nodeLeft + nodeWidth >= windowInnerLeft &&
+        nodeLeft <= windowInnerLeft + regionWidth &&
+        nodeTop + nodeHeight >= windowInnerTop &&
+        nodeTop <= windowInnerTop + regionHeight;
+      return collide;
     },
-    [windowHeight, windowInnerLeft, windowInnerRight, windowInnerTop, windowWith]
+    [mapInteractionValue.scale, windowHeight, windowInnerLeft, windowInnerRight, windowInnerTop, windowWith]
   );
 
   useEffect(() => {
@@ -442,63 +421,66 @@ const Dashboard = ({}: DashboardProps) => {
   }, [graph.edges]);
 
   const scrollToNode = useCallback(
-    (nodeId: string, tries = 0) => {
+    (nodeId: string, regardless = false, tries = 0) => {
       if (tries === 10) return;
 
       if (!scrollToNodeInitialized.current) {
         setTimeout(() => {
-          const originalNode = document.getElementById(nodeId);
-          if (!originalNode) {
-            return;
-          }
-          const isSearcher = lastNodeOperation.current ? ["Searcher"].includes(lastNodeOperation.current.name) : false;
-          if (isSearcher) {
-            lastNodeOperation.current = null;
-          }
+          setGraph(graph => {
+            const originalNode = document.getElementById(nodeId);
+            const thisNode = graph.nodes[nodeId];
+            if (!originalNode) return graph;
+            if (!thisNode) return graph;
 
-          if (onNodeInViewport(nodeId) && !isSearcher && !forcedTutorial) return;
-          devLog("scroll To Node", { nodeId, tries });
+            const nodeInViewport = onNodeInViewport(nodeId, graph.nodes);
+            if (!regardless && nodeInViewport && !forcedTutorial) return graph;
 
-          if (
-            originalNode &&
-            "offsetLeft" in originalNode &&
-            originalNode.offsetLeft !== 0 &&
-            "offsetTop" in originalNode &&
-            originalNode.offsetTop !== 0
-          ) {
-            scrollToNodeInitialized.current = true;
-            setTimeout(() => {
-              scrollToNodeInitialized.current = false;
-            }, 1300);
+            if (
+              originalNode &&
+              "offsetLeft" in originalNode &&
+              originalNode.offsetLeft !== 0 &&
+              "offsetTop" in originalNode &&
+              originalNode.offsetTop !== 0
+            ) {
+              scrollToNodeInitialized.current = true;
+              setTimeout(() => {
+                scrollToNodeInitialized.current = false;
+              }, 1300);
 
-            setMapInteractionValue(() => {
-              const windowSize = window.innerWidth;
-              let defaultScale;
-              if (windowSize < 400) {
-                defaultScale = 0.45;
-              } else if (windowSize < 600) {
-                defaultScale = 0.575;
-              } else if (windowSize < 1260) {
-                defaultScale = 0.8;
-              } else {
-                defaultScale = 0.92;
-              }
+              setMapInteractionValue(() => {
+                const windowSize = window.innerWidth;
+                let defaultScale;
+                if (windowSize < 400) {
+                  defaultScale = 0.45;
+                } else if (windowSize < 600) {
+                  defaultScale = 0.575;
+                } else if (windowSize < 1260) {
+                  defaultScale = 0.8;
+                } else {
+                  defaultScale = 0.92;
+                }
+                const regionWidth = windowWith - windowInnerLeft - windowInnerRight;
+                const regionHeight = windowHeight - windowInnerTop - windowInnerBottom;
 
-              return {
-                scale: defaultScale,
-                translation: {
-                  x: (window.innerWidth / 2.6 - originalNode.offsetLeft) * defaultScale,
-                  y: (window.innerHeight / 3.4 - originalNode.offsetTop) * defaultScale,
-                },
-              };
-            });
-          } else {
-            scrollToNode(nodeId, tries + 1);
-          }
+                return {
+                  scale: defaultScale,
+                  translation: {
+                    x:
+                      windowInnerLeft + regionWidth / 2 - (thisNode.left + originalNode.offsetWidth / 2) * defaultScale,
+                    y:
+                      windowInnerTop + regionHeight / 2 - (thisNode.top + originalNode.offsetHeight / 2) * defaultScale,
+                  },
+                };
+              });
+            } else {
+              scrollToNode(nodeId, regardless, tries + 1);
+            }
+            return graph;
+          });
         }, 400);
       }
     },
-    [forcedTutorial, onNodeInViewport]
+    [forcedTutorial, onNodeInViewport, windowHeight, windowInnerLeft, windowInnerRight, windowInnerTop, windowWith]
   );
 
   useEffect(() => {
@@ -565,9 +547,14 @@ const Dashboard = ({}: DashboardProps) => {
   }, [currentStep, graph.nodes, setTargetClientRect, nodeBookState.selectedNode, targetId]);
 
   const onCompleteWorker = useCallback(() => {
-    if (!nodeBookState.selectedNode) return;
+    setGraph(graph => {
+      if (!nodeBookState.selectedNode) return graph;
+      if (!graph.nodes[nodeBookState.selectedNode]) return graph;
 
-    scrollToNode(nodeBookState.selectedNode);
+      scrollToNode(nodeBookState.selectedNode);
+
+      return graph;
+    });
   }, [nodeBookState.selectedNode, scrollToNode]);
 
   const setOperation = useCallback((operation: string) => {
@@ -3086,7 +3073,6 @@ const Dashboard = ({}: DashboardProps) => {
           const willBeApproved = isVersionApproved({ corrects: 1, wrongs: 0, nodeData: newNode });
 
           lastNodeOperation.current = { name: "ProposeProposals", data: willBeApproved ? "accepted" : "notAccepted" };
-          console.log({ willBeApproved, lastOps: lastNodeOperation.current });
 
           if (willBeApproved) {
             const newParentIds: string[] = newNode.parents.map(parent => parent.node);
@@ -3372,7 +3358,6 @@ const Dashboard = ({}: DashboardProps) => {
         nodes = { ...nodes, [newNodeId]: { ...nodes[newNodeId], changedAt: new Date(), ...nodePartChanges } };
 
         getMapGraph("/proposeChildNode", postData, !willBeApproved);
-        scrollToNode(newNodeId);
 
         setTimeout(() => {
           onComplete();
@@ -3381,10 +3366,11 @@ const Dashboard = ({}: DashboardProps) => {
           nodeIds: updatedNodeIds,
           updatedAt: new Date(),
         });
+        scrollToNode(newNodeId);
         return { nodes, edges };
       });
     },
-    [setGraph, getMapGraph]
+    [nodeBookDispatch, getMapGraph, scrollToNode]
   );
 
   const fetchProposals = useCallback(
@@ -3976,7 +3962,7 @@ const Dashboard = ({}: DashboardProps) => {
 
   const onScrollToLastNode = () => {
     if (!nodeBookState.selectedNode) return;
-    scrollToNode(nodeBookState.selectedNode);
+    scrollToNode(nodeBookState.selectedNode, true);
   };
 
   const onCloseSidebar = useCallback(() => {
@@ -5981,6 +5967,7 @@ const Dashboard = ({}: DashboardProps) => {
                 <Button onClick={() => console.log(allNodes)}>All Nodes</Button>
                 <Button onClick={() => console.log(citations)}>citations</Button>
                 <Button onClick={() => console.log(clusterNodes)}>clusterNodes</Button>
+                <Button onClick={() => console.log(graph.nodes[nodeBookState.selectedNode ?? ""])}>SelectedNode</Button>
               </Box>
 
               <Divider />
@@ -6482,20 +6469,16 @@ const Dashboard = ({}: DashboardProps) => {
                 value={mapInteractionValue}
                 onChange={navigateWhenNotScrolling}
               >
-                {/* <Tooltip title={`(${targetClientRect.left},${targetClientRect.top})`}>
-                  <Box
-                    sx={{
-                      width: "10px",
-                      height: "10px",
-                      borderRadius: "50%",
-                      position: "absolute",
-                      top: targetClientRect.top,
-                      left: targetClientRect.left,
-                      backgroundColor: "red",
-                      zIndex: 999999,
-                    }}
-                  ></Box>
-                </Tooltip> */}
+                {/* origin used to measure the the relative position of each node to the ViewPort */}
+                {/* used in onNodeInViewport Callback */}
+                <Box
+                  id="map-interaction-origin"
+                  sx={{
+                    position: "absolute",
+                    top: 0,
+                    left: 0,
+                  }}
+                ></Box>
                 {!currentStep?.anchor && tutorial && (
                   <TooltipTutorial
                     tutorial={tutorial}
@@ -6579,8 +6562,10 @@ const Dashboard = ({}: DashboardProps) => {
                   setOpenPart={onChangeNodePart}
                 />
               </MapInteractionCSS>
+
               {showRegion && (
                 <Box
+                  id="region-stn"
                   sx={{
                     position: "absolute",
                     top: windowInnerTop,

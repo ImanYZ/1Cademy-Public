@@ -76,8 +76,6 @@ export const useWorkerQueue = ({
       worker.onmessage = e => {
         const { oldMapWidth, oldMapHeight, oldNodes, oldEdges, graph, oldClusterNodes } = e.data;
 
-        // console.log("WORKER RESULT", { oldNodes, oldEdges });
-
         const gObject = dagreUtils.mapGraphToObject(g.current);
         const graphObject: GraphObject = graph;
 
@@ -103,7 +101,6 @@ export const useWorkerQueue = ({
 
         setDidWork(true);
         setGraph(({ nodes, edges }) => {
-          // console.log("[queue]: set results", { nodes, edges, gg, oldNodes, oldEdges });
           const nodesCopy = { ...nodes };
           const updatedNodeIds: string[] = [];
           Object.keys(nodesCopy).forEach(nodeId => {
@@ -148,17 +145,27 @@ export const useWorkerQueue = ({
             nodeIds: updatedNodeIds,
             updatedAt: new Date(),
           });
-          // console.log("WORKER Result Merged", { nodes: nodesCopy, edges: edgesCopy });
+
           return { nodes: nodesCopy, edges: edgesCopy };
         });
 
         setIsWorking(false);
-        setTimeout(() => {
-          onComplete();
-        }, 1500);
+        onComplete();
       };
     },
-    [allTags, g, mapHeight, mapWidth, onComplete, setClusterNodes, setGraph, setMapHeight, setMapWidth, withClusters]
+    [
+      allTags,
+      g,
+      mapHeight,
+      mapWidth,
+      onComplete,
+      setClusterNodes,
+      setGraph,
+      setMapHeight,
+      setMapWidth,
+      setNodeUpdates,
+      withClusters,
+    ]
   );
 
   useEffect(() => {
