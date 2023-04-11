@@ -719,33 +719,18 @@ MainSidebarProps) => {
                       <ListItemText primary="Copy link to page" />
                     </ListItemButton>
                   </ListItem>
-                  <ListItem disablePadding>
-                    <ListItemButton onClick={onDeleteNotebook} sx={{ p: "12px 14px" }}>
-                      <ListItemText primary="Delete" />
-                    </ListItemButton>
-                  </ListItem>
+                  {editableNotebook.owner === user.uname && (
+                    <ListItem disablePadding>
+                      <ListItemButton onClick={onDeleteNotebook} sx={{ p: "12px 14px" }}>
+                        <ListItemText primary="Delete" />
+                      </ListItemButton>
+                    </ListItem>
+                  )}
                 </List>
-                {/* <Typography id="modal-modal-title" variant="h6" component="h2">
-                {notebooks.find(cur => cur.id === notebookEditableId)?.title ?? ""}
-              </Typography> */}
               </Box>
             </ClickAwayListener>
           )}
         </Portal>
-
-        {/* {notebookEditableId && (
-          
-          // <Modal open={open} onClose={() => setNotebookEditableId("")} aria-labelledby="Edit notebook">
-          //   <Box sx={{}}>
-          //     <Typography id="modal-modal-title" variant="h6" component="h2">
-          //       {notebooks.find(cur => cur.id === notebookEditableId)?.title ?? ""}
-          //     </Typography>
-          //     <Typography id="modal-modal-description" sx={{ mt: 2 }}>
-          //       Duis mollis, est non commodo luctus, nisi erat porttitor ligula.
-          //     </Typography>
-          //   </Box>
-          // </Modal>
-        )} */}
 
         {shouldShowTagSearcher && (
           <Suspense fallback={<div>loading...</div>}>
