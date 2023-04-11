@@ -609,14 +609,6 @@ const NodePage: NextPage<Props> = ({ notebook }) => {
         )}
 
         <Box sx={{ width: "100vw", height: "100vh", overflow: "hidden" }}>
-          {/* <MemoizedUserInfoSidebar
-            theme={settings.theme}
-            openLinkedNode={openLinkedNode}
-            username={user.uname}
-            open={openSidebar === "USER_INFO"}
-            onClose={() => setOpenSidebar(null)}
-          /> */}
-
           <Box
             id="MapContent"
             className={scrollToNodeInitialized.current ? "ScrollToNode" : undefined}

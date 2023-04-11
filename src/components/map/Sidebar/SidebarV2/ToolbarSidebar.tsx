@@ -351,7 +351,6 @@ MainSidebarProps) => {
       editableNotebook.id
     }`;
     navigator.clipboard.writeText(url);
-    console.log({ url });
   }, [editableNotebook]);
 
   const onDeleteNotebook = useCallback(async () => {

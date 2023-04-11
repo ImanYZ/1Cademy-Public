@@ -8,7 +8,7 @@ import relativeTime from "dayjs/plugin/relativeTime";
 import moment from "moment";
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
-import { useAuth } from "../../context/AuthContext";
+// import { useAuth } from "../../context/AuthContext";
 import { KnowledgeChoice } from "../../knowledgeTypes";
 import { getVideoDataByUrl } from "../../lib/utils/utils";
 import { OpenPart } from "../../nodeBookTypes";
@@ -112,7 +112,7 @@ const BasicNode = ({
 // disabled = false,
 // enableChildElements = [],
 BasicNodeProps) => {
-  const [{ user }] = useAuth();
+  // const [{ user }] = useAuth();
   const [videoUrl, setVideoUrl] = useState(nodeVideo);
   const [videoStartTime, setVideoStartTime] = useState<any>(nodeVideoStartTime ? nodeVideoStartTime : 0);
   const [videoEndTime, setVideoEndTime] = useState<any>(nodeVideoEndTime ? nodeVideoEndTime : 0);
@@ -224,9 +224,9 @@ BasicNodeProps) => {
 
   const onImageClick = useCallback(() => setOpenMedia(nodeImage), [nodeImage]);
 
-  if (!user) {
-    return null;
-  }
+  // if (!user) {
+  //   return null;
+  // }
   return (
     <Box
       id={identifier}
