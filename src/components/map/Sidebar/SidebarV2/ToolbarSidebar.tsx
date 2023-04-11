@@ -315,9 +315,10 @@ MainSidebarProps) => {
       if (!editableNotebook) return;
       setIsCreatingNotebook(true);
 
+      const notebooksWithSameName = notebooks.filter(cur => cur.title === editableNotebook.title);
       const copyNotebook: Omit<Notebook, "id"> = {
         owner: editableNotebook.owner,
-        title: `${editableNotebook.title} copy`,
+        title: `${editableNotebook.title} (${notebooksWithSameName.length + 1})`,
         isPublic: editableNotebook.isPublic,
         users: editableNotebook.users,
         roles: editableNotebook.roles,
@@ -342,7 +343,7 @@ MainSidebarProps) => {
     } finally {
       setIsCreatingNotebook(false);
     }
-  }, [db, editableNotebook, onChangeNotebook, openNodesOnNotebook]);
+  }, [db, editableNotebook, notebooks, onChangeNotebook, openNodesOnNotebook]);
 
   const onDeleteNotebook = useCallback(async () => {
     try {
