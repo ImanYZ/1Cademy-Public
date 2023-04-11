@@ -23,7 +23,6 @@ import {
 import {
   addDoc,
   collection,
-  deleteDoc,
   doc,
   getDocs,
   getFirestore,
@@ -40,7 +39,7 @@ import { ChosenTag, MemoizedTagsSearcher } from "@/components/TagsSearcher";
 import { useNodeBook } from "@/context/NodeBookContext";
 import { useTagsTreeView } from "@/hooks/useTagsTreeView";
 import { retrieveAuthenticatedUser } from "@/lib/firestoreClient/auth";
-import { Post } from "@/lib/mapApi";
+import { Delete, Post } from "@/lib/mapApi";
 
 import BookmarkIcon from "../../../../../public/bookmark.svg";
 import EditIcon from "../../../../../public/edit.svg";
@@ -144,6 +143,7 @@ MainSidebarProps) => {
   const [editableNotebook, setEditableNotebook] = useState<Notebook | null>(null);
   const createNotebookButtonRef = useRef<any>(null);
   const { height } = useWindowSize();
+  // const titleInputRef = useRef<HTMLInputElement | null>(null);
 
   const displayLargeToolbar = useMemo(() => isHovered || isMenuOpen, [isHovered, isMenuOpen]);
   // console.log({ displayLargeToolbar, isHovered, isMenuOpen });
@@ -294,6 +294,7 @@ MainSidebarProps) => {
       const docRef = await addDoc(notebooksRef, newNotebook);
       setEditableNotebook({ ...newNotebook, id: docRef.id });
       onChangeNotebook(docRef.id);
+      // if (titleInputRef.current) titleInputRef.current.focus();
     } catch (error) {
       console.error("Cant create a notebook", error);
     } finally {
@@ -338,6 +339,7 @@ MainSidebarProps) => {
       userNodesDocs.forEach(doc => nodeIds.push(doc.data().node));
       console.log({ nodeIds });
       await openNodesOnNotebook(docRef.id, nodeIds);
+      // if (titleInputRef.current) titleInputRef.current.focus();
     } catch (error) {
       console.error("Cant duplicate a notebook", error);
     } finally {
@@ -355,19 +357,19 @@ MainSidebarProps) => {
 
   const onDeleteNotebook = useCallback(async () => {
     try {
-      // TODO: show confirm message
       if (!editableNotebook) return;
-      const notebooksRef = doc(db, "notebooks", editableNotebook.id);
-      await deleteDoc(notebooksRef);
-      // call DB
+
+      if (!window.confirm("Are you sure to delete notebook")) return;
+      await Delete("/notebooks/delete", { notebookId: editableNotebook.id });
       setEditableNotebook(null);
       onChangeNotebook("");
+      console.log("deleted complete");
     } catch (error) {
       console.error("Cant remove notebook", error);
     } finally {
       setIsCreatingNotebook(false);
     }
-  }, [db, editableNotebook, onChangeNotebook]);
+  }, [editableNotebook, onChangeNotebook]);
 
   useEffect(() => {
     if (!displayLargeToolbar) {
@@ -666,6 +668,7 @@ MainSidebarProps) => {
               >
                 <Box sx={{ p: "14px 12px" }}>
                   <TextField
+                    // ref={titleInputRef}
                     id="notebook-title"
                     label=""
                     variant="outlined"
@@ -889,7 +892,11 @@ MainSidebarProps) => {
     isCreatingNotebook,
     onCreateNotebook,
     editableNotebook,
+    onUpdateNotebookTitle,
     height,
+    onDuplicateNotebook,
+    onCopyNotebookUrl,
+    onDeleteNotebook,
     shouldShowTagSearcher,
     closeTagSelector,
     chosenTags,
@@ -948,6 +955,7 @@ MainSidebarProps) => {
     selectedNotebook,
     isCreatingNotebook,
     editableNotebook,
+    // titleInputRef.current,
   ]);
 
   return (
