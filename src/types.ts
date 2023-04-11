@@ -35,12 +35,14 @@ export type NotebookDocument = {
   ownerFullName: string;
   ownerChooseUname: boolean;
   title: string;
+  duplicatedFrom: string;
   isPublic: "visible" | "editable" | "none";
   users: string[];
   roles: {
     [key: string]: "viewer" | "editor";
   };
 };
+
 export type Notebook = NotebookDocument & {
   id: string;
 };

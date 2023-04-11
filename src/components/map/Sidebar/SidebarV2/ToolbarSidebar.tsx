@@ -290,6 +290,7 @@ MainSidebarProps) => {
         ownerChooseUname: Boolean(user.chooseUname),
         ownerFullName: user.fName ?? "",
         title: `notebook ${notebooks.length + 1}`,
+        duplicatedFrom: "",
         isPublic: "none",
         users: [],
         roles: {},
@@ -320,13 +321,14 @@ MainSidebarProps) => {
       if (!editableNotebook) return;
       setIsCreatingNotebook(true);
 
-      const notebooksWithSameName = notebooks.filter(cur => cur.title === editableNotebook.title);
+      const sameDuplications = notebooks.filter(cur => cur.duplicatedFrom === editableNotebook.id);
       const copyNotebook: NotebookDocument = {
         owner: editableNotebook.owner,
         ownerImgUrl: editableNotebook.ownerImgUrl ?? NO_USER_IMAGE,
         ownerChooseUname: Boolean(user.chooseUname),
         ownerFullName: user.fName ?? "",
-        title: `${editableNotebook.title} (${notebooksWithSameName.length + 1})`,
+        title: `${editableNotebook.title} (${sameDuplications.length + 2})`,
+        duplicatedFrom: editableNotebook.id,
         isPublic: editableNotebook.isPublic,
         users: editableNotebook.users,
         roles: editableNotebook.roles,
