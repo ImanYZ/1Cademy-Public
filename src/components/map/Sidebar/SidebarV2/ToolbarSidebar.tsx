@@ -20,7 +20,19 @@ import {
   useMediaQuery,
   useTheme,
 } from "@mui/material";
-import { addDoc, collection, deleteDoc, doc, getFirestore, setDoc, Timestamp, updateDoc } from "firebase/firestore";
+import {
+  addDoc,
+  collection,
+  deleteDoc,
+  doc,
+  getDocs,
+  getFirestore,
+  query,
+  setDoc,
+  Timestamp,
+  updateDoc,
+  where,
+} from "firebase/firestore";
 import NextImage from "next/image";
 import React, { Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
 
@@ -83,6 +95,7 @@ type MainSidebarProps = {
   notebooks: Notebook[];
   onChangeNotebook: (notebookId: string) => void;
   selectedNotebook: string;
+  openNodesOnNotebook: (notebookId: string, nodeIds: string[]) => Promise<void>;
   // setSelectedNtoebook
   // setCurrentTutorial: Dispatch<SetStateAction<TutorialKeys>>;
 };
@@ -111,6 +124,7 @@ export const ToolbarSidebar = ({
   notebooks,
   onChangeNotebook,
   selectedNotebook,
+  openNodesOnNotebook,
 }: // setCurrentTutorial,
 // enabledToolbarElements = [],
 MainSidebarProps) => {
@@ -312,13 +326,23 @@ MainSidebarProps) => {
       const docRef = await addDoc(notebooksRef, copyNotebook);
       setEditableNotebook({ ...copyNotebook, id: docRef.id });
       onChangeNotebook(docRef.id);
-      // TODO: duplicated users nodes
+      const q = query(
+        collection(db, "userNodes"),
+        where("user", "==", editableNotebook.owner),
+        where("notebooks", "array-contains", editableNotebook.id),
+        where("deleted", "==", false)
+      );
+      const userNodesDocs = await getDocs(q);
+      const nodeIds: string[] = [];
+      userNodesDocs.forEach(doc => nodeIds.push(doc.data().node));
+      console.log({ nodeIds });
+      await openNodesOnNotebook(docRef.id, nodeIds);
     } catch (error) {
       console.error("Cant duplicate a notebook", error);
     } finally {
       setIsCreatingNotebook(false);
     }
-  }, [db, editableNotebook, onChangeNotebook]);
+  }, [db, editableNotebook, onChangeNotebook, openNodesOnNotebook]);
 
   const onDeleteNotebook = useCallback(async () => {
     try {

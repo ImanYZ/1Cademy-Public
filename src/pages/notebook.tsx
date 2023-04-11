@@ -1137,9 +1137,9 @@ const Dashboard = ({}: DashboardProps) => {
     const q = query(
       userNodesRef,
       where("user", "==", user.uname),
-      where("notebooks", "array-contains", selectedNotebookId)
+      where("notebooks", "array-contains", selectedNotebookId),
       // where("visible", "==", true),
-      // where("deleted", "==", false)
+      where("deleted", "==", false)
     );
 
     const killSnapshot = snapshot(q);
@@ -2364,6 +2364,104 @@ const Dashboard = ({}: DashboardProps) => {
       lastNodeOperation.current = { name: "OpenAllParent", data: "" };
     },
     [db, nodeBookDispatch, selectedNotebookId, user]
+  );
+
+  const openNodesOnNotebook = useCallback(
+    async (notebookId: string, nodeIds: string[]) => {
+      if (isWritingOnDBRef.current) return;
+      if (notebookRef.current.choosingNode || !user) return;
+
+      devLog("OPEN_NODES_ON_NOTEBOOK", { notebookId, nodeIds, isWritingOnDB: isWritingOnDBRef.current });
+
+      // let linkedNodeId = null;
+      // let linkedNodeRef = null;
+      let userNodeRef = null;
+      let userNodeData = null;
+
+      const batch = writeBatch(db);
+
+      await Promise.all(
+        nodeIds.map(async nodeId => {
+          const nodeRef = doc(db, "nodes", nodeId);
+          const nodeDoc = await getDoc(nodeRef);
+
+          if (!nodeDoc.exists()) return;
+          const thisNode: any = { ...nodeDoc.data(), id: nodeId };
+
+          for (let chi of thisNode.children) {
+            const childNodeRef = doc(db, "nodes", chi.node);
+            batch.update(childNodeRef, { updatedAt: Timestamp.fromDate(new Date()) });
+          }
+
+          for (let par of thisNode.parents) {
+            const parentNodeRef = doc(db, "nodes", par.node);
+            batch.update(parentNodeRef, { updatedAt: Timestamp.fromDate(new Date()) });
+          }
+
+          const userNodesRef = collection(db, "userNodes");
+          const userNodeQuery = query(
+            userNodesRef,
+            where("node", "==", nodeId),
+            where("user", "==", user.uname),
+            limit(1)
+          );
+          const userNodeDoc = await getDocs(userNodeQuery);
+
+          if (userNodeDoc.docs.length > 0) {
+            console.log("update", nodeId);
+            // if exist documents update the first
+            userNodeRef = doc(db, "userNodes", userNodeDoc.docs[0].id);
+            userNodeData = userNodeDoc.docs[0].data();
+            // userNodeData.visible = true;
+            userNodeData.notebooks = [...(userNodeData.notebooks ?? []), notebookId];
+            userNodeData.expands = [...(userNodeData.expands ?? []), true];
+            userNodeData.updatedAt = Timestamp.fromDate(new Date());
+            batch.update(userNodeRef, userNodeData);
+            delete userNodeData?.visible;
+            delete userNodeData?.open;
+          } else {
+            // if NOT exist documents create a document
+            console.log("create", nodeId);
+            userNodeData = {
+              changed: true,
+              correct: false,
+              createdAt: Timestamp.fromDate(new Date()),
+              updatedAt: Timestamp.fromDate(new Date()),
+              deleted: false,
+              isStudied: false,
+              bookmarked: false,
+              node: nodeId,
+              // open: true,
+              user: user.uname,
+              // visible: true,
+              wrong: false,
+              notebooks: [notebookId],
+              expands: [true],
+            };
+            userNodeRef = await addDoc(collection(db, "userNodes"), userNodeData);
+          }
+
+          batch.update(nodeRef, {
+            viewers: thisNode.viewers + 1,
+            updatedAt: Timestamp.fromDate(new Date()),
+          });
+          const userNodeLogRef = collection(db, "userNodesLog");
+          const userNodeLogData = {
+            ...userNodeData,
+            createdAt: Timestamp.fromDate(new Date()),
+          };
+
+          batch.set(doc(userNodeLogRef), userNodeLogData);
+        })
+      );
+      // notebookRef.current.selectedNode = nodeId;
+      // nodeBookDispatch({ type: "setSelectedNode", payload: nodeId });
+      console.log("commit");
+      await batch.commit();
+      await detectElements({ ids: nodeIds });
+      isWritingOnDBRef.current = false;
+    },
+    [db, user]
   );
 
   const toggleNode = useCallback(
@@ -6230,6 +6328,7 @@ const Dashboard = ({}: DashboardProps) => {
                 notebooks={notebooks}
                 onChangeNotebook={onChangeNotebook}
                 selectedNotebook={selectedNotebookId}
+                openNodesOnNotebook={openNodesOnNotebook}
               />
 
               <MemoizedBookmarksSidebar
