@@ -816,30 +816,26 @@ const Dashboard = ({}: DashboardProps) => {
 
   //  bd => state (first render)
   useEffect(() => {
-    setTimeout(() => {
-      if (!user) return;
-      if (firstScrollToNode) return;
-      if (!queueFinished) return;
-      if (!urlNodeProcess) return;
+    if (!user) return;
+    if (firstScrollToNode) return;
+    if (!queueFinished) return;
+    if (!urlNodeProcess) return;
 
-      if (user.sNode && user.sNode === nodeBookState.selectedNode) {
-        const selectedNode = graph.nodes[user.sNode];
-        if (selectedNode && selectedNode.top === 0) {
-          if (selectedNode.top === 0) return;
-
-          nodeBookDispatch({ type: "setSelectedNode", payload: user.sNode });
-          notebookRef.current.selectedNode = user.sNode;
-          setNodeUpdates({
-            nodeIds: [user.sNode],
-            updatedAt: new Date(),
-          });
-          scrollToNode(user.sNode);
-          setFirstScrollToNode(true);
-        }
+    if (user.sNode) {
+      const selectedNode = graph.nodes[user.sNode];
+      if (selectedNode && selectedNode.top !== 0) {
+        nodeBookDispatch({ type: "setSelectedNode", payload: user.sNode });
+        notebookRef.current.selectedNode = user.sNode;
+        setNodeUpdates({
+          nodeIds: [user.sNode],
+          updatedAt: new Date(),
+        });
+        scrollToNode(user.sNode);
+        setFirstScrollToNode(true);
       }
-      setIsSubmitting(false);
-      setFirstLoading(false);
-    }, 1000);
+    }
+    setIsSubmitting(false);
+    setFirstLoading(false);
   }, [
     firstScrollToNode,
     graph.nodes,
