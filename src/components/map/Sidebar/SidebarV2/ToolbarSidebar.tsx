@@ -345,6 +345,15 @@ MainSidebarProps) => {
     }
   }, [db, editableNotebook, notebooks, onChangeNotebook, openNodesOnNotebook]);
 
+  const onCopyNotebookUrl = useCallback(() => {
+    if (!editableNotebook) return;
+    const url = `${window.location.origin}/notebooks/${encodeURIComponent(editableNotebook.title)}/${
+      editableNotebook.id
+    }`;
+    navigator.clipboard.writeText(url);
+    console.log({ url });
+  }, [editableNotebook]);
+
   const onDeleteNotebook = useCallback(async () => {
     try {
       // TODO: show confirm message
@@ -704,7 +713,7 @@ MainSidebarProps) => {
                     </ListItemButton>
                   </ListItem>
                   <ListItem disablePadding>
-                    <ListItemButton sx={{ p: "12px 14px" }}>
+                    <ListItemButton onClick={onCopyNotebookUrl} sx={{ p: "12px 14px" }}>
                       <ListItemText primary="Copy link to page" />
                     </ListItemButton>
                   </ListItem>

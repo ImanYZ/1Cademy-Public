@@ -1,6 +1,7 @@
 import CloseIcon from "@mui/icons-material/Close";
-import { Modal, Paper, ThemeProvider } from "@mui/material";
+import { Button, Modal, Paper, ThemeProvider, Typography } from "@mui/material";
 import Box from "@mui/material/Box";
+import { Stack } from "@mui/system";
 import { getAuth } from "firebase/auth";
 import { collection, DocumentData, getFirestore, onSnapshot, Query, query, where } from "firebase/firestore";
 import { useRouter } from "next/router";
@@ -16,6 +17,7 @@ import NodeItemFullSkeleton from "@/components/NodeItemFullSkeleton";
 
 import { MemoizedBasicNode } from "../../../components/map/BasicNode";
 import { MemoizedLinksList } from "../../../components/map/LinksList";
+import { NotebookPopup } from "../../../components/map/Popup";
 import { useWorkerQueue } from "../../../hooks/useWorkerQueue";
 import { getNotebookById } from "../../../lib/firestoreServer/notebooks";
 import { brandingLightTheme } from "../../../lib/theme/brandingTheme";
@@ -23,6 +25,7 @@ import { dagreUtils } from "../../../lib/utils/dagre.util";
 import { devLog } from "../../../lib/utils/develop.util";
 import { COLUMN_GAP, copyNode, NODE_WIDTH } from "../../../lib/utils/Map.utils";
 import { buildFullNodes, fillDagre, getNodes, getUserNodeChanges } from "../../../lib/utils/nodesSyncronization.utils";
+import ROUTES from "../../../lib/utils/routes";
 import { FullNodeData, FullNodesData, OpenPart, TNodeUpdates } from "../../../nodeBookTypes";
 import { Notebook } from "../../../types";
 import { Graph } from "../../notebook";
@@ -68,6 +71,7 @@ export const getStaticPaths: GetStaticPaths<Params> = async () => {
 };
 
 const NodePage: NextPage<Props> = ({ notebook }) => {
+  console.log({ notebook });
   const db = getFirestore();
   const router = useRouter();
   // flag for when scrollToNode is called
@@ -533,8 +537,8 @@ const NodePage: NextPage<Props> = ({ notebook }) => {
     const q = query(
       userNodesRef,
       where("user", "==", notebook.owner),
-      where("notebooks", "array-contains", notebook.id),
-      where("deleted", "==", false)
+      where("notebooks", "array-contains", notebook.id)
+      // where("deleted", "==", false)
     );
 
     const killSnapshot = userNodesSnapshot(q);
@@ -553,7 +557,42 @@ const NodePage: NextPage<Props> = ({ notebook }) => {
 
   // TODO: add Node head to SEO
   return (
-    <div className="MapContainer" style={{ overflow: "hidden" }}>
+    <Box className="MapContainer" sx={{ position: "relative", overflow: "hidden" }}>
+      <Stack
+        direction={"row"}
+        spacing={"16px"}
+        alignItems={"center"}
+        sx={{
+          p: "12px 16px",
+          position: "absolute",
+          right: "8px",
+          top: "8px",
+          zIndex: 100,
+          backgroundColor: theme =>
+            theme.palette.mode === "dark" ? theme.palette.common.notebookMainBlack : theme.palette.common.gray50,
+        }}
+      >
+        <Typography sx={{ width: "138px", textOverflow: "ellipsis", whiteSpace: "nowrap", overflow: "hidden" }}>
+          {notebook.title}
+        </Typography>
+        <Stack direction={"row"} spacing={"8px"}>
+          <Button
+            variant="outlined"
+            sx={{ borderRadius: "26px", borderColor: theme => theme.palette.common.primary800 }}
+            onClick={() => router.push(ROUTES.signIn)}
+          >
+            Sign in
+          </Button>
+          <Button
+            variant="contained"
+            sx={{ borderRadius: "26px", background: theme => theme.palette.common.primary800 }}
+            onClick={() => router.push(ROUTES.signUp)}
+          >
+            Sign Up
+          </Button>
+        </Stack>
+      </Stack>
+
       <Box
         id="Map"
         sx={{
@@ -565,6 +604,10 @@ const NodePage: NextPage<Props> = ({ notebook }) => {
               : theme.palette.common.lightGrayBackground,
         }}
       >
+        {Object.keys(graph.nodes).length === 0 && (
+          <NotebookPopup showIcon={false}>This notebook has no nodes</NotebookPopup>
+        )}
+
         <Box sx={{ width: "100vw", height: "100vh", overflow: "hidden" }}>
           {/* <MemoizedUserInfoSidebar
             theme={settings.theme}
@@ -688,7 +731,7 @@ const NodePage: NextPage<Props> = ({ notebook }) => {
           </Box>
         </Box>
       </Box>
-    </div>
+    </Box>
   );
 };
 

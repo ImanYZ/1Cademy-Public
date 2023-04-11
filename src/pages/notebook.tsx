@@ -6041,7 +6041,7 @@ const Dashboard = ({}: DashboardProps) => {
       >
         {/* {isWritingOnDB && <NotebookPopup showIcon={false}>Writing DB</NotebookPopup>} */}
         {Object.keys(graph.nodes).length === 0 && (
-          <NotebookPopup showIcon={false}>This Notebook does not contain node</NotebookPopup>
+          <NotebookPopup showIcon={false}>This notebook has no nodes</NotebookPopup>
         )}
 
         {nodeBookState.choosingNode && (
