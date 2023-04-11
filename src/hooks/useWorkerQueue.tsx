@@ -59,7 +59,6 @@ export const useWorkerQueue = ({
       setIsWorking(true);
       const worker: Worker = new Worker(new URL("../workers/MapWorker.ts", import.meta.url));
 
-      console.log("Worker called");
       worker.postMessage({
         oldMapWidth,
         oldMapHeight,
@@ -76,8 +75,6 @@ export const useWorkerQueue = ({
       };
       worker.onmessage = e => {
         const { oldMapWidth, oldMapHeight, oldNodes, oldEdges, graph, oldClusterNodes } = e.data;
-
-        // console.log("WORKER RESULT", { oldNodes, oldEdges });
 
         const gObject = dagreUtils.mapGraphToObject(g.current);
         const graphObject: GraphObject = graph;
@@ -104,7 +101,6 @@ export const useWorkerQueue = ({
 
         setDidWork(true);
         setGraph(({ nodes, edges }) => {
-          // console.log("[queue]: set results", { nodes, edges, gg, oldNodes, oldEdges });
           const nodesCopy = { ...nodes };
           const updatedNodeIds: string[] = [];
           Object.keys(nodesCopy).forEach(nodeId => {
@@ -149,17 +145,27 @@ export const useWorkerQueue = ({
             nodeIds: updatedNodeIds,
             updatedAt: new Date(),
           });
-          console.log({ nodesCopy });
 
           return { nodes: nodesCopy, edges: edgesCopy };
         });
 
         setIsWorking(false);
-
         onComplete();
       };
     },
-    [allTags, g, mapHeight, mapWidth, onComplete, setClusterNodes, setGraph, setMapHeight, setMapWidth, withClusters]
+    [
+      allTags,
+      g,
+      mapHeight,
+      mapWidth,
+      onComplete,
+      setClusterNodes,
+      setGraph,
+      setMapHeight,
+      setMapWidth,
+      setNodeUpdates,
+      withClusters,
+    ]
   );
 
   useEffect(() => {

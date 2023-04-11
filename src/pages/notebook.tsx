@@ -423,7 +423,7 @@ const Dashboard = ({}: DashboardProps) => {
   const scrollToNode = useCallback(
     (nodeId: string, regardless = false, tries = 0) => {
       if (tries === 10) return;
-      console.log("STN");
+
       if (!scrollToNodeInitialized.current) {
         setTimeout(() => {
           setGraph(graph => {
@@ -466,9 +466,9 @@ const Dashboard = ({}: DashboardProps) => {
                   scale: defaultScale,
                   translation: {
                     x:
-                      windowInnerLeft + regionWidth / 2 - (thisNode.left + originalNode.clientWidth / 2) * defaultScale,
+                      windowInnerLeft + regionWidth / 2 - (thisNode.left + originalNode.offsetWidth / 2) * defaultScale,
                     y:
-                      windowInnerTop + regionHeight / 2 - (thisNode.top + originalNode.clientHeight / 2) * defaultScale,
+                      windowInnerTop + regionHeight / 2 - (thisNode.top + originalNode.offsetHeight / 2) * defaultScale,
                   },
                 };
               });
@@ -3073,7 +3073,6 @@ const Dashboard = ({}: DashboardProps) => {
           const willBeApproved = isVersionApproved({ corrects: 1, wrongs: 0, nodeData: newNode });
 
           lastNodeOperation.current = { name: "ProposeProposals", data: willBeApproved ? "accepted" : "notAccepted" };
-          console.log({ willBeApproved, lastOps: lastNodeOperation.current });
 
           if (willBeApproved) {
             const newParentIds: string[] = newNode.parents.map(parent => parent.node);
