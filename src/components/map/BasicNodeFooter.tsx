@@ -44,9 +44,9 @@ type BasicNodeFooterProps = {
   aImgUrl: any;
   viewers: any;
   correctNum: any;
-  markedCorrect: any;
+  // markedCorrect: any;
   wrongNum: any;
-  markedWrong: any;
+  // markedWrong: any;
   references: any;
   tags: any;
   parents: any;
@@ -74,9 +74,9 @@ const BasicNodeFooter = ({
   nodeType,
   aImgUrl,
   correctNum,
-  markedCorrect,
+  // markedCorrect,
   wrongNum,
-  markedWrong,
+  // markedWrong,
   references,
   tags,
   parents,
@@ -582,7 +582,7 @@ BasicNodeFooterProps) => {
                     sx={{ padding: "0px", color: "inherit", minWidth: "0px" }}
                   >
                     <Box sx={{ display: "flex", fontSize: "14px", alignItems: "center" }}>
-                      <DoneIcon sx={{ fontSize: "18px", color: markedCorrect ? "#00E676" : "inherit" }} />
+                      <DoneIcon sx={{ fontSize: "18px" }} />
                       <span style={{ marginLeft: "2px" }}>{shortenNumber(correctNum, 2, false)}</span>
                     </Box>
                   </Button>
@@ -603,7 +603,7 @@ BasicNodeFooterProps) => {
                     sx={{ padding: "0px", color: "inherit", minWidth: "0px" }}
                   >
                     <Box sx={{ display: "flex", fontSize: "14px", alignItems: "center" }}>
-                      <CloseIcon sx={{ fontSize: "18px", color: markedWrong ? "red" : "inherit" }} />
+                      <CloseIcon sx={{ fontSize: "18px" }} />
                       <span style={{ marginLeft: "2px" }}>{shortenNumber(wrongNum, 2, false)}</span>
                     </Box>
                   </Button>
@@ -737,7 +737,7 @@ BasicNodeFooterProps) => {
                       alignItems: "center",
                     }}
                   >
-                    <DoneIcon sx={{ fontSize: "18px", color: markedCorrect ? "#00E676" : "inherit" }} />
+                    <DoneIcon sx={{ fontSize: "18px" }} />
                     <span>{shortenNumber(correctNum, 2, false)}</span>
                   </Box>
                 </Tooltip>
@@ -761,7 +761,7 @@ BasicNodeFooterProps) => {
                     <CloseIcon
                       sx={{
                         fontSize: "18px",
-                        color: markedWrong ? "red" : "inherit",
+                        // color: markedWrong ? "red" : "inherit",
                       }}
                     />
                     <span>{shortenNumber(wrongNum, 2, false)}</span>

@@ -648,8 +648,8 @@ const NodePage: NextPage<Props> = ({ notebook }) => {
                     changedAt={cur.changedAt as string}
                     correctNum={cur.corrects}
                     locked={Boolean(cur.locked)}
-                    markedCorrect={cur.correct}
-                    markedWrong={cur.wrong}
+                    // markedCorrect={cur.correct}
+                    // markedWrong={cur.wrong}
                     nodesChildren={cur.children}
                     notebookRef={null}
                     // onNodeShare={onNodeShare}

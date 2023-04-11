@@ -45,9 +45,9 @@ type BasicNodeProps = {
   // notebookRef: MutableRefObject<TNodeBookState>;
   openPart: OpenPart;
   viewers: number;
-  markedCorrect: any;
+  // markedCorrect: any;
   wrongNum: any;
-  markedWrong: any;
+  // markedWrong: any;
   references: { title: string; node: string; label: string }[];
   tags: { node: string; title?: string; label?: string }[];
   parents: string[];
@@ -91,9 +91,9 @@ const BasicNode = ({
   // notebookRef,
   openPart,
   viewers,
-  markedCorrect,
+  // markedCorrect,
   wrongNum,
-  markedWrong,
+  // markedWrong,
   references,
   tags,
   parents,
@@ -366,9 +366,9 @@ BasicNodeProps) => {
         openPart={openPart}
         nodeType={nodeType}
         viewers={viewers}
-        markedCorrect={markedCorrect}
+        // markedCorrect={markedCorrect}
         wrongNum={wrongNum}
-        markedWrong={markedWrong}
+        // markedWrong={markedWrong}
         references={references}
         tags={tags}
         parents={parents}
