@@ -55,6 +55,7 @@ type BasicNodeProps = {
   setOpenPart: (newOpenPart: OpenPart) => void;
   locked: boolean;
   openNodePart: (event: any, id: string, partType: any, openPart: any, setOpenPart: any, tags: any) => void; //
+  toggleNode: (event: any, id: string) => void;
   // onNodeShare: (nodeId: string, platform: string) => void;
   selectNode: any;
   // proposalsNum: number;
@@ -106,6 +107,7 @@ const BasicNode = ({
   openNodePart,
   // onNodeShare,
   selectNode,
+  toggleNode,
 }: // wrongNode,
 // disabled = false,
 // enableChildElements = [],
@@ -135,6 +137,13 @@ BasicNodeProps) => {
     },
 
     [identifier, openPart, tags]
+  );
+
+  const onToggleNode = useCallback(
+    (event: any) => {
+      toggleNode(event, identifier);
+    },
+    [toggleNode, identifier]
   );
 
   const selectNodeHandler = useCallback(
@@ -257,11 +266,11 @@ BasicNodeProps) => {
         }}
       >
         {open ? (
-          <IconButton color="inherit" aria-label="Close the node" size="small">
+          <IconButton onClick={onToggleNode} color="inherit" aria-label="Close the node" size="small">
             <RemoveIcon fontSize="inherit" />
           </IconButton>
         ) : (
-          <IconButton color="inherit" aria-label="open the node" size="small">
+          <IconButton onClick={onToggleNode} color="inherit" aria-label="open the node" size="small">
             <FullscreenIcon fontSize="inherit" />
           </IconButton>
         )}
@@ -375,6 +384,8 @@ BasicNodeProps) => {
   );
 };
 
-export const MemoizedBasicNode = React.memo(BasicNode, (prev, next) => {
+export const MemoizedBasicNode = React.memo(
+  BasicNode /* , (prev, next) => {
   return prev.top === next.top && prev.left === next.left;
-});
+} */
+);

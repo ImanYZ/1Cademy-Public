@@ -23,7 +23,7 @@ import { dagreUtils } from "../../../lib/utils/dagre.util";
 import { devLog } from "../../../lib/utils/develop.util";
 import { COLUMN_GAP, copyNode, NODE_WIDTH } from "../../../lib/utils/Map.utils";
 import { buildFullNodes, fillDagre, getNodes, getUserNodeChanges } from "../../../lib/utils/nodesSyncronization.utils";
-import { FullNodesData, OpenPart, TNodeUpdates } from "../../../nodeBookTypes";
+import { FullNodeData, FullNodesData, OpenPart, TNodeUpdates } from "../../../nodeBookTypes";
 import { Notebook } from "../../../types";
 import { Graph } from "../../notebook";
 
@@ -122,10 +122,13 @@ const NodePage: NextPage<Props> = ({ notebook }) => {
   //   ------------------------------ functions
 
   const setNodeParts = useCallback((nodeId: string, innerFunc: (thisNode: FullNodeData) => FullNodeData) => {
+    console.log("setNodeParts..");
     setGraph(({ nodes: oldNodes, edges }) => {
-      setSelectedNodeType(oldNodes[nodeId].nodeType);
+      // setSelectedNodeType(oldNodes[nodeId].nodeType);
+      console.log("set graph");
       const thisNode = { ...oldNodes[nodeId] };
       const newNode = { ...oldNodes, [nodeId]: innerFunc(thisNode) };
+      console.log({ thisNode, newNode });
       return { nodes: newNode, edges };
     });
     setNodeUpdates({
@@ -487,6 +490,20 @@ const NodePage: NextPage<Props> = ({ notebook }) => {
     [setNodeParts]
   );
 
+  const toggleNode = useCallback(
+    (event: any, nodeId: string) => {
+      setNodeParts(nodeId, node => {
+        console.log("set node parts");
+        const notebookIdx = node.notebooks.findIndex(cur => cur === notebook.id);
+        if (notebookIdx < 0) return node;
+
+        const newValue = !node.expands[notebookIdx];
+        return { ...node, expands: node.expands.map((c, idx) => (idx === notebookIdx ? newValue : c)), open: newValue };
+      });
+    },
+    [notebook.id, setNodeParts]
+  );
+
   //   ------------------------------ useEffect
 
   useEffect(() => {
@@ -617,6 +634,7 @@ const NodePage: NextPage<Props> = ({ notebook }) => {
                     }))}
                     viewers={cur.viewers}
                     wrongNum={cur.wrongs}
+                    toggleNode={toggleNode}
                   />
                 ))}
             </MapInteractionCSS>
