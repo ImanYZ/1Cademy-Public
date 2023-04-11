@@ -56,7 +56,7 @@ import { useWindowSize } from "../../../../hooks/useWindowSize";
 import { DispatchAuthActions, Reputation, ReputationSignal, User, UserTheme } from "../../../../knowledgeTypes";
 import { UsersStatus, UserTutorials } from "../../../../nodeBookTypes";
 import { OpenSidebar } from "../../../../pages/notebook";
-import { Notebook } from "../../../../types";
+import { Notebook, NotebookDocument } from "../../../../types";
 import { Portal } from "../../../Portal";
 import { CustomBadge } from "../../CustomBudge";
 import CustomModal from "../../Modal/Modal";
@@ -67,6 +67,7 @@ import UsersStatusList from "../UsersStatusList";
 import { SidebarWrapper } from "./SidebarWrapper";
 
 const lBTypes = ["Weekly", "Monthly", "All Time", "Others Votes", "Others Monthly"];
+const NO_USER_IMAGE = "https://storage.googleapis.com/onecademy-1.appspot.com/ProfilePictures/no-img.png";
 
 type MainSidebarProps = {
   notebookRef: any;
@@ -283,8 +284,11 @@ MainSidebarProps) => {
   const onCreateNotebook = useCallback(async () => {
     try {
       setIsCreatingNotebook(true);
-      const newNotebook: Omit<Notebook, "id"> = {
+      const newNotebook: NotebookDocument = {
         owner: user.uname,
+        ownerImgUrl: user.imageUrl ?? NO_USER_IMAGE,
+        ownerChooseUname: Boolean(user.chooseUname),
+        ownerFullName: user.fName ?? "",
         title: `notebook ${notebooks.length + 1}`,
         isPublic: "none",
         users: [],
@@ -300,7 +304,7 @@ MainSidebarProps) => {
     } finally {
       setIsCreatingNotebook(false);
     }
-  }, [db, notebooks.length, onChangeNotebook, user.uname]);
+  }, [db, notebooks.length, onChangeNotebook, user.chooseUname, user.fName, user.imageUrl, user.uname]);
 
   const onUpdateNotebookTitle = useCallback(async () => {
     try {
@@ -317,8 +321,11 @@ MainSidebarProps) => {
       setIsCreatingNotebook(true);
 
       const notebooksWithSameName = notebooks.filter(cur => cur.title === editableNotebook.title);
-      const copyNotebook: Omit<Notebook, "id"> = {
+      const copyNotebook: NotebookDocument = {
         owner: editableNotebook.owner,
+        ownerImgUrl: editableNotebook.ownerImgUrl ?? NO_USER_IMAGE,
+        ownerChooseUname: Boolean(user.chooseUname),
+        ownerFullName: user.fName ?? "",
         title: `${editableNotebook.title} (${notebooksWithSameName.length + 1})`,
         isPublic: editableNotebook.isPublic,
         users: editableNotebook.users,
@@ -337,7 +344,7 @@ MainSidebarProps) => {
       const userNodesDocs = await getDocs(q);
       const nodeIds: string[] = [];
       userNodesDocs.forEach(doc => nodeIds.push(doc.data().node));
-      console.log({ nodeIds });
+      // console.log({ nodeIds });
       await openNodesOnNotebook(docRef.id, nodeIds);
       // if (titleInputRef.current) titleInputRef.current.focus();
     } catch (error) {
@@ -345,7 +352,7 @@ MainSidebarProps) => {
     } finally {
       setIsCreatingNotebook(false);
     }
-  }, [db, editableNotebook, notebooks, onChangeNotebook, openNodesOnNotebook]);
+  }, [db, editableNotebook, notebooks, onChangeNotebook, openNodesOnNotebook, user.chooseUname, user.fName]);
 
   const onCopyNotebookUrl = useCallback(() => {
     if (!editableNotebook) return;
@@ -370,6 +377,28 @@ MainSidebarProps) => {
       setIsCreatingNotebook(false);
     }
   }, [editableNotebook, onChangeNotebook]);
+
+  const onOpenUserInfo = useCallback(() => {
+    if (!editableNotebook) return;
+
+    nodeBookDispatch({
+      type: "setSelectedUser",
+      payload: {
+        username: editableNotebook.owner,
+        imageUrl: editableNotebook.ownerImgUrl,
+        fullName: editableNotebook.ownerFullName,
+        chooseUname: editableNotebook.ownerChooseUname,
+      },
+    });
+    setOpenSideBar("USER_INFO");
+    const userUserInfoCollection = collection(db, "userUserInfoLog");
+    addDoc(userUserInfoCollection, {
+      uname: user.uname,
+      uInfo: editableNotebook.owner,
+      createdAt: Timestamp.fromDate(new Date()),
+    });
+    setEditableNotebook(null);
+  }, [db, editableNotebook, nodeBookDispatch, setOpenSideBar, user.uname]);
 
   useEffect(() => {
     if (!displayLargeToolbar) {
@@ -666,7 +695,7 @@ MainSidebarProps) => {
                       : theme.palette.common.gray50,
                 }}
               >
-                <Box sx={{ p: "14px 12px" }}>
+                <Stack direction={"row"} spacing={"20px"} sx={{ p: "14px 12px" }}>
                   <TextField
                     // ref={titleInputRef}
                     id="notebook-title"
@@ -701,7 +730,29 @@ MainSidebarProps) => {
                     multiline
                     fullWidth
                   />
-                </Box>
+                  <Box
+                    onClick={onOpenUserInfo}
+                    sx={{
+                      minWidth: "36px",
+                      width: "36px",
+                      height: "36px",
+                      position: "relative",
+                      borderRadius: "30px",
+                      cursor: "pointer",
+                      // border: "solid 2px",
+                    }}
+                  >
+                    <NextImage
+                      src={editableNotebook.ownerImgUrl ?? NO_USER_IMAGE}
+                      alt={"owner image"}
+                      width="36px"
+                      height="36px"
+                      quality={40}
+                      objectFit="cover"
+                      style={{ borderRadius: "30px" }}
+                    />
+                  </Box>
+                </Stack>
                 <Divider />
                 <List sx={{ p: "0px", "& .MuiTypography-body1": { fontSize: "12px" } }}>
                   {/* <ListItem disablePadding>
@@ -879,6 +930,7 @@ MainSidebarProps) => {
     editableNotebook,
     onUpdateNotebookTitle,
     height,
+    onOpenUserInfo,
     onDuplicateNotebook,
     onCopyNotebookUrl,
     onDeleteNotebook,
@@ -940,6 +992,7 @@ MainSidebarProps) => {
     selectedNotebook,
     isCreatingNotebook,
     editableNotebook,
+    onOpenUserInfo,
     // titleInputRef.current,
   ]);
 

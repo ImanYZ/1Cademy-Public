@@ -1429,7 +1429,7 @@ const Dashboard = ({}: DashboardProps) => {
           username: uname,
           imageUrl,
           fullName,
-          chooseUname,
+          chooseUname: Boolean(chooseUname),
         },
       });
 

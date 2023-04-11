@@ -22,7 +22,7 @@ export type SelectedUser = {
   username: string;
   imageUrl: string;
   fullName: string;
-  chooseUname: string;
+  chooseUname: boolean;
 };
 
 export type SelectionType = "AcceptedProposals" | "Proposals" | "Citations" | "Comments" | "UserInfo" | null;

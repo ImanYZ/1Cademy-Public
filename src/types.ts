@@ -31,6 +31,9 @@ export type SimpleNode2 = {
 
 export type NotebookDocument = {
   owner: string;
+  ownerImgUrl: string;
+  ownerFullName: string;
+  ownerChooseUname: boolean;
   title: string;
   isPublic: "visible" | "editable" | "none";
   users: string[];
