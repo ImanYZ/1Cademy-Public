@@ -2725,8 +2725,6 @@ right: 5px; */
   display: flex;
   align-items: center;
   visibility: visible;
-  line-height: 16px;
-  height: 24px;
   /* height: auto; */
   transition: visibility 1s, line-height 1s, height 1s; /* vendorless fallback */
   -o-transition: visibility 1s, line-height 1s, height 1s; /* opera */
@@ -2771,7 +2769,7 @@ right: 5px; */
 
 .toolbar:focus .user-status-section,
 .toolbar:hover .user-status-section {
-  margin-top: 110px !important;
+  margin-top: 95px !important;
 }
 
 .scroll-styled::-webkit-scrollbar {

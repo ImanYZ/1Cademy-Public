@@ -1,13 +1,12 @@
+import { MenuItem, Select, Typography } from "@mui/material";
 import { Box } from "@mui/system";
 import { getDocs, getFirestore, limit, onSnapshot, query, where } from "firebase/firestore";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { UserTheme } from "src/knowledgeTypes";
 import { NodeType } from "src/types";
 
 import { getTypedCollections } from "@/lib/utils/getTypedCollections";
 
-import referencesDarkTheme from "../../../../../public/references-dark-theme.jpg";
-import referencesLightTheme from "../../../../../public/references-light-theme.jpg";
 import PendingProposalList from "../PendingProposalList";
 import { SidebarWrapper } from "./SidebarWrapper";
 
@@ -27,7 +26,6 @@ const NODE_TYPES_ARRAY: NodeType[] = ["Concept", "Code", "Reference", "Relation"
 const PendingProposalSidebar = ({
   open,
   onClose,
-  theme,
   openLinkedNode,
   username,
   tagId,
@@ -36,12 +34,12 @@ const PendingProposalSidebar = ({
 }: // innerWidth,
 PendingProposalSidebarProps) => {
   const [proposals, setProposals] = useState<any[]>([]);
+  const [type, setType] = useState<string>("all");
   const db = getFirestore();
 
   useEffect(() => {
     if (!username) return;
     if (!tagId) return;
-
     const versionsSnapshots: any[] = [];
     const versions: { [key: string]: any } = {};
     for (let nodeType of NODE_TYPES_ARRAY) {
@@ -97,6 +95,7 @@ PendingProposalSidebarProps) => {
                 };
               }
             }
+            versions[versionId]["nodeType"] = nodeType;
           }
 
           const pendingProposals = { ...versions };
@@ -117,20 +116,77 @@ PendingProposalSidebarProps) => {
     };
   }, [db, username, tagId]);
 
+  const contentSignalState = useMemo(() => {
+    return { updates: true };
+  }, [type, proposals]);
+
   return (
     <SidebarWrapper
       id="sidebar-wrapper-pending-list"
       title="Pending Proposals"
-      headerImage={theme === "Dark" ? referencesDarkTheme : referencesLightTheme}
       open={open}
       onClose={onClose}
       width={sidebarWidth}
       // height={innerWidth > 599 ? 100 : 35}
       innerHeight={innerHeight}
-      contentSignalState={proposals}
+      contentSignalState={contentSignalState}
       SidebarContent={
-        <Box sx={{ p: "2px 4px" }}>
-          <PendingProposalList proposals={proposals} openLinkedNode={openLinkedNode} />
+        <Box sx={{ p: "10px" }}>
+          <Box
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "right",
+              marginTop: "15px",
+              py: "10px",
+            }}
+          >
+            <Typography>Show</Typography>
+            <Select
+              sx={{
+                marginLeft: "10px",
+                height: "35px",
+                width: "120px",
+              }}
+              MenuProps={{
+                sx: {
+                  "& .MuiMenu-paper": {
+                    backgroundColor: theme => (theme.palette.mode === "dark" ? "#1B1A1A" : "#F9FAFB"),
+                    color: "text.white",
+                  },
+                  "& .MuiMenuItem-root:hover": {
+                    backgroundColor: theme => (theme.palette.mode === "dark" ? "##2F2F2F" : "#EAECF0"),
+                    color: "text.white",
+                  },
+                  "& .Mui-selected": {
+                    backgroundColor: "transparent!important",
+                    color: "#FF8134",
+                  },
+                  "& .Mui-selected:hover": {
+                    backgroundColor: "transparent",
+                  },
+                },
+              }}
+              labelId="demo-select-small"
+              id="demo-select-small"
+              value={type}
+              onChange={e => {
+                setType(e.target.value);
+              }}
+            >
+              <MenuItem value="all">All</MenuItem>
+              <MenuItem value="Concept">Concepts</MenuItem>
+              <MenuItem value="Relation">Relations</MenuItem>
+              <MenuItem value="Question">Questions</MenuItem>
+              <MenuItem value="Idea">Ideas</MenuItem>
+              <MenuItem value="Code">Codes</MenuItem>
+              <MenuItem value="Reference">References</MenuItem>
+            </Select>
+          </Box>
+          <PendingProposalList
+            proposals={type === "all" ? proposals : proposals.filter(proposal => proposal.nodeType === type)}
+            openLinkedNode={openLinkedNode}
+          />
         </Box>
       }
     />

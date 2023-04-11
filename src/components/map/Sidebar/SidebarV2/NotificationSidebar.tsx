@@ -1,5 +1,18 @@
-import DoneAllIcon from "@mui/icons-material/DoneAll";
-import { Box, Button, MenuItem, Select, Tab, Tabs, Typography } from "@mui/material";
+import ClearIcon from "@mui/icons-material/Clear";
+import SearchIcon from "@mui/icons-material/Search";
+import {
+  Box,
+  Button,
+  Checkbox,
+  FormControl,
+  InputAdornment,
+  ListItemText,
+  MenuItem,
+  Tab,
+  Tabs,
+  TextField,
+  Typography,
+} from "@mui/material";
 import {
   collection,
   doc,
@@ -17,7 +30,11 @@ import NextImage from "next/image";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { UserTheme } from "src/knowledgeTypes";
 
+import FilterIcon from "../../../../../public/filter.svg";
+import FilterDarkIcon from "../../../../../public/filter-dark.svg";
 import NoNotificationIcon from "../../../../../public/no-notification-dark.svg";
+import ReadAllIcon from "../../../../../public/read-all.svg";
+import SelectAllIcon from "../../../../../public/select-all.svg";
 import NotificationsList from "../NotificationsList";
 import { SidebarWrapper } from "./SidebarWrapper";
 
@@ -44,6 +61,8 @@ type Notification = {
   uname: string;
 };
 
+const names = ["Approvals", "Disapprovals", "Awards", "Proposals", "Improvements", "Invitations"];
+
 const NotificationSidebar = ({
   open,
   onClose,
@@ -57,6 +76,10 @@ const NotificationSidebar = ({
   const [value, setValue] = React.useState(0);
   const [checkedNotifications, setCheckedNotifications] = useState<Notification[]>([]);
   const [uncheckedNotifications, setUncheckedNotifications] = useState<Notification[]>([]);
+  const [showClearIcon, setShowClearIcon] = useState<string>("none");
+  const [openFilter, setOpenFilter] = React.useState<boolean>(false);
+  const [filter, setFilter] = React.useState<string[]>([]);
+  const [markNotifications, setMarkNotifications] = useState<string[]>([]);
 
   const db = getFirestore();
 
@@ -167,24 +190,32 @@ const NotificationSidebar = ({
     };
   }, [db, snapshot, username]);
 
-  const checkAllNotification = useCallback(async () => {
+  const checkNotifications = useCallback(async () => {
     if (!username) return;
     const batch = writeBatch(db);
-    const q = query(collection(db, "notifications"), where("proposer", "==", username));
-    const querySnapshot = await getDocs(q);
-    querySnapshot.forEach(notificationDoc => {
-      const notificationRef = doc(db, "notifications", notificationDoc.id);
+
+    for (const notification of markNotifications) {
+      const notificationRef = doc(db, "notifications", notification);
       batch.update(notificationRef, { checked: true });
-    });
+    }
 
     const notificationNumsQuery = query(collection(db, "notificationNums"), where("uname", "==", username), limit(1));
     const notificationNumsDocs = await getDocs(notificationNumsQuery);
     if (notificationNumsDocs.docs.length) {
       const notificationNumsRef = doc(db, "notificationNums", notificationNumsDocs.docs[0].id);
-      batch.update(notificationNumsRef, { nNum: 0 });
+      let nNums = notificationNumsDocs.docs[0].data().nNum - markAllNotifications.length;
+      batch.update(notificationNumsRef, { nNum: nNums > 0 ? nNums : 0 });
     }
     await batch.commit();
   }, [db, username]);
+
+  const markAllNotifications = () => {
+    let notificationIds: string[] = [];
+    for (const notification of uncheckedNotifications) {
+      notificationIds = [...notificationIds, notification.id];
+    }
+    setMarkNotifications(notificationIds);
+  };
 
   const handleChange = (event: React.SyntheticEvent, newValue: number) => {
     setValue(newValue);
@@ -195,9 +226,28 @@ const NotificationSidebar = ({
     };
   };
 
+  const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>): void => {
+    setShowClearIcon(event.target.value === "" ? "none" : "flex");
+  };
+
+  const setNotificationFilter = (name: string) => {
+    const index = filter.indexOf(name);
+    if (index > -1) {
+      setFilter([...filter.filter((fName: string) => fName !== name)]);
+    } else {
+      setFilter([...filter, name]);
+    }
+  };
+
+  // const filteredNotifications = () => {
+  //   const filteredArray = uncheckedNotifications.filter(notification =>
+  //     filter.some(fltr => fltr === notification.aType)
+  //   );
+  // };
+
   const contentSignalState = useMemo(() => {
     return [...uncheckedNotifications];
-  }, [checkedNotifications, uncheckedNotifications, value]);
+  }, [checkedNotifications, uncheckedNotifications, value, openFilter, filter, markNotifications]);
 
   return (
     <SidebarWrapper
@@ -209,44 +259,29 @@ const NotificationSidebar = ({
       // anchor="right"
       onClose={onClose}
       SidebarOptions={
-        <>
-          <Typography
-            component={"h2"}
-            sx={{
-              width: "100%",
-              marginTop: "10px",
-              paddingLeft: "13px",
-              fontSize: { xs: "24px", sm: "40px" },
-
-              fontWeight: "500",
-            }}
-          >
-            Notifications
-          </Typography>
-          <Box
-            sx={{
-              marginTop: "25px",
-              borderBottom: 1,
-              borderColor: theme => (theme.palette.mode === "dark" ? "black" : "divider"),
-              width: "100%",
-            }}
-          >
-            <Tabs value={value} onChange={handleChange} aria-label={"Notification Tabs"} variant="fullWidth">
-              {[{ title: "Unread" }, { title: "Read" }].map((tabItem, idx: number) => (
-                <Tab
-                  key={tabItem.title}
-                  id={`notifications-tab-${tabItem.title.toLowerCase()}`}
-                  label={tabItem.title}
-                  {...a11yProps(idx)}
-                />
-              ))}
-            </Tabs>
-          </Box>
-        </>
+        <Box
+          sx={{
+            marginTop: "25px",
+            borderBottom: 1,
+            borderColor: theme => (theme.palette.mode === "dark" ? "black" : "divider"),
+            width: "100%",
+          }}
+        >
+          <Tabs value={value} onChange={handleChange} aria-label={"Notification Tabs"} variant="fullWidth">
+            {[{ title: "Unread" }, { title: "Read" }].map((tabItem, idx: number) => (
+              <Tab
+                key={tabItem.title}
+                id={`notifications-tab-${tabItem.title.toLowerCase()}`}
+                label={tabItem.title}
+                {...a11yProps(idx)}
+              />
+            ))}
+          </Tabs>
+        </Box>
       }
       contentSignalState={contentSignalState}
       SidebarContent={
-        <Box sx={{ display: "flex", flexDirection: "column", padding: "10px" }}>
+        <Box sx={{ display: "flex", flexDirection: "column", padding: "16px" }}>
           {((!uncheckedNotifications.length && value === 0) || (!checkedNotifications.length && value === 1)) && (
             <Box
               sx={{
@@ -281,22 +316,185 @@ const NotificationSidebar = ({
           )}
           {uncheckedNotifications.length > 0 && value === 0 && (
             <Box sx={{ display: "flex", flexDirection: "column", gap: "4px" }}>
-              <Box
-                sx={{
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "space-between",
-                }}
-              >
+              {markNotifications.length > 0 && (
                 <Box
                   sx={{
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "space-between",
+                    paddingY: "14px",
+                    height: "72px",
                   }}
                 >
-                  <Typography>Show</Typography>
-                  <Select
+                  <Box
+                    sx={{
+                      display: "flex",
+                      gap: "10px",
+                    }}
+                  >
+                    <Button
+                      sx={{
+                        justifyContent: "stretch",
+                        textAlign: "left",
+                        padding: "0",
+                        minWidth: "0px",
+                        ":hover": {
+                          background: "transparent",
+                        },
+                      }}
+                      onClick={() => markAllNotifications()}
+                    >
+                      <NextImage width={"22px"} height={"22px"} src={SelectAllIcon.src} alt="Select icon" />
+                    </Button>
+                    <Button
+                      sx={{
+                        justifyContent: "stretch",
+                        textAlign: "left",
+                        padding: "0",
+                        minWidth: "0px",
+                        ":hover": {
+                          background: "transparent",
+                        },
+                      }}
+                      onClick={() => checkNotifications()}
+                    >
+                      <NextImage width={"22px"} height={"22px"} src={ReadAllIcon.src} alt="Read icon" />
+                    </Button>
+                  </Box>
+                  <Button
+                    sx={{
+                      justifyContent: "stretch",
+                      textAlign: "left",
+                      fontWeight: "600",
+                      fontSize: "16px",
+                      lineHeight: "24px",
+                      color: "#FF6D00",
+                      ":hover": {
+                        background: "transparent",
+                      },
+                    }}
+                    onClick={() => setMarkNotifications([])}
+                  >
+                    Cancel
+                  </Button>
+                </Box>
+              )}
+              {markNotifications.length === 0 && (
+                <Box
+                  sx={{
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "space-between",
+                    paddingY: "16px",
+                    height: "72px",
+                  }}
+                >
+                  <FormControl>
+                    <TextField
+                      placeholder="Search"
+                      size="small"
+                      variant="outlined"
+                      onChange={handleInputChange}
+                      InputProps={{
+                        startAdornment: (
+                          <InputAdornment position="start">
+                            <SearchIcon />
+                          </InputAdornment>
+                        ),
+                        endAdornment: (
+                          <InputAdornment position="end" style={{ display: showClearIcon }}>
+                            <ClearIcon />
+                          </InputAdornment>
+                        ),
+                      }}
+                      sx={{
+                        width: "370px",
+                        height: "40px",
+                        border: theme => (theme.palette.mode === "dark" ? "1px solid #404040" : "solid 1px #D0D5DD"),
+                        borderRadius: "4px",
+                      }}
+                    />
+                  </FormControl>
+                  <Box
+                    sx={{
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "space-between",
+                    }}
+                  >
+                    <Button
+                      sx={{
+                        width: "40px",
+                        height: "40px",
+                        borderRadius: "8px",
+                        border: theme => (theme.palette.mode === "dark" ? "1px solid #404040" : "solid 1px #D0D5DD"),
+                        display: "flex",
+                        justifyContent: "center",
+                        cursor: "pointer",
+                        minWidth: "0px",
+                        ...(openFilter && {
+                          border: "solid 1px #FF8134",
+                        }),
+                      }}
+                      onClick={() => setOpenFilter(!openFilter)}
+                    >
+                      <NextImage
+                        width={"22px"}
+                        height={"22px"}
+                        src={theme === "Dark" ? FilterIcon.src : FilterDarkIcon.src}
+                        alt="Filter icon"
+                      />
+                      {openFilter && (
+                        <Box
+                          sx={{
+                            border: theme =>
+                              theme.palette.mode === "dark" ? "1px solid #404040" : "1px solid #D0D5DD",
+                            position: "absolute",
+                            right: "0px",
+                            top: "45px",
+                            background: theme => (theme.palette.mode === "dark" ? "#1B1A1A" : "#F9FAFB"),
+                            zIndex: "99",
+                            borderRadius: "4px",
+                            padding: "3px 0px 3px 0px",
+                          }}
+                        >
+                          {names.map(name => (
+                            <MenuItem
+                              sx={{
+                                color: theme => (theme.palette.mode === "dark" ? "#FCFCFD" : "#1D2939"),
+
+                                textAlign: "left",
+                                height: "34px",
+                                padding: "8px 10px 8px 10px",
+                                background: theme =>
+                                  filter.indexOf(name) > -1
+                                    ? theme.palette.mode === "dark"
+                                      ? "#55402B"
+                                      : "#FFE2D0"
+                                    : undefined,
+                                ":hover": {
+                                  background: theme => (theme.palette.mode === "dark" ? "#55402B" : "#FFE2D0"),
+                                },
+                              }}
+                              onClick={() => setNotificationFilter(name)}
+                              key={name}
+                              value={name}
+                            >
+                              <Checkbox checked={filter.indexOf(name) > -1} />
+                              <ListItemText
+                                sx={{
+                                  fontSize: "12px",
+                                  fontWeight: "400",
+                                  lineHeight: "18px",
+                                }}
+                                primary={name}
+                              />
+                            </MenuItem>
+                          ))}
+                        </Box>
+                      )}
+                    </Button>
+                    {/* <Select
                     sx={{
                       marginLeft: "10px",
                       height: "30px",
@@ -310,23 +508,13 @@ const NotificationSidebar = ({
                     <MenuItem value={10}>All</MenuItem>
                     <MenuItem value={20}>Twenty</MenuItem>
                     <MenuItem value={30}>Thirty</MenuItem>
-                  </Select>
+                  </Select> */}
+                  </Box>
                 </Box>
-
-                <Button
-                  sx={{
-                    ":hover": {
-                      background: "transparent",
-                    },
-                  }}
-                  onClick={() => checkAllNotification()}
-                >
-                  {/* <i className="material-icons DoneIcon green-text">done_all</i> */}
-                  <DoneAllIcon className="material-icons DoneIcon" sx={{ marginRight: "10px" }} />
-                  <span>Mark All Read</span>
-                </Button>
-              </Box>
+              )}
               <NotificationsList
+                markNotifications={markNotifications}
+                setMarkNotifications={setMarkNotifications}
                 notifications={uncheckedNotifications}
                 openLinkedNode={openLinkedNode}
                 checked={false}
@@ -335,7 +523,13 @@ const NotificationSidebar = ({
           )}
           {checkedNotifications.length > 0 && value === 1 && (
             <Box sx={{ display: "flex", flexDirection: "column", gap: "4px" }}>
-              <NotificationsList notifications={checkedNotifications} openLinkedNode={openLinkedNode} checked={true} />
+              <NotificationsList
+                markNotifications={markNotifications}
+                setMarkNotifications={setMarkNotifications}
+                notifications={checkedNotifications}
+                openLinkedNode={openLinkedNode}
+                checked={true}
+              />
             </Box>
           )}
         </Box>

@@ -142,7 +142,7 @@ const AppHeader = forwardRef(({ page, sections, selectedSectionId, onSwitchSecti
           <MenuItem
             sx={{ flexGrow: 3 }}
             onClick={() => {
-              window.open("https://1cademy.us/Activities", "_blank");
+              window.open("https://1cademy.us/Activities/experiment", "_blank");
             }}
           >
             <BiotechIcon /> <span id="ExperimentActivities">Experiment Activities</span>

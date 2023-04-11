@@ -3,27 +3,30 @@ import { grey } from "@mui/material/colors";
 import { Theme, ThemeOptions } from "@mui/material/styles";
 import { deepmerge } from "@mui/utils";
 
+import { Colors, DESIGN_SYSTEM_COLORS } from "./colors";
+
+type OldColors = {
+  black: string;
+  white: string;
+  orange: string;
+  orangeLight: string;
+  orangeDark: string;
+  darkGrayBackground: string;
+  lightGrayBackground: string;
+  gray: string;
+  borderColor: string;
+  darkBackground1: string;
+  lightBackground1: string;
+  darkBackground2: string;
+  lightBackground2: string;
+  lightBackground: string;
+  darkBackground: string;
+};
 declare module "@mui/material/styles/createPalette" {
-  interface CommonColors {
-    black: string;
-    white: string;
-    orange: string;
-    orangeLight: string;
-    orangeDark: string;
-    darkGrayBackground: string;
-    lightGrayBackground: string;
-    gray: string;
-    borderColor: string;
-    darkBackground1: string;
-    lightBackground1: string;
-    darkBackground2: string;
-    lightBackground2: string;
-    lightBackground: string;
-    darkBackground: string;
-  }
+  interface CommonColors extends OldColors, Colors {}
 }
 
-const common = {
+const common: OldColors & Colors = {
   black: "#1a1a1a",
   white: "#F8F8F8",
   orange: "#ff8a33",
@@ -39,6 +42,7 @@ const common = {
   lightBackground2: "#dbd9d9",
   darkBackground: "#1B1A1A",
   lightBackground: "#F9FAFB",
+  ...DESIGN_SYSTEM_COLORS,
 };
 
 const systemFont = ["Roboto", "sans-serif"];
