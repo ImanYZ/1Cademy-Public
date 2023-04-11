@@ -59,6 +59,7 @@ export const useWorkerQueue = ({
       setIsWorking(true);
       const worker: Worker = new Worker(new URL("../workers/MapWorker.ts", import.meta.url));
 
+      console.log("Worker called");
       worker.postMessage({
         oldMapWidth,
         oldMapHeight,

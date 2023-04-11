@@ -466,8 +466,9 @@ const Dashboard = ({}: DashboardProps) => {
                   scale: defaultScale,
                   translation: {
                     x:
-                      windowInnerLeft + regionWidth / 2 - (thisNode.left + originalNode.offsetWidth / 2) * defaultScale,
-                    y: windowInnerTop + regionHeight / 2 - (thisNode.top + (thisNode.height ?? 0) / 2) * defaultScale,
+                      windowInnerLeft + regionWidth / 2 - (thisNode.left + originalNode.clientWidth / 2) * defaultScale,
+                    y:
+                      windowInnerTop + regionHeight / 2 - (thisNode.top + originalNode.clientHeight / 2) * defaultScale,
                   },
                 };
               });
@@ -548,16 +549,13 @@ const Dashboard = ({}: DashboardProps) => {
   const onCompleteWorker = useCallback(() => {
     setGraph(graph => {
       if (!nodeBookState.selectedNode) return graph;
+      if (!graph.nodes[nodeBookState.selectedNode]) return graph;
 
-      const timeout = onNodeInViewport(nodeBookState.selectedNode, graph.nodes) ? 0 : 0;
-      setTimeout(() => {
-        if (!nodeBookState.selectedNode) return graph;
+      scrollToNode(nodeBookState.selectedNode);
 
-        scrollToNode(nodeBookState.selectedNode);
-      }, timeout);
       return graph;
     });
-  }, [nodeBookState.selectedNode, onNodeInViewport, scrollToNode]);
+  }, [nodeBookState.selectedNode, scrollToNode]);
 
   const setOperation = useCallback((operation: string) => {
     lastNodeOperation.current = { name: operation, data: "" };
@@ -3361,7 +3359,6 @@ const Dashboard = ({}: DashboardProps) => {
         nodes = { ...nodes, [newNodeId]: { ...nodes[newNodeId], changedAt: new Date(), ...nodePartChanges } };
 
         getMapGraph("/proposeChildNode", postData, !willBeApproved);
-        scrollToNode(newNodeId);
 
         setTimeout(() => {
           onComplete();
@@ -3370,10 +3367,11 @@ const Dashboard = ({}: DashboardProps) => {
           nodeIds: updatedNodeIds,
           updatedAt: new Date(),
         });
+        scrollToNode(newNodeId);
         return { nodes, edges };
       });
     },
-    [setGraph, getMapGraph]
+    [nodeBookDispatch, getMapGraph, scrollToNode]
   );
 
   const fetchProposals = useCallback(
