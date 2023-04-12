@@ -345,6 +345,7 @@ export const MemoizedNodeList = React.memo(NodesList, (prev, next) => {
     prev.openSidebar === prev.openSidebar && // TODO: check this
     // prev.showProposeTutorial === next.showProposeTutorial &&
     prev.ableToPropose === next.ableToPropose &&
+    prev.setNodeParts === next.setNodeParts &&
     // prev.selectedNotebookId === next.selectedNotebookId &&
     validateTutorialProps()
   );

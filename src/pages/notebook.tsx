@@ -775,6 +775,8 @@ const Dashboard = ({}: DashboardProps) => {
 
   const setNodeParts = useCallback((nodeId: string, innerFunc: (thisNode: FullNodeData) => FullNodeData) => {
     setGraph(({ nodes: oldNodes, edges }) => {
+      console.log("setNodeParts", { nodeId, oldNodes, innerFunc });
+      console.trace();
       setSelectedNodeType(oldNodes[nodeId].nodeType);
       const thisNode = { ...oldNodes[nodeId] };
       const newNode = { ...oldNodes, [nodeId]: innerFunc(thisNode) };
@@ -960,7 +962,7 @@ const Dashboard = ({}: DashboardProps) => {
             setNoNodesFoundMessage(true);
             return null;
           }
-
+          // TODO: set synchronizationIsWorking true
           setNoNodesFoundMessage(false);
           const userNodeChanges = getUserNodeChanges(docChanges);
           devLog("2:Snapshot:Nodes Data", userNodeChanges);
@@ -977,6 +979,7 @@ const Dashboard = ({}: DashboardProps) => {
           setAllNodes(oldAllNodes => mergeAllNodes(fullNodes, oldAllNodes));
 
           setGraph(({ nodes, edges }) => {
+            console.log("4.5:Snapshot: graph", { nodes });
             // const visibleFullNodesMerged = visibleFullNodes.map(cur => {
             const visibleFullNodesMerged = fullNodes.map(cur => {
               const tmpNode = nodes[cur.node];
@@ -1029,6 +1032,7 @@ const Dashboard = ({}: DashboardProps) => {
             if (!Object.keys(newNodes).length) {
               setNoNodesFoundMessage(true);
             }
+            // TODO: set synchronizationIsWorking false
             // setUserNodesLoaded(true);
             return { nodes: newNodes, edges: newEdges };
           });
@@ -1115,7 +1119,7 @@ const Dashboard = ({}: DashboardProps) => {
     if (!userTutorialLoaded) return;
     if (!selectedNotebookId) return;
 
-    devLog("SYNCHRONIZATION");
+    devLog("SYNCHRONIZATION", { selectedNotebookId });
 
     // db.collection("cities").where("regions", "array-contains", "west_coast").where("population", ">", 1000000).where("area", ">", 1000000)
     const userNodesRef = collection(db, "userNodes");
@@ -1129,19 +1133,22 @@ const Dashboard = ({}: DashboardProps) => {
 
     const killSnapshot = snapshot(q);
     return () => {
-      console.log("reset: kill userNodes", {
-        selectedNotebookId,
-        selectedPreviousNotebookIdRef: selectedPreviousNotebookIdRef.current,
-      });
+      // INFO: if nodes from notebooks are colliding, we cant add a state
+      // to determine when synchronization is complete,
+      // to remove snapshot with previous Graph (nodes, edges)
+      // and add snapshot with new Notebook Id
       if (selectedPreviousNotebookIdRef.current !== selectedNotebookId) {
         // if we change notebook, we need to clean graph
+        console.log("reset", { p: selectedPreviousNotebookIdRef.current, n: selectedNotebookId });
         selectedPreviousNotebookIdRef.current = selectedNotebookId;
-        console.log("reset");
+
         g.current = createGraph();
-        setGraph({ nodes: {}, edges: {} });
-        setNodeUpdates({
-          nodeIds: [],
-          updatedAt: new Date(),
+        setGraph(prev => {
+          setNodeUpdates({
+            nodeIds: Object.keys(prev.nodes),
+            updatedAt: new Date(),
+          });
+          return { nodes: {}, edges: {} };
         });
       }
       killSnapshot();
@@ -2362,8 +2369,30 @@ const Dashboard = ({}: DashboardProps) => {
       // let linkedNodeRef = null;
       let userNodeRef = null;
       let userNodeData = null;
+      const batchArray = [writeBatch(db)];
+      let batchFlags = { operationCounter: 0, batchIndex: 0 };
 
-      const batch = writeBatch(db);
+      const updateBatchIndexes = ({
+        operationCounter: oldOperationCounter,
+        batchIndex: oldBatchIndex,
+      }: {
+        operationCounter: number;
+        batchIndex: number;
+      }) => {
+        let operationCounter = oldOperationCounter;
+        let batchIndex = oldBatchIndex;
+        if (oldOperationCounter === 499) {
+          batchArray.push(writeBatch(db));
+          batchIndex++;
+          operationCounter = 0;
+        } else {
+          operationCounter++;
+        }
+        return { operationCounter, batchIndex };
+      };
+
+      // let batch = writeBatch(db);
+      // let writeCounts = 0;
 
       await Promise.all(
         nodeIds.map(async nodeId => {
@@ -2375,12 +2404,16 @@ const Dashboard = ({}: DashboardProps) => {
 
           for (let chi of thisNode.children) {
             const childNodeRef = doc(db, "nodes", chi.node);
-            batch.update(childNodeRef, { updatedAt: Timestamp.fromDate(new Date()) });
+            batchArray[batchFlags.batchIndex].update(childNodeRef, { updatedAt: Timestamp.fromDate(new Date()) });
+            batchFlags = updateBatchIndexes(batchFlags);
+            // [batch, writeCounts] = await checkRestartBatchWriteCounts(batch, writeCounts);
           }
 
           for (let par of thisNode.parents) {
             const parentNodeRef = doc(db, "nodes", par.node);
-            batch.update(parentNodeRef, { updatedAt: Timestamp.fromDate(new Date()) });
+            batchArray[batchFlags.batchIndex].update(parentNodeRef, { updatedAt: Timestamp.fromDate(new Date()) });
+            batchFlags = updateBatchIndexes(batchFlags);
+            // [batch, writeCounts] = await checkRestartBatchWriteCounts(batch, writeCounts);
           }
 
           const userNodesRef = collection(db, "userNodes");
@@ -2401,7 +2434,9 @@ const Dashboard = ({}: DashboardProps) => {
             userNodeData.notebooks = [...(userNodeData.notebooks ?? []), notebookId];
             userNodeData.expands = [...(userNodeData.expands ?? []), true];
             userNodeData.updatedAt = Timestamp.fromDate(new Date());
-            batch.update(userNodeRef, userNodeData);
+            batchArray[batchFlags.batchIndex].update(userNodeRef, userNodeData);
+            batchFlags = updateBatchIndexes(batchFlags);
+            // [batch, writeCounts] = await checkRestartBatchWriteCounts(batch, writeCounts);
             delete userNodeData?.visible;
             delete userNodeData?.open;
           } else {
@@ -2426,23 +2461,31 @@ const Dashboard = ({}: DashboardProps) => {
             userNodeRef = await addDoc(collection(db, "userNodes"), userNodeData);
           }
 
-          batch.update(nodeRef, {
+          batchArray[batchFlags.batchIndex].update(nodeRef, {
             viewers: thisNode.viewers + 1,
             updatedAt: Timestamp.fromDate(new Date()),
           });
+          batchFlags = updateBatchIndexes(batchFlags);
+          // [batch, writeCounts] = await checkRestartBatchWriteCounts(batch, writeCounts);
           const userNodeLogRef = collection(db, "userNodesLog");
           const userNodeLogData = {
             ...userNodeData,
             createdAt: Timestamp.fromDate(new Date()),
           };
 
-          batch.set(doc(userNodeLogRef), userNodeLogData);
+          batchArray[batchFlags.batchIndex].set(doc(userNodeLogRef), userNodeLogData);
+          batchFlags = updateBatchIndexes(batchFlags);
+          // [batch, writeCounts] = await checkRestartBatchWriteCounts(batch, writeCounts);
         })
       );
       // notebookRef.current.selectedNode = nodeId;
       // nodeBookDispatch({ type: "setSelectedNode", payload: nodeId });
-      console.log("commit");
-      await batch.commit();
+      // console.log("commit", operationCounter);
+      await Promise.all(batchArray.map(async batch => await batch.commit()));
+      // batchArray.forEach(async batch => await batch.commit());
+      // await commitBatch(batch);
+      // await batch.commit();
+      setSelectedNotebookId(notebookId);
       await detectElements({ ids: nodeIds });
       isWritingOnDBRef.current = false;
     },
@@ -2610,7 +2653,7 @@ const Dashboard = ({}: DashboardProps) => {
         []
       );
     },
-    [user]
+    [db, user]
   );
 
   const referenceLabelChange = useCallback(
@@ -2940,7 +2983,7 @@ const Dashboard = ({}: DashboardProps) => {
         setAbleToPropose(true);
       }
     },
-    [setNodeParts]
+    [ableToPropose, setNodeParts]
   );
 
   const changeFeedback = useCallback(
@@ -2958,7 +3001,7 @@ const Dashboard = ({}: DashboardProps) => {
         setAbleToPropose(true);
       }
     },
-    [setNodeParts]
+    [ableToPropose, setNodeParts]
   );
 
   const switchChoice = useCallback(
@@ -2977,7 +3020,7 @@ const Dashboard = ({}: DashboardProps) => {
         setAbleToPropose(true);
       }
     },
-    [setNodeParts]
+    [ableToPropose, setNodeParts]
   );
 
   const deleteChoice = useCallback(
@@ -2994,7 +3037,7 @@ const Dashboard = ({}: DashboardProps) => {
         setAbleToPropose(true);
       }
     },
-    [setNodeParts]
+    [ableToPropose, setNodeParts]
   );
 
   const addChoice = useCallback(
@@ -3015,7 +3058,7 @@ const Dashboard = ({}: DashboardProps) => {
         setAbleToPropose(true);
       }
     },
-    [setNodeParts]
+    [ableToPropose, setNodeParts]
   );
 
   /////////////////////////////////////////////////////
@@ -6016,7 +6059,6 @@ const Dashboard = ({}: DashboardProps) => {
 
         const notebooksRef = collection(db, "notebooks");
         const docRef = await addDoc(notebooksRef, copyNotebook);
-        onChangeNotebook(docRef.id);
         const q = query(
           collection(db, "userNodes"),
           where("user", "==", notebookData.owner),

@@ -385,13 +385,13 @@ NodeProps) => {
     }
 
     return getVideoDataByUrl(videoUrl, startTime, endTime);
-  }, [videoUrl, videoStartTime, videoEndTime]);
+  }, [videoStartTime, videoEndTime, videoUrl, timePickerError]);
 
   useEffect(() => {
     if (!addVideo) {
       setNodeParts(identifier, node => ({ ...node, nodeVideo: "" }));
     }
-  }, [addVideo]);
+  }, [addVideo, identifier, setNodeParts]);
 
   useEffect(() => {
     observer.current = new ResizeObserver(entries => {
@@ -633,27 +633,11 @@ NodeProps) => {
     }
   }, [editable, activeNode]);
 
-  const onBlurContent = useCallback((newContent: string) => {
-    setNodeParts(identifier, thisNode => ({ ...thisNode, content: newContent }));
-  }, []);
-
-  const onBlurNodeTitle = useCallback(
-    async (newTitle: string) => {
-      setNodeParts(identifier, thisNode => ({ ...thisNode, title: newTitle }));
-      if (titleUpdated && newTitle.trim().length > 0) {
-        nodeBookDispatch({ type: "setSearchByTitleOnly", payload: true });
-        notebookRef.current.searchByTitleOnly = true;
-        onSearch(1, newTitle.trim());
-        setTitleUpdated(false);
-      }
-      notebookRef.current.nodeTitleBlured = true;
-      notebookRef.current.searchQuery = newTitle;
-
-      // setOpenSideBar("SEARCHER_SIDEBAR");
-      // nodeBookDispatch({ type: "setNodeTitleBlured", payload: true });
-      // nodeBookDispatch({ type: "setSearchQuery", payload: newTitle });
+  const onBlurContent = useCallback(
+    (newContent: string) => {
+      setNodeParts(identifier, thisNode => ({ ...thisNode, content: newContent }));
     },
-    [titleUpdated]
+    [identifier, setNodeParts]
   );
 
   const onSearch = useCallback(async (page: number, q: string) => {
@@ -694,6 +678,25 @@ NodeProps) => {
       console.error(err);
     }
   }, []);
+
+  const onBlurNodeTitle = useCallback(
+    async (newTitle: string) => {
+      setNodeParts(identifier, thisNode => ({ ...thisNode, title: newTitle }));
+      if (titleUpdated && newTitle.trim().length > 0) {
+        nodeBookDispatch({ type: "setSearchByTitleOnly", payload: true });
+        notebookRef.current.searchByTitleOnly = true;
+        onSearch(1, newTitle.trim());
+        setTitleUpdated(false);
+      }
+      notebookRef.current.nodeTitleBlured = true;
+      notebookRef.current.searchQuery = newTitle;
+
+      // setOpenSideBar("SEARCHER_SIDEBAR");
+      // nodeBookDispatch({ type: "setNodeTitleBlured", payload: true });
+      // nodeBookDispatch({ type: "setSearchQuery", payload: newTitle });
+    },
+    [identifier, nodeBookDispatch, notebookRef, onSearch, setNodeParts, titleUpdated]
+  );
 
   const onChangeOption = useCallback(
     (newOption: boolean) => {

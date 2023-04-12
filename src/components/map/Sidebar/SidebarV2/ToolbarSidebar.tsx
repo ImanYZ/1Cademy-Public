@@ -336,7 +336,7 @@ MainSidebarProps) => {
       const notebooksRef = collection(db, "notebooks");
       const docRef = await addDoc(notebooksRef, copyNotebook);
       setEditableNotebook({ ...copyNotebook, id: docRef.id });
-      onChangeNotebook(docRef.id);
+      // onChangeNotebook(docRef.id);
       const q = query(
         collection(db, "userNodes"),
         where("user", "==", editableNotebook.owner),
@@ -354,7 +354,7 @@ MainSidebarProps) => {
     } finally {
       setIsCreatingNotebook(false);
     }
-  }, [db, editableNotebook, notebooks, onChangeNotebook, openNodesOnNotebook, user.chooseUname, user.fName]);
+  }, [db, editableNotebook, notebooks, openNodesOnNotebook, user.chooseUname, user.fName]);
 
   const onCopyNotebookUrl = useCallback(() => {
     if (!editableNotebook) return;
