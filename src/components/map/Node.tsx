@@ -1461,6 +1461,7 @@ export const MemoizedNode = React.memo(Node, (prev, next) => {
     prev.unaccepted === next.unaccepted &&
     prev.disableVotes === next.disableVotes &&
     prev.openPart === next.openPart &&
+    prev.openSidebar === next.openSidebar &&
     (!next.activeNode || prev.ableToPropose === next.ableToPropose);
   if (
     !basicChanges ||
