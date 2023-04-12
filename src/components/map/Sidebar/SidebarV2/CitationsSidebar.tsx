@@ -81,12 +81,15 @@ export const CitationsSidebar = ({
       width={sidebarWidth}
       height={innerWidth > 599 ? 100 : 35}
       innerHeight={innerHeight}
+      sx={{
+        boxShadow: "none",
+      }}
       // anchor="right"
       contentSignalState={citationList}
       SidebarContent={
         <Box
           component={"ul"}
-          sx={{ px: "10px", display: "flex", flexDirection: "column", gap: "4px", marginTop: "30px" }}
+          sx={{ px: "16px", display: "flex", flexDirection: "column", gap: "4px", marginTop: "30px" }}
         >
           {citationList.map(cur => (
             <Paper
@@ -104,10 +107,12 @@ export const CitationsSidebar = ({
                   theme.palette.mode === "light"
                     ? "0px 1px 2px rgba(0, 0, 0, 0.06), 0px 1px 3px rgba(0, 0, 0, 0.1)"
                     : "none",
-                background: theme => (theme.palette.mode === "dark" ? "#242425" : "#F2F4F7"),
-                marginBottom: "5px",
+                background: theme =>
+                  theme.palette.mode === "dark" ? theme.palette.common.notebookG700 : theme.palette.common.gray100,
+                cursor: "pointer",
                 ":hover": {
-                  background: theme => (theme.palette.mode === "dark" ? "#2F2F2F" : "#EAECF0"),
+                  background: theme =>
+                    theme.palette.mode === "dark" ? theme.palette.common.notebookG600 : theme.palette.common.gray200,
                 },
               }}
             >
@@ -145,7 +150,10 @@ export const CitationsSidebar = ({
                         width: "28px",
                         height: "28px",
                         borderRadius: "50%",
-                        background: theme => (theme.palette.mode === "dark" ? "#404040" : "#EAECF0"),
+                        background: theme =>
+                          theme.palette.mode === "dark"
+                            ? theme.palette.common.notebookG500
+                            : theme.palette.common.gray200,
                         display: "flex",
                         justifyContent: "center",
                         alignItems: "center",
@@ -157,20 +165,26 @@ export const CitationsSidebar = ({
                       sx={{
                         fontSize: "12px",
                         marginLeft: "5px",
-                        color: theme => (theme.palette.mode === "dark" ? "#A4A4A4" : "#667085"),
+                        color: theme =>
+                          theme.palette.mode === "dark"
+                            ? theme.palette.common.notebookG200
+                            : theme.palette.common.gray500,
                       }}
                     >
                       {dayjs(new Date(cur.changedAt)).fromNow()}
                     </Box>
                   </Box>
                   <Box
-                    id={`${identifier}-node-footer-votes`}
                     className="tab-double-button-node-footer"
                     sx={{
-                      background: (theme: any) => (theme.palette.mode === "dark" ? "#404040" : "#EAECF0"),
+                      background: (theme: any) =>
+                        theme.palette.mode === "dark"
+                          ? theme.palette.common.notebookG500
+                          : theme.palette.common.gray200,
                       display: "flex",
                       alignItems: "center",
                       marginRight: "0px",
+                      cursor: "auto",
                     }}
                   >
                     <Box

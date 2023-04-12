@@ -3,8 +3,6 @@ import { collection, getFirestore, onSnapshot, query, where } from "firebase/fir
 import React, { useEffect, useMemo, useState } from "react";
 import { UserTheme } from "src/knowledgeTypes";
 
-import bookmarksDarkTheme from "../../../../../public/bookmarks-dark-mode.jpg";
-import bookmarksLightTheme from "../../../../../public/bookmarks-light-theme.jpg";
 import { buildFullNodes, getNodes } from "../../../../lib/utils/nodesSyncronization.utils";
 import { FullNodeData, FullNodesData, UserNodeChanges, UserNodesData } from "../../../../nodeBookTypes";
 import { BookmarksList } from "../BookmarksList";
@@ -36,6 +34,7 @@ export const BookmarksSidebar = ({
   const db = getFirestore();
   const [bookmarks, setBookmarks] = useState<FullNodesData>({});
   const [value, setValue] = React.useState(0);
+  const [type, setType] = useState<string>("all");
   const handleChange = (event: React.SyntheticEvent, newValue: number) => {
     setValue(newValue);
   };
@@ -100,27 +99,30 @@ export const BookmarksSidebar = ({
 
   const contentSignalState = useMemo(() => {
     return { updates: true };
-  }, [bookmarkedUserNodes, value]);
+  }, [bookmarkedUserNodes, value, type]);
 
   return (
     <SidebarWrapper
       title="Bookmarks"
-      headerImage={theme === "Dark" ? bookmarksDarkTheme : bookmarksLightTheme}
       open={open}
       onClose={onClose}
       width={sidebarWidth}
       height={innerWidth > 599 ? 100 : 35}
       innerHeight={innerHeight}
+      sx={{
+        boxShadow: "none",
+      }}
       // anchor="right"
       SidebarOptions={
         <Box
           sx={{
+            marginTop: "20px",
             borderBottom: 1,
             borderColor: theme => (theme.palette.mode === "dark" ? "black" : "divider"),
             width: "100%",
           }}
         >
-          <Tabs value={value} onChange={handleChange} aria-label={"Bookmarks Tabs"}>
+          <Tabs value={value} onChange={handleChange} aria-label={"Bookmarks Tabs"} variant="fullWidth">
             {[{ title: "Updated" }, { title: "Studied" }].map((tabItem: any, idx: number) => (
               <Tab
                 key={tabItem.title}
@@ -134,21 +136,35 @@ export const BookmarksSidebar = ({
       }
       contentSignalState={contentSignalState}
       SidebarContent={
-        <Box sx={{ p: "2px 4px" }}>
+        <Box sx={{ p: "2px 16px" }}>
           {value === 0 && (
             <BookmarksList
+              theme={theme}
               openLinkedNode={openLinkedNode}
               updates={true}
-              bookmarks={bookmarkedUserNodes}
+              bookmarks={
+                type === "all"
+                  ? bookmarkedUserNodes
+                  : bookmarkedUserNodes.filter(bookmark => bookmark.nodeType === type)
+              }
               bookmark={bookmark}
+              type={type}
+              setType={setType}
             />
           )}
           {value === 1 && (
             <BookmarksList
+              theme={theme}
               openLinkedNode={openLinkedNode}
               updates={false}
-              bookmarks={bookmarkedUserNodes}
+              bookmarks={
+                type === "all"
+                  ? bookmarkedUserNodes
+                  : bookmarkedUserNodes.filter(bookmark => bookmark.nodeType === type)
+              }
               bookmark={bookmark}
+              type={type}
+              setType={setType}
             />
           )}
         </Box>
