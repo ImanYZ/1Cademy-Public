@@ -413,7 +413,7 @@ const Dashboard = ({}: DashboardProps) => {
     const parents = edgeObjects.reduce((acu: { [key: string]: string[] }, cur) => {
       return { ...acu, [cur.parent]: acu[cur.parent] ? [...acu[cur.parent], cur.child] : [cur.child] };
     }, {});
-    console.log({ pathway });
+
     const pathways = edgeObjects.reduce(
       (acu: { node: string; parent: string; child: string }, cur) => {
         if (acu.node) return acu;
@@ -775,8 +775,6 @@ const Dashboard = ({}: DashboardProps) => {
 
   const setNodeParts = useCallback((nodeId: string, innerFunc: (thisNode: FullNodeData) => FullNodeData) => {
     setGraph(({ nodes: oldNodes, edges }) => {
-      console.log("setNodeParts", { nodeId, oldNodes, innerFunc });
-      console.trace();
       setSelectedNodeType(oldNodes[nodeId].nodeType);
       const thisNode = { ...oldNodes[nodeId] };
       const newNode = { ...oldNodes, [nodeId]: innerFunc(thisNode) };
@@ -1074,17 +1072,13 @@ const Dashboard = ({}: DashboardProps) => {
     const notebooksRef = collection(db, "notebooks");
     const q = query(notebooksRef, where("owner", "==", user.uname));
 
-    console.log(11);
     const killSnapshot = onSnapshot(q, snapshot => {
-      console.log("NOTEBOOKS fired", 22);
       const docChanges = snapshot.docChanges();
 
       const newNotebooks = docChanges.map(change => {
         const userNodeData = change.doc.data() as Notebook;
         return { type: change.type, id: change.doc.id, data: userNodeData };
       });
-
-      console.log("NOTEBOOKS", { newNotebooks });
 
       setNotebooks(prevNotebooks => {
         const notesBooksMerged = newNotebooks.reduce((acu: Notebook[], cur) => {
@@ -1097,7 +1091,6 @@ const Dashboard = ({}: DashboardProps) => {
     });
 
     return () => {
-      console.log("kill NOTEBOOKS snapshot");
       killSnapshot();
     };
   }, [allTagsLoaded, db, user?.uname, userTutorialLoaded]);
@@ -2365,8 +2358,6 @@ const Dashboard = ({}: DashboardProps) => {
 
       devLog("OPEN_NODES_ON_NOTEBOOK", { notebookId, nodeIds, isWritingOnDB: isWritingOnDBRef.current });
 
-      // let linkedNodeId = null;
-      // let linkedNodeRef = null;
       let userNodeRef = null;
       let userNodeData = null;
       const batchArray = [writeBatch(db)];
@@ -2391,9 +2382,6 @@ const Dashboard = ({}: DashboardProps) => {
         return { operationCounter, batchIndex };
       };
 
-      // let batch = writeBatch(db);
-      // let writeCounts = 0;
-
       await Promise.all(
         nodeIds.map(async nodeId => {
           const nodeRef = doc(db, "nodes", nodeId);
@@ -2406,14 +2394,12 @@ const Dashboard = ({}: DashboardProps) => {
             const childNodeRef = doc(db, "nodes", chi.node);
             batchArray[batchFlags.batchIndex].update(childNodeRef, { updatedAt: Timestamp.fromDate(new Date()) });
             batchFlags = updateBatchIndexes(batchFlags);
-            // [batch, writeCounts] = await checkRestartBatchWriteCounts(batch, writeCounts);
           }
 
           for (let par of thisNode.parents) {
             const parentNodeRef = doc(db, "nodes", par.node);
             batchArray[batchFlags.batchIndex].update(parentNodeRef, { updatedAt: Timestamp.fromDate(new Date()) });
             batchFlags = updateBatchIndexes(batchFlags);
-            // [batch, writeCounts] = await checkRestartBatchWriteCounts(batch, writeCounts);
           }
 
           const userNodesRef = collection(db, "userNodes");
@@ -2426,22 +2412,18 @@ const Dashboard = ({}: DashboardProps) => {
           const userNodeDoc = await getDocs(userNodeQuery);
 
           if (userNodeDoc.docs.length > 0) {
-            console.log("update", nodeId);
             // if exist documents update the first
             userNodeRef = doc(db, "userNodes", userNodeDoc.docs[0].id);
             userNodeData = userNodeDoc.docs[0].data();
-            // userNodeData.visible = true;
             userNodeData.notebooks = [...(userNodeData.notebooks ?? []), notebookId];
             userNodeData.expands = [...(userNodeData.expands ?? []), true];
             userNodeData.updatedAt = Timestamp.fromDate(new Date());
             batchArray[batchFlags.batchIndex].update(userNodeRef, userNodeData);
             batchFlags = updateBatchIndexes(batchFlags);
-            // [batch, writeCounts] = await checkRestartBatchWriteCounts(batch, writeCounts);
             delete userNodeData?.visible;
             delete userNodeData?.open;
           } else {
             // if NOT exist documents create a document
-            console.log("create", nodeId);
             userNodeData = {
               changed: true,
               correct: false,
@@ -2451,9 +2433,7 @@ const Dashboard = ({}: DashboardProps) => {
               isStudied: false,
               bookmarked: false,
               node: nodeId,
-              // open: true,
               user: user.uname,
-              // visible: true,
               wrong: false,
               notebooks: [notebookId],
               expands: [true],
@@ -2466,7 +2446,6 @@ const Dashboard = ({}: DashboardProps) => {
             updatedAt: Timestamp.fromDate(new Date()),
           });
           batchFlags = updateBatchIndexes(batchFlags);
-          // [batch, writeCounts] = await checkRestartBatchWriteCounts(batch, writeCounts);
           const userNodeLogRef = collection(db, "userNodesLog");
           const userNodeLogData = {
             ...userNodeData,
@@ -2475,16 +2454,9 @@ const Dashboard = ({}: DashboardProps) => {
 
           batchArray[batchFlags.batchIndex].set(doc(userNodeLogRef), userNodeLogData);
           batchFlags = updateBatchIndexes(batchFlags);
-          // [batch, writeCounts] = await checkRestartBatchWriteCounts(batch, writeCounts);
         })
       );
-      // notebookRef.current.selectedNode = nodeId;
-      // nodeBookDispatch({ type: "setSelectedNode", payload: nodeId });
-      // console.log("commit", operationCounter);
       await Promise.all(batchArray.map(async batch => await batch.commit()));
-      // batchArray.forEach(async batch => await batch.commit());
-      // await commitBatch(batch);
-      // await batch.commit();
       setSelectedNotebookId(notebookId);
       await detectElements({ ids: nodeIds });
       isWritingOnDBRef.current = false;
