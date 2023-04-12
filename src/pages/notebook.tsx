@@ -6003,39 +6003,23 @@ const Dashboard = ({}: DashboardProps) => {
   // ------------------------ useEffects
 
   useEffect(() => {
-    // const duplicateNotebook = async ({ user, nb }: { user: User; nb: string }) => {
-
-    // };
-
     const duplicateNotebookFromParams = async () => {
       const nb = router.query.nb as string;
       if (!nb) return;
       if (!user) return;
-      // if (!userNodesLoaded) return;
 
-      // const notebooksRef = collection(db, "notebooks");
       const userNotebooks: Notebook[] = [];
       const q = query(collection(db, "notebooks"), where("owner", "==", user.uname));
       const queryDocs = await getDocs(q);
       queryDocs.forEach(c => userNotebooks.push({ id: c.id, ...(c.data() as NotebookDocument) }));
 
-      // if there is a notebook in params we need to create automatically
+      // validate if notebook was duplicated previously
       const notebookFromParams = userNotebooks.find(cur => cur.duplicatedFrom === nb);
-      console.log(
-        "11dddd",
-        userNotebooks.map(c => ({ id: c.id, df: c.duplicatedFrom })),
-        nb
-      );
       if (notebookFromParams) return setSelectedNotebookId(notebookFromParams.id);
 
-      // duplicateNotebook({ user, nb });
-
-      console.log("22dddd", nb);
       const notebookRef = doc(db, "notebooks", nb);
       const notebookDoc = await getDoc(notebookRef);
-      console.log({ exists: notebookDoc.exists() });
       if (notebookDoc.exists()) {
-        console.log("2.1dddd");
         const notebookData = { id: nb, ...(notebookDoc.data() as NotebookDocument) };
         const sameDuplications = userNotebooks.filter(cur => cur.duplicatedFrom === notebookData.id);
         const copyNotebook: NotebookDocument = {
@@ -6050,11 +6034,8 @@ const Dashboard = ({}: DashboardProps) => {
           roles: {},
         };
 
-        console.log("2.2dddd");
         const notebooksRef = collection(db, "notebooks");
         const docRef = await addDoc(notebooksRef, copyNotebook);
-        console.log("2.3dddd", docRef.id);
-        // setEditableNotebook({ ...copyNotebook, id: docRef.id });
         onChangeNotebook(docRef.id);
         const q = query(
           collection(db, "userNodes"),
@@ -6065,16 +6046,14 @@ const Dashboard = ({}: DashboardProps) => {
         const userNodesDocs = await getDocs(q);
         const nodeIds: string[] = [];
         userNodesDocs.forEach(doc => nodeIds.push(doc.data().node));
-        // console.log({ nodeIds });
         await openNodesOnNotebook(docRef.id, nodeIds);
-        console.log("33dddd");
       } else {
         console.warn(`Notebook with id: ${nb} from params doesn't exist`);
       }
     };
 
     duplicateNotebookFromParams();
-  }, [db, notebooks, onChangeNotebook, openNodesOnNotebook, router.query.nb, user]);
+  }, [db, onChangeNotebook, openNodesOnNotebook, router.query.nb, user]);
 
   return (
     <div className="MapContainer" style={{ overflow: "hidden" }}>
