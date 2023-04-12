@@ -124,7 +124,6 @@ type NodeFooterProps = {
   institutions: any;
   openUserInfoSidebar: (uname: string, imageUrl: string, fullName: string, chooseUname: string) => void;
   proposeNodeImprovement: any;
-  setOperation: any;
   disabled?: boolean;
   enableChildElements?: string[];
   showProposeTutorial?: boolean;
@@ -190,7 +189,6 @@ const NodeFooter = ({
   institutions,
   openUserInfoSidebar,
   proposeNodeImprovement,
-  setOperation,
   disabled,
   enableChildElements = [],
   setAbleToPropose,
@@ -430,14 +428,12 @@ const NodeFooter = ({
   const proposeNodeImprovementClick = useCallback(
     (event: any) => {
       selectPendingProposals(event);
-      setOperation("CancelProposals");
       notebookRef.current.selectedNode = identifier;
       nodeBookDispatch({ type: "setSelectedNode", payload: identifier });
       proposeNodeImprovement(event, identifier);
     },
-    [identifier, nodeBookDispatch, proposeNodeImprovement, selectPendingProposals, setOperation]
+    [identifier, nodeBookDispatch, notebookRef, proposeNodeImprovement, selectPendingProposals]
   );
-
   return (
     <>
       <Box
@@ -605,7 +601,7 @@ const NodeFooter = ({
                     <Tooltip title={"Vote to prevent further changes."} placement={"top"}>
                       <span>
                         <Button
-                          onClick={wrongNode}
+                          onClick={correctNode}
                           disabled={disableVotes || disableDownvoteButton}
                           sx={{
                             padding: "0",
@@ -662,7 +658,7 @@ const NodeFooter = ({
                     <Tooltip title={"Vote to delete node."} placement={"top"}>
                       <span>
                         <Button
-                          onClick={correctNode}
+                          onClick={wrongNode}
                           disabled={disableVotes || disableUpvoteButton}
                           sx={{
                             padding: "0",
@@ -840,9 +836,13 @@ const NodeFooter = ({
                         background: (theme: any) => (theme.palette.mode === "dark" ? "#404040" : "#EAECF0"),
                         color:
                           openSidebar === "CITATIONS" && notebookRef.current.selectedNode === identifier
-                            ? theme => theme.palette.common.orange
+                            ? theme => theme.palette.common.primary600
                             : "inherit",
                         fontWeight: 400,
+                        border:
+                          openSidebar === "CITATIONS" && notebookRef.current.selectedNode === identifier
+                            ? `solid 1px ${theme.palette.common.primary600}`
+                            : undefined,
                         ":hover": {
                           borderWidth: "0px",
                           background: (theme: any) =>
@@ -857,7 +857,13 @@ const NodeFooter = ({
                         <ArrowForwardIcon sx={{ fontSize: "16px" }} />
                         <NextImage
                           width={"22px"}
-                          src={theme.palette.mode === "dark" ? ReferenceLightIcon : ReferenceDarkIcon}
+                          src={
+                            openSidebar === "CITATIONS" && notebookRef.current.selectedNode === identifier
+                              ? ReferenceIcon
+                              : theme.palette.mode === "dark"
+                              ? ReferenceLightIcon
+                              : ReferenceDarkIcon
+                          }
                           alt="tag icon"
                         />
                       </Box>
