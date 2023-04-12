@@ -273,7 +273,6 @@ const Node = ({
   proposeNodeImprovement,
   proposeNewChild,
   cleanEditorLink,
-  scrollToNode,
   openSidebar,
   locked,
   setOperation,
@@ -422,8 +421,10 @@ NodeProps) => {
 
   const nodeClickHandler = useCallback(
     (event: any) => {
+      let operation = "selectNode";
       if (notebookRef.current.choosingNode && notebookRef.current.choosingNode.id !== identifier) {
         // The first Nodes exist, Now is clicking the Chosen Node
+
         notebookRef.current.chosenNode = {
           id: identifier,
           title,
@@ -431,7 +432,8 @@ NodeProps) => {
         nodeBookDispatch({ type: "setChosenNode", payload: { id: identifier, title } });
         chosenNodeChanged(notebookRef.current.choosingNode.id);
         setAbleToPropose(true);
-        scrollToNode(notebookRef.current.selectedNode);
+        // scrollToNode(notebookRef.current.selectedNode);
+        operation = "chooseNode";
       } else if (
         "activeElement" in event.currentTarget &&
         "nodeName" in event.currentTarget.activeElement &&
@@ -441,7 +443,11 @@ NodeProps) => {
         nodeClicked(event, identifier, nodeType, setOpenPart);
       }
 
-      if (!notebookRef.current.choosingNode && notebookRef.current.selectedNode !== identifier) {
+      if (
+        !notebookRef.current.choosingNode &&
+        notebookRef.current.selectedNode !== identifier &&
+        operation === "selectNode"
+      ) {
         const updatedNodeIds: string[] = [notebookRef.current.selectedNode!, identifier];
         notebookRef.current.selectedNode = identifier;
         nodeBookDispatch({ type: "setSelectedNode", payload: identifier });
@@ -1214,7 +1220,6 @@ NodeProps) => {
               institutions={institutions}
               openUserInfoSidebar={openUserInfoSidebar}
               proposeNodeImprovement={proposeNodeImprovementHandler}
-              setOperation={setOperation}
               disabled={disabled}
               enableChildElements={enableChildElements}
               setAbleToPropose={setAbleToPropose}
@@ -1390,7 +1395,6 @@ NodeProps) => {
               institutions={institutions}
               openUserInfoSidebar={openUserInfoSidebar}
               proposeNodeImprovement={proposeNodeImprovement}
-              setOperation={setOperation}
               disabled={disabled}
               setAbleToPropose={setAbleToPropose}
             />
@@ -1469,9 +1473,7 @@ export const MemoizedNode = React.memo(Node, (prev, next) => {
     prev.unaccepted === next.unaccepted &&
     prev.disableVotes === next.disableVotes &&
     prev.openPart === next.openPart &&
-    // prev.notebooks === next.notebooks &&
-    // prev.expands === next.expands &&
-    // prev.selectedNotebookId === next.selectedNotebookId &&
+    prev.openSidebar === next.openSidebar &&
     (!next.activeNode || prev.ableToPropose === next.ableToPropose);
   if (
     !basicChanges ||
