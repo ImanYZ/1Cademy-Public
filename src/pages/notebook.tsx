@@ -2898,6 +2898,7 @@ const Dashboard = ({}: DashboardProps) => {
       if (chosenType === "Citations") {
         if (openSidebar === "CITATIONS") {
           setOpenSidebar(null);
+          notebookRef.current.selectionType = null;
           return;
         }
         setOpenSidebar("CITATIONS");
