@@ -74,6 +74,7 @@ const NodePage: NextPage<Props> = ({ notebook }) => {
   console.log({ notebook });
   const db = getFirestore();
   const router = useRouter();
+  const auth = getAuth();
   // flag for when scrollToNode is called
   const scrollToNodeInitialized = useRef(false);
 
@@ -511,17 +512,12 @@ const NodePage: NextPage<Props> = ({ notebook }) => {
   //   ------------------------------ useEffect
 
   useEffect(() => {
-    const auth = getAuth();
     const userAuthObj = auth?.currentUser;
-    console.log({ userAuthObj });
-    // if (userAuthObj !== null && node?.title && node?.id) {
-    //   router.push({
-    //     pathname: ROUTES.notebook,
-    //     query: { nodeId: node?.id },
-    //   });
-    //   return;
-    // }
-  }, []);
+    if (userAuthObj) {
+      router.push(`${ROUTES.notebook}?nb=${notebook.id}`);
+    }
+    console.log({ userAuthObj, query: router.query });
+  }, [auth?.currentUser, notebook.id, router]);
 
   useEffect(() => {
     if (!db) return;

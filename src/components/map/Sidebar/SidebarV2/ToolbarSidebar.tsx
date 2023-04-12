@@ -54,6 +54,7 @@ import TagIcon from "../../../../../public/tag.svg";
 import { useHover } from "../../../../hooks/userHover";
 import { useWindowSize } from "../../../../hooks/useWindowSize";
 import { DispatchAuthActions, Reputation, ReputationSignal, User, UserTheme } from "../../../../knowledgeTypes";
+import { NO_USER_IMAGE } from "../../../../lib/utils/constants";
 import { UsersStatus, UserTutorials } from "../../../../nodeBookTypes";
 import { OpenSidebar } from "../../../../pages/notebook";
 import { Notebook, NotebookDocument } from "../../../../types";
@@ -67,7 +68,6 @@ import UsersStatusList from "../UsersStatusList";
 import { SidebarWrapper } from "./SidebarWrapper";
 
 const lBTypes = ["Weekly", "Monthly", "All Time", "Others Votes", "Others Monthly"];
-const NO_USER_IMAGE = "https://storage.googleapis.com/onecademy-1.appspot.com/ProfilePictures/no-img.png";
 
 type MainSidebarProps = {
   notebookRef: any;
@@ -330,8 +330,8 @@ MainSidebarProps) => {
         title: `${editableNotebook.title} (${sameDuplications.length + 2})`,
         duplicatedFrom: editableNotebook.id,
         isPublic: editableNotebook.isPublic,
-        users: editableNotebook.users,
-        roles: editableNotebook.roles,
+        users: [],
+        roles: {},
       };
       const notebooksRef = collection(db, "notebooks");
       const docRef = await addDoc(notebooksRef, copyNotebook);

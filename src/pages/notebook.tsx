@@ -40,6 +40,7 @@ import {
 import { getDownloadURL, getStorage, ref, uploadBytesResumable } from "firebase/storage";
 import Image from "next/image";
 import NextImage from "next/image";
+import { useRouter } from "next/router";
 import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
 /* eslint-disable */ //This wrapper comments it to use react-map-interaction without types
 // @ts-ignore
@@ -100,6 +101,7 @@ import { useWorkerQueue } from "../hooks/useWorkerQueue";
 import { NodeChanges, ReputationSignal } from "../knowledgeTypes";
 import { idToken, retrieveAuthenticatedUser } from "../lib/firestoreClient/auth";
 import { Post, postWithToken } from "../lib/mapApi";
+import { NO_USER_IMAGE } from "../lib/utils/constants";
 import { createGraph, dagreUtils } from "../lib/utils/dagre.util";
 import { devLog } from "../lib/utils/develop.util";
 import { getTypedCollections } from "../lib/utils/getTypedCollections";
@@ -152,7 +154,7 @@ import {
   UserTutorial,
   UserTutorials,
 } from "../nodeBookTypes";
-import { NodeType, Notebook, SimpleNode2 } from "../types";
+import { NodeType, Notebook, NotebookDocument, SimpleNode2 } from "../types";
 import { doNeedToDeleteNode, getNodeTypesFromNode, isVersionApproved } from "../utils/helpers";
 
 // export type TutorialKeys = TutorialTypeKeys | null;
@@ -207,6 +209,7 @@ const Dashboard = ({}: DashboardProps) => {
   const { allTags, allTagsLoaded } = useTagsTreeView();
   const db = getFirestore();
   const theme = useTheme();
+  const router = useRouter();
 
   // ---------------------------------------------------------------------
   // ---------------------------------------------------------------------
@@ -613,7 +616,7 @@ const Dashboard = ({}: DashboardProps) => {
   // const [userTutorialLoaded, setUserTutorialLoaded] = useState(false);
 
   // flag for whether users' nodes data is downloaded from server
-  const [, /* userNodesLoaded */ setUserNodesLoaded] = useState(false);
+  // const [userNodesLoaded, setUserNodesLoaded] = useState(false);
 
   // flag set to true when sending request to server
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -1043,16 +1046,16 @@ const Dashboard = ({}: DashboardProps) => {
             if (!Object.keys(newNodes).length) {
               setNoNodesFoundMessage(true);
             }
+            // setUserNodesLoaded(true);
             return { nodes: newNodes, edges: newEdges };
           });
-          devLog("user Nodes Snapshot", {
-            userNodeChanges,
-            nodeIds,
-            nodesData,
-            fullNodes,
-            // visibleFullNodes,
-          });
-          setUserNodesLoaded(true);
+          // devLog("USER_NODES_SUMMARY", {
+          //   userNodeChanges,
+          //   nodeIds,
+          //   nodesData,
+          //   fullNodes,
+          //   // visibleFullNodes,
+          // });
         },
         error => console.error(error)
       );
@@ -1119,7 +1122,6 @@ const Dashboard = ({}: DashboardProps) => {
     // first time we set as default the first notebook
     const firstNotebook = notebooks[0].id;
     setSelectedNotebookId(firstNotebook);
-    // selectedPreviousNotebookIdRef.current = firstNotebook;
   }, [notebooks, selectedNotebookId]);
 
   useEffect(() => {
@@ -5997,6 +5999,82 @@ const Dashboard = ({}: DashboardProps) => {
   const onChangeNotebook = useCallback((notebookId: string) => {
     setSelectedNotebookId(notebookId);
   }, []);
+
+  // ------------------------ useEffects
+
+  useEffect(() => {
+    // const duplicateNotebook = async ({ user, nb }: { user: User; nb: string }) => {
+
+    // };
+
+    const duplicateNotebookFromParams = async () => {
+      const nb = router.query.nb as string;
+      if (!nb) return;
+      if (!user) return;
+      // if (!userNodesLoaded) return;
+
+      // const notebooksRef = collection(db, "notebooks");
+      const userNotebooks: Notebook[] = [];
+      const q = query(collection(db, "notebooks"), where("owner", "==", user.uname));
+      const queryDocs = await getDocs(q);
+      queryDocs.forEach(c => userNotebooks.push({ id: c.id, ...(c.data() as NotebookDocument) }));
+
+      // if there is a notebook in params we need to create automatically
+      const notebookFromParams = userNotebooks.find(cur => cur.duplicatedFrom === nb);
+      console.log(
+        "11dddd",
+        userNotebooks.map(c => ({ id: c.id, df: c.duplicatedFrom })),
+        nb
+      );
+      if (notebookFromParams) return setSelectedNotebookId(notebookFromParams.id);
+
+      // duplicateNotebook({ user, nb });
+
+      console.log("22dddd", nb);
+      const notebookRef = doc(db, "notebooks", nb);
+      const notebookDoc = await getDoc(notebookRef);
+      console.log({ exists: notebookDoc.exists() });
+      if (notebookDoc.exists()) {
+        console.log("2.1dddd");
+        const notebookData = { id: nb, ...(notebookDoc.data() as NotebookDocument) };
+        const sameDuplications = userNotebooks.filter(cur => cur.duplicatedFrom === notebookData.id);
+        const copyNotebook: NotebookDocument = {
+          owner: user.uname,
+          ownerImgUrl: user.imageUrl ?? NO_USER_IMAGE,
+          ownerChooseUname: Boolean(user.chooseUname),
+          ownerFullName: user.fName ?? "",
+          title: `${notebookData.title} (${sameDuplications.length + 2})`,
+          duplicatedFrom: notebookData.id,
+          isPublic: notebookData.isPublic,
+          users: [],
+          roles: {},
+        };
+
+        console.log("2.2dddd");
+        const notebooksRef = collection(db, "notebooks");
+        const docRef = await addDoc(notebooksRef, copyNotebook);
+        console.log("2.3dddd", docRef.id);
+        // setEditableNotebook({ ...copyNotebook, id: docRef.id });
+        onChangeNotebook(docRef.id);
+        const q = query(
+          collection(db, "userNodes"),
+          where("user", "==", notebookData.owner),
+          where("notebooks", "array-contains", notebookData.id),
+          where("deleted", "==", false)
+        );
+        const userNodesDocs = await getDocs(q);
+        const nodeIds: string[] = [];
+        userNodesDocs.forEach(doc => nodeIds.push(doc.data().node));
+        // console.log({ nodeIds });
+        await openNodesOnNotebook(docRef.id, nodeIds);
+        console.log("33dddd");
+      } else {
+        console.warn(`Notebook with id: ${nb} from params doesn't exist`);
+      }
+    };
+
+    duplicateNotebookFromParams();
+  }, [db, notebooks, onChangeNotebook, openNodesOnNotebook, router.query.nb, user]);
 
   return (
     <div className="MapContainer" style={{ overflow: "hidden" }}>
