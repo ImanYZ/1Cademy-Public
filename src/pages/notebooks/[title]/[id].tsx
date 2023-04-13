@@ -18,6 +18,7 @@ import NodeItemFullSkeleton from "@/components/NodeItemFullSkeleton";
 import { MemoizedBasicNode } from "../../../components/map/BasicNode";
 import { MemoizedLinksList } from "../../../components/map/LinksList";
 import { NotebookPopup } from "../../../components/map/Popup";
+import { MemoizedUserInfoSidebar } from "../../../components/map/Sidebar/SidebarV2/UserInfoSidebar";
 import { useWorkerQueue } from "../../../hooks/useWorkerQueue";
 import { getNotebookById } from "../../../lib/firestoreServer/notebooks";
 import { brandingLightTheme } from "../../../lib/theme/brandingTheme";
@@ -26,7 +27,7 @@ import { devLog } from "../../../lib/utils/develop.util";
 import { COLUMN_GAP, copyNode, NODE_WIDTH } from "../../../lib/utils/Map.utils";
 import { buildFullNodes, fillDagre, getNodes, getUserNodeChanges } from "../../../lib/utils/nodesSyncronization.utils";
 import ROUTES from "../../../lib/utils/routes";
-import { FullNodeData, FullNodesData, OpenPart, TNodeUpdates } from "../../../nodeBookTypes";
+import { FullNodeData, FullNodesData, OpenPart, SelectedUser, TNodeUpdates } from "../../../nodeBookTypes";
 import { Notebook } from "../../../types";
 import { Graph } from "../../notebook";
 
@@ -123,6 +124,9 @@ const NodePage: NextPage<Props> = ({ notebook }) => {
     setClusterNodes,
     withClusters: false,
   });
+
+  const [openSidebar, setOpenSidebar] = useState<"USER_INFO" | null>(null);
+  const [selectedUser, setSelectedUser] = useState<SelectedUser | null>(null);
 
   //   ------------------------------ functions
 
@@ -275,29 +279,6 @@ const NodePage: NextPage<Props> = ({ notebook }) => {
     },
     [addTask]
   );
-
-  // const onNodeShare = useCallback(
-  //   (nodeId: string, platform: string) => {
-  //     gtmEvent("Interaction", {
-  //       customType: "NodeShare",
-  //     });
-
-  //     createActionTrack(
-  //       db,
-  //       "NodeShare",
-  //       platform,
-  //       {
-  //         fullname: `${user?.fName} ${user?.lName}`,
-  //         chooseUname: !!user?.chooseUname,
-  //         uname: String(user?.uname),
-  //         imageUrl: String(user?.imageUrl),
-  //       },
-  //       nodeId,
-  //       []
-  //     );
-  //   },
-  //   [user]
-  // );
 
   const getColumnRows = useCallback((nodes: FullNodesData, column: number) => {
     let rows: string[] = [];
@@ -509,6 +490,11 @@ const NodePage: NextPage<Props> = ({ notebook }) => {
     [notebook.id, setNodeParts]
   );
 
+  const onOpenUserInfoSidebar = (user: SelectedUser) => {
+    setOpenSidebar("USER_INFO");
+    setSelectedUser(user);
+  };
+
   //   ------------------------------ memos
 
   const nodeList = useMemo(() => {
@@ -532,7 +518,13 @@ const NodePage: NextPage<Props> = ({ notebook }) => {
           title={cur.title}
           top={cur.top}
           width={NODE_WIDTH}
-          aImgUrl={cur.aImgUrl ?? ""}
+          // aImgUrl={cur. .aImgUrl ?? ""}
+          admin={{
+            username: cur.admin,
+            imageUrl: cur.aImgUrl ?? "",
+            fullName: cur.aFullname,
+            chooseUname: cur.aChooseUname,
+          }}
           bookmarked={cur.bookmarked}
           bookmarks={cur.bookmarks}
           changedAt={cur.changedAt as string}
@@ -560,6 +552,7 @@ const NodePage: NextPage<Props> = ({ notebook }) => {
           viewers={cur.viewers}
           wrongNum={cur.wrongs}
           toggleNode={toggleNode}
+          openUserInfoSidebar={onOpenUserInfoSidebar}
         />
       ));
   }, [changeNodeHight, graph.nodes, onChangeNodePart, openNodePart, selectNode, toggleNode]);
@@ -655,6 +648,14 @@ const NodePage: NextPage<Props> = ({ notebook }) => {
               : theme.palette.common.lightGrayBackground,
         }}
       >
+        <MemoizedUserInfoSidebar
+          theme={"Dark"}
+          openLinkedNode={() => {}}
+          open={openSidebar === "USER_INFO"}
+          onClose={() => setOpenSidebar(null)}
+          selectedUser={selectedUser}
+        />
+
         {Object.keys(graph.nodes).length === 0 && (
           <NotebookPopup showIcon={false}>This notebook has no nodes</NotebookPopup>
         )}

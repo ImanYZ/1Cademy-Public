@@ -11,7 +11,7 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from "react"
 // import { useAuth } from "../../context/AuthContext";
 import { KnowledgeChoice } from "../../knowledgeTypes";
 import { getVideoDataByUrl } from "../../lib/utils/utils";
-import { OpenPart } from "../../nodeBookTypes";
+import { OpenPart, SelectedUser } from "../../nodeBookTypes";
 import MarkdownRender from "../Markdown/MarkdownRender";
 import { MemoizedBasicNodeFooter } from "./BasicNodeFooter";
 import { MemoizedBasicQuestionChoices } from "./BasicQuestionChoices";
@@ -41,7 +41,8 @@ type BasicNodeProps = {
   changedAt: string;
   // correctNode: any;
   correctNum: any;
-  aImgUrl: string;
+  // aImgUrl: string;
+  admin: SelectedUser;
   // notebookRef: MutableRefObject<TNodeBookState>;
   openPart: OpenPart;
   viewers: number;
@@ -63,6 +64,7 @@ type BasicNodeProps = {
   // isStudied: boolean;
   // markStudied: any;
   // wrongNode: any;
+  openUserInfoSidebar: (user: SelectedUser) => void;
 };
 
 const BasicNode = ({
@@ -87,7 +89,8 @@ const BasicNode = ({
   changedAt,
   // correctNode,
   correctNum,
-  aImgUrl,
+  // aImgUrl,
+  admin,
   // notebookRef,
   openPart,
   viewers,
@@ -108,6 +111,7 @@ const BasicNode = ({
   // onNodeShare,
   selectNode,
   toggleNode,
+  openUserInfoSidebar,
 }: // wrongNode,
 // disabled = false,
 // enableChildElements = [],
@@ -352,7 +356,8 @@ BasicNodeProps) => {
       )}
 
       <MemoizedBasicNodeFooter
-        aImgUrl={aImgUrl}
+        // aImgUrl={aImgUrl}
+        admin={admin}
         bookmarked={bookmarked}
         bookmarks={bookmarks}
         changedAt={changedAt}
@@ -375,6 +380,7 @@ BasicNodeProps) => {
         nodesChildren={nodesChildren}
         // onNodeShare={onNodeShare}
         openNodePart={openNodePartHandler}
+        openUserInfoSidebar={openUserInfoSidebar}
         selectNode={selectNodeHandler}
         locked={locked}
         disabled={true}

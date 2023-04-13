@@ -24,7 +24,7 @@ import { useRouter } from "next/router";
 import React, { ReactNode, useCallback, useEffect, useMemo, useState } from "react";
 
 import shortenNumber from "../../lib/utils/shortenNumber";
-import { OpenPart } from "../../nodeBookTypes";
+import { OpenPart, SelectedUser } from "../../nodeBookTypes";
 import NodeTypeIcon from "../NodeTypeIcon";
 import OptimizedAvatar from "../OptimizedAvatar";
 import { ContainedButton } from "./ContainedButton";
@@ -41,7 +41,7 @@ type BasicNodeFooterProps = {
   content: any;
   openPart: OpenPart;
   nodeType: any;
-  aImgUrl: any;
+  // aImgUrl: any;
   viewers: any;
   correctNum: any;
   // markedCorrect: any;
@@ -62,6 +62,8 @@ type BasicNodeFooterProps = {
   disabled?: boolean;
   enableChildElements?: string[];
   showProposeTutorial?: boolean;
+  openUserInfoSidebar: (user: SelectedUser) => void;
+  admin: SelectedUser;
 };
 
 const BasicNodeFooter = ({
@@ -72,7 +74,7 @@ const BasicNodeFooter = ({
   content,
   openPart,
   nodeType,
-  aImgUrl,
+  // aImgUrl,
   correctNum,
   // markedCorrect,
   wrongNum,
@@ -91,6 +93,8 @@ const BasicNodeFooter = ({
   locked,
   disabled,
   enableChildElements = [],
+  openUserInfoSidebar,
+  admin,
 }: // setAbleToPropose,
 BasicNodeFooterProps) => {
   const router = useRouter();
@@ -515,9 +519,9 @@ BasicNodeFooterProps) => {
       {/* left footer options */}
       <Stack direction={"row"} alignItems={"center"} spacing={"10px"}>
         {open && (
-          <Box id={userPictureId}>
+          <Box id={userPictureId} onClick={() => openUserInfoSidebar(admin)}>
             <OptimizedAvatar
-              imageUrl={aImgUrl}
+              imageUrl={admin.imageUrl}
               renderAsAvatar={true}
               contained={false}
               sx={{ border: "none", width: "38px", height: "38px", position: "static" }}

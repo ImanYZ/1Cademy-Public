@@ -6436,6 +6436,7 @@ const Dashboard = ({}: DashboardProps) => {
                 username={user.uname}
                 open={openSidebar === "USER_INFO"}
                 onClose={() => setOpenSidebar(null)}
+                selectedUser={nodeBookState.selectedUser}
               />
 
               <MemoizedProposalsSidebar
