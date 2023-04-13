@@ -1759,8 +1759,8 @@ const NodeFooter = ({
         </Box>
       </Box>
       {openSidebar === "USER_INFO" &&
-        notebookRef.current.contributorsNodeId.showContributors &&
-        notebookRef.current.contributorsNodeId.nodeId === identifier &&
+        notebookRef.current.contributorsNodeId?.showContributors &&
+        notebookRef.current.contributorsNodeId?.nodeId === identifier &&
         contributors &&
         Object.keys(contributors).length > 0 && (
           <>
