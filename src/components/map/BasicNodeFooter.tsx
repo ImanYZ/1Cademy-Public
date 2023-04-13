@@ -893,10 +893,10 @@ const ButtonWithDetails = ({ id, children, showDetails, disabled = false, onClic
         minWidth: "0px",
         width: "auto",
         backgroundColor: ({ palette }) =>
-          palette.mode === "dark" ? palette.common.notebookG500 : palette.common.notebookG200,
+          palette.mode === "dark" ? palette.common.notebookG800 : palette.common.notebookG200,
         ":hover": {
           backgroundColor: ({ palette }) =>
-            palette.mode === "dark" ? palette.common.notebookG400 : palette.common.lightBackground2,
+            palette.mode === "dark" ? palette.common.notebookG400 : palette.common.gray300,
         },
         ...(showDetails && {
           marginBottom: "-2px",
@@ -904,6 +904,7 @@ const ButtonWithDetails = ({ id, children, showDetails, disabled = false, onClic
           marginRight: "10px",
           borderBottomLeftRadius: "0px",
           borderBottomRightRadius: "0px",
+          // TODO: add color when is focus
         }),
       }}
     >
