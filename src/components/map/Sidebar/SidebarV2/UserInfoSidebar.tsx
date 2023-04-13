@@ -240,7 +240,13 @@ const UserInfoSidebar = ({ open, onClose, theme, openLinkedNode, username, selec
             {proposals.slice(0, lastIndex).map((proposal, idx) => {
               return (
                 proposal.title && (
-                  <ProposalItem key={idx} proposal={proposal} openLinkedNode={openLinkedNode} showTitle={true} />
+                  <ProposalItem
+                    key={idx}
+                    proposal={proposal}
+                    openLinkedNode={openLinkedNode}
+                    showTitle={true}
+                    isClickable={Boolean(username)}
+                  />
                 )
               );
             })}
@@ -259,7 +265,7 @@ const UserInfoSidebar = ({ open, onClose, theme, openLinkedNode, username, selec
         ),
       },
     ];
-  }, [lastIndex, loadOlderProposalsClick, proposals, proposalsPerDay, openLinkedNode, theme]);
+  }, [proposalsPerDay, theme, proposals, lastIndex, loadOlderProposalsClick, openLinkedNode, username]);
 
   const totalPoints = useMemo(() => {
     if (!sUserObj) return 0;

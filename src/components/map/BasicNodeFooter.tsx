@@ -524,7 +524,7 @@ BasicNodeFooterProps) => {
               imageUrl={admin.imageUrl}
               renderAsAvatar={true}
               contained={false}
-              sx={{ border: "none", width: "38px", height: "38px", position: "static" }}
+              sx={{ border: "none", width: "38px", height: "38px", position: "static", cursor: "pointer" }}
             />
           </Box>
         )}
