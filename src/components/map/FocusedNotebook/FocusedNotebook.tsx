@@ -134,7 +134,7 @@ const FocusedNotebook = ({
           width: "100%",
           height: "100%",
           zIndex: 1399,
-          padding: { xs: "50px 5px", sm: "50px 10px" },
+          padding: { xs: "50px 15px", sm: "32px 60px" },
           overflow: "auto",
         }}
       >
