@@ -153,19 +153,9 @@ BasicNodeFooterProps) => {
     // onNodeShare(identifier, "copy-link");
   }, [identifier]);
 
-  // const selectReferences = useCallback(
-  //   (event: any) => {
-  //     openNodePart(event, "References");
-  //   },
-  //   [openNodePart]
-  // );
-
-  // const selectTags = useCallback(
-  //   (event: any) => {
-  //     openNodePart(event, "Tags");
-  //   },
-  //   [openNodePart]
-  // );
+  const selectReferences = useCallback(() => openNodePart("References"), [openNodePart]);
+  const selectTags = useCallback(() => openNodePart("Tags"), [openNodePart]);
+  const selectLinkingWords = useCallback(() => openNodePart("LinkingWords"), [openNodePart]);
 
   // const selectPendingProposals = useCallback(
   //   (event: any) => {
@@ -193,13 +183,6 @@ BasicNodeFooterProps) => {
   //   (event: any) => uploadNodeImage(event, isUploading, setIsUploading, setPercentageUploaded),
   //   [uploadNodeImage, isUploading]
   // );
-
-  const selectLinkingWords = useCallback(
-    (event: any) => {
-      openNodePart(event, "LinkingWords");
-    },
-    [openNodePart]
-  );
 
   const narrateNode = useCallback(() => {
     if (!window.speechSynthesis.speaking) {
@@ -624,7 +607,11 @@ BasicNodeFooterProps) => {
           <>
             {nodeType === "Reference" ? (
               <>
-                <CustomButton id={`${identifier}-node-footer-tags-referecnes`} disabled={disabled}>
+                <CustomButton
+                  id={`${identifier}-node-footer-tags-referecnes`}
+                  // onClick={selectCitations}
+                  disabled={disabled}
+                >
                   <Stack
                     direction={"row"}
                     alignItems={"center"}
@@ -641,6 +628,7 @@ BasicNodeFooterProps) => {
                 <ButtonWithDetails
                   id={`${identifier}-node-footer-tags-citations`}
                   showDetails={openPart === "Tags"}
+                  onClick={selectTags}
                   disabled={disableTagsCitationsButton}
                 >
                   <Stack direction={"row"} alignItems={"center"}>
@@ -654,6 +642,7 @@ BasicNodeFooterProps) => {
               <ButtonWithDetails
                 id={tagsCitationsButtonId}
                 showDetails={openPart === "References"}
+                onClick={selectReferences}
                 disabled={disableTagsCitationsButton}
               >
                 <Stack direction={"row"} alignItems={"center"}>
@@ -671,31 +660,18 @@ BasicNodeFooterProps) => {
               </ButtonWithDetails>
             )}
 
-            {openPart === "LinkingWords" ? (
-              <Box
-                id={parentChildrenButtonId}
-                onClick={disableParentChildrenButton ? undefined : selectLinkingWords}
-                className={"select-tab-button-node-footer"}
-                sx={{
-                  position: "relative",
-                  background: theme => (theme.palette.mode === "dark" ? "#303134" : "#EAECF0"),
-                  border: "none",
-                  cursor: disableParentChildrenButton ? "not-allowed" : "pointer",
-                }}
-              >
+            <ButtonWithDetails
+              id={parentChildrenButtonId}
+              showDetails={openPart === "LinkingWords"}
+              onClick={selectLinkingWords}
+              disabled={disableParentChildrenButton}
+            >
+              <Stack direction={"row"} alignItems={"center"}>
                 <span className="FooterParentNodesOpen">{shortenNumber(parents.length, 2, false)}</span>
                 <SwapHorizIcon sx={{ fontSize: "20px" }} color={openPart === "LinkingWords" ? "primary" : "inherit"} />
                 <span>{shortenNumber(nodesChildren.length, 2, false)}</span>
-              </Box>
-            ) : (
-              <CustomButton id={parentChildrenButtonId} disabled={disableParentChildrenButton}>
-                <Box sx={{ display: "flex", alignItems: "center", gap: "4px", fill: "inherit" }}>
-                  <span>{shortenNumber(parents.length, 2, false)}</span>
-                  <SwapHorizIcon sx={{ fontSize: "16px" }} color={"inherit"} />
-                  <span>{shortenNumber(nodesChildren.length, 2, false)}</span>
-                </Box>
-              </CustomButton>
-            )}
+              </Stack>
+            </ButtonWithDetails>
 
             <CustomIconButton onClick={() => setOpenMenu(true)} id={moreOptionsButtonId}>
               <MoreHorizIcon />
@@ -916,12 +892,18 @@ const ButtonWithDetails = ({ id, children, showDetails, disabled = false, onClic
       sx={{
         minWidth: "0px",
         width: "auto",
+        backgroundColor: ({ palette }) =>
+          palette.mode === "dark" ? palette.common.notebookG500 : palette.common.notebookG200,
+        ":hover": {
+          backgroundColor: ({ palette }) =>
+            palette.mode === "dark" ? palette.common.notebookG400 : palette.common.lightBackground2,
+        },
         ...(showDetails && {
           marginBottom: "-2px",
           height: "48px",
           marginRight: "10px",
-          borderTopLeftRadius: "16px",
-          borderTopRightRadius: "16px",
+          borderBottomLeftRadius: "0px",
+          borderBottomRightRadius: "0px",
         }),
       }}
     >
@@ -944,8 +926,10 @@ const CustomWrapperButton = ({ id, children, sx }: CustomIconButtonProps) => {
         backgroundColor: ({ palette }) =>
           palette.mode === "dark" ? palette.common.notebookG500 : palette.common.notebookG200,
         color: ({ palette }) => (palette.mode === "dark" ? palette.common.gray50 : palette.common.gray600),
-        ":hover": ({ palette }) =>
-          palette.mode === "dark" ? palette.common.notebookG400 : palette.common.lightBackground2,
+        ":hover": {
+          backgroundColor: ({ palette }) =>
+            palette.mode === "dark" ? palette.common.notebookG400 : palette.common.lightBackground2,
+        },
         "&.Mui-disabled": {
           backgroundColor: ({ palette }) =>
             palette.mode === "dark" ? palette.common.notebookG500 : palette.common.notebookG200,

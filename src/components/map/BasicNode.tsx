@@ -15,6 +15,7 @@ import { OpenPart, SelectedUser } from "../../nodeBookTypes";
 import MarkdownRender from "../Markdown/MarkdownRender";
 import { MemoizedBasicNodeFooter } from "./BasicNodeFooter";
 import { MemoizedBasicQuestionChoices } from "./BasicQuestionChoices";
+import { MemoizedBasicNodeDetails } from "./LinkingWords/BasicNodeDetails";
 import { MemoizedNodeVideo } from "./Node/NodeVideo";
 // import { MemoizedNodeFooter } from "./NodeFooter";
 
@@ -53,9 +54,9 @@ type BasicNodeProps = {
   tags: { node: string; title?: string; label?: string }[];
   parents: string[];
   nodesChildren: string[] | { node: string; title?: string; label?: string }[];
-  setOpenPart: (newOpenPart: OpenPart) => void;
+  setOpenPart: (nodeId: string, newOpenPart: OpenPart) => void;
   locked: boolean;
-  openNodePart: (event: any, id: string, partType: any, openPart: any, setOpenPart: any, tags: any) => void; //
+  // openNodePart: (event: any, id: string, partType: any, openPart: any, setOpenPart: any, tags: any) => void; //
   toggleNode: (event: any, id: string) => void;
   // onNodeShare: (nodeId: string, platform: string) => void;
   selectNode: any;
@@ -107,7 +108,7 @@ const BasicNode = ({
   // studied,
   // isStudied,
   // markStudied,
-  openNodePart,
+  // openNodePart,
   // onNodeShare,
   selectNode,
   toggleNode,
@@ -136,11 +137,11 @@ BasicNodeProps) => {
   //   const disableCancelButton = disabled && !enableChildElements.includes(`${identifier}-button-cancel-proposal`);
 
   const openNodePartHandler = useCallback(
-    (event: any, partType: any) => {
-      openNodePart(event, identifier, partType, openPart, setOpenPart, tags);
+    (partType: any) => {
+      setOpenPart(identifier, openPart === partType ? undefined : partType);
     },
 
-    [identifier, openPart, tags]
+    [identifier, openPart, setOpenPart]
   );
 
   const onToggleNode = useCallback(
@@ -384,8 +385,53 @@ BasicNodeProps) => {
         selectNode={selectNodeHandler}
         locked={locked}
         disabled={true}
-        // enableChildElements={enableChildElements}
+        enableChildElements={[`${identifier}-button-parent-children`, `${identifier}-node-footer-tags-citations`]}
       />
+
+      {openPart && (
+        <MemoizedBasicNodeDetails
+          identifier={identifier}
+          nodeType={nodeType}
+          nodesChildren={nodesChildren}
+          parents={parents}
+          references={references}
+          tags={tags}
+          openPart={openPart}
+        />
+      )}
+      {/* {(openPart === "LinkingWords" || openPart === "Tags" || openPart === "References") && (
+        <LinkingWords
+          identifier={identifier}
+          notebookRef={notebookRef}
+          nodeBookDispatch={nodeBookDispatch}
+          editable={editable}
+          isNew={isNew}
+          openPart={openPart}
+          title={title}
+          reason={reason}
+          references={references}
+          tags={tags}
+          parents={parents}
+          nodesChildren={nodesChildren}
+          chosenNodeChanged={chosenNodeChanged}
+          referenceLabelChange={referenceLabelChange}
+          deleteLink={deleteLinkHandler}
+          openLinkedNode={openLinkedNode}
+          openAllChildren={openAllChildren}
+          openAllParent={openAllParent}
+          saveProposedChildNode={saveProposedChildNode}
+          saveProposedImprovement={saveProposedImprovement}
+          closeSideBar={closeSideBar}
+          setAbleToPropose={setAbleToPropose}
+          ableToPropose={ableToPropose}
+          isLoading={isLoading}
+          onResetButton={newValue => setAbleToPropose(newValue)}
+          setOperation={setOperation}
+          disabled={disabled}
+          enableChildElements={enableChildElements}
+          nodeType={nodeType}
+        />
+      )} */}
     </Box>
   );
 };

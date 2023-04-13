@@ -356,47 +356,6 @@ const NodePage: NextPage<Props> = ({ notebook }) => {
     [setGraph, getColumnRows]
   );
 
-  const openNodePart = useCallback(
-    (event: any, nodeId: string, partType: any, openPart: any, setOpenPart: any) => {
-      // lastNodeOperation.current = { name: partType, data: "" };
-      // if (notebookRef.current.choosingNode) return;
-
-      if (partType === "PendingProposals") {
-        // TODO: refactor to use only one state to open node options
-        return; // HERE we are breakin the code, for now this part is manage by setOpenEditButton, change after refactor
-      }
-      if (openPart === partType) {
-        // is opened, so will close
-        setOpenPart(null);
-        event.currentTarget.blur();
-      } else {
-        setOpenPart(partType);
-        // if (user) {
-        //   const userNodePartsLogRef = collection(db, "userNodePartsLog");
-        //   setDoc(doc(userNodePartsLogRef), {
-        //     nodeId,
-        //     uname: user?.uname,
-        //     partType,
-        //     createdAt: Timestamp.fromDate(new Date()),
-        //   });
-        // }
-        // if (
-        //   partType === "Tags" &&
-        //   notebookRef.current.selectionType !== "AcceptedProposals" &&
-        //   notebookRef.current.selectionType !== "Proposals"
-        // ) {
-        //   // tags;
-        //   setOpenRecentNodes(true);
-        // }
-      }
-
-      processHeightChange(nodeId);
-      // nodeBookDispatch({ type: "setSelectedNode", payload: nodeId });
-      // notebookRef.current.selectedNode = nodeId;
-    },
-    [processHeightChange]
-  );
-
   const selectNode = useCallback((event: any, nodeId: string, chosenType: any, nodeType: any) => {
     devLog("SELECT_NODE", {
       // choosingNode: notebookRef.current.choosingNode,
@@ -472,8 +431,9 @@ const NodePage: NextPage<Props> = ({ notebook }) => {
       setNodeParts(nodeId, node => {
         return { ...node, localLinkingWords: newOpenPart };
       });
+      processHeightChange(nodeId); // CHECK: check if is required, maybe we can remove it
     },
-    [setNodeParts]
+    [processHeightChange, setNodeParts]
   );
 
   const toggleNode = useCallback(
@@ -532,20 +492,20 @@ const NodePage: NextPage<Props> = ({ notebook }) => {
           locked={Boolean(cur.locked)}
           // markedCorrect={cur.correct}
           // markedWrong={cur.wrong}
-          nodesChildren={cur.children}
+          nodesChildren={cur.children ?? []}
           notebookRef={null}
           // onNodeShare={onNodeShare}
-          openNodePart={openNodePart}
+          // openNodePart={openNodePart}
           openPart={cur.localLinkingWords}
-          parents={cur.parents}
-          references={cur.references.map((c: string, idx: number) => ({
+          parents={cur.parents ?? []}
+          references={(cur.references ?? []).map((c: string, idx: number) => ({
             title: c,
             node: cur.referenceIds[idx],
             label: cur.referenceLabels[idx],
           }))}
           selectNode={selectNode}
           setOpenPart={onChangeNodePart}
-          tags={cur.tags.map((c: string, idx: number) => ({
+          tags={(cur.tags ?? []).map((c: string, idx: number) => ({
             node: cur.tagIds[idx],
             title: c,
           }))}
@@ -555,7 +515,7 @@ const NodePage: NextPage<Props> = ({ notebook }) => {
           openUserInfoSidebar={onOpenUserInfoSidebar}
         />
       ));
-  }, [changeNodeHight, graph.nodes, onChangeNodePart, openNodePart, selectNode, toggleNode]);
+  }, [changeNodeHight, graph.nodes, onChangeNodePart, selectNode, toggleNode]);
 
   //   ------------------------------ useEffect
 
