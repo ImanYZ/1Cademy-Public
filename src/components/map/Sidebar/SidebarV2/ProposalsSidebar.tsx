@@ -105,6 +105,9 @@ const ProposalsSidebar = ({
       innerHeight={innerHeight}
       anchor="left"
       contentSignalState={contentSignalState}
+      sx={{
+        boxShadow: "none",
+      }}
       SidebarOptions={
         <Box
           sx={{
