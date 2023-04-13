@@ -1,5 +1,6 @@
 import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
 import { CircularProgress, Collapse, Divider, IconButton, Stack, useTheme } from "@mui/material";
+import { SxProps, Theme } from "@mui/material/styles";
 import { Box } from "@mui/system";
 import NextImage from "next/image";
 import React, { ReactNode, useState } from "react";
@@ -8,15 +9,14 @@ import toolBox from "../../../public/toolbox.svg";
 import toolBoxDark from "../../../public/toolbox-dark.svg";
 import toolBoxDarkOpen from "../../../public/toolbox-dark-open.svg";
 import toolBoxOpen from "../../../public/toolbox-open.svg";
-import { OpenSidebar } from "../../pages/notebook";
 
 type ToolboxProps = {
-  isLoading: boolean;
-  openSidebar: OpenSidebar;
   children: ReactNode;
+  isLoading?: boolean;
+  sx?: SxProps<Theme>;
 };
 
-const Toolbox = ({ isLoading: isQueueWorking, openSidebar, children }: ToolboxProps) => {
+const Toolbox = ({ children, isLoading = false, sx }: ToolboxProps) => {
   const theme = useTheme();
   const [expanded, setExpanded] = useState(false);
 
@@ -25,18 +25,13 @@ const Toolbox = ({ isLoading: isQueueWorking, openSidebar, children }: ToolboxPr
       sx={{
         borderRadius: "8px",
         height: { xs: "44px", sm: "60px" },
-        position: "absolute",
-        right: { xs: "8px", sm: "18px" },
-        top: {
-          xs: openSidebar ? `${innerHeight * 0.25 + 7}px!important` : "7px!important",
-          sm: "7px!important",
-        },
         display: "flex",
         opacity: 1,
         cursor: "pointer",
         background: theme =>
           theme.palette.mode === "dark" ? theme.palette.common.notebookMainBlack : theme.palette.common.gray50,
         zIndex: 10,
+        ...sx,
       }}
     >
       {/* collapse button */}
@@ -87,7 +82,7 @@ const Toolbox = ({ isLoading: isQueueWorking, openSidebar, children }: ToolboxPr
         }}
         onClick={() => setExpanded(!expanded)}
       >
-        {isQueueWorking && (
+        {isLoading && (
           <CircularProgress
             size={46}
             sx={{

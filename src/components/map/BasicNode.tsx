@@ -60,6 +60,7 @@ type BasicNodeProps = {
   toggleNode: (event: any, id: string) => void;
   // onNodeShare: (nodeId: string, platform: string) => void;
   selectNode: any;
+  onSelecteNode: (nodeId: string) => void;
   // proposalsNum: number;
   // studied: number;
   // isStudied: boolean;
@@ -111,6 +112,7 @@ const BasicNode = ({
   // openNodePart,
   // onNodeShare,
   selectNode,
+  onSelecteNode: onSelectedNode,
   toggleNode,
   openUserInfoSidebar,
 }: // wrongNode,
@@ -245,6 +247,7 @@ BasicNodeProps) => {
       //     (isHiding ? " IsHiding" : "") +
       //     (nodeType === "Reference" ? " Choosable" : "")
       //   }
+      onClick={() => onSelectedNode(identifier)}
       style={{
         left: left ? left : 1000,
         top: top ? top : 1000,

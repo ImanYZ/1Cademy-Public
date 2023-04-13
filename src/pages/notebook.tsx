@@ -6491,7 +6491,17 @@ const Dashboard = ({}: DashboardProps) => {
             setComLeaderboardOpen={setComLeaderboardOpen}
           />
 
-          <MemoizedToolbox isLoading={isQueueWorking} openSidebar={openSidebar}>
+          <MemoizedToolbox
+            isLoading={isQueueWorking}
+            sx={{
+              position: "absolute",
+              right: { xs: "8px", sm: "18px" },
+              top: {
+                xs: openSidebar ? `${innerHeight * 0.25 + 7}px!important` : "7px!important",
+                sm: "7px!important",
+              },
+            }}
+          >
             <>
               <Tooltip title="Scroll to last Selected Node" placement="bottom">
                 <IconButton

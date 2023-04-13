@@ -1,9 +1,11 @@
 import CloseIcon from "@mui/icons-material/Close";
-import { Button, Modal, Paper, ThemeProvider, Typography } from "@mui/material";
+import MyLocationIcon from "@mui/icons-material/MyLocation";
+import { Button, IconButton, Modal, Paper, ThemeProvider, Tooltip, Typography, useTheme } from "@mui/material";
 import Box from "@mui/material/Box";
 import { Stack } from "@mui/system";
 import { getAuth } from "firebase/auth";
 import { collection, DocumentData, getFirestore, onSnapshot, Query, query, where } from "firebase/firestore";
+import NextImage from "next/image";
 import { useRouter } from "next/router";
 import { GetStaticPaths, GetStaticProps, NextPage } from "next/types";
 import { ParsedUrlQuery } from "querystring";
@@ -15,10 +17,14 @@ import { MapInteractionCSS } from "react-map-interaction";
 /* eslint-enable */
 import NodeItemFullSkeleton from "@/components/NodeItemFullSkeleton";
 
+import focusViewLogo from "../../../../public/focus.svg";
+import focusViewDarkLogo from "../../../../public/focus-dark.svg";
 import { MemoizedBasicNode } from "../../../components/map/BasicNode";
 import { MemoizedLinksList } from "../../../components/map/LinksList";
 import { NotebookPopup } from "../../../components/map/Popup";
 import { MemoizedUserInfoSidebar } from "../../../components/map/Sidebar/SidebarV2/UserInfoSidebar";
+import { MemoizedToolbox } from "../../../components/map/Toolbox";
+import { useWindowSize } from "../../../hooks/useWindowSize";
 import { useWorkerQueue } from "../../../hooks/useWorkerQueue";
 import { getNotebookById } from "../../../lib/firestoreServer/notebooks";
 import { brandingLightTheme } from "../../../lib/theme/brandingTheme";
@@ -72,7 +78,7 @@ export const getStaticPaths: GetStaticPaths<Params> = async () => {
 };
 
 const NodePage: NextPage<Props> = ({ notebook }) => {
-  console.log({ notebook });
+  const theme = useTheme();
   const db = getFirestore();
   const router = useRouter();
   const auth = getAuth();
@@ -110,6 +116,14 @@ const NodePage: NextPage<Props> = ({ notebook }) => {
     updatedAt: new Date(),
   });
 
+  const [, /* focusView */ setFocusView] = useState<{
+    selectedNode: string;
+    isEnabled: boolean;
+  }>({
+    selectedNode: "",
+    isEnabled: false,
+  });
+
   const { addTask /* isQueueWorking, queueFinished */ } = useWorkerQueue({
     setNodeUpdates,
     g,
@@ -125,9 +139,11 @@ const NodePage: NextPage<Props> = ({ notebook }) => {
     withClusters: false,
   });
 
+  const { width: windowWith, height: windowHeight } = useWindowSize();
+
   const [openSidebar, setOpenSidebar] = useState<"USER_INFO" | null>(null);
   const [selectedUser, setSelectedUser] = useState<SelectedUser | null>(null);
-
+  const [selectedNodeId, setSelectedNodeId] = useState("");
   //   ------------------------------ functions
 
   const setNodeParts = useCallback((nodeId: string, innerFunc: (thisNode: FullNodeData) => FullNodeData) => {
@@ -455,6 +471,64 @@ const NodePage: NextPage<Props> = ({ notebook }) => {
     setSelectedUser(user);
   };
 
+  const scrollToNode = useCallback(
+    (nodeId: string, tries = 0) => {
+      if (scrollToNodeInitialized.current) return;
+
+      if (tries === 10) return;
+
+      setTimeout(() => {
+        setGraph(graph => {
+          const originalNode = document.getElementById(nodeId);
+          const thisNode = graph.nodes[nodeId];
+          if (!originalNode) return graph;
+          if (!thisNode) return graph;
+
+          if (
+            originalNode &&
+            "offsetLeft" in originalNode &&
+            originalNode.offsetLeft !== 0 &&
+            "offsetTop" in originalNode &&
+            originalNode.offsetTop !== 0
+          ) {
+            scrollToNodeInitialized.current = true;
+            setTimeout(() => {
+              scrollToNodeInitialized.current = false;
+            }, 1300);
+
+            setMapInteractionValue(() => {
+              const windowSize = window.innerWidth;
+              let defaultScale;
+              if (windowSize < 400) defaultScale = 0.45;
+              else if (windowSize < 600) defaultScale = 0.575;
+              else if (windowSize < 1260) defaultScale = 0.8;
+              else defaultScale = 0.92;
+
+              const windowInnerTop = windowWith < 899 ? (openSidebar ? 350 : 50) : 50;
+              const windowInnerLeft = (windowWith * 10) / 100 + (windowWith > 899 ? (openSidebar ? 430 : 80) : 10);
+              const windowInnerRight = (windowWith * 10) / 100;
+              const windowInnerBottom = 50;
+              const regionWidth = windowWith - windowInnerLeft - windowInnerRight;
+              const regionHeight = windowHeight - windowInnerTop - windowInnerBottom;
+
+              return {
+                scale: defaultScale,
+                translation: {
+                  x: windowInnerLeft + regionWidth / 2 - (thisNode.left + originalNode.offsetWidth / 2) * defaultScale,
+                  y: windowInnerTop + regionHeight / 2 - (thisNode.top + originalNode.offsetHeight / 2) * defaultScale,
+                },
+              };
+            });
+          } else {
+            scrollToNode(nodeId, tries + 1);
+          }
+          return graph;
+        });
+      }, 400);
+    },
+    [openSidebar, windowHeight, windowWith]
+  );
+
   //   ------------------------------ memos
 
   const nodeList = useMemo(() => {
@@ -513,6 +587,7 @@ const NodePage: NextPage<Props> = ({ notebook }) => {
           wrongNum={cur.wrongs}
           toggleNode={toggleNode}
           openUserInfoSidebar={onOpenUserInfoSidebar}
+          onSelecteNode={setSelectedNodeId}
         />
       ));
   }, [changeNodeHight, graph.nodes, onChangeNodePart, selectNode, toggleNode]);
@@ -562,6 +637,63 @@ const NodePage: NextPage<Props> = ({ notebook }) => {
   // TODO: add Node head to SEO
   return (
     <Box className="MapContainer" sx={{ position: "relative", overflow: "hidden" }}>
+      <MemoizedToolbox
+        sx={{
+          position: "absolute",
+          right: "364px",
+          top: {
+            xs: openSidebar ? `${innerHeight * 0.25 + 7}px!important` : "8px",
+            sm: "8px",
+          },
+        }}
+      >
+        <>
+          <Tooltip title="Scroll to last Selected Node" placement="bottom">
+            <IconButton
+              id="toolbox-scroll-to-node"
+              color="secondary"
+              onClick={() => scrollToNode(selectedNodeId)}
+              disabled={!selectedNodeId ? true : false}
+              sx={{
+                opacity: !selectedNodeId ? 0.5 : undefined,
+                padding: { xs: "2px", sm: "8px" },
+              }}
+            >
+              <MyLocationIcon sx={{ color: theme => (theme.palette.mode === "dark" ? "#CACACA" : "#667085") }} />
+            </IconButton>
+          </Tooltip>
+          <Tooltip
+            title="Focused view for selected node"
+            placement="bottom"
+            sx={{
+              ":hover": {
+                background: theme.palette.mode === "dark" ? "#404040" : "#EAECF0",
+                borderRadius: "8px",
+              },
+              padding: { xs: "2px", sm: "8px" },
+            }}
+          >
+            <IconButton
+              id="toolbox-focus-mode"
+              color="secondary"
+              onClick={() => {
+                setFocusView({ isEnabled: true, selectedNode: selectedNodeId });
+                // setOpenProgressBar(false);
+              }}
+              disabled={!selectedNodeId}
+              sx={{ opacity: !selectedNodeId ? 0.5 : undefined }}
+            >
+              <NextImage
+                src={theme.palette.mode === "light" ? focusViewLogo : focusViewDarkLogo}
+                alt="logo 1cademy"
+                width="24px"
+                height="24px"
+              />
+            </IconButton>
+          </Tooltip>
+        </>
+      </MemoizedToolbox>
+
       <Stack
         direction={"row"}
         spacing={"16px"}
@@ -576,9 +708,11 @@ const NodePage: NextPage<Props> = ({ notebook }) => {
             theme.palette.mode === "dark" ? theme.palette.common.notebookMainBlack : theme.palette.common.gray50,
         }}
       >
-        <Typography sx={{ width: "138px", textOverflow: "ellipsis", whiteSpace: "nowrap", overflow: "hidden" }}>
-          {notebook.title}
-        </Typography>
+        <Tooltip title={notebook.title}>
+          <Typography sx={{ width: "138px", textOverflow: "ellipsis", whiteSpace: "nowrap", overflow: "hidden" }}>
+            {notebook.title}
+          </Typography>
+        </Tooltip>
         <Stack direction={"row"} spacing={"8px"}>
           <Button
             variant="outlined"
