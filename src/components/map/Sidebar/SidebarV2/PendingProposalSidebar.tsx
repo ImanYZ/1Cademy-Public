@@ -130,6 +130,9 @@ PendingProposalSidebarProps) => {
       // height={innerWidth > 599 ? 100 : 35}
       innerHeight={innerHeight}
       contentSignalState={contentSignalState}
+      sx={{
+        boxShadow: "none",
+      }}
       SidebarContent={
         <Box sx={{ p: "10px" }}>
           <Box

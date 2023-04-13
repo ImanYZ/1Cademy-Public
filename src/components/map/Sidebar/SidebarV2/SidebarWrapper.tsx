@@ -129,13 +129,18 @@ export const SidebarWrapper = ({
                     fontSize: { xs: "24px", sm: "40px" },
                     fontWeight: "700",
                     lineHeight: "29.05px",
+                    marginBottom: headerImage ? "50px" : undefined,
                   }}
                 >
                   {title}
                 </Typography>
               </Box>
             ) : (
-              <>
+              <Box
+                sx={{
+                  height: "40px",
+                }}
+              >
                 {title != "Proposals" && title != "Search Nodes" && (
                   <Typography
                     component={"h2"}
@@ -143,16 +148,13 @@ export const SidebarWrapper = ({
                       width: "100%",
                       paddingLeft: "13px",
                       fontSize: { xs: "24px", sm: "40px" },
-                      background: theme =>
-                        theme.palette.mode === "dark"
-                          ? "linear-gradient(0deg, rgba(31, 31, 31, 1) 0%, rgba(31, 31, 31, 0) 100%)"
-                          : "linear-gradient(0deg, rgb(255, 255, 255) 0%, rgba(255, 255, 255, 0) 100%)",
+                      marginTop: "10px",
                     }}
                   >
                     {title}
                   </Typography>
                 )}
-              </>
+              </Box>
             )}
           </Box>
         </Box>
@@ -183,7 +185,7 @@ export const SidebarWrapper = ({
             position: "absolute",
             top: {
               xs: "0px",
-              sm: "30px",
+              sm: "10px",
             },
             right: "10px",
           }}
