@@ -1,4 +1,3 @@
-import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
 import AutoFixHighIcon from "@mui/icons-material/AutoFixHigh";
 import CloseIcon from "@mui/icons-material/Close";
 import CodeIcon from "@mui/icons-material/Code";
@@ -7,7 +6,6 @@ import MyLocationIcon from "@mui/icons-material/MyLocation";
 import { Masonry } from "@mui/lab";
 import {
   Button,
-  CircularProgress,
   Container,
   Divider,
   Drawer,
@@ -72,10 +70,6 @@ import focusViewLogo from "../../public/focus.svg";
 import focusViewDarkLogo from "../../public/focus-dark.svg";
 import PrevNodeIcon from "../../public/prev-node.svg";
 import PrevNodeLightIcon from "../../public/prev-node-light.svg";
-import toolBox from "../../public/toolbox.svg";
-import toolBoxDark from "../../public/toolbox-dark.svg";
-import toolBoxDarkOpen from "../../public/toolbox-dark-open.svg";
-import toolBoxOpen from "../../public/toolbox-open.svg";
 import { TooltipTutorial } from "../components/interactiveTutorial/Tutorial";
 // import nodesData from "../../testUtils/mockCollections/nodes.data";
 // import { Tutorial } from "../components/interactiveTutorial/Tutorial";
@@ -84,6 +78,7 @@ import { MemoizedLinksList } from "../components/map/LinksList";
 import { MemoizedNodeList } from "../components/map/NodesList";
 import { NotebookPopup } from "../components/map/Popup";
 import { MemoizedToolbarSidebar } from "../components/map/Sidebar/SidebarV2/ToolbarSidebar";
+import { MemoizedToolbox } from "../components/map/Toolbox";
 import { NodeItemDashboard } from "../components/NodeItemDashboard";
 import { Portal } from "../components/Portal";
 import { MemoizedTutorialTableOfContent } from "../components/tutorial/TutorialTableOfContent";
@@ -6496,177 +6491,111 @@ const Dashboard = ({}: DashboardProps) => {
             setComLeaderboardOpen={setComLeaderboardOpen}
           />
 
-          <Box
-            id="RightButtonsdMain"
-            className={buttonsOpen ? undefined : "Minimized"}
-            sx={{
-              width: {
-                xs: "270px",
-                sm: "300px",
-                ...(process.env.NODE_ENV === "development" && { xs: "310px", sm: "340px" }),
-              },
-              height: {
-                xs: "44px",
-                sm: "60px",
-              },
-              right: {
-                xs: "8px",
-                sm: "18px",
-              },
-              opacity: 1,
-              cursor: "pointer",
-              top: {
-                xs: !openSidebar
-                  ? "7px!important"
-                  : openSidebar && openSidebar !== "SEARCHER_SIDEBAR"
-                  ? `${innerHeight * 0.35 + 7}px!important`
-                  : `${innerHeight * 0.25 + 7}px!important`,
-                sm: "7px!important",
-              },
-            }}
-          >
-            <Box
-              sx={{
-                position: "fixed",
-                width: { xs: "50px", sm: "60px" },
-                right: "8px",
-                height: { xs: "44px", sm: "60px" },
-                borderRadius: buttonsOpen ? "0px 8px 8px 0px" : "8px",
-                padding: "10px",
-                zIndex: 1299,
-                boxShadow: theme =>
-                  theme.palette.mode === "dark"
-                    ? "0px 1px 2px rgba(0, 0, 0, 0.06), 0px 1px 3px rgba(0, 0, 0, 0.1)"
-                    : "box-shadow: 0px 1px 2px rgba(0, 0, 0, 0.06), 0px 1px 3px rgba(0, 0, 0, 0.1)",
-                background: theme =>
-                  theme.palette.mode === "dark"
-                    ? theme.palette.common.darkBackground
-                    : theme.palette.common.lightBackground,
-              }}
-              onClick={() => setButtonsOpen(!buttonsOpen)}
-            >
-              {isQueueWorking && (
-                <CircularProgress
-                  size={46}
+          <MemoizedToolbox isLoading={isQueueWorking} openSidebar={openSidebar}>
+            <>
+              <Tooltip title="Scroll to last Selected Node" placement="bottom">
+                <IconButton
+                  id="toolbox-scroll-to-node"
+                  color="secondary"
+                  onClick={onScrollToLastNode}
+                  disabled={!nodeBookState.selectedNode ? true : false}
                   sx={{
-                    position: "absolute",
-                    right: { xs: "1px", sm: "7px" },
-                    bottom: { xs: "0px", sm: "7px" },
-                    zIndex: "1300",
+                    opacity: !nodeBookState.selectedNode ? 0.5 : undefined,
+                    padding: { xs: "2px", sm: "8px" },
                   }}
-                />
-              )}
-              <IconButton
-                color="secondary"
-                sx={{
-                  padding: { xs: "0px !important", sm: "8px!important" },
+                >
+                  <MyLocationIcon sx={{ color: theme => (theme.palette.mode === "dark" ? "#CACACA" : "#667085") }} />
+                </IconButton>
+              </Tooltip>
 
-                  width: windowWith <= 599 ? "30px" : undefined,
-                  height: windowWith <= 599 ? "25px" : undefined,
+              <Tooltip
+                title="Redraw graph"
+                placement="bottom"
+                sx={{
                   ":hover": {
-                    bottom: windowWith <= 599 ? "2px" : undefined,
-                    width: { xs: "32px", sm: "40px" },
-                    height: { xs: "30px", sm: "40px" },
+                    background: theme.palette.mode === "dark" ? "#404040" : "#EAECF0",
                     borderRadius: "8px",
-                    background: theme =>
-                      buttonsOpen ? (theme.palette.mode === "dark" ? "#55402B" : "#FDEAD7") : "inherit",
                   },
+                  padding: { xs: "2px", sm: "8px" },
                 }}
               >
-                <NextImage
-                  src={
-                    theme.palette.mode === "dark"
-                      ? buttonsOpen
-                        ? toolBoxDarkOpen
-                        : toolBoxDark
-                      : buttonsOpen
-                      ? toolBoxOpen
-                      : toolBox
-                  }
-                  alt="logo 1cademy"
-                  width="24px"
-                  height="24px"
-                />
-              </IconButton>
-            </Box>
-            <Box
-              id="RightButtonsContainer"
-              sx={{
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "flex-start",
-                gap: { xs: "5px", md: "16px" },
-                background: theme =>
-                  theme.palette.mode === "dark"
-                    ? theme.palette.common.darkBackground
-                    : theme.palette.common.lightBackground,
-              }}
-            >
-              <Box
-                className="RightButtonsItems"
+                <IconButton
+                  id="toolbox-redraw-graph"
+                  color="secondary"
+                  onClick={() => {
+                    onRedrawGraph();
+                    if (tutorial?.name === "redrawGraph") {
+                      onFinalizeTutorial();
+                    }
+                  }}
+                >
+                  <AutoFixHighIcon sx={{ color: theme => (theme.palette.mode === "dark" ? "#CACACA" : "#667085") }} />
+                </IconButton>
+              </Tooltip>
+
+              <Tooltip
+                title="Start tutorial"
+                placement="bottom"
                 sx={{
-                  width: "100%",
-                  display: "flex",
-                  justifyContent: "space-evenly",
-                  alignItems: "center",
-                  gap: {
-                    xs: "5px",
-                    md: "10px",
+                  ":hover": {
+                    background: theme.palette.mode === "dark" ? "#404040" : "#EAECF0",
+                    borderRadius: "8px",
                   },
-                  height: "inherit",
-                  background: theme =>
-                    theme.palette.mode === "dark"
-                      ? theme.palette.common.darkBackground
-                      : theme.palette.common.lightBackground,
+                  padding: { xs: "2px", sm: "8px" },
                 }}
               >
-                <Box
-                  id="RightButtonsMinimizer"
-                  sx={{
-                    background: theme =>
-                      theme.palette.mode === "dark"
-                        ? theme.palette.common.darkBackground
-                        : theme.palette.common.lightBackground,
+                <IconButton
+                  id="toolbox-table-of-contents"
+                  color="error"
+                  onClick={() => {
+                    setOpenProgressBar(prev => !prev);
+                    if (tutorial?.name === "tableOfContents") {
+                      onFinalizeTutorial();
+                    }
                   }}
                 >
-                  <Box
-                    onClick={() => setButtonsOpen(false)}
-                    sx={{
-                      display: "flex",
-                      flexDirection: "column",
-                      alignItems: "center",
-                      marginLeft: "10px",
-                      marginTop: "24px",
-                      cursor: "pointer",
-                    }}
-                  >
-                    <Box>
-                      <ArrowForwardIosIcon
-                        fontSize="inherit"
-                        sx={{
-                          color: theme => (theme.palette.mode === "dark" ? "#A4A4A4" : "#98A2B3"),
-                        }}
-                      />
-                    </Box>
-                  </Box>
-                </Box>
-                <Tooltip title="Scroll to last Selected Node" placement="bottom">
-                  <IconButton
-                    id="toolbox-scroll-to-node"
-                    color="secondary"
-                    onClick={onScrollToLastNode}
-                    disabled={!nodeBookState.selectedNode ? true : false}
-                    sx={{
-                      opacity: !nodeBookState.selectedNode ? 0.5 : undefined,
-                      padding: { xs: "2px", sm: "8px" },
-                    }}
-                  >
-                    <MyLocationIcon sx={{ color: theme => (theme.palette.mode === "dark" ? "#CACACA" : "#667085") }} />
-                  </IconButton>
-                </Tooltip>
+                  <HelpCenterIcon sx={{ color: theme => (theme.palette.mode === "dark" ? "#CACACA" : "#667085") }} />
+                </IconButton>
+              </Tooltip>
 
+              <Tooltip
+                title="Focused view for selected node"
+                placement="bottom"
+                sx={{
+                  ":hover": {
+                    background: theme.palette.mode === "dark" ? "#404040" : "#EAECF0",
+                    borderRadius: "8px",
+                  },
+                  padding: { xs: "2px", sm: "8px" },
+                }}
+              >
+                <IconButton
+                  id="toolbox-focus-mode"
+                  color="secondary"
+                  onClick={() => {
+                    setFocusView({ isEnabled: true, selectedNode: nodeBookState.selectedNode || "" });
+                    setOpenProgressBar(false);
+                    if (tutorial?.name === "focusMode") {
+                      onFinalizeTutorial();
+                    }
+                  }}
+                  disabled={!nodeBookState.selectedNode ? true : false}
+                  sx={{
+                    opacity: !nodeBookState.selectedNode ? 0.5 : undefined,
+                  }}
+                >
+                  <NextImage
+                    src={theme.palette.mode === "light" ? focusViewLogo : focusViewDarkLogo}
+                    alt="logo 1cademy"
+                    width="24px"
+                    height="24px"
+                  />
+                </IconButton>
+              </Tooltip>
+
+              {process.env.NODE_ENV === "development" && (
                 <Tooltip
-                  title="Redraw graph"
+                  title={"Watch geek data"}
                   placement="bottom"
                   sx={{
                     ":hover": {
@@ -6676,100 +6605,13 @@ const Dashboard = ({}: DashboardProps) => {
                     padding: { xs: "2px", sm: "8px" },
                   }}
                 >
-                  <IconButton
-                    id="toolbox-redraw-graph"
-                    color="secondary"
-                    onClick={() => {
-                      onRedrawGraph();
-                      if (tutorial?.name === "redrawGraph") {
-                        onFinalizeTutorial();
-                      }
-                    }}
-                  >
-                    <AutoFixHighIcon sx={{ color: theme => (theme.palette.mode === "dark" ? "#CACACA" : "#667085") }} />
+                  <IconButton onClick={() => setOpenDeveloperMenu(!openDeveloperMenu)}>
+                    <CodeIcon sx={{ color: theme => (theme.palette.mode === "dark" ? "#CACACA" : "#667085") }} />
                   </IconButton>
                 </Tooltip>
-
-                <Tooltip
-                  title="Start tutorial"
-                  placement="bottom"
-                  sx={{
-                    ":hover": {
-                      background: theme.palette.mode === "dark" ? "#404040" : "#EAECF0",
-                      borderRadius: "8px",
-                    },
-                    padding: { xs: "2px", sm: "8px" },
-                  }}
-                >
-                  <IconButton
-                    id="toolbox-table-of-contents"
-                    color="error"
-                    onClick={() => {
-                      setOpenProgressBar(prev => !prev);
-                      if (tutorial?.name === "tableOfContents") {
-                        onFinalizeTutorial();
-                      }
-                    }}
-                  >
-                    <HelpCenterIcon sx={{ color: theme => (theme.palette.mode === "dark" ? "#CACACA" : "#667085") }} />
-                  </IconButton>
-                </Tooltip>
-
-                <Tooltip
-                  title="Focused view for selected node"
-                  placement="bottom"
-                  sx={{
-                    ":hover": {
-                      background: theme.palette.mode === "dark" ? "#404040" : "#EAECF0",
-                      borderRadius: "8px",
-                    },
-                    padding: { xs: "2px", sm: "8px" },
-                  }}
-                >
-                  <IconButton
-                    id="toolbox-focus-mode"
-                    color="secondary"
-                    onClick={() => {
-                      setFocusView({ isEnabled: true, selectedNode: nodeBookState.selectedNode || "" });
-                      setOpenProgressBar(false);
-                      if (tutorial?.name === "focusMode") {
-                        onFinalizeTutorial();
-                      }
-                    }}
-                    disabled={!nodeBookState.selectedNode ? true : false}
-                    sx={{
-                      opacity: !nodeBookState.selectedNode ? 0.5 : undefined,
-                    }}
-                  >
-                    <NextImage
-                      src={theme.palette.mode === "light" ? focusViewLogo : focusViewDarkLogo}
-                      alt="logo 1cademy"
-                      width="24px"
-                      height="24px"
-                    />
-                  </IconButton>
-                </Tooltip>
-                {process.env.NODE_ENV === "development" && (
-                  <Tooltip
-                    title={"Watch geek data"}
-                    placement="bottom"
-                    sx={{
-                      ":hover": {
-                        background: theme.palette.mode === "dark" ? "#404040" : "#EAECF0",
-                        borderRadius: "8px",
-                      },
-                      padding: { xs: "2px", sm: "8px" },
-                    }}
-                  >
-                    {/* DEVTOOLS */}
-                    <IconButton onClick={() => setOpenDeveloperMenu(!openDeveloperMenu)}>
-                      <CodeIcon sx={{ color: theme => (theme.palette.mode === "dark" ? "#CACACA" : "#667085") }} />
-                    </IconButton>
-                  </Tooltip>
-                )}
-              </Box>
-            </Box>
-          </Box>
+              )}
+            </>
+          </MemoizedToolbox>
           {/* end Data from map */}
 
           {window.innerHeight > 399 && user?.livelinessBar === "interaction" && (
