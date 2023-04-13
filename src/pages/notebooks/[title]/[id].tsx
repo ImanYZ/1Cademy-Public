@@ -7,7 +7,7 @@ import { collection, DocumentData, getFirestore, onSnapshot, Query, query, where
 import { useRouter } from "next/router";
 import { GetStaticPaths, GetStaticProps, NextPage } from "next/types";
 import { ParsedUrlQuery } from "querystring";
-import { Suspense, useCallback, useEffect, useRef, useState } from "react";
+import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
 /* eslint-disable */
 // @ts-ignore
 import { MapInteractionCSS } from "react-map-interaction";
@@ -509,6 +509,61 @@ const NodePage: NextPage<Props> = ({ notebook }) => {
     [notebook.id, setNodeParts]
   );
 
+  //   ------------------------------ memos
+
+  const nodeList = useMemo(() => {
+    return Object.keys(graph.nodes)
+      .map(nId => graph.nodes[nId])
+      .map(cur => (
+        <MemoizedBasicNode
+          key={cur.node}
+          changeNodeHight={changeNodeHight}
+          choices={cur.choices}
+          content={cur.content}
+          identifier={cur.node}
+          left={cur.left}
+          nodeImage={cur.nodeImage ?? ""}
+          nodeType={cur.nodeType}
+          nodeVideo={cur.nodeVideo ?? ""}
+          nodeVideoEndTime={cur.nodeVideoEndTime || 0}
+          nodeVideoStartTime={cur.nodeVideoStartTime || 0}
+          open={Boolean(cur.open)}
+          setOpenMedia={setOpenMedia}
+          title={cur.title}
+          top={cur.top}
+          width={NODE_WIDTH}
+          aImgUrl={cur.aImgUrl ?? ""}
+          bookmarked={cur.bookmarked}
+          bookmarks={cur.bookmarks}
+          changedAt={cur.changedAt as string}
+          correctNum={cur.corrects}
+          locked={Boolean(cur.locked)}
+          // markedCorrect={cur.correct}
+          // markedWrong={cur.wrong}
+          nodesChildren={cur.children}
+          notebookRef={null}
+          // onNodeShare={onNodeShare}
+          openNodePart={openNodePart}
+          openPart={cur.localLinkingWords}
+          parents={cur.parents}
+          references={cur.references.map((c: string, idx: number) => ({
+            title: c,
+            node: cur.referenceIds[idx],
+            label: cur.referenceLabels[idx],
+          }))}
+          selectNode={selectNode}
+          setOpenPart={onChangeNodePart}
+          tags={cur.tags.map((c: string, idx: number) => ({
+            node: cur.tagIds[idx],
+            title: c,
+          }))}
+          viewers={cur.viewers}
+          wrongNum={cur.wrongs}
+          toggleNode={toggleNode}
+        />
+      ));
+  }, [changeNodeHight, graph.nodes, onChangeNodePart, openNodePart, selectNode, toggleNode]);
+
   //   ------------------------------ useEffect
 
   useEffect(() => {
@@ -618,56 +673,7 @@ const NodePage: NextPage<Props> = ({ notebook }) => {
               onChange={navigateWhenNotScrolling}
             >
               <MemoizedLinksList edgeIds={edgeIds} edges={graph.edges} />
-              {Object.keys(graph.nodes)
-                .map(nId => graph.nodes[nId])
-                .map(cur => (
-                  <MemoizedBasicNode
-                    key={cur.node}
-                    changeNodeHight={changeNodeHight}
-                    choices={cur.choices}
-                    content={cur.content}
-                    identifier={cur.node}
-                    left={cur.left}
-                    nodeImage={cur.nodeImage ?? ""}
-                    nodeType={cur.nodeType}
-                    nodeVideo={cur.nodeVideo ?? ""}
-                    nodeVideoEndTime={cur.nodeVideoEndTime || 0}
-                    nodeVideoStartTime={cur.nodeVideoStartTime || 0}
-                    open={Boolean(cur.open)}
-                    setOpenMedia={setOpenMedia}
-                    title={cur.title}
-                    top={cur.top}
-                    width={NODE_WIDTH}
-                    aImgUrl={cur.aImgUrl ?? ""}
-                    bookmarked={cur.bookmarked}
-                    bookmarks={cur.bookmarks}
-                    changedAt={cur.changedAt as string}
-                    correctNum={cur.corrects}
-                    locked={Boolean(cur.locked)}
-                    // markedCorrect={cur.correct}
-                    // markedWrong={cur.wrong}
-                    nodesChildren={cur.children}
-                    notebookRef={null}
-                    // onNodeShare={onNodeShare}
-                    openNodePart={openNodePart}
-                    openPart={cur.localLinkingWords}
-                    parents={cur.parents}
-                    references={cur.references.map((c: string, idx: number) => ({
-                      title: c,
-                      node: cur.referenceIds[idx],
-                      label: cur.referenceLabels[idx],
-                    }))}
-                    selectNode={selectNode}
-                    setOpenPart={onChangeNodePart}
-                    tags={cur.tags.map((c: string, idx: number) => ({
-                      node: cur.tagIds[idx],
-                      title: c,
-                    }))}
-                    viewers={cur.viewers}
-                    wrongNum={cur.wrongs}
-                    toggleNode={toggleNode}
-                  />
-                ))}
+              {nodeList}
             </MapInteractionCSS>
 
             <Suspense fallback={<div></div>}>
