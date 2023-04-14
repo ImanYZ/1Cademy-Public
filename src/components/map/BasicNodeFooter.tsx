@@ -864,7 +864,7 @@ const CustomIconButton = ({ id, children, disabled = false, sx, onClick, onClick
           borderRadius: "16px",
           width: "30px",
           height: "30px",
-          color: ({ palette }) => (palette.mode === "dark" ? "rgba(255, 255, 255, 0.3)" : palette.common.notebookG200),
+          color: ({ palette }) => (palette.mode === "dark" ? "rgba(255, 255, 255, 0.3)" : "#475467"),
           ...DisableStyles,
         }}
       >

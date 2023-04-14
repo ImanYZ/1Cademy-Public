@@ -293,7 +293,8 @@ BasicNodeProps) => {
             p: "5px",
             width: "28px",
             height: "28px",
-            color: theme => (theme.palette.mode === "dark" ? "rgba(255, 255, 255, 0.3)" : "rgba(255, 255, 255, 0.3)"),
+            color: theme =>
+              theme.palette.mode === "dark" ? "rgba(255, 255, 255, 0.3)" : theme.palette.common.notebookG200,
           }}
         >
           <KeyboardTabIcon fontSize="inherit" sx={{ transform: "scaleX(-1)" }} />
@@ -306,7 +307,8 @@ BasicNodeProps) => {
             p: "5px",
             width: "28px",
             height: "28px",
-            color: theme => (theme.palette.mode === "dark" ? "rgba(255, 255, 255, 0.3)" : "rgba(255, 255, 255, 0.3)"),
+            color: theme =>
+              theme.palette.mode === "dark" ? "rgba(255, 255, 255, 0.3)" : theme.palette.common.notebookG200,
           }}
         >
           <CloseIcon fontSize="inherit" />
