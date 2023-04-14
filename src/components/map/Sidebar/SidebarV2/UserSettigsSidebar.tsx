@@ -1,24 +1,22 @@
 import AdapterDaysJs from "@date-io/dayjs";
-import CodeIcon from "@mui/icons-material/Code";
-import DoneIcon from "@mui/icons-material/Done";
-import EmojiObjectsIcon from "@mui/icons-material/EmojiObjects";
+import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
+import DoneRoundedIcon from "@mui/icons-material/DoneRounded";
 import ExitToAppIcon from "@mui/icons-material/ExitToApp";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
-import HelpOutlineIcon from "@mui/icons-material/HelpOutline";
-import LocalLibraryIcon from "@mui/icons-material/LocalLibrary";
-import LocalOfferIcon from "@mui/icons-material/LocalOffer";
-import MenuBookIcon from "@mui/icons-material/MenuBook";
-import ShareIcon from "@mui/icons-material/Share";
+import LocalOfferRoundedIcon from "@mui/icons-material/LocalOfferRounded";
 import {
   Autocomplete,
   Button,
   FormControlLabel,
   FormGroup,
   LinearProgress,
+  Paper,
+  Stack,
   Switch,
   Tab,
   Tabs,
   TextField,
+  Typography,
 } from "@mui/material";
 import { Box } from "@mui/system";
 import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers";
@@ -39,11 +37,13 @@ import {
   where,
   writeBatch,
 } from "firebase/firestore";
+import Image from "next/image";
 import React, { MutableRefObject, ReactNode, Suspense, useCallback, useEffect, useMemo, useState } from "react";
 import { DispatchAuthActions, Reputation, User, UserSettings, UserTheme } from "src/knowledgeTypes";
 import { DispatchNodeBookActions, NodeBookState, TNodeBookState } from "src/nodeBookTypes";
 import { NodeType } from "src/types";
 
+import NodeTypeIcon from "@/components/NodeTypeIcon";
 import OptimizedAvatar from "@/components/OptimizedAvatar";
 import { ChosenTag, MemoizedTagsSearcher } from "@/components/TagsSearcher";
 import { useTagsTreeView } from "@/hooks/useTagsTreeView";
@@ -55,14 +55,13 @@ import { justADate } from "@/lib/utils/justADate";
 import shortenNumber from "@/lib/utils/shortenNumber";
 import { ToUpperCaseEveryWord } from "@/lib/utils/utils";
 
+import { DESIGN_SYSTEM_COLORS } from "../../../../lib/theme/colors";
 import { MemoizedInputSave } from "../../InputSave";
 import { MemoizedMetaButton } from "../../MetaButton";
 import Modal from "../../Modal/Modal";
 import ProposalItem from "../../ProposalsList/ProposalItem/ProposalItem";
-import ProfileAvatar from "../ProfileAvatar";
 import { UserSettingsProfessionalInfo } from "../UserSettingsProfessionalInfo";
 import { SidebarWrapper } from "./SidebarWrapper";
-
 dayjs.extend(relativeTime);
 
 type UserSettingsSidebarProps = {
@@ -85,7 +84,28 @@ type UserSettingsTabs = {
   content: ReactNode;
 };
 
-export const NODE_TYPE_OPTIONS: NodeType[] = ["Code", "Concept", "Idea", "Question", "Reference", "Relation", "News"];
+export const NODE_TYPE_OPTIONS: NodeType[] = ["Code", "Concept", "Idea", "Question", "Reference", "Relation"];
+
+const PointsType = ({ points, children }: { points: number; children: ReactNode }) => {
+  const { notebookG700, notebookG50 } = DESIGN_SYSTEM_COLORS;
+  return (
+    <Stack direction={"row"} alignItems={"center"} spacing={"6px"}>
+      <Typography sx={{ fontWeight: "600" }}>{points}</Typography>
+      <Box
+        sx={{
+          width: "20px",
+          height: "20px",
+          borderRadius: "50%",
+          display: "grid",
+          placeItems: "center",
+          backgroundColor: theme => (theme.palette.mode === "dark" ? notebookG700 : notebookG50),
+        }}
+      >
+        {children}
+      </Box>
+    </Stack>
+  );
+};
 
 const UserSettigsSidebar = ({
   notebookRef,
@@ -108,11 +128,14 @@ const UserSettigsSidebar = ({
   const [states, setStates] = useState<IState[]>([]);
   const [cities, setCities] = useState<ICity[]>([]);
   const [instlogoURL, setInstlogoURL] = useState("");
-  const [totalPoints, setTotalPoints] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
   const [proposals, setProposals] = useState<any[]>([]);
   const [lastIndex, setLastIndex] = useState(ELEMENTS_PER_PAGE);
   const [value, setValue] = React.useState(0);
+  const [points, setPoints] = useState({ positives: 0, negatives: 0, totalPoints: 0 });
+
+  const { success600, orange600, gray500, gray300 } = DESIGN_SYSTEM_COLORS;
+
   const isInEthnicityValues = (ethnicityItem: string) => ETHNICITY_VALUES.includes(ethnicityItem);
   const getOtherValue = (userValues: string[], defaultValue: string, userValue?: string) => {
     if (!userValue) return "";
@@ -238,7 +261,7 @@ const UserSettigsSidebar = ({
   }, [countries, db, dispatch, user]);
 
   useEffect(() => {
-    const total =
+    const totalPoints =
       userReputation.cnCorrects -
       userReputation.cnWrongs +
       userReputation.cnInst +
@@ -269,8 +292,34 @@ const UserSettigsSidebar = ({
       userReputation.iCorrects -
       userReputation.iWrongs +
       userReputation.iInst;
-    setTotalPoints(total);
+    const positives =
+      ("positives" in userReputation && userReputation.positives) ||
+      userReputation.cnCorrects +
+        userReputation.cdCorrects +
+        userReputation.qCorrects +
+        userReputation.pCorrects +
+        userReputation.sCorrects +
+        userReputation.aCorrects +
+        userReputation.rfCorrects +
+        userReputation.nCorrects +
+        userReputation.mCorrects +
+        userReputation.iCorrects +
+        userReputation.lterm;
+    const negatives =
+      ("negatives" in userReputation && userReputation.negatives) ||
+      userReputation.cnWrongs +
+        userReputation.cdWrongs +
+        userReputation.qWrongs +
+        userReputation.pWrongs +
+        userReputation.sWrongs +
+        userReputation.aWrongs +
+        userReputation.rfWrongs +
+        userReputation.nWrongs +
+        userReputation.mWrongs +
+        userReputation.iWrongs;
+    setPoints({ positives, negatives, totalPoints });
   }, [
+    userReputation,
     userReputation.aCorrects,
     userReputation.aInst,
     userReputation.aWrongs,
@@ -760,11 +809,82 @@ const UserSettigsSidebar = ({
       await batch.commit();
     }
   };
-
+  //
   const loadOlderProposalsClick = useCallback(() => {
     if (lastIndex >= proposals.length) return;
     setLastIndex(lastIndex + ELEMENTS_PER_PAGE);
   }, [lastIndex, proposals.length]);
+
+  const nodeTypeStats = useMemo(() => {
+    const stats = new Map(NODE_TYPE_OPTIONS.map(nodeType => [nodeType, "0"]));
+    stats.forEach((value, key) => {
+      switch (key) {
+        case "Concept":
+          value = shortenNumber(userReputation.cnCorrects - userReputation.cnWrongs, 2, false);
+          stats.set(key, value);
+        case "Relation":
+          value = shortenNumber(userReputation.mCorrects - userReputation.mWrongs, 2, false);
+          stats.set(key, value);
+        case "Reference":
+          value = shortenNumber(userReputation.rfCorrects - userReputation.rfWrongs, 2, false);
+          stats.set(key, value);
+        case "Question":
+          value = shortenNumber(userReputation.qCorrects - userReputation.qWrongs, 2, false);
+          stats.set(key, value);
+        case "Idea":
+          value = shortenNumber(userReputation.iCorrects - userReputation.iWrongs, 2, false);
+          stats.set(key, value);
+        case "Code":
+          value = shortenNumber(userReputation.cdCorrects - userReputation.cdWrongs, 2, false);
+          stats.set(key, value);
+      }
+      console.log("map value", { value, key });
+    });
+    return stats;
+  }, [
+    userReputation.cdCorrects,
+    userReputation.cdWrongs,
+    userReputation.cnCorrects,
+    userReputation.cnWrongs,
+    userReputation.iCorrects,
+    userReputation.iWrongs,
+    userReputation.mCorrects,
+    userReputation.mWrongs,
+    userReputation.qCorrects,
+    userReputation.qWrongs,
+    userReputation.rfCorrects,
+    userReputation.rfWrongs,
+  ]);
+  const newTabsItems: UserSettingsTabs[] = useMemo(() => {
+    return [
+      {
+        title: "Trends",
+        content: (
+          <Box id="TrendsSettings" sx={{}}>
+            <Box component={"section"} sx={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "10px" }}>
+              {NODE_TYPE_OPTIONS.map((nodeType, idx) => (
+                <Paper
+                  key={`${nodeType}-${idx}`}
+                  sx={{
+                    p: "16px",
+                    borderRadius: "8px",
+                    backgroundColor: theme =>
+                      theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookG700 : DESIGN_SYSTEM_COLORS.gray200,
+                  }}
+                >
+                  <NodeTypeIcon nodeType={nodeType} sx={{ justifyContent: "flex-start" }} />
+                  <Typography fontSize={"16px"} fontWeight={"600"}>
+                    {nodeTypeStats.get(nodeType)}
+                  </Typography>
+                  <Typography>{`${nodeType}s`}</Typography>
+                </Paper>
+              ))}
+            </Box>
+          </Box>
+        ),
+      },
+    ];
+  }, [nodeTypeStats]);
 
   const tabsItems: UserSettingsTabs[] = useMemo(() => {
     return [
@@ -1051,12 +1171,13 @@ const UserSettigsSidebar = ({
     lastIndex,
     loadOlderProposalsClick,
   ]);
-  const setUserImage = useCallback(
-    (newImage: string) => {
-      dispatch({ type: "setAuthUser", payload: { ...user, imageUrl: newImage } });
-    },
-    [dispatch, user]
-  );
+  console.log(tabsItems);
+  // const setUserImage = useCallback(
+  //   (newImage: string) => {
+  //     dispatch({ type: "setAuthUser", payload: { ...user, imageUrl: newImage } });
+  //   },
+  //   [dispatch, user]
+  // );
 
   const a11yProps = (index: number) => {
     return {
@@ -1067,7 +1188,7 @@ const UserSettigsSidebar = ({
 
   const contentSignalState = useMemo(() => {
     return { updates: true };
-  }, [tabsItems, value]);
+  }, [newTabsItems, value]);
 
   const shouldShowTagSearcher = useMemo(() => {
     return nodeBookState?.choosingNode?.id === "Tag";
@@ -1083,7 +1204,89 @@ const UserSettigsSidebar = ({
           paddingTop: "40px",
         }}
       >
-        <div id="MiniUserPrifileHeader" className="MiniUserProfileHeaderMobile">
+        <Box p="0 32px 16px 32px">
+          <Stack direction={"row"} alignItems={"center"} component={"section"} spacing={"20px"} mb="18px">
+            <Box sx={{ "& img": { borderRadius: "50%" } }}>
+              <Image src={user.imageUrl ?? ""} alt={`${user?.fName} ${user?.lName}`} width={90} height={90} />
+            </Box>
+            <Box>
+              <Typography sx={{ fontSize: "20px", fontWeight: "700", mb: "4px" }}>
+                {user.chooseUname ? user.uname : `${user.fName} ${user.lName}`}
+              </Typography>
+              <Typography sx={{ mb: "6px", color: theme => (theme.palette.mode === "dark" ? gray300 : gray500) }}>
+                @{user.uname}
+              </Typography>
+              <Stack direction={"row"} spacing={"12px"}>
+                <PointsType points={points.positives}>
+                  <DoneRoundedIcon sx={{ color: success600, fontSize: "16px" }} />
+                </PointsType>
+                <PointsType points={points.negatives}>
+                  <CloseRoundedIcon sx={{ color: orange600, fontSize: "16px" }} />
+                </PointsType>
+              </Stack>
+            </Box>
+          </Stack>
+          <div id="MiniUserPrifileInstitution" style={{ display: "flex", gap: "12px", borderRadius: "6px" }}>
+            <OptimizedAvatar
+              imageUrl={instlogoURL}
+              name={user.deInstit + " logo"}
+              sx={{
+                width: "20px",
+                height: "20px",
+                fontSize: "16px",
+              }}
+              renderAsAvatar={false}
+            />
+            <span>{user.deInstit}</span>
+          </div>
+          <div id="MiniUserPrifileTag">
+            <MemoizedMetaButton
+              id="user-settings-community-tag"
+              style={{ padding: "4px 0" }}
+              onClick={() => choosingNodeClick("Tag")}
+            >
+              <div className="AccountSettingsButton">
+                <LocalOfferRoundedIcon
+                  sx={{ marginRight: "8px" }}
+                  id="tagChangeIcon"
+                  className="material-icons deep-orange-text"
+                />
+                {user.tag}
+                {isLoading && <LinearProgress />}
+              </div>
+            </MemoizedMetaButton>
+            {shouldShowTagSearcher && (
+              <Suspense fallback={<div></div>}>
+                <div id="tagModal">
+                  <Modal
+                    className="tagSelectorModalUserSetting"
+                    onClick={closeTagSelector}
+                    returnDown={false}
+                    noBackground={true}
+                    style={{
+                      width: "441px",
+                      height: "495px",
+                      left: window.innerWidth <= 500 ? "28px" : "420px",
+                    }}
+                    contentStyle={{
+                      height: "500px",
+                    }}
+                  >
+                    <MemoizedTagsSearcher
+                      id="user-settings-tag-searcher"
+                      setChosenTags={setChosenTags}
+                      chosenTags={chosenTags}
+                      allTags={allTags}
+                      setAllTags={setAllTags}
+                      sx={{ maxHeight: "339px", height: "339px" }}
+                    />
+                  </Modal>
+                </div>
+              </Suspense>
+            )}
+          </div>
+        </Box>
+        {/* <div id="MiniUserPrifileHeader" className="MiniUserProfileHeaderMobile">
           <ProfileAvatar
             id="user-settings-picture"
             userId={user.userId}
@@ -1157,7 +1360,7 @@ const UserSettigsSidebar = ({
             </div>
             <Box id="user-settings-statistics" sx={{ borderRadius: "6px" }}>
               <DoneIcon className="material-icons DoneIcon green-text" sx={{ mr: "12px" }} />
-              <span>{shortenNumber(totalPoints, 2, false)}</span>
+              <span>{shortenNumber(points.totalPoints, 2, false)}</span>
             </Box>
           </div>
         </div>
@@ -1202,9 +1405,9 @@ const UserSettigsSidebar = ({
               {shortenNumber(userReputation.rfCorrects - userReputation.rfWrongs, 2, false)}
             </span>
           </div>
-        </div>
+        </div> */}
         <Tabs id="user-settings-personalization" value={value} onChange={handleTabChange} aria-label={"Bookmarks Tabs"}>
-          {tabsItems.map((tabItem: UserSettingsTabs, idx: number) => (
+          {newTabsItems.map((tabItem: UserSettingsTabs, idx: number) => (
             <Tab
               id={`user-settings-${tabItem.title.toLowerCase()}`}
               key={tabItem.title}
@@ -1221,13 +1424,17 @@ const UserSettigsSidebar = ({
     choosingNodeClick,
     chosenTags,
     closeTagSelector,
+    gray300,
+    gray500,
     instlogoURL,
     isLoading,
+    newTabsItems,
+    orange600,
+    points.negatives,
+    points.positives,
     setAllTags,
-    setUserImage,
     shouldShowTagSearcher,
-    tabsItems,
-    totalPoints,
+    success600,
     user.chooseUname,
     user.deInstit,
     user.fName,
@@ -1235,19 +1442,6 @@ const UserSettigsSidebar = ({
     user.lName,
     user.tag,
     user.uname,
-    user.userId,
-    userReputation.cdCorrects,
-    userReputation.cdWrongs,
-    userReputation.cnCorrects,
-    userReputation.cnWrongs,
-    userReputation.iCorrects,
-    userReputation.iWrongs,
-    userReputation.mCorrects,
-    userReputation.mWrongs,
-    userReputation.qCorrects,
-    userReputation.qWrongs,
-    userReputation.rfCorrects,
-    userReputation.rfWrongs,
     value,
   ]);
 
@@ -1260,7 +1454,7 @@ const UserSettigsSidebar = ({
       onClose={onClose}
       width={430}
       SidebarOptions={open ? SidebarOptions : null}
-      SidebarContent={open ? <Box sx={{ p: "10px" }}>{tabsItems[value].content}</Box> : null}
+      SidebarContent={open ? <Box sx={{ p: "10px" }}>{newTabsItems[value].content}</Box> : null}
     />
   );
 };
