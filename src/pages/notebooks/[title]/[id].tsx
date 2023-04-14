@@ -18,6 +18,7 @@ import { MapInteractionCSS } from "react-map-interaction";
 /* eslint-enable */
 import NodeItemFullSkeleton from "@/components/NodeItemFullSkeleton";
 
+import oneCademyLogo from "../../../../public/1Cademy-head.svg";
 import focusViewLogo from "../../../../public/focus.svg";
 import focusViewDarkLogo from "../../../../public/focus-dark.svg";
 import { MemoizedBasicNode } from "../../../components/map/BasicNode";
@@ -140,6 +141,7 @@ const NodePage: NextPage<Props> = ({ notebook }) => {
   const [selectedUser, setSelectedUser] = useState<SelectedUser | null>(null);
   const [selectedNodeId, setSelectedNodeId] = useState("");
   const [displayFocusMode, setDisplayFocusMode] = useState(false);
+  const [displayJoinMessage, setDisplayJoinMessage] = useState(false);
   //   ------------------------------ functions
 
   const setNodeParts = useCallback((nodeId: string, innerFunc: (thisNode: FullNodeData) => FullNodeData) => {
@@ -737,14 +739,14 @@ const NodePage: NextPage<Props> = ({ notebook }) => {
           <Button
             variant="outlined"
             sx={{ borderRadius: "26px", borderColor: theme => theme.palette.common.primary800 }}
-            onClick={() => router.push(ROUTES.signIn)}
+            onClick={() => router.push({ pathname: ROUTES.signUp, query: { from: router.asPath } })}
           >
             Sign in
           </Button>
           <Button
             variant="contained"
             sx={{ borderRadius: "26px", background: theme => theme.palette.common.primary800 }}
-            onClick={() => router.push(ROUTES.signUp)}
+            onClick={() => router.push({ pathname: ROUTES.signIn, query: { from: router.asPath } })}
           >
             Sign Up
           </Button>
@@ -790,6 +792,75 @@ const NodePage: NextPage<Props> = ({ notebook }) => {
               <MemoizedLinksList edgeIds={edgeIds} edges={graph.edges} />
               {nodeList}
             </MapInteractionCSS>
+
+            <Modal open={displayJoinMessage} onClose={() => setDisplayJoinMessage(false)}>
+              <Box sx={{ display: "grid", placeItems: "center", width: "100%", height: "100%" }}>
+                <Stack
+                  alignItems={"center"}
+                  sx={{
+                    position: "relative",
+                    p: "40px 87px",
+                    maxWidth: "538px",
+                    backgroundColor: theme =>
+                      theme.palette.mode === "dark" ? theme.palette.common.notebookG900 : theme.palette.common.gray50,
+                  }}
+                >
+                  <IconButton
+                    onClick={() => setDisplayJoinMessage(false)}
+                    size={"small"}
+                    sx={{ position: "absolute", top: "36px", right: "36px", p: "0px" }}
+                  >
+                    <CloseIcon />
+                  </IconButton>
+
+                  <NextImage src={oneCademyLogo.src} alt="logo" width={"70px"} height={"70px"} />
+
+                  <Typography
+                    sx={{
+                      fontSize: "16px",
+                      textAlign: "center",
+                      fontWeight: 500,
+                      mb: "8px",
+                      mt: "20px",
+                      color: theme =>
+                        theme.palette.mode === "dark" ? theme.palette.common.gray25 : theme.palette.common.gray900,
+                    }}
+                  >
+                    Unlock the power of our platform and join now!
+                  </Typography>
+                  <Typography
+                    sx={{
+                      fontSize: "14px",
+                      textAlign: "center",
+                      mb: "32px",
+                      color: theme =>
+                        theme.palette.mode === "dark"
+                          ? theme.palette.common.notebookG100
+                          : theme.palette.common.gray500,
+                    }}
+                  >
+                    Sign up and get access to all features. Discover our large community to enhance the standards of
+                    research and education.
+                  </Typography>
+                  <Button
+                    variant="contained"
+                    fullWidth
+                    onClick={() => router.push({ pathname: ROUTES.signUp, query: { from: router.asPath } })}
+                  >
+                    Sign Up
+                  </Button>
+                  <Typography sx={{ mt: "20px" }}>
+                    Already a member?{" "}
+                    <Button
+                      variant="text"
+                      onClick={() => router.push({ pathname: ROUTES.signIn, query: { from: router.asPath } })}
+                    >
+                      Sign In
+                    </Button>
+                  </Typography>
+                </Stack>
+              </Box>
+            </Modal>
 
             <Suspense fallback={<div></div>}>
               <Modal
