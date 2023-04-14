@@ -25,6 +25,7 @@ type FocusedNotebookProps = {
   };
   focusedNode: string;
   navigationBlocked?: boolean;
+  onClickOnNavigationBlocked?: () => void;
 };
 
 const FocusedNotebook = ({
@@ -35,6 +36,7 @@ const FocusedNotebook = ({
   onCloseFocusMode,
   db,
   navigationBlocked = false,
+  onClickOnNavigationBlocked,
 }: FocusedNotebookProps) => {
   const [selectedNodeId, setSelectedNodeId] = useState("");
   const [relatedNodes, setRelatedNodes] = useState<INodeLink[]>([]);
@@ -91,7 +93,7 @@ const FocusedNotebook = ({
 
   const navigateToNode = useCallback(
     (nodeId: string) => {
-      if (navigationBlocked) return;
+      if (navigationBlocked) return onClickOnNavigationBlocked && onClickOnNavigationBlocked();
       if (!graph.nodes[nodeId]) {
         openLinkedNode(nodeId);
       } else {
@@ -99,7 +101,7 @@ const FocusedNotebook = ({
       }
       setSelectedNodeId(nodeId);
     },
-    [navigationBlocked, setSelectedNodeId, graph]
+    [navigationBlocked, onClickOnNavigationBlocked, graph.nodes, openLinkedNode, setSelectedNode]
   );
 
   const _contributors = useMemo(() => {
@@ -136,7 +138,7 @@ const FocusedNotebook = ({
           position: "absolute",
           width: "100%",
           height: "100%",
-          zIndex: 1399,
+          zIndex: 1299,
           padding: { xs: "50px 5px", sm: "50px 10px" },
           overflow: "auto",
         }}
