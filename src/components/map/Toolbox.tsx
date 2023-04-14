@@ -1,7 +1,6 @@
 import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
-import { CircularProgress, Collapse, Divider, IconButton, Stack, useTheme } from "@mui/material";
+import { Box, CircularProgress, Collapse, Divider, IconButton, Stack, useTheme } from "@mui/material";
 import { SxProps, Theme } from "@mui/material/styles";
-import { Box } from "@mui/system";
 import NextImage from "next/image";
 import React, { ReactNode, useState } from "react";
 
@@ -61,7 +60,7 @@ const Toolbox = ({ children, isLoading = false, sx }: ToolboxProps) => {
         }}
       >
         <Collapse in={expanded} timeout="auto" orientation="horizontal" unmountOnExit>
-          <Stack direction={"row"} spacing={"10px"} sx={{ px: "10px 0px 10px 10px" }}>
+          <Stack direction={"row"} spacing={"10px"} sx={{ p: "10px 0px 10px 10px" }}>
             {children}
             <Divider orientation="vertical" sx={{ height: "auto" }} />
           </Stack>

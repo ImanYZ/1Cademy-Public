@@ -1,9 +1,10 @@
 import CloseIcon from "@mui/icons-material/Close";
+import DarkModeIcon from "@mui/icons-material/DarkMode";
+import LightModeIcon from "@mui/icons-material/LightMode";
 import MyLocationIcon from "@mui/icons-material/MyLocation";
-import { Button, IconButton, Modal, Paper, ThemeProvider, Tooltip, Typography, useTheme } from "@mui/material";
+import { Button, Divider, IconButton, Modal, Paper, ThemeProvider, Tooltip, Typography, useTheme } from "@mui/material";
 import Box from "@mui/material/Box";
 import { Stack } from "@mui/system";
-import { getAuth } from "firebase/auth";
 import { collection, DocumentData, getFirestore, onSnapshot, Query, query, where } from "firebase/firestore";
 import NextImage from "next/image";
 import { useRouter } from "next/router";
@@ -25,6 +26,7 @@ import { MemoizedLinksList } from "../../../components/map/LinksList";
 import { NotebookPopup } from "../../../components/map/Popup";
 import { MemoizedUserInfoSidebar } from "../../../components/map/Sidebar/SidebarV2/UserInfoSidebar";
 import { MemoizedToolbox } from "../../../components/map/Toolbox";
+import { useAuth } from "../../../context/AuthContext";
 import { useWindowSize } from "../../../hooks/useWindowSize";
 import { useWorkerQueue } from "../../../hooks/useWorkerQueue";
 import { getNotebookById } from "../../../lib/firestoreServer/notebooks";
@@ -82,7 +84,7 @@ const NodePage: NextPage<Props> = ({ notebook }) => {
   const theme = useTheme();
   const db = getFirestore();
   const router = useRouter();
-  const auth = getAuth();
+  const [{ user }, { dispatch }] = useAuth();
   // flag for when scrollToNode is called
   const scrollToNodeInitialized = useRef(false);
 
@@ -590,12 +592,12 @@ const NodePage: NextPage<Props> = ({ notebook }) => {
   //   ------------------------------ useEffect
 
   useEffect(() => {
-    const userAuthObj = auth?.currentUser;
-    if (userAuthObj) {
+    // const userAuthObj = auth?.currentUser;
+    if (user) {
       router.push(`${ROUTES.notebook}?nb=${notebook.id}`);
     }
-    console.log({ userAuthObj, query: router.query });
-  }, [auth?.currentUser, notebook.id, router]);
+    // console.log({ userAuthObj, query: router.query });
+  }, [notebook.id, router, user]);
 
   useEffect(() => {
     if (!db) return;
@@ -643,6 +645,16 @@ const NodePage: NextPage<Props> = ({ notebook }) => {
         }}
       >
         <>
+          <Tooltip title="Change theme">
+            <IconButton
+              onClick={() => dispatch({ type: "setTheme", payload: theme.palette.mode === "dark" ? "Light" : "Dark" })}
+              size="small"
+            >
+              {theme.palette.mode === "dark" ? <LightModeIcon /> : <DarkModeIcon />}
+            </IconButton>
+          </Tooltip>
+
+          <Divider orientation="vertical" sx={{ height: "auto" }} />
           <Tooltip title="Scroll to last Selected Node" placement="bottom">
             <IconButton
               id="toolbox-scroll-to-node"
