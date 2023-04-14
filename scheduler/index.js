@@ -1,5 +1,5 @@
 const { assignNodeContributorsInstitutionsStats } = require("./assignNodeContributorsInstitutionsStats");
-const { updateInstitutions } = require("./updateInstitutions");
+// const { updateInstitutions } = require("./updateInstitutions");
 
 // Retrieve Job-defined env vars
 const { CLOUD_RUN_TASK_ATTEMPT = 0 } = process.env;
@@ -10,9 +10,9 @@ const main = async () => {
   console.log(`Starting Task #${CLOUD_RUN_TASK_INDEX}, Attempt #${CLOUD_RUN_TASK_ATTEMPT}...`);
 
   if (CLOUD_RUN_TASK_INDEX === 0) {
-    console.log("Task: Update institutions");
-    await updateInstitutions(true);
-    console.log("Done Task: Update institutions");
+    // console.log("Task: Update institutions");
+    // await updateInstitutions(true);
+    // console.log("Done Task: Update institutions");
 
     console.log("Task: Assign Node Contributors Institutions Stats");
     await assignNodeContributorsInstitutionsStats(true);
