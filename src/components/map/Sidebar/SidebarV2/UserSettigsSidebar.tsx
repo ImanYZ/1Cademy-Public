@@ -883,6 +883,32 @@ const UserSettigsSidebar = ({
           </Box>
         ),
       },
+      {
+        title: "Proposals",
+        content: (
+          <Box sx={{ display: "flex", flexDirection: "column", gap: "4px" }}>
+            <div className="ChartTitle">Proposals in chronological order</div>
+            {proposals.slice(0, lastIndex).map((proposal, idx) => {
+              return (
+                proposal.title && (
+                  <ProposalItem key={idx} proposal={proposal} openLinkedNode={openLinkedNode} showTitle={true} />
+                )
+              );
+            })}
+            {proposals.length > lastIndex && (
+              <div id="ContinueButton" style={{ padding: "10px 0px" }}>
+                <MemoizedMetaButton onClick={loadOlderProposalsClick}>
+                  <>
+                    <ExpandMoreIcon className="material-icons grey-text" />
+                    Older Proposals
+                    <ExpandMoreIcon className="material-icons grey-text" />
+                  </>
+                </MemoizedMetaButton>
+              </div>
+            )}
+          </Box>
+        ),
+      },
     ];
   }, [nodeTypeStats]);
 
