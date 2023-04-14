@@ -1,7 +1,7 @@
 import LaunchIcon from "@mui/icons-material/Launch";
 import { Button, IconButton, Link, Tooltip } from "@mui/material";
 import { Box } from "@mui/system";
-import React from "react";
+import React, { ReactNode } from "react";
 
 import LinkingButton from "./LinkingButton";
 
@@ -13,6 +13,7 @@ type BasicNodeDetailsProps = {
   tags: any[];
   references: any[];
   nodeType: any;
+  displayJoinMessage?: () => void;
 };
 
 const BasicNodeDetails = (props: BasicNodeDetailsProps) => {
@@ -43,7 +44,7 @@ const BasicNodeDetails = (props: BasicNodeDetailsProps) => {
                     key={props.identifier + "LinkTo" + parent.node}
                   >
                     <LinkingButton
-                      onClick={() => {}}
+                      onClick={props.displayJoinMessage}
                       linkedNodeID={parent.node}
                       linkedNodeTitle={parent.title}
                       linkedNodeType="parent"
@@ -55,19 +56,9 @@ const BasicNodeDetails = (props: BasicNodeDetailsProps) => {
                 );
               })}
               {props.parents.length > 0 && (
-                <Button
-                  onClick={() => {}}
-                  sx={{
-                    justifyContent: "stretch",
-                    textAlign: "left",
-                    ":hover": {
-                      background: "transparent",
-                    },
-                  }}
-                  disabled={true}
-                >
+                <CustomButton onClickOnDisable={props.displayJoinMessage} disable={true}>
                   Open All Parents
-                </Button>
+                </CustomButton>
               )}
             </Box>
           )}
@@ -105,7 +96,7 @@ const BasicNodeDetails = (props: BasicNodeDetailsProps) => {
                       <LinkingButton
                         id={`${props.identifier}-reference-button-${idx}`}
                         key={props.identifier + "LinkTo" + reference.node}
-                        onClick={() => {}}
+                        onClick={props.displayJoinMessage}
                         linkedNodeID={reference.node}
                         linkedNodeTitle={refTitle}
                         linkedNodeType="reference"
@@ -160,7 +151,7 @@ const BasicNodeDetails = (props: BasicNodeDetailsProps) => {
                     <LinkingButton
                       id={`${props.identifier}-tag-button-${idx}`}
                       key={props.identifier + "LinkTo" + tag.node}
-                      onClick={() => {}}
+                      onClick={props.displayJoinMessage}
                       linkedNodeID={tag.node}
                       linkedNodeTitle={tag.title}
                       linkedNodeType="tag"
@@ -181,7 +172,7 @@ const BasicNodeDetails = (props: BasicNodeDetailsProps) => {
                   <div key={props.identifier + "LinkTo" + tag.node + "DIV"}>
                     <LinkingButton
                       key={props.identifier + "LinkTo" + tag.node}
-                      onClick={() => {}}
+                      onClick={props.displayJoinMessage}
                       linkedNodeID={tag.node}
                       linkedNodeTitle={tag.title}
                       linkedNodeType="tag"
@@ -210,7 +201,7 @@ const BasicNodeDetails = (props: BasicNodeDetailsProps) => {
                   >
                     <LinkingButton
                       key={props.identifier + "LinkTo" + child.node}
-                      onClick={() => {}}
+                      onClick={props.displayJoinMessage}
                       linkedNodeID={child.node}
                       linkedNodeTitle={child.title}
                       linkedNodeType="child"
@@ -222,19 +213,9 @@ const BasicNodeDetails = (props: BasicNodeDetailsProps) => {
                 );
               })}
               {props.nodesChildren.length > 0 && (
-                <Button
-                  onClick={() => {}}
-                  sx={{
-                    justifyContent: "stretch",
-                    textAlign: "left",
-                    ":hover": {
-                      background: "transparent",
-                    },
-                  }}
-                  disabled={true}
-                >
+                <CustomButton onClickOnDisable={props.displayJoinMessage} disable={true}>
                   Open All Children
-                </Button>
+                </CustomButton>
               )}
             </Box>
           )}
@@ -253,8 +234,8 @@ const separateURL = (text: string, url: string): [boolean, any] => {
   if (matches && matches.length > 0) {
     return [
       true,
-      // eslint-disable-next-line react/jsx-key
       <Link
+        key={"link"}
         href={matches[0]}
         target="_blank"
         rel="noreferrer"
@@ -273,4 +254,39 @@ const separateURL = (text: string, url: string): [boolean, any] => {
   } else {
     return [false, url];
   }
+};
+
+type CustomButtonProps = {
+  children: ReactNode;
+  onClick?: () => void;
+  onClickOnDisable?: () => void;
+  disable?: boolean;
+};
+
+const CustomButton = ({ children, onClick, onClickOnDisable, disable }: CustomButtonProps) => {
+  if (disable) {
+    return (
+      <Box
+        onClick={onClickOnDisable}
+        sx={{ color: "rgba(255, 255, 255, 0.3)", fontSize: "0.875rem", p: "6px 8px", fontWeight: 500 }}
+      >
+        {children}
+      </Box>
+    );
+  }
+
+  return (
+    <Button
+      onClick={onClick}
+      sx={{
+        justifyContent: "stretch",
+        textAlign: "left",
+        ":hover": {
+          background: "transparent",
+        },
+      }}
+    >
+      {children}
+    </Button>
+  );
 };

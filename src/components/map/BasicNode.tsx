@@ -427,6 +427,7 @@ BasicNodeProps) => {
           references={references}
           tags={tags}
           openPart={openPart}
+          displayJoinMessage={displayJoinMessage}
         />
       )}
       {/* {(openPart === "LinkingWords" || openPart === "Tags" || openPart === "References") && (
