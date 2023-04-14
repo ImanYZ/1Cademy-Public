@@ -6654,7 +6654,7 @@ const Dashboard = ({}: DashboardProps) => {
               setSelectedNode={setSelectedNode}
               db={db}
               graph={graph}
-              setFocusView={setFocusView}
+              onCloseFocusMode={() => setFocusView({ isEnabled: false, selectedNode: "" })}
               focusedNode={focusView.selectedNode}
               openLinkedNode={openLinkedNode}
             />

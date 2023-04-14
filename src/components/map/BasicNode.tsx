@@ -67,6 +67,7 @@ type BasicNodeProps = {
   // markStudied: any;
   // wrongNode: any;
   openUserInfoSidebar: (user: SelectedUser) => void;
+  selectedNodeId: string;
 };
 
 const BasicNode = ({
@@ -115,6 +116,7 @@ const BasicNode = ({
   onSelecteNode: onSelectedNode,
   toggleNode,
   openUserInfoSidebar,
+  selectedNodeId,
 }: // wrongNode,
 // disabled = false,
 // enableChildElements = [],
@@ -238,7 +240,7 @@ BasicNodeProps) => {
     <Box
       id={identifier}
       ref={nodeRef}
-      className={"Node card"}
+      className={"Node card" + (selectedNodeId === identifier ? " active" : "")}
       sx={{ borderColor: "#fd7373" }}
       //   className={
       //     "Node card" +

@@ -20,6 +20,7 @@ import NodeItemFullSkeleton from "@/components/NodeItemFullSkeleton";
 import focusViewLogo from "../../../../public/focus.svg";
 import focusViewDarkLogo from "../../../../public/focus-dark.svg";
 import { MemoizedBasicNode } from "../../../components/map/BasicNode";
+import { MemoizedFocusedNotebook } from "../../../components/map/FocusedNotebook/FocusedNotebook";
 import { MemoizedLinksList } from "../../../components/map/LinksList";
 import { NotebookPopup } from "../../../components/map/Popup";
 import { MemoizedUserInfoSidebar } from "../../../components/map/Sidebar/SidebarV2/UserInfoSidebar";
@@ -116,14 +117,6 @@ const NodePage: NextPage<Props> = ({ notebook }) => {
     updatedAt: new Date(),
   });
 
-  const [, /* focusView */ setFocusView] = useState<{
-    selectedNode: string;
-    isEnabled: boolean;
-  }>({
-    selectedNode: "",
-    isEnabled: false,
-  });
-
   const { addTask /* isQueueWorking, queueFinished */ } = useWorkerQueue({
     setNodeUpdates,
     g,
@@ -144,6 +137,7 @@ const NodePage: NextPage<Props> = ({ notebook }) => {
   const [openSidebar, setOpenSidebar] = useState<"USER_INFO" | null>(null);
   const [selectedUser, setSelectedUser] = useState<SelectedUser | null>(null);
   const [selectedNodeId, setSelectedNodeId] = useState("");
+  const [displayFocusMode, setDisplayFocusMode] = useState(false);
   //   ------------------------------ functions
 
   const setNodeParts = useCallback((nodeId: string, innerFunc: (thisNode: FullNodeData) => FullNodeData) => {
@@ -588,9 +582,10 @@ const NodePage: NextPage<Props> = ({ notebook }) => {
           toggleNode={toggleNode}
           openUserInfoSidebar={onOpenUserInfoSidebar}
           onSelecteNode={setSelectedNodeId}
+          selectedNodeId={selectedNodeId}
         />
       ));
-  }, [changeNodeHight, graph.nodes, onChangeNodePart, selectNode, toggleNode]);
+  }, [changeNodeHight, graph.nodes, onChangeNodePart, selectNode, selectedNodeId, toggleNode]);
 
   //   ------------------------------ useEffect
 
@@ -677,7 +672,8 @@ const NodePage: NextPage<Props> = ({ notebook }) => {
               id="toolbox-focus-mode"
               color="secondary"
               onClick={() => {
-                setFocusView({ isEnabled: true, selectedNode: selectedNodeId });
+                setDisplayFocusMode(true);
+                // setFocusView({ isEnabled: true, selectedNode: selectedNodeId });
                 // setOpenProgressBar(false);
               }}
               disabled={!selectedNodeId}
@@ -693,6 +689,18 @@ const NodePage: NextPage<Props> = ({ notebook }) => {
           </Tooltip>
         </>
       </MemoizedToolbox>
+
+      {displayFocusMode && (
+        <MemoizedFocusedNotebook
+          setSelectedNode={() => {}}
+          db={db}
+          graph={graph}
+          onCloseFocusMode={() => setDisplayFocusMode(false)}
+          focusedNode={selectedNodeId}
+          openLinkedNode={() => {}}
+          navigationBlocked={true}
+        />
+      )}
 
       <Stack
         direction={"row"}
