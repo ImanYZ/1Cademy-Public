@@ -10,7 +10,9 @@ import {
   FormControlLabel,
   FormGroup,
   LinearProgress,
+  MenuItem,
   Paper,
+  Select,
   Stack,
   Switch,
   Tab,
@@ -133,6 +135,7 @@ const UserSettigsSidebar = ({
   const [lastIndex, setLastIndex] = useState(ELEMENTS_PER_PAGE);
   const [value, setValue] = React.useState(0);
   const [points, setPoints] = useState({ positives: 0, negatives: 0, totalPoints: 0 });
+  const [type, setType] = useState<string>("all");
 
   const { success600, orange600, gray500, gray300 } = DESIGN_SYSTEM_COLORS;
 
@@ -410,7 +413,7 @@ const UserSettigsSidebar = ({
       }
     }
 
-    const orderredProposals = Object.values(versions).sort(
+    let orderredProposals = Object.values(versions).sort(
       (a, b) => Number(new Date(b.createdAt)) - Number(new Date(a.createdAt))
     );
     const proposalsPerDayDict: { [key: string]: any } = {};
@@ -435,8 +438,10 @@ const UserSettigsSidebar = ({
         averageVotes: proposalsPerDayDict[dateValue].netVotes / proposalsPerDayDict[dateValue].num,
       });
     }
-    setProposals(orderredProposals);
-  }, [db, user]);
+    if (type !== "all") orderredProposals = orderredProposals.filter(proposal => proposal.nodeType === type);
+    console.log({ orderredProposals, type });
+    setProposals(orderredProposals); //
+  }, [db, type, user.uname]);
 
   useEffect(() => {
     fetchProposals();
@@ -887,14 +892,67 @@ const UserSettigsSidebar = ({
         title: "Proposals",
         content: (
           <Box sx={{ display: "flex", flexDirection: "column", gap: "4px" }}>
-            <div className="ChartTitle">Proposals in chronological order</div>
-            {proposals.slice(0, lastIndex).map((proposal, idx) => {
-              return (
-                proposal.title && (
-                  <ProposalItem key={idx} proposal={proposal} openLinkedNode={openLinkedNode} showTitle={true} />
-                )
-              );
-            })}
+            <Box
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "right",
+
+                py: "10px",
+              }}
+            >
+              <Typography>Show</Typography>
+              <Select
+                sx={{
+                  marginLeft: "10px",
+                  height: "35px",
+                  width: "120px",
+                }}
+                MenuProps={{
+                  sx: {
+                    "& .MuiMenu-paper": {
+                      backgroundColor: theme => (theme.palette.mode === "dark" ? "#1B1A1A" : "#F9FAFB"),
+                      color: "text.white",
+                    },
+                    "& .MuiMenuItem-root:hover": {
+                      backgroundColor: theme => (theme.palette.mode === "dark" ? "##2F2F2F" : "#EAECF0"),
+                      color: "text.white",
+                    },
+                    "& .Mui-selected": {
+                      backgroundColor: "transparent!important",
+                      color: "#FF8134",
+                    },
+                    "& .Mui-selected:hover": {
+                      backgroundColor: "transparent",
+                    },
+                  },
+                }}
+                labelId="demo-select-small"
+                id="demo-select-small"
+                value={type}
+                onChange={e => {
+                  setType(e.target.value);
+                }}
+              >
+                <MenuItem value="all">All</MenuItem>
+                <MenuItem value="Concept">Concepts</MenuItem>
+                <MenuItem value="Relation">Relations</MenuItem>
+                <MenuItem value="Question">Questions</MenuItem>
+                <MenuItem value="Idea">Ideas</MenuItem>
+                <MenuItem value="Code">Codes</MenuItem>
+                <MenuItem value="Reference">References</MenuItem>
+              </Select>
+            </Box>
+            <Stack spacing={"8px"}>
+              {proposals.slice(0, lastIndex).map((proposal, idx) => {
+                return (
+                  proposal.title && (
+                    <ProposalItem key={idx} proposal={proposal} openLinkedNode={openLinkedNode} showTitle={true} />
+                  )
+                );
+              })}
+            </Stack>
+
             {proposals.length > lastIndex && (
               <div id="ContinueButton" style={{ padding: "10px 0px" }}>
                 <MemoizedMetaButton onClick={loadOlderProposalsClick}>
@@ -1143,7 +1201,6 @@ const UserSettigsSidebar = ({
         title: "Proposals",
         content: (
           <Box sx={{ display: "flex", flexDirection: "column", gap: "4px" }}>
-            <div className="ChartTitle">Proposals in chronological order</div>
             {proposals.slice(0, lastIndex).map((proposal, idx) => {
               return (
                 proposal.title && (
@@ -1151,6 +1208,7 @@ const UserSettigsSidebar = ({
                 )
               );
             })}
+
             {proposals.length > lastIndex && (
               <div id="ContinueButton" style={{ padding: "10px 0px" }}>
                 <MemoizedMetaButton onClick={loadOlderProposalsClick}>
@@ -1167,35 +1225,38 @@ const UserSettigsSidebar = ({
       },
     ];
   }, [
-    canShowOtherEthnicityInput,
-    changeAttr,
-    cities,
-    countries,
-    dispatch,
-    ethnicityOtherValue,
-    foundFromOtherValue,
-    genderOtherValue,
-    getDisplayNameValue,
-    handleBackgroundSwitch,
-    handleChange,
-    handleShowClusterOptionsSwitch,
-    handleShowClustersSwitch,
-    handleThemeSwitch,
-    handleViewSwitch,
-    handlesChooseUnameSwitch,
-    languages,
-    logoutClick,
-    mergeEthnicityOtherValueWithUserEthnicity,
-    reason,
+    settings.theme,
     settings.background,
+    settings.view,
     settings.showClusterOptions,
     settings.showClusters,
-    settings.theme,
-    settings.view,
-    states,
+    handleThemeSwitch,
+    handleBackgroundSwitch,
+    handleViewSwitch,
     user,
+    getDisplayNameValue,
+    removeAllNodes,
+    changeAttr,
+    logoutClick,
+    languages,
+    genderOtherValue,
+    canShowOtherEthnicityInput,
+    ethnicityOtherValue,
+    countries,
+    states,
+    cities,
+    reason,
+    foundFromOtherValue,
+    proposals,
     lastIndex,
     loadOlderProposalsClick,
+    handlesChooseUnameSwitch,
+    handleShowClusterOptionsSwitch,
+    handleShowClustersSwitch,
+    dispatch,
+    handleChange,
+    mergeEthnicityOtherValueWithUserEthnicity,
+    openLinkedNode,
   ]);
   console.log(tabsItems);
   // const setUserImage = useCallback(
