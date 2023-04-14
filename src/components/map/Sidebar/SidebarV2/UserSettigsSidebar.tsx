@@ -821,22 +821,22 @@ const UserSettigsSidebar = ({
       switch (key) {
         case "Concept":
           value = shortenNumber(userReputation.cnCorrects - userReputation.cnWrongs, 2, false);
-          stats.set(key, value);
+          stats.set("Concept", value);
         case "Relation":
           value = shortenNumber(userReputation.mCorrects - userReputation.mWrongs, 2, false);
-          stats.set(key, value);
+          stats.set("Relation", value);
         case "Reference":
           value = shortenNumber(userReputation.rfCorrects - userReputation.rfWrongs, 2, false);
-          stats.set(key, value);
+          stats.set("Reference", value);
         case "Question":
           value = shortenNumber(userReputation.qCorrects - userReputation.qWrongs, 2, false);
-          stats.set(key, value);
+          stats.set("Question", value);
         case "Idea":
           value = shortenNumber(userReputation.iCorrects - userReputation.iWrongs, 2, false);
-          stats.set(key, value);
+          stats.set("Idea", value);
         case "Code":
           value = shortenNumber(userReputation.cdCorrects - userReputation.cdWrongs, 2, false);
-          stats.set(key, value);
+          stats.set("Code", value);
       }
       console.log("map value", { value, key });
     });
