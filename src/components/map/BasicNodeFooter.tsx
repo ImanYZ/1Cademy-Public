@@ -15,9 +15,20 @@ import ShareIcon from "@mui/icons-material/Share";
 import SwapHorizIcon from "@mui/icons-material/SwapHoriz";
 import TwitterIcon from "@mui/icons-material/Twitter";
 import VoiceOverOffIcon from "@mui/icons-material/VoiceOverOff";
-import { Button, ClickAwayListener, Divider, MenuItem, MenuList, Paper, Stack, Theme, Tooltip } from "@mui/material";
+import {
+  Box,
+  Button,
+  ClickAwayListener,
+  Divider,
+  MenuItem,
+  MenuList,
+  Paper,
+  Stack,
+  Theme,
+  Tooltip,
+} from "@mui/material";
 import IconButton from "@mui/material/IconButton";
-import { Box, SxProps } from "@mui/system";
+import { SxProps } from "@mui/system";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import { useRouter } from "next/router";
@@ -64,6 +75,7 @@ type BasicNodeFooterProps = {
   showProposeTutorial?: boolean;
   openUserInfoSidebar: (user: SelectedUser) => void;
   admin: SelectedUser;
+  displayJoinMessage?: () => void;
 };
 
 const BasicNodeFooter = ({
@@ -95,6 +107,7 @@ const BasicNodeFooter = ({
   enableChildElements = [],
   openUserInfoSidebar,
   admin,
+  displayJoinMessage,
 }: // setAbleToPropose,
 BasicNodeFooterProps) => {
   const router = useRouter();
@@ -556,11 +569,19 @@ BasicNodeFooterProps) => {
 
         {open && (
           <>
-            <CustomIconButton id={proposeButtonId} disabled={disableProposeButton}>
+            <CustomIconButton
+              id={proposeButtonId}
+              disabled={disableProposeButton}
+              onClickOnDisable={displayJoinMessage}
+            >
               <CreateIcon sx={{ fontSize: "16px" }} />
             </CustomIconButton>
 
-            <CustomWrapperButton id={`${identifier}-node-footer-votes`}>
+            <CustomWrapperButton
+              id={`${identifier}-node-footer-votes`}
+              onClickOnWrapper={displayJoinMessage}
+              disabled={disableUpvoteButton && disableDownvoteButton}
+            >
               <Stack direction={"row"} alignItems={"center"}>
                 <Tooltip title={"Vote to prevent further changes."} placement={"top"}>
                   <Button
@@ -823,32 +844,57 @@ type CustomIconButtonProps = {
   id: string;
   children: ReactNode;
   onClick?: () => void;
+  onClickOnDisable?: () => void;
   disabled?: boolean;
   sx?: SxProps<Theme>;
 };
 
-const CustomIconButton = ({ id, children, disabled = false, sx, onClick }: CustomIconButtonProps) => (
-  <IconButton
-    id={id}
-    disabled={disabled}
-    onClick={disabled ? undefined : onClick}
-    sx={{
-      width: "30px",
-      height: "30px",
-      backgroundColor: ({ palette }) =>
-        palette.mode === "dark" ? palette.common.notebookG500 : palette.common.notebookG200,
-      ":hover": ({ palette }) =>
-        palette.mode === "dark" ? palette.common.notebookG400 : palette.common.lightBackground2,
-      "&.Mui-disabled": {
+const CustomIconButton = ({ id, children, disabled = false, sx, onClick, onClickOnDisable }: CustomIconButtonProps) => {
+  const DisableStyles: SxProps<Theme> = {
+    backgroundColor: ({ palette }) =>
+      palette.mode === "dark" ? palette.common.notebookG500 : palette.common.notebookG200,
+  };
+
+  if (onClickOnDisable)
+    return (
+      <Box
+        onClick={onClickOnDisable}
+        sx={{
+          p: "6px 8px",
+          borderRadius: "16px",
+          width: "30px",
+          height: "30px",
+          color: ({ palette }) => (palette.mode === "dark" ? "rgba(255, 255, 255, 0.3)" : palette.common.notebookG200),
+          ...DisableStyles,
+        }}
+      >
+        {children}
+      </Box>
+    );
+
+  return (
+    <IconButton
+      id={id}
+      disabled={disabled}
+      // className={disabled ? "Mui-disabled" : ""}
+      onClick={disabled ? undefined : onClick}
+      sx={{
+        width: "30px",
+        height: "30px",
         backgroundColor: ({ palette }) =>
           palette.mode === "dark" ? palette.common.notebookG500 : palette.common.notebookG200,
-      },
-      ...sx,
-    }}
-  >
-    {children}
-  </IconButton>
-);
+        ":hover": ({ palette }) =>
+          palette.mode === "dark" ? palette.common.notebookG400 : palette.common.lightBackground2,
+        "&.Mui-disabled": {
+          ...DisableStyles,
+        },
+        ...sx,
+      }}
+    >
+      {children}
+    </IconButton>
+  );
+};
 
 const CustomButton = ({ id, children, disabled = false, sx, onClick }: CustomIconButtonProps) => (
   <Button
@@ -913,10 +959,17 @@ const ButtonWithDetails = ({ id, children, showDetails, disabled = false, onClic
   );
 };
 
-const CustomWrapperButton = ({ id, children, sx }: CustomIconButtonProps) => {
+const CustomWrapperButton = ({
+  id,
+  children,
+  sx,
+  disabled,
+  onClickOnWrapper,
+}: CustomIconButtonProps & { onClickOnWrapper?: () => void }) => {
   return (
     <Box
       id={id}
+      onClick={onClickOnWrapper}
       sx={{
         height: "30px",
         p: "6px 8px",
@@ -927,14 +980,12 @@ const CustomWrapperButton = ({ id, children, sx }: CustomIconButtonProps) => {
         backgroundColor: ({ palette }) =>
           palette.mode === "dark" ? palette.common.notebookG500 : palette.common.notebookG200,
         color: ({ palette }) => (palette.mode === "dark" ? palette.common.gray50 : palette.common.gray600),
-        ":hover": {
-          backgroundColor: ({ palette }) =>
-            palette.mode === "dark" ? palette.common.notebookG400 : palette.common.lightBackground2,
-        },
-        "&.Mui-disabled": {
-          backgroundColor: ({ palette }) =>
-            palette.mode === "dark" ? palette.common.notebookG500 : palette.common.notebookG200,
-        },
+        ...(!disabled && {
+          ":hover": {
+            backgroundColor: ({ palette }) =>
+              palette.mode === "dark" ? palette.common.notebookG400 : palette.common.lightBackground2,
+          },
+        }),
         ...sx,
       }}
     >

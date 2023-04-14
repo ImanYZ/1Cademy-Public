@@ -587,6 +587,10 @@ const NodePage: NextPage<Props> = ({ notebook }) => {
           openUserInfoSidebar={onOpenUserInfoSidebar}
           onSelecteNode={setSelectedNodeId}
           selectedNodeId={selectedNodeId}
+          displayJoinMessage={() => {
+            console.log("display join message");
+            setDisplayJoinMessage(true);
+          }}
         />
       ));
   }, [changeNodeHight, graph.nodes, onChangeNodePart, selectNode, selectedNodeId, toggleNode]);

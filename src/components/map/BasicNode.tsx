@@ -68,6 +68,7 @@ type BasicNodeProps = {
   // wrongNode: any;
   openUserInfoSidebar: (user: SelectedUser) => void;
   selectedNodeId: string;
+  displayJoinMessage?: () => void;
 };
 
 const BasicNode = ({
@@ -117,6 +118,7 @@ const BasicNode = ({
   toggleNode,
   openUserInfoSidebar,
   selectedNodeId,
+  displayJoinMessage,
 }: // wrongNode,
 // disabled = false,
 // enableChildElements = [],
@@ -284,12 +286,32 @@ BasicNodeProps) => {
             <FullscreenIcon fontSize="inherit" />
           </IconButton>
         )}
-        <IconButton disabled={true} color="inherit" aria-label="delete" size="small">
+        {/* <IconButton disabled={true} color="inherit" aria-label="Hide Descendants" size="small"> */}
+        <Box
+          onClick={displayJoinMessage}
+          sx={{
+            p: "5px",
+            width: "28px",
+            height: "28px",
+            color: theme => (theme.palette.mode === "dark" ? "rgba(255, 255, 255, 0.3)" : "rgba(255, 255, 255, 0.3)"),
+          }}
+        >
           <KeyboardTabIcon fontSize="inherit" sx={{ transform: "scaleX(-1)" }} />
-        </IconButton>
-        <IconButton disabled={true} color="inherit" aria-label="delete" size="small">
+        </Box>
+        {/* </IconButton> */}
+        {/* <IconButton disabled={true} color="inherit" aria-label="Hide Node" size="small"> */}
+        <Box
+          onClick={displayJoinMessage}
+          sx={{
+            p: "5px",
+            width: "28px",
+            height: "28px",
+            color: theme => (theme.palette.mode === "dark" ? "rgba(255, 255, 255, 0.3)" : "rgba(255, 255, 255, 0.3)"),
+          }}
+        >
           <CloseIcon fontSize="inherit" />
-        </IconButton>
+        </Box>
+        {/* </IconButton> */}
       </Box>
 
       {open ? (
@@ -391,6 +413,7 @@ BasicNodeProps) => {
         locked={locked}
         disabled={true}
         enableChildElements={[`${identifier}-button-parent-children`, `${identifier}-node-footer-tags-citations`]}
+        displayJoinMessage={displayJoinMessage}
       />
 
       {openPart && (
