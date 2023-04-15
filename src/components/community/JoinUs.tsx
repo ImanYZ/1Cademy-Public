@@ -180,8 +180,6 @@ const JoinUs = (props: JoinUsProps) => {
     props.community,
   ]);
 
-  console.log(props.community);
-
   useEffect(() => {
     const loadExistingApplication = async () => {
       if (!props.community) return;
