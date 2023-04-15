@@ -163,7 +163,7 @@ export const UserSettingsProfessionalInfo = ({ user }: UserSettingsProfessionalI
         )}
         isOptionEqualToValue={(option: Institution, value: Institution) => option.id === value.id}
         fullWidth
-        sx={{ mb: "16px" }}
+        sx={{ mb: "10px" }}
       />
       <Autocomplete
         id="major"
@@ -182,7 +182,6 @@ export const UserSettingsProfessionalInfo = ({ user }: UserSettingsProfessionalI
           />
         )}
         fullWidth
-        sx={{ mb: "16px" }}
       />
       <MemoizedInputSave
         identification="fieldOfInterest"

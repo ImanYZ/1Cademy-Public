@@ -1,4 +1,6 @@
 import AdapterDaysJs from "@date-io/dayjs";
+import ArrowBackIosRoundedIcon from "@mui/icons-material/ArrowBackIosRounded";
+import ArrowForwardIosRoundedIcon from "@mui/icons-material/ArrowForwardIosRounded";
 import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
 import DoneRoundedIcon from "@mui/icons-material/DoneRounded";
 import ExitToAppIcon from "@mui/icons-material/ExitToApp";
@@ -57,13 +59,20 @@ import { justADate } from "@/lib/utils/justADate";
 import shortenNumber from "@/lib/utils/shortenNumber";
 import { ToUpperCaseEveryWord } from "@/lib/utils/utils";
 
+import BellIcon from "../../../../../public/icons/bell-icon.svg";
+import GraphIcon from "../../../../../public/icons/graph-icon.svg";
+import LockIcon from "../../../../../public/icons/lock-icon.svg";
+import ProfileIcon from "../../../../../public/icons/profile-icon.svg";
+import UserIcon from "../../../../../public/icons/vector.svg";
 import { DESIGN_SYSTEM_COLORS } from "../../../../lib/theme/colors";
 import { MemoizedInputSave } from "../../InputSave";
 import { MemoizedMetaButton } from "../../MetaButton";
 import Modal from "../../Modal/Modal";
 import ProposalItem from "../../ProposalsList/ProposalItem/ProposalItem";
+import ProfileAvatar from "../ProfileAvatar";
 import { UserSettingsProfessionalInfo } from "../UserSettingsProfessionalInfo";
 import { SidebarWrapper } from "./SidebarWrapper";
+
 dayjs.extend(relativeTime);
 
 type UserSettingsSidebarProps = {
@@ -86,7 +95,29 @@ type UserSettingsTabs = {
   content: ReactNode;
 };
 
+type TabPanelProps = {
+  children?: ReactNode;
+  index: number;
+  value: number;
+};
+
+type AccountOptions = {
+  type: string;
+  icon: any;
+};
 export const NODE_TYPE_OPTIONS: NodeType[] = ["Code", "Concept", "Idea", "Question", "Reference", "Relation"];
+
+const ACCOUNT_OPTIONS: AccountOptions[] = [
+  { type: "My details", icon: UserIcon },
+  { type: "Profile", icon: ProfileIcon },
+  { type: "Notebook settings", icon: GraphIcon },
+  { type: "Email notifications", icon: BellIcon },
+  { type: "Account access", icon: LockIcon },
+];
+
+const TabPanel = ({ value, index, children }: TabPanelProps) => {
+  return <Box hidden={value !== index}>{value === index && children}</Box>;
+};
 
 const PointsType = ({ points, children }: { points: number; children: ReactNode }) => {
   const { notebookG700, notebookG50 } = DESIGN_SYSTEM_COLORS;
@@ -136,6 +167,12 @@ const UserSettigsSidebar = ({
   const [value, setValue] = React.useState(0);
   const [points, setPoints] = useState({ positives: 0, negatives: 0, totalPoints: 0 });
   const [type, setType] = useState<string>("all");
+
+  const [settingsValue, setSettingsValue] = React.useState(-1);
+
+  const handleSettingsValue = (newValue: number) => {
+    setSettingsValue(newValue);
+  };
 
   const { success600, orange600, gray500, gray300 } = DESIGN_SYSTEM_COLORS;
 
@@ -860,6 +897,14 @@ const UserSettigsSidebar = ({
     userReputation.rfCorrects,
     userReputation.rfWrongs,
   ]);
+
+  const setUserImage = useCallback(
+    (newImage: string) => {
+      dispatch({ type: "setAuthUser", payload: { ...user, imageUrl: newImage } });
+    },
+    [dispatch, user]
+  );
+
   const newTabsItems: UserSettingsTabs[] = useMemo(() => {
     return [
       {
@@ -967,8 +1012,147 @@ const UserSettigsSidebar = ({
           </Box>
         ),
       },
+      {
+        title: "Account",
+        content: (
+          <Box>
+            <Box hidden={settingsValue !== -1}>
+              <Stack>
+                {ACCOUNT_OPTIONS.map((option, idx) => (
+                  <Stack
+                    key={`${option.type}-${idx}`}
+                    direction={"row"}
+                    justifyContent={"space-between"}
+                    spacing={"12px"}
+                    onClick={() => handleSettingsValue(idx)}
+                    p="12px 10px"
+                    sx={{
+                      ":hover": {
+                        backgroundColor: theme =>
+                          theme.palette.mode === "dark"
+                            ? DESIGN_SYSTEM_COLORS.notebookG700
+                            : DESIGN_SYSTEM_COLORS.gray100,
+                        cursor: "pointer",
+                      },
+                    }}
+                  >
+                    <Stack direction={"row"} alignItems={"center"} spacing={"12px"}>
+                      <Box
+                        sx={{
+                          p: "6px",
+                          borderRadius: "8px",
+                          backgroundColor: "#FF8134",
+                          display: "grid",
+                          placeItems: "center",
+                        }}
+                      >
+                        <Image src={option.icon} width={18} height={18} alt={option.type} />
+                      </Box>
+                      <Typography>{option.type}</Typography>
+                    </Stack>
+                    <ArrowForwardIosRoundedIcon />
+                  </Stack>
+                ))}
+              </Stack>
+            </Box>
+            <TabPanel value={settingsValue} index={0}>
+              <ArrowBackButton text={ACCOUNT_OPTIONS[0].type} backwardsHandler={handleSettingsValue} />
+              <Box component={"section"} px={"20px"}>
+                <ProfileAvatar
+                  id="user-settings-picture"
+                  userId={user.userId}
+                  userImage={user.imageUrl}
+                  setUserImage={setUserImage}
+                  userFullName={`${user?.fName} ${user?.lName}`}
+                />
+                <Typography textAlign={"center"}>{user.imageUrl ? "Change Photo" : "Add Photo"}</Typography>
+              </Box>
+              <Box mx="20px">
+                <Box sx={{ display: "flex", gap: "12px" }}>
+                  <MemoizedInputSave
+                    identification="fNameInput"
+                    initialValue={user.fName || ""}
+                    onSubmit={changeAttr("fName")}
+                    setState={(fName: string) => dispatch({ type: "setAuthUser", payload: { ...user, fName } })}
+                    label="Name"
+                  />
+
+                  <MemoizedInputSave
+                    identification="lNameInput"
+                    initialValue={user.lName || ""}
+                    onSubmit={changeAttr("lName")}
+                    setState={(lName: string) => dispatch({ type: "setAuthUser", payload: { ...user, lName } })}
+                    label="Last Name"
+                  />
+                </Box>
+                <MemoizedInputSave
+                  identification="email"
+                  initialValue={user.email}
+                  onSubmit={() => {}}
+                  setState={() => {}}
+                  label="Email"
+                  disabled={true}
+                />
+                <Box sx={{ display: "flex", gap: "12px", my: "8px" }}>
+                  <Autocomplete
+                    id="gender"
+                    value={getValidValue(GENDER_VALUES, GENDER_VALUES[2], user.gender)}
+                    onChange={(_, value) => handleChange({ target: { value, name: "gender" } })}
+                    options={GENDER_VALUES}
+                    renderInput={params => <TextField {...params} label="Gender" />}
+                    fullWidth
+                    sx={{ flex: 1 }}
+                  />
+                  <LocalizationProvider dateAdapter={AdapterDaysJs}>
+                    <DatePicker
+                      value={user.birthDate}
+                      onChange={value => handleChange({ target: { value, name: "birthDate" } })}
+                      renderInput={params => (
+                        <TextField {...params} id="birthDate" label="Birth Date" name="birthDate" sx={{ flex: 1 }} />
+                      )}
+                    />
+                  </LocalizationProvider>
+                </Box>
+                <Typography fontWeight={"500"} my="8px">
+                  Professional Info
+                </Typography>
+                <UserSettingsProfessionalInfo user={user} />
+                <Button
+                  variant="contained"
+                  fullWidth
+                  sx={{
+                    m: "24px 0 32px 0",
+                    borderRadius: "24px",
+                    py: "10px",
+                    backgroundColor: DESIGN_SYSTEM_COLORS.primary800,
+                  }}
+                >
+                  {" "}
+                  Save Changes
+                </Button>
+              </Box>
+            </TabPanel>
+            <TabPanel value={settingsValue} index={1}>
+              <ArrowBackButton text={ACCOUNT_OPTIONS[1].type} backwardsHandler={handleSettingsValue} />
+            </TabPanel>
+          </Box>
+        ),
+      },
     ];
-  }, [nodeTypeStats]);
+  }, [
+    changeAttr,
+    dispatch,
+    handleChange,
+    lastIndex,
+    loadOlderProposalsClick,
+    nodeTypeStats,
+    openLinkedNode,
+    proposals,
+    setUserImage,
+    settingsValue,
+    type,
+    user,
+  ]);
 
   const tabsItems: UserSettingsTabs[] = useMemo(() => {
     return [
@@ -1259,12 +1443,6 @@ const UserSettigsSidebar = ({
     openLinkedNode,
   ]);
   console.log(tabsItems);
-  // const setUserImage = useCallback(
-  //   (newImage: string) => {
-  //     dispatch({ type: "setAuthUser", payload: { ...user, imageUrl: newImage } });
-  //   },
-  //   [dispatch, user]
-  // );
 
   const a11yProps = (index: number) => {
     return {
@@ -1541,8 +1719,36 @@ const UserSettigsSidebar = ({
       onClose={onClose}
       width={430}
       SidebarOptions={open ? SidebarOptions : null}
-      SidebarContent={open ? <Box sx={{ p: "10px" }}>{newTabsItems[value].content}</Box> : null}
+      SidebarContent={open ? <Box pt="24px">{newTabsItems[value].content}</Box> : null}
     />
   );
 };
+
+type ButtonBacKProps = {
+  text: string;
+  backwardsHandler: (index: number) => void;
+};
+
+const ArrowBackButton = ({ text, backwardsHandler }: ButtonBacKProps) => {
+  return (
+    <Stack
+      position={"relative"}
+      direction={"row"}
+      justifyContent={"space-between"}
+      p="12px 10px"
+      onClick={() => backwardsHandler(-1)}
+      sx={{
+        ":hover": {
+          backgroundColor: theme =>
+            theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookG700 : DESIGN_SYSTEM_COLORS.gray100,
+          cursor: "pointer",
+        },
+      }}
+    >
+      <ArrowBackIosRoundedIcon sx={{ position: "absolute", left: "20px", top: "calc(50% - 12px)" }} />
+      <Typography sx={{ flex: 1, textAlign: "center", fontWeight: "500" }}>{text}</Typography>
+    </Stack>
+  );
+};
+
 export const MemoizedUserSettingsSidebar = React.memo(UserSettigsSidebar);

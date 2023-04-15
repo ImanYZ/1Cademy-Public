@@ -1,6 +1,7 @@
 import { Box } from "@mui/system";
 import { getAuth } from "firebase/auth";
 import { getDownloadURL, getStorage, ref, uploadBytesResumable } from "firebase/storage";
+import Image from "next/image";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 
 import { addSuffixToUrlGMT } from "@/lib/utils/string.utils";
@@ -163,22 +164,33 @@ const ProfileAvatar = ({ id, userId, userImage, setUserImage, userFullName }: Pr
     >
       <input type="file" ref={inputEl} onChange={handleImageChange} accept="image/png, image/jpg, image/jpeg" hidden />
       <Box
-        // round={true}
         onClick={handleEditImage}
-        // tooltip="Change your profile picture."
-        // tooltipPosition="right"
-        sx={{ position: "relative", width: "170px", height: "170px", padding: "5px" }}
+        sx={{
+          position: "relative",
+          "& img": {
+            borderRadius: "50%",
+            ":hover": {
+              cursor: "pointer",
+            },
+          },
+          "&  span": {
+            ":hover": {
+              borderRadius: "50%",
+              boxShadow: "0 0 16px 0 #bebebe",
+            },
+          },
+        }}
       >
-        {/* TODO: change with NextJs image */}
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          className="profileImage"
-          // style={{ width: imageWidth, height: imageHeight, borderRadius: "50%" }}
-          src={userImage}
+        <Image
+          width="90px"
+          height="90px"
+          src={userImage ?? ""}
           alt="1Cademist Profile Picture"
+          objectFit="cover"
+          objectPosition="center center"
         />
         {isUploading && (
-          <PercentageLoader percentage={percentageUploaded} radius={78} widthInPx="170px" heightInPx="170px" />
+          <PercentageLoader percentage={percentageUploaded} radius={78} widthInPx="90px" heightInPx="90px" />
         )}
       </Box>
 
