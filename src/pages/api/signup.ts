@@ -1,5 +1,5 @@
 import { getAuth } from "firebase-admin/auth";
-import { Timestamp, WriteBatch } from "firebase-admin/firestore";
+import { Timestamp, WriteBatch, QueryDocumentSnapshot, DocumentData } from "firebase-admin/firestore";
 import { NextApiRequest, NextApiResponse } from "next";
 import { SignUpData } from "src/knowledgeTypes";
 
@@ -9,6 +9,7 @@ import { isEmail, isEmpty } from "@/lib/utils/utils";
 import { admin, checkRestartBatchWriteCounts, commitBatch, db } from "../../lib/firestoreServer/admin";
 import { IInstitution } from "src/types/IInstitution";
 import { createOrRestoreStatDocs } from "src/utils/course-helpers";
+import { INotebook } from "src/types/INotebook";
 
 const addPracticeQuestions = async (
   batch: WriteBatch,
@@ -300,6 +301,23 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
         [batch, writeCounts] = await checkRestartBatchWriteCounts(batch, writeCounts);
       }
 
+      const notebooks = await db.collection("notebooks").where("owner", "==", userData.uname).limit(1).get();
+
+      let notebookId: string;
+      if (notebooks.docs.length) {
+        notebookId = notebooks.docs[0].id;
+      } else {
+        const notebookRef = db.collection("notebooks").doc();
+        notebookId = notebookRef.id;
+        batch.set(notebookRef, {
+          isPublic: "none",
+          owner: userData.uname,
+          roles: {},
+          users: [],
+          title: "My Notebook",
+        } as INotebook);
+      }
+
       const userNodeQuery = db
         .collection("userNodes")
         .where("user", "==", userData.uname)
@@ -312,11 +330,22 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
         //  if for some reason userNode is deleted, or not open, or not visible, reset it
         if (userNodeData.deleted || !userNodeData.open || !userNodeData.visible) {
           userNodeRef = db.collection("userNodes").doc(userNodeDocs.docs[0].id);
+          const notebooks: string[] = userNodeData.notebooks || [];
+          const expands: boolean[] = userNodeData.expands || [];
+          const notebookIdx = notebooks.indexOf(notebookId);
+          if (notebookIdx === -1) {
+            notebooks.push(notebookId);
+            expands.push(true);
+          } else {
+            expands[notebookIdx] = true;
+          }
           const userNodeUpdates = {
             deleted: false,
             open: true,
             visible: true,
             updatedAt: currentTimestamp,
+            notebooks,
+            expands,
           };
           batch.update(userNodeRef, userNodeUpdates);
           [batch, writeCounts] = await checkRestartBatchWriteCounts(batch, writeCounts);
@@ -336,6 +365,8 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
           isStudied: false,
           bookmarked: false,
           node: rootId,
+          notebooks: [notebookId],
+          expands: [true],
           open: true,
           user: userData.uname,
           visible: true,
