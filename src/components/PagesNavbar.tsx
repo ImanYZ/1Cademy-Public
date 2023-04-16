@@ -55,7 +55,13 @@ const PagesNavbar: FC<Props> = ({ children, title, description }) => {
   };
 
   return (
-    <>
+    <Box
+      sx={{
+        height: "100vh",
+        overflow: "auto",
+        "&::-webkit-scrollbar": { display: "none" },
+      }}
+    >
       <Head title={title} description={description} />
       <AppHeaderMemoized
         page="ONE_CADEMY"
@@ -153,7 +159,7 @@ const PagesNavbar: FC<Props> = ({ children, title, description }) => {
           </Tooltip>
         </Fab>
       </FeedbackTooltip>
-    </>
+    </Box>
   );
 };
 
