@@ -87,6 +87,7 @@ async function buildSitemap(pages) {
     sitemap += `<url>
       <loc>${page.url}</loc>
       <lastmod>${page.updated_at}</lastmod>
+      ${page.priority ? "<priority>" + page.priority + "</priority>" : ""}
     </url>`;
   });
 
@@ -96,91 +97,62 @@ async function buildSitemap(pages) {
 
 async function main() {
   const db = admin.firestore();
-  const nodes = await db.collection("nodes").where("deleted", "==", false).where("isTag", "==", true).get();
 
   // for sitemap index builder
   let sitemaps = [];
-  const pages = {};
-  const communityIds = [];
 
-  for (const node of nodes.docs) {
-    const nodeData = node.data();
-    communityIds.push({
-      id: node.id,
-      title: nodeData.title,
-    });
-    console.log(
-      `${process.env.APP_URL}/node/${generateAlias(nodeData.title)}/${node.id}`,
-      nodeData.title,
-      node.id,
-      "c"
-    );
-    pages[node.id] = {
-      url: `${process.env.APP_URL}/node/${generateAlias(nodeData.title)}/${node.id}`,
-      updated_at: nodeData.updatedAt.toDate().toISOString(),
-    };
-  }
+  const nodesQuery = db.collection("nodes");
 
-  // community sitemaps
-  for (const community of communityIds) {
-    const contentNodes = await db
-      .collection("nodes")
-      .where("deleted", "==", false)
-      .where("tagIds", "array-contains", community.id)
-      .get();
+  let lastNodeDoc = (await nodesQuery.limit(1).get()).docs[0];
+  let nodes = [];
+  const nodeData = lastNodeDoc.data();
+  nodes.push({
+    url: `${process.env.APP_URL}/node/${generateAlias(nodeData.title)}/${lastNodeDoc.id}`,
+    priority: nodeData.isTag ? 1 : 0.7,
+    updated_at: nodeData.updatedAt.toDate().toISOString(),
+  });
 
-    // individual nodes in this community
-    for (const contentNode of contentNodes.docs) {
-      const contentNodeData = contentNode.data();
-      // if node already present in pages hashmap
-      if (pages.hasOwnProperty(contentNode.id)) continue;
-      console.log(
-        `${process.env.APP_URL}/node/${generateAlias(contentNodeData.title)}/${contentNode.id}`,
-        contentNodeData.title,
-        contentNode.id
-      );
-      pages[contentNode.id] = {
-        url: `${process.env.APP_URL}/node/${generateAlias(contentNodeData.title)}/${contentNode.id}`,
-        updated_at: contentNodeData.updatedAt.toDate().toISOString(),
-      };
-    }
-  }
+  let totalNodes = 1;
 
-  // this variable will hold sitemap (urlset) or sitemap index, contents depends upon total entries
-  let sitemapContent = "";
-
-  let _nodes = Object.values(pages);
-  // apply sub indexes strategy for community tags
-  // sitemap can have atmost 50000 entries and should not exceed 50MB in size
-  // we are using 40000 to be safe in case of size per entry increases
-  if (_nodes.length > 40000) {
-    const subSitemaps = [];
-    while (_nodes.length > 0) {
-      subSitemaps.push(_nodes.splice(0, 40000));
-    }
-
-    // building each sitemap with atmost 40k entries
-    let c = 1;
-    for (const subSitemapIndex of subSitemaps) {
-      const _sitemapContent = await buildSitemap(subSitemapIndex);
-      const communitySubSmFilename = `sitemaps/sitemap_${c}.xml`;
-      // pushing sub tree sitemap to bucket
-      const communitySubSmUrl = await uploadToBucket(communitySubSmFilename, _sitemapContent);
-      sitemaps.push({
-        url: communitySubSmUrl,
-        updated_at: new Date().toISOString(),
+  // building each sitemap with atmost 40k entries
+  let c = 1;
+  while (lastNodeDoc) {
+    // apply sub indexes strategy for community tags
+    // sitemap can have atmost 50000 entries and should not exceed 50MB in size
+    // we are using 40000 to be safe in case of size per entry increases
+    const _nodes = await db.collection("nodes").startAfter(lastNodeDoc).limit(40000).get();
+    lastNodeDoc = null;
+    for (const node of _nodes.docs) {
+      const nodeData = node.data();
+      if (nodeData.deleted) {
+        continue;
+      }
+      nodes.push({
+        url: `${process.env.APP_URL}/node/${generateAlias(nodeData.title)}/${node.id}`,
+        priority: nodeData.isTag ? 1 : 0.7,
+        updated_at: nodeData.updatedAt.toDate().toISOString(),
       });
-      c++;
+      lastNodeDoc = node;
+      totalNodes++;
     }
-    sitemapContent = await buildSitemapIndex(sitemaps);
-  } else {
-    // building sitemap in index because, entries were less than 40k
-    sitemapContent = await buildSitemap(_nodes);
+    const comSitemapFile = `sitemaps/sitemap_${c++}.xml`;
+    const sitemapContent = await buildSitemap(nodes);
+    const communitySubSmUrl = await uploadToBucket(comSitemapFile, sitemapContent);
+
+    sitemaps.push({
+      url: communitySubSmUrl,
+      updated_at: new Date().toISOString(),
+    });
+    console.log("lastNodeDoc");
+    nodes = [];
   }
 
+  console.log("Sitemap Node Count: ", totalNodes);
+
+  const sitemapIndex = await buildSitemapIndex(sitemaps);
   // pushing sitemap index to bucket
   try {
-    const sitemapIndexUrl = await uploadToBucket(`sitemap_index.xml`, sitemapContent);
+    const sitemapIndexUrl = await uploadToBucket(`sitemap_index.xml`, sitemapIndex);
     console.log(sitemapIndexUrl, "Sitemap index url");
   } catch (e) {
     console.log(e.message);
