@@ -1,5 +1,6 @@
 import Container from "@mui/material/Container";
 import dynamic from "next/dynamic";
+import Head from "next/head";
 import { useRouter } from "next/router";
 import { ComponentType, useEffect, useRef, useState } from "react";
 import { useQuery } from "react-query";
@@ -7,6 +8,7 @@ import { useQuery } from "react-query";
 import HomeFilter, { HomeFilterRef } from "@/components/HomeFilter";
 import HomeSearch, { HomeSearchRef } from "@/components/HomeSearch";
 import { getSearchNodes } from "@/lib/knowledgeApi";
+import { ONECADEMY_DOMAIN } from "@/lib/utils/1cademyConfig";
 import {
   getDefaultSortedByType,
   getQueryParameter,
@@ -162,6 +164,10 @@ const SearcherPage: NextPageWithLayout = () => {
 
   return (
     <PagesNavbar onClickSearcher={!isIntersecting ? onClickSearcher : undefined} enableMenu>
+      <Head>
+        <link rel="canonical" href={`${ONECADEMY_DOMAIN}/search`} key="canonical" />
+        <title>1Cademy - Search</title>
+      </Head>
       <HomeSearch onSearch={handleSearch} ref={homeSearchRef} setOpenAdvanceFilter={setOpenAdvanceFilter} />
       <Container sx={{ py: 10 }}>
         {openAdvanceFilter && (
