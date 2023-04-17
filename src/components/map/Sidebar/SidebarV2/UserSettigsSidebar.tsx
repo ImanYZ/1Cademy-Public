@@ -1468,6 +1468,19 @@ const UserSettigsSidebar = ({
                     </>
                   )}
                 </Paper>
+                <Button
+                  variant="outlined"
+                  onClick={removeAllNodes}
+                  sx={{
+                    width: "100%",
+                    borderRadius: "24px",
+                    mt: "8px",
+                    borderColor: DESIGN_SYSTEM_COLORS.primary800,
+                    color: DESIGN_SYSTEM_COLORS.primary800,
+                  }}
+                >
+                  Hide all Nodes
+                </Button>
               </Box>
             </TabPanel>
           </Box>
@@ -1495,6 +1508,7 @@ const UserSettigsSidebar = ({
     nodeTypeStats,
     openLinkedNode,
     proposals,
+    removeAllNodes,
     setUserImage,
     settings.background,
     settings.showClusterOptions,
@@ -1763,8 +1777,6 @@ const UserSettigsSidebar = ({
     ];
   }, [
     settings.background,
-    settings.showClusterOptions,
-    settings.showClusters,
     handleBackgroundSwitch,
     user,
     getDisplayNameValue,
@@ -1784,8 +1796,6 @@ const UserSettigsSidebar = ({
     lastIndex,
     loadOlderProposalsClick,
     handlesChooseUnameSwitch,
-    handleShowClusterOptionsSwitch,
-    handleShowClustersSwitch,
     dispatch,
     handleChange,
     mergeEthnicityOtherValueWithUserEthnicity,
