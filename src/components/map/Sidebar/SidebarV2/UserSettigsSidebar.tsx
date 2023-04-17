@@ -42,12 +42,13 @@ import {
   where,
   writeBatch,
 } from "firebase/firestore";
-import Image from "next/image";
+import Image, { StaticImageData } from "next/image";
 import React, { MutableRefObject, ReactNode, Suspense, useCallback, useEffect, useMemo, useState } from "react";
-import { DispatchAuthActions, Reputation, User, UserSettings, UserTheme } from "src/knowledgeTypes";
+import { DispatchAuthActions, Reputation, User, UserSettings, UserTheme, UserView } from "src/knowledgeTypes";
 import { DispatchNodeBookActions, NodeBookState, TNodeBookState } from "src/nodeBookTypes";
 import { NodeType } from "src/types";
 
+import { IOSSwitch } from "@/components/IOSSwitcher";
 import NodeTypeIcon from "@/components/NodeTypeIcon";
 import OptimizedAvatar from "@/components/OptimizedAvatar";
 import { ChosenTag, MemoizedTagsSearcher } from "@/components/TagsSearcher";
@@ -59,12 +60,15 @@ import { getTypedCollections } from "@/lib/utils/getTypedCollections";
 import { justADate } from "@/lib/utils/justADate";
 import shortenNumber from "@/lib/utils/shortenNumber";
 import { ToUpperCaseEveryWord } from "@/lib/utils/utils";
+import { gray200 } from "@/pages/home";
 
+import darkModeLibraryBackground from "../../../../../public/darkModeLibraryBackground.jpg";
 import BellIcon from "../../../../../public/icons/bell-icon.svg";
 import GraphIcon from "../../../../../public/icons/graph-icon.svg";
 import LockIcon from "../../../../../public/icons/lock-icon.svg";
 import ProfileIcon from "../../../../../public/icons/profile-icon.svg";
 import UserIcon from "../../../../../public/icons/vector.svg";
+import LightmodeLibraryBackground from "../../../../../public/lightModeLibraryBackground.png";
 import { DESIGN_SYSTEM_COLORS } from "../../../../lib/theme/colors";
 import { MemoizedInputSave } from "../../InputSave";
 import { MemoizedMetaButton } from "../../MetaButton";
@@ -661,30 +665,26 @@ const UserSettigsSidebar = ({
     [db, user]
   );
 
-  const handleThemeSwitch = useCallback(
-    (event: any) => {
-      event.preventDefault();
-      const newTheme = settings.theme === "Dark" ? "Light" : "Dark";
-      changeAttr("theme")(newTheme);
-      dispatch({ type: "setTheme", payload: newTheme });
+  const handleSwitchTheme = useCallback(
+    (theme: UserTheme) => {
+      changeAttr("theme")(theme);
+      dispatch({ type: "setTheme", payload: theme });
     },
-    [changeAttr, dispatch, settings.theme]
+    [changeAttr, dispatch]
   );
 
   const handleViewSwitch = useCallback(
-    (event: any) => {
-      event.preventDefault();
-      const newView = settings.view === "Graph" ? "Masonry" : "Graph";
-      changeAttr("view")(newView);
-      dispatch({ type: "setView", payload: newView });
+    (view: UserView) => {
+      changeAttr("view")(view);
+      dispatch({ type: "setView", payload: view });
 
-      if (newView === "Graph") {
+      if (view === "Graph") {
         setTimeout(() => {
           if (nodeBookState?.selectedNode) scrollToNode(nodeBookState.selectedNode);
         }, 1500);
       }
     },
-    [changeAttr, dispatch, nodeBookState.selectedNode, scrollToNode, settings.view]
+    [changeAttr, dispatch, nodeBookState.selectedNode, scrollToNode]
   );
 
   const handleBackgroundSwitch = useCallback(
@@ -1229,6 +1229,155 @@ const UserSettigsSidebar = ({
                     label="Please specify, How did you hear about us."
                   />
                 )}
+                <Button
+                  variant="contained"
+                  fullWidth
+                  sx={{
+                    m: "24px 0 32px 0",
+                    borderRadius: "24px",
+                    py: "10px",
+                    backgroundColor: DESIGN_SYSTEM_COLORS.primary800,
+                  }}
+                >
+                  {" "}
+                  Save Changes
+                </Button>
+              </Box>
+            </TabPanel>
+            <TabPanel value={settingsValue} index={2}>
+              <ArrowBackButton text={ACCOUNT_OPTIONS[2].type} backwardsHandler={handleSettingsValue} />
+              <Box p="20px">
+                <Typography>Appearance</Typography>
+                <Stack direction={"row"} alignItems={"center"} justifyContent={"center"} spacing={"32px"} mt="12px">
+                  <ModeOption
+                    image={LightmodeLibraryBackground}
+                    mode="Light"
+                    active={settings.theme === "Light"}
+                    handleSwitchTheme={handleSwitchTheme}
+                  />
+                  <ModeOption
+                    image={darkModeLibraryBackground}
+                    mode="Dark"
+                    active={settings.theme === "Dark"}
+                    handleSwitchTheme={handleSwitchTheme}
+                  />
+                </Stack>
+                <Paper
+                  sx={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    borderRadius: "8px",
+                    p: "12px",
+                    my: "16px",
+                    backgroundColor: theme =>
+                      theme.palette.mode === "light" ? DESIGN_SYSTEM_COLORS.gray200 : DESIGN_SYSTEM_COLORS.notebookG700,
+                  }}
+                >
+                  <Typography>Background Image</Typography>
+                  <IOSSwitch checked={settings.background === "Image"} onChange={handleBackgroundSwitch} />
+                </Paper>
+                <Typography>Nodes view</Typography>
+                <Stack direction={"row"} alignItems={"center"} justifyContent={"center"} spacing={"32px"} mt="12px">
+                  <Box
+                    sx={{
+                      ":hover": { cursor: "pointer" },
+                    }}
+                    onClick={() => handleViewSwitch("Graph")}
+                  >
+                    <Stack
+                      direction={"row"}
+                      alignItems={"center"}
+                      justifyContent={"center"}
+                      sx={{
+                        width: "130px",
+                        height: "90px",
+                        backgroundColor: theme =>
+                          theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookG700 : gray200,
+                        border: `${settings.view === "Graph" ? 1 : 0}px solid ${DESIGN_SYSTEM_COLORS.primary600}`,
+                        borderRadius: "8px",
+                      }}
+                    >
+                      <NodeVersion width={52} height={30} mode={settings.theme} />
+                      <ArrowVersion />
+                      <NodeVersion width={30} height={30} mode={settings.theme} />
+                    </Stack>
+                    <Typography
+                      textAlign={"center"}
+                      sx={{
+                        color: theme =>
+                          theme.palette.mode === "dark"
+                            ? settings.view === "Graph"
+                              ? DESIGN_SYSTEM_COLORS.gray25
+                              : DESIGN_SYSTEM_COLORS.notebookG200
+                            : settings.view === "Graph"
+                            ? DESIGN_SYSTEM_COLORS.gray900
+                            : DESIGN_SYSTEM_COLORS.notebookG300,
+                      }}
+                    >
+                      Graph
+                    </Typography>
+                  </Box>
+                  <Box
+                    sx={{
+                      ":hover": { cursor: "pointer" },
+                    }}
+                    onClick={() => handleViewSwitch("Masonry")}
+                  >
+                    <Stack
+                      direction={"row"}
+                      alignItems={"center"}
+                      justifyContent={"center"}
+                      spacing={"5px"}
+                      sx={{
+                        width: "130px",
+                        height: "90px",
+                        backgroundColor: theme =>
+                          theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookG700 : gray200,
+                        border: `${settings.view === "Masonry" ? 1 : 0}px solid ${DESIGN_SYSTEM_COLORS.primary600}`,
+                        borderRadius: "8px",
+                      }}
+                    >
+                      <Stack spacing={"5px"}>
+                        <NodeVersion width={52} height={35} mode={settings.theme} />
+                        <NodeVersion width={52} height={30} mode={settings.theme} />
+                      </Stack>
+                      <Stack spacing={"5px"}>
+                        <NodeVersion width={52} height={14} mode={settings.theme} />
+                        <NodeVersion width={52} height={30} mode={settings.theme} />
+                        <NodeVersion width={52} height={18} mode={settings.theme} />
+                      </Stack>
+                    </Stack>
+                    <Typography
+                      textAlign={"center"}
+                      sx={{
+                        color: theme =>
+                          theme.palette.mode === "dark"
+                            ? settings.view === "Masonry"
+                              ? DESIGN_SYSTEM_COLORS.gray25
+                              : DESIGN_SYSTEM_COLORS.notebookG200
+                            : settings.view === "Masonry"
+                            ? DESIGN_SYSTEM_COLORS.gray900
+                            : DESIGN_SYSTEM_COLORS.notebookG300,
+                      }}
+                    >
+                      Masonry
+                    </Typography>
+                  </Box>
+                </Stack>
+                <Paper
+                  sx={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    borderRadius: "8px",
+                    p: "12px",
+                    my: "16px",
+                    backgroundColor: theme =>
+                      theme.palette.mode === "light" ? DESIGN_SYSTEM_COLORS.gray200 : DESIGN_SYSTEM_COLORS.notebookG700,
+                  }}
+                >
+                  <Typography>Clusters</Typography>
+                  <IOSSwitch checked={settings.background === "Image"} onChange={handleBackgroundSwitch} />
+                </Paper>
               </Box>
             </TabPanel>
           </Box>
@@ -1242,7 +1391,10 @@ const UserSettigsSidebar = ({
     dispatch,
     foundFromOtherValue,
     genderOtherValue,
+    handleBackgroundSwitch,
     handleChange,
+    handleSwitchTheme,
+    handleViewSwitch,
     languages,
     lastIndex,
     loadOlderProposalsClick,
@@ -1251,6 +1403,9 @@ const UserSettigsSidebar = ({
     openLinkedNode,
     proposals,
     setUserImage,
+    settings.background,
+    settings.theme,
+    settings.view,
     settingsValue,
     states,
     type,
@@ -1266,24 +1421,24 @@ const UserSettigsSidebar = ({
             id="AccountSettings"
             style={{ display: "flex", flexDirection: "column", justifyContent: "space-between", height: "450px" }}
           >
-            <FormGroup>
+            {/* <FormGroup>
               <FormControlLabel
                 control={<Switch checked={settings.theme === "Dark"} onChange={handleThemeSwitch} />}
                 label={`Theme: ${settings.theme === "Dark" ? "🌜" : "🌞"}`}
               />
-            </FormGroup>
+            </FormGroup> */}
             <FormGroup>
               <FormControlLabel
                 control={<Switch checked={settings.background === "Image"} onChange={handleBackgroundSwitch} />}
                 label={`Background: ${settings.background === "Color" ? "Color" : "Image"}`}
               />
             </FormGroup>
-            <FormGroup>
+            {/* <FormGroup>
               <FormControlLabel
                 control={<Switch checked={settings.view === "Graph"} onChange={handleViewSwitch} />}
                 label={`View: ${settings.view === "Graph" ? "Graph" : "Masonry"}`}
               />
-            </FormGroup>
+            </FormGroup> */}
             <FormGroup>
               <FormControlLabel
                 control={<Switch checked={!user.chooseUname} onChange={e => handlesChooseUnameSwitch(e, user)} />}
@@ -1512,14 +1667,10 @@ const UserSettigsSidebar = ({
       },
     ];
   }, [
-    settings.theme,
     settings.background,
-    settings.view,
     settings.showClusterOptions,
     settings.showClusters,
-    handleThemeSwitch,
     handleBackgroundSwitch,
-    handleViewSwitch,
     user,
     getDisplayNameValue,
     removeAllNodes,
@@ -1873,6 +2024,89 @@ const ArrowBackButton = ({ text, backwardsHandler }: ButtonBacKProps) => {
       <ArrowBackIosRoundedIcon sx={{ position: "absolute", left: "20px", top: "calc(50% - 12px)" }} />
       <Typography sx={{ flex: 1, textAlign: "center", fontWeight: "500" }}>{text}</Typography>
     </Stack>
+  );
+};
+
+type ModeOptionProps = {
+  image: StaticImageData;
+  mode: UserTheme;
+  active: boolean;
+  handleSwitchTheme: (theme: UserTheme) => void;
+};
+
+const NodeVersion = ({ width, height, mode }: { width: number; height: number; mode: UserTheme }) => {
+  return (
+    <Box
+      sx={{
+        width: `${width}px`,
+        height: `${height}px`,
+        borderRadius: "4px",
+        border: `1px solid ${DESIGN_SYSTEM_COLORS.notebookScarlet}`,
+        backgroundColor: mode === "Dark" ? DESIGN_SYSTEM_COLORS.notebookG600 : DESIGN_SYSTEM_COLORS.gray50,
+      }}
+    ></Box>
+  );
+};
+const ArrowVersion = () => {
+  return (
+    <Box
+      component={"span"}
+      sx={{
+        position: "relative",
+        borderBottom: "1.5px solid rgb(1, 211, 106)",
+        height: "2px",
+        width: "32px",
+        "&::after": {
+          content: '""',
+          position: "absolute",
+          top: "-5px",
+          right: "-6px",
+          width: 0,
+          height: 0,
+          border: "6px solid transparent",
+          borderLeft: "6px solid rgb(1, 211, 106)",
+        },
+      }}
+    ></Box>
+  );
+};
+const ModeOption = ({ image, mode, active, handleSwitchTheme }: ModeOptionProps) => {
+  return (
+    <Box sx={{ ":hover": { cursor: "pointer" } }} onClick={() => handleSwitchTheme(mode)}>
+      <Stack
+        direction={"row"}
+        alignItems={"center"}
+        justifyContent={"center"}
+        sx={{
+          width: "130px",
+          height: "90px",
+          border: `${Number(active)}px solid ${DESIGN_SYSTEM_COLORS.primary600}`,
+          borderRadius: "8px",
+          backgroundImage: `url(${image.src})`,
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+        }}
+      >
+        <NodeVersion width={52} height={30} mode={mode} />
+        <ArrowVersion />
+        <NodeVersion width={30} height={30} mode={mode} />
+      </Stack>
+      <Typography
+        textAlign={"center"}
+        sx={{
+          color: theme =>
+            theme.palette.mode === "dark"
+              ? active
+                ? DESIGN_SYSTEM_COLORS.gray25
+                : DESIGN_SYSTEM_COLORS.notebookG200
+              : active
+              ? DESIGN_SYSTEM_COLORS.gray900
+              : DESIGN_SYSTEM_COLORS.notebookG300,
+        }}
+      >
+        {mode}
+      </Typography>
+    </Box>
   );
 };
 
