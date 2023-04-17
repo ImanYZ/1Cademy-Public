@@ -1015,8 +1015,13 @@ const UserSettigsSidebar = ({
       {
         title: "Account",
         content: (
-          <Box>
-            <Box hidden={settingsValue !== -1}>
+          <Box height={"100%"}>
+            <Box
+              height={"100%"}
+              display={settingsValue !== -1 ? "none" : "flex"}
+              flexDirection={"column"}
+              justifyContent={"space-between"}
+            >
               <Stack>
                 {ACCOUNT_OPTIONS.map((option, idx) => (
                   <Stack
@@ -1054,6 +1059,9 @@ const UserSettigsSidebar = ({
                   </Stack>
                 ))}
               </Stack>
+              <Button onClick={logoutClick} color="error">
+                Log out
+              </Button>
             </Box>
             <TabPanel value={settingsValue} index={0}>
               <ArrowBackButton text={ACCOUNT_OPTIONS[0].type} backwardsHandler={handleSettingsValue} />
@@ -1108,13 +1116,13 @@ const UserSettigsSidebar = ({
                       value={user.birthDate}
                       onChange={value => handleChange({ target: { value, name: "birthDate" } })}
                       renderInput={params => (
-                        <TextField {...params} id="birthDate" label="Birth Date" name="birthDate" sx={{ flex: 1 }} />
+                        <TextField {...params} id="birthDate" label="Date of Birth" name="birthDate" sx={{ flex: 1 }} />
                       )}
                     />
                   </LocalizationProvider>
                 </Box>
                 <Typography fontWeight={"500"} my="8px">
-                  Professional Info
+                  Professional Information
                 </Typography>
                 <UserSettingsProfessionalInfo user={user} />
                 <Button
@@ -1145,6 +1153,7 @@ const UserSettigsSidebar = ({
     handleChange,
     lastIndex,
     loadOlderProposalsClick,
+    logoutClick,
     nodeTypeStats,
     openLinkedNode,
     proposals,
@@ -1719,7 +1728,7 @@ const UserSettigsSidebar = ({
       onClose={onClose}
       width={430}
       SidebarOptions={open ? SidebarOptions : null}
-      SidebarContent={open ? <Box pt="24px">{newTabsItems[value].content}</Box> : null}
+      SidebarContent={open ? <Box py="24px">{newTabsItems[value].content}</Box> : null}
     />
   );
 };
