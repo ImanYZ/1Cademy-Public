@@ -1,3 +1,4 @@
+import { Avatar } from "@mui/material";
 import { Box } from "@mui/system";
 import { getAuth } from "firebase/auth";
 import { getDownloadURL, getStorage, ref, uploadBytesResumable } from "firebase/storage";
@@ -20,9 +21,10 @@ type ProfileAvatarType = {
   userId: string;
   userImage?: string;
   setUserImage: (newImage: string) => void;
-  userFullName: string;
+  name: string;
+  lastName: string;
 };
-const ProfileAvatar = ({ id, userId, userImage, setUserImage, userFullName }: ProfileAvatarType) => {
+const ProfileAvatar = ({ id, userId, userImage, setUserImage, name, lastName }: ProfileAvatarType) => {
   // const firebase = useRecoilValue(firebaseState);
   // const uid = useRecoilValue(uidState);
   // const [imageUrl, setImageUrl] = useRecoilState(imageUrlState);
@@ -74,7 +76,7 @@ const ProfileAvatar = ({ id, userId, userImage, setUserImage, userFullName }: Pr
           let fullName = prompt(
             "Type your full name below to consent that you have all the rights to upload this image and the image does not violate any laws."
           );
-          if (fullName != userFullName) {
+          if (fullName !== `${name} ${lastName}`) {
             alert("Entered full name is not correct");
             return;
           }
@@ -181,20 +183,39 @@ const ProfileAvatar = ({ id, userId, userImage, setUserImage, userFullName }: Pr
           },
         }}
       >
-        <Image
-          width="90px"
-          height="90px"
-          src={userImage ?? ""}
-          alt="1Cademist Profile Picture"
-          objectFit="cover"
-          objectPosition="center center"
-        />
-        {isUploading && (
-          <PercentageLoader percentage={percentageUploaded} radius={78} widthInPx="90px" heightInPx="90px" />
+        {imageUrlError ? (
+          <Avatar
+            sx={{
+              width: "90px",
+              height: "90px",
+              color: "white",
+              background: "linear-gradient(143.7deg, #FDC830 15.15%, #F37335 83.11%);",
+              ":hover": {
+                boxShadow: "0 0 16px 0 #bebebe",
+                cursor: "pointer",
+              },
+            }}
+          >
+            {`${name.charAt(0)}${lastName.charAt(0)}`}
+          </Avatar>
+        ) : (
+          <>
+            <Image
+              width="90px"
+              height="90px"
+              src={userImage ?? ""}
+              alt="1Cademist Profile Picture"
+              objectFit="cover"
+              objectPosition="center center"
+            />
+            {isUploading && (
+              <PercentageLoader percentage={percentageUploaded} radius={78} widthInPx="90px" heightInPx="90px" />
+            )}
+          </>
         )}
       </Box>
 
-      {imageUrlError && <div className="errorMessage">{imageUrlError}</div>}
+      {/* {imageUrlError && <div className="errorMessage">{imageUrlError}</div>} */}
     </Box>
   );
 };

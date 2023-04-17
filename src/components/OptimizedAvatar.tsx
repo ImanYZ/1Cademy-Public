@@ -54,7 +54,8 @@ const OptimizedAvatar: FC<Props> = ({ name = "", imageUrl, renderAsAvatar = true
         sx={{
           width: "50px",
           height: "50px",
-          backgroundColor: "#ff9800",
+          background: "linear-gradient(143.7deg, #FDC830 15.15%, #F37335 83.11%);",
+
           color: common.white,
           fontSize: "16px",
         }}

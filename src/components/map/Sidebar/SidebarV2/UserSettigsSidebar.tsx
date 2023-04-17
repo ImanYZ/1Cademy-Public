@@ -8,6 +8,7 @@ import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import LocalOfferRoundedIcon from "@mui/icons-material/LocalOfferRounded";
 import {
   Autocomplete,
+  Avatar,
   Button,
   FormControlLabel,
   FormGroup,
@@ -106,6 +107,7 @@ type AccountOptions = {
   icon: any;
 };
 export const NODE_TYPE_OPTIONS: NodeType[] = ["Code", "Concept", "Idea", "Question", "Reference", "Relation"];
+const DEFAULT_PROFILE_URL = "https://storage.googleapis.com/onecademy-1.appspot.com/ProfilePictures/no-img.png";
 
 const ACCOUNT_OPTIONS: AccountOptions[] = [
   { type: "My details", icon: UserIcon },
@@ -1071,7 +1073,8 @@ const UserSettigsSidebar = ({
                   userId={user.userId}
                   userImage={user.imageUrl}
                   setUserImage={setUserImage}
-                  userFullName={`${user?.fName} ${user?.lName}`}
+                  name={user?.fName ?? ""}
+                  lastName={user?.lName ?? ""}
                 />
                 <Typography textAlign={"center"}>{user.imageUrl ? "Change Photo" : "Add Photo"}</Typography>
               </Box>
@@ -1481,7 +1484,20 @@ const UserSettigsSidebar = ({
         <Box p="0 32px 16px 32px">
           <Stack direction={"row"} alignItems={"center"} component={"section"} spacing={"20px"} mb="18px">
             <Box sx={{ "& img": { borderRadius: "50%" } }}>
-              <Image src={user.imageUrl ?? ""} alt={`${user?.fName} ${user?.lName}`} width={90} height={90} />
+              {user.imageUrl && user.imageUrl !== "" && user.imageUrl !== DEFAULT_PROFILE_URL ? (
+                <Image src={user.imageUrl} alt={`${user?.fName} ${user?.lName}`} width={90} height={90} />
+              ) : (
+                <Avatar
+                  sx={{
+                    width: "90px",
+                    height: "90px",
+                    color: "white",
+                    background: "linear-gradient(143.7deg, #FDC830 15.15%, #F37335 83.11%);",
+                  }}
+                >
+                  {`${(user.fName ?? "").charAt(0)}${(user.lName ?? "").charAt(0)}`}
+                </Avatar>
+              )}
             </Box>
             <Box>
               <Typography sx={{ fontSize: "20px", fontWeight: "700", mb: "4px" }}>
