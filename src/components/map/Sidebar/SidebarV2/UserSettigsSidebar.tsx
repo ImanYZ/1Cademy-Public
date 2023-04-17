@@ -19,9 +19,11 @@ import {
   Select,
   Stack,
   Switch,
+  SxProps,
   Tab,
   Tabs,
   TextField,
+  Theme,
   Typography,
 } from "@mui/material";
 import { Box } from "@mui/system";
@@ -52,6 +54,7 @@ import { NodeType } from "src/types";
 import { IOSSwitch } from "@/components/IOSSwitcher";
 import NodeTypeIcon from "@/components/NodeTypeIcon";
 import OptimizedAvatar from "@/components/OptimizedAvatar";
+import ResetPasswordForm from "@/components/ResetPasswordForm";
 import { ChosenTag, MemoizedTagsSearcher } from "@/components/TagsSearcher";
 import { useTagsTreeView } from "@/hooks/useTagsTreeView";
 import { retrieveAuthenticatedUser } from "@/lib/firestoreClient/auth";
@@ -66,8 +69,10 @@ import { gray200 } from "@/pages/home";
 import darkModeLibraryBackground from "../../../../../public/darkModeLibraryBackground.jpg";
 import BellIcon from "../../../../../public/icons/bell-icon.svg";
 import GraphIcon from "../../../../../public/icons/graph-icon.svg";
+import KeyIcon from "../../../../../public/icons/key-icon.svg";
 import LockIcon from "../../../../../public/icons/lock-icon.svg";
 import ProfileIcon from "../../../../../public/icons/profile-icon.svg";
+import SadfaceIcon from "../../../../../public/icons/sadface-icon.svg";
 import UserIcon from "../../../../../public/icons/vector.svg";
 import LightmodeLibraryBackground from "../../../../../public/lightModeLibraryBackground.png";
 import { DESIGN_SYSTEM_COLORS } from "../../../../lib/theme/colors";
@@ -110,6 +115,7 @@ type TabPanelProps = {
 type AccountOptions = {
   type: string;
   icon: any;
+  options?: AccountOptions[];
 };
 export const NODE_TYPE_OPTIONS: NodeType[] = ["Code", "Concept", "Idea", "Question", "Reference", "Relation"];
 const DEFAULT_PROFILE_URL = "https://storage.googleapis.com/onecademy-1.appspot.com/ProfilePictures/no-img.png";
@@ -119,7 +125,20 @@ const ACCOUNT_OPTIONS: AccountOptions[] = [
   { type: "Profile", icon: ProfileIcon },
   { type: "Notebook settings", icon: GraphIcon },
   { type: "Email notifications", icon: BellIcon },
-  { type: "Account access", icon: LockIcon },
+  {
+    type: "Account access",
+    icon: LockIcon,
+    options: [
+      {
+        type: "Change your Password",
+        icon: KeyIcon,
+      },
+      {
+        type: "Deactive your Account",
+        icon: SadfaceIcon,
+      },
+    ],
+  },
 ];
 
 const TabPanel = ({ value, index, children }: TabPanelProps) => {
@@ -176,11 +195,13 @@ const UserSettigsSidebar = ({
   const [type, setType] = useState<string>("all");
 
   const [settingsValue, setSettingsValue] = React.useState(-1);
-
+  const [settingsSubValue, setSettingsSubValue] = React.useState(-1);
   const handleSettingsValue = (newValue: number) => {
     setSettingsValue(newValue);
   };
-
+  const handleSettingsSubValue = (newValue: number) => {
+    setSettingsSubValue(newValue);
+  };
   const { success600, orange600, gray500, gray300 } = DESIGN_SYSTEM_COLORS;
 
   const isInEthnicityValues = (ethnicityItem: string) => ETHNICITY_VALUES.includes(ethnicityItem);
@@ -824,7 +845,7 @@ const UserSettigsSidebar = ({
   const getValidValue = (userOptions: string[], defaultValue: string, userValue?: string) => {
     if (!userValue) return null;
     userOptions.includes(userValue) ? userValue : defaultValue;
-    // console.log("RES -->", res);
+    // console.log("RES -->", res)
     return userOptions.includes(userValue) ? userValue : defaultValue;
   };
   const getSelectedOptionsByValue = (userValues: string[], isInValues: any, defaultValue: string) => {
@@ -907,8 +928,12 @@ const UserSettigsSidebar = ({
       {
         title: "Trends",
         content: (
-          <Box id="TrendsSettings" sx={{}}>
-            <Box component={"section"} sx={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "10px" }}>
+          <Box id="TrendsSettings" sx={{ p: "12px" }}>
+            <Typography fontWeight={"500"}>Nodes Overwiew</Typography>
+            <Box
+              component={"section"}
+              sx={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "10px", mt: "16px" }}
+            >
               {NODE_TYPE_OPTIONS.map((nodeType, idx) => (
                 <Paper
                   key={`${nodeType}-${idx}`}
@@ -933,7 +958,7 @@ const UserSettigsSidebar = ({
       {
         title: "Proposals",
         content: (
-          <Box sx={{ display: "flex", flexDirection: "column", gap: "4px" }}>
+          <Box sx={{ display: "flex", flexDirection: "column", gap: "4px", px: "12px" }}>
             <Box
               sx={{
                 display: "flex",
@@ -1483,6 +1508,62 @@ const UserSettigsSidebar = ({
                 </Button>
               </Box>
             </TabPanel>
+            <TabPanel value={settingsValue} index={4}>
+              <ArrowBackButton
+                text={ACCOUNT_OPTIONS[4].type}
+                backwardsHandler={handleSettingsValue}
+                sx={{ display: settingsSubValue !== -1 ? "none" : "block" }}
+              />
+              <Stack display={settingsSubValue !== -1 ? "none" : "flex"}>
+                {ACCOUNT_OPTIONS[4].options &&
+                  ACCOUNT_OPTIONS[4].options.map((option, idx) => (
+                    <Stack
+                      key={`${option.type}-${idx}`}
+                      direction={"row"}
+                      justifyContent={"space-between"}
+                      spacing={"12px"}
+                      onClick={() => handleSettingsSubValue(idx)}
+                      p="12px 10px"
+                      sx={{
+                        ":hover": {
+                          backgroundColor: theme =>
+                            theme.palette.mode === "dark"
+                              ? DESIGN_SYSTEM_COLORS.notebookG700
+                              : DESIGN_SYSTEM_COLORS.gray100,
+                          cursor: "pointer",
+                        },
+                      }}
+                    >
+                      <Stack direction={"row"} alignItems={"center"} spacing={"12px"}>
+                        <Box
+                          sx={{
+                            p: "6px",
+                            borderRadius: "8px",
+                            backgroundColor: "#FF8134",
+                            display: "grid",
+                            placeItems: "center",
+                          }}
+                        >
+                          <Image src={option.icon} width={18} height={18} alt={option.type} />
+                        </Box>
+                        <Typography>{option.type}</Typography>
+                      </Stack>
+                      <ArrowForwardIosRoundedIcon />
+                    </Stack>
+                  ))}
+              </Stack>
+              {ACCOUNT_OPTIONS[4].options && (
+                <TabPanel value={settingsSubValue} index={0}>
+                  <ArrowBackButton
+                    text={ACCOUNT_OPTIONS[4].options[0].type}
+                    backwardsHandler={handleSettingsSubValue}
+                  />
+                  <Box p="24px 20px">
+                    <ResetPasswordForm />
+                  </Box>
+                </TabPanel>
+              )}
+            </TabPanel>
           </Box>
         ),
       },
@@ -1515,6 +1596,7 @@ const UserSettigsSidebar = ({
     settings.showClusters,
     settings.theme,
     settings.view,
+    settingsSubValue,
     settingsValue,
     states,
     type,
@@ -2108,9 +2190,10 @@ const UserSettigsSidebar = ({
 type ButtonBacKProps = {
   text: string;
   backwardsHandler: (index: number) => void;
+  sx?: SxProps<Theme>;
 };
 
-const ArrowBackButton = ({ text, backwardsHandler }: ButtonBacKProps) => {
+const ArrowBackButton = ({ text, backwardsHandler, sx }: ButtonBacKProps) => {
   return (
     <Stack
       position={"relative"}
@@ -2124,6 +2207,7 @@ const ArrowBackButton = ({ text, backwardsHandler }: ButtonBacKProps) => {
             theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookG700 : DESIGN_SYSTEM_COLORS.gray100,
           cursor: "pointer",
         },
+        ...sx,
       }}
     >
       <ArrowBackIosRoundedIcon sx={{ position: "absolute", left: "20px", top: "calc(50% - 12px)" }} />
