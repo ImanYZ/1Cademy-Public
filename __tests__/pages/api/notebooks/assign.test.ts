@@ -103,7 +103,10 @@ describe("POST /api/notebooks/assign", () => {
         documentId: "n1",
         isPublic: "none",
         owner: users[0].uname,
-        roles: {},
+        ownerChooseUname: users[0].chooseUname,
+        ownerFullName: `${users[0].fName} ${users[0].lName}`,
+        ownerImgUrl: users[0].imageUrl,
+        usersInfo: {},
         title: "n1",
         users: [],
       } as INotebook,
@@ -174,6 +177,6 @@ describe("POST /api/notebooks/assign", () => {
   it("Notebook should have correct role", async () => {
     const notebook = await db.collection("notebooks").doc("n1").get();
     const notebookData = notebook.data() as INotebook;
-    expect(notebookData.roles[users[1].uname]).toEqual("editor");
+    expect(notebookData.usersInfo[users[1].uname]?.role).toEqual("editor");
   });
 });

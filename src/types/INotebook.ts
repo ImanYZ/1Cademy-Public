@@ -1,10 +1,19 @@
 export type INotebook = {
   documentId?: string;
   owner: string;
+  ownerImgUrl: string;
+  ownerFullName: string;
+  ownerChooseUname: boolean;
+  duplicatedFrom?: string;
   title: string;
   isPublic: "visible" | "editable" | "none";
   users: string[];
-  roles: {
-    [uname: string]: "viewer" | "editor";
+  usersInfo: {
+    [uname: string]: {
+      role: "viewer" | "editor";
+      imageUrl: string;
+      fullname: string;
+      chooseUname: boolean;
+    };
   };
 };
