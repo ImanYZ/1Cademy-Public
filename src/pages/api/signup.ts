@@ -312,7 +312,10 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
         batch.set(notebookRef, {
           isPublic: "none",
           owner: userData.uname,
-          roles: {},
+          ownerImgUrl: userData.imageUrl,
+          ownerFullName: `${userData.fName} ${userData.lName}`,
+          ownerChooseUname: userData.chooseUname,
+          usersInfo: {},
           users: [],
           title: "My Notebook",
         } as INotebook);

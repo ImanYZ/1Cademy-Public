@@ -3,6 +3,7 @@ import fbAuth from "src/middlewares/fbAuth";
 import { checkRestartBatchWriteCounts, commitBatch, db } from "@/lib/firestoreServer/admin";
 import { INotebook } from "src/types/INotebook";
 import { IUserNode } from "src/types/IUserNode";
+import { IUser } from "src/types/IUser";
 
 export type INotebookAssignPayload = {
   notebookId: string;
@@ -42,7 +43,19 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       throw new Error("Your don't have access to roles");
     }
 
-    notebookData.roles[user] = role;
+    const userDoc = await db.collection("users").doc(user).get();
+    if (!userDoc.exists) {
+      throw new Error(`${user} doesn't exists`);
+    }
+
+    const userData = userDoc.data() as IUser;
+
+    notebookData.usersInfo[user] = {
+      role,
+      chooseUname: !!userData.chooseUname,
+      fullname: `${userData.fName} ${userData.lName}`,
+      imageUrl: userData.imageUrl,
+    };
     if (!notebookData.users.includes(user)) {
       notebookData.users.push(user);
     }
@@ -102,7 +115,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
 
     batch.update(notebookRef, {
       users: notebookData.users,
-      roles: notebookData.roles,
+      usersInfo: notebookData.usersInfo,
     });
 
     commitBatch(batch);

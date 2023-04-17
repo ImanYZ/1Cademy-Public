@@ -14,7 +14,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       throw new Error("only post method allowed");
     }
 
-    const { uname } = req.body?.data?.user?.userData;
+    const { uname, fName, lName, chooseUname, imageUrl } = req.body?.data?.user?.userData;
 
     const { notebookId } = req.body as INotebookViewPayload;
     if (!notebookId) {
@@ -42,7 +42,12 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
 
     if (!notebookData.users.includes(uname)) {
       notebookData.users.push(uname);
-      notebookData.roles[uname] = notebookData.isPublic === "editable" ? "editor" : "viewer";
+      notebookData.usersInfo[uname] = {
+        imageUrl,
+        fullname: `${fName} ${lName}`,
+        chooseUname,
+        role: notebookData.isPublic === "editable" ? "editor" : "viewer",
+      };
     }
 
     // updating user nodes
@@ -100,7 +105,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
 
     batch.update(notebookRef, {
       users: notebookData.users,
-      roles: notebookData.roles,
+      usersInfo: notebookData.usersInfo,
     });
 
     commitBatch(batch);
