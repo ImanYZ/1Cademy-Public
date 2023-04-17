@@ -86,17 +86,17 @@ type LinkingButtonWrapperProps = {
   children: ReactNode;
   onClick: () => void;
   onClickOnDisable?: () => void;
-  disable?: boolean;
+  disabled?: boolean;
 };
 
 const LinkingButtonWrapper = ({
   id,
   children,
-  disable = false,
+  disabled = false,
   onClick,
   onClickOnDisable,
 }: LinkingButtonWrapperProps) => {
-  if (disable)
+  if (disabled)
     return (
       <Box id={id} onClick={onClickOnDisable}>
         {children}

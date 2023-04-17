@@ -39,7 +39,7 @@ type BasicNodeProps = {
   // bookmark: any;
   bookmarked: boolean;
   bookmarks: any;
-  changedAt: string;
+  changedAt: any; // TODO: check real type of this
   // correctNode: any;
   correctNum: any;
   // aImgUrl: string;
@@ -52,7 +52,7 @@ type BasicNodeProps = {
   // markedWrong: any;
   references: { title: string; node: string; label: string }[];
   tags: { node: string; title?: string; label?: string }[];
-  parents: string[];
+  parents: any[];
   nodesChildren: string[] | { node: string; title?: string; label?: string }[];
   setOpenPart: (nodeId: string, newOpenPart: OpenPart) => void;
   locked: boolean;

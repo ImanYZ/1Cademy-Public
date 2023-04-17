@@ -559,13 +559,13 @@ const NodePage: NextPage<Props> = ({ notebook }) => {
           }}
           bookmarked={cur.bookmarked}
           bookmarks={cur.bookmarks}
-          changedAt={cur.changedAt as string}
+          changedAt={cur.changedAt}
           correctNum={cur.corrects}
           locked={Boolean(cur.locked)}
           // markedCorrect={cur.correct}
           // markedWrong={cur.wrong}
           nodesChildren={cur.children ?? []}
-          notebookRef={null}
+          // notebookRef={null}
           // onNodeShare={onNodeShare}
           // openNodePart={openNodePart}
           openPart={cur.localLinkingWords}

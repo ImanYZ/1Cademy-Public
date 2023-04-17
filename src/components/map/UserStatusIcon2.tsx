@@ -106,7 +106,7 @@ const UserStatusIcon = ({ nodeBookDispatch, smallVersion = true, ...props }: Use
     let title: string = "";
     title += props.chooseUname ? props.uname : props.fullname;
 
-    if (!("inNodeFooter" in props && props.inNodeFooter) && "totalPositives" in props && "totalNegatives" in props) {
+    if ("totalPositives" in props && "totalNegatives" in props) {
       return (
         <>
           <span>{title}</span>
