@@ -135,6 +135,11 @@ async function main() {
       lastNodeDoc = node;
       totalNodes++;
     }
+
+    // if last node empty don't create sitemap as it will create empty sitemap
+    if (!lastNodeDoc) {
+      continue;
+    }
     const comSitemapFile = `sitemaps/sitemap_${c++}.xml`;
     const sitemapContent = await buildSitemap(nodes);
     const communitySubSmUrl = await uploadToBucket(comSitemapFile, sitemapContent);
@@ -143,7 +148,6 @@ async function main() {
       url: communitySubSmUrl,
       updated_at: new Date().toISOString(),
     });
-    console.log("lastNodeDoc");
     nodes = [];
   }
 
