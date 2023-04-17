@@ -1485,13 +1485,22 @@ const UserSettigsSidebar = ({
           <Stack direction={"row"} alignItems={"center"} component={"section"} spacing={"20px"} mb="18px">
             <Box sx={{ "& img": { borderRadius: "50%" } }}>
               {user.imageUrl && user.imageUrl !== "" && user.imageUrl !== DEFAULT_PROFILE_URL ? (
-                <Image src={user.imageUrl} alt={`${user?.fName} ${user?.lName}`} width={90} height={90} />
+                <Image
+                  src={user.imageUrl}
+                  alt={`${user?.fName} ${user?.lName}`}
+                  width={90}
+                  height={90}
+                  objectFit="cover"
+                  objectPosition="center center"
+                />
               ) : (
                 <Avatar
                   sx={{
                     width: "90px",
                     height: "90px",
                     color: "white",
+                    fontSize: "24px",
+                    fontWeight: "600",
                     background: "linear-gradient(143.7deg, #FDC830 15.15%, #F37335 83.11%);",
                   }}
                 >

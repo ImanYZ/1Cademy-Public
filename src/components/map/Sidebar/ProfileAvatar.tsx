@@ -162,6 +162,7 @@ const ProfileAvatar = ({ id, userId, userImage, setUserImage, name, lastName }: 
         justifyContent: "center",
         alignItems: "center",
         borderRadius: "6px",
+        py: "8px",
       }}
     >
       <input type="file" ref={inputEl} onChange={handleImageChange} accept="image/png, image/jpg, image/jpeg" hidden />
@@ -190,6 +191,8 @@ const ProfileAvatar = ({ id, userId, userImage, setUserImage, name, lastName }: 
               height: "90px",
               color: "white",
               background: "linear-gradient(143.7deg, #FDC830 15.15%, #F37335 83.11%);",
+              fontSize: "24px",
+              fontWeight: "600",
               ":hover": {
                 boxShadow: "0 0 16px 0 #bebebe",
                 cursor: "pointer",
