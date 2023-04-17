@@ -1105,15 +1105,28 @@ const UserSettigsSidebar = ({
                   disabled={true}
                 />
                 <Box sx={{ display: "flex", gap: "12px", my: "8px" }}>
-                  <Autocomplete
-                    id="gender"
-                    value={getValidValue(GENDER_VALUES, GENDER_VALUES[2], user.gender)}
-                    onChange={(_, value) => handleChange({ target: { value, name: "gender" } })}
-                    options={GENDER_VALUES}
-                    renderInput={params => <TextField {...params} label="Gender" />}
-                    fullWidth
-                    sx={{ flex: 1 }}
-                  />
+                  <Stack sx={{ flex: 1 }}>
+                    <Autocomplete
+                      id="gender"
+                      value={getValidValue(GENDER_VALUES, GENDER_VALUES[2], user.gender)}
+                      onChange={(_, value) => handleChange({ target: { value, name: "gender" } })}
+                      options={GENDER_VALUES}
+                      renderInput={params => <TextField {...params} label="Gender" />}
+                      fullWidth
+                    />
+
+                    {(user.gender === "Not listed (Please specify)" || !GENDER_VALUES.includes(user.gender || "")) && (
+                      <MemoizedInputSave
+                        identification="genderOtherValue"
+                        initialValue={genderOtherValue} //TODO: important fill empty user field
+                        onSubmit={(value: any) => changeAttr("gender")(value)}
+                        setState={(value: string) =>
+                          dispatch({ type: "setAuthUser", payload: { ...user, gender: value } })
+                        }
+                        label="Please specify your gender."
+                      />
+                    )}
+                  </Stack>
                   <LocalizationProvider dateAdapter={AdapterDaysJs}>
                     <DatePicker
                       value={user.birthDate}
@@ -1145,6 +1158,78 @@ const UserSettigsSidebar = ({
             </TabPanel>
             <TabPanel value={settingsValue} index={1}>
               <ArrowBackButton text={ACCOUNT_OPTIONS[1].type} backwardsHandler={handleSettingsValue} />
+              <Box component={"section"} p={"24px 20px"}>
+                <Autocomplete
+                  id="language"
+                  value={user.lang}
+                  onChange={(_, value) => handleChange({ target: { value, name: "language" } })}
+                  options={languages}
+                  renderInput={params => <TextField {...params} label="Language" />}
+                  fullWidth
+                  sx={{ mb: "16px" }}
+                />
+                <Autocomplete
+                  id="country"
+                  value={user.country}
+                  onChange={(_, value) => handleChange({ target: { value, name: "country" } })}
+                  options={countries.map(cur => cur.name)}
+                  renderInput={params => <TextField {...params} label="Country" />}
+                  fullWidth
+                  sx={{ mb: "16px" }}
+                />
+                <Box sx={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px" }}>
+                  <Autocomplete
+                    id="state"
+                    value={user.state}
+                    onChange={(_, value) => handleChange({ target: { value, name: "state" } })}
+                    options={states.map(cur => cur.name)}
+                    renderInput={params => <TextField {...params} label="State" />}
+                    fullWidth
+                    sx={{ mb: "16px" }}
+                  />
+                  <Autocomplete
+                    id="city"
+                    value={user.city}
+                    onChange={(_, value) => handleChange({ target: { value, name: "city" } })}
+                    options={cities.map(cur => cur.name)}
+                    renderInput={params => <TextField {...params} label="City" />}
+                    fullWidth
+                    sx={{ mb: "16px" }}
+                  />
+                </Box>
+                <Autocomplete
+                  id="ethnicity"
+                  value={getSelectedOptionsByValue(user.ethnicity, isInEthnicityValues, ETHNICITY_VALUES[6])}
+                  onChange={(_, value) => handleChange({ target: { value, name: "ethnicity" } })}
+                  // structure based from https://blog.hubspot.com/service/survey-demographic-questions
+                  options={ETHNICITY_VALUES}
+                  renderInput={params => <TextField {...params} label="Ethnicity" />}
+                  fullWidth
+                  multiple
+                  sx={{ mb: "16px" }}
+                />
+                <Autocomplete
+                  id="foundFrom"
+                  value={getValidValue(FOUND_FROM_VALUES, FOUND_FROM_VALUES[5], user.foundFrom)}
+                  onChange={(_, value) => handleChange({ target: { value, name: "foundFrom" } })}
+                  options={FOUND_FROM_VALUES}
+                  renderInput={params => <TextField {...params} label="How did you hear about us?" />}
+                  fullWidth
+                  sx={{ mb: "16px" }}
+                />
+                {(user.foundFrom === "Not listed (Please specify)" ||
+                  !FOUND_FROM_VALUES.includes(user.foundFrom || "")) && (
+                  <MemoizedInputSave
+                    identification="foundFromOtherValue"
+                    initialValue={foundFromOtherValue} //TODO: important fill empty user field
+                    onSubmit={(value: any) => changeAttr("foundFrom")(value)}
+                    setState={(value: string) =>
+                      dispatch({ type: "setAuthUser", payload: { ...user, foundFrom: value } })
+                    }
+                    label="Please specify, How did you hear about us."
+                  />
+                )}
+              </Box>
             </TabPanel>
           </Box>
         ),
@@ -1152,8 +1237,13 @@ const UserSettigsSidebar = ({
     ];
   }, [
     changeAttr,
+    cities,
+    countries,
     dispatch,
+    foundFromOtherValue,
+    genderOtherValue,
     handleChange,
+    languages,
     lastIndex,
     loadOlderProposalsClick,
     logoutClick,
@@ -1162,6 +1252,7 @@ const UserSettigsSidebar = ({
     proposals,
     setUserImage,
     settingsValue,
+    states,
     type,
     user,
   ]);

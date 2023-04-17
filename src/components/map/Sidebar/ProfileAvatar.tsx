@@ -217,8 +217,6 @@ const ProfileAvatar = ({ id, userId, userImage, setUserImage, name, lastName }: 
           </>
         )}
       </Box>
-
-      {/* {imageUrlError && <div className="errorMessage">{imageUrlError}</div>} */}
     </Box>
   );
 };
