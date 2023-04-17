@@ -10,6 +10,7 @@ import {
   Autocomplete,
   Avatar,
   Button,
+  Divider,
   FormControlLabel,
   FormGroup,
   LinearProgress,
@@ -707,24 +708,18 @@ const UserSettigsSidebar = ({
     [changeAttr, dispatch]
   );
 
-  const handleShowClusterOptionsSwitch = useCallback(
-    (event: any) => {
-      event.preventDefault();
-      const newShowClusterOption = !settings.showClusterOptions;
-      changeAttr("showClusterOptions")(newShowClusterOption);
-      dispatch({ type: "setShowClusterOptions", payload: newShowClusterOption });
-    },
-    [changeAttr, dispatch, settings.showClusterOptions]
-  );
+  const handleShowClusterOptionsSwitch = useCallback(() => {
+    const newShowClusterOption = !settings.showClusterOptions;
+    changeAttr("showClusterOptions")(newShowClusterOption);
+    dispatch({ type: "setShowClusterOptions", payload: newShowClusterOption });
+  }, [changeAttr, dispatch, settings.showClusterOptions]);
 
   const handleShowClustersSwitch = useCallback(
-    (event: any) => {
-      event.preventDefault();
-      const newShowCluster = !settings.showClusters;
-      changeAttr("showClusters")(newShowCluster);
-      dispatch({ type: "setShowClusters", payload: newShowCluster });
+    (showClusters: boolean) => {
+      changeAttr("showClusters")(showClusters);
+      dispatch({ type: "setShowClusters", payload: showClusters });
     },
-    [changeAttr, dispatch, settings.showClusters]
+    [changeAttr, dispatch]
   );
 
   const closeTagSelector = useCallback(() => {
@@ -1247,8 +1242,8 @@ const UserSettigsSidebar = ({
             <TabPanel value={settingsValue} index={2}>
               <ArrowBackButton text={ACCOUNT_OPTIONS[2].type} backwardsHandler={handleSettingsValue} />
               <Box p="20px">
-                <Typography>Appearance</Typography>
-                <Stack direction={"row"} alignItems={"center"} justifyContent={"center"} spacing={"32px"} mt="12px">
+                <Typography fontWeight={"500"}>Appearance</Typography>
+                <Stack direction={"row"} alignItems={"center"} justifyContent={"space-evenly"} mt="12px">
                   <ModeOption
                     image={LightmodeLibraryBackground}
                     mode="Light"
@@ -1276,8 +1271,8 @@ const UserSettigsSidebar = ({
                   <Typography>Background Image</Typography>
                   <IOSSwitch checked={settings.background === "Image"} onChange={handleBackgroundSwitch} />
                 </Paper>
-                <Typography>Nodes view</Typography>
-                <Stack direction={"row"} alignItems={"center"} justifyContent={"center"} spacing={"32px"} mt="12px">
+                <Typography fontWeight={"500"}>Nodes view</Typography>
+                <Stack direction={"row"} alignItems={"center"} justifyContent={"space-evenly"} mt="12px">
                   <Box
                     sx={{
                       ":hover": { cursor: "pointer" },
@@ -1366,17 +1361,112 @@ const UserSettigsSidebar = ({
                 </Stack>
                 <Paper
                   sx={{
-                    display: "flex",
-                    justifyContent: "space-between",
                     borderRadius: "8px",
-                    p: "12px",
+                    py: "12px",
                     my: "16px",
                     backgroundColor: theme =>
                       theme.palette.mode === "light" ? DESIGN_SYSTEM_COLORS.gray200 : DESIGN_SYSTEM_COLORS.notebookG700,
                   }}
                 >
-                  <Typography>Clusters</Typography>
-                  <IOSSwitch checked={settings.background === "Image"} onChange={handleBackgroundSwitch} />
+                  <Stack direction={"row"} justifyContent={"space-between"} px={"12px"}>
+                    <Typography>Clusters</Typography>
+                    <IOSSwitch checked={settings.showClusterOptions} onChange={handleShowClusterOptionsSwitch} />
+                  </Stack>
+                  {settings.showClusterOptions && (
+                    <>
+                      <Divider
+                        sx={{
+                          m: "12px",
+                          borderColor: theme =>
+                            theme.palette.mode === "dark"
+                              ? DESIGN_SYSTEM_COLORS.notebookG500
+                              : DESIGN_SYSTEM_COLORS.gray300,
+                        }}
+                      />
+                      <Stack direction={"row"} justifyContent={"space-evenly"}>
+                        <Box onClick={() => handleShowClustersSwitch(false)} sx={{ ":hover": { cursor: "pointer" } }}>
+                          <Stack
+                            direction={"row"}
+                            alignItems={"center"}
+                            justifyContent={"center"}
+                            spacing={"24px"}
+                            sx={{
+                              width: "130px",
+                              height: "90px",
+                              backgroundColor: theme =>
+                                theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookG600 : gray300,
+                              border: `${!settings.showClusters ? 1 : 0}px solid ${DESIGN_SYSTEM_COLORS.primary600}`,
+                              borderRadius: "8px",
+                            }}
+                          >
+                            <NodeVersion width={52} height={30} mode={settings.theme} />
+
+                            <NodeVersion width={30} height={30} mode={settings.theme} />
+                          </Stack>
+                          <Typography
+                            textAlign={"center"}
+                            sx={{
+                              color: theme =>
+                                theme.palette.mode === "dark"
+                                  ? !settings.showClusters
+                                    ? DESIGN_SYSTEM_COLORS.gray25
+                                    : DESIGN_SYSTEM_COLORS.notebookG200
+                                  : !settings.showClusters
+                                  ? DESIGN_SYSTEM_COLORS.gray900
+                                  : DESIGN_SYSTEM_COLORS.notebookG300,
+                            }}
+                          >
+                            Unlabeled
+                          </Typography>
+                        </Box>
+                        <Box onClick={() => handleShowClustersSwitch(true)} sx={{ ":hover": { cursor: "pointer" } }}>
+                          <Box
+                            sx={{
+                              width: "130px",
+                              height: "90px",
+                              display: "grid",
+                              placeItems: "center",
+                              backgroundColor: theme =>
+                                theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookG600 : gray300,
+                              border: `${settings.showClusters ? 1 : 0}px solid ${DESIGN_SYSTEM_COLORS.primary600}`,
+                              borderRadius: "8px",
+                            }}
+                          >
+                            <Stack
+                              direction={"row"}
+                              alignItems={"center"}
+                              justifyContent={"center"}
+                              spacing={"24px"}
+                              sx={{
+                                outline: `1px dashed ${DESIGN_SYSTEM_COLORS.gray400}`,
+                                outlineOffset: "6px",
+                                borderRadius: "2px",
+                              }}
+                            >
+                              <NodeVersion width={52} height={30} mode={settings.theme} />
+
+                              <NodeVersion width={30} height={30} mode={settings.theme} />
+                            </Stack>
+                          </Box>
+                          <Typography
+                            textAlign={"center"}
+                            sx={{
+                              color: theme =>
+                                theme.palette.mode === "dark"
+                                  ? settings.showClusters
+                                    ? DESIGN_SYSTEM_COLORS.gray25
+                                    : DESIGN_SYSTEM_COLORS.notebookG200
+                                  : settings.showClusters
+                                  ? DESIGN_SYSTEM_COLORS.gray900
+                                  : DESIGN_SYSTEM_COLORS.notebookG300,
+                            }}
+                          >
+                            Labeled
+                          </Typography>
+                        </Box>
+                      </Stack>
+                    </>
+                  )}
                 </Paper>
               </Box>
             </TabPanel>
@@ -1391,8 +1481,11 @@ const UserSettigsSidebar = ({
     dispatch,
     foundFromOtherValue,
     genderOtherValue,
+    gray300,
     handleBackgroundSwitch,
     handleChange,
+    handleShowClusterOptionsSwitch,
+    handleShowClustersSwitch,
     handleSwitchTheme,
     handleViewSwitch,
     languages,
@@ -1404,6 +1497,8 @@ const UserSettigsSidebar = ({
     proposals,
     setUserImage,
     settings.background,
+    settings.showClusterOptions,
+    settings.showClusters,
     settings.theme,
     settings.view,
     settingsValue,
@@ -1446,23 +1541,23 @@ const UserSettigsSidebar = ({
               />
             </FormGroup>
 
-            <FormGroup>
+            {/* <FormGroup>
               <FormControlLabel
                 control={
                   <Switch checked={settings.showClusterOptions} onChange={e => handleShowClusterOptionsSwitch(e)} />
                 }
                 label={`Nodes are: ${settings.showClusterOptions ? "Clustered" : "Not Clustered"}`}
               />
-            </FormGroup>
+            </FormGroup> */}
 
-            {settings.showClusterOptions && (
+            {/* {settings.showClusterOptions && (
               <FormGroup>
                 <FormControlLabel
                   control={<Switch checked={settings.showClusters} onChange={e => handleShowClustersSwitch(e)} />}
                   label={`Cluster Labels: ${settings.showClusters ? "Shown" : "Hidden"}`}
                 />
               </FormGroup>
-            )}
+            )} */}
             <Box
               sx={{
                 textAlign: "center",
