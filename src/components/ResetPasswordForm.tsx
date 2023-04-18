@@ -1,28 +1,24 @@
+import EmailRoundedIcon from "@mui/icons-material/EmailRounded";
 import Visibility from "@mui/icons-material/Visibility";
 import VisibilityOff from "@mui/icons-material/VisibilityOff";
 import { LoadingButton } from "@mui/lab";
-import {
-  Button,
-  IconButton,
-  InputAdornment,
-  Snackbar,
-  SnackbarContent,
-  Stack,
-  TextField,
-  useTheme,
-} from "@mui/material";
+import { IconButton, InputAdornment, Snackbar, SnackbarContent, Stack, TextField, useTheme } from "@mui/material";
 import { FirebaseError } from "firebase/app";
-import { EmailAuthProvider, getAuth, reauthenticateWithCredential, updatePassword } from "firebase/auth";
+import {
+  EmailAuthProvider,
+  getAuth,
+  reauthenticateWithCredential,
+  sendPasswordResetEmail,
+  updatePassword,
+} from "firebase/auth";
 import { FormikConfig, useFormik } from "formik";
 import Image from "next/image";
-import Link from "next/link";
-import React, { useState } from "react";
+import React, { ReactNode, useState } from "react";
 import * as yup from "yup";
 
 // import { useAuth } from "@/context/AuthContext";
 import { DESIGN_SYSTEM_COLORS } from "@/lib/theme/colors";
 import { getFirebaseFriendlyError } from "@/lib/utils/firebaseErrors";
-import ROUTES from "@/lib/utils/routes";
 
 import KeyGrayIcon from "../../public/icons/key-gray-icon.svg";
 import KeyIcon from "../../public/icons/key-icon.svg";
@@ -38,6 +34,7 @@ type ResetPasswordProps = {
 
 const ResetPasswordForm = () => {
   const [isLoading, setIsLoading] = useState(false);
+  const [isLoadingForgotPassword, setIsLoadingForgotPassword] = useState(false);
   const theme = useTheme();
 
   const initialPasswordValue: ResetPasswordProps = {
@@ -70,11 +67,26 @@ const ResetPasswordForm = () => {
       const errorMessage = getFirebaseFriendlyError(error as FirebaseError);
       setErrors({ currentPassword: errorMessage });
       setIsLoading(false);
-      console.error(error);
       return;
     }
   };
-
+  const handleResetForgotPassword = async () => {
+    try {
+      setIsLoadingForgotPassword(true);
+      const auth = getAuth();
+      if (!auth.currentUser || !auth.currentUser.email)
+        return formik.setStatus({ success: false, msg: "Something went wrong restoring your password" });
+      await sendPasswordResetEmail(auth, auth.currentUser.email);
+      setIsLoadingForgotPassword(false);
+      return formik.setStatus({ success: true, msg: "Check your email and open the link to rest the password" });
+    } catch (error) {
+      const err = error as FirebaseError;
+      const msg = getFirebaseFriendlyError(err);
+      setIsLoadingForgotPassword(false);
+      return formik.setStatus({ success: false, msg });
+    }
+    setIsLoading(false);
+  };
   const validationSchema = yup.object({
     currentPassword: yup.string().required("Current password is required"),
     newPassword: yup
@@ -110,10 +122,6 @@ const ResetPasswordForm = () => {
   return (
     <form onSubmit={formik.handleSubmit}>
       <Stack>
-        {/* <CustomPasswordInput />
-        <CustomPasswordInput /> */}
-      </Stack>
-      <Stack>
         <TextField
           id="currentPassword"
           name="currentPassword"
@@ -144,9 +152,14 @@ const ResetPasswordForm = () => {
             ),
           }}
         />
-        <Link href={ROUTES.forgotpassword} passHref>
-          <Button sx={{ my: "4px", alignSelf: "flex-end" }}>Forgot Password?</Button>
-        </Link>
+        <LoadingButton
+          loading={isLoadingForgotPassword}
+          disabled={formik.isSubmitting}
+          sx={{ my: "4px", alignSelf: "flex-end" }}
+          onClick={handleResetForgotPassword}
+        >
+          Forgot Password?
+        </LoadingButton>
       </Stack>
       <TextField
         id="newPassword"
@@ -218,47 +231,73 @@ const ResetPasswordForm = () => {
       >
         Update Password
       </LoadingButton>
-      <Snackbar
-        anchorOrigin={{ vertical: "top", horizontal: "left" }}
-        open={Boolean(formik.status)}
-        onClose={() => formik.setStatus(null)}
-        sx={{
-          "& 	.MuiSnackbarContent-action": {
-            m: 0,
-            mr: "16px",
-            p: 0,
-          },
-        }}
-      >
-        <SnackbarContent
-          elevation={1}
-          action={
-            <Image
-              src={theme.palette.mode === "dark" ? KeyIcon : KeyGrayIcon}
-              width={18}
-              height={18}
-              alt={"key icon"}
-            />
-          }
-          message={formik.status}
-          sx={{
-            flexDirection: "row-reverse",
-            justifyContent: "flex-end",
-            backgroundColor: theme =>
-              theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookG700 : DESIGN_SYSTEM_COLORS.gray200,
-            border: theme =>
-              `1px solid ${
-                theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookG500 : DESIGN_SYSTEM_COLORS.gray300
-              }`,
-            color: theme =>
-              theme.palette.mode === "light" ? DESIGN_SYSTEM_COLORS.notebookG700 : DESIGN_SYSTEM_COLORS.gray200,
-            fontSize: "12px",
-            borderRadius: "8px",
-            p: "8px 22px",
-          }}
-        />
-      </Snackbar>
+
+      <CustomSnackbar
+        open={Boolean(formik.status && typeof formik.status === "string")}
+        msg={formik.status && typeof formik.status === "string" ? formik.status : ""}
+        handleClose={() => formik.setStatus(null)}
+        icon={
+          <Image src={theme.palette.mode === "dark" ? KeyIcon : KeyGrayIcon} width={18} height={18} alt={"key icon"} />
+        }
+      />
+      <CustomSnackbar
+        open={Boolean(formik.status && typeof formik.status === "object")}
+        msg={formik.status && typeof formik.status === "object" ? formik.status.msg : ""}
+        handleClose={() => formik.setStatus(null)}
+        icon={
+          <EmailRoundedIcon
+            sx={{
+              color: theme =>
+                theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.gray25 : DESIGN_SYSTEM_COLORS.gray700,
+            }}
+          />
+        }
+      />
     </form>
+  );
+};
+
+type CustomSnackbarProps = {
+  open: boolean;
+  msg: string;
+  icon: ReactNode;
+  handleClose: () => void;
+};
+const CustomSnackbar = ({ icon, open, msg, handleClose }: CustomSnackbarProps) => {
+  return (
+    <Snackbar
+      anchorOrigin={{ vertical: "top", horizontal: "left" }}
+      open={open}
+      onClose={handleClose}
+      sx={{
+        "& 	.MuiSnackbarContent-action": {
+          m: 0,
+          mr: "16px",
+          p: 0,
+        },
+      }}
+    >
+      <SnackbarContent
+        elevation={1}
+        action={icon}
+        message={msg}
+        sx={{
+          flexDirection: "row-reverse",
+          justifyContent: "flex-end",
+          backgroundColor: theme =>
+            theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookG700 : DESIGN_SYSTEM_COLORS.gray200,
+          border: theme =>
+            `1px solid ${
+              theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookG500 : DESIGN_SYSTEM_COLORS.gray300
+            }`,
+          color: theme =>
+            theme.palette.mode === "light" ? DESIGN_SYSTEM_COLORS.notebookG700 : DESIGN_SYSTEM_COLORS.gray200,
+          fontSize: "12px",
+          borderRadius: "8px",
+          p: "8px 22px",
+        }}
+      />
+    </Snackbar>
   );
 };
 
