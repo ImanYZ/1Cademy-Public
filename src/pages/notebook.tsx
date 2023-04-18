@@ -112,7 +112,6 @@ import {
   createActionTrack,
   generateReputationSignal,
   getSelectionText,
-  hideNodeAndItsLinks,
   NODE_WIDTH,
   removeDagAllEdges,
   removeDagEdge,
@@ -1847,7 +1846,7 @@ const Dashboard = ({}: DashboardProps) => {
                 createdAt: Timestamp.fromDate(new Date()),
               };
               const changeNode: any = {
-                viewers: (thisNode.viewers || 0) - 1, // CHECK I add 0
+                viewers: (thisNode.viewers || 0) - 1,
                 updatedAt: Timestamp.fromDate(new Date()),
               };
               // INFO: this was commented because is not used
@@ -1866,12 +1865,6 @@ const Dashboard = ({}: DashboardProps) => {
 
             await batch.commit();
 
-            // TODO: need to discuss about these
-            let oldNodes = { ...graph.nodes };
-            let oldEdges = { ...graph.edges };
-            for (let descendant of descendants) {
-              ({ oldNodes, oldEdges } = hideNodeAndItsLinks(g.current, descendant, oldNodes, oldEdges, updatedNodeIds));
-            }
             setNodeUpdates({
               nodeIds: updatedNodeIds,
               updatedAt: new Date(),

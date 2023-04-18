@@ -6,9 +6,8 @@ import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import Tab from "@mui/material/Tab";
 import Tabs from "@mui/material/Tabs";
-import axios from "axios";
 import { sendEmailVerification, sendPasswordResetEmail, signInWithEmailAndPassword } from "firebase/auth";
-import { collection, doc, getDoc, getDocs, getFirestore, onSnapshot, query, where } from "firebase/firestore";
+import { collection, doc, getDoc, getDocs, getFirestore, limit, onSnapshot, query, where } from "firebase/firestore";
 import Image from "next/image";
 import { useRouter } from "next/router";
 import React, { Suspense, useEffect, useState } from "react";
@@ -32,7 +31,7 @@ const isEmail = (email: string): boolean => {
   if (email.match(regEx)) return true;
   else return false;
 };
-const DEFAULT_PROJECT = "H2K2";
+const DEFAULT_PROJECT = "H1L2";
 
 const SignUpExpPage = () => {
   const [email, setEmail] = useState("");
@@ -208,24 +207,13 @@ const SignUpExpPage = () => {
     setValidPasswordResetEmail(isEmail(resetPasswordEmail));
   }, [resetPasswordEmail]);
 
-  useEffect(() => {
-    const getNameFromInstitutionSelected = async () => {
-      if (email !== "") {
-        const data = await axios.post("/checkEmailInstitution", { email });
-        if (data?.data.institution) {
-          setNameFromInstitutionSelected(data.data.institution);
-        }
-      }
-    };
-    getNameFromInstitutionSelected();
-  }, [email]);
   const switchAccount = (event: any) => {
     event.preventDefault();
     setIsSubmitting(false);
     if (isSignUp === 1) {
-      auth.delete();
+      auth.currentUser.delete();
     }
-    auth.logout();
+    auth.signOut();
   };
 
   const resendVerificationEmail = () => {
@@ -322,7 +310,39 @@ const SignUpExpPage = () => {
       signUp(event);
     }
   };
+  useEffect(() => {
+    const checkEmailInstitution = async () => {
+      try {
+        const domainName = email.match("@(.+)$")?.[0];
+        const institutionsQuery = query(
+          collection(db, "institutions"),
+          where("domains", "array-contains", domainName),
+          limit(1)
+        );
+        const institutionDoc = await getDocs(institutionsQuery);
 
+        if (institutionDoc && institutionDoc.docs.length > 0) {
+          const institutionData = institutionDoc.docs[0].data();
+          console.log("institutionData", institutionData);
+          setNameFromInstitutionSelected(institutionData);
+          return institutionData;
+        } else {
+          setNameFromInstitutionSelected({});
+        }
+      } catch (err) {
+        console.log("err", err);
+      }
+    };
+    checkEmailInstitution();
+  }, [email]);
+  function removeDuplicates(arr: any) {
+    return arr.reduce((accumulator: any, current: any) => {
+      if (!accumulator.find((item: any) => item.id === current.id)) {
+        accumulator.push(current);
+      }
+      return accumulator;
+    }, []);
+  }
   useEffect(() => {
     const institutionsQuery = query(collection(db, "institutions"), where("usersNum", ">=", 1));
     const unsubscribe = onSnapshot(institutionsQuery, snapshot => {
@@ -332,17 +352,18 @@ const SignUpExpPage = () => {
         for (const docChange of docChanges) {
           const institutionData: Institution | any = docChange.doc.data();
           if (docChange.type === "added") {
-            _insitutions.push(institutionData);
+            _insitutions.push({ id: docChange.doc.id, ...institutionData });
             continue;
           }
           const idx = _insitutions.findIndex(insitution => insitution.name === institutionData.name);
           if (docChange.type === "modified") {
-            _insitutions[idx] = institutionData;
+            _insitutions[idx] = { id: docChange.doc.id, ...institutionData };
           } else {
             _insitutions.splice(idx, 1);
           }
         }
-        return _insitutions;
+
+        return removeDuplicates(_insitutions);
       });
     });
     return () => unsubscribe();
