@@ -969,57 +969,53 @@ const UserSettigsSidebar = ({
         title: "Proposals",
         content: (
           <Box sx={{ display: "flex", flexDirection: "column", gap: "4px", px: "12px" }}>
-            <Box
-              sx={{
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "right",
+            <Stack direction={"row"} alignItems={"center"} justifyContent={"space-between"} py="10px">
+              <Typography fontWeight={"500"}>Overview</Typography>
 
-                py: "10px",
-              }}
-            >
-              <Typography>Show</Typography>
-              <Select
-                sx={{
-                  marginLeft: "10px",
-                  height: "35px",
-                  width: "120px",
-                }}
-                MenuProps={{
-                  sx: {
-                    "& .MuiMenu-paper": {
-                      backgroundColor: theme => (theme.palette.mode === "dark" ? "#1B1A1A" : "#F9FAFB"),
-                      color: "text.white",
+              <Box>
+                <Typography sx={{ display: "inline-block" }}>Shows</Typography>
+                <Select
+                  sx={{
+                    marginLeft: "10px",
+                    height: "35px",
+                    width: "120px",
+                  }}
+                  MenuProps={{
+                    sx: {
+                      "& .MuiMenu-paper": {
+                        backgroundColor: theme => (theme.palette.mode === "dark" ? "#1B1A1A" : "#F9FAFB"),
+                        color: "text.white",
+                      },
+                      "& .MuiMenuItem-root:hover": {
+                        backgroundColor: theme => (theme.palette.mode === "dark" ? "##2F2F2F" : "#EAECF0"),
+                        color: "text.white",
+                      },
+                      "& .Mui-selected": {
+                        backgroundColor: "transparent!important",
+                        color: "#FF8134",
+                      },
+                      "& .Mui-selected:hover": {
+                        backgroundColor: "transparent",
+                      },
                     },
-                    "& .MuiMenuItem-root:hover": {
-                      backgroundColor: theme => (theme.palette.mode === "dark" ? "##2F2F2F" : "#EAECF0"),
-                      color: "text.white",
-                    },
-                    "& .Mui-selected": {
-                      backgroundColor: "transparent!important",
-                      color: "#FF8134",
-                    },
-                    "& .Mui-selected:hover": {
-                      backgroundColor: "transparent",
-                    },
-                  },
-                }}
-                labelId="demo-select-small"
-                id="demo-select-small"
-                value={type}
-                onChange={e => {
-                  setType(e.target.value);
-                }}
-              >
-                <MenuItem value="all">All</MenuItem>
-                <MenuItem value="Concept">Concepts</MenuItem>
-                <MenuItem value="Relation">Relations</MenuItem>
-                <MenuItem value="Question">Questions</MenuItem>
-                <MenuItem value="Idea">Ideas</MenuItem>
-                <MenuItem value="Code">Codes</MenuItem>
-                <MenuItem value="Reference">References</MenuItem>
-              </Select>
-            </Box>
+                  }}
+                  labelId="demo-select-small"
+                  id="demo-select-small"
+                  value={type}
+                  onChange={e => {
+                    setType(e.target.value);
+                  }}
+                >
+                  <MenuItem value="all">All</MenuItem>
+                  <MenuItem value="Concept">Concepts</MenuItem>
+                  <MenuItem value="Relation">Relations</MenuItem>
+                  <MenuItem value="Question">Questions</MenuItem>
+                  <MenuItem value="Idea">Ideas</MenuItem>
+                  <MenuItem value="Code">Codes</MenuItem>
+                  <MenuItem value="Reference">References</MenuItem>
+                </Select>
+              </Box>
+            </Stack>
             <Stack spacing={"8px"}>
               {proposals.slice(0, lastIndex).map((proposal, idx) => {
                 return (
@@ -1047,7 +1043,7 @@ const UserSettigsSidebar = ({
       {
         title: "Account",
         content: (
-          <Box height={"100%"}>
+          <Box height={"100%"} py="16px">
             <Box
               height={"100%"}
               display={settingsValue !== -1 ? "none" : "flex"}
@@ -1599,6 +1595,7 @@ const UserSettigsSidebar = ({
     nodeTypeStats,
     openLinkedNode,
     proposals,
+    proposalsPerDay,
     removeAllNodes,
     setUserImage,
     settings.background,
@@ -1609,6 +1606,7 @@ const UserSettigsSidebar = ({
     settingsSubValue,
     settingsValue,
     states,
+    theme.palette.mode,
     type,
     user,
   ]);
@@ -2192,7 +2190,13 @@ const UserSettigsSidebar = ({
       onClose={onClose}
       width={430}
       SidebarOptions={open ? SidebarOptions : null}
-      SidebarContent={open ? <Box py="24px">{newTabsItems[value].content}</Box> : null}
+      SidebarContent={
+        open ? (
+          <Box pb="16px" height={"100%"}>
+            {newTabsItems[value].content}
+          </Box>
+        ) : null
+      }
     />
   );
 };
