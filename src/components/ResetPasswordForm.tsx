@@ -187,6 +187,7 @@ const ResetPasswordForm = () => {
         error={Boolean(formik.errors.confirmPassword) && Boolean(formik.touched.confirmPassword)}
         helperText={formik.errors.confirmPassword}
         fullWidth
+        autoComplete="new-password"
         InputProps={{
           endAdornment: (
             <InputAdornment position="end">
