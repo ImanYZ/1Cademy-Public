@@ -1,4 +1,5 @@
 import AutoFixHighIcon from "@mui/icons-material/AutoFixHigh";
+import CenterFocusStrongIcon from "@mui/icons-material/CenterFocusStrong";
 import CloseIcon from "@mui/icons-material/Close";
 import CodeIcon from "@mui/icons-material/Code";
 import HelpCenterIcon from "@mui/icons-material/HelpCenter";
@@ -66,8 +67,6 @@ import { useTagsTreeView } from "@/hooks/useTagsTreeView";
 import { addSuffixToUrlGMT } from "@/lib/utils/string.utils";
 
 import LoadingImg from "../../public/animated-icon-1cademy.gif";
-import focusViewLogo from "../../public/focus.svg";
-import focusViewDarkLogo from "../../public/focus-dark.svg";
 import PrevNodeIcon from "../../public/prev-node.svg";
 import PrevNodeLightIcon from "../../public/prev-node-light.svg";
 import { TooltipTutorial } from "../components/interactiveTutorial/Tutorial";
@@ -6514,7 +6513,7 @@ const Dashboard = ({}: DashboardProps) => {
                 sx={{
                   ":hover": {
                     background: theme.palette.mode === "dark" ? "#404040" : "#EAECF0",
-                    borderRadius: "8px",
+                    // borderRadius: "8px",
                   },
                   padding: { xs: "2px", sm: "8px" },
                 }}
@@ -6539,7 +6538,7 @@ const Dashboard = ({}: DashboardProps) => {
                 sx={{
                   ":hover": {
                     background: theme.palette.mode === "dark" ? "#404040" : "#EAECF0",
-                    borderRadius: "8px",
+                    // borderRadius: "8px",
                   },
                   padding: { xs: "2px", sm: "8px" },
                 }}
@@ -6584,11 +6583,8 @@ const Dashboard = ({}: DashboardProps) => {
                     opacity: !nodeBookState.selectedNode ? 0.5 : undefined,
                   }}
                 >
-                  <NextImage
-                    src={theme.palette.mode === "light" ? focusViewLogo : focusViewDarkLogo}
-                    alt="logo 1cademy"
-                    width="24px"
-                    height="24px"
+                  <CenterFocusStrongIcon
+                    sx={{ color: theme => (theme.palette.mode === "dark" ? "#CACACA" : "#667085") }}
                   />
                 </IconButton>
               </Tooltip>
@@ -6600,7 +6596,7 @@ const Dashboard = ({}: DashboardProps) => {
                   sx={{
                     ":hover": {
                       background: theme.palette.mode === "dark" ? "#404040" : "#EAECF0",
-                      borderRadius: "8px",
+                      // borderRadius: "8px",
                     },
                     padding: { xs: "2px", sm: "8px" },
                   }}

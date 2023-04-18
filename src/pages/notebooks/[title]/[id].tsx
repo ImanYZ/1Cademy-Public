@@ -1,3 +1,4 @@
+import CenterFocusStrongIcon from "@mui/icons-material/CenterFocusStrong";
 import CloseIcon from "@mui/icons-material/Close";
 import DarkModeIcon from "@mui/icons-material/DarkMode";
 import LightModeIcon from "@mui/icons-material/LightMode";
@@ -19,8 +20,6 @@ import { MapInteractionCSS } from "react-map-interaction";
 import NodeItemFullSkeleton from "@/components/NodeItemFullSkeleton";
 
 import oneCademyLogo from "../../../../public/1Cademy-head.svg";
-import focusViewLogo from "../../../../public/focus.svg";
-import focusViewDarkLogo from "../../../../public/focus-dark.svg";
 import { MemoizedBasicNode } from "../../../components/map/BasicNode";
 import { MemoizedFocusedNotebook } from "../../../components/map/FocusedNotebook/FocusedNotebook";
 import { MemoizedLinksList } from "../../../components/map/LinksList";
@@ -697,12 +696,7 @@ const NodePage: NextPage<Props> = ({ notebook }) => {
               disabled={!selectedNodeId}
               sx={{ opacity: !selectedNodeId ? 0.5 : undefined }}
             >
-              <NextImage
-                src={theme.palette.mode === "light" ? focusViewLogo : focusViewDarkLogo}
-                alt="logo 1cademy"
-                width="24px"
-                height="24px"
-              />
+              <CenterFocusStrongIcon />
             </IconButton>
           </Tooltip>
         </>
