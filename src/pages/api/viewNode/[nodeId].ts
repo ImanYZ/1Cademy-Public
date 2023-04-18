@@ -33,7 +33,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
 
     // checking role of current user
     const notebookData = notebook.data() as INotebook;
-    if (notebookData.owner !== uname && notebookData.roles?.[uname] !== "editor") {
+    if (notebookData.owner !== uname && notebookData.usersInfo?.[uname]?.role !== "editor") {
       throw new Error("Only owner or editor can update Notebooks");
     }
 
