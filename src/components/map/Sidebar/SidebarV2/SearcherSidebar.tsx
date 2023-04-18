@@ -26,13 +26,14 @@ import {
 import { Box } from "@mui/system";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
-import { getFirestore } from "firebase/firestore";
 import NextImage from "next/image";
 import React, { MutableRefObject, useCallback, useEffect, useMemo, useState, useTransition } from "react";
 
 import OptimizedAvatar from "@/components/OptimizedAvatar";
 
-import NotebookImage from "../../../../../public/notebook.svg";
+import FindNodeImage from "../../../../../public/find-node.svg";
+import NotebookDarkImage from "../../../../../public/notebook-dark.png";
+import NotebookLightImage from "../../../../../public/notebook-light.png";
 import { useNodeBook } from "../../../../context/NodeBookContext";
 import { useInView } from "../../../../hooks/useObserver";
 import { useTagsTreeView } from "../../../../hooks/useTagsTreeView";
@@ -61,8 +62,6 @@ type SearcherSidebarProps = {
   innerWidth: number;
   disableSearcher?: boolean;
   enableElements: string[];
-  username: string;
-  tagId: string | undefined;
 };
 
 type Pagination = {
@@ -85,9 +84,7 @@ const SearcherSidebar = ({
   innerWidth,
   disableSearcher,
   enableElements = [],
-  username,
 }: SearcherSidebarProps) => {
-  const db = getFirestore();
   const { nodeBookState, nodeBookDispatch } = useNodeBook();
   const { allTags, setAllTags } = useTagsTreeView();
   const theme = useTheme();
@@ -97,7 +94,7 @@ const SearcherSidebar = ({
   const [showTagSelector, setShowTagSelector] = useState(false);
   const [nodeTypes, setNodeTypes] = useState(NODE_TYPES_ARRAY);
   const [sortOption, setSortOption] = useState<SortValues>("NOT_SELECTED");
-  const [timeFilter, setTimeFilter] = useState<any>("");
+  const [timeFilter, setTimeFilter] = useState<any>("ALL_TIME");
   const [sortDirection, setSortDirection] = useState<SortDirection>("DESCENDING");
   const [chosenTags, setChosenTags] = useState<ChosenTag[]>([]);
   const [search, setSearch] = useState<string>(nodeBookState.searchQuery);
@@ -106,11 +103,13 @@ const SearcherSidebar = ({
     data: [],
     lastPageLoaded: 0,
     totalResults: 0,
+    totalPage: 0,
   });
   const [pendingProposals, setPendingProposals] = useState<any>({
     data: [],
     lastPageLoaded: 0,
     totalResults: 0,
+    totalPage: 0,
   });
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [isPending, startTransition] = useTransition();
@@ -195,6 +194,7 @@ const SearcherSidebar = ({
         setNoteBooks({
           data: newData,
           lastPageLoaded: data.page,
+          totalPage: Math.ceil((data.numResults || 0) / (data.perPage || 10)),
           totalResults: data.numResults,
         });
         setIsRetrieving(false);
@@ -220,13 +220,14 @@ const SearcherSidebar = ({
         }
         const data: SearchNotebookResponse = await Post<SearchNotebookResponse>("/searchPendingProposals", {
           q,
-          page: 1,
+          page: page,
           onlyTitle: nodeBookState.searchByTitleOnly,
         });
         const newData = page === 1 ? data.data : [...pendingProposals.data, ...data.data];
         setPendingProposals({
           data: newData,
           lastPageLoaded: data.page,
+          totalPage: Math.ceil((data.numResults || 0) / (data.perPage || 10)),
           totalResults: data.numResults,
         });
         setIsRetrieving(false);
@@ -243,6 +244,10 @@ const SearcherSidebar = ({
     if (isRetrieving) return;
     if (value === 0) {
       onSearch(searchResults.lastPageLoaded + 1, search, sortOption, sortDirection, nodeTypes);
+    } else if (value === 1) {
+      onSearchNotebooks(notebooks.lastPageLoaded + 1, search);
+    } else if (value === 2) {
+      onSearchPendingProposals(pendingProposals.lastPageLoaded + 1, search);
     }
   }, [
     inViewInfinityLoaderTrigger,
@@ -260,13 +265,13 @@ const SearcherSidebar = ({
     if (value === 1) {
       onSearchNotebooks(notebooks.lastPageLoaded + 1, search);
     }
-  }, [db, username, onSearch]);
+  }, [onSearch]);
 
   useEffect(() => {
     if (value === 2) {
       onSearchPendingProposals(pendingProposals.lastPageLoaded + 1, search);
     }
-  }, [db, username, onSearch]);
+  }, [onSearch]);
 
   const onFocusSearcherInput = useCallback(
     (inputTitle: HTMLElement) => {
@@ -354,44 +359,22 @@ const SearcherSidebar = ({
   const onChangeTimeFilter = useCallback(
     (newTimeFilter: any) => {
       let timeFilter: number = 0;
-      const currentDate = new Date();
       switch (newTimeFilter) {
         case "LAST_DAY":
-          const startDate = new Date(currentDate.getFullYear(), currentDate.getMonth(), currentDate.getDate());
-          timeFilter = currentDate.getTime() - startDate.getTime();
+          timeFilter = 1;
+          break;
         case "LAST_15_DAYS":
-          timeFilter = 15 * 24 * 60 * 60 * 1000;
+          timeFilter = 15;
+          break;
         case "LAST_30_DAYS":
-          timeFilter = 30 * 24 * 60 * 60 * 1000;
+          timeFilter = 30;
+          break;
         case "LAST_QUARTER":
-          // Determine the start and end dates of the last quarter
-          const currentMonth = currentDate.getMonth() + 1;
-          let startQuarterMonth;
-          let endQuarterMonth;
-          if (currentMonth >= 1 && currentMonth <= 3) {
-            startQuarterMonth = 0;
-            endQuarterMonth = 2;
-          } else if (currentMonth >= 4 && currentMonth <= 6) {
-            startQuarterMonth = 3;
-            endQuarterMonth = 5;
-          } else if (currentMonth >= 7 && currentMonth <= 9) {
-            startQuarterMonth = 6;
-            endQuarterMonth = 8;
-          } else {
-            startQuarterMonth = 9;
-            endQuarterMonth = 11;
-          }
-
-          const startQuarter = new Date(currentDate.getFullYear(), startQuarterMonth, 1);
-          const endQuarter = new Date(currentDate.getFullYear(), endQuarterMonth + 1, 0);
-
-          // Calculate the number of milliseconds between the start and end of the quarter
-          timeFilter = endQuarter.getTime() - startQuarter.getTime();
+          timeFilter = 92;
+          break;
         case "LAST_YEAR":
-          const startOfYear = new Date(currentDate.getFullYear(), 0, 1); // Get the start of the current year
-          timeFilter = currentDate.getTime() - startOfYear.getTime();
-        case "ALL_TIME":
-          timeFilter = Number.MAX_SAFE_INTEGER;
+          timeFilter = 365;
+          break;
       }
       setNodesUpdatedSince(timeFilter);
       setTimeFilter(newTimeFilter);
@@ -488,9 +471,27 @@ const SearcherSidebar = ({
     [setChosenTags]
   );
 
+  const closeTagSelector = useCallback(() => {
+    notebookRef.current.chosenNode = null;
+    notebookRef.current.choosingNode = null;
+    nodeBookDispatch({ type: "setChosenNode", payload: null });
+    nodeBookDispatch({ type: "setChoosingNode", payload: null });
+    setShowTagSelector(false);
+  }, [nodeBookDispatch]);
+
   const handleTabValueChange = (event: React.SyntheticEvent, newValue: number) => {
     setValue(newValue);
   };
+
+  const results = useMemo(() => {
+    if (value === 0) {
+      return searchResults.totalResults;
+    } else if (value === 1) {
+      return notebooks.totalResults;
+    } else {
+      return pendingProposals.totalResults;
+    }
+  }, [value, searchResults.data, notebooks.data, pendingProposals.data]);
 
   const searcherOptionsMemoized = useMemo(() => {
     return (
@@ -501,7 +502,7 @@ const SearcherSidebar = ({
             marginTop: "20px",
             p: {
               xs: "10px",
-              sm: innerHeight && innerHeight < 600 ? "20px 10px 10px 10px" : "0px 10px 10px 10px",
+              sm: innerHeight && innerHeight < 600 ? "20px 10px 10px 10px" : "0px 15px 10px 15px",
             },
             borderBottom: 1,
             borderColor: theme => (theme.palette.mode === "dark" ? "black" : "divider"),
@@ -509,18 +510,40 @@ const SearcherSidebar = ({
           }}
         >
           {!isMovil && showTagSelector && (
-            <div id="tagModal">
-              <Modal onClick={setShowTagSelectorClick} returnLeft={true} noBackground={true}>
+            <Box
+              id="tagModal"
+              sx={{
+                background: theme => theme.palette.common.notebookMainBlack,
+                paddingX: "10px",
+              }}
+            >
+              <Modal
+                className="tagSelectorModalUserSetting"
+                onClick={closeTagSelector}
+                returnDown={false}
+                noBackground={true}
+                style={{
+                  width: "441px",
+                  height: "600px",
+                  left: "15px",
+                  top: "250px",
+                  border: theme.palette.mode === "dark" ? "solid 1px #2F2F2F" : "solid 1px #D0D5DD",
+                  boxShadow: "none",
+                }}
+                contentStyle={{
+                  height: "550px",
+                }}
+              >
                 <MemoizedTagsSearcher
+                  id="user-settings-tag-searcher"
+                  setChosenTags={setChosenTags}
+                  chosenTags={chosenTags}
                   allTags={allTags}
                   setAllTags={setAllTags}
-                  chosenTags={chosenTags}
-                  setChosenTags={setChosenTagsCallback}
-                  sx={{ maxHeight: "235px", height: "235px" }}
-                  multiple
+                  sx={{ maxHeight: "450px", height: "450px" }}
                 />
               </Modal>
-            </div>
+            </Box>
           )}
 
           <Box
@@ -538,7 +561,8 @@ const SearcherSidebar = ({
             <Typography
               sx={{
                 color: theme =>
-                  theme.palette.mode === "dark" ? theme.palette.common.notebookG200 : theme.palette.common.notebookG300,
+                  theme.palette.mode === "dark" ? theme.palette.common.notebookG200 : theme.palette.common.notebookG400,
+                fontWeight: "500",
               }}
               className="tagText"
             >
@@ -552,6 +576,15 @@ const SearcherSidebar = ({
                   label={tag.title}
                   onDelete={() => deleteChip(tag.nodeId)} //
                   size="small"
+                  sx={{
+                    paddingY: "15px!important",
+                    paddingX: "10px!important",
+                    background: theme =>
+                      theme.palette.mode === "dark" ? theme.palette.common.notebookG600 : theme.palette.common.gray200,
+                    color: theme =>
+                      theme.palette.mode === "dark" ? theme.palette.common.gray50 : theme.palette.common.gray600,
+                    border: "none!important",
+                  }}
                 />
               );
             })}
@@ -573,8 +606,8 @@ const SearcherSidebar = ({
                 transform: showTagSelector ? "rotate(45deg)" : "rotate(0deg)",
                 cursor: disableSearcher ? "not-allowed" : "pointer",
                 color: theme =>
-                  theme.palette.mode === "dark" ? theme.palette.common.notebookG200 : theme.palette.common.notebookG300,
-                fontWeight: "none",
+                  theme.palette.mode === "dark" ? theme.palette.common.notebookG200 : theme.palette.common.notebookG400,
+                fontWeight: "500",
               }}
             />
           </Box>
@@ -586,6 +619,7 @@ const SearcherSidebar = ({
                   identification="SearchQuery"
                   name="SearchQuery"
                   type="text"
+                  placeholder={"Nodes Search"}
                   onChange={handleChange}
                   value={search}
                   disabled={disableInputSearcher}
@@ -684,41 +718,87 @@ const SearcherSidebar = ({
                     ),
                     endAdornment: (
                       <InputAdornment position="end" disablePointerEvents={disableSearchIcon}>
-                        <IconButton
-                          id="SearchIcon"
-                          onClick={() => {
-                            if (value === 0) {
-                              onSearch(1, search, sortOption, sortDirection, nodeTypes);
-                            } else if (value === 1) {
-                              onSearchNotebooks(1, search);
-                            } else if (value === 2) {
-                              onSearchPendingProposals(1, search);
-                            }
-                          }}
-                          sx={{
-                            padding: {
-                              xs: "5px !important",
-                              sm: "10px",
-                            },
-                            marginRight: {
-                              xs: "-11px !important",
-                              sm: "-8px",
-                            },
-                          }}
-                        >
-                          <SearchIcon
+                        <Stack direction={"row"} spacing={"10px"}>
+                          {search && (
+                            <IconButton
+                              onClick={() => setSearch("")}
+                              sx={{
+                                padding: {
+                                  xs: "5px !important",
+                                  sm: "10px",
+                                },
+                                marginRight: {
+                                  xs: "-11px !important",
+                                  sm: "-8px",
+                                },
+                                ":hover": {
+                                  background: "transparent!important",
+                                },
+                              }}
+                            >
+                              <CloseIcon
+                                sx={{
+                                  width: {
+                                    xs: "16px",
+                                    sm: "1em",
+                                  },
+                                  height: {
+                                    xs: "16px",
+                                    sm: "1em",
+                                  },
+                                }}
+                              />
+                            </IconButton>
+                          )}
+                          {search && (
+                            <Divider
+                              orientation="vertical"
+                              variant="middle"
+                              flexItem
+                              sx={{
+                                borderColor: theme => (theme.palette.mode === "dark" ? "#D3D3D3" : "inherit"),
+                              }}
+                            />
+                          )}
+                          <IconButton
+                            onClick={() => {
+                              if (value === 0) {
+                                onSearch(1, search, sortOption, sortDirection, nodeTypes);
+                              } else if (value === 1) {
+                                onSearchNotebooks(1, search);
+                              } else if (value === 2) {
+                                onSearchPendingProposals(1, search);
+                              }
+                            }}
                             sx={{
-                              width: {
-                                xs: "16px",
-                                sm: "1em",
+                              padding: {
+                                xs: "5px !important",
+                                sm: "10px 10px 10px 0px",
                               },
-                              height: {
-                                xs: "16px",
-                                sm: "1em",
+                              marginRight: {
+                                xs: "-11px !important",
+                                sm: "-8px",
+                              },
+                              marginLeft: "0px!important",
+                              ":hover": {
+                                background: "transparent!important",
                               },
                             }}
-                          />
-                        </IconButton>
+                          >
+                            <SearchIcon
+                              sx={{
+                                width: {
+                                  xs: "16px",
+                                  sm: "1em",
+                                },
+                                height: {
+                                  xs: "16px",
+                                  sm: "1em",
+                                },
+                              }}
+                            />
+                          </IconButton>
+                        </Stack>
                       </InputAdornment>
                     ),
                     inputRef: onFocusSearcherInput,
@@ -732,7 +812,7 @@ const SearcherSidebar = ({
                     "& fieldset": {
                       borderWidth: 1,
                       borderColor: (theme: any) =>
-                        theme.palette.mode === "dark" ? theme.palette.common.notebookG500 : "##D5D9E1",
+                        theme.palette.mode === "dark" ? theme.palette.common.notebookG500 : "#D0D5DD",
                       borderRadius: "4px",
                     },
                   }}
@@ -794,7 +874,7 @@ const SearcherSidebar = ({
                   }}
                   id="SearchResutlsNum"
                 >
-                  {shortenNumber(searchResults.totalResults, 2, false)} Results
+                  {shortenNumber(results, 2, false)} Results
                 </div>
               </Box>
             </>
@@ -855,6 +935,8 @@ const SearcherSidebar = ({
     innerWidth,
     theme.breakpoints.values.sm,
     searchResults,
+    notebooks,
+    pendingProposals,
     onlyTags,
     disableRecentNodeList,
     sortOption,
@@ -890,8 +972,47 @@ const SearcherSidebar = ({
       SidebarContent={
         <Box>
           {value === 0 && (
-            <Box id="search-list" sx={{ p: "2px 4px" }}>
+            <Box id="search-list" sx={{ p: "10px 4px" }}>
               <Box sx={{ display: "flex", flexDirection: "column", gap: "4px" }}>
+                {!isRetrieving && searchResults.data.length === 0 && (
+                  <Box
+                    sx={{
+                      display: "flex",
+                      flexDirection: "column",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      marginTop: "25%",
+                    }}
+                  >
+                    <NextImage src={FindNodeImage} alt="Notification icon" />
+                    <Typography
+                      sx={{
+                        fontSize: "18px",
+                        lineHeight: "24px",
+                        width: "300px",
+                        fontWeight: "500",
+                        textAlign: "center",
+                        marginTop: "10px",
+                      }}
+                    >
+                      Looking for something specific?
+                    </Typography>
+
+                    <Typography
+                      sx={{
+                        fontSize: "13px",
+                        lineHeight: "24px",
+                        width: "300px",
+                        fontWeight: "400",
+                        textAlign: "center",
+                        marginTop: "10px",
+                        color: theme => (theme.palette.mode === "dark" ? "#AEAEAE" : theme.palette.common.gray700),
+                      }}
+                    >
+                      Add tags, select type, or simply enter a keyword and we will find all relevant nodes for you.
+                    </Typography>
+                  </Box>
+                )}
                 {searchResults.data.map((resNode, idx) => {
                   return (
                     <Paper
@@ -1012,7 +1133,10 @@ const SearcherSidebar = ({
                         <Box
                           className="tab-double-button-node-footer"
                           sx={{
-                            background: (theme: any) => (theme.palette.mode === "dark" ? "#404040" : "#EAECF0"),
+                            background: (theme: any) =>
+                              theme.palette.mode === "dark"
+                                ? theme.palette.common.notebookG500
+                                : theme.palette.common.gray200,
                             display: "flex",
                             alignItems: "center",
                             marginRight: "0px",
@@ -1088,23 +1212,19 @@ const SearcherSidebar = ({
           )}
 
           <Box sx={{ p: "10px" }}>
-            {isRetrieving && (value === 1 || value === 2) && (
-              <Box sx={{ py: "10px", display: "flex", justifyContent: "center" }}>
-                <CircularProgress />
-              </Box>
-            )}
-            {!isRetrieving && value === 1 && (
+            {value === 1 && (
               <Box>
                 {notebooks.data.map((notebook: any, idx: number) => (
                   <Box
                     key={`notebook-${idx}`}
                     sx={{
-                      width: "455px",
+                      width: "98%",
                       height: "238px",
-                      border: "solid 1px #2F2F2F",
+                      border: theme => (theme.palette.mode === "dark" ? "solid 1px #2F2F2F" : "solid 1px #D0D5DD"),
                       borderRadius: "8px",
                       background: theme => (theme.palette.mode === "dark" ? "#1F1F1F" : theme.palette.common.gray100),
                       marginBottom: "10px",
+                      marginX: "auto",
                     }}
                   >
                     <Box
@@ -1112,9 +1232,13 @@ const SearcherSidebar = ({
                         height: "172px",
                       }}
                     >
-                      <NextImage src={NotebookImage.src} width={"455px"} height={"172px"} />
+                      <NextImage
+                        src={theme.palette.mode === "dark" ? NotebookDarkImage.src : NotebookLightImage.src}
+                        width={"455px"}
+                        height={"172px"}
+                      />
                     </Box>
-                    <Stack mt={"7px"} direction={"row"} spacing={"10px"} alignItems={"center"}>
+                    <Stack paddingX={"15px"} mt={"7px"} direction={"row"} spacing={"10px"} alignItems={"center"}>
                       <Box>
                         <OptimizedAvatar
                           imageUrl={notebook.ownerImgUrl}
@@ -1152,16 +1276,31 @@ const SearcherSidebar = ({
                                 ? theme.palette.common.notebookG200
                                 : theme.palette.common.gray500,
                           }}
-                        >{`Edited in 3 months ago`}</Typography>
+                        >
+                          {notebook.createdAt
+                            ? `Edited in ${dayjs(new Date(notebook.createdAt)).fromNow()}`
+                            : `Edited in 3 months ago`}
+                        </Typography>
                       </Box>
                     </Stack>
                   </Box>
                 ))}
+                {!isRetrieving && notebooks.lastPageLoaded < notebooks.totalPage && (
+                  <Box id="ContinueButton" ref={refInfinityLoaderTrigger}></Box>
+                )}
               </Box>
             )}
-            {!isRetrieving && value === 2 && (
+            {value === 2 && (
               <Box>
                 <PendingProposalList proposals={pendingProposals.data} openLinkedNode={openLinkedNode} />
+                {!isRetrieving && pendingProposals.lastPageLoaded < pendingProposals.totalPage && (
+                  <Box id="ContinueButton" ref={refInfinityLoaderTrigger}></Box>
+                )}
+              </Box>
+            )}
+            {isRetrieving && (value === 1 || value === 2) && (
+              <Box sx={{ py: "10px", display: "flex", justifyContent: "center" }}>
+                <CircularProgress />
               </Box>
             )}
           </Box>

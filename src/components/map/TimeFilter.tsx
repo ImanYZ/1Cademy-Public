@@ -36,7 +36,6 @@ const TIME_OPTIONS: any[] = [
 
 const TimeFilter = (props: any) => {
   const onChangeTimeFilter = (event: SelectChangeEvent) => {
-    console.log(event.target.value, "event.target.value");
     props.setTimeFilter(event.target.value as SortValues);
   };
 
@@ -82,7 +81,8 @@ const TimeFilter = (props: any) => {
           sx={{
             height: "35px",
             "&> fieldset": {
-              borderColor: theme => (theme.palette.mode === "dark" ? theme.palette.common.notebookG500 : "##D5D9E1"),
+              borderColor: theme =>
+                theme.palette.mode === "dark" ? theme.palette.common.notebookG500 : theme.palette.common.gray300,
               borderWidth: "1px",
               borderRadius: "4px",
             },

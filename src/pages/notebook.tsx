@@ -6039,8 +6039,6 @@ const Dashboard = ({}: DashboardProps) => {
               <MemoizedSearcherSidebar
                 notebookRef={notebookRef}
                 openLinkedNode={openLinkedNode}
-                username={user.uname}
-                tagId={user.tagId}
                 open={openSidebar === "SEARCHER_SIDEBAR"}
                 onClose={() => setOpenSidebar(null)}
                 sidebarWidth={sidebarWidth()}

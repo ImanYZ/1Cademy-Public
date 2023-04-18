@@ -356,25 +356,25 @@ const fillPendingProposals = async (forceReIndex?: boolean) => {
 };
 
 const main = async () => {
-  // console.log(`Starting Task #${CLOUD_RUN_TASK_INDEX}, Attempt #${CLOUD_RUN_TASK_ATTEMPT}...`);
-  // console.log(`Begin indexing at ${new Date().toISOString()}`);
-  // // if (CLOUD_RUN_TASK_INDEX === 0) {
-  // console.log("Index users tasks");
-  // await fillUsersIndex(true);
-  // // }
-  // // if (CLOUD_RUN_TASK_INDEX === 1) {
-  // console.log("Index Institutions task");
-  // await fillInstitutionsIndex(true);
-  // // }
-  // // if (CLOUD_RUN_TASK_INDEX === 2) {
-  // console.log("Index Nodes and References task");
-  // const nodeDocs = await db.collection("nodes").where("deleted", "==", false).get();
-  // await fillNodesIndex(nodeDocs, true);
-  // await fillReferencesIndex(nodeDocs, true);
+  console.log(`Starting Task #${CLOUD_RUN_TASK_INDEX}, Attempt #${CLOUD_RUN_TASK_ATTEMPT}...`);
+  console.log(`Begin indexing at ${new Date().toISOString()}`);
+  // if (CLOUD_RUN_TASK_INDEX === 0) {
+  console.log("Index users tasks");
+  await fillUsersIndex(true);
   // }
-  // console.log("Index Notebooks task");
-  // await fillNotebooks(true);
+  // if (CLOUD_RUN_TASK_INDEX === 1) {
+  console.log("Index Institutions task");
+  await fillInstitutionsIndex(true);
+  // }
+  // if (CLOUD_RUN_TASK_INDEX === 2) {
+  console.log("Index Nodes and References task");
+  const nodeDocs = await db.collection("nodes").where("deleted", "==", false).get();
+  await fillNodesIndex(nodeDocs, true);
+  await fillReferencesIndex(nodeDocs, true);
 
+  console.log("Index Notebooks task");
+  await fillNotebooks(true);
+  console.log("Index Pending Proposals task");
   await fillPendingProposals(true);
   console.log(`End indexing at ${new Date().toISOString()}`);
   console.log(`Completed Task #${CLOUD_RUN_TASK_INDEX}.`);

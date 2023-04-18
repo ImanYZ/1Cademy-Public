@@ -125,12 +125,14 @@ const RecentNodesList = (props: any) => {
               width: "200px",
               borderWidth: "1px",
               borderRadius: "4px",
+              borderColor: theme =>
+                theme.palette.mode === "dark" ? theme.palette.common.notebookG500 : theme.palette.common.gray300,
             },
           }}
           value={props.sortOption}
           variant="outlined"
           onChange={onChangeSortOption}
-          renderValue={() => SORT_OPTIONS.filter(option => option.value === props.sortOption)[0]?.name}
+          renderValue={() => SORT_OPTIONS.filter(option => option.value === props.sortOption)[0]?.name || "Sort by"}
         >
           {SORT_OPTIONS.map(cur => {
             const isSelected = props.sortOption === cur.value;
