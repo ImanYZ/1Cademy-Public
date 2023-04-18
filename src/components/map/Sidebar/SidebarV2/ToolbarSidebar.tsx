@@ -293,7 +293,9 @@ MainSidebarProps) => {
         duplicatedFrom: "",
         isPublic: "none",
         users: [],
-        roles: {},
+        usersInfo: {},
+        createdAt: Timestamp.fromDate(new Date()),
+        updatedAt: Timestamp.fromDate(new Date()),
       };
       const notebooksRef = collection(db, "notebooks");
       const docRef = await addDoc(notebooksRef, newNotebook);
@@ -331,7 +333,9 @@ MainSidebarProps) => {
         duplicatedFrom: editableNotebook.id,
         isPublic: editableNotebook.isPublic,
         users: [],
-        roles: {},
+        usersInfo: {},
+        createdAt: Timestamp.fromDate(new Date()),
+        updatedAt: Timestamp.fromDate(new Date()),
       };
       const notebooksRef = collection(db, "notebooks");
       const docRef = await addDoc(notebooksRef, copyNotebook);

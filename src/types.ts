@@ -40,8 +40,13 @@ export type NotebookDocument = {
   duplicatedFrom: string;
   isPublic: "visible" | "editable" | "none";
   users: string[];
-  roles: {
-    [key: string]: "viewer" | "editor";
+  usersInfo: {
+    [uname: string]: {
+      role: "viewer" | "editor";
+      imageUrl: string;
+      fullname: string;
+      chooseUname: boolean;
+    };
   };
   createdAt: Timestamp | Date;
   updatedAt: Timestamp | Date;
