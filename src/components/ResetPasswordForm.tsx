@@ -1,15 +1,21 @@
-import { Button, Stack, TextField } from "@mui/material";
+import { LoadingButton } from "@mui/lab";
+import { Button, Snackbar, SnackbarContent, Stack, TextField, useTheme } from "@mui/material";
 import { FirebaseError } from "firebase/app";
 import { EmailAuthProvider, getAuth, reauthenticateWithCredential, updatePassword } from "firebase/auth";
 import { FormikConfig, useFormik } from "formik";
+import Image from "next/image";
 import Link from "next/link";
-import React from "react";
+import React, { useState } from "react";
 import * as yup from "yup";
 
 // import { useAuth } from "@/context/AuthContext";
 import { DESIGN_SYSTEM_COLORS } from "@/lib/theme/colors";
 import { getFirebaseFriendlyError } from "@/lib/utils/firebaseErrors";
 import ROUTES from "@/lib/utils/routes";
+
+import KeyGrayIcon from "../../public/icons/key-gray-icon.svg";
+import KeyIcon from "../../public/icons/key-icon.svg";
+
 type ResetPasswordProps = {
   currentPassword: string;
   newPassword: string;
@@ -17,7 +23,9 @@ type ResetPasswordProps = {
 };
 
 const ResetPasswordForm = () => {
-  // const [, { handleError }] = useAuth();
+  const [isLoading, setIsLoading] = useState(false);
+  const theme = useTheme();
+
   const initialPasswordValue: ResetPasswordProps = {
     currentPassword: "",
     newPassword: "",
@@ -26,39 +34,59 @@ const ResetPasswordForm = () => {
 
   const onSubmitChangePassword: FormikConfig<ResetPasswordProps>["onSubmit"] = async (
     { currentPassword, newPassword, confirmPassword },
-    { setErrors }
+    { setErrors, resetForm, setStatus }
   ) => {
     try {
+      setIsLoading(true);
       const { currentUser } = getAuth();
-      if (!currentUser || !currentUser.email) return;
-      if (newPassword !== confirmPassword) return;
+      if (!currentUser || !currentUser.email) return setErrors({ currentPassword: "Wrong password" });
+      if (newPassword !== confirmPassword)
+        return setErrors({ currentPassword: "Both paswords must match", confirmPassword: "Both paswords must match" });
 
       const credential = EmailAuthProvider.credential(currentUser?.email, currentPassword);
       await reauthenticateWithCredential(currentUser, credential);
       await updatePassword(currentUser, newPassword);
+      resetForm();
+      setStatus("Password was successfully updated");
+      setIsLoading(false);
     } catch (error) {
       const errorMessage = getFirebaseFriendlyError(error as FirebaseError);
       setErrors({ currentPassword: errorMessage });
+      setIsLoading(false);
       console.error(error);
       return;
     }
   };
 
   const validationSchema = yup.object({
-    newPassword: yup.string().min(8, "New password must be at least 8 characters long").required(""),
-    confirmPassword: yup
+    currentPassword: yup.string().required("Current password is required"),
+    newPassword: yup
       .string()
-      .required("Confirm password is required")
-      .oneOf([yup.ref("newPassword"), null], "Both Password must match"),
+      .min(8, "New password must be at least 8 characters long")
+      .required("New password is required"),
+
+    confirmPassword: yup.string().when("newPassword", {
+      is: (value: string) => value && value.length > 0,
+      then: yup
+        .string()
+        .required("Confirm password is required")
+        .oneOf([yup.ref("newPassword"), null], "Both password must match"),
+      otherwise: yup.string().min(8, "Confirm password must have at least 8 characters long"),
+    }),
   });
 
-  const formik = useFormik({ initialValues: initialPasswordValue, validationSchema, onSubmit: onSubmitChangePassword });
+  const formik = useFormik({
+    initialValues: initialPasswordValue,
+    validationSchema,
+    onSubmit: onSubmitChangePassword,
+    validateOnChange: true,
+  });
 
   return (
     <form onSubmit={formik.handleSubmit}>
       <Stack>
         <TextField
-          id="Your current password"
+          id="currentPassword"
           name="currentPassword"
           label="Your current password"
           type="password"
@@ -74,32 +102,36 @@ const ResetPasswordForm = () => {
         </Link>
       </Stack>
       <TextField
-        id="new-password"
+        id="newPassword"
         name="newPassword"
         label="At least 8 characters"
         type="password"
         value={formik.values.newPassword}
         onChange={formik.handleChange}
-        error={Boolean(formik.errors.newPassword) && Boolean(formik.touched.newPassword)}
+        onBlur={formik.handleBlur}
+        error={formik.touched.newPassword && Boolean(formik.errors.newPassword)}
         helperText={formik.errors.newPassword}
         fullWidth
         sx={{ mb: "16px" }}
       />
       <TextField
-        id="confirm-password"
+        id="confirmPassword"
         name="confirmPassword"
         label="Confirm the password"
         type="password"
         value={formik.values.confirmPassword}
         onChange={formik.handleChange}
+        onBlur={formik.handleBlur}
         error={Boolean(formik.errors.confirmPassword) && Boolean(formik.touched.confirmPassword)}
         helperText={formik.errors.confirmPassword}
         fullWidth
       />
-      <Button
+      <LoadingButton
+        loading={isLoading}
+        disabled={formik.isSubmitting}
+        type="submit"
         variant="contained"
         fullWidth
-        type="submit"
         sx={{
           backgroundColor: DESIGN_SYSTEM_COLORS.primary800,
           borderRadius: "32px",
@@ -108,7 +140,47 @@ const ResetPasswordForm = () => {
         }}
       >
         Update Password
-      </Button>
+      </LoadingButton>
+      <Snackbar
+        anchorOrigin={{ vertical: "top", horizontal: "left" }}
+        open={Boolean(formik.status)}
+        onClose={() => formik.setStatus(null)}
+        sx={{
+          "& 	.MuiSnackbarContent-action": {
+            m: 0,
+            mr: "16px",
+            p: 0,
+          },
+        }}
+      >
+        <SnackbarContent
+          elevation={1}
+          action={
+            <Image
+              src={theme.palette.mode === "dark" ? KeyIcon : KeyGrayIcon}
+              width={18}
+              height={18}
+              alt={"key icon"}
+            />
+          }
+          message={formik.status}
+          sx={{
+            flexDirection: "row-reverse",
+            justifyContent: "flex-end",
+            backgroundColor: theme =>
+              theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookG700 : DESIGN_SYSTEM_COLORS.gray200,
+            border: theme =>
+              `1px solid ${
+                theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookG500 : DESIGN_SYSTEM_COLORS.gray300
+              }`,
+            color: theme =>
+              theme.palette.mode === "light" ? DESIGN_SYSTEM_COLORS.notebookG700 : DESIGN_SYSTEM_COLORS.gray200,
+            fontSize: "12px",
+            borderRadius: "8px",
+            p: "8px 22px",
+          }}
+        />
+      </Snackbar>
     </form>
   );
 };
