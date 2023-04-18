@@ -6503,7 +6503,14 @@ const Dashboard = ({}: DashboardProps) => {
                     padding: { xs: "2px", sm: "8px" },
                   }}
                 >
-                  <MyLocationIcon sx={{ color: theme => (theme.palette.mode === "dark" ? "#CACACA" : "#667085") }} />
+                  <MyLocationIcon
+                    sx={{
+                      color: theme =>
+                        theme.palette.mode === "dark"
+                          ? theme.palette.common.notebookG100
+                          : theme.palette.common.gray500,
+                    }}
+                  />
                 </IconButton>
               </Tooltip>
 
@@ -6528,7 +6535,14 @@ const Dashboard = ({}: DashboardProps) => {
                     }
                   }}
                 >
-                  <AutoFixHighIcon sx={{ color: theme => (theme.palette.mode === "dark" ? "#CACACA" : "#667085") }} />
+                  <AutoFixHighIcon
+                    sx={{
+                      color: theme =>
+                        theme.palette.mode === "dark"
+                          ? theme.palette.common.notebookG100
+                          : theme.palette.common.gray500,
+                    }}
+                  />
                 </IconButton>
               </Tooltip>
 
@@ -6553,7 +6567,14 @@ const Dashboard = ({}: DashboardProps) => {
                     }
                   }}
                 >
-                  <HelpCenterIcon sx={{ color: theme => (theme.palette.mode === "dark" ? "#CACACA" : "#667085") }} />
+                  <HelpCenterIcon
+                    sx={{
+                      color: theme =>
+                        theme.palette.mode === "dark"
+                          ? theme.palette.common.notebookG100
+                          : theme.palette.common.gray500,
+                    }}
+                  />
                 </IconButton>
               </Tooltip>
 
@@ -6584,7 +6605,12 @@ const Dashboard = ({}: DashboardProps) => {
                   }}
                 >
                   <CenterFocusStrongIcon
-                    sx={{ color: theme => (theme.palette.mode === "dark" ? "#CACACA" : "#667085") }}
+                    sx={{
+                      color: theme =>
+                        theme.palette.mode === "dark"
+                          ? theme.palette.common.notebookG100
+                          : theme.palette.common.gray500,
+                    }}
                   />
                 </IconButton>
               </Tooltip>
@@ -6602,7 +6628,14 @@ const Dashboard = ({}: DashboardProps) => {
                   }}
                 >
                   <IconButton onClick={() => setOpenDeveloperMenu(!openDeveloperMenu)}>
-                    <CodeIcon sx={{ color: theme => (theme.palette.mode === "dark" ? "#CACACA" : "#667085") }} />
+                    <CodeIcon
+                      sx={{
+                        color: theme =>
+                          theme.palette.mode === "dark"
+                            ? theme.palette.common.notebookG100
+                            : theme.palette.common.gray500,
+                      }}
+                    />
                   </IconButton>
                 </Tooltip>
               )}

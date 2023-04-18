@@ -655,7 +655,21 @@ const NodePage: NextPage<Props> = ({ notebook }) => {
               onClick={() => dispatch({ type: "setTheme", payload: theme.palette.mode === "dark" ? "Light" : "Dark" })}
               size="small"
             >
-              {theme.palette.mode === "dark" ? <LightModeIcon /> : <DarkModeIcon />}
+              {theme.palette.mode === "dark" ? (
+                <LightModeIcon
+                  sx={{
+                    color: theme =>
+                      theme.palette.mode === "dark" ? theme.palette.common.notebookG100 : theme.palette.common.gray500,
+                  }}
+                />
+              ) : (
+                <DarkModeIcon
+                  sx={{
+                    color: theme =>
+                      theme.palette.mode === "dark" ? theme.palette.common.notebookG100 : theme.palette.common.gray500,
+                  }}
+                />
+              )}
             </IconButton>
           </Tooltip>
 
@@ -671,7 +685,12 @@ const NodePage: NextPage<Props> = ({ notebook }) => {
                 padding: { xs: "2px", sm: "8px" },
               }}
             >
-              <MyLocationIcon sx={{ color: theme => (theme.palette.mode === "dark" ? "#CACACA" : "#667085") }} />
+              <MyLocationIcon
+                sx={{
+                  color: theme =>
+                    theme.palette.mode === "dark" ? theme.palette.common.notebookG100 : theme.palette.common.gray500,
+                }}
+              />
             </IconButton>
           </Tooltip>
           <Tooltip
@@ -696,7 +715,12 @@ const NodePage: NextPage<Props> = ({ notebook }) => {
               disabled={!selectedNodeId}
               sx={{ opacity: !selectedNodeId ? 0.5 : undefined }}
             >
-              <CenterFocusStrongIcon />
+              <CenterFocusStrongIcon
+                sx={{
+                  color: theme =>
+                    theme.palette.mode === "dark" ? theme.palette.common.notebookG100 : theme.palette.common.gray500,
+                }}
+              />
             </IconButton>
           </Tooltip>
         </>

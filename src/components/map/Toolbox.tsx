@@ -89,6 +89,8 @@ const Toolbox = ({ children, isLoading = false, sx }: ToolboxProps) => {
         <IconButton
           color="secondary"
           sx={{
+            color: theme =>
+              theme.palette.mode === "dark" ? theme.palette.common.notebookG100 : theme.palette.common.gray500,
             ...(expanded && {
               color: theme =>
                 theme.palette.mode === "dark" ? theme.palette.common.primary800 : theme.palette.common.primary600,
