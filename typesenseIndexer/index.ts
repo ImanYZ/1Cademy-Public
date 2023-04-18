@@ -3,10 +3,10 @@ import { App, cert, initializeApp } from "firebase-admin/app";
 import { getFirestore } from "firebase-admin/firestore";
 import { CollectionFieldSchema } from "typesense/lib/Typesense/Collection";
 
-import { getNodeReferences } from "./helper";
+import { getNodeReferences, getTypedCollections } from "./helper";
 import indexCollection from "./populateIndex";
 import { NodeFireStore, TypesenseNodesSchema, TypesenseProcessedReferences } from "./types";
-
+const NODE_TYPES_ARRAY: string[] = ["Concept", "Code", "Reference", "Relation", "Question", "Idea"];
 // Retrieve Job-defined env vars
 const { CLOUD_RUN_TASK_ATTEMPT = 0 } = process.env;
 // Retrieve User-defined env vars
@@ -30,6 +30,47 @@ const firebaseApp: App = initializeApp({
 });
 
 export const db = getFirestore(firebaseApp);
+
+const getPendingProposalsFromFirestore = async () => {
+  let pendingProposals: string[] = [];
+  for (let nodeType of NODE_TYPES_ARRAY) {
+    const { versionsColl, userVersionsColl } = getTypedCollections(nodeType);
+    if (!versionsColl || !userVersionsColl) continue;
+    let versionsQuery = await db
+      .collection(versionsColl)
+      .where("accepted", "==", false)
+      .where("deleted", "==", false)
+      .get();
+    versionsQuery.docs.forEach(async doc => {
+      let versions: any = {};
+      const versionId = doc.id;
+      const versionData = doc.data();
+      versions = {
+        ...versionData,
+        id: versionId,
+        createdAt: versionData.createdAt.toDate(),
+        award: false,
+        correct: false,
+        wrong: false,
+      };
+      delete versions.deleted;
+      delete versions.updatedAt;
+      versions["nodeType"] = nodeType;
+      pendingProposals.push(versions);
+    });
+  }
+  return pendingProposals;
+};
+
+const getNotebooksFromFirestore = async () => {
+  let notebooks: { title: string; owner: string; ownerImgUrl: string }[] = [];
+  const notebookDocs = await db.collection("notebooks").get();
+  for (let notebookDoc of notebookDocs.docs) {
+    const notebookData = notebookDoc.data();
+    notebooks.push({ title: notebookData.title, owner: notebookData.owner, ownerImgUrl: notebookData.ownerImgUrl });
+  }
+  return notebooks;
+};
 
 const getUsersFromFirestore = async () => {
   let users: { name: string; username: string; imageUrl: string }[] = [];
@@ -268,6 +309,52 @@ const fillReferencesIndex = async (
   await indexCollection("processedReferences", fieldsProcessedReferences, processedReferences, forceReIndex);
 };
 
+const fillNotebooks = async (forceReIndex?: boolean) => {
+  const data = await getNotebooksFromFirestore();
+  const fields: CollectionFieldSchema[] = [
+    { name: "title", type: "string" },
+    { name: "owner", type: "string" },
+    { name: "ownerImgUrl", type: "string" },
+  ];
+  await indexCollection("notebooks", fields, data, forceReIndex);
+};
+
+const fillPendingProposals = async (forceReIndex?: boolean) => {
+  const data = await getPendingProposalsFromFirestore();
+  const fields: CollectionFieldSchema[] = [
+    { name: "title", type: "string" },
+    { name: "proposer", type: "string" },
+    { name: "content", type: "string" },
+    { name: "summary", type: "string" },
+    { name: "corrects", type: "int64" },
+    { name: "wrongs", type: "int64" },
+    { name: "awards", type: "int64" },
+    { name: "nodeType", type: "string" },
+    { name: "newChild", optional: true, type: "bool" },
+    { name: "addedChoices", optional: true, type: "bool" },
+    { name: "deletedChoices", optional: true, type: "bool" },
+    { name: "changedChoices", optional: true, type: "bool" },
+    { name: "changedTitle", optional: true, type: "bool" },
+    { name: "changedContent", optional: true, type: "bool" },
+    { name: "addedImage", optional: true, type: "bool" },
+    { name: "deletedImage", optional: true, type: "bool" },
+    { name: "changedImage", optional: true, type: "bool" },
+    { name: "addedReferences", optional: true, type: "bool" },
+    { name: "deletedReferences", optional: true, type: "bool" },
+    { name: "changedReferences", optional: true, type: "bool" },
+    { name: "addedTags", optional: true, type: "bool" },
+    { name: "deletedTags", optional: true, type: "bool" },
+    { name: "changedTags", optional: true, type: "bool" },
+    { name: "addedParents", optional: true, type: "bool" },
+    { name: "addedChildren", optional: true, type: "bool" },
+    { name: "removedParents", optional: true, type: "bool" },
+    { name: "removedChildren", optional: true, type: "bool" },
+    { name: "changedNodeType", optional: true, type: "bool" },
+    { name: "createdAt", type: "string" },
+  ];
+  await indexCollection("pendingProposals", fields, data, forceReIndex);
+};
+
 const main = async () => {
   console.log(`Starting Task #${CLOUD_RUN_TASK_INDEX}, Attempt #${CLOUD_RUN_TASK_ATTEMPT}...`);
   console.log(`Begin indexing at ${new Date().toISOString()}`);
@@ -284,7 +371,11 @@ const main = async () => {
   const nodeDocs = await db.collection("nodes").where("deleted", "==", false).get();
   await fillNodesIndex(nodeDocs, true);
   await fillReferencesIndex(nodeDocs, true);
-  // }
+
+  console.log("Index Notebooks task");
+  await fillNotebooks(true);
+  console.log("Index Pending Proposals task");
+  await fillPendingProposals(true);
   console.log(`End indexing at ${new Date().toISOString()}`);
   console.log(`Completed Task #${CLOUD_RUN_TASK_INDEX}.`);
 };

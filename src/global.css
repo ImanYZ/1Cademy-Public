@@ -2160,7 +2160,7 @@ button.MuiTab-textColorInherit:focus {
 
 #nodeSelectMenu.MuiPopover-root {
   position: absolute !important;
-  top: 51px !important;
+  top: 0px !important;
 }
 
 #recentNodesList .Mui-focused .MuiOutlinedInput-notchedOutline {
