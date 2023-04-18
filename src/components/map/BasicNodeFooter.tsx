@@ -852,7 +852,8 @@ type CustomIconButtonProps = {
 const CustomIconButton = ({ id, children, disabled = false, sx, onClick, onClickOnDisable }: CustomIconButtonProps) => {
   const DisableStyles: SxProps<Theme> = {
     backgroundColor: ({ palette }) =>
-      palette.mode === "dark" ? palette.common.notebookG500 : palette.common.notebookG200,
+      palette.mode === "dark" ? palette.common.notebookG500 : palette.common.notebookG50,
+    color: ({ palette }) => (palette.mode === "dark" ? palette.common.notebookG300 : palette.common.notebookG200),
   };
 
   if (onClickOnDisable)
@@ -882,7 +883,7 @@ const CustomIconButton = ({ id, children, disabled = false, sx, onClick, onClick
         width: "30px",
         height: "30px",
         backgroundColor: ({ palette }) =>
-          palette.mode === "dark" ? palette.common.notebookG500 : palette.common.notebookG200,
+          palette.mode === "dark" ? palette.common.notebookG500 : palette.common.gray200,
         ":hover": ({ palette }) =>
           palette.mode === "dark" ? palette.common.notebookG400 : palette.common.lightBackground2,
         "&.Mui-disabled": {
@@ -907,13 +908,27 @@ const CustomButton = ({ id, children, disabled = false, sx, onClick }: CustomIco
       height: "30px",
       borderRadius: "16px",
       backgroundColor: ({ palette }) =>
-        palette.mode === "dark" ? palette.common.notebookG500 : palette.common.notebookG200,
-      color: ({ palette }) => (palette.mode === "dark" ? palette.common.gray50 : palette.common.gray600),
+        disabled
+          ? palette.mode === "dark"
+            ? palette.common.notebookG600
+            : palette.common.notebookG50
+          : palette.mode === "dark"
+          ? palette.common.notebookG500
+          : palette.common.gray200,
+      color: ({ palette }) =>
+        disabled
+          ? palette.mode === "dark"
+            ? palette.common.notebookG300
+            : palette.common.notebookG200
+          : palette.mode === "dark"
+          ? palette.common.gray50
+          : palette.common.gray600,
       ":hover": ({ palette }) =>
         palette.mode === "dark" ? palette.common.notebookG400 : palette.common.lightBackground2,
       "&.Mui-disabled": {
         backgroundColor: ({ palette }) =>
-          palette.mode === "dark" ? palette.common.notebookG500 : palette.common.notebookG200,
+          palette.mode === "dark" ? palette.common.notebookG600 : palette.common.notebookG50,
+        // color: ({ palette }) => (palette.mode === "dark" ? palette.common.notebookG300 : palette.common.notebookG200),
       },
       ...sx,
     }}
@@ -939,7 +954,13 @@ const ButtonWithDetails = ({ id, children, showDetails, disabled = false, onClic
         minWidth: "0px",
         width: "auto",
         backgroundColor: ({ palette }) =>
-          palette.mode === "dark" ? palette.common.notebookG800 : palette.common.notebookG200,
+          disabled
+            ? palette.mode === "dark"
+              ? palette.common.notebookG600
+              : palette.common.notebookG50
+            : palette.mode === "dark"
+            ? palette.common.notebookG500
+            : palette.common.gray200,
         ":hover": {
           backgroundColor: ({ palette }) =>
             palette.mode === "dark" ? palette.common.notebookG400 : palette.common.gray300,
@@ -978,7 +999,13 @@ const CustomWrapperButton = ({
         justifyContent: "center",
         borderRadius: "16px",
         backgroundColor: ({ palette }) =>
-          palette.mode === "dark" ? palette.common.notebookG500 : palette.common.notebookG200,
+          disabled
+            ? palette.mode === "dark"
+              ? palette.common.notebookG600
+              : palette.common.notebookG50
+            : palette.mode === "dark"
+            ? palette.common.notebookG500
+            : palette.common.notebookG200,
         color: ({ palette }) => (palette.mode === "dark" ? palette.common.gray50 : palette.common.gray600),
         ...(!disabled && {
           ":hover": {

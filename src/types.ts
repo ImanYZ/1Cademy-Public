@@ -1,3 +1,5 @@
+import { Timestamp } from "firebase/firestore";
+
 import { KnowledgeChoice } from "./knowledgeTypes";
 
 export type NodeType =
@@ -41,6 +43,8 @@ export type NotebookDocument = {
   roles: {
     [key: string]: "viewer" | "editor";
   };
+  createdAt: Timestamp | Date;
+  updatedAt: Timestamp | Date;
 };
 
 export type Notebook = NotebookDocument & {
