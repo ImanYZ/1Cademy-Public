@@ -854,7 +854,7 @@ const UserSettigsSidebar = ({
     return existOtherValue ? [...filteredValues, defaultValue] : filteredValues;
   };
 
-  const removeAllNodes = async () => {
+  const removeAllNodes = useCallback(async () => {
     if (confirm("Are you sure to hide all the nodes")) {
       const batch = writeBatch(db);
       const userNodesCol = collection(db, "userNodes");
@@ -868,7 +868,7 @@ const UserSettigsSidebar = ({
       }
       await batch.commit();
     }
-  };
+  }, [db, user.uname]);
   //
   const loadOlderProposalsClick = useCallback(() => {
     if (lastIndex >= proposals.length) return;
