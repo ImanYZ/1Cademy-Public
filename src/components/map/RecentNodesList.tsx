@@ -71,7 +71,6 @@ const SORT_OPTIONS: SortOptions[] = [
 
 const RecentNodesList = (props: any) => {
   const onChangeSortOption = (event: SelectChangeEvent) => {
-    console.log(event.target.value, "event.target.value");
     props.setSortOption(event.target.value as SortValues);
   };
 
