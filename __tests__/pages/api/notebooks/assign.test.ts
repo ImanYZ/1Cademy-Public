@@ -109,6 +109,8 @@ describe("POST /api/notebooks/assign", () => {
         usersInfo: {},
         title: "n1",
         users: [],
+        createdAt: new Date(),
+        updatedAt: new Date(),
       } as INotebook,
     ],
     "notebooks"

@@ -79,6 +79,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         batch.update(userNodeRef, {
           notebooks: _userNodeData.notebooks,
           expands: _userNodeData.expands,
+          updatedAt: new Date(),
         });
       } else {
         const userNodeRef = db.collection("userNodes").doc();
@@ -106,9 +107,10 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
     batch.update(notebookRef, {
       users: notebookData.users,
       usersInfo: notebookData.usersInfo,
+      updatedAt: new Date(),
     });
 
-    commitBatch(batch);
+    await commitBatch(batch);
     return res.status(200).json({ success: true });
   } catch (error) {
     return res.status(500).json({ error, success: false });

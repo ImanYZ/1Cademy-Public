@@ -318,6 +318,8 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
           usersInfo: {},
           users: [],
           title: "My Notebook",
+          createdAt: new Date(),
+          updatedAt: new Date(),
         } as INotebook);
       }
 

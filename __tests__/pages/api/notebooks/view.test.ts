@@ -108,6 +108,8 @@ describe("POST /api/notebooks/view", () => {
         usersInfo: {},
         title: "n1",
         users: [],
+        createdAt: new Date(),
+        updatedAt: new Date(),
       } as INotebook,
     ],
     "notebooks"

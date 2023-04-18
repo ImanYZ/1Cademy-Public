@@ -108,6 +108,8 @@ describe("DELETE /api/notebooks/delete", () => {
         usersInfo: {},
         title: "n1",
         users: [],
+        createdAt: new Date(),
+        updatedAt: new Date(),
       } as INotebook,
     ],
     "notebooks"

@@ -50,6 +50,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       userNodeData.notebooks!.splice(notebookIdx, 1);
       batch.update(userNodeRef, {
         notebooks: userNodeData.notebooks,
+        updatedAt: new Date(),
       });
       [batch, writeCounts] = await checkRestartBatchWriteCounts(batch, writeCounts);
     }
@@ -57,7 +58,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
     // deleting notebook document itself
     batch.delete(notebookRef);
 
-    commitBatch(batch);
+    await commitBatch(batch);
     return res.status(200).json({ success: true });
   } catch (error) {
     return res.status(500).json({ error, success: false });

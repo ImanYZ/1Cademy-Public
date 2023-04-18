@@ -1,3 +1,5 @@
+import { Timestamp } from "firebase-admin/firestore";
+
 export type INotebook = {
   documentId?: string;
   owner: string;
@@ -16,4 +18,6 @@ export type INotebook = {
       chooseUname: boolean;
     };
   };
+  createdAt: Timestamp | Date;
+  updatedAt: Timestamp | Date;
 };
