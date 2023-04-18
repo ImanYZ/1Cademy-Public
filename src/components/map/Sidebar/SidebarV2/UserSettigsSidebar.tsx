@@ -25,6 +25,7 @@ import {
   TextField,
   Theme,
   Typography,
+  useTheme,
 } from "@mui/material";
 import { Box } from "@mui/system";
 import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers";
@@ -80,6 +81,7 @@ import { MemoizedMetaButton } from "../../MetaButton";
 import Modal from "../../Modal/Modal";
 import ProposalItem from "../../ProposalsList/ProposalItem/ProposalItem";
 import ProfileAvatar from "../ProfileAvatar";
+import UseInfoTrends from "../UseInfoTrends";
 import { UserSettingsProfessionalInfo } from "../UserSettingsProfessionalInfo";
 import { SidebarWrapper } from "./SidebarWrapper";
 
@@ -180,6 +182,8 @@ const UserSettigsSidebar = ({
 }: UserSettingsSidebarProps) => {
   const db = getFirestore();
   const ELEMENTS_PER_PAGE: number = 13;
+  const theme = useTheme();
+
   const { allTags, setAllTags } = useTagsTreeView(user.tagId ? [user.tagId] : []);
   const [languages, setLanguages] = useState<string[]>([]);
   const [countries, setCountries] = useState<ICountry[]>([]);
@@ -188,6 +192,8 @@ const UserSettigsSidebar = ({
   const [instlogoURL, setInstlogoURL] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [proposals, setProposals] = useState<any[]>([]);
+  const [proposalsPerDay, setProposalsPerDay] = useState<any[]>([]);
+
   const [lastIndex, setLastIndex] = useState(ELEMENTS_PER_PAGE);
   const [value, setValue] = React.useState(0);
   const [points, setPoints] = useState({ positives: 0, negatives: 0, totalPoints: 0 });
@@ -505,6 +511,7 @@ const UserSettigsSidebar = ({
     if (type !== "all") orderredProposals = orderredProposals.filter(proposal => proposal.nodeType === type);
     console.log({ orderredProposals, type });
     setProposals(orderredProposals); //
+    setProposalsPerDay(proposalsPerDayList);
   }, [db, type, user.uname]);
 
   useEffect(() => {
@@ -951,6 +958,10 @@ const UserSettigsSidebar = ({
                 </Paper>
               ))}
             </Box>
+            <Typography fontWeight={"500"} my="16px">
+              Proposals Overview
+            </Typography>
+            <UseInfoTrends proposalsPerDay={proposalsPerDay} theme={theme.palette.mode || ""} />
           </Box>
         ),
       },
