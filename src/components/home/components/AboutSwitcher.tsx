@@ -51,7 +51,7 @@ const TEAM_ITEMS = [
         </Typography>
       </>
     ),
-    link: "",
+    link: "https://www.linkedin.com/in/joel-podolny-58395a63",
   },
   {
     id: "item-3",
@@ -75,7 +75,7 @@ const TEAM_ITEMS = [
         </Typography>
       </>
     ),
-    link: "",
+    link: "https://www.linkedin.com/in/roby-harrington-7860a1137",
   },
 
   {
