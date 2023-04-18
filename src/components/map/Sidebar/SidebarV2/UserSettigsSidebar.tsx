@@ -2149,7 +2149,7 @@ const UserSettigsSidebar = ({
               key={tabItem.title}
               label={tabItem.title}
               {...a11yProps(idx)}
-              sx={{ borderRadius: "6px" }}
+              sx={{ borderRadius: "6px", flex: 1 }}
             />
           ))}
         </Tabs>
