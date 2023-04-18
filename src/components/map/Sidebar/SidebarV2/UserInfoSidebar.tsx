@@ -228,7 +228,7 @@ const UserInfoSidebar = ({ open, onClose, theme, openLinkedNode, username }: Use
             title: "Nodes",
             content: (
               <>
-                <UseInfoTrends proposalsPerDay={proposalsPerDay} theme={theme || ""} />
+                <UseInfoTrends proposalsPerDay={proposalsPerDay} theme={theme.toLowerCase() || ""} />
               </>
             ),
           },
