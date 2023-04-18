@@ -1,5 +1,16 @@
+import Visibility from "@mui/icons-material/Visibility";
+import VisibilityOff from "@mui/icons-material/VisibilityOff";
 import { LoadingButton } from "@mui/lab";
-import { Button, Snackbar, SnackbarContent, Stack, TextField, useTheme } from "@mui/material";
+import {
+  Button,
+  IconButton,
+  InputAdornment,
+  Snackbar,
+  SnackbarContent,
+  Stack,
+  TextField,
+  useTheme,
+} from "@mui/material";
 import { FirebaseError } from "firebase/app";
 import { EmailAuthProvider, getAuth, reauthenticateWithCredential, updatePassword } from "firebase/auth";
 import { FormikConfig, useFormik } from "formik";
@@ -18,8 +29,11 @@ import KeyIcon from "../../public/icons/key-icon.svg";
 
 type ResetPasswordProps = {
   currentPassword: string;
+  showcurrentPassword: boolean;
   newPassword: string;
+  showNewPassword: boolean;
   confirmPassword: string;
+  showConfirmPassword: boolean;
 };
 
 const ResetPasswordForm = () => {
@@ -28,8 +42,11 @@ const ResetPasswordForm = () => {
 
   const initialPasswordValue: ResetPasswordProps = {
     currentPassword: "",
+    showcurrentPassword: false,
     newPassword: "",
+    showNewPassword: false,
     confirmPassword: "",
+    showConfirmPassword: false,
   };
 
   const onSubmitChangePassword: FormikConfig<ResetPasswordProps>["onSubmit"] = async (
@@ -82,20 +99,50 @@ const ResetPasswordForm = () => {
     validateOnChange: true,
   });
 
+  const handleClickShowPassword = (param: keyof ResetPasswordProps) => {
+    const prevValue = formik.values[param];
+
+    formik.setFieldValue(param, !prevValue);
+  };
+  const handleMouseDownPassword = (event: React.MouseEvent<HTMLButtonElement>) => {
+    event.preventDefault();
+  };
   return (
     <form onSubmit={formik.handleSubmit}>
+      <Stack>
+        {/* <CustomPasswordInput />
+        <CustomPasswordInput /> */}
+      </Stack>
       <Stack>
         <TextField
           id="currentPassword"
           name="currentPassword"
           label="Your current password"
-          type="password"
+          type={formik.values.showcurrentPassword ? "text" : "password"}
           value={formik.values.currentPassword}
           onChange={formik.handleChange}
           onBlur={formik.handleBlur}
           error={Boolean(formik.errors.currentPassword) && Boolean(formik.touched.currentPassword)}
           helperText={formik.errors.currentPassword}
           fullWidth
+          InputProps={{
+            endAdornment: (
+              <InputAdornment position="end">
+                <IconButton
+                  aria-label="toggle password visibility"
+                  onClick={() => handleClickShowPassword("showcurrentPassword")}
+                  onMouseDown={handleMouseDownPassword}
+                  edge="end"
+                >
+                  {formik.values.showcurrentPassword ? (
+                    <VisibilityOff color="primary" />
+                  ) : (
+                    <Visibility color="primary" />
+                  )}
+                </IconButton>
+              </InputAdornment>
+            ),
+          }}
         />
         <Link href={ROUTES.forgotpassword} passHref>
           <Button sx={{ my: "4px", alignSelf: "flex-end" }}>Forgot Password?</Button>
@@ -105,26 +152,55 @@ const ResetPasswordForm = () => {
         id="newPassword"
         name="newPassword"
         label="At least 8 characters"
-        type="password"
+        type={formik.values.showNewPassword ? "text" : "password"}
         value={formik.values.newPassword}
         onChange={formik.handleChange}
         onBlur={formik.handleBlur}
         error={formik.touched.newPassword && Boolean(formik.errors.newPassword)}
         helperText={formik.errors.newPassword}
         fullWidth
+        autoComplete="new-password"
+        InputProps={{
+          endAdornment: (
+            <InputAdornment position="end">
+              <IconButton
+                aria-label="toggle password visibility"
+                onClick={() => handleClickShowPassword("showNewPassword")}
+                onMouseDown={handleMouseDownPassword}
+                edge="end"
+              >
+                {formik.values.showNewPassword ? <VisibilityOff color="primary" /> : <Visibility color="primary" />}
+              </IconButton>
+            </InputAdornment>
+          ),
+        }}
         sx={{ mb: "16px" }}
       />
       <TextField
         id="confirmPassword"
         name="confirmPassword"
         label="Confirm the password"
-        type="password"
+        type={formik.values.showConfirmPassword ? "text" : "password"}
         value={formik.values.confirmPassword}
         onChange={formik.handleChange}
         onBlur={formik.handleBlur}
         error={Boolean(formik.errors.confirmPassword) && Boolean(formik.touched.confirmPassword)}
         helperText={formik.errors.confirmPassword}
         fullWidth
+        InputProps={{
+          endAdornment: (
+            <InputAdornment position="end">
+              <IconButton
+                aria-label="toggle password visibility"
+                onClick={() => handleClickShowPassword("showConfirmPassword")}
+                onMouseDown={handleMouseDownPassword}
+                edge="end"
+              >
+                {formik.values.showConfirmPassword ? <VisibilityOff color="primary" /> : <Visibility color="primary" />}
+              </IconButton>
+            </InputAdornment>
+          ),
+        }}
       />
       <LoadingButton
         loading={isLoading}

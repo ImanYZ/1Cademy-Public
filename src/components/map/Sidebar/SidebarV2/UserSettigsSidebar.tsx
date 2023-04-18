@@ -72,7 +72,6 @@ import GraphIcon from "../../../../../public/icons/graph-icon.svg";
 import KeyIcon from "../../../../../public/icons/key-icon.svg";
 import LockIcon from "../../../../../public/icons/lock-icon.svg";
 import ProfileIcon from "../../../../../public/icons/profile-icon.svg";
-import SadfaceIcon from "../../../../../public/icons/sadface-icon.svg";
 import UserIcon from "../../../../../public/icons/vector.svg";
 import LightmodeLibraryBackground from "../../../../../public/lightModeLibraryBackground.png";
 import { DESIGN_SYSTEM_COLORS } from "../../../../lib/theme/colors";
@@ -133,10 +132,10 @@ const ACCOUNT_OPTIONS: AccountOptions[] = [
         type: "Change your Password",
         icon: KeyIcon,
       },
-      {
-        type: "Deactive your Account",
-        icon: SadfaceIcon,
-      },
+      // {
+      //   type: "Deactive your Account",
+      //   icon: SadfaceIcon,
+      // },
     ],
   },
 ];
