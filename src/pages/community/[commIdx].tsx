@@ -381,56 +381,67 @@ const Communities = (props: Props) => {
                   backgroundColor: gray400,
                   borderRadius: "10px",
                 },
+                a: {
+                  display: "flex",
+                  textDecoration: "none",
+                },
               }}
             >
               {communities.map(item => (
-                <Link key={item.id} href={`/community/${item.id}`} style={{ textDecoration: "none", color: "inherit" }}>
-                  <Card
-                    elevation={0}
-                    sx={{
-                      minWidth: { xs: "150px", sm: "210px" },
-                      maxWidth: { xs: "160px", sm: "220px" },
-                      flex: 1,
-                      backgroundColor: "transparent",
-                    }}
-                    square
-                  >
-                    <CardActionArea
+                <Link
+                  key={item.id}
+                  href={`/community/${item.id}`}
+                  style={{ textDecoration: "none", color: "inherit" }}
+                  passHref
+                >
+                  <a>
+                    <Card
+                      elevation={0}
                       sx={{
-                        display: "flex",
-                        flexDirection: "column",
-                        justifyContent: "flex-start",
-                        p: "16px",
-                        border: theme => `1px solid ${theme.palette.mode === "dark" ? darkBase : gray200}`,
-                        backgroundColor: theme => (theme.palette.mode === "dark" ? "#181818" : "transparent"),
-                        borderRadius: "8px",
-                        cursor: "pointer",
-                        height: "100%",
-                        borderColor: community.id === item.id ? orangeDark : "",
-                        ":hover": {
-                          borderColor: orangeDark,
-                        },
+                        minWidth: { xs: "150px", sm: "210px" },
+                        maxWidth: { xs: "160px", sm: "220px" },
+                        flex: 1,
+                        backgroundColor: "transparent",
                       }}
+                      square
                     >
-                      <CardMedia
-                        component={"img"}
-                        image={item.url}
-                        alt={item.title}
-                        sx={{ borderRadius: "8px", height: { xs: "100px", sm: "140px" } }}
-                      />
-                      <CardContent sx={{ p: "16px 0 0 0" }}>
-                        <Typography
-                          sx={{
-                            fontSize: "14px",
-                            fontWeight: 600,
-                            pt: "16px",
-                          }}
-                        >
-                          {item.title}
-                        </Typography>
-                      </CardContent>
-                    </CardActionArea>
-                  </Card>
+                      <CardActionArea
+                        sx={{
+                          display: "flex",
+                          flexDirection: "column",
+                          justifyContent: "flex-start",
+                          p: "16px",
+                          border: theme => `1px solid ${theme.palette.mode === "dark" ? darkBase : gray200}`,
+                          backgroundColor: theme => (theme.palette.mode === "dark" ? "#181818" : "transparent"),
+                          borderRadius: "8px",
+                          cursor: "pointer",
+                          height: "100%",
+                          borderColor: community.id === item.id ? orangeDark : "",
+                          ":hover": {
+                            borderColor: orangeDark,
+                          },
+                        }}
+                      >
+                        <CardMedia
+                          component={"img"}
+                          image={item.url}
+                          alt={item.title}
+                          sx={{ borderRadius: "8px", height: { xs: "100px", sm: "140px" } }}
+                        />
+                        <CardContent sx={{ p: "16px 0 0 0" }}>
+                          <Typography
+                            sx={{
+                              fontSize: "14px",
+                              fontWeight: 600,
+                              pt: "16px",
+                            }}
+                          >
+                            {item.title}
+                          </Typography>
+                        </CardContent>
+                      </CardActionArea>
+                    </Card>
+                  </a>
                 </Link>
               ))}
             </Stack>
