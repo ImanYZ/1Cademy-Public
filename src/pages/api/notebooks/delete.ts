@@ -48,8 +48,10 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       const notebookIdx = userNodeData.notebooks!.indexOf(notebookId as string);
       // removing deleted notebook from userNode
       userNodeData.notebooks!.splice(notebookIdx, 1);
+      userNodeData.expands!.splice(notebookIdx, 1);
       batch.update(userNodeRef, {
         notebooks: userNodeData.notebooks,
+        expands: userNodeData.expands,
         updatedAt: new Date(),
       });
       [batch, writeCounts] = await checkRestartBatchWriteCounts(batch, writeCounts);
