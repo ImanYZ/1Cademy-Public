@@ -44,7 +44,7 @@
     "csv-writer": "^1.6.0",
     "d3": "^7.6.1",
     "d3-collection": "^1.0.7",
-    "dagre": "^0.8.5",
+    "dagre": "github:r3alst/dagre#master",
     "dayjs": "^1.11.3",
     "dotenv": "^16.0.1",
     "firebase": "^9.9.0",
