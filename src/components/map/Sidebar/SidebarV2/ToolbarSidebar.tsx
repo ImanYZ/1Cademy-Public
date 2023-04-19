@@ -33,7 +33,7 @@ import {
   where,
 } from "firebase/firestore";
 import NextImage from "next/image";
-import React, { Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import React, { Dispatch, SetStateAction, Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { ChosenTag, MemoizedTagsSearcher } from "@/components/TagsSearcher";
 import { useNodeBook } from "@/context/NodeBookContext";
@@ -93,6 +93,7 @@ type MainSidebarProps = {
   userTutorial: UserTutorials;
   dispatch: React.Dispatch<DispatchAuthActions>;
   notebooks: Notebook[];
+  setNotebooks: Dispatch<SetStateAction<Notebook[]>>;
   onChangeNotebook: (notebookId: string) => void;
   selectedNotebook: string;
   openNodesOnNotebook: (notebookId: string, nodeIds: string[]) => Promise<void>;
@@ -122,6 +123,7 @@ export const ToolbarSidebar = ({
   userTutorial,
   dispatch,
   notebooks,
+  setNotebooks,
   onChangeNotebook,
   selectedNotebook,
   openNodesOnNotebook,
@@ -374,16 +376,21 @@ MainSidebarProps) => {
       if (!editableNotebook) return;
 
       if (!window.confirm("Are you sure to delete notebook")) return;
-      await Delete("/notebooks/delete", { notebookId: editableNotebook.id });
+      setNotebooks(prevNotebooks => {
+        const newNotebooks = prevNotebooks.filter(cur => cur.id !== editableNotebook.id);
+        onChangeNotebook(newNotebooks[0]?.id ?? "");
+        return newNotebooks;
+      });
       setEditableNotebook(null);
-      onChangeNotebook("");
+      await Delete("/notebooks/delete", { notebookId: editableNotebook.id });
+      // onChangeNotebook("");
       console.log("deleted complete");
     } catch (error) {
       console.error("Cant remove notebook", error);
     } finally {
       setIsCreatingNotebook(false);
     }
-  }, [editableNotebook, onChangeNotebook]);
+  }, [editableNotebook, onChangeNotebook, setNotebooks]);
 
   const onOpenUserInfo = useCallback(() => {
     if (!editableNotebook) return;
