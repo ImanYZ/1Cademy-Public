@@ -261,7 +261,13 @@ const UserInfoSidebar = ({ open, onClose, theme, openLinkedNode, username }: Use
                 <Typography fontWeight={"500"} my="16px">
                   Proposals Overview
                 </Typography>
-                <UseInfoTrends proposalsPerDay={proposalsPerDay} theme={theme.toLowerCase() || ""} />
+                {!isRetrieving ? (
+                  <UseInfoTrends proposalsPerDay={proposalsPerDay} theme={theme.toLowerCase() || ""} />
+                ) : (
+                  <Box sx={{ display: "grid", placeItems: "center" }}>
+                    <CircularProgress />
+                  </Box>
+                )}
               </Box>
             ),
           },
@@ -389,22 +395,12 @@ const UserInfoSidebar = ({ open, onClose, theme, openLinkedNode, username }: Use
               />
             ))}
           </Tabs>
-          {/* {!isRetrieving && (
-          )} */}
         </Box>
       }
       contentSignalState={contentSignalState}
       SidebarContent={
         <Box>
-          <Box sx={{ px: "10px", paddingTop: "10px" }}>
-            {!isRetrieving ? (
-              tabsItems[value].content
-            ) : (
-              <Box sx={{ display: "grid", placeItems: "center" }}>
-                <CircularProgress />
-              </Box>
-            )}
-          </Box>
+          <Box sx={{ px: "10px", paddingTop: "10px" }}>{tabsItems[value].content}</Box>
         </Box>
       }
     />
