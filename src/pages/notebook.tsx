@@ -6006,8 +6006,8 @@ const Dashboard = ({}: DashboardProps) => {
           isPublic: notebookData.isPublic,
           users: [],
           usersInfo: {},
-          createdAt: Timestamp.fromDate(new Date()),
-          updatedAt: Timestamp.fromDate(new Date()),
+          createdAt: new Date(),
+          updatedAt: new Date(),
         };
 
         const notebooksRef = collection(db, "notebooks");
