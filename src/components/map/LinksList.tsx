@@ -7,7 +7,7 @@ import Line from "./Line/Line";
 type LinkListProps = {
   edgeIds: string[];
   edges: any;
-  selectedRelation: string | null;
+  // selectedRelation: string | null;
 };
 
 export const LinksList = ({ edgeIds, edges }: LinkListProps) => {

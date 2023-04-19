@@ -16,7 +16,7 @@ import { MemoizedFocusedTagsList } from "./FocusedTagsList";
 
 type FocusedNotebookProps = {
   db: Firestore;
-  setFocusView: (state: { selectedNode: string; isEnabled: boolean }) => void;
+  onCloseFocusMode: () => void;
   openLinkedNode: (linkedNodeID: string, typeOperation?: string) => void;
   setSelectedNode: (nodeId: string) => void;
   graph: {
@@ -24,6 +24,8 @@ type FocusedNotebookProps = {
     edges: EdgesData;
   };
   focusedNode: string;
+  navigationBlocked?: boolean;
+  onClickOnNavigationBlocked?: () => void;
 };
 
 const FocusedNotebook = ({
@@ -31,8 +33,10 @@ const FocusedNotebook = ({
   setSelectedNode,
   graph,
   focusedNode,
-  setFocusView,
+  onCloseFocusMode,
   db,
+  navigationBlocked = false,
+  onClickOnNavigationBlocked,
 }: FocusedNotebookProps) => {
   const [selectedNodeId, setSelectedNodeId] = useState("");
   const [relatedNodes, setRelatedNodes] = useState<INodeLink[]>([]);
@@ -89,6 +93,7 @@ const FocusedNotebook = ({
 
   const navigateToNode = useCallback(
     (nodeId: string) => {
+      if (navigationBlocked) return onClickOnNavigationBlocked && onClickOnNavigationBlocked();
       if (!graph.nodes[nodeId]) {
         openLinkedNode(nodeId);
       } else {
@@ -96,7 +101,7 @@ const FocusedNotebook = ({
       }
       setSelectedNodeId(nodeId);
     },
-    [setSelectedNodeId, graph]
+    [navigationBlocked, onClickOnNavigationBlocked, graph.nodes, openLinkedNode, setSelectedNode]
   );
 
   const _contributors = useMemo(() => {
@@ -133,7 +138,7 @@ const FocusedNotebook = ({
           position: "absolute",
           width: "100%",
           height: "100%",
-          zIndex: 1399,
+          zIndex: 1299,
           padding: { xs: "50px 5px", sm: "50px 10px" },
           overflow: "auto",
         }}
@@ -147,7 +152,7 @@ const FocusedNotebook = ({
               zIndex: "99",
               color: theme => (theme.palette.mode === "dark" ? theme.palette.common.white : "rgba(31,31,31, 1)"),
             }}
-            onClick={() => setFocusView({ isEnabled: false, selectedNode: "" })}
+            onClick={onCloseFocusMode}
           />
         </Tooltip>
         {currentNode.title ? (

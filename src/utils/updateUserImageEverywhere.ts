@@ -9,6 +9,7 @@ import {
 } from ".";
 import { detach } from "./helpers";
 import { Timestamp } from "firebase-admin/firestore";
+import { INotebook } from "src/types/INotebook";
 
 export const updateUserImageEverywhere = async ({
   batch,
@@ -39,6 +40,41 @@ export const updateUserImageEverywhere = async ({
         imageUrl,
         chooseUname,
         fullname,
+      });
+      [batch, writeCounts] = await checkRestartBatchWriteCounts(batch, writeCounts);
+    }
+
+    await commitBatch(batch);
+  });
+
+  // update notebooks collection
+  await detach(async () => {
+    let batch = db.batch();
+    let writeCounts = 0;
+
+    const ownedNotebooks = await db.collection("notebooks").where("owner", "==", uname).get();
+    for (const ownedNotebook of ownedNotebooks.docs) {
+      const notebookRef = db.collection("notebooks").doc(ownedNotebook.id);
+      batch.update(notebookRef, {
+        ownerImgUrl: imageUrl,
+        ownerChooseUname: chooseUname,
+        ownerFullName: fullname,
+      });
+      [batch, writeCounts] = await checkRestartBatchWriteCounts(batch, writeCounts);
+    }
+
+    const allowedNotebooks = await db.collection("notebooks").where("users", "array-contains", uname).get();
+    for (const allowedNotebook of allowedNotebooks.docs) {
+      const notebookRef = db.collection("notebooks").doc(allowedNotebook.id);
+      const notebookData = allowedNotebook.data() as INotebook;
+      notebookData.usersInfo[uname] = {
+        chooseUname,
+        fullname,
+        imageUrl,
+        role: notebookData.usersInfo?.[uname]?.role || "viewer",
+      };
+      batch.update(notebookRef, {
+        usersInfo: notebookData.usersInfo,
       });
       [batch, writeCounts] = await checkRestartBatchWriteCounts(batch, writeCounts);
     }

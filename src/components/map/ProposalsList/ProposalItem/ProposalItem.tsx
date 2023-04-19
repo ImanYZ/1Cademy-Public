@@ -2,7 +2,7 @@
 import CloseIcon from "@mui/icons-material/Close";
 import DoneIcon from "@mui/icons-material/Done";
 import GradeIcon from "@mui/icons-material/Grade";
-import { Box, Button, Divider, Paper, Tooltip, Typography } from "@mui/material";
+import { Box, Divider, Paper, Tooltip, Typography } from "@mui/material";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import React, { useCallback } from "react";
@@ -22,7 +22,17 @@ const doNothing = () => {};
 
 dayjs.extend(relativeTime);
 
-const ProposalItem = (props: any) => {
+type ProposalItemProps = {
+  proposal: any;
+  shouldSelectProposal?: boolean;
+  showTitle: boolean;
+  selectProposal?: any;
+  openLinkedNode: any;
+  proposalSummaries?: any;
+  isClickable?: boolean;
+};
+
+const ProposalItem = ({ isClickable = true, ...props }: ProposalItemProps) => {
   const openLinkedNodeClick = useCallback(
     (proposal: any) => (event: any) => {
       if (props.shouldSelectProposal) {
@@ -37,6 +47,7 @@ const ProposalItem = (props: any) => {
   );
 
   let proposalSummaries;
+
   if (props.proposalSummaries) {
     proposalSummaries = props.proposalSummaries;
   } else {
@@ -48,24 +59,23 @@ const ProposalItem = (props: any) => {
       elevation={3}
       className="CollapsedProposal collection-item avatar"
       key={`Proposal${props.proposal.id}`}
-      onClick={openLinkedNodeClick(props.proposal)}
+      onClick={isClickable ? openLinkedNodeClick(props.proposal) : undefined}
       sx={{
-        ":hover": {
-          background: theme => (theme.palette.mode === "dark" ? "#2F2F2F" : "#EAECF0"),
-        },
-
         display: "flex",
         flexDirection: "column",
-        padding: {
-          xs: "5px 10px",
-          sm: "15px",
-        },
+        padding: { xs: "5px 10px", sm: "15px" },
         borderRadius: "8px",
         boxShadow: theme =>
           theme.palette.mode === "light"
             ? "0px 1px 2px rgba(0, 0, 0, 0.06), 0px 1px 3px rgba(0, 0, 0, 0.1)"
             : undefined,
         background: theme => (theme.palette.mode === "dark" ? "#242425" : "#F2F4F7"),
+        ...(isClickable && {
+          cursor: "pointer",
+          ":hover": {
+            background: theme => (theme.palette.mode === "dark" ? "#2F2F2F" : "#EAECF0"),
+          },
+        }),
       }}
     >
       {/* <h6>{props.proposal.newNodeId}</h6> */}
@@ -156,7 +166,7 @@ const ProposalItem = (props: any) => {
             }}
           >
             <Tooltip title="# of 1Cademists who have found this proposal helpful." placement="bottom-start">
-              <Button
+              <Box
                 sx={{
                   padding: "0",
                   minWidth: "0",
@@ -179,7 +189,7 @@ const ProposalItem = (props: any) => {
                     {shortenNumber(props.proposal.corrects, 2, false)}
                   </Typography>
                 </Box>
-              </Button>
+              </Box>
             </Tooltip>
             <Divider
               orientation="vertical"
@@ -188,7 +198,7 @@ const ProposalItem = (props: any) => {
               sx={{ borderColor: theme => (theme.palette.mode === "dark" ? "#D3D3D3" : "inherit") }}
             />
             <Tooltip title="# of 1Cademists who have found this proposal unhelpful." placement="bottom-start">
-              <Button
+              <Box
                 sx={{
                   padding: "0",
                   minWidth: "0",
@@ -211,7 +221,7 @@ const ProposalItem = (props: any) => {
                     {shortenNumber(props.proposal.wrongs, 2, false)}
                   </Typography>
                 </Box>
-              </Button>
+              </Box>
             </Tooltip>
 
             <Divider
@@ -222,7 +232,7 @@ const ProposalItem = (props: any) => {
             />
 
             <Tooltip title="# of 1Admins who have awarded this proposal." placement="bottom-start">
-              <Button
+              <Box
                 sx={{
                   padding: "0",
                   minWidth: "0",
@@ -245,7 +255,7 @@ const ProposalItem = (props: any) => {
                     {shortenNumber(props.proposal.awards, 2, false)}
                   </Typography>
                 </Box>
-              </Button>
+              </Box>
             </Tooltip>
           </Box>
         </Box>

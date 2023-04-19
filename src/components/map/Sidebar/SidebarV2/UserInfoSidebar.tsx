@@ -14,11 +14,11 @@ import { UserTheme } from "src/knowledgeTypes";
 import { NodeType } from "src/types";
 
 import OptimizedAvatar from "@/components/OptimizedAvatar";
-import { useNodeBook } from "@/context/NodeBookContext";
 import { getTypedCollections } from "@/lib/utils/getTypedCollections";
 import { justADate } from "@/lib/utils/justADate";
 import shortenNumber from "@/lib/utils/shortenNumber";
 
+import { SelectedUser } from "../../../../nodeBookTypes";
 import { MemoizedMetaButton } from "../../MetaButton";
 import ProposalItem from "../../ProposalsList/ProposalItem/ProposalItem";
 import RoundImage from "../../RoundImage";
@@ -30,7 +30,8 @@ type UserInfoSidebarProps = {
   onClose: () => void;
   theme: UserTheme;
   openLinkedNode: any;
-  username: string;
+  selectedUser: SelectedUser | null;
+  username?: string;
 };
 
 type UserInfoTabs = {
@@ -40,7 +41,7 @@ type UserInfoTabs = {
 
 const NODE_TYPE_ARRAY: NodeType[] = ["Concept", "Code", "Relation", "Question", "Reference", "News", "Idea"];
 const ELEMENTS_PER_PAGE = 13;
-const UserInfoSidebar = ({ open, onClose, theme, openLinkedNode, username }: UserInfoSidebarProps) => {
+const UserInfoSidebar = ({ open, onClose, theme, openLinkedNode, username, selectedUser }: UserInfoSidebarProps) => {
   const [value, setValue] = React.useState(0);
   const [proposals, setProposals] = useState<any[]>([]);
   const [proposalsPerDay, setProposalsPerDay] = useState<any[]>([]);
@@ -49,7 +50,6 @@ const UserInfoSidebar = ({ open, onClose, theme, openLinkedNode, username }: Use
   const [sUserObj, setSUserObj] = useState<any | null>(null);
 
   const db = getFirestore();
-  const { nodeBookState } = useNodeBook();
 
   useEffect(() => {
     if (!db || !sUserObj) return;
@@ -73,8 +73,8 @@ const UserInfoSidebar = ({ open, onClose, theme, openLinkedNode, username }: Use
   }, [db, sUserObj]);
 
   const fetchProposals = useCallback(async () => {
-    if (!nodeBookState.selectedUser) return;
-    if (!username) return;
+    if (!selectedUser) return;
+    // if (!username) return;
 
     setIsRetrieving(true);
     const versions: { [key: string]: any } = {};
@@ -85,7 +85,7 @@ const UserInfoSidebar = ({ open, onClose, theme, openLinkedNode, username }: Use
 
       const versionCollectionRef = query(
         versionsColl,
-        where("proposer", "==", nodeBookState.selectedUser.username),
+        where("proposer", "==", selectedUser.username),
         where("deleted", "==", false)
       );
 
@@ -105,14 +105,15 @@ const UserInfoSidebar = ({ open, onClose, theme, openLinkedNode, username }: Use
         };
         delete versions[versionDoc.id].deleted;
         delete versions[versionDoc.id].updatedAt;
-        const userVersionCollectionRef = query(
-          userVersionsColl,
-          where("version", "==", versionDoc.id),
-          where("user", "==", username)
-        );
-        userVersionsRefs.push(userVersionCollectionRef);
+        if (username) {
+          const userVersionCollectionRef = query(
+            userVersionsColl,
+            where("version", "==", versionDoc.id),
+            where("user", "==", username)
+          );
+          userVersionsRefs.push(userVersionCollectionRef);
+        }
       });
-
       if (userVersionsRefs.length > 0) {
         await Promise.all(
           userVersionsRefs.map(async userVersionsRef => {
@@ -162,17 +163,18 @@ const UserInfoSidebar = ({ open, onClose, theme, openLinkedNode, username }: Use
     setProposals(orderredProposals);
     setProposalsPerDay(proposalsPerDayList);
     setIsRetrieving(false);
-  }, [db, nodeBookState.selectedUser, username]);
+  }, [db, selectedUser, username]);
 
   useEffect(() => {
     fetchProposals();
   }, [fetchProposals]);
+
   useEffect(() => {
     const fetchUserData = async () => {
       if (!db) return;
-      if (!nodeBookState.selectedUser) return;
+      if (!selectedUser) return;
 
-      const userRef = doc(db, "users", nodeBookState.selectedUser.username);
+      const userRef = doc(db, "users", selectedUser.username);
       const userDoc = await getDoc(userRef);
 
       // const userDoc = await firebase.db.collection("users").doc(selectedUser).get();
@@ -182,7 +184,7 @@ const UserInfoSidebar = ({ open, onClose, theme, openLinkedNode, username }: Use
 
         const reputationQuery = query(
           collection(db, "reputations"),
-          where("uname", "==", nodeBookState.selectedUser.username),
+          where("uname", "==", selectedUser.username),
           where("tagId", "==", userData.tagId),
           limit(1)
         );
@@ -204,7 +206,7 @@ const UserInfoSidebar = ({ open, onClose, theme, openLinkedNode, username }: Use
       }
     };
     fetchUserData();
-  }, [db, nodeBookState.selectedUser]);
+  }, [db, selectedUser]);
 
   const loadOlderProposalsClick = useCallback(() => {
     if (lastIndex >= proposals.length) return;
@@ -221,45 +223,49 @@ const UserInfoSidebar = ({ open, onClose, theme, openLinkedNode, username }: Use
     };
   };
   const tabsItems: UserInfoTabs[] = useMemo(() => {
-    return !username
-      ? []
-      : [
-          {
-            title: "Nodes",
-            content: (
-              <>
-                <UseInfoTrends proposalsPerDay={proposalsPerDay} theme={theme || ""} />
-              </>
-            ),
-          },
-          {
-            title: "Proposals",
-            content: (
-              <Box sx={{ display: "flex", flexDirection: "column", gap: "4px" }}>
-                <div className="ChartTitle">Proposals in chronological order</div>
-                {proposals.slice(0, lastIndex).map((proposal, idx) => {
-                  return (
-                    proposal.title && (
-                      <ProposalItem key={idx} proposal={proposal} openLinkedNode={openLinkedNode} showTitle={true} />
-                    )
-                  );
-                })}
-                {proposals.length > lastIndex && (
-                  <div id="ContinueButton" style={{ padding: "10px 0px" }}>
-                    <MemoizedMetaButton onClick={loadOlderProposalsClick}>
-                      <>
-                        <ExpandMoreIcon className="material-icons grey-text" />
-                        Older Proposals
-                        <ExpandMoreIcon className="material-icons grey-text" />
-                      </>
-                    </MemoizedMetaButton>
-                  </div>
-                )}
-              </Box>
-            ),
-          },
-        ];
-  }, [lastIndex, loadOlderProposalsClick, proposals, proposalsPerDay, openLinkedNode, theme, username]);
+    return [
+      {
+        title: "Nodes",
+        content: (
+          <>
+            <UseInfoTrends proposalsPerDay={proposalsPerDay} theme={theme || ""} />
+          </>
+        ),
+      },
+      {
+        title: "Proposals",
+        content: (
+          <Box sx={{ display: "flex", flexDirection: "column", gap: "4px" }}>
+            <div className="ChartTitle">Proposals in chronological order</div>
+            {proposals.slice(0, lastIndex).map((proposal, idx) => {
+              return (
+                proposal.title && (
+                  <ProposalItem
+                    key={idx}
+                    proposal={proposal}
+                    openLinkedNode={openLinkedNode}
+                    showTitle={true}
+                    isClickable={Boolean(username)}
+                  />
+                )
+              );
+            })}
+            {proposals.length > lastIndex && (
+              <div id="ContinueButton" style={{ padding: "10px 0px" }}>
+                <MemoizedMetaButton onClick={loadOlderProposalsClick}>
+                  <>
+                    <ExpandMoreIcon className="material-icons grey-text" />
+                    Older Proposals
+                    <ExpandMoreIcon className="material-icons grey-text" />
+                  </>
+                </MemoizedMetaButton>
+              </div>
+            )}
+          </Box>
+        ),
+      },
+    ];
+  }, [proposalsPerDay, theme, proposals, lastIndex, loadOlderProposalsClick, openLinkedNode, username]);
 
   const totalPoints = useMemo(() => {
     if (!sUserObj) return 0;
@@ -275,7 +281,7 @@ const UserInfoSidebar = ({ open, onClose, theme, openLinkedNode, username }: Use
     return { updated: true };
   }, [isRetrieving, tabsItems, value]);
 
-  if (!nodeBookState.selectedUser) return null;
+  if (!selectedUser) return null;
 
   return (
     <SidebarWrapper
@@ -295,13 +301,11 @@ const UserInfoSidebar = ({ open, onClose, theme, openLinkedNode, username }: Use
           }}
         >
           <div id="MiniUserPrifileHeader" className="MiniUserProfileHeaderMobile">
-            <RoundImage imageUrl={nodeBookState.selectedUser.imageUrl} alt="1Cademist Profile Picture" />
+            <RoundImage imageUrl={selectedUser.imageUrl} alt="1Cademist Profile Picture" />
 
             <div id="MiniUserPrifileIdentityUSettingSidebar" className="MiniUserPrifileIdentityMobile">
               <div id="MiniUserPrifileName">
-                {nodeBookState.selectedUser.chooseUname
-                  ? nodeBookState.selectedUser.username
-                  : nodeBookState.selectedUser.fullName}
+                {selectedUser.chooseUname ? selectedUser.username : selectedUser.fullName}
               </div>
               {sUserObj && (
                 <Box sx={{ display: "flex", flexDirection: "column", gap: "8px" }}>
