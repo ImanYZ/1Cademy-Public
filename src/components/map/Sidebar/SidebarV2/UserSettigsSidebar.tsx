@@ -53,7 +53,6 @@ import { DispatchNodeBookActions, NodeBookState, TNodeBookState } from "src/node
 import { NodeType } from "src/types";
 
 import { IOSSwitch } from "@/components/IOSSwitcher";
-import NodeTypeIcon from "@/components/NodeTypeIcon";
 import OptimizedAvatar from "@/components/OptimizedAvatar";
 import ResetPasswordForm from "@/components/ResetPasswordForm";
 import { ChosenTag, MemoizedTagsSearcher } from "@/components/TagsSearcher";
@@ -80,6 +79,7 @@ import { MemoizedInputSave } from "../../InputSave";
 import { MemoizedMetaButton } from "../../MetaButton";
 import Modal from "../../Modal/Modal";
 import ProposalItem from "../../ProposalsList/ProposalItem/ProposalItem";
+import NodeTypeTrends from "../NodeTypeTrends";
 import ProfileAvatar from "../ProfileAvatar";
 import UseInfoTrends from "../UseInfoTrends";
 import { UserSettingsProfessionalInfo } from "../UserSettingsProfessionalInfo";
@@ -883,6 +883,7 @@ const UserSettigsSidebar = ({
 
   const nodeTypeStats = useMemo(() => {
     const stats = new Map(NODE_TYPE_OPTIONS.map(nodeType => [nodeType, "0"]));
+    if (!userReputation) return stats;
     stats.forEach((value, key) => {
       switch (key) {
         case "Concept":
@@ -907,20 +908,7 @@ const UserSettigsSidebar = ({
       console.log("map value", { value, key });
     });
     return stats;
-  }, [
-    userReputation.cdCorrects,
-    userReputation.cdWrongs,
-    userReputation.cnCorrects,
-    userReputation.cnWrongs,
-    userReputation.iCorrects,
-    userReputation.iWrongs,
-    userReputation.mCorrects,
-    userReputation.mWrongs,
-    userReputation.qCorrects,
-    userReputation.qWrongs,
-    userReputation.rfCorrects,
-    userReputation.rfWrongs,
-  ]);
+  }, [userReputation]);
 
   const setUserImage = useCallback(
     (newImage: string) => {
@@ -936,28 +924,7 @@ const UserSettigsSidebar = ({
         content: (
           <Box id="TrendsSettings" sx={{ p: "12px" }}>
             <Typography fontWeight={"500"}>Nodes Overwiew</Typography>
-            <Box
-              component={"section"}
-              sx={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "10px", mt: "16px" }}
-            >
-              {NODE_TYPE_OPTIONS.map((nodeType, idx) => (
-                <Paper
-                  key={`${nodeType}-${idx}`}
-                  sx={{
-                    p: "16px",
-                    borderRadius: "8px",
-                    backgroundColor: theme =>
-                      theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookG700 : DESIGN_SYSTEM_COLORS.gray200,
-                  }}
-                >
-                  <NodeTypeIcon nodeType={nodeType} sx={{ justifyContent: "flex-start" }} />
-                  <Typography fontSize={"16px"} fontWeight={"600"}>
-                    {nodeTypeStats.get(nodeType)}
-                  </Typography>
-                  <Typography>{`${nodeType}s`}</Typography>
-                </Paper>
-              ))}
-            </Box>
+            <NodeTypeTrends nodeTypeStats={nodeTypeStats} />
             <Typography fontWeight={"500"} my="16px">
               Proposals Overview
             </Typography>
@@ -2022,126 +1989,6 @@ const UserSettigsSidebar = ({
             )}
           </div>
         </Box>
-        {/* <div id="MiniUserPrifileHeader" className="MiniUserProfileHeaderMobile">
-          <ProfileAvatar
-            id="user-settings-picture"
-            userId={user.userId}
-            userImage={user.imageUrl}
-            setUserImage={setUserImage}
-            userFullName={`${user?.fName} ${user?.lName}`}
-          />
-
-          <div id="MiniUserPrifileIdentity" className="MiniUserPrifileIdentityMobile">
-            <Box id="MiniUserPrifileName" sx={{ borderRadius: "6px" }}>
-              {user.chooseUname ? user.uname : `${user.fName} ${user.lName}`}
-            </Box>
-            <div id="MiniUserPrifileTag">
-              <MemoizedMetaButton
-                id="user-settings-community-tag"
-                style={{ padding: "0px" }}
-                onClick={() => choosingNodeClick("Tag")}
-              >
-                <div className="AccountSettingsButton">
-                  <LocalOfferIcon
-                    sx={{ marginRight: "8px" }}
-                    id="tagChangeIcon"
-                    className="material-icons deep-orange-text"
-                  />
-                  {user.tag}
-                  {isLoading && <LinearProgress />}
-                </div>
-              </MemoizedMetaButton>
-              {shouldShowTagSearcher && (
-                <Suspense fallback={<div></div>}>
-                  <div id="tagModal">
-                    <Modal
-                      className="tagSelectorModalUserSetting"
-                      onClick={closeTagSelector}
-                      returnDown={false}
-                      noBackground={true}
-                      style={{
-                        width: "441px",
-                        height: "495px",
-                        left: window.innerWidth <= 500 ? "28px" : "420px",
-                      }}
-                      contentStyle={{
-                        height: "500px",
-                      }}
-                    >
-                      <MemoizedTagsSearcher
-                        id="user-settings-tag-searcher"
-                        setChosenTags={setChosenTags}
-                        chosenTags={chosenTags}
-                        allTags={allTags}
-                        setAllTags={setAllTags}
-                        sx={{ maxHeight: "339px", height: "339px" }}
-                      />
-                    </Modal>
-                  </div>
-                </Suspense>
-              )}
-            </div>
-            <div id="MiniUserPrifileInstitution" style={{ display: "flex", gap: "12px", borderRadius: "6px" }}>
-              <OptimizedAvatar
-                imageUrl={instlogoURL}
-                name={user.deInstit + " logo"}
-                sx={{
-                  width: "25px",
-                  height: "25px",
-                  fontSize: "16px",
-                }}
-                renderAsAvatar={false}
-              />
-              <span>{user.deInstit}</span>
-            </div>
-            <Box id="user-settings-statistics" sx={{ borderRadius: "6px" }}>
-              <DoneIcon className="material-icons DoneIcon green-text" sx={{ mr: "12px" }} />
-              <span>{shortenNumber(points.totalPoints, 2, false)}</span>
-            </Box>
-          </div>
-        </div>
-        <div
-          id="user-settings-node-types"
-          className="MiniUserPrifilePointsContainer"
-          style={{ alignItems: "center", justifyContent: "space-around" }}
-        >
-          <div className="MiniUserProfilePoints">
-            <LocalLibraryIcon className="material-icons amber-text" />
-            <span className="ToolbarValue">
-              {shortenNumber(userReputation.cnCorrects - userReputation.cnWrongs, 2, false)}
-            </span>
-          </div>
-          <div className="MiniUserProfilePoints">
-            <ShareIcon className="material-icons amber-text" />
-            <span className="ToolbarValue">
-              {shortenNumber(userReputation.mCorrects - userReputation.mWrongs, 2, false)}
-            </span>
-          </div>
-          <div className="MiniUserProfilePoints">
-            <HelpOutlineIcon className="material-icons amber-text" />
-            <span className="ToolbarValue">
-              {shortenNumber(userReputation.qCorrects - userReputation.qWrongs, 2, false)}
-            </span>
-          </div>
-          <div className="MiniUserProfilePoints">
-            <EmojiObjectsIcon className="material-icons material-icons--outlined amber-text" />
-            <span className="ToolbarValue">
-              {shortenNumber(userReputation.iCorrects - userReputation.iWrongs, 2, false)}
-            </span>
-          </div>
-          <div className="MiniUserProfilePoints">
-            <CodeIcon className="material-icons amber-text" />
-            <span className="ToolbarValue">
-              {shortenNumber(userReputation.cdCorrects - userReputation.cdWrongs, 2, false)}
-            </span>
-          </div>
-          <div className="MiniUserProfilePoints">
-            <MenuBookIcon className="material-icons amber-text" />
-            <span className="ToolbarValue">
-              {shortenNumber(userReputation.rfCorrects - userReputation.rfWrongs, 2, false)}
-            </span>
-          </div>
-        </div> */}
         <Tabs id="user-settings-personalization" value={value} onChange={handleTabChange} aria-label={"Bookmarks Tabs"}>
           {newTabsItems.map((tabItem: UserSettingsTabs, idx: number) => (
             <Tab

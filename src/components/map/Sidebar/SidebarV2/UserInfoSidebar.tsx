@@ -1,13 +1,7 @@
-import CodeIcon from "@mui/icons-material/Code";
 import DoneIcon from "@mui/icons-material/Done";
-import EmojiObjectsIcon from "@mui/icons-material/EmojiObjects";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
-import HelpOutlineIcon from "@mui/icons-material/HelpOutline";
-import LocalLibraryIcon from "@mui/icons-material/LocalLibrary";
 import LocalOfferIcon from "@mui/icons-material/LocalOffer";
-import MenuBookIcon from "@mui/icons-material/MenuBook";
-import ShareIcon from "@mui/icons-material/Share";
-import { Box, CircularProgress, Tab, Tabs } from "@mui/material";
+import { Box, CircularProgress, Tab, Tabs, Typography } from "@mui/material";
 import { collection, doc, getDoc, getDocs, getFirestore, limit, query, where } from "firebase/firestore";
 import React, { ReactNode, useCallback, useEffect, useMemo, useState } from "react";
 import { UserTheme } from "src/knowledgeTypes";
@@ -22,8 +16,10 @@ import shortenNumber from "@/lib/utils/shortenNumber";
 import { MemoizedMetaButton } from "../../MetaButton";
 import ProposalItem from "../../ProposalsList/ProposalItem/ProposalItem";
 import RoundImage from "../../RoundImage";
+import NodeTypeTrends from "../NodeTypeTrends";
 import UseInfoTrends from "../UseInfoTrends";
 import { SidebarWrapper } from "./SidebarWrapper";
+import { NODE_TYPE_OPTIONS } from "./UserSettigsSidebar";
 
 type UserInfoSidebarProps = {
   open: boolean;
@@ -206,6 +202,35 @@ const UserInfoSidebar = ({ open, onClose, theme, openLinkedNode, username }: Use
     fetchUserData();
   }, [db, nodeBookState.selectedUser]);
 
+  const nodeTypeStats = useMemo(() => {
+    const stats = new Map(NODE_TYPE_OPTIONS.map(nodeType => [nodeType, "0"]));
+    if (!sUserObj) return stats;
+    stats.forEach((value, key) => {
+      switch (key) {
+        case "Concept":
+          value = shortenNumber(sUserObj.cnCorrects - sUserObj.cnWrongs, 2, false);
+          stats.set("Concept", value);
+        case "Relation":
+          value = shortenNumber(sUserObj.mCorrects - sUserObj.mWrongs, 2, false);
+          stats.set("Relation", value);
+        case "Reference":
+          value = shortenNumber(sUserObj.rfCorrects - sUserObj.rfWrongs, 2, false);
+          stats.set("Reference", value);
+        case "Question":
+          value = shortenNumber(sUserObj.qCorrects - sUserObj.qWrongs, 2, false);
+          stats.set("Question", value);
+        case "Idea":
+          value = shortenNumber(sUserObj.iCorrects - sUserObj.iWrongs, 2, false);
+          stats.set("Idea", value);
+        case "Code":
+          value = shortenNumber(sUserObj.cdCorrects - sUserObj.cdWrongs, 2, false);
+          stats.set("Code", value);
+      }
+      console.log("map value", { value, key });
+    });
+    return stats;
+  }, [sUserObj]);
+
   const loadOlderProposalsClick = useCallback(() => {
     if (lastIndex >= proposals.length) return;
     setLastIndex(lastIndex + ELEMENTS_PER_PAGE);
@@ -225,11 +250,16 @@ const UserInfoSidebar = ({ open, onClose, theme, openLinkedNode, username }: Use
       ? []
       : [
           {
-            title: "Nodes",
+            title: "Trends",
             content: (
-              <>
+              <Box id="TrendsSettings" sx={{ p: "12px" }}>
+                <Typography fontWeight={"500"}>Nodes Overwiew</Typography>
+                <NodeTypeTrends nodeTypeStats={nodeTypeStats} />
+                <Typography fontWeight={"500"} my="16px">
+                  Proposals Overview
+                </Typography>
                 <UseInfoTrends proposalsPerDay={proposalsPerDay} theme={theme.toLowerCase() || ""} />
-              </>
+              </Box>
             ),
           },
           {
@@ -330,51 +360,6 @@ const UserInfoSidebar = ({ open, onClose, theme, openLinkedNode, username }: Use
               )}
             </div>
           </div>
-          <div
-            className="MiniUserPrifilePointsContainer"
-            style={{ alignItems: "center", justifyContent: "space-around" }}
-          >
-            {sUserObj && (
-              <>
-                <div className="MiniUserProfilePoints">
-                  <LocalLibraryIcon className="material-icons amber-text" />
-                  <span className="ToolbarValue">
-                    {shortenNumber((sUserObj.cnCorrects || 0) - (sUserObj.cnWrongs || 0), 2, false)}
-                  </span>
-                </div>
-                <div className="MiniUserProfilePoints">
-                  <ShareIcon className="material-icons amber-text" />
-                  <span className="ToolbarValue">
-                    {shortenNumber((sUserObj.mCorrects || 0) - (sUserObj.mWrongs || 0), 2, false)}
-                  </span>
-                </div>
-                <div className="MiniUserProfilePoints">
-                  <HelpOutlineIcon className="material-icons amber-text" />
-                  <span className="ToolbarValue">
-                    {shortenNumber((sUserObj.qCorrects || 0) - (sUserObj.qWrongs || 0), 2, false)}
-                  </span>
-                </div>
-                <div className="MiniUserProfilePoints">
-                  <EmojiObjectsIcon className="material-icons material-icons--outlined amber-text" />
-                  <span className="ToolbarValue">
-                    {shortenNumber(sUserObj.iCorrects || 0 - (sUserObj.iWrongs || 0), 2, false)}
-                  </span>
-                </div>
-                <div className="MiniUserProfilePoints">
-                  <CodeIcon className="material-icons amber-text" />
-                  <span className="ToolbarValue">
-                    {shortenNumber(sUserObj.cdCorrects || 0 - (sUserObj.cdWrongs || 0), 2, false)}
-                  </span>
-                </div>
-                <div className="MiniUserProfilePoints">
-                  <MenuBookIcon className="material-icons amber-text" />
-                  <span className="ToolbarValue">
-                    {shortenNumber((sUserObj.rfCorrects || 0) - (sUserObj.rfWrongs || 0), 2, false)}
-                  </span>
-                </div>
-              </>
-            )}
-          </div>
 
           <Tabs value={value} onChange={handleChange} aria-label={"Bookmarks Tabs"}>
             {tabsItems.map((tabItem: UserInfoTabs, idx: number) => (
@@ -383,7 +368,7 @@ const UserInfoSidebar = ({ open, onClose, theme, openLinkedNode, username }: Use
                 key={tabItem.title}
                 label={tabItem.title}
                 {...a11yProps(idx)}
-                sx={{ borderRadius: "6px" }}
+                sx={{ borderRadius: "6px", flex: 1 }}
               />
             ))}
           </Tabs>
