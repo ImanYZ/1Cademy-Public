@@ -784,7 +784,7 @@ MainSidebarProps) => {
                       <ListItemText primary="Copy link to page" />
                     </ListItemButton>
                   </ListItem>
-                  {editableNotebook.owner === user.uname && (
+                  {editableNotebook.owner === user.uname && notebooks.length > 1 && (
                     <ListItem disablePadding>
                       <ListItemButton onClick={onDeleteNotebook} sx={{ p: "12px 14px" }}>
                         <ListItemText primary="Delete" />
