@@ -67,7 +67,7 @@ type BasicNodeFooterProps = {
   bookmarks: any;
   // onNodeShare: (nodeId: string, platform: string) => void;
   openNodePart: any;
-  selectNode: any;
+  // selectNode: any;
   // correctNode: any;
   locked: boolean;
   disabled?: boolean;
@@ -236,39 +236,6 @@ BasicNodeFooterProps) => {
             }}
           >
             <MenuList>
-              {/* ----------------------- */}
-
-              {/* <CustomMenuItem
-                menuItemProps={{ disabled: disableFooterMenuOptions }}
-                tooltipText={!isStudied ? 'Mark this node as "studied."' : 'Mark this node as "not studied."'}
-                icon={
-                  isStudied ? (
-                    <DraftsIcon sx={{ fontSize: "16px" }} />
-                  ) : (
-                    <MailIcon sx={{ fontSize: "16px" }} />
-                  )
-                }
-                badgeContent={shortenNumber(studied, 2, false) ?? 0}
-                text="Mark as studied"
-              /> */}
-
-              {/* <CustomMenuItem
-                menuItemProps={{ disabled: disableFooterMenuOptions, onClick: bookmark }}
-                tooltipText={"Bookmark this node."}
-                icon={
-                  bookmarked ? (
-                    <BookmarkIcon color={bookmarked ? "primary" : "secondary"} sx={{ fontSize: "16px" }} />
-                  ) : (
-                    <BookmarkBorderIcon
-                      color={bookmarked ? "primary" : "secondary"}
-                      sx={{ fontSize: "16px" }}
-                    />
-                  )
-                }
-                badgeContent={shortenNumber(bookmarks, 2, false) ?? 0}
-                text="Bookmark"
-              /> */}
-
               <CustomMenuItem
                 menuItemProps={{ onClick: narrateNode }}
                 tooltipText={isSpeaking ? "Stop narration." : "Narrate the node."}

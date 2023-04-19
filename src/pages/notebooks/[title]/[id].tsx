@@ -369,76 +369,6 @@ const NodePage: NextPage<Props> = ({ notebook }) => {
     [setGraph, getColumnRows]
   );
 
-  const selectNode = useCallback((event: any, nodeId: string, chosenType: any, nodeType: any) => {
-    devLog("SELECT_NODE", {
-      // choosingNode: notebookRef.current.choosingNode,
-      nodeId,
-      chosenType,
-      nodeType,
-    });
-    // if (notebookRef.current.choosingNode) return;
-
-    // if (
-    //   notebookRef.current.selectionType === "AcceptedProposals" ||
-    //   notebookRef.current.selectionType === "Proposals"
-    // ) {
-    //   reloadPermanentGraph();
-    // }
-
-    // if (chosenType === "Proposals") {
-    //   if (openSidebar === "PROPOSALS" && nodeId === notebookRef.current.selectedNode) {
-    //     setOpenSidebar(null);
-    //   } else {
-    //     setOpenSidebar("PROPOSALS");
-    //     setSelectedNodeType(nodeType);
-    //     notebookRef.current.selectionType = chosenType;
-    //     notebookRef.current.selectedNode = nodeId;
-    //     nodeBookDispatch({ type: "setSelectionType", payload: chosenType });
-    //     nodeBookDispatch({ type: "setSelectedNode", payload: nodeId });
-    //   }
-    //   return;
-    // }
-
-    // if (chosenType === "Citations") {
-    //   if (openSidebar === "CITATIONS") {
-    //     setOpenSidebar(null);
-    //     return;
-    //   }
-    //   setOpenSidebar("CITATIONS");
-    //   setSelectedNodeType(nodeType);
-    //   notebookRef.current.selectionType = chosenType;
-    //   notebookRef.current.selectedNode = nodeId;
-    //   nodeBookDispatch({ type: "setSelectionType", payload: chosenType });
-    //   nodeBookDispatch({ type: "setSelectedNode", payload: nodeId });
-    //   return;
-    // }
-
-    // if (notebookRef.current.selectedNode === nodeId && notebookRef.current.selectionType === chosenType) {
-    //   notebookRef.current.selectionType = null;
-    //   nodeBookDispatch({ type: "setSelectionType", payload: null });
-    //   setSelectedNodeType(null);
-    //   setOpenPendingProposals(false);
-    //   setOpenChat(false);
-    //   setOpenNotifications(false);
-    //   notebookRef.current.openToolbar = false;
-    //   nodeBookDispatch({ type: "setOpenToolbar", payload: false });
-    //   setOpenSearch(false);
-    //   setOpenRecentNodes(false);
-    //   setOpenTrends(false);
-    //   setOpenMedia(false);
-    //   resetAddedRemovedParentsChildren();
-    //   setOpenSidebar(null);
-    //   event.currentTarget.blur();
-    // } else {
-    //   setOpenSidebar("PROPOSALS");
-    //   setSelectedNodeType(nodeType);
-    //   notebookRef.current.selectionType = chosenType;
-    //   notebookRef.current.selectedNode = nodeId;
-    //   nodeBookDispatch({ type: "setSelectionType", payload: chosenType });
-    //   nodeBookDispatch({ type: "setSelectedNode", payload: nodeId });
-    // }
-  }, []);
-
   const onChangeNodePart = useCallback(
     (nodeId: string, newOpenPart: OpenPart) => {
       setNodeParts(nodeId, node => {
@@ -574,7 +504,7 @@ const NodePage: NextPage<Props> = ({ notebook }) => {
             node: cur.referenceIds[idx],
             label: cur.referenceLabels[idx],
           }))}
-          selectNode={selectNode}
+          // selectNode={selectNode}
           setOpenPart={onChangeNodePart}
           tags={(cur.tags ?? []).map((c: string, idx: number) => ({
             node: cur.tagIds[idx],
@@ -592,7 +522,7 @@ const NodePage: NextPage<Props> = ({ notebook }) => {
           }}
         />
       ));
-  }, [changeNodeHight, graph.nodes, onChangeNodePart, selectNode, selectedNodeId, toggleNode]);
+  }, [changeNodeHight, graph.nodes, onChangeNodePart, selectedNodeId, toggleNode]);
 
   //   ------------------------------ useEffect
 

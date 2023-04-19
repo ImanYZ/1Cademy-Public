@@ -59,7 +59,7 @@ type BasicNodeProps = {
   // openNodePart: (event: any, id: string, partType: any, openPart: any, setOpenPart: any, tags: any) => void; //
   toggleNode: (event: any, id: string) => void;
   // onNodeShare: (nodeId: string, platform: string) => void;
-  selectNode: any;
+  // selectNode: any;
   onSelecteNode: (nodeId: string) => void;
   // proposalsNum: number;
   // studied: number;
@@ -113,7 +113,7 @@ const BasicNode = ({
   // markStudied,
   // openNodePart,
   // onNodeShare,
-  selectNode,
+  // selectNode,
   onSelecteNode: onSelectedNode,
   toggleNode,
   openUserInfoSidebar,
@@ -155,11 +155,6 @@ BasicNodeProps) => {
       toggleNode(event, identifier);
     },
     [toggleNode, identifier]
-  );
-
-  const selectNodeHandler = useCallback(
-    (event: any, chosenType: any) => selectNode(event, identifier, chosenType, nodeType),
-    [selectNode, identifier, nodeType]
   );
 
   useEffect(() => {
@@ -411,7 +406,7 @@ BasicNodeProps) => {
         // onNodeShare={onNodeShare}
         openNodePart={openNodePartHandler}
         openUserInfoSidebar={openUserInfoSidebar}
-        selectNode={selectNodeHandler}
+        // selectNode={selectNodeHandler}
         locked={locked}
         disabled={true}
         enableChildElements={[`${identifier}-button-parent-children`, `${identifier}-node-footer-tags-citations`]}

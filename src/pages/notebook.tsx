@@ -1125,7 +1125,7 @@ const Dashboard = ({}: DashboardProps) => {
       // and add snapshot with new Notebook Id
       if (selectedPreviousNotebookIdRef.current !== selectedNotebookId) {
         // if we change notebook, we need to clean graph
-        console.log("reset", { p: selectedPreviousNotebookIdRef.current, n: selectedNotebookId });
+        // console.log("reset", { p: selectedPreviousNotebookIdRef.current, n: selectedNotebookId });
         selectedPreviousNotebookIdRef.current = selectedNotebookId;
 
         g.current = createGraph();
@@ -2120,10 +2120,10 @@ const Dashboard = ({}: DashboardProps) => {
               visible?: boolean | undefined;
             }[] = [];
             thisNode.children.forEach(child => {
-              console.log({ child });
+              // console.log({ child });
               if (!document.getElementById(child.node)) childrenNotInNotebook.push(child);
             });
-            console.log({ childrenNotInNotebook });
+            // console.log({ childrenNotInNotebook });
             // for (const child of thisNode.children) {
             for (const child of childrenNotInNotebook) {
               linkedNodeId = child.node as string;
@@ -2206,6 +2206,7 @@ const Dashboard = ({}: DashboardProps) => {
             await detectElements({ ids: childrenNotInNotebook.map(c => c.node) });
             isWritingOnDBRef.current = false;
           } catch (err) {
+            isWritingOnDBRef.current = false;
             console.error(err);
           }
         })();
@@ -2327,6 +2328,7 @@ const Dashboard = ({}: DashboardProps) => {
             await detectElements({ ids: parentsNotInNotebook.map(c => c.node) });
             isWritingOnDBRef.current = false;
           } catch (err) {
+            isWritingOnDBRef.current = false;
             console.error(err);
           }
         })();
@@ -6296,6 +6298,8 @@ const Dashboard = ({}: DashboardProps) => {
               </Box>
 
               <Divider />
+              <Button onClick={() => console.log(isWritingOnDBRef.current)}>isWritingOnDBRef</Button>
+              <Divider />
 
               <Typography>Tutorial:</Typography>
               <Box>
@@ -6315,7 +6319,7 @@ const Dashboard = ({}: DashboardProps) => {
                 <Button onClick={() => nodeBookDispatch({ type: "setSelectionType", payload: "Proposals" })}>
                   Open Proposal
                 </Button>
-                <Button onClick={() => openNodeHandler("r98BjyFDCe4YyLA3U8ZE")}>Open Node Handler</Button>
+                <Button onClick={() => openNodeHandler("0JI7dmq1qFF18j4ZbKMw")}>Open Node Handler</Button>
                 <Button onClick={() => setShowRegion(prev => !prev)}>Show Region</Button>
                 <Button onClick={() => console.log({ openSidebar })}>Open Sidebar</Button>
               </Box>
@@ -6362,6 +6366,7 @@ const Dashboard = ({}: DashboardProps) => {
                 onChangeNotebook={onChangeNotebook}
                 selectedNotebook={selectedNotebookId}
                 openNodesOnNotebook={openNodesOnNotebook}
+                setNotebooks={setNotebooks}
               />
 
               <MemoizedBookmarksSidebar
