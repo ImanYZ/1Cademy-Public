@@ -1,10 +1,13 @@
 import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
 import DoneRoundedIcon from "@mui/icons-material/DoneRounded";
+import StarRoundedIcon from "@mui/icons-material/StarRounded";
 import { Avatar, Box, Stack, Typography } from "@mui/material";
 import Image from "next/image";
 import React, { ReactNode } from "react";
 
 import { DESIGN_SYSTEM_COLORS } from "@/lib/theme/colors";
+
+import { UserPoints } from "./SidebarV2/UserSettigsSidebar";
 
 type UserDetailsProps = {
   id?: string;
@@ -12,12 +15,7 @@ type UserDetailsProps = {
   fName: string;
   lName: string;
   uname: string;
-
-  points: {
-    positives: number;
-    negatives: number;
-    totalPoints: number;
-  };
+  points: UserPoints;
   chooseUname?: boolean;
 };
 const DEFAULT_PROFILE_URL = "https://storage.googleapis.com/onecademy-1.appspot.com/ProfilePictures/no-img.png";
@@ -70,6 +68,9 @@ const UserDetails = ({ id, imageUrl, fName, lName, uname, chooseUname, points }:
           </PointsType>
           <PointsType points={points.negatives}>
             <CloseRoundedIcon sx={{ color: DESIGN_SYSTEM_COLORS.orange600, fontSize: "16px" }} />
+          </PointsType>
+          <PointsType points={points.stars}>
+            <StarRoundedIcon sx={{ color: DESIGN_SYSTEM_COLORS.yellow400, fontSize: "16px" }} />
           </PointsType>
         </Stack>
       </Box>

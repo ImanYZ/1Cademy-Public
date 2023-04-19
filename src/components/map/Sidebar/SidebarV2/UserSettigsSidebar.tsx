@@ -116,6 +116,9 @@ type AccountOptions = {
   icon: any;
   options?: AccountOptions[];
 };
+
+export type UserPoints = { positives: number; negatives: number; totalPoints: number; stars: number };
+
 export const NODE_TYPE_OPTIONS: NodeType[] = ["Code", "Concept", "Idea", "Question", "Reference", "Relation"];
 
 const ACCOUNT_OPTIONS: AccountOptions[] = [
@@ -172,7 +175,7 @@ const UserSettigsSidebar = ({
 
   const [lastIndex, setLastIndex] = useState(ELEMENTS_PER_PAGE);
   const [value, setValue] = React.useState(0);
-  const [points, setPoints] = useState({ positives: 0, negatives: 0, totalPoints: 0 });
+
   const [type, setType] = useState<string>("all");
 
   const [settingsValue, setSettingsValue] = React.useState(-1);
@@ -308,97 +311,41 @@ const UserSettigsSidebar = ({
     getCSCByGeolocation();
   }, [countries, db, dispatch, user]);
 
-  useEffect(() => {
-    const totalPoints =
-      userReputation.cnCorrects -
-      userReputation.cnWrongs +
-      userReputation.cnInst +
-      userReputation.cdCorrects -
-      userReputation.cdWrongs +
-      userReputation.cdInst +
-      userReputation.qCorrects -
-      userReputation.qWrongs +
-      userReputation.qInst +
-      userReputation.pCorrects -
-      userReputation.pWrongs +
-      userReputation.pInst +
-      userReputation.sCorrects -
-      userReputation.sWrongs +
-      userReputation.sInst +
-      userReputation.aCorrects -
-      userReputation.aWrongs +
-      userReputation.aInst +
-      userReputation.rfCorrects -
-      userReputation.rfWrongs +
-      userReputation.rfInst +
-      userReputation.nCorrects -
-      userReputation.nWrongs +
-      userReputation.nInst +
-      userReputation.mCorrects -
-      userReputation.mWrongs +
-      userReputation.mInst +
-      userReputation.iCorrects -
-      userReputation.iWrongs +
-      userReputation.iInst;
-    const positives =
-      ("positives" in userReputation && userReputation.positives) ||
-      userReputation.cnCorrects +
-        userReputation.cdCorrects +
-        userReputation.qCorrects +
-        userReputation.pCorrects +
-        userReputation.sCorrects +
-        userReputation.aCorrects +
-        userReputation.rfCorrects +
-        userReputation.nCorrects +
-        userReputation.mCorrects +
-        userReputation.iCorrects +
-        userReputation.lterm;
-    const negatives =
-      ("negatives" in userReputation && userReputation.negatives) ||
-      userReputation.cnWrongs +
-        userReputation.cdWrongs +
-        userReputation.qWrongs +
-        userReputation.pWrongs +
-        userReputation.sWrongs +
-        userReputation.aWrongs +
-        userReputation.rfWrongs +
-        userReputation.nWrongs +
-        userReputation.mWrongs +
-        userReputation.iWrongs;
-    setPoints({ positives, negatives, totalPoints });
-  }, [
-    userReputation,
-    userReputation.aCorrects,
-    userReputation.aInst,
-    userReputation.aWrongs,
-    userReputation.cdCorrects,
-    userReputation.cdInst,
-    userReputation.cdWrongs,
-    userReputation.cnCorrects,
-    userReputation.cnInst,
-    userReputation.cnWrongs,
-    userReputation.iCorrects,
-    userReputation.iInst,
-    userReputation.iWrongs,
-    userReputation.mCorrects,
-    userReputation.mInst,
-    userReputation.mWrongs,
-    userReputation.nCorrects,
-    userReputation.nInst,
-    userReputation.nWrongs,
-    userReputation.pCorrects,
-    userReputation.pInst,
-    userReputation.pWrongs,
-    userReputation.qCorrects,
-    userReputation.qInst,
-    userReputation.qWrongs,
-    userReputation.rfCorrects,
-    userReputation.rfInst,
-    userReputation.rfWrongs,
-    userReputation.sCorrects,
-    userReputation.sInst,
-    userReputation.sWrongs,
-  ]);
+  const totalPoints = useMemo<UserPoints>(() => {
+    if (!userReputation) return { positives: 0, negatives: 0, totalPoints: 0, stars: 0 };
+
+    const positiveKeys: (keyof Reputation)[] = [
+      "cnCorrects",
+      "mCorrects",
+      "qCorrects",
+      "iCorrects",
+      "cdCorrects",
+      "rfCorrects",
+    ];
+    const negativeKeys: (keyof Reputation)[] = ["cnWrongs", "mWrongs", "qWrongs", "iWrongs", "cdWrongs", "rfWrongs"];
+    const starKeys: (keyof Reputation)[] = ["cnInst", "mInst", "qInst", "iInst", "cdInst", "rfInst"];
+
+    const positives = positiveKeys.reduce(
+      (carry, el) => carry + ((typeof userReputation[el] === "number" && (userReputation[el] as number)) || 0),
+      0
+    );
+    const negatives = negativeKeys.reduce(
+      (carry, el) => carry + ((typeof userReputation[el] === "number" && (userReputation[el] as number)) || 0),
+      0
+    );
+    const stars = starKeys.reduce(
+      (carry, el) => carry + ((typeof userReputation[el] === "number" && (userReputation[el] as number)) || 0),
+      0
+    );
+    const totalPoints = positives + stars - negatives;
+
+    return {
+      positives,
+      negatives,
+      stars,
+      totalPoints,
+    };
+  }, [userReputation]);
 
   const fetchProposals = useCallback(async () => {
     const versions: { [key: string]: any } = {};
@@ -1848,7 +1795,7 @@ const UserSettigsSidebar = ({
             fName={user.fName ?? ""}
             lName={user.lName ?? ""}
             chooseUname={user.chooseUname}
-            points={points}
+            points={totalPoints}
           />
 
           <div id="MiniUserPrifileInstitution" style={{ display: "flex", gap: "12px", borderRadius: "6px" }}>
@@ -1932,9 +1879,9 @@ const UserSettigsSidebar = ({
     instlogoURL,
     isLoading,
     newTabsItems,
-    points,
     setAllTags,
     shouldShowTagSearcher,
+    totalPoints,
     user.chooseUname,
     user.deInstit,
     user.fName,

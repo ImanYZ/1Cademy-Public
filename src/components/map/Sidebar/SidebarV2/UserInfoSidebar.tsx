@@ -4,7 +4,7 @@ import SendRoundedIcon from "@mui/icons-material/SendRounded";
 import { Box, Button, CircularProgress, MenuItem, Select, Stack, Tab, Tabs, Typography } from "@mui/material";
 import { collection, doc, getDoc, getDocs, getFirestore, limit, query, where } from "firebase/firestore";
 import React, { ReactNode, useCallback, useEffect, useMemo, useState } from "react";
-import { UserTheme } from "src/knowledgeTypes";
+import { Reputation, UserTheme } from "src/knowledgeTypes";
 import { NodeType } from "src/types";
 
 import OptimizedAvatar from "@/components/OptimizedAvatar";
@@ -20,7 +20,7 @@ import NodeTypeTrends from "../NodeTypeTrends";
 import UseInfoTrends from "../UseInfoTrends";
 import UserDetails from "../UserDetails";
 import { SidebarWrapper } from "./SidebarWrapper";
-import { NODE_TYPE_OPTIONS } from "./UserSettigsSidebar";
+import { NODE_TYPE_OPTIONS, UserPoints } from "./UserSettigsSidebar";
 
 type UserInfoSidebarProps = {
   open: boolean;
@@ -34,8 +34,6 @@ type UserInfoTabs = {
   title: string;
   content: ReactNode;
 };
-
-type UserPoints = { positives: number; negatives: number; totalPoints: number };
 
 const NODE_TYPE_ARRAY: NodeType[] = ["Concept", "Code", "Relation", "Question", "Reference", "News", "Idea"];
 const ELEMENTS_PER_PAGE = 13;
@@ -361,18 +359,38 @@ const UserInfoSidebar = ({ open, onClose, theme, openLinkedNode, username }: Use
   ]);
 
   const totalPoints = useMemo<UserPoints>(() => {
-    if (!sUserObj) return { positives: 0, negatives: 0, totalPoints: 0 };
+    if (!sUserObj) return { positives: 0, negatives: 0, totalPoints: 0, stars: 0 };
 
-    const positiveKeys = ["cnCorrects", "mCorrects", "qCorrects", "iCorrects", "cdCorrects", "rfCorrects"];
-    const negativeKeys = ["cnWrongs", "mWrongs", "qWrongs", "iWrongs", "cdWrongs", "rfWrongs"];
+    const positiveKeys: (keyof Reputation)[] = [
+      "cnCorrects",
+      "mCorrects",
+      "qCorrects",
+      "iCorrects",
+      "cdCorrects",
+      "rfCorrects",
+    ];
+    const negativeKeys: (keyof Reputation)[] = ["cnWrongs", "mWrongs", "qWrongs", "iWrongs", "cdWrongs", "rfWrongs"];
+    const starKeys: (keyof Reputation)[] = ["cnInst", "mInst", "qInst", "iInst", "cdInst", "rfInst"];
 
-    const positives = positiveKeys.reduce((carry, pve) => carry + (sUserObj[pve] || 0), 0);
-    const negatives = negativeKeys.reduce((carry, nve) => carry + (sUserObj[nve] || 0), 0);
-    const totalPoints = positives - negatives;
+    const positives = positiveKeys.reduce(
+      (carry, el) => carry + ((typeof sUserObj[el] === "number" && (sUserObj[el] as number)) || 0),
+      0
+    );
+    const negatives = negativeKeys.reduce(
+      (carry, el) => carry + ((typeof sUserObj[el] === "number" && (sUserObj[el] as number)) || 0),
+      0
+    );
+    const stars = starKeys.reduce(
+      (carry, el) => carry + ((typeof sUserObj[el] === "number" && (sUserObj[el] as number)) || 0),
+      0
+    );
+
+    const totalPoints = positives + stars - negatives;
 
     return {
       positives,
       negatives,
+      stars,
       totalPoints,
     };
   }, [sUserObj]);
