@@ -388,10 +388,10 @@ const UserInfoSidebar = ({ open, onClose, theme, openLinkedNode, username }: Use
     const totalPoints = positives + stars - negatives;
 
     return {
-      positives,
-      negatives,
-      stars,
-      totalPoints,
+      positives: parseFloat(shortenNumber(positives, 2, false)),
+      negatives: parseFloat(shortenNumber(negatives, 2, false)),
+      stars: parseFloat(shortenNumber(stars, 2, false)),
+      totalPoints: parseFloat(shortenNumber(totalPoints, 2, false)),
     };
   }, [sUserObj]);
 
