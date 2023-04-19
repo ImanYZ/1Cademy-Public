@@ -6005,7 +6005,9 @@ const Dashboard = ({}: DashboardProps) => {
           duplicatedFrom: notebookData.id,
           isPublic: notebookData.isPublic,
           users: [],
-          roles: {},
+          usersInfo: {},
+          createdAt: Timestamp.fromDate(new Date()),
+          updatedAt: Timestamp.fromDate(new Date()),
         };
 
         const notebooksRef = collection(db, "notebooks");
