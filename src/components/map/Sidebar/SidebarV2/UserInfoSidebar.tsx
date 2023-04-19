@@ -248,6 +248,7 @@ const UserInfoSidebar = ({ open, onClose, theme, openLinkedNode, username }: Use
     };
   };
   const proposalsFiltered = useMemo(() => {
+    console.log({ proposalssss: proposals });
     if (type === "all") return proposals;
 
     return proposals.filter(proposal => proposal.nodeType === type);
@@ -452,10 +453,17 @@ const UserInfoSidebar = ({ open, onClose, theme, openLinkedNode, username }: Use
                 </div>
               </>
             )}
+
+            {/* this Button has no functionality yet once it has remove the display none */}
             <Button
               variant="contained"
               endIcon={<SendRoundedIcon sx={{ transform: "rotate(-45deg)" }} />}
-              sx={{ backgroundColor: DESIGN_SYSTEM_COLORS.primary800, borderRadius: "24px", mt: "16px" }}
+              sx={{
+                display: "none",
+                backgroundColor: DESIGN_SYSTEM_COLORS.primary800,
+                borderRadius: "24px",
+                mt: "16px",
+              }}
               fullWidth
             >
               Message
