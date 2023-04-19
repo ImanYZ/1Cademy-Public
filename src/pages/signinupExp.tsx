@@ -31,7 +31,7 @@ const isEmail = (email: string): boolean => {
   if (email.match(regEx)) return true;
   else return false;
 };
-const DEFAULT_PROJECT = "H2K2";
+const DEFAULT_PROJECT = "H1L2";
 
 const SignUpExpPage = () => {
   const [email, setEmail] = useState("");
@@ -211,9 +211,9 @@ const SignUpExpPage = () => {
     event.preventDefault();
     setIsSubmitting(false);
     if (isSignUp === 1) {
-      auth.delete();
+      auth.currentUser.delete();
     }
-    auth.logout();
+    auth.signOut();
   };
 
   const resendVerificationEmail = () => {

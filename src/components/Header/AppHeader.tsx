@@ -17,6 +17,7 @@ import MenuItem from "@mui/material/MenuItem";
 import Tooltip from "@mui/material/Tooltip";
 import { Stack } from "@mui/system";
 import { getAuth } from "firebase/auth";
+import { collection, getDocs, query, where } from "firebase/firestore";
 import Image from "next/image";
 import { useRouter } from "next/router";
 import React, { forwardRef, useEffect, useState } from "react";
@@ -27,7 +28,7 @@ import { orange900, orangeDark } from "@/pages/home";
 import oneCademyLogo from "../../../public/DarkmodeLogo.png";
 import oneCademyLogoExtended from "../../../public/logo-extended.png";
 import { useAuth } from "../../context/AuthContext";
-import { auth } from "../../lib/firestoreClient/firestoreClient.config";
+import { auth, dbExp } from "../../lib/firestoreClient/firestoreClient.config";
 import { postWithToken } from "../../lib/mapApi";
 import ROUTES from "../../lib/utils/routes";
 import { capitalizeString } from "../../lib/utils/string.utils";
@@ -99,7 +100,18 @@ const AppHeader = forwardRef(({ page, sections, selectedSectionId, onSwitchSecti
 
   useEffect(() => {
     return auth.onAuthStateChanged(async (user: any) => {
-      if (user) {
+      const uEmail = user?.email?.toLowerCase();
+      console.log(user);
+      if (!uEmail || !user.emailVerified) {
+        setEmailExp("");
+        setNameExp("");
+        return;
+      }
+      const users = await getDocs(query(collection(dbExp, "users"), where("email", "==", uEmail)));
+      const usersStudentSurvey = await getDocs(
+        query(collection(dbExp, "usersStudentCoNoteSurvey"), where("email", "==", uEmail))
+      );
+      if (users.docs.length > 0 || usersStudentSurvey.docs.length > 0) {
         setEmailExp(user.email.toLowerCase());
         setNameExp(user.displayName);
       } else {
@@ -154,7 +166,6 @@ const AppHeader = forwardRef(({ page, sections, selectedSectionId, onSwitchSecti
       )}
     </Menu>
   );
-  console.log("userExp :: :: ", emailExp);
   return (
     <>
       <Box
