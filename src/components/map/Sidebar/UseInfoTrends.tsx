@@ -10,7 +10,7 @@ type UseInfoTrendsProps = {
 };
 
 const UseInfoTrends = (props: UseInfoTrendsProps) => {
-  console.log("------>> props.proposalsPerDay", props.proposalsPerDay);
+  // console.log("------>> props.proposalsPerDay", props.proposalsPerDay);
   return (
     <>
       <TrendsPlotRow

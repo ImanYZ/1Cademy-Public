@@ -340,7 +340,7 @@ label {
   color: unset !important;
 }
 
-.LightMode #tagModal #ModalBody,
+.LightMode #tagModal .ModalBody,
 .LightMode #nodeSelect .MuiInputBase-root,
 .LightMode .searchSelect,
 .LightMode #autocompleteList,
@@ -541,7 +541,7 @@ i {
   color: #ee5e00;
 }
 
-#tagModal #ModalBody {
+#tagModal .ModalBody {
   position: fixed;
   width: 364px;
   height: 370px;
@@ -553,7 +553,7 @@ i {
 }
 
 @media screen and (max-width: 800px) and (min-width: 431px) {
-  #tagModal #ModalBody {
+  #tagModal .ModalBody {
     width: 300px;
     height: 350px;
     left: 50px;
@@ -562,7 +562,7 @@ i {
 }
 
 @media screen and (max-width: 430px) and (min-width: 10px) {
-  #tagModal #ModalBody {
+  #tagModal .ModalBody {
     width: 300px;
     height: 350px;
     left: calc(50% - 150px);
@@ -582,7 +582,7 @@ i {
   }
 }
 
-.LightMode #tagModal #ModalBody {
+.LightMode #tagModal .ModalBody {
   background: #f2f4f7;
 }
 

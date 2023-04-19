@@ -29,11 +29,7 @@ import relativeTime from "dayjs/plugin/relativeTime";
 import NextImage from "next/image";
 import React, { MutableRefObject, useCallback, useEffect, useMemo, useState, useTransition } from "react";
 
-import OptimizedAvatar from "@/components/OptimizedAvatar";
-
 import FindNodeImage from "../../../../../public/find-node.svg";
-import NotebookDarkImage from "../../../../../public/notebook-dark.png";
-import NotebookLightImage from "../../../../../public/notebook-light.png";
 import { useNodeBook } from "../../../../context/NodeBookContext";
 import { useInView } from "../../../../hooks/useObserver";
 import { useTagsTreeView } from "../../../../hooks/useTagsTreeView";
@@ -99,12 +95,12 @@ const SearcherSidebar = ({
   const [chosenTags, setChosenTags] = useState<ChosenTag[]>([]);
   const [search, setSearch] = useState<string>(nodeBookState.searchQuery);
   const [value, setValue] = React.useState(0);
-  const [notebooks, setNoteBooks] = useState<any>({
-    data: [],
-    lastPageLoaded: 0,
-    totalResults: 0,
-    totalPage: 0,
-  });
+  // const [notebooks, setNoteBooks] = useState<any>({
+  //   data: [],
+  //   lastPageLoaded: 0,
+  //   totalResults: 0,
+  //   totalPage: 0,
+  // });
   const [pendingProposals, setPendingProposals] = useState<any>({
     data: [],
     lastPageLoaded: 0,
@@ -173,38 +169,38 @@ const SearcherSidebar = ({
     [selectedTags, nodesUpdatedSince, nodeBookState.searchByTitleOnly, searchResults.data]
   );
 
-  const onSearchNotebooks = useCallback(
-    async (page: number, q: string) => {
-      try {
-        setIsRetrieving(true);
-        if (page < 2) {
-          setNoteBooks({
-            data: [],
-            lastPageLoaded: 0,
-            totalPage: 0,
-            totalResults: 0,
-          });
-        }
-        const data: SearchNotebookResponse = await Post<SearchNotebookResponse>("/searchNotebooks", {
-          q,
-          page,
-          onlyTitle: nodeBookState.searchByTitleOnly,
-        });
-        const newData = page === 1 ? data.data : [...notebooks.data, ...data.data];
-        setNoteBooks({
-          data: newData,
-          lastPageLoaded: data.page,
-          totalPage: Math.ceil((data.numResults || 0) / (data.perPage || 10)),
-          totalResults: data.numResults,
-        });
-        setIsRetrieving(false);
-      } catch (err) {
-        console.error(err);
-        setIsRetrieving(false);
-      }
-    },
-    [nodeBookState.searchByTitleOnly, notebooks.data]
-  );
+  // const onSearchNotebooks = useCallback(
+  //   async (page: number, q: string) => {
+  //     try {
+  //       setIsRetrieving(true);
+  //       if (page < 2) {
+  //         setNoteBooks({
+  //           data: [],
+  //           lastPageLoaded: 0,
+  //           totalPage: 0,
+  //           totalResults: 0,
+  //         });
+  //       }
+  //       const data: SearchNotebookResponse = await Post<SearchNotebookResponse>("/searchNotebooks", {
+  //         q,
+  //         page,
+  //         onlyTitle: nodeBookState.searchByTitleOnly,
+  //       });
+  //       const newData = page === 1 ? data.data : [...notebooks.data, ...data.data];
+  //       setNoteBooks({
+  //         data: newData,
+  //         lastPageLoaded: data.page,
+  //         totalPage: Math.ceil((data.numResults || 0) / (data.perPage || 10)),
+  //         totalResults: data.numResults,
+  //       });
+  //       setIsRetrieving(false);
+  //     } catch (err) {
+  //       console.error(err);
+  //       setIsRetrieving(false);
+  //     }
+  //   },
+  //   [nodeBookState.searchByTitleOnly, notebooks.data]
+  // );
 
   const onSearchPendingProposals = useCallback(
     async (page: number, q: string) => {
@@ -245,10 +241,11 @@ const SearcherSidebar = ({
     if (value === 0) {
       onSearch(searchResults.lastPageLoaded + 1, search, sortOption, sortDirection, nodeTypes);
     } else if (value === 1) {
-      onSearchNotebooks(notebooks.lastPageLoaded + 1, search);
-    } else if (value === 2) {
       onSearchPendingProposals(pendingProposals.lastPageLoaded + 1, search);
-    }
+      // onSearchNotebooks(notebooks.lastPageLoaded + 1, search);
+    } /* else if (value === 2) {
+      onSearchPendingProposals(pendingProposals.lastPageLoaded + 1, search);
+    } */
   }, [
     inViewInfinityLoaderTrigger,
     isRetrieving,
@@ -263,15 +260,16 @@ const SearcherSidebar = ({
 
   useEffect(() => {
     if (value === 1) {
-      onSearchNotebooks(notebooks.lastPageLoaded + 1, search);
+      onSearchPendingProposals(pendingProposals.lastPageLoaded + 1, search);
+      // onSearchNotebooks(notebooks.lastPageLoaded + 1, search);
     }
   }, [onSearch]);
 
-  useEffect(() => {
-    if (value === 2) {
-      onSearchPendingProposals(pendingProposals.lastPageLoaded + 1, search);
-    }
-  }, [onSearch]);
+  // useEffect(() => {
+  //   if (value === 2) {
+  //     onSearchPendingProposals(pendingProposals.lastPageLoaded + 1, search);
+  //   }
+  // }, [onSearch]);
 
   const onFocusSearcherInput = useCallback(
     (inputTitle: HTMLElement) => {
@@ -398,10 +396,11 @@ const SearcherSidebar = ({
         if (value === 0) {
           onSearch(1, search, sortOption, sortDirection, nodeTypes);
         } else if (value === 1) {
-          onSearchNotebooks(1, search);
-        } else if (value === 2) {
+          // onSearchNotebooks(1, search);
           onSearchPendingProposals(1, search);
-        }
+        } /* else if (value === 2) {
+          onSearchPendingProposals(1, search);
+        } */
       }
     },
     [nodeTypes, onSearch, search, sortDirection, sortOption]
@@ -461,7 +460,7 @@ const SearcherSidebar = ({
     sortOption,
     timeFilter,
     value,
-    notebooks,
+    // notebooks,
   ]);
 
   const setChosenTagsCallback = useCallback(
@@ -487,11 +486,12 @@ const SearcherSidebar = ({
     if (value === 0) {
       return searchResults.totalResults;
     } else if (value === 1) {
-      return notebooks.totalResults;
-    } else {
+      // return notebooks.totalResults;
       return pendingProposals.totalResults;
-    }
-  }, [value, searchResults.data, notebooks.data, pendingProposals.data]);
+    } /* else {
+      return pendingProposals.totalResults;
+    } */
+  }, [value, searchResults.totalResults, pendingProposals.totalResults]);
 
   const searcherOptionsMemoized = useMemo(() => {
     return (
@@ -765,10 +765,11 @@ const SearcherSidebar = ({
                               if (value === 0) {
                                 onSearch(1, search, sortOption, sortDirection, nodeTypes);
                               } else if (value === 1) {
-                                onSearchNotebooks(1, search);
-                              } else if (value === 2) {
                                 onSearchPendingProposals(1, search);
-                              }
+                                // onSearchNotebooks(1, search);
+                              } /* else if (value === 2) {
+                                onSearchPendingProposals(1, search);
+                              } */
                             }}
                             sx={{
                               padding: {
@@ -842,30 +843,6 @@ const SearcherSidebar = ({
                 />
 
                 <TimeFilter timeFilter={timeFilter} setTimeFilter={onChangeTimeFilter} />
-
-                {/* <Box id="search-recently-input" sx={{ display: "flex", alignItems: "center", gap: "5px" }}>
-                Edited in past
-                <InputBase
-                  type="number"
-                  defaultValue={nodesUpdatedSince}
-                  onChange={setNodesUpdatedSinceClick}
-                  size="small"
-                  disabled={disableEditedInThePast}
-                  sx={{
-                    width: "76px",
-                    p: "0px",
-                  }}
-                  inputProps={{
-                    style: {
-                      padding: "4px 8px",
-                      border: "solid 1px rgba(88, 88, 88,.7)",
-                      borderRadius: "16px",
-                    },
-                  }}
-                />
-                days
-              </Box> */}
-
                 <div
                   style={{
                     ...(sidebarWidth < 350 && {
@@ -900,14 +877,16 @@ const SearcherSidebar = ({
           }}
         >
           <Tabs value={value} onChange={handleTabValueChange} aria-label={"Search Sidebar Tabs"} variant="fullWidth">
-            {[{ title: "Nodes" }, { title: "Notebooks" }, { title: "Proposals" }].map((tabItem: any, idx: number) => (
-              <Tab
-                key={tabItem.title}
-                id={`bookmarks-tab-${tabItem.title.toLowerCase()}`}
-                label={tabItem.title}
-                {...a11yProps(idx)}
-              />
-            ))}
+            {[{ title: "Nodes" }, /* { title: "Notebooks" }, */ { title: "Proposals" }].map(
+              (tabItem: any, idx: number) => (
+                <Tab
+                  key={tabItem.title}
+                  id={`bookmarks-tab-${tabItem.title.toLowerCase()}`}
+                  label={tabItem.title}
+                  {...a11yProps(idx)}
+                />
+              )
+            )}
           </Tabs>
         </Box>
       </>
@@ -935,7 +914,7 @@ const SearcherSidebar = ({
     innerWidth,
     theme.breakpoints.values.sm,
     searchResults,
-    notebooks,
+    // notebooks,
     pendingProposals,
     onlyTags,
     disableRecentNodeList,
@@ -1212,7 +1191,8 @@ const SearcherSidebar = ({
           )}
 
           <Box sx={{ p: "10px" }}>
-            {value === 1 && (
+            {/* INFO: I commented this while we develop the endpoints */}
+            {/* {value === 1 && (
               <Box>
                 {notebooks.data.map((notebook: any, idx: number) => (
                   <Box
@@ -1289,8 +1269,9 @@ const SearcherSidebar = ({
                   <Box id="ContinueButton" ref={refInfinityLoaderTrigger}></Box>
                 )}
               </Box>
-            )}
-            {value === 2 && (
+            )} */}
+            {/* {value === 2 && ( */}
+            {value === 1 && (
               <Box>
                 <PendingProposalList proposals={pendingProposals.data} openLinkedNode={openLinkedNode} />
                 {!isRetrieving && pendingProposals.lastPageLoaded < pendingProposals.totalPage && (

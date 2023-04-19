@@ -8,12 +8,12 @@ import { Reputation, UserTheme } from "src/knowledgeTypes";
 import { NodeType } from "src/types";
 
 import OptimizedAvatar from "@/components/OptimizedAvatar";
-import { useNodeBook } from "@/context/NodeBookContext";
 import { DESIGN_SYSTEM_COLORS } from "@/lib/theme/colors";
 import { getTypedCollections } from "@/lib/utils/getTypedCollections";
 import { justADate } from "@/lib/utils/justADate";
 import shortenNumber from "@/lib/utils/shortenNumber";
 
+import { SelectedUser } from "../../../../nodeBookTypes";
 import { MemoizedMetaButton } from "../../MetaButton";
 import ProposalItem from "../../ProposalsList/ProposalItem/ProposalItem";
 import NodeTypeTrends from "../NodeTypeTrends";
@@ -27,7 +27,8 @@ type UserInfoSidebarProps = {
   onClose: () => void;
   theme: UserTheme;
   openLinkedNode: any;
-  username: string;
+  selectedUser: SelectedUser | null;
+  username?: string;
 };
 
 type UserInfoTabs = {
@@ -37,7 +38,7 @@ type UserInfoTabs = {
 
 const NODE_TYPE_ARRAY: NodeType[] = ["Concept", "Code", "Relation", "Question", "Reference", "News", "Idea"];
 const ELEMENTS_PER_PAGE = 13;
-const UserInfoSidebar = ({ open, onClose, theme, openLinkedNode, username }: UserInfoSidebarProps) => {
+const UserInfoSidebar = ({ open, onClose, theme, openLinkedNode, username, selectedUser }: UserInfoSidebarProps) => {
   const [value, setValue] = React.useState(0);
   const [proposals, setProposals] = useState<any[]>([]);
   const [proposalsPerDay, setProposalsPerDay] = useState<any[]>([]);
@@ -47,7 +48,6 @@ const UserInfoSidebar = ({ open, onClose, theme, openLinkedNode, username }: Use
   const [type, setType] = useState<string>("all");
 
   const db = getFirestore();
-  const { nodeBookState } = useNodeBook();
 
   useEffect(() => {
     if (!db || !sUserObj) return;
@@ -71,8 +71,8 @@ const UserInfoSidebar = ({ open, onClose, theme, openLinkedNode, username }: Use
   }, [db, sUserObj]);
 
   const fetchProposals = useCallback(async () => {
-    if (!nodeBookState.selectedUser) return;
-    if (!username) return;
+    if (!selectedUser) return;
+    // if (!username) return;
 
     setIsRetrieving(true);
     const versions: { [key: string]: any } = {};
@@ -83,7 +83,7 @@ const UserInfoSidebar = ({ open, onClose, theme, openLinkedNode, username }: Use
 
       const versionCollectionRef = query(
         versionsColl,
-        where("proposer", "==", nodeBookState.selectedUser.username),
+        where("proposer", "==", selectedUser.username),
         where("deleted", "==", false)
       );
 
@@ -103,14 +103,15 @@ const UserInfoSidebar = ({ open, onClose, theme, openLinkedNode, username }: Use
         };
         delete versions[versionDoc.id].deleted;
         delete versions[versionDoc.id].updatedAt;
-        const userVersionCollectionRef = query(
-          userVersionsColl,
-          where("version", "==", versionDoc.id),
-          where("user", "==", username)
-        );
-        userVersionsRefs.push(userVersionCollectionRef);
+        if (username) {
+          const userVersionCollectionRef = query(
+            userVersionsColl,
+            where("version", "==", versionDoc.id),
+            where("user", "==", username)
+          );
+          userVersionsRefs.push(userVersionCollectionRef);
+        }
       });
-
       if (userVersionsRefs.length > 0) {
         await Promise.all(
           userVersionsRefs.map(async userVersionsRef => {
@@ -160,17 +161,18 @@ const UserInfoSidebar = ({ open, onClose, theme, openLinkedNode, username }: Use
     setProposals(orderredProposals);
     setProposalsPerDay(proposalsPerDayList);
     setIsRetrieving(false);
-  }, [db, nodeBookState.selectedUser, username]);
+  }, [db, selectedUser, username]);
 
   useEffect(() => {
     fetchProposals();
   }, [fetchProposals]);
+
   useEffect(() => {
     const fetchUserData = async () => {
       if (!db) return;
-      if (!nodeBookState.selectedUser) return;
+      if (!selectedUser) return;
 
-      const userRef = doc(db, "users", nodeBookState.selectedUser.username);
+      const userRef = doc(db, "users", selectedUser.username);
       const userDoc = await getDoc(userRef);
 
       // const userDoc = await firebase.db.collection("users").doc(selectedUser).get();
@@ -180,7 +182,7 @@ const UserInfoSidebar = ({ open, onClose, theme, openLinkedNode, username }: Use
 
         const reputationQuery = query(
           collection(db, "reputations"),
-          where("uname", "==", nodeBookState.selectedUser.username),
+          where("uname", "==", selectedUser.username),
           where("tagId", "==", userData.tagId),
           limit(1)
         );
@@ -202,7 +204,7 @@ const UserInfoSidebar = ({ open, onClose, theme, openLinkedNode, username }: Use
       }
     };
     fetchUserData();
-  }, [db, nodeBookState.selectedUser]);
+  }, [db, selectedUser]);
 
   const nodeTypeStats = useMemo(() => {
     const stats = new Map(NODE_TYPE_OPTIONS.map(nodeType => [nodeType, "0"]));
@@ -400,7 +402,7 @@ const UserInfoSidebar = ({ open, onClose, theme, openLinkedNode, username }: Use
     return { updated: true };
   }, [isRetrieving, tabsItems, value]);
 
-  if (!nodeBookState.selectedUser) return null;
+  if (!selectedUser) return null;
 
   return (
     <SidebarWrapper
@@ -421,11 +423,11 @@ const UserInfoSidebar = ({ open, onClose, theme, openLinkedNode, username }: Use
         >
           <Box p="0 32px 16px 32px">
             <UserDetails
-              imageUrl={nodeBookState.selectedUser.imageUrl}
-              fName={nodeBookState.selectedUser.fullName.split(" ")[0]}
-              lName={nodeBookState.selectedUser.fullName.split(" ")[1] ?? ""}
-              uname={nodeBookState.selectedUser.username}
-              chooseUname={Boolean(nodeBookState.selectedUser.chooseUname)}
+              imageUrl={selectedUser.imageUrl}
+              fName={selectedUser.fullName.split(" ")[0]}
+              lName={selectedUser.fullName.split(" ")[1] ?? ""}
+              uname={selectedUser.username}
+              chooseUname={Boolean(selectedUser.chooseUname)}
               points={totalPoints}
             />
             {sUserObj && (

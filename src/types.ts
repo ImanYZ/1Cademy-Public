@@ -1,3 +1,5 @@
+import { Timestamp } from "firebase/firestore";
+
 import { KnowledgeChoice } from "./knowledgeTypes";
 
 export type NodeType =
@@ -27,4 +29,29 @@ export type SimpleNode2 = {
   institutions: { name: string }[];
   versions: number;
   studied?: boolean;
+};
+
+export type NotebookDocument = {
+  owner: string;
+  ownerImgUrl: string;
+  ownerFullName: string;
+  ownerChooseUname: boolean;
+  title: string;
+  duplicatedFrom: string;
+  isPublic: "visible" | "editable" | "none";
+  users: string[];
+  usersInfo: {
+    [uname: string]: {
+      role: "viewer" | "editor";
+      imageUrl: string;
+      fullname: string;
+      chooseUname: boolean;
+    };
+  };
+  createdAt: Timestamp | Date;
+  updatedAt: Timestamp | Date;
+};
+
+export type Notebook = NotebookDocument & {
+  id: string;
 };

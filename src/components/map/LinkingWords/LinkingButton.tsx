@@ -1,6 +1,6 @@
 import { Box, Button, Tooltip } from "@mui/material";
 import NextImage from "next/image";
-import React, { useCallback } from "react";
+import React, { ReactNode, useCallback } from "react";
 
 import { Editor } from "@/components/Editor";
 
@@ -22,23 +22,14 @@ type LinkingButtonProps = {
   visible?: boolean;
   iClassName?: string;
   disabled?: boolean;
+  onClickOnDisable?: () => void;
 };
 
-const LinkingButton = ({ disabled = false, id, ...props }: LinkingButtonProps) => {
+const LinkingButton = ({ disabled = false, id, onClickOnDisable, ...props }: LinkingButtonProps) => {
   // TODO: check dependencies to remove eslint-disable-next-line
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const linkedNodeClick = useCallback(() => props.onClick(props.linkedNodeID), [props.onClick, props.linkedNodeID]);
 
-  // let iClassName = "material-icons LinkingButtonIcon ";
-  // if (props.linkedNodeType !== "children") {
-  //   if (props.visible) {
-  //     iClassName += "green-text";
-  //   } else {
-  //     iClassName += "orange-text text-lighten-2";
-  //   }
-  // } else {
-  //   iClassName += "gray-text";
-  // }
   return (
     <Tooltip
       title={`${props.visible ? "Navigate to" : "Open"} ${
@@ -53,19 +44,7 @@ const LinkingButton = ({ disabled = false, id, ...props }: LinkingButtonProps) =
       }
       disableInteractive
     >
-      <Button
-        id={id}
-        onClick={linkedNodeClick}
-        sx={{
-          justifyContent: "stretch",
-          textAlign: "inherit",
-          padding: "5px",
-          ":hover": {
-            background: theme => (theme.palette.mode === "dark" ? "#404040" : "#D0D5DD"),
-          },
-        }}
-        disabled={disabled}
-      >
+      <LinkingButtonWrapper id={id} onClick={linkedNodeClick} onClickOnDisable={onClickOnDisable} disabled={disabled}>
         <Box sx={{ display: "flex", alignItems: "center", fontSize: "16px", justifyContent: "space-between" }}>
           {props.iClassName == "local_offer" ? (
             <NextImage height={"20px"} width={"22px"} src={TagYellowIcon} alt="tag icon" />
@@ -96,25 +75,48 @@ const LinkingButton = ({ disabled = false, id, ...props }: LinkingButtonProps) =
             disabled={disabled}
             sxPreview={{ fontSize: "14px", lineHeight: "1.5", marginLeft: "8px" }}
           />
-          {/* CHECK: I commented this, please uncomment this */}
-          {/* <HyperEditor readOnly={true} onChange={doNothing} content={props.linkedNodeTitle} /> */}
-          {/* <HyperEditor
-        readOnly={true}
-        onChange={doNothing}
-        content={props.linkedNodeTitle}
-      /> */}
-          {/* {props.nodeLoading == props.nodeID + "LinkTo" + props.linkedNodeID && (
-        <div c<Editor readOnly={true} setValue={doNothing} label={""} value={props.linkedNodeTlassName="preloader-wrapper active small right">
-          <div className="spinner-layer spinner-yellow-only">
-            <div className="circle-clipper left">
-              <div className="circle"></div>
-            </div>
-          </div>
-        </div>
-      )} */}
         </Box>
-      </Button>
+      </LinkingButtonWrapper>
     </Tooltip>
+  );
+};
+
+type LinkingButtonWrapperProps = {
+  id?: string;
+  children: ReactNode;
+  onClick: () => void;
+  onClickOnDisable?: () => void;
+  disabled?: boolean;
+};
+
+const LinkingButtonWrapper = ({
+  id,
+  children,
+  disabled = false,
+  onClick,
+  onClickOnDisable,
+}: LinkingButtonWrapperProps) => {
+  if (disabled)
+    return (
+      <Box id={id} onClick={onClickOnDisable}>
+        {children}
+      </Box>
+    );
+  return (
+    <Button
+      id={id}
+      onClick={onClick}
+      sx={{
+        justifyContent: "stretch",
+        textAlign: "inherit",
+        padding: "5px",
+        ":hover": {
+          background: theme => (theme.palette.mode === "dark" ? "#404040" : "#D0D5DD"),
+        },
+      }}
+    >
+      {children}
+    </Button>
   );
 };
 
