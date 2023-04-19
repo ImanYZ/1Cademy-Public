@@ -1,7 +1,7 @@
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import LocalOfferRoundedIcon from "@mui/icons-material/LocalOfferRounded";
 import SendRoundedIcon from "@mui/icons-material/SendRounded";
-import { Box, Button, CircularProgress, Tab, Tabs, Typography } from "@mui/material";
+import { Box, Button, CircularProgress, MenuItem, Select, Stack, Tab, Tabs, Typography } from "@mui/material";
 import { collection, doc, getDoc, getDocs, getFirestore, limit, query, where } from "firebase/firestore";
 import React, { ReactNode, useCallback, useEffect, useMemo, useState } from "react";
 import { UserTheme } from "src/knowledgeTypes";
@@ -46,6 +46,7 @@ const UserInfoSidebar = ({ open, onClose, theme, openLinkedNode, username }: Use
   const [isRetrieving, setIsRetrieving] = useState(false);
   const [lastIndex, setLastIndex] = useState(ELEMENTS_PER_PAGE);
   const [sUserObj, setSUserObj] = useState<any | null>(null);
+  const [type, setType] = useState<string>("all");
 
   const db = getFirestore();
   const { nodeBookState } = useNodeBook();
@@ -261,28 +262,71 @@ const UserInfoSidebar = ({ open, onClose, theme, openLinkedNode, username }: Use
                 <Typography fontWeight={"500"} my="16px">
                   Proposals Overview
                 </Typography>
-                {!isRetrieving ? (
-                  <UseInfoTrends proposalsPerDay={proposalsPerDay} theme={theme.toLowerCase() || ""} />
-                ) : (
-                  <Box sx={{ display: "grid", placeItems: "center" }}>
-                    <CircularProgress />
-                  </Box>
-                )}
+                <UseInfoTrends proposalsPerDay={proposalsPerDay} theme={theme.toLowerCase() || ""} />
               </Box>
             ),
           },
           {
             title: "Proposals",
             content: (
-              <Box sx={{ display: "flex", flexDirection: "column", gap: "4px" }}>
-                <div className="ChartTitle">Proposals in chronological order</div>
-                {proposals.slice(0, lastIndex).map((proposal, idx) => {
-                  return (
-                    proposal.title && (
-                      <ProposalItem key={idx} proposal={proposal} openLinkedNode={openLinkedNode} showTitle={true} />
-                    )
-                  );
-                })}
+              <Box sx={{ display: "flex", flexDirection: "column", gap: "4px", px: "12px" }}>
+                <Stack direction={"row"} alignItems={"center"} justifyContent={"space-between"} py="10px">
+                  <Typography fontWeight={"500"}>Overview</Typography>
+
+                  <Box>
+                    <Typography sx={{ display: "inline-block" }}>Shows</Typography>
+                    <Select
+                      sx={{
+                        marginLeft: "10px",
+                        height: "35px",
+                        width: "120px",
+                      }}
+                      MenuProps={{
+                        sx: {
+                          "& .MuiMenu-paper": {
+                            backgroundColor: theme => (theme.palette.mode === "dark" ? "#1B1A1A" : "#F9FAFB"),
+                            color: "text.white",
+                          },
+                          "& .MuiMenuItem-root:hover": {
+                            backgroundColor: theme => (theme.palette.mode === "dark" ? "##2F2F2F" : "#EAECF0"),
+                            color: "text.white",
+                          },
+                          "& .Mui-selected": {
+                            backgroundColor: "transparent!important",
+                            color: "#FF8134",
+                          },
+                          "& .Mui-selected:hover": {
+                            backgroundColor: "transparent",
+                          },
+                        },
+                      }}
+                      labelId="demo-select-small"
+                      id="demo-select-small"
+                      value={type}
+                      onChange={e => {
+                        setType(e.target.value);
+                      }}
+                    >
+                      <MenuItem value="all">All</MenuItem>
+                      <MenuItem value="Concept">Concepts</MenuItem>
+                      <MenuItem value="Relation">Relations</MenuItem>
+                      <MenuItem value="Question">Questions</MenuItem>
+                      <MenuItem value="Idea">Ideas</MenuItem>
+                      <MenuItem value="Code">Codes</MenuItem>
+                      <MenuItem value="Reference">References</MenuItem>
+                    </Select>
+                  </Box>
+                </Stack>
+                <Stack spacing={"8px"}>
+                  {proposals.slice(0, lastIndex).map((proposal, idx) => {
+                    return (
+                      proposal.title && (
+                        <ProposalItem key={idx} proposal={proposal} openLinkedNode={openLinkedNode} showTitle={true} />
+                      )
+                    );
+                  })}
+                </Stack>
+
                 {proposals.length > lastIndex && (
                   <div id="ContinueButton" style={{ padding: "10px 0px" }}>
                     <MemoizedMetaButton onClick={loadOlderProposalsClick}>
@@ -298,7 +342,17 @@ const UserInfoSidebar = ({ open, onClose, theme, openLinkedNode, username }: Use
             ),
           },
         ];
-  }, [lastIndex, loadOlderProposalsClick, proposals, proposalsPerDay, openLinkedNode, theme, username]);
+  }, [
+    username,
+    nodeTypeStats,
+    proposalsPerDay,
+    theme,
+    type,
+    proposals,
+    lastIndex,
+    loadOlderProposalsClick,
+    openLinkedNode,
+  ]);
 
   const totalPoints = useMemo<UserPoints>(() => {
     if (!sUserObj) return { positives: 0, negatives: 0, totalPoints: 0 };
@@ -399,8 +453,16 @@ const UserInfoSidebar = ({ open, onClose, theme, openLinkedNode, username }: Use
       }
       contentSignalState={contentSignalState}
       SidebarContent={
-        <Box>
-          <Box sx={{ px: "10px", paddingTop: "10px" }}>{tabsItems[value].content}</Box>
+        <Box height={"100%"}>
+          <Box sx={{ px: "10px", paddingTop: "10px", height: "100%" }}>
+            {!isRetrieving ? (
+              tabsItems[value].content
+            ) : (
+              <Box sx={{ display: "grid", placeItems: "center", height: "100%" }}>
+                <CircularProgress />
+              </Box>
+            )}
+          </Box>
         </Box>
       }
     />
