@@ -1,7 +1,7 @@
 import ArrowDownwardIcon from "@mui/icons-material/ArrowDownward";
 import CloseIcon from "@mui/icons-material/Close";
 import WestIcon from "@mui/icons-material/West";
-import { Typography } from "@mui/material";
+import { Box, Typography } from "@mui/material";
 // import "./Modal.css";
 import React, { useCallback } from "react";
 
@@ -31,7 +31,12 @@ const Modal = ({ onClick, ...props }: ModalProps) => {
 
   const ModalBody = () => {
     return (
-      <div id="ModalBody" className={props.className} style={props.style}>
+      <Box
+        id="ModalBody"
+        className={props.className}
+        sx={{ borderRadius: "5px", padding: "19px", zIndex: 20 }}
+        style={props.style}
+      >
         <div
           id="ModalContent"
           style={props.contentStyle}
@@ -59,7 +64,7 @@ const Modal = ({ onClick, ...props }: ModalProps) => {
             </MemoizedMetaButton>
           </div>
         </div>
-      </div>
+      </Box>
     );
   };
 

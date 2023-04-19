@@ -1116,7 +1116,7 @@ const UserSettigsSidebar = ({
                 <Suspense fallback={<div></div>}>
                   <div id="tagModal">
                     <Modal
-                      className="tagSelectorModalUserSetting"
+                      className="tagSelectorModalUserSetting ModalBody"
                       onClick={closeTagSelector}
                       returnDown={false}
                       noBackground={true}

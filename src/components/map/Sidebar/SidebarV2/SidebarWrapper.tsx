@@ -13,12 +13,11 @@ type SidebarWrapperProps = {
   open: boolean;
   onClose: () => void;
   SidebarContent: ReactNode;
-  width: any;
+  width: number;
   height?: number;
   SidebarOptions?: ReactNode;
   anchor?: DrawerProps["anchor"];
   headerImage?: StaticImageData;
-  hoverWidth?: any;
   showCloseButton?: boolean;
   showScrollUpButton?: boolean;
   isMenuOpen?: boolean;
@@ -27,6 +26,7 @@ type SidebarWrapperProps = {
   innerHeight?: number;
   disabled?: boolean;
   sx?: SxProps<Theme>;
+  sxContentWrapper?: SxProps<Theme>;
 };
 /**
  * Only Sidebar content should be scrollable
@@ -44,13 +44,13 @@ export const SidebarWrapper = ({
   SidebarContent,
   showCloseButton = true,
   showScrollUpButton = true,
-  hoverWidth,
   isMenuOpen,
   contentSignalState,
   innerHeight,
   openSidebar,
   disabled,
   sx,
+  sxContentWrapper,
 }: SidebarWrapperProps) => {
   const sidebarContentRef = useRef<any>(null);
   const theme = useTheme();
@@ -76,9 +76,9 @@ export const SidebarWrapper = ({
       PaperProps={{
         id,
         sx: {
-          minWidth: { xs: "0px", sm: width },
-          width: { xs: isMenuOpen ? "100%" : "auto", sm: width },
-          maxWidth: { xs: width, sm: "80px" },
+          // minWidth: { xs: "0px", sm: width },
+          width: { xs: "100%", sm: width },
+          // maxWidth: { xs: width, sm: "80px" },
           height: height < 100 && innerHeight ? `${(height / 100) * innerHeight}px` : `${height}%`,
           borderRight: "none",
           background: theme => (theme.palette.mode === "dark" ? "#1B1A1A" : "#F9FAFB"),
@@ -103,11 +103,6 @@ export const SidebarWrapper = ({
                     ? "-1px 0px 10px 4px rgba(190, 190, 190, 1)"
                     : "-1px 0px 10px 4px #3b3b3b"
               : "",
-          // left: open ? "0" : `${-width - 20}px`,
-          ":hover": {
-            maxWidth: { xs: width, sm: "50vw" },
-            width: hoverWidth ? hoverWidth : undefined,
-          },
           transition: "0.5s cubic-bezier(0.4, 0, 0.2, 1) !important",
           ...sx,
         },
@@ -166,6 +161,7 @@ export const SidebarWrapper = ({
         ref={sidebarContentRef}
         sx={{
           height: "100%",
+          overflowX: "hidden",
           overflowY: "auto",
           scrollBehavior: "smooth",
           "::-webkit-scrollbar-thumb": {
@@ -174,6 +170,7 @@ export const SidebarWrapper = ({
           },
           "::-webkit-scrollbar ": { width: "4px", height: "4px" },
           borderRadius: "6px",
+          ...sxContentWrapper,
         }}
       >
         {sidebarContent}
@@ -183,10 +180,7 @@ export const SidebarWrapper = ({
         <Box
           sx={{
             position: "absolute",
-            top: {
-              xs: "0px",
-              sm: "10px",
-            },
+            top: { xs: "0px", sm: "10px" },
             right: "10px",
           }}
         >

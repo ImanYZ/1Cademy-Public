@@ -31,3 +31,14 @@ export const Post = async <R>(mapUrl: string, postData: any = {}): Promise<R> =>
   const response = await API.post(`/api${mapUrl}`, { ...postData }, { headers: { Authorization: `Bearer ${token}` } });
   return response.data;
 };
+
+export const Delete = async <R>(mapUrl: string, postData: any = {}): Promise<R> => {
+  const token = await getIdToken();
+  console.log("11 call delete");
+  const response = await API.delete(`/api${mapUrl}`, {
+    headers: { Authorization: `Bearer ${token}` },
+    data: { ...postData },
+  });
+  console.log("11 get answer");
+  return response.data;
+};

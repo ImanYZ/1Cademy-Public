@@ -1822,7 +1822,7 @@ type CustomMenuItemProps = {
   rightAdornment?: ReactNode;
 };
 
-const CustomMenuItem = ({
+export const CustomMenuItem = ({
   menuItemProps,
   icon,
   text,
