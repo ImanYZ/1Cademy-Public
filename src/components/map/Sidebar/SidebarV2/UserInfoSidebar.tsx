@@ -249,6 +249,12 @@ const UserInfoSidebar = ({ open, onClose, theme, openLinkedNode, username }: Use
       "aria-controls": `simple-tabpanel-${index}`,
     };
   };
+  const proposalsFiltered = useMemo(() => {
+    if (type === "all") return proposals;
+
+    return proposals.filter(proposal => proposal.nodeType === type);
+  }, [proposals, type]);
+
   const tabsItems: UserInfoTabs[] = useMemo(() => {
     return !username
       ? []
@@ -269,7 +275,7 @@ const UserInfoSidebar = ({ open, onClose, theme, openLinkedNode, username }: Use
           {
             title: "Proposals",
             content: (
-              <Box sx={{ display: "flex", flexDirection: "column", gap: "4px", px: "12px" }}>
+              <Box sx={{ display: "flex", flexDirection: "column", gap: "4px" }}>
                 <Stack direction={"row"} alignItems={"center"} justifyContent={"space-between"} py="10px">
                   <Typography fontWeight={"500"}>Overview</Typography>
 
@@ -318,7 +324,7 @@ const UserInfoSidebar = ({ open, onClose, theme, openLinkedNode, username }: Use
                   </Box>
                 </Stack>
                 <Stack spacing={"8px"}>
-                  {proposals.slice(0, lastIndex).map((proposal, idx) => {
+                  {proposalsFiltered.slice(0, lastIndex).map((proposal, idx) => {
                     return (
                       proposal.title && (
                         <ProposalItem key={idx} proposal={proposal} openLinkedNode={openLinkedNode} showTitle={true} />
@@ -327,7 +333,7 @@ const UserInfoSidebar = ({ open, onClose, theme, openLinkedNode, username }: Use
                   })}
                 </Stack>
 
-                {proposals.length > lastIndex && (
+                {proposalsFiltered.length > lastIndex && (
                   <div id="ContinueButton" style={{ padding: "10px 0px" }}>
                     <MemoizedMetaButton onClick={loadOlderProposalsClick}>
                       <>
@@ -348,7 +354,7 @@ const UserInfoSidebar = ({ open, onClose, theme, openLinkedNode, username }: Use
     proposalsPerDay,
     theme,
     type,
-    proposals,
+    proposalsFiltered,
     lastIndex,
     loadOlderProposalsClick,
     openLinkedNode,

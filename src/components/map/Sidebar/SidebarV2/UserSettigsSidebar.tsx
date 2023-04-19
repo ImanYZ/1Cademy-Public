@@ -483,10 +483,10 @@ const UserSettigsSidebar = ({
         averageVotes: proposalsPerDayDict[dateValue].netVotes / proposalsPerDayDict[dateValue].num,
       });
     }
-    if (type !== "all") orderredProposals = orderredProposals.filter(proposal => proposal.nodeType === type);
+    // if (type !== "all") orderredProposals = orderredProposals.filter(proposal => proposal.nodeType === type);
     setProposals(orderredProposals); //
     setProposalsPerDay(proposalsPerDayList);
-  }, [db, type, user.uname]);
+  }, [db, user.uname]);
 
   useEffect(() => {
     fetchProposals();
@@ -888,6 +888,12 @@ const UserSettigsSidebar = ({
     [dispatch, user]
   );
 
+  const proposalsFiltered = useMemo(() => {
+    if (type === "all") return proposals;
+
+    return proposals.filter(proposal => proposal.nodeType === type);
+  }, [proposals, type]);
+
   const newTabsItems: UserSettingsTabs[] = useMemo(() => {
     return [
       {
@@ -955,7 +961,7 @@ const UserSettigsSidebar = ({
               </Box>
             </Stack>
             <Stack spacing={"8px"}>
-              {proposals.slice(0, lastIndex).map((proposal, idx) => {
+              {proposalsFiltered.slice(0, lastIndex).map((proposal, idx) => {
                 return (
                   proposal.title && (
                     <ProposalItem key={idx} proposal={proposal} openLinkedNode={openLinkedNode} showTitle={true} />
@@ -964,7 +970,7 @@ const UserSettigsSidebar = ({
               })}
             </Stack>
 
-            {proposals.length > lastIndex && (
+            {proposalsFiltered.length > lastIndex && (
               <div id="ContinueButton" style={{ padding: "10px 0px" }}>
                 <MemoizedMetaButton onClick={loadOlderProposalsClick}>
                   <>
@@ -1509,7 +1515,7 @@ const UserSettigsSidebar = ({
     logoutClick,
     nodeTypeStats,
     openLinkedNode,
-    proposals,
+    proposalsFiltered,
     proposalsPerDay,
     removeAllNodes,
     setUserImage,
