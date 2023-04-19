@@ -64,7 +64,7 @@ import { ToUpperCaseEveryWord } from "@/lib/utils/utils";
 import { gray200 } from "@/pages/home";
 
 import darkModeLibraryBackground from "../../../../../public/darkModeLibraryBackground.jpg";
-import BellIcon from "../../../../../public/icons/bell-icon.svg";
+// import BellIcon from "../../../../../public/icons/bell-icon.svg";
 import GraphIcon from "../../../../../public/icons/graph-icon.svg";
 import KeyIcon from "../../../../../public/icons/key-icon.svg";
 import LockIcon from "../../../../../public/icons/lock-icon.svg";
@@ -122,7 +122,7 @@ const ACCOUNT_OPTIONS: AccountOptions[] = [
   { type: "My details", icon: UserIcon },
   { type: "Profile", icon: ProfileIcon },
   { type: "Notebook settings", icon: GraphIcon },
-  { type: "Email notifications", icon: BellIcon },
+  // { type: "Email notifications", icon: BellIcon },
   {
     type: "Account access",
     icon: LockIcon,
@@ -484,7 +484,6 @@ const UserSettigsSidebar = ({
       });
     }
     if (type !== "all") orderredProposals = orderredProposals.filter(proposal => proposal.nodeType === type);
-    console.log({ orderredProposals, type });
     setProposals(orderredProposals); //
     setProposalsPerDay(proposalsPerDayList);
   }, [db, type, user.uname]);
@@ -498,7 +497,6 @@ const UserSettigsSidebar = ({
     if (!db || !user) return;
 
     if ("deInstit" in user && !("instLogo" in user)) {
-      // console.log("useEffect:", user);
       const fetchInstitution = async () => {
         const institutionsQuery = query(collection(db, "institutions"), where("name", "==", user.deInstit));
 
@@ -826,7 +824,6 @@ const UserSettigsSidebar = ({
   const getValidValue = (userOptions: string[], defaultValue: string, userValue?: string) => {
     if (!userValue) return null;
     userOptions.includes(userValue) ? userValue : defaultValue;
-    // console.log("RES -->", res)
     return userOptions.includes(userValue) ? userValue : defaultValue;
   };
   const getSelectedOptionsByValue = (userValues: string[], isInValues: any, defaultValue: string) => {
@@ -880,7 +877,6 @@ const UserSettigsSidebar = ({
           value = shortenNumber(userReputation.cdCorrects - userReputation.cdWrongs, 2, false);
           stats.set("Code", value);
       }
-      console.log("map value", { value, key });
     });
     return stats;
   }, [userReputation]);
@@ -1109,19 +1105,6 @@ const UserSettigsSidebar = ({
                   Professional Information
                 </Typography>
                 <UserSettingsProfessionalInfo user={user} />
-                <Button
-                  variant="contained"
-                  fullWidth
-                  sx={{
-                    m: "24px 0 32px 0",
-                    borderRadius: "24px",
-                    py: "10px",
-                    backgroundColor: DESIGN_SYSTEM_COLORS.primary800,
-                  }}
-                >
-                  {" "}
-                  Save Changes
-                </Button>
               </Box>
             </TabPanel>
             <TabPanel value={settingsValue} index={1}>
@@ -1197,19 +1180,6 @@ const UserSettigsSidebar = ({
                     label="Please specify, How did you hear about us."
                   />
                 )}
-                <Button
-                  variant="contained"
-                  fullWidth
-                  sx={{
-                    m: "24px 0 32px 0",
-                    borderRadius: "24px",
-                    py: "10px",
-                    backgroundColor: DESIGN_SYSTEM_COLORS.primary800,
-                  }}
-                >
-                  {" "}
-                  Save Changes
-                </Button>
               </Box>
             </TabPanel>
             <TabPanel value={settingsValue} index={2}>
@@ -1460,15 +1430,15 @@ const UserSettigsSidebar = ({
                 </Button>
               </Box>
             </TabPanel>
-            <TabPanel value={settingsValue} index={4}>
+            <TabPanel value={settingsValue} index={3}>
               <ArrowBackButton
-                text={ACCOUNT_OPTIONS[4].type}
+                text={ACCOUNT_OPTIONS[3].type}
                 backwardsHandler={handleSettingsValue}
                 sx={{ display: settingsSubValue !== -1 ? "none" : "block" }}
               />
               <Stack display={settingsSubValue !== -1 ? "none" : "flex"}>
-                {ACCOUNT_OPTIONS[4].options &&
-                  ACCOUNT_OPTIONS[4].options.map((option, idx) => (
+                {ACCOUNT_OPTIONS[3].options &&
+                  ACCOUNT_OPTIONS[3].options.map((option, idx) => (
                     <Stack
                       key={`${option.type}-${idx}`}
                       direction={"row"}
@@ -1504,10 +1474,10 @@ const UserSettigsSidebar = ({
                     </Stack>
                   ))}
               </Stack>
-              {ACCOUNT_OPTIONS[4].options && (
+              {ACCOUNT_OPTIONS[3].options && (
                 <TabPanel value={settingsSubValue} index={0}>
                   <ArrowBackButton
-                    text={ACCOUNT_OPTIONS[4].options[0].type}
+                    text={ACCOUNT_OPTIONS[3].options[0].type}
                     backwardsHandler={handleSettingsSubValue}
                   />
                   <Box p="24px 20px">
@@ -1556,6 +1526,8 @@ const UserSettigsSidebar = ({
     user,
   ]);
 
+  // There are some fields we may copy
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const tabsItems: UserSettingsTabs[] = useMemo(() => {
     return [
       {
@@ -1836,7 +1808,6 @@ const UserSettigsSidebar = ({
     mergeEthnicityOtherValueWithUserEthnicity,
     openLinkedNode,
   ]);
-  console.log(tabsItems);
 
   const a11yProps = (index: number) => {
     return {
