@@ -8,12 +8,17 @@ import { DESIGN_SYSTEM_COLORS } from "@/lib/theme/colors";
 import { NODE_TYPE_OPTIONS } from "./SidebarV2/UserSettigsSidebar";
 
 type NodeTypeTrendsProps = {
+  id?: string;
   nodeTypeStats: Map<NodeType, string>;
 };
 
-const NodeTypeTrends = ({ nodeTypeStats }: NodeTypeTrendsProps) => {
+const NodeTypeTrends = ({ id, nodeTypeStats }: NodeTypeTrendsProps) => {
   return (
-    <Box component={"section"} sx={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "10px", mt: "16px" }}>
+    <Box
+      id={`${id}-node-types`}
+      component={"section"}
+      sx={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "10px", mt: "16px", borderRadius: "8px" }}
+    >
       {NODE_TYPE_OPTIONS.map((nodeType, idx) => (
         <Paper
           key={`${nodeType}-${idx}`}

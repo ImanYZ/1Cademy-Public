@@ -7,6 +7,7 @@ import React, { ReactNode } from "react";
 import { DESIGN_SYSTEM_COLORS } from "@/lib/theme/colors";
 
 type UserDetailsProps = {
+  id?: string;
   imageUrl: any;
   fName: string;
   lName: string;
@@ -21,10 +22,10 @@ type UserDetailsProps = {
 };
 const DEFAULT_PROFILE_URL = "https://storage.googleapis.com/onecademy-1.appspot.com/ProfilePictures/no-img.png";
 
-const UserDetails = ({ imageUrl, fName, lName, uname, chooseUname, points }: UserDetailsProps) => {
+const UserDetails = ({ id, imageUrl, fName, lName, uname, chooseUname, points }: UserDetailsProps) => {
   return (
-    <Stack direction={"row"} alignItems={"center"} component={"section"} spacing={"20px"} mb="18px">
-      <Box sx={{ "& img": { borderRadius: "50%" } }}>
+    <Stack direction={"row"} alignItems={"center"} component={"section"} spacing={"24px"} mb="18px">
+      <Box id={`${id}-picture`} sx={{ "& img": { borderRadius: "50%" }, borderRadius: "8px" }}>
         {imageUrl && imageUrl !== "" && imageUrl !== DEFAULT_PROFILE_URL ? (
           <Image
             src={imageUrl}
@@ -50,20 +51,20 @@ const UserDetails = ({ imageUrl, fName, lName, uname, chooseUname, points }: Use
         )}
       </Box>
       <Box>
-        <Typography sx={{ fontSize: "20px", fontWeight: "700", mb: "4px" }}>
+        <Typography id={`${id}-username`} sx={{ fontSize: "20px", fontWeight: "700", borderRadius: "4px" }}>
           {chooseUname ? uname : `${fName} ${lName}`}
         </Typography>
         <Typography
           sx={{
             fontSize: "14px",
-            mb: "6px",
+            mb: "8px",
             color: theme =>
               theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.gray300 : DESIGN_SYSTEM_COLORS.gray500,
           }}
         >
           @{uname}
         </Typography>
-        <Stack direction={"row"} spacing={"12px"}>
+        <Stack id={`${id}-statistics`} direction={"row"} spacing={"12px"} borderRadius={"4px"}>
           <PointsType points={points.positives}>
             <DoneRoundedIcon sx={{ color: DESIGN_SYSTEM_COLORS.success600, fontSize: "16px" }} />
           </PointsType>

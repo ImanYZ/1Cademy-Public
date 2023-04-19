@@ -899,9 +899,9 @@ const UserSettigsSidebar = ({
       {
         title: "Trends",
         content: (
-          <Box id="TrendsSettings" sx={{ p: "12px" }}>
+          <Box sx={{ p: "12px" }}>
             <Typography fontWeight={"500"}>Nodes Overwiew</Typography>
-            <NodeTypeTrends nodeTypeStats={nodeTypeStats} />
+            <NodeTypeTrends id="user-settings" nodeTypeStats={nodeTypeStats} />
             <Typography fontWeight={"500"} my="16px">
               Proposals Overview
             </Typography>
@@ -1842,6 +1842,7 @@ const UserSettigsSidebar = ({
       >
         <Box p="0 32px 16px 32px">
           <UserDetails
+            id="user-settings"
             imageUrl={user.imageUrl}
             uname={user.uname}
             fName={user.fName ?? ""}
@@ -1849,49 +1850,7 @@ const UserSettigsSidebar = ({
             chooseUname={user.chooseUname}
             points={points}
           />
-          {/* <Stack direction={"row"} alignItems={"center"} component={"section"} spacing={"20px"} mb="18px">
-            <Box sx={{ "& img": { borderRadius: "50%" } }}>
-              {user.imageUrl && user.imageUrl !== "" && user.imageUrl !== DEFAULT_PROFILE_URL ? (
-                <Image
-                  src={user.imageUrl}
-                  alt={`${user?.fName} ${user?.lName}`}
-                  width={90}
-                  height={90}
-                  objectFit="cover"
-                  objectPosition="center center"
-                />
-              ) : (
-                <Avatar
-                  sx={{
-                    width: "90px",
-                    height: "90px",
-                    color: "white",
-                    fontSize: "24px",
-                    fontWeight: "600",
-                    background: "linear-gradient(143.7deg, #FDC830 15.15%, #F37335 83.11%);",
-                  }}
-                >
-                  {`${(user.fName ?? "").charAt(0)}${(user.lName ?? "").charAt(0)}`}
-                </Avatar>
-              )}
-            </Box>
-            <Box>
-              <Typography sx={{ fontSize: "20px", fontWeight: "700", mb: "4px" }}>
-                {user.chooseUname ? user.uname : `${user.fName} ${user.lName}`}
-              </Typography>
-              <Typography sx={{ mb: "6px", color: theme => (theme.palette.mode === "dark" ? gray300 : gray500) }}>
-                @{user.uname}
-              </Typography>
-              <Stack direction={"row"} spacing={"12px"}>
-                <PointsType points={points.positives}>
-                  <DoneRoundedIcon sx={{ color: success600, fontSize: "16px" }} />
-                </PointsType>
-                <PointsType points={points.negatives}>
-                  <CloseRoundedIcon sx={{ color: orange600, fontSize: "16px" }} />
-                </PointsType>
-              </Stack>
-            </Box>
-          </Stack> */}
+
           <div id="MiniUserPrifileInstitution" style={{ display: "flex", gap: "12px", borderRadius: "6px" }}>
             <OptimizedAvatar
               imageUrl={instlogoURL}
