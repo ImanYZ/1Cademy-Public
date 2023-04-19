@@ -1,14 +1,11 @@
 import AdapterDaysJs from "@date-io/dayjs";
 import ArrowBackIosRoundedIcon from "@mui/icons-material/ArrowBackIosRounded";
 import ArrowForwardIosRoundedIcon from "@mui/icons-material/ArrowForwardIosRounded";
-import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
-import DoneRoundedIcon from "@mui/icons-material/DoneRounded";
 import ExitToAppIcon from "@mui/icons-material/ExitToApp";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import LocalOfferRoundedIcon from "@mui/icons-material/LocalOfferRounded";
 import {
   Autocomplete,
-  Avatar,
   Button,
   Divider,
   FormControlLabel,
@@ -82,6 +79,7 @@ import ProposalItem from "../../ProposalsList/ProposalItem/ProposalItem";
 import NodeTypeTrends from "../NodeTypeTrends";
 import ProfileAvatar from "../ProfileAvatar";
 import UseInfoTrends from "../UseInfoTrends";
+import UserDetails from "../UserDetails";
 import { UserSettingsProfessionalInfo } from "../UserSettingsProfessionalInfo";
 import { SidebarWrapper } from "./SidebarWrapper";
 
@@ -119,7 +117,6 @@ type AccountOptions = {
   options?: AccountOptions[];
 };
 export const NODE_TYPE_OPTIONS: NodeType[] = ["Code", "Concept", "Idea", "Question", "Reference", "Relation"];
-const DEFAULT_PROFILE_URL = "https://storage.googleapis.com/onecademy-1.appspot.com/ProfilePictures/no-img.png";
 
 const ACCOUNT_OPTIONS: AccountOptions[] = [
   { type: "My details", icon: UserIcon },
@@ -144,27 +141,6 @@ const ACCOUNT_OPTIONS: AccountOptions[] = [
 
 const TabPanel = ({ value, index, children }: TabPanelProps) => {
   return <Box hidden={value !== index}>{value === index && children}</Box>;
-};
-
-const PointsType = ({ points, children }: { points: number; children: ReactNode }) => {
-  const { notebookG700, notebookG50 } = DESIGN_SYSTEM_COLORS;
-  return (
-    <Stack direction={"row"} alignItems={"center"} spacing={"6px"}>
-      <Typography sx={{ fontWeight: "600" }}>{points}</Typography>
-      <Box
-        sx={{
-          width: "20px",
-          height: "20px",
-          borderRadius: "50%",
-          display: "grid",
-          placeItems: "center",
-          backgroundColor: theme => (theme.palette.mode === "dark" ? notebookG700 : notebookG50),
-        }}
-      >
-        {children}
-      </Box>
-    </Stack>
-  );
 };
 
 const UserSettigsSidebar = ({
@@ -207,7 +183,6 @@ const UserSettigsSidebar = ({
   const handleSettingsSubValue = (newValue: number) => {
     setSettingsSubValue(newValue);
   };
-  const { success600, orange600, gray500, gray300 } = DESIGN_SYSTEM_COLORS;
 
   const isInEthnicityValues = (ethnicityItem: string) => ETHNICITY_VALUES.includes(ethnicityItem);
   const getOtherValue = (userValues: string[], defaultValue: string, userValue?: string) => {
@@ -1392,7 +1367,9 @@ const UserSettigsSidebar = ({
                               width: "130px",
                               height: "90px",
                               backgroundColor: theme =>
-                                theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookG600 : gray300,
+                                theme.palette.mode === "dark"
+                                  ? DESIGN_SYSTEM_COLORS.notebookG600
+                                  : DESIGN_SYSTEM_COLORS.gray300,
                               border: `${!settings.showClusters ? 1 : 0}px solid ${DESIGN_SYSTEM_COLORS.primary600}`,
                               borderRadius: "8px",
                             }}
@@ -1425,7 +1402,9 @@ const UserSettigsSidebar = ({
                               display: "grid",
                               placeItems: "center",
                               backgroundColor: theme =>
-                                theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookG600 : gray300,
+                                theme.palette.mode === "dark"
+                                  ? DESIGN_SYSTEM_COLORS.notebookG600
+                                  : DESIGN_SYSTEM_COLORS.gray300,
                               border: `${settings.showClusters ? 1 : 0}px solid ${DESIGN_SYSTEM_COLORS.primary600}`,
                               borderRadius: "8px",
                             }}
@@ -1548,7 +1527,6 @@ const UserSettigsSidebar = ({
     dispatch,
     foundFromOtherValue,
     genderOtherValue,
-    gray300,
     handleBackgroundSwitch,
     handleChange,
     handleShowClusterOptionsSwitch,
@@ -1886,7 +1864,15 @@ const UserSettigsSidebar = ({
         }}
       >
         <Box p="0 32px 16px 32px">
-          <Stack direction={"row"} alignItems={"center"} component={"section"} spacing={"20px"} mb="18px">
+          <UserDetails
+            imageUrl={user.imageUrl}
+            uname={user.uname}
+            fName={user.fName ?? ""}
+            lName={user.lName ?? ""}
+            chooseUname={user.chooseUname}
+            points={points}
+          />
+          {/* <Stack direction={"row"} alignItems={"center"} component={"section"} spacing={"20px"} mb="18px">
             <Box sx={{ "& img": { borderRadius: "50%" } }}>
               {user.imageUrl && user.imageUrl !== "" && user.imageUrl !== DEFAULT_PROFILE_URL ? (
                 <Image
@@ -1928,7 +1914,7 @@ const UserSettigsSidebar = ({
                 </PointsType>
               </Stack>
             </Box>
-          </Stack>
+          </Stack> */}
           <div id="MiniUserPrifileInstitution" style={{ display: "flex", gap: "12px", borderRadius: "6px" }}>
             <OptimizedAvatar
               imageUrl={instlogoURL}
@@ -2007,17 +1993,12 @@ const UserSettigsSidebar = ({
     choosingNodeClick,
     chosenTags,
     closeTagSelector,
-    gray300,
-    gray500,
     instlogoURL,
     isLoading,
     newTabsItems,
-    orange600,
-    points.negatives,
-    points.positives,
+    points,
     setAllTags,
     shouldShowTagSearcher,
-    success600,
     user.chooseUname,
     user.deInstit,
     user.fName,

@@ -1,7 +1,7 @@
-import DoneIcon from "@mui/icons-material/Done";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
-import LocalOfferIcon from "@mui/icons-material/LocalOffer";
-import { Box, CircularProgress, Tab, Tabs, Typography } from "@mui/material";
+import LocalOfferRoundedIcon from "@mui/icons-material/LocalOfferRounded";
+import SendRoundedIcon from "@mui/icons-material/SendRounded";
+import { Box, Button, CircularProgress, Tab, Tabs, Typography } from "@mui/material";
 import { collection, doc, getDoc, getDocs, getFirestore, limit, query, where } from "firebase/firestore";
 import React, { ReactNode, useCallback, useEffect, useMemo, useState } from "react";
 import { UserTheme } from "src/knowledgeTypes";
@@ -9,15 +9,16 @@ import { NodeType } from "src/types";
 
 import OptimizedAvatar from "@/components/OptimizedAvatar";
 import { useNodeBook } from "@/context/NodeBookContext";
+import { DESIGN_SYSTEM_COLORS } from "@/lib/theme/colors";
 import { getTypedCollections } from "@/lib/utils/getTypedCollections";
 import { justADate } from "@/lib/utils/justADate";
 import shortenNumber from "@/lib/utils/shortenNumber";
 
 import { MemoizedMetaButton } from "../../MetaButton";
 import ProposalItem from "../../ProposalsList/ProposalItem/ProposalItem";
-import RoundImage from "../../RoundImage";
 import NodeTypeTrends from "../NodeTypeTrends";
 import UseInfoTrends from "../UseInfoTrends";
+import UserDetails from "../UserDetails";
 import { SidebarWrapper } from "./SidebarWrapper";
 import { NODE_TYPE_OPTIONS } from "./UserSettigsSidebar";
 
@@ -33,6 +34,8 @@ type UserInfoTabs = {
   title: string;
   content: ReactNode;
 };
+
+type UserPoints = { positives: number; negatives: number; totalPoints: number };
 
 const NODE_TYPE_ARRAY: NodeType[] = ["Concept", "Code", "Relation", "Question", "Reference", "News", "Idea"];
 const ELEMENTS_PER_PAGE = 13;
@@ -291,14 +294,21 @@ const UserInfoSidebar = ({ open, onClose, theme, openLinkedNode, username }: Use
         ];
   }, [lastIndex, loadOlderProposalsClick, proposals, proposalsPerDay, openLinkedNode, theme, username]);
 
-  const totalPoints = useMemo(() => {
-    if (!sUserObj) return 0;
-    const positives = ["cnCorrects", "mCorrects", "qCorrects", "iCorrects", "cdCorrects", "rfCorrects"];
-    const negatives = ["cnWrongs", "mWrongs", "qWrongs", "iWrongs", "cdWrongs", "rfWrongs"];
-    const total =
-      positives.reduce((carry, pve) => carry + (sUserObj[pve] || 0), 0) -
-      negatives.reduce((carry, nve) => carry + (sUserObj[nve] || 0), 0);
-    return shortenNumber(total, 2, false);
+  const totalPoints = useMemo<UserPoints>(() => {
+    if (!sUserObj) return { positives: 0, negatives: 0, totalPoints: 0 };
+
+    const positiveKeys = ["cnCorrects", "mCorrects", "qCorrects", "iCorrects", "cdCorrects", "rfCorrects"];
+    const negativeKeys = ["cnWrongs", "mWrongs", "qWrongs", "iWrongs", "cdWrongs", "rfWrongs"];
+
+    const positives = positiveKeys.reduce((carry, pve) => carry + (sUserObj[pve] || 0), 0);
+    const negatives = negativeKeys.reduce((carry, nve) => carry + (sUserObj[nve] || 0), 0);
+    const totalPoints = positives - negatives;
+
+    return {
+      positives,
+      negatives,
+      totalPoints,
+    };
   }, [sUserObj]);
 
   const contentSignalState = useMemo(() => {
@@ -324,42 +334,49 @@ const UserInfoSidebar = ({ open, onClose, theme, openLinkedNode, username }: Use
             marginTop: "40px",
           }}
         >
-          <div id="MiniUserPrifileHeader" className="MiniUserProfileHeaderMobile">
-            <RoundImage imageUrl={nodeBookState.selectedUser.imageUrl} alt="1Cademist Profile Picture" />
-
-            <div id="MiniUserPrifileIdentityUSettingSidebar" className="MiniUserPrifileIdentityMobile">
-              <div id="MiniUserPrifileName">
-                {nodeBookState.selectedUser.chooseUname
-                  ? nodeBookState.selectedUser.username
-                  : nodeBookState.selectedUser.fullName}
-              </div>
-              {sUserObj && (
-                <Box sx={{ display: "flex", flexDirection: "column", gap: "8px" }}>
-                  <Box sx={{ display: "flex", gap: "8px" }}>
-                    <LocalOfferIcon className="material-icons grey-text" />
-                    <span>{sUserObj.tag}</span>
-                  </Box>
-                  <Box sx={{ display: "flex", gap: "8px" }}>
-                    <OptimizedAvatar
-                      imageUrl={sUserObj.instLogo}
-                      name={sUserObj.deInstit + " logo"}
-                      sx={{
-                        width: "25px",
-                        height: "25px",
-                        fontSize: "15px",
-                      }}
-                      renderAsAvatar={false}
-                    />
-                    <span>{sUserObj.deInstit}</span>
-                  </Box>
-                  <Box sx={{ display: "flex", gap: "8px" }}>
-                    <DoneIcon className="material-icons DoneIcon green-text" />
-                    <span>{totalPoints}</span>
-                  </Box>
-                </Box>
-              )}
-            </div>
-          </div>
+          <Box p="0 32px 16px 32px">
+            <UserDetails
+              imageUrl={nodeBookState.selectedUser.imageUrl}
+              fName={nodeBookState.selectedUser.fullName.split(" ")[0]}
+              lName={nodeBookState.selectedUser.fullName.split(" ")[1] ?? ""}
+              uname={nodeBookState.selectedUser.username}
+              chooseUname={Boolean(nodeBookState.selectedUser.chooseUname)}
+              points={totalPoints}
+            />
+            {sUserObj && (
+              <>
+                <div id="MiniUserPrifileInstitution" style={{ display: "flex", gap: "12px", borderRadius: "6px" }}>
+                  <OptimizedAvatar
+                    imageUrl={sUserObj.instLogo}
+                    name={sUserObj.deInstit + " logo"}
+                    sx={{
+                      width: "20px",
+                      height: "20px",
+                      fontSize: "16px",
+                    }}
+                    renderAsAvatar={false}
+                  />
+                  <span>{sUserObj.deInstit}</span>
+                </div>
+                <div id="MiniUserPrifileTag">
+                  <LocalOfferRoundedIcon
+                    sx={{ marginRight: "8px" }}
+                    id="tagChangeIcon"
+                    className="material-icons deep-orange-text"
+                  />
+                  {sUserObj.tag}
+                </div>
+              </>
+            )}
+            <Button
+              variant="contained"
+              endIcon={<SendRoundedIcon sx={{ transform: "rotate(-45deg)" }} />}
+              sx={{ backgroundColor: DESIGN_SYSTEM_COLORS.primary800, borderRadius: "24px", mt: "16px" }}
+              fullWidth
+            >
+              Message
+            </Button>
+          </Box>
 
           <Tabs value={value} onChange={handleChange} aria-label={"Bookmarks Tabs"}>
             {tabsItems.map((tabItem: UserInfoTabs, idx: number) => (
