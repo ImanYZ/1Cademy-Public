@@ -1,4 +1,5 @@
 import AutoFixHighIcon from "@mui/icons-material/AutoFixHigh";
+import CenterFocusStrongIcon from "@mui/icons-material/CenterFocusStrong";
 import CloseIcon from "@mui/icons-material/Close";
 import CodeIcon from "@mui/icons-material/Code";
 import HelpCenterIcon from "@mui/icons-material/HelpCenter";
@@ -66,8 +67,6 @@ import { useTagsTreeView } from "@/hooks/useTagsTreeView";
 import { addSuffixToUrlGMT } from "@/lib/utils/string.utils";
 
 import LoadingImg from "../../public/animated-icon-1cademy.gif";
-import focusViewLogo from "../../public/focus.svg";
-import focusViewDarkLogo from "../../public/focus-dark.svg";
 import PrevNodeIcon from "../../public/prev-node.svg";
 import PrevNodeLightIcon from "../../public/prev-node-light.svg";
 import { TooltipTutorial } from "../components/interactiveTutorial/Tutorial";
@@ -113,7 +112,6 @@ import {
   createActionTrack,
   generateReputationSignal,
   getSelectionText,
-  hideNodeAndItsLinks,
   NODE_WIDTH,
   removeDagAllEdges,
   removeDagEdge,
@@ -1848,7 +1846,7 @@ const Dashboard = ({}: DashboardProps) => {
                 createdAt: Timestamp.fromDate(new Date()),
               };
               const changeNode: any = {
-                viewers: (thisNode.viewers || 0) - 1, // CHECK I add 0
+                viewers: (thisNode.viewers || 0) - 1,
                 updatedAt: Timestamp.fromDate(new Date()),
               };
               // INFO: this was commented because is not used
@@ -1867,12 +1865,6 @@ const Dashboard = ({}: DashboardProps) => {
 
             await batch.commit();
 
-            // TODO: need to discuss about these
-            let oldNodes = { ...graph.nodes };
-            let oldEdges = { ...graph.edges };
-            for (let descendant of descendants) {
-              ({ oldNodes, oldEdges } = hideNodeAndItsLinks(g.current, descendant, oldNodes, oldEdges, updatedNodeIds));
-            }
             setNodeUpdates({
               nodeIds: updatedNodeIds,
               updatedAt: new Date(),
@@ -6504,7 +6496,14 @@ const Dashboard = ({}: DashboardProps) => {
                     padding: { xs: "2px", sm: "8px" },
                   }}
                 >
-                  <MyLocationIcon sx={{ color: theme => (theme.palette.mode === "dark" ? "#CACACA" : "#667085") }} />
+                  <MyLocationIcon
+                    sx={{
+                      color: theme =>
+                        theme.palette.mode === "dark"
+                          ? theme.palette.common.notebookG100
+                          : theme.palette.common.gray500,
+                    }}
+                  />
                 </IconButton>
               </Tooltip>
 
@@ -6514,7 +6513,7 @@ const Dashboard = ({}: DashboardProps) => {
                 sx={{
                   ":hover": {
                     background: theme.palette.mode === "dark" ? "#404040" : "#EAECF0",
-                    borderRadius: "8px",
+                    // borderRadius: "8px",
                   },
                   padding: { xs: "2px", sm: "8px" },
                 }}
@@ -6529,7 +6528,14 @@ const Dashboard = ({}: DashboardProps) => {
                     }
                   }}
                 >
-                  <AutoFixHighIcon sx={{ color: theme => (theme.palette.mode === "dark" ? "#CACACA" : "#667085") }} />
+                  <AutoFixHighIcon
+                    sx={{
+                      color: theme =>
+                        theme.palette.mode === "dark"
+                          ? theme.palette.common.notebookG100
+                          : theme.palette.common.gray500,
+                    }}
+                  />
                 </IconButton>
               </Tooltip>
 
@@ -6539,7 +6545,7 @@ const Dashboard = ({}: DashboardProps) => {
                 sx={{
                   ":hover": {
                     background: theme.palette.mode === "dark" ? "#404040" : "#EAECF0",
-                    borderRadius: "8px",
+                    // borderRadius: "8px",
                   },
                   padding: { xs: "2px", sm: "8px" },
                 }}
@@ -6554,7 +6560,14 @@ const Dashboard = ({}: DashboardProps) => {
                     }
                   }}
                 >
-                  <HelpCenterIcon sx={{ color: theme => (theme.palette.mode === "dark" ? "#CACACA" : "#667085") }} />
+                  <HelpCenterIcon
+                    sx={{
+                      color: theme =>
+                        theme.palette.mode === "dark"
+                          ? theme.palette.common.notebookG100
+                          : theme.palette.common.gray500,
+                    }}
+                  />
                 </IconButton>
               </Tooltip>
 
@@ -6584,11 +6597,13 @@ const Dashboard = ({}: DashboardProps) => {
                     opacity: !nodeBookState.selectedNode ? 0.5 : undefined,
                   }}
                 >
-                  <NextImage
-                    src={theme.palette.mode === "light" ? focusViewLogo : focusViewDarkLogo}
-                    alt="logo 1cademy"
-                    width="24px"
-                    height="24px"
+                  <CenterFocusStrongIcon
+                    sx={{
+                      color: theme =>
+                        theme.palette.mode === "dark"
+                          ? theme.palette.common.notebookG100
+                          : theme.palette.common.gray500,
+                    }}
                   />
                 </IconButton>
               </Tooltip>
@@ -6600,13 +6615,20 @@ const Dashboard = ({}: DashboardProps) => {
                   sx={{
                     ":hover": {
                       background: theme.palette.mode === "dark" ? "#404040" : "#EAECF0",
-                      borderRadius: "8px",
+                      // borderRadius: "8px",
                     },
                     padding: { xs: "2px", sm: "8px" },
                   }}
                 >
                   <IconButton onClick={() => setOpenDeveloperMenu(!openDeveloperMenu)}>
-                    <CodeIcon sx={{ color: theme => (theme.palette.mode === "dark" ? "#CACACA" : "#667085") }} />
+                    <CodeIcon
+                      sx={{
+                        color: theme =>
+                          theme.palette.mode === "dark"
+                            ? theme.palette.common.notebookG100
+                            : theme.palette.common.gray500,
+                      }}
+                    />
                   </IconButton>
                 </Tooltip>
               )}

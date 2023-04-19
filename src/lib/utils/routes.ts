@@ -1,5 +1,6 @@
 const ROUTES = {
   home: "/",
+  search: "/search",
   publicHome: "/home",
   assistant: "/assistant",
   node: "/node",

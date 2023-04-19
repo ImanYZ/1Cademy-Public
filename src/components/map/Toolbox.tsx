@@ -1,13 +1,8 @@
 import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
-import { Box, CircularProgress, Collapse, Divider, IconButton, Stack, useTheme } from "@mui/material";
+import ConstructionIcon from "@mui/icons-material/Construction";
+import { Box, CircularProgress, Collapse, Divider, IconButton, Stack } from "@mui/material";
 import { SxProps, Theme } from "@mui/material/styles";
-import NextImage from "next/image";
 import React, { ReactNode, useState } from "react";
-
-import toolBox from "../../../public/toolbox.svg";
-import toolBoxDark from "../../../public/toolbox-dark.svg";
-import toolBoxDarkOpen from "../../../public/toolbox-dark-open.svg";
-import toolBoxOpen from "../../../public/toolbox-open.svg";
 
 type ToolboxProps = {
   children: ReactNode;
@@ -16,7 +11,6 @@ type ToolboxProps = {
 };
 
 const Toolbox = ({ children, isLoading = false, sx }: ToolboxProps) => {
-  const theme = useTheme();
   const [expanded, setExpanded] = useState(false);
 
   return (
@@ -95,31 +89,21 @@ const Toolbox = ({ children, isLoading = false, sx }: ToolboxProps) => {
         <IconButton
           color="secondary"
           sx={{
+            color: theme =>
+              theme.palette.mode === "dark" ? theme.palette.common.notebookG100 : theme.palette.common.gray500,
+            ...(expanded && {
+              color: theme =>
+                theme.palette.mode === "dark" ? theme.palette.common.primary800 : theme.palette.common.primary600,
+            }),
             padding: { xs: "0px !important", sm: "8px!important" },
             width: { xs: "32px", sm: "40px" },
             height: { xs: "30px", sm: "40px" },
             ":hover": {
-              width: { xs: "32px", sm: "40px" },
-              height: { xs: "30px", sm: "40px" },
-              borderRadius: "8px",
               background: theme => (expanded ? (theme.palette.mode === "dark" ? "#55402B" : "#FDEAD7") : "inherit"),
             },
           }}
         >
-          <NextImage
-            src={
-              theme.palette.mode === "dark"
-                ? expanded
-                  ? toolBoxDarkOpen
-                  : toolBoxDark
-                : expanded
-                ? toolBoxOpen
-                : toolBox
-            }
-            alt="logo 1cademy"
-            width="24px"
-            height="24px"
-          />
+          <ConstructionIcon />
         </IconButton>
       </Box>
     </Box>

@@ -293,7 +293,9 @@ MainSidebarProps) => {
         duplicatedFrom: "",
         isPublic: "none",
         users: [],
-        roles: {},
+        usersInfo: {},
+        createdAt: Timestamp.fromDate(new Date()),
+        updatedAt: Timestamp.fromDate(new Date()),
       };
       const notebooksRef = collection(db, "notebooks");
       const docRef = await addDoc(notebooksRef, newNotebook);
@@ -331,7 +333,9 @@ MainSidebarProps) => {
         duplicatedFrom: editableNotebook.id,
         isPublic: editableNotebook.isPublic,
         users: [],
-        roles: {},
+        usersInfo: {},
+        createdAt: Timestamp.fromDate(new Date()),
+        updatedAt: Timestamp.fromDate(new Date()),
       };
       const notebooksRef = collection(db, "notebooks");
       const docRef = await addDoc(notebooksRef, copyNotebook);
@@ -635,6 +639,13 @@ MainSidebarProps) => {
               p: "11px 16px",
               width: "100%",
               height: "100%",
+              background: theme =>
+                theme.palette.mode === "dark" ? theme.palette.common.notebookG700 : theme.palette.common.gray100,
+              borderWidth: "1px",
+              borderStyle: "solid",
+              borderColor: theme =>
+                theme.palette.mode === "dark" ? theme.palette.common.notebookG800 : theme.palette.common.gray200,
+              borderRadius: "0px",
               ":hover": {
                 background: theme => (theme.palette.mode === "dark" ? "#55402B" : "#FFE2D0"),
               },
