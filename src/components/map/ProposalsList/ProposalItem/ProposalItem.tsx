@@ -166,7 +166,7 @@ const ProposalItem = ({ isClickable = true, ...props }: ProposalItemProps) => {
 
               borderRadius: "24px",
               backgroundColor: theme =>
-                theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookG500 : DESIGN_SYSTEM_COLORS.gray300,
+                theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookG500 : DESIGN_SYSTEM_COLORS.gray250,
             }}
           >
             <Tooltip title="# of 1Admins who have awarded this proposal." placement="bottom-start">
@@ -189,7 +189,7 @@ const ProposalItem = ({ isClickable = true, ...props }: ProposalItemProps) => {
               variant="middle"
               flexItem
               sx={{
-                borderColor: theme => (theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookG300 : "inherit"),
+                borderColor: DESIGN_SYSTEM_COLORS.notebookG300,
               }}
             />
 
@@ -213,7 +213,7 @@ const ProposalItem = ({ isClickable = true, ...props }: ProposalItemProps) => {
               variant="middle"
               flexItem
               sx={{
-                borderColor: theme => (theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookG300 : "inherit"),
+                borderColor: DESIGN_SYSTEM_COLORS.notebookG300,
               }}
             />
 

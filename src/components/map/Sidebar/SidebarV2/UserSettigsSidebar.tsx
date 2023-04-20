@@ -919,13 +919,9 @@ const UserSettigsSidebar = ({
 
             {proposalsFiltered.length > lastIndex && (
               <div id="ContinueButton" style={{ padding: "10px 0px" }}>
-                <MemoizedMetaButton onClick={loadOlderProposalsClick}>
-                  <>
-                    <ExpandMoreIcon className="material-icons grey-text" />
-                    Older Proposals
-                    <ExpandMoreIcon className="material-icons grey-text" />
-                  </>
-                </MemoizedMetaButton>
+                <Button onClick={loadOlderProposalsClick} sx={{ color: DESIGN_SYSTEM_COLORS.primary800 }}>
+                  Show older proposals{" "}
+                </Button>
               </div>
             )}
           </Box>
