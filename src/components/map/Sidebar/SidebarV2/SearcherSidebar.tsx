@@ -28,6 +28,7 @@ import { Box } from "@mui/system";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import React, { MutableRefObject, useCallback, useEffect, useMemo, useState, useTransition } from "react";
+import { filterOnDaysAgo } from "src/utils/dates";
 
 import { RiveComponentMemoized } from "@/components/home/components/temporals/RiveComponentExtended";
 import { DESIGN_SYSTEM_COLORS } from "@/lib/theme/colors";
@@ -132,7 +133,14 @@ const SearcherSidebar = ({
   const disableSearchItem = disableSearcher && !enableElements.includes("search-item");
 
   const onSearch = useCallback(
-    async (page: number, q: string, sortOption: SortValues, sortDirection: SortDirection, nodeTypes: NodeType[]) => {
+    async (
+      page: number,
+      q: string,
+      sortOption: SortValues,
+      sortDirection: SortDirection,
+      nodeTypes: NodeType[],
+      daysAgo?: number
+    ) => {
       try {
         setIsRetrieving(true);
         if (page < 2) {
@@ -154,9 +162,11 @@ const SearcherSidebar = ({
           onlyTitle: nodeBookState.searchByTitleOnly,
         });
 
+        console.log({ data });
         const newData = page === 1 ? data.data : [...searchResults.data, ...data.data];
+        const filteredData = daysAgo ? filterOnDaysAgo(newData, daysAgo) : newData;
         setSearchResults({
-          data: newData,
+          data: filteredData,
           lastPageLoaded: data.page,
           totalPage: Math.ceil((data.numResults || 0) / (data.perPage || 10)),
           totalResults: data.numResults,
@@ -239,6 +249,7 @@ const SearcherSidebar = ({
   useEffect(() => {
     if (!inViewInfinityLoaderTrigger) return;
     if (isRetrieving) return;
+
     if (value === 0) {
       onSearch(searchResults.lastPageLoaded + 1, search, sortOption, sortDirection, nodeTypes);
     } else if (value === 1) {
@@ -252,11 +263,14 @@ const SearcherSidebar = ({
     isRetrieving,
     nodeTypes,
     onSearch,
+    onSearchPendingProposals,
+    pendingProposals.lastPageLoaded,
     refInfinityLoaderTrigger,
     search,
     searchResults.lastPageLoaded,
     sortDirection,
     sortOption,
+    value,
   ]);
 
   useEffect(() => {
