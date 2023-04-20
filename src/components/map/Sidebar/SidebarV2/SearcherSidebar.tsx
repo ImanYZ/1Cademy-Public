@@ -27,12 +27,11 @@ import {
 import { Box } from "@mui/system";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
-import NextImage from "next/image";
 import React, { MutableRefObject, useCallback, useEffect, useMemo, useState, useTransition } from "react";
 
+import { RiveComponentMemoized } from "@/components/home/components/temporals/RiveComponentExtended";
 import { DESIGN_SYSTEM_COLORS } from "@/lib/theme/colors";
 
-import FindNodeImage from "../../../../../public/find-node.svg";
 import { useNodeBook } from "../../../../context/NodeBookContext";
 import { useInView } from "../../../../hooks/useObserver";
 import { useTagsTreeView } from "../../../../hooks/useTagsTreeView";
@@ -967,7 +966,14 @@ const SearcherSidebar = ({
                       marginTop: "25%",
                     }}
                   >
-                    <NextImage src={FindNodeImage} alt="Notification icon" />
+                    <Box sx={{ width: { xs: "250px", sm: "300" }, height: { xs: "250px", sm: "300" } }}>
+                      <RiveComponentMemoized
+                        src="./rive-notebook/search-engine.riv"
+                        artboard="New Artboard"
+                        animations="Timeline 1"
+                        autoplay={true}
+                      />
+                    </Box>
                     <Typography
                       sx={{
                         fontSize: "18px",
