@@ -1,4 +1,5 @@
 import AddIcon from "@mui/icons-material/Add";
+import CheckIcon from "@mui/icons-material/Check";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import KeyboardArrowLeftIcon from "@mui/icons-material/KeyboardArrowLeft";
 import MenuIcon from "@mui/icons-material/Menu";
@@ -9,6 +10,7 @@ import {
   ClickAwayListener,
   Divider,
   IconButton,
+  InputAdornment,
   List,
   ListItem,
   ListItemButton,
@@ -716,22 +718,30 @@ MainSidebarProps) => {
                       : theme.palette.common.gray50,
                 }}
               >
-                <Stack direction={"row"} spacing={"20px"} sx={{ p: "14px 12px" }}>
+                <Stack direction={"row"} sx={{ p: "14px 12px" }}>
                   <TextField
                     // ref={titleInputRef}
                     id="notebook-title"
                     label=""
                     variant="outlined"
-                    // onKeyDown={e => {
-                    //   console.log({ e });
-                    //   onUpdateNotebookTitle();
-                    //   if (e.code === "Enter" || e.keyCode === 13) {
-                    //     e.stopPropagation();
-                    //   }
-                    // }}
+                    onKeyDown={e => {
+                      if (e.code === "Enter" || e.keyCode === 13) {
+                        onUpdateNotebookTitle();
+                        e.stopPropagation();
+                      }
+                    }}
                     value={editableNotebook.title}
                     onChange={e => setEditableNotebook(prev => (prev ? { ...prev, title: e.target.value } : null))}
-                    InputProps={{ sx: { p: "10px 14px", fontSize: "12px" } }}
+                    InputProps={{
+                      endAdornment: (
+                        <InputAdornment position="end">
+                          <IconButton onClick={() => onUpdateNotebookTitle()} sx={{ p: "4px", ml: "10px" }}>
+                            <CheckIcon />
+                          </IconButton>
+                        </InputAdornment>
+                      ),
+                      sx: { p: "10px 14px", fontSize: "12px" },
+                    }}
                     inputProps={{ sx: {} }}
                     sx={{
                       "& .Mui-focused .MuiOutlinedInput-notchedOutline": {
@@ -751,9 +761,13 @@ MainSidebarProps) => {
                     multiline
                     fullWidth
                   />
+                  {/* <Box sx={{ position: "absolute" }}>
+                    
+                  </Box> */}
                   <Box
                     onClick={onOpenUserInfo}
                     sx={{
+                      ml: "20px",
                       minWidth: "36px",
                       width: "36px",
                       height: "36px",

@@ -65,6 +65,8 @@ const AppHeader = forwardRef(({ page, sections, selectedSectionId, onSwitchSecti
 
   const [profileMenuOpen, setProfileMenuOpen] = useState(null);
   const isProfileMenuOpen = Boolean(profileMenuOpen);
+  const [profileMenuOpenExp, setProfileMenuOpenExp] = useState(null);
+  const isProfileMenuOpenExp = Boolean(profileMenuOpenExp);
   const [openMenu, setOpenMenu] = useState(false);
   const [openForm, setOpenForm] = useState(false);
   const [idxOptionVisible, setIdxOptionVisible] = useState(-1);
@@ -80,6 +82,12 @@ const AppHeader = forwardRef(({ page, sections, selectedSectionId, onSwitchSecti
 
   const handleProfileMenuClose = () => {
     setProfileMenuOpen(null);
+  };
+  const handleProfileMenuCloseExp = () => {
+    setProfileMenuOpenExp(null);
+  };
+  const handleProfileMenuOpenExp = (event: any) => {
+    setProfileMenuOpenExp(event.currentTarget);
   };
 
   const onCloseMenu = () => {
@@ -147,7 +155,12 @@ const AppHeader = forwardRef(({ page, sections, selectedSectionId, onSwitchSecti
     await auth.signOut();
   };
   const renderProfileMenuExp = (
-    <Menu id="ProfileMenu" anchorEl={profileMenuOpen} open={isProfileMenuOpen} onClose={handleProfileMenuClose}>
+    <Menu
+      id="ProfileMenu"
+      anchorEl={profileMenuOpenExp}
+      open={isProfileMenuOpenExp}
+      onClose={handleProfileMenuCloseExp}
+    >
       {emailExp && <Typography sx={{ p: "6px 16px" }}>{capitalizeString(nameExp)}</Typography>}
       {emailExp && (
         <>
@@ -353,8 +366,8 @@ const AppHeader = forwardRef(({ page, sections, selectedSectionId, onSwitchSecti
                     aria-haspopup="true"
                     aria-controls="lock-menu"
                     aria-label={`${emailExp}'s Account`}
-                    aria-expanded={isProfileMenuOpen ? "true" : undefined}
-                    onClick={handleProfileMenuOpen}
+                    aria-expanded={isProfileMenuOpenExp ? "true" : undefined}
+                    onClick={handleProfileMenuOpenExp}
                     color="inherit"
                   >
                     <AccountCircle />
