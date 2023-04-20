@@ -1,5 +1,6 @@
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import SearchRoundedIcon from "@mui/icons-material/SearchRounded";
 import { TreeItem, TreeView } from "@mui/lab";
 import {
   Autocomplete,
@@ -13,6 +14,8 @@ import {
 } from "@mui/material";
 import { Box, SxProps, Theme } from "@mui/system";
 import React, { useCallback } from "react";
+
+import { DESIGN_SYSTEM_COLORS } from "@/lib/theme/colors";
 
 export type TagTreeView = {
   nodeId: string;
@@ -51,7 +54,16 @@ const TagsSearcher = ({
   sx,
 }: TagsExploratorySearcherProps) => {
   // const [chosenTags, setChosenTags] = useState<{ id: string; title: string }[]>([]);
-  const setAutocompleteInput = useCallback((params: any) => <TextField label="Search on 1cademy" {...params} />, []);
+  const setAutocompleteInput = useCallback(
+    (params: any) => (
+      <TextField
+        label="Search on 1cademy"
+        InputProps={{ ...params.InputProps, startAdornment: <SearchRoundedIcon /> }}
+        {...params}
+      />
+    ),
+    []
+  );
 
   const setAutocompleteOptions = useCallback(
     (props: React.HTMLAttributes<HTMLLIElement>, option: TagTreeView, { selected }: AutocompleteRenderOptionState) => {
@@ -241,9 +253,17 @@ const TagsSearcher = ({
           matchFrom: "any",
           limit: 10,
         })}
-        sx={{ marginTop: "5px", marginBottom: "5px" }}
+        sx={{ marginTop: "5px", marginBottom: "16px" }}
       />
-      <Box id="FilterTagsTreeView">
+      <Box
+        id="FilterTagsTreeView"
+        sx={{
+          pr: "2px",
+          border: theme =>
+            `1px solid ${theme.palette.mode === "light" ? "rgba(0, 0, 0, 0.23)" : "rgba(255, 255, 255, 0.23)"}`,
+          borderRadius: theme => `${theme.shape.borderRadius}px`,
+        }}
+      >
         <TreeView
           id="TreeViewRoot"
           defaultCollapseIcon={<ExpandMoreIcon />}
@@ -252,11 +272,21 @@ const TagsSearcher = ({
           sx={{
             marginTop: "15px",
             overflowY: "auto",
-            borderColor: theme =>
-              theme.palette.mode === "light" ? "rgba(0, 0, 0, 0.23)" : "rgba(255, 255, 255, 0.23)",
-            borderWidth: "1px",
-            borderStyle: "solid",
-            borderRadius: theme => `${theme.shape.borderRadius}px`,
+            backgroundColor: theme =>
+              theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookG900 : DESIGN_SYSTEM_COLORS.gray100,
+            "&::-webkit-scrollbar": {
+              width: "4px",
+            },
+            "&::-webkit-scrollbar-thumb": {
+              background: theme =>
+                theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookG400 : DESIGN_SYSTEM_COLORS.notebookG100,
+              borderRadius: "2px",
+              marginRight: "4px",
+              "&:hover": {
+                background: "#999",
+              },
+            },
+            mt: "1px",
             ...sx,
           }}
         >

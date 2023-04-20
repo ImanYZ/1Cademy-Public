@@ -1,4 +1,5 @@
 import CloseIcon from "@mui/icons-material/Close";
+import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
 import ControlPointIcon from "@mui/icons-material/ControlPoint";
 import DoneIcon from "@mui/icons-material/Done";
 import SearchIcon from "@mui/icons-material/Search";
@@ -29,6 +30,8 @@ import relativeTime from "dayjs/plugin/relativeTime";
 import NextImage from "next/image";
 import React, { MutableRefObject, useCallback, useEffect, useMemo, useState, useTransition } from "react";
 
+import { DESIGN_SYSTEM_COLORS } from "@/lib/theme/colors";
+
 import FindNodeImage from "../../../../../public/find-node.svg";
 import { useNodeBook } from "../../../../context/NodeBookContext";
 import { useInView } from "../../../../hooks/useObserver";
@@ -40,7 +43,6 @@ import { SortDirection, SortValues, TNodeBookState } from "../../../../nodeBookT
 import { NodeType } from "../../../../types";
 import NodeTypeIcon from "../../../NodeTypeIcon2";
 import { ChosenTag, MemoizedTagsSearcher, TagTreeView } from "../../../TagsSearcher";
-import Modal from "../../Modal/Modal";
 import RecentNodesList from "../../RecentNodesList";
 import TimeFilter from "../../TimeFilter";
 import ValidatedInput from "../../ValidatedInput";
@@ -126,7 +128,7 @@ const SearcherSidebar = ({
   // tutorial constants
   const disableInputSearcher = disableSearcher && !enableElements.includes("search-input");
   const disableSearchIcon = disableSearcher && !enableElements.includes("SearchIcon");
-  const disableEditedInThePast = disableSearcher && !enableElements.includes("search-recently-input");
+  // const disableEditedInThePast = disableSearcher && !enableElements.includes("search-recently-input");
   const disableRecentNodeList = disableSearcher && !enableElements.includes("recentNodesList");
   const disableSearchItem = disableSearcher && !enableElements.includes("search-item");
 
@@ -428,7 +430,7 @@ const SearcherSidebar = ({
   //   // setChosenTags([tag.node]);
   // }, []);
 
-  const setNodesUpdatedSinceClick = useCallback((event: any) => setNodesUpdatedSince(event.target.value), []);
+  // const setNodesUpdatedSinceClick = useCallback((event: any) => setNodesUpdatedSince(event.target.value), []);
 
   const setShowTagSelectorClick = useCallback(() => {
     setShowTagSelector(prevValue => {
@@ -460,6 +462,7 @@ const SearcherSidebar = ({
     sortOption,
     timeFilter,
     value,
+
     // notebooks,
   ]);
 
@@ -495,7 +498,7 @@ const SearcherSidebar = ({
 
   const searcherOptionsMemoized = useMemo(() => {
     return (
-      <>
+      <Box>
         <Box
           id="searcher-sidebar-options"
           sx={{
@@ -505,47 +508,11 @@ const SearcherSidebar = ({
               sm: innerHeight && innerHeight < 600 ? "20px 10px 10px 10px" : "0px 15px 10px 15px",
             },
             borderBottom: 1,
-            borderColor: theme => (theme.palette.mode === "dark" ? "black" : "divider"),
+            borderColor: theme =>
+              theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookG700 : DESIGN_SYSTEM_COLORS.gray200,
             width: "100%",
           }}
         >
-          {!isMovil && showTagSelector && (
-            <Box
-              id="tagModal"
-              sx={{
-                background: theme => theme.palette.common.notebookMainBlack,
-                paddingX: "10px",
-              }}
-            >
-              <Modal
-                className="tagSelectorModalUserSetting"
-                onClick={closeTagSelector}
-                returnDown={false}
-                noBackground={true}
-                style={{
-                  width: "441px",
-                  height: "600px",
-                  left: "15px",
-                  top: "250px",
-                  border: theme.palette.mode === "dark" ? "solid 1px #2F2F2F" : "solid 1px #D0D5DD",
-                  boxShadow: "none",
-                }}
-                contentStyle={{
-                  height: "550px",
-                }}
-              >
-                <MemoizedTagsSearcher
-                  id="user-settings-tag-searcher"
-                  setChosenTags={setChosenTags}
-                  chosenTags={chosenTags}
-                  allTags={allTags}
-                  setAllTags={setAllTags}
-                  sx={{ maxHeight: "450px", height: "450px" }}
-                />
-              </Modal>
-            </Box>
-          )}
-
           <Box
             sx={{
               display: "flex",
@@ -821,7 +788,7 @@ const SearcherSidebar = ({
               </Box>
               <Box
                 id="nodesUpdatedSinceContainer"
-                style={{
+                sx={{
                   display: "flex",
                   justifyContent: "space-between",
                   alignItems: "center",
@@ -829,6 +796,7 @@ const SearcherSidebar = ({
                   flexWrap: "wrap",
                   gap: "10px",
                   paddingTop: "13px",
+                  mb: "16px",
                 }}
               >
                 <RecentNodesList
@@ -856,7 +824,42 @@ const SearcherSidebar = ({
               </Box>
             </>
           )}
-
+          {!isMovil && showTagSelector && (
+            <Box
+              id="tagModal"
+              sx={{
+                position: "relative",
+                background: theme =>
+                  theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookG900 : DESIGN_SYSTEM_COLORS.gray100,
+                p: "16px 10px",
+                borderRadius: "8px",
+                border: theme =>
+                  `1px solid ${
+                    theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookG600 : DESIGN_SYSTEM_COLORS.gray300
+                  }`,
+              }}
+            >
+              <Typography textAlign={"center"} fontSize={"18px"} fontWeight={"600"} m={"8px 0 24px 0"}>
+                Search for tags
+              </Typography>
+              <IconButton
+                size="small"
+                sx={{ position: "absolute", top: "20px", right: "8px" }}
+                onClick={closeTagSelector}
+              >
+                <CloseRoundedIcon />
+              </IconButton>
+              <MemoizedTagsSearcher
+                id="user-settings-tag-searcher"
+                setChosenTags={setChosenTags}
+                chosenTags={chosenTags}
+                allTags={allTags}
+                setAllTags={setAllTags}
+                sx={{ maxHeight: "450px", height: "450px" }}
+                multiple
+              />
+            </Box>
+          )}
           {isMovil && showTagSelector && (
             <MemoizedTagsSearcher
               allTags={allTags}
@@ -870,7 +873,6 @@ const SearcherSidebar = ({
         </Box>
         <Box
           sx={{
-            marginTop: "20px",
             borderBottom: 1,
             borderColor: theme => (theme.palette.mode === "dark" ? "black" : "divider"),
             width: "100%",
@@ -884,25 +886,22 @@ const SearcherSidebar = ({
                   id={`bookmarks-tab-${tabItem.title.toLowerCase()}`}
                   label={tabItem.title}
                   {...a11yProps(idx)}
+                  sx={{ py: "20px" }}
                 />
               )
             )}
           </Tabs>
         </Box>
-      </>
+      </Box>
     );
   }, [
     innerHeight,
     isMovil,
-    showTagSelector,
-    setShowTagSelectorClick,
-    allTags,
-    setAllTags,
-    chosenTags,
-    setChosenTagsCallback,
     viewTagsInMovil,
     selectedTags,
     disableSearcher,
+    setShowTagSelectorClick,
+    showTagSelector,
     handleChange,
     search,
     disableInputSearcher,
@@ -914,24 +913,25 @@ const SearcherSidebar = ({
     innerWidth,
     theme.breakpoints.values.sm,
     searchResults,
-    // notebooks,
-    pendingProposals,
     onlyTags,
     disableRecentNodeList,
     sortOption,
     onChangeSortOptions,
     sortDirection,
     onChangeSortDirection,
-    nodesUpdatedSince,
-    setNodesUpdatedSinceClick,
-    disableEditedInThePast,
-    sidebarWidth,
-    deleteChip,
-    onSearch,
     timeFilter,
     onChangeTimeFilter,
+    sidebarWidth,
+    results,
+    closeTagSelector,
+    chosenTags,
+    allTags,
+    setAllTags,
+    setChosenTagsCallback,
     value,
-    setValue,
+    deleteChip,
+    onSearch,
+    onSearchPendingProposals,
   ]);
 
   return (
@@ -948,11 +948,17 @@ const SearcherSidebar = ({
       sx={{
         boxShadow: "none",
       }}
+      sxContentWrapper={{
+        height: "100%",
+        minHeight: "calc(100% - 60px)",
+        overflowX: "auto",
+        overflowY: "auto",
+      }}
       SidebarContent={
         <Box>
           {value === 0 && (
-            <Box id="search-list" sx={{ p: "10px 4px" }}>
-              <Box sx={{ display: "flex", flexDirection: "column", gap: "4px" }}>
+            <Box id="search-list" sx={{ p: "6px" }}>
+              <Box sx={{ display: "flex", flexDirection: "column", gap: "6px" }}>
                 {!isRetrieving && searchResults.data.length === 0 && (
                   <Box
                     sx={{
@@ -1005,6 +1011,7 @@ const SearcherSidebar = ({
                             }
                       }
                       sx={{
+                        overflow: "hidden",
                         listStyle: "none",
                         padding: {
                           xs: "5px 10px",
@@ -1019,7 +1026,6 @@ const SearcherSidebar = ({
                           "studied" in resNode && resNode.studied ? "solid 6px #fdc473" : " solid 6px #fd7373",
                         cursor: disableSearchItem ? "not-allowed" : "pointer",
                         opacity: disableSearchItem ? "0.5" : "1",
-                        marginBottom: "5px",
                       }}
                     >
                       {/* {innerWidth > theme.breakpoints.values.sm && (
@@ -1189,7 +1195,6 @@ const SearcherSidebar = ({
               )}
             </Box>
           )}
-
           <Box sx={{ p: "10px" }}>
             {/* INFO: I commented this while we develop the endpoints */}
             {/* {value === 1 && (
