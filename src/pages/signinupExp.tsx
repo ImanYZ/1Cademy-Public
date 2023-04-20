@@ -550,12 +550,13 @@ const SignUpExpPage = () => {
                       className={submitable && !isSubmitting ? "Button" : "Button Disabled"}
                       variant="contained"
                       disabled={submitable && !isSubmitting ? false : true}
+                      sx={{ borderRadius: "26px", backgroundColor: DESIGN_SYSTEM_COLORS.primary800 }}
                     >
                       {isSignUp === 0 ? "Sign In" : isSubmitting ? "Creating your account..." : "Consent and Sign Up"}
                     </Button>
                   </Box>
                   <Box style={{ textAlign: "center", marginTop: "10px" }}>
-                    <Button onClick={openForgotPassword} variant="contained" color="warning">
+                    <Button onClick={openForgotPassword} variant="outlined" sx={{ borderRadius: "26px" }}>
                       Forgot Password?
                     </Button>
                   </Box>
@@ -586,7 +587,7 @@ const SignUpExpPage = () => {
                         onClick={handleResetPassword}
                         className={!isSubmitting && validPasswordResetEmail ? "Button" : "Button Disabled"}
                         disabled={isSubmitting || !validPasswordResetEmail}
-                        sx={{ textAlign: "center" }}
+                        sx={{ borderRadius: "26px", backgroundColor: DESIGN_SYSTEM_COLORS.primary800 }}
                       >
                         Send Email
                       </Button>
