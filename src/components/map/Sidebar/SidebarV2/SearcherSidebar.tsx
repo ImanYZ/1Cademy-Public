@@ -162,7 +162,6 @@ const SearcherSidebar = ({
           onlyTitle: nodeBookState.searchByTitleOnly,
         });
 
-        console.log({ data });
         const newData = page === 1 ? data.data : [...searchResults.data, ...data.data];
         const filteredData = daysAgo ? filterOnDaysAgo(newData, daysAgo) : newData;
         setSearchResults({
@@ -370,7 +369,6 @@ const SearcherSidebar = ({
   );
 
   const onChangeTimeFilter = useCallback((newTimeFilter: any) => {
-    console.log({ newTimeFilter });
     let timeFilter: number = 0;
     switch (newTimeFilter) {
       case "LAST_DAY":
