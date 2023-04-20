@@ -356,31 +356,29 @@ const SearcherSidebar = ({
     [nodeTypes, onSearch, search, sortDirection]
   );
 
-  const onChangeTimeFilter = useCallback(
-    (newTimeFilter: any) => {
-      let timeFilter: number = 0;
-      switch (newTimeFilter) {
-        case "LAST_DAY":
-          timeFilter = 1;
-          break;
-        case "LAST_15_DAYS":
-          timeFilter = 15;
-          break;
-        case "LAST_30_DAYS":
-          timeFilter = 30;
-          break;
-        case "LAST_QUARTER":
-          timeFilter = 92;
-          break;
-        case "LAST_YEAR":
-          timeFilter = 365;
-          break;
-      }
-      setNodesUpdatedSince(timeFilter);
-      setTimeFilter(newTimeFilter);
-    },
-    [nodeTypes, onSearch, search, timeFilter]
-  );
+  const onChangeTimeFilter = useCallback((newTimeFilter: any) => {
+    console.log({ newTimeFilter });
+    let timeFilter: number = 0;
+    switch (newTimeFilter) {
+      case "LAST_DAY":
+        timeFilter = 1;
+        break;
+      case "LAST_15_DAYS":
+        timeFilter = 15;
+        break;
+      case "LAST_30_DAYS":
+        timeFilter = 30;
+        break;
+      case "LAST_QUARTER":
+        timeFilter = 92;
+        break;
+      case "LAST_YEAR":
+        timeFilter = 365;
+        break;
+    }
+    setNodesUpdatedSince(timeFilter);
+    setTimeFilter(newTimeFilter);
+  }, []);
 
   const onChangeSortDirection = useCallback(
     (newSortDirection: SortDirection) => {
