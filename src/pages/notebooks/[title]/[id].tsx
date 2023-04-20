@@ -692,14 +692,14 @@ const NodePage: NextPage<Props> = ({ notebook }) => {
           <Button
             variant="outlined"
             sx={{ borderRadius: "26px", borderColor: theme => theme.palette.common.primary800 }}
-            onClick={() => router.push({ pathname: ROUTES.signUp, query: { from: router.asPath } })}
+            onClick={() => router.push({ pathname: ROUTES.signIn, query: { from: router.asPath } })}
           >
             Sign in
           </Button>
           <Button
             variant="contained"
             sx={{ borderRadius: "26px", background: theme => theme.palette.common.primary800 }}
-            onClick={() => router.push({ pathname: ROUTES.signIn, query: { from: router.asPath } })}
+            onClick={() => router.push({ pathname: ROUTES.signUp, query: { from: router.asPath } })}
           >
             Sign Up
           </Button>

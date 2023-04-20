@@ -39,7 +39,7 @@ export type NotebookDocument = {
   title: string;
   duplicatedFrom: string;
   isPublic: "visible" | "editable" | "none";
-  users: string[];
+  users: string[]; // here is users which access and owner
   usersInfo: {
     [uname: string]: {
       role: "viewer" | "editor";
