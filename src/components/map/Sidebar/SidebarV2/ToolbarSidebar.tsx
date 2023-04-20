@@ -722,13 +722,12 @@ MainSidebarProps) => {
                     id="notebook-title"
                     label=""
                     variant="outlined"
-                    // onKeyDown={e => {
-                    //   console.log({ e });
-                    //   onUpdateNotebookTitle();
-                    //   if (e.code === "Enter" || e.keyCode === 13) {
-                    //     e.stopPropagation();
-                    //   }
-                    // }}
+                    onKeyDown={e => {
+                      if (e.code === "Enter" || e.keyCode === 13) {
+                        onUpdateNotebookTitle();
+                        e.stopPropagation();
+                      }
+                    }}
                     value={editableNotebook.title}
                     onChange={e => setEditableNotebook(prev => (prev ? { ...prev, title: e.target.value } : null))}
                     InputProps={{ sx: { p: "10px 14px", fontSize: "12px" } }}
