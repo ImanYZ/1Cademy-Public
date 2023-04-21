@@ -1,9 +1,14 @@
 import AdapterDaysJs from "@date-io/dayjs";
 import ArrowBackIosRoundedIcon from "@mui/icons-material/ArrowBackIosRounded";
 import ArrowForwardIosRoundedIcon from "@mui/icons-material/ArrowForwardIosRounded";
+import BadgeIcon from "@mui/icons-material/Badge";
+import DashboardIcon from "@mui/icons-material/Dashboard";
 import ExitToAppIcon from "@mui/icons-material/ExitToApp";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import LocalOfferRoundedIcon from "@mui/icons-material/LocalOfferRounded";
+import LockRoundedIcon from "@mui/icons-material/LockRounded";
+import PersonIcon from "@mui/icons-material/Person";
+import VpnKeyRoundedIcon from "@mui/icons-material/VpnKeyRounded";
 import {
   Autocomplete,
   Button,
@@ -43,7 +48,7 @@ import {
   where,
   writeBatch,
 } from "firebase/firestore";
-import Image, { StaticImageData } from "next/image";
+import { StaticImageData } from "next/image";
 import React, { MutableRefObject, ReactNode, Suspense, useCallback, useEffect, useMemo, useState } from "react";
 import { DispatchAuthActions, Reputation, User, UserSettings, UserTheme, UserView } from "src/knowledgeTypes";
 import { DispatchNodeBookActions, NodeBookState, TNodeBookState } from "src/nodeBookTypes";
@@ -64,12 +69,6 @@ import { ToUpperCaseEveryWord } from "@/lib/utils/utils";
 import { gray200 } from "@/pages/home";
 
 import darkModeLibraryBackground from "../../../../../public/darkModeLibraryBackground.jpg";
-// import BellIcon from "../../../../../public/icons/bell-icon.svg";
-import GraphIcon from "../../../../../public/icons/graph-icon.svg";
-import KeyIcon from "../../../../../public/icons/key-icon.svg";
-import LockIcon from "../../../../../public/icons/lock-icon.svg";
-import ProfileIcon from "../../../../../public/icons/profile-icon.svg";
-import UserIcon from "../../../../../public/icons/vector.svg";
 import LightmodeLibraryBackground from "../../../../../public/lightModeLibraryBackground.png";
 import { DESIGN_SYSTEM_COLORS } from "../../../../lib/theme/colors";
 import { MemoizedInputSave } from "../../InputSave";
@@ -113,7 +112,7 @@ type TabPanelProps = {
 
 type AccountOptions = {
   type: string;
-  icon: any;
+  icon: ReactNode;
   options?: AccountOptions[];
 };
 
@@ -122,17 +121,17 @@ export type UserPoints = { positives: number; negatives: number; totalPoints: nu
 export const NODE_TYPE_OPTIONS: NodeType[] = ["Code", "Concept", "Idea", "Question", "Reference", "Relation"];
 
 const ACCOUNT_OPTIONS: AccountOptions[] = [
-  { type: "My details", icon: UserIcon },
-  { type: "Profile", icon: ProfileIcon },
-  { type: "Notebook settings", icon: GraphIcon },
+  { type: "My details", icon: <PersonIcon /> },
+  { type: "Profile", icon: <BadgeIcon /> },
+  { type: "Notebook settings", icon: <DashboardIcon /> },
   // { type: "Email notifications", icon: BellIcon },
   {
     type: "Account access",
-    icon: LockIcon,
+    icon: <LockRoundedIcon />,
     options: [
       {
         type: "Change your Password",
-        icon: KeyIcon,
+        icon: <VpnKeyRoundedIcon />,
       },
       // {
       //   type: "Deactive your Account",
@@ -966,7 +965,7 @@ const UserSettigsSidebar = ({
                           placeItems: "center",
                         }}
                       >
-                        <Image src={option.icon} width={18} height={18} alt={option.type} />
+                        {option.icon}
                       </Box>
                       <Typography>{option.type}</Typography>
                     </Stack>
@@ -1415,7 +1414,7 @@ const UserSettigsSidebar = ({
                             placeItems: "center",
                           }}
                         >
-                          <Image src={option.icon} width={18} height={18} alt={option.type} />
+                          {option.icon}
                         </Box>
                         <Typography>{option.type}</Typography>
                       </Stack>
