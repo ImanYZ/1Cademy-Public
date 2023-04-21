@@ -107,7 +107,7 @@ describe("DELETE /api/notebooks/delete", () => {
         ownerImgUrl: users[0].imageUrl,
         usersInfo: {},
         title: "n1",
-        users: [],
+        users: [users[0].uname],
         createdAt: new Date(),
         updatedAt: new Date(),
       } as INotebook,
