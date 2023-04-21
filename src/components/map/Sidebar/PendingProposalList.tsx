@@ -176,7 +176,7 @@ const PendingProposalList = (props: PendingProposalListProps) => {
               fontWeight: "500",
             }}
           >
-            You've not checked off any notifications
+            No proposals found
           </Typography>
         </Box>
       )}
