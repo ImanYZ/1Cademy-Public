@@ -1,24 +1,33 @@
 import AdapterDaysJs from "@date-io/dayjs";
-import CodeIcon from "@mui/icons-material/Code";
-import DoneIcon from "@mui/icons-material/Done";
-import EmojiObjectsIcon from "@mui/icons-material/EmojiObjects";
+import ArrowBackIosRoundedIcon from "@mui/icons-material/ArrowBackIosRounded";
+import ArrowForwardIosRoundedIcon from "@mui/icons-material/ArrowForwardIosRounded";
+import BadgeIcon from "@mui/icons-material/Badge";
+import DashboardIcon from "@mui/icons-material/Dashboard";
 import ExitToAppIcon from "@mui/icons-material/ExitToApp";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
-import HelpOutlineIcon from "@mui/icons-material/HelpOutline";
-import LocalLibraryIcon from "@mui/icons-material/LocalLibrary";
-import LocalOfferIcon from "@mui/icons-material/LocalOffer";
-import MenuBookIcon from "@mui/icons-material/MenuBook";
-import ShareIcon from "@mui/icons-material/Share";
+import LocalOfferRoundedIcon from "@mui/icons-material/LocalOfferRounded";
+import LockRoundedIcon from "@mui/icons-material/LockRounded";
+import PersonIcon from "@mui/icons-material/Person";
+import VpnKeyRoundedIcon from "@mui/icons-material/VpnKeyRounded";
 import {
   Autocomplete,
   Button,
+  Divider,
   FormControlLabel,
   FormGroup,
   LinearProgress,
+  MenuItem,
+  Paper,
+  Select,
+  Stack,
   Switch,
+  SxProps,
   Tab,
   Tabs,
   TextField,
+  Theme,
+  Typography,
+  useTheme,
 } from "@mui/material";
 import { Box } from "@mui/system";
 import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers";
@@ -39,12 +48,15 @@ import {
   where,
   writeBatch,
 } from "firebase/firestore";
+import { StaticImageData } from "next/image";
 import React, { MutableRefObject, ReactNode, Suspense, useCallback, useEffect, useMemo, useState } from "react";
-import { DispatchAuthActions, Reputation, User, UserSettings, UserTheme } from "src/knowledgeTypes";
+import { DispatchAuthActions, Reputation, User, UserSettings, UserTheme, UserView } from "src/knowledgeTypes";
 import { DispatchNodeBookActions, NodeBookState, TNodeBookState } from "src/nodeBookTypes";
 import { NodeType } from "src/types";
 
+import { IOSSwitch } from "@/components/IOSSwitcher";
 import OptimizedAvatar from "@/components/OptimizedAvatar";
+import ResetPasswordForm from "@/components/ResetPasswordForm";
 import { ChosenTag, MemoizedTagsSearcher } from "@/components/TagsSearcher";
 import { useTagsTreeView } from "@/hooks/useTagsTreeView";
 import { retrieveAuthenticatedUser } from "@/lib/firestoreClient/auth";
@@ -54,12 +66,19 @@ import { getTypedCollections } from "@/lib/utils/getTypedCollections";
 import { justADate } from "@/lib/utils/justADate";
 import shortenNumber from "@/lib/utils/shortenNumber";
 import { ToUpperCaseEveryWord } from "@/lib/utils/utils";
+import { gray200 } from "@/pages/home";
 
+import darkModeLibraryBackground from "../../../../../public/darkModeLibraryBackground.jpg";
+import LightmodeLibraryBackground from "../../../../../public/lightModeLibraryBackground.png";
+import { DESIGN_SYSTEM_COLORS } from "../../../../lib/theme/colors";
 import { MemoizedInputSave } from "../../InputSave";
 import { MemoizedMetaButton } from "../../MetaButton";
 import Modal from "../../Modal/Modal";
 import ProposalItem from "../../ProposalsList/ProposalItem/ProposalItem";
+import NodeTypeTrends from "../NodeTypeTrends";
 import ProfileAvatar from "../ProfileAvatar";
+import UseInfoTrends from "../UseInfoTrends";
+import UserDetails from "../UserDetails";
 import { UserSettingsProfessionalInfo } from "../UserSettingsProfessionalInfo";
 import { SidebarWrapper } from "./SidebarWrapper";
 
@@ -85,7 +104,46 @@ type UserSettingsTabs = {
   content: ReactNode;
 };
 
-export const NODE_TYPE_OPTIONS: NodeType[] = ["Code", "Concept", "Idea", "Question", "Reference", "Relation", "News"];
+type TabPanelProps = {
+  children?: ReactNode;
+  index: number;
+  value: number;
+};
+
+type AccountOptions = {
+  type: string;
+  icon: ReactNode;
+  options?: AccountOptions[];
+};
+
+export type UserPoints = { positives: number; negatives: number; totalPoints: number; stars: number };
+
+export const NODE_TYPE_OPTIONS: NodeType[] = ["Code", "Concept", "Idea", "Question", "Reference", "Relation"];
+
+const ACCOUNT_OPTIONS: AccountOptions[] = [
+  { type: "My details", icon: <PersonIcon /> },
+  { type: "Profile", icon: <BadgeIcon /> },
+  { type: "Notebook settings", icon: <DashboardIcon /> },
+  // { type: "Email notifications", icon: BellIcon },
+  {
+    type: "Account access",
+    icon: <LockRoundedIcon />,
+    options: [
+      {
+        type: "Change your Password",
+        icon: <VpnKeyRoundedIcon />,
+      },
+      // {
+      //   type: "Deactive your Account",
+      //   icon: SadfaceIcon,
+      // },
+    ],
+  },
+];
+
+const TabPanel = ({ value, index, children }: TabPanelProps) => {
+  return <Box hidden={value !== index}>{value === index && children}</Box>;
+};
 
 const UserSettigsSidebar = ({
   notebookRef,
@@ -102,17 +160,32 @@ const UserSettigsSidebar = ({
 }: UserSettingsSidebarProps) => {
   const db = getFirestore();
   const ELEMENTS_PER_PAGE: number = 13;
+  const theme = useTheme();
+
   const { allTags, setAllTags } = useTagsTreeView(user.tagId ? [user.tagId] : []);
   const [languages, setLanguages] = useState<string[]>([]);
   const [countries, setCountries] = useState<ICountry[]>([]);
   const [states, setStates] = useState<IState[]>([]);
   const [cities, setCities] = useState<ICity[]>([]);
   const [instlogoURL, setInstlogoURL] = useState("");
-  const [totalPoints, setTotalPoints] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
   const [proposals, setProposals] = useState<any[]>([]);
+  const [proposalsPerDay, setProposalsPerDay] = useState<any[]>([]);
+
   const [lastIndex, setLastIndex] = useState(ELEMENTS_PER_PAGE);
   const [value, setValue] = React.useState(0);
+
+  const [type, setType] = useState<string>("all");
+
+  const [settingsValue, setSettingsValue] = React.useState(-1);
+  const [settingsSubValue, setSettingsSubValue] = React.useState(-1);
+  const handleSettingsValue = (newValue: number) => {
+    setSettingsValue(newValue);
+  };
+  const handleSettingsSubValue = (newValue: number) => {
+    setSettingsSubValue(newValue);
+  };
+
   const isInEthnicityValues = (ethnicityItem: string) => ETHNICITY_VALUES.includes(ethnicityItem);
   const getOtherValue = (userValues: string[], defaultValue: string, userValue?: string) => {
     if (!userValue) return "";
@@ -237,71 +310,41 @@ const UserSettigsSidebar = ({
     getCSCByGeolocation();
   }, [countries, db, dispatch, user]);
 
-  useEffect(() => {
-    const total =
-      userReputation.cnCorrects -
-      userReputation.cnWrongs +
-      userReputation.cnInst +
-      userReputation.cdCorrects -
-      userReputation.cdWrongs +
-      userReputation.cdInst +
-      userReputation.qCorrects -
-      userReputation.qWrongs +
-      userReputation.qInst +
-      userReputation.pCorrects -
-      userReputation.pWrongs +
-      userReputation.pInst +
-      userReputation.sCorrects -
-      userReputation.sWrongs +
-      userReputation.sInst +
-      userReputation.aCorrects -
-      userReputation.aWrongs +
-      userReputation.aInst +
-      userReputation.rfCorrects -
-      userReputation.rfWrongs +
-      userReputation.rfInst +
-      userReputation.nCorrects -
-      userReputation.nWrongs +
-      userReputation.nInst +
-      userReputation.mCorrects -
-      userReputation.mWrongs +
-      userReputation.mInst +
-      userReputation.iCorrects -
-      userReputation.iWrongs +
-      userReputation.iInst;
-    setTotalPoints(total);
-  }, [
-    userReputation.aCorrects,
-    userReputation.aInst,
-    userReputation.aWrongs,
-    userReputation.cdCorrects,
-    userReputation.cdInst,
-    userReputation.cdWrongs,
-    userReputation.cnCorrects,
-    userReputation.cnInst,
-    userReputation.cnWrongs,
-    userReputation.iCorrects,
-    userReputation.iInst,
-    userReputation.iWrongs,
-    userReputation.mCorrects,
-    userReputation.mInst,
-    userReputation.mWrongs,
-    userReputation.nCorrects,
-    userReputation.nInst,
-    userReputation.nWrongs,
-    userReputation.pCorrects,
-    userReputation.pInst,
-    userReputation.pWrongs,
-    userReputation.qCorrects,
-    userReputation.qInst,
-    userReputation.qWrongs,
-    userReputation.rfCorrects,
-    userReputation.rfInst,
-    userReputation.rfWrongs,
-    userReputation.sCorrects,
-    userReputation.sInst,
-    userReputation.sWrongs,
-  ]);
+  const totalPoints = useMemo<UserPoints>(() => {
+    if (!userReputation) return { positives: 0, negatives: 0, totalPoints: 0, stars: 0 };
+
+    const positiveKeys: (keyof Reputation)[] = [
+      "cnCorrects",
+      "mCorrects",
+      "qCorrects",
+      "iCorrects",
+      "cdCorrects",
+      "rfCorrects",
+    ];
+    const negativeKeys: (keyof Reputation)[] = ["cnWrongs", "mWrongs", "qWrongs", "iWrongs", "cdWrongs", "rfWrongs"];
+    const starKeys: (keyof Reputation)[] = ["cnInst", "mInst", "qInst", "iInst", "cdInst", "rfInst"];
+
+    const positives = positiveKeys.reduce(
+      (carry, el) => carry + ((typeof userReputation[el] === "number" && (userReputation[el] as number)) || 0),
+      0
+    );
+    const negatives = negativeKeys.reduce(
+      (carry, el) => carry + ((typeof userReputation[el] === "number" && (userReputation[el] as number)) || 0),
+      0
+    );
+    const stars = starKeys.reduce(
+      (carry, el) => carry + ((typeof userReputation[el] === "number" && (userReputation[el] as number)) || 0),
+      0
+    );
+    const totalPoints = positives + stars - negatives;
+
+    return {
+      positives: parseFloat(shortenNumber(positives, 2, false)),
+      negatives: parseFloat(shortenNumber(negatives, 2, false)),
+      stars: parseFloat(shortenNumber(stars, 2, false)),
+      totalPoints: parseFloat(shortenNumber(totalPoints, 2, false)),
+    };
+  }, [userReputation]);
 
   const fetchProposals = useCallback(async () => {
     const versions: { [key: string]: any } = {};
@@ -361,7 +404,7 @@ const UserSettigsSidebar = ({
       }
     }
 
-    const orderredProposals = Object.values(versions).sort(
+    let orderredProposals = Object.values(versions).sort(
       (a, b) => Number(new Date(b.createdAt)) - Number(new Date(a.createdAt))
     );
     const proposalsPerDayDict: { [key: string]: any } = {};
@@ -386,8 +429,10 @@ const UserSettigsSidebar = ({
         averageVotes: proposalsPerDayDict[dateValue].netVotes / proposalsPerDayDict[dateValue].num,
       });
     }
-    setProposals(orderredProposals);
-  }, [db, user]);
+    // if (type !== "all") orderredProposals = orderredProposals.filter(proposal => proposal.nodeType === type);
+    setProposals(orderredProposals); //
+    setProposalsPerDay(proposalsPerDayList);
+  }, [db, user.uname]);
 
   useEffect(() => {
     fetchProposals();
@@ -398,7 +443,6 @@ const UserSettigsSidebar = ({
     if (!db || !user) return;
 
     if ("deInstit" in user && !("instLogo" in user)) {
-      // console.log("useEffect:", user);
       const fetchInstitution = async () => {
         const institutionsQuery = query(collection(db, "institutions"), where("name", "==", user.deInstit));
 
@@ -568,30 +612,26 @@ const UserSettigsSidebar = ({
     [db, user]
   );
 
-  const handleThemeSwitch = useCallback(
-    (event: any) => {
-      event.preventDefault();
-      const newTheme = settings.theme === "Dark" ? "Light" : "Dark";
-      changeAttr("theme")(newTheme);
-      dispatch({ type: "setTheme", payload: newTheme });
+  const handleSwitchTheme = useCallback(
+    (theme: UserTheme) => {
+      changeAttr("theme")(theme);
+      dispatch({ type: "setTheme", payload: theme });
     },
-    [changeAttr, dispatch, settings.theme]
+    [changeAttr, dispatch]
   );
 
   const handleViewSwitch = useCallback(
-    (event: any) => {
-      event.preventDefault();
-      const newView = settings.view === "Graph" ? "Masonry" : "Graph";
-      changeAttr("view")(newView);
-      dispatch({ type: "setView", payload: newView });
+    (view: UserView) => {
+      changeAttr("view")(view);
+      dispatch({ type: "setView", payload: view });
 
-      if (newView === "Graph") {
+      if (view === "Graph") {
         setTimeout(() => {
           if (nodeBookState?.selectedNode) scrollToNode(nodeBookState.selectedNode);
         }, 1500);
       }
     },
-    [changeAttr, dispatch, nodeBookState.selectedNode, scrollToNode, settings.view]
+    [changeAttr, dispatch, nodeBookState.selectedNode, scrollToNode]
   );
 
   const handleBackgroundSwitch = useCallback(
@@ -614,24 +654,18 @@ const UserSettigsSidebar = ({
     [changeAttr, dispatch]
   );
 
-  const handleShowClusterOptionsSwitch = useCallback(
-    (event: any) => {
-      event.preventDefault();
-      const newShowClusterOption = !settings.showClusterOptions;
-      changeAttr("showClusterOptions")(newShowClusterOption);
-      dispatch({ type: "setShowClusterOptions", payload: newShowClusterOption });
-    },
-    [changeAttr, dispatch, settings.showClusterOptions]
-  );
+  const handleShowClusterOptionsSwitch = useCallback(() => {
+    const newShowClusterOption = !settings.showClusterOptions;
+    changeAttr("showClusterOptions")(newShowClusterOption);
+    dispatch({ type: "setShowClusterOptions", payload: newShowClusterOption });
+  }, [changeAttr, dispatch, settings.showClusterOptions]);
 
   const handleShowClustersSwitch = useCallback(
-    (event: any) => {
-      event.preventDefault();
-      const newShowCluster = !settings.showClusters;
-      changeAttr("showClusters")(newShowCluster);
-      dispatch({ type: "setShowClusters", payload: newShowCluster });
+    (showClusters: boolean) => {
+      changeAttr("showClusters")(showClusters);
+      dispatch({ type: "setShowClusters", payload: showClusters });
     },
-    [changeAttr, dispatch, settings.showClusters]
+    [changeAttr, dispatch]
   );
 
   const closeTagSelector = useCallback(() => {
@@ -736,7 +770,6 @@ const UserSettigsSidebar = ({
   const getValidValue = (userOptions: string[], defaultValue: string, userValue?: string) => {
     if (!userValue) return null;
     userOptions.includes(userValue) ? userValue : defaultValue;
-    // console.log("RES -->", res);
     return userOptions.includes(userValue) ? userValue : defaultValue;
   };
   const getSelectedOptionsByValue = (userValues: string[], isInValues: any, defaultValue: string) => {
@@ -745,7 +778,7 @@ const UserSettigsSidebar = ({
     return existOtherValue ? [...filteredValues, defaultValue] : filteredValues;
   };
 
-  const removeAllNodes = async () => {
+  const removeAllNodes = useCallback(async () => {
     if (confirm("Are you sure to hide all the nodes")) {
       const batch = writeBatch(db);
       const userNodesCol = collection(db, "userNodes");
@@ -759,13 +792,690 @@ const UserSettigsSidebar = ({
       }
       await batch.commit();
     }
-  };
-
+  }, [db, user.uname]);
+  //
   const loadOlderProposalsClick = useCallback(() => {
     if (lastIndex >= proposals.length) return;
     setLastIndex(lastIndex + ELEMENTS_PER_PAGE);
   }, [lastIndex, proposals.length]);
 
+  const nodeTypeStats = useMemo(() => {
+    const stats = new Map(NODE_TYPE_OPTIONS.map(nodeType => [nodeType, "0"]));
+    if (!userReputation) return stats;
+    stats.forEach((value, key) => {
+      switch (key) {
+        case "Concept":
+          value = shortenNumber(userReputation.cnCorrects - userReputation.cnWrongs, 2, false);
+          stats.set("Concept", value);
+        case "Relation":
+          value = shortenNumber(userReputation.mCorrects - userReputation.mWrongs, 2, false);
+          stats.set("Relation", value);
+        case "Reference":
+          value = shortenNumber(userReputation.rfCorrects - userReputation.rfWrongs, 2, false);
+          stats.set("Reference", value);
+        case "Question":
+          value = shortenNumber(userReputation.qCorrects - userReputation.qWrongs, 2, false);
+          stats.set("Question", value);
+        case "Idea":
+          value = shortenNumber(userReputation.iCorrects - userReputation.iWrongs, 2, false);
+          stats.set("Idea", value);
+        case "Code":
+          value = shortenNumber(userReputation.cdCorrects - userReputation.cdWrongs, 2, false);
+          stats.set("Code", value);
+      }
+    });
+    return stats;
+  }, [userReputation]);
+
+  const setUserImage = useCallback(
+    (newImage: string) => {
+      dispatch({ type: "setAuthUser", payload: { ...user, imageUrl: newImage } });
+    },
+    [dispatch, user]
+  );
+
+  const proposalsFiltered = useMemo(() => {
+    if (type === "all") return proposals;
+
+    return proposals.filter(proposal => proposal.nodeType === type);
+  }, [proposals, type]);
+
+  const newTabsItems: UserSettingsTabs[] = useMemo(() => {
+    return [
+      {
+        title: "Trends",
+        content: (
+          <Box sx={{ p: "12px" }}>
+            <Typography fontWeight={"500"}>Nodes Overwiew</Typography>
+            <NodeTypeTrends id="user-settings" nodeTypeStats={nodeTypeStats} />
+            <Typography fontWeight={"500"} my="16px">
+              Proposals Overview
+            </Typography>
+            <UseInfoTrends proposalsPerDay={proposalsPerDay} theme={theme.palette.mode || ""} />
+          </Box>
+        ),
+      },
+      {
+        title: "Proposals",
+        content: (
+          <Box sx={{ display: "flex", flexDirection: "column", gap: "4px", px: "12px" }}>
+            <Stack direction={"row"} alignItems={"center"} justifyContent={"space-between"} py="10px">
+              <Typography fontWeight={"500"}>Overview</Typography>
+
+              <Box>
+                <Typography sx={{ display: "inline-block" }}>Shows</Typography>
+                <Select
+                  sx={{
+                    marginLeft: "10px",
+                    height: "35px",
+                    width: "120px",
+                  }}
+                  MenuProps={{
+                    sx: {
+                      "& .MuiMenu-paper": {
+                        backgroundColor: theme => (theme.palette.mode === "dark" ? "#1B1A1A" : "#F9FAFB"),
+                        color: "text.white",
+                      },
+                      "& .MuiMenuItem-root:hover": {
+                        backgroundColor: theme => (theme.palette.mode === "dark" ? "##2F2F2F" : "#EAECF0"),
+                        color: "text.white",
+                      },
+                      "& .Mui-selected": {
+                        backgroundColor: "transparent!important",
+                        color: "#FF8134",
+                      },
+                      "& .Mui-selected:hover": {
+                        backgroundColor: "transparent",
+                      },
+                    },
+                  }}
+                  labelId="demo-select-small"
+                  id="demo-select-small"
+                  value={type}
+                  onChange={e => {
+                    setType(e.target.value);
+                  }}
+                >
+                  <MenuItem value="all">All</MenuItem>
+                  <MenuItem value="Concept">Concepts</MenuItem>
+                  <MenuItem value="Relation">Relations</MenuItem>
+                  <MenuItem value="Question">Questions</MenuItem>
+                  <MenuItem value="Idea">Ideas</MenuItem>
+                  <MenuItem value="Code">Codes</MenuItem>
+                  <MenuItem value="Reference">References</MenuItem>
+                </Select>
+              </Box>
+            </Stack>
+            <Stack spacing={"8px"}>
+              {proposalsFiltered.slice(0, lastIndex).map((proposal, idx) => {
+                return (
+                  proposal.title && (
+                    <ProposalItem key={idx} proposal={proposal} openLinkedNode={openLinkedNode} showTitle={true} />
+                  )
+                );
+              })}
+            </Stack>
+
+            {proposalsFiltered.length > lastIndex && (
+              <div id="ContinueButton" style={{ padding: "10px 0px" }}>
+                <Button onClick={loadOlderProposalsClick} sx={{ color: DESIGN_SYSTEM_COLORS.primary800 }}>
+                  Show older proposals{" "}
+                </Button>
+              </div>
+            )}
+          </Box>
+        ),
+      },
+      {
+        title: "Account",
+        content: (
+          <Box height={"100%"} py="16px">
+            <Box
+              height={"100%"}
+              display={settingsValue !== -1 ? "none" : "flex"}
+              flexDirection={"column"}
+              justifyContent={"space-between"}
+            >
+              <Stack>
+                {ACCOUNT_OPTIONS.map((option, idx) => (
+                  <Stack
+                    key={`${option.type}-${idx}`}
+                    direction={"row"}
+                    justifyContent={"space-between"}
+                    spacing={"12px"}
+                    onClick={() => handleSettingsValue(idx)}
+                    p="12px 10px"
+                    sx={{
+                      ":hover": {
+                        backgroundColor: theme =>
+                          theme.palette.mode === "dark"
+                            ? DESIGN_SYSTEM_COLORS.notebookG700
+                            : DESIGN_SYSTEM_COLORS.gray100,
+                        cursor: "pointer",
+                      },
+                    }}
+                  >
+                    <Stack direction={"row"} alignItems={"center"} spacing={"12px"}>
+                      <Box
+                        sx={{
+                          p: "6px",
+                          borderRadius: "8px",
+                          backgroundColor: "#FF8134",
+                          display: "grid",
+                          placeItems: "center",
+                        }}
+                      >
+                        {option.icon}
+                      </Box>
+                      <Typography>{option.type}</Typography>
+                    </Stack>
+                    <ArrowForwardIosRoundedIcon />
+                  </Stack>
+                ))}
+              </Stack>
+              <Button onClick={logoutClick} color="error">
+                Log out
+              </Button>
+            </Box>
+            <TabPanel value={settingsValue} index={0}>
+              <ArrowBackButton text={ACCOUNT_OPTIONS[0].type} backwardsHandler={handleSettingsValue} />
+              <Box component={"section"} px={"20px"}>
+                <ProfileAvatar
+                  id="user-settings-picture"
+                  userId={user.userId}
+                  userImage={user.imageUrl}
+                  setUserImage={setUserImage}
+                  name={user?.fName ?? ""}
+                  lastName={user?.lName ?? ""}
+                />
+                <Typography textAlign={"center"}>{user.imageUrl ? "Change Photo" : "Add Photo"}</Typography>
+              </Box>
+              <Box mx="20px">
+                <Box sx={{ display: "flex", gap: "12px" }}>
+                  <MemoizedInputSave
+                    identification="fNameInput"
+                    initialValue={user.fName || ""}
+                    onSubmit={changeAttr("fName")}
+                    setState={(fName: string) => dispatch({ type: "setAuthUser", payload: { ...user, fName } })}
+                    label="Name"
+                  />
+
+                  <MemoizedInputSave
+                    identification="lNameInput"
+                    initialValue={user.lName || ""}
+                    onSubmit={changeAttr("lName")}
+                    setState={(lName: string) => dispatch({ type: "setAuthUser", payload: { ...user, lName } })}
+                    label="Last Name"
+                  />
+                </Box>
+                <MemoizedInputSave
+                  identification="email"
+                  initialValue={user.email}
+                  onSubmit={() => {}}
+                  setState={() => {}}
+                  label="Email"
+                  disabled={true}
+                />
+                <Box sx={{ display: "flex", gap: "12px", my: "8px" }}>
+                  <Stack sx={{ flex: 1 }}>
+                    <Autocomplete
+                      id="gender"
+                      value={getValidValue(GENDER_VALUES, GENDER_VALUES[2], user.gender)}
+                      onChange={(_, value) => handleChange({ target: { value, name: "gender" } })}
+                      options={GENDER_VALUES}
+                      renderInput={params => <TextField {...params} label="Gender" />}
+                      fullWidth
+                    />
+
+                    {(user.gender === "Not listed (Please specify)" || !GENDER_VALUES.includes(user.gender || "")) && (
+                      <MemoizedInputSave
+                        identification="genderOtherValue"
+                        initialValue={genderOtherValue} //TODO: important fill empty user field
+                        onSubmit={(value: any) => changeAttr("gender")(value)}
+                        setState={(value: string) =>
+                          dispatch({ type: "setAuthUser", payload: { ...user, gender: value } })
+                        }
+                        label="Please specify your gender."
+                      />
+                    )}
+                  </Stack>
+                  <LocalizationProvider dateAdapter={AdapterDaysJs}>
+                    <DatePicker
+                      value={user.birthDate}
+                      onChange={value => handleChange({ target: { value, name: "birthDate" } })}
+                      renderInput={params => (
+                        <TextField {...params} id="birthDate" label="Date of Birth" name="birthDate" sx={{ flex: 1 }} />
+                      )}
+                    />
+                  </LocalizationProvider>
+                </Box>
+                <Typography fontWeight={"500"} my="8px">
+                  Professional Information
+                </Typography>
+                <UserSettingsProfessionalInfo user={user} />
+              </Box>
+            </TabPanel>
+            <TabPanel value={settingsValue} index={1}>
+              <ArrowBackButton text={ACCOUNT_OPTIONS[1].type} backwardsHandler={handleSettingsValue} />
+              <Box component={"section"} p={"24px 20px"}>
+                <Autocomplete
+                  id="language"
+                  value={user.lang}
+                  onChange={(_, value) => handleChange({ target: { value, name: "language" } })}
+                  options={languages}
+                  renderInput={params => <TextField {...params} label="Language" />}
+                  fullWidth
+                  sx={{ mb: "16px" }}
+                />
+                <Autocomplete
+                  id="country"
+                  value={user.country}
+                  onChange={(_, value) => handleChange({ target: { value, name: "country" } })}
+                  options={countries.map(cur => cur.name)}
+                  renderInput={params => <TextField {...params} label="Country" />}
+                  fullWidth
+                  sx={{ mb: "16px" }}
+                />
+                <Box sx={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px" }}>
+                  <Autocomplete
+                    id="state"
+                    value={user.state}
+                    onChange={(_, value) => handleChange({ target: { value, name: "state" } })}
+                    options={states.map(cur => cur.name)}
+                    renderInput={params => <TextField {...params} label="State" />}
+                    fullWidth
+                    sx={{ mb: "16px" }}
+                  />
+                  <Autocomplete
+                    id="city"
+                    value={user.city}
+                    onChange={(_, value) => handleChange({ target: { value, name: "city" } })}
+                    options={cities.map(cur => cur.name)}
+                    renderInput={params => <TextField {...params} label="City" />}
+                    fullWidth
+                    sx={{ mb: "16px" }}
+                  />
+                </Box>
+                <Autocomplete
+                  id="ethnicity"
+                  value={getSelectedOptionsByValue(user.ethnicity, isInEthnicityValues, ETHNICITY_VALUES[6])}
+                  onChange={(_, value) => handleChange({ target: { value, name: "ethnicity" } })}
+                  // structure based from https://blog.hubspot.com/service/survey-demographic-questions
+                  options={ETHNICITY_VALUES}
+                  renderInput={params => <TextField {...params} label="Ethnicity" />}
+                  fullWidth
+                  multiple
+                  sx={{ mb: "16px" }}
+                />
+                <Autocomplete
+                  id="foundFrom"
+                  value={getValidValue(FOUND_FROM_VALUES, FOUND_FROM_VALUES[5], user.foundFrom)}
+                  onChange={(_, value) => handleChange({ target: { value, name: "foundFrom" } })}
+                  options={FOUND_FROM_VALUES}
+                  renderInput={params => <TextField {...params} label="How did you hear about us?" />}
+                  fullWidth
+                  sx={{ mb: "16px" }}
+                />
+                {(user.foundFrom === "Not listed (Please specify)" ||
+                  !FOUND_FROM_VALUES.includes(user.foundFrom || "")) && (
+                  <MemoizedInputSave
+                    identification="foundFromOtherValue"
+                    initialValue={foundFromOtherValue} //TODO: important fill empty user field
+                    onSubmit={(value: any) => changeAttr("foundFrom")(value)}
+                    setState={(value: string) =>
+                      dispatch({ type: "setAuthUser", payload: { ...user, foundFrom: value } })
+                    }
+                    label="Please specify, How did you hear about us."
+                  />
+                )}
+              </Box>
+            </TabPanel>
+            <TabPanel value={settingsValue} index={2}>
+              <ArrowBackButton text={ACCOUNT_OPTIONS[2].type} backwardsHandler={handleSettingsValue} />
+              <Box p="20px">
+                <Typography fontWeight={"500"}>Appearance</Typography>
+                <Stack direction={"row"} alignItems={"center"} justifyContent={"space-evenly"} mt="12px">
+                  <ModeOption
+                    image={LightmodeLibraryBackground}
+                    mode="Light"
+                    active={settings.theme === "Light"}
+                    handleSwitchTheme={handleSwitchTheme}
+                  />
+                  <ModeOption
+                    image={darkModeLibraryBackground}
+                    mode="Dark"
+                    active={settings.theme === "Dark"}
+                    handleSwitchTheme={handleSwitchTheme}
+                  />
+                </Stack>
+                <Paper
+                  sx={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    borderRadius: "8px",
+                    p: "12px",
+                    my: "16px",
+                    backgroundColor: theme =>
+                      theme.palette.mode === "light" ? DESIGN_SYSTEM_COLORS.gray200 : DESIGN_SYSTEM_COLORS.notebookG700,
+                  }}
+                >
+                  <Typography>Background Image</Typography>
+                  <IOSSwitch checked={settings.background === "Image"} onChange={handleBackgroundSwitch} />
+                </Paper>
+                <Typography fontWeight={"500"}>Nodes view</Typography>
+                <Stack direction={"row"} alignItems={"center"} justifyContent={"space-evenly"} mt="12px">
+                  <Box
+                    sx={{
+                      ":hover": { cursor: "pointer" },
+                    }}
+                    onClick={() => handleViewSwitch("Graph")}
+                  >
+                    <Stack
+                      direction={"row"}
+                      alignItems={"center"}
+                      justifyContent={"center"}
+                      sx={{
+                        width: "130px",
+                        height: "90px",
+                        backgroundColor: theme =>
+                          theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookG700 : gray200,
+                        border: `${settings.view === "Graph" ? 1 : 0}px solid ${DESIGN_SYSTEM_COLORS.primary600}`,
+                        borderRadius: "8px",
+                      }}
+                    >
+                      <NodeVersion width={52} height={30} mode={settings.theme} />
+                      <ArrowVersion />
+                      <NodeVersion width={30} height={30} mode={settings.theme} />
+                    </Stack>
+                    <Typography
+                      textAlign={"center"}
+                      sx={{
+                        color: theme =>
+                          theme.palette.mode === "dark"
+                            ? settings.view === "Graph"
+                              ? DESIGN_SYSTEM_COLORS.gray25
+                              : DESIGN_SYSTEM_COLORS.notebookG200
+                            : settings.view === "Graph"
+                            ? DESIGN_SYSTEM_COLORS.gray900
+                            : DESIGN_SYSTEM_COLORS.notebookG300,
+                      }}
+                    >
+                      Graph
+                    </Typography>
+                  </Box>
+                  <Box
+                    sx={{
+                      ":hover": { cursor: "pointer" },
+                    }}
+                    onClick={() => handleViewSwitch("Masonry")}
+                  >
+                    <Stack
+                      direction={"row"}
+                      alignItems={"center"}
+                      justifyContent={"center"}
+                      spacing={"5px"}
+                      sx={{
+                        width: "130px",
+                        height: "90px",
+                        backgroundColor: theme =>
+                          theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookG700 : gray200,
+                        border: `${settings.view === "Masonry" ? 1 : 0}px solid ${DESIGN_SYSTEM_COLORS.primary600}`,
+                        borderRadius: "8px",
+                      }}
+                    >
+                      <Stack spacing={"5px"}>
+                        <NodeVersion width={52} height={35} mode={settings.theme} />
+                        <NodeVersion width={52} height={30} mode={settings.theme} />
+                      </Stack>
+                      <Stack spacing={"5px"}>
+                        <NodeVersion width={52} height={14} mode={settings.theme} />
+                        <NodeVersion width={52} height={30} mode={settings.theme} />
+                        <NodeVersion width={52} height={18} mode={settings.theme} />
+                      </Stack>
+                    </Stack>
+                    <Typography
+                      textAlign={"center"}
+                      sx={{
+                        color: theme =>
+                          theme.palette.mode === "dark"
+                            ? settings.view === "Masonry"
+                              ? DESIGN_SYSTEM_COLORS.gray25
+                              : DESIGN_SYSTEM_COLORS.notebookG200
+                            : settings.view === "Masonry"
+                            ? DESIGN_SYSTEM_COLORS.gray900
+                            : DESIGN_SYSTEM_COLORS.notebookG300,
+                      }}
+                    >
+                      Masonry
+                    </Typography>
+                  </Box>
+                </Stack>
+                <Paper
+                  sx={{
+                    borderRadius: "8px",
+                    py: "12px",
+                    my: "16px",
+                    backgroundColor: theme =>
+                      theme.palette.mode === "light" ? DESIGN_SYSTEM_COLORS.gray200 : DESIGN_SYSTEM_COLORS.notebookG700,
+                  }}
+                >
+                  <Stack direction={"row"} justifyContent={"space-between"} px={"12px"}>
+                    <Typography>Clusters</Typography>
+                    <IOSSwitch checked={settings.showClusterOptions} onChange={handleShowClusterOptionsSwitch} />
+                  </Stack>
+                  {settings.showClusterOptions && (
+                    <>
+                      <Divider
+                        sx={{
+                          m: "12px",
+                          borderColor: theme =>
+                            theme.palette.mode === "dark"
+                              ? DESIGN_SYSTEM_COLORS.notebookG500
+                              : DESIGN_SYSTEM_COLORS.gray300,
+                        }}
+                      />
+                      <Stack direction={"row"} justifyContent={"space-evenly"}>
+                        <Box onClick={() => handleShowClustersSwitch(false)} sx={{ ":hover": { cursor: "pointer" } }}>
+                          <Stack
+                            direction={"row"}
+                            alignItems={"center"}
+                            justifyContent={"center"}
+                            spacing={"24px"}
+                            sx={{
+                              width: "130px",
+                              height: "90px",
+                              backgroundColor: theme =>
+                                theme.palette.mode === "dark"
+                                  ? DESIGN_SYSTEM_COLORS.notebookG600
+                                  : DESIGN_SYSTEM_COLORS.gray300,
+                              border: `${!settings.showClusters ? 1 : 0}px solid ${DESIGN_SYSTEM_COLORS.primary600}`,
+                              borderRadius: "8px",
+                            }}
+                          >
+                            <NodeVersion width={52} height={30} mode={settings.theme} />
+
+                            <NodeVersion width={30} height={30} mode={settings.theme} />
+                          </Stack>
+                          <Typography
+                            textAlign={"center"}
+                            sx={{
+                              color: theme =>
+                                theme.palette.mode === "dark"
+                                  ? !settings.showClusters
+                                    ? DESIGN_SYSTEM_COLORS.gray25
+                                    : DESIGN_SYSTEM_COLORS.notebookG200
+                                  : !settings.showClusters
+                                  ? DESIGN_SYSTEM_COLORS.gray900
+                                  : DESIGN_SYSTEM_COLORS.notebookG300,
+                            }}
+                          >
+                            Unlabeled
+                          </Typography>
+                        </Box>
+                        <Box onClick={() => handleShowClustersSwitch(true)} sx={{ ":hover": { cursor: "pointer" } }}>
+                          <Box
+                            sx={{
+                              width: "130px",
+                              height: "90px",
+                              display: "grid",
+                              placeItems: "center",
+                              backgroundColor: theme =>
+                                theme.palette.mode === "dark"
+                                  ? DESIGN_SYSTEM_COLORS.notebookG600
+                                  : DESIGN_SYSTEM_COLORS.gray300,
+                              border: `${settings.showClusters ? 1 : 0}px solid ${DESIGN_SYSTEM_COLORS.primary600}`,
+                              borderRadius: "8px",
+                            }}
+                          >
+                            <Stack
+                              direction={"row"}
+                              alignItems={"center"}
+                              justifyContent={"center"}
+                              spacing={"24px"}
+                              sx={{
+                                outline: `1px dashed ${DESIGN_SYSTEM_COLORS.gray400}`,
+                                outlineOffset: "6px",
+                                borderRadius: "2px",
+                              }}
+                            >
+                              <NodeVersion width={52} height={30} mode={settings.theme} />
+
+                              <NodeVersion width={30} height={30} mode={settings.theme} />
+                            </Stack>
+                          </Box>
+                          <Typography
+                            textAlign={"center"}
+                            sx={{
+                              color: theme =>
+                                theme.palette.mode === "dark"
+                                  ? settings.showClusters
+                                    ? DESIGN_SYSTEM_COLORS.gray25
+                                    : DESIGN_SYSTEM_COLORS.notebookG200
+                                  : settings.showClusters
+                                  ? DESIGN_SYSTEM_COLORS.gray900
+                                  : DESIGN_SYSTEM_COLORS.notebookG300,
+                            }}
+                          >
+                            Labeled
+                          </Typography>
+                        </Box>
+                      </Stack>
+                    </>
+                  )}
+                </Paper>
+                <Button
+                  variant="outlined"
+                  onClick={removeAllNodes}
+                  sx={{
+                    width: "100%",
+                    borderRadius: "24px",
+                    mt: "8px",
+                    borderColor: DESIGN_SYSTEM_COLORS.primary800,
+                    color: DESIGN_SYSTEM_COLORS.primary800,
+                  }}
+                >
+                  Hide all Nodes
+                </Button>
+              </Box>
+            </TabPanel>
+            <TabPanel value={settingsValue} index={3}>
+              <ArrowBackButton
+                text={ACCOUNT_OPTIONS[3].type}
+                backwardsHandler={handleSettingsValue}
+                sx={{ display: settingsSubValue !== -1 ? "none" : "block" }}
+              />
+              <Stack display={settingsSubValue !== -1 ? "none" : "flex"}>
+                {ACCOUNT_OPTIONS[3].options &&
+                  ACCOUNT_OPTIONS[3].options.map((option, idx) => (
+                    <Stack
+                      key={`${option.type}-${idx}`}
+                      direction={"row"}
+                      justifyContent={"space-between"}
+                      spacing={"12px"}
+                      onClick={() => handleSettingsSubValue(idx)}
+                      p="12px 10px"
+                      sx={{
+                        ":hover": {
+                          backgroundColor: theme =>
+                            theme.palette.mode === "dark"
+                              ? DESIGN_SYSTEM_COLORS.notebookG700
+                              : DESIGN_SYSTEM_COLORS.gray100,
+                          cursor: "pointer",
+                        },
+                      }}
+                    >
+                      <Stack direction={"row"} alignItems={"center"} spacing={"12px"}>
+                        <Box
+                          sx={{
+                            p: "6px",
+                            borderRadius: "8px",
+                            backgroundColor: "#FF8134",
+                            display: "grid",
+                            placeItems: "center",
+                          }}
+                        >
+                          {option.icon}
+                        </Box>
+                        <Typography>{option.type}</Typography>
+                      </Stack>
+                      <ArrowForwardIosRoundedIcon />
+                    </Stack>
+                  ))}
+              </Stack>
+              {ACCOUNT_OPTIONS[3].options && (
+                <TabPanel value={settingsSubValue} index={0}>
+                  <ArrowBackButton
+                    text={ACCOUNT_OPTIONS[3].options[0].type}
+                    backwardsHandler={handleSettingsSubValue}
+                  />
+                  <Box p="24px 20px">
+                    <ResetPasswordForm />
+                  </Box>
+                </TabPanel>
+              )}
+            </TabPanel>
+          </Box>
+        ),
+      },
+    ];
+  }, [
+    changeAttr,
+    cities,
+    countries,
+    dispatch,
+    foundFromOtherValue,
+    genderOtherValue,
+    handleBackgroundSwitch,
+    handleChange,
+    handleShowClusterOptionsSwitch,
+    handleShowClustersSwitch,
+    handleSwitchTheme,
+    handleViewSwitch,
+    languages,
+    lastIndex,
+    loadOlderProposalsClick,
+    logoutClick,
+    nodeTypeStats,
+    openLinkedNode,
+    proposalsFiltered,
+    proposalsPerDay,
+    removeAllNodes,
+    setUserImage,
+    settings.background,
+    settings.showClusterOptions,
+    settings.showClusters,
+    settings.theme,
+    settings.view,
+    settingsSubValue,
+    settingsValue,
+    states,
+    theme.palette.mode,
+    type,
+    user,
+  ]);
+
+  // There are some fields we may copy
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const tabsItems: UserSettingsTabs[] = useMemo(() => {
     return [
       {
@@ -775,24 +1485,24 @@ const UserSettigsSidebar = ({
             id="AccountSettings"
             style={{ display: "flex", flexDirection: "column", justifyContent: "space-between", height: "450px" }}
           >
-            <FormGroup>
+            {/* <FormGroup>
               <FormControlLabel
                 control={<Switch checked={settings.theme === "Dark"} onChange={handleThemeSwitch} />}
                 label={`Theme: ${settings.theme === "Dark" ? "🌜" : "🌞"}`}
               />
-            </FormGroup>
+            </FormGroup> */}
             <FormGroup>
               <FormControlLabel
                 control={<Switch checked={settings.background === "Image"} onChange={handleBackgroundSwitch} />}
                 label={`Background: ${settings.background === "Color" ? "Color" : "Image"}`}
               />
             </FormGroup>
-            <FormGroup>
+            {/* <FormGroup>
               <FormControlLabel
                 control={<Switch checked={settings.view === "Graph"} onChange={handleViewSwitch} />}
                 label={`View: ${settings.view === "Graph" ? "Graph" : "Masonry"}`}
               />
-            </FormGroup>
+            </FormGroup> */}
             <FormGroup>
               <FormControlLabel
                 control={<Switch checked={!user.chooseUname} onChange={e => handlesChooseUnameSwitch(e, user)} />}
@@ -800,23 +1510,23 @@ const UserSettigsSidebar = ({
               />
             </FormGroup>
 
-            <FormGroup>
+            {/* <FormGroup>
               <FormControlLabel
                 control={
                   <Switch checked={settings.showClusterOptions} onChange={e => handleShowClusterOptionsSwitch(e)} />
                 }
                 label={`Nodes are: ${settings.showClusterOptions ? "Clustered" : "Not Clustered"}`}
               />
-            </FormGroup>
+            </FormGroup> */}
 
-            {settings.showClusterOptions && (
+            {/* {settings.showClusterOptions && (
               <FormGroup>
                 <FormControlLabel
                   control={<Switch checked={settings.showClusters} onChange={e => handleShowClustersSwitch(e)} />}
                   label={`Cluster Labels: ${settings.showClusters ? "Shown" : "Hidden"}`}
                 />
               </FormGroup>
-            )}
+            )} */}
             <Box
               sx={{
                 textAlign: "center",
@@ -997,7 +1707,6 @@ const UserSettigsSidebar = ({
         title: "Proposals",
         content: (
           <Box sx={{ display: "flex", flexDirection: "column", gap: "4px" }}>
-            <div className="ChartTitle">Proposals in chronological order</div>
             {proposals.slice(0, lastIndex).map((proposal, idx) => {
               return (
                 proposal.title && (
@@ -1005,6 +1714,7 @@ const UserSettigsSidebar = ({
                 )
               );
             })}
+
             {proposals.length > lastIndex && (
               <div id="ContinueButton" style={{ padding: "10px 0px" }}>
                 <MemoizedMetaButton onClick={loadOlderProposalsClick}>
@@ -1021,42 +1731,31 @@ const UserSettigsSidebar = ({
       },
     ];
   }, [
-    canShowOtherEthnicityInput,
-    changeAttr,
-    cities,
-    countries,
-    dispatch,
-    ethnicityOtherValue,
-    foundFromOtherValue,
-    genderOtherValue,
-    getDisplayNameValue,
-    handleBackgroundSwitch,
-    handleChange,
-    handleShowClusterOptionsSwitch,
-    handleShowClustersSwitch,
-    handleThemeSwitch,
-    handleViewSwitch,
-    handlesChooseUnameSwitch,
-    languages,
-    logoutClick,
-    mergeEthnicityOtherValueWithUserEthnicity,
-    reason,
     settings.background,
-    settings.showClusterOptions,
-    settings.showClusters,
-    settings.theme,
-    settings.view,
-    states,
+    handleBackgroundSwitch,
     user,
+    getDisplayNameValue,
+    removeAllNodes,
+    changeAttr,
+    logoutClick,
+    languages,
+    genderOtherValue,
+    canShowOtherEthnicityInput,
+    ethnicityOtherValue,
+    countries,
+    states,
+    cities,
+    reason,
+    foundFromOtherValue,
+    proposals,
     lastIndex,
     loadOlderProposalsClick,
+    handlesChooseUnameSwitch,
+    dispatch,
+    handleChange,
+    mergeEthnicityOtherValueWithUserEthnicity,
+    openLinkedNode,
   ]);
-  const setUserImage = useCallback(
-    (newImage: string) => {
-      dispatch({ type: "setAuthUser", payload: { ...user, imageUrl: newImage } });
-    },
-    [dispatch, user]
-  );
 
   const a11yProps = (index: number) => {
     return {
@@ -1067,7 +1766,7 @@ const UserSettigsSidebar = ({
 
   const contentSignalState = useMemo(() => {
     return { updates: true };
-  }, [tabsItems, value]);
+  }, [newTabsItems, value]);
 
   const shouldShowTagSearcher = useMemo(() => {
     return nodeBookState?.choosingNode?.id === "Tag";
@@ -1083,134 +1782,85 @@ const UserSettigsSidebar = ({
           paddingTop: "40px",
         }}
       >
-        <div id="MiniUserPrifileHeader" className="MiniUserProfileHeaderMobile">
-          <ProfileAvatar
-            id="user-settings-picture"
-            userId={user.userId}
-            userImage={user.imageUrl}
-            setUserImage={setUserImage}
-            userFullName={`${user?.fName} ${user?.lName}`}
+        <Box p="0 32px 16px 32px">
+          <UserDetails
+            id="user-settings"
+            imageUrl={user.imageUrl}
+            uname={user.uname}
+            fName={user.fName ?? ""}
+            lName={user.lName ?? ""}
+            chooseUname={user.chooseUname}
+            points={totalPoints}
           />
 
-          <div id="MiniUserPrifileIdentity" className="MiniUserPrifileIdentityMobile">
-            <Box id="MiniUserPrifileName" sx={{ borderRadius: "6px" }}>
-              {user.chooseUname ? user.uname : `${user.fName} ${user.lName}`}
-            </Box>
-            <div id="MiniUserPrifileTag">
-              <MemoizedMetaButton
-                id="user-settings-community-tag"
-                style={{ padding: "0px" }}
-                onClick={() => choosingNodeClick("Tag")}
-              >
-                <div className="AccountSettingsButton">
-                  <LocalOfferIcon
-                    sx={{ marginRight: "8px" }}
-                    id="tagChangeIcon"
-                    className="material-icons deep-orange-text"
-                  />
-                  {user.tag}
-                  {isLoading && <LinearProgress />}
+          <div id="MiniUserPrifileInstitution" style={{ display: "flex", gap: "12px", borderRadius: "6px" }}>
+            <OptimizedAvatar
+              imageUrl={instlogoURL}
+              name={user.deInstit + " logo"}
+              sx={{
+                width: "20px",
+                height: "20px",
+                fontSize: "16px",
+              }}
+              renderAsAvatar={false}
+            />
+            <span>{user.deInstit}</span>
+          </div>
+          <div id="MiniUserPrifileTag">
+            <MemoizedMetaButton
+              id="user-settings-community-tag"
+              style={{ padding: "4px 0" }}
+              onClick={() => choosingNodeClick("Tag")}
+            >
+              <div className="AccountSettingsButton">
+                <LocalOfferRoundedIcon
+                  sx={{ marginRight: "8px" }}
+                  id="tagChangeIcon"
+                  className="material-icons deep-orange-text"
+                />
+                {user.tag}
+                {isLoading && <LinearProgress />}
+              </div>
+            </MemoizedMetaButton>
+            {shouldShowTagSearcher && (
+              <Suspense fallback={<div></div>}>
+                <div id="tagModal">
+                  <Modal
+                    className="tagSelectorModalUserSetting"
+                    onClick={closeTagSelector}
+                    returnDown={false}
+                    noBackground={true}
+                    style={{
+                      width: "441px",
+                      height: "495px",
+                      left: window.innerWidth <= 500 ? "28px" : "420px",
+                    }}
+                    contentStyle={{
+                      height: "500px",
+                    }}
+                  >
+                    <MemoizedTagsSearcher
+                      id="user-settings-tag-searcher"
+                      setChosenTags={setChosenTags}
+                      chosenTags={chosenTags}
+                      allTags={allTags}
+                      setAllTags={setAllTags}
+                      sx={{ maxHeight: "339px", height: "339px" }}
+                    />
+                  </Modal>
                 </div>
-              </MemoizedMetaButton>
-              {shouldShowTagSearcher && (
-                <Suspense fallback={<div></div>}>
-                  <div id="tagModal">
-                    <Modal
-                      className="tagSelectorModalUserSetting ModalBody"
-                      onClick={closeTagSelector}
-                      returnDown={false}
-                      noBackground={true}
-                      style={{
-                        width: "441px",
-                        height: "495px",
-                        left: window.innerWidth <= 500 ? "28px" : "420px",
-                      }}
-                      contentStyle={{
-                        height: "500px",
-                      }}
-                    >
-                      <MemoizedTagsSearcher
-                        id="user-settings-tag-searcher"
-                        setChosenTags={setChosenTags}
-                        chosenTags={chosenTags}
-                        allTags={allTags}
-                        setAllTags={setAllTags}
-                        sx={{ maxHeight: "339px", height: "339px" }}
-                      />
-                    </Modal>
-                  </div>
-                </Suspense>
-              )}
-            </div>
-            <div id="MiniUserPrifileInstitution" style={{ display: "flex", gap: "12px", borderRadius: "6px" }}>
-              <OptimizedAvatar
-                imageUrl={instlogoURL}
-                name={user.deInstit + " logo"}
-                sx={{
-                  width: "25px",
-                  height: "25px",
-                  fontSize: "16px",
-                }}
-                renderAsAvatar={false}
-              />
-              <span>{user.deInstit}</span>
-            </div>
-            <Box id="user-settings-statistics" sx={{ borderRadius: "6px" }}>
-              <DoneIcon className="material-icons DoneIcon green-text" sx={{ mr: "12px" }} />
-              <span>{shortenNumber(totalPoints, 2, false)}</span>
-            </Box>
+              </Suspense>
+            )}
           </div>
-        </div>
-        <div
-          id="user-settings-node-types"
-          className="MiniUserPrifilePointsContainer"
-          style={{ alignItems: "center", justifyContent: "space-around" }}
-        >
-          <div className="MiniUserProfilePoints">
-            <LocalLibraryIcon className="material-icons amber-text" />
-            <span className="ToolbarValue">
-              {shortenNumber(userReputation.cnCorrects - userReputation.cnWrongs, 2, false)}
-            </span>
-          </div>
-          <div className="MiniUserProfilePoints">
-            <ShareIcon className="material-icons amber-text" />
-            <span className="ToolbarValue">
-              {shortenNumber(userReputation.mCorrects - userReputation.mWrongs, 2, false)}
-            </span>
-          </div>
-          <div className="MiniUserProfilePoints">
-            <HelpOutlineIcon className="material-icons amber-text" />
-            <span className="ToolbarValue">
-              {shortenNumber(userReputation.qCorrects - userReputation.qWrongs, 2, false)}
-            </span>
-          </div>
-          <div className="MiniUserProfilePoints">
-            <EmojiObjectsIcon className="material-icons material-icons--outlined amber-text" />
-            <span className="ToolbarValue">
-              {shortenNumber(userReputation.iCorrects - userReputation.iWrongs, 2, false)}
-            </span>
-          </div>
-          <div className="MiniUserProfilePoints">
-            <CodeIcon className="material-icons amber-text" />
-            <span className="ToolbarValue">
-              {shortenNumber(userReputation.cdCorrects - userReputation.cdWrongs, 2, false)}
-            </span>
-          </div>
-          <div className="MiniUserProfilePoints">
-            <MenuBookIcon className="material-icons amber-text" />
-            <span className="ToolbarValue">
-              {shortenNumber(userReputation.rfCorrects - userReputation.rfWrongs, 2, false)}
-            </span>
-          </div>
-        </div>
+        </Box>
         <Tabs id="user-settings-personalization" value={value} onChange={handleTabChange} aria-label={"Bookmarks Tabs"}>
-          {tabsItems.map((tabItem: UserSettingsTabs, idx: number) => (
+          {newTabsItems.map((tabItem: UserSettingsTabs, idx: number) => (
             <Tab
               id={`user-settings-${tabItem.title.toLowerCase()}`}
               key={tabItem.title}
               label={tabItem.title}
               {...a11yProps(idx)}
-              sx={{ borderRadius: "6px" }}
+              sx={{ borderRadius: "6px", flex: 1 }}
             />
           ))}
         </Tabs>
@@ -1223,10 +1873,9 @@ const UserSettigsSidebar = ({
     closeTagSelector,
     instlogoURL,
     isLoading,
+    newTabsItems,
     setAllTags,
-    setUserImage,
     shouldShowTagSearcher,
-    tabsItems,
     totalPoints,
     user.chooseUname,
     user.deInstit,
@@ -1235,19 +1884,6 @@ const UserSettigsSidebar = ({
     user.lName,
     user.tag,
     user.uname,
-    user.userId,
-    userReputation.cdCorrects,
-    userReputation.cdWrongs,
-    userReputation.cnCorrects,
-    userReputation.cnWrongs,
-    userReputation.iCorrects,
-    userReputation.iWrongs,
-    userReputation.mCorrects,
-    userReputation.mWrongs,
-    userReputation.qCorrects,
-    userReputation.qWrongs,
-    userReputation.rfCorrects,
-    userReputation.rfWrongs,
     value,
   ]);
 
@@ -1260,8 +1896,127 @@ const UserSettigsSidebar = ({
       onClose={onClose}
       width={430}
       SidebarOptions={open ? SidebarOptions : null}
-      SidebarContent={open ? <Box sx={{ p: "10px" }}>{tabsItems[value].content}</Box> : null}
+      SidebarContent={
+        open ? (
+          <Box pb="16px" height={"100%"}>
+            {newTabsItems[value].content}
+          </Box>
+        ) : null
+      }
     />
   );
 };
+
+type ButtonBacKProps = {
+  text: string;
+  backwardsHandler: (index: number) => void;
+  sx?: SxProps<Theme>;
+};
+
+const ArrowBackButton = ({ text, backwardsHandler, sx }: ButtonBacKProps) => {
+  return (
+    <Stack
+      position={"relative"}
+      direction={"row"}
+      justifyContent={"space-between"}
+      p="12px 10px"
+      onClick={() => backwardsHandler(-1)}
+      sx={{
+        ":hover": {
+          backgroundColor: theme =>
+            theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookG700 : DESIGN_SYSTEM_COLORS.gray100,
+          cursor: "pointer",
+        },
+        ...sx,
+      }}
+    >
+      <ArrowBackIosRoundedIcon sx={{ position: "absolute", left: "20px", top: "calc(50% - 12px)" }} />
+      <Typography sx={{ flex: 1, textAlign: "center", fontWeight: "500" }}>{text}</Typography>
+    </Stack>
+  );
+};
+
+type ModeOptionProps = {
+  image: StaticImageData;
+  mode: UserTheme;
+  active: boolean;
+  handleSwitchTheme: (theme: UserTheme) => void;
+};
+
+const NodeVersion = ({ width, height, mode }: { width: number; height: number; mode: UserTheme }) => {
+  return (
+    <Box
+      sx={{
+        width: `${width}px`,
+        height: `${height}px`,
+        borderRadius: "4px",
+        border: `1px solid ${DESIGN_SYSTEM_COLORS.notebookScarlet}`,
+        backgroundColor: mode === "Dark" ? DESIGN_SYSTEM_COLORS.notebookG600 : DESIGN_SYSTEM_COLORS.gray50,
+      }}
+    ></Box>
+  );
+};
+const ArrowVersion = () => {
+  return (
+    <Box
+      component={"span"}
+      sx={{
+        position: "relative",
+        borderBottom: "1.5px solid rgb(1, 211, 106)",
+        height: "2px",
+        width: "32px",
+        "&::after": {
+          content: '""',
+          position: "absolute",
+          top: "-5px",
+          right: "-6px",
+          width: 0,
+          height: 0,
+          border: "6px solid transparent",
+          borderLeft: "6px solid rgb(1, 211, 106)",
+        },
+      }}
+    ></Box>
+  );
+};
+const ModeOption = ({ image, mode, active, handleSwitchTheme }: ModeOptionProps) => {
+  return (
+    <Box sx={{ ":hover": { cursor: "pointer" } }} onClick={() => handleSwitchTheme(mode)}>
+      <Stack
+        direction={"row"}
+        alignItems={"center"}
+        justifyContent={"center"}
+        sx={{
+          width: "130px",
+          height: "90px",
+          border: `${Number(active)}px solid ${DESIGN_SYSTEM_COLORS.primary600}`,
+          borderRadius: "8px",
+          backgroundImage: `url(${image.src})`,
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+        }}
+      >
+        <NodeVersion width={52} height={30} mode={mode} />
+        <ArrowVersion />
+        <NodeVersion width={30} height={30} mode={mode} />
+      </Stack>
+      <Typography
+        textAlign={"center"}
+        sx={{
+          color: theme =>
+            theme.palette.mode === "dark"
+              ? active
+                ? DESIGN_SYSTEM_COLORS.gray25
+                : DESIGN_SYSTEM_COLORS.notebookG200
+              : active
+              ? DESIGN_SYSTEM_COLORS.gray900
+              : DESIGN_SYSTEM_COLORS.notebookG300,
+        }}
+      >
+        {mode}
+      </Typography>
+    </Box>
+  );
+};
+
 export const MemoizedUserSettingsSidebar = React.memo(UserSettigsSidebar);
