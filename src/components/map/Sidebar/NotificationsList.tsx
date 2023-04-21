@@ -108,6 +108,7 @@ const NotificationsList = (props: NotificationsListProps) => {
   }, [lastIndex, props.notifications]);
 
   const handleSelectNotification = (event: ChangeEvent<HTMLInputElement>, notificationId: string) => {
+    event.stopPropagation();
     setSelectedNotifications(prev => {
       let sNotifications = [...prev];
       if (event.target.checked === true) {
@@ -139,12 +140,15 @@ const NotificationsList = (props: NotificationsListProps) => {
       batch.update(notificationNumsRef, { nNum: increment(incrementValue) });
     }
     await batch.commit();
+    setSelectedNotifications([]);
   }, [db, props.checked, selectedNotifications, user?.uname]);
 
-  // const openLinkedNodeClick = useCallback(
-  //   (notification: any) => notification.aType !== "Delete" && props.openLinkedNode(notification.nodeId),
-  //   [props.openLinkedNode]
-  // );
+  const openLinkedNodeClick = useCallback(
+    (notification: any) => {
+      notification.aType !== "Delete" && props.openLinkedNode(notification.nodeId);
+    },
+    [props.openLinkedNode]
+  );
 
   const YOUR_NODE_TEXT = (notification: any) => {
     const notificationTypeMsg = (() => {
@@ -216,7 +220,7 @@ const NotificationsList = (props: NotificationsListProps) => {
                 sx: {
                   borderRadius: "8px",
                   ":focus-within": {
-                    outline: "4px solid #62544B",
+                    outline: theme => `4px solid ${theme.palette.mode === "dark" ? "#62544B" : "#ECCFBD"}}`,
                   },
                 },
               }}
@@ -265,7 +269,7 @@ const NotificationsList = (props: NotificationsListProps) => {
           {filteredNotifications.map(notification => {
             return (
               <Paper
-                elevation={3}
+                elevation={2}
                 key={`Notification${notification.id}`}
                 sx={{
                   display: "flex",
@@ -274,8 +278,15 @@ const NotificationsList = (props: NotificationsListProps) => {
                   p: "10px 16px",
                   borderRadius: "8px",
                   backgroundColor: theme =>
-                    theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookG700 : DESIGN_SYSTEM_COLORS.gray100,
+                    selectedNotifications.includes(notification.id)
+                      ? theme.palette.mode === "dark"
+                        ? DESIGN_SYSTEM_COLORS.notebookO900
+                        : DESIGN_SYSTEM_COLORS.primary50
+                      : theme.palette.mode === "dark"
+                      ? DESIGN_SYSTEM_COLORS.notebookG700
+                      : DESIGN_SYSTEM_COLORS.gray100,
                 }}
+                onClick={() => openLinkedNodeClick(notification)}
               >
                 <Box flex={1}>
                   <Typography fontSize={"12px"} fontWeight={"500"} mb="10px">
@@ -297,7 +308,10 @@ const NotificationsList = (props: NotificationsListProps) => {
                   </Typography>
 
                   <Stack direction={"row"} alignItems={"center"} spacing={"8px"} mb="10px">
-                    <NotificationTypeIcon notification={notification} />
+                    <NotificationTypeIcon
+                      notification={notification}
+                      checked={selectedNotifications.includes(notification.id)}
+                    />
                     <Typography fontSize={"14px"} fontWeight={"500"}>
                       {notification.title ?? "Notification"}
                     </Typography>
@@ -314,7 +328,7 @@ const NotificationsList = (props: NotificationsListProps) => {
                     {dayjs(notification.createdAt).fromNow()}
                   </Typography>
                 </Box>
-                <Box sx={{ display: "f  lex", justifyContent: "space-between", alignItems: "center", gap: "5px" }}>
+                <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: "5px" }}>
                   {/* <Tooltip title={`Click to ${props.checked ? "check" : "uncheck"} this notification.`}>
                 <IconButton onClick={() => checkNotification(notification.id, !props.checked)}>
                   {props.checked ? <CheckCircleOutlineIcon /> : <RadioButtonUncheckedIcon />}
@@ -342,7 +356,7 @@ const NotificationsList = (props: NotificationsListProps) => {
   );
 };
 
-const NotificationTypeIcon = ({ notification }: { notification: any }) => {
+const NotificationTypeIcon = ({ notification, checked }: { notification: any; checked: boolean }) => {
   if (!notification) return null;
   return (
     <Box
@@ -354,7 +368,13 @@ const NotificationTypeIcon = ({ notification }: { notification: any }) => {
         p: "7px",
         borderRadius: "50%",
         backgroundColor: theme =>
-          theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookG600 : DESIGN_SYSTEM_COLORS.notebookG50,
+          checked
+            ? theme.palette.mode === "dark"
+              ? DESIGN_SYSTEM_COLORS.notebookO800
+              : DESIGN_SYSTEM_COLORS.primary25
+            : theme.palette.mode === "dark"
+            ? DESIGN_SYSTEM_COLORS.notebookG600
+            : DESIGN_SYSTEM_COLORS.notebookG50,
       }}
     >
       {notification.oType === "Propo" ? (

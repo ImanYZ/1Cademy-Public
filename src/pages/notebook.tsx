@@ -6393,7 +6393,6 @@ const Dashboard = ({}: DashboardProps) => {
                 enableElements={[]}
               />
               <MemoizedNotificationSidebar
-                theme={settings.theme}
                 openLinkedNode={openLinkedNode}
                 username={user.uname}
                 open={openSidebar === "NOTIFICATION_SIDEBAR"}
