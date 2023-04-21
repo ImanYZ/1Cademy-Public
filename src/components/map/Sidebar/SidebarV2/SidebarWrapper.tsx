@@ -96,15 +96,11 @@ export const SidebarWrapper = ({
         <Box>
           <Box>
             {!innerHeight || (height > 50 && innerHeight > 600) ? (
-              <Box sx={{ position: "relative", height: headerImage ? "127px" : "65px" }}>
+              <Box sx={{ position: "relative", height: headerImage ? "127px" : "auto", p: "24px" }}>
                 {headerImage && <Image src={headerImage} alt="header image" width={width} height={127} />}
                 <Typography
                   component={"h2"}
                   sx={{
-                    width: "100%",
-                    position: "absolute",
-                    bottom: 0,
-                    paddingLeft: "13px",
                     fontSize: { xs: "24px", sm: "40px" },
                     fontWeight: "700",
                     lineHeight: "29.05px",

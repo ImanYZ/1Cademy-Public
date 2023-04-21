@@ -8,7 +8,20 @@ import EditRoundedIcon from "@mui/icons-material/EditRounded";
 import EmailOutlinedIcon from "@mui/icons-material/EmailOutlined";
 import EmojiEventsRoundedIcon from "@mui/icons-material/EmojiEventsRounded";
 import IndeterminateCheckBoxOutlinedIcon from "@mui/icons-material/IndeterminateCheckBoxOutlined";
-import { Box, Button, Checkbox, IconButton, Paper, Stack, Tooltip, Typography } from "@mui/material";
+import SearchIcon from "@mui/icons-material/Search";
+import {
+  Box,
+  Button,
+  Checkbox,
+  Divider,
+  IconButton,
+  InputAdornment,
+  Paper,
+  Stack,
+  TextField,
+  Tooltip,
+  Typography,
+} from "@mui/material";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import { collection, doc, getDocs, getFirestore, increment, limit, query, where, writeBatch } from "firebase/firestore";
@@ -66,6 +79,7 @@ const NotificationsList = (props: NotificationsListProps) => {
   const [isRetrieving, setIsRetrieving] = useState(false);
   const [selectedNotifications, setSelectedNotifications] = useState<string[]>([]);
   const { ref: refInfinityLoaderTrigger, inView: inViewInfinityLoaderTrigger } = useInView();
+  const [searchQuery, setSearchQuery] = useState<string>("");
 
   const loadOlderNotificationsClick = useCallback(() => {
     setIsRetrieving(true);
@@ -103,10 +117,6 @@ const NotificationsList = (props: NotificationsListProps) => {
       }
       return sNotifications;
     });
-  };
-  const onSelectAll = () => {
-    const notificationIds: string[] = notifications.reduce((acc, notification) => [...acc, notification.id], []);
-    setSelectedNotifications(notificationIds);
   };
 
   const onReadNotifications = useCallback(async () => {
@@ -154,114 +164,180 @@ const NotificationsList = (props: NotificationsListProps) => {
     return "";
   };
 
+  const handleClearSearchQuery = () => {
+    setSearchQuery("");
+  };
+  const filteredNotifications = useMemo(() => {
+    if (!searchQuery) return notifications;
+    return notifications.filter(notification =>
+      notification.title.toLowerCase().includes(searchQuery.toLocaleLowerCase())
+    );
+  }, [notifications, searchQuery]);
+
   const allNotificationsSelected = useMemo(
-    () => selectedNotifications.length !== 0 && selectedNotifications.length === notifications.length,
-    [notifications.length, selectedNotifications.length]
+    () => selectedNotifications.length !== 0 && selectedNotifications.length === filteredNotifications.length,
+    [filteredNotifications.length, selectedNotifications.length]
   );
+
+  const onSelectAll = useCallback(() => {
+    const notificationIds: string[] = filteredNotifications.reduce(
+      (acc, notification) => [...acc, notification.id],
+      []
+    );
+    setSelectedNotifications(notificationIds);
+  }, [filteredNotifications]);
+
   return (
     <Box>
-      <Stack direction={"row"} spacing={"12px"} justifyContent={"space-between"} my="14px">
-        <Box>
-          <Tooltip title={"Select all"}>
-            <IconButton onClick={onSelectAll} sx={{ mr: "12px" }}>
-              {!allNotificationsSelected ? <IndeterminateCheckBoxOutlinedIcon /> : <CheckBoxOutlinedIcon />}
-            </IconButton>
-          </Tooltip>
-          {!props.checked ? (
-            <Tooltip title={"Mark as read"}>
-              <IconButton onClick={onReadNotifications}>
-                <DraftsOutlinedIcon />
-              </IconButton>
-            </Tooltip>
-          ) : (
-            <Tooltip title={"Mark as read"}>
-              <IconButton onClick={onReadNotifications}>
-                <EmailOutlinedIcon />
-              </IconButton>
-            </Tooltip>
-          )}
-        </Box>
-        <Button sx={{ color: DESIGN_SYSTEM_COLORS.primary800 }} onClick={() => setSelectedNotifications([])}>
-          Cancel
-        </Button>
-      </Stack>
-
-      <Stack spacing={"8px"}>
-        {notifications.map(notification => {
-          return (
-            <Paper
-              elevation={3}
-              key={`Notification${notification.id}`}
-              sx={{
-                display: "flex",
-
-                listStyle: "none",
-                p: "10px 16px",
-                borderRadius: "8px",
-                backgroundColor: theme =>
-                  theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookG700 : DESIGN_SYSTEM_COLORS.gray100,
+      {!selectedNotifications.length && (
+        <>
+          <Stack my="14px" px="16px">
+            <TextField
+              id="outlined-search"
+              type="text"
+              placeholder="Search"
+              fullWidth
+              onChange={event => setSearchQuery(event.target.value)}
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <SearchIcon />
+                  </InputAdornment>
+                ),
+                endAdornment: (
+                  <InputAdornment position="end">
+                    {searchQuery.length ? (
+                      <IconButton onClick={handleClearSearchQuery}>
+                        <CloseRoundedIcon sx={{ fontSize: "14px" }} />
+                      </IconButton>
+                    ) : null}
+                  </InputAdornment>
+                ),
+                sx: {
+                  borderRadius: "8px",
+                  ":focus-within": {
+                    outline: "4px solid #62544B",
+                  },
+                },
               }}
-            >
-              <Box flex={1}>
-                <Typography fontSize={"12px"} fontWeight={"500"} mb="10px">
-                  {notification.oType === "Proposal"
-                    ? " Your pending proposal "
-                    : notification.oType === "AccProposal"
-                    ? " Your accepted proposal "
-                    : notification.oType === "Node"
-                    ? YOUR_NODE_TEXT(notification)
-                    : notification.oType === "Propo"
-                    ? " Your node got a proposal for "
-                    : notification.oType === "PropoAccept" &&
-                      " Your node got an improvement for " +
-                        (notification.aType === "newChild"
-                          ? "a new Child!"
-                          : notification.aType.map((pType: any) => {
-                              <p>- {pType.replace(/([a-z])([A-Z])/g, "$1 $2")}</p>;
-                            }))}
-                </Typography>
+            />
+            <Box></Box>
+          </Stack>
+          <Divider
+            sx={{
+              borderColor: theme =>
+                theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookG600 : DESIGN_SYSTEM_COLORS.gray300,
+            }}
+          />
+        </>
+      )}
 
-                <Stack direction={"row"} alignItems={"center"} spacing={"8px"} mb="10px">
-                  <NotificationTypeIcon notification={notification} />
-                  <Typography fontSize={"14px"} fontWeight={"500"}>
-                    {notification.title ?? "Notification"}
+      <Box px="16px" mt="5px">
+        {selectedNotifications.length > 0 && (
+          <Stack direction={"row"} spacing={"12px"} justifyContent={"space-between"} my="14px">
+            <Box>
+              <Tooltip title={"Select all"}>
+                <IconButton onClick={onSelectAll} sx={{ mr: "12px" }}>
+                  {!allNotificationsSelected ? <IndeterminateCheckBoxOutlinedIcon /> : <CheckBoxOutlinedIcon />}
+                </IconButton>
+              </Tooltip>
+              {!props.checked ? (
+                <Tooltip title={"Mark as read"}>
+                  <IconButton onClick={onReadNotifications}>
+                    <DraftsOutlinedIcon />
+                  </IconButton>
+                </Tooltip>
+              ) : (
+                <Tooltip title={"Mark as read"}>
+                  <IconButton onClick={onReadNotifications}>
+                    <EmailOutlinedIcon />
+                  </IconButton>
+                </Tooltip>
+              )}
+            </Box>
+            <Button sx={{ color: DESIGN_SYSTEM_COLORS.primary800 }} onClick={() => setSelectedNotifications([])}>
+              Cancel
+            </Button>
+          </Stack>
+        )}
+
+        <Stack spacing={"8px"}>
+          {filteredNotifications.map(notification => {
+            return (
+              <Paper
+                elevation={3}
+                key={`Notification${notification.id}`}
+                sx={{
+                  display: "flex",
+
+                  listStyle: "none",
+                  p: "10px 16px",
+                  borderRadius: "8px",
+                  backgroundColor: theme =>
+                    theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookG700 : DESIGN_SYSTEM_COLORS.gray100,
+                }}
+              >
+                <Box flex={1}>
+                  <Typography fontSize={"12px"} fontWeight={"500"} mb="10px">
+                    {notification.oType === "Proposal"
+                      ? " Your pending proposal "
+                      : notification.oType === "AccProposal"
+                      ? " Your accepted proposal "
+                      : notification.oType === "Node"
+                      ? YOUR_NODE_TEXT(notification)
+                      : notification.oType === "Propo"
+                      ? " Your node got a proposal for "
+                      : notification.oType === "PropoAccept" &&
+                        " Your node got an improvement for " +
+                          (notification.aType === "newChild"
+                            ? "a new Child!"
+                            : notification.aType.map((pType: any) => {
+                                <p>- {pType.replace(/([a-z])([A-Z])/g, "$1 $2")}</p>;
+                              }))}
                   </Typography>
-                </Stack>
-                <Typography
-                  sx={{
-                    fontSize: "12px",
-                    color: theme =>
-                      theme.palette.mode === "dark"
-                        ? DESIGN_SYSTEM_COLORS.notebookG200
-                        : DESIGN_SYSTEM_COLORS.notebookG300,
-                  }}
-                >
-                  {dayjs(notification.createdAt).fromNow()}
-                </Typography>
-              </Box>
-              <Box sx={{ display: "f  lex", justifyContent: "space-between", alignItems: "center", gap: "5px" }}>
-                {/* <Tooltip title={`Click to ${props.checked ? "check" : "uncheck"} this notification.`}>
+
+                  <Stack direction={"row"} alignItems={"center"} spacing={"8px"} mb="10px">
+                    <NotificationTypeIcon notification={notification} />
+                    <Typography fontSize={"14px"} fontWeight={"500"}>
+                      {notification.title ?? "Notification"}
+                    </Typography>
+                  </Stack>
+                  <Typography
+                    sx={{
+                      fontSize: "12px",
+                      color: theme =>
+                        theme.palette.mode === "dark"
+                          ? DESIGN_SYSTEM_COLORS.notebookG200
+                          : DESIGN_SYSTEM_COLORS.notebookG300,
+                    }}
+                  >
+                    {dayjs(notification.createdAt).fromNow()}
+                  </Typography>
+                </Box>
+                <Box sx={{ display: "f  lex", justifyContent: "space-between", alignItems: "center", gap: "5px" }}>
+                  {/* <Tooltip title={`Click to ${props.checked ? "check" : "uncheck"} this notification.`}>
                 <IconButton onClick={() => checkNotification(notification.id, !props.checked)}>
                   {props.checked ? <CheckCircleOutlineIcon /> : <RadioButtonUncheckedIcon />}
                 </IconButton>
               </Tooltip> */}
-                <Checkbox
-                  checked={selectedNotifications.includes(notification.id)}
-                  onChange={event => handleSelectNotification(event, notification.id)}
-                  sx={{
-                    "&.Mui-checked": {
-                      color: DESIGN_SYSTEM_COLORS.primary800,
-                      background: "radial-gradient(circle, #fff 30%, transparent 30%)",
-                    },
-                  }}
-                />
-              </Box>
-            </Paper>
-          );
-        })}
-      </Stack>
+                  <Checkbox
+                    checked={selectedNotifications.includes(notification.id)}
+                    onChange={event => handleSelectNotification(event, notification.id)}
+                    sx={{
+                      "&.Mui-checked": {
+                        color: DESIGN_SYSTEM_COLORS.primary800,
+                        background: "radial-gradient(circle, #fff 30%, transparent 30%)",
+                      },
+                    }}
+                  />
+                </Box>
+              </Paper>
+            );
+          })}
+        </Stack>
 
-      {props.notifications.length > lastIndex && <Box ref={refInfinityLoaderTrigger}></Box>}
+        {props.notifications.length > lastIndex && <Box ref={refInfinityLoaderTrigger}></Box>}
+      </Box>
     </Box>
   );
 };

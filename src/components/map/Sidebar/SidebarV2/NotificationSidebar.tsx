@@ -1,17 +1,13 @@
 import { Box, Tab, Tabs } from "@mui/material";
 import { collection, DocumentData, getFirestore, onSnapshot, Query, query, where } from "firebase/firestore";
 import React, { ReactNode, useCallback, useEffect, useMemo, useState } from "react";
-import { UserTheme } from "src/knowledgeTypes";
 
-import notificationsDarkTheme from "../../../../../public/notifications-dark-theme.jpg";
-import notificationsLightTheme from "../../../../../public/notifications-light-theme.jpg";
 import NotificationsList from "../NotificationsList";
 import { SidebarWrapper } from "./SidebarWrapper";
 
 type NotificationSidebarProps = {
   open: boolean;
   onClose: () => void;
-  theme: UserTheme;
   openLinkedNode: any;
   username: string;
   sidebarWidth: number;
@@ -39,7 +35,6 @@ type NotificationTabs = {
 const NotificationSidebar = ({
   open,
   onClose,
-  theme,
   openLinkedNode,
   username,
   sidebarWidth,
@@ -193,7 +188,6 @@ const NotificationSidebar = ({
     <SidebarWrapper
       open={open}
       title="Notifications"
-      headerImage={theme === "Dark" ? notificationsDarkTheme : notificationsLightTheme}
       width={sidebarWidth}
       height={innerWidth > 599 ? 100 : 35}
       innerHeight={innerHeight}
@@ -222,7 +216,7 @@ const NotificationSidebar = ({
       }
       contentSignalState={contentSignalState}
       SidebarContent={
-        open ? <Box sx={{ p: "10px 16px" }}>{tabItems[value].content}</Box> : null
+        open ? <Box sx={{ py: "10px" }}>{tabItems[value].content}</Box> : null
         // <Box sx={{ display: "flex", flexDirection: "column", p: "2px 4px" }}>
         //   {((!uncheckedNotifications.length && value === 0) || (!checkedNotifications.length && value === 1)) && (
         //     <Box
