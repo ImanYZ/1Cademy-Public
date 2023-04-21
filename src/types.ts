@@ -38,7 +38,7 @@ export type NotebookDocument = {
   ownerChooseUname: boolean;
   title: string;
   duplicatedFrom: string;
-  isPublic: "visible" | "editable" | "none";
+  isPublic: "visible" | "editable" | "private";
   users: string[]; // here is users which access and owner
   usersInfo: {
     [uname: string]: {
@@ -54,4 +54,22 @@ export type NotebookDocument = {
 
 export type Notebook = NotebookDocument & {
   id: string;
+};
+
+export type RequestDocument = {
+  requestingUser: string;
+  requestingUserInfo: {
+    imageUrl: string;
+  };
+  requestedUser: string;
+  requestedUserInfo: {
+    imageUrl: string;
+  };
+  permission: "view" | "edit";
+  item: string;
+  itemInfo: {
+    name: string;
+  };
+  state: "waiting" | "denied" | "accepted";
+  type: "notebook";
 };

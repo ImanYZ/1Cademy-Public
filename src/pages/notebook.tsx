@@ -3,6 +3,7 @@ import CenterFocusStrongIcon from "@mui/icons-material/CenterFocusStrong";
 import CloseIcon from "@mui/icons-material/Close";
 import CodeIcon from "@mui/icons-material/Code";
 import HelpCenterIcon from "@mui/icons-material/HelpCenter";
+import LockIcon from "@mui/icons-material/Lock";
 import MyLocationIcon from "@mui/icons-material/MyLocation";
 import { Masonry } from "@mui/lab";
 import {
@@ -13,6 +14,7 @@ import {
   IconButton,
   Modal,
   Paper,
+  Stack,
   Tooltip,
   Typography,
   useTheme,
@@ -78,6 +80,7 @@ import { MemoizedNodeList } from "../components/map/NodesList";
 import { NotebookPopup } from "../components/map/Popup";
 import { MemoizedToolbarSidebar } from "../components/map/Sidebar/SidebarV2/ToolbarSidebar";
 import { MemoizedToolbox } from "../components/map/Toolbox";
+import ModalWrapper from "../components/ModalWrapper";
 import { NodeItemDashboard } from "../components/NodeItemDashboard";
 import { Portal } from "../components/Portal";
 import { MemoizedTutorialTableOfContent } from "../components/tutorial/TutorialTableOfContent";
@@ -147,10 +150,18 @@ import {
   UserTutorial,
   UserTutorials,
 } from "../nodeBookTypes";
-import { NodeType, Notebook, NotebookDocument, SimpleNode2 } from "../types";
+import { NodeType, Notebook, NotebookDocument, RequestDocument, SimpleNode2 } from "../types";
 import { doNeedToDeleteNode, getNodeTypesFromNode, isVersionApproved } from "../utils/helpers";
 
 // export type TutorialKeys = TutorialTypeKeys | null;
+
+type RequestNotebookAccess = {
+  permission: "view" | "edit";
+  requestedUser: string;
+  requestedUserImageUrl: string;
+  notebookId: string;
+  notebookName: string;
+};
 
 type DashboardProps = {};
 
@@ -363,10 +374,10 @@ const Dashboard = ({}: DashboardProps) => {
   const pathwayRef = useRef({ node: "", parent: "", child: "" });
 
   const [notebooks, setNotebooks] = useState<Notebook[]>([]);
-  // const [selectedNotebookId, setSelectedNotebookId] = useState("");
   const [selectedNotebook, setSelectedNotebook] = useState<Notebook | null>(null);
-  // const selectedNotebookIdRef = useRef<string>("");
   const selectedPreviousNotebookIdRef = useRef("");
+
+  const [showModalAccessLimited, setShowModalAccessLimited] = useState<RequestNotebookAccess | null>(null);
 
   const onNodeInViewport = useCallback(
     (nodeId: string, nodes: FullNodesData) => {
@@ -4279,6 +4290,32 @@ const Dashboard = ({}: DashboardProps) => {
     [nodeBookDispatch]
   );
 
+  const onCreateRequestPermissionNotebook = useCallback(
+    async ({ permission, requestedUser, requestedUserImageUrl, notebookId, notebookName }: RequestNotebookAccess) => {
+      try {
+        if (!user) return;
+        const requestDocument: RequestDocument = {
+          requestingUser: user.uname,
+          requestingUserInfo: { imageUrl: user.imageUrl ?? "" },
+          requestedUser: requestedUser,
+          requestedUserInfo: { imageUrl: requestedUserImageUrl },
+          permission,
+          item: notebookId,
+          itemInfo: { name: notebookName },
+          state: "waiting",
+          type: "notebook",
+        };
+
+        const requestsRef = collection(db, "requests");
+        setShowModalAccessLimited(null);
+        await addDoc(requestsRef, requestDocument);
+      } catch (err) {
+        console.log(err);
+      }
+    },
+    [db, user]
+  );
+
   const handleCloseProgressBarMenu = useCallback(() => {
     setOpenProgressBarMenu(false);
   }, []);
@@ -5994,6 +6031,8 @@ const Dashboard = ({}: DashboardProps) => {
       if (!nb) return;
       if (!user) return;
 
+      devLog("DUPLICATE_NOTEBOOK_FROM_PARAMS", { nb, user });
+
       const userNotebooks: Notebook[] = [];
       const q = query(collection(db, "notebooks"), where("owner", "==", user.uname));
       const queryDocs = await getDocs(q);
@@ -6006,42 +6045,49 @@ const Dashboard = ({}: DashboardProps) => {
       const notebookRef = doc(db, "notebooks", nb);
       const notebookDoc = await getDoc(notebookRef);
       if (notebookDoc.exists()) {
-        const notebookData = { id: nb, ...(notebookDoc.data() as NotebookDocument) };
-        if (notebookData.isPublic === "none") return; // TODO: validate if user has permissions
-
-        const sameDuplications = userNotebooks.filter(cur => cur.duplicatedFrom === notebookData.id);
-        const getOwnerData = (notebookData: Notebook) => {
-          if (notebookData.isPublic === "visible") {
-            return {
-              owner: user.uname,
-              ownerImgUrl: user.imageUrl ?? NO_USER_IMAGE,
-              ownerChooseUname: Boolean(user.chooseUname),
-              ownerFullName: user.fName ?? "",
-            };
-          }
-          if (notebookData.isPublic === "editable") {
-            return {
-              owner: notebookData.owner,
-              ownerImgUrl: notebookData.ownerImgUrl,
-              ownerChooseUname: notebookData.ownerChooseUname,
-              ownerFullName: notebookData.ownerFullName,
-            };
-          }
-          return null;
+        const notebookData: Notebook = { id: nb, ...(notebookDoc.data() as NotebookDocument) };
+        const tmpNotebookAccessRequest: RequestNotebookAccess = {
+          notebookId: notebookData.id,
+          notebookName: notebookData.title,
+          requestedUser: notebookData.owner,
+          requestedUserImageUrl: notebookData.ownerImgUrl,
+          permission: "view",
         };
+        // if private: user has access ? select modal : show access request modal
+        // editable: user has access ? select: modify document to have access and select
+        // visible: duplicate as owner
+        const userHasAccess = notebookData.users.find(cur => cur === user.uname);
 
-        const ownerData = getOwnerData(notebookData);
-        if (!ownerData) return;
+        if (notebookData.isPublic === "private") {
+          if (userHasAccess) return setSelectedNotebook(notebookData);
+          return setShowModalAccessLimited(tmpNotebookAccessRequest);
+        }
+        if (notebookData.isPublic === "editable") {
+          if (userHasAccess) return setSelectedNotebook(notebookData);
+          return await updateDoc(notebookRef, {
+            users: [...notebookData.users, user.uname],
+            usersInfo: {
+              ...notebookData.usersInfo,
+              [user.uname]: {
+                role: "viewer",
+                imageUrl: user.imageUrl ?? NO_USER_IMAGE,
+                fullname: user.fName,
+                chooseUname: user.chooseUname,
+              },
+            },
+          });
+        }
 
+        // duplicate visible notebook from params
+        const sameDuplications = userNotebooks.filter(cur => cur.duplicatedFrom === notebookData.id);
         const copyNotebook: NotebookDocument = {
-          // owner: user.uname,
-          // ownerImgUrl: user.imageUrl ?? NO_USER_IMAGE,
-          // ownerChooseUname: Boolean(user.chooseUname),
-          ...ownerData,
+          owner: user.uname,
+          ownerImgUrl: user.imageUrl ?? NO_USER_IMAGE,
+          ownerChooseUname: Boolean(user.chooseUname),
           ownerFullName: user.fName ?? "",
           title: `${notebookData.title} (${sameDuplications.length + 2})`,
           duplicatedFrom: notebookData.id,
-          isPublic: notebookData.isPublic,
+          isPublic: "visible",
           users: [user.uname],
           usersInfo: {
             [user.uname]: {
@@ -6057,6 +6103,7 @@ const Dashboard = ({}: DashboardProps) => {
 
         const notebooksRef = collection(db, "notebooks");
         const docRef = await addDoc(notebooksRef, copyNotebook);
+        console.log({ docRef });
         const q = query(
           collection(db, "userNodes"),
           where("user", "==", notebookData.owner),
@@ -6958,6 +7005,35 @@ const Dashboard = ({}: DashboardProps) => {
             onForceTutorial={setForcedTutorial}
             tutorialProgress={tutorialProgress}
           />
+          <ModalWrapper open={Boolean(showModalAccessLimited)} handleClose={() => setShowModalAccessLimited(null)}>
+            <Stack alignItems={"center"} sx={{ width: "300px" }}>
+              <LockIcon sx={{ fontSize: "31px" }} />
+              <Typography sx={{ fontSize: "18px", fontWeight: 500, mt: "18px", mb: "6px" }}>
+                Access is limited
+              </Typography>
+              <Typography sx={{ fontSize: "14px", textAlign: "center", mb: "16px" }}>
+                You can send a request to a creator to view this Notebook.
+              </Typography>
+              <Box sx={{ width: "100%", display: "flex", justifyContent: "space-between" }}>
+                <Button
+                  variant="outlined"
+                  onClick={() => setShowModalAccessLimited(null)}
+                  sx={{ borderRadius: "26px" }}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  variant="contained"
+                  onClick={
+                    showModalAccessLimited ? () => onCreateRequestPermissionNotebook(showModalAccessLimited) : undefined
+                  }
+                  sx={{ borderRadius: "26px" }}
+                >
+                  Send Request
+                </Button>
+              </Box>
+            </Stack>
+          </ModalWrapper>
         </Box>
       </Box>
     </div>

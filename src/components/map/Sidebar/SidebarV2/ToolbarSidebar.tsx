@@ -326,8 +326,8 @@ MainSidebarProps) => {
   const onUpdateNotebookTitle = useCallback(async () => {
     try {
       if (!editableNotebook) return;
-      const notebooksRef = doc(db, "notebooks", editableNotebook.id);
-      await updateDoc(notebooksRef, { title: editableNotebook.title });
+      const notebookRef = doc(db, "notebooks", editableNotebook.id);
+      await updateDoc(notebookRef, { title: editableNotebook.title });
       setEditableNotebook(null);
     } catch (err) {}
   }, [db, editableNotebook]);
