@@ -1,6 +1,9 @@
 import { Box, Tab, Tabs } from "@mui/material";
 import { collection, DocumentData, getFirestore, onSnapshot, Query, query, where } from "firebase/firestore";
 import React, { ReactNode, useCallback, useEffect, useMemo, useState } from "react";
+import { ReactElement } from "react-markdown/lib/react-markdown";
+
+import { DESIGN_SYSTEM_COLORS } from "@/lib/theme/colors";
 
 import NotificationsList from "../NotificationsList";
 import { SidebarWrapper } from "./SidebarWrapper";
@@ -30,6 +33,7 @@ type Notification = {
 type NotificationTabs = {
   title: string;
   content: ReactNode;
+  badge?: ReactElement;
 };
 
 const NotificationSidebar = ({
@@ -174,6 +178,23 @@ const NotificationSidebar = ({
         content: (
           <NotificationsList notifications={uncheckedNotifications} openLinkedNode={openLinkedNode} checked={false} />
         ),
+        badge: (
+          <>
+            {uncheckedNotifications.length > 0 ? (
+              <Box
+                sx={{
+                  ml: "10px",
+                  p: "4px 8px",
+                  borderRadius: "28px",
+                  backgroundColor: DESIGN_SYSTEM_COLORS.notebookScarlet,
+                  color: DESIGN_SYSTEM_COLORS.gray50,
+                }}
+              >
+                {uncheckedNotifications.length}
+              </Box>
+            ) : null}
+          </>
+        ),
       },
       {
         title: "Read",
@@ -209,6 +230,8 @@ const NotificationSidebar = ({
                 label={tabItem.title}
                 {...a11yProps(idx)}
                 sx={{ py: "16px" }}
+                icon={tabItem.badge || <></>}
+                iconPosition="end"
               />
             ))}
           </Tabs>
