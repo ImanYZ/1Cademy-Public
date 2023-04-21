@@ -97,8 +97,8 @@ type MainSidebarProps = {
   notebooks: Notebook[];
   setNotebooks: Dispatch<SetStateAction<Notebook[]>>;
   onChangeNotebook: (notebookId: string) => void;
-  selectedNotebook: string;
-  openNodesOnNotebook: (notebookId: string, nodeIds: string[]) => Promise<void>;
+  selectedNotebook: Notebook | null;
+  openNodesOnNotebook: (notebook: Notebook, nodeIds: string[]) => Promise<void>;
   // setSelectedNtoebook
   // setCurrentTutorial: Dispatch<SetStateAction<TutorialKeys>>;
 };
@@ -355,7 +355,8 @@ MainSidebarProps) => {
       const nodeIds: string[] = [];
       userNodesDocs.forEach(doc => nodeIds.push(doc.data().node));
       // console.log({ nodeIds });
-      await openNodesOnNotebook(docRef.id, nodeIds);
+      const newNotebook: Notebook = { ...copyNotebook, id: docRef.id };
+      await openNodesOnNotebook(newNotebook, nodeIds);
       // if (titleInputRef.current) titleInputRef.current.focus();
     } catch (error) {
       console.error("Cant duplicate a notebook", error);
@@ -573,7 +574,7 @@ MainSidebarProps) => {
                       <Box sx={{ minWidth: "0px", display: "flex", alignItems: "center" }}>
                         <Box
                           sx={{
-                            background: selectedNotebook === cur.id ? "#12B76A" : "none",
+                            background: selectedNotebook?.id === cur.id ? "#12B76A" : "none",
                             minWidth: "10px",
                             width: "10px",
                             height: "10px",

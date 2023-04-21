@@ -365,7 +365,7 @@ const Dashboard = ({}: DashboardProps) => {
   const [notebooks, setNotebooks] = useState<Notebook[]>([]);
   // const [selectedNotebookId, setSelectedNotebookId] = useState("");
   const [selectedNotebook, setSelectedNotebook] = useState<Notebook | null>(null);
-  const selectedNotebookIdRef = useRef<string>("");
+  // const selectedNotebookIdRef = useRef<string>("");
   const selectedPreviousNotebookIdRef = useRef("");
 
   const onNodeInViewport = useCallback(
@@ -678,7 +678,7 @@ const Dashboard = ({}: DashboardProps) => {
   };
   const openNodeHandler = useMemoizedCallback(
     async (nodeId: string, openWithDefaultValues: Partial<UserNodesData> = {}) => {
-      if (!selectedNotebookIdRef.current) return;
+      if (!selectedNotebook?.id) return;
       devLog("OPEN_NODE_HANDLER", { nodeId, openWithDefaultValues });
 
       let linkedNodeRef;
@@ -715,9 +715,9 @@ const Dashboard = ({}: DashboardProps) => {
               ...userNodeDataTmp,
               ...openWithDefaultValues,
             };
-            const existNotebooks = (userNodeData.notebooks ?? []).find(c => c === selectedNotebookIdRef.current);
+            const existNotebooks = (userNodeData.notebooks ?? []).find(c => c === selectedNotebook.id);
             if (!existNotebooks) {
-              userNodeData.notebooks = [...(userNodeData.notebooks ?? []), selectedNotebookIdRef.current];
+              userNodeData.notebooks = [...(userNodeData.notebooks ?? []), selectedNotebook.id];
               userNodeData.expands = [...(userNodeData.expands ?? []), true];
             }
             userNodeData.updatedAt = Timestamp.fromDate(new Date());
@@ -740,7 +740,7 @@ const Dashboard = ({}: DashboardProps) => {
               node: nodeId,
               user: user.uname,
               wrong: false,
-              notebooks: [selectedNotebookIdRef.current],
+              notebooks: [selectedNotebook.id],
               expands: [true],
             };
             batch.set(doc(userNodeRef), userNodeData);
@@ -766,7 +766,7 @@ const Dashboard = ({}: DashboardProps) => {
         }
       }
     },
-    [user, allTags]
+    [user, allTags, selectedNotebook?.id]
   );
 
   const setNodeParts = useCallback((nodeId: string, innerFunc: (thisNode: FullNodeData) => FullNodeData) => {
@@ -1108,9 +1108,9 @@ const Dashboard = ({}: DashboardProps) => {
     if (!user.uname) return;
     if (!allTagsLoaded) return;
     if (!userTutorialLoaded) return;
-    if (!selectedNotebook) return;
+    if (!selectedNotebook?.id) return;
 
-    devLog("SYNCHRONIZATION", { selectedNotebook });
+    devLog("SYNCHRONIZATION", { selectedNotebookId: selectedNotebook.id });
 
     // db.collection("cities").where("regions", "array-contains", "west_coast").where("population", ">", 1000000).where("area", ">", 1000000)
     const userNodesRef = collection(db, "userNodes");
@@ -1145,7 +1145,7 @@ const Dashboard = ({}: DashboardProps) => {
       killSnapshot();
     };
     // INFO: notebookChanged used in dependecies because of the redraw graph (magic wand button)
-  }, [allTagsLoaded, db, snapshot, user, userTutorialLoaded, notebookChanged, selectedNotebook]);
+  }, [allTagsLoaded, db, snapshot, user, userTutorialLoaded, notebookChanged, selectedNotebook?.id]);
 
   useEffect(() => {
     if (!db) return;
@@ -1808,7 +1808,7 @@ const Dashboard = ({}: DashboardProps) => {
 
   const hideDescendants = useMemoizedCallback(
     nodeId => {
-      if (!selectedNotebook) return;
+      if (!selectedNotebook?.id) return;
       if (notebookRef.current.choosingNode || !user) return;
 
       setGraph(graph => {
@@ -1883,7 +1883,7 @@ const Dashboard = ({}: DashboardProps) => {
         return graph;
       });
     },
-    [recursiveDescendants, selectedNotebook]
+    [recursiveDescendants, selectedNotebook?.id]
   );
 
   const openLinkedNode = useCallback(
@@ -2350,11 +2350,11 @@ const Dashboard = ({}: DashboardProps) => {
   );
 
   const openNodesOnNotebook = useCallback(
-    async (notebookId: string, nodeIds: string[]) => {
+    async (notebook: Notebook, nodeIds: string[]) => {
       if (isWritingOnDBRef.current) return;
       if (notebookRef.current.choosingNode || !user) return;
 
-      devLog("OPEN_NODES_ON_NOTEBOOK", { notebookId, nodeIds, isWritingOnDB: isWritingOnDBRef.current });
+      devLog("OPEN_NODES_ON_NOTEBOOK", { notebook, nodeIds, isWritingOnDB: isWritingOnDBRef.current });
 
       let userNodeRef = null;
       let userNodeData = null;
@@ -2413,7 +2413,7 @@ const Dashboard = ({}: DashboardProps) => {
             // if exist documents update the first
             userNodeRef = doc(db, "userNodes", userNodeDoc.docs[0].id);
             userNodeData = userNodeDoc.docs[0].data();
-            userNodeData.notebooks = [...(userNodeData.notebooks ?? []), notebookId];
+            userNodeData.notebooks = [...(userNodeData.notebooks ?? []), notebook.id];
             userNodeData.expands = [...(userNodeData.expands ?? []), true];
             userNodeData.updatedAt = Timestamp.fromDate(new Date());
             batchArray[batchFlags.batchIndex].update(userNodeRef, userNodeData);
@@ -2433,7 +2433,7 @@ const Dashboard = ({}: DashboardProps) => {
               node: nodeId,
               user: user.uname,
               wrong: false,
-              notebooks: [notebookId],
+              notebooks: [notebook.id],
               expands: [true],
             };
             userNodeRef = await addDoc(collection(db, "userNodes"), userNodeData);
@@ -2455,7 +2455,8 @@ const Dashboard = ({}: DashboardProps) => {
         })
       );
       await Promise.all(batchArray.map(async batch => await batch.commit()));
-      setSelectedNotebookId(notebookId);
+      setSelectedNotebook(notebook);
+      // setSelectedNotebookId(notebookId);
       await detectElements({ ids: nodeIds });
       isWritingOnDBRef.current = false;
     },
@@ -2464,6 +2465,7 @@ const Dashboard = ({}: DashboardProps) => {
 
   const toggleNode = useCallback(
     (event: any, nodeId: string) => {
+      if (selectedNotebook?.id) return;
       if (notebookRef.current.choosingNode) return;
 
       notebookRef.current.selectedNode = nodeId;
@@ -2486,7 +2488,7 @@ const Dashboard = ({}: DashboardProps) => {
         //   changeNode.closedHeight = thisNode.closedHeight;
         // }
 
-        const notebookIdx = (thisNode.notebooks ?? []).findIndex(cur => cur === selectedNotebookId);
+        const notebookIdx = (thisNode.notebooks ?? []).findIndex(cur => cur === selectedNotebook?.id);
         if (notebookIdx < 0) {
           console.error("notebook property has invalid values");
           return { nodes: oldNodes, edges };
@@ -2548,7 +2550,7 @@ const Dashboard = ({}: DashboardProps) => {
     },
     // TODO: CHECK dependencies
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [user, initNodeStatusChange]
+    [user, initNodeStatusChange, selectedNotebook?.id]
   );
 
   const openNodePart = useCallback(
@@ -3518,9 +3520,9 @@ const Dashboard = ({}: DashboardProps) => {
 
   const saveProposedChildNode = useCallback(
     (newNodeId: string, summary: string, reason: string, onComplete: () => void) => {
-      if (!selectedNotebookId) return;
+      if (!selectedNotebook?.id) return;
 
-      devLog("SAVE_PROPOSED_CHILD_NODE", { selectedNotebookId, newNodeId, summary, reason });
+      devLog("SAVE_PROPOSED_CHILD_NODE", { selectedNotebookId: selectedNotebook.id, newNodeId, summary, reason });
       notebookRef.current.choosingNode = null;
       notebookRef.current.chosenNode = null;
       nodeBookDispatch({ type: "setChoosingNode", payload: null });
@@ -3587,7 +3589,7 @@ const Dashboard = ({}: DashboardProps) => {
           summary: summary,
           proposal: reason,
           versionNodeId: newNodeId,
-          notebookId: selectedNotebookId,
+          notebookId: selectedNotebook.id,
         };
         delete postData.isStudied;
         delete postData.bookmarked;
@@ -3647,7 +3649,7 @@ const Dashboard = ({}: DashboardProps) => {
         return { nodes, edges };
       });
     },
-    [selectedNotebookId, nodeBookDispatch, getMapGraph, scrollToNode]
+    [selectedNotebook?.id, nodeBookDispatch, getMapGraph, scrollToNode]
   );
 
   const fetchProposals = useCallback(
@@ -4108,7 +4110,7 @@ const Dashboard = ({}: DashboardProps) => {
       award: any,
       newNodeId: string
     ) => {
-      if (!selectedNotebookId) return;
+      if (!selectedNotebook?.id) return;
       if (!user) return;
 
       devLog("RATE_PROPOSAL", { proposals, setProposals, proposalId, proposalIdx, correct, wrong, award, newNodeId });
@@ -4166,7 +4168,7 @@ const Dashboard = ({}: DashboardProps) => {
           award,
           uname: user.uname,
           versionNodeId: newNodeId,
-          notebookId: selectedNotebookId,
+          notebookId: selectedNotebook.id,
         };
         try {
           Post("/rateVersion", postData);
@@ -4203,7 +4205,7 @@ const Dashboard = ({}: DashboardProps) => {
         });
       }
     },
-    [selectedNotebookId, user, nodeBookState, selectedNodeType]
+    [selectedNotebook?.id, user, nodeBookState, selectedNodeType]
     // [user, nodeBookState, selectedNodeType, reloadPermanentGraph]
   );
   const removeImage = useCallback(
@@ -5979,9 +5981,13 @@ const Dashboard = ({}: DashboardProps) => {
     return { tutorialsComplete, totalTutorials: tutorialsOfTOC.length };
   }, [tutorialGroup, userTutorial]);
 
-  const onChangeNotebook = useCallback((notebookId: string) => {
-    setSelectedNotebookId(notebookId);
-  }, []);
+  const onChangeNotebook = useCallback(
+    (notebookId: string) => {
+      // setSelectedNotebookId(notebookId);
+      setSelectedNotebook(notebooks.find(cur => notebookId === cur.id) ?? null);
+    },
+    [notebooks]
+  );
 
   // ------------------------ useEffects
 
@@ -5998,7 +6004,7 @@ const Dashboard = ({}: DashboardProps) => {
 
       // validate if notebook was duplicated previously
       const notebookFromParams = userNotebooks.find(cur => cur.duplicatedFrom === nb);
-      if (notebookFromParams) return setSelectedNotebookId(notebookFromParams.id);
+      if (notebookFromParams) return setSelectedNotebook(notebookFromParams);
 
       const notebookRef = doc(db, "notebooks", nb);
       const notebookDoc = await getDoc(notebookRef);
@@ -6056,7 +6062,8 @@ const Dashboard = ({}: DashboardProps) => {
         const userNodesDocs = await getDocs(q);
         const nodeIds: string[] = [];
         userNodesDocs.forEach(doc => nodeIds.push(doc.data().node));
-        await openNodesOnNotebook(docRef.id, nodeIds);
+        const newNotebook: Notebook = { ...copyNotebook, id: docRef.id };
+        await openNodesOnNotebook(newNotebook, nodeIds);
       } else {
         console.warn(`Notebook with id: ${nb} from params doesn't exist`);
       }
@@ -6231,7 +6238,7 @@ const Dashboard = ({}: DashboardProps) => {
               {/* Data from map, don't REMOVE */}
               <Box>
                 Interaction map from '{user?.uname}' with [{Object.entries(graph.nodes).length}] Nodes in Notebook:
-                {notebooks.find(c => c.id === selectedNotebookId)?.title ?? "--"} with Id: {selectedNotebookId}
+                {selectedNotebook?.title ?? "--"} with Id: {selectedNotebook?.id ?? "--"}
               </Box>
 
               <Divider />
@@ -6265,7 +6272,7 @@ const Dashboard = ({}: DashboardProps) => {
 
               <Typography>Notebooks:</Typography>
               <Box>
-                <Button onClick={() => console.log(selectedNotebookId)}>selectedNotebookId</Button>
+                <Button onClick={() => console.log(selectedNotebook)}>selectedNotebook</Button>
                 <Button onClick={() => console.log(selectedPreviousNotebookIdRef.current)}>
                   selectedPreviousNotebookIdRef
                 </Button>
@@ -6401,7 +6408,7 @@ const Dashboard = ({}: DashboardProps) => {
                 dispatch={dispatch}
                 notebooks={notebooks}
                 onChangeNotebook={onChangeNotebook}
-                selectedNotebook={selectedNotebookId}
+                selectedNotebook={selectedNotebook}
                 openNodesOnNotebook={openNodesOnNotebook}
                 setNotebooks={setNotebooks}
               />
