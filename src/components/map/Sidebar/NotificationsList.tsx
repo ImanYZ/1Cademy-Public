@@ -1,16 +1,18 @@
+import CheckBoxOutlinedIcon from "@mui/icons-material/CheckBoxOutlined";
 import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
 import DeleteForeverRoundedIcon from "@mui/icons-material/DeleteForeverRounded";
 import DoneAllRoundedIcon from "@mui/icons-material/DoneAllRounded";
 import DoneRoundedIcon from "@mui/icons-material/DoneRounded";
 import DraftsOutlinedIcon from "@mui/icons-material/DraftsOutlined";
 import EditRoundedIcon from "@mui/icons-material/EditRounded";
+import EmailOutlinedIcon from "@mui/icons-material/EmailOutlined";
 import EmojiEventsRoundedIcon from "@mui/icons-material/EmojiEventsRounded";
 import IndeterminateCheckBoxOutlinedIcon from "@mui/icons-material/IndeterminateCheckBoxOutlined";
-import { Box, Checkbox, IconButton, Paper, Stack, Tooltip, Typography } from "@mui/material";
+import { Box, Button, Checkbox, IconButton, Paper, Stack, Tooltip, Typography } from "@mui/material";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import { collection, doc, getDocs, getFirestore, increment, limit, query, where, writeBatch } from "firebase/firestore";
-import React, { ChangeEvent, useCallback, useEffect, useState } from "react";
+import React, { ChangeEvent, useCallback, useEffect, useMemo, useState } from "react";
 
 import { DESIGN_SYSTEM_COLORS } from "@/lib/theme/colors";
 
@@ -102,6 +104,11 @@ const NotificationsList = (props: NotificationsListProps) => {
       return sNotifications;
     });
   };
+  const onSelectAll = () => {
+    const notificationIds: string[] = notifications.reduce((acc, notification) => [...acc, notification.id], []);
+    setSelectedNotifications(notificationIds);
+  };
+
   const onReadNotifications = useCallback(async () => {
     if (selectedNotifications.length <= 0) return;
 
@@ -146,21 +153,39 @@ const NotificationsList = (props: NotificationsListProps) => {
     }
     return "";
   };
-  console.log({ notifications });
+
+  const allNotificationsSelected = useMemo(
+    () => selectedNotifications.length !== 0 && selectedNotifications.length === notifications.length,
+    [notifications.length, selectedNotifications.length]
+  );
   return (
     <Box>
-      <Stack direction={"row"} spacing={"12px"}>
-        <Tooltip title={"Select all"}>
-          <IconButton onClick={onReadNotifications}>
-            <IndeterminateCheckBoxOutlinedIcon />
-          </IconButton>
-        </Tooltip>
-        <Tooltip title={"Mark as read"}>
-          <IconButton onClick={onReadNotifications}>
-            <DraftsOutlinedIcon />
-          </IconButton>
-        </Tooltip>
+      <Stack direction={"row"} spacing={"12px"} justifyContent={"space-between"} my="14px">
+        <Box>
+          <Tooltip title={"Select all"}>
+            <IconButton onClick={onSelectAll} sx={{ mr: "12px" }}>
+              {!allNotificationsSelected ? <IndeterminateCheckBoxOutlinedIcon /> : <CheckBoxOutlinedIcon />}
+            </IconButton>
+          </Tooltip>
+          {!props.checked ? (
+            <Tooltip title={"Mark as read"}>
+              <IconButton onClick={onReadNotifications}>
+                <DraftsOutlinedIcon />
+              </IconButton>
+            </Tooltip>
+          ) : (
+            <Tooltip title={"Mark as read"}>
+              <IconButton onClick={onReadNotifications}>
+                <EmailOutlinedIcon />
+              </IconButton>
+            </Tooltip>
+          )}
+        </Box>
+        <Button sx={{ color: DESIGN_SYSTEM_COLORS.primary800 }} onClick={() => setSelectedNotifications([])}>
+          Cancel
+        </Button>
       </Stack>
+
       <Stack spacing={"8px"}>
         {notifications.map(notification => {
           return (
@@ -221,6 +246,7 @@ const NotificationsList = (props: NotificationsListProps) => {
                 </IconButton>
               </Tooltip> */}
                 <Checkbox
+                  checked={selectedNotifications.includes(notification.id)}
                   onChange={event => handleSelectNotification(event, notification.id)}
                   sx={{
                     "&.Mui-checked": {
@@ -234,7 +260,8 @@ const NotificationsList = (props: NotificationsListProps) => {
           );
         })}
       </Stack>
-      {props.notifications.length > lastIndex && <Box id="ContinueButton" ref={refInfinityLoaderTrigger}></Box>}
+
+      {props.notifications.length > lastIndex && <Box ref={refInfinityLoaderTrigger}></Box>}
     </Box>
   );
 };

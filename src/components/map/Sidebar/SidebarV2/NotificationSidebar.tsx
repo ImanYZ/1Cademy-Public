@@ -1,24 +1,10 @@
-import DoneAllIcon from "@mui/icons-material/DoneAll";
 import { Box, Tab, Tabs } from "@mui/material";
-import {
-  collection,
-  doc,
-  DocumentData,
-  getDocs,
-  getFirestore,
-  limit,
-  onSnapshot,
-  Query,
-  query,
-  where,
-  writeBatch,
-} from "firebase/firestore";
+import { collection, DocumentData, getFirestore, onSnapshot, Query, query, where } from "firebase/firestore";
 import React, { ReactNode, useCallback, useEffect, useMemo, useState } from "react";
 import { UserTheme } from "src/knowledgeTypes";
 
 import notificationsDarkTheme from "../../../../../public/notifications-dark-theme.jpg";
 import notificationsLightTheme from "../../../../../public/notifications-light-theme.jpg";
-import { MemoizedMetaButton } from "../../MetaButton";
 import NotificationsList from "../NotificationsList";
 import { SidebarWrapper } from "./SidebarWrapper";
 
@@ -173,25 +159,6 @@ const NotificationSidebar = ({
     };
   }, [db, snapshot, username]);
 
-  const checkAllNotification = useCallback(async () => {
-    if (!username) return;
-    const batch = writeBatch(db);
-    const q = query(collection(db, "notifications"), where("proposer", "==", username));
-    const querySnapshot = await getDocs(q);
-    querySnapshot.forEach(notificationDoc => {
-      const notificationRef = doc(db, "notifications", notificationDoc.id);
-      batch.update(notificationRef, { checked: true });
-    });
-
-    const notificationNumsQuery = query(collection(db, "notificationNums"), where("uname", "==", username), limit(1));
-    const notificationNumsDocs = await getDocs(notificationNumsQuery);
-    if (notificationNumsDocs.docs.length) {
-      const notificationNumsRef = doc(db, "notificationNums", notificationNumsDocs.docs[0].id);
-      batch.update(notificationNumsRef, { nNum: 0 });
-    }
-    await batch.commit();
-  }, [db, username]);
-
   const handleChange = (event: React.SyntheticEvent, newValue: number) => {
     setValue(newValue);
   };
@@ -210,18 +177,7 @@ const NotificationSidebar = ({
       {
         title: "Unread",
         content: (
-          <Box sx={{ display: "flex", flexDirection: "column", gap: "4px" }}>
-            <div id="MarkAllRead">
-              <MemoizedMetaButton onClick={() => checkAllNotification()}>
-                <div id="MarkAllReadButton">
-                  {/* <i className="material-icons DoneIcon green-text">done_all</i> */}
-                  <DoneAllIcon className="material-icons DoneIcon green-text" />
-                  <span>Mark All Read</span>
-                </div>
-              </MemoizedMetaButton>
-            </div>
-            <NotificationsList notifications={uncheckedNotifications} openLinkedNode={openLinkedNode} checked={false} />
-          </Box>
+          <NotificationsList notifications={uncheckedNotifications} openLinkedNode={openLinkedNode} checked={false} />
         ),
       },
       {
@@ -231,7 +187,7 @@ const NotificationSidebar = ({
         ),
       },
     ];
-  }, [checkAllNotification, checkedNotifications, openLinkedNode, uncheckedNotifications]);
+  }, [checkedNotifications, openLinkedNode, uncheckedNotifications]);
 
   return (
     <SidebarWrapper
