@@ -13,7 +13,7 @@ import {
   where,
   writeBatch,
 } from "firebase/firestore";
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, { ReactNode, useCallback, useEffect, useMemo, useState } from "react";
 import { UserTheme } from "src/knowledgeTypes";
 
 import notificationsDarkTheme from "../../../../../public/notifications-dark-theme.jpg";
@@ -43,6 +43,11 @@ type Notification = {
   title: string;
   oType: string;
   uname: string;
+};
+
+type NotificationTabs = {
+  title: string;
+  content: ReactNode;
 };
 
 const NotificationSidebar = ({
@@ -200,6 +205,34 @@ const NotificationSidebar = ({
     return [...uncheckedNotifications];
   }, [checkedNotifications, uncheckedNotifications, value]);
 
+  const tabItems = useMemo<NotificationTabs[]>(() => {
+    return [
+      {
+        title: "Unread",
+        content: (
+          <Box sx={{ display: "flex", flexDirection: "column", gap: "4px" }}>
+            <div id="MarkAllRead">
+              <MemoizedMetaButton onClick={() => checkAllNotification()}>
+                <div id="MarkAllReadButton">
+                  {/* <i className="material-icons DoneIcon green-text">done_all</i> */}
+                  <DoneAllIcon className="material-icons DoneIcon green-text" />
+                  <span>Mark All Read</span>
+                </div>
+              </MemoizedMetaButton>
+            </div>
+            <NotificationsList notifications={uncheckedNotifications} openLinkedNode={openLinkedNode} checked={false} />
+          </Box>
+        ),
+      },
+      {
+        title: "Read",
+        content: (
+          <NotificationsList notifications={checkedNotifications} openLinkedNode={openLinkedNode} checked={true} />
+        ),
+      },
+    ];
+  }, [checkAllNotification, checkedNotifications, openLinkedNode, uncheckedNotifications]);
+
   return (
     <SidebarWrapper
       open={open}
@@ -218,13 +251,14 @@ const NotificationSidebar = ({
             width: "100%",
           }}
         >
-          <Tabs value={value} onChange={handleChange} aria-label={"Notification Tabs"}>
-            {[{ title: "Unread" }, { title: "Read" }].map((tabItem, idx: number) => (
+          <Tabs value={value} onChange={handleChange} aria-label={"Notification Tabs"} variant="fullWidth">
+            {tabItems.map((tabItem, idx: number) => (
               <Tab
                 key={tabItem.title}
                 id={`notifications-tab-${tabItem.title.toLowerCase()}`}
                 label={tabItem.title}
                 {...a11yProps(idx)}
+                sx={{ py: "16px" }}
               />
             ))}
           </Tabs>
@@ -232,43 +266,43 @@ const NotificationSidebar = ({
       }
       contentSignalState={contentSignalState}
       SidebarContent={
-        <Box sx={{ display: "flex", flexDirection: "column", p: "2px 4px" }}>
-          {((!uncheckedNotifications.length && value === 0) || (!checkedNotifications.length && value === 1)) && (
-            <Box
-              sx={{
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
-                justifyContent: "center",
-              }}
-            >
-              <h3>You don't have notifications</h3>
-            </Box>
-          )}
-          {uncheckedNotifications.length > 0 && value === 0 && (
-            <Box sx={{ display: "flex", flexDirection: "column", gap: "4px" }}>
-              <div id="MarkAllRead">
-                <MemoizedMetaButton onClick={() => checkAllNotification()}>
-                  <div id="MarkAllReadButton">
-                    {/* <i className="material-icons DoneIcon green-text">done_all</i> */}
-                    <DoneAllIcon className="material-icons DoneIcon green-text" />
-                    <span>Mark All Read</span>
-                  </div>
-                </MemoizedMetaButton>
-              </div>
-              <NotificationsList
-                notifications={uncheckedNotifications}
-                openLinkedNode={openLinkedNode}
-                checked={false}
-              />
-            </Box>
-          )}
-          {checkedNotifications.length > 0 && value === 1 && (
-            <Box sx={{ display: "flex", flexDirection: "column", gap: "4px" }}>
-              <NotificationsList notifications={checkedNotifications} openLinkedNode={openLinkedNode} checked={true} />
-            </Box>
-          )}
-        </Box>
+        open ? <Box sx={{ p: "10px 16px" }}>{tabItems[value].content}</Box> : null
+        // <Box sx={{ display: "flex", flexDirection: "column", p: "2px 4px" }}>
+        //   {((!uncheckedNotifications.length && value === 0) || (!checkedNotifications.length && value === 1)) && (
+        //     <Box
+        //       sx={{
+        //         display: "flex",
+        //         flexDirection: "column",
+        //         alignItems: "center",
+        //         justifyContent: "center",
+        //       }}
+        //     >
+        //       <h3>You don't have notifications</h3>
+        //     </Box>
+        //   )}
+        //   {uncheckedNotifications.length > 0 && value === 0 && (
+        //     <Box sx={{ display: "flex", flexDirection: "column", gap: "4px" }}>
+        //       <div id="MarkAllRead">
+        //         <MemoizedMetaButton onClick={() => checkAllNotification()}>
+        //           <div id="MarkAllReadButton">
+        //             <DoneAllIcon className="material-icons DoneIcon green-text" />
+        //             <span>Mark All Read</span>
+        //           </div>
+        //         </MemoizedMetaButton>
+        //       </div>
+        //       <NotificationsList
+        //         notifications={uncheckedNotifications}
+        //         openLinkedNode={openLinkedNode}
+        //         checked={false}
+        //       />
+        //     </Box>
+        //   )}
+        //   {checkedNotifications.length > 0 && value === 1 && (
+        //     <Box sx={{ display: "flex", flexDirection: "column", gap: "4px" }}>
+        //       <NotificationsList notifications={checkedNotifications} openLinkedNode={openLinkedNode} checked={true} />
+        //     </Box>
+        //   )}
+        // </Box>
       }
     />
   );

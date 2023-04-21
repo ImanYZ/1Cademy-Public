@@ -1,26 +1,23 @@
-import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
-import CloseIcon from "@mui/icons-material/Close";
-import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
-import DoneIcon from "@mui/icons-material/Done";
-import DoneAllIcon from "@mui/icons-material/DoneAll";
-import EditIcon from "@mui/icons-material/Edit";
-import EmojiEventsIcon from "@mui/icons-material/EmojiEvents";
-import LinkIcon from "@mui/icons-material/Link";
-import RadioButtonUncheckedIcon from "@mui/icons-material/RadioButtonUnchecked";
-import { Box, IconButton, Paper, Tooltip } from "@mui/material";
+import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
+import DeleteForeverRoundedIcon from "@mui/icons-material/DeleteForeverRounded";
+import DoneAllRoundedIcon from "@mui/icons-material/DoneAllRounded";
+import DoneRoundedIcon from "@mui/icons-material/DoneRounded";
+import DraftsOutlinedIcon from "@mui/icons-material/DraftsOutlined";
+import EditRoundedIcon from "@mui/icons-material/EditRounded";
+import EmojiEventsRoundedIcon from "@mui/icons-material/EmojiEventsRounded";
+import IndeterminateCheckBoxOutlinedIcon from "@mui/icons-material/IndeterminateCheckBoxOutlined";
+import { Box, Checkbox, IconButton, Paper, Stack, Tooltip, Typography } from "@mui/material";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import { collection, doc, getDocs, getFirestore, increment, limit, query, where, writeBatch } from "firebase/firestore";
-import React, { useCallback, useEffect, useState } from "react";
+import React, { ChangeEvent, useCallback, useEffect, useState } from "react";
+
+import { DESIGN_SYSTEM_COLORS } from "@/lib/theme/colors";
 
 import { useAuth } from "../../../context/AuthContext";
 import { useInView } from "../../../hooks/useObserver";
-import { Editor } from "../../Editor";
-import { MemoizedMetaButton } from "../MetaButton";
 
 const NOTIFICATIONS_PER_PAGE = 13;
-
-const doNothing = () => {};
 
 // CHECK: I comented this unnused variable
 // const improvementTypes = [
@@ -65,7 +62,7 @@ const NotificationsList = (props: NotificationsListProps) => {
   const [notifications, setNotifications] = useState<any[]>([]);
   const [lastIndex, setLastIndex] = useState<number>(NOTIFICATIONS_PER_PAGE);
   const [isRetrieving, setIsRetrieving] = useState(false);
-
+  const [selectedNotifications, setSelectedNotifications] = useState<string[]>([]);
   const { ref: refInfinityLoaderTrigger, inView: inViewInfinityLoaderTrigger } = useInView();
 
   const loadOlderNotificationsClick = useCallback(() => {
@@ -94,33 +91,43 @@ const NotificationsList = (props: NotificationsListProps) => {
     setNotifications(displayableNs.slice(0, lastIndex));
   }, [lastIndex, props.notifications]);
 
-  const checkNotification = useCallback(
-    async (nId: string, value: boolean) => {
-      if (!user) return;
-      const notificationRef = doc(db, "notifications", nId);
-
-      const batch = writeBatch(db);
-      batch.update(notificationRef, { checked: value });
-      const notificationNumsQuery = query(
-        collection(db, "notificationNums"),
-        where("uname", "==", user?.uname),
-        limit(1)
-      );
-      const notificationNumsDocs = await getDocs(notificationNumsQuery);
-      if (notificationNumsDocs.docs.length) {
-        const notificationNumsRef = doc(db, "notificationNums", notificationNumsDocs.docs[0].id);
-        const incrementValue = value ? -1 : 1;
-        batch.update(notificationNumsRef, { nNum: increment(incrementValue) });
+  const handleSelectNotification = (event: ChangeEvent<HTMLInputElement>, notificationId: string) => {
+    setSelectedNotifications(prev => {
+      let sNotifications = [...prev];
+      if (event.target.checked === true) {
+        sNotifications.push(notificationId);
+      } else {
+        sNotifications = sNotifications.filter(notification => notification !== notificationId);
       }
-      await batch.commit();
-    },
-    [db, user]
-  );
+      return sNotifications;
+    });
+  };
+  const onReadNotifications = useCallback(async () => {
+    if (selectedNotifications.length <= 0) return;
 
-  const openLinkedNodeClick = useCallback(
-    (notification: any) => notification.aType !== "Delete" && props.openLinkedNode(notification.nodeId),
-    [props.openLinkedNode]
-  );
+    const batch = writeBatch(db);
+    for (const notificationId of selectedNotifications) {
+      const notificationRef = doc(db, "notifications", notificationId);
+      batch.update(notificationRef, { checked: !props.checked });
+    }
+    const notificationNumsQuery = query(
+      collection(db, "notificationNums"),
+      where("uname", "==", user?.uname),
+      limit(1)
+    );
+    const notificationNumsDocs = await getDocs(notificationNumsQuery);
+    if (notificationNumsDocs.docs.length) {
+      const notificationNumsRef = doc(db, "notificationNums", notificationNumsDocs.docs[0].id);
+      const incrementValue = !props.checked ? -selectedNotifications.length : selectedNotifications.length;
+      batch.update(notificationNumsRef, { nNum: increment(incrementValue) });
+    }
+    await batch.commit();
+  }, [db, props.checked, selectedNotifications, user?.uname]);
+
+  // const openLinkedNodeClick = useCallback(
+  //   (notification: any) => notification.aType !== "Delete" && props.openLinkedNode(notification.nodeId),
+  //   [props.openLinkedNode]
+  // );
 
   const YOUR_NODE_TEXT = (notification: any) => {
     const notificationTypeMsg = (() => {
@@ -139,55 +146,39 @@ const NotificationsList = (props: NotificationsListProps) => {
     }
     return "";
   };
-
+  console.log({ notifications });
   return (
-    <>
-      {notifications.map(notification => {
-        return (
-          <Paper
-            elevation={3}
-            className="collection-item Notifications"
-            key={`Notification${notification.id}`}
-            sx={{
-              // border: "solid 2px royalBlue",
-              listStyle: "none",
-              px: "10px",
-              fontSize: "16px",
-            }}
-          >
-            <div className="NotificationBody">
-              <Box
-                sx={{
-                  display: "grid",
-                  gridTemplateColumns: "20px 1fr 72px",
-                  gap: "8px",
-                  marginTop: "8px",
-                }}
-              >
-                <Box component="span" className="NotificationAction" style={{ fontSize: "20px", width: "20px" }}>
-                  {notification.oType === "Propo" ? (
-                    <EditIcon className="amber-text" fontSize="inherit" />
-                  ) : notification.oType === "PropoAccept" ? (
-                    <EditIcon className="DoneIcon green-text" fontSize="inherit" />
-                  ) : notification.aType === "Correct" ? (
-                    <DoneIcon className="DoneIcon green-text" fontSize="inherit" />
-                  ) : notification.aType === "CorrectRM" ? (
-                    <DoneIcon className="DoneIcon green-text Striked" fontSize="inherit" />
-                  ) : notification.aType === "Wrong" ? (
-                    <CloseIcon className="red-text" fontSize="inherit" />
-                  ) : notification.aType === "WrongRM" ? (
-                    <CloseIcon className="red-text Striked" fontSize="inherit" />
-                  ) : notification.aType === "Award" ? (
-                    <EmojiEventsIcon className="amber-text" fontSize="inherit" />
-                  ) : notification.aType === "AwardRM" ? (
-                    <EmojiEventsIcon className="amber-text Striked" fontSize="inherit" />
-                  ) : notification.aType === "Accepted" ? (
-                    <DoneAllIcon className="amber-text" fontSize="inherit" />
-                  ) : (
-                    notification.aType === "Delete" && <DeleteForeverIcon className="red-text" />
-                  )}
-                </Box>
-                <span style={{ lineHeight: "20px" }}>
+    <Box>
+      <Stack direction={"row"} spacing={"12px"}>
+        <Tooltip title={"Select all"}>
+          <IconButton onClick={onReadNotifications}>
+            <IndeterminateCheckBoxOutlinedIcon />
+          </IconButton>
+        </Tooltip>
+        <Tooltip title={"Mark as read"}>
+          <IconButton onClick={onReadNotifications}>
+            <DraftsOutlinedIcon />
+          </IconButton>
+        </Tooltip>
+      </Stack>
+      <Stack spacing={"8px"}>
+        {notifications.map(notification => {
+          return (
+            <Paper
+              elevation={3}
+              key={`Notification${notification.id}`}
+              sx={{
+                display: "flex",
+
+                listStyle: "none",
+                p: "10px 16px",
+                borderRadius: "8px",
+                backgroundColor: theme =>
+                  theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookG700 : DESIGN_SYSTEM_COLORS.gray100,
+              }}
+            >
+              <Box flex={1}>
+                <Typography fontSize={"12px"} fontWeight={"500"} mb="10px">
                   {notification.oType === "Proposal"
                     ? " Your pending proposal "
                     : notification.oType === "AccProposal"
@@ -203,45 +194,97 @@ const NotificationsList = (props: NotificationsListProps) => {
                           : notification.aType.map((pType: any) => {
                               <p>- {pType.replace(/([a-z])([A-Z])/g, "$1 $2")}</p>;
                             }))}
-                </span>
+                </Typography>
 
-                <Box className="title Time" sx={{ fontSize: "12px", justifySelf: "right" }}>
-                  {dayjs(notification.createdAt).fromNow()}
-                </Box>
-              </Box>
-              <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: "5px" }}>
-                <MemoizedMetaButton
-                  onClick={() => openLinkedNodeClick(notification)}
-                  tooltip={
-                    notification.aType === "Delete" ? "The node is deleted." : "Click to go to the corresponding node."
-                  }
-                  tooltipPosition="right"
+                <Stack direction={"row"} alignItems={"center"} spacing={"8px"} mb="10px">
+                  <NotificationTypeIcon notification={notification} />
+                  <Typography fontSize={"14px"} fontWeight={"500"}>
+                    {notification.title ?? "Notification"}
+                  </Typography>
+                </Stack>
+                <Typography
+                  sx={{
+                    fontSize: "12px",
+                    color: theme =>
+                      theme.palette.mode === "dark"
+                        ? DESIGN_SYSTEM_COLORS.notebookG200
+                        : DESIGN_SYSTEM_COLORS.notebookG300,
+                  }}
                 >
-                  <Box
-                    className="NotificationNodeLink"
-                    sx={{ display: "flex", alignItems: "center", gap: "5px", paddingY: "10px" }}
-                  >
-                    <LinkIcon className="grey-text" fontSize="inherit" />
-                    <Editor
-                      value={notification.title ?? "Notification"}
-                      readOnly={true}
-                      setValue={doNothing}
-                      label=""
-                    />
-                  </Box>
-                </MemoizedMetaButton>
-                <Tooltip title={`Click to ${props.checked ? "check" : "uncheck"} this notification.`}>
-                  <IconButton onClick={() => checkNotification(notification.id, !props.checked)}>
-                    {props.checked ? <CheckCircleOutlineIcon /> : <RadioButtonUncheckedIcon />}
-                  </IconButton>
-                </Tooltip>
+                  {dayjs(notification.createdAt).fromNow()}
+                </Typography>
               </Box>
-            </div>
-          </Paper>
-        );
-      })}
+              <Box sx={{ display: "f  lex", justifyContent: "space-between", alignItems: "center", gap: "5px" }}>
+                {/* <Tooltip title={`Click to ${props.checked ? "check" : "uncheck"} this notification.`}>
+                <IconButton onClick={() => checkNotification(notification.id, !props.checked)}>
+                  {props.checked ? <CheckCircleOutlineIcon /> : <RadioButtonUncheckedIcon />}
+                </IconButton>
+              </Tooltip> */}
+                <Checkbox
+                  onChange={event => handleSelectNotification(event, notification.id)}
+                  sx={{
+                    "&.Mui-checked": {
+                      color: DESIGN_SYSTEM_COLORS.primary800,
+                      background: "radial-gradient(circle, #fff 30%, transparent 30%)",
+                    },
+                  }}
+                />
+              </Box>
+            </Paper>
+          );
+        })}
+      </Stack>
       {props.notifications.length > lastIndex && <Box id="ContinueButton" ref={refInfinityLoaderTrigger}></Box>}
-    </>
+    </Box>
+  );
+};
+
+const NotificationTypeIcon = ({ notification }: { notification: any }) => {
+  if (!notification) return null;
+  return (
+    <Box
+      component="span"
+      sx={{
+        display: "grid",
+        placeItems: "center",
+        alignSelf: "center",
+        p: "7px",
+        borderRadius: "50%",
+        backgroundColor: theme =>
+          theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookG600 : DESIGN_SYSTEM_COLORS.notebookG50,
+      }}
+    >
+      {notification.oType === "Propo" ? (
+        <EditRoundedIcon sx={{ color: DESIGN_SYSTEM_COLORS.yellow400 }} fontSize="inherit" />
+      ) : notification.oType === "PropoAccept" ? (
+        <EditRoundedIcon sx={{ color: DESIGN_SYSTEM_COLORS.success600 }} fontSize="inherit" />
+      ) : notification.aType === "Correct" ? (
+        <DoneRoundedIcon sx={{ color: DESIGN_SYSTEM_COLORS.success600 }} fontSize="inherit" />
+      ) : notification.aType === "CorrectRM" ? (
+        <DoneRoundedIcon
+          sx={{ color: DESIGN_SYSTEM_COLORS.success600, textDecoration: "line-through" }}
+          fontSize="inherit"
+        />
+      ) : notification.aType === "Wrong" ? (
+        <CloseRoundedIcon sx={{ color: DESIGN_SYSTEM_COLORS.orange700 }} fontSize="inherit" />
+      ) : notification.aType === "WrongRM" ? (
+        <CloseRoundedIcon
+          sx={{ color: DESIGN_SYSTEM_COLORS.orange700, textDecoration: "line-through" }}
+          fontSize="inherit"
+        />
+      ) : notification.aType === "Award" ? (
+        <EmojiEventsRoundedIcon sx={{ color: DESIGN_SYSTEM_COLORS.yellow400 }} fontSize="inherit" />
+      ) : notification.aType === "AwardRM" ? (
+        <EmojiEventsRoundedIcon
+          sx={{ color: DESIGN_SYSTEM_COLORS.yellow400, textDecoration: "line-through" }}
+          fontSize="inherit"
+        />
+      ) : notification.aType === "Accepted" ? (
+        <DoneAllRoundedIcon sx={{ color: DESIGN_SYSTEM_COLORS.yellow400 }} fontSize="inherit" />
+      ) : (
+        notification.aType === "Delete" && <DeleteForeverRoundedIcon sx={{ color: DESIGN_SYSTEM_COLORS.orange700 }} />
+      )}
+    </Box>
   );
 };
 
