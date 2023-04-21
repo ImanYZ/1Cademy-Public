@@ -20,6 +20,7 @@ type InputSaveProps = {
   onSubmit: any;
   setState: any;
   label: string;
+  disabled?: boolean;
 };
 const InputSave = (props: InputSaveProps) => {
   const [value, setValue] = useState(props.initialValue);
@@ -79,6 +80,7 @@ const InputSave = (props: InputSaveProps) => {
             </InputAdornment>
           ),
         }}
+        disabled={props.disabled}
       />
     </div>
   );
