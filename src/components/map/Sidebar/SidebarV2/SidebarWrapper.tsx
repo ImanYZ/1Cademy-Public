@@ -1,11 +1,10 @@
 import { Theme } from "@emotion/react";
 import ArrowUpwardIcon from "@mui/icons-material/ArrowUpward";
 import CloseIcon from "@mui/icons-material/Close";
-import { Drawer, DrawerProps, IconButton, Tooltip, Typography, useMediaQuery, useTheme } from "@mui/material";
+import { Drawer, DrawerProps, IconButton, Tooltip, Typography } from "@mui/material";
 import { Box, SxProps } from "@mui/system";
 import Image, { StaticImageData } from "next/image";
 import React, { ReactNode, useCallback, useMemo, useRef } from "react";
-import { OpenSidebar } from "src/pages/notebook";
 
 type SidebarWrapperProps = {
   id?: string;
@@ -20,9 +19,7 @@ type SidebarWrapperProps = {
   headerImage?: StaticImageData;
   showCloseButton?: boolean;
   showScrollUpButton?: boolean;
-  isMenuOpen?: boolean;
   contentSignalState: any;
-  openSidebar?: OpenSidebar;
   innerHeight?: number;
   disabled?: boolean;
   sx?: SxProps<Theme>;
@@ -44,18 +41,13 @@ export const SidebarWrapper = ({
   SidebarContent,
   showCloseButton = true,
   showScrollUpButton = true,
-  isMenuOpen,
   contentSignalState,
   innerHeight,
-  openSidebar,
   disabled,
   sx,
   sxContentWrapper,
 }: SidebarWrapperProps) => {
   const sidebarContentRef = useRef<any>(null);
-  const theme = useTheme();
-
-  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
   const scrollToTop = useCallback(() => {
     if (!sidebarContentRef.current) return;
@@ -82,27 +74,7 @@ export const SidebarWrapper = ({
           height: height < 100 && innerHeight ? `${(height / 100) * innerHeight}px` : `${height}%`,
           borderRight: "none",
           background: theme => (theme.palette.mode === "dark" ? "#1B1A1A" : "#F9FAFB"),
-          boxShadow:
-            !isMobile || isMenuOpen || openSidebar !== null
-              ? theme =>
-                  theme.palette.mode === "dark"
-                    ? "-1px 0px 10px 4px rgba(190, 190, 190, 1)"
-                    : "-1px 0px 10px 4px #3b3b3b"
-              : "",
-          ":-webkit-box-shadow":
-            isMenuOpen || openSidebar !== null
-              ? theme =>
-                  theme.palette.mode === "dark"
-                    ? "-1px 0px 10px 4px rgba(190, 190, 190, 1)"
-                    : "-1px 0px 10px 4px #3b3b3b"
-              : "",
-          ":-moz-box-shadow":
-            isMenuOpen || openSidebar !== null
-              ? theme =>
-                  theme.palette.mode === "dark"
-                    ? "-1px 0px 10px 4px rgba(190, 190, 190, 1)"
-                    : "-1px 0px 10px 4px #3b3b3b"
-              : "",
+
           transition: "0.5s cubic-bezier(0.4, 0, 0.2, 1) !important",
           ...sx,
         },
