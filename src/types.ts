@@ -42,7 +42,7 @@ export type NotebookDocument = {
   users: string[]; // here is users which access and owner
   usersInfo: {
     [uname: string]: {
-      role: "viewer" | "editor";
+      role: "viewer" | "editor" | "owner";
       imageUrl: string;
       fullname: string;
       chooseUname: boolean;

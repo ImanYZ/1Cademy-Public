@@ -1079,9 +1079,14 @@ const Dashboard = ({}: DashboardProps) => {
 
       setNotebooks(prevNotebooks => {
         const notesBooksMerged = newNotebooks.reduce((acu: Notebook[], cur) => {
-          if (cur.type === "added") return [...acu, { ...cur.data, id: cur.id }];
-          if (cur.type === "modified") return acu.map(c => (c.id === cur.id ? { ...cur.data, id: cur.id } : c));
-          return acu.filter(c => c.id !== cur.id);
+          // change to modified if notebook was added previously by backend response simulation
+          let newNotebook = { ...cur };
+          const notebooksExist = acu.find(c => c.id === cur.id);
+          if (notebooksExist) newNotebook.type = "modified";
+          if (newNotebook.type === "added") return [...acu, { ...newNotebook.data, id: newNotebook.id }];
+          if (newNotebook.type === "modified")
+            return acu.map(c => (c.id === newNotebook.id ? { ...newNotebook.data, id: newNotebook.id } : c));
+          return acu.filter(c => c.id !== newNotebook.id);
         }, prevNotebooks);
         return notesBooksMerged;
       });
@@ -5981,14 +5986,6 @@ const Dashboard = ({}: DashboardProps) => {
     return { tutorialsComplete, totalTutorials: tutorialsOfTOC.length };
   }, [tutorialGroup, userTutorial]);
 
-  const onChangeNotebook = useCallback(
-    (notebookId: string) => {
-      // setSelectedNotebookId(notebookId);
-      setSelectedNotebook(notebooks.find(cur => notebookId === cur.id) ?? null);
-    },
-    [notebooks]
-  );
-
   // ------------------------ useEffects
 
   useEffect(() => {
@@ -6045,8 +6042,15 @@ const Dashboard = ({}: DashboardProps) => {
           title: `${notebookData.title} (${sameDuplications.length + 2})`,
           duplicatedFrom: notebookData.id,
           isPublic: notebookData.isPublic,
-          users: [],
-          usersInfo: {},
+          users: [user.uname],
+          usersInfo: {
+            [user.uname]: {
+              chooseUname: Boolean(user.chooseUname),
+              fullname: user.fName ?? "",
+              imageUrl: user.imageUrl ?? NO_USER_IMAGE,
+              role: "owner",
+            },
+          },
           createdAt: new Date(),
           updatedAt: new Date(),
         };
@@ -6070,7 +6074,7 @@ const Dashboard = ({}: DashboardProps) => {
     };
 
     duplicateNotebookFromParams();
-  }, [db, onChangeNotebook, openNodesOnNotebook, router.query.nb, user]);
+  }, [db, openNodesOnNotebook, router.query.nb, user]);
 
   return (
     <div className="MapContainer" style={{ overflow: "hidden" }}>
@@ -6407,7 +6411,7 @@ const Dashboard = ({}: DashboardProps) => {
                 userTutorial={userTutorial}
                 dispatch={dispatch}
                 notebooks={notebooks}
-                onChangeNotebook={onChangeNotebook}
+                onChangeNotebook={setSelectedNotebook}
                 selectedNotebook={selectedNotebook}
                 openNodesOnNotebook={openNodesOnNotebook}
                 setNotebooks={setNotebooks}

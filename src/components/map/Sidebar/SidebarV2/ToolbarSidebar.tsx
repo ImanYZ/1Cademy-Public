@@ -96,7 +96,7 @@ type MainSidebarProps = {
   dispatch: React.Dispatch<DispatchAuthActions>;
   notebooks: Notebook[];
   setNotebooks: Dispatch<SetStateAction<Notebook[]>>;
-  onChangeNotebook: (notebookId: string) => void;
+  onChangeNotebook: (newNotebook: Notebook) => void;
   selectedNotebook: Notebook | null;
   openNodesOnNotebook: (notebook: Notebook, nodeIds: string[]) => Promise<void>;
   // setSelectedNtoebook
@@ -281,14 +281,14 @@ MainSidebarProps) => {
   const disabledNotificationButton = disableToolbar;
   const disabledBookmarksButton = disableToolbar;
   const disabledPendingProposalButton = disableToolbar;
-  const disabledIntructorButton = disableToolbar;
+  const disabledInstructorsButton = disableToolbar;
   const disabledLeaderboardButton = disableToolbar;
   const disableUserStatusList = disableToolbar;
 
   const onCreateNotebook = useCallback(async () => {
     try {
       setIsCreatingNotebook(true);
-      const newNotebook: NotebookDocument = {
+      const newNotebookDocument: NotebookDocument = {
         owner: user.uname,
         ownerImgUrl: user.imageUrl ?? NO_USER_IMAGE,
         ownerChooseUname: Boolean(user.chooseUname),
@@ -296,22 +296,34 @@ MainSidebarProps) => {
         title: `notebook ${notebooks.length + 1}`,
         duplicatedFrom: "",
         isPublic: "none",
-        users: [],
-        usersInfo: {},
+        users: [user.uname],
+        usersInfo: {
+          [user.uname]: {
+            chooseUname: Boolean(user.chooseUname),
+            fullname: user.fName ?? "",
+            imageUrl: user.imageUrl ?? NO_USER_IMAGE,
+            role: "owner",
+          },
+        },
         createdAt: Timestamp.fromDate(new Date()),
         updatedAt: Timestamp.fromDate(new Date()),
       };
       const notebooksRef = collection(db, "notebooks");
-      const docRef = await addDoc(notebooksRef, newNotebook);
-      setEditableNotebook({ ...newNotebook, id: docRef.id });
-      onChangeNotebook(docRef.id);
+      const docRef = await addDoc(notebooksRef, newNotebookDocument);
+      const newNotebook: Notebook = { ...newNotebookDocument, id: docRef.id };
+      setEditableNotebook(newNotebook);
+      setNotebooks(prev => {
+        const notebookExist = prev.find(cur => cur.id === newNotebook.id);
+        return notebookExist ? prev : [...prev, newNotebook];
+      });
+      onChangeNotebook(newNotebook);
       // if (titleInputRef.current) titleInputRef.current.focus();
     } catch (error) {
       console.error("Cant create a notebook", error);
     } finally {
       setIsCreatingNotebook(false);
     }
-  }, [db, notebooks.length, onChangeNotebook, user.chooseUname, user.fName, user.imageUrl, user.uname]);
+  }, [db, notebooks.length, onChangeNotebook, setNotebooks, user.chooseUname, user.fName, user.imageUrl, user.uname]);
 
   const onUpdateNotebookTitle = useCallback(async () => {
     try {
@@ -336,8 +348,15 @@ MainSidebarProps) => {
         title: `${editableNotebook.title} (${sameDuplications.length + 2})`,
         duplicatedFrom: editableNotebook.id,
         isPublic: editableNotebook.isPublic,
-        users: [],
-        usersInfo: {},
+        users: [user.uname],
+        usersInfo: {
+          [user.uname]: {
+            chooseUname: Boolean(user.chooseUname),
+            fullname: user.fName ?? "",
+            imageUrl: user.imageUrl ?? NO_USER_IMAGE,
+            role: "owner",
+          },
+        },
         createdAt: Timestamp.fromDate(new Date()),
         updatedAt: Timestamp.fromDate(new Date()),
       };
@@ -363,7 +382,7 @@ MainSidebarProps) => {
     } finally {
       setIsCreatingNotebook(false);
     }
-  }, [db, editableNotebook, notebooks, openNodesOnNotebook, user.chooseUname, user.fName]);
+  }, [db, editableNotebook, notebooks, openNodesOnNotebook, user.chooseUname, user.fName, user.imageUrl, user.uname]);
 
   const onCopyNotebookUrl = useCallback(() => {
     if (!editableNotebook) return;
@@ -381,7 +400,7 @@ MainSidebarProps) => {
       if (!window.confirm("Are you sure to delete notebook")) return;
       setNotebooks(prevNotebooks => {
         const newNotebooks = prevNotebooks.filter(cur => cur.id !== editableNotebook.id);
-        onChangeNotebook(newNotebooks[0]?.id ?? "");
+        onChangeNotebook(newNotebooks[0] ?? null);
         return newNotebooks;
       });
       setEditableNotebook(null);
@@ -568,7 +587,7 @@ MainSidebarProps) => {
                   >
                     {/* min-width is making ellipsis works correctly */}
                     <Box
-                      onClick={() => onChangeNotebook(cur.id)}
+                      onClick={() => onChangeNotebook(cur)}
                       sx={{ minWidth: "0px", display: "flex", alignItems: "center" }}
                     >
                       <Box sx={{ minWidth: "0px", display: "flex", alignItems: "center" }}>
@@ -1013,7 +1032,7 @@ MainSidebarProps) => {
     disabledNotificationButton,
     disabledBookmarksButton,
     disabledPendingProposalButton,
-    disabledIntructorButton,
+    disabledInstructorsButton,
     disabledLeaderboardButton,
     userTutorial.searcher.done,
     userTutorial.searcher.skipped,
