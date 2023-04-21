@@ -98,11 +98,21 @@ describe("POST /api/notebooks/view", () => {
         documentId: "n1",
         isPublic: "editable",
         owner: users[1].uname,
-        roles: {
-          [users[0].uname]: "editor",
+        ownerChooseUname: users[1].chooseUname,
+        ownerFullName: `${users[1].fName} ${users[1].lName}`,
+        ownerImgUrl: users[1].imageUrl,
+        usersInfo: {
+          [users[0].uname]: {
+            chooseUname: users[0].chooseUname,
+            fullname: `${users[0].fName} ${users[1].lName}`,
+            imageUrl: users[0].imageUrl,
+            role: "editor",
+          },
         },
         title: "n1",
-        users: [users[0].uname],
+        users: [users[1].uname, users[0].uname],
+        createdAt: new Date(),
+        updatedAt: new Date(),
       } as INotebook,
     ],
     "notebooks"

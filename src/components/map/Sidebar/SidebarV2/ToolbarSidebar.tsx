@@ -85,7 +85,6 @@ type MainSidebarProps = {
   uncheckedNotificationsNum: number;
   bookmarkUpdatesNum: number;
   pendingProposalsNum: number;
-  openSidebar?: OpenSidebar;
   windowHeight: number;
   reputationSignal: ReputationSignal[];
   onlineUsers: string[];
@@ -116,7 +115,6 @@ export const ToolbarSidebar = ({
   uncheckedNotificationsNum = 0,
   bookmarkUpdatesNum = 0,
   pendingProposalsNum = 0,
-  openSidebar,
   windowHeight,
   reputationSignal,
   onlineUsers,
@@ -1085,8 +1083,6 @@ MainSidebarProps) => {
         // width={window.innerWidth <= 500 ? "100%" : isMenuOpen ? "100%" : 80}
         showCloseButton={false}
         showScrollUpButton={false}
-        isMenuOpen={isMenuOpen}
-        openSidebar={openSidebar}
         contentSignalState={contentSignalState}
         SidebarContent={toolbarContentMemoized}
         sx={{

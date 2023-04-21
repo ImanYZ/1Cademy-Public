@@ -6402,7 +6402,6 @@ const Dashboard = ({}: DashboardProps) => {
                 uncheckedNotificationsNum={uncheckedNotificationsNum}
                 bookmarkUpdatesNum={bookmarkUpdatesNum}
                 pendingProposalsNum={pendingProposalsNum}
-                openSidebar={openSidebar}
                 windowHeight={windowHeight}
                 onlineUsers={onlineUsers}
                 usersOnlineStatusLoaded={usersOnlineStatusLoaded}

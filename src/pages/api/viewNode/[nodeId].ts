@@ -42,6 +42,11 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       users.push(uname);
     }
 
+    // if owner is missing in users
+    if (users.indexOf(notebookData.owner) === -1) {
+      users.push(notebookData.owner);
+    }
+
     // pushing owner to create user node
     if (users.indexOf(notebookData.owner) === -1) {
       users.push(notebookData.owner);
@@ -101,6 +106,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
     commitBatch(batch);
     return res.status(200).json({ success: true });
   } catch (error) {
+    console.log(error);
     return res.status(500).json({ error, success: false });
   }
 }

@@ -20,6 +20,8 @@ import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import React from "react";
 
+import { DESIGN_SYSTEM_COLORS } from "@/lib/theme/colors";
+
 import { SortDirection, SortValues } from "../../nodeBookTypes";
 
 // import { SortDirection, SortValues } from "../../noteBookTypes";
@@ -98,7 +100,10 @@ const RecentNodesList = (props: any) => {
                 width: "200px",
                 borderRadius: "4px",
                 boxShadow: "0px 4px 4px rgba(0, 0, 0, 0.25), 0px 8px 8px -4px rgba(0, 0, 0, 0.03)",
-                border: "1px solid #2F2F2F",
+                border: theme =>
+                  `1px solid ${
+                    theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookG500 : DESIGN_SYSTEM_COLORS.gray300
+                  }`,
               },
               "& .MuiMenuItem-root:hover": {
                 backgroundColor: theme =>
