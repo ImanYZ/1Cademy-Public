@@ -107,7 +107,7 @@ describe("POST /api/notebooks/view", () => {
         ownerImgUrl: users[1].imageUrl,
         usersInfo: {},
         title: "n1",
-        users: [],
+        users: [users[1].uname],
         createdAt: new Date(),
         updatedAt: new Date(),
       } as INotebook,
