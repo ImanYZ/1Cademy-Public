@@ -279,15 +279,24 @@ const NotificationSidebar = ({
           <>{notebookRequests.length > 0 ? <CustomBadge value={notebookRequests.length} sx={{ ml: "4px" }} /> : null}</>
         ),
         content: (
-          <Stack spacing={"8px"} p="24px 16px">
-            {notebookRequests.map((request, idx) => (
-              <RequestNotificationItem
-                key={`${idx}`}
-                notebookRequest={request}
-                handleSubmitRequest={handleSubmitRequest}
+          <>
+            {checkedNotifications.length > 0 ? (
+              <Stack spacing={"8px"} p="24px 16px">
+                {notebookRequests.map((request, idx) => (
+                  <RequestNotificationItem
+                    key={`${idx}`}
+                    notebookRequest={request}
+                    handleSubmitRequest={handleSubmitRequest}
+                  />
+                ))}
+              </Stack>
+            ) : (
+              <NotFoundNotification
+                title="No new requests for now!"
+                description="We'll let you know when something new comes up."
               />
-            ))}
-          </Stack>
+            )}
+          </>
         ),
       },
     ];
