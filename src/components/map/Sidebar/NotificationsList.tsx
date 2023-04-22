@@ -35,6 +35,7 @@ import { DESIGN_SYSTEM_COLORS } from "@/lib/theme/colors";
 
 import { useAuth } from "../../../context/AuthContext";
 import { useInView } from "../../../hooks/useObserver";
+import { Notification } from "./SidebarV2/NotificationSidebar";
 
 const NOTIFICATIONS_PER_PAGE = 13;
 
@@ -70,7 +71,7 @@ dayjs.extend(relativeTime);
 
 type NotificationsListProps = {
   openLinkedNode: any;
-  notifications: any;
+  notifications: Notification[];
   checked: boolean;
 };
 
@@ -142,12 +143,17 @@ const NotificationsList = (props: NotificationsListProps) => {
     const notificationNumsDocs = await getDocs(notificationNumsQuery);
     if (notificationNumsDocs.docs.length) {
       const notificationNumsRef = doc(db, "notificationNums", notificationNumsDocs.docs[0].id);
-      const incrementValue = !props.checked ? -selectedNotifications.length : selectedNotifications.length;
-      batch.update(notificationNumsRef, { nNum: increment(incrementValue) });
+      const incrementValue = selectedNotifications.length;
+      if (!props.checked) {
+        const newNum = props.notifications.length - incrementValue;
+        batch.update(notificationNumsRef, { nNum: newNum });
+      } else {
+        batch.update(notificationNumsRef, { nNum: increment(incrementValue) });
+      }
     }
     await batch.commit();
     setSelectedNotifications([]);
-  }, [db, props.checked, selectedNotifications, user?.uname]);
+  }, [db, props.checked, props.notifications.length, selectedNotifications, user?.uname]);
 
   const openLinkedNodeClick = useCallback(
     (notification: any) => {
@@ -204,12 +210,12 @@ const NotificationsList = (props: NotificationsListProps) => {
   );
 
   const onSelectAll = useCallback(() => {
-    const notificationIds: string[] = filteredNotifications.reduce(
-      (acc, notification) => [...acc, notification.id],
+    const notificationIds: string[] = props.notifications.reduce(
+      (acc: string[], notification) => [...acc, notification.id],
       []
     );
     setSelectedNotifications(notificationIds);
-  }, [filteredNotifications]);
+  }, [props.notifications]);
 
   return (
     <Box>

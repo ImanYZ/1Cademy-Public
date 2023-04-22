@@ -3,8 +3,7 @@ import { collection, DocumentData, getFirestore, onSnapshot, Query, query, where
 import React, { ReactNode, useCallback, useEffect, useMemo, useState } from "react";
 import { ReactElement } from "react-markdown/lib/react-markdown";
 
-import { DESIGN_SYSTEM_COLORS } from "@/lib/theme/colors";
-
+import { CustomBadge } from "../../CustomBudge";
 import NotificationsList from "../NotificationsList";
 import { SidebarWrapper } from "./SidebarWrapper";
 
@@ -17,7 +16,7 @@ type NotificationSidebarProps = {
   innerHeight?: number;
   innerWidth: number;
 };
-type Notification = {
+export type Notification = {
   id: string;
   aType: string;
   createdAt: Date;
@@ -181,17 +180,7 @@ const NotificationSidebar = ({
         badge: (
           <>
             {uncheckedNotifications.length > 0 ? (
-              <Box
-                sx={{
-                  ml: "10px",
-                  p: "4px 8px",
-                  borderRadius: "28px",
-                  backgroundColor: DESIGN_SYSTEM_COLORS.notebookScarlet,
-                  color: DESIGN_SYSTEM_COLORS.gray50,
-                }}
-              >
-                {uncheckedNotifications.length}
-              </Box>
+              <CustomBadge value={uncheckedNotifications.length} sx={{ ml: "4px" }} />
             ) : null}
           </>
         ),
