@@ -1,5 +1,15 @@
-import { Box, Tab, Tabs, Typography } from "@mui/material";
-import { collection, DocumentData, getFirestore, onSnapshot, Query, query, where } from "firebase/firestore";
+import { Box, Stack, Tab, Tabs, Typography } from "@mui/material";
+import {
+  collection,
+  doc,
+  DocumentData,
+  getFirestore,
+  onSnapshot,
+  Query,
+  query,
+  updateDoc,
+  where,
+} from "firebase/firestore";
 import React, { ReactNode, useCallback, useEffect, useMemo, useState } from "react";
 import { ReactElement } from "react-markdown/lib/react-markdown";
 
@@ -8,6 +18,7 @@ import { DESIGN_SYSTEM_COLORS } from "@/lib/theme/colors";
 
 import { CustomBadge } from "../../CustomBudge";
 import NotificationsList from "../NotificationsList";
+import RequestNotificationItem, { NotebookRequest, NotebookRequestType } from "../RequestNotificationItem";
 import { SidebarWrapper } from "./SidebarWrapper";
 
 type NotificationSidebarProps = {
@@ -48,7 +59,7 @@ const NotificationSidebar = ({
   const [value, setValue] = React.useState(0);
   const [checkedNotifications, setCheckedNotifications] = useState<Notification[]>([]);
   const [uncheckedNotifications, setUncheckedNotifications] = useState<Notification[]>([]);
-
+  const [notebookRequests, setNotebookRequests] = useState<NotebookRequest[]>([]);
   const db = getFirestore();
 
   const snapshot = useCallback((q: Query<DocumentData>) => {
@@ -169,7 +180,55 @@ const NotificationSidebar = ({
 
   const contentSignalState = useMemo(() => {
     return [...uncheckedNotifications];
-  }, [checkedNotifications, uncheckedNotifications, value]);
+  }, [notebookRequests, checkedNotifications, uncheckedNotifications, value]);
+
+  useEffect(() => {
+    const requestRef = collection(db, "requests");
+    const q = query(requestRef, where("requestedUser", "==", "jjnnx"), where("state", "==", "waiting"));
+    const unsub = onSnapshot(q, snapshot => {
+      console.log("requests");
+      const docChages = snapshot.docChanges();
+      if (!(docChages.length > 0)) return;
+
+      setNotebookRequests(prev => {
+        const currentRequests = [...prev];
+
+        for (const docChange of docChages) {
+          const newRequest = { ...docChange.doc.data(), id: docChange.doc.id } as NotebookRequest;
+          const exists = currentRequests.some(el => el.id === newRequest.id);
+          if (!exists) currentRequests.push(newRequest);
+        }
+        return currentRequests;
+      });
+    });
+    return () => {
+      unsub();
+    };
+  }, [db, username]);
+
+  const handleSubmitRequest = useCallback(
+    async (
+      requestId: string,
+      state: NotebookRequestType,
+      setIsLoading: (loading: { state: NotebookRequestType; loading: boolean }) => void
+    ) => {
+      try {
+        setIsLoading({ state, loading: true });
+        const docRef = doc(db, "requests", requestId);
+        await updateDoc(docRef, { state });
+        setNotebookRequests(prev => {
+          let requests = [...prev];
+          requests = requests.filter(request => request.id !== requestId);
+          return requests;
+        });
+        setIsLoading({ state: "waiting", loading: false });
+      } catch (error) {
+        console.log(error);
+        setIsLoading({ state: "waiting", loading: false });
+      }
+    },
+    [db]
+  );
 
   const tabItems = useMemo<NotificationTabs[]>(() => {
     return [
@@ -214,8 +273,25 @@ const NotificationSidebar = ({
           </>
         ),
       },
+      {
+        title: "Requests",
+        badge: (
+          <>{notebookRequests.length > 0 ? <CustomBadge value={notebookRequests.length} sx={{ ml: "4px" }} /> : null}</>
+        ),
+        content: (
+          <Stack spacing={"8px"} p="24px 16px">
+            {notebookRequests.map((request, idx) => (
+              <RequestNotificationItem
+                key={`${idx}`}
+                notebookRequest={request}
+                handleSubmitRequest={handleSubmitRequest}
+              />
+            ))}
+          </Stack>
+        ),
+      },
     ];
-  }, [checkedNotifications, openLinkedNode, uncheckedNotifications]);
+  }, [checkedNotifications, handleSubmitRequest, notebookRequests, openLinkedNode, uncheckedNotifications]);
 
   return (
     <SidebarWrapper

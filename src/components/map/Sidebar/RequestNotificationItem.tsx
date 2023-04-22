@@ -1,10 +1,12 @@
-import { Box, Button, Stack, Typography } from "@mui/material";
-import Image from "next/image";
-import React from "react";
+import { LoadingButton } from "@mui/lab";
+import { Avatar, Box, Paper, Stack, Typography } from "@mui/material";
+import React, { useState } from "react";
 
 import { DESIGN_SYSTEM_COLORS } from "@/lib/theme/colors";
 
-type NotebookRequest = {
+export type NotebookRequestType = "waiting" | "denied" | "accepted";
+export type NotebookRequest = {
+  id: string;
   requestingUser: string;
   requestingUserInfo: {
     imageUrl: string;
@@ -18,18 +20,29 @@ type NotebookRequest = {
   itemInfo: {
     name: string;
   };
-  state: "waiting" | "denied" | "accepted";
+  state: NotebookRequestType;
   type: "notebook";
 };
 type RequestNotificationItemProps = {
   notebookRequest: NotebookRequest;
+  handleSubmitRequest: (
+    requestId: string,
+    state: NotebookRequestType,
+    onLoad: (loading: { state: NotebookRequestType; loading: boolean }) => void
+  ) => void;
 };
 
 const RequestNotificationItem = ({
-  notebookRequest: { requestingUser, requestingUserInfo, permission, itemInfo },
+  handleSubmitRequest,
+  notebookRequest: { requestingUser, requestingUserInfo, permission, itemInfo, id },
 }: RequestNotificationItemProps) => {
+  const [isLoading, setIsLoading] = useState<{ state: NotebookRequestType; loading: boolean }>({
+    state: "waiting",
+    loading: false,
+  });
   return (
-    <Box
+    <Paper
+      elevation={1}
       sx={{
         backgroundColor: ({ palette: { mode } }) =>
           mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookG700 : DESIGN_SYSTEM_COLORS.gray100,
@@ -37,37 +50,53 @@ const RequestNotificationItem = ({
         p: "16px",
       }}
     >
-      <Stack direction={"row"}>
-        <Image src={requestingUserInfo.imageUrl} width={40} height={40} alt={`${requestingUser} requester`} />
+      <Stack direction={"row"} spacing={"8px"} mb="12px">
+        <Avatar src={requestingUserInfo.imageUrl} alt={`${requestingUser} requester`} />
         <Box sx={{ flex: 1, fontSize: "14px" }}>
           <Typography>
             <b>{requestingUser}</b>
-            {`requested access to${permission}your`}
+            {` requested access to ${permission} your`}
           </Typography>
-          <Typography>Notebook: {itemInfo.name}</Typography>
+          <Typography>{`Notebook: ${itemInfo.name}`}</Typography>
         </Box>
       </Stack>
       <Stack direction={"row"} spacing={"6px"}>
-        <Button
+        <LoadingButton
           variant="contained"
           sx={{
+            fontWeight: "600",
+            borderRadius: "24px",
             backgroundColor: DESIGN_SYSTEM_COLORS.orange700,
+            ":hover": {
+              backgroundColor: DESIGN_SYSTEM_COLORS.orange600,
+            },
           }}
           fullWidth
+          onClick={() => handleSubmitRequest(id, "denied", setIsLoading)}
+          disabled={isLoading.state === "accepted"}
+          loading={isLoading.state === "denied" ? isLoading.loading : undefined}
         >
           Deny
-        </Button>
-        <Button
+        </LoadingButton>
+        <LoadingButton
           variant="contained"
           sx={{
+            fontWeight: "600",
+            borderRadius: "24px",
             backgroundColor: DESIGN_SYSTEM_COLORS.success600,
+            ":hover": {
+              backgroundColor: DESIGN_SYSTEM_COLORS.success500,
+            },
           }}
           fullWidth
+          onClick={() => handleSubmitRequest(id, "accepted", setIsLoading)}
+          disabled={isLoading.state === "denied"}
+          loading={isLoading.state === "accepted" ? isLoading.loading : undefined}
         >
           Accept
-        </Button>
+        </LoadingButton>
       </Stack>
-    </Box>
+    </Paper>
   );
 };
 
