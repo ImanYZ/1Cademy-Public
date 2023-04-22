@@ -9,13 +9,17 @@ import EmailOutlinedIcon from "@mui/icons-material/EmailOutlined";
 import EmojiEventsRoundedIcon from "@mui/icons-material/EmojiEventsRounded";
 import IndeterminateCheckBoxOutlinedIcon from "@mui/icons-material/IndeterminateCheckBoxOutlined";
 import SearchIcon from "@mui/icons-material/Search";
+import TuneRoundedIcon from "@mui/icons-material/TuneRounded";
 import {
   Box,
   Button,
+  ButtonBase,
   Checkbox,
   Divider,
   IconButton,
   InputAdornment,
+  Menu,
+  MenuItem,
   Paper,
   Stack,
   TextField,
@@ -25,7 +29,7 @@ import {
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import { collection, doc, getDocs, getFirestore, increment, limit, query, where, writeBatch } from "firebase/firestore";
-import React, { ChangeEvent, useCallback, useEffect, useMemo, useState } from "react";
+import React, { ChangeEvent, MouseEvent, useCallback, useEffect, useMemo, useState } from "react";
 
 import { DESIGN_SYSTEM_COLORS } from "@/lib/theme/colors";
 
@@ -80,6 +84,7 @@ const NotificationsList = (props: NotificationsListProps) => {
   const [selectedNotifications, setSelectedNotifications] = useState<string[]>([]);
   const { ref: refInfinityLoaderTrigger, inView: inViewInfinityLoaderTrigger } = useInView();
   const [searchQuery, setSearchQuery] = useState<string>("");
+  const [notificatioType, setNotificationType] = useState<NotificationFilterItem | null>(null);
 
   const loadOlderNotificationsClick = useCallback(() => {
     setIsRetrieving(true);
@@ -118,6 +123,7 @@ const NotificationsList = (props: NotificationsListProps) => {
       }
       return sNotifications;
     });
+    return false;
   };
 
   const onReadNotifications = useCallback(async () => {
@@ -172,11 +178,25 @@ const NotificationsList = (props: NotificationsListProps) => {
     setSearchQuery("");
   };
   const filteredNotifications = useMemo(() => {
-    if (!searchQuery) return notifications;
-    return notifications.filter(notification =>
-      notification.title.toLowerCase().includes(searchQuery.toLocaleLowerCase())
-    );
-  }, [notifications, searchQuery]);
+    let newNotifications = [...notifications];
+    if (searchQuery) {
+      newNotifications = notifications.filter(notification =>
+        notification.title.toLowerCase().includes(searchQuery.toLocaleLowerCase())
+      );
+    }
+    if (notificatioType) {
+      newNotifications = newNotifications.filter(notification => {
+        let toReturn = false;
+        const filter = NOTITICATION_TYPES[notificatioType];
+        for (const type of filter) {
+          toReturn = type === notification.oType || (!Array.isArray(notification.aType) && type === notification.aType);
+          if (toReturn) break;
+        }
+        if (toReturn) return notification;
+      });
+    }
+    return newNotifications;
+  }, [notificatioType, notifications, searchQuery]);
 
   const allNotificationsSelected = useMemo(
     () => selectedNotifications.length !== 0 && selectedNotifications.length === filteredNotifications.length,
@@ -195,7 +215,7 @@ const NotificationsList = (props: NotificationsListProps) => {
     <Box>
       {!selectedNotifications.length && (
         <>
-          <Stack my="14px" px="16px">
+          <Stack direction={"row"} spacing={"12px"} my="14px" px="16px">
             <TextField
               id="outlined-search"
               type="text"
@@ -225,7 +245,7 @@ const NotificationsList = (props: NotificationsListProps) => {
                 },
               }}
             />
-            <Box></Box>
+            <NotificationFilter selectedOption={notificatioType} handleSelect={setNotificationType} />
           </Stack>
           <Divider
             sx={{
@@ -408,6 +428,116 @@ const NotificationTypeIcon = ({ notification, checked }: { notification: any; ch
         notification.aType === "Delete" && <DeleteForeverRoundedIcon sx={{ color: DESIGN_SYSTEM_COLORS.orange700 }} />
       )}
     </Box>
+  );
+};
+
+type NotificationFilterItem = "Approvals" | "Disapprovals" | "Awards" | "Proposals" | "Improvements" | "Invitations";
+
+type NotificationTypes = {
+  [key in NotificationFilterItem]: string[];
+};
+
+const NOTITICATION_TYPES: NotificationTypes = {
+  Approvals: ["Accept"],
+  Disapprovals: ["Deleted"],
+  Awards: ["Award", "AwardRM"],
+  Improvements: ["PropoAccept"],
+  Proposals: ["Propo", "Proposal", "AccProposal"],
+  Invitations: [],
+};
+
+const NOTIFICATION_FILTER_OPTIONS: NotificationFilterItem[] = [
+  "Approvals",
+  "Disapprovals",
+  "Awards",
+  "Proposals",
+  "Improvements",
+  "Invitations",
+];
+type NotificationFilterProps = {
+  selectedOption: NotificationFilterItem | null;
+  handleSelect: (option: NotificationFilterItem | null) => void;
+};
+const NotificationFilter = ({ handleSelect, selectedOption }: NotificationFilterProps) => {
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+  const open = Boolean(anchorEl);
+  const handleClick = (event: MouseEvent<HTMLButtonElement>) => {
+    setAnchorEl(event.currentTarget);
+  };
+  const handleClose = () => {
+    setAnchorEl(null);
+  };
+  const handleSelectItem = (option: NotificationFilterItem) => {
+    if (selectedOption === option) handleSelect(null);
+    else handleSelect(option);
+    setAnchorEl(null);
+  };
+  return (
+    <>
+      <ButtonBase
+        onClick={handleClick}
+        sx={{
+          borderRadius: "12px",
+          alignSelf: "center",
+          p: "8px",
+          border: theme =>
+            `1px solid ${theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.gray400 : DESIGN_SYSTEM_COLORS.gray25}}`,
+          ":hover": {
+            borderColor: DESIGN_SYSTEM_COLORS.primary600,
+          },
+        }}
+      >
+        <TuneRoundedIcon
+          sx={{
+            ":hover": {
+              color: DESIGN_SYSTEM_COLORS.primary600,
+            },
+          }}
+        />
+      </ButtonBase>
+      <Menu
+        id="basic-menu"
+        anchorOrigin={{ vertical: "bottom", horizontal: "left" }}
+        anchorEl={anchorEl}
+        elevation={1}
+        open={open}
+        onClose={handleClose}
+        MenuListProps={{
+          "aria-labelledby": "basic-button",
+        }}
+        sx={{
+          "& 	.MuiMenu-list": {
+            border: ({ palette: { mode } }) =>
+              `1px solid ${mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookG600 : DESIGN_SYSTEM_COLORS.gray300}`,
+            backgroundColor: ({ palette: { mode } }) =>
+              mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookMainBlack : DESIGN_SYSTEM_COLORS.gray50,
+            borderRadius: "4px",
+            p: "0",
+          },
+        }}
+      >
+        {NOTIFICATION_FILTER_OPTIONS.map(option => (
+          <MenuItem
+            key={`${option}`}
+            onClick={() => handleSelectItem(option)}
+            sx={{
+              p: "6px 10px",
+              minWidth: "210px",
+            }}
+          >
+            <Stack direction={"row"} alignItems={"center"} spacing={"8px"}>
+              <Checkbox
+                size="small"
+                sx={{ p: "8px" }}
+                checked={option === selectedOption}
+                onChange={() => handleSelectItem(option)}
+              />
+              <Typography fontSize={"12px"}>{option}</Typography>
+            </Stack>
+          </MenuItem>
+        ))}
+      </Menu>
+    </>
   );
 };
 
