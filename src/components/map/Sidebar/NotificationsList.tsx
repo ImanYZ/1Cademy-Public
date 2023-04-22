@@ -238,7 +238,7 @@ const NotificationsList = (props: NotificationsListProps) => {
                   </InputAdornment>
                 ),
                 sx: {
-                  borderRadius: "8px",
+                  borderRadius: "4px",
                   ":focus-within": {
                     outline: theme => `4px solid ${theme.palette.mode === "dark" ? "#62544B" : "#ECCFBD"}}`,
                   },
@@ -305,10 +305,12 @@ const NotificationsList = (props: NotificationsListProps) => {
                       : theme.palette.mode === "dark"
                       ? DESIGN_SYSTEM_COLORS.notebookG700
                       : DESIGN_SYSTEM_COLORS.gray100,
+                  ":hover": {
+                    cursor: "pointer",
+                  },
                 }}
-                onClick={() => openLinkedNodeClick(notification)}
               >
-                <Box flex={1}>
+                <Box flex={1} onClick={() => openLinkedNodeClick(notification)}>
                   <Typography fontSize={"12px"} fontWeight={"500"} mb="10px">
                     {notification.oType === "Proposal"
                       ? " Your pending proposal "
@@ -349,11 +351,6 @@ const NotificationsList = (props: NotificationsListProps) => {
                   </Typography>
                 </Box>
                 <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: "5px" }}>
-                  {/* <Tooltip title={`Click to ${props.checked ? "check" : "uncheck"} this notification.`}>
-                <IconButton onClick={() => checkNotification(notification.id, !props.checked)}>
-                  {props.checked ? <CheckCircleOutlineIcon /> : <RadioButtonUncheckedIcon />}
-                </IconButton>
-              </Tooltip> */}
                   <Checkbox
                     checked={selectedNotifications.includes(notification.id)}
                     onChange={event => handleSelectNotification(event, notification.id)}
@@ -481,7 +478,7 @@ const NotificationFilter = ({ handleSelect, selectedOption }: NotificationFilter
           alignSelf: "center",
           p: "8px",
           border: theme =>
-            `1px solid ${theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.gray400 : DESIGN_SYSTEM_COLORS.gray25}}`,
+            `1px solid ${theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.gray400 : DESIGN_SYSTEM_COLORS.gray400}}`,
           ":hover": {
             borderColor: DESIGN_SYSTEM_COLORS.primary600,
           },
