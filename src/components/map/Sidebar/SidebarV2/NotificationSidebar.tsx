@@ -184,7 +184,10 @@ const NotificationSidebar = ({
                 checked={false}
               />
             ) : (
-              <NotFoundNotification />
+              <NotFoundNotification
+                title="You are all caught up!"
+                description="Check back soon for more exciting updates."
+              />
             )}
           </>
         ),
@@ -203,7 +206,10 @@ const NotificationSidebar = ({
             {checkedNotifications.length > 0 ? (
               <NotificationsList notifications={checkedNotifications} openLinkedNode={openLinkedNode} checked={true} />
             ) : (
-              <NotFoundNotification />
+              <NotFoundNotification
+                title="You've not checked off any notifications"
+                description="If you mark your notifications as read, they'll show up in this list."
+              />
             )}
           </>
         ),
@@ -248,7 +254,7 @@ const NotificationSidebar = ({
   );
 };
 
-const NotFoundNotification = () => {
+const NotFoundNotification = ({ title, description }: { title: string; description: string }) => {
   return (
     <Box sx={{ height: "100%", display: "grid", placeItems: "center" }}>
       <Box>
@@ -261,7 +267,7 @@ const NotFoundNotification = () => {
           />
         </Box>
         <Typography fontWeight={"500"} fontSize={"18px"} textAlign={"center"} maxWidth={"300px"}>
-          You've not checked off any notifications
+          {title}
         </Typography>
         <Typography
           fontSize={"12px"}
@@ -272,7 +278,7 @@ const NotFoundNotification = () => {
               mode === "dark" ? DESIGN_SYSTEM_COLORS.gray50 : DESIGN_SYSTEM_COLORS.gray700,
           }}
         >
-          If you mark your notifications as read, they'll show up in this list.{" "}
+          {description}
         </Typography>
       </Box>
     </Box>
