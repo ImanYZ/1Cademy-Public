@@ -69,9 +69,7 @@ export const SidebarWrapper = ({
         id,
         sx: {
           maxHeight: "100vh",
-          // minWidth: { xs: "0px", sm: width },
           width: { xs: "100%", sm: width },
-          // maxWidth: { xs: width, sm: "80px" },
           height: height < 100 && innerHeight ? `${(height / 100) * innerHeight}px` : `${height}%`,
           borderRight: "none",
           background: theme => (theme.palette.mode === "dark" ? "#1B1A1A" : "#F9FAFB"),

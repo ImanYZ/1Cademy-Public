@@ -14,7 +14,6 @@ type NotificationSidebarProps = {
   username: string;
   sidebarWidth: number;
   innerHeight?: number;
-  innerWidth: number;
 };
 export type Notification = {
   id: string;
@@ -42,7 +41,6 @@ const NotificationSidebar = ({
   username,
   sidebarWidth,
   innerHeight,
-  innerWidth,
 }: NotificationSidebarProps) => {
   const [value, setValue] = React.useState(0);
   const [checkedNotifications, setCheckedNotifications] = useState<Notification[]>([]);
@@ -199,7 +197,6 @@ const NotificationSidebar = ({
       open={open}
       title="Notifications"
       width={sidebarWidth}
-      height={innerWidth > 599 ? 100 : 35}
       innerHeight={innerHeight}
       // anchor="right"
       onClose={onClose}
@@ -227,45 +224,7 @@ const NotificationSidebar = ({
         </Box>
       }
       contentSignalState={contentSignalState}
-      SidebarContent={
-        open ? <Box sx={{ py: "10px" }}>{tabItems[value].content}</Box> : null
-        // <Box sx={{ display: "flex", flexDirection: "column", p: "2px 4px" }}>
-        //   {((!uncheckedNotifications.length && value === 0) || (!checkedNotifications.length && value === 1)) && (
-        //     <Box
-        //       sx={{
-        //         display: "flex",
-        //         flexDirection: "column",
-        //         alignItems: "center",
-        //         justifyContent: "center",
-        //       }}
-        //     >
-        //       <h3>You don't have notifications</h3>
-        //     </Box>
-        //   )}
-        //   {uncheckedNotifications.length > 0 && value === 0 && (
-        //     <Box sx={{ display: "flex", flexDirection: "column", gap: "4px" }}>
-        //       <div id="MarkAllRead">
-        //         <MemoizedMetaButton onClick={() => checkAllNotification()}>
-        //           <div id="MarkAllReadButton">
-        //             <DoneAllIcon className="material-icons DoneIcon green-text" />
-        //             <span>Mark All Read</span>
-        //           </div>
-        //         </MemoizedMetaButton>
-        //       </div>
-        //       <NotificationsList
-        //         notifications={uncheckedNotifications}
-        //         openLinkedNode={openLinkedNode}
-        //         checked={false}
-        //       />
-        //     </Box>
-        //   )}
-        //   {checkedNotifications.length > 0 && value === 1 && (
-        //     <Box sx={{ display: "flex", flexDirection: "column", gap: "4px" }}>
-        //       <NotificationsList notifications={checkedNotifications} openLinkedNode={openLinkedNode} checked={true} />
-        //     </Box>
-        //   )}
-        // </Box>
-      }
+      SidebarContent={open ? <Box sx={{ py: "10px" }}>{tabItems[value].content}</Box> : null}
     />
   );
 };
