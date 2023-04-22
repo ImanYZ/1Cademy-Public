@@ -1,7 +1,10 @@
-import { Box, Tab, Tabs } from "@mui/material";
+import { Box, Tab, Tabs, Typography } from "@mui/material";
 import { collection, DocumentData, getFirestore, onSnapshot, Query, query, where } from "firebase/firestore";
 import React, { ReactNode, useCallback, useEffect, useMemo, useState } from "react";
 import { ReactElement } from "react-markdown/lib/react-markdown";
+
+import { RiveComponentMemoized } from "@/components/home/components/temporals/RiveComponentExtended";
+import { DESIGN_SYSTEM_COLORS } from "@/lib/theme/colors";
 
 import { CustomBadge } from "../../CustomBudge";
 import NotificationsList from "../NotificationsList";
@@ -173,7 +176,17 @@ const NotificationSidebar = ({
       {
         title: "Unread",
         content: (
-          <NotificationsList notifications={uncheckedNotifications} openLinkedNode={openLinkedNode} checked={false} />
+          <>
+            {uncheckedNotifications.length > 0 ? (
+              <NotificationsList
+                notifications={uncheckedNotifications}
+                openLinkedNode={openLinkedNode}
+                checked={false}
+              />
+            ) : (
+              <NotFoundNotification />
+            )}
+          </>
         ),
         badge: (
           <>
@@ -186,7 +199,13 @@ const NotificationSidebar = ({
       {
         title: "Read",
         content: (
-          <NotificationsList notifications={checkedNotifications} openLinkedNode={openLinkedNode} checked={true} />
+          <>
+            {checkedNotifications.length > 0 ? (
+              <NotificationsList notifications={checkedNotifications} openLinkedNode={openLinkedNode} checked={true} />
+            ) : (
+              <NotFoundNotification />
+            )}
+          </>
         ),
       },
     ];
@@ -224,8 +243,39 @@ const NotificationSidebar = ({
         </Box>
       }
       contentSignalState={contentSignalState}
-      SidebarContent={open ? <Box sx={{ py: "10px" }}>{tabItems[value].content}</Box> : null}
+      SidebarContent={open ? <Box sx={{ height: "100%", py: "10px" }}>{tabItems[value].content}</Box> : null}
     />
+  );
+};
+
+const NotFoundNotification = () => {
+  return (
+    <Box sx={{ height: "100%", display: "grid", placeItems: "center" }}>
+      <Box>
+        <Box sx={{ width: { xs: "250px", sm: "300px" }, height: { xs: "150px", sm: "200px" } }}>
+          <RiveComponentMemoized
+            src="./rive-notebook/notification.riv"
+            animations={"Timeline 1"}
+            artboard="New Artboard"
+            autoplay={true}
+          />
+        </Box>
+        <Typography fontWeight={"500"} fontSize={"18px"} textAlign={"center"} maxWidth={"300px"}>
+          You've not checked off any notifications
+        </Typography>
+        <Typography
+          fontSize={"12px"}
+          textAlign={"center"}
+          maxWidth={"300px"}
+          sx={{
+            color: ({ palette: { mode } }) =>
+              mode === "dark" ? DESIGN_SYSTEM_COLORS.gray50 : DESIGN_SYSTEM_COLORS.gray700,
+          }}
+        >
+          If you mark your notifications as read, they'll show up in this list.{" "}
+        </Typography>
+      </Box>
+    </Box>
   );
 };
 export const MemoizedNotificationSidebar = React.memo(NotificationSidebar);

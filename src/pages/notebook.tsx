@@ -6399,7 +6399,6 @@ const Dashboard = ({}: DashboardProps) => {
                 onClose={() => setOpenSidebar(null)}
                 sidebarWidth={sidebarWidth()}
                 innerHeight={innerHeight}
-                innerWidth={windowWith}
               />
               <MemoizedPendingProposalSidebar
                 theme={settings.theme}
