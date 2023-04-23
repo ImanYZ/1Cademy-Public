@@ -186,7 +186,6 @@ const NotificationSidebar = ({
     const requestRef = collection(db, "requests");
     const q = query(requestRef, where("requestedUser", "==", "jjnnx"), where("state", "==", "waiting"));
     const unsub = onSnapshot(q, snapshot => {
-      console.log("requests");
       const docChages = snapshot.docChanges();
       if (!(docChages.length > 0)) return;
 
