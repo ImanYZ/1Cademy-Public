@@ -253,6 +253,7 @@ const Dashboard = ({}: DashboardProps) => {
     lastOperation: "CancelProposals",
     contributorsNodeId: null,
     showContributors: false,
+    scaleThreshold: 2,
   });
 
   // scale and translation of the viewport over the map for the map interactions module
@@ -4210,6 +4211,7 @@ const Dashboard = ({}: DashboardProps) => {
   const edgeIds = Object.keys(graph.edges);
 
   const navigateWhenNotScrolling = (newMapInteractionValue: any) => {
+    console.log({ newMapInteractionValue });
     if (!scrollToNodeInitialized.current) {
       return setMapInteractionValue(newMapInteractionValue);
     }
@@ -6784,6 +6786,7 @@ const Dashboard = ({}: DashboardProps) => {
                   setAbleToPropose={setAbleToPropose}
                   setOpenPart={onChangeNodePart}
                   // selectedNotebookId={selectedNotebookId}
+                  scaleThreshold={mapInteractionValue.scale}
                 />
               </MapInteractionCSS>
 

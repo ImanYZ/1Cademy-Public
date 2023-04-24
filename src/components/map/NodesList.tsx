@@ -62,7 +62,7 @@ type NodeListProps = {
   ableToPropose: boolean;
   setAbleToPropose: (newValue: boolean) => void;
   setOpenPart: (nodeId: string, newOpenPart: OpenPart) => void;
-  // selectedNotebookId: string;
+  scaleThreshold: number;
 };
 
 const NodesList = ({
@@ -115,13 +115,11 @@ const NodesList = ({
   openUserInfoSidebar,
   disabledNodes = [],
   enableChildElements = [],
-  // showProposeTutorial = false,
-  // setCurrentTutorial,
   ableToPropose,
   setAbleToPropose,
   setOpenPart,
-}: // selectedNotebookId,
-NodeListProps) => {
+  scaleThreshold,
+}: NodeListProps) => {
   /* eslint-disable-next-line @typescript-eslint/no-unused-vars */
   const { nodeBookDispatch } = useNodeBook();
 
@@ -290,6 +288,7 @@ NodeListProps) => {
             // expands={nodes[nId].expands}
             // notebooks={nodes[nId].notebooks}
             open={nodes[nId].open}
+            scaleThreshold={scaleThreshold}
           />
         );
       })}
@@ -344,6 +343,7 @@ export const MemoizedNodeList = React.memo(NodesList, (prev, next) => {
     prev.setOpenPart === next.setOpenPart &&
     prev.openSidebar === prev.openSidebar && // TODO: check this
     // prev.showProposeTutorial === next.showProposeTutorial &&
+    prev.scaleThreshold === next.scaleThreshold &&
     prev.ableToPropose === next.ableToPropose &&
     prev.setNodeParts === next.setNodeParts &&
     // prev.selectedNotebookId === next.selectedNotebookId &&

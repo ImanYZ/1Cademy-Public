@@ -170,6 +170,7 @@ type NodeProps = {
   // expands: boolean[];
   // selectedNotebookId: string;
   open: boolean;
+  scaleThreshold: number;
 };
 
 const proposedChildTypesIcons: { [key in ProposedChildTypesIcons]: string } = {
@@ -289,10 +290,8 @@ const Node = ({
   setAbleToPropose,
   openPart,
   setOpenPart,
-}: // notebooks,
-// expands,
-// selectedNotebookId: selectedNotebook,
-NodeProps) => {
+  scaleThreshold,
+}: NodeProps) => {
   const [{ user }] = useAuth();
   const { nodeBookState } = useNodeBook();
   const [option, setOption] = useState<EditorOptions>("EDIT");
@@ -306,7 +305,7 @@ NodeProps) => {
   const [videoUrl, setVideoUrl] = useState(nodeVideo);
   const [videoStartTime, setVideoStartTime] = useState<any>(nodeVideoStartTime ? nodeVideoStartTime : 0);
   const [videoEndTime, setVideoEndTime] = useState<any>(nodeVideoEndTime ? nodeVideoEndTime : 0);
-  const nodeRef = useRef(null);
+  const nodeRef = useRef<HTMLDivElement>(null);
   const previousHeightRef = useRef<number>(0);
   const previousTopRef = useRef<string>("0px");
   const observer = useRef<ResizeObserver | null>(null);
@@ -318,6 +317,7 @@ NodeProps) => {
     totalPage: 0,
     totalResults: 0,
   });
+  const [hideNodeContent, setHideNodeContent] = useState<boolean>(false);
 
   const [openProposal, setOpenProposal] = useState<any>(false);
   const [startTimeValue, setStartTimeValue] = React.useState<any>(moment.utc(nodeVideoStartTime * 1000));
@@ -325,6 +325,7 @@ NodeProps) => {
   const [timePickerError, setTimePickerError] = React.useState<any>(false);
   const [contentCopy, setContentCopy] = useState(content);
   const [isLoading, startTransition] = useTransition();
+
   const childNodeButtonsAnimation = keyframes({
     from: { left: "500px", zIndex: -999 },
     to: { left: "600px", zIndex: 0 },
@@ -711,9 +712,44 @@ NodeProps) => {
     }
   };
 
+  useEffect(() => {
+    if (!nodeRef.current) return;
+    console.log({ scaleThreshold });
+    setHideNodeContent(scaleThreshold < 0.4);
+  }, [scaleThreshold]);
+
   if (!user) {
     return null;
   }
+
+  if (hideNodeContent) {
+    return (
+      <div
+        ref={nodeRef}
+        id={identifier}
+        onClick={nodeClickHandler}
+        data-hoverable={true}
+        className={
+          "Node card" +
+          (activeNode ? " active" : "") +
+          (changed || !isStudied ? " Changed" : "") +
+          (isHiding ? " IsHiding" : "") +
+          (nodeType === "Reference" ? " Choosable" : "")
+        }
+        style={{
+          left: left ? left : 1000,
+          top: top ? top : 1000,
+          width,
+          transition: "0.3s",
+          padding: "13px 13px 13px 12px",
+        }}
+      >
+        {/* scaleThreshold > 0.2 ? 8 / scaleThreshold : 8 / 0.2 */}
+        <Typography fontSize={`${scaleThreshold > 0.32 ? 16 / scaleThreshold : 16 / 0.32}px`}>{title}</Typography>
+      </div>
+    );
+  }
+
   return (
     <div
       ref={nodeRef}
@@ -1477,6 +1513,7 @@ export const MemoizedNode = React.memo(Node, (prev, next) => {
     prev.disableVotes === next.disableVotes &&
     prev.openPart === next.openPart &&
     prev.openSidebar === next.openSidebar &&
+    prev.scaleThreshold === next.scaleThreshold &&
     (!next.activeNode || prev.ableToPropose === next.ableToPropose);
   if (
     !basicChanges ||
