@@ -1,9 +1,20 @@
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
+import DoneRoundedIcon from "@mui/icons-material/DoneRounded";
 import EmailIcon from "@mui/icons-material/Email";
 import LinkIcon from "@mui/icons-material/Link";
 import LinkedInIcon from "@mui/icons-material/LinkedIn";
-import { Button, Card, CardActionArea, CardContent, CardMedia, Divider, styled, Typography } from "@mui/material";
+import {
+  Button,
+  Card,
+  CardActionArea,
+  CardContent,
+  CardMedia,
+  CircularProgress,
+  Divider,
+  styled,
+  Typography,
+} from "@mui/material";
 import Avatar from "@mui/material/Avatar";
 import Box from "@mui/material/Box";
 import IconButton from "@mui/material/IconButton";
@@ -21,6 +32,7 @@ import AppHeaderMemoized from "@/components/Header/AppHeader";
 import { allCommunities } from "@/components/home/CommunitiesOrder";
 import YoutubeEmbed from "@/components/home/components/YoutubeEmbed";
 import { ONE_CADEMY_SECTIONS } from "@/components/home/SectionsItems";
+import { DESIGN_SYSTEM_COLORS } from "@/lib/theme/colors";
 import { ONECADEMY_DOMAIN } from "@/lib/utils/1cademyConfig";
 import ROUTES from "@/lib/utils/routes";
 
@@ -164,7 +176,7 @@ const Communities = (props: Props) => {
   const [reputations, setReputations] = useState<{
     [key: string]: { [key: string]: number };
   }>({});
-  const [, /* reputationsLoaded */ setReputationsLoaded] = useState(false);
+  const [reputationsLoaded, setReputationsLoaded] = useState(false);
   const [usersChanges, setUsersChanges] = useState<DocumentChange<DocumentData>[]>([]);
   const [users, setUsers] = useState<{ [key: string]: Pick<User, "uname" | "fName" | "lName" | "imageUrl"> }>({});
   const [usersLoaded, setUsersLoaded] = useState(false);
@@ -237,6 +249,7 @@ const Communities = (props: Props) => {
 
   useEffect(() => {
     if (reputationsChanges.length > 0) {
+      setReputationsLoaded(false);
       const tempReputationsChanges = [...reputationsChanges];
       setReputationsChanges([]);
       let rpts = { ...reputations };
@@ -689,85 +702,96 @@ const Communities = (props: Props) => {
               </>
             )}
           <DividerStyled />
-
-          <Box
-            sx={{
-              m: "2.5px",
-              mt: "10px",
-              minHeight: "130px",
-            }}
-          >
-            <Typography
+          {!reputationsLoaded && (
+            <Stack direction={"row"} alignItems={"center"} justifyContent={"center"} mb="32px">
+              <CircularProgress />
+            </Stack>
+          )}
+          {reputationsLoaded && (
+            <Box
               sx={{
-                display: "block",
+                m: "24px 2.5px",
+                minHeight: "130px",
               }}
             >
-              <b>Leaderboard</b>
-              <br />
-              <span> Only those with &gt; 25 points </span>
-            </Typography>
-            <br />
-            <Stack
-              sx={{
-                display: "grid",
-                gridTemplateColumns: "repeat(auto-fill,minmax(240px,1fr))",
-                placeItems: "stretch",
-                gap: "8px",
-                listStyle: "none",
-                p: 0.5,
-                m: 0,
-              }}
-            >
-              {community.allTime &&
-                community.allTime.slice(0, limit).map((member: any, idx) => {
-                  return member.points >= 25 ? (
-                    <Stack
-                      key={idx}
-                      direction={"row"}
-                      alignItems={"center"}
-                      sx={{
-                        minWidth: "150px",
-                        maxWidth: "100%",
-                        height: "84px",
-                        borderRadius: "12px",
-                        border: `1px solid ${gray800}`,
-                        backgroundColor: "black",
-                        p: { xs: "6px 8px", sm: "16px 24px" },
-                      }}
-                    >
-                      <Avatar
-                        src={member.imageUrl}
-                        alt={member.fullname}
-                        sx={{
-                          width: "50px",
-                          height: "50px",
-                          mr: 2.5,
-                        }}
-                      />
-                      <Stack>
-                        <Typography sx={{ fontSize: "16px", fontWeight: 600 }}>{member.fullname}</Typography>
-                        <Typography variant="body2" component="div">
-                          {idx < 3 ? "🏆" : "✔️"}
-                          {" " + Math.round((member.points + Number.EPSILON) * 100) / 100}
-                        </Typography>
-                      </Stack>
-                    </Stack>
-                  ) : null;
-                })}
-              <Button
-                onClick={() => (community.allTime ? setLimit(community.allTime.length) : setLimit(3))}
+              <Typography
                 sx={{
-                  display: limit === 3 ? "block" : "none",
-                  textTransform: "capitalize",
-                  color: orangeDark,
-                  cursor: "pointer",
-                  // placeSelf: "center"
+                  display: "block",
                 }}
               >
-                View more...
-              </Button>
-            </Stack>
-          </Box>
+                <b>Leaderboard</b>
+                <br />
+                <span> Only those with &gt; 25 points </span>
+              </Typography>
+              <br />
+              <Stack
+                sx={{
+                  display: "grid",
+                  gridTemplateColumns: "repeat(auto-fill,minmax(240px,1fr))",
+                  placeItems: "stretch",
+                  gap: "8px",
+                  listStyle: "none",
+                  p: 0.5,
+                  m: 0,
+                }}
+              >
+                {community.allTime &&
+                  community.allTime.slice(0, limit).map((member: any, idx) => {
+                    return member.points >= 25 ? (
+                      <Stack
+                        key={idx}
+                        direction={"row"}
+                        alignItems={"center"}
+                        sx={{
+                          minWidth: "150px",
+                          maxWidth: "100%",
+                          height: "84px",
+                          borderRadius: "12px",
+                          border: `1px solid ${gray800}`,
+                          backgroundColor: "black",
+                          p: { xs: "6px 8px", sm: "16px 24px" },
+                        }}
+                      >
+                        <Avatar
+                          src={member.imageUrl}
+                          alt={member.fullname}
+                          sx={{
+                            width: "50px",
+                            height: "50px",
+                            mr: 2.5,
+                          }}
+                        />
+                        <Stack>
+                          <Typography
+                            sx={{ fontSize: "16px", fontWeight: 600 }}
+                          >{`${member.fName} ${member.lName}`}</Typography>
+                          <Typography variant="body2" component="div" sx={{ display: "flex" }}>
+                            {idx < 3 ? (
+                              "🏆"
+                            ) : (
+                              <DoneRoundedIcon sx={{ color: DESIGN_SYSTEM_COLORS.success500, alignSelf: "center" }} />
+                            )}
+                            {" " + Math.round((member.points + Number.EPSILON) * 100) / 100}
+                          </Typography>
+                        </Stack>
+                      </Stack>
+                    ) : null;
+                  })}
+                <Button
+                  onClick={() => (community.allTime ? setLimit(community.allTime.length) : setLimit(3))}
+                  sx={{
+                    display: limit === 3 ? "block" : "none",
+                    textTransform: "capitalize",
+                    color: orangeDark,
+                    cursor: "pointer",
+                    // placeSelf: "center"
+                  }}
+                >
+                  View more...
+                </Button>
+              </Stack>
+            </Box>
+          )}
         </Box>
 
         <AppFooter prevPage={ROUTES.publicHome} />
