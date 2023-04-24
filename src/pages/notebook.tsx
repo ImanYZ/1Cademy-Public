@@ -253,7 +253,6 @@ const Dashboard = ({}: DashboardProps) => {
     lastOperation: "CancelProposals",
     contributorsNodeId: null,
     showContributors: false,
-    scaleThreshold: 2,
   });
 
   // scale and translation of the viewport over the map for the map interactions module
@@ -463,6 +462,7 @@ const Dashboard = ({}: DashboardProps) => {
                 } else {
                   defaultScale = 0.92;
                 }
+                console.log("threshold (default scale)", { defaultScale });
                 const regionWidth = windowWith - windowInnerLeft - windowInnerRight;
                 const regionHeight = windowHeight - windowInnerTop - windowInnerBottom;
 

@@ -75,6 +75,7 @@ import { MemoizedInputSave } from "../../InputSave";
 import { MemoizedMetaButton } from "../../MetaButton";
 import Modal from "../../Modal/Modal";
 import ProposalItem from "../../ProposalsList/ProposalItem/ProposalItem";
+import LevelSlider from "../LevelSlider";
 import NodeTypeTrends from "../NodeTypeTrends";
 import ProfileAvatar from "../ProfileAvatar";
 import UseInfoTrends from "../UseInfoTrends";
@@ -138,6 +139,24 @@ const ACCOUNT_OPTIONS: AccountOptions[] = [
       //   icon: SadfaceIcon,
       // },
     ],
+  },
+];
+
+const MARKS = [
+  {
+    value: 0,
+  },
+  {
+    value: 50,
+  },
+  {
+    value: 100,
+  },
+  {
+    value: 150,
+  },
+  {
+    value: 200,
   },
 ];
 
@@ -1160,8 +1179,23 @@ const UserSettigsSidebar = ({
                   }}
                 >
                   <Typography>Background Image</Typography>
-                  <IOSSwitch checked={settings.background === "Image"} onChange={handleBackgroundSwitch} />
+                  <IOSSwitch
+                    aria-label="Temperature"
+                    checked={settings.background === "Image"}
+                    onChange={handleBackgroundSwitch}
+                  />
                 </Paper>
+                <Typography fontWeight={"500"}>Font Size</Typography>
+                <LevelSlider
+                  min={0}
+                  max={200}
+                  aria-label="ios slider"
+                  marks={MARKS}
+                  valueLabelDisplay="on"
+                  valueLabelFormat={(value: number) => `${value}%`}
+                  defaultValue={100}
+                  sx={{ my: "16px" }}
+                />
                 <Typography fontWeight={"500"}>Nodes view</Typography>
                 <Stack direction={"row"} alignItems={"center"} justifyContent={"space-evenly"} mt="12px">
                   <Box

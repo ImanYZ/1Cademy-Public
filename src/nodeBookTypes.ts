@@ -84,7 +84,6 @@ export type TNodeBookState = {
   lastOperation: LastOperation;
   contributorsNodeId: any;
   showContributors: any;
-  scaleThreshold: number;
 };
 
 export type SetSNodeAction = {

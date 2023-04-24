@@ -714,9 +714,19 @@ const Node = ({
 
   useEffect(() => {
     if (!nodeRef.current) return;
-    console.log({ scaleThreshold });
-    setHideNodeContent(scaleThreshold < 0.4);
-  }, [scaleThreshold]);
+    if (!user || !user.scaleThreshold) return;
+    console.log(!user.scaleThreshold);
+    let userThreshold = 157;
+    let threshold = 3;
+    if (userThreshold > 100) {
+      threshold = ((3 - 0.8) * (userThreshold - 100)) / 100;
+    } else {
+      threshold = ((0.8 - 0.05) * userThreshold) / 100;
+    }
+    if (scaleThreshold) console.log({ scaleThreshold, threshold });
+    setHideNodeContent(scaleThreshold < threshold);
+    // setHideNodeContent(scaleThreshold < 0.4);
+  }, [scaleThreshold, user]);
 
   if (!user) {
     return null;
