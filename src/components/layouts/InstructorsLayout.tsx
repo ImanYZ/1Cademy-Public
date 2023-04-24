@@ -177,6 +177,8 @@ export const InstructorsLayout: FC<Props> = ({ children }) => {
       sx={{
         background: theme => (theme.palette.mode === "light" ? "#F5F5F5" : "#28282A"),
         minHeight: "100vh",
+        maxHeight: "100vh",
+        overflowY: "scroll",
       }}
     >
       {!isMovil && <HeaderNavbar options={filteredOptions} user={user} onNewCourse={onNewCourse} />}
