@@ -8,11 +8,13 @@ import Avatar from "@mui/material/Avatar";
 import Box from "@mui/material/Box";
 import IconButton from "@mui/material/IconButton";
 import { Stack } from "@mui/system";
+import { collection, DocumentChange, DocumentData, getFirestore, onSnapshot, query } from "firebase/firestore";
 import { GetStaticPaths, GetStaticProps } from "next";
 import Head from "next/head";
 import Image from "next/image";
 import Link from "next/link";
-import React, { useMemo, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
+import { User } from "src/knowledgeTypes";
 
 import AppFooter from "@/components/AppFooter";
 import AppHeaderMemoized from "@/components/Header/AppHeader";
@@ -98,24 +100,29 @@ const subSections = [
   },
 ];
 
-// const accumulatePoints = (groups, reputationData, user, points) => {
-//   for (let communi of groups) {
-//     for (let deTag of communi.tags) {
-//       if (reputationData.tag === deTag.title) {
-//         const userIdx = communi.allTime.findIndex(obj => obj.uname === reputationData.uname);
-//         if (userIdx !== -1) {
-//           communi.allTime[userIdx].points += points;
-//         } else {
-//           communi.allTime.push({
-//             uname: reputationData.uname,
-//             ...user,
-//             points,
-//           });
-//         }
-//       }
-//     }
-//   }
-// };
+const accumulatePoints = (
+  groups: any,
+  reputationData: DocumentData,
+  user: Pick<User, "uname" | "fName" | "lName" | "imageUrl">,
+  points: number
+) => {
+  for (let communi of groups) {
+    for (let deTag of communi.tags) {
+      if (reputationData.tag === deTag.title) {
+        const userIdx = communi.allTime.findIndex((obj: any) => obj.uname === reputationData.uname);
+        if (userIdx !== -1) {
+          communi.allTime[userIdx].points += points;
+        } else {
+          communi.allTime.push({
+            ...user,
+            uname: reputationData.uname,
+            points,
+          });
+        }
+      }
+    }
+  }
+};
 
 const DividerStyled = styled(props => <Divider {...props} />)(({ theme }) => ({
   marginTop: "32px",
@@ -152,121 +159,125 @@ export const getStaticPaths: GetStaticPaths<Params> = async () => {
 
 const Communities = (props: Props) => {
   const { commIdx } = props;
-  // const [reputationsChanges, setReputationsChanges] = useState([]);
-  // const [reputations, setReputations] = useState({});
-  // const [reputationsLoaded, setReputationsLoaded] = useState(false);
-  // const [usersChanges, setUsersChanges] = useState([]);
-  // const [users, setUsers] = useState({});
-  // const [usersLoaded, setUsersLoaded] = useState(false);
-  const [communities /* setCommunities */] = useState(allCommunities);
+  const db = getFirestore();
+  const [reputationsChanges, setReputationsChanges] = useState<DocumentChange<DocumentData>[]>([]);
+  const [reputations, setReputations] = useState<{
+    [key: string]: { [key: string]: number };
+  }>({});
+  const [, /* reputationsLoaded */ setReputationsLoaded] = useState(false);
+  const [usersChanges, setUsersChanges] = useState<DocumentChange<DocumentData>[]>([]);
+  const [users, setUsers] = useState<{ [key: string]: Pick<User, "uname" | "fName" | "lName" | "imageUrl"> }>({});
+  const [usersLoaded, setUsersLoaded] = useState(false);
+  const [communities, setCommunities] = useState(allCommunities);
 
   const community = useMemo(() => {
     return allCommunities.find(e => e.id === commIdx) ?? allCommunities[0];
   }, [commIdx, allCommunities]);
   // const [expandedOption, setExpandedOption] = useState("");
-  // const [limit, setLimit] = useState(3);
+  const [limit, setLimit] = useState(3);
 
   const carouselRef = useRef<HTMLDivElement | null>(null);
 
-  // useEffect(() => {
-  //   if (firebase) {
-  //     const usersQuery = firebase.db.collection("users");
-  //     const usersSnapshot = usersQuery.onSnapshot(snapshot => {
-  //       const docChanges = snapshot.docChanges();
-  //       setUsersChanges(oldUsersChanges => {
-  //         return [...oldUsersChanges, ...docChanges];
-  //       });
-  //     });
-  //     return () => {
-  //       setUsersChanges([]);
-  //       usersSnapshot();
-  //     };
-  //   }
-  // }, [firebase]);
+  useEffect(() => {
+    // if (firebase) {}
+    // const usersQuery = firebase.db.collection("users");
+    const userRef = collection(db, "users");
+    const q = query(userRef);
+    const usersSnapshot = onSnapshot(q, snapshot => {
+      const docChanges = snapshot.docChanges();
+      setUsersChanges(oldUsersChanges => {
+        return [...oldUsersChanges, ...docChanges];
+      });
+    });
+    return () => {
+      setUsersChanges([]);
+      usersSnapshot();
+    };
+  }, [db]);
 
-  // useEffect(() => {
-  //   if (usersChanges.length > 0) {
-  //     const tempUsersChanges = [...usersChanges];
-  //     setUsersChanges([]);
-  //     let members = { ...users };
-  //     for (let change of tempUsersChanges) {
-  //       const userData = change.doc.data();
-  //       if (change.type === "removed" || userData.deleted) {
-  //         if (change.doc.id in members) {
-  //           delete members[change.doc.id];
-  //         }
-  //       } else {
-  //         members[change.doc.id] = {
-  //           uname: userData.uname,
-  //           fullname: userData.fName + " " + userData.lName,
-  //           imageUrl: userData.imageUrl,
-  //         };
-  //       }
-  //     }
-  //     setUsers(members);
-  //     setUsersLoaded(true);
-  //   }
-  // }, [usersChanges, users]);
+  useEffect(() => {
+    if (usersChanges.length > 0) {
+      const tempUsersChanges = [...usersChanges];
+      setUsersChanges([]);
+      let members = { ...users };
+      for (let change of tempUsersChanges) {
+        const userData = change.doc.data();
+        if (change.type === "removed" || userData.deleted) {
+          if (change.doc.id in members) {
+            delete members[change.doc.id];
+          }
+        } else {
+          members[change.doc.id] = {
+            uname: userData.uname,
+            fName: userData.fName,
+            lName: userData.lName,
+            imageUrl: userData.imageUrl,
+          };
+        }
+      }
+      setUsers(members);
+      setUsersLoaded(true);
+    }
+  }, [usersChanges, users]);
 
-  // useEffect(() => {
-  //   if (firebase && usersLoaded) {
-  //     const reputationsQuery = firebase.db.collection("reputations");
-  //     const reputationsSnapshot = reputationsQuery.onSnapshot(snapshot => {
-  //       const docChanges = snapshot.docChanges();
-  //       setReputationsChanges(oldReputationsChanges => {
-  //         return [...oldReputationsChanges, ...docChanges];
-  //       });
-  //     });
-  //     return () => {
-  //       setReputationsChanges([]);
-  //       reputationsSnapshot();
-  //     };
-  //   }
-  // }, [firebase, usersLoaded]);
+  useEffect(() => {
+    if (!usersLoaded) return;
+    const reputationsQuery = collection(db, "reputations");
+    const reputationsSnapshot = onSnapshot(reputationsQuery, snapshot => {
+      const docChanges = snapshot.docChanges();
+      setReputationsChanges(oldReputationsChanges => {
+        return [...oldReputationsChanges, ...docChanges];
+      });
+    });
+    return () => {
+      setReputationsChanges([]);
+      reputationsSnapshot();
+    };
+  }, [db, usersLoaded]);
 
-  // useEffect(() => {
-  //   if (reputationsChanges.length > 0) {
-  //     const tempReputationsChanges = [...reputationsChanges];
-  //     setReputationsChanges([]);
-  //     let rpts = { ...reputations };
-  //     const groups = [...communities];
-  //     for (let change of tempReputationsChanges) {
-  //       const reputationData = change.doc.data();
-  //       const points =
-  //         reputationData.cdCorrects +
-  //         reputationData.iCorrects +
-  //         reputationData.mCorrects -
-  //         reputationData.cdWrongs -
-  //         reputationData.iWrongs -
-  //         reputationData.mWrongs;
-  //       if (change.type === "removed" || reputationData.deleted) {
-  //         if (reputationData.uname in rpts) {
-  //           delete rpts[reputationData.uname];
-  //         }
-  //       } else {
-  //         const user = users[reputationData.uname];
-  //         if (!(reputationData.uname in rpts)) {
-  //           accumulatePoints(groups, reputationData, user, points);
-  //           rpts[reputationData.uname] = { [reputationData.tag]: points };
-  //         } else {
-  //           if (!(reputationData.tag in rpts[reputationData.uname])) {
-  //             accumulatePoints(groups, reputationData, user, points);
-  //             rpts[reputationData.uname][reputationData.tag] = points;
-  //           } else {
-  //             accumulatePoints(groups, reputationData, user, points - rpts[reputationData.uname][reputationData.tag]);
-  //             rpts[reputationData.uname][reputationData.tag] = points;
-  //           }
-  //         }
-  //       }
-  //     }
-  //     for (let communi of groups) {
-  //       communi.allTime.sort((a, b) => b.points - a.points);
-  //     }
-  //     setReputations(rpts);
-  //     setCommunities(groups);
-  //     setReputationsLoaded(true);
-  //   }
-  // }, [reputationsChanges, reputations, communities, users]);
+  useEffect(() => {
+    if (reputationsChanges.length > 0) {
+      const tempReputationsChanges = [...reputationsChanges];
+      setReputationsChanges([]);
+      let rpts = { ...reputations };
+      const groups = [...communities];
+      for (let change of tempReputationsChanges) {
+        const reputationData = change.doc.data();
+        const points =
+          reputationData.cdCorrects +
+          reputationData.iCorrects +
+          reputationData.mCorrects -
+          reputationData.cdWrongs -
+          reputationData.iWrongs -
+          reputationData.mWrongs;
+        if (change.type === "removed" || reputationData.deleted) {
+          if (reputationData.uname in rpts) {
+            delete rpts[reputationData.uname];
+          }
+        } else {
+          const user = users[reputationData.uname];
+          if (!(reputationData.uname in rpts)) {
+            accumulatePoints(groups, reputationData, user, points);
+            rpts[reputationData.uname] = { [reputationData.tag]: points };
+          } else {
+            if (!(reputationData.tag in rpts[reputationData.uname])) {
+              accumulatePoints(groups, reputationData, user, points);
+              rpts[reputationData.uname][reputationData.tag] = points;
+            } else {
+              accumulatePoints(groups, reputationData, user, points - rpts[reputationData.uname][reputationData.tag]);
+              rpts[reputationData.uname][reputationData.tag] = points;
+            }
+          }
+        }
+      }
+      for (let communi of groups) {
+        communi.allTime.sort((a: any, b: any) => b.points - a.points);
+      }
+      setReputations(rpts);
+      setCommunities(groups);
+      setReputationsLoaded(true);
+    }
+  }, [reputationsChanges, reputations, communities, users]);
 
   // const handleChangeOption = option => (event, newExpanded) => {
   //   setExpandedOption(newExpanded ? option : false);
@@ -678,7 +689,7 @@ const Communities = (props: Props) => {
               </>
             )}
           <DividerStyled />
-          {/*
+
           <Box
             sx={{
               m: "2.5px",
@@ -708,9 +719,10 @@ const Communities = (props: Props) => {
               }}
             >
               {community.allTime &&
-                community.allTime.slice(0, limit).map((member, idx) => {
+                community.allTime.slice(0, limit).map((member: any, idx) => {
                   return member.points >= 25 ? (
                     <Stack
+                      key={idx}
                       direction={"row"}
                       alignItems={"center"}
                       sx={{
@@ -755,7 +767,7 @@ const Communities = (props: Props) => {
                 View more...
               </Button>
             </Stack>
-          </Box> */}
+          </Box>
         </Box>
 
         <AppFooter prevPage={ROUTES.publicHome} />
