@@ -14,6 +14,7 @@ import {
   Divider,
   styled,
   Typography,
+  useMediaQuery,
 } from "@mui/material";
 import Avatar from "@mui/material/Avatar";
 import Box from "@mui/material/Box";
@@ -189,6 +190,8 @@ const Communities = (props: Props) => {
   const [limit, setLimit] = useState(3);
 
   const carouselRef = useRef<HTMLDivElement | null>(null);
+
+  const isMobile = useMediaQuery("(max-width:599px)");
 
   useEffect(() => {
     // if (firebase) {}
@@ -651,8 +654,13 @@ const Communities = (props: Props) => {
                   </Typography>
                   {subSection.component(community)}
                 </Box>
-                <Box sx={{ width: { sm: "250px", lg: "300px" }, height: { sm: "250px", lg: "300px" } }}>
-                  <Image src={subSection.image} alt={subSection.title} width="100%" height="100%" />
+                <Box sx={{ alignSelf: "center" }}>
+                  <Image
+                    src={subSection.image}
+                    alt={subSection.title}
+                    width={isMobile ? "250" : "300"}
+                    height={isMobile ? "250" : "300"}
+                  />
                 </Box>
               </Stack>
             ))}
