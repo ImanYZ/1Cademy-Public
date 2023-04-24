@@ -721,7 +721,16 @@ const Communities = (props: Props) => {
               >
                 <b>Leaderboard</b>
                 <br />
-                <span> Only those with &gt; 25 points </span>
+                <Typography
+                  component={"span"}
+                  sx={{
+                    color: ({ palette: { mode } }) =>
+                      mode === "dark" ? DESIGN_SYSTEM_COLORS.gray25 : DESIGN_SYSTEM_COLORS.gray600,
+                  }}
+                >
+                  {" "}
+                  Only those with &gt; 25 points{" "}
+                </Typography>
               </Typography>
               <br />
               <Stack
@@ -747,8 +756,12 @@ const Communities = (props: Props) => {
                           maxWidth: "100%",
                           height: "84px",
                           borderRadius: "12px",
-                          border: `1px solid ${gray800}`,
-                          backgroundColor: "black",
+                          border: ({ palette: { mode } }) =>
+                            `1px solid ${
+                              mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookG800 : DESIGN_SYSTEM_COLORS.notebookG50
+                            }`,
+                          backgroundColor: ({ palette: { mode } }) =>
+                            mode === "dark" ? "black" : DESIGN_SYSTEM_COLORS.baseWhite,
                           p: { xs: "6px 8px", sm: "16px 24px" },
                         }}
                       >
