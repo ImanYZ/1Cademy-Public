@@ -15,7 +15,7 @@ import ROUTES from "../../lib/utils/routes";
 import HeaderNavbar from "../instructors/HeaderNavbar";
 import HeaderNavbarMovil from "../instructors/HeaderNavbarMovil";
 import { SemesterFilter } from "../instructors/SemesterFilter";
-import { PracticeTool } from "../PracticeQuestion";
+import { PracticeTool } from "../PracticeTool";
 
 export type Option = {
   id: string;
@@ -199,7 +199,7 @@ export const StudentsLayout: FC<Props> = ({ children }) => {
       </div>
     );
 
-  if (displayPracticeTool) return <PracticeTool onClose={() => setDisplayPracticeTool(false)} />;
+  if (displayPracticeTool) return <PracticeTool />;
 
   return (
     <Box
