@@ -156,16 +156,16 @@ const MARKS = [
     value: 0,
   },
   {
+    value: 25,
+  },
+  {
     value: 50,
   },
   {
+    value: 75,
+  },
+  {
     value: 100,
-  },
-  {
-    value: 150,
-  },
-  {
-    value: 200,
   },
 ];
 
@@ -1211,13 +1211,13 @@ const UserSettigsSidebar = ({
                 <Typography fontWeight={"500"}>Node Threshold</Typography>
                 <LevelSlider
                   min={0}
-                  max={200}
+                  max={100}
                   marks={MARKS}
                   valueLabelDisplay="on"
                   valueLabelFormat={(value: number) => `${value}%`}
                   defaultValue={user.scaleThreshold}
                   onChangeCommitted={onHandleChangeSlider}
-                  sx={{ my: "16px" }}
+                  sx={{ my: "32px" }}
                 />
                 <Typography fontWeight={"500"}>Nodes view</Typography>
                 <Stack direction={"row"} alignItems={"center"} justifyContent={"space-evenly"} mt="12px">

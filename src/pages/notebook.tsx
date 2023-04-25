@@ -6048,13 +6048,8 @@ const Dashboard = ({}: DashboardProps) => {
     }
     const userThresholdPercentage = user.scaleThreshold;
     let userThresholdcurrentScale = 1;
-    const maxcurrentScale = 3;
 
-    if (userThresholdPercentage <= 100) {
-      userThresholdcurrentScale = (userThresholdPercentage * defaultScaleDevice) / 100;
-    } else {
-      userThresholdcurrentScale = (userThresholdPercentage * maxcurrentScale) / 200;
-    }
+    userThresholdcurrentScale = (userThresholdPercentage * defaultScaleDevice) / 100;
 
     console.log({ currentScale: mapInteractionValue.scale, userThresholdcurrentScale });
 
