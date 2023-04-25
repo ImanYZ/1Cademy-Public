@@ -19,6 +19,7 @@ export const getRootQuestionDescendants = async (
   rootId: string
 ): Promise<{ root: Node; descendants: Node[] } | null> => {
   const root = await getNode(db, rootId);
+  console.log({ root });
   if (!root) return null;
 
   const questionDescendantIds = root.children.filter(c => c.type === "Question").map(c => c.node);

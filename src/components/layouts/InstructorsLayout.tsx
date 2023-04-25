@@ -172,6 +172,7 @@ export const InstructorsLayout: FC<Props> = ({ children }) => {
     );
 
   if (!user) return <Typography>No user</Typography>;
+
   return (
     <Box
       sx={{

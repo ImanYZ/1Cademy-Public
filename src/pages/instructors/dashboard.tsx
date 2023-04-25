@@ -1,8 +1,5 @@
-import CloseFullscreenIcon from "@mui/icons-material/CloseFullscreen";
 import SquareIcon from "@mui/icons-material/Square";
-import { IconButton, Paper, Typography /* useTheme */, useMediaQuery, useTheme } from "@mui/material";
-// import { useTheme } from "@mui/material/styles";
-// import useMediaQuery from "@mui/material/useMediaQuery";
+import { Paper, Typography /* useTheme */, useMediaQuery, useTheme } from "@mui/material";
 import { Box } from "@mui/system";
 import { collection, getFirestore, onSnapshot, query, where } from "firebase/firestore";
 import { useCallback, useEffect, useState } from "react";
@@ -43,7 +40,7 @@ import { GeneralPlotStatsSkeleton } from "../../components/instructors/skeletons
 import { StackedBarPlotStatsSkeleton } from "../../components/instructors/skeletons/StackedBarPlotStatsSkeleton";
 import { StudentDailyPlotStatsSkeleton } from "../../components/instructors/skeletons/StudentDailyPlotStatsSkeleton";
 import { InstructorLayoutPage, InstructorsLayout } from "../../components/layouts/InstructorsLayout";
-import { PracticeTool } from "../../components/PracticeQuestion";
+// import { PracticeTool } from "../../components/PracticeQuestion";
 import { useWindowSize } from "../../hooks/useWindowSize";
 import {
   calculateVoteStatPoints,
@@ -201,7 +198,7 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
   const isLgDesktop = useMediaQuery(theme.breakpoints.up("lg"));
   const isXlDesktop = useMediaQuery(theme.breakpoints.up("xl"));
 
-  const [displayPracticeTool, setDisplayPracticeTool] = useState(false);
+  // const [displayPracticeTool, setDisplayPracticeTool] = useState(false);
 
   const [semesterStats, setSemesterStats] = useState<GeneralSemesterStudentsStats | null>(null);
   const [studentsCounter, setStudentsCounter] = useState<number>(0);
@@ -620,13 +617,6 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
         position: "relative",
       }}
     >
-      <Box sx={{ position: "absolute", top: "0px", right: "0px", zIndex: 2 }}>
-        <IconButton size="small" onClick={() => setDisplayPracticeTool(prev => !prev)}>
-          <CloseFullscreenIcon />
-        </IconButton>
-      </Box>
-      {displayPracticeTool && <PracticeTool />}
-
       <Box
         sx={{
           display: "grid",

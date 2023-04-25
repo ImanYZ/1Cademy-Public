@@ -75,6 +75,8 @@ export type Colors = {
   notebookPink: string;
   notebookScarlet: string;
   notebookRed: string;
+  notebookRed2: string;
+  notebookRed3: string;
 
   // ------------------------- secondary colors
   // blue
@@ -205,7 +207,7 @@ export const DESIGN_SYSTEM_COLORS: Colors = {
   success700: "#027A48",
   success800: "#05603A",
   success900: "#054F31",
-  success1000: "#054F31",
+  success1000: "#282C29",
 
   // ------------------------- notebooks colors
   // base
@@ -235,6 +237,8 @@ export const DESIGN_SYSTEM_COLORS: Colors = {
   notebookPink: "#FD7373",
   notebookScarlet: "#E34848",
   notebookRed: "#C03938",
+  notebookRed2: "#D92D20",
+  notebookRed3: "#301A1A",
 
   // ------------------------- secondary colors
   // blue

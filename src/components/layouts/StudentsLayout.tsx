@@ -1,4 +1,4 @@
-import { useMediaQuery, useTheme } from "@mui/material";
+import { Button, useMediaQuery, useTheme } from "@mui/material";
 import { Box } from "@mui/system";
 import { collection, doc, getDoc, getDocs, getFirestore, query, where } from "firebase/firestore";
 import { NextPage } from "next";
@@ -15,6 +15,7 @@ import ROUTES from "../../lib/utils/routes";
 import HeaderNavbar from "../instructors/HeaderNavbar";
 import HeaderNavbarMovil from "../instructors/HeaderNavbarMovil";
 import { SemesterFilter } from "../instructors/SemesterFilter";
+import { PracticeTool } from "../PracticeQuestion";
 
 export type Option = {
   id: string;
@@ -61,7 +62,7 @@ export const StudentsLayout: FC<Props> = ({ children }) => {
   const [currentSemester, setCurrentSemester] = useState<ICourseTag | null>(null);
   const [allSemesters, setAllSemesters] = useState<Semester[]>([]);
   const [queryUname, setQueryUname] = useState("");
-
+  const [displayPracticeTool, setDisplayPracticeTool] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
   const db = getFirestore();
@@ -198,6 +199,8 @@ export const StudentsLayout: FC<Props> = ({ children }) => {
       </div>
     );
 
+  if (displayPracticeTool) return <PracticeTool onClose={() => setDisplayPracticeTool(false)} />;
+
   return (
     <Box
       sx={{
@@ -212,6 +215,8 @@ export const StudentsLayout: FC<Props> = ({ children }) => {
           width: "100%",
           py: "10px",
           m: "auto",
+          display: "flex",
+          alignItems: "center",
           px: { xs: "10px", md: "20px" },
         }}
       >
@@ -227,6 +232,12 @@ export const StudentsLayout: FC<Props> = ({ children }) => {
           role={user.role}
           uname={queryUname}
         />
+
+        <Box sx={{}}>
+          <Button size="small" onClick={() => setDisplayPracticeTool(true)}>
+            Practice tutorial
+          </Button>
+        </Box>
       </Box>
 
       {children({
