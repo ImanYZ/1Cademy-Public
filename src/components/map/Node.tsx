@@ -715,7 +715,7 @@ const Node = ({
     return null;
   }
 
-  if (hideNode) {
+  if (hideNode && !editable) {
     return (
       <div
         ref={nodeRef}
@@ -739,7 +739,10 @@ const Node = ({
       >
         {/* currentScaleThreshold > 0.2 ? 8 / currentScaleThreshold : 8 / 0.2 */}
         {/* <Typography fontSize={`${currentScale > 0.32 ? 16 / currentScale : 16 / 0.32}px`}>{title}</Typography> */}
-        <Typography fontSize={`${16 / 0.32}px`}>{title}</Typography>
+        <Typography fontSize={`${14 / 0.32}px`} fontWeight={500} mb="8px">
+          {title}
+        </Typography>
+        <NodeTypeIcon nodeType={nodeType} tooltipPlacement="bottom" sx={{ fontSize: `${36}px` }} />
       </div>
     );
   }

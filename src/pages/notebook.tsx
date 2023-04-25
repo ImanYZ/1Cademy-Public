@@ -344,6 +344,11 @@ const Dashboard = ({}: DashboardProps) => {
   const [openLivelinessBar, setOpenLivelinessBar] = useState(false);
   const [comLeaderboardOpen, setComLeaderboardOpen] = useState(false);
 
+  //MAP NAVIGATION STATES
+
+  const isNavigatingRef = useRef<boolean>(false);
+  const navigationTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
   //TUTORIAL STATES
   const {
     startTutorial,
@@ -436,7 +441,8 @@ const Dashboard = ({}: DashboardProps) => {
             if (!thisNode) return graph;
 
             const nodeInViewport = onNodeInViewport(nodeId, graph.nodes);
-            if (!regardless && nodeInViewport && !forcedTutorial) return graph;
+            const isNavigating = isNavigatingRef.current;
+            if ((!regardless && nodeInViewport && !forcedTutorial) || isNavigating) return graph;
 
             if (
               originalNode &&
@@ -462,7 +468,6 @@ const Dashboard = ({}: DashboardProps) => {
                 } else {
                   defaultScale = 0.92;
                 }
-                console.log("threshold (default scale)", { defaultScale });
                 const regionWidth = windowWith - windowInnerLeft - windowInnerRight;
                 const regionHeight = windowHeight - windowInnerTop - windowInnerBottom;
 
@@ -4211,7 +4216,14 @@ const Dashboard = ({}: DashboardProps) => {
   const edgeIds = Object.keys(graph.edges);
 
   const navigateWhenNotScrolling = (newMapInteractionValue: any) => {
-    console.log({ newMapInteractionValue });
+    isNavigatingRef.current = true;
+
+    if (navigationTimeoutRef.current) clearTimeout(navigationTimeoutRef.current);
+    navigationTimeoutRef.current = setTimeout(() => {
+      console.log({ navigating: navigationTimeoutRef.current });
+      isNavigatingRef.current = false;
+    }, 1500);
+
     if (!scrollToNodeInitialized.current) {
       return setMapInteractionValue(newMapInteractionValue);
     }
@@ -4264,6 +4276,28 @@ const Dashboard = ({}: DashboardProps) => {
     },
     [nodeBookDispatch]
   );
+
+  const hideNodeContent = useMemo(() => {
+    if (!user || !user.scaleThreshold) return false;
+    let defaultScaleDevice = 0.45;
+    if (windowWith < 400) {
+      defaultScaleDevice = 0.45;
+    } else if (windowWith < 600) {
+      defaultScaleDevice = 0.575;
+    } else if (windowWith < 1260) {
+      defaultScaleDevice = 0.8;
+    } else {
+      defaultScaleDevice = 0.92;
+    }
+    const userThresholdPercentage = user.scaleThreshold;
+    let userThresholdcurrentScale = 1;
+
+    userThresholdcurrentScale = (userThresholdPercentage * defaultScaleDevice) / 100;
+
+    console.log({ currentScale: mapInteractionValue.scale, userThresholdcurrentScale });
+
+    return mapInteractionValue.scale < userThresholdcurrentScale;
+  }, [mapInteractionValue.scale, user, windowWith]);
 
   const handleCloseProgressBarMenu = useCallback(() => {
     setOpenProgressBarMenu(false);
@@ -5506,7 +5540,7 @@ const Dashboard = ({}: DashboardProps) => {
     if (!tutorial) return;
     if (!currentStep) return;
 
-    if (focusView.isEnabled) {
+    if (focusView.isEnabled || hideNodeContent) {
       setTutorial(null);
       setForcedTutorial(null);
       return;
@@ -5932,6 +5966,7 @@ const Dashboard = ({}: DashboardProps) => {
     firstLoading,
     focusView.isEnabled,
     graph.nodes,
+    hideNodeContent,
     nodeBookState.selectedNode,
     openLivelinessBar,
     openProgressBar,
@@ -6031,30 +6066,6 @@ const Dashboard = ({}: DashboardProps) => {
 
     duplicateNotebookFromParams();
   }, [db, onChangeNotebook, openNodesOnNotebook, router.query.nb, user]);
-
-  useEffect(() => {}, [mapInteractionValue.scale, user]);
-
-  const hideNodeContent = useMemo(() => {
-    if (!user || !user.scaleThreshold) return false;
-    let defaultScaleDevice = 0.45;
-    if (windowWith < 400) {
-      defaultScaleDevice = 0.45;
-    } else if (windowWith < 600) {
-      defaultScaleDevice = 0.575;
-    } else if (windowWith < 1260) {
-      defaultScaleDevice = 0.8;
-    } else {
-      defaultScaleDevice = 0.92;
-    }
-    const userThresholdPercentage = user.scaleThreshold;
-    let userThresholdcurrentScale = 1;
-
-    userThresholdcurrentScale = (userThresholdPercentage * defaultScaleDevice) / 100;
-
-    console.log({ currentScale: mapInteractionValue.scale, userThresholdcurrentScale });
-
-    return mapInteractionValue.scale < userThresholdcurrentScale;
-  }, [mapInteractionValue.scale, user, windowWith]);
 
   return (
     <div className="MapContainer" style={{ overflow: "hidden" }}>
