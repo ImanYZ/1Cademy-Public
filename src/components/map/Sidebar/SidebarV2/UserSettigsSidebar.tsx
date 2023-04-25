@@ -49,7 +49,16 @@ import {
   writeBatch,
 } from "firebase/firestore";
 import { StaticImageData } from "next/image";
-import React, { MutableRefObject, ReactNode, Suspense, useCallback, useEffect, useMemo, useState } from "react";
+import React, {
+  MutableRefObject,
+  ReactNode,
+  Suspense,
+  SyntheticEvent,
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 import { DispatchAuthActions, Reputation, User, UserSettings, UserTheme, UserView } from "src/knowledgeTypes";
 import { DispatchNodeBookActions, NodeBookState, TNodeBookState } from "src/nodeBookTypes";
 import { NodeType } from "src/types";
@@ -198,6 +207,9 @@ const UserSettigsSidebar = ({
 
   const [settingsValue, setSettingsValue] = React.useState(-1);
   const [settingsSubValue, setSettingsSubValue] = React.useState(-1);
+
+  // const [levelThreshold, setLevelThreshold] = useState<number>(user.scaleThreshold ?? 100);
+
   const handleSettingsValue = (newValue: number) => {
     setSettingsValue(newValue);
   };
@@ -554,6 +566,7 @@ const UserSettigsSidebar = ({
           | "view"
           | "showClusterOptions"
           | "showClusters"
+          | "scaleThreshold"
       ) =>
       async (newValue: any) => {
         if (!user) return;
@@ -858,6 +871,16 @@ const UserSettigsSidebar = ({
 
     return proposals.filter(proposal => proposal.nodeType === type);
   }, [proposals, type]);
+
+  const onHandleChangeSlider = useCallback(
+    (event: SyntheticEvent | Event, value: number | Array<number>) => {
+      event.preventDefault();
+      if (typeof value !== "number") return;
+      changeAttr("scaleThreshold")(value);
+      dispatch({ type: "setAuthUser", payload: { ...user, scaleThreshold: value } });
+    },
+    [changeAttr, dispatch, user]
+  );
 
   const newTabsItems: UserSettingsTabs[] = useMemo(() => {
     return [
@@ -1185,15 +1208,15 @@ const UserSettigsSidebar = ({
                     onChange={handleBackgroundSwitch}
                   />
                 </Paper>
-                <Typography fontWeight={"500"}>Font Size</Typography>
+                <Typography fontWeight={"500"}>Node Threshold</Typography>
                 <LevelSlider
                   min={0}
                   max={200}
-                  aria-label="ios slider"
                   marks={MARKS}
                   valueLabelDisplay="on"
                   valueLabelFormat={(value: number) => `${value}%`}
-                  defaultValue={100}
+                  defaultValue={user.scaleThreshold}
+                  onChangeCommitted={onHandleChangeSlider}
                   sx={{ my: "16px" }}
                 />
                 <Typography fontWeight={"500"}>Nodes view</Typography>
@@ -1490,6 +1513,7 @@ const UserSettigsSidebar = ({
     loadOlderProposalsClick,
     logoutClick,
     nodeTypeStats,
+    onHandleChangeSlider,
     openLinkedNode,
     proposalsFiltered,
     proposalsPerDay,

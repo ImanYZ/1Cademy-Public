@@ -170,7 +170,7 @@ type NodeProps = {
   // expands: boolean[];
   // selectedNotebookId: string;
   open: boolean;
-  scaleThreshold: number;
+  hideNode: boolean;
 };
 
 const proposedChildTypesIcons: { [key in ProposedChildTypesIcons]: string } = {
@@ -290,7 +290,7 @@ const Node = ({
   setAbleToPropose,
   openPart,
   setOpenPart,
-  scaleThreshold,
+  hideNode,
 }: NodeProps) => {
   const [{ user }] = useAuth();
   const { nodeBookState } = useNodeBook();
@@ -317,7 +317,6 @@ const Node = ({
     totalPage: 0,
     totalResults: 0,
   });
-  const [hideNodeContent, setHideNodeContent] = useState<boolean>(false);
 
   const [openProposal, setOpenProposal] = useState<any>(false);
   const [startTimeValue, setStartTimeValue] = React.useState<any>(moment.utc(nodeVideoStartTime * 1000));
@@ -712,28 +711,11 @@ const Node = ({
     }
   };
 
-  useEffect(() => {
-    if (!nodeRef.current) return;
-    if (!user || !user.scaleThreshold) return;
-    console.log(!user.scaleThreshold);
-    let userThreshold = 157;
-    let threshold = 3;
-    threshold = ((0.8 - 0.05) * (userThreshold - 100)) / 100;
-    // if (userThreshold > 100) {
-    //   threshold = ((3 - 0.8) * (userThreshold - 100)) / 100;
-    // } else {
-    //   threshold = ((0.8 - 0.05) * userThreshold) / 100;
-    // }
-    if (scaleThreshold) console.log({ scaleThreshold, threshold });
-    setHideNodeContent(scaleThreshold < threshold);
-    // setHideNodeContent(scaleThreshold < 0.4);
-  }, [scaleThreshold, user]);
-
   if (!user) {
     return null;
   }
 
-  if (hideNodeContent) {
+  if (hideNode) {
     return (
       <div
         ref={nodeRef}
@@ -755,8 +737,9 @@ const Node = ({
           padding: "13px 13px 13px 12px",
         }}
       >
-        {/* scaleThreshold > 0.2 ? 8 / scaleThreshold : 8 / 0.2 */}
-        <Typography fontSize={`${scaleThreshold > 0.32 ? 16 / scaleThreshold : 16 / 0.32}px`}>{title}</Typography>
+        {/* currentScaleThreshold > 0.2 ? 8 / currentScaleThreshold : 8 / 0.2 */}
+        {/* <Typography fontSize={`${currentScale > 0.32 ? 16 / currentScale : 16 / 0.32}px`}>{title}</Typography> */}
+        <Typography fontSize={`${16 / 0.32}px`}>{title}</Typography>
       </div>
     );
   }
@@ -1524,7 +1507,7 @@ export const MemoizedNode = React.memo(Node, (prev, next) => {
     prev.disableVotes === next.disableVotes &&
     prev.openPart === next.openPart &&
     prev.openSidebar === next.openSidebar &&
-    prev.scaleThreshold === next.scaleThreshold &&
+    prev.hideNode === next.hideNode &&
     (!next.activeNode || prev.ableToPropose === next.ableToPropose);
   if (
     !basicChanges ||

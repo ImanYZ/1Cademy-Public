@@ -6032,6 +6032,35 @@ const Dashboard = ({}: DashboardProps) => {
     duplicateNotebookFromParams();
   }, [db, onChangeNotebook, openNodesOnNotebook, router.query.nb, user]);
 
+  useEffect(() => {}, [mapInteractionValue.scale, user]);
+
+  const hideNodeContent = useMemo(() => {
+    if (!user || !user.scaleThreshold) return false;
+    let defaultScaleDevice = 0.45;
+    if (windowWith < 400) {
+      defaultScaleDevice = 0.45;
+    } else if (windowWith < 600) {
+      defaultScaleDevice = 0.575;
+    } else if (windowWith < 1260) {
+      defaultScaleDevice = 0.8;
+    } else {
+      defaultScaleDevice = 0.92;
+    }
+    const userThresholdPercentage = user.scaleThreshold;
+    let userThresholdcurrentScale = 1;
+    const maxcurrentScale = 3;
+
+    if (userThresholdPercentage <= 100) {
+      userThresholdcurrentScale = (userThresholdPercentage * defaultScaleDevice) / 100;
+    } else {
+      userThresholdcurrentScale = (userThresholdPercentage * maxcurrentScale) / 200;
+    }
+
+    console.log({ currentScale: mapInteractionValue.scale, userThresholdcurrentScale });
+
+    return mapInteractionValue.scale < userThresholdcurrentScale;
+  }, [mapInteractionValue.scale, user, windowWith]);
+
   return (
     <div className="MapContainer" style={{ overflow: "hidden" }}>
       {currentStep?.anchor && (
@@ -6786,7 +6815,7 @@ const Dashboard = ({}: DashboardProps) => {
                   setAbleToPropose={setAbleToPropose}
                   setOpenPart={onChangeNodePart}
                   // selectedNotebookId={selectedNotebookId}
-                  scaleThreshold={mapInteractionValue.scale}
+                  hideNode={hideNodeContent}
                 />
               </MapInteractionCSS>
 

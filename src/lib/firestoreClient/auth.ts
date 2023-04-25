@@ -105,7 +105,7 @@ export const retrieveAuthenticatedUser = async (userId: string, role: UserRole) 
       fieldOfInterest: userData.fieldOfInterest ?? "",
       role,
       livelinessBar: userData.livelinessBar,
-      scaleThreshold: userData.scaleThreshold ?? 100,
+      scaleThreshold: userData.scaleThreshold ?? 20,
     };
 
     theme = userData.theme;
