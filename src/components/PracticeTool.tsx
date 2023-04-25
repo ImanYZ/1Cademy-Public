@@ -260,18 +260,48 @@ export const PracticeTool = () => {
                 Leaderboard
               </Typography>
               <ButtonGroup variant="contained" aria-label="leaderboard options">
-                <Button onClick={() => setSelectedLeaderboardOption("WEEK")} sx={{ p: "4px 14px" }}>
+                <Button
+                  onClick={() => setSelectedLeaderboardOption("WEEK")}
+                  sx={{
+                    height: "28px",
+                    p: "4px 14px",
+                    background: theme =>
+                      selectedLeaderboardOption === "WEEK"
+                        ? theme.palette.common.primary800
+                        : theme.palette.common.notebookG600,
+                  }}
+                >
                   Week
                 </Button>
-                <Button onClick={() => setSelectedLeaderboardOption("MONTH")} sx={{ p: "4px 14px" }}>
+                <Button
+                  onClick={() => setSelectedLeaderboardOption("MONTH")}
+                  sx={{
+                    height: "28px",
+                    p: "4px 14px",
+                    background: theme =>
+                      selectedLeaderboardOption === "MONTH"
+                        ? theme.palette.common.primary800
+                        : theme.palette.common.notebookG600,
+                  }}
+                >
                   Month
                 </Button>
-                <Button onClick={() => setSelectedLeaderboardOption("ALL_TIME")} sx={{ p: "4px 14px" }}>
+                <Button
+                  onClick={() => setSelectedLeaderboardOption("ALL_TIME")}
+                  sx={{
+                    height: "28px",
+                    p: "4px 14px",
+                    background: theme =>
+                      selectedLeaderboardOption === "ALL_TIME"
+                        ? theme.palette.common.primary800
+                        : theme.palette.common.notebookG600,
+                  }}
+                >
                   All Time
                 </Button>
               </ButtonGroup>
             </Box>
-            <Box className="scroll-styled" sx={{ maxHeight: "476px", overflowY: "auto" }}>
+            <Box className="scroll-styled" sx={{ py: "18px", maxHeight: "476px", overflowY: "auto" }}>
               {leaderBoardUsers.map((cur, idx) => (
                 <Box
                   key={cur}
