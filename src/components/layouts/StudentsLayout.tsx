@@ -260,6 +260,6 @@ const getCourseBySemester = (semester: string | undefined, courses: { [key: stri
   return courses[semester] ?? [];
 };
 
-type CoursesResult = {
+export type CoursesResult = {
   [key: string]: string[];
 };

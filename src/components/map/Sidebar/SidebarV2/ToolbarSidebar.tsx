@@ -100,6 +100,7 @@ type MainSidebarProps = {
   openNodesOnNotebook: (notebookId: string, nodeIds: string[]) => Promise<void>;
   // setSelectedNtoebook
   // setCurrentTutorial: Dispatch<SetStateAction<TutorialKeys>>;
+  onDisplayInstructorPage: () => void;
 };
 
 export const ToolbarSidebar = ({
@@ -127,6 +128,7 @@ export const ToolbarSidebar = ({
   onChangeNotebook,
   selectedNotebook,
   openNodesOnNotebook,
+  onDisplayInstructorPage,
 }: // setCurrentTutorial,
 // enabledToolbarElements = [],
 MainSidebarProps) => {
@@ -525,10 +527,7 @@ MainSidebarProps) => {
             <SidebarButton
               id="toolbar-dashboard-button"
               iconSrc={GraduatedIcon}
-              onClick={() => {
-                if (user.role === "INSTRUCTOR") return window.open("/instructors/dashboard", "_blank");
-                if (user.role === "STUDENT") return window.open(`/instructors/dashboard/${user.uname}`, "_blank");
-              }}
+              onClick={onDisplayInstructorPage}
               text="Dashboard"
               toolbarIsOpen={displayLargeToolbar}
             />
