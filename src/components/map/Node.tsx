@@ -430,7 +430,6 @@ NodeProps) => {
           title,
         };
         nodeBookDispatch({ type: "setChosenNode", payload: { id: identifier, title } });
-        console.log({ id: notebookRef.current.choosingNode.id });
         chosenNodeChanged(identifier);
         setAbleToPropose(true);
         // scrollToNode(notebookRef.current.selectedNode);

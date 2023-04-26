@@ -1569,7 +1569,6 @@ const Dashboard = ({}: DashboardProps) => {
 
           updatedNodeIds.push(nodeId);
           updatedNodeIds.push(notebookRef.current.chosenNode.id);
-          console.log({ oldNodes, nodeId });
           const thisNode = copyNode(oldNodes[nodeId]);
           const chosenNodeObj = copyNode(oldNodes[notebookRef.current.chosenNode.id]);
 
