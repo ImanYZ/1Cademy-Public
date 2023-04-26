@@ -1005,6 +1005,7 @@ const UserSettigsSidebar = ({
                           backgroundColor: "#FF8134",
                           display: "grid",
                           placeItems: "center",
+                          color: DESIGN_SYSTEM_COLORS.gray50,
                         }}
                       >
                         {option.icon}
