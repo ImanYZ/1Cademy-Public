@@ -16,7 +16,7 @@ import HeaderNavbar from "../instructors/HeaderNavbar";
 import HeaderNavbarMovil from "../instructors/HeaderNavbarMovil";
 import { SemesterFilter } from "../instructors/SemesterFilter";
 // import { PracticeTool } from "../PracticeQuestion";
-import { PracticeTool } from "../PracticeTool";
+import { PracticeTool } from "../practiceTool/PracticeTool";
 
 export type Option = {
   id: string;
@@ -200,8 +200,7 @@ export const StudentsLayout: FC<Props> = ({ children }) => {
       </div>
     );
 
-  if (displayPracticeTool) return <PracticeTool />;
-  // if (displayPracticeTool) return <PracticeTool onClose={() => setDisplayPracticeTool(false)} />;
+  if (displayPracticeTool) return <PracticeTool onClose={() => setDisplayPracticeTool(false)} />;
 
   return (
     <Box

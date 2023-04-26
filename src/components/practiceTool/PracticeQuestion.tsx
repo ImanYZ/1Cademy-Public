@@ -2,24 +2,26 @@ import CheckIcon from "@mui/icons-material/Check";
 import CloseIcon from "@mui/icons-material/Close";
 import CloseFullscreenIcon from "@mui/icons-material/CloseFullscreen";
 import DoneIcon from "@mui/icons-material/Done";
+import LeaderboardIcon from "@mui/icons-material/Leaderboard";
 import LocalOfferIcon from "@mui/icons-material/LocalOffer";
 import { Button, ClickAwayListener, Divider, IconButton, ListItem, Tooltip, Typography } from "@mui/material";
 import { Box, Stack } from "@mui/system";
 import { getFirestore } from "firebase/firestore";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 
-import { getRootQuestionDescendants } from "../client/services/nodes.sercice";
-import shortenNumber from "../lib/utils/shortenNumber";
-import { Node } from "../nodeBookTypes";
-import { CustomWrapperButton } from "./map/Buttons/Buttons";
+import { getRootQuestionDescendants } from "../../client/services/nodes.sercice";
+import { DESIGN_SYSTEM_COLORS } from "../../lib/theme/colors";
+import shortenNumber from "../../lib/utils/shortenNumber";
+import { Node } from "../../nodeBookTypes";
+import { CustomWrapperButton } from "../map/Buttons/Buttons";
 
-type PracticeQuestionProps = {
+type NodeQuestionProps = {
   node: Node;
   selectedIdxAnswer: number;
   setSelectedIdxAnswer: (newValue: number) => void;
 };
 
-const PracticeQuestion = ({ node, selectedIdxAnswer, setSelectedIdxAnswer }: PracticeQuestionProps) => {
+const NodeQuestion = ({ node, selectedIdxAnswer, setSelectedIdxAnswer }: NodeQuestionProps) => {
   const [displayTags, setDisplayTags] = useState(false);
 
   const otherTags = useMemo(() => {
@@ -27,7 +29,14 @@ const PracticeQuestion = ({ node, selectedIdxAnswer, setSelectedIdxAnswer }: Pra
   }, [node.tags]);
 
   return (
-    <Box sx={{ p: "32px", border: "2px solid #FD7373", borderRadius: "8px" }}>
+    <Box
+      sx={{
+        p: "32px",
+        border: "2px solid #FD7373",
+        borderRadius: "8px",
+        background: DESIGN_SYSTEM_COLORS.notebookG900,
+      }}
+    >
       <Typography component={"h1"} sx={{ fontSize: "30px" }}>
         {node.title}
       </Typography>
@@ -237,8 +246,8 @@ const PracticeQuestion = ({ node, selectedIdxAnswer, setSelectedIdxAnswer }: Pra
   );
 };
 
-type PracticeToolProps = { onClose: () => void };
-export const PracticeTool = ({ onClose }: PracticeToolProps) => {
+type PracticeQuestionProps = { onClose: () => void };
+export const PracticeQuestion = ({ onClose }: PracticeQuestionProps) => {
   const db = getFirestore();
   const [questions, setQuestions] = useState<Node[]>([]);
   const [selectedQuestion, setSelectedQuestion] = useState<{ question: Node; idx: number } | null>(null);
@@ -293,11 +302,11 @@ export const PracticeTool = ({ onClose }: PracticeToolProps) => {
   return (
     <Box
       sx={{
-        position: "absolute",
-        inset: "0px",
-        background: theme =>
-          theme.palette.mode === "dark" ? theme.palette.common.notebookG900 : theme.palette.common.notebookG900,
-        zIndex: 1,
+        // position: "absolute",
+        // inset: "0px",
+        // background: theme =>
+        //   theme.palette.mode === "dark" ? theme.palette.common.notebookG900 : theme.palette.common.notebookG900,
+        // zIndex: 1,
         p: "45px 64px",
       }}
     >
@@ -305,13 +314,46 @@ export const PracticeTool = ({ onClose }: PracticeToolProps) => {
         <CloseFullscreenIcon />
       </IconButton>
 
+      <Stack spacing={"8px"} sx={{ position: "absolute", right: "12px", top: "8px" }}>
+        <IconButton
+          onClick={onClose}
+          sx={{
+            width: "56px",
+            height: "56px",
+            color: theme => theme.palette.common.primary800,
+            borderRadius: "0px",
+            backgroundColor: DESIGN_SYSTEM_COLORS.notebookMainBlack,
+          }}
+        >
+          <svg width="29" height="23" viewBox="0 0 29 23" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path
+              d="M14.5001 23H4.61759L0 9.27492L8.24261 12.5906L14.5001 0L20.7576 12.5906L29 9.27492L24.3826 23H14.5001Z"
+              fill="#A4A4A4"
+            />
+          </svg>
+        </IconButton>
+
+        <IconButton
+          onClick={onClose}
+          sx={{
+            width: "56px",
+            height: "56px",
+            color: theme => theme.palette.common.primary800,
+            borderRadius: "0px",
+            backgroundColor: DESIGN_SYSTEM_COLORS.notebookMainBlack,
+          }}
+        >
+          <LeaderboardIcon sx={{ color: DESIGN_SYSTEM_COLORS.notebookG200 }} />
+        </IconButton>
+      </Stack>
+
       <Box sx={{ maxWidth: "820px", m: "auto" }}>
         <Typography
           sx={{ textAlign: "center", color: theme => theme.palette.common.primary800, mb: "12px", fontWeight: 600 }}
         >
           {questions.length - selectedQuestion.idx} questions left to get today’s point!{" "}
         </Typography>
-        <PracticeQuestion
+        <NodeQuestion
           node={selectedQuestion.question}
           selectedIdxAnswer={selectedAnswers}
           setSelectedIdxAnswer={onSelectAnswer}
