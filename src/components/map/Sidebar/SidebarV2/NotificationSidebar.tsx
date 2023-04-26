@@ -1,38 +1,35 @@
-import DoneAllIcon from "@mui/icons-material/DoneAll";
-import { Box, Tab, Tabs } from "@mui/material";
+import { Box, Stack, Tab, Tabs, Typography } from "@mui/material";
 import {
   collection,
   doc,
   DocumentData,
-  getDocs,
   getFirestore,
-  limit,
   onSnapshot,
   Query,
   query,
+  updateDoc,
   where,
-  writeBatch,
 } from "firebase/firestore";
-import React, { useCallback, useEffect, useMemo, useState } from "react";
-import { UserTheme } from "src/knowledgeTypes";
+import React, { ReactNode, useCallback, useEffect, useMemo, useState } from "react";
+import { ReactElement } from "react-markdown/lib/react-markdown";
 
-import notificationsDarkTheme from "../../../../../public/notifications-dark-theme.jpg";
-import notificationsLightTheme from "../../../../../public/notifications-light-theme.jpg";
-import { MemoizedMetaButton } from "../../MetaButton";
+import { RiveComponentMemoized } from "@/components/home/components/temporals/RiveComponentExtended";
+import { DESIGN_SYSTEM_COLORS } from "@/lib/theme/colors";
+
+import { CustomBadge } from "../../CustomBudge";
 import NotificationsList from "../NotificationsList";
+import RequestNotificationItem, { NotebookRequest, NotebookRequestType } from "../RequestNotificationItem";
 import { SidebarWrapper } from "./SidebarWrapper";
 
 type NotificationSidebarProps = {
   open: boolean;
   onClose: () => void;
-  theme: UserTheme;
   openLinkedNode: any;
   username: string;
   sidebarWidth: number;
   innerHeight?: number;
-  innerWidth: number;
 };
-type Notification = {
+export type Notification = {
   id: string;
   aType: string;
   createdAt: Date;
@@ -45,20 +42,24 @@ type Notification = {
   uname: string;
 };
 
+type NotificationTabs = {
+  title: string;
+  content: ReactNode;
+  badge?: ReactElement;
+};
+
 const NotificationSidebar = ({
   open,
   onClose,
-  theme,
   openLinkedNode,
   username,
   sidebarWidth,
   innerHeight,
-  innerWidth,
 }: NotificationSidebarProps) => {
   const [value, setValue] = React.useState(0);
   const [checkedNotifications, setCheckedNotifications] = useState<Notification[]>([]);
   const [uncheckedNotifications, setUncheckedNotifications] = useState<Notification[]>([]);
-
+  const [notebookRequests, setNotebookRequests] = useState<NotebookRequest[]>([]);
   const db = getFirestore();
 
   const snapshot = useCallback((q: Query<DocumentData>) => {
@@ -168,25 +169,6 @@ const NotificationSidebar = ({
     };
   }, [db, snapshot, username]);
 
-  const checkAllNotification = useCallback(async () => {
-    if (!username) return;
-    const batch = writeBatch(db);
-    const q = query(collection(db, "notifications"), where("proposer", "==", username));
-    const querySnapshot = await getDocs(q);
-    querySnapshot.forEach(notificationDoc => {
-      const notificationRef = doc(db, "notifications", notificationDoc.id);
-      batch.update(notificationRef, { checked: true });
-    });
-
-    const notificationNumsQuery = query(collection(db, "notificationNums"), where("uname", "==", username), limit(1));
-    const notificationNumsDocs = await getDocs(notificationNumsQuery);
-    if (notificationNumsDocs.docs.length) {
-      const notificationNumsRef = doc(db, "notificationNums", notificationNumsDocs.docs[0].id);
-      batch.update(notificationNumsRef, { nNum: 0 });
-    }
-    await batch.commit();
-  }, [db, username]);
-
   const handleChange = (event: React.SyntheticEvent, newValue: number) => {
     setValue(newValue);
   };
@@ -198,15 +180,132 @@ const NotificationSidebar = ({
 
   const contentSignalState = useMemo(() => {
     return [...uncheckedNotifications];
-  }, [checkedNotifications, uncheckedNotifications, value]);
+  }, [notebookRequests, checkedNotifications, uncheckedNotifications, value]);
+
+  useEffect(() => {
+    const requestRef = collection(db, "requests");
+    const q = query(requestRef, where("requestedUser", "==", username), where("state", "==", "waiting"));
+    const unsub = onSnapshot(q, snapshot => {
+      const docChages = snapshot.docChanges();
+      if (!(docChages.length > 0)) return;
+
+      setNotebookRequests(prev => {
+        const currentRequests = [...prev];
+
+        for (const docChange of docChages) {
+          const newRequest = { ...docChange.doc.data(), id: docChange.doc.id } as NotebookRequest;
+          const exists = currentRequests.some(el => el.id === newRequest.id);
+          if (!exists) currentRequests.push(newRequest);
+        }
+        return currentRequests;
+      });
+    });
+    return () => {
+      unsub();
+    };
+  }, [db, username]);
+
+  const handleSubmitRequest = useCallback(
+    async (
+      requestId: string,
+      state: NotebookRequestType,
+      setIsLoading: (loading: { state: NotebookRequestType; loading: boolean }) => void
+    ) => {
+      try {
+        setIsLoading({ state, loading: true });
+        const docRef = doc(db, "requests", requestId);
+        await updateDoc(docRef, { state });
+        setNotebookRequests(prev => {
+          let requests = [...prev];
+          requests = requests.filter(request => request.id !== requestId);
+          return requests;
+        });
+        setIsLoading({ state: "waiting", loading: false });
+      } catch (error) {
+        console.log(error);
+        setIsLoading({ state: "waiting", loading: false });
+      }
+    },
+    [db]
+  );
+
+  const tabItems = useMemo<NotificationTabs[]>(() => {
+    return [
+      {
+        title: "Unread",
+        content: (
+          <>
+            {uncheckedNotifications.length > 0 ? (
+              <NotificationsList
+                notifications={uncheckedNotifications}
+                openLinkedNode={openLinkedNode}
+                checked={false}
+              />
+            ) : (
+              <NotFoundNotification
+                title="You are all caught up!"
+                description="Check back soon for more exciting updates."
+              />
+            )}
+          </>
+        ),
+        badge: (
+          <>
+            {uncheckedNotifications.length > 0 ? (
+              <CustomBadge value={uncheckedNotifications.length} sx={{ ml: "4px" }} />
+            ) : null}
+          </>
+        ),
+      },
+      {
+        title: "Read",
+        content: (
+          <>
+            {checkedNotifications.length > 0 ? (
+              <NotificationsList notifications={checkedNotifications} openLinkedNode={openLinkedNode} checked={true} />
+            ) : (
+              <NotFoundNotification
+                title="You've not checked off any notifications"
+                description="If you mark your notifications as read, they'll show up in this list."
+              />
+            )}
+          </>
+        ),
+      },
+      {
+        title: "Requests",
+        badge: (
+          <>{notebookRequests.length > 0 ? <CustomBadge value={notebookRequests.length} sx={{ ml: "4px" }} /> : null}</>
+        ),
+        content: (
+          <>
+            {notebookRequests.length > 0 ? (
+              <Stack spacing={"8px"} p="24px 16px">
+                {notebookRequests.map((request, idx) => (
+                  <RequestNotificationItem
+                    key={`${idx}`}
+                    notebookRequest={request}
+                    handleSubmitRequest={handleSubmitRequest}
+                  />
+                ))}
+              </Stack>
+            ) : (
+              <NotFoundNotification
+                title="No new requests for now!"
+                description="We'll let you know when something new comes up."
+              />
+            )}
+          </>
+        ),
+      },
+    ];
+  }, [checkedNotifications, handleSubmitRequest, notebookRequests, openLinkedNode, uncheckedNotifications]);
 
   return (
     <SidebarWrapper
       open={open}
       title="Notifications"
-      headerImage={theme === "Dark" ? notificationsDarkTheme : notificationsLightTheme}
       width={sidebarWidth}
-      height={innerWidth > 599 ? 100 : 35}
       innerHeight={innerHeight}
       // anchor="right"
       onClose={onClose}
@@ -218,59 +317,55 @@ const NotificationSidebar = ({
             width: "100%",
           }}
         >
-          <Tabs value={value} onChange={handleChange} aria-label={"Notification Tabs"}>
-            {[{ title: "Unread" }, { title: "Read" }].map((tabItem, idx: number) => (
+          <Tabs value={value} onChange={handleChange} aria-label={"Notification Tabs"} variant="fullWidth">
+            {tabItems.map((tabItem, idx: number) => (
               <Tab
                 key={tabItem.title}
                 id={`notifications-tab-${tabItem.title.toLowerCase()}`}
                 label={tabItem.title}
                 {...a11yProps(idx)}
+                sx={{ py: "16px" }}
+                icon={tabItem.badge || <></>}
+                iconPosition="end"
               />
             ))}
           </Tabs>
         </Box>
       }
       contentSignalState={contentSignalState}
-      SidebarContent={
-        <Box sx={{ display: "flex", flexDirection: "column", p: "2px 4px" }}>
-          {((!uncheckedNotifications.length && value === 0) || (!checkedNotifications.length && value === 1)) && (
-            <Box
-              sx={{
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
-                justifyContent: "center",
-              }}
-            >
-              <h3>You don't have notifications</h3>
-            </Box>
-          )}
-          {uncheckedNotifications.length > 0 && value === 0 && (
-            <Box sx={{ display: "flex", flexDirection: "column", gap: "4px" }}>
-              <div id="MarkAllRead">
-                <MemoizedMetaButton onClick={() => checkAllNotification()}>
-                  <div id="MarkAllReadButton">
-                    {/* <i className="material-icons DoneIcon green-text">done_all</i> */}
-                    <DoneAllIcon className="material-icons DoneIcon green-text" />
-                    <span>Mark All Read</span>
-                  </div>
-                </MemoizedMetaButton>
-              </div>
-              <NotificationsList
-                notifications={uncheckedNotifications}
-                openLinkedNode={openLinkedNode}
-                checked={false}
-              />
-            </Box>
-          )}
-          {checkedNotifications.length > 0 && value === 1 && (
-            <Box sx={{ display: "flex", flexDirection: "column", gap: "4px" }}>
-              <NotificationsList notifications={checkedNotifications} openLinkedNode={openLinkedNode} checked={true} />
-            </Box>
-          )}
-        </Box>
-      }
+      SidebarContent={open ? <Box sx={{ height: "100%", py: "10px" }}>{tabItems[value].content}</Box> : null}
     />
+  );
+};
+
+const NotFoundNotification = ({ title, description }: { title: string; description: string }) => {
+  return (
+    <Box sx={{ height: "100%", display: "grid", placeItems: "center" }}>
+      <Box>
+        <Box sx={{ width: { xs: "250px", sm: "300px" }, height: { xs: "150px", sm: "200px" } }}>
+          <RiveComponentMemoized
+            src="./rive-notebook/notification.riv"
+            animations={"Timeline 1"}
+            artboard="New Artboard"
+            autoplay={true}
+          />
+        </Box>
+        <Typography fontWeight={"500"} fontSize={"18px"} textAlign={"center"} maxWidth={"300px"}>
+          {title}
+        </Typography>
+        <Typography
+          fontSize={"12px"}
+          textAlign={"center"}
+          maxWidth={"300px"}
+          sx={{
+            color: ({ palette: { mode } }) =>
+              mode === "dark" ? DESIGN_SYSTEM_COLORS.gray50 : DESIGN_SYSTEM_COLORS.gray700,
+          }}
+        >
+          {description}
+        </Typography>
+      </Box>
+    </Box>
   );
 };
 export const MemoizedNotificationSidebar = React.memo(NotificationSidebar);

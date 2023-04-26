@@ -235,6 +235,8 @@ describe("POST /api/proposeNodeImprovement", () => {
     notificationsCollection,
     new MockData(tags, "tags"),
     new MockData(institutions, "institutions"),
+    new MockData([], "ideaVersions"),
+    new MockData([], "userIdeaVersions"),
 
     new MockData([], "comPoints"),
     new MockData([], "comMonthlyPoints"),

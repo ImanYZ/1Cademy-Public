@@ -1,9 +1,9 @@
-import { Box } from "@mui/system";
+import { Box, SxProps, Theme } from "@mui/material";
 import React from "react";
 
-type CustomBadgeProps = { value: number };
+type CustomBadgeProps = { value: number; sx?: SxProps<Theme> };
 
-export const CustomBadge = ({ value }: CustomBadgeProps) => {
+export const CustomBadge = ({ value, sx }: CustomBadgeProps) => {
   if (value === 0) return null;
   return (
     <Box
@@ -17,6 +17,7 @@ export const CustomBadge = ({ value }: CustomBadgeProps) => {
         display: "flex",
         justifyContent: "center",
         alignItems: "center",
+        ...sx,
       }}
     >
       {value > 99 ? "99+" : value}
