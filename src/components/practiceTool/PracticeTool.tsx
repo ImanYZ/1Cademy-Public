@@ -18,6 +18,7 @@ export const PracticeTool = ({ onClose }: PracticeToolProps) => {
         background: theme =>
           theme.palette.mode === "dark" ? theme.palette.common.notebookG900 : theme.palette.common.notebookG900,
         zIndex: 1,
+        overflow: "hidden",
       }}
     >
       {startPractice ? (
