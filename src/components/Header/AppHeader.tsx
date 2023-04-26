@@ -8,7 +8,7 @@ import LightModeIcon from "@mui/icons-material/LightMode";
 import LogoutIcon from "@mui/icons-material/Logout";
 import MenuIcon from "@mui/icons-material/Menu";
 import SearchIcon from "@mui/icons-material/Search";
-import { Modal, Typography, useMediaQuery, useTheme } from "@mui/material";
+import { Avatar, Modal, Typography, useMediaQuery, useTheme } from "@mui/material";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import IconButton from "@mui/material/IconButton";
@@ -206,12 +206,10 @@ const AppHeader = forwardRef(({ page, sections, selectedSectionId, onSwitchSecti
         >
           <Stack direction={"row"} alignItems="center" spacing={"16px"}>
             <Tooltip title="1Cademy's Landing Page">
-              <Image
+              <Avatar
                 src={isMobile ? oneCademyLogoExtended.src : oneCademyLogo.src}
                 alt="logo"
-                width={isMobile ? "149px" : "60px"}
-                height={isMobile ? "40px" : "64px"}
-                style={{ cursor: "pointer" }}
+                sx={{ cursor: "pointer", width: { xs: "149px", sm: "60px" }, height: { xs: "40px", sm: "64px" } }}
                 onClick={() => router.push(ROUTES.home)}
               />
             </Tooltip>
