@@ -47,6 +47,7 @@ export const useWorkerQueue = ({
   const [queue, setQueue] = useState<Task[]>([]);
   const [isWorking, setIsWorking] = useState(false);
   const [didWork, setDidWork] = useState(false);
+  const [isSameGraph, setIsSameGraph] = useState(false);
   const workerRef = useRef<Worker | null>(null);
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [deferredTimer, setDeferredTimer] = useState<NodeJS.Timeout | null>(null);
@@ -122,8 +123,12 @@ export const useWorkerQueue = ({
               (c, k) => c && resultNode[k as keyof FullNodeData] === nodes[nodeId][k as keyof FullNodeData],
               true
             );
-            if (isSame) return true; // don't update graph for this node
+            if (isSame) return setIsSameGraph(isSame); // don't update graph for this node
+            console.log(`calc height ${nodeId}`, { nH: resultNode.height, H: nodesCopy[nodeId].height });
 
+            if (resultNode.height !== nodesCopy[nodeId].height) {
+              console.log(`calc height ${nodeId}`, { nH: resultNode.height, H: nodesCopy[nodeId].height });
+            }
             const overrideNode: FullNodeData = {
               ...nodesCopy[nodeId],
               left: resultNode.left,
@@ -160,12 +165,13 @@ export const useWorkerQueue = ({
         });
 
         setIsWorking(false);
-        onComplete();
+        if (!isSameGraph) onComplete();
       };
     },
     [
       allTags,
       g,
+      isSameGraph,
       mapHeight,
       mapWidth,
       onComplete,

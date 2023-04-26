@@ -344,11 +344,6 @@ const Dashboard = ({}: DashboardProps) => {
   const [openLivelinessBar, setOpenLivelinessBar] = useState(false);
   const [comLeaderboardOpen, setComLeaderboardOpen] = useState(false);
 
-  //MAP NAVIGATION STATES
-
-  const isNavigatingRef = useRef<boolean>(false);
-  const navigationTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-
   //TUTORIAL STATES
   const {
     startTutorial,
@@ -441,8 +436,7 @@ const Dashboard = ({}: DashboardProps) => {
             if (!thisNode) return graph;
 
             const nodeInViewport = onNodeInViewport(nodeId, graph.nodes);
-            const isNavigating = isNavigatingRef.current;
-            if ((!regardless && nodeInViewport && !forcedTutorial) || isNavigating) return graph;
+            if (!regardless && nodeInViewport && !forcedTutorial) return graph;
 
             if (
               originalNode &&
@@ -4216,14 +4210,6 @@ const Dashboard = ({}: DashboardProps) => {
   const edgeIds = Object.keys(graph.edges);
 
   const navigateWhenNotScrolling = (newMapInteractionValue: any) => {
-    isNavigatingRef.current = true;
-
-    if (navigationTimeoutRef.current) clearTimeout(navigationTimeoutRef.current);
-    navigationTimeoutRef.current = setTimeout(() => {
-      console.log({ navigating: navigationTimeoutRef.current });
-      isNavigatingRef.current = false;
-    }, 1500);
-
     if (!scrollToNodeInitialized.current) {
       return setMapInteractionValue(newMapInteractionValue);
     }

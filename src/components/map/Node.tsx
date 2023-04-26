@@ -170,6 +170,7 @@ type NodeProps = {
   // expands: boolean[];
   // selectedNotebookId: string;
   open: boolean;
+  nodeHeigth: number;
   hideNode: boolean;
 };
 
@@ -291,6 +292,7 @@ const Node = ({
   openPart,
   setOpenPart,
   hideNode,
+  nodeHeigth,
 }: NodeProps) => {
   const [{ user }] = useAuth();
   const { nodeBookState } = useNodeBook();
@@ -730,19 +732,58 @@ const Node = ({
           (nodeType === "Reference" ? " Choosable" : "")
         }
         style={{
+          height: nodeHeigth,
+          maxHeight: nodeHeigth,
           left: left ? left : 1000,
           top: top ? top : 1000,
           width,
           transition: "0.3s",
           padding: "13px 13px 13px 12px",
+          display: "flex",
+          flexDirection: "column",
+          justifyContent: "space-between",
         }}
       >
         {/* currentScaleThreshold > 0.2 ? 8 / currentScaleThreshold : 8 / 0.2 */}
         {/* <Typography fontSize={`${currentScale > 0.32 ? 16 / currentScale : 16 / 0.32}px`}>{title}</Typography> */}
-        <Typography fontSize={`${14 / 0.32}px`} fontWeight={500} mb="8px">
-          {title}
-        </Typography>
-        <NodeTypeIcon nodeType={nodeType} tooltipPlacement="bottom" sx={{ fontSize: `${36}px` }} />
+        <Box
+          sx={{
+            position: "relative",
+            display: "grid",
+            placeItems: "center",
+            height: "100%",
+            width: "100%",
+            "-webkit-line-clamp": 2,
+
+            overflow: "hidden",
+            textOverflow: "ellipsis",
+            "& > p": {
+              margin: 0,
+              lineHeight: "1.2em",
+              maxHeight: "2.4em",
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+              "-webkit-box-orient": "vertical",
+              "-webkit-line-clamp": 2,
+              display: "-webkit-box",
+            },
+          }}
+        >
+          <Typography
+            component={"p"}
+            fontSize={`${14 / 0.32}px`}
+            fontWeight={500}
+            textAlign={"center"}
+            textOverflow={"ellipsis"}
+          >
+            {title}
+          </Typography>
+          <NodeTypeIcon
+            nodeType={nodeType}
+            tooltipPlacement="bottom"
+            sx={{ fontSize: `${30}px`, position: "absolute", bottom: "4px", left: "4px" }}
+          />
+        </Box>
       </div>
     );
   }

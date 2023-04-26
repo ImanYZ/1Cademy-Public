@@ -288,6 +288,7 @@ const NodesList = ({
             // notebooks={nodes[nId].notebooks}
             open={nodes[nId].open}
             hideNode={hideNode}
+            nodeHeigth={nodes[nId].height}
           />
         );
       })}
