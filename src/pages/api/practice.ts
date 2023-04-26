@@ -1,18 +1,31 @@
 import { NextApiRequest, NextApiResponse } from "next";
 
 import { admin, db } from "../../lib/firestoreServer/admin";
+import moment from "moment";
+import { INode } from "src/types/INode";
+import { IUser } from "src/types/IUser";
 
-const get_ancestors = ({ nodeId, nodes, ancestors }: any) => {
+type IGetAncestorsParams = {
+  nodeId: string;
+  nodes: {
+    [nodeId: string]: INode;
+  };
+  ancestors: {
+    [nodeId: string]: string[];
+  };
+};
+
+const get_ancestors = ({ nodeId, nodes, ancestors }: IGetAncestorsParams) => {
   if (nodeId in ancestors) {
     return ancestors[nodeId];
   }
   ancestors[nodeId] = [];
-  const node = nodes.find((n: any) => n.id === nodeId);
-  for (let parent of node.parents) {
+  const node = nodes[nodeId];
+  for (const parent of node.parents) {
     if (!ancestors[nodeId].includes(parent.node)) {
       ancestors[nodeId].push(parent.node);
       ancestors[parent.node] = get_ancestors({ nodeId: parent.node, nodes, ancestors });
-      for (let ancestor of ancestors[parent.node]) {
+      for (const ancestor of ancestors[parent.node]) {
         if (!ancestors[nodeId].includes(ancestor)) {
           ancestors[nodeId].push(ancestor);
         }
@@ -24,11 +37,15 @@ const get_ancestors = ({ nodeId, nodes, ancestors }: any) => {
 
 async function handler(req: NextApiRequest, res: NextApiResponse) {
   try {
+    const userData = req.body.data.user.userData as IUser;
+    // db.collection("practiceFlashes").where("uname", )
     let available_flashcards: any[] = [];
-    let nodes: any[] = [];
+    const nodes: {
+      [nodeId: string]: INode;
+    } = {};
     let ancestors: any = {};
     let ordered_ancestors_nums: any[] = [];
-    let theNode;
+    let theNode: any;
     let fCard: any;
     const flashcardsQuery = db
       .collection("practice")
@@ -40,9 +57,10 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       .where("deleted", "==", false)
       .where("tagIds", "array-contains", req.body.data.user.userData.tagId);
     const nodesDocs = await nodesQuery.get();
-    for (let node of nodesDocs.docs) {
-      nodes.push({ ...node.data(), id: node.id });
+    for (const node of nodesDocs.docs) {
+      nodes[node.id] = node.data() as INode;
     }
+
     const question_ids = [];
     flashcardsDocs.forEach(flashcard => {
       // Select only those where enough time has passed since last presentation.
@@ -56,7 +74,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
     });
     ordered_ancestors_nums.sort((a, b) => a[1] - b[1]);
     fCard = available_flashcards.find((f: any) => f.node === ordered_ancestors_nums[0][0]);
-    theNode = nodes.find((n: any) => n.id === fCard.node);
+    theNode = nodes[fCard.node];
     const userNodeQuery = db
       .collection("userNodes")
       .where("node", "==", fCard.node)
@@ -66,7 +84,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
     const userNodeData = userNodeDocs.docs[0].data();
     theNode = {
       id: fCard.node,
-      choices: theNode.choices.map((c: any) => ({ choice: c.choice })),
+      choices: (theNode.choices || []).map((c: any) => ({ choice: c.choice })),
       content: theNode.content,
       corrects: theNode.corrects,
       nodeImage: theNode.nodeImage,
