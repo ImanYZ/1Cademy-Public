@@ -220,9 +220,9 @@ type CoursesResult = {
 const getCoursesByInstructor = (instructor: Instructor): CoursesResult => {
   return instructor.courses.reduce((acu: CoursesResult, cur) => {
     const tmpValues = acu[cur.title] ?? [];
-    return { ...acu, [cur.title]: [...tmpValues, `${cur.cTitle} ${cur.pTitle}`] };
+    return { ...acu, [cur.title]: [...tmpValues, `${cur.cTitle} ${cur.pTitle || "- " + cur.uTitle}`] };
   }, {});
 };
 const selectCourse = (description: string, instructor: Instructor): ICourseTag | undefined => {
-  return instructor.courses.find(course => `${course.cTitle} ${course.pTitle}` === description);
+  return instructor.courses.find(course => `${course.cTitle} ${course.pTitle || "- " + course.uTitle}` === description);
 };
