@@ -27,13 +27,35 @@ const USER_SETTINGS_STEPS: TutorialStepConfig[] = [
     outline: "shallow",
   },
   {
-    childTargetId: "MiniUserPrifileName",
+    childTargetId: "user-settings-username",
     title: "Username",
     description: (
       <MarkdownRender
         text={"This is your username. If you need to change this, you can edit it on this page under the account tab."}
       />
     ),
+
+    tooltipPosition: "bottom",
+    anchor: "Portal",
+    outline: "shallow",
+  },
+  {
+    childTargetId: "user-settings-statistics",
+    title: "Total Points",
+    description: (
+      <MarkdownRender
+        text={"This displays the total number of points that you have received in the current community."}
+      />
+    ),
+
+    tooltipPosition: "bottom",
+    anchor: "Portal",
+    outline: "outside",
+  },
+  {
+    childTargetId: "MiniUserPrifileInstitution",
+    title: "University",
+    description: <MarkdownRender text={"This displays the university that you are enrolled at."} />,
 
     tooltipPosition: "bottom",
     anchor: "Portal",
@@ -54,27 +76,19 @@ const USER_SETTINGS_STEPS: TutorialStepConfig[] = [
     anchor: "Portal",
     outline: "shallow",
   },
-  {
-    childTargetId: "MiniUserPrifileInstitution",
-    title: "University",
-    description: <MarkdownRender text={"This displays the university that you are enrolled at."} />,
 
-    tooltipPosition: "bottom",
-    anchor: "Portal",
-    outline: "shallow",
-  },
   {
-    childTargetId: "user-settings-statistics",
-    title: "Total Points",
+    childTargetId: "user-settings-trends",
+    title: "Account",
     description: (
       <MarkdownRender
-        text={"This displays the total number of points that you have received in the current community."}
+        text={"The Trends tab allows you to keep track of your activity and general starts under 1Cademy."}
       />
     ),
 
     tooltipPosition: "bottom",
     anchor: "Portal",
-    outline: "outside",
+    outline: "inside",
   },
   {
     childTargetId: "user-settings-node-types",
@@ -84,6 +98,16 @@ const USER_SETTINGS_STEPS: TutorialStepConfig[] = [
         text={"This displays the total number of points that you have received in the current community."}
       />
     ),
+
+    tooltipPosition: "top",
+    anchor: "Portal",
+    outline: "shallow",
+  },
+
+  {
+    childTargetId: "user-settings-proposals",
+    title: "Proposals",
+    description: <MarkdownRender text={"The proposals tab displays all the proposals that you have made."} />,
 
     tooltipPosition: "bottom",
     anchor: "Portal",
@@ -100,36 +124,7 @@ const USER_SETTINGS_STEPS: TutorialStepConfig[] = [
       />
     ),
 
-    tooltipPosition: "top",
-    anchor: "Portal",
-    outline: "inside",
-  },
-  {
-    childTargetId: "user-settings-personal",
-    title: "Personal",
-    description: <MarkdownRender text={"Personal tab is where you can update your personal information."} />,
-
-    tooltipPosition: "top",
-    anchor: "Portal",
-    outline: "inside",
-  },
-  {
-    childTargetId: "user-settings-professional",
-    title: "Professional",
-    description: (
-      <MarkdownRender text={"The professional tab lets you update information about your occupation and education."} />
-    ),
-
-    tooltipPosition: "top",
-    anchor: "Portal",
-    outline: "inside",
-  },
-  {
-    childTargetId: "user-settings-proposals",
-    title: "Proposals",
-    description: <MarkdownRender text={"The proposals tab displays all the proposals that you have made."} />,
-
-    tooltipPosition: "top",
+    tooltipPosition: "bottom",
     anchor: "Portal",
     outline: "inside",
   },

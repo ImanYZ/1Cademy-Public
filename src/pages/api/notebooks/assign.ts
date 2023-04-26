@@ -60,6 +60,11 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       notebookData.users.push(user);
     }
 
+    // if owner is missing in users
+    if (notebookData.users.indexOf(notebookData.owner) === -1) {
+      notebookData.users.push(notebookData.owner);
+    }
+
     // updating user nodes
     const userNodes = await db
       .collection("userNodes")

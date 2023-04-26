@@ -1,11 +1,10 @@
 import { Theme } from "@emotion/react";
 import ArrowUpwardIcon from "@mui/icons-material/ArrowUpward";
 import CloseIcon from "@mui/icons-material/Close";
-import { Drawer, DrawerProps, IconButton, Tooltip, Typography, useMediaQuery, useTheme } from "@mui/material";
+import { Drawer, DrawerProps, IconButton, Tooltip, Typography } from "@mui/material";
 import { Box, SxProps } from "@mui/system";
 import Image, { StaticImageData } from "next/image";
 import React, { ReactNode, useCallback, useMemo, useRef } from "react";
-import { OpenSidebar } from "src/pages/notebook";
 
 type SidebarWrapperProps = {
   id?: string;
@@ -20,9 +19,7 @@ type SidebarWrapperProps = {
   headerImage?: StaticImageData;
   showCloseButton?: boolean;
   showScrollUpButton?: boolean;
-  isMenuOpen?: boolean;
   contentSignalState: any;
-  openSidebar?: OpenSidebar;
   innerHeight?: number;
   disabled?: boolean;
   sx?: SxProps<Theme>;
@@ -44,18 +41,13 @@ export const SidebarWrapper = ({
   SidebarContent,
   showCloseButton = true,
   showScrollUpButton = true,
-  isMenuOpen,
   contentSignalState,
   innerHeight,
-  openSidebar,
   disabled,
   sx,
   sxContentWrapper,
 }: SidebarWrapperProps) => {
   const sidebarContentRef = useRef<any>(null);
-  const theme = useTheme();
-
-  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
   const scrollToTop = useCallback(() => {
     if (!sidebarContentRef.current) return;
@@ -76,43 +68,35 @@ export const SidebarWrapper = ({
       PaperProps={{
         id,
         sx: {
+          maxHeight: "100vh",
           // minWidth: { xs: "0px", sm: width },
           width: { xs: "100%", sm: width },
           // maxWidth: { xs: width, sm: "80px" },
           height: height < 100 && innerHeight ? `${(height / 100) * innerHeight}px` : `${height}%`,
           borderRight: "none",
           background: theme => (theme.palette.mode === "dark" ? "#1B1A1A" : "#F9FAFB"),
-          boxShadow:
-            !isMobile || isMenuOpen || openSidebar !== null
-              ? theme =>
-                  theme.palette.mode === "dark"
-                    ? "-1px 0px 10px 4px rgba(190, 190, 190, 1)"
-                    : "-1px 0px 10px 4px #3b3b3b"
-              : "",
-          ":-webkit-box-shadow":
-            isMenuOpen || openSidebar !== null
-              ? theme =>
-                  theme.palette.mode === "dark"
-                    ? "-1px 0px 10px 4px rgba(190, 190, 190, 1)"
-                    : "-1px 0px 10px 4px #3b3b3b"
-              : "",
-          ":-moz-box-shadow":
-            isMenuOpen || openSidebar !== null
-              ? theme =>
-                  theme.palette.mode === "dark"
-                    ? "-1px 0px 10px 4px rgba(190, 190, 190, 1)"
-                    : "-1px 0px 10px 4px #3b3b3b"
-              : "",
+
           transition: "0.5s cubic-bezier(0.4, 0, 0.2, 1) !important",
+          scrollBehavior: "smooth",
+          "::-webkit-scrollbar-thumb": {
+            borderRadius: "4px",
+          },
+          "::-webkit-scrollbar ": { width: "4px", height: "4px" },
+          borderRadius: "6px",
+          ":hover": {
+            "::-webkit-scrollbar-thumb": {
+              background: "rgba(119, 119, 119, 0.692)",
+            },
+          },
           ...sx,
         },
       }}
     >
       {title && (
-        <Box sx={{ width }}>
+        <Box>
           <Box>
             {!innerHeight || (height > 50 && innerHeight > 600) ? (
-              <Box sx={{ position: "relative", height: headerImage ? "127px" : "65px", width }}>
+              <Box sx={{ position: "relative", height: headerImage ? "127px" : "65px" }}>
                 {headerImage && <Image src={headerImage} alt="header image" width={width} height={127} />}
                 <Typography
                   component={"h2"}
@@ -160,6 +144,7 @@ export const SidebarWrapper = ({
         id={`${id}-content`}
         ref={sidebarContentRef}
         sx={{
+          position: "relative",
           height: "100%",
           overflowX: "hidden",
           overflowY: "auto",
@@ -175,7 +160,32 @@ export const SidebarWrapper = ({
       >
         {sidebarContent}
       </Box>
-
+      {showScrollUpButton && (
+        <Box
+          sx={{
+            position: "fixed",
+            bottom: "10px",
+            left: `${width - 56}px`,
+            display: "flex",
+            justifyContent: "flex-end",
+          }}
+        >
+          <Tooltip title="Back to top.">
+            <IconButton
+              onClick={scrollToTop}
+              sx={{
+                background: theme => (theme.palette.mode === "light" ? "rgb(240,240,240)" : "rgb(31,31,31)"),
+                ":hover": {
+                  background: theme =>
+                    theme.palette.mode === "light" ? "rgba(240,240,240,0.7)" : "rgba(31,31,31,0.7)",
+                },
+              }}
+            >
+              <ArrowUpwardIcon />
+            </IconButton>
+          </Tooltip>
+        </Box>
+      )}
       {showCloseButton && (
         <Box
           sx={{
@@ -196,31 +206,6 @@ export const SidebarWrapper = ({
               }}
             >
               <CloseIcon />
-            </IconButton>
-          </Tooltip>
-        </Box>
-      )}
-
-      {showScrollUpButton && (
-        <Box
-          sx={{
-            position: "absolute",
-            bottom: "10px",
-            right: "10px",
-          }}
-        >
-          <Tooltip title="Back to top.">
-            <IconButton
-              onClick={scrollToTop}
-              sx={{
-                background: theme => (theme.palette.mode === "light" ? "rgb(240,240,240)" : "rgb(31,31,31)"),
-                ":hover": {
-                  background: theme =>
-                    theme.palette.mode === "light" ? "rgba(240,240,240,0.7)" : "rgba(31,31,31,0.7)",
-                },
-              }}
-            >
-              <ArrowUpwardIcon />
             </IconButton>
           </Tooltip>
         </Box>

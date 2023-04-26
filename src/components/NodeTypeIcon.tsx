@@ -22,6 +22,7 @@ type Props = {
   id?: string;
   tooltipPlacement?: TooltipProps["placement"];
   nodeType?: NodeType | NodeTypes | "locked";
+
   // disabled?: boolean;
 } & SvgIconProps;
 
@@ -30,6 +31,7 @@ const NodeTypeIcon: FC<Props> = ({
   nodeType,
   tooltipPlacement = "top",
   color = "primary",
+
   // disabled = false,
   ...rest
 }) => {
@@ -75,18 +77,7 @@ const NodeTypeIcon: FC<Props> = ({
 
   return (
     <Tooltip title={`${nodeType} node`} placement={tooltipPlacement}>
-      <Box
-        id={`${id}-node-footer-type`}
-        sx={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          borderRadius: "50%",
-          outlineOffset: "4px",
-        }}
-      >
-        {renderIcon()}
-      </Box>
+      <Box id={`${id}-node-footer-type`}>{renderIcon()}</Box>
     </Tooltip>
   );
 };

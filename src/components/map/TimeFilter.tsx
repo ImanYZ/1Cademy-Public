@@ -1,10 +1,10 @@
 import { FormControl, FormControlLabel, ListItemText, MenuItem, Radio, Select, SelectChangeEvent } from "@mui/material";
-import { Box } from "@mui/system";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import React from "react";
 
-import { SortValues } from "../../nodeBookTypes";
+import { DESIGN_SYSTEM_COLORS } from "@/lib/theme/colors";
+
 dayjs.extend(relativeTime);
 
 const TIME_OPTIONS: any[] = [
@@ -36,7 +36,8 @@ const TIME_OPTIONS: any[] = [
 
 const TimeFilter = (props: any) => {
   const onChangeTimeFilter = (event: SelectChangeEvent) => {
-    props.setTimeFilter(event.target.value as SortValues);
+    console.log({ event });
+    props.setTimeFilter(event.target.value);
   };
 
   return (
@@ -59,7 +60,10 @@ const TimeFilter = (props: any) => {
                 width: "200px",
                 borderRadius: "4px",
                 boxShadow: "0px 4px 4px rgba(0, 0, 0, 0.25), 0px 8px 8px -4px rgba(0, 0, 0, 0.03)",
-                border: "1px solid #2F2F2F",
+                border: theme =>
+                  `1px solid ${
+                    theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookG500 : DESIGN_SYSTEM_COLORS.gray300
+                  }`,
               },
               "& .MuiMenuItem-root:hover": {
                 backgroundColor: theme =>
@@ -93,24 +97,23 @@ const TimeFilter = (props: any) => {
           renderValue={() => TIME_OPTIONS.filter(option => option.value === props.timeFilter)[0]?.name}
         >
           {TIME_OPTIONS.map(cur => {
-            const isSelected = props.sortOption === cur.value;
+            console.log({ timeFilter: props.timeFilter });
+            const isSelected = props.timeFilter === cur.value;
             return (
               <MenuItem key={cur.name} value={cur.value} sx={{ display: "flex", justifyContent: "space-between" }}>
-                <Box sx={{ display: "flex", alignItems: "center" }}>
-                  <FormControlLabel
-                    className={isSelected ? "selected" : ""}
-                    control={<Radio className="searchCheckbox" checked={isSelected} />}
-                    label=""
-                    sx={{ p: "0px", marginX: "0px" }}
-                  />
-                  <ListItemText
-                    sx={{
-                      fontSize: "10px!important",
-                    }}
-                    className={isSelected ? "selected" : ""}
-                    primary={cur.name}
-                  />
-                </Box>
+                <FormControlLabel
+                  className={isSelected ? "selected" : ""}
+                  control={<Radio className="searchCheckbox" checked={isSelected} />}
+                  label=""
+                  sx={{ p: "0px", marginX: "0px" }}
+                />
+                <ListItemText
+                  sx={{
+                    fontSize: "10px ",
+                  }}
+                  className={isSelected ? "selected" : ""}
+                  primary={cur.name}
+                />
               </MenuItem>
             );
           })}
