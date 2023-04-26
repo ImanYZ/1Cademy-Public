@@ -184,7 +184,7 @@ const NotificationSidebar = ({
 
   useEffect(() => {
     const requestRef = collection(db, "requests");
-    const q = query(requestRef, where("requestedUser", "==", "jjnnx"), where("state", "==", "waiting"));
+    const q = query(requestRef, where("requestedUser", "==", username), where("state", "==", "waiting"));
     const unsub = onSnapshot(q, snapshot => {
       const docChages = snapshot.docChanges();
       if (!(docChages.length > 0)) return;
@@ -279,7 +279,7 @@ const NotificationSidebar = ({
         ),
         content: (
           <>
-            {checkedNotifications.length > 0 ? (
+            {notebookRequests.length > 0 ? (
               <Stack spacing={"8px"} p="24px 16px">
                 {notebookRequests.map((request, idx) => (
                   <RequestNotificationItem
