@@ -254,12 +254,28 @@ export const PracticeTool = () => {
                 borderBottom: theme => `solid 1px ${theme.palette.common.notebookG600}`,
               }}
             >
-              <Typography
-                sx={{ my: "18px", color: theme => theme.palette.common.gray25, fontSize: "24px", fontWeight: 500 }}
+              <Box sx={{ my: "18px", display: "flex", alignItems: "center" }}>
+                <svg width="24" height="19" viewBox="0 0 24 19" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path
+                    d="M12.4001 18.6H4.49407L0.799999 7.61995L7.39409 10.2725L12.4001 0.200012L17.406 10.2725L24 7.61995L20.3061 18.6H12.4001Z"
+                    fill="#FAC515"
+                  />
+                </svg>
+                <Typography
+                  sx={{ ml: "12px", color: theme => theme.palette.common.gray25, fontSize: "24px", fontWeight: 500 }}
+                >
+                  Leaderboard
+                </Typography>
+              </Box>
+              <ButtonGroup
+                variant="contained"
+                aria-label="leaderboard options"
+                sx={{
+                  "& .MuiButtonGroup-grouped:not(:last-of-type)": {
+                    borderWidth: "0px",
+                  },
+                }}
               >
-                Leaderboard
-              </Typography>
-              <ButtonGroup variant="contained" aria-label="leaderboard options">
                 <Button
                   onClick={() => setSelectedLeaderboardOption("WEEK")}
                   sx={{
