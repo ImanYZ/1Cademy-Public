@@ -1,4 +1,7 @@
 import { admin, checkRestartBatchWriteCounts, commitBatch, db, TWriteOperation } from "../lib/firestoreServer/admin";
+import axios from "axios";
+import { google } from "googleapis";
+
 import {
   arrayToChunks,
   convertToTGet,
@@ -31,6 +34,7 @@ import { TypesenseNodeSchema } from "@/lib/schemas/node";
 import { INodeType } from "src/types/INodeType";
 import { IComReputationUpdates } from "./reputations";
 import { IUserNodeVersion } from "src/types/IUserNodeVersion";
+import { getNodePageWithDomain } from "@/lib/utils/utils";
 
 export const comPointTypes = [
   "comPoints",
@@ -320,6 +324,46 @@ export const compareFlatLinks = ({ links1, links2 }: any) => {
     }
   }
   return true;
+};
+
+export const indexNodeChange = async (nodeId: string, nodeTitle: string, actionType: "NEW" | "UPDATE" | "DELETE") => {
+  // don't send request on dev and prod
+  if (process.env.ONECADEMYCRED_PROJECT_ID !== "onecademy-1") return;
+  const nodeUrl = getNodePageWithDomain(nodeTitle, nodeId);
+
+  try {
+    await axios.get(
+      `https://www.bing.com/indexnow?url=${encodeURIComponent(nodeUrl)}&key=${process.env.INDEXNOW_API_KEY}`
+    );
+  } catch (e) {
+    console.error(e, "BING_INDEX_ERROR");
+  }
+
+  const jwtClient = new google.auth.JWT(
+    process.env.ONECADEMYCRED_CLIENT_EMAIL,
+    undefined,
+    process.env.ONECADEMYCRED_PRIVATE_KEY,
+    ["https://www.googleapis.com/auth/indexing"],
+    undefined
+  );
+  const tokens = await jwtClient.authorize();
+  try {
+    await axios.post(
+      "https://indexing.googleapis.com/v3/urlNotifications:publish",
+      {
+        url: nodeUrl,
+        type: actionType === "DELETE" ? "URL_DELETED" : "URL_UPDATED",
+      },
+      {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: "Bearer " + tokens.access_token,
+        },
+      }
+    );
+  } catch (e) {
+    console.error(e, "GOOGLE_INDEX_ERROR");
+  }
 };
 
 export const createPractice = async ({
@@ -1978,6 +2022,9 @@ export const versionCreateUpdate = async ({
             });
           }
 
+          // signal search about improvement or new node
+          await indexNodeChange(nodeId, title, "UPDATE");
+
           // TODO: move these to queue
           await detach(async () => {
             let linkedNode, linkedNodeChanges;
@@ -2129,6 +2176,9 @@ export const versionCreateUpdate = async ({
           newUpdates.versionId = versionRef.id;
           newUpdates.nodeId = childNodeRef.id;
           newUpdates.versionData = childVersion;
+
+          // signal search about improvement or new node
+          await indexNodeChange(newUpdates.nodeId, title, "NEW");
 
           // Because it's a child version, the old version that was proposed on the parent node should be
           // removed. So, we should create a new version and a new userVersion document that use the data of the previous one.
