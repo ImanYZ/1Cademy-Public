@@ -19,10 +19,15 @@ export const Dashboard = ({ sx, onClose }: DashboardProps) => {
   //   const [allSemesters, setAllSemesters] = useState<Semester[]>([]);
 
   return (
-    <Box sx={{ ...sx, p: "100px" }}>
+    <Box sx={{ ...sx, p: "100px", display: "grid", gridTemplateColumns: "200px auto", border: "solid 2px yellow" }}>
       <div>toolbar</div>
-      <div>selected page</div>
-      <button onClick={onClose}>......................Close</button>
+      <Box sx={{ width: "100%", border: "solid 2px royalBlue" }}>
+        <Box>
+          Lorem ipsum dolor sit amet consectetur adipisicing elit. Minima adipisci, amet quidem et nulla quas omnis
+          corrupti, deserunt soluta repellat ex, fugit molestias dolor doloribus quis. Eos modi voluptates iure!
+          <button onClick={onClose}>......................Close</button>
+        </Box>
+      </Box>
     </Box>
   );
 };
