@@ -1208,7 +1208,7 @@ const UserSettigsSidebar = ({
                     onChange={handleBackgroundSwitch}
                   />
                 </Paper>
-                <Typography fontWeight={"500"}>Node Threshold</Typography>
+                <Typography fontWeight={"500"}>Nodes Threshold</Typography>
                 <LevelSlider
                   min={0}
                   max={100}
