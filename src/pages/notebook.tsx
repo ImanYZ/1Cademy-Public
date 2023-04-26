@@ -1696,9 +1696,8 @@ const Dashboard = ({}: DashboardProps) => {
         return { ...updatedLinks };
       });
     },
-    // TODO: CHECK dependencies
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [notebookRef.current.choosingNode, notebookRef.current.chosenNode]
+    [nodeBookDispatch]
+    // [notebookRef.current.choosingNode, notebookRef.current.chosenNode]
   );
 
   const deleteLink = useCallback(
