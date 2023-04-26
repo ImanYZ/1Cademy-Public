@@ -4,6 +4,7 @@ import CloseIcon from "@mui/icons-material/Close";
 import CodeIcon from "@mui/icons-material/Code";
 import HelpCenterIcon from "@mui/icons-material/HelpCenter";
 import MyLocationIcon from "@mui/icons-material/MyLocation";
+import UndoIcon from "@mui/icons-material/Undo";
 import { Masonry } from "@mui/lab";
 import {
   Button,
@@ -38,7 +39,6 @@ import {
 } from "firebase/firestore";
 import { getDownloadURL, getStorage, ref, uploadBytesResumable } from "firebase/storage";
 import Image from "next/image";
-import NextImage from "next/image";
 import { useRouter } from "next/router";
 import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
 /* eslint-disable */ //This wrapper comments it to use react-map-interaction without types
@@ -64,10 +64,9 @@ import { MemoizedUserSettingsSidebar } from "@/components/map/Sidebar/SidebarV2/
 import { useAuth } from "@/context/AuthContext";
 import useEventListener from "@/hooks/useEventListener";
 import { useTagsTreeView } from "@/hooks/useTagsTreeView";
+import { DESIGN_SYSTEM_COLORS } from "@/lib/theme/colors";
 
 import LoadingImg from "../../public/animated-icon-1cademy.gif";
-import PrevNodeIcon from "../../public/prev-node.svg";
-import PrevNodeLightIcon from "../../public/prev-node-light.svg";
 import { TooltipTutorial } from "../components/interactiveTutorial/Tutorial";
 // import nodesData from "../../testUtils/mockCollections/nodes.data";
 // import { Tutorial } from "../components/interactiveTutorial/Tutorial";
@@ -6095,78 +6094,68 @@ const Dashboard = ({}: DashboardProps) => {
           </NotebookPopup>
         )}
 
-        {nodeBookState.previousNode && (
+        {
           <Box
             sx={{
-              position: "absolute",
-              width: "auto",
-              left: "50%",
-              transform: "translateX(-50%)",
-              bottom: "35px",
-              background: theme =>
-                theme.palette.mode === "dark"
-                  ? theme.palette.common.darkBackground
-                  : theme.palette.common.lightBackground,
-              fontFamily: "Roboto",
-              fontStyle: "normal",
-              fontWeight: "normal",
-              fontSize: "25px",
-              lineHeight: "28px",
-              color: "#e5e5e5",
-              zIndex: "4",
-              textAlign: "center",
-              overflow: "hidden",
-              display: "flex",
               height: "40px",
+              display: "flex",
+              position: "absolute",
+              left: "50%",
+              bottom: "35px",
+              transform: "translateX(-50%)",
+              zIndex: "4",
+              backgroundColor: ({ palette: { mode } }) =>
+                mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookMainBlack : DESIGN_SYSTEM_COLORS.gray50,
+              borderRadius: "4px",
             }}
           >
-            <Box
+            <Button
+              onClick={() => {
+                notebookRef.current.selectedNode = nodeBookState.previousNode;
+                nodeBookDispatch({ type: "setSelectedNode", payload: nodeBookState.previousNode });
+                setTimeout(() => {
+                  scrollToNode(nodeBookState.previousNode);
+                }, 1500);
+                nodeBookDispatch({ type: "setPreviousNode", payload: null });
+              }}
               sx={{
-                paddingTop: "3px",
-                borderRight: "solid 1px #98A2B3",
-                paddingX: "5px",
+                display: "flex",
+                alignItems: "center",
+                gap: "10px",
                 ":hover": {
-                  background: theme => (theme.palette.mode === "dark" ? "#2F2F2F" : "#EAECF0"),
+                  backgroundColor: ({ palette: { mode } }) =>
+                    mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookG600 : DESIGN_SYSTEM_COLORS.gray200,
                 },
               }}
             >
-              <Button
-                onClick={() => {
-                  notebookRef.current.selectedNode = nodeBookState.previousNode;
-                  nodeBookDispatch({ type: "setSelectedNode", payload: nodeBookState.previousNode });
-                  setTimeout(() => {
-                    scrollToNode(nodeBookState.previousNode);
-                  }, 1500);
-                  nodeBookDispatch({ type: "setPreviousNode", payload: null });
-                }}
+              <UndoIcon
                 sx={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "10px",
-                  ":hover": {
-                    background: "transparent",
-                  },
+                  color: theme =>
+                    theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.baseWhite : DESIGN_SYSTEM_COLORS.gray800,
+                }}
+              />
+              <Typography
+                sx={{
+                  color: theme =>
+                    theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.gray25 : DESIGN_SYSTEM_COLORS.gray800,
                 }}
               >
-                <NextImage
-                  width={"20px"}
-                  src={theme.palette.mode === "dark" ? PrevNodeIcon : PrevNodeLightIcon}
-                  alt="previous node icon"
-                />
-                <Typography
-                  sx={{
-                    color: theme => (theme.palette.mode === "dark" ? "#FCFCFD" : "#1D2939"),
-                  }}
-                >
-                  Return to previous node
-                </Typography>
-              </Button>
-            </Box>
+                Return to previous node
+              </Typography>
+            </Button>
+            <Divider
+              orientation="vertical"
+              sx={{
+                borderColor: ({ palette: { mode } }) =>
+                  mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookG500 : DESIGN_SYSTEM_COLORS.gray300,
+              }}
+            />
             <Button
               sx={{
                 minWidth: "30px!important",
                 ":hover": {
-                  background: theme => (theme.palette.mode === "dark" ? "#2F2F2F" : "#EAECF0"),
+                  backgroundColor: ({ palette: { mode } }) =>
+                    mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookG600 : DESIGN_SYSTEM_COLORS.gray200,
                 },
               }}
               onClick={() => {
@@ -6176,12 +6165,13 @@ const Dashboard = ({}: DashboardProps) => {
               <CloseIcon
                 fontSize="small"
                 sx={{
-                  color: theme => (theme.palette.mode === "dark" ? "#A4A4A4" : "#98A2B3"),
+                  color: theme =>
+                    theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookG200 : DESIGN_SYSTEM_COLORS.gray400,
                 }}
               />
             </Button>
           </Box>
-        )}
+        }
         <Box sx={{ width: "100vw", height: "100vh", overflow: "hidden" }}>
           {
             <Drawer
@@ -6390,14 +6380,12 @@ const Dashboard = ({}: DashboardProps) => {
                 enableElements={[]}
               />
               <MemoizedNotificationSidebar
-                theme={settings.theme}
                 openLinkedNode={openLinkedNode}
                 username={user.uname}
                 open={openSidebar === "NOTIFICATION_SIDEBAR"}
                 onClose={() => setOpenSidebar(null)}
                 sidebarWidth={sidebarWidth()}
                 innerHeight={innerHeight}
-                innerWidth={windowWith}
               />
               <MemoizedPendingProposalSidebar
                 theme={settings.theme}

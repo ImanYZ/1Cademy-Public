@@ -69,9 +69,7 @@ export const SidebarWrapper = ({
         id,
         sx: {
           maxHeight: "100vh",
-          // minWidth: { xs: "0px", sm: width },
           width: { xs: "100%", sm: width },
-          // maxWidth: { xs: width, sm: "80px" },
           height: height < 100 && innerHeight ? `${(height / 100) * innerHeight}px` : `${height}%`,
           borderRight: "none",
           background: theme => (theme.palette.mode === "dark" ? "#1B1A1A" : "#F9FAFB"),
@@ -96,15 +94,11 @@ export const SidebarWrapper = ({
         <Box>
           <Box>
             {!innerHeight || (height > 50 && innerHeight > 600) ? (
-              <Box sx={{ position: "relative", height: headerImage ? "127px" : "65px" }}>
+              <Box sx={{ position: "relative", height: headerImage ? "127px" : "auto", p: "24px" }}>
                 {headerImage && <Image src={headerImage} alt="header image" width={width} height={127} />}
                 <Typography
                   component={"h2"}
                   sx={{
-                    width: "100%",
-                    position: "absolute",
-                    bottom: 0,
-                    paddingLeft: "13px",
                     fontSize: { xs: "24px", sm: "40px" },
                     fontWeight: "700",
                     lineHeight: "29.05px",
