@@ -65,7 +65,6 @@ import { useAuth } from "@/context/AuthContext";
 import useEventListener from "@/hooks/useEventListener";
 import { useTagsTreeView } from "@/hooks/useTagsTreeView";
 import { DESIGN_SYSTEM_COLORS } from "@/lib/theme/colors";
-import { addSuffixToUrlGMT } from "@/lib/utils/string.utils";
 
 import LoadingImg from "../../public/animated-icon-1cademy.gif";
 import { TooltipTutorial } from "../components/interactiveTutorial/Tutorial";
@@ -1695,9 +1694,8 @@ const Dashboard = ({}: DashboardProps) => {
         return { ...updatedLinks };
       });
     },
-    // TODO: CHECK dependencies
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [notebookRef.current.choosingNode, notebookRef.current.chosenNode]
+    [nodeBookDispatch]
+    // [notebookRef.current.choosingNode, notebookRef.current.chosenNode]
   );
 
   const deleteLink = useCallback(
@@ -4063,13 +4061,12 @@ const Dashboard = ({}: DashboardProps) => {
             },
             async function complete() {
               const imageGeneratedUrl = await getDownloadURL(storageRef);
-              const imageUrlFixed = addSuffixToUrlGMT(imageGeneratedUrl, "_430x1300");
               setIsSubmitting(false);
               setIsUploading(false);
-              await imageLoaded(imageUrlFixed);
-              if (imageUrlFixed && imageUrlFixed !== "") {
+              await imageLoaded(imageGeneratedUrl);
+              if (imageGeneratedUrl && imageGeneratedUrl !== "") {
                 setNodeParts(nodeId, (thisNode: any) => {
-                  thisNode.nodeImage = imageUrlFixed;
+                  thisNode.nodeImage = imageGeneratedUrl;
                   return { ...thisNode };
                 });
               }
