@@ -14,6 +14,8 @@ import { DESIGN_SYSTEM_COLORS } from "../../lib/theme/colors";
 import shortenNumber from "../../lib/utils/shortenNumber";
 import { Node } from "../../nodeBookTypes";
 import { CustomWrapperButton } from "../map/Buttons/Buttons";
+import Leaderboard from "./Leaderboard";
+import { UserStatus } from "./UserStatus";
 
 type NodeQuestionProps = {
   node: Node;
@@ -252,6 +254,7 @@ export const PracticeQuestion = ({ onClose }: PracticeQuestionProps) => {
   const [questions, setQuestions] = useState<Node[]>([]);
   const [selectedQuestion, setSelectedQuestion] = useState<{ question: Node; idx: number } | null>(null);
   const [selectedAnswers, setSelectedAnswers] = useState<number>(-1);
+  const [displaySidebar, setDisplaySidebar] = useState<"LEADERBOARD" | "USER_STATUS" | null>(null);
 
   useEffect(() => {
     if (!selectedQuestion) return;
@@ -308,6 +311,9 @@ export const PracticeQuestion = ({ onClose }: PracticeQuestionProps) => {
         //   theme.palette.mode === "dark" ? theme.palette.common.notebookG900 : theme.palette.common.notebookG900,
         // zIndex: 1,
         p: "45px 64px",
+        width: "100%",
+        height: "100%",
+        position: "relative",
       }}
     >
       <IconButton onClick={onClose} sx={{ color: theme => theme.palette.common.primary800, position: "absolute" }}>
@@ -316,7 +322,7 @@ export const PracticeQuestion = ({ onClose }: PracticeQuestionProps) => {
 
       <Stack spacing={"8px"} sx={{ position: "absolute", right: "12px", top: "8px" }}>
         <IconButton
-          onClick={onClose}
+          onClick={() => setDisplaySidebar("USER_STATUS")}
           sx={{
             width: "56px",
             height: "56px",
@@ -334,7 +340,7 @@ export const PracticeQuestion = ({ onClose }: PracticeQuestionProps) => {
         </IconButton>
 
         <IconButton
-          onClick={onClose}
+          onClick={() => setDisplaySidebar("LEADERBOARD")}
           sx={{
             width: "56px",
             height: "56px",
@@ -388,6 +394,46 @@ export const PracticeQuestion = ({ onClose }: PracticeQuestionProps) => {
             Claim my point
           </Button>
         </Box>
+      </Box>
+
+      <Box
+        sx={{
+          position: "absolute",
+          width: "350px",
+          top: "0px",
+          bottom: "0px",
+          right: displaySidebar === "LEADERBOARD" ? "0px" : "-350px",
+          backgroundColor: DESIGN_SYSTEM_COLORS.notebookMainBlack,
+          transition: "right 0.4s",
+        }}
+      >
+        <IconButton
+          sx={{ position: "absolute", top: "17px", right: "17px", p: "4px" }}
+          onClick={() => setDisplaySidebar(null)}
+        >
+          <CloseIcon />
+        </IconButton>
+        <Leaderboard />
+      </Box>
+
+      <Box
+        sx={{
+          position: "absolute",
+          width: "350px",
+          top: "0px",
+          bottom: "0px",
+          right: displaySidebar === "USER_STATUS" ? "0px" : "-350px",
+          backgroundColor: DESIGN_SYSTEM_COLORS.notebookMainBlack,
+          transition: "right 0.4s",
+        }}
+      >
+        <IconButton
+          sx={{ position: "absolute", top: "17px", right: "17px", p: "4px" }}
+          onClick={() => setDisplaySidebar(null)}
+        >
+          <CloseIcon />
+        </IconButton>
+        <UserStatus />
       </Box>
     </Box>
   );
