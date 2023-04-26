@@ -1569,6 +1569,7 @@ const Dashboard = ({}: DashboardProps) => {
 
           updatedNodeIds.push(nodeId);
           updatedNodeIds.push(notebookRef.current.chosenNode.id);
+          console.log({ oldNodes, nodeId });
           const thisNode = copyNode(oldNodes[nodeId]);
           const chosenNodeObj = copyNode(oldNodes[notebookRef.current.chosenNode.id]);
 
@@ -1696,9 +1697,8 @@ const Dashboard = ({}: DashboardProps) => {
         return { ...updatedLinks };
       });
     },
-    // TODO: CHECK dependencies
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [notebookRef.current.choosingNode, notebookRef.current.chosenNode]
+    [nodeBookDispatch]
+    // [notebookRef.current.choosingNode, notebookRef.current.chosenNode]
   );
 
   const deleteLink = useCallback(
