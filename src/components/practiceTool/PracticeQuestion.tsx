@@ -305,11 +305,6 @@ export const PracticeQuestion = ({ onClose }: PracticeQuestionProps) => {
   return (
     <Box
       sx={{
-        // position: "absolute",
-        // inset: "0px",
-        // background: theme =>
-        //   theme.palette.mode === "dark" ? theme.palette.common.notebookG900 : theme.palette.common.notebookG900,
-        // zIndex: 1,
         p: "45px 64px",
         width: "100%",
         height: "100%",

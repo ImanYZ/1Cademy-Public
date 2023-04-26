@@ -16,7 +16,7 @@ const Leaderboard = () => {
   }, [selectedLeaderboardOption]);
 
   return (
-    <Box sx={{ width: "100%" }}>
+    <Box sx={{ width: "100%", height: "100%" }}>
       <Box
         sx={{
           display: "flex",
@@ -89,7 +89,7 @@ const Leaderboard = () => {
           </Button>
         </ButtonGroup>
       </Box>
-      <Box className="scroll-styled" sx={{ py: "18px", maxHeight: "476px", overflowY: "auto" }}>
+      <Box className="scroll-styled" sx={{ py: "18px", overflowY: "auto" }}>
         {leaderBoardUsers.map((cur, idx) => (
           <Box
             key={cur}
