@@ -98,7 +98,7 @@ export const SemesterFilter = ({
         justifyContent: { xs: "center", sm: "space-between" },
       }}
     >
-      <Box sx={{ maxWidth: "170px", display: "flex", flexDirection: "column", gap: { xs: "16px", md: "16px" } }}>
+      <Box sx={{ width: "170px", display: "flex", flexDirection: "column", gap: { xs: "16px", md: "16px" } }}>
         <FormControl size={"small"}>
           <InputLabel id="semester-filter-labels">Semester</InputLabel>
           <Select
@@ -108,7 +108,6 @@ export const SemesterFilter = ({
             label="Semester"
             onChange={onChangeSemester}
             fullWidth
-            sx={{ "& 	.MuiSelect-root": { position: "absolute", zIndex: 99999 } }}
           >
             {semesters.map((cur, idx) => (
               <MenuItem key={idx} value={cur}>
@@ -121,7 +120,7 @@ export const SemesterFilter = ({
           <Typography fontSize={"14px"} fontWeight={"500"} flex={1}>
             Dashboard
           </Typography>
-          <Button sx={{ p: "7px", backgroundColor: DESIGN_SYSTEM_COLORS.notebookO900 }}>
+          <Button sx={{ minWidth: "auto", backgroundColor: DESIGN_SYSTEM_COLORS.notebookO900, borderRadius: "8px" }}>
             <AddRoundedIcon sx={{ fontSize: "14px" }} />
           </Button>
         </Stack>
@@ -135,7 +134,7 @@ export const SemesterFilter = ({
                 onClick={() => onChangeCourse(course)}
                 sx={{
                   whiteSpace: " nowrap",
-                  p: "6px",
+
                   border: "none",
 
                   backgroundColor: selectedCourse === course ? DESIGN_SYSTEM_COLORS.notebookO900 : "transparerent",
@@ -143,10 +142,6 @@ export const SemesterFilter = ({
                   borderBottom: `1px solid ${
                     selectedCourse === course ? DESIGN_SYSTEM_COLORS.primary600 : DESIGN_SYSTEM_COLORS.notebookG500
                   }}`,
-                  "& .MuiButton-root": {
-                    borderRadius: "4px 4px 0px 0px",
-                    justifyContent: "flex-start",
-                  },
                 }}
                 fullWidth
               >

@@ -136,6 +136,7 @@ export const Dashboard = ({ user, sx, onClose }: DashboardProps) => {
         selectedSemester={selectedSemester}
         onChangeSelecedSemesterHandler={setSelectedSemester}
         user={user}
+        onClose={onClose}
       />
 
       <div>selected page</div>

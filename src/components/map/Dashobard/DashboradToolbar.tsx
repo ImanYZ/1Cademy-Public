@@ -21,6 +21,7 @@ type DashboardToolbarProps = {
   currentSemester: ICourseTag | null;
   onChangeSelecedSemesterHandler: (newSemester: string | null) => void;
   onChangeSelectedCourseHandler: (newSemester: string | null) => void;
+  onClose: () => void;
 };
 
 export const DashboradToolbar = ({
@@ -32,6 +33,7 @@ export const DashboradToolbar = ({
   currentSemester,
   onChangeSelecedSemesterHandler,
   onChangeSelectedCourseHandler,
+  onClose,
 }: DashboardToolbarProps) => {
   const {
     palette: { mode },
@@ -87,7 +89,7 @@ export const DashboradToolbar = ({
             spacing={"16px"}
             sx={{
               borderRadius: "16px",
-              p: "10px 16px ",
+              p: "8px 16px ",
               cursor: "pointer",
               transition: "background-color 300ms ease-out",
               ":hover": {
@@ -104,7 +106,7 @@ export const DashboradToolbar = ({
             spacing={"16px"}
             sx={{
               borderRadius: "16px",
-              p: "10px 16px ",
+              p: "8px 16px ",
               cursor: "pointer",
               transition: "background-color 300ms ease-out",
               ":hover": {
@@ -113,11 +115,11 @@ export const DashboradToolbar = ({
             }}
           >
             <InsightsRoundedIcon sx={{ color: DESIGN_SYSTEM_COLORS.orange400 }} />
-            <Typography fontWeight={500}>Practice</Typography>
+            <Typography fontWeight={500}>Practise</Typography>
           </Stack>
           <Stack direction={"row"}></Stack>
         </Box>
-        <Divider sx={{ mt: 0 }} />
+        <Divider />
 
         <SemesterFilter
           semesters={semesters}
@@ -132,6 +134,7 @@ export const DashboradToolbar = ({
         />
       </Stack>
       <Button
+        onClick={onClose}
         sx={{
           color: DESIGN_SYSTEM_COLORS.primary800,
           justifyContent: "flex-start",
