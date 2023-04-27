@@ -671,6 +671,13 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
           numQuestionsPerDay: 1,
           totalDaysOfCourse: 1,
         },
+        dailyPractice: {
+          startDate: Timestamp.fromDate(startDate.toDate()),
+          endDate: Timestamp.fromDate(endDate.toDate()),
+          numPoints: 1,
+          numQuestionsPerDay: 1,
+          totalDaysOfCourse: 1,
+        },
         votes: {
           pointIncrementOnAgreement: 1,
           pointDecrementOnAgreement: 1,
@@ -678,8 +685,10 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
           onReceiveDownVote: 1,
           onReceiveStar: 1,
         },
+
         isProposalRequired: false,
         isQuestionProposalRequired: false,
+        isDailyPracticeRequired: false,
         isCastingVotesRequired: false,
         isGettingVotesRequired: false,
         deleted: false,
