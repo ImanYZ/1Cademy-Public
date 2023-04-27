@@ -58,6 +58,7 @@ export const createSemester = (params: IFakeSemesterOptions): ISemester => {
     days: 0,
     isProposalRequired: true,
     isQuestionProposalRequired: true,
+    isDailyPracticeRequired: true,
     isCastingVotesRequired: true,
     isGettingVotesRequired: true,
     startDate: Timestamp.now(),
@@ -70,6 +71,13 @@ export const createSemester = (params: IFakeSemesterOptions): ISemester => {
       totalDaysOfCourse: 0,
     },
     questionProposals: {
+      startDate: Timestamp.now(),
+      endDate: Timestamp.now(),
+      numPoints: 0,
+      numQuestionsPerDay: 0,
+      totalDaysOfCourse: 0,
+    },
+    dailyPractice: {
       startDate: Timestamp.now(),
       endDate: Timestamp.now(),
       numPoints: 0,
