@@ -32,6 +32,15 @@ export type InstructorSemesterSettingPayload = {
     numQuestionsPerDay: number;
     totalDaysOfCourse: number;
   };
+
+  dailyPractice: {
+    startDate: string;
+    endDate: string;
+    numPoints: number;
+    numQuestionsPerDay: number;
+    totalDaysOfCourse: number;
+  };
+
   votes: {
     pointIncrementOnAgreement: number;
     pointDecrementOnAgreement: number;
@@ -41,6 +50,7 @@ export type InstructorSemesterSettingPayload = {
   };
   isProposalRequired: boolean;
   isQuestionProposalRequired: boolean;
+  isDailyPracticeRequired: boolean;
   isCastingVotesRequired: boolean;
   isGettingVotesRequired: boolean;
 };
@@ -539,8 +549,17 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
       totalDaysOfCourse: payload.questionProposals.totalDaysOfCourse,
     };
 
+    semesterData.dailyPractice = {
+      startDate: Timestamp.fromDate(moment(payload.dailyPractice.startDate).toDate()),
+      endDate: Timestamp.fromDate(moment(payload.dailyPractice.endDate).toDate()),
+      numPoints: payload.dailyPractice.numPoints,
+      numQuestionsPerDay: payload.dailyPractice.numQuestionsPerDay,
+      totalDaysOfCourse: payload.dailyPractice.totalDaysOfCourse,
+    };
+
     semesterData.isProposalRequired = payload.isProposalRequired;
     semesterData.isQuestionProposalRequired = payload.isQuestionProposalRequired;
+    semesterData.isDailyPracticeRequired = payload.isDailyPracticeRequired;
     semesterData.isCastingVotesRequired = payload.isCastingVotesRequired;
     semesterData.isGettingVotesRequired = payload.isGettingVotesRequired;
 
