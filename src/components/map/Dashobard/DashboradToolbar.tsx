@@ -1,4 +1,5 @@
 import HomeRoundedIcon from "@mui/icons-material/HomeRounded";
+import InsightsRoundedIcon from "@mui/icons-material/InsightsRounded";
 import { Avatar, Box, Stack, Typography, useTheme } from "@mui/material";
 import Image from "next/image";
 import React from "react";
@@ -49,10 +50,18 @@ export const DashboradToolbar = () => {
             </Typography>
           </Box>
         </Stack>
-        <Stack>
-          <Stack direction={"row"} sx={{ backgroundColor: DESIGN_SYSTEM_COLORS.notebookO900, borderRadius: "16px" }}>
-            <HomeRoundedIcon />
+        <Stack spacing={"8px"}>
+          <Stack
+            direction={"row"}
+            spacing={"16px"}
+            sx={{ backgroundColor: DESIGN_SYSTEM_COLORS.notebookO900, borderRadius: "16px", p: "10px 16px " }}
+          >
+            <HomeRoundedIcon sx={{ color: DESIGN_SYSTEM_COLORS.orange400 }} />
             <Typography>Dashboard</Typography>
+          </Stack>
+          <Stack direction={"row"} spacing={"16px"} sx={{ borderRadius: "16px", p: "10px 16px " }}>
+            <InsightsRoundedIcon sx={{ color: DESIGN_SYSTEM_COLORS.orange400 }} />
+            <Typography>Practice</Typography>
           </Stack>
           <Stack direction={"row"}></Stack>
         </Stack>
