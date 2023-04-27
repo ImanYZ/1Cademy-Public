@@ -2385,6 +2385,7 @@ export const versionCreateUpdate = async ({
               batch,
               tagIds,
               nodeId: childNodeRef.id,
+              parentId: childNode.parents?.[0]?.node || "",
               currentTimestamp,
               writeCounts,
               t,

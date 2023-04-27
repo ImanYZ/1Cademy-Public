@@ -810,6 +810,15 @@ describe("POST /api/rateVersion", () => {
         new MockData([], "userVersionsLog"),
         new MockData([], "questionVersions"),
         new MockData([], "userQuestionVersions"),
+        new MockData(
+          [
+            {
+              documentId: nodes[0].documentId,
+              tagId: nodes[0].documentId,
+            },
+          ],
+          "courses"
+        ),
 
         new MockData(tags, "tags"),
 
@@ -958,7 +967,7 @@ describe("POST /api/rateVersion", () => {
       it("create practice if childType was Question (we are not testing it right now)", async () => {
         const practices = await db
           .collection("practice")
-          .where("node", "==", newNode.id)
+          .where("node", "==", nodeVersions[1].node)
           .where("user", "==", users[1].uname)
           .get();
         expect(practices.docs.length).toEqual(1);

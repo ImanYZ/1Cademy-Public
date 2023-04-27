@@ -263,6 +263,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           batch,
           tagIds: req.body.data.tagIds,
           nodeId: nodeRef.id,
+          parentId: req.body.data.parents[0].id,
           currentTimestamp,
           writeCounts,
         });
