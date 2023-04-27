@@ -92,6 +92,12 @@ This approach to learning empowers students to take an active role in their educ
         link: "/community/ux-research-in-cognitive-psychology-of-Learning",
       },
       {
+        title: "ADHD and Autism",
+        description:
+          "The ADHD and Autism research community is centered around researching aspects of neurodivergence including (but by no means limited to) the relationships between ADHD and Autism with things such as OCD, schizoid disorders, physical disabilities, different types of therapy, depression, anxiety, and gender identity. Interns are encouraged to personalize their research to suit their interests surrounding neurodivergence and will have the opportunity to present their findings at our weekly meetings as well as collaborate with other interns. We will also have opportunities to work with other communities such as the Clinical Psychology community and Disabilities Studies community. Working with 1Cademy allows interns to gain valuable research experience, explore various research topics, collaborate with others, and learn how to present their findings in a succinct, articulate manner.",
+        link: "/community/ADHD-and-autism",
+      },
+      {
         title: "Liaison Librarians",
         description:
           "The 1Cademy Librarian community supports the information processes of all the communities on the 1Cademy platform. We do this by liaising with the co-leaders and interns from each community to help them develop their area of the map and information literacy skills. This work supports communities across all fields of focus in three ways: 1) Embedded Liaison: We work directly with other communities and attend meetings to help create, edit, and arrange their content 2) Asynchronous Support: We review a portion of a community's map during Librarian meetings 3) Consultations: We give feedback directly to co-leaders of other communities when they attend our weekly meetings Through each of these efforts communities receive the support they need to locate, interpret, abstract, disseminate, and organize knowledge clearly, comprehensively, and accurately on the 1Cademy Platform.",
