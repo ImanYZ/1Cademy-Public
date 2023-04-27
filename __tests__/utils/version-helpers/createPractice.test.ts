@@ -31,6 +31,7 @@ describe("createPractice", () => {
       batch,
       tagIds: nodeDoc.data().tagIds,
       nodeId: nodeDoc.data().title,
+      parentId: nodeDoc.data().parents?.[0]?.node || "",
       uname: "1man",
       currentTimestamp,
       writeCounts,

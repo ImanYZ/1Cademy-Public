@@ -12,4 +12,5 @@ export type IPractice = {
   q: number;
   updatedAt: Date;
   iInterval: number;
+  questionNodes: string[];
 };

@@ -328,6 +328,7 @@ export const createPractice = async ({
   batch,
   tagIds,
   nodeId,
+  parentId,
   currentTimestamp,
   writeCounts,
   t,
@@ -335,11 +336,43 @@ export const createPractice = async ({
 }: any) => {
   let newBatch = batch;
   let usersRef, usersDocs, practiceRef;
+  if (!parentId) {
+    return [newBatch, writeCounts];
+  }
   const courseIds = await getCourseIdsFromTagIds(tagIds);
   for (const tagId of courseIds) {
     usersRef = db.collection("users").where("tagId", "==", tagId);
     usersDocs = await convertToTGet(usersRef, t);
     for (let userDoc of usersDocs.docs) {
+      const practices = await db
+        .collection("practice")
+        .where("user", "==", userDoc.id)
+        .where("tagId", "==", tagId)
+        .where("node", "==", parentId)
+        .limit(1)
+        .get();
+      if (practices.docs.length) {
+        const practiceRef = db.collection("practice").doc(practices.docs[0].id);
+        const questionNodes: string[] = practices.docs[0].data()?.questionNodes || [];
+        if (!questionNodes.includes(nodeId)) {
+          questionNodes.push(nodeId);
+        }
+        if (t) {
+          tWriteOperations.push({
+            objRef: practiceRef,
+            data: {
+              questionNodes,
+            },
+            operationType: "update",
+          });
+        } else {
+          newBatch.set(practiceRef, {
+            questionNodes,
+          });
+          [newBatch, writeCounts] = await checkRestartBatchWriteCounts(newBatch, writeCounts);
+        }
+        continue;
+      }
       practiceRef = db.collection("practice").doc();
       const practiceData = {
         createdAt: currentTimestamp,
@@ -349,9 +382,10 @@ export const createPractice = async ({
         lastCompleted: null,
         lastPresented: null,
         nextDate: currentTimestamp,
-        node: nodeId,
+        node: parentId,
         q: 0,
         tagId,
+        questionNodes: [nodeId],
         user: userDoc.id,
       } as IPractice;
       if (t) {
