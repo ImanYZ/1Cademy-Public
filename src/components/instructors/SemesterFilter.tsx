@@ -108,6 +108,7 @@ export const SemesterFilter = ({
             label="Semester"
             onChange={onChangeSemester}
             fullWidth
+            sx={{ "& 	.MuiSelect-root": { position: "absolute", zIndex: 99999 } }}
           >
             {semesters.map((cur, idx) => (
               <MenuItem key={idx} value={cur}>
