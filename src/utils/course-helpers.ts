@@ -136,6 +136,21 @@ export const getSemesterIdsFromTagIds = async (tagIds: string[]) => {
   return Array.from(new Set(semesterIds)); // unique semester ids
 };
 
+export const getCourseIdsFromTagIds = async (tagIds: string[]) => {
+  const courseIds: string[] = [];
+
+  const tagIdsChunks = arrayToChunks(tagIds, 10);
+  for (const tagIds of tagIdsChunks) {
+    const courses = await db.collection("courses").where("__name__", "in", tagIds).get();
+    for (const course of courses.docs) {
+      courseIds.push(course.id);
+    }
+  }
+
+  return Array.from(new Set(courseIds)); // unique course ids
+};
+// tagIds
+
 export const getSemestersByIds = async (semesterIds: string[]) => {
   const semestersByIds: {
     [semesterId: string]: ISemester;
