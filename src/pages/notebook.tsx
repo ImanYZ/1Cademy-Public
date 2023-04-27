@@ -71,7 +71,7 @@ import { TooltipTutorial } from "../components/interactiveTutorial/Tutorial";
 // import nodesData from "../../testUtils/mockCollections/nodes.data";
 // import { Tutorial } from "../components/interactiveTutorial/Tutorial";
 import { MemoizedClustersList } from "../components/map/ClustersList";
-import { Dashboard } from "../components/map/Dashboard";
+import { DashboardWrapper } from "../components/map/dashboard/DashboardWrapper";
 import { MemoizedLinksList } from "../components/map/LinksList";
 import { MemoizedNodeList } from "../components/map/NodesList";
 import { NotebookPopup } from "../components/map/Popup";
@@ -6469,8 +6469,8 @@ const Notebook = ({}: NotebookProps) => {
             setComLeaderboardOpen={setComLeaderboardOpen}
           />
 
-          {displayDashboard && (
-            <Dashboard
+          {user && displayDashboard && (
+            <DashboardWrapper
               user={user}
               onClose={() => setDisplayDashboard(false)}
               sx={{ position: "absolute", inset: "0px" }}

@@ -15,25 +15,25 @@ import {
 } from "firebase/firestore";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { Instructor, Semester, SemesterStudentVoteStat } from "src/instructorsTypes";
-import { User } from "src/knowledgeTypes";
-import { ICourseTag } from "src/types/ICourse";
 
-import { DESIGN_SYSTEM_COLORS } from "@/lib/theme/colors";
+import { CoursesResult } from "@/components/layouts/StudentsLayout";
 
-import { CoursesResult } from "../layouts/StudentsLayout";
-import { DashboradToolbar } from "./Dashobard/DashboradToolbar";
-
+import { User } from "../../../knowledgeTypes";
+import { ICourseTag } from "../../../types/ICourse";
+import { NoDataMessage } from "../../instructors/NoDataMessage";
+import { DashboradToolbar } from "../Dashobard/DashboradToolbar";
+import { Dashboard } from "./Dashboard";
 // import { Semester } from "../../instructorsTypes";
 // import { ICourseTag } from "../../types/ICourse";
 // import { CoursesResult } from "../layouts/StudentsLayout";
 
-type DashboardProps = {
-  user: User | null;
+type DashboardWrapperProps = {
+  user: User;
   onClose: () => void;
   sx?: SxProps<Theme>;
 };
 
-export const Dashboard = ({ user, sx, onClose }: DashboardProps) => {
+export const DashboardWrapper = ({ user, onClose, sx }: DashboardWrapperProps) => {
   const db = getFirestore();
 
   // const [semesters, setSemesters] = useState<string[]>([]);
@@ -229,17 +229,7 @@ export const Dashboard = ({ user, sx, onClose }: DashboardProps) => {
   }, [allSemesters, selectedCourse, user]);
 
   return (
-    <Box
-      sx={{
-        width: "100%",
-        height: "100%",
-        backgroundColor: ({ palette: { mode } }) =>
-          mode === "dark" ? DESIGN_SYSTEM_COLORS.baseBlack : DESIGN_SYSTEM_COLORS.gray200,
-        ...sx,
-
-        zIndex: 999,
-      }}
-    >
+    <Box sx={{ ...sx, p: "100px", display: "grid", gridTemplateColumns: "200px auto", border: "solid 2px yellow" }}>
       <DashboradToolbar
         courses={courses}
         selectedCourse={selectedCourse}
@@ -251,13 +241,21 @@ export const Dashboard = ({ user, sx, onClose }: DashboardProps) => {
         user={user}
         onClose={onClose}
       />
-
-      <div>selected page</div>
-      <button onClick={onClose}>......................Close</button>
+      <Box sx={{ width: "100%", border: "solid 2px royalBlue" }}>
+        {currentSemester ? (
+          <Dashboard user={user} currentSemester={currentSemester} />
+        ) : (
+          <NoDataMessage message="No data in this semester" />
+        )}
+        <Box>
+          Lorem ipsum dolor sit amet consectetur adipisicing elit. Minima adipisci, amet quidem et nulla quas omnis
+          corrupti, deserunt soluta repellat ex, fugit molestias dolor doloribus quis. Eos modi voluptates iure!
+          <button onClick={onClose}>......................Close</button>
+        </Box>
+      </Box>
     </Box>
   );
 };
-
 const getCoursesByInstructor = (instructor: Instructor): CoursesResult => {
   return instructor.courses.reduce((acu: CoursesResult, cur) => {
     const tmpValues = acu[cur.title] ?? [];

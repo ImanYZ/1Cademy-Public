@@ -43,10 +43,10 @@ export const DashboradToolbar = ({
   return (
     <Box
       sx={{
+        width: "100%",
         display: "flex",
         flexDirection: "column",
         justifyContent: "space-between",
-        width: "200px",
         minHeight: "100%",
         p: "16px",
         bgcolor: mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookG900 : DESIGN_SYSTEM_COLORS.gray25,
