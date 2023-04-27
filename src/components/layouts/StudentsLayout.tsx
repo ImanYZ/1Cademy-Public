@@ -207,6 +207,9 @@ export const StudentsLayout: FC<Props> = ({ children }) => {
       sx={{
         background: theme => (theme.palette.mode === "light" ? "#F5F5F5" : "#28282A"),
         minHeight: "100vh",
+        height: "100vh",
+        overflow: "auto",
+        "&::-webkit-scrollbar": { display: "none" },
       }}
     >
       {!isMovil && <HeaderNavbar options={filteredOptions} user={user} onNewCourse={onNewCourse} />}
