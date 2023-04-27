@@ -1580,7 +1580,7 @@ const Dashboard = ({}: DashboardProps) => {
           const validLink =
             (notebookRef.current.choosingNode.type === "Reference" &&
               /* thisNode.referenceIds.filter(l => l === nodeBookState.chosenNode?.id).length === 0 &&*/
-              notebookRef.current.chosenNode.id !== nodeId &&
+              notebookRef.current.chosenNode.id !== notebookRef.current.choosingNode.id &&
               chosenNodeObj.nodeType === notebookRef.current.choosingNode.type) ||
             (notebookRef.current.choosingNode.type === "Tag" &&
               choosingNodeCopy.tagIds.filter(l => l === notebookRef.current.chosenNode?.id).length === 0) ||
