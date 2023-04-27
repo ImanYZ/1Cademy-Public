@@ -725,11 +725,6 @@ NodeProps) => {
     if (!notebookRef.current.choosingNode) return;
     if (notebookRef.current.choosingNode.id === identifier) return;
 
-    notebookRef.current.chosenNode = {
-      id: identifier,
-      title,
-    };
-
     if (notebookRef.current.choosingNode.type === "Reference" && nodeType !== "Reference") {
       setToBeElligible(false);
       return;
@@ -740,7 +735,6 @@ NodeProps) => {
 
   const onMouseLeaveHandler = () => {
     if (notebookRef.current.choosingNode && notebookRef.current.choosingNode.id !== identifier) {
-      notebookRef.current.chosenNode = null;
       setToBeElligible(false);
     }
   };
@@ -760,12 +754,7 @@ NodeProps) => {
         (activeNode ? " active" : "") +
         (changed || !isStudied ? " Changed" : "") +
         (isHiding ? " IsHiding" : "") +
-        (notebookRef.current.choosingNode &&
-        notebookRef.current.chosenNode &&
-        notebookRef.current.chosenNode.id === identifier &&
-        toBeElligible
-          ? " Choosable"
-          : " ")
+        (toBeElligible ? " Choosable" : " ")
       }
       style={{
         left: left ? left : 1000,
