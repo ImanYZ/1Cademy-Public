@@ -729,19 +729,12 @@ NodeProps) => {
       id: identifier,
       title,
     };
-    console.log({ elligible: notebookRef.current.chosenNode.id });
+
     if (notebookRef.current.choosingNode.type === "Reference" && nodeType !== "Reference") {
       setToBeElligible(false);
-      console.log("elligible", false);
       return;
     }
-    console.log(
-      "elligible",
-      notebookRef.current.choosingNode &&
-        notebookRef.current.chosenNode &&
-        notebookRef.current.chosenNode.id === identifier &&
-        toBeElligible
-    );
+
     setToBeElligible(true);
   };
 
@@ -774,22 +767,6 @@ NodeProps) => {
           ? " Choosable"
           : " ")
       }
-      // className={
-      //   "Node card" +
-      //   (props.activeNode
-      //     ? //   &&
-      //       // ["AcceptedProposals", "Proposals", "Comments"].includes(selectionType)
-      //       " active"
-      //     : "") +
-      //   (props.changed || !props.isStudied ? " Changed" : "") +
-      //   (isHiding ? " IsHiding" : "") +
-      //   (choosingNode &&
-      //   choosingNode !== props.identifier &&
-      //   !props.activeNode &&
-      //   (choosingType !== "Reference" || props.nodeType === "Reference")
-      //     ? " Choosable"
-      //     : "")
-      // }
       style={{
         left: left ? left : 1000,
         top: top ? top : 1000,
