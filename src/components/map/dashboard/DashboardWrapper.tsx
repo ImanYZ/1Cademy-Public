@@ -2,6 +2,7 @@ import { Box, SxProps, Theme } from "@mui/material";
 import React, { useState } from "react";
 
 import { User } from "../../../knowledgeTypes";
+import { DESIGN_SYSTEM_COLORS } from "../../../lib/theme/colors";
 import { ICourseTag } from "../../../types/ICourse";
 import { NoDataMessage } from "../../instructors/NoDataMessage";
 import { Dashboard } from "./Dashboard";
@@ -34,19 +35,27 @@ export const DashboardWrapper = ({ user, onClose, sx }: DashboardWrapperProps) =
   //   const [allSemesters, setAllSemesters] = useState<Semester[]>([]);
 
   return (
-    <Box sx={{ ...sx, p: "100px", display: "grid", gridTemplateColumns: "200px auto", border: "solid 2px yellow" }}>
-      <div>toolbar</div>
-      <Box sx={{ width: "100%", border: "solid 2px royalBlue" }}>
+    <Box
+      sx={{
+        ...sx,
+        display: "grid",
+        gridTemplateColumns: "200px auto",
+        gridTemplateRows: "100%",
+        border: "solid 2px yellow",
+        background: theme =>
+          theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookG900 : DESIGN_SYSTEM_COLORS.gray100,
+      }}
+    >
+      <div>
+        toolbar
+        <button onClick={onClose}>......................Close</button>
+      </div>
+      <Box sx={{ width: "100%", height: "100%", border: "solid 2px royalBlue", overflowY: "auto", p: "40px 32px" }}>
         {currentSemester ? (
           <Dashboard user={user} currentSemester={currentSemester} />
         ) : (
           <NoDataMessage message="No data in this semester" />
         )}
-        <Box>
-          Lorem ipsum dolor sit amet consectetur adipisicing elit. Minima adipisci, amet quidem et nulla quas omnis
-          corrupti, deserunt soluta repellat ex, fugit molestias dolor doloribus quis. Eos modi voluptates iure!
-          <button onClick={onClose}>......................Close</button>
-        </Box>
       </Box>
     </Box>
   );

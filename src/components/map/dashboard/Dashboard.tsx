@@ -1,5 +1,5 @@
 import SquareIcon from "@mui/icons-material/Square";
-import { Box, Paper, Typography, useMediaQuery, useTheme } from "@mui/material";
+import { Box, Paper, Stack, Typography, useMediaQuery, useTheme } from "@mui/material";
 import { collection, getFirestore, onSnapshot, query, where } from "firebase/firestore";
 import React, { useCallback, useEffect, useState } from "react";
 
@@ -100,8 +100,13 @@ export const Dashboard = ({ user, currentSemester }: DashboardProps) => {
 
   const trendPlotHeightTop = isMovil ? 150 : isTablet ? 250 : 354;
   const trendPlotHeightBottom = isMovil ? 80 : isTablet ? 120 : 160;
-  const trendPlotWith = isMovil ? windowWidth - 60 : isTablet ? windowWidth - 100 : windowWidth - 140;
+  // other consts
 
+  const TOOLBAR_WIDTH = 200;
+  const WRAPPER_PADDING = 32;
+  const GRID_WIDTH = windowWidth - TOOLBAR_WIDTH - 2 * WRAPPER_PADDING;
+  const bubbleChartWidth = isMovil ? windowWidth - 10 - 20 - 10 : GRID_WIDTH - infoWidth - stackBarWidth - 40 - 16;
+  const trendPlotWith = isMovil ? windowWidth - 60 : isTablet ? GRID_WIDTH - 100 : GRID_WIDTH - 150;
   const boxPlotWidth = isXlDesktop ? 500 : isLgDesktop ? 320 : isDesktop ? 230 : 220;
 
   const infoWrapperRef = useCallback((element: HTMLDivElement) => {
@@ -422,7 +427,7 @@ export const Dashboard = ({ user, currentSemester }: DashboardProps) => {
   if (!thereIsData && !isLoading) return <NoDataMessage />;
 
   return (
-    <Box sx={{ width: "100%" }}>
+    <Stack spacing={"24px"} sx={{ width: "100%" }}>
       <Box
         sx={{
           display: "grid",
@@ -535,9 +540,7 @@ export const Dashboard = ({ user, currentSemester }: DashboardProps) => {
               </Box>
               <BubbleChart
                 data={bubble}
-                width={
-                  isMovil ? windowWidth - 10 - 20 - 10 : windowWidth - infoWidth - stackBarWidth - 40 - 32 - 32 - 16
-                }
+                width={bubbleChartWidth}
                 margin={{ top: 20, right: 0, bottom: 40, left: 50 }}
                 theme={theme.palette.mode === "dark" ? "Dark" : "Light"}
                 maxAxisX={bubbleAxis.maxAxisX}
@@ -551,14 +554,127 @@ export const Dashboard = ({ user, currentSemester }: DashboardProps) => {
         </Paper>
       </Box>
 
-      <Box
+      {/* box plot */}
+      <Paper
         sx={{
-          width: "100%",
-          display: "grid",
-          gridTemplateColumns: "1fr",
-          gap: "16px",
+          display: "flex",
+          flexDirection: "column",
+          justifyContent: "center",
+          alignItems: "center",
+          p: isMovil ? "10px" : "16px",
+          backgroundColor: theme => (theme.palette.mode === "light" ? "#FFFFFF" : undefined),
         }}
       >
+        <Box
+          sx={{
+            display: "flex",
+            flexDirection: { sm: "column", md: "row" },
+            justifyContent: "center",
+            alignItems: "center",
+            gap: isMovil ? "24px" : "0px",
+            flexWrap: "wrap",
+          }}
+        >
+          {isLoading && <BoxPlotStatsSkeleton width={boxPlotWidth} boxes={isLgDesktop ? 3 : isTablet ? 3 : 1} />}
+          {!isLoading && (
+            <>
+              <Box
+                sx={{
+                  display: semesterConfig?.isProposalRequired ? "flex" : "none",
+                  flexDirection: "column",
+                  gap: "12px",
+                }}
+              >
+                <Box sx={{ display: "grid", gridTemplateColumns: "1fr 1fr" }}>
+                  <Typography sx={{ fontSize: "16px", justifySelf: "center", alignSelf: "flex-end" }}>
+                    Chapters{" "}
+                  </Typography>
+                  <Typography sx={{ fontSize: "19px" }}> Proposal Points</Typography>
+                </Box>
+
+                <BoxChart
+                  theme={theme.palette.mode === "dark" ? "Dark" : "Light"}
+                  data={boxStats.proposalsPoints.data}
+                  width={boxPlotWidth}
+                  // width={trendPlotWith}
+                  boxHeight={25}
+                  margin={{ top: 10, right: 0, bottom: 20, left: 8 }}
+                  offsetX={isMovil ? 100 : 100}
+                  offsetY={18}
+                  identifier="plot-1"
+                  maxX={boxStats.proposalsPoints.max}
+                  minX={boxStats.proposalsPoints.min}
+                />
+                {isMovil && <BoxLegend />}
+              </Box>
+              <Box
+                sx={{
+                  display: semesterConfig?.isQuestionProposalRequired ? "flex" : "none",
+                  flexDirection: "column",
+                  gap: "12px",
+                }}
+              >
+                <Box sx={{ display: "flex", justifyContent: "space-around" }}>
+                  {isMovil && (
+                    <Typography sx={{ fontSize: "16px", justifySelf: "center", alignSelf: "flex-end" }}>
+                      Chapters{" "}
+                    </Typography>
+                  )}
+                  <Typography sx={{ fontSize: "19px" }}> Question Points</Typography>
+                </Box>
+                <BoxChart
+                  theme={theme.palette.mode === "dark" ? "Dark" : "Light"}
+                  data={boxStats.questionsPoints.data}
+                  drawYAxis={isMovil}
+                  width={boxPlotWidth}
+                  boxHeight={25}
+                  margin={{ top: 10, right: 0, bottom: 20, left: 10 }}
+                  offsetX={isMovil ? 100 : 2}
+                  offsetY={18}
+                  identifier="plot-2"
+                  maxX={boxStats.questionsPoints.max}
+                  minX={boxStats.questionsPoints.min}
+                />
+                {isMovil && <BoxLegend />}
+              </Box>
+              <Box
+                sx={{
+                  display: semesterConfig?.isCastingVotesRequired ? "flex" : "none",
+                  flexDirection: "column",
+                  gap: "12px",
+                }}
+              >
+                <Box sx={{ display: "flex", justifyContent: "space-around" }}>
+                  {isMovil && (
+                    <Typography sx={{ fontSize: "16px", justifySelf: "center", alignSelf: "flex-end" }}>
+                      Chapters{" "}
+                    </Typography>
+                  )}
+                  <Typography sx={{ fontSize: "19px" }}> Vote Points</Typography>
+                </Box>
+                <BoxChart
+                  theme={theme.palette.mode === "dark" ? "Dark" : "Light"}
+                  data={boxStats.votesPoints.data}
+                  drawYAxis={isMovil}
+                  width={boxPlotWidth}
+                  boxHeight={25}
+                  margin={{ top: 10, right: 0, bottom: 20, left: 10 }}
+                  offsetX={isMovil ? 100 : 2}
+                  offsetY={18}
+                  identifier="plot-3"
+                  minX={boxStats.votesPoints.min}
+                  maxX={boxStats.votesPoints.max}
+                />
+                {isMovil && <BoxLegend />}
+              </Box>
+            </>
+          )}
+        </Box>
+        {!isMovil && !isLoading && <BoxLegend />}
+      </Paper>
+
+      {/* Sankey Chart */}
+      {sankeyData.length && (
         <Paper
           sx={{
             display: "flex",
@@ -569,147 +685,35 @@ export const Dashboard = ({ user, currentSemester }: DashboardProps) => {
             backgroundColor: theme => (theme.palette.mode === "light" ? "#FFFFFF" : undefined),
           }}
         >
-          <Box
-            sx={{
-              display: "flex",
-              flexDirection: { sm: "column", md: "row" },
-              justifyContent: "center",
-              alignItems: "center",
-              gap: isMovil ? "24px" : "0px",
-              flexWrap: "wrap",
-            }}
-          >
-            {isLoading && <BoxPlotStatsSkeleton width={boxPlotWidth} boxes={isLgDesktop ? 3 : isTablet ? 3 : 1} />}
-            {!isLoading && (
-              <>
-                <Box
-                  sx={{
-                    display: semesterConfig?.isProposalRequired ? "flex" : "none",
-                    flexDirection: "column",
-                    gap: "12px",
-                  }}
-                >
-                  <Box sx={{ display: "grid", gridTemplateColumns: "1fr 1fr" }}>
-                    <Typography sx={{ fontSize: "16px", justifySelf: "center", alignSelf: "flex-end" }}>
-                      Chapters{" "}
-                    </Typography>
-                    <Typography sx={{ fontSize: "19px" }}> Proposal Points</Typography>
-                  </Box>
-
-                  <BoxChart
-                    theme={theme.palette.mode === "dark" ? "Dark" : "Light"}
-                    data={boxStats.proposalsPoints.data}
-                    width={boxPlotWidth}
-                    // width={trendPlotWith}
-                    boxHeight={25}
-                    margin={{ top: 10, right: 0, bottom: 20, left: 8 }}
-                    offsetX={isMovil ? 100 : 100}
-                    offsetY={18}
-                    identifier="plot-1"
-                    maxX={boxStats.proposalsPoints.max}
-                    minX={boxStats.proposalsPoints.min}
-                  />
-                  {isMovil && <BoxLegend />}
-                </Box>
-                <Box
-                  sx={{
-                    display: semesterConfig?.isQuestionProposalRequired ? "flex" : "none",
-                    flexDirection: "column",
-                    gap: "12px",
-                  }}
-                >
-                  <Box sx={{ display: "flex", justifyContent: "space-around" }}>
-                    {isMovil && (
-                      <Typography sx={{ fontSize: "16px", justifySelf: "center", alignSelf: "flex-end" }}>
-                        Chapters{" "}
-                      </Typography>
-                    )}
-                    <Typography sx={{ fontSize: "19px" }}> Question Points</Typography>
-                  </Box>
-                  <BoxChart
-                    theme={theme.palette.mode === "dark" ? "Dark" : "Light"}
-                    data={boxStats.questionsPoints.data}
-                    drawYAxis={isMovil}
-                    width={boxPlotWidth}
-                    boxHeight={25}
-                    margin={{ top: 10, right: 0, bottom: 20, left: 10 }}
-                    offsetX={isMovil ? 100 : 2}
-                    offsetY={18}
-                    identifier="plot-2"
-                    maxX={boxStats.questionsPoints.max}
-                    minX={boxStats.questionsPoints.min}
-                  />
-                  {isMovil && <BoxLegend />}
-                </Box>
-                <Box
-                  sx={{
-                    display: semesterConfig?.isCastingVotesRequired ? "flex" : "none",
-                    flexDirection: "column",
-                    gap: "12px",
-                  }}
-                >
-                  <Box sx={{ display: "flex", justifyContent: "space-around" }}>
-                    {isMovil && (
-                      <Typography sx={{ fontSize: "16px", justifySelf: "center", alignSelf: "flex-end" }}>
-                        Chapters{" "}
-                      </Typography>
-                    )}
-                    <Typography sx={{ fontSize: "19px" }}> Vote Points</Typography>
-                  </Box>
-                  <BoxChart
-                    theme={theme.palette.mode === "dark" ? "Dark" : "Light"}
-                    data={boxStats.votesPoints.data}
-                    drawYAxis={isMovil}
-                    width={boxPlotWidth}
-                    boxHeight={25}
-                    margin={{ top: 10, right: 0, bottom: 20, left: 10 }}
-                    offsetX={isMovil ? 100 : 2}
-                    offsetY={18}
-                    identifier="plot-3"
-                    minX={boxStats.votesPoints.min}
-                    maxX={boxStats.votesPoints.max}
-                  />
-                  {isMovil && <BoxLegend />}
-                </Box>
-              </>
-            )}
-          </Box>
-          {!isMovil && !isLoading && <BoxLegend />}
+          {!isLoading && (
+            <>
+              <Box
+                sx={{
+                  paddingLeft: "10px",
+                  width: "100%",
+                  textAlign: "left",
+                }}
+              >
+                {"Collaborations"}
+              </Box>
+              <SankeyChart
+                innerWidth={windowWidth}
+                labelCounts={parseInt(String(students?.length))}
+                sankeyData={sankeyData}
+              />
+            </>
+          )}
         </Paper>
+      )}
 
-        {/* Sankey Chart */}
-        {sankeyData.length && (
-          <Paper
-            sx={{
-              display: "flex",
-              flexDirection: "column",
-              justifyContent: "center",
-              alignItems: "center",
-              p: isMovil ? "10px" : "16px",
-              backgroundColor: theme => (theme.palette.mode === "light" ? "#FFFFFF" : undefined),
-            }}
-          >
-            {!isLoading && (
-              <>
-                <Box
-                  sx={{
-                    paddingLeft: "10px",
-                    width: "100%",
-                    textAlign: "left",
-                  }}
-                >
-                  {"Collaborations"}
-                </Box>
-                <SankeyChart
-                  innerWidth={windowWidth}
-                  labelCounts={parseInt(String(students?.length))}
-                  sankeyData={sankeyData}
-                />
-              </>
-            )}
-          </Paper>
-        )}
-
+      <Box
+        sx={{
+          width: "100%",
+          display: "grid",
+          gridTemplateColumns: "1fr",
+          gap: "16px",
+        }}
+      >
         {isLoading && (
           <Paper
             sx={{
@@ -759,7 +763,7 @@ export const Dashboard = ({ user, currentSemester }: DashboardProps) => {
           </>
         )}
       </Box>
-    </Box>
+    </Stack>
   );
 };
 

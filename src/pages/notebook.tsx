@@ -6473,7 +6473,7 @@ const Notebook = ({}: NotebookProps) => {
             <DashboardWrapper
               user={user}
               onClose={() => setDisplayDashboard(false)}
-              sx={{ position: "absolute", inset: "0px", zIndex: 10 }}
+              sx={{ position: "absolute", inset: "0px", zIndex: 1500 }}
             />
           )}
 
