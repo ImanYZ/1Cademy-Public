@@ -6470,7 +6470,11 @@ const Notebook = ({}: NotebookProps) => {
           />
 
           {displayDashboard && (
-            <Dashboard onClose={() => setDisplayDashboard(false)} sx={{ position: "absolute", inset: "0px" }} />
+            <Dashboard
+              user={user}
+              onClose={() => setDisplayDashboard(false)}
+              sx={{ position: "absolute", inset: "0px" }}
+            />
           )}
 
           <MemoizedToolbox

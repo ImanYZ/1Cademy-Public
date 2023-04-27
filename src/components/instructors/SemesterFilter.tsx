@@ -1,11 +1,13 @@
+import AddRoundedIcon from "@mui/icons-material/AddRounded";
+import ArrowRightRoundedIcon from "@mui/icons-material/ArrowRightRounded";
 import {
+  Button,
   FormControl,
   InputLabel,
   MenuItem,
   Select,
   SelectChangeEvent,
-  ToggleButton,
-  ToggleButtonGroup,
+  Stack,
   Tooltip,
   Typography,
   useMediaQuery,
@@ -16,6 +18,8 @@ import { doc, getDoc, getFirestore } from "firebase/firestore";
 import Image from "next/image";
 import React, { useEffect, useState } from "react";
 import { ICourseTag, ISemester, ISemesterStudent } from "src/types/ICourse";
+
+import { DESIGN_SYSTEM_COLORS } from "@/lib/theme/colors";
 
 import { UserRole } from "../../knowledgeTypes";
 import { UserProfileSkeleton } from "./skeletons/UserProfileSkeleton";
@@ -57,11 +61,7 @@ export const SemesterFilter = ({
     setSelectedSemester(event.target.value as string);
   };
 
-  const onChangeCourse2 = (event: SelectChangeEvent) => {
-    setSelectedCourse(event.target.value as string);
-  };
-
-  const onChangeCourse = (event: React.MouseEvent<HTMLElement>, newAlignment: string | null) => {
+  const onChangeCourse = (newAlignment: string | null) => {
     if (newAlignment) {
       setSelectedCourse(newAlignment);
     }
@@ -98,23 +98,16 @@ export const SemesterFilter = ({
         justifyContent: { xs: "center", sm: "space-between" },
       }}
     >
-      <Box
-        sx={{
-          display: matches ? " grid" : "flex",
-          gridTemplateColumns: matches ? "repeat(2,1fr)" : "",
-          justifyContent: { xs: "space-between", sm: "flex-start" },
-          gap: { xs: "16px", md: "16px" },
-        }}
-      >
-        <FormControl size={matches ? "small" : "medium"}>
-          <InputLabel id="semester-filter-label">Semester</InputLabel>
+      <Box sx={{ maxWidth: "170px", display: "flex", flexDirection: "column", gap: { xs: "16px", md: "16px" } }}>
+        <FormControl size={"small"}>
+          <InputLabel id="semester-filter-labels">Semester</InputLabel>
           <Select
-            labelId="semester-filter-label"
+            labelId="semester-filter-labels"
             id="semester-filter"
             value={selectedSemester ?? ""}
             label="Semester"
             onChange={onChangeSemester}
-            sx={{ width: matches ? "auto" : "140px" }}
+            fullWidth
           >
             {semesters.map((cur, idx) => (
               <MenuItem key={idx} value={cur}>
@@ -123,46 +116,53 @@ export const SemesterFilter = ({
             ))}
           </Select>
         </FormControl>
-
+        <Stack direction={"row"} justifyContent={"space-between"} alignItems={"center"}>
+          <Typography fontSize={"14px"} fontWeight={"500"} flex={1}>
+            Dashboard
+          </Typography>
+          <Button sx={{ p: "7px", backgroundColor: DESIGN_SYSTEM_COLORS.notebookO900 }}>
+            <AddRoundedIcon sx={{ fontSize: "14px" }} />
+          </Button>
+        </Stack>
         {!isMovil && (
-          <ToggleButtonGroup
-            value={selectedCourse}
-            exclusive
-            onChange={onChangeCourse}
-            aria-label="text alignment"
-            sx={{ width: { sm: "500px", lg: "700px", xl: "1000px" }, overflowY: "auto" }}
-            className="scroll-styled"
-          >
-            {courses.map((cur, idx) => (
-              <ToggleButton
+          <Stack spacing={"12px"}>
+            {courses.map((course, idx) => (
+              <Button
                 key={idx}
-                value={cur}
+                value={course}
                 aria-label="left aligned"
-                sx={{ border: "solid 1px rgb(185 185 185)", whiteSpace: " nowrap" }}
+                onClick={() => onChangeCourse(course)}
+                sx={{
+                  whiteSpace: " nowrap",
+                  p: "6px",
+                  border: "none",
+
+                  backgroundColor: selectedCourse === course ? DESIGN_SYSTEM_COLORS.notebookO900 : "transparerent",
+                  color: selectedCourse === course ? DESIGN_SYSTEM_COLORS.primary600 : DESIGN_SYSTEM_COLORS.gray300,
+                  borderBottom: `1px solid ${
+                    selectedCourse === course ? DESIGN_SYSTEM_COLORS.primary600 : DESIGN_SYSTEM_COLORS.notebookG500
+                  }}`,
+                  "& .MuiButton-root": {
+                    borderRadius: "4px 4px 0px 0px",
+                    justifyContent: "flex-start",
+                  },
+                }}
+                fullWidth
               >
-                {cur}
-              </ToggleButton>
+                <Stack
+                  direction={"row"}
+                  spacing={"4px"}
+                  alignItems={"center"}
+                  sx={{ textOverflow: { overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" } }}
+                >
+                  <ArrowRightRoundedIcon fontSize="medium" />
+                  <Typography color={"inherit"} fontSize={"14px"}>
+                    {course}
+                  </Typography>
+                </Stack>
+              </Button>
             ))}
-          </ToggleButtonGroup>
-        )}
-        {isMovil && (
-          <FormControl size={matches ? "small" : "medium"}>
-            <InputLabel id="course-filter-label">Courses</InputLabel>
-            <Select
-              labelId="course-filter-label"
-              id="course-filter"
-              value={selectedCourse ?? ""}
-              label="Course"
-              onChange={onChangeCourse2}
-              sx={{ width: matches ? "auto" : "140px" }}
-            >
-              {courses.map((cur, idx) => (
-                <MenuItem key={idx} value={cur}>
-                  {cur}
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
+          </Stack>
         )}
       </Box>
 
