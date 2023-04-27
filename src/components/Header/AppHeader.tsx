@@ -8,7 +8,7 @@ import LightModeIcon from "@mui/icons-material/LightMode";
 import LogoutIcon from "@mui/icons-material/Logout";
 import MenuIcon from "@mui/icons-material/Menu";
 import SearchIcon from "@mui/icons-material/Search";
-import { Modal, Typography, useMediaQuery, useTheme } from "@mui/material";
+import { Avatar, Modal, Typography, useMediaQuery, useTheme } from "@mui/material";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import IconButton from "@mui/material/IconButton";
@@ -17,6 +17,7 @@ import MenuItem from "@mui/material/MenuItem";
 import Tooltip from "@mui/material/Tooltip";
 import { Stack } from "@mui/system";
 import { getAuth } from "firebase/auth";
+import { collection, getDocs, query, where } from "firebase/firestore";
 import Image from "next/image";
 import { useRouter } from "next/router";
 import React, { forwardRef, useEffect, useState } from "react";
@@ -27,7 +28,7 @@ import { orange900, orangeDark } from "@/pages/home";
 import oneCademyLogo from "../../../public/DarkmodeLogo.png";
 import oneCademyLogoExtended from "../../../public/logo-extended.png";
 import { useAuth } from "../../context/AuthContext";
-import { auth } from "../../lib/firestoreClient/firestoreClient.config";
+import { auth, dbExp } from "../../lib/firestoreClient/firestoreClient.config";
 import { postWithToken } from "../../lib/mapApi";
 import ROUTES from "../../lib/utils/routes";
 import { capitalizeString } from "../../lib/utils/string.utils";
@@ -64,6 +65,8 @@ const AppHeader = forwardRef(({ page, sections, selectedSectionId, onSwitchSecti
 
   const [profileMenuOpen, setProfileMenuOpen] = useState(null);
   const isProfileMenuOpen = Boolean(profileMenuOpen);
+  const [profileMenuOpenExp, setProfileMenuOpenExp] = useState(null);
+  const isProfileMenuOpenExp = Boolean(profileMenuOpenExp);
   const [openMenu, setOpenMenu] = useState(false);
   const [openForm, setOpenForm] = useState(false);
   const [idxOptionVisible, setIdxOptionVisible] = useState(-1);
@@ -79,6 +82,12 @@ const AppHeader = forwardRef(({ page, sections, selectedSectionId, onSwitchSecti
 
   const handleProfileMenuClose = () => {
     setProfileMenuOpen(null);
+  };
+  const handleProfileMenuCloseExp = () => {
+    setProfileMenuOpenExp(null);
+  };
+  const handleProfileMenuOpenExp = (event: any) => {
+    setProfileMenuOpenExp(event.currentTarget);
   };
 
   const onCloseMenu = () => {
@@ -99,7 +108,18 @@ const AppHeader = forwardRef(({ page, sections, selectedSectionId, onSwitchSecti
 
   useEffect(() => {
     return auth.onAuthStateChanged(async (user: any) => {
-      if (user) {
+      const uEmail = user?.email?.toLowerCase();
+      console.log(user);
+      if (!uEmail || !user.emailVerified) {
+        setEmailExp("");
+        setNameExp("");
+        return;
+      }
+      const users = await getDocs(query(collection(dbExp, "users"), where("email", "==", uEmail)));
+      const usersStudentSurvey = await getDocs(
+        query(collection(dbExp, "usersStudentCoNoteSurvey"), where("email", "==", uEmail))
+      );
+      if (users.docs.length > 0 || usersStudentSurvey.docs.length > 0) {
         setEmailExp(user.email.toLowerCase());
         setNameExp(user.displayName);
       } else {
@@ -135,7 +155,12 @@ const AppHeader = forwardRef(({ page, sections, selectedSectionId, onSwitchSecti
     await auth.signOut();
   };
   const renderProfileMenuExp = (
-    <Menu id="ProfileMenu" anchorEl={profileMenuOpen} open={isProfileMenuOpen} onClose={handleProfileMenuClose}>
+    <Menu
+      id="ProfileMenu"
+      anchorEl={profileMenuOpenExp}
+      open={isProfileMenuOpenExp}
+      onClose={handleProfileMenuCloseExp}
+    >
       {emailExp && <Typography sx={{ p: "6px 16px" }}>{capitalizeString(nameExp)}</Typography>}
       {emailExp && (
         <>
@@ -154,7 +179,6 @@ const AppHeader = forwardRef(({ page, sections, selectedSectionId, onSwitchSecti
       )}
     </Menu>
   );
-  console.log("userExp :: :: ", emailExp);
   return (
     <>
       <Box
@@ -182,12 +206,10 @@ const AppHeader = forwardRef(({ page, sections, selectedSectionId, onSwitchSecti
         >
           <Stack direction={"row"} alignItems="center" spacing={"16px"}>
             <Tooltip title="1Cademy's Landing Page">
-              <Image
+              <Avatar
                 src={isMobile ? oneCademyLogoExtended.src : oneCademyLogo.src}
                 alt="logo"
-                width={isMobile ? "149px" : "60px"}
-                height={isMobile ? "40px" : "64px"}
-                style={{ cursor: "pointer" }}
+                sx={{ cursor: "pointer", width: { xs: "149px", sm: "60px" }, height: { xs: "40px", sm: "64px" } }}
                 onClick={() => router.push(ROUTES.home)}
               />
             </Tooltip>
@@ -342,8 +364,8 @@ const AppHeader = forwardRef(({ page, sections, selectedSectionId, onSwitchSecti
                     aria-haspopup="true"
                     aria-controls="lock-menu"
                     aria-label={`${emailExp}'s Account`}
-                    aria-expanded={isProfileMenuOpen ? "true" : undefined}
-                    onClick={handleProfileMenuOpen}
+                    aria-expanded={isProfileMenuOpenExp ? "true" : undefined}
+                    onClick={handleProfileMenuOpenExp}
                     color="inherit"
                   >
                     <AccountCircle />

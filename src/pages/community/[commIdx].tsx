@@ -1,24 +1,39 @@
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
+import DoneRoundedIcon from "@mui/icons-material/DoneRounded";
 import EmailIcon from "@mui/icons-material/Email";
 import LinkIcon from "@mui/icons-material/Link";
 import LinkedInIcon from "@mui/icons-material/LinkedIn";
-import { Button, Card, CardActionArea, CardContent, CardMedia, Divider, styled, Typography } from "@mui/material";
+import {
+  Button,
+  Card,
+  CardActionArea,
+  CardContent,
+  CardMedia,
+  CircularProgress,
+  Divider,
+  styled,
+  Typography,
+  useMediaQuery,
+} from "@mui/material";
 import Avatar from "@mui/material/Avatar";
 import Box from "@mui/material/Box";
 import IconButton from "@mui/material/IconButton";
 import { Stack } from "@mui/system";
+import { collection, DocumentChange, DocumentData, getFirestore, onSnapshot, query } from "firebase/firestore";
 import { GetStaticPaths, GetStaticProps } from "next";
 import Head from "next/head";
 import Image from "next/image";
 import Link from "next/link";
-import React, { useMemo, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
+import { User } from "src/knowledgeTypes";
 
 import AppFooter from "@/components/AppFooter";
 import AppHeaderMemoized from "@/components/Header/AppHeader";
 import { allCommunities } from "@/components/home/CommunitiesOrder";
 import YoutubeEmbed from "@/components/home/components/YoutubeEmbed";
 import { ONE_CADEMY_SECTIONS } from "@/components/home/SectionsItems";
+import { DESIGN_SYSTEM_COLORS } from "@/lib/theme/colors";
 import { ONECADEMY_DOMAIN } from "@/lib/utils/1cademyConfig";
 import ROUTES from "@/lib/utils/routes";
 
@@ -98,24 +113,29 @@ const subSections = [
   },
 ];
 
-// const accumulatePoints = (groups, reputationData, user, points) => {
-//   for (let communi of groups) {
-//     for (let deTag of communi.tags) {
-//       if (reputationData.tag === deTag.title) {
-//         const userIdx = communi.allTime.findIndex(obj => obj.uname === reputationData.uname);
-//         if (userIdx !== -1) {
-//           communi.allTime[userIdx].points += points;
-//         } else {
-//           communi.allTime.push({
-//             uname: reputationData.uname,
-//             ...user,
-//             points,
-//           });
-//         }
-//       }
-//     }
-//   }
-// };
+const accumulatePoints = (
+  groups: any,
+  reputationData: DocumentData,
+  user: Pick<User, "uname" | "fName" | "lName" | "imageUrl">,
+  points: number
+) => {
+  for (let communi of groups) {
+    for (let deTag of communi.tags) {
+      if (reputationData.tag === deTag.title) {
+        const userIdx = communi.allTime.findIndex((obj: any) => obj.uname === reputationData.uname);
+        if (userIdx !== -1) {
+          communi.allTime[userIdx].points += points;
+        } else {
+          communi.allTime.push({
+            ...user,
+            uname: reputationData.uname,
+            points,
+          });
+        }
+      }
+    }
+  }
+};
 
 const DividerStyled = styled(props => <Divider {...props} />)(({ theme }) => ({
   marginTop: "32px",
@@ -152,121 +172,128 @@ export const getStaticPaths: GetStaticPaths<Params> = async () => {
 
 const Communities = (props: Props) => {
   const { commIdx } = props;
-  // const [reputationsChanges, setReputationsChanges] = useState([]);
-  // const [reputations, setReputations] = useState({});
-  // const [reputationsLoaded, setReputationsLoaded] = useState(false);
-  // const [usersChanges, setUsersChanges] = useState([]);
-  // const [users, setUsers] = useState({});
-  // const [usersLoaded, setUsersLoaded] = useState(false);
-  const [communities /* setCommunities */] = useState(allCommunities);
+  const db = getFirestore();
+  const [reputationsChanges, setReputationsChanges] = useState<DocumentChange<DocumentData>[]>([]);
+  const [reputations, setReputations] = useState<{
+    [key: string]: { [key: string]: number };
+  }>({});
+  const [reputationsLoaded, setReputationsLoaded] = useState(false);
+  const [usersChanges, setUsersChanges] = useState<DocumentChange<DocumentData>[]>([]);
+  const [users, setUsers] = useState<{ [key: string]: Pick<User, "uname" | "fName" | "lName" | "imageUrl"> }>({});
+  const [usersLoaded, setUsersLoaded] = useState(false);
+  const [communities, setCommunities] = useState(allCommunities);
 
   const community = useMemo(() => {
     return allCommunities.find(e => e.id === commIdx) ?? allCommunities[0];
   }, [commIdx, allCommunities]);
   // const [expandedOption, setExpandedOption] = useState("");
-  // const [limit, setLimit] = useState(3);
+  const [limit, setLimit] = useState(3);
 
   const carouselRef = useRef<HTMLDivElement | null>(null);
 
-  // useEffect(() => {
-  //   if (firebase) {
-  //     const usersQuery = firebase.db.collection("users");
-  //     const usersSnapshot = usersQuery.onSnapshot(snapshot => {
-  //       const docChanges = snapshot.docChanges();
-  //       setUsersChanges(oldUsersChanges => {
-  //         return [...oldUsersChanges, ...docChanges];
-  //       });
-  //     });
-  //     return () => {
-  //       setUsersChanges([]);
-  //       usersSnapshot();
-  //     };
-  //   }
-  // }, [firebase]);
+  const isMobile = useMediaQuery("(max-width:599px)");
 
-  // useEffect(() => {
-  //   if (usersChanges.length > 0) {
-  //     const tempUsersChanges = [...usersChanges];
-  //     setUsersChanges([]);
-  //     let members = { ...users };
-  //     for (let change of tempUsersChanges) {
-  //       const userData = change.doc.data();
-  //       if (change.type === "removed" || userData.deleted) {
-  //         if (change.doc.id in members) {
-  //           delete members[change.doc.id];
-  //         }
-  //       } else {
-  //         members[change.doc.id] = {
-  //           uname: userData.uname,
-  //           fullname: userData.fName + " " + userData.lName,
-  //           imageUrl: userData.imageUrl,
-  //         };
-  //       }
-  //     }
-  //     setUsers(members);
-  //     setUsersLoaded(true);
-  //   }
-  // }, [usersChanges, users]);
+  useEffect(() => {
+    // if (firebase) {}
+    // const usersQuery = firebase.db.collection("users");
+    const userRef = collection(db, "users");
+    const q = query(userRef);
+    const usersSnapshot = onSnapshot(q, snapshot => {
+      const docChanges = snapshot.docChanges();
+      setUsersChanges(oldUsersChanges => {
+        return [...oldUsersChanges, ...docChanges];
+      });
+    });
+    return () => {
+      setUsersChanges([]);
+      usersSnapshot();
+    };
+  }, [db]);
 
-  // useEffect(() => {
-  //   if (firebase && usersLoaded) {
-  //     const reputationsQuery = firebase.db.collection("reputations");
-  //     const reputationsSnapshot = reputationsQuery.onSnapshot(snapshot => {
-  //       const docChanges = snapshot.docChanges();
-  //       setReputationsChanges(oldReputationsChanges => {
-  //         return [...oldReputationsChanges, ...docChanges];
-  //       });
-  //     });
-  //     return () => {
-  //       setReputationsChanges([]);
-  //       reputationsSnapshot();
-  //     };
-  //   }
-  // }, [firebase, usersLoaded]);
+  useEffect(() => {
+    if (usersChanges.length > 0) {
+      const tempUsersChanges = [...usersChanges];
+      setUsersChanges([]);
+      let members = { ...users };
+      for (let change of tempUsersChanges) {
+        const userData = change.doc.data();
+        if (change.type === "removed" || userData.deleted) {
+          if (change.doc.id in members) {
+            delete members[change.doc.id];
+          }
+        } else {
+          members[change.doc.id] = {
+            uname: userData.uname,
+            fName: userData.fName,
+            lName: userData.lName,
+            imageUrl: userData.imageUrl,
+          };
+        }
+      }
+      setUsers(members);
+      setUsersLoaded(true);
+    }
+  }, [usersChanges, users]);
 
-  // useEffect(() => {
-  //   if (reputationsChanges.length > 0) {
-  //     const tempReputationsChanges = [...reputationsChanges];
-  //     setReputationsChanges([]);
-  //     let rpts = { ...reputations };
-  //     const groups = [...communities];
-  //     for (let change of tempReputationsChanges) {
-  //       const reputationData = change.doc.data();
-  //       const points =
-  //         reputationData.cdCorrects +
-  //         reputationData.iCorrects +
-  //         reputationData.mCorrects -
-  //         reputationData.cdWrongs -
-  //         reputationData.iWrongs -
-  //         reputationData.mWrongs;
-  //       if (change.type === "removed" || reputationData.deleted) {
-  //         if (reputationData.uname in rpts) {
-  //           delete rpts[reputationData.uname];
-  //         }
-  //       } else {
-  //         const user = users[reputationData.uname];
-  //         if (!(reputationData.uname in rpts)) {
-  //           accumulatePoints(groups, reputationData, user, points);
-  //           rpts[reputationData.uname] = { [reputationData.tag]: points };
-  //         } else {
-  //           if (!(reputationData.tag in rpts[reputationData.uname])) {
-  //             accumulatePoints(groups, reputationData, user, points);
-  //             rpts[reputationData.uname][reputationData.tag] = points;
-  //           } else {
-  //             accumulatePoints(groups, reputationData, user, points - rpts[reputationData.uname][reputationData.tag]);
-  //             rpts[reputationData.uname][reputationData.tag] = points;
-  //           }
-  //         }
-  //       }
-  //     }
-  //     for (let communi of groups) {
-  //       communi.allTime.sort((a, b) => b.points - a.points);
-  //     }
-  //     setReputations(rpts);
-  //     setCommunities(groups);
-  //     setReputationsLoaded(true);
-  //   }
-  // }, [reputationsChanges, reputations, communities, users]);
+  useEffect(() => {
+    if (!usersLoaded) return;
+    const reputationsQuery = collection(db, "reputations");
+    const reputationsSnapshot = onSnapshot(reputationsQuery, snapshot => {
+      const docChanges = snapshot.docChanges();
+      setReputationsChanges(oldReputationsChanges => {
+        return [...oldReputationsChanges, ...docChanges];
+      });
+    });
+    return () => {
+      setReputationsChanges([]);
+      reputationsSnapshot();
+    };
+  }, [db, usersLoaded]);
+
+  useEffect(() => {
+    if (reputationsChanges.length > 0) {
+      setReputationsLoaded(false);
+      const tempReputationsChanges = [...reputationsChanges];
+      setReputationsChanges([]);
+      let rpts = { ...reputations };
+      const groups = [...communities];
+      for (let change of tempReputationsChanges) {
+        const reputationData = change.doc.data();
+        const points =
+          reputationData.cdCorrects +
+          reputationData.iCorrects +
+          reputationData.mCorrects -
+          reputationData.cdWrongs -
+          reputationData.iWrongs -
+          reputationData.mWrongs;
+        if (change.type === "removed" || reputationData.deleted) {
+          if (reputationData.uname in rpts) {
+            delete rpts[reputationData.uname];
+          }
+        } else {
+          const user = users[reputationData.uname];
+          if (!(reputationData.uname in rpts)) {
+            accumulatePoints(groups, reputationData, user, points);
+            rpts[reputationData.uname] = { [reputationData.tag]: points };
+          } else {
+            if (!(reputationData.tag in rpts[reputationData.uname])) {
+              accumulatePoints(groups, reputationData, user, points);
+              rpts[reputationData.uname][reputationData.tag] = points;
+            } else {
+              accumulatePoints(groups, reputationData, user, points - rpts[reputationData.uname][reputationData.tag]);
+              rpts[reputationData.uname][reputationData.tag] = points;
+            }
+          }
+        }
+      }
+      for (let communi of groups) {
+        communi.allTime.sort((a: any, b: any) => b.points - a.points);
+      }
+      setReputations(rpts);
+      setCommunities(groups);
+      setReputationsLoaded(true);
+    }
+  }, [reputationsChanges, reputations, communities, users]);
 
   // const handleChangeOption = option => (event, newExpanded) => {
   //   setExpandedOption(newExpanded ? option : false);
@@ -381,56 +408,67 @@ const Communities = (props: Props) => {
                   backgroundColor: gray400,
                   borderRadius: "10px",
                 },
+                a: {
+                  display: "flex",
+                  textDecoration: "none",
+                },
               }}
             >
               {communities.map(item => (
-                <Link key={item.id} href={`/community/${item.id}`} style={{ textDecoration: "none", color: "inherit" }}>
-                  <Card
-                    elevation={0}
-                    sx={{
-                      minWidth: { xs: "150px", sm: "210px" },
-                      maxWidth: { xs: "160px", sm: "220px" },
-                      flex: 1,
-                      backgroundColor: "transparent",
-                    }}
-                    square
-                  >
-                    <CardActionArea
+                <Link
+                  key={item.id}
+                  href={`/community/${item.id}`}
+                  style={{ textDecoration: "none", color: "inherit" }}
+                  passHref
+                >
+                  <a>
+                    <Card
+                      elevation={0}
                       sx={{
-                        display: "flex",
-                        flexDirection: "column",
-                        justifyContent: "flex-start",
-                        p: "16px",
-                        border: theme => `1px solid ${theme.palette.mode === "dark" ? darkBase : gray200}`,
-                        backgroundColor: theme => (theme.palette.mode === "dark" ? "#181818" : "transparent"),
-                        borderRadius: "8px",
-                        cursor: "pointer",
-                        height: "100%",
-                        borderColor: community.id === item.id ? orangeDark : "",
-                        ":hover": {
-                          borderColor: orangeDark,
-                        },
+                        minWidth: { xs: "150px", sm: "210px" },
+                        maxWidth: { xs: "160px", sm: "220px" },
+                        flex: 1,
+                        backgroundColor: "transparent",
                       }}
+                      square
                     >
-                      <CardMedia
-                        component={"img"}
-                        image={item.url}
-                        alt={item.title}
-                        sx={{ borderRadius: "8px", height: { xs: "100px", sm: "140px" } }}
-                      />
-                      <CardContent sx={{ p: "16px 0 0 0" }}>
-                        <Typography
-                          sx={{
-                            fontSize: "14px",
-                            fontWeight: 600,
-                            pt: "16px",
-                          }}
-                        >
-                          {item.title}
-                        </Typography>
-                      </CardContent>
-                    </CardActionArea>
-                  </Card>
+                      <CardActionArea
+                        sx={{
+                          display: "flex",
+                          flexDirection: "column",
+                          justifyContent: "flex-start",
+                          p: "16px",
+                          border: theme => `1px solid ${theme.palette.mode === "dark" ? darkBase : gray200}`,
+                          backgroundColor: theme => (theme.palette.mode === "dark" ? "#181818" : "transparent"),
+                          borderRadius: "8px",
+                          cursor: "pointer",
+                          height: "100%",
+                          borderColor: community.id === item.id ? orangeDark : "",
+                          ":hover": {
+                            borderColor: orangeDark,
+                          },
+                        }}
+                      >
+                        <CardMedia
+                          component={"img"}
+                          image={item.url}
+                          alt={item.title}
+                          sx={{ borderRadius: "8px", height: { xs: "100px", sm: "140px" } }}
+                        />
+                        <CardContent sx={{ p: "16px 0 0 0" }}>
+                          <Typography
+                            sx={{
+                              fontSize: "14px",
+                              fontWeight: 600,
+                              pt: "16px",
+                            }}
+                          >
+                            {item.title}
+                          </Typography>
+                        </CardContent>
+                      </CardActionArea>
+                    </Card>
+                  </a>
                 </Link>
               ))}
             </Stack>
@@ -616,8 +654,13 @@ const Communities = (props: Props) => {
                   </Typography>
                   {subSection.component(community)}
                 </Box>
-                <Box sx={{ width: { sm: "250px", lg: "300px" }, height: { sm: "250px", lg: "300px" } }}>
-                  <Image src={subSection.image} alt={subSection.title} width="100%" height="100%" />
+                <Box sx={{ alignSelf: "center" }}>
+                  <Image
+                    src={subSection.image}
+                    alt={subSection.title}
+                    width={isMobile ? "250" : "300"}
+                    height={isMobile ? "250" : "300"}
+                  />
                 </Box>
               </Stack>
             ))}
@@ -667,84 +710,109 @@ const Communities = (props: Props) => {
               </>
             )}
           <DividerStyled />
-          {/*
-          <Box
-            sx={{
-              m: "2.5px",
-              mt: "10px",
-              minHeight: "130px",
-            }}
-          >
-            <Typography
+          {!reputationsLoaded && (
+            <Stack direction={"row"} alignItems={"center"} justifyContent={"center"} mb="32px">
+              <CircularProgress />
+            </Stack>
+          )}
+          {reputationsLoaded && (
+            <Box
               sx={{
-                display: "block",
+                m: "24px 2.5px",
+                minHeight: "130px",
               }}
             >
-              <b>Leaderboard</b>
-              <br />
-              <span> Only those with &gt; 25 points </span>
-            </Typography>
-            <br />
-            <Stack
-              sx={{
-                display: "grid",
-                gridTemplateColumns: "repeat(auto-fill,minmax(240px,1fr))",
-                placeItems: "stretch",
-                gap: "8px",
-                listStyle: "none",
-                p: 0.5,
-                m: 0,
-              }}
-            >
-              {community.allTime &&
-                community.allTime.slice(0, limit).map((member, idx) => {
-                  return member.points >= 25 ? (
-                    <Stack
-                      direction={"row"}
-                      alignItems={"center"}
-                      sx={{
-                        minWidth: "150px",
-                        maxWidth: "100%",
-                        height: "84px",
-                        borderRadius: "12px",
-                        border: `1px solid ${gray800}`,
-                        backgroundColor: "black",
-                        p: { xs: "6px 8px", sm: "16px 24px" },
-                      }}
-                    >
-                      <Avatar
-                        src={member.imageUrl}
-                        alt={member.fullname}
-                        sx={{
-                          width: "50px",
-                          height: "50px",
-                          mr: 2.5,
-                        }}
-                      />
-                      <Stack>
-                        <Typography sx={{ fontSize: "16px", fontWeight: 600 }}>{member.fullname}</Typography>
-                        <Typography variant="body2" component="div">
-                          {idx < 3 ? "🏆" : "✔️"}
-                          {" " + Math.round((member.points + Number.EPSILON) * 100) / 100}
-                        </Typography>
-                      </Stack>
-                    </Stack>
-                  ) : null;
-                })}
-              <Button
-                onClick={() => (community.allTime ? setLimit(community.allTime.length) : setLimit(3))}
+              <Typography
                 sx={{
-                  display: limit === 3 ? "block" : "none",
-                  textTransform: "capitalize",
-                  color: orangeDark,
-                  cursor: "pointer",
-                  // placeSelf: "center"
+                  display: "block",
                 }}
               >
-                View more...
-              </Button>
-            </Stack>
-          </Box> */}
+                <b>Leaderboard</b>
+                <br />
+                <Typography
+                  component={"span"}
+                  sx={{
+                    color: ({ palette: { mode } }) =>
+                      mode === "dark" ? DESIGN_SYSTEM_COLORS.gray25 : DESIGN_SYSTEM_COLORS.gray600,
+                  }}
+                >
+                  {" "}
+                  Only those with &gt; 25 points{" "}
+                </Typography>
+              </Typography>
+              <br />
+              <Stack
+                sx={{
+                  display: "grid",
+                  gridTemplateColumns: "repeat(auto-fill,minmax(240px,1fr))",
+                  placeItems: "stretch",
+                  gap: "8px",
+                  listStyle: "none",
+                  p: 0.5,
+                  m: 0,
+                }}
+              >
+                {community.allTime &&
+                  community.allTime.slice(0, limit).map((member: any, idx) => {
+                    return member.points >= 25 ? (
+                      <Stack
+                        key={idx}
+                        direction={"row"}
+                        alignItems={"center"}
+                        sx={{
+                          minWidth: "150px",
+                          maxWidth: "100%",
+                          height: "84px",
+                          borderRadius: "12px",
+                          border: ({ palette: { mode } }) =>
+                            `1px solid ${
+                              mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookG800 : DESIGN_SYSTEM_COLORS.notebookG50
+                            }`,
+                          backgroundColor: ({ palette: { mode } }) =>
+                            mode === "dark" ? "black" : DESIGN_SYSTEM_COLORS.baseWhite,
+                          p: { xs: "6px 8px", sm: "16px 24px" },
+                        }}
+                      >
+                        <Avatar
+                          src={member.imageUrl}
+                          alt={member.fullname}
+                          sx={{
+                            width: "50px",
+                            height: "50px",
+                            mr: 2.5,
+                          }}
+                        />
+                        <Stack>
+                          <Typography
+                            sx={{ fontSize: "16px", fontWeight: 600 }}
+                          >{`${member.fName} ${member.lName}`}</Typography>
+                          <Typography variant="body2" component="div" sx={{ display: "flex" }}>
+                            {idx < 3 ? (
+                              "🏆"
+                            ) : (
+                              <DoneRoundedIcon sx={{ color: DESIGN_SYSTEM_COLORS.success500, alignSelf: "center" }} />
+                            )}
+                            {" " + Math.round((member.points + Number.EPSILON) * 100) / 100}
+                          </Typography>
+                        </Stack>
+                      </Stack>
+                    ) : null;
+                  })}
+                <Button
+                  onClick={() => (community.allTime ? setLimit(community.allTime.length) : setLimit(3))}
+                  sx={{
+                    display: limit === 3 ? "block" : "none",
+                    textTransform: "capitalize",
+                    color: orangeDark,
+                    cursor: "pointer",
+                    // placeSelf: "center"
+                  }}
+                >
+                  View more...
+                </Button>
+              </Stack>
+            </Box>
+          )}
         </Box>
 
         <AppFooter prevPage={ROUTES.publicHome} />

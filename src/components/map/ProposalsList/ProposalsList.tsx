@@ -322,6 +322,7 @@ const ProposalsList = ({ username, ...props }: ProposalsListProps) => {
                   proposalSummaries={proposalSummaries}
                   shouldSelectProposal={true}
                   showTitle={true}
+                  openLinkedNode={() => {}}
                 />
               </Box>
             );

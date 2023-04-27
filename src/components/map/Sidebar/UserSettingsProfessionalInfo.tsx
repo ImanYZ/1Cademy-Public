@@ -130,7 +130,7 @@ export const UserSettingsProfessionalInfo = ({ user }: UserSettingsProfessionalI
         initialValue={ocupation} //TODO: important fill empty user field
         onSubmit={(value: string) => onSubmitField(user, "occupation", value)}
         setState={(value: string) => dispatch({ type: "setAuthUser", payload: { ...user, occupation: value } })}
-        label="Please specify your occupation."
+        label="Occupation."
       />
       <Autocomplete
         id="institution"
@@ -163,7 +163,7 @@ export const UserSettingsProfessionalInfo = ({ user }: UserSettingsProfessionalI
         )}
         isOptionEqualToValue={(option: Institution, value: Institution) => option.id === value.id}
         fullWidth
-        sx={{ mb: "16px" }}
+        sx={{ mb: "10px" }}
       />
       <Autocomplete
         id="major"
@@ -182,14 +182,13 @@ export const UserSettingsProfessionalInfo = ({ user }: UserSettingsProfessionalI
           />
         )}
         fullWidth
-        sx={{ mb: "16px" }}
       />
       <MemoizedInputSave
         identification="fieldOfInterest"
         initialValue={fieldOfInterest}
         onSubmit={(value: string) => onSubmitField(user, "fieldOfInterest", value)}
         setState={(value: string) => dispatch({ type: "setAuthUser", payload: { ...user, fieldOfInterest: value } })}
-        label="Research field of interest (if any)"
+        label="Research Field"
       />
       {/* <TextField
         id="fieldOfInterest"

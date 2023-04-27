@@ -166,7 +166,7 @@ export const NodeItem = ({ node }: NodeItemProps) => {
                 <Box sx={{ display: "flex", flexWrap: "wrap", px: "10px" }}>
                   {node.contributors &&
                     node.contributors.map((contributor, idx) => (
-                      <NextLink key={idx} passHref href={`${ROUTES.home}?contributors=${contributor.username}`}>
+                      <NextLink key={idx} passHref href={`${ROUTES.search}?contributors=${contributor.username}`}>
                         <Tooltip title={`${contributor.fullName} contributed to the evolution of this node.`}>
                           <Avatar
                             component={Link}
@@ -202,7 +202,7 @@ export const NodeItem = ({ node }: NodeItemProps) => {
                       >
                         <Box sx={{ marginLeft: "-10px" }}>
                           {institution.id ? (
-                            <Link href={`${ROUTES.home}?institutions=${institution.id}`}>
+                            <Link href={`${ROUTES.search}?institutions=${institution.id}`}>
                               <OptimizedAvatar
                                 name={institution.name}
                                 imageUrl={institution?.logoURL}

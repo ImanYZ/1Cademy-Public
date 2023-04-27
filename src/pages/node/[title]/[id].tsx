@@ -17,6 +17,7 @@ import PagesNavbar from "@/components/PagesNavbar";
 import { ReferencesList } from "@/components/ReferencesList";
 import { TagsList } from "@/components/TagsList";
 import { getAllNodeParamsForStaticProps, getNodeData } from "@/lib/firestoreServer/nodes";
+import { ONECADEMY_DOMAIN } from "@/lib/utils/1cademyConfig";
 import ROUTES from "@/lib/utils/routes";
 import { escapeBreaksQuotes } from "@/lib/utils/utils";
 
@@ -40,8 +41,12 @@ export const getStaticProps: GetStaticProps<Props, Params> = async ({ params }) 
   const nodeData = await getNodeData(params?.id || "");
   if (!nodeData) {
     return {
+      redirect: {
+        permanent: true,
+        destination: ONECADEMY_DOMAIN,
+      },
       // returns the default 404 page with a status code of 404
-      notFound: true,
+      // notFound: true,
     };
   }
   let keywords = "";

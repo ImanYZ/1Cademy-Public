@@ -1,36 +1,34 @@
-import CodeIcon from "@mui/icons-material/Code";
-import DoneIcon from "@mui/icons-material/Done";
-import EmojiObjectsIcon from "@mui/icons-material/EmojiObjects";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
-import HelpOutlineIcon from "@mui/icons-material/HelpOutline";
-import LocalLibraryIcon from "@mui/icons-material/LocalLibrary";
-import LocalOfferIcon from "@mui/icons-material/LocalOffer";
-import MenuBookIcon from "@mui/icons-material/MenuBook";
-import ShareIcon from "@mui/icons-material/Share";
-import { Box, CircularProgress, Tab, Tabs } from "@mui/material";
+import LocalOfferRoundedIcon from "@mui/icons-material/LocalOfferRounded";
+import SendRoundedIcon from "@mui/icons-material/SendRounded";
+import { Box, Button, CircularProgress, MenuItem, Select, Stack, Tab, Tabs, Typography } from "@mui/material";
 import { collection, doc, getDoc, getDocs, getFirestore, limit, query, where } from "firebase/firestore";
 import React, { ReactNode, useCallback, useEffect, useMemo, useState } from "react";
-import { UserTheme } from "src/knowledgeTypes";
+import { Reputation, UserTheme } from "src/knowledgeTypes";
 import { NodeType } from "src/types";
 
 import OptimizedAvatar from "@/components/OptimizedAvatar";
-import { useNodeBook } from "@/context/NodeBookContext";
+import { DESIGN_SYSTEM_COLORS } from "@/lib/theme/colors";
 import { getTypedCollections } from "@/lib/utils/getTypedCollections";
 import { justADate } from "@/lib/utils/justADate";
 import shortenNumber from "@/lib/utils/shortenNumber";
 
+import { SelectedUser } from "../../../../nodeBookTypes";
 import { MemoizedMetaButton } from "../../MetaButton";
 import ProposalItem from "../../ProposalsList/ProposalItem/ProposalItem";
-import RoundImage from "../../RoundImage";
+import NodeTypeTrends from "../NodeTypeTrends";
 import UseInfoTrends from "../UseInfoTrends";
+import UserDetails from "../UserDetails";
 import { SidebarWrapper } from "./SidebarWrapper";
+import { NODE_TYPE_OPTIONS, UserPoints } from "./UserSettigsSidebar";
 
 type UserInfoSidebarProps = {
   open: boolean;
   onClose: () => void;
   theme: UserTheme;
   openLinkedNode: any;
-  username: string;
+  selectedUser: SelectedUser | null;
+  username?: string;
 };
 
 type UserInfoTabs = {
@@ -40,16 +38,16 @@ type UserInfoTabs = {
 
 const NODE_TYPE_ARRAY: NodeType[] = ["Concept", "Code", "Relation", "Question", "Reference", "News", "Idea"];
 const ELEMENTS_PER_PAGE = 13;
-const UserInfoSidebar = ({ open, onClose, theme, openLinkedNode, username }: UserInfoSidebarProps) => {
+const UserInfoSidebar = ({ open, onClose, theme, openLinkedNode, username, selectedUser }: UserInfoSidebarProps) => {
   const [value, setValue] = React.useState(0);
   const [proposals, setProposals] = useState<any[]>([]);
   const [proposalsPerDay, setProposalsPerDay] = useState<any[]>([]);
   const [isRetrieving, setIsRetrieving] = useState(false);
   const [lastIndex, setLastIndex] = useState(ELEMENTS_PER_PAGE);
   const [sUserObj, setSUserObj] = useState<any | null>(null);
+  const [type, setType] = useState<string>("all");
 
   const db = getFirestore();
-  const { nodeBookState } = useNodeBook();
 
   useEffect(() => {
     if (!db || !sUserObj) return;
@@ -73,8 +71,8 @@ const UserInfoSidebar = ({ open, onClose, theme, openLinkedNode, username }: Use
   }, [db, sUserObj]);
 
   const fetchProposals = useCallback(async () => {
-    if (!nodeBookState.selectedUser) return;
-    if (!username) return;
+    if (!selectedUser) return;
+    // if (!username) return;
 
     setIsRetrieving(true);
     const versions: { [key: string]: any } = {};
@@ -85,7 +83,7 @@ const UserInfoSidebar = ({ open, onClose, theme, openLinkedNode, username }: Use
 
       const versionCollectionRef = query(
         versionsColl,
-        where("proposer", "==", nodeBookState.selectedUser.username),
+        where("proposer", "==", selectedUser.username),
         where("deleted", "==", false)
       );
 
@@ -105,14 +103,15 @@ const UserInfoSidebar = ({ open, onClose, theme, openLinkedNode, username }: Use
         };
         delete versions[versionDoc.id].deleted;
         delete versions[versionDoc.id].updatedAt;
-        const userVersionCollectionRef = query(
-          userVersionsColl,
-          where("version", "==", versionDoc.id),
-          where("user", "==", username)
-        );
-        userVersionsRefs.push(userVersionCollectionRef);
+        if (username) {
+          const userVersionCollectionRef = query(
+            userVersionsColl,
+            where("version", "==", versionDoc.id),
+            where("user", "==", username)
+          );
+          userVersionsRefs.push(userVersionCollectionRef);
+        }
       });
-
       if (userVersionsRefs.length > 0) {
         await Promise.all(
           userVersionsRefs.map(async userVersionsRef => {
@@ -162,17 +161,18 @@ const UserInfoSidebar = ({ open, onClose, theme, openLinkedNode, username }: Use
     setProposals(orderredProposals);
     setProposalsPerDay(proposalsPerDayList);
     setIsRetrieving(false);
-  }, [db, nodeBookState.selectedUser, username]);
+  }, [db, selectedUser, username]);
 
   useEffect(() => {
     fetchProposals();
   }, [fetchProposals]);
+
   useEffect(() => {
     const fetchUserData = async () => {
       if (!db) return;
-      if (!nodeBookState.selectedUser) return;
+      if (!selectedUser) return;
 
-      const userRef = doc(db, "users", nodeBookState.selectedUser.username);
+      const userRef = doc(db, "users", selectedUser.username);
       const userDoc = await getDoc(userRef);
 
       // const userDoc = await firebase.db.collection("users").doc(selectedUser).get();
@@ -182,7 +182,7 @@ const UserInfoSidebar = ({ open, onClose, theme, openLinkedNode, username }: Use
 
         const reputationQuery = query(
           collection(db, "reputations"),
-          where("uname", "==", nodeBookState.selectedUser.username),
+          where("uname", "==", selectedUser.username),
           where("tagId", "==", userData.tagId),
           limit(1)
         );
@@ -204,7 +204,36 @@ const UserInfoSidebar = ({ open, onClose, theme, openLinkedNode, username }: Use
       }
     };
     fetchUserData();
-  }, [db, nodeBookState.selectedUser]);
+  }, [db, selectedUser]);
+
+  const nodeTypeStats = useMemo(() => {
+    const stats = new Map(NODE_TYPE_OPTIONS.map(nodeType => [nodeType, "0"]));
+    if (!sUserObj) return stats;
+    stats.forEach((value, key) => {
+      switch (key) {
+        case "Concept":
+          value = shortenNumber(sUserObj.cnCorrects - sUserObj.cnWrongs, 2, false);
+          stats.set("Concept", value);
+        case "Relation":
+          value = shortenNumber(sUserObj.mCorrects - sUserObj.mWrongs, 2, false);
+          stats.set("Relation", value);
+        case "Reference":
+          value = shortenNumber(sUserObj.rfCorrects - sUserObj.rfWrongs, 2, false);
+          stats.set("Reference", value);
+        case "Question":
+          value = shortenNumber(sUserObj.qCorrects - sUserObj.qWrongs, 2, false);
+          stats.set("Question", value);
+        case "Idea":
+          value = shortenNumber(sUserObj.iCorrects - sUserObj.iWrongs, 2, false);
+          stats.set("Idea", value);
+        case "Code":
+          value = shortenNumber(sUserObj.cdCorrects - sUserObj.cdWrongs, 2, false);
+          stats.set("Code", value);
+      }
+      console.log("map value", { value, key });
+    });
+    return stats;
+  }, [sUserObj]);
 
   const loadOlderProposalsClick = useCallback(() => {
     if (lastIndex >= proposals.length) return;
@@ -220,31 +249,92 @@ const UserInfoSidebar = ({ open, onClose, theme, openLinkedNode, username }: Use
       "aria-controls": `simple-tabpanel-${index}`,
     };
   };
+  const proposalsFiltered = useMemo(() => {
+    console.log({ proposalssss: proposals });
+    if (type === "all") return proposals;
+
+    return proposals.filter(proposal => proposal.nodeType === type);
+  }, [proposals, type]);
+
   const tabsItems: UserInfoTabs[] = useMemo(() => {
     return !username
       ? []
       : [
           {
-            title: "Nodes",
+            title: "Trends",
             content: (
-              <>
-                <UseInfoTrends proposalsPerDay={proposalsPerDay} theme={theme || ""} />
-              </>
+              <Box id="TrendsSettings" sx={{ p: "12px" }}>
+                <Typography fontWeight={"500"}>Nodes Overwiew</Typography>
+                <NodeTypeTrends nodeTypeStats={nodeTypeStats} />
+                <Typography fontWeight={"500"} my="16px">
+                  Proposals Overview
+                </Typography>
+                <UseInfoTrends proposalsPerDay={proposalsPerDay} theme={theme.toLowerCase() || ""} />
+              </Box>
             ),
           },
           {
             title: "Proposals",
             content: (
               <Box sx={{ display: "flex", flexDirection: "column", gap: "4px" }}>
-                <div className="ChartTitle">Proposals in chronological order</div>
-                {proposals.slice(0, lastIndex).map((proposal, idx) => {
-                  return (
-                    proposal.title && (
-                      <ProposalItem key={idx} proposal={proposal} openLinkedNode={openLinkedNode} showTitle={true} />
-                    )
-                  );
-                })}
-                {proposals.length > lastIndex && (
+                <Stack direction={"row"} alignItems={"center"} justifyContent={"space-between"} py="10px">
+                  <Typography fontWeight={"500"}>Overview</Typography>
+
+                  <Box>
+                    <Typography sx={{ display: "inline-block" }}>Shows</Typography>
+                    <Select
+                      sx={{
+                        marginLeft: "10px",
+                        height: "35px",
+                        width: "120px",
+                      }}
+                      MenuProps={{
+                        sx: {
+                          "& .MuiMenu-paper": {
+                            backgroundColor: theme => (theme.palette.mode === "dark" ? "#1B1A1A" : "#F9FAFB"),
+                            color: "text.white",
+                          },
+                          "& .MuiMenuItem-root:hover": {
+                            backgroundColor: theme => (theme.palette.mode === "dark" ? "##2F2F2F" : "#EAECF0"),
+                            color: "text.white",
+                          },
+                          "& .Mui-selected": {
+                            backgroundColor: "transparent!important",
+                            color: "#FF8134",
+                          },
+                          "& .Mui-selected:hover": {
+                            backgroundColor: "transparent",
+                          },
+                        },
+                      }}
+                      labelId="demo-select-small"
+                      id="demo-select-small"
+                      value={type}
+                      onChange={e => {
+                        setType(e.target.value);
+                      }}
+                    >
+                      <MenuItem value="all">All</MenuItem>
+                      <MenuItem value="Concept">Concepts</MenuItem>
+                      <MenuItem value="Relation">Relations</MenuItem>
+                      <MenuItem value="Question">Questions</MenuItem>
+                      <MenuItem value="Idea">Ideas</MenuItem>
+                      <MenuItem value="Code">Codes</MenuItem>
+                      <MenuItem value="Reference">References</MenuItem>
+                    </Select>
+                  </Box>
+                </Stack>
+                <Stack spacing={"8px"}>
+                  {proposalsFiltered.slice(0, lastIndex).map((proposal, idx) => {
+                    return (
+                      proposal.title && (
+                        <ProposalItem key={idx} proposal={proposal} openLinkedNode={openLinkedNode} showTitle={true} />
+                      )
+                    );
+                  })}
+                </Stack>
+
+                {proposalsFiltered.length > lastIndex && (
                   <div id="ContinueButton" style={{ padding: "10px 0px" }}>
                     <MemoizedMetaButton onClick={loadOlderProposalsClick}>
                       <>
@@ -259,23 +349,60 @@ const UserInfoSidebar = ({ open, onClose, theme, openLinkedNode, username }: Use
             ),
           },
         ];
-  }, [lastIndex, loadOlderProposalsClick, proposals, proposalsPerDay, openLinkedNode, theme, username]);
+  }, [
+    username,
+    nodeTypeStats,
+    proposalsPerDay,
+    theme,
+    type,
+    proposalsFiltered,
+    lastIndex,
+    loadOlderProposalsClick,
+    openLinkedNode,
+  ]);
 
-  const totalPoints = useMemo(() => {
-    if (!sUserObj) return 0;
-    const positives = ["cnCorrects", "mCorrects", "qCorrects", "iCorrects", "cdCorrects", "rfCorrects"];
-    const negatives = ["cnWrongs", "mWrongs", "qWrongs", "iWrongs", "cdWrongs", "rfWrongs"];
-    const total =
-      positives.reduce((carry, pve) => carry + (sUserObj[pve] || 0), 0) -
-      negatives.reduce((carry, nve) => carry + (sUserObj[nve] || 0), 0);
-    return shortenNumber(total, 2, false);
+  const totalPoints = useMemo<UserPoints>(() => {
+    if (!sUserObj) return { positives: 0, negatives: 0, totalPoints: 0, stars: 0 };
+
+    const positiveKeys: (keyof Reputation)[] = [
+      "cnCorrects",
+      "mCorrects",
+      "qCorrects",
+      "iCorrects",
+      "cdCorrects",
+      "rfCorrects",
+    ];
+    const negativeKeys: (keyof Reputation)[] = ["cnWrongs", "mWrongs", "qWrongs", "iWrongs", "cdWrongs", "rfWrongs"];
+    const starKeys: (keyof Reputation)[] = ["cnInst", "mInst", "qInst", "iInst", "cdInst", "rfInst"];
+
+    const positives = positiveKeys.reduce(
+      (carry, el) => carry + ((typeof sUserObj[el] === "number" && (sUserObj[el] as number)) || 0),
+      0
+    );
+    const negatives = negativeKeys.reduce(
+      (carry, el) => carry + ((typeof sUserObj[el] === "number" && (sUserObj[el] as number)) || 0),
+      0
+    );
+    const stars = starKeys.reduce(
+      (carry, el) => carry + ((typeof sUserObj[el] === "number" && (sUserObj[el] as number)) || 0),
+      0
+    );
+
+    const totalPoints = positives + stars - negatives;
+
+    return {
+      positives: parseFloat(shortenNumber(positives, 2, false)),
+      negatives: parseFloat(shortenNumber(negatives, 2, false)),
+      stars: parseFloat(shortenNumber(stars, 2, false)),
+      totalPoints: parseFloat(shortenNumber(totalPoints, 2, false)),
+    };
   }, [sUserObj]);
 
   const contentSignalState = useMemo(() => {
     return { updated: true };
   }, [isRetrieving, tabsItems, value]);
 
-  if (!nodeBookState.selectedUser) return null;
+  if (!selectedUser) return null;
 
   return (
     <SidebarWrapper
@@ -294,87 +421,56 @@ const UserInfoSidebar = ({ open, onClose, theme, openLinkedNode, username }: Use
             marginTop: "40px",
           }}
         >
-          <div id="MiniUserPrifileHeader" className="MiniUserProfileHeaderMobile">
-            <RoundImage imageUrl={nodeBookState.selectedUser.imageUrl} alt="1Cademist Profile Picture" />
-
-            <div id="MiniUserPrifileIdentityUSettingSidebar" className="MiniUserPrifileIdentityMobile">
-              <div id="MiniUserPrifileName">
-                {nodeBookState.selectedUser.chooseUname
-                  ? nodeBookState.selectedUser.username
-                  : nodeBookState.selectedUser.fullName}
-              </div>
-              {sUserObj && (
-                <Box sx={{ display: "flex", flexDirection: "column", gap: "8px" }}>
-                  <Box sx={{ display: "flex", gap: "8px" }}>
-                    <LocalOfferIcon className="material-icons grey-text" />
-                    <span>{sUserObj.tag}</span>
-                  </Box>
-                  <Box sx={{ display: "flex", gap: "8px" }}>
-                    <OptimizedAvatar
-                      imageUrl={sUserObj.instLogo}
-                      name={sUserObj.deInstit + " logo"}
-                      sx={{
-                        width: "25px",
-                        height: "25px",
-                        fontSize: "15px",
-                      }}
-                      renderAsAvatar={false}
-                    />
-                    <span>{sUserObj.deInstit}</span>
-                  </Box>
-                  <Box sx={{ display: "flex", gap: "8px" }}>
-                    <DoneIcon className="material-icons DoneIcon green-text" />
-                    <span>{totalPoints}</span>
-                  </Box>
-                </Box>
-              )}
-            </div>
-          </div>
-          <div
-            className="MiniUserPrifilePointsContainer"
-            style={{ alignItems: "center", justifyContent: "space-around" }}
-          >
+          <Box p="0 32px 16px 32px">
+            <UserDetails
+              imageUrl={selectedUser.imageUrl}
+              fName={selectedUser.fullName.split(" ")[0]}
+              lName={selectedUser.fullName.split(" ")[1] ?? ""}
+              uname={selectedUser.username}
+              chooseUname={Boolean(selectedUser.chooseUname)}
+              points={totalPoints}
+            />
             {sUserObj && (
               <>
-                <div className="MiniUserProfilePoints">
-                  <LocalLibraryIcon className="material-icons amber-text" />
-                  <span className="ToolbarValue">
-                    {shortenNumber((sUserObj.cnCorrects || 0) - (sUserObj.cnWrongs || 0), 2, false)}
-                  </span>
+                <div id="MiniUserPrifileInstitution" style={{ display: "flex", gap: "12px", borderRadius: "6px" }}>
+                  <OptimizedAvatar
+                    imageUrl={sUserObj.instLogo}
+                    name={sUserObj.deInstit + " logo"}
+                    sx={{
+                      width: "20px",
+                      height: "20px",
+                      fontSize: "16px",
+                    }}
+                    renderAsAvatar={false}
+                  />
+                  <span>{sUserObj.deInstit}</span>
                 </div>
-                <div className="MiniUserProfilePoints">
-                  <ShareIcon className="material-icons amber-text" />
-                  <span className="ToolbarValue">
-                    {shortenNumber((sUserObj.mCorrects || 0) - (sUserObj.mWrongs || 0), 2, false)}
-                  </span>
-                </div>
-                <div className="MiniUserProfilePoints">
-                  <HelpOutlineIcon className="material-icons amber-text" />
-                  <span className="ToolbarValue">
-                    {shortenNumber((sUserObj.qCorrects || 0) - (sUserObj.qWrongs || 0), 2, false)}
-                  </span>
-                </div>
-                <div className="MiniUserProfilePoints">
-                  <EmojiObjectsIcon className="material-icons material-icons--outlined amber-text" />
-                  <span className="ToolbarValue">
-                    {shortenNumber(sUserObj.iCorrects || 0 - (sUserObj.iWrongs || 0), 2, false)}
-                  </span>
-                </div>
-                <div className="MiniUserProfilePoints">
-                  <CodeIcon className="material-icons amber-text" />
-                  <span className="ToolbarValue">
-                    {shortenNumber(sUserObj.cdCorrects || 0 - (sUserObj.cdWrongs || 0), 2, false)}
-                  </span>
-                </div>
-                <div className="MiniUserProfilePoints">
-                  <MenuBookIcon className="material-icons amber-text" />
-                  <span className="ToolbarValue">
-                    {shortenNumber((sUserObj.rfCorrects || 0) - (sUserObj.rfWrongs || 0), 2, false)}
-                  </span>
+                <div id="MiniUserPrifileTag">
+                  <LocalOfferRoundedIcon
+                    sx={{ marginRight: "8px" }}
+                    id="tagChangeIcon"
+                    className="material-icons deep-orange-text"
+                  />
+                  {sUserObj.tag}
                 </div>
               </>
             )}
-          </div>
+
+            {/* this Button has no functionality yet once it has remove the display none */}
+            <Button
+              variant="contained"
+              endIcon={<SendRoundedIcon sx={{ transform: "rotate(-45deg)" }} />}
+              sx={{
+                display: "none",
+                backgroundColor: DESIGN_SYSTEM_COLORS.primary800,
+                borderRadius: "24px",
+                mt: "16px",
+              }}
+              fullWidth
+            >
+              Message
+            </Button>
+          </Box>
 
           <Tabs value={value} onChange={handleChange} aria-label={"Bookmarks Tabs"}>
             {tabsItems.map((tabItem: UserInfoTabs, idx: number) => (
@@ -383,22 +479,20 @@ const UserInfoSidebar = ({ open, onClose, theme, openLinkedNode, username }: Use
                 key={tabItem.title}
                 label={tabItem.title}
                 {...a11yProps(idx)}
-                sx={{ borderRadius: "6px" }}
+                sx={{ borderRadius: "6px", flex: 1 }}
               />
             ))}
           </Tabs>
-          {/* {!isRetrieving && (
-          )} */}
         </Box>
       }
       contentSignalState={contentSignalState}
       SidebarContent={
-        <Box>
-          <Box sx={{ px: "10px", paddingTop: "10px" }}>
+        <Box height={"100%"}>
+          <Box sx={{ px: "10px", paddingTop: "10px", height: "100%" }}>
             {!isRetrieving ? (
               tabsItems[value].content
             ) : (
-              <Box sx={{ display: "grid", placeItems: "center" }}>
+              <Box sx={{ display: "grid", placeItems: "center", height: "100%" }}>
                 <CircularProgress />
               </Box>
             )}

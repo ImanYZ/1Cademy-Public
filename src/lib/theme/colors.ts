@@ -225,7 +225,7 @@ export const DESIGN_SYSTEM_COLORS: Colors = {
   notebookG600: "#2F2F2F",
   notebookG700: "#242425",
   notebookG800: "#303134",
-  notebookG900: "#0A0D14",
+  notebookG900: "#1F1F1F",
 
   // secondary
   notebookO100: "#F8A824",

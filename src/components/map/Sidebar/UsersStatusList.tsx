@@ -8,9 +8,7 @@ import { OpenSidebar } from "@/pages/notebook";
 import { useAuth } from "../../../context/AuthContext";
 import { loadReputationsData } from "../../../lib/utils/Map.utils";
 import { DispatchNodeBookActions, UsersStatus } from "../../../nodeBookTypes";
-// import OptimizedAvatar from "../../OptimizedAvatar";
-// import { UsersStatus } from "../../../noteBookTypes";
-import { MemoizedUserStatusIcon } from "../UserStatusIcon";
+import { MemoizedUserStatusIcon } from "../UserStatusIcon2";
 
 // const scale = 1;
 type DictByReputationType = {
@@ -98,12 +96,14 @@ type UsersStatusListProps = {
   reputationSignal: ReputationSignal[];
   setOpenSideBar: (sidebar: OpenSidebar) => void;
   sx?: SxProps<Theme>;
+  sxUserStatus?: SxProps<Theme>;
   onlineUsers: string[];
   usersOnlineStatusLoaded: boolean;
+  isSmaller?: boolean;
   disabled?: boolean;
 };
 
-const UsersStatusList = ({ nodeBookDispatch, disabled = false, ...props }: UsersStatusListProps) => {
+const UsersStatusList = ({ nodeBookDispatch, isSmaller = true, disabled = false, ...props }: UsersStatusListProps) => {
   const [{ user }] = useAuth();
   const db = getFirestore();
 
@@ -404,16 +404,17 @@ const UsersStatusList = ({ nodeBookDispatch, disabled = false, ...props }: Users
           fullname={user.fullname}
           chooseUname={user.chooseUname}
           online={online}
-          inUserBar={false}
-          inNodeFooter={false}
+          // inUserBar={false}
+          // inNodeFooter={false}
           reloadPermanentGrpah={() => console.log("props.reloadPermanentGrpah")}
           tagTitle={user.tag}
           setOpenSideBar={props.setOpenSideBar}
-          sx={{ ...props.sx }}
+          sx={{ ...props.sxUserStatus }}
+          smallVersion={isSmaller}
         />
       ));
     },
-    [props.setOpenSideBar, props.sx]
+    [isSmaller, nodeBookDispatch, props.setOpenSideBar, props.sxUserStatus]
   );
 
   return (
@@ -427,8 +428,9 @@ const UsersStatusList = ({ nodeBookDispatch, disabled = false, ...props }: Users
         // display: "flex",
         // flexDirection: "column",
         // alignItems: "center",
-        overflowY: "auto",
-        px: "20px",
+        // overflowY: "auto",
+        // px: "20px",
+        ...props.sx,
       }}
     >
       {disabled && (

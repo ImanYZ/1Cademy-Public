@@ -171,12 +171,14 @@ const PendingProposalList = (props: PendingProposalListProps) => {
           />
           <Typography
             sx={{
-              fontSize: "20px",
-
+              fontSize: "16px",
               fontWeight: "500",
+              textAlign: "center",
+              mt: "24px",
+              maxWidth: "300px",
             }}
           >
-            You've not checked off any notifications
+            The node currently has no pending proposals
           </Typography>
         </Box>
       )}

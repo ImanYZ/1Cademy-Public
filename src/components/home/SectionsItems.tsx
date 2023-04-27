@@ -27,9 +27,18 @@ export const ONE_CADEMY_SECTIONS: HomepageSection[] = [
     id: "magnitude",
     title: "Magnitude",
     label: "Magnitude",
-    description: `Over the past two years, ${1543} students and researchers from ${183} institutions have participated in a large-scale collaboration effort through 1Cademy. This collaboration has resulted in the creation of ${44665} nodes and ${235674} prerequisite links between them, which have been proposed through [${88167}] proposals.`,
+    description: `Over the past two years, ${1543} students and researchers from ${183} institutions have participated in a large-scale collaboration effort through 1Cademy. This collaboration has resulted in the creation of ${44665} nodes and ${235674} prerequisite links between them, which have been proposed through [${88167}] proposals.
+    It is truly inspiring to witness the collaborative learning environment that has been fostered at 1Cademy, where students from both top-ranked and low-ranked schools can come together regardless of their background, ethnicity, or socio-economic status.
+Through this platform, students are able to share their unique learning pathways, making difficult concepts more accessible to those who may be struggling. The simplified learning pathways offered on 1Cademy have been a valuable resource for those seeking to deepen their understanding of complex subject matter.
+Students are able to engage with the content by voting and commenting on the nodes and links that have been created, which not only helps to acknowledge the valuable contributions of their peers but also encourages meaningful collaboration within the learning community.
+This approach to learning empowers students to take an active role in their education, making it a more enjoyable and fulfilling experience. By helping one another, students are able to take pride in their contributions to the larger learning community and are able to learn from one another in a truly collaborative way.
+    `,
     getDescription: ({ users, institutions, nodes, links, proposals }: StatsSchema) =>
-      `Over the past two years, [${users}] students and researchers from [${institutions}] institutions have participated in a large-scale collaboration effort through 1Cademy. This collaboration has resulted in the creation of [${nodes}] nodes and [${links}] prerequisite links between them, which have been proposed through [${proposals}] proposals.`,
+      `Over the past two years, [${users}] students and researchers from [${institutions}] institutions have participated in a large-scale collaboration effort through 1Cademy. This collaboration has resulted in the creation of [${nodes}] nodes and [${links}] prerequisite links between them, which have been proposed through [${proposals}] proposals.
+      It is truly inspiring to witness the collaborative learning environment that has been fostered at 1Cademy, where students from both top-ranked and low-ranked schools can come together regardless of their background, ethnicity, or socio-economic status.
+Through this platform, students are able to share their unique learning pathways, making difficult concepts more accessible to those who may be struggling. The simplified learning pathways offered on 1Cademy have been a valuable resource for those seeking to deepen their understanding of complex subject matter.
+Students are able to engage with the content by voting and commenting on the nodes and links that have been created, which not only helps to acknowledge the valuable contributions of their peers but also encourages meaningful collaboration within the learning community.
+This approach to learning empowers students to take an active role in their education, making it a more enjoyable and fulfilling experience. By helping one another, students are able to take pride in their contributions to the larger learning community and are able to learn from one another in a truly collaborative way.`,
     options: [],
   },
   {
@@ -69,7 +78,7 @@ export const ONE_CADEMY_SECTIONS: HomepageSection[] = [
         title: "Disability Studies",
         description:
           "The Disability Studies community explores current and past research related to disability. We investigate a wide range of topics related to disability including, disability legislation, disability culture, the psychosocial impact of disability, the economics of disability, and more. Interns summarize research articles and present their findings weekly with the rest of the group. By using 1Cademy, interns learn how to break down articles into smaller ideas, connect them to broader concepts, extrapolate the research for deeper analysis, and communicate their findings to other community members. We value collaborative learning and expect interns to participate in group discussions to dive deeper into the content.",
-        link: "/community/disability_studies",
+        link: "/community/disability-studies",
       },
       {
         title: "Social Psychology",

@@ -73,7 +73,6 @@ type NodeProps = {
   proposalsSelected: any;
   acceptedProposalsSelected: any;
   commentsSelected: any;
-  open: boolean;
   left: number;
   top: number;
   width: number;
@@ -167,6 +166,10 @@ type NodeProps = {
   setAbleToPropose: (newValue: boolean) => void;
   openPart: OpenPart;
   setOpenPart: (newOpenPart: OpenPart) => void;
+  // notebooks: string[];
+  // expands: boolean[];
+  // selectedNotebookId: string;
+  open: boolean;
 };
 
 const proposedChildTypesIcons: { [key in ProposedChildTypesIcons]: string } = {
@@ -197,7 +200,6 @@ const Node = ({
   proposalsSelected,
   acceptedProposalsSelected,
   commentsSelected,
-  open,
   left,
   top,
   width,
@@ -279,6 +281,7 @@ const Node = ({
   openUserInfoSidebar,
   disabled = false,
   enableChildElements = [],
+  open,
   // defaultOpenPart: defaultOpenPartByTutorial = "LinkingWords",
   // showProposeTutorial = false,
   // setCurrentTutorial,
@@ -286,7 +289,10 @@ const Node = ({
   setAbleToPropose,
   openPart,
   setOpenPart,
-}: NodeProps) => {
+}: // notebooks,
+// expands,
+// selectedNotebookId: selectedNotebook,
+NodeProps) => {
   const [{ user }] = useAuth();
   const { nodeBookState } = useNodeBook();
   const [option, setOption] = useState<EditorOptions>("EDIT");
@@ -379,13 +385,13 @@ const Node = ({
     }
 
     return getVideoDataByUrl(videoUrl, startTime, endTime);
-  }, [videoUrl, videoStartTime, videoEndTime]);
+  }, [videoStartTime, videoEndTime, videoUrl, timePickerError]);
 
   useEffect(() => {
     if (!addVideo) {
       setNodeParts(identifier, node => ({ ...node, nodeVideo: "" }));
     }
-  }, [addVideo]);
+  }, [addVideo, identifier, setNodeParts]);
 
   useEffect(() => {
     observer.current = new ResizeObserver(entries => {
@@ -416,7 +422,9 @@ const Node = ({
   const nodeClickHandler = useCallback(
     (event: any) => {
       let operation = "selectNode";
+      console.log({ rrrrrr: notebookRef.current });
       if (notebookRef.current.choosingNode && notebookRef.current.choosingNode.id !== identifier) {
+        console.log("-1");
         // The first Nodes exist, Now is clicking the Chosen Node
 
         notebookRef.current.chosenNode = {
@@ -424,7 +432,11 @@ const Node = ({
           title,
         };
         nodeBookDispatch({ type: "setChosenNode", payload: { id: identifier, title } });
-        chosenNodeChanged(notebookRef.current.choosingNode.id);
+
+        if (notebookRef.current.choosingNode.id === "Tag") return; //INFO: this is important to update a community
+        chosenNodeChanged(identifier);
+        // chosenNodeChanged(notebookRef.current.choosingNode.id);
+
         setAbleToPropose(true);
         // scrollToNode(notebookRef.current.selectedNode);
         operation = "chooseNode";
@@ -434,6 +446,7 @@ const Node = ({
         event.currentTarget.activeElement.nodeName !== "INPUT" &&
         !notebookRef.current.choosingNode
       ) {
+        console.log("-2");
         nodeClicked(event, identifier, nodeType, setOpenPart);
       }
 
@@ -442,6 +455,7 @@ const Node = ({
         notebookRef.current.selectedNode !== identifier &&
         operation === "selectNode"
       ) {
+        console.log("-3");
         const updatedNodeIds: string[] = [notebookRef.current.selectedNode!, identifier];
         notebookRef.current.selectedNode = identifier;
         nodeBookDispatch({ type: "setSelectedNode", payload: identifier });
@@ -481,6 +495,12 @@ const Node = ({
     }
   };
   const hideDescendantsHandler = useCallback(() => onHideDescendants(identifier), [onHideDescendants, identifier]);
+
+  // const open = useMemo(() => {
+  //   const idx = notebooks.findIndex(notebook => notebook === selectedNotebook);
+  //   console.log({ idx, notebooks, selectedNotebook });
+  //   return expands[idx];
+  // }, [expands, notebooks, selectedNotebook]);
 
   const toggleNodeHandler = useCallback(
     (event: any) => {
@@ -621,27 +641,11 @@ const Node = ({
     }
   }, [editable, activeNode]);
 
-  const onBlurContent = useCallback((newContent: string) => {
-    setNodeParts(identifier, thisNode => ({ ...thisNode, content: newContent }));
-  }, []);
-
-  const onBlurNodeTitle = useCallback(
-    async (newTitle: string) => {
-      setNodeParts(identifier, thisNode => ({ ...thisNode, title: newTitle }));
-      if (titleUpdated && newTitle.trim().length > 0) {
-        nodeBookDispatch({ type: "setSearchByTitleOnly", payload: true });
-        notebookRef.current.searchByTitleOnly = true;
-        onSearch(1, newTitle.trim());
-        setTitleUpdated(false);
-      }
-      notebookRef.current.nodeTitleBlured = true;
-      notebookRef.current.searchQuery = newTitle;
-
-      // setOpenSideBar("SEARCHER_SIDEBAR");
-      // nodeBookDispatch({ type: "setNodeTitleBlured", payload: true });
-      // nodeBookDispatch({ type: "setSearchQuery", payload: newTitle });
+  const onBlurContent = useCallback(
+    (newContent: string) => {
+      setNodeParts(identifier, thisNode => ({ ...thisNode, content: newContent }));
     },
-    [titleUpdated]
+    [identifier, setNodeParts]
   );
 
   const onSearch = useCallback(async (page: number, q: string) => {
@@ -682,6 +686,25 @@ const Node = ({
       console.error(err);
     }
   }, []);
+
+  const onBlurNodeTitle = useCallback(
+    async (newTitle: string) => {
+      setNodeParts(identifier, thisNode => ({ ...thisNode, title: newTitle }));
+      if (titleUpdated && newTitle.trim().length > 0) {
+        nodeBookDispatch({ type: "setSearchByTitleOnly", payload: true });
+        notebookRef.current.searchByTitleOnly = true;
+        onSearch(1, newTitle.trim());
+        setTitleUpdated(false);
+      }
+      notebookRef.current.nodeTitleBlured = true;
+      notebookRef.current.searchQuery = newTitle;
+
+      // setOpenSideBar("SEARCHER_SIDEBAR");
+      // nodeBookDispatch({ type: "setNodeTitleBlured", payload: true });
+      // nodeBookDispatch({ type: "setSearchQuery", payload: newTitle });
+    },
+    [identifier, nodeBookDispatch, notebookRef, onSearch, setNodeParts, titleUpdated]
+  );
 
   const onChangeOption = useCallback(
     (newOption: boolean) => {
