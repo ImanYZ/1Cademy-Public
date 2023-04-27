@@ -77,6 +77,7 @@ describe("POST /api/instructor/course/create", () => {
     creditsCollection,
     nodeVersionsCollection,
     new MockData([], "relationVersions"),
+    new MockData([], "semesterStudentSankeys"),
     reputationsCollection,
 
     coursesCollection,
