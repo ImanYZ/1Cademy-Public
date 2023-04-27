@@ -37,6 +37,8 @@ export const signalAllUserNodesChanges = async ({
     }
     if (deleted) {
       changedUserNode.deleted = true;
+      changedUserNode.notebooks = [];
+      changedUserNode.expands = [];
     }
     if (Object.keys(changedUserNode).length > 0) {
       changedUserNode.updatedAt = currentTimestamp;

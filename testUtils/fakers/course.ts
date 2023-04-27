@@ -84,6 +84,7 @@ export const createSemester = (params: IFakeSemesterOptions): ISemester => {
       numQuestionsPerDay: 0,
       totalDaysOfCourse: 0,
     },
+    isDailyPracticeRequired: false,
     votes: {
       pointIncrementOnAgreement: 0,
       pointDecrementOnAgreement: 0,

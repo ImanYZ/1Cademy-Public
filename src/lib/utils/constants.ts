@@ -50,3 +50,5 @@ export const EDUCATION_VALUES = [
 ];
 
 // export const NODE_WIDTH = 580
+
+export const NO_USER_IMAGE = "https://storage.googleapis.com/onecademy-1.appspot.com/ProfilePictures/no-img.png";

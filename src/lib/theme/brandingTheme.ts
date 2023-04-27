@@ -221,6 +221,13 @@ export function getThemedComponents(theme: Theme): {
       //     },
       //   },
       // },
+      MuiDivider: {
+        styleOverrides: {
+          root: {
+            borderColor: theme.palette.mode === "light" ? "#EAECF0" : "#2F2F2F",
+          },
+        },
+      },
       MuiCardContent: {
         styleOverrides: {
           root: {
@@ -288,13 +295,6 @@ export function getThemedComponents(theme: Theme): {
         styleOverrides: {
           root: {
             background: theme.palette.mode === "dark" ? "#303134" : "#f0f0f0",
-          },
-        },
-      },
-      MuiDivider: {
-        styleOverrides: {
-          root: {
-            borderColor: theme.palette.mode === "dark" ? common.white : common.black,
           },
         },
       },

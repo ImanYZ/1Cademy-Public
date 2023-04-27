@@ -19,7 +19,7 @@
 }
 
 /* Modal Content/Box */
-#ModalBody {
+.ModalBody {
   position: absolute;
   top: 4%;
   left: 4%;
@@ -35,7 +35,7 @@
   z-index: 7; /* Sit on top */
 }
 
-.LightMode #ModalBody {
+.LightMode .ModalBody {
   background: #f0f0f0;
 }
 

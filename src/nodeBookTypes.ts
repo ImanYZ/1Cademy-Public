@@ -22,7 +22,7 @@ export type SelectedUser = {
   username: string;
   imageUrl: string;
   fullName: string;
-  chooseUname: string;
+  chooseUname: boolean;
 };
 
 export type SelectionType = "AcceptedProposals" | "Proposals" | "Citations" | "Comments" | "UserInfo" | null;
@@ -286,17 +286,19 @@ export type UserNodesData = {
   // "lastVisit": Timestamp,//CHECK
   // "userNodeId": string,//CHECK
   updatedAt: Timestamp;
-  open: boolean;
+  open?: boolean;
   deleted: boolean;
   wrong: boolean;
   bookmarked: boolean;
   isStudied: boolean;
-  visible: boolean;
+  visible?: boolean;
   createdAt: Timestamp;
   correct: boolean;
   user: string;
   changed: boolean;
   node: string;
+  notebooks: string[];
+  expands: boolean[];
   nodeChanges?: any;
 };
 

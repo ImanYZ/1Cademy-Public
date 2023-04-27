@@ -30,6 +30,55 @@ const TEAM_ITEMS = [
     link: "https://www.si.umich.edu/people/iman-yeckehzaare",
   },
   {
+    id: "item-3",
+    title: "1Cademy Advisor",
+    subtitle: "Joel Podolny",
+    image: "home/about/03.png",
+    description: (
+      <>
+        <Typography>
+          Joel Podolny is a highly regarded sociologist and CEO of Honor Education. Prior to his current position, Joel
+          served as Vice President of Apple and was the founding Dean of Apple University, where he oversaw the
+          company's internal training program.
+        </Typography>
+        <Typography>
+          Joel's educational background is equally impressive. He was Dean and Professor of Management at the Yale
+          School of Management and held professorships at the Harvard Business School and Stanford Graduate School of
+          Business. During his tenure at Stanford, he served as senior associate dean and taught courses in business
+          strategy, organizational behavior, and global management. At Harvard, he was a professor and director of
+          research. In 2006, Joel led a major restructuring of the Yale MBA curriculum to better prepare students for
+          the complex and cross-functional global environment.
+        </Typography>
+      </>
+    ),
+    link: "https://www.linkedin.com/in/joel-podolny-58395a63",
+  },
+  {
+    id: "item-3",
+    title: "1Cademy Advisor",
+    subtitle: "Roby Harrington",
+    image: "home/about/roby.jpg",
+    description: (
+      <>
+        <Typography>
+          Roby Harrington is a prominent figure in the American publishing industry, having previously served as the
+          Vice-Chairman of W. W. Norton & Company, a major book publishing company. During his time at Norton, he
+          oversaw the publication of numerous academic titles and textbooks as the Director of the College Department, a
+          position he held for many years.
+        </Typography>
+        <Typography>
+          Aside from his work in publishing, Harrington is also actively involved in preserving the legacy of President
+          Calvin Coolidge. He currently serves as a board member of the Coolidge Foundation, a non-profit organization
+          that aims to promote and educate the public about Coolidge's contributions to American history and politics.
+          Harrington's extensive experience in the publishing industry and commitment to preserving history have made
+          him a respected and influential figure in both fields.
+        </Typography>
+      </>
+    ),
+    link: "https://www.linkedin.com/in/roby-harrington-7860a1137",
+  },
+
+  {
     id: "item-2",
     title: "1Cademy Advisor",
     subtitle: "Paul Resnick",
@@ -60,30 +109,6 @@ const TEAM_ITEMS = [
       </>
     ),
     link: "https://www.si.umich.edu/people/paul-resnick",
-  },
-  {
-    id: "item-3",
-    title: "1Cademy Advisor",
-    subtitle: "Joel Podolny",
-    image: "home/about/03.jpg",
-    description: (
-      <>
-        <Typography>
-          Joel Podolny is a highly regarded sociologist and CEO of Honor Education. Prior to his current position, Joel
-          served as Vice President of Apple and was the founding Dean of Apple University, where he oversaw the
-          company's internal training program.
-        </Typography>
-        <Typography>
-          Joel's educational background is equally impressive. He was Dean and Professor of Management at the Yale
-          School of Management and held professorships at the Harvard Business School and Stanford Graduate School of
-          Business. During his tenure at Stanford, he served as senior associate dean and taught courses in business
-          strategy, organizational behavior, and global management. At Harvard, he was a professor and director of
-          research. In 2006, Joel led a major restructuring of the Yale MBA curriculum to better prepare students for
-          the complex and cross-functional global environment.
-        </Typography>
-      </>
-    ),
-    link: "",
   },
 ];
 

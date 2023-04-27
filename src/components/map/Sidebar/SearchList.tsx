@@ -427,7 +427,7 @@ const SearchList = ({ openLinkedNode }: SearchListProps) => {
       <div id="SearchBoxContainer">
         {showTagSelector && (
           <div id="tagModal">
-            <Modal onClick={setShowTagSelectorClick} returnLeft={true}>
+            <Modal onClick={setShowTagSelectorClick} returnLeft={true} className="ModalBody">
               <MemoizedTagsSearcher
                 allTags={allTags}
                 setAllTags={setAllTags}

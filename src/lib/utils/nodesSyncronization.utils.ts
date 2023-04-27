@@ -47,6 +47,8 @@ export const getNodes = async (db: Firestore, nodeIds: string[]): Promise<NodesD
 
     const tmpData = nodeDoc.data();
     delete tmpData?.height; // IMPORTANT: we are removing height to not spoil height in dagre // DON'T remove this
+    delete tmpData?.visible; // IMPORTANT: visible wont exist on DB, that value is calculated by notebooks // REMOVE after update backend and DB
+    delete tmpData?.open; // IMPORTANT: open wont exist on DB, that value is calculated by expands // REMOVE after update backend and DB
     const nData: NodeFireStore = tmpData as NodeFireStore;
     // if (nData.deleted) return null;
     if (nData.deleted) {

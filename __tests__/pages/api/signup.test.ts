@@ -112,6 +112,24 @@ describe("/signup", () => {
     expect(institutionData.users.includes(body.data.uname)).toBeTruthy();
   });
 
+  let notebookId: string = "";
+  it("new user should have a default notebook", async () => {
+    const notebooks = await db.collection("notebooks").where("owner", "==", body.data.uname).limit(1).get();
+    expect(notebooks.docs.length).toEqual(1);
+    notebookId = notebooks.docs[0].id;
+  });
+
+  it("root userNode should have expanded on default notebook", async () => {
+    const userNodes = await db
+      .collection("userNodes")
+      .where("notebooks", "array-contains", notebookId)
+      .where("user", "==", body.data.uname)
+      .where("node", "==", body.data.tagId)
+      .limit(1)
+      .get();
+    expect(userNodes.docs.length).toEqual(1);
+  });
+
   afterAll(async () => {
     await deleteAllUsers();
     await Promise.all(collects.map(collect => collect.clean()));

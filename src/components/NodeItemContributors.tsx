@@ -39,7 +39,7 @@ const NodeItemContributors: FC<Props> = ({ contributors, institutions }) => {
           reputation={el.reputation || 0}
           isChamp={idx === 0}
           renderAsAvatar={false}
-          href={`${ROUTES.home}?institutions=${el.id}`}
+          href={`${ROUTES.search}?institutions=${el.id}`}
         />
       </Grid>
     ));
