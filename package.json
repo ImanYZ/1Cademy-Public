@@ -21,7 +21,7 @@
     "cy:open": "cypress open",
     "test": "jest --watch --runInBand",
     "test:coverage": "firebase emulators:exec  --project test --only auth,firestore 'jest --watch --coverage --all --runInBand'",
-    "test:ci": "firebase emulators:exec  --project test --only auth,firestore 'jest --ci --runInBand'",
+    "test:ci": "firebase emulators:exec  --project test --only auth,firestore 'jest --ci --runInBand __tests__/utils && jest --ci --runInBand __tests__/pages'",
     "run-emulator": "firebase emulators:start --project test --only auth,firestore"
   },
   "author": "Iman YeckehZaare",
