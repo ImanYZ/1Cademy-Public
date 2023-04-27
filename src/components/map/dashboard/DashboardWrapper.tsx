@@ -23,17 +23,18 @@ export const DashboardWrapper = ({ user, onClose, sx }: DashboardWrapperProps) =
   //   const [courses, setCourses] = useState<any[]>([]);
   //   const [selectedCourse, setSelectedCourse] = useState<string | null>(null);
   const [currentSemester /* setCurrentSemester */] = useState<ICourseTag | null>({
-    cTagId: "27bDHjvlG9aJTO0NNKF5",
-    cTitle: "CS105",
     pTagId: "1YS1DzzS3vKW5yZ3Rsot",
+    uTagId: "13LYVLypMpxl3BBCbNjg",
+    title: "Fall 2022",
+    uTitle: "University of Michigan - Ann Arbor",
+    cTitle: "CS105",
     pTitle: "B.S. in Computer Science",
     tagId: "uKI3kMAhMllXyahRayEO",
-    title: "Fall 2022",
-    uTagId: "13LYVLypMpxl3BBCbNjg",
-    uTitle: "University of Michigan - Ann Arbor",
+    cTagId: "27bDHjvlG9aJTO0NNKF5",
   });
   //   const [allSemesters, setAllSemesters] = useState<Semester[]>([]);
 
+  console.log({ user, currentSemester });
   return (
     <Box
       sx={{
@@ -50,7 +51,17 @@ export const DashboardWrapper = ({ user, onClose, sx }: DashboardWrapperProps) =
         toolbar
         <button onClick={onClose}>......................Close</button>
       </div>
-      <Box sx={{ width: "100%", height: "100%", border: "solid 2px royalBlue", overflowY: "auto", p: "40px 32px" }}>
+      <Box
+        className="wide scroll-styled"
+        sx={{
+          width: "100%",
+          height: "100%",
+          border: "solid 2px royalBlue",
+          overflowY: "auto",
+          overflowX: "hidden",
+          p: "40px 32px",
+        }}
+      >
         {currentSemester ? (
           <Dashboard user={user} currentSemester={currentSemester} />
         ) : (
