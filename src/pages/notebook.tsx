@@ -6077,11 +6077,7 @@ const Dashboard = ({}: DashboardProps) => {
       )}
       <Box
         id="Map"
-        className={
-          notebookRef.current.choosingNode && notebookRef.current.choosingNode.type !== "Reference"
-            ? "ChoosableNotebook"
-            : ""
-        }
+        className={notebookRef.current.choosingNode ? "ChoosableNotebook" : ""}
         sx={{
           overflow: "hidden",
           position: "relative",

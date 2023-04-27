@@ -330,6 +330,8 @@ NodeProps) => {
     to: { left: "600px", zIndex: 0 },
   });
 
+  const [toBeElligible, setToBeElligible] = useState(false);
+
   const disableTitle = disabled && !enableChildElements.includes(`${identifier}-node-title`);
   const disableContent = disabled && !enableChildElements.includes(`${identifier}-node-content`);
   const disableWhy = disabled && !enableChildElements.includes(`${identifier}-node-why`);
@@ -719,6 +721,36 @@ NodeProps) => {
     }
   };
 
+  const onMouseOverHandler = () => {
+    if (!notebookRef.current.choosingNode) return;
+    if (notebookRef.current.choosingNode.id === identifier) return;
+
+    notebookRef.current.chosenNode = {
+      id: identifier,
+      title,
+    };
+    console.log({ elligible: notebookRef.current.chosenNode.id });
+    if (notebookRef.current.choosingNode.type === "Reference" && nodeType !== "Reference") {
+      setToBeElligible(false);
+      console.log("elligible", false);
+      return;
+    }
+    console.log(
+      "elligible",
+      notebookRef.current.choosingNode &&
+        notebookRef.current.chosenNode &&
+        notebookRef.current.chosenNode.id === identifier &&
+        toBeElligible
+    );
+    setToBeElligible(true);
+  };
+
+  const onMouseLeaveHandler = () => {
+    if (notebookRef.current.choosingNode && notebookRef.current.choosingNode.id !== identifier) {
+      notebookRef.current.chosenNode = null;
+      setToBeElligible(false);
+    }
+  };
   if (!user) {
     return null;
   }
@@ -727,14 +759,37 @@ NodeProps) => {
       ref={nodeRef}
       id={identifier}
       onClick={nodeClickHandler}
+      onMouseEnter={onMouseOverHandler}
+      onMouseLeave={onMouseLeaveHandler}
       data-hoverable={true}
       className={
         "Node card" +
         (activeNode ? " active" : "") +
         (changed || !isStudied ? " Changed" : "") +
         (isHiding ? " IsHiding" : "") +
-        (nodeType === "Reference" ? " Choosable" : "")
+        (notebookRef.current.choosingNode &&
+        notebookRef.current.chosenNode &&
+        notebookRef.current.chosenNode.id === identifier &&
+        toBeElligible
+          ? " Choosable"
+          : " ")
       }
+      // className={
+      //   "Node card" +
+      //   (props.activeNode
+      //     ? //   &&
+      //       // ["AcceptedProposals", "Proposals", "Comments"].includes(selectionType)
+      //       " active"
+      //     : "") +
+      //   (props.changed || !props.isStudied ? " Changed" : "") +
+      //   (isHiding ? " IsHiding" : "") +
+      //   (choosingNode &&
+      //   choosingNode !== props.identifier &&
+      //   !props.activeNode &&
+      //   (choosingType !== "Reference" || props.nodeType === "Reference")
+      //     ? " Choosable"
+      //     : "")
+      // }
       style={{
         left: left ? left : 1000,
         top: top ? top : 1000,
