@@ -218,7 +218,7 @@ const NodeFooter = ({
   const disableUpvoteButton = disabled && !enableChildElements.includes(upvoteButtonId);
   const disableTagsCitationsButton = disabled && !enableChildElements.includes(tagsCitationsButtonId);
   const disableParentChildrenButton = disabled && !enableChildElements.includes(parentChildrenButtonId);
-  const disableMoreOptionsButton = disabled && !enableChildElements.includes(moreOptionsButtonId);
+  const disableMoreOptionsButton = editable;
   const disableFooterMenuOptions = enableChildElements.includes(moreOptionsButtonId);
   const disableNodeTypeSelector = disabled && !enableChildElements.includes(nodeTypeSelectorId);
 
