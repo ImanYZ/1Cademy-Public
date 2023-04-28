@@ -1,4 +1,4 @@
-import { Timestamp, WriteBatch } from "firebase-admin/firestore";
+import { DocumentSnapshot, Timestamp, WriteBatch } from "firebase-admin/firestore";
 import { checkRestartBatchWriteCounts, db, MAX_TRANSACTION_WRITES, TWriteOperation } from "@/lib/firestoreServer/admin";
 import { NodeType } from "src/types";
 import {
@@ -16,6 +16,8 @@ import { IUserNodeVersion } from "src/types/IUserNodeVersion";
 import { SemesterStudentStat, SemesterStudentVoteStat } from "src/instructorsTypes";
 import moment from "moment";
 import { INodeType } from "src/types/INodeType";
+import { IPractice } from "src/types/IPractice";
+import { IUserNode } from "src/types/IUserNode";
 
 export const createOrRestoreStatDocs = async (
   semesterId: string,
@@ -120,6 +122,73 @@ export const createOrRestoreStatDocs = async (
     } as ISemesterStudentSankey);
   }
   return [batch, writeCounts];
+};
+
+type INodePracticePresentableParams = {
+  nodeId: string;
+  tagId: string;
+  user: string;
+};
+export const isNodePracticePresentable = async ({
+  nodeId,
+  tagId,
+  user,
+}: INodePracticePresentableParams): Promise<IPractice | null> => {
+  const practices = await db
+    .collection("practice")
+    .where("user", "==", user)
+    .where("tagId", "==", tagId)
+    .where("node", "==", nodeId)
+    .limit(1)
+    .get();
+  if (practices.docs.length) {
+    const practice = practices.docs[0].data() as IPractice;
+    const nextDate = practice.nextDate as Timestamp;
+    if (!practice.lastPresented || (practice.nextDate && moment().isSameOrBefore(nextDate.toDate())) || !practice.q) {
+      practice.documentId = practices.docs[0].id;
+      return practice;
+    }
+  }
+  return null;
+};
+
+type IGetOrCreateUserNodeParams = {
+  nodeId: string;
+  user: string;
+};
+export const getOrCreateUserNode = async ({
+  nodeId,
+  user,
+}: IGetOrCreateUserNodeParams): Promise<DocumentSnapshot<any>> => {
+  const userNodes = await db
+    .collection("userNodes")
+    .where("user", "==", user)
+    .where("node", "==", nodeId)
+    .limit(1)
+    .get();
+  if (userNodes.docs.length) {
+    return userNodes.docs[0];
+  }
+  const userNodeData: IUserNode = {
+    changed: false,
+    correct: false,
+    deleted: false,
+    isStudied: false,
+    bookmarked: false,
+    node: nodeId,
+    notebooks: [],
+    expands: [],
+    open: true,
+    user,
+    visible: true,
+    wrong: false,
+    nodeChanges: {},
+    createdAt: new Date(),
+    updatedAt: new Date(),
+  };
+  const userNodeRef = db.collection("userNodes").doc();
+  await userNodeRef.set(userNodeData);
+  return userNodeRef.get();
 };
 
 export const getSemesterIdsFromTagIds = async (tagIds: string[]) => {
