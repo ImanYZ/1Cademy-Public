@@ -300,6 +300,8 @@ MainSidebarProps) => {
         usersInfo: {},
         createdAt: Timestamp.fromDate(new Date()),
         updatedAt: Timestamp.fromDate(new Date()),
+        defaultTagId: user.tagId ?? "",
+        defaultTagName: user.tag ?? "",
       };
       const notebooksRef = collection(db, "notebooks");
       const docRef = await addDoc(notebooksRef, newNotebook);
@@ -311,7 +313,7 @@ MainSidebarProps) => {
     } finally {
       setIsCreatingNotebook(false);
     }
-  }, [db, notebooks.length, onChangeNotebook, user.chooseUname, user.fName, user.imageUrl, user.uname]);
+  }, [db, notebooks.length, onChangeNotebook, user.chooseUname, user.fName, user.imageUrl, user.tagId, user.uname]);
 
   const onUpdateNotebookTitle = useCallback(async () => {
     try {
@@ -340,6 +342,8 @@ MainSidebarProps) => {
         usersInfo: {},
         createdAt: Timestamp.fromDate(new Date()),
         updatedAt: Timestamp.fromDate(new Date()),
+        defaultTagId: user.tagId ?? "",
+        defaultTagName: user.tag ?? "",
       };
       const notebooksRef = collection(db, "notebooks");
       const docRef = await addDoc(notebooksRef, copyNotebook);
@@ -362,7 +366,7 @@ MainSidebarProps) => {
     } finally {
       setIsCreatingNotebook(false);
     }
-  }, [db, editableNotebook, notebooks, openNodesOnNotebook, user.chooseUname, user.fName]);
+  }, [db, editableNotebook, notebooks, openNodesOnNotebook, user.chooseUname, user.fName, user.tagId]);
 
   const onCopyNotebookUrl = useCallback(() => {
     if (!editableNotebook) return;
