@@ -6062,6 +6062,8 @@ const Dashboard = ({}: DashboardProps) => {
           usersInfo: {},
           createdAt: new Date(),
           updatedAt: new Date(),
+          defaultTagId: notebookData.defaultTagId ?? user.tagId ?? "",
+          defaultTagName: notebookData.defaultTagName ?? user.tag ?? "",
         };
 
         const notebooksRef = collection(db, "notebooks");
