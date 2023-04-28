@@ -816,7 +816,16 @@ describe("POST /api/rateVersion", () => {
             {
               documentId: nodes[0].documentId,
               tagId: nodes[0].documentId,
-              students: [],
+              students: [
+                {
+                  chooseUname: false,
+                  email: users[1].email,
+                  fName: users[1].fName,
+                  lName: users[1].lName,
+                  imageUrl: users[1].imageUrl,
+                  uname: users[1].uname,
+                },
+              ],
               days: 1,
               cTagId: "",
               cTitle: "",
@@ -856,6 +865,7 @@ describe("POST /api/rateVersion", () => {
               },
               syllabus: [],
               title: nodes[0].title,
+              root: nodes[0].documentId!,
               deleted: false,
               updatedAt: Timestamp.now(),
               createdAt: Timestamp.now(),

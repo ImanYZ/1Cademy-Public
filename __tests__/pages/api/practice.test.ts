@@ -92,6 +92,17 @@ describe("POST /practice", () => {
     new MockData(
       [
         {
+          students: [
+            {
+              chooseUname: false,
+              email: users[0].email,
+              fName: users[0].fName,
+              lName: users[0].lName,
+              imageUrl: users[0].imageUrl,
+              uname: users[0].uname,
+            },
+          ],
+          root: nodes[0].documentId!,
           documentId: nodes[0].documentId!,
           tagId: nodes[0].documentId!,
         },

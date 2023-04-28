@@ -18,6 +18,51 @@ import moment from "moment";
 import { INodeType } from "src/types/INodeType";
 import { IPractice } from "src/types/IPractice";
 import { IUserNode } from "src/types/IUserNode";
+import { INode } from "src/types/INode";
+import { createPractice } from "./version-helpers";
+
+export const createPracticeForSemesterStudent = async (
+  semesterId: string,
+  studentUname: string,
+  batch: WriteBatch,
+  writeCounts: number
+) => {
+  const semesterDoc = await db.collection("semesters").doc(semesterId).get();
+  const bfs = async (_nodeIds: string[]) => {
+    const nodeIdsChunk = arrayToChunks(_nodeIds, 10);
+    const cRelationNodes: string[] = [];
+    for (const nodeIds of nodeIdsChunk) {
+      const nodes = await db.collection("nodes").where("__name__", "in", nodeIds).get();
+      for (const node of nodes.docs) {
+        const nodeData = node.data() as INode;
+        for (const child of nodeData.children) {
+          if ((nodeData.nodeType === "Concept" || nodeData.nodeType === "Relation") && child.type === "Question") {
+            // looking for practice
+            [batch, writeCounts] = await createPractice({
+              uname: studentUname,
+              tagIds: [semesterId],
+              nodeId: child.node,
+              parentId: node.id,
+              currentTimestamp: Timestamp.now(),
+              writeCounts,
+              batch,
+            });
+            cRelationNodes.push(child.node);
+          }
+        }
+      }
+    }
+
+    if (!cRelationNodes.length) {
+      return;
+    }
+
+    bfs(cRelationNodes);
+  };
+
+  const semester = semesterDoc.data() as ISemester;
+  await bfs([semester.root]);
+};
 
 export const createOrRestoreStatDocs = async (
   semesterId: string,

@@ -21,7 +21,7 @@ describe("createPractice", () => {
     let nodeDoc: any = await db.collection("nodes").doc("GJfzAY1zbgQs9jU5XeEL").get();
 
     for (const tagId of nodeDoc.data().tagIds) {
-      const courseRef = db.collection("courses").doc(tagId);
+      const courseRef = db.collection("semesters").doc(tagId);
       await courseRef.set({
         tagId,
       });
