@@ -21,9 +21,10 @@ type NodeQuestionProps = {
   node: Node;
   selectedAnswers: boolean[];
   setSelectedIdxAnswer: (newValue: number) => void;
+  submitAnswer: boolean;
 };
 
-const NodeQuestion = ({ node, selectedAnswers, setSelectedIdxAnswer }: NodeQuestionProps) => {
+const NodeQuestion = ({ node, selectedAnswers, setSelectedIdxAnswer, submitAnswer }: NodeQuestionProps) => {
   const [displayTags, setDisplayTags] = useState(false);
 
   const otherTags = useMemo(() => {
@@ -151,7 +152,7 @@ const NodeQuestion = ({ node, selectedAnswers, setSelectedIdxAnswer }: NodeQuest
                 {selectedAnswers[idx] && !cur.correct && <CloseIcon sx={{ fontSize: "12px" }} />}
               </Box>
             </ListItem>
-            {selectedAnswers[idx] && <Typography sx={{ mt: "8px" }}>{cur.feedback}</Typography>}
+            {selectedAnswers[idx] && submitAnswer && <Typography sx={{ mt: "8px" }}>{cur.feedback}</Typography>}
           </Box>
         ))}
       </Stack>
@@ -356,6 +357,7 @@ export const PracticeQuestion = ({ onClose }: PracticeQuestionProps) => {
           node={selectedQuestion.question}
           selectedAnswers={selectedAnswers}
           setSelectedIdxAnswer={onSelectAnswer}
+          submitAnswer={submitAnswer}
         />
 
         <Box sx={{ display: "flex", justifyContent: "space-between", mt: "32px" }}>
