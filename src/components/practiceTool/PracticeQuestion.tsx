@@ -7,7 +7,7 @@ import LocalOfferIcon from "@mui/icons-material/LocalOffer";
 import { Button, ClickAwayListener, Divider, IconButton, ListItem, Tooltip, Typography } from "@mui/material";
 import { Box, Stack } from "@mui/system";
 import { getFirestore } from "firebase/firestore";
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, { ReactNode, useCallback, useEffect, useMemo, useState } from "react";
 
 import { getRootQuestionDescendants } from "../../client/services/nodes.sercice";
 import { DESIGN_SYSTEM_COLORS } from "../../lib/theme/colors";
@@ -343,11 +343,13 @@ export const PracticeQuestion = ({ onClose }: PracticeQuestionProps) => {
       </Stack>
 
       <Box sx={{ maxWidth: "820px", m: "auto" }}>
-        <Typography
-          sx={{ textAlign: "center", color: theme => theme.palette.common.primary800, mb: "12px", fontWeight: 600 }}
-        >
-          {questions.length - selectedQuestion.idx} questions left to get today’s point!{" "}
-        </Typography>
+        <QuestionMessage
+          messages={[
+            `7 questions left to get today’s point.`,
+            `You have completed 19 days out of 45 days of your review practice.`,
+            `24 days are remaining to the end of the semester.`,
+          ]}
+        />
         <NodeQuestion
           node={selectedQuestion.question}
           selectedIdxAnswer={selectedAnswers}
@@ -426,6 +428,40 @@ export const PracticeQuestion = ({ onClose }: PracticeQuestionProps) => {
         </IconButton>
         <UserStatus />
       </Box>
+    </Box>
+  );
+};
+
+type CustomTextProps = { children: ReactNode };
+
+const CustomText = ({ children }: CustomTextProps) => (
+  <Typography
+    sx={{
+      color: theme =>
+        theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.yellow100 : DESIGN_SYSTEM_COLORS.notebookO900,
+      fontWeight: 400,
+    }}
+  >
+    {children}
+  </Typography>
+);
+
+type QuestionMessageProps = {
+  messages: string[];
+};
+const QuestionMessage = ({ messages }: QuestionMessageProps) => {
+  return (
+    <Box
+      sx={{
+        p: "20px 24px",
+        mb: "12px",
+        border: "26px",
+        backgroundColor: theme => (theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.yellow1000 : "#FFF3E5"),
+      }}
+    >
+      {messages.map((c, i) => (
+        <CustomText key={i}>{c}</CustomText>
+      ))}
     </Box>
   );
 };
