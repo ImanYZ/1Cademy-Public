@@ -3,6 +3,8 @@ import { Box, Paper, Stack, Tab, Tabs, Typography, useMediaQuery, useTheme } fro
 import { collection, getFirestore, onSnapshot, query, where } from "firebase/firestore";
 import React, { useCallback, useEffect, useState } from "react";
 
+import { DESIGN_SYSTEM_COLORS } from "@/lib/theme/colors";
+
 import { useWindowSize } from "../../../hooks/useWindowSize";
 import {
   BubbleAxis,
@@ -56,6 +58,9 @@ type DashboardProps = { user: User; currentSemester: ICourseTag };
 
 export const Dashboard = ({ user, currentSemester }: DashboardProps) => {
   const theme = useTheme();
+  const {
+    palette: { mode },
+  } = theme;
   const db = getFirestore();
 
   const { width: windowWidth } = useWindowSize();
@@ -780,11 +785,13 @@ export const Dashboard = ({ user, currentSemester }: DashboardProps) => {
             </Tabs>
             <Paper
               sx={{
-                p: isMovil ? "10px" : "16px",
+                p: isMovil ? "10px" : "40px 60px",
                 display: trendStats[trendStat].length > 0 ? "flex" : "none",
                 alignItems: "center",
                 justifyContent: "center",
-                backgroundColor: theme => (theme.palette.mode === "light" ? "#FFFFFF" : undefined),
+                backgroundColor:
+                  mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookMainBlack : DESIGN_SYSTEM_COLORS.baseWhite,
+                borderRadius: "8px",
               }}
             >
               <TrendPlot
@@ -798,7 +805,7 @@ export const Dashboard = ({ user, currentSemester }: DashboardProps) => {
                 labelX={"Day"}
                 scaleY={"linear"}
                 labelY={"# of edit Proposals"}
-                theme={theme.palette.mode === "dark" ? "Dark" : "Light"}
+                theme={mode === "dark" ? "Dark" : "Light"}
                 x="date"
                 y="num"
                 trendData={trendStats[trendStat]}

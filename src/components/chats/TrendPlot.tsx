@@ -11,6 +11,8 @@ import {
   VictoryZoomContainer,
 } from "victory";
 
+import { DESIGN_SYSTEM_COLORS } from "@/lib/theme/colors";
+
 import { UserTheme } from "../../knowledgeTypes";
 
 type TrendPlotProps = {
@@ -83,7 +85,7 @@ export const TrendPlot = ({
           width={width}
           height={heightTop}
           theme={VictoryTheme.material}
-          domainPadding={25}
+          domainPadding={30}
           // scale={{ x: props.scaleX }}
           // scale={{props.scaleX}}
           scale={{ x: scaleX, y: "linear" }}
@@ -97,15 +99,16 @@ export const TrendPlot = ({
             label={labelX}
             axisLabelComponent={<VictoryLabel dy={25} />}
             style={{
+              axis: { size: 0, strokeWidth: 1, stroke: DESIGN_SYSTEM_COLORS.notebookG200 },
               tickLabels: {
                 fontSize: 13,
-                fill: theme === "Dark" ? "white" : "#454545",
+                fill: theme === "Dark" ? DESIGN_SYSTEM_COLORS.gray50 : DESIGN_SYSTEM_COLORS.gray800,
               },
               axisLabel: {
                 fill: theme === "Dark" ? "white" : "#454545",
               },
               grid: {
-                stroke: theme === "Dark" ? "white" : "#454545",
+                stroke: theme === "Dark" ? DESIGN_SYSTEM_COLORS.notebookG200 : DESIGN_SYSTEM_COLORS.gray300,
               },
               ticks: { size: 0 },
             }}
@@ -117,6 +120,7 @@ export const TrendPlot = ({
             label={labelY}
             axisLabelComponent={<VictoryLabel dy={-40} />}
             style={{
+              axis: { size: 0, strokeWidth: 1, stroke: DESIGN_SYSTEM_COLORS.notebookG200 },
               tickLabels: {
                 fontSize: 13,
                 fill: theme === "Dark" ? "white" : "#454545",
@@ -125,14 +129,15 @@ export const TrendPlot = ({
                 fill: theme === "Dark" ? "white" : "#454545",
               },
               grid: {
-                stroke: theme === "Dark" ? "white" : "#454545",
+                stroke: theme === "Dark" ? DESIGN_SYSTEM_COLORS.notebookG200 : DESIGN_SYSTEM_COLORS.gray300,
               },
               ticks: { size: 1 },
             }}
           />
           <VictoryBar
+            barWidth={2}
             style={{
-              data: { fill: "tomato" },
+              data: { fill: DESIGN_SYSTEM_COLORS.primary600 },
             }}
             data={trendData}
             x={x}
@@ -154,8 +159,8 @@ export const TrendPlot = ({
               brushDimension="x"
               brushStyle={{
                 stroke: "transparent",
-                fill: theme === "Dark" ? "white" : "#454545",
-                fillOpacity: 0.4,
+                fill: DESIGN_SYSTEM_COLORS.notebookO900,
+                fillOpacity: 0.6,
               }}
               brushDomain={zoomDomain}
               onBrushDomainChange={setZoomDomain}
@@ -165,18 +170,21 @@ export const TrendPlot = ({
           <VictoryAxis
             scale={scaleX}
             style={{
+              axis: { size: 0, strokeWidth: 1, stroke: DESIGN_SYSTEM_COLORS.notebookG200 },
+
               tickLabels: {
                 fontSize: 13,
                 fill: theme === "Dark" ? "white" : "#454545",
               },
               grid: {
-                stroke: theme === "Dark" ? "white" : "#454545",
+                stroke: theme === "Dark" ? DESIGN_SYSTEM_COLORS.notebookG200 : DESIGN_SYSTEM_COLORS.gray300,
               },
             }}
           />
           <VictoryBar
+            barWidth={2}
             style={{
-              data: { fill: "tomato" },
+              data: { fill: DESIGN_SYSTEM_COLORS.primary600 },
             }}
             data={trendData}
             x={x}

@@ -130,7 +130,7 @@ const TrendsPlotRow = (props: TrendsPlotRowProps) => {
             }}
           />
           <VictoryBar
-            barWidth={2}
+            barWidth={4}
             style={{
               data: { fill: DESIGN_SYSTEM_COLORS.primary600 },
             }}
@@ -177,6 +177,7 @@ const TrendsPlotRow = (props: TrendsPlotRowProps) => {
               ticks: { size: 0 },
               grid: {
                 stroke: props.theme === "dark" ? DESIGN_SYSTEM_COLORS.notebookG500 : DESIGN_SYSTEM_COLORS.gray300,
+                strokeDasharray: null,
               },
             }}
           />
