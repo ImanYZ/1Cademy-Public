@@ -21,12 +21,12 @@ import { IUserNode } from "src/types/IUserNode";
 import { INode } from "src/types/INode";
 import { createPractice } from "./version-helpers";
 
-export const createPracticeForSemesterStudent = async (
+export const createPracticeForSemesterStudents = async (
   semesterId: string,
-  studentUname: string,
+  studentUnames: string[],
   batch: WriteBatch,
   writeCounts: number
-) => {
+): Promise<[WriteBatch, number]> => {
   const semesterDoc = await db.collection("semesters").doc(semesterId).get();
   const bfs = async (_nodeIds: string[]) => {
     const nodeIdsChunk = arrayToChunks(_nodeIds, 10);
@@ -39,7 +39,7 @@ export const createPracticeForSemesterStudent = async (
           if ((nodeData.nodeType === "Concept" || nodeData.nodeType === "Relation") && child.type === "Question") {
             // looking for practice
             [batch, writeCounts] = await createPractice({
-              unames: [studentUname],
+              unames: studentUnames,
               tagIds: [semesterId],
               nodeId: child.node,
               parentId: node.id,
@@ -62,6 +62,8 @@ export const createPracticeForSemesterStudent = async (
 
   const semester = semesterDoc.data() as ISemester;
   await bfs([semester.root]);
+
+  return [batch, writeCounts];
 };
 
 export const createOrRestoreStatDocs = async (
