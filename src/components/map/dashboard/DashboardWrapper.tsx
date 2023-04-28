@@ -162,6 +162,7 @@ export const DashboardWrapper = ({ user, onClose, sx }: DashboardWrapperProps) =
     setCurrentSemester(current ?? null);
   }, [instructor, selectedCourse]);
 
+  console.log({ user, currentSemester });
   return (
     <Box
       sx={{

@@ -10,6 +10,7 @@ import {
   GeneralSemesterStudentsStats,
   MaxPoints,
   SemesterStudentStat,
+  SemesterStudentVoteStat,
   StackedBarStats,
 } from "../../../instructorsTypes";
 import { User } from "../../../knowledgeTypes";
@@ -48,6 +49,8 @@ import { BubblePlotStatsSkeleton } from "../../instructors/skeletons/BubblePlotS
 import { GeneralPlotStatsSkeleton } from "../../instructors/skeletons/GeneralPlotStatsSkeleton";
 import { StackedBarPlotStatsSkeleton } from "../../instructors/skeletons/StackedBarPlotStatsSkeleton";
 import { StudentDailyPlotStatsSkeleton } from "../../instructors/skeletons/StudentDailyPlotStatsSkeleton";
+import Leaderboard from "../../practiceTool/Leaderboard";
+import { UserStatus } from "../../practiceTool/UserStatus";
 
 type DashboardProps = { user: User; currentSemester: ICourseTag };
 
@@ -107,7 +110,7 @@ export const Dashboard = ({ user, currentSemester }: DashboardProps) => {
   const GRID_WIDTH = windowWidth - TOOLBAR_WIDTH - 2 * WRAPPER_PADDING;
   const bubbleChartWidth = isMovil ? windowWidth - 10 - 20 - 10 : GRID_WIDTH - infoWidth - stackBarWidth - 40 - 16;
   const trendPlotWith = isMovil ? windowWidth - 60 : isTablet ? GRID_WIDTH - 100 : GRID_WIDTH - 150;
-  const boxPlotWidth = isXlDesktop ? 500 : isLgDesktop ? 320 : isDesktop ? 230 : 220;
+  const boxPlotWidth = isXlDesktop ? 500 : isLgDesktop ? 300 : isDesktop ? 230 : 220;
 
   const infoWrapperRef = useCallback((element: HTMLDivElement) => {
     if (!element) return;
@@ -428,6 +431,26 @@ export const Dashboard = ({ user, currentSemester }: DashboardProps) => {
 
   return (
     <Stack spacing={"24px"} sx={{ width: "100%" }}>
+      {user.role === "STUDENT" && (
+        <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", md: "1fr 1fr" }, gap: "16px" }}>
+          <Paper
+            sx={{
+              p: { sm: "10px", md: "16px" },
+              backgroundColor: theme => (theme.palette.mode === "light" ? "#FFFFFF" : undefined),
+            }}
+          >
+            <UserStatus />
+          </Paper>
+          <Paper
+            sx={{
+              p: { sm: "10px", md: "16px" },
+              backgroundColor: theme => (theme.palette.mode === "light" ? "#FFFFFF" : undefined),
+            }}
+          >
+            <Leaderboard />
+          </Paper>
+        </Box>
+      )}
       <Box
         sx={{
           display: "grid",
@@ -697,7 +720,7 @@ export const Dashboard = ({ user, currentSemester }: DashboardProps) => {
                 {"Collaborations"}
               </Box>
               <SankeyChart
-                innerWidth={windowWidth}
+                innerWidth={GRID_WIDTH}
                 labelCounts={parseInt(String(students?.length))}
                 sankeyData={sankeyData}
               />
