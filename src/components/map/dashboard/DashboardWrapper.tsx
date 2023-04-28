@@ -71,7 +71,7 @@ export const DashboardWrapper = ({ user, onClose, sx }: DashboardWrapperProps) =
         }, {});
 
         // const semester = allSemesters.map(cur => cur.title);
-
+        setAllSemesters(semesters);
         setAllCourses(coursesResult);
         // setSelectedSemester(semester[0]);
       }),
@@ -150,10 +150,18 @@ export const DashboardWrapper = ({ user, onClose, sx }: DashboardWrapperProps) =
 
     const firstCourse = selectCourse(courses[0], instructor);
     if (!firstCourse) return;
-
+    console.log({ firstCourse });
     setCurrentSemester(firstCourse);
     setSelectedCourse(courses[0]);
   }, [allCourses, currentSemester, instructor, selectedCourse]);
+
+  useEffect(() => {
+    if (instructor) return;
+    if (!currentSemester) return;
+    const newCourses = getCourseBySemester(currentSemester?.title, allCourses);
+
+    setSelectedCourse(newCourses[0]);
+  }, [allCourses, currentSemester, instructor]);
 
   useEffect(() => {
     if (!instructor) return;
@@ -211,10 +219,10 @@ const getCoursesByInstructor = (instructor: Instructor): CoursesResult => {
   }, {});
 };
 
-// const getCourseBySemester = (semester: string | undefined, courses: { [key: string]: string[] }): string[] => {
-//   if (!semester) return [];
-//   return courses[semester] ?? [];
-// };
+const getCourseBySemester = (semester: string | undefined, courses: { [key: string]: string[] }): string[] => {
+  if (!semester) return [];
+  return courses[semester] ?? [];
+};
 
 const getSemesterByIds = async (db: Firestore, semesterIds: string[]) => {
   const semestersDocsPromises = semesterIds.map((semesterId: string) => {

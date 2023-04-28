@@ -1,5 +1,5 @@
 import SquareIcon from "@mui/icons-material/Square";
-import { Box, Paper, Stack, Tab, Tabs, Typography, useMediaQuery, useTheme } from "@mui/material";
+import { Box, Paper, Stack, Typography, useMediaQuery, useTheme } from "@mui/material";
 import { collection, getFirestore, onSnapshot, query, where } from "firebase/firestore";
 import React, { useCallback, useEffect, useState } from "react";
 
@@ -101,7 +101,7 @@ export const Dashboard = ({ user, currentSemester }: DashboardProps) => {
     questions: [],
   });
 
-  const [value, setValue] = React.useState(0);
+  // const [value, setValue] = React.useState(0);
 
   const trendPlotHeightTop = isMovil ? 150 : isTablet ? 250 : 354;
   const trendPlotHeightBottom = isMovil ? 80 : isTablet ? 120 : 160;
@@ -124,9 +124,9 @@ export const Dashboard = ({ user, currentSemester }: DashboardProps) => {
     setstackBarWidth(element.clientWidth);
   }, []);
 
-  const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
-    setValue(newValue);
-  };
+  // const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
+  //   setValue(newValue);
+  // };
   // ---- ---- ---- ----
   // ---- ---- ---- ---- useEffects
   // ---- ---- ---- ----
@@ -757,7 +757,7 @@ export const Dashboard = ({ user, currentSemester }: DashboardProps) => {
           </Paper>
         )}
 
-        <Tabs id="user-settings-personalization" value={value} onChange={handleTabChange} aria-label={"Trend Tabs"}>
+        {/* <Tabs id="user-settings-personalization" value={value} onChange={handleTabChange} aria-label={"Trend Tabs"}>
           {Object.keys(trendStats).map((key: string, idx: number) => (
             <Tab
               key={`${key}-${idx}`}
@@ -765,7 +765,7 @@ export const Dashboard = ({ user, currentSemester }: DashboardProps) => {
               sx={{ flex: 1 }}
             />
           ))}
-        </Tabs>
+        </Tabs> */}
 
         {!isLoading && (
           <>
