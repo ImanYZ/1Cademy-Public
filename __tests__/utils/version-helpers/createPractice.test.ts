@@ -32,7 +32,7 @@ describe("createPractice", () => {
       tagIds: nodeDoc.data().tagIds,
       nodeId: nodeDoc.data().title,
       parentId: nodeDoc.data().parents?.[0]?.node || "",
-      uname: "1man",
+      unames: ["1man"],
       currentTimestamp,
       writeCounts,
     });

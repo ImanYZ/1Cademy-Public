@@ -327,7 +327,7 @@ export const compareFlatLinks = ({ links1, links2 }: any) => {
 
 export const createPractice = async ({
   batch,
-  uname,
+  unames,
   tagIds,
   nodeId,
   parentId,
@@ -344,8 +344,8 @@ export const createPractice = async ({
   const semesterIds = await getSemesterIdsFromTagIds(tagIds);
   for (const tagId of semesterIds) {
     const userIds: string[] = [];
-    if (uname) {
-      userIds.push(uname);
+    if (unames && Array.isArray(unames)) {
+      userIds.push(...unames);
     } else {
       const semesterDoc = await db.collection("semesters").doc(tagId).get();
       const semester = semesterDoc.data() as ISemester;

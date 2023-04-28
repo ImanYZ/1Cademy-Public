@@ -39,7 +39,7 @@ export const createPracticeForSemesterStudent = async (
           if ((nodeData.nodeType === "Concept" || nodeData.nodeType === "Relation") && child.type === "Question") {
             // looking for practice
             [batch, writeCounts] = await createPractice({
-              uname: studentUname,
+              unames: [studentUname],
               tagIds: [semesterId],
               nodeId: child.node,
               parentId: node.id,
