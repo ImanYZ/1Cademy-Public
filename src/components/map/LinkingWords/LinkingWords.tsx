@@ -236,7 +236,7 @@ const LinkingWords = ({
                   </Box>
                 );
               })}
-              {props.parents.length > 0 && !props.isNew && (
+              {props.parents.length > 0 && !props.isNew && !props.editable && (
                 <Button
                   onClick={() => props.openAllParent(props.identifier)}
                   sx={{
@@ -543,7 +543,7 @@ const LinkingWords = ({
                   </Box>
                 );
               })}
-              {props.nodesChildren.length > 0 && !props.isNew && (
+              {props.nodesChildren.length > 0 && !props.isNew && !props.editable && (
                 <Button
                   onClick={() => props.openAllChildren(props.identifier)}
                   sx={{
