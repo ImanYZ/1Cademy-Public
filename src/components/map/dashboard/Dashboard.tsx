@@ -101,7 +101,7 @@ export const Dashboard = ({ user, currentSemester }: DashboardProps) => {
     questions: [],
   });
 
-  const [value, setValue] = useState<keyof TrendStats>("editProposals");
+  const [trendStat, setTrendStat] = useState<keyof TrendStats>("childProposals");
 
   const trendPlotHeightTop = isMovil ? 150 : isTablet ? 250 : 354;
   const trendPlotHeightBottom = isMovil ? 80 : isTablet ? 120 : 160;
@@ -124,9 +124,9 @@ export const Dashboard = ({ user, currentSemester }: DashboardProps) => {
     setstackBarWidth(element.clientWidth);
   }, []);
 
-  const handleTabChange = (event: React.SyntheticEvent, newValue: keyof TrendStats) => {
-    console.log("onchange", { event, newValue });
-    setValue(newValue);
+  const handleTabChange = (event: React.SyntheticEvent, newtrendStat: keyof TrendStats) => {
+    event.preventDefault();
+    setTrendStat(newtrendStat);
   };
 
   // ---- ---- ---- ----
@@ -761,7 +761,12 @@ export const Dashboard = ({ user, currentSemester }: DashboardProps) => {
 
         {!isLoading && (
           <>
-            <Tabs id="user-settings-personalization" value={value} onChange={handleTabChange} aria-label={"Trend Tabs"}>
+            <Tabs
+              id="user-settings-personalization"
+              value={trendStat}
+              onChange={handleTabChange}
+              aria-label={"Trend Tabs"}
+            >
               {Object.keys(trendStats).map((key: string, idx: number) => (
                 <Tab
                   value={key}
@@ -776,14 +781,14 @@ export const Dashboard = ({ user, currentSemester }: DashboardProps) => {
             <Paper
               sx={{
                 p: isMovil ? "10px" : "16px",
-                display: trendStats[value as keyof TrendStats].length > 0 ? "flex" : "none",
+                display: trendStats[trendStat].length > 0 ? "flex" : "none",
                 alignItems: "center",
                 justifyContent: "center",
                 backgroundColor: theme => (theme.palette.mode === "light" ? "#FFFFFF" : undefined),
               }}
             >
               <TrendPlot
-                title={capitalizeFirstLetter(value)
+                title={capitalizeFirstLetter(trendStat)
                   .split(/(?=[A-Z])/)
                   .join(" ")}
                 heightTop={trendPlotHeightTop}
@@ -796,7 +801,7 @@ export const Dashboard = ({ user, currentSemester }: DashboardProps) => {
                 theme={theme.palette.mode === "dark" ? "Dark" : "Light"}
                 x="date"
                 y="num"
-                trendData={trendStats[value as keyof TrendStats]}
+                trendData={trendStats[trendStat]}
               />
             </Paper>
           </>
