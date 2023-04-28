@@ -78,7 +78,7 @@ export const Dashboard = ({ user, currentSemester }: DashboardProps) => {
   const [stackedBar, setStackedBar] = useState<StackedBarStats[]>([]);
   const [proposalsStudents, setProposalsStudents] = useState<StudentStackedBarStatsObject | null>(null);
   const [questionsStudents, setQuestionsStudents] = useState<StudentStackedBarStatsObject | null>(null);
-  const [, /* dailyPraticeStudents */ setDailyPracitceStudents] = useState<StudentStackedBarStatsObject | null>(null);
+  const [dailyPraticeStudents, setDailyPracitceStudents] = useState<StudentStackedBarStatsObject | null>(null);
   const [bubble, setBubble] = useState<BubbleStats[]>([]);
   const [bubbleAxis, setBubbleAxis] = useState<BubbleAxis>({ maxAxisX: 0, maxAxisY: 0, minAxisX: 0, minAxisY: 0 });
   const [semesterConfig, setSemesterConfig] = useState<ISemester | null>(null);
@@ -541,6 +541,7 @@ export const Dashboard = ({ user, currentSemester }: DashboardProps) => {
                   data={stackedBar}
                   proposalsStudents={user.role === "INSTRUCTOR" ? proposalsStudents : null}
                   questionsStudents={user.role === "INSTRUCTOR" ? questionsStudents : null}
+                  dailyPracticeStudents={user.role === "INSTRUCTOR" ? dailyPraticeStudents : null}
                   maxAxisY={studentsCounter}
                   theme={theme.palette.mode === "dark" ? "Dark" : "Light"}
                   mobile={isMovil}

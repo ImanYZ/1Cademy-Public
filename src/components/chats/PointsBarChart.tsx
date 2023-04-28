@@ -40,6 +40,8 @@ function drawChart(
   maxAxisY: number,
   studentProposalsRate: StudentStackedBarStatsObject | null,
   studentQuestionsRate: StudentStackedBarStatsObject | null,
+  studentDailyPracticeRate: StudentStackedBarStatsObject | null,
+
   theme: UserTheme,
   studentLocation?: StudenBarsSubgroupLocation,
   mobile?: boolean,
@@ -316,6 +318,7 @@ type StackedBarProps = {
   data: StackedBarStats[];
   proposalsStudents: StudentStackedBarStatsObject | null;
   questionsStudents: StudentStackedBarStatsObject | null;
+  dailyPracticeStudents: StudentStackedBarStatsObject | null;
   maxAxisY: number;
   theme: UserTheme;
   mobile?: boolean;
@@ -327,6 +330,7 @@ export const PointsBarChart = ({
   data,
   proposalsStudents,
   questionsStudents,
+  dailyPracticeStudents,
   maxAxisY,
   theme,
   studentLocation,
@@ -343,6 +347,7 @@ export const PointsBarChart = ({
         maxAxisY,
         proposalsStudents,
         questionsStudents,
+        dailyPracticeStudents,
         theme,
         studentLocation,
         mobile,
@@ -353,11 +358,12 @@ export const PointsBarChart = ({
     [
       data,
       maxAxisY,
-      mobile,
       proposalsStudents,
       questionsStudents,
-      studentLocation,
+      dailyPracticeStudents,
       theme,
+      studentLocation,
+      mobile,
       isQuestionRequired,
       isProposalRequired,
     ]
@@ -366,9 +372,9 @@ export const PointsBarChart = ({
   return (
     <div style={{ position: "relative" }}>
       <svg ref={svg}>
-        <text style={{ fontSize: "16px" }} fill={theme === "Dark" ? "white" : "black"} x={10} y={20}>
+        {/* <text style={{ fontSize: "16px" }} fill={theme === "Dark" ? "white" : "black"} x={10} y={20}>
           # of Students
-        </text>
+        </text> */}
         <g id="bars"></g>
         <path id="loc"></path>
         <g id="locations"></g>
