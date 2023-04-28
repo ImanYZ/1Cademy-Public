@@ -19,6 +19,7 @@ type DashboardToolbarProps = {
   courses: any[];
   selectedCourse: string | null;
   currentSemester: ICourseTag | null;
+  view: ToolbarView;
   onChangeCurrentSemesterHandler: (semester: ICourseTag | null) => void;
   onChangeSelectedCourseHandler: (newSemester: string | null) => void;
   onChangeToolbarView: (view: ToolbarView) => void;
@@ -35,6 +36,7 @@ export const DashboradToolbar = ({
   onChangeSelectedCourseHandler,
   onChangeToolbarView,
   onClose,
+  view,
 }: DashboardToolbarProps) => {
   const {
     palette: { mode },
@@ -93,6 +95,12 @@ export const DashboradToolbar = ({
               p: "8px 16px ",
               cursor: "pointer",
               transition: "background-color 300ms ease-out",
+              backgroundColor:
+                view === "DASHBOARD"
+                  ? mode === "dark"
+                    ? DESIGN_SYSTEM_COLORS.notebookO900
+                    : DESIGN_SYSTEM_COLORS.primary50
+                  : undefined,
               ":hover": {
                 backgroundColor: mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookO900 : DESIGN_SYSTEM_COLORS.primary50,
               },
@@ -103,7 +111,7 @@ export const DashboradToolbar = ({
             <Typography fontWeight={500}>Dashboard</Typography>
           </Stack>
           <Stack
-            onClick={() => onChangeToolbarView("PRACTICE")}
+            onClick={() => onChangeToolbarView("PRACTISE")}
             direction={"row"}
             spacing={"16px"}
             sx={{
@@ -111,6 +119,12 @@ export const DashboradToolbar = ({
               p: "8px 16px ",
               cursor: "pointer",
               transition: "background-color 300ms ease-out",
+              backgroundColor:
+                view === "PRACTISE"
+                  ? mode === "dark"
+                    ? DESIGN_SYSTEM_COLORS.notebookO900
+                    : DESIGN_SYSTEM_COLORS.primary50
+                  : undefined,
               ":hover": {
                 backgroundColor: mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookO900 : DESIGN_SYSTEM_COLORS.primary50,
               },

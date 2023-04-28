@@ -34,7 +34,7 @@ type DashboardWrapperProps = {
   sx?: SxProps<Theme>;
 };
 
-export type ToolbarView = "DASHBOARD" | "PRACTICE";
+export type ToolbarView = "DASHBOARD" | "PRACTISE";
 
 export const DashboardWrapper = ({ user, onClose, sx }: DashboardWrapperProps) => {
   const db = getFirestore();
@@ -194,6 +194,7 @@ export const DashboardWrapper = ({ user, onClose, sx }: DashboardWrapperProps) =
         onChangeToolbarView={setSelectToolbarView}
         user={user}
         onClose={onClose}
+        view={selectToolbarView}
       />
       <Box
         sx={{
@@ -208,7 +209,7 @@ export const DashboardWrapper = ({ user, onClose, sx }: DashboardWrapperProps) =
         {currentSemester ? (
           <>
             {selectToolbarView === "DASHBOARD" && <Dashboard user={user} currentSemester={currentSemester} />}
-            {selectToolbarView === "PRACTICE" && <PracticeTool onClose={onClose} />}
+            {selectToolbarView === "PRACTISE" && <PracticeTool onClose={onClose} />}
           </>
         ) : (
           <NoDataMessage message="No data in this semester" />
