@@ -104,7 +104,6 @@ export const DashboardWrapper = ({ user, onClose, sx }: DashboardWrapperProps) =
   );
   useEffect(() => {
     if (!user) return;
-    console.log("main effect");
     let killSnapshot: Unsubscribe | null = null;
     if (user.role === "INSTRUCTOR") {
       const instructorsRef = collection(db, "instructors");
@@ -164,7 +163,6 @@ export const DashboardWrapper = ({ user, onClose, sx }: DashboardWrapperProps) =
     setCurrentSemester(current ?? null);
   }, [instructor, selectedCourse]);
 
-  console.log({ user, currentSemester });
   return (
     <Box
       sx={{
@@ -219,15 +217,12 @@ const getCoursesByInstructor = (instructor: Instructor): CoursesResult => {
 // };
 
 const getSemesterByIds = async (db: Firestore, semesterIds: string[]) => {
-  // const semestersIds = semestersStudent.map(cur => cur.data.tagId);
-  console.log({ semesterIds });
   const semestersDocsPromises = semesterIds.map((semesterId: string) => {
     const nodeRef = doc(db, "semesters", semesterId);
     return getDoc(nodeRef);
   });
   const semesterDocs = await Promise.all(semestersDocsPromises);
   const allSemesters = semesterDocs.map(cur => cur.data()).flatMap(c => (c as Semester) || []);
-  console.log({ allSemesters });
   return allSemesters;
 };
 const selectCourse = (description: string, instructor: Instructor): CourseTag | undefined => {
