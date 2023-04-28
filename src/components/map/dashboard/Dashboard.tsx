@@ -1,7 +1,9 @@
 import SquareIcon from "@mui/icons-material/Square";
-import { Box, Paper, Stack, Typography, useMediaQuery, useTheme } from "@mui/material";
+import { Box, Paper, Stack, Tab, Tabs, Typography, useMediaQuery, useTheme } from "@mui/material";
 import { collection, getFirestore, onSnapshot, query, where } from "firebase/firestore";
 import React, { useCallback, useEffect, useState } from "react";
+
+import { DESIGN_SYSTEM_COLORS } from "@/lib/theme/colors";
 
 import { useWindowSize } from "../../../hooks/useWindowSize";
 import {
@@ -56,6 +58,9 @@ type DashboardProps = { user: User; currentSemester: ICourseTag };
 
 export const Dashboard = ({ user, currentSemester }: DashboardProps) => {
   const theme = useTheme();
+  const {
+    palette: { mode },
+  } = theme;
   const db = getFirestore();
 
   const { width: windowWidth } = useWindowSize();
@@ -101,7 +106,7 @@ export const Dashboard = ({ user, currentSemester }: DashboardProps) => {
     questions: [],
   });
 
-  // const [value, setValue] = React.useState(0);
+  const [trendStat, setTrendStat] = useState<keyof TrendStats>("childProposals");
 
   const trendPlotHeightTop = isMovil ? 150 : isTablet ? 250 : 354;
   const trendPlotHeightBottom = isMovil ? 80 : isTablet ? 120 : 160;
@@ -124,9 +129,11 @@ export const Dashboard = ({ user, currentSemester }: DashboardProps) => {
     setstackBarWidth(element.clientWidth);
   }, []);
 
-  // const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
-  //   setValue(newValue);
-  // };
+  const handleTabChange = (event: React.SyntheticEvent, newtrendStat: keyof TrendStats) => {
+    event.preventDefault();
+    setTrendStat(newtrendStat);
+  };
+
   // ---- ---- ---- ----
   // ---- ---- ---- ---- useEffects
   // ---- ---- ---- ----
@@ -752,6 +759,9 @@ export const Dashboard = ({ user, currentSemester }: DashboardProps) => {
           gap: "16px",
         }}
       >
+        <Typography fontSize={"30px"} fontWeight={600}>
+          Histograms
+        </Typography>
         {isLoading && (
           <Paper
             sx={{
@@ -767,47 +777,53 @@ export const Dashboard = ({ user, currentSemester }: DashboardProps) => {
           </Paper>
         )}
 
-        {/* <Tabs id="user-settings-personalization" value={value} onChange={handleTabChange} aria-label={"Trend Tabs"}>
-          {Object.keys(trendStats).map((key: string, idx: number) => (
-            <Tab
-              key={`${key}-${idx}`}
-              label={`${key.charAt(0).toUpperCase()}${key.slice(1).toLocaleLowerCase()}`}
-              sx={{ flex: 1 }}
-            />
-          ))}
-        </Tabs> */}
-
         {!isLoading && (
           <>
-            {Object.keys(trendStats).map((trendStat, i) => (
-              <Paper
-                key={i}
-                sx={{
-                  p: isMovil ? "10px" : "16px",
-                  display: trendStats[trendStat as keyof TrendStats].length > 0 ? "flex" : "none",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  backgroundColor: theme => (theme.palette.mode === "light" ? "#FFFFFF" : undefined),
-                }}
-              >
-                <TrendPlot
-                  title={capitalizeFirstLetter(trendStat)
+            <Tabs
+              id="user-settings-personalization"
+              value={trendStat}
+              onChange={handleTabChange}
+              aria-label={"Trend Tabs"}
+            >
+              {Object.keys(trendStats).map((key: string, idx: number) => (
+                <Tab
+                  value={key}
+                  key={`${key}-${idx}`}
+                  label={capitalizeFirstLetter(key)
                     .split(/(?=[A-Z])/)
                     .join(" ")}
-                  heightTop={trendPlotHeightTop}
-                  heightBottom={trendPlotHeightBottom}
-                  width={trendPlotWith}
-                  scaleX={"time"}
-                  labelX={"Day"}
-                  scaleY={"linear"}
-                  labelY={"# of edit Proposals"}
-                  theme={theme.palette.mode === "dark" ? "Dark" : "Light"}
-                  x="date"
-                  y="num"
-                  trendData={trendStats[trendStat as keyof TrendStats]}
+                  sx={{ flex: 1 }}
                 />
-              </Paper>
-            ))}
+              ))}
+            </Tabs>
+            <Paper
+              sx={{
+                p: isMovil ? "10px" : "40px 60px",
+                display: trendStats[trendStat].length > 0 ? "flex" : "none",
+                alignItems: "center",
+                justifyContent: "center",
+                backgroundColor:
+                  mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookMainBlack : DESIGN_SYSTEM_COLORS.baseWhite,
+                borderRadius: "8px",
+              }}
+            >
+              <TrendPlot
+                title={capitalizeFirstLetter(trendStat)
+                  .split(/(?=[A-Z])/)
+                  .join(" ")}
+                heightTop={trendPlotHeightTop}
+                heightBottom={trendPlotHeightBottom}
+                width={trendPlotWith}
+                scaleX={"time"}
+                labelX={"Day"}
+                scaleY={"linear"}
+                labelY={"# of edit Proposals"}
+                theme={mode === "dark" ? "Dark" : "Light"}
+                x="date"
+                y="num"
+                trendData={trendStats[trendStat]}
+              />
+            </Paper>
           </>
         )}
       </Box>
