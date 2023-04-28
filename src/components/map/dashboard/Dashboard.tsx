@@ -749,6 +749,9 @@ export const Dashboard = ({ user, currentSemester }: DashboardProps) => {
           gap: "16px",
         }}
       >
+        <Typography fontSize={"30px"} fontWeight={600}>
+          Histograms
+        </Typography>
         {isLoading && (
           <Paper
             sx={{
