@@ -1,93 +1,125 @@
 import { NextApiRequest, NextApiResponse } from "next";
 
-import { admin, db } from "../../lib/firestoreServer/admin";
+import { db } from "../../lib/firestoreServer/admin";
+import { INode } from "src/types/INode";
+import { IUser } from "src/types/IUser";
+import { arrayToChunks } from "src/utils";
+import { IPractice } from "src/types/IPractice";
+import { Timestamp } from "firebase-admin/firestore";
+import { getOrCreateUserNode, isNodePracticePresentable } from "src/utils/course-helpers";
+import { IUserNode } from "src/types/IUserNode";
+import fbAuth from "src/middlewares/fbAuth";
 
-const get_ancestors = ({ nodeId, nodes, ancestors }: any) => {
-  if (nodeId in ancestors) {
-    return ancestors[nodeId];
-  }
-  ancestors[nodeId] = [];
-  const node = nodes.find((n: any) => n.id === nodeId);
-  for (let parent of node.parents) {
-    if (!ancestors[nodeId].includes(parent.node)) {
-      ancestors[nodeId].push(parent.node);
-      ancestors[parent.node] = get_ancestors({ nodeId: parent.node, nodes, ancestors });
-      for (let ancestor of ancestors[parent.node]) {
-        if (!ancestors[nodeId].includes(ancestor)) {
-          ancestors[nodeId].push(ancestor);
-        }
-      }
-    }
-  }
-  return ancestors[nodeId];
+type IPracticeParams = {
+  tagId: string;
 };
 
 async function handler(req: NextApiRequest, res: NextApiResponse) {
   try {
-    let available_flashcards: any[] = [];
-    let nodes: any[] = [];
-    let ancestors: any = {};
-    let ordered_ancestors_nums: any[] = [];
-    let theNode;
-    let fCard: any;
-    const flashcardsQuery = db
-      .collection("practice")
-      .where("user", "==", req.body.data.user.userData.uname)
-      .where("tagId", "==", req.body.data.user.userData.tagId);
-    const flashcardsDocs = await flashcardsQuery.get();
-    const nodesQuery = db
-      .collection("nodes")
-      .where("deleted", "==", false)
-      .where("tagIds", "array-contains", req.body.data.user.userData.tagId);
-    const nodesDocs = await nodesQuery.get();
-    for (let node of nodesDocs.docs) {
-      nodes.push({ ...node.data(), id: node.id });
+    if (req.method !== "POST") {
+      throw new Error(`${req.method} not allowed.`);
     }
-    const question_ids = [];
-    flashcardsDocs.forEach(flashcard => {
-      // Select only those where enough time has passed since last presentation.
-      const fData: any = { ...flashcard.data(), id: flashcard.id };
-      if (new Date() >= fData.nextDate.toDate()) {
-        question_ids.push(fData.node);
-        ancestors[fData.node] = get_ancestors({ nodeId: fData.node, nodes, ancestors });
-        ordered_ancestors_nums.push([fData.node, ancestors[fData.node].length]);
-        available_flashcards.push(fData);
+
+    const userData = req.body.data.user.userData as IUser;
+    const payload = req.body as IPracticeParams;
+
+    const semesterDoc = await db.collection("semesters").doc(payload.tagId).get();
+    if (!semesterDoc.exists) {
+      throw new Error(`invalid request`);
+    }
+
+    const bfs = async (_nodeIds: string[]): Promise<IPractice | null> => {
+      const nodeIdsChunk = arrayToChunks(_nodeIds, 10);
+      const cRelationNodes: string[] = [];
+      for (const nodeIds of nodeIdsChunk) {
+        const nodes = await db.collection("nodes").where("__name__", "in", nodeIds).get();
+        for (const node of nodes.docs) {
+          const nodeData = node.data() as INode;
+          for (const child of nodeData.children) {
+            if (child.type === "Concept" || child.type === "Relation") {
+              // looking for practice
+              const practice = await isNodePracticePresentable({
+                user: userData.uname,
+                tagId: payload.tagId,
+                nodeId: child.node,
+              });
+              if (practice !== null) {
+                return practice;
+              }
+
+              cRelationNodes.push(child.node);
+            }
+          }
+        }
       }
+
+      if (!cRelationNodes.length) {
+        return null;
+      }
+
+      return bfs(cRelationNodes);
+    };
+
+    let practice: IPractice | null = await isNodePracticePresentable({
+      nodeId: payload.tagId,
+      tagId: payload.tagId,
+      user: userData.uname,
     });
-    ordered_ancestors_nums.sort((a, b) => a[1] - b[1]);
-    fCard = available_flashcards.find((f: any) => f.node === ordered_ancestors_nums[0][0]);
-    theNode = nodes.find((n: any) => n.id === fCard.node);
-    const userNodeQuery = db
-      .collection("userNodes")
-      .where("node", "==", fCard.node)
-      .where("user", "==", req.body.data.user.userData.uname)
-      .limit(1);
-    const userNodeDocs = await userNodeQuery.get();
-    const userNodeData = userNodeDocs.docs[0].data();
-    theNode = {
-      id: fCard.node,
-      choices: theNode.choices.map((c: any) => ({ choice: c.choice })),
-      content: theNode.content,
-      corrects: theNode.corrects,
-      nodeImage: theNode.nodeImage,
-      nodeVideo: theNode.nodeVideo,
-      nodeAudio: theNode.nodeAudio,
-      studied: theNode.studied,
-      title: theNode.title,
-      wrongs: theNode.wrongs,
+
+    if (practice === null) {
+      practice = await bfs([payload.tagId]);
+    }
+
+    if (practice === null) {
+      return res.json({
+        done: true,
+      });
+    }
+
+    let questionId: string = practice.questionNodes[0];
+    if (practice.lastId) {
+      let questionIdx = practice.questionNodes.indexOf(practice.lastId);
+      if (questionIdx >= practice.questionNodes.length - 1) {
+        questionIdx = 0;
+      } else {
+        questionIdx += 1;
+      }
+      questionId = practice.questionNodes[questionIdx];
+    }
+
+    const questionNode = await db.collection("nodes").doc(questionId).get();
+    const questionNodeData = questionNode.data() as INode;
+
+    const userNode = await getOrCreateUserNode({
+      nodeId: questionNode.id,
+      user: userData.uname,
+    });
+    const userNodeData = userNode.data() as IUserNode;
+    const theNode = {
+      id: questionNode.id,
+      choices: (questionNodeData.choices || []).map((c: any) => ({ choice: c.choice })),
+      content: questionNodeData.content,
+      corrects: questionNodeData.corrects,
+      nodeImage: questionNodeData.nodeImage,
+      nodeVideo: questionNodeData.nodeVideo,
+      nodeAudio: questionNodeData.nodeAudio,
+      studied: questionNodeData.studied,
+      title: questionNodeData.title,
+      wrongs: questionNodeData.wrongs,
       correct: userNodeData.correct,
       isStudied: userNodeData.isStudied,
       wrong: userNodeData.wrong,
     };
-    const currentTimestamp = admin.firestore.Timestamp.fromDate(new Date());
+    const currentTimestamp = Timestamp.fromDate(new Date());
     // This is required to only check answers after this timestamp in do_check_answer().
-    const flashcardRef = db.collection("practice").doc(fCard.id);
-    await flashcardRef.set({
+    const flashcardRef = db.collection("practice").doc(practice.documentId!);
+    await flashcardRef.update({
+      lastId: theNode.id,
       lastPresented: currentTimestamp,
       updatedAt: currentTimestamp,
     });
     return res.json({
-      flashcardId: fCard.id,
+      flashcardId: practice.documentId,
       question: theNode,
     });
   } catch (err) {
@@ -96,4 +128,4 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
   }
 }
 
-export default handler;
+export default fbAuth(handler);

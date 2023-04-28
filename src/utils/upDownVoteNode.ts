@@ -444,7 +444,7 @@ export const UpDownVoteNode = async ({
       const userData = user.data() as IUser;
 
       let actionRef = db.collection("actionTracks").doc();
-      batch.create(actionRef, {
+      batch.set(actionRef, {
         accepted: true,
         type: "NodeVote",
         action,
