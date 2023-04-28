@@ -154,7 +154,7 @@ describe("POST /practice", () => {
   });
 
   // in next endpoint call as there are not other nodes to present in graph as practice
-  it("Should be able to get question.", async () => {
+  it("Should get done=true when all questions are practiced.", async () => {
     const practiceRef = db.collection("practice").doc(flashcardId);
     practiceRef.update({
       q: 5,
