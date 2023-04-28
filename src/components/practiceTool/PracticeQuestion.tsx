@@ -9,7 +9,8 @@ import { Box, Stack } from "@mui/system";
 import { getFirestore } from "firebase/firestore";
 import React, { ReactNode, useCallback, useEffect, useMemo, useState } from "react";
 
-import { getRootQuestionDescendants } from "../../client/services/nodes.sercice";
+import { getRootQuestionDescendants } from "../../client/serveless/nodes.serveless";
+import { Post } from "../../lib/mapApi";
 import { DESIGN_SYSTEM_COLORS } from "../../lib/theme/colors";
 import shortenNumber from "../../lib/utils/shortenNumber";
 import { Node } from "../../nodeBookTypes";
@@ -276,14 +277,24 @@ const NodeQuestion = ({ node, selectedAnswers, setSelectedIdxAnswer, submitAnswe
   );
 };
 
-type PracticeQuestionProps = { onClose: () => void };
-export const PracticeQuestion = ({ onClose }: PracticeQuestionProps) => {
+type PracticeQuestionProps = { courseId: string; onClose: () => void };
+export const PracticeQuestion = ({ courseId, onClose }: PracticeQuestionProps) => {
   const db = getFirestore();
   const [questions, setQuestions] = useState<Node[]>([]);
   const [selectedQuestion, setSelectedQuestion] = useState<{ question: Node; idx: number } | null>(null);
   const [selectedAnswers, setSelectedAnswers] = useState<boolean[]>([]);
   const [displaySidebar, setDisplaySidebar] = useState<"LEADERBOARD" | "USER_STATUS" | null>(null);
   const [submitAnswer, setSubmitAnswer] = useState(false);
+
+  // call first question
+  useEffect(() => {
+    console.log("getPracticeQuestion");
+    const getPracticeQuestion = async () => {
+      const res = await Post("/practice", { tagId: courseId });
+      console.log("------>", { res });
+    };
+    getPracticeQuestion();
+  }, [courseId]);
 
   useEffect(() => {
     if (!selectedQuestion) return;

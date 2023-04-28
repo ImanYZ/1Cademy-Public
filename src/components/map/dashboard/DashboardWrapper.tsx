@@ -34,7 +34,7 @@ type DashboardWrapperProps = {
   sx?: SxProps<Theme>;
 };
 
-export type ToolbarView = "DASHBOARD" | "PRACTISE";
+export type ToolbarView = "DASHBOARD" | "PRACTICE";
 
 export const DashboardWrapper = ({ user, onClose, sx }: DashboardWrapperProps) => {
   const db = getFirestore();
@@ -141,6 +141,7 @@ export const DashboardWrapper = ({ user, onClose, sx }: DashboardWrapperProps) =
     });
   }, [allCourses, allSemesters, currentSemester, instructor]);
 
+  // select default semester and course
   useEffect(() => {
     if (!currentSemester) return;
     if (selectedCourse) return;
@@ -156,6 +157,7 @@ export const DashboardWrapper = ({ user, onClose, sx }: DashboardWrapperProps) =
     setSelectedCourse(courses[0]);
   }, [allCourses, currentSemester, instructor, selectedCourse]);
 
+  // select default course when exist a semester is selected
   useEffect(() => {
     if (instructor) return;
     if (!currentSemester) return;
@@ -164,6 +166,7 @@ export const DashboardWrapper = ({ user, onClose, sx }: DashboardWrapperProps) =
     setSelectedCourse(newCourses[0]);
   }, [allCourses, currentSemester, instructor]);
 
+  // will show current semester properties with selected course
   useEffect(() => {
     if (!instructor) return;
     if (!selectedCourse) return;
@@ -209,7 +212,7 @@ export const DashboardWrapper = ({ user, onClose, sx }: DashboardWrapperProps) =
         {currentSemester ? (
           <>
             {selectToolbarView === "DASHBOARD" && <Dashboard user={user} currentSemester={currentSemester} />}
-            {selectToolbarView === "PRACTISE" && <PracticeTool onClose={onClose} />}
+            {selectToolbarView === "PRACTICE" && <PracticeTool currentSemester={currentSemester} onClose={onClose} />}
           </>
         ) : (
           <NoDataMessage message="No data in this semester" />

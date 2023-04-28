@@ -111,7 +111,7 @@ export const DashboradToolbar = ({
             <Typography fontWeight={500}>Dashboard</Typography>
           </Stack>
           <Stack
-            onClick={() => onChangeToolbarView("PRACTISE")}
+            onClick={() => onChangeToolbarView("PRACTICE")}
             direction={"row"}
             spacing={"16px"}
             sx={{
@@ -120,7 +120,7 @@ export const DashboradToolbar = ({
               cursor: "pointer",
               transition: "background-color 300ms ease-out",
               backgroundColor:
-                view === "PRACTISE"
+                view === "PRACTICE"
                   ? mode === "dark"
                     ? DESIGN_SYSTEM_COLORS.notebookO900
                     : DESIGN_SYSTEM_COLORS.primary50

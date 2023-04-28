@@ -1,14 +1,16 @@
 import { Box } from "@mui/material";
 import React, { useState } from "react";
 
+import { CourseTag } from "../../instructorsTypes";
 import CourseDetail from "./CourseDetail";
 import { PracticeQuestion } from "./PracticeQuestion";
 
 type PracticeToolProps = {
+  currentSemester: CourseTag;
   onClose: () => void;
 };
 
-export const PracticeTool = ({ onClose }: PracticeToolProps) => {
+export const PracticeTool = ({ currentSemester, onClose }: PracticeToolProps) => {
   const [startPractice, setStartPractice] = useState(false);
   return startPractice ? (
     <Box
@@ -21,7 +23,7 @@ export const PracticeTool = ({ onClose }: PracticeToolProps) => {
         overflow: "hidden",
       }}
     >
-      <PracticeQuestion onClose={onClose} />
+      <PracticeQuestion courseId={currentSemester.tagId} onClose={onClose} />
     </Box>
   ) : (
     <CourseDetail onStartPractice={() => setStartPractice(true)} />
