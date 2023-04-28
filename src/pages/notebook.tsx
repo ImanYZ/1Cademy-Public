@@ -1096,6 +1096,40 @@ const Dashboard = ({}: DashboardProps) => {
   }, [notebooks, selectedNotebookId]);
 
   useEffect(() => {
+    // TODO: check if is possible to move this to a pure function and call when user change notebooks
+    // this after merge with "share not public notebooks"
+    if (!user) return;
+    if (!selectedNotebookId) return;
+    const selectedNotebook = notebooks.find(cur => cur.id === selectedNotebookId);
+
+    if (!selectedNotebook) return;
+    if (!selectedNotebook.defaultTagId || !selectedNotebook.defaultTagName) return;
+    if (user.tagId === selectedNotebook.defaultTagId) return; // is updated
+
+    console.log("Update tag when a notebook is changed");
+    const updateDefaultTag = async (defaultTagId: string, defaultTagName: string) => {
+      try {
+        dispatch({
+          type: "setAuthUser",
+          payload: { ...user, tagId: defaultTagId, tag: defaultTagName },
+        });
+        await Post(`/changeDefaultTag/${defaultTagId}`);
+
+        let { reputation, user: userUpdated } = await retrieveAuthenticatedUser(user.userId, user.role);
+        if (!reputation) throw Error("Cant find Reputation");
+        if (!userUpdated) throw Error("Cant find User");
+
+        dispatch({ type: "setReputation", payload: reputation });
+        dispatch({ type: "setAuthUser", payload: userUpdated });
+      } catch (error) {
+        console.error(error);
+      }
+    };
+
+    updateDefaultTag(selectedNotebook.defaultTagId, selectedNotebook.defaultTagName);
+  }, [dispatch, notebooks, selectedNotebookId, user, user?.role, user?.userId]);
+
+  useEffect(() => {
     if (!db) return;
     if (!user) return;
     if (!user.uname) return;
