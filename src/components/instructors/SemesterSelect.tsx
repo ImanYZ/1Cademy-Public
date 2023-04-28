@@ -74,6 +74,7 @@ export const SemesterSelect = ({
       cTagId,
     };
     setCurrentSemester(semesterMapped);
+    setSelectedCourse(null);
   };
 
   const onChangeCourse = (newAlignment: string | null) => {
