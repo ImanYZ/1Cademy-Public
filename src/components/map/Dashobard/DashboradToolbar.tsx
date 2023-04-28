@@ -79,7 +79,7 @@ export const DashboradToolbar = ({
                 color: mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookG200 : DESIGN_SYSTEM_COLORS.gray500,
               }}
             >
-              {user.role?.toLocaleLowerCase()}
+              {user.role ? `${user.role.charAt(0).toUpperCase()}${user.role.slice(1).toLocaleLowerCase()}` : ""}
             </Typography>
           </Box>
         </Stack>
@@ -94,7 +94,7 @@ export const DashboradToolbar = ({
               cursor: "pointer",
               transition: "background-color 300ms ease-out",
               ":hover": {
-                backgroundColor: DESIGN_SYSTEM_COLORS.notebookO900,
+                backgroundColor: mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookO900 : DESIGN_SYSTEM_COLORS.primary50,
               },
               mb: "8px",
             }}
@@ -112,14 +112,13 @@ export const DashboradToolbar = ({
               cursor: "pointer",
               transition: "background-color 300ms ease-out",
               ":hover": {
-                backgroundColor: DESIGN_SYSTEM_COLORS.notebookO900,
+                backgroundColor: mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookO900 : DESIGN_SYSTEM_COLORS.primary50,
               },
             }}
           >
             <InsightsRoundedIcon sx={{ color: DESIGN_SYSTEM_COLORS.orange400 }} />
             <Typography fontWeight={500}>Practise</Typography>
           </Stack>
-          <Stack direction={"row"}></Stack>
         </Box>
         <Divider />
 

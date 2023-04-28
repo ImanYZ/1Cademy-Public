@@ -19,7 +19,7 @@ import { CoursesResult } from "@/components/layouts/StudentsLayout";
 
 import { User } from "../../../knowledgeTypes";
 import { DESIGN_SYSTEM_COLORS } from "../../../lib/theme/colors";
-import { ICourseTag, ISemester } from "../../../types/ICourse";
+import { ISemester } from "../../../types/ICourse";
 import { NoDataMessage } from "../../instructors/NoDataMessage";
 import { PracticeTool } from "../../practiceTool/PracticeTool";
 import { DashboradToolbar } from "../Dashobard/DashboradToolbar";
@@ -73,7 +73,6 @@ export const DashboardWrapper = ({ user, onClose, sx }: DashboardWrapperProps) =
 
         // const semester = allSemesters.map(cur => cur.title);
 
-        setAllSemesters(semesters);
         setAllCourses(coursesResult);
         // setSelectedSemester(semester[0]);
       }),
@@ -92,6 +91,7 @@ export const DashboardWrapper = ({ user, onClose, sx }: DashboardWrapperProps) =
           const semestersIds = intructor.courses.map(course => course.tagId);
 
           const semesters = await getSemesterByIds(db, semestersIds);
+          semesters.sort((a, b) => (b.title > a.title ? 1 : -1));
 
           setAllSemesters(semesters);
           setAllCourses(allCourses);
@@ -105,7 +105,6 @@ export const DashboardWrapper = ({ user, onClose, sx }: DashboardWrapperProps) =
   );
   useEffect(() => {
     if (!user) return;
-    console.log("main effect");
     let killSnapshot: Unsubscribe | null = null;
     if (user.role === "INSTRUCTOR") {
       const instructorsRef = collection(db, "instructors");
@@ -124,36 +123,38 @@ export const DashboardWrapper = ({ user, onClose, sx }: DashboardWrapperProps) =
     };
   }, [db, semesterByStudentSnapthot, semestersByInstructorSnapshot, user]);
 
-  // useEffect(() => {
-  //   if (!user) return;
-  //   if (!selectedSemester) return setCourses([]);
+  useEffect(() => {
+    if (currentSemester) return;
+    if (!allSemesters) return;
+    const mostRecentSemester = allSemesters[0];
+    if (!mostRecentSemester) return;
 
-  //   const newCourses = getCourseBySemester(selectedSemester, allCourses);
-  //   // setCourses(newCourses);
-  //   setSelectedCourse(newCourses[0]);
-  // }, [allCourses, selectedSemester, user]);
+    setCurrentSemester({
+      cTagId: mostRecentSemester.cTagId,
+      cTitle: mostRecentSemester.cTitle,
+      pTagId: mostRecentSemester.pTagId,
+      pTitle: mostRecentSemester.pTitle,
+      tagId: mostRecentSemester.tagId,
+      title: mostRecentSemester.title,
+      uTagId: mostRecentSemester.uTagId,
+      uTitle: mostRecentSemester.uTitle,
+    });
+  }, [allCourses, allSemesters, currentSemester, instructor]);
 
-  //USEEFFECT TO SELECT THE DEFAULT COURSE
-  // useEffect(() => {
-  //   if (!user) return;
-  //   // if (!selectedCourse) return;
+  useEffect(() => {
+    if (!currentSemester) return;
+    if (selectedCourse) return;
+    const courses = allCourses[currentSemester.title];
 
-  //   const semesterFound = allSemesters.find(course => `${course.cTitle} ${course.pTitle}` === selectedCourse);
-  //   if (!semesterFound) {
-  //     setCurrentSemester(null);
-  //   } else {
-  //     setCurrentSemester({
-  //       cTagId: semesterFound.cTagId,
-  //       cTitle: semesterFound.cTitle,
-  //       pTagId: semesterFound.pTagId,
-  //       pTitle: semesterFound.pTitle,
-  //       tagId: semesterFound.tagId,
-  //       title: semesterFound.title,
-  //       uTagId: semesterFound.uTagId,
-  //       uTitle: semesterFound.uTitle,
-  //     });
-  //   }
-  // }, [allSemesters, selectedCourse, user]);
+    if (!courses) return;
+    if (!instructor) return;
+
+    const firstCourse = selectCourse(courses[0], instructor);
+    if (!firstCourse) return;
+
+    setCurrentSemester(firstCourse);
+    setSelectedCourse(courses[0]);
+  }, [allCourses, currentSemester, instructor, selectedCourse]);
 
   useEffect(() => {
     if (!instructor) return;
@@ -163,7 +164,6 @@ export const DashboardWrapper = ({ user, onClose, sx }: DashboardWrapperProps) =
     setCurrentSemester(current ?? null);
   }, [instructor, selectedCourse]);
 
-  console.log({ user, currentSemester });
   return (
     <Box
       sx={{
@@ -227,17 +227,14 @@ const getCoursesByInstructor = (instructor: Instructor): CoursesResult => {
 // };
 
 const getSemesterByIds = async (db: Firestore, semesterIds: string[]) => {
-  // const semestersIds = semestersStudent.map(cur => cur.data.tagId);
-  console.log({ semesterIds });
   const semestersDocsPromises = semesterIds.map((semesterId: string) => {
     const nodeRef = doc(db, "semesters", semesterId);
     return getDoc(nodeRef);
   });
   const semesterDocs = await Promise.all(semestersDocsPromises);
   const allSemesters = semesterDocs.map(cur => cur.data()).flatMap(c => (c as Semester) || []);
-  console.log({ allSemesters });
   return allSemesters;
 };
-const selectCourse = (description: string, instructor: Instructor): ICourseTag | undefined => {
+const selectCourse = (description: string, instructor: Instructor): CourseTag | undefined => {
   return instructor.courses.find(course => `${course.cTitle} ${course.pTitle || "- " + course.uTitle}` === description);
 };

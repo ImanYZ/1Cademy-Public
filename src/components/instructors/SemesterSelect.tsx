@@ -48,16 +48,16 @@ export const SemesterSelect = ({
   role,
   uname,
 }: SemesterSelectProps) => {
-  console.log({ semesters });
   const db = getFirestore();
-
+  const {
+    palette: { mode },
+  } = useTheme();
   const theme = useTheme();
   const matches = useMediaQuery(theme.breakpoints.down("sm"));
 
   const [student, setStudent] = useState<ISemesterStudent | undefined>(undefined);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const onChangeSemester = (event: SelectChangeEvent) => {
-    console.log("aaaaaaaaaaaaa");
     const semester = semesters.find(semester => semester.tagId === event.target.value);
     if (!semester) return;
 
@@ -74,6 +74,7 @@ export const SemesterSelect = ({
       cTagId,
     };
     setCurrentSemester(semesterMapped);
+    setSelectedCourse(null);
   };
 
   const onChangeCourse = (newAlignment: string | null) => {
@@ -81,7 +82,6 @@ export const SemesterSelect = ({
       setSelectedCourse(newAlignment);
     }
   };
-  console.log({ courses });
   useEffect(() => {
     if (!currentSemester || !uname) {
       setIsLoading(false);
@@ -135,7 +135,16 @@ export const SemesterSelect = ({
           <Typography fontSize={"14px"} fontWeight={"500"} flex={1}>
             Dashboard
           </Typography>
-          <Button sx={{ minWidth: "auto", backgroundColor: DESIGN_SYSTEM_COLORS.notebookO900, borderRadius: "8px" }}>
+          <Button
+            sx={{
+              minWidth: "auto",
+              backgroundColor: mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookO900 : DESIGN_SYSTEM_COLORS.primary100,
+              borderRadius: "8px",
+              ":hover": {
+                opacity: "0.9",
+              },
+            }}
+          >
             <AddRoundedIcon sx={{ fontSize: "14px" }} />
           </Button>
         </Stack>
@@ -149,8 +158,19 @@ export const SemesterSelect = ({
                 sx={{
                   whiteSpace: " nowrap",
                   border: "none",
-                  backgroundColor: selectedCourse === course ? DESIGN_SYSTEM_COLORS.notebookO900 : "transparerent",
-                  color: selectedCourse === course ? DESIGN_SYSTEM_COLORS.primary600 : DESIGN_SYSTEM_COLORS.gray300,
+                  backgroundColor:
+                    selectedCourse === course
+                      ? mode === "dark"
+                        ? DESIGN_SYSTEM_COLORS.notebookO900
+                        : DESIGN_SYSTEM_COLORS.primary50
+                      : "transparerent",
+
+                  color:
+                    selectedCourse === course
+                      ? DESIGN_SYSTEM_COLORS.primary600
+                      : mode === "dark"
+                      ? DESIGN_SYSTEM_COLORS.gray300
+                      : DESIGN_SYSTEM_COLORS.gray700,
                   borderBottom: `1px solid ${
                     selectedCourse === course ? DESIGN_SYSTEM_COLORS.primary600 : DESIGN_SYSTEM_COLORS.notebookG500
                   }}`,
