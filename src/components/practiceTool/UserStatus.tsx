@@ -14,14 +14,20 @@ import { PointsType } from "../PointsType";
 const MAX_DAILY_VALUE = 24;
 const DAYS_LABEL = ["M", "T", "W", "T", "F", "S", "S"];
 
-export const UserStatus = () => {
+type UserStatusProps = {
+  displayTitle?: boolean;
+};
+
+export const UserStatus = ({ displayTitle = true }: UserStatusProps) => {
   const [daysValue, setDaysValue] = useState([0, 14, 18, 17, 7, 9, 14]);
   return (
     <Box sx={{ width: "100%" }}>
-      <Box sx={{ width: "100%", height: "64px", display: "flex", alignItems: "center", justifyContent: "center" }}>
-        <LeaderboardIcon sx={{ color: DESIGN_SYSTEM_COLORS.yellow400, mr: "12px" }} />
-        <Typography sx={{ fontSize: "18px", fontWeight: 500 }}>Your Status</Typography>
-      </Box>
+      {displayTitle && (
+        <Box sx={{ width: "100%", height: "64px", display: "flex", alignItems: "center", justifyContent: "center" }}>
+          <LeaderboardIcon sx={{ color: DESIGN_SYSTEM_COLORS.yellow400, mr: "12px" }} />
+          <Typography sx={{ fontSize: "18px", fontWeight: 500 }}>Your Status</Typography>
+        </Box>
+      )}
       <Box
         sx={{
           width: "100%",
@@ -86,7 +92,7 @@ export const UserStatus = () => {
             </IconButton>
           </Stack>
         </Box>
-        <Box sx={{ p: "8px 20px 24px 20px", display: "flex", justifyContent: "space-between" }}>
+        <Stack direction={"row"} spacing={"12px"} sx={{ p: "8px 20px 24px 20px" }}>
           <Stack spacing={"20px"} sx={{ width: "51px", borderRight: `solid 1px ${DESIGN_SYSTEM_COLORS.notebookG600}` }}>
             {daysValue.map((cur, idx) => (
               <Box
@@ -104,7 +110,7 @@ export const UserStatus = () => {
               </Box>
             ))}
           </Stack>
-          <Stack spacing={"20px"} alignItems={"center"} sx={{ width: "247px" }}>
+          <Stack spacing={"20px"} alignItems={"center"} sx={{ width: "100%" }}>
             {daysValue.map((cur, idx) => (
               <Box key={idx} sx={{ width: "100%", display: "flex", alignItems: "center" }}>
                 <Box
@@ -119,7 +125,7 @@ export const UserStatus = () => {
               </Box>
             ))}
           </Stack>
-        </Box>
+        </Stack>
       </Box>
     </Box>
   );

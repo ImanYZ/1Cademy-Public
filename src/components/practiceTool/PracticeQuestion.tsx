@@ -36,7 +36,8 @@ const NodeQuestion = ({ node, selectedIdxAnswer, setSelectedIdxAnswer }: NodeQue
         p: "32px",
         border: "2px solid #FD7373",
         borderRadius: "8px",
-        background: DESIGN_SYSTEM_COLORS.notebookG900,
+        background: theme =>
+          theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookG900 : DESIGN_SYSTEM_COLORS.gray100,
       }}
     >
       <Typography component={"h1"} sx={{ fontSize: "30px" }}>
@@ -54,14 +55,13 @@ const NodeQuestion = ({ node, selectedIdxAnswer, setSelectedIdxAnswer }: NodeQue
                 justifyContent: "space-between",
                 fontSize: "18px",
                 background: theme =>
-                  theme.palette.mode === "dark" ? theme.palette.common.notebookG600 : theme.palette.common.notebookG900,
+                  theme.palette.mode === "dark" ? theme.palette.common.notebookG600 : theme.palette.common.gray50,
                 borderRadius: "8px",
                 border: theme =>
                   `solid 1px ${
-                    theme.palette.mode === "dark"
-                      ? theme.palette.common.notebookG600
-                      : theme.palette.common.notebookG900
+                    theme.palette.mode === "dark" ? theme.palette.common.notebookG600 : theme.palette.common.gray50
                   }`,
+                boxShadow: "0px 1px 2px rgba(0, 0, 0, 0.06), 0px 1px 3px rgba(0, 0, 0, 0.1)",
                 cursor: "pointer",
                 ":hover": {
                   background: theme =>
@@ -72,14 +72,10 @@ const NodeQuestion = ({ node, selectedIdxAnswer, setSelectedIdxAnswer }: NodeQue
                     }`,
                   "& .check-box": {
                     backgroundColor: theme =>
-                      theme.palette.mode === "dark"
-                        ? theme.palette.common.notebookG600
-                        : theme.palette.common.notebookG600,
+                      theme.palette.mode === "dark" ? theme.palette.common.notebookG600 : theme.palette.common.gray100,
                     border: theme =>
                       `solid 1px ${
-                        theme.palette.mode === "dark"
-                          ? theme.palette.common.notebookG400
-                          : theme.palette.common.notebookG400
+                        theme.palette.mode === "dark" ? theme.palette.common.notebookG400 : theme.palette.common.gray300
                       }`,
                   },
                 },
@@ -90,14 +86,14 @@ const NodeQuestion = ({ node, selectedIdxAnswer, setSelectedIdxAnswer }: NodeQue
                         ? theme.palette.common.success1000
                         : theme.palette.common.notebookRed3
                       : cur.correct
-                      ? theme.palette.common.success1000
-                      : theme.palette.common.notebookRed3,
+                      ? theme.palette.common.success50
+                      : "#FCEDEC",
                   border: theme =>
                     `solid 1px ${
                       theme.palette.mode === "dark"
                         ? cur.correct
                           ? theme.palette.common.teal700
-                          : theme.palette.common.notebookRed2
+                          : theme.palette.common.teal600
                         : cur.correct
                         ? theme.palette.common.teal700
                         : theme.palette.common.notebookRed2
@@ -110,8 +106,8 @@ const NodeQuestion = ({ node, selectedIdxAnswer, setSelectedIdxAnswer }: NodeQue
                           ? theme.palette.common.success1000
                           : theme.palette.common.notebookRed3
                         : cur.correct
-                        ? theme.palette.common.success1000
-                        : theme.palette.common.notebookRed3,
+                        ? theme.palette.common.success50
+                        : "#FCEDEC",
                     border: theme =>
                       `solid 1px ${
                         theme.palette.mode === "dark"
@@ -136,15 +132,12 @@ const NodeQuestion = ({ node, selectedIdxAnswer, setSelectedIdxAnswer }: NodeQue
                   borderRadius: "8px",
                   display: "grid",
                   placeItems: "center",
+                  color: DESIGN_SYSTEM_COLORS.baseWhite,
                   backgroundColor: theme =>
-                    theme.palette.mode === "dark"
-                      ? theme.palette.common.notebookG700
-                      : theme.palette.common.notebookG700,
+                    theme.palette.mode === "dark" ? theme.palette.common.notebookG700 : theme.palette.common.gray100,
                   border: theme =>
                     `solid 1px ${
-                      theme.palette.mode === "dark"
-                        ? theme.palette.common.notebookG500
-                        : theme.palette.common.notebookG500
+                      theme.palette.mode === "dark" ? theme.palette.common.notebookG500 : theme.palette.common.gray300
                     }`,
                   ...(selectedIdxAnswer === idx && {
                     backgroundColor: theme =>
@@ -185,7 +178,7 @@ const NodeQuestion = ({ node, selectedIdxAnswer, setSelectedIdxAnswer }: NodeQue
                   background: theme =>
                     theme.palette.mode === "dark"
                       ? theme.palette.common.notebookMainBlack
-                      : theme.palette.common.notebookMainBlack,
+                      : theme.palette.common.gray50,
                   boxShadow: " 0px 4px 4px rgba(0, 0, 0, 0.25), 0px 8px 8px -4px rgba(0, 0, 0, 0.03)",
                 }}
               >
@@ -321,16 +314,15 @@ export const PracticeQuestion = ({ onClose }: PracticeQuestionProps) => {
           sx={{
             width: "56px",
             height: "56px",
-            color: theme => theme.palette.common.primary800,
-            borderRadius: "0px",
-            backgroundColor: DESIGN_SYSTEM_COLORS.notebookMainBlack,
+            fill: theme =>
+              theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookG200 : DESIGN_SYSTEM_COLORS.gray500,
+            borderRadius: "8px",
+            backgroundColor: theme =>
+              theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookMainBlack : DESIGN_SYSTEM_COLORS.gray50,
           }}
         >
-          <svg width="29" height="23" viewBox="0 0 29 23" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path
-              d="M14.5001 23H4.61759L0 9.27492L8.24261 12.5906L14.5001 0L20.7576 12.5906L29 9.27492L24.3826 23H14.5001Z"
-              fill="#A4A4A4"
-            />
+          <svg width="29" height="23" viewBox="0 0 29 23" fill="inherit" xmlns="http://www.w3.org/2000/svg">
+            <path d="M14.5001 23H4.61759L0 9.27492L8.24261 12.5906L14.5001 0L20.7576 12.5906L29 9.27492L24.3826 23H14.5001Z" />
           </svg>
         </IconButton>
 
@@ -339,12 +331,14 @@ export const PracticeQuestion = ({ onClose }: PracticeQuestionProps) => {
           sx={{
             width: "56px",
             height: "56px",
-            color: theme => theme.palette.common.primary800,
-            borderRadius: "0px",
-            backgroundColor: DESIGN_SYSTEM_COLORS.notebookMainBlack,
+            color: theme =>
+              theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookG200 : DESIGN_SYSTEM_COLORS.gray500,
+            borderRadius: "8px",
+            backgroundColor: theme =>
+              theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookMainBlack : DESIGN_SYSTEM_COLORS.gray50,
           }}
         >
-          <LeaderboardIcon sx={{ color: DESIGN_SYSTEM_COLORS.notebookG200 }} />
+          <LeaderboardIcon />
         </IconButton>
       </Stack>
 
@@ -398,7 +392,8 @@ export const PracticeQuestion = ({ onClose }: PracticeQuestionProps) => {
           top: "0px",
           bottom: "0px",
           right: displaySidebar === "LEADERBOARD" ? "0px" : "-350px",
-          backgroundColor: DESIGN_SYSTEM_COLORS.notebookMainBlack,
+          backgroundColor: theme =>
+            theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookMainBlack : DESIGN_SYSTEM_COLORS.gray50,
           transition: "right 0.4s",
         }}
       >
@@ -418,7 +413,8 @@ export const PracticeQuestion = ({ onClose }: PracticeQuestionProps) => {
           top: "0px",
           bottom: "0px",
           right: displaySidebar === "USER_STATUS" ? "0px" : "-350px",
-          backgroundColor: DESIGN_SYSTEM_COLORS.notebookMainBlack,
+          backgroundColor: theme =>
+            theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookMainBlack : DESIGN_SYSTEM_COLORS.gray50,
           transition: "right 0.4s",
         }}
       >

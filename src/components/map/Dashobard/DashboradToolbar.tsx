@@ -103,7 +103,7 @@ export const DashboradToolbar = ({
             <Typography fontWeight={500}>Dashboard</Typography>
           </Stack>
           <Stack
-            onClick={() => onChangeToolbarView("PRACTISE")}
+            onClick={() => onChangeToolbarView("PRACTICE")}
             direction={"row"}
             spacing={"16px"}
             sx={{
