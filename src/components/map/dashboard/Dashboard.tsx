@@ -515,28 +515,27 @@ export const Dashboard = ({ user, currentSemester }: DashboardProps) => {
 
           {!isLoading && (semesterConfig?.isQuestionProposalRequired || semesterConfig?.isProposalRequired) && (
             <>
-              <Box
+              <Stack
+                direction={"row"}
+                spacing={"24px"}
                 sx={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  alignItems: "flex-start",
-                  gap: "4px",
                   marginBottom: "24px",
                 }}
               >
                 <Box>
-                  <Typography sx={{ fontSize: "19px" }}>Points</Typography>
+                  <Typography sx={{ fontSize: "19px", mb: "6px", lineHeight: "30px" }}>Points</Typography>
+                  <Typography sx={{ fontSize: "12px", fontWeight: "500" }}>Nº of Students</Typography>
                 </Box>
                 <Legend
                   title={"Completion rate"}
                   options={[
-                    { title: ">100%", color: "#388E3C" },
-                    { title: ">10%", color: "#F9E2D0" },
-                    { title: ">50%", color: "#A7D841" },
-                    { title: "<=10%", color: "rgba(255, 196, 153, 0.75)" },
+                    { title: " > 100%", color: "#388E3C" },
+                    { title: " > 10%", color: "#F9E2D0" },
+                    { title: " > 50%", color: "#A7D841" },
+                    { title: " <= 10%", color: "rgba(255, 196, 153, 0.75)" },
                   ]}
                 />
-              </Box>
+              </Stack>
               <Box sx={{ alignSelf: "center" }}>
                 <PointsBarChart
                   data={stackedBar}
