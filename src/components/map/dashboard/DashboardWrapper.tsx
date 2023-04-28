@@ -21,6 +21,7 @@ import { User } from "../../../knowledgeTypes";
 import { DESIGN_SYSTEM_COLORS } from "../../../lib/theme/colors";
 import { ICourseTag, ISemester } from "../../../types/ICourse";
 import { NoDataMessage } from "../../instructors/NoDataMessage";
+import { PracticeTool } from "../../practiceTool/PracticeTool";
 import { DashboradToolbar } from "../Dashobard/DashboradToolbar";
 import { Dashboard } from "./Dashboard";
 // import { Semester } from "../../instructorsTypes";
@@ -33,7 +34,7 @@ type DashboardWrapperProps = {
   sx?: SxProps<Theme>;
 };
 
-export type ToolbarView = "DASHBOARD" | "PRACTISE";
+export type ToolbarView = "DASHBOARD" | "PRACTICE";
 
 export const DashboardWrapper = ({ user, onClose, sx }: DashboardWrapperProps) => {
   const db = getFirestore();
@@ -190,7 +191,7 @@ export const DashboardWrapper = ({ user, onClose, sx }: DashboardWrapperProps) =
         {currentSemester ? (
           <>
             {selectToolbarView === "DASHBOARD" && <Dashboard user={user} currentSemester={currentSemester} />}
-            {selectToolbarView === "PRACTISE" && <Box>practise</Box>}
+            {selectToolbarView === "PRACTICE" && <PracticeTool onClose={onClose} />}
           </>
         ) : (
           <NoDataMessage message="No data in this semester" />

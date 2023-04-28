@@ -1,32 +1,32 @@
 import AccessTimeFilledOutlinedIcon from "@mui/icons-material/AccessTimeFilledOutlined";
 import ArticleIcon from "@mui/icons-material/Article";
 import BoltIcon from "@mui/icons-material/Bolt";
-import CheckIcon from "@mui/icons-material/Check";
-import SchoolIcon from "@mui/icons-material/School";
+// import CheckIcon from "@mui/icons-material/Check";
+// import SchoolIcon from "@mui/icons-material/School";
 import { Button, Paper, Stack, Typography } from "@mui/material";
 import { Box } from "@mui/system";
 import React from "react";
 
 import Leaderboard from "./Leaderboard";
 
-const topicComplete = 10;
-const totalTopic = 100;
+// const topicComplete = 10;
+// const totalTopic = 100;
 
 type CourseDetailProps = {
   onStartPractice: () => void;
 };
 
 const CourseDetail = ({ onStartPractice }: CourseDetailProps) => {
-  const topicCompletePercentage = Math.round((topicComplete * 100) / totalTopic);
+  // const topicCompletePercentage = Math.round((topicComplete * 100) / totalTopic);
 
   return (
     <Box sx={{ width: "100%" }}>
-      <Box sx={{ p: "48px 32px 32px 32px", borderBottom: theme => `solid 1px ${theme.palette.common.notebookG600}` }}>
+      <Box sx={{ pY: "48px 32px 32px 32px", borderBottom: theme => `solid 1px ${theme.palette.common.notebookG600}` }}>
         <Typography component={"h1"} sx={{ fontSize: "30px", fontWeight: 600 }}>
           1Cademy Assistant
         </Typography>
       </Box>
-      <Box sx={{ p: "48px 100px" }}>
+      <Box sx={{ pY: "48px" }}>
         <Box
           sx={{ maxWidth: "1040px", margin: "auto", display: "grid", gridTemplateColumns: "716px 300px", gap: "24px" }}
         >
@@ -118,7 +118,7 @@ const CourseDetail = ({ onStartPractice }: CourseDetailProps) => {
               </Stack>
             </Paper>
 
-            <Box
+            {/* <Box
               sx={{
                 display: "grid",
                 gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr", md: "1fr 1fr 1fr", lg: "1fr 1fr 1fr 1fr" },
@@ -217,7 +217,7 @@ const CourseDetail = ({ onStartPractice }: CourseDetailProps) => {
                   </Box>
                 </Paper>
               ))}
-            </Box>
+            </Box> */}
           </Box>
           <Paper
             sx={{

@@ -10,7 +10,7 @@ type PracticeToolProps = {
 
 export const PracticeTool = ({ onClose }: PracticeToolProps) => {
   const [startPractice, setStartPractice] = useState(false);
-  return (
+  return startPractice ? (
     <Box
       sx={{
         position: "absolute",
@@ -21,11 +21,9 @@ export const PracticeTool = ({ onClose }: PracticeToolProps) => {
         overflow: "hidden",
       }}
     >
-      {startPractice ? (
-        <PracticeQuestion onClose={onClose} />
-      ) : (
-        <CourseDetail onStartPractice={() => setStartPractice(true)} />
-      )}
+      <PracticeQuestion onClose={onClose} />
     </Box>
+  ) : (
+    <CourseDetail onStartPractice={() => setStartPractice(true)} />
   );
 };
