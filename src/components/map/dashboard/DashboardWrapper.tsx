@@ -187,7 +187,16 @@ export const DashboardWrapper = ({ user, onClose, sx }: DashboardWrapperProps) =
         user={user}
         onClose={onClose}
       />
-      <Box sx={{ width: "100%", height: "100%", border: "solid 2px royalBlue", overflowY: "auto", p: "40px 32px" }}>
+      <Box
+        sx={{
+          width: "100%",
+          height: "100%",
+          border: "solid 2px royalBlue",
+          overflowY: "auto",
+          overflowX: "hidden",
+          p: "40px 32px",
+        }}
+      >
         {currentSemester ? (
           <>
             {selectToolbarView === "DASHBOARD" && <Dashboard user={user} currentSemester={currentSemester} />}
