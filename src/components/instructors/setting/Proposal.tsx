@@ -318,6 +318,132 @@ const Proposal: FC<Props> = ({ semester, inputsHandler, switchHandler, errorStat
           </Typography>
         </Box>
       </Box>
+      <Box sx={{ marginTop: "50px" }}>
+        <Typography variant="h3" sx={{ display: "flex", justifyContent: "space-between" }}>
+          Daily Practice
+          <Switch
+            inputProps={{ "aria-label": "controlled" }}
+            checked={semester.isDailyPracticeRequired}
+            color="primary"
+            name="isDailyPracticeRequired"
+            onChange={switchHandler}
+          />
+        </Typography>
+        <hr style={{ color: "#A5A5A5" }} />
+        <Box
+          sx={{
+            display: "flex",
+            flexWrap: "wrap",
+            alignContent: "center",
+            alignItems: "baseline",
+            ...(!semester.isDailyPracticeRequired && {
+              pointerEvents: "none",
+              opacity: "0.4",
+            }),
+          }}
+        >
+          <Typography mt={3} variant="h4" sx={{ lineHeight: "2.5" }}>
+            From&nbsp;
+            <FilledInput
+              type="date"
+              className={layoutTheme.palette.mode === "dark" ? "light-calender" : "dark-calender"}
+              value={semester.dailyPractice.startDate}
+              id="filled-adornment-weight"
+              onChange={event => inputsHandler(event, "dailyPractice", "startDate")}
+              aria-describedby="filled-weight-helper-text"
+              inputProps={{
+                "aria-label": "days",
+              }}
+              sx={{
+                paddingBottom: "10px",
+                height: "40px",
+                width: "150px",
+                borderBottom: "orange",
+                color: theme =>
+                  semester.dailyPractice.startDate != ""
+                    ? theme.palette.mode === "dark"
+                      ? "white"
+                      : "black"
+                    : "transparent",
+              }}
+              error={errorState.dailyPracticeStartDate}
+            />
+            &nbsp; to &nbsp;
+            <FilledInput
+              type="date"
+              className={layoutTheme.palette.mode === "dark" ? "light-calender" : "dark-calender"}
+              value={semester.dailyPractice.endDate}
+              id="filled-adornment-weight"
+              onChange={event => inputsHandler(event, "dailyPractice", "endDate")}
+              aria-describedby="filled-weight-helper-text"
+              inputProps={{
+                "aria-label": "days",
+              }}
+              sx={{
+                paddingBottom: "10px",
+                height: "40px",
+                width: "150px",
+                borderBottom: "orange",
+                color: theme =>
+                  semester.dailyPractice.endDate != ""
+                    ? theme.palette.mode === "dark"
+                      ? "white"
+                      : "black"
+                    : "transparent",
+              }}
+              error={errorState.dailyPracticeEndDate}
+            />
+            &nbsp;each student can practice and get&nbsp;
+            <FilledInput
+              type="number"
+              value={semester.dailyPractice.numPoints}
+              onChange={event => inputsHandler(event, "dailyPractice", "numPoints")}
+              aria-describedby="filled-weight-helper-text"
+              inputProps={{
+                "aria-label": "days",
+                min: 1,
+              }}
+              sx={{
+                paddingBottom: "10px",
+                height: "40px",
+                width: "70px",
+                borderBottom: "orange",
+              }}
+            />
+            &nbsp;{semester.dailyPractice.numPoints > 1 ? "points" : "point"} by answering &nbsp;
+            <FilledInput
+              type="number"
+              value={semester.dailyPractice.numQuestionsPerDay}
+              id="filled-adornment-weight"
+              onChange={event => inputsHandler(event, "dailyPractice", "numQuestionsPerDay")}
+              aria-describedby="filled-weight-helper-text"
+              inputProps={{
+                "aria-label": "days",
+                min: 1,
+              }}
+              sx={{
+                paddingBottom: "10px",
+                height: "40px",
+                width: "70px",
+                borderBottom: "orange",
+              }}
+            />
+            &nbsp;{semester.dailyPractice.numQuestionsPerDay > 1 ? "questions/day" : "question/day"}.
+          </Typography>
+          <Typography
+            mt={3}
+            color="error"
+            sx={{
+              display:
+                errorState.dailyPracticeDay || errorState.dailyPracticeStartDate || errorState.dailyPracticeEndDate
+                  ? "block"
+                  : "none",
+            }}
+          >
+            * {errorState.errorText}
+          </Typography>
+        </Box>
+      </Box>
     </Paper>
   );
 };
