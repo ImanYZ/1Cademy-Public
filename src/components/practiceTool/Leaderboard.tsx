@@ -1,11 +1,15 @@
 import { Check } from "@mui/icons-material";
-import { Box, Button, ButtonGroup, Typography } from "@mui/material";
+import { Box, Button, ButtonGroup, SxProps, Theme, Typography } from "@mui/material";
 import Image from "next/image";
 import React, { useEffect, useState } from "react";
 
 import { NO_USER_IMAGE } from "../../lib/utils/constants";
 
-const Leaderboard = () => {
+type LeaderboardProps = {
+  sxBody?: SxProps<Theme>;
+};
+
+const Leaderboard = ({ sxBody }: LeaderboardProps) => {
   const [leaderBoardUsers, setLeaderBoardUSers] = useState<number[]>([]);
   const [selectedLeaderboardOption, setSelectedLeaderboardOption] = useState<"WEEK" | "MONTH" | "ALL_TIME">("WEEK");
 
@@ -16,7 +20,7 @@ const Leaderboard = () => {
   }, [selectedLeaderboardOption]);
 
   return (
-    <Box sx={{ width: "100%", height: "100%", border: "solid" }}>
+    <Box sx={{ width: "100%", height: "100%" }}>
       <Box
         sx={{
           display: "flex",
@@ -89,7 +93,7 @@ const Leaderboard = () => {
           </Button>
         </ButtonGroup>
       </Box>
-      <Box className="scroll-styled" sx={{ py: "18px", overflowY: "auto" }}>
+      <Box className="scroll-styled" sx={{ py: "18px", overflowY: "auto", ...sxBody }}>
         {leaderBoardUsers.map((cur, idx) => (
           <Box
             key={cur}

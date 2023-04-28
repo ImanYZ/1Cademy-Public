@@ -72,7 +72,7 @@ export const DashboardWrapper = ({ user, onClose, sx }: DashboardWrapperProps) =
         }, {});
 
         // const semester = allSemesters.map(cur => cur.title);
-
+        setAllSemesters(semesters);
         setAllCourses(coursesResult);
         // setSelectedSemester(semester[0]);
       }),

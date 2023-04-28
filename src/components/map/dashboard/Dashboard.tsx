@@ -438,27 +438,26 @@ export const Dashboard = ({ user, currentSemester }: DashboardProps) => {
             gridTemplateColumns: { xs: "1fr", md: "1fr 1fr" },
             // gridTemplateRows: "minmax(auto, 581px)",
             gap: "16px",
-            height: "581px",
+            height: "588px",
           }}
         >
           <Paper
             sx={{
-              height: "581px",
+              height: "588px",
               p: { sm: "10px", md: "16px" },
               backgroundColor: theme => (theme.palette.mode === "light" ? "#FFFFFF" : undefined),
             }}
           >
-            <UserStatus />
+            <UserStatus displayTitle={false} />
           </Paper>
           <Paper
             sx={{
-              height: "581px",
+              height: "588px",
               p: { sm: "10px", md: "16px" },
               backgroundColor: theme => (theme.palette.mode === "light" ? "#FFFFFF" : undefined),
-              border: "solid 1px pink",
             }}
           >
-            <Leaderboard />
+            <Leaderboard sxBody={{ maxHeight: "435px" }} />
           </Paper>
         </Box>
       )}
