@@ -19,11 +19,11 @@ import { UserStatus } from "./UserStatus";
 
 type NodeQuestionProps = {
   node: Node;
-  selectedIdxAnswer: number;
+  selectedAnswers: boolean[];
   setSelectedIdxAnswer: (newValue: number) => void;
 };
 
-const NodeQuestion = ({ node, selectedIdxAnswer, setSelectedIdxAnswer }: NodeQuestionProps) => {
+const NodeQuestion = ({ node, selectedAnswers, setSelectedIdxAnswer }: NodeQuestionProps) => {
   const [displayTags, setDisplayTags] = useState(false);
 
   const otherTags = useMemo(() => {
@@ -79,7 +79,7 @@ const NodeQuestion = ({ node, selectedIdxAnswer, setSelectedIdxAnswer }: NodeQue
                       }`,
                   },
                 },
-                ...(selectedIdxAnswer === idx && {
+                ...(selectedAnswers[idx] && {
                   background: theme =>
                     theme.palette.mode === "dark"
                       ? cur.correct
@@ -139,7 +139,7 @@ const NodeQuestion = ({ node, selectedIdxAnswer, setSelectedIdxAnswer }: NodeQue
                     `solid 1px ${
                       theme.palette.mode === "dark" ? theme.palette.common.notebookG500 : theme.palette.common.gray300
                     }`,
-                  ...(selectedIdxAnswer === idx && {
+                  ...(selectedAnswers[idx] && {
                     backgroundColor: theme =>
                       cur.correct ? theme.palette.common.teal700 : theme.palette.common.notebookRed2,
                     border: theme =>
@@ -147,11 +147,11 @@ const NodeQuestion = ({ node, selectedIdxAnswer, setSelectedIdxAnswer }: NodeQue
                   }),
                 }}
               >
-                {selectedIdxAnswer === idx && cur.correct && <CheckIcon sx={{ fontSize: "12px" }} />}
-                {selectedIdxAnswer === idx && !cur.correct && <CloseIcon sx={{ fontSize: "12px" }} />}
+                {selectedAnswers[idx] && cur.correct && <CheckIcon sx={{ fontSize: "12px" }} />}
+                {selectedAnswers[idx] && !cur.correct && <CloseIcon sx={{ fontSize: "12px" }} />}
               </Box>
             </ListItem>
-            {selectedIdxAnswer === idx && <Typography sx={{ mt: "8px" }}>{cur.feedback}</Typography>}
+            {selectedAnswers[idx] && <Typography sx={{ mt: "8px" }}>{cur.feedback}</Typography>}
           </Box>
         ))}
       </Stack>
@@ -246,12 +246,13 @@ export const PracticeQuestion = ({ onClose }: PracticeQuestionProps) => {
   const db = getFirestore();
   const [questions, setQuestions] = useState<Node[]>([]);
   const [selectedQuestion, setSelectedQuestion] = useState<{ question: Node; idx: number } | null>(null);
-  const [selectedAnswers, setSelectedAnswers] = useState<number>(-1);
+  const [selectedAnswers, setSelectedAnswers] = useState<boolean[]>([]);
   const [displaySidebar, setDisplaySidebar] = useState<"LEADERBOARD" | "USER_STATUS" | null>(null);
+  const [submitAnswer, setSubmitAnswer] = useState(false);
 
   useEffect(() => {
     if (!selectedQuestion) return;
-    setSelectedAnswers(-1);
+    setSelectedAnswers(new Array(selectedQuestion.question.choices.length).fill(false));
   }, [selectedQuestion]);
 
   const onNextQuestion = useCallback(() => {
@@ -262,10 +263,11 @@ export const PracticeQuestion = ({ onClose }: PracticeQuestionProps) => {
       const newIdx = pre.idx + 1;
       return { question: questions[newIdx], idx: newIdx };
     });
+    setSubmitAnswer(false);
   }, [questions]);
 
   const onSelectAnswer = (answerIdx: number) => {
-    setSelectedAnswers(answerIdx);
+    setSelectedAnswers(prev => prev.map((c, i) => (answerIdx === i ? !c : c)));
   };
 
   useEffect(() => {
@@ -288,7 +290,7 @@ export const PracticeQuestion = ({ onClose }: PracticeQuestionProps) => {
           position: "absolute",
           inset: "0px",
           background: theme =>
-            theme.palette.mode === "dark" ? theme.palette.common.notebookG900 : theme.palette.common.notebookG900,
+            theme.palette.mode === "dark" ? theme.palette.common.notebookG900 : theme.palette.common.notebookBl1,
           zIndex: 1,
           p: "45px 64px",
         }}
@@ -352,7 +354,7 @@ export const PracticeQuestion = ({ onClose }: PracticeQuestionProps) => {
         />
         <NodeQuestion
           node={selectedQuestion.question}
-          selectedIdxAnswer={selectedAnswers}
+          selectedAnswers={selectedAnswers}
           setSelectedIdxAnswer={onSelectAnswer}
         />
 
@@ -376,14 +378,26 @@ export const PracticeQuestion = ({ onClose }: PracticeQuestionProps) => {
           >
             View Node Tree
           </Button>
-          <Button
-            variant="contained"
-            onClick={onNextQuestion}
-            disabled={!(selectedAnswers >= 0)}
-            sx={{ borderRadius: "26px" }}
-          >
-            Claim my point
-          </Button>
+          {!submitAnswer && (
+            <Button
+              variant="contained"
+              onClick={() => setSubmitAnswer(true)}
+              disabled={!selectedAnswers.length}
+              sx={{ borderRadius: "26px" }}
+            >
+              Claim my point
+            </Button>
+          )}
+          {submitAnswer && (
+            <Button
+              variant="contained"
+              onClick={onNextQuestion}
+              disabled={!selectedAnswers.length}
+              sx={{ borderRadius: "26px" }}
+            >
+              Next
+            </Button>
+          )}
         </Box>
       </Box>
 
