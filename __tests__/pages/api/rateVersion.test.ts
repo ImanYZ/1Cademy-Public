@@ -16,9 +16,10 @@ import { createCredit } from "testUtils/fakers/credit";
 import { createReputationPoints } from "testUtils/fakers/reputation-point";
 initFirebaseClientSDK();
 
-import { DocumentSnapshot } from "firebase-admin/firestore";
+import { DocumentSnapshot, Timestamp } from "firebase-admin/firestore";
 import { admin, db } from "src/lib/firestoreServer/admin";
 import rateVersionHandler, { IRateVersionPayload } from "src/pages/api/rateVersion";
+import { ISemester } from "src/types/ICourse";
 import { IInstitution } from "src/types/IInstitution";
 import { INode } from "src/types/INode";
 import { INodeLink } from "src/types/INodeLink";
@@ -815,9 +816,52 @@ describe("POST /api/rateVersion", () => {
             {
               documentId: nodes[0].documentId,
               tagId: nodes[0].documentId,
-            },
+              students: [],
+              days: 1,
+              cTagId: "",
+              cTitle: "",
+              dTagId: "",
+              dTitle: "",
+              pTagId: "",
+              pTitle: "",
+              uTagId: "",
+              uTitle: "",
+              instructors: [],
+              startDate: Timestamp.now(),
+              endDate: Timestamp.now(),
+              isCastingVotesRequired: false,
+              isGettingVotesRequired: false,
+              isProposalRequired: false,
+              isQuestionProposalRequired: false,
+              nodeProposals: {
+                startDate: Timestamp.now(),
+                endDate: Timestamp.now(),
+                numPoints: 0,
+                numProposalPerDay: 0,
+                totalDaysOfCourse: 0,
+              },
+              questionProposals: {
+                startDate: Timestamp.now(),
+                endDate: Timestamp.now(),
+                numPoints: 0,
+                numQuestionsPerDay: 0,
+                totalDaysOfCourse: 0,
+              },
+              votes: {
+                onReceiveDownVote: 0,
+                onReceiveStar: 0,
+                onReceiveVote: 0,
+                pointDecrementOnAgreement: 0,
+                pointIncrementOnAgreement: 0,
+              },
+              syllabus: [],
+              title: nodes[0].title,
+              deleted: false,
+              updatedAt: Timestamp.now(),
+              createdAt: Timestamp.now(),
+            } as ISemester,
           ],
-          "courses"
+          "semesters"
         ),
 
         new MockData(tags, "tags"),

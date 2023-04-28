@@ -23,12 +23,12 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
     const userData = req.body.data.user.userData as IUser;
     const payload = req.body as IPracticeParams;
 
-    const courseDoc = await db.collection("courses").doc(payload.tagId).get();
-    if (!courseDoc.exists) {
+    const semesterDoc = await db.collection("semesters").doc(payload.tagId).get();
+    if (!semesterDoc.exists) {
       throw new Error(`invalid request`);
     }
 
-    const dfs = async (_nodeIds: string[]): Promise<IPractice | null> => {
+    const bfs = async (_nodeIds: string[]): Promise<IPractice | null> => {
       const nodeIdsChunk = arrayToChunks(_nodeIds, 10);
       const cRelationNodes: string[] = [];
       for (const nodeIds of nodeIdsChunk) {
@@ -57,7 +57,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         return null;
       }
 
-      return dfs(cRelationNodes);
+      return bfs(cRelationNodes);
     };
 
     let practice: IPractice | null = await isNodePracticePresentable({
@@ -67,7 +67,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
     });
 
     if (practice === null) {
-      practice = await dfs([payload.tagId]);
+      practice = await bfs([payload.tagId]);
     }
 
     if (practice === null) {
@@ -96,7 +96,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
     });
     const userNodeData = userNode.data() as IUserNode;
     const theNode = {
-      id: practice.documentId,
+      id: questionNode.id,
       choices: (questionNodeData.choices || []).map((c: any) => ({ choice: c.choice })),
       content: questionNodeData.content,
       corrects: questionNodeData.corrects,
@@ -114,6 +114,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
     // This is required to only check answers after this timestamp in do_check_answer().
     const flashcardRef = db.collection("practice").doc(practice.documentId!);
     await flashcardRef.update({
+      lastId: theNode.id,
       lastPresented: currentTimestamp,
       updatedAt: currentTimestamp,
     });

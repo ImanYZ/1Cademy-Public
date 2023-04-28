@@ -89,6 +89,8 @@ export const createOrRestoreStatDocs = async (
       days: [],
       tagId: semesterId,
       uname: studentUname,
+      correctPractices: 0,
+      totalPractices: 0,
       deleted: false,
       createdAt: Timestamp.fromDate(new Date()),
       updatedAt: Timestamp.fromDate(new Date()),
@@ -336,6 +338,8 @@ export const getStatDayIdx = (statDate: string, studentStat: ISemesterStudentSta
         newNodes: 0,
         node: syllabusItem.node!,
         title: syllabusItem.title,
+        correctPractices: 0,
+        totalPractices: 0,
       });
     }
   }
@@ -358,6 +362,8 @@ export const getStatDayChapterIdx = (dayStat: ISemesterStudentStatDay, chapterId
       newNodes: 0,
       node: syllabusItem.node!,
       title: syllabusItem.title,
+      correctPractices: 0,
+      totalPractices: 0,
     });
     chapterIdx = dayStat.chapters.length - 1;
   }
@@ -382,6 +388,8 @@ export const getStatVoteDayIdx = (statDate: string, studentVoteStat: ISemesterSt
       links: 0,
       newNodes: 0,
       improvements: 0,
+      correctPractices: 0,
+      totalPractices: 0,
     });
     dayVIdx = studentVoteStat.days.length - 1;
   }
@@ -837,6 +845,8 @@ export const updateStatsOnProposal = async ({
           votes: 0,
           votePoints: 0,
           deleted: false,
+          correctPractices: 0,
+          totalPractices: 0,
           createdAt: Timestamp.fromDate(new Date()),
           updatedAt: Timestamp.fromDate(new Date()),
         };
@@ -956,3 +966,20 @@ export const updateStatsOnProposal = async ({
     }
   });
 };
+
+// type IUpdateStatsOnPractice = {
+//   tagIds: string[];
+//   nodeId: string;
+//   parentId: INodeType;
+//   correct: boolean;
+// };
+// export const updateStatsOnPractice = async ({
+//   tagIds,
+//   nodeId,
+//   parentId,
+//   correct
+// }: IUpdateStatsOnPractice) => {
+//   await db.runTransaction(async t => {
+//     const semesters = await getSemestersByIds(tagIds);
+//   });
+// }

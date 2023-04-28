@@ -13,6 +13,8 @@ export type IPractice = {
   q: number;
   updatedAt: Date;
   iInterval: number;
+  start_practice?: Date | Timestamp;
+  end_practice?: Date | Timestamp;
   lastId?: string; // This will hold last id that was presented as question
   questionNodes: string[];
 };

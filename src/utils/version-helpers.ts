@@ -31,7 +31,7 @@ import { TypesenseNodeSchema } from "@/lib/schemas/node";
 import { INodeType } from "src/types/INodeType";
 import { IComReputationUpdates } from "./reputations";
 import { IUserNodeVersion } from "src/types/IUserNodeVersion";
-import { getCourseIdsFromTagIds } from "./course-helpers";
+import { getCourseIdsFromTagIds, getSemesterIdsFromTagIds } from "./course-helpers";
 import { IPractice } from "src/types/IPractice";
 
 export const comPointTypes = [
@@ -339,8 +339,8 @@ export const createPractice = async ({
   if (!parentId) {
     return [newBatch, writeCounts];
   }
-  const courseIds = await getCourseIdsFromTagIds(tagIds);
-  for (const tagId of courseIds) {
+  const semesterIds = await getSemesterIdsFromTagIds(tagIds);
+  for (const tagId of semesterIds) {
     usersRef = db.collection("users").where("tagId", "==", tagId);
     usersDocs = await convertToTGet(usersRef, t);
     for (let userDoc of usersDocs.docs) {

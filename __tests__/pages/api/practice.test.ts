@@ -96,7 +96,7 @@ describe("POST /practice", () => {
           tagId: nodes[0].documentId!,
         },
       ],
-      "courses"
+      "semesters"
     ),
   ];
 
