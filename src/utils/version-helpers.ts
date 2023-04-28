@@ -336,13 +336,13 @@ export const indexNodeChange = async (nodeId: string, nodeTitle: string, actionT
       `https://www.bing.com/indexnow?url=${encodeURIComponent(nodeUrl)}&key=${process.env.INDEXNOW_API_KEY}`
     );
   } catch (e) {
-    console.error(e, "BING_INDEX_ERROR");
+    console.log(e, "BING_INDEX_ERROR");
   }
 
   const jwtClient = new google.auth.JWT(
     process.env.ONECADEMYCRED_CLIENT_EMAIL,
     undefined,
-    process.env.ONECADEMYCRED_PRIVATE_KEY,
+    process.env.ONECADEMYCRED_PRIVATE_KEY?.replace(/\\n/g, "\n"),
     ["https://www.googleapis.com/auth/indexing"],
     undefined
   );
@@ -362,7 +362,7 @@ export const indexNodeChange = async (nodeId: string, nodeTitle: string, actionT
       }
     );
   } catch (e) {
-    console.error(e, "GOOGLE_INDEX_ERROR");
+    console.log(e, "GOOGLE_INDEX_ERROR");
   }
 };
 
