@@ -55,41 +55,44 @@ export const calculateVoteStatPoints = (voteStat: ISemesterStudentVoteStat, seme
 };
 
 // TODO: test
+
+const initialRate = (index: number): StackedBarStats => {
+  return {
+    index,
+    alessEqualTen: 0,
+    bgreaterTen: 0,
+    cgreaterFifty: 0,
+    dgreaterHundred: 0,
+  };
+};
+
+const initialStudentsRate: StudentStackedBarStatsObject = {
+  alessEqualTen: [],
+  bgreaterTen: [],
+  cgreaterFifty: [],
+  dgreaterHundred: [],
+};
 export const getStackedBarStat = (
   data: SemesterStudentVoteStat[],
   students: ISemesterStudent[],
   maxProposalsPoints: number,
   maxQuestionsPoints: number
 ): StackedBarStatsData => {
+  console.log({ daaaaata: data });
   const stackedBarStats: StackedBarStats[] = [];
-  const studentProposalsRate: StudentStackedBarStatsObject = {
-    alessEqualTen: [],
-    bgreaterTen: [],
-    cgreaterFifty: [],
-    dgreaterHundred: [],
-  };
-  const studentQuestionsRate: StudentStackedBarStatsObject = {
-    alessEqualTen: [],
-    bgreaterTen: [],
-    cgreaterFifty: [],
-    dgreaterHundred: [],
-  };
-  const ProposalsRate: StackedBarStats = {
-    index: 0,
-    alessEqualTen: 0,
-    bgreaterTen: 0,
-    cgreaterFifty: 0,
-    dgreaterHundred: 0,
-  };
-  const QuestionsRate: StackedBarStats = {
-    index: 1,
-    alessEqualTen: 0,
-    bgreaterTen: 0,
-    cgreaterFifty: 0,
-    dgreaterHundred: 0,
-  };
+
+  const studentProposalsRate: StudentStackedBarStatsObject = initialStudentsRate;
+  const studentQuestionsRate: StudentStackedBarStatsObject = initialStudentsRate;
+  const studentDailyPracticeRate: StudentStackedBarStatsObject = initialStudentsRate;
+
+  const ProposalsRate = initialRate(0);
+  const QuestionsRate = initialRate(1);
+  const dailyPracticeRate = initialRate(2);
+
   const sortedByProposals = [...data].sort((x, y) => y.proposalPoints! - x.proposalPoints!);
   const sortedByQuestions = [...data].sort((x, y) => y.questionPoints! - x.questionPoints!);
+  const sortedByDailyPractices = [...data].sort((x, y) => y.totalPractices! - x.totalPractices!);
+
   sortedByProposals.map(d => {
     const proposals = d.proposalPoints!;
     const proposalSubgroup = getStudentSubgroupInBars(proposals, maxProposalsPoints);
@@ -109,12 +112,24 @@ export const getStackedBarStat = (
     studentQuestionsRate[questionsSubgroup as keyof StudentStackedBarStats].push(student);
   });
 
+  sortedByDailyPractices.map(d => {
+    const totalPractices = d.totalPractices!;
+    const totalPracticesSubgroup = getStudentSubgroupInBars(totalPractices, 30);
+    const student = students.find(student => student.uname === d.uname);
+    if (!student) return;
+
+    dailyPracticeRate[totalPracticesSubgroup] += 1;
+    studentDailyPracticeRate[totalPracticesSubgroup as keyof StudentStackedBarStats].push(student);
+  });
+
   stackedBarStats.push(ProposalsRate);
   stackedBarStats.push(QuestionsRate);
+  stackedBarStats.push(dailyPracticeRate);
   return {
     stackedBarStats: stackedBarStats,
     studentStackedBarProposalsStats: studentProposalsRate,
     studentStackedBarQuestionsStats: studentQuestionsRate,
+    studentStackedBarDailyPracticeStats: studentDailyPracticeRate,
   };
 };
 

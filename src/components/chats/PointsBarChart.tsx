@@ -3,19 +3,20 @@ import React, { useCallback } from "react";
 import { UserTheme } from "src/knowledgeTypes";
 import { ISemesterStudent } from "src/types/ICourse";
 
+import { DESIGN_SYSTEM_COLORS } from "@/lib/theme/colors";
 import { StudenBarsSubgroupLocation, StudentStackedBarStatsObject } from "@/pages/instructors/dashboard";
 
 import { StackedBarStats } from "../../instructorsTypes";
 
 // const columns = ["fruit", "vegetable"];
-const LESS_EQUAL_THAN_10_COLOR = "rgb(255, 196, 153)";
-const LESS_EQUAL_THAN_10_COLOR_ALPHA = "rgba(255, 196, 153, .75)";
-const GREATER_THAN_10_COLOR = "rgb(249, 226, 208 )";
-const GREATER_THAN_10_COLOR_ALPHA = "rgba(249, 226, 208, .75)";
-const GREATER_THAN_50_COLOR = "rgb(167, 216, 65 )";
-const GREATER_THAN_50_COLOR_ALPHA = "rgba(167, 216, 65, .75)";
-const GREATER_THAN_100_COLOR = "rgb(56, 142, 60)";
-const GREATER_THAN_100_COLOR_ALPHA = "rgba(56, 142, 60, .75)";
+const LESS_EQUAL_THAN_10_COLOR = "#f4a869";
+const LESS_EQUAL_THAN_10_COLOR_ALPHA = "#F7B27A";
+const GREATER_THAN_10_COLOR = "#f8d198";
+const GREATER_THAN_10_COLOR_ALPHA = "#F9DBAE";
+const GREATER_THAN_50_COLOR = "#a4d734";
+const GREATER_THAN_50_COLOR_ALPHA = "#A7D841";
+const GREATER_THAN_100_COLOR = "#309135";
+const GREATER_THAN_100_COLOR_ALPHA = "#388E3C";
 
 // var data1 = [
 //   { index: 0, alessEqualTen: 12, bgreaterTen: 11, cgreaterFifty: 1, dgreaterHundred: 0 },
@@ -52,8 +53,8 @@ function drawChart(
 
   // set the dimensions and margins of the graph
   const margin = { top: 30, right: 0, bottom: 30, left: 50 },
-    width = 280 - margin.left - margin.right,
-    height = 400 - margin.top - margin.bottom;
+    width = 300 - margin.left - margin.right,
+    height = 340 - margin.top - margin.bottom;
 
   svg
     .attr("width", width + margin.left + margin.right)
@@ -77,22 +78,34 @@ function drawChart(
   if (isQuestionRequired) {
     columns.push("Questions");
   }
-
+  columns.push("Daily Practice");
   // remove axis if exist to avoid overdrawing
   svg.select("#axis-x").remove();
   svg.select("#axis-y").remove();
 
   // Add X axis
-  const x = d3.scaleBand().domain(columns).range([0, width]).paddingInner(0.4).paddingOuter(0.1);
+  const x = d3.scaleBand().domain(columns).range([0, width]).paddingInner(0.2).paddingOuter(0.1);
   svg
     .append("g")
     .attr("id", "axis-x")
     .attr("transform", `translate(30, ${height + 30})`)
-    .call(d3.axisBottom(x).tickSizeOuter(0));
+    .call(d3.axisBottom(x).tickSizeOuter(0).tickSize(0).tickPadding(8))
+    .style("font-size", "12px")
+    .style("font-weight", "bold")
+    .selectAll("path")
+    .style("color", DESIGN_SYSTEM_COLORS.notebookG400);
 
   // Add Y axis
   const y = d3.scaleLinear().domain([0, maxAxisY]).range([height, 0]);
-  svg.append("g").attr("id", "axis-y").attr("transform", `translate(30,30)`).call(d3.axisLeft(y));
+  const integerTickValues = d3.range(Math.ceil(y.domain()[0]), Math.floor(y.domain()[1]) + 1);
+  svg
+    .append("g")
+    .attr("id", "axis-y")
+    .attr("transform", `translate(30,30)`)
+    .call(d3.axisLeft(y).tickSize(0).tickPadding(8).tickFormat(d3.format(".0f")).tickValues(integerTickValues))
+    .style("font-size", "12px")
+    .selectAll("path")
+    .style("color", DESIGN_SYSTEM_COLORS.notebookG400);
 
   // color palette = one color per subgroup
   const colorApha = d3
@@ -128,7 +141,7 @@ function drawChart(
   if (isQuestionRequired) {
     chartData.push(data[1] || []);
   }
-
+  chartData.push(data[2] || []);
   const stackedData = d3.stack().keys(subgroups)(chartData);
 
   //tooltip
@@ -321,6 +334,7 @@ export const PointsBarChart = ({
   isQuestionRequired,
   isProposalRequired,
 }: StackedBarProps) => {
+  console.log({ newData: data });
   const svg = useCallback(
     (svgRef: any) => {
       drawChart(

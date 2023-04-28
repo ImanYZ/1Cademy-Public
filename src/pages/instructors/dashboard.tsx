@@ -123,6 +123,7 @@ export type StackedBarStatsData = {
   stackedBarStats: StackedBarStats[];
   studentStackedBarProposalsStats: StudentStackedBarStatsObject;
   studentStackedBarQuestionsStats: StudentStackedBarStatsObject;
+  studentStackedBarDailyPracticeStats: StudentStackedBarStatsObject;
 };
 export type StudenBarsSubgroupLocation = {
   proposals: number;

@@ -78,6 +78,7 @@ export const Dashboard = ({ user, currentSemester }: DashboardProps) => {
   const [stackedBar, setStackedBar] = useState<StackedBarStats[]>([]);
   const [proposalsStudents, setProposalsStudents] = useState<StudentStackedBarStatsObject | null>(null);
   const [questionsStudents, setQuestionsStudents] = useState<StudentStackedBarStatsObject | null>(null);
+  const [, /* dailyPraticeStudents */ setDailyPracitceStudents] = useState<StudentStackedBarStatsObject | null>(null);
   const [bubble, setBubble] = useState<BubbleStats[]>([]);
   const [bubbleAxis, setBubbleAxis] = useState<BubbleAxis>({ maxAxisX: 0, maxAxisY: 0, minAxisX: 0, minAxisY: 0 });
   const [semesterConfig, setSemesterConfig] = useState<ISemester | null>(null);
@@ -311,15 +312,16 @@ export const Dashboard = ({ user, currentSemester }: DashboardProps) => {
   useEffect(() => {
     if (!semesterStudentVoteState.length || !students) return setStackedBar([]);
 
-    const { stackedBarStats, studentStackedBarProposalsStats, studentStackedBarQuestionsStats } = getStackedBarStat(
-      semesterStudentVoteState,
-      students,
-      maxProposalsPoints,
-      maxQuestionsPoints
-    );
+    const {
+      stackedBarStats,
+      studentStackedBarProposalsStats,
+      studentStackedBarQuestionsStats,
+      studentStackedBarDailyPracticeStats,
+    } = getStackedBarStat(semesterStudentVoteState, students, maxProposalsPoints, maxQuestionsPoints);
     setStackedBar(stackedBarStats);
     setProposalsStudents(studentStackedBarProposalsStats);
     setQuestionsStudents(studentStackedBarQuestionsStats);
+    setDailyPracitceStudents(studentStackedBarDailyPracticeStats);
   }, [maxProposalsPoints, maxQuestionsPoints, semesterStudentVoteState, students]);
 
   // set up semester snapshot to modify state
@@ -506,7 +508,7 @@ export const Dashboard = ({ user, currentSemester }: DashboardProps) => {
             display: "flex",
             flexDirection: "column",
             justifyContent: "center",
-            backgroundColor: theme => (theme.palette.mode === "light" ? "#FFFFFF" : undefined),
+            backgroundColor: mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookMainBlack : DESIGN_SYSTEM_COLORS.baseWhite,
           }}
         >
           {isLoading && <StackedBarPlotStatsSkeleton />}
