@@ -41,12 +41,12 @@ function drawChart(
   studentProposalsRate: StudentStackedBarStatsObject | null,
   studentQuestionsRate: StudentStackedBarStatsObject | null,
   studentDailyPracticeRate: StudentStackedBarStatsObject | null,
-
   theme: UserTheme,
   studentLocation?: StudenBarsSubgroupLocation,
   mobile?: boolean,
   isQuestionRequired?: boolean,
-  isProposalRequired?: boolean
+  isProposalRequired?: boolean,
+  isDailyPracticeRequiered?: boolean
 ) {
   //   const data = [12, 5, 6, 6, 9, 10];
   //   const height = 120;
@@ -80,7 +80,9 @@ function drawChart(
   if (isQuestionRequired) {
     columns.push("Questions");
   }
-  columns.push("Daily Practice");
+  if (isDailyPracticeRequiered) {
+    columns.push("Daily Practice");
+  }
   // remove axis if exist to avoid overdrawing
   svg.select("#axis-x").remove();
   svg.select("#axis-y").remove();
@@ -143,7 +145,9 @@ function drawChart(
   if (isQuestionRequired) {
     chartData.push(data[1] || []);
   }
-  chartData.push(data[2] || []);
+  if (isDailyPracticeRequiered) {
+    chartData.push(data[2] || []);
+  }
   const stackedData = d3.stack().keys(subgroups)(chartData);
 
   //tooltip
@@ -253,6 +257,9 @@ function drawChart(
       } else if (studentQuestionsRate) {
         // @ts-ignore
         html = htmlTooltip(studentQuestionsRate[subgroupName]);
+      } else if (studentDailyPracticeRate) {
+        // @ts-ignore
+        html = htmlTooltip(studentDailyPracticeRate[subgroupName]);
       }
       const middle = e.offsetY;
       d3.select(this)
@@ -325,6 +332,7 @@ type StackedBarProps = {
   studentLocation?: StudenBarsSubgroupLocation;
   isQuestionRequired?: boolean;
   isProposalRequired?: boolean;
+  isDailyPracticeRequiered?: boolean;
 };
 export const PointsBarChart = ({
   data,
@@ -337,6 +345,7 @@ export const PointsBarChart = ({
   mobile,
   isQuestionRequired,
   isProposalRequired,
+  isDailyPracticeRequiered,
 }: StackedBarProps) => {
   console.log({ newData: data });
   const svg = useCallback(
@@ -348,11 +357,13 @@ export const PointsBarChart = ({
         proposalsStudents,
         questionsStudents,
         dailyPracticeStudents,
+
         theme,
         studentLocation,
         mobile,
         isQuestionRequired,
-        isProposalRequired
+        isProposalRequired,
+        isDailyPracticeRequiered
       );
     },
     [
@@ -366,6 +377,7 @@ export const PointsBarChart = ({
       mobile,
       isQuestionRequired,
       isProposalRequired,
+      isDailyPracticeRequiered,
     ]
   );
 

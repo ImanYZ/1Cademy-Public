@@ -690,6 +690,7 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
                   mobile={isMovil}
                   isQuestionRequired={semesterConfig?.isQuestionProposalRequired}
                   isProposalRequired={semesterConfig?.isProposalRequired}
+                  dailyPracticeStudents={null}
                 />
               </Box>
             </>

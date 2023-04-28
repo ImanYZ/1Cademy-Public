@@ -625,6 +625,7 @@ const StudentDashboard: InstructorLayoutPage = ({ user, currentSemester, setting
                   data={stackedBar}
                   proposalsStudents={user.role === "INSTRUCTOR" ? proposalsStudents : null}
                   questionsStudents={user.role === "INSTRUCTOR" ? questionsStudents : null}
+                  dailyPracticeStudents={null}
                   maxAxisY={studentsCounter}
                   studentLocation={studentLocation}
                   theme={settings.theme}
