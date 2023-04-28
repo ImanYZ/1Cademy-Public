@@ -1,5 +1,5 @@
 import SquareIcon from "@mui/icons-material/Square";
-import { Box, Paper, Stack, Typography, useMediaQuery, useTheme } from "@mui/material";
+import { Box, Paper, Stack, Tab, Tabs, Typography, useMediaQuery, useTheme } from "@mui/material";
 import { collection, getFirestore, onSnapshot, query, where } from "firebase/firestore";
 import React, { useCallback, useEffect, useState } from "react";
 
@@ -101,7 +101,7 @@ export const Dashboard = ({ user, currentSemester }: DashboardProps) => {
     questions: [],
   });
 
-  // const [value, setValue] = React.useState(0);
+  const [value, setValue] = useState<keyof TrendStats>("editProposals");
 
   const trendPlotHeightTop = isMovil ? 150 : isTablet ? 250 : 354;
   const trendPlotHeightBottom = isMovil ? 80 : isTablet ? 120 : 160;
@@ -124,9 +124,11 @@ export const Dashboard = ({ user, currentSemester }: DashboardProps) => {
     setstackBarWidth(element.clientWidth);
   }, []);
 
-  // const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
-  //   setValue(newValue);
-  // };
+  const handleTabChange = (event: React.SyntheticEvent, newValue: keyof TrendStats) => {
+    console.log("onchange", { event, newValue });
+    setValue(newValue);
+  };
+
   // ---- ---- ---- ----
   // ---- ---- ---- ---- useEffects
   // ---- ---- ---- ----
@@ -757,47 +759,46 @@ export const Dashboard = ({ user, currentSemester }: DashboardProps) => {
           </Paper>
         )}
 
-        {/* <Tabs id="user-settings-personalization" value={value} onChange={handleTabChange} aria-label={"Trend Tabs"}>
-          {Object.keys(trendStats).map((key: string, idx: number) => (
-            <Tab
-              key={`${key}-${idx}`}
-              label={`${key.charAt(0).toUpperCase()}${key.slice(1).toLocaleLowerCase()}`}
-              sx={{ flex: 1 }}
-            />
-          ))}
-        </Tabs> */}
-
         {!isLoading && (
           <>
-            {Object.keys(trendStats).map((trendStat, i) => (
-              <Paper
-                key={i}
-                sx={{
-                  p: isMovil ? "10px" : "16px",
-                  display: trendStats[trendStat as keyof TrendStats].length > 0 ? "flex" : "none",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  backgroundColor: theme => (theme.palette.mode === "light" ? "#FFFFFF" : undefined),
-                }}
-              >
-                <TrendPlot
-                  title={capitalizeFirstLetter(trendStat)
+            <Tabs id="user-settings-personalization" value={value} onChange={handleTabChange} aria-label={"Trend Tabs"}>
+              {Object.keys(trendStats).map((key: string, idx: number) => (
+                <Tab
+                  value={key}
+                  key={`${key}-${idx}`}
+                  label={capitalizeFirstLetter(key)
                     .split(/(?=[A-Z])/)
                     .join(" ")}
-                  heightTop={trendPlotHeightTop}
-                  heightBottom={trendPlotHeightBottom}
-                  width={trendPlotWith}
-                  scaleX={"time"}
-                  labelX={"Day"}
-                  scaleY={"linear"}
-                  labelY={"# of edit Proposals"}
-                  theme={theme.palette.mode === "dark" ? "Dark" : "Light"}
-                  x="date"
-                  y="num"
-                  trendData={trendStats[trendStat as keyof TrendStats]}
+                  sx={{ flex: 1 }}
                 />
-              </Paper>
-            ))}
+              ))}
+            </Tabs>
+            <Paper
+              sx={{
+                p: isMovil ? "10px" : "16px",
+                display: trendStats[value as keyof TrendStats].length > 0 ? "flex" : "none",
+                alignItems: "center",
+                justifyContent: "center",
+                backgroundColor: theme => (theme.palette.mode === "light" ? "#FFFFFF" : undefined),
+              }}
+            >
+              <TrendPlot
+                title={capitalizeFirstLetter(value)
+                  .split(/(?=[A-Z])/)
+                  .join(" ")}
+                heightTop={trendPlotHeightTop}
+                heightBottom={trendPlotHeightBottom}
+                width={trendPlotWith}
+                scaleX={"time"}
+                labelX={"Day"}
+                scaleY={"linear"}
+                labelY={"# of edit Proposals"}
+                theme={theme.palette.mode === "dark" ? "Dark" : "Light"}
+                x="date"
+                y="num"
+                trendData={trendStats[value as keyof TrendStats]}
+              />
+            </Paper>
           </>
         )}
       </Box>
