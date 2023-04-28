@@ -1,5 +1,4 @@
 import {
-  ICourseTag,
   IInstructor,
   ISemester,
   ISemesterStudent,
@@ -8,8 +7,6 @@ import {
 } from "./types/ICourse";
 
 export type Instructor = IInstructor;
-
-export type CourseTag = ICourseTag;
 
 export type SemesterStudentVoteStat = ISemesterStudentVoteStat & {
   links: number;
@@ -64,4 +61,16 @@ export type GeneralSemesterStudentsStats = {
 export type MappedData = {
   date: string;
   value: GeneralSemesterStudentsStats;
+};
+
+export type CourseTag = {
+  documentId?: string;
+  pTagId: string;
+  pTitle: string;
+  cTagId: string;
+  cTitle: string;
+  uTagId: string;
+  uTitle: string;
+  tagId: string;
+  title: string;
 };

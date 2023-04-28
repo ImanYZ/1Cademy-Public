@@ -5,40 +5,40 @@ import { Avatar, Box, Button, Divider, Stack, Typography, useTheme } from "@mui/
 import Image from "next/image";
 import React from "react";
 import { User } from "src/knowledgeTypes";
-import { ICourseTag } from "src/types/ICourse";
+import { ICourseTag, ISemester } from "src/types/ICourse";
 
-import { SemesterFilter } from "@/components/instructors/SemesterFilter";
+import { SemesterSelect } from "@/components/instructors/SemesterSelect";
 import { DESIGN_SYSTEM_COLORS } from "@/lib/theme/colors";
 
 import Logo1Cademy from "../../../../public/full-logo.svg";
+import { ToolbarView } from "../dashboard/DashboardWrapper";
 
 type DashboardToolbarProps = {
   user: User | null;
-  semesters: string[];
-  selectedSemester: string | null;
+  semesters: ISemester[];
   courses: any[];
   selectedCourse: string | null;
   currentSemester: ICourseTag | null;
-  onChangeSelecedSemesterHandler: (newSemester: string | null) => void;
+  onChangeCurrentSemesterHandler: (semester: ICourseTag | null) => void;
   onChangeSelectedCourseHandler: (newSemester: string | null) => void;
+  onChangeToolbarView: (view: ToolbarView) => void;
   onClose: () => void;
 };
 
 export const DashboradToolbar = ({
   user,
   semesters,
-  selectedSemester,
   courses,
   selectedCourse,
   currentSemester,
-  onChangeSelecedSemesterHandler,
+  onChangeCurrentSemesterHandler,
   onChangeSelectedCourseHandler,
+  onChangeToolbarView,
   onClose,
 }: DashboardToolbarProps) => {
   const {
     palette: { mode },
   } = useTheme();
-  console.log({ semesters });
   if (!user) return null;
   return (
     <Box
@@ -85,6 +85,7 @@ export const DashboradToolbar = ({
         </Stack>
         <Box>
           <Stack
+            onClick={() => onChangeToolbarView("DASHBOARD")}
             direction={"row"}
             spacing={"16px"}
             sx={{
@@ -102,6 +103,7 @@ export const DashboradToolbar = ({
             <Typography fontWeight={500}>Dashboard</Typography>
           </Stack>
           <Stack
+            onClick={() => onChangeToolbarView("PRACTISE")}
             direction={"row"}
             spacing={"16px"}
             sx={{
@@ -121,10 +123,9 @@ export const DashboradToolbar = ({
         </Box>
         <Divider />
 
-        <SemesterFilter
+        <SemesterSelect
           semesters={semesters}
-          selectedSemester={selectedSemester}
-          setSelectedSemester={onChangeSelecedSemesterHandler}
+          setCurrentSemester={onChangeCurrentSemesterHandler}
           courses={courses}
           selectedCourse={selectedCourse}
           setSelectedCourse={onChangeSelectedCourseHandler}
