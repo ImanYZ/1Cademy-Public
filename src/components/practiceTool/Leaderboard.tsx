@@ -1,9 +1,11 @@
-import { Check } from "@mui/icons-material";
+import CheckIcon from "@mui/icons-material/Check";
 import { Box, Button, ButtonGroup, SxProps, Theme, Typography } from "@mui/material";
 import Image from "next/image";
 import React, { useEffect, useState } from "react";
 
+import { DESIGN_SYSTEM_COLORS } from "../../lib/theme/colors";
 import { NO_USER_IMAGE } from "../../lib/utils/constants";
+import { PointsType } from "../PointsType";
 
 type LeaderboardProps = {
   sxBody?: SxProps<Theme>;
@@ -38,7 +40,13 @@ const Leaderboard = ({ sxBody }: LeaderboardProps) => {
             />
           </svg>
           <Typography
-            sx={{ ml: "12px", color: theme => theme.palette.common.gray25, fontSize: "24px", fontWeight: 500 }}
+            sx={{
+              ml: "12px",
+              color: theme =>
+                theme.palette.mode === "dark" ? theme.palette.common.gray25 : theme.palette.common.gray900,
+              fontSize: "24px",
+              fontWeight: 500,
+            }}
           >
             Leaderboard
           </Typography>
@@ -58,9 +66,19 @@ const Leaderboard = ({ sxBody }: LeaderboardProps) => {
               height: "28px",
               p: "4px 14px",
               background: theme =>
+                theme.palette.mode === "dark"
+                  ? selectedLeaderboardOption === "WEEK"
+                    ? theme.palette.common.primary800
+                    : theme.palette.common.notebookG600
+                  : selectedLeaderboardOption === "WEEK"
+                  ? theme.palette.common.primary600
+                  : theme.palette.common.gray200,
+              color: theme =>
                 selectedLeaderboardOption === "WEEK"
-                  ? theme.palette.common.primary800
-                  : theme.palette.common.notebookG600,
+                  ? theme.palette.common.primary25
+                  : theme.palette.mode === "dark"
+                  ? theme.palette.common.gray25
+                  : theme.palette.common.gray800,
             }}
           >
             Week
@@ -71,9 +89,19 @@ const Leaderboard = ({ sxBody }: LeaderboardProps) => {
               height: "28px",
               p: "4px 14px",
               background: theme =>
+                theme.palette.mode === "dark"
+                  ? selectedLeaderboardOption === "MONTH"
+                    ? theme.palette.common.primary800
+                    : theme.palette.common.notebookG600
+                  : selectedLeaderboardOption === "MONTH"
+                  ? theme.palette.common.primary600
+                  : theme.palette.common.gray200,
+              color: theme =>
                 selectedLeaderboardOption === "MONTH"
-                  ? theme.palette.common.primary800
-                  : theme.palette.common.notebookG600,
+                  ? theme.palette.common.primary25
+                  : theme.palette.mode === "dark"
+                  ? theme.palette.common.gray25
+                  : theme.palette.common.gray800,
             }}
           >
             Month
@@ -84,9 +112,19 @@ const Leaderboard = ({ sxBody }: LeaderboardProps) => {
               height: "28px",
               p: "4px 14px",
               background: theme =>
+                theme.palette.mode === "dark"
+                  ? selectedLeaderboardOption === "ALL_TIME"
+                    ? theme.palette.common.primary800
+                    : theme.palette.common.notebookG600
+                  : selectedLeaderboardOption === "ALL_TIME"
+                  ? theme.palette.common.primary600
+                  : theme.palette.common.gray200,
+              color: theme =>
                 selectedLeaderboardOption === "ALL_TIME"
-                  ? theme.palette.common.primary800
-                  : theme.palette.common.notebookG600,
+                  ? theme.palette.common.primary25
+                  : theme.palette.mode === "dark"
+                  ? theme.palette.common.gray25
+                  : theme.palette.common.gray800,
             }}
           >
             All Time
@@ -103,7 +141,8 @@ const Leaderboard = ({ sxBody }: LeaderboardProps) => {
               display: "flex",
               alignItems: "center",
               ":hover": {
-                backgroundColor: theme => theme.palette.common.notebookO900,
+                backgroundColor: theme =>
+                  theme.palette.mode === "dark" ? theme.palette.common.notebookO900 : theme.palette.common.primary25,
               },
             }}
           >
@@ -157,21 +196,10 @@ const Leaderboard = ({ sxBody }: LeaderboardProps) => {
             </Box>
             <Box>
               <Typography sx={{ mb: "4px" }}>Carl Johnson</Typography>
-              <Box sx={{ display: "flex" }}>
-                <Typography sx={{ mr: "6px" }}>999K</Typography>
-                <Box
-                  sx={{
-                    backgroundColor: theme => theme.palette.common.notebookG700,
-                    borderRadius: "50%",
-                    display: "grid",
-                    placeItems: "center",
-                    width: "20px",
-                    height: "20px",
-                  }}
-                >
-                  <Check sx={{ fontSize: "12px", color: theme => theme.palette.common.success600 }} />
-                </Box>
-              </Box>
+
+              <PointsType points={999} fontWeight={400}>
+                <CheckIcon sx={{ color: DESIGN_SYSTEM_COLORS.success600, fontSize: "16px" }} />
+              </PointsType>
             </Box>
           </Box>
         ))}

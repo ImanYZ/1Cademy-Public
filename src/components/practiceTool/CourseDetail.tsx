@@ -26,7 +26,7 @@ const CourseDetail = ({ onStartPractice }: CourseDetailProps) => {
           1Cademy Assistant
         </Typography>
       </Box>
-      <Box sx={{ pY: "48px" }}>
+      <Box sx={{ py: "48px" }}>
         <Box
           sx={{ maxWidth: "1040px", margin: "auto", display: "grid", gridTemplateColumns: "716px 300px", gap: "24px" }}
         >
@@ -35,26 +35,52 @@ const CourseDetail = ({ onStartPractice }: CourseDetailProps) => {
               sx={{
                 p: "32px 40px 24px 40px",
                 mb: "12px",
-                backgroundColor: theme => theme.palette.common.notebookMainBlack,
+                backgroundColor: theme =>
+                  theme.palette.mode === "dark" ? theme.palette.common.notebookMainBlack : theme.palette.common.gray50,
               }}
             >
               <Typography
-                sx={{ mb: "12px", color: theme => theme.palette.common.gray25, fontSize: "24px", fontWeight: 500 }}
+                sx={{
+                  mb: "12px",
+                  color: theme =>
+                    theme.palette.mode === "dark" ? theme.palette.common.gray25 : theme.palette.common.gray900,
+                  fontSize: "24px",
+                  fontWeight: 500,
+                }}
               >
                 Course 1
               </Typography>
               <Box sx={{ display: "flex", mb: "24px" }}>
                 <Typography
-                  sx={{ mr: "48px", color: theme => theme.palette.common.gray25, fontSize: "16px", fontWeight: 500 }}
+                  sx={{
+                    mr: "48px",
+                    color: theme =>
+                      theme.palette.mode === "dark" ? theme.palette.common.gray25 : theme.palette.common.gray900,
+                    fontSize: "16px",
+                    fontWeight: 500,
+                  }}
                 >
                   51%
                 </Typography>
                 <Typography
-                  sx={{ mr: "12px", color: theme => theme.palette.common.gray25, fontSize: "16px", fontWeight: 500 }}
+                  sx={{
+                    mr: "12px",
+                    color: theme =>
+                      theme.palette.mode === "dark" ? theme.palette.common.gray25 : theme.palette.common.gray900,
+                    fontSize: "16px",
+                    fontWeight: 500,
+                  }}
                 >
                   500 / 999
                 </Typography>
-                <Typography sx={{ color: theme => theme.palette.common.gray25, fontSize: "16px", fontWeight: 500 }}>
+                <Typography
+                  sx={{
+                    color: theme =>
+                      theme.palette.mode === "dark" ? theme.palette.common.gray25 : theme.palette.common.gray900,
+                    fontSize: "16px",
+                    fontWeight: 500,
+                  }}
+                >
                   items learned
                 </Typography>
               </Box>
@@ -63,7 +89,8 @@ const CourseDetail = ({ onStartPractice }: CourseDetailProps) => {
                   mb: "24px",
                   width: "100%",
                   height: "18px",
-                  backgroundColor: theme => theme.palette.common.notebookG600,
+                  backgroundColor: theme =>
+                    theme.palette.mode === "dark" ? theme.palette.common.notebookG600 : theme.palette.common.gray200,
                   borderRadius: "8px",
                 }}
               >
@@ -71,7 +98,8 @@ const CourseDetail = ({ onStartPractice }: CourseDetailProps) => {
                   sx={{
                     width: "50%",
                     height: "100%",
-                    backgroundColor: theme => theme.palette.common.primary800,
+                    backgroundColor: theme =>
+                      theme.palette.mode === "dark" ? theme.palette.common.primary800 : theme.palette.common.primary600,
                     borderRadius: "8px",
                   }}
                 ></Box>
@@ -92,28 +120,65 @@ const CourseDetail = ({ onStartPractice }: CourseDetailProps) => {
                 <Button
                   variant="contained"
                   onClick={onStartPractice}
-                  sx={{ backgroundColor: theme => theme.palette.common.primary800, borderRadius: "26px" }}
+                  sx={{
+                    backgroundColor: theme =>
+                      theme.palette.mode === "dark" ? theme.palette.common.primary800 : theme.palette.common.primary600,
+                    borderRadius: "26px",
+                    minWidth: "156px",
+                  }}
                 >
-                  Review (12)
+                  Practice
                 </Button>
               </Box>
             </Paper>
 
             <Paper
-              sx={{ p: "16px 40px", mb: "24px", backgroundColor: theme => theme.palette.common.notebookMainBlack }}
+              sx={{
+                p: "16px 40px",
+                mb: "24px",
+                backgroundColor: theme =>
+                  theme.palette.mode === "dark" ? theme.palette.common.notebookMainBlack : theme.palette.common.gray50,
+              }}
             >
               <Stack direction={"row"} spacing={"24px"} justifyContent={"space-between"}>
                 <Box sx={{ display: "flex" }}>
                   <ArticleIcon sx={{ mr: "15px", color: theme => theme.palette.common.yellow500 }} />{" "}
-                  <Typography>Ready to learn</Typography>
+                  <Typography
+                    sx={{
+                      color: theme =>
+                        theme.palette.mode === "dark"
+                          ? theme.palette.common.notebookG200
+                          : theme.palette.common.gray500,
+                    }}
+                  >
+                    Ready to learn
+                  </Typography>
                 </Box>
                 <Box sx={{ display: "flex" }}>
                   <AccessTimeFilledOutlinedIcon sx={{ mr: "15px", color: theme => theme.palette.common.yellow500 }} />{" "}
-                  <Typography>Ready to review</Typography>
+                  <Typography
+                    sx={{
+                      color: theme =>
+                        theme.palette.mode === "dark"
+                          ? theme.palette.common.notebookG200
+                          : theme.palette.common.gray500,
+                    }}
+                  >
+                    Ready to review
+                  </Typography>
                 </Box>
                 <Box sx={{ display: "flex" }}>
                   <BoltIcon sx={{ mr: "15px", color: theme => theme.palette.common.yellow500 }} />{" "}
-                  <Typography>In long term memory</Typography>
+                  <Typography
+                    sx={{
+                      color: theme =>
+                        theme.palette.mode === "dark"
+                          ? theme.palette.common.notebookG200
+                          : theme.palette.common.gray500,
+                    }}
+                  >
+                    In long term memory
+                  </Typography>
                 </Box>
               </Stack>
             </Paper>
@@ -223,7 +288,8 @@ const CourseDetail = ({ onStartPractice }: CourseDetailProps) => {
             sx={{
               width: "100%",
               mb: "12px",
-              backgroundColor: theme => theme.palette.common.notebookMainBlack,
+              backgroundColor: theme =>
+                theme.palette.mode === "dark" ? theme.palette.common.notebookMainBlack : theme.palette.common.gray50,
             }}
           >
             <Leaderboard />

@@ -35,7 +35,7 @@ export const CustomWrapperButton = ({
               : palette.common.notebookG50
             : palette.mode === "dark"
             ? palette.common.notebookG500
-            : palette.common.notebookG200,
+            : palette.common.gray200,
         color: ({ palette }) => (palette.mode === "dark" ? palette.common.gray50 : palette.common.gray600),
         ...(!disabled && {
           ":hover": {
