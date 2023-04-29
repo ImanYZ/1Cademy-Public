@@ -9,7 +9,8 @@ import { Box, Stack } from "@mui/system";
 import { getFirestore } from "firebase/firestore";
 import React, { ReactNode, useCallback, useEffect, useMemo, useState } from "react";
 
-import { getRootQuestionDescendants } from "../../client/services/nodes.sercice";
+import { getRootQuestionDescendants } from "../../client/serveless/nodes.serveless";
+import { Post } from "../../lib/mapApi";
 import { DESIGN_SYSTEM_COLORS } from "../../lib/theme/colors";
 import shortenNumber from "../../lib/utils/shortenNumber";
 import { Node } from "../../nodeBookTypes";
@@ -31,6 +32,11 @@ const NodeQuestion = ({ node, selectedAnswers, setSelectedIdxAnswer, submitAnswe
     return node.tags.splice(0, node.tags.length - 2);
   }, [node.tags]);
 
+  const onSelectAnswer = (idx: number) => {
+    if (submitAnswer) return;
+    setSelectedIdxAnswer(idx);
+  };
+
   return (
     <Box
       sx={{
@@ -48,7 +54,7 @@ const NodeQuestion = ({ node, selectedAnswers, setSelectedIdxAnswer, submitAnswe
         {node.choices.map((cur, idx) => (
           <Box key={idx}>
             <ListItem
-              onClick={() => setSelectedIdxAnswer(idx)}
+              onClick={() => onSelectAnswer(idx)}
               sx={{
                 p: "24px 16px",
                 display: "flex",
@@ -82,42 +88,58 @@ const NodeQuestion = ({ node, selectedAnswers, setSelectedIdxAnswer, submitAnswe
                 },
                 ...(selectedAnswers[idx] && {
                   background: theme =>
-                    theme.palette.mode === "dark"
-                      ? cur.correct
-                        ? theme.palette.common.success1000
-                        : theme.palette.common.notebookRed3
-                      : cur.correct
-                      ? theme.palette.common.success50
-                      : "#FCEDEC",
-                  border: theme =>
-                    `solid 1px ${
-                      theme.palette.mode === "dark"
-                        ? cur.correct
-                          ? theme.palette.common.teal700
-                          : theme.palette.common.teal600
-                        : cur.correct
-                        ? theme.palette.common.teal700
-                        : theme.palette.common.notebookRed2
-                    }`,
-
-                  ":hover": {
-                    background: theme =>
-                      theme.palette.mode === "dark"
+                    submitAnswer
+                      ? theme.palette.mode === "dark"
                         ? cur.correct
                           ? theme.palette.common.success1000
                           : theme.palette.common.notebookRed3
                         : cur.correct
                         ? theme.palette.common.success50
-                        : "#FCEDEC",
-                    border: theme =>
-                      `solid 1px ${
-                        theme.palette.mode === "dark"
+                        : "#FCEDEC"
+                      : theme.palette.mode === "dark"
+                      ? DESIGN_SYSTEM_COLORS.notebookO900
+                      : DESIGN_SYSTEM_COLORS.primary50,
+                  border: theme =>
+                    `solid 1px ${
+                      submitAnswer
+                        ? theme.palette.mode === "dark"
                           ? cur.correct
                             ? theme.palette.common.teal700
                             : theme.palette.common.notebookRed2
                           : cur.correct
                           ? theme.palette.common.teal700
                           : theme.palette.common.notebookRed2
+                        : theme.palette.mode === "dark"
+                        ? DESIGN_SYSTEM_COLORS.primary800
+                        : DESIGN_SYSTEM_COLORS.primary600
+                    }`,
+
+                  ":hover": {
+                    background: theme =>
+                      submitAnswer
+                        ? theme.palette.mode === "dark"
+                          ? cur.correct
+                            ? theme.palette.common.success1000
+                            : theme.palette.common.notebookRed3
+                          : cur.correct
+                          ? theme.palette.common.success50
+                          : "#FCEDEC"
+                        : theme.palette.mode === "dark"
+                        ? DESIGN_SYSTEM_COLORS.notebookO900
+                        : DESIGN_SYSTEM_COLORS.primary50,
+                    border: theme =>
+                      `solid 1px ${
+                        submitAnswer
+                          ? theme.palette.mode === "dark"
+                            ? cur.correct
+                              ? theme.palette.common.teal700
+                              : theme.palette.common.notebookRed2
+                            : cur.correct
+                            ? theme.palette.common.teal700
+                            : theme.palette.common.notebookRed2
+                          : theme.palette.mode === "dark"
+                          ? DESIGN_SYSTEM_COLORS.primary800
+                          : DESIGN_SYSTEM_COLORS.primary600
                       }`,
                   },
                 }),
@@ -142,17 +164,30 @@ const NodeQuestion = ({ node, selectedAnswers, setSelectedIdxAnswer, submitAnswe
                     }`,
                   ...(selectedAnswers[idx] && {
                     backgroundColor: theme =>
-                      cur.correct ? theme.palette.common.teal700 : theme.palette.common.notebookRed2,
+                      submitAnswer
+                        ? cur.correct
+                          ? theme.palette.common.teal700
+                          : theme.palette.common.notebookRed2
+                        : theme.palette.mode === "dark"
+                        ? DESIGN_SYSTEM_COLORS.primary800
+                        : DESIGN_SYSTEM_COLORS.primary600,
                     border: theme =>
-                      `solid 1px ${cur.correct ? theme.palette.common.teal700 : theme.palette.common.notebookRed2}`,
+                      `solid 1px ${
+                        submitAnswer
+                          ? cur.correct
+                            ? theme.palette.common.teal700
+                            : theme.palette.common.notebookRed2
+                          : undefined
+                      }`,
                   }),
                 }}
               >
-                {selectedAnswers[idx] && cur.correct && <CheckIcon sx={{ fontSize: "12px" }} />}
-                {selectedAnswers[idx] && !cur.correct && <CloseIcon sx={{ fontSize: "12px" }} />}
+                {submitAnswer && selectedAnswers[idx] && cur.correct && <CheckIcon sx={{ fontSize: "12px" }} />}
+                {submitAnswer && selectedAnswers[idx] && !cur.correct && <CloseIcon sx={{ fontSize: "12px" }} />}
+                {!submitAnswer && selectedAnswers[idx] && <CheckIcon sx={{ fontSize: "12px" }} />}
               </Box>
             </ListItem>
-            {selectedAnswers[idx] && submitAnswer && <Typography sx={{ mt: "8px" }}>{cur.feedback}</Typography>}
+            {submitAnswer && <Typography sx={{ mt: "8px" }}>{cur.feedback}</Typography>}
           </Box>
         ))}
       </Stack>
@@ -242,14 +277,24 @@ const NodeQuestion = ({ node, selectedAnswers, setSelectedIdxAnswer, submitAnswe
   );
 };
 
-type PracticeQuestionProps = { onClose: () => void };
-export const PracticeQuestion = ({ onClose }: PracticeQuestionProps) => {
+type PracticeQuestionProps = { courseId: string; onClose: () => void };
+export const PracticeQuestion = ({ courseId, onClose }: PracticeQuestionProps) => {
   const db = getFirestore();
   const [questions, setQuestions] = useState<Node[]>([]);
   const [selectedQuestion, setSelectedQuestion] = useState<{ question: Node; idx: number } | null>(null);
   const [selectedAnswers, setSelectedAnswers] = useState<boolean[]>([]);
   const [displaySidebar, setDisplaySidebar] = useState<"LEADERBOARD" | "USER_STATUS" | null>(null);
   const [submitAnswer, setSubmitAnswer] = useState(false);
+
+  // call first question
+  useEffect(() => {
+    console.log("getPracticeQuestion");
+    const getPracticeQuestion = async () => {
+      const res = await Post("/practice", { tagId: courseId });
+      console.log("------>", { res });
+    };
+    getPracticeQuestion();
+  }, [courseId]);
 
   useEffect(() => {
     if (!selectedQuestion) return;
@@ -366,6 +411,8 @@ export const PracticeQuestion = ({ onClose }: PracticeQuestionProps) => {
             onClick={onNextQuestion}
             sx={{
               borderRadius: "26px",
+              minWidth: "180px",
+              fontSize: "16px",
               backgroundColor: theme =>
                 theme.palette.mode === "dark" ? theme.palette.common.baseWhite : theme.palette.common.baseWhite,
               color: theme =>
@@ -384,10 +431,10 @@ export const PracticeQuestion = ({ onClose }: PracticeQuestionProps) => {
             <Button
               variant="contained"
               onClick={() => setSubmitAnswer(true)}
-              disabled={!selectedAnswers.length}
-              sx={{ borderRadius: "26px" }}
+              disabled={!selectedAnswers.some(c => c)}
+              sx={{ borderRadius: "26px", minWidth: "180px", fontSize: "16px" }}
             >
-              Claim my point
+              Submit
             </Button>
           )}
           {submitAnswer && (
@@ -395,7 +442,7 @@ export const PracticeQuestion = ({ onClose }: PracticeQuestionProps) => {
               variant="contained"
               onClick={onNextQuestion}
               disabled={!selectedAnswers.length}
-              sx={{ borderRadius: "26px" }}
+              sx={{ borderRadius: "26px", minWidth: "180px", fontSize: "16px" }}
             >
               Next
             </Button>
