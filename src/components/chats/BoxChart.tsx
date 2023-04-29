@@ -2,6 +2,8 @@ import * as d3 from "d3";
 import React, { useCallback } from "react";
 import { UserTheme } from "src/knowledgeTypes";
 
+import { DESIGN_SYSTEM_COLORS } from "@/lib/theme/colors";
+
 import { BoxChapterStat, Chapter } from "../../pages/instructors/dashboard";
 
 type boxPlotMargin = {
@@ -59,7 +61,10 @@ function drawChart(
     .append("g")
     .attr("id", `axis-x`)
     .attr("transform", `translate(${offsetX},${heightProcessed})`)
-    .call(d3.axisBottom(x).tickSizeOuter(0));
+    .call(d3.axisBottom(x).tickSizeOuter(0).tickSize(0))
+    .style("font-size", "12px")
+    .selectAll("path")
+    .style("color", DESIGN_SYSTEM_COLORS.notebookG400);
 
   const y = d3
     .scaleBand()
@@ -81,7 +86,10 @@ function drawChart(
       .append("g")
       .attr("id", `axis-y`)
       .attr("transform", `translate(${offsetX},0)`)
-      .call(d3.axisLeft(y))
+      .call(d3.axisLeft(y).tickSize(0))
+      .style("font-size", "12px")
+      .selectAll("path")
+      .style("color", DESIGN_SYSTEM_COLORS.notebookG400)
       .on("mouseover", function (e) {
         const _this = this as any;
         d3.select(_this).style("cursor", "pointer");
@@ -161,6 +169,7 @@ function drawChart(
     .attr("x", d => d.q1)
     .attr("y", d => d.boxCenter - boxHeight / 2)
     .attr("height", boxHeight)
+    .attr("rx", "3px")
     .attr("width", d => d.q3 - d.q1)
     .style("fill", "rgba(255, 196, 152, 1)")
     .attr("transform", `translate(${offsetX},${offsetY})`);
@@ -197,7 +206,7 @@ function drawChart(
     .attr("x2", d => x(d.x))
     .attr("y1", d => d.boxCenter - boxHeight / 2)
     .attr("y2", d => d.boxCenter + boxHeight / 2)
-    .attr("stroke", theme === "Dark" ? "white" : "black")
+    .attr("stroke", theme === "Dark" ? DESIGN_SYSTEM_COLORS.gray25 : "black")
     .attr("transform", `translate(${offsetX},${offsetY})`);
 
   // Median drawing
@@ -219,7 +228,7 @@ function drawChart(
   // Locations Icons Drawing
   if (studentStats) {
     const locationIconPath =
-      "M7 9.5C6.33696 9.5 5.70107 9.23661 5.23223 8.76777C4.76339 8.29893 4.5 7.66304 4.5 7C4.5 6.33696 4.76339 5.70107 5.23223 5.23223C5.70107 4.76339 6.33696 4.5 7 4.5C7.66304 4.5 8.29893 4.76339 8.76777 5.23223C9.23661 5.70107 9.5 6.33696 9.5 7C9.5 7.3283 9.43534 7.65339 9.3097 7.95671C9.18406 8.26002 8.99991 8.53562 8.76777 8.76777C8.53562 8.99991 8.26002 9.18406 7.95671 9.3097C7.65339 9.43534 7.3283 9.5 7 9.5ZM7 0C5.14348 0 3.36301 0.737498 2.05025 2.05025C0.737498 3.36301 0 5.14348 0 7C0 12.25 7 20 7 20C7 20 14 12.25 14 7C14 5.14348 13.2625 3.36301 11.9497 2.05025C10.637 0.737498 8.85652 0 7 0Z";
+      "M8.54 20.351L8.61 20.391L8.638 20.407C8.74903 20.467 8.87327 20.4985 8.9995 20.4985C9.12573 20.4985 9.24997 20.467 9.361 20.407L9.389 20.392L9.46 20.351C9.85112 20.1191 10.2328 19.8716 10.604 19.609C11.5651 18.9305 12.463 18.1667 13.287 17.327C15.231 15.337 17.25 12.347 17.25 8.5C17.25 6.31196 16.3808 4.21354 14.8336 2.66637C13.2865 1.11919 11.188 0.25 9 0.25C6.81196 0.25 4.71354 1.11919 3.16637 2.66637C1.61919 4.21354 0.75 6.31196 0.75 8.5C0.75 12.346 2.77 15.337 4.713 17.327C5.53664 18.1667 6.43427 18.9304 7.395 19.609C7.76657 19.8716 8.14854 20.1191 8.54 20.351ZM9 11.5C9.79565 11.5 10.5587 11.1839 11.1213 10.6213C11.6839 10.0587 12 9.29565 12 8.5C12 7.70435 11.6839 6.94129 11.1213 6.37868C10.5587 5.81607 9.79565 5.5 9 5.5C8.20435 5.5 7.44129 5.81607 6.87868 6.37868C6.31607 6.94129 6 7.70435 6 8.5C6 9.29565 6.31607 10.0587 6.87868 10.6213C7.44129 11.1839 8.20435 11.5 9 11.5Z";
 
     svg
       .select("#locations")
@@ -227,7 +236,9 @@ function drawChart(
       .data(statistics)
       .join("path")
       .attr("d", locationIconPath)
-      .attr("transform", d => `translate(${offsetX + x(studentStats[d.key] ?? 0) - 7},${d.boxCenter})`)
+      .attr("fill-rule", "evenodd")
+      .attr("clip-rule", "evenodd")
+      .attr("transform", d => `translate(${offsetX + x(studentStats[d.key] ?? 0) - 9},${d.boxCenter})`)
       .attr("fill", "#EF5350");
   }
 
@@ -241,7 +252,8 @@ function drawChart(
     .attr("x2", widthProcessed - offsetX)
     .attr("y1", d => d.boxCenter)
     .attr("y2", d => d.boxCenter)
-    .attr("stroke", theme === "Dark" ? "rgba(224, 224, 224, .1)" : "rgba(0, 0, 0, .25)")
+    .attr("height", "3px")
+    .attr("stroke", theme === "Dark" ? DESIGN_SYSTEM_COLORS.notebookG500 : "rgba(0, 0, 0, .25)")
     .attr("stroke-width", "1")
     .attr("transform", `translate(${offsetX},${offsetY})`);
 }
