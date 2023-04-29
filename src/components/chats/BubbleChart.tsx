@@ -116,6 +116,7 @@ function drawChart(
   // remove axis if exists
   svg.select("#axis-x").remove();
   svg.select("#axis-y").remove();
+  svg.select("#bubbles").remove();
   // Add X axis
   const x = d3.scaleLinear().domain([minAxisX, maxAxisX]).range([0, widthProcessed]);
   svg
@@ -169,7 +170,8 @@ function drawChart(
     .range([RED, LESS_EQUAL_THAN_10_COLOR, GREATER_THAN_10_COLOR, GREATER_THAN_50_COLOR, GREATER_THAN_100_COLOR]);
 
   svg
-    .select("#bubbles")
+    .append("g")
+    .attr("id", "bubbles")
     .selectAll("circle")
 
     // Enter in the stack data = loop key per key = group per group
@@ -224,7 +226,8 @@ function drawChart(
       .attr("fill-rule", "evenodd")
       .attr("clip-rule", "evenodd")
       .attr("transform", `translate(${x(student.votes!) + 21},${y(student.votePoints!)})`) //-23 and -24 because of right plot tranlation
-      .attr("fill", "#EF5350");
+      .attr("fill", "#EF5350")
+      .raise();
   }
   // svg
   //   .select("#nums")
@@ -285,12 +288,12 @@ export const BubbleChart = ({
   return (
     <div style={{ position: "relative" }}>
       <svg ref={svg} style={{ position: "relative" }}>
-        <g id="bubbles"></g>
+        <rect id="background" fill={`${DESIGN_SYSTEM_COLORS.notebookG700}`} />
         <g id="nums"></g>
+        <g id="mesh"></g>
         <g id="location">
           <path></path>
         </g>
-        <rect id="background" fill={`${DESIGN_SYSTEM_COLORS.notebookG700}`}></rect>
         <text style={{ fontSize: "12px" }} fill={theme === "Dark" ? "white" : "black"} x={0} y={20}>
           Vote Points
         </text>
