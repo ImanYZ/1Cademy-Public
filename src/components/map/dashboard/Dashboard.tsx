@@ -697,6 +697,8 @@ export const Dashboard = ({ user, currentSemester }: DashboardProps) => {
         <Paper
           ref={infoWrapperRef}
           sx={{
+            display: "grid",
+            placeItems: "center",
             p: { sm: "10px", md: "16px" },
             backgroundColor: mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookMainBlack : DESIGN_SYSTEM_COLORS.baseWhite,
           }}

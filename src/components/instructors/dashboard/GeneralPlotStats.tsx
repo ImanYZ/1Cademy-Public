@@ -35,7 +35,12 @@ export const GeneralPlotStats = ({ semesterConfig, semesterStats, student }: Gen
       <Typography component={"h3"} fontSize={"36px"} fontWeight={"600"}>
         Numbers
       </Typography>
-      <Divider />
+      <Divider
+        sx={{
+          borderColor: mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookG500 : DESIGN_SYSTEM_COLORS.gray400,
+          my: "12px",
+        }}
+      />
       <Box
         sx={{
           display: "grid",
@@ -43,7 +48,6 @@ export const GeneralPlotStats = ({ semesterConfig, semesterStats, student }: Gen
           justifyContent: "center",
           alignItems: "center",
           textAlign: "right",
-          columnGap: "16px",
           rowGap: "12px",
           "& span:nth-child(odd)": {
             fontWeight: "600",
