@@ -700,7 +700,7 @@ export const Dashboard = ({ user, currentSemester }: DashboardProps) => {
             minWidth: "300px",
             display: "grid",
             placeItems: "center",
-            p: { sm: "10px", md: "16px" },
+            p: { sm: "10px", md: "24px" },
             backgroundColor: mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookMainBlack : DESIGN_SYSTEM_COLORS.baseWhite,
           }}
         >
