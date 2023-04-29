@@ -132,7 +132,7 @@ export const Dashboard = ({ user, currentSemester }: DashboardProps) => {
   const TOOLBAR_WIDTH = 200;
   const WRAPPER_PADDING = 32;
   const GRID_WIDTH = windowWidth - TOOLBAR_WIDTH - 2 * WRAPPER_PADDING;
-  const bubbleChartWidth = isMovil ? windowWidth - 10 - 20 - 10 : GRID_WIDTH - infoWidth - stackBarWidth - 4 * 16;
+  const bubbleChartWidth = isMovil ? windowWidth - 10 - 20 - 10 : GRID_WIDTH - infoWidth - stackBarWidth - 6 * 16;
   const trendPlotWith = isMovil ? windowWidth - 60 : isTablet ? GRID_WIDTH - 100 : GRID_WIDTH - 150;
   const boxPlotWidth = isXlDesktop ? 300 : isLgDesktop ? 300 : isDesktop ? 230 : 220;
 
@@ -697,6 +697,7 @@ export const Dashboard = ({ user, currentSemester }: DashboardProps) => {
         <Paper
           ref={infoWrapperRef}
           sx={{
+            minWidth: "300px",
             display: "grid",
             placeItems: "center",
             p: { sm: "10px", md: "16px" },
@@ -740,6 +741,7 @@ export const Dashboard = ({ user, currentSemester }: DashboardProps) => {
                     { title: " > 50%", color: "#A7D841" },
                     { title: " <= 10%", color: "rgba(255, 196, 153, 0.75)" },
                   ]}
+                  sx={{ gridTemplateColumns: "16px 1fr 16px 1fr" }}
                 />
               </Stack>
               <Box sx={{ alignSelf: "center" }}>
@@ -766,7 +768,7 @@ export const Dashboard = ({ user, currentSemester }: DashboardProps) => {
           // className="test"
           sx={{
             p: isMovil ? "10px" : "16px",
-            backgroundColor: theme => (theme.palette.mode === "light" ? "#FFFFFF" : undefined),
+            backgroundColor: mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookMainBlack : DESIGN_SYSTEM_COLORS.baseWhite,
           }}
         >
           {isLoading && <BubblePlotStatsSkeleton />}
@@ -777,20 +779,20 @@ export const Dashboard = ({ user, currentSemester }: DashboardProps) => {
                   display: "flex",
                   justifyContent: "space-between",
                   alignItems: "flex-start",
-                  marginBottom: "6px",
                 }}
               >
-                <Typography sx={{ fontSize: "19px", mb: "40px" }}>Vote Leaderboard</Typography>
+                <Typography sx={{ fontSize: "19px", alignSelf: "center" }}>Vote Leaderboard</Typography>
                 <Legend
                   title={""}
                   options={[
                     { title: ">100%", color: "#388E3C" },
-                    { title: ">10%", color: "#F9E2D0" },
+                    { title: ">10%", color: "#F9DBAF" },
+                    { title: "< 0%", color: "#E04F16" },
                     { title: ">50%", color: "#A7D841" },
-                    { title: "<=10%", color: "rgb(255, 196, 153)" },
-                    { title: "= 0%", color: "rgb(117, 117, 117)" },
-                    { title: "< 0%", color: "rgb(239, 83, 80)" },
+                    { title: "<=10%", color: "#F7B27A" },
+                    { title: "= 0%", color: "#575757" },
                   ]}
+                  sx={{ gridTemplateColumns: "repeat(3,12px 1fr)" }}
                 />
               </Box>
               <BubbleChart
