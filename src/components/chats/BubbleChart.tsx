@@ -122,7 +122,7 @@ function drawChart(
     .append("g")
     .attr("id", "axis-x")
     .attr("transform", `translate(30, ${height + 30})`)
-    .call(d3.axisBottom(x).tickSizeOuter(0).tickSize(-height).tickPadding(8))
+    .call(d3.axisBottom(x).tickSizeOuter(0).tickSize(-height).tickPadding(8).tickValues(x.ticks().slice(1)))
     .style("font-size", "12px")
     .selectAll("line")
     .style("color", DESIGN_SYSTEM_COLORS.notebookG400)
@@ -137,7 +137,7 @@ function drawChart(
     .append("g")
     .attr("id", "axis-y")
     .attr("transform", `translate(30, 30)`)
-    .call(d3.axisLeft(y).tickSize(-width).tickPadding(8))
+    .call(d3.axisLeft(y).tickSizeOuter(0).tickSize(-width).tickPadding(8).tickValues(y.ticks().slice(1)))
     .style("font-size", "12px")
     .selectAll("line")
     .attr("stroke", DESIGN_SYSTEM_COLORS.notebookG400)
@@ -145,13 +145,16 @@ function drawChart(
 
   svg
     .select("#background")
-    .attr("width", width)
+    .attr("width", width - 30.75)
     .attr("height", height)
     .attr("transform", `translate(30, 30)`)
-    .attr("r", "8px")
+    .attr("rx", "10px")
+    .attr("ry", "10px")
+    .attr("stroke", DESIGN_SYSTEM_COLORS.notebookG500)
+    .attr("stroke-width", 1)
     .lower();
 
-  svg.selectAll("path").attr("stroke", DESIGN_SYSTEM_COLORS.notebookG500).lower();
+  svg.selectAll("path").attr("stroke", "transparent").lower();
 
   svg.selectAll("line").attr("stroke", DESIGN_SYSTEM_COLORS.notebookG500).lower();
   // svg.append("g").attr("class", "grid").call(d3.axisLeft(y).tickSize(-width));
