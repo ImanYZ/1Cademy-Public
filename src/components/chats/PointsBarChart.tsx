@@ -55,7 +55,7 @@ function drawChart(
 
   // set the dimensions and margins of the graph
   const margin = { top: 30, right: 0, bottom: 30, left: 50 },
-    width = 300 - margin.left - margin.right,
+    width = 325 - margin.left - margin.right,
     height = 340 - margin.top - margin.bottom;
 
   svg
@@ -88,12 +88,12 @@ function drawChart(
   svg.select("#axis-y").remove();
 
   // Add X axis
-  const x = d3.scaleBand().domain(columns).range([0, width]).paddingInner(0.2).paddingOuter(0.1);
+  const x = d3.scaleBand().domain(columns).range([0, width]).paddingInner(0.27).paddingOuter(0.27);
   svg
     .append("g")
     .attr("id", "axis-x")
     .attr("transform", `translate(30, ${height + 30})`)
-    .call(d3.axisBottom(x).tickSizeInner(2).tickSizeOuter(0).tickSize(0).tickPadding(8))
+    .call(d3.axisBottom(x).tickSizeOuter(0).tickSize(0).tickPadding(8))
     .style("font-size", "12px")
     .style("font-weight", "bold")
     .selectAll("path")
@@ -314,7 +314,11 @@ function drawChart(
       .attr("d", locationIconPath)
       .attr("fill-rule", "evenodd")
       .attr("clip-rule", "evenodd")
-      .attr("transform", d => `translate(${d.x + 5},${y(maxAxisY - d.y) + 10})`)
+      .attr(
+        "transform",
+        (d, i) =>
+          `translate(${30 + (i + 1) * 0.369 * x.bandwidth() + (i + 1) * x.bandwidth() + 2},${y(maxAxisY - d.y) + 10})`
+      )
       .attr("fill", "#C03938");
     svg
       .select("#location-line")
@@ -322,9 +326,13 @@ function drawChart(
       .data(locations)
       .join("rect")
       .attr("height", "1px")
-      .attr("width", x.bandwidth() + 10)
-      .attr("transform", d => `translate(${d.x - 0.99 * x.bandwidth()},${y(maxAxisY - d.y) + 30})`)
+      .attr("width", x.bandwidth() + 12)
+      .attr(
+        "transform",
+        (d, i) => `translate(${30 + (i + 1) * 0.369 * x.bandwidth() + i * x.bandwidth()},${y(maxAxisY - d.y) + 30})`
+      )
       .attr("fill", "#C03938");
+    // d.x - 0.72 * x.bandwidth()
   }
 }
 type StackedBarProps = {
