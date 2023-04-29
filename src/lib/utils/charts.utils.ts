@@ -76,7 +76,8 @@ export const getStackedBarStat = (
   data: SemesterStudentVoteStat[],
   students: ISemesterStudent[],
   maxProposalsPoints: number,
-  maxQuestionsPoints: number
+  maxQuestionsPoints: number,
+  maxDailyPractices: number
 ): StackedBarStatsData => {
   console.log({ daaaaata: data });
   const stackedBarStats: StackedBarStats[] = [];
@@ -129,7 +130,7 @@ export const getStackedBarStat = (
     const totalPractices = d.totalPractices!;
     if (!totalPractices) return;
 
-    const totalPracticesSubgroup = getStudentSubgroupInBars(totalPractices, 30);
+    const totalPracticesSubgroup = getStudentSubgroupInBars(totalPractices, maxDailyPractices);
     const student = students.find(student => student.uname === d.uname);
     if (!student) return;
 

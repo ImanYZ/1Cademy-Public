@@ -90,6 +90,7 @@ export const Dashboard = ({ user, currentSemester }: DashboardProps) => {
   const [semesterStudentsVoteStats, setSemesterStudentVoteStats] = useState<SemesterStudentVoteStat[]>([]);
   const [maxProposalsPoints, setMaxProposalsPoints] = useState<number>(0);
   const [maxQuestionsPoints, setMaxQuestionsPoints] = useState<number>(0);
+  const [maxDailyPractices, setMaxDailyPractices] = useState<number>(0);
 
   const [studentVoteStat, setStudentVoteStat] = useState<SemesterStudentVoteStat | null>(null);
   const [semesterStudentStats, setSemesterStudentStats] = useState<GeneralSemesterStudentsStats | null>(null);
@@ -332,12 +333,18 @@ export const Dashboard = ({ user, currentSemester }: DashboardProps) => {
       studentStackedBarProposalsStats,
       studentStackedBarQuestionsStats,
       studentStackedBarDailyPracticeStats,
-    } = getStackedBarStat(semesterStudentsVoteStats, students, maxProposalsPoints, maxQuestionsPoints);
+    } = getStackedBarStat(
+      semesterStudentsVoteStats,
+      students,
+      maxProposalsPoints,
+      maxQuestionsPoints,
+      maxDailyPractices
+    );
     setStackedBar(stackedBarStats);
     setProposalsStudents(studentStackedBarProposalsStats);
     setQuestionsStudents(studentStackedBarQuestionsStats);
     setDailyPracitceStudents(studentStackedBarDailyPracticeStats);
-  }, [maxProposalsPoints, maxQuestionsPoints, semesterStudentsVoteStats, students]);
+  }, [maxDailyPractices, maxProposalsPoints, maxQuestionsPoints, semesterStudentsVoteStats, students]);
 
   // set up semester snapshot to modify state
   useEffect(() => {
@@ -352,19 +359,21 @@ export const Dashboard = ({ user, currentSemester }: DashboardProps) => {
         setStudents(null);
         setMaxProposalsPoints(0);
         setMaxQuestionsPoints(0);
+        setMaxDailyPractices(0);
         setThereIsData(false);
         return;
       }
 
       for (let change of docChanges) {
         const semesterDoc = change.doc;
-        const { maxProposalsPoints, maxQuestionsPoints } = getMaxProposalsQuestionsPoints(
+        const { maxProposalsPoints, maxQuestionsPoints, maxDailyPractices } = getMaxProposalsQuestionsPoints(
           semesterDoc.data() as ISemester
         );
         setSemesterConfig(semesterDoc.data() as ISemester);
         setStudentsCounter((semesterDoc.data() as ISemester).students.length);
         setMaxProposalsPoints(maxProposalsPoints);
         setMaxQuestionsPoints(maxQuestionsPoints);
+        setMaxDailyPractices(maxDailyPractices);
         setStudents(semesterDoc.data().students);
         setThereIsData(true);
       }
@@ -1051,5 +1060,6 @@ const getMaxProposalsQuestionsPoints = (data: ISemester): MaxPoints => {
   return {
     maxProposalsPoints: data.nodeProposals.totalDaysOfCourse * data.nodeProposals.numPoints,
     maxQuestionsPoints: data.questionProposals.totalDaysOfCourse * data.questionProposals.numPoints,
+    maxDailyPractices: data.dailyPractice.totalDaysOfCourse * data.dailyPractice.numPoints,
   };
 };

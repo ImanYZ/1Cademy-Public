@@ -440,7 +440,8 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
       semesterStudentVoteState,
       students,
       maxProposalsPoints,
-      maxQuestionsPoints
+      maxQuestionsPoints,
+      100
     );
     setStackedBar(stackedBarStats);
     setProposalsStudents(studentStackedBarProposalsStats);
@@ -567,6 +568,7 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
     return {
       maxProposalsPoints: data.nodeProposals.totalDaysOfCourse * data.nodeProposals.numPoints,
       maxQuestionsPoints: data.questionProposals.totalDaysOfCourse * data.questionProposals.numPoints,
+      maxDailyPractices: 100,
     };
   };
 
