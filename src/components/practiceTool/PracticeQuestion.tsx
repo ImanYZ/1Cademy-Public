@@ -12,8 +12,6 @@ import { SimpleQuestionNode } from "../../instructorsTypes";
 import { DESIGN_SYSTEM_COLORS } from "../../lib/theme/colors";
 import shortenNumber from "../../lib/utils/shortenNumber";
 import { CustomWrapperButton } from "../map/Buttons/Buttons";
-import Leaderboard from "./Leaderboard";
-import { UserStatus } from "./UserStatus";
 
 type NodeQuestionProps = {
   node: SimpleQuestionNode;
@@ -267,8 +265,20 @@ const NodeQuestion = ({ node, selectedAnswers, setSelectedIdxAnswer, submitAnswe
   );
 };
 
-type PracticeQuestionProps = { question: SimpleQuestionNode; practiceIsCompleted: boolean; onClose: () => void };
-export const PracticeQuestion = ({ question, practiceIsCompleted, onClose }: PracticeQuestionProps) => {
+type PracticeQuestionProps = {
+  question: SimpleQuestionNode | null;
+  practiceIsCompleted: boolean;
+  onClose: () => void;
+  leaderboard: ReactNode;
+  userStatus: ReactNode;
+};
+export const PracticeQuestion = ({
+  question,
+  practiceIsCompleted,
+  onClose,
+  leaderboard,
+  userStatus,
+}: PracticeQuestionProps) => {
   // const db = getFirestore();
   // const [questions, setQuestions] = useState<Node[]>([]);
 
@@ -455,7 +465,7 @@ export const PracticeQuestion = ({ question, practiceIsCompleted, onClose }: Pra
             >
               <CloseIcon />
             </IconButton>
-            <Leaderboard />
+            {leaderboard}
           </Box>
 
           {/* userStatus */}
@@ -477,7 +487,7 @@ export const PracticeQuestion = ({ question, practiceIsCompleted, onClose }: Pra
             >
               <CloseIcon />
             </IconButton>
-            <UserStatus />
+            {userStatus}
           </Box>
         </>
       )}

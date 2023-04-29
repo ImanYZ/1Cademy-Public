@@ -4,14 +4,17 @@ import React, { useEffect, useState } from "react";
 import { CourseTag, SimpleQuestionNode } from "../../instructorsTypes";
 import { Post } from "../../lib/mapApi";
 import CourseDetail from "./CourseDetail";
+import Leaderboard from "./Leaderboard";
 import { PracticeQuestion } from "./PracticeQuestion";
+import { UserStatus } from "./UserStatus";
 
 type PracticeToolProps = {
+  user: User;
   currentSemester: CourseTag;
   onClose: () => void;
 };
 
-export const PracticeTool = ({ currentSemester, onClose }: PracticeToolProps) => {
+export const PracticeTool = ({ user, currentSemester, onClose }: PracticeToolProps) => {
   const [startPractice, setStartPractice] = useState(false);
   const [question, setQuestion] = useState<SimpleQuestionNode | null>(null);
   const [practiceIsCompleted, setPracticeIsCompleted] = useState(false);
@@ -40,7 +43,13 @@ export const PracticeTool = ({ currentSemester, onClose }: PracticeToolProps) =>
         overflow: "hidden",
       }}
     >
-      <PracticeQuestion question={question} practiceIsCompleted={practiceIsCompleted} onClose={onClose} />
+      <PracticeQuestion
+        question={question}
+        practiceIsCompleted={practiceIsCompleted}
+        onClose={onClose}
+        leaderboard={<Leaderboard semesterId={currentSemester.tagId} />}
+        userStatus={<UserStatus semesterId={currentSemester.tagId} user={user} />}
+      />
     </Box>
   ) : (
     <CourseDetail currentSemester={currentSemester} onStartPractice={() => setStartPractice(true)} />
