@@ -1,9 +1,9 @@
 import ArrowForwardIosRoundedIcon from "@mui/icons-material/ArrowForwardIosRounded";
 import HomeRoundedIcon from "@mui/icons-material/HomeRounded";
 import InsightsRoundedIcon from "@mui/icons-material/InsightsRounded";
-import { Box, Button, Divider, Paper, Stack, Typography, useTheme } from "@mui/material";
+import { Box, Button, ButtonBase, Divider, Paper, Stack, Typography, useTheme } from "@mui/material";
 import Image from "next/image";
-import React from "react";
+import React, { ReactNode } from "react";
 import { User } from "src/knowledgeTypes";
 import { ICourseTag, ISemester } from "src/types/ICourse";
 
@@ -92,53 +92,20 @@ export const DashboradToolbar = ({
           </Box>
         </Stack>
         <Box>
-          <Stack
-            onClick={() => onChangeToolbarView("DASHBOARD")}
-            direction={"row"}
-            spacing={"16px"}
-            sx={{
-              borderRadius: "16px",
-              p: "8px 16px ",
-              cursor: "pointer",
-              transition: "background-color 300ms ease-out",
-              backgroundColor:
-                view === "DASHBOARD"
-                  ? mode === "dark"
-                    ? DESIGN_SYSTEM_COLORS.notebookO900
-                    : DESIGN_SYSTEM_COLORS.primary50
-                  : undefined,
-              ":hover": {
-                backgroundColor: mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookO900 : DESIGN_SYSTEM_COLORS.primary50,
-              },
-              mb: "8px",
-            }}
-          >
-            <HomeRoundedIcon sx={{ color: DESIGN_SYSTEM_COLORS.orange400 }} />
-            <Typography fontWeight={500}>Dashboard</Typography>
-          </Stack>
-          <Stack
-            onClick={() => onChangeToolbarView("PRACTICE")}
-            direction={"row"}
-            spacing={"16px"}
-            sx={{
-              borderRadius: "16px",
-              p: "8px 16px ",
-              cursor: "pointer",
-              transition: "background-color 300ms ease-out",
-              backgroundColor:
-                view === "PRACTICE"
-                  ? mode === "dark"
-                    ? DESIGN_SYSTEM_COLORS.notebookO900
-                    : DESIGN_SYSTEM_COLORS.primary50
-                  : undefined,
-              ":hover": {
-                backgroundColor: mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookO900 : DESIGN_SYSTEM_COLORS.primary50,
-              },
-            }}
-          >
-            <InsightsRoundedIcon sx={{ color: DESIGN_SYSTEM_COLORS.orange400 }} />
-            <Typography fontWeight={500}>Practise</Typography>
-          </Stack>
+          <DashboardToolbarViewButton
+            name="Dashboard"
+            view="DASHBOARD"
+            active={view === "DASHBOARD"}
+            IconButton={<HomeRoundedIcon sx={{ color: DESIGN_SYSTEM_COLORS.orange400 }} />}
+            onChangeToolbarView={() => onChangeToolbarView("DASHBOARD")}
+          />
+          <DashboardToolbarViewButton
+            name="Practise"
+            view="PRACTICE"
+            active={view === "PRACTICE"}
+            IconButton={<InsightsRoundedIcon sx={{ color: DESIGN_SYSTEM_COLORS.orange400 }} />}
+            onChangeToolbarView={() => onChangeToolbarView("PRACTICE")}
+          />
         </Box>
         <Divider />
 
@@ -166,5 +133,52 @@ export const DashboradToolbar = ({
         Go to Notebook
       </Button>
     </Paper>
+  );
+};
+
+type DashboardToolbarViewButtonProps = {
+  view: ToolbarView;
+  active: boolean;
+  name: string;
+  IconButton: ReactNode;
+  onChangeToolbarView: (view: ToolbarView) => void;
+};
+
+const DashboardToolbarViewButton = ({
+  view,
+  onChangeToolbarView,
+  IconButton,
+  name,
+  active,
+}: DashboardToolbarViewButtonProps) => {
+  const {
+    palette: { mode },
+  } = useTheme();
+  return (
+    <ButtonBase sx={{ display: "block", width: "100%" }}>
+      <Stack
+        onClick={() => onChangeToolbarView(view)}
+        direction={"row"}
+        spacing={"16px"}
+        sx={{
+          borderRadius: "16px",
+          p: "8px 16px ",
+          cursor: "pointer",
+          transition: "background-color 300ms ease-out",
+          backgroundColor: active
+            ? mode === "dark"
+              ? DESIGN_SYSTEM_COLORS.notebookO900
+              : DESIGN_SYSTEM_COLORS.primary50
+            : undefined,
+          ":hover": {
+            backgroundColor: mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookO900 : DESIGN_SYSTEM_COLORS.primary50,
+          },
+          mb: "8px",
+        }}
+      >
+        {IconButton}
+        <Typography fontWeight={500}>{name}</Typography>
+      </Stack>
+    </ButtonBase>
   );
 };
