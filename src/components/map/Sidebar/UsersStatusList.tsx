@@ -392,9 +392,7 @@ const UsersStatusList = ({ nodeBookDispatch, isSmaller = true, disabled = false,
 
   const renderUsersList = useCallback(
     (uList: any[], online: boolean) => {
-      console.log({ username: uList });
       return uList.map((user: any) => {
-        console.log({ fullname: user.fullname });
         return (
           <MemoizedUserStatusIcon
             key={"User" + user.uname}
