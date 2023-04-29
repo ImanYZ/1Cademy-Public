@@ -596,7 +596,12 @@ export const allCommunities = [
   {
     id: "ADHD-and-autism",
     name: "ADHD-and-autism",
-    tags: [],
+    tags: [
+      {
+        title: "Attention-Deficit Hyperactivity Disorder (ADHD)",
+        node: "HJq7AEyAXkO3Kp3ft2o7",
+      },
+    ],
     allTime: [],
     weekly: [],
     url: "/static/Communities/ADHD_and_Autism.jpeg",
