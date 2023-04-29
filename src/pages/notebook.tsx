@@ -998,6 +998,7 @@ const Dashboard = ({}: DashboardProps) => {
                 top: tmpNode?.top ?? topParent,
                 visible: Boolean((cur.notebooks ?? [])[notebookIdx]),
                 open: Boolean((cur.expands ?? [])[notebookIdx]),
+                editable: tmpNode?.editable ?? false,
               };
             });
 
