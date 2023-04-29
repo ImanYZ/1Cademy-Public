@@ -1,3 +1,4 @@
+import { KnowledgeChoice } from "./knowledgeTypes";
 import {
   IInstructor,
   ISemester,
@@ -75,4 +76,21 @@ export type CourseTag = {
   uTitle: string;
   tagId: string;
   title: string;
+};
+
+export type SimpleQuestionNode = {
+  id: string;
+  choices: KnowledgeChoice[];
+  tags: string[];
+  content: string;
+  corrects: number;
+  nodeImage: string;
+  nodeVideo: string;
+  nodeAudio: string;
+  studied: number;
+  title: string;
+  wrongs: number;
+  correct: boolean;
+  isStudied: boolean;
+  wrong: boolean;
 };

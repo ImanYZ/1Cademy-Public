@@ -6,20 +6,17 @@ import LeaderboardIcon from "@mui/icons-material/Leaderboard";
 import LocalOfferIcon from "@mui/icons-material/LocalOffer";
 import { Button, ClickAwayListener, Divider, IconButton, ListItem, Tooltip, Typography } from "@mui/material";
 import { Box, Stack } from "@mui/system";
-import { getFirestore } from "firebase/firestore";
 import React, { ReactNode, useCallback, useEffect, useMemo, useState } from "react";
 
-import { getRootQuestionDescendants } from "../../client/serveless/nodes.serveless";
-import { Post } from "../../lib/mapApi";
+import { SimpleQuestionNode } from "../../instructorsTypes";
 import { DESIGN_SYSTEM_COLORS } from "../../lib/theme/colors";
 import shortenNumber from "../../lib/utils/shortenNumber";
-import { Node } from "../../nodeBookTypes";
 import { CustomWrapperButton } from "../map/Buttons/Buttons";
 import Leaderboard from "./Leaderboard";
 import { UserStatus } from "./UserStatus";
 
 type NodeQuestionProps = {
-  node: Node;
+  node: SimpleQuestionNode;
   selectedAnswers: boolean[];
   setSelectedIdxAnswer: (newValue: number) => void;
   submitAnswer: boolean;
@@ -236,12 +233,7 @@ const NodeQuestion = ({ node, selectedAnswers, setSelectedIdxAnswer, submitAnswe
         <CustomWrapperButton id={`${node.id}-node-footer-votes`}>
           <Stack direction={"row"} alignItems={"center"}>
             <Tooltip title={"Vote to prevent further changes."} placement={"top"}>
-              <Button
-                // id={downvoteButtonId}
-                // disabled={disableUpvoteButton}
-                onClick={() => console.log("upvote")}
-                sx={{ padding: "0px", color: "inherit", minWidth: "0px" }}
-              >
+              <Button onClick={() => console.log("upvote")} sx={{ padding: "0px", color: "inherit", minWidth: "0px" }}>
                 <Box sx={{ display: "flex", fontSize: "14px", alignItems: "center" }}>
                   <DoneIcon sx={{ fontSize: "18px" }} />
                   <span style={{ marginLeft: "2px" }}>{shortenNumber(node.corrects, 2, false)}</span>
@@ -255,12 +247,10 @@ const NodeQuestion = ({ node, selectedAnswers, setSelectedIdxAnswer, submitAnswe
               sx={{
                 borderColor: theme => (theme.palette.mode === "dark" ? "#D3D3D3" : "inherit"),
                 mx: "4px",
-              }} /* sx={{ borderColor: "#6A6A6A" }}  */
+              }}
             />
             <Tooltip title={"Vote to delete node."} placement={"top"}>
               <Button
-                // id={upvoteButtonId}
-                // disabled={disableDownvoteButton}
                 onClick={() => console.log("downvote")}
                 sx={{ padding: "0px", color: "inherit", minWidth: "0px" }}
               >
@@ -277,71 +267,49 @@ const NodeQuestion = ({ node, selectedAnswers, setSelectedIdxAnswer, submitAnswe
   );
 };
 
-type PracticeQuestionProps = { courseId: string; onClose: () => void };
-export const PracticeQuestion = ({ courseId, onClose }: PracticeQuestionProps) => {
-  const db = getFirestore();
-  const [questions, setQuestions] = useState<Node[]>([]);
-  const [selectedQuestion, setSelectedQuestion] = useState<{ question: Node; idx: number } | null>(null);
+type PracticeQuestionProps = { question: SimpleQuestionNode; practiceIsCompleted: boolean; onClose: () => void };
+export const PracticeQuestion = ({ question, practiceIsCompleted, onClose }: PracticeQuestionProps) => {
+  // const db = getFirestore();
+  // const [questions, setQuestions] = useState<Node[]>([]);
+
+  // const [selectedQuestion, setSelectedQuestion] = useState<{ question: Node; idx: number } | null>(null);
   const [selectedAnswers, setSelectedAnswers] = useState<boolean[]>([]);
   const [displaySidebar, setDisplaySidebar] = useState<"LEADERBOARD" | "USER_STATUS" | null>(null);
   const [submitAnswer, setSubmitAnswer] = useState(false);
 
-  // call first question
-  useEffect(() => {
-    console.log("getPracticeQuestion");
-    const getPracticeQuestion = async () => {
-      const res = await Post("/practice", { tagId: courseId });
-      console.log("------>", { res });
-    };
-    getPracticeQuestion();
-  }, [courseId]);
+  // // call first question
+  // useEffect(() => {
+  //   console.log("getPracticeQuestion");
+  //   const getPracticeQuestion = async () => {
+  //     const res: any = await Post("/practice", { tagId: courseId });
+  //     if (res?.done) setPracticeIsCompleted(true);
+
+  //     const { question, flashcardId } = res as { question: SimpleQuestionNode; flashcardId: string };
+  //     console.log("------>", { question, flashcardId });
+  //   };
+  //   getPracticeQuestion();
+  // }, [courseId]);
 
   useEffect(() => {
-    if (!selectedQuestion) return;
-    setSelectedAnswers(new Array(selectedQuestion.question.choices.length).fill(false));
-  }, [selectedQuestion]);
+    if (!question) return;
+    setSelectedAnswers(new Array(question.choices.length).fill(false));
+  }, [question]);
 
   const onNextQuestion = useCallback(() => {
     console.log("onNextQuestion");
-    setSelectedQuestion(pre => {
-      if (!pre) return pre;
-      if (pre.idx >= questions.length - 1) return pre;
-      const newIdx = pre.idx + 1;
-      return { question: questions[newIdx], idx: newIdx };
-    });
+    // setSelectedQuestion(pre => {
+    //   if (!pre) return pre;
+    //   if (pre.idx >= questions.length - 1) return pre;
+    //   const newIdx = pre.idx + 1;
+    //   return { question: questions[newIdx], idx: newIdx };
+    // });
+    // TODO: call endpoint
     setSubmitAnswer(false);
-  }, [questions]);
+  }, []);
 
   const onSelectAnswer = (answerIdx: number) => {
     setSelectedAnswers(prev => prev.map((c, i) => (answerIdx === i ? !c : c)));
   };
-
-  useEffect(() => {
-    const getUserInfo = async () => {
-      const rootInfo = await getRootQuestionDescendants(db, "ib25pTDmuDtnR0SJbccT");
-      if (!rootInfo) return;
-      console.log({ rootInfo });
-      setQuestions(rootInfo.descendants);
-      if (rootInfo.descendants.length > 0) {
-        setSelectedQuestion({ question: rootInfo.descendants[0], idx: 0 });
-      }
-    };
-    getUserInfo();
-  }, [db]);
-
-  if (!selectedQuestion)
-    return (
-      <Box
-        sx={{
-          position: "absolute",
-          inset: "0px",
-          background: theme =>
-            theme.palette.mode === "dark" ? theme.palette.common.notebookG900 : theme.palette.common.notebookBl1,
-          zIndex: 1,
-          p: "45px 64px",
-        }}
-      ></Box>
-    );
 
   return (
     <Box
@@ -356,141 +324,163 @@ export const PracticeQuestion = ({ courseId, onClose }: PracticeQuestionProps) =
         <CloseFullscreenIcon />
       </IconButton>
 
-      <Stack spacing={"8px"} sx={{ position: "absolute", right: "12px", top: "8px" }}>
-        <IconButton
-          onClick={() => setDisplaySidebar("USER_STATUS")}
-          sx={{
-            width: "56px",
-            height: "56px",
-            fill: theme =>
-              theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookG200 : DESIGN_SYSTEM_COLORS.gray500,
-            borderRadius: "8px",
-            backgroundColor: theme =>
-              theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookMainBlack : DESIGN_SYSTEM_COLORS.gray50,
-          }}
-        >
-          <svg width="29" height="23" viewBox="0 0 29 23" fill="inherit" xmlns="http://www.w3.org/2000/svg">
-            <path d="M14.5001 23H4.61759L0 9.27492L8.24261 12.5906L14.5001 0L20.7576 12.5906L29 9.27492L24.3826 23H14.5001Z" />
-          </svg>
-        </IconButton>
+      {practiceIsCompleted && (
+        <Box sx={{ mt: "50px" }}>
+          <QuestionMessage
+            messages={[
+              `Daily practice has been completed.`,
+              `You have completed 19 days out of 45 days of your review practice.`,
+              `24 days are remaining to the end of the semester.`,
+            ]}
+          />
+        </Box>
+      )}
 
-        <IconButton
-          onClick={() => setDisplaySidebar("LEADERBOARD")}
-          sx={{
-            width: "56px",
-            height: "56px",
-            color: theme =>
-              theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookG200 : DESIGN_SYSTEM_COLORS.gray500,
-            borderRadius: "8px",
-            backgroundColor: theme =>
-              theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookMainBlack : DESIGN_SYSTEM_COLORS.gray50,
-          }}
-        >
-          <LeaderboardIcon />
-        </IconButton>
-      </Stack>
+      {/* {!question && !practiceIsCompleted && <Typography>Can't get question</Typography>} */}
 
-      <Box sx={{ maxWidth: "820px", m: "auto" }}>
-        <QuestionMessage
-          messages={[
-            `7 questions left to get today’s point.`,
-            `You have completed 19 days out of 45 days of your review practice.`,
-            `24 days are remaining to the end of the semester.`,
-          ]}
-        />
-        <NodeQuestion
-          node={selectedQuestion.question}
-          selectedAnswers={selectedAnswers}
-          setSelectedIdxAnswer={onSelectAnswer}
-          submitAnswer={submitAnswer}
-        />
-
-        <Box sx={{ display: "flex", justifyContent: "space-between", mt: "32px" }}>
-          <Button
-            variant="contained"
-            onClick={onNextQuestion}
-            sx={{
-              borderRadius: "26px",
-              minWidth: "180px",
-              fontSize: "16px",
-              backgroundColor: theme =>
-                theme.palette.mode === "dark" ? theme.palette.common.baseWhite : theme.palette.common.baseWhite,
-              color: theme =>
-                theme.palette.mode === "dark" ? theme.palette.common.gray700 : theme.palette.common.gray700,
-              ":hover": {
+      {question && !practiceIsCompleted && (
+        <>
+          {/* options */}
+          <Stack spacing={"8px"} sx={{ position: "absolute", right: "12px", top: "8px" }}>
+            <IconButton
+              onClick={() => setDisplaySidebar("USER_STATUS")}
+              sx={{
+                width: "56px",
+                height: "56px",
+                fill: theme =>
+                  theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookG200 : DESIGN_SYSTEM_COLORS.gray500,
+                borderRadius: "8px",
                 backgroundColor: theme =>
-                  theme.palette.mode === "dark" ? theme.palette.common.baseWhite : theme.palette.common.baseWhite,
+                  theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookMainBlack : DESIGN_SYSTEM_COLORS.gray50,
+              }}
+            >
+              <svg width="29" height="23" viewBox="0 0 29 23" fill="inherit" xmlns="http://www.w3.org/2000/svg">
+                <path d="M14.5001 23H4.61759L0 9.27492L8.24261 12.5906L14.5001 0L20.7576 12.5906L29 9.27492L24.3826 23H14.5001Z" />
+              </svg>
+            </IconButton>
+
+            <IconButton
+              onClick={() => setDisplaySidebar("LEADERBOARD")}
+              sx={{
+                width: "56px",
+                height: "56px",
                 color: theme =>
-                  theme.palette.mode === "dark" ? theme.palette.common.gray700 : theme.palette.common.gray700,
-              },
+                  theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookG200 : DESIGN_SYSTEM_COLORS.gray500,
+                borderRadius: "8px",
+                backgroundColor: theme =>
+                  theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookMainBlack : DESIGN_SYSTEM_COLORS.gray50,
+              }}
+            >
+              <LeaderboardIcon />
+            </IconButton>
+          </Stack>
+
+          {/* node question */}
+          <Box sx={{ maxWidth: "820px", m: "auto" }}>
+            <QuestionMessage
+              messages={[
+                `7 questions left to get today’s point.`,
+                `You have completed 19 days out of 45 days of your review practice.`,
+                `24 days are remaining to the end of the semester.`,
+              ]}
+            />
+            <NodeQuestion
+              node={question}
+              selectedAnswers={selectedAnswers}
+              setSelectedIdxAnswer={onSelectAnswer}
+              submitAnswer={submitAnswer}
+            />
+
+            <Box sx={{ display: "flex", justifyContent: "space-between", mt: "32px" }}>
+              <Button
+                variant="contained"
+                onClick={onNextQuestion}
+                sx={{
+                  borderRadius: "26px",
+                  minWidth: "180px",
+                  fontSize: "16px",
+                  backgroundColor: theme =>
+                    theme.palette.mode === "dark" ? theme.palette.common.baseWhite : theme.palette.common.baseWhite,
+                  color: theme =>
+                    theme.palette.mode === "dark" ? theme.palette.common.gray700 : theme.palette.common.gray700,
+                  ":hover": {
+                    backgroundColor: theme =>
+                      theme.palette.mode === "dark" ? theme.palette.common.baseWhite : theme.palette.common.baseWhite,
+                    color: theme =>
+                      theme.palette.mode === "dark" ? theme.palette.common.gray700 : theme.palette.common.gray700,
+                  },
+                }}
+              >
+                View Node Tree
+              </Button>
+              {!submitAnswer && (
+                <Button
+                  variant="contained"
+                  onClick={() => setSubmitAnswer(true)}
+                  disabled={!selectedAnswers.some(c => c)}
+                  sx={{ borderRadius: "26px", minWidth: "180px", fontSize: "16px" }}
+                >
+                  Submit
+                </Button>
+              )}
+              {submitAnswer && (
+                <Button
+                  variant="contained"
+                  onClick={onNextQuestion}
+                  disabled={!selectedAnswers.length}
+                  sx={{ borderRadius: "26px", minWidth: "180px", fontSize: "16px" }}
+                >
+                  Next
+                </Button>
+              )}
+            </Box>
+          </Box>
+
+          {/* leaderBoard */}
+          <Box
+            sx={{
+              position: "absolute",
+              width: "350px",
+              top: "0px",
+              bottom: "0px",
+              right: displaySidebar === "LEADERBOARD" ? "0px" : "-350px",
+              backgroundColor: theme =>
+                theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookMainBlack : DESIGN_SYSTEM_COLORS.gray50,
+              transition: "right 0.4s",
             }}
           >
-            View Node Tree
-          </Button>
-          {!submitAnswer && (
-            <Button
-              variant="contained"
-              onClick={() => setSubmitAnswer(true)}
-              disabled={!selectedAnswers.some(c => c)}
-              sx={{ borderRadius: "26px", minWidth: "180px", fontSize: "16px" }}
+            <IconButton
+              sx={{ position: "absolute", top: "17px", right: "17px", p: "4px" }}
+              onClick={() => setDisplaySidebar(null)}
             >
-              Submit
-            </Button>
-          )}
-          {submitAnswer && (
-            <Button
-              variant="contained"
-              onClick={onNextQuestion}
-              disabled={!selectedAnswers.length}
-              sx={{ borderRadius: "26px", minWidth: "180px", fontSize: "16px" }}
+              <CloseIcon />
+            </IconButton>
+            <Leaderboard />
+          </Box>
+
+          {/* userStatus */}
+          <Box
+            sx={{
+              position: "absolute",
+              width: "350px",
+              top: "0px",
+              bottom: "0px",
+              right: displaySidebar === "USER_STATUS" ? "0px" : "-350px",
+              backgroundColor: theme =>
+                theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookMainBlack : DESIGN_SYSTEM_COLORS.gray50,
+              transition: "right 0.4s",
+            }}
+          >
+            <IconButton
+              sx={{ position: "absolute", top: "17px", right: "17px", p: "4px" }}
+              onClick={() => setDisplaySidebar(null)}
             >
-              Next
-            </Button>
-          )}
-        </Box>
-      </Box>
-
-      <Box
-        sx={{
-          position: "absolute",
-          width: "350px",
-          top: "0px",
-          bottom: "0px",
-          right: displaySidebar === "LEADERBOARD" ? "0px" : "-350px",
-          backgroundColor: theme =>
-            theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookMainBlack : DESIGN_SYSTEM_COLORS.gray50,
-          transition: "right 0.4s",
-        }}
-      >
-        <IconButton
-          sx={{ position: "absolute", top: "17px", right: "17px", p: "4px" }}
-          onClick={() => setDisplaySidebar(null)}
-        >
-          <CloseIcon />
-        </IconButton>
-        <Leaderboard />
-      </Box>
-
-      <Box
-        sx={{
-          position: "absolute",
-          width: "350px",
-          top: "0px",
-          bottom: "0px",
-          right: displaySidebar === "USER_STATUS" ? "0px" : "-350px",
-          backgroundColor: theme =>
-            theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookMainBlack : DESIGN_SYSTEM_COLORS.gray50,
-          transition: "right 0.4s",
-        }}
-      >
-        <IconButton
-          sx={{ position: "absolute", top: "17px", right: "17px", p: "4px" }}
-          onClick={() => setDisplaySidebar(null)}
-        >
-          <CloseIcon />
-        </IconButton>
-        <UserStatus />
-      </Box>
+              <CloseIcon />
+            </IconButton>
+            <UserStatus />
+          </Box>
+        </>
+      )}
     </Box>
   );
 };

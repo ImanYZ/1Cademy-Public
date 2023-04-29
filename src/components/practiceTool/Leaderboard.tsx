@@ -1,25 +1,61 @@
 import CheckIcon from "@mui/icons-material/Check";
 import { Box, Button, ButtonGroup, SxProps, Theme, Typography } from "@mui/material";
+import { getFirestore } from "firebase/firestore";
 import Image from "next/image";
 import React, { useEffect, useState } from "react";
 
+import { getSemesterById } from "../../client/serveless/semesters.serverless";
+import { getSemesterStudentVoteStats } from "../../client/serveless/semesterStudentVoteStat.serverless";
 import { DESIGN_SYSTEM_COLORS } from "../../lib/theme/colors";
 import { NO_USER_IMAGE } from "../../lib/utils/constants";
+import { getWeekNumber } from "../../lib/utils/date.utils";
+import { ISemesterStudentVoteStat, ISemesterStudentVoteStatDay } from "../../types/ICourse";
 import { PointsType } from "../PointsType";
 
+type UsersInfo = { [key: string]: { name: string; imageUrl: string } };
+type LeaderboardOption = "WEEK" | "MONTH" | "ALL_TIME";
+type LeaderboardItem = { uname: string; totalPoints: number };
 type LeaderboardProps = {
+  semesterId: string;
   sxBody?: SxProps<Theme>;
 };
 
-const Leaderboard = ({ sxBody }: LeaderboardProps) => {
-  const [leaderBoardUsers, setLeaderBoardUSers] = useState<number[]>([]);
-  const [selectedLeaderboardOption, setSelectedLeaderboardOption] = useState<"WEEK" | "MONTH" | "ALL_TIME">("WEEK");
+const Leaderboard = ({ semesterId, sxBody }: LeaderboardProps) => {
+  console.log({ semesterId });
+  const db = getFirestore();
+  const [usersInfo, setUsersInfo] = useState<UsersInfo>({});
+  const [leaderBoardUsers, setLeaderBoardUSers] = useState<LeaderboardItem[]>([]);
+  const [selectedLeaderboardOption, setSelectedLeaderboardOption] = useState<LeaderboardOption>("WEEK");
+  const [studentStatsBySemester, setStudentStatsBySemester] = useState<ISemesterStudentVoteStat[]>([]);
 
   useEffect(() => {
-    if (selectedLeaderboardOption === "WEEK") setLeaderBoardUSers([1, 2, 3, 4, 5]);
-    if (selectedLeaderboardOption === "MONTH") setLeaderBoardUSers([1, 2, 3, 4, 5, 6]);
-    if (selectedLeaderboardOption === "ALL_TIME") setLeaderBoardUSers([1, 2, 3, 4, 5, 7, 8]);
-  }, [selectedLeaderboardOption]);
+    const getStudentsStatsBySemester = async () => {
+      const res = await getSemesterStudentVoteStats(db, semesterId);
+      console.log("1ress", { res });
+      setStudentStatsBySemester(res);
+    };
+
+    const getSemester = async () => {
+      const res = await getSemesterById(db, semesterId);
+      if (!res) return;
+      const usersInfoBySemester = res.students.reduce(
+        (acu, cur): UsersInfo => ({
+          ...acu,
+          [cur.uname]: { imageUrl: cur.imageUrl, name: `${cur.fName} ${cur.lName}` },
+        }),
+        {}
+      );
+      setUsersInfo(usersInfoBySemester);
+    };
+    getStudentsStatsBySemester();
+    getSemester();
+  }, [db, semesterId]);
+
+  useEffect(() => {
+    const res = mapSemesterStudentVoteStatToLeaderboard(studentStatsBySemester, selectedLeaderboardOption);
+    console.log("2ress", { res });
+    setLeaderBoardUSers(res);
+  }, [selectedLeaderboardOption, studentStatsBySemester]);
 
   return (
     <Box sx={{ width: "100%", height: "100%" }}>
@@ -134,7 +170,7 @@ const Leaderboard = ({ sxBody }: LeaderboardProps) => {
       <Box className="scroll-styled" sx={{ py: "18px", overflowY: "auto", ...sxBody }}>
         {leaderBoardUsers.map((cur, idx) => (
           <Box
-            key={cur}
+            key={cur.uname}
             sx={{
               p: "8px 20px",
               height: "74px",
@@ -157,7 +193,7 @@ const Leaderboard = ({ sxBody }: LeaderboardProps) => {
               }}
             >
               <Image
-                src={NO_USER_IMAGE}
+                src={usersInfo[cur.uname]?.imageUrl ?? NO_USER_IMAGE}
                 alt={"user-image"}
                 width="52px"
                 height="52px"
@@ -191,13 +227,13 @@ const Leaderboard = ({ sxBody }: LeaderboardProps) => {
                   placeItems: "center",
                 }}
               >
-                <Typography sx={{ fontSize: "12px" }}>1</Typography>
+                <Typography sx={{ fontSize: "12px" }}>{idx + 1}</Typography>
               </Box>
             </Box>
             <Box>
-              <Typography sx={{ mb: "4px" }}>Carl Johnson</Typography>
+              <Typography sx={{ mb: "4px" }}>{usersInfo[cur.uname]?.name ?? cur.uname}</Typography>
 
-              <PointsType points={999} fontWeight={400}>
+              <PointsType points={cur.totalPoints} fontWeight={400}>
                 <CheckIcon sx={{ color: DESIGN_SYSTEM_COLORS.success600, fontSize: "16px" }} />
               </PointsType>
             </Box>
@@ -215,4 +251,37 @@ const getColorFromLeaderboardUser = (position: number) => {
   if (position === 2) return "#98A2B3";
   if (position === 3) return "#FFA168";
   return "#A4A4A4";
+};
+
+const filterDayStatsByLastWeek = (dayStats: ISemesterStudentVoteStatDay[]) => {
+  // dayStats.day: YY-MM-DD
+  const currentWeekNumber = getWeekNumber(new Date());
+  return dayStats.filter(cur => getWeekNumber(new Date(cur.day.replace("-", " "))) === currentWeekNumber);
+};
+
+const filterDayStatsByLastMonth = (dayStats: ISemesterStudentVoteStatDay[]) => {
+  // dayStats.day: YY-MM-DD
+  const currentWeekNumber = new Date().getMonth();
+  return dayStats.filter(cur => new Date(cur.day.replace("-", " ")).getMonth() === currentWeekNumber);
+};
+
+const filterDaysStatsByOption = (option: LeaderboardOption, dayStats: ISemesterStudentVoteStatDay[]) => {
+  if (option === "WEEK") return filterDayStatsByLastWeek(dayStats);
+  if (option === "MONTH") return filterDayStatsByLastMonth(dayStats);
+  if (option === "ALL_TIME") return dayStats;
+  return [];
+};
+
+const mapSemesterStudentVoteStatToLeaderboard = (
+  stats: ISemesterStudentVoteStat[],
+  option: LeaderboardOption
+): LeaderboardItem[] => {
+  // move to backend to not get unused data
+  return stats.map(cur => {
+    const statDaysFiltered = filterDaysStatsByOption(option, cur.days);
+    console.log({ statDaysFiltered });
+    const totalPoints = statDaysFiltered.reduce((acu, cur) => acu + (cur?.totalPractices ?? 0), 0);
+    console.log({ totalPoints });
+    return { uname: cur.uname, totalPoints };
+  });
 };
