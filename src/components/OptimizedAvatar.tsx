@@ -1,4 +1,4 @@
-import { Avatar, Box } from "@mui/material";
+import { Avatar, Box, Typography } from "@mui/material";
 import { common } from "@mui/material/colors";
 import { SxProps, Theme } from "@mui/system";
 import { getDownloadURL, getStorage, ref } from "firebase/storage";
@@ -11,6 +11,8 @@ type Props = {
   contained?: boolean;
   sx?: SxProps<Theme>;
 };
+
+const DEFAULT_AVATAR = "https://storage.googleapis.com/onecademy-1.appspot.com/ProfilePictures/no-img.png";
 
 const OptimizedAvatar: FC<Props> = ({ name = "", imageUrl, renderAsAvatar = true, contained = false, sx }) => {
   const [checkIfFileExist, setCheckIfFileExist] = useState(true);
@@ -88,7 +90,6 @@ const OptimizedAvatar: FC<Props> = ({ name = "", imageUrl, renderAsAvatar = true
       </Box>
     );
   }
-
   // render an Avatar with Image cover
   if (renderAsAvatar && !contained) {
     return (
@@ -104,17 +105,34 @@ const OptimizedAvatar: FC<Props> = ({ name = "", imageUrl, renderAsAvatar = true
           ...sx,
         }}
       >
-        <Image
-          src={imageUrl}
-          alt={name}
-          width="46px"
-          height="46px"
-          quality={40}
-          objectFit="cover"
-          style={{
-            borderRadius: "30px",
-          }}
-        />
+        {(!imageUrl || imageUrl === DEFAULT_AVATAR) && (
+          <Avatar
+            sx={{
+              background: "linear-gradient(143.7deg, #FDC830 15.15%, #F37335 83.11%);",
+
+              color: common.white,
+              ...sx,
+            }}
+          >
+            <Typography sx={{ fontWeight: "600", fontSize: "16px" }}>
+              {name.split(" ")[0].charAt(0).toUpperCase()}
+              {name.split(" ")[1]?.charAt(0).toUpperCase()}
+            </Typography>
+          </Avatar>
+        )}
+        {imageUrl && imageUrl !== DEFAULT_AVATAR && (
+          <Image
+            src={imageUrl}
+            alt={name}
+            width="46px"
+            height="46px"
+            quality={40}
+            objectFit="cover"
+            style={{
+              borderRadius: "30px",
+            }}
+          />
+        )}
       </Box>
     );
   }
