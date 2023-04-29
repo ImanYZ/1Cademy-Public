@@ -674,7 +674,7 @@ export const Dashboard = ({ user, currentSemester }: DashboardProps) => {
               backgroundColor: theme => (theme.palette.mode === "light" ? "#FFFFFF" : undefined),
             }}
           >
-            <UserStatus displayTitle={false} />
+            <UserStatus user={user} semesterId={currentSemester.tagId} displayTitle={false} />
           </Paper>
           <Paper
             sx={{

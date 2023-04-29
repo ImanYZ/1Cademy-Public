@@ -253,10 +253,15 @@ const getColorFromLeaderboardUser = (position: number) => {
   return "#A4A4A4";
 };
 
+export const filterDayStatsByWeek = (dayStats: ISemesterStudentVoteStatDay[], weekNumber: number) => {
+  // dayStats.day: YY-MM-DD
+  return dayStats.filter(cur => getWeekNumber(new Date(cur.day.replace("-", " "))) === weekNumber);
+};
+
 const filterDayStatsByLastWeek = (dayStats: ISemesterStudentVoteStatDay[]) => {
   // dayStats.day: YY-MM-DD
   const currentWeekNumber = getWeekNumber(new Date());
-  return dayStats.filter(cur => getWeekNumber(new Date(cur.day.replace("-", " "))) === currentWeekNumber);
+  return filterDayStatsByWeek(dayStats, currentWeekNumber);
 };
 
 const filterDayStatsByLastMonth = (dayStats: ISemesterStudentVoteStatDay[]) => {

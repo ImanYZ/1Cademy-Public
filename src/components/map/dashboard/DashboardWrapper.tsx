@@ -212,7 +212,9 @@ export const DashboardWrapper = ({ user, onClose, sx }: DashboardWrapperProps) =
         {currentSemester ? (
           <>
             {selectToolbarView === "DASHBOARD" && <Dashboard user={user} currentSemester={currentSemester} />}
-            {selectToolbarView === "PRACTICE" && <PracticeTool currentSemester={currentSemester} onClose={onClose} />}
+            {selectToolbarView === "PRACTICE" && (
+              <PracticeTool user={user} currentSemester={currentSemester} onClose={onClose} />
+            )}
           </>
         ) : (
           <NoDataMessage message="No data in this semester" />
