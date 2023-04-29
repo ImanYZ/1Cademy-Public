@@ -48,6 +48,8 @@ export type NotebookDocument = {
       chooseUname: boolean;
     };
   };
+  defaultTagId: string;
+  defaultTagName: string;
   createdAt: Timestamp | Date;
   updatedAt: Timestamp | Date;
 };
