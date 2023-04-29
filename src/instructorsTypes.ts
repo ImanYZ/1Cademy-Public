@@ -57,6 +57,7 @@ export type GeneralSemesterStudentsStats = {
   nodes: number;
   votes: number;
   questions: number;
+  correctPractices: number;
 };
 
 export type MappedData = {

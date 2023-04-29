@@ -267,6 +267,7 @@ export const Dashboard = ({ user, currentSemester }: DashboardProps) => {
       }
 
       const res = mapStudentsStatsDataByDates(semesterStudentVoteStats);
+
       const gg = getGeneralStats(res);
       const ts = res.reduce(
         (a: TrendStats, c): TrendStats => {
@@ -697,17 +698,14 @@ export const Dashboard = ({ user, currentSemester }: DashboardProps) => {
           ref={infoWrapperRef}
           sx={{
             p: { sm: "10px", md: "16px" },
-            backgroundColor: theme => (theme.palette.mode === "light" ? "#FFFFFF" : undefined),
+            backgroundColor: mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookMainBlack : DESIGN_SYSTEM_COLORS.baseWhite,
           }}
         >
           {isLoading && <GeneralPlotStatsSkeleton />}
           {!isLoading && (
             <GeneralPlotStats
-              courseTitle={currentSemester.cTitle.split(" ")[0]}
-              programTitle={currentSemester.pTitle}
+              semesterConfig={semesterConfig}
               semesterStats={semesterStats}
-              semesterTitle={currentSemester.title}
-              studentsCounter={studentsCounter}
               student={semesterStudentStats}
             />
           )}
@@ -727,13 +725,7 @@ export const Dashboard = ({ user, currentSemester }: DashboardProps) => {
 
           {!isLoading && (semesterConfig?.isQuestionProposalRequired || semesterConfig?.isProposalRequired) && (
             <>
-              <Stack
-                direction={"row"}
-                spacing={"24px"}
-                sx={{
-                  marginBottom: "24px",
-                }}
-              >
+              <Stack direction={"row"} spacing={"24px"}>
                 <Box>
                   <Typography sx={{ fontSize: "19px", mb: "6px", lineHeight: "30px" }}>Points</Typography>
                   <Typography sx={{ fontSize: "12px", fontWeight: "500" }}>Nº of Students</Typography>

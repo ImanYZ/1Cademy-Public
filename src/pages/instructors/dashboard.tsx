@@ -637,15 +637,7 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
           }}
         >
           {isLoading && <GeneralPlotStatsSkeleton />}
-          {!isLoading && (
-            <GeneralPlotStats
-              courseTitle={currentSemester.cTitle.split(" ")[0]}
-              programTitle={currentSemester.pTitle}
-              semesterStats={semesterStats}
-              semesterTitle={currentSemester.title}
-              studentsCounter={studentsCounter}
-            />
-          )}
+          {!isLoading && <GeneralPlotStats semesterStats={semesterStats} semesterConfig={semesterConfig} />}
         </Paper>
 
         <Paper

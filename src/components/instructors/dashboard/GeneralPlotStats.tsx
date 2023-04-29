@@ -1,99 +1,99 @@
-import { Divider, Typography } from "@mui/material";
+import { Divider, Typography, useTheme } from "@mui/material";
 import { Box } from "@mui/system";
-import React from "react";
+import React, { useMemo } from "react";
 import { GeneralSemesterStudentsStats } from "src/instructorsTypes";
+import { ISemester } from "src/types/ICourse";
+
+import { DESIGN_SYSTEM_COLORS } from "@/lib/theme/colors";
 
 import { formatNumber } from "../../../lib/utils/number.utils";
 
 type GeneralPlotStatsProps = {
-  courseTitle: string;
-  semesterTitle: string;
-  programTitle: string;
-  studentsCounter: number;
   semesterStats: GeneralSemesterStudentsStats | null;
+  semesterConfig: ISemester | null;
   student?: GeneralSemesterStudentsStats | null;
 };
 
-export const GeneralPlotStats = ({
-  semesterStats,
-  semesterTitle,
-  studentsCounter,
-  programTitle,
-  courseTitle,
-  student,
-}: GeneralPlotStatsProps) => {
+export const GeneralPlotStats = ({ semesterConfig, semesterStats, student }: GeneralPlotStatsProps) => {
   console.log("semesterStats", semesterStats);
+  const {
+    palette: { mode },
+  } = useTheme();
+
+  const totalDaysAllowedToPractice = useMemo(() => {
+    if (!semesterConfig || !semesterConfig.dailyPractice) return 0;
+    const startDate = semesterConfig.dailyPractice.startDate.toDate();
+    const endDate = semesterConfig.dailyPractice.endDate.toDate();
+
+    const diffInMs = Math.abs(startDate.getTime() - endDate.getTime());
+    const diffInDays = Math.ceil(diffInMs / (1000 * 60 * 60 * 24));
+    return diffInDays;
+  }, [semesterConfig]);
+
   return (
     <Box>
-      <Box
-        sx={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          columnGap: "8px",
-          color: "white",
-        }}
-      >
-        <Typography sx={{ color: "#EC7115", fontSize: "36px" }}>{courseTitle} </Typography>
-        <Typography>{semesterTitle}</Typography>
-        <Typography> {studentsCounter ? `Students: ${studentsCounter}` : ""}</Typography>
-      </Box>
-      <Typography>{programTitle}</Typography>
+      <Typography component={"h3"} fontSize={"36px"} fontWeight={"600"}>
+        Numbers
+      </Typography>
       <Divider />
       <Box
         sx={{
           display: "grid",
-          gridTemplateColumns: "1fr 72px",
-          justifyContent: "center",
-          alignItems: "end",
-          py: "12px",
-          textAlign: "center",
-          columnGap: "16px",
-        }}
-      >
-        <Typography style={{ color: "#303134" }}></Typography>
-        <span>Numbers</span>
-      </Box>
-      <Box
-        sx={{
-          display: "grid",
-          gridTemplateColumns: "1fr 100px",
+          gridTemplateColumns: "minmax(150px,max-content) max-content ",
           justifyContent: "center",
           alignItems: "center",
-          textAlign: "center",
+          textAlign: "right",
           columnGap: "16px",
-          rowGap: "24px",
+          rowGap: "12px",
+          "& span:nth-child(odd)": {
+            fontWeight: "600",
+            textAlign: "left",
+          },
         }}
       >
-        <span style={{ textAlign: "left" }}>Child Proposals</span>
+        <span></span>
+        <span
+          style={{
+            fontSize: "12px",
+            color: mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookG200 : DESIGN_SYSTEM_COLORS.gray500,
+          }}
+        >
+          Numbers
+        </span>
+        <span>Child Proposals</span>
         <span>
           {student ? `${formatNumber(student.childProposals)} / ` : ""}
           {formatNumber(semesterStats?.childProposals)}
         </span>
-        <span style={{ textAlign: "left" }}>Edit Proposals</span>
+        <span>Edit Proposals</span>
         <span>
           {student ? `${formatNumber(student.editProposals)} / ` : ""}
           {formatNumber(semesterStats?.editProposals)}
         </span>
-        <span style={{ textAlign: "left" }}>Proposed Links</span>
+        <span>Links</span>
         <span>
           {student ? `${formatNumber(student.links)} / ` : ""}
           {formatNumber(semesterStats?.links)}
         </span>
-        <span style={{ textAlign: "left" }}>Nodes</span>
+        <span>Nodes</span>
         <span>
           {student ? `${formatNumber(student.nodes)} / ` : ""}
           {formatNumber(semesterStats?.nodes)}
         </span>
-        <span style={{ textAlign: "left" }}>Votes</span>
+        <span>Votes</span>
         <span>
           {student ? `${formatNumber(student.votes)} / ` : ""}
           {formatNumber(semesterStats?.votes)}
         </span>
-        <span style={{ textAlign: "left" }}>Questions</span>
+        <span>Questions</span>
         <span>
           {student ? `${formatNumber(student.questions)} / ` : ""}
           {formatNumber(semesterStats?.questions)}
+        </span>
+        <span>Days to complete the practice</span>
+        <span>
+          {student ? `${formatNumber(student.correctPractices)} / ` : ""}
+          {formatNumber(totalDaysAllowedToPractice)}
         </span>
       </Box>
     </Box>
