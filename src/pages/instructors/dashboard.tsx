@@ -123,10 +123,12 @@ export type StackedBarStatsData = {
   stackedBarStats: StackedBarStats[];
   studentStackedBarProposalsStats: StudentStackedBarStatsObject;
   studentStackedBarQuestionsStats: StudentStackedBarStatsObject;
+  studentStackedBarDailyPracticeStats: StudentStackedBarStatsObject;
 };
 export type StudenBarsSubgroupLocation = {
   proposals: number;
   questions: number;
+  totalDailyPractices: number;
 };
 
 // export type BubbleStats = {
@@ -438,7 +440,8 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
       semesterStudentVoteState,
       students,
       maxProposalsPoints,
-      maxQuestionsPoints
+      maxQuestionsPoints,
+      100
     );
     setStackedBar(stackedBarStats);
     setProposalsStudents(studentStackedBarProposalsStats);
@@ -565,6 +568,7 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
     return {
       maxProposalsPoints: data.nodeProposals.totalDaysOfCourse * data.nodeProposals.numPoints,
       maxQuestionsPoints: data.questionProposals.totalDaysOfCourse * data.questionProposals.numPoints,
+      maxDailyPractices: 100,
     };
   };
 
@@ -689,6 +693,7 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
                   mobile={isMovil}
                   isQuestionRequired={semesterConfig?.isQuestionProposalRequired}
                   isProposalRequired={semesterConfig?.isProposalRequired}
+                  dailyPracticeStudents={null}
                 />
               </Box>
             </>

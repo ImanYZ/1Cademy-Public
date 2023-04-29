@@ -25,9 +25,12 @@ import {
 import { capitalizeFirstLetter } from "../../../lib/utils/string.utils";
 import {
   BoxStudentsStats,
+  BoxStudentStats,
   getBoxPlotData,
   getBubbleStats,
   getMaxMinVoxPlotData,
+  groupStudentPointsDayChapter,
+  StudenBarsSubgroupLocation,
   StudentStackedBarStatsObject,
   TrendStats,
 } from "../../../pages/instructors/dashboard";
@@ -78,15 +81,29 @@ export const Dashboard = ({ user, currentSemester }: DashboardProps) => {
   const [stackedBar, setStackedBar] = useState<StackedBarStats[]>([]);
   const [proposalsStudents, setProposalsStudents] = useState<StudentStackedBarStatsObject | null>(null);
   const [questionsStudents, setQuestionsStudents] = useState<StudentStackedBarStatsObject | null>(null);
+  const [dailyPraticeStudents, setDailyPracitceStudents] = useState<StudentStackedBarStatsObject | null>(null);
   const [bubble, setBubble] = useState<BubbleStats[]>([]);
   const [bubbleAxis, setBubbleAxis] = useState<BubbleAxis>({ maxAxisX: 0, maxAxisY: 0, minAxisX: 0, minAxisY: 0 });
   const [semesterConfig, setSemesterConfig] = useState<ISemester | null>(null);
   const [infoWidth, setInfoWidth] = useState(0);
   const [students, setStudents] = useState<ISemesterStudent[] | null>(null);
-  const [semesterStudentVoteState, setSemesterStudentVoteState] = useState<SemesterStudentVoteStat[]>([]);
+  const [semesterStudentsVoteStats, setSemesterStudentVoteStats] = useState<SemesterStudentVoteStat[]>([]);
   const [maxProposalsPoints, setMaxProposalsPoints] = useState<number>(0);
   const [maxQuestionsPoints, setMaxQuestionsPoints] = useState<number>(0);
+  const [maxDailyPractices, setMaxDailyPractices] = useState<number>(0);
 
+  const [studentVoteStat, setStudentVoteStat] = useState<SemesterStudentVoteStat | null>(null);
+  const [semesterStudentStats, setSemesterStudentStats] = useState<GeneralSemesterStudentsStats | null>(null);
+  const [studentLocation, setStudentLocation] = useState<StudenBarsSubgroupLocation>({
+    proposals: 0,
+    questions: 0,
+    totalDailyPractices: 0,
+  });
+  const [studentBoxStat, setStudentBoxStat] = useState<BoxStudentStats>({
+    proposalsPoints: {},
+    questionsPoints: {},
+    votesPoints: {},
+  });
   /// Box plot States
   const [boxStats, setBoxStats] = useState<BoxStudentsStats>({
     proposalsPoints: { data: {}, min: 0, max: 1000 },
@@ -217,7 +234,7 @@ export const Dashboard = ({ user, currentSemester }: DashboardProps) => {
         setBubble([]);
         setStackedBar([]);
         setThereIsData(false);
-        setSemesterStudentVoteState([]);
+        setSemesterStudentVoteStats([]);
         setTrendStats({
           childProposals: [],
           editProposals: [],
@@ -231,9 +248,9 @@ export const Dashboard = ({ user, currentSemester }: DashboardProps) => {
 
       for (let change of docChanges) {
         if (change.type === "added") {
-          const semesterStudentVoteStat = change.doc.data() as ISemesterStudentVoteStat;
-          const points = calculateVoteStatPoints(semesterStudentVoteStat, semesterConfig!);
-          semesterStudentVoteStats.push({ ...semesterStudentVoteStat, ...points });
+          const semesterStudentsVoteStats = change.doc.data() as ISemesterStudentVoteStat;
+          const points = calculateVoteStatPoints(semesterStudentsVoteStats, semesterConfig!);
+          semesterStudentVoteStats.push({ ...semesterStudentsVoteStats, ...points });
         } else if (change.type === "modified") {
           const index = semesterStudentVoteStats.findIndex(
             (semester: ISemesterStudentVoteStat) => semester.uname === change.doc.data().uname
@@ -281,8 +298,8 @@ export const Dashboard = ({ user, currentSemester }: DashboardProps) => {
       );
       setTrendStats(ts);
       setSemesterStats(gg);
-      // semesterStudentVoteState
-      setSemesterStudentVoteState([...semesterStudentVoteStats]);
+      // semesterStudentsVoteStats
+      setSemesterStudentVoteStats([...semesterStudentVoteStats]);
       // setSemesterStats(getSemStat(semester));
       setThereIsData(true);
     });
@@ -292,10 +309,10 @@ export const Dashboard = ({ user, currentSemester }: DashboardProps) => {
 
   // update data in buble
   useEffect(() => {
-    if (!semesterStudentVoteState.length) return setBubble([]);
+    if (!semesterStudentsVoteStats.length) return setBubble([]);
 
     const { bubbleStats, maxVote, maxVotePoints, minVote, minVotePoints } = getBubbleStats(
-      semesterStudentVoteState,
+      semesterStudentsVoteStats,
       students
     );
     setBubble(bubbleStats);
@@ -305,22 +322,29 @@ export const Dashboard = ({ user, currentSemester }: DashboardProps) => {
       minAxisX: minVote,
       minAxisY: minVotePoints,
     });
-  }, [semesterStudentVoteState, students]);
+  }, [semesterStudentsVoteStats, students]);
 
   // update data in stackbar
   useEffect(() => {
-    if (!semesterStudentVoteState.length || !students) return setStackedBar([]);
+    if (!semesterStudentsVoteStats.length || !students) return setStackedBar([]);
 
-    const { stackedBarStats, studentStackedBarProposalsStats, studentStackedBarQuestionsStats } = getStackedBarStat(
-      semesterStudentVoteState,
+    const {
+      stackedBarStats,
+      studentStackedBarProposalsStats,
+      studentStackedBarQuestionsStats,
+      studentStackedBarDailyPracticeStats,
+    } = getStackedBarStat(
+      semesterStudentsVoteStats,
       students,
       maxProposalsPoints,
-      maxQuestionsPoints
+      maxQuestionsPoints,
+      maxDailyPractices
     );
     setStackedBar(stackedBarStats);
     setProposalsStudents(studentStackedBarProposalsStats);
     setQuestionsStudents(studentStackedBarQuestionsStats);
-  }, [maxProposalsPoints, maxQuestionsPoints, semesterStudentVoteState, students]);
+    setDailyPracitceStudents(studentStackedBarDailyPracticeStats);
+  }, [maxDailyPractices, maxProposalsPoints, maxQuestionsPoints, semesterStudentsVoteStats, students]);
 
   // set up semester snapshot to modify state
   useEffect(() => {
@@ -335,25 +359,86 @@ export const Dashboard = ({ user, currentSemester }: DashboardProps) => {
         setStudents(null);
         setMaxProposalsPoints(0);
         setMaxQuestionsPoints(0);
+        setMaxDailyPractices(0);
         setThereIsData(false);
         return;
       }
 
       for (let change of docChanges) {
         const semesterDoc = change.doc;
-        const { maxProposalsPoints, maxQuestionsPoints } = getMaxProposalsQuestionsPoints(
+        const { maxProposalsPoints, maxQuestionsPoints, maxDailyPractices } = getMaxProposalsQuestionsPoints(
           semesterDoc.data() as ISemester
         );
         setSemesterConfig(semesterDoc.data() as ISemester);
         setStudentsCounter((semesterDoc.data() as ISemester).students.length);
         setMaxProposalsPoints(maxProposalsPoints);
         setMaxQuestionsPoints(maxQuestionsPoints);
+        setMaxDailyPractices(maxDailyPractices);
         setStudents(semesterDoc.data().students);
         setThereIsData(true);
       }
     });
     return () => snapShotFunc();
   }, [currentSemester, db]);
+
+  useEffect(() => {
+    if (!currentSemester || !currentSemester.tagId || !user.uname || !semesterConfig) return;
+
+    setIsLoading(true);
+    const userDailyStatRef = collection(db, "semesterStudentStats");
+    const q = query(userDailyStatRef, where("tagId", "==", currentSemester.tagId), where("uname", "==", user.uname));
+    // const userDailyStatDoc = await getDocs(q);
+    let userDailyStatsIncomplete: SemesterStudentStat[] = [];
+    const snapShotFunc = onSnapshot(q, async snapshot => {
+      const docChanges = snapshot.docChanges();
+      if (!docChanges.length) {
+      }
+      for (let change of docChanges) {
+        if (change.type === "added") {
+          userDailyStatsIncomplete.push(change.doc.data() as SemesterStudentStat);
+        } else if (change.type === "modified") {
+          const index = userDailyStatsIncomplete.findIndex(
+            (userDailyStat: SemesterStudentStat) => userDailyStat.uname === change.doc.data().uname
+          );
+          userDailyStatsIncomplete[index] = change.doc.data() as SemesterStudentStat;
+        } else if (change.type === "removed") {
+          const index = userDailyStatsIncomplete.findIndex(
+            (userDailyStat: SemesterStudentStat) => userDailyStat.uname === change.doc.data().uname
+          );
+          userDailyStatsIncomplete.splice(index, 1);
+        }
+      }
+      userDailyStatsIncomplete = userDailyStatsIncomplete.slice(0, 1);
+      const userDailyStats: ISemesterStudentStat[] = userDailyStatsIncomplete.map(cur => {
+        const daysFixed = cur.days.map(c => ({ day: c.day, chapters: c.chapters ?? [] }));
+        return { ...cur, days: daysFixed };
+      });
+
+      const proposalsPoints = groupStudentPointsDayChapter(
+        userDailyStats[0],
+        "proposals",
+        semesterConfig?.nodeProposals.numPoints,
+        semesterConfig?.nodeProposals.numProposalPerDay
+      );
+      const questionsPoints = groupStudentPointsDayChapter(
+        userDailyStats[0],
+        "questions",
+        semesterConfig?.questionProposals.numPoints,
+        semesterConfig?.questionProposals.numQuestionsPerDay
+      );
+      const votesPoints = groupStudentPointsDayChapter(
+        userDailyStats[0],
+        "votes",
+        0,
+        0,
+        semesterConfig?.votes.pointIncrementOnAgreement,
+        semesterConfig?.votes.pointDecrementOnAgreement
+      );
+      setStudentBoxStat({ proposalsPoints, questionsPoints, votesPoints });
+      setThereIsData(true);
+    });
+    return () => snapShotFunc();
+  }, [currentSemester, db, semesterConfig, user.uname]);
 
   // set up semesterStudentStats snapshot to fill data on BoxPlot
   useEffect(() => {
@@ -439,6 +524,128 @@ export const Dashboard = ({ user, currentSemester }: DashboardProps) => {
     return () => snapShotFunc();
   }, [currentSemester, db, semesterConfig]);
 
+  useEffect(() => {
+    if (!user.uname) return;
+    if (user.role && user.role !== "STUDENT") return;
+    const tagId = currentSemester?.tagId;
+    if (!tagId) return;
+    if (!semesterConfig) return;
+    const semesterStudentVoteStatRef = collection(db, "semesterStudentVoteStats");
+    const qByAll = query(semesterStudentVoteStatRef, where("tagId", "==", tagId));
+    const qByStudent = query(semesterStudentVoteStatRef, where("uname", "==", user.uname), where("tagId", "==", tagId));
+
+    // const semesterStudentVoteStatAllDoc = await getDocs(qByAll);
+    let userDailyStats: ISemesterStudentVoteStat[] = [];
+    const snapShotFuncForAll = onSnapshot(qByAll, async snapshot => {
+      const docChanges = snapshot.docChanges();
+      if (!docChanges.length) {
+        setSemesterStats(null);
+        return;
+      }
+      for (let change of docChanges) {
+        if (change.type === "added") {
+          userDailyStats.push(change.doc.data() as ISemesterStudentVoteStat);
+        } else if (change.type === "modified") {
+          const index = userDailyStats.findIndex(
+            (userDailyStat: ISemesterStudentVoteStat) => userDailyStat.uname === change.doc.data().uname
+          );
+          userDailyStats[index] = change.doc.data() as ISemesterStudentVoteStat;
+        } else if (change.type === "removed") {
+          const index = userDailyStats.findIndex(
+            (userDailyStat: ISemesterStudentVoteStat) => userDailyStat.uname === change.doc.data().uname
+          );
+          userDailyStats.splice(index, 1);
+        }
+
+        const resAll = mapStudentsStatsDataByDates(userDailyStats);
+        const ggAll = getGeneralStats(resAll);
+        setSemesterStats(ggAll);
+      }
+    });
+
+    const snapShotFunc = onSnapshot(qByStudent, async snapshot => {
+      const docChanges = snapshot.docChanges();
+      if (!docChanges.length) {
+        setThereIsData(false);
+        setSemesterStudentStats(null);
+        setTrendStats({
+          childProposals: [],
+          editProposals: [],
+          proposedLinks: [],
+          nodes: [],
+          votes: [],
+          questions: [],
+        });
+        return;
+      }
+      for (let change of docChanges) {
+        if (change.type === "added" || change.type === "modified") {
+          const semesterStudentVoteStat = change.doc.data() as ISemesterStudentVoteStat;
+          const points = calculateVoteStatPoints(semesterStudentVoteStat, semesterConfig!);
+          setStudentVoteStat({
+            ...semesterStudentVoteStat,
+            ...points,
+          });
+
+          const res = mapStudentsStatsDataByDates([semesterStudentVoteStat]);
+          const gg = getGeneralStats(res);
+          setSemesterStudentStats(gg);
+          const ts = res.reduce(
+            (a: TrendStats, c): TrendStats => {
+              return {
+                childProposals: semesterConfig?.isProposalRequired
+                  ? [...a.childProposals, { date: new Date(c.date), num: c.value.childProposals }]
+                  : [],
+                editProposals: semesterConfig?.isProposalRequired
+                  ? [...a.editProposals, { date: new Date(c.date), num: c.value.editProposals }]
+                  : [],
+                proposedLinks: [...a.proposedLinks, { date: new Date(c.date), num: c.value.links }],
+                nodes: [...a.nodes, { date: new Date(c.date), num: c.value.nodes }],
+                questions: semesterConfig?.isQuestionProposalRequired
+                  ? [...a.questions, { date: new Date(c.date), num: c.value.questions }]
+                  : [],
+                votes: semesterConfig?.isCastingVotesRequired
+                  ? [...a.votes, { date: new Date(c.date), num: c.value.votes }]
+                  : [],
+              };
+            },
+            {
+              childProposals: [],
+              editProposals: [],
+              proposedLinks: [],
+              nodes: [],
+              questions: [],
+              votes: [],
+            }
+          );
+          setTrendStats(ts);
+          setThereIsData(true);
+          return;
+        }
+      }
+    });
+
+    return () => {
+      snapShotFunc();
+      snapShotFuncForAll();
+    };
+  }, [semesterConfig, currentSemester?.tagId, db, user.uname, user.role]);
+
+  useEffect(() => {
+    if (!semesterStudentsVoteStats || !studentVoteStat) return;
+
+    const sortedByProposals = [...semesterStudentsVoteStats].sort((x, y) => y.proposalPoints! - x.proposalPoints!);
+    const proposals = sortedByProposals.findIndex(s => s.uname === studentVoteStat?.uname);
+    const sortedByQuestions = [...semesterStudentsVoteStats].sort((x, y) => y.questionPoints! - x.questionPoints!);
+    const questions = sortedByQuestions.findIndex(s => s.uname === studentVoteStat?.uname);
+    const sortedByTotalDailyPractices = [...semesterStudentsVoteStats].sort(
+      (x, y) => y.totalPractices! - x.totalPractices!
+    );
+    const totalDailyPractices = sortedByTotalDailyPractices.findIndex(s => s.uname === studentVoteStat?.uname);
+    console.log({ totalDailyPractices });
+    setStudentLocation({ proposals, questions, totalDailyPractices });
+  }, [semesterStudentsVoteStats, studentVoteStat]);
+
   if (!thereIsData && !isLoading) return <NoDataMessage />;
 
   return (
@@ -495,6 +702,7 @@ export const Dashboard = ({ user, currentSemester }: DashboardProps) => {
               semesterStats={semesterStats}
               semesterTitle={currentSemester.title}
               studentsCounter={studentsCounter}
+              student={semesterStudentStats}
             />
           )}
         </Paper>
@@ -506,45 +714,47 @@ export const Dashboard = ({ user, currentSemester }: DashboardProps) => {
             display: "flex",
             flexDirection: "column",
             justifyContent: "center",
-            backgroundColor: theme => (theme.palette.mode === "light" ? "#FFFFFF" : undefined),
+            backgroundColor: mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookMainBlack : DESIGN_SYSTEM_COLORS.baseWhite,
           }}
         >
           {isLoading && <StackedBarPlotStatsSkeleton />}
 
           {!isLoading && (semesterConfig?.isQuestionProposalRequired || semesterConfig?.isProposalRequired) && (
             <>
-              <Box
+              <Stack
+                direction={"row"}
+                spacing={"24px"}
                 sx={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  alignItems: "flex-start",
-                  gap: "4px",
                   marginBottom: "24px",
                 }}
               >
                 <Box>
-                  <Typography sx={{ fontSize: "19px" }}>Points</Typography>
+                  <Typography sx={{ fontSize: "19px", mb: "6px", lineHeight: "30px" }}>Points</Typography>
+                  <Typography sx={{ fontSize: "12px", fontWeight: "500" }}>Nº of Students</Typography>
                 </Box>
                 <Legend
                   title={"Completion rate"}
                   options={[
-                    { title: ">100%", color: "#388E3C" },
-                    { title: ">10%", color: "#F9E2D0" },
-                    { title: ">50%", color: "#A7D841" },
-                    { title: "<=10%", color: "rgba(255, 196, 153, 0.75)" },
+                    { title: " > 100%", color: "#388E3C" },
+                    { title: " > 10%", color: "#F9E2D0" },
+                    { title: " > 50%", color: "#A7D841" },
+                    { title: " <= 10%", color: "rgba(255, 196, 153, 0.75)" },
                   ]}
                 />
-              </Box>
+              </Stack>
               <Box sx={{ alignSelf: "center" }}>
                 <PointsBarChart
                   data={stackedBar}
                   proposalsStudents={user.role === "INSTRUCTOR" ? proposalsStudents : null}
                   questionsStudents={user.role === "INSTRUCTOR" ? questionsStudents : null}
+                  dailyPracticeStudents={user.role === "INSTRUCTOR" ? dailyPraticeStudents : null}
                   maxAxisY={studentsCounter}
                   theme={theme.palette.mode === "dark" ? "Dark" : "Light"}
                   mobile={isMovil}
                   isQuestionRequired={semesterConfig?.isQuestionProposalRequired}
                   isProposalRequired={semesterConfig?.isProposalRequired}
+                  isDailyPracticeRequiered={true}
+                  studentLocation={studentLocation}
                 />
               </Box>
             </>
@@ -593,6 +803,7 @@ export const Dashboard = ({ user, currentSemester }: DashboardProps) => {
                 minAxisX={bubbleAxis.minAxisX}
                 minAxisY={bubbleAxis.minAxisY}
                 role={user.role}
+                student={studentVoteStat}
               />
             </>
           )}
@@ -649,6 +860,7 @@ export const Dashboard = ({ user, currentSemester }: DashboardProps) => {
                   identifier="plot-1"
                   maxX={boxStats.proposalsPoints.max}
                   minX={boxStats.proposalsPoints.min}
+                  studentStats={studentBoxStat.proposalsPoints}
                 />
                 {isMovil && <BoxLegend />}
               </Box>
@@ -679,6 +891,7 @@ export const Dashboard = ({ user, currentSemester }: DashboardProps) => {
                   identifier="plot-2"
                   maxX={boxStats.questionsPoints.max}
                   minX={boxStats.questionsPoints.min}
+                  studentStats={studentBoxStat.questionsPoints}
                 />
                 {isMovil && <BoxLegend />}
               </Box>
@@ -709,6 +922,7 @@ export const Dashboard = ({ user, currentSemester }: DashboardProps) => {
                   identifier="plot-3"
                   minX={boxStats.votesPoints.min}
                   maxX={boxStats.votesPoints.max}
+                  studentStats={studentBoxStat.votesPoints}
                 />
                 {isMovil && <BoxLegend />}
               </Box>
@@ -846,5 +1060,6 @@ const getMaxProposalsQuestionsPoints = (data: ISemester): MaxPoints => {
   return {
     maxProposalsPoints: data.nodeProposals.totalDaysOfCourse * data.nodeProposals.numPoints,
     maxQuestionsPoints: data.questionProposals.totalDaysOfCourse * data.questionProposals.numPoints,
+    maxDailyPractices: data.dailyPractice.totalDaysOfCourse * data.dailyPractice.numPoints,
   };
 };

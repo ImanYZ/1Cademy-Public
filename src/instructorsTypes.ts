@@ -41,6 +41,7 @@ export type BubbleStats = {
 export type MaxPoints = {
   maxProposalsPoints: number;
   maxQuestionsPoints: number;
+  maxDailyPractices: number;
 };
 
 export type BubbleAxis = {
