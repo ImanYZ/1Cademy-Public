@@ -82,7 +82,7 @@ export const buildFullNodes = (userNodesChanges: UserNodeChanges[], nodesData: N
         userNodeId: cur.uNodeId,
         nodeChangeType: cur.cType, // TODO: improve the names and values
         userNodeChangeType: nodeDataFound.cType,
-        editable: false,
+        // editable: false,
         left: 0,
         top: 0,
         firstVisit: cur.uNodeData.createdAt.toDate(),
