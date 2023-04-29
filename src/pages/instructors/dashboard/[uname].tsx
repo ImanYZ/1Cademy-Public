@@ -310,7 +310,8 @@ const StudentDashboard: InstructorLayoutPage = ({ user, currentSemester, setting
       semesterStudentsVoteStats,
       students,
       maxProposalsPoints,
-      maxQuestionsPoints
+      maxQuestionsPoints,
+      100
     );
 
     setStackedBar(stackedBarStats);
@@ -488,6 +489,7 @@ const StudentDashboard: InstructorLayoutPage = ({ user, currentSemester, setting
     return {
       maxProposalsPoints: data.nodeProposals.totalDaysOfCourse * data.nodeProposals.numPoints,
       maxQuestionsPoints: data.questionProposals.totalDaysOfCourse * data.questionProposals.numPoints,
+      maxDailyPractices: 100,
     };
   };
 
@@ -579,12 +581,9 @@ const StudentDashboard: InstructorLayoutPage = ({ user, currentSemester, setting
           {isLoading && <GeneralPlotStatsSkeleton />}
           {!isLoading && (
             <GeneralPlotStats
-              courseTitle={currentSemester.cTitle.split(" ")[0]}
-              programTitle={currentSemester.pTitle}
               semesterStats={semesterStats}
-              semesterTitle={currentSemester.title}
-              studentsCounter={studentsCounter}
               student={semesterStudentStats}
+              semesterConfig={semesterConfig}
             />
           )}
         </Paper>

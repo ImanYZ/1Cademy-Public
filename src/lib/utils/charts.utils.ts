@@ -5,6 +5,7 @@ import {
   ISemesterStudentStat,
   ISemesterStudentStatChapter,
   ISemesterStudentVoteStat,
+  ISemesterStudentVoteStatDay,
 } from "src/types/ICourse";
 
 import {
@@ -211,6 +212,7 @@ export const mapStudentsStatsToDataByDates = (data: ISemesterStudentStat[]): Map
         nodes: prevDay.nodes + responseSumChapterPerDay.chaptersSum.nodes,
         questions: prevDay.questions + responseSumChapterPerDay.chaptersSum.questions,
         votes: prevDay.votes + responseSumChapterPerDay.chaptersSum.votes,
+        correctPractices: prevDay.correctPractices + responseSumChapterPerDay.chaptersSum.correctPractices,
       };
       return { ...acu, [cur.day]: sum };
     }, {});
@@ -227,6 +229,7 @@ export const mapStudentsStatsToDataByDates = (data: ISemesterStudentStat[]): Map
         nodes: prevStudent.nodes + value.nodes,
         questions: prevStudent.questions + value.questions,
         votes: prevStudent.votes + value.votes,
+        correctPractices: prevStudent.correctPractices + value.correctPractices,
       };
       return { ...acuStudent, [key]: sumsStudents };
     }, acu);
@@ -236,7 +239,7 @@ export const mapStudentsStatsToDataByDates = (data: ISemesterStudentStat[]): Map
   return Object.entries(resByDay).map(([date, value]) => ({ date, value }));
 };
 
-const sumPerDay = (day: any) => {
+const sumPerDay = (day: ISemesterStudentVoteStatDay) => {
   return {
     ...day,
     childProposals: day.nodes,
@@ -245,23 +248,26 @@ const sumPerDay = (day: any) => {
     nodes: day.newNodes,
     questions: day.questions,
     votes: day.agreementsWithInst + day.disagreementsWithInst,
+    correctPractices: day.correctPractices,
   };
 };
 
 // TODO: test
+
 export const mapStudentsStatsDataByDates = (data: ISemesterStudentVoteStat[]): MappedData[] => {
   // resByStudents: [{d1,d2},{d1,d3}]
 
   const resByStudents = data.map(student => {
-    return student.days.reduce((acu: any, cur) => {
+    return student.days.reduce((acu: { [key: string]: GeneralSemesterStudentsStats }, cur) => {
       const responseSumChapterPerDay = { day: cur.day, chaptersSum: sumPerDay(cur) };
-      const sum: any = {
+      const sum: GeneralSemesterStudentsStats = {
         childProposals: responseSumChapterPerDay.chaptersSum.childProposals,
         editProposals: responseSumChapterPerDay.chaptersSum.editProposals,
         links: responseSumChapterPerDay.chaptersSum.links,
         nodes: responseSumChapterPerDay.chaptersSum.nodes,
         questions: responseSumChapterPerDay.chaptersSum.questions,
         votes: responseSumChapterPerDay.chaptersSum.votes,
+        correctPractices: responseSumChapterPerDay.chaptersSum.correctPractices,
       };
       return { ...acu, [cur.day]: sum };
     }, {});
@@ -269,7 +275,7 @@ export const mapStudentsStatsDataByDates = (data: ISemesterStudentVoteStat[]): M
 
   // resByDay: {d1,d2,d3}
   const resByDay = resByStudents.reduce((acu, cur) => {
-    return Object.entries(cur).reduce((acuStudent: any, [key, value]: any) => {
+    return Object.entries(cur).reduce((acuStudent: { [key: string]: GeneralSemesterStudentsStats }, [key, value]) => {
       const prevStudent = acuStudent[key] ?? getInitialSumChapterPerDay();
       const sumsStudents: GeneralSemesterStudentsStats = {
         childProposals: prevStudent.childProposals + value.childProposals,
@@ -278,6 +284,7 @@ export const mapStudentsStatsDataByDates = (data: ISemesterStudentVoteStat[]): M
         nodes: prevStudent.nodes + value.nodes,
         questions: prevStudent.questions + value.questions,
         votes: prevStudent.votes + value.votes,
+        correctPractices: prevStudent.correctPractices + value.correctPractices,
       };
       return { ...acuStudent, [key]: sumsStudents };
     }, acu);
@@ -296,6 +303,7 @@ export const getGeneralStats = (data: MappedData[]) => {
       nodes: acu.nodes + cur.value.nodes,
       questions: acu.questions + cur.value.questions,
       votes: acu.votes + cur.value.votes,
+      correctPractices: acu.correctPractices + cur.value.correctPractices,
     };
     return sumsStudents;
   }, getInitialSumChapterPerDay());

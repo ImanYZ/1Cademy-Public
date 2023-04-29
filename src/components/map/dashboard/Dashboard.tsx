@@ -15,7 +15,7 @@ import {
   SemesterStudentVoteStat,
   StackedBarStats,
 } from "../../../instructorsTypes";
-import { User } from "../../../knowledgeTypes";
+import { User, UserRole } from "../../../knowledgeTypes";
 import {
   calculateVoteStatPoints,
   getGeneralStats,
@@ -132,7 +132,7 @@ export const Dashboard = ({ user, currentSemester }: DashboardProps) => {
   const TOOLBAR_WIDTH = 200;
   const WRAPPER_PADDING = 32;
   const GRID_WIDTH = windowWidth - TOOLBAR_WIDTH - 2 * WRAPPER_PADDING;
-  const bubbleChartWidth = isMovil ? windowWidth - 10 - 20 - 10 : GRID_WIDTH - infoWidth - stackBarWidth - 4 * 16;
+  const bubbleChartWidth = isMovil ? windowWidth - 10 - 20 - 10 : GRID_WIDTH - infoWidth - stackBarWidth - 8 * 16;
   const trendPlotWith = isMovil ? windowWidth - 60 : isTablet ? GRID_WIDTH - 100 : GRID_WIDTH - 150;
   const boxPlotWidth = isXlDesktop ? 300 : isLgDesktop ? 300 : isDesktop ? 230 : 220;
 
@@ -267,6 +267,7 @@ export const Dashboard = ({ user, currentSemester }: DashboardProps) => {
       }
 
       const res = mapStudentsStatsDataByDates(semesterStudentVoteStats);
+
       const gg = getGeneralStats(res);
       const ts = res.reduce(
         (a: TrendStats, c): TrendStats => {
@@ -326,6 +327,7 @@ export const Dashboard = ({ user, currentSemester }: DashboardProps) => {
 
   // update data in stackbar
   useEffect(() => {
+    if (user.role !== "STUDENT") return;
     if (!semesterStudentsVoteStats.length || !students) return setStackedBar([]);
 
     const {
@@ -344,7 +346,7 @@ export const Dashboard = ({ user, currentSemester }: DashboardProps) => {
     setProposalsStudents(studentStackedBarProposalsStats);
     setQuestionsStudents(studentStackedBarQuestionsStats);
     setDailyPracitceStudents(studentStackedBarDailyPracticeStats);
-  }, [maxDailyPractices, maxProposalsPoints, maxQuestionsPoints, semesterStudentsVoteStats, students]);
+  }, [maxDailyPractices, maxProposalsPoints, maxQuestionsPoints, semesterStudentsVoteStats, students, user.role]);
 
   // set up semester snapshot to modify state
   useEffect(() => {
@@ -379,7 +381,7 @@ export const Dashboard = ({ user, currentSemester }: DashboardProps) => {
       }
     });
     return () => snapShotFunc();
-  }, [currentSemester, db]);
+  }, [currentSemester, db, user.role]);
 
   useEffect(() => {
     if (!currentSemester || !currentSemester.tagId || !user.uname || !semesterConfig) return;
@@ -413,6 +415,8 @@ export const Dashboard = ({ user, currentSemester }: DashboardProps) => {
         const daysFixed = cur.days.map(c => ({ day: c.day, chapters: c.chapters ?? [] }));
         return { ...cur, days: daysFixed };
       });
+      console.log({ userDailyStatsIncomplete });
+      if (userDailyStats.length <= 0) return;
 
       const proposalsPoints = groupStudentPointsDayChapter(
         userDailyStats[0],
@@ -436,6 +440,7 @@ export const Dashboard = ({ user, currentSemester }: DashboardProps) => {
       );
       setStudentBoxStat({ proposalsPoints, questionsPoints, votesPoints });
       setThereIsData(true);
+      setIsLoading(false);
     });
     return () => snapShotFunc();
   }, [currentSemester, db, semesterConfig, user.uname]);
@@ -479,6 +484,8 @@ export const Dashboard = ({ user, currentSemester }: DashboardProps) => {
         return { ...cur, days: daysFixed };
       });
 
+      console.log({ userDailyStatsasdasdas: userDailyStats });
+      if (userDailyStats.length <= 0) return;
       const proposalsPoints = getBoxPlotData(
         userDailyStats,
         "proposals",
@@ -632,6 +639,7 @@ export const Dashboard = ({ user, currentSemester }: DashboardProps) => {
   }, [semesterConfig, currentSemester?.tagId, db, user.uname, user.role]);
 
   useEffect(() => {
+    if (user.role !== "STUDENT") return;
     if (!semesterStudentsVoteStats || !studentVoteStat) return;
 
     const sortedByProposals = [...semesterStudentsVoteStats].sort((x, y) => y.proposalPoints! - x.proposalPoints!);
@@ -642,9 +650,8 @@ export const Dashboard = ({ user, currentSemester }: DashboardProps) => {
       (x, y) => y.totalPractices! - x.totalPractices!
     );
     const totalDailyPractices = sortedByTotalDailyPractices.findIndex(s => s.uname === studentVoteStat?.uname);
-    console.log({ totalDailyPractices });
     setStudentLocation({ proposals, questions, totalDailyPractices });
-  }, [semesterStudentsVoteStats, studentVoteStat]);
+  }, [semesterStudentsVoteStats, studentVoteStat, user.role]);
 
   if (!thereIsData && !isLoading) return <NoDataMessage />;
 
@@ -690,18 +697,18 @@ export const Dashboard = ({ user, currentSemester }: DashboardProps) => {
         <Paper
           ref={infoWrapperRef}
           sx={{
-            p: { sm: "10px", md: "16px" },
-            backgroundColor: theme => (theme.palette.mode === "light" ? "#FFFFFF" : undefined),
+            minWidth: "300px",
+            display: "grid",
+            placeItems: "center",
+            p: { sm: "10px", md: "24px" },
+            backgroundColor: mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookMainBlack : DESIGN_SYSTEM_COLORS.baseWhite,
           }}
         >
           {isLoading && <GeneralPlotStatsSkeleton />}
           {!isLoading && (
             <GeneralPlotStats
-              courseTitle={currentSemester.cTitle.split(" ")[0]}
-              programTitle={currentSemester.pTitle}
+              semesterConfig={semesterConfig}
               semesterStats={semesterStats}
-              semesterTitle={currentSemester.title}
-              studentsCounter={studentsCounter}
               student={semesterStudentStats}
             />
           )}
@@ -721,13 +728,7 @@ export const Dashboard = ({ user, currentSemester }: DashboardProps) => {
 
           {!isLoading && (semesterConfig?.isQuestionProposalRequired || semesterConfig?.isProposalRequired) && (
             <>
-              <Stack
-                direction={"row"}
-                spacing={"24px"}
-                sx={{
-                  marginBottom: "24px",
-                }}
-              >
+              <Stack direction={"row"} spacing={"24px"}>
                 <Box>
                   <Typography sx={{ fontSize: "19px", mb: "6px", lineHeight: "30px" }}>Points</Typography>
                   <Typography sx={{ fontSize: "12px", fontWeight: "500" }}>Nº of Students</Typography>
@@ -740,6 +741,7 @@ export const Dashboard = ({ user, currentSemester }: DashboardProps) => {
                     { title: " > 50%", color: "#A7D841" },
                     { title: " <= 10%", color: "rgba(255, 196, 153, 0.75)" },
                   ]}
+                  sx={{ gridTemplateColumns: "16px 1fr 16px 1fr" }}
                 />
               </Stack>
               <Box sx={{ alignSelf: "center" }}>
@@ -757,6 +759,20 @@ export const Dashboard = ({ user, currentSemester }: DashboardProps) => {
                   studentLocation={studentLocation}
                 />
               </Box>
+              {user.role === "STUDENT" && (
+                <Box sx={{ display: "flex", justifyContent: "center", gap: "6px", alignItems: "center" }}>
+                  <svg width="18" height="21" viewBox="0 0 18 21" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path
+                      fillRule="evenodd"
+                      clipRule="evenodd"
+                      d="M8.54 20.351L8.61 20.391L8.638 20.407C8.74903 20.467 8.87327 20.4985 8.9995 20.4985C9.12573 20.4985 9.24997 20.467 9.361 20.407L9.389 20.392L9.46 20.351C9.85112 20.1191 10.2328 19.8716 10.604 19.609C11.5651 18.9305 12.463 18.1667 13.287 17.327C15.231 15.337 17.25 12.347 17.25 8.5C17.25 6.31196 16.3808 4.21354 14.8336 2.66637C13.2865 1.11919 11.188 0.25 9 0.25C6.81196 0.25 4.71354 1.11919 3.16637 2.66637C1.61919 4.21354 0.75 6.31196 0.75 8.5C0.75 12.346 2.77 15.337 4.713 17.327C5.53664 18.1667 6.43427 18.9304 7.395 19.609C7.76657 19.8716 8.14854 20.1191 8.54 20.351ZM9 11.5C9.79565 11.5 10.5587 11.1839 11.1213 10.6213C11.6839 10.0587 12 9.29565 12 8.5C12 7.70435 11.6839 6.94129 11.1213 6.37868C10.5587 5.81607 9.79565 5.5 9 5.5C8.20435 5.5 7.44129 5.81607 6.87868 6.37868C6.31607 6.94129 6 7.70435 6 8.5C6 9.29565 6.31607 10.0587 6.87868 10.6213C7.44129 11.1839 8.20435 11.5 9 11.5Z"
+                      fill="#C03938"
+                    />
+                  </svg>
+
+                  <Typography sx={{ fontSize: "12px" }}>Your Position</Typography>
+                </Box>
+              )}
             </>
           )}
         </Paper>
@@ -766,7 +782,7 @@ export const Dashboard = ({ user, currentSemester }: DashboardProps) => {
           // className="test"
           sx={{
             p: isMovil ? "10px" : "16px",
-            backgroundColor: theme => (theme.palette.mode === "light" ? "#FFFFFF" : undefined),
+            backgroundColor: mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookMainBlack : DESIGN_SYSTEM_COLORS.baseWhite,
           }}
         >
           {isLoading && <BubblePlotStatsSkeleton />}
@@ -777,20 +793,20 @@ export const Dashboard = ({ user, currentSemester }: DashboardProps) => {
                   display: "flex",
                   justifyContent: "space-between",
                   alignItems: "flex-start",
-                  marginBottom: "6px",
                 }}
               >
-                <Typography sx={{ fontSize: "19px", mb: "40px" }}>Vote Leaderboard</Typography>
+                <Typography sx={{ fontSize: "19px", alignSelf: "center" }}>Vote Leaderboard</Typography>
                 <Legend
                   title={""}
                   options={[
                     { title: ">100%", color: "#388E3C" },
-                    { title: ">10%", color: "#F9E2D0" },
+                    { title: ">10%", color: "#F9DBAF" },
+                    { title: "< 0%", color: "#E04F16" },
                     { title: ">50%", color: "#A7D841" },
-                    { title: "<=10%", color: "rgb(255, 196, 153)" },
-                    { title: "= 0%", color: "rgb(117, 117, 117)" },
-                    { title: "< 0%", color: "rgb(239, 83, 80)" },
+                    { title: "<=10%", color: "#F7B27A" },
+                    { title: "= 0%", color: "#575757" },
                   ]}
+                  sx={{ gridTemplateColumns: "repeat(3,12px 1fr)" }}
                 />
               </Box>
               <BubbleChart
@@ -805,6 +821,19 @@ export const Dashboard = ({ user, currentSemester }: DashboardProps) => {
                 role={user.role}
                 student={studentVoteStat}
               />
+              {user.role === "STUDENT" && (
+                <Box sx={{ display: "flex", justifyContent: "center", gap: "6px", alignItems: "center" }}>
+                  <svg width="18" height="21" viewBox="0 0 18 21" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path
+                      fillRule="evenodd"
+                      clipRule="evenodd"
+                      d="M8.54 20.351L8.61 20.391L8.638 20.407C8.74903 20.467 8.87327 20.4985 8.9995 20.4985C9.12573 20.4985 9.24997 20.467 9.361 20.407L9.389 20.392L9.46 20.351C9.85112 20.1191 10.2328 19.8716 10.604 19.609C11.5651 18.9305 12.463 18.1667 13.287 17.327C15.231 15.337 17.25 12.347 17.25 8.5C17.25 6.31196 16.3808 4.21354 14.8336 2.66637C13.2865 1.11919 11.188 0.25 9 0.25C6.81196 0.25 4.71354 1.11919 3.16637 2.66637C1.61919 4.21354 0.75 6.31196 0.75 8.5C0.75 12.346 2.77 15.337 4.713 17.327C5.53664 18.1667 6.43427 18.9304 7.395 19.609C7.76657 19.8716 8.14854 20.1191 8.54 20.351ZM9 11.5C9.79565 11.5 10.5587 11.1839 11.1213 10.6213C11.6839 10.0587 12 9.29565 12 8.5C12 7.70435 11.6839 6.94129 11.1213 6.37868C10.5587 5.81607 9.79565 5.5 9 5.5C8.20435 5.5 7.44129 5.81607 6.87868 6.37868C6.31607 6.94129 6 7.70435 6 8.5C6 9.29565 6.31607 10.0587 6.87868 10.6213C7.44129 11.1839 8.20435 11.5 9 11.5Z"
+                      fill="#C03938"
+                    />
+                  </svg>
+                  <Typography sx={{ fontSize: "12px" }}>Your Position</Typography>
+                </Box>
+              )}
             </>
           )}
         </Paper>
@@ -818,7 +847,7 @@ export const Dashboard = ({ user, currentSemester }: DashboardProps) => {
           justifyContent: "center",
           alignItems: "center",
           p: isMovil ? "10px" : "16px",
-          backgroundColor: theme => (theme.palette.mode === "light" ? "#FFFFFF" : undefined),
+          backgroundColor: mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookMainBlack : DESIGN_SYSTEM_COLORS.baseWhite,
         }}
       >
         <Box
@@ -862,7 +891,7 @@ export const Dashboard = ({ user, currentSemester }: DashboardProps) => {
                   minX={boxStats.proposalsPoints.min}
                   studentStats={studentBoxStat.proposalsPoints}
                 />
-                {isMovil && <BoxLegend />}
+                {isMovil && <BoxLegend role={user.role} />}
               </Box>
               <Box
                 sx={{
@@ -893,7 +922,7 @@ export const Dashboard = ({ user, currentSemester }: DashboardProps) => {
                   minX={boxStats.questionsPoints.min}
                   studentStats={studentBoxStat.questionsPoints}
                 />
-                {isMovil && <BoxLegend />}
+                {isMovil && <BoxLegend role={user.role} />}
               </Box>
               <Box
                 sx={{
@@ -924,12 +953,12 @@ export const Dashboard = ({ user, currentSemester }: DashboardProps) => {
                   maxX={boxStats.votesPoints.max}
                   studentStats={studentBoxStat.votesPoints}
                 />
-                {isMovil && <BoxLegend />}
+                {isMovil && <BoxLegend role={user.role} />}
               </Box>
             </>
           )}
         </Box>
-        {!isMovil && !isLoading && <BoxLegend />}
+        {!isMovil && !isLoading && <BoxLegend role={user.role} />}
       </Paper>
 
       {/* Sankey Chart */}
@@ -941,7 +970,7 @@ export const Dashboard = ({ user, currentSemester }: DashboardProps) => {
             justifyContent: "center",
             alignItems: "center",
             p: isMovil ? "10px" : "16px",
-            backgroundColor: theme => (theme.palette.mode === "light" ? "#FFFFFF" : undefined),
+            backgroundColor: mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookMainBlack : DESIGN_SYSTEM_COLORS.baseWhite,
           }}
         >
           {!isLoading && (
@@ -1045,13 +1074,26 @@ export const Dashboard = ({ user, currentSemester }: DashboardProps) => {
   );
 };
 
-const BoxLegend = () => {
+const BoxLegend = ({ role }: { role: UserRole }) => {
   return (
     <Box sx={{ display: "flex", gap: "16px", alignItems: "center", alignSelf: "center" }}>
       <Box sx={{ display: "flex", gap: "6px", alignItems: "center" }}>
         <SquareIcon sx={{ fill: "#EC7115", fontSize: "12px" }} />
         <Typography sx={{ fontSize: "12px" }}>Class Average</Typography>
       </Box>
+      {role === "STUDENT" && (
+        <Box sx={{ display: "flex", gap: "6px", alignItems: "center" }}>
+          <svg width="18" height="21" viewBox="0 0 18 21" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path
+              fillRule="evenodd"
+              clipRule="evenodd"
+              d="M8.54 20.351L8.61 20.391L8.638 20.407C8.74903 20.467 8.87327 20.4985 8.9995 20.4985C9.12573 20.4985 9.24997 20.467 9.361 20.407L9.389 20.392L9.46 20.351C9.85112 20.1191 10.2328 19.8716 10.604 19.609C11.5651 18.9305 12.463 18.1667 13.287 17.327C15.231 15.337 17.25 12.347 17.25 8.5C17.25 6.31196 16.3808 4.21354 14.8336 2.66637C13.2865 1.11919 11.188 0.25 9 0.25C6.81196 0.25 4.71354 1.11919 3.16637 2.66637C1.61919 4.21354 0.75 6.31196 0.75 8.5C0.75 12.346 2.77 15.337 4.713 17.327C5.53664 18.1667 6.43427 18.9304 7.395 19.609C7.76657 19.8716 8.14854 20.1191 8.54 20.351ZM9 11.5C9.79565 11.5 10.5587 11.1839 11.1213 10.6213C11.6839 10.0587 12 9.29565 12 8.5C12 7.70435 11.6839 6.94129 11.1213 6.37868C10.5587 5.81607 9.79565 5.5 9 5.5C8.20435 5.5 7.44129 5.81607 6.87868 6.37868C6.31607 6.94129 6 7.70435 6 8.5C6 9.29565 6.31607 10.0587 6.87868 10.6213C7.44129 11.1839 8.20435 11.5 9 11.5Z"
+              fill="#C03938"
+            />
+          </svg>
+          <Typography sx={{ fontSize: "12px" }}>Your Position</Typography>
+        </Box>
+      )}
     </Box>
   );
 };
@@ -1060,6 +1102,6 @@ const getMaxProposalsQuestionsPoints = (data: ISemester): MaxPoints => {
   return {
     maxProposalsPoints: data.nodeProposals.totalDaysOfCourse * data.nodeProposals.numPoints,
     maxQuestionsPoints: data.questionProposals.totalDaysOfCourse * data.questionProposals.numPoints,
-    maxDailyPractices: data.dailyPractice.totalDaysOfCourse * data.dailyPractice.numPoints,
+    maxDailyPractices: data?.dailyPractice?.totalDaysOfCourse * data?.dailyPractice?.numPoints ?? 0,
   };
 };
