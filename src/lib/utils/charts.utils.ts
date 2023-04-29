@@ -95,51 +95,51 @@ export const getStackedBarStat = (
 
   sortedByProposals.map(d => {
     const proposals = d.proposalPoints!;
-    // if (!proposals) return;
+    if (!proposals) return;
 
     const proposalSubgroup = getStudentSubgroupInBars(proposals, maxProposalsPoints);
     const student = students.find(student => student.uname === d.uname);
     if (!student) return;
 
     ProposalsRate[proposalSubgroup] += 1;
-    // const exist = studentProposalsRate[proposalSubgroup as keyof StudentStackedBarStats].some(
-    //   e => e.uname === student.uname
-    // );
-    // if (!exist) return;
-    // studentProposalsRate[proposalSubgroup as keyof StudentStackedBarStats].push(student);
+    const exist = studentProposalsRate[proposalSubgroup as keyof StudentStackedBarStats].some(
+      e => e.uname === student.uname
+    );
+    if (!exist) return;
+    studentProposalsRate[proposalSubgroup as keyof StudentStackedBarStats].push(student);
   });
   sortedByQuestions.map(d => {
     const question = d.questionPoints!;
-    // if (!question) return;
+    if (!question) return;
 
     const questionsSubgroup = getStudentSubgroupInBars(question, maxQuestionsPoints);
     const student = students.find(student => student.uname === d.uname);
     if (!student) return;
 
     QuestionsRate[questionsSubgroup] += 1;
-    // const exist = studentQuestionsRate[questionsSubgroup as keyof StudentStackedBarStats].some(
-    //   e => e.uname === student.uname
-    // );
-    // if (!exist) return;
+    const exist = studentQuestionsRate[questionsSubgroup as keyof StudentStackedBarStats].some(
+      e => e.uname === student.uname
+    );
+    if (!exist) return;
 
     studentQuestionsRate[questionsSubgroup as keyof StudentStackedBarStats].push(student);
   });
 
   sortedByDailyPractices.map(d => {
     const totalPractices = d.totalPractices!;
-    // if (!totalPractices) return;
+    if (!totalPractices) return;
 
     const totalPracticesSubgroup = getStudentSubgroupInBars(totalPractices, 30);
     const student = students.find(student => student.uname === d.uname);
     if (!student) return;
 
     dailyPracticeRate[totalPracticesSubgroup] += 1;
-    // const exist = studentDailyPracticeRate[totalPracticesSubgroup as keyof StudentStackedBarStats].some(
-    //   e => e.uname === student.uname
-    // );
-    // if (!exist) return;
+    const exist = studentDailyPracticeRate[totalPracticesSubgroup as keyof StudentStackedBarStats].some(
+      e => e.uname === student.uname
+    );
+    if (!exist) return;
 
-    // studentDailyPracticeRate[totalPracticesSubgroup as keyof StudentStackedBarStats].push(student);
+    studentDailyPracticeRate[totalPracticesSubgroup as keyof StudentStackedBarStats].push(student);
   });
 
   stackedBarStats.push(ProposalsRate);

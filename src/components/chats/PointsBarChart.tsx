@@ -83,6 +83,7 @@ function drawChart(
   if (isDailyPracticeRequiered) {
     columns.push("Daily Practice");
   }
+
   // remove axis if exist to avoid overdrawing
   svg.select("#axis-x").remove();
   svg.select("#axis-y").remove();
@@ -126,7 +127,7 @@ function drawChart(
     .domain(subgroups)
     .range([LESS_EQUAL_THAN_10_COLOR, GREATER_THAN_10_COLOR, GREATER_THAN_50_COLOR, GREATER_THAN_100_COLOR]);
 
-  const locations = [
+  let locations = [
     {
       x: 1.55 * x.bandwidth(),
       y: studentLocation ? studentLocation.proposals ?? 0 : 0,
@@ -140,7 +141,7 @@ function drawChart(
       y: studentLocation ? studentLocation.totalDailyPractices ?? 0 : 0,
     },
   ];
-
+  locations = locations.filter(location => location.y !== 0);
   let chartData = [];
   if (isProposalRequired) {
     chartData.push(data[0] || []);
