@@ -18,21 +18,12 @@ const GREATER_THAN_50_COLOR_ALPHA = "#A7D841";
 const GREATER_THAN_100_COLOR = "#309135";
 const GREATER_THAN_100_COLOR_ALPHA = "#388E3C";
 
-// var data1 = [
-//   { index: 0, alessEqualTen: 12, bgreaterTen: 11, cgreaterFifty: 1, dgreaterHundred: 0 },
-//   { index: 1, alessEqualTen: 7, bgreaterTen: 7, cgreaterFifty: 7, dgreaterHundred: 7 },
+//MOCK
+// const mockedData = [
+//   { index: 0, alessEqualTen: 10, bgreaterTen: 5, cgreaterFifty: 6, dgreaterHundred: 3 },
+//   { index: 1, alessEqualTen: 8, bgreaterTen: 9, cgreaterFifty: 2, dgreaterHundred: 5 },
+//   { index: 2, alessEqualTen: 2, bgreaterTen: 10, cgreaterFifty: 9, dgreaterHundred: 3 },
 // ];
-// // const data = [
-// //   { category: "fruit", yes: 6, no: 7, maybe: 8 },
-// //   { category: "vegetable", yes: 5, no: 4, maybe: 9 },
-// // ];
-// // const data = [
-// //   { category: "fruit", yes: 6, no: 7, maybe: 8 },
-// //   { category: "vegetable", yes: 5, no: 4, maybe: 9 },
-// // ];
-
-// const chartWidth = 100;
-// const chartHeight = 100;
 
 function drawChart(
   svgRef: SVGGElement,
@@ -329,8 +320,7 @@ function drawChart(
       .attr("clip-rule", "evenodd")
       .attr(
         "transform",
-        (d, i) =>
-          `translate(${30 + (i + 1) * 0.369 * x.bandwidth() + (i + 1) * x.bandwidth() + 2},${y(maxAxisY - d.y) + 10})`
+        (d, i) => `translate(${30 + (i + 1) * 0.369 * x.bandwidth() + (i + 1) * x.bandwidth() + 2},${y(d.y) + 10})`
       )
       .attr("fill", "#C03938");
     svg
@@ -342,7 +332,7 @@ function drawChart(
       .attr("width", x.bandwidth() + 12)
       .attr(
         "transform",
-        (d, i) => `translate(${30 + (i + 1) * 0.369 * x.bandwidth() + i * x.bandwidth()},${y(maxAxisY - d.y) + 30})`
+        (d, i) => `translate(${30 + (i + 1) * 0.369 * x.bandwidth() + i * x.bandwidth()},${y(d.y) + 30})`
       )
       .attr("fill", "#C03938");
     // d.x - 0.72 * x.bandwidth()
@@ -374,7 +364,7 @@ export const PointsBarChart = ({
   isProposalRequired,
   isDailyPracticeRequiered,
 }: StackedBarProps) => {
-  console.log({ studentLocation });
+  console.log({ daaaata: data });
   const svg = useCallback(
     (svgRef: any) => {
       drawChart(
