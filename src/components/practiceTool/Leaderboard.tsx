@@ -7,13 +7,18 @@ import { DESIGN_SYSTEM_COLORS } from "../../lib/theme/colors";
 import { NO_USER_IMAGE } from "../../lib/utils/constants";
 import { PointsType } from "../PointsType";
 
+type LeaderBoardOption = "WEEK" | "MONTH" | "ALL_TIME";
 type LeaderboardProps = {
   sxBody?: SxProps<Theme>;
 };
 
 const Leaderboard = ({ sxBody }: LeaderboardProps) => {
   const [leaderBoardUsers, setLeaderBoardUSers] = useState<number[]>([]);
-  const [selectedLeaderboardOption, setSelectedLeaderboardOption] = useState<"WEEK" | "MONTH" | "ALL_TIME">("WEEK");
+  const [selectedLeaderboardOption, setSelectedLeaderboardOption] = useState<LeaderBoardOption>("WEEK");
+  // TODO: get ISemesterStudentVoteStat by uname and semester
+  // const mapSemesterStudentVoteStatToLeaderboard = (stats: ISemesterStudentVoteStat, option: LeaderBoardOption) => {
+  //   // move to backend to not get unrequired data
+  // };
 
   useEffect(() => {
     if (selectedLeaderboardOption === "WEEK") setLeaderBoardUSers([1, 2, 3, 4, 5]);

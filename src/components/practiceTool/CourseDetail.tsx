@@ -5,25 +5,32 @@ import BoltIcon from "@mui/icons-material/Bolt";
 // import SchoolIcon from "@mui/icons-material/School";
 import { Button, Paper, Stack, Typography } from "@mui/material";
 import { Box } from "@mui/system";
-import React from "react";
+import React, { useEffect } from "react";
 
+import { CourseTag } from "../../instructorsTypes";
 import Leaderboard from "./Leaderboard";
 
 // const topicComplete = 10;
 // const totalTopic = 100;
 
 type CourseDetailProps = {
+  currentSemester: CourseTag;
   onStartPractice: () => void;
 };
 
-const CourseDetail = ({ onStartPractice }: CourseDetailProps) => {
-  // const topicCompletePercentage = Math.round((topicComplete * 100) / totalTopic);
+const CourseDetail = ({ currentSemester, onStartPractice }: CourseDetailProps) => {
+  useEffect(() => {
+    const getCourseDetails = async () => {
+      // TODO: add course details
+    };
+    getCourseDetails();
+  }, []);
 
   return (
     <Box sx={{ width: "100%" }}>
       <Box sx={{ pY: "48px 32px 32px 32px", borderBottom: theme => `solid 1px ${theme.palette.common.notebookG600}` }}>
         <Typography component={"h1"} sx={{ fontSize: "30px", fontWeight: 600 }}>
-          1Cademy Assistant
+          Practice
         </Typography>
       </Box>
       <Box sx={{ py: "48px" }}>
@@ -48,7 +55,7 @@ const CourseDetail = ({ onStartPractice }: CourseDetailProps) => {
                   fontWeight: 500,
                 }}
               >
-                Course 1
+                {currentSemester.cTitle}
               </Typography>
               <Box sx={{ display: "flex", mb: "24px" }}>
                 <Typography
