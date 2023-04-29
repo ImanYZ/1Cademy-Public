@@ -89,7 +89,11 @@ const StudentDashboard: InstructorLayoutPage = ({ user, currentSemester, setting
   const [studentsCounter, setStudentsCounter] = useState<number>(0);
   const [proposalsStudents, setProposalsStudents] = useState<StudentStackedBarStatsObject | null>(null);
   const [questionsStudents, setQuestionsStudents] = useState<StudentStackedBarStatsObject | null>(null);
-  const [studentLocation, setStudentLocation] = useState<StudenBarsSubgroupLocation>({ proposals: 0, questions: 0 });
+  const [studentLocation, setStudentLocation] = useState<StudenBarsSubgroupLocation>({
+    proposals: 0,
+    questions: 0,
+    totalDailyPractices: 0,
+  });
 
   //Trend Plots
   const [trendStats, setTrendStats] = useState<TrendStats>({
@@ -323,7 +327,7 @@ const StudentDashboard: InstructorLayoutPage = ({ user, currentSemester, setting
     const sortedByQuestions = [...semesterStudentsVoteStats].sort((x, y) => y.questionPoints! - x.questionPoints!);
     const questions = sortedByQuestions.findIndex(s => s.uname === studentVoteStat?.uname);
 
-    setStudentLocation({ proposals: proposals, questions: questions });
+    setStudentLocation({ proposals: proposals, questions: questions, totalDailyPractices: 0 });
   }, [semesterStudentsVoteStats, studentVoteStat]);
 
   //STATIC "MODIFTY"

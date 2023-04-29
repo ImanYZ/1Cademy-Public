@@ -93,7 +93,11 @@ export const Dashboard = ({ user, currentSemester }: DashboardProps) => {
 
   const [studentVoteStat, setStudentVoteStat] = useState<SemesterStudentVoteStat | null>(null);
   const [semesterStudentStats, setSemesterStudentStats] = useState<GeneralSemesterStudentsStats | null>(null);
-  const [studentLocation, setStudentLocation] = useState<StudenBarsSubgroupLocation>({ proposals: 0, questions: 0 });
+  const [studentLocation, setStudentLocation] = useState<StudenBarsSubgroupLocation>({
+    proposals: 0,
+    questions: 0,
+    totalDailyPractices: 0,
+  });
   const [studentBoxStat, setStudentBoxStat] = useState<BoxStudentStats>({
     proposalsPoints: {},
     questionsPoints: {},
@@ -625,8 +629,12 @@ export const Dashboard = ({ user, currentSemester }: DashboardProps) => {
     const proposals = sortedByProposals.findIndex(s => s.uname === studentVoteStat?.uname);
     const sortedByQuestions = [...semesterStudentsVoteStats].sort((x, y) => y.questionPoints! - x.questionPoints!);
     const questions = sortedByQuestions.findIndex(s => s.uname === studentVoteStat?.uname);
-
-    setStudentLocation({ proposals: proposals, questions: questions });
+    const sortedByTotalDailyPractices = [...semesterStudentsVoteStats].sort(
+      (x, y) => y.totalPractices! - x.totalPractices!
+    );
+    const totalDailyPractices = sortedByTotalDailyPractices.findIndex(s => s.uname === studentVoteStat?.uname);
+    console.log({ totalDailyPractices });
+    setStudentLocation({ proposals, questions, totalDailyPractices });
   }, [semesterStudentsVoteStats, studentVoteStat]);
 
   if (!thereIsData && !isLoading) return <NoDataMessage />;

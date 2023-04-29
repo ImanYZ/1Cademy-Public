@@ -128,6 +128,7 @@ export type StackedBarStatsData = {
 export type StudenBarsSubgroupLocation = {
   proposals: number;
   questions: number;
+  totalDailyPractices: number;
 };
 
 // export type BubbleStats = {
