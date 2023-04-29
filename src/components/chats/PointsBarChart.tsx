@@ -276,8 +276,20 @@ function drawChart(
         .style("top", `${middle}px`)
         .style(
           "left",
-          `${d.data.index === 0 ? 1.6 * x.bandwidth() : mobile ? -x.bandwidth() / 2.5 : 3.25 * x.bandwidth()}px`
+          `${
+            !mobile
+              ? //offsetLeft = 50 , bars innergap = 0.369 , half of location icon = 2
+                50 + (d.data.index + 1) * 0.369 * x.bandwidth() + (d.data.index + 1) * x.bandwidth() + 2
+              : //offsetLeft = 30 , bars innergap = 0.369 , half of location icon = 2, half of tooltip width=90
+                30 +
+                (d.data.index + 1) * 0.369 * x.bandwidth() +
+                (d.data.index + 1) * x.bandwidth() +
+                2 -
+                90 -
+                x.bandwidth() / 2
+          }px`
         );
+
       retrieveEvent(e, subgroupName);
     })
     .on("mouseout", function (e) {
@@ -361,7 +373,7 @@ export const PointsBarChart = ({
   isProposalRequired,
   isDailyPracticeRequiered,
 }: StackedBarProps) => {
-  console.log({ newData: data });
+  console.log({ studentLocation });
   const svg = useCallback(
     (svgRef: any) => {
       drawChart(
