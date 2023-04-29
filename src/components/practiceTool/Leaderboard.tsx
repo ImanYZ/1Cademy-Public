@@ -4,6 +4,7 @@ import { getFirestore } from "firebase/firestore";
 import Image from "next/image";
 import React, { useEffect, useState } from "react";
 
+import { getSemesterById } from "../../client/serveless/semesters.serverless";
 import { getSemesterStudentVoteStats } from "../../client/serveless/semesterStudentVoteStat.serverless";
 import { DESIGN_SYSTEM_COLORS } from "../../lib/theme/colors";
 import { NO_USER_IMAGE } from "../../lib/utils/constants";
@@ -11,6 +12,7 @@ import { getWeekNumber } from "../../lib/utils/date.utils";
 import { ISemesterStudentVoteStat, ISemesterStudentVoteStatDay } from "../../types/ICourse";
 import { PointsType } from "../PointsType";
 
+type UsersInfo = { [key: string]: { name: string; imageUrl: string } };
 type LeaderboardOption = "WEEK" | "MONTH" | "ALL_TIME";
 type LeaderboardItem = { uname: string; totalPoints: number };
 type LeaderboardProps = {
@@ -21,6 +23,7 @@ type LeaderboardProps = {
 const Leaderboard = ({ semesterId, sxBody }: LeaderboardProps) => {
   console.log({ semesterId });
   const db = getFirestore();
+  const [usersInfo, setUsersInfo] = useState<UsersInfo>({});
   const [leaderBoardUsers, setLeaderBoardUSers] = useState<LeaderboardItem[]>([]);
   const [selectedLeaderboardOption, setSelectedLeaderboardOption] = useState<LeaderboardOption>("WEEK");
   const [studentStatsBySemester, setStudentStatsBySemester] = useState<ISemesterStudentVoteStat[]>([]);
@@ -31,7 +34,21 @@ const Leaderboard = ({ semesterId, sxBody }: LeaderboardProps) => {
       console.log("1ress", { res });
       setStudentStatsBySemester(res);
     };
+
+    const getSemester = async () => {
+      const res = await getSemesterById(db, semesterId);
+      if (!res) return;
+      const usersInfoBySemester = res.students.reduce(
+        (acu, cur): UsersInfo => ({
+          ...acu,
+          [cur.uname]: { imageUrl: cur.imageUrl, name: `${cur.fName} ${cur.lName}` },
+        }),
+        {}
+      );
+      setUsersInfo(usersInfoBySemester);
+    };
     getStudentsStatsBySemester();
+    getSemester();
   }, [db, semesterId]);
 
   useEffect(() => {
@@ -176,7 +193,7 @@ const Leaderboard = ({ semesterId, sxBody }: LeaderboardProps) => {
               }}
             >
               <Image
-                src={NO_USER_IMAGE}
+                src={usersInfo[cur.uname]?.imageUrl ?? NO_USER_IMAGE}
                 alt={"user-image"}
                 width="52px"
                 height="52px"
@@ -214,7 +231,7 @@ const Leaderboard = ({ semesterId, sxBody }: LeaderboardProps) => {
               </Box>
             </Box>
             <Box>
-              <Typography sx={{ mb: "4px" }}>{cur.uname}</Typography>
+              <Typography sx={{ mb: "4px" }}>{usersInfo[cur.uname]?.name ?? cur.uname}</Typography>
 
               <PointsType points={cur.totalPoints} fontWeight={400}>
                 <CheckIcon sx={{ color: DESIGN_SYSTEM_COLORS.success600, fontSize: "16px" }} />
