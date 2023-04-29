@@ -325,16 +325,18 @@ export const PracticeQuestion = ({ question, practiceIsCompleted, onClose }: Pra
       </IconButton>
 
       {practiceIsCompleted && (
-        <QuestionMessage
-          messages={[
-            `Daily practice has been completed.`,
-            `You have completed 19 days out of 45 days of your review practice.`,
-            `24 days are remaining to the end of the semester.`,
-          ]}
-        />
+        <Box sx={{ mt: "50px" }}>
+          <QuestionMessage
+            messages={[
+              `Daily practice has been completed.`,
+              `You have completed 19 days out of 45 days of your review practice.`,
+              `24 days are remaining to the end of the semester.`,
+            ]}
+          />
+        </Box>
       )}
 
-      {!question && !practiceIsCompleted && <Typography>Can't get question</Typography>}
+      {/* {!question && !practiceIsCompleted && <Typography>Can't get question</Typography>} */}
 
       {question && !practiceIsCompleted && (
         <>

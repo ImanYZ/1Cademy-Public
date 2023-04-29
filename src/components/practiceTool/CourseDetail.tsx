@@ -299,7 +299,7 @@ const CourseDetail = ({ currentSemester, onStartPractice }: CourseDetailProps) =
                 theme.palette.mode === "dark" ? theme.palette.common.notebookMainBlack : theme.palette.common.gray50,
             }}
           >
-            <Leaderboard />
+            <Leaderboard semesterId={currentSemester.tagId} />
           </Paper>
         </Box>
       </Box>

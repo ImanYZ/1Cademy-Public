@@ -676,7 +676,7 @@ export const Dashboard = ({ user, currentSemester }: DashboardProps) => {
               backgroundColor: theme => (theme.palette.mode === "light" ? "#FFFFFF" : undefined),
             }}
           >
-            <Leaderboard sxBody={{ maxHeight: "435px" }} />
+            <Leaderboard semesterId={currentSemester.tagId} sxBody={{ maxHeight: "435px" }} />
           </Paper>
         </Box>
       )}
