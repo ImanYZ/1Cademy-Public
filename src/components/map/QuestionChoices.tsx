@@ -109,7 +109,7 @@ const QuestionChoices = (props: QuestionChoicesProps) => {
           </div>
           {/* TODO: Keep the state of readonly after render */}
           <Editor
-            label=""
+            label="Replace this with the choice."
             readOnly={false}
             value={choiceCopy}
             setValue={onSetChoiseCopy}
@@ -128,7 +128,7 @@ const QuestionChoices = (props: QuestionChoicesProps) => {
         <div className="collapsible-body" style={{ display: "block" }}>
           {/* TODO: Keep the state of readonly after render */}
           <Editor
-            label=""
+            label="Replace this with the choice-specific feedback."
             readOnly={false}
             setValue={onSetFeedbackCopy}
             value={feedbackCopy}
@@ -157,7 +157,7 @@ const QuestionChoices = (props: QuestionChoicesProps) => {
             <CheckBoxOutlineBlankIcon sx={{ marginRight: "8px" }} />
           )}
           <Editor
-            label=""
+            label="Replace this with the choice."
             readOnly={true}
             value={props.choice.choice}
             setValue={doNothing}
@@ -171,7 +171,7 @@ const QuestionChoices = (props: QuestionChoicesProps) => {
             style={{ display: "block", borderBottom: "solid 1px #fff", paddingLeft: "32px" }}
           >
             <Editor
-              label=""
+              label="Replace this with the choice-specific feedback."
               readOnly={true}
               value={props.choice.feedback}
               setValue={doNothing}
