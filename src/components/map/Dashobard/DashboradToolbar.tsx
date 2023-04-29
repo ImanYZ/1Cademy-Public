@@ -51,7 +51,7 @@ export const DashboradToolbar = ({
         justifyContent: "space-between",
         minHeight: "100%",
         p: "16px",
-        bgcolor: mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookG900 : DESIGN_SYSTEM_COLORS.gray25,
+        bgcolor: mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookG900 : DESIGN_SYSTEM_COLORS.gray50,
       }}
     >
       <Stack spacing={"16px"}>
