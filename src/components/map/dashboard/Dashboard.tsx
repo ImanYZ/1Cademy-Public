@@ -326,6 +326,7 @@ export const Dashboard = ({ user, currentSemester }: DashboardProps) => {
 
   // update data in stackbar
   useEffect(() => {
+    if (user.role !== "STUDENT") return;
     if (!semesterStudentsVoteStats.length || !students) return setStackedBar([]);
 
     const {
@@ -344,7 +345,7 @@ export const Dashboard = ({ user, currentSemester }: DashboardProps) => {
     setProposalsStudents(studentStackedBarProposalsStats);
     setQuestionsStudents(studentStackedBarQuestionsStats);
     setDailyPracitceStudents(studentStackedBarDailyPracticeStats);
-  }, [maxDailyPractices, maxProposalsPoints, maxQuestionsPoints, semesterStudentsVoteStats, students]);
+  }, [maxDailyPractices, maxProposalsPoints, maxQuestionsPoints, semesterStudentsVoteStats, students, user.role]);
 
   // set up semester snapshot to modify state
   useEffect(() => {
@@ -379,7 +380,7 @@ export const Dashboard = ({ user, currentSemester }: DashboardProps) => {
       }
     });
     return () => snapShotFunc();
-  }, [currentSemester, db]);
+  }, [currentSemester, db, user.role]);
 
   useEffect(() => {
     if (!currentSemester || !currentSemester.tagId || !user.uname || !semesterConfig) return;
@@ -413,6 +414,8 @@ export const Dashboard = ({ user, currentSemester }: DashboardProps) => {
         const daysFixed = cur.days.map(c => ({ day: c.day, chapters: c.chapters ?? [] }));
         return { ...cur, days: daysFixed };
       });
+      console.log({ userDailyStatsIncomplete });
+      if (userDailyStats.length <= 0) return;
 
       const proposalsPoints = groupStudentPointsDayChapter(
         userDailyStats[0],
@@ -436,6 +439,7 @@ export const Dashboard = ({ user, currentSemester }: DashboardProps) => {
       );
       setStudentBoxStat({ proposalsPoints, questionsPoints, votesPoints });
       setThereIsData(true);
+      setIsLoading(false);
     });
     return () => snapShotFunc();
   }, [currentSemester, db, semesterConfig, user.uname]);
@@ -479,6 +483,8 @@ export const Dashboard = ({ user, currentSemester }: DashboardProps) => {
         return { ...cur, days: daysFixed };
       });
 
+      console.log({ userDailyStatsasdasdas: userDailyStats });
+      if (userDailyStats.length <= 0) return;
       const proposalsPoints = getBoxPlotData(
         userDailyStats,
         "proposals",
@@ -632,6 +638,7 @@ export const Dashboard = ({ user, currentSemester }: DashboardProps) => {
   }, [semesterConfig, currentSemester?.tagId, db, user.uname, user.role]);
 
   useEffect(() => {
+    if (user.role !== "STUDENT") return;
     if (!semesterStudentsVoteStats || !studentVoteStat) return;
 
     const sortedByProposals = [...semesterStudentsVoteStats].sort((x, y) => y.proposalPoints! - x.proposalPoints!);
@@ -642,9 +649,8 @@ export const Dashboard = ({ user, currentSemester }: DashboardProps) => {
       (x, y) => y.totalPractices! - x.totalPractices!
     );
     const totalDailyPractices = sortedByTotalDailyPractices.findIndex(s => s.uname === studentVoteStat?.uname);
-    console.log({ totalDailyPractices });
     setStudentLocation({ proposals, questions, totalDailyPractices });
-  }, [semesterStudentsVoteStats, studentVoteStat]);
+  }, [semesterStudentsVoteStats, studentVoteStat, user.role]);
 
   if (!thereIsData && !isLoading) return <NoDataMessage />;
 
@@ -1060,6 +1066,6 @@ const getMaxProposalsQuestionsPoints = (data: ISemester): MaxPoints => {
   return {
     maxProposalsPoints: data.nodeProposals.totalDaysOfCourse * data.nodeProposals.numPoints,
     maxQuestionsPoints: data.questionProposals.totalDaysOfCourse * data.questionProposals.numPoints,
-    maxDailyPractices: data.dailyPractice.totalDaysOfCourse * data.dailyPractice.numPoints,
+    maxDailyPractices: data?.dailyPractice?.totalDaysOfCourse * data?.dailyPractice?.numPoints ?? 0,
   };
 };

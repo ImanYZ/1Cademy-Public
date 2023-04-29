@@ -518,6 +518,7 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
         const daysFixed = cur.days.map(c => ({ day: c.day, chapters: c.chapters ?? [] }));
         return { ...cur, days: daysFixed };
       });
+      if (userDailyStats.length <= 0) return;
 
       const proposalsPoints = getBoxPlotData(
         userDailyStats,
@@ -1075,6 +1076,7 @@ export const groupStudentPointsDayChapter = (
   agreementPoints = 1,
   disagreementPoints = 1
 ) => {
+  console.log({ userDailyStat });
   const groupedDays = userDailyStat.days.reduce((acuDayPerStudent: { [key: string]: number }, curDayPerStudent) => {
     const groupedChapters = curDayPerStudent.chapters.reduce((acuChapter: { [key: string]: number }, curChapter) => {
       if (type in curChapter) {
@@ -1112,6 +1114,7 @@ export const getBoxPlotData = (
   // days -> chapters -> data
   //
   // proposal=> chapters => [1,2,34,54]
+  console.log({ userDailyStatssss: userDailyStats });
   const res = userDailyStats.map(cur => {
     // [{c1:1,c2:3},{c1:1,c2:3}]
     const groupedDays = groupStudentPointsDayChapter(
