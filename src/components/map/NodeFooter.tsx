@@ -1187,32 +1187,34 @@ const NodeFooter = ({
                 </Box>
               )}
 
-              <IconButton
-                aria-label="more"
-                id={moreOptionsButtonId}
-                aria-controls={openMenu ? "long-menu" : undefined}
-                aria-expanded={openMenu ? "true" : undefined}
-                aria-haspopup="true"
-                onClick={handleClick}
-                disabled={disableMoreOptionsButton}
-                sx={{
-                  display: simulated ? "none" : "flex",
-                  background: (theme: any) => (theme.palette.mode === "dark" ? "#404040" : "#EAECF0"),
-                  padding: "3px",
-                  ":hover": {
-                    background: (theme: any) =>
-                      theme.palette.mode === "dark"
-                        ? theme.palette.common.darkBackground2
-                        : theme.palette.common.lightBackground2,
-                  },
-                }}
-              >
-                <MoreHorizIcon
+              {!editable && (
+                <IconButton
+                  aria-label="more"
+                  id={moreOptionsButtonId}
+                  aria-controls={openMenu ? "long-menu" : undefined}
+                  aria-expanded={openMenu ? "true" : undefined}
+                  aria-haspopup="true"
+                  onClick={handleClick}
+                  disabled={disableMoreOptionsButton}
                   sx={{
-                    color: "inherit",
+                    display: simulated ? "none" : "flex",
+                    background: (theme: any) => (theme.palette.mode === "dark" ? "#404040" : "#EAECF0"),
+                    padding: "3px",
+                    ":hover": {
+                      background: (theme: any) =>
+                        theme.palette.mode === "dark"
+                          ? theme.palette.common.darkBackground2
+                          : theme.palette.common.lightBackground2,
+                    },
                   }}
-                />
-              </IconButton>
+                >
+                  <MoreHorizIcon
+                    sx={{
+                      color: "inherit",
+                    }}
+                  />
+                </IconButton>
+              )}
 
               {openMenu && (
                 <ClickAwayListener onClickAway={handleClose}>
