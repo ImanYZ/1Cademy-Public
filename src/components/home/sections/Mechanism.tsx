@@ -21,40 +21,40 @@ export const MECHANISM_ITEMS: TMechanisms[] = [
     id: "summarizing",
     title: "Summarizing",
     description:
-      "1Cademy aims to convert human knowledge into an easily digestible presentation and representation that facilitates efficient learning. The issue of “knowledge overload” arises from the redundancy of the same topics being covered in numerous books, websites, and videos. This is exacerbated by mass generation of content by large language models. To maximize our learning potential, we must eliminate overlapping content and merge all available explanations for a particular subject into a single comprehensive chunk. This chunk should encompass various perspectives and use-cases side-by-side, allowing learners to refer to it as the sole source for complete mastery of the topic. Conventional knowledge structures organized in pages, whether in books or on websites, do not serve this purpose. Instead, we must divide the content into smaller chunks, each dedicated to a single topic.\nThrough a human-AI collaboration, we gather valuable information from various sources such as books, articles, and videos, divide it into granular pieces, and identify the overlapping pieces. We then combine them into concise notes, each focusing on a single concept. Traditional note-taking methods often only benefit the individual for a short period of time, typically for a semester or two. 1Cademy's human-AI collaborative note-taking approach ensures that the notes are useful and usable for multiple students studying the same topics.",
+      "1Cademy's goal is to streamline the learning process by converting human knowledge into easily digestible micro-content that eliminates redundancy. By combining various perspectives for a given concept within a particular discipline, learners can master this concept by referring to a single comprehensive piece of micro-content. To achieve this, 1Cademy uses human-AI collaboration to gather valuable knowledge from multiple sources and merges it into concise pieces. This collaborative note-taking approach ensures that the micro-content is applicable to various students studying the same topics, beyond the scope of just one semester.",
     animation: {
-      src: "rive/notebook.riv",
-      artboard: "artboard-3",
+      src: "rive/summarizing.riv",
+      artboard: "New Artboard",
     },
   },
   {
     id: "linking",
     title: "Linking",
     description:
-      "To facilitate efficient learning we need to develop progressive learning content, but the representation of the granular notes should not be combined into multiple larger constructs, such as books or collections. Doing so perpetuates the issue of overlapping content and knowledge overload because larger constructs require contextual knowledge that are also covered in other large constructs. While they provide progressive learning content, in the aggregate they create a surplus of overlapping knowledge and defeat the purpose of efficient learning. Instead, we need to develop a single, comprehensive “prerequisite knowledge graph” of the granular notes.",
+      'Efficient learning requires progressive learning content without overlapping knowledge that creates redundancy. 1Cademy divides learning content into micro-content that define a single concept and can be used in a variety of learning contexts and goals. This mitigates the redundancy and disorientation of reading a concept defined in different ways from numerous pieces of literature. This can be achieved through a comprehensive "prerequisite knowledge graph" of micro-content. To address competing or conflicting claims on a given concept, we link the differing views to a generic definition of the concept so that the opposed views can be compared in a side-by-side presentation. 1Cademy notebooks are knowledge graphs of these micro-content pieces, shared among many learners and researchers, who continually improve and add perspectives to the content over time.',
     animation: {
-      src: "rive/notebook.riv",
-      artboard: "artboard-4",
+      src: "rive/linking.riv",
+      artboard: "New Artboard",
     },
   },
   {
-    id: "Evaluating",
-    title: "Voting",
+    id: "evaluating",
+    title: "Evaluating",
     description:
-      "To ensure the quality of the knowledge graph on 1Cademy, we have implemented an AI-enhanced peer-review process. Each individual concept, represented as a node, is evaluated through a collaboration of AI and members of the community, and the score of the node will determine its level of modification or the possibility of deletion.",
+      "To ensure the quality of the knowledge graph on 1Cademy, we have implemented an AI-enhanced peer-review process. Each individual concept, represented as a micro-content piece, is evaluated through a collaboration of AI and members of the community, and the score of the piece will determine its possibility for modification or deletion.",
     animation: {
-      src: "rive/notebook.riv",
-      artboard: "artboard-5",
+      src: "rive/evaluating.riv",
+      artboard: "New Artboard",
     },
   },
   {
     id: "improving",
     title: "Improving",
     description:
-      "We collaborate with each other and get AI assistance to improve the knowledge presented by continually updating and refining concepts. For each node, there are multiple versions proposed by different people which cover different perspectives and use-cases for each concept. 1Cademy visualizes these side-by-side to optimize learning.",
+      "We collaborate with each other and AI assistance to improve the micro-content in the knowledge graph by continually updating and refining concepts. For each micro-content piece, there are multiple versions proposed by different people, which cover multiple perspectives and use-cases. 1Cademy visualizes these side-by-side to optimize learning.",
     animation: {
-      src: "rive/notebook.riv",
-      artboard: "artboard-6",
+      src: "rive/improving.riv",
+      artboard: "New Artboard",
     },
   },
 ];
@@ -70,9 +70,9 @@ const Mechanism = ({ mechanisms }: IMechanism) => {
   const canvasDimensions = useMemo(() => {
     let newWidth = width - 10;
 
-    if (width >= 600) newWidth = 500;
-    if (width >= 900) newWidth = 350;
-    if (width >= 1200) newWidth = 550;
+    if (width >= 600) newWidth = 600;
+    if (width >= 900) newWidth = 700;
+    if (width >= 1200) newWidth = 500;
 
     const newHeight = getHeight(newWidth);
     return { width: newWidth, height: newHeight };
@@ -88,10 +88,10 @@ const Mechanism = ({ mechanisms }: IMechanism) => {
           alignItems="center"
           justifyContent={"space-between"}
           minHeight={{ md: "512px" }}
-          sx={{ mb: { xs: "32px", md: "61px" } }}
+          sx={{ mb: { xs: "32px", md: "48px" } }}
         >
-          <Box sx={{ maxWidth: { md: "528px" }, textAlign: "left" }}>
-            <Typography component={"h3"} sx={{ fontSize: "30px", fontWeight: "600px", mb: "16px" }}>
+          <Box sx={{ maxWidth: { md: "528px" }, textAlign: "left", flex: 1 }}>
+            <Typography component={"h3"} sx={{ fontSize: "30px", fontWeight: "600", mb: "16px" }}>
               {cur.title}
             </Typography>
             {cur.description.split("\n").map((paragraph: string, idx: number) => (
@@ -109,7 +109,14 @@ const Mechanism = ({ mechanisms }: IMechanism) => {
             ))}
             {/* <Typography sx={{ color: theme.palette.mode === "dark" ? gray200 : gray600 }}>{cur.description}</Typography> */}
           </Box>
-          <Box sx={{ width: canvasDimensions.width, height: canvasDimensions.height }}>
+          <Box
+            sx={{
+              width: canvasDimensions.width,
+              height: canvasDimensions.height,
+              display: "grid",
+              placeItems: "center",
+            }}
+          >
             <RiveComponentMemoized
               src={cur.animation.src}
               artboard={cur.animation.artboard}
@@ -123,6 +130,6 @@ const Mechanism = ({ mechanisms }: IMechanism) => {
   );
 };
 
-const getHeight = (width: number) => (300 * width) / 500;
+const getHeight = (width: number) => width;
 
 export default Mechanism;

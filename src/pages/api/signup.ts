@@ -325,6 +325,29 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
         [batch, writeCounts] = await checkRestartBatchWriteCounts(batch, writeCounts);
       }
 
+      const notebooks = await db.collection("notebooks").where("owner", "==", userData.uname).limit(1).get();
+
+      let notebookId: string;
+      if (notebooks.docs.length) {
+        notebookId = notebooks.docs[0].id;
+      } else {
+        const notebookRef = db.collection("notebooks").doc();
+        notebookId = notebookRef.id;
+        batch.set(notebookRef, {
+          isPublic: "none",
+          owner: userData.uname,
+          ownerImgUrl: userData.imageUrl,
+          ownerFullName: `${userData.fName} ${userData.lName}`,
+          ownerChooseUname: userData.chooseUname,
+          usersInfo: {},
+          users: [],
+          title: "My Notebook",
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        } as INotebook);
+        [batch, writeCounts] = await checkRestartBatchWriteCounts(batch, writeCounts);
+      }
+
       const userNodeQuery = db
         .collection("userNodes")
         .where("user", "==", userData.uname)
