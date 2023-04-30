@@ -13,6 +13,7 @@ import Chapter from "@/components/instructors/setting/Chapter";
 import Proposal from "@/components/instructors/setting/Proposal";
 import Vote from "@/components/instructors/setting/Vote";
 import { Post } from "@/lib/mapApi";
+import { DESIGN_SYSTEM_COLORS } from "@/lib/theme/colors";
 import { InstructorSemesterSettingPayload } from "@/pages/api/instructor/students/[semesterId]/setting";
 
 import LoadingImg from "../../../../public/animated-icon-1cademy.gif";
@@ -424,25 +425,22 @@ export const DashboardSettings = ({ currentSemester }: DashboardSettingsProps) =
       <Grid container spacing={0} mt={5}>
         <Vote semester={baseSemester} inputsHandler={inputsHandler} switchHandler={switchHandler} />
       </Grid>
-      <Box display="flex" justifyContent="space-between" alignItems="center" gap="10px" mt={3}>
+      <Box display="flex" justifyContent="flex-end" alignItems="center" gap="10px" mt={3}>
         <LoadingButton
           onClick={handleClickOpen}
           loading={deleteLoader}
-          variant="contained"
-          color="error"
+          variant="outlined"
           loadingIndicator={
             <CircularProgress
               sx={{ color: theme => (theme.palette.mode === "dark" ? theme.palette.common.white : "#555") }}
             />
           }
           sx={{
-            color: theme => theme.palette.common.white,
             fontWeight: "bold",
             padding: {
               xs: "5px 50px",
-              md: "15px 80px",
             },
-            fontSize: "20px",
+            borderRadius: "32px",
           }}
         >
           Delete
@@ -451,20 +449,22 @@ export const DashboardSettings = ({ currentSemester }: DashboardSettingsProps) =
           onClick={onSubmitHandler}
           loading={requestLoader}
           variant="contained"
-          color="success"
           loadingIndicator={
             <CircularProgress
               sx={{ color: theme => (theme.palette.mode === "dark" ? theme.palette.common.white : "#555") }}
             />
           }
           sx={{
-            color: theme => theme.palette.common.white,
             fontWeight: "bold",
             padding: {
               xs: "5px 50px",
-              md: "15px 80px",
             },
-            fontSize: "20px",
+
+            borderRadius: "32px",
+            backgroundColor: DESIGN_SYSTEM_COLORS.primary800,
+            ":hover": {
+              backgroundColor: DESIGN_SYSTEM_COLORS.primary900,
+            },
           }}
         >
           Submit
