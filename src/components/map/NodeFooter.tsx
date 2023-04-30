@@ -497,6 +497,7 @@ const NodeFooter = ({
                 nodeType={"locked"}
                 tooltipPlacement={"top"}
                 fontSize={"inherit"}
+                sx={{ fontSize: "22px" }}
                 // disabled={disabled}
               />
             )}
@@ -511,13 +512,7 @@ const NodeFooter = ({
                   setAbleToPropose={setAbleToPropose}
                 />
               ) : (
-                <NodeTypeIcon
-                  id={identifier}
-                  nodeType={nodeType}
-                  tooltipPlacement={"top"}
-                  fontSize={"inherit"}
-                  // disabled={disabled}
-                />
+                <NodeTypeIcon id={identifier} nodeType={nodeType} tooltipPlacement={"top"} sx={{ fontSize: "24px" }} />
               ))}
             <Tooltip
               title={`This node was last edited at ${dayjs(new Date(changedAt)).hour()}:${dayjs(

@@ -155,6 +155,7 @@ describe("updateStatsOnProposal", () => {
         programName: "P Name",
         semesterName: "S Name",
         universityName: institutions[0].name,
+        root: nodes[0].documentId!,
       } as InstructorCourseCreatePayload,
       headers: {
         authorization: "Bearer " + accessToken,
@@ -223,6 +224,14 @@ describe("updateStatsOnProposal", () => {
           pointIncrementOnAgreement: 1,
           pointDecrementOnAgreement: 1,
         },
+        dailyPractice: {
+          startDate,
+          endDate,
+          numPoints: 1,
+          numQuestionsPerDay: 1,
+          totalDaysOfCourse: moment(endDate).diff(moment(startDate), "days"),
+        },
+        isDailyPracticeRequired: true,
       } as InstructorSemesterSettingPayload,
       headers: {
         authorization: "Bearer " + accessToken,

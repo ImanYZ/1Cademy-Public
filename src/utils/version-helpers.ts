@@ -34,6 +34,9 @@ import { TypesenseNodeSchema } from "@/lib/schemas/node";
 import { INodeType } from "src/types/INodeType";
 import { IComReputationUpdates } from "./reputations";
 import { IUserNodeVersion } from "src/types/IUserNodeVersion";
+import { getCourseIdsFromTagIds, getSemesterIdsFromTagIds } from "./course-helpers";
+import { IPractice } from "src/types/IPractice";
+import { ISemester } from "src/types/ICourse";
 import { getNodePageWithDomain } from "@/lib/utils/utils";
 
 export const comPointTypes = [
@@ -368,19 +371,60 @@ export const indexNodeChange = async (nodeId: string, nodeTitle: string, actionT
 
 export const createPractice = async ({
   batch,
+  unames,
   tagIds,
   nodeId,
+  parentId,
   currentTimestamp,
   writeCounts,
   t,
   tWriteOperations,
 }: any) => {
   let newBatch = batch;
-  let usersRef, usersDocs, practiceRef;
-  for (let tagId of tagIds) {
-    usersRef = db.collection("users").where("tagId", "==", tagId);
-    usersDocs = await convertToTGet(usersRef, t);
-    for (let userDoc of usersDocs.docs) {
+  let practiceRef;
+  if (!parentId) {
+    return [newBatch, writeCounts];
+  }
+  const semesterIds = await getSemesterIdsFromTagIds(tagIds);
+  for (const tagId of semesterIds) {
+    const userIds: string[] = [];
+    if (unames && Array.isArray(unames)) {
+      userIds.push(...unames);
+    } else {
+      const semesterDoc = await db.collection("semesters").doc(tagId).get();
+      const semester = semesterDoc.data() as ISemester;
+      semester.students.forEach(student => userIds.push(student.uname));
+    }
+    for (const userId of userIds) {
+      const practices = await db
+        .collection("practice")
+        .where("user", "==", userId)
+        .where("tagId", "==", tagId)
+        .where("node", "==", parentId)
+        .limit(1)
+        .get();
+      if (practices.docs.length) {
+        const practiceRef = db.collection("practice").doc(practices.docs[0].id);
+        const questionNodes: string[] = practices.docs[0].data()?.questionNodes || [];
+        if (!questionNodes.includes(nodeId)) {
+          questionNodes.push(nodeId);
+        }
+        if (t) {
+          tWriteOperations.push({
+            objRef: practiceRef,
+            data: {
+              questionNodes,
+            },
+            operationType: "update",
+          });
+        } else {
+          newBatch.set(practiceRef, {
+            questionNodes,
+          });
+          [newBatch, writeCounts] = await checkRestartBatchWriteCounts(newBatch, writeCounts);
+        }
+        continue;
+      }
       practiceRef = db.collection("practice").doc();
       const practiceData = {
         createdAt: currentTimestamp,
@@ -390,12 +434,12 @@ export const createPractice = async ({
         lastCompleted: null,
         lastPresented: null,
         nextDate: currentTimestamp,
-        node: nodeId,
+        node: parentId,
         q: 0,
         tagId,
-        tag: null,
-        user: userDoc.id,
-      };
+        questionNodes: [nodeId],
+        user: userId,
+      } as IPractice;
       if (t) {
         tWriteOperations.push({
           objRef: practiceRef,
@@ -2399,6 +2443,7 @@ export const versionCreateUpdate = async ({
               batch,
               tagIds,
               nodeId: childNodeRef.id,
+              parentId: childNode.parents?.[0]?.node || "",
               currentTimestamp,
               writeCounts,
               t,

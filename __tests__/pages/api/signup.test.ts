@@ -1,23 +1,26 @@
+jest.mock("src/utils/helpers", () => {
+  const original = jest.requireActual("src/utils/helpers");
+  return {
+    ...original,
+    detach: jest.fn().mockImplementation(async (callback: any) => {
+      return callback();
+    }),
+  };
+});
+
 import { getAuth } from "firebase-admin/auth";
+import { Timestamp } from "firebase-admin/firestore";
+import { ISemester } from "src/types/ICourse";
 import { IInstitution } from "src/types/IInstitution";
 import { createInstitution } from "testUtils/fakers/institution";
+import { createNode, getDefaultNode } from "testUtils/fakers/node";
+import { getDefaultUser } from "testUtils/fakers/user";
 
 import { db } from "../../../src/lib/firestoreServer/admin";
 import handler from "../../../src/pages/api/signup";
 import createPostReq from "../../../testUtils/helpers/createPostReq";
 import deleteAllUsers from "../../../testUtils/helpers/deleteAllUsers";
-import {
-  bookmarkNumsData,
-  creditsData,
-  MockData,
-  notificationNumsData,
-  pendingPropsNumsData,
-  reputationsData,
-  tagsData,
-  userNodesData,
-  userNodesLogData,
-  usersData,
-} from "../../../testUtils/mockCollections";
+import { creditsData, MockData, tagsData } from "../../../testUtils/mockCollections";
 
 describe("/signup", () => {
   const institutions = [
@@ -30,7 +33,19 @@ describe("/signup", () => {
       domain: "@1cad123emy.edu",
     }),
   ];
-  const collects = [new MockData(institutions, "institutions"), tagsData, creditsData];
+  const collects = [
+    new MockData(institutions, "institutions"),
+    new MockData([], "bookmarkNums"),
+    new MockData([], "credits"),
+    new MockData([], "notificationNums"),
+    new MockData([], "pendingPropsNums"),
+    new MockData([], "reputations"),
+    new MockData([], "userNodes"),
+    new MockData([], "userNodesLog"),
+    new MockData([], "users"),
+    tagsData,
+    creditsData,
+  ];
   beforeAll(async () => {
     await Promise.all(collects.map(collect => collect.populate()));
   });
@@ -133,13 +148,6 @@ describe("/signup", () => {
   afterAll(async () => {
     await deleteAllUsers();
     await Promise.all(collects.map(collect => collect.clean()));
-    await usersData.clean();
-    await bookmarkNumsData.clean();
-    await notificationNumsData.clean();
-    await pendingPropsNumsData.clean();
-    await reputationsData.clean();
-    await userNodesData.clean();
-    await userNodesLogData.clean();
   });
 });
 
@@ -154,12 +162,104 @@ describe("/signup as student", () => {
       domain: "@1cad123emy.edu",
     }),
   ];
-  const semestersCollection = new MockData([{ students: [] }], "semesters");
+
+  const users = [
+    getDefaultUser({
+      institutionName: institutions[0].name,
+    }),
+  ];
+  const nodes = [
+    getDefaultNode({
+      admin: users[0],
+    }),
+  ];
+
+  const questionNode = createNode({
+    parents: [nodes[0]],
+    nodeType: "Question",
+    choices: [],
+    admin: users[0],
+  });
+  nodes[0].children.push({
+    node: questionNode.documentId!,
+    title: questionNode.title,
+    type: "Question",
+  });
+
+  nodes.push(questionNode);
+
+  // setting default community to default user
+  users[0].tag = nodes[0].title;
+  users[0].tagId = String(nodes[0].documentId);
+
+  const semestersCollection = new MockData(
+    [
+      {
+        documentId: nodes[0].documentId,
+        tagId: nodes[0].documentId,
+        students: [],
+        days: 1,
+        cTagId: "",
+        cTitle: "",
+        dTagId: "",
+        dTitle: "",
+        pTagId: "",
+        pTitle: "",
+        uTagId: "",
+        uTitle: "",
+        instructors: [],
+        startDate: Timestamp.now(),
+        endDate: Timestamp.now(),
+        isCastingVotesRequired: false,
+        isGettingVotesRequired: false,
+        isProposalRequired: false,
+        isQuestionProposalRequired: false,
+        nodeProposals: {
+          startDate: Timestamp.now(),
+          endDate: Timestamp.now(),
+          numPoints: 0,
+          numProposalPerDay: 0,
+          totalDaysOfCourse: 0,
+        },
+        questionProposals: {
+          startDate: Timestamp.now(),
+          endDate: Timestamp.now(),
+          numPoints: 0,
+          numQuestionsPerDay: 0,
+          totalDaysOfCourse: 0,
+        },
+        votes: {
+          onReceiveDownVote: 0,
+          onReceiveStar: 0,
+          onReceiveVote: 0,
+          pointDecrementOnAgreement: 0,
+          pointIncrementOnAgreement: 0,
+        },
+        dailyPractice: {
+          startDate: Timestamp.now(),
+          endDate: Timestamp.now(),
+          numPoints: 1,
+          numQuestionsPerDay: 1,
+          totalDaysOfCourse: 0,
+        },
+        isDailyPracticeRequired: true,
+        syllabus: [],
+        title: nodes[0].title,
+        root: nodes[0].documentId!,
+        deleted: false,
+        updatedAt: Timestamp.now(),
+        createdAt: Timestamp.now(),
+      } as ISemester,
+    ],
+    "semesters"
+  );
   const semesterStudentStatsCollection = new MockData([], "semesterStudentStats");
   const semesterStudentVoteStatsCollection = new MockData([], "semesterStudentVoteStats");
 
   const collects = [
     new MockData(institutions, "institutions"),
+    new MockData(nodes, "nodes"),
+    new MockData(users, "users"),
     tagsData,
     creditsData,
     semestersCollection,
@@ -224,6 +324,19 @@ describe("/signup as student", () => {
     });
   });
 
+  it("practices should be created semester students", async () => {
+    const semesterDoc = await db.collection("semesters").doc(semesterId).get();
+    const semesterData = semesterDoc.data() as ISemester;
+    for (const student of semesterData.students) {
+      const practices = await db
+        .collection("practice")
+        .where("user", "==", student.uname)
+        .where("tagId", "==", semesterDoc.id)
+        .get();
+      expect(practices.docs.length).toEqual(1);
+    }
+  });
+
   it("user role should be student", async () => {
     const createdUser = await getAuth().getUserByEmail(body.data.email);
     expect(createdUser.customClaims).toEqual({ student: true });
@@ -248,12 +361,5 @@ describe("/signup as student", () => {
   afterAll(async () => {
     await deleteAllUsers();
     await Promise.all(collects.map(collect => collect.clean()));
-    await usersData.clean();
-    await bookmarkNumsData.clean();
-    await notificationNumsData.clean();
-    await pendingPropsNumsData.clean();
-    await reputationsData.clean();
-    await userNodesData.clean();
-    await userNodesLogData.clean();
   });
 });

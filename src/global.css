@@ -181,13 +181,13 @@
 }
 
 .Node.active,
-.ChoosableNotebook .Node.Choosable:hover {
+.Node.Choosable:hover {
   -webkit-box-shadow: 0px 0px 14px 12px rgba(204, 159, 72, 0.4);
   -moz-box-shadow: 0px 0px 14px 12px rgba(204, 159, 72, 0.4);
   box-shadow: 0px 0px 14px 12px rgba(204, 159, 72, 0.4);
 }
 .LightMode .Node.active,
-.LightMode .ChoosableNotebook .Node.Choosable:hover {
+.LightMode .Node.Choosable:hover {
   -webkit-box-shadow: 0px 0px 14px 12px rgba(236, 178, 142, 0.6);
   -moz-box-shadow: 0px 0px 14px 12px rgba(236, 178, 142, 0.6);
   box-shadow: 0px 0px 14px 12px rgba(236, 178, 142, 0.6);
