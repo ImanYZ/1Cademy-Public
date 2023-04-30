@@ -2,6 +2,7 @@ import { Box } from "@mui/material";
 import React, { useEffect, useState } from "react";
 
 import { CourseTag, SimpleQuestionNode } from "../../instructorsTypes";
+import { User } from "../../knowledgeTypes";
 import { Post } from "../../lib/mapApi";
 import CourseDetail from "./CourseDetail";
 import Leaderboard from "./Leaderboard";
