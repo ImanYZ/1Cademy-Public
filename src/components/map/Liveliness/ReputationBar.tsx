@@ -7,6 +7,8 @@ import React, { useEffect, useMemo, useState } from "react";
 import { ActionTrackType } from "src/knowledgeTypes";
 import { IActionTrack } from "src/types/IActionTrack";
 
+import { DESIGN_SYSTEM_COLORS } from "@/lib/theme/colors";
+
 type ILivelinessBarProps = {
   db: Firestore;
   onlineUsers: string[];
@@ -358,7 +360,9 @@ const ReputationlinessBar = ({ open, setOpen, ...props }: ILivelinessBarProps) =
                             />
                           ) : (
                             <Box sx={{ width: "100%", height: "100%", display: "grid", placeItems: "center" }}>
-                              <Typography sx={{ fontSize: "12px", fontWeight: "600" }}>
+                              <Typography
+                                sx={{ fontSize: "12px", fontWeight: "600", color: DESIGN_SYSTEM_COLORS.baseWhite }}
+                              >
                                 {`${users[uname].fullname.split(" ")[0].charAt(0).toUpperCase()}${users[uname].fullname
                                   .split(" ")[1]
                                   ?.charAt(0)

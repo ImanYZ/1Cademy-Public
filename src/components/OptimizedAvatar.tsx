@@ -4,6 +4,8 @@ import { SxProps, Theme } from "@mui/system";
 import { getDownloadURL, getStorage, ref } from "firebase/storage";
 import Image from "next/image";
 import React, { FC, useEffect, useState } from "react";
+
+import { DESIGN_SYSTEM_COLORS } from "@/lib/theme/colors";
 type Props = {
   name?: string;
   imageUrl?: string;
@@ -108,12 +110,11 @@ const OptimizedAvatar: FC<Props> = ({ name = "", imageUrl, renderAsAvatar = true
           <Avatar
             sx={{
               background: "linear-gradient(143.7deg, #FDC830 15.15%, #F37335 83.11%);",
-
               color: common.white,
               ...sx,
             }}
           >
-            <Typography sx={{ fontWeight: "600", fontSize: "16px" }}>
+            <Typography sx={{ fontWeight: "600", fontSize: "16px", color: DESIGN_SYSTEM_COLORS.baseWhite }}>
               {name.split(" ")[0].charAt(0).toUpperCase()}
               {name.split(" ")[1]?.charAt(0).toUpperCase()}
             </Typography>
