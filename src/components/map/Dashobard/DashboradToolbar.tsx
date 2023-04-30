@@ -77,7 +77,7 @@ export const DashboradToolbar = ({
             renderAsAvatar={true}
             contained={false}
             name={`${user.fName} ${user.lName}`}
-            sx={{ width: "38px", height: "38px" }}
+            sx={{ width: "38px", height: "38px", alignSelf: "center" }}
           />
           <Box>
             <Typography p="0">
