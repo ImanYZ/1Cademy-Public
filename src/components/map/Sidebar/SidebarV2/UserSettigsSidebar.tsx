@@ -49,7 +49,16 @@ import {
   writeBatch,
 } from "firebase/firestore";
 import { StaticImageData } from "next/image";
-import React, { MutableRefObject, ReactNode, Suspense, useCallback, useEffect, useMemo, useState } from "react";
+import React, {
+  MutableRefObject,
+  ReactNode,
+  Suspense,
+  SyntheticEvent,
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 import { DispatchAuthActions, Reputation, User, UserSettings, UserTheme, UserView } from "src/knowledgeTypes";
 import { DispatchNodeBookActions, NodeBookState, TNodeBookState } from "src/nodeBookTypes";
 import { NodeType } from "src/types";
@@ -75,6 +84,7 @@ import { MemoizedInputSave } from "../../InputSave";
 import { MemoizedMetaButton } from "../../MetaButton";
 import Modal from "../../Modal/Modal";
 import ProposalItem from "../../ProposalsList/ProposalItem/ProposalItem";
+import LevelSlider from "../LevelSlider";
 import NodeTypeTrends from "../NodeTypeTrends";
 import ProfileAvatar from "../ProfileAvatar";
 import UseInfoTrends from "../UseInfoTrends";
@@ -141,6 +151,24 @@ const ACCOUNT_OPTIONS: AccountOptions[] = [
   },
 ];
 
+const MARKS = [
+  {
+    value: 0,
+  },
+  {
+    value: 25,
+  },
+  {
+    value: 50,
+  },
+  {
+    value: 75,
+  },
+  {
+    value: 100,
+  },
+];
+
 const TabPanel = ({ value, index, children }: TabPanelProps) => {
   return <Box hidden={value !== index}>{value === index && children}</Box>;
 };
@@ -179,6 +207,9 @@ const UserSettigsSidebar = ({
 
   const [settingsValue, setSettingsValue] = React.useState(-1);
   const [settingsSubValue, setSettingsSubValue] = React.useState(-1);
+
+  // const [levelThreshold, setLevelThreshold] = useState<number>(user.scaleThreshold ?? 100);
+
   const handleSettingsValue = (newValue: number) => {
     setSettingsValue(newValue);
   };
@@ -535,6 +566,7 @@ const UserSettigsSidebar = ({
           | "view"
           | "showClusterOptions"
           | "showClusters"
+          | "scaleThreshold"
       ) =>
       async (newValue: any) => {
         if (!user) return;
@@ -839,6 +871,16 @@ const UserSettigsSidebar = ({
 
     return proposals.filter(proposal => proposal.nodeType === type);
   }, [proposals, type]);
+
+  const onHandleChangeSlider = useCallback(
+    (event: SyntheticEvent | Event, value: number | Array<number>) => {
+      event.preventDefault();
+      if (typeof value !== "number") return;
+      changeAttr("scaleThreshold")(value);
+      dispatch({ type: "setAuthUser", payload: { ...user, scaleThreshold: value } });
+    },
+    [changeAttr, dispatch, user]
+  );
 
   const newTabsItems: UserSettingsTabs[] = useMemo(() => {
     return [
@@ -1161,8 +1203,23 @@ const UserSettigsSidebar = ({
                   }}
                 >
                   <Typography>Background Image</Typography>
-                  <IOSSwitch checked={settings.background === "Image"} onChange={handleBackgroundSwitch} />
+                  <IOSSwitch
+                    aria-label="Temperature"
+                    checked={settings.background === "Image"}
+                    onChange={handleBackgroundSwitch}
+                  />
                 </Paper>
+                <Typography fontWeight={"500"}>Nodes Threshold</Typography>
+                <LevelSlider
+                  min={0}
+                  max={100}
+                  marks={MARKS}
+                  valueLabelDisplay="on"
+                  valueLabelFormat={(value: number) => `${value}%`}
+                  defaultValue={user.scaleThreshold}
+                  onChangeCommitted={onHandleChangeSlider}
+                  sx={{ my: "32px" }}
+                />
                 <Typography fontWeight={"500"}>Nodes view</Typography>
                 <Stack direction={"row"} alignItems={"center"} justifyContent={"space-evenly"} mt="12px">
                   <Box
@@ -1457,6 +1514,7 @@ const UserSettigsSidebar = ({
     loadOlderProposalsClick,
     logoutClick,
     nodeTypeStats,
+    onHandleChangeSlider,
     openLinkedNode,
     proposalsFiltered,
     proposalsPerDay,
@@ -1801,9 +1859,10 @@ const UserSettigsSidebar = ({
               sx={{
                 width: "20px",
                 height: "20px",
-                fontSize: "16px",
+                fontSize: "12px",
               }}
               renderAsAvatar={false}
+              contained={false}
             />
             <span>{user.deInstit}</span>
           </div>

@@ -8,8 +8,9 @@ import { isEmail, isEmpty } from "@/lib/utils/utils";
 
 import { admin, checkRestartBatchWriteCounts, commitBatch, db } from "../../lib/firestoreServer/admin";
 import { IInstitution } from "src/types/IInstitution";
-import { createOrRestoreStatDocs } from "src/utils/course-helpers";
+import { createOrRestoreStatDocs, createPracticeForSemesterStudents } from "src/utils/course-helpers";
 import { INotebook } from "src/types/INotebook";
+import { detach } from "src/utils/helpers";
 
 const addPracticeQuestions = async (
   batch: WriteBatch,
@@ -421,6 +422,20 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
     const bookmarkNumsRef = db.collection("bookmarkNums").doc(data.uname);
     batch.set(bookmarkNumsRef, { bNum: 0 });
     await commitBatch(batch);
+
+    // TODO: move these to queue
+    await detach(async () => {
+      if (!data?.course) return;
+      let batch = db.batch();
+      let writeCounts = 0;
+
+      const semesterRef = db.collection("semesters").doc(data?.course);
+      const semesterData = (await semesterRef.get()).data();
+      if (!semesterData) return;
+      [batch, writeCounts] = await createPracticeForSemesterStudents(semesterRef.id, [data.uname], batch, writeCounts);
+      await commitBatch(batch);
+    });
+
     const creditsRef = db.collection("credits").where("tagId", "==", tagId).limit(1);
     const creditsData = await creditsRef.get();
 

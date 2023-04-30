@@ -1,3 +1,13 @@
+jest.mock("src/utils/helpers", () => {
+  const original = jest.requireActual("src/utils/helpers");
+  return {
+    ...original,
+    detach: jest.fn().mockImplementation(async (callback: any) => {
+      return callback();
+    }),
+  };
+});
+
 import { faker } from "@faker-js/faker";
 import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
 import { getAuth as adminGetAuth } from "firebase-admin/auth";
@@ -82,11 +92,24 @@ describe("POST /api/instructor/students/:semesterId/signup", () => {
     nodeType: semesterNode.nodeType,
   });
 
+  const questionNode = createNode({
+    admin: users[0],
+    parents: [courseNode],
+    corrects: 1,
+    nodeType: "Question",
+  });
+  courseNode.children.push({
+    node: questionNode.documentId!,
+    title: questionNode.title,
+    type: "Question",
+  });
+
   nodes.push(universityNode);
   nodes.push(departmentNode);
   nodes.push(programNode);
   nodes.push(courseNode);
   nodes.push(semesterNode);
+  nodes.push(questionNode);
 
   const course = createCourse({
     documentId: courseNode.documentId,
@@ -103,6 +126,7 @@ describe("POST /api/instructor/students/:semesterId/signup", () => {
     course: courseNode,
     program: programNode,
     university: universityNode,
+    root: courseNode.documentId,
   });
 
   const instructor = createInstructor({
@@ -167,6 +191,7 @@ describe("POST /api/instructor/students/:semesterId/signup", () => {
     instructorsCollection,
     new MockData([], "semesterStudentStats"),
     new MockData([], "semesterStudentVoteStats"),
+    new MockData([], "practice"),
   ];
 
   const nodesCollection = new MockData(nodes, "nodes");
@@ -317,6 +342,19 @@ describe("POST /api/instructor/students/:semesterId/signup", () => {
       const semesterData = semesterDoc.data() as ISemester;
       const filteredStudents = semesterData.students.filter(student => student.email === removedStudents[0].email);
       expect(filteredStudents.length).toEqual(0);
+    });
+
+    it("practices should be created semester students", async () => {
+      const semesterDoc = await db.collection("semesters").doc(String(semester.documentId)).get();
+      const semesterData = semesterDoc.data() as ISemester;
+      for (const student of semesterData.students) {
+        const practices = await db
+          .collection("practice")
+          .where("user", "==", student.uname)
+          .where("tagId", "==", semesterDoc.id)
+          .get();
+        expect(practices.docs.length).toEqual(1);
+      }
     });
   });
 
