@@ -93,7 +93,7 @@ export const DashboardSettings = ({ currentSemester }: DashboardSettingsProps) =
         let semesterData = snapshot.data() as ISemester;
         if (semesterData) {
           setSemester(semesterData);
-          setBaseSemester((prevSemester: any) => {
+          setBaseSemester(prevSemester => {
             return {
               ...prevSemester,
               startDate: semesterData.startDate
@@ -132,7 +132,6 @@ export const DashboardSettings = ({ currentSemester }: DashboardSettingsProps) =
       });
       return () => semesterSnapshot();
     }
-    // [selectedSemester, selectedCourse, currentSemester]
   }, [currentSemester, db]);
 
   const handleClickOpen = () => {

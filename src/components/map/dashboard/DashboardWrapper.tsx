@@ -191,7 +191,7 @@ export const DashboardWrapper = ({ user, onClose, sx }: DashboardWrapperProps) =
       }}
     >
       <DashboradToolbar
-        courses={currentSemester ? allCourses[currentSemester.tagId] : []}
+        courses={currentSemester ? allCourses[currentSemester.tagId] ?? [] : []}
         selectedCourse={selectedCourse}
         onChangeSelectedCourseHandler={setSelectedCourse}
         semesters={allSemesters}
@@ -212,7 +212,7 @@ export const DashboardWrapper = ({ user, onClose, sx }: DashboardWrapperProps) =
           p: "40px 32px",
         }}
       >
-        {currentSemester ? (
+        {currentSemester && allCourses[currentSemester.tagId] ? (
           <>
             {selectToolbarView === "DASHBOARD" && <Dashboard user={user} currentSemester={currentSemester} />}
             {selectToolbarView === "PRACTICE" && (
