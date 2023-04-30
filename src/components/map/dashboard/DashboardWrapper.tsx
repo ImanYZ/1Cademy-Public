@@ -5,7 +5,9 @@ import {
   DocumentData,
   Firestore,
   getDoc,
+  getDocs,
   getFirestore,
+  limit,
   onSnapshot,
   Query,
   query,
@@ -25,6 +27,7 @@ import { PracticeTool } from "../../practiceTool/PracticeTool";
 import { DashboradToolbar } from "../Dashobard/DashboradToolbar";
 import { Dashboard } from "./Dashboard";
 import { DashboardSettings } from "./DashboardSettings";
+import { DashboardStudents } from "./DashboardStudents";
 // import { Semester } from "../../instructorsTypes";
 // import { ICourseTag } from "../../types/ICourse";
 // import { CoursesResult } from "../layouts/StudentsLayout";
@@ -35,7 +38,7 @@ type DashboardWrapperProps = {
   sx?: SxProps<Theme>;
 };
 
-export type ToolbarView = "DASHBOARD" | "PRACTICE" | "SETTINGS";
+export type ToolbarView = "DASHBOARD" | "PRACTICE" | "SETTINGS" | "STUDENTS";
 
 export const DashboardWrapper = ({ user, onClose, sx }: DashboardWrapperProps) => {
   const db = getFirestore();
@@ -43,13 +46,12 @@ export const DashboardWrapper = ({ user, onClose, sx }: DashboardWrapperProps) =
   // const [semesters, setSemesters] = useState<string[]>([]);
   const [allCourses, setAllCourses] = useState<CoursesResult>({});
   const [allSemesters, setAllSemesters] = useState<Semester[]>([]);
-
   const [instructor, setInstructor] = useState<Instructor | null>(null);
-
   const [selectedCourse, setSelectedCourse] = useState<string | null>(null);
   const [currentSemester, setCurrentSemester] = useState<CourseTag | null>(null);
-
   const [selectToolbarView, setSelectToolbarView] = useState<ToolbarView>("DASHBOARD");
+
+  const [selectedStudent, setSelectedStudent] = useState<User | null>(null);
 
   const [, /* isLoading */ setIsLoading] = useState(true);
 
@@ -179,7 +181,32 @@ export const DashboardWrapper = ({ user, onClose, sx }: DashboardWrapperProps) =
     setCurrentSemester(current ?? null);
   }, [instructor, selectedCourse]);
 
-  console.log({ allCourses });
+  const onChangeView = (view: ToolbarView) => {
+    setSelectedStudent(null);
+    setSelectToolbarView(view);
+  };
+
+  const getSelectedStudent = useCallback(
+    (uname: string) => {
+      const getUser = async () => {
+        const userRef = collection(db, "users");
+        const q = query(userRef, where("uname", "==", uname), limit(1));
+
+        const users = await getDocs(q);
+        if (users.empty) return;
+
+        const student = users.docs[0].data() as User;
+        setSelectedStudent(student);
+      };
+      getUser();
+    },
+    [db]
+  );
+
+  const onSelectUserHandler = (uname: string, view: ToolbarView) => {
+    getSelectedStudent(uname);
+    setSelectToolbarView(view);
+  };
 
   return (
     <Box
@@ -194,13 +221,13 @@ export const DashboardWrapper = ({ user, onClose, sx }: DashboardWrapperProps) =
       }}
     >
       <DashboradToolbar
-        courses={currentSemester ? allCourses[currentSemester.tagId] : []}
+        courses={currentSemester ? allCourses[currentSemester.tagId] ?? [] : []}
         selectedCourse={selectedCourse}
         onChangeSelectedCourseHandler={setSelectedCourse}
         semesters={allSemesters}
         currentSemester={currentSemester}
         onChangeCurrentSemesterHandler={setCurrentSemester}
-        onChangeToolbarView={setSelectToolbarView}
+        onChangeToolbarView={onChangeView}
         user={user}
         onClose={onClose}
         view={selectToolbarView}
@@ -215,9 +242,11 @@ export const DashboardWrapper = ({ user, onClose, sx }: DashboardWrapperProps) =
           p: "40px 32px",
         }}
       >
-        {currentSemester ? (
+        {currentSemester && allCourses[currentSemester.tagId] ? (
           <>
-            {selectToolbarView === "DASHBOARD" && <Dashboard user={user} currentSemester={currentSemester} />}
+            {selectToolbarView === "DASHBOARD" && (
+              <Dashboard user={selectedStudent ? selectedStudent : user} currentSemester={currentSemester} />
+            )}
             {selectToolbarView === "PRACTICE" && (
               <PracticeTool
                 user={user}
@@ -228,6 +257,9 @@ export const DashboardWrapper = ({ user, onClose, sx }: DashboardWrapperProps) =
               />
             )}
             {selectToolbarView === "SETTINGS" && <DashboardSettings currentSemester={currentSemester} />}
+            {selectToolbarView === "STUDENTS" && (
+              <DashboardStudents currentSemester={currentSemester} onSelectUserHandler={onSelectUserHandler} />
+            )}
           </>
         ) : (
           <NoDataMessage message="No data in this semester" />

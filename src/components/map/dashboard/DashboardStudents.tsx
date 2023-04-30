@@ -1,37 +1,43 @@
 import AddIcon from "@mui/icons-material/Add";
+import AddRoundedIcon from "@mui/icons-material/AddRounded";
 import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
-import EditIcon from "@mui/icons-material/Edit";
 import FilterAltIcon from "@mui/icons-material/FilterAlt";
 import SearchIcon from "@mui/icons-material/Search";
-import LoadingButton from "@mui/lab/LoadingButton";
-import { Box, Divider, Link, TableContainer, useMediaQuery, useTheme } from "@mui/material";
-import { Button } from "@mui/material";
-import Chip from "@mui/material/Chip";
+import { LoadingButton } from "@mui/lab";
+import {
+  Box,
+  Button,
+  Chip,
+  Paper,
+  Popover,
+  Stack,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  TextField,
+  Typography,
+  useMediaQuery,
+  useTheme,
+} from "@mui/material";
 import IconButton from "@mui/material/IconButton";
-import Paper from "@mui/material/Paper";
-import Popover from "@mui/material/Popover";
-import Stack from "@mui/material/Stack";
-import Table from "@mui/material/Table";
-import TableBody from "@mui/material/TableBody";
-import TableCell from "@mui/material/TableCell";
-import TableHead from "@mui/material/TableHead";
-import TableRow from "@mui/material/TableRow";
-import TextField from "@mui/material/TextField";
-import Typography from "@mui/material/Typography";
 import { collection, getFirestore, onSnapshot, query, where } from "firebase/firestore";
-import LinkNext from "next/link";
 import React, { useEffect, useState } from "react";
+import { CourseTag } from "src/instructorsTypes";
 import { ISemester, ISemesterStudentVoteStat } from "src/types/ICourse";
 import { v4 as uuidv4 } from "uuid";
 
-import { InstructorLayoutPage, InstructorsLayout } from "@/components/layouts/InstructorsLayout";
+import CSVBtn from "@/components/CSVBtn";
+import DeleteButton from "@/components/DeleteButton";
+import { StudentFilters, StudentsProfile } from "@/components/instructors/Drawers";
 import OptimizedAvatar from "@/components/OptimizedAvatar";
+import { postWithToken } from "@/lib/mapApi";
+import { DESIGN_SYSTEM_COLORS } from "@/lib/theme/colors";
 import { calculateVoteStatPoints } from "@/lib/utils/charts.utils";
 
-import { postWithToken } from "../../../src/lib/mapApi";
-import CSVBtn from "../../components/CSVBtn";
-import DeleteButton from "../../components/DeleteButton";
-import { StudentFilters, StudentsProfile } from "../../components/instructors/Drawers";
+import { ToolbarView } from "./DashboardWrapper";
 
 const filterChoices: any = {
   "Total Points": "totalPoints",
@@ -101,7 +107,12 @@ const keysColumns: any = {
   "Last Activity": "lastActivity",
 };
 
-export const Students: InstructorLayoutPage = ({ /* selectedSemester, */ selectedCourse, currentSemester }) => {
+type DashboardStudentsProps = {
+  currentSemester: CourseTag | null;
+  onSelectUserHandler: (uname: string, view: ToolbarView) => void;
+};
+
+export const DashboardStudents = ({ currentSemester, onSelectUserHandler }: DashboardStudentsProps) => {
   const [keys, setKeys] = useState([...defaultKeys]);
   const [columns, setColumns] = useState([...defaultColumns]);
   const [rows, setRows] = useState<any>([]);
@@ -121,7 +132,7 @@ export const Students: InstructorLayoutPage = ({ /* selectedSemester, */ selecte
   const isMovil = useMediaQuery(theme.breakpoints.down("md"));
   const [openProfile, setOpenProfile] = useState(false);
   const [selectedColumn, setSelectedColumn] = useState("");
-  const [openedProfile, setOpenedProfile] = useState(tableRows.slice()[0]);
+  const [openedProfile /* setOpenedProfile */] = useState(tableRows.slice()[0]);
   const [savedTableState, setSavedTableState] = useState([]);
   const [states, setStates] = useState<ISemesterStudentVoteStat[]>([]);
   const [anchorEl, setAnchorEl] = useState(null);
@@ -380,7 +391,6 @@ export const Students: InstructorLayoutPage = ({ /* selectedSemester, */ selecte
   const handleOpenCloseFilter = () => setOpenFilter(!openFilter);
   const handleOpenCloseProfile = () => setOpenProfile(!openProfile);
 
-  //this to filter the results
   const handleFilterBy = (filters: any, fromDash: boolean) => {
     let _tableRows = rows.slice();
     for (let filter of filters) {
@@ -483,12 +493,6 @@ export const Students: InstructorLayoutPage = ({ /* selectedSemester, */ selecte
     };
     const updateFilters = [...filters, newFilter];
     setFilters(updateFilters);
-  };
-
-  const openThisProfile = (row: any) => {
-    if (!isMovil) return;
-    setOpenedProfile(row);
-    handleOpenCloseProfile();
   };
 
   const saveTableChanges = async () => {
@@ -609,7 +613,6 @@ export const Students: InstructorLayoutPage = ({ /* selectedSemester, */ selecte
     });
     setTableRows(newTable);
   };
-
   const addNewStudent = () => {
     const _tableRow: any = tableRows.slice();
     _tableRow.push({
@@ -698,7 +701,7 @@ export const Students: InstructorLayoutPage = ({ /* selectedSemester, */ selecte
   };
 
   if (!currentSemester) return <Typography>You don't have semester</Typography>;
-  // if (!tableRows.length) return <Typography>you don't a user </Typography>;
+
   return (
     <>
       {/* Drawers */}
@@ -723,6 +726,31 @@ export const Students: InstructorLayoutPage = ({ /* selectedSemester, */ selecte
       />
       {/* Main Component */}
       <Box
+        sx={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          px: "10px",
+          gap: "15px",
+        }}
+      >
+        <Stack direction={"row"} alignItems={"center"} spacing={"12px"}>
+          <Typography variant="h2" component="h2" fontWeight={600}>
+            {currentSemester.cTitle}
+          </Typography>
+          <Typography>Students:</Typography>
+          <Typography>{rows.length}</Typography>
+        </Stack>
+        <Button
+          variant="outlined"
+          disabled={editMode || disableEdit}
+          onClick={handleEditAndAdd}
+          sx={{ borderRadius: "32px" }}
+        >
+          <AddRoundedIcon fontSize="small" /> Add Student
+        </Button>
+      </Box>
+      <Box
         className="student-dashboard"
         sx={{
           height: "100%",
@@ -735,40 +763,24 @@ export const Students: InstructorLayoutPage = ({ /* selectedSemester, */ selecte
         <Box
           sx={{
             position: "sticky",
-            top: "75px",
+            top: "50px",
+
             zIndex: 200,
-            backgroundColor: theme =>
-              theme.palette.mode === "dark" ? theme.palette.common.darkGrayBackground : theme.palette.common.white,
           }}
         >
           <Box
             sx={{
+              width: "100%",
               display: "flex",
               justifyContent: "space-between",
               flexDirection: isMovil ? "column" : "row",
+
               py: "20px",
             }}
           >
             <Box
               sx={{
-                display: "flex",
-                alignItems: "center",
-                flexDirection: "row",
-                gap: "15px",
-              }}
-            >
-              <Typography sx={{ fontFamily: "math" }} variant="h2" component="h2">
-                {selectedCourse?.split(" ")[0]}
-              </Typography>
-              <Typography sx={{ fontFamily: "fangsong" }} component="h2">
-                Students:
-              </Typography>
-              <Typography sx={{ fontFamily: "fangsong" }} component="h2">
-                {rows.length}
-              </Typography>
-            </Box>
-            <Box
-              sx={{
+                width: "100%",
                 display: "flex",
                 gap: "10px",
                 justifyContent: "space-between",
@@ -777,6 +789,7 @@ export const Students: InstructorLayoutPage = ({ /* selectedSemester, */ selecte
               }}
             >
               <TextField
+                fullWidth
                 size="small"
                 sx={{
                   alignSelf: "center",
@@ -806,21 +819,16 @@ export const Students: InstructorLayoutPage = ({ /* selectedSemester, */ selecte
                     onClick={handleOpenCloseFilter}
                     sx={{
                       color: theme => theme.palette.common.white,
-                      background: theme => theme.palette.common.orange,
+                      background: DESIGN_SYSTEM_COLORS.primary800,
+                      ":hover": {
+                        background: DESIGN_SYSTEM_COLORS.primary700,
+                      },
+                      whiteSpace: "nowrap",
+                      borderRadius: "32px",
+                      p: "8px 24px",
                     }}
                   >
                     Filter By
-                  </Button>
-                  <Button
-                    variant="contained"
-                    disabled={editMode || disableEdit}
-                    onClick={handleEditAndAdd}
-                    sx={{
-                      color: theme => theme.palette.common.white,
-                      background: theme => theme.palette.common.black,
-                    }}
-                  >
-                    <EditIcon /> Add
                   </Button>
                 </>
               ) : (
@@ -859,7 +867,6 @@ export const Students: InstructorLayoutPage = ({ /* selectedSemester, */ selecte
               </Stack>
             )}
           </Box>
-          <Divider />
         </Box>
 
         <Box
@@ -870,10 +877,17 @@ export const Students: InstructorLayoutPage = ({ /* selectedSemester, */ selecte
             overflowX: "hidden",
           }}
         >
-          <TableContainer sx={{ overflowY: "hidden" }} component={Paper}>
+          <TableContainer
+            sx={{
+              overflowY: "hidden",
+              backgroundColor:
+                theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookMainBlack : DESIGN_SYSTEM_COLORS.gray50,
+            }}
+            component={Paper}
+          >
             <Table stickyHeader>
               <TableHead>
-                <TableRow>
+                <TableRow sx={{ backgroundColor: "red" }}>
                   {!isMovil && <TableCell sx={{ px: "0px", width: "70px" }}>{""}</TableCell>}
                   {keys.map((key: string, keyIndex: number) => (
                     <TableCell
@@ -1024,9 +1038,12 @@ export const Students: InstructorLayoutPage = ({ /* selectedSemester, */ selecte
                         ) : (
                           <>
                             {["firstName", "lastName"].includes(colmn) ? (
-                              <LinkNext passHref href={isMovil ? "#" : "/instructors/dashboard/" + row.username}>
-                                <Link onClick={() => openThisProfile(row)}>{row[colmn]}</Link>
-                              </LinkNext>
+                              <Typography
+                                onClick={() => onSelectUserHandler(row.username, "DASHBOARD")}
+                                sx={{ color: DESIGN_SYSTEM_COLORS.primary800, cursor: "pointer" }}
+                              >
+                                {row[colmn]}
+                              </Typography>
                             ) : (
                               <>{row[colmn]}</>
                             )}
@@ -1161,9 +1178,3 @@ export const Students: InstructorLayoutPage = ({ /* selectedSemester, */ selecte
     </>
   );
 };
-
-// This wrapper expose the shared variables from filters
-const PageWrapper = () => {
-  return <InstructorsLayout>{props => <Students {...props} />}</InstructorsLayout>;
-};
-export default PageWrapper;

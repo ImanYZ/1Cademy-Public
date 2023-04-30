@@ -840,7 +840,6 @@ export const Dashboard = ({ user, currentSemester }: DashboardProps) => {
           )}
         </Paper>
       </Box>
-
       {/* box plot */}
       <Paper
         sx={{
@@ -962,7 +961,6 @@ export const Dashboard = ({ user, currentSemester }: DashboardProps) => {
         </Box>
         {!isMovil && !isLoading && <BoxLegend role={user.role} />}
       </Paper>
-
       {/* Sankey Chart */}
       {sankeyData.length && (
         <Paper
@@ -995,7 +993,6 @@ export const Dashboard = ({ user, currentSemester }: DashboardProps) => {
           )}
         </Paper>
       )}
-
       <Box
         sx={{
           width: "100%",
