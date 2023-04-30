@@ -93,4 +93,5 @@ export type SimpleQuestionNode = {
   correct: boolean;
   isStudied: boolean;
   wrong: boolean;
+  locked: boolean;
 };

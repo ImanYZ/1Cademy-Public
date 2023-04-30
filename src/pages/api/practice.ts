@@ -110,6 +110,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       correct: userNodeData.correct,
       isStudied: userNodeData.isStudied,
       wrong: userNodeData.wrong,
+      locked: Boolean(questionNodeData.locked),
     };
     const currentTimestamp = Timestamp.fromDate(new Date());
     // This is required to only check answers after this timestamp in do_check_answer().

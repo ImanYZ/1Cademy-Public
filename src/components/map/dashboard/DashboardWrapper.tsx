@@ -219,7 +219,13 @@ export const DashboardWrapper = ({ user, onClose, sx }: DashboardWrapperProps) =
           <>
             {selectToolbarView === "DASHBOARD" && <Dashboard user={user} currentSemester={currentSemester} />}
             {selectToolbarView === "PRACTICE" && (
-              <PracticeTool user={user} currentSemester={currentSemester} onClose={onClose} />
+              <PracticeTool
+                user={user}
+                currentSemester={currentSemester}
+                onClose={onClose}
+                onCorrectNode={(qq: any) => console.log("dfdfd", qq)}
+                onWrongNode={(qq: any) => console.log("sdfsd", qq)}
+              />
             )}
             {selectToolbarView === "SETTINGS" && <DashboardSettings currentSemester={currentSemester} />}
           </>
