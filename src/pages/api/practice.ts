@@ -99,7 +99,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
     const userNodeData = userNode.data() as IUserNode;
     const theNode = {
       id: questionNode.id,
-      choices: (questionNodeData.choices || []).map((c: any) => ({ choice: c.choice })),
+      choices: questionNodeData.choices || [],
       tags: questionNodeData.tags,
       content: questionNodeData.content,
       corrects: questionNodeData.corrects,

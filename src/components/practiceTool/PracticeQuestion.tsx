@@ -4,7 +4,7 @@ import CloseFullscreenIcon from "@mui/icons-material/CloseFullscreen";
 import DoneIcon from "@mui/icons-material/Done";
 import LeaderboardIcon from "@mui/icons-material/Leaderboard";
 import LocalOfferIcon from "@mui/icons-material/LocalOffer";
-import { Button, ClickAwayListener, Divider, IconButton, ListItem, Tooltip, Typography } from "@mui/material";
+import { Button, ClickAwayListener, Divider, IconButton, ListItem, Skeleton, Tooltip, Typography } from "@mui/material";
 import { Box, Stack } from "@mui/system";
 import React, { ReactNode, useCallback, useEffect, useMemo, useState } from "react";
 
@@ -83,22 +83,28 @@ const NodeQuestion = ({
                     theme.palette.mode === "dark" ? theme.palette.common.notebookG600 : theme.palette.common.gray50
                   }`,
                 boxShadow: "0px 1px 2px rgba(0, 0, 0, 0.06), 0px 1px 3px rgba(0, 0, 0, 0.1)",
-                cursor: "pointer",
                 ":hover": {
-                  background: theme =>
-                    theme.palette.mode === "dark" ? theme.palette.common.notebookG500 : theme.palette.common.gray200,
-                  border: theme =>
-                    `solid 1px ${
-                      theme.palette.mode === "dark" ? theme.palette.common.notebookG300 : theme.palette.common.gray300
-                    }`,
-                  "& .check-box": {
-                    backgroundColor: theme =>
-                      theme.palette.mode === "dark" ? theme.palette.common.notebookG600 : theme.palette.common.gray100,
+                  ...(!submitAnswer && {
+                    cursor: "pointer",
+                    background: theme =>
+                      theme.palette.mode === "dark" ? theme.palette.common.notebookG500 : theme.palette.common.gray200,
                     border: theme =>
                       `solid 1px ${
-                        theme.palette.mode === "dark" ? theme.palette.common.notebookG400 : theme.palette.common.gray300
+                        theme.palette.mode === "dark" ? theme.palette.common.notebookG300 : theme.palette.common.gray300
                       }`,
-                  },
+                    "& .check-box": {
+                      backgroundColor: theme =>
+                        theme.palette.mode === "dark"
+                          ? theme.palette.common.notebookG600
+                          : theme.palette.common.gray100,
+                      border: theme =>
+                        `solid 1px ${
+                          theme.palette.mode === "dark"
+                            ? theme.palette.common.notebookG400
+                            : theme.palette.common.gray300
+                        }`,
+                    },
+                  }),
                 },
                 ...(selectedAnswers[idx] && {
                   background: theme =>
@@ -164,6 +170,8 @@ const NodeQuestion = ({
               <Box
                 className="check-box"
                 sx={{
+                  minWidth: "24px",
+                  minHeight: "24px",
                   width: "24px",
                   height: "24px",
                   borderRadius: "8px",
@@ -209,7 +217,7 @@ const NodeQuestion = ({
         <Stack direction={"row"} alignItems="center" spacing={"10px"} sx={{ position: "relative" }}>
           <LocalOfferIcon sx={{ mr: "10px", color: theme => theme.palette.common.notebookO100 }} />
           <Typography>{node.tags[node.tags.length - 1] ?? ""} </Typography>
-          {node.tags.length > 1 && (
+          {otherTags.length > 0 && (
             <Typography
               onClick={() => setDisplayTags(true)}
               sx={{ ml: "8px", color: theme => theme.palette.common.primary800, cursor: "pointer" }}
@@ -307,6 +315,8 @@ type PracticeQuestionProps = {
     corrects: number,
     locked: boolean
   ) => void;
+  onSaveAnswer: (answers: boolean[]) => Promise<void>;
+  onGetNextQuestion: () => Promise<void>;
 };
 export const PracticeQuestion = ({
   question,
@@ -315,41 +325,35 @@ export const PracticeQuestion = ({
   leaderboard,
   userStatus,
   onViewNodeOnNodeBook,
+  onCorrectNode,
+  onWrongNode,
+  onSaveAnswer,
+  onGetNextQuestion,
 }: PracticeQuestionProps) => {
-  // const db = getFirestore();
-  // const [questions, setQuestions] = useState<Node[]>([]);
-
-  // const [selectedQuestion, setSelectedQuestion] = useState<{ question: Node; idx: number } | null>(null);
   const [selectedAnswers, setSelectedAnswers] = useState<boolean[]>([]);
   const [displaySidebar, setDisplaySidebar] = useState<"LEADERBOARD" | "USER_STATUS" | null>(null);
   const [submitAnswer, setSubmitAnswer] = useState(false);
-
-  // // call first question
-  // useEffect(() => {
-  //   console.log("getPracticeQuestion");
-  //   const getPracticeQuestion = async () => {
-  //     const res: any = await Post("/practice", { tagId: courseId });
-  //     if (res?.done) setPracticeIsCompleted(true);
-
-  //     const { question, flashcardId } = res as { question: SimpleQuestionNode; flashcardId: string };
-  //     console.log("------>", { question, flashcardId });
-  //   };
-  //   getPracticeQuestion();
-  // }, [courseId]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (!question) return;
     setSelectedAnswers(new Array(question.choices.length).fill(false));
+    setLoading(false);
   }, [question]);
 
-  const onSubmitAnswer = useCallback(() => {}, []);
-
-  const onNextQuestion = useCallback(() => {
-    console.log("onNextQuestion");
+  const onSubmitAnswer = useCallback(() => {
+    console.log("onSubmitAnswer");
     setSubmitAnswer(true);
-    // TODO call anser endpoint
+    onSaveAnswer(selectedAnswers);
+  }, [onSaveAnswer, selectedAnswers]);
+
+  const onNextQuestion = useCallback(async () => {
+    console.log("onNextQuestion");
+    setLoading(true);
     setSubmitAnswer(false);
-  }, []);
+    await onGetNextQuestion();
+    setLoading(false);
+  }, [onGetNextQuestion]);
 
   const onSelectAnswer = (answerIdx: number) => {
     setSelectedAnswers(prev => prev.map((c, i) => (answerIdx === i ? !c : c)));
@@ -360,7 +364,7 @@ export const PracticeQuestion = ({
       sx={{
         p: "45px 64px",
         width: "100%",
-        height: "100%",
+        minHeight: "100%",
         position: "relative",
       }}
     >
@@ -428,56 +432,79 @@ export const PracticeQuestion = ({
                 `24 days are remaining to the end of the semester.`,
               ]}
             />
-            <NodeQuestion
-              node={question}
-              selectedAnswers={selectedAnswers}
-              setSelectedIdxAnswer={onSelectAnswer}
-              submitAnswer={submitAnswer}
-            />
-
-            <Box sx={{ display: "flex", justifyContent: "space-between", mt: "32px" }}>
-              <Button
-                variant="contained"
-                onClick={() => onViewNodeOnNodeBook(question.id)}
+            {loading && (
+              <Box
                 sx={{
-                  borderRadius: "26px",
-                  minWidth: "180px",
-                  fontSize: "16px",
-                  backgroundColor: theme =>
-                    theme.palette.mode === "dark" ? theme.palette.common.baseWhite : theme.palette.common.baseWhite,
-                  color: theme =>
-                    theme.palette.mode === "dark" ? theme.palette.common.gray700 : theme.palette.common.gray700,
-                  ":hover": {
+                  p: "32px",
+                  border: "2px solid #FD7373",
+                  borderRadius: "8px",
+                  background: theme =>
+                    theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookG900 : DESIGN_SYSTEM_COLORS.gray100,
+                }}
+              >
+                <Skeleton variant="rectangular" height={50} width={350} sx={{ mb: "20px" }} />
+                <Skeleton variant="rectangular" height={80} sx={{ mb: "10px" }} />
+                <Skeleton variant="rectangular" height={80} sx={{ mb: "10px" }} />
+                <Skeleton variant="rectangular" height={80} sx={{ mb: "10px" }} />
+                <Skeleton variant="rectangular" height={80} />
+              </Box>
+            )}
+            {!loading && (
+              <NodeQuestion
+                node={question}
+                selectedAnswers={selectedAnswers}
+                setSelectedIdxAnswer={onSelectAnswer}
+                submitAnswer={submitAnswer}
+                onCorrectNode={onCorrectNode}
+                onWrongNode={onWrongNode}
+              />
+            )}
+
+            {!loading && (
+              <Box sx={{ display: "flex", justifyContent: "space-between", mt: "32px" }}>
+                <Button
+                  variant="contained"
+                  onClick={() => onViewNodeOnNodeBook(question.id)}
+                  sx={{
+                    borderRadius: "26px",
+                    minWidth: "180px",
+                    fontSize: "16px",
                     backgroundColor: theme =>
                       theme.palette.mode === "dark" ? theme.palette.common.baseWhite : theme.palette.common.baseWhite,
                     color: theme =>
                       theme.palette.mode === "dark" ? theme.palette.common.gray700 : theme.palette.common.gray700,
-                  },
-                }}
-              >
-                View Node Tree
-              </Button>
-              {!submitAnswer && (
-                <Button
-                  variant="contained"
-                  onClick={onSubmitAnswer}
-                  disabled={!selectedAnswers.some(c => c)}
-                  sx={{ borderRadius: "26px", minWidth: "180px", fontSize: "16px" }}
+                    ":hover": {
+                      backgroundColor: theme =>
+                        theme.palette.mode === "dark" ? theme.palette.common.baseWhite : theme.palette.common.baseWhite,
+                      color: theme =>
+                        theme.palette.mode === "dark" ? theme.palette.common.gray700 : theme.palette.common.gray700,
+                    },
+                  }}
                 >
-                  Submit
+                  View Node Tree
                 </Button>
-              )}
-              {submitAnswer && (
-                <Button
-                  variant="contained"
-                  onClick={onNextQuestion}
-                  disabled={!selectedAnswers.length}
-                  sx={{ borderRadius: "26px", minWidth: "180px", fontSize: "16px" }}
-                >
-                  Next
-                </Button>
-              )}
-            </Box>
+                {!submitAnswer && (
+                  <Button
+                    variant="contained"
+                    onClick={onSubmitAnswer}
+                    disabled={!selectedAnswers.some(c => c)}
+                    sx={{ borderRadius: "26px", minWidth: "180px", fontSize: "16px" }}
+                  >
+                    Submit
+                  </Button>
+                )}
+                {submitAnswer && (
+                  <Button
+                    variant="contained"
+                    onClick={onNextQuestion}
+                    disabled={!selectedAnswers.length}
+                    sx={{ borderRadius: "26px", minWidth: "180px", fontSize: "16px" }}
+                  >
+                    Next
+                  </Button>
+                )}
+              </Box>
+            )}
           </Box>
 
           {/* leaderBoard */}
