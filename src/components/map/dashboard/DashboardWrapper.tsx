@@ -88,12 +88,14 @@ export const DashboardWrapper = ({ user, onClose, sx }: DashboardWrapperProps) =
           const docChanges = snapshot.docChanges();
           const intructor = docChanges[0].doc.data() as Instructor;
           setInstructor(intructor);
-          const allCourses = getCoursesByInstructor(intructor);
-          const semestersIds = intructor.courses.map(course => course.tagId);
 
+          const allCourses = getCoursesByInstructor(intructor);
+          console.log({ allCourses });
+          const semestersIds = intructor.courses.map(course => course.tagId);
+          console.log({ semestersIds });
           const semesters = await getSemesterByIds(db, semestersIds);
           semesters.sort((a, b) => (b.title > a.title ? 1 : -1));
-
+          console.log({ semesters });
           setAllSemesters(semesters);
           setAllCourses(allCourses);
         },
@@ -172,7 +174,7 @@ export const DashboardWrapper = ({ user, onClose, sx }: DashboardWrapperProps) =
     if (!instructor) return;
     if (!selectedCourse) return;
     const current = selectCourse(selectedCourse, instructor);
-
+    console.log({ current });
     setCurrentSemester(current ?? null);
   }, [instructor, selectedCourse]);
 
@@ -189,7 +191,7 @@ export const DashboardWrapper = ({ user, onClose, sx }: DashboardWrapperProps) =
       }}
     >
       <DashboradToolbar
-        courses={currentSemester ? allCourses[currentSemester.title] : []}
+        courses={currentSemester ? allCourses[currentSemester.tagId] : []}
         selectedCourse={selectedCourse}
         onChangeSelectedCourseHandler={setSelectedCourse}
         semesters={allSemesters}
@@ -231,9 +233,10 @@ export const getCourseTitleFromSemester = (semester: ISemester) => {
 };
 
 const getCoursesByInstructor = (instructor: Instructor): CoursesResult => {
+  console.log({ instructor });
   return instructor.courses.reduce((acu: CoursesResult, cur) => {
     const tmpValues = acu[cur.title] ?? [];
-    return { ...acu, [cur.title]: [...tmpValues, `${cur.cTitle} ${cur.pTitle || "- " + cur.uTitle}`] };
+    return { ...acu, [cur.tagId]: [...tmpValues, `${cur.cTitle} ${cur.pTitle || "@ " + cur.uTitle}`] };
   }, {});
 };
 
@@ -252,5 +255,5 @@ const getSemesterByIds = async (db: Firestore, semesterIds: string[]) => {
   return allSemesters;
 };
 const selectCourse = (description: string, instructor: Instructor): CourseTag | undefined => {
-  return instructor.courses.find(course => `${course.cTitle} ${course.pTitle || "- " + course.uTitle}` === description);
+  return instructor.courses.find(course => `${course.cTitle} ${course.pTitle || "@ " + course.uTitle}` === description);
 };
