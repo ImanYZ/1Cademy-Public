@@ -24,6 +24,7 @@ import { NoDataMessage } from "../../instructors/NoDataMessage";
 import { PracticeTool } from "../../practiceTool/PracticeTool";
 import { DashboradToolbar } from "../Dashobard/DashboradToolbar";
 import { Dashboard } from "./Dashboard";
+import { DashboardSettings } from "./DashboardSettings";
 // import { Semester } from "../../instructorsTypes";
 // import { ICourseTag } from "../../types/ICourse";
 // import { CoursesResult } from "../layouts/StudentsLayout";
@@ -34,7 +35,7 @@ type DashboardWrapperProps = {
   sx?: SxProps<Theme>;
 };
 
-export type ToolbarView = "DASHBOARD" | "PRACTICE";
+export type ToolbarView = "DASHBOARD" | "PRACTICE" | "SETTINGS";
 
 export const DashboardWrapper = ({ user, onClose, sx }: DashboardWrapperProps) => {
   const db = getFirestore();
@@ -215,6 +216,7 @@ export const DashboardWrapper = ({ user, onClose, sx }: DashboardWrapperProps) =
             {selectToolbarView === "PRACTICE" && (
               <PracticeTool user={user} currentSemester={currentSemester} onClose={onClose} />
             )}
+            {selectToolbarView === "SETTINGS" && <DashboardSettings currentSemester={currentSemester} />}
           </>
         ) : (
           <NoDataMessage message="No data in this semester" />
@@ -224,7 +226,7 @@ export const DashboardWrapper = ({ user, onClose, sx }: DashboardWrapperProps) =
   );
 };
 
-export const getCourseTitle = (semester: ISemester) => {
+export const getCourseTitleFromSemester = (semester: ISemester) => {
   return `${semester.cTitle} ${semester.pTitle || "- " + semester.uTitle}`;
 };
 

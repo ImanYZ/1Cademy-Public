@@ -1,6 +1,7 @@
 import ArrowForwardIosRoundedIcon from "@mui/icons-material/ArrowForwardIosRounded";
 import HomeRoundedIcon from "@mui/icons-material/HomeRounded";
 import InsightsRoundedIcon from "@mui/icons-material/InsightsRounded";
+import SettingsRoundedIcon from "@mui/icons-material/SettingsRounded";
 import { Box, Button, ButtonBase, Divider, Paper, Stack, Typography, useTheme } from "@mui/material";
 import Image from "next/image";
 import React, { ReactNode } from "react";
@@ -75,6 +76,7 @@ export const DashboradToolbar = ({
             renderAsAvatar={true}
             contained={false}
             name={`${user.fName} ${user.lName}`}
+            sx={{ width: "38px", height: "38px" }}
           />
           <Box>
             <Typography p="0">
@@ -99,13 +101,26 @@ export const DashboradToolbar = ({
             IconButton={<HomeRoundedIcon sx={{ color: DESIGN_SYSTEM_COLORS.orange400 }} />}
             onChangeToolbarView={() => onChangeToolbarView("DASHBOARD")}
           />
-          <DashboardToolbarViewButton
-            name="Practise"
-            view="PRACTICE"
-            active={view === "PRACTICE"}
-            IconButton={<InsightsRoundedIcon sx={{ color: DESIGN_SYSTEM_COLORS.orange400 }} />}
-            onChangeToolbarView={() => onChangeToolbarView("PRACTICE")}
-          />
+          {user.role === "STUDENT" && (
+            <>
+              <DashboardToolbarViewButton
+                name="Practise"
+                view="PRACTICE"
+                active={view === "PRACTICE"}
+                IconButton={<InsightsRoundedIcon sx={{ color: DESIGN_SYSTEM_COLORS.orange400 }} />}
+                onChangeToolbarView={() => onChangeToolbarView("PRACTICE")}
+              />
+            </>
+          )}
+          {user.role === "INSTRUCTOR" && (
+            <DashboardToolbarViewButton
+              name="Settings"
+              view="SETTINGS"
+              active={view === "SETTINGS"}
+              IconButton={<SettingsRoundedIcon sx={{ color: DESIGN_SYSTEM_COLORS.orange400 }} />}
+              onChangeToolbarView={() => onChangeToolbarView("SETTINGS")}
+            />
+          )}
         </Box>
         <Divider />
 
