@@ -42,7 +42,13 @@ const data: any[] = [
     aImgUrl:
       "https://firebasestorage.googleapis.com/v0/b/onecademy-1.appspot.com/o/ProfilePictures%2F1man_Thu%2C%2006%20Feb%202020%2016%3A26%3A40%20GMT.png?alt=media&token=94459dbb-81f9-462a-83ef-62d1129f5851",
     changedAt: new Date(),
-    parents: [],
+    parents: [
+      {
+        node: "FJfzAX7zbgQS8jU5XcEk",
+        title: "Data Science & something",
+        type: "Concept",
+      },
+    ],
     maxVersionRating: 43.96,
     deleted: false,
     contribNames: ["TirdadBarghi", "Tirdad", "1man"],

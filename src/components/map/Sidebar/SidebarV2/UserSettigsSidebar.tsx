@@ -1859,9 +1859,10 @@ const UserSettigsSidebar = ({
               sx={{
                 width: "20px",
                 height: "20px",
-                fontSize: "16px",
+                fontSize: "12px",
               }}
               renderAsAvatar={false}
+              contained={false}
             />
             <span>{user.deInstit}</span>
           </div>

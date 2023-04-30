@@ -764,7 +764,7 @@ MainSidebarProps) => {
                     fullWidth
                   />
                   {/* <Box sx={{ position: "absolute" }}>
-                    
+
                   </Box> */}
                   <Box
                     onClick={onOpenUserInfo}
@@ -875,18 +875,19 @@ MainSidebarProps) => {
         <Stack
           spacing={"10px"}
           direction="column"
+          alignItems={isHovered ? "flex-start" : "center"}
           sx={{
             paddingBottom: "20px",
+
             position: "relative",
             height: "100%",
             width: "inherit",
           }}
         >
           {displayLargeToolbar && (
-            <>
+            <Box sx={{ px: "16px", pt: "8px", width: "100%" }}>
               <Button
                 sx={{
-                  mx: "16px",
                   display: "flex",
                   justifyContent: "space-between",
                   ":hover": {
@@ -894,6 +895,7 @@ MainSidebarProps) => {
                   },
                 }}
                 onClick={openLeaderboardTypes}
+                fullWidth
               >
                 <Box
                   sx={{
@@ -915,7 +917,7 @@ MainSidebarProps) => {
                     width: "86%",
                     marginX: "auto",
                     left: "7%",
-                    top: "25px",
+                    top: "48px",
                     height: "173px",
                   }}
                   choices={choices}
@@ -923,7 +925,7 @@ MainSidebarProps) => {
                   comLeaderboardType={leaderBoardType ? leaderBoardType : "Leaderboard"}
                 />
               )}
-            </>
+            </Box>
           )}
           {user?.tag && leaderBoardType && (
             <UsersStatusList
@@ -976,6 +978,7 @@ MainSidebarProps) => {
     chosenTags,
     allTags,
     setAllTags,
+    isHovered,
     openLeaderboardTypes,
     leaderBoardType,
     leaderboardTypeOpen,
