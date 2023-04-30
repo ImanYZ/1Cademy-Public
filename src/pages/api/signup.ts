@@ -322,6 +322,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
           createdAt: new Date(),
           updatedAt: new Date(),
         } as INotebook);
+        [batch, writeCounts] = await checkRestartBatchWriteCounts(batch, writeCounts);
       }
 
       const userNodeQuery = db

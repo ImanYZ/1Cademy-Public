@@ -70,7 +70,7 @@ const Modal = ({ onClick, ...props }: ModalProps) => {
 
   return !props.noBackground ? (
     <div id="Modal">
-      <div id="ModalBackground" onClick={closeModal}></div>
+      {/* <div id="ModalBackground" onClick={closeModal}></div> */}
       <ModalBody />
     </div>
   ) : (
