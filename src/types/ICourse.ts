@@ -67,6 +67,7 @@ export type ISemester = {
   isDailyPracticeRequired: boolean;
   isCastingVotesRequired: boolean;
   isGettingVotesRequired: boolean;
+  root: string;
   deleted: boolean;
   students: ISemesterStudent[];
   createdAt: Timestamp;

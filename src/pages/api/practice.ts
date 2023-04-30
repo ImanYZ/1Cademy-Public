@@ -9,6 +9,7 @@ import { Timestamp } from "firebase-admin/firestore";
 import { getOrCreateUserNode, isNodePracticePresentable } from "src/utils/course-helpers";
 import { IUserNode } from "src/types/IUserNode";
 import fbAuth from "src/middlewares/fbAuth";
+import { ISemester } from "src/types/ICourse";
 
 type IPracticeParams = {
   tagId: string;
@@ -27,6 +28,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
     if (!semesterDoc.exists) {
       throw new Error(`invalid request`);
     }
+    const semester = semesterDoc.data() as ISemester;
 
     const bfs = async (_nodeIds: string[]): Promise<IPractice | null> => {
       const nodeIdsChunk = arrayToChunks(_nodeIds, 10);
@@ -67,7 +69,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
     });
 
     if (practice === null) {
-      practice = await bfs([payload.tagId]);
+      practice = await bfs([semester.root]);
     }
 
     if (practice === null) {

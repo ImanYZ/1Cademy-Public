@@ -3,14 +3,14 @@ import { NextApiRequest, NextApiResponse } from "next";
 import { db } from "../../lib/firestoreServer/admin";
 import { INode } from "src/types/INode";
 import { IUser } from "src/types/IUser";
-import { arrayToChunks, getUserNode } from "src/utils";
 import { IPractice } from "src/types/IPractice";
 import { Timestamp } from "firebase-admin/firestore";
-import { getOrCreateUserNode, isNodePracticePresentable } from "src/utils/course-helpers";
+import { getOrCreateUserNode, updateStatsOnPractice } from "src/utils/course-helpers";
 import { IUserNode } from "src/types/IUserNode";
 import fbAuth from "src/middlewares/fbAuth";
 import moment from "moment";
-import { checkRestartBatchWriteCounts, commitBatch } from "@/lib/firestoreServer/admin-exp";
+import { checkRestartBatchWriteCounts, commitBatch } from "@/lib/firestoreServer/admin";
+import { detach } from "src/utils/helpers";
 
 export type ICheckAnswerRequestParams = {
   nodeId: string;
@@ -37,12 +37,12 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
     const practiceRef = db.collection("practice").doc(payload.flashcardId);
     const practice = practiceDoc.data() as IPractice;
 
-    if (practice.questionNodes.includes(payload.nodeId)) {
+    if (!practice.questionNodes.includes(payload.nodeId)) {
       throw new Error(`invalid request`);
     }
 
-    const courseDoc = await db.collection("courses").doc(practice.tagId).get();
-    if (!courseDoc.exists) {
+    const semesterDoc = await db.collection("semesters").doc(practice.tagId).get();
+    if (!semesterDoc.exists) {
       throw new Error(`invalid request`);
     }
 
@@ -141,6 +141,16 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
     });
 
     await commitBatch(batch);
+
+    // TODO: move these to queue
+    await detach(async () => {
+      if (payload.postpone) return;
+      await updateStatsOnPractice({
+        correct: q === 5,
+        tagIds: nodeData.tagIds,
+        uname: userData.uname,
+      });
+    });
 
     return res.json({
       flashcardId: practiceDoc.id,

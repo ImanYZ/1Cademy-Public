@@ -18,6 +18,55 @@ import moment from "moment";
 import { INodeType } from "src/types/INodeType";
 import { IPractice } from "src/types/IPractice";
 import { IUserNode } from "src/types/IUserNode";
+import { INode } from "src/types/INode";
+import { createPractice } from "./version-helpers";
+
+export const createPracticeForSemesterStudents = async (
+  semesterId: string,
+  studentUnames: string[],
+  batch: WriteBatch,
+  writeCounts: number
+): Promise<[WriteBatch, number]> => {
+  const semesterDoc = await db.collection("semesters").doc(semesterId).get();
+  const bfs = async (_nodeIds: string[]) => {
+    const nodeIdsChunk = arrayToChunks(_nodeIds, 10);
+    const cRelationNodes: string[] = [];
+    for (const nodeIds of nodeIdsChunk) {
+      const nodes = await db.collection("nodes").where("__name__", "in", nodeIds).get();
+      for (const node of nodes.docs) {
+        const nodeData = node.data() as INode;
+        for (const child of nodeData.children) {
+          if ((nodeData.nodeType === "Concept" || nodeData.nodeType === "Relation") && child.type === "Question") {
+            // looking for practice
+            [batch, writeCounts] = await createPractice({
+              unames: studentUnames,
+              tagIds: [semesterId],
+              nodeId: child.node,
+              parentId: node.id,
+              currentTimestamp: Timestamp.now(),
+              writeCounts,
+              batch,
+            });
+            cRelationNodes.push(child.node);
+          }
+        }
+      }
+    }
+
+    if (!cRelationNodes.length) {
+      return;
+    }
+
+    bfs(cRelationNodes);
+  };
+
+  const semester = semesterDoc.data() as ISemester;
+  if (semester.root) {
+    await bfs([semester.root]);
+  }
+
+  return [batch, writeCounts];
+};
 
 export const createOrRestoreStatDocs = async (
   semesterId: string,
@@ -967,19 +1016,139 @@ export const updateStatsOnProposal = async ({
   });
 };
 
-// type IUpdateStatsOnPractice = {
-//   tagIds: string[];
-//   nodeId: string;
-//   parentId: INodeType;
-//   correct: boolean;
-// };
-// export const updateStatsOnPractice = async ({
-//   tagIds,
-//   nodeId,
-//   parentId,
-//   correct
-// }: IUpdateStatsOnPractice) => {
-//   await db.runTransaction(async t => {
-//     const semesters = await getSemestersByIds(tagIds);
-//   });
-// }
+type IUpdateStatsOnPractice = {
+  tagIds: string[];
+  uname: string;
+  correct: boolean;
+};
+export const updateStatsOnPractice = async ({ tagIds, correct, uname }: IUpdateStatsOnPractice) => {
+  const tWriteOperations: TWriteOperation[] = [];
+
+  await db.runTransaction(async t => {
+    const semesters = await getSemestersByIds(tagIds);
+    const statDate = moment().format("YYYY-MM-DD");
+
+    for (const semesterId in semesters) {
+      const semester = semesters[semesterId];
+
+      // creating missing stat documents
+      let batch = db.batch();
+      let writeCounts = 0;
+      for (const student of semester.students) {
+        [batch, writeCounts] = await createOrRestoreStatDocs(semesterId, student.uname, batch, writeCounts);
+      }
+      await batch.commit();
+
+      const isPractitionerStudent = semester.students.some(student => student.uname === uname);
+      // if practitioner is not student then we don't need do to processing
+      if (!isPractitionerStudent) {
+        continue;
+      }
+
+      const chapterIds = getChapterIdsByTagIds(tagIds, semester.syllabus);
+
+      // per chapter stats
+      const studentStats = (await convertToTGet(
+        db.collection("semesterStudentStats").where("tagId", "==", semesterId).where("uname", "==", uname),
+        t
+      )) as FirebaseFirestore.QuerySnapshot<FirebaseFirestore.DocumentData>;
+      // aggregated stats
+      const studentVoteStats = (await convertToTGet(
+        db.collection("semesterStudentVoteStats").where("tagId", "==", semesterId).where("uname", "==", uname),
+        t
+      )) as FirebaseFirestore.QuerySnapshot<FirebaseFirestore.DocumentData>;
+
+      const studentStatRef = db.collection("semesterStudentStats").doc(studentStats.docs[0].id);
+      const studentStat = studentStats.docs[0].data() as ISemesterStudentStat;
+      const studentVoteStatRef = db.collection("semesterStudentVoteStats").doc(studentVoteStats.docs[0].id);
+      const studentVoteStat = studentVoteStats.docs[0].data() as ISemesterStudentVoteStat;
+
+      if (chapterIds.length) {
+        for (const chapterId of chapterIds) {
+          const dayIdx = getStatDayIdx(statDate, studentStat, semester);
+          const dayStat = studentStat.days[dayIdx];
+          const chapterIdx = getStatDayChapterIdx(dayStat, chapterId, semester);
+          if (correct) {
+            studentStat.days[dayIdx].chapters[chapterIdx].correctPractices += 1;
+          }
+          studentStat.days[dayIdx].chapters[chapterIdx].totalPractices += 1;
+        }
+        tWriteOperations.push({
+          objRef: studentStatRef,
+          operationType: "update",
+          data: {
+            days: studentStat.days,
+          },
+        });
+      }
+
+      const dayVIdx = getStatVoteDayIdx(statDate, studentVoteStat);
+      const dayVoteStat = studentVoteStat.days[dayVIdx];
+
+      if (correct) {
+        if (!dayVoteStat.correctPractices) {
+          dayVoteStat.correctPractices = 0;
+        }
+        if (!studentVoteStat.correctPractices) {
+          studentVoteStat.correctPractices = 0;
+        }
+
+        dayVoteStat.correctPractices += 1;
+        studentVoteStat.correctPractices += 1;
+      }
+
+      if (!dayVoteStat.totalPractices) {
+        dayVoteStat.totalPractices = 0;
+      }
+      if (!studentVoteStat.totalPractices) {
+        studentVoteStat.totalPractices = 0;
+      }
+      dayVoteStat.totalPractices += 1;
+      studentVoteStat.totalPractices += 1;
+
+      studentVoteStat.updatedAt = Timestamp.now();
+
+      tWriteOperations.push({
+        objRef: studentVoteStatRef,
+        operationType: "update",
+        data: studentVoteStat,
+      });
+    }
+
+    const _tWriteOperations = tWriteOperations.splice(0, MAX_TRANSACTION_WRITES - 1);
+    for (const operation of _tWriteOperations) {
+      const { objRef, data, operationType } = operation;
+      switch (operationType) {
+        case "update":
+          t.update(objRef, data);
+          break;
+        case "set":
+          t.set(objRef, data);
+          break;
+        case "delete":
+          t.delete(objRef);
+          break;
+      }
+    }
+  });
+
+  const chunkedArray = arrayToChunks(tWriteOperations);
+  for (const chunk of chunkedArray) {
+    await db.runTransaction(async t => {
+      for (const operation of chunk) {
+        const { objRef, data, operationType } = operation;
+        switch (operationType) {
+          case "update":
+            t.update(objRef, data);
+            break;
+          case "set":
+            t.set(objRef, data);
+            break;
+          case "delete":
+            t.delete(objRef);
+            break;
+        }
+      }
+    });
+  }
+};
