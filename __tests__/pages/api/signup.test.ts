@@ -43,6 +43,10 @@ describe("/signup", () => {
     new MockData([], "userNodes"),
     new MockData([], "userNodesLog"),
     new MockData([], "users"),
+    new MockData([], "notebooks"),
+    new MockData([], "practice"),
+    new MockData([], "practiceLog"),
+    new MockData([], "semesterStudentSankeys"),
     tagsData,
     creditsData,
   ];
@@ -265,6 +269,18 @@ describe("/signup as student", () => {
     semestersCollection,
     semesterStudentStatsCollection,
     semesterStudentVoteStatsCollection,
+    new MockData([], "bookmarkNums"),
+    new MockData([], "credits"),
+    new MockData([], "notificationNums"),
+    new MockData([], "pendingPropsNums"),
+    new MockData([], "reputations"),
+    new MockData([], "userNodes"),
+    new MockData([], "userNodesLog"),
+    new MockData([], "users"),
+    new MockData([], "notebooks"),
+    new MockData([], "practice"),
+    new MockData([], "practiceLog"),
+    new MockData([], "semesterStudentSankeys"),
   ];
   let semesterId: string = "";
 
