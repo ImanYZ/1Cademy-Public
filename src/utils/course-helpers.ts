@@ -35,6 +35,9 @@ export const createPracticeForSemesterStudents = async (
       const nodes = await db.collection("nodes").where("__name__", "in", nodeIds).get();
       for (const node of nodes.docs) {
         const nodeData = node.data() as INode;
+        if (!nodeData.tagIds.includes(semesterId)) {
+          continue;
+        }
         for (const child of nodeData.children) {
           if ((nodeData.nodeType === "Concept" || nodeData.nodeType === "Relation") && child.type === "Question") {
             // looking for practice
@@ -47,8 +50,8 @@ export const createPracticeForSemesterStudents = async (
               writeCounts,
               batch,
             });
-            cRelationNodes.push(child.node);
           }
+          cRelationNodes.push(child.node);
         }
       }
     }
@@ -57,7 +60,7 @@ export const createPracticeForSemesterStudents = async (
       return;
     }
 
-    bfs(cRelationNodes);
+    await bfs(cRelationNodes);
   };
 
   const semester = semesterDoc.data() as ISemester;
