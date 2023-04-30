@@ -4,6 +4,7 @@ import React, { useEffect, useState } from "react";
 import { CourseTag, SimpleQuestionNode } from "../../instructorsTypes";
 import { User } from "../../knowledgeTypes";
 import { Post } from "../../lib/mapApi";
+import { NodeType } from "../../types";
 import CourseDetail from "./CourseDetail";
 import Leaderboard from "./Leaderboard";
 import { PracticeQuestion } from "./PracticeQuestion";
@@ -13,9 +14,20 @@ type PracticeToolProps = {
   user: User;
   currentSemester: CourseTag;
   onClose: () => void;
+  onCorrectNode: (e: any, nodeId: string) => void;
+  onWrongNode: (
+    event: any,
+    nodeId: string,
+    nodeType: NodeType,
+    wrong: any,
+    correct: any,
+    wrongs: number,
+    corrects: number,
+    locked: boolean
+  ) => void;
 };
 
-export const PracticeTool = ({ user, currentSemester, onClose }: PracticeToolProps) => {
+export const PracticeTool = ({ user, currentSemester, onClose, onCorrectNode, onWrongNode }: PracticeToolProps) => {
   const [startPractice, setStartPractice] = useState(false);
   const [question, setQuestion] = useState<SimpleQuestionNode | null>(null);
   const [practiceIsCompleted, setPracticeIsCompleted] = useState(false);
@@ -24,7 +36,8 @@ export const PracticeTool = ({ user, currentSemester, onClose }: PracticeToolPro
     console.log("getPracticeQuestion");
     const getPracticeQuestion = async () => {
       const res: any = await Post("/practice", { tagId: currentSemester.tagId });
-      if (res?.done) setPracticeIsCompleted(true);
+      console.log("practice:res", { res });
+      if (res?.done) return setPracticeIsCompleted(true);
 
       const { question, flashcardId } = res as { question: SimpleQuestionNode; flashcardId: string };
       setQuestion(question);
@@ -50,6 +63,9 @@ export const PracticeTool = ({ user, currentSemester, onClose }: PracticeToolPro
         onClose={onClose}
         leaderboard={<Leaderboard semesterId={currentSemester.tagId} />}
         userStatus={<UserStatus semesterId={currentSemester.tagId} user={user} />}
+        onCorrectNode={onCorrectNode}
+        onWrongNode={onWrongNode}
+        onViewNodeOnNodeBook={(id: string) => console.log(id)}
       />
     </Box>
   ) : (

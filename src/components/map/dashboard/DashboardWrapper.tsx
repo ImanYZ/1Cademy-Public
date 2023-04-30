@@ -70,9 +70,10 @@ export const DashboardWrapper = ({ user, onClose, sx }: DashboardWrapperProps) =
         const semestersIds = semestersStudent.map(cur => cur.data.tagId);
         const semesters = await getSemesterByIds(db, semestersIds);
         const coursesResult = semesters.reduce((acu: CoursesResult, cur: Semester) => {
-          const tmpValues = acu[cur.title] ?? [];
-          return { ...acu, [cur.title]: [...tmpValues, `${cur.cTitle} ${cur.pTitle}`] };
+          const tmpValues = acu[cur.tagId] ?? [];
+          return { ...acu, [cur.tagId]: [...tmpValues, `${cur.cTitle} ${cur.pTitle}`] };
         }, {});
+        console.log({ coursesResult });
 
         // const semester = allSemesters.map(cur => cur.title);
         setAllSemesters(semesters);
@@ -247,7 +248,13 @@ export const DashboardWrapper = ({ user, onClose, sx }: DashboardWrapperProps) =
               <Dashboard user={selectedStudent ? selectedStudent : user} currentSemester={currentSemester} />
             )}
             {selectToolbarView === "PRACTICE" && (
-              <PracticeTool user={user} currentSemester={currentSemester} onClose={onClose} />
+              <PracticeTool
+                user={user}
+                currentSemester={currentSemester}
+                onClose={onClose}
+                onCorrectNode={(qq: any) => console.log("dfdfd", qq)}
+                onWrongNode={(qq: any) => console.log("sdfsd", qq)}
+              />
             )}
             {selectToolbarView === "SETTINGS" && <DashboardSettings currentSemester={currentSemester} />}
             {selectToolbarView === "STUDENTS" && (

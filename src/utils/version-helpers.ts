@@ -35,8 +35,9 @@ import { INodeType } from "src/types/INodeType";
 import { IComReputationUpdates } from "./reputations";
 import { IUserNodeVersion } from "src/types/IUserNodeVersion";
 import { getNodePageWithDomain } from "@/lib/utils/utils";
-import { getCourseIdsFromTagIds, getSemesterIdsFromTagIds } from "./course-helpers";
 import { IPractice } from "src/types/IPractice";
+import { getCourseIdsFromTagIds, getSemesterIdsFromTagIds } from "./course-helpers";
+import { ISemester } from "src/types/ICourse";
 
 export const comPointTypes = [
   "comPoints",
@@ -370,6 +371,7 @@ export const indexNodeChange = async (nodeId: string, nodeTitle: string, actionT
 
 export const createPractice = async ({
   batch,
+  unames,
   tagIds,
   nodeId,
   parentId,
@@ -379,18 +381,24 @@ export const createPractice = async ({
   tWriteOperations,
 }: any) => {
   let newBatch = batch;
-  let usersRef, usersDocs, practiceRef;
+  let practiceRef;
   if (!parentId) {
     return [newBatch, writeCounts];
   }
   const semesterIds = await getSemesterIdsFromTagIds(tagIds);
   for (const tagId of semesterIds) {
-    usersRef = db.collection("users").where("tagId", "==", tagId);
-    usersDocs = await convertToTGet(usersRef, t);
-    for (let userDoc of usersDocs.docs) {
+    const userIds: string[] = [];
+    if (unames && Array.isArray(unames)) {
+      userIds.push(...unames);
+    } else {
+      const semesterDoc = await db.collection("semesters").doc(tagId).get();
+      const semester = semesterDoc.data() as ISemester;
+      semester.students.forEach(student => userIds.push(student.uname));
+    }
+    for (const userId of userIds) {
       const practices = await db
         .collection("practice")
-        .where("user", "==", userDoc.id)
+        .where("user", "==", userId)
         .where("tagId", "==", tagId)
         .where("node", "==", parentId)
         .limit(1)
@@ -430,7 +438,7 @@ export const createPractice = async ({
         q: 0,
         tagId,
         questionNodes: [nodeId],
-        user: userDoc.id,
+        user: userId,
       } as IPractice;
       if (t) {
         tWriteOperations.push({

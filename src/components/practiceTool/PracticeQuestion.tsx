@@ -11,6 +11,7 @@ import React, { ReactNode, useCallback, useEffect, useMemo, useState } from "rea
 import { SimpleQuestionNode } from "../../instructorsTypes";
 import { DESIGN_SYSTEM_COLORS } from "../../lib/theme/colors";
 import shortenNumber from "../../lib/utils/shortenNumber";
+import { NodeType } from "../../types";
 import { CustomWrapperButton } from "../map/Buttons/Buttons";
 
 type NodeQuestionProps = {
@@ -18,9 +19,27 @@ type NodeQuestionProps = {
   selectedAnswers: boolean[];
   setSelectedIdxAnswer: (newValue: number) => void;
   submitAnswer: boolean;
+  onCorrectNode: (e: any, nodeId: string) => void;
+  onWrongNode: (
+    event: any,
+    nodeId: string,
+    nodeType: NodeType,
+    wrong: any,
+    correct: any,
+    wrongs: number,
+    corrects: number,
+    locked: boolean
+  ) => void;
 };
 
-const NodeQuestion = ({ node, selectedAnswers, setSelectedIdxAnswer, submitAnswer }: NodeQuestionProps) => {
+const NodeQuestion = ({
+  node,
+  selectedAnswers,
+  setSelectedIdxAnswer,
+  submitAnswer,
+  onCorrectNode,
+  onWrongNode,
+}: NodeQuestionProps) => {
   const [displayTags, setDisplayTags] = useState(false);
 
   const otherTags = useMemo(() => {
@@ -231,7 +250,10 @@ const NodeQuestion = ({ node, selectedAnswers, setSelectedIdxAnswer, submitAnswe
         <CustomWrapperButton id={`${node.id}-node-footer-votes`}>
           <Stack direction={"row"} alignItems={"center"}>
             <Tooltip title={"Vote to prevent further changes."} placement={"top"}>
-              <Button onClick={() => console.log("upvote")} sx={{ padding: "0px", color: "inherit", minWidth: "0px" }}>
+              <Button
+                onClick={e => onCorrectNode(e, node.id)}
+                sx={{ padding: "0px", color: "inherit", minWidth: "0px" }}
+              >
                 <Box sx={{ display: "flex", fontSize: "14px", alignItems: "center" }}>
                   <DoneIcon sx={{ fontSize: "18px" }} />
                   <span style={{ marginLeft: "2px" }}>{shortenNumber(node.corrects, 2, false)}</span>
@@ -249,7 +271,9 @@ const NodeQuestion = ({ node, selectedAnswers, setSelectedIdxAnswer, submitAnswe
             />
             <Tooltip title={"Vote to delete node."} placement={"top"}>
               <Button
-                onClick={() => console.log("downvote")}
+                onClick={e =>
+                  onWrongNode(e, node.id, "Question", node.wrong, node.correct, node.wrongs, node.corrects, node.locked)
+                }
                 sx={{ padding: "0px", color: "inherit", minWidth: "0px" }}
               >
                 <Box sx={{ display: "flex", fontSize: "14px", alignItems: "center" }}>
@@ -271,6 +295,18 @@ type PracticeQuestionProps = {
   onClose: () => void;
   leaderboard: ReactNode;
   userStatus: ReactNode;
+  onViewNodeOnNodeBook: (nodeId: string) => void;
+  onCorrectNode: (e: any, nodeId: string) => void;
+  onWrongNode: (
+    event: any,
+    nodeId: string,
+    nodeType: NodeType,
+    wrong: any,
+    correct: any,
+    wrongs: number,
+    corrects: number,
+    locked: boolean
+  ) => void;
 };
 export const PracticeQuestion = ({
   question,
@@ -278,6 +314,7 @@ export const PracticeQuestion = ({
   onClose,
   leaderboard,
   userStatus,
+  onViewNodeOnNodeBook,
 }: PracticeQuestionProps) => {
   // const db = getFirestore();
   // const [questions, setQuestions] = useState<Node[]>([]);
@@ -305,15 +342,12 @@ export const PracticeQuestion = ({
     setSelectedAnswers(new Array(question.choices.length).fill(false));
   }, [question]);
 
+  const onSubmitAnswer = useCallback(() => {}, []);
+
   const onNextQuestion = useCallback(() => {
     console.log("onNextQuestion");
-    // setSelectedQuestion(pre => {
-    //   if (!pre) return pre;
-    //   if (pre.idx >= questions.length - 1) return pre;
-    //   const newIdx = pre.idx + 1;
-    //   return { question: questions[newIdx], idx: newIdx };
-    // });
-    // TODO: call endpoint
+    setSubmitAnswer(true);
+    // TODO call anser endpoint
     setSubmitAnswer(false);
   }, []);
 
@@ -404,7 +438,7 @@ export const PracticeQuestion = ({
             <Box sx={{ display: "flex", justifyContent: "space-between", mt: "32px" }}>
               <Button
                 variant="contained"
-                onClick={onNextQuestion}
+                onClick={() => onViewNodeOnNodeBook(question.id)}
                 sx={{
                   borderRadius: "26px",
                   minWidth: "180px",
@@ -426,7 +460,7 @@ export const PracticeQuestion = ({
               {!submitAnswer && (
                 <Button
                   variant="contained"
-                  onClick={() => setSubmitAnswer(true)}
+                  onClick={onSubmitAnswer}
                   disabled={!selectedAnswers.some(c => c)}
                   sx={{ borderRadius: "26px", minWidth: "180px", fontSize: "16px" }}
                 >
