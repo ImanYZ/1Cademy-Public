@@ -46,6 +46,15 @@ export type ISemester = {
     numQuestionsPerDay: number;
     totalDaysOfCourse: number;
   };
+
+  dailyPractice: {
+    startDate: Timestamp;
+    endDate: Timestamp;
+    numPoints: number;
+    numQuestionsPerDay: number;
+    totalDaysOfCourse: number;
+  };
+
   votes: {
     pointIncrementOnAgreement: number;
     pointDecrementOnAgreement: number;
@@ -55,6 +64,7 @@ export type ISemester = {
   };
   isProposalRequired: boolean;
   isQuestionProposalRequired: boolean;
+  isDailyPracticeRequired: boolean;
   isCastingVotesRequired: boolean;
   isGettingVotesRequired: boolean;
   root: string;

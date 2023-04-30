@@ -422,7 +422,9 @@ NodeProps) => {
   const nodeClickHandler = useCallback(
     (event: any) => {
       let operation = "selectNode";
+      console.log({ rrrrrr: notebookRef.current });
       if (notebookRef.current.choosingNode && notebookRef.current.choosingNode.id !== identifier) {
+        console.log("-1");
         // The first Nodes exist, Now is clicking the Chosen Node
 
         notebookRef.current.chosenNode = {
@@ -430,7 +432,11 @@ NodeProps) => {
           title,
         };
         nodeBookDispatch({ type: "setChosenNode", payload: { id: identifier, title } });
-        chosenNodeChanged(notebookRef.current.choosingNode.id);
+
+        if (notebookRef.current.choosingNode.id === "Tag") return; //INFO: this is important to update a community
+        chosenNodeChanged(identifier);
+        // chosenNodeChanged(notebookRef.current.choosingNode.id);
+
         setAbleToPropose(true);
         // scrollToNode(notebookRef.current.selectedNode);
         operation = "chooseNode";
@@ -440,6 +446,7 @@ NodeProps) => {
         event.currentTarget.activeElement.nodeName !== "INPUT" &&
         !notebookRef.current.choosingNode
       ) {
+        console.log("-2");
         nodeClicked(event, identifier, nodeType, setOpenPart);
       }
 
@@ -448,6 +455,7 @@ NodeProps) => {
         notebookRef.current.selectedNode !== identifier &&
         operation === "selectNode"
       ) {
+        console.log("-3");
         const updatedNodeIds: string[] = [notebookRef.current.selectedNode!, identifier];
         notebookRef.current.selectedNode = identifier;
         nodeBookDispatch({ type: "setSelectedNode", payload: identifier });

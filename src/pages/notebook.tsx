@@ -4,6 +4,7 @@ import CloseIcon from "@mui/icons-material/Close";
 import CodeIcon from "@mui/icons-material/Code";
 import HelpCenterIcon from "@mui/icons-material/HelpCenter";
 import MyLocationIcon from "@mui/icons-material/MyLocation";
+import UndoIcon from "@mui/icons-material/Undo";
 import { Masonry } from "@mui/lab";
 import {
   Button,
@@ -38,7 +39,6 @@ import {
 } from "firebase/firestore";
 import { getDownloadURL, getStorage, ref, uploadBytesResumable } from "firebase/storage";
 import Image from "next/image";
-import NextImage from "next/image";
 import { useRouter } from "next/router";
 import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
 /* eslint-disable */ //This wrapper comments it to use react-map-interaction without types
@@ -64,11 +64,9 @@ import { MemoizedUserSettingsSidebar } from "@/components/map/Sidebar/SidebarV2/
 import { useAuth } from "@/context/AuthContext";
 import useEventListener from "@/hooks/useEventListener";
 import { useTagsTreeView } from "@/hooks/useTagsTreeView";
-import { addSuffixToUrlGMT } from "@/lib/utils/string.utils";
+import { DESIGN_SYSTEM_COLORS } from "@/lib/theme/colors";
 
 import LoadingImg from "../../public/animated-icon-1cademy.gif";
-import PrevNodeIcon from "../../public/prev-node.svg";
-import PrevNodeLightIcon from "../../public/prev-node-light.svg";
 import { TooltipTutorial } from "../components/interactiveTutorial/Tutorial";
 // import nodesData from "../../testUtils/mockCollections/nodes.data";
 // import { Tutorial } from "../components/interactiveTutorial/Tutorial";
@@ -1000,6 +998,7 @@ const Dashboard = ({}: DashboardProps) => {
                 top: tmpNode?.top ?? topParent,
                 visible: Boolean((cur.notebooks ?? [])[notebookIdx]),
                 open: Boolean((cur.expands ?? [])[notebookIdx]),
+                editable: tmpNode?.editable ?? false,
               };
             });
 
@@ -1096,6 +1095,40 @@ const Dashboard = ({}: DashboardProps) => {
     const firstNotebook = notebooks[0].id;
     setSelectedNotebookId(firstNotebook);
   }, [notebooks, selectedNotebookId]);
+
+  useEffect(() => {
+    // TODO: check if is possible to move this to a pure function and call when user change notebooks
+    // this after merge with "share not public notebooks"
+    if (!user) return;
+    if (!selectedNotebookId) return;
+    const selectedNotebook = notebooks.find(cur => cur.id === selectedNotebookId);
+
+    if (!selectedNotebook) return;
+    if (!selectedNotebook.defaultTagId || !selectedNotebook.defaultTagName) return;
+    if (user.tagId === selectedNotebook.defaultTagId) return; // is updated
+
+    console.log("Update tag when a notebook is changed");
+    const updateDefaultTag = async (defaultTagId: string, defaultTagName: string) => {
+      try {
+        dispatch({
+          type: "setAuthUser",
+          payload: { ...user, tagId: defaultTagId, tag: defaultTagName },
+        });
+        await Post(`/changeDefaultTag/${defaultTagId}`);
+
+        let { reputation, user: userUpdated } = await retrieveAuthenticatedUser(user.userId, user.role);
+        if (!reputation) throw Error("Cant find Reputation");
+        if (!userUpdated) throw Error("Cant find User");
+
+        dispatch({ type: "setReputation", payload: reputation });
+        dispatch({ type: "setAuthUser", payload: userUpdated });
+      } catch (error) {
+        console.error(error);
+      }
+    };
+
+    updateDefaultTag(selectedNotebook.defaultTagId, selectedNotebook.defaultTagName);
+  }, [dispatch, notebooks, selectedNotebookId, user, user?.role, user?.userId]);
 
   useEffect(() => {
     if (!db) return;
@@ -1560,46 +1593,58 @@ const Dashboard = ({}: DashboardProps) => {
 
   const chosenNodeChanged = useCallback(
     (nodeId: string) => {
+      devLog("CHOSEN_NODE_CHANGE", { nodeId });
       setUpdatedLinks(updatedLinks => {
+        console.log("setUpdatedLinks");
         setGraph(({ nodes: oldNodes, edges: oldEdges }) => {
+          console.log("setGraph");
           const updatedNodeIds: string[] = [];
           if (!notebookRef.current.choosingNode || !notebookRef.current.chosenNode)
             return { nodes: oldNodes, edges: oldEdges };
-          if (nodeId !== notebookRef.current.choosingNode.id) return { nodes: oldNodes, edges: oldEdges };
+          if (nodeId === notebookRef.current.choosingNode.id) return { nodes: oldNodes, edges: oldEdges };
 
+          // console.log({ cn: nodeId, ching: notebookRef.current.choosingNode.id });
           updatedNodeIds.push(nodeId);
-          updatedNodeIds.push(notebookRef.current.chosenNode.id);
-          const thisNode = copyNode(oldNodes[nodeId]);
+          updatedNodeIds.push(notebookRef.current.choosingNode.id);
+          // updatedNodeIds.push(notebookRef.current.chosenNode.id);
+          let choosingNodeCopy = copyNode(oldNodes[notebookRef.current.choosingNode.id]);
           const chosenNodeObj = copyNode(oldNodes[notebookRef.current.chosenNode.id]);
-
+          console.log("aa", { thisNode: choosingNodeCopy });
           let newEdges: EdgesData = oldEdges;
 
           const validLink =
             (notebookRef.current.choosingNode.type === "Reference" &&
               /* thisNode.referenceIds.filter(l => l === nodeBookState.chosenNode?.id).length === 0 &&*/
-              notebookRef.current.chosenNode.id !== nodeId &&
+              notebookRef.current.chosenNode.id !== notebookRef.current.choosingNode.id &&
               chosenNodeObj.nodeType === notebookRef.current.choosingNode.type) ||
             (notebookRef.current.choosingNode.type === "Tag" &&
-              thisNode.tagIds.filter(l => l === notebookRef.current.chosenNode?.id).length === 0) ||
+              choosingNodeCopy.tagIds.filter(l => l === notebookRef.current.chosenNode?.id).length === 0) ||
             (notebookRef.current.choosingNode.type === "Parent" &&
               notebookRef.current.choosingNode.id !== notebookRef.current.chosenNode.id &&
-              thisNode.parents.filter((l: any) => l.node === notebookRef.current.chosenNode?.id).length === 0) ||
+              choosingNodeCopy.parents.filter((l: any) => l.node === notebookRef.current.chosenNode?.id).length ===
+                0) ||
             (notebookRef.current.choosingNode.type === "Child" &&
               notebookRef.current.choosingNode.id !== notebookRef.current.chosenNode.id &&
-              thisNode.children.filter((l: any) => l.node === notebookRef.current.chosenNode?.id).length === 0);
+              choosingNodeCopy.children.filter((l: any) => l.node === notebookRef.current.chosenNode?.id).length === 0);
+          console.log({ validLink });
 
           if (!validLink) return { nodes: oldNodes, edges: oldEdges };
 
+          const chosenNodeId = notebookRef.current.chosenNode.id;
+          const chosingNodeId = notebookRef.current.choosingNode.id;
+
+          console.log("bb");
           if (notebookRef.current.choosingNode.type === "Reference") {
-            thisNode.references = [...thisNode.references, chosenNodeObj.title];
-            thisNode.referenceIds = [...thisNode.referenceIds, notebookRef.current.chosenNode.id];
-            thisNode.referenceLabels = [...thisNode.referenceLabels, ""];
+            choosingNodeCopy.references = [...choosingNodeCopy.references, chosenNodeObj.title];
+            choosingNodeCopy.referenceIds = [...choosingNodeCopy.referenceIds, notebookRef.current.chosenNode.id];
+            choosingNodeCopy.referenceLabels = [...choosingNodeCopy.referenceLabels, ""];
           } else if (notebookRef.current.choosingNode.type === "Tag") {
-            thisNode.tags = [...thisNode.tags, chosenNodeObj.title];
-            thisNode.tagIds = [...thisNode.tagIds, notebookRef.current.chosenNode.id];
+            choosingNodeCopy.tags = [...choosingNodeCopy.tags, chosenNodeObj.title];
+            choosingNodeCopy.tagIds = [...choosingNodeCopy.tagIds, notebookRef.current.chosenNode.id];
           } else if (notebookRef.current.choosingNode.type === "Parent") {
-            thisNode.parents = [
-              ...thisNode.parents,
+            console.log("Parent", choosingNodeCopy.parents);
+            choosingNodeCopy.parents = [
+              ...choosingNodeCopy.parents,
               {
                 node: notebookRef.current.chosenNode.id,
                 title: chosenNodeObj.title,
@@ -1607,19 +1652,28 @@ const Dashboard = ({}: DashboardProps) => {
                 type: chosenNodeObj.nodeType,
               },
             ];
-            if (!(notebookRef.current.chosenNode.id in changedNodes)) {
-              changedNodes[notebookRef.current.chosenNode.id] = copyNode(oldNodes[notebookRef.current.chosenNode.id]);
+
+            // console.log("Parent after", choosingNodeCopy.parents);
+            // if (!(notebookRef.current.chosenNode.id in changedNodes)) {
+            //   changedNodes[notebookRef.current.chosenNode.id] = copyNode(oldNodes[notebookRef.current.chosenNode.id]);
+            // }
+
+            if (!(notebookRef.current.choosingNode.id in changedNodes)) {
+              changedNodes[notebookRef.current.choosingNode.id] = copyNode(
+                oldNodes[notebookRef.current.choosingNode.id]
+              );
             }
+
             chosenNodeObj.children = [
               ...chosenNodeObj.children,
               {
                 node: notebookRef.current.choosingNode.id,
-                title: thisNode.title,
+                title: choosingNodeCopy.title,
                 label: "",
-                type: chosenNodeObj.nodeType,
+                type: choosingNodeCopy.nodeType,
               },
             ];
-            const chosenNodeId = notebookRef.current.chosenNode.id;
+
             if (updatedLinks.removedParents.includes(notebookRef.current.chosenNode.id)) {
               updatedLinks.removedParents = updatedLinks.removedParents.filter((nId: string) => nId !== chosenNodeId);
             } else {
@@ -1636,8 +1690,9 @@ const Dashboard = ({}: DashboardProps) => {
               );
             }
           } else if (notebookRef.current.choosingNode.type === "Child") {
-            thisNode.children = [
-              ...thisNode.children,
+            console.log("Child");
+            choosingNodeCopy.children = [
+              ...choosingNodeCopy.children,
               {
                 node: notebookRef.current.chosenNode.id,
                 title: chosenNodeObj.title,
@@ -1652,7 +1707,7 @@ const Dashboard = ({}: DashboardProps) => {
               ...chosenNodeObj.parents,
               {
                 node: notebookRef.current.choosingNode.id,
-                title: thisNode.title,
+                title: choosingNodeCopy.title,
                 label: "",
                 type: chosenNodeObj.nodeType,
               },
@@ -1674,24 +1729,24 @@ const Dashboard = ({}: DashboardProps) => {
             }
           }
 
-          const chosenNode = notebookRef.current.chosenNode.id;
-          notebookRef.current.choosingNode = null;
-          notebookRef.current.chosenNode = null;
-          nodeBookDispatch({ type: "setChoosingNode", payload: null });
-          nodeBookDispatch({ type: "setChosenNode", payload: null });
-
-          const newNodes = {
+          console.log("newNodes:thisNode", { oldNodes, choosingNodeCopy, chosenNodeObj });
+          const newNodesObj = {
             ...oldNodes,
-            [nodeId]: thisNode,
-            [chosenNode]: chosenNodeObj,
+            [chosingNodeId]: choosingNodeCopy,
+            [chosenNodeId]: chosenNodeObj,
           };
+          console.log({ newNodesObj });
           setTimeout(() => {
             setNodeUpdates({
               nodeIds: updatedNodeIds,
               updatedAt: new Date(),
             });
           }, 200);
-          return { nodes: newNodes, edges: newEdges };
+          notebookRef.current.choosingNode = null;
+          notebookRef.current.chosenNode = null;
+          nodeBookDispatch({ type: "setChoosingNode", payload: null });
+          nodeBookDispatch({ type: "setChosenNode", payload: null });
+          return { nodes: newNodesObj, edges: newEdges };
         });
         return { ...updatedLinks };
       });
@@ -1699,6 +1754,7 @@ const Dashboard = ({}: DashboardProps) => {
     // TODO: CHECK dependencies
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [notebookRef.current.choosingNode, notebookRef.current.chosenNode]
+    // [notebookRef.current.choosingNode, notebookRef.current.chosenNode]
   );
 
   const deleteLink = useCallback(
@@ -3008,9 +3064,9 @@ const Dashboard = ({}: DashboardProps) => {
       setNodeParts(nodeId, (thisNode: FullNodeData) => {
         const choices = [...thisNode.choices];
         choices.push({
-          choice: "Replace this with the choice.",
+          choice: "",
           correct: true,
-          feedback: "Replace this with the choice-specific feedback.",
+          feedback: "",
         });
         thisNode.choices = choices;
         return { ...thisNode };
@@ -3461,9 +3517,9 @@ const Dashboard = ({}: DashboardProps) => {
         if (childNodeType === "Question") {
           newChildNode.choices = [
             {
-              choice: "Replace this with the choice.",
+              choice: "",
               correct: true,
-              feedback: "Replace this with the choice-specific feedback.",
+              feedback: "",
             },
           ];
         }
@@ -4064,13 +4120,12 @@ const Dashboard = ({}: DashboardProps) => {
             },
             async function complete() {
               const imageGeneratedUrl = await getDownloadURL(storageRef);
-              const imageUrlFixed = addSuffixToUrlGMT(imageGeneratedUrl, "_430x1300");
               setIsSubmitting(false);
               setIsUploading(false);
-              await imageLoaded(imageUrlFixed);
-              if (imageUrlFixed && imageUrlFixed !== "") {
+              await imageLoaded(imageGeneratedUrl);
+              if (imageGeneratedUrl && imageGeneratedUrl !== "") {
                 setNodeParts(nodeId, (thisNode: any) => {
-                  thisNode.nodeImage = imageUrlFixed;
+                  thisNode.nodeImage = imageGeneratedUrl;
                   return { ...thisNode };
                 });
               }
@@ -6008,6 +6063,8 @@ const Dashboard = ({}: DashboardProps) => {
           usersInfo: {},
           createdAt: new Date(),
           updatedAt: new Date(),
+          defaultTagId: notebookData.defaultTagId ?? user.tagId ?? "",
+          defaultTagName: notebookData.defaultTagName ?? user.tag ?? "",
         };
 
         const notebooksRef = collection(db, "notebooks");
@@ -6098,78 +6155,68 @@ const Dashboard = ({}: DashboardProps) => {
           </NotebookPopup>
         )}
 
-        {nodeBookState.previousNode && (
+        {
           <Box
             sx={{
-              position: "absolute",
-              width: "auto",
-              left: "50%",
-              transform: "translateX(-50%)",
-              bottom: "35px",
-              background: theme =>
-                theme.palette.mode === "dark"
-                  ? theme.palette.common.darkBackground
-                  : theme.palette.common.lightBackground,
-              fontFamily: "Roboto",
-              fontStyle: "normal",
-              fontWeight: "normal",
-              fontSize: "25px",
-              lineHeight: "28px",
-              color: "#e5e5e5",
-              zIndex: "4",
-              textAlign: "center",
-              overflow: "hidden",
-              display: "flex",
               height: "40px",
+              display: "flex",
+              position: "absolute",
+              left: "50%",
+              bottom: "35px",
+              transform: "translateX(-50%)",
+              zIndex: "4",
+              backgroundColor: ({ palette: { mode } }) =>
+                mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookMainBlack : DESIGN_SYSTEM_COLORS.gray50,
+              borderRadius: "4px",
             }}
           >
-            <Box
+            <Button
+              onClick={() => {
+                notebookRef.current.selectedNode = nodeBookState.previousNode;
+                nodeBookDispatch({ type: "setSelectedNode", payload: nodeBookState.previousNode });
+                setTimeout(() => {
+                  scrollToNode(nodeBookState.previousNode);
+                }, 1500);
+                nodeBookDispatch({ type: "setPreviousNode", payload: null });
+              }}
               sx={{
-                paddingTop: "3px",
-                borderRight: "solid 1px #98A2B3",
-                paddingX: "5px",
+                display: "flex",
+                alignItems: "center",
+                gap: "10px",
                 ":hover": {
-                  background: theme => (theme.palette.mode === "dark" ? "#2F2F2F" : "#EAECF0"),
+                  backgroundColor: ({ palette: { mode } }) =>
+                    mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookG600 : DESIGN_SYSTEM_COLORS.gray200,
                 },
               }}
             >
-              <Button
-                onClick={() => {
-                  notebookRef.current.selectedNode = nodeBookState.previousNode;
-                  nodeBookDispatch({ type: "setSelectedNode", payload: nodeBookState.previousNode });
-                  setTimeout(() => {
-                    scrollToNode(nodeBookState.previousNode);
-                  }, 1500);
-                  nodeBookDispatch({ type: "setPreviousNode", payload: null });
-                }}
+              <UndoIcon
                 sx={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "10px",
-                  ":hover": {
-                    background: "transparent",
-                  },
+                  color: theme =>
+                    theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.baseWhite : DESIGN_SYSTEM_COLORS.gray800,
+                }}
+              />
+              <Typography
+                sx={{
+                  color: theme =>
+                    theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.gray25 : DESIGN_SYSTEM_COLORS.gray800,
                 }}
               >
-                <NextImage
-                  width={"20px"}
-                  src={theme.palette.mode === "dark" ? PrevNodeIcon : PrevNodeLightIcon}
-                  alt="previous node icon"
-                />
-                <Typography
-                  sx={{
-                    color: theme => (theme.palette.mode === "dark" ? "#FCFCFD" : "#1D2939"),
-                  }}
-                >
-                  Return to previous node
-                </Typography>
-              </Button>
-            </Box>
+                Return to previous node
+              </Typography>
+            </Button>
+            <Divider
+              orientation="vertical"
+              sx={{
+                borderColor: ({ palette: { mode } }) =>
+                  mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookG500 : DESIGN_SYSTEM_COLORS.gray300,
+              }}
+            />
             <Button
               sx={{
                 minWidth: "30px!important",
                 ":hover": {
-                  background: theme => (theme.palette.mode === "dark" ? "#2F2F2F" : "#EAECF0"),
+                  backgroundColor: ({ palette: { mode } }) =>
+                    mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookG600 : DESIGN_SYSTEM_COLORS.gray200,
                 },
               }}
               onClick={() => {
@@ -6179,12 +6226,13 @@ const Dashboard = ({}: DashboardProps) => {
               <CloseIcon
                 fontSize="small"
                 sx={{
-                  color: theme => (theme.palette.mode === "dark" ? "#A4A4A4" : "#98A2B3"),
+                  color: theme =>
+                    theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookG200 : DESIGN_SYSTEM_COLORS.gray400,
                 }}
               />
             </Button>
           </Box>
-        )}
+        }
         <Box sx={{ width: "100vw", height: "100vh", overflow: "hidden" }}>
           {
             <Drawer
@@ -6393,14 +6441,12 @@ const Dashboard = ({}: DashboardProps) => {
                 enableElements={[]}
               />
               <MemoizedNotificationSidebar
-                theme={settings.theme}
                 openLinkedNode={openLinkedNode}
                 username={user.uname}
                 open={openSidebar === "NOTIFICATION_SIDEBAR"}
                 onClose={() => setOpenSidebar(null)}
                 sidebarWidth={sidebarWidth()}
                 innerHeight={innerHeight}
-                innerWidth={windowWith}
               />
               <MemoizedPendingProposalSidebar
                 theme={settings.theme}

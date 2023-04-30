@@ -26,6 +26,8 @@ const initialErrorsState = {
   nodeProposalEndDate: false,
   questionProposalStartDate: false,
   questionProposalEndDate: false,
+  dailyPracticeStartDate: false,
+  dailyPracticeEndDate: false,
   errorText: "",
 };
 const CourseSetting: InstructorLayoutPage = ({ selectedSemester, selectedCourse, currentSemester }) => {
@@ -52,6 +54,12 @@ const CourseSetting: InstructorLayoutPage = ({ selectedSemester, selectedCourse,
       numPoints: 1,
       numQuestionsPerDay: 1,
     },
+    dailyPractice: {
+      startDate: "",
+      endDate: "",
+      numPoints: 1,
+      numQuestionsPerDay: 1,
+    },
     votes: {
       pointIncrementOnAgreement: 1,
       pointDecrementOnAgreement: 1,
@@ -60,6 +68,7 @@ const CourseSetting: InstructorLayoutPage = ({ selectedSemester, selectedCourse,
       onReceiveStar: 1,
     },
     isProposalRequired: false,
+    isDailyPracticeRequired: false,
     isQuestionProposalRequired: false,
     isCastingVotesRequired: false,
     isGettingVotesRequired: false,
@@ -70,29 +79,34 @@ const CourseSetting: InstructorLayoutPage = ({ selectedSemester, selectedCourse,
       setLoaded(false);
       const semesterSnapshot = onSnapshot(doc(db, "semesters", currentSemester.tagId), snapshot => {
         let semester: any = snapshot.data();
-        console.log(semester, "semester");
         if (semester) {
           setSemester((prevSemester: any) => {
             return {
               ...prevSemester,
-              startDate: semester.startDate ? moment(new Date(semester.startDate.toDate())).format("YYYY-MM-DD") : "",
-              endDate: semester.endDate ? moment(new Date(semester.endDate.toDate())).format("YYYY-MM-DD") : "",
+              startDate: semester.startDate ? moment(new Date(semester?.startDate.toDate())).format("YYYY-MM-DD") : "",
+              endDate: semester.endDate ? moment(new Date(semester?.endDate.toDate())).format("YYYY-MM-DD") : "",
               syllabus: semester.syllabus,
               nodeProposals: {
                 ...semester.nodeProposals,
-                startDate: moment(new Date(semester.nodeProposals.startDate.toDate())).format("YYYY-MM-DD"),
-                endDate: moment(new Date(semester.nodeProposals.endDate.toDate())).format("YYYY-MM-DD"),
+                startDate: moment(new Date(semester?.nodeProposals?.startDate.toDate())).format("YYYY-MM-DD"),
+                endDate: moment(new Date(semester?.nodeProposals?.endDate.toDate())).format("YYYY-MM-DD"),
               },
               questionProposals: {
                 ...semester.questionProposals,
-                startDate: moment(new Date(semester.questionProposals.startDate.toDate())).format("YYYY-MM-DD"),
-                endDate: moment(new Date(semester.questionProposals.endDate.toDate())).format("YYYY-MM-DD"),
+                startDate: moment(new Date(semester?.questionProposals?.startDate.toDate())).format("YYYY-MM-DD"),
+                endDate: moment(new Date(semester?.questionProposals?.endDate.toDate())).format("YYYY-MM-DD"),
               },
-              votes: semester.votes,
-              isProposalRequired: semester.isProposalRequired,
-              isQuestionProposalRequired: semester.isQuestionProposalRequired,
-              isCastingVotesRequired: semester.isCastingVotesRequired,
-              isGettingVotesRequired: semester.isGettingVotesRequired,
+              dailyPractice: {
+                ...semester?.dailyPractice,
+                startDate: moment(new Date(semester?.dailyPractice?.startDate.toDate())).format("YYYY-MM-DD"),
+                endDate: moment(new Date(semester?.dailyPractice?.endDate.toDate())).format("YYYY-MM-DD"),
+              },
+              votes: semester?.votes,
+              isProposalRequired: semester?.isProposalRequired,
+              isDailyPracticeRequired: semester?.isDailyPracticeRequired,
+              isQuestionProposalRequired: semester?.isQuestionProposalRequired,
+              isCastingVotesRequired: semester?.isCastingVotesRequired,
+              isGettingVotesRequired: semester?.isGettingVotesRequired,
             };
           });
           setChapters(semester.syllabus);
@@ -141,6 +155,23 @@ const CourseSetting: InstructorLayoutPage = ({ selectedSemester, selectedCourse,
         setSemester({
           ...semester,
           questionProposals: { ...semester.questionProposals, [field]: Number(parseInt(e.target.value)) },
+        });
+      }
+    } else if (type === "dailyPractice") {
+      if (field == "startDate" || field == "endDate") {
+        setSemester({
+          ...semester,
+          dailyPractice: { ...semester.dailyPractice, [field]: String(e.target.value) },
+        });
+      } else if (field == "numPoints") {
+        setSemester({
+          ...semester,
+          dailyPractice: { ...semester.dailyPractice, [field]: Number(e.target.value) },
+        });
+      } else {
+        setSemester({
+          ...semester,
+          dailyPractice: { ...semester.dailyPractice, [field]: Number(parseInt(e.target.value)) },
         });
       }
     } else if (type === "votes") {
@@ -201,8 +232,13 @@ const CourseSetting: InstructorLayoutPage = ({ selectedSemester, selectedCourse,
       let endDate = moment(semester.endDate);
       let nodeProposalStartDate = moment(semester.nodeProposals.startDate);
       let nodeProposalEndDate = moment(semester.nodeProposals.endDate);
+
       let questionProposalStartDate = moment(semester.questionProposals.startDate);
       let questionProposalEndDate = moment(semester.questionProposals.endDate);
+
+      let dailyPracticeStartDate = moment(semester.dailyPractice.startDate);
+      let dailyPracticeEndDate = moment(semester.dailyPractice.endDate);
+
       let chapterDateDiff = endDate.diff(startDate, "days");
 
       if (!semester.startDate) {
@@ -272,6 +308,33 @@ const CourseSetting: InstructorLayoutPage = ({ selectedSemester, selectedCourse,
           ...initialErrorsState,
           questionProposalEndDate: true,
           errorText: `The end date of the question proposal should be less than the start date of the question proposal.`,
+        });
+        setRequestLoader(false);
+        return;
+      } else if (
+        !dailyPracticeStartDate.isBetween(startDate, endDate, null, "[]") &&
+        semester.isDailyPracticeRequired
+      ) {
+        setErrorState({
+          ...initialErrorsState,
+          dailyPracticeStartDate: true,
+          errorText: `The start date of the daily practice should fall between the start and end dates of the chapter.`,
+        });
+        setRequestLoader(false);
+        return;
+      } else if (!dailyPracticeEndDate.isBetween(startDate, endDate, null, "[]") && semester.isDailyPracticeRequired) {
+        setErrorState({
+          ...initialErrorsState,
+          dailyPracticeEndDate: true,
+          errorText: `The end date of the daily practice should fall between the start and end dates of the chapter.`,
+        });
+        setRequestLoader(false);
+        return;
+      } else if (dailyPracticeEndDate < dailyPracticeStartDate && semester.isDailyPracticeRequired) {
+        setErrorState({
+          ...initialErrorsState,
+          dailyPracticeEndDate: true,
+          errorText: `The end date of the daily practice should be less than the start date of the daily practice.`,
         });
         setRequestLoader(false);
         return;
