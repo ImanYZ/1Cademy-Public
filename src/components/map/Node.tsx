@@ -332,6 +332,8 @@ const Node = ({
     to: { left: "600px", zIndex: 0 },
   });
 
+  const [toBeElligible, setToBeElligible] = useState(false);
+
   const disableTitle = disabled && !enableChildElements.includes(`${identifier}-node-title`);
   const disableContent = disabled && !enableChildElements.includes(`${identifier}-node-content`);
   const disableWhy = disabled && !enableChildElements.includes(`${identifier}-node-why`);
@@ -721,6 +723,23 @@ const Node = ({
     }
   };
 
+  const onMouseOverHandler = () => {
+    if (!notebookRef.current.choosingNode) return;
+    if (notebookRef.current.choosingNode.id === identifier) return;
+
+    if (notebookRef.current.choosingNode.type === "Reference" && nodeType !== "Reference") {
+      setToBeElligible(false);
+      return;
+    }
+
+    setToBeElligible(true);
+  };
+
+  const onMouseLeaveHandler = () => {
+    if (notebookRef.current.choosingNode && notebookRef.current.choosingNode.id !== identifier) {
+      setToBeElligible(false);
+    }
+  };
   if (!user) {
     return null;
   }
@@ -801,13 +820,15 @@ const Node = ({
       ref={nodeRef}
       id={identifier}
       onClick={nodeClickHandler}
+      onMouseEnter={onMouseOverHandler}
+      onMouseLeave={onMouseLeaveHandler}
       data-hoverable={true}
       className={
         "Node card" +
         (activeNode ? " active" : "") +
         (changed || !isStudied ? " Changed" : "") +
         (isHiding ? " IsHiding" : "") +
-        (nodeType === "Reference" ? " Choosable" : "")
+        (toBeElligible ? " Choosable" : " ")
       }
       style={{
         left: left ? left : 1000,
