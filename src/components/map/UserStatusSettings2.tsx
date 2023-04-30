@@ -107,6 +107,7 @@ const UserStatusSettings = ({ onClick, smallVersion = true, sx, ...props }: User
         <div className={(pointsGained ? "GainedPoint" : "") + (pointsLost ? "LostPoint" : "")}>
           <OptimizedAvatar
             imageUrl={props.imageUrl}
+            name={`${props.user.fName} ${props.user.lName}`}
             renderAsAvatar={true}
             contained={false}
             sx={{ border: "none", width: "48px", height: "48px", position: "static" }}
