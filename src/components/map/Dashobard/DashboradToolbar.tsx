@@ -18,7 +18,7 @@ import { ToolbarView } from "../dashboard/DashboardWrapper";
 type DashboardToolbarProps = {
   user: User | null;
   semesters: ISemester[];
-  courses: any[];
+  courses: string[];
   selectedCourse: string | null;
   currentSemester: ICourseTag | null;
   view: ToolbarView;
