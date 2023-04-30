@@ -3,14 +3,13 @@ import { NextApiRequest, NextApiResponse } from "next";
 import { db } from "../../lib/firestoreServer/admin";
 import { INode } from "src/types/INode";
 import { IUser } from "src/types/IUser";
-import { arrayToChunks, getUserNode } from "src/utils";
 import { IPractice } from "src/types/IPractice";
 import { Timestamp } from "firebase-admin/firestore";
-import { getOrCreateUserNode, isNodePracticePresentable, updateStatsOnPractice } from "src/utils/course-helpers";
+import { getOrCreateUserNode, updateStatsOnPractice } from "src/utils/course-helpers";
 import { IUserNode } from "src/types/IUserNode";
 import fbAuth from "src/middlewares/fbAuth";
 import moment from "moment";
-import { checkRestartBatchWriteCounts, commitBatch } from "@/lib/firestoreServer/admin-exp";
+import { checkRestartBatchWriteCounts, commitBatch } from "@/lib/firestoreServer/admin";
 import { detach } from "src/utils/helpers";
 
 export type ICheckAnswerRequestParams = {
