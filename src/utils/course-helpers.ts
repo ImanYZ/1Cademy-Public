@@ -61,7 +61,9 @@ export const createPracticeForSemesterStudents = async (
   };
 
   const semester = semesterDoc.data() as ISemester;
-  await bfs([semester.root]);
+  if (semester.root) {
+    await bfs([semester.root]);
+  }
 
   return [batch, writeCounts];
 };

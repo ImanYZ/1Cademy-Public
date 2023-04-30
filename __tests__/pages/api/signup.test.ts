@@ -20,18 +20,7 @@ import { db } from "../../../src/lib/firestoreServer/admin";
 import handler from "../../../src/pages/api/signup";
 import createPostReq from "../../../testUtils/helpers/createPostReq";
 import deleteAllUsers from "../../../testUtils/helpers/deleteAllUsers";
-import {
-  bookmarkNumsData,
-  creditsData,
-  MockData,
-  notificationNumsData,
-  pendingPropsNumsData,
-  reputationsData,
-  tagsData,
-  userNodesData,
-  userNodesLogData,
-  usersData,
-} from "../../../testUtils/mockCollections";
+import { creditsData, MockData, tagsData } from "../../../testUtils/mockCollections";
 
 describe("/signup", () => {
   const institutions = [
@@ -44,7 +33,19 @@ describe("/signup", () => {
       domain: "@1cad123emy.edu",
     }),
   ];
-  const collects = [new MockData(institutions, "institutions"), tagsData, creditsData];
+  const collects = [
+    new MockData(institutions, "institutions"),
+    new MockData([], "bookmarkNums"),
+    new MockData([], "credits"),
+    new MockData([], "notificationNums"),
+    new MockData([], "pendingPropsNums"),
+    new MockData([], "reputations"),
+    new MockData([], "userNodes"),
+    new MockData([], "userNodesLog"),
+    new MockData([], "users"),
+    tagsData,
+    creditsData,
+  ];
   beforeAll(async () => {
     await Promise.all(collects.map(collect => collect.populate()));
   });
@@ -147,13 +148,6 @@ describe("/signup", () => {
   afterAll(async () => {
     await deleteAllUsers();
     await Promise.all(collects.map(collect => collect.clean()));
-    await usersData.clean();
-    await bookmarkNumsData.clean();
-    await notificationNumsData.clean();
-    await pendingPropsNumsData.clean();
-    await reputationsData.clean();
-    await userNodesData.clean();
-    await userNodesLogData.clean();
   });
 });
 
@@ -241,6 +235,14 @@ describe("/signup as student", () => {
           pointDecrementOnAgreement: 0,
           pointIncrementOnAgreement: 0,
         },
+        dailyPractice: {
+          startDate: Timestamp.now(),
+          endDate: Timestamp.now(),
+          numPoints: 1,
+          numQuestionsPerDay: 1,
+          totalDaysOfCourse: 0,
+        },
+        isDailyPracticeRequired: true,
         syllabus: [],
         title: nodes[0].title,
         root: nodes[0].documentId!,
@@ -359,12 +361,5 @@ describe("/signup as student", () => {
   afterAll(async () => {
     await deleteAllUsers();
     await Promise.all(collects.map(collect => collect.clean()));
-    await usersData.clean();
-    await bookmarkNumsData.clean();
-    await notificationNumsData.clean();
-    await pendingPropsNumsData.clean();
-    await reputationsData.clean();
-    await userNodesData.clean();
-    await userNodesLogData.clean();
   });
 });
