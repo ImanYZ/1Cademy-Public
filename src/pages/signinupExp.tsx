@@ -318,22 +318,24 @@ const SignUpExpPage = () => {
     }, []);
   }
   useEffect(() => {
-    const institutionsQuery = query(collection(db, "institutions"), where("usersNum", ">=", 1));
+    const institutionsQuery = query(collection(db, "institutions"));
     const unsubscribe = onSnapshot(institutionsQuery, snapshot => {
       setInstitutions((insitutions: Institution[]) => {
         let _insitutions = [...insitutions];
         const docChanges = snapshot.docChanges();
         for (const docChange of docChanges) {
           const institutionData: Institution | any = docChange.doc.data();
-          if (docChange.type === "added") {
-            _insitutions.push({ id: docChange.doc.id, ...institutionData });
-            continue;
-          }
-          const idx = _insitutions.findIndex(insitution => insitution.name === institutionData.name);
-          if (docChange.type === "modified") {
-            _insitutions[idx] = { id: docChange.doc.id, ...institutionData };
-          } else {
-            _insitutions.splice(idx, 1);
+          if (institutionData.usersNum >= 1 || institutionData.country === "United States") {
+            if (docChange.type === "added") {
+              _insitutions.push({ id: docChange.doc.id, ...institutionData });
+              continue;
+            }
+            const idx = _insitutions.findIndex(insitution => insitution.name === institutionData.name);
+            if (docChange.type === "modified") {
+              _insitutions[idx] = { id: docChange.doc.id, ...institutionData };
+            } else {
+              _insitutions.splice(idx, 1);
+            }
           }
         }
 
