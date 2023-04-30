@@ -34,7 +34,7 @@ const generateTextFromGPT = async (prompt: string) => {
     }
   );
 
-  return response.data.choices[0].text;
+  return response.data.choices[0].message;
 };
 
 async function handler(req: NextApiRequest, res: NextApiResponse<[]>) {
