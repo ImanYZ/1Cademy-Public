@@ -38,23 +38,23 @@ export const MECHANISM_ITEMS: TMechanisms[] = [
     },
   },
   {
-    id: "Evaluating",
-    title: "Voting",
+    id: "evaluating",
+    title: "Evaluating",
     description:
-      "To ensure the quality of the knowledge graph on 1Cademy, we have implemented an AI-enhanced peer-review process. Each individual concept, represented as a node, is evaluated through a collaboration of AI and members of the community, and the score of the node will determine its level of modification or the possibility of deletion.",
+      "To ensure the quality of the knowledge graph on 1Cademy, we have implemented an AI-enhanced peer-review process. Each individual concept, represented as a micro-content piece, is evaluated through a collaboration of AI and members of the community, and the score of the piece will determine its possibility for modification or deletion.",
     animation: {
-      src: "rive/notebook.riv",
-      artboard: "artboard-5",
+      src: "rive/evaluating.riv",
+      artboard: "New Artboard",
     },
   },
   {
     id: "improving",
     title: "Improving",
     description:
-      "We collaborate with each other and get AI assistance to improve the knowledge presented by continually updating and refining concepts. For each node, there are multiple versions proposed by different people which cover different perspectives and use-cases for each concept. 1Cademy visualizes these side-by-side to optimize learning.",
+      "We collaborate with each other and AI assistance to improve the micro-content in the knowledge graph by continually updating and refining concepts. For each micro-content piece, there are multiple versions proposed by different people, which cover multiple perspectives and use-cases. 1Cademy visualizes these side-by-side to optimize learning.",
     animation: {
-      src: "rive/notebook.riv",
-      artboard: "artboard-6",
+      src: "rive/improving.riv",
+      artboard: "New Artboard",
     },
   },
 ];
@@ -70,9 +70,9 @@ const Mechanism = ({ mechanisms }: IMechanism) => {
   const canvasDimensions = useMemo(() => {
     let newWidth = width - 10;
 
-    if (width >= 600) newWidth = 500;
-    if (width >= 900) newWidth = 350;
-    if (width >= 1200) newWidth = 550;
+    if (width >= 600) newWidth = 600;
+    if (width >= 900) newWidth = 700;
+    if (width >= 1200) newWidth = 500;
 
     const newHeight = getHeight(newWidth);
     return { width: newWidth, height: newHeight };
@@ -88,10 +88,10 @@ const Mechanism = ({ mechanisms }: IMechanism) => {
           alignItems="center"
           justifyContent={"space-between"}
           minHeight={{ md: "512px" }}
-          sx={{ mb: { xs: "32px", md: "61px" } }}
+          sx={{ mb: { xs: "32px", md: "48px" } }}
         >
-          <Box sx={{ maxWidth: { md: "528px" }, textAlign: "left" }}>
-            <Typography component={"h3"} sx={{ fontSize: "30px", fontWeight: "600px", mb: "16px" }}>
+          <Box sx={{ maxWidth: { md: "528px" }, textAlign: "left", flex: 1 }}>
+            <Typography component={"h3"} sx={{ fontSize: "30px", fontWeight: "600", mb: "16px" }}>
               {cur.title}
             </Typography>
             {cur.description.split("\n").map((paragraph: string, idx: number) => (
@@ -109,7 +109,14 @@ const Mechanism = ({ mechanisms }: IMechanism) => {
             ))}
             {/* <Typography sx={{ color: theme.palette.mode === "dark" ? gray200 : gray600 }}>{cur.description}</Typography> */}
           </Box>
-          <Box sx={{ width: canvasDimensions.width, height: canvasDimensions.height }}>
+          <Box
+            sx={{
+              width: canvasDimensions.width,
+              height: canvasDimensions.height,
+              display: "grid",
+              placeItems: "center",
+            }}
+          >
             <RiveComponentMemoized
               src={cur.animation.src}
               artboard={cur.animation.artboard}
@@ -123,6 +130,6 @@ const Mechanism = ({ mechanisms }: IMechanism) => {
   );
 };
 
-const getHeight = (width: number) => (300 * width) / 500;
+const getHeight = (width: number) => width;
 
 export default Mechanism;
