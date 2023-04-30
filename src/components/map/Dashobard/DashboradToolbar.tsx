@@ -1,13 +1,14 @@
 import ArrowForwardIosRoundedIcon from "@mui/icons-material/ArrowForwardIosRounded";
 import HomeRoundedIcon from "@mui/icons-material/HomeRounded";
 import InsightsRoundedIcon from "@mui/icons-material/InsightsRounded";
-import { Avatar, Box, Button, Divider, Stack, Typography, useTheme } from "@mui/material";
+import { Box, Button, Divider, Paper, Stack, Typography, useTheme } from "@mui/material";
 import Image from "next/image";
 import React from "react";
 import { User } from "src/knowledgeTypes";
 import { ICourseTag, ISemester } from "src/types/ICourse";
 
 import { SemesterSelect } from "@/components/instructors/SemesterSelect";
+import OptimizedAvatar from "@/components/OptimizedAvatar";
 import { DESIGN_SYSTEM_COLORS } from "@/lib/theme/colors";
 
 import Logo1Cademy from "../../../../public/full-logo.svg";
@@ -43,7 +44,7 @@ export const DashboradToolbar = ({
   } = useTheme();
   if (!user) return null;
   return (
-    <Box
+    <Paper
       sx={{
         width: "100%",
         display: "flex",
@@ -51,7 +52,7 @@ export const DashboradToolbar = ({
         justifyContent: "space-between",
         minHeight: "100%",
         p: "16px",
-        bgcolor: mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookG900 : DESIGN_SYSTEM_COLORS.gray25,
+        bgcolor: mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookMainBlack : DESIGN_SYSTEM_COLORS.gray50,
       }}
     >
       <Stack spacing={"16px"}>
@@ -69,7 +70,12 @@ export const DashboradToolbar = ({
             borderRadius: "16px",
           }}
         >
-          <Avatar src={user.imageUrl} alt={`${user.fName} ${user.lName}`} />
+          <OptimizedAvatar
+            imageUrl={user.imageUrl}
+            renderAsAvatar={true}
+            contained={false}
+            name={`${user.fName} ${user.lName}`}
+          />
           <Box>
             <Typography p="0">
               {user.fName} {user.lName}
@@ -159,6 +165,6 @@ export const DashboradToolbar = ({
         <ArrowForwardIosRoundedIcon fontSize="small" sx={{ mr: "8px" }} />
         Go to Notebook
       </Button>
-    </Box>
+    </Paper>
   );
 };

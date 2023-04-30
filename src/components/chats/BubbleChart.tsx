@@ -151,13 +151,17 @@ function drawChart(
     .attr("transform", `translate(30, 30)`)
     .attr("rx", "10px")
     .attr("ry", "10px")
-    .attr("stroke", DESIGN_SYSTEM_COLORS.notebookG500)
+    .attr("fill", theme === "Dark" ? DESIGN_SYSTEM_COLORS.notebookG700 : DESIGN_SYSTEM_COLORS.gray100)
+    .attr("stroke", theme === "Dark" ? DESIGN_SYSTEM_COLORS.notebookG500 : DESIGN_SYSTEM_COLORS.gray250)
     .attr("stroke-width", 1)
     .lower();
 
   svg.selectAll("path").attr("stroke", "transparent").lower();
 
-  svg.selectAll("line").attr("stroke", DESIGN_SYSTEM_COLORS.notebookG500).lower();
+  svg
+    .selectAll("line")
+    .attr("stroke", theme === "Dark" ? DESIGN_SYSTEM_COLORS.notebookG500 : DESIGN_SYSTEM_COLORS.gray250)
+    .lower();
   // svg.append("g").attr("class", "grid").call(d3.axisLeft(y).tickSize(-width));
 
   // color palette = one color per subgroup
@@ -288,7 +292,7 @@ export const BubbleChart = ({
   return (
     <div style={{ position: "relative" }}>
       <svg ref={svg} style={{ position: "relative" }}>
-        <rect id="background" fill={`${DESIGN_SYSTEM_COLORS.notebookG700}`} />
+        <rect id="background" />
         <g id="nums"></g>
         <g id="mesh"></g>
         <g id="location">

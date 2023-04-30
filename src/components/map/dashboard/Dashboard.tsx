@@ -703,7 +703,7 @@ export const Dashboard = ({ user, currentSemester }: DashboardProps) => {
             display: "grid",
             placeItems: "center",
             p: { sm: "10px", md: "24px" },
-            backgroundColor: mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookMainBlack : DESIGN_SYSTEM_COLORS.baseWhite,
+            backgroundColor: mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookMainBlack : DESIGN_SYSTEM_COLORS.gray50,
           }}
         >
           {isLoading && <GeneralPlotStatsSkeleton />}
@@ -723,7 +723,7 @@ export const Dashboard = ({ user, currentSemester }: DashboardProps) => {
             display: "flex",
             flexDirection: "column",
             justifyContent: "center",
-            backgroundColor: mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookMainBlack : DESIGN_SYSTEM_COLORS.baseWhite,
+            backgroundColor: mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookMainBlack : DESIGN_SYSTEM_COLORS.gray50,
           }}
         >
           {isLoading && <StackedBarPlotStatsSkeleton />}
@@ -784,7 +784,7 @@ export const Dashboard = ({ user, currentSemester }: DashboardProps) => {
           // className="test"
           sx={{
             p: isMovil ? "10px" : "16px",
-            backgroundColor: mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookMainBlack : DESIGN_SYSTEM_COLORS.baseWhite,
+            backgroundColor: mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookMainBlack : DESIGN_SYSTEM_COLORS.gray50,
           }}
         >
           {isLoading && <BubblePlotStatsSkeleton />}
@@ -849,7 +849,7 @@ export const Dashboard = ({ user, currentSemester }: DashboardProps) => {
           justifyContent: "center",
           alignItems: "center",
           p: isMovil ? "10px" : "16px",
-          backgroundColor: mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookMainBlack : DESIGN_SYSTEM_COLORS.baseWhite,
+          backgroundColor: mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookMainBlack : DESIGN_SYSTEM_COLORS.gray50,
         }}
       >
         <Box
@@ -972,7 +972,7 @@ export const Dashboard = ({ user, currentSemester }: DashboardProps) => {
             justifyContent: "center",
             alignItems: "center",
             p: isMovil ? "10px" : "16px",
-            backgroundColor: mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookMainBlack : DESIGN_SYSTEM_COLORS.baseWhite,
+            backgroundColor: mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookMainBlack : DESIGN_SYSTEM_COLORS.gray50,
           }}
         >
           {!isLoading && (
@@ -1047,8 +1047,7 @@ export const Dashboard = ({ user, currentSemester }: DashboardProps) => {
                 display: trendStats[trendStat].length > 0 ? "flex" : "none",
                 alignItems: "center",
                 justifyContent: "center",
-                backgroundColor:
-                  mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookMainBlack : DESIGN_SYSTEM_COLORS.baseWhite,
+                backgroundColor: mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookMainBlack : DESIGN_SYSTEM_COLORS.gray50,
                 borderRadius: "8px",
               }}
             >
