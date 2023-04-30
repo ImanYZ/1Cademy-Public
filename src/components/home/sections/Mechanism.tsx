@@ -21,20 +21,20 @@ export const MECHANISM_ITEMS: TMechanisms[] = [
     id: "summarizing",
     title: "Summarizing",
     description:
-      "1Cademy aims to convert human knowledge into an easily digestible presentation and representation that facilitates efficient learning. The issue of “knowledge overload” arises from the redundancy of the same topics being covered in numerous books, websites, and videos. This is exacerbated by mass generation of content by large language models. To maximize our learning potential, we must eliminate overlapping content and merge all available explanations for a particular subject into a single comprehensive chunk. This chunk should encompass various perspectives and use-cases side-by-side, allowing learners to refer to it as the sole source for complete mastery of the topic. Conventional knowledge structures organized in pages, whether in books or on websites, do not serve this purpose. Instead, we must divide the content into smaller chunks, each dedicated to a single topic.\nThrough a human-AI collaboration, we gather valuable information from various sources such as books, articles, and videos, divide it into granular pieces, and identify the overlapping pieces. We then combine them into concise notes, each focusing on a single concept. Traditional note-taking methods often only benefit the individual for a short period of time, typically for a semester or two. 1Cademy's human-AI collaborative note-taking approach ensures that the notes are useful and usable for multiple students studying the same topics.",
+      "1Cademy's goal is to streamline the learning process by converting human knowledge into easily digestible micro-content that eliminates redundancy. By combining various perspectives for a given concept within a particular discipline, learners can master this concept by referring to a single comprehensive piece of micro-content. To achieve this, 1Cademy uses human-AI collaboration to gather valuable knowledge from multiple sources and merges it into concise pieces. This collaborative note-taking approach ensures that the micro-content is applicable to various students studying the same topics, beyond the scope of just one semester.",
     animation: {
-      src: "rive/notebook.riv",
-      artboard: "artboard-3",
+      src: "rive/summarizing.riv",
+      artboard: "New Artboard",
     },
   },
   {
     id: "linking",
     title: "Linking",
     description:
-      "To facilitate efficient learning we need to develop progressive learning content, but the representation of the granular notes should not be combined into multiple larger constructs, such as books or collections. Doing so perpetuates the issue of overlapping content and knowledge overload because larger constructs require contextual knowledge that are also covered in other large constructs. While they provide progressive learning content, in the aggregate they create a surplus of overlapping knowledge and defeat the purpose of efficient learning. Instead, we need to develop a single, comprehensive “prerequisite knowledge graph” of the granular notes.",
+      'Efficient learning requires progressive learning content without overlapping knowledge that creates redundancy. 1Cademy divides learning content into micro-content that define a single concept and can be used in a variety of learning contexts and goals. This mitigates the redundancy and disorientation of reading a concept defined in different ways from numerous pieces of literature. This can be achieved through a comprehensive "prerequisite knowledge graph" of micro-content. To address competing or conflicting claims on a given concept, we link the differing views to a generic definition of the concept so that the opposed views can be compared in a side-by-side presentation. 1Cademy notebooks are knowledge graphs of these micro-content pieces, shared among many learners and researchers, who continually improve and add perspectives to the content over time.',
     animation: {
-      src: "rive/notebook.riv",
-      artboard: "artboard-4",
+      src: "rive/linking.riv",
+      artboard: "New Artboard",
     },
   },
   {
