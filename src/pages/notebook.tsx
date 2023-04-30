@@ -998,6 +998,7 @@ const Dashboard = ({}: DashboardProps) => {
                 top: tmpNode?.top ?? topParent,
                 visible: Boolean((cur.notebooks ?? [])[notebookIdx]),
                 open: Boolean((cur.expands ?? [])[notebookIdx]),
+                editable: tmpNode?.editable ?? false,
               };
             });
 
@@ -3063,9 +3064,9 @@ const Dashboard = ({}: DashboardProps) => {
       setNodeParts(nodeId, (thisNode: FullNodeData) => {
         const choices = [...thisNode.choices];
         choices.push({
-          choice: "Replace this with the choice.",
+          choice: "",
           correct: true,
-          feedback: "Replace this with the choice-specific feedback.",
+          feedback: "",
         });
         thisNode.choices = choices;
         return { ...thisNode };
@@ -3516,9 +3517,9 @@ const Dashboard = ({}: DashboardProps) => {
         if (childNodeType === "Question") {
           newChildNode.choices = [
             {
-              choice: "Replace this with the choice.",
+              choice: "",
               correct: true,
-              feedback: "Replace this with the choice-specific feedback.",
+              feedback: "",
             },
           ];
         }
