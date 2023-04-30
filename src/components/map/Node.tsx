@@ -170,6 +170,8 @@ type NodeProps = {
   // expands: boolean[];
   // selectedNotebookId: string;
   open: boolean;
+  nodeHeigth: number;
+  hideNode: boolean;
 };
 
 const proposedChildTypesIcons: { [key in ProposedChildTypesIcons]: string } = {
@@ -289,10 +291,9 @@ const Node = ({
   setAbleToPropose,
   openPart,
   setOpenPart,
-}: // notebooks,
-// expands,
-// selectedNotebookId: selectedNotebook,
-NodeProps) => {
+  hideNode,
+  nodeHeigth,
+}: NodeProps) => {
   const [{ user }] = useAuth();
   const { nodeBookState } = useNodeBook();
   const [option, setOption] = useState<EditorOptions>("EDIT");
@@ -306,7 +307,7 @@ NodeProps) => {
   const [videoUrl, setVideoUrl] = useState(nodeVideo);
   const [videoStartTime, setVideoStartTime] = useState<any>(nodeVideoStartTime ? nodeVideoStartTime : 0);
   const [videoEndTime, setVideoEndTime] = useState<any>(nodeVideoEndTime ? nodeVideoEndTime : 0);
-  const nodeRef = useRef(null);
+  const nodeRef = useRef<HTMLDivElement>(null);
   const previousHeightRef = useRef<number>(0);
   const previousTopRef = useRef<string>("0px");
   const observer = useRef<ResizeObserver | null>(null);
@@ -325,6 +326,7 @@ NodeProps) => {
   const [timePickerError, setTimePickerError] = React.useState<any>(false);
   const [contentCopy, setContentCopy] = useState(content);
   const [isLoading, startTransition] = useTransition();
+
   const childNodeButtonsAnimation = keyframes({
     from: { left: "500px", zIndex: -999 },
     to: { left: "600px", zIndex: 0 },
@@ -741,6 +743,78 @@ NodeProps) => {
   if (!user) {
     return null;
   }
+
+  if (hideNode && !editable) {
+    return (
+      <div
+        ref={nodeRef}
+        id={identifier}
+        onClick={nodeClickHandler}
+        data-hoverable={true}
+        className={
+          "Node card" +
+          (activeNode ? " active" : "") +
+          (changed || !isStudied ? " Changed" : "") +
+          (isHiding ? " IsHiding" : "") +
+          (nodeType === "Reference" ? " Choosable" : "")
+        }
+        style={{
+          height: nodeHeigth,
+          maxHeight: nodeHeigth,
+          left: left ? left : 1000,
+          top: top ? top : 1000,
+          width,
+          transition: "0.3s",
+          padding: "13px 13px 13px 12px",
+          display: "flex",
+          flexDirection: "column",
+          justifyContent: "space-between",
+        }}
+      >
+        {/* currentScaleThreshold > 0.2 ? 8 / currentScaleThreshold : 8 / 0.2 */}
+        {/* <Typography fontSize={`${currentScale > 0.32 ? 16 / currentScale : 16 / 0.32}px`}>{title}</Typography> */}
+        <Box
+          sx={{
+            position: "relative",
+            display: "grid",
+            placeItems: "center",
+            height: "100%",
+            width: "100%",
+            "-webkit-line-clamp": 2,
+
+            overflow: "hidden",
+            textOverflow: "ellipsis",
+            "& > p": {
+              margin: 0,
+              lineHeight: "1.2em",
+              maxHeight: "2.4em",
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+              "-webkit-box-orient": "vertical",
+              "-webkit-line-clamp": 2,
+              display: "-webkit-box",
+            },
+          }}
+        >
+          <Typography
+            component={"p"}
+            fontSize={`${14 / 0.32}px`}
+            fontWeight={500}
+            textAlign={"center"}
+            textOverflow={"ellipsis"}
+          >
+            {title}
+          </Typography>
+          <NodeTypeIcon
+            nodeType={nodeType}
+            tooltipPlacement="bottom"
+            sx={{ fontSize: `${30}px`, position: "absolute", bottom: "4px", left: "4px" }}
+          />
+        </Box>
+      </div>
+    );
+  }
+
   return (
     <div
       ref={nodeRef}
@@ -1506,6 +1580,7 @@ export const MemoizedNode = React.memo(Node, (prev, next) => {
     prev.disableVotes === next.disableVotes &&
     prev.openPart === next.openPart &&
     prev.openSidebar === next.openSidebar &&
+    prev.hideNode === next.hideNode &&
     (!next.activeNode || prev.ableToPropose === next.ableToPropose);
   if (
     !basicChanges ||

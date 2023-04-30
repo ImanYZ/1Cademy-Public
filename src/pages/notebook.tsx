@@ -4318,6 +4318,28 @@ const Dashboard = ({}: DashboardProps) => {
     [nodeBookDispatch]
   );
 
+  const hideNodeContent = useMemo(() => {
+    if (!user || !user.scaleThreshold) return false;
+    let defaultScaleDevice = 0.45;
+    if (windowWith < 400) {
+      defaultScaleDevice = 0.45;
+    } else if (windowWith < 600) {
+      defaultScaleDevice = 0.575;
+    } else if (windowWith < 1260) {
+      defaultScaleDevice = 0.8;
+    } else {
+      defaultScaleDevice = 0.92;
+    }
+    const userThresholdPercentage = user.scaleThreshold;
+    let userThresholdcurrentScale = 1;
+
+    userThresholdcurrentScale = (userThresholdPercentage * defaultScaleDevice) / 100;
+
+    console.log({ currentScale: mapInteractionValue.scale, userThresholdcurrentScale });
+
+    return mapInteractionValue.scale < userThresholdcurrentScale;
+  }, [mapInteractionValue.scale, user, windowWith]);
+
   const handleCloseProgressBarMenu = useCallback(() => {
     setOpenProgressBarMenu(false);
   }, []);
@@ -5559,7 +5581,7 @@ const Dashboard = ({}: DashboardProps) => {
     if (!tutorial) return;
     if (!currentStep) return;
 
-    if (focusView.isEnabled) {
+    if (focusView.isEnabled || hideNodeContent) {
       setTutorial(null);
       setForcedTutorial(null);
       return;
@@ -5985,6 +6007,7 @@ const Dashboard = ({}: DashboardProps) => {
     firstLoading,
     focusView.isEnabled,
     graph.nodes,
+    hideNodeContent,
     nodeBookState.selectedNode,
     openLivelinessBar,
     openProgressBar,
@@ -6825,6 +6848,7 @@ const Dashboard = ({}: DashboardProps) => {
                   setAbleToPropose={setAbleToPropose}
                   setOpenPart={onChangeNodePart}
                   // selectedNotebookId={selectedNotebookId}
+                  hideNode={hideNodeContent}
                 />
               </MapInteractionCSS>
 
