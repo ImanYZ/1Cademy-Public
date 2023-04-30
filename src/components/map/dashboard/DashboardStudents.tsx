@@ -8,7 +8,6 @@ import {
   Box,
   Button,
   Chip,
-  Link,
   Paper,
   Popover,
   Stack,
@@ -25,7 +24,6 @@ import {
 } from "@mui/material";
 import IconButton from "@mui/material/IconButton";
 import { collection, getFirestore, onSnapshot, query, where } from "firebase/firestore";
-import LinkNext from "next/link";
 import React, { useEffect, useState } from "react";
 import { CourseTag } from "src/instructorsTypes";
 import { ISemester, ISemesterStudentVoteStat } from "src/types/ICourse";
@@ -38,6 +36,8 @@ import OptimizedAvatar from "@/components/OptimizedAvatar";
 import { postWithToken } from "@/lib/mapApi";
 import { DESIGN_SYSTEM_COLORS } from "@/lib/theme/colors";
 import { calculateVoteStatPoints } from "@/lib/utils/charts.utils";
+
+import { ToolbarView } from "./DashboardWrapper";
 
 const filterChoices: any = {
   "Total Points": "totalPoints",
@@ -109,9 +109,10 @@ const keysColumns: any = {
 
 type DashboardStudentsProps = {
   currentSemester: CourseTag | null;
+  onSelectUserHandler: (uname: string, view: ToolbarView) => void;
 };
 
-export const DashboardStudents = ({ currentSemester }: DashboardStudentsProps) => {
+export const DashboardStudents = ({ currentSemester, onSelectUserHandler }: DashboardStudentsProps) => {
   const [keys, setKeys] = useState([...defaultKeys]);
   const [columns, setColumns] = useState([...defaultColumns]);
   const [rows, setRows] = useState<any>([]);
@@ -131,7 +132,7 @@ export const DashboardStudents = ({ currentSemester }: DashboardStudentsProps) =
   const isMovil = useMediaQuery(theme.breakpoints.down("md"));
   const [openProfile, setOpenProfile] = useState(false);
   const [selectedColumn, setSelectedColumn] = useState("");
-  const [openedProfile, setOpenedProfile] = useState(tableRows.slice()[0]);
+  const [openedProfile /* setOpenedProfile */] = useState(tableRows.slice()[0]);
   const [savedTableState, setSavedTableState] = useState([]);
   const [states, setStates] = useState<ISemesterStudentVoteStat[]>([]);
   const [anchorEl, setAnchorEl] = useState(null);
@@ -492,12 +493,6 @@ export const DashboardStudents = ({ currentSemester }: DashboardStudentsProps) =
     };
     const updateFilters = [...filters, newFilter];
     setFilters(updateFilters);
-  };
-
-  const openThisProfile = (row: any) => {
-    if (!isMovil) return;
-    setOpenedProfile(row);
-    handleOpenCloseProfile();
   };
 
   const saveTableChanges = async () => {
@@ -1043,9 +1038,12 @@ export const DashboardStudents = ({ currentSemester }: DashboardStudentsProps) =
                         ) : (
                           <>
                             {["firstName", "lastName"].includes(colmn) ? (
-                              <LinkNext passHref href={isMovil ? "#" : "/instructors/dashboard/" + row.username}>
-                                <Link onClick={() => openThisProfile(row)}>{row[colmn]}</Link>
-                              </LinkNext>
+                              <Typography
+                                onClick={() => onSelectUserHandler(row.username, "DASHBOARD")}
+                                sx={{ color: DESIGN_SYSTEM_COLORS.primary800, cursor: "pointer" }}
+                              >
+                                {row[colmn]}
+                              </Typography>
                             ) : (
                               <>{row[colmn]}</>
                             )}
