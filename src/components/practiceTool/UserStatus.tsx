@@ -5,7 +5,7 @@ import NavigateNextIcon from "@mui/icons-material/NavigateNext";
 import { Box, IconButton, Stack, Typography } from "@mui/material";
 import { getFirestore } from "firebase/firestore";
 import Image from "next/image";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 
 import { getSemesterById } from "../../client/serveless/semesters.serverless";
 import { getSemesterStudentVoteStatsByIdAndStudent } from "../../client/serveless/semesterStudentVoteStat.serverless";
@@ -58,6 +58,11 @@ export const UserStatus = ({ user, semesterId, displayTitle = true }: UserStatus
       dates: prev.dates.map(cur => moveDateByDays(cur, -7)),
     }));
   };
+
+  const practiceDaysInfo: PracticeDayInfo = useMemo(() => {
+    if (!semester || !semesterStudentVoteStats) return { successPracticeDays: 0, totalPracticeDays: 0 };
+    return getDaysInSemester(semester, semesterStudentVoteStats, semester.dailyPractice.numQuestionsPerDay);
+  }, [semester, semesterStudentVoteStats]);
 
   useEffect(() => {
     const getSemesterStudentVotesStats = async () => {
@@ -114,9 +119,9 @@ export const UserStatus = ({ user, semesterId, displayTitle = true }: UserStatus
         <Box sx={{ display: "flex" }}>
           <Box
             sx={{
-              width: "56px",
-              height: "56px",
-              borderRadius: "30px",
+              width: "90px",
+              height: "90px",
+              borderRadius: "50%",
               color: theme => theme.palette.common.gray,
               mr: "20px",
             }}
@@ -124,23 +129,22 @@ export const UserStatus = ({ user, semesterId, displayTitle = true }: UserStatus
             <Image
               src={user.imageUrl ?? ""}
               alt={`${user.uname} profile picture`}
-              width="56px"
-              height="56px"
-              quality={40}
+              width="90px"
+              height="90px"
+              quality={80}
               objectFit="cover"
-              style={{ borderRadius: "30px" }}
+              style={{ borderRadius: "50%" }}
             />
           </Box>
-          <Box>
-            <Typography
-              sx={{ fontWeight: 500, fontSize: "20px", mb: "6px" }}
-            >{`${user.fName} ${user.lName}`}</Typography>
+          <Stack spacing={"6px"}>
+            <Typography sx={{ fontWeight: 500, fontSize: "20px" }}>{`${user.fName} ${user.lName}`}</Typography>
             <Stack direction={"row"} spacing="12px">
               <PointsType points={semesterStudentVoteStats.totalPractices ?? 0} fontWeight={400}>
                 <CheckIcon sx={{ color: DESIGN_SYSTEM_COLORS.success600, fontSize: "16px" }} />
               </PointsType>
             </Stack>
-          </Box>
+            <Typography>{`Days in semester ${practiceDaysInfo.successPracticeDays}/${practiceDaysInfo.totalPracticeDays}`}</Typography>
+          </Stack>
         </Box>
         <Stack alignItems={"center"} spacing="6px">
           <Box
@@ -155,7 +159,7 @@ export const UserStatus = ({ user, semesterId, displayTitle = true }: UserStatus
           >
             {calculateDailyStreak(semesterStudentVoteStats)}
           </Box>
-          <Typography>Daily streak</Typography>
+          <Typography sx={{ fontSize: "14px", color: DESIGN_SYSTEM_COLORS.gray25 }}>Daily streak</Typography>
         </Stack>
       </Box>
 
@@ -248,4 +252,20 @@ const calculateDailyStreak = (semesterStudentStats: ISemesterStudentVoteStat): n
     { max: 0, newMax: 0, previousDate: "" }
   );
   return dailyStreakResult.max > dailyStreakResult.newMax ? dailyStreakResult.max : dailyStreakResult.newMax;
+};
+
+type PracticeDayInfo = { successPracticeDays: number; totalPracticeDays: number };
+
+const getDaysInSemester = (
+  semester: ISemester,
+  semesterStudentStats: ISemesterStudentVoteStat,
+  numQuestionsPerDay: number
+): PracticeDayInfo => {
+  const endDate = semester.dailyPractice.endDate.toDate();
+  const startDate = semester.dailyPractice.startDate.toDate();
+  const totalPracticeDays = differentBetweenDays(endDate, startDate);
+  const successPracticeDays = semesterStudentStats.days.filter(
+    cur => cur.correctPractices >= numQuestionsPerDay
+  ).length;
+  return { successPracticeDays, totalPracticeDays };
 };

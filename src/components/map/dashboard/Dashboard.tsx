@@ -671,7 +671,8 @@ export const Dashboard = ({ user, currentSemester }: DashboardProps) => {
             sx={{
               height: "588px",
               p: { sm: "10px", md: "16px" },
-              backgroundColor: theme => (theme.palette.mode === "light" ? "#FFFFFF" : undefined),
+              backgroundColor:
+                mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookMainBlack : DESIGN_SYSTEM_COLORS.baseWhite,
             }}
           >
             <UserStatus user={user} semesterId={currentSemester.tagId} displayTitle={false} />
@@ -680,7 +681,8 @@ export const Dashboard = ({ user, currentSemester }: DashboardProps) => {
             sx={{
               height: "588px",
               p: { sm: "10px", md: "16px" },
-              backgroundColor: theme => (theme.palette.mode === "light" ? "#FFFFFF" : undefined),
+              backgroundColor:
+                mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookMainBlack : DESIGN_SYSTEM_COLORS.baseWhite,
             }}
           >
             <Leaderboard semesterId={currentSemester.tagId} sxBody={{ maxHeight: "435px" }} />
