@@ -673,7 +673,13 @@ export const Dashboard = ({ user, currentSemester }: DashboardProps) => {
                 mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookMainBlack : DESIGN_SYSTEM_COLORS.baseWhite,
             }}
           >
-            <UserStatus user={user} semesterId={currentSemester.tagId} displayTitle={false} displayStreak={false} />
+            <UserStatus
+              user={user}
+              semesterId={currentSemester.tagId}
+              displayTitle={false}
+              displayFooterStreak={false}
+              displayHeaderStreak
+            />
           </Paper>
           <Paper
             sx={{

@@ -18,7 +18,7 @@ import {
   moveDateByDays,
   SHORT_MONTH_NAMES,
 } from "../../lib/utils/date.utils";
-import { ISemester, ISemesterStudentVoteStat } from "../../types/ICourse";
+import { ISemester, ISemesterStudentVoteStat, ISemesterStudentVoteStatDay } from "../../types/ICourse";
 import { PointsType } from "../PointsType";
 import { filterDayStatsByWeek } from "./Leaderboard";
 
@@ -33,10 +33,17 @@ type UserStatusProps = {
   user: User;
   semesterId: string;
   displayTitle?: boolean;
-  displayStreak?: boolean;
+  displayFooterStreak?: boolean;
+  displayHeaderStreak?: boolean;
 };
 
-export const UserStatus = ({ user, semesterId, displayTitle = true, displayStreak = true }: UserStatusProps) => {
+export const UserStatus = ({
+  user,
+  semesterId,
+  displayTitle = true,
+  displayFooterStreak = true,
+  displayHeaderStreak = false,
+}: UserStatusProps) => {
   const db = getFirestore();
   const [daysValue, setDaysValue] = useState<DailyPoint[]>([]);
   const [semester, setSemester] = useState<ISemester | null>(null);
@@ -116,37 +123,58 @@ export const UserStatus = ({ user, semesterId, displayTitle = true, displayStrea
           borderBottom: `solid 1px ${DESIGN_SYSTEM_COLORS.notebookG600}`,
         }}
       >
-        <Box sx={{ display: "flex" }}>
-          <Box
-            sx={{
-              width: "90px",
-              height: "90px",
-              borderRadius: "50%",
-              color: theme => theme.palette.common.gray,
-              mr: "20px",
-            }}
-          >
-            <Image
-              src={user.imageUrl ?? ""}
-              alt={`${user.uname} profile picture`}
-              width="90px"
-              height="90px"
-              quality={80}
-              objectFit="cover"
-              style={{ borderRadius: "50%" }}
-            />
-          </Box>
-          <Stack spacing={"6px"}>
-            <Typography sx={{ fontWeight: 500, fontSize: "20px" }}>{`${user.fName} ${user.lName}`}</Typography>
-            <Stack direction={"row"} spacing="12px">
-              <PointsType points={semesterStudentVoteStats.totalPractices ?? 0} fontWeight={400}>
-                <CheckIcon sx={{ color: DESIGN_SYSTEM_COLORS.success600, fontSize: "16px" }} />
-              </PointsType>
+        <Box sx={{ width: "100%", display: "flex", justifyContent: "space-betweens" }}>
+          <Stack direction={"row"} flex={1}>
+            <Box
+              sx={{
+                width: "90px",
+                height: "90px",
+                borderRadius: "50%",
+                color: theme => theme.palette.common.gray,
+                mr: "20px",
+              }}
+            >
+              <Image
+                src={user.imageUrl ?? ""}
+                alt={`${user.uname} profile picture`}
+                width="90px"
+                height="90px"
+                quality={80}
+                objectFit="cover"
+                style={{ borderRadius: "50%" }}
+              />
+            </Box>
+            <Stack spacing={"6px"}>
+              <Typography sx={{ fontWeight: 500, fontSize: "20px" }}>{`${user.fName} ${user.lName}`}</Typography>
+              <Stack direction={"row"} spacing="12px">
+                <PointsType points={semesterStudentVoteStats.totalPractices ?? 0} fontWeight={400}>
+                  <CheckIcon sx={{ color: DESIGN_SYSTEM_COLORS.success600, fontSize: "16px" }} />
+                </PointsType>
+              </Stack>
+              <Typography
+                fontWeight={"500"}
+              >{`Days in semester ${practiceDaysInfo.successPracticeDays}/${practiceDaysInfo.totalPracticeDays}`}</Typography>
             </Stack>
-            <Typography
-              fontWeight={"500"}
-            >{`Days in semester ${practiceDaysInfo.successPracticeDays}/${practiceDaysInfo.totalPracticeDays}`}</Typography>
           </Stack>
+          {displayHeaderStreak && (
+            <Box sx={{ display: "grid", placeItems: "center", gap: "6px" }}>
+              <Box
+                sx={{
+                  width: "48px",
+                  height: "48px",
+                  border: `solid 2px ${DESIGN_SYSTEM_COLORS.success500}`,
+                  borderRadius: "50%",
+                  display: "grid",
+                  placeItems: "center",
+                }}
+              >
+                <Typography fontSize={"16px"} fontWeight={"500"} color={DESIGN_SYSTEM_COLORS.success500}>
+                  {calculateDailyStreak(semesterStudentVoteStats)}
+                </Typography>
+              </Box>
+              <Typography sx={{ fontSize: "16px", color: DESIGN_SYSTEM_COLORS.gray25 }}>Daily streak</Typography>
+            </Box>
+          )}
         </Box>
       </Box>
 
@@ -215,7 +243,7 @@ export const UserStatus = ({ user, semesterId, displayTitle = true, displayStrea
             ))}
           </Stack>
         </Stack>
-        {displayStreak && (
+        {displayFooterStreak && (
           <>
             <Divider sx={{ mb: "24px" }} />
             <Box sx={{ display: "grid", placeItems: "center", gap: "8px" }}>
@@ -267,19 +295,31 @@ const mapSemesterStudentStatsToWeekStats = (
   }));
 };
 
-type DailyStreak = { max: number; newMax: number; previousDate: string };
+type Numbers<T> = Pick<
+  T,
+  {
+    [K in keyof T]: T[K] extends number ? K : never;
+  }[keyof T]
+>;
+
+type DailyPoints = {
+  [key: string]: number;
+};
+const calcMetricPerDay = (
+  semesterStudentStats: ISemesterStudentVoteStat,
+  metric: keyof Numbers<ISemesterStudentVoteStatDay>
+): DailyPoints => {
+  return semesterStudentStats.days.reduce((acc: DailyPoints, day) => {
+    const today = day.day;
+    console.log({ dailyy: day[metric] });
+    return { ...acc, [today]: acc[today] ? (acc[today] = acc[today] + day[metric]) : day[metric] };
+  }, {});
+};
 
 const calculateDailyStreak = (semesterStudentStats: ISemesterStudentVoteStat): number => {
-  const dailyStreakResult: DailyStreak = semesterStudentStats.days.reduce(
-    (acu: DailyStreak, cur) => {
-      if (!acu.previousDate) return { max: 0, newMax: 0, previousDate: cur.day };
-      const diff = differentBetweenDays(new Date(acu.previousDate), new Date(cur.day));
-      if (diff > 1) return { max: acu.max > acu.newMax ? acu.max : acu.newMax, newMax: 0, previousDate: cur.day };
-      return { max: acu.max, newMax: acu.newMax + 1, previousDate: cur.day };
-    },
-    { max: 0, newMax: 0, previousDate: "" }
-  );
-  return dailyStreakResult.max > dailyStreakResult.newMax ? dailyStreakResult.max : dailyStreakResult.newMax;
+  const dailyCorrectPractices = calcMetricPerDay(semesterStudentStats, "correctPractices");
+  console.log({ dailyCorrectPractices });
+  return 100;
 };
 
 type PracticeDayInfo = { successPracticeDays: number; totalPracticeDays: number };
