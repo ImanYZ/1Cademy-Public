@@ -25,7 +25,9 @@ const getDateYYMMDD = (date = new Date()) => {
 
 export const getDateYYMMDDWithHyphens = (date = new Date()) => {
   const { year, month, day } = getDateYYMMDD(date);
-  return [year, month, day].join("-");
+  const monthFixed = month < 10 ? `0${month}` : month;
+  const dayFixed = day < 10 ? `0${day}` : day;
+  return [year, monthFixed, dayFixed].join("-");
 };
 
 export const moveDateByDays = (date: Date, offset: number): Date => {

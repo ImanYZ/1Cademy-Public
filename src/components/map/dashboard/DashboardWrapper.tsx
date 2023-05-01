@@ -21,6 +21,7 @@ import { CoursesResult } from "@/components/layouts/StudentsLayout";
 
 import { User } from "../../../knowledgeTypes";
 import { DESIGN_SYSTEM_COLORS } from "../../../lib/theme/colors";
+import { NodeType } from "../../../types";
 import { ISemester } from "../../../types/ICourse";
 import { NoDataMessage } from "../../instructors/NoDataMessage";
 import { PracticeTool } from "../../practiceTool/PracticeTool";
@@ -35,12 +36,23 @@ import { DashboardStudents } from "./DashboardStudents";
 type DashboardWrapperProps = {
   user: User;
   onClose: () => void;
+  onCorrectNode: (e: any, nodeId: string) => void;
+  onWrongNode: (
+    event: any,
+    nodeId: string,
+    nodeType: NodeType,
+    wrong: any,
+    correct: any,
+    wrongs: number,
+    corrects: number,
+    locked: boolean
+  ) => void;
   sx?: SxProps<Theme>;
 };
 
 export type ToolbarView = "DASHBOARD" | "PRACTICE" | "SETTINGS" | "STUDENTS";
 
-export const DashboardWrapper = ({ user, onClose, sx }: DashboardWrapperProps) => {
+export const DashboardWrapper = ({ user, onClose, onCorrectNode, onWrongNode, sx }: DashboardWrapperProps) => {
   const db = getFirestore();
 
   // const [semesters, setSemesters] = useState<string[]>([]);
@@ -252,8 +264,8 @@ export const DashboardWrapper = ({ user, onClose, sx }: DashboardWrapperProps) =
                 user={user}
                 currentSemester={currentSemester}
                 onClose={onClose}
-                onCorrectNode={(qq: any) => console.log("dfdfd", qq)}
-                onWrongNode={(qq: any) => console.log("sdfsd", qq)}
+                onCorrectNode={onCorrectNode}
+                onWrongNode={onWrongNode}
               />
             )}
             {selectToolbarView === "SETTINGS" && <DashboardSettings currentSemester={currentSemester} />}

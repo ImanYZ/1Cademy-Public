@@ -23,7 +23,7 @@ export const CustomWrapperButton = ({
       onClick={onClickOnWrapper}
       sx={{
         height: "30px",
-        p: "6px 8px",
+        // p: "6px 8px",
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
@@ -37,12 +37,13 @@ export const CustomWrapperButton = ({
             ? palette.common.notebookG500
             : palette.common.gray200,
         color: ({ palette }) => (palette.mode === "dark" ? palette.common.gray50 : palette.common.gray600),
-        ...(!disabled && {
-          ":hover": {
-            backgroundColor: ({ palette }) =>
-              palette.mode === "dark" ? palette.common.notebookG400 : palette.common.lightBackground2,
-          },
-        }),
+        ...(!disabled &&
+          {
+            // ":hover": {
+            //   backgroundColor: ({ palette }) =>
+            //     palette.mode === "dark" ? palette.common.notebookG400 : palette.common.lightBackground2,
+            // },
+          }),
         ...sx,
       }}
     >
