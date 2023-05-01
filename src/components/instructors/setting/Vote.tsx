@@ -1,16 +1,22 @@
 import CheckIcon from "@mui/icons-material/Check";
 import ClearIcon from "@mui/icons-material/Clear";
 import StarIcon from "@mui/icons-material/Star";
-import { FilledInput, Grid, Paper, Switch, Typography } from "@mui/material";
+import { Divider, FilledInput, Grid, Paper, Typography, useTheme } from "@mui/material";
 import { Box } from "@mui/system";
 import { FC } from "react";
 import React from "react";
+
+import { IOSSwitch } from "@/components/IOSSwitcher";
+import { DESIGN_SYSTEM_COLORS } from "@/lib/theme/colors";
 type Props = {
   inputsHandler: any;
   semester: any;
   switchHandler: any;
 };
 const Vote: FC<Props> = ({ semester, inputsHandler, switchHandler }) => {
+  const {
+    palette: { mode },
+  } = useTheme();
   return (
     <Paper
       sx={{
@@ -19,6 +25,7 @@ const Vote: FC<Props> = ({ semester, inputsHandler, switchHandler }) => {
           xs: "column",
           md: "row",
         },
+        backgroundColor: mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookMainBlack : DESIGN_SYSTEM_COLORS.gray50,
       }}
       elevation={2}
     >
@@ -37,7 +44,7 @@ const Vote: FC<Props> = ({ semester, inputsHandler, switchHandler }) => {
               }}
             >
               Casting Votes
-              <Switch
+              <IOSSwitch
                 inputProps={{ "aria-label": "controlled" }}
                 checked={semester.isCastingVotesRequired}
                 color="primary"
@@ -50,7 +57,7 @@ const Vote: FC<Props> = ({ semester, inputsHandler, switchHandler }) => {
                 * Note that students do not see the instructor(s)' votes on any proposals
               </Typography>
             </Box>
-            <hr style={{ color: "#A5A5A5" }} />
+            <Divider sx={{ my: "16px" }} />
             <Box
               sx={{
                 ...(!semester.isCastingVotesRequired && {
@@ -138,7 +145,7 @@ const Vote: FC<Props> = ({ semester, inputsHandler, switchHandler }) => {
               }}
             >
               Getting Votes
-              <Switch
+              <IOSSwitch
                 inputProps={{ "aria-label": "controlled" }}
                 checked={semester.isGettingVotesRequired}
                 color="primary"
@@ -146,7 +153,7 @@ const Vote: FC<Props> = ({ semester, inputsHandler, switchHandler }) => {
                 onChange={switchHandler}
               />
             </Typography>
-            <hr style={{ color: "#A5A5A5" }} />
+            <Divider sx={{ my: "16px" }} />
             <Box
               sx={{
                 ...(!semester.isGettingVotesRequired && {

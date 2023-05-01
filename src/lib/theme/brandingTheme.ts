@@ -118,6 +118,9 @@ export const getDesignTokens = (mode: "light" | "dark") =>
     },
   } as ThemeOptions);
 
+// TODO: override with trypografy with
+// https://mui.com/material-ui/customization/typography/#adding-amp-disabling-variants
+
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export function getThemedComponents(theme: Theme): {
   components: Theme["components"];

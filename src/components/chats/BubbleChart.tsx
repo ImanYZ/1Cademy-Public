@@ -3,29 +3,20 @@ import React, { useCallback } from "react";
 import { UserRole, UserTheme } from "src/knowledgeTypes";
 import { ISemesterStudent } from "src/types/ICourse";
 
+import { DESIGN_SYSTEM_COLORS } from "@/lib/theme/colors";
+
 import { BubbleStats, SemesterStudentVoteStat } from "../../instructorsTypes";
 
 // import { BubbleStats } from "@/pages/instructors/dashboard";
 
 // const columns = ["fruit", "vegetable"];
 
-// const GREEN = "rgb(56, 142, 60)";
-// const GREEN_ALPHA = "rgba(129, 199, 132, 0.5)";
-const RED = "rgb(239, 83, 80)";
-const RED_ALPHA = "rgba(239, 83, 80, 0.5)";
-const GRAY = "rgb(117, 117, 117)";
-const GRAY_ALPHA = "rgba(237, 237, 237, 0.5)";
-// const ORANGE = "rgb(255, 138, 51)";
-// const ORANGE_ALPHA = "rgba(251, 204, 169, 0.5)";
-
-const LESS_EQUAL_THAN_10_COLOR = "rgb(255, 196, 153)";
-const LESS_EQUAL_THAN_10_COLOR_ALPHA = "rgba(255, 196, 153, .75)";
-const GREATER_THAN_10_COLOR = "rgb(249, 226, 208 )";
-const GREATER_THAN_10_COLOR_ALPHA = "rgba(249, 226, 208, .75)";
-const GREATER_THAN_50_COLOR = "rgb(167, 216, 65 )";
-const GREATER_THAN_50_COLOR_ALPHA = "rgba(167, 216, 65, .75)";
-const GREATER_THAN_100_COLOR = "rgb(56, 142, 60)";
-const GREATER_THAN_100_COLOR_ALPHA = "rgba(56, 142, 60, .75)";
+const RED = "#E04F16";
+const GRAY = "#575757";
+const LESS_EQUAL_THAN_10_COLOR = "#F7B27A";
+const GREATER_THAN_10_COLOR = "#F9DBAF";
+const GREATER_THAN_50_COLOR = "#A7D841";
+const GREATER_THAN_100_COLOR = "#388E3C";
 
 // const data = [
 //   { students: 30, votes: 170, points: 40 },
@@ -125,20 +116,53 @@ function drawChart(
   // remove axis if exists
   svg.select("#axis-x").remove();
   svg.select("#axis-y").remove();
+  svg.select("#bubbles").remove();
   // Add X axis
   const x = d3.scaleLinear().domain([minAxisX, maxAxisX]).range([0, widthProcessed]);
   svg
     .append("g")
     .attr("id", "axis-x")
     .attr("transform", `translate(30, ${height + 30})`)
-    .call(d3.axisBottom(x).tickSizeOuter(0));
+    .call(d3.axisBottom(x).tickSizeOuter(0).tickSize(-height).tickPadding(8).tickValues(x.ticks().slice(1)))
+    .style("font-size", "12px")
+    .selectAll("line")
+    .style("color", DESIGN_SYSTEM_COLORS.notebookG400)
+    .lower();
 
   // Add Y axis
   const y = d3
     .scaleLinear()
     .domain([minAxisY, maxAxisY + 10])
     .range([height, 0]);
-  svg.append("g").attr("id", "axis-y").attr("transform", `translate(30, 30)`).call(d3.axisLeft(y));
+  svg
+    .append("g")
+    .attr("id", "axis-y")
+    .attr("transform", `translate(30, 30)`)
+    .call(d3.axisLeft(y).tickSizeOuter(0).tickSize(-width).tickPadding(8).tickValues(y.ticks().slice(1)))
+    .style("font-size", "12px")
+    .selectAll("line")
+    .attr("stroke", DESIGN_SYSTEM_COLORS.notebookG400)
+    .lower();
+
+  svg
+    .select("#background")
+    .attr("width", width - 30.75)
+    .attr("height", height)
+    .attr("transform", `translate(30, 30)`)
+    .attr("rx", "10px")
+    .attr("ry", "10px")
+    .attr("fill", theme === "Dark" ? DESIGN_SYSTEM_COLORS.notebookG700 : DESIGN_SYSTEM_COLORS.gray100)
+    .attr("stroke", theme === "Dark" ? DESIGN_SYSTEM_COLORS.notebookG500 : DESIGN_SYSTEM_COLORS.gray250)
+    .attr("stroke-width", 1)
+    .lower();
+
+  svg.selectAll("path").attr("stroke", "transparent").lower();
+
+  svg
+    .selectAll("line")
+    .attr("stroke", theme === "Dark" ? DESIGN_SYSTEM_COLORS.notebookG500 : DESIGN_SYSTEM_COLORS.gray250)
+    .lower();
+  // svg.append("g").attr("class", "grid").call(d3.axisLeft(y).tickSize(-width));
 
   // color palette = one color per subgroup
   // const color = d3.scaleLinear().domain([]).range(["#FF8A33", "#F9E2D0", "#A7D841", "#388E3C"]);
@@ -147,36 +171,28 @@ function drawChart(
   const color = d3
     .scaleThreshold()
     .domain([0, maxAxisY / 10, maxAxisY / 2, maxAxisY]) // @ts-ignore
-    .range([
-      RED_ALPHA,
-      LESS_EQUAL_THAN_10_COLOR_ALPHA,
-      GREATER_THAN_10_COLOR_ALPHA,
-      GREATER_THAN_50_COLOR_ALPHA,
-      GREATER_THAN_100_COLOR_ALPHA,
-    ]);
-  // @ts-ignore
-  const borderColor = d3
-    .scaleThreshold()
-    .domain([0, maxAxisY / 10, maxAxisY / 2, maxAxisY]) // @ts-ignore
     .range([RED, LESS_EQUAL_THAN_10_COLOR, GREATER_THAN_10_COLOR, GREATER_THAN_50_COLOR, GREATER_THAN_100_COLOR]);
 
   svg
-    .select("#bubbles")
+    .append("g")
+    .attr("id", "bubbles")
     .selectAll("circle")
+
     // Enter in the stack data = loop key per key = group per group
     .data(data)
+
     // .join("g")
     .join("circle")
-    .attr("fill", d => (d.points !== 0 ? color(d.points) : GRAY_ALPHA))
+    .attr("fill", d => (d.points !== 0 ? color(d.points) : GRAY))
     // .selectAll("rect")
     // enter a second time = loop subgroup per subgroup to add all rectangles
     // .data(d => d)
     .attr("cx", d => x(d.votes))
     .attr("cy", d => y(d.points))
-    // .attr("height", d => y(d[0]) - y(d[1]))
-    .attr("r", 10)
+
+    .attr("r", 7.5)
     .attr("stroke-width", 2)
-    .attr("stroke", d => (d.points !== 0 ? borderColor(d.points) : GRAY))
+    .attr("stroke", d => (d.points !== 0 ? color(d.points) : GRAY))
     .attr("transform", `translate(30, 30)`)
     .on("mouseover", function (e, d) {
       const _this = this as any;
@@ -192,7 +208,7 @@ function drawChart(
 
       d3.select(this)
         .transition()
-        .style("fill", d.points !== 0 ? borderColor(d.points) : GRAY);
+        .style("fill", d.points !== 0 ? color(d.points) : GRAY);
     })
     .on("mouseout", function (e, d) {
       const _this = this as any;
@@ -200,18 +216,22 @@ function drawChart(
       tooltip.style("opacity", 0).style("pointer-events", "none");
       d3.select(this)
         .transition()
-        .style("fill", d.points !== 0 ? color(d.points) : GRAY_ALPHA);
+        .style("fill", d.points !== 0 ? color(d.points) : GRAY);
     });
-  if (student) {
+
+  if (student && student.votes !== 0 && student.votePoints !== 0) {
     const locationIconPath =
-      "M7 9.5C6.33696 9.5 5.70107 9.23661 5.23223 8.76777C4.76339 8.29893 4.5 7.66304 4.5 7C4.5 6.33696 4.76339 5.70107 5.23223 5.23223C5.70107 4.76339 6.33696 4.5 7 4.5C7.66304 4.5 8.29893 4.76339 8.76777 5.23223C9.23661 5.70107 9.5 6.33696 9.5 7C9.5 7.3283 9.43534 7.65339 9.3097 7.95671C9.18406 8.26002 8.99991 8.53562 8.76777 8.76777C8.53562 8.99991 8.26002 9.18406 7.95671 9.3097C7.65339 9.43534 7.3283 9.5 7 9.5ZM7 0C5.14348 0 3.36301 0.737498 2.05025 2.05025C0.737498 3.36301 0 5.14348 0 7C0 12.25 7 20 7 20C7 20 14 12.25 14 7C14 5.14348 13.2625 3.36301 11.9497 2.05025C10.637 0.737498 8.85652 0 7 0Z";
+      "M8.54 20.351L8.61 20.391L8.638 20.407C8.74903 20.467 8.87327 20.4985 8.9995 20.4985C9.12573 20.4985 9.24997 20.467 9.361 20.407L9.389 20.392L9.46 20.351C9.85112 20.1191 10.2328 19.8716 10.604 19.609C11.5651 18.9305 12.463 18.1667 13.287 17.327C15.231 15.337 17.25 12.347 17.25 8.5C17.25 6.31196 16.3808 4.21354 14.8336 2.66637C13.2865 1.11919 11.188 0.25 9 0.25C6.81196 0.25 4.71354 1.11919 3.16637 2.66637C1.61919 4.21354 0.75 6.31196 0.75 8.5C0.75 12.346 2.77 15.337 4.713 17.327C5.53664 18.1667 6.43427 18.9304 7.395 19.609C7.76657 19.8716 8.14854 20.1191 8.54 20.351ZM9 11.5C9.79565 11.5 10.5587 11.1839 11.1213 10.6213C11.6839 10.0587 12 9.29565 12 8.5C12 7.70435 11.6839 6.94129 11.1213 6.37868C10.5587 5.81607 9.79565 5.5 9 5.5C8.20435 5.5 7.44129 5.81607 6.87868 6.37868C6.31607 6.94129 6 7.70435 6 8.5C6 9.29565 6.31607 10.0587 6.87868 10.6213C7.44129 11.1839 8.20435 11.5 9 11.5Z";
 
     svg
       .select("#location")
       .selectAll("path")
       .attr("d", locationIconPath)
-      .attr("transform", `translate(${x(student.votes!) + 23},${y(student.votePoints!)})`) //-23 and -24 because of right plot tranlation
-      .attr("fill", "#EF5350");
+      .attr("fill-rule", "evenodd")
+      .attr("clip-rule", "evenodd")
+      .attr("transform", `translate(${x(student.votes!) + 21},${y(student.votePoints!)})`) //-23 and -24 because of right plot tranlation
+      .attr("fill", "#EF5350")
+      .raise();
   }
   // svg
   //   .select("#nums")
@@ -261,6 +281,7 @@ export const BubbleChart = ({
   student,
   role,
 }: BubblePlotProps) => {
+  console.log({ bubbledata: data });
   const height = 400;
   const svg = useCallback(
     (svgRef: any) => {
@@ -272,16 +293,17 @@ export const BubbleChart = ({
   return (
     <div style={{ position: "relative" }}>
       <svg ref={svg} style={{ position: "relative" }}>
-        <g id="bubbles"></g>
+        <rect id="background" />
         <g id="nums"></g>
+        <g id="mesh"></g>
         <g id="location">
           <path></path>
         </g>
-        <text style={{ fontSize: "16px" }} fill={theme === "Dark" ? "white" : "black"} x={0} y={20}>
+        <text style={{ fontSize: "12px" }} fill={theme === "Dark" ? "white" : "black"} x={0} y={20}>
           Vote Points
         </text>
-        <text style={{ fontSize: "16px" }} fill={theme === "Dark" ? "white" : "black"} x={width - 100} y={height}>
-          # of Votes
+        <text style={{ fontSize: "12px" }} fill={theme === "Dark" ? "white" : "black"} x={width - 70} y={height}>
+          Nº of Votes
         </text>
       </svg>
       <div id="bubble-tool-tip" className={`tooltip-plot ${theme === "Light" ? "lightMode" : "darkMode"}`}></div>
