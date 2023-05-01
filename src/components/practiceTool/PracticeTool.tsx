@@ -1,9 +1,10 @@
 import { Box } from "@mui/material";
-import { getFirestore } from "firebase/firestore";
+import { collection, getFirestore, onSnapshot, query, where } from "firebase/firestore";
 import React, { useCallback, useEffect, useState } from "react";
+import { ISemester } from "src/types/ICourse";
+import { ISemesterStudentVoteStat } from "src/types/ICourse";
 
 import { getSemesterById } from "../../client/serveless/semesters.serverless";
-import { getSemesterStudentVoteStatsByIdAndStudent } from "../../client/serveless/semesterStudentVoteStat.serverless";
 import { CourseTag, SimpleQuestionNode } from "../../instructorsTypes";
 import { User } from "../../knowledgeTypes";
 import { Post } from "../../lib/mapApi";
@@ -43,7 +44,7 @@ export const PracticeTool = ({ user, currentSemester, openNodeHandler, onClose }
   const [questionData, setQuestionData] = useState<{ question: SimpleQuestionNode; flashcardId: string } | null>(null);
   const [practiceIsCompleted, setPracticeIsCompleted] = useState(false);
   const [practiceInfo, setPracticeInfo] = useState<PracticeInfo>(DEFAULT_PRACTICE_INFO);
-
+  const [semesterConfig, setSemesterConfig] = useState<ISemester | null>(null);
   const onSubmitAnswer = useCallback(
     async (answers: boolean[]) => {
       if (!questionData) return;
@@ -54,7 +55,7 @@ export const PracticeTool = ({ user, currentSemester, openNodeHandler, onClose }
         nodeId: questionData.question.id,
         postpone: false,
       };
-      await Post("/checkAnswer", payload);
+      await Post("/checkAnswer", payload).then(() => {});
     },
     [questionData]
   );
@@ -79,43 +80,58 @@ export const PracticeTool = ({ user, currentSemester, openNodeHandler, onClose }
   }, [getPracticeQuestion]);
 
   useEffect(() => {
-    const getPracticeInfo = async () => {
-      const semesterStudentStats = await getSemesterStudentVoteStatsByIdAndStudent(
-        db,
-        currentSemester.tagId,
-        user.uname
-      );
-      if (!semesterStudentStats) return;
+    const getSemesterConfig = async () => {
       const semester = await getSemesterById(db, currentSemester.tagId);
       if (!semester) return;
 
-      console.log({ semesterStudentStats });
-      const currentDateYYMMDD = getDateYYMMDDWithHyphens();
-      console.log({ currentDateYYMMDD });
-      const currentDayStats = semesterStudentStats.days.find(cur => cur.day === currentDateYYMMDD);
-      console.log({ currentDayStats });
-      if (!currentDayStats) return;
-
-      const totalQuestions = semester.dailyPractice.numQuestionsPerDay;
-      const questionsLeft = totalQuestions - currentDayStats.correctPractices;
-      console.log({ questionsLeft });
-      // setPracticeInfo(prev => ({ ...prev, questionsLeft }));
-
-      const completedDays = differentBetweenDays(new Date(), semester.startDate.toDate());
-      const totalDays = differentBetweenDays(semester.endDate.toDate(), semester.startDate.toDate());
-      const remainingDays = totalDays - completedDays;
-      setPracticeInfo(prev => ({
-        ...prev,
-        questionsLeft,
-        totalQuestions,
-        completedDays,
-        totalDays,
-        remainingDays,
-      }));
+      setSemesterConfig(semester);
     };
-
-    getPracticeInfo();
+    getSemesterConfig();
   }, [currentSemester.tagId, db, user.uname]);
+
+  useEffect(() => {
+    if (!semesterConfig) return;
+
+    const q = query(
+      collection(db, "semesterStudentVoteStats"),
+      where("uname", "==", user.uname),
+      where("tagId", "==", currentSemester.tagId)
+    );
+    const unsub = onSnapshot(q, snapshot => {
+      if (snapshot.empty) return;
+
+      const docChanges = snapshot.docChanges();
+      for (const docChange of docChanges) {
+        const semesterStudentVoteStat = docChange.doc.data() as ISemesterStudentVoteStat;
+
+        const currentDateYYMMDD = getDateYYMMDDWithHyphens();
+        console.log({ currentDateYYMMDD });
+        const currentDayStats = semesterStudentVoteStat.days.find(cur => cur.day === currentDateYYMMDD);
+        console.log({ currentDayStats });
+        if (!currentDayStats) return;
+
+        const totalQuestions = semesterConfig.dailyPractice.numQuestionsPerDay;
+        const questionsLeft = totalQuestions - currentDayStats.correctPractices;
+        console.log({ questionsLeft });
+        // setPracticeInfo(prev => ({ ...prev, questionsLeft }));
+
+        const completedDays = differentBetweenDays(new Date(), semesterConfig.startDate.toDate());
+        const totalDays = differentBetweenDays(semesterConfig.endDate.toDate(), semesterConfig.startDate.toDate());
+        const remainingDays = totalDays - completedDays;
+        setPracticeInfo(prev => ({
+          ...prev,
+          questionsLeft,
+          totalQuestions,
+          completedDays,
+          totalDays,
+          remainingDays,
+        }));
+      }
+    });
+    return () => {
+      if (unsub) unsub();
+    };
+  }, [currentSemester.tagId, db, semesterConfig, user.uname]);
 
   return startPractice ? (
     <Box
