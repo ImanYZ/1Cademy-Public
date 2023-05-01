@@ -204,6 +204,7 @@ const layoutHandler = (
     oldNodes,
     oldEdges,
     graph,
+    computedState: (g.graph() as any)?.computedState,
   };
 };
 
@@ -218,9 +219,11 @@ onmessage = e => {
     allTags,
     graph,
     withClusters,
+    computedState,
   } = e.data;
 
   const g = dagreUtils.mapObjectToGraph(graph);
+  (g.graph() as any).computedState = computedState;
 
   const workerResults = layoutHandler(oldMapWidth, oldMapHeight, oldNodes, oldEdges, allTags, g, withClusters);
   postMessage(workerResults);

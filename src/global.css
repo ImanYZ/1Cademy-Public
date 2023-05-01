@@ -57,7 +57,7 @@
   -webkit-transition: transform 1s linear; /*safari and chrome */
 }
 
-#ChoosingNodeMessage {
+/* #ChoosingNodeMessage {
   position: absolute;
   width: auto;
   left: 310px;
@@ -78,8 +78,8 @@
 
 .LightMode #ChoosingNodeMessage {
   background: #f2f4f7;
-}
-@media screen and (max-width: 800px) and (min-width: 601px) {
+} */
+/* @media screen and (max-width: 800px) and (min-width: 601px) {
   #ChoosingNodeMessage {
     width: auto;
     left: 430px;
@@ -92,7 +92,7 @@
   #ChoosingNodeMessage {
     display: none;
   }
-}
+} */
 
 .spinner-white,
 .spinner-white-only {
@@ -181,13 +181,13 @@
 }
 
 .Node.active,
-.ChoosableNotebook .Node.Choosable:hover {
+.Node.Choosable:hover {
   -webkit-box-shadow: 0px 0px 14px 12px rgba(204, 159, 72, 0.4);
   -moz-box-shadow: 0px 0px 14px 12px rgba(204, 159, 72, 0.4);
   box-shadow: 0px 0px 14px 12px rgba(204, 159, 72, 0.4);
 }
 .LightMode .Node.active,
-.LightMode .ChoosableNotebook .Node.Choosable:hover {
+.LightMode .Node.Choosable:hover {
   -webkit-box-shadow: 0px 0px 14px 12px rgba(236, 178, 142, 0.6);
   -moz-box-shadow: 0px 0px 14px 12px rgba(236, 178, 142, 0.6);
   box-shadow: 0px 0px 14px 12px rgba(236, 178, 142, 0.6);
@@ -2160,7 +2160,7 @@ button.MuiTab-textColorInherit:focus {
 
 #nodeSelectMenu.MuiPopover-root {
   position: absolute !important;
-  top: 51px !important;
+  top: 0px !important;
 }
 
 #recentNodesList .Mui-focused .MuiOutlinedInput-notchedOutline {
@@ -2196,7 +2196,7 @@ button.MuiTab-textColorInherit:focus {
 /* The Modal (background) */
 #Modal {
   position: fixed; /* Stay in place */
-  z-index: 7; /* Sit on top */
+  z-index: 20; /* Sit on top */
   left: 0;
   top: 0;
   width: 100%; /* Full width */
@@ -2214,7 +2214,7 @@ button.MuiTab-textColorInherit:focus {
 }
 
 /* Modal Content/Box */
-#ModalBody {
+.ModalBody {
   position: absolute;
   top: 4%;
   left: 4%;
@@ -2230,7 +2230,7 @@ button.MuiTab-textColorInherit:focus {
   z-index: 7; /* Sit on top */
 }
 
-.LightMode #ModalBody {
+.LightMode .ModalBody {
   background: #f0f0f0;
 }
 
@@ -2610,9 +2610,9 @@ right: 5px; */
 }
 /* -------------------------------- */
 /* Input save */
-.InputSaveContainer {
+/* .InputSaveContainer {
   margin: 10px 0px;
-}
+} */
 
 .InputSaveContainer .ImageUploadButtonLoader {
   position: relative;
@@ -2652,8 +2652,8 @@ right: 5px; */
 }
 
 .profileImage {
-  width: 160px;
-  height: 160px;
+  width: 90px;
+  height: 90px;
   border-radius: 50%;
   object-fit: cover;
   object-position: center center;
@@ -2759,18 +2759,18 @@ right: 5px; */
   display: flex;
 }
 
-.toolbar:hover .show-on-hover {
+/* .toolbar:hover .show-on-hover {
   display: flex !important;
 }
 
 .toolbar:hover .hide-on-hover {
   display: none !important;
-}
+} */
 
-.toolbar:focus .user-status-section,
+/* .toolbar:focus .user-status-section,
 .toolbar:hover .user-status-section {
-  margin-top: 95px !important;
-}
+  margin-top: 110px !important;
+} */
 
 .scroll-styled::-webkit-scrollbar {
   /* CHECK: I add this to hide scroll and have functionality */

@@ -1,29 +1,25 @@
 import EmailIcon from "@mui/icons-material/Email";
 import SwitchAccountIcon from "@mui/icons-material/SwitchAccount";
-import { Autocomplete, Checkbox, Link, Paper, TextField } from "@mui/material";
+import { Autocomplete, Paper, TextField, Typography } from "@mui/material";
 import Alert from "@mui/material/Alert";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
+import Grid from "@mui/material/Grid";
 import Tab from "@mui/material/Tab";
 import Tabs from "@mui/material/Tabs";
 import { sendEmailVerification, sendPasswordResetEmail, signInWithEmailAndPassword } from "firebase/auth";
 import { collection, doc, getDoc, getDocs, getFirestore, limit, onSnapshot, query, where } from "firebase/firestore";
-import Image from "next/image";
 import { useRouter } from "next/router";
-import React, { Suspense, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Institution } from "src/knowledgeTypes";
 
-import darkModeLibraryImage from "../../public/darkModeLibraryBackground.jpg";
+import { signUpExp as signUpExpApi } from "@/lib/knowledgeApi";
+
 import { auth, dbExp } from "../../src/lib/firestoreClient/firestoreClient.config";
+import { DESIGN_SYSTEM_COLORS } from "../lib/theme/colors";
 import { a11yProps, TabPanel } from "../utils/TabPanel";
 import ValidatedInput from "../utils/ValidatedInput";
-
-const GDPRPolicy = React.lazy(() => import("../components/modals/GDPRPolicy"));
-const CookiePolicy = React.lazy(() => import("../components/modals/CookiePolicy"));
-const PrivacyPolicy = React.lazy(() => import("../components/modals/PrivacyPolicy"));
-const TermsOfUse = React.lazy(() => import("../components/modals/TermsOfUse"));
-const InformedConsent = React.lazy(() => import("../components/modals/InformedConsent"));
-import { signUpExp as signUpExpApi } from "@/lib/knowledgeApi";
+import ConsentDocument from "./ConsentDocument";
 const isEmail = (email: string): boolean => {
   const regEx =
     // eslint-disable-next-line
@@ -31,7 +27,7 @@ const isEmail = (email: string): boolean => {
   if (email.match(regEx)) return true;
   else return false;
 };
-const DEFAULT_PROJECT = "H2K2";
+const DEFAULT_PROJECT = "H1L2";
 
 const SignUpExpPage = () => {
   const [email, setEmail] = useState("");
@@ -58,33 +54,13 @@ const SignUpExpPage = () => {
   const [submitable, setSubmitable] = useState(false);
   const [validPasswordResetEmail, setValidPasswordResetEmail] = useState(false);
   const [nameFromInstitutionSelected, setNameFromInstitutionSelected] = useState<any>({});
-  const [signUpAgreement, setSignUpAgreement] = useState(false);
-  const [GDPRAgreement, setGDPRAgreement] = useState(false);
-  const [privacyAgreement, setPrivacyAgreement] = useState(false);
-  const [termAgreement, setTermAgreement] = useState(false);
-  const [cookieAgreement, setCookieAgreement] = useState(false);
-
-  const [openInformedConsent, setOpenInformedConsent] = useState(false);
-  const [openTermOfUse, setOpenTermsOfUse] = useState(false);
-  const [openPrivacyPolicy, setOpenPrivacyPolicy] = useState(false);
-  const [openCookiePolicy, setOpenCookiePolicy] = useState(false);
-  const [openGDPRPolicy, setOpenGDPRPolicy] = useState(false);
+  const [participatedBefore, setParticipatedBefore] = useState(false);
+  const [databaseAccountNotCreatedYet, setDatabaseAccountNotCreatedYet] = useState(false);
   const router = useRouter();
   const [institutions, setInstitutions] = useState<Institution[]>([]);
 
   const [projectSpecs, setProjectSpecs] = useState({});
   const haveProjectSpecs = Object.keys(projectSpecs).length > 0;
-  const [fullname, setFullname] = useState<string>("");
-  const isDisabled =
-    isSignUp === 0
-      ? !submitable || isSubmitting
-      : !submitable ||
-        isSubmitting ||
-        !signUpAgreement ||
-        !privacyAgreement ||
-        !termAgreement ||
-        !cookieAgreement ||
-        !GDPRAgreement;
 
   const db = getFirestore();
 
@@ -94,20 +70,18 @@ const SignUpExpPage = () => {
     const users = await getDocs(query(collection(dbExp, "users"), where("email", "==", uEmail)));
 
     let userData: any = null;
-    let fullName: string = "";
+
     if (!users.docs.length) {
       const usersStudentSurvey = await getDocs(
         query(collection(dbExp, "usersStudentCoNoteSurvey"), where("email", "==", uEmail))
       );
       if (usersStudentSurvey.docs.length) {
-        fullName = usersStudentSurvey.docs[0].id;
         userData = usersStudentSurvey.docs[0].data();
       }
     } else {
-      fullName = users.docs[0].id;
       userData = users.docs[0].data();
     }
-    setFullname(fullName);
+
     if (!userData) return; // if user document doesn't exists
     router.push("/community/clinical-psychology");
     setEmailVerified("Verified");
@@ -145,14 +119,15 @@ const SignUpExpPage = () => {
       } else {
         // setShowSignInorUp(true);
         setEmailVerified("NotSent");
-        setFullname("");
       }
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
+    setParticipatedBefore(false);
     setInvalidAuth(false);
+    setDatabaseAccountNotCreatedYet(false);
   }, [firstname, lastname, email]);
   useEffect(() => {
     const getProjectSpecs = async () => {
@@ -211,9 +186,9 @@ const SignUpExpPage = () => {
     event.preventDefault();
     setIsSubmitting(false);
     if (isSignUp === 1) {
-      auth.delete();
+      auth.currentUser.delete();
     }
-    auth.logout();
+    auth.signOut();
   };
 
   const resendVerificationEmail = () => {
@@ -323,7 +298,6 @@ const SignUpExpPage = () => {
 
         if (institutionDoc && institutionDoc.docs.length > 0) {
           const institutionData = institutionDoc.docs[0].data();
-          console.log("institutionData", institutionData);
           setNameFromInstitutionSelected(institutionData);
           return institutionData;
         } else {
@@ -344,22 +318,24 @@ const SignUpExpPage = () => {
     }, []);
   }
   useEffect(() => {
-    const institutionsQuery = query(collection(db, "institutions"), where("usersNum", ">=", 1));
+    const institutionsQuery = query(collection(db, "institutions"));
     const unsubscribe = onSnapshot(institutionsQuery, snapshot => {
       setInstitutions((insitutions: Institution[]) => {
         let _insitutions = [...insitutions];
         const docChanges = snapshot.docChanges();
         for (const docChange of docChanges) {
           const institutionData: Institution | any = docChange.doc.data();
-          if (docChange.type === "added") {
-            _insitutions.push({ id: docChange.doc.id, ...institutionData });
-            continue;
-          }
-          const idx = _insitutions.findIndex(insitution => insitution.name === institutionData.name);
-          if (docChange.type === "modified") {
-            _insitutions[idx] = { id: docChange.doc.id, ...institutionData };
-          } else {
-            _insitutions.splice(idx, 1);
+          if (institutionData.usersNum >= 1 || institutionData.country === "United States") {
+            if (docChange.type === "added") {
+              _insitutions.push({ id: docChange.doc.id, ...institutionData });
+              continue;
+            }
+            const idx = _insitutions.findIndex(insitution => insitution.name === institutionData.name);
+            if (docChange.type === "modified") {
+              _insitutions[idx] = { id: docChange.doc.id, ...institutionData };
+            } else {
+              _insitutions.splice(idx, 1);
+            }
           }
         }
 
@@ -368,59 +344,67 @@ const SignUpExpPage = () => {
     });
     return () => unsubscribe();
   }, [db]);
-  console.log("fullname", fullname);
-  return (
-    <Box>
-      <Box
-        data-testid="auth-layout"
-        sx={{
-          width: "100vw",
-          height: "100vh",
-          position: "fixed",
-          filter: "brightness(1.95)",
-          zIndex: -2,
-        }}
-      >
-        <Image alt="Library" src={darkModeLibraryImage} layout="fill" objectFit="cover" priority />
-      </Box>
 
-      <Box
-        sx={{
-          p: { xs: "0px", width: "100%" },
-          height: "100vh",
-          overflowY: "auto",
-          overflowX: "auto",
-          position: "relative",
-          scrollBehavior: "smooth",
+  return (
+    <Grid
+      container
+      spacing={{ xs: 1, md: 2.2 }}
+      sx={{
+        width: "100%",
+        height: "150vh",
+        overflowY: { xs: "auto", md: "hidden" },
+        overflowX: "hidden",
+        backgroundColor: theme =>
+          theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.gray850 : DESIGN_SYSTEM_COLORS.gray250,
+        background: "transprant",
+      }}
+    >
+      <Grid
+        item
+        xs={12}
+        md={8}
+        style={{
+          overflowY: "hidden",
+          overflowX: "hidden",
         }}
-        id="ScrollableContainer"
       >
         <Paper
           sx={{
-            m: "10px 500px 200px 500px",
-            "@media (max-width: 1120px)": {
-              m: "0px",
-            },
+            overflowY: "auto",
+            overflowX: "hidden",
+            margin: "10px 0px 25px 10px",
+            width: "100%",
+            height: "100vh",
           }}
         >
-          {emailVerified === "Sent" ? (
-            <div
-              style={{
-                height: "200px",
-                marginTop: "200px",
-                flexDirection: "column",
-                display: "flex",
-                justifyContent: "center",
-                alignItems: "center",
-              }}
-            >
+          <ConsentDocument />
+        </Paper>
+      </Grid>
+      <Grid
+        item
+        xs={12}
+        md={4}
+        style={{
+          overflowY: "hidden",
+          overflowX: "hidden",
+        }}
+      >
+        <Paper
+          sx={{
+            overflowY: "auto",
+            overflowX: "hidden",
+            margin: "10px 0px 25px 0px",
+            width: "100%",
+            height: "100vh",
+          }}
+        >
+          <Box sx={{ m: "0px 13px 13px 13px", p: "9px", pb: "100px", overflowY: "auto", overflowX: "hidden" }}>
+            {emailVerified === "Sent" ? (
               <Box>
                 <p>
                   We just sent you a verification email. Please click the link in the email to verify and complete your
                   sign-up.
                 </p>
-              </Box>
-              <Box>
                 <Button
                   variant="contained"
                   color="warning"
@@ -433,24 +417,27 @@ const SignUpExpPage = () => {
                   <SwitchAccountIcon /> Switch Account
                 </Button>
               </Box>
-            </div>
-          ) : (
-            <Box>
-              <Alert severity="error">
-                Please only use your Gmail address to create an account. You can also use your school email address,
-                only if your school email is provided by Google.
-              </Alert>
-              <Box sx={{ width: "100%" }}>
-                <Box sx={{ borderBottom: 1, borderColor: "divider" }}>
-                  <Tabs value={isSignUp} onChange={switchSignUp} aria-label="basic tabs" variant="fullWidth">
-                    <Tab label="Sign In" {...a11yProps(0)} />
-                    <Tab label="Sign Up" {...a11yProps(1)} />
-                  </Tabs>
-                </Box>
-                <TabPanel value={isSignUp} index={0}>
-                  <Box sx={{ m: "20px 20px 0px 20px" }}>
+            ) : (
+              <>
+                <Typography variant="h3">Sign the Consent Form to Get Started!</Typography>
+                <Typography paragraph sx={{ mt: 5, mb: 5 }}>
+                  Please read the consent form on the left carefully. By creating and account or signing into this
+                  website, you sign the consent form and allow us to analyze your data collected throughout this study.
+                </Typography>
+                <Alert severity="error" sx={{ fontSize: "14px" }}>
+                  Please only use your Gmail address to create an account. You can also use your school email address,
+                  only if your school email is provided by Google.
+                </Alert>
+                <Box sx={{ width: "100%" }}>
+                  <Box sx={{ borderBottom: 1, borderColor: "divider" }}>
+                    <Tabs value={isSignUp} onChange={switchSignUp} aria-label="basic tabs" variant="fullWidth">
+                      <Tab label="Sign In" {...a11yProps(0)} />
+                      <Tab label="Sign Up" {...a11yProps(1)} />
+                    </Tabs>
+                  </Box>
+                  <TabPanel value={isSignUp} index={0}>
                     <ValidatedInput
-                      className="inputValidate"
+                      className="PleaseSpecify"
                       label="Email address"
                       onChange={emailChange}
                       name="email"
@@ -458,10 +445,8 @@ const SignUpExpPage = () => {
                       errorMessage={validEmail ? null : "Please enter your valid email address!"}
                       onKeyPress={onKeyPress}
                     />
-                  </Box>
-                  <Box sx={{ m: "0px 20px 0px 20px" }}>
                     <ValidatedInput
-                      className="inputValidate"
+                      className="PleaseSpecify"
                       onChange={passwordChange}
                       name="password"
                       type="password"
@@ -472,12 +457,10 @@ const SignUpExpPage = () => {
                       }
                       onKeyPress={onKeyPress}
                     />
-                  </Box>
-                </TabPanel>
-                <TabPanel value={isSignUp} index={1}>
-                  <Box sx={{ m: "0px 20px 0px 20px" }}>
+                  </TabPanel>
+                  <TabPanel value={isSignUp} index={1}>
                     <ValidatedInput
-                      className="inputValidate"
+                      className="PleaseSpecify"
                       label="Firstname"
                       onChange={firstnameChange}
                       name="firstname"
@@ -485,10 +468,8 @@ const SignUpExpPage = () => {
                       errorMessage={validFirstname ? null : "Please enter your firstname!"}
                       onKeyPress={onKeyPress}
                     />
-                  </Box>
-                  <Box sx={{ m: "0px 20px 0px 20px" }}>
                     <ValidatedInput
-                      className="inputValidate"
+                      className="PleaseSpecify"
                       label="lastname"
                       onChange={lastnameChange}
                       name="lastname"
@@ -496,10 +477,8 @@ const SignUpExpPage = () => {
                       errorMessage={validlastname ? null : "Please enter your lastname!"}
                       onKeyPress={onKeyPress}
                     />
-                  </Box>
-                  <Box sx={{ m: "0px 20px 0px 20px" }}>
                     <ValidatedInput
-                      className="inputValidate"
+                      className="PleaseSpecify"
                       label="Email address"
                       onChange={emailChange}
                       name="email"
@@ -507,10 +486,7 @@ const SignUpExpPage = () => {
                       errorMessage={validEmail ? null : "Please enter your valid email address!"}
                       onKeyPress={onKeyPress}
                     />
-                  </Box>
-                  <Box sx={{ m: "0px 20px 0px 20px" }}>
                     <Autocomplete
-                      className="inputValidate"
                       id="institution"
                       value={nameFromInstitutionSelected}
                       options={institutions}
@@ -528,10 +504,8 @@ const SignUpExpPage = () => {
                       fullWidth
                       sx={{ mb: "16px" }}
                     />
-                  </Box>
-                  <Box sx={{ m: "0px 20px 0px 20px" }}>
                     <ValidatedInput
-                      className="inputValidate"
+                      className="PleaseSpecify"
                       onChange={passwordChange}
                       name="password"
                       type="password"
@@ -543,10 +517,8 @@ const SignUpExpPage = () => {
                       }
                       onKeyPress={onKeyPress}
                     />
-                  </Box>
-                  <Box sx={{ m: "0px 20px 0px 20px" }}>
                     <ValidatedInput
-                      className="inputValidate"
+                      className="PleaseSpecify"
                       onChange={confirmPasswordChange}
                       name="ConfirmPassword"
                       type="password"
@@ -558,104 +530,47 @@ const SignUpExpPage = () => {
                       }
                       onKeyPress={onKeyPress}
                     />
-                  </Box>
-                  <Box sx={{ ml: "20px" }}>
-                    <Checkbox checked={signUpAgreement} onChange={(_, value) => setSignUpAgreement(value)} />I
-                    acknowledge and agree that any data generated from my use of 1Cademy may be utilized for research
-                    purposes by the investigators at 1Cademy, the University of Michigan School of Information, and
-                    Honor Education.
-                  </Box>
-
-                  <Box sx={{ ml: "20px" }}>
-                    <Checkbox checked={GDPRAgreement} onChange={(_, value) => setGDPRAgreement(value)} />I acknowledge
-                    and agree to{" "}
-                    <Link
-                      onClick={() => {
-                        setOpenGDPRPolicy(true);
-                      }}
-                      sx={{ cursor: "pointer", textDecoration: "none", color: "#ed6c02" }}
+                  </TabPanel>
+                  {databaseAccountNotCreatedYet && (
+                    <Alert severity="error">
+                      Please sign up using the same email address, firstname, and lastname so that we link your existing
+                      account with your authentication.
+                    </Alert>
+                  )}
+                  {invalidAuth && (
+                    <Alert severity="error" sx={{ fontSize: "13px" }}>
+                      {invalidAuth}
+                    </Alert>
+                  )}
+                  {participatedBefore && (
+                    <Box className="Error">You've participated in this study before and cannot participate again!</Box>
+                  )}
+                  <Box sx={{ margin: "auto", textAlign: "center", mt: "10px" }}>
+                    <Button
+                      id="SignButton"
+                      onClick={signUp}
+                      className={submitable && !isSubmitting ? "Button" : "Button Disabled"}
+                      variant="contained"
+                      disabled={submitable && !isSubmitting ? false : true}
+                      sx={{ borderRadius: "26px", backgroundColor: DESIGN_SYSTEM_COLORS.primary800 }}
                     >
-                      1Cademy's General Data Protection Regulation (GDPR) Policy.
-                    </Link>
+                      {isSignUp === 0 ? "Sign In" : isSubmitting ? "Creating your account..." : "Consent and Sign Up"}
+                    </Button>
                   </Box>
-
-                  <Box sx={{ ml: "20px" }}>
-                    <Checkbox checked={termAgreement} onChange={(_, value) => setTermAgreement(value)} />I acknowledge
-                    and agree to{" "}
-                    <Link
-                      onClick={() => {
-                        setOpenTermsOfUse(true);
+                  <Box style={{ textAlign: "center", marginTop: "10px" }}>
+                    <Button onClick={openForgotPassword} variant="outlined" sx={{ borderRadius: "26px" }}>
+                      Forgot Password?
+                    </Button>
+                  </Box>
+                  {forgotPassword && (
+                    <Box
+                      sx={{
+                        display: "flex",
+                        flexDirection: "column",
+                        alignItems: "center",
+                        justifyContent: "center",
                       }}
-                      sx={{ cursor: "pointer", textDecoration: "none", color: "#ed6c02" }}
                     >
-                      1Cademy's Terms of Service.
-                    </Link>
-                  </Box>
-
-                  <Box sx={{ ml: "20px" }}>
-                    <Checkbox checked={privacyAgreement} onChange={(_, value) => setPrivacyAgreement(value)} />I
-                    acknowledge and agree to{" "}
-                    <Link
-                      onClick={() => {
-                        setOpenPrivacyPolicy(true);
-                      }}
-                      sx={{ cursor: "pointer", textDecoration: "none", color: "#ed6c02" }}
-                    >
-                      1Cademy's Privacy Policy.
-                    </Link>
-                  </Box>
-
-                  <Box sx={{ ml: "20px" }}>
-                    <Checkbox checked={cookieAgreement} onChange={(_, value) => setCookieAgreement(value)} />I
-                    acknowledge and agree to{" "}
-                    <Link
-                      onClick={() => {
-                        setOpenCookiePolicy(true);
-                      }}
-                      sx={{ cursor: "pointer", textDecoration: "none", color: "#ed6c02" }}
-                    >
-                      1Cademy's Cookies Policy.
-                    </Link>
-                  </Box>
-                </TabPanel>
-                {invalidAuth && <div className="Error">{invalidAuth.replace("Firebase:", "")}</div>}
-
-                <div style={{ textAlign: "center", marginTop: "10px" }}>
-                  <Button
-                    id="SignButton"
-                    className={isDisabled ? "Button" : "Button Disabled"}
-                    onClick={signUp}
-                    sx={{ width: isSignUp === 0 ? "150px" : "250" }}
-                    variant="contained"
-                    color="secondary"
-                    disabled={isDisabled}
-                  >
-                    {isSignUp === 0 ? "Sign In" : isSubmitting ? "Creating your account..." : " Sign Up"}
-                  </Button>
-                </div>
-
-                <Suspense fallback={<div></div>}>
-                  <>
-                    <InformedConsent open={openInformedConsent} handleClose={() => setOpenInformedConsent(false)} />
-                    <GDPRPolicy open={openGDPRPolicy} handleClose={() => setOpenGDPRPolicy(false)} />
-                    <CookiePolicy open={openCookiePolicy} handleClose={() => setOpenCookiePolicy(false)} />
-                    <PrivacyPolicy open={openPrivacyPolicy} handleClose={() => setOpenPrivacyPolicy(false)} />
-                    <TermsOfUse open={openTermOfUse} handleClose={() => setOpenTermsOfUse(false)} />
-                  </>
-                </Suspense>
-                <div style={{ textAlign: "center", marginTop: "10px" }}>
-                  <Button
-                    onClick={openForgotPassword}
-                    sx={{ m: "0px 10px 10px 10px" }}
-                    variant="contained"
-                    color="warning"
-                  >
-                    Forgot Password?
-                  </Button>
-                </div>
-                {forgotPassword && (
-                  <>
-                    <Box sx={{ m: "20px 20px 0px 20px" }}>
                       <p>Enter your account email below to receive a password reset link.</p>
                       <ValidatedInput
                         identification="email"
@@ -663,35 +578,32 @@ const SignUpExpPage = () => {
                         type="email"
                         placeholder="Email"
                         label="Email"
-                        onChange={(event: React.ChangeEvent<HTMLInputElement>) =>
-                          setResetPasswordEmail(event.target.value)
-                        }
+                        onChange={(event: any) => setResetPasswordEmail(event.target.value)}
                         value={resetPasswordEmail}
                         errorMessage={passwordResetError}
                         // autocomplete="off"
                       />
-                    </Box>
-                    <div style={{ textAlign: "center", marginTop: "10px" }}>
-                      {isPasswordReset && <h4>Check your email to reset the password.</h4>}
-                    </div>
-                    <div style={{ textAlign: "center", marginTop: "10px" }}>
                       <Button
                         id="ForgotPasswordEmailButton"
+                        variant="contained"
                         onClick={handleResetPassword}
                         className={!isSubmitting && validPasswordResetEmail ? "Button" : "Button Disabled"}
                         disabled={isSubmitting || !validPasswordResetEmail}
+                        sx={{ borderRadius: "26px", backgroundColor: DESIGN_SYSTEM_COLORS.primary800 }}
                       >
                         Send Email
                       </Button>
-                    </div>
-                  </>
-                )}
-              </Box>
-            </Box>
-          )}
+
+                      {isPasswordReset && <h4>Check your email to reset the password.</h4>}
+                    </Box>
+                  )}
+                </Box>
+              </>
+            )}
+          </Box>
         </Paper>
-      </Box>
-    </Box>
+      </Grid>
+    </Grid>
   );
 };
 

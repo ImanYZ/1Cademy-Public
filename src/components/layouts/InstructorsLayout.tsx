@@ -177,6 +177,9 @@ export const InstructorsLayout: FC<Props> = ({ children }) => {
       sx={{
         background: theme => (theme.palette.mode === "light" ? "#F5F5F5" : "#28282A"),
         minHeight: "100vh",
+        height: "100vh",
+        overflow: "auto",
+        "&::-webkit-scrollbar": { display: "none" },
       }}
     >
       {!isMovil && <HeaderNavbar options={filteredOptions} user={user} onNewCourse={onNewCourse} />}
@@ -220,9 +223,9 @@ type CoursesResult = {
 const getCoursesByInstructor = (instructor: Instructor): CoursesResult => {
   return instructor.courses.reduce((acu: CoursesResult, cur) => {
     const tmpValues = acu[cur.title] ?? [];
-    return { ...acu, [cur.title]: [...tmpValues, `${cur.cTitle} ${cur.pTitle}`] };
+    return { ...acu, [cur.title]: [...tmpValues, `${cur.cTitle} ${cur.pTitle || "- " + cur.uTitle}`] };
   }, {});
 };
 const selectCourse = (description: string, instructor: Instructor): ICourseTag | undefined => {
-  return instructor.courses.find(course => `${course.cTitle} ${course.pTitle}` === description);
+  return instructor.courses.find(course => `${course.cTitle} ${course.pTitle || "- " + course.uTitle}` === description);
 };

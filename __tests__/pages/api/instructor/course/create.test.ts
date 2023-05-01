@@ -77,6 +77,7 @@ describe("POST /api/instructor/course/create", () => {
     creditsCollection,
     nodeVersionsCollection,
     new MockData([], "relationVersions"),
+    new MockData([], "semesterStudentSankeys"),
     reputationsCollection,
 
     coursesCollection,
@@ -123,6 +124,7 @@ describe("POST /api/instructor/course/create", () => {
     let semesterId: string = "";
     beforeAll(async () => {
       const body = {
+        root: nodes[0].documentId!,
         courseCode: "SI691",
         semesterName: "Fall 2020",
         programName: "MSI",

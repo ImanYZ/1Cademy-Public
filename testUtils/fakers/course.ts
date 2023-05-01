@@ -38,9 +38,10 @@ type IFakeSemesterOptions = {
   instructor?: IUser;
   title?: string;
   tagId?: string;
+  root?: string;
 };
 export const createSemester = (params: IFakeSemesterOptions): ISemester => {
-  const { documentId, instructor, title, tagId, university, course, program, department } = params;
+  const { documentId, instructor, title, tagId, university, course, program, department, root } = params;
   return {
     documentId: documentId ? documentId : faker.datatype.uuid(),
     instructors: [instructor?.documentId || faker.datatype.uuid()],
@@ -76,6 +77,14 @@ export const createSemester = (params: IFakeSemesterOptions): ISemester => {
       numQuestionsPerDay: 0,
       totalDaysOfCourse: 0,
     },
+    dailyPractice: {
+      startDate: Timestamp.now(),
+      endDate: Timestamp.now(),
+      numPoints: 0,
+      numQuestionsPerDay: 0,
+      totalDaysOfCourse: 0,
+    },
+    isDailyPracticeRequired: false,
     votes: {
       pointIncrementOnAgreement: 0,
       pointDecrementOnAgreement: 0,
@@ -83,6 +92,7 @@ export const createSemester = (params: IFakeSemesterOptions): ISemester => {
       onReceiveDownVote: 0,
       onReceiveStar: 0,
     },
+    root: root || tagId || faker.datatype.uuid(),
     deleted: false,
     students: [],
     createdAt: Timestamp.now(),

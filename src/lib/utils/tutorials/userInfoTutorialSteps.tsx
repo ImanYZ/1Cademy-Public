@@ -12,7 +12,7 @@ dayjs.extend(relativeTime);
 
 const USER_INFO_STEPS: TutorialStepConfig[] = [
   {
-    childTargetId: "user-info-nodes",
+    childTargetId: "user-info-trends",
     title: "User Information",
     description: (
       <MarkdownRender

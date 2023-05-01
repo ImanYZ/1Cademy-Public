@@ -1,13 +1,14 @@
 // import "./ProposalItem.css";
-import CloseIcon from "@mui/icons-material/Close";
-import DoneIcon from "@mui/icons-material/Done";
-import GradeIcon from "@mui/icons-material/Grade";
-import { Box, Button, Divider, Paper, Tooltip, Typography } from "@mui/material";
+import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
+import DoneRoundedIcon from "@mui/icons-material/DoneRounded";
+import StarRoundedIcon from "@mui/icons-material/StarRounded";
+import { Box, Divider, Paper, Tooltip, Typography } from "@mui/material";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import React, { useCallback } from "react";
 
 import NodeTypeIcon from "@/components/NodeTypeIcon2";
+import { DESIGN_SYSTEM_COLORS } from "@/lib/theme/colors";
 
 import { proposalSummariesGenerator } from "../../../../lib/utils/proposalSummariesGenerator";
 import shortenNumber from "../../../../lib/utils/shortenNumber";
@@ -22,7 +23,17 @@ const doNothing = () => {};
 
 dayjs.extend(relativeTime);
 
-const ProposalItem = (props: any) => {
+type ProposalItemProps = {
+  proposal: any;
+  shouldSelectProposal?: boolean;
+  showTitle: boolean;
+  selectProposal?: any;
+  openLinkedNode: any;
+  proposalSummaries?: any;
+  isClickable?: boolean;
+};
+
+const ProposalItem = ({ isClickable = true, ...props }: ProposalItemProps) => {
   const openLinkedNodeClick = useCallback(
     (proposal: any) => (event: any) => {
       if (props.shouldSelectProposal) {
@@ -37,6 +48,7 @@ const ProposalItem = (props: any) => {
   );
 
   let proposalSummaries;
+
   if (props.proposalSummaries) {
     proposalSummaries = props.proposalSummaries;
   } else {
@@ -48,24 +60,23 @@ const ProposalItem = (props: any) => {
       elevation={3}
       className="CollapsedProposal collection-item avatar"
       key={`Proposal${props.proposal.id}`}
-      onClick={openLinkedNodeClick(props.proposal)}
+      onClick={isClickable ? openLinkedNodeClick(props.proposal) : undefined}
       sx={{
-        ":hover": {
-          background: theme => (theme.palette.mode === "dark" ? "#2F2F2F" : "#EAECF0"),
-        },
-
         display: "flex",
         flexDirection: "column",
-        padding: {
-          xs: "5px 10px",
-          sm: "15px",
-        },
+        padding: { xs: "5px 10px", sm: "15px" },
         borderRadius: "8px",
         boxShadow: theme =>
           theme.palette.mode === "light"
             ? "0px 1px 2px rgba(0, 0, 0, 0.06), 0px 1px 3px rgba(0, 0, 0, 0.1)"
             : undefined,
         background: theme => (theme.palette.mode === "dark" ? "#242425" : "#F2F4F7"),
+        ...(isClickable && {
+          cursor: "pointer",
+          ":hover": {
+            background: theme => (theme.palette.mode === "dark" ? "#2F2F2F" : "#EAECF0"),
+          },
+        }),
       }}
     >
       {/* <h6>{props.proposal.newNodeId}</h6> */}
@@ -147,105 +158,79 @@ const ProposalItem = (props: any) => {
             </Box>
           </Box>
           <Box
-            style={{
+            sx={{
               display: "flex",
               alignItems: "center",
               gap: "10px",
-              fontSize: "16px",
-              marginRight: "9px",
+              p: "2px 8px",
+
+              borderRadius: "24px",
+              backgroundColor: theme =>
+                theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookG500 : DESIGN_SYSTEM_COLORS.gray250,
             }}
           >
-            <Tooltip title="# of 1Cademists who have found this proposal helpful." placement="bottom-start">
-              <Button
-                sx={{
-                  padding: "0",
-                  minWidth: "0",
-                  ":hover": {
-                    background: "transparent",
-                  },
-                }}
-              >
-                <Box style={{ display: "flex", alignItems: "center", gap: "4px", fontSize: "16px" }}>
-                  <DoneIcon
-                    className={props.proposal.correct ? "green-text" : "grey-text"}
-                    sx={{ fontSize: "19px", color: theme => (theme.palette.mode === "dark" ? "#F9FAFB" : "#475467") }}
-                  />
-                  <Typography
-                    sx={{
-                      color: theme => (theme.palette.mode === "dark" ? "#F9FAFB" : "#475467"),
-                      mt: "3px",
-                    }}
-                  >
-                    {shortenNumber(props.proposal.corrects, 2, false)}
-                  </Typography>
-                </Box>
-              </Button>
+            <Tooltip title="# of 1Admins who have awarded this proposal." placement="bottom-start">
+              <Box style={{ display: "flex", alignItems: "center", gap: "4px", fontSize: "16px" }}>
+                <DoneRoundedIcon
+                  fontSize="small"
+                  sx={{ color: theme => (theme.palette.mode === "dark" ? "#F9FAFB" : "#475467") }}
+                />
+                <Typography
+                  sx={{
+                    color: theme => (theme.palette.mode === "dark" ? "#F9FAFB" : "#475467"),
+                  }}
+                >
+                  {shortenNumber(props.proposal.corrects, 2, false)}
+                </Typography>
+              </Box>
             </Tooltip>
             <Divider
               orientation="vertical"
               variant="middle"
               flexItem
-              sx={{ borderColor: theme => (theme.palette.mode === "dark" ? "#D3D3D3" : "inherit") }}
-            />
-            <Tooltip title="# of 1Cademists who have found this proposal unhelpful." placement="bottom-start">
-              <Button
-                sx={{
-                  padding: "0",
-                  minWidth: "0",
-                  ":hover": {
-                    background: "transparent",
-                  },
-                }}
-              >
-                <Box style={{ display: "flex", alignItems: "center", gap: "4px", fontSize: "16px" }}>
-                  <CloseIcon
-                    className={props.proposal.wrong ? "red-text" : "grey-text"}
-                    sx={{ fontSize: "19px", color: theme => (theme.palette.mode === "dark" ? "#F9FAFB" : "#475467") }}
-                  />
-                  <Typography
-                    sx={{
-                      color: theme => (theme.palette.mode === "dark" ? "#F9FAFB" : "#475467"),
-                      mt: "3px",
-                    }}
-                  >
-                    {shortenNumber(props.proposal.wrongs, 2, false)}
-                  </Typography>
-                </Box>
-              </Button>
-            </Tooltip>
-
-            <Divider
-              orientation="vertical"
-              variant="middle"
-              flexItem
-              sx={{ borderColor: theme => (theme.palette.mode === "dark" ? "#D3D3D3" : "inherit") }}
+              sx={{
+                borderColor: DESIGN_SYSTEM_COLORS.notebookG300,
+              }}
             />
 
             <Tooltip title="# of 1Admins who have awarded this proposal." placement="bottom-start">
-              <Button
-                sx={{
-                  padding: "0",
-                  minWidth: "0",
-                  ":hover": {
-                    background: "transparent",
-                  },
-                }}
-              >
-                <Box style={{ display: "flex", alignItems: "center", gap: "4px", fontSize: "16px" }}>
-                  <GradeIcon
-                    className={props.proposal.award ? "amber-text" : "grey-text"}
-                    sx={{ fontSize: "19px", color: theme => (theme.palette.mode === "dark" ? "#F9FAFB" : "#475467") }}
-                  />
-                  <Typography
-                    sx={{
-                      color: theme => (theme.palette.mode === "dark" ? "#F9FAFB" : "#475467"),
-                      mt: "3px",
-                    }}
-                  >
-                    {shortenNumber(props.proposal.awards, 2, false)}
-                  </Typography>
-                </Box>
-              </Button>
+              <Box style={{ display: "flex", alignItems: "center", gap: "4px", fontSize: "16px" }}>
+                <CloseRoundedIcon
+                  fontSize="small"
+                  sx={{ color: theme => (theme.palette.mode === "dark" ? "#F9FAFB" : "#475467") }}
+                />
+                <Typography
+                  sx={{
+                    color: theme => (theme.palette.mode === "dark" ? "#F9FAFB" : "#475467"),
+                  }}
+                >
+                  {shortenNumber(props.proposal.wrongs, 2, false)}
+                </Typography>
+              </Box>
+            </Tooltip>
+            <Divider
+              orientation="vertical"
+              variant="middle"
+              flexItem
+              sx={{
+                borderColor: DESIGN_SYSTEM_COLORS.notebookG300,
+              }}
+            />
+
+            <Tooltip title="# of 1Admins who have awarded this proposal." placement="bottom-start">
+              <Box style={{ display: "flex", alignItems: "center", gap: "4px", fontSize: "16px" }}>
+                <StarRoundedIcon
+                  fontSize="small"
+                  sx={{ color: theme => (theme.palette.mode === "dark" ? "#F9FAFB" : "#475467") }}
+                />
+                <Typography
+                  sx={{
+                    color: theme => (theme.palette.mode === "dark" ? "#F9FAFB" : "#475467"),
+                  }}
+                >
+                  {shortenNumber(props.proposal.awards, 2, false)}
+                </Typography>
+              </Box>
             </Tooltip>
           </Box>
         </Box>

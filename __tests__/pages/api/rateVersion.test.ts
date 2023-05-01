@@ -16,9 +16,10 @@ import { createCredit } from "testUtils/fakers/credit";
 import { createReputationPoints } from "testUtils/fakers/reputation-point";
 initFirebaseClientSDK();
 
-import { DocumentSnapshot } from "firebase-admin/firestore";
+import { DocumentSnapshot, Timestamp } from "firebase-admin/firestore";
 import { admin, db } from "src/lib/firestoreServer/admin";
 import rateVersionHandler, { IRateVersionPayload } from "src/pages/api/rateVersion";
+import { ISemester } from "src/types/ICourse";
 import { IInstitution } from "src/types/IInstitution";
 import { INode } from "src/types/INode";
 import { INodeLink } from "src/types/INodeLink";
@@ -810,6 +811,76 @@ describe("POST /api/rateVersion", () => {
         new MockData([], "userVersionsLog"),
         new MockData([], "questionVersions"),
         new MockData([], "userQuestionVersions"),
+        new MockData(
+          [
+            {
+              documentId: nodes[0].documentId,
+              tagId: nodes[0].documentId,
+              students: [
+                {
+                  chooseUname: false,
+                  email: users[1].email,
+                  fName: users[1].fName,
+                  lName: users[1].lName,
+                  imageUrl: users[1].imageUrl,
+                  uname: users[1].uname,
+                },
+              ],
+              days: 1,
+              cTagId: "",
+              cTitle: "",
+              dTagId: "",
+              dTitle: "",
+              pTagId: "",
+              pTitle: "",
+              uTagId: "",
+              uTitle: "",
+              instructors: [],
+              startDate: Timestamp.now(),
+              endDate: Timestamp.now(),
+              isCastingVotesRequired: false,
+              isGettingVotesRequired: false,
+              isProposalRequired: false,
+              isQuestionProposalRequired: false,
+              nodeProposals: {
+                startDate: Timestamp.now(),
+                endDate: Timestamp.now(),
+                numPoints: 0,
+                numProposalPerDay: 0,
+                totalDaysOfCourse: 0,
+              },
+              questionProposals: {
+                startDate: Timestamp.now(),
+                endDate: Timestamp.now(),
+                numPoints: 0,
+                numQuestionsPerDay: 0,
+                totalDaysOfCourse: 0,
+              },
+              votes: {
+                onReceiveDownVote: 0,
+                onReceiveStar: 0,
+                onReceiveVote: 0,
+                pointDecrementOnAgreement: 0,
+                pointIncrementOnAgreement: 0,
+              },
+              dailyPractice: {
+                startDate: Timestamp.now(),
+                endDate: Timestamp.now(),
+                numPoints: 1,
+                numQuestionsPerDay: 1,
+                totalDaysOfCourse: 1,
+              },
+              isDailyPracticeRequired: false,
+              syllabus: [],
+              title: nodes[0].title,
+              root: nodes[0].documentId!,
+              deleted: false,
+              updatedAt: Timestamp.now(),
+              createdAt: Timestamp.now(),
+            } as ISemester,
+          ],
+          "semesters"
+        ),
 
         new MockData(tags, "tags"),
 
@@ -958,7 +1029,7 @@ describe("POST /api/rateVersion", () => {
       it("create practice if childType was Question (we are not testing it right now)", async () => {
         const practices = await db
           .collection("practice")
-          .where("node", "==", newNode.id)
+          .where("node", "==", nodeVersions[1].node)
           .where("user", "==", users[1].uname)
           .get();
         expect(practices.docs.length).toEqual(1);

@@ -313,6 +313,13 @@ export type SearchNodesResponse = {
   numResults: number;
   perPage: number;
 };
+
+export type SearchNotebookResponse = {
+  data: SimpleNode[];
+  page: number;
+  numResults: number;
+  perPage: number;
+};
 export type SearchNodesParams = {
   q?: string | string[];
   upvotes?: boolean;
@@ -411,6 +418,7 @@ export type User = {
   fieldOfInterest: string;
   role: UserRole;
   livelinessBar?: string;
+  scaleThreshold?: number;
 };
 
 export type UserSettings = {

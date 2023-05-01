@@ -1,5 +1,5 @@
 import { getAuth } from "firebase-admin/auth";
-import { Timestamp, WriteBatch } from "firebase-admin/firestore";
+import { Timestamp, WriteBatch, QueryDocumentSnapshot, DocumentData } from "firebase-admin/firestore";
 import { NextApiRequest, NextApiResponse } from "next";
 import { SignUpData } from "src/knowledgeTypes";
 
@@ -8,7 +8,9 @@ import { isEmail, isEmpty } from "@/lib/utils/utils";
 
 import { admin, checkRestartBatchWriteCounts, commitBatch, db } from "../../lib/firestoreServer/admin";
 import { IInstitution } from "src/types/IInstitution";
-import { createOrRestoreStatDocs } from "src/utils/course-helpers";
+import { createOrRestoreStatDocs, createPracticeForSemesterStudents } from "src/utils/course-helpers";
+import { INotebook } from "src/types/INotebook";
+import { detach } from "src/utils/helpers";
 
 const addPracticeQuestions = async (
   batch: WriteBatch,
@@ -279,6 +281,29 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
     [batch, writeCounts] = await checkRestartBatchWriteCounts(batch, writeCounts);
 
     const rootTitles = { r98BjyFDCe4YyLA3U8ZE: "1Cademy", [tagId]: tag };
+
+    const notebooks = await db.collection("notebooks").where("owner", "==", userData.uname).limit(1).get();
+
+    let notebookId: string;
+    if (notebooks.docs.length) {
+      notebookId = notebooks.docs[0].id;
+    } else {
+      const notebookRef = db.collection("notebooks").doc();
+      notebookId = notebookRef.id;
+      batch.set(notebookRef, {
+        isPublic: "none",
+        owner: userData.uname,
+        ownerImgUrl: userData.imageUrl,
+        ownerFullName: `${userData.fName} ${userData.lName}`,
+        ownerChooseUname: userData.chooseUname,
+        usersInfo: {},
+        users: [],
+        title: "My Notebook",
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      } as INotebook);
+    }
+
     for (let rootId in rootTitles) {
       const reputationQuery = db
         .collection("reputations")
@@ -312,11 +337,22 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
         //  if for some reason userNode is deleted, or not open, or not visible, reset it
         if (userNodeData.deleted || !userNodeData.open || !userNodeData.visible) {
           userNodeRef = db.collection("userNodes").doc(userNodeDocs.docs[0].id);
+          const notebooks: string[] = userNodeData.notebooks || [];
+          const expands: boolean[] = userNodeData.expands || [];
+          const notebookIdx = notebooks.indexOf(notebookId);
+          if (notebookIdx === -1) {
+            notebooks.push(notebookId);
+            expands.push(true);
+          } else {
+            expands[notebookIdx] = true;
+          }
           const userNodeUpdates = {
             deleted: false,
             open: true,
             visible: true,
             updatedAt: currentTimestamp,
+            notebooks,
+            expands,
           };
           batch.update(userNodeRef, userNodeUpdates);
           [batch, writeCounts] = await checkRestartBatchWriteCounts(batch, writeCounts);
@@ -336,6 +372,8 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
           isStudied: false,
           bookmarked: false,
           node: rootId,
+          notebooks: [notebookId],
+          expands: [true],
           open: true,
           user: userData.uname,
           visible: true,
@@ -352,25 +390,6 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
       }
     }
 
-    const questionsRef = db
-      .collection("nodes")
-      .where("nodeType", "==", "Question")
-      .where("tagIds", "array-contains", tagId);
-    const questionsDocs = await questionsRef.get();
-    const nodeIds: string[] = [];
-    questionsDocs.forEach(questionDoc => {
-      nodeIds.push(questionDoc.id);
-    });
-    [batch, writeCounts] = await addPracticeQuestions(
-      batch,
-      data.uname,
-      tagId,
-      tag,
-      nodeIds,
-      currentTimestamp,
-      writeCounts
-    );
-
     const notificationNumsRef = db.collection("notificationNums").doc(data.uname);
     batch.set(notificationNumsRef, { nNum: 0 });
 
@@ -384,6 +403,20 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
     const bookmarkNumsRef = db.collection("bookmarkNums").doc(data.uname);
     batch.set(bookmarkNumsRef, { bNum: 0 });
     await commitBatch(batch);
+
+    // TODO: move these to queue
+    await detach(async () => {
+      if (!data?.course) return;
+      let batch = db.batch();
+      let writeCounts = 0;
+
+      const semesterRef = db.collection("semesters").doc(data?.course);
+      const semesterData = (await semesterRef.get()).data();
+      if (!semesterData) return;
+      [batch, writeCounts] = await createPracticeForSemesterStudents(semesterRef.id, [data.uname], batch, writeCounts);
+      await commitBatch(batch);
+    });
+
     const creditsRef = db.collection("credits").where("tagId", "==", tagId).limit(1);
     const creditsData = await creditsRef.get();
 

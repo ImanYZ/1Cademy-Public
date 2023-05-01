@@ -6,6 +6,7 @@ import { INodeLink } from "src/types/INodeLink";
 import { INodeType } from "src/types/INodeType";
 import { IQuestionChoice } from "src/types/IQuestionChoice";
 import { IUser } from "src/types/IUser";
+import { IUserNode } from "src/types/IUserNode";
 import { updateStatsOnProposal } from "src/utils/course-helpers";
 import { detach } from "src/utils/helpers";
 import { IComReputationUpdates } from "src/utils/reputations";
@@ -27,6 +28,7 @@ import {
 
 export type IProposeChildNodePayload = {
   data: {
+    notebookId?: string;
     versionNodeId?: string;
     parentId: string;
     parentType: INodeType;
@@ -261,6 +263,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           batch,
           tagIds: req.body.data.tagIds,
           nodeId: nodeRef.id,
+          parentId: req.body.data.parents[0].id,
           currentTimestamp,
           writeCounts,
         });
@@ -313,10 +316,10 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         writeCounts,
       });
 
-      const newUserNodeObj: any = {
+      const newUserNodeObj: IUserNode = {
         correct: true,
-        createdAt: currentTimestamp,
-        updatedAt: currentTimestamp,
+        createdAt: currentTimestamp as unknown as Date,
+        updatedAt: currentTimestamp as unknown as Date,
         deleted: false,
         isStudied: true,
         bookmarked: false,
@@ -326,14 +329,46 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         user: req.body.data.user.userData.uname,
         visible: true,
         wrong: false,
+        nodeChanges: {},
+        notebooks: [req.body.data.notebookId],
+        expands: [true],
       };
       const userNodeRef = db.collection("userNodes").doc();
       batch.set(userNodeRef, newUserNodeObj);
       [batch, writeCounts] = await checkRestartBatchWriteCounts(batch, writeCounts);
       const userNodeLogRef = db.collection("userNodesLog").doc();
-      delete newUserNodeObj.updatedAt;
+      delete (newUserNodeObj as unknown as any).updatedAt;
       batch.set(userNodeLogRef, newUserNodeObj);
       [batch, writeCounts] = await checkRestartBatchWriteCounts(batch, writeCounts);
+
+      // create user nodes for new node
+      // TODO: move these to queue
+      await detach(async () => {
+        if (!req.body.data.notebookId) return;
+
+        let batch = db.batch();
+        let writeCounts = 0;
+        const nodesUserNodes = await db
+          .collection("userNodes")
+          .where("node", "==", req.body.data.parentId)
+          .where("notebooks", "array-contains", req.body.data.notebookId)
+          .get();
+        for (const userNode of nodesUserNodes.docs) {
+          const userNodeData = userNode.data() as IUserNode;
+          if (userNodeData.user === req.body.data.user.userData.uname || userNodeData.deleted) {
+            continue;
+          }
+          const userNodeRef = db.collection("userNodes").doc();
+          const newUserNode = { ...newUserNodeObj };
+          newUserNode.correct = false;
+          newUserNode.user = userNodeData.user;
+          newUserNode.isStudied = false;
+          batch.set(userNodeRef, newUserNode);
+          [batch, writeCounts] = await checkRestartBatchWriteCounts(batch, writeCounts);
+        }
+
+        await commitBatch(batch);
+      });
     }
 
     for (const tagId in comReputationUpdates) {

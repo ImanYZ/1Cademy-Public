@@ -8,6 +8,7 @@ import { INode } from "src/types/INode";
 import { IUser } from "src/types/IUser";
 
 export type InstructorCourseCreatePayload = {
+  root: string;
   startDate: string;
   endDate: string;
   courseCode: string;
@@ -671,6 +672,14 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
           numQuestionsPerDay: 1,
           totalDaysOfCourse: 1,
         },
+        dailyPractice: {
+          startDate: Timestamp.fromDate(startDate.toDate()),
+          endDate: Timestamp.fromDate(endDate.toDate()),
+          numPoints: 1,
+          numQuestionsPerDay: 1,
+          totalDaysOfCourse: 1,
+        },
+        isDailyPracticeRequired: false,
         votes: {
           pointIncrementOnAgreement: 1,
           pointDecrementOnAgreement: 1,
@@ -682,6 +691,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
         isQuestionProposalRequired: false,
         isCastingVotesRequired: false,
         isGettingVotesRequired: false,
+        root: payload.root,
         deleted: false,
         students: [],
         createdAt: Timestamp.now(),

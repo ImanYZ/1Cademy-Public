@@ -62,6 +62,7 @@ type NodeListProps = {
   ableToPropose: boolean;
   setAbleToPropose: (newValue: boolean) => void;
   setOpenPart: (nodeId: string, newOpenPart: OpenPart) => void;
+  hideNode: boolean;
 };
 
 const NodesList = ({
@@ -114,13 +115,11 @@ const NodesList = ({
   openUserInfoSidebar,
   disabledNodes = [],
   enableChildElements = [],
-  // showProposeTutorial = false,
-  // setCurrentTutorial,
   ableToPropose,
   setAbleToPropose,
   setOpenPart,
+  hideNode,
 }: NodeListProps) => {
-  /* eslint-disable-next-line @typescript-eslint/no-unused-vars */
   const { nodeBookDispatch } = useNodeBook();
 
   const setOpenPartNode = useCallback(
@@ -164,6 +163,12 @@ const NodesList = ({
           commentsSelected = true;
         }
 
+        // const notebookIdx = (nodes[nId].notebooks ?? []).findIndex((cur: string) => cur === selectedNotebookId);
+        // if (notebookIdx < 0) return null;
+
+        // const open = (nodes[nId].expands ?? [])[notebookIdx];
+        // if (open === undefined) return null;
+
         return (
           <MemoizedNode
             key={nId}
@@ -178,7 +183,6 @@ const NodesList = ({
             proposalsSelected={proposalsSelected}
             acceptedProposalsSelected={acceptedProposalsSelected}
             commentsSelected={commentsSelected}
-            open={nodes[nId].open}
             left={nodes[nId].left}
             top={nodes[nId].top}
             width={NODE_WIDTH}
@@ -279,6 +283,12 @@ const NodesList = ({
             setAbleToPropose={setAbleToPropose}
             openPart={nodes[nId].localLinkingWords}
             setOpenPart={setOpenPartNode(nId)}
+            // selectedNotebookId={selectedNotebookId}
+            // expands={nodes[nId].expands}
+            // notebooks={nodes[nId].notebooks}
+            open={nodes[nId].open}
+            hideNode={hideNode}
+            nodeHeigth={nodes[nId].height}
           />
         );
       })}
@@ -334,6 +344,9 @@ export const MemoizedNodeList = React.memo(NodesList, (prev, next) => {
     prev.openSidebar === prev.openSidebar && // TODO: check this
     // prev.showProposeTutorial === next.showProposeTutorial &&
     prev.ableToPropose === next.ableToPropose &&
+    prev.setNodeParts === next.setNodeParts &&
+    prev.hideNode === next.hideNode &&
+    // prev.selectedNotebookId === next.selectedNotebookId &&
     validateTutorialProps()
   );
 });

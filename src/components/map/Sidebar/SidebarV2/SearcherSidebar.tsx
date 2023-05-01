@@ -1,22 +1,26 @@
 import CloseIcon from "@mui/icons-material/Close";
+import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
 import ControlPointIcon from "@mui/icons-material/ControlPoint";
-import CreateIcon from "@mui/icons-material/Create";
 import DoneIcon from "@mui/icons-material/Done";
-import EventAvailableIcon from "@mui/icons-material/EventAvailable";
 import SearchIcon from "@mui/icons-material/Search";
 import {
   Checkbox,
   Chip,
   CircularProgress,
+  Divider,
   IconButton,
   InputAdornment,
-  InputBase,
   ListItemIcon,
   ListItemText,
   MenuItem,
   Paper,
   Select,
   SelectChangeEvent,
+  Stack,
+  Tab,
+  Tabs,
+  Tooltip,
+  Typography,
   useMediaQuery,
   useTheme,
 } from "@mui/material";
@@ -24,27 +28,26 @@ import { Box } from "@mui/system";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import React, { MutableRefObject, useCallback, useEffect, useMemo, useState, useTransition } from "react";
+import { filterOnDaysAgo } from "src/utils/dates";
 
-import searcherHeaderImage from "../../../../../public/Magnifier_Compas.jpg";
+import { RiveComponentMemoized } from "@/components/home/components/temporals/RiveComponentExtended";
+import { DESIGN_SYSTEM_COLORS } from "@/lib/theme/colors";
+
 import { useNodeBook } from "../../../../context/NodeBookContext";
 import { useInView } from "../../../../hooks/useObserver";
 import { useTagsTreeView } from "../../../../hooks/useTagsTreeView";
-import { SearchNodesResponse } from "../../../../knowledgeTypes";
+import { SearchNodesResponse, SearchNotebookResponse } from "../../../../knowledgeTypes";
 import { Post } from "../../../../lib/mapApi";
 import shortenNumber from "../../../../lib/utils/shortenNumber";
 import { SortDirection, SortValues, TNodeBookState } from "../../../../nodeBookTypes";
 import { NodeType } from "../../../../types";
-import { Editor } from "../../../Editor";
 import NodeTypeIcon from "../../../NodeTypeIcon2";
 import { ChosenTag, MemoizedTagsSearcher, TagTreeView } from "../../../TagsSearcher";
-import { MemoizedMetaButton } from "../../MetaButton";
-import Modal from "../../Modal/Modal";
 import RecentNodesList from "../../RecentNodesList";
+import TimeFilter from "../../TimeFilter";
 import ValidatedInput from "../../ValidatedInput";
+import PendingProposalList from "../PendingProposalList";
 import { SidebarWrapper } from "./SidebarWrapper";
-
-const doNothing = () => {};
-
 dayjs.extend(relativeTime);
 
 type SearcherSidebarProps = {
@@ -89,9 +92,23 @@ const SearcherSidebar = ({
   const [showTagSelector, setShowTagSelector] = useState(false);
   const [nodeTypes, setNodeTypes] = useState(NODE_TYPES_ARRAY);
   const [sortOption, setSortOption] = useState<SortValues>("NOT_SELECTED");
+  const [timeFilter, setTimeFilter] = useState<any>("ALL_TIME");
   const [sortDirection, setSortDirection] = useState<SortDirection>("DESCENDING");
   const [chosenTags, setChosenTags] = useState<ChosenTag[]>([]);
   const [search, setSearch] = useState<string>(nodeBookState.searchQuery);
+  const [value, setValue] = React.useState(0);
+  // const [notebooks, setNoteBooks] = useState<any>({
+  //   data: [],
+  //   lastPageLoaded: 0,
+  //   totalResults: 0,
+  //   totalPage: 0,
+  // });
+  const [pendingProposals, setPendingProposals] = useState<any>({
+    data: [],
+    lastPageLoaded: 0,
+    totalResults: 0,
+    totalPage: 0,
+  });
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [isPending, startTransition] = useTransition();
 
@@ -111,12 +128,19 @@ const SearcherSidebar = ({
   // tutorial constants
   const disableInputSearcher = disableSearcher && !enableElements.includes("search-input");
   const disableSearchIcon = disableSearcher && !enableElements.includes("SearchIcon");
-  const disableEditedInThePast = disableSearcher && !enableElements.includes("search-recently-input");
+  // const disableEditedInThePast = disableSearcher && !enableElements.includes("search-recently-input");
   const disableRecentNodeList = disableSearcher && !enableElements.includes("recentNodesList");
   const disableSearchItem = disableSearcher && !enableElements.includes("search-item");
 
   const onSearch = useCallback(
-    async (page: number, q: string, sortOption: SortValues, sortDirection: SortDirection, nodeTypes: NodeType[]) => {
+    async (
+      page: number,
+      q: string,
+      sortOption: SortValues,
+      sortDirection: SortDirection,
+      nodeTypes: NodeType[],
+      daysAgo?: number
+    ) => {
       try {
         setIsRetrieving(true);
         if (page < 2) {
@@ -139,8 +163,9 @@ const SearcherSidebar = ({
         });
 
         const newData = page === 1 ? data.data : [...searchResults.data, ...data.data];
+        const filteredData = daysAgo ? filterOnDaysAgo(newData, daysAgo) : newData;
         setSearchResults({
-          data: newData,
+          data: filteredData,
           lastPageLoaded: data.page,
           totalPage: Math.ceil((data.numResults || 0) / (data.perPage || 10)),
           totalResults: data.numResults,
@@ -154,22 +179,111 @@ const SearcherSidebar = ({
     [selectedTags, nodesUpdatedSince, nodeBookState.searchByTitleOnly, searchResults.data]
   );
 
+  // const onSearchNotebooks = useCallback(
+  //   async (page: number, q: string) => {
+  //     try {
+  //       setIsRetrieving(true);
+  //       if (page < 2) {
+  //         setNoteBooks({
+  //           data: [],
+  //           lastPageLoaded: 0,
+  //           totalPage: 0,
+  //           totalResults: 0,
+  //         });
+  //       }
+  //       const data: SearchNotebookResponse = await Post<SearchNotebookResponse>("/searchNotebooks", {
+  //         q,
+  //         page,
+  //         onlyTitle: nodeBookState.searchByTitleOnly,
+  //       });
+  //       const newData = page === 1 ? data.data : [...notebooks.data, ...data.data];
+  //       setNoteBooks({
+  //         data: newData,
+  //         lastPageLoaded: data.page,
+  //         totalPage: Math.ceil((data.numResults || 0) / (data.perPage || 10)),
+  //         totalResults: data.numResults,
+  //       });
+  //       setIsRetrieving(false);
+  //     } catch (err) {
+  //       console.error(err);
+  //       setIsRetrieving(false);
+  //     }
+  //   },
+  //   [nodeBookState.searchByTitleOnly, notebooks.data]
+  // );
+
+  const onSearchPendingProposals = useCallback(
+    async (page: number, q: string) => {
+      try {
+        setIsRetrieving(true);
+        if (page < 2) {
+          setPendingProposals({
+            data: [],
+            lastPageLoaded: 0,
+            totalPage: 0,
+            totalResults: 0,
+          });
+        }
+        const data: SearchNotebookResponse = await Post<SearchNotebookResponse>("/searchPendingProposals", {
+          q,
+          page: page,
+          onlyTitle: nodeBookState.searchByTitleOnly,
+        });
+        const newData = page === 1 ? data.data : [...pendingProposals.data, ...data.data];
+        setPendingProposals({
+          data: newData,
+          lastPageLoaded: data.page,
+          totalPage: Math.ceil((data.numResults || 0) / (data.perPage || 10)),
+          totalResults: data.numResults,
+        });
+        setIsRetrieving(false);
+      } catch (err) {
+        console.error(err);
+        setIsRetrieving(false);
+      }
+    },
+    [nodeBookState.searchByTitleOnly, pendingProposals.data]
+  );
+
   useEffect(() => {
     if (!inViewInfinityLoaderTrigger) return;
     if (isRetrieving) return;
 
-    onSearch(searchResults.lastPageLoaded + 1, search, sortOption, sortDirection, nodeTypes);
+    if (value === 0) {
+      onSearch(searchResults.lastPageLoaded + 1, search, sortOption, sortDirection, nodeTypes);
+    } else if (value === 1) {
+      onSearchPendingProposals(pendingProposals.lastPageLoaded + 1, search);
+      // onSearchNotebooks(notebooks.lastPageLoaded + 1, search);
+    } /* else if (value === 2) {
+      onSearchPendingProposals(pendingProposals.lastPageLoaded + 1, search);
+    } */
   }, [
     inViewInfinityLoaderTrigger,
     isRetrieving,
     nodeTypes,
     onSearch,
+    onSearchPendingProposals,
+    pendingProposals.lastPageLoaded,
     refInfinityLoaderTrigger,
     search,
     searchResults.lastPageLoaded,
     sortDirection,
     sortOption,
+    value,
   ]);
+
+  useEffect(() => {
+    if (value === 1) {
+      onSearchPendingProposals(pendingProposals.lastPageLoaded + 1, search);
+      // onSearchNotebooks(notebooks.lastPageLoaded + 1, search);
+    }
+  }, [onSearch]);
+
+  // useEffect(() => {
+  //   if (value === 2) {
+  //     onSearchPendingProposals(pendingProposals.lastPageLoaded + 1, search);
+  //   }
+  // }, [onSearch]);
 
   const onFocusSearcherInput = useCallback(
     (inputTitle: HTMLElement) => {
@@ -183,7 +297,7 @@ const SearcherSidebar = ({
   const viewTagsInMovil = useMemo<TagTreeView[]>(() => selectedTags.slice(0, MAX_TAGS_IN_MOBILE), [selectedTags]);
 
   useEffect(() => {
-    if (nodeBookState.searchQuery && nodeBookState.nodeTitleBlured) {
+    if (nodeBookState.searchQuery && nodeBookState.nodeTitleBlured && value === 0) {
       setSearch(nodeBookState.searchQuery);
       onSearch(1, nodeBookState.searchQuery, sortOption, sortDirection, nodeTypes);
       notebookRef.current.nodeTitleBlured = false;
@@ -227,6 +341,11 @@ const SearcherSidebar = ({
     showTagSelector,
   ]);
 
+  const a11yProps = (index: number) => {
+    return {
+      "aria-controls": `simple-tabpanel-${index}`,
+    };
+  };
   const handleChange = useCallback(
     (event: any) => {
       let val = event.target.value;
@@ -242,15 +361,42 @@ const SearcherSidebar = ({
   const onChangeSortOptions = useCallback(
     (newSortOption: SortValues) => {
       setSortOption(newSortOption);
-      onSearch(1, search, newSortOption, sortDirection, nodeTypes);
+      if (value === 0) {
+        onSearch(1, search, newSortOption, sortDirection, nodeTypes);
+      }
     },
     [nodeTypes, onSearch, search, sortDirection]
   );
 
+  const onChangeTimeFilter = useCallback((newTimeFilter: any) => {
+    let timeFilter: number = 0;
+    switch (newTimeFilter) {
+      case "LAST_DAY":
+        timeFilter = 1;
+        break;
+      case "LAST_15_DAYS":
+        timeFilter = 15;
+        break;
+      case "LAST_30_DAYS":
+        timeFilter = 30;
+        break;
+      case "LAST_QUARTER":
+        timeFilter = 92;
+        break;
+      case "LAST_YEAR":
+        timeFilter = 365;
+        break;
+    }
+    setNodesUpdatedSince(timeFilter);
+    setTimeFilter(newTimeFilter);
+  }, []);
+
   const onChangeSortDirection = useCallback(
     (newSortDirection: SortDirection) => {
       setSortDirection(newSortDirection);
-      onSearch(1, search, sortOption, newSortDirection, nodeTypes);
+      if (value === 0) {
+        onSearch(1, search, sortOption, newSortDirection, nodeTypes);
+      }
     },
     [nodeTypes, onSearch, search, sortOption]
   );
@@ -258,7 +404,14 @@ const SearcherSidebar = ({
   const onSearchEnter = useCallback(
     (event: any) => {
       if (event.charCode === 13) {
-        onSearch(1, search, sortOption, sortDirection, nodeTypes);
+        if (value === 0) {
+          onSearch(1, search, sortOption, sortDirection, nodeTypes);
+        } else if (value === 1) {
+          // onSearchNotebooks(1, search);
+          onSearchPendingProposals(1, search);
+        } /* else if (value === 2) {
+          onSearchPendingProposals(1, search);
+        } */
       }
     },
     [nodeTypes, onSearch, search, sortDirection, sortOption]
@@ -278,7 +431,7 @@ const SearcherSidebar = ({
   );
 
   // const setRecoverDefaultTags = useCallback(() => {
-  //   // console.log("setRecoverDefaultTags");
+  //   // console.log("setRecoverDefaultTwgs");
   //   // setOnlyTags(true);
   //   // setAllTags(oldAllTags => {
   //   //   return { ...oldAllTags, [tag.node]: { ...oldAllTags[tag.node], checked: true } };
@@ -286,7 +439,7 @@ const SearcherSidebar = ({
   //   // setChosenTags([tag.node]);
   // }, []);
 
-  const setNodesUpdatedSinceClick = useCallback((event: any) => setNodesUpdatedSince(event.target.value), []);
+  // const setNodesUpdatedSinceClick = useCallback((event: any) => setNodesUpdatedSince(event.target.value), []);
 
   const setShowTagSelectorClick = useCallback(() => {
     setShowTagSelector(prevValue => {
@@ -301,14 +454,26 @@ const SearcherSidebar = ({
     (event: SelectChangeEvent<string[]>) => {
       const newNodeTypes = event.target.value as NodeType[];
       setNodeTypes(newNodeTypes);
-      onSearch(1, search, sortOption, sortDirection, newNodeTypes);
+      if (value === 0) {
+        onSearch(1, search, sortOption, sortDirection, newNodeTypes);
+      }
     },
     [onSearch, search, sortDirection, sortOption]
   );
 
   const contentSignalState = useMemo(() => {
     return { updated: true };
-  }, [isRetrieving, searchResults, JSON.stringify(enableElements), disableSearcher]);
+  }, [
+    isRetrieving,
+    searchResults,
+    JSON.stringify(enableElements),
+    disableSearcher,
+    sortOption,
+    timeFilter,
+    value,
+
+    // notebooks,
+  ]);
 
   const setChosenTagsCallback = useCallback(
     (newChosenTags: ChosenTag[]) => {
@@ -317,283 +482,435 @@ const SearcherSidebar = ({
     [setChosenTags]
   );
 
+  const closeTagSelector = useCallback(() => {
+    notebookRef.current.chosenNode = null;
+    notebookRef.current.choosingNode = null;
+    nodeBookDispatch({ type: "setChosenNode", payload: null });
+    nodeBookDispatch({ type: "setChoosingNode", payload: null });
+    setShowTagSelector(false);
+  }, [nodeBookDispatch]);
+
+  const handleTabValueChange = (event: React.SyntheticEvent, newValue: number) => {
+    setValue(newValue);
+  };
+
+  const results = useMemo(() => {
+    if (value === 0) {
+      return searchResults.totalResults;
+    } else if (value === 1) {
+      // return notebooks.totalResults;
+      return pendingProposals.totalResults;
+    } /* else {
+      return pendingProposals.totalResults;
+    } */
+  }, [value, searchResults.totalResults, pendingProposals.totalResults]);
+
   const searcherOptionsMemoized = useMemo(() => {
     return (
-      <Box
-        id="searcher-sidebar-options"
-        sx={{
-          p: {
-            xs: "10px",
-            sm: innerHeight && innerHeight < 600 ? "20px 10px 10px 10px" : "0px 10px 10px 10px",
-          },
-          borderBottom: 1,
-          borderColor: theme => (theme.palette.mode === "dark" ? "black" : "divider"),
-          width: "100%",
-        }}
-      >
-        {!isMovil && showTagSelector && (
-          <div id="tagModal">
-            <Modal onClick={setShowTagSelectorClick} returnLeft={true} noBackground={true}>
-              <MemoizedTagsSearcher
-                allTags={allTags}
-                setAllTags={setAllTags}
-                chosenTags={chosenTags}
-                setChosenTags={setChosenTagsCallback}
-                sx={{ maxHeight: "235px", height: "235px" }}
-                multiple
-              />
-            </Modal>
-          </div>
-        )}
-
+      <Box>
         <Box
+          id="searcher-sidebar-options"
           sx={{
-            display: "flex",
-            alignItems: "center",
-            flexWrap: "wrap",
-            columnGap: "4px",
-            rowGap: "8px",
-            marginTop: { xs: "0px", sm: "0px" },
-            marginBottom: { xs: "8px", sm: "8px" },
-            pr: "40px",
+            marginTop: "20px",
+            p: {
+              xs: "10px",
+              sm: innerHeight && innerHeight < 600 ? "20px 10px 10px 10px" : "0px 15px 10px 15px",
+            },
+            borderBottom: 1,
+            borderColor: theme =>
+              theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookG700 : DESIGN_SYSTEM_COLORS.gray200,
+            width: "100%",
           }}
         >
-          <span className="tagText">Tags: </span>
-          {(isMovil ? viewTagsInMovil : selectedTags).map(tag => {
-            return (
+          <Box
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              flexWrap: "wrap",
+              columnGap: "4px",
+              rowGap: "8px",
+              marginTop: { xs: "0px", sm: "0px" },
+              marginBottom: { xs: "8px", sm: "8px" },
+              pr: "40px",
+            }}
+          >
+            <Typography
+              sx={{
+                color: theme =>
+                  theme.palette.mode === "dark" ? theme.palette.common.notebookG200 : theme.palette.common.notebookG400,
+                fontWeight: "500",
+              }}
+              className="tagText"
+            >
+              Tags:
+            </Typography>
+            {(isMovil ? viewTagsInMovil : selectedTags).map(tag => {
+              return (
+                <Chip
+                  key={"tag" + tag.nodeId}
+                  variant="outlined"
+                  label={tag.title}
+                  onDelete={() => deleteChip(tag.nodeId)} //
+                  size="small"
+                  sx={{
+                    paddingY: "15px!important",
+                    paddingX: "10px!important",
+                    background: theme =>
+                      theme.palette.mode === "dark" ? theme.palette.common.notebookG600 : theme.palette.common.gray200,
+                    color: theme =>
+                      theme.palette.mode === "dark" ? theme.palette.common.gray50 : theme.palette.common.gray600,
+                    border: "none!important",
+                  }}
+                />
+              );
+            })}
+
+            {isMovil && selectedTags.length > MAX_TAGS_IN_MOBILE && (
               <Chip
-                key={"tag" + tag.nodeId}
+                key={"more-tags"}
                 variant="outlined"
-                label={tag.title}
-                onDelete={() => deleteChip(tag.nodeId)} //
+                label={`${selectedTags.length - MAX_TAGS_IN_MOBILE}+`}
                 size="small"
               />
-            );
-          })}
+            )}
 
-          {isMovil && selectedTags.length > MAX_TAGS_IN_MOBILE && (
-            <Chip
-              key={"more-tags"}
-              variant="outlined"
-              label={`${selectedTags.length - MAX_TAGS_IN_MOBILE}+`}
-              size="small"
+            <ControlPointIcon
+              id="searcher-tags-button"
+              onClick={disableSearcher ? undefined : setShowTagSelectorClick}
+              sx={{
+                zIndex: 1,
+                transform: showTagSelector ? "rotate(45deg)" : "rotate(0deg)",
+                cursor: disableSearcher ? "not-allowed" : "pointer",
+                color: theme =>
+                  theme.palette.mode === "dark" ? theme.palette.common.notebookG200 : theme.palette.common.notebookG400,
+                fontWeight: "500",
+              }}
             />
-          )}
+          </Box>
 
-          <ControlPointIcon
-            id="searcher-tags-button"
-            onClick={disableSearcher ? undefined : setShowTagSelectorClick}
-            sx={{
-              zIndex: 1,
-              transform: showTagSelector ? "rotate(45deg)" : "rotate(0deg)",
-              cursor: disableSearcher ? "not-allowed" : "pointer",
-
-              color: "rgba(88, 88, 88,1)",
-              fontWeight: "none",
-            }}
-          />
-        </Box>
-
-        {((isMovil && !showTagSelector) || !isMovil) && (
-          <>
-            <Box id="search-input">
-              <ValidatedInput
-                identification="SearchQuery"
-                name="SearchQuery"
-                type="text"
-                onChange={handleChange}
-                value={search}
-                disabled={disableInputSearcher}
-                onKeyPress={onSearchEnter}
-                InputProps={{
-                  startAdornment: (
-                    <InputAdornment position="start">
-                      <Select
-                        disabled={disableSearcher}
-                        multiple
-                        MenuProps={{ id: "nodeSelectMenu" }}
-                        value={nodeTypes}
-                        variant="outlined"
-                        displayEmpty
-                        renderValue={() => "Types"}
-                        onChange={onChangeNoteType}
-                        sx={{
-                          padding: {
-                            xs: "2px 0px",
-                            sm: "0px",
-                          },
-                          height: {
-                            xs: "31px",
-                            sm: "46px",
-                          },
-                          marginLeft: "-14px",
-                          zIndex: "99",
-                          borderRadius: "32px 0 0 32px ",
-                          background: theme =>
-                            theme.palette.mode === "dark"
-                              ? theme.palette.common.darkBackground1
-                              : theme.palette.common.lightBackground1,
-
-                          ":hover .MuiOutlinedInput-notchedOutline": {
-                            borderColor: theme => theme.palette.common.orange,
-                          },
-                          "&> fieldset": {
-                            borderWidth: "1px",
-                            borderRadius: "32px 0 0 32px ",
-                          },
-                        }}
-                      >
-                        {NODE_TYPES_ARRAY.map(nodeType => (
-                          <MenuItem
-                            key={nodeType}
-                            value={nodeType}
-                            id="nodeTypesSelect"
-                            sx={{
-                              py: "0px",
-                              color: nodeTypes.includes(nodeType) ? "blue" : undefined,
-                              fontSize: "12px",
-                            }}
-                          >
-                            <Checkbox checked={nodeTypes.includes(nodeType)} />
-                            <ListItemIcon>
-                              <NodeTypeIcon nodeType={nodeType} />
-                            </ListItemIcon>
-                            <ListItemText primary={nodeType} sx={{ fontSize: "12px" }} />
-                          </MenuItem>
-                        ))}
-                      </Select>
-                    </InputAdornment>
-                  ),
-                  endAdornment: (
-                    <InputAdornment position="end" disablePointerEvents={disableSearchIcon}>
-                      <IconButton
-                        id="SearchIcon"
-                        onClick={() => onSearch(1, search, sortOption, sortDirection, nodeTypes)}
-                        sx={{
-                          padding: {
-                            xs: "5px !important",
-                            sm: "10px",
-                          },
-                          marginRight: {
-                            xs: "-11px !important",
-                            sm: "-8px",
-                          },
-                        }}
-                      >
-                        <SearchIcon
-                          sx={{
-                            width: {
-                              xs: "16px",
-                              sm: "1em",
-                            },
-                            height: {
-                              xs: "16px",
-                              sm: "1em",
+          {((isMovil && !showTagSelector) || !isMovil) && (
+            <>
+              <Box id="search-input">
+                <ValidatedInput
+                  identification="SearchQuery"
+                  name="SearchQuery"
+                  type="text"
+                  placeholder={"Nodes Search"}
+                  onChange={handleChange}
+                  value={search}
+                  disabled={disableInputSearcher}
+                  onKeyPress={onSearchEnter}
+                  InputProps={{
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <Select
+                          disabled={disableSearcher}
+                          multiple
+                          MenuProps={{
+                            sx: {
+                              "& .MuiMenu-paper": {
+                                backgroundColor: theme =>
+                                  theme.palette.mode === "dark"
+                                    ? theme.palette.common.notebookMainBlack
+                                    : theme.palette.common.gray50,
+                                color: "text.white",
+                                width: "180px",
+                              },
+                              "& .MuiMenuItem-root:hover": {
+                                backgroundColor: theme =>
+                                  theme.palette.mode === "dark"
+                                    ? theme.palette.common.notebookG600
+                                    : theme.palette.common.gray200,
+                                color: "text.white",
+                              },
+                              "& .MuiMenuItem-root": {
+                                padding: "3px 0px 3px 0px",
+                              },
+                              "& .Mui-selected": {
+                                backgroundColor: theme =>
+                                  theme.palette.mode === "dark" ? `${theme.palette.common.notebookO900}!important` : "",
+                                color: theme => theme.palette.common.primary600,
+                              },
+                              "& .Mui-selected:hover": {
+                                backgroundColor: "transparent",
+                              },
                             },
                           }}
-                        />
-                      </IconButton>
-                    </InputAdornment>
-                  ),
-                  inputRef: onFocusSearcherInput,
-                }}
-                inputProps={{
-                  style: {
-                    padding: innerWidth >= theme.breakpoints.values.sm ? "9.5px 14px" : "2px 0px",
-                  },
-                }}
-                sx={{
-                  "& fieldset": {
-                    borderWidth: 1,
-                    borderColor: "rgba(88, 88, 88,.7)",
-                    borderRadius: "32px",
-                  },
-                }}
-              />
-            </Box>
-            <Box
-              id="nodesUpdatedSinceContainer"
-              style={{
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
-                fontSize: innerWidth > 410 ? "14px" : "11px",
-                flexWrap: "wrap",
-                gap: "10px",
-                paddingTop: "13px",
-              }}
-            >
-              <RecentNodesList
-                id="recentNodesList"
-                recentNodes={searchResults}
-                setRecentNodes={setSearchResults}
-                onlyTags={onlyTags}
-                disabled={disableRecentNodeList}
-                sortOption={sortOption}
-                setSortOption={onChangeSortOptions}
-                sortDirection={sortDirection}
-                setSortDirection={onChangeSortDirection}
-              />
-              <Box id="search-recently-input" sx={{ display: "flex", alignItems: "center", gap: "5px" }}>
-                Edited in past
-                <InputBase
-                  type="number"
-                  defaultValue={nodesUpdatedSince}
-                  onChange={setNodesUpdatedSinceClick}
-                  size="small"
-                  disabled={disableEditedInThePast}
-                  sx={{
-                    width: "76px",
-                    p: "0px",
+                          value={nodeTypes}
+                          variant="outlined"
+                          displayEmpty
+                          renderValue={() => "Types"}
+                          onChange={onChangeNoteType}
+                          sx={{
+                            padding: {
+                              xs: "2px 0px",
+                              sm: "0px",
+                            },
+                            height: {
+                              xs: "31px",
+                              sm: "46px",
+                            },
+                            marginLeft: "-14px",
+                            zIndex: "99",
+                            borderRadius: "4px 0 0 4px",
+                            background: theme =>
+                              theme.palette.mode === "dark"
+                                ? theme.palette.common.notebookG700
+                                : theme.palette.common.gray100,
+
+                            ":hover .MuiOutlinedInput-notchedOutline": {
+                              borderColor: theme => theme.palette.common.orange,
+                            },
+                            "&> fieldset": {
+                              borderColor: theme =>
+                                theme.palette.mode === "dark"
+                                  ? theme.palette.common.notebookG500
+                                  : theme.palette.common.gray400,
+                              borderWidth: "1px",
+                              borderRadius: "4px 0 0 4px ",
+                            },
+                          }}
+                        >
+                          {NODE_TYPES_ARRAY.map(nodeType => (
+                            <MenuItem
+                              key={nodeType}
+                              value={nodeType}
+                              id="nodeTypesSelect"
+                              sx={{
+                                py: "0px",
+                                color: nodeTypes.includes(nodeType) ? "blue" : undefined,
+                              }}
+                            >
+                              <Checkbox checked={nodeTypes.includes(nodeType)} />
+
+                              <ListItemText primary={nodeType} sx={{ fontSize: "12px!important" }} />
+                              <ListItemIcon>
+                                <NodeTypeIcon fontSize="small" nodeType={nodeType} />
+                              </ListItemIcon>
+                            </MenuItem>
+                          ))}
+                        </Select>
+                      </InputAdornment>
+                    ),
+                    endAdornment: (
+                      <InputAdornment position="end" disablePointerEvents={disableSearchIcon}>
+                        <Stack direction={"row"} spacing={"10px"}>
+                          {search && (
+                            <IconButton
+                              onClick={() => setSearch("")}
+                              sx={{
+                                padding: {
+                                  xs: "5px !important",
+                                  sm: "10px",
+                                },
+                                marginRight: {
+                                  xs: "-11px !important",
+                                  sm: "-8px",
+                                },
+                                ":hover": {
+                                  background: "transparent!important",
+                                },
+                              }}
+                            >
+                              <CloseIcon
+                                sx={{
+                                  width: {
+                                    xs: "16px",
+                                    sm: "1em",
+                                  },
+                                  height: {
+                                    xs: "16px",
+                                    sm: "1em",
+                                  },
+                                }}
+                              />
+                            </IconButton>
+                          )}
+                          {search && (
+                            <Divider
+                              orientation="vertical"
+                              variant="middle"
+                              flexItem
+                              sx={{
+                                borderColor: theme => (theme.palette.mode === "dark" ? "#D3D3D3" : "inherit"),
+                              }}
+                            />
+                          )}
+                          <IconButton
+                            onClick={() => {
+                              if (value === 0) {
+                                onSearch(1, search, sortOption, sortDirection, nodeTypes);
+                              } else if (value === 1) {
+                                onSearchPendingProposals(1, search);
+                                // onSearchNotebooks(1, search);
+                              } /* else if (value === 2) {
+                                onSearchPendingProposals(1, search);
+                              } */
+                            }}
+                            sx={{
+                              padding: {
+                                xs: "5px !important",
+                                sm: "10px 10px 10px 0px",
+                              },
+                              marginRight: {
+                                xs: "-11px !important",
+                                sm: "-8px",
+                              },
+                              marginLeft: "0px!important",
+                              ":hover": {
+                                background: "transparent!important",
+                              },
+                            }}
+                          >
+                            <SearchIcon
+                              sx={{
+                                width: {
+                                  xs: "16px",
+                                  sm: "1em",
+                                },
+                                height: {
+                                  xs: "16px",
+                                  sm: "1em",
+                                },
+                              }}
+                            />
+                          </IconButton>
+                        </Stack>
+                      </InputAdornment>
+                    ),
+                    inputRef: onFocusSearcherInput,
                   }}
                   inputProps={{
                     style: {
-                      padding: "4px 8px",
-                      border: "solid 1px rgba(88, 88, 88,.7)",
-                      borderRadius: "16px",
+                      padding: innerWidth >= theme.breakpoints.values.sm ? "9.5px 14px" : "2px 0px",
+                    },
+                  }}
+                  sx={{
+                    "& fieldset": {
+                      borderWidth: 1,
+                      borderColor: (theme: any) =>
+                        theme.palette.mode === "dark" ? theme.palette.common.notebookG500 : "#D0D5DD",
+                      borderRadius: "4px",
                     },
                   }}
                 />
-                days
               </Box>
-              <div
-                style={{
-                  ...(sidebarWidth < 350 && {
-                    marginLeft: "auto",
-                  }),
+              <Box
+                id="nodesUpdatedSinceContainer"
+                sx={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                  fontSize: innerWidth > 410 ? "14px" : "11px",
+                  flexWrap: "wrap",
+                  gap: "10px",
+                  paddingTop: "13px",
+                  mb: "16px",
                 }}
-                id="SearchResutlsNum"
               >
-                {shortenNumber(searchResults.totalResults, 2, false)} Results
-              </div>
-            </Box>
-          </>
-        )}
+                <RecentNodesList
+                  recentNodes={searchResults}
+                  setRecentNodes={setSearchResults}
+                  onlyTags={onlyTags}
+                  disabled={disableRecentNodeList}
+                  sortOption={sortOption}
+                  setSortOption={onChangeSortOptions}
+                  sortDirection={sortDirection}
+                  setSortDirection={onChangeSortDirection}
+                />
 
-        {isMovil && showTagSelector && (
-          <MemoizedTagsSearcher
-            allTags={allTags}
-            setAllTags={setAllTags}
-            chosenTags={chosenTags}
-            setChosenTags={setChosenTagsCallback}
-            sx={{ maxHeight: "235px", height: "235px" }}
-            multiple
-          />
-        )}
+                <TimeFilter timeFilter={timeFilter} setTimeFilter={onChangeTimeFilter} />
+                <div
+                  style={{
+                    ...(sidebarWidth < 350 && {
+                      marginLeft: "auto",
+                    }),
+                  }}
+                  id="SearchResutlsNum"
+                >
+                  {shortenNumber(results, 2, false)} Results
+                </div>
+              </Box>
+            </>
+          )}
+          {!isMovil && showTagSelector && (
+            <Box
+              id="tagModal"
+              sx={{
+                position: "relative",
+                background: theme =>
+                  theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookG900 : DESIGN_SYSTEM_COLORS.gray100,
+                p: "16px 10px",
+                borderRadius: "8px",
+                border: theme =>
+                  `1px solid ${
+                    theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookG600 : DESIGN_SYSTEM_COLORS.gray300
+                  }`,
+              }}
+            >
+              <Typography textAlign={"center"} fontSize={"18px"} fontWeight={"600"} m={"8px 0 24px 0"}>
+                Search for tags
+              </Typography>
+              <IconButton
+                size="small"
+                sx={{ position: "absolute", top: "20px", right: "8px" }}
+                onClick={closeTagSelector}
+              >
+                <CloseRoundedIcon />
+              </IconButton>
+              <MemoizedTagsSearcher
+                id="user-settings-tag-searcher"
+                setChosenTags={setChosenTags}
+                chosenTags={chosenTags}
+                allTags={allTags}
+                setAllTags={setAllTags}
+                sx={{ maxHeight: "450px", height: "450px" }}
+                multiple
+              />
+            </Box>
+          )}
+          {isMovil && showTagSelector && (
+            <MemoizedTagsSearcher
+              allTags={allTags}
+              setAllTags={setAllTags}
+              chosenTags={chosenTags}
+              setChosenTags={setChosenTagsCallback}
+              sx={{ maxHeight: "235px", height: "235px" }}
+              multiple
+            />
+          )}
+        </Box>
+        <Box
+          sx={{
+            borderBottom: 1,
+            borderColor: theme => (theme.palette.mode === "dark" ? "black" : "divider"),
+            width: "100%",
+          }}
+        >
+          <Tabs value={value} onChange={handleTabValueChange} aria-label={"Search Sidebar Tabs"} variant="fullWidth">
+            {[{ title: "Nodes" }, /* { title: "Notebooks" }, */ { title: "Proposals" }].map(
+              (tabItem: any, idx: number) => (
+                <Tab
+                  key={tabItem.title}
+                  id={`bookmarks-tab-${tabItem.title.toLowerCase()}`}
+                  label={tabItem.title}
+                  {...a11yProps(idx)}
+                  sx={{ py: "20px" }}
+                />
+              )
+            )}
+          </Tabs>
+        </Box>
       </Box>
     );
   }, [
     innerHeight,
     isMovil,
-    showTagSelector,
-    setShowTagSelectorClick,
-    allTags,
-    setAllTags,
-    chosenTags,
-    setChosenTagsCallback,
     viewTagsInMovil,
     selectedTags,
     disableSearcher,
+    setShowTagSelectorClick,
+    showTagSelector,
     handleChange,
     search,
     disableInputSearcher,
@@ -611,19 +928,25 @@ const SearcherSidebar = ({
     onChangeSortOptions,
     sortDirection,
     onChangeSortDirection,
-    nodesUpdatedSince,
-    setNodesUpdatedSinceClick,
-    disableEditedInThePast,
+    timeFilter,
+    onChangeTimeFilter,
     sidebarWidth,
+    results,
+    closeTagSelector,
+    chosenTags,
+    allTags,
+    setAllTags,
+    setChosenTagsCallback,
+    value,
     deleteChip,
     onSearch,
+    onSearchPendingProposals,
   ]);
 
   return (
     <SidebarWrapper
       id="sidebar-wrapper-searcher"
       title="Search Nodes"
-      headerImage={searcherHeaderImage}
       open={open}
       onClose={onClose}
       width={sidebarWidth}
@@ -631,34 +954,98 @@ const SearcherSidebar = ({
       SidebarOptions={searcherOptionsMemoized}
       contentSignalState={contentSignalState}
       disabled={disableSearcher}
+      sx={{
+        boxShadow: "none",
+      }}
+      sxContentWrapper={{
+        height: "100%",
+        minHeight: "calc(100% - 60px)",
+        overflowX: "auto",
+        overflowY: "auto",
+      }}
       SidebarContent={
-        <Box id="search-list" sx={{ p: "2px 4px" }}>
-          <Box sx={{ display: "flex", flexDirection: "column", gap: "4px" }}>
-            {searchResults.data.map((resNode, idx) => {
-              return (
-                <Paper
-                  elevation={3}
-                  key={`resNode${idx}`}
-                  onClick={
-                    disableSearchItem
-                      ? () => {}
-                      : () => {
-                          openLinkedNode(resNode.id, "Searcher");
-                        }
-                  }
-                  sx={{
-                    listStyle: "none",
-                    padding: {
-                      xs: "5px 10px",
-                      sm: "10px",
-                    },
-                    borderLeft: "studied" in resNode && resNode.studied ? "solid 4px #fdc473" : " solid 4px #fd7373",
-                    cursor: disableSearchItem ? "not-allowed" : "pointer",
-                    opacity: disableSearchItem ? "0.5" : "1",
-                  }}
-                >
-                  {innerWidth > theme.breakpoints.values.sm && (
-                    <div
+        <Box>
+          {value === 0 && (
+            <Box id="search-list" sx={{ p: "6px" }}>
+              <Box sx={{ display: "flex", flexDirection: "column", gap: "6px" }}>
+                {!isRetrieving && searchResults.data.length === 0 && (
+                  <Box
+                    sx={{
+                      display: "flex",
+                      flexDirection: "column",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      marginTop: "25%",
+                    }}
+                  >
+                    <Box sx={{ width: { xs: "250px", sm: "300" }, height: { xs: "250px", sm: "300" } }}>
+                      <RiveComponentMemoized
+                        src="./rive-notebook/search-engine.riv"
+                        artboard="New Artboard"
+                        animations="Timeline 1"
+                        autoplay={true}
+                      />
+                    </Box>
+                    <Typography
+                      sx={{
+                        fontSize: "18px",
+                        lineHeight: "24px",
+                        width: "300px",
+                        fontWeight: "500",
+                        textAlign: "center",
+                        marginTop: "10px",
+                      }}
+                    >
+                      Looking for something specific?
+                    </Typography>
+
+                    <Typography
+                      sx={{
+                        fontSize: "13px",
+                        lineHeight: "24px",
+                        width: "300px",
+                        fontWeight: "400",
+                        textAlign: "center",
+                        marginTop: "10px",
+                        color: theme => (theme.palette.mode === "dark" ? "#AEAEAE" : theme.palette.common.gray700),
+                      }}
+                    >
+                      Add tags, select type, or simply enter a keyword and we will find all relevant nodes for you.
+                    </Typography>
+                  </Box>
+                )}
+                {searchResults.data.map((resNode, idx) => {
+                  return (
+                    <Paper
+                      elevation={3}
+                      key={`resNode${idx}`}
+                      onClick={
+                        disableSearchItem
+                          ? () => {}
+                          : () => {
+                              openLinkedNode(resNode.id, "Searcher");
+                            }
+                      }
+                      sx={{
+                        overflow: "hidden",
+                        listStyle: "none",
+                        padding: {
+                          xs: "5px 10px",
+                          sm: "12px 16px 10px 16px",
+                        },
+                        background: theme =>
+                          theme.palette.mode === "dark"
+                            ? theme.palette.common.notebookG700
+                            : theme.palette.common.gray100,
+                        borderRadius: "8px",
+                        borderLeft:
+                          "studied" in resNode && resNode.studied ? "solid 6px #fdc473" : " solid 6px #fd7373",
+                        cursor: disableSearchItem ? "not-allowed" : "pointer",
+                        opacity: disableSearchItem ? "0.5" : "1",
+                      }}
+                    >
+                      {/* {innerWidth > theme.breakpoints.values.sm && (
+                    <Box
                       className="SidebarNodeTypeIcon"
                       style={{ display: "flex", justifyContent: "space-between", fontSize: "16px" }}
                     >
@@ -689,35 +1076,236 @@ const SearcherSidebar = ({
                           </>
                         </MemoizedMetaButton>
                       </div>
-                    </div>
-                  )}
-                  <div className="SearchResultTitle">
-                    {/* CHECK: here is causing problems to hide scroll */}
-                    <Editor
-                      sxPreview={{
-                        fontSize: {
-                          xs: "14px",
-                          sm: "16px",
-                        },
-                      }}
-                      label=""
-                      readOnly={true}
-                      setValue={doNothing}
-                      value={resNode.title}
-                    />
-                  </div>
-                </Paper>
-              );
-            })}
-          </Box>
-          {isRetrieving && (
-            <Box sx={{ py: "10px", display: "flex", justifyContent: "center" }}>
-              <CircularProgress />
+                    </Box>
+                  )} */}
+                      <Typography
+                        sx={{
+                          fontSize: "16px",
+                          fontWeight: "500",
+                          lineHeight: "24px",
+                        }}
+                      >
+                        {resNode.title}
+                      </Typography>
+                      <Box
+                        sx={{
+                          marginTop: "10px",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "space-between",
+                        }}
+                      >
+                        <Box
+                          sx={{
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "space-between",
+                          }}
+                        >
+                          <Box
+                            sx={{
+                              width: "28px",
+                              height: "28px",
+                              borderRadius: "50%",
+                              background: theme =>
+                                theme.palette.mode === "dark"
+                                  ? theme.palette.common.notebookG500
+                                  : theme.palette.common.gray200,
+                              display: "flex",
+                              justifyContent: "center",
+                              alignItems: "center",
+                            }}
+                          >
+                            <NodeTypeIcon nodeType={resNode.nodeType || ""} fontSize="inherit" />
+                          </Box>
+                          <Box
+                            sx={{
+                              fontSize: "12px",
+                              marginLeft: "5px",
+                              color: theme =>
+                                theme.palette.mode === "dark"
+                                  ? theme.palette.common.notebookG200
+                                  : theme.palette.common.gray500,
+                            }}
+                          >
+                            {dayjs(new Date(resNode.changedAt)).fromNow()}
+                          </Box>
+                        </Box>
+                        <Box
+                          className="tab-double-button-node-footer"
+                          sx={{
+                            background: (theme: any) =>
+                              theme.palette.mode === "dark"
+                                ? theme.palette.common.notebookG500
+                                : theme.palette.common.gray200,
+                            display: "flex",
+                            alignItems: "center",
+                            marginRight: "0px",
+                            cursor: "auto",
+                          }}
+                        >
+                          <Box
+                            sx={{
+                              padding: "2px 10px 2px 10px",
+                              borderRadius: "52px 0px 0px 52px",
+                            }}
+                          >
+                            <Tooltip title={"Correct votes"} placement={"top"}>
+                              <Box
+                                sx={{
+                                  display: "flex",
+                                  fontSize: "14px",
+                                  alignItems: "center",
+                                }}
+                              >
+                                <DoneIcon sx={{ fontSize: "18px", color: "inherit" }} />
+                                <span>{shortenNumber(resNode.corrects, 2, false)}</span>
+                              </Box>
+                            </Tooltip>
+                          </Box>
+                          <Divider
+                            orientation="vertical"
+                            variant="middle"
+                            flexItem
+                            sx={{
+                              background: theme => (theme.palette.mode === "dark" ? "#D3D3D3" : "inherit"),
+                            }}
+                          />
+                          <Box
+                            sx={{
+                              padding: "2px 10px 2px 10px",
+                              borderRadius: "0px 52px 52px 0px",
+                            }}
+                          >
+                            <Tooltip title={"Wrong votes"} placement={"top"}>
+                              <Box
+                                sx={{
+                                  display: "flex",
+                                  fontSize: "14px",
+                                  alignItems: "center",
+                                }}
+                              >
+                                <CloseIcon
+                                  sx={{
+                                    fontSize: "18px",
+                                    color: "inherit",
+                                  }}
+                                />
+                                <span>{shortenNumber(resNode.wrongs, 2, false)}</span>
+                              </Box>
+                            </Tooltip>
+                          </Box>
+                        </Box>
+                      </Box>
+                    </Paper>
+                  );
+                })}
+              </Box>
+              {isRetrieving && (
+                <Box sx={{ py: "10px", display: "flex", justifyContent: "center" }}>
+                  <CircularProgress />
+                </Box>
+              )}
+              {!isRetrieving && searchResults.lastPageLoaded < searchResults.totalPage && (
+                <Box id="ContinueButton" ref={refInfinityLoaderTrigger}></Box>
+              )}
             </Box>
           )}
-          {!isRetrieving && searchResults.lastPageLoaded < searchResults.totalPage && (
-            <Box id="ContinueButton" ref={refInfinityLoaderTrigger}></Box>
-          )}
+          <Box sx={{ p: "10px" }}>
+            {/* INFO: I commented this while we develop the endpoints */}
+            {/* {value === 1 && (
+              <Box>
+                {notebooks.data.map((notebook: any, idx: number) => (
+                  <Box
+                    key={`notebook-${idx}`}
+                    sx={{
+                      width: "98%",
+                      height: "238px",
+                      border: theme => (theme.palette.mode === "dark" ? "solid 1px #2F2F2F" : "solid 1px #D0D5DD"),
+                      borderRadius: "8px",
+                      background: theme => (theme.palette.mode === "dark" ? "#1F1F1F" : theme.palette.common.gray100),
+                      marginBottom: "10px",
+                      marginX: "auto",
+                    }}
+                  >
+                    <Box
+                      sx={{
+                        height: "172px",
+                      }}
+                    >
+                      <NextImage
+                        src={theme.palette.mode === "dark" ? NotebookDarkImage.src : NotebookLightImage.src}
+                        width={"455px"}
+                        height={"172px"}
+                      />
+                    </Box>
+                    <Stack paddingX={"15px"} mt={"7px"} direction={"row"} spacing={"10px"} alignItems={"center"}>
+                      <Box>
+                        <OptimizedAvatar
+                          imageUrl={notebook.ownerImgUrl}
+                          renderAsAvatar={true}
+                          contained={false}
+                          sx={{ border: "none", width: "48px", height: "48px", position: "static" }}
+                        />
+                      </Box>
+                      <Box
+                        sx={{
+                          display: "flex",
+                          flexDirection: "column",
+                        }}
+                      >
+                        <Typography
+                          sx={{
+                            overflow: "hidden",
+                            textOverflow: "ellipsis",
+                            whiteSpace: "nowrap",
+                            display: "inline-block",
+                            fontWeight: "500",
+                            lineHeight: "24px",
+                          }}
+                        >{`${notebook.title}`}</Typography>
+                        <Typography
+                          sx={{
+                            overflow: "hidden",
+                            textOverflow: "ellipsis",
+                            whiteSpace: "nowrap",
+                            display: "inline-block",
+                            fontSize: "12px",
+                            lineHeight: "18px",
+                            color: theme =>
+                              theme.palette.mode === "dark"
+                                ? theme.palette.common.notebookG200
+                                : theme.palette.common.gray500,
+                          }}
+                        >
+                          {notebook.createdAt
+                            ? `Edited in ${dayjs(new Date(notebook.createdAt)).fromNow()}`
+                            : `Edited in 3 months ago`}
+                        </Typography>
+                      </Box>
+                    </Stack>
+                  </Box>
+                ))}
+                {!isRetrieving && notebooks.lastPageLoaded < notebooks.totalPage && (
+                  <Box id="ContinueButton" ref={refInfinityLoaderTrigger}></Box>
+                )}
+              </Box>
+            )} */}
+            {/* {value === 2 && ( */}
+            {value === 1 && (
+              <Box>
+                <PendingProposalList proposals={pendingProposals.data} openLinkedNode={openLinkedNode} />
+                {!isRetrieving && pendingProposals.lastPageLoaded < pendingProposals.totalPage && (
+                  <Box id="ContinueButton" ref={refInfinityLoaderTrigger}></Box>
+                )}
+              </Box>
+            )}
+            {isRetrieving && (value === 1 || value === 2) && (
+              <Box sx={{ py: "10px", display: "flex", justifyContent: "center" }}>
+                <CircularProgress />
+              </Box>
+            )}
+          </Box>
         </Box>
       }
     />
