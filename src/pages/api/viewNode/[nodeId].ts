@@ -103,7 +103,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       [batch, writeCounts] = await checkRestartBatchWriteCounts(batch, writeCounts);
     }
 
-    commitBatch(batch);
+    await commitBatch(batch);
     return res.status(200).json({ success: true });
   } catch (error) {
     console.log(error);

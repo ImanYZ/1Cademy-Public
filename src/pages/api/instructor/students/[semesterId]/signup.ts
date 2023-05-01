@@ -11,7 +11,8 @@ import { IUser } from "src/types/IUser";
 import { initializeNewReputationData } from "src/utils";
 import { searchAvailableUnameByEmail } from "src/utils/instructor";
 import { v4 as uuidv4 } from "uuid";
-import { createOrRestoreStatDocs } from "src/utils/course-helpers";
+import { createOrRestoreStatDocs, createPracticeForSemesterStudents } from "src/utils/course-helpers";
+import { detach } from "src/utils/helpers";
 
 export type InstructorSemesterSignUpPayload = {
   students: {
@@ -54,6 +55,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
 
     const addedStudents = payload.students.filter(student => existingEmails.indexOf(student.email) === -1);
     const removedStudents = semesterData.students.filter(student => receivedEmails.indexOf(student.email) === -1);
+    const addedUnames: string[] = [];
 
     // adding new students to course
     if (addedStudents.length) {
@@ -78,6 +80,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
             imageUrl: "https://storage.googleapis.com/onecademy-1.appspot.com/ProfilePictures/no-img.png",
             uname: userData.uname,
           });
+          addedUnames.push(userData.uname);
 
           // Create or Restoring Deleted documents for stats
           [batch, writeCounts] = await createOrRestoreStatDocs(semesterData.tagId, userData.uname, batch, writeCounts);
@@ -86,6 +89,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
 
         // If Student wasn't present in 1Cademy
         let uname = await searchAvailableUnameByEmail(addedStudent.email);
+        addedUnames.push(uname);
 
         // Creating Authorization for User
         const authUser = await getAuth().createUser({
@@ -145,6 +149,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
         [batch, writeCounts] = await checkRestartBatchWriteCounts(batch, writeCounts);
 
         // usernode for sNode
+        // TODO: add notebooks feature
         const userNodeRef = db.collection("userNodes").doc();
         batch.set(userNodeRef, {
           visible: true,
@@ -242,6 +247,21 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
 
     batch.update(semesterRef, semesterData);
     await commitBatch(batch);
+
+    if (addedUnames.length) {
+      // TODO: move these to queue
+      await detach(async () => {
+        let batch = db.batch();
+        let writeCounts = 0;
+        [batch, writeCounts] = await createPracticeForSemesterStudents(
+          semesterId as string,
+          addedUnames,
+          batch,
+          writeCounts
+        );
+        await commitBatch(batch);
+      });
+    }
 
     res.status(200).json({ message: "students updated" });
   } catch (error) {

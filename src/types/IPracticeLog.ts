@@ -1,4 +1,5 @@
 export type IPracticeLog = {
+  documentId?: string;
   iInterval: number;
   available_flashcards: number;
   tagId: string;

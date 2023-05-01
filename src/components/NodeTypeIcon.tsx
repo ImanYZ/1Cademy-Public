@@ -76,7 +76,7 @@ const NodeTypeIcon: FC<Props> = ({
   //   );
 
   return (
-    <Tooltip title={`${nodeType} node`} placement={tooltipPlacement}>
+    <Tooltip title={`${nodeType} node`} placement={tooltipPlacement} sx={{ display: "grid", placeItems: "center" }}>
       <Box id={`${id}-node-footer-type`}>{renderIcon()}</Box>
     </Tooltip>
   );

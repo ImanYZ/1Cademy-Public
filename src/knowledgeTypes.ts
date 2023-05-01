@@ -418,6 +418,7 @@ export type User = {
   fieldOfInterest: string;
   role: UserRole;
   livelinessBar?: string;
+  scaleThreshold?: number;
 };
 
 export type UserSettings = {

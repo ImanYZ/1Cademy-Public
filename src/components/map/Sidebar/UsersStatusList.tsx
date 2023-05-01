@@ -392,27 +392,29 @@ const UsersStatusList = ({ nodeBookDispatch, isSmaller = true, disabled = false,
 
   const renderUsersList = useCallback(
     (uList: any[], online: boolean) => {
-      return uList.map((user: any) => (
-        <MemoizedUserStatusIcon
-          key={"User" + user.uname}
-          nodeBookDispatch={nodeBookDispatch}
-          uname={user.uname}
-          totalPoints={user.totalPoints}
-          totalPositives={user.totalPositives}
-          totalNegatives={user.totalNegatives}
-          imageUrl={user.imageUrl}
-          fullname={user.fullname}
-          chooseUname={user.chooseUname}
-          online={online}
-          // inUserBar={false}
-          // inNodeFooter={false}
-          reloadPermanentGrpah={() => console.log("props.reloadPermanentGrpah")}
-          tagTitle={user.tag}
-          setOpenSideBar={props.setOpenSideBar}
-          sx={{ ...props.sxUserStatus }}
-          smallVersion={isSmaller}
-        />
-      ));
+      return uList.map((user: any) => {
+        return (
+          <MemoizedUserStatusIcon
+            key={"User" + user.uname}
+            nodeBookDispatch={nodeBookDispatch}
+            uname={user.uname}
+            totalPoints={user.totalPoints}
+            totalPositives={user.totalPositives}
+            totalNegatives={user.totalNegatives}
+            imageUrl={user.imageUrl}
+            fullname={user.fullname}
+            chooseUname={user.chooseUname}
+            online={online}
+            // inUserBar={false}
+            // inNodeFooter={false}
+            reloadPermanentGrpah={() => console.log("props.reloadPermanentGrpah")}
+            tagTitle={user.tag}
+            setOpenSideBar={props.setOpenSideBar}
+            sx={{ ...props.sxUserStatus }}
+            smallVersion={isSmaller}
+          />
+        );
+      });
     },
     [isSmaller, nodeBookDispatch, props.setOpenSideBar, props.sxUserStatus]
   );
