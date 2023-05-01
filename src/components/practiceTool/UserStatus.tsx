@@ -90,7 +90,7 @@ export const UserStatus = ({ user, semesterId, displayTitle = true }: UserStatus
       weekInfo.weekNumber,
       semester.dailyPractice.numQuestionsPerDay
     );
-
+    console.log({ dailyq: res[0] });
     setDaysValue(res);
     console.log("res345", { res });
   }, [semester, semesterStudentVoteStats, weekInfo.weekNumber]);
@@ -98,7 +98,7 @@ export const UserStatus = ({ user, semesterId, displayTitle = true }: UserStatus
   if (!semesterStudentVoteStats) return null;
 
   return (
-    <Box sx={{ width: "100%" }}>
+    <Box>
       {displayTitle && (
         <Box sx={{ width: "100%", height: "64px", display: "flex", alignItems: "center", justifyContent: "center" }}>
           <LeaderboardIcon sx={{ color: DESIGN_SYSTEM_COLORS.yellow400, mr: "12px" }} />
@@ -107,7 +107,6 @@ export const UserStatus = ({ user, semesterId, displayTitle = true }: UserStatus
       )}
       <Box
         sx={{
-          width: "100%",
           //   height: "64px",
           p: "16px 20px 24px 20px",
           display: "flex",
@@ -143,7 +142,9 @@ export const UserStatus = ({ user, semesterId, displayTitle = true }: UserStatus
                 <CheckIcon sx={{ color: DESIGN_SYSTEM_COLORS.success600, fontSize: "16px" }} />
               </PointsType>
             </Stack>
-            <Typography>{`Days in semester ${practiceDaysInfo.successPracticeDays}/${practiceDaysInfo.totalPracticeDays}`}</Typography>
+            <Typography
+              fontWeight={"500"}
+            >{`Days in semester ${practiceDaysInfo.successPracticeDays}/${practiceDaysInfo.totalPracticeDays}`}</Typography>
           </Stack>
         </Box>
       </Box>
@@ -164,7 +165,7 @@ export const UserStatus = ({ user, semesterId, displayTitle = true }: UserStatus
         </Box>
         <Stack direction={"row"} spacing={"12px"} sx={{ p: "8px 20px 24px 20px" }}>
           <Stack spacing={"20px"} sx={{ width: "51px", borderRight: `solid 1px ${DESIGN_SYSTEM_COLORS.notebookG600}` }}>
-            {daysValue.map((cur, idx) => (
+            {DAYS_LABEL.map((cur, idx) => (
               <Box
                 key={idx}
                 sx={{
@@ -173,10 +174,24 @@ export const UserStatus = ({ user, semesterId, displayTitle = true }: UserStatus
                   display: "grid",
                   placeItems: "center",
                   borderRadius: "50%",
-                  border: `solid 2px ${DESIGN_SYSTEM_COLORS.success500}`,
+                  border: `solid 2px ${
+                    daysValue[idx]
+                      ? daysValue[idx].gotPoint === true
+                        ? DESIGN_SYSTEM_COLORS.success500
+                        : DESIGN_SYSTEM_COLORS.notebookScarlet
+                      : DESIGN_SYSTEM_COLORS.notebookG200
+                  }`,
+
+                  color: daysValue[idx]
+                    ? daysValue[idx].gotPoint === true
+                      ? DESIGN_SYSTEM_COLORS.success500
+                      : DESIGN_SYSTEM_COLORS.notebookScarlet
+                    : DESIGN_SYSTEM_COLORS.notebookG200,
                 }}
               >
-                {DAYS_LABEL[idx % DAYS_LABEL.length]}
+                <Typography fontSize={"16px"} fontWeight={"500"} color={"inherit"}>
+                  {DAYS_LABEL[idx]}
+                </Typography>
               </Box>
             ))}
           </Stack>
@@ -187,8 +202,11 @@ export const UserStatus = ({ user, semesterId, displayTitle = true }: UserStatus
                   sx={{
                     height: "35px",
                     width: `${(cur.value * 100) / MAX_DAILY_VALUE}%`,
-                    backgroundColor: DESIGN_SYSTEM_COLORS.success500,
+                    backgroundColor: cur.gotPoint
+                      ? DESIGN_SYSTEM_COLORS.success500
+                      : DESIGN_SYSTEM_COLORS.notebookScarlet,
                     mr: "12px",
+                    borderRadius: "0px 3px 3px 0px",
                   }}
                 />
                 <Typography sx={{ fontWeight: 500 }}>{cur.value}</Typography>
@@ -239,7 +257,7 @@ const mapSemesterStudentStatsToWeekStats = (
   const dayStats = filterDayStatsByWeek(semesterStudentStats.days, weekNumber);
   const dayStatsSorted = dayStats.sort((a, b) => new Date(a.day).getDay() - new Date(b.day).getDay());
   return dayStatsSorted.map(cur => ({
-    value: cur.totalPractices ?? 0,
+    value: cur.correctPractices ?? 0,
     gotPoint: cur.correctPractices >= numQuestionsPerDay,
   }));
 };
