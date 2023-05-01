@@ -2,7 +2,7 @@ import CheckIcon from "@mui/icons-material/Check";
 import LeaderboardIcon from "@mui/icons-material/Leaderboard";
 import NavigateBeforeIcon from "@mui/icons-material/NavigateBefore";
 import NavigateNextIcon from "@mui/icons-material/NavigateNext";
-import { Box, IconButton, Stack, Typography } from "@mui/material";
+import { Box, Divider, IconButton, Stack, Typography } from "@mui/material";
 import { getFirestore } from "firebase/firestore";
 import Image from "next/image";
 import React, { useEffect, useMemo, useState } from "react";
@@ -146,21 +146,6 @@ export const UserStatus = ({ user, semesterId, displayTitle = true }: UserStatus
             <Typography>{`Days in semester ${practiceDaysInfo.successPracticeDays}/${practiceDaysInfo.totalPracticeDays}`}</Typography>
           </Stack>
         </Box>
-        <Stack alignItems={"center"} spacing="6px">
-          <Box
-            sx={{
-              width: "48px",
-              height: "48px",
-              border: `solid 2px ${DESIGN_SYSTEM_COLORS.success500}`,
-              borderRadius: "50%",
-              display: "grid",
-              placeItems: "center",
-            }}
-          >
-            {calculateDailyStreak(semesterStudentVoteStats)}
-          </Box>
-          <Typography sx={{ fontSize: "14px", color: DESIGN_SYSTEM_COLORS.gray25 }}>Daily streak</Typography>
-        </Stack>
       </Box>
 
       {/* body */}
@@ -211,6 +196,26 @@ export const UserStatus = ({ user, semesterId, displayTitle = true }: UserStatus
             ))}
           </Stack>
         </Stack>
+        <Divider sx={{ mb: "24px" }} />
+        <Box sx={{ display: "grid", placeItems: "center", gap: "8px" }}>
+          <Box
+            sx={{
+              width: "60px",
+              height: "60px",
+              border: `solid 2px ${DESIGN_SYSTEM_COLORS.success500}`,
+              borderRadius: "50%",
+              display: "grid",
+              placeItems: "center",
+            }}
+          >
+            <Typography fontSize={"18px"} fontWeight={"500"} color={DESIGN_SYSTEM_COLORS.success500}>
+              {calculateDailyStreak(semesterStudentVoteStats)}
+            </Typography>
+          </Box>
+          <Typography sx={{ fontSize: "18px", fontWeight: "500", color: DESIGN_SYSTEM_COLORS.gray25 }}>
+            Daily streak
+          </Typography>
+        </Box>
       </Box>
     </Box>
   );
