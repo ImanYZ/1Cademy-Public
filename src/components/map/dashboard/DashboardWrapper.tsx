@@ -74,7 +74,6 @@ export const DashboardWrapper = ({ user, openNodeHandler, onClose, sx }: Dashboa
           const tmpValues = acu[cur.tagId] ?? [];
           return { ...acu, [cur.tagId]: [...tmpValues, `${cur.cTitle} ${cur.pTitle}`] };
         }, {});
-        console.log({ coursesResult });
 
         // const semester = allSemesters.map(cur => cur.title);
         setAllSemesters(semesters);
@@ -166,7 +165,7 @@ export const DashboardWrapper = ({ user, openNodeHandler, onClose, sx }: Dashboa
     if (instructor) return;
     if (!currentSemester) return;
 
-    const newCourses = getCourseBySemester(currentSemester?.title, allCourses);
+    const newCourses = getCourseBySemester(currentSemester.tagId, allCourses);
 
     setSelectedCourse(newCourses[0]);
   }, [allCourses, currentSemester, instructor]);

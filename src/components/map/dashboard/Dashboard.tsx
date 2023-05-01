@@ -1036,7 +1036,7 @@ export const Dashboard = ({ user, currentSemester }: DashboardProps) => {
         {!isMovil && !isLoading && <BoxLegend role={user.role} />}
       </Paper>
       {/* Sankey Chart */}
-      {sankeyData.length && (
+      {sankeyData.length > 0 && (
         <Paper
           sx={{
             display: "flex",
