@@ -48,6 +48,7 @@ export const SemesterSelect = ({
   role,
   uname,
 }: SemesterSelectProps) => {
+  console.log({ selectedCourse });
   const db = getFirestore();
   const {
     palette: { mode },

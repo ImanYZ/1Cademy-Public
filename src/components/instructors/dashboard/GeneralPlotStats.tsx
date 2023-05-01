@@ -49,7 +49,7 @@ export const GeneralPlotStats = ({ semesterConfig, semesterStats, student }: Gen
           alignItems: "center",
           textAlign: "right",
           rowGap: "12px",
-          "& span:nth-child(odd)": {
+          "& span:nth-of-type(odd)": {
             fontWeight: "600",
             textAlign: "left",
           },

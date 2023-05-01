@@ -281,6 +281,7 @@ export const BubbleChart = ({
   student,
   role,
 }: BubblePlotProps) => {
+  console.log({ bubbledata: data });
   const height = 400;
   const svg = useCallback(
     (svgRef: any) => {

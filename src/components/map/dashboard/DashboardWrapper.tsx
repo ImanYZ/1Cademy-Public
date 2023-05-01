@@ -94,12 +94,10 @@ export const DashboardWrapper = ({ user, openNodeHandler, onClose, sx }: Dashboa
           setInstructor(intructor);
 
           const allCourses = getCoursesByInstructor(intructor);
-          console.log({ allCourses });
+
           const semestersIds = intructor.courses.map(course => course.tagId);
-          console.log({ semestersIds });
           const semesters = await getSemesterByIds(db, semestersIds);
           semesters.sort((a, b) => (b.title > a.title ? 1 : -1));
-          console.log({ semesters });
           setAllSemesters(semesters);
           setAllCourses(allCourses);
         },
@@ -152,14 +150,13 @@ export const DashboardWrapper = ({ user, openNodeHandler, onClose, sx }: Dashboa
   useEffect(() => {
     if (!currentSemester) return;
     if (selectedCourse) return;
-    const courses = allCourses[currentSemester.title];
+    const courses = allCourses[currentSemester.tagId];
 
     if (!courses) return;
     if (!instructor) return;
 
     const firstCourse = selectCourse(courses[0], instructor);
     if (!firstCourse) return;
-    console.log({ firstCourse });
     setCurrentSemester(firstCourse);
     setSelectedCourse(courses[0]);
   }, [allCourses, currentSemester, instructor, selectedCourse]);
@@ -168,6 +165,7 @@ export const DashboardWrapper = ({ user, openNodeHandler, onClose, sx }: Dashboa
   useEffect(() => {
     if (instructor) return;
     if (!currentSemester) return;
+
     const newCourses = getCourseBySemester(currentSemester?.title, allCourses);
 
     setSelectedCourse(newCourses[0]);
@@ -178,7 +176,6 @@ export const DashboardWrapper = ({ user, openNodeHandler, onClose, sx }: Dashboa
     if (!instructor) return;
     if (!selectedCourse) return;
     const current = selectCourse(selectedCourse, instructor);
-    console.log({ current });
     setCurrentSemester(current ?? null);
   }, [instructor, selectedCourse]);
 
@@ -274,7 +271,6 @@ export const getCourseTitleFromSemester = (semester: ISemester) => {
 };
 
 const getCoursesByInstructor = (instructor: Instructor): CoursesResult => {
-  console.log({ instructor });
   return instructor.courses.reduce((acu: CoursesResult, cur) => {
     const tmpValues = acu[cur.title] ?? [];
     return { ...acu, [cur.tagId]: [...tmpValues, `${cur.cTitle} ${cur.pTitle || "@ " + cur.uTitle}`] };

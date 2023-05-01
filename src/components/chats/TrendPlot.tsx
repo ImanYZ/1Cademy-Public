@@ -159,7 +159,7 @@ export const TrendPlot = ({
               brushDimension="x"
               brushStyle={{
                 stroke: "transparent",
-                fill: DESIGN_SYSTEM_COLORS.notebookO900,
+                fill: theme === "Dark" ? DESIGN_SYSTEM_COLORS.notebookO900 : DESIGN_SYSTEM_COLORS.primary50,
                 fillOpacity: 0.6,
               }}
               brushDomain={zoomDomain}

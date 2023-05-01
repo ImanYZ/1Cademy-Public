@@ -778,67 +778,84 @@ export const Dashboard = ({ user, currentSemester }: DashboardProps) => {
             </>
           )}
         </Paper>
-
-        <Paper
-          // ref={bubbleRef}
-          // className="test"
-          sx={{
-            p: isMovil ? "10px" : "16px",
-            backgroundColor: mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookMainBlack : DESIGN_SYSTEM_COLORS.gray50,
-          }}
-        >
-          {isLoading && <BubblePlotStatsSkeleton />}
-          {!isLoading && semesterConfig?.isCastingVotesRequired && (
-            <>
-              <Box
-                sx={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  alignItems: "flex-start",
-                }}
-              >
-                <Typography sx={{ fontSize: "19px", alignSelf: "center" }}>Vote Leaderboard</Typography>
-                <Legend
-                  title={""}
-                  options={[
-                    { title: ">100%", color: "#388E3C" },
-                    { title: ">10%", color: "#F9DBAF" },
-                    { title: "< 0%", color: "#E04F16" },
-                    { title: ">50%", color: "#A7D841" },
-                    { title: "<=10%", color: "#F7B27A" },
-                    { title: "= 0%", color: "#575757" },
-                  ]}
-                  sx={{ gridTemplateColumns: "repeat(3,12px 1fr)" }}
-                />
+        {
+          <Paper
+            // ref={bubbleRef}
+            // className="test"
+            sx={{
+              p: isMovil ? "10px" : "16px",
+              backgroundColor: mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookMainBlack : DESIGN_SYSTEM_COLORS.gray50,
+            }}
+          >
+            {isLoading && <BubblePlotStatsSkeleton />}
+            {!isLoading && semesterConfig && !semesterConfig.isCastingVotesRequired && (
+              <Box sx={{ height: "100%", display: "grid", placeItems: "center" }}>
+                <Typography
+                  sx={{
+                    fontSize: "21px",
+                    fontWeight: "600",
+                    textAlign: "center",
+                    maxWidth: "300px",
+                    color: theme =>
+                      theme.palette.mode === "light" ? "rgba(67, 68, 69,.125)" : "rgba(224, 224, 224,.125)",
+                  }}
+                >
+                  Casting Votes chart is not enabled
+                </Typography>
               </Box>
-              <BubbleChart
-                data={bubble}
-                width={bubbleChartWidth}
-                margin={{ top: 20, right: 0, bottom: 40, left: 50 }}
-                theme={theme.palette.mode === "dark" ? "Dark" : "Light"}
-                maxAxisX={bubbleAxis.maxAxisX}
-                maxAxisY={bubbleAxis.maxAxisY}
-                minAxisX={bubbleAxis.minAxisX}
-                minAxisY={bubbleAxis.minAxisY}
-                role={user.role}
-                student={studentVoteStat}
-              />
-              {user.role === "STUDENT" && (
-                <Box sx={{ display: "flex", justifyContent: "center", gap: "6px", alignItems: "center" }}>
-                  <svg width="18" height="21" viewBox="0 0 18 21" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path
-                      fillRule="evenodd"
-                      clipRule="evenodd"
-                      d="M8.54 20.351L8.61 20.391L8.638 20.407C8.74903 20.467 8.87327 20.4985 8.9995 20.4985C9.12573 20.4985 9.24997 20.467 9.361 20.407L9.389 20.392L9.46 20.351C9.85112 20.1191 10.2328 19.8716 10.604 19.609C11.5651 18.9305 12.463 18.1667 13.287 17.327C15.231 15.337 17.25 12.347 17.25 8.5C17.25 6.31196 16.3808 4.21354 14.8336 2.66637C13.2865 1.11919 11.188 0.25 9 0.25C6.81196 0.25 4.71354 1.11919 3.16637 2.66637C1.61919 4.21354 0.75 6.31196 0.75 8.5C0.75 12.346 2.77 15.337 4.713 17.327C5.53664 18.1667 6.43427 18.9304 7.395 19.609C7.76657 19.8716 8.14854 20.1191 8.54 20.351ZM9 11.5C9.79565 11.5 10.5587 11.1839 11.1213 10.6213C11.6839 10.0587 12 9.29565 12 8.5C12 7.70435 11.6839 6.94129 11.1213 6.37868C10.5587 5.81607 9.79565 5.5 9 5.5C8.20435 5.5 7.44129 5.81607 6.87868 6.37868C6.31607 6.94129 6 7.70435 6 8.5C6 9.29565 6.31607 10.0587 6.87868 10.6213C7.44129 11.1839 8.20435 11.5 9 11.5Z"
-                      fill="#C03938"
-                    />
-                  </svg>
-                  <Typography sx={{ fontSize: "12px" }}>Your Position</Typography>
+            )}
+            {!isLoading && semesterConfig?.isCastingVotesRequired && (
+              <>
+                <Box
+                  sx={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "flex-start",
+                  }}
+                >
+                  <Typography sx={{ fontSize: "19px", alignSelf: "center" }}>Vote Leaderboard</Typography>
+                  <Legend
+                    title={""}
+                    options={[
+                      { title: ">100%", color: "#388E3C" },
+                      { title: ">10%", color: "#F9DBAF" },
+                      { title: "< 0%", color: "#E04F16" },
+                      { title: ">50%", color: "#A7D841" },
+                      { title: "<=10%", color: "#F7B27A" },
+                      { title: "= 0%", color: "#575757" },
+                    ]}
+                    sx={{ gridTemplateColumns: "repeat(3,12px 1fr)" }}
+                  />
                 </Box>
-              )}
-            </>
-          )}
-        </Paper>
+                <BubbleChart
+                  data={bubble}
+                  width={bubbleChartWidth}
+                  margin={{ top: 20, right: 0, bottom: 40, left: 50 }}
+                  theme={theme.palette.mode === "dark" ? "Dark" : "Light"}
+                  maxAxisX={bubbleAxis.maxAxisX}
+                  maxAxisY={bubbleAxis.maxAxisY}
+                  minAxisX={bubbleAxis.minAxisX}
+                  minAxisY={bubbleAxis.minAxisY}
+                  role={user.role}
+                  student={studentVoteStat}
+                />
+                {user.role === "STUDENT" && (
+                  <Box sx={{ display: "flex", justifyContent: "center", gap: "6px", alignItems: "center" }}>
+                    <svg width="18" height="21" viewBox="0 0 18 21" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path
+                        fillRule="evenodd"
+                        clipRule="evenodd"
+                        d="M8.54 20.351L8.61 20.391L8.638 20.407C8.74903 20.467 8.87327 20.4985 8.9995 20.4985C9.12573 20.4985 9.24997 20.467 9.361 20.407L9.389 20.392L9.46 20.351C9.85112 20.1191 10.2328 19.8716 10.604 19.609C11.5651 18.9305 12.463 18.1667 13.287 17.327C15.231 15.337 17.25 12.347 17.25 8.5C17.25 6.31196 16.3808 4.21354 14.8336 2.66637C13.2865 1.11919 11.188 0.25 9 0.25C6.81196 0.25 4.71354 1.11919 3.16637 2.66637C1.61919 4.21354 0.75 6.31196 0.75 8.5C0.75 12.346 2.77 15.337 4.713 17.327C5.53664 18.1667 6.43427 18.9304 7.395 19.609C7.76657 19.8716 8.14854 20.1191 8.54 20.351ZM9 11.5C9.79565 11.5 10.5587 11.1839 11.1213 10.6213C11.6839 10.0587 12 9.29565 12 8.5C12 7.70435 11.6839 6.94129 11.1213 6.37868C10.5587 5.81607 9.79565 5.5 9 5.5C8.20435 5.5 7.44129 5.81607 6.87868 6.37868C6.31607 6.94129 6 7.70435 6 8.5C6 9.29565 6.31607 10.0587 6.87868 10.6213C7.44129 11.1839 8.20435 11.5 9 11.5Z"
+                        fill="#C03938"
+                      />
+                    </svg>
+                    <Typography sx={{ fontSize: "12px" }}>Your Position</Typography>
+                  </Box>
+                )}
+              </>
+            )}
+          </Paper>
+        }
       </Box>
       {/* box plot */}
       <Paper
@@ -866,95 +883,152 @@ export const Dashboard = ({ user, currentSemester }: DashboardProps) => {
             <>
               <Box
                 sx={{
-                  display: semesterConfig?.isProposalRequired ? "flex" : "none",
+                  display: "flex",
                   flexDirection: "column",
                   gap: "12px",
                 }}
               >
-                <Box sx={{ display: "grid", gridTemplateColumns: "1fr 1fr" }}>
-                  <Typography sx={{ fontSize: "16px", justifySelf: "center", alignSelf: "flex-end" }}>
-                    Chapters{" "}
-                  </Typography>
-                  <Typography sx={{ fontSize: "19px" }}> Proposal Points</Typography>
-                </Box>
+                {semesterConfig?.isProposalRequired ? (
+                  <>
+                    <Box sx={{ display: "grid", gridTemplateColumns: "1fr 1fr" }}>
+                      <Typography sx={{ fontSize: "16px", justifySelf: "center", alignSelf: "flex-end" }}>
+                        Chapters{" "}
+                      </Typography>
+                      <Typography sx={{ fontSize: "19px" }}> Proposal Points</Typography>
+                    </Box>
 
-                <BoxChart
-                  theme={theme.palette.mode === "dark" ? "Dark" : "Light"}
-                  data={boxStats.proposalsPoints.data}
-                  width={boxPlotWidth}
-                  // width={trendPlotWith}
-                  boxHeight={25}
-                  margin={{ top: 10, right: 0, bottom: 20, left: 8 }}
-                  offsetX={isMovil ? 100 : 100}
-                  offsetY={18}
-                  identifier="plot-1"
-                  maxX={boxStats.proposalsPoints.max}
-                  minX={boxStats.proposalsPoints.min}
-                  studentStats={studentBoxStat.proposalsPoints}
-                />
-                {isMovil && <BoxLegend role={user.role} />}
+                    <BoxChart
+                      theme={theme.palette.mode === "dark" ? "Dark" : "Light"}
+                      data={boxStats.proposalsPoints.data}
+                      width={boxPlotWidth}
+                      boxHeight={25}
+                      margin={{ top: 10, right: 0, bottom: 20, left: 8 }}
+                      offsetX={isMovil ? 100 : 100}
+                      offsetY={18}
+                      identifier="plot-1"
+                      maxX={boxStats.proposalsPoints.max}
+                      minX={boxStats.proposalsPoints.min}
+                      studentStats={studentBoxStat.proposalsPoints}
+                    />
+                    {isMovil && <BoxLegend role={user.role} />}
+                  </>
+                ) : (
+                  <Box sx={{ height: "100%", display: "grid", placeItems: "center" }}>
+                    <Typography
+                      sx={{
+                        fontSize: "21px",
+                        fontWeight: "600",
+                        textAlign: "center",
+                        maxWidth: "325px",
+                        color: theme =>
+                          theme.palette.mode === "light" ? "rgba(67, 68, 69,.125)" : "rgba(224, 224, 224,.125)",
+                      }}
+                    >
+                      Proposal Box chart is not enabled
+                    </Typography>
+                  </Box>
+                )}
               </Box>
               <Box
                 sx={{
-                  display: semesterConfig?.isQuestionProposalRequired ? "flex" : "none",
+                  display: "flex",
                   flexDirection: "column",
                   gap: "12px",
                 }}
               >
-                <Box sx={{ display: "flex", justifyContent: "space-around" }}>
-                  {isMovil && (
-                    <Typography sx={{ fontSize: "16px", justifySelf: "center", alignSelf: "flex-end" }}>
-                      Chapters{" "}
+                {semesterConfig?.isQuestionProposalRequired ? (
+                  <>
+                    <Box sx={{ display: "flex", justifyContent: "space-around" }}>
+                      {isMovil && (
+                        <Typography sx={{ fontSize: "16px", justifySelf: "center", alignSelf: "flex-end" }}>
+                          Chapters{" "}
+                        </Typography>
+                      )}
+                      <Typography sx={{ fontSize: "19px" }}> Question Points</Typography>
+                    </Box>
+
+                    <BoxChart
+                      theme={theme.palette.mode === "dark" ? "Dark" : "Light"}
+                      data={boxStats.questionsPoints.data}
+                      drawYAxis={isMovil}
+                      width={boxPlotWidth}
+                      boxHeight={25}
+                      margin={{ top: 10, right: 0, bottom: 20, left: 10 }}
+                      offsetX={isMovil ? 100 : 2}
+                      offsetY={18}
+                      identifier="plot-2"
+                      maxX={boxStats.questionsPoints.max}
+                      minX={boxStats.questionsPoints.min}
+                      studentStats={studentBoxStat.questionsPoints}
+                    />
+                    {isMovil && <BoxLegend role={user.role} />}
+                  </>
+                ) : (
+                  <Box sx={{ height: "100%", display: "grid", placeItems: "center" }}>
+                    <Typography
+                      sx={{
+                        fontSize: "21px",
+                        fontWeight: "600",
+                        textAlign: "center",
+                        maxWidth: "325px",
+                        color: theme =>
+                          theme.palette.mode === "light" ? "rgba(67, 68, 69,.125)" : "rgba(224, 224, 224,.125)",
+                      }}
+                    >
+                      Question Box chart is not enabled
                     </Typography>
-                  )}
-                  <Typography sx={{ fontSize: "19px" }}> Question Points</Typography>
-                </Box>
-                <BoxChart
-                  theme={theme.palette.mode === "dark" ? "Dark" : "Light"}
-                  data={boxStats.questionsPoints.data}
-                  drawYAxis={isMovil}
-                  width={boxPlotWidth}
-                  boxHeight={25}
-                  margin={{ top: 10, right: 0, bottom: 20, left: 10 }}
-                  offsetX={isMovil ? 100 : 2}
-                  offsetY={18}
-                  identifier="plot-2"
-                  maxX={boxStats.questionsPoints.max}
-                  minX={boxStats.questionsPoints.min}
-                  studentStats={studentBoxStat.questionsPoints}
-                />
-                {isMovil && <BoxLegend role={user.role} />}
+                  </Box>
+                )}
               </Box>
               <Box
                 sx={{
-                  display: semesterConfig?.isCastingVotesRequired ? "flex" : "none",
+                  display: "flex",
                   flexDirection: "column",
                   gap: "12px",
                 }}
               >
-                <Box sx={{ display: "flex", justifyContent: "space-around" }}>
-                  {isMovil && (
-                    <Typography sx={{ fontSize: "16px", justifySelf: "center", alignSelf: "flex-end" }}>
-                      Chapters{" "}
+                {semesterConfig?.isCastingVotesRequired ? (
+                  <>
+                    <Box sx={{ display: "flex", justifyContent: "space-around" }}>
+                      {isMovil && (
+                        <Typography sx={{ fontSize: "16px", justifySelf: "center", alignSelf: "flex-end" }}>
+                          Chapters{" "}
+                        </Typography>
+                      )}
+                      <Typography sx={{ fontSize: "19px" }}> Vote Points</Typography>
+                    </Box>
+                    <BoxChart
+                      theme={theme.palette.mode === "dark" ? "Dark" : "Light"}
+                      data={boxStats.votesPoints.data}
+                      drawYAxis={isMovil}
+                      width={boxPlotWidth}
+                      boxHeight={25}
+                      margin={{ top: 10, right: 0, bottom: 20, left: 10 }}
+                      offsetX={isMovil ? 100 : 2}
+                      offsetY={18}
+                      identifier="plot-3"
+                      minX={boxStats.votesPoints.min}
+                      maxX={boxStats.votesPoints.max}
+                      studentStats={studentBoxStat.votesPoints}
+                    />
+                    {isMovil && <BoxLegend role={user.role} />}
+                  </>
+                ) : (
+                  <Box sx={{ height: "100%", display: "grid", placeItems: "center" }}>
+                    <Typography
+                      sx={{
+                        fontSize: "21px ",
+                        fontWeight: "600",
+                        textAlign: "center",
+                        maxWidth: "325px",
+                        color: theme =>
+                          theme.palette.mode === "light" ? "rgba(67, 68, 69,.125)" : "rgba(224, 224, 224,.125)",
+                      }}
+                    >
+                      Casting Votes Box chart is not enabled
                     </Typography>
-                  )}
-                  <Typography sx={{ fontSize: "19px" }}> Vote Points</Typography>
-                </Box>
-                <BoxChart
-                  theme={theme.palette.mode === "dark" ? "Dark" : "Light"}
-                  data={boxStats.votesPoints.data}
-                  drawYAxis={isMovil}
-                  width={boxPlotWidth}
-                  boxHeight={25}
-                  margin={{ top: 10, right: 0, bottom: 20, left: 10 }}
-                  offsetX={isMovil ? 100 : 2}
-                  offsetY={18}
-                  identifier="plot-3"
-                  minX={boxStats.votesPoints.min}
-                  maxX={boxStats.votesPoints.max}
-                  studentStats={studentBoxStat.votesPoints}
-                />
-                {isMovil && <BoxLegend role={user.role} />}
+                  </Box>
+                )}
               </Box>
             </>
           )}
