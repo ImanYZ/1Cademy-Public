@@ -9,46 +9,78 @@ import { Box, Stack } from "@mui/system";
 import React, { ReactNode, useCallback, useEffect, useMemo, useState } from "react";
 
 import { SimpleQuestionNode } from "../../instructorsTypes";
+import { Post } from "../../lib/mapApi";
 import { DESIGN_SYSTEM_COLORS } from "../../lib/theme/colors";
 import shortenNumber from "../../lib/utils/shortenNumber";
-import { NodeType } from "../../types";
+import { doNeedToDeleteNode } from "../../utils/helpers";
 import { CustomWrapperButton } from "../map/Buttons/Buttons";
+import { PracticeInfo } from "./PracticeTool";
 
 type NodeQuestionProps = {
   node: SimpleQuestionNode;
   selectedAnswers: boolean[];
   setSelectedIdxAnswer: (newValue: number) => void;
   submitAnswer: boolean;
-  onCorrectNode: (e: any, nodeId: string) => void;
-  onWrongNode: (
-    event: any,
-    nodeId: string,
-    nodeType: NodeType,
-    wrong: any,
-    correct: any,
-    wrongs: number,
-    corrects: number,
-    locked: boolean
-  ) => void;
 };
 
-const NodeQuestion = ({
-  node,
-  selectedAnswers,
-  setSelectedIdxAnswer,
-  submitAnswer,
-  onCorrectNode,
-  onWrongNode,
-}: NodeQuestionProps) => {
+const NodeQuestion = ({ node, selectedAnswers, setSelectedIdxAnswer, submitAnswer }: NodeQuestionProps) => {
   const [displayTags, setDisplayTags] = useState(false);
+  const [nodeCopy, setNodeCopy] = useState<SimpleQuestionNode>(node);
+
+  useEffect(() => {
+    setNodeCopy(node);
+  }, [node]);
 
   const otherTags = useMemo(() => {
-    return node.tags.splice(0, node.tags.length - 2);
-  }, [node.tags]);
+    return nodeCopy.tags.splice(0, nodeCopy.tags.length - 2);
+  }, [nodeCopy.tags]);
 
   const onSelectAnswer = (idx: number) => {
     if (submitAnswer) return;
     setSelectedIdxAnswer(idx);
+  };
+
+  const onCorrectNode = async (nodeId: string) => {
+    setNodeCopy(prev => {
+      const correct = prev.correct;
+      const wrong = prev.wrong;
+
+      const correctChange = correct ? -1 : 1;
+      const wrongChange = !correct && wrong ? -1 : 0;
+      const corrects = prev.corrects + correctChange;
+      const wrongs = prev.wrongs + wrongChange;
+      return { ...prev, correct: !correct, wrong: false, corrects, wrongs, disableVotes: true };
+    });
+    await Post(`/correctNode/${nodeId}`);
+    setNodeCopy(prev => ({ ...prev, disableVotes: false }));
+  };
+
+  const onWrongNode = async (thisNode: SimpleQuestionNode) => {
+    if (thisNode?.locked) return;
+    const correctChange = !thisNode.wrong && thisNode.correct ? -1 : 0;
+    const wrongChange = thisNode.wrong ? -1 : 1;
+    const _corrects = thisNode.corrects + correctChange;
+    const _wrongs = thisNode.wrongs + wrongChange;
+    const willRemoveNode = doNeedToDeleteNode(_corrects, _wrongs, thisNode.locked);
+    let deleteOK = willRemoveNode ? false : true;
+    // INFO: is not required to validate children, because a question shoould not have childs
+    if (willRemoveNode) {
+      deleteOK = window.confirm("You are going to permanently delete this node by downvoting it. Are you sure?");
+    }
+
+    if (!deleteOK) return;
+    setNodeCopy(prev => {
+      return {
+        ...prev,
+        wrong: !thisNode.wrong,
+        correct: false,
+        wrongs: _wrongs,
+        corrects: _corrects,
+        disableVotes: true,
+      };
+    });
+    await Post(`/wrongNode/${thisNode.id}`);
+    setNodeCopy(prev => ({ ...prev, disableVotes: false }));
   };
 
   return (
@@ -62,10 +94,10 @@ const NodeQuestion = ({
       }}
     >
       <Typography component={"h1"} sx={{ fontSize: "30px" }}>
-        {node.title}
+        {nodeCopy.title}
       </Typography>
       <Stack component={"ul"} spacing="16px" sx={{ p: "0px" }}>
-        {node.choices.map((cur, idx) => (
+        {nodeCopy.choices.map((cur, idx) => (
           <Box key={idx}>
             <ListItem
               onClick={() => onSelectAnswer(idx)}
@@ -216,7 +248,7 @@ const NodeQuestion = ({
       <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
         <Stack direction={"row"} alignItems="center" spacing={"10px"} sx={{ position: "relative" }}>
           <LocalOfferIcon sx={{ mr: "10px", color: theme => theme.palette.common.notebookO100 }} />
-          <Typography>{node.tags[node.tags.length - 1] ?? ""} </Typography>
+          <Typography>{nodeCopy.tags[nodeCopy.tags.length - 1] ?? ""} </Typography>
           {otherTags.length > 0 && (
             <Typography
               onClick={() => setDisplayTags(true)}
@@ -231,7 +263,6 @@ const NodeQuestion = ({
                 sx={{
                   position: "absolute",
                   bottom: "35px",
-                  // p: "8px 16px",
                   borderRadius: "8px",
                   background: theme =>
                     theme.palette.mode === "dark"
@@ -255,16 +286,26 @@ const NodeQuestion = ({
             </ClickAwayListener>
           )}
         </Stack>
-        <CustomWrapperButton id={`${node.id}-node-footer-votes`}>
+        <CustomWrapperButton id={`${nodeCopy.id}-node-footer-votes`} disabled={nodeCopy?.disableVotes}>
           <Stack direction={"row"} alignItems={"center"}>
             <Tooltip title={"Vote to prevent further changes."} placement={"top"}>
               <Button
-                onClick={e => onCorrectNode(e, node.id)}
-                sx={{ padding: "0px", color: "inherit", minWidth: "0px" }}
+                onClick={() => onCorrectNode(nodeCopy.id)}
+                disabled={nodeCopy?.disableVotes}
+                sx={{
+                  padding: "3px 2px 3px 8px",
+                  color: "inherit",
+                  minWidth: "0px",
+                  borderRadius: "16px 0px 0px 16px",
+                  ":hover": {
+                    backgroundColor: ({ palette }) =>
+                      palette.mode === "dark" ? palette.common.notebookG400 : palette.common.lightBackground2,
+                  },
+                }}
               >
                 <Box sx={{ display: "flex", fontSize: "14px", alignItems: "center" }}>
-                  <DoneIcon sx={{ fontSize: "18px" }} />
-                  <span style={{ marginLeft: "2px" }}>{shortenNumber(node.corrects, 2, false)}</span>
+                  <DoneIcon sx={{ fontSize: "18px", color: nodeCopy.correct ? "#00E676" : undefined }} />
+                  <span style={{ marginLeft: "2px" }}>{shortenNumber(nodeCopy.corrects, 2, false)}</span>
                 </Box>
               </Button>
             </Tooltip>
@@ -274,19 +315,27 @@ const NodeQuestion = ({
               flexItem
               sx={{
                 borderColor: theme => (theme.palette.mode === "dark" ? "#D3D3D3" : "inherit"),
-                mx: "4px",
+                mx: "0px",
               }}
             />
             <Tooltip title={"Vote to delete node."} placement={"top"}>
               <Button
-                onClick={e =>
-                  onWrongNode(e, node.id, "Question", node.wrong, node.correct, node.wrongs, node.corrects, node.locked)
-                }
-                sx={{ padding: "0px", color: "inherit", minWidth: "0px" }}
+                onClick={() => onWrongNode(nodeCopy)}
+                disabled={nodeCopy?.disableVotes}
+                sx={{
+                  padding: "3px 8px 3px 2px",
+                  color: "inherit",
+                  minWidth: "0px",
+                  borderRadius: "0px 16px 16px 0px",
+                  ":hover": {
+                    backgroundColor: ({ palette }) =>
+                      palette.mode === "dark" ? palette.common.notebookG400 : palette.common.lightBackground2,
+                  },
+                }}
               >
                 <Box sx={{ display: "flex", fontSize: "14px", alignItems: "center" }}>
-                  <CloseIcon sx={{ fontSize: "18px" }} />
-                  <span style={{ marginLeft: "2px" }}>{shortenNumber(node.wrongs, 2, false)}</span>
+                  <CloseIcon sx={{ fontSize: "18px", color: nodeCopy.wrong ? "red" : undefined }} />
+                  <span style={{ marginLeft: "2px" }}>{shortenNumber(nodeCopy.wrongs, 2, false)}</span>
                 </Box>
               </Button>
             </Tooltip>
@@ -304,19 +353,9 @@ type PracticeQuestionProps = {
   leaderboard: ReactNode;
   userStatus: ReactNode;
   onViewNodeOnNodeBook: (nodeId: string) => void;
-  onCorrectNode: (e: any, nodeId: string) => void;
-  onWrongNode: (
-    event: any,
-    nodeId: string,
-    nodeType: NodeType,
-    wrong: any,
-    correct: any,
-    wrongs: number,
-    corrects: number,
-    locked: boolean
-  ) => void;
   onSaveAnswer: (answers: boolean[]) => Promise<void>;
   onGetNextQuestion: () => Promise<void>;
+  practiceInfo: PracticeInfo;
 };
 export const PracticeQuestion = ({
   question,
@@ -325,30 +364,21 @@ export const PracticeQuestion = ({
   leaderboard,
   userStatus,
   onViewNodeOnNodeBook,
-  onCorrectNode,
-  onWrongNode,
   onSaveAnswer,
   onGetNextQuestion,
+  practiceInfo,
 }: PracticeQuestionProps) => {
   const [selectedAnswers, setSelectedAnswers] = useState<boolean[]>([]);
   const [displaySidebar, setDisplaySidebar] = useState<"LEADERBOARD" | "USER_STATUS" | null>(null);
   const [submitAnswer, setSubmitAnswer] = useState(false);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    if (!question) return;
-    setSelectedAnswers(new Array(question.choices.length).fill(false));
-    setLoading(false);
-  }, [question]);
-
   const onSubmitAnswer = useCallback(() => {
-    console.log("onSubmitAnswer");
     setSubmitAnswer(true);
     onSaveAnswer(selectedAnswers);
   }, [onSaveAnswer, selectedAnswers]);
 
   const onNextQuestion = useCallback(async () => {
-    console.log("onNextQuestion");
     setLoading(true);
     setSubmitAnswer(false);
     await onGetNextQuestion();
@@ -358,6 +388,12 @@ export const PracticeQuestion = ({
   const onSelectAnswer = (answerIdx: number) => {
     setSelectedAnswers(prev => prev.map((c, i) => (answerIdx === i ? !c : c)));
   };
+
+  useEffect(() => {
+    if (!question) return;
+    setSelectedAnswers(new Array(question.choices.length).fill(false));
+    setLoading(false);
+  }, [question]);
 
   return (
     <Box
@@ -377,8 +413,8 @@ export const PracticeQuestion = ({
           <QuestionMessage
             messages={[
               `Daily practice has been completed.`,
-              `You have completed 19 days out of 45 days of your review practice.`,
-              `24 days are remaining to the end of the semester.`,
+              `You have completed ${practiceInfo.completedDays} days out of ${practiceInfo.totalDays} days of your review practice.`,
+              `${practiceInfo.remainingDays} days are remaining to the end of the semester.`,
             ]}
           />
         </Box>
@@ -427,9 +463,11 @@ export const PracticeQuestion = ({
           <Box sx={{ maxWidth: "820px", m: "auto" }}>
             <QuestionMessage
               messages={[
-                `7 questions left to get today’s point.`,
-                `You have completed 19 days out of 45 days of your review practice.`,
-                `24 days are remaining to the end of the semester.`,
+                practiceInfo.questionsLeft > 0
+                  ? `${practiceInfo.questionsLeft} questions left to get today’s point.`
+                  : "You've got today's practice point!",
+                `You have completed ${practiceInfo.completedDays} days out of ${practiceInfo.totalDays} days of your review practice.`,
+                `${practiceInfo.remainingDays} days are remaining to the end of the semester.`,
               ]}
             />
             {loading && (
@@ -455,8 +493,6 @@ export const PracticeQuestion = ({
                 selectedAnswers={selectedAnswers}
                 setSelectedIdxAnswer={onSelectAnswer}
                 submitAnswer={submitAnswer}
-                onCorrectNode={onCorrectNode}
-                onWrongNode={onWrongNode}
               />
             )}
 

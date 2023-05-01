@@ -1,11 +1,14 @@
 import { Box } from "@mui/material";
+import { getFirestore } from "firebase/firestore";
 import React, { useCallback, useEffect, useState } from "react";
 
+import { getSemesterById } from "../../client/serveless/semesters.serverless";
+import { getSemesterStudentVoteStatsByIdAndStudent } from "../../client/serveless/semesterStudentVoteStat.serverless";
 import { CourseTag, SimpleQuestionNode } from "../../instructorsTypes";
 import { User } from "../../knowledgeTypes";
 import { Post } from "../../lib/mapApi";
+import { differentBetweenDays, getDateYYMMDDWithHyphens } from "../../lib/utils/date.utils";
 import { ICheckAnswerRequestParams } from "../../pages/api/checkAnswer";
-import { NodeType } from "../../types";
 import CourseDetail from "./CourseDetail";
 import Leaderboard from "./Leaderboard";
 import { PracticeQuestion } from "./PracticeQuestion";
@@ -15,23 +18,30 @@ type PracticeToolProps = {
   user: User;
   currentSemester: CourseTag;
   onClose: () => void;
-  onCorrectNode: (e: any, nodeId: string) => void;
-  onWrongNode: (
-    event: any,
-    nodeId: string,
-    nodeType: NodeType,
-    wrong: any,
-    correct: any,
-    wrongs: number,
-    corrects: number,
-    locked: boolean
-  ) => void;
 };
 
-export const PracticeTool = ({ user, currentSemester, onClose, onCorrectNode, onWrongNode }: PracticeToolProps) => {
+export type PracticeInfo = {
+  questionsLeft: number;
+  totalQuestions: number;
+  completedDays: number;
+  totalDays: number;
+  remainingDays: number;
+};
+
+const DEFAULT_PRACTICE_INFO: PracticeInfo = {
+  questionsLeft: 0,
+  totalQuestions: 0,
+  completedDays: 0,
+  remainingDays: 0,
+  totalDays: 0,
+};
+
+export const PracticeTool = ({ user, currentSemester, onClose }: PracticeToolProps) => {
+  const db = getFirestore();
   const [startPractice, setStartPractice] = useState(false);
   const [questionData, setQuestionData] = useState<{ question: SimpleQuestionNode; flashcardId: string } | null>(null);
   const [practiceIsCompleted, setPracticeIsCompleted] = useState(false);
+  const [practiceInfo, setPracticeInfo] = useState<PracticeInfo>(DEFAULT_PRACTICE_INFO);
 
   const onSubmitAnswer = useCallback(
     async (answers: boolean[]) => {
@@ -62,6 +72,45 @@ export const PracticeTool = ({ user, currentSemester, onClose, onCorrectNode, on
     getPracticeQuestion();
   }, [getPracticeQuestion]);
 
+  useEffect(() => {
+    const getPracticeInfo = async () => {
+      const semesterStudentStats = await getSemesterStudentVoteStatsByIdAndStudent(
+        db,
+        currentSemester.tagId,
+        user.uname
+      );
+      if (!semesterStudentStats) return;
+      const semester = await getSemesterById(db, currentSemester.tagId);
+      if (!semester) return;
+
+      console.log({ semesterStudentStats });
+      const currentDateYYMMDD = getDateYYMMDDWithHyphens();
+      console.log({ currentDateYYMMDD });
+      const currentDayStats = semesterStudentStats.days.find(cur => cur.day === currentDateYYMMDD);
+      console.log({ currentDayStats });
+      if (!currentDayStats) return;
+
+      const totalQuestions = semester.dailyPractice.numQuestionsPerDay;
+      const questionsLeft = totalQuestions - currentDayStats.correctPractices;
+      console.log({ questionsLeft });
+      // setPracticeInfo(prev => ({ ...prev, questionsLeft }));
+
+      const completedDays = differentBetweenDays(new Date(), semester.startDate.toDate());
+      const totalDays = differentBetweenDays(semester.endDate.toDate(), semester.startDate.toDate());
+      const remainingDays = totalDays - completedDays;
+      setPracticeInfo(prev => ({
+        ...prev,
+        questionsLeft,
+        totalQuestions,
+        completedDays,
+        totalDays,
+        remainingDays,
+      }));
+    };
+
+    getPracticeInfo();
+  }, [currentSemester.tagId, db, user.uname]);
+
   return startPractice ? (
     <Box
       sx={{
@@ -80,11 +129,10 @@ export const PracticeTool = ({ user, currentSemester, onClose, onCorrectNode, on
         onClose={onClose}
         leaderboard={<Leaderboard semesterId={currentSemester.tagId} />}
         userStatus={<UserStatus semesterId={currentSemester.tagId} user={user} />}
-        onCorrectNode={onCorrectNode}
-        onWrongNode={onWrongNode}
         onViewNodeOnNodeBook={(id: string) => console.log(id)}
         onGetNextQuestion={getPracticeQuestion}
         onSaveAnswer={onSubmitAnswer}
+        practiceInfo={practiceInfo}
       />
     </Box>
   ) : (

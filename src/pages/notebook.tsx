@@ -6534,6 +6534,8 @@ const Notebook = ({}: NotebookProps) => {
             <DashboardWrapper
               user={user}
               onClose={() => setDisplayDashboard(false)}
+              onCorrectNode={correctNode}
+              onWrongNode={wrongNode}
               sx={{ position: "absolute", inset: "0px", zIndex: 999 }}
             />
           )}

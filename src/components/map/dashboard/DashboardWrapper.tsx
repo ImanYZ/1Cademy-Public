@@ -245,13 +245,7 @@ export const DashboardWrapper = ({ user, onClose, sx }: DashboardWrapperProps) =
               <Dashboard user={selectedStudent ? selectedStudent : user} currentSemester={currentSemester} />
             )}
             {selectToolbarView === "PRACTICE" && (
-              <PracticeTool
-                user={user}
-                currentSemester={currentSemester}
-                onClose={onClose}
-                onCorrectNode={(qq: any) => console.log("dfdfd", qq)}
-                onWrongNode={(qq: any) => console.log("sdfsd", qq)}
-              />
+              <PracticeTool user={user} currentSemester={currentSemester} onClose={onClose} />
             )}
             {selectToolbarView === "SETTINGS" && <DashboardSettings currentSemester={currentSemester} />}
             {selectToolbarView === "STUDENTS" && (
