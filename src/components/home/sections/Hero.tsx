@@ -81,8 +81,8 @@ const Hero = ({ headerHeight, headerHeightMobile }: HeroProps) => {
           Human-AI Collaborative Knowledge Graph
         </Typography>
         <Typography color="white" variant="h5" sx={{ textAlign: "center", fontSize: { xs: "18px", md: "20px" } }}>
-          Through 1Cademy, students, instructors, and researchers collaborate with AI to improve each-others' learning
-          and research.
+          At 1Cademy, we leverage the power of AI to foster collaboration and enhance the learning and research
+          experiences for students, instructors, and researchers alike.
         </Typography>
       </Box>
       <Button
