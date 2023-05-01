@@ -281,6 +281,29 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
     [batch, writeCounts] = await checkRestartBatchWriteCounts(batch, writeCounts);
 
     const rootTitles = { r98BjyFDCe4YyLA3U8ZE: "1Cademy", [tagId]: tag };
+
+    const notebooks = await db.collection("notebooks").where("owner", "==", userData.uname).limit(1).get();
+
+    let notebookId: string;
+    if (notebooks.docs.length) {
+      notebookId = notebooks.docs[0].id;
+    } else {
+      const notebookRef = db.collection("notebooks").doc();
+      notebookId = notebookRef.id;
+      batch.set(notebookRef, {
+        isPublic: "none",
+        owner: userData.uname,
+        ownerImgUrl: userData.imageUrl,
+        ownerFullName: `${userData.fName} ${userData.lName}`,
+        ownerChooseUname: userData.chooseUname,
+        usersInfo: {},
+        users: [],
+        title: "My Notebook",
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      } as INotebook);
+    }
+
     for (let rootId in rootTitles) {
       const reputationQuery = db
         .collection("reputations")
@@ -300,28 +323,6 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
         const reputationsRef = db.collection("reputations").doc();
         batch.set(reputationsRef, reputations);
         [batch, writeCounts] = await checkRestartBatchWriteCounts(batch, writeCounts);
-      }
-
-      const notebooks = await db.collection("notebooks").where("owner", "==", userData.uname).limit(1).get();
-
-      let notebookId: string;
-      if (notebooks.docs.length) {
-        notebookId = notebooks.docs[0].id;
-      } else {
-        const notebookRef = db.collection("notebooks").doc();
-        notebookId = notebookRef.id;
-        batch.set(notebookRef, {
-          isPublic: "none",
-          owner: userData.uname,
-          ownerImgUrl: userData.imageUrl,
-          ownerFullName: `${userData.fName} ${userData.lName}`,
-          ownerChooseUname: userData.chooseUname,
-          usersInfo: {},
-          users: [],
-          title: "My Notebook",
-          createdAt: new Date(),
-          updatedAt: new Date(),
-        } as INotebook);
       }
 
       const userNodeQuery = db
@@ -388,25 +389,6 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
         [batch, writeCounts] = await checkRestartBatchWriteCounts(batch, writeCounts);
       }
     }
-
-    const questionsRef = db
-      .collection("nodes")
-      .where("nodeType", "==", "Question")
-      .where("tagIds", "array-contains", tagId);
-    const questionsDocs = await questionsRef.get();
-    const nodeIds: string[] = [];
-    questionsDocs.forEach(questionDoc => {
-      nodeIds.push(questionDoc.id);
-    });
-    [batch, writeCounts] = await addPracticeQuestions(
-      batch,
-      data.uname,
-      tagId,
-      tag,
-      nodeIds,
-      currentTimestamp,
-      writeCounts
-    );
 
     const notificationNumsRef = db.collection("notificationNums").doc(data.uname);
     batch.set(notificationNumsRef, { nNum: 0 });

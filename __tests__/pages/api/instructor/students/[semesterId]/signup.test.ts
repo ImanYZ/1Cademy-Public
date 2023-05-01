@@ -86,6 +86,9 @@ describe("POST /api/instructor/students/:semesterId/signup", () => {
     isTag: true,
     corrects: 1,
   });
+
+  courseNode.tagIds.push(semesterNode.documentId!);
+  courseNode.tags.push(semesterNode.title);
   courseNode.children.push({
     node: String(semesterNode.documentId),
     title: semesterNode.title,
@@ -94,6 +97,7 @@ describe("POST /api/instructor/students/:semesterId/signup", () => {
 
   const questionNode = createNode({
     admin: users[0],
+    tags: [courseNode, semesterNode],
     parents: [courseNode],
     corrects: 1,
     nodeType: "Question",

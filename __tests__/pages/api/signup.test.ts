@@ -43,6 +43,10 @@ describe("/signup", () => {
     new MockData([], "userNodes"),
     new MockData([], "userNodesLog"),
     new MockData([], "users"),
+    new MockData([], "notebooks"),
+    new MockData([], "practice"),
+    new MockData([], "practiceLog"),
+    new MockData([], "semesterStudentSankeys"),
     tagsData,
     creditsData,
   ];
@@ -179,7 +183,11 @@ describe("/signup as student", () => {
     nodeType: "Question",
     choices: [],
     admin: users[0],
+    tags: [nodes[0]],
   });
+
+  nodes[0].tagIds.push(nodes[0].documentId!);
+  nodes[0].tags.push(nodes[0].title);
   nodes[0].children.push({
     node: questionNode.documentId!,
     title: questionNode.title,
@@ -265,6 +273,18 @@ describe("/signup as student", () => {
     semestersCollection,
     semesterStudentStatsCollection,
     semesterStudentVoteStatsCollection,
+    new MockData([], "bookmarkNums"),
+    new MockData([], "credits"),
+    new MockData([], "notificationNums"),
+    new MockData([], "pendingPropsNums"),
+    new MockData([], "reputations"),
+    new MockData([], "userNodes"),
+    new MockData([], "userNodesLog"),
+    new MockData([], "users"),
+    new MockData([], "notebooks"),
+    new MockData([], "practice"),
+    new MockData([], "practiceLog"),
+    new MockData([], "semesterStudentSankeys"),
   ];
   let semesterId: string = "";
 

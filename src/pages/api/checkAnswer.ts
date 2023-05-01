@@ -139,6 +139,22 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       end_practice: currentTimestamp,
       updatedAt: currentTimestamp,
     });
+    [batch, writeCounts] = await checkRestartBatchWriteCounts(batch, writeCounts);
+
+    const practiceLogRef = db.collection("practiceLog").doc();
+    batch.set(practiceLogRef, {
+      ...practice,
+      id: practiceRef.id,
+      answers: payload.answers,
+      q,
+      eFactor: e_factor,
+      iInterval: i_interval,
+      nextDate: moment().add(i_interval, "day").toDate(),
+      start_practice: lastPresented,
+      end_practice: currentTimestamp,
+      updatedAt: currentTimestamp,
+    });
+    [batch, writeCounts] = await checkRestartBatchWriteCounts(batch, writeCounts);
 
     await commitBatch(batch);
 
