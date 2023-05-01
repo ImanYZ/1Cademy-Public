@@ -428,6 +428,8 @@ export type TNodeUpdates = {
   updatedAt: Date;
 };
 
+export type Node = NodeFireStore & { id: string };
+
 export type SortDirection = "ASCENDING" | "DESCENDING";
 export type SortValues =
   | "LAST_VIEWED"

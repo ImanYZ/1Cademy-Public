@@ -19,7 +19,6 @@ import { ICourseTag, ISemester, ISemesterStudent } from "src/types/ICourse";
 
 import { UserRole } from "../../knowledgeTypes";
 import { UserProfileSkeleton } from "./skeletons/UserProfileSkeleton";
-
 type SemesterFilterProps = {
   semesters: string[];
   selectedSemester: string | null;
@@ -32,7 +31,6 @@ type SemesterFilterProps = {
   role: UserRole;
   uname?: string;
 };
-
 export const SemesterFilter = ({
   semesters,
   selectedSemester,
@@ -47,26 +45,21 @@ export const SemesterFilter = ({
 }: SemesterFilterProps) => {
   console.log("selectedSemester", selectedSemester, currentSemester);
   const db = getFirestore();
-
   const theme = useTheme();
   const matches = useMediaQuery(theme.breakpoints.down("sm"));
-
   const [student, setStudent] = useState<ISemesterStudent | undefined>(undefined);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const onChangeSemester = (event: SelectChangeEvent) => {
     setSelectedSemester(event.target.value as string);
   };
-
   const onChangeCourse2 = (event: SelectChangeEvent) => {
     setSelectedCourse(event.target.value as string);
   };
-
   const onChangeCourse = (event: React.MouseEvent<HTMLElement>, newAlignment: string | null) => {
     if (newAlignment) {
       setSelectedCourse(newAlignment);
     }
   };
-
   useEffect(() => {
     if (!currentSemester || !uname) {
       setIsLoading(false);
@@ -80,7 +73,6 @@ export const SemesterFilter = ({
         setIsLoading(false);
         return;
       }
-
       const student = (semesterDoc.data() as ISemester).students.find(student => student.uname === uname);
       setStudent(student);
       setIsLoading(false);
@@ -88,7 +80,6 @@ export const SemesterFilter = ({
     };
     getStudenData();
   }, [currentSemester, db, uname]);
-
   return (
     <Box
       sx={{
@@ -123,7 +114,6 @@ export const SemesterFilter = ({
             ))}
           </Select>
         </FormControl>
-
         {!isMovil && (
           <ToggleButtonGroup
             value={selectedCourse}
@@ -165,7 +155,6 @@ export const SemesterFilter = ({
           </FormControl>
         )}
       </Box>
-
       {role === "INSTRUCTOR" && (
         <>
           {isLoading && <UserProfileSkeleton mobile={matches} />}

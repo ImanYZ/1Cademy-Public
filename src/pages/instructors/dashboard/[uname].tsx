@@ -89,7 +89,11 @@ const StudentDashboard: InstructorLayoutPage = ({ user, currentSemester, setting
   const [studentsCounter, setStudentsCounter] = useState<number>(0);
   const [proposalsStudents, setProposalsStudents] = useState<StudentStackedBarStatsObject | null>(null);
   const [questionsStudents, setQuestionsStudents] = useState<StudentStackedBarStatsObject | null>(null);
-  const [studentLocation, setStudentLocation] = useState<StudenBarsSubgroupLocation>({ proposals: 0, questions: 0 });
+  const [studentLocation, setStudentLocation] = useState<StudenBarsSubgroupLocation>({
+    proposals: 0,
+    questions: 0,
+    totalDailyPractices: 0,
+  });
 
   //Trend Plots
   const [trendStats, setTrendStats] = useState<TrendStats>({
@@ -306,7 +310,8 @@ const StudentDashboard: InstructorLayoutPage = ({ user, currentSemester, setting
       semesterStudentsVoteStats,
       students,
       maxProposalsPoints,
-      maxQuestionsPoints
+      maxQuestionsPoints,
+      100
     );
 
     setStackedBar(stackedBarStats);
@@ -323,7 +328,7 @@ const StudentDashboard: InstructorLayoutPage = ({ user, currentSemester, setting
     const sortedByQuestions = [...semesterStudentsVoteStats].sort((x, y) => y.questionPoints! - x.questionPoints!);
     const questions = sortedByQuestions.findIndex(s => s.uname === studentVoteStat?.uname);
 
-    setStudentLocation({ proposals: proposals, questions: questions });
+    setStudentLocation({ proposals: proposals, questions: questions, totalDailyPractices: 0 });
   }, [semesterStudentsVoteStats, studentVoteStat]);
 
   //STATIC "MODIFTY"
@@ -484,6 +489,7 @@ const StudentDashboard: InstructorLayoutPage = ({ user, currentSemester, setting
     return {
       maxProposalsPoints: data.nodeProposals.totalDaysOfCourse * data.nodeProposals.numPoints,
       maxQuestionsPoints: data.questionProposals.totalDaysOfCourse * data.questionProposals.numPoints,
+      maxDailyPractices: 100,
     };
   };
 
@@ -575,12 +581,9 @@ const StudentDashboard: InstructorLayoutPage = ({ user, currentSemester, setting
           {isLoading && <GeneralPlotStatsSkeleton />}
           {!isLoading && (
             <GeneralPlotStats
-              courseTitle={currentSemester.cTitle.split(" ")[0]}
-              programTitle={currentSemester.pTitle}
               semesterStats={semesterStats}
-              semesterTitle={currentSemester.title}
-              studentsCounter={studentsCounter}
               student={semesterStudentStats}
+              semesterConfig={semesterConfig}
             />
           )}
         </Paper>
@@ -625,6 +628,7 @@ const StudentDashboard: InstructorLayoutPage = ({ user, currentSemester, setting
                   data={stackedBar}
                   proposalsStudents={user.role === "INSTRUCTOR" ? proposalsStudents : null}
                   questionsStudents={user.role === "INSTRUCTOR" ? questionsStudents : null}
+                  dailyPracticeStudents={null}
                   maxAxisY={studentsCounter}
                   studentLocation={studentLocation}
                   theme={settings.theme}

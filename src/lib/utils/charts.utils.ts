@@ -5,6 +5,7 @@ import {
   ISemesterStudentStat,
   ISemesterStudentStatChapter,
   ISemesterStudentVoteStat,
+  ISemesterStudentVoteStatDay,
 } from "src/types/ICourse";
 
 import {
@@ -55,66 +56,102 @@ export const calculateVoteStatPoints = (voteStat: ISemesterStudentVoteStat, seme
 };
 
 // TODO: test
+
+const initialRate = (index: number): StackedBarStats => {
+  return {
+    index,
+    alessEqualTen: 0,
+    bgreaterTen: 0,
+    cgreaterFifty: 0,
+    dgreaterHundred: 0,
+  };
+};
+
+const initialStudentsRate: StudentStackedBarStatsObject = {
+  alessEqualTen: [],
+  bgreaterTen: [],
+  cgreaterFifty: [],
+  dgreaterHundred: [],
+};
 export const getStackedBarStat = (
   data: SemesterStudentVoteStat[],
   students: ISemesterStudent[],
   maxProposalsPoints: number,
-  maxQuestionsPoints: number
+  maxQuestionsPoints: number,
+  maxDailyPractices: number
 ): StackedBarStatsData => {
+  console.log({ daaaaata: data });
   const stackedBarStats: StackedBarStats[] = [];
-  const studentProposalsRate: StudentStackedBarStatsObject = {
-    alessEqualTen: [],
-    bgreaterTen: [],
-    cgreaterFifty: [],
-    dgreaterHundred: [],
-  };
-  const studentQuestionsRate: StudentStackedBarStatsObject = {
-    alessEqualTen: [],
-    bgreaterTen: [],
-    cgreaterFifty: [],
-    dgreaterHundred: [],
-  };
-  const ProposalsRate: StackedBarStats = {
-    index: 0,
-    alessEqualTen: 0,
-    bgreaterTen: 0,
-    cgreaterFifty: 0,
-    dgreaterHundred: 0,
-  };
-  const QuestionsRate: StackedBarStats = {
-    index: 1,
-    alessEqualTen: 0,
-    bgreaterTen: 0,
-    cgreaterFifty: 0,
-    dgreaterHundred: 0,
-  };
+
+  const studentProposalsRate: StudentStackedBarStatsObject = initialStudentsRate;
+  const studentQuestionsRate: StudentStackedBarStatsObject = initialStudentsRate;
+  const studentDailyPracticeRate: StudentStackedBarStatsObject = initialStudentsRate;
+
+  const ProposalsRate = initialRate(0);
+  const QuestionsRate = initialRate(1);
+  const dailyPracticeRate = initialRate(2);
+
   const sortedByProposals = [...data].sort((x, y) => y.proposalPoints! - x.proposalPoints!);
   const sortedByQuestions = [...data].sort((x, y) => y.questionPoints! - x.questionPoints!);
+  const sortedByDailyPractices = [...data].sort((x, y) => y.totalPractices! - x.totalPractices!);
+
   sortedByProposals.map(d => {
     const proposals = d.proposalPoints!;
+    if (!proposals) return;
+
     const proposalSubgroup = getStudentSubgroupInBars(proposals, maxProposalsPoints);
     const student = students.find(student => student.uname === d.uname);
     if (!student) return;
 
     ProposalsRate[proposalSubgroup] += 1;
+    const exist = studentProposalsRate[proposalSubgroup as keyof StudentStackedBarStats].some(
+      e => e.uname === student.uname
+    );
+    if (!exist) return;
     studentProposalsRate[proposalSubgroup as keyof StudentStackedBarStats].push(student);
   });
   sortedByQuestions.map(d => {
     const question = d.questionPoints!;
+    if (!question) return;
+
     const questionsSubgroup = getStudentSubgroupInBars(question, maxQuestionsPoints);
     const student = students.find(student => student.uname === d.uname);
     if (!student) return;
 
     QuestionsRate[questionsSubgroup] += 1;
+    const exist = studentQuestionsRate[questionsSubgroup as keyof StudentStackedBarStats].some(
+      e => e.uname === student.uname
+    );
+    if (!exist) return;
+
     studentQuestionsRate[questionsSubgroup as keyof StudentStackedBarStats].push(student);
+  });
+
+  sortedByDailyPractices.map(d => {
+    const totalPractices = d.totalPractices!;
+    if (!totalPractices) return;
+
+    const totalPracticesSubgroup = getStudentSubgroupInBars(totalPractices, maxDailyPractices);
+    const student = students.find(student => student.uname === d.uname);
+    if (!student) return;
+
+    dailyPracticeRate[totalPracticesSubgroup] += 1;
+    const exist = studentDailyPracticeRate[totalPracticesSubgroup as keyof StudentStackedBarStats].some(
+      e => e.uname === student.uname
+    );
+    if (!exist) return;
+
+    studentDailyPracticeRate[totalPracticesSubgroup as keyof StudentStackedBarStats].push(student);
   });
 
   stackedBarStats.push(ProposalsRate);
   stackedBarStats.push(QuestionsRate);
+  stackedBarStats.push(dailyPracticeRate);
   return {
     stackedBarStats: stackedBarStats,
     studentStackedBarProposalsStats: studentProposalsRate,
     studentStackedBarQuestionsStats: studentQuestionsRate,
+    studentStackedBarDailyPracticeStats: studentDailyPracticeRate,
   };
 };
 
@@ -175,6 +212,7 @@ export const mapStudentsStatsToDataByDates = (data: ISemesterStudentStat[]): Map
         nodes: prevDay.nodes + responseSumChapterPerDay.chaptersSum.nodes,
         questions: prevDay.questions + responseSumChapterPerDay.chaptersSum.questions,
         votes: prevDay.votes + responseSumChapterPerDay.chaptersSum.votes,
+        correctPractices: prevDay.correctPractices + responseSumChapterPerDay.chaptersSum.correctPractices,
       };
       return { ...acu, [cur.day]: sum };
     }, {});
@@ -191,6 +229,7 @@ export const mapStudentsStatsToDataByDates = (data: ISemesterStudentStat[]): Map
         nodes: prevStudent.nodes + value.nodes,
         questions: prevStudent.questions + value.questions,
         votes: prevStudent.votes + value.votes,
+        correctPractices: prevStudent.correctPractices + value.correctPractices,
       };
       return { ...acuStudent, [key]: sumsStudents };
     }, acu);
@@ -200,7 +239,7 @@ export const mapStudentsStatsToDataByDates = (data: ISemesterStudentStat[]): Map
   return Object.entries(resByDay).map(([date, value]) => ({ date, value }));
 };
 
-const sumPerDay = (day: any) => {
+const sumPerDay = (day: ISemesterStudentVoteStatDay) => {
   return {
     ...day,
     childProposals: day.nodes,
@@ -209,23 +248,26 @@ const sumPerDay = (day: any) => {
     nodes: day.newNodes,
     questions: day.questions,
     votes: day.agreementsWithInst + day.disagreementsWithInst,
+    correctPractices: day.correctPractices,
   };
 };
 
 // TODO: test
+
 export const mapStudentsStatsDataByDates = (data: ISemesterStudentVoteStat[]): MappedData[] => {
   // resByStudents: [{d1,d2},{d1,d3}]
 
   const resByStudents = data.map(student => {
-    return student.days.reduce((acu: any, cur) => {
+    return student.days.reduce((acu: { [key: string]: GeneralSemesterStudentsStats }, cur) => {
       const responseSumChapterPerDay = { day: cur.day, chaptersSum: sumPerDay(cur) };
-      const sum: any = {
+      const sum: GeneralSemesterStudentsStats = {
         childProposals: responseSumChapterPerDay.chaptersSum.childProposals,
         editProposals: responseSumChapterPerDay.chaptersSum.editProposals,
         links: responseSumChapterPerDay.chaptersSum.links,
         nodes: responseSumChapterPerDay.chaptersSum.nodes,
         questions: responseSumChapterPerDay.chaptersSum.questions,
         votes: responseSumChapterPerDay.chaptersSum.votes,
+        correctPractices: responseSumChapterPerDay.chaptersSum.correctPractices,
       };
       return { ...acu, [cur.day]: sum };
     }, {});
@@ -233,7 +275,7 @@ export const mapStudentsStatsDataByDates = (data: ISemesterStudentVoteStat[]): M
 
   // resByDay: {d1,d2,d3}
   const resByDay = resByStudents.reduce((acu, cur) => {
-    return Object.entries(cur).reduce((acuStudent: any, [key, value]: any) => {
+    return Object.entries(cur).reduce((acuStudent: { [key: string]: GeneralSemesterStudentsStats }, [key, value]) => {
       const prevStudent = acuStudent[key] ?? getInitialSumChapterPerDay();
       const sumsStudents: GeneralSemesterStudentsStats = {
         childProposals: prevStudent.childProposals + value.childProposals,
@@ -242,6 +284,7 @@ export const mapStudentsStatsDataByDates = (data: ISemesterStudentVoteStat[]): M
         nodes: prevStudent.nodes + value.nodes,
         questions: prevStudent.questions + value.questions,
         votes: prevStudent.votes + value.votes,
+        correctPractices: prevStudent.correctPractices + value.correctPractices,
       };
       return { ...acuStudent, [key]: sumsStudents };
     }, acu);
@@ -260,6 +303,7 @@ export const getGeneralStats = (data: MappedData[]) => {
       nodes: acu.nodes + cur.value.nodes,
       questions: acu.questions + cur.value.questions,
       votes: acu.votes + cur.value.votes,
+      correctPractices: acu.correctPractices + cur.value.correctPractices,
     };
     return sumsStudents;
   }, getInitialSumChapterPerDay());
