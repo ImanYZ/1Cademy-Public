@@ -93,12 +93,10 @@ export const DashboardWrapper = ({ user, onClose, sx }: DashboardWrapperProps) =
           setInstructor(intructor);
 
           const allCourses = getCoursesByInstructor(intructor);
-          console.log({ allCourses });
+
           const semestersIds = intructor.courses.map(course => course.tagId);
-          console.log({ semestersIds });
           const semesters = await getSemesterByIds(db, semestersIds);
           semesters.sort((a, b) => (b.title > a.title ? 1 : -1));
-          console.log({ semesters });
           setAllSemesters(semesters);
           setAllCourses(allCourses);
         },
@@ -151,14 +149,13 @@ export const DashboardWrapper = ({ user, onClose, sx }: DashboardWrapperProps) =
   useEffect(() => {
     if (!currentSemester) return;
     if (selectedCourse) return;
-    const courses = allCourses[currentSemester.title];
+    const courses = allCourses[currentSemester.tagId];
 
     if (!courses) return;
     if (!instructor) return;
 
     const firstCourse = selectCourse(courses[0], instructor);
     if (!firstCourse) return;
-    console.log({ firstCourse });
     setCurrentSemester(firstCourse);
     setSelectedCourse(courses[0]);
   }, [allCourses, currentSemester, instructor, selectedCourse]);
@@ -167,6 +164,7 @@ export const DashboardWrapper = ({ user, onClose, sx }: DashboardWrapperProps) =
   useEffect(() => {
     if (instructor) return;
     if (!currentSemester) return;
+
     const newCourses = getCourseBySemester(currentSemester?.title, allCourses);
 
     setSelectedCourse(newCourses[0]);
@@ -176,7 +174,6 @@ export const DashboardWrapper = ({ user, onClose, sx }: DashboardWrapperProps) =
   useEffect(() => {
     if (!instructor) return;
     if (!selectedCourse) return;
-
     const current = selectCourse(selectedCourse, instructor);
     setCurrentSemester(current ?? null);
   }, [instructor, selectedCourse]);
