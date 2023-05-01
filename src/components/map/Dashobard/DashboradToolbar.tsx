@@ -196,6 +196,7 @@ const DashboardToolbarViewButton = ({
               ? DESIGN_SYSTEM_COLORS.notebookO900
               : DESIGN_SYSTEM_COLORS.primary50
             : undefined,
+
           ":hover": {
             backgroundColor: mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookO900 : DESIGN_SYSTEM_COLORS.primary50,
           },
