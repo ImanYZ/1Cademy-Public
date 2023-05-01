@@ -35,12 +35,13 @@ import { DashboardStudents } from "./DashboardStudents";
 type DashboardWrapperProps = {
   user: User;
   onClose: () => void;
+  openNodeHandler: (nodeId: string) => void;
   sx?: SxProps<Theme>;
 };
 
 export type ToolbarView = "DASHBOARD" | "PRACTICE" | "SETTINGS" | "STUDENTS";
 
-export const DashboardWrapper = ({ user, onClose, sx }: DashboardWrapperProps) => {
+export const DashboardWrapper = ({ user, openNodeHandler, onClose, sx }: DashboardWrapperProps) => {
   const db = getFirestore();
 
   // const [semesters, setSemesters] = useState<string[]>([]);
@@ -248,7 +249,12 @@ export const DashboardWrapper = ({ user, onClose, sx }: DashboardWrapperProps) =
               <Dashboard user={selectedStudent ? selectedStudent : user} currentSemester={currentSemester} />
             )}
             {selectToolbarView === "PRACTICE" && (
-              <PracticeTool user={user} currentSemester={currentSemester} onClose={onClose} />
+              <PracticeTool
+                user={user}
+                currentSemester={currentSemester}
+                onClose={onClose}
+                openNodeHandler={openNodeHandler}
+              />
             )}
             {selectToolbarView === "SETTINGS" && <DashboardSettings currentSemester={currentSemester} />}
             {selectToolbarView === "STUDENTS" && (

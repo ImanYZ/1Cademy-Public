@@ -18,6 +18,7 @@ type PracticeToolProps = {
   user: User;
   currentSemester: CourseTag;
   onClose: () => void;
+  openNodeHandler: (nodeId: string) => void;
 };
 
 export type PracticeInfo = {
@@ -36,7 +37,7 @@ const DEFAULT_PRACTICE_INFO: PracticeInfo = {
   totalDays: 0,
 };
 
-export const PracticeTool = ({ user, currentSemester, onClose }: PracticeToolProps) => {
+export const PracticeTool = ({ user, currentSemester, openNodeHandler, onClose }: PracticeToolProps) => {
   const db = getFirestore();
   const [startPractice, setStartPractice] = useState(false);
   const [questionData, setQuestionData] = useState<{ question: SimpleQuestionNode; flashcardId: string } | null>(null);
@@ -66,6 +67,11 @@ export const PracticeTool = ({ user, currentSemester, onClose }: PracticeToolPro
     setQuestionData(res);
     console.log("------>", res);
   }, [currentSemester.tagId]);
+
+  const onViewNodeOnNodeBook = (nodeId: string) => {
+    openNodeHandler(nodeId);
+    onClose();
+  };
 
   // this is executed the first time we get selected a semester
   useEffect(() => {
@@ -129,7 +135,7 @@ export const PracticeTool = ({ user, currentSemester, onClose }: PracticeToolPro
         onClose={onClose}
         leaderboard={<Leaderboard semesterId={currentSemester.tagId} />}
         userStatus={<UserStatus semesterId={currentSemester.tagId} user={user} />}
-        onViewNodeOnNodeBook={(id: string) => console.log(id)}
+        onViewNodeOnNodeBook={onViewNodeOnNodeBook}
         onGetNextQuestion={getPracticeQuestion}
         onSaveAnswer={onSubmitAnswer}
         practiceInfo={practiceInfo}
