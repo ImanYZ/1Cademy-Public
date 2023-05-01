@@ -12,7 +12,6 @@ import { SimpleQuestionNode } from "../../instructorsTypes";
 import { Post } from "../../lib/mapApi";
 import { DESIGN_SYSTEM_COLORS } from "../../lib/theme/colors";
 import shortenNumber from "../../lib/utils/shortenNumber";
-import { NodeType } from "../../types";
 import { doNeedToDeleteNode } from "../../utils/helpers";
 import { CustomWrapperButton } from "../map/Buttons/Buttons";
 import { PracticeInfo } from "./PracticeTool";
@@ -22,27 +21,9 @@ type NodeQuestionProps = {
   selectedAnswers: boolean[];
   setSelectedIdxAnswer: (newValue: number) => void;
   submitAnswer: boolean;
-  onCorrectNode: (e: any, nodeId: string) => void;
-  onWrongNode: (
-    event: any,
-    nodeId: string,
-    nodeType: NodeType,
-    wrong: any,
-    correct: any,
-    wrongs: number,
-    corrects: number,
-    locked: boolean
-  ) => void;
 };
 
-const NodeQuestion = ({
-  node,
-  selectedAnswers,
-  setSelectedIdxAnswer,
-  submitAnswer,
-}: // onCorrectNode,
-// onWrongNode,
-NodeQuestionProps) => {
+const NodeQuestion = ({ node, selectedAnswers, setSelectedIdxAnswer, submitAnswer }: NodeQuestionProps) => {
   const [displayTags, setDisplayTags] = useState(false);
   const [nodeCopy, setNodeCopy] = useState<SimpleQuestionNode>(node);
 
@@ -60,7 +41,6 @@ NodeQuestionProps) => {
   };
 
   const onCorrectNode = async (nodeId: string) => {
-    // console.log("onCorrectNode");
     setNodeCopy(prev => {
       const correct = prev.correct;
       const wrong = prev.wrong;
@@ -76,25 +56,19 @@ NodeQuestionProps) => {
   };
 
   const onWrongNode = async (thisNode: SimpleQuestionNode) => {
-    // console.log("onWrongNode", thisNode.locked);
     if (thisNode?.locked) return;
-    // console.log(11);
     const correctChange = !thisNode.wrong && thisNode.correct ? -1 : 0;
     const wrongChange = thisNode.wrong ? -1 : 1;
     const _corrects = thisNode.corrects + correctChange;
     const _wrongs = thisNode.wrongs + wrongChange;
-    // console.log(11);
     const willRemoveNode = doNeedToDeleteNode(_corrects, _wrongs, thisNode.locked);
     let deleteOK = willRemoveNode ? false : true;
-    // console.log(22);
     // INFO: is not required to validate children, because a question shoould not have childs
     if (willRemoveNode) {
       deleteOK = window.confirm("You are going to permanently delete this node by downvoting it. Are you sure?");
     }
 
-    // console.log(33);
     if (!deleteOK) return;
-    // console.log("onWrongNode");
     setNodeCopy(prev => {
       return {
         ...prev,
@@ -107,7 +81,6 @@ NodeQuestionProps) => {
     });
     await Post(`/wrongNode/${thisNode.id}`);
     setNodeCopy(prev => ({ ...prev, disableVotes: false }));
-    // console.log(44);
   };
 
   return (
@@ -290,7 +263,6 @@ NodeQuestionProps) => {
                 sx={{
                   position: "absolute",
                   bottom: "35px",
-                  // p: "8px 16px",
                   borderRadius: "8px",
                   background: theme =>
                     theme.palette.mode === "dark"
@@ -381,17 +353,6 @@ type PracticeQuestionProps = {
   leaderboard: ReactNode;
   userStatus: ReactNode;
   onViewNodeOnNodeBook: (nodeId: string) => void;
-  onCorrectNode: (e: any, nodeId: string) => void;
-  onWrongNode: (
-    event: any,
-    nodeId: string,
-    nodeType: NodeType,
-    wrong: any,
-    correct: any,
-    wrongs: number,
-    corrects: number,
-    locked: boolean
-  ) => void;
   onSaveAnswer: (answers: boolean[]) => Promise<void>;
   onGetNextQuestion: () => Promise<void>;
   practiceInfo: PracticeInfo;
@@ -403,8 +364,6 @@ export const PracticeQuestion = ({
   leaderboard,
   userStatus,
   onViewNodeOnNodeBook,
-  onCorrectNode,
-  onWrongNode,
   onSaveAnswer,
   onGetNextQuestion,
   practiceInfo,
@@ -415,13 +374,11 @@ export const PracticeQuestion = ({
   const [loading, setLoading] = useState(true);
 
   const onSubmitAnswer = useCallback(() => {
-    // console.log("onSubmitAnswer");
     setSubmitAnswer(true);
     onSaveAnswer(selectedAnswers);
   }, [onSaveAnswer, selectedAnswers]);
 
   const onNextQuestion = useCallback(async () => {
-    // console.log("onNextQuestion");
     setLoading(true);
     setSubmitAnswer(false);
     await onGetNextQuestion();
@@ -536,8 +493,6 @@ export const PracticeQuestion = ({
                 selectedAnswers={selectedAnswers}
                 setSelectedIdxAnswer={onSelectAnswer}
                 submitAnswer={submitAnswer}
-                onCorrectNode={onCorrectNode}
-                onWrongNode={onWrongNode}
               />
             )}
 

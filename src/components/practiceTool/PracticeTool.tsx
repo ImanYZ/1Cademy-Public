@@ -9,7 +9,6 @@ import { User } from "../../knowledgeTypes";
 import { Post } from "../../lib/mapApi";
 import { differentBetweenDays, getDateYYMMDDWithHyphens } from "../../lib/utils/date.utils";
 import { ICheckAnswerRequestParams } from "../../pages/api/checkAnswer";
-import { NodeType } from "../../types";
 import CourseDetail from "./CourseDetail";
 import Leaderboard from "./Leaderboard";
 import { PracticeQuestion } from "./PracticeQuestion";
@@ -19,17 +18,6 @@ type PracticeToolProps = {
   user: User;
   currentSemester: CourseTag;
   onClose: () => void;
-  onCorrectNode: (e: any, nodeId: string) => void;
-  onWrongNode: (
-    event: any,
-    nodeId: string,
-    nodeType: NodeType,
-    wrong: any,
-    correct: any,
-    wrongs: number,
-    corrects: number,
-    locked: boolean
-  ) => void;
 };
 
 export type PracticeInfo = {
@@ -48,7 +36,7 @@ const DEFAULT_PRACTICE_INFO: PracticeInfo = {
   totalDays: 0,
 };
 
-export const PracticeTool = ({ user, currentSemester, onClose, onCorrectNode, onWrongNode }: PracticeToolProps) => {
+export const PracticeTool = ({ user, currentSemester, onClose }: PracticeToolProps) => {
   const db = getFirestore();
   const [startPractice, setStartPractice] = useState(false);
   const [questionData, setQuestionData] = useState<{ question: SimpleQuestionNode; flashcardId: string } | null>(null);
@@ -141,8 +129,6 @@ export const PracticeTool = ({ user, currentSemester, onClose, onCorrectNode, on
         onClose={onClose}
         leaderboard={<Leaderboard semesterId={currentSemester.tagId} />}
         userStatus={<UserStatus semesterId={currentSemester.tagId} user={user} />}
-        onCorrectNode={onCorrectNode}
-        onWrongNode={onWrongNode}
         onViewNodeOnNodeBook={(id: string) => console.log(id)}
         onGetNextQuestion={getPracticeQuestion}
         onSaveAnswer={onSubmitAnswer}
