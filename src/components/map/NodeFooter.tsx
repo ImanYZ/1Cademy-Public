@@ -218,7 +218,7 @@ const NodeFooter = ({
   const disableUpvoteButton = disabled && !enableChildElements.includes(upvoteButtonId);
   const disableTagsCitationsButton = disabled && !enableChildElements.includes(tagsCitationsButtonId);
   const disableParentChildrenButton = disabled && !enableChildElements.includes(parentChildrenButtonId);
-  const disableMoreOptionsButton = disabled && !enableChildElements.includes(moreOptionsButtonId);
+  const disableMoreOptionsButton = editable;
   const disableFooterMenuOptions = enableChildElements.includes(moreOptionsButtonId);
   const disableNodeTypeSelector = disabled && !enableChildElements.includes(nodeTypeSelectorId);
 
@@ -497,6 +497,7 @@ const NodeFooter = ({
                 nodeType={"locked"}
                 tooltipPlacement={"top"}
                 fontSize={"inherit"}
+                sx={{ fontSize: "22px" }}
                 // disabled={disabled}
               />
             )}
@@ -511,13 +512,7 @@ const NodeFooter = ({
                   setAbleToPropose={setAbleToPropose}
                 />
               ) : (
-                <NodeTypeIcon
-                  id={identifier}
-                  nodeType={nodeType}
-                  tooltipPlacement={"top"}
-                  fontSize={"inherit"}
-                  // disabled={disabled}
-                />
+                <NodeTypeIcon id={identifier} nodeType={nodeType} tooltipPlacement={"top"} sx={{ fontSize: "24px" }} />
               ))}
             <Tooltip
               title={`This node was last edited at ${dayjs(new Date(changedAt)).hour()}:${dayjs(
@@ -1192,32 +1187,34 @@ const NodeFooter = ({
                 </Box>
               )}
 
-              <IconButton
-                aria-label="more"
-                id={moreOptionsButtonId}
-                aria-controls={openMenu ? "long-menu" : undefined}
-                aria-expanded={openMenu ? "true" : undefined}
-                aria-haspopup="true"
-                onClick={handleClick}
-                disabled={disableMoreOptionsButton}
-                sx={{
-                  display: simulated ? "none" : "flex",
-                  background: (theme: any) => (theme.palette.mode === "dark" ? "#404040" : "#EAECF0"),
-                  padding: "3px",
-                  ":hover": {
-                    background: (theme: any) =>
-                      theme.palette.mode === "dark"
-                        ? theme.palette.common.darkBackground2
-                        : theme.palette.common.lightBackground2,
-                  },
-                }}
-              >
-                <MoreHorizIcon
+              {!editable && (
+                <IconButton
+                  aria-label="more"
+                  id={moreOptionsButtonId}
+                  aria-controls={openMenu ? "long-menu" : undefined}
+                  aria-expanded={openMenu ? "true" : undefined}
+                  aria-haspopup="true"
+                  onClick={handleClick}
+                  disabled={disableMoreOptionsButton}
                   sx={{
-                    color: "inherit",
+                    display: simulated ? "none" : "flex",
+                    background: (theme: any) => (theme.palette.mode === "dark" ? "#404040" : "#EAECF0"),
+                    padding: "3px",
+                    ":hover": {
+                      background: (theme: any) =>
+                        theme.palette.mode === "dark"
+                          ? theme.palette.common.darkBackground2
+                          : theme.palette.common.lightBackground2,
+                    },
                   }}
-                />
-              </IconButton>
+                >
+                  <MoreHorizIcon
+                    sx={{
+                      color: "inherit",
+                    }}
+                  />
+                </IconButton>
+              )}
 
               {openMenu && (
                 <ClickAwayListener onClickAway={handleClose}>

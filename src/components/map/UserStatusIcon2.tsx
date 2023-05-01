@@ -140,6 +140,7 @@ const UserStatusIcon = ({ nodeBookDispatch, smallVersion = true, ...props }: Use
         <div className={(pointsGained ? "GainedPoint" : "") + (pointsLost ? "LostPoint" : "")}>
           <OptimizedAvatar
             imageUrl={props.imageUrl}
+            name={props.fullname}
             renderAsAvatar={true}
             contained={false}
             sx={{ border: "none", width: "38px", height: "38px", position: "static", cursor: "pointer" }}
