@@ -183,7 +183,11 @@ describe("/signup as student", () => {
     nodeType: "Question",
     choices: [],
     admin: users[0],
+    tags: [nodes[0]],
   });
+
+  nodes[0].tagIds.push(nodes[0].documentId!);
+  nodes[0].tags.push(nodes[0].title);
   nodes[0].children.push({
     node: questionNode.documentId!,
     title: questionNode.title,
