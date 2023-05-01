@@ -212,7 +212,7 @@ export const DashboardWrapper = ({ user, openNodeHandler, onClose, sx }: Dashboa
         display: "grid",
         gridTemplateColumns: "200px auto",
         gridTemplateRows: "100%",
-        border: "solid 2px yellow",
+        // border: "solid 2px yellow",
         background: theme =>
           theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookG900 : DESIGN_SYSTEM_COLORS.gray100,
       }}
@@ -233,7 +233,7 @@ export const DashboardWrapper = ({ user, openNodeHandler, onClose, sx }: Dashboa
         sx={{
           width: "100%",
           height: "100%",
-          border: "solid 2px royalBlue",
+          // border: "solid 2px royalBlue",
           overflowY: "auto",
           overflowX: "hidden",
           p: "40px 32px",
