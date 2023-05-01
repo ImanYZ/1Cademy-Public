@@ -57,6 +57,16 @@ export const MECHANISM_ITEMS: TMechanisms[] = [
       artboard: "New Artboard",
     },
   },
+  {
+    id: "long-term-learning",
+    title: "Long-term Learning",
+    description:
+      "1Cademy Assistant uses a personalized question-asking approach, leveraging the prerequisite relations in the 1Cademy knowledge graph as well as the student's prior answers. Upon answering correctly, students are guided towards more advanced topics, while incorrect answers result in a review of the topic's prerequisites to ensure a strong foundation before proceeding. Through this method, students can earn a daily point for answering ten questions correctly, which has been shown through years of experimentation to increase motivation and encourage spaced-out practice throughout the semester. Our research has found that this approach is especially beneficial for students with lower GPAs, ultimately leading to improved exam scores. By combining the power of the 1Cademy knowledge graph, personalized practice history, and the counting days incentive, 1Cademy Assistant is a highly effective tool for facilitating long-term learning.",
+    animation: {
+      src: "rive/long-term-learning.riv",
+      artboard: "New Artboard",
+    },
+  },
 ];
 
 export interface IMechanism {
