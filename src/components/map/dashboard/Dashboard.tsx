@@ -664,22 +664,19 @@ export const Dashboard = ({ user, currentSemester }: DashboardProps) => {
             gridTemplateColumns: { xs: "1fr", md: "1fr 1fr" },
             // gridTemplateRows: "minmax(auto, 581px)",
             gap: "16px",
-            height: "588px",
           }}
         >
           <Paper
             sx={{
-              height: "588px",
               p: { sm: "10px", md: "16px" },
               backgroundColor:
                 mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookMainBlack : DESIGN_SYSTEM_COLORS.baseWhite,
             }}
           >
-            <UserStatus user={user} semesterId={currentSemester.tagId} displayTitle={false} />
+            <UserStatus user={user} semesterId={currentSemester.tagId} displayTitle={false} displayStreak={false} />
           </Paper>
           <Paper
             sx={{
-              height: "588px",
               p: { sm: "10px", md: "16px" },
               backgroundColor:
                 mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookMainBlack : DESIGN_SYSTEM_COLORS.baseWhite,

@@ -33,9 +33,10 @@ type UserStatusProps = {
   user: User;
   semesterId: string;
   displayTitle?: boolean;
+  displayStreak?: boolean;
 };
 
-export const UserStatus = ({ user, semesterId, displayTitle = true }: UserStatusProps) => {
+export const UserStatus = ({ user, semesterId, displayTitle = true, displayStreak = true }: UserStatusProps) => {
   const db = getFirestore();
   const [daysValue, setDaysValue] = useState<DailyPoint[]>([]);
   const [semester, setSemester] = useState<ISemester | null>(null);
@@ -206,7 +207,7 @@ export const UserStatus = ({ user, semesterId, displayTitle = true }: UserStatus
                       ? DESIGN_SYSTEM_COLORS.success500
                       : DESIGN_SYSTEM_COLORS.notebookScarlet,
                     mr: "12px",
-                    borderRadius: "0px 3px 3px 0px",
+                    borderRadius: "3px",
                   }}
                 />
                 <Typography sx={{ fontWeight: 500 }}>{cur.value}</Typography>
@@ -214,26 +215,30 @@ export const UserStatus = ({ user, semesterId, displayTitle = true }: UserStatus
             ))}
           </Stack>
         </Stack>
-        <Divider sx={{ mb: "24px" }} />
-        <Box sx={{ display: "grid", placeItems: "center", gap: "8px" }}>
-          <Box
-            sx={{
-              width: "60px",
-              height: "60px",
-              border: `solid 2px ${DESIGN_SYSTEM_COLORS.success500}`,
-              borderRadius: "50%",
-              display: "grid",
-              placeItems: "center",
-            }}
-          >
-            <Typography fontSize={"18px"} fontWeight={"500"} color={DESIGN_SYSTEM_COLORS.success500}>
-              {calculateDailyStreak(semesterStudentVoteStats)}
-            </Typography>
-          </Box>
-          <Typography sx={{ fontSize: "18px", fontWeight: "500", color: DESIGN_SYSTEM_COLORS.gray25 }}>
-            Daily streak
-          </Typography>
-        </Box>
+        {displayStreak && (
+          <>
+            <Divider sx={{ mb: "24px" }} />
+            <Box sx={{ display: "grid", placeItems: "center", gap: "8px" }}>
+              <Box
+                sx={{
+                  width: "60px",
+                  height: "60px",
+                  border: `solid 2px ${DESIGN_SYSTEM_COLORS.success500}`,
+                  borderRadius: "50%",
+                  display: "grid",
+                  placeItems: "center",
+                }}
+              >
+                <Typography fontSize={"18px"} fontWeight={"500"} color={DESIGN_SYSTEM_COLORS.success500}>
+                  {calculateDailyStreak(semesterStudentVoteStats)}
+                </Typography>
+              </Box>
+              <Typography sx={{ fontSize: "18px", fontWeight: "500", color: DESIGN_SYSTEM_COLORS.gray25 }}>
+                Daily streak
+              </Typography>
+            </Box>
+          </>
+        )}
       </Box>
     </Box>
   );
