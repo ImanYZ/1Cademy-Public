@@ -176,8 +176,8 @@ export const DashboardWrapper = ({ user, onClose, sx }: DashboardWrapperProps) =
   useEffect(() => {
     if (!instructor) return;
     if (!selectedCourse) return;
+
     const current = selectCourse(selectedCourse, instructor);
-    console.log({ current });
     setCurrentSemester(current ?? null);
   }, [instructor, selectedCourse]);
 
@@ -274,7 +274,6 @@ export const getCourseTitleFromSemester = (semester: ISemester) => {
 };
 
 const getCoursesByInstructor = (instructor: Instructor): CoursesResult => {
-  console.log({ instructor });
   return instructor.courses.reduce((acu: CoursesResult, cur) => {
     const tmpValues = acu[cur.title] ?? [];
     return { ...acu, [cur.tagId]: [...tmpValues, `${cur.cTitle} ${cur.pTitle || "@ " + cur.uTitle}`] };
