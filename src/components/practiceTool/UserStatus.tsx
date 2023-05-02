@@ -115,6 +115,13 @@ export const UserStatus = ({
     console.log("res345", { res });
   }, [semester, semesterStudentVoteStats, weekInfo.dates]);
 
+  const studentStrike = useMemo(() => {
+    if (!semester) return 0;
+    if (!semesterStudentVoteStats) return 0;
+
+    return calculateDailyStreak(semesterStudentVoteStats, semester.dailyPractice.numQuestionsPerDay);
+  }, [semester, semesterStudentVoteStats]);
+
   if (!semesterStudentVoteStats) return null;
 
   return (
@@ -174,14 +181,20 @@ export const UserStatus = ({
                 sx={{
                   width: "48px",
                   height: "48px",
-                  border: `solid 2px ${DESIGN_SYSTEM_COLORS.success500}`,
+                  border: `solid 2px ${
+                    studentStrike > 0 ? DESIGN_SYSTEM_COLORS.success500 : DESIGN_SYSTEM_COLORS.notebookScarlet
+                  }`,
                   borderRadius: "50%",
                   display: "grid",
                   placeItems: "center",
                 }}
               >
-                <Typography fontSize={"16px"} fontWeight={"500"} color={DESIGN_SYSTEM_COLORS.success500}>
-                  {calculateDailyStreak(semesterStudentVoteStats, semester?.dailyPractice.numQuestionsPerDay ?? 0)}
+                <Typography
+                  fontSize={"16px"}
+                  fontWeight={"500"}
+                  color={studentStrike > 0 ? DESIGN_SYSTEM_COLORS.success500 : DESIGN_SYSTEM_COLORS.notebookScarlet}
+                >
+                  {studentStrike}
                 </Typography>
               </Box>
               <Typography sx={{ fontSize: "16px", color: DESIGN_SYSTEM_COLORS.gray25 }}>Daily streak</Typography>
