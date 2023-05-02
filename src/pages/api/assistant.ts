@@ -9,6 +9,7 @@ import {
   processRecursiveCommands,
   loadResponseNodes,
   getGeneralKnowledgePrompt,
+  getExplainMorePrompt,
 } from "src/utils/assistant-helpers";
 
 export type IAssistantRequestPayload = {
@@ -68,6 +69,8 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
         ? payload.message
         : payload.actionType === "GeneralExplanation"
         ? getGeneralKnowledgePrompt(conversationData)
+        : payload.actionType === "ExplainMore"
+        ? getExplainMorePrompt(conversationData)
         : "";
 
     if (!payload.message.trim()) {

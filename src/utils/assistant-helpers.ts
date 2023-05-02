@@ -374,3 +374,48 @@ export const getGeneralKnowledgePrompt = (conversationData: IAssistantConversati
 
   return `Please provide an answer to the following question based on your general knowledge:\n` + request;
 };
+
+export const getLastAssistantResponse = (conversationData: IAssistantConversation) => {
+  for (let i = conversationData.messages.length - 1; i >= 0; i--) {
+    if (conversationData.messages[i].gptMessage?.role === "assistant") {
+      return conversationData.messages[i];
+    }
+  }
+
+  return null;
+};
+
+export const getExplainMorePrompt = (conversationData: IAssistantConversation) => {
+  let nodes: IAssistantNode[] = [];
+  for (let i = conversationData.messages.length - 1; i >= 0; i--) {
+    if (conversationData.messages[i].nodes) {
+      nodes = conversationData.messages[i].nodes!;
+      break;
+    }
+  }
+
+  if (!nodes.length) {
+    const assistantMessage = getLastAssistantResponse(conversationData);
+    if (!assistantMessage) return "";
+
+    return `Further explain following triple-quoted text:\n'''\n${assistantMessage.gptMessage!.content}\n'''`;
+  }
+
+  const nodeTitles = nodes.map(node => node.title);
+  let _nodeTitles: string = "";
+  if (nodeTitles.length > 1) {
+    _nodeTitles += nodeTitles[0];
+    for (let i = 1; i < nodeTitles.length; i++) {
+      let postfix = ", ";
+      if (i === nodeTitles.length - 1) {
+        postfix = " and ";
+      }
+
+      _nodeTitles += postfix + nodeTitles[i];
+    }
+  } else {
+    _nodeTitles = nodeTitles[0];
+  }
+
+  return `Further explain ` + _nodeTitles + ".";
+};
