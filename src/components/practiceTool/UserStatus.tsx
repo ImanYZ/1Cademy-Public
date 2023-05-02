@@ -53,7 +53,6 @@ export const UserStatus = ({
     weekNumber: getWeekNumber(),
     dates: getDatesOfWeek(),
   });
-  console.log({ weekInfo });
   const onNextWeek = () => {
     setWeekInfo(prev => ({
       weekNumber: prev.weekNumber + 1,
@@ -87,7 +86,6 @@ export const UserStatus = ({
     const getSemesterStudentVotesStats = async () => {
       const res = await getSemesterStudentVoteStatsByIdAndStudent(db, semesterId, user.uname);
       if (!res) return;
-      console.log("res123", res);
       setSemesterStudentVoteStats(res);
     };
     const getSemester = async () => {
@@ -109,10 +107,8 @@ export const UserStatus = ({
       weekInfo.dates.map(date => getDateYYMMDDWithHyphens(date)),
       semester.dailyPractice.numQuestionsPerDay
     );
-    console.log({ dailyq: res[0] });
 
     setDaysValue(res);
-    console.log("res345", { res });
   }, [semester, semesterStudentVoteStats, weekInfo.dates]);
 
   const studentStrike = useMemo(() => {
@@ -322,9 +318,7 @@ const mapSemesterStudentStatsToWeekStats = (
   weekdays: string[],
   numQuestionsPerDay: number
 ): DailyPoint => {
-  console.log({ weekdays });
   const weeklyStatsByDay = getWeeklyMetric(semesterStudentStats.days, "correctPractices", weekdays);
-  console.log({ weeklyStatsByDay });
   return Object.keys(weeklyStatsByDay).reduce((acc: DailyPoint, key) => {
     return {
       ...acc,
@@ -352,7 +346,6 @@ const calcMetricPerDay = (
 ): DailyPoints => {
   return days.reduce((acc: DailyPoints, day) => {
     const today = day.day;
-    console.log({ dailyy: day[metric] });
     return { ...acc, [today]: acc[today] ? (acc[today] = acc[today] + day[metric]) : day[metric] };
   }, {});
 };
@@ -373,13 +366,11 @@ const calculateDailyStreak = (semesterStudentStats: ISemesterStudentVoteStat, qu
   const sortedDailyCorrectPractices: DailyPoints = Object.fromEntries(
     Object.entries(dailyCorrectPractices).sort(([keyA], [keyB]) => keyB.localeCompare(keyA))
   );
-  console.log({ dailyCorrectPractices });
 
   const dailyKeys = Object.keys(sortedDailyCorrectPractices);
 
   const streak = Object.keys(sortedDailyCorrectPractices).reduce(
     (streak: { counter: number; lastDate: string }, key) => {
-      console.log("keeeeey", key);
       if (getTodayYYYYMMDD() < key) return streak;
       if (streak.lastDate && substractDatesIntoDays(streak.lastDate, key) > 1) return streak;
 
