@@ -1,0 +1,55 @@
+import { Timestamp } from "firebase-admin/firestore";
+import { ChatCompletionRequestMessage } from "openai";
+
+import { INodeType } from "./INodeType";
+
+export type IAssistantNode = {
+  type: INodeType;
+  node: string;
+  title: string;
+  link: string;
+};
+
+export type IAssistantMessage = {
+  request?: string;
+  gptMessage?: ChatCompletionRequestMessage;
+  actions?: {
+    type: IAssitantRequestAction;
+    title: string;
+    variant: "contained" | "outline";
+  }[];
+  nodes?: IAssistantNode[];
+  message?: string;
+};
+
+export type IAssistantConversation = {
+  documentId?: string;
+  messages: IAssistantMessage[];
+  createdAt: Timestamp;
+  updatedAt: Timestamp;
+};
+
+export type IAssitantRequestAction =
+  | "Practice"
+  | "TeachContent"
+  | "PracticeLater"
+  | "Understood"
+  | "ExplainMore"
+  | "GeneralExplanation"
+  | "IllContribute"
+  | "DirectQuestion";
+
+export type IAssistantResponse = {
+  conversationId: string;
+  message: string;
+  nodes?: {
+    type: INodeType;
+    node: string;
+    title: string;
+  }[];
+  actions?: {
+    type: IAssitantRequestAction;
+    title: string;
+    variant: "contained" | "outline";
+  }[];
+};
