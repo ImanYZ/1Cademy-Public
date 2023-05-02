@@ -95,7 +95,6 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
     // If was able to get information from knowledge graph
     return res.status(200).json({
       conversationId: assistantConversationRef.id,
-      gptMessage: assistantMessage.gptMessage,
       message: assistantMessage.message,
       actions: assistantMessage.actions,
       nodes: assistantMessage.nodes,
