@@ -916,7 +916,7 @@ export const Dashboard = ({ user, currentSemester }: DashboardProps) => {
                     {isMovil && <BoxLegend role={user.role} />}
                   </>
                 ) : (
-                  <Box sx={{ height: "100%", display: "grid", placeItems: "center" }}>
+                  <Box sx={{ height: "100%", display: "grid", placeItems: "center", mx: "24px" }}>
                     <Typography
                       sx={{
                         fontSize: "21px",
@@ -967,7 +967,7 @@ export const Dashboard = ({ user, currentSemester }: DashboardProps) => {
                     {isMovil && <BoxLegend role={user.role} />}
                   </>
                 ) : (
-                  <Box sx={{ height: "100%", display: "grid", placeItems: "center" }}>
+                  <Box sx={{ height: "100%", display: "grid", placeItems: "center", mx: "32px" }}>
                     <Typography
                       sx={{
                         fontSize: "21px",
@@ -1017,7 +1017,7 @@ export const Dashboard = ({ user, currentSemester }: DashboardProps) => {
                     {isMovil && <BoxLegend role={user.role} />}
                   </>
                 ) : (
-                  <Box sx={{ height: "100%", display: "grid", placeItems: "center" }}>
+                  <Box sx={{ height: "200px", display: "grid", placeItems: "center", mx: "32px" }}>
                     <Typography
                       sx={{
                         fontSize: "21px ",
