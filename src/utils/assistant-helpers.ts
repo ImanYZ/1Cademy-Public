@@ -349,6 +349,7 @@ export const loadResponseNodes = async (assistantMessage: IAssistantMessage) => 
           title: _nodeData.title,
           type: _nodeData.nodeType,
           link: getNodePageWithDomain(_nodeData.title, _node.id),
+          content: _nodeData.content,
         });
         break;
       }

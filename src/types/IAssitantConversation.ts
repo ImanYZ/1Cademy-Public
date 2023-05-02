@@ -8,6 +8,7 @@ export type IAssistantNode = {
   node: string;
   title: string;
   link: string;
+  content: string;
 };
 
 export type IAssistantMessage = {
