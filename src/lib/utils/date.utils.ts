@@ -48,9 +48,9 @@ export const getDatesOfWeek = (date = new Date()) => {
 
 export const getWeekNumber = (currentDate = new Date()) => {
   const firstDayOfYear = new Date(currentDate.getFullYear(), 0, 1);
-  const weekNumber = Math.ceil(
-    ((currentDate.getTime() - firstDayOfYear.getTime()) / 86400000 + firstDayOfYear.getDay() + 1) / 7
-  );
+  const firstMondayOfYear = new Date(firstDayOfYear.getTime() + ((8 - firstDayOfYear.getDay()) % 7) * 86400000);
+  const daysSinceFirstMonday = Math.floor((currentDate.getTime() - firstMondayOfYear.getTime()) / 86400000);
+  const weekNumber = Math.floor(daysSinceFirstMonday / 7) + 1;
   return weekNumber;
 };
 

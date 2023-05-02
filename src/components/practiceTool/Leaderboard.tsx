@@ -255,6 +255,7 @@ const getColorFromLeaderboardUser = (position: number) => {
 
 export const filterDayStatsByWeek = (dayStats: ISemesterStudentVoteStatDay[], weekNumber: number) => {
   // dayStats.day: YY-MM-DD
+
   return dayStats.filter(cur => getWeekNumber(new Date(cur.day.replace("-", " "))) === weekNumber);
 };
 
