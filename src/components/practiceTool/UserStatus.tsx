@@ -282,14 +282,20 @@ export const UserStatus = ({
                 sx={{
                   width: "60px",
                   height: "60px",
-                  border: `solid 2px ${DESIGN_SYSTEM_COLORS.success500}`,
+                  border: `solid 2px ${
+                    studentStrike > 0 ? DESIGN_SYSTEM_COLORS.success500 : DESIGN_SYSTEM_COLORS.notebookScarlet
+                  }`,
                   borderRadius: "50%",
                   display: "grid",
                   placeItems: "center",
                 }}
               >
-                <Typography fontSize={"18px"} fontWeight={"500"} color={DESIGN_SYSTEM_COLORS.success500}>
-                  {calculateDailyStreak(semesterStudentVoteStats, semester?.dailyPractice.numQuestionsPerDay ?? 0)}
+                <Typography
+                  fontSize={"18px"}
+                  fontWeight={"500"}
+                  color={studentStrike > 0 ? DESIGN_SYSTEM_COLORS.success500 : DESIGN_SYSTEM_COLORS.notebookScarlet}
+                >
+                  {studentStrike}
                 </Typography>
               </Box>
               <Typography sx={{ fontSize: "18px", fontWeight: "500", color: DESIGN_SYSTEM_COLORS.gray25 }}>
