@@ -6,6 +6,7 @@ import Image from "next/image";
 import React from "react";
 
 import { DESIGN_SYSTEM_COLORS } from "@/lib/theme/colors";
+import { getAvatarName } from "@/lib/utils/Map.utils";
 
 import { PointsType } from "../../PointsType";
 import { UserPoints } from "./SidebarV2/UserSettigsSidebar";
@@ -45,7 +46,7 @@ const UserDetails = ({ id, imageUrl, fName, lName, uname, chooseUname, points }:
               background: "linear-gradient(143.7deg, #FDC830 15.15%, #F37335 83.11%);",
             }}
           >
-            {`${(fName ?? "").charAt(0)}${(lName ?? "").charAt(0)}`}
+            {getAvatarName(fName, lName)}
           </Avatar>
         )}
       </Box>

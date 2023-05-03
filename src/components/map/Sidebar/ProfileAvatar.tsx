@@ -5,6 +5,7 @@ import { getDownloadURL, getStorage, ref, uploadBytesResumable } from "firebase/
 import Image from "next/image";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 
+import { getAvatarName } from "@/lib/utils/Map.utils";
 import { addSuffixToUrlGMT } from "@/lib/utils/string.utils";
 
 import { postWithToken } from "../../../lib/mapApi";
@@ -199,7 +200,7 @@ const ProfileAvatar = ({ id, userId, userImage, setUserImage, name, lastName }: 
               },
             }}
           >
-            {`${name.charAt(0)}${lastName.charAt(0)}`}
+            {getAvatarName(name, lastName)}
           </Avatar>
         ) : (
           <>

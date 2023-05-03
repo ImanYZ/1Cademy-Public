@@ -67,6 +67,17 @@ export const MECHANISM_ITEMS: TMechanisms[] = [
       artboard: "New Artboard",
     },
   },
+  {
+    id: "contextualized-q-a",
+    title: "Contextualized Q&A",
+    description: `
+    1Cademy Assistant is an intelligent system that leverages the power of 1Cademy's knowledge graph to provide personalized question answering to learners. By analyzing the learner's history of answers to practice questions and understanding the prerequisite relationships between the topics covered in the course, the system can provide learners with context-specific guidance. This not only helps learners understand what is covered in the course, but also what lies beyond its boundaries. Additionally, 1Cademy Assistant helps learners develop metacognitive skills by providing insights into why they may be struggling with a specific concept. The system can trace these difficulties back to the prerequisite topics they had difficulty with, helping them to build a more comprehensive understanding of the subject. Finally, 1Cademy Assistant provides instructors with insightful reports on each student's personalized learning journey, allowing them to fine-tune their teaching strategies to better serve their students' needs.
+    `,
+    animation: {
+      src: "rive/contextualized-q-a.riv",
+      artboard: "New Artboard",
+    },
+  },
 ];
 
 export interface IMechanism {
@@ -132,6 +143,7 @@ const Mechanism = ({ mechanisms }: IMechanism) => {
               artboard={cur.animation.artboard}
               animations={["Timeline 1", theme.palette.mode]}
               autoplay={true}
+              displayControls
             />
           </Box>
         </Stack>
