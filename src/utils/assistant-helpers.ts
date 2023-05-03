@@ -72,8 +72,8 @@ export const top4TypesenseSearch = async (query: string, tagTitle?: string): Pro
     sort_by: "",
     filter_by: "nodeType:=[Concept,Relation]" + (tagTitle ? ` && tags:=[\`${tagTitle}\`]` : ""),
     page: 1,
-    num_typos: numOfWords.length > 2 ? "2" : "0",
-    typo_tokens_threshold: numOfWords.length > 2 ? 2 : 0,
+    num_typos: numOfWords.length > 2 ? "2" : "1",
+    typo_tokens_threshold: numOfWords.length > 2 ? 2 : 1,
   };
 
   const searchResults = await getTypesenseClient()
@@ -241,7 +241,8 @@ export const processRecursiveCommands = async (
       }
 
       // If not results found for desired query then
-      if (!nodeIds.length && (n >= 4 || n === 1)) {
+      // TODO: instead of just checking >= 3 check if we are processing same search results again and again
+      if (n >= 3 || (!nodeIds.length && n === 1)) {
         const message: IAssistantMessage = {
           message: ASSISTANT_NOT_FOUND_MESSAGE,
           actions: [
