@@ -1,8 +1,7 @@
-import { admin, db } from "@/lib/firestoreServer/admin";
+import { db } from "@/lib/firestoreServer/admin";
 import { Timestamp } from "firebase-admin/firestore";
 import { NextApiRequest, NextApiResponse } from "next";
 import fbAuth from "src/middlewares/fbAuth";
-import { IAssistantConversation, IAssistantResponse, IAssitantRequestAction } from "src/types/IAssitantConversation";
 import { INode } from "src/types/INode";
 import { INotebook } from "src/types/INotebook";
 import { IUser } from "src/types/IUser";
