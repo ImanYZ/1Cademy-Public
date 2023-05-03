@@ -48,11 +48,7 @@ export type IAssitantRequestAction =
 export type IAssistantResponse = {
   conversationId: string;
   message: string;
-  nodes?: {
-    type: INodeType;
-    node: string;
-    title: string;
-  }[];
+  nodes?: IAssistantNode[];
   actions?: {
     type: IAssitantRequestAction;
     title: string;
