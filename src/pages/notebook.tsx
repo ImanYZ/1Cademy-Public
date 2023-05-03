@@ -71,6 +71,7 @@ import { TooltipTutorial } from "../components/interactiveTutorial/Tutorial";
 // import nodesData from "../../testUtils/mockCollections/nodes.data";
 // import { Tutorial } from "../components/interactiveTutorial/Tutorial";
 import { MemoizedClustersList } from "../components/map/ClustersList";
+import { DashboardWrapper } from "../components/map/dashboard/DashboardWrapper";
 import { MemoizedLinksList } from "../components/map/LinksList";
 import { MemoizedNodeList } from "../components/map/NodesList";
 import { NotebookPopup } from "../components/map/Popup";
@@ -150,7 +151,7 @@ import { doNeedToDeleteNode, getNodeTypesFromNode, isVersionApproved } from "../
 
 // export type TutorialKeys = TutorialTypeKeys | null;
 
-type DashboardProps = {};
+type NotebookProps = {};
 
 export type OpenSidebar =
   | "SEARCHER_SIDEBAR"
@@ -188,7 +189,7 @@ export type Graph = { nodes: FullNodesData; edges: EdgesData };
  *  --- render nodes
  */
 let arrowKeyMapTransitionInitialized = false;
-const Dashboard = ({}: DashboardProps) => {
+const Notebook = ({}: NotebookProps) => {
   // ---------------------------------------------------------------------
   // ---------------------------------------------------------------------
   // GLOBAL STATES
@@ -321,6 +322,7 @@ const Dashboard = ({}: DashboardProps) => {
 
   const [openProgressBar, setOpenProgressBar] = useState(false);
   const [, /* openProgressBarMenu */ setOpenProgressBarMenu] = useState(false);
+  const [displayDashboard, setDisplayDashboard] = useState(false);
 
   // Scroll to node configs
 
@@ -6434,6 +6436,9 @@ const Dashboard = ({}: DashboardProps) => {
                 selectedNotebook={selectedNotebookId}
                 openNodesOnNotebook={openNodesOnNotebook}
                 setNotebooks={setNotebooks}
+                onDisplayInstructorPage={() => {
+                  setDisplayDashboard(true);
+                }}
               />
 
               <MemoizedBookmarksSidebar
@@ -6542,6 +6547,15 @@ const Dashboard = ({}: DashboardProps) => {
             comLeaderboardOpen={comLeaderboardOpen}
             setComLeaderboardOpen={setComLeaderboardOpen}
           />
+
+          {user && displayDashboard && (
+            <DashboardWrapper
+              user={user}
+              onClose={() => setDisplayDashboard(false)}
+              openNodeHandler={openNodeHandler}
+              sx={{ position: "absolute", inset: "0px", zIndex: 999 }}
+            />
+          )}
 
           <MemoizedToolbox
             isLoading={isQueueWorking}
@@ -6985,7 +6999,7 @@ const Dashboard = ({}: DashboardProps) => {
 
 const NodeBook = () => (
   <NodeBookProvider>
-    <Dashboard />
+    <Notebook />
   </NodeBookProvider>
 );
 export default withAuthUser({

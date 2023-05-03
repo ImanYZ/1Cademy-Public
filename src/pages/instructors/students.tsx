@@ -25,13 +25,13 @@ import { ISemester, ISemesterStudentVoteStat } from "src/types/ICourse";
 import { v4 as uuidv4 } from "uuid";
 
 import { InstructorLayoutPage, InstructorsLayout } from "@/components/layouts/InstructorsLayout";
+import OptimizedAvatar from "@/components/OptimizedAvatar";
 import { calculateVoteStatPoints } from "@/lib/utils/charts.utils";
 
 import { postWithToken } from "../../../src/lib/mapApi";
 import CSVBtn from "../../components/CSVBtn";
 import DeleteButton from "../../components/DeleteButton";
 import { StudentFilters, StudentsProfile } from "../../components/instructors/Drawers";
-import OptimizedAvatar from "../../components/OptimizedAvatar";
 
 const filterChoices: any = {
   "Total Points": "totalPoints",

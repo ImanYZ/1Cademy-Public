@@ -1,5 +1,5 @@
+import { KnowledgeChoice } from "./knowledgeTypes";
 import {
-  ICourseTag,
   IInstructor,
   ISemester,
   ISemesterStudent,
@@ -8,8 +8,6 @@ import {
 } from "./types/ICourse";
 
 export type Instructor = IInstructor;
-
-export type CourseTag = ICourseTag;
 
 export type SemesterStudentVoteStat = ISemesterStudentVoteStat & {
   links: number;
@@ -43,6 +41,7 @@ export type BubbleStats = {
 export type MaxPoints = {
   maxProposalsPoints: number;
   maxQuestionsPoints: number;
+  maxDailyPractices: number;
 };
 
 export type BubbleAxis = {
@@ -59,9 +58,41 @@ export type GeneralSemesterStudentsStats = {
   nodes: number;
   votes: number;
   questions: number;
+  correctPractices: number;
 };
 
 export type MappedData = {
   date: string;
   value: GeneralSemesterStudentsStats;
+};
+
+export type CourseTag = {
+  documentId?: string;
+  pTagId: string;
+  pTitle: string;
+  cTagId: string;
+  cTitle: string;
+  uTagId: string;
+  uTitle: string;
+  tagId: string;
+  title: string;
+};
+
+export type SimpleQuestionNode = {
+  id: string;
+  choices: KnowledgeChoice[];
+  tags: string[];
+  content: string;
+  corrects: number;
+  nodeImage: string;
+  nodeVideo: string;
+  nodeAudio: string;
+  studied: number;
+  title: string;
+  wrongs: number;
+  correct: boolean;
+  isStudied: boolean;
+  wrong: boolean;
+  locked: boolean;
+  disableVotes?: boolean;
 };

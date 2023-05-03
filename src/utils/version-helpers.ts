@@ -34,10 +34,10 @@ import { TypesenseNodeSchema } from "@/lib/schemas/node";
 import { INodeType } from "src/types/INodeType";
 import { IComReputationUpdates } from "./reputations";
 import { IUserNodeVersion } from "src/types/IUserNodeVersion";
-import { getCourseIdsFromTagIds, getSemesterIdsFromTagIds } from "./course-helpers";
-import { IPractice } from "src/types/IPractice";
-import { ISemester } from "src/types/ICourse";
 import { getNodePageWithDomain } from "@/lib/utils/utils";
+import { IPractice } from "src/types/IPractice";
+import { getCourseIdsFromTagIds, getSemesterIdsFromTagIds } from "./course-helpers";
+import { ISemester } from "src/types/ICourse";
 
 export const comPointTypes = [
   "comPoints",

@@ -99,18 +99,20 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
     const userNodeData = userNode.data() as IUserNode;
     const theNode = {
       id: questionNode.id,
-      choices: (questionNodeData.choices || []).map((c: any) => ({ choice: c.choice })),
+      choices: questionNodeData.choices || [],
+      tags: questionNodeData.tags,
       content: questionNodeData.content,
       corrects: questionNodeData.corrects,
-      nodeImage: questionNodeData.nodeImage,
-      nodeVideo: questionNodeData.nodeVideo,
-      nodeAudio: questionNodeData.nodeAudio,
+      nodeImage: questionNodeData.nodeImage ?? "",
+      nodeVideo: questionNodeData.nodeVideo ?? "",
+      nodeAudio: questionNodeData.nodeAudio ?? "",
       studied: questionNodeData.studied,
       title: questionNodeData.title,
       wrongs: questionNodeData.wrongs,
       correct: userNodeData.correct,
       isStudied: userNodeData.isStudied,
       wrong: userNodeData.wrong,
+      locked: Boolean(questionNodeData.locked),
     };
     const currentTimestamp = Timestamp.fromDate(new Date());
     // This is required to only check answers after this timestamp in do_check_answer().

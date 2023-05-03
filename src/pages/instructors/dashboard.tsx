@@ -1,7 +1,5 @@
 import SquareIcon from "@mui/icons-material/Square";
 import { Paper, Typography /* useTheme */, useMediaQuery, useTheme } from "@mui/material";
-// import { useTheme } from "@mui/material/styles";
-// import useMediaQuery from "@mui/material/useMediaQuery";
 import { Box } from "@mui/system";
 import { collection, getFirestore, onSnapshot, query, where } from "firebase/firestore";
 import { useCallback, useEffect, useState } from "react";
@@ -42,6 +40,7 @@ import { GeneralPlotStatsSkeleton } from "../../components/instructors/skeletons
 import { StackedBarPlotStatsSkeleton } from "../../components/instructors/skeletons/StackedBarPlotStatsSkeleton";
 import { StudentDailyPlotStatsSkeleton } from "../../components/instructors/skeletons/StudentDailyPlotStatsSkeleton";
 import { InstructorLayoutPage, InstructorsLayout } from "../../components/layouts/InstructorsLayout";
+// import { PracticeTool } from "../../components/PracticeQuestion";
 import { useWindowSize } from "../../hooks/useWindowSize";
 import {
   calculateVoteStatPoints,
@@ -124,10 +123,12 @@ export type StackedBarStatsData = {
   stackedBarStats: StackedBarStats[];
   studentStackedBarProposalsStats: StudentStackedBarStatsObject;
   studentStackedBarQuestionsStats: StudentStackedBarStatsObject;
+  studentStackedBarDailyPracticeStats: StudentStackedBarStatsObject;
 };
 export type StudenBarsSubgroupLocation = {
   proposals: number;
   questions: number;
+  totalDailyPractices: number;
 };
 
 // export type BubbleStats = {
@@ -198,6 +199,8 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
   const isDesktop = useMediaQuery(theme.breakpoints.up("md"));
   const isLgDesktop = useMediaQuery(theme.breakpoints.up("lg"));
   const isXlDesktop = useMediaQuery(theme.breakpoints.up("xl"));
+
+  // const [displayPracticeTool, setDisplayPracticeTool] = useState(false);
 
   const [semesterStats, setSemesterStats] = useState<GeneralSemesterStudentsStats | null>(null);
   const [studentsCounter, setStudentsCounter] = useState<number>(0);
@@ -437,7 +440,8 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
       semesterStudentVoteState,
       students,
       maxProposalsPoints,
-      maxQuestionsPoints
+      maxQuestionsPoints,
+      100
     );
     setStackedBar(stackedBarStats);
     setProposalsStudents(studentStackedBarProposalsStats);
@@ -514,6 +518,7 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
         const daysFixed = cur.days.map(c => ({ day: c.day, chapters: c.chapters ?? [] }));
         return { ...cur, days: daysFixed };
       });
+      if (userDailyStats.length <= 0) return;
 
       const proposalsPoints = getBoxPlotData(
         userDailyStats,
@@ -564,6 +569,7 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
     return {
       maxProposalsPoints: data.nodeProposals.totalDaysOfCourse * data.nodeProposals.numPoints,
       maxQuestionsPoints: data.questionProposals.totalDaysOfCourse * data.questionProposals.numPoints,
+      maxDailyPractices: 100,
     };
   };
 
@@ -613,6 +619,7 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
         flexDirection: "column",
         gap: "16px",
         overflowX: "hidden",
+        position: "relative",
       }}
     >
       <Box
@@ -630,15 +637,7 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
           }}
         >
           {isLoading && <GeneralPlotStatsSkeleton />}
-          {!isLoading && (
-            <GeneralPlotStats
-              courseTitle={currentSemester.cTitle.split(" ")[0]}
-              programTitle={currentSemester.pTitle}
-              semesterStats={semesterStats}
-              semesterTitle={currentSemester.title}
-              studentsCounter={studentsCounter}
-            />
-          )}
+          {!isLoading && <GeneralPlotStats semesterStats={semesterStats} semesterConfig={semesterConfig} />}
         </Paper>
 
         <Paper
@@ -687,6 +686,7 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
                   mobile={isMovil}
                   isQuestionRequired={semesterConfig?.isQuestionProposalRequired}
                   isProposalRequired={semesterConfig?.isProposalRequired}
+                  dailyPracticeStudents={null}
                 />
               </Box>
             </>
@@ -1068,6 +1068,7 @@ export const groupStudentPointsDayChapter = (
   agreementPoints = 1,
   disagreementPoints = 1
 ) => {
+  console.log({ userDailyStat });
   const groupedDays = userDailyStat.days.reduce((acuDayPerStudent: { [key: string]: number }, curDayPerStudent) => {
     const groupedChapters = curDayPerStudent.chapters.reduce((acuChapter: { [key: string]: number }, curChapter) => {
       if (type in curChapter) {
@@ -1105,6 +1106,7 @@ export const getBoxPlotData = (
   // days -> chapters -> data
   //
   // proposal=> chapters => [1,2,34,54]
+  console.log({ userDailyStatssss: userDailyStats });
   const res = userDailyStats.map(cur => {
     // [{c1:1,c2:3},{c1:1,c2:3}]
     const groupedDays = groupStudentPointsDayChapter(

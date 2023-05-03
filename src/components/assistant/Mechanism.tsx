@@ -118,6 +118,7 @@ const Mechanism = ({ mechanisms }: IMechanism) => {
               artboard={cur.animation.artboard}
               animations={["Timeline 1", theme.palette.mode]}
               autoplay={true}
+              displayControls
             />
           </Box>
         </Stack>

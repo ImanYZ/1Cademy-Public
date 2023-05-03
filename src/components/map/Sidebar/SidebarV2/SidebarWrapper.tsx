@@ -87,6 +87,7 @@ export const SidebarWrapper = ({
             },
           },
           ...sx,
+          zIndex: 999,
         },
       }}
     >

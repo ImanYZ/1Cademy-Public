@@ -192,7 +192,7 @@ const ReputationlinessBar = ({ open, setOpen, ...props }: ILivelinessBarProps) =
           top: "50%",
           transform: "translateY(-50%)",
           right: "0px",
-          zIndex: 1199,
+          zIndex: 998,
           position: "absolute",
           height: `calc(100% - ${window.innerHeight > 799 ? "375px" : "420px"})`,
         }}
