@@ -91,7 +91,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
         : payload.actionType === "GeneralExplanation"
         ? getGeneralKnowledgePrompt(conversationData)
         : payload.actionType === "ExplainMore"
-        ? getExplainMorePrompt(conversationData)
+        ? getExplainMorePrompt(conversationData, payload.message)
         : "";
 
     if (!payload.message.trim()) {

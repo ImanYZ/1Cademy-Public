@@ -463,8 +463,13 @@ export const getLastAssistantResponse = (conversationData: IAssistantConversatio
   return null;
 };
 
-export const getExplainMorePrompt = (conversationData: IAssistantConversation) => {
+export const getExplainMorePrompt = (conversationData: IAssistantConversation, message?: string) => {
   let nodes: IAssistantNode[] = [];
+
+  if (message) {
+    return `Further explain ` + message + ".";
+  }
+
   for (let i = conversationData.messages.length - 1; i >= 0; i--) {
     if (conversationData.messages[i].nodes) {
       nodes = conversationData.messages[i].nodes!;
