@@ -64,6 +64,7 @@ export const top4GoogleSearchResults = async (query: string, tagTitle?: string):
 };
 
 export const top4TypesenseSearch = async (query: string, tagTitle?: string): Promise<string[]> => {
+  const numOfWords = query.split(" ");
   const tSQuery = {
     q: query,
     query_by: "title,content",
@@ -71,8 +72,8 @@ export const top4TypesenseSearch = async (query: string, tagTitle?: string): Pro
     sort_by: "",
     filter_by: "nodeType:=[Concept,Relation]" + (tagTitle ? ` && tags:=[\`${tagTitle}\`]` : ""),
     page: 1,
-    num_typos: "2",
-    typo_tokens_threshold: 2,
+    num_typos: numOfWords.length > 2 ? "2" : "0",
+    typo_tokens_threshold: numOfWords.length > 2 ? 2 : 0,
   };
 
   const searchResults = await getTypesenseClient()
@@ -430,7 +431,7 @@ export const loadResponseNodes = async (assistantMessage: IAssistantMessage, use
     assistantMessage.message = _content;
     assistantMessage.nodes = nodes;
   } else {
-    assistantMessage.message = content;
+    assistantMessage.message = content || assistantMessage.message;
   }
 };
 
