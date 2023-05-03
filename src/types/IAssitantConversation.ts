@@ -18,6 +18,7 @@ export type IAssistantNode = {
 
 export type IAssistantMessage = {
   request?: string;
+  is404?: boolean;
   gptMessage?: ChatCompletionRequestMessage;
   actions?: {
     type: IAssitantRequestAction;
@@ -48,6 +49,7 @@ export type IAssitantRequestAction =
 export type IAssistantResponse = {
   conversationId: string;
   message: string;
+  is404?: boolean;
   nodes?: IAssistantNode[];
   actions?: {
     type: IAssitantRequestAction;

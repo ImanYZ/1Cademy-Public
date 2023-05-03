@@ -244,6 +244,7 @@ export const processRecursiveCommands = async (
       // TODO: instead of just checking >= 3 check if we are processing same search results again and again
       if (n >= 3 || (!nodeIds.length && n === 1)) {
         const message: IAssistantMessage = {
+          is404: true,
           message: ASSISTANT_NOT_FOUND_MESSAGE,
           actions: [
             {

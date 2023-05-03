@@ -17,7 +17,7 @@ export type IAssistantRequestPayload = {
   actionType: IAssitantRequestAction;
   message: string;
   conversationId?: string;
-  notebookId?: string;
+  // notebookId?: string;
 };
 
 const saveConversation = async (
@@ -128,6 +128,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
       message: assistantMessage.message,
       actions: assistantMessage.actions,
       nodes: assistantMessage.nodes,
+      is404: assistantMessage.is404,
     } as IAssistantResponse);
   } catch (error) {
     console.error(error);
