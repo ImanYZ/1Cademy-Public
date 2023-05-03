@@ -129,6 +129,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
       actions: assistantMessage.actions,
       nodes: assistantMessage.nodes,
       is404: assistantMessage.is404,
+      request: payload.message,
     } as IAssistantResponse);
   } catch (error) {
     console.error(error);
