@@ -88,6 +88,7 @@ export const DashboardWrapper = ({ user, openNodeHandler, onClose, sx }: Dashboa
       onSnapshot(
         q,
         async snapshot => {
+          if (snapshot.empty) return;
           const docChanges = snapshot.docChanges();
           const intructor = docChanges[0].doc.data() as Instructor;
           setInstructor(intructor);
