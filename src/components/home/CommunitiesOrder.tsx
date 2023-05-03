@@ -579,9 +579,6 @@ export const allCommunities = [
       "Ability to engage in group discourse and resolve complex issues",
       "Ability to work asynchronously and independently",
       "Strong presentation and summarization skills",
-      "Submit your most current resume and unofficial transcripts, indicating a GPA above 3.4/4.0",
-      "Explain in a few paragraphs why you apply to this specific community.",
-      "Complete our community-specific quiz by answering a set of questions about some research papers or book chapters and get a satisfying score",
     ],
     responsibilities: [
       "Work asynchronously and attend online meetings once per week. ",
@@ -648,9 +645,6 @@ export const allCommunities = [
       `Willingness to contribute to group discussions and present your findings to others during team meetings`,
       `Able to commit to around 5-10 hours of work each week`,
       `Fluency in reading and writing in English (will have to summarize research articles)`,
-      `Submit most current resume and unofficial transcripts, indicating a GPA above 3.4/4 `,
-      `Explain in a few paragraphs why you are interested and want to apply to this specific community`,
-      `Complete our community-specific quiz by answering a set of questions about a provided book chapter or research paper and get a satisfactory score (strive for the best score possible!)`,
     ],
     responsibilities: [
       `Read and summarize textbook chapters and scientific journal articles`,
@@ -1184,7 +1178,6 @@ export const allCommunities = [
   //   requirements: `In addition to the 1Cademy general application process, we require our interns to submit both their most current cover letter and the most current version of their university transcript, with GPA included on it. We require our interns to have a minimum of a 3.5/4.0 GPA to apply for this position. Interns are also required to have elevant experience with research and literature review, Psychology preferred.`,
   //   hasTest: true,
   //   qualifications: [
-  //     `Submit your most current resume and unofficial transcripts, indicating a GPA above 3.4/4.0`,
   //     `A clear understanding of fundamentals of psychology`,
   //     `Interest and enthusiasm for positive psychology and scientific research`,
   //     `Strong desire and willingness to collaborate with others and engage in group discussions`,
