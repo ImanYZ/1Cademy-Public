@@ -30,6 +30,38 @@ const TEAM_ITEMS = [
     link: "https://www.si.umich.edu/people/iman-yeckehzaare",
   },
   {
+    id: "item-2",
+    title: "1Cademy Advisor",
+    subtitle: "Paul Resnick",
+    image: "home/about/02.jpeg",
+    description: (
+      <>
+        <Typography
+          sx={{ p: "8px", pt: "0" }}
+          fontSize={"16px"}
+          color={theme => (theme.palette.mode === "light" ? "#475467" : "#EAECF0")}
+        >
+          Paul Resnick is a professor at the University of Michigan's School of Information. He is a leading expert in
+          the field of information and technology and has made significant contributions to the study of online
+          communities, reputation systems, and recommendation systems. Professor Resnick has received numerous
+          recognition for his work. Some of his most notable awards include:
+        </Typography>
+        <Box component={"ul"}>
+          <Box component={"li"}>The ACM SIGCHI Lifetime Research Award</Box>
+          <Box component={"li"}>The National Science Foundation's CAREER Award</Box>
+          <Box component={"li"}>
+            The Association for Computing Machinery's Conference on Electronic Commerce Best Paper Award
+          </Box>
+          <Box component={"li"}>The Michigan School of Information's Education Innovator Award</Box>
+          <Box component={"li"}>
+            The W. Wallace McDowell Award for outstanding contributions to the field of computer science
+          </Box>
+        </Box>
+      </>
+    ),
+    link: "https://www.si.umich.edu/people/paul-resnick",
+  },
+  {
     id: "item-3",
     title: "1Cademy Advisor",
     subtitle: "Joel Podolny",
@@ -76,39 +108,6 @@ const TEAM_ITEMS = [
       </>
     ),
     link: "https://www.linkedin.com/in/roby-harrington-7860a1137",
-  },
-
-  {
-    id: "item-2",
-    title: "1Cademy Advisor",
-    subtitle: "Paul Resnick",
-    image: "home/about/02.jpg",
-    description: (
-      <>
-        <Typography
-          sx={{ p: "8px", pt: "0" }}
-          fontSize={"16px"}
-          color={theme => (theme.palette.mode === "light" ? "#475467" : "#EAECF0")}
-        >
-          Paul Resnick is a professor at the University of Michigan's School of Information. He is a leading expert in
-          the field of information and technology and has made significant contributions to the study of online
-          communities, reputation systems, and recommendation systems. Professor Resnick has received numerous
-          recognition for his work. Some of his most notable awards include:
-        </Typography>
-        <Box component={"ul"}>
-          <Box component={"li"}>The ACM SIGCHI Lifetime Research Award</Box>
-          <Box component={"li"}>The National Science Foundation's CAREER Award</Box>
-          <Box component={"li"}>
-            The Association for Computing Machinery's Conference on Electronic Commerce Best Paper Award
-          </Box>
-          <Box component={"li"}>The Michigan School of Information's Education Innovator Award</Box>
-          <Box component={"li"}>
-            The W. Wallace McDowell Award for outstanding contributions to the field of computer science
-          </Box>
-        </Box>
-      </>
-    ),
-    link: "https://www.si.umich.edu/people/paul-resnick",
   },
 ];
 
