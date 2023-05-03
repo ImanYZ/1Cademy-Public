@@ -290,9 +290,40 @@ export const processRecursiveCommands = async (
     );
 
     // If need to process commands further
-    const hasCommands = String(queryInputResponse.choices?.[0]?.message?.content).includes("\\1Cademy\\");
+    const responseMessage = queryInputResponse.choices?.[0]?.message;
+    const hasCommands = String(responseMessage?.content).includes("\\1Cademy\\");
     if (hasCommands) {
-      return processRecursiveCommands(queryInputResponse.choices?.[0]?.message!, conversationData, tagId, uname, n + 1);
+      return processRecursiveCommands(responseMessage!, conversationData, tagId, uname, n + 1);
+    }
+
+    const contentInitial = String(responseMessage?.content).substring(0, 50).toLowerCase();
+    if (
+      contentInitial.includes("i apologize") ||
+      contentInitial.includes("i couldn't find any information") ||
+      contentInitial.includes("i could not find any information") ||
+      contentInitial.includes("i can not find any information") ||
+      contentInitial.includes("i can't find any information") ||
+      contentInitial.includes("i'm afraid this topic is not included") ||
+      contentInitial.includes("i am afraid this topic is not included")
+    ) {
+      const message: IAssistantMessage = {
+        is404: true,
+        message: ASSISTANT_NOT_FOUND_MESSAGE,
+        actions: [
+          {
+            type: "GeneralExplanation",
+            title: "Provide me an explanation",
+            variant: "outline",
+          },
+          {
+            type: "IllContribute",
+            title: "I'll Contribute",
+            variant: "outline",
+          },
+        ],
+      };
+      conversationData.messages.push(message);
+      return message;
     }
 
     conversationData.messages.push({
