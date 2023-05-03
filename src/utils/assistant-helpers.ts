@@ -240,7 +240,7 @@ export const processRecursiveCommands = async (
       }
 
       // If not results found for desired query then
-      if (!nodeIds.length && n >= 4) {
+      if (!nodeIds.length && (n >= 4 || n === 1)) {
         const message: IAssistantMessage = {
           message: ASSISTANT_NOT_FOUND_MESSAGE,
           actions: [
