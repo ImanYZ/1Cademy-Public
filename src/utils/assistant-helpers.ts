@@ -9,6 +9,8 @@ import { INode } from "src/types/INode";
 import { getNodePageWithDomain } from "@/lib/utils/utils";
 import { IUser } from "src/types/IUser";
 import { IPractice } from "src/types/IPractice";
+import { Timestamp } from "firebase-admin/firestore";
+import moment from "moment";
 
 export const ASSISTANT_SYSTEM_PROMPT =
   `You are a tutor that answers each student's questions based on 1Cademy, which is a knowledge graph where:\n` +
@@ -109,8 +111,6 @@ export const sendMessageToGPT4 = async (
 
   return response.data;
 };
-
-export const generateNotebookTitleUsingGPT4 = async (message: string, uname: string) => {};
 
 export const createTeachMePrompt = (bookText: string): string => {
   return (
@@ -494,4 +494,38 @@ export const getExplainMorePrompt = (conversationData: IAssistantConversation) =
   }
 
   return `Further explain ` + _nodeTitles + ".";
+};
+
+export const generateNotebookTitleGpt4 = async (message: string) => {
+  const conversationData: IAssistantConversation = {
+    messages: [],
+    createdAt: Timestamp.now(),
+    updatedAt: Timestamp.now(),
+  };
+
+  const prompt = `Write a short title for the following triple-quoted text, in a few words:\n'''\n${message}\n'''`;
+
+  const gpt4Response = await sendMessageToGPT4(
+    {
+      role: "user",
+      content: prompt,
+    },
+    conversationData
+  );
+
+  const defaultTitle = "Conversation " + moment().format("YYYY-MM-DD HH:mm:ss");
+
+  let notebookTitle = gpt4Response.choices?.[0]?.message?.content || defaultTitle;
+  const notebook_parts = notebookTitle.split("\n").filter(line => line.replace(/[^a-zA-Z0-9]+/g, "").trim());
+  notebookTitle = notebook_parts.pop() || defaultTitle;
+  if (
+    notebookTitle[0] === '"' ||
+    notebookTitle[0] === "'" ||
+    notebookTitle[notebookTitle.length - 1] === '"' ||
+    notebookTitle[notebookTitle.length - 1] === "'"
+  ) {
+    notebookTitle = notebookTitle.substring(1, notebookTitle.length - 1);
+  }
+
+  return notebookTitle;
 };
