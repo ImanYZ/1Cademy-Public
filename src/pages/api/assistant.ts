@@ -89,7 +89,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
         : payload.actionType === "DirectQuestion"
         ? payload.message
         : payload.actionType === "GeneralExplanation"
-        ? getGeneralKnowledgePrompt(conversationData)
+        ? getGeneralKnowledgePrompt(conversationData, payload.message)
         : payload.actionType === "ExplainMore"
         ? getExplainMorePrompt(conversationData, payload.message)
         : "";

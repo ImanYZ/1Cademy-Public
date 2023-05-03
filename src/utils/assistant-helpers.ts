@@ -470,7 +470,11 @@ export const loadResponseNodes = async (assistantMessage: IAssistantMessage, use
   }
 };
 
-export const getGeneralKnowledgePrompt = (conversationData: IAssistantConversation) => {
+export const getGeneralKnowledgePrompt = (conversationData: IAssistantConversation, message?: string) => {
+  if (message) {
+    return `Please provide an answer to the following question based on your general knowledge:\n` + message;
+  }
+
   let request: string = "";
   for (let i = conversationData.messages.length - 1; i >= 0; i--) {
     if (conversationData.messages[i].request) {
