@@ -105,9 +105,7 @@ export const getNodePageUrl = (title: string, id: string) => {
 };
 
 export const getNodePageWithDomain = (title: string, id: string) => {
-  const nodePageUrl = getNodePageUrl(title, id);
-  const url = new URL(nodePageUrl, ONECADEMY_DOMAIN);
-  return url.toString();
+  return `${ONECADEMY_DOMAIN}${getNodePageUrl(title, id)}`;
 };
 
 export const homePageSortByDefaults = {

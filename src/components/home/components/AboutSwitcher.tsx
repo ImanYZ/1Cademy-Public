@@ -10,7 +10,7 @@ const TEAM_ITEMS = [
     id: "item-1",
     title: "1Cademy Architect",
     subtitle: "Iman YeckehZaare",
-    image: "home/about/01.jpg",
+    image: "home/about/01.png",
     description: (
       <>
         <Typography>
