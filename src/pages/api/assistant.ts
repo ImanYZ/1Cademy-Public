@@ -1,7 +1,8 @@
-import { db } from "@/lib/firestoreServer/admin";
+import { admin, db } from "@/lib/firestoreServer/admin";
 import { Timestamp } from "firebase-admin/firestore";
 import { NextApiRequest, NextApiResponse } from "next";
 import { IAssistantConversation, IAssistantResponse, IAssitantRequestAction } from "src/types/IAssitantConversation";
+import { IUser } from "src/types/IUser";
 import {
   ASSISTANT_SYSTEM_PROMPT,
   createTeachMePrompt,
@@ -16,6 +17,7 @@ export type IAssistantRequestPayload = {
   actionType: IAssitantRequestAction;
   message: string;
   conversationId?: string;
+  notebookId?: string;
 };
 
 const saveConversation = async (
@@ -35,6 +37,25 @@ const saveConversation = async (
 
 async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
   try {
+    // Course Id
+    const tagId: string = "HjIukJr12fIP9DNoD9gX";
+
+    let userData: IUser | null = null;
+    // loading user document if authorization provided
+    let token = (req.headers.authorization || req.headers.Authorization || "") as string;
+    token = token.replace("Bearer ", "").trim();
+    if (token) {
+      try {
+        const decodedToken = await admin.auth().verifyIdToken(token);
+        if (decodedToken) {
+          const users = await db.collection("users").where("userId", "==", decodedToken.uid).limit(1).get();
+          if (users.docs.length) {
+            userData = users.docs[0].data() as IUser;
+          }
+        }
+      } catch (e) {}
+    }
+
     const payload = req.body as IAssistantRequestPayload;
     const assistantConversationRef = payload.conversationId
       ? db.collection("assistantConversations").doc(payload.conversationId)
@@ -89,7 +110,13 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
     );
 
     // Process ChatGPT requests for Nodes Search recursively.
-    const assistantMessage = await processRecursiveCommands(gpt4Response.choices?.[0]?.message!, conversationData);
+    const assistantMessage = await processRecursiveCommands(
+      gpt4Response.choices?.[0]?.message!,
+      conversationData,
+      tagId,
+      userData?.uname!,
+      1
+    );
     // Parsing JSON and removing it from final content.
     await loadResponseNodes(assistantMessage);
     // Saving conversation process to provide context of conversation in future

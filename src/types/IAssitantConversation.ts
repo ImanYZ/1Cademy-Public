@@ -9,6 +9,11 @@ export type IAssistantNode = {
   title: string;
   link: string;
   content: string;
+  practice?: {
+    totalQuestions: number;
+    answered: number;
+  };
+  unit?: string;
 };
 
 export type IAssistantMessage = {

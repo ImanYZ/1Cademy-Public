@@ -7,6 +7,8 @@ import { IAssistantConversation, IAssistantMessage, IAssistantNode } from "src/t
 import { arrayToChunks } from "./arrayToChunks";
 import { INode } from "src/types/INode";
 import { getNodePageWithDomain } from "@/lib/utils/utils";
+import { IUser } from "src/types/IUser";
+import { IPractice } from "src/types/IPractice";
 
 export const ASSISTANT_SYSTEM_PROMPT =
   `You are a tutor that answers each student's questions based on 1Cademy, which is a knowledge graph where:\n` +
@@ -43,10 +45,10 @@ export const ASSISTANT_NOT_FOUND_MESSAGE =
   `- I can provide you with an explanation based on my general knowledge outside of the course content.\n` +
   `- Alternatively, if you would like to contribute to the knowledge graph of the course, I am open to learning from you and expanding my knowledge on the topic.`;
 
-export const top4GoogleSearchResults = async (query: string): Promise<string[]> => {
+export const top4GoogleSearchResults = async (query: string, tagTitle?: string): Promise<string[]> => {
   const customsearch = google.customsearch("v1");
   const res = await customsearch.cse.list({
-    q: query,
+    q: query + (tagTitle ? JSON.stringify(tagTitle) : ""),
     cx: process.env.GOOGLE_CX,
     auth: process.env.GOOGLE_CX_API_KEY,
   });
@@ -61,13 +63,13 @@ export const top4GoogleSearchResults = async (query: string): Promise<string[]> 
     .splice(0, 4);
 };
 
-export const top4TypesenseSearch = async (query: string): Promise<string[]> => {
+export const top4TypesenseSearch = async (query: string, tagTitle?: string): Promise<string[]> => {
   const tSQuery = {
     q: query,
     query_by: "title,content",
     query_by_weights: "1,1",
     sort_by: "",
-    filter_by: "nodeType:=[Concept,Relation]",
+    filter_by: "nodeType:=[Concept,Relation]" + (tagTitle ? ` && tags:=[\`${tagTitle}\`]` : ""),
     page: 1,
     num_typos: "2",
     typo_tokens_threshold: 2,
@@ -106,6 +108,8 @@ export const sendMessageToGPT4 = async (
 
   return response.data;
 };
+
+export const generateNotebookTitleUsingGPT4 = async (message: string, uname: string) => {};
 
 export const createTeachMePrompt = (bookText: string): string => {
   return (
@@ -169,6 +173,7 @@ export const generateGpt4QueryResult = async (nodeIds: string[], uname?: string)
           .where("user", "==", uname)
           .where("node", "==", _node.id)
           .where("q", "==", 5)
+          .limit(5)
           .get();
         practiceAnsweredByNodeIds[_node.id] = practiceLogs.docs.length;
       }
@@ -204,6 +209,8 @@ export const generateGpt4QueryResult = async (nodeIds: string[], uname?: string)
 export const processRecursiveCommands = async (
   message: ChatCompletionRequestMessage,
   conversationData: IAssistantConversation,
+  tagId: string,
+  uname: string,
   n: number = 1
 ): Promise<IAssistantMessage> => {
   // updating conversation
@@ -211,16 +218,25 @@ export const processRecursiveCommands = async (
     gptMessage: message,
   });
 
+  let tagTitle: string = "";
+  if (tagId) {
+    const tagDoc = await db.collection("nodes").doc(tagId).get();
+    if (tagDoc.exists) {
+      const tag = tagDoc.data() as INode;
+      tagTitle = tag.title;
+    }
+  }
+
   const commands: string[] = extractSearchCommands(message?.content || "");
   if (commands.length) {
     let gpt4QueryResult: string = ``;
     for (const command of commands) {
       let nodeIds: string[] = [];
-      const googleNodeIds = await top4GoogleSearchResults(command);
+      const googleNodeIds = await top4GoogleSearchResults(command, tagTitle);
       if (googleNodeIds.length) {
         nodeIds = googleNodeIds;
       } else {
-        nodeIds = await top4TypesenseSearch(command);
+        nodeIds = await top4TypesenseSearch(command, tagTitle);
       }
 
       // If not results found for desired query then
@@ -254,7 +270,7 @@ export const processRecursiveCommands = async (
           conversationData
         );
 
-        return processRecursiveCommands(response.choices?.[0]?.message!, conversationData, n + 1);
+        return processRecursiveCommands(response.choices?.[0]?.message!, conversationData, tagId, uname, n + 1);
       }
 
       gpt4QueryResult += (await generateGpt4QueryResult(nodeIds)) + "\n\n";
@@ -273,7 +289,7 @@ export const processRecursiveCommands = async (
     // If need to process commands further
     const hasCommands = String(queryInputResponse.choices?.[0]?.message?.content).includes("\\1Cademy\\");
     if (hasCommands) {
-      return processRecursiveCommands(queryInputResponse.choices?.[0]?.message!, conversationData, n + 1);
+      return processRecursiveCommands(queryInputResponse.choices?.[0]?.message!, conversationData, tagId, uname, n + 1);
     }
 
     conversationData.messages.push({
@@ -312,13 +328,60 @@ const parseJSONArrayFromResponse = (content: string) => {
   return JSON.parse(content.substring(startIdx, endIdx + 1));
 };
 
+export const numOfPracticesAnsweredByNodeAndUser = async (nodeId: string, uname: string) => {
+  const result = {
+    totalQuestions: 0,
+    answered: 0, // correctly answered
+  };
+  const practices = await db
+    .collection("practice")
+    .where("node", "==", nodeId)
+    .where("user", "==", uname)
+    .limit(1)
+    .get();
+  if (!practices.docs.length) return result;
+
+  const practice = practices.docs[0].data() as IPractice;
+  const questionNodes = practice.questionNodes || [];
+  result.totalQuestions = questionNodes.length;
+
+  for (const questionNode of questionNodes) {
+    const practiceLogs = await db
+      .collection("practiceLog")
+      .where("lastId", "==", questionNode)
+      .where("user", "==", uname)
+      .where("q", "==", 5)
+      .limit(1)
+      .get();
+    if (practiceLogs.docs.length) {
+      result.answered += 1;
+    }
+  }
+
+  return result;
+};
+
+export const findUnitNoFromNodeData = (nodeData: INode): string | undefined => {
+  const referenceLabel = nodeData.referenceLabels.find(label => label.trim().includes(`https://www.core-econ.org/`));
+  if (referenceLabel) {
+    const label_parts = referenceLabel.trim().split("/");
+    const fileName = String(label_parts.pop()!);
+    const unitNo = fileName.split(".html")[0];
+    const _unitNo = parseInt(unitNo);
+    if (isNaN(_unitNo)) return;
+    return unitNo;
+  }
+
+  return;
+};
+
 // 1. Try to match following to substring JSON explanation and JSON itself
 // [^\n]+\:[^a-zA-Z0-9]*?\[[\t\n ]*?{
 // 2. If JSON don't have explanation
 // \[[\t\n ]*?{
 // Second case when response only include JSON
 // 3. If both above pattern don't match that means response doesn't include JSON/nodes
-export const loadResponseNodes = async (assistantMessage: IAssistantMessage) => {
+export const loadResponseNodes = async (assistantMessage: IAssistantMessage, userData?: IUser) => {
   const content = assistantMessage?.gptMessage?.content || "";
   const case1 = content.match(/[^\n]+\:[^a-zA-Z0-9]*?\[[\t\n ]*?{/gm);
   const case2 = content.match(/\[[\t\n ]*?{/gm);
@@ -344,13 +407,22 @@ export const loadResponseNodes = async (assistantMessage: IAssistantMessage) => 
       for (const _node of _nodes.docs) {
         const _nodeData = _node.data() as INode;
         if (_nodeData.deleted || !["Concept", "Relation"].includes(_nodeData.nodeType)) continue;
-        nodes.push({
+        const responseNode: IAssistantNode = {
           node: _node.id,
           title: _nodeData.title,
           type: _nodeData.nodeType,
           link: getNodePageWithDomain(_nodeData.title, _node.id),
           content: _nodeData.content,
-        });
+        };
+        if (userData) {
+          // adding practice related data
+          responseNode.practice = await numOfPracticesAnsweredByNodeAndUser(_node.id, userData.uname);
+        }
+        const unitNo = findUnitNoFromNodeData(_nodeData);
+        if (unitNo !== undefined) {
+          responseNode.unit = unitNo;
+        }
+        nodes.push(responseNode);
         break;
       }
     }
