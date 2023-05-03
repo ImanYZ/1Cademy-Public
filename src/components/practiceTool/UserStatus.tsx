@@ -238,11 +238,13 @@ export const UserStatus = ({
                       : DESIGN_SYSTEM_COLORS.notebookScarlet
                     : DESIGN_SYSTEM_COLORS.notebookG200,
                   boxShadow:
-                    daysValue[keyDate] && getTodayYYYYMMDD() === keyDate
+                    getTodayYYYYMMDD() === keyDate
                       ? `0 0 4px 2px ${
-                          daysValue[keyDate].gotPoint === true
-                            ? DESIGN_SYSTEM_COLORS.success500
-                            : DESIGN_SYSTEM_COLORS.notebookScarlet
+                          daysValue[keyDate]
+                            ? daysValue[keyDate].gotPoint === true
+                              ? DESIGN_SYSTEM_COLORS.success500
+                              : DESIGN_SYSTEM_COLORS.notebookScarlet
+                            : DESIGN_SYSTEM_COLORS.notebookG200
                         }`
                       : undefined,
                 }}
