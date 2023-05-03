@@ -9,6 +9,8 @@ export type IAssistantNode = {
   title: string;
   link: string;
   content: string;
+  nodeImage?: string;
+  nodeVideo?: string;
   practice?: {
     totalQuestions: number;
     answered: number;

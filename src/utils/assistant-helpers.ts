@@ -416,6 +416,8 @@ export const loadResponseNodes = async (assistantMessage: IAssistantMessage, use
           type: _nodeData.nodeType,
           link: getNodePageWithDomain(_nodeData.title, _node.id),
           content: _nodeData.content,
+          nodeImage: _nodeData.nodeImage,
+          nodeVideo: _nodeData.nodeVideo,
         };
         if (userData) {
           // adding practice related data
