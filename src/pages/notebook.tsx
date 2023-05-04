@@ -44,6 +44,7 @@ import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from "rea
 /* eslint-disable */ //This wrapper comments it to use react-map-interaction without types
 // @ts-ignore
 import { MapInteractionCSS } from "react-map-interaction";
+import { CourseTag } from "src/instructorsTypes";
 import { INodeType } from "src/types/INodeType";
 /* eslint-enable */
 import { INotificationNum } from "src/types/INotification";
@@ -323,6 +324,7 @@ const Notebook = ({}: NotebookProps) => {
   const [openProgressBar, setOpenProgressBar] = useState(false);
   const [, /* openProgressBarMenu */ setOpenProgressBarMenu] = useState(false);
   const [displayDashboard, setDisplayDashboard] = useState(false);
+  const [rootQuery, setRootQuery] = useState<string | undefined>(undefined);
 
   // Scroll to node configs
 
@@ -6057,6 +6059,19 @@ const Notebook = ({}: NotebookProps) => {
   // ------------------------ useEffects
 
   useEffect(() => {
+    if (!user) return;
+    if (!user.role) return;
+
+    const notebook = router.query.nb as string;
+    const root = router.query.root as string;
+    if (!root) return;
+
+    setRootQuery(root);
+    setDisplayDashboard(true);
+    console.log({ notebook, root });
+  }, [displayDashboard, router.query.nb, router.query.root, user]);
+
+  useEffect(() => {
     const duplicateNotebookFromParams = async () => {
       const nb = router.query.nb as string;
       if (!nb) return;
@@ -6554,6 +6569,7 @@ const Notebook = ({}: NotebookProps) => {
               onClose={() => setDisplayDashboard(false)}
               openNodeHandler={openNodeHandler}
               sx={{ position: "absolute", inset: "0px", zIndex: 999 }}
+              root={rootQuery}
             />
           )}
 
