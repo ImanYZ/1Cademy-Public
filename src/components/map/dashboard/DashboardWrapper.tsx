@@ -14,7 +14,7 @@ import {
   Unsubscribe,
   where,
 } from "firebase/firestore";
-import React, { useCallback, useEffect, useState } from "react";
+import React, { RefObject, useCallback, useEffect, useRef, useState } from "react";
 import { CourseTag, Instructor, Semester, SemesterStudentVoteStat } from "src/instructorsTypes";
 
 import { CoursesResult } from "@/components/layouts/StudentsLayout";
@@ -23,7 +23,7 @@ import { User } from "../../../knowledgeTypes";
 import { DESIGN_SYSTEM_COLORS } from "../../../lib/theme/colors";
 import { ISemester } from "../../../types/ICourse";
 import { NoDataMessage } from "../../instructors/NoDataMessage";
-import { PracticeTool } from "../../practiceTool/PracticeTool";
+import PracticeTool, { PracticeToolRef } from "../../practiceTool/PracticeTool";
 import { DashboradToolbar } from "../Dashobard/DashboradToolbar";
 import { Dashboard } from "./Dashboard";
 import { DashboardSettings } from "./DashboardSettings";
@@ -36,12 +36,13 @@ type DashboardWrapperProps = {
   user: User;
   onClose: () => void;
   openNodeHandler: (nodeId: string) => void;
+  root?: string;
   sx?: SxProps<Theme>;
 };
 
 export type ToolbarView = "DASHBOARD" | "PRACTICE" | "SETTINGS" | "STUDENTS";
 
-export const DashboardWrapper = ({ user, openNodeHandler, onClose, sx }: DashboardWrapperProps) => {
+export const DashboardWrapper = ({ user, openNodeHandler, onClose, root, sx }: DashboardWrapperProps) => {
   const db = getFirestore();
 
   // const [semesters, setSemesters] = useState<string[]>([]);
@@ -55,7 +56,9 @@ export const DashboardWrapper = ({ user, openNodeHandler, onClose, sx }: Dashboa
   const [selectedStudent, setSelectedStudent] = useState<User | null>(null);
 
   const [, /* isLoading */ setIsLoading] = useState(true);
+  const [rootFound, setRootFound] = useState<boolean>(false);
 
+  const practiceToolRef = useRef<PracticeToolRef>(null) as RefObject<PracticeToolRef>;
   const semesterByStudentSnapthot = useCallback(
     (q: Query<DocumentData>) =>
       onSnapshot(q, async snaphot => {
@@ -66,7 +69,7 @@ export const DashboardWrapper = ({ user, openNodeHandler, onClose, sx }: Dashboa
           return {
             id: change.doc.id,
             data: semesterData,
-          };
+          }; //
         });
         const semestersIds = semestersStudent.map(cur => cur.data.tagId);
         const semesters = await getSemesterByIds(db, semestersIds);
@@ -206,6 +209,20 @@ export const DashboardWrapper = ({ user, openNodeHandler, onClose, sx }: Dashboa
     setSelectToolbarView(view);
   };
 
+  useEffect(() => {
+    if (!root) return;
+    const rootSemester = allSemesters.find(semester => semester.tagId === root);
+    if (!rootSemester) return;
+    console.log({ rootSemester });
+    const { cTagId, cTitle, pTagId, pTitle, tagId, title, uTagId, uTitle } = rootSemester;
+
+    setCurrentSemester({ cTagId, cTitle, pTagId, pTitle, tagId, title, uTagId, uTitle });
+    setSelectToolbarView("PRACTICE");
+    setRootFound(true);
+    // console.log("currentsssss ", practiceToolRef.current);
+    // practiceToolRef.current?.onRunPracticeTool(true);
+  }, [allSemesters, root]);
+
   return (
     <Box
       sx={{
@@ -247,10 +264,12 @@ export const DashboardWrapper = ({ user, openNodeHandler, onClose, sx }: Dashboa
             )}
             {selectToolbarView === "PRACTICE" && (
               <PracticeTool
+                ref={practiceToolRef}
                 user={user}
                 currentSemester={currentSemester}
                 onClose={onClose}
                 openNodeHandler={openNodeHandler}
+                root={rootFound ? root : undefined}
               />
             )}
             {selectToolbarView === "SETTINGS" && <DashboardSettings currentSemester={currentSemester} />}
