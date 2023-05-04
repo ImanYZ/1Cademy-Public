@@ -64,15 +64,15 @@ function drawChart(
 
   const columns: string[] = [];
 
+  columns.push("Proposals");
   if (isProposalRequired) {
-    columns.push("Proposals");
   }
 
+  columns.push("Questions");
   if (isQuestionRequired) {
-    columns.push("Questions");
   }
+  columns.push("Daily Practice");
   if (isDailyPracticeRequiered) {
-    columns.push("Daily Practice");
   }
 
   // remove axis if exist to avoid overdrawing
@@ -132,7 +132,7 @@ function drawChart(
       y: studentLocation ? studentLocation.totalDailyPractices ?? 0 : 0,
     },
   ];
-  locations = locations.filter(location => location.y !== 0);
+  // locations = locations.filter(location => location.y !== 0);
   let chartData = [];
   if (isProposalRequired) {
     chartData.push(data[0] || []);
@@ -322,7 +322,7 @@ function drawChart(
         "transform",
         (d, i) => `translate(${30 + (i + 1) * 0.369 * x.bandwidth() + (i + 1) * x.bandwidth() + 2},${y(d.y) + 10})`
       )
-      .attr("fill", "#C03938");
+      .attr("fill", d => (d.y !== 0 ? "#C03938" : "transparent"));
     svg
       .select("#location-line")
       .selectAll("rect")
@@ -334,7 +334,7 @@ function drawChart(
         "transform",
         (d, i) => `translate(${30 + (i + 1) * 0.369 * x.bandwidth() + i * x.bandwidth()},${y(d.y) + 30})`
       )
-      .attr("fill", "#C03938");
+      .attr("fill", d => (d.y !== 0 ? "#C03938" : "transparent"));
     // d.x - 0.72 * x.bandwidth()
   }
 }
@@ -364,7 +364,7 @@ export const PointsBarChart = ({
   isProposalRequired,
   isDailyPracticeRequiered,
 }: StackedBarProps) => {
-  console.log({ daaaata: data });
+  console.log({ daaaata: data, studentLocation });
   const svg = useCallback(
     (svgRef: any) => {
       drawChart(

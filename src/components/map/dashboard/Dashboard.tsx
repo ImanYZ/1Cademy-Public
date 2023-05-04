@@ -664,22 +664,25 @@ export const Dashboard = ({ user, currentSemester }: DashboardProps) => {
             gridTemplateColumns: { xs: "1fr", md: "1fr 1fr" },
             // gridTemplateRows: "minmax(auto, 581px)",
             gap: "16px",
-            height: "588px",
           }}
         >
           <Paper
             sx={{
-              height: "588px",
               p: { sm: "10px", md: "16px" },
               backgroundColor:
                 mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookMainBlack : DESIGN_SYSTEM_COLORS.baseWhite,
             }}
           >
-            <UserStatus user={user} semesterId={currentSemester.tagId} displayTitle={false} />
+            <UserStatus
+              user={user}
+              semesterId={currentSemester.tagId}
+              displayTitle={false}
+              displayFooterStreak={false}
+              displayHeaderStreak
+            />
           </Paper>
           <Paper
             sx={{
-              height: "588px",
               p: { sm: "10px", md: "16px" },
               backgroundColor:
                 mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookMainBlack : DESIGN_SYSTEM_COLORS.baseWhite,
@@ -913,7 +916,7 @@ export const Dashboard = ({ user, currentSemester }: DashboardProps) => {
                     {isMovil && <BoxLegend role={user.role} />}
                   </>
                 ) : (
-                  <Box sx={{ height: "100%", display: "grid", placeItems: "center" }}>
+                  <Box sx={{ height: "100%", display: "grid", placeItems: "center", mx: "24px" }}>
                     <Typography
                       sx={{
                         fontSize: "21px",
@@ -964,7 +967,7 @@ export const Dashboard = ({ user, currentSemester }: DashboardProps) => {
                     {isMovil && <BoxLegend role={user.role} />}
                   </>
                 ) : (
-                  <Box sx={{ height: "100%", display: "grid", placeItems: "center" }}>
+                  <Box sx={{ height: "100%", display: "grid", placeItems: "center", mx: "32px" }}>
                     <Typography
                       sx={{
                         fontSize: "21px",
@@ -1014,7 +1017,7 @@ export const Dashboard = ({ user, currentSemester }: DashboardProps) => {
                     {isMovil && <BoxLegend role={user.role} />}
                   </>
                 ) : (
-                  <Box sx={{ height: "100%", display: "grid", placeItems: "center" }}>
+                  <Box sx={{ height: "200px", display: "grid", placeItems: "center", mx: "32px" }}>
                     <Typography
                       sx={{
                         fontSize: "21px ",

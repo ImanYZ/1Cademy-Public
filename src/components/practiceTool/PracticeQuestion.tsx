@@ -13,6 +13,7 @@ import { Post } from "../../lib/mapApi";
 import { DESIGN_SYSTEM_COLORS } from "../../lib/theme/colors";
 import shortenNumber from "../../lib/utils/shortenNumber";
 import { doNeedToDeleteNode } from "../../utils/helpers";
+import { CustomCircularProgress } from "../CustomCircularProgress";
 import { CustomWrapperButton } from "../map/Buttons/Buttons";
 import { PracticeInfo } from "./PracticeTool";
 
@@ -416,6 +417,8 @@ export const PracticeQuestion = ({
               `You have completed ${practiceInfo.completedDays} days out of ${practiceInfo.totalDays} days of your review practice.`,
               `${practiceInfo.remainingDays} days are remaining to the end of the semester.`,
             ]}
+            totalQuestions={practiceInfo.totalQuestions}
+            questionsCompleted={practiceInfo.totalQuestions - practiceInfo.questionsLeft}
           />
         </Box>
       )}
@@ -464,11 +467,20 @@ export const PracticeQuestion = ({
             <QuestionMessage
               messages={[
                 practiceInfo.questionsLeft > 0
-                  ? `${practiceInfo.questionsLeft} questions left to get today’s point.`
+                  ? `${practiceInfo.questionsLeft}
+                  question${practiceInfo.questionsLeft > 1 ? "s" : ""} left to get today’s point.`
                   : "You've got today's practice point!",
-                `You have completed ${practiceInfo.completedDays} days out of ${practiceInfo.totalDays} days of your review practice.`,
-                `${practiceInfo.remainingDays} days are remaining to the end of the semester.`,
+                `You have completed ${practiceInfo.completedDays} day${
+                  practiceInfo.completedDays > 1 ? "s" : ""
+                } out of ${practiceInfo.totalDays} day${
+                  practiceInfo.totalDays > 1 ? "s" : ""
+                } of your review practice.`,
+                `${practiceInfo.remainingDays} day${
+                  practiceInfo.remainingDays > 1 ? "s" : ""
+                } are remaining to the end of the semester.`,
               ]}
+              totalQuestions={practiceInfo.totalQuestions}
+              questionsCompleted={practiceInfo.totalQuestions - practiceInfo.questionsLeft}
             />
             {loading && (
               <Box
@@ -608,20 +620,32 @@ const CustomText = ({ children }: CustomTextProps) => (
 
 type QuestionMessageProps = {
   messages: string[];
+  totalQuestions: number;
+  questionsCompleted: number;
 };
-const QuestionMessage = ({ messages }: QuestionMessageProps) => {
+const QuestionMessage = ({ messages, questionsCompleted, totalQuestions }: QuestionMessageProps) => {
   return (
-    <Box
+    <Stack
+      direction={"row"}
+      justifyContent={"space-between"}
       sx={{
         p: "20px 24px",
         mb: "12px",
         border: "26px",
         backgroundColor: theme => (theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.yellow1000 : "#FFF3E5"),
+        borderRadius: "12px",
       }}
     >
-      {messages.map((c, i) => (
-        <CustomText key={i}>{c}</CustomText>
-      ))}
-    </Box>
+      <Box>
+        {messages.map((c, i) => (
+          <CustomText key={i}>{c}</CustomText>
+        ))}
+      </Box>
+      <CustomCircularProgress
+        variant="determinate"
+        value={(100 * questionsCompleted) / totalQuestions}
+        realValue={questionsCompleted}
+      />
+    </Stack>
   );
 };

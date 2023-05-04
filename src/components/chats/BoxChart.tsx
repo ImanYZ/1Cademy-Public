@@ -243,19 +243,19 @@ function drawChart(
   }
 
   //mesh
-  svg
-    .select("#mesh")
-    .selectAll("line")
-    .data(statistics)
-    .join("line")
-    .attr("x1", 0)
-    .attr("x2", widthProcessed - offsetX)
-    .attr("y1", d => d.boxCenter)
-    .attr("y2", d => d.boxCenter)
-    .attr("height", "3px")
-    .attr("stroke", theme === "Dark" ? DESIGN_SYSTEM_COLORS.notebookG500 : "rgba(0, 0, 0, .25)")
-    .attr("stroke-width", "1")
-    .attr("transform", `translate(${offsetX},${offsetY})`);
+  // svg
+  //   .select("#mesh")
+  //   .selectAll("line")
+  //   .data(statistics)
+  //   .join("line")
+  //   .attr("x1", 0)
+  //   .attr("x2", widthProcessed - offsetX)
+  //   .attr("y1", d => d.boxCenter)
+  //   .attr("y2", d => d.boxCenter)
+  //   .attr("height", "3px")
+  //   .attr("stroke", theme === "Dark" ? DESIGN_SYSTEM_COLORS.notebookG500 : "rgba(0, 0, 0, .25)")
+  //   .attr("stroke-width", "1")
+  //   .attr("transform", `translate(${offsetX},${offsetY})`);
 }
 
 type BoxChartProps = {

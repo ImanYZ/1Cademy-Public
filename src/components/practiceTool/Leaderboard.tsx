@@ -4,6 +4,8 @@ import { getFirestore } from "firebase/firestore";
 import Image from "next/image";
 import React, { useEffect, useState } from "react";
 
+import { getAvatarName } from "@/lib/utils/Map.utils";
+
 import { getSemesterById } from "../../client/serveless/semesters.serverless";
 import { getSemesterStudentVoteStats } from "../../client/serveless/semesterStudentVoteStat.serverless";
 import { DESIGN_SYSTEM_COLORS } from "../../lib/theme/colors";
@@ -12,13 +14,15 @@ import { getWeekNumber } from "../../lib/utils/date.utils";
 import { ISemesterStudentVoteStat, ISemesterStudentVoteStatDay } from "../../types/ICourse";
 import { PointsType } from "../PointsType";
 
-type UsersInfo = { [key: string]: { name: string; imageUrl: string } };
+type UsersInfo = { [key: string]: { name: string; imageUrl: string; fName: string; lName: string } };
 type LeaderboardOption = "WEEK" | "MONTH" | "ALL_TIME";
 type LeaderboardItem = { uname: string; totalPoints: number };
 type LeaderboardProps = {
   semesterId: string;
   sxBody?: SxProps<Theme>;
 };
+
+const DEFAULT_AVATAR = "https://storage.googleapis.com/onecademy-1.appspot.com/ProfilePictures/no-img.png";
 
 const Leaderboard = ({ semesterId, sxBody }: LeaderboardProps) => {
   console.log({ semesterId });
@@ -41,7 +45,12 @@ const Leaderboard = ({ semesterId, sxBody }: LeaderboardProps) => {
       const usersInfoBySemester = res.students.reduce(
         (acu, cur): UsersInfo => ({
           ...acu,
-          [cur.uname]: { imageUrl: cur.imageUrl, name: `${cur.fName} ${cur.lName}` },
+          [cur.uname]: {
+            imageUrl: cur.imageUrl,
+            name: `${cur.fName} ${cur.lName}`,
+            fName: cur.fName,
+            lName: cur.lName,
+          },
         }),
         {}
       );
@@ -176,6 +185,7 @@ const Leaderboard = ({ semesterId, sxBody }: LeaderboardProps) => {
               height: "74px",
               display: "flex",
               alignItems: "center",
+              borderRadius: "4px",
               ":hover": {
                 backgroundColor: theme =>
                   theme.palette.mode === "dark" ? theme.palette.common.notebookO900 : theme.palette.common.primary25,
@@ -190,26 +200,35 @@ const Leaderboard = ({ semesterId, sxBody }: LeaderboardProps) => {
                 border: `solid 2px ${getColorFromLeaderboardUser(idx + 1)}`,
                 borderRadius: "50%",
                 position: "relative",
+                background: "linear-gradient(143.7deg, #FDC830 15.15%, #F37335 83.11%);",
               }}
             >
-              <Image
-                src={usersInfo[cur.uname]?.imageUrl ?? NO_USER_IMAGE}
-                alt={"user-image"}
-                width="52px"
-                height="52px"
-                quality={40}
-                objectFit="cover"
-                style={{
-                  borderRadius: "30px",
-                }}
-              />
+              {usersInfo[cur.uname].imageUrl && usersInfo[cur.uname].imageUrl !== DEFAULT_AVATAR ? (
+                <Image
+                  src={usersInfo[cur.uname]?.imageUrl ?? NO_USER_IMAGE}
+                  alt={"user-image"}
+                  width="52px"
+                  height="52px"
+                  quality={40}
+                  objectFit="cover"
+                  style={{
+                    borderRadius: "30px",
+                  }}
+                />
+              ) : (
+                <Box sx={{ width: "100%", height: "100%", display: "grid", placeItems: "center" }}>
+                  <Typography sx={{ fontSize: "16px", fontWeight: "600", color: DESIGN_SYSTEM_COLORS.baseWhite }}>
+                    {getAvatarName(usersInfo[cur.uname].fName, usersInfo[cur.uname].lName)}
+                  </Typography>
+                </Box>
+              )}
               <svg
                 width="46"
                 height="17"
                 viewBox="0 0 46 17"
                 fill="none"
                 xmlns="http://www.w3.org/2000/svg"
-                style={{ position: "absolute", bottom: "-1px", left: "3px" }}
+                style={{ position: "absolute", bottom: "-1px", left: "3px", fontWeight: "bold" }}
               >
                 <path
                   opacity="0.4"
@@ -227,7 +246,7 @@ const Leaderboard = ({ semesterId, sxBody }: LeaderboardProps) => {
                   placeItems: "center",
                 }}
               >
-                <Typography sx={{ fontSize: "12px" }}>{idx + 1}</Typography>
+                <Typography sx={{ fontSize: "12px", fontWeight: "600" }}>{idx + 1}</Typography>
               </Box>
             </Box>
             <Box>
@@ -255,6 +274,7 @@ const getColorFromLeaderboardUser = (position: number) => {
 
 export const filterDayStatsByWeek = (dayStats: ISemesterStudentVoteStatDay[], weekNumber: number) => {
   // dayStats.day: YY-MM-DD
+
   return dayStats.filter(cur => getWeekNumber(new Date(cur.day.replace("-", " "))) === weekNumber);
 };
 

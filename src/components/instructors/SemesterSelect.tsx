@@ -1,4 +1,4 @@
-import AddRoundedIcon from "@mui/icons-material/AddRounded";
+// import AddRoundedIcon from "@mui/icons-material/AddRounded";
 import ArrowRightRoundedIcon from "@mui/icons-material/ArrowRightRounded";
 import {
   Button,
@@ -132,7 +132,7 @@ export const SemesterSelect = ({
             ))}
           </Select>
         </FormControl>
-        <Stack direction={"row"} justifyContent={"space-between"} alignItems={"center"}>
+        {/* <Stack direction={"row"} justifyContent={"space-between"} alignItems={"center"}>
           <Typography fontSize={"14px"} fontWeight={"500"} flex={1}>
             Dashboard
           </Typography>
@@ -148,7 +148,7 @@ export const SemesterSelect = ({
           >
             <AddRoundedIcon sx={{ fontSize: "14px" }} />
           </Button>
-        </Stack>
+        </Stack> */}
         {!isMovil && (
           <Stack spacing={"12px"}>
             {courses.map((course, idx) => (
