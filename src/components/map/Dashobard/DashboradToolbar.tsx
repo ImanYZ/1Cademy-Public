@@ -106,7 +106,7 @@ export const DashboradToolbar = ({
           {user.role === "STUDENT" && (
             <>
               <DashboardToolbarViewButton
-                name="Practise"
+                name="Practice"
                 view="PRACTICE"
                 active={view === "PRACTICE"}
                 IconButton={<InsightsRoundedIcon sx={{ color: DESIGN_SYSTEM_COLORS.orange400 }} />}
