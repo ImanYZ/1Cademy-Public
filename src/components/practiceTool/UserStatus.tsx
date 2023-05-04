@@ -4,7 +4,10 @@ import NavigateBeforeIcon from "@mui/icons-material/NavigateBefore";
 import NavigateNextIcon from "@mui/icons-material/NavigateNext";
 import { Box, Divider, IconButton, Stack, Typography } from "@mui/material";
 import { getFirestore } from "firebase/firestore";
+import Image from "next/image";
 import React, { useEffect, useMemo, useState } from "react";
+
+import { getAvatarName } from "@/lib/utils/Map.utils";
 
 import { getSemesterById } from "../../client/serveless/semesters.serverless";
 import { getSemesterStudentVoteStatsByIdAndStudent } from "../../client/serveless/semesterStudentVoteStat.serverless";
@@ -19,10 +22,10 @@ import {
   SHORT_MONTH_NAMES,
 } from "../../lib/utils/date.utils";
 import { ISemester, ISemesterStudentVoteStat, ISemesterStudentVoteStatDay } from "../../types/ICourse";
-import OptimizedAvatar from "../OptimizedAvatar";
 import { PointsType } from "../PointsType";
 
 const MAX_DAILY_VALUE = 24;
+const DEFAULT_AVATAR = "https://storage.googleapis.com/onecademy-1.appspot.com/ProfilePictures/no-img.png";
 
 type DailyPoint = {
   [key: string]: { value: number; gotPoint: boolean };
@@ -146,10 +149,27 @@ export const UserStatus = ({
                 height: "90px",
                 borderRadius: "50%",
                 color: theme => theme.palette.common.gray,
+                background: "linear-gradient(143.7deg, #FDC830 15.15%, #F37335 83.11%);",
                 mr: "20px",
               }}
             >
-              <OptimizedAvatar imageUrl={user.imageUrl ?? ""} renderAsAvatar={true} contained={false} />
+              {user.imageUrl && user.imageUrl !== DEFAULT_AVATAR ? (
+                <Image
+                  src={user.imageUrl ?? ""}
+                  alt={`${user.uname} profile picture`}
+                  width="90px"
+                  height="90px"
+                  quality={80}
+                  objectFit="cover"
+                  style={{ borderRadius: "50%" }}
+                />
+              ) : (
+                <Box sx={{ width: "100%", height: "100%", display: "grid", placeItems: "center" }}>
+                  <Typography sx={{ fontSize: "32px", fontWeight: "600", color: DESIGN_SYSTEM_COLORS.baseWhite }}>
+                    {getAvatarName(user.fName ?? "", user.lName ?? "")}
+                  </Typography>
+                </Box>
+              )}
             </Box>
             <Stack spacing={"6px"}>
               <Typography sx={{ fontWeight: 500, fontSize: "20px" }}>{`${user.fName} ${user.lName}`}</Typography>
