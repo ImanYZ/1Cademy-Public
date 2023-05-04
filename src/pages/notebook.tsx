@@ -857,6 +857,17 @@ const Notebook = ({}: NotebookProps) => {
 
   // called after first time map is rendered
   useEffect(() => {
+
+    window.addEventListener("assistant", (e: any) => {
+      const detail: {
+        type: "SELECT_NOTEBOOK",
+        notebookId: string
+      } = e.detail || {};
+      if(detail.type === "SELECT_NOTEBOOK") {
+        onChangeNotebook(detail.notebookId);
+      }
+    });
+
     window.location.hash = "no-back-button";
 
     // Again because Google Chrome doesn't insert
