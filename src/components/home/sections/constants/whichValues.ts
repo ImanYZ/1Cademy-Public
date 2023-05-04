@@ -18,8 +18,8 @@ const whichValues: TWhichValue[] = [
     getBody: ({ users, institutions, communities }: StatsSchema) =>
       `1Cademy is a platform that aims to improve the efficiency of learning and research by utilizing a collaborative approach to gather information from various sources and organize it into concise notes that focus on a single concept.\nThese notes are granularly organized and visualized as a knowledge graph that illustrates the hierarchical relationships between concepts. The platform uses a peer-review process, reputation system, and voting mechanism to ensure the quality of the knowledge graph and encourage the development of high-quality content.\nThrough this process, students and researchers can improve upon each other's contributions, propose more up-to-date and user-friendly versions of each note and share their learning perspectives.\nOver the past two years, [${users}] students and researchers from [${institutions}] institutions have participated in the platform, resulting in the formation of [${communities}] research and learning communities covering a wide range of subjects.`,
     link: "https://1cademy.com/search",
-    src: "rive/notebook.riv",
-    artboard: "artboard-6",
+    src: "rive/linking.riv",
+    artboard: "New Artboard",
   },
   {
     id: "assistant",
