@@ -4,7 +4,6 @@ import NavigateBeforeIcon from "@mui/icons-material/NavigateBefore";
 import NavigateNextIcon from "@mui/icons-material/NavigateNext";
 import { Box, Divider, IconButton, Stack, Typography } from "@mui/material";
 import { getFirestore } from "firebase/firestore";
-import Image from "next/image";
 import React, { useEffect, useMemo, useState } from "react";
 
 import { getSemesterById } from "../../client/serveless/semesters.serverless";
@@ -20,6 +19,7 @@ import {
   SHORT_MONTH_NAMES,
 } from "../../lib/utils/date.utils";
 import { ISemester, ISemesterStudentVoteStat, ISemesterStudentVoteStatDay } from "../../types/ICourse";
+import OptimizedAvatar from "../OptimizedAvatar";
 import { PointsType } from "../PointsType";
 
 const MAX_DAILY_VALUE = 24;
@@ -149,15 +149,7 @@ export const UserStatus = ({
                 mr: "20px",
               }}
             >
-              <Image
-                src={user.imageUrl ?? ""}
-                alt={`${user.uname} profile picture`}
-                width="90px"
-                height="90px"
-                quality={80}
-                objectFit="cover"
-                style={{ borderRadius: "50%" }}
-              />
+              <OptimizedAvatar imageUrl={user.imageUrl ?? ""} renderAsAvatar={true} contained={false} />
             </Box>
             <Stack spacing={"6px"}>
               <Typography sx={{ fontWeight: 500, fontSize: "20px" }}>{`${user.fName} ${user.lName}`}</Typography>
