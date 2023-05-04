@@ -4,9 +4,10 @@ import { checkRestartBatchWriteCounts, commitBatch, db } from "@/lib/firestoreSe
 import { IUserNode } from "src/types/IUserNode";
 import { INotebook } from "src/types/INotebook";
 
-export type IViewNodePayload = {
+export type IViewNodeOpenNodesPayload = {
   notebookId: string;
   visible: boolean;
+  nodeIds: string[];
 };
 
 async function handler(req: NextApiRequest, res: NextApiResponse) {
@@ -16,8 +17,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
     }
 
     const { uname } = req.body?.data?.user?.userData;
-    const { notebookId, visible } = req.body as IViewNodePayload;
-    const nodeIds: string[] = req.body?.data?.nodeIds || [];
+    const { notebookId, visible, nodeIds } = req.body as IViewNodeOpenNodesPayload;
     let batch = db.batch();
     let writeCounts = 0;
 

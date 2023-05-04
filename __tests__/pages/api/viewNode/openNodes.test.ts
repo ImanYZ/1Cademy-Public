@@ -6,7 +6,7 @@ import { INotebook } from "src/types/INotebook";
 import { createReputationPoints } from "testUtils/fakers/reputation-point";
 initFirebaseClientSDK();
 import { admin, db } from "@/lib/firestoreServer/admin";
-import viewNodeHandler, { IViewNodePayload } from "@/pages/api/viewNode/openNodes";
+import viewNodeHandler, { IViewNodeOpenNodesPayload } from "@/pages/api/viewNode/openNodes";
 
 import { createNode, createNodeVersion, getDefaultNode } from "../../../../testUtils/fakers/node";
 import { createUser, getDefaultUser } from "../../../../testUtils/fakers/user";
@@ -150,7 +150,7 @@ describe("POST /api/notebooks/view", () => {
         notebookId: "n1",
         visible: true,
         nodeIds: [nodes[0].documentId, nodes[1].documentId],
-      } as IViewNodePayload,
+      } as IViewNodeOpenNodesPayload,
       headers: {
         authorization: "Bearer " + accessToken,
       },
