@@ -859,13 +859,12 @@ const Notebook = ({}: NotebookProps) => {
 
   // called after first time map is rendered
   useEffect(() => {
-
     window.addEventListener("assistant", (e: any) => {
       const detail: {
-        type: "SELECT_NOTEBOOK",
-        notebookId: string
+        type: "SELECT_NOTEBOOK";
+        notebookId: string;
       } = e.detail || {};
-      if(detail.type === "SELECT_NOTEBOOK") {
+      if (detail.type === "SELECT_NOTEBOOK") {
         onChangeNotebook(detail.notebookId);
       }
     });
@@ -6577,7 +6576,11 @@ const Notebook = ({}: NotebookProps) => {
           {user && displayDashboard && (
             <DashboardWrapper
               user={user}
-              onClose={() => setDisplayDashboard(false)}
+              onClose={() => {
+                setRootQuery(undefined);
+                setDisplayDashboard(false);
+                router.replace(router.pathname);
+              }}
               openNodeHandler={openNodeHandler}
               sx={{ position: "absolute", inset: "0px", zIndex: 999 }}
               root={rootQuery}
