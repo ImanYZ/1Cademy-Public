@@ -64,15 +64,15 @@ function drawChart(
 
   const columns: string[] = [];
 
+  columns.push("Proposals");
   if (isProposalRequired) {
-    columns.push("Proposals");
   }
 
+  columns.push("Questions");
   if (isQuestionRequired) {
-    columns.push("Questions");
   }
+  columns.push("Daily Practice");
   if (isDailyPracticeRequiered) {
-    columns.push("Daily Practice");
   }
 
   // remove axis if exist to avoid overdrawing
