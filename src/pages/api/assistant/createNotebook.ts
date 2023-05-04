@@ -60,6 +60,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
 
     return res.status(200).json({
       notebookId: notebookRef.id,
+      notebookTitle: notebookData.title,
     });
   } catch (error) {
     console.error(error);
