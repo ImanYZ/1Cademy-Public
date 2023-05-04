@@ -6,7 +6,7 @@ import { INotebook } from "src/types/INotebook";
 import { createReputationPoints } from "testUtils/fakers/reputation-point";
 initFirebaseClientSDK();
 import { admin, db } from "@/lib/firestoreServer/admin";
-import viewNodeHandler, { IViewNodePayload } from "@/pages/api/viewNode/[nodeId]";
+import viewNodeHandler, { IViewNodeOpenNodesPayload } from "@/pages/api/viewNode/openNodes";
 
 import { createNode, createNodeVersion, getDefaultNode } from "../../../../testUtils/fakers/node";
 import { createUser, getDefaultUser } from "../../../../testUtils/fakers/user";
@@ -146,13 +146,11 @@ describe("POST /api/notebooks/view", () => {
 
     req = HttpMock.createRequest({
       method: "POST",
-      query: {
-        nodeId: nodes[0].documentId,
-      },
       body: {
         notebookId: "n1",
         visible: true,
-      } as IViewNodePayload,
+        nodeIds: [nodes[0].documentId, nodes[1].documentId],
+      } as IViewNodeOpenNodesPayload,
       headers: {
         authorization: "Bearer " + accessToken,
       },
@@ -173,7 +171,7 @@ describe("POST /api/notebooks/view", () => {
 
   it("Usernodes should be created for viewed notebook", async () => {
     const userNodes = await db.collection("userNodes").where("notebooks", "array-contains", "n1").get();
-    expect(userNodes.docs.length).toEqual(2);
+    expect(userNodes.docs.length).toEqual(4);
   });
 
   it("Editor usernode should exists", async () => {
@@ -182,6 +180,6 @@ describe("POST /api/notebooks/view", () => {
       .where("user", "==", users[0].uname)
       .where("notebooks", "array-contains", "n1")
       .get();
-    expect(userNodes.docs.length).toEqual(1);
+    expect(userNodes.docs.length).toEqual(2);
   });
 });
