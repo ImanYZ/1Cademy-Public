@@ -18,8 +18,8 @@ const whichValues: TWhichValue[] = [
     getBody: ({ users, institutions, communities }: StatsSchema) =>
       `1Cademy is a platform that aims to improve the efficiency of learning and research by utilizing a collaborative approach to gather information from various sources and organize it into concise notes that focus on a single concept.\nThese notes are granularly organized and visualized as a knowledge graph that illustrates the hierarchical relationships between concepts. The platform uses a peer-review process, reputation system, and voting mechanism to ensure the quality of the knowledge graph and encourage the development of high-quality content.\nThrough this process, students and researchers can improve upon each other's contributions, propose more up-to-date and user-friendly versions of each note and share their learning perspectives.\nOver the past two years, [${users}] students and researchers from [${institutions}] institutions have participated in the platform, resulting in the formation of [${communities}] research and learning communities covering a wide range of subjects.`,
     link: "https://1cademy.com/search",
-    src: "rive/notebook.riv",
-    artboard: "artboard-6",
+    src: "rive/linking.riv",
+    artboard: "New Artboard",
   },
   {
     id: "assistant",
@@ -28,14 +28,6 @@ const whichValues: TWhichValue[] = [
     link: "https://1cademy.com/assistant",
     src: "rive-assistant/goals.riv",
     artboard: "artboard-3",
-  },
-  {
-    id: "extensions",
-    name: "1Cademy Chrome Extension",
-    body: "The 1Cademy extension simplifies the use of OpenAI ChatGPT for researchers, instructors, and students by providing easy access to the model's capabilities through simple text selection and right-clicking, or by using keyboard shortcuts.\nThe extension not only improves writing style, grammar, dictation, coherency, and flow, but also provides clear explanations and helpful hints on the rules applied.\nIt also offers a range of features such as text summarization, clarification, paraphrasing, shortening, text analysis, literature review, multiple-choice question generation, and stepwise teaching to aid in learning and research. Additionally, it helps with fact-checking and learning about alternative viewpoints on topics discussed on the Web.\nThis extension streamlines the use of the OpenAI ChatGPT model and allows users to efficiently access and utilize its capabilities in their research and learning.",
-    link: "https://chrome.google.com/webstore/detail/1cademy-assistant-helper/jdlbjglnnjcjigpodegggihmcaoikeob",
-    src: "rive/extension.riv",
-    artboard: "extension",
   },
 ];
 
