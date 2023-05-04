@@ -203,7 +203,7 @@ const Leaderboard = ({ semesterId, sxBody }: LeaderboardProps) => {
                 background: "linear-gradient(143.7deg, #FDC830 15.15%, #F37335 83.11%);",
               }}
             >
-              {usersInfo[cur.uname].imageUrl && usersInfo[cur.uname].imageUrl !== DEFAULT_AVATAR ? (
+              {usersInfo[cur.uname]?.imageUrl && usersInfo[cur.uname]?.imageUrl !== DEFAULT_AVATAR ? (
                 <Image
                   src={usersInfo[cur.uname]?.imageUrl ?? NO_USER_IMAGE}
                   alt={"user-image"}
