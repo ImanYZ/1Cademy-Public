@@ -111,6 +111,7 @@ export const DashboardWrapper = ({ user, openNodeHandler, onClose, root, sx }: D
       ),
     [db]
   );
+
   useEffect(() => {
     if (!user) return;
     let killSnapshot: Unsubscribe | null = null;

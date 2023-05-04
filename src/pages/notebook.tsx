@@ -6566,7 +6566,11 @@ const Notebook = ({}: NotebookProps) => {
           {user && displayDashboard && (
             <DashboardWrapper
               user={user}
-              onClose={() => setDisplayDashboard(false)}
+              onClose={() => {
+                router.replace(router.pathname);
+                setRootQuery(undefined);
+                setDisplayDashboard(false);
+              }}
               openNodeHandler={openNodeHandler}
               sx={{ position: "absolute", inset: "0px", zIndex: 999 }}
               root={rootQuery}
