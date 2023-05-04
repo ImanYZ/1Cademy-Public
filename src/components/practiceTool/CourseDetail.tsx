@@ -5,7 +5,9 @@ import BoltIcon from "@mui/icons-material/Bolt";
 // import SchoolIcon from "@mui/icons-material/School";
 import { Button, Paper, Stack, Typography } from "@mui/material";
 import { Box } from "@mui/system";
-import React, { useEffect } from "react";
+import { collection, getFirestore, onSnapshot, query, where } from "firebase/firestore";
+import React, { useEffect, useState } from "react";
+import { User } from "src/knowledgeTypes";
 
 import { CourseTag } from "../../instructorsTypes";
 import Leaderboard from "./Leaderboard";
@@ -14,11 +16,16 @@ import Leaderboard from "./Leaderboard";
 // const totalTopic = 100;
 
 type CourseDetailProps = {
+  user: User;
   currentSemester: CourseTag;
   onStartPractice: () => void;
 };
 
-const CourseDetail = ({ currentSemester, onStartPractice }: CourseDetailProps) => {
+const CourseDetail = ({ user, currentSemester, onStartPractice }: CourseDetailProps) => {
+  console.log({ currentSemester });
+  const db = getFirestore();
+  const [semesterNodes, setSemesterNodes] = useState<Set<string>>(new Set());
+  const [studentNodesLearnt, setStudentNodesLearnt] = useState<Set<string>>(new Set());
   useEffect(() => {
     const getCourseDetails = async () => {
       // TODO: add course details
@@ -26,6 +33,46 @@ const CourseDetail = ({ currentSemester, onStartPractice }: CourseDetailProps) =
     getCourseDetails();
   }, []);
 
+  useEffect(() => {
+    console.log("call use effect");
+    const q = query(collection(db, "practice"), where("tagId", "==", currentSemester.tagId));
+
+    const unsub = onSnapshot(q, snapshot => {
+      if (snapshot.empty) return;
+      const docChanges = snapshot.docChanges();
+      setSemesterNodes(prevNodes => {
+        return docChanges.reduce((ids: Set<string>, docChange) => {
+          ids.add(docChange.doc.id);
+          return ids;
+        }, prevNodes);
+      });
+    });
+
+    return () => unsub();
+  }, [currentSemester.tagId, db]);
+
+  useEffect(() => {
+    console.log("call use effect");
+    const q = query(
+      collection(db, "practice"),
+      where("user", "==", user.uname),
+      where("tagId", "==", currentSemester.tagId),
+      where("q", "==", 5)
+    );
+
+    const unsub = onSnapshot(q, snapshot => {
+      if (snapshot.empty) return;
+
+      setStudentNodesLearnt(prevLearnNodes => {
+        return snapshot.docChanges().reduce((ids: Set<string>, docChange) => {
+          ids.add(docChange.doc.id);
+          return ids;
+        }, prevLearnNodes);
+      });
+    });
+
+    return () => unsub();
+  }, [currentSemester.tagId, db, user.uname]);
   return (
     <Box sx={{ width: "100%" }}>
       <Box sx={{ pY: "48px 32px 32px 32px", borderBottom: theme => `solid 1px ${theme.palette.common.notebookG600}` }}>
@@ -67,7 +114,7 @@ const CourseDetail = ({ currentSemester, onStartPractice }: CourseDetailProps) =
                     fontWeight: 500,
                   }}
                 >
-                  51%
+                  {`${((studentNodesLearnt.size * 100) / semesterNodes.size).toFixed(2)}%`}
                 </Typography>
                 <Typography
                   sx={{
@@ -78,7 +125,7 @@ const CourseDetail = ({ currentSemester, onStartPractice }: CourseDetailProps) =
                     fontWeight: 500,
                   }}
                 >
-                  500 / 999
+                  {`${studentNodesLearnt.size}/${semesterNodes.size}`}
                 </Typography>
                 <Typography
                   sx={{

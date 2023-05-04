@@ -158,6 +158,6 @@ export const PracticeTool = ({ user, currentSemester, openNodeHandler, onClose }
       />
     </Box>
   ) : (
-    <CourseDetail currentSemester={currentSemester} onStartPractice={() => setStartPractice(true)} />
+    <CourseDetail user={user} currentSemester={currentSemester} onStartPractice={() => setStartPractice(true)} />
   );
 };
