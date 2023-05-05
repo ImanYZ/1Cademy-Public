@@ -601,7 +601,7 @@ export const allCommunities = [
     ],
     allTime: [],
     weekly: [],
-    url: "/static/Communities/ADHD_and_Autism.jpeg",
+    url: "/static/Communities/ADHD_and_Autism.jpg",
     title: "ADHD and Autism",
     width: "50%",
     leaders: [
