@@ -36,11 +36,11 @@ export const ASSISTANT_SYSTEM_PROMPT =
   `- The titles of all the node's children as an array\n` +
   `- The student has correctly answered [number] questions about this node.\n` +
   `Never solve a problem for the student. That would be considered cheating. Instead guide them, step-by-step, to find the solution on their own.\n` +
-  `You should not ask the student multiple queries at once. In each of your responses you can include one single query, but your can ask many queries, each in a separate response to formulate your final answer to the student. The student will search 1Cademy database as many times as you ask and would respond to all your queries until you respond to their original request.\n` +
+  `You should not ask the student multiple queries at once. In each of your responses you can include one single query, but you can ask many queries, each in a separate response to formulate your final answer to the student. The student will search 1Cademy database as many times as you ask and would respond to all your queries until you respond to their original request.\n` +
   `Your final response to their original request should not include any query.\n` +
   `If your final response contains nodes from 1Cademy, please present them as a JSON array of objects at the end of the response. Each node object should only include the following components:\n` +
-  `- "title": This field will contain the title of node on 1Cademy.\n`;
-`- "type": This field will contain the node type on 1Cademy, which can be either "Concept" or "Relation".`;
+  `- "title": This field will contain the title of node on 1Cademy.\n` +
+  `- "type": This field will contain the node type on 1Cademy, which can be either "Concept" or "Relation".`;
 
 export const ASSISTANT_NOT_FOUND_MESSAGE =
   `I'm afraid this topic is not included in the course content that I have been trained on. However, I would be happy to help you in one of the following ways:\n` +
@@ -266,7 +266,7 @@ export const processRecursiveCommands = async (
         const response = await sendMessageToGPT4(
           {
             content:
-              "I was not able to find nodes from given query, Please provide more commands to search Knowledge graph.",
+              "I was not able to find nodes from the given query, Please provide more queries to search 1Cademy Knowledge graph.",
             role: "system",
             name: "1Cademy",
           },
@@ -472,7 +472,7 @@ export const loadResponseNodes = async (assistantMessage: IAssistantMessage, use
 
 export const getGeneralKnowledgePrompt = (conversationData: IAssistantConversation, message?: string) => {
   if (message) {
-    return `Please provide an answer to the following question based on your general knowledge:\n` + message;
+    return `Please provide an answer to the following question triple-quoted text based on your general knowledge:\n'''\n${message}\n'''`;
   }
 
   let request: string = "";
@@ -485,7 +485,7 @@ export const getGeneralKnowledgePrompt = (conversationData: IAssistantConversati
 
   if (!request) return request;
 
-  return `Please provide an answer to the following question based on your general knowledge:\n` + request;
+  return `Please provide an answer to the following question triple-quoted text based on your general knowledge:\n'''\n${message}\n'''`;
 };
 
 export const getLastAssistantResponse = (conversationData: IAssistantConversation) => {
@@ -521,21 +521,11 @@ export const getExplainMorePrompt = (conversationData: IAssistantConversation, m
 
   const nodeTitles = nodes.map(node => node.title);
   let _nodeTitles: string = "";
-  if (nodeTitles.length > 1) {
-    _nodeTitles += nodeTitles[0];
-    for (let i = 1; i < nodeTitles.length; i++) {
-      let postfix = ", ";
-      if (i === nodeTitles.length - 1) {
-        postfix = " and ";
-      }
-
-      _nodeTitles += postfix + nodeTitles[i];
-    }
-  } else {
-    _nodeTitles = nodeTitles[0];
+  for (let i = 1; i < nodeTitles.length; i++) {
+    _nodeTitles += "- " + JSON.stringify(nodeTitles[i]) + "\n";
   }
 
-  return `Further explain ` + _nodeTitles + ".";
+  return `Further explain following nodes from 1Cademy:\n` + _nodeTitles;
 };
 
 export const generateNotebookTitleGpt4 = async (message: string) => {
