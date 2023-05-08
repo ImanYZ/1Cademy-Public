@@ -1,57 +1,57 @@
 import { Box } from "@mui/material";
 import React from "react";
 
+// TODO: calculate dynamically
+// strokeDasharray={Math.PI * Math.pow(size / 2, 2)}
+const CIRCLE_DASH_ARRAY = 270;
+
 type PercentageLoaderProps = {
+  size: number;
   percentage: number;
-  widthInPx: string;
-  heightInPx: string;
-  radius: number;
+  strokeWidth?: number;
 };
-const PercentageLoader = (props: PercentageLoaderProps) => {
+const PercentageLoader = ({ size, strokeWidth = 4, ...props }: PercentageLoaderProps) => {
   return (
     <>
-      <div
-        className="cont"
-        data-pct={props.percentage}
-        style={{ width: props.widthInPx, height: props.heightInPx, position: "absolute", bottom: "0px" }}
-      >
-        <svg className="svg" width="170px" height="170px" version="1.1">
+      <Box data-pct={props.percentage} sx={{ width: size, height: size, position: "absolute", bottom: "0px" }}>
+        <svg className="svg" width={size} height={size} version="1.1">
           <circle
-            r={props.radius}
-            cx="80"
-            cy="85"
+            r={(size - strokeWidth) / 2}
+            cx={size / 2}
+            cy={size / 2}
             fill="transparent"
-            strokeDasharray="565.48"
+            strokeDasharray={CIRCLE_DASH_ARRAY}
             strokeDashoffset="0"
+            stroke="#666"
+            strokeWidth={`${strokeWidth}px`}
           ></circle>
           <circle
             className="bar"
-            r={props.radius}
-            cx="80"
-            cy="85"
+            r={(size - strokeWidth) / 2}
+            cx={size / 2}
+            cy={size / 2}
             fill="transparent"
-            strokeDasharray="565.48"
+            strokeDasharray={270}
             strokeDashoffset="0"
-            style={{
-              strokeDashoffset: ((109 - props.percentage) / 100) * Math.PI * (props.radius * 2),
-            }}
+            stroke="#ff9f1e"
+            strokeWidth={`${strokeWidth}px`}
+            style={{ strokeDashoffset: ((100 - props.percentage) / 100) * CIRCLE_DASH_ARRAY }}
           ></circle>
         </svg>
-      </div>
+      </Box>
       <Box
         style={{
-          width: props.widthInPx,
-          height: props.heightInPx,
+          width: size,
+          height: size,
           position: "absolute",
           bottom: "0px",
           display: "flex",
           justifyContent: "center",
           alignItems: "center",
           color: "white",
-          fontSize: "32px",
+          fontSize: "22px",
           textShadow: "0 0 .125em black",
         }}
-        className="cont"
       >
         {props.percentage} %
       </Box>
