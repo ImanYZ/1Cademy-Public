@@ -361,7 +361,9 @@ const parseJSONArrayFromResponse = (content: string) => {
 };
 
 export const parseJSONMarkdownObjectsFromResponse = (content: string) => {
-  let startIdx = content.indexOf("{");
+  const matchResult = content.match(/\n[-]?[ ]?\{[\t\n ]*?"title"/gm);
+  const matchIdx = content.indexOf(matchResult![0]);
+  let startIdx = content.indexOf("{", matchIdx <= 0 ? 0 : matchIdx - 1);
   const objs: {
     title: string;
     type: string;
