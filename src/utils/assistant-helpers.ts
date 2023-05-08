@@ -23,24 +23,22 @@ export const ASSISTANT_SYSTEM_PROMPT =
   `- There is no loop in this knowledge graph. This means if node A is a parent of node B and node B is a parent of node C, node C cannot be a parent of node A.\n` +
   `- Each node includes a 'title' that represents the corresponding concept, and 'content' that explains the concept in a short paragraph.\n` +
   `- The 'title' of each node is unique and very specific. This means to understand what concept the node is representing, one can just read its title without a need to know its parents or children.\n` +
-  `- Nodes are in three types:\n` +
+  `- Nodes are in two types:\n` +
   `   1. A 'Concept' node defines a concept. What we explained above was a Concept node.\n` +
   `   2. A 'Relation' node is similar to a Concept node, but does not define any new concept, but just explains the relations between two or more concepts.\n` +
-  `   3. A 'Question' node is similar to a Concept node, but contains a multiple-choice question. The title is only the question stem. The content of a Question node should include one or more correct choices. Each choice should start with an alphabetical character and a dot, such as 'a.', 'b.', 'c.', and continue with the word 'CORRECT' if the choice is correct, or 'WRONG' if the choice is wrong. The next line after each choice should explain the reason for why the choice is correct or wrong. A Question node cannot be a parent of any other node.\n` +
-  `Your users are students. When a student asks you a question, you should mainly respond based on 1Cademy. In each response, clarify which nodes and links of 1Cademy can help to answer the question.\n` +
-  `You can query the 1Cademy knowledge graph by generating the code \`\\1Cademy\\ [Your Query goes here]\\\`. If you give the student this query, they'll search the 1Cademy database based on your query and respond to you with all the information about the first four search resulted nodes, each in the following format. They separate each node information from the others by a line break.\n` +
+  `You can query the 1Cademy knowledge graph by generating the code \`\\1Cademy\\ [Your Query goes here]\\\`. Once you provide the student with the query, they will conduct a search on the 1Cademy database and retrieve information on the first four nodes that match the query. The student will present the information in the following format for each node, with a line break separating each node's details.\n` +
   `- Node Title\n` +
   `- Node Content\n` +
   `- Node Type\n` +
   `- The titles of all the node's parents as an array\n` +
   `- The titles of all the node's children as an array\n` +
   `- The student has correctly answered [number] questions about this node.\n` +
-  `Never solve a problem for the student. That would be considered cheating. Instead guide them, step-by-step, to find the solution on their own.\n` +
-  `You should not ask the student multiple queries at once. In each of your responses you can include one single query, but you can ask many queries, each in a separate response to formulate your final answer to the student. The student will search 1Cademy database as many times as you ask and would respond to all your queries until you respond to their original request.\n` +
+  `You can ask many queries until you formulate your final response to the student. The student will search 1Cademy database as many times as you ask and would respond to all your queries until you respond to their original request.\n` +
   `Your final response to their original request should not include any query.\n` +
-  `If your final response contains nodes from 1Cademy, please present them as a JSON array of objects at the end of the response. Each node object should only include the following components:\n` +
-  `- "title": This field will contain the title of node on 1Cademy.\n` +
-  `- "type": This field will contain the node type on 1Cademy, which can be either "Concept" or "Relation".`;
+  `Never solve a problem for the student. That would be considered cheating. Instead, guide them step-by-step, to find the solution on their own.\n` +
+  `If your final response contains nodes from 1Cademy, list their titles and types as a JSON array of objects at the end of the response. Each node object should only include the following components:\n` +
+  `- "title": This field will contain the title of node on 1Cademy\n` +
+  `- "type": This field will contain the node type on 1Cademy, which can be either "Concept" or "Relation"`;
 
 export const ASSISTANT_NOT_FOUND_MESSAGE =
   `I'm afraid this topic is not included in the course content that I have been trained on. However, I would be happy to help you in one of the following ways:\n` +
@@ -362,6 +360,40 @@ const parseJSONArrayFromResponse = (content: string) => {
   return JSON.parse(content.substring(startIdx, endIdx + 1));
 };
 
+export const parseJSONMarkdownObjectsFromResponse = (content: string) => {
+  let startIdx = content.indexOf("{");
+  const objs: {
+    title: string;
+    type: string;
+  }[] = [];
+  let endIdx = -1;
+  const stack: string[] = ["{"];
+  for (let idx = startIdx + 1; idx < content.length; idx++) {
+    if (content[idx] === "{" || content[idx] === "[") {
+      if (stack.length === 0) {
+        startIdx = idx;
+      }
+      stack.push(content[idx]);
+    } else if (content[idx] === "}" || content[idx] === "]") {
+      const opening = stack.pop();
+      if ((opening !== "{" && content[idx] === "}") || (opening !== "[" && content[idx] === "]")) {
+        throw new Error(`Invalid syntax at ${idx}`);
+      }
+    }
+
+    if (stack.length === 0) {
+      endIdx = idx;
+      if (startIdx !== -1 && endIdx !== -1) {
+        objs.push(JSON.parse(content.substring(startIdx, endIdx + 1)));
+        startIdx = -1;
+        endIdx = -1;
+      }
+    }
+  }
+
+  return objs;
+};
+
 export const numOfPracticesAnsweredByNodeAndUser = async (nodeId: string, uname: string) => {
   const result = {
     totalQuestions: 0,
@@ -413,18 +445,29 @@ export const findUnitNoFromNodeData = (nodeData: INode): string | undefined => {
 // [^\n]+\:[^a-zA-Z0-9]*?\[[\t\n ]*?{
 // 2. If JSON don't have explanation
 // \[[\t\n ]*?{
+// 3. If JSON have explanation and instead of array gave markdown and json
+// [^\n\.]+\:[^a-zA-Z0-9]*?\n[-]?[ ]?\{[\t\n ]*?"title"
+// 4. If JSON have no explanation and instead of array gave markdown and json
+// \n[-]?[ ]?\{[\t\n ]*?"title"
 // Second case when response only include JSON
-// 3. If both above pattern don't match that means response doesn't include JSON/nodes
+// 5. If both above pattern don't match that means response doesn't include JSON/nodes
 export const loadResponseNodes = async (assistantMessage: IAssistantMessage, userData?: IUser) => {
   const content = assistantMessage?.gptMessage?.content || "";
   const case1 = content.match(/[^\n]+\:[^a-zA-Z0-9]*?\[[\t\n ]*?{/gm);
   const case2 = content.match(/\[[\t\n ]*?{/gm);
-  if ((case1 && case1.length) || (case2 && case2.length)) {
+  const case3 = content.match(/[^\n\.]+\:[^a-zA-Z0-9]*?\n[-]?[ ]?\{[\t\n ]*?"title"/gm);
+  const case4 = content.match(/\n[-]?[ ]?\{[\t\n ]*?"title"/gm);
+
+  if (case1 || case2 || case3 || case4) {
     let jsonStart: string = "";
     if (case1) {
       jsonStart = case1[0];
-    } else {
+    } else if (case2) {
       jsonStart = case2![0];
+    } else if (case3) {
+      jsonStart = case3![0];
+    } else if (case4) {
+      jsonStart = case4![0];
     }
 
     const markupIdx = content.indexOf(jsonStart);
@@ -433,7 +476,10 @@ export const loadResponseNodes = async (assistantMessage: IAssistantMessage, use
     const nodesList: {
       title: string;
       type?: string;
-    }[] = parseJSONArrayFromResponse(_markupContent);
+    }[] =
+      case3 || case4
+        ? parseJSONMarkdownObjectsFromResponse(_markupContent)
+        : parseJSONArrayFromResponse(_markupContent);
     const nodes: IAssistantNode[] = [];
 
     for (const node of nodesList) {
