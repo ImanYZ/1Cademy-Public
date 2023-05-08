@@ -28,9 +28,20 @@ export const createSemesterNotebookForStudents = async (
   studentUnames: string[],
   batch: WriteBatch,
   writeCounts: number
-): Promise<[WriteBatch, number]> => {
+): Promise<
+  [
+    WriteBatch,
+    number,
+    {
+      [uname: string]: string;
+    }
+  ]
+> => {
   const semesterDoc = await db.collection("semesters").doc(semesterId).get();
   const semesterData = semesterDoc.data() as ISemester;
+  const unameNotebooks: {
+    [uname: string]: string;
+  } = {};
   for (const uname of studentUnames) {
     const userDoc = await db.collection("users").doc(uname).get();
     const userData = userDoc.data() as IUser;
@@ -42,6 +53,7 @@ export const createSemesterNotebookForStudents = async (
       .limit(1)
       .get();
     if (notebooks.docs.length) {
+      unameNotebooks[uname] = notebooks.docs[0].id;
       [batch, writeCounts] = await createNotebookUserNode(notebooks.docs[0].id, semesterId, uname, batch, writeCounts);
       continue;
     }
@@ -69,10 +81,11 @@ export const createSemesterNotebookForStudents = async (
     } as INotebook);
     [batch, writeCounts] = await checkRestartBatchWriteCounts(batch, writeCounts);
 
+    unameNotebooks[uname] = notebookRef.id;
     [batch, writeCounts] = await createNotebookUserNode(notebookRef.id, semesterId, uname, batch, writeCounts);
   }
 
-  return [batch, writeCounts];
+  return [batch, writeCounts, unameNotebooks];
 };
 
 export const createNotebookUserNode = async (

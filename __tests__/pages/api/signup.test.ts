@@ -133,7 +133,12 @@ describe("/signup", () => {
 
   let notebookId: string = "";
   it("new user should have a default notebook", async () => {
-    const notebooks = await db.collection("notebooks").where("owner", "==", body.data.uname).limit(1).get();
+    const notebooks = await db
+      .collection("notebooks")
+      .where("owner", "==", body.data.uname)
+      .where("title", "==", "My Notebook")
+      .limit(1)
+      .get();
     expect(notebooks.docs.length).toEqual(1);
     notebookId = notebooks.docs[0].id;
   });
@@ -376,6 +381,15 @@ describe("/signup as student", () => {
       .where("uname", "==", body.data.uname)
       .get();
     expect(semesterStudentVoteStatsRef.docs[0].data().uname).toEqual(body.data.uname);
+  });
+
+  it("student should have semester notebook on enrollment", async () => {
+    const notebooks = await db
+      .collection("notebooks")
+      .where("owner", "==", body.data.uname)
+      .where("defaultTagId", "==", body.data.course)
+      .get();
+    expect(notebooks.docs.length).toEqual(1);
   });
 
   afterAll(async () => {
