@@ -148,6 +148,7 @@ MainSidebarProps) => {
   const [editableNotebook, setEditableNotebook] = useState<Notebook | null>(null);
   const createNotebookButtonRef = useRef<any>(null);
   const { height } = useWindowSize();
+  const [notebookTitleIsEditable, setNotebookTitleEditable] = useState(false);
   // const titleInputRef = useRef<HTMLInputElement | null>(null);
 
   const displayLargeToolbar = useMemo(() => isHovered || isMenuOpen, [isHovered, isMenuOpen]);
@@ -302,6 +303,7 @@ MainSidebarProps) => {
         updatedAt: Timestamp.fromDate(new Date()),
         defaultTagId: user.tagId ?? "",
         defaultTagName: user.tag ?? "",
+        type: "default",
       };
       const notebooksRef = collection(db, "notebooks");
       const docRef = await addDoc(notebooksRef, newNotebook);
@@ -313,7 +315,17 @@ MainSidebarProps) => {
     } finally {
       setIsCreatingNotebook(false);
     }
-  }, [db, notebooks.length, onChangeNotebook, user.chooseUname, user.fName, user.imageUrl, user.tagId, user.uname]);
+  }, [
+    db,
+    notebooks.length,
+    onChangeNotebook,
+    user.chooseUname,
+    user.fName,
+    user.imageUrl,
+    user.tag,
+    user.tagId,
+    user.uname,
+  ]);
 
   const onUpdateNotebookTitle = useCallback(async () => {
     try {
@@ -321,6 +333,7 @@ MainSidebarProps) => {
       const notebooksRef = doc(db, "notebooks", editableNotebook.id);
       await updateDoc(notebooksRef, { title: editableNotebook.title });
       setEditableNotebook(null);
+      setNotebookTitleEditable(false);
     } catch (err) {}
   }, [db, editableNotebook]);
 
@@ -344,6 +357,7 @@ MainSidebarProps) => {
         updatedAt: Timestamp.fromDate(new Date()),
         defaultTagId: user.tagId ?? "",
         defaultTagName: user.tag ?? "",
+        type: editableNotebook.type ?? "default",
       };
       const notebooksRef = collection(db, "notebooks");
       const docRef = await addDoc(notebooksRef, copyNotebook);
@@ -366,7 +380,7 @@ MainSidebarProps) => {
     } finally {
       setIsCreatingNotebook(false);
     }
-  }, [db, editableNotebook, notebooks, openNodesOnNotebook, user.chooseUname, user.fName, user.tagId]);
+  }, [db, editableNotebook, notebooks, openNodesOnNotebook, user.chooseUname, user.fName, user.tag, user.tagId]);
 
   const onCopyNotebookUrl = useCallback(() => {
     if (!editableNotebook) return;
@@ -375,6 +389,7 @@ MainSidebarProps) => {
     }`;
     navigator.clipboard.writeText(url);
     setEditableNotebook(null);
+    setNotebookTitleEditable(false);
   }, [editableNotebook]);
 
   const onDeleteNotebook = useCallback(async () => {
@@ -388,6 +403,7 @@ MainSidebarProps) => {
         return newNotebooks;
       });
       setEditableNotebook(null);
+      setNotebookTitleEditable(false);
       await Delete("/notebooks/delete", { notebookId: editableNotebook.id });
       // onChangeNotebook("");
       console.log("deleted complete");
@@ -418,6 +434,7 @@ MainSidebarProps) => {
       createdAt: Timestamp.fromDate(new Date()),
     });
     setEditableNotebook(null);
+    setNotebookTitleEditable(false);
   }, [db, editableNotebook, nodeBookDispatch, setOpenSideBar, user.uname]);
 
   useEffect(() => {
@@ -626,13 +643,7 @@ MainSidebarProps) => {
                       />
                     </Box>
                     <Box sx={{ display: "flex", alignItems: "center" }}>
-                      <Typography
-                        sx={{
-                          ml: "20px",
-                        }}
-                      >
-                        Create New
-                      </Typography>
+                      <Typography sx={{ ml: "20px" }}>Create New</Typography>
                     </Box>
                   </Box>
                 )}
@@ -690,19 +701,6 @@ MainSidebarProps) => {
           </Button>
         )}
 
-        {/* <Popover
-          id={"pp"}
-          open={Boolean(notebookEditableId)}
-          anchorEl={createNotebookButtonRef}
-          onClose={() => setNotebookEditableId("")}
-          anchorOrigin={{
-            vertical: "center",
-            horizontal: "left",
-          }}
-        >
-          <Typography sx={{ p: 2 }}>The content of the Popover.</Typography>
-        </Popover> */}
-
         <Portal anchor="portal">
           {editableNotebook && (
             <ClickAwayListener onClickAway={onUpdateNotebookTitle}>
@@ -719,52 +717,53 @@ MainSidebarProps) => {
                       : theme.palette.common.gray50,
                 }}
               >
-                <Stack direction={"row"} sx={{ p: "14px 12px" }}>
-                  <TextField
-                    // ref={titleInputRef}
-                    id="notebook-title"
-                    label=""
-                    variant="outlined"
-                    onKeyDown={e => {
-                      if (e.code === "Enter" || e.keyCode === 13) {
-                        onUpdateNotebookTitle();
-                        e.stopPropagation();
-                      }
-                    }}
-                    value={editableNotebook.title}
-                    onChange={e => setEditableNotebook(prev => (prev ? { ...prev, title: e.target.value } : null))}
-                    InputProps={{
-                      endAdornment: (
-                        <InputAdornment position="end">
-                          <IconButton onClick={() => onUpdateNotebookTitle()} sx={{ p: "4px", ml: "10px" }}>
-                            <CheckIcon />
-                          </IconButton>
-                        </InputAdornment>
-                      ),
-                      sx: { p: "10px 14px", fontSize: "12px" },
-                    }}
-                    inputProps={{ sx: {} }}
-                    sx={{
-                      "& .Mui-focused .MuiOutlinedInput-notchedOutline": {
-                        borderColor: theme =>
-                          theme.palette.mode === "dark"
-                            ? theme.palette.common.primary600
-                            : theme.palette.common.primary600,
-                        boxShadow: theme =>
-                          theme.palette.mode === "dark"
-                            ? "0px 1px 2px rgba(16, 24, 40, 0.05), 0px 0px 0px 4px #62544B"
-                            : "0px 1px 2px rgba(16, 24, 40, 0.05), 0px 0px 0px 4px #ECCFBD",
-                      },
-                      "& .MuiOutlinedInput-notchedOutline": {
-                        borderWidth: "0px",
-                      },
-                    }}
-                    multiline
-                    fullWidth
-                  />
-                  {/* <Box sx={{ position: "absolute" }}>
-
-                  </Box> */}
+                <Stack direction={"row"} alignItems="center" sx={{ p: "14px 12px" }}>
+                  {notebookTitleIsEditable ? (
+                    <TextField
+                      // ref={titleInputRef}
+                      id="notebook-title"
+                      label=""
+                      variant="outlined"
+                      onKeyDown={e => {
+                        if (e.code === "Enter" || e.keyCode === 13) {
+                          onUpdateNotebookTitle();
+                          e.stopPropagation();
+                        }
+                      }}
+                      value={editableNotebook.title}
+                      onChange={e => setEditableNotebook(prev => (prev ? { ...prev, title: e.target.value } : null))}
+                      InputProps={{
+                        endAdornment: (
+                          <InputAdornment position="end">
+                            <IconButton onClick={() => onUpdateNotebookTitle()} sx={{ p: "4px" }}>
+                              <CheckIcon />
+                            </IconButton>
+                          </InputAdornment>
+                        ),
+                        sx: { p: "10px 14px", fontSize: "12px" },
+                      }}
+                      inputProps={{ sx: {} }}
+                      sx={{
+                        "& .Mui-focused .MuiOutlinedInput-notchedOutline": {
+                          borderColor: theme =>
+                            theme.palette.mode === "dark"
+                              ? theme.palette.common.primary600
+                              : theme.palette.common.primary600,
+                          boxShadow: theme =>
+                            theme.palette.mode === "dark"
+                              ? "0px 1px 2px rgba(16, 24, 40, 0.05), 0px 0px 0px 4px #62544B"
+                              : "0px 1px 2px rgba(16, 24, 40, 0.05), 0px 0px 0px 4px #ECCFBD",
+                        },
+                        "& .MuiOutlinedInput-notchedOutline": {
+                          borderWidth: "0px",
+                        },
+                      }}
+                      multiline
+                      fullWidth
+                    />
+                  ) : (
+                    <Typography sx={{ fontSize: "14px" }}>{editableNotebook.title}</Typography>
+                  )}
                   <Box
                     onClick={onOpenUserInfo}
                     sx={{
@@ -791,11 +790,14 @@ MainSidebarProps) => {
                 </Stack>
                 <Divider />
                 <List sx={{ p: "0px", "& .MuiTypography-body1": { fontSize: "12px" } }}>
-                  {/* <ListItem disablePadding>
-                    <ListItemButton sx={{ p: "12px 14px" }}>
-                      <ListItemText primary="Rename" />
-                    </ListItemButton>
-                  </ListItem> */}
+                  {/* TODO: remove type undefined on validation, Ameer will update with default */}
+                  {(!editableNotebook.type || editableNotebook.type === "default") && (
+                    <ListItem disablePadding>
+                      <ListItemButton onClick={() => setNotebookTitleEditable(true)} sx={{ p: "12px 14px" }}>
+                        <ListItemText primary="Rename" />
+                      </ListItemButton>
+                    </ListItem>
+                  )}
                   <ListItem disablePadding>
                     <ListItemButton onClick={onDuplicateNotebook} sx={{ p: "12px 14px" }}>
                       <ListItemText primary="Duplicate" />
@@ -806,13 +808,15 @@ MainSidebarProps) => {
                       <ListItemText primary="Copy link to page" />
                     </ListItemButton>
                   </ListItem>
-                  {editableNotebook.owner === user.uname && notebooks.length > 1 && (
-                    <ListItem disablePadding>
-                      <ListItemButton onClick={onDeleteNotebook} sx={{ p: "12px 14px" }}>
-                        <ListItemText primary="Delete" />
-                      </ListItemButton>
-                    </ListItem>
-                  )}
+                  {editableNotebook.owner === user.uname &&
+                    editableNotebook.type !== "course" &&
+                    notebooks.length > 1 && (
+                      <ListItem disablePadding>
+                        <ListItemButton onClick={onDeleteNotebook} sx={{ p: "12px 14px" }}>
+                          <ListItemText primary="Delete" />
+                        </ListItemButton>
+                      </ListItem>
+                    )}
                 </List>
               </Box>
             </ClickAwayListener>
@@ -961,6 +965,7 @@ MainSidebarProps) => {
     uncheckedNotificationsNum,
     bookmarkUpdatesNum,
     pendingProposalsNum,
+    onDisplayInstructorPage,
     displayNotebooks,
     notebooks,
     isCreatingNotebook,
@@ -968,6 +973,7 @@ MainSidebarProps) => {
     editableNotebook,
     onUpdateNotebookTitle,
     height,
+    notebookTitleIsEditable,
     onOpenUserInfo,
     onDuplicateNotebook,
     onCopyNotebookUrl,
@@ -1032,6 +1038,7 @@ MainSidebarProps) => {
     isCreatingNotebook,
     editableNotebook,
     onOpenUserInfo,
+    notebookTitleIsEditable,
     // titleInputRef.current,
   ]);
 
