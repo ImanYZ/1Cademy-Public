@@ -19,7 +19,118 @@ import { INodeType } from "src/types/INodeType";
 import { IPractice } from "src/types/IPractice";
 import { IUserNode } from "src/types/IUserNode";
 import { INode } from "src/types/INode";
+import { INotebook } from "src/types/INotebook";
 import { createPractice } from "./version-helpers";
+import { IUser } from "src/types/IUser";
+
+export const createSemesterNotebookForStudents = async (
+  semesterId: string,
+  studentUnames: string[],
+  batch: WriteBatch,
+  writeCounts: number
+): Promise<[WriteBatch, number]> => {
+  const semesterDoc = await db.collection("semesters").doc(semesterId).get();
+  const semesterData = semesterDoc.data() as ISemester;
+  for (const uname of studentUnames) {
+    const userDoc = await db.collection("users").doc(uname).get();
+    const userData = userDoc.data() as IUser;
+    const notebooks = await db
+      .collection("notebooks")
+      .where("owner", "==", uname)
+      .where("defaultTagId", "==", semesterId)
+      .where("title", "==", semesterData.title)
+      .limit(1)
+      .get();
+    if (notebooks.docs.length) {
+      [batch, writeCounts] = await createNotebookUserNode(notebooks.docs[0].id, semesterId, uname, batch, writeCounts);
+      continue;
+    }
+    const notebookRef = db.collection("notebooks").doc();
+    batch.set(notebookRef, {
+      defaultTagId: semesterId,
+      defaultTagName: semesterData.title,
+      owner: userData.uname,
+      ownerImgUrl: userData.imageUrl,
+      ownerFullName: `${userData.fName} ${userData.lName}`,
+      ownerChooseUname: userData.chooseUname,
+      title: semesterData.title,
+      isPublic: "none",
+      users: [userData.uname],
+      usersInfo: {
+        [uname]: {
+          role: "owner",
+          imageUrl: userData.imageUrl,
+          fullname: `${userData.fName} ${userData.lName}`,
+          chooseUname: userData.chooseUname,
+        },
+      },
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    } as INotebook);
+    [batch, writeCounts] = await checkRestartBatchWriteCounts(batch, writeCounts);
+
+    [batch, writeCounts] = await createNotebookUserNode(notebookRef.id, semesterId, uname, batch, writeCounts);
+  }
+
+  return [batch, writeCounts];
+};
+
+export const createNotebookUserNode = async (
+  notebookId: string,
+  nodeId: string,
+  uname: string,
+  batch: WriteBatch,
+  writeCounts: number
+): Promise<[WriteBatch, number]> => {
+  const userNodes = await db
+    .collection("userNodes")
+    .where("user", "==", uname)
+    .where("node", "==", nodeId)
+    .limit(1)
+    .get();
+  if (userNodes.docs.length) {
+    const userNodeRef = db.collection("userNodes").doc(userNodes.docs[0].id);
+    const userNode = userNodes.docs[0].data() as IUserNode;
+    const notebooks = userNode.notebooks || [];
+    const expands = userNode.expands || [];
+
+    const notebookIdx = notebooks.indexOf(notebookId);
+    if (notebookIdx === -1) {
+      notebooks.push(notebookId);
+      expands.push(true);
+    } else {
+      expands[notebookIdx] = true;
+    }
+    batch.update(userNodeRef, {
+      notebooks,
+      expands,
+    });
+    [batch, writeCounts] = await checkRestartBatchWriteCounts(batch, writeCounts);
+    return [batch, writeCounts];
+  }
+
+  const userNodeRef = db.collection("userNodes").doc();
+  batch.set(userNodeRef, {
+    visible: true,
+    open: false,
+    bookmarked: false,
+    changed: false,
+    correct: false,
+    createdAt: new Date(),
+    deleted: false,
+    isStudied: false,
+    node: nodeId,
+    updatedAt: new Date(),
+    user: uname,
+    wrong: false,
+    nodeChanges: {},
+    expands: [false],
+    notebooks: [notebookId],
+  } as IUserNode);
+  [batch, writeCounts] = await checkRestartBatchWriteCounts(batch, writeCounts);
+
+  return [batch, writeCounts];
+};
 
 export const createPracticeForSemesterStudents = async (
   semesterId: string,

@@ -20,6 +20,7 @@ initFirebaseClientSDK();
 import { admin, db } from "src/lib/firestoreServer/admin";
 import signupHandler, { InstructorSemesterSignUpPayload } from "src/pages/api/instructor/students/[semesterId]/signup";
 import { ISemester } from "src/types/ICourse";
+import { IUserNode } from "src/types/IUserNode";
 import { createCourse, createInstructor, createSemester } from "testUtils/fakers/course";
 import { createNode, createNodeVersion, getDefaultNode } from "testUtils/fakers/node";
 import { getDefaultUser } from "testUtils/fakers/user";
@@ -358,6 +359,35 @@ describe("POST /api/instructor/students/:semesterId/signup", () => {
           .where("tagId", "==", semesterDoc.id)
           .get();
         expect(practices.docs.length).toEqual(1);
+      }
+    });
+
+    it("each semester student should have a notebook and user node for semester", async () => {
+      const semesterDoc = await db.collection("semesters").doc(String(semester.documentId)).get();
+      const semesterData = semesterDoc.data() as ISemester;
+      for (const student of semesterData.students) {
+        const userNodes = await db
+          .collection("userNodes")
+          .where("user", "==", student.uname)
+          .where("node", "==", semesterDoc.id)
+          .get();
+        expect(userNodes.docs.length).toEqual(1);
+        const userNode = userNodes.docs[0].data() as IUserNode;
+        const notebooks: string[] = userNode.notebooks || [];
+        expect(notebooks.length).toEqual(1);
+
+        // checking notebook exist for student
+        const _notebooks = await db
+          .collection("notebooks")
+          .where("owner", "==", student.uname)
+          .where("defaultTagId", "==", semesterDoc.id)
+          .where("title", "==", semesterData.title)
+          .get();
+
+        const expands: boolean[] = userNode.expands || [];
+        expect(expands.length).toEqual(1);
+        expect(_notebooks.docs.length).toEqual(1);
+        expect(_notebooks.docs[0].id).toEqual(notebooks[0]);
       }
     });
   });
