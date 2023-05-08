@@ -2627,29 +2627,28 @@ right: 5px; */
 
 /* ------------------------------- */
 /* percentaje loader styles */
-.svg circle {
+/* .svg circle {
   stroke-dashoffset: 0;
-  transition: stroke-dashoffset 1s linear; /* vendorless fallback */
-  -o-transition: stroke-dashoffset 1s linear; /* opera */
-  -ms-transition: stroke-dashoffset 1s linear; /* IE 10 */
-  -moz-transition: stroke-dashoffset 1s linear; /* Firefox */
-  -webkit-transition: stroke-dashoffset 1s linear; /*safari and chrome */
+  transition: stroke-dashoffset 1s linear;
+  -o-transition: stroke-dashoffset 1s linear;
+  -ms-transition: stroke-dashoffset 1s linear;
+  -moz-transition: stroke-dashoffset 1s linear;
+  -webkit-transition: stroke-dashoffset 1s linear;
   stroke: #666;
   stroke-width: 4px;
 }
 .svg .bar {
   stroke: #ff9f1e;
-}
-.cont {
+} */
+/* .cont {
   display: block;
   height: 200px;
   width: 200px;
   border-radius: 100%;
   position: relative;
   margin-top: -190px;
-  /* margin-left: -1px; */
   z-index: 4;
-}
+} */
 
 .profileImage {
   width: 90px;

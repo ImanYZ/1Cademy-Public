@@ -151,23 +151,7 @@ const ACCOUNT_OPTIONS: AccountOptions[] = [
   },
 ];
 
-const MARKS = [
-  {
-    value: 0,
-  },
-  {
-    value: 25,
-  },
-  {
-    value: 50,
-  },
-  {
-    value: 75,
-  },
-  {
-    value: 100,
-  },
-];
+const MARKS = [{ value: 0 }, { value: 25 }, { value: 50 }, { value: 75 }, { value: 100 }];
 
 const TabPanel = ({ value, index, children }: TabPanelProps) => {
   return <Box hidden={value !== index}>{value === index && children}</Box>;
@@ -1022,7 +1006,7 @@ const UserSettigsSidebar = ({
             </Box>
             <TabPanel value={settingsValue} index={0}>
               <ArrowBackButton text={ACCOUNT_OPTIONS[0].type} backwardsHandler={handleSettingsValue} />
-              <Box component={"section"} px={"20px"}>
+              <Box component={"section"} p={"24px 20px"}>
                 <ProfileAvatar
                   id="user-settings-picture"
                   userId={user.userId}
@@ -1031,7 +1015,9 @@ const UserSettigsSidebar = ({
                   name={user?.fName ?? ""}
                   lastName={user?.lName ?? ""}
                 />
-                <Typography textAlign={"center"}>{user.imageUrl ? "Change Photo" : "Add Photo"}</Typography>
+                <Typography textAlign={"center"} sx={{ mt: "10px" }}>
+                  {user.imageUrl ? "Change Photo" : "Add Photo"}
+                </Typography>
               </Box>
               <Box mx="20px">
                 <Box sx={{ display: "flex", gap: "12px" }}>
