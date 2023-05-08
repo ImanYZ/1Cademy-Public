@@ -8,7 +8,12 @@ import { isEmail, isEmpty } from "@/lib/utils/utils";
 
 import { admin, checkRestartBatchWriteCounts, commitBatch, db } from "../../lib/firestoreServer/admin";
 import { IInstitution } from "src/types/IInstitution";
-import { createOrRestoreStatDocs, createPracticeForSemesterStudents } from "src/utils/course-helpers";
+import {
+  createNotebookUserNode,
+  createOrRestoreStatDocs,
+  createPracticeForSemesterStudents,
+  createSemesterNotebookForStudents,
+} from "src/utils/course-helpers";
 import { INotebook } from "src/types/INotebook";
 import { detach } from "src/utils/helpers";
 
@@ -414,6 +419,24 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
       const semesterData = (await semesterRef.get()).data();
       if (!semesterData) return;
       [batch, writeCounts] = await createPracticeForSemesterStudents(semesterRef.id, [data.uname], batch, writeCounts);
+
+      let unameNotebooks: {
+        [uname: string]: string;
+      } = {};
+      [batch, writeCounts, unameNotebooks] = await createSemesterNotebookForStudents(
+        semesterRef.id,
+        [data.uname],
+        batch,
+        writeCounts
+      );
+
+      [batch, writeCounts] = await createNotebookUserNode(
+        unameNotebooks[data.uname],
+        data?.course,
+        data.uname,
+        batch,
+        writeCounts
+      );
       await commitBatch(batch);
     });
 
