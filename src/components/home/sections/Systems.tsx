@@ -64,10 +64,11 @@ const Systems = () => {
       >
         {value.id === "notebook" && (
           <RiveComponentMemoized
-            src="rive/notebook.riv"
-            artboard={"artboard-6"}
-            animations={["Timeline 1", theme.palette.mode]}
+            src="rive/linking.riv"
+            artboard={"New Artboard"}
+            animations={["Timeline 1"]}
             autoplay={true}
+            displayControls
           />
         )}
         {value.id === "assistant" && (
@@ -76,6 +77,7 @@ const Systems = () => {
             artboard={"artboard-3"}
             animations={["Timeline 1", theme.palette.mode]}
             autoplay={true}
+            displayControls
           />
         )}
         {value.id === "extensions" && (
@@ -84,6 +86,7 @@ const Systems = () => {
             artboard={"extension"}
             animations={["Timeline 1", theme.palette.mode]}
             autoplay={true}
+            displayControls
           />
         )}
       </Box>

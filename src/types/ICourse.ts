@@ -46,6 +46,15 @@ export type ISemester = {
     numQuestionsPerDay: number;
     totalDaysOfCourse: number;
   };
+
+  dailyPractice: {
+    startDate: Timestamp;
+    endDate: Timestamp;
+    numPoints: number;
+    numQuestionsPerDay: number;
+    totalDaysOfCourse: number;
+  };
+
   votes: {
     pointIncrementOnAgreement: number;
     pointDecrementOnAgreement: number;
@@ -55,8 +64,10 @@ export type ISemester = {
   };
   isProposalRequired: boolean;
   isQuestionProposalRequired: boolean;
+  isDailyPracticeRequired: boolean;
   isCastingVotesRequired: boolean;
   isGettingVotesRequired: boolean;
+  root: string;
   deleted: boolean;
   students: ISemesterStudent[];
   createdAt: Timestamp;
@@ -96,14 +107,16 @@ export type ICourse = {
 export type ISemesterStudentStatChapter = {
   node: string; // chapter node id
   title: string; // chapter title
-  proposals: number; // all pending/accepted proposals //+-
-  questions: number; // all accepted questions //+-
-  nodes: number; // pending/accepted proposals of new nodes //+-
-  questionProposals: number; // all question proposals //+-
-  newNodes: number; //+-
-  links: number; // pending/accepted links //+
+  proposals: number; // all pending/accepted proposals
+  questions: number; // all accepted questions
+  nodes: number; // pending/accepted proposals of new nodes
+  questionProposals: number; // all question proposals
+  newNodes: number;
+  links: number; // pending/accepted links
   agreementsWithInst: number;
   disagreementsWithInst: number;
+  correctPractices: number;
+  totalPractices: number;
 };
 export type ISemesterStudentStatDay = {
   day: string; // 11-1-2022 -> now changing to YYYY-MM-DD
@@ -120,18 +133,20 @@ export type ISemesterStudentStat = {
 };
 
 export type ISemesterStudentVoteStatDay = {
-  proposals: number; // pending/accepted proposals //+
-  questions: number; // accepted questions //+
-  questionProposals: number; // pending/accepted questions //+
-  nodes: number; // pending/accepted questions //+
-  links: number; // pending/accepted links //+
-  agreementsWithInst: number; //+
-  disagreementsWithInst: number; //+
-  newNodes: number; // accepted nodes //+
-  improvements: number; // accepted improvement proposals //+
-  upVotes: number; //+
-  downVotes: number; //+
+  proposals: number; // pending/accepted proposals
+  questions: number; // accepted questions
+  questionProposals: number; // pending/accepted questions
+  nodes: number; // pending/accepted questions
+  links: number; // pending/accepted links
+  agreementsWithInst: number;
+  disagreementsWithInst: number;
+  newNodes: number; // accepted nodes
+  improvements: number; // accepted improvement proposals
+  upVotes: number;
+  downVotes: number;
   instVotes: number;
+  correctPractices: number;
+  totalPractices: number;
   day: string; // YYYY-MM-DD
 };
 // semesterStudentVoteStats
@@ -139,24 +154,26 @@ export type ISemesterStudentVoteStat = {
   documentId?: string;
   tagId: string; // tagId of semester
   uname: string;
-  upVotes: number; //+
-  downVotes: number; //+
+  upVotes: number;
+  downVotes: number;
   instVotes: number;
-  agreementsWithInst: number; //+
-  disagreementsWithInst: number; //+
+  agreementsWithInst: number;
+  disagreementsWithInst: number;
   lastActivity: Timestamp;
   days: ISemesterStudentVoteStatDay[];
   totalPoints?: number;
-  nodes: number; // pending/accepted nodes //+-
-  newNodes: number; // accepted nodes //+-
-  improvements: number; // accepted improvement proposals //+-
-  links: number; // pending/accepted links //+-
-  questions: number; //+-
-  questionProposals: number; //+-
-  questionPoints?: number;
-  proposalPoints?: number;
+  nodes: number; // pending/accepted nodes
+  newNodes: number; // accepted nodes
+  improvements: number; // accepted improvement proposals
+  links: number; // pending/accepted links
+  questions: number;
+  questionProposals: number;
+  questionPoints?: number; // depreciated
+  proposalPoints?: number; // depreciated
   votes?: number;
   votePoints?: number; // depreciated
+  correctPractices: number;
+  totalPractices: number;
   deleted: boolean;
   createdAt: Timestamp;
   updatedAt: Timestamp;

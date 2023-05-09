@@ -228,6 +228,8 @@ describe("POST /api/instructor/students/:semesterId/setting", () => {
           totalDaysOfCourse: 30,
         },
         votes: {
+          pointDecrementOnAgreement: 1,
+          pointIncrementOnAgreement: 1,
           onReceiveDownVote: 1,
           onReceiveVote: 1,
           onReceiveStar: 1,
@@ -268,6 +270,15 @@ describe("POST /api/instructor/students/:semesterId/setting", () => {
         isQuestionProposalRequired: true,
         isCastingVotesRequired: true,
         isGettingVotesRequired: true,
+        dailyPractice: {
+          startDate,
+          endDate,
+          numPoints: 1,
+          numQuestionsPerDay: 1,
+          totalDaysOfCourse: moment(endDate).diff(moment(startDate), "days"),
+        },
+        isDailyPracticeRequired: true,
+        root: nodes[0].documentId!,
       } as InstructorSemesterSettingPayload;
 
       const req: any = HttpMock.createRequest({
@@ -339,6 +350,14 @@ describe("POST /api/instructor/students/:semesterId/setting", () => {
         isQuestionProposalRequired: true,
         isCastingVotesRequired: true,
         isGettingVotesRequired: true,
+        dailyPractice: {
+          startDate,
+          endDate,
+          numPoints: 1,
+          numQuestionsPerDay: 1,
+          totalDaysOfCourse: moment(endDate).diff(moment(startDate), "days"),
+        },
+        isDailyPracticeRequired: true,
       } as InstructorSemesterSettingPayload;
 
       const req: any = HttpMock.createRequest({
@@ -395,6 +414,14 @@ describe("POST /api/instructor/students/:semesterId/setting", () => {
         isQuestionProposalRequired: true,
         isCastingVotesRequired: true,
         isGettingVotesRequired: true,
+        dailyPractice: {
+          startDate,
+          endDate,
+          numPoints: 1,
+          numQuestionsPerDay: 1,
+          totalDaysOfCourse: moment(endDate).diff(moment(startDate), "days"),
+        },
+        isDailyPracticeRequired: true,
       } as InstructorSemesterSettingPayload;
 
       const req: any = HttpMock.createRequest({
@@ -478,6 +505,14 @@ describe("POST /api/instructor/students/:semesterId/setting", () => {
         isQuestionProposalRequired: true,
         isCastingVotesRequired: true,
         isGettingVotesRequired: true,
+        dailyPractice: {
+          startDate,
+          endDate,
+          numPoints: 1,
+          numQuestionsPerDay: 1,
+          totalDaysOfCourse: moment(endDate).diff(moment(startDate), "days"),
+        },
+        isDailyPracticeRequired: true,
       } as InstructorSemesterSettingPayload;
 
       const req: any = HttpMock.createRequest({

@@ -1,9 +1,11 @@
-import { Avatar, Box } from "@mui/material";
+import { Avatar, Box, Typography } from "@mui/material";
 import { common } from "@mui/material/colors";
 import { SxProps, Theme } from "@mui/system";
 import { getDownloadURL, getStorage, ref } from "firebase/storage";
 import Image from "next/image";
 import React, { FC, useEffect, useState } from "react";
+
+import { DESIGN_SYSTEM_COLORS } from "@/lib/theme/colors";
 type Props = {
   name?: string;
   imageUrl?: string;
@@ -11,6 +13,8 @@ type Props = {
   contained?: boolean;
   sx?: SxProps<Theme>;
 };
+
+const DEFAULT_AVATAR = "https://storage.googleapis.com/onecademy-1.appspot.com/ProfilePictures/no-img.png";
 
 const OptimizedAvatar: FC<Props> = ({ name = "", imageUrl, renderAsAvatar = true, contained = false, sx }) => {
   const [checkIfFileExist, setCheckIfFileExist] = useState(true);
@@ -52,12 +56,11 @@ const OptimizedAvatar: FC<Props> = ({ name = "", imageUrl, renderAsAvatar = true
     return (
       <Avatar
         sx={{
-          width: "50px",
-          height: "50px",
           background: "linear-gradient(143.7deg, #FDC830 15.15%, #F37335 83.11%);",
           fontWeight: "500",
           fontSize: "12px",
           color: common.white,
+          ...sx,
         }}
       >
         {name.charAt(0)}
@@ -88,7 +91,6 @@ const OptimizedAvatar: FC<Props> = ({ name = "", imageUrl, renderAsAvatar = true
       </Box>
     );
   }
-
   // render an Avatar with Image cover
   if (renderAsAvatar && !contained) {
     return (
@@ -104,17 +106,34 @@ const OptimizedAvatar: FC<Props> = ({ name = "", imageUrl, renderAsAvatar = true
           ...sx,
         }}
       >
-        <Image
-          src={imageUrl}
-          alt={name}
-          width="46px"
-          height="46px"
-          quality={40}
-          objectFit="cover"
-          style={{
-            borderRadius: "30px",
-          }}
-        />
+        {(!imageUrl || imageUrl === DEFAULT_AVATAR) && (
+          <Avatar
+            sx={{
+              background: "linear-gradient(143.7deg, #FDC830 15.15%, #F37335 83.11%);",
+              color: common.white,
+              width: "100%",
+              height: "100%",
+            }}
+          >
+            <Typography sx={{ fontWeight: "600", fontSize: "16px", color: DESIGN_SYSTEM_COLORS.baseWhite }}>
+              {name.split(" ")[0].charAt(0).toUpperCase()}
+              {name.split(" ")[1]?.charAt(0).toUpperCase()}
+            </Typography>
+          </Avatar>
+        )}
+        {imageUrl && imageUrl !== DEFAULT_AVATAR && (
+          <Image
+            src={imageUrl}
+            alt={name}
+            width="46px"
+            height="46px"
+            quality={40}
+            objectFit="cover"
+            style={{
+              borderRadius: "30px",
+            }}
+          />
+        )}
       </Box>
     );
   }

@@ -18,9 +18,10 @@ export const ONE_CADEMY_SECTIONS: HomepageSection[] = [
   },
   {
     id: "mechanism",
-    title: "Mechanism",
-    label: "Mechanism",
-    description: "Through human-AI collaboration, we summarize, link, evaluate, and improve science on 1Cademy.",
+    title: "Mechanisms",
+    label: "Mechanisms",
+    description:
+      "Through human-AI collaboration, we summarize, link, evaluate, improve, and learn science for long-term.",
     options: [],
   },
   {
@@ -78,7 +79,7 @@ This approach to learning empowers students to take an active role in their educ
         title: "Disability Studies",
         description:
           "The Disability Studies community explores current and past research related to disability. We investigate a wide range of topics related to disability including, disability legislation, disability culture, the psychosocial impact of disability, the economics of disability, and more. Interns summarize research articles and present their findings weekly with the rest of the group. By using 1Cademy, interns learn how to break down articles into smaller ideas, connect them to broader concepts, extrapolate the research for deeper analysis, and communicate their findings to other community members. We value collaborative learning and expect interns to participate in group discussions to dive deeper into the content.",
-        link: "/community/disability_studies",
+        link: "/community/disability-studies",
       },
       {
         title: "Social Psychology",
@@ -90,6 +91,12 @@ This approach to learning empowers students to take an active role in their educ
         title: "UX Research in Cognitive Psychology of Learning",
         description: `We study the UX Research and Cognitive Psychology literature on learning and memorizing. Using 1Cademy, we break down articles into granular knowledge pieces, connect them within a larger context of research, communicate our findings to other community members, and utilize our knowledge to conduct research. We conduct online controlled experiments using our research pipeline and co-author research papers to submit to reputable journals and conferences.`,
         link: "/community/ux-research-in-cognitive-psychology-of-Learning",
+      },
+      {
+        title: "ADHD and Autism",
+        description:
+          "The ADHD and Autism research community is centered around researching aspects of neurodivergence including (but by no means limited to) the relationships between ADHD and Autism with things such as OCD, schizoid disorders, physical disabilities, different types of therapy, depression, anxiety, and gender identity. Interns are encouraged to personalize their research to suit their interests surrounding neurodivergence and will have the opportunity to present their findings at our weekly meetings as well as collaborate with other interns. We will also have opportunities to work with other communities such as the Clinical Psychology community and Disabilities Studies community. Working with 1Cademy allows interns to gain valuable research experience, explore various research topics, collaborate with others, and learn how to present their findings in a succinct, articulate manner.",
+        link: "/community/ADHD-and-autism",
       },
       {
         title: "Liaison Librarians",

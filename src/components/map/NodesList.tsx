@@ -62,7 +62,7 @@ type NodeListProps = {
   ableToPropose: boolean;
   setAbleToPropose: (newValue: boolean) => void;
   setOpenPart: (nodeId: string, newOpenPart: OpenPart) => void;
-  // selectedNotebookId: string;
+  hideNode: boolean;
 };
 
 const NodesList = ({
@@ -115,14 +115,11 @@ const NodesList = ({
   openUserInfoSidebar,
   disabledNodes = [],
   enableChildElements = [],
-  // showProposeTutorial = false,
-  // setCurrentTutorial,
   ableToPropose,
   setAbleToPropose,
   setOpenPart,
-}: // selectedNotebookId,
-NodeListProps) => {
-  /* eslint-disable-next-line @typescript-eslint/no-unused-vars */
+  hideNode,
+}: NodeListProps) => {
   const { nodeBookDispatch } = useNodeBook();
 
   const setOpenPartNode = useCallback(
@@ -290,6 +287,8 @@ NodeListProps) => {
             // expands={nodes[nId].expands}
             // notebooks={nodes[nId].notebooks}
             open={nodes[nId].open}
+            hideNode={hideNode}
+            nodeHeigth={nodes[nId].height}
           />
         );
       })}
@@ -346,6 +345,7 @@ export const MemoizedNodeList = React.memo(NodesList, (prev, next) => {
     // prev.showProposeTutorial === next.showProposeTutorial &&
     prev.ableToPropose === next.ableToPropose &&
     prev.setNodeParts === next.setNodeParts &&
+    prev.hideNode === next.hideNode &&
     // prev.selectedNotebookId === next.selectedNotebookId &&
     validateTutorialProps()
   );

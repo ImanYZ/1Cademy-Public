@@ -147,7 +147,7 @@ describe("POST /api/notebooks/view", () => {
     req = HttpMock.createRequest({
       method: "POST",
       query: {
-        nodeId: nodes[0],
+        nodeId: nodes[0].documentId,
       },
       body: {
         notebookId: "n1",

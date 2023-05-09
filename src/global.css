@@ -181,13 +181,13 @@
 }
 
 .Node.active,
-.ChoosableNotebook .Node.Choosable:hover {
+.Node.Choosable:hover {
   -webkit-box-shadow: 0px 0px 14px 12px rgba(204, 159, 72, 0.4);
   -moz-box-shadow: 0px 0px 14px 12px rgba(204, 159, 72, 0.4);
   box-shadow: 0px 0px 14px 12px rgba(204, 159, 72, 0.4);
 }
 .LightMode .Node.active,
-.LightMode .ChoosableNotebook .Node.Choosable:hover {
+.LightMode .Node.Choosable:hover {
   -webkit-box-shadow: 0px 0px 14px 12px rgba(236, 178, 142, 0.6);
   -moz-box-shadow: 0px 0px 14px 12px rgba(236, 178, 142, 0.6);
   box-shadow: 0px 0px 14px 12px rgba(236, 178, 142, 0.6);
@@ -2627,29 +2627,28 @@ right: 5px; */
 
 /* ------------------------------- */
 /* percentaje loader styles */
-.svg circle {
+/* .svg circle {
   stroke-dashoffset: 0;
-  transition: stroke-dashoffset 1s linear; /* vendorless fallback */
-  -o-transition: stroke-dashoffset 1s linear; /* opera */
-  -ms-transition: stroke-dashoffset 1s linear; /* IE 10 */
-  -moz-transition: stroke-dashoffset 1s linear; /* Firefox */
-  -webkit-transition: stroke-dashoffset 1s linear; /*safari and chrome */
+  transition: stroke-dashoffset 1s linear;
+  -o-transition: stroke-dashoffset 1s linear;
+  -ms-transition: stroke-dashoffset 1s linear;
+  -moz-transition: stroke-dashoffset 1s linear;
+  -webkit-transition: stroke-dashoffset 1s linear;
   stroke: #666;
   stroke-width: 4px;
 }
 .svg .bar {
   stroke: #ff9f1e;
-}
-.cont {
+} */
+/* .cont {
   display: block;
   height: 200px;
   width: 200px;
   border-radius: 100%;
   position: relative;
   margin-top: -190px;
-  /* margin-left: -1px; */
   z-index: 4;
-}
+} */
 
 .profileImage {
   width: 90px;
@@ -2776,6 +2775,11 @@ right: 5px; */
   /* CHECK: I add this to hide scroll and have functionality */
   width: 4px;
   height: 4px;
+}
+
+.wide.scroll-styled::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
 }
 
 .scroll-styled::-webkit-scrollbar-thumb {

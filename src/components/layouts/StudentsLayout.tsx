@@ -15,6 +15,8 @@ import ROUTES from "../../lib/utils/routes";
 import HeaderNavbar from "../instructors/HeaderNavbar";
 import HeaderNavbarMovil from "../instructors/HeaderNavbarMovil";
 import { SemesterFilter } from "../instructors/SemesterFilter";
+// import { PracticeTool } from "../PracticeQuestion";
+// import { PracticeTool } from "../practiceTool/PracticeTool";
 
 export type Option = {
   id: string;
@@ -61,7 +63,7 @@ export const StudentsLayout: FC<Props> = ({ children }) => {
   const [currentSemester, setCurrentSemester] = useState<ICourseTag | null>(null);
   const [allSemesters, setAllSemesters] = useState<Semester[]>([]);
   const [queryUname, setQueryUname] = useState("");
-
+  // const [displayPracticeTool, setDisplayPracticeTool] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
   const db = getFirestore();
@@ -198,11 +200,16 @@ export const StudentsLayout: FC<Props> = ({ children }) => {
       </div>
     );
 
+  // if (displayPracticeTool) return <PracticeTool onClose={() => setDisplayPracticeTool(false)} />;
+
   return (
     <Box
       sx={{
         background: theme => (theme.palette.mode === "light" ? "#F5F5F5" : "#28282A"),
         minHeight: "100vh",
+        height: "100vh",
+        overflow: "auto",
+        "&::-webkit-scrollbar": { display: "none" },
       }}
     >
       {!isMovil && <HeaderNavbar options={filteredOptions} user={user} onNewCourse={onNewCourse} />}
@@ -212,6 +219,8 @@ export const StudentsLayout: FC<Props> = ({ children }) => {
           width: "100%",
           py: "10px",
           m: "auto",
+          display: "flex",
+          alignItems: "center",
           px: { xs: "10px", md: "20px" },
         }}
       >
@@ -227,6 +236,12 @@ export const StudentsLayout: FC<Props> = ({ children }) => {
           role={user.role}
           uname={queryUname}
         />
+
+        {/* <Box sx={{}}>
+          <Button size="small" onClick={() => setDisplayPracticeTool(true)}>
+            Practice tutorial
+          </Button>
+        </Box> */}
       </Box>
 
       {children({
@@ -248,6 +263,6 @@ const getCourseBySemester = (semester: string | undefined, courses: { [key: stri
   return courses[semester] ?? [];
 };
 
-type CoursesResult = {
+export type CoursesResult = {
   [key: string]: string[];
 };

@@ -170,6 +170,7 @@ const UserStatusIcon = ({ nodeBookDispatch, disabled = false, ...props }: UserSt
           <OptimizedAvatar
             imageUrl={props.imageUrl}
             renderAsAvatar={true}
+            name={`${user?.fName} ${user?.lName}`}
             contained={false}
             sx={{
               border: "none",
@@ -216,6 +217,7 @@ const UserStatusIcon = ({ nodeBookDispatch, disabled = false, ...props }: UserSt
             imageUrl={props.imageUrl}
             renderAsAvatar={true}
             contained={false}
+            name={props.fullname}
             sx={{ border: "none", width: "38px", height: "38px", position: "static", cursor: "pointer" }}
           />
           {!props.inNodeFooter && <>{props.online && <Box className={"UserStatusOnlineIcon"}></Box>}</>}

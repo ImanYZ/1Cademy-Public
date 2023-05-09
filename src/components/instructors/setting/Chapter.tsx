@@ -5,10 +5,21 @@ import CreateIcon from "@mui/icons-material/Create";
 import DeleteIcon from "@mui/icons-material/Delete";
 import IndeterminateCheckBoxOutlinedIcon from "@mui/icons-material/IndeterminateCheckBoxOutlined";
 import SaveIcon from "@mui/icons-material/Save";
-import { Accordion, AccordionDetails, AccordionSummary, Button, Paper, TextField, Typography } from "@mui/material";
+import {
+  Accordion,
+  AccordionDetails,
+  AccordionSummary,
+  Button,
+  Paper,
+  TextField,
+  Typography,
+  useTheme,
+} from "@mui/material";
 import { Box } from "@mui/system";
 import { FC } from "react";
 import React, { useState } from "react";
+
+import { DESIGN_SYSTEM_COLORS } from "@/lib/theme/colors";
 type Props = {
   chapters: any;
   setChapters: any;
@@ -239,10 +250,14 @@ const Chapter: FC<Props> = ({ chapters, setChapters, selectedCourse }) => {
     );
   };
 
+  const {
+    palette: { mode },
+  } = useTheme();
   return (
     <Paper
       sx={{
         padding: "40px 40px 40px 40px",
+        backgroundColor: mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookMainBlack : DESIGN_SYSTEM_COLORS.gray50,
       }}
       elevation={2}
     >
@@ -326,6 +341,10 @@ const Chapter: FC<Props> = ({ chapters, setChapters, selectedCourse }) => {
                     style={{ boxShadow: "none" }}
                     expanded={expanded === chapter.node}
                     onChange={handleChange(chapter.node)}
+                    sx={{
+                      backgroundColor:
+                        mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookMainBlack : DESIGN_SYSTEM_COLORS.gray50,
+                    }}
                   >
                     <AccordionSummary
                       aria-controls="panel1d-content"

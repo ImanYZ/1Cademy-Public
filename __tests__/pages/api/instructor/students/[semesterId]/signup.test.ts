@@ -1,3 +1,13 @@
+jest.mock("src/utils/helpers", () => {
+  const original = jest.requireActual("src/utils/helpers");
+  return {
+    ...original,
+    detach: jest.fn().mockImplementation(async (callback: any) => {
+      return callback();
+    }),
+  };
+});
+
 import { faker } from "@faker-js/faker";
 import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
 import { getAuth as adminGetAuth } from "firebase-admin/auth";
@@ -10,6 +20,7 @@ initFirebaseClientSDK();
 import { admin, db } from "src/lib/firestoreServer/admin";
 import signupHandler, { InstructorSemesterSignUpPayload } from "src/pages/api/instructor/students/[semesterId]/signup";
 import { ISemester } from "src/types/ICourse";
+import { IUserNode } from "src/types/IUserNode";
 import { createCourse, createInstructor, createSemester } from "testUtils/fakers/course";
 import { createNode, createNodeVersion, getDefaultNode } from "testUtils/fakers/node";
 import { getDefaultUser } from "testUtils/fakers/user";
@@ -76,10 +87,26 @@ describe("POST /api/instructor/students/:semesterId/signup", () => {
     isTag: true,
     corrects: 1,
   });
+
+  courseNode.tagIds.push(semesterNode.documentId!);
+  courseNode.tags.push(semesterNode.title);
   courseNode.children.push({
     node: String(semesterNode.documentId),
     title: semesterNode.title,
     nodeType: semesterNode.nodeType,
+  });
+
+  const questionNode = createNode({
+    admin: users[0],
+    tags: [courseNode, semesterNode],
+    parents: [courseNode],
+    corrects: 1,
+    nodeType: "Question",
+  });
+  courseNode.children.push({
+    node: questionNode.documentId!,
+    title: questionNode.title,
+    type: "Question",
   });
 
   nodes.push(universityNode);
@@ -87,6 +114,7 @@ describe("POST /api/instructor/students/:semesterId/signup", () => {
   nodes.push(programNode);
   nodes.push(courseNode);
   nodes.push(semesterNode);
+  nodes.push(questionNode);
 
   const course = createCourse({
     documentId: courseNode.documentId,
@@ -103,6 +131,7 @@ describe("POST /api/instructor/students/:semesterId/signup", () => {
     course: courseNode,
     program: programNode,
     university: universityNode,
+    root: courseNode.documentId,
   });
 
   const instructor = createInstructor({
@@ -167,6 +196,7 @@ describe("POST /api/instructor/students/:semesterId/signup", () => {
     instructorsCollection,
     new MockData([], "semesterStudentStats"),
     new MockData([], "semesterStudentVoteStats"),
+    new MockData([], "practice"),
   ];
 
   const nodesCollection = new MockData(nodes, "nodes");
@@ -317,6 +347,48 @@ describe("POST /api/instructor/students/:semesterId/signup", () => {
       const semesterData = semesterDoc.data() as ISemester;
       const filteredStudents = semesterData.students.filter(student => student.email === removedStudents[0].email);
       expect(filteredStudents.length).toEqual(0);
+    });
+
+    it("practices should be created semester students", async () => {
+      const semesterDoc = await db.collection("semesters").doc(String(semester.documentId)).get();
+      const semesterData = semesterDoc.data() as ISemester;
+      for (const student of semesterData.students) {
+        const practices = await db
+          .collection("practice")
+          .where("user", "==", student.uname)
+          .where("tagId", "==", semesterDoc.id)
+          .get();
+        expect(practices.docs.length).toEqual(1);
+      }
+    });
+
+    it("each semester student should have a notebook and user node for semester", async () => {
+      const semesterDoc = await db.collection("semesters").doc(String(semester.documentId)).get();
+      const semesterData = semesterDoc.data() as ISemester;
+      for (const student of semesterData.students) {
+        const userNodes = await db
+          .collection("userNodes")
+          .where("user", "==", student.uname)
+          .where("node", "==", semesterDoc.id)
+          .get();
+        expect(userNodes.docs.length).toEqual(1);
+        const userNode = userNodes.docs[0].data() as IUserNode;
+        const notebooks: string[] = userNode.notebooks || [];
+        expect(notebooks.length).toEqual(1);
+
+        // checking notebook exist for student
+        const _notebooks = await db
+          .collection("notebooks")
+          .where("owner", "==", student.uname)
+          .where("defaultTagId", "==", semesterDoc.id)
+          .where("title", "==", semesterData.title)
+          .get();
+
+        const expands: boolean[] = userNode.expands || [];
+        expect(expands.length).toEqual(1);
+        expect(_notebooks.docs.length).toEqual(1);
+        expect(_notebooks.docs[0].id).toEqual(notebooks[0]);
+      }
     });
   });
 

@@ -12,7 +12,12 @@ import {
   updateReputation,
 } from ".";
 import { detach, doNeedToDeleteNode, getNodeTypesFromNode, MIN_ACCEPTED_VERSION_POINT_WEIGHT } from "./helpers";
-import { signalNodeDeleteToTypesense, signalNodeVoteToTypesense, updateNodeContributions } from "./version-helpers";
+import {
+  indexNodeChange,
+  signalNodeDeleteToTypesense,
+  signalNodeVoteToTypesense,
+  updateNodeContributions,
+} from "./version-helpers";
 import { IActionTrack } from "src/types/IActionTrack";
 import { IUser } from "src/types/IUser";
 import { IComReputationUpdates } from "./reputations";
@@ -113,6 +118,9 @@ export const UpDownVoteNode = async ({
   //  if the new change yields node with more downvotes than upvotes, DELETE
   // node should not be deleted if its a locked node
   if (doNeedToDeleteNode(nodeData.corrects + correctChange, nodeData.wrongs + wrongChange, !!nodeData?.locked)) {
+    // signal search about deletion of node
+    await indexNodeChange(nodeId, nodeData.title, "DELETE");
+
     deleteNode = true;
     // TODO: move these to queue
     await detach(async () => {
@@ -436,7 +444,7 @@ export const UpDownVoteNode = async ({
       const userData = user.data() as IUser;
 
       let actionRef = db.collection("actionTracks").doc();
-      batch.create(actionRef, {
+      batch.set(actionRef, {
         accepted: true,
         type: "NodeVote",
         action,

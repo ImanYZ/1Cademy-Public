@@ -1,4 +1,5 @@
 import dayjs from "dayjs";
+import { URL } from "url";
 
 import { ONECADEMY_DOMAIN } from "@/lib/utils/1cademyConfig";
 import ROUTES from "@/lib/utils/routes";
@@ -104,7 +105,7 @@ export const getNodePageUrl = (title: string, id: string) => {
 };
 
 export const getNodePageWithDomain = (title: string, id: string) => {
-  return `${ONECADEMY_DOMAIN}${getNodePageUrl(title, id).slice(1)}`;
+  return `${ONECADEMY_DOMAIN}${getNodePageUrl(title, id)}`;
 };
 
 export const homePageSortByDefaults = {

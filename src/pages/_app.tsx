@@ -13,6 +13,7 @@ import { AppPropsWithLayout } from "src/knowledgeTypes";
 
 import { AuthProvider } from "@/context/AuthContext";
 import { ThemeProvider } from "@/context/ThemeContext";
+import { getIdToken } from "@/lib/firestoreClient/auth";
 import { initFirebaseClientSDK } from "@/lib/firestoreClient/firestoreClient.config";
 import { createEmotionCache } from "@/lib/theme/createEmotionCache";
 
@@ -25,10 +26,30 @@ initFirebaseClientSDK();
 // worker for sending uname to assitant helper
 (async () => {
   if (typeof chrome !== "undefined") {
+    const memos: {
+      timer: NodeJS.Timeout | null;
+    } = {
+      timer: null,
+    };
     const auth = getAuth();
     auth.onAuthStateChanged(user => {
+      if (memos.timer) {
+        clearInterval(memos.timer);
+      }
+
       if (user && chrome?.runtime?.sendMessage) {
+        // sending user information to extension
         chrome.runtime.sendMessage(process.env.NEXT_PUBLIC_CHROME_EXTENSION_ID, "onecademy-user-" + user?.displayName);
+        // registering event handler
+        const sendToken = async () => {
+          const idToken = await getIdToken();
+          chrome.runtime.sendMessage(process.env.NEXT_PUBLIC_CHROME_EXTENSION_ID, {
+            type: "NOTEBOOK_ID_TOKEN",
+            token: idToken,
+          });
+        };
+        memos.timer = setInterval(sendToken, 120000);
+        sendToken();
       }
     });
   }

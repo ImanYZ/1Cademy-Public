@@ -1416,6 +1416,13 @@ export const createActionTrack = (
   } as IActionTrack);
 };
 
+export const getAvatarName = (fName: string, lName: string) => {
+  const fullName = `${fName} ${lName}`;
+  const strs = fullName.split(" ");
+
+  return `${strs[0]?.charAt(0).toUpperCase() ?? ""}${strs[1]?.charAt(0).toUpperCase() ?? ""}`;
+};
+
 {
   // const sortedNodeIndex = (nodes, newNode, attr) => {
   //   let low = 0,

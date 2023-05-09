@@ -1,4 +1,4 @@
-import { Timestamp, WriteBatch } from "firebase-admin/firestore";
+import { DocumentSnapshot, Timestamp, WriteBatch } from "firebase-admin/firestore";
 import { checkRestartBatchWriteCounts, db, MAX_TRANSACTION_WRITES, TWriteOperation } from "@/lib/firestoreServer/admin";
 import { NodeType } from "src/types";
 import {
@@ -16,6 +16,184 @@ import { IUserNodeVersion } from "src/types/IUserNodeVersion";
 import { SemesterStudentStat, SemesterStudentVoteStat } from "src/instructorsTypes";
 import moment from "moment";
 import { INodeType } from "src/types/INodeType";
+import { IPractice } from "src/types/IPractice";
+import { IUserNode } from "src/types/IUserNode";
+import { INode } from "src/types/INode";
+import { INotebook } from "src/types/INotebook";
+import { createPractice } from "./version-helpers";
+import { IUser } from "src/types/IUser";
+
+export const createSemesterNotebookForStudents = async (
+  semesterId: string,
+  studentUnames: string[],
+  batch: WriteBatch,
+  writeCounts: number
+): Promise<
+  [
+    WriteBatch,
+    number,
+    {
+      [uname: string]: string;
+    }
+  ]
+> => {
+  const semesterDoc = await db.collection("semesters").doc(semesterId).get();
+  const semesterData = semesterDoc.data() as ISemester;
+  const unameNotebooks: {
+    [uname: string]: string;
+  } = {};
+  for (const uname of studentUnames) {
+    const userDoc = await db.collection("users").doc(uname).get();
+    const userData = userDoc.data() as IUser;
+    const notebooks = await db
+      .collection("notebooks")
+      .where("owner", "==", uname)
+      .where("defaultTagId", "==", semesterId)
+      .where("title", "==", semesterData.title)
+      .limit(1)
+      .get();
+    if (notebooks.docs.length) {
+      unameNotebooks[uname] = notebooks.docs[0].id;
+      [batch, writeCounts] = await createNotebookUserNode(notebooks.docs[0].id, semesterId, uname, batch, writeCounts);
+      continue;
+    }
+    const notebookRef = db.collection("notebooks").doc();
+    batch.set(notebookRef, {
+      defaultTagId: semesterId,
+      defaultTagName: semesterData.title,
+      owner: userData.uname,
+      ownerImgUrl: userData.imageUrl,
+      ownerFullName: `${userData.fName} ${userData.lName}`,
+      ownerChooseUname: userData.chooseUname,
+      title: semesterData.title,
+      isPublic: "none",
+      users: [userData.uname],
+      usersInfo: {
+        [uname]: {
+          role: "owner",
+          imageUrl: userData.imageUrl,
+          fullname: `${userData.fName} ${userData.lName}`,
+          chooseUname: userData.chooseUname,
+        },
+      },
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    } as INotebook);
+    [batch, writeCounts] = await checkRestartBatchWriteCounts(batch, writeCounts);
+
+    unameNotebooks[uname] = notebookRef.id;
+    [batch, writeCounts] = await createNotebookUserNode(notebookRef.id, semesterId, uname, batch, writeCounts);
+  }
+
+  return [batch, writeCounts, unameNotebooks];
+};
+
+export const createNotebookUserNode = async (
+  notebookId: string,
+  nodeId: string,
+  uname: string,
+  batch: WriteBatch,
+  writeCounts: number
+): Promise<[WriteBatch, number]> => {
+  const userNodes = await db
+    .collection("userNodes")
+    .where("user", "==", uname)
+    .where("node", "==", nodeId)
+    .limit(1)
+    .get();
+  if (userNodes.docs.length) {
+    const userNodeRef = db.collection("userNodes").doc(userNodes.docs[0].id);
+    const userNode = userNodes.docs[0].data() as IUserNode;
+    const notebooks = userNode.notebooks || [];
+    const expands = userNode.expands || [];
+
+    const notebookIdx = notebooks.indexOf(notebookId);
+    if (notebookIdx === -1) {
+      notebooks.push(notebookId);
+      expands.push(true);
+    } else {
+      expands[notebookIdx] = true;
+    }
+    batch.update(userNodeRef, {
+      notebooks,
+      expands,
+    });
+    [batch, writeCounts] = await checkRestartBatchWriteCounts(batch, writeCounts);
+    return [batch, writeCounts];
+  }
+
+  const userNodeRef = db.collection("userNodes").doc();
+  batch.set(userNodeRef, {
+    visible: true,
+    open: false,
+    bookmarked: false,
+    changed: false,
+    correct: false,
+    createdAt: new Date(),
+    deleted: false,
+    isStudied: false,
+    node: nodeId,
+    updatedAt: new Date(),
+    user: uname,
+    wrong: false,
+    nodeChanges: {},
+    expands: [false],
+    notebooks: [notebookId],
+  } as IUserNode);
+  [batch, writeCounts] = await checkRestartBatchWriteCounts(batch, writeCounts);
+
+  return [batch, writeCounts];
+};
+
+export const createPracticeForSemesterStudents = async (
+  semesterId: string,
+  studentUnames: string[],
+  batch: WriteBatch,
+  writeCounts: number
+): Promise<[WriteBatch, number]> => {
+  const semesterDoc = await db.collection("semesters").doc(semesterId).get();
+  const bfs = async (_nodeIds: string[]) => {
+    const nodeIdsChunk = arrayToChunks(_nodeIds, 10);
+    const cRelationNodes: string[] = [];
+    for (const nodeIds of nodeIdsChunk) {
+      const nodes = await db.collection("nodes").where("__name__", "in", nodeIds).get();
+      for (const node of nodes.docs) {
+        const nodeData = node.data() as INode;
+        if (!nodeData.tagIds.includes(semesterId)) {
+          continue;
+        }
+        for (const child of nodeData.children) {
+          if ((nodeData.nodeType === "Concept" || nodeData.nodeType === "Relation") && child.type === "Question") {
+            // looking for practice
+            [batch, writeCounts] = await createPractice({
+              unames: studentUnames,
+              tagIds: [semesterId],
+              nodeId: child.node,
+              parentId: node.id,
+              currentTimestamp: Timestamp.now(),
+              writeCounts,
+              batch,
+            });
+          }
+          cRelationNodes.push(child.node);
+        }
+      }
+    }
+
+    if (!cRelationNodes.length) {
+      return;
+    }
+
+    await bfs(cRelationNodes);
+  };
+
+  const semester = semesterDoc.data() as ISemester;
+  if (semester.root) {
+    await bfs([semester.root]);
+  }
+
+  return [batch, writeCounts];
+};
 
 export const createOrRestoreStatDocs = async (
   semesterId: string,
@@ -87,6 +265,8 @@ export const createOrRestoreStatDocs = async (
       days: [],
       tagId: semesterId,
       uname: studentUname,
+      correctPractices: 0,
+      totalPractices: 0,
       deleted: false,
       createdAt: Timestamp.fromDate(new Date()),
       updatedAt: Timestamp.fromDate(new Date()),
@@ -122,6 +302,73 @@ export const createOrRestoreStatDocs = async (
   return [batch, writeCounts];
 };
 
+type INodePracticePresentableParams = {
+  nodeId: string;
+  tagId: string;
+  user: string;
+};
+export const isNodePracticePresentable = async ({
+  nodeId,
+  tagId,
+  user,
+}: INodePracticePresentableParams): Promise<IPractice | null> => {
+  const practices = await db
+    .collection("practice")
+    .where("user", "==", user)
+    .where("tagId", "==", tagId)
+    .where("node", "==", nodeId)
+    .limit(1)
+    .get();
+  if (practices.docs.length) {
+    const practice = practices.docs[0].data() as IPractice;
+    const nextDate = practice.nextDate as Timestamp;
+    if (!practice.lastPresented || (practice.nextDate && moment().isSameOrBefore(nextDate.toDate())) || !practice.q) {
+      practice.documentId = practices.docs[0].id;
+      return practice;
+    }
+  }
+  return null;
+};
+
+type IGetOrCreateUserNodeParams = {
+  nodeId: string;
+  user: string;
+};
+export const getOrCreateUserNode = async ({
+  nodeId,
+  user,
+}: IGetOrCreateUserNodeParams): Promise<DocumentSnapshot<any>> => {
+  const userNodes = await db
+    .collection("userNodes")
+    .where("user", "==", user)
+    .where("node", "==", nodeId)
+    .limit(1)
+    .get();
+  if (userNodes.docs.length) {
+    return userNodes.docs[0];
+  }
+  const userNodeData: IUserNode = {
+    changed: false,
+    correct: false,
+    deleted: false,
+    isStudied: false,
+    bookmarked: false,
+    node: nodeId,
+    notebooks: [],
+    expands: [],
+    open: true,
+    user,
+    visible: true,
+    wrong: false,
+    nodeChanges: {},
+    createdAt: new Date(),
+    updatedAt: new Date(),
+  };
+  const userNodeRef = db.collection("userNodes").doc();
+  await userNodeRef.set(userNodeData);
+  return userNodeRef.get();
+};
+
 export const getSemesterIdsFromTagIds = async (tagIds: string[]) => {
   const semesterIds: string[] = [];
 
@@ -135,6 +382,21 @@ export const getSemesterIdsFromTagIds = async (tagIds: string[]) => {
 
   return Array.from(new Set(semesterIds)); // unique semester ids
 };
+
+export const getCourseIdsFromTagIds = async (tagIds: string[]) => {
+  const courseIds: string[] = [];
+
+  const tagIdsChunks = arrayToChunks(tagIds, 10);
+  for (const tagIds of tagIdsChunks) {
+    const courses = await db.collection("courses").where("__name__", "in", tagIds).get();
+    for (const course of courses.docs) {
+      courseIds.push(course.id);
+    }
+  }
+
+  return Array.from(new Set(courseIds)); // unique course ids
+};
+// tagIds
 
 export const getSemestersByIds = async (semesterIds: string[]) => {
   const semestersByIds: {
@@ -252,6 +514,8 @@ export const getStatDayIdx = (statDate: string, studentStat: ISemesterStudentSta
         newNodes: 0,
         node: syllabusItem.node!,
         title: syllabusItem.title,
+        correctPractices: 0,
+        totalPractices: 0,
       });
     }
   }
@@ -274,6 +538,8 @@ export const getStatDayChapterIdx = (dayStat: ISemesterStudentStatDay, chapterId
       newNodes: 0,
       node: syllabusItem.node!,
       title: syllabusItem.title,
+      correctPractices: 0,
+      totalPractices: 0,
     });
     chapterIdx = dayStat.chapters.length - 1;
   }
@@ -298,6 +564,8 @@ export const getStatVoteDayIdx = (statDate: string, studentVoteStat: ISemesterSt
       links: 0,
       newNodes: 0,
       improvements: 0,
+      correctPractices: 0,
+      totalPractices: 0,
     });
     dayVIdx = studentVoteStat.days.length - 1;
   }
@@ -753,6 +1021,8 @@ export const updateStatsOnProposal = async ({
           votes: 0,
           votePoints: 0,
           deleted: false,
+          correctPractices: 0,
+          totalPractices: 0,
           createdAt: Timestamp.fromDate(new Date()),
           updatedAt: Timestamp.fromDate(new Date()),
         };
@@ -871,4 +1141,141 @@ export const updateStatsOnProposal = async ({
       }
     }
   });
+};
+
+type IUpdateStatsOnPractice = {
+  tagIds: string[];
+  uname: string;
+  correct: boolean;
+};
+export const updateStatsOnPractice = async ({ tagIds, correct, uname }: IUpdateStatsOnPractice) => {
+  const tWriteOperations: TWriteOperation[] = [];
+
+  await db.runTransaction(async t => {
+    const semesters = await getSemestersByIds(tagIds);
+    const statDate = moment().format("YYYY-MM-DD");
+
+    for (const semesterId in semesters) {
+      const semester = semesters[semesterId];
+
+      // creating missing stat documents
+      let batch = db.batch();
+      let writeCounts = 0;
+      for (const student of semester.students) {
+        [batch, writeCounts] = await createOrRestoreStatDocs(semesterId, student.uname, batch, writeCounts);
+      }
+      await batch.commit();
+
+      const isPractitionerStudent = semester.students.some(student => student.uname === uname);
+      // if practitioner is not student then we don't need do to processing
+      if (!isPractitionerStudent) {
+        continue;
+      }
+
+      const chapterIds = getChapterIdsByTagIds(tagIds, semester.syllabus);
+
+      // per chapter stats
+      const studentStats = (await convertToTGet(
+        db.collection("semesterStudentStats").where("tagId", "==", semesterId).where("uname", "==", uname),
+        t
+      )) as FirebaseFirestore.QuerySnapshot<FirebaseFirestore.DocumentData>;
+      // aggregated stats
+      const studentVoteStats = (await convertToTGet(
+        db.collection("semesterStudentVoteStats").where("tagId", "==", semesterId).where("uname", "==", uname),
+        t
+      )) as FirebaseFirestore.QuerySnapshot<FirebaseFirestore.DocumentData>;
+
+      const studentStatRef = db.collection("semesterStudentStats").doc(studentStats.docs[0].id);
+      const studentStat = studentStats.docs[0].data() as ISemesterStudentStat;
+      const studentVoteStatRef = db.collection("semesterStudentVoteStats").doc(studentVoteStats.docs[0].id);
+      const studentVoteStat = studentVoteStats.docs[0].data() as ISemesterStudentVoteStat;
+
+      if (chapterIds.length) {
+        for (const chapterId of chapterIds) {
+          const dayIdx = getStatDayIdx(statDate, studentStat, semester);
+          const dayStat = studentStat.days[dayIdx];
+          const chapterIdx = getStatDayChapterIdx(dayStat, chapterId, semester);
+          if (correct) {
+            studentStat.days[dayIdx].chapters[chapterIdx].correctPractices += 1;
+          }
+          studentStat.days[dayIdx].chapters[chapterIdx].totalPractices += 1;
+        }
+        tWriteOperations.push({
+          objRef: studentStatRef,
+          operationType: "update",
+          data: {
+            days: studentStat.days,
+          },
+        });
+      }
+
+      const dayVIdx = getStatVoteDayIdx(statDate, studentVoteStat);
+      const dayVoteStat = studentVoteStat.days[dayVIdx];
+
+      if (correct) {
+        if (!dayVoteStat.correctPractices) {
+          dayVoteStat.correctPractices = 0;
+        }
+        if (!studentVoteStat.correctPractices) {
+          studentVoteStat.correctPractices = 0;
+        }
+
+        dayVoteStat.correctPractices += 1;
+        studentVoteStat.correctPractices += 1;
+      }
+
+      if (!dayVoteStat.totalPractices) {
+        dayVoteStat.totalPractices = 0;
+      }
+      if (!studentVoteStat.totalPractices) {
+        studentVoteStat.totalPractices = 0;
+      }
+      dayVoteStat.totalPractices += 1;
+      studentVoteStat.totalPractices += 1;
+
+      studentVoteStat.updatedAt = Timestamp.now();
+
+      tWriteOperations.push({
+        objRef: studentVoteStatRef,
+        operationType: "update",
+        data: studentVoteStat,
+      });
+    }
+
+    const _tWriteOperations = tWriteOperations.splice(0, MAX_TRANSACTION_WRITES - 1);
+    for (const operation of _tWriteOperations) {
+      const { objRef, data, operationType } = operation;
+      switch (operationType) {
+        case "update":
+          t.update(objRef, data);
+          break;
+        case "set":
+          t.set(objRef, data);
+          break;
+        case "delete":
+          t.delete(objRef);
+          break;
+      }
+    }
+  });
+
+  const chunkedArray = arrayToChunks(tWriteOperations);
+  for (const chunk of chunkedArray) {
+    await db.runTransaction(async t => {
+      for (const operation of chunk) {
+        const { objRef, data, operationType } = operation;
+        switch (operationType) {
+          case "update":
+            t.update(objRef, data);
+            break;
+          case "set":
+            t.set(objRef, data);
+            break;
+          case "delete":
+            t.delete(objRef);
+            break;
+        }
+      }
+    });
+  }
 };

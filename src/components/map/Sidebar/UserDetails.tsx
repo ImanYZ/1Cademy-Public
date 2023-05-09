@@ -3,10 +3,12 @@ import DoneRoundedIcon from "@mui/icons-material/DoneRounded";
 import StarRoundedIcon from "@mui/icons-material/StarRounded";
 import { Avatar, Box, Stack, Typography } from "@mui/material";
 import Image from "next/image";
-import React, { ReactNode } from "react";
+import React from "react";
 
 import { DESIGN_SYSTEM_COLORS } from "@/lib/theme/colors";
+import { getAvatarName } from "@/lib/utils/Map.utils";
 
+import { PointsType } from "../../PointsType";
 import { UserPoints } from "./SidebarV2/UserSettigsSidebar";
 
 type UserDetailsProps = {
@@ -44,7 +46,7 @@ const UserDetails = ({ id, imageUrl, fName, lName, uname, chooseUname, points }:
               background: "linear-gradient(143.7deg, #FDC830 15.15%, #F37335 83.11%);",
             }}
           >
-            {`${(fName ?? "").charAt(0)}${(lName ?? "").charAt(0)}`}
+            {getAvatarName(fName, lName)}
           </Avatar>
         )}
       </Box>
@@ -73,27 +75,6 @@ const UserDetails = ({ id, imageUrl, fName, lName, uname, chooseUname, points }:
             <StarRoundedIcon sx={{ color: DESIGN_SYSTEM_COLORS.yellow400, fontSize: "16px" }} />
           </PointsType>
         </Stack>
-      </Box>
-    </Stack>
-  );
-};
-
-const PointsType = ({ points, children }: { points: number; children: ReactNode }) => {
-  const { notebookG700, notebookG50 } = DESIGN_SYSTEM_COLORS;
-  return (
-    <Stack direction={"row"} alignItems={"center"} spacing={"6px"}>
-      <Typography sx={{ fontWeight: "600" }}>{points}</Typography>
-      <Box
-        sx={{
-          width: "20px",
-          height: "20px",
-          borderRadius: "50%",
-          display: "grid",
-          placeItems: "center",
-          backgroundColor: theme => (theme.palette.mode === "dark" ? notebookG700 : notebookG50),
-        }}
-      >
-        {children}
       </Box>
     </Stack>
   );

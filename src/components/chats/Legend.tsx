@@ -1,26 +1,25 @@
-import SquareIcon from "@mui/icons-material/Square";
-import { Typography } from "@mui/material";
-import { Box } from "@mui/system";
+import { Box, SxProps, Theme, Typography } from "@mui/material";
 import React, { Fragment } from "react";
 
-type LegendProps = { title: string; options: { title: string; color: string }[] };
+type LegendProps = { title: string; options: { title: string; color: string }[]; sx?: SxProps<Theme> };
 
-export const Legend = ({ title, options }: LegendProps) => {
+export const Legend = ({ title, options, sx }: LegendProps) => {
   return (
     <Box>
-      <Typography sx={{ fontSize: "12px" }}>{title}</Typography>
+      <Typography sx={{ fontSize: "12px", mb: "6px" }}>{title}</Typography>
       <Box
         sx={{
           display: "grid",
-          gridTemplateColumns: "15px 1fr 15px 1fr",
           alignItems: "center",
-          columnGap: "2px",
+          columnGap: "6px",
+          rowGap: "6px",
           fontSize: "12px",
+          ...sx,
         }}
       >
         {options.map((cur, idx) => (
           <Fragment key={idx}>
-            <SquareIcon fontSize="inherit" sx={{ fill: cur.color }} />
+            <Box width={"12px"} height={"12px"} borderRadius={"2px"} sx={{ backgroundColor: cur.color }}></Box>
             <span>{cur.title}</span>
           </Fragment>
         ))}

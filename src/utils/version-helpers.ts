@@ -1,4 +1,7 @@
 import { admin, checkRestartBatchWriteCounts, commitBatch, db, TWriteOperation } from "../lib/firestoreServer/admin";
+import axios from "axios";
+import { google } from "googleapis";
+
 import {
   arrayToChunks,
   convertToTGet,
@@ -31,6 +34,10 @@ import { TypesenseNodeSchema } from "@/lib/schemas/node";
 import { INodeType } from "src/types/INodeType";
 import { IComReputationUpdates } from "./reputations";
 import { IUserNodeVersion } from "src/types/IUserNodeVersion";
+import { getNodePageWithDomain } from "@/lib/utils/utils";
+import { IPractice } from "src/types/IPractice";
+import { getCourseIdsFromTagIds, getSemesterIdsFromTagIds } from "./course-helpers";
+import { ISemester } from "src/types/ICourse";
 
 export const comPointTypes = [
   "comPoints",
@@ -322,21 +329,102 @@ export const compareFlatLinks = ({ links1, links2 }: any) => {
   return true;
 };
 
+export const indexNodeChange = async (nodeId: string, nodeTitle: string, actionType: "NEW" | "UPDATE" | "DELETE") => {
+  // don't send request on dev and prod
+  if (process.env.ONECADEMYCRED_PROJECT_ID !== "onecademy-1") return;
+  const nodeUrl = getNodePageWithDomain(nodeTitle, nodeId);
+
+  try {
+    await axios.get(
+      `https://www.bing.com/indexnow?url=${encodeURIComponent(nodeUrl)}&key=${process.env.INDEXNOW_API_KEY}`
+    );
+  } catch (e) {
+    console.log(e, "BING_INDEX_ERROR");
+  }
+
+  const jwtClient = new google.auth.JWT(
+    process.env.ONECADEMYCRED_CLIENT_EMAIL,
+    undefined,
+    process.env.ONECADEMYCRED_PRIVATE_KEY?.replace(/\\n/g, "\n"),
+    ["https://www.googleapis.com/auth/indexing"],
+    undefined
+  );
+  const tokens = await jwtClient.authorize();
+  try {
+    await axios.post(
+      "https://indexing.googleapis.com/v3/urlNotifications:publish",
+      {
+        url: nodeUrl,
+        type: actionType === "DELETE" ? "URL_DELETED" : "URL_UPDATED",
+      },
+      {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: "Bearer " + tokens.access_token,
+        },
+      }
+    );
+  } catch (e) {
+    console.log(e, "GOOGLE_INDEX_ERROR");
+  }
+};
+
 export const createPractice = async ({
   batch,
+  unames,
   tagIds,
   nodeId,
+  parentId,
   currentTimestamp,
   writeCounts,
   t,
   tWriteOperations,
 }: any) => {
   let newBatch = batch;
-  let usersRef, usersDocs, practiceRef;
-  for (let tagId of tagIds) {
-    usersRef = db.collection("users").where("tagId", "==", tagId);
-    usersDocs = await convertToTGet(usersRef, t);
-    for (let userDoc of usersDocs.docs) {
+  let practiceRef;
+  if (!parentId) {
+    return [newBatch, writeCounts];
+  }
+  const semesterIds = await getSemesterIdsFromTagIds(tagIds);
+  for (const tagId of semesterIds) {
+    const userIds: string[] = [];
+    if (unames && Array.isArray(unames)) {
+      userIds.push(...unames);
+    } else {
+      const semesterDoc = await db.collection("semesters").doc(tagId).get();
+      const semester = semesterDoc.data() as ISemester;
+      semester.students.forEach(student => userIds.push(student.uname));
+    }
+    for (const userId of userIds) {
+      const practices = await db
+        .collection("practice")
+        .where("user", "==", userId)
+        .where("tagId", "==", tagId)
+        .where("node", "==", parentId)
+        .limit(1)
+        .get();
+      if (practices.docs.length) {
+        const practiceRef = db.collection("practice").doc(practices.docs[0].id);
+        const questionNodes: string[] = practices.docs[0].data()?.questionNodes || [];
+        if (!questionNodes.includes(nodeId)) {
+          questionNodes.push(nodeId);
+        }
+        if (t) {
+          tWriteOperations.push({
+            objRef: practiceRef,
+            data: {
+              questionNodes,
+            },
+            operationType: "update",
+          });
+        } else {
+          newBatch.set(practiceRef, {
+            questionNodes,
+          });
+          [newBatch, writeCounts] = await checkRestartBatchWriteCounts(newBatch, writeCounts);
+        }
+        continue;
+      }
       practiceRef = db.collection("practice").doc();
       const practiceData = {
         createdAt: currentTimestamp,
@@ -346,12 +434,12 @@ export const createPractice = async ({
         lastCompleted: null,
         lastPresented: null,
         nextDate: currentTimestamp,
-        node: nodeId,
+        node: parentId,
         q: 0,
         tagId,
-        tag: null,
-        user: userDoc.id,
-      };
+        questionNodes: [nodeId],
+        user: userId,
+      } as IPractice;
       if (t) {
         tWriteOperations.push({
           objRef: practiceRef,
@@ -1978,6 +2066,9 @@ export const versionCreateUpdate = async ({
             });
           }
 
+          // signal search about improvement or new node
+          await indexNodeChange(nodeId, title, "UPDATE");
+
           // TODO: move these to queue
           await detach(async () => {
             let linkedNode, linkedNodeChanges;
@@ -2129,6 +2220,9 @@ export const versionCreateUpdate = async ({
           newUpdates.versionId = versionRef.id;
           newUpdates.nodeId = childNodeRef.id;
           newUpdates.versionData = childVersion;
+
+          // signal search about improvement or new node
+          await indexNodeChange(newUpdates.nodeId, title, "NEW");
 
           // Because it's a child version, the old version that was proposed on the parent node should be
           // removed. So, we should create a new version and a new userVersion document that use the data of the previous one.
@@ -2349,6 +2443,7 @@ export const versionCreateUpdate = async ({
               batch,
               tagIds,
               nodeId: childNodeRef.id,
+              parentId: childNode.parents?.[0]?.node || "",
               currentTimestamp,
               writeCounts,
               t,

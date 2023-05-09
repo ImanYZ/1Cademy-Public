@@ -579,9 +579,6 @@ export const allCommunities = [
       "Ability to engage in group discourse and resolve complex issues",
       "Ability to work asynchronously and independently",
       "Strong presentation and summarization skills",
-      "Submit your most current resume and unofficial transcripts, indicating a GPA above 3.4/4.0",
-      "Explain in a few paragraphs why you apply to this specific community.",
-      "Complete our community-specific quiz by answering a set of questions about some research papers or book chapters and get a satisfying score",
     ],
     responsibilities: [
       "Work asynchronously and attend online meetings once per week. ",
@@ -591,6 +588,71 @@ export const allCommunities = [
       "Support research projects by summarizing background literature",
       "Work remotely for all interactions, task fulfillment, and communications ",
       "Translate research into ideas to improve the experience of 1Cademy communities",
+    ],
+  },
+  {
+    id: "ADHD-and-autism",
+    name: "ADHD_and_autism",
+    tags: [
+      {
+        title: "Attention-Deficit Hyperactivity Disorder (ADHD)",
+        node: "HJq7AEyAXkO3Kp3ft2o7",
+      },
+    ],
+    allTime: [],
+    weekly: [],
+    url: "/static/Communities/ADHD_and_Autism.jpg",
+    title: "ADHD and Autism",
+    width: "50%",
+    leaders: [
+      {
+        name: "Lee Pavelle",
+        image: "Lee_Pavelle.jpeg",
+        about: `I am a Ph.D. Candidate at the University of Michigan School of Information.`,
+        websites: [
+          {
+            name: "LinkedIn",
+            url: "https://www.linkedin.com/in/eleanore-pavelle-73642b199/",
+          },
+        ],
+      },
+    ],
+    YouTube: "jFBeYsMNbY4",
+    description: `
+    The ADHD and Autism research community is centered around researching aspects of neurodivergence including (but by no means limited to) the relationships between ADHD and Autism with things such as OCD, schizoid disorders, physical disabilities, different types of therapy, depression, anxiety, and gender identity. Interns are encouraged to personalize their research to suit their interests surrounding neurodivergence and will have the opportunity to present their findings at our weekly meetings as well as collaborate with other interns. We will also have opportunities to work with other communities such as the Clinical Psychology community and Disabilities Studies community. Working with 1Cademy allows interns to gain valuable research experience, explore various research topics, collaborate with others, and learn how to present their findings in a succinct, articulate manner.
+    `,
+    accomplishments: (
+      <>
+        This community is new and brimming with potential! Join our interdisciplinary, transnational community of
+        researchers who have been developing and adding empirical research to the large-scale and collaborative
+        platform, 1Cademy, to gain research experience on what you want to research. The goal of the ADHD and Autism
+        research community on 1Cademy is to deepen our understanding of ADHD, Autism Spectrum Disorder, and the many
+        related conditions that can accompany them while also strengthening research skills and preparing to enter the
+        professional psychology field.
+      </>
+    ),
+    gains: [
+      `Gain valuable research experience such as paper summarization, topic organization, paper analysis, and making connections between disciplines/topics`,
+      "Work towards publishing papers about ADHD and ASD",
+      "Be able to collaborate with others to review, summarize, and analyze existing research and examine future research topics",
+      "Work remotely with all task fulfillment, interactions, and communications (about 5-10 hours per week)",
+    ],
+    requirements: `In addition to the 1Cademy general application process, we require our interns to submit both their most current resume and unofficial transcripts, with GPA included on those transcripts. We require our interns to have a minimum of a 3.5/4.0 GPA to apply for this position. Interns are required to have a degree path in psychology, education, or a related field, and answer our quiz questions to evaluate their domain knowledge.`,
+    // coursera: "https://www.coursera.org/learn/academicinfoseek",
+    hasTest: true,
+    qualifications: [
+      `Strong interest in topics relating to ADHD and ASD`,
+      `Willingness to contribute to group discussions and present your findings to others during team meetings`,
+      `Able to commit to around 5-10 hours of work each week`,
+      `Fluency in reading and writing in English (will have to summarize research articles)`,
+    ],
+    responsibilities: [
+      `Read and summarize textbook chapters and scientific journal articles`,
+      `Make connections between different concepts and disciplines `,
+      `Contribute concise summaries of information to the 1Cademy platform`,
+      `Attend weekly online meetings`,
+      `Contribute to meetings by presenting findings and participating in group discussions`,
+      `All interactions, task fulfillment, and communications will be remote`,
     ],
   },
   // {
@@ -1116,7 +1178,6 @@ export const allCommunities = [
   //   requirements: `In addition to the 1Cademy general application process, we require our interns to submit both their most current cover letter and the most current version of their university transcript, with GPA included on it. We require our interns to have a minimum of a 3.5/4.0 GPA to apply for this position. Interns are also required to have elevant experience with research and literature review, Psychology preferred.`,
   //   hasTest: true,
   //   qualifications: [
-  //     `Submit your most current resume and unofficial transcripts, indicating a GPA above 3.4/4.0`,
   //     `A clear understanding of fundamentals of psychology`,
   //     `Interest and enthusiasm for positive psychology and scientific research`,
   //     `Strong desire and willingness to collaborate with others and engage in group discussions`,

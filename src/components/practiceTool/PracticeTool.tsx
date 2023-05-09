@@ -1,0 +1,198 @@
+import { Box } from "@mui/material";
+import { collection, getFirestore, onSnapshot, query, where } from "firebase/firestore";
+import React, { forwardRef, useCallback, useEffect, useImperativeHandle, useState } from "react";
+import { ISemester } from "src/types/ICourse";
+import { ISemesterStudentVoteStat } from "src/types/ICourse";
+
+import { getSemesterById } from "../../client/serveless/semesters.serverless";
+import { CourseTag, SimpleQuestionNode } from "../../instructorsTypes";
+import { User } from "../../knowledgeTypes";
+import { Post } from "../../lib/mapApi";
+import { differentBetweenDays, getDateYYMMDDWithHyphens } from "../../lib/utils/date.utils";
+import { ICheckAnswerRequestParams } from "../../pages/api/checkAnswer";
+import CourseDetail from "./CourseDetail";
+import Leaderboard from "./Leaderboard";
+import { PracticeQuestion } from "./PracticeQuestion";
+import { UserStatus } from "./UserStatus";
+
+type PracticeToolProps = {
+  user: User;
+  root?: string;
+  currentSemester: CourseTag;
+  onClose: () => void;
+  openNodeHandler: (nodeId: string) => void;
+};
+
+export type PracticeInfo = {
+  questionsLeft: number;
+  totalQuestions: number;
+  completedDays: number;
+  totalDays: number;
+  remainingDays: number;
+};
+
+const DEFAULT_PRACTICE_INFO: PracticeInfo = {
+  questionsLeft: 0,
+  totalQuestions: 0,
+  completedDays: 0,
+  remainingDays: 0,
+  totalDays: 0,
+};
+
+export interface PracticeToolRef {
+  onRunPracticeTool: (start: boolean) => void;
+}
+
+const PracticeTool = forwardRef<PracticeToolRef, PracticeToolProps>(
+  ({ user, currentSemester, openNodeHandler, onClose, root }, ref) => {
+    console.log({ currentSemester });
+    const db = getFirestore();
+    const [startPractice, setStartPractice] = useState(false);
+    const [questionData, setQuestionData] = useState<{ question: SimpleQuestionNode; flashcardId: string } | null>(
+      null
+    );
+    const [practiceIsCompleted, setPracticeIsCompleted] = useState(false);
+    const [practiceInfo, setPracticeInfo] = useState<PracticeInfo>(DEFAULT_PRACTICE_INFO);
+    const [semesterConfig, setSemesterConfig] = useState<ISemester | null>(null);
+
+    const onRunPracticeTool = useCallback(() => {
+      (start: boolean) => {
+        if (!practiceInfo) return;
+
+        setStartPractice(start);
+      };
+    }, [practiceInfo]);
+
+    useImperativeHandle(ref, () => ({
+      onRunPracticeTool,
+    }));
+
+    const onSubmitAnswer = useCallback(
+      async (answers: boolean[]) => {
+        if (!questionData) return;
+
+        const payload: ICheckAnswerRequestParams = {
+          answers,
+          flashcardId: questionData.flashcardId,
+          nodeId: questionData.question.id,
+          postpone: false,
+        };
+        await Post("/checkAnswer", payload).then(() => {});
+      },
+      [questionData]
+    );
+
+    const getPracticeQuestion = useCallback(async () => {
+      const res: any = await Post("/practice", { tagId: currentSemester.tagId });
+      console.log("practice:res", { res });
+      if (res?.done) return setPracticeIsCompleted(true);
+
+      setQuestionData(res);
+      console.log("------>", res);
+    }, [currentSemester.tagId]);
+
+    const onViewNodeOnNodeBook = (nodeId: string) => {
+      openNodeHandler(nodeId);
+      onClose();
+    };
+
+    // this is executed the first time we get selected a semester
+    useEffect(() => {
+      getPracticeQuestion();
+    }, [getPracticeQuestion]);
+
+    useEffect(() => {
+      const getSemesterConfig = async () => {
+        const semester = await getSemesterById(db, currentSemester.tagId);
+        if (!semester) return;
+
+        setSemesterConfig(semester);
+      };
+      getSemesterConfig();
+    }, [currentSemester.tagId, db, user.uname]);
+
+    useEffect(() => {
+      console.log({ semesterConfig });
+      if (!semesterConfig) return;
+
+      const q = query(
+        collection(db, "semesterStudentVoteStats"),
+        where("uname", "==", user.uname),
+        where("tagId", "==", currentSemester.tagId)
+      );
+      const unsub = onSnapshot(q, snapshot => {
+        if (snapshot.empty) return;
+
+        const docChanges = snapshot.docChanges();
+        for (const docChange of docChanges) {
+          const semesterStudentVoteStat = docChange.doc.data() as ISemesterStudentVoteStat;
+          console.log({ semesterStudentVoteStat });
+          const currentDateYYMMDD = getDateYYMMDDWithHyphens();
+          console.log({ currentDateYYMMDD });
+          const currentDayStats = semesterStudentVoteStat.days.find(cur => cur.day === currentDateYYMMDD);
+          console.log({ currentDayStats });
+          // if (!currentDayStats) return;
+          //
+          const totalQuestions = semesterConfig.dailyPractice.numQuestionsPerDay;
+          const questionsLeft = totalQuestions - (currentDayStats?.correctPractices ?? 0);
+          console.log({ questionsLeft });
+          // setPracticeInfo(prev => ({ ...prev, questionsLeft }));
+
+          const completedDays = differentBetweenDays(new Date(), semesterConfig.startDate.toDate());
+          const totalDays = differentBetweenDays(semesterConfig.endDate.toDate(), semesterConfig.startDate.toDate());
+          const remainingDays = totalDays - completedDays;
+          setPracticeInfo(prev => ({
+            ...prev,
+            questionsLeft,
+            totalQuestions,
+            completedDays,
+            totalDays,
+            remainingDays,
+          }));
+        }
+      });
+      return () => {
+        if (unsub) unsub();
+      };
+    }, [currentSemester.tagId, db, semesterConfig, user.uname]);
+
+    useEffect(() => {
+      console.log({ practiceInfo });
+      if (!practiceInfo) return;
+      if (!semesterConfig) return;
+      if (!root) return;
+
+      setStartPractice(true);
+    }, [practiceInfo, root, semesterConfig]);
+
+    return startPractice ? (
+      <Box
+        sx={{
+          position: "absolute",
+          inset: "0px",
+          background: theme =>
+            theme.palette.mode === "dark" ? theme.palette.common.notebookG900 : theme.palette.common.notebookBl1,
+          zIndex: 1,
+          overflowY: "auto",
+          overflowX: "hidden",
+        }}
+      >
+        <PracticeQuestion
+          question={questionData?.question ?? null}
+          practiceIsCompleted={practiceIsCompleted}
+          onClose={onClose}
+          leaderboard={<Leaderboard semesterId={currentSemester.tagId} />}
+          userStatus={<UserStatus semesterId={currentSemester.tagId} user={user} />}
+          onViewNodeOnNodeBook={onViewNodeOnNodeBook}
+          onGetNextQuestion={getPracticeQuestion}
+          onSaveAnswer={onSubmitAnswer}
+          practiceInfo={practiceInfo}
+        />
+      </Box>
+    ) : (
+      <CourseDetail user={user} currentSemester={currentSemester} onStartPractice={() => setStartPractice(true)} />
+    );
+  }
+);
+PracticeTool.displayName = "PracticeTool";
+export default PracticeTool;

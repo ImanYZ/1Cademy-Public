@@ -46,6 +46,13 @@ const TOPICS_ITEMS = [
     link: "/community/ux-research-in-online-communities",
   },
   {
+    id: "ADHD-and-autism",
+    title: "ADHD and Autism",
+    // image: "home/communities/08-liaisonlibrarians.jpg",
+    image: "/static/Communities/ADHD_and_Autism.jpg",
+    link: "/community/ADHD-and-autism",
+  },
+  {
     id: "liaison-librarians",
     title: "Liaison Librarians",
     // image: "home/communities/08-liaisonlibrarians.jpg",

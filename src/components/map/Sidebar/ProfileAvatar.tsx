@@ -5,17 +5,13 @@ import { getDownloadURL, getStorage, ref, uploadBytesResumable } from "firebase/
 import Image from "next/image";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 
+import { getAvatarName } from "@/lib/utils/Map.utils";
 import { addSuffixToUrlGMT } from "@/lib/utils/string.utils";
 
 import { postWithToken } from "../../../lib/mapApi";
 import { imageLoaded, isValidHttpUrl } from "../../../lib/utils/utils";
-// import { newId } from "../../../lib/utils/newid";
-// import { MemoizedMetaButton } from "../MetaButton";
 import PercentageLoader from "../PercentageLoader";
 
-// import { firebaseState, imageUrlState, uidState } from "../../../../store/AuthAtoms";
-// import PercentageLoader from "../../../PublicComps/PercentageLoader/PercentageLoader";
-// import MetaButton from "../../MetaButton/MetaButton";
 type ProfileAvatarType = {
   id?: string;
   userId: string;
@@ -24,28 +20,13 @@ type ProfileAvatarType = {
   name: string;
   lastName: string;
 };
-const ProfileAvatar = ({ id, userId, userImage, setUserImage, name, lastName }: ProfileAvatarType) => {
-  // const firebase = useRecoilValue(firebaseState);
-  // const uid = useRecoilValue(uidState);
-  // const [imageUrl, setImageUrl] = useRecoilState(imageUrlState);
 
+const ProfileAvatar = ({ id, userId, userImage, setUserImage, name, lastName }: ProfileAvatarType) => {
   const [isUploading, setIsUploading] = useState(false);
   const [percentageUploaded, setPercentageUploaded] = useState(0);
   const [imageUrlError, setImageUrlError] = useState<string | boolean>(false);
-  // const [imageWidth, setImageWidth] = useState("100%");
-  // const [imageHeight, setImageHeight] = useState("auto");
 
   const inputEl = useRef<HTMLInputElement>(null);
-
-  // const setImageSize = useCallback(({ target: img }: { target: any }) => {
-  //   if (img.offsetHeight > img.offsetWidth) {
-  //     setImageWidth("100%");
-  //     setImageHeight("auto");
-  //   } else {
-  //     setImageWidth("auto");
-  //     setImageHeight("100%");
-  //   }
-  // }, []);
 
   useEffect(() => {
     setImageUrlError(
@@ -81,21 +62,6 @@ const ProfileAvatar = ({ id, userId, userImage, setUserImage, name, lastName }: 
             return;
           }
           setIsUploading(true);
-          // Uploading image by calling this API
-          // const formData = {
-          //   file: event.target.files[0],
-          // };
-          // setPercentageUploaded(30);
-          // const { imageUrl } = await postImageWithToken("/uploadImage", formData);
-          // setPercentageUploaded(50);
-          // await imageLoaded(imageUrl);
-          // setPercentageUploaded(100);
-
-          // setImageUrlError(false);
-          // setIsUploading(false);
-          // setUserImage(imageUrl);
-          //Setting the url everywhere in the DB
-          //await postWithToken("/updateUserImageInDB", { imageUrl }); // update userImage in everywhere
 
           //Showing profile picture on frontend
           let bucket = process.env.NEXT_PUBLIC_STORAGE_BUCKET ?? "onecademy-dev.appspot.com";
@@ -125,10 +91,6 @@ const ProfileAvatar = ({ id, userId, userImage, setUserImage, name, lastName }: 
             async function complete() {
               let imageGeneratedUrl = await getDownloadURL(storageRef);
               imageGeneratedUrl = addSuffixToUrlGMT(imageGeneratedUrl, "_430x1300");
-              // TODO: REQUEST TO BACKEND
-              // const postData = {
-              //   imageUrl: imageGeneratedUrl,
-              // };
               await imageLoaded(imageGeneratedUrl);
               setImageUrlError(false);
               setIsUploading(false);
@@ -162,13 +124,14 @@ const ProfileAvatar = ({ id, userId, userImage, setUserImage, name, lastName }: 
         justifyContent: "center",
         alignItems: "center",
         borderRadius: "6px",
-        py: "8px",
       }}
     >
       <input type="file" ref={inputEl} onChange={handleImageChange} accept="image/png, image/jpg, image/jpeg" hidden />
       <Box
         onClick={handleEditImage}
         sx={{
+          width: "90px",
+          height: "90px",
           position: "relative",
           "& img": {
             borderRadius: "50%",
@@ -199,7 +162,7 @@ const ProfileAvatar = ({ id, userId, userImage, setUserImage, name, lastName }: 
               },
             }}
           >
-            {`${name.charAt(0)}${lastName.charAt(0)}`}
+            {getAvatarName(name, lastName)}
           </Avatar>
         ) : (
           <>
@@ -211,9 +174,7 @@ const ProfileAvatar = ({ id, userId, userImage, setUserImage, name, lastName }: 
               objectFit="cover"
               objectPosition="center center"
             />
-            {isUploading && (
-              <PercentageLoader percentage={percentageUploaded} radius={78} widthInPx="90px" heightInPx="90px" />
-            )}
+            {isUploading && <PercentageLoader percentage={percentageUploaded} size={90} />}
           </>
         )}
       </Box>

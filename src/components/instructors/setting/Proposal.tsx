@@ -1,8 +1,10 @@
-import { useTheme } from "@emotion/react";
-import { FilledInput, Paper, Switch, Typography } from "@mui/material";
+import { Divider, FilledInput, Paper, Typography, useTheme } from "@mui/material";
 import { Box } from "@mui/system";
 import { FC } from "react";
 import React from "react";
+
+import { IOSSwitch } from "@/components/IOSSwitcher";
+import { DESIGN_SYSTEM_COLORS } from "@/lib/theme/colors";
 type Props = {
   semester: any;
   switchHandler: any;
@@ -10,9 +12,19 @@ type Props = {
   errorState: any;
 };
 const Proposal: FC<Props> = ({ semester, inputsHandler, switchHandler, errorState }) => {
-  const layoutTheme: any = useTheme();
+  const layoutTheme = useTheme();
+  const {
+    palette: { mode },
+  } = layoutTheme;
   return (
-    <Paper className="remove-arrow-buttons unselect-date-placeholder" sx={{ padding: "40px 40px" }} elevation={2}>
+    <Paper
+      className="remove-arrow-buttons unselect-date-placeholder"
+      elevation={2}
+      sx={{
+        padding: "40px 40px",
+        backgroundColor: mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookMainBlack : DESIGN_SYSTEM_COLORS.gray50,
+      }}
+    >
       <Typography variant="h3">Course Contributions</Typography>
       <Box>
         <Typography mt={3} variant="h4">
@@ -71,7 +83,7 @@ const Proposal: FC<Props> = ({ semester, inputsHandler, switchHandler, errorStat
       <Box sx={{ marginTop: "50px" }}>
         <Typography variant="h3" sx={{ display: "flex", justifyContent: "space-between" }}>
           Proposals
-          <Switch
+          <IOSSwitch
             inputProps={{ "aria-label": "controlled" }}
             checked={semester.isProposalRequired}
             color="primary"
@@ -79,7 +91,7 @@ const Proposal: FC<Props> = ({ semester, inputsHandler, switchHandler, errorStat
             onChange={switchHandler}
           />
         </Typography>
-        <hr style={{ color: "#A5A5A5" }} />
+        <Divider sx={{ my: "16px" }} />
         <Box
           sx={{
             ...(!semester.isProposalRequired && {
@@ -193,7 +205,7 @@ const Proposal: FC<Props> = ({ semester, inputsHandler, switchHandler, errorStat
       <Box sx={{ marginTop: "50px" }}>
         <Typography variant="h3" sx={{ display: "flex", justifyContent: "space-between" }}>
           Question Proposals
-          <Switch
+          <IOSSwitch
             inputProps={{ "aria-label": "controlled" }}
             checked={semester.isQuestionProposalRequired}
             color="primary"
@@ -201,7 +213,7 @@ const Proposal: FC<Props> = ({ semester, inputsHandler, switchHandler, errorStat
             onChange={switchHandler}
           />
         </Typography>
-        <hr style={{ color: "#A5A5A5" }} />
+        <Divider sx={{ my: "16px" }} />
         <Box
           sx={{
             display: "flex",
@@ -310,6 +322,132 @@ const Proposal: FC<Props> = ({ semester, inputsHandler, switchHandler, errorStat
                 errorState.questionProposalDay ||
                 errorState.questionProposalStartDate ||
                 errorState.questionProposalEndDate
+                  ? "block"
+                  : "none",
+            }}
+          >
+            * {errorState.errorText}
+          </Typography>
+        </Box>
+      </Box>
+      <Box sx={{ marginTop: "50px" }}>
+        <Typography variant="h3" sx={{ display: "flex", justifyContent: "space-between" }}>
+          Daily Practice
+          <IOSSwitch
+            inputProps={{ "aria-label": "controlled" }}
+            checked={semester.isDailyPracticeRequired}
+            color="primary"
+            name="isDailyPracticeRequired"
+            onChange={switchHandler}
+          />
+        </Typography>
+        <Divider sx={{ my: "16px" }} />
+        <Box
+          sx={{
+            display: "flex",
+            flexWrap: "wrap",
+            alignContent: "center",
+            alignItems: "baseline",
+            ...(!semester.isDailyPracticeRequired && {
+              pointerEvents: "none",
+              opacity: "0.4",
+            }),
+          }}
+        >
+          <Typography mt={3} variant="h4" sx={{ lineHeight: "2.5" }}>
+            From&nbsp;
+            <FilledInput
+              type="date"
+              className={layoutTheme.palette.mode === "dark" ? "light-calender" : "dark-calender"}
+              value={semester.dailyPractice.startDate}
+              id="filled-adornment-weight"
+              onChange={event => inputsHandler(event, "dailyPractice", "startDate")}
+              aria-describedby="filled-weight-helper-text"
+              inputProps={{
+                "aria-label": "days",
+              }}
+              sx={{
+                paddingBottom: "10px",
+                height: "40px",
+                width: "150px",
+                borderBottom: "orange",
+                color: theme =>
+                  semester.dailyPractice.startDate != ""
+                    ? theme.palette.mode === "dark"
+                      ? "white"
+                      : "black"
+                    : "transparent",
+              }}
+              error={errorState.dailyPracticeStartDate}
+            />
+            &nbsp; to &nbsp;
+            <FilledInput
+              type="date"
+              className={layoutTheme.palette.mode === "dark" ? "light-calender" : "dark-calender"}
+              value={semester.dailyPractice.endDate}
+              id="filled-adornment-weight"
+              onChange={event => inputsHandler(event, "dailyPractice", "endDate")}
+              aria-describedby="filled-weight-helper-text"
+              inputProps={{
+                "aria-label": "days",
+              }}
+              sx={{
+                paddingBottom: "10px",
+                height: "40px",
+                width: "150px",
+                borderBottom: "orange",
+                color: theme =>
+                  semester.dailyPractice.endDate != ""
+                    ? theme.palette.mode === "dark"
+                      ? "white"
+                      : "black"
+                    : "transparent",
+              }}
+              error={errorState.dailyPracticeEndDate}
+            />
+            &nbsp;each student can practice and get&nbsp;
+            <FilledInput
+              type="number"
+              value={semester.dailyPractice.numPoints}
+              onChange={event => inputsHandler(event, "dailyPractice", "numPoints")}
+              aria-describedby="filled-weight-helper-text"
+              inputProps={{
+                "aria-label": "days",
+                min: 1,
+              }}
+              sx={{
+                paddingBottom: "10px",
+                height: "40px",
+                width: "70px",
+                borderBottom: "orange",
+              }}
+            />
+            &nbsp;{semester.dailyPractice.numPoints > 1 ? "points" : "point"} by answering &nbsp;
+            <FilledInput
+              type="number"
+              value={semester.dailyPractice.numQuestionsPerDay}
+              id="filled-adornment-weight"
+              onChange={event => inputsHandler(event, "dailyPractice", "numQuestionsPerDay")}
+              aria-describedby="filled-weight-helper-text"
+              inputProps={{
+                "aria-label": "days",
+                min: 1,
+              }}
+              sx={{
+                paddingBottom: "10px",
+                height: "40px",
+                width: "70px",
+                borderBottom: "orange",
+              }}
+            />
+            &nbsp;{semester.dailyPractice.numQuestionsPerDay > 1 ? "questions/day" : "question/day"}.
+          </Typography>
+          <Typography
+            mt={3}
+            color="error"
+            sx={{
+              display:
+                errorState.dailyPracticeDay || errorState.dailyPracticeStartDate || errorState.dailyPracticeEndDate
                   ? "block"
                   : "none",
             }}
