@@ -1,39 +1,10 @@
 import AddIcon from "@mui/icons-material/Add";
-import CheckIcon from "@mui/icons-material/Check";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import KeyboardArrowLeftIcon from "@mui/icons-material/KeyboardArrowLeft";
 import MenuIcon from "@mui/icons-material/Menu";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
-import {
-  Box,
-  Button,
-  ClickAwayListener,
-  Divider,
-  IconButton,
-  InputAdornment,
-  List,
-  ListItem,
-  ListItemButton,
-  ListItemText,
-  Stack,
-  TextField,
-  Tooltip,
-  Typography,
-  useMediaQuery,
-  useTheme,
-} from "@mui/material";
-import {
-  addDoc,
-  collection,
-  doc,
-  getDocs,
-  getFirestore,
-  query,
-  setDoc,
-  Timestamp,
-  updateDoc,
-  where,
-} from "firebase/firestore";
+import { Box, Button, Divider, IconButton, Stack, Tooltip, Typography, useMediaQuery, useTheme } from "@mui/material";
+import { addDoc, collection, doc, getFirestore, setDoc, Timestamp } from "firebase/firestore";
 import NextImage from "next/image";
 import React, { Dispatch, SetStateAction, Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
 
@@ -41,7 +12,7 @@ import { ChosenTag, MemoizedTagsSearcher } from "@/components/TagsSearcher";
 import { useNodeBook } from "@/context/NodeBookContext";
 import { useTagsTreeView } from "@/hooks/useTagsTreeView";
 import { retrieveAuthenticatedUser } from "@/lib/firestoreClient/auth";
-import { Delete, Post } from "@/lib/mapApi";
+import { Post } from "@/lib/mapApi";
 
 import BookmarkIcon from "../../../../../public/bookmark.svg";
 import EditIcon from "../../../../../public/edit.svg";
@@ -54,7 +25,6 @@ import NotificationIcon from "../../../../../public/notification.svg";
 import SearchIcon from "../../../../../public/search.svg";
 import TagIcon from "../../../../../public/tag.svg";
 import { useHover } from "../../../../hooks/userHover";
-import { useWindowSize } from "../../../../hooks/useWindowSize";
 import { DispatchAuthActions, Reputation, ReputationSignal, UserDocument, UserTheme } from "../../../../knowledgeTypes";
 import { NO_USER_IMAGE } from "../../../../lib/utils/constants";
 import { UsersStatus, UserTutorials } from "../../../../nodeBookTypes";
@@ -67,6 +37,7 @@ import { SidebarButton } from "../../SidebarButtons";
 import { MemoizedUserStatusSettings } from "../../UserStatusSettings2";
 import MultipleChoiceBtn from "../MultipleChoiceBtn";
 import UsersStatusList from "../UsersStatusList";
+import { NotebookMenu } from "./NotebookMenu";
 import { SidebarWrapper } from "./SidebarWrapper";
 
 const lBTypes = ["Weekly", "Monthly", "All Time", "Others Votes", "Others Monthly"];
@@ -147,12 +118,7 @@ MainSidebarProps) => {
   const [isCreatingNotebook, setIsCreatingNotebook] = useState(false);
   const [editableNotebook, setEditableNotebook] = useState<Notebook | null>(null);
   const createNotebookButtonRef = useRef<any>(null);
-  const { height } = useWindowSize();
-  const [notebookTitleIsEditable, setNotebookTitleEditable] = useState(false);
-  // const titleInputRef = useRef<HTMLInputElement | null>(null);
-
   const displayLargeToolbar = useMemo(() => isHovered || isMenuOpen, [isHovered, isMenuOpen]);
-  // console.log({ displayLargeToolbar, isHovered, isMenuOpen });
 
   useEffect(() => {
     if (chosenTags.length > 0 && chosenTags[0].id in allTags) {
@@ -329,112 +295,6 @@ MainSidebarProps) => {
     }
   }, []);
 
-  const onUpdateNotebookTitle = useCallback(async () => {
-    try {
-      if (!editableNotebook) return;
-      const notebookRef = doc(db, "notebooks", editableNotebook.id);
-      await updateDoc(notebookRef, { title: editableNotebook.title });
-      setEditableNotebook(null);
-      setNotebookTitleEditable(false);
-    } catch (err) {}
-  }, [db, editableNotebook]);
-
-  const onDuplicateNotebook = useCallback(async () => {
-    try {
-      if (!editableNotebook) return;
-      setIsCreatingNotebook(true);
-
-      const sameDuplications = notebooks.filter(cur => cur.duplicatedFrom === editableNotebook.id);
-      const copyNotebook: NotebookDocument = {
-        owner: editableNotebook.owner,
-        ownerImgUrl: editableNotebook.ownerImgUrl ?? NO_USER_IMAGE,
-        ownerChooseUname: Boolean(user.chooseUname),
-        ownerFullName: user.fName ?? "",
-        title: `${editableNotebook.title} (${sameDuplications.length + 2})`,
-        duplicatedFrom: editableNotebook.id,
-        isPublic: editableNotebook.isPublic,
-        users: [user.uname],
-        usersInfo: {
-          [user.uname]: {
-            chooseUname: Boolean(user.chooseUname),
-            fullname: user.fName ?? "",
-            imageUrl: user.imageUrl ?? NO_USER_IMAGE,
-            role: "owner",
-          },
-        },
-        createdAt: Timestamp.fromDate(new Date()),
-        updatedAt: Timestamp.fromDate(new Date()),
-        defaultTagId: user.tagId ?? "",
-        defaultTagName: user.tag ?? "",
-        type: editableNotebook.type ?? "default",
-      };
-      const notebooksRef = collection(db, "notebooks");
-      const docRef = await addDoc(notebooksRef, copyNotebook);
-      setEditableNotebook({ ...copyNotebook, id: docRef.id });
-      // onChangeNotebook(docRef.id);
-      const q = query(
-        collection(db, "userNodes"),
-        where("user", "==", editableNotebook.owner),
-        where("notebooks", "array-contains", editableNotebook.id),
-        where("deleted", "==", false)
-      );
-      const userNodesDocs = await getDocs(q);
-      const nodeIds: string[] = [];
-      userNodesDocs.forEach(doc => nodeIds.push(doc.data().node));
-      // console.log({ nodeIds });
-      const newNotebook: Notebook = { ...copyNotebook, id: docRef.id };
-      await openNodesOnNotebook(newNotebook, nodeIds);
-      // if (titleInputRef.current) titleInputRef.current.focus();
-    } catch (error) {
-      console.error("Cant duplicate a notebook", error);
-    } finally {
-      setIsCreatingNotebook(false);
-    }
-  }, [
-    db,
-    editableNotebook,
-    notebooks,
-    openNodesOnNotebook,
-    user.chooseUname,
-    user.fName,
-    user.imageUrl,
-    user.tag,
-    user.tagId,
-    user.uname,
-  ]);
-
-  const onCopyNotebookUrl = useCallback(() => {
-    if (!editableNotebook) return;
-    const url = `${window.location.origin}/notebooks/${encodeURIComponent(editableNotebook.title)}/${
-      editableNotebook.id
-    }`;
-    navigator.clipboard.writeText(url);
-    setEditableNotebook(null);
-    setNotebookTitleEditable(false);
-  }, [editableNotebook]);
-
-  const onDeleteNotebook = useCallback(async () => {
-    try {
-      if (!editableNotebook) return;
-
-      if (!window.confirm("Are you sure to delete notebook")) return;
-      setNotebooks(prevNotebooks => {
-        const newNotebooks = prevNotebooks.filter(cur => cur.id !== editableNotebook.id);
-        onChangeNotebook(newNotebooks[0] ?? null);
-        return newNotebooks;
-      });
-      setEditableNotebook(null);
-      setNotebookTitleEditable(false);
-      await Delete("/notebooks/delete", { notebookId: editableNotebook.id });
-      // onChangeNotebook("");
-      console.log("deleted complete");
-    } catch (error) {
-      console.error("Cant remove notebook", error);
-    } finally {
-      setIsCreatingNotebook(false);
-    }
-  }, [editableNotebook, onChangeNotebook, setNotebooks]);
-
   const onOpenUserInfo = useCallback(() => {
     if (!editableNotebook) return;
 
@@ -455,7 +315,7 @@ MainSidebarProps) => {
       createdAt: Timestamp.fromDate(new Date()),
     });
     setEditableNotebook(null);
-    setNotebookTitleEditable(false);
+    // setNotebookTitleEditable(false);
   }, [db, editableNotebook, nodeBookDispatch, setOpenSideBar, user.uname]);
 
   useEffect(() => {
@@ -724,123 +584,17 @@ MainSidebarProps) => {
 
         <Portal anchor="portal">
           {editableNotebook && (
-            <ClickAwayListener onClickAway={onUpdateNotebookTitle}>
-              <Box
-                sx={{
-                  width: "263px",
-                  position: "absolute",
-                  top: `${height / 2 - 200}px`,
-                  left: "255px",
-                  zIndex: 10000,
-                  backgroundColor: theme =>
-                    theme.palette.mode === "dark"
-                      ? theme.palette.common.notebookMainBlack
-                      : theme.palette.common.gray50,
-                }}
-              >
-                <Stack direction={"row"} alignItems="center" justifyContent={"space-between"} sx={{ p: "14px 12px" }}>
-                  {notebookTitleIsEditable ? (
-                    <TextField
-                      // ref={titleInputRef}
-                      id="notebook-title"
-                      label=""
-                      variant="outlined"
-                      onKeyDown={e => {
-                        if (e.code === "Enter" || e.keyCode === 13) {
-                          onUpdateNotebookTitle();
-                          e.stopPropagation();
-                        }
-                      }}
-                      value={editableNotebook.title}
-                      onChange={e => setEditableNotebook(prev => (prev ? { ...prev, title: e.target.value } : null))}
-                      InputProps={{
-                        endAdornment: (
-                          <InputAdornment position="end">
-                            <IconButton onClick={() => onUpdateNotebookTitle()} sx={{ p: "4px" }}>
-                              <CheckIcon />
-                            </IconButton>
-                          </InputAdornment>
-                        ),
-                        sx: { p: "10px 14px", fontSize: "12px" },
-                      }}
-                      inputProps={{ sx: {} }}
-                      sx={{
-                        "& .Mui-focused .MuiOutlinedInput-notchedOutline": {
-                          borderColor: theme =>
-                            theme.palette.mode === "dark"
-                              ? theme.palette.common.primary600
-                              : theme.palette.common.primary600,
-                          boxShadow: theme =>
-                            theme.palette.mode === "dark"
-                              ? "0px 1px 2px rgba(16, 24, 40, 0.05), 0px 0px 0px 4px #62544B"
-                              : "0px 1px 2px rgba(16, 24, 40, 0.05), 0px 0px 0px 4px #ECCFBD",
-                        },
-                        "& .MuiOutlinedInput-notchedOutline": {
-                          borderWidth: "0px",
-                        },
-                      }}
-                      multiline
-                      fullWidth
-                    />
-                  ) : (
-                    <Typography sx={{ fontSize: "14px" }}>{editableNotebook.title}</Typography>
-                  )}
-                  <Box
-                    onClick={onOpenUserInfo}
-                    sx={{
-                      ml: "20px",
-                      minWidth: "36px",
-                      width: "36px",
-                      height: "36px",
-                      position: "relative",
-                      borderRadius: "30px",
-                      cursor: "pointer",
-                      // border: "solid 2px",
-                    }}
-                  >
-                    <NextImage
-                      src={editableNotebook.ownerImgUrl ?? NO_USER_IMAGE}
-                      alt={"owner image"}
-                      width="36px"
-                      height="36px"
-                      quality={40}
-                      objectFit="cover"
-                      style={{ borderRadius: "30px" }}
-                    />
-                  </Box>
-                </Stack>
-                <Divider />
-                <List sx={{ p: "0px", "& .MuiTypography-body1": { fontSize: "12px" } }}>
-                  {/* TODO: remove type undefined on validation, Ameer will update with default */}
-                  {(!editableNotebook.type || editableNotebook.type === "default") && (
-                    <ListItem disablePadding>
-                      <ListItemButton onClick={() => setNotebookTitleEditable(true)} sx={{ p: "12px 14px" }}>
-                        <ListItemText primary="Rename" />
-                      </ListItemButton>
-                    </ListItem>
-                  )}
-                  <ListItem disablePadding>
-                    <ListItemButton onClick={onDuplicateNotebook} sx={{ p: "12px 14px" }}>
-                      <ListItemText primary="Duplicate" />
-                    </ListItemButton>
-                  </ListItem>
-                  <ListItem disablePadding>
-                    <ListItemButton onClick={onCopyNotebookUrl} sx={{ p: "12px 14px" }}>
-                      <ListItemText primary="Copy link to page" />
-                    </ListItemButton>
-                  </ListItem>
-                  {editableNotebook.owner === user.uname &&
-                    editableNotebook.type !== "course" &&
-                    notebooks.length > 1 && (
-                      <ListItem disablePadding>
-                        <ListItemButton onClick={onDeleteNotebook} sx={{ p: "12px 14px" }}>
-                          <ListItemText primary="Delete" />
-                        </ListItemButton>
-                      </ListItem>
-                    )}
-                </List>
-              </Box>
-            </ClickAwayListener>
+            <NotebookMenu
+              editableNotebook={editableNotebook}
+              notebooks={notebooks}
+              onChangeNotebook={onChangeNotebook}
+              openUserInfo={onOpenUserInfo}
+              openNodesOnNotebook={openNodesOnNotebook}
+              setEditableNotebook={setEditableNotebook}
+              setIsCreatingNotebook={setIsCreatingNotebook}
+              setNotebooks={setNotebooks}
+              user={user}
+            />
           )}
         </Portal>
 
@@ -974,53 +728,49 @@ MainSidebarProps) => {
       </Box>
     );
   }, [
-    isMenuOpen,
-    ref,
-    displayLargeToolbar,
-    theme.palette.mode,
-    user,
-    reputation?.totalPoints,
-    reputation?.positives,
-    reputation?.negatives,
-    onOpenUserSettingsSidebar,
-    uncheckedNotificationsNum,
-    bookmarkUpdatesNum,
-    pendingProposalsNum,
-    onDisplayInstructorPage,
-    displayNotebooks,
-    notebooks,
-    isCreatingNotebook,
-    onCreateNotebook,
-    editableNotebook,
-    onUpdateNotebookTitle,
-    height,
-    notebookTitleIsEditable,
-    onOpenUserInfo,
-    onDuplicateNotebook,
-    onCopyNotebookUrl,
-    onDeleteNotebook,
-    shouldShowTagSearcher,
-    closeTagSelector,
-    chosenTags,
     allTags,
-    setAllTags,
+    bookmarkUpdatesNum,
+    choices,
+    choosingNodeClick,
+    chosenTags,
+    closeTagSelector,
+    disableUserStatusList,
+    displayLargeToolbar,
+    displayNotebooks,
+    editableNotebook,
+    isCreatingNotebook,
     isHovered,
-    openLeaderboardTypes,
+    isMenuOpen,
     leaderBoardType,
     leaderboardTypeOpen,
-    choices,
-    onlineUsers,
-    usersOnlineStatusLoaded,
     nodeBookDispatch,
-    reloadPermanentGrpah,
-    setOpenSideBar,
-    reputationSignal,
-    disableUserStatusList,
-    onOpenSidebar,
-    setIsMenuOpen,
-    selectedNotebook,
+    notebooks,
     onChangeNotebook,
-    choosingNodeClick,
+    onCreateNotebook,
+    onDisplayInstructorPage,
+    onOpenSidebar,
+    onOpenUserInfo,
+    onOpenUserSettingsSidebar,
+    onlineUsers,
+    openLeaderboardTypes,
+    openNodesOnNotebook,
+    pendingProposalsNum,
+    ref,
+    reloadPermanentGrpah,
+    reputation?.negatives,
+    reputation?.positives,
+    reputation?.totalPoints,
+    reputationSignal,
+    selectedNotebook?.id,
+    setAllTags,
+    setIsMenuOpen,
+    setNotebooks,
+    setOpenSideBar,
+    shouldShowTagSearcher,
+    theme.palette.mode,
+    uncheckedNotificationsNum,
+    user,
+    usersOnlineStatusLoaded,
   ]);
 
   const contentSignalState = useMemo(() => {
@@ -1059,7 +809,7 @@ MainSidebarProps) => {
     isCreatingNotebook,
     editableNotebook,
     onOpenUserInfo,
-    notebookTitleIsEditable,
+    // notebookTitleIsEditable,
     // titleInputRef.current,
   ]);
 
@@ -1094,23 +844,14 @@ MainSidebarProps) => {
         open={open}
         onClose={onClose}
         width={80}
-        // width={window.innerWidth <= 500 ? "100%" : isMenuOpen ? "100%" : 80}
         showCloseButton={false}
         showScrollUpButton={false}
         contentSignalState={contentSignalState}
         SidebarContent={toolbarContentMemoized}
         sx={{
           boxShadow: undefined,
-          // overflow: "hidden",
           width: { sm: isHovered ? "250px" : "80px" },
           ...(isMenuOpen && { width: "100%" }),
-
-          // width: { xs: displayLargeToolbar ? "100%" : "80px", sm: "80px" },
-          // maxWidth: { xs: displayLargeToolbar ? "100%" : "80px", sm: "80px" },
-          // ":hover": {
-          //   width: { xs: isMenuOpen ? "100%" : "80px", sm: "250px" },
-          // maxWidth: { xs: isMenuOpen ? "100%" : "80px", sm: "250px" },
-          // },
         }}
         sxContentWrapper={{
           width: "inherit",
