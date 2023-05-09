@@ -31,6 +31,8 @@ export type SimpleNode2 = {
   studied?: boolean;
 };
 
+export type NotebookUserRole = "viewer" | "editor" | "owner";
+
 export type NotebookDocument = {
   owner: string;
   ownerImgUrl: string;
@@ -42,7 +44,7 @@ export type NotebookDocument = {
   users: string[]; // here is users which access and owner
   usersInfo: {
     [uname: string]: {
-      role: "viewer" | "editor" | "owner";
+      role: NotebookUserRole;
       imageUrl: string;
       fullname: string;
       chooseUname: boolean;

@@ -738,7 +738,7 @@ MainSidebarProps) => {
                       : theme.palette.common.gray50,
                 }}
               >
-                <Stack direction={"row"} alignItems="center" sx={{ p: "14px 12px" }}>
+                <Stack direction={"row"} alignItems="center" justifyContent={"space-between"} sx={{ p: "14px 12px" }}>
                   {notebookTitleIsEditable ? (
                     <TextField
                       // ref={titleInputRef}
