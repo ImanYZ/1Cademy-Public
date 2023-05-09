@@ -6,7 +6,7 @@ import SettingsRoundedIcon from "@mui/icons-material/SettingsRounded";
 import { Box, Button, ButtonBase, Divider, Paper, Stack, Typography, useTheme } from "@mui/material";
 import Image from "next/image";
 import React, { ReactNode } from "react";
-import { User } from "src/knowledgeTypes";
+import { UserDocument } from "src/knowledgeTypes";
 import { ICourseTag, ISemester } from "src/types/ICourse";
 
 import { SemesterSelect } from "@/components/instructors/SemesterSelect";
@@ -17,7 +17,7 @@ import Logo1Cademy from "../../../../public/full-logo.svg";
 import { ToolbarView } from "../dashboard/DashboardWrapper";
 
 type DashboardToolbarProps = {
-  user: User | null;
+  user: UserDocument | null;
   semesters: ISemester[];
   courses: string[];
   selectedCourse: string | null;

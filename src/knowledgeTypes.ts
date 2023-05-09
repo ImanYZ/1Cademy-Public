@@ -368,7 +368,7 @@ export type UserBackground = "Color" | "Image";
 
 export type UserRole = "INSTRUCTOR" | "STUDENT" | null;
 
-export type User = {
+export type UserDocument = {
   blocked?: boolean;
   chooseUname?: boolean;
   city?: string;
@@ -420,6 +420,8 @@ export type User = {
   livelinessBar?: string;
   scaleThreshold?: number;
 };
+
+export type User = UserDocument & { id: string };
 
 export type UserSettings = {
   background: UserBackground;
@@ -476,7 +478,7 @@ export type Reputation = {
 export interface AuthState {
   readonly isAuthenticated: boolean;
   readonly isAuthInitialized: boolean;
-  readonly user: User | null;
+  readonly user: UserDocument | null;
   readonly reputation: Reputation | null;
   readonly settings: UserSettings;
 }
@@ -499,7 +501,7 @@ export type AuthLogoutSuccessAction = {
 export type AuthLoginSuccessAction = {
   type: "loginSuccess";
   payload: {
-    user: User;
+    user: UserDocument;
     reputation: Reputation;
     theme: UserTheme;
     background: UserBackground;
@@ -528,7 +530,7 @@ export type SetShowClustersAction = {
 };
 export type SetAuthUserAction = {
   type: "setAuthUser";
-  payload: User;
+  payload: UserDocument;
 };
 export type SetViewAction = {
   type: "setView";
@@ -604,7 +606,7 @@ export interface SignUpFormValues {
   clickedGDPR: boolean;
 }
 
-export interface SignUpData extends Omit<User, "userId" | "role"> {
+export interface SignUpData extends Omit<UserDocument, "userId" | "role"> {
   password: string;
   background: UserBackground;
   theme: UserTheme;

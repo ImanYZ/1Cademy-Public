@@ -59,7 +59,7 @@ import React, {
   useMemo,
   useState,
 } from "react";
-import { DispatchAuthActions, Reputation, User, UserSettings, UserTheme, UserView } from "src/knowledgeTypes";
+import { DispatchAuthActions, Reputation, UserDocument, UserSettings, UserTheme, UserView } from "src/knowledgeTypes";
 import { DispatchNodeBookActions, NodeBookState, TNodeBookState } from "src/nodeBookTypes";
 import { NodeType } from "src/types";
 
@@ -100,7 +100,7 @@ type UserSettingsSidebarProps = {
   openLinkedNode: any;
   onClose: () => void;
   theme: UserTheme;
-  user: User;
+  user: UserDocument;
   settings: UserSettings;
   userReputation: Reputation;
   dispatch: React.Dispatch<DispatchAuthActions>;
@@ -207,7 +207,7 @@ const UserSettigsSidebar = ({
     if (userValue === defaultValue || !userValues.includes(userValue)) return userValue;
     return "";
   };
-  const getOtherEthnicityValue = (user: User): string => {
+  const getOtherEthnicityValue = (user: UserDocument): string => {
     if (!user?.ethnicity) return "";
     const otherEthnicity = user.ethnicity.find(ethnicityItem => !isInEthnicityValues(ethnicityItem));
     return otherEthnicity ? otherEthnicity : "";
@@ -661,7 +661,7 @@ const UserSettigsSidebar = ({
   );
 
   const handlesChooseUnameSwitch = useCallback(
-    (event: any, user: User) => {
+    (event: any, user: UserDocument) => {
       event.preventDefault();
       const newChooseUname = !user.chooseUname;
       changeAttr("chooseUname")(newChooseUname);
@@ -762,7 +762,7 @@ const UserSettigsSidebar = ({
     [changeAttr, dispatch, genderOtherValue, user]
   );
 
-  const getDisplayNameValue = useCallback((user: User) => {
+  const getDisplayNameValue = useCallback((user: UserDocument) => {
     if (user.chooseUname) return user.uname || "Your Username";
     return user.fName || user.lName ? ToUpperCaseEveryWord(user.fName + " " + user.lName) : "Your Full Name";
   }, []);
@@ -773,7 +773,7 @@ const UserSettigsSidebar = ({
     return false;
   }, []);
 
-  const mergeEthnicityOtherValueWithUserEthnicity = useCallback((user: User, otherEthnicity: string) => {
+  const mergeEthnicityOtherValueWithUserEthnicity = useCallback((user: UserDocument, otherEthnicity: string) => {
     const toRemoveOtherValues = !user.ethnicity.includes(ETHNICITY_VALUES[6]);
     const processedUserEthnicity = toRemoveOtherValues
       ? user.ethnicity.filter(eth => isInEthnicityValues(eth))

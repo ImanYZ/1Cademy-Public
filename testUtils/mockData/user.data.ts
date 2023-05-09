@@ -1,6 +1,6 @@
-import { User } from "../../src/knowledgeTypes";
+import { UserDocument } from "../../src/knowledgeTypes";
 
-export const registeredUser: User = {
+export const registeredUser: UserDocument = {
   email: "",
   uname: "",
   birthDate: "",

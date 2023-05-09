@@ -2,7 +2,7 @@ import CloseIcon from "@mui/icons-material/Close";
 import DoneIcon from "@mui/icons-material/Done";
 import { Box, SxProps, Theme, Tooltip, Typography } from "@mui/material";
 import React, { useEffect, useState } from "react";
-import { User } from "src/knowledgeTypes";
+import { UserDocument } from "src/knowledgeTypes";
 
 import usePrevious from "../../hooks/usePrevious";
 import shortenNumber from "../../lib/utils/shortenNumber";
@@ -16,7 +16,7 @@ type UserStatusSettingsProps = {
   totalNegatives?: any;
   totalPoints?: any;
   smallVersion?: boolean;
-  user: User;
+  user: UserDocument;
   sx: SxProps<Theme>;
 };
 

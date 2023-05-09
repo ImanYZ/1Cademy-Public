@@ -15,7 +15,7 @@ import {
   SemesterStudentVoteStat,
   StackedBarStats,
 } from "../../../instructorsTypes";
-import { User, UserRole } from "../../../knowledgeTypes";
+import { UserDocument, UserRole } from "../../../knowledgeTypes";
 import {
   calculateVoteStatPoints,
   getGeneralStats,
@@ -57,7 +57,7 @@ import { StudentDailyPlotStatsSkeleton } from "../../instructors/skeletons/Stude
 import Leaderboard from "../../practiceTool/Leaderboard";
 import { UserStatus } from "../../practiceTool/UserStatus";
 
-type DashboardProps = { user: User; currentSemester: ICourseTag };
+type DashboardProps = { user: UserDocument; currentSemester: ICourseTag };
 
 export const Dashboard = ({ user, currentSemester }: DashboardProps) => {
   const theme = useTheme();

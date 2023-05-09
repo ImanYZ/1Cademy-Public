@@ -20,7 +20,7 @@ import {
   SignUpData,
   SignUpValidation,
   StatsSchema,
-  User,
+  UserDocument,
 } from "../knowledgeTypes";
 
 export const getTagsAutocomplete = async (tagName: string): Promise<ResponseAutocompleteTags> => {
@@ -130,8 +130,8 @@ export const validateSignUp = async ({
   return { results: res.data };
 };
 
-export const signUp = async (user: SignUpData): Promise<User> => {
-  const res = await API.post<User>("/api/signup", { data: user });
+export const signUp = async (user: SignUpData): Promise<UserDocument> => {
+  const res = await API.post<UserDocument>("/api/signup", { data: user });
   return res.data;
 };
 
@@ -140,7 +140,7 @@ export const signIn = async (): Promise<void> => {
   return res.data;
 };
 
-export const signUpExp = async (user: any): Promise<User> => {
-  const res = await API.post<User>("/api/signUpExp", { data: user });
+export const signUpExp = async (user: any): Promise<UserDocument> => {
+  const res = await API.post<UserDocument>("/api/signUpExp", { data: user });
   return res.data;
 };

@@ -26,16 +26,14 @@ export type NotebookRequest = {
 type RequestNotificationItemProps = {
   notebookRequest: NotebookRequest;
   handleSubmitRequest: (
-    requestId: string,
-    state: NotebookRequestType,
+    request: NotebookRequest,
+    newState: NotebookRequestType,
     onLoad: (loading: { state: NotebookRequestType; loading: boolean }) => void
   ) => void;
 };
 
-const RequestNotificationItem = ({
-  handleSubmitRequest,
-  notebookRequest: { requestingUser, requestingUserInfo, permission, itemInfo, id },
-}: RequestNotificationItemProps) => {
+const RequestNotificationItem = ({ handleSubmitRequest, notebookRequest }: RequestNotificationItemProps) => {
+  const { requestingUser, requestingUserInfo, permission, itemInfo } = notebookRequest;
   const [isLoading, setIsLoading] = useState<{ state: NotebookRequestType; loading: boolean }>({
     state: "waiting",
     loading: false,
@@ -72,7 +70,7 @@ const RequestNotificationItem = ({
             },
           }}
           fullWidth
-          onClick={() => handleSubmitRequest(id, "denied", setIsLoading)}
+          onClick={() => handleSubmitRequest(notebookRequest, "denied", setIsLoading)}
           disabled={isLoading.state === "accepted"}
           loading={isLoading.state === "denied" ? isLoading.loading : undefined}
         >
@@ -89,7 +87,7 @@ const RequestNotificationItem = ({
             },
           }}
           fullWidth
-          onClick={() => handleSubmitRequest(id, "accepted", setIsLoading)}
+          onClick={() => handleSubmitRequest(notebookRequest, "accepted", setIsLoading)}
           disabled={isLoading.state === "denied"}
           loading={isLoading.state === "accepted" ? isLoading.loading : undefined}
         >

@@ -46,7 +46,7 @@ import ReferenceLightIcon from "../../../public/reference-light.svg";
 import TagIcon from "../../../public/tag.svg";
 import TagDarkIcon from "../../../public/tag-dark.svg";
 import TagLightIcon from "../../../public/tag-light.svg";
-import { User } from "../../knowledgeTypes";
+import { UserDocument } from "../../knowledgeTypes";
 import shortenNumber from "../../lib/utils/shortenNumber";
 import { DispatchNodeBookActions, FullNodeData, OpenPart, TNodeBookState } from "../../nodeBookTypes";
 import LeaderboardChip from "../LeaderboardChip";
@@ -110,7 +110,7 @@ type NodeFooterProps = {
   wrongNode: any;
   disableVotes: boolean;
   uploadNodeImage: any;
-  user: User;
+  user: UserDocument;
   citations: { [key: string]: Set<string> };
   setOpenSideBar: (sidebar: OpenSidebar) => void;
   locked: boolean;

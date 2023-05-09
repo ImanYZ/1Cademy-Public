@@ -9,7 +9,7 @@ import {
   updateProfile,
 } from "firebase/auth";
 import { collection, getDocs, getFirestore, limit, query, where } from "firebase/firestore";
-import { Reputation, User, UserBackground, UserRole, UserTheme, UserView } from "src/knowledgeTypes";
+import { Reputation, UserBackground, UserDocument, UserRole, UserTheme, UserView } from "src/knowledgeTypes";
 
 export const signUp = async (name: string, email: string, password: string) => {
   const newUser = await createUserWithEmailAndPassword(getAuth(), email, password);
@@ -53,7 +53,7 @@ export const getIdToken = async (): Promise<string | undefined> => {
 };
 
 export const retrieveAuthenticatedUser = async (userId: string, role: UserRole) => {
-  let user: User | null = null;
+  let user: UserDocument | null = null;
   let reputationsData: Reputation | null = null;
   let theme: UserTheme = "Dark";
   let view: UserView = "Graph";

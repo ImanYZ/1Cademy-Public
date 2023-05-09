@@ -1,7 +1,7 @@
 import { Autocomplete, Box, createFilterOptions, TextField } from "@mui/material";
 import { collection, doc, getDocs, getFirestore, query, setDoc, Timestamp, updateDoc } from "firebase/firestore";
 import React, { HTMLAttributes, useEffect, useState } from "react";
-import { Institution, Major, User } from "src/knowledgeTypes";
+import { Institution, Major, UserDocument } from "src/knowledgeTypes";
 
 import OptimizedAvatar from "@/components/OptimizedAvatar";
 // import OptimizedAvatar from "@/components/OptimizedAvatar";
@@ -10,7 +10,7 @@ import { capitalizeFirstLetter } from "@/lib/utils/string.utils";
 
 import { MemoizedInputSave } from "../InputSave";
 type UserSettingsProfessionalInfoProps = {
-  user: User;
+  user: UserDocument;
 };
 export const UserSettingsProfessionalInfo = ({ user }: UserSettingsProfessionalInfoProps) => {
   const db = getFirestore();
@@ -38,7 +38,7 @@ export const UserSettingsProfessionalInfo = ({ user }: UserSettingsProfessionalI
     });
   };
 
-  const onSubmitField = async (user: User, attributeName: string, newValue: string) => {
+  const onSubmitField = async (user: UserDocument, attributeName: string, newValue: string) => {
     //try {
     await updateUserField(user.uname, attributeName, newValue);
     await upadteUserFieldLog(user.uname, attributeName, newValue);
@@ -47,7 +47,7 @@ export const UserSettingsProfessionalInfo = ({ user }: UserSettingsProfessionalI
     // }
   };
 
-  const onChangeField = async (user: User, attributeName: string, newValue: any) => {
+  const onChangeField = async (user: UserDocument, attributeName: string, newValue: any) => {
     //try {
     await updateUserField(user.uname, attributeName, newValue);
     await upadteUserFieldLog(user.uname, attributeName, newValue);

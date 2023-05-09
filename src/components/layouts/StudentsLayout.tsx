@@ -5,7 +5,7 @@ import { NextPage } from "next";
 import Image from "next/image";
 import { useRouter } from "next/router";
 import React, { FC, ReactNode, useEffect, useMemo, useState } from "react";
-import { User, UserSettings } from "src/knowledgeTypes";
+import { UserDocument, UserSettings } from "src/knowledgeTypes";
 import { ICourseTag } from "src/types/ICourse";
 
 import LoadingImg from "../../../public/animated-icon-1cademy.gif";
@@ -37,7 +37,7 @@ const OPTIONS: Option[] = [
 type InstructorsLayoutPageProps = {
   selectedSemester: string | null;
   selectedCourse: string | null;
-  user: User;
+  user: UserDocument;
   currentSemester: ICourseTag | null;
   settings: UserSettings;
   isLoading: boolean;

@@ -16,6 +16,7 @@ import { ReactElement } from "react-markdown/lib/react-markdown";
 import { RiveComponentMemoized } from "@/components/home/components/temporals/RiveComponentExtended";
 import { DESIGN_SYSTEM_COLORS } from "@/lib/theme/colors";
 
+import { addUserOnNotebook } from "../../../../client/serveless/notebooks.serverless";
 import { CustomBadge } from "../../CustomBudge";
 import NotificationsList from "../NotificationsList";
 import RequestNotificationItem, { NotebookRequest, NotebookRequestType } from "../RequestNotificationItem";
@@ -185,41 +186,47 @@ const NotificationSidebar = ({
   useEffect(() => {
     const requestRef = collection(db, "requests");
     const q = query(requestRef, where("requestedUser", "==", username), where("state", "==", "waiting"));
-    const unsub = onSnapshot(q, snapshot => {
-      const docChages = snapshot.docChanges();
-      if (!(docChages.length > 0)) return;
+    const killSnapshot = onSnapshot(q, snapshot => {
+      const docChanges = snapshot.docChanges();
+      if (!(docChanges.length > 0)) return;
 
       setNotebookRequests(prev => {
-        const currentRequests = [...prev];
+        // const currentRequests = [...prev];
 
-        for (const docChange of docChages) {
-          const newRequest = { ...docChange.doc.data(), id: docChange.doc.id } as NotebookRequest;
-          const exists = currentRequests.some(el => el.id === newRequest.id);
-          if (!exists) currentRequests.push(newRequest);
-        }
-        return currentRequests;
+        return docChanges.reduce((acu, cur): NotebookRequest[] => {
+          const notebookRequestData = { ...cur.doc.data(), id: cur.doc.id } as NotebookRequest;
+          if (cur.type === "added") return [...acu, notebookRequestData];
+          if (cur.type === "modified") return acu.map(c => (c.id === notebookRequestData.id ? notebookRequestData : c));
+          if (cur.type === "removed") return acu.filter(c => c.id !== notebookRequestData.id);
+          return acu;
+        }, prev);
+
+        // for (const docChange of docChanges) {
+        //   const newRequest = { ...docChange.doc.data(), id: docChange.doc.id } as NotebookRequest;
+        //   const exists = currentRequests.some(el => el.id === newRequest.id);
+        //   if (!exists) currentRequests.push(newRequest);
+        // }
+        // return currentRequests;
       });
     });
-    return () => {
-      unsub();
-    };
+    return () => killSnapshot();
   }, [db, username]);
 
   const handleSubmitRequest = useCallback(
     async (
-      requestId: string,
-      state: NotebookRequestType,
+      request: NotebookRequest,
+      newState: NotebookRequestType,
       setIsLoading: (loading: { state: NotebookRequestType; loading: boolean }) => void
     ) => {
       try {
-        setIsLoading({ state, loading: true });
-        const docRef = doc(db, "requests", requestId);
-        await updateDoc(docRef, { state });
-        setNotebookRequests(prev => {
-          let requests = [...prev];
-          requests = requests.filter(request => request.id !== requestId);
-          return requests;
-        });
+        setIsLoading({ state: newState, loading: true });
+        const docRef = doc(db, "requests", request.id);
+        await updateDoc(docRef, { state: newState });
+
+        if (newState === "accepted") {
+          await addUserOnNotebook(db, request.item, request.requestingUser, "viewer");
+        }
+        setNotebookRequests(prev => prev.filter(cur => cur.id !== request.id));
         setIsLoading({ state: "waiting", loading: false });
       } catch (error) {
         console.log(error);

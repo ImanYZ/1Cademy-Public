@@ -1,6 +1,6 @@
 import { Timestamp } from "firebase-admin/firestore";
 import { NextApiRequest, NextApiResponse } from "next";
-import { User } from "src/knowledgeTypes";
+import { UserDocument } from "src/knowledgeTypes";
 import fbAuth from "src/middlewares/fbAuth";
 import { ISemesterStudentStat } from "src/types/ICourse";
 import { checkRestartBatchWriteCounts, commitBatch, db } from "../../lib/firestoreServer/admin";

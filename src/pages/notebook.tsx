@@ -1175,11 +1175,11 @@ const Notebook = ({}: NotebookProps) => {
 
     devLog("SYNCHRONIZATION", { selectedNotebookId: selectedNotebook.id });
 
-    // db.collection("cities").where("regions", "array-contains", "west_coast").where("population", ">", 1000000).where("area", ">", 1000000)
     const userNodesRef = collection(db, "userNodes");
     const q = query(
       userNodesRef,
-      where("user", "==", user.uname),
+      // where("user", "==", user.uname),
+      where("user", "==", selectedNotebook.owner),
       where("notebooks", "array-contains", selectedNotebook.id),
       // where("visible", "==", true),
       where("deleted", "==", false)
@@ -6139,16 +6139,18 @@ const Notebook = ({}: NotebookProps) => {
       devLog("DUPLICATE_NOTEBOOK_FROM_PARAMS", { nb, user });
 
       const userNotebooks: Notebook[] = [];
-      const q = query(collection(db, "notebooks"), where("owner", "==", user.uname));
+      const q = query(collection(db, "notebooks"), where("users", "array-contains", user.uname));
       const queryDocs = await getDocs(q);
       queryDocs.forEach(c => userNotebooks.push({ id: c.id, ...(c.data() as NotebookDocument) }));
 
       // validate if notebook was duplicated previously
       const notebookFromParams = userNotebooks.find(cur => cur.duplicatedFrom === nb);
+      console.log({ notebookFromParams, userNotebooks, nb });
       if (notebookFromParams) return setSelectedNotebook(notebookFromParams);
 
       const notebookRef = doc(db, "notebooks", nb);
       const notebookDoc = await getDoc(notebookRef);
+      console.log({ notebookDoc: notebookDoc.exists() });
       if (notebookDoc.exists()) {
         const notebookData: Notebook = { id: nb, ...(notebookDoc.data() as NotebookDocument) };
         const tmpNotebookAccessRequest: RequestNotebookAccess = {
@@ -6161,6 +6163,7 @@ const Notebook = ({}: NotebookProps) => {
         // if private: user has access ? select modal : show access request modal
         // editable: user has access ? select: modify document to have access and select
         // visible: duplicate as owner
+        console.log({ notebookData });
         const userHasAccess = notebookData.users.find(cur => cur === user.uname);
 
         if (notebookData.isPublic === "private") {

@@ -16,7 +16,7 @@ import AuthLayout from "../components/layouts/AuthLayout";
 import { SignUpBasicInfo } from "../components/SignUpBasicInfo";
 import { SignUpPersonalInfo } from "../components/SignUpPersonalInfo";
 import { SignUpProfessionalInfo } from "../components/SignUpProfessionalInfo";
-import { NextPageWithLayout, SignUpData, SignUpFormValues, User } from "../knowledgeTypes";
+import { NextPageWithLayout, SignUpData, SignUpFormValues, UserDocument } from "../knowledgeTypes";
 
 const getDateBySubstractYears = (years: number, date = new Date()) => {
   date.setFullYear(date.getFullYear() - years);
@@ -30,7 +30,7 @@ const SignUpPage: NextPageWithLayout = () => {
   const minDate = getDateBySubstractYears(100);
   const maxDate = getDateBySubstractYears(10);
   const steps = ["Account", "Personal", "Education"];
-  const mutateSignUp = useMutation<User, unknown, SignUpData>(signUpApi, {
+  const mutateSignUp = useMutation<UserDocument, unknown, SignUpData>(signUpApi, {
     onSuccess: async (data, variables) => {
       try {
         await signIn(variables.email, variables.password);

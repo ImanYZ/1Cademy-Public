@@ -6,7 +6,7 @@ import { ISemesterStudentVoteStat } from "src/types/ICourse";
 
 import { getSemesterById } from "../../client/serveless/semesters.serverless";
 import { CourseTag, SimpleQuestionNode } from "../../instructorsTypes";
-import { User } from "../../knowledgeTypes";
+import { UserDocument } from "../../knowledgeTypes";
 import { Post } from "../../lib/mapApi";
 import { differentBetweenDays, getDateYYMMDDWithHyphens } from "../../lib/utils/date.utils";
 import { ICheckAnswerRequestParams } from "../../pages/api/checkAnswer";
@@ -16,7 +16,7 @@ import { PracticeQuestion } from "./PracticeQuestion";
 import { UserStatus } from "./UserStatus";
 
 type PracticeToolProps = {
-  user: User;
+  user: UserDocument;
   root?: string;
   currentSemester: CourseTag;
   onClose: () => void;

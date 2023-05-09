@@ -26,7 +26,7 @@ import Head from "next/head";
 import Image from "next/image";
 import Link from "next/link";
 import React, { useEffect, useMemo, useRef, useState } from "react";
-import { User } from "src/knowledgeTypes";
+import { UserDocument } from "src/knowledgeTypes";
 
 import AppFooter from "@/components/AppFooter";
 import AppHeaderMemoized from "@/components/Header/AppHeader";
@@ -116,7 +116,7 @@ const subSections = [
 const accumulatePoints = (
   groups: any,
   reputationData: DocumentData,
-  user: Pick<User, "uname" | "fName" | "lName" | "imageUrl">,
+  user: Pick<UserDocument, "uname" | "fName" | "lName" | "imageUrl">,
   points: number
 ) => {
   for (let communi of groups) {
@@ -179,7 +179,9 @@ const Communities = (props: Props) => {
   }>({});
   const [reputationsLoaded, setReputationsLoaded] = useState(false);
   const [usersChanges, setUsersChanges] = useState<DocumentChange<DocumentData>[]>([]);
-  const [users, setUsers] = useState<{ [key: string]: Pick<User, "uname" | "fName" | "lName" | "imageUrl"> }>({});
+  const [users, setUsers] = useState<{ [key: string]: Pick<UserDocument, "uname" | "fName" | "lName" | "imageUrl"> }>(
+    {}
+  );
   const [usersLoaded, setUsersLoaded] = useState(false);
   const [communities, setCommunities] = useState(allCommunities);
 

@@ -55,7 +55,7 @@ import SearchIcon from "../../../../../public/search.svg";
 import TagIcon from "../../../../../public/tag.svg";
 import { useHover } from "../../../../hooks/userHover";
 import { useWindowSize } from "../../../../hooks/useWindowSize";
-import { DispatchAuthActions, Reputation, ReputationSignal, User, UserTheme } from "../../../../knowledgeTypes";
+import { DispatchAuthActions, Reputation, ReputationSignal, UserDocument, UserTheme } from "../../../../knowledgeTypes";
 import { NO_USER_IMAGE } from "../../../../lib/utils/constants";
 import { UsersStatus, UserTutorials } from "../../../../nodeBookTypes";
 import { OpenSidebar } from "../../../../pages/notebook";
@@ -76,7 +76,7 @@ type MainSidebarProps = {
   open: boolean;
   onClose: () => void;
   reloadPermanentGrpah: any;
-  user: User;
+  user: UserDocument;
   theme: UserTheme;
   reputation: Reputation;
   setOpenSideBar: (sidebar: OpenSidebar) => void;

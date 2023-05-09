@@ -25,7 +25,7 @@ import {
 import { USER_INFO_STEPS_COMPLETE } from "@/lib/utils/tutorials/userInfoTutorialSteps";
 import { USER_SETTINGS_STEPS_COMPLETE } from "@/lib/utils/tutorials/userSettingsTutorialSteps";
 
-import { User } from "../knowledgeTypes";
+import { UserDocument } from "../knowledgeTypes";
 import { devLog } from "../lib/utils/develop.util";
 import { BOOKMARKS_STEPS } from "../lib/utils/tutorials/bookmarksTutorialSteps";
 import {
@@ -90,7 +90,7 @@ export type Step = {
 export type TargetClientRect = { width: number; height: number; top: number; left: number };
 
 type useInteractiveTutorialProps = {
-  user: User | null;
+  user: UserDocument | null;
 };
 
 export type Tutorial = { name: TutorialTypeKeys; steps: TutorialStep[]; step: number } | null;

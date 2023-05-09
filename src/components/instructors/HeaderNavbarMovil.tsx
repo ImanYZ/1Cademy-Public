@@ -21,10 +21,10 @@ import useThemeChange from "@/hooks/useThemeChange";
 import ROUTES from "@/lib/utils/routes";
 
 import LogoDarkMode from "../../../public/DarkModeLogo.svg";
-import { User } from "../../knowledgeTypes";
+import { UserDocument } from "../../knowledgeTypes";
 import { Option } from "../layouts/InstructorsLayout";
 
-type HeaderNavbarMovilProps = { options: Option[]; user: User; onNewCourse?: () => void };
+type HeaderNavbarMovilProps = { options: Option[]; user: UserDocument; onNewCourse?: () => void };
 const HeaderNavbarMovil = ({ options, user, onNewCourse }: HeaderNavbarMovilProps) => {
   const [handleThemeSwitch] = useThemeChange();
   const theme = useTheme();

@@ -11,7 +11,7 @@ import { getAvatarName } from "@/lib/utils/Map.utils";
 
 import { getSemesterById } from "../../client/serveless/semesters.serverless";
 import { getSemesterStudentVoteStatsByIdAndStudent } from "../../client/serveless/semesterStudentVoteStat.serverless";
-import { User } from "../../knowledgeTypes";
+import { UserDocument } from "../../knowledgeTypes";
 import { DESIGN_SYSTEM_COLORS } from "../../lib/theme/colors";
 import {
   differentBetweenDays,
@@ -34,7 +34,7 @@ type DailyPoint = {
 type WeekInfo = { weekNumber: number; dates: Date[] };
 
 type UserStatusProps = {
-  user: User;
+  user: UserDocument;
   semesterId: string;
   displayTitle?: boolean;
   displayFooterStreak?: boolean;

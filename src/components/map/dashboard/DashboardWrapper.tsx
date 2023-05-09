@@ -19,7 +19,7 @@ import { CourseTag, Instructor, Semester, SemesterStudentVoteStat } from "src/in
 
 import { CoursesResult } from "@/components/layouts/StudentsLayout";
 
-import { User } from "../../../knowledgeTypes";
+import { UserDocument } from "../../../knowledgeTypes";
 import { DESIGN_SYSTEM_COLORS } from "../../../lib/theme/colors";
 import { ISemester } from "../../../types/ICourse";
 import { NoDataMessage } from "../../instructors/NoDataMessage";
@@ -33,7 +33,7 @@ import { DashboardStudents } from "./DashboardStudents";
 // import { CoursesResult } from "../layouts/StudentsLayout";
 
 type DashboardWrapperProps = {
-  user: User;
+  user: UserDocument;
   onClose: () => void;
   openNodeHandler: (nodeId: string) => void;
   root?: string;
@@ -53,7 +53,7 @@ export const DashboardWrapper = ({ user, openNodeHandler, onClose, root, sx }: D
   const [currentSemester, setCurrentSemester] = useState<CourseTag | null>(null);
   const [selectToolbarView, setSelectToolbarView] = useState<ToolbarView>("DASHBOARD");
 
-  const [selectedStudent, setSelectedStudent] = useState<User | null>(null);
+  const [selectedStudent, setSelectedStudent] = useState<UserDocument | null>(null);
 
   const [, /* isLoading */ setIsLoading] = useState(true);
   const [rootFound, setRootFound] = useState<boolean>(false);
@@ -197,7 +197,7 @@ export const DashboardWrapper = ({ user, openNodeHandler, onClose, root, sx }: D
         const users = await getDocs(q);
         if (users.empty) return;
 
-        const student = users.docs[0].data() as User;
+        const student = users.docs[0].data() as UserDocument;
         setSelectedStudent(student);
       };
       getUser();

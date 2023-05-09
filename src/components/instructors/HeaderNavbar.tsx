@@ -21,11 +21,11 @@ import useThemeChange from "@/hooks/useThemeChange";
 import ROUTES from "@/lib/utils/routes";
 
 import LogoDarkMode from "../../../public/DarkModeLogo.svg";
-import { User } from "../../knowledgeTypes";
+import { UserDocument } from "../../knowledgeTypes";
 import { Option } from "../layouts/InstructorsLayout";
 import { ThemeSwitcher } from "../ThemeSwitcher";
 
-type HeaderNavbarProps = { options: Option[]; user: User; onNewCourse?: () => void };
+type HeaderNavbarProps = { options: Option[]; user: UserDocument; onNewCourse?: () => void };
 const HeaderNavbar = ({ options, user, onNewCourse }: HeaderNavbarProps) => {
   const [handleThemeSwitch] = useThemeChange();
   const router = useRouter();

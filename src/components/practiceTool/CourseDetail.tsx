@@ -8,7 +8,7 @@ import { Box } from "@mui/system";
 import { collection, getFirestore, onSnapshot, query, Timestamp, where } from "firebase/firestore";
 import moment from "moment";
 import React, { useEffect, useState } from "react";
-import { User } from "src/knowledgeTypes";
+import { UserDocument } from "src/knowledgeTypes";
 
 import { DESIGN_SYSTEM_COLORS } from "@/lib/theme/colors";
 
@@ -19,7 +19,7 @@ import Leaderboard from "./Leaderboard";
 // const totalTopic = 100;
 
 type CourseDetailProps = {
-  user: User;
+  user: UserDocument;
   currentSemester: CourseTag;
   onStartPractice: () => void;
 };
