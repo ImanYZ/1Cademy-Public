@@ -41,22 +41,17 @@ const TEAM_ITEMS = [
           fontSize={"16px"}
           color={theme => (theme.palette.mode === "light" ? "#475467" : "#EAECF0")}
         >
-          Paul Resnick is a professor at the University of Michigan's School of Information. He is a leading expert in
-          the field of information and technology and has made significant contributions to the study of online
-          communities, reputation systems, and recommendation systems. Professor Resnick has received numerous
-          recognition for his work. Some of his most notable awards include:
+          Paul Resnick is the Michael D. Cohen Collegiate Professor of Information, Associate Dean for Research and
+          Innovation, and Professor of Information at the University of Michigan's School of Information. He has made
+          significant contributions to research on online communities, reputation systems, and recommendation systems.
+          Paul was elected to the CHI Academy in 2017, received the 2010 ACM Software Systems Award for the GroupLens
+          Collaborative Filtering Recommender System, the ACM Special Interest Group on E-commerce Test of Time Award
+          for "The Social Cost of Cheap Pseudonyms," and the 2016 University of Michigan Distinguished Faculty
+          Achievement Award. In 2020, he became an ACM Fellow for his contributions to recommender systems, economics
+          and computation, and online communities. Paul chaired the RecSys Conference steering committee from 2013 to
+          2015 and co-chaired the ICWSM Conference in 2014. He earned his Ph.D. from MIT in 1992 and has advised the
+          1Cademy project since 2013.
         </Typography>
-        <Box component={"ul"}>
-          <Box component={"li"}>The ACM SIGCHI Lifetime Research Award</Box>
-          <Box component={"li"}>The National Science Foundation's CAREER Award</Box>
-          <Box component={"li"}>
-            The Association for Computing Machinery's Conference on Electronic Commerce Best Paper Award
-          </Box>
-          <Box component={"li"}>The Michigan School of Information's Education Innovator Award</Box>
-          <Box component={"li"}>
-            The W. Wallace McDowell Award for outstanding contributions to the field of computer science
-          </Box>
-        </Box>
       </>
     ),
     link: "https://www.si.umich.edu/people/paul-resnick",
@@ -69,17 +64,19 @@ const TEAM_ITEMS = [
     description: (
       <>
         <Typography>
-          Joel Podolny is a highly regarded sociologist and CEO of Honor Education. Prior to his current position, Joel
-          served as Vice President of Apple and was the founding Dean of Apple University, where he oversaw the
-          company's internal training program.
+          Joel Podolny, a distinguished sociologist and CEO of Honor Education, Inc., has an impressive background in
+          academia and corporate training. Previously, he held the position of Vice President at Apple and was the
+          founding Dean of Apple University (2009-2021), where he managed the company's internal training program. In
+          addition, he served as Dean and Professor of Management at the Yale School of Management (2005-2008),
+          spearheading a significant overhaul of the Yale MBA curriculum to better equip students for the intricate,
+          cross-functional global landscape.
         </Typography>
         <Typography>
-          Joel's educational background is equally impressive. He was Dean and Professor of Management at the Yale
-          School of Management and held professorships at the Harvard Business School and Stanford Graduate School of
-          Business. During his tenure at Stanford, he served as senior associate dean and taught courses in business
-          strategy, organizational behavior, and global management. At Harvard, he was a professor and director of
-          research. In 2006, Joel led a major restructuring of the Yale MBA curriculum to better prepare students for
-          the complex and cross-functional global environment.
+          Prior to his tenure at Yale, Podolny was a Professor of Business Administration and Sociology at Harvard
+          Business School (2002-2005) and a Professor of Organizational Behavior and Strategic Management at Stanford
+          Graduate School of Business (1991-2002). While at Stanford, he held the position of Senior Associate Dean and
+          taught courses in business strategy, organizational behavior, and global management. Podolny earned his Ph.D.
+          in Sociology from Harvard University in 1991.
         </Typography>
       </>
     ),
@@ -93,17 +90,13 @@ const TEAM_ITEMS = [
     description: (
       <>
         <Typography>
-          Roby Harrington is a prominent figure in the American publishing industry, having previously served as the
-          Vice-Chairman of W. W. Norton & Company, a major book publishing company. During his time at Norton, he
-          oversaw the publication of numerous academic titles and textbooks as the Director of the College Department, a
-          position he held for many years.
-        </Typography>
-        <Typography>
-          Aside from his work in publishing, Harrington is also actively involved in preserving the legacy of President
-          Calvin Coolidge. He currently serves as a board member of the Coolidge Foundation, a non-profit organization
-          that aims to promote and educate the public about Coolidge's contributions to American history and politics.
-          Harrington's extensive experience in the publishing industry and commitment to preserving history have made
-          him a respected and influential figure in both fields.
+          Roby Harrington is currently a board member of the Camphill Foundation, an advisor to CORE ECON, a board
+          member of governors at Stanford University Press, a special advisor to the CEO of Honor Education Technology,
+          and a farmer at Ten Barn Farm in Ghent, NY. At W. W. Norton & Company, Inc, Roby held various positions,
+          including sales representative (1979-82), editor of political science, philosophy, and religion (1983-2020),
+          national sales manager (1987-93), director of the college department (1994-2020), and Vice Chairman
+          (2007-2021). He was also the chairman of the board at Camphill Foundation (2015-2020) and a fellow at the
+          Center for Advanced Study in the Behavioral Sciences at Stanford University (2020-2021).
         </Typography>
       </>
     ),
