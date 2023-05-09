@@ -11,7 +11,12 @@ import { IUser } from "src/types/IUser";
 import { initializeNewReputationData } from "src/utils";
 import { searchAvailableUnameByEmail } from "src/utils/instructor";
 import { v4 as uuidv4 } from "uuid";
-import { createOrRestoreStatDocs, createPracticeForSemesterStudents } from "src/utils/course-helpers";
+import {
+  createNotebookUserNode,
+  createOrRestoreStatDocs,
+  createPracticeForSemesterStudents,
+  createSemesterNotebookForStudents,
+} from "src/utils/course-helpers";
 import { detach } from "src/utils/helpers";
 
 export type InstructorSemesterSignUpPayload = {
@@ -148,24 +153,6 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
         } as IUser);
         [batch, writeCounts] = await checkRestartBatchWriteCounts(batch, writeCounts);
 
-        // usernode for sNode
-        // TODO: add notebooks feature
-        const userNodeRef = db.collection("userNodes").doc();
-        batch.set(userNodeRef, {
-          visible: true,
-          open: false,
-          bookmarked: false,
-          changed: false,
-          correct: false,
-          createdAt: new Date(),
-          deleted: false,
-          isStudied: false,
-          node: semesterData.tagId,
-          updatedAt: new Date(),
-          user: uname,
-          wrong: false,
-        });
-
         const reputationRef = db.collection("reputations").doc();
         let reputationData = initializeNewReputationData({
           tagId: semesterId,
@@ -253,6 +240,12 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
       await detach(async () => {
         let batch = db.batch();
         let writeCounts = 0;
+        [batch, writeCounts] = await createSemesterNotebookForStudents(
+          semesterId as string,
+          addedUnames,
+          batch,
+          writeCounts
+        );
         [batch, writeCounts] = await createPracticeForSemesterStudents(
           semesterId as string,
           addedUnames,

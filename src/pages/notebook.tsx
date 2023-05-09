@@ -6115,6 +6115,7 @@ const Notebook = ({}: NotebookProps) => {
           updatedAt: new Date(),
           defaultTagId: notebookData.defaultTagId ?? user.tagId ?? "",
           defaultTagName: notebookData.defaultTagName ?? user.tag ?? "",
+          type: notebookData.type ?? "default",
         };
 
         const notebooksRef = collection(db, "notebooks");
