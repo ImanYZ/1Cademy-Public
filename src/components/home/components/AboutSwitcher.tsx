@@ -41,22 +41,17 @@ const TEAM_ITEMS = [
           fontSize={"16px"}
           color={theme => (theme.palette.mode === "light" ? "#475467" : "#EAECF0")}
         >
-          Paul Resnick is a professor at the University of Michigan's School of Information. He is a leading expert in
-          the field of information and technology and has made significant contributions to the study of online
-          communities, reputation systems, and recommendation systems. Professor Resnick has received numerous
-          recognition for his work. Some of his most notable awards include:
+          Paul Resnick is the Michael D. Cohen Collegiate Professor of Information, Associate Dean for Research and
+          Innovation, and Professor of Information at the University of Michigan's School of Information. He has
+          significantly contributed to research on online communities, reputation systems, and recommendation systems.
+          In 2017, Paul was elected to the CHI Academy. He received the 2010 ACM Software Systems Award for his work on
+          the GroupLens Collaborative Filtering Recommender System, which demonstrated how distributed users could
+          personalize recommendations through ratings. Additionally, he received the ACM Special Interest Group on
+          E-commerce Test of Time Award for his paper "The Social Cost of Cheap Pseudonyms" and the 2016 University of
+          Michigan Distinguished Faculty Achievement Award. In 2020, Paul was selected as a Fellow of the Association
+          for Computing Machinery (ACM) for his contributions to recommender systems, economics and computation, and
+          online communities.
         </Typography>
-        <Box component={"ul"}>
-          <Box component={"li"}>The ACM SIGCHI Lifetime Research Award</Box>
-          <Box component={"li"}>The National Science Foundation's CAREER Award</Box>
-          <Box component={"li"}>
-            The Association for Computing Machinery's Conference on Electronic Commerce Best Paper Award
-          </Box>
-          <Box component={"li"}>The Michigan School of Information's Education Innovator Award</Box>
-          <Box component={"li"}>
-            The W. Wallace McDowell Award for outstanding contributions to the field of computer science
-          </Box>
-        </Box>
       </>
     ),
     link: "https://www.si.umich.edu/people/paul-resnick",
@@ -74,12 +69,11 @@ const TEAM_ITEMS = [
           company's internal training program.
         </Typography>
         <Typography>
-          Joel's educational background is equally impressive. He was Dean and Professor of Management at the Yale
-          School of Management and held professorships at the Harvard Business School and Stanford Graduate School of
-          Business. During his tenure at Stanford, he served as senior associate dean and taught courses in business
-          strategy, organizational behavior, and global management. At Harvard, he was a professor and director of
-          research. In 2006, Joel led a major restructuring of the Yale MBA curriculum to better prepare students for
-          the complex and cross-functional global environment.
+          He was Dean and Professor of Management at the Yale School of Management and held professorships at the
+          Harvard Business School and Stanford Graduate School of Business. During his tenure at Stanford, he served as
+          senior associate dean and taught courses in business strategy, organizational behavior, and global management.
+          At Harvard, he was a professor and director of research. In 2006, Joel led a major restructuring of the Yale
+          MBA curriculum to better prepare students for the complex and cross-functional global environment.
         </Typography>
       </>
     ),
