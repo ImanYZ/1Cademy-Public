@@ -6294,7 +6294,7 @@ const Notebook = ({}: NotebookProps) => {
           </NotebookPopup>
         )}
 
-        {
+        {nodeBookState.previousNode && (
           <Box
             sx={{
               height: "40px",
@@ -6371,7 +6371,7 @@ const Notebook = ({}: NotebookProps) => {
               />
             </Button>
           </Box>
-        }
+        )}
         <Box sx={{ width: "100vw", height: "100vh", overflow: "hidden" }}>
           {
             <Drawer
