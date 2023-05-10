@@ -218,7 +218,7 @@ const Leaderboard = ({ semesterId, sxBody }: LeaderboardProps) => {
               ) : (
                 <Box sx={{ width: "100%", height: "100%", display: "grid", placeItems: "center" }}>
                   <Typography sx={{ fontSize: "16px", fontWeight: "600", color: DESIGN_SYSTEM_COLORS.baseWhite }}>
-                    {getAvatarName(usersInfo[cur.uname].fName, usersInfo[cur.uname].lName)}
+                    {getAvatarName(usersInfo[cur.uname]?.fName, usersInfo[cur.uname]?.lName)}
                   </Typography>
                 </Box>
               )}
