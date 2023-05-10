@@ -5,6 +5,7 @@ import CodeIcon from "@mui/icons-material/Code";
 import HelpCenterIcon from "@mui/icons-material/HelpCenter";
 import LockIcon from "@mui/icons-material/Lock";
 import MyLocationIcon from "@mui/icons-material/MyLocation";
+import PlayCircleOutlineIcon from "@mui/icons-material/PlayCircleOutline";
 import UndoIcon from "@mui/icons-material/Undo";
 import { Masonry } from "@mui/lab";
 import {
@@ -82,6 +83,7 @@ import { MemoizedToolbarSidebar } from "../components/map/Sidebar/SidebarV2/Tool
 import { MemoizedToolbox } from "../components/map/Toolbox";
 import ModalWrapper from "../components/ModalWrapper";
 import { NodeItemDashboard } from "../components/NodeItemDashboard";
+import OptimizedAvatar2 from "../components/OptimizedAvatar2";
 import { Portal } from "../components/Portal";
 import { MemoizedTutorialTableOfContent } from "../components/tutorial/TutorialTableOfContent";
 import { NodeBookProvider, useNodeBook } from "../context/NodeBookContext";
@@ -6845,6 +6847,67 @@ const Notebook = ({}: NotebookProps) => {
               )}
             </>
           </MemoizedToolbox>
+
+          {selectedNotebook && (
+            <Stack
+              direction={"row"}
+              spacing={"16px"}
+              alignItems={"center"}
+              sx={{
+                p: "12px 16px",
+                position: "absolute",
+                right: "8px",
+                top: "108px",
+                zIndex: 100,
+                borderRadius: "8px",
+                backgroundColor: theme =>
+                  theme.palette.mode === "dark" ? theme.palette.common.notebookMainBlack : theme.palette.common.gray50,
+              }}
+            >
+              <Stack direction={"row"} spacing={"-8px"}>
+                {selectedNotebook.users
+                  .map(cur => ({ ...selectedNotebook.usersInfo[cur], uname: cur }))
+                  .map(cur => (
+                    <OptimizedAvatar2 key={cur.uname} imageUrl={cur.imageUrl} size={32} alt={cur.uname} />
+                  ))}
+              </Stack>
+              {/* <Tooltip title={selectedNotebook.title}>
+                <Typography sx={{ width: "138px", textOverflow: "ellipsis", whiteSpace: "nowrap", overflow: "hidden" }}>
+                  {selectedNotebook.title}
+                </Typography>
+              </Tooltip> */}
+              <Stack direction={"row"} spacing={"8px"}>
+                {user?.uname === selectedNotebook.owner ? (
+                  <Button
+                    variant="outlined"
+                    sx={{ borderRadius: "26px", borderColor: theme => theme.palette.common.primary800 }}
+                    onClick={() => console.log("join")}
+                  >
+                    Present
+                    <PlayCircleOutlineIcon sx={{ ml: "8px" }} />
+                  </Button>
+                ) : (
+                  <Button
+                    variant="outlined"
+                    sx={{ borderRadius: "26px", borderColor: theme => theme.palette.common.primary800 }}
+                    onClick={() => console.log("join")}
+                  >
+                    Join
+                  </Button>
+                )}
+
+                <Divider orientation="vertical" sx={{ height: "auto" }} />
+
+                <Button
+                  variant="contained"
+                  sx={{ borderRadius: "26px", background: theme => theme.palette.common.primary800 }}
+                  onClick={() => console.log("share")}
+                >
+                  Share
+                </Button>
+              </Stack>
+            </Stack>
+          )}
           {/* end Data from map */}
 
           {window.innerHeight > 399 && user?.livelinessBar === "interaction" && (

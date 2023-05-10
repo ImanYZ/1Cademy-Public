@@ -1,13 +1,12 @@
 import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
 import DoneRoundedIcon from "@mui/icons-material/DoneRounded";
 import StarRoundedIcon from "@mui/icons-material/StarRounded";
-import { Avatar, Box, Stack, Typography } from "@mui/material";
-import Image from "next/image";
+import { Box, Stack, Typography } from "@mui/material";
 import React from "react";
 
 import { DESIGN_SYSTEM_COLORS } from "@/lib/theme/colors";
-import { getAvatarName } from "@/lib/utils/Map.utils";
 
+import OptimizedAvatar2 from "../../OptimizedAvatar2";
 import { PointsType } from "../../PointsType";
 import { UserPoints } from "./SidebarV2/UserSettigsSidebar";
 
@@ -20,35 +19,12 @@ type UserDetailsProps = {
   points: UserPoints;
   chooseUname?: boolean;
 };
-const DEFAULT_PROFILE_URL = "https://storage.googleapis.com/onecademy-1.appspot.com/ProfilePictures/no-img.png";
 
 const UserDetails = ({ id, imageUrl, fName, lName, uname, chooseUname, points }: UserDetailsProps) => {
   return (
     <Stack direction={"row"} alignItems={"center"} component={"section"} spacing={"24px"} mb="18px">
       <Box id={`${id}-picture`} sx={{ "& img": { borderRadius: "50%" }, borderRadius: "8px" }}>
-        {imageUrl && imageUrl !== "" && imageUrl !== DEFAULT_PROFILE_URL ? (
-          <Image
-            src={imageUrl}
-            alt={`${fName} ${lName}`}
-            width={90}
-            height={90}
-            objectFit="cover"
-            objectPosition="center center"
-          />
-        ) : (
-          <Avatar
-            sx={{
-              width: "90px",
-              height: "90px",
-              color: "white",
-              fontSize: "24px",
-              fontWeight: "600",
-              background: "linear-gradient(143.7deg, #FDC830 15.15%, #F37335 83.11%);",
-            }}
-          >
-            {getAvatarName(fName, lName)}
-          </Avatar>
-        )}
+        <OptimizedAvatar2 alt={`${uname}`} imageUrl={imageUrl} size={90} />
       </Box>
       <Box>
         <Typography id={`${id}-username`} sx={{ fontSize: "20px", fontWeight: "700", borderRadius: "4px" }}>

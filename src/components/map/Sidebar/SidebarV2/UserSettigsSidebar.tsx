@@ -1818,6 +1818,7 @@ const UserSettigsSidebar = ({
   }, [nodeBookState?.choosingNode?.id]);
 
   const SidebarOptions = useMemo(() => {
+    // console.log({ imageUrlX: user.imageUrl });
     return (
       <Box
         sx={{
