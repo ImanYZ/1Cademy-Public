@@ -103,7 +103,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       for (const parentIds of parentIdChunks) {
         const parentPractices = await db
           .collection("practice")
-          .where("node", "array-contains", parentIds)
+          .where("node", "in", parentIds)
           .where("tagId", "==", practice.tagId)
           .where("user", "==", practice.user)
           .limit(parentIds.length)
