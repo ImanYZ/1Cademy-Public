@@ -6377,154 +6377,155 @@ const Notebook = ({}: NotebookProps) => {
             </Button>
           </Box>
         )}
+
         <Box sx={{ width: "100vw", height: "100vh", overflow: "hidden" }}>
-          {
-            <Drawer
-              anchor={"right"}
-              open={openDeveloperMenu}
-              onClose={() => setOpenDeveloperMenu(false)}
-              PaperProps={{ sx: { maxWidth: "300px", p: "10px" } }}
-            >
-              {/* Data from map, don't REMOVE */}
-              <Box>
-                Interaction map from '{user?.uname}' with [{Object.entries(graph.nodes).length}] Nodes in Notebook:
-                {selectedNotebook?.title ?? "--"} with Id: {selectedNotebook?.id ?? "--"}
-              </Box>
+          {/* dev sidebar */}
+          <Drawer
+            anchor={"right"}
+            open={openDeveloperMenu}
+            onClose={() => setOpenDeveloperMenu(false)}
+            PaperProps={{ sx: { maxWidth: "300px", p: "10px" } }}
+          >
+            {/* Data from map, don't REMOVE */}
+            <Box>
+              Interaction map from '{user?.uname}' with [{Object.entries(graph.nodes).length}] Nodes in Notebook:
+              {selectedNotebook?.title ?? "--"} with Id: {selectedNotebook?.id ?? "--"}
+            </Box>
+
+            <Divider />
+
+            <Typography>Global states:</Typography>
+            <Box>
+              <Button onClick={() => console.log(graph.nodes)}>nodes</Button>
+              <Button onClick={() => console.log(graph.edges)}>edges</Button>
+              <Button onClick={() => console.log(allTags)}>allTags</Button>
+              <Button
+                onClick={() => {
+                  const mosParent = parentWithMostChildren();
+
+                  console.log(mosParent);
+                }}
+              >
+                Most Parent
+              </Button>
+              <Button
+                onClick={() => {
+                  const mosParent = parentWithChildren("r98BjyFDCe4YyLA3U8ZE");
+
+                  console.log(`children :${mosParent}`);
+                }}
+              >
+                Children of Parent
+              </Button>
+            </Box>
+
+            <Divider />
+
+            <Typography>Notebooks:</Typography>
+            <Box>
+              <Button onClick={() => console.log(selectedNotebook)}>selectedNotebook</Button>
+              <Button onClick={() => console.log(selectedPreviousNotebookIdRef.current)}>
+                selectedPreviousNotebookIdRef
+              </Button>
+            </Box>
+
+            <Divider />
+
+            <Typography>...</Typography>
+            <Box>
+              <Button onClick={() => console.log("DAGGER", g)}>Dagre</Button>
+              <Button onClick={() => console.log(nodeBookState)}>nodeBookState</Button>
+              <Button onClick={() => console.log(notebookRef)}>notebookRef</Button>
+              <Divider />
+              <Button onClick={() => console.log(user)}>user</Button>
+              <Button onClick={() => console.log(settings)}>setting</Button>
+              <Button onClick={() => console.log(reputation)}>reputation</Button>
+              <Divider />
+              <Button onClick={() => console.log(openSidebar)}>open sidebar</Button>
+            </Box>
+            <Box>
+              <Button onClick={() => console.log(nodeChanges)}>node changes</Button>
+              <Button onClick={() => console.log(mapRendered)}>map rendered</Button>
+              <Button onClick={() => console.log(userNodeChanges)}>user node changes</Button>
+              <Button onClick={() => console.log(nodeBookState)}>show global state</Button>
 
               <Divider />
 
-              <Typography>Global states:</Typography>
-              <Box>
-                <Button onClick={() => console.log(graph.nodes)}>nodes</Button>
-                <Button onClick={() => console.log(graph.edges)}>edges</Button>
-                <Button onClick={() => console.log(allTags)}>allTags</Button>
-                <Button
-                  onClick={() => {
-                    const mosParent = parentWithMostChildren();
+              <Button
+                onClick={() =>
+                  setReputationSignal([
+                    {
+                      uname: "1man",
+                      reputation: 1,
+                      type: ["All Time", "Weekly"],
+                    },
+                  ])
+                }
+              >
+                Test Increment Reputation
+              </Button>
+              <Button
+                onClick={() =>
+                  setReputationSignal([
+                    {
+                      uname: "1man",
+                      reputation: -1,
+                      type: ["All Time", "Weekly"],
+                    },
+                  ])
+                }
+              >
+                Test Decrement Reputation
+              </Button>
+            </Box>
+            <Box>
+              <Button onClick={() => console.log(tempNodes)}>tempNodes</Button>
+              <Button onClick={() => console.log({ ...changedNodes })}>changedNodes</Button>
+            </Box>
 
-                    console.log(mosParent);
-                  }}
-                >
-                  Most Parent
-                </Button>
-                <Button
-                  onClick={() => {
-                    const mosParent = parentWithChildren("r98BjyFDCe4YyLA3U8ZE");
+            <Divider />
 
-                    console.log(`children :${mosParent}`);
-                  }}
-                >
-                  Children of Parent
-                </Button>
-              </Box>
+            <Box>
+              <Button onClick={() => console.log(allNodes)}>All Nodes</Button>
+              <Button onClick={() => console.log(citations)}>citations</Button>
+              <Button onClick={() => console.log(clusterNodes)}>clusterNodes</Button>
+              <Button onClick={() => console.log(graph.nodes[nodeBookState.selectedNode ?? ""])}>SelectedNode</Button>
+            </Box>
 
-              <Divider />
+            <Divider />
+            <Button onClick={() => console.log(isWritingOnDBRef.current)}>isWritingOnDBRef</Button>
+            <Divider />
 
-              <Typography>Notebooks:</Typography>
-              <Box>
-                <Button onClick={() => console.log(selectedNotebook)}>selectedNotebook</Button>
-                <Button onClick={() => console.log(selectedPreviousNotebookIdRef.current)}>
-                  selectedPreviousNotebookIdRef
-                </Button>
-              </Box>
+            <Typography>Tutorial:</Typography>
+            <Box>
+              <Button onClick={() => console.log(tutorial)}>Tutorial</Button>
+              <Button onClick={() => console.log(userTutorial)}>userTutorial</Button>
+              <Button onClick={() => console.log(targetId)}>targetId</Button>
+              <Button onClick={() => console.log(forcedTutorial)}>forcedTutorial</Button>
+            </Box>
 
-              <Divider />
+            <Divider />
 
-              <Typography>...</Typography>
-              <Box>
-                <Button onClick={() => console.log("DAGGER", g)}>Dagre</Button>
-                <Button onClick={() => console.log(nodeBookState)}>nodeBookState</Button>
-                <Button onClick={() => console.log(notebookRef)}>notebookRef</Button>
-                <Divider />
-                <Button onClick={() => console.log(user)}>user</Button>
-                <Button onClick={() => console.log(settings)}>setting</Button>
-                <Button onClick={() => console.log(reputation)}>reputation</Button>
-                <Divider />
-                <Button onClick={() => console.log(openSidebar)}>open sidebar</Button>
-              </Box>
-              <Box>
-                <Button onClick={() => console.log(nodeChanges)}>node changes</Button>
-                <Button onClick={() => console.log(mapRendered)}>map rendered</Button>
-                <Button onClick={() => console.log(userNodeChanges)}>user node changes</Button>
-                <Button onClick={() => console.log(nodeBookState)}>show global state</Button>
+            <Typography>Functions:</Typography>
+            <Box>
+              <Button onClick={() => nodeBookDispatch({ type: "setSelectionType", payload: "Proposals" })}>
+                Toggle Open proposals
+              </Button>
+              <Button onClick={() => nodeBookDispatch({ type: "setSelectionType", payload: "Proposals" })}>
+                Open Proposal
+              </Button>
+              <Button onClick={() => openNodeHandler("0JI7dmq1qFF18j4ZbKMw")}>Open Node Handler</Button>
+              <Button onClick={() => setShowRegion(prev => !prev)}>Show Region</Button>
+              <Button onClick={() => console.log({ openSidebar })}>Open Sidebar</Button>
+            </Box>
+            <Typography>Last Operation:</Typography>
+            <Box>
+              <Button onClick={() => console.log({ lastOperaion: lastNodeOperation.current })}>
+                lastNodeOperation
+              </Button>
+            </Box>
+          </Drawer>
 
-                <Divider />
-
-                <Button
-                  onClick={() =>
-                    setReputationSignal([
-                      {
-                        uname: "1man",
-                        reputation: 1,
-                        type: ["All Time", "Weekly"],
-                      },
-                    ])
-                  }
-                >
-                  Test Increment Reputation
-                </Button>
-                <Button
-                  onClick={() =>
-                    setReputationSignal([
-                      {
-                        uname: "1man",
-                        reputation: -1,
-                        type: ["All Time", "Weekly"],
-                      },
-                    ])
-                  }
-                >
-                  Test Decrement Reputation
-                </Button>
-              </Box>
-              <Box>
-                <Button onClick={() => console.log(tempNodes)}>tempNodes</Button>
-                <Button onClick={() => console.log({ ...changedNodes })}>changedNodes</Button>
-              </Box>
-
-              <Divider />
-
-              <Box>
-                <Button onClick={() => console.log(allNodes)}>All Nodes</Button>
-                <Button onClick={() => console.log(citations)}>citations</Button>
-                <Button onClick={() => console.log(clusterNodes)}>clusterNodes</Button>
-                <Button onClick={() => console.log(graph.nodes[nodeBookState.selectedNode ?? ""])}>SelectedNode</Button>
-              </Box>
-
-              <Divider />
-              <Button onClick={() => console.log(isWritingOnDBRef.current)}>isWritingOnDBRef</Button>
-              <Divider />
-
-              <Typography>Tutorial:</Typography>
-              <Box>
-                <Button onClick={() => console.log(tutorial)}>Tutorial</Button>
-                <Button onClick={() => console.log(userTutorial)}>userTutorial</Button>
-                <Button onClick={() => console.log(targetId)}>targetId</Button>
-                <Button onClick={() => console.log(forcedTutorial)}>forcedTutorial</Button>
-              </Box>
-
-              <Divider />
-
-              <Typography>Functions:</Typography>
-              <Box>
-                <Button onClick={() => nodeBookDispatch({ type: "setSelectionType", payload: "Proposals" })}>
-                  Toggle Open proposals
-                </Button>
-                <Button onClick={() => nodeBookDispatch({ type: "setSelectionType", payload: "Proposals" })}>
-                  Open Proposal
-                </Button>
-                <Button onClick={() => openNodeHandler("0JI7dmq1qFF18j4ZbKMw")}>Open Node Handler</Button>
-                <Button onClick={() => setShowRegion(prev => !prev)}>Show Region</Button>
-                <Button onClick={() => console.log({ openSidebar })}>Open Sidebar</Button>
-              </Box>
-              <Typography>Last Operation:</Typography>
-              <Box>
-                <Button onClick={() => console.log({ lastOperaion: lastNodeOperation.current })}>
-                  lastNodeOperation
-                </Button>
-              </Box>
-            </Drawer>
-          }
           {user && reputation && (userTutorial.navigation.done || userTutorial.navigation.skipped) && (
             <Box
               sx={{
@@ -6686,155 +6687,22 @@ const Notebook = ({}: NotebookProps) => {
             />
           )}
 
-          <MemoizedToolbox
-            isLoading={isQueueWorking}
-            sx={{
-              position: "absolute",
-              right: { xs: "8px", sm: "18px" },
-              top: {
-                xs: openSidebar ? `${innerHeight * 0.25 + 7}px!important` : "7px!important",
-                sm: "7px!important",
-              },
-            }}
-          >
-            <>
-              <Tooltip title="Scroll to last Selected Node" placement="bottom">
-                <IconButton
-                  id="toolbox-scroll-to-node"
-                  color="secondary"
-                  onClick={onScrollToLastNode}
-                  disabled={!nodeBookState.selectedNode ? true : false}
-                  sx={{
-                    opacity: !nodeBookState.selectedNode ? 0.5 : undefined,
-                    padding: { xs: "2px", sm: "8px" },
-                  }}
-                >
-                  <MyLocationIcon
+          <Stack direction={"row"} spacing={"8px"} sx={{ position: "absolute", right: "8px", top: "8px", zIndex: 100 }}>
+            {/* height: { xs: "44px", sm: "60px" }, */}
+            <MemoizedToolbox isLoading={isQueueWorking}>
+              <>
+                <Tooltip title="Scroll to last Selected Node" placement="bottom">
+                  <IconButton
+                    id="toolbox-scroll-to-node"
+                    color="secondary"
+                    onClick={onScrollToLastNode}
+                    disabled={!nodeBookState.selectedNode ? true : false}
                     sx={{
-                      color: theme =>
-                        theme.palette.mode === "dark"
-                          ? theme.palette.common.notebookG100
-                          : theme.palette.common.gray500,
+                      opacity: !nodeBookState.selectedNode ? 0.5 : undefined,
+                      padding: { xs: "2px", sm: "8px" },
                     }}
-                  />
-                </IconButton>
-              </Tooltip>
-
-              <Tooltip
-                title="Redraw graph"
-                placement="bottom"
-                sx={{
-                  ":hover": {
-                    background: theme.palette.mode === "dark" ? "#404040" : "#EAECF0",
-                    // borderRadius: "8px",
-                  },
-                  padding: { xs: "2px", sm: "8px" },
-                }}
-              >
-                <IconButton
-                  id="toolbox-redraw-graph"
-                  color="secondary"
-                  onClick={() => {
-                    onRedrawGraph();
-                    if (tutorial?.name === "redrawGraph") {
-                      onFinalizeTutorial();
-                    }
-                  }}
-                >
-                  <AutoFixHighIcon
-                    sx={{
-                      color: theme =>
-                        theme.palette.mode === "dark"
-                          ? theme.palette.common.notebookG100
-                          : theme.palette.common.gray500,
-                    }}
-                  />
-                </IconButton>
-              </Tooltip>
-
-              <Tooltip
-                title="Start tutorial"
-                placement="bottom"
-                sx={{
-                  ":hover": {
-                    background: theme.palette.mode === "dark" ? "#404040" : "#EAECF0",
-                    // borderRadius: "8px",
-                  },
-                  padding: { xs: "2px", sm: "8px" },
-                }}
-              >
-                <IconButton
-                  id="toolbox-table-of-contents"
-                  color="error"
-                  onClick={() => {
-                    setOpenProgressBar(prev => !prev);
-                    if (tutorial?.name === "tableOfContents") {
-                      onFinalizeTutorial();
-                    }
-                  }}
-                >
-                  <HelpCenterIcon
-                    sx={{
-                      color: theme =>
-                        theme.palette.mode === "dark"
-                          ? theme.palette.common.notebookG100
-                          : theme.palette.common.gray500,
-                    }}
-                  />
-                </IconButton>
-              </Tooltip>
-
-              <Tooltip
-                title="Focused view for selected node"
-                placement="bottom"
-                sx={{
-                  ":hover": {
-                    background: theme.palette.mode === "dark" ? "#404040" : "#EAECF0",
-                    borderRadius: "8px",
-                  },
-                  padding: { xs: "2px", sm: "8px" },
-                }}
-              >
-                <IconButton
-                  id="toolbox-focus-mode"
-                  color="secondary"
-                  onClick={() => {
-                    setFocusView({ isEnabled: true, selectedNode: nodeBookState.selectedNode || "" });
-                    setOpenProgressBar(false);
-                    if (tutorial?.name === "focusMode") {
-                      onFinalizeTutorial();
-                    }
-                  }}
-                  disabled={!nodeBookState.selectedNode ? true : false}
-                  sx={{
-                    opacity: !nodeBookState.selectedNode ? 0.5 : undefined,
-                  }}
-                >
-                  <CenterFocusStrongIcon
-                    sx={{
-                      color: theme =>
-                        theme.palette.mode === "dark"
-                          ? theme.palette.common.notebookG100
-                          : theme.palette.common.gray500,
-                    }}
-                  />
-                </IconButton>
-              </Tooltip>
-
-              {process.env.NODE_ENV === "development" && (
-                <Tooltip
-                  title={"Watch geek data"}
-                  placement="bottom"
-                  sx={{
-                    ":hover": {
-                      background: theme.palette.mode === "dark" ? "#404040" : "#EAECF0",
-                      // borderRadius: "8px",
-                    },
-                    padding: { xs: "2px", sm: "8px" },
-                  }}
-                >
-                  <IconButton onClick={() => setOpenDeveloperMenu(!openDeveloperMenu)}>
-                    <CodeIcon
+                  >
+                    <MyLocationIcon
                       sx={{
                         color: theme =>
                           theme.palette.mode === "dark"
@@ -6844,70 +6712,195 @@ const Notebook = ({}: NotebookProps) => {
                     />
                   </IconButton>
                 </Tooltip>
-              )}
-            </>
-          </MemoizedToolbox>
 
-          {selectedNotebook && (
-            <Stack
-              direction={"row"}
-              spacing={"16px"}
-              alignItems={"center"}
-              sx={{
-                p: "12px 16px",
-                position: "absolute",
-                right: "8px",
-                top: "108px",
-                zIndex: 100,
-                borderRadius: "8px",
-                backgroundColor: theme =>
-                  theme.palette.mode === "dark" ? theme.palette.common.notebookMainBlack : theme.palette.common.gray50,
-              }}
-            >
-              <Stack direction={"row"} spacing={"-8px"}>
-                {selectedNotebook.users
-                  .map(cur => ({ ...selectedNotebook.usersInfo[cur], uname: cur }))
-                  .map(cur => (
-                    <OptimizedAvatar2 key={cur.uname} imageUrl={cur.imageUrl} size={32} alt={cur.uname} />
-                  ))}
-              </Stack>
-              {/* <Tooltip title={selectedNotebook.title}>
+                <Tooltip
+                  title="Redraw graph"
+                  placement="bottom"
+                  sx={{
+                    ":hover": {
+                      background: theme.palette.mode === "dark" ? "#404040" : "#EAECF0",
+                      // borderRadius: "8px",
+                    },
+                    padding: { xs: "2px", sm: "8px" },
+                  }}
+                >
+                  <IconButton
+                    id="toolbox-redraw-graph"
+                    color="secondary"
+                    onClick={() => {
+                      onRedrawGraph();
+                      if (tutorial?.name === "redrawGraph") {
+                        onFinalizeTutorial();
+                      }
+                    }}
+                  >
+                    <AutoFixHighIcon
+                      sx={{
+                        color: theme =>
+                          theme.palette.mode === "dark"
+                            ? theme.palette.common.notebookG100
+                            : theme.palette.common.gray500,
+                      }}
+                    />
+                  </IconButton>
+                </Tooltip>
+
+                <Tooltip
+                  title="Start tutorial"
+                  placement="bottom"
+                  sx={{
+                    ":hover": {
+                      background: theme.palette.mode === "dark" ? "#404040" : "#EAECF0",
+                      // borderRadius: "8px",
+                    },
+                    padding: { xs: "2px", sm: "8px" },
+                  }}
+                >
+                  <IconButton
+                    id="toolbox-table-of-contents"
+                    color="error"
+                    onClick={() => {
+                      setOpenProgressBar(prev => !prev);
+                      if (tutorial?.name === "tableOfContents") {
+                        onFinalizeTutorial();
+                      }
+                    }}
+                  >
+                    <HelpCenterIcon
+                      sx={{
+                        color: theme =>
+                          theme.palette.mode === "dark"
+                            ? theme.palette.common.notebookG100
+                            : theme.palette.common.gray500,
+                      }}
+                    />
+                  </IconButton>
+                </Tooltip>
+
+                <Tooltip
+                  title="Focused view for selected node"
+                  placement="bottom"
+                  sx={{
+                    ":hover": {
+                      background: theme.palette.mode === "dark" ? "#404040" : "#EAECF0",
+                      borderRadius: "8px",
+                    },
+                    padding: { xs: "2px", sm: "8px" },
+                  }}
+                >
+                  <IconButton
+                    id="toolbox-focus-mode"
+                    color="secondary"
+                    onClick={() => {
+                      setFocusView({ isEnabled: true, selectedNode: nodeBookState.selectedNode || "" });
+                      setOpenProgressBar(false);
+                      if (tutorial?.name === "focusMode") {
+                        onFinalizeTutorial();
+                      }
+                    }}
+                    disabled={!nodeBookState.selectedNode ? true : false}
+                    sx={{
+                      opacity: !nodeBookState.selectedNode ? 0.5 : undefined,
+                    }}
+                  >
+                    <CenterFocusStrongIcon
+                      sx={{
+                        color: theme =>
+                          theme.palette.mode === "dark"
+                            ? theme.palette.common.notebookG100
+                            : theme.palette.common.gray500,
+                      }}
+                    />
+                  </IconButton>
+                </Tooltip>
+
+                {process.env.NODE_ENV === "development" && (
+                  <Tooltip
+                    title={"Watch geek data"}
+                    placement="bottom"
+                    sx={{
+                      ":hover": {
+                        background: theme.palette.mode === "dark" ? "#404040" : "#EAECF0",
+                        // borderRadius: "8px",
+                      },
+                      padding: { xs: "2px", sm: "8px" },
+                    }}
+                  >
+                    <IconButton onClick={() => setOpenDeveloperMenu(!openDeveloperMenu)}>
+                      <CodeIcon
+                        sx={{
+                          color: theme =>
+                            theme.palette.mode === "dark"
+                              ? theme.palette.common.notebookG100
+                              : theme.palette.common.gray500,
+                        }}
+                      />
+                    </IconButton>
+                  </Tooltip>
+                )}
+              </>
+            </MemoizedToolbox>
+
+            {selectedNotebook && (
+              <Stack
+                direction={"row"}
+                spacing={"16px"}
+                alignItems={"center"}
+                sx={{
+                  p: "12px 16px",
+                  borderRadius: "8px",
+                  backgroundColor: theme =>
+                    theme.palette.mode === "dark"
+                      ? theme.palette.common.notebookMainBlack
+                      : theme.palette.common.gray50,
+                }}
+              >
+                <Stack direction={"row"} spacing={"-8px"}>
+                  {selectedNotebook.users
+                    .map(cur => ({ ...selectedNotebook.usersInfo[cur], uname: cur }))
+                    .map(cur => (
+                      <OptimizedAvatar2 key={cur.uname} imageUrl={cur.imageUrl} size={32} alt={cur.uname} />
+                    ))}
+                </Stack>
+                {/* <Tooltip title={selectedNotebook.title}>
                 <Typography sx={{ width: "138px", textOverflow: "ellipsis", whiteSpace: "nowrap", overflow: "hidden" }}>
                   {selectedNotebook.title}
                 </Typography>
               </Tooltip> */}
-              <Stack direction={"row"} spacing={"8px"}>
-                {user?.uname === selectedNotebook.owner ? (
-                  <Button
-                    variant="outlined"
-                    sx={{ borderRadius: "26px", borderColor: theme => theme.palette.common.primary800 }}
-                    onClick={() => console.log("join")}
-                  >
-                    Present
-                    <PlayCircleOutlineIcon sx={{ ml: "8px" }} />
-                  </Button>
-                ) : (
-                  <Button
-                    variant="outlined"
-                    sx={{ borderRadius: "26px", borderColor: theme => theme.palette.common.primary800 }}
-                    onClick={() => console.log("join")}
-                  >
-                    Join
-                  </Button>
-                )}
+                <Stack direction={"row"} spacing={"8px"}>
+                  {user?.uname === selectedNotebook.owner ? (
+                    <Button
+                      variant="outlined"
+                      sx={{ borderRadius: "26px", borderColor: theme => theme.palette.common.primary800 }}
+                      onClick={() => console.log("join")}
+                    >
+                      Present
+                      <PlayCircleOutlineIcon sx={{ ml: "8px" }} />
+                    </Button>
+                  ) : (
+                    <Button
+                      variant="outlined"
+                      sx={{ borderRadius: "26px", borderColor: theme => theme.palette.common.primary800 }}
+                      onClick={() => console.log("join")}
+                    >
+                      Join
+                    </Button>
+                  )}
 
-                <Divider orientation="vertical" sx={{ height: "auto" }} />
+                  <Divider orientation="vertical" sx={{ height: "auto" }} />
 
-                <Button
-                  variant="contained"
-                  sx={{ borderRadius: "26px", background: theme => theme.palette.common.primary800 }}
-                  onClick={() => console.log("share")}
-                >
-                  Share
-                </Button>
+                  <Button
+                    variant="contained"
+                    sx={{ borderRadius: "26px", background: theme => theme.palette.common.primary800 }}
+                    onClick={() => console.log("share")}
+                  >
+                    Share
+                  </Button>
+                </Stack>
               </Stack>
-            </Stack>
-          )}
+            )}
+          </Stack>
+
           {/* end Data from map */}
 
           {window.innerHeight > 399 && user?.livelinessBar === "interaction" && (

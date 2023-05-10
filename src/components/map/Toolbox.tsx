@@ -16,8 +16,9 @@ const Toolbox = ({ children, isLoading = false, sx }: ToolboxProps) => {
   return (
     <Box
       sx={{
+        position: "relative",
         borderRadius: "8px",
-        height: { xs: "44px", sm: "60px" },
+        height: "60px",
         display: "flex",
         opacity: 1,
         cursor: "pointer",
@@ -64,9 +65,11 @@ const Toolbox = ({ children, isLoading = false, sx }: ToolboxProps) => {
       {/* toggle button */}
       <Box
         sx={{
-          width: { xs: "50px", sm: "60px" },
-          right: "8px",
-          height: { xs: "44px", sm: "60px" },
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "flex-start",
+          width: "60px",
+          // width: { xs: "50px", sm: "60px" },
           padding: "10px",
           boxShadow: theme =>
             theme.palette.mode === "dark"
