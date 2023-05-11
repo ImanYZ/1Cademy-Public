@@ -93,6 +93,8 @@ describe("POST /practice", () => {
     new MockData(
       [
         {
+          startDate: moment().startOf("day").subtract(4, "days"),
+          endDate: moment().startOf("day").add(4, "days"),
           students: [
             {
               chooseUname: false,
