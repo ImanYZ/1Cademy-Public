@@ -83,7 +83,7 @@ const TEAM_ITEMS = [
     link: "https://www.linkedin.com/in/joel-podolny-58395a63",
   },
   {
-    id: "item-3",
+    id: "item-4",
     title: "1Cademy Advisor",
     subtitle: "Roby Harrington",
     image: "home/about/roby.jpg",

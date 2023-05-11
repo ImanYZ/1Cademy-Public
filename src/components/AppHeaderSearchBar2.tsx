@@ -6,7 +6,7 @@ import { styled, SxProps, Theme } from "@mui/material/styles";
 import { useRouter } from "next/router";
 import React, { MouseEvent, useEffect, useState } from "react";
 
-import { gray300 } from "../pages/home";
+import { DESIGN_SYSTEM_COLORS } from "../lib/theme/colors";
 
 type AppHeaderSearchBarProps = {
   sx?: SxProps<Theme>;
@@ -32,8 +32,13 @@ const AppHeaderSearchBar = ({ /* searcherUrl, */ sx }: AppHeaderSearchBarProps) 
         alignItems: "center",
         width: "100%",
         borderRadius: "8px",
-        border: `solid 1px ${gray300}`,
+        border: theme =>
+          `solid 1px ${
+            theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookG400 : DESIGN_SYSTEM_COLORS.gray300
+          }`,
         color: theme => (theme.palette.mode === "dark" ? theme.palette.common.white : theme.palette.common.black),
+        backgroundColor: theme =>
+          theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.baseGraphit : theme.palette.common.white,
         ...sx,
       }}
     >
