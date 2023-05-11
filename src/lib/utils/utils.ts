@@ -105,7 +105,15 @@ export const getNodePageUrl = (title: string, id: string) => {
 };
 
 export const getNodePageWithDomain = (title: string, id: string) => {
-  return `${ONECADEMY_DOMAIN}${getNodePageUrl(title, id)}`;
+  const _ONECADEMY_DOMAIN =
+    ONECADEMY_DOMAIN[ONECADEMY_DOMAIN.length - 1] === "/"
+      ? ONECADEMY_DOMAIN.substring(0, ONECADEMY_DOMAIN.length - 1)
+      : ONECADEMY_DOMAIN;
+  let NODE_URL = getNodePageUrl(title, id);
+  if (NODE_URL[0] === "/") {
+    NODE_URL = NODE_URL.substring(1, NODE_URL.length);
+  }
+  return `${_ONECADEMY_DOMAIN}/${NODE_URL}`;
 };
 
 export const homePageSortByDefaults = {
