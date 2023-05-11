@@ -12,6 +12,7 @@ import { HEADER_HEIGHT, HEADER_HEIGHT_MOBILE } from "../components/Header/AppHea
 import UniversitiesMap from "../components/home/components/UniversitiesMap/UniversitiesMap";
 import HomeWrapper from "../components/home/HomeWrapper";
 import About from "../components/home/sections/About";
+import { Demos } from "../components/home/sections/Demos";
 import { HeroMemoized } from "../components/home/sections/Hero";
 import Magnitude from "../components/home/sections/Magnitude";
 import Mechanism, { MECHANISM_ITEMS } from "../components/home/sections/Mechanism";
@@ -90,6 +91,7 @@ export const Home = () => {
             <>
               <About />
               <Papers />
+              <Demos />
             </>
           }
         />

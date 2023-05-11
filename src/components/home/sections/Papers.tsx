@@ -106,33 +106,6 @@ const Papers = () => {
         Related Research
       </Typography>
       <SectionItemSwitcher items={PAPER_ITEMS} />
-      {/* <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr", md: "1fr 1fr 1fr" }, gap: "24px" }}>
-        {PAPER_ITEMS.map(cur => (
-          <Link
-            key={cur.id}
-            href={cur.link || undefined}
-            target="_blank"
-            rel="noopener"
-            sx={{ textDecoration: "none" }}
-          >
-            <Box
-              sx={{
-                p: "24px",
-                background: theme => (theme.palette.mode === "dark" ? "#000000" : "#F9FAFB"),
-                cursor: "pointer",
-                ":hover": {
-                  background: theme => (theme.palette.mode === "dark" ? "#1d1d1d" : "#ebebeb"),
-                },
-              }}
-            >
-              <Typography component={"h4"} sx={{ fontSize: "20px", fontWeight: 600, mb: "8px" }}>
-                {cur.title}
-              </Typography>
-              <Typography>{wrapStringWithTag(cur.content, RE_DETECT_TEXT, "i")}</Typography>
-            </Box>
-          </Link>
-        ))}
-      </Box> */}
     </Box>
   );
 };
