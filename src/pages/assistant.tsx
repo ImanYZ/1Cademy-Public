@@ -86,7 +86,7 @@ const Home = () => {
         systemsSectionChildren={<Systems />}
         aboutectionChildren={
           <>
-            <About />
+            <About sx={{ mb: "64px" }} />
             <Papers />
           </>
         }

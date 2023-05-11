@@ -89,8 +89,8 @@ export const Home = () => {
           systemSectionChildren={<Systems />}
           aboutSectionChildren={
             <>
-              <About />
-              <Papers />
+              <About sx={{ mb: "64px" }} />
+              <Papers sx={{ mb: "64px" }} />
               <Demos />
             </>
           }

@@ -54,7 +54,7 @@ export const SectionWrapper = forwardRef(
           maxWidth: "1280px",
           m: "auto",
           textAlign,
-          //   border: "solid 2px royalBlue",
+          // border: "solid 2px royalBlue",
         }}
       >
         <Box sx={{ mb: "64px" }}>

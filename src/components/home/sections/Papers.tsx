@@ -1,4 +1,4 @@
-import { Box, Typography } from "@mui/material";
+import { Box, SxProps, Theme, Typography } from "@mui/material";
 import React from "react";
 
 import { SectionItemSwitcher } from "../components/SectionItemSwitcher";
@@ -99,9 +99,11 @@ const PAPER_ITEMS = [
   },
 ];
 
-const Papers = () => {
+type PapersProps = { sx?: SxProps<Theme> };
+
+const Papers = ({ sx }: PapersProps) => {
   return (
-    <Box>
+    <Box sx={{ ...sx }}>
       <Typography component={"h3"} sx={{ fontSize: "20px", fontWeight: 600, mb: "32px" }}>
         Related Research
       </Typography>

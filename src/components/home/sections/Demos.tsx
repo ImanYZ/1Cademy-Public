@@ -12,7 +12,7 @@ const ONE_CADEMY_CHANEL_URL = "https://www.youtube.com/@1cademy530/videos";
 
 type Demo = {
   id: string;
-  toolName: string;
+  // toolName: string;
   demoName: string;
   description: string;
   demoCreationDate: string;
@@ -26,7 +26,7 @@ type Demo = {
 const DEMOS_ITEMS: Demo[] = [
   {
     id: "01",
-    toolName: "1Cademy Assistant",
+    // toolName: "1Cademy Assistant",
     demoName: "Introducing 1Cademy Assistant - Practice Tool",
     description:
       "Ben Brown presents an introduction to 1Cademy Assistant practice tool and how it personalizes the daily practice and motivates students to improve their long-term learning.",
@@ -39,7 +39,7 @@ const DEMOS_ITEMS: Demo[] = [
   },
   {
     id: "02",
-    toolName: "1Cademy Assistant",
+    // toolName: "1Cademy Assistant",
     demoName: "Introducing 1Cademy Assistant - Question Answering",
     description: "Ben Brown presents the question-answering process using the 1Cademy Assistant.",
     demoCreationDate: "10 May 2023",
@@ -90,17 +90,6 @@ export const Demos = () => {
               </Box>
             </Link>
             <Box width={"100%"}>
-              <Typography
-                sx={{
-                  mb: "12px",
-                  fontWeight: 600,
-                  fontSize: "14px",
-                  color: theme =>
-                    theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.primary800 : DESIGN_SYSTEM_COLORS.primary700,
-                }}
-              >
-                {cur.toolName}
-              </Typography>
               <Link href={cur.url} target="_blank" rel="noopener" sx={{ textDecoration: "none" }}>
                 <Typography
                   sx={{
