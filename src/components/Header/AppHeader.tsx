@@ -274,24 +274,22 @@ const AppHeader = forwardRef(({ page, sections, selectedSectionId, onSwitchSecti
               <AppHeaderSearchBar />
             </Box>
 
-            {true && (
-              <Tooltip title="Open Searcher">
-                <IconButton
-                  onClick={() => setOpenSearch(true)}
-                  sx={{
-                    display: {
-                      xs: !isAuthenticated ? undefined : "none",
-                      sm: "none",
-                      md: "flex",
-                      lg: "none",
-                    },
-                  }}
-                  size="small"
-                >
-                  <SearchIcon />
-                </IconButton>
-              </Tooltip>
-            )}
+            <Tooltip title="Open Searcher">
+              <IconButton
+                onClick={() => setOpenSearch(true)}
+                sx={{
+                  display: {
+                    xs: isAuthenticated ? "none" : undefined,
+                    sm: "none",
+                    md: isAuthenticated ? "none" : undefined,
+                    lg: "none",
+                  },
+                }}
+                size="small"
+              >
+                <SearchIcon />
+              </IconButton>
+            </Tooltip>
 
             <Tooltip title="Change theme">
               <IconButton onClick={handleThemeSwitch} size="small">
