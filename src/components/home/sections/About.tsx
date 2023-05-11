@@ -1,5 +1,5 @@
-import { Link, Theme, Typography } from "@mui/material";
-import { Box, SxProps } from "@mui/system";
+import { Box, Link, Theme, Typography } from "@mui/material";
+import { SxProps } from "@mui/system";
 import React from "react";
 
 import Team from "../components/AboutSwitcher";
