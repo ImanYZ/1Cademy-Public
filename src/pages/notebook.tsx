@@ -2605,9 +2605,17 @@ const Notebook = ({}: NotebookProps) => {
         event.currentTarget.blur();
       }
     },
-    // TODO: CHECK dependencies
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [user, initNodeStatusChange]
+    [
+      db,
+      initNodeStatusChange,
+      nodeBookDispatch,
+      selectedNotebookId,
+      user?.chooseUname,
+      user?.fName,
+      user?.imageUrl,
+      user?.lName,
+      user?.uname,
+    ]
   );
 
   const openNodePart = useCallback(

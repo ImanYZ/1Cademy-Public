@@ -780,7 +780,7 @@ const Node = ({
             placeItems: "center",
             height: "100%",
             width: "100%",
-            "-webkit-line-clamp": 2,
+            // "-webkit-line-clamp": 2,
 
             overflow: "hidden",
             textOverflow: "ellipsis",
