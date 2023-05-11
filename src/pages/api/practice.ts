@@ -6,7 +6,7 @@ import { IUser } from "src/types/IUser";
 import { arrayToChunks } from "src/utils";
 import { IPractice } from "src/types/IPractice";
 import { Timestamp } from "firebase-admin/firestore";
-import { getOrCreateUserNode, isNodePracticePresentable } from "src/utils/course-helpers";
+import { getOrCreateUserNode, getStudentPracticeDayStats, isNodePracticePresentable } from "src/utils/course-helpers";
 import { IUserNode } from "src/types/IUserNode";
 import fbAuth from "src/middlewares/fbAuth";
 import { ISemester } from "src/types/ICourse";
@@ -115,6 +115,8 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       locked: Boolean(questionNodeData.locked),
     };
     const currentTimestamp = Timestamp.fromDate(new Date());
+    const studentPracticeDay = await getStudentPracticeDayStats(semesterDoc.id, userData.uname);
+
     // This is required to only check answers after this timestamp in do_check_answer().
     const flashcardRef = db.collection("practice").doc(practice.documentId!);
     await flashcardRef.update({
@@ -125,6 +127,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
     return res.json({
       flashcardId: practice.documentId,
       question: theNode,
+      ...studentPracticeDay,
     });
   } catch (err) {
     console.error(err);

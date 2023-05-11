@@ -1,6 +1,7 @@
 import { faker } from "@faker-js/faker";
 import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
 import { Timestamp } from "firebase-admin/firestore";
+import moment from "moment";
 import HttpMock from "node-mocks-http";
 import { createPractice } from "src/utils";
 import { createInstitution } from "testUtils/fakers/institution";
@@ -92,6 +93,8 @@ describe("POST /practice", () => {
     new MockData(
       [
         {
+          startDate: moment().startOf("day").subtract(4, "days"),
+          endDate: moment().startOf("day").add(4, "days"),
           students: [
             {
               chooseUname: false,
@@ -167,8 +170,9 @@ describe("POST /practice", () => {
   // in next endpoint call as there are not other nodes to present in graph as practice
   it("Should get done=true when all questions are practiced.", async () => {
     const practiceRef = db.collection("practice").doc(flashcardId);
-    practiceRef.update({
+    await practiceRef.update({
       q: 5,
+      nextDate: moment().add(1, "day").toDate(),
     });
 
     const req: any = HttpMock.createRequest({

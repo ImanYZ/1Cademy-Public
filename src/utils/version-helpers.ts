@@ -411,7 +411,7 @@ export const createPractice = async ({
         if (!questionNodes.includes(nodeId)) {
           questionNodes.push(nodeId);
         }
-        _batch.set(practiceRef, {
+        _batch.update(practiceRef, {
           questionNodes,
         });
         await _batch.commit();
