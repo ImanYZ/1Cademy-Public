@@ -45,6 +45,7 @@ import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from "rea
 // @ts-ignore
 import { MapInteractionCSS } from "react-map-interaction";
 import { CourseTag } from "src/instructorsTypes";
+import { IAssistantEventDetail } from "src/types/IAssistant";
 import { INodeType } from "src/types/INodeType";
 /* eslint-enable */
 import { INotificationNum } from "src/types/INotification";
@@ -860,10 +861,7 @@ const Notebook = ({}: NotebookProps) => {
   // called after first time map is rendered
   useEffect(() => {
     window.addEventListener("assistant", (e: any) => {
-      const detail: {
-        type: "SELECT_NOTEBOOK";
-        notebookId: string;
-      } = e.detail || {};
+      const detail: IAssistantEventDetail = e.detail || {};
       if (detail.type === "SELECT_NOTEBOOK") {
         onChangeNotebook(detail.notebookId);
       }
