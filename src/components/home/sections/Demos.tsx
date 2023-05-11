@@ -40,38 +40,11 @@ const DEMOS_ITEMS: Demo[] = [
   {
     id: "02",
     toolName: "1Cademy Assistant",
-    demoName: "Introducing 1Cademy Assistant - Practice Tool",
-    description:
-      "Ben Brown presents an introduction to 1Cademy Assistant practice tool and how it personalizes the daily practice and motivates students to improve their long-term learning.",
+    demoName: "Introducing 1Cademy Assistant - Question Answering",
+    description: "Ben Brown presents the question-answering process using the 1Cademy Assistant.",
     demoCreationDate: "10 May 2023",
-    previewImage: "/home/demos/practice-tool-demo.jpg",
-    url: "https://www.youtube.com/watch?v=kU6ppO_WLC0",
-    chanelName: ONE_CADEMY_CHANGE_NAME,
-    chanelImage: ONE_CADEMY_CHANEL_IMAGE,
-    chanelUrl: ONE_CADEMY_CHANEL_URL,
-  },
-  {
-    id: "03",
-    toolName: "1Cademy Assistant",
-    demoName: "Introducing 1Cademy Assistant - Practice Tool",
-    description:
-      "Ben Brown presents an introduction to 1Cademy Assistant practice tool and how it personalizes the daily practice and motivates students to improve their long-term learning.",
-    demoCreationDate: "10 May 2023",
-    previewImage: "/home/demos/practice-tool-demo.jpg",
-    url: "https://www.youtube.com/watch?v=kU6ppO_WLC0",
-    chanelName: ONE_CADEMY_CHANGE_NAME,
-    chanelImage: ONE_CADEMY_CHANEL_IMAGE,
-    chanelUrl: ONE_CADEMY_CHANEL_URL,
-  },
-  {
-    id: "04",
-    toolName: "1Cademy Assistant",
-    demoName: "Introducing 1Cademy Assistant - Practice Tool",
-    description:
-      "Ben Brown presents an introduction to 1Cademy Assistant practice tool and how it personalizes the daily practice and motivates students to improve their long-term learning.",
-    demoCreationDate: "10 May 2023",
-    previewImage: "/home/demos/practice-tool-demo.jpg",
-    url: "https://www.youtube.com/watch?v=kU6ppO_WLC0",
+    previewImage: "/home/demos/question-answering-demo.jpg",
+    url: "https://www.youtube.com/watch?v=Z8aVR459Kks",
     chanelName: ONE_CADEMY_CHANGE_NAME,
     chanelImage: ONE_CADEMY_CHANEL_IMAGE,
     chanelUrl: ONE_CADEMY_CHANEL_URL,
@@ -90,7 +63,7 @@ export const Demos = () => {
       <Box
         sx={{
           display: "grid",
-          gridTemplateColumns: { xs: "1fr", md: "1fr 1fr" },
+          gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr" },
           columnGap: "32px",
           rowGap: { xs: "32px", md: "64px" },
           // border: "solid 2px royalBlue",
@@ -104,7 +77,7 @@ export const Demos = () => {
               display: "grid",
               gridTemplateColumns: {
                 xs: "minmax(0px,1fr)",
-                md: "minmax(80px, 180px) minmax(0px,1fr)",
+                // md: "minmax(80px, 180px) minmax(0px,1fr)",
                 lg: "minmax(100px, 320px) minmax(0px,1fr)",
               },
               columnGap: { xs: "10px", lg: "24px" },
