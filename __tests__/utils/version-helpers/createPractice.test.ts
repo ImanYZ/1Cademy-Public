@@ -38,7 +38,7 @@ describe("createPractice", () => {
     });
     await commitBatch(batch);
     const practiceDocs: any = await db.collection("practice").where("user", "==", "1man").get();
-    expect(writeCounts).toBeGreaterThan(0);
+    expect(practiceDocs.docs.length).toBeGreaterThan(0);
     expect(practiceDocs.docs[0].data()).toBeDefined();
   });
 });

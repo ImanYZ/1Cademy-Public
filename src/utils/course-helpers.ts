@@ -22,6 +22,59 @@ import { INode } from "src/types/INode";
 import { INotebook } from "src/types/INotebook";
 import { createPractice } from "./version-helpers";
 import { IUser } from "src/types/IUser";
+import { ISemesterStudentVoteStatDay } from "src/types/ICourse";
+
+type IStudentPracticeDayStat = {
+  practicesLeft: number;
+  correctPractices: number;
+  completedDays: number;
+  totalDays: number;
+};
+export const getStudentPracticeDayStats = async (
+  semesterId: string,
+  uname: string
+): Promise<IStudentPracticeDayStat> => {
+  const semesterDoc = await db.collection("semesters").doc(semesterId).get();
+  const semesterData = semesterDoc.data() as ISemester;
+
+  const practiceDayStat: IStudentPracticeDayStat = {
+    practicesLeft: 0,
+    correctPractices: 0,
+    totalDays: 0,
+    completedDays: 0,
+  };
+
+  if (!semesterData) return practiceDayStat;
+
+  practiceDayStat.totalDays = moment(semesterData.endDate.toDate()).diff(semesterData.startDate.toDate());
+
+  const studentVoteStats = await db
+    .collection("semesterStudentVoteStats")
+    .where("uname", "==", uname)
+    .where("tagId", "==", semesterId)
+    .limit(1)
+    .get();
+
+  if (studentVoteStats.docs.length === 0) return practiceDayStat;
+
+  const studentVoteStat = studentVoteStats.docs[0].data() as ISemesterStudentVoteStat;
+  const statDate = moment(studentVoteStat.createdAt.toDate()).format("YYYY-MM-DD");
+  const dayIdx = getStatVoteDayIdx(statDate, studentVoteStat);
+
+  const completedDays: number = studentVoteStat.days.reduce(
+    (completed: number, day: ISemesterStudentVoteStatDay) =>
+      day.correctPractices > semesterData?.dailyPractice?.numQuestionsPerDay ? completed + 1 : completed,
+    0
+  );
+  practiceDayStat.completedDays = completedDays;
+
+  const statDay = studentVoteStat.days[dayIdx];
+  practiceDayStat.correctPractices = statDay.correctPractices;
+  const practicesLeft = (semesterData?.dailyPractice?.numQuestionsPerDay || 0) - statDay.correctPractices;
+  practiceDayStat.practicesLeft = practicesLeft < 0 ? 0 : practicesLeft;
+
+  return practiceDayStat;
+};
 
 export const createSemesterNotebookForStudents = async (
   semesterId: string,
@@ -322,7 +375,7 @@ export const isNodePracticePresentable = async ({
   if (practices.docs.length) {
     const practice = practices.docs[0].data() as IPractice;
     const nextDate = practice.nextDate as Timestamp;
-    if (!practice.lastPresented || (practice.nextDate && moment().isSameOrBefore(nextDate.toDate())) || !practice.q) {
+    if (!practice.lastPresented || (practice.nextDate && moment().isSameOrAfter(nextDate.toDate())) || !practice.q) {
       practice.documentId = practices.docs[0].id;
       return practice;
     }

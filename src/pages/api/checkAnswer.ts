@@ -11,6 +11,7 @@ import fbAuth from "src/middlewares/fbAuth";
 import moment from "moment";
 import { checkRestartBatchWriteCounts, commitBatch } from "@/lib/firestoreServer/admin";
 import { detach } from "src/utils/helpers";
+import { arrayToChunks } from "src/utils";
 
 export type ICheckAnswerRequestParams = {
   nodeId: string;
@@ -58,6 +59,9 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         : moment().add(20, "minutes").toDate();
     const practiceDuration: number = moment(lastPresented).diff(moment(), "minute", true);
 
+    let batch = db.batch();
+    let writeCounts = 0;
+
     let q = 0;
     let corrects = 0;
     for (let i = 0; i < (nodeData.choices || []).length; i++) {
@@ -91,6 +95,28 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
     } else if (q <= 4) {
       // If the student has clicked "I want to postpone this to tomorrow." or if we think they've forgotten the concept.
       i_interval = 0;
+      // Also find parent nodes related to course and update their next date to current date
+      const practiceNodeDoc = await db.collection("nodes").doc(practice.node).get();
+      const practiceNode = practiceNodeDoc.data() as INode;
+      const parentIds = practiceNode.parents.map(parent => parent.node);
+      const parentIdChunks = arrayToChunks(parentIds, 10);
+      for (const parentIds of parentIdChunks) {
+        const parentPractices = await db
+          .collection("practice")
+          .where("node", "in", parentIds)
+          .where("tagId", "==", practice.tagId)
+          .where("user", "==", practice.user)
+          .limit(parentIds.length)
+          .get();
+        for (const parentPractice of parentPractices.docs) {
+          const parentPracticeRef = db.collection("practice").doc(parentPractice.id);
+          batch.update(parentPracticeRef, {
+            nextDate: moment().subtract(1, "day").toDate(),
+            updatedAt: currentTimestamp,
+          });
+          [batch, writeCounts] = await checkRestartBatchWriteCounts(batch, writeCounts);
+        }
+      }
     } else {
       const last_i_interval = practice.iInterval;
       if (last_i_interval === 0) {
@@ -101,9 +127,6 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         i_interval = Math.ceil(last_i_interval * e_factor);
       }
     }
-
-    let batch = db.batch();
-    let writeCounts = 0;
 
     const userNodeDoc = await getOrCreateUserNode({
       nodeId: practice.node,

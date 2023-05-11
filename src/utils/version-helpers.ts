@@ -396,6 +396,8 @@ export const createPractice = async ({
       semester.students.forEach(student => userIds.push(student.uname));
     }
     for (const userId of userIds) {
+      // TODO: update this helper to use batch and memo of request data to fix data replacement issue
+      let _batch = db.batch();
       const practices = await db
         .collection("practice")
         .where("user", "==", userId)
@@ -409,20 +411,10 @@ export const createPractice = async ({
         if (!questionNodes.includes(nodeId)) {
           questionNodes.push(nodeId);
         }
-        if (t) {
-          tWriteOperations.push({
-            objRef: practiceRef,
-            data: {
-              questionNodes,
-            },
-            operationType: "update",
-          });
-        } else {
-          newBatch.set(practiceRef, {
-            questionNodes,
-          });
-          [newBatch, writeCounts] = await checkRestartBatchWriteCounts(newBatch, writeCounts);
-        }
+        _batch.update(practiceRef, {
+          questionNodes,
+        });
+        await _batch.commit();
         continue;
       }
       practiceRef = db.collection("practice").doc();
@@ -440,16 +432,8 @@ export const createPractice = async ({
         questionNodes: [nodeId],
         user: userId,
       } as IPractice;
-      if (t) {
-        tWriteOperations.push({
-          objRef: practiceRef,
-          data: practiceData,
-          operationType: "set",
-        });
-      } else {
-        newBatch.set(practiceRef, practiceData);
-        [newBatch, writeCounts] = await checkRestartBatchWriteCounts(newBatch, writeCounts);
-      }
+      _batch.set(practiceRef, practiceData);
+      await _batch.commit();
     }
   }
   return [newBatch, writeCounts];
