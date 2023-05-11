@@ -184,8 +184,8 @@ const AppHeader = forwardRef(({ page, sections, selectedSectionId, onSwitchSecti
       <Box
         ref={ref}
         sx={{
-          background: theme => (theme.palette.mode === "dark" ? "rgba(0,0,0,.72)" : "#f8f8f894"),
-          backdropFilter: "saturate(180%) blur(20px)",
+          background: theme => (theme.palette.mode === "dark" ? "rgba(0,0,0,.72)" : "rgba(255, 255, 255, 0.85);"),
+          backdropFilter: "saturate(180%) blur(10px)",
           position: "sticky",
           top: "0",
           zIndex: "22",
@@ -274,24 +274,22 @@ const AppHeader = forwardRef(({ page, sections, selectedSectionId, onSwitchSecti
               <AppHeaderSearchBar />
             </Box>
 
-            {true && (
-              <Tooltip title="Open Searcher">
-                <IconButton
-                  onClick={() => setOpenSearch(true)}
-                  sx={{
-                    display: {
-                      xs: !isAuthenticated ? undefined : "none",
-                      sm: "none",
-                      md: "flex",
-                      lg: "none",
-                    },
-                  }}
-                  size="small"
-                >
-                  <SearchIcon />
-                </IconButton>
-              </Tooltip>
-            )}
+            <Tooltip title="Open Searcher">
+              <IconButton
+                onClick={() => setOpenSearch(true)}
+                sx={{
+                  display: {
+                    xs: isAuthenticated ? "none" : undefined,
+                    sm: "none",
+                    md: isAuthenticated ? "none" : undefined,
+                    lg: "none",
+                  },
+                }}
+                size="small"
+              >
+                <SearchIcon />
+              </IconButton>
+            </Tooltip>
 
             <Tooltip title="Change theme">
               <IconButton onClick={handleThemeSwitch} size="small">
