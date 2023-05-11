@@ -2605,9 +2605,17 @@ const Notebook = ({}: NotebookProps) => {
         event.currentTarget.blur();
       }
     },
-    // TODO: CHECK dependencies
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [user, initNodeStatusChange]
+    [
+      db,
+      initNodeStatusChange,
+      nodeBookDispatch,
+      selectedNotebookId,
+      user?.chooseUname,
+      user?.fName,
+      user?.imageUrl,
+      user?.lName,
+      user?.uname,
+    ]
   );
 
   const openNodePart = useCallback(
@@ -6199,7 +6207,7 @@ const Notebook = ({}: NotebookProps) => {
           </NotebookPopup>
         )}
 
-        {
+        {nodeBookState.previousNode && (
           <Box
             sx={{
               height: "40px",
@@ -6276,7 +6284,7 @@ const Notebook = ({}: NotebookProps) => {
               />
             </Button>
           </Box>
-        }
+        )}
         <Box sx={{ width: "100vw", height: "100vh", overflow: "hidden" }}>
           {
             <Drawer
