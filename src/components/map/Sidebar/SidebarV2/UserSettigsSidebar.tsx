@@ -382,6 +382,7 @@ const UserSettigsSidebar = ({
 
         versions[versionDoc.id] = {
           ...versionData,
+          nodeType,
           id: versionDoc.id,
           createdAt: versionData.createdAt.toDate(),
           award: false,

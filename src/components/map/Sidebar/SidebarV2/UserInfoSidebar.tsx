@@ -100,6 +100,7 @@ const UserInfoSidebar = ({ open, onClose, theme, openLinkedNode, username, selec
           award: false,
           correct: false,
           wrong: false,
+          nodeType,
         };
         delete versions[versionDoc.id].deleted;
         delete versions[versionDoc.id].updatedAt;
