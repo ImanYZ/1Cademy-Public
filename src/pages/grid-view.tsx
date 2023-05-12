@@ -4,12 +4,11 @@ import React, { useEffect, useMemo, useRef, useState } from "react";
 import { Node, NodeGrid, NodePosition } from "../gridViewTypes";
 import { useWindowSize } from "../hooks/useWindowSize";
 import {
-  GAP_X,
-  GAP_Y,
-  getNodesHeight,
+  calculateNodePosition,
+  calculateNodesPositions,
+  changeNodesPosition,
   gridNodesToNodes,
   NODE_WIDTH,
-  SMALL_GAP_Y,
   SMALL_NODE_WIDTH,
 } from "../lib/utils/gridView.utils";
 
@@ -17,6 +16,7 @@ const GridView = () => {
   const { width: windowWidth, height: windowHeight } = useWindowSize();
   const [gridNodes, setGridNodes] = useState<NodeGrid>(NODE_GRID);
   const [selectedNode /* setSelectedNode */] = useState<Node | null>(null);
+
   const nodes = useMemo(
     () => [
       ...gridNodesToNodes(gridNodes, "nodes"),
@@ -27,90 +27,71 @@ const GridView = () => {
     ],
     [gridNodes]
   );
-
-  const getPivot = (type: NodePosition, containerHeigh: number, totalHeight: number, nodesOffsetHeight: number) => {
-    if (type === "siblingsTop") return containerHeigh / 2 - totalHeight - GAP_Y - nodesOffsetHeight; // above nodes
-    if (type === "siblingsBottom") return containerHeigh / 2 + GAP_Y + nodesOffsetHeight; // below nodes
-    return containerHeigh / 2 - totalHeight / 2; // parents, children and nodes are centered on middle of window
-  };
-
-  const calculatePositions = (
-    gridNodes: NodeGrid,
-    leftPosition: number,
-    containerHeigh: number,
-    gap: number,
-    type: NodePosition,
-    nodesOffsetHeight: number = 0
-  ): Node[] => {
-    const nodes = gridNodesToNodes(gridNodes, type);
-    const nodesHeight = getNodesHeight(nodes);
-    const gapHeight = (nodes.length - 1) * gap;
-    const totalHeight = nodesHeight + gapHeight;
-    const nodesPivot = getPivot(type, containerHeigh, totalHeight, nodesOffsetHeight);
-    const result = nodes.reduce(
-      (acu: { nodes: Node[]; previousHeight: number }, cur) => {
-        const thisNode: Node = { ...cur, top: acu.previousHeight, left: leftPosition };
-        return { nodes: [...acu.nodes, thisNode], previousHeight: acu.previousHeight + cur.height + gap };
-      },
-      { nodes: [], previousHeight: nodesPivot }
-    );
-    return result.nodes;
-  };
-
-  const LEFT_POSITION: { [key in NodePosition]: number } = {
-    nodes: 0,
-    children: NODE_WIDTH + GAP_X,
-    parents: -(NODE_WIDTH + GAP_X),
-    siblingsTop: 57,
-    siblingsBottom: 57,
-  };
+  // console.log(">>>>>>>>>>>>>>>>>>>", { nodes, gridNodes });
 
   const onChangeHeight = (id: string, height: number, type: NodePosition) => {
-    setGridNodes(prev => {
-      console.log("onChangeHeight", { id, height, type, prev });
-      const thisNode = prev[type][id];
-      if (!thisNode) return prev;
+    setGridNodes(prev => calculateNodePosition({ id, height, type, gridNodes: prev, windowWidth, windowHeight }));
+  };
 
-      const OFFSET_X = windowWidth / 2 - NODE_WIDTH / 2;
-      const newGridNodes: NodeGrid = { ...prev, [type]: { ...prev[type], [id]: { ...thisNode, height } } };
-      console.log({ id, type, newGridNodes });
-      const nodesWithNewPositions: Node[] = calculatePositions(
-        newGridNodes,
-        LEFT_POSITION[type] + OFFSET_X,
-        windowHeight,
-        SMALL_GAP_Y,
-        type,
-        getNodesHeight(gridNodesToNodes(prev, "nodes")) / 2
-      );
-      const copyNewGridNodes = { ...newGridNodes };
-      nodesWithNewPositions.forEach(cur => (copyNewGridNodes[type][cur.id] = cur));
-      return copyNewGridNodes;
-    });
+  const handleKeyDown: React.KeyboardEventHandler<HTMLDivElement> = event => {
+    console.log(event.key);
+
+    if (event.key === "Enter") {
+      console.log("Enter key pressed");
+    }
+
+    if (event.key === "ArrowDown") {
+      console.log("ArrowDown key pressed");
+    }
+
+    if (event.key === "ArrowLeft") {
+      console.log("ArrowLeft key pressed");
+      setGridNodes(prev => {
+        const gridNodesUpdated: NodeGrid = {
+          children: {},
+          nodes: changeNodesPosition(prev.children, "nodes"),
+          parents: changeNodesPosition(prev.nodes, "parents"),
+          siblingsBottom: {},
+          siblingsTop: {},
+        };
+        return calculateNodesPositions({ gridNodes: gridNodesUpdated, windowWidth, windowHeight });
+      });
+    }
+
+    if (event.key === "ArrowRight") {
+      console.log("ArrowRight key pressed");
+      setGridNodes(prev => {
+        const gridNodesUpdated: NodeGrid = {
+          children: changeNodesPosition(prev.nodes, "children"),
+          nodes: changeNodesPosition(prev.parents, "nodes"),
+          parents: {},
+          siblingsBottom: {},
+          siblingsTop: {},
+        };
+        return calculateNodesPositions({ gridNodes: gridNodesUpdated, windowWidth, windowHeight });
+      });
+    }
+
+    if (event.key === "ArrowUp") {
+      console.log("ArrowUp key pressed");
+    }
   };
 
   return (
     <Box
+      tabIndex={0}
+      onKeyDown={handleKeyDown}
       sx={{
         border: "dashed 6px royalBlue",
         height: "100vh",
         width: "100vw",
-        display: "grid",
-        gridTemplateColumns: "1fr 1fr 1fr",
+        // display: "grid",
+        // gridTemplateColumns: "1fr 1fr 1fr",
         position: "relative",
       }}
     >
       {nodes.map(cur => (
-        <Node
-          key={cur.id}
-          node={cur}
-          selectedNodeId={selectedNode?.id ?? ""}
-          changeNodeHight={onChangeHeight}
-          sx={{
-            position: "absolute",
-            top: `${cur.top}px`,
-            left: `${cur.left}px`,
-          }}
-        />
+        <Node key={cur.id} node={cur} selectedNodeId={selectedNode?.id ?? ""} changeNodeHight={onChangeHeight} />
       ))}
     </Box>
   );
@@ -129,6 +110,10 @@ const Node = ({ node, /* selectedNodeId */ changeNodeHight, sx }: NodeProps) => 
   const observer = useRef<ResizeObserver | null>(null);
   const previousHeightRef = useRef<number>(0);
   const previousTopRef = useRef<string>("0px");
+  useEffect(() => {
+    console.log("start", node.id);
+    return () => console.log("end", node.id);
+  }, [node.id]);
 
   useEffect(() => {
     observer.current = new ResizeObserver(entries => {
@@ -160,12 +145,17 @@ const Node = ({ node, /* selectedNodeId */ changeNodeHight, sx }: NodeProps) => 
   return (
     <Box
       ref={nodeRef}
+      tabIndex={0}
       sx={{
         // width: selectedNodeId === node.id ? `${NODE_WIDTH}px` : `${SMALL_NODE_WIDTH}px`,
         width: node.position === "nodes" ? `${NODE_WIDTH}px` : `${SMALL_NODE_WIDTH}px`,
         backgroundColor: "#eee",
         border: "solid 2px orange",
         p: "10px",
+        transition: "1s",
+        position: "absolute",
+        top: `${node.top}px`,
+        left: `${node.left}px`,
         ...sx,
       }}
     >
@@ -175,6 +165,144 @@ const Node = ({ node, /* selectedNodeId */ changeNodeHight, sx }: NodeProps) => 
   );
 };
 
+// const NODE_GRID: NodeGrid = {
+//   nodes: {
+//     n1: {
+//       id: "n1",
+//       top: 0,
+//       left: 0,
+//       height: 0,
+//       content:
+//         "Lorem ipsum dolor sit amet, consectetur adipisicing elit. Quidem culpa dolor unde at earum! Voluptatum provident, cupiditate ea officia debitis obcaecati, fugit odit architecto nihil delectus doloremque. Autem, commodi veritatis.",
+//       position: "nodes",
+//     },
+//   },
+//   parents: {
+//     p1: {
+//       id: "p1",
+//       top: 0,
+//       left: 0,
+//       height: 0,
+//       content: "Lorem ipsum dolor sit amet, consectetur adipisicing elit. ",
+//       position: "parents",
+//     },
+//     p2: {
+//       id: "p2",
+//       top: 0,
+//       left: 0,
+//       height: 0,
+//       content:
+//         "Lorem ipsum dolor sit amet, consectetur adipisicing elit. Quidem culpa dolor unde at earum! Voluptatum provident, cupiditate ea officia debitis obcaecati, fugit odit architecto nihil delectus doloremque. Autem, commodi veritatis.",
+//       position: "parents",
+//     },
+//     p3: {
+//       id: "p3",
+//       top: 0,
+//       left: 0,
+//       height: 0,
+//       content:
+//         "Quidem culpa dolor unde at earum! Voluptatum provident, cupiditate ea officia debitis obcaecati, fugit odit architecto nihil delectus doloremque. Autem, commodi veritatis.",
+//       position: "parents",
+//     },
+//     p4: {
+//       id: "p4",
+//       top: 0,
+//       left: 0,
+//       height: 0,
+//       content:
+//         "Quidem culpa dolor unde at earum! Voluptatum provident, cupiditate ea officia debitis obcaecati, fugit odit architecto nihil delectus doloremque. Autem, commodi veritatis.",
+//       position: "parents",
+//     },
+//     p5: {
+//       id: "p5",
+//       top: 0,
+//       left: 0,
+//       height: 0,
+//       content:
+//         "Quidem culpa dolor unde at earum! Voluptatum provident, cupiditate ea officia debitis obcaecati, fugit odit architecto nihil delectus doloremque. Autem, commodi veritatis.",
+//       position: "parents",
+//     },
+//   },
+//   children: {
+//     CH1: {
+//       id: "CH1",
+//       top: 0,
+//       left: 0,
+//       height: 0,
+//       content:
+//         "Lorem ipsum dolor sit amet, consectetur adipisicing elit. Quidem culpa dolor unde at earum! Voluptatum provident, cupiditate ea officia debitis obcaecati, fugit odit architecto nihil delectus doloremque. Autem, commodi veritatis.",
+//       position: "children",
+//     },
+//     CH2: {
+//       id: "CH2",
+//       top: 0,
+//       left: 0,
+//       height: 0,
+//       content:
+//         "Lorem ipsum dolor sit amet, consectetur adipisicing elit. Quidem culpa dolor unde at earum! Voluptatum provident, cupiditate ea officia debitis obcaecati, fugit odit architecto nihil delectus doloremque. Autem, commodi veritatis.",
+//       position: "children",
+//     },
+//     CH3: {
+//       id: "CH3",
+//       top: 0,
+//       left: 0,
+//       height: 0,
+//       content:
+//         "Lorem ipsum dolor sit amet, consectetur adipisicing elit. Quidem culpa dolor unde at earum! Voluptatum provident, cupiditate ea officia debitis obcaecati, fugit odit architecto nihil delectus doloremque. Autem, commodi veritatis.",
+//       position: "children",
+//     },
+//   },
+//   siblingsTop: {
+//     st1: {
+//       id: "st1",
+//       top: 0,
+//       left: 0,
+//       height: 0,
+//       content:
+//         "Lorem ipsum dolor sit amet, consectetur adipisicing elit. Quidem culpa dolor unde at earum! Voluptatum provident, cupiditate ea officia debitis obcaecati, fugit odit architecto nihil delectus doloremque. Autem, commodi veritatis.",
+//       position: "siblingsTop",
+//     },
+//     st2: {
+//       id: "st2",
+//       top: 0,
+//       left: 0,
+//       height: 0,
+//       content:
+//         "Lorem ipsum dolor sit amet, consectetur adipisicing elit. Quidem culpa dolor unde at earum! Voluptatum provident, cupiditate ea officia debitis obcaecati, fugit odit architecto nihil delectus doloremque. Autem, commodi veritatis.",
+//       position: "siblingsTop",
+//     },
+//   },
+//   siblingsBottom: {
+//     sb1: {
+//       id: "sb1",
+//       top: 0,
+//       left: 0,
+//       height: 0,
+//       content:
+//         "Lorem ipsum dolor sit amet, consectetur adipisicing elit. Quidem culpa dolor unde at earum! Voluptatum provident, cupiditate ea officia debitis obcaecati, fugit odit architecto nihil delectus doloremque. Autem, commodi veritatis.",
+//       position: "siblingsBottom",
+//     },
+//     sb2: {
+//       id: "sb2",
+//       top: 0,
+//       left: 0,
+//       height: 0,
+//       content:
+//         "Lorem ipsum dolor sit amet, consectetur adipisicing elit. Quidem culpa dolor unde at earum! Voluptatum provident, cupiditate ea officia debitis obcaecati, fugit odit architecto nihil delectus doloremque. Autem, commodi veritatis.",
+//       position: "siblingsBottom",
+//     },
+//     sb3: {
+//       id: "sb3",
+//       top: 0,
+//       left: 0,
+//       height: 0,
+//       content:
+//         "Lorem ipsum dolor sit amet, consectetur adipisicing elit. Quidem culpa dolor unde at earum! Voluptatum provident, cupiditate ea officia debitis obcaecati, fugit odit architecto nihil delectus doloremque. Autem, commodi veritatis.",
+//       position: "siblingsBottom",
+//     },
+//   },
+// };
+
 const NODE_GRID: NodeGrid = {
   nodes: {
     n1: {
@@ -182,8 +310,7 @@ const NODE_GRID: NodeGrid = {
       top: 0,
       left: 0,
       height: 0,
-      content:
-        "Lorem ipsum dolor sit amet, consectetur adipisicing elit. Quidem culpa dolor unde at earum! Voluptatum provident, cupiditate ea officia debitis obcaecati, fugit odit architecto nihil delectus doloremque. Autem, commodi veritatis.",
+      content: "n1",
       position: "nodes",
     },
   },
@@ -193,7 +320,7 @@ const NODE_GRID: NodeGrid = {
       top: 0,
       left: 0,
       height: 0,
-      content: "Lorem ipsum dolor sit amet, consectetur adipisicing elit. ",
+      content: "p1",
       position: "parents",
     },
     p2: {
@@ -201,8 +328,7 @@ const NODE_GRID: NodeGrid = {
       top: 0,
       left: 0,
       height: 0,
-      content:
-        "Lorem ipsum dolor sit amet, consectetur adipisicing elit. Quidem culpa dolor unde at earum! Voluptatum provident, cupiditate ea officia debitis obcaecati, fugit odit architecto nihil delectus doloremque. Autem, commodi veritatis.",
+      content: "p2",
       position: "parents",
     },
     p3: {
@@ -210,8 +336,7 @@ const NODE_GRID: NodeGrid = {
       top: 0,
       left: 0,
       height: 0,
-      content:
-        "Quidem culpa dolor unde at earum! Voluptatum provident, cupiditate ea officia debitis obcaecati, fugit odit architecto nihil delectus doloremque. Autem, commodi veritatis.",
+      content: "p3",
       position: "parents",
     },
     p4: {
@@ -219,8 +344,7 @@ const NODE_GRID: NodeGrid = {
       top: 0,
       left: 0,
       height: 0,
-      content:
-        "Quidem culpa dolor unde at earum! Voluptatum provident, cupiditate ea officia debitis obcaecati, fugit odit architecto nihil delectus doloremque. Autem, commodi veritatis.",
+      content: "p4",
       position: "parents",
     },
     p5: {
@@ -228,8 +352,7 @@ const NODE_GRID: NodeGrid = {
       top: 0,
       left: 0,
       height: 0,
-      content:
-        "Quidem culpa dolor unde at earum! Voluptatum provident, cupiditate ea officia debitis obcaecati, fugit odit architecto nihil delectus doloremque. Autem, commodi veritatis.",
+      content: "p5",
       position: "parents",
     },
   },
@@ -239,8 +362,7 @@ const NODE_GRID: NodeGrid = {
       top: 0,
       left: 0,
       height: 0,
-      content:
-        "Lorem ipsum dolor sit amet, consectetur adipisicing elit. Quidem culpa dolor unde at earum! Voluptatum provident, cupiditate ea officia debitis obcaecati, fugit odit architecto nihil delectus doloremque. Autem, commodi veritatis.",
+      content: "CH1",
       position: "children",
     },
     CH2: {
@@ -248,8 +370,7 @@ const NODE_GRID: NodeGrid = {
       top: 0,
       left: 0,
       height: 0,
-      content:
-        "Lorem ipsum dolor sit amet, consectetur adipisicing elit. Quidem culpa dolor unde at earum! Voluptatum provident, cupiditate ea officia debitis obcaecati, fugit odit architecto nihil delectus doloremque. Autem, commodi veritatis.",
+      content: "CH2",
       position: "children",
     },
     CH3: {
@@ -257,8 +378,7 @@ const NODE_GRID: NodeGrid = {
       top: 0,
       left: 0,
       height: 0,
-      content:
-        "Lorem ipsum dolor sit amet, consectetur adipisicing elit. Quidem culpa dolor unde at earum! Voluptatum provident, cupiditate ea officia debitis obcaecati, fugit odit architecto nihil delectus doloremque. Autem, commodi veritatis.",
+      content: "CH3",
       position: "children",
     },
   },
@@ -268,8 +388,7 @@ const NODE_GRID: NodeGrid = {
       top: 0,
       left: 0,
       height: 0,
-      content:
-        "Lorem ipsum dolor sit amet, consectetur adipisicing elit. Quidem culpa dolor unde at earum! Voluptatum provident, cupiditate ea officia debitis obcaecati, fugit odit architecto nihil delectus doloremque. Autem, commodi veritatis.",
+      content: "st1",
       position: "siblingsTop",
     },
     st2: {
@@ -277,8 +396,7 @@ const NODE_GRID: NodeGrid = {
       top: 0,
       left: 0,
       height: 0,
-      content:
-        "Lorem ipsum dolor sit amet, consectetur adipisicing elit. Quidem culpa dolor unde at earum! Voluptatum provident, cupiditate ea officia debitis obcaecati, fugit odit architecto nihil delectus doloremque. Autem, commodi veritatis.",
+      content: "st2",
       position: "siblingsTop",
     },
   },
@@ -288,8 +406,7 @@ const NODE_GRID: NodeGrid = {
       top: 0,
       left: 0,
       height: 0,
-      content:
-        "Lorem ipsum dolor sit amet, consectetur adipisicing elit. Quidem culpa dolor unde at earum! Voluptatum provident, cupiditate ea officia debitis obcaecati, fugit odit architecto nihil delectus doloremque. Autem, commodi veritatis.",
+      content: "sb1",
       position: "siblingsBottom",
     },
     sb2: {
@@ -297,8 +414,7 @@ const NODE_GRID: NodeGrid = {
       top: 0,
       left: 0,
       height: 0,
-      content:
-        "Lorem ipsum dolor sit amet, consectetur adipisicing elit. Quidem culpa dolor unde at earum! Voluptatum provident, cupiditate ea officia debitis obcaecati, fugit odit architecto nihil delectus doloremque. Autem, commodi veritatis.",
+      content: "sb2",
       position: "siblingsBottom",
     },
     sb3: {
@@ -306,8 +422,7 @@ const NODE_GRID: NodeGrid = {
       top: 0,
       left: 0,
       height: 0,
-      content:
-        "Lorem ipsum dolor sit amet, consectetur adipisicing elit. Quidem culpa dolor unde at earum! Voluptatum provident, cupiditate ea officia debitis obcaecati, fugit odit architecto nihil delectus doloremque. Autem, commodi veritatis.",
+      content: "sb3",
       position: "siblingsBottom",
     },
   },
