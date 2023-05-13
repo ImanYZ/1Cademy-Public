@@ -15,7 +15,7 @@ import shortenNumber from "../../lib/utils/shortenNumber";
 import { doNeedToDeleteNode } from "../../utils/helpers";
 import { CustomCircularProgress } from "../CustomCircularProgress";
 import { CustomWrapperButton } from "../map/Buttons/Buttons";
-import { PracticeInfo } from "./PracticeTool";
+import { QuestionInfo } from "./PracticeTool";
 
 type NodeQuestionProps = {
   node: SimpleQuestionNode;
@@ -348,26 +348,22 @@ const NodeQuestion = ({ node, selectedAnswers, setSelectedIdxAnswer, submitAnswe
 };
 
 type PracticeQuestionProps = {
-  question: SimpleQuestionNode | null;
-  practiceIsCompleted: boolean;
+  questionData: QuestionInfo | null;
   onClose: () => void;
   leaderboard: ReactNode;
   userStatus: ReactNode;
-  onViewNodeOnNodeBook: (nodeId: string) => void;
+  onViewNodeOnNodeBook: () => void;
   onSaveAnswer: (answers: boolean[]) => Promise<void>;
   onGetNextQuestion: () => Promise<void>;
-  practiceInfo: PracticeInfo;
 };
 export const PracticeQuestion = ({
-  question,
-  practiceIsCompleted,
+  questionData,
   onClose,
   leaderboard,
   userStatus,
   onViewNodeOnNodeBook,
   onSaveAnswer,
   onGetNextQuestion,
-  practiceInfo,
 }: PracticeQuestionProps) => {
   const [selectedAnswers, setSelectedAnswers] = useState<boolean[]>([]);
   const [displaySidebar, setDisplaySidebar] = useState<"LEADERBOARD" | "USER_STATUS" | null>(null);
@@ -391,10 +387,10 @@ export const PracticeQuestion = ({
   };
 
   useEffect(() => {
-    if (!question) return;
-    setSelectedAnswers(new Array(question.choices.length).fill(false));
+    if (!questionData?.question) return;
+    setSelectedAnswers(new Array(questionData.question.choices.length).fill(false));
     setLoading(false);
-  }, [question]);
+  }, [questionData]);
 
   return (
     <Box
@@ -409,23 +405,23 @@ export const PracticeQuestion = ({
         <CloseFullscreenIcon />
       </IconButton>
 
-      {practiceIsCompleted && (
+      {questionData && !questionData?.question && (
         <Box sx={{ mt: "50px" }}>
           <QuestionMessage
             messages={[
               `Daily practice has been completed.`,
-              `You have completed ${practiceInfo.completedDays} days out of ${practiceInfo.totalDays} days of your review practice.`,
-              `${practiceInfo.remainingDays} days are remaining to the end of the semester.`,
+              `You have completed ${questionData.completedDays} days out of ${questionData.totalDays} days of your review practice.`,
+              `${questionData.totalDays - questionData.completedDays} days are remaining to the end of the semester.`,
             ]}
-            totalQuestions={practiceInfo.totalQuestions}
-            questionsCompleted={practiceInfo.totalQuestions - practiceInfo.questionsLeft}
+            totalQuestions={questionData.practicesLeft + questionData.correctPractices}
+            questionsCompleted={questionData.correctPractices}
           />
         </Box>
       )}
 
       {/* {!question && !practiceIsCompleted && <Typography>Can't get question</Typography>} */}
 
-      {question && !practiceIsCompleted && (
+      {questionData && questionData.question && (
         <>
           {/* options */}
           <Stack spacing={"8px"} sx={{ position: "absolute", right: "12px", top: "8px" }}>
@@ -466,21 +462,21 @@ export const PracticeQuestion = ({
           <Box sx={{ maxWidth: "820px", m: "auto" }}>
             <QuestionMessage
               messages={[
-                practiceInfo.questionsLeft > 0
-                  ? `${practiceInfo.questionsLeft}
-                  question${practiceInfo.questionsLeft > 1 ? "s" : ""} left to get today’s point.`
+                questionData.practicesLeft > 0
+                  ? `${questionData.practicesLeft}
+                  question${questionData.practicesLeft > 1 ? "s" : ""} left to get today’s point.`
                   : "You've got today's practice point!",
-                `You have completed ${practiceInfo.completedDays} day${
-                  practiceInfo.completedDays > 1 ? "s" : ""
-                } out of ${practiceInfo.totalDays} day${
-                  practiceInfo.totalDays > 1 ? "s" : ""
+                `You have completed ${questionData.completedDays} day${
+                  questionData.completedDays > 1 ? "s" : ""
+                } out of ${questionData.totalDays} day${
+                  questionData.totalDays > 1 ? "s" : ""
                 } of your review practice.`,
-                `${practiceInfo.remainingDays} day${
-                  practiceInfo.remainingDays > 1 ? "s" : ""
+                `${questionData.totalDays - questionData.completedDays} day${
+                  questionData.totalDays - questionData.completedDays > 1 ? "s" : ""
                 } are remaining to the end of the semester.`,
               ]}
-              totalQuestions={practiceInfo.totalQuestions}
-              questionsCompleted={practiceInfo.totalQuestions - practiceInfo.questionsLeft}
+              totalQuestions={questionData.practicesLeft}
+              questionsCompleted={questionData.correctPractices}
             />
             {loading && (
               <Box
@@ -501,7 +497,7 @@ export const PracticeQuestion = ({
             )}
             {!loading && (
               <NodeQuestion
-                node={question}
+                node={questionData.question}
                 selectedAnswers={selectedAnswers}
                 setSelectedIdxAnswer={onSelectAnswer}
                 submitAnswer={submitAnswer}
@@ -512,7 +508,7 @@ export const PracticeQuestion = ({
               <Box sx={{ display: "flex", justifyContent: "space-between", mt: "32px" }}>
                 <Button
                   variant="contained"
-                  onClick={() => onViewNodeOnNodeBook(question.id)}
+                  onClick={onViewNodeOnNodeBook}
                   sx={{
                     borderRadius: "26px",
                     minWidth: "180px",

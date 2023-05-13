@@ -1,14 +1,12 @@
 import { Box } from "@mui/material";
-import { collection, getFirestore, onSnapshot, query, where } from "firebase/firestore";
+import { getFirestore } from "firebase/firestore";
 import React, { forwardRef, useCallback, useEffect, useImperativeHandle, useState } from "react";
 import { ISemester } from "src/types/ICourse";
-import { ISemesterStudentVoteStat } from "src/types/ICourse";
 
 import { getSemesterById } from "../../client/serveless/semesters.serverless";
 import { CourseTag, SimpleQuestionNode } from "../../instructorsTypes";
 import { User } from "../../knowledgeTypes";
 import { Post } from "../../lib/mapApi";
-import { differentBetweenDays, getDateYYMMDDWithHyphens } from "../../lib/utils/date.utils";
 import { ICheckAnswerRequestParams } from "../../pages/api/checkAnswer";
 import CourseDetail from "./CourseDetail";
 import Leaderboard from "./Leaderboard";
@@ -23,20 +21,13 @@ type PracticeToolProps = {
   openNodeHandler: (nodeId: string) => void;
 };
 
-export type PracticeInfo = {
-  questionsLeft: number;
-  totalQuestions: number;
+export type QuestionInfo = {
+  question: SimpleQuestionNode | null;
+  flashcardId: string;
+  practicesLeft: number;
+  correctPractices: number;
   completedDays: number;
   totalDays: number;
-  remainingDays: number;
-};
-
-const DEFAULT_PRACTICE_INFO: PracticeInfo = {
-  questionsLeft: 0,
-  totalQuestions: 0,
-  completedDays: 0,
-  remainingDays: 0,
-  totalDays: 0,
 };
 
 export interface PracticeToolRef {
@@ -48,20 +39,18 @@ const PracticeTool = forwardRef<PracticeToolRef, PracticeToolProps>(
     console.log({ currentSemester });
     const db = getFirestore();
     const [startPractice, setStartPractice] = useState(false);
-    const [questionData, setQuestionData] = useState<{ question: SimpleQuestionNode; flashcardId: string } | null>(
-      null
-    );
-    const [practiceIsCompleted, setPracticeIsCompleted] = useState(false);
-    const [practiceInfo, setPracticeInfo] = useState<PracticeInfo>(DEFAULT_PRACTICE_INFO);
+    const [questionData, setQuestionData] = useState<QuestionInfo | null>(null);
+    // const [practiceIsCompleted, setPracticeIsCompleted] = useState(false);
     const [semesterConfig, setSemesterConfig] = useState<ISemester | null>(null);
 
     const onRunPracticeTool = useCallback(() => {
       (start: boolean) => {
-        if (!practiceInfo) return;
+        if (!semesterConfig) return;
+        if (!root) return;
 
         setStartPractice(start);
       };
-    }, [practiceInfo]);
+    }, [root, semesterConfig]);
 
     useImperativeHandle(ref, () => ({
       onRunPracticeTool,
@@ -69,7 +58,7 @@ const PracticeTool = forwardRef<PracticeToolRef, PracticeToolProps>(
 
     const onSubmitAnswer = useCallback(
       async (answers: boolean[]) => {
-        if (!questionData) return;
+        if (!questionData?.question) return;
 
         const payload: ICheckAnswerRequestParams = {
           answers,
@@ -85,16 +74,28 @@ const PracticeTool = forwardRef<PracticeToolRef, PracticeToolProps>(
     const getPracticeQuestion = useCallback(async () => {
       const res: any = await Post("/practice", { tagId: currentSemester.tagId });
       console.log("practice:res", { res });
-      if (res?.done) return setPracticeIsCompleted(true);
+      if (res?.done)
+        return setQuestionData(prev => {
+          if (!prev) return null;
+          return {
+            question: null,
+            completedDays: prev.completedDays,
+            correctPractices: prev.correctPractices + 1,
+            flashcardId: prev.flashcardId,
+            practicesLeft: prev.practicesLeft - 1,
+            totalDays: prev.totalDays,
+          };
+        });
 
       setQuestionData(res);
       console.log("------>", res);
     }, [currentSemester.tagId]);
 
-    const onViewNodeOnNodeBook = (nodeId: string) => {
-      openNodeHandler(nodeId);
+    const onViewNodeOnNodeBook = useCallback(() => {
+      if (!questionData?.question) return;
+      openNodeHandler(questionData?.question?.id);
       onClose();
-    };
+    }, [onClose, openNodeHandler, questionData?.question]);
 
     // this is executed the first time we get selected a semester
     useEffect(() => {
@@ -111,59 +112,57 @@ const PracticeTool = forwardRef<PracticeToolRef, PracticeToolProps>(
       getSemesterConfig();
     }, [currentSemester.tagId, db, user.uname]);
 
+    // useEffect(() => {
+    //   console.log({ semesterConfig });
+    //   if (!semesterConfig) return;
+
+    //   const q = query(
+    //     collection(db, "semesterStudentVoteStats"),
+    //     where("uname", "==", user.uname),
+    //     where("tagId", "==", currentSemester.tagId)
+    //   );
+    //   const unsub = onSnapshot(q, snapshot => {
+    //     if (snapshot.empty) return;
+
+    //     const docChanges = snapshot.docChanges();
+    //     for (const docChange of docChanges) {
+    //       const semesterStudentVoteStat = docChange.doc.data() as ISemesterStudentVoteStat;
+    //       console.log({ semesterStudentVoteStat });
+    //       const currentDateYYMMDD = getDateYYMMDDWithHyphens();
+    //       console.log({ currentDateYYMMDD });
+    //       const currentDayStats = semesterStudentVoteStat.days.find(cur => cur.day === currentDateYYMMDD);
+    //       console.log({ currentDayStats });
+    //       // if (!currentDayStats) return;
+    //       //
+    //       const totalQuestions = semesterConfig.dailyPractice.numQuestionsPerDay;
+    //       const questionsLeft = totalQuestions - (currentDayStats?.correctPractices ?? 0);
+    //       console.log({ questionsLeft });
+    //       // setPracticeInfo(prev => ({ ...prev, questionsLeft }));
+
+    //       const completedDays = differentBetweenDays(new Date(), semesterConfig.startDate.toDate());
+    //       const totalDays = differentBetweenDays(semesterConfig.endDate.toDate(), semesterConfig.startDate.toDate());
+    //       const remainingDays = totalDays - completedDays;
+    //       setPracticeInfo(prev => ({
+    //         ...prev,
+    //         questionsLeft,
+    //         totalQuestions,
+    //         completedDays,
+    //         totalDays,
+    //         remainingDays,
+    //       }));
+    //     }
+    //   });
+    //   return () => {
+    //     if (unsub) unsub();
+    //   };
+    // }, [currentSemester.tagId, db, semesterConfig, user.uname]);
+
     useEffect(() => {
-      console.log({ semesterConfig });
-      if (!semesterConfig) return;
-
-      const q = query(
-        collection(db, "semesterStudentVoteStats"),
-        where("uname", "==", user.uname),
-        where("tagId", "==", currentSemester.tagId)
-      );
-      const unsub = onSnapshot(q, snapshot => {
-        if (snapshot.empty) return;
-
-        const docChanges = snapshot.docChanges();
-        for (const docChange of docChanges) {
-          const semesterStudentVoteStat = docChange.doc.data() as ISemesterStudentVoteStat;
-          console.log({ semesterStudentVoteStat });
-          const currentDateYYMMDD = getDateYYMMDDWithHyphens();
-          console.log({ currentDateYYMMDD });
-          const currentDayStats = semesterStudentVoteStat.days.find(cur => cur.day === currentDateYYMMDD);
-          console.log({ currentDayStats });
-          // if (!currentDayStats) return;
-          //
-          const totalQuestions = semesterConfig.dailyPractice.numQuestionsPerDay;
-          const questionsLeft = totalQuestions - (currentDayStats?.correctPractices ?? 0);
-          console.log({ questionsLeft });
-          // setPracticeInfo(prev => ({ ...prev, questionsLeft }));
-
-          const completedDays = differentBetweenDays(new Date(), semesterConfig.startDate.toDate());
-          const totalDays = differentBetweenDays(semesterConfig.endDate.toDate(), semesterConfig.startDate.toDate());
-          const remainingDays = totalDays - completedDays;
-          setPracticeInfo(prev => ({
-            ...prev,
-            questionsLeft,
-            totalQuestions,
-            completedDays,
-            totalDays,
-            remainingDays,
-          }));
-        }
-      });
-      return () => {
-        if (unsub) unsub();
-      };
-    }, [currentSemester.tagId, db, semesterConfig, user.uname]);
-
-    useEffect(() => {
-      console.log({ practiceInfo });
-      if (!practiceInfo) return;
       if (!semesterConfig) return;
       if (!root) return;
 
       setStartPractice(true);
-    }, [practiceInfo, root, semesterConfig]);
+    }, [root, semesterConfig]);
 
     return startPractice ? (
       <Box
@@ -178,15 +177,13 @@ const PracticeTool = forwardRef<PracticeToolRef, PracticeToolProps>(
         }}
       >
         <PracticeQuestion
-          question={questionData?.question ?? null}
-          practiceIsCompleted={practiceIsCompleted}
+          questionData={questionData}
           onClose={onClose}
           leaderboard={<Leaderboard semesterId={currentSemester.tagId} />}
           userStatus={<UserStatus semesterId={currentSemester.tagId} user={user} />}
           onViewNodeOnNodeBook={onViewNodeOnNodeBook}
           onGetNextQuestion={getPracticeQuestion}
           onSaveAnswer={onSubmitAnswer}
-          practiceInfo={practiceInfo}
         />
       </Box>
     ) : (
