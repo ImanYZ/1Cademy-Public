@@ -1605,7 +1605,9 @@ const Notebook = ({}: NotebookProps) => {
 
   const chosenNodeChanged = useCallback(
     (nodeId: string) => {
-      devLog("CHOSEN_NODE_CHANGE", { nodeId });
+      if (notebookRef.current?.choosingNode?.id === "Tag") return; //INFO: this is important to update a community
+
+      devLog("CHOSEN_NODE_CHANGE", { nodeId, tt: notebookRef.current?.choosingNode?.id });
       setUpdatedLinks(updatedLinks => {
         console.log("setUpdatedLinks");
         setGraph(({ nodes: oldNodes, edges: oldEdges }) => {
@@ -6198,10 +6200,12 @@ const Notebook = ({}: NotebookProps) => {
               nodeBookDispatch({ type: "setSelectedNode", payload: null });
               nodeBookDispatch({ type: "setChosenNode", payload: null });
             }}
-            sx={{
-              left: nodeBookState.choosingNode.id === "ToolbarTag" ? "310px" : "50%!important",
-              transform: nodeBookState.choosingNode.id !== "ToolbarTag" ? "translateX(-50%)" : undefined,
-            }}
+            sx={
+              {
+                // left: nodeBookState.choosingNode.id === "ToolbarTag" ? "310px" : "50%!important",
+                // transform: nodeBookState.choosingNode.id !== "ToolbarTag" ? "translateX(-50%)" : undefined,
+              }
+            }
           >
             Click the node you'd like to link to...
           </NotebookPopup>

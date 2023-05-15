@@ -165,7 +165,7 @@ MainSidebarProps) => {
   // this useEffect updated the defaultTag when chosen node change
   useEffect(() => {
     const setDefaultTag = async () => {
-      if (nodeBookState.choosingNode?.id === "ToolbarTag" && nodeBookState.chosenNode) {
+      if (nodeBookState.choosingNode?.id === "Tag" && nodeBookState.chosenNode) {
         const { id: nodeId, title: nodeTitle } = nodeBookState.chosenNode;
         notebookRef.current.choosingNode = null;
         notebookRef.current.chosenNode = null;
@@ -183,13 +183,14 @@ MainSidebarProps) => {
 
           dispatch({ type: "setReputation", payload: reputation });
           dispatch({ type: "setAuthUser", payload: userUpdated });
+          setShouldShowTagSearcher(false);
         } catch (err) {
           console.error(err);
         }
       }
     };
     setDefaultTag();
-  }, [dispatch, nodeBookDispatch, nodeBookState.chosenNode, user]);
+  }, [dispatch, nodeBookDispatch, nodeBookState.choosingNode?.id, nodeBookState.chosenNode, notebookRef, user]);
 
   const onOpenSidebarLog = useCallback(
     async (sidebarType: string) => {
@@ -673,7 +674,7 @@ MainSidebarProps) => {
             }}
             onClick={() => {
               setShouldShowTagSearcher(true);
-              choosingNodeClick("ToolbarTag");
+              choosingNodeClick("Tag");
             }}
           >
             <Box
@@ -1073,23 +1074,14 @@ MainSidebarProps) => {
         open={open}
         onClose={onClose}
         width={80}
-        // width={window.innerWidth <= 500 ? "100%" : isMenuOpen ? "100%" : 80}
         showCloseButton={false}
         showScrollUpButton={false}
         contentSignalState={contentSignalState}
         SidebarContent={toolbarContentMemoized}
         sx={{
           boxShadow: undefined,
-          // overflow: "hidden",
           width: { sm: isHovered ? "250px" : "80px" },
           ...(isMenuOpen && { width: "100%" }),
-
-          // width: { xs: displayLargeToolbar ? "100%" : "80px", sm: "80px" },
-          // maxWidth: { xs: displayLargeToolbar ? "100%" : "80px", sm: "80px" },
-          // ":hover": {
-          //   width: { xs: isMenuOpen ? "100%" : "80px", sm: "250px" },
-          // maxWidth: { xs: isMenuOpen ? "100%" : "80px", sm: "250px" },
-          // },
         }}
         sxContentWrapper={{
           width: "inherit",
