@@ -168,7 +168,6 @@ MainSidebarProps) => {
   // this useEffect updated the defaultTag when chosen node change
   useEffect(() => {
     const setDefaultTag = async () => {
-      // TODO: add validations
       if (!selectedNotebook) return;
       const thisNotebook = notebooks.find(cur => cur.id === selectedNotebook);
       if (!thisNotebook) return;

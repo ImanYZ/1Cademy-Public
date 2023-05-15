@@ -1131,7 +1131,6 @@ const Notebook = ({}: NotebookProps) => {
     // TODO: check if is possible to move this to a pure function and call when user change notebooks
     // this after merge with "share not public notebooks"
 
-    // TODO: add validations
     if (!user) return;
     if (!selectedNotebookId) return;
 
@@ -6218,12 +6217,6 @@ const Notebook = ({}: NotebookProps) => {
               nodeBookDispatch({ type: "setSelectedNode", payload: null });
               nodeBookDispatch({ type: "setChosenNode", payload: null });
             }}
-            sx={
-              {
-                // left: nodeBookState.choosingNode.id === "ToolbarTag" ? "310px" : "50%!important",
-                // transform: nodeBookState.choosingNode.id !== "ToolbarTag" ? "translateX(-50%)" : undefined,
-              }
-            }
           >
             Click the node you'd like to link to...
           </NotebookPopup>
