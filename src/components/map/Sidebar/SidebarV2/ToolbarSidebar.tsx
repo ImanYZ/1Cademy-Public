@@ -56,6 +56,7 @@ import TagIcon from "../../../../../public/tag.svg";
 import { useHover } from "../../../../hooks/userHover";
 import { useWindowSize } from "../../../../hooks/useWindowSize";
 import { DispatchAuthActions, Reputation, ReputationSignal, User, UserTheme } from "../../../../knowledgeTypes";
+import { updateNotebookTag } from "../../../../lib/firestoreClient/notebooks.serverless";
 import { NO_USER_IMAGE } from "../../../../lib/utils/constants";
 import { UsersStatus, UserTutorials } from "../../../../nodeBookTypes";
 import { OpenSidebar } from "../../../../pages/notebook";
@@ -165,6 +166,9 @@ MainSidebarProps) => {
   // this useEffect updated the defaultTag when chosen node change
   useEffect(() => {
     const setDefaultTag = async () => {
+      // TODO: add validations
+      if (!selectedNotebook) return;
+
       if (nodeBookState.choosingNode?.id === "Tag" && nodeBookState.chosenNode) {
         const { id: nodeId, title: nodeTitle } = nodeBookState.chosenNode;
         notebookRef.current.choosingNode = null;
@@ -177,6 +181,11 @@ MainSidebarProps) => {
             payload: { ...user, tagId: nodeId, tag: nodeTitle },
           });
           await Post(`/changeDefaultTag/${nodeId}`);
+
+          await updateNotebookTag(db, selectedNotebook, { defaultTagId: nodeId, defaultTagName: nodeTitle });
+
+          onChangeNotebook(nodeId);
+
           let { reputation, user: userUpdated } = await retrieveAuthenticatedUser(user.userId, user.role);
           if (!reputation) throw Error("Cant find Reputation");
           if (!userUpdated) throw Error("Cant find User");
@@ -190,7 +199,17 @@ MainSidebarProps) => {
       }
     };
     setDefaultTag();
-  }, [dispatch, nodeBookDispatch, nodeBookState.choosingNode?.id, nodeBookState.chosenNode, notebookRef, user]);
+  }, [
+    db,
+    dispatch,
+    nodeBookDispatch,
+    nodeBookState.choosingNode?.id,
+    nodeBookState.chosenNode,
+    notebookRef,
+    onChangeNotebook,
+    selectedNotebook,
+    user,
+  ]);
 
   const onOpenSidebarLog = useCallback(
     async (sidebarType: string) => {

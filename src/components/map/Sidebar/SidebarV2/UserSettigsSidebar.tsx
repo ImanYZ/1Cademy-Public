@@ -79,6 +79,7 @@ import { gray200 } from "@/pages/home";
 
 import darkModeLibraryBackground from "../../../../../public/darkModeLibraryBackground.jpg";
 import LightmodeLibraryBackground from "../../../../../public/lightModeLibraryBackground.png";
+import { updateNotebookTag } from "../../../../lib/firestoreClient/notebooks.serverless";
 import { DESIGN_SYSTEM_COLORS } from "../../../../lib/theme/colors";
 import { MemoizedInputSave } from "../../InputSave";
 import { MemoizedMetaButton } from "../../MetaButton";
@@ -107,6 +108,7 @@ type UserSettingsSidebarProps = {
   nodeBookDispatch: React.Dispatch<DispatchNodeBookActions>;
   nodeBookState: NodeBookState;
   scrollToNode: (nodeId: string) => void;
+  selectedNotebookId: string;
 };
 
 type UserSettingsTabs = {
@@ -169,6 +171,7 @@ const UserSettigsSidebar = ({
   nodeBookDispatch,
   nodeBookState,
   scrollToNode,
+  selectedNotebookId,
 }: UserSettingsSidebarProps) => {
   const db = getFirestore();
   const ELEMENTS_PER_PAGE: number = 13;
@@ -482,6 +485,8 @@ const UserSettigsSidebar = ({
   // this useEffect updated the defaultTag when chosen node change
   useEffect(() => {
     const setDefaultTag = async () => {
+      // TODO: add validations
+
       if (nodeBookState.choosingNode?.id === "Tag" && nodeBookState.chosenNode) {
         const { id: nodeId, title: nodeTitle } = nodeBookState.chosenNode;
         notebookRef.current.choosingNode = null;
@@ -494,7 +499,9 @@ const UserSettigsSidebar = ({
             payload: { ...user, tagId: nodeId, tag: nodeTitle },
           });
           setIsLoading(true);
+
           await Post(`/changeDefaultTag/${nodeId}`);
+          await updateNotebookTag(db, selectedNotebookId, { defaultTagId: nodeId, defaultTagName: nodeTitle });
           setIsLoading(false);
           let { reputation, user: userUpdated } = await retrieveAuthenticatedUser(user.userId, user.role);
 
@@ -511,7 +518,16 @@ const UserSettigsSidebar = ({
       }
     };
     setDefaultTag();
-  }, [dispatch, nodeBookDispatch, nodeBookState.choosingNode?.id, nodeBookState.chosenNode, user]);
+  }, [
+    db,
+    dispatch,
+    nodeBookDispatch,
+    nodeBookState.choosingNode?.id,
+    nodeBookState.chosenNode,
+    notebookRef,
+    selectedNotebookId,
+    user,
+  ]);
 
   const choosingNodeClick = useCallback(
     (choosingNodeTag: string) => {

@@ -95,6 +95,7 @@ import { useWindowSize } from "../hooks/useWindowSize";
 import { useWorkerQueue } from "../hooks/useWorkerQueue";
 import { NodeChanges, ReputationSignal } from "../knowledgeTypes";
 import { idToken, retrieveAuthenticatedUser } from "../lib/firestoreClient/auth";
+import { updateNotebookTag } from "../lib/firestoreClient/notebooks.serverless";
 import { Post, postWithToken } from "../lib/mapApi";
 import { NO_USER_IMAGE } from "../lib/utils/constants";
 import { createGraph, dagreUtils } from "../lib/utils/dagre.util";
@@ -1111,6 +1112,8 @@ const Notebook = ({}: NotebookProps) => {
   useEffect(() => {
     // TODO: check if is possible to move this to a pure function and call when user change notebooks
     // this after merge with "share not public notebooks"
+
+    // TODO: add validations
     if (!user) return;
     if (!selectedNotebookId) return;
     const selectedNotebook = notebooks.find(cur => cur.id === selectedNotebookId);
@@ -1119,7 +1122,7 @@ const Notebook = ({}: NotebookProps) => {
     if (!selectedNotebook.defaultTagId || !selectedNotebook.defaultTagName) return;
     if (user.tagId === selectedNotebook.defaultTagId) return; // is updated
 
-    console.log("Update tag when a notebook is changed");
+    console.log("Update tag when a notebook is changed", user.tagId, selectedNotebook.defaultTagId);
     const updateDefaultTag = async (defaultTagId: string, defaultTagName: string) => {
       try {
         dispatch({
@@ -1127,6 +1130,7 @@ const Notebook = ({}: NotebookProps) => {
           payload: { ...user, tagId: defaultTagId, tag: defaultTagName },
         });
         await Post(`/changeDefaultTag/${defaultTagId}`);
+        await updateNotebookTag(db, selectedNotebookId, { defaultTagId: defaultTagId, defaultTagName });
 
         let { reputation, user: userUpdated } = await retrieveAuthenticatedUser(user.userId, user.role);
         if (!reputation) throw Error("Cant find Reputation");
@@ -1140,7 +1144,7 @@ const Notebook = ({}: NotebookProps) => {
     };
 
     updateDefaultTag(selectedNotebook.defaultTagId, selectedNotebook.defaultTagName);
-  }, [dispatch, notebooks, selectedNotebookId, user, user?.role, user?.userId]);
+  }, [db, dispatch, notebooks, selectedNotebookId, user, user?.role, user?.userId]);
 
   useEffect(() => {
     if (!db) return;
@@ -6562,6 +6566,7 @@ const Notebook = ({}: NotebookProps) => {
                 user={user}
                 scrollToNode={scrollToNode}
                 settings={settings}
+                selectedNotebookId={selectedNotebookId}
               />
               {nodeBookState.selectedNode && (
                 <CitationsSidebar
