@@ -102,6 +102,7 @@ type MainSidebarProps = {
   // setSelectedNtoebook
   // setCurrentTutorial: Dispatch<SetStateAction<TutorialKeys>>;
   onDisplayInstructorPage: () => void;
+  onChangeTagOfNotebookById: (notebookId: string, data: { defaultTagId: string; defaultTagName: string }) => void;
 };
 
 export const ToolbarSidebar = ({
@@ -130,6 +131,7 @@ export const ToolbarSidebar = ({
   selectedNotebook,
   openNodesOnNotebook,
   onDisplayInstructorPage,
+  onChangeTagOfNotebookById,
 }: // setCurrentTutorial,
 // enabledToolbarElements = [],
 MainSidebarProps) => {
@@ -168,6 +170,10 @@ MainSidebarProps) => {
     const setDefaultTag = async () => {
       // TODO: add validations
       if (!selectedNotebook) return;
+      const thisNotebook = notebooks.find(cur => cur.id === selectedNotebook);
+      if (!thisNotebook) return;
+
+      if (thisNotebook.owner !== user.uname) return console.warn("this user cant change notebook tag");
 
       if (nodeBookState.choosingNode?.id === "Tag" && nodeBookState.chosenNode) {
         const { id: nodeId, title: nodeTitle } = nodeBookState.chosenNode;
@@ -176,15 +182,15 @@ MainSidebarProps) => {
         nodeBookDispatch({ type: "setChoosingNode", payload: null });
         nodeBookDispatch({ type: "setChosenNode", payload: null });
         try {
+          // onChangeNotebook(selectedNotebook);
           dispatch({
             type: "setAuthUser",
             payload: { ...user, tagId: nodeId, tag: nodeTitle },
           });
+          onChangeTagOfNotebookById(selectedNotebook, { defaultTagId: nodeId, defaultTagName: nodeTitle });
           await Post(`/changeDefaultTag/${nodeId}`);
 
           await updateNotebookTag(db, selectedNotebook, { defaultTagId: nodeId, defaultTagName: nodeTitle });
-
-          onChangeNotebook(nodeId);
 
           let { reputation, user: userUpdated } = await retrieveAuthenticatedUser(user.userId, user.role);
           if (!reputation) throw Error("Cant find Reputation");
@@ -206,7 +212,9 @@ MainSidebarProps) => {
     nodeBookState.choosingNode?.id,
     nodeBookState.chosenNode,
     notebookRef,
+    notebooks,
     onChangeNotebook,
+    onChangeTagOfNotebookById,
     selectedNotebook,
     user,
   ]);

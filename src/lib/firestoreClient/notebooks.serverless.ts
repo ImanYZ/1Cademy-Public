@@ -6,6 +6,6 @@ export const updateNotebookTag = async (
   data: { defaultTagId: string; defaultTagName: string }
 ) => {
   // console.log('first')
-  const notebookRef = doc(db, "notebook", notebookId);
+  const notebookRef = doc(db, "notebooks", notebookId);
   await updateDoc(notebookRef, data);
 };

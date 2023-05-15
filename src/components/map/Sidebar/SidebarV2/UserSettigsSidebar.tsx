@@ -109,6 +109,8 @@ type UserSettingsSidebarProps = {
   nodeBookState: NodeBookState;
   scrollToNode: (nodeId: string) => void;
   selectedNotebookId: string;
+  onChangeNotebook: (notebookId: string) => void;
+  onChangeTagOfNotebookById: (notebookId: string, data: { defaultTagId: string; defaultTagName: string }) => void;
 };
 
 type UserSettingsTabs = {
@@ -172,6 +174,8 @@ const UserSettigsSidebar = ({
   nodeBookState,
   scrollToNode,
   selectedNotebookId,
+  onChangeNotebook,
+  onChangeTagOfNotebookById,
 }: UserSettingsSidebarProps) => {
   const db = getFirestore();
   const ELEMENTS_PER_PAGE: number = 13;
@@ -498,6 +502,8 @@ const UserSettigsSidebar = ({
             type: "setAuthUser",
             payload: { ...user, tagId: nodeId, tag: nodeTitle },
           });
+          // onChangeNotebook(nodeId);
+          onChangeTagOfNotebookById(selectedNotebookId, { defaultTagId: nodeId, defaultTagName: nodeTitle });
           setIsLoading(true);
 
           await Post(`/changeDefaultTag/${nodeId}`);
@@ -525,6 +531,8 @@ const UserSettigsSidebar = ({
     nodeBookState.choosingNode?.id,
     nodeBookState.chosenNode,
     notebookRef,
+    onChangeNotebook,
+    onChangeTagOfNotebookById,
     selectedNotebookId,
     user,
   ]);

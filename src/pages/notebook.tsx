@@ -370,6 +370,15 @@ const Notebook = ({}: NotebookProps) => {
   const [selectedNotebookId, setSelectedNotebookId] = useState("");
   const selectedPreviousNotebookIdRef = useRef("");
 
+  const onChangeTagOfNotebookById = (notebookId: string, data: { defaultTagId: string; defaultTagName: string }) => {
+    setNotebooks(prev => {
+      return prev.map(
+        (cur): Notebook =>
+          cur.id === notebookId ? { ...cur, defaultTagId: data.defaultTagId, defaultTagName: data.defaultTagName } : cur
+      );
+    });
+  };
+
   const onNodeInViewport = useCallback(
     (nodeId: string, nodes: FullNodesData) => {
       const originalNode = document.getElementById(nodeId);
@@ -783,6 +792,11 @@ const Notebook = ({}: NotebookProps) => {
     });
   }, []);
 
+  const onChangeNotebook = useCallback((notebookId: string) => {
+    console.log("onChangeNotebook", { notebookId });
+    setSelectedNotebookId(notebookId);
+  }, []);
+
   //Getting the node from the Url to open and scroll to that node in the first render
   useEffect(() => {
     const queryString = window.location.search;
@@ -1129,6 +1143,7 @@ const Notebook = ({}: NotebookProps) => {
           type: "setAuthUser",
           payload: { ...user, tagId: defaultTagId, tag: defaultTagName },
         });
+        onChangeTagOfNotebookById(selectedNotebookId, { defaultTagId: defaultTagId, defaultTagName });
         await Post(`/changeDefaultTag/${defaultTagId}`);
         await updateNotebookTag(db, selectedNotebookId, { defaultTagId: defaultTagId, defaultTagName });
 
@@ -1144,7 +1159,7 @@ const Notebook = ({}: NotebookProps) => {
     };
 
     updateDefaultTag(selectedNotebook.defaultTagId, selectedNotebook.defaultTagName);
-  }, [db, dispatch, notebooks, selectedNotebookId, user, user?.role, user?.userId]);
+  }, [db, dispatch, notebooks, onChangeNotebook, selectedNotebookId, user, user?.role, user?.userId]);
 
   useEffect(() => {
     if (!db) return;
@@ -6074,10 +6089,6 @@ const Notebook = ({}: NotebookProps) => {
     return { tutorialsComplete, totalTutorials: tutorialsOfTOC.length };
   }, [tutorialGroup, userTutorial]);
 
-  const onChangeNotebook = useCallback((notebookId: string) => {
-    setSelectedNotebookId(notebookId);
-  }, []);
-
   // ------------------------ useEffects
 
   useEffect(() => {
@@ -6479,6 +6490,7 @@ const Notebook = ({}: NotebookProps) => {
                 onDisplayInstructorPage={() => {
                   setDisplayDashboard(true);
                 }}
+                onChangeTagOfNotebookById={onChangeTagOfNotebookById}
               />
 
               <MemoizedBookmarksSidebar
@@ -6567,6 +6579,8 @@ const Notebook = ({}: NotebookProps) => {
                 scrollToNode={scrollToNode}
                 settings={settings}
                 selectedNotebookId={selectedNotebookId}
+                onChangeNotebook={onChangeNotebook}
+                onChangeTagOfNotebookById={onChangeTagOfNotebookById}
               />
               {nodeBookState.selectedNode && (
                 <CitationsSidebar
