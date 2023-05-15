@@ -14,7 +14,7 @@ import {
   Unsubscribe,
   where,
 } from "firebase/firestore";
-import React, { RefObject, useCallback, useEffect, useRef, useState } from "react";
+import React, { Dispatch, RefObject, SetStateAction, useCallback, useEffect, useRef, useState } from "react";
 import { CourseTag, Instructor, Semester, SemesterStudentVoteStat } from "src/instructorsTypes";
 import { TVoiceAssistantRef } from "src/nodeBookTypes";
 
@@ -34,8 +34,9 @@ import { DashboardStudents } from "./DashboardStudents";
 // import { CoursesResult } from "../layouts/StudentsLayout";
 
 type DashboardWrapperProps = {
-  setVoiceAssistantUpdates: (voiceAssistantUpdates: { updated: Date }) => void;
-  voiceAssistantRef: TVoiceAssistantRef;
+  setVoiceAssistant: Dispatch<SetStateAction<TVoiceAssistantRef>>;
+  // setVoiceAssistant: (voiceAssistantUpdates: { updated: Date }) => void;
+  // voiceAssistantRef: TVoiceAssistantRef;
   user: User;
   onClose: () => void;
   openNodeHandler: (nodeId: string) => void;
@@ -46,8 +47,8 @@ type DashboardWrapperProps = {
 export type ToolbarView = "DASHBOARD" | "PRACTICE" | "SETTINGS" | "STUDENTS";
 
 export const DashboardWrapper = ({
-  setVoiceAssistantUpdates,
-  voiceAssistantRef,
+  setVoiceAssistant,
+  // voiceAssistantRef,
   user,
   openNodeHandler,
   onClose,
@@ -276,8 +277,9 @@ export const DashboardWrapper = ({
             )}
             {selectToolbarView === "PRACTICE" && (
               <PracticeTool
-                setVoiceAssistantUpdates={setVoiceAssistantUpdates}
-                voiceAssistantRef={voiceAssistantRef}
+                // setVoiceAssistant={setVoiceAssistant}
+                setVoiceAssistant={setVoiceAssistant}
+                // voiceAssistantRef={voiceAssistantRef}
                 ref={practiceToolRef}
                 user={user}
                 currentSemester={currentSemester}

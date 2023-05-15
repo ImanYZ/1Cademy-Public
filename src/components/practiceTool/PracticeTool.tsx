@@ -1,10 +1,17 @@
 import { Box } from "@mui/material";
 import { collection, getFirestore, onSnapshot, query, where } from "firebase/firestore";
-import React, { forwardRef, useCallback, useEffect, useImperativeHandle, useState } from "react";
+import React, {
+  Dispatch,
+  forwardRef,
+  SetStateAction,
+  useCallback,
+  useEffect,
+  useImperativeHandle,
+  useState,
+} from "react";
 import { TVoiceAssistantRef } from "src/nodeBookTypes";
 import { ISemester } from "src/types/ICourse";
 import { ISemesterStudentVoteStat } from "src/types/ICourse";
-import { narrateQueue } from "src/utils/helpers";
 
 import { getSemesterById } from "../../client/serveless/semesters.serverless";
 import { CourseTag, SimpleQuestionNode } from "../../instructorsTypes";
@@ -18,8 +25,8 @@ import { PracticeQuestion } from "./PracticeQuestion";
 import { UserStatus } from "./UserStatus";
 
 type PracticeToolProps = {
-  setVoiceAssistantUpdates: (voiceAssistantUpdates: { updated: Date }) => void;
-  voiceAssistantRef: TVoiceAssistantRef;
+  setVoiceAssistant: Dispatch<SetStateAction<TVoiceAssistantRef>>;
+  // voiceAssistantRef: TVoiceAssistantRef;
   user: User;
   root?: string;
   currentSemester: CourseTag;
@@ -48,7 +55,7 @@ export interface PracticeToolRef {
 }
 
 const PracticeTool = forwardRef<PracticeToolRef, PracticeToolProps>(
-  ({ setVoiceAssistantUpdates, voiceAssistantRef, user, currentSemester, openNodeHandler, onClose, root }, ref) => {
+  ({ setVoiceAssistant, user, currentSemester, openNodeHandler, onClose, root }, ref) => {
     console.log({ currentSemester });
     const db = getFirestore();
     const [startPractice, setStartPractice] = useState(false);
@@ -93,31 +100,30 @@ const PracticeTool = forwardRef<PracticeToolRef, PracticeToolProps>(
 
       setQuestionData(res);
 
-      voiceAssistantRef.keepListening = false;
-      voiceAssistantRef.stopListening = true;
-      setVoiceAssistantUpdates({
-        updated: new Date(),
-      });
+      // voiceAssistantRef.keepListening = false;
+      // voiceAssistantRef.stopListening = true;
+      // setVoiceAssistant(prev=>({
+
+      // }));
 
       const question = res.question as SimpleQuestionNode;
-      voiceAssistantRef.keepListening = false;
-      voiceAssistantRef.listening = false;
+      // voiceAssistantRef.keepListening = false;
+      // voiceAssistantRef.listening = null;
       const messages = [question.title];
       const choices = question.choices || [];
       for (const choice of choices) {
         messages.push(choice.choice);
       }
-      await narrateQueue(voiceAssistantRef, messages);
+      // await narrateQueue(voiceAssistantRef, messages);
 
-      voiceAssistantRef.keepListening = true;
-      voiceAssistantRef.startListening = true;
+      // voiceAssistantRef.keepListening = true;
+      // voiceAssistantRef.startListening = true;
+      // voiceAssistantRef.listening = "ANSWERING";
 
       console.log("listening should be started");
-      setVoiceAssistantUpdates({
-        updated: new Date(),
-      });
+      setVoiceAssistant(prev => ({ ...prev, narrationQueue: messages }));
       console.log("------>", res);
-    }, [currentSemester.tagId]);
+    }, [currentSemester.tagId, setVoiceAssistant]);
 
     const onViewNodeOnNodeBook = (nodeId: string) => {
       openNodeHandler(nodeId);

@@ -527,7 +527,7 @@ export type TVoiceAssistantRef = {
   narrating: SpeechSynthesisUtterance | null;
   worker: Worker | null;
   narrationQueue: string[];
-  listening: boolean; // to listening status only
+  listening: "ANSWERING" | "CONFIRM" | "NEXT_ACTION" | null; // to listening status only
   recognition: SpeechRecognition | null;
   stopListening: boolean; // to stop listening add value as true and set voiceAssistantUpdates
   startListening: boolean;

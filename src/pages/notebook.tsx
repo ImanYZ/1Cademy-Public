@@ -96,7 +96,7 @@ import { useWorkerQueue } from "../hooks/useWorkerQueue";
 import { NodeChanges, ReputationSignal } from "../knowledgeTypes";
 import { idToken, retrieveAuthenticatedUser } from "../lib/firestoreClient/auth";
 import { Post, postWithToken } from "../lib/mapApi";
-import { NO_USER_IMAGE } from "../lib/utils/constants";
+import { NO_USER_IMAGE, VOICE_ASSISTANT_DEFAULT } from "../lib/utils/constants";
 import { createGraph, dagreUtils } from "../lib/utils/dagre.util";
 import { devLog } from "../lib/utils/develop.util";
 import { getTypedCollections } from "../lib/utils/getTypedCollections";
@@ -150,8 +150,13 @@ import {
   UserTutorials,
 } from "../nodeBookTypes";
 import { NodeType, Notebook, NotebookDocument, SimpleNode2 } from "../types";
-import { doNeedToDeleteNode, getNodeTypesFromNode, isVersionApproved } from "../utils/helpers";
-const _SpeechRecognition = typeof webkitSpeechRecognition !== "undefined" ? webkitSpeechRecognition : typeof SpeechRecognition !== "undefined" ? SpeechRecognition : null;
+import { doNeedToDeleteNode, getNodeTypesFromNode, isVersionApproved, narrateText } from "../utils/helpers";
+const _SpeechRecognition =
+  typeof webkitSpeechRecognition !== "undefined"
+    ? webkitSpeechRecognition
+    : typeof SpeechRecognition !== "undefined"
+    ? SpeechRecognition
+    : null;
 
 // export type TutorialKeys = TutorialTypeKeys | null;
 
@@ -600,10 +605,7 @@ const Notebook = ({}: NotebookProps) => {
   // // flag for whether tutorial state was loaded
   // const [userTutorialLoaded, setUserTutorialLoaded] = useState(false);
 
-  // flag for whether users' nodes data is downloaded from server
-  // const [userNodesLoaded, setUserNodesLoaded] = useState(false);
-
-  // flag set to true when sending request to server
+  // flag for whether users' nodes data is downloaded from servermessages
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   // flag to open proposal sidebar
@@ -648,75 +650,96 @@ const Notebook = ({}: NotebookProps) => {
   const [onlineUsers, setOnlineUsers] = useState<string[]>([]);
 
   // state to handle assistant listening
-  const [voiceAssistantUpdates, setVoiceAssistantUpdates] = useState({
-    updated: new Date(),
-  });
-  const voiceAssistantRef = useRef<TVoiceAssistantRef>({
-    keepListening: false,
-    narrating: null,
-    narrationQueue: [],
-    worker: null,
-    listening: false,
-    recognition: null,
-    stopListening: false,
-    startListening: false,
-  });
+  // const [voiceAssistantUpdates, setVoiceAssistantUpdates] = useState({
+  //   updated: new Date(),
+  // });
+  const [voiceAssistant, setVoiceAssistant] = useState<TVoiceAssistantRef>(VOICE_ASSISTANT_DEFAULT);
+  // const voiceAssistantRef = useRef<TVoiceAssistantRef>({
+  //   keepListening: false,
+  //   narrating: null,
+  //   narrationQueue: [],
+  //   worker: null,
+  //   listening: false,
+  //   recognition: null,
+  //   stopListening: false,
+  //   startListening: false,
+  // });
 
   useEffect(() => {
-    if(!_SpeechRecognition) return;
+    if (!_SpeechRecognition) return console.log("There is not Speech recognition");
 
-    if(!voiceAssistantRef.current.recognition) {
-      voiceAssistantRef.current.recognition = new _SpeechRecognition();
-      voiceAssistantRef.current.recognition.continuous = false;
-      voiceAssistantRef.current.recognition.lang = 'en-US';
-      voiceAssistantRef.current.recognition.interimResults = false;
-      voiceAssistantRef.current.recognition.maxAlternatives = 1;
+    if (!voiceAssistant.recognition) {
+      voiceAssistant.recognition = new _SpeechRecognition();
+      voiceAssistant.recognition.continuous = false;
+      voiceAssistant.recognition.lang = "en-US";
+      voiceAssistant.recognition.interimResults = false;
+      voiceAssistant.recognition.maxAlternatives = 1;
     }
 
-    const recognition = voiceAssistantRef.current.recognition;
+    const recognition = voiceAssistant.recognition;
 
-    if(!voiceAssistantRef.current.stopListening) {
-      voiceAssistantRef.current.stopListening = false;
+    if (voiceAssistant.stopListening) {
+      voiceAssistant.stopListening = false;
+      voiceAssistant.keepListening = false;
       recognition.stop();
     }
 
-    console.log("listening should be started", voiceAssistantRef.current.startListening);
-    if(voiceAssistantRef.current.startListening) {
-      voiceAssistantRef.current.startListening = false;
+    console.log("listening should be started", voiceAssistant.startListening);
+    if (voiceAssistant.startListening) {
+      voiceAssistant.startListening = false;
       recognition.start();
     }
 
-    recognition.onresult = (event) => {
+    recognition.onresult = (event: any) => {
       const transcript: string = event.results?.[0]?.[0]?.transcript || "";
       console.log(transcript, "transcript");
     };
 
-    recognition.onspeechstart = () => {
-      voiceAssistantRef.current.listening = true;
-      console.log("onspeechstart");
-    };
+    // recognition.onspeechstart = () => {
+    //   // voiceAssistant.current.listening = true; // TODO: change depent of the options
+    //   console.log("onspeechstart");
+    // };
 
-    recognition.onspeechend = () => {
-      voiceAssistantRef.current.listening = false;
-      console.log("onspeechend");
-    };
+    // recognition.onspeechend = () => {
+    //   voiceAssistant.listening = null; // TODO: call action
+    //   console.log("onspeechend");
+    // };
 
     recognition.onend = () => {
-      if(voiceAssistantRef.current.keepListening) {
+      console.log("recognition.onend");
+      if (voiceAssistant.keepListening) {
         recognition.start();
       }
     };
 
     recognition.onnomatch = () => {
-      voiceAssistantRef.current.listening = false;
+      // TODO: narrate message to ask user answer again
+      voiceAssistant.listening = null;
       console.log("onnomatch");
     };
 
-    recognition.onerror = function(event) {
-      voiceAssistantRef.current.listening = false;
+    recognition.onerror = function (event: any) {
+      voiceAssistant.listening = null;
       console.log("onerror", event.error);
     };
-  }, [voiceAssistantUpdates]);
+  }, [voiceAssistant]);
+
+  useEffect(() => {
+    const narrate = async () => {
+      console.log("narrate");
+      if (voiceAssistant.narrationQueue.length === 0) return window.speechSynthesis.cancel();
+
+      // const first;
+      const message = voiceAssistant.narrationQueue.join(" ");
+      console.log("start:narrate", message);
+      const speech = new SpeechSynthesisUtterance(message);
+      await narrateText(speech);
+      setVoiceAssistant(prev => ({ ...prev, narrationQueue: [] }));
+      // await narrateText(msg);
+    };
+
+    narrate();
+  }, [voiceAssistant]);
 
   // ---------------------------------------------------------------------
   // ---------------------------------------------------------------------
@@ -6654,8 +6677,8 @@ const Notebook = ({}: NotebookProps) => {
           />
           {user && displayDashboard && (
             <DashboardWrapper
-              setVoiceAssistantUpdates={setVoiceAssistantUpdates}
-              voiceAssistantRef={voiceAssistantRef.current}
+              setVoiceAssistant={setVoiceAssistant}
+              // voiceAssistantRef={voiceAssistantRef.current}
               user={user}
               onClose={() => {
                 setRootQuery(undefined);
@@ -6829,6 +6852,18 @@ const Notebook = ({}: NotebookProps) => {
               )}
             </>
           </MemoizedToolbox>
+
+          <Button
+            onClick={() => setVoiceAssistant(VOICE_ASSISTANT_DEFAULT)}
+            sx={{
+              position: "absolute",
+              top: "20px",
+              right: "200px",
+              zIndex: 99999,
+            }}
+          >
+            Stop Naration
+          </Button>
           {/* end Data from map */}
 
           {window.innerHeight > 399 && user?.livelinessBar === "interaction" && (

@@ -54,3 +54,14 @@ export const EDUCATION_VALUES = [
 export const NO_USER_IMAGE = "https://storage.googleapis.com/onecademy-1.appspot.com/ProfilePictures/no-img.png";
 
 export const NARRATE_WORKER_TERMINATED = "narrate-worker-terminated";
+
+export const VOICE_ASSISTANT_DEFAULT = {
+  keepListening: false,
+  narrating: null,
+  narrationQueue: [],
+  worker: null,
+  listening: null,
+  recognition: null,
+  stopListening: false,
+  startListening: false,
+};
