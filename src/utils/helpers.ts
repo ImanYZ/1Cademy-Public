@@ -1,3 +1,6 @@
+import { NARRATE_WORKER_TERMINATED } from "@/lib/utils/constants";
+import { TVoiceAssistantRef } from "src/nodeBookTypes";
+import { INarrateWorkerMessage } from "src/types/IAssistant";
 import { INode } from "src/types/INode";
 import { INodeType } from "src/types/INodeType";
 
@@ -49,4 +52,68 @@ export const getNodeTypesFromNode = (nodeData: INode): INodeType[] => {
   const _nodeTypes: INodeType[] = nodeData.nodeTypes || [];
   _nodeTypes.push(nodeData.nodeType);
   return Array.from(new Set(_nodeTypes));
+};
+
+export const narrateText = async (message: SpeechSynthesisUtterance) => {
+  return new Promise(resolve => {
+    window.speechSynthesis.cancel();
+    window.speechSynthesis.speak(message);
+    // e: SpeechSynthesisEvent
+    const endListener = () => {
+      message.removeEventListener("end", endListener);
+      resolve(true);
+    };
+    message.addEventListener("end", endListener);
+  });
+};
+
+export const narrateQueue = async (voiceAssistantRef: TVoiceAssistantRef, batch: string[]) => {
+  return new Promise(resolve => {
+    // terminating previous worker
+    if (voiceAssistantRef.worker) {
+      voiceAssistantRef.worker.terminate();
+      voiceAssistantRef.worker = null;
+      const e = new CustomEvent(NARRATE_WORKER_TERMINATED);
+      window.dispatchEvent(e);
+    }
+
+    // detect termination
+    const terminateHandler = async () => {
+      resolve(true);
+      window.removeEventListener(NARRATE_WORKER_TERMINATED, terminateHandler);
+    };
+    window.addEventListener(NARRATE_WORKER_TERMINATED, terminateHandler);
+
+    console.log(batch, "batch");
+    const worker: Worker = new Worker(new URL("../workers/NarrateWorker.ts", import.meta.url));
+    voiceAssistantRef.worker = worker;
+
+    worker.postMessage({
+      messages: batch,
+    } as INarrateWorkerMessage);
+
+    worker.onerror = e => {
+      console.log("Narrate Worker Error", e);
+    };
+
+    worker.onmessage = e => {
+      const data = e.data as INarrateWorkerMessage;
+
+      (async () => {
+        if (data.message) {
+          const msg = new SpeechSynthesisUtterance(data.message);
+          await narrateText(msg);
+        }
+
+        if (!data.messages.length) {
+          window.removeEventListener(NARRATE_WORKER_TERMINATED, terminateHandler);
+          return resolve(true);
+        }
+
+        worker.postMessage({
+          messages: data.messages,
+        } as INarrateWorkerMessage);
+      })();
+    };
+  });
 };

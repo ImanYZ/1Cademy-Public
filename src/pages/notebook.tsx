@@ -142,6 +142,7 @@ import {
   TNodeBookState,
   TNodeUpdates,
   TutorialTypeKeys,
+  TVoiceAssistantRef,
   // TutorialType,
   UserNodes,
   UserNodesData,
@@ -150,6 +151,7 @@ import {
 } from "../nodeBookTypes";
 import { NodeType, Notebook, NotebookDocument, SimpleNode2 } from "../types";
 import { doNeedToDeleteNode, getNodeTypesFromNode, isVersionApproved } from "../utils/helpers";
+const _SpeechRecognition = typeof webkitSpeechRecognition !== "undefined" ? webkitSpeechRecognition : typeof SpeechRecognition !== "undefined" ? SpeechRecognition : null;
 
 // export type TutorialKeys = TutorialTypeKeys | null;
 
@@ -644,6 +646,77 @@ const Notebook = ({}: NotebookProps) => {
 
   const [usersOnlineStatusLoaded, setUsersOnlineStatusLoaded] = useState(false);
   const [onlineUsers, setOnlineUsers] = useState<string[]>([]);
+
+  // state to handle assistant listening
+  const [voiceAssistantUpdates, setVoiceAssistantUpdates] = useState({
+    updated: new Date(),
+  });
+  const voiceAssistantRef = useRef<TVoiceAssistantRef>({
+    keepListening: false,
+    narrating: null,
+    narrationQueue: [],
+    worker: null,
+    listening: false,
+    recognition: null,
+    stopListening: false,
+    startListening: false,
+  });
+
+  useEffect(() => {
+    if(!_SpeechRecognition) return;
+
+    if(!voiceAssistantRef.current.recognition) {
+      voiceAssistantRef.current.recognition = new _SpeechRecognition();
+      voiceAssistantRef.current.recognition.continuous = false;
+      voiceAssistantRef.current.recognition.lang = 'en-US';
+      voiceAssistantRef.current.recognition.interimResults = false;
+      voiceAssistantRef.current.recognition.maxAlternatives = 1;
+    }
+
+    const recognition = voiceAssistantRef.current.recognition;
+
+    if(!voiceAssistantRef.current.stopListening) {
+      voiceAssistantRef.current.stopListening = false;
+      recognition.stop();
+    }
+
+    console.log("listening should be started", voiceAssistantRef.current.startListening);
+    if(voiceAssistantRef.current.startListening) {
+      voiceAssistantRef.current.startListening = false;
+      recognition.start();
+    }
+
+    recognition.onresult = (event) => {
+      const transcript: string = event.results?.[0]?.[0]?.transcript || "";
+      console.log(transcript, "transcript");
+    };
+
+    recognition.onspeechstart = () => {
+      voiceAssistantRef.current.listening = true;
+      console.log("onspeechstart");
+    };
+
+    recognition.onspeechend = () => {
+      voiceAssistantRef.current.listening = false;
+      console.log("onspeechend");
+    };
+
+    recognition.onend = () => {
+      if(voiceAssistantRef.current.keepListening) {
+        recognition.start();
+      }
+    };
+
+    recognition.onnomatch = () => {
+      voiceAssistantRef.current.listening = false;
+      console.log("onnomatch");
+    };
+
+    recognition.onerror = function(event) {
+      voiceAssistantRef.current.listening = false;
+      console.log("onerror", event.error);
+    };
+  }, [voiceAssistantUpdates]);
 
   // ---------------------------------------------------------------------
   // ---------------------------------------------------------------------
@@ -6579,9 +6652,10 @@ const Notebook = ({}: NotebookProps) => {
             comLeaderboardOpen={comLeaderboardOpen}
             setComLeaderboardOpen={setComLeaderboardOpen}
           />
-
           {user && displayDashboard && (
             <DashboardWrapper
+              setVoiceAssistantUpdates={setVoiceAssistantUpdates}
+              voiceAssistantRef={voiceAssistantRef.current}
               user={user}
               onClose={() => {
                 setRootQuery(undefined);

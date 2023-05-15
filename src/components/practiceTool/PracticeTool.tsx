@@ -1,8 +1,10 @@
 import { Box } from "@mui/material";
 import { collection, getFirestore, onSnapshot, query, where } from "firebase/firestore";
 import React, { forwardRef, useCallback, useEffect, useImperativeHandle, useState } from "react";
+import { TVoiceAssistantRef } from "src/nodeBookTypes";
 import { ISemester } from "src/types/ICourse";
 import { ISemesterStudentVoteStat } from "src/types/ICourse";
+import { narrateQueue } from "src/utils/helpers";
 
 import { getSemesterById } from "../../client/serveless/semesters.serverless";
 import { CourseTag, SimpleQuestionNode } from "../../instructorsTypes";
@@ -16,6 +18,8 @@ import { PracticeQuestion } from "./PracticeQuestion";
 import { UserStatus } from "./UserStatus";
 
 type PracticeToolProps = {
+  setVoiceAssistantUpdates: (voiceAssistantUpdates: { updated: Date }) => void;
+  voiceAssistantRef: TVoiceAssistantRef;
   user: User;
   root?: string;
   currentSemester: CourseTag;
@@ -44,7 +48,7 @@ export interface PracticeToolRef {
 }
 
 const PracticeTool = forwardRef<PracticeToolRef, PracticeToolProps>(
-  ({ user, currentSemester, openNodeHandler, onClose, root }, ref) => {
+  ({ setVoiceAssistantUpdates, voiceAssistantRef, user, currentSemester, openNodeHandler, onClose, root }, ref) => {
     console.log({ currentSemester });
     const db = getFirestore();
     const [startPractice, setStartPractice] = useState(false);
@@ -88,6 +92,30 @@ const PracticeTool = forwardRef<PracticeToolRef, PracticeToolProps>(
       if (res?.done) return setPracticeIsCompleted(true);
 
       setQuestionData(res);
+
+      voiceAssistantRef.keepListening = false;
+      voiceAssistantRef.stopListening = true;
+      setVoiceAssistantUpdates({
+        updated: new Date(),
+      });
+
+      const question = res.question as SimpleQuestionNode;
+      voiceAssistantRef.keepListening = false;
+      voiceAssistantRef.listening = false;
+      const messages = [question.title];
+      const choices = question.choices || [];
+      for (const choice of choices) {
+        messages.push(choice.choice);
+      }
+      await narrateQueue(voiceAssistantRef, messages);
+
+      voiceAssistantRef.keepListening = true;
+      voiceAssistantRef.startListening = true;
+
+      console.log("listening should be started");
+      setVoiceAssistantUpdates({
+        updated: new Date(),
+      });
       console.log("------>", res);
     }, [currentSemester.tagId]);
 

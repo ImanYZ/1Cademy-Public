@@ -427,6 +427,21 @@ export const PracticeQuestion = ({
 
       {question && !practiceIsCompleted && (
         <>
+          {/* Assistant */}
+          <Box
+            sx={{
+              position: "fixed",
+              bottom: "50px",
+              right: "50px",
+            }}
+          >
+            <img
+              src={`/assistant.svg`}
+              style={{
+                width: "70px",
+              }}
+            />
+          </Box>
           {/* options */}
           <Stack spacing={"8px"} sx={{ position: "absolute", right: "12px", top: "8px" }}>
             <IconButton

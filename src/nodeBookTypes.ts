@@ -521,3 +521,14 @@ export type UserTutorial = {
 export type UserTutorials = {
   [key in TutorialTypeKeys]: UserTutorial;
 };
+
+export type TVoiceAssistantRef = {
+  keepListening: boolean;
+  narrating: SpeechSynthesisUtterance | null;
+  worker: Worker | null;
+  narrationQueue: string[];
+  listening: boolean; // to listening status only
+  recognition: SpeechRecognition | null;
+  stopListening: boolean; // to stop listening add value as true and set voiceAssistantUpdates
+  startListening: boolean;
+};
