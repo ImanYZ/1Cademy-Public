@@ -111,6 +111,7 @@ type UserSettingsSidebarProps = {
   selectedNotebookId: string;
   onChangeNotebook: (notebookId: string) => void;
   onChangeTagOfNotebookById: (notebookId: string, data: { defaultTagId: string; defaultTagName: string }) => void;
+  notebookOwner: string;
 };
 
 type UserSettingsTabs = {
@@ -176,6 +177,7 @@ const UserSettigsSidebar = ({
   selectedNotebookId,
   onChangeNotebook,
   onChangeTagOfNotebookById,
+  notebookOwner,
 }: UserSettingsSidebarProps) => {
   const db = getFirestore();
   const ELEMENTS_PER_PAGE: number = 13;
@@ -489,9 +491,9 @@ const UserSettigsSidebar = ({
   // this useEffect updated the defaultTag when chosen node change
   useEffect(() => {
     const setDefaultTag = async () => {
-      // TODO: add validations
-
       if (nodeBookState.choosingNode?.id === "Tag" && nodeBookState.chosenNode) {
+        if (notebookOwner !== user.uname)
+          return alert("You cannot modify this tag. Please ask the notebook's owner for permission.");
         const { id: nodeId, title: nodeTitle } = nodeBookState.chosenNode;
         notebookRef.current.choosingNode = null;
         notebookRef.current.chosenNode = null;
@@ -530,6 +532,7 @@ const UserSettigsSidebar = ({
     nodeBookDispatch,
     nodeBookState.choosingNode?.id,
     nodeBookState.chosenNode,
+    notebookOwner,
     notebookRef,
     onChangeNotebook,
     onChangeTagOfNotebookById,

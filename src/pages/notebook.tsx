@@ -44,7 +44,6 @@ import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from "rea
 /* eslint-disable */ //This wrapper comments it to use react-map-interaction without types
 // @ts-ignore
 import { MapInteractionCSS } from "react-map-interaction";
-import { CourseTag } from "src/instructorsTypes";
 import { IAssistantEventDetail } from "src/types/IAssistant";
 import { INodeType } from "src/types/INodeType";
 /* eslint-enable */
@@ -95,7 +94,6 @@ import { useWindowSize } from "../hooks/useWindowSize";
 import { useWorkerQueue } from "../hooks/useWorkerQueue";
 import { NodeChanges, ReputationSignal } from "../knowledgeTypes";
 import { idToken, retrieveAuthenticatedUser } from "../lib/firestoreClient/auth";
-import { updateNotebookTag } from "../lib/firestoreClient/notebooks.serverless";
 import { Post, postWithToken } from "../lib/mapApi";
 import { NO_USER_IMAGE } from "../lib/utils/constants";
 import { createGraph, dagreUtils } from "../lib/utils/dagre.util";
@@ -687,6 +685,12 @@ const Notebook = ({}: NotebookProps) => {
     }
     return width;
   };
+
+  const selectedNotebook = useMemo(() => {
+    const thisNotebook = notebooks.find(c => c.id === selectedNotebookId);
+    return thisNotebook ?? null;
+  }, [notebooks, selectedNotebookId]);
+
   const openNodeHandler = useMemoizedCallback(
     async (nodeId: string, openWithDefaultValues: Partial<UserNodesData> = {}) => {
       devLog("OPEN_NODE_HANDLER", { nodeId, openWithDefaultValues });
@@ -1130,7 +1134,6 @@ const Notebook = ({}: NotebookProps) => {
     // TODO: add validations
     if (!user) return;
     if (!selectedNotebookId) return;
-    const selectedNotebook = notebooks.find(cur => cur.id === selectedNotebookId);
 
     if (!selectedNotebook) return;
     if (!selectedNotebook.defaultTagId || !selectedNotebook.defaultTagName) return;
@@ -1145,7 +1148,7 @@ const Notebook = ({}: NotebookProps) => {
         });
         onChangeTagOfNotebookById(selectedNotebookId, { defaultTagId: defaultTagId, defaultTagName });
         await Post(`/changeDefaultTag/${defaultTagId}`);
-        await updateNotebookTag(db, selectedNotebookId, { defaultTagId: defaultTagId, defaultTagName });
+        // await updateNotebookTag(db, selectedNotebookId, { defaultTagId: defaultTagId, defaultTagName });
 
         let { reputation, user: userUpdated } = await retrieveAuthenticatedUser(user.userId, user.role);
         if (!reputation) throw Error("Cant find Reputation");
@@ -1159,7 +1162,7 @@ const Notebook = ({}: NotebookProps) => {
     };
 
     updateDefaultTag(selectedNotebook.defaultTagId, selectedNotebook.defaultTagName);
-  }, [db, dispatch, notebooks, onChangeNotebook, selectedNotebookId, user, user?.role, user?.userId]);
+  }, [db, dispatch, notebooks, onChangeNotebook, selectedNotebook, selectedNotebookId, user, user?.role, user?.userId]);
 
   useEffect(() => {
     if (!db) return;
@@ -6581,6 +6584,7 @@ const Notebook = ({}: NotebookProps) => {
                 selectedNotebookId={selectedNotebookId}
                 onChangeNotebook={onChangeNotebook}
                 onChangeTagOfNotebookById={onChangeTagOfNotebookById}
+                notebookOwner={selectedNotebook?.owner ?? ""}
               />
               {nodeBookState.selectedNode && (
                 <CitationsSidebar

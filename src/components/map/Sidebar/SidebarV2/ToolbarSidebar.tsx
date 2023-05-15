@@ -173,7 +173,7 @@ MainSidebarProps) => {
       const thisNotebook = notebooks.find(cur => cur.id === selectedNotebook);
       if (!thisNotebook) return;
 
-      if (thisNotebook.owner !== user.uname) return console.warn("this user cant change notebook tag");
+      if (thisNotebook.owner !== user.uname) return alert("Cant modify this tag, ask to the notebook's owner");
 
       if (nodeBookState.choosingNode?.id === "Tag" && nodeBookState.chosenNode) {
         const { id: nodeId, title: nodeTitle } = nodeBookState.chosenNode;
