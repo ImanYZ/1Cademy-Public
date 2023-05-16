@@ -79,6 +79,7 @@ import { gray200 } from "@/pages/home";
 
 import darkModeLibraryBackground from "../../../../../public/darkModeLibraryBackground.jpg";
 import LightmodeLibraryBackground from "../../../../../public/lightModeLibraryBackground.png";
+import { updateNotebookTag } from "../../../../lib/firestoreClient/notebooks.serverless";
 import { DESIGN_SYSTEM_COLORS } from "../../../../lib/theme/colors";
 import { MemoizedInputSave } from "../../InputSave";
 import { MemoizedMetaButton } from "../../MetaButton";
@@ -107,6 +108,10 @@ type UserSettingsSidebarProps = {
   nodeBookDispatch: React.Dispatch<DispatchNodeBookActions>;
   nodeBookState: NodeBookState;
   scrollToNode: (nodeId: string) => void;
+  selectedNotebookId: string;
+  onChangeNotebook: (notebookId: string) => void;
+  onChangeTagOfNotebookById: (notebookId: string, data: { defaultTagId: string; defaultTagName: string }) => void;
+  notebookOwner: string;
 };
 
 type UserSettingsTabs = {
@@ -169,6 +174,10 @@ const UserSettigsSidebar = ({
   nodeBookDispatch,
   nodeBookState,
   scrollToNode,
+  selectedNotebookId,
+  onChangeNotebook,
+  onChangeTagOfNotebookById,
+  notebookOwner,
 }: UserSettingsSidebarProps) => {
   const db = getFirestore();
   const ELEMENTS_PER_PAGE: number = 13;
@@ -484,6 +493,8 @@ const UserSettigsSidebar = ({
   useEffect(() => {
     const setDefaultTag = async () => {
       if (nodeBookState.choosingNode?.id === "Tag" && nodeBookState.chosenNode) {
+        if (notebookOwner !== user.uname)
+          return alert("You cannot modify this tag. Please ask the notebook's owner for permission.");
         const { id: nodeId, title: nodeTitle } = nodeBookState.chosenNode;
         notebookRef.current.choosingNode = null;
         notebookRef.current.chosenNode = null;
@@ -494,8 +505,12 @@ const UserSettigsSidebar = ({
             type: "setAuthUser",
             payload: { ...user, tagId: nodeId, tag: nodeTitle },
           });
+          // onChangeNotebook(nodeId);
+          onChangeTagOfNotebookById(selectedNotebookId, { defaultTagId: nodeId, defaultTagName: nodeTitle });
           setIsLoading(true);
+
           await Post(`/changeDefaultTag/${nodeId}`);
+          await updateNotebookTag(db, selectedNotebookId, { defaultTagId: nodeId, defaultTagName: nodeTitle });
           setIsLoading(false);
           let { reputation, user: userUpdated } = await retrieveAuthenticatedUser(user.userId, user.role);
 
@@ -512,7 +527,19 @@ const UserSettigsSidebar = ({
       }
     };
     setDefaultTag();
-  }, [dispatch, nodeBookDispatch, nodeBookState.choosingNode?.id, nodeBookState.chosenNode, user]);
+  }, [
+    db,
+    dispatch,
+    nodeBookDispatch,
+    nodeBookState.choosingNode?.id,
+    nodeBookState.chosenNode,
+    notebookOwner,
+    notebookRef,
+    onChangeNotebook,
+    onChangeTagOfNotebookById,
+    selectedNotebookId,
+    user,
+  ]);
 
   const choosingNodeClick = useCallback(
     (choosingNodeTag: string) => {
