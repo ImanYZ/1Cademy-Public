@@ -55,7 +55,7 @@ export type DashboardWrapperRef = PracticeToolRef;
 
 export type ToolbarView = "DASHBOARD" | "PRACTICE" | "SETTINGS" | "STUDENTS";
 
-export const DashboardWrapper = forwardRef<any, DashboardWrapperProps>((props, ref) => {
+export const DashboardWrapper = forwardRef<DashboardWrapperRef, DashboardWrapperProps>((props, ref) => {
   const { setVoiceAssistant, user, openNodeHandler, onClose, root, sx } = props;
   const db = getFirestore();
 
@@ -75,9 +75,11 @@ export const DashboardWrapper = forwardRef<any, DashboardWrapperProps>((props, r
   const practiceToolRef = useRef<PracticeToolRef | null>(null);
 
   useImperativeHandle(ref, () => ({
+    onRunPracticeTool: (start: boolean) => console.log("start practice", start),
     onSubmitAnswer: (answers: boolean[]) => practiceToolRef.current && practiceToolRef.current.onSubmitAnswer(answers),
     onSelectAnswers: practiceToolRef.current ? practiceToolRef.current.onSelectAnswers : () => {},
     nextQuestion: practiceToolRef.current ? practiceToolRef.current.nextQuestion : () => {},
+    getQuestionParents: practiceToolRef.current ? practiceToolRef.current.getQuestionParents : () => [],
   }));
 
   const semesterByStudentSnapthot = useCallback(
@@ -231,6 +233,7 @@ export const DashboardWrapper = forwardRef<any, DashboardWrapperProps>((props, r
     setSelectToolbarView(view);
   };
 
+  // detect root (semester) to open practice tool automatically
   useEffect(() => {
     if (!root) return;
     const rootSemester = allSemesters.find(semester => semester.tagId === root);

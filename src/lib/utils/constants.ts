@@ -57,13 +57,14 @@ export const NO_USER_IMAGE = "https://storage.googleapis.com/onecademy-1.appspot
 export const NARRATE_WORKER_TERMINATED = "narrate-worker-terminated";
 
 export const VOICE_ASSISTANT_DEFAULT: TVoiceAssistantRef = {
-  answers: [],
-  date: "",
   listen: false,
+  answers: [],
   listenType: null,
   message: "",
   narrate: false,
   selectedAnswer: "",
+  date: "",
+  tagId: "",
 };
 
 export const QUESTION_OPTIONS = [

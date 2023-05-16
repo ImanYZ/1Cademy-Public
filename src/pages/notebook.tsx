@@ -68,6 +68,7 @@ import { useTagsTreeView } from "@/hooks/useTagsTreeView";
 import { DESIGN_SYSTEM_COLORS } from "@/lib/theme/colors";
 
 import LoadingImg from "../../public/animated-icon-1cademy.gif";
+import { getNode } from "../client/serveless/nodes.serveless";
 import { TooltipTutorial } from "../components/interactiveTutorial/Tutorial";
 // import nodesData from "../../testUtils/mockCollections/nodes.data";
 // import { Tutorial } from "../components/interactiveTutorial/Tutorial";
@@ -143,6 +144,7 @@ import {
   EdgesData,
   FullNodeData,
   FullNodesData,
+  Node,
   OpenPart,
   // NodeTutorialState,
   TNodeBookState,
@@ -157,6 +159,7 @@ import {
 } from "../nodeBookTypes";
 import { NodeType, Notebook, NotebookDocument, SimpleNode2 } from "../types";
 import { doNeedToDeleteNode, getNodeTypesFromNode, isVersionApproved, narrateLargeTexts } from "../utils/helpers";
+import { nodeToNarration } from "../utils/node.utils";
 const _SpeechRecognition =
   typeof webkitSpeechRecognition !== "undefined"
     ? webkitSpeechRecognition
@@ -659,208 +662,9 @@ const Notebook = ({}: NotebookProps) => {
   // const [voiceAssistantUpdates, setVoiceAssistantUpdates] = useState({
   //   updated: new Date(),
   // });
-  const [voiceAssistant, setVoiceAssistant] = useState<TVoiceAssistantRef>({
-    listen: false,
-    answers: [],
-    listenType: null,
-    message: "",
-    narrate: false,
-    selectedAnswer: "",
-    date: "",
-  });
+  const [voiceAssistant, setVoiceAssistant] = useState<TVoiceAssistantRef>(VOICE_ASSISTANT_DEFAULT);
 
   const assistantRef = useRef<DashboardWrapperRef | null>(null);
-
-  // narrator
-  useEffect(() => {
-    const assistantActions = async () => {
-      // Speech Recognition doesn't exist on browser
-      if (!_SpeechRecognition) return;
-      const recognition = new _SpeechRecognition();
-      recognition.continuous = false;
-      recognition.lang = "en-US";
-      recognition.interimResults = false;
-      recognition.maxAlternatives = 1;
-
-      console.log("assistantActions:narrate");
-      // if (!voiceAssistant.message) return window.speechSynthesis.cancel();
-
-      console.log("assistantActions:start:narrate", voiceAssistant.message);
-      // const speech = new SpeechSynthesisUtterance(voiceAssistant.message);
-      await narrateLargeTexts(voiceAssistant.message);
-      // setVoiceAssistant(prev => ({ ...prev, message: "", narrate: true, listen: false }));
-
-      if (!voiceAssistant.listenType) return;
-
-      const NEXT_ACTION = "*";
-      const OPEN_NOTEBOOK = ".";
-      const REPEAT_QUESTION = "?";
-
-      const MapSentences: { [key: string]: string } = {
-        hey: "a",
-        be: "b",
-        ve: "b",
-        me: "b",
-        ce: "c",
-        see: "c",
-        se: "s",
-        de: "d",
-        dee: "d",
-        yes: "y",
-        correct: "y",
-        "repeat question": REPEAT_QUESTION,
-        next: NEXT_ACTION,
-        "open notebook": OPEN_NOTEBOOK,
-      };
-      recognition.start();
-      recognition.onresult = async (event: any) => {
-        const transcript: string = event.results?.[0]?.[0]?.transcript || "";
-        console.log("----> result", { transcript });
-        const transcriptProcessed =
-          transcript.toLowerCase() === "open notebook"
-            ? OPEN_NOTEBOOK
-            : transcript
-                .toLowerCase()
-                .split(" ")
-                .map(cur => (cur.length === 1 ? cur : MapSentences[cur] ?? ""))
-                .filter(cur => cur.length === 1)
-                .join("");
-        console.log("assistantActions:onresult", { transcriptProceced: transcriptProcessed });
-        if ([REPEAT_QUESTION].includes(transcriptProcessed)) {
-          setVoiceAssistant(prev => ({
-            ...prev,
-            listen: false,
-            listenType: "ANSWERING",
-            narrate: true,
-            selectedAnswer: "",
-          })); // this will force to narrate again
-        }
-        if (voiceAssistant.listenType === "ANSWERING") {
-          if (!assistantRef.current) return;
-          // transcriptProcessed:"bc"
-          // possibleOptions: "abcd"
-          const possibleOptions = QUESTION_OPTIONS.slice(0, voiceAssistant.answers.length);
-          const answerIsValid = Array.from(transcriptProcessed).reduce(
-            (acu, cur) => acu && possibleOptions.includes(cur),
-            true
-          );
-          console.log("assistantActions:ANSWERING", { possibleOptions, transcriptProcessed, answerIsValid });
-          if (!answerIsValid) {
-            const message =
-              "Sorry, I didn't get your choices. Please only tell me a, b, c, d, or a combination of them, such as ab, bd, or acd.";
-            setVoiceAssistant(prev => ({
-              ...prev,
-              listen: false,
-              listenType: "ANSWERING",
-              message,
-              narrate: true,
-              selectedAnswer: "",
-            }));
-            return;
-          }
-
-          // const message =`You have selected a, b and c. Is this correct?`
-
-          const submitOptions = getAnswersLettersOptions(transcriptProcessed, voiceAssistant.answers.length);
-          assistantRef.current.onSelectAnswers(submitOptions);
-          const message = `You have selected ${transcriptProcessed}. Is this correct?`;
-          setVoiceAssistant(prev => ({
-            ...prev,
-            listen: false,
-            listenType: "CONFIRM",
-            narrate: true,
-            message,
-            selectedAnswer: transcriptProcessed,
-          }));
-        }
-        if (voiceAssistant.listenType === "CONFIRM") {
-          console.log("assistantActions:CONFIRM");
-          if (["y"].includes(transcriptProcessed)) {
-            const submitOptions = getAnswersLettersOptions(
-              voiceAssistant.selectedAnswer,
-              voiceAssistant.answers.length
-            );
-            const isCorrect = voiceAssistant.answers.reduce(
-              (acu, cur, idx) => acu && submitOptions[idx] === cur.correct,
-              true
-            );
-            const possibleAssistantMessages = isCorrect ? ASSISTANT_POSITIVE_SENTENCES : ASSISTANT_NEGATIVE_SENTENCES;
-            const randomMessageIndex = Math.round(Math.random() * possibleAssistantMessages.length);
-            const assistantMessageBasedOnResultOfAnswer = possibleAssistantMessages[randomMessageIndex];
-            assistantRef.current?.onSubmitAnswer(submitOptions);
-            setVoiceAssistant({
-              listen: false,
-              listenType: "NEXT_ACTION",
-              narrate: true,
-              message: assistantMessageBasedOnResultOfAnswer ?? "",
-              answers: [],
-              selectedAnswer: "",
-              date: "",
-            });
-          } else {
-            const message = "Please only tell me a, b, c, d, or a combination of them, such as ab, bd, or acd.";
-            setVoiceAssistant(prev => ({ ...prev, listen: false, listenType: "ANSWERING", narrate: true, message }));
-          }
-        }
-
-        if (voiceAssistant.listenType === "NEXT_ACTION") {
-          console.log("assistantActions:NEXT_ACTION");
-          if (transcriptProcessed === NEXT_ACTION) {
-            if (!assistantRef.current) return;
-            assistantRef.current.nextQuestion();
-            return;
-          }
-          if (transcriptProcessed === OPEN_NOTEBOOK) {
-            console.log("ACTION:Open Notebook");
-            // TODO Open Notebook
-            // open nodes and narrate parentNode
-            return;
-          }
-          // No valid action was selected, try again
-          let message = "Sorry, I didn't get your choices. Please only tell me Next or Open Notebook";
-          await narrateLargeTexts(message);
-          console.log("NEXT_ACTION");
-          setVoiceAssistant(prev => {
-            console.log({ prev });
-            return { ...prev, date: new Date().toISOString(), message: "" };
-          });
-        }
-      };
-
-      recognition.onnomatch = async () => {
-        console.log("onnomatch");
-        let message = "Sorry, I didn't get your choices.";
-        if (voiceAssistant.listenType === "CONFIRM") {
-          message += "Please only tell me yes or correct.";
-        }
-        if (voiceAssistant.listenType === "ANSWERING") {
-          message += "Please only tell me a, b, c, d, or a combination of them, such as ab, bd, or acd.";
-        }
-        if (voiceAssistant.listenType === "NEXT_ACTION") {
-          message += "Please only tell me Next or Open Notebook";
-        }
-
-        await narrateLargeTexts(message);
-        setVoiceAssistant(prev => ({
-          ...prev,
-          date: new Date().toISOString(),
-          message: voiceAssistant.listenType === "NEXT_ACTION" ? "" : voiceAssistant.message,
-        }));
-      };
-
-      recognition.onerror = async function (event: any) {
-        console.log("xonerror", event.error);
-        const message = "Sorry, I cannot detect speech, try later";
-        // const speech = new SpeechSynthesisUtterance(message);
-        console.log("onerror:will narrate", message);
-        await narrateLargeTexts(message);
-        console.log("onerror:will narrate");
-        setVoiceAssistant(prev => ({ ...prev, date: new Date().toISOString() }));
-      };
-    };
-
-    assistantActions();
-  }, [voiceAssistant]);
 
   // ---------------------------------------------------------------------
   // ---------------------------------------------------------------------
@@ -6291,6 +6095,7 @@ const Notebook = ({}: NotebookProps) => {
 
   // ------------------------ useEffects
 
+  // detect root from url to open practice tool automatically
   useEffect(() => {
     if (!user) return;
     if (!user.role) return;
@@ -6360,6 +6165,244 @@ const Notebook = ({}: NotebookProps) => {
 
     duplicateNotebookFromParams();
   }, [db, onChangeNotebook, openNodesOnNotebook, router.query.nb, user]);
+
+  // narrator
+  useEffect(() => {
+    const assistantActions = async () => {
+      // Speech Recognition doesn't exist on browser
+      if (!_SpeechRecognition) return;
+      const recognition = new _SpeechRecognition();
+      recognition.continuous = false;
+      recognition.lang = "en-US";
+      recognition.interimResults = false;
+      recognition.maxAlternatives = 1;
+
+      console.log("assistantActions:narrate");
+      // if (!voiceAssistant.message) return window.speechSynthesis.cancel();
+
+      console.log("assistantActions:start:narrate", voiceAssistant.message);
+      // const speech = new SpeechSynthesisUtterance(voiceAssistant.message);
+      await narrateLargeTexts(voiceAssistant.message);
+      // setVoiceAssistant(prev => ({ ...prev, message: "", narrate: true, listen: false }));
+
+      if (!voiceAssistant.listenType) return;
+
+      const NEXT_ACTION = "*";
+      const OPEN_NOTEBOOK = ".";
+      const REPEAT_QUESTION = "?";
+      const OPEN_PRACTICE = "#";
+
+      const MapSentences: { [key: string]: string } = {
+        "repeat question": REPEAT_QUESTION,
+        "open notebook": OPEN_NOTEBOOK,
+        "continue practicing": OPEN_PRACTICE,
+      };
+      const MapWords: { [key: string]: string } = {
+        hey: "a",
+        be: "b",
+        ve: "b",
+        me: "b",
+        ce: "c",
+        see: "c",
+        se: "s",
+        de: "d",
+        dee: "d",
+        guess: "d",
+        yes: "y",
+        correct: "y",
+        "repeat question": REPEAT_QUESTION,
+        next: NEXT_ACTION,
+        "open notebook": OPEN_NOTEBOOK,
+        "continue practicing": OPEN_PRACTICE,
+      };
+      recognition.start();
+      recognition.onresult = async (event: any) => {
+        const transcript: string = event.results?.[0]?.[0]?.transcript || "";
+        console.log("----> result", { transcript });
+        const transcriptProcessed =
+          MapSentences[transcript.toLowerCase()] ??
+          transcript
+            .toLowerCase()
+            .split(" ")
+            .map(cur => (cur.length === 1 ? cur : MapWords[cur] ?? ""))
+            .filter(cur => cur.length === 1)
+            .join("");
+        console.log("assistantActions:onresult", { transcriptProcessed });
+        if ([REPEAT_QUESTION].includes(transcriptProcessed)) {
+          setVoiceAssistant(prev => ({
+            ...prev,
+            listen: false,
+            listenType: "ANSWERING",
+            narrate: true,
+            selectedAnswer: "",
+          })); // this will force to narrate again
+        }
+        if (voiceAssistant.listenType === "ANSWERING") {
+          if (!assistantRef.current) return;
+          // transcriptProcessed:"bc"
+          // possibleOptions: "abcd"
+          const possibleOptions = QUESTION_OPTIONS.slice(0, voiceAssistant.answers.length);
+          const answerIsValid = Array.from(transcriptProcessed).reduce(
+            (acu, cur) => acu && possibleOptions.includes(cur),
+            true
+          );
+          console.log("assistantActions:ANSWERING", { possibleOptions, transcriptProcessed, answerIsValid });
+          if (!answerIsValid) {
+            const message =
+              "Sorry, I didn't get your choices. Please only tell me a, b, c, d, or a combination of them, such as ab, bd, or acd.";
+            setVoiceAssistant(prev => ({
+              ...prev,
+              listen: false,
+              listenType: "ANSWERING",
+              message,
+              narrate: true,
+              selectedAnswer: "",
+            }));
+            return;
+          }
+
+          // const message =`You have selected a, b and c. Is this correct?`
+
+          const submitOptions = getAnswersLettersOptions(transcriptProcessed, voiceAssistant.answers.length);
+          assistantRef.current.onSelectAnswers(submitOptions);
+          const message = `You have selected ${transcriptProcessed}. Is this correct?`;
+          setVoiceAssistant(prev => ({
+            ...prev,
+            listen: false,
+            listenType: "CONFIRM",
+            narrate: true,
+            message,
+            selectedAnswer: transcriptProcessed,
+          }));
+        }
+        if (voiceAssistant.listenType === "CONFIRM") {
+          console.log("assistantActions:CONFIRM");
+          if (["y"].includes(transcriptProcessed)) {
+            const submitOptions = getAnswersLettersOptions(
+              voiceAssistant.selectedAnswer,
+              voiceAssistant.answers.length
+            );
+            const isCorrect = voiceAssistant.answers.reduce(
+              (acu, cur, idx) => acu && submitOptions[idx] === cur.correct,
+              true
+            );
+            const possibleAssistantMessages = isCorrect ? ASSISTANT_POSITIVE_SENTENCES : ASSISTANT_NEGATIVE_SENTENCES;
+            const randomMessageIndex = Math.round(Math.random() * possibleAssistantMessages.length);
+            const assistantMessageBasedOnResultOfAnswer = possibleAssistantMessages[randomMessageIndex];
+            assistantRef.current?.onSubmitAnswer(submitOptions);
+            setVoiceAssistant(prev => ({
+              ...prev,
+              listen: false,
+              listenType: "NEXT_ACTION",
+              narrate: true,
+              message: assistantMessageBasedOnResultOfAnswer ?? "",
+              answers: [],
+              selectedAnswer: "",
+              date: "",
+            }));
+          } else {
+            const message = "Please only tell me a, b, c, d, or a combination of them, such as ab, bd, or acd.";
+            setVoiceAssistant(prev => ({ ...prev, listen: false, listenType: "ANSWERING", narrate: true, message }));
+          }
+        }
+
+        if (voiceAssistant.listenType === "NEXT_ACTION") {
+          console.log("assistantActions:NEXT_ACTION");
+          if (transcriptProcessed === NEXT_ACTION) {
+            if (!assistantRef.current) return;
+            assistantRef.current.nextQuestion();
+            return;
+          }
+          if (transcriptProcessed === OPEN_NOTEBOOK) {
+            if (!assistantRef.current) return;
+            console.log("ACTION:Open Notebook");
+            const parents = assistantRef.current.getQuestionParents();
+            setDisplayDashboard(false);
+            openNodesOnNotebook(selectedNotebookId, parents);
+            await detectElements({ ids: parents });
+            for (let i = 0; i < parents.length; i++) {
+              const parent = parents[i];
+              const node: Node | null = await getNode(db, parent);
+              if (!node) return;
+
+              const message = nodeToNarration(node);
+              scrollToNode(parent);
+              await narrateLargeTexts(message);
+            }
+            // TODO: wait for next action
+            console.log("execute NOTEBOOK_ACTIONS ");
+            setVoiceAssistant(prev => ({
+              ...prev,
+              answers: [],
+              date: "",
+              listen: false,
+              listenType: "NOTEBOOK_ACTIONS",
+              message: "",
+              narrate: false,
+              selectedAnswer: "",
+            }));
+            return;
+          }
+          // No valid action was selected, try again
+          let message = "Sorry, I didn't get your choices. Please only tell me Next or Open Notebook";
+          await narrateLargeTexts(message);
+          console.log("NEXT_ACTION");
+          setVoiceAssistant(prev => {
+            console.log({ prev });
+            return { ...prev, date: new Date().toISOString(), message: "" };
+          });
+        }
+
+        if (voiceAssistant.listenType === "NOTEBOOK_ACTIONS") {
+          setRootQuery(voiceAssistant.tagId);
+          setDisplayDashboard(true);
+        }
+      };
+
+      recognition.onnomatch = async () => {
+        console.log("onnomatch");
+        let message = "Sorry, I didn't get your choices.";
+        if (voiceAssistant.listenType === "CONFIRM") {
+          message += "Please only tell me yes or correct.";
+        }
+        if (voiceAssistant.listenType === "ANSWERING") {
+          message += "Please only tell me a, b, c, d, or a combination of them, such as ab, bd, or acd.";
+        }
+        if (voiceAssistant.listenType === "NEXT_ACTION") {
+          message += "Please only tell me Next or Open Notebook";
+        }
+
+        await narrateLargeTexts(message);
+        setVoiceAssistant(prev => ({
+          ...prev,
+          date: new Date().toISOString(),
+          message: voiceAssistant.listenType === "NEXT_ACTION" ? "" : voiceAssistant.message,
+        }));
+      };
+
+      recognition.onerror = async function (event: any) {
+        console.log("xonerror", event.error);
+        const message = "Sorry, I cannot detect speech, try later";
+        // const speech = new SpeechSynthesisUtterance(message);
+        console.log("onerror:will narrate", message);
+        await narrateLargeTexts(message);
+        console.log("onerror:will narrate");
+        setVoiceAssistant(prev => ({ ...prev, date: new Date().toISOString() }));
+      };
+    };
+
+    assistantActions();
+  }, [
+    db,
+    openNodesOnNotebook,
+    scrollToNode,
+    selectedNotebookId,
+    voiceAssistant.answers,
+    voiceAssistant.listenType,
+    voiceAssistant.message,
+    voiceAssistant.selectedAnswer,
+    voiceAssistant.tagId,
+  ]);
 
   return (
     <div className="MapContainer" style={{ overflow: "hidden" }}>
@@ -6685,9 +6728,7 @@ const Notebook = ({}: NotebookProps) => {
                 selectedNotebook={selectedNotebookId}
                 openNodesOnNotebook={openNodesOnNotebook}
                 setNotebooks={setNotebooks}
-                onDisplayInstructorPage={() => {
-                  setDisplayDashboard(true);
-                }}
+                onDisplayInstructorPage={() => setDisplayDashboard(true)}
               />
 
               <MemoizedBookmarksSidebar
@@ -6975,17 +7016,6 @@ const Notebook = ({}: NotebookProps) => {
             </>
           </MemoizedToolbox>
 
-          <Button
-            onClick={() => setVoiceAssistant(VOICE_ASSISTANT_DEFAULT)}
-            sx={{
-              position: "absolute",
-              top: "20px",
-              right: "200px",
-              zIndex: 99999,
-            }}
-          >
-            Stop Naration
-          </Button>
           {/* end Data from map */}
 
           {window.innerHeight > 399 && user?.livelinessBar === "interaction" && (

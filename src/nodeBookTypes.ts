@@ -535,12 +535,13 @@ export type UserTutorials = {
 
 export type TVoiceAssistantRef = {
   listen: boolean;
-  listenType: "ANSWERING" | "CONFIRM" | "NEXT_ACTION" | null;
+  listenType: "ANSWERING" | "CONFIRM" | "NEXT_ACTION" | "NOTEBOOK_ACTIONS" | null;
   narrate: boolean;
   message: string;
   answers: KnowledgeChoice[];
   selectedAnswer: string;
   date: string;
+  tagId: string;
   // keepListening: boolean;
   // narrating: SpeechSynthesisUtterance | null;
   // worker: Worker | null;

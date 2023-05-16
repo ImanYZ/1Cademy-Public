@@ -55,6 +55,7 @@ export type PracticeToolRef = {
   onSelectAnswers: (answers: boolean[]) => void;
   onSubmitAnswer: (answers: boolean[]) => void;
   nextQuestion: () => void;
+  getQuestionParents: () => string[];
 };
 
 const PracticeTool = forwardRef<PracticeToolRef, PracticeToolProps>(
@@ -116,6 +117,7 @@ const PracticeTool = forwardRef<PracticeToolRef, PracticeToolProps>(
         answers: question.choices,
         selectedAnswer: "",
         date: "",
+        tagId: currentSemester.tagId,
       });
       setSubmitAnswer(false);
       setSelectedAnswers(new Array(question.choices.length).fill(false));
@@ -127,6 +129,7 @@ const PracticeTool = forwardRef<PracticeToolRef, PracticeToolProps>(
       onSubmitAnswer,
       onSelectAnswers: answers => setSelectedAnswers(answers),
       nextQuestion: getPracticeQuestion,
+      getQuestionParents: () => questionData?.question.parents ?? [],
     }));
 
     const onViewNodeOnNodeBook = (nodeId: string) => {
