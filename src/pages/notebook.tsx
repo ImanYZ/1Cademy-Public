@@ -791,12 +791,15 @@ const Notebook = ({}: NotebookProps) => {
       recognition.onresult = async (event: any) => {
         const transcript: string = event.results?.[0]?.[0]?.transcript || "";
         console.log("----> result", { transcript });
-        const transcriptProcessed = transcript
-          .toLowerCase()
-          .split(" ")
-          .map(cur => (cur.length === 1 ? cur : MapSentences[cur] ?? ""))
-          .filter(cur => cur.length === 1)
-          .join("");
+        const transcriptProcessed =
+          transcript.toLowerCase() === "open notebook"
+            ? OPEN_NOTEBOOK
+            : transcript
+                .toLowerCase()
+                .split(" ")
+                .map(cur => (cur.length === 1 ? cur : MapSentences[cur] ?? ""))
+                .filter(cur => cur.length === 1)
+                .join("");
         console.log("assistantActions:onresult", { transcriptProceced: transcriptProcessed });
         if ([REPEAT_QUESTION].includes(transcriptProcessed)) {
           setVoiceAssistant(prev => ({
