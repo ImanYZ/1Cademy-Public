@@ -819,11 +819,16 @@ const Notebook = ({}: NotebookProps) => {
           // No valid action was selected, try again
           let message = "Sorry, I didn't get your choices. Please only tell me Next or Open Notebook";
           await narrateLargeTexts(message);
-          setVoiceAssistant(prev => ({ ...prev, date: new Date().toISOString() }));
+          console.log("NEXT_ACTION");
+          setVoiceAssistant(prev => {
+            console.log({ prev });
+            return { ...prev, date: new Date().toISOString(), message: "" };
+          });
         }
       };
 
       recognition.onnomatch = async () => {
+        console.log("onnomatch");
         let message = "Sorry, I didn't get your choices.";
         if (voiceAssistant.listenType === "CONFIRM") {
           message += "Please only tell me yes or correct.";
@@ -836,7 +841,11 @@ const Notebook = ({}: NotebookProps) => {
         }
 
         await narrateLargeTexts(message);
-        setVoiceAssistant(prev => ({ ...prev, date: new Date().toISOString() }));
+        setVoiceAssistant(prev => ({
+          ...prev,
+          date: new Date().toISOString(),
+          message: voiceAssistant.listenType === "NEXT_ACTION" ? "" : voiceAssistant.message,
+        }));
       };
 
       recognition.onerror = async function (event: any) {
@@ -846,7 +855,7 @@ const Notebook = ({}: NotebookProps) => {
         console.log("onerror:will narrate", message);
         await narrateLargeTexts(message);
         console.log("onerror:will narrate");
-        // setVoiceAssistant(prev => ({ ...prev, listen: false, listenType: null, message: "", narrate: false }));
+        setVoiceAssistant(prev => ({ ...prev, date: new Date().toISOString() }));
       };
     };
 
