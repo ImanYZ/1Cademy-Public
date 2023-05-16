@@ -539,6 +539,8 @@ export type TVoiceAssistantRef = {
   narrate: boolean;
   message: string;
   answers: KnowledgeChoice[];
+  selectedAnswer: string;
+  date: string;
   // keepListening: boolean;
   // narrating: SpeechSynthesisUtterance | null;
   // worker: Worker | null;

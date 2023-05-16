@@ -50,9 +50,12 @@ const DEFAULT_PRACTICE_INFO: PracticeInfo = {
   totalDays: 0,
 };
 
-export interface PracticeToolRef {
+export type PracticeToolRef = {
   onRunPracticeTool: (start: boolean) => void;
-}
+  onSelectAnswers: (answers: boolean[]) => void;
+  onSubmitAnswer: (answers: boolean[]) => void;
+  nextQuestion: () => void;
+};
 
 const PracticeTool = forwardRef<PracticeToolRef, PracticeToolProps>(
   ({ setVoiceAssistant, user, currentSemester, openNodeHandler, onClose, root }, ref) => {
@@ -65,7 +68,8 @@ const PracticeTool = forwardRef<PracticeToolRef, PracticeToolProps>(
     const [practiceIsCompleted, setPracticeIsCompleted] = useState(false);
     const [practiceInfo, setPracticeInfo] = useState<PracticeInfo>(DEFAULT_PRACTICE_INFO);
     const [semesterConfig, setSemesterConfig] = useState<ISemester | null>(null);
-
+    const [submitAnswer, setSubmitAnswer] = useState(false);
+    const [selectedAnswers, setSelectedAnswers] = useState<boolean[]>([]);
     const onRunPracticeTool = useCallback(() => {
       (start: boolean) => {
         if (!practiceInfo) return;
@@ -74,13 +78,12 @@ const PracticeTool = forwardRef<PracticeToolRef, PracticeToolProps>(
       };
     }, [practiceInfo]);
 
-    useImperativeHandle(ref, () => ({
-      onRunPracticeTool,
-    }));
-
     const onSubmitAnswer = useCallback(
       async (answers: boolean[]) => {
         if (!questionData) return;
+
+        console.log("onSubmitAnswer", answers);
+        setSubmitAnswer(true);
 
         const payload: ICheckAnswerRequestParams = {
           answers,
@@ -100,24 +103,9 @@ const PracticeTool = forwardRef<PracticeToolRef, PracticeToolProps>(
 
       setQuestionData(res);
 
-      // voiceAssistantRef.keepListening = false;
-      // voiceAssistantRef.stopListening = true;
-      // setVoiceAssistant(prev=>({
-
-      // }));
-
       const question = res.question as SimpleQuestionNode;
-      // voiceAssistantRef.keepListening = false;
-      // voiceAssistantRef.listening = null;
-      // const messages = [question.title];
-      // const choices = question.choices || [];
+
       const choicesMessage = question.choices.map(cur => cur.choice).join(", ");
-
-      // await narrateQueue(voiceAssistantRef, messages);
-
-      // voiceAssistantRef.keepListening = true;
-      // voiceAssistantRef.startListening = true;
-      // voiceAssistantRef.listening = "ANSWERING";
 
       console.log("listening should be started");
       setVoiceAssistant({
@@ -126,9 +114,20 @@ const PracticeTool = forwardRef<PracticeToolRef, PracticeToolProps>(
         message: `${question.title}. ${choicesMessage}`,
         narrate: true,
         answers: question.choices,
+        selectedAnswer: "",
+        date: "",
       });
+      setSubmitAnswer(false);
+      setSelectedAnswers(new Array(question.choices.length).fill(false));
       console.log("------>", res);
     }, [currentSemester.tagId, setVoiceAssistant]);
+
+    useImperativeHandle(ref, () => ({
+      onRunPracticeTool,
+      onSubmitAnswer,
+      onSelectAnswers: answers => setSelectedAnswers(answers),
+      nextQuestion: getPracticeQuestion,
+    }));
 
     const onViewNodeOnNodeBook = (nodeId: string) => {
       openNodeHandler(nodeId);
@@ -137,8 +136,9 @@ const PracticeTool = forwardRef<PracticeToolRef, PracticeToolProps>(
 
     // this is executed the first time we get selected a semester
     useEffect(() => {
+      if (!startPractice) return;
       getPracticeQuestion();
-    }, [getPracticeQuestion]);
+    }, [getPracticeQuestion, startPractice]);
 
     useEffect(() => {
       const getSemesterConfig = async () => {
@@ -226,6 +226,10 @@ const PracticeTool = forwardRef<PracticeToolRef, PracticeToolProps>(
           onGetNextQuestion={getPracticeQuestion}
           onSaveAnswer={onSubmitAnswer}
           practiceInfo={practiceInfo}
+          submitAnswer={submitAnswer}
+          setSubmitAnswer={setSubmitAnswer}
+          selectedAnswers={selectedAnswers}
+          setSelectedAnswers={setSelectedAnswers}
         />
       </Box>
     ) : (

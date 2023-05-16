@@ -73,7 +73,7 @@ export const narrateLargeTexts = async (message: string) => {
 export const narrateText2 = async (message: string) => {
   return new Promise(resolve => {
     const speech = new SpeechSynthesisUtterance(message);
-    window.speechSynthesis.cancel();
+    // window.speechSynthesis.cancel();
     speech.addEventListener("end", event => {
       resolve(true);
     });

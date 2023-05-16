@@ -357,6 +357,10 @@ type PracticeQuestionProps = {
   onSaveAnswer: (answers: boolean[]) => Promise<void>;
   onGetNextQuestion: () => Promise<void>;
   practiceInfo: PracticeInfo;
+  submitAnswer: boolean;
+  setSubmitAnswer: React.Dispatch<React.SetStateAction<boolean>>;
+  selectedAnswers: boolean[];
+  setSelectedAnswers: React.Dispatch<React.SetStateAction<boolean[]>>;
 };
 export const PracticeQuestion = ({
   question,
@@ -368,14 +372,17 @@ export const PracticeQuestion = ({
   onSaveAnswer,
   onGetNextQuestion,
   practiceInfo,
+  submitAnswer,
+  setSubmitAnswer,
+  selectedAnswers,
+  setSelectedAnswers,
 }: PracticeQuestionProps) => {
-  const [selectedAnswers, setSelectedAnswers] = useState<boolean[]>([]);
+  // const [selectedAnswers, setSelectedAnswers] = useState<boolean[]>([]);
   const [displaySidebar, setDisplaySidebar] = useState<"LEADERBOARD" | "USER_STATUS" | null>(null);
-  const [submitAnswer, setSubmitAnswer] = useState(false);
+  // const [submitAnswer, setSubmitAnswer] = useState(false);
   const [loading, setLoading] = useState(true);
 
   const onSubmitAnswer = useCallback(() => {
-    setSubmitAnswer(true);
     onSaveAnswer(selectedAnswers);
   }, [onSaveAnswer, selectedAnswers]);
 
@@ -384,7 +391,7 @@ export const PracticeQuestion = ({
     setSubmitAnswer(false);
     await onGetNextQuestion();
     setLoading(false);
-  }, [onGetNextQuestion]);
+  }, [onGetNextQuestion, setSubmitAnswer]);
 
   const onSelectAnswer = (answerIdx: number) => {
     setSelectedAnswers(prev => prev.map((c, i) => (answerIdx === i ? !c : c)));
@@ -394,7 +401,7 @@ export const PracticeQuestion = ({
     if (!question) return;
     setSelectedAnswers(new Array(question.choices.length).fill(false));
     setLoading(false);
-  }, [question]);
+  }, [question, setSelectedAnswers]);
 
   return (
     <Box

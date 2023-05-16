@@ -14,7 +14,16 @@ import {
   Unsubscribe,
   where,
 } from "firebase/firestore";
-import React, { Dispatch, RefObject, SetStateAction, useCallback, useEffect, useRef, useState } from "react";
+import React, {
+  Dispatch,
+  forwardRef,
+  SetStateAction,
+  useCallback,
+  useEffect,
+  useImperativeHandle,
+  useRef,
+  useState,
+} from "react";
 import { CourseTag, Instructor, Semester, SemesterStudentVoteStat } from "src/instructorsTypes";
 import { TVoiceAssistantRef } from "src/nodeBookTypes";
 
@@ -35,8 +44,6 @@ import { DashboardStudents } from "./DashboardStudents";
 
 type DashboardWrapperProps = {
   setVoiceAssistant: Dispatch<SetStateAction<TVoiceAssistantRef>>;
-  // setVoiceAssistant: (voiceAssistantUpdates: { updated: Date }) => void;
-  // voiceAssistantRef: TVoiceAssistantRef;
   user: User;
   onClose: () => void;
   openNodeHandler: (nodeId: string) => void;
@@ -44,17 +51,12 @@ type DashboardWrapperProps = {
   sx?: SxProps<Theme>;
 };
 
+export type DashboardWrapperRef = PracticeToolRef;
+
 export type ToolbarView = "DASHBOARD" | "PRACTICE" | "SETTINGS" | "STUDENTS";
 
-export const DashboardWrapper = ({
-  setVoiceAssistant,
-  // voiceAssistantRef,
-  user,
-  openNodeHandler,
-  onClose,
-  root,
-  sx,
-}: DashboardWrapperProps) => {
+export const DashboardWrapper = forwardRef<any, DashboardWrapperProps>((props, ref) => {
+  const { setVoiceAssistant, user, openNodeHandler, onClose, root, sx } = props;
   const db = getFirestore();
 
   // const [semesters, setSemesters] = useState<string[]>([]);
@@ -70,7 +72,14 @@ export const DashboardWrapper = ({
   const [, /* isLoading */ setIsLoading] = useState(true);
   const [rootFound, setRootFound] = useState<boolean>(false);
 
-  const practiceToolRef = useRef<PracticeToolRef>(null) as RefObject<PracticeToolRef>;
+  const practiceToolRef = useRef<PracticeToolRef | null>(null);
+
+  useImperativeHandle(ref, () => ({
+    onSubmitAnswer: (answers: boolean[]) => practiceToolRef.current && practiceToolRef.current.onSubmitAnswer(answers),
+    onSelectAnswers: practiceToolRef.current ? practiceToolRef.current.onSelectAnswers : () => {},
+    nextQuestion: practiceToolRef.current ? practiceToolRef.current.nextQuestion : () => {},
+  }));
+
   const semesterByStudentSnapthot = useCallback(
     (q: Query<DocumentData>) =>
       onSnapshot(q, async snaphot => {
@@ -299,7 +308,9 @@ export const DashboardWrapper = ({
       </Box>
     </Box>
   );
-};
+});
+
+DashboardWrapper.displayName = "DashboardWrapper";
 
 export const getCourseTitleFromSemester = (semester: ISemester) => {
   return `${semester.cTitle} ${semester.pTitle || "- " + semester.uTitle}`;
