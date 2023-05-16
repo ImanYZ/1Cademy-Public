@@ -109,11 +109,10 @@ const PracticeTool = forwardRef<PracticeToolRef, PracticeToolProps>(
       const question = res.question as SimpleQuestionNode;
       // voiceAssistantRef.keepListening = false;
       // voiceAssistantRef.listening = null;
-      const messages = [question.title];
-      const choices = question.choices || [];
-      for (const choice of choices) {
-        messages.push(choice.choice);
-      }
+      // const messages = [question.title];
+      // const choices = question.choices || [];
+      const choicesMessage = question.choices.map(cur => cur.choice).join(", ");
+
       // await narrateQueue(voiceAssistantRef, messages);
 
       // voiceAssistantRef.keepListening = true;
@@ -121,7 +120,13 @@ const PracticeTool = forwardRef<PracticeToolRef, PracticeToolProps>(
       // voiceAssistantRef.listening = "ANSWERING";
 
       console.log("listening should be started");
-      setVoiceAssistant(prev => ({ ...prev, narrationQueue: messages }));
+      setVoiceAssistant({
+        listen: false,
+        listenType: "ANSWERING",
+        message: `${question.title}. ${choicesMessage}`,
+        narrate: true,
+        answers: question.choices,
+      });
       console.log("------>", res);
     }, [currentSemester.tagId, setVoiceAssistant]);
 

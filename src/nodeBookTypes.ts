@@ -522,13 +522,29 @@ export type UserTutorials = {
   [key in TutorialTypeKeys]: UserTutorial;
 };
 
+// export type TVoiceAssistantRef = {
+//   keepListening: boolean;
+//   narrating: SpeechSynthesisUtterance | null;
+//   worker: Worker | null;
+//   narrationQueue: string[];
+//   listening: "ANSWERING" | "CONFIRM" | "NEXT_ACTION" | null; // to listening status only
+//   recognition: SpeechRecognition | null;
+//   stopListening: boolean; // to stop listening add value as true and set voiceAssistantUpdates
+//   startListening: boolean;
+// };
+
 export type TVoiceAssistantRef = {
-  keepListening: boolean;
-  narrating: SpeechSynthesisUtterance | null;
-  worker: Worker | null;
-  narrationQueue: string[];
-  listening: "ANSWERING" | "CONFIRM" | "NEXT_ACTION" | null; // to listening status only
-  recognition: SpeechRecognition | null;
-  stopListening: boolean; // to stop listening add value as true and set voiceAssistantUpdates
-  startListening: boolean;
+  listen: boolean;
+  listenType: "ANSWERING" | "CONFIRM" | "NEXT_ACTION" | null;
+  narrate: boolean;
+  message: string;
+  answers: KnowledgeChoice[];
+  // keepListening: boolean;
+  // narrating: SpeechSynthesisUtterance | null;
+  // worker: Worker | null;
+  // narrationQueue: string[];
+  // listening: "ANSWERING" | "CONFIRM" | "NEXT_ACTION" | null; // to listening status only
+  // recognition: SpeechRecognition | null;
+  // stopListening: boolean; // to stop listening add value as true and set voiceAssistantUpdates
+  // startListening: boolean;
 };
