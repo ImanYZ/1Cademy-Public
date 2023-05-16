@@ -575,7 +575,7 @@ const NodeFooter = ({
                   }}
                 >
                   <Box
-                    id={downvoteButtonId}
+                    id={upvoteButtonId}
                     sx={{
                       padding: "2px 0px 2px 5px",
                       borderRadius: "52px 0px 0px 52px",
@@ -632,7 +632,7 @@ const NodeFooter = ({
                     }}
                   />
                   <Box
-                    id={upvoteButtonId}
+                    id={downvoteButtonId}
                     sx={{
                       padding: "2px 5px 2px 0px",
                       borderRadius: "0px 52px 52px 0px",
