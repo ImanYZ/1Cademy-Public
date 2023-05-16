@@ -1,5 +1,6 @@
 // import { NodeType } from "../../knowledgeTypes";
 
+import { TVoiceAssistantRef } from "src/nodeBookTypes";
 import { NodeType } from "src/types";
 
 export const NODE_TYPE_OPTIONS: NodeType[] = [
@@ -55,15 +56,14 @@ export const NO_USER_IMAGE = "https://storage.googleapis.com/onecademy-1.appspot
 
 export const NARRATE_WORKER_TERMINATED = "narrate-worker-terminated";
 
-export const VOICE_ASSISTANT_DEFAULT = {
-  keepListening: false,
-  narrating: null,
-  narrationQueue: [],
-  worker: null,
-  listening: null,
-  recognition: null,
-  stopListening: false,
-  startListening: false,
+export const VOICE_ASSISTANT_DEFAULT: TVoiceAssistantRef = {
+  answers: [],
+  date: "",
+  listen: false,
+  listenType: null,
+  message: "",
+  narrate: false,
+  selectedAnswer: "",
 };
 
 export const QUESTION_OPTIONS = [

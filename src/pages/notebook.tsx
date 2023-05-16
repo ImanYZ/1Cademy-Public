@@ -670,87 +670,12 @@ const Notebook = ({}: NotebookProps) => {
   });
 
   const assistantRef = useRef<DashboardWrapperRef | null>(null);
-  // const assistantListener = useRef<"">();
-  // const voiceAssistantRef = useRef<TVoiceAssistantRef>({
-  //   keepListening: false,
-  //   narrating: null,
-  //   narrationQueue: [],
-  //   worker: null,
-  //   listening: false,
-  //   recognition: null,
-  //   stopListening: false,
-  //   startListening: false,
-  // });
-
-  // useEffect(() => {
-  //   if (!_SpeechRecognition) return console.log("There is not Speech recognition");
-
-  //   const recognition = new _SpeechRecognition();
-  //   recognition.continuous = false;
-  //   recognition.lang = "en-US";
-  //   recognition.interimResults = false;
-  //   recognition.maxAlternatives = 1;
-  //   // if (!voiceAssistant.recognition) {
-  //   //   voiceAssistant.recognition = new _SpeechRecognition();
-  //   //   voiceAssistant.recognition.continuous = false;
-  //   //   voiceAssistant.recognition.lang = "en-US";
-  //   //   voiceAssistant.recognition.interimResults = false;
-  //   //   voiceAssistant.recognition.maxAlternatives = 1;
-  //   // }
-
-  //   // const recognition = voiceAssistant.recognition;
-
-  //   // if (voiceAssistant.stopListening) {
-  //   //   voiceAssistant.stopListening = false;
-  //   //   voiceAssistant.keepListening = false;
-  //   //   recognition.stop();
-  //   // }
-
-  //   // console.log("listening should be started", voiceAssistant.startListening);
-  //   if (voiceAssistant.startListening) {
-  //     voiceAssistant.startListening = false;
-  //     recognition.start();
-  //   }
-
-  //   recognition.onresult = (event: any) => {
-  //     const transcript: string = event.results?.[0]?.[0]?.transcript || "";
-  //     console.log(transcript, "transcript");
-  //   };
-
-  //   // recognition.onspeechstart = () => {
-  //   //   // voiceAssistant.current.listening = true; // TODO: change depent of the options
-  //   //   console.log("onspeechstart");
-  //   // };
-
-  //   recognition.onspeechend = () => {
-  //     voiceAssistant.listening = null; // TODO: call action
-  //     console.log("onspeechend");
-  //   };
-
-  //   recognition.onend = () => {
-  //     console.log("recognition.onend");
-  //     if (voiceAssistant.keepListening) {
-  //       recognition.start();
-  //     }
-  //   };
-
-  //   recognition.onnomatch = () => {
-  //     // TODO: narrate message to ask user answer again
-  //     voiceAssistant.listening = null;
-  //     console.log("onnomatch");
-  //   };
-
-  //   recognition.onerror = function (event: any) {
-  //     voiceAssistant.listening = null;
-  //     console.log("onerror", event.error);
-  //   };
-  // }, [voiceAssistant]);
 
   // narrator
   useEffect(() => {
     const assistantActions = async () => {
-      // const grammar =
-      //   "#JSGF V1.0; grammar colors; public <color> = aqua | azure | beige | bisque | black | blue | brown | chocolate | coral | crimson | cyan | fuchsia | ghostwhite | gold | goldenrod | gray | green | indigo | ivory | khaki | lavender | lime | linen | magenta | maroon | moccasin | navy | olive | orange | orchid | peru | pink | plum | purple | red | salmon | sienna | silver | snow | tan | teal | thistle | tomato | turquoise | violet | white | yellow ;";
+      // Speech Recognition doesn't exist on browser
+      if (!_SpeechRecognition) return;
       const recognition = new _SpeechRecognition();
       recognition.continuous = false;
       recognition.lang = "en-US";
@@ -897,14 +822,7 @@ const Notebook = ({}: NotebookProps) => {
           setVoiceAssistant(prev => ({ ...prev, date: new Date().toISOString() }));
         }
       };
-      // recognition.onspeechend = () => {
-      //   console.log("xonspeechend");
-      //   // setVoiceAssistant(prev => ({ ...prev, listen: false, listenType: null, message: "", narrate: true }));
-      // };
-      // recognition.onend = () => {
-      //   console.log("xonend");
-      //   // setVoiceAssistant(prev => ({ ...prev, listen: false, listenType: null, message: "", narrate: true }));
-      // };
+
       recognition.onnomatch = async () => {
         let message = "Sorry, I didn't get your choices.";
         if (voiceAssistant.listenType === "CONFIRM") {
@@ -920,6 +838,7 @@ const Notebook = ({}: NotebookProps) => {
         await narrateLargeTexts(message);
         setVoiceAssistant(prev => ({ ...prev, date: new Date().toISOString() }));
       };
+
       recognition.onerror = async function (event: any) {
         console.log("xonerror", event.error);
         const message = "Sorry, I cannot detect speech, try later";
