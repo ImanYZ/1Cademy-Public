@@ -136,6 +136,7 @@ import {
   getUserNodeChanges,
   mergeAllNodes,
 } from "../lib/utils/nodesSyncronization.utils";
+import { newRecognition } from "../lib/utils/speechRecognitions.utils";
 import { getGroupTutorials, LivelinessBar } from "../lib/utils/tutorials/grouptutorials";
 import { gtmEvent, imageLoaded, isValidHttpUrl } from "../lib/utils/utils";
 import {
@@ -159,15 +160,6 @@ import {
 import { NodeType, Notebook, NotebookDocument, SimpleNode2 } from "../types";
 import { doNeedToDeleteNode, getNodeTypesFromNode, isVersionApproved, narrateLargeTexts } from "../utils/helpers";
 import { nodeToNarration } from "../utils/node.utils";
-
-const _SpeechRecognition =
-  typeof webkitSpeechRecognition !== "undefined"
-    ? webkitSpeechRecognition
-    : typeof SpeechRecognition !== "undefined"
-    ? SpeechRecognition
-    : null;
-
-// export type TutorialKeys = TutorialTypeKeys | null;
 
 type NotebookProps = {};
 
@@ -6169,26 +6161,17 @@ const Notebook = ({}: NotebookProps) => {
   // assistant will narrate and then will listen
   useEffect(() => {
     const assistantActions = async () => {
-      if (!voiceAssistant) return; // assistant is stoped
-      // Speech Recognition doesn't exist on browser
-      if (!_SpeechRecognition) return;
-      const recognition = new _SpeechRecognition();
+      if (!voiceAssistant) return;
 
-      recognition.continuous = false;
-      recognition.lang = "en-US";
-      recognition.interimResults = false;
-      recognition.maxAlternatives = 1;
-
-      console.log("assistantActions:narrate");
-      // if (!voiceAssistant.message) return window.speechSynthesis.cancel();
+      const recognition = newRecognition();
+      if (!recognition) return console.error("This browser does't support speech recognition");
 
       console.log("assistantActions:start:narrate", voiceAssistant);
-      // const speech = new SpeechSynthesisUtterance(voiceAssistant.message);
       await narrateLargeTexts(voiceAssistant.message);
-      // setVoiceAssistant(prev => ({ ...prev, message: "", narrate: true, listen: false }));
 
+      console.log("assistant:11", voiceAssistant.listenType);
       if (!voiceAssistant.listenType) return;
-
+      console.log("assistant:22", voiceAssistant.listenType);
       const NEXT_ACTION = "*";
       const OPEN_NOTEBOOK = ".";
       const REPEAT_QUESTION = "?";
@@ -6273,11 +6256,13 @@ const Notebook = ({}: NotebookProps) => {
         //   return;
         // }
 
-        if (!transcriptProcessed) {
+        // no valid answers will ask again the same question
+        if (!transcriptProcessed && voiceAssistant.listenType !== "CONFIRM") {
+          console.log("No transcription", voiceAssistant.listenType);
           let message = "Sorry, I didn't get your choices.";
-          if (voiceAssistant.listenType === "CONFIRM") {
-            message += "Please only tell me yes or correct.";
-          }
+          // if (voiceAssistant.listenType === "CONFIRM") {
+          //   message += "Please only tell me yes or correct.";
+          // }
           if (voiceAssistant.listenType === "ANSWERING") {
             message += "Please only tell me a, b, c, d, or a combination of them, such as ab, bd, or acd.";
           }
@@ -6286,7 +6271,11 @@ const Notebook = ({}: NotebookProps) => {
           }
 
           await narrateLargeTexts(message);
-          setVoiceAssistant({ ...voiceAssistant, date: "from-empty transcript" });
+          setVoiceAssistant({
+            ...voiceAssistant,
+            date: "from-empty transcript",
+            message: voiceAssistant.listenType === "NEXT_ACTION" ? "" : voiceAssistant.message,
+          });
           return;
         }
 
@@ -6355,7 +6344,7 @@ const Notebook = ({}: NotebookProps) => {
               .map(cur => `Option ${cur.option}: ${cur.choice.feedback}`)
               .join(". ");
             const possibleAssistantMessages = isCorrect ? ASSISTANT_POSITIVE_SENTENCES : ASSISTANT_NEGATIVE_SENTENCES;
-            const randomMessageIndex = Math.round(Math.random() * possibleAssistantMessages.length);
+            const randomMessageIndex = Math.ceil(Math.random() * possibleAssistantMessages.length);
             const assistantMessageBasedOnResultOfAnswer = possibleAssistantMessages[randomMessageIndex];
             assistantRef.current?.onSubmitAnswer(submitOptions);
             setVoiceAssistant({
