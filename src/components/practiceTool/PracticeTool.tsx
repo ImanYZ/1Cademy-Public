@@ -196,7 +196,7 @@ const PracticeTool = forwardRef<PracticeToolRef, PracticeToolProps>(
         if (!enabledAssistant) return setVoiceAssistant(null);
         if (!questionData) return;
 
-        const choiceMessage = questionData.question.choices.map(cur => cur.choice).join(", ");
+        const choiceMessage = questionData.question.choices.map(cur => cur.choice.replace(".", ",")).join(". ");
         setVoiceAssistant({
           listen: false,
           listenType: "ANSWERING",
