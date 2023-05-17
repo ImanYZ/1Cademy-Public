@@ -6181,7 +6181,12 @@ const Notebook = ({}: NotebookProps) => {
   // assistant will narrate and then will listen
   useEffect(() => {
     const assistantActions = async () => {
-      if (!voiceAssistant) return;
+      if (!voiceAssistant) {
+        window.speechSynthesis.cancel();
+        const message = "Assistant stopped";
+        await narrateLargeTexts(message);
+        return;
+      }
 
       const recognition = newRecognition();
       if (!recognition) return console.error("This browser does't support speech recognition");

@@ -440,20 +440,22 @@ export const PracticeQuestion = ({
       {question && !practiceIsCompleted && (
         <>
           {/* Assistant */}
-          <Box
-            sx={{
-              position: "fixed",
-              bottom: "50px",
-              right: "50px",
-            }}
-          >
-            <img
-              src={`/assistant.svg`}
-              style={{
-                width: "70px",
+          {enabledAssistant && (
+            <Box
+              sx={{
+                position: "fixed",
+                bottom: "50px",
+                right: "50px",
               }}
-            />
-          </Box>
+            >
+              <img
+                src={`/assistant.svg`}
+                style={{
+                  width: "70px",
+                }}
+              />
+            </Box>
+          )}
           {/* options */}
           <Stack spacing={"8px"} sx={{ position: "absolute", right: "12px", top: "8px" }}>
             <IconButton
@@ -495,12 +497,14 @@ export const PracticeQuestion = ({
                   width: "56px",
                   height: "56px",
                   color: theme =>
-                    theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookG200 : DESIGN_SYSTEM_COLORS.gray500,
-                  borderRadius: "8px",
-                  backgroundColor: theme =>
                     enabledAssistant
                       ? DESIGN_SYSTEM_COLORS.primary600
                       : theme.palette.mode === "dark"
+                      ? DESIGN_SYSTEM_COLORS.notebookG200
+                      : DESIGN_SYSTEM_COLORS.gray500,
+                  borderRadius: "8px",
+                  backgroundColor: theme =>
+                    theme.palette.mode === "dark"
                       ? DESIGN_SYSTEM_COLORS.notebookMainBlack
                       : DESIGN_SYSTEM_COLORS.gray50,
                 }}

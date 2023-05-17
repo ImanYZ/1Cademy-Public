@@ -17,7 +17,6 @@ import { getSemesterById } from "../../client/serveless/semesters.serverless";
 import { CourseTag, SimpleQuestionNode } from "../../instructorsTypes";
 import { User } from "../../knowledgeTypes";
 import { Post } from "../../lib/mapApi";
-import { VOICE_ASSISTANT_DEFAULT } from "../../lib/utils/constants";
 import { differentBetweenDays, getDateYYMMDDWithHyphens } from "../../lib/utils/date.utils";
 import { ICheckAnswerRequestParams } from "../../pages/api/checkAnswer";
 import CourseDetail from "./CourseDetail";
@@ -104,24 +103,24 @@ const PracticeTool = forwardRef<PracticeToolRef, PracticeToolProps>(
       if (res?.done) return setPracticeIsCompleted(true);
 
       const question = res.question as SimpleQuestionNode;
-      const choicesMessage = question.choices.map(cur => cur.choice).join(", ");
+      // const choicesMessage = question.choices.map(cur => cur.choice).join(", ");
       setSubmitAnswer(false);
       setSelectedAnswers(new Array(question.choices.length).fill(false));
       setQuestionData(res);
 
-      if (enabledAssistant) return;
-      // should start assistant
-      setVoiceAssistant({
-        listen: false,
-        listenType: "ANSWERING",
-        message: `${question.title}. ${choicesMessage}`,
-        narrate: true,
-        answers: question.choices,
-        selectedAnswer: "",
-        date: "",
-        tagId: currentSemester.tagId,
-      });
-    }, [currentSemester.tagId, enabledAssistant, setVoiceAssistant]);
+      // if (!enabledAssistant) return;
+      // // should start assistant
+      // setVoiceAssistant({
+      //   listen: false,
+      //   listenType: "ANSWERING",
+      //   message: `${question.title}. ${choicesMessage}`,
+      //   narrate: true,
+      //   answers: question.choices,
+      //   selectedAnswer: "",
+      //   date: "",
+      //   tagId: currentSemester.tagId,
+      // });
+    }, [currentSemester.tagId]);
 
     useImperativeHandle(ref, () => ({
       onRunPracticeTool,
@@ -208,7 +207,7 @@ const PracticeTool = forwardRef<PracticeToolRef, PracticeToolProps>(
 
     useEffect(() => {
       const detectAssistantEnable = () => {
-        if (!enabledAssistant) return setVoiceAssistant(VOICE_ASSISTANT_DEFAULT);
+        if (!enabledAssistant) return setVoiceAssistant(null);
         if (!questionData) return;
 
         const choiceMessage = questionData.question.choices.map(cur => cur.choice).join(", ");
