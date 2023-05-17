@@ -17,6 +17,7 @@ import { getSemesterById } from "../../client/serveless/semesters.serverless";
 import { CourseTag, SimpleQuestionNode } from "../../instructorsTypes";
 import { User } from "../../knowledgeTypes";
 import { Post } from "../../lib/mapApi";
+import { VOICE_ASSISTANT_DEFAULT } from "../../lib/utils/constants";
 import { differentBetweenDays, getDateYYMMDDWithHyphens } from "../../lib/utils/date.utils";
 import { ICheckAnswerRequestParams } from "../../pages/api/checkAnswer";
 import CourseDetail from "./CourseDetail";
@@ -25,8 +26,7 @@ import { PracticeQuestion } from "./PracticeQuestion";
 import { UserStatus } from "./UserStatus";
 
 type PracticeToolProps = {
-  setVoiceAssistant: Dispatch<SetStateAction<TVoiceAssistantRef>>;
-  // voiceAssistantRef: TVoiceAssistantRef;
+  setVoiceAssistant: Dispatch<SetStateAction<TVoiceAssistantRef | null>>;
   user: User;
   root?: string;
   currentSemester: CourseTag;
@@ -71,6 +71,7 @@ const PracticeTool = forwardRef<PracticeToolRef, PracticeToolProps>(
     const [semesterConfig, setSemesterConfig] = useState<ISemester | null>(null);
     const [submitAnswer, setSubmitAnswer] = useState(false);
     const [selectedAnswers, setSelectedAnswers] = useState<boolean[]>([]);
+    const [enabledAssistant, setEnabledAssistant] = useState(false);
     const onRunPracticeTool = useCallback(() => {
       (start: boolean) => {
         if (!practiceInfo) return;
@@ -102,13 +103,14 @@ const PracticeTool = forwardRef<PracticeToolRef, PracticeToolProps>(
       console.log("practice:res", { res });
       if (res?.done) return setPracticeIsCompleted(true);
 
+      const question = res.question as SimpleQuestionNode;
+      const choicesMessage = question.choices.map(cur => cur.choice).join(", ");
+      setSubmitAnswer(false);
+      setSelectedAnswers(new Array(question.choices.length).fill(false));
       setQuestionData(res);
 
-      const question = res.question as SimpleQuestionNode;
-
-      const choicesMessage = question.choices.map(cur => cur.choice).join(", ");
-
-      console.log("listening should be started");
+      if (enabledAssistant) return;
+      // should start assistant
       setVoiceAssistant({
         listen: false,
         listenType: "ANSWERING",
@@ -119,10 +121,7 @@ const PracticeTool = forwardRef<PracticeToolRef, PracticeToolProps>(
         date: "",
         tagId: currentSemester.tagId,
       });
-      setSubmitAnswer(false);
-      setSelectedAnswers(new Array(question.choices.length).fill(false));
-      console.log("------>", res);
-    }, [currentSemester.tagId, setVoiceAssistant]);
+    }, [currentSemester.tagId, enabledAssistant, setVoiceAssistant]);
 
     useImperativeHandle(ref, () => ({
       onRunPracticeTool,
@@ -207,6 +206,27 @@ const PracticeTool = forwardRef<PracticeToolRef, PracticeToolProps>(
       setStartPractice(true);
     }, [practiceInfo, root, semesterConfig]);
 
+    useEffect(() => {
+      const detectAssistantEnable = () => {
+        if (!enabledAssistant) return setVoiceAssistant(VOICE_ASSISTANT_DEFAULT);
+        if (!questionData) return;
+
+        const choiceMessage = questionData.question.choices.map(cur => cur.choice).join(", ");
+        setVoiceAssistant({
+          listen: false,
+          listenType: "ANSWERING",
+          message: `${questionData.question.title}. ${choiceMessage}`,
+          narrate: true,
+          answers: questionData.question.choices,
+          selectedAnswer: "",
+          date: "",
+          tagId: currentSemester.tagId,
+        });
+      };
+
+      detectAssistantEnable();
+    }, [currentSemester.tagId, enabledAssistant, questionData, setVoiceAssistant]);
+
     return startPractice ? (
       <Box
         sx={{
@@ -233,6 +253,8 @@ const PracticeTool = forwardRef<PracticeToolRef, PracticeToolProps>(
           setSubmitAnswer={setSubmitAnswer}
           selectedAnswers={selectedAnswers}
           setSelectedAnswers={setSelectedAnswers}
+          enabledAssistant={enabledAssistant}
+          setEnabledAssistant={setEnabledAssistant}
         />
       </Box>
     ) : (

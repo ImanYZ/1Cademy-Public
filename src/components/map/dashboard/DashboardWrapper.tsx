@@ -43,7 +43,7 @@ import { DashboardStudents } from "./DashboardStudents";
 // import { CoursesResult } from "../layouts/StudentsLayout";
 
 type DashboardWrapperProps = {
-  setVoiceAssistant: Dispatch<SetStateAction<TVoiceAssistantRef>>;
+  setVoiceAssistant: Dispatch<SetStateAction<TVoiceAssistantRef | null>>;
   user: User;
   onClose: () => void;
   openNodeHandler: (nodeId: string) => void;
@@ -289,9 +289,7 @@ export const DashboardWrapper = forwardRef<DashboardWrapperRef, DashboardWrapper
             )}
             {selectToolbarView === "PRACTICE" && (
               <PracticeTool
-                // setVoiceAssistant={setVoiceAssistant}
                 setVoiceAssistant={setVoiceAssistant}
-                // voiceAssistantRef={voiceAssistantRef}
                 ref={practiceToolRef}
                 user={user}
                 currentSemester={currentSemester}

@@ -4,6 +4,7 @@ import CloseFullscreenIcon from "@mui/icons-material/CloseFullscreen";
 import DoneIcon from "@mui/icons-material/Done";
 import LeaderboardIcon from "@mui/icons-material/Leaderboard";
 import LocalOfferIcon from "@mui/icons-material/LocalOffer";
+import VolumeUpIcon from "@mui/icons-material/VolumeUp";
 import { Button, ClickAwayListener, Divider, IconButton, ListItem, Skeleton, Tooltip, Typography } from "@mui/material";
 import { Box, Stack } from "@mui/system";
 import React, { ReactNode, useCallback, useEffect, useMemo, useState } from "react";
@@ -361,6 +362,8 @@ type PracticeQuestionProps = {
   setSubmitAnswer: React.Dispatch<React.SetStateAction<boolean>>;
   selectedAnswers: boolean[];
   setSelectedAnswers: React.Dispatch<React.SetStateAction<boolean[]>>;
+  enabledAssistant: boolean;
+  setEnabledAssistant: React.Dispatch<React.SetStateAction<boolean>>;
 };
 export const PracticeQuestion = ({
   question,
@@ -376,6 +379,8 @@ export const PracticeQuestion = ({
   setSubmitAnswer,
   selectedAnswers,
   setSelectedAnswers,
+  enabledAssistant,
+  setEnabledAssistant,
 }: PracticeQuestionProps) => {
   // const [selectedAnswers, setSelectedAnswers] = useState<boolean[]>([]);
   const [displaySidebar, setDisplaySidebar] = useState<"LEADERBOARD" | "USER_STATUS" | null>(null);
@@ -482,6 +487,27 @@ export const PracticeQuestion = ({
             >
               <LeaderboardIcon />
             </IconButton>
+
+            <Tooltip title="Voice-based practice">
+              <IconButton
+                onClick={() => setEnabledAssistant(prev => !prev)}
+                sx={{
+                  width: "56px",
+                  height: "56px",
+                  color: theme =>
+                    theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookG200 : DESIGN_SYSTEM_COLORS.gray500,
+                  borderRadius: "8px",
+                  backgroundColor: theme =>
+                    enabledAssistant
+                      ? DESIGN_SYSTEM_COLORS.primary600
+                      : theme.palette.mode === "dark"
+                      ? DESIGN_SYSTEM_COLORS.notebookMainBlack
+                      : DESIGN_SYSTEM_COLORS.gray50,
+                }}
+              >
+                <VolumeUpIcon />
+              </IconButton>
+            </Tooltip>
           </Stack>
 
           {/* node question */}
