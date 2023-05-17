@@ -377,6 +377,15 @@ const Notebook = ({}: NotebookProps) => {
   const [selectedNotebookId, setSelectedNotebookId] = useState("");
   const selectedPreviousNotebookIdRef = useRef("");
 
+  const onChangeTagOfNotebookById = (notebookId: string, data: { defaultTagId: string; defaultTagName: string }) => {
+    setNotebooks(prev => {
+      return prev.map(
+        (cur): Notebook =>
+          cur.id === notebookId ? { ...cur, defaultTagId: data.defaultTagId, defaultTagName: data.defaultTagName } : cur
+      );
+    });
+  };
+
   const onNodeInViewport = useCallback(
     (nodeId: string, nodes: FullNodesData) => {
       const originalNode = document.getElementById(nodeId);
@@ -690,6 +699,12 @@ const Notebook = ({}: NotebookProps) => {
     }
     return width;
   };
+
+  const selectedNotebook = useMemo(() => {
+    const thisNotebook = notebooks.find(c => c.id === selectedNotebookId);
+    return thisNotebook ?? null;
+  }, [notebooks, selectedNotebookId]);
+
   const openNodeHandler = useMemoizedCallback(
     async (nodeId: string, openWithDefaultValues: Partial<UserNodesData> = {}) => {
       devLog("OPEN_NODE_HANDLER", { nodeId, openWithDefaultValues });
@@ -793,6 +808,11 @@ const Notebook = ({}: NotebookProps) => {
       nodeIds: [nodeId],
       updatedAt: new Date(),
     });
+  }, []);
+
+  const onChangeNotebook = useCallback((notebookId: string) => {
+    console.log("onChangeNotebook", { notebookId });
+    setSelectedNotebookId(notebookId);
   }, []);
 
   //Getting the node from the Url to open and scroll to that node in the first render
@@ -1124,22 +1144,24 @@ const Notebook = ({}: NotebookProps) => {
   useEffect(() => {
     // TODO: check if is possible to move this to a pure function and call when user change notebooks
     // this after merge with "share not public notebooks"
+
     if (!user) return;
     if (!selectedNotebookId) return;
-    const selectedNotebook = notebooks.find(cur => cur.id === selectedNotebookId);
 
     if (!selectedNotebook) return;
     if (!selectedNotebook.defaultTagId || !selectedNotebook.defaultTagName) return;
     if (user.tagId === selectedNotebook.defaultTagId) return; // is updated
 
-    console.log("Update tag when a notebook is changed");
+    console.log("Update tag when a notebook is changed", user.tagId, selectedNotebook.defaultTagId);
     const updateDefaultTag = async (defaultTagId: string, defaultTagName: string) => {
       try {
         dispatch({
           type: "setAuthUser",
           payload: { ...user, tagId: defaultTagId, tag: defaultTagName },
         });
+        onChangeTagOfNotebookById(selectedNotebookId, { defaultTagId: defaultTagId, defaultTagName });
         await Post(`/changeDefaultTag/${defaultTagId}`);
+        // await updateNotebookTag(db, selectedNotebookId, { defaultTagId: defaultTagId, defaultTagName });
 
         let { reputation, user: userUpdated } = await retrieveAuthenticatedUser(user.userId, user.role);
         if (!reputation) throw Error("Cant find Reputation");
@@ -1153,7 +1175,7 @@ const Notebook = ({}: NotebookProps) => {
     };
 
     updateDefaultTag(selectedNotebook.defaultTagId, selectedNotebook.defaultTagName);
-  }, [dispatch, notebooks, selectedNotebookId, user, user?.role, user?.userId]);
+  }, [db, dispatch, notebooks, onChangeNotebook, selectedNotebook, selectedNotebookId, user, user?.role, user?.userId]);
 
   useEffect(() => {
     if (!db) return;
@@ -1618,7 +1640,9 @@ const Notebook = ({}: NotebookProps) => {
 
   const chosenNodeChanged = useCallback(
     (nodeId: string) => {
-      devLog("CHOSEN_NODE_CHANGE", { nodeId });
+      if (notebookRef.current?.choosingNode?.id === "Tag") return; //INFO: this is important to update a community
+
+      devLog("CHOSEN_NODE_CHANGE", { nodeId, tt: notebookRef.current?.choosingNode?.id });
       setUpdatedLinks(updatedLinks => {
         console.log("setUpdatedLinks");
         setGraph(({ nodes: oldNodes, edges: oldEdges }) => {
@@ -6081,10 +6105,6 @@ const Notebook = ({}: NotebookProps) => {
     return { tutorialsComplete, totalTutorials: tutorialsOfTOC.length };
   }, [tutorialGroup, userTutorial]);
 
-  const onChangeNotebook = useCallback((notebookId: string) => {
-    setSelectedNotebookId(notebookId);
-  }, []);
-
   // ------------------------ useEffects
 
   // detect root from url to open practice tool automatically
@@ -6515,10 +6535,6 @@ const Notebook = ({}: NotebookProps) => {
               nodeBookDispatch({ type: "setSelectedNode", payload: null });
               nodeBookDispatch({ type: "setChosenNode", payload: null });
             }}
-            sx={{
-              left: nodeBookState.choosingNode.id === "ToolbarTag" ? "310px" : "50%!important",
-              transform: nodeBookState.choosingNode.id !== "ToolbarTag" ? "translateX(-50%)" : undefined,
-            }}
           >
             Click the node you'd like to link to...
           </NotebookPopup>
@@ -6786,6 +6802,7 @@ const Notebook = ({}: NotebookProps) => {
                 openNodesOnNotebook={openNodesOnNotebook}
                 setNotebooks={setNotebooks}
                 onDisplayInstructorPage={() => setDisplayDashboard(true)}
+                onChangeTagOfNotebookById={onChangeTagOfNotebookById}
               />
 
               <MemoizedBookmarksSidebar
@@ -6873,6 +6890,10 @@ const Notebook = ({}: NotebookProps) => {
                 user={user}
                 scrollToNode={scrollToNode}
                 settings={settings}
+                selectedNotebookId={selectedNotebookId}
+                onChangeNotebook={onChangeNotebook}
+                onChangeTagOfNotebookById={onChangeTagOfNotebookById}
+                notebookOwner={selectedNotebook?.owner ?? ""}
               />
               {nodeBookState.selectedNode && (
                 <CitationsSidebar

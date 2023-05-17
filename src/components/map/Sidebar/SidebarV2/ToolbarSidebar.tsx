@@ -56,6 +56,7 @@ import TagIcon from "../../../../../public/tag.svg";
 import { useHover } from "../../../../hooks/userHover";
 import { useWindowSize } from "../../../../hooks/useWindowSize";
 import { DispatchAuthActions, Reputation, ReputationSignal, User, UserTheme } from "../../../../knowledgeTypes";
+import { updateNotebookTag } from "../../../../lib/firestoreClient/notebooks.serverless";
 import { NO_USER_IMAGE } from "../../../../lib/utils/constants";
 import { UsersStatus, UserTutorials } from "../../../../nodeBookTypes";
 import { OpenSidebar } from "../../../../pages/notebook";
@@ -101,6 +102,7 @@ type MainSidebarProps = {
   // setSelectedNtoebook
   // setCurrentTutorial: Dispatch<SetStateAction<TutorialKeys>>;
   onDisplayInstructorPage: () => void;
+  onChangeTagOfNotebookById: (notebookId: string, data: { defaultTagId: string; defaultTagName: string }) => void;
 };
 
 export const ToolbarSidebar = ({
@@ -129,6 +131,7 @@ export const ToolbarSidebar = ({
   selectedNotebook,
   openNodesOnNotebook,
   onDisplayInstructorPage,
+  onChangeTagOfNotebookById,
 }: // setCurrentTutorial,
 // enabledToolbarElements = [],
 MainSidebarProps) => {
@@ -165,31 +168,55 @@ MainSidebarProps) => {
   // this useEffect updated the defaultTag when chosen node change
   useEffect(() => {
     const setDefaultTag = async () => {
-      if (nodeBookState.choosingNode?.id === "ToolbarTag" && nodeBookState.chosenNode) {
+      if (!selectedNotebook) return;
+      const thisNotebook = notebooks.find(cur => cur.id === selectedNotebook);
+      if (!thisNotebook) return;
+
+      if (thisNotebook.owner !== user.uname) return alert("Cant modify this tag, ask to the notebook's owner");
+
+      if (nodeBookState.choosingNode?.id === "Tag" && nodeBookState.chosenNode) {
         const { id: nodeId, title: nodeTitle } = nodeBookState.chosenNode;
         notebookRef.current.choosingNode = null;
         notebookRef.current.chosenNode = null;
         nodeBookDispatch({ type: "setChoosingNode", payload: null });
         nodeBookDispatch({ type: "setChosenNode", payload: null });
         try {
+          // onChangeNotebook(selectedNotebook);
           dispatch({
             type: "setAuthUser",
             payload: { ...user, tagId: nodeId, tag: nodeTitle },
           });
+          onChangeTagOfNotebookById(selectedNotebook, { defaultTagId: nodeId, defaultTagName: nodeTitle });
           await Post(`/changeDefaultTag/${nodeId}`);
+
+          await updateNotebookTag(db, selectedNotebook, { defaultTagId: nodeId, defaultTagName: nodeTitle });
+
           let { reputation, user: userUpdated } = await retrieveAuthenticatedUser(user.userId, user.role);
           if (!reputation) throw Error("Cant find Reputation");
           if (!userUpdated) throw Error("Cant find User");
 
           dispatch({ type: "setReputation", payload: reputation });
           dispatch({ type: "setAuthUser", payload: userUpdated });
+          setShouldShowTagSearcher(false);
         } catch (err) {
           console.error(err);
         }
       }
     };
     setDefaultTag();
-  }, [dispatch, nodeBookDispatch, nodeBookState.chosenNode, user]);
+  }, [
+    db,
+    dispatch,
+    nodeBookDispatch,
+    nodeBookState.choosingNode?.id,
+    nodeBookState.chosenNode,
+    notebookRef,
+    notebooks,
+    onChangeNotebook,
+    onChangeTagOfNotebookById,
+    selectedNotebook,
+    user,
+  ]);
 
   const onOpenSidebarLog = useCallback(
     async (sidebarType: string) => {
@@ -673,7 +700,7 @@ MainSidebarProps) => {
             }}
             onClick={() => {
               setShouldShowTagSearcher(true);
-              choosingNodeClick("ToolbarTag");
+              choosingNodeClick("Tag");
             }}
           >
             <Box
@@ -1073,23 +1100,14 @@ MainSidebarProps) => {
         open={open}
         onClose={onClose}
         width={80}
-        // width={window.innerWidth <= 500 ? "100%" : isMenuOpen ? "100%" : 80}
         showCloseButton={false}
         showScrollUpButton={false}
         contentSignalState={contentSignalState}
         SidebarContent={toolbarContentMemoized}
         sx={{
           boxShadow: undefined,
-          // overflow: "hidden",
           width: { sm: isHovered ? "250px" : "80px" },
           ...(isMenuOpen && { width: "100%" }),
-
-          // width: { xs: displayLargeToolbar ? "100%" : "80px", sm: "80px" },
-          // maxWidth: { xs: displayLargeToolbar ? "100%" : "80px", sm: "80px" },
-          // ":hover": {
-          //   width: { xs: isMenuOpen ? "100%" : "80px", sm: "250px" },
-          // maxWidth: { xs: isMenuOpen ? "100%" : "80px", sm: "250px" },
-          // },
         }}
         sxContentWrapper={{
           width: "inherit",
