@@ -54,42 +54,24 @@ export const getNodeTypesFromNode = (nodeData: INode): INodeType[] => {
   return Array.from(new Set(_nodeTypes));
 };
 
-// speechSynthesis works only with 100 characters
+/**
+ * speechSynthesis works only with 100 characters
+ * message will be splitted by .
+ */
 export const narrateLargeTexts = async (message: string) => {
   const messages = message.split(".");
-  // const messages = ["hi everyone", "good morning"];
   console.log("narrateLargeTexts", messages);
   for (const messageItem of messages) {
     await narrateText2(messageItem);
   }
-  // (messages.map(c => async () => await narrateText2(c)) as (() => Promise<void>)[]).reduce(
-  //   (p, fn) => p.then(fn),
-  //   Promise.resolve()
-  // );
-
-  // return await Promise.all(messages.map(async cur => await narrateText2(cur)));
 };
 
 export const narrateText2 = async (message: string) => {
   return new Promise(resolve => {
     const speech = new SpeechSynthesisUtterance(message);
-    // window.speechSynthesis.cancel();
-    speech.addEventListener("end", event => {
-      resolve(true);
-    });
-    window.speechSynthesis.speak(speech);
-  });
-};
+    speech.addEventListener("end", () => resolve(true));
 
-export const narrateText = async (message: SpeechSynthesisUtterance) => {
-  return new Promise(resolve => {
     window.speechSynthesis.cancel();
-    window.speechSynthesis.speak(message);
-    // e: SpeechSynthesisEvent
-    const endListener = () => {
-      message.removeEventListener("end", endListener);
-      resolve(true);
-    };
-    message.addEventListener("end", endListener);
+    window.speechSynthesis.speak(speech);
   });
 };

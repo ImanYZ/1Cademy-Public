@@ -103,23 +103,9 @@ const PracticeTool = forwardRef<PracticeToolRef, PracticeToolProps>(
       if (res?.done) return setPracticeIsCompleted(true);
 
       const question = res.question as SimpleQuestionNode;
-      // const choicesMessage = question.choices.map(cur => cur.choice).join(", ");
       setSubmitAnswer(false);
       setSelectedAnswers(new Array(question.choices.length).fill(false));
       setQuestionData(res);
-
-      // if (!enabledAssistant) return;
-      // // should start assistant
-      // setVoiceAssistant({
-      //   listen: false,
-      //   listenType: "ANSWERING",
-      //   message: `${question.title}. ${choicesMessage}`,
-      //   narrate: true,
-      //   answers: question.choices,
-      //   selectedAnswer: "",
-      //   date: "",
-      //   tagId: currentSemester.tagId,
-      // });
     }, [currentSemester.tagId]);
 
     useImperativeHandle(ref, () => ({
