@@ -20,3 +20,8 @@ export const newRecognition = () => {
     return null;
   }
 };
+
+export const isValidABCDOptions = (text: string) => {
+  const result = Array.from(text).filter(c => "abcd".includes(c));
+  return result.length === text.length;
+};
