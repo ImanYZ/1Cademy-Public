@@ -6293,18 +6293,18 @@ const Notebook = ({}: NotebookProps) => {
           // if (voiceAssistant.listenType === "CONFIRM") {
           //   message += "Please only tell me yes or correct.";
           // }
-          if (voiceAssistant.listenType === "ANSWERING") {
-            message += ANSWERING_ERROR;
-          }
-          if (voiceAssistant.listenType === "NEXT_ACTION") {
-            message += "Please only tell me Next or Open Notebook";
-          }
+          // if (voiceAssistant.listenType === "ANSWERING") {
+          //   message += ANSWERING_ERROR;
+          // }
+          // if (voiceAssistant.listenType === "NEXT_ACTION") {
+          //   message += "Please only tell me Next or Open Notebook";
+          // }
 
           await narrateLargeTexts(message);
           setVoiceAssistant({
             ...voiceAssistant,
             date: "from-empty transcript",
-            message: voiceAssistant.listenType === "NEXT_ACTION" ? "" : voiceAssistant.message,
+            // message: voiceAssistant.listenType === "NEXT_ACTION" ? "" : voiceAssistant.message,
           });
           return;
         }
@@ -6472,7 +6472,11 @@ const Notebook = ({}: NotebookProps) => {
         console.log("onerror:will narrate", message);
         await narrateLargeTexts(message);
         console.log("onerror:will narrate");
-        setVoiceAssistant({ ...voiceAssistant, date: "from-error" });
+        setVoiceAssistant({
+          ...voiceAssistant,
+          date: "from-error",
+          message: voiceAssistant.listenType === "NEXT_ACTION" ? "" : voiceAssistant.message,
+        });
       };
     };
 
