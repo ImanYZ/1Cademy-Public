@@ -6224,7 +6224,7 @@ const Notebook = ({}: NotebookProps) => {
         me: "b",
         ce: "c",
         see: "c",
-        se: "s",
+        se: "c",
         de: "d",
         dee: "d",
         guess: "d",
@@ -6373,6 +6373,18 @@ const Notebook = ({}: NotebookProps) => {
               voiceAssistant.selectedAnswer,
               voiceAssistant.answers.length
             );
+            const correctOptionsProcessed: { choice: KnowledgeChoice; option: string }[] = voiceAssistant.answers
+              .reduce(
+                (acu: { choice: KnowledgeChoice; option: string }[], cur, idx) => [
+                  ...acu,
+                  { choice: cur, option: QUESTION_OPTIONS[idx] },
+                ],
+                []
+              )
+              .filter(cur => cur.choice.correct);
+
+            // const correctOption = voiceAssistant.answers.filter(cur=>cur.correct)
+
             const isCorrect = voiceAssistant.answers.reduce(
               (acu, cur, idx) => acu && submitOptions[idx] === cur.correct,
               true
@@ -6388,18 +6400,24 @@ const Notebook = ({}: NotebookProps) => {
             );
             console.log({ selectedAnswer });
             const feedbackForAnswers = selectedAnswer
-              .map(cur => `You Chose ${cur.option}: ${cur.choice.feedback}`)
+              .map(cur => `You selected option ${cur.option}: ${cur.choice.feedback}`)
               .join(". ");
             const possibleAssistantMessages = isCorrect ? ASSISTANT_POSITIVE_SENTENCES : ASSISTANT_NEGATIVE_SENTENCES;
             const randomMessageIndex = Math.floor(Math.random() * possibleAssistantMessages.length);
             const assistantMessageBasedOnResultOfAnswer = possibleAssistantMessages[randomMessageIndex];
             assistantRef.current?.onSubmitAnswer(submitOptions);
+
+            const feedbackToWrongChoice = !isCorrect
+              ? `The correct choice${correctOptionsProcessed.length > 1 ? "s are" : " is"} ${correctOptionsProcessed
+                  .map(c => c.option)
+                  .join(" ")}`
+              : "";
             setVoiceAssistant({
               ...voiceAssistant,
               listen: false,
               listenType: "NEXT_ACTION",
               narrate: true,
-              message: `${assistantMessageBasedOnResultOfAnswer} ${feedbackForAnswers}` ?? "",
+              message: `${assistantMessageBasedOnResultOfAnswer} ${feedbackForAnswers} ${feedbackToWrongChoice}` ?? "",
               answers: [],
               selectedAnswer: "",
               date: "",
