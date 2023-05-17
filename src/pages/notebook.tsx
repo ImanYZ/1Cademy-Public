@@ -140,7 +140,7 @@ import {
   getUserNodeChanges,
   mergeAllNodes,
 } from "../lib/utils/nodesSyncronization.utils";
-import { isValidABCDOptions, newRecognition } from "../lib/utils/speechRecognitions.utils";
+import { getValidABCDOptions, newRecognition } from "../lib/utils/speechRecognitions.utils";
 import { getTextSplittedByCharacter } from "../lib/utils/string.utils";
 import { getGroupTutorials, LivelinessBar } from "../lib/utils/tutorials/grouptutorials";
 import { gtmEvent, imageLoaded, isValidHttpUrl } from "../lib/utils/utils";
@@ -6228,16 +6228,11 @@ const Notebook = ({}: NotebookProps) => {
         dee: "d",
         guess: "d",
         he: "e",
-        av: "ab",
-        cv: "cb",
-        dv: "db",
-        va: "ba",
-        vd: "bd",
-        vc: "bc",
         yes: "y",
         correct: "y",
         "repeat question": REPEAT_QUESTION,
         next: NEXT_ACTION,
+        nikes: NEXT_ACTION,
         "open notebook": OPEN_NOTEBOOK,
         "continue practicing": OPEN_PRACTICE,
       };
@@ -6266,17 +6261,18 @@ const Notebook = ({}: NotebookProps) => {
         }
 
         // here process the transcript to correct most possible transcript value
+        const possibleTranscript: string | null =
+          voiceAssistant.listenType === "ANSWERING" && getValidABCDOptions(transcript.toLowerCase()); // if is answering and is valid, we use directly
 
         const transcriptProcessed =
-          voiceAssistant.listenType === "ANSWERING" && isValidABCDOptions(transcript.toLowerCase())
-            ? transcript.toLowerCase() // if is answering and is valid, we use directly
-            : MapSentences[transcript.toLowerCase()] ??
-              transcript
-                .toLowerCase()
-                .split(" ")
-                .map(cur => (cur.length === 1 ? cur : MapWords[cur] ?? ""))
-                .filter(cur => cur.length === 1)
-                .join("");
+          possibleTranscript ??
+          MapSentences[transcript.toLowerCase()] ??
+          transcript
+            .toLowerCase()
+            .split(" ")
+            .map(cur => (cur.length === 1 ? cur : MapWords[cur] ?? ""))
+            .filter(cur => cur.length === 1)
+            .join("");
         console.log("--->", { transcriptProcessed });
         // actions to interrupt normal flow
 
@@ -6498,10 +6494,10 @@ const Notebook = ({}: NotebookProps) => {
     };
 
     assistantActions();
+    // prevVoiceAssistant, dont add this on dependencies, this is a ref
   }, [
     db,
     openNodesOnNotebook,
-    prevVoiceAssistant,
     scrollToNode,
     selectedNotebookId,
     voiceAssistant,
