@@ -6261,8 +6261,9 @@ const Notebook = ({}: NotebookProps) => {
         }
 
         // here process the transcript to correct most possible transcript value
-        const possibleTranscript: string | null =
-          voiceAssistant.listenType === "ANSWERING" && getValidABCDOptions(transcript.toLowerCase()); // if is answering and is valid, we use directly
+        let possibleTranscript: string | null = null;
+        if (voiceAssistant.listenType === "ANSWERING")
+          possibleTranscript = getValidABCDOptions(transcript.toLowerCase()); // if is answering and is valid, we use directly
 
         const transcriptProcessed =
           possibleTranscript ??
