@@ -16,3 +16,7 @@ export const addSuffixToUrlGMT = (url: string, suffix: string) => {
 export const ellipsisString = (text: string, length: number) => {
   return text.length > length ? `${text.slice(0, length)}...` : text;
 };
+
+export const getTextSplittedByCharacter = (text: string, character: string): string => {
+  return Array.from(text).join(character);
+};

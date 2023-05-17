@@ -46,3 +46,16 @@ export const newRecognition = (grammerType?: TVoiceAssistantListenType) => {
     return null;
   }
 };
+
+export const getValidABCDOptions = (text: string): string | null => {
+  const resultSimple = Array.from(text).filter(c => "abcd".includes(c));
+  const isCorrect = resultSimple.length === text.length;
+
+  if (isCorrect) return text;
+
+  const resultMapping = Array.from(text)
+    .map(c => (c === "v" ? "b" : c))
+    .filter(c => "abcd".includes(c));
+  const isCorrectMapping = resultMapping.length === text.length;
+  return isCorrectMapping ? resultMapping.join("") : null;
+};
