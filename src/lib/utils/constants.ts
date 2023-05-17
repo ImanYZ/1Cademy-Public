@@ -111,6 +111,37 @@ export const ASSISTANT_NEGATIVE_SENTENCES: string[] = [
   "That's a good try. You just need to practice a bit more.",
 ];
 
+export const CHOICES_GRAMMER: string = `
+#JSGF V1.0;
+   
+grammar choicesGrammer;
+    
+public <choice> = a | b | c | d | e | f | g | h | i | j | k | l | repeat question;
+`;
+
+export const NEXT_GRAMMER: string = `
+#JSGF V1.0;
+   
+grammar nextGrammer;
+    
+public <command> = open notebook | next;
+`;
+
+export const NOTEBOOK_GRAMMER: string = `
+#JSGF V1.0;
+   
+grammar notebookGrammer;
+    
+public <command> = continue practicing | up | down | left | right;
+`;
+
+export const CONFIRMATION_GRAMMER: string = `
+#JSGF V1.0;
+   
+grammar confirmationGrammer;
+    
+public <command> = correct | yes;
+`;
 export const ANSWERING_ERROR = "Please only tell me a, b, c, d, or a combination of them, such as a-b, b-d, or a-c-d.";
 export const CONFIRM_ERROR = "Please only tell me yes or correct.";
 export const NEXT_ACTION_ERROR = "Please only tell me Next or Open Notebook.";
