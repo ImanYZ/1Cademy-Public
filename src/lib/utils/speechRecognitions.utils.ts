@@ -28,8 +28,14 @@ export const getValidABCDOptions = (text: string): string | null => {
   if (isCorrect) return text;
 
   const resultMapping = Array.from(text)
-    .map(c => (c === "v" ? "b" : c))
+    .map(forceCharacterToOptions)
     .filter(c => "abcd".includes(c));
   const isCorrectMapping = resultMapping.length === text.length;
   return isCorrectMapping ? resultMapping.join("") : null;
+};
+
+const forceCharacterToOptions = (character: string) => {
+  if (character === "v") return "b";
+  if (character === "s") return "c";
+  return character;
 };
