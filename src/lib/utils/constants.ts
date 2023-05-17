@@ -110,3 +110,35 @@ export const ASSISTANT_NEGATIVE_SENTENCES: string[] = [
   "No worries. You're getting closer to the right answer.",
   "That's a good try. You just need to practice a bit more.",
 ];
+
+export const CHOICES_GRAMMER: string = `
+#JSGF V1.0;
+   
+grammar choicesGrammer;
+    
+public <choice> = a | b | c | d | e | f | g | h | i | j | k | l | repeat question;
+`;
+
+export const NEXT_GRAMMER: string = `
+#JSGF V1.0;
+   
+grammar nextGrammer;
+    
+public <command> = open notebook | next;
+`;
+
+export const NOTEBOOK_GRAMMER: string = `
+#JSGF V1.0;
+   
+grammar notebookGrammer;
+    
+public <command> = continue practicing | up | down | left | right;
+`;
+
+export const CONFIRMATION_GRAMMER: string = `
+#JSGF V1.0;
+   
+grammar confirmationGrammer;
+    
+public <command> = correct | yes;
+`;

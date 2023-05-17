@@ -151,6 +151,7 @@ import {
   TNodeBookState,
   TNodeUpdates,
   TutorialTypeKeys,
+  TVoiceAssistantListenType,
   TVoiceAssistantRef,
   // TutorialType,
   UserNodes,
@@ -6189,11 +6190,11 @@ const Notebook = ({}: NotebookProps) => {
         await narrateLargeTexts(message);
       }
 
-      if(!voiceAssistant) {
+      if (!voiceAssistant) {
         return;
       }
 
-      const recognition = newRecognition();
+      const recognition = newRecognition(voiceAssistant.listenType as TVoiceAssistantListenType);
       if (!recognition) return console.error("This browser does't support speech recognition");
 
       console.log("assistantActions:start:narrate", voiceAssistant);

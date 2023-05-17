@@ -522,9 +522,11 @@ export type UserTutorials = {
   [key in TutorialTypeKeys]: UserTutorial;
 };
 
+export type TVoiceAssistantListenType = "ANSWERING" | "CONFIRM" | "NEXT_ACTION" | "NOTEBOOK_ACTIONS" | null;
+
 export type TVoiceAssistantRef = {
   listen: boolean;
-  listenType: "ANSWERING" | "CONFIRM" | "NEXT_ACTION" | "NOTEBOOK_ACTIONS" | null;
+  listenType: TVoiceAssistantListenType;
   narrate: boolean;
   message: string;
   answers: KnowledgeChoice[];
