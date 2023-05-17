@@ -13,7 +13,7 @@ import { SimpleQuestionNode } from "../../instructorsTypes";
 import { Post } from "../../lib/mapApi";
 import { DESIGN_SYSTEM_COLORS } from "../../lib/theme/colors";
 import shortenNumber from "../../lib/utils/shortenNumber";
-import { doNeedToDeleteNode, narrateLargeTexts } from "../../utils/helpers";
+import { doNeedToDeleteNode } from "../../utils/helpers";
 import { CustomCircularProgress } from "../CustomCircularProgress";
 import { CustomWrapperButton } from "../map/Buttons/Buttons";
 import { PracticeInfo } from "./PracticeTool";
@@ -492,17 +492,7 @@ export const PracticeQuestion = ({
 
             <Tooltip title="Voice-based practice">
               <IconButton
-                onClick={() =>
-                  setEnabledAssistant(prev => {
-                    if (prev) {
-                      setTimeout(() => {
-                        const message = "Assistant stopped";
-                        narrateLargeTexts(message);
-                      }, 200);
-                    }
-                    return !prev;
-                  })
-                }
+                onClick={() => setEnabledAssistant(prev => !prev)}
                 sx={{
                   width: "56px",
                   height: "56px",

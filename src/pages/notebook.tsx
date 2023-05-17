@@ -64,6 +64,7 @@ import { MemoizedUserInfoSidebar } from "@/components/map/Sidebar/SidebarV2/User
 import { MemoizedUserSettingsSidebar } from "@/components/map/Sidebar/SidebarV2/UserSettigsSidebar";
 import { useAuth } from "@/context/AuthContext";
 import useEventListener from "@/hooks/useEventListener";
+import usePrevious from "@/hooks/usePrevious";
 import { useTagsTreeView } from "@/hooks/useTagsTreeView";
 import { DESIGN_SYSTEM_COLORS } from "@/lib/theme/colors";
 
@@ -664,6 +665,7 @@ const Notebook = ({}: NotebookProps) => {
   //   updated: new Date(),
   // });
   const [voiceAssistant, setVoiceAssistant] = useState<TVoiceAssistantRef | null>(null);
+  const prevVoiceAssistant = usePrevious(voiceAssistant);
 
   const assistantRef = useRef<DashboardWrapperRef | null>(null);
 
@@ -6181,10 +6183,13 @@ const Notebook = ({}: NotebookProps) => {
   // assistant will narrate and then will listen
   useEffect(() => {
     const assistantActions = async () => {
-      if (!voiceAssistant) {
+      if (prevVoiceAssistant && !voiceAssistant) {
         window.speechSynthesis.cancel();
-        // const message = "Assistant stopped";
-        // await narrateLargeTexts(message);
+        const message = "Assistant stopped";
+        await narrateLargeTexts(message);
+      }
+
+      if(!voiceAssistant) {
         return;
       }
 
@@ -6383,7 +6388,7 @@ const Notebook = ({}: NotebookProps) => {
               date: "",
             });
           } else {
-            const message = "Please only tell me a, b, c, d, or a combination of them, such as ab, bd, or acd.";
+            const message = "Please only tell me a, b, c, d, or a combination of them, such as a b, b d, or a c d.";
             setVoiceAssistant({ ...voiceAssistant, listen: false, listenType: "ANSWERING", narrate: true, message });
           }
           return;
