@@ -488,7 +488,7 @@ export const PracticeQuestion = ({
               <LeaderboardIcon />
             </IconButton>
 
-            <Tooltip title="Voice-based practice">
+            <Tooltip title="Voice-based practice" placement="left">
               <IconButton
                 onClick={() => setEnabledAssistant(prev => !prev)}
                 sx={{

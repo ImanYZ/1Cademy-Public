@@ -98,8 +98,11 @@ import { idToken, retrieveAuthenticatedUser } from "../lib/firestoreClient/auth"
 import { Post, postWithToken } from "../lib/mapApi";
 import { getAnswersLettersOptions } from "../lib/utils/assistant.utils";
 import {
+  ANSWERING_ERROR,
   ASSISTANT_NEGATIVE_SENTENCES,
   ASSISTANT_POSITIVE_SENTENCES,
+  CONFIRM_ERROR,
+  NEXT_ACTION_ERROR,
   NO_USER_IMAGE,
   QUESTION_OPTIONS,
 } from "../lib/utils/constants";
@@ -137,6 +140,7 @@ import {
   mergeAllNodes,
 } from "../lib/utils/nodesSyncronization.utils";
 import { newRecognition } from "../lib/utils/speechRecognitions.utils";
+import { getTextSplittedByCharacter } from "../lib/utils/string.utils";
 import { getGroupTutorials, LivelinessBar } from "../lib/utils/tutorials/grouptutorials";
 import { gtmEvent, imageLoaded, isValidHttpUrl } from "../lib/utils/utils";
 import {
@@ -6290,7 +6294,7 @@ const Notebook = ({}: NotebookProps) => {
           //   message += "Please only tell me yes or correct.";
           // }
           if (voiceAssistant.listenType === "ANSWERING") {
-            message += "Please only tell me a, b, c, d, or a combination of them, such as ab, bd, or acd.";
+            message += ANSWERING_ERROR;
           }
           if (voiceAssistant.listenType === "NEXT_ACTION") {
             message += "Please only tell me Next or Open Notebook";
@@ -6317,8 +6321,7 @@ const Notebook = ({}: NotebookProps) => {
           );
           console.log("assistantActions:ANSWERING", { possibleOptions, transcriptProcessed, answerIsValid });
           if (!answerIsValid) {
-            const message =
-              "Sorry, I didn't get your choices. Please only tell me a, b, c, d, or a combination of them, such as ab, bd, or acd.";
+            const message = ANSWERING_ERROR;
             setVoiceAssistant({
               ...voiceAssistant,
               listen: false,
@@ -6334,7 +6337,7 @@ const Notebook = ({}: NotebookProps) => {
 
           const submitOptions = getAnswersLettersOptions(transcriptProcessed, voiceAssistant.answers.length);
           assistantRef.current.onSelectAnswers(submitOptions);
-          const message = `You have selected ${transcriptProcessed}. Is this correct?`;
+          const message = `You have selected ${getTextSplittedByCharacter(transcriptProcessed, "-")}. Is this correct?`;
           setVoiceAssistant({
             ...voiceAssistant,
             listen: false,
@@ -6367,10 +6370,10 @@ const Notebook = ({}: NotebookProps) => {
             );
             console.log({ selectedAnswer });
             const feedbackForAnswers = selectedAnswer
-              .map(cur => `Option ${cur.option}: ${cur.choice.feedback}`)
+              .map(cur => `You Chose ${cur.option}: ${cur.choice.feedback}`)
               .join(". ");
             const possibleAssistantMessages = isCorrect ? ASSISTANT_POSITIVE_SENTENCES : ASSISTANT_NEGATIVE_SENTENCES;
-            const randomMessageIndex = Math.ceil(Math.random() * possibleAssistantMessages.length);
+            const randomMessageIndex = Math.floor(Math.random() * possibleAssistantMessages.length);
             const assistantMessageBasedOnResultOfAnswer = possibleAssistantMessages[randomMessageIndex];
             assistantRef.current?.onSubmitAnswer(submitOptions);
             setVoiceAssistant({
@@ -6378,13 +6381,13 @@ const Notebook = ({}: NotebookProps) => {
               listen: false,
               listenType: "NEXT_ACTION",
               narrate: true,
-              message: assistantMessageBasedOnResultOfAnswer + ". So, in other words" + feedbackForAnswers ?? "",
+              message: `${assistantMessageBasedOnResultOfAnswer} ${feedbackForAnswers}` ?? "",
               answers: [],
               selectedAnswer: "",
               date: "",
             });
           } else {
-            const message = "Please only tell me a, b, c, d, or a combination of them, such as ab, bd, or acd.";
+            const message = ANSWERING_ERROR;
             setVoiceAssistant({ ...voiceAssistant, listen: false, listenType: "ANSWERING", narrate: true, message });
           }
           return;
@@ -6428,7 +6431,7 @@ const Notebook = ({}: NotebookProps) => {
             return;
           }
           // No valid action was selected, try again
-          let message = "Sorry, I didn't get your choices. Please only tell me Next or Open Notebook";
+          let message = `Sorry, I didn't get your choices. ${NEXT_ACTION_ERROR}`;
           await narrateLargeTexts(message);
           console.log("NEXT_ACTION");
           setVoiceAssistant({ ...voiceAssistant, date: new Date().toISOString(), message: "" });
@@ -6445,13 +6448,13 @@ const Notebook = ({}: NotebookProps) => {
         console.log("onnomatch");
         let message = "Sorry, I didn't get your choices.";
         if (voiceAssistant.listenType === "CONFIRM") {
-          message += "Please only tell me yes or correct.";
+          message += CONFIRM_ERROR;
         }
         if (voiceAssistant.listenType === "ANSWERING") {
-          message += "Please only tell me a, b, c, d, or a combination of them, such as ab, bd, or acd.";
+          message += ANSWERING_ERROR;
         }
         if (voiceAssistant.listenType === "NEXT_ACTION") {
-          message += "Please only tell me Next or Open Notebook";
+          message += NEXT_ACTION_ERROR;
         }
 
         await narrateLargeTexts(message);

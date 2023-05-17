@@ -110,3 +110,7 @@ export const ASSISTANT_NEGATIVE_SENTENCES: string[] = [
   "No worries. You're getting closer to the right answer.",
   "That's a good try. You just need to practice a bit more.",
 ];
+
+export const ANSWERING_ERROR = "Please only tell me a, b, c, d, or a combination of them, such as a-b, b-d, or a-c-d.";
+export const CONFIRM_ERROR = "Please only tell me yes or correct.";
+export const NEXT_ACTION_ERROR = "Please only tell me Next or Open Notebook.";
