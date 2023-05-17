@@ -382,9 +382,7 @@ export const PracticeQuestion = ({
   enabledAssistant,
   setEnabledAssistant,
 }: PracticeQuestionProps) => {
-  // const [selectedAnswers, setSelectedAnswers] = useState<boolean[]>([]);
   const [displaySidebar, setDisplaySidebar] = useState<"LEADERBOARD" | "USER_STATUS" | null>(null);
-  // const [submitAnswer, setSubmitAnswer] = useState(false);
   const [loading, setLoading] = useState(true);
 
   const onSubmitAnswer = useCallback(() => {

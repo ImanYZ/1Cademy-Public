@@ -6218,6 +6218,7 @@ const Notebook = ({}: NotebookProps) => {
         de: "d",
         dee: "d",
         guess: "d",
+        he: "e",
         yes: "y",
         correct: "y",
         "repeat question": REPEAT_QUESTION,
