@@ -93,7 +93,7 @@ import {
 import { useMemoizedCallback } from "../hooks/useMemoizedCallback";
 import { useWindowSize } from "../hooks/useWindowSize";
 import { useWorkerQueue } from "../hooks/useWorkerQueue";
-import { NodeChanges, ReputationSignal } from "../knowledgeTypes";
+import { KnowledgeChoice, NodeChanges, ReputationSignal } from "../knowledgeTypes";
 import { idToken, retrieveAuthenticatedUser } from "../lib/firestoreClient/auth";
 import { Post, postWithToken } from "../lib/mapApi";
 import { getAnswersLettersOptions } from "../lib/utils/assistant.utils";
@@ -6166,7 +6166,7 @@ const Notebook = ({}: NotebookProps) => {
     duplicateNotebookFromParams();
   }, [db, onChangeNotebook, openNodesOnNotebook, router.query.nb, user]);
 
-  // narrator
+  // assistant will narrate and then will listen
   useEffect(() => {
     const assistantActions = async () => {
       // Speech Recognition doesn't exist on browser
@@ -6180,7 +6180,7 @@ const Notebook = ({}: NotebookProps) => {
       console.log("assistantActions:narrate");
       // if (!voiceAssistant.message) return window.speechSynthesis.cancel();
 
-      console.log("assistantActions:start:narrate", voiceAssistant.message);
+      console.log("assistantActions:start:narrate", voiceAssistant);
       // const speech = new SpeechSynthesisUtterance(voiceAssistant.message);
       await narrateLargeTexts(voiceAssistant.message);
       // setVoiceAssistant(prev => ({ ...prev, message: "", narrate: true, listen: false }));
@@ -6227,16 +6227,68 @@ const Notebook = ({}: NotebookProps) => {
             .map(cur => (cur.length === 1 ? cur : MapWords[cur] ?? ""))
             .filter(cur => cur.length === 1)
             .join("");
-        console.log("assistantActions:onresult", { transcriptProcessed });
-        if ([REPEAT_QUESTION].includes(transcriptProcessed)) {
+        console.log("--->", { transcriptProcessed });
+        // actions to interrupt normal flow
+        if ("repeat question" === transcript.toLowerCase()) {
           setVoiceAssistant(prev => ({
             ...prev,
             listen: false,
             listenType: "ANSWERING",
             narrate: true,
             selectedAnswer: "",
-          })); // this will force to narrate again
+          }));
+          return;
         }
+        if ("stop" === transcript.toLowerCase()) {
+          const message = "Assistant stopped";
+          await narrateLargeTexts(message);
+          setVoiceAssistant(VOICE_ASSISTANT_DEFAULT);
+          return;
+        }
+
+        // INFO: pause and resumen is not possible because will work like
+        //       and infinity loop waiting on silence until user tell resumen
+        //       that need to executed into useEffect so render will be called in every iteration
+
+        // if ("pause" === transcript.toLowerCase()) {
+        //   const message = "Assistant paused, please tell me resume to continue";
+        //   await narrateLargeTexts(message);
+        //   setVoiceAssistant(VOICE_ASSISTANT_DEFAULT);
+        //   return;
+        // }
+
+        // if ("resume" === transcript.toLowerCase()) {
+        //   const message = "I am resuming my previous task";
+        //   await narrateLargeTexts(message);
+        //   setVoiceAssistant(prev => ({ ...prev, date: "from-resume-assistant" }));
+        //   return;
+        // }
+
+        // if ("help" === transcript.toLowerCase()) {
+        //   const message = "Assistant Paused, Please tell me resume";
+        //   await narrateLargeTexts(message);
+        //   setVoiceAssistant(VOICE_ASSISTANT_DEFAULT);
+        //   return;
+        // }
+
+        if (!transcriptProcessed) {
+          let message = "Sorry, I didn't get your choices.";
+          if (voiceAssistant.listenType === "CONFIRM") {
+            message += "Please only tell me yes or correct.";
+          }
+          if (voiceAssistant.listenType === "ANSWERING") {
+            message += "Please only tell me a, b, c, d, or a combination of them, such as ab, bd, or acd.";
+          }
+          if (voiceAssistant.listenType === "NEXT_ACTION") {
+            message += "Please only tell me Next or Open Notebook";
+          }
+
+          await narrateLargeTexts(message);
+          setVoiceAssistant(prev => ({ ...prev, date: "from-empty transcript" }));
+          return;
+        }
+
+        // actions according the flow
         if (voiceAssistant.listenType === "ANSWERING") {
           if (!assistantRef.current) return;
           // transcriptProcessed:"bc"
@@ -6274,6 +6326,7 @@ const Notebook = ({}: NotebookProps) => {
             message,
             selectedAnswer: transcriptProcessed,
           }));
+          return;
         }
         if (voiceAssistant.listenType === "CONFIRM") {
           console.log("assistantActions:CONFIRM");
@@ -6286,6 +6339,19 @@ const Notebook = ({}: NotebookProps) => {
               (acu, cur, idx) => acu && submitOptions[idx] === cur.correct,
               true
             );
+            const selectedAnswer: { choice: KnowledgeChoice; option: string }[] = voiceAssistant.answers.reduce(
+              (acu: { choice: KnowledgeChoice; option: string }[], cur, idx) => {
+                const answer = voiceAssistant.selectedAnswer.includes(QUESTION_OPTIONS[idx])
+                  ? { choice: cur, option: QUESTION_OPTIONS[idx] }
+                  : null;
+                return answer ? [...acu, answer] : acu;
+              },
+              []
+            );
+            console.log({ selectedAnswer });
+            const feedbackForAnswers = selectedAnswer
+              .map(cur => `Option ${cur.option}: ${cur.choice.feedback}`)
+              .join(". ");
             const possibleAssistantMessages = isCorrect ? ASSISTANT_POSITIVE_SENTENCES : ASSISTANT_NEGATIVE_SENTENCES;
             const randomMessageIndex = Math.round(Math.random() * possibleAssistantMessages.length);
             const assistantMessageBasedOnResultOfAnswer = possibleAssistantMessages[randomMessageIndex];
@@ -6295,7 +6361,7 @@ const Notebook = ({}: NotebookProps) => {
               listen: false,
               listenType: "NEXT_ACTION",
               narrate: true,
-              message: assistantMessageBasedOnResultOfAnswer ?? "",
+              message: assistantMessageBasedOnResultOfAnswer + ". So, in other words" + feedbackForAnswers ?? "",
               answers: [],
               selectedAnswer: "",
               date: "",
@@ -6304,6 +6370,7 @@ const Notebook = ({}: NotebookProps) => {
             const message = "Please only tell me a, b, c, d, or a combination of them, such as ab, bd, or acd.";
             setVoiceAssistant(prev => ({ ...prev, listen: false, listenType: "ANSWERING", narrate: true, message }));
           }
+          return;
         }
 
         if (voiceAssistant.listenType === "NEXT_ACTION") {
@@ -6351,6 +6418,7 @@ const Notebook = ({}: NotebookProps) => {
             console.log({ prev });
             return { ...prev, date: new Date().toISOString(), message: "" };
           });
+          return;
         }
 
         if (voiceAssistant.listenType === "NOTEBOOK_ACTIONS") {
@@ -6382,12 +6450,12 @@ const Notebook = ({}: NotebookProps) => {
 
       recognition.onerror = async function (event: any) {
         console.log("xonerror", event.error);
-        const message = "Sorry, I cannot detect speech, try later";
+        const message = "Sorry, I cannot detect speech, lets try again.";
         // const speech = new SpeechSynthesisUtterance(message);
         console.log("onerror:will narrate", message);
         await narrateLargeTexts(message);
         console.log("onerror:will narrate");
-        setVoiceAssistant(prev => ({ ...prev, date: new Date().toISOString() }));
+        setVoiceAssistant(prev => ({ ...prev, date: "from-error" }));
       };
     };
 
@@ -6397,6 +6465,7 @@ const Notebook = ({}: NotebookProps) => {
     openNodesOnNotebook,
     scrollToNode,
     selectedNotebookId,
+    voiceAssistant,
     voiceAssistant.answers,
     voiceAssistant.listenType,
     voiceAssistant.message,
