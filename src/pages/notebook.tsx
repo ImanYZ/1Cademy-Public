@@ -6183,8 +6183,8 @@ const Notebook = ({}: NotebookProps) => {
     const assistantActions = async () => {
       if (!voiceAssistant) {
         window.speechSynthesis.cancel();
-        const message = "Assistant stopped";
-        await narrateLargeTexts(message);
+        // const message = "Assistant stopped";
+        // await narrateLargeTexts(message);
         return;
       }
 
@@ -6289,7 +6289,7 @@ const Notebook = ({}: NotebookProps) => {
           //   message += "Please only tell me yes or correct.";
           // }
           if (voiceAssistant.listenType === "ANSWERING") {
-            message += "Please only tell me a, b, c, d, or a combination of them, such as ab, bd, or acd.";
+            message += "Please only tell me a, b, c, d, or a combination of them, such as a b, b d, or a c d.";
           }
           if (voiceAssistant.listenType === "NEXT_ACTION") {
             message += "Please only tell me Next or Open Notebook";
@@ -6317,7 +6317,7 @@ const Notebook = ({}: NotebookProps) => {
           console.log("assistantActions:ANSWERING", { possibleOptions, transcriptProcessed, answerIsValid });
           if (!answerIsValid) {
             const message =
-              "Sorry, I didn't get your choices. Please only tell me a, b, c, d, or a combination of them, such as ab, bd, or acd.";
+              "Sorry, I didn't get your choices. Please only tell me a, b, c, d, or a combination of them, such as a b, b d, or a c d.";
             setVoiceAssistant({
               ...voiceAssistant,
               listen: false,
