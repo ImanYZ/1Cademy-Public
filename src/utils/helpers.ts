@@ -1,3 +1,6 @@
+import { NARRATE_WORKER_TERMINATED } from "@/lib/utils/constants";
+import { TVoiceAssistantRef } from "src/nodeBookTypes";
+import { INarrateWorkerMessage } from "src/types/IAssistant";
 import { INode } from "src/types/INode";
 import { INodeType } from "src/types/INodeType";
 
@@ -49,4 +52,26 @@ export const getNodeTypesFromNode = (nodeData: INode): INodeType[] => {
   const _nodeTypes: INodeType[] = nodeData.nodeTypes || [];
   _nodeTypes.push(nodeData.nodeType);
   return Array.from(new Set(_nodeTypes));
+};
+
+/**
+ * speechSynthesis works only with 100 characters
+ * message will be splitted by .
+ */
+export const narrateLargeTexts = async (message: string) => {
+  const messages = message.split(".");
+  console.log("narrateLargeTexts", messages);
+  for (const messageItem of messages) {
+    await narrateText2(messageItem);
+  }
+};
+
+export const narrateText2 = async (message: string) => {
+  return new Promise(resolve => {
+    const speech = new SpeechSynthesisUtterance(message);
+    speech.addEventListener("end", () => resolve(true));
+
+    window.speechSynthesis.cancel();
+    window.speechSynthesis.speak(speech);
+  });
 };

@@ -4,6 +4,7 @@ import CloseFullscreenIcon from "@mui/icons-material/CloseFullscreen";
 import DoneIcon from "@mui/icons-material/Done";
 import LeaderboardIcon from "@mui/icons-material/Leaderboard";
 import LocalOfferIcon from "@mui/icons-material/LocalOffer";
+import VolumeUpIcon from "@mui/icons-material/VolumeUp";
 import { Button, ClickAwayListener, Divider, IconButton, ListItem, Skeleton, Tooltip, Typography } from "@mui/material";
 import { Box, Stack } from "@mui/system";
 import React, { ReactNode, useCallback, useEffect, useMemo, useState } from "react";
@@ -357,6 +358,12 @@ type PracticeQuestionProps = {
   onSaveAnswer: (answers: boolean[]) => Promise<void>;
   onGetNextQuestion: () => Promise<void>;
   practiceInfo: PracticeInfo;
+  submitAnswer: boolean;
+  setSubmitAnswer: React.Dispatch<React.SetStateAction<boolean>>;
+  selectedAnswers: boolean[];
+  setSelectedAnswers: React.Dispatch<React.SetStateAction<boolean[]>>;
+  enabledAssistant: boolean;
+  setEnabledAssistant: React.Dispatch<React.SetStateAction<boolean>>;
 };
 export const PracticeQuestion = ({
   question,
@@ -368,14 +375,19 @@ export const PracticeQuestion = ({
   onSaveAnswer,
   onGetNextQuestion,
   practiceInfo,
+  submitAnswer,
+  setSubmitAnswer,
+  selectedAnswers,
+  setSelectedAnswers,
+  enabledAssistant,
+  setEnabledAssistant,
 }: PracticeQuestionProps) => {
-  const [selectedAnswers, setSelectedAnswers] = useState<boolean[]>([]);
+  // const [selectedAnswers, setSelectedAnswers] = useState<boolean[]>([]);
   const [displaySidebar, setDisplaySidebar] = useState<"LEADERBOARD" | "USER_STATUS" | null>(null);
-  const [submitAnswer, setSubmitAnswer] = useState(false);
+  // const [submitAnswer, setSubmitAnswer] = useState(false);
   const [loading, setLoading] = useState(true);
 
   const onSubmitAnswer = useCallback(() => {
-    setSubmitAnswer(true);
     onSaveAnswer(selectedAnswers);
   }, [onSaveAnswer, selectedAnswers]);
 
@@ -384,7 +396,7 @@ export const PracticeQuestion = ({
     setSubmitAnswer(false);
     await onGetNextQuestion();
     setLoading(false);
-  }, [onGetNextQuestion]);
+  }, [onGetNextQuestion, setSubmitAnswer]);
 
   const onSelectAnswer = (answerIdx: number) => {
     setSelectedAnswers(prev => prev.map((c, i) => (answerIdx === i ? !c : c)));
@@ -394,7 +406,7 @@ export const PracticeQuestion = ({
     if (!question) return;
     setSelectedAnswers(new Array(question.choices.length).fill(false));
     setLoading(false);
-  }, [question]);
+  }, [question, setSelectedAnswers]);
 
   return (
     <Box
@@ -427,6 +439,23 @@ export const PracticeQuestion = ({
 
       {question && !practiceIsCompleted && (
         <>
+          {/* Assistant */}
+          {enabledAssistant && (
+            <Box
+              sx={{
+                position: "fixed",
+                bottom: "50px",
+                right: "50px",
+              }}
+            >
+              <img
+                src={`/assistant.svg`}
+                style={{
+                  width: "70px",
+                }}
+              />
+            </Box>
+          )}
           {/* options */}
           <Stack spacing={"8px"} sx={{ position: "absolute", right: "12px", top: "8px" }}>
             <IconButton
@@ -460,6 +489,29 @@ export const PracticeQuestion = ({
             >
               <LeaderboardIcon />
             </IconButton>
+
+            <Tooltip title="Voice-based practice">
+              <IconButton
+                onClick={() => setEnabledAssistant(prev => !prev)}
+                sx={{
+                  width: "56px",
+                  height: "56px",
+                  color: theme =>
+                    enabledAssistant
+                      ? DESIGN_SYSTEM_COLORS.primary600
+                      : theme.palette.mode === "dark"
+                      ? DESIGN_SYSTEM_COLORS.notebookG200
+                      : DESIGN_SYSTEM_COLORS.gray500,
+                  borderRadius: "8px",
+                  backgroundColor: theme =>
+                    theme.palette.mode === "dark"
+                      ? DESIGN_SYSTEM_COLORS.notebookMainBlack
+                      : DESIGN_SYSTEM_COLORS.gray50,
+                }}
+              >
+                <VolumeUpIcon />
+              </IconButton>
+            </Tooltip>
           </Stack>
 
           {/* node question */}

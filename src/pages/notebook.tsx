@@ -68,11 +68,12 @@ import { useTagsTreeView } from "@/hooks/useTagsTreeView";
 import { DESIGN_SYSTEM_COLORS } from "@/lib/theme/colors";
 
 import LoadingImg from "../../public/animated-icon-1cademy.gif";
+import { getNode } from "../client/serveless/nodes.serveless";
 import { TooltipTutorial } from "../components/interactiveTutorial/Tutorial";
 // import nodesData from "../../testUtils/mockCollections/nodes.data";
 // import { Tutorial } from "../components/interactiveTutorial/Tutorial";
 import { MemoizedClustersList } from "../components/map/ClustersList";
-import { DashboardWrapper } from "../components/map/dashboard/DashboardWrapper";
+import { DashboardWrapper, DashboardWrapperRef } from "../components/map/dashboard/DashboardWrapper";
 import { MemoizedLinksList } from "../components/map/LinksList";
 import { MemoizedNodeList } from "../components/map/NodesList";
 import { NotebookPopup } from "../components/map/Popup";
@@ -92,10 +93,16 @@ import {
 import { useMemoizedCallback } from "../hooks/useMemoizedCallback";
 import { useWindowSize } from "../hooks/useWindowSize";
 import { useWorkerQueue } from "../hooks/useWorkerQueue";
-import { NodeChanges, ReputationSignal } from "../knowledgeTypes";
+import { KnowledgeChoice, NodeChanges, ReputationSignal } from "../knowledgeTypes";
 import { idToken, retrieveAuthenticatedUser } from "../lib/firestoreClient/auth";
 import { Post, postWithToken } from "../lib/mapApi";
-import { NO_USER_IMAGE } from "../lib/utils/constants";
+import { getAnswersLettersOptions } from "../lib/utils/assistant.utils";
+import {
+  ASSISTANT_NEGATIVE_SENTENCES,
+  ASSISTANT_POSITIVE_SENTENCES,
+  NO_USER_IMAGE,
+  QUESTION_OPTIONS,
+} from "../lib/utils/constants";
 import { createGraph, dagreUtils } from "../lib/utils/dagre.util";
 import { devLog } from "../lib/utils/develop.util";
 import { getTypedCollections } from "../lib/utils/getTypedCollections";
@@ -129,6 +136,7 @@ import {
   getUserNodeChanges,
   mergeAllNodes,
 } from "../lib/utils/nodesSyncronization.utils";
+import { newRecognition } from "../lib/utils/speechRecognitions.utils";
 import { getGroupTutorials, LivelinessBar } from "../lib/utils/tutorials/grouptutorials";
 import { gtmEvent, imageLoaded, isValidHttpUrl } from "../lib/utils/utils";
 import {
@@ -136,11 +144,13 @@ import {
   EdgesData,
   FullNodeData,
   FullNodesData,
+  Node,
   OpenPart,
   // NodeTutorialState,
   TNodeBookState,
   TNodeUpdates,
   TutorialTypeKeys,
+  TVoiceAssistantRef,
   // TutorialType,
   UserNodes,
   UserNodesData,
@@ -148,9 +158,8 @@ import {
   UserTutorials,
 } from "../nodeBookTypes";
 import { NodeType, Notebook, NotebookDocument, SimpleNode2 } from "../types";
-import { doNeedToDeleteNode, getNodeTypesFromNode, isVersionApproved } from "../utils/helpers";
-
-// export type TutorialKeys = TutorialTypeKeys | null;
+import { doNeedToDeleteNode, getNodeTypesFromNode, isVersionApproved, narrateLargeTexts } from "../utils/helpers";
+import { nodeToNarration } from "../utils/node.utils";
 
 type NotebookProps = {};
 
@@ -606,10 +615,7 @@ const Notebook = ({}: NotebookProps) => {
   // // flag for whether tutorial state was loaded
   // const [userTutorialLoaded, setUserTutorialLoaded] = useState(false);
 
-  // flag for whether users' nodes data is downloaded from server
-  // const [userNodesLoaded, setUserNodesLoaded] = useState(false);
-
-  // flag set to true when sending request to server
+  // flag for whether users' nodes data is downloaded from servermessages
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   // flag to open proposal sidebar
@@ -652,6 +658,14 @@ const Notebook = ({}: NotebookProps) => {
 
   const [usersOnlineStatusLoaded, setUsersOnlineStatusLoaded] = useState(false);
   const [onlineUsers, setOnlineUsers] = useState<string[]>([]);
+
+  // state to handle assistant listening
+  // const [voiceAssistantUpdates, setVoiceAssistantUpdates] = useState({
+  //   updated: new Date(),
+  // });
+  const [voiceAssistant, setVoiceAssistant] = useState<TVoiceAssistantRef | null>(null);
+
+  const assistantRef = useRef<DashboardWrapperRef | null>(null);
 
   // ---------------------------------------------------------------------
   // ---------------------------------------------------------------------
@@ -6093,6 +6107,7 @@ const Notebook = ({}: NotebookProps) => {
 
   // ------------------------ useEffects
 
+  // detect root from url to open practice tool automatically
   useEffect(() => {
     if (!user) return;
     if (!user.role) return;
@@ -6162,6 +6177,314 @@ const Notebook = ({}: NotebookProps) => {
 
     duplicateNotebookFromParams();
   }, [db, onChangeNotebook, openNodesOnNotebook, router.query.nb, user]);
+
+  // assistant will narrate and then will listen
+  useEffect(() => {
+    const assistantActions = async () => {
+      if (!voiceAssistant) {
+        window.speechSynthesis.cancel();
+        const message = "Assistant stopped";
+        await narrateLargeTexts(message);
+        return;
+      }
+
+      const recognition = newRecognition();
+      if (!recognition) return console.error("This browser does't support speech recognition");
+
+      console.log("assistantActions:start:narrate", voiceAssistant);
+      await narrateLargeTexts(voiceAssistant.message);
+
+      console.log("assistant:11", voiceAssistant.listenType);
+      if (!voiceAssistant.listenType) return;
+      console.log("assistant:22", voiceAssistant.listenType);
+      const NEXT_ACTION = "*";
+      const OPEN_NOTEBOOK = ".";
+      const REPEAT_QUESTION = "?";
+      const OPEN_PRACTICE = "#";
+
+      const MapSentences: { [key: string]: string } = {
+        "repeat question": REPEAT_QUESTION,
+        "open notebook": OPEN_NOTEBOOK,
+        "continue practicing": OPEN_PRACTICE,
+      };
+      const MapWords: { [key: string]: string } = {
+        hey: "a",
+        be: "b",
+        ve: "b",
+        me: "b",
+        ce: "c",
+        see: "c",
+        se: "s",
+        de: "d",
+        dee: "d",
+        guess: "d",
+        yes: "y",
+        correct: "y",
+        "repeat question": REPEAT_QUESTION,
+        next: NEXT_ACTION,
+        "open notebook": OPEN_NOTEBOOK,
+        "continue practicing": OPEN_PRACTICE,
+      };
+      recognition.start();
+      recognition.onresult = async (event: any) => {
+        const transcript: string = event.results?.[0]?.[0]?.transcript || "";
+        console.log("----> result", { transcript });
+        const transcriptProcessed =
+          MapSentences[transcript.toLowerCase()] ??
+          transcript
+            .toLowerCase()
+            .split(" ")
+            .map(cur => (cur.length === 1 ? cur : MapWords[cur] ?? ""))
+            .filter(cur => cur.length === 1)
+            .join("");
+        console.log("--->", { transcriptProcessed });
+        // actions to interrupt normal flow
+        if ("repeat question" === transcript.toLowerCase()) {
+          setVoiceAssistant({
+            ...voiceAssistant,
+            listen: false,
+            listenType: "ANSWERING",
+            narrate: true,
+            selectedAnswer: "",
+          });
+          return;
+        }
+        if ("stop" === transcript.toLowerCase()) {
+          const message = "Assistant stopped";
+          await narrateLargeTexts(message);
+          setVoiceAssistant(null);
+          return;
+        }
+
+        // INFO: pause and resumen is not possible because will work like
+        //       and infinity loop waiting on silence until user tell resumen
+        //       that need to executed into useEffect so render will be called in every iteration
+
+        // if ("pause" === transcript.toLowerCase()) {
+        //   const message = "Assistant paused, please tell me resume to continue";
+        //   await narrateLargeTexts(message);
+        //   setVoiceAssistant(VOICE_ASSISTANT_DEFAULT);
+        //   return;
+        // }
+
+        // if ("resume" === transcript.toLowerCase()) {
+        //   const message = "I am resuming my previous task";
+        //   await narrateLargeTexts(message);
+        //   setVoiceAssistant(prev => ({ ...prev, date: "from-resume-assistant" }));
+        //   return;
+        // }
+
+        // if ("help" === transcript.toLowerCase()) {
+        //   const message = "Assistant Paused, Please tell me resume";
+        //   await narrateLargeTexts(message);
+        //   setVoiceAssistant(VOICE_ASSISTANT_DEFAULT);
+        //   return;
+        // }
+
+        // no valid answers will ask again the same question
+        if (!transcriptProcessed && voiceAssistant.listenType !== "CONFIRM") {
+          console.log("No transcription", voiceAssistant.listenType);
+          let message = "Sorry, I didn't get your choices.";
+          // if (voiceAssistant.listenType === "CONFIRM") {
+          //   message += "Please only tell me yes or correct.";
+          // }
+          if (voiceAssistant.listenType === "ANSWERING") {
+            message += "Please only tell me a, b, c, d, or a combination of them, such as ab, bd, or acd.";
+          }
+          if (voiceAssistant.listenType === "NEXT_ACTION") {
+            message += "Please only tell me Next or Open Notebook";
+          }
+
+          await narrateLargeTexts(message);
+          setVoiceAssistant({
+            ...voiceAssistant,
+            date: "from-empty transcript",
+            message: voiceAssistant.listenType === "NEXT_ACTION" ? "" : voiceAssistant.message,
+          });
+          return;
+        }
+
+        // actions according the flow
+        if (voiceAssistant.listenType === "ANSWERING") {
+          if (!assistantRef.current) return;
+          // transcriptProcessed:"bc"
+          // possibleOptions: "abcd"
+          const possibleOptions = QUESTION_OPTIONS.slice(0, voiceAssistant.answers.length);
+          const answerIsValid = Array.from(transcriptProcessed).reduce(
+            (acu, cur) => acu && possibleOptions.includes(cur),
+            true
+          );
+          console.log("assistantActions:ANSWERING", { possibleOptions, transcriptProcessed, answerIsValid });
+          if (!answerIsValid) {
+            const message =
+              "Sorry, I didn't get your choices. Please only tell me a, b, c, d, or a combination of them, such as ab, bd, or acd.";
+            setVoiceAssistant({
+              ...voiceAssistant,
+              listen: false,
+              listenType: "ANSWERING",
+              message,
+              narrate: true,
+              selectedAnswer: "",
+            });
+            return;
+          }
+
+          // const message =`You have selected a, b and c. Is this correct?`
+
+          const submitOptions = getAnswersLettersOptions(transcriptProcessed, voiceAssistant.answers.length);
+          assistantRef.current.onSelectAnswers(submitOptions);
+          const message = `You have selected ${transcriptProcessed}. Is this correct?`;
+          setVoiceAssistant({
+            ...voiceAssistant,
+            listen: false,
+            listenType: "CONFIRM",
+            narrate: true,
+            message,
+            selectedAnswer: transcriptProcessed,
+          });
+          return;
+        }
+        if (voiceAssistant.listenType === "CONFIRM") {
+          console.log("assistantActions:CONFIRM");
+          if (["y"].includes(transcriptProcessed)) {
+            const submitOptions = getAnswersLettersOptions(
+              voiceAssistant.selectedAnswer,
+              voiceAssistant.answers.length
+            );
+            const isCorrect = voiceAssistant.answers.reduce(
+              (acu, cur, idx) => acu && submitOptions[idx] === cur.correct,
+              true
+            );
+            const selectedAnswer: { choice: KnowledgeChoice; option: string }[] = voiceAssistant.answers.reduce(
+              (acu: { choice: KnowledgeChoice; option: string }[], cur, idx) => {
+                const answer = voiceAssistant.selectedAnswer.includes(QUESTION_OPTIONS[idx])
+                  ? { choice: cur, option: QUESTION_OPTIONS[idx] }
+                  : null;
+                return answer ? [...acu, answer] : acu;
+              },
+              []
+            );
+            console.log({ selectedAnswer });
+            const feedbackForAnswers = selectedAnswer
+              .map(cur => `Option ${cur.option}: ${cur.choice.feedback}`)
+              .join(". ");
+            const possibleAssistantMessages = isCorrect ? ASSISTANT_POSITIVE_SENTENCES : ASSISTANT_NEGATIVE_SENTENCES;
+            const randomMessageIndex = Math.ceil(Math.random() * possibleAssistantMessages.length);
+            const assistantMessageBasedOnResultOfAnswer = possibleAssistantMessages[randomMessageIndex];
+            assistantRef.current?.onSubmitAnswer(submitOptions);
+            setVoiceAssistant({
+              ...voiceAssistant,
+              listen: false,
+              listenType: "NEXT_ACTION",
+              narrate: true,
+              message: assistantMessageBasedOnResultOfAnswer + ". So, in other words" + feedbackForAnswers ?? "",
+              answers: [],
+              selectedAnswer: "",
+              date: "",
+            });
+          } else {
+            const message = "Please only tell me a, b, c, d, or a combination of them, such as ab, bd, or acd.";
+            setVoiceAssistant({ ...voiceAssistant, listen: false, listenType: "ANSWERING", narrate: true, message });
+          }
+          return;
+        }
+
+        if (voiceAssistant.listenType === "NEXT_ACTION") {
+          console.log("assistantActions:NEXT_ACTION");
+          if (transcriptProcessed === NEXT_ACTION) {
+            if (!assistantRef.current) return;
+            assistantRef.current.nextQuestion();
+            return;
+          }
+          if (transcriptProcessed === OPEN_NOTEBOOK) {
+            if (!assistantRef.current) return;
+            console.log("ACTION:Open Notebook");
+            const parents = assistantRef.current.getQuestionParents();
+            setDisplayDashboard(false);
+            openNodesOnNotebook(selectedNotebookId, parents);
+            await detectElements({ ids: parents });
+            for (let i = 0; i < parents.length; i++) {
+              const parent = parents[i];
+              const node: Node | null = await getNode(db, parent);
+              if (!node) return;
+
+              const message = nodeToNarration(node);
+              scrollToNode(parent);
+              await narrateLargeTexts(message);
+            }
+            // TODO: wait for next action
+            console.log("execute NOTEBOOK_ACTIONS ");
+            setVoiceAssistant({
+              ...voiceAssistant,
+              answers: [],
+              date: "",
+              listen: false,
+              listenType: "NOTEBOOK_ACTIONS",
+              message: "",
+              narrate: false,
+              selectedAnswer: "",
+            });
+            return;
+          }
+          // No valid action was selected, try again
+          let message = "Sorry, I didn't get your choices. Please only tell me Next or Open Notebook";
+          await narrateLargeTexts(message);
+          console.log("NEXT_ACTION");
+          setVoiceAssistant({ ...voiceAssistant, date: new Date().toISOString(), message: "" });
+          return;
+        }
+
+        if (voiceAssistant.listenType === "NOTEBOOK_ACTIONS") {
+          setRootQuery(voiceAssistant.tagId);
+          setDisplayDashboard(true);
+        }
+      };
+
+      recognition.onnomatch = async () => {
+        console.log("onnomatch");
+        let message = "Sorry, I didn't get your choices.";
+        if (voiceAssistant.listenType === "CONFIRM") {
+          message += "Please only tell me yes or correct.";
+        }
+        if (voiceAssistant.listenType === "ANSWERING") {
+          message += "Please only tell me a, b, c, d, or a combination of them, such as ab, bd, or acd.";
+        }
+        if (voiceAssistant.listenType === "NEXT_ACTION") {
+          message += "Please only tell me Next or Open Notebook";
+        }
+
+        await narrateLargeTexts(message);
+        setVoiceAssistant({
+          ...voiceAssistant,
+          date: new Date().toISOString(),
+          message: voiceAssistant.listenType === "NEXT_ACTION" ? "" : voiceAssistant.message,
+        });
+      };
+
+      recognition.onerror = async function (event: any) {
+        console.log("xonerror", event.error);
+        const message = "Sorry, I cannot detect speech, lets try again.";
+        // const speech = new SpeechSynthesisUtterance(message);
+        console.log("onerror:will narrate", message);
+        await narrateLargeTexts(message);
+        console.log("onerror:will narrate");
+        setVoiceAssistant({ ...voiceAssistant, date: "from-error" });
+      };
+    };
+
+    assistantActions();
+  }, [
+    db,
+    openNodesOnNotebook,
+    scrollToNode,
+    selectedNotebookId,
+    voiceAssistant,
+    voiceAssistant?.answers,
+    voiceAssistant?.listenType,
+    voiceAssistant?.message,
+    voiceAssistant?.selectedAnswer,
+    voiceAssistant?.tagId,
+  ]);
 
   return (
     <div className="MapContainer" style={{ overflow: "hidden" }}>
@@ -6483,9 +6806,7 @@ const Notebook = ({}: NotebookProps) => {
                 selectedNotebook={selectedNotebookId}
                 openNodesOnNotebook={openNodesOnNotebook}
                 setNotebooks={setNotebooks}
-                onDisplayInstructorPage={() => {
-                  setDisplayDashboard(true);
-                }}
+                onDisplayInstructorPage={() => setDisplayDashboard(true)}
                 onChangeTagOfNotebookById={onChangeTagOfNotebookById}
               />
 
@@ -6599,9 +6920,11 @@ const Notebook = ({}: NotebookProps) => {
             comLeaderboardOpen={comLeaderboardOpen}
             setComLeaderboardOpen={setComLeaderboardOpen}
           />
-
           {user && displayDashboard && (
             <DashboardWrapper
+              ref={assistantRef}
+              setVoiceAssistant={setVoiceAssistant}
+              // voiceAssistantRef={voiceAssistantRef.current}
               user={user}
               onClose={() => {
                 setRootQuery(undefined);
@@ -6775,6 +7098,7 @@ const Notebook = ({}: NotebookProps) => {
               )}
             </>
           </MemoizedToolbox>
+
           {/* end Data from map */}
 
           {window.innerHeight > 399 && user?.livelinessBar === "interaction" && (

@@ -521,3 +521,14 @@ export type UserTutorial = {
 export type UserTutorials = {
   [key in TutorialTypeKeys]: UserTutorial;
 };
+
+export type TVoiceAssistantRef = {
+  listen: boolean;
+  listenType: "ANSWERING" | "CONFIRM" | "NEXT_ACTION" | "NOTEBOOK_ACTIONS" | null;
+  narrate: boolean;
+  message: string;
+  answers: KnowledgeChoice[];
+  selectedAnswer: string;
+  date: string;
+  tagId: string;
+};
