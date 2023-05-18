@@ -363,7 +363,7 @@ type PracticeQuestionProps = {
   selectedAnswers: boolean[];
   setSelectedAnswers: React.Dispatch<React.SetStateAction<boolean[]>>;
   enabledAssistant: boolean;
-  setEnabledAssistant: React.Dispatch<React.SetStateAction<boolean>>;
+  onToggleAssistant: () => void;
 };
 export const PracticeQuestion = ({
   question,
@@ -380,11 +380,9 @@ export const PracticeQuestion = ({
   selectedAnswers,
   setSelectedAnswers,
   enabledAssistant,
-  setEnabledAssistant,
+  onToggleAssistant,
 }: PracticeQuestionProps) => {
-  // const [selectedAnswers, setSelectedAnswers] = useState<boolean[]>([]);
   const [displaySidebar, setDisplaySidebar] = useState<"LEADERBOARD" | "USER_STATUS" | null>(null);
-  // const [submitAnswer, setSubmitAnswer] = useState(false);
   const [loading, setLoading] = useState(true);
 
   const onSubmitAnswer = useCallback(() => {
@@ -439,23 +437,6 @@ export const PracticeQuestion = ({
 
       {question && !practiceIsCompleted && (
         <>
-          {/* Assistant */}
-          {enabledAssistant && (
-            <Box
-              sx={{
-                position: "fixed",
-                bottom: "50px",
-                right: "50px",
-              }}
-            >
-              <img
-                src={`/assistant.svg`}
-                style={{
-                  width: "70px",
-                }}
-              />
-            </Box>
-          )}
           {/* options */}
           <Stack spacing={"8px"} sx={{ position: "absolute", right: "12px", top: "8px" }}>
             <IconButton
@@ -490,9 +471,9 @@ export const PracticeQuestion = ({
               <LeaderboardIcon />
             </IconButton>
 
-            <Tooltip title="Voice-based practice">
+            <Tooltip title="Voice-based practice" placement="left">
               <IconButton
-                onClick={() => setEnabledAssistant(prev => !prev)}
+                onClick={onToggleAssistant}
                 sx={{
                   width: "56px",
                   height: "56px",
