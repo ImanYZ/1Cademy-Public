@@ -88,6 +88,7 @@ export const Assistant = ({
         await narrateLargeTexts(message);
       }
 
+      if (!enabledAssistantRef.current) return;
       if (voiceAssistant?.state !== "NARRATE") return;
 
       console.log("👉 1. assistant:narrate", { voiceAssistant, previousVoiceAssistant, enabledAssistantRef });
@@ -96,11 +97,13 @@ export const Assistant = ({
         if (!voiceAssistant.questionNode) return console.error("No question node found");
         if (!assistantRef.current) return console.log("cant execute operations with assistantRef");
         await narrateLargeTexts(voiceAssistant.questionNode.title);
+        if (!enabledAssistantRef.current) return;
         for (let i = 0; i < voiceAssistant.questionNode.choices.length; i++) {
           if (!enabledAssistantRef.current) return assistantRef.current.onSelectedQuestionAnswer(-1);
           const choice = voiceAssistant.questionNode.choices[i];
           assistantRef.current.onSelectedQuestionAnswer(i);
           await narrateLargeTexts(choice.choice);
+          if (!enabledAssistantRef.current) return;
         }
         assistantRef.current.onSelectedQuestionAnswer(-1);
         setVoiceAssistant({ ...voiceAssistant, state: "LISTEN" });
@@ -302,6 +305,7 @@ export const Assistant = ({
                 .map(c => `${c.option}: ${c.choice.feedback}`)
                 .join(" ")}`
             : "";
+          if (!enabledAssistantRef.current) return;
           setVoiceAssistant({
             ...voiceAssistant,
             listenType: "NEXT_ACTION",
@@ -313,6 +317,7 @@ export const Assistant = ({
           });
         } else {
           const message = ANSWERING_ERROR;
+          if (!enabledAssistantRef.current) return;
           setVoiceAssistant({
             ...voiceAssistant,
             listenType: "ANSWERING",
