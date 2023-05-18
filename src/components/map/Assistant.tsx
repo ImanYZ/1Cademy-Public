@@ -98,7 +98,9 @@ export const Assistant = ({
         setVoiceAssistant({ ...voiceAssistant, state: "LISTEN", date: "" });
         return;
       }
+      console.log("Confirmation Started");
       await narrateLargeTexts(voiceAssistant.message);
+      console.log("Confirmation Problem");
       if (!enabledAssistantRef.current) return;
       setVoiceAssistant({ ...voiceAssistant, state: "LISTEN" });
     };
