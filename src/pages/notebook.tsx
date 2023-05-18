@@ -6663,6 +6663,7 @@ const Notebook = ({}: NotebookProps) => {
             setDisplayDashboard={setDisplayDashboard}
             setRootQuery={setRootQuery}
             setVoiceAssistant={setVoiceAssistant}
+            displayDashboard={displayDashboard}
           />
         </Box>
         {/* )} */}

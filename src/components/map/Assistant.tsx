@@ -1,6 +1,6 @@
 import { Box, Tooltip } from "@mui/material";
 import { getFirestore } from "firebase/firestore";
-import React, { Dispatch, MutableRefObject, SetStateAction, useEffect } from "react";
+import React, { Dispatch, MutableRefObject, SetStateAction, useEffect, useRef } from "react";
 
 import { getNode } from "../../client/serveless/nodes.serveless";
 import { detectElements } from "../../hooks/detectElements";
@@ -33,6 +33,7 @@ type AssistantProps = {
   selectedNotebookId: string;
   scrollToNode: (nodeId: string, regardless?: boolean, tries?: number) => void;
   setRootQuery: Dispatch<SetStateAction<string | undefined>>;
+  displayDashboard: boolean;
 };
 
 export const Assistant = ({
@@ -44,20 +45,26 @@ export const Assistant = ({
   selectedNotebookId,
   scrollToNode,
   setRootQuery,
+  displayDashboard,
 }: AssistantProps) => {
   /**
    * Assistant narrate after that listen
    */
 
+  const previousVoiceAssistant = useRef<VoiceAssistant | null>(null);
+
   // 1. assistant will narrate
   useEffect(() => {
-    //   if (prevVoiceAssistant && !voiceAssistant) {
-    //     window.speechSynthesis.cancel();
-    //     const message = "Assistant stopped";
-    //     await narrateLargeTexts(message);
-    //   }
     const narrate = async () => {
+      if (previousVoiceAssistant.current && !voiceAssistant) {
+        window.speechSynthesis.cancel();
+        const message = "Assistant stopped";
+        await narrateLargeTexts(message);
+      }
+      previousVoiceAssistant.current = voiceAssistant;
+
       if (voiceAssistant?.state !== "NARRATE") return;
+
       console.log("👉 1. assistant:narrate", { message: voiceAssistant.message });
       if (voiceAssistant.date === "from-error") {
         const message = "Sorry, I cannot detect speech, lets try again.";
@@ -76,6 +83,7 @@ export const Assistant = ({
   // TODO: create use recognition and if for some readon is not detected answer create other recognition after some seconds to try again
   useEffect(() => {
     const listen = async () => {
+      previousVoiceAssistant.current = voiceAssistant;
       if (voiceAssistant?.state !== "LISTEN") return;
 
       const recognition = newRecognition(voiceAssistant.listenType as VoiceAssistantType);
@@ -378,7 +386,11 @@ export const Assistant = ({
 
   console.log("render");
   return (
-    <Tooltip title='To go back to practice, say "Continue practicing."' placement="top">
+    <Tooltip
+      title={displayDashboard ? "" : 'To go back to practice, say "Continue practicing."'}
+      placement="top"
+      open={true}
+    >
       <Box sx={{ width: "80px", height: "80px" }}>
         {voiceAssistant.state === "NARRATE" && (
           <RiveComponentMemoized
