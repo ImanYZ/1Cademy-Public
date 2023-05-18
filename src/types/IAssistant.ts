@@ -6,3 +6,8 @@ export type IAssistantEventDetail =
   | {
       type: "REQUEST_ID_TOKEN";
     };
+
+export type INarrateWorkerMessage = {
+  message?: string;
+  messages: string[];
+};
