@@ -233,7 +233,7 @@ export const Assistant = ({
 
         const submitOptions = getAnswersLettersOptions(transcriptProcessed, voiceAssistant.answers.length);
         assistantRef.current.onSelectAnswers(submitOptions);
-        const message = `You have selected ${getTextSplittedByCharacter(transcriptProcessed, "-")
+        const message = `Did you choose option ${getTextSplittedByCharacter(transcriptProcessed, "-")
           .split("-")
           .map(char => (char === "a" ? "ae" : char))
           .join("-")}. Is this correct?`;
