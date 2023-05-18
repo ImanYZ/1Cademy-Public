@@ -63,6 +63,7 @@ export const narrateLargeTexts = async (message: string) => {
   // const messages = message.split(".");
   const messages = message
     .split(".")
+    //.reduce((a: string[], c) => [...a, c], []);
     .reduce((a: string[], c) => (c.length <= 3 ? [...a, c] : [...a, ...splitSentenceIntoChunks(c)]), []);
   for (const messageItem of messages) {
     await narrateText2(messageItem);
@@ -71,8 +72,15 @@ export const narrateLargeTexts = async (message: string) => {
 
 export const narrateText2 = async (message: string) => {
   return new Promise(resolve => {
+    const timeout = setTimeout(() => {
+      window.speechSynthesis.cancel();
+      resolve(true);
+    }, 5000);
     const speech = new SpeechSynthesisUtterance(message);
-    speech.addEventListener("end", () => resolve(true));
+    speech.addEventListener("end", () => {
+      clearTimeout(timeout);
+      resolve(true);
+    });
 
     window.speechSynthesis.cancel();
     window.speechSynthesis.speak(speech);

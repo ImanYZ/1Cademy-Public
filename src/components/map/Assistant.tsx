@@ -1,6 +1,8 @@
 import { Box, Tooltip } from "@mui/material";
 import { getFirestore } from "firebase/firestore";
-import React, { Dispatch, MutableRefObject, SetStateAction, useEffect, useMemo, useRef, useState } from "react";
+import React, { Dispatch, MutableRefObject, SetStateAction, useEffect, useMemo, useState } from "react";
+
+import usePrevious from "@/hooks/usePrevious";
 
 import { getNode } from "../../client/serveless/nodes.serveless";
 import { detectElements } from "../../hooks/detectElements";
@@ -37,6 +39,9 @@ type AssistantProps = {
   scrollToNode: (nodeId: string, regardless?: boolean, tries?: number) => void;
   setRootQuery: Dispatch<SetStateAction<string | undefined>>;
   displayNotebook: boolean;
+  enabledAssistantRef: {
+    current: boolean;
+  };
 };
 
 export const Assistant = ({
@@ -49,12 +54,13 @@ export const Assistant = ({
   scrollToNode,
   setRootQuery,
   displayNotebook,
+  enabledAssistantRef,
 }: AssistantProps) => {
   /**
    * Assistant narrate after that listen
    */
 
-  const previousVoiceAssistant = useRef<VoiceAssistant | null>(null);
+  const previousVoiceAssistant = usePrevious(voiceAssistant);
   const [forceAssistantReaction, setForceAssistantReaction] = useState<AssistantReaction | "">("");
 
   const assistantReaction: AssistantReaction = useMemo(() => {
@@ -75,7 +81,7 @@ export const Assistant = ({
   // 1. assistant will narrate
   useEffect(() => {
     const narrate = async () => {
-      if (previousVoiceAssistant.current?.state !== "IDLE" && voiceAssistant?.state === "IDLE") {
+      if (previousVoiceAssistant?.state !== "IDLE" && voiceAssistant?.state === "IDLE" && voiceAssistant) {
         window.speechSynthesis.cancel();
         const message = "Assistant stopped";
         await narrateLargeTexts(message);
@@ -88,10 +94,14 @@ export const Assistant = ({
       if (voiceAssistant.date === "from-error") {
         const message = "Sorry, I cannot detect speech, lets try again.";
         await narrateLargeTexts(message);
+        if (!enabledAssistantRef.current) return;
         setVoiceAssistant({ ...voiceAssistant, state: "LISTEN", date: "" });
         return;
       }
+      console.log("Confirmation Started");
       await narrateLargeTexts(voiceAssistant.message);
+      console.log("Confirmation Problem");
+      if (!enabledAssistantRef.current) return;
       setVoiceAssistant({ ...voiceAssistant, state: "LISTEN" });
     };
     narrate();
@@ -113,6 +123,7 @@ export const Assistant = ({
 
       if (recognitionResult.error) {
         console.log("onerror", recognitionResult.error);
+        if (!enabledAssistantRef.current) return;
         setVoiceAssistant({
           ...voiceAssistant,
           date: "from-error",
@@ -130,6 +141,7 @@ export const Assistant = ({
         if (voiceAssistant.listenType === "NEXT_ACTION") message += NEXT_ACTION_ERROR;
 
         await narrateLargeTexts(message);
+        if (!enabledAssistantRef.current) return;
         setVoiceAssistant({
           ...voiceAssistant,
           date: new Date().toISOString(),
@@ -146,6 +158,7 @@ export const Assistant = ({
       // here call directly important commands
 
       if ("repeat question" === transcript) {
+        if (!enabledAssistantRef.current) return;
         setVoiceAssistant({
           ...voiceAssistant,
           listenType: "ANSWERING",
@@ -157,6 +170,7 @@ export const Assistant = ({
       if ("stop" === transcript) {
         const message = "Assistant stopped";
         await narrateLargeTexts(message);
+        enabledAssistantRef.current = false;
         setVoiceAssistant(ASSISTANT_IDLE);
         return;
       }
@@ -187,6 +201,7 @@ export const Assistant = ({
         if (voiceAssistant.listenType === "NEXT_ACTION") message += NEXT_ACTION_ERROR;
 
         await narrateLargeTexts(message);
+        if (!enabledAssistantRef.current) return;
         setVoiceAssistant({ ...voiceAssistant, date: "from-empty transcript", message, state: "NARRATE" });
         return;
       }
@@ -219,6 +234,7 @@ export const Assistant = ({
         const submitOptions = getAnswersLettersOptions(transcriptProcessed, voiceAssistant.answers.length);
         assistantRef.current.onSelectAnswers(submitOptions);
         const message = `You have selected ${getTextSplittedByCharacter(transcriptProcessed, "-")}. Is this correct?`;
+        if (!enabledAssistantRef.current) return;
         setVoiceAssistant({
           ...voiceAssistant,
           listenType: "CONFIRM",
@@ -332,6 +348,7 @@ export const Assistant = ({
         let message = `Sorry, I didn't get your choices. ${NEXT_ACTION_ERROR}`;
         await narrateLargeTexts(message);
         console.log("NEXT_ACTION");
+        if (!enabledAssistantRef.current) return;
         setVoiceAssistant({ ...voiceAssistant, date: new Date().toISOString(), message: "", state: "NARRATE" });
         return;
       }
@@ -353,10 +370,6 @@ export const Assistant = ({
     setVoiceAssistant,
     voiceAssistant,
   ]);
-
-  useEffect(() => {
-    previousVoiceAssistant.current = voiceAssistant;
-  }, [voiceAssistant]);
 
   console.log("render");
 
