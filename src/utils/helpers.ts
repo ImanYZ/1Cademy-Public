@@ -1,8 +1,9 @@
 import { NARRATE_WORKER_TERMINATED } from "@/lib/utils/constants";
-import { TVoiceAssistantRef } from "src/nodeBookTypes";
+import { VoiceAssistant } from "src/nodeBookTypes";
 import { INarrateWorkerMessage } from "src/types/IAssistant";
 import { INode } from "src/types/INode";
 import { INodeType } from "src/types/INodeType";
+import { splitSentenceIntoChunks } from "../lib/utils/string.utils";
 
 export const firstWeekMonthDays = (thisDate?: any) => {
   let today = new Date();
@@ -59,8 +60,10 @@ export const getNodeTypesFromNode = (nodeData: INode): INodeType[] => {
  * message will be splitted by .
  */
 export const narrateLargeTexts = async (message: string) => {
-  const messages = message.split(".");
-  console.log("narrateLargeTexts", messages);
+  // const messages = message.split(".");
+  const messages = message
+    .split(".")
+    .reduce((a: string[], c) => (c.length <= 3 ? [...a, c] : [...a, ...splitSentenceIntoChunks(c)]), []);
   for (const messageItem of messages) {
     await narrateText2(messageItem);
   }

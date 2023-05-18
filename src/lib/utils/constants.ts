@@ -1,8 +1,8 @@
-// import { NodeType } from "../../knowledgeTypes";
-
-import { TVoiceAssistantRef } from "src/nodeBookTypes";
 import { NodeType } from "src/types";
 
+export const ZINDEX = {
+  assistant: 1500,
+};
 export const NODE_TYPE_OPTIONS: NodeType[] = [
   // NodeType.Advertisement,
   "Code",
@@ -55,17 +55,6 @@ export const EDUCATION_VALUES = [
 export const NO_USER_IMAGE = "https://storage.googleapis.com/onecademy-1.appspot.com/ProfilePictures/no-img.png";
 
 export const NARRATE_WORKER_TERMINATED = "narrate-worker-terminated";
-
-export const VOICE_ASSISTANT_DEFAULT: TVoiceAssistantRef = {
-  listen: false,
-  answers: [],
-  listenType: null,
-  message: "",
-  narrate: false,
-  selectedAnswer: "",
-  date: "",
-  tagId: "",
-};
 
 export const QUESTION_OPTIONS = [
   "a",

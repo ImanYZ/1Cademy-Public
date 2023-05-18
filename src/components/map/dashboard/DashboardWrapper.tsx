@@ -25,7 +25,7 @@ import React, {
   useState,
 } from "react";
 import { CourseTag, Instructor, Semester, SemesterStudentVoteStat } from "src/instructorsTypes";
-import { TVoiceAssistantRef } from "src/nodeBookTypes";
+import { VoiceAssistant } from "src/nodeBookTypes";
 
 import { CoursesResult } from "@/components/layouts/StudentsLayout";
 
@@ -43,10 +43,13 @@ import { DashboardStudents } from "./DashboardStudents";
 // import { CoursesResult } from "../layouts/StudentsLayout";
 
 type DashboardWrapperProps = {
-  setVoiceAssistant: Dispatch<SetStateAction<TVoiceAssistantRef | null>>;
+  voiceAssistant: VoiceAssistant | null;
+  setVoiceAssistant: Dispatch<SetStateAction<VoiceAssistant | null>>;
   user: User;
   onClose: () => void;
   openNodeHandler: (nodeId: string) => void;
+  enabledAssistant: boolean;
+  setEnabledAssistant: Dispatch<SetStateAction<boolean>>;
   root?: string;
   sx?: SxProps<Theme>;
 };
@@ -56,7 +59,17 @@ export type DashboardWrapperRef = PracticeToolRef;
 export type ToolbarView = "DASHBOARD" | "PRACTICE" | "SETTINGS" | "STUDENTS";
 
 export const DashboardWrapper = forwardRef<DashboardWrapperRef, DashboardWrapperProps>((props, ref) => {
-  const { setVoiceAssistant, user, openNodeHandler, onClose, root, sx } = props;
+  const {
+    voiceAssistant,
+    setVoiceAssistant,
+    user,
+    openNodeHandler,
+    onClose,
+    root,
+    sx,
+    enabledAssistant,
+    setEnabledAssistant,
+  } = props;
   const db = getFirestore();
 
   // const [semesters, setSemesters] = useState<string[]>([]);
@@ -289,6 +302,7 @@ export const DashboardWrapper = forwardRef<DashboardWrapperRef, DashboardWrapper
             )}
             {selectToolbarView === "PRACTICE" && (
               <PracticeTool
+                voiceAssistant={voiceAssistant}
                 setVoiceAssistant={setVoiceAssistant}
                 ref={practiceToolRef}
                 user={user}
@@ -296,6 +310,8 @@ export const DashboardWrapper = forwardRef<DashboardWrapperRef, DashboardWrapper
                 onClose={onClose}
                 openNodeHandler={openNodeHandler}
                 root={rootFound ? root : undefined}
+                enabledAssistant={enabledAssistant}
+                setEnabledAssistant={setEnabledAssistant}
               />
             )}
             {selectToolbarView === "SETTINGS" && <DashboardSettings currentSemester={currentSemester} />}

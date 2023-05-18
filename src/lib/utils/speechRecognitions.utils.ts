@@ -1,4 +1,4 @@
-import { TVoiceAssistantListenType } from "src/nodeBookTypes";
+import { VoiceAssistantType } from "src/nodeBookTypes";
 
 import { CHOICES_GRAMMER, CONFIRMATION_GRAMMER, NEXT_GRAMMER, NOTEBOOK_GRAMMER } from "./constants";
 
@@ -10,7 +10,7 @@ const _SpeechRecognition =
     ? SpeechRecognition
     : null;
 
-export const getGrammerByType = (grammerType: TVoiceAssistantListenType): string | undefined => {
+export const getGrammerByType = (grammerType: VoiceAssistantType): string | undefined => {
   if (grammerType === "ANSWERING") {
     return CHOICES_GRAMMER;
   } else if (grammerType === "NEXT_ACTION") {
@@ -22,7 +22,7 @@ export const getGrammerByType = (grammerType: TVoiceAssistantListenType): string
   }
 };
 
-export const newRecognition = (grammerType?: TVoiceAssistantListenType) => {
+export const newRecognition = (grammerType?: VoiceAssistantType) => {
   try {
     if (!_SpeechRecognition) return null;
 
