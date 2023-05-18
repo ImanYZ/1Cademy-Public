@@ -266,7 +266,7 @@ export const Assistant = ({
 
           const feedbackToWrongChoice = !isCorrect
             ? `The correct choice${correctOptionsProcessed.length > 1 ? "s are" : " is"} ${correctOptionsProcessed
-                .map(c => c.option)
+                .map(c => `${c.option}: ${c.choice.feedback}`)
                 .join(" ")}`
             : "";
           setVoiceAssistant({
