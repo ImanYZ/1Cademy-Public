@@ -658,6 +658,7 @@ const Notebook = ({}: NotebookProps) => {
   //   updated: new Date(),
   // });
   const [voiceAssistant, setVoiceAssistant] = useState<VoiceAssistant>(ASSISTANT_IDLE);
+  const enabledAssistantRef = useRef<boolean>(false);
   // const prevVoiceAssistant = usePrevious(voiceAssistant);
 
   const assistantRef = useRef<DashboardWrapperRef | null>(null);
@@ -6665,6 +6666,7 @@ const Notebook = ({}: NotebookProps) => {
             setRootQuery={setRootQuery}
             setVoiceAssistant={setVoiceAssistant}
             displayNotebook={!displayDashboard}
+            enabledAssistantRef={enabledAssistantRef}
           />
         </Box>
         {/* )} */}
@@ -6984,6 +6986,7 @@ const Notebook = ({}: NotebookProps) => {
               root={rootQuery}
               enabledAssistant={enabledAssistant}
               setEnabledAssistant={setEnabledAssistant}
+              enabledAssistantRef={enabledAssistantRef}
             />
           )}
 
