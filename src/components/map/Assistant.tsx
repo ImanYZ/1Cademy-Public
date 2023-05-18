@@ -1,6 +1,6 @@
 import { Box, Tooltip } from "@mui/material";
 import { getFirestore } from "firebase/firestore";
-import React, { Dispatch, MutableRefObject, SetStateAction, useEffect, useRef } from "react";
+import React, { Dispatch, MutableRefObject, SetStateAction, useEffect, useMemo, useRef, useState } from "react";
 
 import { getNode } from "../../client/serveless/nodes.serveless";
 import { detectElements } from "../../hooks/detectElements";
@@ -24,6 +24,8 @@ import { RiveComponentMemoized } from "../home/components/temporals/RiveComponen
 import { PracticeToolRef } from "../practiceTool/PracticeTool";
 
 const db = getFirestore();
+
+type AssistantReaction = "IDLE" | "LISTENING" | "HAPPY" | "SAD" | /* "SNORING" | */ "TALKING";
 
 type AssistantProps = {
   voiceAssistant: VoiceAssistant;
@@ -53,25 +55,36 @@ export const Assistant = ({
    */
 
   const previousVoiceAssistant = useRef<VoiceAssistant | null>(null);
+  const [forceAssistantReaction, setForceAssistantReaction] = useState<AssistantReaction | "">("");
+
+  const assistantReaction: AssistantReaction = useMemo(() => {
+    if (forceAssistantReaction) return forceAssistantReaction;
+    if (voiceAssistant.state === "LISTEN") return "LISTENING";
+    if (
+      voiceAssistant.state === "NARRATE" &&
+      ![CORRECT_ANSWER_REACTION, WRONG_ANSWER_REACTION].includes(voiceAssistant.date)
+    )
+      return "TALKING";
+    if (voiceAssistant.state === "NARRATE" && voiceAssistant.date === CORRECT_ANSWER_REACTION) return "HAPPY";
+    if (voiceAssistant.state === "NARRATE" && voiceAssistant.date === WRONG_ANSWER_REACTION) return "SAD";
+    return "IDLE";
+  }, [forceAssistantReaction, voiceAssistant.date, voiceAssistant.state]);
 
   // 0. assistant idle, assistant doesn't nothing
 
   // 1. assistant will narrate
   useEffect(() => {
     const narrate = async () => {
-      //   if (voiceAssistant?.state === "IDLE") return;
-
       if (previousVoiceAssistant.current?.state !== "IDLE" && voiceAssistant?.state === "IDLE") {
         window.speechSynthesis.cancel();
         const message = "Assistant stopped";
         await narrateLargeTexts(message);
-        // setVoiceAssistant(ASSISTANT_IDLE);
       }
-      //   previousVoiceAssistant.current = voiceAssistant;
 
       if (voiceAssistant?.state !== "NARRATE") return;
 
       console.log("👉 1. assistant:narrate", { message: voiceAssistant.message });
+
       if (voiceAssistant.date === "from-error") {
         const message = "Sorry, I cannot detect speech, lets try again.";
         await narrateLargeTexts(message);
@@ -292,6 +305,7 @@ export const Assistant = ({
           openNodesOnNotebook(selectedNotebookId, parents);
           await detectElements({ ids: parents });
           for (let i = 0; i < parents.length; i++) {
+            setForceAssistantReaction("TALKING");
             const parent = parents[i];
             const node: Node | null = await getNode(db, parent);
             if (!node) return;
@@ -300,6 +314,7 @@ export const Assistant = ({
             scrollToNode(parent);
             await narrateLargeTexts(message);
           }
+          setForceAssistantReaction("");
           // TODO: wait for next action
           console.log("execute NOTEBOOK_ACTIONS ");
           setVoiceAssistant({
@@ -360,17 +375,16 @@ export const Assistant = ({
       open={true}
     >
       <Box sx={{ width: "80px", height: "80px" }}>
-        {voiceAssistant.state === "NARRATE" &&
-          ![CORRECT_ANSWER_REACTION, WRONG_ANSWER_REACTION].includes(voiceAssistant.date) && (
-            <RiveComponentMemoized
-              src={TALKING_ANIMATION}
-              artboard="New Artboard"
-              animations="Timeline 1"
-              autoplay={true}
-            />
-          )}
+        {assistantReaction === "TALKING" && (
+          <RiveComponentMemoized
+            src={TALKING_ANIMATION}
+            artboard="New Artboard"
+            animations="Timeline 1"
+            autoplay={true}
+          />
+        )}
 
-        {voiceAssistant.state === "NARRATE" && voiceAssistant.date === CORRECT_ANSWER_REACTION && (
+        {assistantReaction === "HAPPY" && (
           <RiveComponentMemoized
             src={HAPPY_ANIMATION}
             artboard="New Artboard"
@@ -379,11 +393,11 @@ export const Assistant = ({
           />
         )}
 
-        {voiceAssistant.state === "NARRATE" && voiceAssistant.date === WRONG_ANSWER_REACTION && (
+        {assistantReaction === "SAD" && (
           <RiveComponentMemoized src={SAD_ANIMATION} artboard="New Artboard" animations="Timeline 1" autoplay={true} />
         )}
 
-        {voiceAssistant.state === "LISTEN" && (
+        {assistantReaction === "LISTENING" && (
           <RiveComponentMemoized
             src={LISTENING_ANIMATION}
             artboard="New Artboard"

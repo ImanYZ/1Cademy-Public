@@ -438,6 +438,7 @@ const Notebook = ({}: NotebookProps) => {
 
   const scrollToNode = useCallback(
     (nodeId: string, regardless = false, tries = 0) => {
+      console.log(">>scrollToNode");
       if (tries === 10) return;
 
       if (!scrollToNodeInitialized.current) {
