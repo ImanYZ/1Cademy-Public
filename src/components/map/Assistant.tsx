@@ -236,7 +236,7 @@ export const Assistant = ({
         const message = `Did you choose option ${getTextSplittedByCharacter(transcriptProcessed, "-")
           .split("-")
           .map(char => (char === "a" ? "ae" : char))
-          .join("-")}. Is this correct?`;
+          .join("-")}.`;
         if (!enabledAssistantRef.current) return;
         setVoiceAssistant({
           ...voiceAssistant,
