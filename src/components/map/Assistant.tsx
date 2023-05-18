@@ -188,8 +188,6 @@ export const Assistant = ({
         return;
       }
       if ("stop" === transcript) {
-        const message = "Assistant stopped";
-        await narrateLargeTexts(message);
         enabledAssistantRef.current = false;
         setVoiceAssistant(ASSISTANT_IDLE);
         return;

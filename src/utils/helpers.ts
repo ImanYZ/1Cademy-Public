@@ -62,16 +62,16 @@ export const getNodeTypesFromNode = (nodeData: INode): INodeType[] => {
 export const narrateLargeTexts = async (message: string) => {
   console.log("narrateLargeTexts:", message);
   // const messages = message.split(".");
+  const maxCharacters = 99;
   const messages = message
     .split(".")
-    //.reduce((a: string[], c) => [...a, c], []);
-    .reduce((a: string[], c) => (c.length <= 3 ? [...a, c] : [...a, ...splitSentenceIntoChunks(c)]), []);
+    .reduce((a: string[], c) => (c.length <= maxCharacters ? [...a, c] : [...a, ...splitSentenceIntoChunks(c)]), []);
   for (const messageItem of messages) {
-    await narrateText2(messageItem);
+    await narrateText(messageItem);
   }
 };
 
-export const narrateText2 = async (message: string) => {
+export const narrateText = async (message: string) => {
   return new Promise(resolve => {
     const timeout = setTimeout(() => {
       window.speechSynthesis.cancel();
