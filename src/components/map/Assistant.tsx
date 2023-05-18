@@ -29,6 +29,7 @@ const db = getFirestore();
 
 type AssistantReaction = "IDLE" | "LISTENING" | "HAPPY" | "SAD" | /* "SNORING" | */ "TALKING";
 
+type SelectedAnswer = { choice: KnowledgeChoice; option: string };
 type AssistantProps = {
   voiceAssistant: VoiceAssistant;
   setVoiceAssistant: (value: SetStateAction<VoiceAssistant>) => void;
@@ -89,13 +90,14 @@ export const Assistant = ({
 
       if (voiceAssistant?.state !== "NARRATE") return;
 
-      console.log("👉 1. assistant:narrate", { voiceAssistant });
+      console.log("👉 1. assistant:narrate", { voiceAssistant, previousVoiceAssistant, enabledAssistantRef });
 
-      if (voiceAssistant.date === "from-assistant-start") {
+      if (voiceAssistant.listenType === "ANSWERING" && voiceAssistant.date === "from-assistant-start") {
         if (!voiceAssistant.questionNode) return console.error("No question node found");
         if (!assistantRef.current) return console.log("cant execute operations with assistantRef");
         await narrateLargeTexts(voiceAssistant.questionNode.title);
         for (let i = 0; i < voiceAssistant.questionNode.choices.length; i++) {
+          if (!enabledAssistantRef.current) return assistantRef.current.onSelectedQuestionAnswer(-1);
           const choice = voiceAssistant.questionNode.choices[i];
           assistantRef.current.onSelectedQuestionAnswer(i);
           await narrateLargeTexts(choice.choice);
@@ -129,7 +131,7 @@ export const Assistant = ({
     const listen = async () => {
       if (voiceAssistant?.state !== "LISTEN") return;
 
-      console.log("👉 2. assistant:listen", { voiceAssistant });
+      console.log("👉 2. assistant:listen", { voiceAssistant, assistantRef });
       const recognitionResult = await recognizeInput(voiceAssistant.listenType as VoiceAssistantType);
       if (!recognitionResult) {
         console.error("This browser doesn't support speech recognition, install last version of chrome browser please");
@@ -224,7 +226,7 @@ export const Assistant = ({
       // actions according the flow
       if (voiceAssistant.listenType === "ANSWERING") {
         if (!assistantRef.current) return;
-        // transcriptProcessed:"bc"
+        // transcriptProcessed:"bc" => [b, c]
         // possibleOptions: "abcd"
         const possibleOptions = QUESTION_OPTIONS.slice(0, voiceAssistant.answers.length);
         const answerIsValid = Array.from(transcriptProcessed).reduce(
@@ -259,6 +261,7 @@ export const Assistant = ({
           message,
           selectedAnswer: transcriptProcessed,
           state: "NARRATE",
+          date: "from-answering",
         });
         return;
       }
@@ -280,15 +283,12 @@ export const Assistant = ({
             (acu, cur, idx) => acu && submitOptions[idx] === cur.correct,
             true
           );
-          const selectedAnswer: { choice: KnowledgeChoice; option: string }[] = voiceAssistant.answers.reduce(
-            (acu: { choice: KnowledgeChoice; option: string }[], cur, idx) => {
-              const answer = voiceAssistant.selectedAnswer.includes(QUESTION_OPTIONS[idx])
-                ? { choice: cur, option: QUESTION_OPTIONS[idx] }
-                : null;
-              return answer ? [...acu, answer] : acu;
-            },
-            []
-          );
+          const selectedAnswer: SelectedAnswer[] = voiceAssistant.answers.reduce((acu: SelectedAnswer[], cur, idx) => {
+            const answer: SelectedAnswer | null = voiceAssistant.selectedAnswer.includes(QUESTION_OPTIONS[idx])
+              ? { choice: cur, option: QUESTION_OPTIONS[idx] }
+              : null;
+            return answer ? [...acu, answer] : acu;
+          }, []);
           console.log({ selectedAnswer });
           const feedbackForAnswers = selectedAnswer
             .map(cur => `You selected option ${cur.option}: ${cur.choice.feedback}`)
@@ -297,7 +297,6 @@ export const Assistant = ({
           const randomMessageIndex = Math.floor(Math.random() * possibleAssistantMessages.length);
           const assistantMessageBasedOnResultOfAnswer = possibleAssistantMessages[randomMessageIndex];
           assistantRef.current?.onSubmitAnswer(submitOptions);
-
           const feedbackToWrongChoice = !isCorrect
             ? `The correct choice${correctOptionsProcessed.length > 1 ? "s are" : " is"} ${correctOptionsProcessed
                 .map(c => `${c.option}: ${c.choice.feedback}`)
@@ -319,6 +318,7 @@ export const Assistant = ({
             listenType: "ANSWERING",
             message,
             state: "NARRATE",
+            date: "from-confirm-no",
           });
         }
         return;

@@ -60,6 +60,7 @@ export const getNodeTypesFromNode = (nodeData: INode): INodeType[] => {
  * message will be splitted by .
  */
 export const narrateLargeTexts = async (message: string) => {
+  console.log("narrateLargeTexts:", message);
   // const messages = message.split(".");
   const messages = message
     .split(".")
