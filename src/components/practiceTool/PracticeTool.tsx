@@ -228,7 +228,9 @@ const PracticeTool = forwardRef<PracticeToolRef, PracticeToolProps>((props, ref)
         return ASSISTANT_IDLE;
       }
       enabledAssistantRef.current = true;
-      const choiceMessage = questionData.question.choices.map(cur => cur.choice.replace(".", ",")).join(". ");
+      const choiceMessage = questionData.question.choices
+        .map(cur => cur.choice.replace(/^a\./, "ae.").replace(".", ","))
+        .join(". ");
       return {
         state: "NARRATE",
         listenType: "ANSWERING",
@@ -249,7 +251,9 @@ const PracticeTool = forwardRef<PracticeToolRef, PracticeToolProps>((props, ref)
     setVoiceAssistant(prev => {
       // if (!prev) return ASSISTANT_IDLE;
       if (prev?.state === "IDLE") return prev;
-      const choiceMessage = questionData.question.choices.map(cur => cur.choice.replace(".", ",")).join(". ");
+      const choiceMessage = questionData.question.choices
+        .map(cur => cur.choice.replace(/^a\./, "ae.").replace(".", ","))
+        .join(". ");
       return {
         state: "NARRATE",
         listenType: "ANSWERING",

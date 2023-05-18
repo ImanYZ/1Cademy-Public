@@ -75,7 +75,7 @@ export const narrateText2 = async (message: string) => {
     const timeout = setTimeout(() => {
       window.speechSynthesis.cancel();
       resolve(true);
-    }, 5000);
+    }, 10000);
     const speech = new SpeechSynthesisUtterance(message);
     speech.addEventListener("end", () => {
       clearTimeout(timeout);

@@ -248,7 +248,10 @@ export const Assistant = ({
 
         const submitOptions = getAnswersLettersOptions(transcriptProcessed, voiceAssistant.answers.length);
         assistantRef.current.onSelectAnswers(submitOptions);
-        const message = `You have selected ${getTextSplittedByCharacter(transcriptProcessed, "-")}. Is this correct?`;
+        const message = `Did you choose option ${getTextSplittedByCharacter(transcriptProcessed, "-")
+          .split("-")
+          .map(char => (char === "a" ? "ae" : char))
+          .join("-")}.`;
         if (!enabledAssistantRef.current) return;
         setVoiceAssistant({
           ...voiceAssistant,
