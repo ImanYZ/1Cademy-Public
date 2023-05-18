@@ -50,6 +50,9 @@ type DashboardWrapperProps = {
   openNodeHandler: (nodeId: string) => void;
   enabledAssistant: boolean;
   setEnabledAssistant: Dispatch<SetStateAction<boolean>>;
+  enabledAssistantRef: {
+    current: boolean;
+  };
   root?: string;
   sx?: SxProps<Theme>;
 };
@@ -69,6 +72,7 @@ export const DashboardWrapper = forwardRef<DashboardWrapperRef, DashboardWrapper
     sx,
     enabledAssistant,
     setEnabledAssistant,
+    enabledAssistantRef,
   } = props;
   const db = getFirestore();
 
@@ -313,6 +317,7 @@ export const DashboardWrapper = forwardRef<DashboardWrapperRef, DashboardWrapper
                 root={rootFound ? root : undefined}
                 enabledAssistant={enabledAssistant}
                 setEnabledAssistant={setEnabledAssistant}
+                enabledAssistantRef={enabledAssistantRef}
               />
             )}
             {selectToolbarView === "SETTINGS" && <DashboardSettings currentSemester={currentSemester} />}

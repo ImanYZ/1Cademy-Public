@@ -35,6 +35,9 @@ type PracticeToolProps = {
   openNodeHandler: (nodeId: string) => void;
   enabledAssistant: boolean;
   setEnabledAssistant: Dispatch<SetStateAction<boolean>>;
+  enabledAssistantRef: {
+    current: boolean;
+  };
 };
 
 export type PracticeInfo = {
@@ -71,6 +74,7 @@ const PracticeTool = forwardRef<PracticeToolRef, PracticeToolProps>((props, ref)
     openNodeHandler,
     onClose,
     root,
+    enabledAssistantRef,
     // enabledAssistant,
     // setEnabledAssistant,
   } = props;
@@ -217,7 +221,11 @@ const PracticeTool = forwardRef<PracticeToolRef, PracticeToolProps>((props, ref)
 
     setVoiceAssistant(prev => {
       // if (!prev) return ASSISTANT_IDLE;
-      if (prev?.state !== "IDLE") return ASSISTANT_IDLE;
+      if (prev?.state !== "IDLE") {
+        enabledAssistantRef.current = false;
+        return ASSISTANT_IDLE;
+      }
+      enabledAssistantRef.current = true;
       const choiceMessage = questionData.question.choices.map(cur => cur.choice.replace(".", ",")).join(". ");
       return {
         state: "NARRATE",

@@ -61,9 +61,8 @@ export const getNodeTypesFromNode = (nodeData: INode): INodeType[] => {
  */
 export const narrateLargeTexts = async (message: string) => {
   // const messages = message.split(".");
-  const messages = message
-    .split(".")
-    .reduce((a: string[], c) => (c.length <= 3 ? [...a, c] : [...a, ...splitSentenceIntoChunks(c)]), []);
+  const messages = message.split(".").reduce((a: string[], c) => [...a, c], []);
+  // .reduce((a: string[], c) => (c.length <= 3 ? [...a, c] : [...a, ...splitSentenceIntoChunks(c)]), []);
   for (const messageItem of messages) {
     await narrateText2(messageItem);
   }
