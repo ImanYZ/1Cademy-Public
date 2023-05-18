@@ -533,5 +533,5 @@ export type VoiceAssistant = {
   date: string;
   tagId: string;
   state: "NARRATE" | "LISTEN" | "IDLE";
-  questionNode?: SimpleQuestionNode | null;
+  questionNode: SimpleQuestionNode | null;
 };

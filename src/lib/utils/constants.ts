@@ -145,4 +145,5 @@ export const ASSISTANT_IDLE: VoiceAssistant = {
   selectedAnswer: "",
   date: "",
   tagId: "",
+  questionNode: null,
 };
