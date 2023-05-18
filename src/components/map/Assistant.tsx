@@ -470,6 +470,7 @@ const MapWords: { [key: string]: string } = {
   se: "c",
   de: "d",
   dee: "d",
+  the: "d",
   guess: "d",
   he: "e",
   yes: "y",
