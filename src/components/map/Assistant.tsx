@@ -6,6 +6,7 @@ import usePrevious from "@/hooks/usePrevious";
 
 import { getNode } from "../../client/serveless/nodes.serveless";
 import { detectElements } from "../../hooks/detectElements";
+import { useNarrator } from "../../hooks/useNarrator";
 import { KnowledgeChoice } from "../../knowledgeTypes";
 import { getAnswersLettersOptions } from "../../lib/utils/assistant.utils";
 import {
@@ -64,6 +65,8 @@ export const Assistant = ({
   const previousVoiceAssistant = usePrevious(voiceAssistant);
   const [forceAssistantReaction, setForceAssistantReaction] = useState<AssistantReaction | "">("");
 
+  const { addNewSentencesToBeNarrated, isWorking, sentenceIndex } = useNarrator();
+
   const assistantReaction: AssistantReaction = useMemo(() => {
     if (forceAssistantReaction) return forceAssistantReaction;
     if (voiceAssistant.state === "LISTEN") return "LISTENING";
@@ -77,6 +80,15 @@ export const Assistant = ({
     return "IDLE";
   }, [forceAssistantReaction, voiceAssistant.date, voiceAssistant.state]);
 
+  // is narrating the node
+  useEffect(() => {
+    if (!assistantRef.current) return;
+    if (!isWorking) return; // TODO: listen
+    if (voiceAssistant.listenType === "ANSWERING" && voiceAssistant.date === "from-assistant-start") {
+      assistantRef.current.onSelectedQuestionAnswer(sentenceIndex - 1);
+    }
+  }, [sentenceIndex]);
+
   // 0. assistant idle, assistant doesn't nothing
 
   // 1. assistant will narrate
@@ -85,7 +97,8 @@ export const Assistant = ({
       if (previousVoiceAssistant?.state !== "IDLE" && voiceAssistant?.state === "IDLE" && voiceAssistant) {
         window.speechSynthesis.cancel();
         const message = "Assistant stopped";
-        await narrateLargeTexts(message);
+        // await narrateLargeTexts(message);
+        addNewSentencesToBeNarrated([message]);
       }
 
       if (!enabledAssistantRef.current) return;
@@ -103,7 +116,7 @@ export const Assistant = ({
           const choice = voiceAssistant.questionNode.choices[i];
           assistantRef.current.onSelectedQuestionAnswer(i);
           await narrateLargeTexts(choice.choice);
-          if (!enabledAssistantRef.current) return;
+          if (!enabledAssistantRef.current) return assistantRef.current.onSelectedQuestionAnswer(-1);
         }
         assistantRef.current.onSelectedQuestionAnswer(-1);
         setVoiceAssistant({ ...voiceAssistant, state: "LISTEN" });
