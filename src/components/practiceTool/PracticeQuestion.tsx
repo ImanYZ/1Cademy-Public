@@ -23,9 +23,16 @@ type NodeQuestionProps = {
   selectedAnswers: boolean[];
   setSelectedIdxAnswer: (newValue: number) => void;
   submitAnswer: boolean;
+  narratedAnswerIdx: number;
 };
 
-const NodeQuestion = ({ node, selectedAnswers, setSelectedIdxAnswer, submitAnswer }: NodeQuestionProps) => {
+const NodeQuestion = ({
+  node,
+  selectedAnswers,
+  setSelectedIdxAnswer,
+  submitAnswer,
+  narratedAnswerIdx,
+}: NodeQuestionProps) => {
   const [displayTags, setDisplayTags] = useState(false);
   const [nodeCopy, setNodeCopy] = useState<SimpleQuestionNode>(node);
 
@@ -140,6 +147,23 @@ const NodeQuestion = ({ node, selectedAnswers, setSelectedIdxAnswer, submitAnswe
                     },
                   }),
                 },
+                ...(narratedAnswerIdx === idx && {
+                  cursor: "pointer",
+                  background: theme =>
+                    theme.palette.mode === "dark" ? theme.palette.common.notebookG500 : theme.palette.common.gray200,
+                  border: theme =>
+                    `solid 1px ${
+                      theme.palette.mode === "dark" ? theme.palette.common.notebookG300 : theme.palette.common.gray300
+                    }`,
+                  "& .check-box": {
+                    backgroundColor: theme =>
+                      theme.palette.mode === "dark" ? theme.palette.common.notebookG600 : theme.palette.common.gray100,
+                    border: theme =>
+                      `solid 1px ${
+                        theme.palette.mode === "dark" ? theme.palette.common.notebookG400 : theme.palette.common.gray300
+                      }`,
+                  },
+                }),
                 ...(selectedAnswers[idx] && {
                   background: theme =>
                     submitAnswer
@@ -364,6 +388,7 @@ type PracticeQuestionProps = {
   setSelectedAnswers: React.Dispatch<React.SetStateAction<boolean[]>>;
   enabledAssistant: boolean;
   onToggleAssistant: () => void;
+  narratedAnswerIdx: number;
 };
 export const PracticeQuestion = ({
   question,
@@ -381,6 +406,7 @@ export const PracticeQuestion = ({
   setSelectedAnswers,
   enabledAssistant,
   onToggleAssistant,
+  narratedAnswerIdx,
 }: PracticeQuestionProps) => {
   const [displaySidebar, setDisplaySidebar] = useState<"LEADERBOARD" | "USER_STATUS" | null>(null);
   const [loading, setLoading] = useState(true);
@@ -538,6 +564,7 @@ export const PracticeQuestion = ({
                 selectedAnswers={selectedAnswers}
                 setSelectedIdxAnswer={onSelectAnswer}
                 submitAnswer={submitAnswer}
+                narratedAnswerIdx={narratedAnswerIdx}
               />
             )}
 

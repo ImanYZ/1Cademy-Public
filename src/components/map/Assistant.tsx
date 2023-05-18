@@ -89,7 +89,21 @@ export const Assistant = ({
 
       if (voiceAssistant?.state !== "NARRATE") return;
 
-      console.log("👉 1. assistant:narrate", { message: voiceAssistant.message });
+      console.log("👉 1. assistant:narrate", { voiceAssistant });
+
+      if (voiceAssistant.date === "from-assistant-start") {
+        if (!voiceAssistant.questionNode) return console.error("No question node found");
+        if (!assistantRef.current) return console.log("cant execute operations with assistantRef");
+        await narrateLargeTexts(voiceAssistant.questionNode.title);
+        for (let i = 0; i < voiceAssistant.questionNode.choices.length; i++) {
+          const choice = voiceAssistant.questionNode.choices[i];
+          assistantRef.current.onSelectedQuestionAnswer(i);
+          await narrateLargeTexts(choice.choice);
+        }
+        assistantRef.current.onSelectedQuestionAnswer(-1);
+        setVoiceAssistant({ ...voiceAssistant, state: "LISTEN" });
+        return;
+      }
 
       if (voiceAssistant.date === "from-error") {
         const message = "Sorry, I cannot detect speech, lets try again.";
@@ -106,6 +120,7 @@ export const Assistant = ({
     };
     narrate();
     // prevVoiceAssistant, don't add this on dependencies, this is a ref
+    // }, [assistantRef, enabledAssistantRef, previousVoiceAssistant?.state, setVoiceAssistant, voiceAssistant]);
   }, [setVoiceAssistant, voiceAssistant]);
 
   // 2. assistant will listen

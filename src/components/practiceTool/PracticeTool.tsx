@@ -63,6 +63,7 @@ export type PracticeToolRef = {
   nextQuestion: () => void;
   getQuestionParents: () => string[];
   getQuestionData: () => SimpleQuestionNode | null;
+  onSelectedQuestionAnswer: (index: number) => void;
 };
 
 const PracticeTool = forwardRef<PracticeToolRef, PracticeToolProps>((props, ref) => {
@@ -87,7 +88,7 @@ const PracticeTool = forwardRef<PracticeToolRef, PracticeToolProps>((props, ref)
   const [semesterConfig, setSemesterConfig] = useState<ISemester | null>(null);
   const [submitAnswer, setSubmitAnswer] = useState(false);
   const [selectedAnswers, setSelectedAnswers] = useState<boolean[]>([]);
-  // const [enabledAssistant, setEnabledAssistant] = useState(Boolean(voiceAssistant));
+  const [narratedAnswerIdx, setNarratedAnswerIdx] = useState(-1); // -1: nothing is selected
   const onRunPracticeTool = useCallback(() => {
     (start: boolean) => {
       if (!practiceInfo) return;
@@ -132,6 +133,7 @@ const PracticeTool = forwardRef<PracticeToolRef, PracticeToolProps>((props, ref)
     nextQuestion: getPracticeQuestion,
     getQuestionParents: () => questionData?.question.parents ?? [],
     getQuestionData: () => questionData?.question ?? null,
+    onSelectedQuestionAnswer: (index: number) => setNarratedAnswerIdx(index),
   }));
 
   const onViewNodeOnNodeBook = (nodeId: string) => {
@@ -233,12 +235,14 @@ const PracticeTool = forwardRef<PracticeToolRef, PracticeToolProps>((props, ref)
         message: `${questionData.question.title}. ${choiceMessage}`,
         answers: questionData.question.choices,
         selectedAnswer: "",
-        date: "",
+        date: "from-assistant-start",
         tagId: currentSemester.tagId,
+        questionNode: questionData.question,
       };
     });
   }, [currentSemester.tagId, questionData, setVoiceAssistant]);
 
+  // this is executed when practice start and get question node
   useEffect(() => {
     if (!questionData) return;
     if (!startPractice) return;
@@ -252,8 +256,9 @@ const PracticeTool = forwardRef<PracticeToolRef, PracticeToolProps>((props, ref)
         message: `${questionData.question.title}. ${choiceMessage}`,
         answers: questionData.question.choices,
         selectedAnswer: "",
-        date: "",
+        date: "from-assistant-start",
         tagId: currentSemester.tagId,
+        questionNode: questionData.question,
       };
     });
   }, [currentSemester.tagId, questionData, setVoiceAssistant, startPractice]);
@@ -286,6 +291,7 @@ const PracticeTool = forwardRef<PracticeToolRef, PracticeToolProps>((props, ref)
         setSelectedAnswers={setSelectedAnswers}
         enabledAssistant={Boolean(voiceAssistant && voiceAssistant.state !== "IDLE")}
         onToggleAssistant={onToggleAssistant}
+        narratedAnswerIdx={narratedAnswerIdx}
       />
     </Box>
   ) : (

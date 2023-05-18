@@ -98,6 +98,7 @@ export const DashboardWrapper = forwardRef<DashboardWrapperRef, DashboardWrapper
     nextQuestion: practiceToolRef.current ? practiceToolRef.current.nextQuestion : () => {},
     getQuestionParents: practiceToolRef.current ? practiceToolRef.current.getQuestionParents : () => [],
     getQuestionData: practiceToolRef.current ? practiceToolRef.current.getQuestionData : () => null,
+    onSelectedQuestionAnswer: practiceToolRef.current ? practiceToolRef.current.onSelectedQuestionAnswer : () => {},
   }));
 
   const semesterByStudentSnapthot = useCallback(
