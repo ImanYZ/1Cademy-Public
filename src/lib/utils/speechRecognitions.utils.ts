@@ -65,3 +65,33 @@ const forceCharacterToOptions = (character: string) => {
   if (character === "s") return "c";
   return character;
 };
+
+export const recogniseInput = async (listenType: VoiceAssistantType) => {
+  const recognition = newRecognition(listenType);
+  if (!recognition) return;
+
+  return new Promise(resolve => {
+    const recogniseResponse = {
+      transcript: "",
+      error: "",
+      nomatch: false,
+    };
+    recognition.start();
+
+    recognition.onresult = (event: any) => {
+      recogniseResponse.transcript = event.results?.[0]?.[0]?.transcript || "";
+    };
+
+    recognition.onerror = (event: any) => {
+      recogniseResponse.error = event.error;
+    };
+
+    recognition.onnomatch = () => {
+      recogniseResponse.nomatch = true;
+    };
+
+    recognition.onend = () => {
+      resolve(recogniseResponse);
+    };
+  });
+};
