@@ -66,7 +66,7 @@ const forceCharacterToOptions = (character: string) => {
   return character;
 };
 
-export const recogniseInput = async (
+export const recognizeInput = async (
   listenType: VoiceAssistantType
 ): Promise<
   | {
