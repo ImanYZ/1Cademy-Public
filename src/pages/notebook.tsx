@@ -97,7 +97,7 @@ import { useWorkerQueue } from "../hooks/useWorkerQueue";
 import { NodeChanges, ReputationSignal } from "../knowledgeTypes";
 import { idToken, retrieveAuthenticatedUser } from "../lib/firestoreClient/auth";
 import { Post, postWithToken } from "../lib/mapApi";
-import { NO_USER_IMAGE, ZINDEX } from "../lib/utils/constants";
+import { ASSISTANT_IDLE, NO_USER_IMAGE, ZINDEX } from "../lib/utils/constants";
 import { createGraph, dagreUtils } from "../lib/utils/dagre.util";
 import { devLog } from "../lib/utils/develop.util";
 import { getTypedCollections } from "../lib/utils/getTypedCollections";
@@ -656,7 +656,7 @@ const Notebook = ({}: NotebookProps) => {
   // const [voiceAssistantUpdates, setVoiceAssistantUpdates] = useState({
   //   updated: new Date(),
   // });
-  const [voiceAssistant, setVoiceAssistant] = useState<VoiceAssistant | null>(null);
+  const [voiceAssistant, setVoiceAssistant] = useState<VoiceAssistant>(ASSISTANT_IDLE);
   // const prevVoiceAssistant = usePrevious(voiceAssistant);
 
   const assistantRef = useRef<DashboardWrapperRef | null>(null);
@@ -6663,7 +6663,7 @@ const Notebook = ({}: NotebookProps) => {
             setDisplayDashboard={setDisplayDashboard}
             setRootQuery={setRootQuery}
             setVoiceAssistant={setVoiceAssistant}
-            displayDashboard={displayDashboard}
+            displayNotebook={!displayDashboard}
           />
         </Box>
         {/* )} */}
@@ -6976,6 +6976,7 @@ const Notebook = ({}: NotebookProps) => {
                 setRootQuery(undefined);
                 setDisplayDashboard(false);
                 router.replace(router.pathname);
+                setVoiceAssistant(ASSISTANT_IDLE);
               }}
               openNodeHandler={openNodeHandler}
               sx={{ position: "absolute", inset: "0px", zIndex: 999 }}

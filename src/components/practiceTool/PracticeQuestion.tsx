@@ -363,7 +363,7 @@ type PracticeQuestionProps = {
   selectedAnswers: boolean[];
   setSelectedAnswers: React.Dispatch<React.SetStateAction<boolean[]>>;
   enabledAssistant: boolean;
-  setEnabledAssistant: React.Dispatch<React.SetStateAction<boolean>>;
+  onToggleAssistant: () => void;
 };
 export const PracticeQuestion = ({
   question,
@@ -380,7 +380,7 @@ export const PracticeQuestion = ({
   selectedAnswers,
   setSelectedAnswers,
   enabledAssistant,
-  setEnabledAssistant,
+  onToggleAssistant,
 }: PracticeQuestionProps) => {
   const [displaySidebar, setDisplaySidebar] = useState<"LEADERBOARD" | "USER_STATUS" | null>(null);
   const [loading, setLoading] = useState(true);
@@ -473,7 +473,7 @@ export const PracticeQuestion = ({
 
             <Tooltip title="Voice-based practice" placement="left">
               <IconButton
-                onClick={() => setEnabledAssistant(prev => !prev)}
+                onClick={onToggleAssistant}
                 sx={{
                   width: "56px",
                   height: "56px",

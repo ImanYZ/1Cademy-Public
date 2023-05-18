@@ -43,8 +43,8 @@ import { DashboardStudents } from "./DashboardStudents";
 // import { CoursesResult } from "../layouts/StudentsLayout";
 
 type DashboardWrapperProps = {
-  voiceAssistant: VoiceAssistant | null;
-  setVoiceAssistant: Dispatch<SetStateAction<VoiceAssistant | null>>;
+  voiceAssistant: VoiceAssistant;
+  setVoiceAssistant: Dispatch<SetStateAction<VoiceAssistant>>;
   user: User;
   onClose: () => void;
   openNodeHandler: (nodeId: string) => void;
@@ -93,6 +93,7 @@ export const DashboardWrapper = forwardRef<DashboardWrapperRef, DashboardWrapper
     onSelectAnswers: practiceToolRef.current ? practiceToolRef.current.onSelectAnswers : () => {},
     nextQuestion: practiceToolRef.current ? practiceToolRef.current.nextQuestion : () => {},
     getQuestionParents: practiceToolRef.current ? practiceToolRef.current.getQuestionParents : () => [],
+    getQuestionData: practiceToolRef.current ? practiceToolRef.current.getQuestionData : () => null,
   }));
 
   const semesterByStudentSnapthot = useCallback(

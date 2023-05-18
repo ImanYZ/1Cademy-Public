@@ -8,6 +8,7 @@ import { KnowledgeChoice } from "../../knowledgeTypes";
 import { getAnswersLettersOptions } from "../../lib/utils/assistant.utils";
 import {
   ANSWERING_ERROR,
+  ASSISTANT_IDLE,
   ASSISTANT_NEGATIVE_SENTENCES,
   ASSISTANT_POSITIVE_SENTENCES,
   CONFIRM_ERROR,
@@ -25,15 +26,15 @@ import { PracticeToolRef } from "../practiceTool/PracticeTool";
 const db = getFirestore();
 
 type AssistantProps = {
-  voiceAssistant: VoiceAssistant | null;
-  setVoiceAssistant: (value: SetStateAction<VoiceAssistant | null>) => void;
+  voiceAssistant: VoiceAssistant;
+  setVoiceAssistant: (value: SetStateAction<VoiceAssistant>) => void;
   openNodesOnNotebook: (notebookId: string, nodeIds: string[]) => Promise<void>;
   assistantRef: MutableRefObject<PracticeToolRef | null>;
   setDisplayDashboard: Dispatch<SetStateAction<boolean>>;
   selectedNotebookId: string;
   scrollToNode: (nodeId: string, regardless?: boolean, tries?: number) => void;
   setRootQuery: Dispatch<SetStateAction<string | undefined>>;
-  displayDashboard: boolean;
+  displayNotebook: boolean;
 };
 
 export const Assistant = ({
@@ -45,7 +46,7 @@ export const Assistant = ({
   selectedNotebookId,
   scrollToNode,
   setRootQuery,
-  displayDashboard,
+  displayNotebook,
 }: AssistantProps) => {
   /**
    * Assistant narrate after that listen
@@ -53,15 +54,20 @@ export const Assistant = ({
 
   const previousVoiceAssistant = useRef<VoiceAssistant | null>(null);
 
+  // 0. assistant idle, assistant doesn't nothing
+
   // 1. assistant will narrate
   useEffect(() => {
     const narrate = async () => {
-      if (previousVoiceAssistant.current && !voiceAssistant) {
+      //   if (voiceAssistant?.state === "IDLE") return;
+
+      if (previousVoiceAssistant.current?.state !== "IDLE" && voiceAssistant?.state === "IDLE") {
         window.speechSynthesis.cancel();
         const message = "Assistant stopped";
         await narrateLargeTexts(message);
+        // setVoiceAssistant(ASSISTANT_IDLE);
       }
-      previousVoiceAssistant.current = voiceAssistant;
+      //   previousVoiceAssistant.current = voiceAssistant;
 
       if (voiceAssistant?.state !== "NARRATE") return;
 
@@ -83,7 +89,7 @@ export const Assistant = ({
   // TODO: create use recognition and if for some readon is not detected answer create other recognition after some seconds to try again
   useEffect(() => {
     const listen = async () => {
-      previousVoiceAssistant.current = voiceAssistant;
+      //   previousVoiceAssistant.current = voiceAssistant;
       if (voiceAssistant?.state !== "LISTEN") return;
 
       const recognition = newRecognition(voiceAssistant.listenType as VoiceAssistantType);
@@ -145,7 +151,7 @@ export const Assistant = ({
         if ("stop" === transcript.toLowerCase()) {
           const message = "Assistant stopped";
           await narrateLargeTexts(message);
-          setVoiceAssistant(null);
+          setVoiceAssistant(ASSISTANT_IDLE);
           return;
         }
         // INFO: pause and resume is not possible because will work like
@@ -268,7 +274,7 @@ export const Assistant = ({
               message: `${assistantMessageBasedOnResultOfAnswer} ${feedbackForAnswers} ${feedbackToWrongChoice}` ?? "",
               answers: [],
               selectedAnswer: "",
-              date: "",
+              date: isCorrect ? CORRECT_ANSWER_REACTION : WRONG_ANSWER_REACTION,
               state: "NARRATE",
             });
           } else {
@@ -382,24 +388,72 @@ export const Assistant = ({
     voiceAssistant,
   ]);
 
-  if (!voiceAssistant) return null;
+  useEffect(() => {
+    previousVoiceAssistant.current = voiceAssistant;
+  }, [voiceAssistant]);
+
+  //   const practiceIsDisplayed = useMemo(() => {
+  //     return assistantRef.current && assistantRef.current.getQuestionData();
+  //   }, [assistantRef]);
+  // 3. assistant will react
+  //   useEffect(() => {
+  //     const assistantReactions = () => {
+  //       if (!voiceAssistant) return;
+  //       if (voiceAssistant?.state === "REACTION") return;
+
+  //       if (concecutiveCorrectAnswers === 3) {
+  //         setVoiceAssistant({ ...voiceAssistant, date: "reaction-sad" });
+  //       }
+
+  //       if (concecutiveWrongAnswers === 3) {
+  //         setVoiceAssistant({ ...voiceAssistant, date: "reaction-happy" });
+  //       }
+  //     };
+  //     assistantReactions();
+  //   }, [concecutiveCorrectAnswers, concecutiveWrongAnswers, setVoiceAssistant, voiceAssistant]);
 
   console.log("render");
+  //   if (!practiceIsDisplayed) return null;
+  //   if (!voiceAssistant) return null;
+
+  if (displayNotebook && voiceAssistant.state === "IDLE") return null;
+  if (voiceAssistant.state === "IDLE")
+    return (
+      <Box sx={{ width: "80px", height: "80px" }}>
+        {<RiveComponentMemoized src={IDLE_ANIMATION} artboard="New Artboard" animations="Timeline 1" autoplay={true} />}
+      </Box>
+    );
+
   return (
     <Tooltip
-      title={displayDashboard ? "" : 'To go back to practice, say "Continue practicing."'}
+      title={displayNotebook ? 'To go back to practice, say "Continue practicing."' : ""}
       placement="top"
       open={true}
     >
       <Box sx={{ width: "80px", height: "80px" }}>
-        {voiceAssistant.state === "NARRATE" && (
+        {voiceAssistant.state === "NARRATE" &&
+          ![CORRECT_ANSWER_REACTION, WRONG_ANSWER_REACTION].includes(voiceAssistant.date) && (
+            <RiveComponentMemoized
+              src={TALKING_ANIMATION}
+              artboard="New Artboard"
+              animations="Timeline 1"
+              autoplay={true}
+            />
+          )}
+
+        {voiceAssistant.state === "NARRATE" && voiceAssistant.date === CORRECT_ANSWER_REACTION && (
           <RiveComponentMemoized
-            src={TALKING_ANIMATION}
+            src={HAPPY_ANIMATION}
             artboard="New Artboard"
             animations="Timeline 1"
             autoplay={true}
           />
         )}
+
+        {voiceAssistant.state === "NARRATE" && voiceAssistant.date === WRONG_ANSWER_REACTION && (
+          <RiveComponentMemoized src={SAD_ANIMATION} artboard="New Artboard" animations="Timeline 1" autoplay={true} />
+        )}
+
         {voiceAssistant.state === "LISTEN" && (
           <RiveComponentMemoized
             src={LISTENING_ANIMATION}
@@ -413,9 +467,12 @@ export const Assistant = ({
   );
 };
 
-// const IDLE_ANIMATION = "/rive-voice-assistant/idle.riv";
+const IDLE_ANIMATION = "/rive-voice-assistant/idle.riv";
 const LISTENING_ANIMATION = "/rive-voice-assistant/listening.riv";
-// const HAPPY_ANIMATION = "/rive-voice-assistant/happy.riv";
-// const SAD_ANIMATION = "/rive-voice-assistant/sad.riv";
+const HAPPY_ANIMATION = "/rive-voice-assistant/happy.riv";
+const SAD_ANIMATION = "/rive-voice-assistant/sad.riv";
 // const SNORING_ANIMATION = "/rive-voice-assistant/snoring.riv";
 const TALKING_ANIMATION = "/rive-voice-assistant/talking.riv";
+
+const CORRECT_ANSWER_REACTION = "correct-answer";
+const WRONG_ANSWER_REACTION = "wrong-answer";

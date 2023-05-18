@@ -67,6 +67,7 @@ export type MappedData = {
 };
 
 export type CourseTag = {
+  currentSemester: unknown;
   documentId?: string;
   pTagId: string;
   pTitle: string;

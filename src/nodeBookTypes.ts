@@ -531,5 +531,5 @@ export type VoiceAssistant = {
   selectedAnswer: string;
   date: string;
   tagId: string;
-  state: "NARRATE" | "LISTEN";
+  state: "NARRATE" | "LISTEN" | "IDLE";
 };

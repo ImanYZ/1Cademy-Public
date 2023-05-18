@@ -1,5 +1,7 @@
 import { NodeType } from "src/types";
 
+import { VoiceAssistant } from "../../nodeBookTypes";
+
 export const ZINDEX = {
   assistant: 1500,
 };
@@ -134,3 +136,13 @@ public <command> = correct | yes;
 export const ANSWERING_ERROR = "Please only tell me a, b, c, d, or a combination of them, such as a-b, b-d, or a-c-d.";
 export const CONFIRM_ERROR = "Please only tell me yes or correct.";
 export const NEXT_ACTION_ERROR = "Please only tell me Next or Open Notebook.";
+
+export const ASSISTANT_IDLE: VoiceAssistant = {
+  state: "IDLE",
+  listenType: null,
+  message: "",
+  answers: [],
+  selectedAnswer: "",
+  date: "",
+  tagId: "",
+};

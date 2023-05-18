@@ -17,6 +17,7 @@ import { getSemesterById } from "../../client/serveless/semesters.serverless";
 import { CourseTag, SimpleQuestionNode } from "../../instructorsTypes";
 import { User } from "../../knowledgeTypes";
 import { Post } from "../../lib/mapApi";
+import { ASSISTANT_IDLE } from "../../lib/utils/constants";
 import { differentBetweenDays, getDateYYMMDDWithHyphens } from "../../lib/utils/date.utils";
 import { ICheckAnswerRequestParams } from "../../pages/api/checkAnswer";
 import CourseDetail from "./CourseDetail";
@@ -25,8 +26,8 @@ import { PracticeQuestion } from "./PracticeQuestion";
 import { UserStatus } from "./UserStatus";
 
 type PracticeToolProps = {
-  voiceAssistant: VoiceAssistant | null;
-  setVoiceAssistant: Dispatch<SetStateAction<VoiceAssistant | null>>;
+  voiceAssistant: VoiceAssistant;
+  setVoiceAssistant: Dispatch<SetStateAction<VoiceAssistant>>;
   user: User;
   root?: string;
   currentSemester: CourseTag;
@@ -58,6 +59,7 @@ export type PracticeToolRef = {
   onSubmitAnswer: (answers: boolean[]) => void;
   nextQuestion: () => void;
   getQuestionParents: () => string[];
+  getQuestionData: () => SimpleQuestionNode | null;
 };
 
 const PracticeTool = forwardRef<PracticeToolRef, PracticeToolProps>((props, ref) => {
@@ -81,7 +83,7 @@ const PracticeTool = forwardRef<PracticeToolRef, PracticeToolProps>((props, ref)
   const [semesterConfig, setSemesterConfig] = useState<ISemester | null>(null);
   const [submitAnswer, setSubmitAnswer] = useState(false);
   const [selectedAnswers, setSelectedAnswers] = useState<boolean[]>([]);
-  const [enabledAssistant, setEnabledAssistant] = useState(Boolean(voiceAssistant));
+  // const [enabledAssistant, setEnabledAssistant] = useState(Boolean(voiceAssistant));
   const onRunPracticeTool = useCallback(() => {
     (start: boolean) => {
       if (!practiceInfo) return;
@@ -125,6 +127,7 @@ const PracticeTool = forwardRef<PracticeToolRef, PracticeToolProps>((props, ref)
     onSelectAnswers: answers => setSelectedAnswers(answers),
     nextQuestion: getPracticeQuestion,
     getQuestionParents: () => questionData?.question.parents ?? [],
+    getQuestionData: () => questionData?.question ?? null,
   }));
 
   const onViewNodeOnNodeBook = (nodeId: string) => {
@@ -202,14 +205,21 @@ const PracticeTool = forwardRef<PracticeToolRef, PracticeToolProps>((props, ref)
     setStartPractice(true);
   }, [practiceInfo, root, semesterConfig]);
 
-  useEffect(() => {
-    const detectAssistantEnable = () => {
-      console.log("detectAssistantEnable", { enabledAssistant, questionData });
-      if (!enabledAssistant) return setVoiceAssistant(null);
-      if (!questionData) return;
+  // useEffect(() => {
+  //   const detectAssistantEnable = () => {};
 
+  //   detectAssistantEnable();
+  // }, [currentSemester.tagId, enabledAssistant, questionData, setVoiceAssistant]);
+
+  const onToggleAssistant = useCallback(() => {
+    console.log("onToggleAssistant", { questionData });
+    if (!questionData) return;
+
+    setVoiceAssistant(prev => {
+      // if (!prev) return ASSISTANT_IDLE;
+      if (prev?.state !== "IDLE") return ASSISTANT_IDLE;
       const choiceMessage = questionData.question.choices.map(cur => cur.choice.replace(".", ",")).join(". ");
-      setVoiceAssistant({
+      return {
         state: "NARRATE",
         listenType: "ANSWERING",
         message: `${questionData.question.title}. ${choiceMessage}`,
@@ -217,11 +227,28 @@ const PracticeTool = forwardRef<PracticeToolRef, PracticeToolProps>((props, ref)
         selectedAnswer: "",
         date: "",
         tagId: currentSemester.tagId,
-      });
-    };
+      };
+    });
+  }, [currentSemester.tagId, questionData, setVoiceAssistant]);
 
-    detectAssistantEnable();
-  }, [currentSemester.tagId, enabledAssistant, questionData, setVoiceAssistant]);
+  useEffect(() => {
+    if (!questionData) return;
+    if (!startPractice) return;
+    setVoiceAssistant(prev => {
+      // if (!prev) return ASSISTANT_IDLE;
+      if (prev?.state === "IDLE") return prev;
+      const choiceMessage = questionData.question.choices.map(cur => cur.choice.replace(".", ",")).join(". ");
+      return {
+        state: "NARRATE",
+        listenType: "ANSWERING",
+        message: `${questionData.question.title}. ${choiceMessage}`,
+        answers: questionData.question.choices,
+        selectedAnswer: "",
+        date: "",
+        tagId: currentSemester.tagId,
+      };
+    });
+  }, [currentSemester.tagId, questionData, setVoiceAssistant, startPractice]);
 
   return startPractice ? (
     <Box
@@ -249,8 +276,8 @@ const PracticeTool = forwardRef<PracticeToolRef, PracticeToolProps>((props, ref)
         setSubmitAnswer={setSubmitAnswer}
         selectedAnswers={selectedAnswers}
         setSelectedAnswers={setSelectedAnswers}
-        enabledAssistant={Boolean(voiceAssistant)}
-        setEnabledAssistant={setEnabledAssistant}
+        enabledAssistant={Boolean(voiceAssistant && voiceAssistant.state !== "IDLE")}
+        onToggleAssistant={onToggleAssistant}
       />
     </Box>
   ) : (
