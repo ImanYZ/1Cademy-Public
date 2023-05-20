@@ -526,12 +526,6 @@ export type UserTutorials = {
 export type VoiceAssistantType = "ANSWERING" | "CONFIRM" | "NEXT_ACTION" | "NOTEBOOK_ACTIONS" | null;
 
 export type VoiceAssistant = {
-  listenType: VoiceAssistantType;
-  message: string;
-  answers: KnowledgeChoice[];
-  selectedAnswer: string;
-  date: string;
   tagId: string;
-  state: "NARRATE" | "LISTEN" | "IDLE";
-  questionNode: SimpleQuestionNode | null;
+  questionNode: SimpleQuestionNode;
 };

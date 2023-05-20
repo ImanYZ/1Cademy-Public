@@ -97,7 +97,7 @@ import { useWorkerQueue } from "../hooks/useWorkerQueue";
 import { NodeChanges, ReputationSignal } from "../knowledgeTypes";
 import { idToken, retrieveAuthenticatedUser } from "../lib/firestoreClient/auth";
 import { Post, postWithToken } from "../lib/mapApi";
-import { ASSISTANT_IDLE, NO_USER_IMAGE, ZINDEX } from "../lib/utils/constants";
+import { NO_USER_IMAGE, ZINDEX } from "../lib/utils/constants";
 import { createGraph, dagreUtils } from "../lib/utils/dagre.util";
 import { devLog } from "../lib/utils/develop.util";
 import { getTypedCollections } from "../lib/utils/getTypedCollections";
@@ -368,7 +368,6 @@ const Notebook = ({}: NotebookProps) => {
   const [notebooks, setNotebooks] = useState<Notebook[]>([]);
   const [selectedNotebookId, setSelectedNotebookId] = useState("");
   const selectedPreviousNotebookIdRef = useRef("");
-  const [enabledAssistant, setEnabledAssistant] = useState(false);
 
   const onChangeTagOfNotebookById = (notebookId: string, data: { defaultTagId: string; defaultTagName: string }) => {
     setNotebooks(prev => {
@@ -653,13 +652,8 @@ const Notebook = ({}: NotebookProps) => {
   const [usersOnlineStatusLoaded, setUsersOnlineStatusLoaded] = useState(false);
   const [onlineUsers, setOnlineUsers] = useState<string[]>([]);
 
-  // state to handle assistant listening
-  // const [voiceAssistantUpdates, setVoiceAssistantUpdates] = useState({
-  //   updated: new Date(),
-  // });
-  const [voiceAssistant, setVoiceAssistant] = useState<VoiceAssistant>(ASSISTANT_IDLE);
-  const enabledAssistantRef = useRef<boolean>(false);
-  // const prevVoiceAssistant = usePrevious(voiceAssistant);
+  const [voiceAssistant, setVoiceAssistant] = useState<VoiceAssistant | null>(null);
+  const [startPractice, setStartPractice] = useState(false);
 
   const assistantRef = useRef<DashboardWrapperRef | null>(null);
 
@@ -6325,7 +6319,7 @@ const Notebook = ({}: NotebookProps) => {
             setRootQuery={setRootQuery}
             setVoiceAssistant={setVoiceAssistant}
             displayNotebook={!displayDashboard}
-            enabledAssistantRef={enabledAssistantRef}
+            startPractice={startPractice}
           />
         </Box>
         {/* )} */}
@@ -6638,14 +6632,13 @@ const Notebook = ({}: NotebookProps) => {
                 setRootQuery(undefined);
                 setDisplayDashboard(false);
                 router.replace(router.pathname);
-                setVoiceAssistant(ASSISTANT_IDLE);
+                setVoiceAssistant(null);
               }}
               openNodeHandler={openNodeHandler}
               sx={{ position: "absolute", inset: "0px", zIndex: 999 }}
               root={rootQuery}
-              enabledAssistant={enabledAssistant}
-              setEnabledAssistant={setEnabledAssistant}
-              enabledAssistantRef={enabledAssistantRef}
+              startPractice={startPractice}
+              setStartPractice={setStartPractice}
             />
           )}
 

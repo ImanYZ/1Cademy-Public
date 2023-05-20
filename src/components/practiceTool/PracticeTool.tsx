@@ -17,7 +17,6 @@ import { getSemesterById } from "../../client/serveless/semesters.serverless";
 import { CourseTag, SimpleQuestionNode } from "../../instructorsTypes";
 import { User } from "../../knowledgeTypes";
 import { Post } from "../../lib/mapApi";
-import { ASSISTANT_IDLE } from "../../lib/utils/constants";
 import { differentBetweenDays, getDateYYMMDDWithHyphens } from "../../lib/utils/date.utils";
 import { ICheckAnswerRequestParams } from "../../pages/api/checkAnswer";
 import CourseDetail from "./CourseDetail";
@@ -26,18 +25,15 @@ import { PracticeQuestion } from "./PracticeQuestion";
 import { UserStatus } from "./UserStatus";
 
 type PracticeToolProps = {
-  voiceAssistant: VoiceAssistant;
-  setVoiceAssistant: Dispatch<SetStateAction<VoiceAssistant>>;
+  voiceAssistant: VoiceAssistant | null;
+  setVoiceAssistant: Dispatch<SetStateAction<VoiceAssistant | null>>;
   user: User;
   root?: string;
   currentSemester: CourseTag;
   onClose: () => void;
   openNodeHandler: (nodeId: string) => void;
-  enabledAssistant: boolean;
-  setEnabledAssistant: Dispatch<SetStateAction<boolean>>;
-  enabledAssistantRef: {
-    current: boolean;
-  };
+  startPractice: boolean;
+  setStartPractice: Dispatch<SetStateAction<boolean>>;
 };
 
 export type PracticeInfo = {
@@ -71,17 +67,16 @@ const PracticeTool = forwardRef<PracticeToolRef, PracticeToolProps>((props, ref)
     voiceAssistant,
     setVoiceAssistant,
     user,
-    currentSemester,
-    openNodeHandler,
-    onClose,
     root,
-    enabledAssistantRef,
-    // enabledAssistant,
-    // setEnabledAssistant,
+    currentSemester,
+    onClose,
+    openNodeHandler,
+    startPractice,
+    setStartPractice,
   } = props;
   console.log({ currentSemester });
   const db = getFirestore();
-  const [startPractice, setStartPractice] = useState(false);
+  // const [startPractice, setStartPractice] = useState(false);
   const [questionData, setQuestionData] = useState<{ question: SimpleQuestionNode; flashcardId: string } | null>(null);
   const [practiceIsCompleted, setPracticeIsCompleted] = useState(false);
   const [practiceInfo, setPracticeInfo] = useState<PracticeInfo>(DEFAULT_PRACTICE_INFO);
@@ -89,21 +84,20 @@ const PracticeTool = forwardRef<PracticeToolRef, PracticeToolProps>((props, ref)
   const [submitAnswer, setSubmitAnswer] = useState(false);
   const [selectedAnswers, setSelectedAnswers] = useState<boolean[]>([]);
   const [narratedAnswerIdx, setNarratedAnswerIdx] = useState(-1); // -1: nothing is selected
+
   const onRunPracticeTool = useCallback(() => {
     (start: boolean) => {
       if (!practiceInfo) return;
 
       setStartPractice(start);
     };
-  }, [practiceInfo]);
+  }, [practiceInfo, setStartPractice]);
 
   const onSubmitAnswer = useCallback(
     async (answers: boolean[]) => {
       if (!questionData) return;
 
-      console.log("onSubmitAnswer", answers);
       setSubmitAnswer(true);
-
       const payload: ICheckAnswerRequestParams = {
         answers,
         flashcardId: questionData.flashcardId,
@@ -209,38 +203,15 @@ const PracticeTool = forwardRef<PracticeToolRef, PracticeToolProps>((props, ref)
     if (!root) return;
 
     setStartPractice(true);
-  }, [practiceInfo, root, semesterConfig]);
-
-  // useEffect(() => {
-  //   const detectAssistantEnable = () => {};
-
-  //   detectAssistantEnable();
-  // }, [currentSemester.tagId, enabledAssistant, questionData, setVoiceAssistant]);
+  }, [practiceInfo, root, semesterConfig, setStartPractice]);
 
   const onToggleAssistant = useCallback(() => {
     console.log("onToggleAssistant", { questionData });
     if (!questionData) return;
 
     setVoiceAssistant(prev => {
-      // if (!prev) return ASSISTANT_IDLE;
-      if (prev?.state !== "IDLE") {
-        enabledAssistantRef.current = false;
-        return ASSISTANT_IDLE;
-      }
-      enabledAssistantRef.current = true;
-      const choiceMessage = questionData.question.choices
-        .map(cur => cur.choice.replace(/^a\./, "ae.").replace(".", ","))
-        .join(". ");
-      return {
-        state: "NARRATE",
-        listenType: "ANSWERING",
-        message: `${questionData.question.title}. ${choiceMessage}`,
-        answers: questionData.question.choices,
-        selectedAnswer: "",
-        date: "from-assistant-start",
-        tagId: currentSemester.tagId,
-        questionNode: questionData.question,
-      };
+      if (prev) return null;
+      return { tagId: currentSemester.tagId, questionNode: questionData.question };
     });
   }, [currentSemester.tagId, questionData, setVoiceAssistant]);
 
@@ -249,23 +220,14 @@ const PracticeTool = forwardRef<PracticeToolRef, PracticeToolProps>((props, ref)
     if (!questionData) return;
     if (!startPractice) return;
     setVoiceAssistant(prev => {
-      // if (!prev) return ASSISTANT_IDLE;
-      if (prev?.state === "IDLE") return prev;
-      const choiceMessage = questionData.question.choices
-        .map(cur => cur.choice.replace(/^a\./, "ae.").replace(".", ","))
-        .join(". ");
-      return {
-        state: "NARRATE",
-        listenType: "ANSWERING",
-        message: `${questionData.question.title}. ${choiceMessage}`,
-        answers: questionData.question.choices,
-        selectedAnswer: "",
-        date: "from-assistant-start",
-        tagId: currentSemester.tagId,
-        questionNode: questionData.question,
-      };
+      if (!prev) return prev; // if practice voice only is disable, we keep disable
+      return { tagId: currentSemester.tagId, questionNode: questionData.question };
     });
   }, [currentSemester.tagId, questionData, setVoiceAssistant, startPractice]);
+
+  useEffect(() => {
+    return () => setStartPractice(false);
+  }, [setStartPractice]);
 
   return startPractice ? (
     <Box
@@ -293,7 +255,7 @@ const PracticeTool = forwardRef<PracticeToolRef, PracticeToolProps>((props, ref)
         setSubmitAnswer={setSubmitAnswer}
         selectedAnswers={selectedAnswers}
         setSelectedAnswers={setSelectedAnswers}
-        enabledAssistant={Boolean(voiceAssistant && voiceAssistant.state !== "IDLE")}
+        enabledAssistant={Boolean(voiceAssistant)}
         onToggleAssistant={onToggleAssistant}
         narratedAnswerIdx={narratedAnswerIdx}
       />
