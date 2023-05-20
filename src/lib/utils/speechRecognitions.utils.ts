@@ -104,3 +104,38 @@ export const recognizeInput = async (
     };
   });
 };
+
+export const recognizeInput2 = async (
+  recognition: SpeechRecognition
+): Promise<{ transcript: string; error: string; nomatch: boolean } | undefined> => {
+  // const recognition = newRecognition(listenType);
+  // if (!recognition) return;
+
+  return new Promise(resolve => {
+    const recogniseResponse = {
+      transcript: "",
+      error: "",
+      nomatch: false,
+    };
+    recognition.abort();
+    recognition.stop();
+    // recognition.
+    recognition.start();
+
+    recognition.onresult = (event: any) => {
+      recogniseResponse.transcript = event.results?.[0]?.[0]?.transcript || "";
+    };
+
+    recognition.onerror = (event: any) => {
+      recogniseResponse.error = event.error;
+    };
+
+    recognition.onnomatch = () => {
+      recogniseResponse.nomatch = true;
+    };
+
+    recognition.onend = () => {
+      resolve(recogniseResponse);
+    };
+  });
+};
