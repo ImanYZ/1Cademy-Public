@@ -149,18 +149,45 @@ export const Assistant = ({
       let preTranscriptProcessed = "";
       let listenType: VoiceAssistantType = "ANSWERING";
       askingRef.current = true;
+      originState.current = "narrate-question";
       while (askingRef.current) {
         console.log("👉 1. narrate", { message, preMessage, preTranscriptProcessed, origin, listenType });
+
         setAssistantState("NARRATE");
-        const textToNarrate = `${preMessage} ${message}`;
-        const { narratorPromise, abortPromise } = narrateLargeTexts(textToNarrate);
-        abortNarratorPromise.current = abortPromise;
-        const res = await narratorPromise();
-        if (!res) break;
-        console.log(3);
+        if (listenType === "ANSWERING" && originState.current === "narrate-question") {
+          if (!assistantRef.current) return console.log("cant execute operations with assistantRef");
+
+          const { narratorPromise, abortPromise } = narrateLargeTexts(questionNode.title);
+          abortNarratorPromise.current = abortPromise;
+          const res = await narratorPromise();
+          if (!res) break;
+          // await narrateLargeTexts( voiceAssistant.questionNode.title);
+          let stopNarration = false;
+          for (let i = 0; i < questionNode.choices.length; i++) {
+            // if (assistantRef.current) return assistantRef.current.onSelectedQuestionAnswer(-1);
+            const choice = questionNode.choices[i];
+            assistantRef.current.onSelectedQuestionAnswer(i);
+            // await narrateLargeTexts(choice.choice);
+            const { narratorPromise, abortPromise } = narrateLargeTexts(choice.choice);
+            abortNarratorPromise.current = abortPromise;
+            const res = await narratorPromise();
+            if (!res) {
+              stopNarration = true;
+              break;
+            }
+          }
+
+          if (stopNarration) break;
+          assistantRef.current.onSelectedQuestionAnswer(-1);
+        } else {
+          const textToNarrate = `${preMessage} ${message}`;
+          const { narratorPromise, abortPromise } = narrateLargeTexts(textToNarrate);
+          abortNarratorPromise.current = abortPromise;
+          const res = await narratorPromise();
+          if (!res) break;
+        }
         if (!askingRef.current) break; // should finish without make nothing
 
-        console.log(4);
         console.log("👉 2. listen", { message, preMessage, preTranscriptProcessed, origin, listenType });
 
         setAssistantState("LISTEN");
@@ -202,7 +229,7 @@ export const Assistant = ({
           message = getMessageFromQuestionNode(questionNode);
           listenType = "ANSWERING";
           preMessage = "";
-          originState.current = "";
+          originState.current = "narrate-question";
           continue;
         }
 
@@ -351,13 +378,10 @@ export const Assistant = ({
     run();
   }, [askQuestion, stopAssistant, voiceAssistant]);
 
-  if (displayNotebook && !voiceAssistant && !startPractice) return null;
-  if (!displayNotebook && !voiceAssistant && startPractice)
-    return (
-      <Box sx={{ width: "80px", height: "80px" }}>
-        {<RiveComponentMemoized src={IDLE_ANIMATION} artboard="New Artboard" animations="Timeline 1" autoplay={true} />}
-      </Box>
-    );
+  console.log("->", { displayNotebook, voiceAssistant, startPractice, assistantReactionMemo });
+
+  if (!voiceAssistant && !startPractice) return null;
+  console.log("->", 1);
 
   return (
     <Tooltip
@@ -395,6 +419,10 @@ export const Assistant = ({
             animations="Timeline 1"
             autoplay={true}
           />
+        )}
+
+        {assistantReactionMemo === "IDLE" && (
+          <RiveComponentMemoized src={IDLE_ANIMATION} artboard="New Artboard" animations="Timeline 1" autoplay={true} />
         )}
       </Box>
     </Tooltip>
