@@ -38,21 +38,15 @@ import { DashboradToolbar } from "../Dashobard/DashboradToolbar";
 import { Dashboard } from "./Dashboard";
 import { DashboardSettings } from "./DashboardSettings";
 import { DashboardStudents } from "./DashboardStudents";
-// import { Semester } from "../../instructorsTypes";
-// import { ICourseTag } from "../../types/ICourse";
-// import { CoursesResult } from "../layouts/StudentsLayout";
 
 type DashboardWrapperProps = {
-  voiceAssistant: VoiceAssistant;
-  setVoiceAssistant: Dispatch<SetStateAction<VoiceAssistant>>;
+  voiceAssistant: VoiceAssistant | null;
+  setVoiceAssistant: Dispatch<SetStateAction<VoiceAssistant | null>>;
   user: User;
   onClose: () => void;
   openNodeHandler: (nodeId: string) => void;
-  enabledAssistant: boolean;
-  setEnabledAssistant: Dispatch<SetStateAction<boolean>>;
-  enabledAssistantRef: {
-    current: boolean;
-  };
+  startPractice: boolean;
+  setStartPractice: Dispatch<SetStateAction<boolean>>;
   root?: string;
   sx?: SxProps<Theme>;
 };
@@ -70,9 +64,8 @@ export const DashboardWrapper = forwardRef<DashboardWrapperRef, DashboardWrapper
     onClose,
     root,
     sx,
-    enabledAssistant,
-    setEnabledAssistant,
-    enabledAssistantRef,
+    startPractice,
+    setStartPractice,
   } = props;
   const db = getFirestore();
 
@@ -98,6 +91,7 @@ export const DashboardWrapper = forwardRef<DashboardWrapperRef, DashboardWrapper
     nextQuestion: practiceToolRef.current ? practiceToolRef.current.nextQuestion : () => {},
     getQuestionParents: practiceToolRef.current ? practiceToolRef.current.getQuestionParents : () => [],
     getQuestionData: practiceToolRef.current ? practiceToolRef.current.getQuestionData : () => null,
+    onSelectedQuestionAnswer: practiceToolRef.current ? practiceToolRef.current.onSelectedQuestionAnswer : () => {},
   }));
 
   const semesterByStudentSnapthot = useCallback(
@@ -315,9 +309,8 @@ export const DashboardWrapper = forwardRef<DashboardWrapperRef, DashboardWrapper
                 onClose={onClose}
                 openNodeHandler={openNodeHandler}
                 root={rootFound ? root : undefined}
-                enabledAssistant={enabledAssistant}
-                setEnabledAssistant={setEnabledAssistant}
-                enabledAssistantRef={enabledAssistantRef}
+                startPractice={startPractice}
+                setStartPractice={setStartPractice}
               />
             )}
             {selectToolbarView === "SETTINGS" && <DashboardSettings currentSemester={currentSemester} />}

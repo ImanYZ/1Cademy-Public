@@ -200,10 +200,10 @@ const ProposalsList = ({ username, ...props }: ProposalsListProps) => {
                         }}
                       >
                         <ContainedButton
-                          title="Click if you find this proposal Unhelpful."
+                          title="Click if you find this proposal helpful."
                           onClick={(e: any) => {
                             e.stopPropagation();
-                            rateProposalClick(e, proposal, proposalIdx, false, true, false);
+                            rateProposalClick(e, proposal, proposalIdx, true, false, false);
                           }}
                           sx={{
                             borderRadius: "52px 0px 0px 52px",
@@ -235,10 +235,10 @@ const ProposalsList = ({ username, ...props }: ProposalsListProps) => {
                           sx={{ borderColor: theme => (theme.palette.mode === "dark" ? "#D3D3D3" : "inherit") }}
                         />
                         <ContainedButton
-                          title="Click if you find this proposal helpful."
+                          title="Click if you find this proposal Unhelpful."
                           onClick={(e: any) => {
                             e.stopPropagation();
-                            rateProposalClick(e, proposal, proposalIdx, true, false, false);
+                            rateProposalClick(e, proposal, proposalIdx, false, true, false);
                           }}
                           sx={{
                             borderRadius: "0px",

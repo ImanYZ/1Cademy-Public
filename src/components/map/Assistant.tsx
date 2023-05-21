@@ -1,23 +1,31 @@
 import { Box, Tooltip } from "@mui/material";
 import { getFirestore } from "firebase/firestore";
-import React, { Dispatch, MutableRefObject, SetStateAction, useEffect, useMemo, useState } from "react";
-
-import usePrevious from "@/hooks/usePrevious";
+import React, {
+  Dispatch,
+  MutableRefObject,
+  SetStateAction,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 
 import { getNode } from "../../client/serveless/nodes.serveless";
 import { detectElements } from "../../hooks/detectElements";
+import { SimpleQuestionNode } from "../../instructorsTypes";
 import { KnowledgeChoice } from "../../knowledgeTypes";
 import { getAnswersLettersOptions } from "../../lib/utils/assistant.utils";
 import {
   ANSWERING_ERROR,
-  ASSISTANT_IDLE,
   ASSISTANT_NEGATIVE_SENTENCES,
   ASSISTANT_POSITIVE_SENTENCES,
   CONFIRM_ERROR,
   NEXT_ACTION_ERROR,
+  OPEN_PRACTICE_ERROR,
   QUESTION_OPTIONS,
 } from "../../lib/utils/constants";
-import { getValidABCDOptions, recognizeInput } from "../../lib/utils/speechRecognitions.utils";
+import { getValidABCDOptions, newRecognition, recognizeInput2 } from "../../lib/utils/speechRecognitions.utils";
 import { getTextSplittedByCharacter } from "../../lib/utils/string.utils";
 import { Node, VoiceAssistant, VoiceAssistantType } from "../../nodeBookTypes";
 import { narrateLargeTexts } from "../../utils/helpers";
@@ -29,9 +37,10 @@ const db = getFirestore();
 
 type AssistantReaction = "IDLE" | "LISTENING" | "HAPPY" | "SAD" | /* "SNORING" | */ "TALKING";
 
+type SelectedAnswer = { choice: KnowledgeChoice; option: string };
 type AssistantProps = {
-  voiceAssistant: VoiceAssistant;
-  setVoiceAssistant: (value: SetStateAction<VoiceAssistant>) => void;
+  voiceAssistant: VoiceAssistant | null;
+  setVoiceAssistant: (value: SetStateAction<VoiceAssistant | null>) => void;
   openNodesOnNotebook: (notebookId: string, nodeIds: string[]) => Promise<void>;
   assistantRef: MutableRefObject<PracticeToolRef | null>;
   setDisplayDashboard: Dispatch<SetStateAction<boolean>>;
@@ -39,14 +48,12 @@ type AssistantProps = {
   scrollToNode: (nodeId: string, regardless?: boolean, tries?: number) => void;
   setRootQuery: Dispatch<SetStateAction<string | undefined>>;
   displayNotebook: boolean;
-  enabledAssistantRef: {
-    current: boolean;
-  };
+  startPractice: boolean;
 };
 
 export const Assistant = ({
-  voiceAssistant,
   setVoiceAssistant,
+  voiceAssistant,
   openNodesOnNotebook,
   assistantRef,
   setDisplayDashboard,
@@ -54,332 +61,327 @@ export const Assistant = ({
   scrollToNode,
   setRootQuery,
   displayNotebook,
-  enabledAssistantRef,
+  startPractice,
 }: AssistantProps) => {
   /**
    * Assistant narrate after that listen
+   * there is only 1 narrate and 1 listener
+   * the narration is a promise and should be aborted when stop assistant
    */
 
-  const previousVoiceAssistant = usePrevious(voiceAssistant);
+  const previousVoiceAssistant = useRef<VoiceAssistant | null>(voiceAssistant);
+  const [assistantState, setAssistantState] = useState<"IDLE" | "LISTEN" | "NARRATE">("IDLE");
   const [forceAssistantReaction, setForceAssistantReaction] = useState<AssistantReaction | "">("");
 
-  const assistantReaction: AssistantReaction = useMemo(() => {
+  const askingRef = useRef<boolean>(false);
+  const speechRef = useRef<SpeechRecognition | null>(newRecognition());
+  const abortNarratorPromise = useRef<(() => void) | null>(null);
+  const originState = useRef("");
+
+  const assistantReactionMemo: AssistantReaction = useMemo(() => {
     if (forceAssistantReaction) return forceAssistantReaction;
-    if (voiceAssistant.state === "LISTEN") return "LISTENING";
-    if (
-      voiceAssistant.state === "NARRATE" &&
-      ![CORRECT_ANSWER_REACTION, WRONG_ANSWER_REACTION].includes(voiceAssistant.date)
-    )
+    if (assistantState === "LISTEN") return "LISTENING";
+    if (assistantState === "NARRATE" && ![CORRECT_ANSWER_REACTION, WRONG_ANSWER_REACTION].includes(originState.current))
       return "TALKING";
-    if (voiceAssistant.state === "NARRATE" && voiceAssistant.date === CORRECT_ANSWER_REACTION) return "HAPPY";
-    if (voiceAssistant.state === "NARRATE" && voiceAssistant.date === WRONG_ANSWER_REACTION) return "SAD";
+    if (assistantState === "NARRATE" && originState.current === CORRECT_ANSWER_REACTION) return "HAPPY";
+    if (assistantState === "NARRATE" && originState.current === WRONG_ANSWER_REACTION) return "SAD";
     return "IDLE";
-  }, [forceAssistantReaction, voiceAssistant.date, voiceAssistant.state]);
+  }, [assistantState, forceAssistantReaction]);
 
-  // 0. assistant idle, assistant doesn't nothing
+  const getNoMatchPreviousMessage = (listenType: VoiceAssistantType) => {
+    let message = "Sorry, I didn't get your choices.";
+    if (listenType === "CONFIRM") message += CONFIRM_ERROR;
+    if (listenType === "ANSWERING") message += ANSWERING_ERROR;
+    if (listenType === "NEXT_ACTION") message += NEXT_ACTION_ERROR;
+    if (listenType === "NOTEBOOK_ACTIONS") message += OPEN_PRACTICE_ERROR;
+    return message;
+  };
 
-  // 1. assistant will narrate
-  useEffect(() => {
-    const narrate = async () => {
-      if (previousVoiceAssistant?.state !== "IDLE" && voiceAssistant?.state === "IDLE" && voiceAssistant) {
-        window.speechSynthesis.cancel();
-        const message = "Assistant stopped";
-        await narrateLargeTexts(message);
-      }
+  const getTranscriptProcessed = (transcript: string, listenType: VoiceAssistantType) => {
+    // here process the transcript to correct most possible transcript value
+    let possibleTranscript: string | null = null;
+    if (listenType === "ANSWERING") possibleTranscript = getValidABCDOptions(transcript); // if is answering and is valid, we use directly
 
-      if (voiceAssistant?.state !== "NARRATE") return;
+    const transcriptProcessed =
+      possibleTranscript ??
+      MapSentences[transcript] ??
+      transcript
+        .split(" ")
+        .map(cur => (cur.length === 1 ? cur : MapWords[cur] ?? ""))
+        .filter(cur => cur.length === 1)
+        .join("");
+    return transcriptProcessed;
+  };
 
-      console.log("👉 1. assistant:narrate", { message: voiceAssistant.message });
+  const getMessageFromQuestionNode = (questionNode: SimpleQuestionNode) => {
+    const choiceMessage = questionNode.choices
+      .map(cur => cur.choice.replace(/^a\./, "ae.").replace(".", ","))
+      .join(". ");
+    return `${questionNode.title}. ${choiceMessage}`;
+  };
 
-      if (voiceAssistant.date === "from-error") {
-        const message = "Sorry, I cannot detect speech, lets try again.";
-        await narrateLargeTexts(message);
-        if (!enabledAssistantRef.current) return;
-        setVoiceAssistant({ ...voiceAssistant, state: "LISTEN", date: "" });
-        return;
-      }
-      console.log("Confirmation Started");
-      await narrateLargeTexts(voiceAssistant.message);
-      console.log("Confirmation Problem");
-      if (!enabledAssistantRef.current) return;
-      setVoiceAssistant({ ...voiceAssistant, state: "LISTEN" });
-    };
-    narrate();
-    // prevVoiceAssistant, don't add this on dependencies, this is a ref
-  }, [setVoiceAssistant, voiceAssistant]);
+  const stopAssistant = useCallback(async (narrateStop: boolean) => {
+    console.log("stopAssistant");
+    // narrate stop only when assistant is stopped by user (by voice or button)
+    window.speechSynthesis.cancel();
+    if (abortNarratorPromise.current) {
+      console.log("will abort");
+      abortNarratorPromise.current();
+    }
+    if (narrateStop) {
+      const { narratorPromise, abortPromise } = narrateLargeTexts("Assistant stopped");
+      abortNarratorPromise.current = abortPromise;
+      await narratorPromise();
+      abortPromise();
+    }
+    askingRef.current = false;
+    setAssistantState("IDLE");
+    if (speechRef.current) speechRef.current?.abort();
+  }, []);
 
-  // 2. assistant will listen
-  // TODO: create use recognition and if for some readon is not detected answer create other recognition after some seconds to try again
-  useEffect(() => {
-    const listen = async () => {
-      if (voiceAssistant?.state !== "LISTEN") return;
+  const askQuestion = useCallback(
+    async ({ questionNode, tagId }: VoiceAssistant) => {
+      if (!speechRef.current)
+        return console.warn("Speech recognition doesn't exist on this browser, install last version of Chrome browser");
 
-      console.log("👉 2. assistant:listen", { voiceAssistant });
-      const recognitionResult = await recognizeInput(voiceAssistant.listenType as VoiceAssistantType);
-      if (!recognitionResult) {
-        console.error("This browser doesn't support speech recognition, install last version of chrome browser please");
-        return;
-      }
+      let message = getMessageFromQuestionNode(questionNode);
+      let preMessage = ""; // used add a previous message for example , "sorry I don't understand"
+      let preTranscriptProcessed = "";
+      let listenType: VoiceAssistantType = "ANSWERING";
+      askingRef.current = true;
+      originState.current = "narrate-question";
+      while (askingRef.current) {
+        console.log("👉 1. narrate", { message, preMessage, preTranscriptProcessed, origin, listenType });
 
-      if (recognitionResult.error) {
-        console.log("onerror", recognitionResult.error);
-        if (!enabledAssistantRef.current) return;
-        setVoiceAssistant({
-          ...voiceAssistant,
-          date: "from-error",
-          message: voiceAssistant.listenType === "NEXT_ACTION" ? "" : voiceAssistant.message,
-          state: "NARRATE",
-        });
-        return;
-      }
+        setAssistantState("NARRATE");
+        if (listenType === "ANSWERING" && originState.current === "narrate-question") {
+          if (!assistantRef.current) return console.log("cant execute operations with assistantRef");
 
-      if (recognitionResult.nomatch) {
-        console.log("onnomatch");
-        let message = "Sorry, I didn't get your choices.";
-        if (voiceAssistant.listenType === "CONFIRM") message += CONFIRM_ERROR;
-        if (voiceAssistant.listenType === "ANSWERING") message += ANSWERING_ERROR;
-        if (voiceAssistant.listenType === "NEXT_ACTION") message += NEXT_ACTION_ERROR;
-
-        await narrateLargeTexts(message);
-        if (!enabledAssistantRef.current) return;
-        setVoiceAssistant({
-          ...voiceAssistant,
-          date: new Date().toISOString(),
-          message: voiceAssistant.listenType === "NEXT_ACTION" ? "" : voiceAssistant.message,
-          state: "NARRATE",
-        });
-        return;
-      }
-
-      const transcript = recognitionResult.transcript.toLowerCase();
-      console.log("----> result", { transcript });
-
-      // ------------------------------------
-      // here call directly important commands
-
-      if ("repeat question" === transcript) {
-        if (!enabledAssistantRef.current) return;
-        setVoiceAssistant({
-          ...voiceAssistant,
-          listenType: "ANSWERING",
-          selectedAnswer: "",
-          state: "NARRATE",
-        });
-        return;
-      }
-      if ("stop" === transcript) {
-        const message = "Assistant stopped";
-        await narrateLargeTexts(message);
-        enabledAssistantRef.current = false;
-        setVoiceAssistant(ASSISTANT_IDLE);
-        return;
-      }
-      // INFO: pause and resume is not possible because will work like
-      //       and infinity loop waiting on silence until user tell resume
-      //       that need to executed into useEffect so render will be called in every iteration
-
-      // ------------------------------------
-      // here process the transcript to correct most possible transcript value
-      let possibleTranscript: string | null = null;
-      if (voiceAssistant.listenType === "ANSWERING") possibleTranscript = getValidABCDOptions(transcript); // if is answering and is valid, we use directly
-
-      const transcriptProcessed =
-        possibleTranscript ??
-        MapSentences[transcript] ??
-        transcript
-          .split(" ")
-          .map(cur => (cur.length === 1 ? cur : MapWords[cur] ?? ""))
-          .filter(cur => cur.length === 1)
-          .join("");
-      console.log("--->", { transcriptProcessed });
-
-      // no valid answers will ask again the same question
-      if (!transcriptProcessed && voiceAssistant.listenType !== "CONFIRM") {
-        console.log("No transcription", voiceAssistant.listenType);
-        let message = "Sorry, I didn't get your choices.";
-        if (voiceAssistant.listenType === "ANSWERING") message += ANSWERING_ERROR;
-        if (voiceAssistant.listenType === "NEXT_ACTION") message += NEXT_ACTION_ERROR;
-
-        await narrateLargeTexts(message);
-        if (!enabledAssistantRef.current) return;
-        setVoiceAssistant({ ...voiceAssistant, date: "from-empty transcript", message, state: "NARRATE" });
-        return;
-      }
-
-      // actions according the flow
-      if (voiceAssistant.listenType === "ANSWERING") {
-        if (!assistantRef.current) return;
-        // transcriptProcessed:"bc"
-        // possibleOptions: "abcd"
-        const possibleOptions = QUESTION_OPTIONS.slice(0, voiceAssistant.answers.length);
-        const answerIsValid = Array.from(transcriptProcessed).reduce(
-          (acu, cur) => acu && possibleOptions.includes(cur),
-          true
-        );
-        console.log("assistantActions:ANSWERING", { possibleOptions, transcriptProcessed, answerIsValid });
-        if (!answerIsValid) {
-          const message = ANSWERING_ERROR;
-          setVoiceAssistant({
-            ...voiceAssistant,
-            listenType: "ANSWERING",
-            message,
-            selectedAnswer: "",
-            state: "NARRATE",
-          });
-          return;
-        }
-
-        // const message =`You have selected a, b and c. Is this correct?`
-
-        const submitOptions = getAnswersLettersOptions(transcriptProcessed, voiceAssistant.answers.length);
-        assistantRef.current.onSelectAnswers(submitOptions);
-        const message = `You have selected ${getTextSplittedByCharacter(transcriptProcessed, "-")}. Is this correct?`;
-        if (!enabledAssistantRef.current) return;
-        setVoiceAssistant({
-          ...voiceAssistant,
-          listenType: "CONFIRM",
-          message,
-          selectedAnswer: transcriptProcessed,
-          state: "NARRATE",
-        });
-        return;
-      }
-      if (voiceAssistant.listenType === "CONFIRM") {
-        console.log("assistantActions:CONFIRM");
-        if (["y"].includes(transcriptProcessed)) {
-          const submitOptions = getAnswersLettersOptions(voiceAssistant.selectedAnswer, voiceAssistant.answers.length);
-          const correctOptionsProcessed: { choice: KnowledgeChoice; option: string }[] = voiceAssistant.answers
-            .reduce(
-              (acu: { choice: KnowledgeChoice; option: string }[], cur, idx) => [
-                ...acu,
-                { choice: cur, option: QUESTION_OPTIONS[idx] },
-              ],
-              []
-            )
-            .filter(cur => cur.choice.correct);
-
-          const isCorrect = voiceAssistant.answers.reduce(
-            (acu, cur, idx) => acu && submitOptions[idx] === cur.correct,
-            true
-          );
-          const selectedAnswer: { choice: KnowledgeChoice; option: string }[] = voiceAssistant.answers.reduce(
-            (acu: { choice: KnowledgeChoice; option: string }[], cur, idx) => {
-              const answer = voiceAssistant.selectedAnswer.includes(QUESTION_OPTIONS[idx])
-                ? { choice: cur, option: QUESTION_OPTIONS[idx] }
-                : null;
-              return answer ? [...acu, answer] : acu;
-            },
-            []
-          );
-          console.log({ selectedAnswer });
-          const feedbackForAnswers = selectedAnswer
-            .map(cur => `You selected option ${cur.option}: ${cur.choice.feedback}`)
-            .join(". ");
-          const possibleAssistantMessages = isCorrect ? ASSISTANT_POSITIVE_SENTENCES : ASSISTANT_NEGATIVE_SENTENCES;
-          const randomMessageIndex = Math.floor(Math.random() * possibleAssistantMessages.length);
-          const assistantMessageBasedOnResultOfAnswer = possibleAssistantMessages[randomMessageIndex];
-          assistantRef.current?.onSubmitAnswer(submitOptions);
-
-          const feedbackToWrongChoice = !isCorrect
-            ? `The correct choice${correctOptionsProcessed.length > 1 ? "s are" : " is"} ${correctOptionsProcessed
-                .map(c => `${c.option}: ${c.choice.feedback}`)
-                .join(" ")}`
-            : "";
-          setVoiceAssistant({
-            ...voiceAssistant,
-            listenType: "NEXT_ACTION",
-            message: `${assistantMessageBasedOnResultOfAnswer} ${feedbackForAnswers} ${feedbackToWrongChoice}` ?? "",
-            answers: [],
-            selectedAnswer: "",
-            date: isCorrect ? CORRECT_ANSWER_REACTION : WRONG_ANSWER_REACTION,
-            state: "NARRATE",
-          });
-        } else {
-          const message = ANSWERING_ERROR;
-          setVoiceAssistant({
-            ...voiceAssistant,
-            listenType: "ANSWERING",
-            message,
-            state: "NARRATE",
-          });
-        }
-        return;
-      }
-
-      if (voiceAssistant.listenType === "NEXT_ACTION") {
-        console.log("assistantActions:NEXT_ACTION");
-        if (transcriptProcessed === NEXT_ACTION) {
-          if (!assistantRef.current) return;
-          assistantRef.current.nextQuestion();
-          return;
-        }
-        if (transcriptProcessed === OPEN_NOTEBOOK) {
-          if (!assistantRef.current) return;
-          console.log("ACTION:Open Notebook");
-          const parents = assistantRef.current.getQuestionParents();
-          setDisplayDashboard(false);
-          openNodesOnNotebook(selectedNotebookId, parents);
-          await detectElements({ ids: parents });
-          for (let i = 0; i < parents.length; i++) {
-            setForceAssistantReaction("TALKING");
-            const parent = parents[i];
-            const node: Node | null = await getNode(db, parent);
-            if (!node) return;
-
-            const message = nodeToNarration(node);
-            scrollToNode(parent);
-            await narrateLargeTexts(message);
+          const { narratorPromise, abortPromise } = narrateLargeTexts(questionNode.title);
+          abortNarratorPromise.current = abortPromise;
+          const res = await narratorPromise();
+          if (!res) break;
+          // await narrateLargeTexts( voiceAssistant.questionNode.title);
+          let stopNarration = false;
+          for (let i = 0; i < questionNode.choices.length; i++) {
+            // if (assistantRef.current) return assistantRef.current.onSelectedQuestionAnswer(-1);
+            const choice = questionNode.choices[i];
+            assistantRef.current.onSelectedQuestionAnswer(i);
+            // await narrateLargeTexts(choice.choice);
+            const { narratorPromise, abortPromise } = narrateLargeTexts(choice.choice);
+            abortNarratorPromise.current = abortPromise;
+            const res = await narratorPromise();
+            if (!res) {
+              stopNarration = true;
+              break;
+            }
           }
-          setForceAssistantReaction("");
-          // TODO: wait for next action
-          console.log("execute NOTEBOOK_ACTIONS ");
-          setVoiceAssistant({
-            ...voiceAssistant,
-            answers: [],
-            date: "",
-            listenType: "NOTEBOOK_ACTIONS",
-            message: "",
-            selectedAnswer: "",
-            state: "NARRATE",
-          });
-          return;
+
+          if (stopNarration) break;
+          assistantRef.current.onSelectedQuestionAnswer(-1);
+        } else {
+          const textToNarrate = `${preMessage} ${message}`;
+          const { narratorPromise, abortPromise } = narrateLargeTexts(textToNarrate);
+          abortNarratorPromise.current = abortPromise;
+          const res = await narratorPromise();
+          if (!res) break;
         }
-        // No valid action was selected, try again
-        let message = `Sorry, I didn't get your choices. ${NEXT_ACTION_ERROR}`;
-        await narrateLargeTexts(message);
-        console.log("NEXT_ACTION");
-        if (!enabledAssistantRef.current) return;
-        setVoiceAssistant({ ...voiceAssistant, date: new Date().toISOString(), message: "", state: "NARRATE" });
-        return;
-      }
+        if (!askingRef.current) break; // should finish without make nothing
 
-      if (voiceAssistant.listenType === "NOTEBOOK_ACTIONS") {
-        setRootQuery(voiceAssistant.tagId);
-        setDisplayDashboard(true);
+        console.log("👉 2. listen", { message, preMessage, preTranscriptProcessed, origin, listenType });
+
+        setAssistantState("LISTEN");
+        const recognitionResult = await recognizeInput2(speechRef.current);
+        speechRef.current.stop(); // stop after get text
+
+        if (!recognitionResult) {
+          console.error(
+            "This browser doesn't support speech recognition, install last version of chrome browser please"
+          );
+          askingRef.current = false;
+          continue;
+        }
+
+        if (recognitionResult.error) {
+          if (recognitionResult.error === "aborted") break;
+          console.log("onerror:", recognitionResult.error);
+          originState.current = "onerror";
+          preMessage = getNoMatchPreviousMessage(listenType);
+          message = "";
+          console.log("onerror", { origin: originState.current, preMessage, message });
+          continue;
+        }
+
+        if (recognitionResult.nomatch) {
+          console.log("onnomatch");
+          originState.current = "nomatch";
+          preMessage = getNoMatchPreviousMessage(listenType);
+          // message = listenType === "NEXT_ACTION" ? "" : message;
+          message = "";
+          continue;
+        }
+
+        const transcript = recognitionResult.transcript.toLowerCase();
+        console.log("----> result", { transcript, listenType });
+        // action
+
+        if (transcript === "repeat question") {
+          message = getMessageFromQuestionNode(questionNode);
+          listenType = "ANSWERING";
+          preMessage = "";
+          originState.current = "narrate-question";
+          continue;
+        }
+
+        if (transcript === "stop") {
+          setVoiceAssistant(null);
+          stopAssistant(true);
+          break;
+        }
+
+        const transcriptProcessed = getTranscriptProcessed(transcript, listenType);
+        console.log("----> transcriptProcessed", { transcriptProcessed });
+        if (!transcriptProcessed && listenType !== "CONFIRM") {
+          // on CONFIRM, we will manage in different way
+          originState.current = "nomatch";
+          preMessage = getNoMatchPreviousMessage(listenType);
+          message = "";
+          continue;
+        }
+
+        if (listenType === "ANSWERING") {
+          console.log("ANSWERING");
+          if (!assistantRef.current) break; // CHECK if we need to stop
+
+          const submitOptions = getAnswersLettersOptions(transcriptProcessed, questionNode.choices.length);
+          assistantRef.current.onSelectAnswers(submitOptions);
+          const { message: newMessage, answerIsValid } = getMessageFromUserAnswering(
+            transcriptProcessed,
+            questionNode.choices.length
+          );
+          preMessage = "";
+          preTranscriptProcessed = answerIsValid ? transcriptProcessed : "";
+          listenType = answerIsValid ? "CONFIRM" : "ANSWERING";
+          message = newMessage;
+          console.log("ANSWERING", { answerIsValid, message, listenType });
+          continue;
+        }
+
+        if (listenType === "CONFIRM") {
+          console.log("CONFIRM");
+          if (["y"].includes(transcriptProcessed)) {
+            const submitOptions = getAnswersLettersOptions(preTranscriptProcessed, questionNode.choices.length);
+            assistantRef.current?.onSubmitAnswer(submitOptions);
+            const { message: messageFromConfirm, isCorrect } = getMessageFromUserConfirm(
+              preTranscriptProcessed,
+              questionNode.choices,
+              submitOptions
+            );
+            message = messageFromConfirm;
+            preMessage = "";
+            listenType = "NEXT_ACTION";
+            originState.current = isCorrect ? CORRECT_ANSWER_REACTION : WRONG_ANSWER_REACTION;
+            console.log("CONFIRM", { message, submitOptions });
+          } else {
+            console.log("confirm-error");
+            preMessage = ANSWERING_ERROR;
+            message = "";
+            originState.current = "confirm-error";
+            listenType = "ANSWERING";
+            console.log("CONFIRM:confirm-error", { message });
+          }
+          continue;
+        }
+
+        if (listenType === "NEXT_ACTION") {
+          if (transcriptProcessed === NEXT_ACTION) {
+            console.log("NEXT_ACTION:next action");
+            assistantRef.current?.nextQuestion();
+            askingRef.current = false;
+            continue;
+          }
+          if (transcriptProcessed === OPEN_NOTEBOOK) {
+            console.log("NEXT_ACTION:open notebook");
+            const parents = questionNode.parents;
+            setDisplayDashboard(false);
+            openNodesOnNotebook(selectedNotebookId, parents);
+            await detectElements({ ids: parents });
+            let stopLoop = false;
+            for (let i = 0; i < parents.length; i++) {
+              setForceAssistantReaction("TALKING");
+              const parent = parents[i];
+              const node: Node | null = await getNode(db, parent);
+              if (!node) continue;
+
+              const message = nodeToNarration(node);
+              scrollToNode(parent);
+              const { narratorPromise, abortPromise } = narrateLargeTexts(message);
+              abortNarratorPromise.current = abortPromise;
+              const res = await narratorPromise();
+              if (!res) {
+                // return
+                stopLoop = true;
+                break;
+              }
+              if (!askingRef.current) break; // should finish without make nothing
+            }
+            if (stopLoop) break;
+            setForceAssistantReaction("");
+            preMessage = "";
+            message = "";
+            listenType = "NOTEBOOK_ACTIONS";
+            continue;
+          }
+          console.log("NEXT_ACTION:No action");
+          preMessage = `Sorry, I didn't get your choices. ${NEXT_ACTION_ERROR}`;
+          message = "";
+          originState.current = "next-action-error";
+        }
+
+        if (listenType === "NOTEBOOK_ACTIONS") {
+          if (transcriptProcessed === OPEN_PRACTICE) {
+            console.log("continue practicing", { transcriptProcessed });
+            setRootQuery(tagId);
+            setDisplayDashboard(true);
+            break;
+          }
+          preMessage = `Sorry, I didn't get your choices. ${OPEN_PRACTICE_ERROR}`;
+          message = "";
+          listenType = "NOTEBOOK_ACTIONS";
+        }
       }
+      setAssistantState("IDLE");
+    },
+    [
+      assistantRef,
+      openNodesOnNotebook,
+      scrollToNode,
+      selectedNotebookId,
+      setDisplayDashboard,
+      setRootQuery,
+      setVoiceAssistant,
+      stopAssistant,
+    ]
+  );
+
+  useEffect(() => {
+    const run = async () => {
+      console.log("askQuestion", { voiceAssistant });
+      if (previousVoiceAssistant.current === voiceAssistant) return;
+
+      previousVoiceAssistant.current = voiceAssistant;
+      await stopAssistant(!voiceAssistant); // if voiceAssistant change: cancel all
+      if (!voiceAssistant) return;
+
+      askQuestion(voiceAssistant);
     };
+    run();
+  }, [askQuestion, stopAssistant, voiceAssistant]);
 
-    listen();
-  }, [
-    assistantRef,
-    openNodesOnNotebook,
-    scrollToNode,
-    selectedNotebookId,
-    setDisplayDashboard,
-    setRootQuery,
-    setVoiceAssistant,
-    voiceAssistant,
-  ]);
+  console.log("->", { displayNotebook, voiceAssistant, startPractice, assistantReactionMemo });
 
-  console.log("render");
-
-  if (displayNotebook && voiceAssistant.state === "IDLE") return null;
-  if (voiceAssistant.state === "IDLE")
-    return (
-      <Box sx={{ width: "80px", height: "80px" }}>
-        {<RiveComponentMemoized src={IDLE_ANIMATION} artboard="New Artboard" animations="Timeline 1" autoplay={true} />}
-      </Box>
-    );
+  if (!voiceAssistant && !startPractice) return null;
+  console.log("->", 1);
 
   return (
     <Tooltip
@@ -388,7 +390,7 @@ export const Assistant = ({
       open={true}
     >
       <Box sx={{ width: "80px", height: "80px" }}>
-        {assistantReaction === "TALKING" && (
+        {assistantReactionMemo === "TALKING" && (
           <RiveComponentMemoized
             src={TALKING_ANIMATION}
             artboard="New Artboard"
@@ -397,7 +399,7 @@ export const Assistant = ({
           />
         )}
 
-        {assistantReaction === "HAPPY" && (
+        {assistantReactionMemo === "HAPPY" && (
           <RiveComponentMemoized
             src={HAPPY_ANIMATION}
             artboard="New Artboard"
@@ -406,17 +408,21 @@ export const Assistant = ({
           />
         )}
 
-        {assistantReaction === "SAD" && (
+        {assistantReactionMemo === "SAD" && (
           <RiveComponentMemoized src={SAD_ANIMATION} artboard="New Artboard" animations="Timeline 1" autoplay={true} />
         )}
 
-        {assistantReaction === "LISTENING" && (
+        {assistantReactionMemo === "LISTENING" && (
           <RiveComponentMemoized
             src={LISTENING_ANIMATION}
             artboard="New Artboard"
             animations="Timeline 1"
             autoplay={true}
           />
+        )}
+
+        {assistantReactionMemo === "IDLE" && (
+          <RiveComponentMemoized src={IDLE_ANIMATION} artboard="New Artboard" animations="Timeline 1" autoplay={true} />
         )}
       </Box>
     </Tooltip>
@@ -430,13 +436,13 @@ const SAD_ANIMATION = "/rive-voice-assistant/sad.riv";
 // const SNORING_ANIMATION = "/rive-voice-assistant/snoring.riv";
 const TALKING_ANIMATION = "/rive-voice-assistant/talking.riv";
 
-const CORRECT_ANSWER_REACTION = "correct-answer";
-const WRONG_ANSWER_REACTION = "wrong-answer";
-
 const NEXT_ACTION = "*";
 const OPEN_NOTEBOOK = ".";
 const REPEAT_QUESTION = "?";
 const OPEN_PRACTICE = "#";
+
+const CORRECT_ANSWER_REACTION = "correct-answer";
+const WRONG_ANSWER_REACTION = "wrong-answer";
 
 const MapSentences: { [key: string]: string } = {
   "repeat question": REPEAT_QUESTION,
@@ -455,13 +461,71 @@ const MapWords: { [key: string]: string } = {
   se: "c",
   de: "d",
   dee: "d",
+  the: "d",
   guess: "d",
   he: "e",
   yes: "y",
+  yet: "y",
+  yep: "y",
   correct: "y",
   "repeat question": REPEAT_QUESTION,
   next: NEXT_ACTION,
   nikes: NEXT_ACTION,
   "open notebook": OPEN_NOTEBOOK,
   "continue practicing": OPEN_PRACTICE,
+};
+
+const getMessageFromUserAnswering = (
+  transcriptProcessed: string,
+  questionsAmount: number
+): { answerIsValid: boolean; message: string } => {
+  const possibleOptions = QUESTION_OPTIONS.slice(0, questionsAmount);
+  console.log({ possibleOptions, transcriptProcessed });
+  const answerIsValid = Array.from(transcriptProcessed).reduce(
+    (acu, cur) => acu && possibleOptions.includes(cur),
+    true
+  );
+
+  if (!answerIsValid) return { answerIsValid: false, message: ANSWERING_ERROR };
+
+  const message = `Did you choose option ${getTextSplittedByCharacter(transcriptProcessed, "-")
+    .split("-")
+    .map(char => (char === "a" ? "ae" : char))
+    .join("-")}.`;
+
+  return { answerIsValid: true, message };
+};
+
+type CorrectOptionProcessed = { choice: KnowledgeChoice; option: string };
+
+const getMessageFromUserConfirm = (
+  selectedAnswer: string,
+  choices: KnowledgeChoice[],
+  submitOptions: boolean[]
+): { message: string; isCorrect: boolean } => {
+  const correctOptionsProcessed: CorrectOptionProcessed[] = choices
+    .reduce((acu: CorrectOptionProcessed[], cur, idx) => [...acu, { choice: cur, option: QUESTION_OPTIONS[idx] }], [])
+    .filter(cur => cur.choice.correct);
+  const isCorrect = choices.reduce((acu, cur, idx) => acu && submitOptions[idx] === cur.correct, true);
+  const selectedAnswerData: SelectedAnswer[] = choices.reduce((acu: SelectedAnswer[], cur, idx) => {
+    const answer: SelectedAnswer | null = selectedAnswer.includes(QUESTION_OPTIONS[idx])
+      ? { choice: cur, option: QUESTION_OPTIONS[idx] }
+      : null;
+    return answer ? [...acu, answer] : acu;
+  }, []);
+
+  const feedbackForAnswers = selectedAnswerData
+    .map(cur => `You selected option ${cur.option}: ${cur.choice.feedback}`)
+    .join(". ");
+  const possibleAssistantMessages = isCorrect ? ASSISTANT_POSITIVE_SENTENCES : ASSISTANT_NEGATIVE_SENTENCES;
+  const randomMessageIndex = Math.floor(Math.random() * possibleAssistantMessages.length);
+  const assistantMessageBasedOnResultOfAnswer = possibleAssistantMessages[randomMessageIndex];
+
+  const feedbackToWrongChoice = !isCorrect
+    ? `The correct choice${correctOptionsProcessed.length > 1 ? "s are" : " is"} ${correctOptionsProcessed
+        .map(c => `${c.option}: ${c.choice.feedback}`)
+        .join(" ")}`
+    : "";
+  const message = `${assistantMessageBasedOnResultOfAnswer} ${feedbackForAnswers} ${feedbackToWrongChoice}` ?? "";
+  return { message, isCorrect };
 };
