@@ -113,6 +113,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       isStudied: userNodeData.isStudied,
       wrong: userNodeData.wrong,
       locked: Boolean(questionNodeData.locked),
+      parents: questionNodeData.parents.map(c => c.node),
     };
     const currentTimestamp = Timestamp.fromDate(new Date());
     const studentPracticeDay = await getStudentPracticeDayStats(semesterDoc.id, userData.uname);

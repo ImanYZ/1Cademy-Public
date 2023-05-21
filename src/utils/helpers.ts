@@ -1,5 +1,11 @@
+import { NARRATE_WORKER_TERMINATED } from "@/lib/utils/constants";
+import { resolve } from "path";
+import { VoiceAssistant } from "src/nodeBookTypes";
+import { INarrateWorkerMessage } from "src/types/IAssistant";
 import { INode } from "src/types/INode";
 import { INodeType } from "src/types/INodeType";
+import { splitSentenceIntoChunks } from "../lib/utils/string.utils";
+import { delay } from "../lib/utils/utils";
 
 export const firstWeekMonthDays = (thisDate?: any) => {
   let today = new Date();
@@ -49,4 +55,75 @@ export const getNodeTypesFromNode = (nodeData: INode): INodeType[] => {
   const _nodeTypes: INodeType[] = nodeData.nodeTypes || [];
   _nodeTypes.push(nodeData.nodeType);
   return Array.from(new Set(_nodeTypes));
+};
+
+/**
+ * speechSynthesis works only with 100 characters
+ * message will be splitted by .
+ */
+export const narrateLargeTexts = (message: string) => {
+  const id = Math.round(Math.random() * 999);
+  const controller = new AbortController();
+  const signal = controller.signal;
+
+  const narratorPromise = () =>
+    new Promise<boolean>(async resolve => {
+      console.log("narrateLargeTexts:", message, id);
+      // const messages = message.split(".");
+
+      const maxCharacters = 99;
+      const messages = message
+        .split(".")
+        .reduce(
+          (a: string[], c) => (c.length <= maxCharacters ? [...a, c] : [...a, ...splitSentenceIntoChunks(c)]),
+          []
+        );
+      console.log({ messages }, id);
+      messages.forEach(messageItem => {
+        const speech = new SpeechSynthesisUtterance(messageItem);
+        window.speechSynthesis.speak(speech);
+      });
+      console.log("loop", id);
+      let isNarrating = window.speechSynthesis.pending || window.speechSynthesis.speaking;
+      const intervalId = setInterval(() => {
+        isNarrating = window.speechSynthesis.pending || window.speechSynthesis.speaking;
+        console.log({ pending: window.speechSynthesis.pending, speaking: window.speechSynthesis.speaking }, id);
+        if (!isNarrating) {
+          clearInterval(intervalId);
+          console.log("will resolve", id);
+          resolve(true);
+        }
+      }, 1000);
+
+      signal.addEventListener("abort", () => {
+        // clearTimeout(timeoutId);
+        // reject(new Error("Promise aborted"));
+        console.log("abort", isNarrating, id);
+        // isNarrating = false;
+        clearInterval(intervalId);
+        resolve(false);
+      });
+    }); /* as Promise<boolean> & { abort: () => void }; */
+
+  // promise.abort = () => controller.abort();
+
+  // return promise;
+  return { narratorPromise, abortPromise: () => controller.abort() };
+};
+
+export const narrateText = async (message: string) => {
+  return new Promise(resolve => {
+    const timeout = setTimeout(() => {
+      window.speechSynthesis.cancel();
+      resolve(true);
+    }, 10000);
+    const speech = new SpeechSynthesisUtterance(message);
+    speech.addEventListener("end", () => {
+      clearTimeout(timeout);
+      resolve(true);
+    });
+
+    window.speechSynthesis.cancel();
+    window.speechSynthesis.speak(speech);
+  });
 };

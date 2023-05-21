@@ -1,6 +1,7 @@
 import { Timestamp } from "firebase/firestore";
 import React, { Dispatch } from "react";
 
+import { SimpleQuestionNode } from "./instructorsTypes";
 import { KnowledgeChoice } from "./knowledgeTypes";
 import { NodeType } from "./types";
 
@@ -520,4 +521,11 @@ export type UserTutorial = {
 
 export type UserTutorials = {
   [key in TutorialTypeKeys]: UserTutorial;
+};
+
+export type VoiceAssistantType = "ANSWERING" | "CONFIRM" | "NEXT_ACTION" | "NOTEBOOK_ACTIONS" | null;
+
+export type VoiceAssistant = {
+  tagId: string;
+  questionNode: SimpleQuestionNode;
 };

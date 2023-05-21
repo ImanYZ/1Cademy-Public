@@ -4,6 +4,7 @@ import CloseFullscreenIcon from "@mui/icons-material/CloseFullscreen";
 import DoneIcon from "@mui/icons-material/Done";
 import LeaderboardIcon from "@mui/icons-material/Leaderboard";
 import LocalOfferIcon from "@mui/icons-material/LocalOffer";
+import VolumeUpIcon from "@mui/icons-material/VolumeUp";
 import { Button, ClickAwayListener, Divider, IconButton, ListItem, Skeleton, Tooltip, Typography } from "@mui/material";
 import { Box, Stack } from "@mui/system";
 import React, { ReactNode, useCallback, useEffect, useMemo, useState } from "react";
@@ -22,9 +23,16 @@ type NodeQuestionProps = {
   selectedAnswers: boolean[];
   setSelectedIdxAnswer: (newValue: number) => void;
   submitAnswer: boolean;
+  narratedAnswerIdx: number;
 };
 
-const NodeQuestion = ({ node, selectedAnswers, setSelectedIdxAnswer, submitAnswer }: NodeQuestionProps) => {
+const NodeQuestion = ({
+  node,
+  selectedAnswers,
+  setSelectedIdxAnswer,
+  submitAnswer,
+  narratedAnswerIdx,
+}: NodeQuestionProps) => {
   const [displayTags, setDisplayTags] = useState(false);
   const [nodeCopy, setNodeCopy] = useState<SimpleQuestionNode>(node);
 
@@ -139,6 +147,23 @@ const NodeQuestion = ({ node, selectedAnswers, setSelectedIdxAnswer, submitAnswe
                     },
                   }),
                 },
+                ...(narratedAnswerIdx === idx && {
+                  cursor: "pointer",
+                  background: theme =>
+                    theme.palette.mode === "dark" ? theme.palette.common.notebookG500 : theme.palette.common.gray200,
+                  border: theme =>
+                    `solid 1px ${
+                      theme.palette.mode === "dark" ? theme.palette.common.notebookG300 : theme.palette.common.gray300
+                    }`,
+                  "& .check-box": {
+                    backgroundColor: theme =>
+                      theme.palette.mode === "dark" ? theme.palette.common.notebookG600 : theme.palette.common.gray100,
+                    border: theme =>
+                      `solid 1px ${
+                        theme.palette.mode === "dark" ? theme.palette.common.notebookG400 : theme.palette.common.gray300
+                      }`,
+                  },
+                }),
                 ...(selectedAnswers[idx] && {
                   background: theme =>
                     submitAnswer
@@ -357,6 +382,13 @@ type PracticeQuestionProps = {
   onSaveAnswer: (answers: boolean[]) => Promise<void>;
   onGetNextQuestion: () => Promise<void>;
   practiceInfo: PracticeInfo;
+  submitAnswer: boolean;
+  setSubmitAnswer: React.Dispatch<React.SetStateAction<boolean>>;
+  selectedAnswers: boolean[];
+  setSelectedAnswers: React.Dispatch<React.SetStateAction<boolean[]>>;
+  enabledAssistant: boolean;
+  onToggleAssistant: () => void;
+  narratedAnswerIdx: number;
 };
 export const PracticeQuestion = ({
   question,
@@ -368,14 +400,18 @@ export const PracticeQuestion = ({
   onSaveAnswer,
   onGetNextQuestion,
   practiceInfo,
+  submitAnswer,
+  setSubmitAnswer,
+  selectedAnswers,
+  setSelectedAnswers,
+  enabledAssistant,
+  onToggleAssistant,
+  narratedAnswerIdx,
 }: PracticeQuestionProps) => {
-  const [selectedAnswers, setSelectedAnswers] = useState<boolean[]>([]);
   const [displaySidebar, setDisplaySidebar] = useState<"LEADERBOARD" | "USER_STATUS" | null>(null);
-  const [submitAnswer, setSubmitAnswer] = useState(false);
   const [loading, setLoading] = useState(true);
 
   const onSubmitAnswer = useCallback(() => {
-    setSubmitAnswer(true);
     onSaveAnswer(selectedAnswers);
   }, [onSaveAnswer, selectedAnswers]);
 
@@ -384,7 +420,7 @@ export const PracticeQuestion = ({
     setSubmitAnswer(false);
     await onGetNextQuestion();
     setLoading(false);
-  }, [onGetNextQuestion]);
+  }, [onGetNextQuestion, setSubmitAnswer]);
 
   const onSelectAnswer = (answerIdx: number) => {
     setSelectedAnswers(prev => prev.map((c, i) => (answerIdx === i ? !c : c)));
@@ -394,7 +430,7 @@ export const PracticeQuestion = ({
     if (!question) return;
     setSelectedAnswers(new Array(question.choices.length).fill(false));
     setLoading(false);
-  }, [question]);
+  }, [question, setSelectedAnswers]);
 
   return (
     <Box
@@ -460,6 +496,29 @@ export const PracticeQuestion = ({
             >
               <LeaderboardIcon />
             </IconButton>
+
+            <Tooltip title="Voice-based practice" placement="left">
+              <IconButton
+                onClick={onToggleAssistant}
+                sx={{
+                  width: "56px",
+                  height: "56px",
+                  color: theme =>
+                    enabledAssistant
+                      ? DESIGN_SYSTEM_COLORS.primary600
+                      : theme.palette.mode === "dark"
+                      ? DESIGN_SYSTEM_COLORS.notebookG200
+                      : DESIGN_SYSTEM_COLORS.gray500,
+                  borderRadius: "8px",
+                  backgroundColor: theme =>
+                    theme.palette.mode === "dark"
+                      ? DESIGN_SYSTEM_COLORS.notebookMainBlack
+                      : DESIGN_SYSTEM_COLORS.gray50,
+                }}
+              >
+                <VolumeUpIcon />
+              </IconButton>
+            </Tooltip>
           </Stack>
 
           {/* node question */}
@@ -505,6 +564,7 @@ export const PracticeQuestion = ({
                 selectedAnswers={selectedAnswers}
                 setSelectedIdxAnswer={onSelectAnswer}
                 submitAnswer={submitAnswer}
+                narratedAnswerIdx={narratedAnswerIdx}
               />
             )}
 

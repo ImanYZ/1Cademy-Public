@@ -64,15 +64,17 @@ import { MemoizedUserInfoSidebar } from "@/components/map/Sidebar/SidebarV2/User
 import { MemoizedUserSettingsSidebar } from "@/components/map/Sidebar/SidebarV2/UserSettigsSidebar";
 import { useAuth } from "@/context/AuthContext";
 import useEventListener from "@/hooks/useEventListener";
+// import usePrevious from "@/hooks/usePrevious";
 import { useTagsTreeView } from "@/hooks/useTagsTreeView";
 import { DESIGN_SYSTEM_COLORS } from "@/lib/theme/colors";
 
 import LoadingImg from "../../public/animated-icon-1cademy.gif";
 import { TooltipTutorial } from "../components/interactiveTutorial/Tutorial";
+import { Assistant } from "../components/map/Assistant";
 // import nodesData from "../../testUtils/mockCollections/nodes.data";
 // import { Tutorial } from "../components/interactiveTutorial/Tutorial";
 import { MemoizedClustersList } from "../components/map/ClustersList";
-import { DashboardWrapper } from "../components/map/dashboard/DashboardWrapper";
+import { DashboardWrapper, DashboardWrapperRef } from "../components/map/dashboard/DashboardWrapper";
 import { MemoizedLinksList } from "../components/map/LinksList";
 import { MemoizedNodeList } from "../components/map/NodesList";
 import { NotebookPopup } from "../components/map/Popup";
@@ -95,7 +97,7 @@ import { useWorkerQueue } from "../hooks/useWorkerQueue";
 import { NodeChanges, ReputationSignal } from "../knowledgeTypes";
 import { idToken, retrieveAuthenticatedUser } from "../lib/firestoreClient/auth";
 import { Post, postWithToken } from "../lib/mapApi";
-import { NO_USER_IMAGE } from "../lib/utils/constants";
+import { NO_USER_IMAGE, ZINDEX } from "../lib/utils/constants";
 import { createGraph, dagreUtils } from "../lib/utils/dagre.util";
 import { devLog } from "../lib/utils/develop.util";
 import { getTypedCollections } from "../lib/utils/getTypedCollections";
@@ -146,11 +148,10 @@ import {
   UserNodesData,
   UserTutorial,
   UserTutorials,
+  VoiceAssistant,
 } from "../nodeBookTypes";
 import { NodeType, Notebook, NotebookDocument, SimpleNode2 } from "../types";
 import { doNeedToDeleteNode, getNodeTypesFromNode, isVersionApproved } from "../utils/helpers";
-
-// export type TutorialKeys = TutorialTypeKeys | null;
 
 type NotebookProps = {};
 
@@ -436,6 +437,7 @@ const Notebook = ({}: NotebookProps) => {
 
   const scrollToNode = useCallback(
     (nodeId: string, regardless = false, tries = 0) => {
+      console.log(">>scrollToNode");
       if (tries === 10) return;
 
       if (!scrollToNodeInitialized.current) {
@@ -606,10 +608,7 @@ const Notebook = ({}: NotebookProps) => {
   // // flag for whether tutorial state was loaded
   // const [userTutorialLoaded, setUserTutorialLoaded] = useState(false);
 
-  // flag for whether users' nodes data is downloaded from server
-  // const [userNodesLoaded, setUserNodesLoaded] = useState(false);
-
-  // flag set to true when sending request to server
+  // flag for whether users' nodes data is downloaded from servermessages
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   // flag to open proposal sidebar
@@ -652,6 +651,11 @@ const Notebook = ({}: NotebookProps) => {
 
   const [usersOnlineStatusLoaded, setUsersOnlineStatusLoaded] = useState(false);
   const [onlineUsers, setOnlineUsers] = useState<string[]>([]);
+
+  const [voiceAssistant, setVoiceAssistant] = useState<VoiceAssistant | null>(null);
+  const [startPractice, setStartPractice] = useState(false);
+
+  const assistantRef = useRef<DashboardWrapperRef | null>(null);
 
   // ---------------------------------------------------------------------
   // ---------------------------------------------------------------------
@@ -6093,6 +6097,7 @@ const Notebook = ({}: NotebookProps) => {
 
   // ------------------------ useEffects
 
+  // detect root from url to open practice tool automatically
   useEffect(() => {
     if (!user) return;
     if (!user.role) return;
@@ -6300,6 +6305,25 @@ const Notebook = ({}: NotebookProps) => {
             </Button>
           </Box>
         )}
+
+        {/* assistant */}
+        {/* {voiceAssistant && ( */}
+        <Box sx={{ position: "absolute", bottom: "50px", right: "50px", zIndex: ZINDEX["assistant"] }}>
+          <Assistant
+            voiceAssistant={voiceAssistant}
+            assistantRef={assistantRef}
+            openNodesOnNotebook={openNodesOnNotebook}
+            scrollToNode={scrollToNode}
+            selectedNotebookId={selectedNotebookId}
+            setDisplayDashboard={setDisplayDashboard}
+            setRootQuery={setRootQuery}
+            setVoiceAssistant={setVoiceAssistant}
+            displayNotebook={!displayDashboard}
+            startPractice={startPractice}
+          />
+        </Box>
+        {/* )} */}
+
         <Box sx={{ width: "100vw", height: "100vh", overflow: "hidden" }}>
           {
             <Drawer
@@ -6483,9 +6507,7 @@ const Notebook = ({}: NotebookProps) => {
                 selectedNotebook={selectedNotebookId}
                 openNodesOnNotebook={openNodesOnNotebook}
                 setNotebooks={setNotebooks}
-                onDisplayInstructorPage={() => {
-                  setDisplayDashboard(true);
-                }}
+                onDisplayInstructorPage={() => setDisplayDashboard(true)}
                 onChangeTagOfNotebookById={onChangeTagOfNotebookById}
               />
 
@@ -6599,18 +6621,24 @@ const Notebook = ({}: NotebookProps) => {
             comLeaderboardOpen={comLeaderboardOpen}
             setComLeaderboardOpen={setComLeaderboardOpen}
           />
-
           {user && displayDashboard && (
             <DashboardWrapper
+              ref={assistantRef}
+              voiceAssistant={voiceAssistant}
+              setVoiceAssistant={setVoiceAssistant}
+              // voiceAssistantRef={voiceAssistantRef.current}
               user={user}
               onClose={() => {
                 setRootQuery(undefined);
                 setDisplayDashboard(false);
                 router.replace(router.pathname);
+                setVoiceAssistant(null);
               }}
               openNodeHandler={openNodeHandler}
               sx={{ position: "absolute", inset: "0px", zIndex: 999 }}
               root={rootQuery}
+              startPractice={startPractice}
+              setStartPractice={setStartPractice}
             />
           )}
 
@@ -6775,6 +6803,7 @@ const Notebook = ({}: NotebookProps) => {
               )}
             </>
           </MemoizedToolbox>
+
           {/* end Data from map */}
 
           {window.innerHeight > 399 && user?.livelinessBar === "interaction" && (

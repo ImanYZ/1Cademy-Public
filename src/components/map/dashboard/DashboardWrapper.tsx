@@ -14,8 +14,18 @@ import {
   Unsubscribe,
   where,
 } from "firebase/firestore";
-import React, { RefObject, useCallback, useEffect, useRef, useState } from "react";
+import React, {
+  Dispatch,
+  forwardRef,
+  SetStateAction,
+  useCallback,
+  useEffect,
+  useImperativeHandle,
+  useRef,
+  useState,
+} from "react";
 import { CourseTag, Instructor, Semester, SemesterStudentVoteStat } from "src/instructorsTypes";
+import { VoiceAssistant } from "src/nodeBookTypes";
 
 import { CoursesResult } from "@/components/layouts/StudentsLayout";
 
@@ -28,21 +38,35 @@ import { DashboradToolbar } from "../Dashobard/DashboradToolbar";
 import { Dashboard } from "./Dashboard";
 import { DashboardSettings } from "./DashboardSettings";
 import { DashboardStudents } from "./DashboardStudents";
-// import { Semester } from "../../instructorsTypes";
-// import { ICourseTag } from "../../types/ICourse";
-// import { CoursesResult } from "../layouts/StudentsLayout";
 
 type DashboardWrapperProps = {
+  voiceAssistant: VoiceAssistant | null;
+  setVoiceAssistant: Dispatch<SetStateAction<VoiceAssistant | null>>;
   user: User;
   onClose: () => void;
   openNodeHandler: (nodeId: string) => void;
+  startPractice: boolean;
+  setStartPractice: Dispatch<SetStateAction<boolean>>;
   root?: string;
   sx?: SxProps<Theme>;
 };
 
+export type DashboardWrapperRef = PracticeToolRef;
+
 export type ToolbarView = "DASHBOARD" | "PRACTICE" | "SETTINGS" | "STUDENTS";
 
-export const DashboardWrapper = ({ user, openNodeHandler, onClose, root, sx }: DashboardWrapperProps) => {
+export const DashboardWrapper = forwardRef<DashboardWrapperRef, DashboardWrapperProps>((props, ref) => {
+  const {
+    voiceAssistant,
+    setVoiceAssistant,
+    user,
+    openNodeHandler,
+    onClose,
+    root,
+    sx,
+    startPractice,
+    setStartPractice,
+  } = props;
   const db = getFirestore();
 
   // const [semesters, setSemesters] = useState<string[]>([]);
@@ -58,7 +82,18 @@ export const DashboardWrapper = ({ user, openNodeHandler, onClose, root, sx }: D
   const [, /* isLoading */ setIsLoading] = useState(true);
   const [rootFound, setRootFound] = useState<boolean>(false);
 
-  const practiceToolRef = useRef<PracticeToolRef>(null) as RefObject<PracticeToolRef>;
+  const practiceToolRef = useRef<PracticeToolRef | null>(null);
+
+  useImperativeHandle(ref, () => ({
+    onRunPracticeTool: (start: boolean) => console.log("start practice", start),
+    onSubmitAnswer: (answers: boolean[]) => practiceToolRef.current && practiceToolRef.current.onSubmitAnswer(answers),
+    onSelectAnswers: practiceToolRef.current ? practiceToolRef.current.onSelectAnswers : () => {},
+    nextQuestion: practiceToolRef.current ? practiceToolRef.current.nextQuestion : () => {},
+    getQuestionParents: practiceToolRef.current ? practiceToolRef.current.getQuestionParents : () => [],
+    getQuestionData: practiceToolRef.current ? practiceToolRef.current.getQuestionData : () => null,
+    onSelectedQuestionAnswer: practiceToolRef.current ? practiceToolRef.current.onSelectedQuestionAnswer : () => {},
+  }));
+
   const semesterByStudentSnapthot = useCallback(
     (q: Query<DocumentData>) =>
       onSnapshot(q, async snaphot => {
@@ -210,6 +245,7 @@ export const DashboardWrapper = ({ user, openNodeHandler, onClose, root, sx }: D
     setSelectToolbarView(view);
   };
 
+  // detect root (semester) to open practice tool automatically
   useEffect(() => {
     if (!root) return;
     const rootSemester = allSemesters.find(semester => semester.tagId === root);
@@ -265,12 +301,16 @@ export const DashboardWrapper = ({ user, openNodeHandler, onClose, root, sx }: D
             )}
             {selectToolbarView === "PRACTICE" && (
               <PracticeTool
+                voiceAssistant={voiceAssistant}
+                setVoiceAssistant={setVoiceAssistant}
                 ref={practiceToolRef}
                 user={user}
                 currentSemester={currentSemester}
                 onClose={onClose}
                 openNodeHandler={openNodeHandler}
                 root={rootFound ? root : undefined}
+                startPractice={startPractice}
+                setStartPractice={setStartPractice}
               />
             )}
             {selectToolbarView === "SETTINGS" && <DashboardSettings currentSemester={currentSemester} />}
@@ -284,7 +324,9 @@ export const DashboardWrapper = ({ user, openNodeHandler, onClose, root, sx }: D
       </Box>
     </Box>
   );
-};
+});
+
+DashboardWrapper.displayName = "DashboardWrapper";
 
 export const getCourseTitleFromSemester = (semester: ISemester) => {
   return `${semester.cTitle} ${semester.pTitle || "- " + semester.uTitle}`;
