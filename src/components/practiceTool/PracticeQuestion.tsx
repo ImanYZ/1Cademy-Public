@@ -589,7 +589,7 @@ export const PracticeQuestion = ({
                     },
                   }}
                 >
-                  View Node Tree
+                  Open this in Notebook
                 </Button>
                 {!submitAnswer && (
                   <Button

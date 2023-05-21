@@ -6634,7 +6634,7 @@ const Notebook = ({}: NotebookProps) => {
                 router.replace(router.pathname);
                 setVoiceAssistant(null);
               }}
-              openNodeHandler={openNodeHandler}
+              openNodeHandler={openLinkedNode}
               sx={{ position: "absolute", inset: "0px", zIndex: 999 }}
               root={rootQuery}
               startPractice={startPractice}
