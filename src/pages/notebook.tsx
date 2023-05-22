@@ -6643,36 +6643,41 @@ const Notebook = ({}: NotebookProps) => {
             />
           )}
 
-          <Tooltip title="Voice-based practice" placement="left">
-            <IconButton
-              onClick={() => console.log("stop")}
-              sx={{
-                position: "absolute",
-                right: "12px",
-                top: "128px",
-                width: "56px",
-                height: "56px",
-                color: theme =>
-                  // enabledAssistant
-                  true
-                    ? DESIGN_SYSTEM_COLORS.primary600
-                    : theme.palette.mode === "dark"
-                    ? DESIGN_SYSTEM_COLORS.notebookG200
-                    : DESIGN_SYSTEM_COLORS.gray500,
-                borderRadius: "8px",
-                backgroundColor: theme =>
-                  theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookMainBlack : DESIGN_SYSTEM_COLORS.gray50,
-              }}
-            >
-              <VolumeUpIcon />
-            </IconButton>
-          </Tooltip>
+          {voiceAssistant && !startPractice && (
+            <Tooltip title="Stop the voice interactions" placement="left">
+              <IconButton
+                onClick={() => setVoiceAssistant(null)}
+                sx={{
+                  position: "absolute",
+                  right: "8px",
+                  zIndex: 999,
+                  top: "76px",
+                  width: "60px",
+                  height: "60px",
+                  color: DESIGN_SYSTEM_COLORS.primary600,
+                  borderRadius: "8px",
+                  backgroundColor: theme =>
+                    theme.palette.mode === "dark"
+                      ? DESIGN_SYSTEM_COLORS.notebookMainBlack
+                      : DESIGN_SYSTEM_COLORS.gray50,
+                  ":hover": {
+                    backgroundColor: theme =>
+                      theme.palette.mode === "dark"
+                        ? DESIGN_SYSTEM_COLORS.notebookMainBlack
+                        : DESIGN_SYSTEM_COLORS.gray50,
+                  },
+                }}
+              >
+                <VolumeUpIcon />
+              </IconButton>
+            </Tooltip>
+          )}
 
           <MemoizedToolbox
             isLoading={isQueueWorking}
             sx={{
               position: "absolute",
-              right: { xs: "8px", sm: "18px" },
+              right: { xs: "8px", sm: "8px" },
               top: {
                 xs: openSidebar ? `${innerHeight * 0.25 + 7}px!important` : "7px!important",
                 sm: "7px!important",
