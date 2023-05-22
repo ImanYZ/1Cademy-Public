@@ -5,6 +5,7 @@ import CodeIcon from "@mui/icons-material/Code";
 import HelpCenterIcon from "@mui/icons-material/HelpCenter";
 import MyLocationIcon from "@mui/icons-material/MyLocation";
 import UndoIcon from "@mui/icons-material/Undo";
+import VolumeUpIcon from "@mui/icons-material/VolumeUp";
 import { Masonry } from "@mui/lab";
 import {
   Button,
@@ -6641,6 +6642,31 @@ const Notebook = ({}: NotebookProps) => {
               setStartPractice={setStartPractice}
             />
           )}
+
+          <Tooltip title="Voice-based practice" placement="left">
+            <IconButton
+              onClick={() => console.log("stop")}
+              sx={{
+                position: "absolute",
+                right: "12px",
+                top: "128px",
+                width: "56px",
+                height: "56px",
+                color: theme =>
+                  // enabledAssistant
+                  true
+                    ? DESIGN_SYSTEM_COLORS.primary600
+                    : theme.palette.mode === "dark"
+                    ? DESIGN_SYSTEM_COLORS.notebookG200
+                    : DESIGN_SYSTEM_COLORS.gray500,
+                borderRadius: "8px",
+                backgroundColor: theme =>
+                  theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookMainBlack : DESIGN_SYSTEM_COLORS.gray50,
+              }}
+            >
+              <VolumeUpIcon />
+            </IconButton>
+          </Tooltip>
 
           <MemoizedToolbox
             isLoading={isQueueWorking}
