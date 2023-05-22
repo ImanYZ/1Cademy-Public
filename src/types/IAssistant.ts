@@ -5,6 +5,10 @@ export type IAssistantEventDetail =
     }
   | {
       type: "REQUEST_ID_TOKEN";
+    }
+  | {
+      type: "EXTENSION_ID";
+      extensionId: string;
     };
 
 export type INarrateWorkerMessage = {
