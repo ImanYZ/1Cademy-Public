@@ -53,14 +53,28 @@ export const top4GoogleSearchResults = async (query: string, tagTitle?: string):
     auth: process.env.GOOGLE_CX_API_KEY,
   });
   const items = res.data.items || [];
-  return items
+  const nodeIds = items
     .filter(item => String(item.link).includes("/node/"))
     .map(item => {
       const link_parts: string[] = (item.link! || "").split("/");
       return (link_parts.pop() || "").replace(/[#?].+/g, "");
     })
-    .filter((nodeId: string) => nodeId)
-    .splice(0, 4);
+    .filter((nodeId: string) => nodeId);
+  const _nodeIds: Set<string> = new Set();
+  const nodeIdsChunk = arrayToChunks(nodeIds, 10);
+  for (const nodeIds of nodeIdsChunk) {
+    const nodes = await db
+      .collection("nodes")
+      .where("__name__", "in", nodeIds)
+      .where("nodeType", "in", ["Concept", "Relation"])
+      .limit(nodeIds.length)
+      .get();
+    for (const node of nodes.docs) {
+      if (_nodeIds.size >= 4) break;
+      _nodeIds.add(node.id);
+    }
+  }
+  return Array.from(_nodeIds);
 };
 
 export const top4TypesenseSearch = async (query: string, tagTitle?: string): Promise<string[]> => {
@@ -82,7 +96,23 @@ export const top4TypesenseSearch = async (query: string, tagTitle?: string): Pro
     .search(tSQuery);
 
   const hits = searchResults.hits || [];
-  return hits.splice(0, 4).map(hit => hit.document.id);
+  const nodeIds = hits.map(hit => hit.document.id);
+
+  const _nodeIds: Set<string> = new Set();
+  const nodeIdsChunk = arrayToChunks(nodeIds, 10);
+  for (const nodeIds of nodeIdsChunk) {
+    const nodes = await db
+      .collection("nodes")
+      .where("__name__", "in", nodeIds)
+      .where("nodeType", "in", ["Concept", "Relation"])
+      .limit(nodeIds.length)
+      .get();
+    for (const node of nodes.docs) {
+      if (_nodeIds.size >= 4) break;
+      _nodeIds.add(node.id);
+    }
+  }
+  return Array.from(_nodeIds);
 };
 
 export const sendMessageToGPT4 = async (
@@ -203,6 +233,48 @@ export const generateGpt4QueryResult = async (nodeIds: string[], uname?: string)
   }
 
   return queryResult;
+};
+
+export const generateBardQueryResult = async (nodeIds: string[], uname?: string) => {
+  const nodes: INode[] = [];
+  const practiceAnsweredByNodeIds: {
+    [nodeId: string]: number;
+  } = {};
+  const nodeIdChunks = arrayToChunks(nodeIds, 10);
+
+  for (const nodeIds of nodeIdChunks) {
+    const _nodes = await db.collection("nodes").where("__name__", "in", nodeIds).get();
+    for (const _node of _nodes.docs) {
+      if (uname) {
+        const practiceLogs = await db
+          .collection("practiceLog")
+          .where("user", "==", uname)
+          .where("node", "==", _node.id)
+          .where("q", "==", 5)
+          .limit(5)
+          .get();
+        practiceAnsweredByNodeIds[_node.id] = practiceLogs.docs.length;
+      }
+      const node = _node.data();
+      node.documentId = _node.id;
+      nodes.push(_node.data() as INode);
+    }
+  }
+
+  const bardResultNodes: {
+    title: string;
+    content: string;
+    correct_answers: number;
+  }[] = [];
+  for (const node of nodes) {
+    bardResultNodes.push({
+      title: node.title,
+      content: node.content,
+      correct_answers: practiceAnsweredByNodeIds[String(node.documentId!)] || 0,
+    });
+  }
+
+  return bardResultNodes;
 };
 
 export const processRecursiveCommands = async (
