@@ -126,6 +126,7 @@ export const NUMBER_POSSIBLE_OPTIONS: { [key in NumberOptionsKeys]: string[] } =
     "treaty",
     "trio",
     "tee",
+    "free",
   ],
   "4": ["four", "for", "fore", "floor", "ford", "fours", "force", "forge", "fork", "fort", "flower"],
   "5": ["five", "hive", "dive", "drive", "jive", "live", "lives", "fives", "rive"],

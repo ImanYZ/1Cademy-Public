@@ -456,6 +456,7 @@ const MapSentences: { [key: string]: string } = {
   "correct correct": "y",
 };
 const MapWords: { [key: string]: string } = {
+  submit: "y",
   yes: "y",
   yet: "y",
   yep: "y",
