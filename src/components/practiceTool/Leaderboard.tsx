@@ -62,8 +62,9 @@ const Leaderboard = ({ semesterId, sxBody }: LeaderboardProps) => {
 
   useEffect(() => {
     const res = mapSemesterStudentVoteStatToLeaderboard(studentStatsBySemester, selectedLeaderboardOption);
-    console.log("2ress", { res });
-    setLeaderBoardUSers(res);
+    const resSortedByPoints = res.sort((a, b) => b.totalPoints - a.totalPoints);
+    console.log("2ress", { resSortedByPoints });
+    setLeaderBoardUSers(resSortedByPoints);
   }, [selectedLeaderboardOption, studentStatsBySemester]);
 
   return (
@@ -304,9 +305,9 @@ const mapSemesterStudentVoteStatToLeaderboard = (
   // move to backend to not get unused data
   return stats.map(cur => {
     const statDaysFiltered = filterDaysStatsByOption(option, cur.days);
-    console.log({ statDaysFiltered });
+    // console.log({ statDaysFiltered });
     const totalPoints = statDaysFiltered.reduce((acu, cur) => acu + (cur?.totalPractices ?? 0), 0);
-    console.log({ totalPoints });
+    // console.log({ totalPoints });
     return { uname: cur.uname, totalPoints };
   });
 };
