@@ -100,6 +100,7 @@ export const Assistant = ({
   const getTranscriptProcessed = (transcript: string, listenType: VoiceAssistantType) => {
     // here process the transcript to correct most possible transcript value
     let possibleTranscript: string | null = null;
+    // if (listenType === "ANSWERING") possibleTranscript = getValidABCDOptions(transcript); // if is answering and is valid, we use directly
     if (listenType === "ANSWERING") possibleTranscript = getValidABCDOptions(transcript); // if is answering and is valid, we use directly
 
     const transcriptProcessed =

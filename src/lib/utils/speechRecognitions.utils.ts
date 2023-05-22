@@ -1,6 +1,6 @@
 import { VoiceAssistantType } from "src/nodeBookTypes";
 
-import { CHOICES_GRAMMER, CONFIRMATION_GRAMMER, NEXT_GRAMMER, NOTEBOOK_GRAMMER } from "./constants";
+import { CHOICES_GRAMMER, CONFIRMATION_GRAMMER, NEXT_GRAMMER, NOTEBOOK_GRAMMER, NUMBER_OPTIONS } from "./constants";
 
 // var SpeechRecognition: any | null = SpeechRecognition || webkitSpeechRecognition;
 const _SpeechRecognition =
@@ -58,6 +58,30 @@ export const getValidABCDOptions = (text: string): string | null => {
     .filter(c => "abcd".includes(c));
   const isCorrectMapping = resultMapping.length === text.length;
   return isCorrectMapping ? resultMapping.join("") : null;
+};
+
+export const getValidNumberOptions = (text: string): string[] => {
+  const options = text.split(" ");
+  const optionsFixed = options.map(cur => {
+    let possibleValue = "";
+    Object.keys(NUMBER_OPTIONS).forEach(key => {
+      if (key === cur) possibleValue = key;
+      if ((NUMBER_OPTIONS[key] as string[]).includes(cur)) possibleValue = key;
+    });
+    return possibleValue;
+  });
+
+  return optionsFixed;
+  // const resultSimple = Array.from(text).filter(c => "abcd".includes(c));
+  // const isCorrect = resultSimple.length === text.length;
+
+  // if (isCorrect) return text;
+
+  // const resultMapping = Array.from(text)
+  //   .map(forceCharacterToOptions)
+  //   .filter(c => "abcd".includes(c));
+  // const isCorrectMapping = resultMapping.length === text.length;
+  // return isCorrectMapping ? resultMapping.join("") : null;
 };
 
 const forceCharacterToOptions = (character: string) => {

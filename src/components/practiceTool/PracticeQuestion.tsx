@@ -223,7 +223,7 @@ const NodeQuestion = ({
                 }),
               }}
             >
-              {cur.choice}
+              {replaceTextByNumber(cur.choice, idx)}
 
               <Box
                 className="check-box"
@@ -708,4 +708,10 @@ const QuestionMessage = ({ messages, questionsCompleted, totalQuestions }: Quest
       />
     </Stack>
   );
+};
+
+// TODO: replace on DB the letters with numbers
+const replaceTextByNumber = (choice: string, idx: number) => {
+  const choiceContent = choice.split(" ").slice(1);
+  return [`${idx + 1}.`, ...choiceContent].join(" ");
 };

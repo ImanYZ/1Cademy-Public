@@ -85,6 +85,54 @@ export const QUESTION_OPTIONS = [
   "z",
 ];
 
+export type NumberOptionsKeys = "one" | "two" | "three" | "four" | "five" | "six" | "seven" | "eight" | "nine" | "ten";
+export const NUMBER_OPTIONS = {
+  one: ["Won", "Juan", "When", "Wren", "Run", "Son", "Fun", "Bun", "Ton", "Sun"],
+  two: [
+    "Too",
+    "To",
+    "Tu",
+    "Tue",
+    "Too-oo",
+    "Tutu",
+    "Tew",
+    "Tooey",
+    "Toot",
+    "Tootie",
+    "Tootoo",
+    "Tu-Tu",
+    "Toon",
+    "Tune",
+    "True",
+  ],
+  three: [
+    "Tree",
+    "Free",
+    "Fee",
+    "See",
+    "Sea",
+    "C",
+    "Th",
+    "Thrill",
+    "Threw",
+    "Throe",
+    "Thru",
+    "Thyme",
+    "T",
+    "Tea",
+    "Treaty",
+    "Trio",
+    "Tee",
+  ],
+  four: ["For", "Fore", "Floor", "Ford", "Fours", "Force", "Forge", "Fork", "Fort", "Flower"],
+  five: ["Hive", "Dive", "Drive", "Jive", "Live", "Lives", "Fives", "Rive"],
+  six: ["Sicks", "Sick", "Sics", "Seeks", "Sicko", "Seiko", "Sikhs", "Sake", "Slick"],
+  seven: ["Heaven", "Leaven", "Evan", "Sevin", "Sven", "Savin", "Savvy", "Saven", "Savon"],
+  eight: ["Ate", "Hate", "Bait", "Great", "Grate", "Weight", "Wait", "Kate", "Gate", "Sate", "Late"],
+  nine: ["Mine", "Sign", "Line", "Vine", "Fine", "Spine", "Shine", "Rhine", "Whine"],
+  ten: ["Den", "Zen", "Ken", "Penn", "Pen", "Gen", "Len", "Men", "Ren"],
+};
+
 export const ASSISTANT_POSITIVE_SENTENCES: string[] = [
   "Great job! You nailed it!",
   "That's correct! You're on fire today!",
@@ -131,7 +179,9 @@ grammar confirmationGrammer;
     
 public <command> = correct | yes;
 `;
-export const ANSWERING_ERROR = "Please only tell me a, b, c, d, or a combination of them, such as a-b, b-d, or a-c-d.";
+// export const ANSWERING_ERROR = "Please only tell me a, b, c, d, or a combination of them, such as a-b, b-d, or a-c-d.";
+export const ANSWERING_ERROR =
+  "Please only tell me one, two, three, for, or a combination of them, such as one-two, two-three, or one-two-three.";
 export const CONFIRM_ERROR = "Please only tell me yes or correct.";
 export const NEXT_ACTION_ERROR = "Please only tell me Next or Open Notebook.";
 export const OPEN_PRACTICE_ERROR = "Please only tell me continue practicing.";
