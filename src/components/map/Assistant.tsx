@@ -26,6 +26,7 @@ import {
   OPEN_PRACTICE_ERROR,
 } from "../../lib/utils/constants";
 import { getValidNumberOptions, newRecognition, recognizeInput2 } from "../../lib/utils/speechRecognitions.utils";
+import { delay } from "../../lib/utils/utils";
 import { Node, VoiceAssistant, VoiceAssistantType } from "../../nodeBookTypes";
 import { narrateLargeTexts } from "../../utils/helpers";
 import { nodeToNarration } from "../../utils/node.utils";
@@ -206,7 +207,8 @@ export const Assistant = ({
           if (recognitionResult.error === "aborted") break;
           console.log("onerror:", recognitionResult.error);
           originState.current = "onerror";
-          preMessage = getNoMatchPreviousMessage(listenType);
+
+          preMessage = listenType === "NOTEBOOK_ACTIONS" ? "" : getNoMatchPreviousMessage(listenType);
           message = "";
           console.log("onerror", { origin: originState.current, preMessage, message });
           continue;
@@ -326,9 +328,11 @@ export const Assistant = ({
               if (!askingRef.current) break; // should finish without make nothing
             }
             if (stopLoop) break;
+            await delay(1000);
             setForceAssistantReaction("");
             preMessage = "";
-            message = "";
+            message =
+              "Please tell me Continue Practicing whenever you'd like to continue, otherwise I'll wait for you to navigate through the notebook.";
             listenType = "NOTEBOOK_ACTIONS";
             continue;
           }
