@@ -12,6 +12,12 @@ import { IPractice } from "src/types/IPractice";
 import { Timestamp } from "firebase-admin/firestore";
 import moment from "moment";
 
+export type BARD_RESULT_NODE = {
+  title: string;
+  content: string;
+  correct_answers: number;
+};
+
 export const ASSISTANT_SYSTEM_PROMPT =
   `You are a tutor that answers each student's questions based on 1Cademy, which is a knowledge graph where:\n` +
   `- Each node represents a unique piece of knowledge, which we call a 'concept.'\n` +
@@ -53,14 +59,28 @@ export const top4GoogleSearchResults = async (query: string, tagTitle?: string):
     auth: process.env.GOOGLE_CX_API_KEY,
   });
   const items = res.data.items || [];
-  return items
+  const nodeIds = items
     .filter(item => String(item.link).includes("/node/"))
     .map(item => {
       const link_parts: string[] = (item.link! || "").split("/");
       return (link_parts.pop() || "").replace(/[#?].+/g, "");
     })
-    .filter((nodeId: string) => nodeId)
-    .splice(0, 4);
+    .filter((nodeId: string) => nodeId);
+  const _nodeIds: Set<string> = new Set();
+  const nodeIdsChunk = arrayToChunks(nodeIds, 10);
+  for (const nodeIds of nodeIdsChunk) {
+    const nodes = await db
+      .collection("nodes")
+      .where("__name__", "in", nodeIds)
+      .where("nodeType", "in", ["Concept", "Relation"])
+      .limit(nodeIds.length)
+      .get();
+    for (const node of nodes.docs) {
+      if (_nodeIds.size >= 4) break;
+      _nodeIds.add(node.id);
+    }
+  }
+  return Array.from(_nodeIds);
 };
 
 export const top4TypesenseSearch = async (query: string, tagTitle?: string): Promise<string[]> => {
@@ -82,7 +102,23 @@ export const top4TypesenseSearch = async (query: string, tagTitle?: string): Pro
     .search(tSQuery);
 
   const hits = searchResults.hits || [];
-  return hits.splice(0, 4).map(hit => hit.document.id);
+  const nodeIds = hits.map(hit => hit.document.id);
+
+  const _nodeIds: Set<string> = new Set();
+  const nodeIdsChunk = arrayToChunks(nodeIds, 10);
+  for (const nodeIds of nodeIdsChunk) {
+    const nodes = await db
+      .collection("nodes")
+      .where("__name__", "in", nodeIds)
+      .where("nodeType", "in", ["Concept", "Relation"])
+      .limit(nodeIds.length)
+      .get();
+    for (const node of nodes.docs) {
+      if (_nodeIds.size >= 4) break;
+      _nodeIds.add(node.id);
+    }
+  }
+  return Array.from(_nodeIds);
 };
 
 export const sendMessageToGPT4 = async (
@@ -110,14 +146,117 @@ export const sendMessageToGPT4 = async (
   return response.data;
 };
 
-export const createTeachMePrompt = (bookText: string): string => {
+export const sendMessageToGPT4V2 = async (
+  message: ChatCompletionRequestMessage,
+  conversation: IAssistantConversation,
+  request?: string
+): Promise<CreateChatCompletionResponse> => {
+  const config = new Configuration({
+    apiKey: process.env.OPENAI_API_KEY,
+  });
+
+  const openai = new OpenAIApi(config);
+  const messages = conversation.messages;
+  messages.push({
+    gptMessage: message,
+    request,
+  });
+
+  const response = await openai.createChatCompletion({
+    messages: [message],
+    model: "gpt-4",
+    temperature: 0,
+  });
+
+  return response.data;
+};
+
+export const getGPT4Queries = async (conversation: IAssistantConversation, bookText: string): Promise<string[]> => {
+  const prompt =
+    `You're a tutor and I'm a student.\n` +
+    `We have a database of flashcards.\n` +
+    `What should I search in our flashcard database to learn the following triple-quoted text?\n` +
+    `'''\n` +
+    `${bookText}\n` +
+    `'''\n` +
+    `Give me a MAXIMUM of 7 query strings with this pattern: \`\\1Cademy\\ [Your Query goes here]\\\`\n` +
+    `Only respond with an Array of query strings like:\n` +
+    `[\n` +
+    `"\\1Cademy\\ capitalist revolution",\n` +
+    `"\\1Cademy\\ history of capitalism"\n` +
+    `]\n` +
+    `DO NOT print any extra text or explanation.`;
+  const gpt4Response = await sendMessageToGPT4V2(
+    {
+      role: "user",
+      content: prompt,
+    },
+    conversation
+  );
+  const response = gpt4Response?.choices?.[0]?.message?.content || "";
+  const commands: string[] = parseJSONArrayFromResponse(response);
+  return commands.map((command: string) => command.replace("\\1Cademy\\", "").trim());
+};
+
+export const createTeachMePrompt = (bookText: string, nodes: IAssistantNode[]): string => {
   return (
-    `I've selected the following triple-quoted text. Explain it to me to learn it.\n` +
     `'''\n` +
     bookText +
     "\n" +
-    `'''`
+    `'''\n` +
+    `I am a student. Explain the above selected text (in triple-quotes) ONLY based on the content of this course shown in the following nodes. For each node, I've specified its title, content, and correct_answers (the number of times I've answered it correctly) in the following JSON object.\n` +
+    generateNodesPrompt(nodes) +
+    `\n` +
+    `Your response should be ONLY a JSON object with your well-explained response to my question and the list of titles of the nodes that you used in your explanation, with the following structure:\n` +
+    `{\n` +
+    `   "response": "Your well-explained response to my question"\n` +
+    `   nodes:\n` +
+    `   [\n` +
+    `      "The title of the node 1",\n` +
+    `      "The title of the node 2",\n` +
+    `      "The title of the node 3"\n` +
+    `   ]\n` +
+    `}`
   );
+};
+
+export const createDirectQuestionPrompt = (bookText: string, nodes: IAssistantNode[]): string => {
+  return (
+    `I am a student. Answer my following question, but NEVER give me the direct solution to a problem. That would be considered cheating. Instead, guide me step-by-step, to find the solution on my own.\n` +
+    `'''\n` +
+    bookText +
+    "\n" +
+    `'''\n` +
+    generateNodesPrompt(nodes) +
+    `\n` +
+    `Your response should be ONLY a JSON object with your well-explained response to my question and the list of titles of the nodes that you used in your explanation, with the following structure:\n` +
+    `{\n` +
+    `   "response": "Your well-explained response to my question"\n` +
+    `   nodes:\n` +
+    `   [\n` +
+    `      "The title of the node 1",\n` +
+    `      "The title of the node 2",\n` +
+    `      "The title of the node 3"\n` +
+    `   ]\n` +
+    `}`
+  );
+};
+
+export const generateNodesPrompt = (nodes: IAssistantNode[]) => {
+  let result = `[\n`;
+  let nodesList: string[] = [];
+  for (const node of nodes) {
+    let nodeResult = `  {\n`;
+    nodeResult += `    "title": '''${node.title}''',\n`;
+    nodeResult += `    "content": '''${node.content}''',\n`;
+    nodeResult += `    "correct_answers": ${node.practice?.answered || 0}\n`;
+    nodeResult += `  }`;
+    nodesList.push(nodeResult);
+  }
+  result += nodesList.join(",\n");
+  result += `\n]`;
+
+  return result;
 };
 
 export const extractSearchCommands = (response: string): string[] => {
@@ -203,6 +342,66 @@ export const generateGpt4QueryResult = async (nodeIds: string[], uname?: string)
   }
 
   return queryResult;
+};
+
+export const generateGpt4QueryResultV2 = async (nodeIds: string[], uname?: string) => {
+  const nodes: IAssistantNode[] = [];
+  const practiceAnsweredByNodeIds: {
+    [nodeId: string]: number;
+  } = {};
+  const nodeIdChunks = arrayToChunks(nodeIds, 10);
+
+  for (const nodeIds of nodeIdChunks) {
+    const _nodes = await db.collection("nodes").where("__name__", "in", nodeIds).get();
+    for (const _node of _nodes.docs) {
+      if (uname) {
+        const practiceLogs = await db
+          .collection("practiceLog")
+          .where("user", "==", uname)
+          .where("node", "==", _node.id)
+          .where("q", "==", 5)
+          .limit(5)
+          .get();
+        practiceAnsweredByNodeIds[_node.id] = practiceLogs.docs.length;
+      }
+      const node = _node.data() as INode;
+      node.documentId = _node.id;
+      nodes.push({
+        node: _node.id,
+        title: node.title,
+        type: node.nodeType,
+        link: getNodePageWithDomain(node.title, _node.id),
+        content: node.content,
+        nodeImage: node.nodeImage,
+        nodeVideo: node.nodeVideo,
+      });
+    }
+  }
+  return nodes;
+};
+
+export const getNodeResultFromCommands = async (
+  commands: string[],
+  tagTitle?: string,
+  uname?: string
+): Promise<IAssistantNode[]> => {
+  const nodeIds: Set<string> = new Set();
+
+  for (const command of commands) {
+    let _nodeIds: string[] = [];
+    const googleNodeIds = await top4GoogleSearchResults(command, tagTitle);
+    if (googleNodeIds.length) {
+      _nodeIds = googleNodeIds;
+    } else {
+      _nodeIds = await top4TypesenseSearch(command, tagTitle);
+    }
+
+    for (const _nodeId of _nodeIds) {
+      nodeIds.add(_nodeId);
+    }
+  }
+
+  return generateGpt4QueryResultV2(Array.from(nodeIds), uname);
 };
 
 export const processRecursiveCommands = async (
@@ -333,10 +532,38 @@ export const processRecursiveCommands = async (
 };
 
 const parseJSONArrayFromResponse = (content: string) => {
-  const matchResult = content.match(/\[[\t\n ]*?{/gm);
+  const matchResult = content.match(/\[[\t\n ]*?[{"]/gm);
   const startIdx = content.indexOf(matchResult![0]);
   let endIdx = -1;
   const stack: string[] = ["["];
+  for (let idx = startIdx + 1; idx < content.length; idx++) {
+    if (content[idx] === "{" || content[idx] === "[") {
+      stack.push(content[idx]);
+    } else if (content[idx] === "}" || content[idx] === "]") {
+      const opening = stack.pop();
+      if ((opening !== "{" && content[idx] === "}") || (opening !== "[" && content[idx] === "]")) {
+        throw new Error(`Invalid syntax at ${idx}`);
+      }
+    }
+
+    if (stack.length === 0) {
+      endIdx = idx;
+      break;
+    }
+  }
+
+  if (startIdx === -1 || endIdx === -1) {
+    throw new Error(`Invalid JSON provided`);
+  }
+
+  return JSON.parse(content.substring(startIdx, endIdx + 1).replace(/\\/g, "\\\\"));
+};
+
+export const parseJSONObjectResponse = (content: string) => {
+  const matchResult = content.match(/\{[\t\n ]*?\"/gm);
+  const startIdx = content.indexOf(matchResult![0]);
+  let endIdx = -1;
+  const stack: string[] = ["{"];
   for (let idx = startIdx + 1; idx < content.length; idx++) {
     if (content[idx] === "{" || content[idx] === "[") {
       stack.push(content[idx]);
@@ -443,6 +670,45 @@ export const findUnitNoFromNodeData = (nodeData: INode): string | undefined => {
   return;
 };
 
+export const getAssistantNodesFromTitles = async (
+  nodesList: {
+    title: string;
+    type?: string;
+  }[],
+  userData?: IUser
+) => {
+  const nodes: IAssistantNode[] = [];
+
+  for (const node of nodesList) {
+    const _nodes = await db.collection("nodes").where("title", "==", node.title).get();
+    for (const _node of _nodes.docs) {
+      const _nodeData = _node.data() as INode;
+      if (_nodeData.deleted || !["Concept", "Relation"].includes(_nodeData.nodeType)) continue;
+      const responseNode: IAssistantNode = {
+        node: _node.id,
+        title: _nodeData.title,
+        type: _nodeData.nodeType,
+        link: getNodePageWithDomain(_nodeData.title, _node.id),
+        content: _nodeData.content,
+        nodeImage: _nodeData.nodeImage,
+        nodeVideo: _nodeData.nodeVideo,
+      };
+      if (userData) {
+        // adding practice related data
+        responseNode.practice = await numOfPracticesAnsweredByNodeAndUser(_node.id, userData.uname);
+      }
+      const unitNo = findUnitNoFromNodeData(_nodeData);
+      if (unitNo !== undefined) {
+        responseNode.unit = unitNo;
+      }
+      nodes.push(responseNode);
+      break;
+    }
+  }
+
+  return nodes;
+};
+
 // 1. Try to match following to substring JSON explanation and JSON itself
 // [^\n]+\:[^a-zA-Z0-9]*?\[[\t\n ]*?{
 // 2. If JSON don't have explanation
@@ -482,35 +748,8 @@ export const loadResponseNodes = async (assistantMessage: IAssistantMessage, use
       case3 || case4
         ? parseJSONMarkdownObjectsFromResponse(_markupContent)
         : parseJSONArrayFromResponse(_markupContent);
-    const nodes: IAssistantNode[] = [];
 
-    for (const node of nodesList) {
-      const _nodes = await db.collection("nodes").where("title", "==", node.title).get();
-      for (const _node of _nodes.docs) {
-        const _nodeData = _node.data() as INode;
-        if (_nodeData.deleted || !["Concept", "Relation"].includes(_nodeData.nodeType)) continue;
-        const responseNode: IAssistantNode = {
-          node: _node.id,
-          title: _nodeData.title,
-          type: _nodeData.nodeType,
-          link: getNodePageWithDomain(_nodeData.title, _node.id),
-          content: _nodeData.content,
-          nodeImage: _nodeData.nodeImage,
-          nodeVideo: _nodeData.nodeVideo,
-        };
-        if (userData) {
-          // adding practice related data
-          responseNode.practice = await numOfPracticesAnsweredByNodeAndUser(_node.id, userData.uname);
-        }
-        const unitNo = findUnitNoFromNodeData(_nodeData);
-        if (unitNo !== undefined) {
-          responseNode.unit = unitNo;
-        }
-        nodes.push(responseNode);
-        break;
-      }
-    }
-
+    const nodes = await getAssistantNodesFromTitles(nodesList, userData);
     assistantMessage.message = _content;
     assistantMessage.nodes = nodes;
   } else {
