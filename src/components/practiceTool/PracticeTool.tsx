@@ -117,7 +117,13 @@ const PracticeTool = forwardRef<PracticeToolRef, PracticeToolProps>((props, ref)
     const question = res.question as SimpleQuestionNode;
     setSubmitAnswer(false);
     setSelectedAnswers(new Array(question.choices.length).fill(false));
-    setQuestionData(res);
+    setQuestionData({
+      ...res,
+      question: {
+        ...question,
+        choices: question.choices.map((cur, idx) => ({ ...cur, choice: replaceTextByNumber(cur.choice, idx) })),
+      },
+    });
   }, [currentSemester.tagId]);
 
   useImperativeHandle(ref, () => ({
@@ -266,3 +272,9 @@ const PracticeTool = forwardRef<PracticeToolRef, PracticeToolProps>((props, ref)
 });
 PracticeTool.displayName = "PracticeTool";
 export default PracticeTool;
+
+// TODO: replace on DB the letters with numbers
+const replaceTextByNumber = (choice: string, idx: number) => {
+  const choiceContent = choice.split(" ").slice(1);
+  return [`${idx + 1}.`, ...choiceContent].join(" ");
+};

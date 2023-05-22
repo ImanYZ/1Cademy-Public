@@ -22,11 +22,10 @@ import {
   ASSISTANT_POSITIVE_SENTENCES,
   CONFIRM_ERROR,
   NEXT_ACTION_ERROR,
+  NUMBER_POSSIBLE_OPTIONS,
   OPEN_PRACTICE_ERROR,
-  QUESTION_OPTIONS,
 } from "../../lib/utils/constants";
-import { getValidABCDOptions, newRecognition, recognizeInput2 } from "../../lib/utils/speechRecognitions.utils";
-import { getTextSplittedByCharacter } from "../../lib/utils/string.utils";
+import { getValidNumberOptions, newRecognition, recognizeInput2 } from "../../lib/utils/speechRecognitions.utils";
 import { Node, VoiceAssistant, VoiceAssistantType } from "../../nodeBookTypes";
 import { narrateLargeTexts } from "../../utils/helpers";
 import { nodeToNarration } from "../../utils/node.utils";
@@ -101,7 +100,7 @@ export const Assistant = ({
     // here process the transcript to correct most possible transcript value
     let possibleTranscript: string | null = null;
     // if (listenType === "ANSWERING") possibleTranscript = getValidABCDOptions(transcript); // if is answering and is valid, we use directly
-    if (listenType === "ANSWERING") possibleTranscript = getValidABCDOptions(transcript); // if is answering and is valid, we use directly
+    if (listenType === "ANSWERING") possibleTranscript = getValidNumberOptions(transcript); // if is answering and is valid, we use directly
 
     const transcriptProcessed =
       possibleTranscript ??
@@ -457,18 +456,6 @@ const MapSentences: { [key: string]: string } = {
   "correct correct": "y",
 };
 const MapWords: { [key: string]: string } = {
-  hey: "a",
-  be: "b",
-  ve: "b",
-  me: "b",
-  ce: "c",
-  see: "c",
-  se: "c",
-  de: "d",
-  dee: "d",
-  the: "d",
-  guess: "d",
-  he: "e",
   yes: "y",
   yet: "y",
   yep: "y",
@@ -484,19 +471,13 @@ const getMessageFromUserAnswering = (
   transcriptProcessed: string,
   questionsAmount: number
 ): { answerIsValid: boolean; message: string } => {
-  const possibleOptions = QUESTION_OPTIONS.slice(0, questionsAmount);
+  const possibleOptions = Object.keys(NUMBER_POSSIBLE_OPTIONS).slice(0, questionsAmount);
   console.log({ possibleOptions, transcriptProcessed });
-  const answerIsValid = Array.from(transcriptProcessed).reduce(
-    (acu, cur) => acu && possibleOptions.includes(cur),
-    true
-  );
+  const answerIsValid = transcriptProcessed.split(" ").reduce((acu, cur) => acu && possibleOptions.includes(cur), true);
 
   if (!answerIsValid) return { answerIsValid: false, message: ANSWERING_ERROR };
 
-  const message = `Did you choose option ${getTextSplittedByCharacter(transcriptProcessed, "-")
-    .split("-")
-    .map(char => (char === "a" ? "ae" : char))
-    .join("-")}.`;
+  const message = `Did you choose option ${transcriptProcessed}.`;
 
   return { answerIsValid: true, message };
 };
@@ -509,12 +490,18 @@ const getMessageFromUserConfirm = (
   submitOptions: boolean[]
 ): { message: string; isCorrect: boolean } => {
   const correctOptionsProcessed: CorrectOptionProcessed[] = choices
-    .reduce((acu: CorrectOptionProcessed[], cur, idx) => [...acu, { choice: cur, option: QUESTION_OPTIONS[idx] }], [])
+    .reduce(
+      (acu: CorrectOptionProcessed[], cur, idx) => [
+        ...acu,
+        { choice: cur, option: Object.keys(NUMBER_POSSIBLE_OPTIONS)[idx] },
+      ],
+      []
+    )
     .filter(cur => cur.choice.correct);
   const isCorrect = choices.reduce((acu, cur, idx) => acu && submitOptions[idx] === cur.correct, true);
   const selectedAnswerData: SelectedAnswer[] = choices.reduce((acu: SelectedAnswer[], cur, idx) => {
-    const answer: SelectedAnswer | null = selectedAnswer.includes(QUESTION_OPTIONS[idx])
-      ? { choice: cur, option: QUESTION_OPTIONS[idx] }
+    const answer: SelectedAnswer | null = selectedAnswer.includes(Object.keys(NUMBER_POSSIBLE_OPTIONS)[idx])
+      ? { choice: cur, option: Object.keys(NUMBER_POSSIBLE_OPTIONS)[idx] }
       : null;
     return answer ? [...acu, answer] : acu;
   }, []);
