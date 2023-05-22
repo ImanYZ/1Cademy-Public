@@ -2,6 +2,7 @@ import React, { useEffect } from "react";
 import { IAssistantEventDetail } from "src/types/IAssistant";
 
 import { getIdToken } from "@/lib/firestoreClient/auth";
+import { getAssistantExtensionId } from "@/lib/utils/assistant.utils";
 
 export const Iframe = () => {
   useEffect(() => {
@@ -11,11 +12,13 @@ export const Iframe = () => {
       if (detail.type === "REQUEST_ID_TOKEN") {
         (async () => {
           const idToken = await getIdToken();
-          chrome.runtime.sendMessage(process.env.NEXT_PUBLIC_CHROME_EXTENSION_ID, {
+          chrome.runtime.sendMessage(getAssistantExtensionId(), {
             type: "NOTEBOOK_ID_TOKEN",
             token: idToken,
           });
         })();
+      } else if (detail.type === "EXTENSION_ID") {
+        localStorage.setItem("ASSISTANT_EXTENSION_ID", detail.extensionId);
       }
     });
   }, []);

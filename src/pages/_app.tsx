@@ -15,6 +15,7 @@ import { AuthProvider } from "@/context/AuthContext";
 import { ThemeProvider } from "@/context/ThemeContext";
 import { initFirebaseClientSDK } from "@/lib/firestoreClient/firestoreClient.config";
 import { createEmotionCache } from "@/lib/theme/createEmotionCache";
+import { getAssistantExtensionId } from "@/lib/utils/assistant.utils";
 
 const clientSideEmotionCache = createEmotionCache();
 
@@ -29,7 +30,7 @@ initFirebaseClientSDK();
     auth.onAuthStateChanged(user => {
       if (user && chrome?.runtime?.sendMessage) {
         // sending user information to extension
-        chrome.runtime.sendMessage(process.env.NEXT_PUBLIC_CHROME_EXTENSION_ID, "onecademy-user-" + user?.displayName);
+        chrome.runtime.sendMessage(getAssistantExtensionId(), "onecademy-user-" + user?.displayName);
       }
     });
   }
