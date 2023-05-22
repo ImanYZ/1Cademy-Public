@@ -1,7 +1,13 @@
 import { admin, db } from "@/lib/firestoreServer/admin";
 import { Timestamp } from "firebase-admin/firestore";
 import { NextApiRequest, NextApiResponse } from "next";
-import { IAssistantConversation, IAssistantResponse, IAssitantRequestAction } from "src/types/IAssitantConversation";
+import {
+  IAssistantConversation,
+  IAssistantMessage,
+  IAssistantResponse,
+  IAssitantRequestAction,
+} from "src/types/IAssitantConversation";
+import { INode } from "src/types/INode";
 import { IUser } from "src/types/IUser";
 import {
   ASSISTANT_SYSTEM_PROMPT,
@@ -11,6 +17,13 @@ import {
   loadResponseNodes,
   getGeneralKnowledgePrompt,
   getExplainMorePrompt,
+  getGPT4Queries,
+  getNodeResultFromCommands,
+  generateNodesPrompt,
+  createDirectQuestionPrompt,
+  sendMessageToGPT4V2,
+  parseJSONObjectResponse,
+  getAssistantNodesFromTitles,
 } from "src/utils/assistant-helpers";
 
 export type IAssistantRequestPayload = {
@@ -40,7 +53,16 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
     // Course Id
     const tagId: string = "HjIukJr12fIP9DNoD9gX";
 
-    let userData: IUser | null = null;
+    let tagTitle: string = "";
+    if (tagId) {
+      const tagDoc = await db.collection("nodes").doc(tagId).get();
+      if (tagDoc.exists) {
+        const tag = tagDoc.data() as INode;
+        tagTitle = tag.title;
+      }
+    }
+
+    let userData: IUser | undefined = undefined;
     // loading user document if authorization provided
     let token = (req.headers.authorization || req.headers.Authorization || "") as string;
     token = token.replace("Bearer ", "").trim();
@@ -83,24 +105,29 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
       });
     }
 
-    const prompt: string =
-      payload.actionType === "TeachContent"
-        ? createTeachMePrompt(payload.message)
-        : payload.actionType === "DirectQuestion"
-        ? payload.message
-        : payload.actionType === "GeneralExplanation"
+    let prompt: string =
+      payload.actionType === "GeneralExplanation"
         ? getGeneralKnowledgePrompt(conversationData, payload.message)
         : payload.actionType === "ExplainMore"
         ? getExplainMorePrompt(conversationData, payload.message)
         : "";
 
-    if (!payload.message.trim()) {
+    if (payload.actionType === "TeachContent" || payload.actionType === "DirectQuestion") {
+      const commands = await getGPT4Queries(conversationData, payload.message);
+      const nodes = await getNodeResultFromCommands(commands, tagTitle, userData?.uname);
+      prompt =
+        payload.actionType === "TeachContent"
+          ? createTeachMePrompt(payload.message, nodes)
+          : createDirectQuestionPrompt(payload.message, nodes);
+    }
+
+    if (!payload.message.trim() || !prompt) {
       return res.status(200).json({
         message: "Unknown",
       });
     }
 
-    const gpt4Response = await sendMessageToGPT4(
+    const gpt4Response = await sendMessageToGPT4V2(
       {
         role: "user",
         content: prompt,
@@ -109,16 +136,29 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
       payload.message
     );
 
-    // Process ChatGPT requests for Nodes Search recursively.
-    const assistantMessage = await processRecursiveCommands(
-      gpt4Response.choices?.[0]?.message!,
-      conversationData,
-      tagId,
-      userData?.uname!,
-      1
-    );
-    // Parsing JSON and removing it from final content.
-    await loadResponseNodes(assistantMessage);
+    const assistantMessage: IAssistantMessage = {
+      gptMessage: gpt4Response?.choices?.[0]?.message,
+      message: "",
+    };
+    conversationData.messages.push(assistantMessage);
+
+    if (payload.actionType === "TeachContent" || payload.actionType === "DirectQuestion") {
+      const _message = assistantMessage.gptMessage?.content || "";
+      const response: {
+        response: string;
+        nodes: string[];
+      } = parseJSONObjectResponse(_message);
+
+      assistantMessage.message = response?.response || assistantMessage.message;
+      const nodes = await getAssistantNodesFromTitles(
+        (response?.nodes || []).map(node => ({ title: node })),
+        userData
+      );
+      assistantMessage.nodes = nodes;
+    } else {
+      assistantMessage.message = assistantMessage.gptMessage?.content || "";
+    }
+
     // Saving conversation process to provide context of conversation in future
     await saveConversation(assistantConversationRef, assistantConversation, conversationData);
 
