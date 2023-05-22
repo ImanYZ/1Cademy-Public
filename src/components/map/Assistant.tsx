@@ -386,7 +386,11 @@ export const Assistant = ({
 
   return (
     <Tooltip
-      title={displayNotebook ? 'To go back to practice, say "Continue practicing."' : ""}
+      title={
+        displayNotebook
+          ? 'To go back to practice, say "Continue practicing" or say "Stop" to stop the voice interactions.'
+          : ""
+      }
       placement="top"
       open={true}
     >

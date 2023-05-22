@@ -5,6 +5,7 @@ import CodeIcon from "@mui/icons-material/Code";
 import HelpCenterIcon from "@mui/icons-material/HelpCenter";
 import MyLocationIcon from "@mui/icons-material/MyLocation";
 import UndoIcon from "@mui/icons-material/Undo";
+import VolumeUpIcon from "@mui/icons-material/VolumeUp";
 import { Masonry } from "@mui/lab";
 import {
   Button,
@@ -6642,11 +6643,41 @@ const Notebook = ({}: NotebookProps) => {
             />
           )}
 
+          {voiceAssistant && !startPractice && (
+            <Tooltip title="Stop the voice interactions" placement="left">
+              <IconButton
+                onClick={() => setVoiceAssistant(null)}
+                sx={{
+                  position: "absolute",
+                  right: "8px",
+                  zIndex: 999,
+                  top: "76px",
+                  width: "60px",
+                  height: "60px",
+                  color: DESIGN_SYSTEM_COLORS.primary600,
+                  borderRadius: "8px",
+                  backgroundColor: theme =>
+                    theme.palette.mode === "dark"
+                      ? DESIGN_SYSTEM_COLORS.notebookMainBlack
+                      : DESIGN_SYSTEM_COLORS.gray50,
+                  ":hover": {
+                    backgroundColor: theme =>
+                      theme.palette.mode === "dark"
+                        ? DESIGN_SYSTEM_COLORS.notebookMainBlack
+                        : DESIGN_SYSTEM_COLORS.gray50,
+                  },
+                }}
+              >
+                <VolumeUpIcon />
+              </IconButton>
+            </Tooltip>
+          )}
+
           <MemoizedToolbox
             isLoading={isQueueWorking}
             sx={{
               position: "absolute",
-              right: { xs: "8px", sm: "18px" },
+              right: { xs: "8px", sm: "8px" },
               top: {
                 xs: openSidebar ? `${innerHeight * 0.25 + 7}px!important` : "7px!important",
                 sm: "7px!important",
