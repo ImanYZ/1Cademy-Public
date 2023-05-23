@@ -111,7 +111,7 @@ const NodeQuestion = ({
             <ListItem
               onClick={() => onSelectAnswer(idx)}
               sx={{
-                p: "24px 16px",
+                p: "18px 16px",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "space-between",
@@ -441,8 +441,11 @@ export const PracticeQuestion = ({
         position: "relative",
       }}
     >
-      <IconButton onClick={onClose} sx={{ color: theme => theme.palette.common.primary800, position: "absolute" }}>
-        <CloseFullscreenIcon />
+      <IconButton
+        onClick={onClose}
+        sx={{ color: theme => theme.palette.common.primary800, position: "fixed", top: "50px", left: "63px" }}
+      >
+        <CloseFullscreenIcon sx={{ fontSize: "32px" }} />
       </IconButton>
 
       {practiceIsCompleted && (
@@ -703,8 +706,8 @@ const QuestionMessage = ({ messages, questionsCompleted, totalQuestions }: Quest
       </Box>
       <CustomCircularProgress
         variant="determinate"
-        value={(100 * questionsCompleted) / totalQuestions}
-        realvalue={questionsCompleted}
+        value={(100 * (questionsCompleted > totalQuestions ? totalQuestions : questionsCompleted)) / totalQuestions}
+        realValue={questionsCompleted}
       />
     </Stack>
   );
