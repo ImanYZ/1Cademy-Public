@@ -1,8 +1,9 @@
-import { QUESTION_OPTIONS } from "./constants";
+import { NUMBER_POSSIBLE_OPTIONS } from "./constants";
 
 export const getAnswersLettersOptions = (selectedAnswer: string, optionsNumber: number) => {
-  const possibleOptions = QUESTION_OPTIONS.slice(0, optionsNumber);
-  const submitOptions: boolean[] = Array.from(possibleOptions).map(cur => Boolean(selectedAnswer.includes(cur)));
+  const selectedAnswers = selectedAnswer.split(" ");
+  const possibleOptions = Object.keys(NUMBER_POSSIBLE_OPTIONS).slice(0, optionsNumber);
+  const submitOptions: boolean[] = Array.from(possibleOptions).map(cur => Boolean(selectedAnswers.includes(cur)));
   return submitOptions;
 };
 

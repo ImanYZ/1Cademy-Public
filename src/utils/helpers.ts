@@ -73,7 +73,7 @@ export const narrateLargeTexts = (message: string) => {
 
       const maxCharacters = 99;
       const messages = message
-        .split(".")
+        .split(/[.,]/)
         .reduce(
           (a: string[], c) => (c.length <= maxCharacters ? [...a, c] : [...a, ...splitSentenceIntoChunks(c)]),
           []

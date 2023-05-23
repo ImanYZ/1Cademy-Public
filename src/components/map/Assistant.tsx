@@ -22,11 +22,11 @@ import {
   ASSISTANT_POSITIVE_SENTENCES,
   CONFIRM_ERROR,
   NEXT_ACTION_ERROR,
+  NUMBER_POSSIBLE_OPTIONS,
   OPEN_PRACTICE_ERROR,
-  QUESTION_OPTIONS,
 } from "../../lib/utils/constants";
-import { getValidABCDOptions, newRecognition, recognizeInput2 } from "../../lib/utils/speechRecognitions.utils";
-import { getTextSplittedByCharacter } from "../../lib/utils/string.utils";
+import { getValidNumberOptions, newRecognition, recognizeInput2 } from "../../lib/utils/speechRecognitions.utils";
+import { delay } from "../../lib/utils/utils";
 import { Node, VoiceAssistant, VoiceAssistantType } from "../../nodeBookTypes";
 import { narrateLargeTexts } from "../../utils/helpers";
 import { nodeToNarration } from "../../utils/node.utils";
@@ -100,7 +100,8 @@ export const Assistant = ({
   const getTranscriptProcessed = (transcript: string, listenType: VoiceAssistantType) => {
     // here process the transcript to correct most possible transcript value
     let possibleTranscript: string | null = null;
-    if (listenType === "ANSWERING") possibleTranscript = getValidABCDOptions(transcript); // if is answering and is valid, we use directly
+    // if (listenType === "ANSWERING") possibleTranscript = getValidABCDOptions(transcript); // if is answering and is valid, we use directly
+    if (listenType === "ANSWERING") possibleTranscript = getValidNumberOptions(transcript); // if is answering and is valid, we use directly
 
     const transcriptProcessed =
       possibleTranscript ??
@@ -144,10 +145,14 @@ export const Assistant = ({
       if (!speechRef.current)
         return console.warn("Speech recognition doesn't exist on this browser, install last version of Chrome browser");
 
-      let message = getMessageFromQuestionNode(questionNode);
+      const submittedAnswers = assistantRef.current?.getSubmittedAnswers() ?? [];
+      let message =
+        submittedAnswers.length > 1
+          ? messageFromUserConfirm2(questionNode.choices, submittedAnswers)
+          : getMessageFromQuestionNode(questionNode);
       let preMessage = ""; // used add a previous message for example , "sorry I don't understand"
       let preTranscriptProcessed = "";
-      let listenType: VoiceAssistantType = "ANSWERING";
+      let listenType: VoiceAssistantType = submittedAnswers.length > 1 ? "NEXT_ACTION" : "ANSWERING";
       askingRef.current = true;
       originState.current = "narrate-question";
       while (askingRef.current) {
@@ -206,7 +211,8 @@ export const Assistant = ({
           if (recognitionResult.error === "aborted") break;
           console.log("onerror:", recognitionResult.error);
           originState.current = "onerror";
-          preMessage = getNoMatchPreviousMessage(listenType);
+
+          preMessage = listenType === "NOTEBOOK_ACTIONS" ? "" : getNoMatchPreviousMessage(listenType);
           message = "";
           console.log("onerror", { origin: originState.current, preMessage, message });
           continue;
@@ -326,9 +332,11 @@ export const Assistant = ({
               if (!askingRef.current) break; // should finish without make nothing
             }
             if (stopLoop) break;
+            await delay(1000);
             setForceAssistantReaction("");
             preMessage = "";
-            message = "";
+            message =
+              "Please tell me Continue Practicing whenever you'd like to continue, otherwise I'll wait for you to navigate through the notebook.";
             listenType = "NOTEBOOK_ACTIONS";
             continue;
           }
@@ -456,18 +464,7 @@ const MapSentences: { [key: string]: string } = {
   "correct correct": "y",
 };
 const MapWords: { [key: string]: string } = {
-  hey: "a",
-  be: "b",
-  ve: "b",
-  me: "b",
-  ce: "c",
-  see: "c",
-  se: "c",
-  de: "d",
-  dee: "d",
-  the: "d",
-  guess: "d",
-  he: "e",
+  submit: "y",
   yes: "y",
   yet: "y",
   yep: "y",
@@ -483,19 +480,13 @@ const getMessageFromUserAnswering = (
   transcriptProcessed: string,
   questionsAmount: number
 ): { answerIsValid: boolean; message: string } => {
-  const possibleOptions = QUESTION_OPTIONS.slice(0, questionsAmount);
+  const possibleOptions = Object.keys(NUMBER_POSSIBLE_OPTIONS).slice(0, questionsAmount);
   console.log({ possibleOptions, transcriptProcessed });
-  const answerIsValid = Array.from(transcriptProcessed).reduce(
-    (acu, cur) => acu && possibleOptions.includes(cur),
-    true
-  );
+  const answerIsValid = transcriptProcessed.split(" ").reduce((acu, cur) => acu && possibleOptions.includes(cur), true);
 
   if (!answerIsValid) return { answerIsValid: false, message: ANSWERING_ERROR };
 
-  const message = `Did you choose option ${getTextSplittedByCharacter(transcriptProcessed, "-")
-    .split("-")
-    .map(char => (char === "a" ? "ae" : char))
-    .join("-")}.`;
+  const message = `Did you choose option ${transcriptProcessed}.`;
 
   return { answerIsValid: true, message };
 };
@@ -508,12 +499,18 @@ const getMessageFromUserConfirm = (
   submitOptions: boolean[]
 ): { message: string; isCorrect: boolean } => {
   const correctOptionsProcessed: CorrectOptionProcessed[] = choices
-    .reduce((acu: CorrectOptionProcessed[], cur, idx) => [...acu, { choice: cur, option: QUESTION_OPTIONS[idx] }], [])
+    .reduce(
+      (acu: CorrectOptionProcessed[], cur, idx) => [
+        ...acu,
+        { choice: cur, option: Object.keys(NUMBER_POSSIBLE_OPTIONS)[idx] },
+      ],
+      []
+    )
     .filter(cur => cur.choice.correct);
   const isCorrect = choices.reduce((acu, cur, idx) => acu && submitOptions[idx] === cur.correct, true);
   const selectedAnswerData: SelectedAnswer[] = choices.reduce((acu: SelectedAnswer[], cur, idx) => {
-    const answer: SelectedAnswer | null = selectedAnswer.includes(QUESTION_OPTIONS[idx])
-      ? { choice: cur, option: QUESTION_OPTIONS[idx] }
+    const answer: SelectedAnswer | null = selectedAnswer.includes(Object.keys(NUMBER_POSSIBLE_OPTIONS)[idx])
+      ? { choice: cur, option: Object.keys(NUMBER_POSSIBLE_OPTIONS)[idx] }
       : null;
     return answer ? [...acu, answer] : acu;
   }, []);
@@ -532,4 +529,39 @@ const getMessageFromUserConfirm = (
     : "";
   const message = `${assistantMessageBasedOnResultOfAnswer} ${feedbackForAnswers} ${feedbackToWrongChoice}` ?? "";
   return { message, isCorrect };
+};
+
+const messageFromUserConfirm2 = (choices: KnowledgeChoice[], submitOptions: boolean[]): string => {
+  const isCorrect = submitOptions.reduce((acu, cur, idx) => acu && cur === choices[idx].correct, true);
+  const correctOptionsProcessed: CorrectOptionProcessed[] = choices
+    .reduce(
+      (acu: CorrectOptionProcessed[], cur, idx) => [
+        ...acu,
+        { choice: cur, option: Object.keys(NUMBER_POSSIBLE_OPTIONS)[idx] },
+      ],
+      []
+    )
+    .filter(cur => cur.choice.correct);
+  const selectedAnswerData: SelectedAnswer[] = choices.reduce((acu: SelectedAnswer[], cur, idx) => {
+    if (submitOptions[idx] && choices[idx].correct)
+      return [...acu, { choice: choices[idx], option: Object.keys(NUMBER_POSSIBLE_OPTIONS)[idx] }];
+    return acu;
+  }, []);
+
+  const feedbackForAnswers = selectedAnswerData
+    .map(
+      (cur, idx) => `You selected option ${selectedAnswerData[idx].option}: ${selectedAnswerData[idx].choice.feedback}`
+    )
+    .join(". ");
+  const possibleAssistantMessages = isCorrect ? ASSISTANT_POSITIVE_SENTENCES : ASSISTANT_NEGATIVE_SENTENCES;
+  const randomMessageIndex = Math.floor(Math.random() * possibleAssistantMessages.length);
+  const assistantMessageBasedOnResultOfAnswer = possibleAssistantMessages[randomMessageIndex];
+
+  const feedbackToWrongChoice = !isCorrect
+    ? `The correct choice${correctOptionsProcessed.length > 1 ? "s are" : " is"} ${correctOptionsProcessed
+        .map(c => `${c.option}: ${c.choice.feedback}`)
+        .join(" ")}`
+    : "";
+  const message = `${assistantMessageBasedOnResultOfAnswer} ${feedbackForAnswers} ${feedbackToWrongChoice}` ?? "";
+  return message;
 };
