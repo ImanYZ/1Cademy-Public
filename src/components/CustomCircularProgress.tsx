@@ -7,7 +7,7 @@ import { DESIGN_SYSTEM_COLORS } from "@/lib/theme/colors";
 
 // Inspired by the former Facebook spinners.
 type CustomCircularProgressProps = {
-  realvalue: number;
+  realValue: number;
 };
 
 export const CustomCircularProgress = (props: CircularProgressProps & CustomCircularProgressProps) => {
@@ -17,7 +17,8 @@ export const CustomCircularProgress = (props: CircularProgressProps & CustomCirc
         variant="determinate"
         sx={{
           "& .MuiCircularProgress-circle": {
-            stroke: DESIGN_SYSTEM_COLORS.notebookG450,
+            stroke: theme =>
+              theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookG450 : DESIGN_SYSTEM_COLORS.orange200,
           },
         }}
         thickness={4}
@@ -31,6 +32,7 @@ export const CustomCircularProgress = (props: CircularProgressProps & CustomCirc
           position: "absolute",
           left: 0,
         }}
+        thickness={4}
         size={60}
         {...props}
       />
@@ -44,7 +46,7 @@ export const CustomCircularProgress = (props: CircularProgressProps & CustomCirc
           justifyContent: "center",
         }}
       >
-        <Typography sx={{ fontSize: "18px", fontWeight: "600" }}>{`${Math.round(props.realvalue)}`}</Typography>
+        <Typography sx={{ fontSize: "18px", fontWeight: "600" }}>{`${Math.round(props.realValue)}`}</Typography>
       </Box>
     </Box>
   );
