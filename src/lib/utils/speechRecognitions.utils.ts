@@ -1,6 +1,13 @@
 import { VoiceAssistantType } from "src/nodeBookTypes";
 
-import { CHOICES_GRAMMER, CONFIRMATION_GRAMMER, NEXT_GRAMMER, NOTEBOOK_GRAMMER } from "./constants";
+import {
+  CHOICES_GRAMMER,
+  CONFIRMATION_GRAMMER,
+  NEXT_GRAMMER,
+  NOTEBOOK_GRAMMER,
+  NUMBER_POSSIBLE_OPTIONS,
+  NumberOptionsKeys,
+} from "./constants";
 
 // var SpeechRecognition: any | null = SpeechRecognition || webkitSpeechRecognition;
 const _SpeechRecognition =
@@ -58,6 +65,21 @@ export const getValidABCDOptions = (text: string): string | null => {
     .filter(c => "abcd".includes(c));
   const isCorrectMapping = resultMapping.length === text.length;
   return isCorrectMapping ? resultMapping.join("") : null;
+};
+
+export const getValidNumberOptions = (text: string): string => {
+  const optionsBySpace = text.split(" ");
+  const options = optionsBySpace.length > 1 ? optionsBySpace : Array.from(text);
+  const optionsFixed = options.map(cur => {
+    let possibleValue = "";
+    (Object.keys(NUMBER_POSSIBLE_OPTIONS) as NumberOptionsKeys[]).forEach(key => {
+      if (key === cur) possibleValue = key;
+      if (NUMBER_POSSIBLE_OPTIONS[key].includes(cur)) possibleValue = key;
+    });
+    return possibleValue;
+  });
+  console.log({ optionsFixed });
+  return optionsFixed.join(" ");
 };
 
 const forceCharacterToOptions = (character: string) => {

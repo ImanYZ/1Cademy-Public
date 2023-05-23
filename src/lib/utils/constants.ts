@@ -85,6 +85,77 @@ export const QUESTION_OPTIONS = [
   "z",
 ];
 
+export type NumberOptionsKeys = "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9" | "10";
+
+export const NUMBER_POSSIBLE_OPTIONS: { [key in NumberOptionsKeys]: string[] } = {
+  "1": ["one", "won", "juan", "when", "wren", "run", "son", "fun", "bun", "ton", "sun"],
+  "2": [
+    "two",
+    "too",
+    "to",
+    "tu",
+    "tue",
+    "too-oo",
+    "tutu",
+    "tew",
+    "tooey",
+    "toot",
+    "tootie",
+    "tootoo",
+    "tu-tu",
+    "toon",
+    "tune",
+    "true",
+  ],
+  "3": [
+    "three",
+    "tree",
+    "free",
+    "fee",
+    "see",
+    "sea",
+    "c",
+    "th",
+    "thrill",
+    "threw",
+    "throe",
+    "thru",
+    "thyme",
+    "t",
+    "tea",
+    "treaty",
+    "trio",
+    "tee",
+    "free",
+  ],
+  "4": ["four", "for", "fore", "floor", "ford", "fours", "force", "forge", "fork", "fort", "flower"],
+  "5": ["five", "hive", "dive", "drive", "jive", "live", "lives", "fives", "rive"],
+  "6": ["six", "sicks", "sick", "sics", "seeks", "sicko", "seiko", "sikhs", "sake", "slick"],
+  "7": ["seven", "heaven", "leaven", "evan", "sevin", "sven", "savin", "savvy", "saven", "savon"],
+  "8": [
+    "eight",
+    "ate",
+    "hate",
+    "bait",
+    "great",
+    "grate",
+    "weight",
+    "wait",
+    "kate",
+    "gate",
+    "sate",
+    "late",
+    "hate",
+    "hey",
+    "hade",
+    "hayes",
+    "hey",
+    "aids",
+  ],
+  "9": ["nine", "mine", "sign", "line", "vine", "fine", "spine", "shine", "rhine", "whine"],
+  "10": ["ten", "den", "zen", "ken", "penn", "pen", "gen", "len", "men", "ren"],
+};
+
 export const ASSISTANT_POSITIVE_SENTENCES: string[] = [
   "Great job! You nailed it!",
   "That's correct! You're on fire today!",
@@ -131,7 +202,9 @@ grammar confirmationGrammer;
     
 public <command> = correct | yes;
 `;
-export const ANSWERING_ERROR = "Please only tell me a, b, c, d, or a combination of them, such as a-b, b-d, or a-c-d.";
+// export const ANSWERING_ERROR = "Please only tell me a, b, c, d, or a combination of them, such as a-b, b-d, or a-c-d.";
+export const ANSWERING_ERROR =
+  "Please only tell me one, two, three, for, or a combination of them, such as one-two, two-three, or one-two-three.";
 export const CONFIRM_ERROR = "Please only tell me yes or correct.";
 export const NEXT_ACTION_ERROR = "Please only tell me Next or Open Notebook.";
 export const OPEN_PRACTICE_ERROR = "Please only tell me continue practicing.";
