@@ -145,10 +145,14 @@ export const Assistant = ({
       if (!speechRef.current)
         return console.warn("Speech recognition doesn't exist on this browser, install last version of Chrome browser");
 
-      let message = getMessageFromQuestionNode(questionNode);
+      const submittedAnswers = assistantRef.current?.getSubmittedAnswers() ?? [];
+      let message =
+        submittedAnswers.length > 1
+          ? messageFromUserConfirm2(questionNode.choices, submittedAnswers)
+          : getMessageFromQuestionNode(questionNode);
       let preMessage = ""; // used add a previous message for example , "sorry I don't understand"
       let preTranscriptProcessed = "";
-      let listenType: VoiceAssistantType = "ANSWERING";
+      let listenType: VoiceAssistantType = submittedAnswers.length > 1 ? "NEXT_ACTION" : "ANSWERING";
       askingRef.current = true;
       originState.current = "narrate-question";
       while (askingRef.current) {
@@ -525,4 +529,39 @@ const getMessageFromUserConfirm = (
     : "";
   const message = `${assistantMessageBasedOnResultOfAnswer} ${feedbackForAnswers} ${feedbackToWrongChoice}` ?? "";
   return { message, isCorrect };
+};
+
+const messageFromUserConfirm2 = (choices: KnowledgeChoice[], submitOptions: boolean[]): string => {
+  const isCorrect = submitOptions.reduce((acu, cur, idx) => acu && cur === choices[idx].correct, true);
+  const correctOptionsProcessed: CorrectOptionProcessed[] = choices
+    .reduce(
+      (acu: CorrectOptionProcessed[], cur, idx) => [
+        ...acu,
+        { choice: cur, option: Object.keys(NUMBER_POSSIBLE_OPTIONS)[idx] },
+      ],
+      []
+    )
+    .filter(cur => cur.choice.correct);
+  const selectedAnswerData: SelectedAnswer[] = choices.reduce((acu: SelectedAnswer[], cur, idx) => {
+    if (submitOptions[idx] && choices[idx].correct)
+      return [...acu, { choice: choices[idx], option: Object.keys(NUMBER_POSSIBLE_OPTIONS)[idx] }];
+    return acu;
+  }, []);
+
+  const feedbackForAnswers = selectedAnswerData
+    .map(
+      (cur, idx) => `You selected option ${selectedAnswerData[idx].option}: ${selectedAnswerData[idx].choice.feedback}`
+    )
+    .join(". ");
+  const possibleAssistantMessages = isCorrect ? ASSISTANT_POSITIVE_SENTENCES : ASSISTANT_NEGATIVE_SENTENCES;
+  const randomMessageIndex = Math.floor(Math.random() * possibleAssistantMessages.length);
+  const assistantMessageBasedOnResultOfAnswer = possibleAssistantMessages[randomMessageIndex];
+
+  const feedbackToWrongChoice = !isCorrect
+    ? `The correct choice${correctOptionsProcessed.length > 1 ? "s are" : " is"} ${correctOptionsProcessed
+        .map(c => `${c.option}: ${c.choice.feedback}`)
+        .join(" ")}`
+    : "";
+  const message = `${assistantMessageBasedOnResultOfAnswer} ${feedbackForAnswers} ${feedbackToWrongChoice}` ?? "";
+  return message;
 };

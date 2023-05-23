@@ -60,6 +60,7 @@ export type PracticeToolRef = {
   getQuestionParents: () => string[];
   getQuestionData: () => SimpleQuestionNode | null;
   onSelectedQuestionAnswer: (index: number) => void;
+  getSubmittedAnswers: () => boolean[];
 };
 
 const PracticeTool = forwardRef<PracticeToolRef, PracticeToolProps>((props, ref) => {
@@ -84,6 +85,7 @@ const PracticeTool = forwardRef<PracticeToolRef, PracticeToolProps>((props, ref)
   const [submitAnswer, setSubmitAnswer] = useState(false);
   const [selectedAnswers, setSelectedAnswers] = useState<boolean[]>([]);
   const [narratedAnswerIdx, setNarratedAnswerIdx] = useState(-1); // -1: nothing is selected
+  const [submittedAnswers, setSubmittedAnswers] = useState<boolean[]>([]);
 
   const onRunPracticeTool = useCallback(() => {
     (start: boolean) => {
@@ -98,6 +100,7 @@ const PracticeTool = forwardRef<PracticeToolRef, PracticeToolProps>((props, ref)
       if (!questionData) return;
 
       setSubmitAnswer(true);
+      setSubmittedAnswers(answers);
       const payload: ICheckAnswerRequestParams = {
         answers,
         flashcardId: questionData.flashcardId,
@@ -111,12 +114,12 @@ const PracticeTool = forwardRef<PracticeToolRef, PracticeToolProps>((props, ref)
 
   const getPracticeQuestion = useCallback(async () => {
     const res: any = await Post("/practice", { tagId: currentSemester.tagId });
-    console.log("practice:res", { res });
     if (res?.done) return setPracticeIsCompleted(true);
 
     const question = res.question as SimpleQuestionNode;
     setSubmitAnswer(false);
     setSelectedAnswers(new Array(question.choices.length).fill(false));
+    setSubmittedAnswers([]);
     setQuestionData({
       ...res,
       question: {
@@ -134,6 +137,7 @@ const PracticeTool = forwardRef<PracticeToolRef, PracticeToolProps>((props, ref)
     getQuestionParents: () => questionData?.question.parents ?? [],
     getQuestionData: () => questionData?.question ?? null,
     onSelectedQuestionAnswer: (index: number) => setNarratedAnswerIdx(index),
+    getSubmittedAnswers: () => submittedAnswers,
   }));
 
   const onViewNodeOnNodeBook = (nodeId: string) => {
