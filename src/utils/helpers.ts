@@ -79,8 +79,11 @@ export const narrateLargeTexts = (message: string) => {
           []
         );
       console.log({ messages }, id);
+      let voices = speechSynthesis.getVoices();
+      let googleVoice = voices.find(voice => voice.name.includes("Google US English"));
       messages.forEach(messageItem => {
         const speech = new SpeechSynthesisUtterance(messageItem);
+        if (googleVoice) speech.voice = googleVoice;
         window.speechSynthesis.speak(speech);
       });
       console.log("loop", id);

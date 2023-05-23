@@ -111,7 +111,7 @@ const NodeQuestion = ({
             <ListItem
               onClick={() => onSelectAnswer(idx)}
               sx={{
-                p: "24px 16px",
+                p: "18px 16px",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "space-between",
@@ -706,8 +706,8 @@ const QuestionMessage = ({ messages, questionsCompleted, totalQuestions }: Quest
       </Box>
       <CustomCircularProgress
         variant="determinate"
-        value={(100 * questionsCompleted) / totalQuestions}
-        realvalue={questionsCompleted}
+        value={(100 * (questionsCompleted > totalQuestions ? totalQuestions : questionsCompleted)) / totalQuestions}
+        realValue={questionsCompleted}
       />
     </Stack>
   );
