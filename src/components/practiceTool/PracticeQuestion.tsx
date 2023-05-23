@@ -441,8 +441,11 @@ export const PracticeQuestion = ({
         position: "relative",
       }}
     >
-      <IconButton onClick={onClose} sx={{ color: theme => theme.palette.common.primary800, position: "absolute" }}>
-        <CloseFullscreenIcon />
+      <IconButton
+        onClick={onClose}
+        sx={{ color: theme => theme.palette.common.primary800, position: "fixed", top: "50px", left: "63px" }}
+      >
+        <CloseFullscreenIcon sx={{ fontSize: "32px" }} />
       </IconButton>
 
       {practiceIsCompleted && (
