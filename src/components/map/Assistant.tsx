@@ -10,6 +10,7 @@ import React, {
   useRef,
   useState,
 } from "react";
+import { useRive, useStateMachineInput } from "rive-react";
 
 import { getNode } from "../../client/serveless/nodes.serveless";
 import { detectElements } from "../../hooks/detectElements";
@@ -30,7 +31,7 @@ import { delay } from "../../lib/utils/utils";
 import { Node, VoiceAssistant, VoiceAssistantType } from "../../nodeBookTypes";
 import { narrateLargeTexts } from "../../utils/helpers";
 import { nodeToNarration } from "../../utils/node.utils";
-import { RiveComponentMemoized } from "../home/components/temporals/RiveComponentExtended";
+// import { RiveComponentMemoized } from "../home/components/temporals/RiveComponentExtended";
 import { PracticeToolRef } from "../practiceTool/PracticeTool";
 
 const db = getFirestore();
@@ -50,6 +51,11 @@ type AssistantProps = {
   displayNotebook: boolean;
   startPractice: boolean;
 };
+
+const STATE_MACHINE_NAME = "State Machine 1";
+const SAD_TRIGGER = "trigger-sad";
+const HAPPY_TRIGGER = "trigger-happy";
+const STATE = "state";
 
 export const Assistant = ({
   setVoiceAssistant,
@@ -77,6 +83,16 @@ export const Assistant = ({
   const speechRef = useRef<SpeechRecognition | null>(newRecognition());
   const abortNarratorPromise = useRef<(() => void) | null>(null);
   const originState = useRef("");
+
+  const { rive, RiveComponent: RiveComponentTouch } = useRive({
+    src: "rive-voice-assistant/assistant-state-machine.riv",
+    stateMachines: STATE_MACHINE_NAME,
+    artboard: "New Artboard",
+    autoplay: true,
+  });
+  const sadTrigger = useStateMachineInput(rive, STATE_MACHINE_NAME, SAD_TRIGGER);
+  const happyTrigger = useStateMachineInput(rive, STATE_MACHINE_NAME, HAPPY_TRIGGER);
+  const stateInput = useStateMachineInput(rive, STATE_MACHINE_NAME, STATE);
 
   const assistantReactionMemo: AssistantReaction = useMemo(() => {
     if (forceAssistantReaction) return forceAssistantReaction;
@@ -142,6 +158,7 @@ export const Assistant = ({
 
   const askQuestion = useCallback(
     async ({ questionNode, tagId }: VoiceAssistant) => {
+      if (!sadTrigger || !happyTrigger || !stateInput) return console.warn("Inputs for state machine are not valid");
       if (!speechRef.current)
         return console.warn("Speech recognition doesn't exist on this browser, install last version of Chrome browser");
 
@@ -158,6 +175,7 @@ export const Assistant = ({
       while (askingRef.current) {
         console.log("👉 1. narrate", { message, preMessage, preTranscriptProcessed, origin, listenType });
 
+        stateInput.value = 1;
         setAssistantState("NARRATE");
         if (listenType === "ANSWERING" && originState.current === "narrate-question") {
           if (!assistantRef.current) return console.log("cant execute operations with assistantRef");
@@ -194,7 +212,7 @@ export const Assistant = ({
         if (!askingRef.current) break; // should finish without make nothing
 
         console.log("👉 2. listen", { message, preMessage, preTranscriptProcessed, origin, listenType });
-
+        stateInput.value = 2;
         setAssistantState("LISTEN");
         const recognitionResult = await recognizeInput2(speechRef.current);
         speechRef.current.stop(); // stop after get text
@@ -283,6 +301,9 @@ export const Assistant = ({
               questionNode.choices,
               submitOptions
             );
+            console.log("will-fire", isCorrect);
+            isCorrect ? happyTrigger.fire() : sadTrigger.fire();
+            await delay(500);
             message = messageFromConfirm;
             preMessage = "";
             listenType = "NEXT_ACTION";
@@ -313,6 +334,7 @@ export const Assistant = ({
             openNodesOnNotebook(selectedNotebookId, parents);
             await detectElements({ ids: parents });
             let stopLoop = false;
+            stateInput.value = 1;
             for (let i = 0; i < parents.length; i++) {
               setForceAssistantReaction("TALKING");
               const parent = parents[i];
@@ -358,16 +380,20 @@ export const Assistant = ({
           listenType = "NOTEBOOK_ACTIONS";
         }
       }
+      stateInput.value = 0;
       setAssistantState("IDLE");
     },
     [
       assistantRef,
+      happyTrigger,
       openNodesOnNotebook,
+      sadTrigger,
       scrollToNode,
       selectedNotebookId,
       setDisplayDashboard,
       setRootQuery,
       setVoiceAssistant,
+      stateInput,
       stopAssistant,
     ]
   );
@@ -402,7 +428,8 @@ export const Assistant = ({
       open={true}
     >
       <Box sx={{ width: "80px", height: "80px" }}>
-        {assistantReactionMemo === "TALKING" && (
+        <RiveComponentTouch />
+        {/* {assistantReactionMemo === "TALKING" && (
           <RiveComponentMemoized
             src={TALKING_ANIMATION}
             artboard="New Artboard"
@@ -435,18 +462,18 @@ export const Assistant = ({
 
         {assistantReactionMemo === "IDLE" && (
           <RiveComponentMemoized src={IDLE_ANIMATION} artboard="New Artboard" animations="Timeline 1" autoplay={true} />
-        )}
+        )} */}
       </Box>
     </Tooltip>
   );
 };
 
-const IDLE_ANIMATION = "/rive-voice-assistant/idle.riv";
-const LISTENING_ANIMATION = "/rive-voice-assistant/listening.riv";
-const HAPPY_ANIMATION = "/rive-voice-assistant/happy.riv";
-const SAD_ANIMATION = "/rive-voice-assistant/sad.riv";
+// const IDLE_ANIMATION = "/rive-voice-assistant/idle.riv";
+// const LISTENING_ANIMATION = "/rive-voice-assistant/listening.riv";
+// const HAPPY_ANIMATION = "/rive-voice-assistant/happy.riv";
+// const SAD_ANIMATION = "/rive-voice-assistant/sad.riv";
 // const SNORING_ANIMATION = "/rive-voice-assistant/snoring.riv";
-const TALKING_ANIMATION = "/rive-voice-assistant/talking.riv";
+// const TALKING_ANIMATION = "/rive-voice-assistant/talking.riv";
 
 const NEXT_ACTION = "*";
 const OPEN_NOTEBOOK = ".";
