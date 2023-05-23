@@ -342,7 +342,7 @@ export const Assistant = ({
               if (!node) continue;
 
               const message = nodeToNarration(node);
-              scrollToNode(parent);
+              scrollToNode(parent, true);
               const { narratorPromise, abortPromise } = narrateLargeTexts(message);
               abortNarratorPromise.current = abortPromise;
               const res = await narratorPromise();
