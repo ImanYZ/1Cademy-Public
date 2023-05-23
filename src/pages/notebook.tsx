@@ -437,7 +437,7 @@ const Notebook = ({}: NotebookProps) => {
   }, [graph.edges]);
 
   const scrollToNode = useCallback(
-    (nodeId: string, regardless = false, tries = 0) => {
+    (nodeId: string, force = false, tries = 0) => {
       console.log(">>scrollToNode");
       if (tries === 10) return;
 
@@ -450,7 +450,7 @@ const Notebook = ({}: NotebookProps) => {
             if (!thisNode) return graph;
 
             const nodeInViewport = onNodeInViewport(nodeId, graph.nodes);
-            if (!regardless && nodeInViewport && !forcedTutorial) return graph;
+            if (!force && nodeInViewport && !forcedTutorial) return graph;
 
             if (
               originalNode &&
@@ -490,7 +490,7 @@ const Notebook = ({}: NotebookProps) => {
                 };
               });
             } else {
-              scrollToNode(nodeId, regardless, tries + 1);
+              scrollToNode(nodeId, force, tries + 1);
             }
             return graph;
           });

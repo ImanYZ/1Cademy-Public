@@ -137,6 +137,15 @@ export const Assistant = ({
     return `${questionNode.title}. ${choiceMessage}`;
   };
 
+  const continuePracticing = useCallback(
+    (tagId: string) => {
+      console.log("continuePracticing");
+      setRootQuery(tagId);
+      setDisplayDashboard(true);
+    },
+    [setDisplayDashboard, setRootQuery]
+  );
+
   const stopAssistant = useCallback(async (narrateStop: boolean) => {
     console.log("stopAssistant");
     // narrate stop only when assistant is stopped by user (by voice or button)
@@ -342,7 +351,7 @@ export const Assistant = ({
               if (!node) continue;
 
               const message = nodeToNarration(node);
-              scrollToNode(parent);
+              scrollToNode(parent, true);
               const { narratorPromise, abortPromise } = narrateLargeTexts(message);
               abortNarratorPromise.current = abortPromise;
               const res = await narratorPromise();
@@ -370,9 +379,8 @@ export const Assistant = ({
 
         if (listenType === "NOTEBOOK_ACTIONS") {
           if (transcriptProcessed === OPEN_PRACTICE) {
-            console.log("continue practicing", { transcriptProcessed });
-            setRootQuery(tagId);
-            setDisplayDashboard(true);
+            // console.log("continue practicing", { transcriptProcessed });
+            continuePracticing(tagId);
             break;
           }
           preMessage = `Sorry, I didn't get your choices. ${OPEN_PRACTICE_ERROR}`;
@@ -385,13 +393,13 @@ export const Assistant = ({
     },
     [
       assistantRef,
+      continuePracticing,
       happyTrigger,
       openNodesOnNotebook,
       sadTrigger,
       scrollToNode,
       selectedNotebookId,
       setDisplayDashboard,
-      setRootQuery,
       setVoiceAssistant,
       stateInput,
       stopAssistant,
@@ -427,7 +435,10 @@ export const Assistant = ({
       placement="top"
       open={true}
     >
-      <Box sx={{ width: "80px", height: "80px" }}>
+      <Box
+        onClick={voiceAssistant && !startPractice ? () => continuePracticing(voiceAssistant.tagId) : undefined}
+        sx={{ width: "80px", height: "80px" }}
+      >
         <RiveComponentTouch />
         {/* {assistantReactionMemo === "TALKING" && (
           <RiveComponentMemoized
