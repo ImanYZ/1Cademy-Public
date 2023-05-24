@@ -96,8 +96,8 @@ export const getStackedBarStat = (
   const sortedByDailyPractices = [...data].sort((x, y) => y.totalPractices! - x.totalPractices!);
 
   sortedByProposals.map(d => {
-    const proposals = d.proposalPoints!;
-    if (!proposals) return;
+    const proposals = d?.proposalPoints ?? -1;
+    if (proposals < 0) return;
 
     const proposalSubgroup = getStudentSubgroupInBars(proposals, maxProposalsPoints);
     const student = students.find(student => student.uname === d.uname);
@@ -111,8 +111,8 @@ export const getStackedBarStat = (
     studentProposalsRate[proposalSubgroup as keyof StudentStackedBarStats].push(student);
   });
   sortedByQuestions.map(d => {
-    const question = d.questionPoints!;
-    if (!question) return;
+    const question = d?.questionPoints ?? -1;
+    if (question < 0) return;
 
     const questionsSubgroup = getStudentSubgroupInBars(question, maxQuestionsPoints);
     const student = students.find(student => student.uname === d.uname);
