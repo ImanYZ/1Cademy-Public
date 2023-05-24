@@ -79,10 +79,17 @@ export const narrateLargeTexts = (message: string) => {
           []
         );
       console.log({ messages }, id);
-      let voices = speechSynthesis.getVoices();
-      let googleVoice = voices.find(voice => voice.name.includes("Google US English"));
+      let googleVoice: any;
+      let tries = 0;
+      while (tries < 10 && !googleVoice) {
+        tries++;
+        let voices = speechSynthesis.getVoices();
+        googleVoice = voices.find(voice => voice.name.includes("Google US English"));
+        await delay(100);
+      }
       messages.forEach(messageItem => {
         const speech = new SpeechSynthesisUtterance(messageItem);
+        console.log("VoiceFound:" + googleVoice ? "YES" : "NOE");
         if (googleVoice) speech.voice = googleVoice;
         window.speechSynthesis.speak(speech);
       });
