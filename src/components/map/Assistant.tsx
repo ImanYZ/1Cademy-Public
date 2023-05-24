@@ -142,7 +142,7 @@ export const Assistant = ({
       }
       askingRef.current = false;
       if (stateInput) {
-        stateInput.value = 1;
+        stateInput.value = 0;
       }
       // setAssistantState("IDLE");
       if (speechRef.current) speechRef.current?.abort();
@@ -252,7 +252,7 @@ export const Assistant = ({
           continue;
         }
 
-        if (transcript === "stop") {
+        if (["stop", "install"].includes(transcript)) {
           setVoiceAssistant(null);
           stopAssistant(true);
           break;
