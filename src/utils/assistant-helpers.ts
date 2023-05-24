@@ -344,7 +344,7 @@ export const generateGpt4QueryResult = async (nodeIds: string[], uname?: string)
   return queryResult;
 };
 
-export const generateGpt4QueryResultV2 = async (nodeIds: string[], uname?: string) => {
+export const generateGpt4QueryResultV2 = async (nodeIds: string[], userData?: IUser) => {
   const nodes: IAssistantNode[] = [];
   const practiceAnsweredByNodeIds: {
     [nodeId: string]: number;
@@ -354,19 +354,9 @@ export const generateGpt4QueryResultV2 = async (nodeIds: string[], uname?: strin
   for (const nodeIds of nodeIdChunks) {
     const _nodes = await db.collection("nodes").where("__name__", "in", nodeIds).get();
     for (const _node of _nodes.docs) {
-      if (uname) {
-        const practiceLogs = await db
-          .collection("practiceLog")
-          .where("user", "==", uname)
-          .where("node", "==", _node.id)
-          .where("q", "==", 5)
-          .limit(5)
-          .get();
-        practiceAnsweredByNodeIds[_node.id] = practiceLogs.docs.length;
-      }
       const node = _node.data() as INode;
       node.documentId = _node.id;
-      nodes.push({
+      const responseNode: IAssistantNode = {
         node: _node.id,
         title: node.title,
         type: node.nodeType,
@@ -374,7 +364,16 @@ export const generateGpt4QueryResultV2 = async (nodeIds: string[], uname?: strin
         content: node.content,
         nodeImage: node.nodeImage,
         nodeVideo: node.nodeVideo,
-      });
+      };
+      if (userData) {
+        // adding practice related data
+        responseNode.practice = await numOfPracticesAnsweredByNodeAndUser(_node.id, userData.uname);
+      }
+      const unitNo = findUnitNoFromNodeData(node);
+      if (unitNo !== undefined) {
+        responseNode.unit = unitNo;
+      }
+      nodes.push(responseNode);
     }
   }
   return nodes;
@@ -383,7 +382,7 @@ export const generateGpt4QueryResultV2 = async (nodeIds: string[], uname?: strin
 export const getNodeResultFromCommands = async (
   commands: string[],
   tagTitle?: string,
-  uname?: string
+  userData?: IUser
 ): Promise<IAssistantNode[]> => {
   const nodeIds: Set<string> = new Set();
 
@@ -401,7 +400,7 @@ export const getNodeResultFromCommands = async (
     }
   }
 
-  return generateGpt4QueryResultV2(Array.from(nodeIds), uname);
+  return generateGpt4QueryResultV2(Array.from(nodeIds), userData);
 };
 
 export const processRecursiveCommands = async (
