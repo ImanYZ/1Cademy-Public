@@ -24,6 +24,12 @@ const DEMOS_ITEMS: Demo[] = [
     url: "https://www.youtube.com/embed/Z8aVR459Kks",
     previewImage: "/home/demos/question-answering-demo.jpg",
   },
+  {
+    id: "03",
+    demoName: "Introducing 1Cademy Assistant - Voice-based Practice",
+    url: "https://www.youtube.com/embed/Un6s1rtfZVA",
+    previewImage: "/home/demos/practice-preview.png",
+  },
 ];
 
 export const Demos = () => {
@@ -31,7 +37,7 @@ export const Demos = () => {
 
   return (
     <Box>
-      <Typography component={"h3"} sx={{ fontSize: "20px", fontWeight: 600, mb: "32px" }}>
+      <Typography component={"h3"} sx={{ fontSize: "20px", fontWeight: 600, my: "32px" }}>
         Demos
       </Typography>
       <Box
