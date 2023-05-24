@@ -6627,15 +6627,11 @@ const Notebook = ({}: NotebookProps) => {
               setVoiceAssistant={setVoiceAssistant}
               // voiceAssistantRef={voiceAssistantRef.current}
               user={user}
-              onClose={(kepAssistant = false) => {
-                console.log("onclose", kepAssistant);
+              onClose={() => {
                 setDisplayDashboard(false);
-                if (!kepAssistant) {
-                  console.log("onclose will remove");
-                  setRootQuery(undefined);
-                  router.replace(router.pathname);
-                  setVoiceAssistant(null);
-                }
+                setRootQuery(undefined);
+                router.replace(router.pathname);
+                setVoiceAssistant(null);
               }}
               openNodeHandler={openLinkedNode}
               sx={{ position: "absolute", inset: "0px", zIndex: 999 }}

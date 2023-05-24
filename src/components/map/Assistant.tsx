@@ -174,6 +174,7 @@ export const Assistant = ({
         if (listenType === "ANSWERING" && originState.current === "narrate-question") {
           if (!assistantRef.current) return console.log("cant execute operations with assistantRef");
 
+          assistantRef.current.onSelectedQuestionAnswer(-10);
           const { narratorPromise, abortPromise } = narrateLargeTexts(questionNode.title);
           abortNarratorPromise.current = abortPromise;
           const res = await narratorPromise();
@@ -375,6 +376,9 @@ export const Assistant = ({
         }
       }
       stateInput.value = 0;
+      if (assistantRef.current) {
+        assistantRef.current.onSelectedQuestionAnswer(-1);
+      }
       // setAssistantState("IDLE");
     },
     [
