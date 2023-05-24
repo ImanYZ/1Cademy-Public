@@ -25,4 +25,4 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
   }
 }
 
-export default fbAuth(handler);
+export default handler;
