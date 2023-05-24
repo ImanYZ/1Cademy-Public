@@ -527,5 +527,5 @@ export type VoiceAssistantType = "ANSWERING" | "CONFIRM" | "NEXT_ACTION" | "NOTE
 
 export type VoiceAssistant = {
   tagId: string;
-  questionNode: SimpleQuestionNode;
+  questionNode: SimpleQuestionNode | null;
 };
