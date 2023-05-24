@@ -99,6 +99,7 @@ export const Dashboard = ({ user, currentSemester }: DashboardProps) => {
     questions: 0,
     totalDailyPractices: 0,
   });
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [studentBoxStat, setStudentBoxStat] = useState<BoxStudentStats>({
     proposalsPoints: {},
     questionsPoints: {},
@@ -327,7 +328,7 @@ export const Dashboard = ({ user, currentSemester }: DashboardProps) => {
 
   // update data in stackbar
   useEffect(() => {
-    if (user.role !== "STUDENT") return;
+    // if (user.role !== "STUDENT") return;
     if (!semesterStudentsVoteStats.length || !students) return setStackedBar([]);
 
     const {
@@ -911,7 +912,7 @@ export const Dashboard = ({ user, currentSemester }: DashboardProps) => {
                       identifier="plot-1"
                       maxX={boxStats.proposalsPoints.max}
                       minX={boxStats.proposalsPoints.min}
-                      studentStats={studentBoxStat.proposalsPoints}
+                      /* studentStats={studentBoxStat.proposalsPoints} */
                     />
                     {isMovil && <BoxLegend role={user.role} />}
                   </>
@@ -962,7 +963,7 @@ export const Dashboard = ({ user, currentSemester }: DashboardProps) => {
                       identifier="plot-2"
                       maxX={boxStats.questionsPoints.max}
                       minX={boxStats.questionsPoints.min}
-                      studentStats={studentBoxStat.questionsPoints}
+                      /* studentStats={studentBoxStat.questionsPoints} */
                     />
                     {isMovil && <BoxLegend role={user.role} />}
                   </>
@@ -1012,7 +1013,7 @@ export const Dashboard = ({ user, currentSemester }: DashboardProps) => {
                       identifier="plot-3"
                       minX={boxStats.votesPoints.min}
                       maxX={boxStats.votesPoints.max}
-                      studentStats={studentBoxStat.votesPoints}
+                      /* studentStats={studentBoxStat.votesPoints} */
                     />
                     {isMovil && <BoxLegend role={user.role} />}
                   </>
