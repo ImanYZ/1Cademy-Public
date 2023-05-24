@@ -21,6 +21,7 @@ import { gray25, gray50, gray100, gray300, gray850, orangeDark } from "@/pages/h
 import { wrapStringWithBoldTag } from "../../../lib/utils/JSX.utils";
 import { RiveComponentMemoized } from "../components/temporals/RiveComponentExtended";
 import whichValues, { TWhichValue } from "./constants/whichValues";
+import { Demos } from "./Demos";
 
 const Systems = () => {
   const theme = useTheme();
@@ -94,88 +95,91 @@ const Systems = () => {
   };
 
   return (
-    <Stack direction={{ xs: "column-reverse", sm: "row" }} justifyContent={"space-between"} sx={{ margin: "auto" }}>
-      <Box sx={{ maxWidth: "500px", flex: 1 }}>
-        {whichValues.map((value, idx: number) => (
-          <Accordion
-            key={value.name}
-            disableGutters
-            elevation={0}
-            square
-            sx={{
-              background: "transparent",
-              border: "none",
-              borderLeft: `4px solid ${
-                expanded === `Option${idx + 1}` ? orangeDark : theme.palette.mode === "dark" ? gray25 : gray100
-              }`,
-              "&:before": {
-                display: "none",
-              },
-              ":hover": {
-                borderLeft: theme =>
-                  expanded !== `Option${idx + 1}`
-                    ? theme.palette.mode === "light"
-                      ? `4px solid ${gray300}`
-                      : `4px solid ${gray300}`
-                    : undefined,
-              },
-            }}
-            expanded={expanded === `Option${idx + 1}`}
-            onChange={handleChange(`Option${idx + 1}`, value.name)}
-          >
-            <AccordionSummary
+    <Box sx={{ margin: "auto" }}>
+      <Stack direction={{ xs: "column-reverse", sm: "row" }} justifyContent={"space-between"}>
+        <Box sx={{ maxWidth: "500px", flex: 1 }}>
+          {whichValues.map((value, idx: number) => (
+            <Accordion
+              key={value.name}
+              disableGutters
+              elevation={0}
+              square
               sx={{
+                background: "transparent",
+                border: "none",
+                borderLeft: `4px solid ${
+                  expanded === `Option${idx + 1}` ? orangeDark : theme.palette.mode === "dark" ? gray25 : gray100
+                }`,
+                "&:before": {
+                  display: "none",
+                },
                 ":hover": {
-                  background: theme => (theme.palette.mode === "dark" ? gray850 : gray50),
+                  borderLeft: theme =>
+                    expanded !== `Option${idx + 1}`
+                      ? theme.palette.mode === "light"
+                        ? `4px solid ${gray300}`
+                        : `4px solid ${gray300}`
+                      : undefined,
                 },
               }}
+              expanded={expanded === `Option${idx + 1}`}
+              onChange={handleChange(`Option${idx + 1}`, value.name)}
             >
-              <Typography
-                component={"h4"}
-                variant={"h4"}
-                fontSize={20}
-                sx={{ fontWeight: 400, p: "8px", cursor: "pointer" }}
+              <AccordionSummary
+                sx={{
+                  ":hover": {
+                    background: theme => (theme.palette.mode === "dark" ? gray850 : gray50),
+                  },
+                }}
               >
-                {value.name}
-              </Typography>
-              <Button
-                variant="text"
-                href={value.link}
-                target="_blank"
-                rel="noreferrer"
-                onClick={e => e.stopPropagation()}
-                sx={{ color: orangeDark }}
-              >
-                Visit
-                <ArrowForwardIcon fontSize={"small"} sx={{ ml: "10px" }} color="inherit" />
-              </Button>
-            </AccordionSummary>
-            <AccordionDetails>
-              {getDescription(value)
-                .split("\n")
-                .map((paragraph: string, idx: number) => (
-                  <Typography
-                    key={idx}
-                    fontSize={"16px"}
-                    color={theme.palette.mode === "light" ? "#475467" : "#EAECF0"}
-                    sx={{ p: "8px", pt: "0" }}
-                  >
-                    {wrapStringWithBoldTag(paragraph, RE_DETECT_NUMBERS_WITH_COMMAS)}
-                  </Typography>
-                ))}
+                <Typography
+                  component={"h4"}
+                  variant={"h4"}
+                  fontSize={20}
+                  sx={{ fontWeight: 400, p: "8px", cursor: "pointer" }}
+                >
+                  {value.name}
+                </Typography>
+                <Button
+                  variant="text"
+                  href={value.link}
+                  target="_blank"
+                  rel="noreferrer"
+                  onClick={e => e.stopPropagation()}
+                  sx={{ color: orangeDark }}
+                >
+                  Visit
+                  <ArrowForwardIcon fontSize={"small"} sx={{ ml: "10px" }} color="inherit" />
+                </Button>
+              </AccordionSummary>
+              <AccordionDetails>
+                {getDescription(value)
+                  .split("\n")
+                  .map((paragraph: string, idx: number) => (
+                    <Typography
+                      key={idx}
+                      fontSize={"16px"}
+                      color={theme.palette.mode === "light" ? "#475467" : "#EAECF0"}
+                      sx={{ p: "8px", pt: "0" }}
+                    >
+                      {wrapStringWithBoldTag(paragraph, RE_DETECT_NUMBERS_WITH_COMMAS)}
+                    </Typography>
+                  ))}
 
-              {getAnimation(value, {
-                display: { xs: "block", sm: "none" },
-                m: "0 auto",
-                opacity: selectedValue?.id !== value.id ? "0" : "1",
-              })}
-            </AccordionDetails>
-          </Accordion>
-        ))}
-      </Box>
+                {getAnimation(value, {
+                  display: { xs: "block", sm: "none" },
+                  m: "0 auto",
+                  opacity: selectedValue?.id !== value.id ? "0" : "1",
+                })}
+              </AccordionDetails>
+            </Accordion>
+          ))}
+        </Box>
 
-      {getAnimation(selectedValue, { display: { xs: "none", sm: "block" }, flex: 1 })}
-    </Stack>
+        {getAnimation(selectedValue, { display: { xs: "none", sm: "block" }, flex: 1 })}
+      </Stack>
+      <Demos />
+    </Box>
   );
 };
 const getHeight = (width: number) => (300 * width) / 500;
