@@ -114,7 +114,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
 
     if (payload.actionType === "TeachContent" || payload.actionType === "DirectQuestion") {
       const commands = await getGPT4Queries(conversationData, payload.message);
-      const nodes = await getNodeResultFromCommands(commands, tagTitle, userData?.uname);
+      const nodes = await getNodeResultFromCommands(commands, tagTitle, userData);
       prompt =
         payload.actionType === "TeachContent"
           ? createTeachMePrompt(payload.message, nodes)
