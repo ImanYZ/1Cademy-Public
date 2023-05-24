@@ -653,7 +653,11 @@ const Notebook = ({}: NotebookProps) => {
   const [usersOnlineStatusLoaded, setUsersOnlineStatusLoaded] = useState(false);
   const [onlineUsers, setOnlineUsers] = useState<string[]>([]);
 
-  const [voiceAssistant, setVoiceAssistant] = useState<VoiceAssistant | null>(null);
+  // this object represent the question by practice
+  // if practice voice only us enable we have a value on question node
+  // if we have a tag (semester id when user start practice tool), we can continue practicing from notebook
+  const [voiceAssistant, setVoiceAssistant] = useState<VoiceAssistant>({ tagId: "", questionNode: null });
+
   const [startPractice, setStartPractice] = useState(false);
 
   const assistantRef = useRef<DashboardWrapperRef | null>(null);
@@ -6308,9 +6312,8 @@ const Notebook = ({}: NotebookProps) => {
         )}
 
         {/* assistant */}
-        {/* {voiceAssistant && ( */}
-        {(voiceAssistant || startPractice) && (
-          <Box sx={{ position: "absolute", bottom: "50px", right: "50px", zIndex: ZINDEX["assistant"] }}>
+        {voiceAssistant.tagId && (
+          <Box sx={{ position: "absolute", bottom: "10px", right: "50px", zIndex: ZINDEX["assistant"] }}>
             <Assistant
               voiceAssistant={voiceAssistant}
               assistantRef={assistantRef}
@@ -6320,12 +6323,10 @@ const Notebook = ({}: NotebookProps) => {
               setDisplayDashboard={setDisplayDashboard}
               setRootQuery={setRootQuery}
               setVoiceAssistant={setVoiceAssistant}
-              displayNotebook={!displayDashboard}
               startPractice={startPractice}
             />
           </Box>
         )}
-        {/* )} */}
 
         <Box sx={{ width: "100vw", height: "100vh", overflow: "hidden" }}>
           {
@@ -6631,7 +6632,7 @@ const Notebook = ({}: NotebookProps) => {
                 setDisplayDashboard(false);
                 setRootQuery(undefined);
                 router.replace(router.pathname);
-                setVoiceAssistant(null);
+                setVoiceAssistant(prev => ({ ...prev, questionNode: null }));
               }}
               openNodeHandler={openLinkedNode}
               sx={{ position: "absolute", inset: "0px", zIndex: 999 }}
@@ -6641,10 +6642,10 @@ const Notebook = ({}: NotebookProps) => {
             />
           )}
 
-          {voiceAssistant && !startPractice && (
+          {voiceAssistant.questionNode && !startPractice && (
             <Tooltip title="Stop the voice interactions" placement="left">
               <IconButton
-                onClick={() => setVoiceAssistant(null)}
+                onClick={() => setVoiceAssistant(prev => ({ ...prev, questionNode: null }))}
                 sx={{
                   position: "absolute",
                   right: "8px",

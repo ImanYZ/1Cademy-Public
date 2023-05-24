@@ -25,8 +25,8 @@ import { PracticeQuestion } from "./PracticeQuestion";
 import { UserStatus } from "./UserStatus";
 
 type PracticeToolProps = {
-  voiceAssistant: VoiceAssistant | null;
-  setVoiceAssistant: Dispatch<SetStateAction<VoiceAssistant | null>>;
+  voiceAssistant: VoiceAssistant;
+  setVoiceAssistant: Dispatch<SetStateAction<VoiceAssistant>>;
   user: User;
   root?: string;
   currentSemester: CourseTag;
@@ -220,7 +220,7 @@ const PracticeTool = forwardRef<PracticeToolRef, PracticeToolProps>((props, ref)
     if (!questionData) return;
 
     setVoiceAssistant(prev => {
-      if (prev) return null;
+      if (prev.questionNode) return { ...prev, questionNode: null };
       return { tagId: currentSemester.tagId, questionNode: questionData.question };
     });
   }, [currentSemester.tagId, questionData, setVoiceAssistant]);
@@ -230,7 +230,7 @@ const PracticeTool = forwardRef<PracticeToolRef, PracticeToolProps>((props, ref)
     if (!questionData) return;
     if (!startPractice) return;
     setVoiceAssistant(prev => {
-      if (!prev) return prev; // if practice voice only is disable, we keep disable
+      if (!prev.questionNode) return { tagId: currentSemester.tagId, questionNode: null }; // if practice voice only is disable, we keep disable
       return { tagId: currentSemester.tagId, questionNode: questionData.question };
     });
   }, [currentSemester.tagId, questionData, setVoiceAssistant, startPractice]);
@@ -265,7 +265,7 @@ const PracticeTool = forwardRef<PracticeToolRef, PracticeToolProps>((props, ref)
         setSubmitAnswer={setSubmitAnswer}
         selectedAnswers={selectedAnswers}
         setSelectedAnswers={setSelectedAnswers}
-        enabledAssistant={Boolean(voiceAssistant)}
+        enabledAssistant={Boolean(voiceAssistant.questionNode)}
         onToggleAssistant={onToggleAssistant}
         narratedAnswerIdx={narratedAnswerIdx}
       />

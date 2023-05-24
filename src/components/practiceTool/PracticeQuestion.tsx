@@ -106,6 +106,7 @@ const NodeQuestion = ({
         component={"h1"}
         sx={{
           fontSize: "30px",
+          borderRadius: "8px",
           ...(narratedAnswerIdx === -10 && {
             backgroundColor: theme =>
               theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookO900 : DESIGN_SYSTEM_COLORS.primary50,

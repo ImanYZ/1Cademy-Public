@@ -31,15 +31,14 @@ const db = getFirestore();
 
 type SelectedAnswer = { choice: KnowledgeChoice; option: string };
 type AssistantProps = {
-  voiceAssistant: VoiceAssistant | null;
-  setVoiceAssistant: (value: SetStateAction<VoiceAssistant | null>) => void;
+  voiceAssistant: VoiceAssistant;
+  setVoiceAssistant: (value: SetStateAction<VoiceAssistant>) => void;
   openNodesOnNotebook: (notebookId: string, nodeIds: string[]) => Promise<void>;
   assistantRef: MutableRefObject<PracticeToolRef | null>;
   setDisplayDashboard: Dispatch<SetStateAction<boolean>>;
   selectedNotebookId: string;
   scrollToNode: (nodeId: string, regardless?: boolean, tries?: number) => void;
   setRootQuery: Dispatch<SetStateAction<string | undefined>>;
-  displayNotebook: boolean;
   startPractice: boolean;
 };
 
@@ -57,7 +56,6 @@ export const Assistant = ({
   selectedNotebookId,
   scrollToNode,
   setRootQuery,
-  displayNotebook,
   startPractice,
 }: AssistantProps) => {
   /**
@@ -66,7 +64,7 @@ export const Assistant = ({
    * the narration is a promise and should be aborted when stop assistant
    */
 
-  const previousVoiceAssistant = useRef<VoiceAssistant | null>(voiceAssistant);
+  const previousVoiceAssistant = useRef<VoiceAssistant>(voiceAssistant);
 
   const askingRef = useRef<boolean>(false);
   const speechRef = useRef<SpeechRecognition | null>(newRecognition());
@@ -151,7 +149,7 @@ export const Assistant = ({
   );
 
   const askQuestion = useCallback(
-    async ({ questionNode, tagId }: VoiceAssistant) => {
+    async (questionNode: SimpleQuestionNode, tagId: string) => {
       if (!sadTrigger || !happyTrigger || !stateInput) return console.warn("Inputs for state machine are not valid");
       if (!speechRef.current)
         return console.warn("Speech recognition doesn't exist on this browser, install last version of Chrome browser");
@@ -253,7 +251,7 @@ export const Assistant = ({
         }
 
         if (["stop", "install"].includes(transcript)) {
-          setVoiceAssistant(null);
+          setVoiceAssistant(prev => ({ ...prev, questionNode: null }));
           stopAssistant(true);
           break;
         }
@@ -398,22 +396,27 @@ export const Assistant = ({
 
   useEffect(() => {
     const run = async () => {
-      console.log("askQuestion", { voiceAssistant });
-      if (previousVoiceAssistant.current === voiceAssistant) return;
+      console.log("askQuestion", { ref: previousVoiceAssistant.current, voiceAssistant });
+      const isEqualsVoiceAssistant =
+        previousVoiceAssistant.current.tagId === voiceAssistant.tagId &&
+        previousVoiceAssistant.current.questionNode === voiceAssistant.questionNode;
+      if (isEqualsVoiceAssistant) return;
 
       previousVoiceAssistant.current = voiceAssistant;
-      await stopAssistant(!voiceAssistant); // if voiceAssistant change: cancel all
-      if (!voiceAssistant) return;
+      await stopAssistant(!voiceAssistant.questionNode); // if voiceAssistant change: cancel all
+      if (!voiceAssistant.questionNode) return;
 
-      askQuestion(voiceAssistant);
+      askQuestion(voiceAssistant.questionNode, voiceAssistant.tagId);
     };
     run();
   }, [askQuestion, stopAssistant, voiceAssistant]);
 
+  if (!startPractice && !voiceAssistant.tagId) return null;
+
   return (
     <Tooltip
       title={
-        displayNotebook
+        voiceAssistant.questionNode && !startPractice
           ? 'To go back to practice, say "Continue practicing" or say "Stop" to stop the voice interactions.'
           : ""
       }
@@ -421,7 +424,7 @@ export const Assistant = ({
       open={true}
     >
       <Box
-        onClick={voiceAssistant && !startPractice ? () => continuePracticing(voiceAssistant.tagId) : undefined}
+        onClick={voiceAssistant.tagId && !startPractice ? () => continuePracticing(voiceAssistant.tagId) : undefined}
         sx={{ width: "80px", height: "80px" }}
       >
         <RiveComponentTouch />
