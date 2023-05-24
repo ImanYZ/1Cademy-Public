@@ -295,6 +295,7 @@ export const Assistant = ({
           preMessage = "";
           preTranscriptProcessed = answerIsValid ? transcriptProcessed : "";
           listenType = answerIsValid ? "CONFIRM" : "ANSWERING";
+          originState.current = "from-answering";
           message = newMessage;
           console.log("ANSWERING", { answerIsValid, message, listenType });
           continue;
