@@ -6309,20 +6309,22 @@ const Notebook = ({}: NotebookProps) => {
 
         {/* assistant */}
         {/* {voiceAssistant && ( */}
-        <Box sx={{ position: "absolute", bottom: "50px", right: "50px", zIndex: ZINDEX["assistant"] }}>
-          <Assistant
-            voiceAssistant={voiceAssistant}
-            assistantRef={assistantRef}
-            openNodesOnNotebook={openNodesOnNotebook}
-            scrollToNode={scrollToNode}
-            selectedNotebookId={selectedNotebookId}
-            setDisplayDashboard={setDisplayDashboard}
-            setRootQuery={setRootQuery}
-            setVoiceAssistant={setVoiceAssistant}
-            displayNotebook={!displayDashboard}
-            startPractice={startPractice}
-          />
-        </Box>
+        {(voiceAssistant || startPractice) && (
+          <Box sx={{ position: "absolute", bottom: "50px", right: "50px", zIndex: ZINDEX["assistant"] }}>
+            <Assistant
+              voiceAssistant={voiceAssistant}
+              assistantRef={assistantRef}
+              openNodesOnNotebook={openNodesOnNotebook}
+              scrollToNode={scrollToNode}
+              selectedNotebookId={selectedNotebookId}
+              setDisplayDashboard={setDisplayDashboard}
+              setRootQuery={setRootQuery}
+              setVoiceAssistant={setVoiceAssistant}
+              displayNotebook={!displayDashboard}
+              startPractice={startPractice}
+            />
+          </Box>
+        )}
         {/* )} */}
 
         <Box sx={{ width: "100vw", height: "100vh", overflow: "hidden" }}>
@@ -6338,9 +6340,7 @@ const Notebook = ({}: NotebookProps) => {
                 Interaction map from '{user?.uname}' with [{Object.entries(graph.nodes).length}] Nodes in Notebook:
                 {notebooks.find(c => c.id === selectedNotebookId)?.title ?? "--"} with Id: {selectedNotebookId}
               </Box>
-
               <Divider />
-
               <Typography>Global states:</Typography>
               <Box>
                 <Button onClick={() => console.log(graph.nodes)}>nodes</Button>
@@ -6365,9 +6365,7 @@ const Notebook = ({}: NotebookProps) => {
                   Children of Parent
                 </Button>
               </Box>
-
               <Divider />
-
               <Typography>Notebooks:</Typography>
               <Box>
                 <Button onClick={() => console.log(selectedNotebookId)}>selectedNotebookId</Button>
@@ -6375,9 +6373,7 @@ const Notebook = ({}: NotebookProps) => {
                   selectedPreviousNotebookIdRef
                 </Button>
               </Box>
-
               <Divider />
-
               <Typography>...</Typography>
               <Box>
                 <Button onClick={() => console.log("DAGGER", g)}>Dagre</Button>
@@ -6431,18 +6427,22 @@ const Notebook = ({}: NotebookProps) => {
               </Box>
 
               <Divider />
+              <Box>
+                Assistant:
+                <Button onClick={() => console.log({ voiceAssistant })}>voiceAssistant</Button>
+                <Button onClick={() => console.log({ startPractice })}>startPractice</Button>
+              </Box>
 
+              <Divider />
               <Box>
                 <Button onClick={() => console.log(allNodes)}>All Nodes</Button>
                 <Button onClick={() => console.log(citations)}>citations</Button>
                 <Button onClick={() => console.log(clusterNodes)}>clusterNodes</Button>
                 <Button onClick={() => console.log(graph.nodes[nodeBookState.selectedNode ?? ""])}>SelectedNode</Button>
               </Box>
-
               <Divider />
               <Button onClick={() => console.log(isWritingOnDBRef.current)}>isWritingOnDBRef</Button>
               <Divider />
-
               <Typography>Tutorial:</Typography>
               <Box>
                 <Button onClick={() => console.log(tutorial)}>Tutorial</Button>
@@ -6450,9 +6450,7 @@ const Notebook = ({}: NotebookProps) => {
                 <Button onClick={() => console.log(targetId)}>targetId</Button>
                 <Button onClick={() => console.log(forcedTutorial)}>forcedTutorial</Button>
               </Box>
-
               <Divider />
-
               <Typography>Functions:</Typography>
               <Box>
                 <Button onClick={() => nodeBookDispatch({ type: "setSelectionType", payload: "Proposals" })}>
@@ -6630,8 +6628,8 @@ const Notebook = ({}: NotebookProps) => {
               // voiceAssistantRef={voiceAssistantRef.current}
               user={user}
               onClose={() => {
-                setRootQuery(undefined);
                 setDisplayDashboard(false);
+                setRootQuery(undefined);
                 router.replace(router.pathname);
                 setVoiceAssistant(null);
               }}

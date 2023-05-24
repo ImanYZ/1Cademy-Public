@@ -1,15 +1,6 @@
 import { Box, Tooltip } from "@mui/material";
 import { getFirestore } from "firebase/firestore";
-import React, {
-  Dispatch,
-  MutableRefObject,
-  SetStateAction,
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+import React, { Dispatch, MutableRefObject, SetStateAction, useCallback, useEffect, useRef } from "react";
 import { useRive, useStateMachineInput } from "rive-react";
 
 import { getNode } from "../../client/serveless/nodes.serveless";
@@ -36,7 +27,7 @@ import { PracticeToolRef } from "../practiceTool/PracticeTool";
 
 const db = getFirestore();
 
-type AssistantReaction = "IDLE" | "LISTENING" | "HAPPY" | "SAD" | /* "SNORING" | */ "TALKING";
+// type AssistantReaction = "IDLE" | "LISTENING" | "HAPPY" | "SAD" | /* "SNORING" | */ "TALKING";
 
 type SelectedAnswer = { choice: KnowledgeChoice; option: string };
 type AssistantProps = {
@@ -76,8 +67,6 @@ export const Assistant = ({
    */
 
   const previousVoiceAssistant = useRef<VoiceAssistant | null>(voiceAssistant);
-  const [assistantState, setAssistantState] = useState<"IDLE" | "LISTEN" | "NARRATE">("IDLE");
-  const [forceAssistantReaction, setForceAssistantReaction] = useState<AssistantReaction | "">("");
 
   const askingRef = useRef<boolean>(false);
   const speechRef = useRef<SpeechRecognition | null>(newRecognition());
@@ -93,16 +82,6 @@ export const Assistant = ({
   const sadTrigger = useStateMachineInput(rive, STATE_MACHINE_NAME, SAD_TRIGGER);
   const happyTrigger = useStateMachineInput(rive, STATE_MACHINE_NAME, HAPPY_TRIGGER);
   const stateInput = useStateMachineInput(rive, STATE_MACHINE_NAME, STATE);
-
-  const assistantReactionMemo: AssistantReaction = useMemo(() => {
-    if (forceAssistantReaction) return forceAssistantReaction;
-    if (assistantState === "LISTEN") return "LISTENING";
-    if (assistantState === "NARRATE" && ![CORRECT_ANSWER_REACTION, WRONG_ANSWER_REACTION].includes(originState.current))
-      return "TALKING";
-    if (assistantState === "NARRATE" && originState.current === CORRECT_ANSWER_REACTION) return "HAPPY";
-    if (assistantState === "NARRATE" && originState.current === WRONG_ANSWER_REACTION) return "SAD";
-    return "IDLE";
-  }, [assistantState, forceAssistantReaction]);
 
   const getNoMatchPreviousMessage = (listenType: VoiceAssistantType) => {
     let message = "Sorry, I didn't get your choices.";
@@ -146,24 +125,30 @@ export const Assistant = ({
     [setDisplayDashboard, setRootQuery]
   );
 
-  const stopAssistant = useCallback(async (narrateStop: boolean) => {
-    console.log("stopAssistant");
-    // narrate stop only when assistant is stopped by user (by voice or button)
-    window.speechSynthesis.cancel();
-    if (abortNarratorPromise.current) {
-      console.log("will abort");
-      abortNarratorPromise.current();
-    }
-    if (narrateStop) {
-      const { narratorPromise, abortPromise } = narrateLargeTexts("Assistant stopped");
-      abortNarratorPromise.current = abortPromise;
-      await narratorPromise();
-      abortPromise();
-    }
-    askingRef.current = false;
-    setAssistantState("IDLE");
-    if (speechRef.current) speechRef.current?.abort();
-  }, []);
+  const stopAssistant = useCallback(
+    async (narrateStop: boolean) => {
+      console.log("stopAssistant");
+      // narrate stop only when assistant is stopped by user (by voice or button)
+      window.speechSynthesis.cancel();
+      if (abortNarratorPromise.current) {
+        console.log("will abort");
+        abortNarratorPromise.current();
+      }
+      if (narrateStop) {
+        const { narratorPromise, abortPromise } = narrateLargeTexts("Assistant stopped");
+        abortNarratorPromise.current = abortPromise;
+        await narratorPromise();
+        abortPromise();
+      }
+      askingRef.current = false;
+      if (stateInput) {
+        stateInput.value = 1;
+      }
+      // setAssistantState("IDLE");
+      if (speechRef.current) speechRef.current?.abort();
+    },
+    [stateInput]
+  );
 
   const askQuestion = useCallback(
     async ({ questionNode, tagId }: VoiceAssistant) => {
@@ -185,10 +170,11 @@ export const Assistant = ({
         console.log("👉 1. narrate", { message, preMessage, preTranscriptProcessed, origin, listenType });
 
         stateInput.value = 1;
-        setAssistantState("NARRATE");
+        // setAssistantState("NARRATE");
         if (listenType === "ANSWERING" && originState.current === "narrate-question") {
           if (!assistantRef.current) return console.log("cant execute operations with assistantRef");
 
+          assistantRef.current.onSelectedQuestionAnswer(-10);
           const { narratorPromise, abortPromise } = narrateLargeTexts(questionNode.title);
           abortNarratorPromise.current = abortPromise;
           const res = await narratorPromise();
@@ -222,7 +208,7 @@ export const Assistant = ({
 
         console.log("👉 2. listen", { message, preMessage, preTranscriptProcessed, origin, listenType });
         stateInput.value = 2;
-        setAssistantState("LISTEN");
+        // setAssistantState("LISTEN");
         const recognitionResult = await recognizeInput2(speechRef.current);
         speechRef.current.stop(); // stop after get text
 
@@ -295,6 +281,7 @@ export const Assistant = ({
           preMessage = "";
           preTranscriptProcessed = answerIsValid ? transcriptProcessed : "";
           listenType = answerIsValid ? "CONFIRM" : "ANSWERING";
+          originState.current = "from-answering";
           message = newMessage;
           console.log("ANSWERING", { answerIsValid, message, listenType });
           continue;
@@ -345,7 +332,7 @@ export const Assistant = ({
             let stopLoop = false;
             stateInput.value = 1;
             for (let i = 0; i < parents.length; i++) {
-              setForceAssistantReaction("TALKING");
+              // setForceAssistantReaction("TALKING");
               const parent = parents[i];
               const node: Node | null = await getNode(db, parent);
               if (!node) continue;
@@ -364,7 +351,7 @@ export const Assistant = ({
             }
             if (stopLoop) break;
             await delay(1000);
-            setForceAssistantReaction("");
+            // setForceAssistantReaction("");
             preMessage = "";
             message =
               "Please tell me Continue Practicing whenever you'd like to continue, otherwise I'll wait for you to navigate through the notebook.";
@@ -389,7 +376,10 @@ export const Assistant = ({
         }
       }
       stateInput.value = 0;
-      setAssistantState("IDLE");
+      if (assistantRef.current) {
+        assistantRef.current.onSelectedQuestionAnswer(-1);
+      }
+      // setAssistantState("IDLE");
     },
     [
       assistantRef,
@@ -420,11 +410,6 @@ export const Assistant = ({
     run();
   }, [askQuestion, stopAssistant, voiceAssistant]);
 
-  console.log("->", { displayNotebook, voiceAssistant, startPractice, assistantReactionMemo });
-
-  if (!voiceAssistant && !startPractice) return null;
-  console.log("->", 1);
-
   return (
     <Tooltip
       title={
@@ -440,51 +425,10 @@ export const Assistant = ({
         sx={{ width: "80px", height: "80px" }}
       >
         <RiveComponentTouch />
-        {/* {assistantReactionMemo === "TALKING" && (
-          <RiveComponentMemoized
-            src={TALKING_ANIMATION}
-            artboard="New Artboard"
-            animations="Timeline 1"
-            autoplay={true}
-          />
-        )}
-
-        {assistantReactionMemo === "HAPPY" && (
-          <RiveComponentMemoized
-            src={HAPPY_ANIMATION}
-            artboard="New Artboard"
-            animations="Timeline 1"
-            autoplay={true}
-          />
-        )}
-
-        {assistantReactionMemo === "SAD" && (
-          <RiveComponentMemoized src={SAD_ANIMATION} artboard="New Artboard" animations="Timeline 1" autoplay={true} />
-        )}
-
-        {assistantReactionMemo === "LISTENING" && (
-          <RiveComponentMemoized
-            src={LISTENING_ANIMATION}
-            artboard="New Artboard"
-            animations="Timeline 1"
-            autoplay={true}
-          />
-        )}
-
-        {assistantReactionMemo === "IDLE" && (
-          <RiveComponentMemoized src={IDLE_ANIMATION} artboard="New Artboard" animations="Timeline 1" autoplay={true} />
-        )} */}
       </Box>
     </Tooltip>
   );
 };
-
-// const IDLE_ANIMATION = "/rive-voice-assistant/idle.riv";
-// const LISTENING_ANIMATION = "/rive-voice-assistant/listening.riv";
-// const HAPPY_ANIMATION = "/rive-voice-assistant/happy.riv";
-// const SAD_ANIMATION = "/rive-voice-assistant/sad.riv";
-// const SNORING_ANIMATION = "/rive-voice-assistant/snoring.riv";
-// const TALKING_ANIMATION = "/rive-voice-assistant/talking.riv";
 
 const NEXT_ACTION = "*";
 const OPEN_NOTEBOOK = ".";

@@ -68,18 +68,24 @@ export const getValidABCDOptions = (text: string): string | null => {
 };
 
 export const getValidNumberOptions = (text: string): string => {
-  const optionsBySpace = text.split(" ");
-  const options = optionsBySpace.length > 1 ? optionsBySpace : Array.from(text);
-  const optionsFixed = options.map(cur => {
-    let possibleValue = "";
-    (Object.keys(NUMBER_POSSIBLE_OPTIONS) as NumberOptionsKeys[]).forEach(key => {
-      if (key === cur) possibleValue = key;
-      if (NUMBER_POSSIBLE_OPTIONS[key].includes(cur)) possibleValue = key;
-    });
-    return possibleValue;
-  });
+  const options = Array.from(new Set([...text.split(/[\s-]+/), ...Array.from(text).filter(c => Number(c))]));
+
+  const optionsFixed = options
+    .map(cur => {
+      let possibleValue = "";
+      (Object.keys(NUMBER_POSSIBLE_OPTIONS) as NumberOptionsKeys[]).forEach(key => {
+        console.log({ cur, key, options: NUMBER_POSSIBLE_OPTIONS[key] });
+        if (key === cur) return (possibleValue = key);
+        if (NUMBER_POSSIBLE_OPTIONS[key].includes(cur)) possibleValue = key;
+      });
+      console.log({ possibleValue });
+      return possibleValue;
+    })
+    .filter(cur => Boolean(cur));
   console.log({ optionsFixed });
-  return optionsFixed.join(" ");
+
+  const res = Array.from(new Set(optionsFixed)).join(" ");
+  return res;
 };
 
 const forceCharacterToOptions = (character: string) => {

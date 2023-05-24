@@ -102,7 +102,16 @@ const NodeQuestion = ({
           theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookG900 : DESIGN_SYSTEM_COLORS.gray100,
       }}
     >
-      <Typography component={"h1"} sx={{ fontSize: "30px" }}>
+      <Typography
+        component={"h1"}
+        sx={{
+          fontSize: "30px",
+          ...(narratedAnswerIdx === -10 && {
+            backgroundColor: theme =>
+              theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookO900 : DESIGN_SYSTEM_COLORS.primary50,
+          }),
+        }}
+      >
         {nodeCopy.title}
       </Typography>
       <Stack component={"ul"} spacing="16px" sx={{ p: "0px" }}>
