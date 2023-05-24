@@ -40,8 +40,8 @@ import { DashboardSettings } from "./DashboardSettings";
 import { DashboardStudents } from "./DashboardStudents";
 
 type DashboardWrapperProps = {
-  voiceAssistant: VoiceAssistant | null;
-  setVoiceAssistant: Dispatch<SetStateAction<VoiceAssistant | null>>;
+  voiceAssistant: VoiceAssistant;
+  setVoiceAssistant: Dispatch<SetStateAction<VoiceAssistant>>;
   user: User;
   onClose: () => void;
   openNodeHandler: (nodeId: string) => void;
