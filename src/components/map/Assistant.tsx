@@ -440,52 +440,11 @@ export const Assistant = ({
         onClick={voiceAssistant && !startPractice ? () => continuePracticing(voiceAssistant.tagId) : undefined}
         sx={{ width: "80px", height: "80px" }}
       >
-        <RiveComponentTouch />
-        {/* {assistantReactionMemo === "TALKING" && (
-          <RiveComponentMemoized
-            src={TALKING_ANIMATION}
-            artboard="New Artboard"
-            animations="Timeline 1"
-            autoplay={true}
-          />
-        )}
-
-        {assistantReactionMemo === "HAPPY" && (
-          <RiveComponentMemoized
-            src={HAPPY_ANIMATION}
-            artboard="New Artboard"
-            animations="Timeline 1"
-            autoplay={true}
-          />
-        )}
-
-        {assistantReactionMemo === "SAD" && (
-          <RiveComponentMemoized src={SAD_ANIMATION} artboard="New Artboard" animations="Timeline 1" autoplay={true} />
-        )}
-
-        {assistantReactionMemo === "LISTENING" && (
-          <RiveComponentMemoized
-            src={LISTENING_ANIMATION}
-            artboard="New Artboard"
-            animations="Timeline 1"
-            autoplay={true}
-          />
-        )}
-
-        {assistantReactionMemo === "IDLE" && (
-          <RiveComponentMemoized src={IDLE_ANIMATION} artboard="New Artboard" animations="Timeline 1" autoplay={true} />
-        )} */}
+        <RiveComponentTouch className={`rive-canvas`} />
       </Box>
     </Tooltip>
   );
 };
-
-// const IDLE_ANIMATION = "/rive-voice-assistant/idle.riv";
-// const LISTENING_ANIMATION = "/rive-voice-assistant/listening.riv";
-// const HAPPY_ANIMATION = "/rive-voice-assistant/happy.riv";
-// const SAD_ANIMATION = "/rive-voice-assistant/sad.riv";
-// const SNORING_ANIMATION = "/rive-voice-assistant/snoring.riv";
-// const TALKING_ANIMATION = "/rive-voice-assistant/talking.riv";
 
 const NEXT_ACTION = "*";
 const OPEN_NOTEBOOK = ".";
