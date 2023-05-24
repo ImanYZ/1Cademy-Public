@@ -43,7 +43,7 @@ type DashboardWrapperProps = {
   voiceAssistant: VoiceAssistant | null;
   setVoiceAssistant: Dispatch<SetStateAction<VoiceAssistant | null>>;
   user: User;
-  onClose: () => void;
+  onClose: (kepAssistant?: boolean) => void;
   openNodeHandler: (nodeId: string) => void;
   startPractice: boolean;
   setStartPractice: Dispatch<SetStateAction<boolean>>;

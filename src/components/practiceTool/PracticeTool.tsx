@@ -30,7 +30,7 @@ type PracticeToolProps = {
   user: User;
   root?: string;
   currentSemester: CourseTag;
-  onClose: () => void;
+  onClose: (keepAssistant: boolean) => void;
   openNodeHandler: (nodeId: string) => void;
   startPractice: boolean;
   setStartPractice: Dispatch<SetStateAction<boolean>>;
@@ -142,7 +142,7 @@ const PracticeTool = forwardRef<PracticeToolRef, PracticeToolProps>((props, ref)
 
   const onViewNodeOnNodeBook = (nodeId: string) => {
     openNodeHandler(nodeId);
-    onClose();
+    onClose(true);
   };
 
   // this is executed the first time we get selected a semester
