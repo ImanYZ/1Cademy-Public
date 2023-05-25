@@ -420,7 +420,7 @@ export const allCommunities = [
     ],
   },
   {
-    id: "ux-research-in-online-communities",
+    id: "education-and-psychology-research",
     name: "UX_Research_in_Online_Communities",
     tags: [
       {
@@ -431,7 +431,7 @@ export const allCommunities = [
     allTime: [],
     weekly: [],
     url: "/static/Communities/Online_Communities.jpg",
-    title: "UX Research in Online Communities",
+    title: "Education and Psychology Research",
     width: "50%",
     leaders: [
       {
