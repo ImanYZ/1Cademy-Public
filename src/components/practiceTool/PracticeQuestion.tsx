@@ -329,7 +329,7 @@ const NodeQuestion = ({
                 onClick={() => onCorrectNode(nodeCopy.id)}
                 disabled={nodeCopy?.disableVotes}
                 sx={{
-                  padding: "3px 2px 3px 8px",
+                  padding: "5px 5px 5px 10px",
                   color: "inherit",
                   minWidth: "0px",
                   borderRadius: "16px 0px 0px 16px",
@@ -350,8 +350,7 @@ const NodeQuestion = ({
               variant="middle"
               flexItem
               sx={{
-                borderColor: theme => (theme.palette.mode === "dark" ? "#D3D3D3" : "inherit"),
-                mx: "0px",
+                borderColor: theme => (theme.palette.mode === "dark" ? "#D3D3D3" : DESIGN_SYSTEM_COLORS.gray300),
               }}
             />
             <Tooltip title={"Vote to delete node."} placement={"top"}>
@@ -359,7 +358,7 @@ const NodeQuestion = ({
                 onClick={() => onWrongNode(nodeCopy)}
                 disabled={nodeCopy?.disableVotes}
                 sx={{
-                  padding: "3px 8px 3px 2px",
+                  padding: "5px 10px 5px 5px",
                   color: "inherit",
                   minWidth: "0px",
                   borderRadius: "0px 16px 16px 0px",
