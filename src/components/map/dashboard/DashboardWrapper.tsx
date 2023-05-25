@@ -31,6 +31,7 @@ import { CoursesResult } from "@/components/layouts/StudentsLayout";
 
 import { User } from "../../../knowledgeTypes";
 import { DESIGN_SYSTEM_COLORS } from "../../../lib/theme/colors";
+import { OpenRightSidebar } from "../../../pages/notebook";
 import { ISemester } from "../../../types/ICourse";
 import { NoDataMessage } from "../../instructors/NoDataMessage";
 import PracticeTool, { PracticeToolRef } from "../../practiceTool/PracticeTool";
@@ -48,6 +49,7 @@ type DashboardWrapperProps = {
   startPractice: boolean;
   setStartPractice: Dispatch<SetStateAction<boolean>>;
   root?: string;
+  setDisplayRightSidebar: (newValue: OpenRightSidebar) => void;
   sx?: SxProps<Theme>;
 };
 
@@ -66,6 +68,7 @@ export const DashboardWrapper = forwardRef<DashboardWrapperRef, DashboardWrapper
     sx,
     startPractice,
     setStartPractice,
+    setDisplayRightSidebar,
   } = props;
   const db = getFirestore();
 
@@ -312,6 +315,7 @@ export const DashboardWrapper = forwardRef<DashboardWrapperRef, DashboardWrapper
                 root={rootFound ? root : undefined}
                 startPractice={startPractice}
                 setStartPractice={setStartPractice}
+                setDisplayRightSidebar={setDisplayRightSidebar}
               />
             )}
             {selectToolbarView === "SETTINGS" && <DashboardSettings currentSemester={currentSemester} />}

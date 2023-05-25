@@ -13,6 +13,7 @@ import { SimpleQuestionNode } from "../../instructorsTypes";
 import { Post } from "../../lib/mapApi";
 import { DESIGN_SYSTEM_COLORS } from "../../lib/theme/colors";
 import shortenNumber from "../../lib/utils/shortenNumber";
+import { OpenRightSidebar } from "../../pages/notebook";
 import { doNeedToDeleteNode } from "../../utils/helpers";
 import { CustomCircularProgress } from "../CustomCircularProgress";
 import { CustomWrapperButton } from "../map/Buttons/Buttons";
@@ -385,8 +386,6 @@ type PracticeQuestionProps = {
   question: SimpleQuestionNode | null;
   practiceIsCompleted: boolean;
   onClose: () => void;
-  leaderboard: ReactNode;
-  userStatus: ReactNode;
   onViewNodeOnNodeBook: (nodeId: string) => void;
   onSaveAnswer: (answers: boolean[]) => Promise<void>;
   onGetNextQuestion: () => Promise<void>;
@@ -398,13 +397,12 @@ type PracticeQuestionProps = {
   enabledAssistant: boolean;
   onToggleAssistant: () => void;
   narratedAnswerIdx: number;
+  setDisplayRightSidebar: (newValue: OpenRightSidebar) => void;
 };
 export const PracticeQuestion = ({
   question,
   practiceIsCompleted,
   onClose,
-  leaderboard,
-  userStatus,
   onViewNodeOnNodeBook,
   onSaveAnswer,
   onGetNextQuestion,
@@ -416,8 +414,8 @@ export const PracticeQuestion = ({
   enabledAssistant,
   onToggleAssistant,
   narratedAnswerIdx,
+  setDisplayRightSidebar,
 }: PracticeQuestionProps) => {
-  const [displaySidebar, setDisplaySidebar] = useState<"LEADERBOARD" | "USER_STATUS" | null>(null);
   const [loading, setLoading] = useState(true);
 
   const onSubmitAnswer = useCallback(() => {
@@ -577,7 +575,7 @@ export const PracticeQuestion = ({
           <>
             {/* options */}
             <IconButton
-              onClick={() => setDisplaySidebar("USER_STATUS")}
+              onClick={() => setDisplayRightSidebar("USER_STATUS")}
               sx={{
                 width: "56px",
                 height: "56px",
@@ -597,7 +595,7 @@ export const PracticeQuestion = ({
             </IconButton>
 
             <IconButton
-              onClick={() => setDisplaySidebar("LEADERBOARD")}
+              onClick={() => setDisplayRightSidebar("LEADERBOARD")}
               sx={{
                 width: "56px",
                 height: "56px",
@@ -642,54 +640,6 @@ export const PracticeQuestion = ({
           </>
         )}
       </Box>
-
-      {question && !practiceIsCompleted && (
-        <>
-          {/* leaderBoard */}
-          <Box
-            sx={{
-              position: "fixed",
-              width: "350px",
-              top: "0px",
-              bottom: "0px",
-              right: displaySidebar === "LEADERBOARD" ? "0px" : "-350px",
-              backgroundColor: theme =>
-                theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookMainBlack : DESIGN_SYSTEM_COLORS.gray50,
-              transition: "right 0.4s",
-            }}
-          >
-            <IconButton
-              sx={{ position: "absolute", top: "17px", right: "17px", p: "4px" }}
-              onClick={() => setDisplaySidebar(null)}
-            >
-              <CloseIcon />
-            </IconButton>
-            {leaderboard}
-          </Box>
-
-          {/* userStatus */}
-          <Box
-            sx={{
-              position: "fixed",
-              width: "350px",
-              top: "0px",
-              bottom: "0px",
-              right: displaySidebar === "USER_STATUS" ? "0px" : "-350px",
-              backgroundColor: theme =>
-                theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookMainBlack : DESIGN_SYSTEM_COLORS.gray50,
-              transition: "right 0.4s",
-            }}
-          >
-            <IconButton
-              sx={{ position: "absolute", top: "17px", right: "17px", p: "4px" }}
-              onClick={() => setDisplaySidebar(null)}
-            >
-              <CloseIcon />
-            </IconButton>
-            {userStatus}
-          </Box>
-        </>
-      )}
     </Box>
   );
 };

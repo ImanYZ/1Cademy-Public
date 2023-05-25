@@ -133,12 +133,11 @@ export const UserStatus = ({
       )}
       <Box
         sx={{
-          //   height: "64px",
           p: "16px 20px 24px 20px",
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between",
-          borderBottom: `solid 1px ${DESIGN_SYSTEM_COLORS.notebookG600}`,
+          borderBottom: `solid 1px ${DESIGN_SYSTEM_COLORS.gray300}`,
         }}
       >
         <Box sx={{ width: "100%", display: "flex", justifyContent: "space-betweens" }}>

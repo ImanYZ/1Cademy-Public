@@ -34,7 +34,7 @@ import { DispatchNodeBookActions, FullNodeData, OpenPart, TNodeUpdates } from "s
 import { useNodeBook } from "@/context/NodeBookContext";
 import { Post } from "@/lib/mapApi";
 import { getVideoDataByUrl, momentDateToSeconds } from "@/lib/utils/utils";
-import { OpenSidebar } from "@/pages/notebook";
+import { OpenLeftSidebar } from "@/pages/notebook";
 
 import { useAuth } from "../../context/AuthContext";
 import { KnowledgeChoice } from "../../knowledgeTypes";
@@ -147,11 +147,11 @@ type NodeProps = {
   setOpenSearch: any;
   setNodeParts: (nodeId: string, callback: (thisNode: FullNodeData) => FullNodeData) => void;
   citations: { [key: string]: Set<string> };
-  setOpenSideBar: (sidebar: OpenSidebar) => void;
+  setOpenSideBar: (sidebar: OpenLeftSidebar) => void;
   proposeNodeImprovement: any;
   proposeNewChild: any;
   scrollToNode: any;
-  openSidebar: OpenSidebar;
+  openSidebar: OpenLeftSidebar;
   locked: boolean;
   setOperation: (operation: string) => void;
   contributors: any;

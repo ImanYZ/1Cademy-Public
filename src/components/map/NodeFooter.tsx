@@ -38,7 +38,7 @@ import NextImage from "next/image";
 import { useRouter } from "next/router";
 import React, { MutableRefObject, ReactNode, useCallback, useEffect, useMemo, useRef, useState } from "react";
 
-import { OpenSidebar } from "@/pages/notebook";
+import { OpenLeftSidebar } from "@/pages/notebook";
 
 import ReferenceIcon from "../../../public/reference.svg";
 import ReferenceDarkIcon from "../../../public/reference-dark.svg";
@@ -112,7 +112,7 @@ type NodeFooterProps = {
   uploadNodeImage: any;
   user: User;
   citations: { [key: string]: Set<string> };
-  setOpenSideBar: (sidebar: OpenSidebar) => void;
+  setOpenSideBar: (sidebar: OpenLeftSidebar) => void;
   locked: boolean;
   openSidebar: any;
   contributors: any;
