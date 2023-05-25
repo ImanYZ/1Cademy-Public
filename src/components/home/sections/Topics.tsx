@@ -40,10 +40,10 @@ const TOPICS_ITEMS = [
   },
   {
     id: "ux-research-communities",
-    title: "UX Research in Online Communities",
+    title: "Education And Psychology Research",
     // image: "home/communities/07-ux-research-communities.jpg",
     image: "/static/Communities/Online_Communities.jpg",
-    link: "/community/ux-research-in-online-communities",
+    link: "/community/education-and-psychology-research",
   },
   {
     id: "ADHD-and-autism",

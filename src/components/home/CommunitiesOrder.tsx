@@ -420,7 +420,7 @@ export const allCommunities = [
     ],
   },
   {
-    id: "ux-research-in-online-communities",
+    id: "education-and-psychology-research",
     name: "UX_Research_in_Online_Communities",
     tags: [
       {
@@ -431,7 +431,7 @@ export const allCommunities = [
     allTime: [],
     weekly: [],
     url: "/static/Communities/Online_Communities.jpg",
-    title: "UX Research in Online Communities",
+    title: "Education and Psychology Research",
     width: "50%",
     leaders: [
       {
@@ -468,10 +468,28 @@ export const allCommunities = [
         ],
       },
     ],
-    YouTube: "i_W_7j9n3aA",
-    description: `1Cademy is a collaborative community that supports interdisciplinary research and learning through content generation, mapping, and evaluation. We have multiple successful communities from various fields collaborating regularly by summarizing and organizing content on the platform. This community is focused on learning how to make healthier, more engaged online communities in order to improve our users’ learning, contributions, and experience.
-    The UX Research in Online Communities team is dedicated to uncovering, presenting, and compiling the latest literature and research on creating and maintaining engaging and beneficial online communities. Our goal is to understand how to foster online communities where users actively contribute their ideas and value the perspectives of their peers. We are seeking a team of dedicated students to conduct thorough research in various disciplines including psychology, social science, cognitive science, information science, and economics. Utilizing the 1Cademy platform, we will take notes, organize ideas, and map concepts from the literature we find. Ultimately, our aim is to apply our findings to make meaningful improvements to the 1Cademy platform and enhance the user experience of our online communities.
-    `,
+    YouTube: "MSysfWhNXmg",
+    description: (
+      <>
+        <p>
+          1Cademy is a collaborative community that supports interdisciplinary research and learning through content
+          generation, mapping, and evaluation. We have multiple successful communities from various fields collaborating
+          regularly by summarizing and organizing content on the platform. This community is focused on learning how to
+          make healthier, more engaged online communities in order to improve our users’ learning, contributions, and
+          experience.
+        </p>
+        This research team is dedicated to uncovering, presenting, and compiling the latest literature and research on
+        creating and maintaining engaging and beneficial online communities. Our goal is to understand how to foster
+        online communities where users actively contribute their ideas and value the perspectives of their peers. We are
+        seeking a team of dedicated students to conduct thorough research in various disciplines including social
+        science, cognitive science, information science, and education. Utilizing the 1Cademy platform, we will take
+        notes, organize ideas, and map concepts from the literature we find. Ultimately, our aim is to apply our
+        findings to make meaningful improvements to the 1Cademy platform and enhance the user experience of our online
+        communities.
+        <p></p>
+      </>
+    ),
+
     accomplishments: (
       <div>
         <Typography>We have recently published the following papers in ACM conferences:</Typography>
@@ -560,34 +578,33 @@ export const allCommunities = [
     ),
     gains: [
       `Learn how to use the 1Cademy platform for information management, organization, and dissemination purposes `,
-      "Collaborate with a team of motivated and invested research interns from around the world",
-      "Gain experience evaluating, paraphrasing, and presenting research",
-      "Gain experience working in a remote setting and collaborating with a team on academic research",
-      "Work toward reviewing and synthesizing literature into original research",
-      "Have opportunities to take on leadership roles ",
-      "Get involved in all aspects of conducting an online controlled experiment under the supervision of Iman YeckehZaare.",
+      `Collaborate with a team of motivated and invested research interns from around the world`,
+      `Gain experience evaluating, paraphrasing, and presenting research`,
+      `Gain experience working in a remote setting and collaborating with a team on academic research`,
+      `Work toward reviewing and synthesizing literature into original research`,
+      `Have opportunities to take on leadership roles `,
     ],
     requirements: `In addition to the 1Cademy general application process, we require our interns to submit both their most current resume and unofficial transcripts, with GPA included on those transcripts. We require our interns to have a minimum of a 3.5/4.0 GPA to apply for this position. Interns are required to have a degree path in psychology, education, or a related field, and answer our quiz questions to evaluate their domain knowledge.`,
     // coursera: "https://www.coursera.org/learn/academicinfoseek",
     hasTest: true,
     qualifications: [
-      "Motivation to read new and upcoming research papers outside your area of interest",
-      "Enthusiasm for topics related to social sciences, information sciences, or economics",
-      "Fluency in writing and reading in English",
-      "Ability to verbally communicate effectively and facilitate team meetings",
-      "Experience and willingness to work in collaborative environments",
-      "Ability to engage in group discourse and resolve complex issues",
-      "Ability to work asynchronously and independently",
-      "Strong presentation and summarization skills",
+      `Enthusiasm for topics related to psychology, information sciences, learning science, education or related fields`,
+      `Ability to verbally communicate effectively and facilitate team meetings`,
+      `Experience and willingness to work in collaborative environments `,
+      `Ability to engage in group discourse and resolve complex issues`,
+      `Ability to work asynchronously and independently`,
+      `Strong presentation and summarization skills `,
+      `Fluency in writing and reading in English`,
+      `Motivation to read new and upcoming research papers`,
     ],
     responsibilities: [
-      "Work asynchronously and attend online meetings once per week. ",
-      "Contribute 15-20 hours/week of your time to developing the 1Cademy platform",
-      "Use the 1Cademy platform to organize knowledge ",
-      "Work with a team to develop and improve the Online Communities area of 1Cademy ",
-      "Support research projects by summarizing background literature",
-      "Work remotely for all interactions, task fulfillment, and communications ",
-      "Translate research into ideas to improve the experience of 1Cademy communities",
+      `Work asynchronously and attend online meetings once per week. `,
+      `Contribute 15-20 hours/week of your time to developing the 1Cademy platform`,
+      `Use the 1Cademy platform to organize knowledge `,
+      `Work with a team to develop and improve the psychology and education area of 1Cademy `,
+      `Support research projects by summarizing background literature`,
+      `Work remotely for all interactions, task fulfillment, and communications `,
+      `Translate research into ideas to improve the experience of 1Cademy communities`,
     ],
   },
   {
