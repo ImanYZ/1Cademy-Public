@@ -249,6 +249,8 @@ const PracticeTool = forwardRef<PracticeToolRef, PracticeToolProps>((props, ref)
         zIndex: 1,
         overflowY: "auto",
         overflowX: "hidden",
+        // border: "dashed 2px royalBlue",
+        boxSizing: "content-box",
       }}
     >
       <PracticeQuestion

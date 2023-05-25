@@ -445,96 +445,38 @@ export const PracticeQuestion = ({
   return (
     <Box
       sx={{
-        p: "45px 64px",
-        width: "100%",
-        minHeight: "100%",
-        position: "relative",
+        minHeight: "100vh",
+        display: "grid",
+        gridTemplateColumns: "1fr auto 1fr",
       }}
     >
-      <IconButton
-        onClick={onClose}
-        sx={{ color: theme => theme.palette.common.primary800, position: "fixed", top: "50px", left: "63px" }}
-      >
-        <CloseFullscreenIcon sx={{ fontSize: "32px" }} />
-      </IconButton>
+      {/* left options */}
+      <Box>
+        <IconButton
+          onClick={onClose}
+          sx={{ color: theme => theme.palette.common.primary800, position: "sticky", top: "50px", left: "63px" }}
+        >
+          <CloseFullscreenIcon sx={{ fontSize: "32px" }} />
+        </IconButton>
+      </Box>
 
-      {practiceIsCompleted && (
-        <Box sx={{ mt: "50px" }}>
-          <QuestionMessage
-            messages={[
-              `Daily practice has been completed.`,
-              `You have completed ${practiceInfo.completedDays} days out of ${practiceInfo.totalDays} days of your review practice.`,
-              `${practiceInfo.remainingDays} days are remaining to the end of the semester.`,
-            ]}
-            totalQuestions={practiceInfo.totalQuestions}
-            questionsCompleted={practiceInfo.totalQuestions - practiceInfo.questionsLeft}
-          />
-        </Box>
-      )}
+      {/* question node */}
+      <Box sx={{ py: "45px" }}>
+        {practiceIsCompleted && (
+          <Box sx={{ mt: "50px" }}>
+            <QuestionMessage
+              messages={[
+                `Daily practice has been completed.`,
+                `You have completed ${practiceInfo.completedDays} days out of ${practiceInfo.totalDays} days of your review practice.`,
+                `${practiceInfo.remainingDays} days are remaining to the end of the semester.`,
+              ]}
+              totalQuestions={practiceInfo.totalQuestions}
+              questionsCompleted={practiceInfo.totalQuestions - practiceInfo.questionsLeft}
+            />
+          </Box>
+        )}
 
-      {/* {!question && !practiceIsCompleted && <Typography>Can't get question</Typography>} */}
-
-      {question && !practiceIsCompleted && (
-        <>
-          {/* options */}
-          <Stack spacing={"8px"} sx={{ position: "absolute", right: "12px", top: "8px" }}>
-            <IconButton
-              onClick={() => setDisplaySidebar("USER_STATUS")}
-              sx={{
-                width: "56px",
-                height: "56px",
-                fill: theme =>
-                  theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookG200 : DESIGN_SYSTEM_COLORS.gray500,
-                borderRadius: "8px",
-                backgroundColor: theme =>
-                  theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookMainBlack : DESIGN_SYSTEM_COLORS.gray50,
-              }}
-            >
-              <svg width="29" height="23" viewBox="0 0 29 23" fill="inherit" xmlns="http://www.w3.org/2000/svg">
-                <path d="M14.5001 23H4.61759L0 9.27492L8.24261 12.5906L14.5001 0L20.7576 12.5906L29 9.27492L24.3826 23H14.5001Z" />
-              </svg>
-            </IconButton>
-
-            <IconButton
-              onClick={() => setDisplaySidebar("LEADERBOARD")}
-              sx={{
-                width: "56px",
-                height: "56px",
-                color: theme =>
-                  theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookG200 : DESIGN_SYSTEM_COLORS.gray500,
-                borderRadius: "8px",
-                backgroundColor: theme =>
-                  theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookMainBlack : DESIGN_SYSTEM_COLORS.gray50,
-              }}
-            >
-              <LeaderboardIcon />
-            </IconButton>
-
-            <Tooltip title="Voice-based practice" placement="left">
-              <IconButton
-                onClick={onToggleAssistant}
-                sx={{
-                  width: "56px",
-                  height: "56px",
-                  color: theme =>
-                    enabledAssistant
-                      ? DESIGN_SYSTEM_COLORS.primary600
-                      : theme.palette.mode === "dark"
-                      ? DESIGN_SYSTEM_COLORS.notebookG200
-                      : DESIGN_SYSTEM_COLORS.gray500,
-                  borderRadius: "8px",
-                  backgroundColor: theme =>
-                    theme.palette.mode === "dark"
-                      ? DESIGN_SYSTEM_COLORS.notebookMainBlack
-                      : DESIGN_SYSTEM_COLORS.gray50,
-                }}
-              >
-                <VolumeUpIcon />
-              </IconButton>
-            </Tooltip>
-          </Stack>
-
-          {/* node question */}
+        {question && !practiceIsCompleted && (
           <Box sx={{ maxWidth: "820px", m: "auto" }}>
             <QuestionMessage
               messages={[
@@ -627,11 +569,87 @@ export const PracticeQuestion = ({
               </Box>
             )}
           </Box>
+        )}
+      </Box>
 
+      {/* right options */}
+      <Box sx={{ display: "flex", flexDirection: "column", alignItems: "end" }}>
+        {question && !practiceIsCompleted && (
+          <>
+            {/* options */}
+            <IconButton
+              onClick={() => setDisplaySidebar("USER_STATUS")}
+              sx={{
+                width: "56px",
+                height: "56px",
+                position: "sticky",
+                right: "12px",
+                top: "8px",
+                fill: theme =>
+                  theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookG200 : DESIGN_SYSTEM_COLORS.gray500,
+                borderRadius: "8px",
+                backgroundColor: theme =>
+                  theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookMainBlack : DESIGN_SYSTEM_COLORS.gray50,
+              }}
+            >
+              <svg width="29" height="23" viewBox="0 0 29 23" fill="inherit" xmlns="http://www.w3.org/2000/svg">
+                <path d="M14.5001 23H4.61759L0 9.27492L8.24261 12.5906L14.5001 0L20.7576 12.5906L29 9.27492L24.3826 23H14.5001Z" />
+              </svg>
+            </IconButton>
+
+            <IconButton
+              onClick={() => setDisplaySidebar("LEADERBOARD")}
+              sx={{
+                width: "56px",
+                height: "56px",
+                position: "sticky",
+                right: "12px",
+                top: "72px",
+                color: theme =>
+                  theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookG200 : DESIGN_SYSTEM_COLORS.gray500,
+                borderRadius: "8px",
+                backgroundColor: theme =>
+                  theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookMainBlack : DESIGN_SYSTEM_COLORS.gray50,
+              }}
+            >
+              <LeaderboardIcon />
+            </IconButton>
+
+            <Tooltip title="Voice-based practice" placement="left">
+              <IconButton
+                onClick={onToggleAssistant}
+                sx={{
+                  width: "56px",
+                  height: "56px",
+                  position: "sticky",
+                  right: "12px",
+                  top: "136px",
+                  color: theme =>
+                    enabledAssistant
+                      ? DESIGN_SYSTEM_COLORS.primary600
+                      : theme.palette.mode === "dark"
+                      ? DESIGN_SYSTEM_COLORS.notebookG200
+                      : DESIGN_SYSTEM_COLORS.gray500,
+                  borderRadius: "8px",
+                  backgroundColor: theme =>
+                    theme.palette.mode === "dark"
+                      ? DESIGN_SYSTEM_COLORS.notebookMainBlack
+                      : DESIGN_SYSTEM_COLORS.gray50,
+                }}
+              >
+                <VolumeUpIcon sx={{ fontSize: "28px" }} />
+              </IconButton>
+            </Tooltip>
+          </>
+        )}
+      </Box>
+
+      {question && !practiceIsCompleted && (
+        <>
           {/* leaderBoard */}
           <Box
             sx={{
-              position: "absolute",
+              position: "fixed",
               width: "350px",
               top: "0px",
               bottom: "0px",
@@ -653,7 +671,7 @@ export const PracticeQuestion = ({
           {/* userStatus */}
           <Box
             sx={{
-              position: "absolute",
+              position: "fixed",
               width: "350px",
               top: "0px",
               bottom: "0px",
