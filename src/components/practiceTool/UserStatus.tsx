@@ -306,7 +306,9 @@ export const UserStatus = ({
                   width: "60px",
                   height: "60px",
                   border: `solid 2px ${
-                    studentStrike > 0 ? DESIGN_SYSTEM_COLORS.success500 : DESIGN_SYSTEM_COLORS.notebookScarlet
+                    studentStrike.dailyStreak > 0
+                      ? DESIGN_SYSTEM_COLORS.success500
+                      : DESIGN_SYSTEM_COLORS.notebookScarlet
                   }`,
                   borderRadius: "50%",
                   display: "grid",
@@ -316,9 +318,13 @@ export const UserStatus = ({
                 <Typography
                   fontSize={"18px"}
                   fontWeight={"500"}
-                  color={studentStrike > 0 ? DESIGN_SYSTEM_COLORS.success500 : DESIGN_SYSTEM_COLORS.notebookScarlet}
+                  color={
+                    studentStrike.dailyStreak > 0
+                      ? DESIGN_SYSTEM_COLORS.success500
+                      : DESIGN_SYSTEM_COLORS.notebookScarlet
+                  }
                 >
-                  {studentStrike}
+                  {studentStrike.dailyStreak}
                 </Typography>
               </Box>
               <Typography
@@ -330,6 +336,14 @@ export const UserStatus = ({
                 }}
               >
                 Daily streak
+              </Typography>
+              <Typography
+                sx={{
+                  color: theme =>
+                    theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookG200 : DESIGN_SYSTEM_COLORS.gray500,
+                }}
+              >
+                Highest daily streak: {studentStrike.maxDailyStreak}
               </Typography>
             </Box>
           </>
