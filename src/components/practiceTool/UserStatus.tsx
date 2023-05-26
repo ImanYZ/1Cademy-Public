@@ -245,11 +245,11 @@ export const UserStatus = ({
                   display: "grid",
                   placeItems: "center",
                   borderRadius: "50%",
-                  border: theme => `solid 2px ${getDailyCircleColor(daysValue[keyDate], theme.palette.mode)}`,
-                  color: theme => getDailyCircleColor(daysValue[keyDate], theme.palette.mode),
+                  border: theme => `solid 2px ${getDailyCircleColor(theme.palette.mode, daysValue[keyDate])}`,
+                  color: theme => getDailyCircleColor(theme.palette.mode, daysValue[keyDate]),
                   boxShadow: theme =>
                     getDateYYMMDDWithHyphens() === keyDate
-                      ? `0 0 4px 2px ${getDailyCircleColor(daysValue[keyDate], theme.palette.mode)}`
+                      ? `0 0 4px 2px ${getDailyCircleColor(theme.palette.mode, daysValue[keyDate])}`
                       : undefined,
                 }}
               >
@@ -404,7 +404,7 @@ const getDaysInSemester = (
   return { successPracticeDays, totalPracticeDays };
 };
 
-const getDailyCircleColor = (dailyPoint?: { value: number; gotPoint: boolean }, theme: PaletteMode) => {
+const getDailyCircleColor = (theme: PaletteMode, dailyPoint?: { value: number; gotPoint: boolean }) => {
   if (!dailyPoint) return theme === "dark" ? DESIGN_SYSTEM_COLORS.primary800 : DESIGN_SYSTEM_COLORS.primary600;
   if (dailyPoint.gotPoint) return DESIGN_SYSTEM_COLORS.success500;
   return DESIGN_SYSTEM_COLORS.notebookScarlet;
