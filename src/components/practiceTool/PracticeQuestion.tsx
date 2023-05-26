@@ -279,7 +279,7 @@ const NodeQuestion = ({
                 {!submitAnswer && selectedAnswers[idx] && <CheckIcon sx={{ fontSize: "12px" }} />}
               </Box>
             </ListItem>
-            {submitAnswer && <Typography sx={{ mt: "8px" }}>{cur.feedback}</Typography>}
+            {submitAnswer && selectedAnswers[idx] && <Typography sx={{ mt: "8px" }}>{cur.feedback}</Typography>}
           </Box>
         ))}
       </Stack>
