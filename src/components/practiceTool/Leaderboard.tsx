@@ -74,11 +74,14 @@ const Leaderboard = ({ semesterId, sxBody }: LeaderboardProps) => {
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
+          justifyContent: "space-between",
           height: "112px",
           borderBottom: theme => `solid 1px ${theme.palette.common.notebookG600}`,
+          pt: "17px",
+          pb: "20px",
         }}
       >
-        <Box sx={{ my: "18px", display: "flex", alignItems: "center" }}>
+        <Box sx={{ display: "flex", alignItems: "center" }}>
           <svg width="24" height="19" viewBox="0 0 24 19" fill="none" xmlns="http://www.w3.org/2000/svg">
             <path
               d="M12.4001 18.6H4.49407L0.799999 7.61995L7.39409 10.2725L12.4001 0.200012L17.406 10.2725L24 7.61995L20.3061 18.6H12.4001Z"
@@ -196,7 +199,9 @@ const Leaderboard = ({ semesterId, sxBody }: LeaderboardProps) => {
                   placeItems: "center",
                 }}
               >
-                <Typography sx={{ fontSize: "12px", fontWeight: "600" }}>{idx + 1}</Typography>
+                <Typography sx={{ fontSize: "12px", fontWeight: "600", color: DESIGN_SYSTEM_COLORS.baseWhite }}>
+                  {idx + 1}
+                </Typography>
               </Box>
             </Box>
             <Box>
