@@ -104,6 +104,7 @@ const NodeQuestion = ({
       }}
     >
       <Typography
+        id={"question-title"}
         component={"h1"}
         sx={{
           fontSize: "30px",
@@ -120,6 +121,7 @@ const NodeQuestion = ({
         {nodeCopy.choices.map((cur, idx) => (
           <Box key={idx}>
             <ListItem
+              id={`question-choice-${idx}`}
               onClick={() => onSelectAnswer(idx)}
               sx={{
                 p: "18px 16px",
@@ -235,7 +237,6 @@ const NodeQuestion = ({
               }}
             >
               {cur.choice}
-
               <Box
                 className="check-box"
                 sx={{

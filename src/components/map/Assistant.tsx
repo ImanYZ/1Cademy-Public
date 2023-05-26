@@ -183,6 +183,7 @@ export const Assistant = ({
           if (!assistantRef.current) return console.log("cant execute operations with assistantRef");
 
           assistantRef.current.onSelectedQuestionAnswer(-10);
+          scrollToHtmlElement("question-title");
           const { narratorPromise, abortPromise } = narrateLargeTexts(questionNode.title);
           abortNarratorPromise.current = abortPromise;
           const res = await narratorPromise();
@@ -193,6 +194,7 @@ export const Assistant = ({
             // if (assistantRef.current) return assistantRef.current.onSelectedQuestionAnswer(-1);
             const choice = questionNode.choices[i];
             assistantRef.current.onSelectedQuestionAnswer(i);
+            scrollToHtmlElement(`question-choice-${i}`);
             // await narrateLargeTexts(choice.choice);
             const { narratorPromise, abortPromise } = narrateLargeTexts(choice.choice);
             abortNarratorPromise.current = abortPromise;
@@ -205,6 +207,43 @@ export const Assistant = ({
 
           if (stopNarration) break;
           assistantRef.current.onSelectedQuestionAnswer(-1);
+        } else if (
+          listenType === "NEXT_ACTION" &&
+          [CORRECT_ANSWER_REACTION, WRONG_ANSWER_REACTION].includes(originState.current)
+        ) {
+          const [messageResultOfAnswers, feedbackForAnswers, feedbackToWrongChoice] = message.split("\n");
+          const { narratorPromise, abortPromise } = narrateLargeTexts(messageResultOfAnswers);
+          abortNarratorPromise.current = abortPromise;
+          const res = await narratorPromise();
+          if (!res) break;
+
+          const indexFeedbackOptions = feedbackForAnswers.split(".").map(c => {
+            const possibleOption = c.split(":")[0].split(" ").pop();
+            if (!possibleOption) return { message: c, index: -1 };
+            const option = Number(possibleOption);
+            if (isNaN(option)) return { message: c, index: -1 };
+            return { message: c, index: option - 1 };
+          });
+          let stopNarration = false;
+          for (let i = 0; i < indexFeedbackOptions.length; i++) {
+            const feedback = indexFeedbackOptions[i];
+            scrollToHtmlElement(`question-choice-${feedback.index}`);
+            const { narratorPromise, abortPromise } = narrateLargeTexts(feedback.message);
+            abortNarratorPromise.current = abortPromise;
+            const res = await narratorPromise();
+            if (!res) {
+              stopNarration = true;
+              break;
+            }
+          }
+          if (stopNarration) break;
+
+          if (feedbackToWrongChoice) {
+            const { narratorPromise, abortPromise } = narrateLargeTexts(feedbackToWrongChoice);
+            abortNarratorPromise.current = abortPromise;
+            const res = await narratorPromise();
+            if (!res) break;
+          }
         } else {
           const textToNarrate = `${preMessage} ${message}`;
           const { narratorPromise, abortPromise } = narrateLargeTexts(textToNarrate);
@@ -550,7 +589,7 @@ const getMessageFromUserConfirm = (
         .map(c => `${c.option}: ${c.choice.feedback}`)
         .join(" ")}`
     : "";
-  const message = `${assistantMessageBasedOnResultOfAnswer} ${feedbackForAnswers} ${feedbackToWrongChoice}` ?? "";
+  const message = `${assistantMessageBasedOnResultOfAnswer}\n${feedbackForAnswers}\n${feedbackToWrongChoice}`;
   return { message, isCorrect };
 };
 
@@ -587,4 +626,9 @@ const messageFromUserConfirm2 = (choices: KnowledgeChoice[], submitOptions: bool
     : "";
   const message = `${assistantMessageBasedOnResultOfAnswer} ${feedbackForAnswers} ${feedbackToWrongChoice}` ?? "";
   return message;
+};
+
+const scrollToHtmlElement = (id: string) => {
+  const questionElement = document.getElementById(id);
+  if (questionElement) questionElement.scrollIntoView({ behavior: "smooth", block: "center" });
 };

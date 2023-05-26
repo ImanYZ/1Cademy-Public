@@ -7,6 +7,7 @@ import React, {
   useCallback,
   useEffect,
   useImperativeHandle,
+  useRef,
   useState,
 } from "react";
 import { VoiceAssistant } from "src/nodeBookTypes";
@@ -88,6 +89,7 @@ const PracticeTool = forwardRef<PracticeToolRef, PracticeToolProps>((props, ref)
   const [narratedAnswerIdx, setNarratedAnswerIdx] = useState(-1); // -1: nothing is selected
   const [submittedAnswers, setSubmittedAnswers] = useState<boolean[]>([]);
   const [loading, setLoading] = useState(true);
+  const scrollableWrapper = useRef<HTMLElement | null>(null);
 
   const onRunPracticeTool = useCallback(() => {
     (start: boolean) => {
@@ -249,6 +251,7 @@ const PracticeTool = forwardRef<PracticeToolRef, PracticeToolProps>((props, ref)
 
   return startPractice ? (
     <Box
+      ref={scrollableWrapper}
       sx={{
         position: "absolute",
         inset: "0px",
