@@ -1,8 +1,10 @@
 import { NodeType } from "src/types";
 
 export const ZINDEX = {
-  assistant: 1500,
+  dashboard: 1500, // dashboard content to (student dashboard, practice tool and assistant floating animation)
+  devtools: 5000,
 };
+
 export const NODE_TYPE_OPTIONS: NodeType[] = [
   // NodeType.Advertisement,
   "Code",

@@ -13,6 +13,7 @@ import { SimpleQuestionNode } from "../../instructorsTypes";
 import { Post } from "../../lib/mapApi";
 import { DESIGN_SYSTEM_COLORS } from "../../lib/theme/colors";
 import shortenNumber from "../../lib/utils/shortenNumber";
+import { OpenRightSidebar } from "../../pages/notebook";
 import { doNeedToDeleteNode } from "../../utils/helpers";
 import { CustomCircularProgress } from "../CustomCircularProgress";
 import { CustomWrapperButton } from "../map/Buttons/Buttons";
@@ -329,7 +330,7 @@ const NodeQuestion = ({
                 onClick={() => onCorrectNode(nodeCopy.id)}
                 disabled={nodeCopy?.disableVotes}
                 sx={{
-                  padding: "3px 2px 3px 8px",
+                  padding: "5px 5px 5px 10px",
                   color: "inherit",
                   minWidth: "0px",
                   borderRadius: "16px 0px 0px 16px",
@@ -350,8 +351,7 @@ const NodeQuestion = ({
               variant="middle"
               flexItem
               sx={{
-                borderColor: theme => (theme.palette.mode === "dark" ? "#D3D3D3" : "inherit"),
-                mx: "0px",
+                borderColor: theme => (theme.palette.mode === "dark" ? "#D3D3D3" : DESIGN_SYSTEM_COLORS.gray300),
               }}
             />
             <Tooltip title={"Vote to delete node."} placement={"top"}>
@@ -359,7 +359,7 @@ const NodeQuestion = ({
                 onClick={() => onWrongNode(nodeCopy)}
                 disabled={nodeCopy?.disableVotes}
                 sx={{
-                  padding: "3px 8px 3px 2px",
+                  padding: "5px 10px 5px 5px",
                   color: "inherit",
                   minWidth: "0px",
                   borderRadius: "0px 16px 16px 0px",
@@ -386,8 +386,6 @@ type PracticeQuestionProps = {
   question: SimpleQuestionNode | null;
   practiceIsCompleted: boolean;
   onClose: () => void;
-  leaderboard: ReactNode;
-  userStatus: ReactNode;
   onViewNodeOnNodeBook: (nodeId: string) => void;
   onSaveAnswer: (answers: boolean[]) => Promise<void>;
   onGetNextQuestion: () => Promise<void>;
@@ -399,13 +397,12 @@ type PracticeQuestionProps = {
   enabledAssistant: boolean;
   onToggleAssistant: () => void;
   narratedAnswerIdx: number;
+  setDisplayRightSidebar: (newValue: OpenRightSidebar) => void;
 };
 export const PracticeQuestion = ({
   question,
   practiceIsCompleted,
   onClose,
-  leaderboard,
-  userStatus,
   onViewNodeOnNodeBook,
   onSaveAnswer,
   onGetNextQuestion,
@@ -417,8 +414,8 @@ export const PracticeQuestion = ({
   enabledAssistant,
   onToggleAssistant,
   narratedAnswerIdx,
+  setDisplayRightSidebar,
 }: PracticeQuestionProps) => {
-  const [displaySidebar, setDisplaySidebar] = useState<"LEADERBOARD" | "USER_STATUS" | null>(null);
   const [loading, setLoading] = useState(true);
 
   const onSubmitAnswer = useCallback(() => {
@@ -445,96 +442,38 @@ export const PracticeQuestion = ({
   return (
     <Box
       sx={{
-        p: "45px 64px",
-        width: "100%",
-        minHeight: "100%",
-        position: "relative",
+        minHeight: "100vh",
+        display: "grid",
+        gridTemplateColumns: "1fr auto 1fr",
       }}
     >
-      <IconButton
-        onClick={onClose}
-        sx={{ color: theme => theme.palette.common.primary800, position: "fixed", top: "50px", left: "63px" }}
-      >
-        <CloseFullscreenIcon sx={{ fontSize: "32px" }} />
-      </IconButton>
+      {/* left options */}
+      <Box>
+        <IconButton
+          onClick={onClose}
+          sx={{ color: theme => theme.palette.common.primary800, position: "sticky", top: "50px", left: "63px" }}
+        >
+          <CloseFullscreenIcon sx={{ fontSize: "32px" }} />
+        </IconButton>
+      </Box>
 
-      {practiceIsCompleted && (
-        <Box sx={{ mt: "50px" }}>
-          <QuestionMessage
-            messages={[
-              `Daily practice has been completed.`,
-              `You have completed ${practiceInfo.completedDays} days out of ${practiceInfo.totalDays} days of your review practice.`,
-              `${practiceInfo.remainingDays} days are remaining to the end of the semester.`,
-            ]}
-            totalQuestions={practiceInfo.totalQuestions}
-            questionsCompleted={practiceInfo.totalQuestions - practiceInfo.questionsLeft}
-          />
-        </Box>
-      )}
+      {/* question node */}
+      <Box sx={{ py: "45px" }}>
+        {practiceIsCompleted && (
+          <Box sx={{ mt: "50px" }}>
+            <QuestionMessage
+              messages={[
+                `Daily practice has been completed.`,
+                `You have completed ${practiceInfo.completedDays} days out of ${practiceInfo.totalDays} days of your review practice.`,
+                `${practiceInfo.remainingDays} days are remaining to the end of the semester.`,
+              ]}
+              totalQuestions={practiceInfo.totalQuestions}
+              questionsCompleted={practiceInfo.totalQuestions - practiceInfo.questionsLeft}
+            />
+          </Box>
+        )}
 
-      {/* {!question && !practiceIsCompleted && <Typography>Can't get question</Typography>} */}
-
-      {question && !practiceIsCompleted && (
-        <>
-          {/* options */}
-          <Stack spacing={"8px"} sx={{ position: "absolute", right: "12px", top: "8px" }}>
-            <IconButton
-              onClick={() => setDisplaySidebar("USER_STATUS")}
-              sx={{
-                width: "56px",
-                height: "56px",
-                fill: theme =>
-                  theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookG200 : DESIGN_SYSTEM_COLORS.gray500,
-                borderRadius: "8px",
-                backgroundColor: theme =>
-                  theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookMainBlack : DESIGN_SYSTEM_COLORS.gray50,
-              }}
-            >
-              <svg width="29" height="23" viewBox="0 0 29 23" fill="inherit" xmlns="http://www.w3.org/2000/svg">
-                <path d="M14.5001 23H4.61759L0 9.27492L8.24261 12.5906L14.5001 0L20.7576 12.5906L29 9.27492L24.3826 23H14.5001Z" />
-              </svg>
-            </IconButton>
-
-            <IconButton
-              onClick={() => setDisplaySidebar("LEADERBOARD")}
-              sx={{
-                width: "56px",
-                height: "56px",
-                color: theme =>
-                  theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookG200 : DESIGN_SYSTEM_COLORS.gray500,
-                borderRadius: "8px",
-                backgroundColor: theme =>
-                  theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookMainBlack : DESIGN_SYSTEM_COLORS.gray50,
-              }}
-            >
-              <LeaderboardIcon />
-            </IconButton>
-
-            <Tooltip title="Voice-based practice" placement="left">
-              <IconButton
-                onClick={onToggleAssistant}
-                sx={{
-                  width: "56px",
-                  height: "56px",
-                  color: theme =>
-                    enabledAssistant
-                      ? DESIGN_SYSTEM_COLORS.primary600
-                      : theme.palette.mode === "dark"
-                      ? DESIGN_SYSTEM_COLORS.notebookG200
-                      : DESIGN_SYSTEM_COLORS.gray500,
-                  borderRadius: "8px",
-                  backgroundColor: theme =>
-                    theme.palette.mode === "dark"
-                      ? DESIGN_SYSTEM_COLORS.notebookMainBlack
-                      : DESIGN_SYSTEM_COLORS.gray50,
-                }}
-              >
-                <VolumeUpIcon />
-              </IconButton>
-            </Tooltip>
-          </Stack>
-
-          {/* node question */}
+        {question && !practiceIsCompleted && (
           <Box sx={{ maxWidth: "820px", m: "auto" }}>
             <QuestionMessage
               messages={[
@@ -627,52 +566,80 @@ export const PracticeQuestion = ({
               </Box>
             )}
           </Box>
+        )}
+      </Box>
 
-          {/* leaderBoard */}
-          <Box
-            sx={{
-              position: "absolute",
-              width: "350px",
-              top: "0px",
-              bottom: "0px",
-              right: displaySidebar === "LEADERBOARD" ? "0px" : "-350px",
-              backgroundColor: theme =>
-                theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookMainBlack : DESIGN_SYSTEM_COLORS.gray50,
-              transition: "right 0.4s",
-            }}
-          >
+      {/* right options */}
+      <Box sx={{ display: "flex", flexDirection: "column", alignItems: "end" }}>
+        {question && !practiceIsCompleted && (
+          <>
+            {/* options */}
             <IconButton
-              sx={{ position: "absolute", top: "17px", right: "17px", p: "4px" }}
-              onClick={() => setDisplaySidebar(null)}
+              onClick={() => setDisplayRightSidebar("USER_STATUS")}
+              sx={{
+                width: "56px",
+                height: "56px",
+                position: "sticky",
+                right: "12px",
+                top: "8px",
+                fill: theme =>
+                  theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookG200 : DESIGN_SYSTEM_COLORS.gray500,
+                borderRadius: "8px",
+                backgroundColor: theme =>
+                  theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookMainBlack : DESIGN_SYSTEM_COLORS.gray50,
+              }}
             >
-              <CloseIcon />
+              <svg width="29" height="23" viewBox="0 0 29 23" fill="inherit" xmlns="http://www.w3.org/2000/svg">
+                <path d="M14.5001 23H4.61759L0 9.27492L8.24261 12.5906L14.5001 0L20.7576 12.5906L29 9.27492L24.3826 23H14.5001Z" />
+              </svg>
             </IconButton>
-            {leaderboard}
-          </Box>
 
-          {/* userStatus */}
-          <Box
-            sx={{
-              position: "absolute",
-              width: "350px",
-              top: "0px",
-              bottom: "0px",
-              right: displaySidebar === "USER_STATUS" ? "0px" : "-350px",
-              backgroundColor: theme =>
-                theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookMainBlack : DESIGN_SYSTEM_COLORS.gray50,
-              transition: "right 0.4s",
-            }}
-          >
             <IconButton
-              sx={{ position: "absolute", top: "17px", right: "17px", p: "4px" }}
-              onClick={() => setDisplaySidebar(null)}
+              onClick={() => setDisplayRightSidebar("LEADERBOARD")}
+              sx={{
+                width: "56px",
+                height: "56px",
+                position: "sticky",
+                right: "12px",
+                top: "72px",
+                color: theme =>
+                  theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookG200 : DESIGN_SYSTEM_COLORS.gray500,
+                borderRadius: "8px",
+                backgroundColor: theme =>
+                  theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookMainBlack : DESIGN_SYSTEM_COLORS.gray50,
+              }}
             >
-              <CloseIcon />
+              <LeaderboardIcon />
             </IconButton>
-            {userStatus}
-          </Box>
-        </>
-      )}
+
+            <Tooltip title="Voice-based practice" placement="left">
+              <IconButton
+                onClick={onToggleAssistant}
+                sx={{
+                  width: "56px",
+                  height: "56px",
+                  position: "sticky",
+                  right: "12px",
+                  top: "136px",
+                  color: theme =>
+                    enabledAssistant
+                      ? DESIGN_SYSTEM_COLORS.primary600
+                      : theme.palette.mode === "dark"
+                      ? DESIGN_SYSTEM_COLORS.notebookG200
+                      : DESIGN_SYSTEM_COLORS.gray500,
+                  borderRadius: "8px",
+                  backgroundColor: theme =>
+                    theme.palette.mode === "dark"
+                      ? DESIGN_SYSTEM_COLORS.notebookMainBlack
+                      : DESIGN_SYSTEM_COLORS.gray50,
+                }}
+              >
+                <VolumeUpIcon sx={{ fontSize: "28px" }} />
+              </IconButton>
+            </Tooltip>
+          </>
+        )}
+      </Box>
     </Box>
   );
 };
