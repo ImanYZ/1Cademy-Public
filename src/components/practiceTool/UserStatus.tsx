@@ -2,7 +2,7 @@ import CheckIcon from "@mui/icons-material/Check";
 import LeaderboardIcon from "@mui/icons-material/Leaderboard";
 import NavigateBeforeIcon from "@mui/icons-material/NavigateBefore";
 import NavigateNextIcon from "@mui/icons-material/NavigateNext";
-import { Box, Divider, IconButton, Stack, Typography } from "@mui/material";
+import { Box, Divider, IconButton, PaletteMode, Stack, Typography } from "@mui/material";
 import { getFirestore } from "firebase/firestore";
 import Image from "next/image";
 import React, { useEffect, useMemo, useState } from "react";
@@ -245,11 +245,11 @@ export const UserStatus = ({
                   display: "grid",
                   placeItems: "center",
                   borderRadius: "50%",
-                  border: `solid 2px ${getDailyCircleColor(daysValue[keyDate])}`,
-                  color: getDailyCircleColor(daysValue[keyDate]),
-                  boxShadow:
+                  border: theme => `solid 2px ${getDailyCircleColor(daysValue[keyDate], theme.palette.mode)}`,
+                  color: theme => getDailyCircleColor(daysValue[keyDate], theme.palette.mode),
+                  boxShadow: theme =>
                     getDateYYMMDDWithHyphens() === keyDate
-                      ? `0 0 4px 2px ${getDailyCircleColor(daysValue[keyDate])}`
+                      ? `0 0 4px 2px ${getDailyCircleColor(daysValue[keyDate], theme.palette.mode)}`
                       : undefined,
                 }}
               >
@@ -283,7 +283,7 @@ export const UserStatus = ({
         {displayFooterStreak && (
           <>
             <Divider sx={{ mb: "24px" }} />
-            <Box sx={{ display: "grid", placeItems: "center", gap: "8px" }}>
+            <Stack direction={"row"} spacing="16px" justifyContent={"center"}>
               <Box
                 sx={{
                   width: "60px",
@@ -310,25 +310,27 @@ export const UserStatus = ({
                   {studentStrike.dailyStreak}
                 </Typography>
               </Box>
-              <Typography
-                sx={{
-                  fontSize: "18px",
-                  fontWeight: "500",
-                  color: theme =>
-                    theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.gray25 : DESIGN_SYSTEM_COLORS.gray800,
-                }}
-              >
-                Daily streak
-              </Typography>
-              <Typography
-                sx={{
-                  color: theme =>
-                    theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookG200 : DESIGN_SYSTEM_COLORS.gray500,
-                }}
-              >
-                Highest daily streak: {studentStrike.maxDailyStreak}
-              </Typography>
-            </Box>
+              <Box>
+                <Typography
+                  sx={{
+                    fontSize: "18px",
+                    fontWeight: "500",
+                    color: theme =>
+                      theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.gray25 : DESIGN_SYSTEM_COLORS.gray800,
+                  }}
+                >
+                  Daily streak
+                </Typography>
+                <Typography
+                  sx={{
+                    color: theme =>
+                      theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookG200 : DESIGN_SYSTEM_COLORS.gray500,
+                  }}
+                >
+                  Highest daily streak: {studentStrike.maxDailyStreak}
+                </Typography>
+              </Box>
+            </Stack>
           </>
         )}
       </Box>
@@ -402,8 +404,8 @@ const getDaysInSemester = (
   return { successPracticeDays, totalPracticeDays };
 };
 
-const getDailyCircleColor = (dailyPoint?: { value: number; gotPoint: boolean }) => {
-  if (!dailyPoint) return DESIGN_SYSTEM_COLORS.primary800;
+const getDailyCircleColor = (dailyPoint?: { value: number; gotPoint: boolean }, theme: PaletteMode) => {
+  if (!dailyPoint) return theme === "dark" ? DESIGN_SYSTEM_COLORS.primary800 : DESIGN_SYSTEM_COLORS.primary600;
   if (dailyPoint.gotPoint) return DESIGN_SYSTEM_COLORS.success500;
   return DESIGN_SYSTEM_COLORS.notebookScarlet;
 };
