@@ -2,7 +2,7 @@ import CheckIcon from "@mui/icons-material/Check";
 import LeaderboardIcon from "@mui/icons-material/Leaderboard";
 import NavigateBeforeIcon from "@mui/icons-material/NavigateBefore";
 import NavigateNextIcon from "@mui/icons-material/NavigateNext";
-import { Box, Divider, IconButton, Stack, Typography } from "@mui/material";
+import { Box, Divider, IconButton, PaletteMode, Stack, Typography } from "@mui/material";
 import { getFirestore } from "firebase/firestore";
 import Image from "next/image";
 import React, { useEffect, useMemo, useState } from "react";
@@ -21,6 +21,7 @@ import {
   moveDateByDays,
   SHORT_MONTH_NAMES,
 } from "../../lib/utils/date.utils";
+import { calculateDailyStreak, CalculateDailyStreakOutput } from "../../lib/utils/userStatus.utils";
 import { ISemester, ISemesterStudentVoteStat, ISemesterStudentVoteStatDay } from "../../types/ICourse";
 import { PointsType } from "../PointsType";
 
@@ -114,9 +115,12 @@ export const UserStatus = ({
     setDaysValue(res);
   }, [semester, semesterStudentVoteStats, weekInfo.dates]);
 
-  const studentStrike = useMemo(() => {
-    if (!semester) return 0;
-    if (!semesterStudentVoteStats) return 0;
+  const studentStrike: CalculateDailyStreakOutput = useMemo(() => {
+    console.log("x11");
+    if (!semester) return { dailyStreak: 0, maxDailyStreak: 0 };
+    console.log("x12");
+    if (!semesterStudentVoteStats) return { dailyStreak: 0, maxDailyStreak: 0 };
+    console.log("x13");
 
     return calculateDailyStreak(semesterStudentVoteStats, semester.dailyPractice.numQuestionsPerDay);
   }, [semester, semesterStudentVoteStats]);
@@ -133,12 +137,11 @@ export const UserStatus = ({
       )}
       <Box
         sx={{
-          //   height: "64px",
           p: "16px 20px 24px 20px",
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between",
-          borderBottom: `solid 1px ${DESIGN_SYSTEM_COLORS.notebookG600}`,
+          borderBottom: `solid 1px ${DESIGN_SYSTEM_COLORS.gray300}`,
         }}
       >
         <Box sx={{ width: "100%", display: "flex", justifyContent: "space-betweens" }}>
@@ -190,7 +193,9 @@ export const UserStatus = ({
                   width: "48px",
                   height: "48px",
                   border: `solid 2px ${
-                    studentStrike > 0 ? DESIGN_SYSTEM_COLORS.success500 : DESIGN_SYSTEM_COLORS.notebookScarlet
+                    studentStrike.dailyStreak > 0
+                      ? DESIGN_SYSTEM_COLORS.success500
+                      : DESIGN_SYSTEM_COLORS.notebookScarlet
                   }`,
                   borderRadius: "50%",
                   display: "grid",
@@ -200,9 +205,13 @@ export const UserStatus = ({
                 <Typography
                   fontSize={"16px"}
                   fontWeight={"500"}
-                  color={studentStrike > 0 ? DESIGN_SYSTEM_COLORS.success500 : DESIGN_SYSTEM_COLORS.notebookScarlet}
+                  color={
+                    studentStrike.dailyStreak > 0
+                      ? DESIGN_SYSTEM_COLORS.success500
+                      : DESIGN_SYSTEM_COLORS.notebookScarlet
+                  }
                 >
-                  {studentStrike}
+                  {studentStrike.dailyStreak}
                 </Typography>
               </Box>
               <Typography sx={{ fontSize: "16px", color: DESIGN_SYSTEM_COLORS.gray25 }}>Daily streak</Typography>
@@ -236,28 +245,11 @@ export const UserStatus = ({
                   display: "grid",
                   placeItems: "center",
                   borderRadius: "50%",
-                  border: `solid 2px ${
-                    daysValue[keyDate]
-                      ? daysValue[keyDate].gotPoint === true
-                        ? DESIGN_SYSTEM_COLORS.success500
-                        : DESIGN_SYSTEM_COLORS.notebookScarlet
-                      : DESIGN_SYSTEM_COLORS.notebookG200
-                  }`,
-
-                  color: daysValue[keyDate]
-                    ? daysValue[keyDate].gotPoint === true
-                      ? DESIGN_SYSTEM_COLORS.success500
-                      : DESIGN_SYSTEM_COLORS.notebookScarlet
-                    : DESIGN_SYSTEM_COLORS.notebookG200,
-                  boxShadow:
-                    getTodayYYYYMMDD() === keyDate
-                      ? `0 0 4px 2px ${
-                          daysValue[keyDate]
-                            ? daysValue[keyDate].gotPoint === true
-                              ? DESIGN_SYSTEM_COLORS.success500
-                              : DESIGN_SYSTEM_COLORS.notebookScarlet
-                            : DESIGN_SYSTEM_COLORS.notebookG200
-                        }`
+                  border: theme => `solid 2px ${getDailyCircleColor(theme.palette.mode, daysValue[keyDate])}`,
+                  color: theme => getDailyCircleColor(theme.palette.mode, daysValue[keyDate]),
+                  boxShadow: theme =>
+                    getDateYYMMDDWithHyphens() === keyDate
+                      ? `0 0 4px 2px ${getDailyCircleColor(theme.palette.mode, daysValue[keyDate])}`
                       : undefined,
                 }}
               >
@@ -291,13 +283,15 @@ export const UserStatus = ({
         {displayFooterStreak && (
           <>
             <Divider sx={{ mb: "24px" }} />
-            <Box sx={{ display: "grid", placeItems: "center", gap: "8px" }}>
+            <Stack direction={"row"} spacing="16px" justifyContent={"center"}>
               <Box
                 sx={{
                   width: "60px",
                   height: "60px",
                   border: `solid 2px ${
-                    studentStrike > 0 ? DESIGN_SYSTEM_COLORS.success500 : DESIGN_SYSTEM_COLORS.notebookScarlet
+                    studentStrike.dailyStreak > 0
+                      ? DESIGN_SYSTEM_COLORS.success500
+                      : DESIGN_SYSTEM_COLORS.notebookScarlet
                   }`,
                   borderRadius: "50%",
                   display: "grid",
@@ -307,15 +301,36 @@ export const UserStatus = ({
                 <Typography
                   fontSize={"18px"}
                   fontWeight={"500"}
-                  color={studentStrike > 0 ? DESIGN_SYSTEM_COLORS.success500 : DESIGN_SYSTEM_COLORS.notebookScarlet}
+                  color={
+                    studentStrike.dailyStreak > 0
+                      ? DESIGN_SYSTEM_COLORS.success500
+                      : DESIGN_SYSTEM_COLORS.notebookScarlet
+                  }
                 >
-                  {studentStrike}
+                  {studentStrike.dailyStreak}
                 </Typography>
               </Box>
-              <Typography sx={{ fontSize: "18px", fontWeight: "500", color: DESIGN_SYSTEM_COLORS.gray25 }}>
-                Daily streak
-              </Typography>
-            </Box>
+              <Box>
+                <Typography
+                  sx={{
+                    fontSize: "18px",
+                    fontWeight: "500",
+                    color: theme =>
+                      theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.gray25 : DESIGN_SYSTEM_COLORS.gray800,
+                  }}
+                >
+                  Daily streak
+                </Typography>
+                <Typography
+                  sx={{
+                    color: theme =>
+                      theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookG200 : DESIGN_SYSTEM_COLORS.gray500,
+                  }}
+                >
+                  Highest daily streak: {studentStrike.maxDailyStreak}
+                </Typography>
+              </Box>
+            </Stack>
           </>
         )}
       </Box>
@@ -360,15 +375,6 @@ type Numbers<T> = Pick<
 type DailyPoints = {
   [key: string]: number;
 };
-const calcMetricPerDay = (
-  days: ISemesterStudentVoteStatDay[],
-  metric: keyof Numbers<ISemesterStudentVoteStatDay>
-): DailyPoints => {
-  return days.reduce((acc: DailyPoints, day) => {
-    const today = day.day;
-    return { ...acc, [today]: acc[today] ? (acc[today] = acc[today] + day[metric]) : day[metric] };
-  }, {});
-};
 const getWeeklyMetric = (
   days: ISemesterStudentVoteStatDay[],
   metric: keyof Numbers<ISemesterStudentVoteStatDay>,
@@ -380,46 +386,6 @@ const getWeeklyMetric = (
 
     return { ...acc, [date]: acc[date] ? (acc[date] = acc[date] + day[metric]) : day[metric] };
   }, {});
-};
-const calculateDailyStreak = (semesterStudentStats: ISemesterStudentVoteStat, questionPerDay: number): number => {
-  const dailyCorrectPractices = calcMetricPerDay(semesterStudentStats.days, "correctPractices");
-  const sortedDailyCorrectPractices: DailyPoints = Object.fromEntries(
-    Object.entries(dailyCorrectPractices).sort(([keyA], [keyB]) => keyB.localeCompare(keyA))
-  );
-
-  const dailyKeys = Object.keys(sortedDailyCorrectPractices);
-
-  const streak = Object.keys(sortedDailyCorrectPractices).reduce(
-    (streak: { counter: number; lastDate: string }, key) => {
-      if (getTodayYYYYMMDD() < key) return streak;
-      if (streak.lastDate && substractDatesIntoDays(streak.lastDate, key) > 1) return streak;
-
-      if (getTodayYYYYMMDD() === dailyKeys[0] && sortedDailyCorrectPractices[key] < questionPerDay)
-        return (streak = { counter: streak.counter, lastDate: key });
-
-      if (sortedDailyCorrectPractices[key] >= questionPerDay) {
-        return (streak = { counter: streak.counter + 1, lastDate: key });
-      }
-      return streak;
-    },
-    { counter: 0, lastDate: getTodayYYYYMMDD() }
-  );
-
-  return streak.counter;
-};
-
-const substractDatesIntoDays = (date1: string, date2: string): number => {
-  const diffTime = Math.abs(new Date(date2).getTime() - new Date(date1).getTime());
-  return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-};
-
-const getTodayYYYYMMDD = () => {
-  const today = new Date();
-  const year = today.getFullYear();
-  const month = String(today.getMonth() + 1).padStart(2, "0");
-  const day = String(today.getDate()).padStart(2, "0");
-
-  return `${year}-${month}-${day}`;
 };
 
 type PracticeDayInfo = { successPracticeDays: number; totalPracticeDays: number };
@@ -436,4 +402,10 @@ const getDaysInSemester = (
     cur => cur.correctPractices >= numQuestionsPerDay
   ).length;
   return { successPracticeDays, totalPracticeDays };
+};
+
+const getDailyCircleColor = (theme: PaletteMode, dailyPoint?: { value: number; gotPoint: boolean }) => {
+  if (!dailyPoint) return theme === "dark" ? DESIGN_SYSTEM_COLORS.primary800 : DESIGN_SYSTEM_COLORS.primary600;
+  if (dailyPoint.gotPoint) return DESIGN_SYSTEM_COLORS.success500;
+  return DESIGN_SYSTEM_COLORS.notebookScarlet;
 };

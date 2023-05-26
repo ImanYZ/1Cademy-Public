@@ -3,7 +3,7 @@ import { collection, documentId, getDocs, getFirestore, onSnapshot, query, where
 import React, { useCallback, useEffect, useState } from "react";
 import { ReputationSignal } from "src/knowledgeTypes";
 
-import { OpenSidebar } from "@/pages/notebook";
+import { OpenLeftSidebar } from "@/pages/notebook";
 
 import { useAuth } from "../../../context/AuthContext";
 import { loadReputationsData } from "../../../lib/utils/Map.utils";
@@ -94,7 +94,7 @@ type UsersStatusListProps = {
   nodeBookDispatch: React.Dispatch<DispatchNodeBookActions>;
   reloadPermanentGraph: any;
   reputationSignal: ReputationSignal[];
-  setOpenSideBar: (sidebar: OpenSidebar) => void;
+  setOpenSideBar: (sidebar: OpenLeftSidebar) => void;
   sx?: SxProps<Theme>;
   sxUserStatus?: SxProps<Theme>;
   onlineUsers: string[];
