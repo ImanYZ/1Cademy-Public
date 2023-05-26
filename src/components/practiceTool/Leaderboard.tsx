@@ -2,7 +2,7 @@ import CheckIcon from "@mui/icons-material/Check";
 import { Box, Button, ButtonGroup, SxProps, Theme, Typography } from "@mui/material";
 import { getFirestore } from "firebase/firestore";
 import Image from "next/image";
-import React, { useEffect, useState } from "react";
+import React, { ReactNode, useEffect, useState } from "react";
 
 import { getAvatarName } from "@/lib/utils/Map.utils";
 
@@ -106,75 +106,24 @@ const Leaderboard = ({ semesterId, sxBody }: LeaderboardProps) => {
             },
           }}
         >
-          <Button
+          <CustomButton
             onClick={() => setSelectedLeaderboardOption("WEEK")}
-            sx={{
-              height: "28px",
-              p: "4px 14px",
-              background: theme =>
-                theme.palette.mode === "dark"
-                  ? selectedLeaderboardOption === "WEEK"
-                    ? theme.palette.common.primary800
-                    : theme.palette.common.notebookG600
-                  : selectedLeaderboardOption === "WEEK"
-                  ? theme.palette.common.primary600
-                  : theme.palette.common.gray200,
-              color: theme =>
-                selectedLeaderboardOption === "WEEK"
-                  ? theme.palette.common.primary25
-                  : theme.palette.mode === "dark"
-                  ? theme.palette.common.gray25
-                  : theme.palette.common.gray800,
-            }}
+            isSelected={selectedLeaderboardOption === "WEEK"}
           >
             Week
-          </Button>
-          <Button
+          </CustomButton>
+          <CustomButton
             onClick={() => setSelectedLeaderboardOption("MONTH")}
-            sx={{
-              height: "28px",
-              p: "4px 14px",
-              background: theme =>
-                theme.palette.mode === "dark"
-                  ? selectedLeaderboardOption === "MONTH"
-                    ? theme.palette.common.primary800
-                    : theme.palette.common.notebookG600
-                  : selectedLeaderboardOption === "MONTH"
-                  ? theme.palette.common.primary600
-                  : theme.palette.common.gray200,
-              color: theme =>
-                selectedLeaderboardOption === "MONTH"
-                  ? theme.palette.common.primary25
-                  : theme.palette.mode === "dark"
-                  ? theme.palette.common.gray25
-                  : theme.palette.common.gray800,
-            }}
+            isSelected={selectedLeaderboardOption === "MONTH"}
           >
             Month
-          </Button>
-          <Button
+          </CustomButton>
+          <CustomButton
             onClick={() => setSelectedLeaderboardOption("ALL_TIME")}
-            sx={{
-              height: "28px",
-              p: "4px 14px",
-              background: theme =>
-                theme.palette.mode === "dark"
-                  ? selectedLeaderboardOption === "ALL_TIME"
-                    ? theme.palette.common.primary800
-                    : theme.palette.common.notebookG600
-                  : selectedLeaderboardOption === "ALL_TIME"
-                  ? theme.palette.common.primary600
-                  : theme.palette.common.gray200,
-              color: theme =>
-                selectedLeaderboardOption === "ALL_TIME"
-                  ? theme.palette.common.primary25
-                  : theme.palette.mode === "dark"
-                  ? theme.palette.common.gray25
-                  : theme.palette.common.gray800,
-            }}
+            isSelected={selectedLeaderboardOption === "ALL_TIME"}
           >
             All Time
-          </Button>
+          </CustomButton>
         </ButtonGroup>
       </Box>
       <Box className="scroll-styled" sx={{ py: "18px", overflowY: "auto", ...sxBody }}>
@@ -265,6 +214,37 @@ const Leaderboard = ({ semesterId, sxBody }: LeaderboardProps) => {
 };
 
 export default Leaderboard;
+
+type CustomButtonProps = { onClick: () => void; isSelected: boolean; children: ReactNode };
+const CustomButton = ({ onClick, isSelected, children }: CustomButtonProps) => (
+  <Button
+    onClick={onClick}
+    sx={{
+      height: "28px",
+      p: "4px 14px",
+      background: theme =>
+        theme.palette.mode === "dark"
+          ? isSelected
+            ? theme.palette.common.primary800
+            : theme.palette.common.notebookG600
+          : isSelected
+          ? theme.palette.common.primary600
+          : theme.palette.common.gray200,
+      color: theme =>
+        isSelected
+          ? theme.palette.common.primary25
+          : theme.palette.mode === "dark"
+          ? theme.palette.common.gray25
+          : theme.palette.common.gray800,
+      ":hover": {
+        background: theme =>
+          theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookG500 : DESIGN_SYSTEM_COLORS.gray300,
+      },
+    }}
+  >
+    {children}
+  </Button>
+);
 
 const getColorFromLeaderboardUser = (position: number) => {
   if (position === 1) return "#FAC515";
