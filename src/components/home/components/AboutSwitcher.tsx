@@ -41,28 +41,33 @@ const TEAM_ITEMS = [
           fontSize={"16px"}
           color={theme => (theme.palette.mode === "light" ? "#475467" : "#EAECF0")}
         >
-          <p>
-            Paul Resnick holds the esteemed position of Michael D. Cohen Collegiate Professor of Information, Associate
-            Dean for Research and Innovation, and Professor of Information at the University of Michigan's School of
-            Information. As a trailblazer in the fields of recommender systems and reputation systems, he played a
-            pivotal role in developing the award-winning GroupLens Collaborative Filtering Recommender system, which
-            received the 2010 ACM Software Systems Award.
-          </p>
-          <p>
-            In recognition of his exceptional work, Resnick received the prestigious University of Michigan
-            Distinguished Faculty Achievement Award in 2016 and the SIGCHI CHI Academy Award in 2017. Among his numerous
-            notable publications, "The Social Cost of Cheap Pseudonyms," co-authored with Eric Friedman, earned the
-            inaugural ACM EC Test of Time Award. Additionally, his 2012 MIT Press book, Building Successful Online
-            Communities: Evidence-based Social Design, co-authored with Robert Kraut, made a significant impact in the
-            field.
-          </p>
-          <p>
-            In 2020, Resnick was honored as an ACM Fellow for his remarkable contributions to recommender systems,
-            economics and computation, and online communities, an honor reserved for the top one percent of ACM Members.
-            He served as chair of the RecSys Conference steering committee from 2013 to 2015, and in 2014, co-chaired
-            the ICWSM Conference. Resnick obtained his Ph.D. from MIT in 1992. He has been an advisor to the 1Cademy
-            project since 2013.
-          </p>
+          Paul Resnick holds the esteemed position of Michael D. Cohen Collegiate Professor of Information, Associate
+          Dean for Research and Innovation, and Professor of Information at the University of Michigan's School of
+          Information. As a trailblazer in the fields of recommender systems and reputation systems, he played a pivotal
+          role in developing the award-winning GroupLens Collaborative Filtering Recommender system, which received the
+          2010 ACM Software Systems Award.
+        </Typography>
+        <Typography
+          sx={{ p: "8px", pt: "0" }}
+          fontSize={"16px"}
+          color={theme => (theme.palette.mode === "light" ? "#475467" : "#EAECF0")}
+        >
+          In recognition of his exceptional work, Resnick received the prestigious University of Michigan Distinguished
+          Faculty Achievement Award in 2016 and the SIGCHI CHI Academy Award in 2017. Among his numerous notable
+          publications, "The Social Cost of Cheap Pseudonyms," co-authored with Eric Friedman, earned the inaugural ACM
+          EC Test of Time Award. Additionally, his 2012 MIT Press book, Building Successful Online Communities:
+          Evidence-based Social Design, co-authored with Robert Kraut, made a significant impact in the field.
+        </Typography>
+        <Typography
+          sx={{ p: "8px", pt: "0" }}
+          fontSize={"16px"}
+          color={theme => (theme.palette.mode === "light" ? "#475467" : "#EAECF0")}
+        >
+          In 2020, Resnick was honored as an ACM Fellow for his remarkable contributions to recommender systems,
+          economics and computation, and online communities, an honor reserved for the top one percent of ACM Members.
+          He served as chair of the RecSys Conference steering committee from 2013 to 2015, and in 2014, co-chaired the
+          ICWSM Conference. Resnick obtained his Ph.D. from MIT in 1992. He has been an advisor to the 1Cademy project
+          since 2013.
         </Typography>
       </>
     ),
