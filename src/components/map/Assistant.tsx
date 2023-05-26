@@ -1,6 +1,15 @@
 import { Box, Tooltip } from "@mui/material";
 import { getFirestore } from "firebase/firestore";
-import React, { Dispatch, MutableRefObject, SetStateAction, useCallback, useEffect, useRef } from "react";
+import React, {
+  Dispatch,
+  MutableRefObject,
+  SetStateAction,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { useRive, useStateMachineInput } from "rive-react";
 
 import { getNode } from "../../client/serveless/nodes.serveless";
@@ -70,6 +79,7 @@ export const Assistant = ({
   const speechRef = useRef<SpeechRecognition | null>(newRecognition());
   const abortNarratorPromise = useRef<(() => void) | null>(null);
   const originState = useRef("");
+  const [tooltipOpen, setTooltipOpen] = useState(false);
 
   const { rive, RiveComponent: RiveComponentTouch } = useRive({
     src: "rive-voice-assistant/assistant-state-machine.riv",
@@ -394,6 +404,18 @@ export const Assistant = ({
     ]
   );
 
+  const isIdle = useMemo(
+    () => voiceAssistant.tagId && !voiceAssistant.questionNode && !startPractice,
+    [startPractice, voiceAssistant.questionNode, voiceAssistant.tagId]
+  );
+
+  const tooltipAssistant = useMemo(() => {
+    if (voiceAssistant.questionNode && !startPractice)
+      return 'To go back to practice, say "Continue practicing" or say "Stop" to stop the voice interactions.';
+    if (isIdle) return "Click to continue practicing.";
+    return "";
+  }, [isIdle, startPractice, voiceAssistant.questionNode]);
+
   useEffect(() => {
     const run = async () => {
       console.log("askQuestion", { ref: previousVoiceAssistant.current, voiceAssistant });
@@ -411,21 +433,37 @@ export const Assistant = ({
     run();
   }, [askQuestion, stopAssistant, voiceAssistant]);
 
+  useEffect(() => {
+    setTooltipOpen(!isIdle);
+  }, [isIdle]);
+
   if (!startPractice && !voiceAssistant.tagId) return null;
 
+  console.log({ isIdle, tooltipAssistant });
   return (
     <Tooltip
-      title={
-        voiceAssistant.questionNode && !startPractice
-          ? 'To go back to practice, say "Continue practicing" or say "Stop" to stop the voice interactions.'
-          : ""
-      }
+      title={tooltipAssistant}
       placement="top"
-      open={true}
+      open={tooltipOpen}
+      onOpen={() => {
+        console.log("onopen");
+        // isIdle ? undefined : true
+        if (isIdle) return setTooltipOpen(true);
+        return setTooltipOpen(true);
+      }}
+      onClose={() => {
+        console.log("onclose");
+        if (isIdle) return setTooltipOpen(false);
+        return setTooltipOpen(true);
+      }}
     >
       <Box
         onClick={voiceAssistant.tagId && !startPractice ? () => continuePracticing(voiceAssistant.tagId) : undefined}
-        sx={{ width: "80px", height: "80px" }}
+        sx={{
+          width: "80px",
+          height: "80px",
+          cursor: isIdle ? "pointer" : undefined,
+        }}
       >
         <RiveComponentTouch />
       </Box>
