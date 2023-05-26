@@ -107,7 +107,7 @@ export const getStackedBarStat = (
     const exist = studentProposalsRate[proposalSubgroup as keyof StudentStackedBarStats].some(
       e => e.uname === student.uname
     );
-    if (!exist) return;
+    if (exist) return;
     studentProposalsRate[proposalSubgroup as keyof StudentStackedBarStats].push(student);
   });
   sortedByQuestions.map(d => {
@@ -122,7 +122,7 @@ export const getStackedBarStat = (
     const exist = studentQuestionsRate[questionsSubgroup as keyof StudentStackedBarStats].some(
       e => e.uname === student.uname
     );
-    if (!exist) return;
+    if (exist) return;
 
     studentQuestionsRate[questionsSubgroup as keyof StudentStackedBarStats].push(student);
   });
@@ -139,7 +139,7 @@ export const getStackedBarStat = (
     const exist = studentDailyPracticeRate[totalPracticesSubgroup as keyof StudentStackedBarStats].some(
       e => e.uname === student.uname
     );
-    if (!exist) return;
+    if (exist) return;
 
     studentDailyPracticeRate[totalPracticesSubgroup as keyof StudentStackedBarStats].push(student);
   });
