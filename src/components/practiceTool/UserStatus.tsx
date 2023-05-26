@@ -245,28 +245,11 @@ export const UserStatus = ({
                   display: "grid",
                   placeItems: "center",
                   borderRadius: "50%",
-                  border: `solid 2px ${
-                    daysValue[keyDate]
-                      ? daysValue[keyDate].gotPoint === true
-                        ? DESIGN_SYSTEM_COLORS.success500
-                        : DESIGN_SYSTEM_COLORS.notebookScarlet
-                      : DESIGN_SYSTEM_COLORS.notebookG200
-                  }`,
-
-                  color: daysValue[keyDate]
-                    ? daysValue[keyDate].gotPoint === true
-                      ? DESIGN_SYSTEM_COLORS.success500
-                      : DESIGN_SYSTEM_COLORS.notebookScarlet
-                    : DESIGN_SYSTEM_COLORS.notebookG200,
+                  border: `solid 2px ${getDailyCircleColor(daysValue[keyDate])}`,
+                  color: getDailyCircleColor(daysValue[keyDate]),
                   boxShadow:
                     getDateYYMMDDWithHyphens() === keyDate
-                      ? `0 0 4px 2px ${
-                          daysValue[keyDate]
-                            ? daysValue[keyDate].gotPoint === true
-                              ? DESIGN_SYSTEM_COLORS.success500
-                              : DESIGN_SYSTEM_COLORS.notebookScarlet
-                            : DESIGN_SYSTEM_COLORS.notebookG200
-                        }`
+                      ? `0 0 4px 2px ${getDailyCircleColor(daysValue[keyDate])}`
                       : undefined,
                 }}
               >
@@ -417,4 +400,10 @@ const getDaysInSemester = (
     cur => cur.correctPractices >= numQuestionsPerDay
   ).length;
   return { successPracticeDays, totalPracticeDays };
+};
+
+const getDailyCircleColor = (dailyPoint?: { value: number; gotPoint: boolean }) => {
+  if (!dailyPoint) return DESIGN_SYSTEM_COLORS.primary800;
+  if (dailyPoint.gotPoint) return DESIGN_SYSTEM_COLORS.success500;
+  return DESIGN_SYSTEM_COLORS.notebookScarlet;
 };
