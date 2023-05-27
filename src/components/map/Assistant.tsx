@@ -91,8 +91,10 @@ export const Assistant = ({
   const happyTrigger = useStateMachineInput(rive, STATE_MACHINE_NAME, HAPPY_TRIGGER);
   const stateInput = useStateMachineInput(rive, STATE_MACHINE_NAME, STATE);
 
-  const getNoMatchPreviousMessage = (listenType: VoiceAssistantType) => {
+  const getNoMatchPreviousMessage = (listenType: VoiceAssistantType, timesAssistantCantUnderstand: number) => {
     let message = "Sorry, I didn't get your choices.";
+    if (timesAssistantCantUnderstand > 0) return message;
+
     if (listenType === "CONFIRM") message += CONFIRM_ERROR;
     if (listenType === "ANSWERING") message += ANSWERING_ERROR;
     if (listenType === "NEXT_ACTION") message += NEXT_ACTION_ERROR;
@@ -172,6 +174,7 @@ export const Assistant = ({
       let preMessage = ""; // used add a previous message for example , "sorry I don't understand"
       let preTranscriptProcessed = "";
       let listenType: VoiceAssistantType = submittedAnswers.length > 1 ? "NEXT_ACTION" : "ANSWERING";
+      let timesAssistantCantUnderstand = 0;
       askingRef.current = true;
       originState.current = "narrate-question";
       while (askingRef.current) {
@@ -272,7 +275,12 @@ export const Assistant = ({
           console.log("onerror:", recognitionResult.error);
           originState.current = "onerror";
 
-          preMessage = listenType === "NOTEBOOK_ACTIONS" ? "" : getNoMatchPreviousMessage(listenType);
+          preMessage =
+            listenType === "NOTEBOOK_ACTIONS"
+              ? ""
+              : getNoMatchPreviousMessage(listenType, timesAssistantCantUnderstand);
+          if (listenType === "NOTEBOOK_ACTIONS") timesAssistantCantUnderstand++;
+          timesAssistantCantUnderstand++;
           message = "";
           console.log("onerror", { origin: originState.current, preMessage, message });
           continue;
@@ -281,7 +289,8 @@ export const Assistant = ({
         if (recognitionResult.nomatch) {
           console.log("onnomatch");
           originState.current = "nomatch";
-          preMessage = getNoMatchPreviousMessage(listenType);
+          preMessage = getNoMatchPreviousMessage(listenType, timesAssistantCantUnderstand);
+          timesAssistantCantUnderstand++;
           // message = listenType === "NEXT_ACTION" ? "" : message;
           message = "";
           continue;
@@ -310,10 +319,13 @@ export const Assistant = ({
         if (!transcriptProcessed && listenType !== "CONFIRM") {
           // on CONFIRM, we will manage in different way
           originState.current = "nomatch";
-          preMessage = getNoMatchPreviousMessage(listenType);
+          preMessage = getNoMatchPreviousMessage(listenType, timesAssistantCantUnderstand);
+          timesAssistantCantUnderstand++;
           message = "";
           continue;
         }
+
+        timesAssistantCantUnderstand = 0; // restart this to say again complete error phrase
 
         if (listenType === "ANSWERING") {
           console.log("ANSWERING");
