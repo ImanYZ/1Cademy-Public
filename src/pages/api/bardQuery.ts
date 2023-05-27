@@ -10,11 +10,6 @@ export type IBardQueryRequestPayload = {
 
 async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
   try {
-    const payload = req.body as IBardQueryRequestPayload;
-
-    // Course Id
-    const tagId: string = "HjIukJr12fIP9DNoD9gX";
-
     let userData: IUser | undefined = undefined;
     // loading user document if authorization provided
     let token = (req.headers.authorization || req.headers.Authorization || "") as string;
@@ -31,6 +26,9 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
       } catch (e) {}
     }
 
+    // Course Id
+    const tagId: string = userData?.uname === "1man" ? "FJfzAX7zbgQS8jU5XcEk" : "HjIukJr12fIP9DNoD9gX";
+
     let tagTitle: string = "";
     if (tagId) {
       const tagDoc = await db.collection("nodes").doc(tagId).get();
@@ -39,6 +37,8 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
         tagTitle = tag.title;
       }
     }
+
+    const payload = req.body as IBardQueryRequestPayload;
 
     const _nodeIds: Set<string> = new Set();
     for (const command of payload.commands) {
