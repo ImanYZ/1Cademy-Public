@@ -5,7 +5,7 @@ import { addDoc, collection, getFirestore, Timestamp } from "firebase/firestore"
 import React, { useCallback, useEffect, useState } from "react";
 import { DispatchNodeBookActions } from "src/nodeBookTypes";
 
-import { OpenSidebar } from "@/pages/notebook";
+import { OpenLeftSidebar } from "@/pages/notebook";
 
 import { useAuth } from "../../context/AuthContext";
 import usePrevious from "../../hooks/usePrevious";
@@ -29,7 +29,7 @@ type UserStatusIconProps = {
   totalNegatives?: any;
   totalPoints?: any;
   tagTitle?: string;
-  setOpenSideBar: (sidebar: OpenSidebar) => void;
+  setOpenSideBar: (sidebar: OpenLeftSidebar) => void;
   sx?: SxProps<Theme>;
   disabled?: boolean;
 };

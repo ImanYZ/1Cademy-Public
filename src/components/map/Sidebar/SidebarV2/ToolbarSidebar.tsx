@@ -59,7 +59,7 @@ import { DispatchAuthActions, Reputation, ReputationSignal, User, UserTheme } fr
 import { updateNotebookTag } from "../../../../lib/firestoreClient/notebooks.serverless";
 import { NO_USER_IMAGE } from "../../../../lib/utils/constants";
 import { UsersStatus, UserTutorials } from "../../../../nodeBookTypes";
-import { OpenSidebar } from "../../../../pages/notebook";
+import { OpenLeftSidebar } from "../../../../pages/notebook";
 import { Notebook, NotebookDocument } from "../../../../types";
 import { Portal } from "../../../Portal";
 import { CustomBadge } from "../../CustomBudge";
@@ -80,7 +80,7 @@ type MainSidebarProps = {
   user: User;
   theme: UserTheme;
   reputation: Reputation;
-  setOpenSideBar: (sidebar: OpenSidebar) => void;
+  setOpenSideBar: (sidebar: OpenLeftSidebar) => void;
   mapRendered: boolean;
   selectedUser: string | null;
   uncheckedNotificationsNum: number;
@@ -262,7 +262,7 @@ MainSidebarProps) => {
   }, [db, setOpenSideBar, user.uname]);
 
   const onOpenSidebar = useCallback(
-    (SidebarType: OpenSidebar, logName: string) => {
+    (SidebarType: OpenLeftSidebar, logName: string) => {
       setOpenSideBar(SidebarType);
       onOpenSidebarLog(logName);
     },

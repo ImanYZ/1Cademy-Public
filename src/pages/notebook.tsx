@@ -9,9 +9,9 @@ import VolumeUpIcon from "@mui/icons-material/VolumeUp";
 import { Masonry } from "@mui/lab";
 import {
   Button,
+  ClickAwayListener,
   Container,
   Divider,
-  Drawer,
   IconButton,
   Modal,
   Paper,
@@ -83,6 +83,8 @@ import { MemoizedToolbarSidebar } from "../components/map/Sidebar/SidebarV2/Tool
 import { MemoizedToolbox } from "../components/map/Toolbox";
 import { NodeItemDashboard } from "../components/NodeItemDashboard";
 import { Portal } from "../components/Portal";
+import Leaderboard from "../components/practiceTool/Leaderboard";
+import { UserStatus } from "../components/practiceTool/UserStatus";
 import { MemoizedTutorialTableOfContent } from "../components/tutorial/TutorialTableOfContent";
 import { NodeBookProvider, useNodeBook } from "../context/NodeBookContext";
 import { detectElements } from "../hooks/detectElements";
@@ -156,7 +158,7 @@ import { doNeedToDeleteNode, getNodeTypesFromNode, isVersionApproved } from "../
 
 type NotebookProps = {};
 
-export type OpenSidebar =
+export type OpenLeftSidebar =
   | "SEARCHER_SIDEBAR"
   | "NOTIFICATION_SIDEBAR"
   | "PENDING_PROPOSALS"
@@ -166,6 +168,8 @@ export type OpenSidebar =
   | "USER_SETTINGS"
   | "CITATIONS"
   | null;
+
+export type OpenRightSidebar = "LEADERBOARD" | "USER_STATUS" | null;
 
 export type Graph = { nodes: FullNodesData; edges: EdgesData };
 /**
@@ -263,7 +267,8 @@ const Notebook = ({}: NotebookProps) => {
     translation: { x: 0, y: 0 },
   });
 
-  const [openSidebar, setOpenSidebar] = useState<OpenSidebar>(null);
+  const [openSidebar, setOpenSidebar] = useState<OpenLeftSidebar>(null);
+  const [displaySidebar, setDisplaySidebar] = useState<OpenRightSidebar>(null);
   const [buttonsOpen, setButtonsOpen] = useState<boolean>(true);
   const [ableToPropose, setAbleToPropose] = useState(false);
 
@@ -4322,7 +4327,7 @@ const Notebook = ({}: NotebookProps) => {
     }
   };
 
-  const onOpenSideBar = (sidebar: OpenSidebar) => {
+  const onOpenSideBar = (sidebar: OpenLeftSidebar) => {
     setOpenSidebar(sidebar);
   };
 
@@ -4615,7 +4620,7 @@ const Notebook = ({}: NotebookProps) => {
   );
 
   const detectAndCallSidebarTutorial = useCallback(
-    (tutorialName: TutorialTypeKeys, sidebar: OpenSidebar) => {
+    (tutorialName: TutorialTypeKeys, sidebar: OpenLeftSidebar) => {
       const shouldIgnore = forcedTutorial
         ? forcedTutorial !== tutorialName
         : userTutorial[tutorialName].done || userTutorial[tutorialName].skipped;
@@ -6311,167 +6316,7 @@ const Notebook = ({}: NotebookProps) => {
           </Box>
         )}
 
-        {/* assistant */}
-        {voiceAssistant.tagId && (
-          <Box sx={{ position: "absolute", bottom: "10px", right: "50px", zIndex: ZINDEX["assistant"] }}>
-            <Assistant
-              voiceAssistant={voiceAssistant}
-              assistantRef={assistantRef}
-              openNodesOnNotebook={openNodesOnNotebook}
-              scrollToNode={scrollToNode}
-              selectedNotebookId={selectedNotebookId}
-              setDisplayDashboard={setDisplayDashboard}
-              setRootQuery={setRootQuery}
-              setVoiceAssistant={setVoiceAssistant}
-              startPractice={startPractice}
-            />
-          </Box>
-        )}
-
         <Box sx={{ width: "100vw", height: "100vh", overflow: "hidden" }}>
-          {
-            <Drawer
-              anchor={"right"}
-              open={openDeveloperMenu}
-              onClose={() => setOpenDeveloperMenu(false)}
-              PaperProps={{ sx: { maxWidth: "300px", p: "10px" } }}
-            >
-              {/* Data from map, don't REMOVE */}
-              <Box>
-                Interaction map from '{user?.uname}' with [{Object.entries(graph.nodes).length}] Nodes in Notebook:
-                {notebooks.find(c => c.id === selectedNotebookId)?.title ?? "--"} with Id: {selectedNotebookId}
-              </Box>
-              <Divider />
-              <Typography>Global states:</Typography>
-              <Box>
-                <Button onClick={() => console.log(graph.nodes)}>nodes</Button>
-                <Button onClick={() => console.log(graph.edges)}>edges</Button>
-                <Button onClick={() => console.log(allTags)}>allTags</Button>
-                <Button
-                  onClick={() => {
-                    const mosParent = parentWithMostChildren();
-
-                    console.log(mosParent);
-                  }}
-                >
-                  Most Parent
-                </Button>
-                <Button
-                  onClick={() => {
-                    const mosParent = parentWithChildren("r98BjyFDCe4YyLA3U8ZE");
-
-                    console.log(`children :${mosParent}`);
-                  }}
-                >
-                  Children of Parent
-                </Button>
-              </Box>
-              <Divider />
-              <Typography>Notebooks:</Typography>
-              <Box>
-                <Button onClick={() => console.log(selectedNotebookId)}>selectedNotebookId</Button>
-                <Button onClick={() => console.log(selectedPreviousNotebookIdRef.current)}>
-                  selectedPreviousNotebookIdRef
-                </Button>
-              </Box>
-              <Divider />
-              <Typography>...</Typography>
-              <Box>
-                <Button onClick={() => console.log("DAGGER", g)}>Dagre</Button>
-                <Button onClick={() => console.log(nodeBookState)}>nodeBookState</Button>
-                <Button onClick={() => console.log(notebookRef)}>notebookRef</Button>
-                <Divider />
-                <Button onClick={() => console.log(user)}>user</Button>
-                <Button onClick={() => console.log(settings)}>setting</Button>
-                <Button onClick={() => console.log(reputation)}>reputation</Button>
-                <Divider />
-                <Button onClick={() => console.log(openSidebar)}>open sidebar</Button>
-              </Box>
-              <Box>
-                <Button onClick={() => console.log(nodeChanges)}>node changes</Button>
-                <Button onClick={() => console.log(mapRendered)}>map rendered</Button>
-                <Button onClick={() => console.log(userNodeChanges)}>user node changes</Button>
-                <Button onClick={() => console.log(nodeBookState)}>show global state</Button>
-
-                <Divider />
-
-                <Button
-                  onClick={() =>
-                    setReputationSignal([
-                      {
-                        uname: "1man",
-                        reputation: 1,
-                        type: ["All Time", "Weekly"],
-                      },
-                    ])
-                  }
-                >
-                  Test Increment Reputation
-                </Button>
-                <Button
-                  onClick={() =>
-                    setReputationSignal([
-                      {
-                        uname: "1man",
-                        reputation: -1,
-                        type: ["All Time", "Weekly"],
-                      },
-                    ])
-                  }
-                >
-                  Test Decrement Reputation
-                </Button>
-              </Box>
-              <Box>
-                <Button onClick={() => console.log(tempNodes)}>tempNodes</Button>
-                <Button onClick={() => console.log({ ...changedNodes })}>changedNodes</Button>
-              </Box>
-
-              <Divider />
-              <Box>
-                Assistant:
-                <Button onClick={() => console.log({ voiceAssistant })}>voiceAssistant</Button>
-                <Button onClick={() => console.log({ startPractice })}>startPractice</Button>
-              </Box>
-
-              <Divider />
-              <Box>
-                <Button onClick={() => console.log(allNodes)}>All Nodes</Button>
-                <Button onClick={() => console.log(citations)}>citations</Button>
-                <Button onClick={() => console.log(clusterNodes)}>clusterNodes</Button>
-                <Button onClick={() => console.log(graph.nodes[nodeBookState.selectedNode ?? ""])}>SelectedNode</Button>
-              </Box>
-              <Divider />
-              <Button onClick={() => console.log(isWritingOnDBRef.current)}>isWritingOnDBRef</Button>
-              <Divider />
-              <Typography>Tutorial:</Typography>
-              <Box>
-                <Button onClick={() => console.log(tutorial)}>Tutorial</Button>
-                <Button onClick={() => console.log(userTutorial)}>userTutorial</Button>
-                <Button onClick={() => console.log(targetId)}>targetId</Button>
-                <Button onClick={() => console.log(forcedTutorial)}>forcedTutorial</Button>
-              </Box>
-              <Divider />
-              <Typography>Functions:</Typography>
-              <Box>
-                <Button onClick={() => nodeBookDispatch({ type: "setSelectionType", payload: "Proposals" })}>
-                  Toggle Open proposals
-                </Button>
-                <Button onClick={() => nodeBookDispatch({ type: "setSelectionType", payload: "Proposals" })}>
-                  Open Proposal
-                </Button>
-                <Button onClick={() => openNodeHandler("0JI7dmq1qFF18j4ZbKMw")}>Open Node Handler</Button>
-                <Button onClick={() => setShowRegion(prev => !prev)}>Show Region</Button>
-                <Button onClick={() => console.log({ openSidebar })}>Open Sidebar</Button>
-              </Box>
-              <Typography>Last Operation:</Typography>
-              <Box>
-                <Button onClick={() => console.log({ lastOperaion: lastNodeOperation.current })}>
-                  lastNodeOperation
-                </Button>
-              </Box>
-            </Drawer>
-          }
           {user && reputation && (userTutorial.navigation.done || userTutorial.navigation.skipped) && (
             <Box
               sx={{
@@ -6621,56 +6466,6 @@ const Notebook = ({}: NotebookProps) => {
             comLeaderboardOpen={comLeaderboardOpen}
             setComLeaderboardOpen={setComLeaderboardOpen}
           />
-          {user && displayDashboard && (
-            <DashboardWrapper
-              ref={assistantRef}
-              voiceAssistant={voiceAssistant}
-              setVoiceAssistant={setVoiceAssistant}
-              // voiceAssistantRef={voiceAssistantRef.current}
-              user={user}
-              onClose={() => {
-                setDisplayDashboard(false);
-                setRootQuery(undefined);
-                router.replace(router.pathname);
-                setVoiceAssistant(prev => ({ ...prev, questionNode: null }));
-              }}
-              openNodeHandler={openLinkedNode}
-              sx={{ position: "absolute", inset: "0px", zIndex: 999 }}
-              root={rootQuery}
-              startPractice={startPractice}
-              setStartPractice={setStartPractice}
-            />
-          )}
-
-          {voiceAssistant.questionNode && !startPractice && (
-            <Tooltip title="Stop the voice interactions" placement="left">
-              <IconButton
-                onClick={() => setVoiceAssistant(prev => ({ ...prev, questionNode: null }))}
-                sx={{
-                  position: "absolute",
-                  right: "8px",
-                  zIndex: 999,
-                  top: "76px",
-                  width: "60px",
-                  height: "60px",
-                  color: DESIGN_SYSTEM_COLORS.primary600,
-                  borderRadius: "8px",
-                  backgroundColor: theme =>
-                    theme.palette.mode === "dark"
-                      ? DESIGN_SYSTEM_COLORS.notebookMainBlack
-                      : DESIGN_SYSTEM_COLORS.gray50,
-                  ":hover": {
-                    backgroundColor: theme =>
-                      theme.palette.mode === "dark"
-                        ? DESIGN_SYSTEM_COLORS.notebookMainBlack
-                        : DESIGN_SYSTEM_COLORS.gray50,
-                  },
-                }}
-              >
-                <VolumeUpIcon />
-              </IconButton>
-            </Tooltip>
-          )}
 
           <MemoizedToolbox
             isLoading={isQueueWorking}
@@ -6806,31 +6601,6 @@ const Notebook = ({}: NotebookProps) => {
                   />
                 </IconButton>
               </Tooltip>
-
-              {process.env.NODE_ENV === "development" && (
-                <Tooltip
-                  title={"Watch geek data"}
-                  placement="bottom"
-                  sx={{
-                    ":hover": {
-                      background: theme.palette.mode === "dark" ? "#404040" : "#EAECF0",
-                      // borderRadius: "8px",
-                    },
-                    padding: { xs: "2px", sm: "8px" },
-                  }}
-                >
-                  <IconButton onClick={() => setOpenDeveloperMenu(!openDeveloperMenu)}>
-                    <CodeIcon
-                      sx={{
-                        color: theme =>
-                          theme.palette.mode === "dark"
-                            ? theme.palette.common.notebookG100
-                            : theme.palette.common.gray500,
-                      }}
-                    />
-                  </IconButton>
-                </Tooltip>
-              )}
             </>
           </MemoizedToolbox>
 
@@ -7108,6 +6878,284 @@ const Notebook = ({}: NotebookProps) => {
             tutorialProgress={tutorialProgress}
           />
         </Box>
+
+        {/*
+        ------------------------------------->
+        ABSOLUTE ELEMENTS
+        <-------------------------------------
+        */}
+
+        {/* stop voice assistant button */}
+        {voiceAssistant.questionNode && !startPractice && (
+          <Tooltip title="Stop the voice interactions" placement="left">
+            <IconButton
+              onClick={() => setVoiceAssistant(prev => ({ ...prev, questionNode: null }))}
+              sx={{
+                position: "absolute",
+                right: "8px",
+                zIndex: 999,
+                top: "76px",
+                width: "60px",
+                height: "60px",
+                color: DESIGN_SYSTEM_COLORS.primary600,
+                borderRadius: "8px",
+                backgroundColor: theme =>
+                  theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookMainBlack : DESIGN_SYSTEM_COLORS.gray50,
+                ":hover": {
+                  backgroundColor: theme =>
+                    theme.palette.mode === "dark"
+                      ? DESIGN_SYSTEM_COLORS.notebookMainBlack
+                      : DESIGN_SYSTEM_COLORS.gray50,
+                },
+              }}
+            >
+              <VolumeUpIcon />
+            </IconButton>
+          </Tooltip>
+        )}
+
+        {/* instructor/student dashboard */}
+        {user && displayDashboard && (
+          <DashboardWrapper
+            ref={assistantRef}
+            voiceAssistant={voiceAssistant}
+            setVoiceAssistant={setVoiceAssistant}
+            // voiceAssistantRef={voiceAssistantRef.current}
+            user={user}
+            onClose={() => {
+              setDisplayDashboard(false);
+              setRootQuery(undefined);
+              router.replace(router.pathname);
+              setVoiceAssistant(prev => ({ ...prev, questionNode: null }));
+            }}
+            openNodeHandler={openLinkedNode}
+            sx={{ position: "absolute", inset: "0px", zIndex: ZINDEX["dashboard"] }}
+            root={rootQuery}
+            startPractice={startPractice}
+            setStartPractice={setStartPractice}
+            setDisplayRightSidebar={setDisplaySidebar}
+          />
+        )}
+
+        {/* assistant */}
+        {voiceAssistant.tagId && (
+          <Box sx={{ position: "absolute", bottom: "10px", right: "50px", zIndex: ZINDEX["dashboard"] }}>
+            <Assistant
+              voiceAssistant={voiceAssistant}
+              assistantRef={assistantRef}
+              openNodesOnNotebook={openNodesOnNotebook}
+              scrollToNode={scrollToNode}
+              selectedNotebookId={selectedNotebookId}
+              setDisplayDashboard={setDisplayDashboard}
+              setRootQuery={setRootQuery}
+              setVoiceAssistant={setVoiceAssistant}
+              startPractice={startPractice}
+            />
+          </Box>
+        )}
+
+        {user && voiceAssistant.tagId && (
+          <>
+            {/* leaderBoard */}
+            <Box
+              sx={{
+                position: "absolute",
+                width: "350px",
+                top: "0px",
+                bottom: "0px",
+                right: displaySidebar === "LEADERBOARD" ? "0px" : "-350px",
+                backgroundColor: theme =>
+                  theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookMainBlack : DESIGN_SYSTEM_COLORS.gray50,
+                borderRadius: "16px 0px 0px 0px",
+                transition: "right 0.4s",
+                zIndex: ZINDEX["dashboard"],
+              }}
+            >
+              <IconButton
+                sx={{
+                  position: "absolute",
+                  top: "17px",
+                  right: "17px",
+                  p: "4px",
+                  color: theme => (theme.palette.mode === "dark" ? undefined : DESIGN_SYSTEM_COLORS.notebookG200),
+                }}
+                onClick={() => setDisplaySidebar(null)}
+              >
+                <CloseIcon />
+              </IconButton>
+              <Leaderboard semesterId={voiceAssistant.tagId} />
+            </Box>
+
+            {/* userStatus */}
+            <Box
+              sx={{
+                position: "absolute",
+                width: "350px",
+                top: "0px",
+                bottom: "0px",
+                right: displaySidebar === "USER_STATUS" ? "0px" : "-350px",
+                backgroundColor: theme =>
+                  theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookMainBlack : DESIGN_SYSTEM_COLORS.gray50,
+                borderRadius: "16px 0px 0px 0px",
+                transition: "right 0.4s",
+                zIndex: ZINDEX["dashboard"],
+              }}
+            >
+              <IconButton
+                sx={{
+                  position: "absolute",
+                  top: "17px",
+                  right: "17px",
+                  p: "4px",
+                  color: theme => (theme.palette.mode === "dark" ? undefined : DESIGN_SYSTEM_COLORS.notebookG200),
+                }}
+                onClick={() => setDisplaySidebar(null)}
+              >
+                <CloseIcon />
+              </IconButton>
+              <UserStatus semesterId={voiceAssistant.tagId} user={user} />
+            </Box>
+          </>
+        )}
+
+        {process.env.NODE_ENV === "development" && (
+          <Tooltip title={"Watch geek data"} placement="bottom">
+            <IconButton
+              onClick={() => setOpenDeveloperMenu(!openDeveloperMenu)}
+              sx={{
+                padding: { xs: "2px", sm: "8px" },
+                position: "absolute",
+                bottom: "12px",
+                left: "70px",
+                color: "white",
+                background: "royalBlue",
+                zIndex: ZINDEX["devtools"],
+                ":hover": {
+                  background: "#3352af",
+                  // borderRadius: "8px",
+                },
+              }}
+            >
+              <CodeIcon />
+            </IconButton>
+          </Tooltip>
+        )}
+
+        {/* Develop sidebar: don't REMOVE, add in required section a button if you need to print console */}
+        {openDeveloperMenu && (
+          <ClickAwayListener onClickAway={() => setOpenDeveloperMenu(false)}>
+            <Box
+              sx={{
+                position: "absolute",
+                top: "0px",
+                bottom: "0px",
+                right: "0px",
+                maxWidth: "300px",
+                p: "10px",
+                display: "grid",
+                rowGap: "20px",
+                overflowY: "auto",
+                backgroundColor: theme =>
+                  theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.baseBlack : DESIGN_SYSTEM_COLORS.baseWhite,
+                zIndex: ZINDEX["devtools"],
+              }}
+            >
+              <Box>
+                User: <b>{user?.uname}</b> with [{Object.entries(graph.nodes).length}] Nodes in Notebook:
+                <b>{notebooks.find(c => c.id === selectedNotebookId)?.title ?? "--"}</b> with Id:{" "}
+                <b>{selectedNotebookId}</b>
+              </Box>
+
+              <Paper>
+                <Divider>Global states</Divider>
+                <Button onClick={() => console.log(nodeBookState)}>nodeBookState</Button>
+                <Button onClick={() => console.log(graph.nodes)}>nodes</Button>
+                <Button onClick={() => console.log(graph.edges)}>edges</Button>
+                <Button onClick={() => console.log("DAGGER", g)}>Dagre</Button>
+                <Button onClick={() => console.log(allTags)}>allTags</Button>
+                <Button onClick={() => console.log(notebookRef)}>notebookRef</Button>
+                <Divider />
+                <Button onClick={() => console.log(user)}>user</Button>
+                <Button onClick={() => console.log(settings)}>setting</Button>
+                <Button onClick={() => console.log(reputation)}>reputation</Button>
+              </Paper>
+
+              <Paper>
+                <Divider>Local states</Divider>
+                <Button onClick={() => console.log(selectedNotebookId)}>selectedNotebookId</Button>
+                <Button onClick={() => console.log(selectedPreviousNotebookIdRef.current)}>
+                  selectedPreviousNotebookIdRef
+                </Button>
+                <Button onClick={() => console.log(allNodes)}>All Nodes</Button>
+                <Button onClick={() => console.log(citations)}>citations</Button>
+                <Button onClick={() => console.log(clusterNodes)}>clusterNodes</Button>
+                <Button onClick={() => console.log(graph.nodes[nodeBookState.selectedNode ?? ""])}>SelectedNode</Button>
+                <Button onClick={() => console.log({ lastOperation: lastNodeOperation.current })}>
+                  lastNodeOperation
+                </Button>
+                <Button onClick={() => console.log(isWritingOnDBRef.current)}>isWritingOnDBRef</Button>
+                <Button onClick={() => console.log(openSidebar)}>openSidebar</Button>
+                <Button onClick={() => console.log(displaySidebar)}>displaySidebar</Button>
+              </Paper>
+
+              <Paper>
+                <Divider>Proposals</Divider>
+                <Button onClick={() => console.log(tempNodes)}>tempNodes</Button>
+                <Button onClick={() => console.log({ ...changedNodes })}>changedNodes</Button>
+              </Paper>
+
+              <Paper>
+                <Divider>Render</Divider>
+                <Button onClick={() => console.log(nodeChanges)}>node changes</Button>
+                <Button onClick={() => console.log(mapRendered)}>map rendered</Button>
+                <Button onClick={() => console.log(userNodeChanges)}>user node changes</Button>
+              </Paper>
+
+              <Paper>
+                <Divider>Reputation</Divider>
+                <Button
+                  onClick={() => setReputationSignal([{ uname: "1man", reputation: 1, type: ["All Time", "Weekly"] }])}
+                >
+                  Test Increment Reputation
+                </Button>
+                <Button
+                  onClick={() => setReputationSignal([{ uname: "1man", reputation: -1, type: ["All Time", "Weekly"] }])}
+                >
+                  Test Decrement Reputation
+                </Button>
+              </Paper>
+
+              <Paper>
+                <Divider>Assistant</Divider>
+                <Button onClick={() => console.log({ voiceAssistant })}>voiceAssistant</Button>
+                <Button onClick={() => console.log({ startPractice })}>startPractice</Button>
+              </Paper>
+
+              <Paper>
+                <Divider>Tutorial</Divider>
+                <Button onClick={() => console.log(tutorial)}>Tutorial</Button>
+                <Button onClick={() => console.log(userTutorial)}>userTutorial</Button>
+                <Button onClick={() => console.log(targetId)}>targetId</Button>
+                <Button onClick={() => console.log(forcedTutorial)}>forcedTutorial</Button>
+              </Paper>
+
+              <Paper>
+                <Divider>Functions</Divider>
+                <Button onClick={() => console.log(parentWithMostChildren())}>Most Parent</Button>
+                <Button onClick={() => console.log(parentWithChildren("r98BjyFDCe4YyLA3U8ZE"))}>hisParent</Button>
+                <Button onClick={() => nodeBookDispatch({ type: "setSelectionType", payload: "Proposals" })}>
+                  Toggle Open proposals
+                </Button>
+                <Button onClick={() => nodeBookDispatch({ type: "setSelectionType", payload: "Proposals" })}>
+                  Open Proposal
+                </Button>
+                <Button onClick={() => openNodeHandler("0JI7dmq1qFF18j4ZbKMw")}>Open Node Handler</Button>
+                <Button onClick={() => setShowRegion(prev => !prev)}>Show Region</Button>
+                <Button onClick={() => console.log({ openSidebar })}>Open Sidebar</Button>
+              </Paper>
+            </Box>
+          </ClickAwayListener>
+        )}
       </Box>
     </div>
   );

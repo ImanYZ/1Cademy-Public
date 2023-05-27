@@ -87,7 +87,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
       const projectSpecs = projectSpecsDoc.data();
       const conditions = shuffleArray([...projectSpecs.conditions]);
 
-      const passages = await db.collection("passages").get();
+      const passages = await db.collection("passages").where("projectIds", "array-contains", projectName).get();
       // passages that contains the current project
       let passagesDocs = passages.docs.filter((p: any) => projectName in p.data()?.projects);
 

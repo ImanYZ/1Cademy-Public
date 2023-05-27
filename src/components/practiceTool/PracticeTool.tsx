@@ -19,10 +19,9 @@ import { User } from "../../knowledgeTypes";
 import { Post } from "../../lib/mapApi";
 import { differentBetweenDays, getDateYYMMDDWithHyphens } from "../../lib/utils/date.utils";
 import { ICheckAnswerRequestParams } from "../../pages/api/checkAnswer";
+import { OpenRightSidebar } from "../../pages/notebook";
 import CourseDetail from "./CourseDetail";
-import Leaderboard from "./Leaderboard";
 import { PracticeQuestion } from "./PracticeQuestion";
-import { UserStatus } from "./UserStatus";
 
 type PracticeToolProps = {
   voiceAssistant: VoiceAssistant;
@@ -34,6 +33,7 @@ type PracticeToolProps = {
   openNodeHandler: (nodeId: string) => void;
   startPractice: boolean;
   setStartPractice: Dispatch<SetStateAction<boolean>>;
+  setDisplayRightSidebar: (newValue: OpenRightSidebar) => void;
 };
 
 export type PracticeInfo = {
@@ -74,6 +74,7 @@ const PracticeTool = forwardRef<PracticeToolRef, PracticeToolProps>((props, ref)
     openNodeHandler,
     startPractice,
     setStartPractice,
+    setDisplayRightSidebar,
   } = props;
   console.log({ currentSemester });
   const db = getFirestore();
@@ -235,9 +236,13 @@ const PracticeTool = forwardRef<PracticeToolRef, PracticeToolProps>((props, ref)
     });
   }, [currentSemester.tagId, questionData, setVoiceAssistant, startPractice]);
 
+  // when practice tool is dismounted
   useEffect(() => {
-    return () => setStartPractice(false);
-  }, [setStartPractice]);
+    return () => {
+      setStartPractice(false);
+      setDisplayRightSidebar(null);
+    };
+  }, [setDisplayRightSidebar, setStartPractice]);
 
   return startPractice ? (
     <Box
@@ -246,17 +251,17 @@ const PracticeTool = forwardRef<PracticeToolRef, PracticeToolProps>((props, ref)
         inset: "0px",
         background: theme =>
           theme.palette.mode === "dark" ? theme.palette.common.notebookG900 : theme.palette.common.notebookBl1,
-        zIndex: 1,
         overflowY: "auto",
         overflowX: "hidden",
+        // border: "dashed 2px royalBlue",
+        boxSizing: "content-box",
+        zIndex: 2,
       }}
     >
       <PracticeQuestion
         question={questionData?.question ?? null}
         practiceIsCompleted={practiceIsCompleted}
         onClose={onClose}
-        leaderboard={<Leaderboard semesterId={currentSemester.tagId} />}
-        userStatus={<UserStatus semesterId={currentSemester.tagId} user={user} />}
         onViewNodeOnNodeBook={onViewNodeOnNodeBook}
         onGetNextQuestion={getPracticeQuestion}
         onSaveAnswer={onSubmitAnswer}
@@ -268,6 +273,7 @@ const PracticeTool = forwardRef<PracticeToolRef, PracticeToolProps>((props, ref)
         enabledAssistant={Boolean(voiceAssistant.questionNode)}
         onToggleAssistant={onToggleAssistant}
         narratedAnswerIdx={narratedAnswerIdx}
+        setDisplayRightSidebar={setDisplayRightSidebar}
       />
     </Box>
   ) : (

@@ -3,7 +3,7 @@ import { FullNodeData, OpenPart, TNodeBookState, TNodeUpdates } from "src/nodeBo
 
 import { useNodeBook } from "@/context/NodeBookContext";
 import { NODE_WIDTH } from "@/lib/utils/Map.utils";
-import { OpenSidebar } from "@/pages/notebook";
+import { OpenLeftSidebar } from "@/pages/notebook";
 
 import { MemoizedNode } from "./Node";
 
@@ -48,11 +48,11 @@ type NodeListProps = {
   setOpenMedia: (imagUrl: string) => void;
   setNodeParts: (nodeId: string, callback: (thisNode: FullNodeData) => FullNodeData) => void;
   citations: { [key: string]: Set<string> };
-  setOpenSideBar: (sidebar: OpenSidebar) => void;
+  setOpenSideBar: (sidebar: OpenLeftSidebar) => void;
   proposeNodeImprovement: any;
   proposeNewChild: any;
   scrollToNode: any;
-  openSidebar: OpenSidebar;
+  openSidebar: OpenLeftSidebar;
   setOperation: (operation: string) => void;
   openUserInfoSidebar: (uname: string, imageUrl: string, fullName: string, chooseUname: string) => void;
   disabledNodes: string[];
