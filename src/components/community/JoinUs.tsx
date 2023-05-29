@@ -54,13 +54,20 @@ const JoinUs = (props: JoinUsProps) => {
   const [fullname, setFullname] = useState("");
   const [needsUpdate, setNeedsUpdate] = useState(true);
   const [email, setEmail] = useState("");
+  const [survey, setSurvey] = useState(false);
   const router = useRouter();
   useEffect(() => {
     return auth.onAuthStateChanged(async (user: any) => {
       if (user) {
         const uEmail = user.email.toLowerCase();
         console.log("user", uEmail);
-        const userDocs = await getDocs(query(collection(dbExp, "users"), where("email", "==", uEmail)));
+        let userDocs = await getDocs(query(collection(dbExp, "users"), where("email", "==", uEmail)));
+        if (userDocs.docs.length === 0) {
+          userDocs = await getDocs(query(collection(dbExp, "usersSurvey"), where("email", "==", uEmail)));
+          if (userDocs.docs.length > 0) {
+            setSurvey(true);
+          }
+        }
         if (userDocs.docs.length > 0) {
           setEmail(uEmail.toLowerCase());
           const userData = userDocs.docs[0].data();
@@ -347,7 +354,10 @@ const JoinUs = (props: JoinUsProps) => {
 
   const setFileUrl = (setUrl: any) => async (name: string, generatedUrl: string) => {
     if (fullname) {
-      const userRef = doc(dbExp, "users", fullname);
+      let userRef = doc(dbExp, "users", fullname);
+      if (survey) {
+        userRef = doc(dbExp, "usersSurvey", fullname);
+      }
       const userDoc = await getDoc(userRef);
       if (userDoc.exists()) {
         await updateDoc(userRef, {
@@ -585,6 +595,7 @@ const JoinUs = (props: JoinUsProps) => {
                       storageFolder="Resumes/"
                       fileUrl={resumeUrl}
                       setFileUrl={setFileUrl(setResumeUrl)}
+                      fullname={fullname}
                     />
                   </StepContent>
                 </Step>

@@ -72,11 +72,9 @@ const SignUpExpPage = () => {
     let userData: any = null;
 
     if (!users.docs.length) {
-      const usersStudentSurvey = await getDocs(
-        query(collection(dbExp, "usersStudentCoNoteSurvey"), where("email", "==", uEmail))
-      );
-      if (usersStudentSurvey.docs.length) {
-        userData = usersStudentSurvey.docs[0].data();
+      const usersSurvey = await getDocs(query(collection(dbExp, "usersSurvey"), where("email", "==", uEmail)));
+      if (usersSurvey.docs.length) {
+        userData = usersSurvey.docs[0].data();
       }
     } else {
       userData = users.docs[0].data();
