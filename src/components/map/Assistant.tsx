@@ -92,9 +92,9 @@ export const Assistant = ({
   const stateInput = useStateMachineInput(rive, STATE_MACHINE_NAME, STATE);
 
   const getNoMatchPreviousMessage = (listenType: VoiceAssistantType, timesAssistantCantUnderstand: number) => {
-    let message = "Sorry, I didn't get your choices.";
-    if (timesAssistantCantUnderstand > 0) return message;
+    if (timesAssistantCantUnderstand > 0) return "I didn't get it, repeat again.";
 
+    let message = "Sorry, I didn't get your choices.";
     if (listenType === "CONFIRM") message += CONFIRM_ERROR;
     if (listenType === "ANSWERING") message += ANSWERING_ERROR;
     if (listenType === "NEXT_ACTION") message += NEXT_ACTION_ERROR;
