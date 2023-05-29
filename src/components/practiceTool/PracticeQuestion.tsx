@@ -685,7 +685,7 @@ const QuestionMessage = ({ messages, questionsCompleted, totalQuestions }: Quest
       <CustomCircularProgress
         variant="determinate"
         value={(100 * (questionsCompleted > totalQuestions ? totalQuestions : questionsCompleted)) / totalQuestions}
-        realValue={questionsCompleted}
+        percentage={questionsCompleted}
       />
     </Stack>
   );

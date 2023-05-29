@@ -7,7 +7,7 @@ import { DESIGN_SYSTEM_COLORS } from "@/lib/theme/colors";
 
 // Inspired by the former Facebook spinners.
 type CustomCircularProgressProps = {
-  realValue: number;
+  percentage: number;
 };
 
 export const CustomCircularProgress = (props: CircularProgressProps & CustomCircularProgressProps) => {
@@ -46,7 +46,7 @@ export const CustomCircularProgress = (props: CircularProgressProps & CustomCirc
           justifyContent: "center",
         }}
       >
-        <Typography sx={{ fontSize: "18px", fontWeight: "600" }}>{`${Math.round(props.realValue)}`}</Typography>
+        <Typography sx={{ fontSize: "18px", fontWeight: "600" }}>{`${Math.round(props.percentage)}`}</Typography>
       </Box>
     </Box>
   );
