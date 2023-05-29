@@ -104,6 +104,7 @@ const NodeQuestion = ({
       }}
     >
       <Typography
+        id={"question-title"}
         component={"h1"}
         sx={{
           fontSize: "30px",
@@ -120,6 +121,7 @@ const NodeQuestion = ({
         {nodeCopy.choices.map((cur, idx) => (
           <Box key={idx}>
             <ListItem
+              id={`question-choice-${idx}`}
               onClick={() => onSelectAnswer(idx)}
               sx={{
                 p: "18px 16px",
@@ -235,7 +237,6 @@ const NodeQuestion = ({
               }}
             >
               {cur.choice}
-
               <Box
                 className="check-box"
                 sx={{
@@ -278,7 +279,7 @@ const NodeQuestion = ({
                 {!submitAnswer && selectedAnswers[idx] && <CheckIcon sx={{ fontSize: "12px" }} />}
               </Box>
             </ListItem>
-            {submitAnswer && <Typography sx={{ mt: "8px" }}>{cur.feedback}</Typography>}
+            {submitAnswer && selectedAnswers[idx] && <Typography sx={{ mt: "8px" }}>{cur.feedback}</Typography>}
           </Box>
         ))}
       </Stack>
@@ -398,6 +399,8 @@ type PracticeQuestionProps = {
   onToggleAssistant: () => void;
   narratedAnswerIdx: number;
   setDisplayRightSidebar: (newValue: OpenRightSidebar) => void;
+  loading: boolean;
+  // setLoading: (newValue: boolean) => void;
 };
 export const PracticeQuestion = ({
   question,
@@ -415,18 +418,17 @@ export const PracticeQuestion = ({
   onToggleAssistant,
   narratedAnswerIdx,
   setDisplayRightSidebar,
-}: PracticeQuestionProps) => {
-  const [loading, setLoading] = useState(true);
-
+  loading,
+}: // setLoading,
+PracticeQuestionProps) => {
+  console.log("------>", { loading });
   const onSubmitAnswer = useCallback(() => {
     onSaveAnswer(selectedAnswers);
   }, [onSaveAnswer, selectedAnswers]);
 
   const onNextQuestion = useCallback(async () => {
-    setLoading(true);
     setSubmitAnswer(false);
     await onGetNextQuestion();
-    setLoading(false);
   }, [onGetNextQuestion, setSubmitAnswer]);
 
   const onSelectAnswer = (answerIdx: number) => {
@@ -436,7 +438,6 @@ export const PracticeQuestion = ({
   useEffect(() => {
     if (!question) return;
     setSelectedAnswers(new Array(question.choices.length).fill(false));
-    setLoading(false);
   }, [question, setSelectedAnswers]);
 
   return (
@@ -444,7 +445,7 @@ export const PracticeQuestion = ({
       sx={{
         minHeight: "100vh",
         display: "grid",
-        gridTemplateColumns: "1fr auto 1fr",
+        gridTemplateColumns: "1fr minmax(0px,820px) 1fr",
       }}
     >
       {/* left options */}
@@ -472,8 +473,29 @@ export const PracticeQuestion = ({
             />
           </Box>
         )}
+        {loading && (
+          <Box sx={{ width: "100%" }}>
+            <Skeleton variant="rectangular" height={112} sx={{ mb: "12px" }} />
 
-        {question && !practiceIsCompleted && (
+            <Box
+              sx={{
+                p: "32px",
+                border: "2px solid #FD7373",
+                borderRadius: "8px",
+                background: theme =>
+                  theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookG900 : DESIGN_SYSTEM_COLORS.gray100,
+              }}
+            >
+              <Skeleton variant="rectangular" height={50} width={350} sx={{ mb: "20px" }} />
+              <Skeleton variant="rectangular" height={80} sx={{ mb: "10px" }} />
+              <Skeleton variant="rectangular" height={80} sx={{ mb: "10px" }} />
+              <Skeleton variant="rectangular" height={80} sx={{ mb: "10px" }} />
+              <Skeleton variant="rectangular" height={80} />
+            </Box>
+          </Box>
+        )}
+
+        {!loading && question && !practiceIsCompleted && (
           <Box sx={{ maxWidth: "820px", m: "auto" }}>
             <QuestionMessage
               messages={[
@@ -493,78 +515,57 @@ export const PracticeQuestion = ({
               totalQuestions={practiceInfo.totalQuestions}
               questionsCompleted={practiceInfo.totalQuestions - practiceInfo.questionsLeft}
             />
-            {loading && (
-              <Box
-                sx={{
-                  p: "32px",
-                  border: "2px solid #FD7373",
-                  borderRadius: "8px",
-                  background: theme =>
-                    theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookG900 : DESIGN_SYSTEM_COLORS.gray100,
-                }}
-              >
-                <Skeleton variant="rectangular" height={50} width={350} sx={{ mb: "20px" }} />
-                <Skeleton variant="rectangular" height={80} sx={{ mb: "10px" }} />
-                <Skeleton variant="rectangular" height={80} sx={{ mb: "10px" }} />
-                <Skeleton variant="rectangular" height={80} sx={{ mb: "10px" }} />
-                <Skeleton variant="rectangular" height={80} />
-              </Box>
-            )}
-            {!loading && (
-              <NodeQuestion
-                node={question}
-                selectedAnswers={selectedAnswers}
-                setSelectedIdxAnswer={onSelectAnswer}
-                submitAnswer={submitAnswer}
-                narratedAnswerIdx={narratedAnswerIdx}
-              />
-            )}
+            <NodeQuestion
+              node={question}
+              selectedAnswers={selectedAnswers}
+              setSelectedIdxAnswer={onSelectAnswer}
+              submitAnswer={submitAnswer}
+              narratedAnswerIdx={narratedAnswerIdx}
+            />
 
-            {!loading && (
-              <Box sx={{ display: "flex", justifyContent: "space-between", mt: "32px" }}>
-                <Button
-                  variant="contained"
-                  onClick={() => onViewNodeOnNodeBook(question.id)}
-                  sx={{
-                    borderRadius: "26px",
-                    minWidth: "180px",
-                    fontSize: "16px",
+            <Box sx={{ display: "flex", justifyContent: "space-between", mt: "32px" }}>
+              <Button
+                variant="contained"
+                onClick={() => onViewNodeOnNodeBook(question.id)}
+                sx={{
+                  borderRadius: "26px",
+                  minWidth: "180px",
+                  fontSize: "16px",
+                  backgroundColor: theme =>
+                    theme.palette.mode === "dark" ? theme.palette.common.baseWhite : theme.palette.common.baseWhite,
+                  color: theme =>
+                    theme.palette.mode === "dark" ? theme.palette.common.gray700 : theme.palette.common.gray700,
+                  ":hover": {
                     backgroundColor: theme =>
                       theme.palette.mode === "dark" ? theme.palette.common.baseWhite : theme.palette.common.baseWhite,
                     color: theme =>
                       theme.palette.mode === "dark" ? theme.palette.common.gray700 : theme.palette.common.gray700,
-                    ":hover": {
-                      backgroundColor: theme =>
-                        theme.palette.mode === "dark" ? theme.palette.common.baseWhite : theme.palette.common.baseWhite,
-                      color: theme =>
-                        theme.palette.mode === "dark" ? theme.palette.common.gray700 : theme.palette.common.gray700,
-                    },
-                  }}
+                  },
+                }}
+              >
+                Open this in Notebook
+              </Button>
+              {!submitAnswer && (
+                <Button
+                  variant="contained"
+                  onClick={onSubmitAnswer}
+                  disabled={!selectedAnswers.some(c => c)}
+                  sx={{ borderRadius: "26px", minWidth: "180px", fontSize: "16px" }}
                 >
-                  Open this in Notebook
+                  Submit
                 </Button>
-                {!submitAnswer && (
-                  <Button
-                    variant="contained"
-                    onClick={onSubmitAnswer}
-                    disabled={!selectedAnswers.some(c => c)}
-                    sx={{ borderRadius: "26px", minWidth: "180px", fontSize: "16px" }}
-                  >
-                    Submit
-                  </Button>
-                )}
-                {submitAnswer && (
-                  <Button
-                    variant="contained"
-                    onClick={onNextQuestion}
-                    disabled={!selectedAnswers.length}
-                    sx={{ borderRadius: "26px", minWidth: "180px", fontSize: "16px" }}
-                  >
-                    Next
-                  </Button>
-                )}
-              </Box>
-            )}
+              )}
+              {submitAnswer && (
+                <Button
+                  variant="contained"
+                  onClick={onNextQuestion}
+                  disabled={!selectedAnswers.length}
+                  sx={{ borderRadius: "26px", minWidth: "180px", fontSize: "16px" }}
+                >
+                  Next
+                </Button>
+              )}
+            </Box>
           </Box>
         )}
       </Box>
@@ -684,7 +685,7 @@ const QuestionMessage = ({ messages, questionsCompleted, totalQuestions }: Quest
       <CustomCircularProgress
         variant="determinate"
         value={(100 * (questionsCompleted > totalQuestions ? totalQuestions : questionsCompleted)) / totalQuestions}
-        realValue={questionsCompleted}
+        percentage={questionsCompleted}
       />
     </Stack>
   );
