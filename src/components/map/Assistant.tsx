@@ -309,7 +309,11 @@ export const Assistant = ({
         }
 
         if (["stop", "install"].includes(transcript) || transcript.includes("stop")) {
-          setVoiceAssistant(prev => ({ ...prev, questionNode: null }));
+          setVoiceAssistant(prev => {
+            const emptyVoiceAssistant = { ...prev, questionNode: null };
+            previousVoiceAssistant.current = emptyVoiceAssistant;
+            return emptyVoiceAssistant;
+          });
           stopAssistant(true);
           break;
         }
