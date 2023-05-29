@@ -13,14 +13,22 @@ const TEAM_ITEMS = [
     image: "home/about/01.png",
     description: (
       <>
-        <Typography>
+        <Typography
+          sx={{ p: "8px", pt: "0" }}
+          fontSize={"16px"}
+          color={theme => (theme.palette.mode === "light" ? "#475467" : "#EAECF0")}
+        >
           Iman YeckehZaare is the founder and architect of 1Cademy. He is currently pursuing his Ph.D. at the University
           of Michigan, School of Information. He has a Master of Science Degree in Information Science with two
           specializations in Human-Computer Interaction (HCI) and Information Economics for Management (IEM) from the
           same institution. Additionally, Iman holds two Bachelor of Engineering Degrees in Computer Science and
           Information Technology.
         </Typography>
-        <Typography>
+        <Typography
+          sx={{ p: "8px", pt: "0" }}
+          fontSize={"16px"}
+          color={theme => (theme.palette.mode === "light" ? "#475467" : "#EAECF0")}
+        >
           Iman was awarded the title of Best Graduate Student Instructor of the Year 2018-2019 at the University of
           Michigan, School of Information. He was also a Michigan I-Corps 2013 Graduate, a Campus of the Future 2018
           Semi-finalist, an Innovation in Action 2018 2nd Prize awardee, and a Learning Levers 2019 3rd Prize awardee.
@@ -80,20 +88,32 @@ const TEAM_ITEMS = [
     image: "home/about/03.png",
     description: (
       <>
-        <Typography>
+        <Typography
+          sx={{ p: "8px", pt: "0" }}
+          fontSize={"16px"}
+          color={theme => (theme.palette.mode === "light" ? "#475467" : "#EAECF0")}
+        >
           Joel Podolny, a distinguished sociologist and CEO of Honor Education, Inc., has an impressive background in
           academia and corporate training. Previously, he held the position of Vice President at Apple and was the
-          founding Dean of Apple University (2009-2021), where he managed the company's internal training program. In
-          addition, he served as Dean and Professor of Management at the Yale School of Management (2005-2008),
-          spearheading a significant overhaul of the Yale MBA curriculum to better equip students for the intricate,
-          cross-functional global landscape.
+          founding Dean of Apple University (2009-2021), where he managed the company's internal training program for
+          employees and executives. This program instilled a deep understanding of Apple's culture, values, and
+          innovative mindset. Apple's online learning program, designed to provide continuous educational opportunities
+          for all employees, has become an indispensable resource for the organization. The comprehensive curriculum
+          covered a wide range of subjects and was crafted by an exceptional group of educators, industry practitioners,
+          and Apple veterans.
         </Typography>
-        <Typography>
-          Prior to his tenure at Yale, Podolny was a Professor of Business Administration and Sociology at Harvard
-          Business School (2002-2005) and a Professor of Organizational Behavior and Strategic Management at Stanford
-          Graduate School of Business (1991-2002). While at Stanford, he held the position of Senior Associate Dean and
-          taught courses in business strategy, organizational behavior, and global management. Podolny earned his Ph.D.
-          in Sociology from Harvard University in 1991.
+        <Typography
+          sx={{ p: "8px", pt: "0" }}
+          fontSize={"16px"}
+          color={theme => (theme.palette.mode === "light" ? "#475467" : "#EAECF0")}
+        >
+          Before working at Apple, Podolny served as Dean and Professor of Management at the Yale School of Management
+          (2005-2008), leading a significant overhaul of the Yale MBA curriculum to better equip students for the
+          intricate, cross-functional global landscape. Prior to his tenure at Yale, he held positions as a Professor of
+          Business Administration and Sociology at Harvard Business School (2002-2005) and as a Professor of
+          Organizational Behavior and Strategic Management at Stanford Graduate School of Business (1991-2002). At
+          Stanford, he served as Senior Associate Dean and taught courses in business strategy, organizational behavior,
+          and global management. Podolny earned his Ph.D. in Sociology from Harvard University in 1991.
         </Typography>
       </>
     ),
@@ -106,7 +126,11 @@ const TEAM_ITEMS = [
     image: "home/about/roby.jpg",
     description: (
       <>
-        <Typography>
+        <Typography
+          sx={{ p: "8px", pt: "0" }}
+          fontSize={"16px"}
+          color={theme => (theme.palette.mode === "light" ? "#475467" : "#EAECF0")}
+        >
           Roby Harrington is currently a board member of the Camphill Foundation, an advisor to CORE ECON, a board
           member of governors at Stanford University Press, a special advisor to the CEO of Honor Education Technology,
           and a farmer at Ten Barn Farm in Ghent, NY. At W. W. Norton & Company, Inc, Roby held various positions,
