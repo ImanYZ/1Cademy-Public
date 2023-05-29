@@ -14,7 +14,8 @@ import { VoiceAssistant } from "src/nodeBookTypes";
 import { ISemester } from "src/types/ICourse";
 import { ISemesterStudentVoteStat } from "src/types/ICourse";
 
-import { getSemesterById } from "../../client/serveless/semesters.serverless";
+import { addPracticeToolLog } from "../../client/firestore/logs/practiceTool.firestore";
+import { getSemesterById } from "../../client/firestore/semesters.firestore";
 import { CourseTag, SimpleQuestionNode } from "../../instructorsTypes";
 import { User } from "../../knowledgeTypes";
 import { Post } from "../../lib/mapApi";
@@ -23,6 +24,8 @@ import { ICheckAnswerRequestParams } from "../../pages/api/checkAnswer";
 import { OpenRightSidebar } from "../../pages/notebook";
 import CourseDetail from "./CourseDetail";
 import { PracticeQuestion } from "./PracticeQuestion";
+
+const db = getFirestore();
 
 type PracticeToolProps = {
   voiceAssistant: VoiceAssistant;
@@ -56,11 +59,11 @@ const DEFAULT_PRACTICE_INFO: PracticeInfo = {
 export type PracticeToolRef = {
   onRunPracticeTool: (start: boolean) => void;
   onSelectAnswers: (answers: boolean[]) => void;
-  onSubmitAnswer: (answers: boolean[]) => void;
+  onSubmitAnswer: (answers: boolean[], byVoice?: boolean) => void;
   nextQuestion: () => void;
   getQuestionParents: () => string[];
   getQuestionData: () => SimpleQuestionNode | null;
-  onSelectedQuestionAnswer: (index: number) => void;
+  onSelectedQuestionAnswer: (index: number) => void; // -10 value is used to select the node title
   getSubmittedAnswers: () => boolean[];
 };
 
@@ -78,7 +81,7 @@ const PracticeTool = forwardRef<PracticeToolRef, PracticeToolProps>((props, ref)
     setDisplayRightSidebar,
   } = props;
   console.log({ currentSemester });
-  const db = getFirestore();
+
   // const [startPractice, setStartPractice] = useState(false);
   const [questionData, setQuestionData] = useState<{ question: SimpleQuestionNode; flashcardId: string } | null>(null);
   const [practiceIsCompleted, setPracticeIsCompleted] = useState(false);
@@ -100,7 +103,7 @@ const PracticeTool = forwardRef<PracticeToolRef, PracticeToolProps>((props, ref)
   }, [practiceInfo, setStartPractice]);
 
   const onSubmitAnswer = useCallback(
-    async (answers: boolean[]) => {
+    async (answers: boolean[], byVoice = false) => {
       if (!questionData) return;
 
       setSubmitAnswer(true);
@@ -112,34 +115,39 @@ const PracticeTool = forwardRef<PracticeToolRef, PracticeToolProps>((props, ref)
         postpone: false,
       };
       await Post("/checkAnswer", payload).then(() => {});
+      addPracticeToolLog(db, { user: user.uname, semesterId: currentSemester.tagId, byVoice, action: "submit" });
     },
-    [questionData]
+    [currentSemester.tagId, questionData, user.uname]
   );
 
-  const getPracticeQuestion = useCallback(async () => {
-    setLoading(true);
-    const res: any = await Post("/practice", { tagId: currentSemester.tagId });
-    if (res?.done) return setPracticeIsCompleted(true);
+  const getPracticeQuestion = useCallback(
+    async (byVoice = false) => {
+      setLoading(true);
+      const res: any = await Post("/practice", { tagId: currentSemester.tagId });
+      if (res?.done) return setPracticeIsCompleted(true);
 
-    const question = res.question as SimpleQuestionNode;
-    setSubmitAnswer(false);
-    setSelectedAnswers(new Array(question.choices.length).fill(false));
-    setSubmittedAnswers([]);
-    setQuestionData({
-      ...res,
-      question: {
-        ...question,
-        choices: question.choices.map((cur, idx) => ({ ...cur, choice: replaceTextByNumber(cur.choice, idx) })),
-      },
-    });
-    setLoading(false);
-  }, [currentSemester.tagId]);
+      const question = res.question as SimpleQuestionNode;
+      setSubmitAnswer(false);
+      setSelectedAnswers(new Array(question.choices.length).fill(false));
+      setSubmittedAnswers([]);
+      setQuestionData({
+        ...res,
+        question: {
+          ...question,
+          choices: question.choices.map((cur, idx) => ({ ...cur, choice: replaceTextByNumber(cur.choice, idx) })),
+        },
+      });
+      addPracticeToolLog(db, { user: user.uname, semesterId: currentSemester.tagId, byVoice, action: "next-question" });
+      setLoading(false);
+    },
+    [currentSemester.tagId, user.uname]
+  );
 
   useImperativeHandle(ref, () => ({
     onRunPracticeTool,
     onSubmitAnswer,
     onSelectAnswers: answers => setSelectedAnswers(answers),
-    nextQuestion: getPracticeQuestion,
+    nextQuestion: () => getPracticeQuestion(true),
     getQuestionParents: () => questionData?.question.parents ?? [],
     getQuestionData: () => questionData?.question ?? null,
     onSelectedQuestionAnswer: (index: number) => setNarratedAnswerIdx(index),
@@ -149,6 +157,15 @@ const PracticeTool = forwardRef<PracticeToolRef, PracticeToolProps>((props, ref)
   const onViewNodeOnNodeBook = (nodeId: string) => {
     openNodeHandler(nodeId);
     onClose();
+  };
+
+  const onSaveLog = (action: "open-leaderboard" | "open-user-status" | "open-notebook" | "display-tags") => {
+    addPracticeToolLog(db, {
+      user: user.uname,
+      semesterId: voiceAssistant.tagId,
+      byVoice: false,
+      action,
+    });
   };
 
   // this is executed the first time we get selected a semester
@@ -165,7 +182,7 @@ const PracticeTool = forwardRef<PracticeToolRef, PracticeToolProps>((props, ref)
       setSemesterConfig(semester);
     };
     getSemesterConfig();
-  }, [currentSemester.tagId, db, user.uname]);
+  }, [currentSemester.tagId, user.uname]);
 
   useEffect(() => {
     console.log({ semesterConfig });
@@ -210,7 +227,7 @@ const PracticeTool = forwardRef<PracticeToolRef, PracticeToolProps>((props, ref)
     return () => {
       if (unsub) unsub();
     };
-  }, [currentSemester.tagId, db, semesterConfig, user.uname]);
+  }, [currentSemester.tagId, semesterConfig, user.uname]);
 
   useEffect(() => {
     console.log({ practiceInfo });
@@ -226,10 +243,16 @@ const PracticeTool = forwardRef<PracticeToolRef, PracticeToolProps>((props, ref)
     if (!questionData) return;
 
     setVoiceAssistant(prev => {
+      addPracticeToolLog(db, {
+        user: user.uname,
+        semesterId: currentSemester.tagId,
+        byVoice: false,
+        action: prev.questionNode ? "stop-assistant" : "start-assistant",
+      });
       if (prev.questionNode) return { ...prev, questionNode: null };
       return { tagId: currentSemester.tagId, questionNode: questionData.question };
     });
-  }, [currentSemester.tagId, questionData, setVoiceAssistant]);
+  }, [currentSemester.tagId, questionData, setVoiceAssistant, user.uname]);
 
   // this is executed when practice start and get question node
   useEffect(() => {
@@ -281,6 +304,7 @@ const PracticeTool = forwardRef<PracticeToolRef, PracticeToolProps>((props, ref)
         narratedAnswerIdx={narratedAnswerIdx}
         setDisplayRightSidebar={setDisplayRightSidebar}
         loading={loading}
+        onSaveLog={onSaveLog}
       />
     </Box>
   ) : (

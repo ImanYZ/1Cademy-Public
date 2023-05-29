@@ -6950,6 +6950,7 @@ const Notebook = ({}: NotebookProps) => {
               setRootQuery={setRootQuery}
               setVoiceAssistant={setVoiceAssistant}
               startPractice={startPractice}
+              uname={user?.uname ?? ""}
             />
           </Box>
         )}
@@ -6979,7 +6980,9 @@ const Notebook = ({}: NotebookProps) => {
                   p: "4px",
                   color: theme => (theme.palette.mode === "dark" ? undefined : DESIGN_SYSTEM_COLORS.notebookG200),
                 }}
-                onClick={() => setDisplaySidebar(null)}
+                onClick={() => {
+                  setDisplaySidebar(null);
+                }}
               >
                 <CloseIcon />
               </IconButton>
@@ -7009,7 +7012,9 @@ const Notebook = ({}: NotebookProps) => {
                   p: "4px",
                   color: theme => (theme.palette.mode === "dark" ? undefined : DESIGN_SYSTEM_COLORS.notebookG200),
                 }}
-                onClick={() => setDisplaySidebar(null)}
+                onClick={() => {
+                  setDisplaySidebar(null);
+                }}
               >
                 <CloseIcon />
               </IconButton>
