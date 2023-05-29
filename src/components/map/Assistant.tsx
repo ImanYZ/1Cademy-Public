@@ -104,18 +104,16 @@ export const Assistant = ({
 
   const getTranscriptProcessed = (transcript: string, listenType: VoiceAssistantType) => {
     // here process the transcript to correct most possible transcript value
-    let possibleTranscript: string | null = null;
-    // if (listenType === "ANSWERING") possibleTranscript = getValidABCDOptions(transcript); // if is answering and is valid, we use directly
-    if (listenType === "ANSWERING") possibleTranscript = getValidNumberOptions(transcript); // if is answering and is valid, we use directly
-
-    const transcriptProcessed =
-      possibleTranscript ??
-      MapSentences[transcript] ??
-      transcript
+    let transcriptProcessed: string = "";
+    if (listenType === "ANSWERING") transcriptProcessed = getValidNumberOptions(transcript); // if is answering and is valid, we use directly
+    if (!transcriptProcessed) transcriptProcessed = MapSentences[transcript];
+    if (!transcriptProcessed)
+      transcriptProcessed = transcript
         .split(" ")
         .map(cur => (cur.length === 1 ? cur : MapWords[cur] ?? ""))
         .filter(cur => cur.length === 1)
         .join("");
+
     return transcriptProcessed;
   };
 
@@ -331,6 +329,42 @@ export const Assistant = ({
 
         timesAssistantCantUnderstand = 0; // restart this to say again complete error phrase
 
+        if (transcriptProcessed === OPEN_NOTEBOOK) {
+          console.log("NEXT_ACTION:open notebook");
+          const parents = questionNode.parents;
+          setDisplayDashboard(false);
+          openNodesOnNotebook(selectedNotebookId, parents);
+          await detectElements({ ids: parents });
+          let stopLoop = false;
+          stateInput.value = 1;
+          for (let i = 0; i < parents.length; i++) {
+            // setForceAssistantReaction("TALKING");
+            const parent = parents[i];
+            const node: Node | null = await getNode(db, parent);
+            if (!node) continue;
+
+            const message = nodeToNarration(node);
+            scrollToNode(parent, true);
+            const { narratorPromise, abortPromise } = narrateLargeTexts(message);
+            abortNarratorPromise.current = abortPromise;
+            const res = await narratorPromise();
+            if (!res) {
+              // return
+              stopLoop = true;
+              break;
+            }
+            if (!askingRef.current) break; // should finish without make nothing
+          }
+          if (stopLoop) break;
+          await delay(1000);
+          // setForceAssistantReaction("");
+          preMessage = "";
+          message =
+            "Please tell me Continue Practicing whenever you'd like to continue, otherwise I'll wait for you to navigate through the notebook.";
+          listenType = "NOTEBOOK_ACTIONS";
+          continue;
+        }
+
         if (listenType === "ANSWERING") {
           console.log("ANSWERING");
           if (!assistantRef.current) break; // CHECK if we need to stop
@@ -386,41 +420,7 @@ export const Assistant = ({
             askingRef.current = false;
             continue;
           }
-          if (transcriptProcessed === OPEN_NOTEBOOK) {
-            console.log("NEXT_ACTION:open notebook");
-            const parents = questionNode.parents;
-            setDisplayDashboard(false);
-            openNodesOnNotebook(selectedNotebookId, parents);
-            await detectElements({ ids: parents });
-            let stopLoop = false;
-            stateInput.value = 1;
-            for (let i = 0; i < parents.length; i++) {
-              // setForceAssistantReaction("TALKING");
-              const parent = parents[i];
-              const node: Node | null = await getNode(db, parent);
-              if (!node) continue;
 
-              const message = nodeToNarration(node);
-              scrollToNode(parent, true);
-              const { narratorPromise, abortPromise } = narrateLargeTexts(message);
-              abortNarratorPromise.current = abortPromise;
-              const res = await narratorPromise();
-              if (!res) {
-                // return
-                stopLoop = true;
-                break;
-              }
-              if (!askingRef.current) break; // should finish without make nothing
-            }
-            if (stopLoop) break;
-            await delay(1000);
-            // setForceAssistantReaction("");
-            preMessage = "";
-            message =
-              "Please tell me Continue Practicing whenever you'd like to continue, otherwise I'll wait for you to navigate through the notebook.";
-            listenType = "NOTEBOOK_ACTIONS";
-            continue;
-          }
           console.log("NEXT_ACTION:No action");
           preMessage = `Sorry, I didn't get your choices. ${NEXT_ACTION_ERROR}`;
           message = "";
