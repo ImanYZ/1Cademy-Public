@@ -9,8 +9,8 @@ import React, { useEffect, useMemo, useState } from "react";
 
 import { getAvatarName } from "@/lib/utils/Map.utils";
 
-import { getSemesterById } from "../../client/serveless/semesters.serverless";
-import { getSemesterStudentVoteStatsByIdAndStudent } from "../../client/serveless/semesterStudentVoteStat.serverless";
+import { getSemesterById } from "../../client/firestore/semesters.firestore";
+import { getSemesterStudentVoteStatsByIdAndStudent } from "../../client/firestore/semesterStudentVoteStat.firestores";
 import { User } from "../../knowledgeTypes";
 import { DESIGN_SYSTEM_COLORS } from "../../lib/theme/colors";
 import {
