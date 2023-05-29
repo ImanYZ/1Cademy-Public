@@ -308,7 +308,7 @@ export const Assistant = ({
           continue;
         }
 
-        if (["stop", "install"].includes(transcript)) {
+        if (["stop", "install"].includes(transcript) || transcript.includes("stop")) {
           setVoiceAssistant(prev => ({ ...prev, questionNode: null }));
           stopAssistant(true);
           break;
