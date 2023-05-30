@@ -496,11 +496,7 @@ MainSidebarProps) => {
             palette.mode === "dark" ? palette.common.notebookMainBlack : palette.common.gray50,
         }}
       >
-        <Stack
-          alignItems="center"
-          direction="column"
-          sx={{ width: "inherit", border: "solid 1px royalBlue", px: "14px" }}
-        >
+        <Stack alignItems="center" direction="column" sx={{ width: "inherit", px: "14px" }}>
           <Box
             sx={{
               mt: "10px",
