@@ -125,7 +125,7 @@ export type StackedBarStatsData = {
   studentStackedBarQuestionsStats: StudentStackedBarStatsObject;
   studentStackedBarDailyPracticeStats: StudentStackedBarStatsObject;
 };
-export type StudenBarsSubgroupLocation = {
+export type StudentBarsSubgroupLocation = {
   proposals: number;
   questions: number;
   totalDailyPractices: number;
