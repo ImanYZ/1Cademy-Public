@@ -7,6 +7,7 @@ type SidebarButtonsProps = {
   id: string;
   onClick: (e: any) => void;
   iconSrc: any;
+  icon?: ReactNode;
   text: string;
   toolbarIsOpen: boolean;
   variant?: "fill" | "text";
@@ -17,6 +18,7 @@ export const SidebarButton = ({
   id,
   onClick,
   iconSrc,
+  icon,
   text,
   toolbarIsOpen,
   variant = "text",
@@ -57,7 +59,7 @@ export const SidebarButton = ({
           fontSize: "19px",
         }}
       >
-        <NextImage width={"22px"} src={iconSrc} alt="search icon" />
+        {icon ? icon : <NextImage width={"22px"} src={iconSrc} alt="search icon" />}
         {toolbarIsOpen && (
           <Typography
             className="toolbarDescription"

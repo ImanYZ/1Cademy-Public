@@ -4,6 +4,7 @@ import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import KeyboardArrowLeftIcon from "@mui/icons-material/KeyboardArrowLeft";
 import MenuIcon from "@mui/icons-material/Menu";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
+import SearchIcon from "@mui/icons-material/Search";
 import {
   Box,
   Button,
@@ -51,12 +52,13 @@ import LogoExtended from "../../../../../public/full-logo.svg";
 import GraduatedIcon from "../../../../../public/graduated.svg";
 import NotebookIcon from "../../../../../public/notebooks.svg";
 import NotificationIcon from "../../../../../public/notification.svg";
-import SearchIcon from "../../../../../public/search.svg";
+// import SearchIcon from "../../../../../public/search.svg";
 import TagIcon from "../../../../../public/tag.svg";
 import { useHover } from "../../../../hooks/userHover";
 import { useWindowSize } from "../../../../hooks/useWindowSize";
 import { DispatchAuthActions, Reputation, ReputationSignal, User, UserTheme } from "../../../../knowledgeTypes";
 import { updateNotebookTag } from "../../../../lib/firestoreClient/notebooks.serverless";
+import { DESIGN_SYSTEM_COLORS } from "../../../../lib/theme/colors";
 import { NO_USER_IMAGE } from "../../../../lib/utils/constants";
 import { UsersStatus, UserTutorials } from "../../../../nodeBookTypes";
 import { OpenLeftSidebar } from "../../../../pages/notebook";
@@ -70,7 +72,13 @@ import MultipleChoiceBtn from "../MultipleChoiceBtn";
 import UsersStatusList from "../UsersStatusList";
 import { SidebarWrapper } from "./SidebarWrapper";
 
-const lBTypes = ["Weekly", "Monthly", "All Time", "Others Votes", "Others Monthly"];
+const LEADERBOARD_OPTIONS: { [key in UsersStatus]: string } = {
+  Weekly: "This Week Points",
+  Monthly: "This Month Points",
+  "All Time": "All Time Points",
+  "Others Votes": "Points by Others",
+  "Others Monthly": "Monthly Points by Others",
+};
 
 type MainSidebarProps = {
   notebookRef: any;
@@ -272,15 +280,15 @@ MainSidebarProps) => {
   const [leaderBoardType, setLeaderBoardType] = useState<UsersStatus>("Weekly");
 
   const changeLeaderBoard = useCallback(
-    async (lBType: any, username: string) => {
-      setLeaderBoardType(lBType);
+    async (type: UsersStatus, username: string) => {
+      setLeaderBoardType(type);
+      setLeaderboardTypeOpen(false);
 
       await addDoc(collection(db, "userLeaderboardLog"), {
         uname: username,
-        type: lBType,
+        type,
         createdAt: Timestamp.fromDate(new Date()),
       });
-      setLeaderboardTypeOpen(false);
     },
     [db]
   );
@@ -288,9 +296,10 @@ MainSidebarProps) => {
   const choices = useMemo((): { label: string; choose: any }[] => {
     if (!user) return [];
 
-    return lBTypes.map(lBType => {
-      return { label: lBType, choose: () => changeLeaderBoard(lBType, user.uname) };
-    });
+    return (Object.keys(LEADERBOARD_OPTIONS) as UsersStatus[]).map(key => ({
+      label: LEADERBOARD_OPTIONS[key],
+      choose: () => changeLeaderBoard(key, user.uname),
+    }));
   }, [changeLeaderBoard, user]);
 
   const setIsMenuOpen = useCallback(
@@ -532,7 +541,8 @@ MainSidebarProps) => {
 
             <SidebarButton
               id="toolbar-search-button"
-              iconSrc={SearchIcon}
+              iconSrc={""}
+              icon={<SearchIcon sx={{ color: DESIGN_SYSTEM_COLORS.baseWhite }} />}
               onClick={() => {
                 onOpenSidebar("SEARCHER_SIDEBAR", "Search");
                 setIsMenuOpen(false);
@@ -604,7 +614,14 @@ MainSidebarProps) => {
               text="Notebooks"
               toolbarIsOpen={displayLargeToolbar}
               rightOption={
-                <KeyboardArrowDownIcon sx={{ transition: ".3s", rotate: displayNotebooks ? "180deg" : "0deg" }} />
+                <KeyboardArrowDownIcon
+                  sx={{
+                    transition: ".3s",
+                    rotate: displayNotebooks ? "180deg" : "0deg",
+                    color: theme =>
+                      theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.gray200 : DESIGN_SYSTEM_COLORS.gray800,
+                  }}
+                />
               }
             />
 
@@ -697,15 +714,18 @@ MainSidebarProps) => {
         {displayLargeToolbar && (
           <Button
             sx={{
+              mt: "14px",
               p: "11px 16px",
               width: "100%",
-              height: "100%",
+              height: "40px",
               background: theme =>
-                theme.palette.mode === "dark" ? theme.palette.common.notebookG700 : theme.palette.common.gray100,
+                theme.palette.mode === "dark" ? theme.palette.common.notebookG900 : theme.palette.common.gray100,
               borderWidth: "1px",
               borderStyle: "solid",
               borderColor: theme =>
-                theme.palette.mode === "dark" ? theme.palette.common.notebookG800 : theme.palette.common.gray200,
+                theme.palette.mode === "dark" ? theme.palette.common.notebookG700 : theme.palette.common.gray200,
+              borderLeft: "none",
+              borderRight: "none",
               borderRadius: "0px",
               ":hover": {
                 background: theme => (theme.palette.mode === "dark" ? "#55402B" : "#FFE2D0"),
@@ -906,7 +926,7 @@ MainSidebarProps) => {
               display: window.innerWidth <= 500 ? "none" : "block",
               width: "50%",
               margin: "auto",
-              marginTop: "10px",
+              marginTop: "14px",
               marginBottom: "14px",
               borderTop: theme => (theme.palette.mode === "dark" ? "solid 1px #303134" : "solid 1px #EAECF0"),
             }}
@@ -928,11 +948,14 @@ MainSidebarProps) => {
           }}
         >
           {displayLargeToolbar && (
-            <Box sx={{ px: "16px", pt: "8px", width: "100%" }}>
+            <Box sx={{ px: "10px", mt: "8px", width: "100%" }}>
               <Button
                 sx={{
+                  height: "36px",
                   display: "flex",
                   justifyContent: "space-between",
+                  borderRadius: "16px",
+                  px: "14px",
                   ":hover": {
                     background: theme => (theme.palette.mode === "dark" ? "#55402B" : "#FFE2D0"),
                   },
@@ -949,9 +972,16 @@ MainSidebarProps) => {
                     color: theme => (theme.palette.mode === "dark" ? "#eaecf0" : "#475467"),
                   }}
                 >
-                  {leaderBoardType ? leaderBoardType : "Leaderboard"}
+                  {leaderBoardType ? LEADERBOARD_OPTIONS[leaderBoardType] : "Leaderboard"}
                 </Box>
-                <KeyboardArrowDownIcon sx={{ transition: ".3s", rotate: leaderboardTypeOpen ? "180deg" : "0deg" }} />
+                <KeyboardArrowDownIcon
+                  sx={{
+                    transition: ".3s",
+                    rotate: leaderboardTypeOpen ? "180deg" : "0deg",
+                    color: theme =>
+                      theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.gray200 : DESIGN_SYSTEM_COLORS.gray800,
+                  }}
+                />
               </Button>
               {leaderboardTypeOpen && (
                 <MultipleChoiceBtn
@@ -965,7 +995,7 @@ MainSidebarProps) => {
                   }}
                   choices={choices}
                   onClose={openLeaderboardTypes}
-                  comLeaderboardType={leaderBoardType ? leaderBoardType : "Leaderboard"}
+                  comLeaderboardType={leaderBoardType ? LEADERBOARD_OPTIONS[leaderBoardType] : "Leaderboard"}
                 />
               )}
             </Box>
@@ -996,7 +1026,6 @@ MainSidebarProps) => {
     isMenuOpen,
     ref,
     displayLargeToolbar,
-    theme.palette.mode,
     user,
     reputation?.totalPoints,
     reputation?.positives,

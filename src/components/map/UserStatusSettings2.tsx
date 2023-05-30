@@ -94,7 +94,7 @@ const UserStatusSettings = ({ onClick, smallVersion = true, sx, ...props }: User
         sx={{
           minWidth: "52px",
           width: "100%",
-          height: "52px",
+          // height: "52px",
           display: "flex",
           alignItems: "center",
           justifyContent: smallVersion ? "center" : "flex-start",
@@ -108,7 +108,11 @@ const UserStatusSettings = ({ onClick, smallVersion = true, sx, ...props }: User
         }}
       >
         <div className={(pointsGained ? "GainedPoint" : "") + (pointsLost ? "LostPoint" : "")}>
-          <OptimizedAvatar2 imageUrl={props.imageUrl} alt={`${props.user.fName} ${props.user.lName}`} size={40} />
+          <OptimizedAvatar2
+            imageUrl={props.imageUrl}
+            alt={`${props.user.fName} ${props.user.lName}`}
+            size={smallVersion ? 40 : 48}
+          />
         </div>
         {!smallVersion && (
           <Box className={"customUserStatusTotalPoints"}>
