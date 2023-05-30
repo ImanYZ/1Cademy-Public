@@ -4,7 +4,10 @@ import { UserTheme } from "src/knowledgeTypes";
 import { ISemesterStudent } from "src/types/ICourse";
 
 import { DESIGN_SYSTEM_COLORS } from "@/lib/theme/colors";
-import { StudenBarsSubgroupLocation, StudentStackedBarStatsObject } from "@/pages/instructors/dashboard";
+import {
+  StudentBarsSubgroupLocation as StudentBarsSubgroupLocation,
+  StudentStackedBarStatsObject,
+} from "@/pages/instructors/dashboard";
 
 import { StackedBarStats } from "../../instructorsTypes";
 
@@ -33,7 +36,7 @@ function drawChart(
   studentQuestionsRate: StudentStackedBarStatsObject | null,
   studentDailyPracticeRate: StudentStackedBarStatsObject | null,
   theme: UserTheme,
-  studentLocation?: StudenBarsSubgroupLocation,
+  studentLocation?: StudentBarsSubgroupLocation,
   mobile?: boolean,
   isQuestionRequired?: boolean,
   isProposalRequired?: boolean,
@@ -157,7 +160,7 @@ function drawChart(
 
   // .style("padding", "10px");
   const htmlTooltip = (users: ISemesterStudent[]) => {
-    console.log("STUDENTS", users);
+    // console.log("STUDENTS", users);
     const html = users.map(user => {
       return `<div class="students-tooltip-body ${theme === "Dark" ? "darkMode" : "lightMode"}">
       <img
@@ -346,10 +349,10 @@ type StackedBarProps = {
   maxAxisY: number;
   theme: UserTheme;
   mobile?: boolean;
-  studentLocation?: StudenBarsSubgroupLocation;
+  studentLocation?: StudentBarsSubgroupLocation;
   isQuestionRequired?: boolean;
   isProposalRequired?: boolean;
-  isDailyPracticeRequiered?: boolean;
+  isDailyPracticeRequired?: boolean;
 };
 export const PointsBarChart = ({
   data,
@@ -362,9 +365,8 @@ export const PointsBarChart = ({
   mobile,
   isQuestionRequired,
   isProposalRequired,
-  isDailyPracticeRequiered,
+  isDailyPracticeRequired: isDailyPracticeRequired,
 }: StackedBarProps) => {
-  console.log({ daaaata: data, studentLocation });
   const svg = useCallback(
     (svgRef: any) => {
       drawChart(
@@ -380,7 +382,7 @@ export const PointsBarChart = ({
         mobile,
         isQuestionRequired,
         isProposalRequired,
-        isDailyPracticeRequiered
+        isDailyPracticeRequired
       );
     },
     [
@@ -394,7 +396,7 @@ export const PointsBarChart = ({
       mobile,
       isQuestionRequired,
       isProposalRequired,
-      isDailyPracticeRequiered,
+      isDailyPracticeRequired,
     ]
   );
 
