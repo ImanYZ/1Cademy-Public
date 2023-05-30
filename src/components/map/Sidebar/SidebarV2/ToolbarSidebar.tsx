@@ -43,12 +43,12 @@ import { useTagsTreeView } from "@/hooks/useTagsTreeView";
 import { retrieveAuthenticatedUser } from "@/lib/firestoreClient/auth";
 import { Delete, Post } from "@/lib/mapApi";
 
+// import LogoDarkMode from "../../../../../public/LogoDarkMode.svg";
+import Logo from "../../../../../public/1Cademy-head.svg";
 import BookmarkIcon from "../../../../../public/bookmark.svg";
 import EditIcon from "../../../../../public/edit.svg";
 import LogoExtended from "../../../../../public/full-logo.svg";
 import GraduatedIcon from "../../../../../public/graduated.svg";
-import LogoDarkMode from "../../../../../public/LogoDarkMode.svg";
-import LogoLightMode from "../../../../../public/LogoLightMode.svg";
 import NotebookIcon from "../../../../../public/notebooks.svg";
 import NotificationIcon from "../../../../../public/notification.svg";
 import SearchIcon from "../../../../../public/search.svg";
@@ -487,17 +487,24 @@ MainSidebarProps) => {
             palette.mode === "dark" ? palette.common.notebookMainBlack : palette.common.gray50,
         }}
       >
-        <Stack alignItems="center" direction="column" spacing={"4px"} sx={{ width: "inherit", px: "14px" }}>
-          <Box sx={{ marginTop: "10px", marginBottom: "15px", display: "grid", placeItems: "center" }}>
+        <Stack
+          alignItems="center"
+          direction="column"
+          sx={{ width: "inherit", border: "solid 1px royalBlue", px: "14px" }}
+        >
+          <Box
+            sx={{
+              mt: "10px",
+              mb: "16px",
+              display: "grid",
+              placeItems: "center",
+              height: "64px",
+            }}
+          >
             {displayLargeToolbar ? (
-              <img src={LogoExtended.src} alt="1Logo" width={"100%"} height={"64px"} />
+              <img src={LogoExtended.src} alt="onecademy logo" width={"100%"} height={"64px"} />
             ) : (
-              <img
-                src={theme.palette.mode === "light" ? LogoLightMode.src : LogoDarkMode.src}
-                alt="1Logo"
-                width="61px"
-                height={"64px"}
-              />
+              <img src={Logo.src} alt="onecademy logo" width="52px" height={"52px"} />
             )}
           </Box>
 
@@ -513,170 +520,176 @@ MainSidebarProps) => {
             online={true} // TODO: get online state from useUserState useEffect
             onClick={onOpenUserSettingsSidebar}
             smallVersion={!displayLargeToolbar}
-            sx={{ width: { xs: "100%", sm: "auto" } }}
           />
 
-          {/* Searcher button */}
+          <Stack
+            alignItems="center"
+            direction="column"
+            spacing={"4px"}
+            sx={{ width: "inherit", px: "14px", mt: "14px" }}
+          >
+            {/* Searcher button */}
 
-          <SidebarButton
-            id="toolbar-search-button"
-            iconSrc={SearchIcon}
-            onClick={() => {
-              onOpenSidebar("SEARCHER_SIDEBAR", "Search");
-              setIsMenuOpen(false);
-            }}
-            text="Search"
-            toolbarIsOpen={displayLargeToolbar}
-            variant="fill"
-          />
-
-          {/* Notifications button */}
-
-          <SidebarButton
-            id="toolbar-notifications-button"
-            iconSrc={NotificationIcon}
-            onClick={() => {
-              onOpenSidebar("NOTIFICATION_SIDEBAR", "Notifications");
-              setIsMenuOpen(false);
-            }}
-            text="Notifications"
-            toolbarIsOpen={displayLargeToolbar}
-            rightOption={<CustomBadge value={uncheckedNotificationsNum} />}
-          />
-
-          {/* Bookmarks button */}
-          <SidebarButton
-            id="toolbar-bookmarks-button"
-            iconSrc={BookmarkIcon}
-            onClick={() => {
-              onOpenSidebar("BOOKMARKS_SIDEBAR", "Bookmarks");
-              setIsMenuOpen(false);
-            }}
-            text="Bookmarks"
-            toolbarIsOpen={displayLargeToolbar}
-            rightOption={<CustomBadge value={bookmarkUpdatesNum} />}
-          />
-
-          {/* Pending proposal sidebar */}
-          <SidebarButton
-            id="toolbar-pending-proposal-button"
-            iconSrc={EditIcon}
-            onClick={() => {
-              onOpenSidebar("PENDING_PROPOSALS", "PendingProposals");
-              setIsMenuOpen(false);
-            }}
-            text="Pending List"
-            toolbarIsOpen={displayLargeToolbar}
-            rightOption={<CustomBadge value={pendingProposalsNum} />}
-          />
-
-          {/* dashboard */}
-          {["INSTRUCTOR", "STUDENT"].includes(user.role ?? "") && (
             <SidebarButton
-              id="toolbar-dashboard-button"
-              iconSrc={GraduatedIcon}
-              onClick={onDisplayInstructorPage}
-              text="Dashboard"
+              id="toolbar-search-button"
+              iconSrc={SearchIcon}
+              onClick={() => {
+                onOpenSidebar("SEARCHER_SIDEBAR", "Search");
+                setIsMenuOpen(false);
+              }}
+              text="Search"
               toolbarIsOpen={displayLargeToolbar}
+              variant="fill"
             />
-          )}
 
-          {/* notebooks */}
-          <SidebarButton
-            id="toolbar-notebooks-button"
-            iconSrc={NotebookIcon}
-            onClick={e => {
-              e.preventDefault();
-              setDisplayNotebooks(!displayNotebooks);
-            }}
-            text="Notebooks"
-            toolbarIsOpen={displayLargeToolbar}
-            rightOption={
-              <KeyboardArrowDownIcon sx={{ transition: ".3s", rotate: displayNotebooks ? "180deg" : "0deg" }} />
-            }
-          />
+            {/* Notifications button */}
 
-          {displayNotebooks && displayLargeToolbar && (
-            <Box sx={{ width: "100%" }}>
-              <Stack className="scroll-styled" sx={{ width: "100%", maxHeight: "126px", overflowY: "auto" }}>
-                {notebooks.map((cur, idx) => (
-                  <Box
-                    key={idx}
-                    sx={{
-                      p: "10px 16px",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "space-between",
-                      cursor: "pointer",
-                    }}
-                  >
-                    {/* min-width is making ellipsis works correctly */}
+            <SidebarButton
+              id="toolbar-notifications-button"
+              iconSrc={NotificationIcon}
+              onClick={() => {
+                onOpenSidebar("NOTIFICATION_SIDEBAR", "Notifications");
+                setIsMenuOpen(false);
+              }}
+              text="Notifications"
+              toolbarIsOpen={displayLargeToolbar}
+              rightOption={<CustomBadge value={uncheckedNotificationsNum} />}
+            />
+
+            {/* Bookmarks button */}
+            <SidebarButton
+              id="toolbar-bookmarks-button"
+              iconSrc={BookmarkIcon}
+              onClick={() => {
+                onOpenSidebar("BOOKMARKS_SIDEBAR", "Bookmarks");
+                setIsMenuOpen(false);
+              }}
+              text="Bookmarks"
+              toolbarIsOpen={displayLargeToolbar}
+              rightOption={<CustomBadge value={bookmarkUpdatesNum} />}
+            />
+
+            {/* Pending proposal sidebar */}
+            <SidebarButton
+              id="toolbar-pending-proposal-button"
+              iconSrc={EditIcon}
+              onClick={() => {
+                onOpenSidebar("PENDING_PROPOSALS", "PendingProposals");
+                setIsMenuOpen(false);
+              }}
+              text="Pending List"
+              toolbarIsOpen={displayLargeToolbar}
+              rightOption={<CustomBadge value={pendingProposalsNum} />}
+            />
+
+            {/* dashboard */}
+            {["INSTRUCTOR", "STUDENT"].includes(user.role ?? "") && (
+              <SidebarButton
+                id="toolbar-dashboard-button"
+                iconSrc={GraduatedIcon}
+                onClick={onDisplayInstructorPage}
+                text="Dashboard"
+                toolbarIsOpen={displayLargeToolbar}
+              />
+            )}
+
+            {/* notebooks */}
+            <SidebarButton
+              id="toolbar-notebooks-button"
+              iconSrc={NotebookIcon}
+              onClick={e => {
+                e.preventDefault();
+                setDisplayNotebooks(!displayNotebooks);
+              }}
+              text="Notebooks"
+              toolbarIsOpen={displayLargeToolbar}
+              rightOption={
+                <KeyboardArrowDownIcon sx={{ transition: ".3s", rotate: displayNotebooks ? "180deg" : "0deg" }} />
+              }
+            />
+
+            {displayNotebooks && displayLargeToolbar && (
+              <Box sx={{ width: "100%" }}>
+                <Stack className="scroll-styled" sx={{ width: "100%", maxHeight: "126px", overflowY: "auto" }}>
+                  {notebooks.map((cur, idx) => (
                     <Box
-                      onClick={() => onChangeNotebook(cur.id)}
-                      sx={{ minWidth: "0px", display: "flex", alignItems: "center" }}
-                    >
-                      <Box sx={{ minWidth: "0px", display: "flex", alignItems: "center" }}>
-                        <Box
-                          sx={{
-                            background: selectedNotebook === cur.id ? "#12B76A" : "none",
-                            minWidth: "10px",
-                            width: "10px",
-                            height: "10px",
-                            borderRadius: "50%",
-                            mr: "10px",
-                          }}
-                        />
-                        <Typography
-                          sx={{
-                            overflow: "hidden",
-                            textOverflow: "ellipsis",
-                            whiteSpace: "nowrap",
-                          }}
-                        >
-                          {cur.title}
-                        </Typography>
-                      </Box>
-                    </Box>
-                    <IconButton onClick={() => setEditableNotebook(cur)} sx={{ p: "0px" }}>
-                      <MoreVertIcon />
-                    </IconButton>
-                  </Box>
-                ))}
-              </Stack>
-
-              <Divider ref={createNotebookButtonRef} />
-
-              <Box sx={{ p: "10px 16px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                {isCreatingNotebook ? (
-                  <Box>
-                    <Typography>Creating...</Typography>
-                  </Box>
-                ) : (
-                  <Box onClick={onCreateNotebook} sx={{ display: "flex", alignItems: "center", cursor: "pointer" }}>
-                    <Box
+                      key={idx}
                       sx={{
-                        p: "0px",
-                        borderRadius: "5px",
-                        backgroundColor: ({ palette }) => (palette.mode === "dark" ? "#55402B66" : "#E7724033"),
-                        display: "grid",
-                        placeItems: "center",
+                        p: "10px 16px",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "space-between",
+                        cursor: "pointer",
                       }}
                     >
-                      <AddIcon
+                      {/* min-width is making ellipsis works correctly */}
+                      <Box
+                        onClick={() => onChangeNotebook(cur.id)}
+                        sx={{ minWidth: "0px", display: "flex", alignItems: "center" }}
+                      >
+                        <Box sx={{ minWidth: "0px", display: "flex", alignItems: "center" }}>
+                          <Box
+                            sx={{
+                              background: selectedNotebook === cur.id ? "#12B76A" : "none",
+                              minWidth: "10px",
+                              width: "10px",
+                              height: "10px",
+                              borderRadius: "50%",
+                              mr: "10px",
+                            }}
+                          />
+                          <Typography
+                            sx={{
+                              overflow: "hidden",
+                              textOverflow: "ellipsis",
+                              whiteSpace: "nowrap",
+                            }}
+                          >
+                            {cur.title}
+                          </Typography>
+                        </Box>
+                      </Box>
+                      <IconButton onClick={() => setEditableNotebook(cur)} sx={{ p: "0px" }}>
+                        <MoreVertIcon />
+                      </IconButton>
+                    </Box>
+                  ))}
+                </Stack>
+
+                <Divider ref={createNotebookButtonRef} />
+
+                <Box sx={{ p: "10px 16px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                  {isCreatingNotebook ? (
+                    <Box>
+                      <Typography>Creating...</Typography>
+                    </Box>
+                  ) : (
+                    <Box onClick={onCreateNotebook} sx={{ display: "flex", alignItems: "center", cursor: "pointer" }}>
+                      <Box
                         sx={{
-                          color: ({ palette }) =>
-                            palette.mode === "dark" ? palette.common.primary800 : palette.common.orange400,
+                          p: "0px",
+                          borderRadius: "5px",
+                          backgroundColor: ({ palette }) => (palette.mode === "dark" ? "#55402B66" : "#E7724033"),
+                          display: "grid",
+                          placeItems: "center",
                         }}
-                      />
+                      >
+                        <AddIcon
+                          sx={{
+                            color: ({ palette }) =>
+                              palette.mode === "dark" ? palette.common.primary800 : palette.common.orange400,
+                          }}
+                        />
+                      </Box>
+                      <Box sx={{ display: "flex", alignItems: "center" }}>
+                        <Typography sx={{ ml: "20px" }}>Create New</Typography>
+                      </Box>
                     </Box>
-                    <Box sx={{ display: "flex", alignItems: "center" }}>
-                      <Typography sx={{ ml: "20px" }}>Create New</Typography>
-                    </Box>
-                  </Box>
-                )}
+                  )}
+                </Box>
               </Box>
-            </Box>
-          )}
+            )}
+          </Stack>
         </Stack>
 
         {/* --------------- */}
