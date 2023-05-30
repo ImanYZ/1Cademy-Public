@@ -29,7 +29,7 @@ type DashboardToolbarProps = {
   onClose: () => void;
 };
 
-export const DashboradToolbar = ({
+export const DashboardToolbar = ({
   user,
   semesters,
   courses,

@@ -25,6 +25,7 @@ type NodeQuestionProps = {
   setSelectedIdxAnswer: (newValue: number) => void;
   submitAnswer: boolean;
   narratedAnswerIdx: number;
+  onSaveLog: (action: "open-leaderboard" | "open-user-status" | "open-notebook" | "display-tags") => void;
 };
 
 const NodeQuestion = ({
@@ -33,6 +34,7 @@ const NodeQuestion = ({
   setSelectedIdxAnswer,
   submitAnswer,
   narratedAnswerIdx,
+  onSaveLog,
 }: NodeQuestionProps) => {
   const [displayTags, setDisplayTags] = useState(false);
   const [nodeCopy, setNodeCopy] = useState<SimpleQuestionNode>(node);
@@ -289,7 +291,12 @@ const NodeQuestion = ({
           <Typography>{nodeCopy.tags[nodeCopy.tags.length - 1] ?? ""} </Typography>
           {otherTags.length > 0 && (
             <Typography
-              onClick={() => setDisplayTags(true)}
+              onClick={() => {
+                setDisplayTags(pre => {
+                  if (!pre) onSaveLog("display-tags");
+                  return true;
+                });
+              }}
               sx={{ ml: "8px", color: theme => theme.palette.common.primary800, cursor: "pointer" }}
             >
               + {otherTags.length} more tags
@@ -400,6 +407,7 @@ type PracticeQuestionProps = {
   narratedAnswerIdx: number;
   setDisplayRightSidebar: (newValue: OpenRightSidebar) => void;
   loading: boolean;
+  onSaveLog: (action: "open-leaderboard" | "open-user-status" | "open-notebook" | "display-tags") => void;
   // setLoading: (newValue: boolean) => void;
 };
 export const PracticeQuestion = ({
@@ -419,6 +427,7 @@ export const PracticeQuestion = ({
   narratedAnswerIdx,
   setDisplayRightSidebar,
   loading,
+  onSaveLog,
 }: // setLoading,
 PracticeQuestionProps) => {
   console.log("------>", { loading });
@@ -521,12 +530,16 @@ PracticeQuestionProps) => {
               setSelectedIdxAnswer={onSelectAnswer}
               submitAnswer={submitAnswer}
               narratedAnswerIdx={narratedAnswerIdx}
+              onSaveLog={onSaveLog}
             />
 
             <Box sx={{ display: "flex", justifyContent: "space-between", mt: "32px" }}>
               <Button
                 variant="contained"
-                onClick={() => onViewNodeOnNodeBook(question.id)}
+                onClick={() => {
+                  onViewNodeOnNodeBook(question.id);
+                  onSaveLog("open-notebook");
+                }}
                 sx={{
                   borderRadius: "26px",
                   minWidth: "180px",
@@ -576,7 +589,10 @@ PracticeQuestionProps) => {
           <>
             {/* options */}
             <IconButton
-              onClick={() => setDisplayRightSidebar("USER_STATUS")}
+              onClick={() => {
+                onSaveLog("open-user-status");
+                setDisplayRightSidebar("USER_STATUS");
+              }}
               sx={{
                 width: "56px",
                 height: "56px",
@@ -596,7 +612,10 @@ PracticeQuestionProps) => {
             </IconButton>
 
             <IconButton
-              onClick={() => setDisplayRightSidebar("LEADERBOARD")}
+              onClick={() => {
+                onSaveLog("open-leaderboard");
+                setDisplayRightSidebar("LEADERBOARD");
+              }}
               sx={{
                 width: "56px",
                 height: "56px",

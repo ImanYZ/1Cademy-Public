@@ -9,8 +9,8 @@ import React, { useEffect, useMemo, useState } from "react";
 
 import { getAvatarName } from "@/lib/utils/Map.utils";
 
-import { getSemesterById } from "../../client/serveless/semesters.serverless";
-import { getSemesterStudentVoteStatsByIdAndStudent } from "../../client/serveless/semesterStudentVoteStat.serverless";
+import { getSemesterById } from "../../client/firestore/semesters.firestore";
+import { getSemesterStudentVoteStatsByIdAndStudent } from "../../client/firestore/semesterStudentVoteStat.firestores";
 import { User } from "../../knowledgeTypes";
 import { DESIGN_SYSTEM_COLORS } from "../../lib/theme/colors";
 import {
@@ -21,7 +21,11 @@ import {
   moveDateByDays,
   SHORT_MONTH_NAMES,
 } from "../../lib/utils/date.utils";
-import { calculateDailyStreak, CalculateDailyStreakOutput } from "../../lib/utils/userStatus.utils";
+import {
+  calculateDailyStreak,
+  CalculateDailyStreakOutput,
+  differentBetweenDaysWithHyphens,
+} from "../../lib/utils/userStatus.utils";
 import { ISemester, ISemesterStudentVoteStat, ISemesterStudentVoteStatDay } from "../../types/ICourse";
 import { PointsType } from "../PointsType";
 
@@ -245,11 +249,25 @@ export const UserStatus = ({
                   display: "grid",
                   placeItems: "center",
                   borderRadius: "50%",
-                  border: theme => `solid 2px ${getDailyCircleColor(theme.palette.mode, daysValue[keyDate])}`,
-                  color: theme => getDailyCircleColor(theme.palette.mode, daysValue[keyDate]),
+                  border: theme =>
+                    `solid 2px ${getDailyCircleColor(
+                      theme.palette.mode,
+                      differentBetweenDaysWithHyphens(getDateYYMMDDWithHyphens(), keyDate),
+                      daysValue[keyDate]
+                    )}`,
+                  color: theme =>
+                    getDailyCircleColor(
+                      theme.palette.mode,
+                      differentBetweenDaysWithHyphens(getDateYYMMDDWithHyphens(), keyDate),
+                      daysValue[keyDate]
+                    ),
                   boxShadow: theme =>
                     getDateYYMMDDWithHyphens() === keyDate
-                      ? `0 0 4px 2px ${getDailyCircleColor(theme.palette.mode, daysValue[keyDate])}`
+                      ? `0 0 4px 2px ${getDailyCircleColor(
+                          theme.palette.mode,
+                          differentBetweenDaysWithHyphens(getDateYYMMDDWithHyphens(), keyDate),
+                          daysValue[keyDate]
+                        )}`
                       : undefined,
                 }}
               >
@@ -397,15 +415,20 @@ const getDaysInSemester = (
 ): PracticeDayInfo => {
   const endDate = semester.dailyPractice.endDate.toDate();
   const startDate = semester.dailyPractice.startDate.toDate();
-  const totalPracticeDays = differentBetweenDays(endDate, startDate);
+  const totalPracticeDays = Math.abs(differentBetweenDays(endDate, startDate));
   const successPracticeDays = semesterStudentStats.days.filter(
     cur => cur.correctPractices >= numQuestionsPerDay
   ).length;
   return { successPracticeDays, totalPracticeDays };
 };
 
-const getDailyCircleColor = (theme: PaletteMode, dailyPoint?: { value: number; gotPoint: boolean }) => {
-  if (!dailyPoint) return theme === "dark" ? DESIGN_SYSTEM_COLORS.primary800 : DESIGN_SYSTEM_COLORS.primary600;
-  if (dailyPoint.gotPoint) return DESIGN_SYSTEM_COLORS.success500;
+const getDailyCircleColor = (
+  theme: PaletteMode,
+  daysUntilToday: number, // currentDate - date
+  dailyPoint?: { value: number; gotPoint: boolean }
+) => {
+  if (daysUntilToday === 0) return theme === "dark" ? DESIGN_SYSTEM_COLORS.primary800 : DESIGN_SYSTEM_COLORS.primary600;
+  if (daysUntilToday < 0) return theme === "dark" ? DESIGN_SYSTEM_COLORS.notebookG200 : DESIGN_SYSTEM_COLORS.gray400;
+  if (dailyPoint?.gotPoint) return DESIGN_SYSTEM_COLORS.success500;
   return DESIGN_SYSTEM_COLORS.notebookScarlet;
 };

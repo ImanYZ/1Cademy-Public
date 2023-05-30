@@ -297,7 +297,7 @@ const UsersStatusList = ({ nodeBookDispatch, isSmaller = true, disabled = false,
   }, [db, reputationsOthersLoaded, user]);
 
   const loadReputationPoints = useCallback(
-    (reputationsDict: any, usersStatus: string) => {
+    (reputationsDict: any, usersStatus: UsersStatus) => {
       const usersListTmp = [];
       for (let uname in reputationsDict) {
         if (!usersDict.hasOwnProperty(uname)) {

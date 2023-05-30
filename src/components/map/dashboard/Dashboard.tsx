@@ -30,7 +30,7 @@ import {
   getBubbleStats,
   getMaxMinVoxPlotData,
   groupStudentPointsDayChapter,
-  StudenBarsSubgroupLocation,
+  StudentBarsSubgroupLocation,
   StudentStackedBarStatsObject,
   TrendStats,
 } from "../../../pages/instructors/dashboard";
@@ -45,25 +45,32 @@ import { BoxChart } from "../../chats/BoxChart";
 import { BubbleChart } from "../../chats/BubbleChart";
 import { Legend } from "../../chats/Legend";
 import { PointsBarChart } from "../../chats/PointsBarChart";
-import { SankeyChart } from "../../chats/SankeyChart";
+import { SankeyChart, SankeyData } from "../../chats/SankeyChart";
 import { TrendPlot } from "../../chats/TrendPlot";
 import { GeneralPlotStats } from "../../instructors/dashboard/GeneralPlotStats";
 import { NoDataMessage } from "../../instructors/NoDataMessage";
 import { BoxPlotStatsSkeleton } from "../../instructors/skeletons/BoxPlotStatsSkeleton";
 import { BubblePlotStatsSkeleton } from "../../instructors/skeletons/BubblePlotStatsSkeleton";
 import { GeneralPlotStatsSkeleton } from "../../instructors/skeletons/GeneralPlotStatsSkeleton";
+import { SankeyChartSkeleton } from "../../instructors/skeletons/SankeyChartSkeleton";
 import { StackedBarPlotStatsSkeleton } from "../../instructors/skeletons/StackedBarPlotStatsSkeleton";
 import { StudentDailyPlotStatsSkeleton } from "../../instructors/skeletons/StudentDailyPlotStatsSkeleton";
 import Leaderboard from "../../practiceTool/Leaderboard";
 import { UserStatus } from "../../practiceTool/UserStatus";
 
+type SemesterStudentSankeys = {
+  createdAt: any;
+  deleted: boolean;
+  interactions: { downVotes: number; uname: string; upVotes: number }[];
+  tagId: string;
+  uname: string;
+  updatedAt: any;
+};
+
 type DashboardProps = { user: User; currentSemester: ICourseTag };
 
 export const Dashboard = ({ user, currentSemester }: DashboardProps) => {
   const theme = useTheme();
-  const {
-    palette: { mode },
-  } = theme;
   const db = getFirestore();
 
   const { width: windowWidth } = useWindowSize();
@@ -76,12 +83,12 @@ export const Dashboard = ({ user, currentSemester }: DashboardProps) => {
   const [semesterStats, setSemesterStats] = useState<GeneralSemesterStudentsStats | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [thereIsData, setThereIsData] = useState<boolean>(true);
-  const [stackBarWidth, setstackBarWidth] = useState(0);
+  const [stackBarWidth, setStackBarWidth] = useState(0);
   const [studentsCounter, setStudentsCounter] = useState<number>(0);
   const [stackedBar, setStackedBar] = useState<StackedBarStats[]>([]);
   const [proposalsStudents, setProposalsStudents] = useState<StudentStackedBarStatsObject | null>(null);
   const [questionsStudents, setQuestionsStudents] = useState<StudentStackedBarStatsObject | null>(null);
-  const [dailyPraticeStudents, setDailyPracitceStudents] = useState<StudentStackedBarStatsObject | null>(null);
+  const [dailyPracticeStudents, setDailyPracticeStudents] = useState<StudentStackedBarStatsObject | null>(null);
   const [bubble, setBubble] = useState<BubbleStats[]>([]);
   const [bubbleAxis, setBubbleAxis] = useState<BubbleAxis>({ maxAxisX: 0, maxAxisY: 0, minAxisX: 0, minAxisY: 0 });
   const [semesterConfig, setSemesterConfig] = useState<ISemester | null>(null);
@@ -94,7 +101,7 @@ export const Dashboard = ({ user, currentSemester }: DashboardProps) => {
 
   const [studentVoteStat, setStudentVoteStat] = useState<SemesterStudentVoteStat | null>(null);
   const [semesterStudentStats, setSemesterStudentStats] = useState<GeneralSemesterStudentsStats | null>(null);
-  const [studentLocation, setStudentLocation] = useState<StudenBarsSubgroupLocation>({
+  const [studentLocation, setStudentLocation] = useState<StudentBarsSubgroupLocation>({
     proposals: 0,
     questions: 0,
     totalDailyPractices: 0,
@@ -112,8 +119,7 @@ export const Dashboard = ({ user, currentSemester }: DashboardProps) => {
     votesPoints: { data: {}, min: 0, max: 1000 },
   });
 
-  // TODO: show sankey data only if user is intructor
-  const [sankeyData, setSankeyData] = useState<any[]>([]);
+  const [sankeyData, setSankeyData] = useState<SankeyData[]>([]);
 
   const [trendStats, setTrendStats] = useState<TrendStats>({
     childProposals: [],
@@ -144,12 +150,12 @@ export const Dashboard = ({ user, currentSemester }: DashboardProps) => {
 
   const stackBarWrapperRef = useCallback((element: HTMLDivElement) => {
     if (!element) return;
-    setstackBarWidth(element.clientWidth);
+    setStackBarWidth(element.clientWidth);
   }, []);
 
-  const handleTabChange = (event: React.SyntheticEvent, newtrendStat: keyof TrendStats) => {
+  const handleTabChange = (event: React.SyntheticEvent, newTrendStat: keyof TrendStats) => {
     event.preventDefault();
-    setTrendStat(newtrendStat);
+    setTrendStat(newTrendStat);
   };
 
   // ---- ---- ---- ----
@@ -157,13 +163,12 @@ export const Dashboard = ({ user, currentSemester }: DashboardProps) => {
   // ---- ---- ---- ----
 
   // setup sankey snapshot
+
   useEffect(() => {
-    if (!user) return;
+    if (user?.role !== "INSTRUCTOR") return; // this chart is only visible to instructors
     if (!currentSemester || !currentSemester.tagId) return;
     if (!students || !students.length) return;
-    const studentNameByUname: {
-      [uname: string]: string;
-    } = {};
+    const studentNameByUname: { [uname: string]: string } = {};
     for (const student of students) {
       studentNameByUname[student.uname] = `${student.fName}|${student.lName}`;
     }
@@ -177,20 +182,18 @@ export const Dashboard = ({ user, currentSemester }: DashboardProps) => {
     let _sankeyData: any[] = [];
     const snapShotFunc = onSnapshot(q, async snapshot => {
       const docChanges = snapshot.docChanges();
-      if (!docChanges.length) {
-        setSankeyData([]);
-        return;
-      }
+      if (!docChanges.length) return;
+
       for (let change of docChanges) {
-        const _semesterStudentSankey = change.doc.data();
+        const _semesterStudentSankey: SemesterStudentSankeys = change.doc.data() as SemesterStudentSankeys;
         if (change.type === "added") {
-          for (const intraction of _semesterStudentSankey.intractions) {
+          for (const interaction of _semesterStudentSankey.interactions) {
             _sankeyData.push({
               source: studentNameByUname[_semesterStudentSankey.uname],
-              target: studentNameByUname[intraction.uname],
-              upVotes: intraction.upVote,
-              downVotes: intraction.downVote,
-              value: intraction.upVote + intraction.downVote,
+              target: studentNameByUname[interaction.uname],
+              upVotes: interaction.upVotes,
+              downVotes: interaction.downVotes,
+              value: interaction.upVotes + interaction.downVotes,
             });
           }
         } else if (change.type === "modified") {
@@ -198,13 +201,13 @@ export const Dashboard = ({ user, currentSemester }: DashboardProps) => {
             sankey => sankey.source !== studentNameByUname[_semesterStudentSankey.uname]
           );
           let newSankeyData: any[] = [];
-          for (const intraction of _semesterStudentSankey.intractions) {
+          for (const interaction of _semesterStudentSankey.interactions) {
             newSankeyData.push({
               source: studentNameByUname[_semesterStudentSankey.uname],
-              target: studentNameByUname[intraction.uname],
-              upVotes: intraction.upVote,
-              downVotes: intraction.downVote,
-              value: intraction.upVote + intraction.downVote,
+              target: studentNameByUname[interaction.uname],
+              upVotes: interaction.upVotes,
+              downVotes: interaction.downVotes,
+              value: interaction.upVotes + interaction.downVotes,
             });
           }
           _sankeyData = [...filterSankeyData, ...newSankeyData];
@@ -214,6 +217,7 @@ export const Dashboard = ({ user, currentSemester }: DashboardProps) => {
           );
         }
       }
+      console.log({ _sankeyData });
       setSankeyData([..._sankeyData]);
     });
     return () => snapShotFunc();
@@ -309,7 +313,7 @@ export const Dashboard = ({ user, currentSemester }: DashboardProps) => {
     return () => snapShotFunc();
   }, [semesterConfig, currentSemester, db, user]);
 
-  // update data in buble
+  // update data in bubble
   useEffect(() => {
     if (!semesterStudentsVoteStats.length) return setBubble([]);
 
@@ -346,7 +350,7 @@ export const Dashboard = ({ user, currentSemester }: DashboardProps) => {
     setStackedBar(stackedBarStats);
     setProposalsStudents(studentStackedBarProposalsStats);
     setQuestionsStudents(studentStackedBarQuestionsStats);
-    setDailyPracitceStudents(studentStackedBarDailyPracticeStats);
+    setDailyPracticeStudents(studentStackedBarDailyPracticeStats);
   }, [maxDailyPractices, maxProposalsPoints, maxQuestionsPoints, semesterStudentsVoteStats, students, user.role]);
 
   // set up semester snapshot to modify state
@@ -670,8 +674,8 @@ export const Dashboard = ({ user, currentSemester }: DashboardProps) => {
           <Paper
             sx={{
               p: { sm: "10px", md: "16px" },
-              backgroundColor:
-                mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookMainBlack : DESIGN_SYSTEM_COLORS.baseWhite,
+              backgroundColor: theme =>
+                theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookMainBlack : DESIGN_SYSTEM_COLORS.baseWhite,
             }}
           >
             <UserStatus
@@ -685,8 +689,8 @@ export const Dashboard = ({ user, currentSemester }: DashboardProps) => {
           <Paper
             sx={{
               p: { sm: "10px", md: "16px" },
-              backgroundColor:
-                mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookMainBlack : DESIGN_SYSTEM_COLORS.baseWhite,
+              backgroundColor: theme =>
+                theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookMainBlack : DESIGN_SYSTEM_COLORS.baseWhite,
             }}
           >
             <Leaderboard semesterId={currentSemester.tagId} sxBody={{ maxHeight: "435px" }} />
@@ -707,7 +711,8 @@ export const Dashboard = ({ user, currentSemester }: DashboardProps) => {
             display: "grid",
             placeItems: "center",
             p: { sm: "10px", md: "24px" },
-            backgroundColor: mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookMainBlack : DESIGN_SYSTEM_COLORS.gray50,
+            backgroundColor: theme =>
+              theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookMainBlack : DESIGN_SYSTEM_COLORS.gray50,
           }}
         >
           {isLoading && <GeneralPlotStatsSkeleton />}
@@ -727,7 +732,8 @@ export const Dashboard = ({ user, currentSemester }: DashboardProps) => {
             display: "flex",
             flexDirection: "column",
             justifyContent: "center",
-            backgroundColor: mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookMainBlack : DESIGN_SYSTEM_COLORS.gray50,
+            backgroundColor: theme =>
+              theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookMainBlack : DESIGN_SYSTEM_COLORS.gray50,
           }}
         >
           {isLoading && <StackedBarPlotStatsSkeleton />}
@@ -755,13 +761,13 @@ export const Dashboard = ({ user, currentSemester }: DashboardProps) => {
                   data={stackedBar}
                   proposalsStudents={user.role === "INSTRUCTOR" ? proposalsStudents : null}
                   questionsStudents={user.role === "INSTRUCTOR" ? questionsStudents : null}
-                  dailyPracticeStudents={user.role === "INSTRUCTOR" ? dailyPraticeStudents : null}
+                  dailyPracticeStudents={user.role === "INSTRUCTOR" ? dailyPracticeStudents : null}
                   maxAxisY={studentsCounter}
                   theme={theme.palette.mode === "dark" ? "Dark" : "Light"}
                   mobile={isMovil}
                   isQuestionRequired={semesterConfig?.isQuestionProposalRequired}
                   isProposalRequired={semesterConfig?.isProposalRequired}
-                  isDailyPracticeRequiered={true}
+                  isDailyPracticeRequired={true}
                   studentLocation={studentLocation}
                 />
               </Box>
@@ -788,7 +794,8 @@ export const Dashboard = ({ user, currentSemester }: DashboardProps) => {
             // className="test"
             sx={{
               p: isMovil ? "10px" : "16px",
-              backgroundColor: mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookMainBlack : DESIGN_SYSTEM_COLORS.gray50,
+              backgroundColor: theme =>
+                theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookMainBlack : DESIGN_SYSTEM_COLORS.gray50,
             }}
           >
             {isLoading && <BubblePlotStatsSkeleton />}
@@ -869,7 +876,8 @@ export const Dashboard = ({ user, currentSemester }: DashboardProps) => {
           justifyContent: "center",
           alignItems: "center",
           p: isMovil ? "10px" : "16px",
-          backgroundColor: mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookMainBlack : DESIGN_SYSTEM_COLORS.gray50,
+          backgroundColor: theme =>
+            theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookMainBlack : DESIGN_SYSTEM_COLORS.gray50,
         }}
       >
         <Box
@@ -1040,34 +1048,24 @@ export const Dashboard = ({ user, currentSemester }: DashboardProps) => {
         {!isMovil && !isLoading && <BoxLegend role={user.role} />}
       </Paper>
       {/* Sankey Chart */}
-      {sankeyData.length > 0 && (
+      {user.role === "INSTRUCTOR" && (
         <Paper
           sx={{
-            display: "flex",
-            flexDirection: "column",
-            justifyContent: "center",
-            alignItems: "center",
             p: isMovil ? "10px" : "16px",
-            backgroundColor: mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookMainBlack : DESIGN_SYSTEM_COLORS.gray50,
+            backgroundColor: theme =>
+              theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookMainBlack : DESIGN_SYSTEM_COLORS.gray50,
           }}
         >
+          <Typography sx={{ fontSize: "19px" }}>Collaborations</Typography>
+          {isLoading && <SankeyChartSkeleton />}
           {!isLoading && (
-            <>
-              <Box
-                sx={{
-                  paddingLeft: "10px",
-                  width: "100%",
-                  textAlign: "left",
-                }}
-              >
-                {"Collaborations"}
-              </Box>
+            <Box sx={{ width: "100%", display: "flex", justifyContent: "center" }}>
               <SankeyChart
                 innerWidth={GRID_WIDTH}
                 labelCounts={parseInt(String(students?.length))}
                 sankeyData={sankeyData}
               />
-            </>
+            </Box>
           )}
         </Paper>
       )}
@@ -1122,7 +1120,8 @@ export const Dashboard = ({ user, currentSemester }: DashboardProps) => {
                 display: trendStats[trendStat].length > 0 ? "flex" : "none",
                 alignItems: "center",
                 justifyContent: "center",
-                backgroundColor: mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookMainBlack : DESIGN_SYSTEM_COLORS.gray50,
+                backgroundColor: theme =>
+                  theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookMainBlack : DESIGN_SYSTEM_COLORS.gray50,
                 borderRadius: "8px",
               }}
             >
@@ -1137,7 +1136,7 @@ export const Dashboard = ({ user, currentSemester }: DashboardProps) => {
                 labelX={"Day"}
                 scaleY={"linear"}
                 labelY={"# of edit Proposals"}
-                theme={mode === "dark" ? "Dark" : "Light"}
+                theme={theme.palette.mode === "dark" ? "Dark" : "Light"}
                 x="date"
                 y="num"
                 trendData={trendStats[trendStat]}
