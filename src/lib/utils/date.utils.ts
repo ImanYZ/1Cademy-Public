@@ -55,7 +55,7 @@ export const getWeekNumber = (currentDate = new Date()) => {
 };
 
 export const differentBetweenDays = (date1: Date, date2: Date) => {
-  const timeDiff = Math.abs(date2.getTime() - date1.getTime());
+  const timeDiff = date1.getTime() - date2.getTime();
   const diffDays = Math.ceil(timeDiff / (1000 * 3600 * 24));
   return diffDays;
 };
