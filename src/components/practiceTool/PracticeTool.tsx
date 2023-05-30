@@ -211,8 +211,10 @@ const PracticeTool = forwardRef<PracticeToolRef, PracticeToolProps>((props, ref)
         console.log({ questionsLeft });
         // setPracticeInfo(prev => ({ ...prev, questionsLeft }));
 
-        const completedDays = differentBetweenDays(new Date(), semesterConfig.startDate.toDate());
-        const totalDays = differentBetweenDays(semesterConfig.endDate.toDate(), semesterConfig.startDate.toDate());
+        const completedDays = Math.abs(differentBetweenDays(new Date(), semesterConfig.startDate.toDate()));
+        const totalDays = Math.abs(
+          differentBetweenDays(semesterConfig.endDate.toDate(), semesterConfig.startDate.toDate())
+        );
         const remainingDays = totalDays - completedDays;
         setPracticeInfo(prev => ({
           ...prev,
