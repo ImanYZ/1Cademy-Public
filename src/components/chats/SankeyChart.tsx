@@ -4,9 +4,17 @@ import * as D3Collection from "d3-collection";
 import { useEffect, useRef } from "react";
 import Sankey from "src/lib/sankey";
 
+export type SankeyData = {
+  source: string;
+  target: string;
+  upVotes: number;
+  downVotes: number;
+  value: number;
+};
+
 type ISankeyChart = {
   labelCounts: number;
-  sankeyData: any[];
+  sankeyData: SankeyData[];
   innerWidth: number;
 };
 
