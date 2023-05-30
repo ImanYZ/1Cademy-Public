@@ -12,8 +12,8 @@ import React, {
 } from "react";
 import { useRive, useStateMachineInput } from "rive-react";
 
-import { addPracticeToolLog } from "../../client/firestore/logs/practiceTool.firestore";
 import { getNode } from "../../client/firestore/nodes.firestore";
+import { addPracticeToolLog } from "../../client/firestore/practiceToolLog.firestore";
 import { detectElements } from "../../hooks/detectElements";
 import { SimpleQuestionNode } from "../../instructorsTypes";
 import { KnowledgeChoice } from "../../knowledgeTypes";

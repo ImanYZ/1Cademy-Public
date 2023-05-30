@@ -14,7 +14,7 @@ import { VoiceAssistant } from "src/nodeBookTypes";
 import { ISemester } from "src/types/ICourse";
 import { ISemesterStudentVoteStat } from "src/types/ICourse";
 
-import { addPracticeToolLog } from "../../client/firestore/logs/practiceTool.firestore";
+import { addPracticeToolLog } from "../../client/firestore/practiceToolLog.firestore";
 import { getSemesterById } from "../../client/firestore/semesters.firestore";
 import { CourseTag, SimpleQuestionNode } from "../../instructorsTypes";
 import { User } from "../../knowledgeTypes";
