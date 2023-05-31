@@ -344,7 +344,7 @@ export const createOrRestoreStatDocs = async (
   } else {
     const semesterStudentSankeyRef = db.collection("semesterStudentSankeys").doc();
     batch.set(semesterStudentSankeyRef, {
-      intractions: [],
+      interactions: [],
       tagId: semesterId,
       uname: studentUname,
       deleted: false,
@@ -847,18 +847,20 @@ export const updateStatsOnVersionVote = async ({
 
       // if both are students then we can consider updating sankey
       if (!isVoterInst && !isProposerInst) {
-        let interactionIdx = studentSankeys[voter].intractions.findIndex(interaction => interaction.uname === proposer);
+        let interactionIdx = studentSankeys[voter].interactions.findIndex(
+          interaction => interaction.uname === proposer
+        );
         if (interactionIdx === -1) {
-          studentSankeys[voter].intractions.push({
+          studentSankeys[voter].interactions.push({
             uname: proposer,
             upVote: 0,
             downVote: 0,
           });
-          interactionIdx = studentSankeys[voter].intractions.length - 1;
+          interactionIdx = studentSankeys[voter].interactions.length - 1;
         }
 
-        studentSankeys[voter].intractions[interactionIdx].upVote += voterCorrect;
-        studentSankeys[voter].intractions[interactionIdx].downVote += voterWrong;
+        studentSankeys[voter].interactions[interactionIdx].upVote += voterCorrect;
+        studentSankeys[voter].interactions[interactionIdx].downVote += voterWrong;
 
         const semesterStudentSankeyRef = db.collection("semesterStudentSankeys").doc(studentSankeys[voter].documentId!);
 
@@ -866,7 +868,7 @@ export const updateStatsOnVersionVote = async ({
           objRef: semesterStudentSankeyRef,
           operationType: "update",
           data: {
-            intractions: studentSankeys[voter].intractions,
+            interactions: studentSankeys[voter].interactions,
           },
         });
       }
@@ -1087,7 +1089,7 @@ export const updateStatsOnProposal = async ({
       if (isStudentSankeyNew) {
         studentSankeyRef = db.collection("semesterStudentSankeys").doc();
         studentSankey = {
-          intractions: [],
+          interactions: [],
           tagId: semesterId,
           uname: proposer,
           createdAt: Timestamp.fromDate(new Date()),
@@ -1164,16 +1166,16 @@ export const updateStatsOnProposal = async ({
       studentVoteStat.upVotes += 1;
 
       // updating sankey data
-      let interactionIdx = studentSankey.intractions.findIndex(interaction => interaction.uname === proposer);
+      let interactionIdx = studentSankey.interactions.findIndex(interaction => interaction.uname === proposer);
       if (interactionIdx === -1) {
-        studentSankey.intractions.push({
+        studentSankey.interactions.push({
           upVote: 0,
           downVote: 0,
           uname: proposer,
         });
-        interactionIdx = studentSankey.intractions.length - 1;
+        interactionIdx = studentSankey.interactions.length - 1;
       }
-      studentSankey.intractions[interactionIdx].upVote += 1;
+      studentSankey.interactions[interactionIdx].upVote += 1;
 
       if (isStudentSankeyNew) {
         t.set(studentSankeyRef, studentSankey);
