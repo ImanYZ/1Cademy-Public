@@ -70,7 +70,7 @@ export const SidebarButton = ({
               maxWidth: "90px",
               whiteSpace: "nowrap",
               fontWeight: "500",
-              fontSize: "15px",
+              fontSize: "14px",
               color: theme => (theme.palette.mode === "dark" ? "#EAECF0" : "#1D2939"),
             }}
           >
