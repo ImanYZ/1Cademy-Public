@@ -639,7 +639,8 @@ MainSidebarProps) => {
                     <Box
                       key={idx}
                       sx={{
-                        p: "10px 16px",
+                        p: "10px 16px 10px 25px",
+                        height: "42px",
                         display: "flex",
                         alignItems: "center",
                         justifyContent: "space-between",
@@ -654,7 +655,7 @@ MainSidebarProps) => {
                         <Box sx={{ minWidth: "0px", display: "flex", alignItems: "center" }}>
                           <Box
                             sx={{
-                              background: selectedNotebook === cur.id ? "#12B76A" : "none",
+                              background: selectedNotebook === cur.id ? DESIGN_SYSTEM_COLORS.success500 : "none",
                               minWidth: "10px",
                               width: "10px",
                               height: "10px",
@@ -664,9 +665,13 @@ MainSidebarProps) => {
                           />
                           <Typography
                             sx={{
+                              fontSize: "14px",
+                              fontWeight: 500,
                               overflow: "hidden",
                               textOverflow: "ellipsis",
                               whiteSpace: "nowrap",
+                              color: ({ palette }) =>
+                                palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.gray200 : DESIGN_SYSTEM_COLORS.gray800,
                             }}
                           >
                             {cur.title}
@@ -674,23 +679,25 @@ MainSidebarProps) => {
                         </Box>
                       </Box>
                       <IconButton onClick={() => setEditableNotebook(cur)} sx={{ p: "0px" }}>
-                        <MoreVertIcon />
+                        <MoreVertIcon sx={{ fontSize: "16px" }} />
                       </IconButton>
                     </Box>
                   ))}
                 </Stack>
 
-                <Divider ref={createNotebookButtonRef} />
+                <Divider ref={createNotebookButtonRef} /* sx={{ width: "162px", float: "right" }} */ />
 
-                <Box sx={{ p: "10px 16px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                <Box sx={{ p: "6px 8px", mt: "8px", display: "flex", alignItems: "center", justifyContent: "center" }}>
                   {isCreatingNotebook ? (
                     <Box>
-                      <Typography>Creating...</Typography>
+                      <Typography sx={{ fontSize: "14px" }}>Creating...</Typography>
                     </Box>
                   ) : (
                     <Box onClick={onCreateNotebook} sx={{ display: "flex", alignItems: "center", cursor: "pointer" }}>
                       <Box
                         sx={{
+                          width: "20px",
+                          height: "20px",
                           p: "0px",
                           borderRadius: "5px",
                           backgroundColor: ({ palette }) => (palette.mode === "dark" ? "#55402B66" : "#E7724033"),
@@ -700,13 +707,14 @@ MainSidebarProps) => {
                       >
                         <AddIcon
                           sx={{
+                            fontSize: "14px",
                             color: ({ palette }) =>
                               palette.mode === "dark" ? palette.common.primary800 : palette.common.orange400,
                           }}
                         />
                       </Box>
                       <Box sx={{ display: "flex", alignItems: "center" }}>
-                        <Typography sx={{ ml: "20px" }}>Create New</Typography>
+                        <Typography sx={{ ml: "10px", fontSize: "14px" }}>Create New</Typography>
                       </Box>
                     </Box>
                   )}
