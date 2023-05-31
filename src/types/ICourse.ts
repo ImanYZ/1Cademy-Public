@@ -190,7 +190,7 @@ export type ISemesterStudentSankey = {
   //+
   documentId?: string;
   deleted: boolean;
-  intractions: ISemesterStudentSankeyInteraction[];
+  interactions: ISemesterStudentSankeyInteraction[];
   tagId: string;
   uname: string;
   createdAt: Timestamp;
