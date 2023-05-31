@@ -5,6 +5,7 @@ type CustomBadgeProps = { value: number; sx?: SxProps<Theme> };
 
 export const CustomBadge = ({ value, sx }: CustomBadgeProps) => {
   if (value === 0) return null;
+
   return (
     <Box
       sx={{
@@ -23,4 +24,11 @@ export const CustomBadge = ({ value, sx }: CustomBadgeProps) => {
       {value > 99 ? "99+" : value}
     </Box>
   );
+};
+
+type CustomSmallBadgeProps = { value: number };
+
+export const CustomSmallBadge = ({ value }: CustomSmallBadgeProps) => {
+  if (!value) return null;
+  return <Box sx={{ width: "6px", height: "6px", borderRadius: "50%", background: "#E34848" }} />;
 };

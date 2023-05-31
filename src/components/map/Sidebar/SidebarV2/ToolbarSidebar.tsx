@@ -63,7 +63,7 @@ import { UsersStatus, UserTutorials } from "../../../../nodeBookTypes";
 import { OpenLeftSidebar } from "../../../../pages/notebook";
 import { Notebook, NotebookDocument } from "../../../../types";
 import { Portal } from "../../../Portal";
-import { CustomBadge } from "../../CustomBudge";
+import { CustomBadge, CustomSmallBadge } from "../../CustomBudge";
 import CustomModal from "../../Modal/Modal";
 import { SidebarButton } from "../../SidebarButtons";
 import { MemoizedUserStatusSettings } from "../../UserStatusSettings2";
@@ -495,7 +495,7 @@ MainSidebarProps) => {
             palette.mode === "dark" ? palette.common.notebookMainBlack : palette.common.gray50,
         }}
       >
-        <Stack alignItems="center" direction="column" sx={{ width: "inherit", px: "14px" }}>
+        <Stack alignItems="center" direction="column" sx={{ width: "inherit", px: "16px" }}>
           <Box
             sx={{
               mt: "10px",
@@ -542,7 +542,7 @@ MainSidebarProps) => {
             alignItems="center"
             direction="column"
             spacing={"4px"}
-            sx={{ width: "inherit", px: "14px", mt: "14px" }}
+            sx={{ width: "inherit", px: "16px", mt: "14px" }}
           >
             {/* Searcher button */}
 
@@ -571,6 +571,7 @@ MainSidebarProps) => {
               text="Notifications"
               toolbarIsOpen={displayLargeToolbar}
               rightOption={<CustomBadge value={uncheckedNotificationsNum} />}
+              rightFloatingOption={<CustomSmallBadge value={uncheckedNotificationsNum} />}
             />
 
             {/* Bookmarks button */}
@@ -584,6 +585,7 @@ MainSidebarProps) => {
               text="Bookmarks"
               toolbarIsOpen={displayLargeToolbar}
               rightOption={<CustomBadge value={bookmarkUpdatesNum} />}
+              rightFloatingOption={<CustomSmallBadge value={bookmarkUpdatesNum} />}
             />
 
             {/* Pending proposal sidebar */}
@@ -597,6 +599,7 @@ MainSidebarProps) => {
               text="Pending List"
               toolbarIsOpen={displayLargeToolbar}
               rightOption={<CustomBadge value={pendingProposalsNum} />}
+              rightFloatingOption={<CustomSmallBadge value={pendingProposalsNum} />}
             />
 
             {/* dashboard */}
@@ -639,7 +642,7 @@ MainSidebarProps) => {
                     <Box
                       key={idx}
                       sx={{
-                        p: "10px 16px 10px 25px",
+                        p: "10px 16px 10px 27px",
                         height: "42px",
                         display: "flex",
                         alignItems: "center",
@@ -685,7 +688,7 @@ MainSidebarProps) => {
                   ))}
                 </Stack>
 
-                <Divider ref={createNotebookButtonRef} /* sx={{ width: "162px", float: "right" }} */ />
+                <Divider ref={createNotebookButtonRef} sx={{ width: "162px", float: "right" }} />
 
                 <Box sx={{ p: "6px 8px", mt: "8px", display: "flex", alignItems: "center", justifyContent: "center" }}>
                   {isCreatingNotebook ? (
