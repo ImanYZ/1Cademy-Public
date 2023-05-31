@@ -3,6 +3,8 @@ import { Box } from "@mui/system";
 import NextImage from "next/image";
 import React, { ReactNode } from "react";
 
+import { DESIGN_SYSTEM_COLORS } from "../../lib/theme/colors";
+
 type SidebarButtonsProps = {
   id: string;
   onClick: (e: any) => void;
@@ -71,7 +73,12 @@ export const SidebarButton = ({
               whiteSpace: "nowrap",
               fontWeight: "500",
               fontSize: "14px",
-              color: theme => (theme.palette.mode === "dark" ? "#EAECF0" : "#1D2939"),
+              color: theme =>
+                variant === "fill"
+                  ? DESIGN_SYSTEM_COLORS.gray200
+                  : theme.palette.mode === "dark"
+                  ? "#EAECF0"
+                  : "#1D2939",
             }}
           >
             {text}

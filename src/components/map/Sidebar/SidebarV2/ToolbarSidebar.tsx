@@ -1164,7 +1164,7 @@ MainSidebarProps) => {
         SidebarContent={toolbarContentMemoized}
         sx={{
           boxShadow: undefined,
-          width: { sm: isHovered ? "250px" : "80px" },
+          width: { sm: isHovered ? "240px" : "80px" },
           ...(isMenuOpen && { width: "100%" }),
         }}
         sxContentWrapper={{
