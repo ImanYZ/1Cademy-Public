@@ -51,7 +51,7 @@ import {
   getBubbleStats,
   getMaxMinVoxPlotData,
   groupStudentPointsDayChapter,
-  StudenBarsSubgroupLocation,
+  StudentBarsSubgroupLocation,
   StudentStackedBarStatsObject,
   TrendStats,
 } from "../dashboard";
@@ -89,7 +89,7 @@ const StudentDashboard: InstructorLayoutPage = ({ user, currentSemester, setting
   const [studentsCounter, setStudentsCounter] = useState<number>(0);
   const [proposalsStudents, setProposalsStudents] = useState<StudentStackedBarStatsObject | null>(null);
   const [questionsStudents, setQuestionsStudents] = useState<StudentStackedBarStatsObject | null>(null);
-  const [studentLocation, setStudentLocation] = useState<StudenBarsSubgroupLocation>({
+  const [studentLocation, setStudentLocation] = useState<StudentBarsSubgroupLocation>({
     proposals: 0,
     questions: 0,
     totalDailyPractices: 0,

@@ -3,7 +3,13 @@ import { getTypesenseClient } from "@/lib/typesense/typesense.config";
 import { google } from "googleapis";
 import { Configuration, OpenAIApi, ChatCompletionRequestMessage, CreateChatCompletionResponse } from "openai";
 import { TypesenseNodesSchema } from "src/knowledgeTypes";
-import { IAssistantConversation, IAssistantMessage, IAssistantNode } from "src/types/IAssitantConversation";
+import {
+  FlashcardResponse,
+  IAssistantChat,
+  IAssistantConversation,
+  IAssistantMessage,
+  IAssistantNode,
+} from "src/types/IAssitantConversation";
 import { arrayToChunks } from "./arrayToChunks";
 import { INode } from "src/types/INode";
 import { getNodePageWithDomain } from "@/lib/utils/utils";
@@ -51,7 +57,11 @@ export const ASSISTANT_NOT_FOUND_MESSAGE =
   `- I can provide you with an explanation based on my general knowledge outside of the course content.\n` +
   `- Alternatively, if you would like to contribute to the knowledge graph of the course, I am open to learning from you and expanding my knowledge on the topic.`;
 
-export const top4GoogleSearchResults = async (query: string, tagTitle?: string): Promise<string[]> => {
+export const topGoogleSearchResults = async (
+  query: string,
+  count: number = 4,
+  tagTitle?: string
+): Promise<string[]> => {
   const customsearch = google.customsearch("v1");
   const res = await customsearch.cse.list({
     q: query + (tagTitle ? JSON.stringify(tagTitle) : ""),
@@ -76,14 +86,14 @@ export const top4GoogleSearchResults = async (query: string, tagTitle?: string):
       .limit(nodeIds.length)
       .get();
     for (const node of nodes.docs) {
-      if (_nodeIds.size >= 4) break;
+      if (_nodeIds.size >= count) break;
       _nodeIds.add(node.id);
     }
   }
   return Array.from(_nodeIds);
 };
 
-export const top4TypesenseSearch = async (query: string, tagTitle?: string): Promise<string[]> => {
+export const topTypesenseSearch = async (query: string, count: number, tagTitle?: string): Promise<string[]> => {
   const numOfWords = query.split(" ");
   const tSQuery = {
     q: query,
@@ -114,7 +124,43 @@ export const top4TypesenseSearch = async (query: string, tagTitle?: string): Pro
       .limit(nodeIds.length)
       .get();
     for (const node of nodes.docs) {
-      if (_nodeIds.size >= 4) break;
+      if (_nodeIds.size >= count) break;
+      _nodeIds.add(node.id);
+    }
+  }
+  return Array.from(_nodeIds);
+};
+
+export const typesenseReferenceNodeSearch = async (query: string): Promise<string[]> => {
+  const tSQuery = {
+    q: query,
+    query_by: "title,content",
+    query_by_weights: "1,1",
+    sort_by: "",
+    filter_by: "nodeType:=[Reference]",
+    page: 1,
+    num_typos: "1",
+    typo_tokens_threshold: 1,
+  };
+
+  const searchResults = await getTypesenseClient()
+    .collections<TypesenseNodesSchema>("nodes")
+    .documents()
+    .search(tSQuery);
+
+  const hits = searchResults.hits || [];
+  const nodeIds = hits.map(hit => hit.document.id);
+
+  const _nodeIds: Set<string> = new Set();
+  const nodeIdsChunk = arrayToChunks(nodeIds, 10);
+  for (const nodeIds of nodeIdsChunk) {
+    const nodes = await db
+      .collection("nodes")
+      .where("__name__", "in", nodeIds)
+      .where("nodeType", "in", ["Reference"])
+      .limit(nodeIds.length)
+      .get();
+    for (const node of nodes.docs) {
       _nodeIds.add(node.id);
     }
   }
@@ -165,6 +211,22 @@ export const sendMessageToGPT4V2 = async (
   const response = await openai.createChatCompletion({
     messages: [message],
     model: "gpt-4",
+    temperature: 0,
+  });
+
+  return response.data;
+};
+
+export const sendGPTPrompt = async (model: "gpt-3.5-turbo" | "gpt-4", messages: ChatCompletionRequestMessage[]) => {
+  const config = new Configuration({
+    apiKey: process.env.OPENAI_API_KEY,
+  });
+
+  const openai = new OpenAIApi(config);
+
+  const response = await openai.createChatCompletion({
+    messages,
+    model,
     temperature: 0,
   });
 
@@ -388,11 +450,11 @@ export const getNodeResultFromCommands = async (
 
   for (const command of commands) {
     let _nodeIds: string[] = [];
-    const googleNodeIds = await top4GoogleSearchResults(command, tagTitle);
+    const googleNodeIds = await topGoogleSearchResults(command, 10, tagTitle);
     if (googleNodeIds.length) {
       _nodeIds = googleNodeIds;
     } else {
-      _nodeIds = await top4TypesenseSearch(command, tagTitle);
+      _nodeIds = await topTypesenseSearch(command, 10, tagTitle);
     }
 
     for (const _nodeId of _nodeIds) {
@@ -429,11 +491,11 @@ export const processRecursiveCommands = async (
     let gpt4QueryResult: string = ``;
     for (const command of commands) {
       let nodeIds: string[] = [];
-      const googleNodeIds = await top4GoogleSearchResults(command, tagTitle);
+      const googleNodeIds = await topGoogleSearchResults(command, 10, tagTitle);
       if (googleNodeIds.length) {
         nodeIds = googleNodeIds;
       } else {
-        nodeIds = await top4TypesenseSearch(command, tagTitle);
+        nodeIds = await topTypesenseSearch(command, 10, tagTitle);
       }
 
       // If not results found for desired query then
@@ -846,4 +908,83 @@ export const generateNotebookTitleGpt4 = async (message: string) => {
   }
 
   return notebookTitle;
+};
+
+export const getPassageTopicGpt4 = async (passage: string) => {
+  let prompt = `Write a title with a few words for the following triple-quoted paragraph. Only print the title, without any extra text. At the end of the title, instead of a full-stop, print a colon.\n`;
+  prompt += `'''\n`;
+  prompt += passage;
+  prompt += `\n'''`;
+  const response = await sendGPTPrompt("gpt-3.5-turbo", [
+    {
+      role: "user",
+      content: prompt,
+    },
+  ]);
+  let topic: any = response?.choices?.[0]?.message?.content || "";
+  topic = topic.trim().split("");
+  if (topic.length && topic[topic.length - 1] === ":") {
+    topic.pop();
+  }
+  return topic.join("");
+};
+
+export const createChat = async (uname?: string) => {
+  const assistantChatRef = db.collection("assistantChats").doc();
+  await assistantChatRef.set({
+    messages: [],
+    uname,
+    createdAt: Timestamp.now(),
+    updatedAt: Timestamp.now(),
+  } as IAssistantChat);
+  return assistantChatRef.id;
+};
+
+export const getFlashcardsFromPassage = async (passage: string): Promise<FlashcardResponse> => {
+  const prompt =
+    `Flashcards are in two types: Concept or Relation\n` +
+    `A "Concept" flashcard defines/explains a concept.\n` +
+    `A "Relation" flashcard explains some relationships between multiple concepts.\n` +
+    `Print some flashcards of valuable information ONLY from the following triple-quoted text:` +
+    `'''\n` +
+    passage +
+    `\n'''` +
+    `NEVER print any information beyond the provided text.\n` +
+    `Print an array of flashcards, each flashcard as a JSON object with the following keys:\n` +
+    `{\n` +
+    `"title": The flashcard title as a string,\n` +
+    `"content": The flashcard content as a string,\n` +
+    `"type": Concept or Relation\n` +
+    `}\n` +
+    `If you cannot extract any valuable information from the text, print an empty array [].`;
+  const response = await sendGPTPrompt("gpt-4", [
+    {
+      role: "user",
+      content: prompt,
+    },
+  ]);
+  let content: string = response?.choices?.[0]?.message?.content || "";
+  const flashCardResponse: FlashcardResponse = parseJSONArrayFromResponse(content);
+  return flashCardResponse;
+};
+
+export const combineContents = async (passages: string[]): Promise<string> => {
+  if (passages.length < 2) {
+    return passages?.[0] || "";
+  }
+  const prompt =
+    `'''\n` +
+    `${passages[0]}\n` +
+    `'''\n` +
+    `Combine the above triple-quoted text with the one below and paraphrase the result.\n` +
+    `'''\n` +
+    `${passages[1]}\n` +
+    `'''`;
+  const response = await sendGPTPrompt("gpt-4", [
+    {
+      role: "user",
+      content: prompt,
+    },
+  ]);
+  return response?.choices?.[0]?.message?.content || "";
 };

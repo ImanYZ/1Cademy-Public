@@ -35,7 +35,7 @@ import { OpenRightSidebar } from "../../../pages/notebook";
 import { ISemester } from "../../../types/ICourse";
 import { NoDataMessage } from "../../instructors/NoDataMessage";
 import PracticeTool, { PracticeToolRef } from "../../practiceTool/PracticeTool";
-import { DashboradToolbar } from "../Dashobard/DashboradToolbar";
+import { DashboardToolbar } from "../Dashobard/DashboradToolbar";
 import { Dashboard } from "./Dashboard";
 import { DashboardSettings } from "./DashboardSettings";
 import { DashboardStudents } from "./DashboardStudents";
@@ -89,7 +89,8 @@ export const DashboardWrapper = forwardRef<DashboardWrapperRef, DashboardWrapper
 
   useImperativeHandle(ref, () => ({
     onRunPracticeTool: (start: boolean) => console.log("start practice", start),
-    onSubmitAnswer: (answers: boolean[]) => practiceToolRef.current && practiceToolRef.current.onSubmitAnswer(answers),
+    onSubmitAnswer: (answers: boolean[], byVoice?: boolean) =>
+      practiceToolRef.current && practiceToolRef.current.onSubmitAnswer(answers, byVoice),
     onSelectAnswers: practiceToolRef.current ? practiceToolRef.current.onSelectAnswers : () => {},
     nextQuestion: practiceToolRef.current ? practiceToolRef.current.nextQuestion : () => {},
     getQuestionParents: practiceToolRef.current ? practiceToolRef.current.getQuestionParents : () => [],
@@ -276,7 +277,7 @@ export const DashboardWrapper = forwardRef<DashboardWrapperRef, DashboardWrapper
           theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookG900 : DESIGN_SYSTEM_COLORS.gray100,
       }}
     >
-      <DashboradToolbar
+      <DashboardToolbar
         courses={currentSemester ? allCourses[currentSemester.tagId] ?? [] : []}
         selectedCourse={selectedCourse}
         onChangeSelectedCourseHandler={setSelectedCourse}

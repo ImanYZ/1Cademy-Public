@@ -12,7 +12,8 @@ import React, {
 } from "react";
 import { useRive, useStateMachineInput } from "rive-react";
 
-import { getNode } from "../../client/serveless/nodes.serveless";
+import { getNode } from "../../client/firestore/nodes.firestore";
+import { addPracticeToolLog } from "../../client/firestore/practiceToolLog.firestore";
 import { detectElements } from "../../hooks/detectElements";
 import { SimpleQuestionNode } from "../../instructorsTypes";
 import { KnowledgeChoice } from "../../knowledgeTypes";
@@ -49,6 +50,7 @@ type AssistantProps = {
   scrollToNode: (nodeId: string, regardless?: boolean, tries?: number) => void;
   setRootQuery: Dispatch<SetStateAction<string | undefined>>;
   startPractice: boolean;
+  uname: string;
 };
 
 const STATE_MACHINE_NAME = "State Machine 1";
@@ -66,6 +68,7 @@ export const Assistant = ({
   scrollToNode,
   setRootQuery,
   startPractice,
+  uname,
 }: AssistantProps) => {
   /**
    * Assistant narrate after that listen
@@ -334,6 +337,12 @@ export const Assistant = ({
           const parents = questionNode.parents;
           setDisplayDashboard(false);
           openNodesOnNotebook(selectedNotebookId, parents);
+          addPracticeToolLog(db, {
+            user: uname,
+            byVoice: true,
+            semesterId: voiceAssistant.tagId,
+            action: "open-notebook",
+          });
           await detectElements({ ids: parents });
           let stopLoop = false;
           stateInput.value = 1;
@@ -388,7 +397,7 @@ export const Assistant = ({
           console.log("CONFIRM");
           if (["y"].includes(transcriptProcessed)) {
             const submitOptions = getAnswersLettersOptions(preTranscriptProcessed, questionNode.choices.length);
-            assistantRef.current?.onSubmitAnswer(submitOptions);
+            assistantRef.current?.onSubmitAnswer(submitOptions, true);
             const { message: messageFromConfirm, isCorrect } = getMessageFromUserConfirm(
               preTranscriptProcessed,
               questionNode.choices,
@@ -456,6 +465,8 @@ export const Assistant = ({
       setVoiceAssistant,
       stateInput,
       stopAssistant,
+      uname,
+      voiceAssistant.tagId,
     ]
   );
 
