@@ -427,8 +427,12 @@ const getDailyCircleColor = (
   daysUntilToday: number, // currentDate - date
   dailyPoint?: { value: number; gotPoint: boolean }
 ) => {
-  if (daysUntilToday === 0) return theme === "dark" ? DESIGN_SYSTEM_COLORS.primary800 : DESIGN_SYSTEM_COLORS.primary600;
   if (daysUntilToday < 0) return theme === "dark" ? DESIGN_SYSTEM_COLORS.notebookG200 : DESIGN_SYSTEM_COLORS.gray400;
+  if (daysUntilToday === 0) {
+    if (dailyPoint?.gotPoint) return DESIGN_SYSTEM_COLORS.success500;
+    if (!dailyPoint?.gotPoint && dailyPoint?.value) return DESIGN_SYSTEM_COLORS.notebookScarlet;
+    return theme === "dark" ? DESIGN_SYSTEM_COLORS.primary800 : DESIGN_SYSTEM_COLORS.primary600; // not got points && not value
+  }
   if (dailyPoint?.gotPoint) return DESIGN_SYSTEM_COLORS.success500;
   return DESIGN_SYSTEM_COLORS.notebookScarlet;
 };
