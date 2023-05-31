@@ -19,6 +19,7 @@ export type IAssistantNode = {
 };
 
 export type IAssistantMessage = {
+  id?: string;
   request?: string;
   is404?: boolean;
   gptMessage?: ChatCompletionRequestMessage;
@@ -46,7 +47,8 @@ export type IAssitantRequestAction =
   | "ExplainMore"
   | "GeneralExplanation"
   | "IllContribute"
-  | "DirectQuestion";
+  | "DirectQuestion"
+  | "ProposeIt";
 
 export type IAssistantResponse = {
   conversationId: string;
@@ -59,3 +61,17 @@ export type IAssistantResponse = {
     variant: "contained" | "outline";
   }[];
 };
+
+export type IAssistantChat = {
+  documentId?: string;
+  uname?: string;
+  messages: IAssistantMessage[];
+  createdAt: Timestamp;
+  updatedAt: Timestamp;
+};
+
+export type FlashcardResponse = {
+  title: string;
+  type: "Relation" | "Concept";
+  content: string;
+}[];

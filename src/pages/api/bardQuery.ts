@@ -2,7 +2,7 @@ import { admin, db } from "@/lib/firestoreServer/admin";
 import { NextApiRequest, NextApiResponse } from "next";
 import { INode } from "src/types/INode";
 import { IUser } from "src/types/IUser";
-import { generateGpt4QueryResultV2, top4GoogleSearchResults, top4TypesenseSearch } from "src/utils/assistant-helpers";
+import { generateGpt4QueryResultV2, topGoogleSearchResults, topTypesenseSearch } from "src/utils/assistant-helpers";
 
 export type IBardQueryRequestPayload = {
   commands: string[];
@@ -43,11 +43,11 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
     const _nodeIds: Set<string> = new Set();
     for (const command of payload.commands) {
       let nodeIds: string[] = [];
-      const googleNodeIds = await top4GoogleSearchResults(command, tagTitle);
+      const googleNodeIds = await topGoogleSearchResults(command, 10, tagTitle);
       if (googleNodeIds.length) {
         nodeIds = googleNodeIds;
       } else {
-        nodeIds = await top4TypesenseSearch(command, tagTitle);
+        nodeIds = await topTypesenseSearch(command, 10, tagTitle);
       }
 
       for (const nodeId of nodeIds) {
