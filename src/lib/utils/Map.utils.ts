@@ -135,7 +135,7 @@ export const loadReputationsData = (
   if (!reputationsQuery) return;
 
   const reputationsSnapshot = onSnapshot(reputationsQuery, async snapshot => {
-    // console.log("SNAPSHOT RAN ");
+    // console.log("reputationsSnapshot ", { reputationType, isCommunity });
     const docChanges = snapshot.docChanges();
 
     if (docChanges.length > 0) {

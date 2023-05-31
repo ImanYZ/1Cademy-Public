@@ -5,6 +5,8 @@ import React from "react";
 
 import MarkdownRender from "@/components/Markdown/MarkdownRender";
 
+import { COMMUNITY_LEADERBOARD_TYPES } from "../CommunityLeaderboard/CommunityLeaderboard";
+
 type MultipleChoiceBtnProps = {
   choices: { label: string; choose: any }[];
   onClose: any;
@@ -20,8 +22,8 @@ const MultipleChoiceBtn = (props: MultipleChoiceBtnProps) => {
         display: "flex",
         flexDirection: "column",
         left: "25px",
-        bottom: "92px",
-        width: "200px",
+        bottom: "74px",
+        width: "168px",
         borderRadius: "4px",
         background: theme => (theme.palette.mode === "dark" ? "#1B1A1A" : "#F9FAFB"),
         border: theme => (theme.palette.mode === "dark" ? "solid 1px #404040" : "solid 1px #D0D5DD"),
@@ -34,20 +36,16 @@ const MultipleChoiceBtn = (props: MultipleChoiceBtnProps) => {
     >
       {props.choices.map(choice => {
         return (
-          <ListItem key={choice.label} disablePadding sx={{ display: "flex" }} onClick={choice.choose}>
-            <ListItemButton
-              component="a"
-              sx={{
-                paddingY: "2px!important",
-              }}
-            >
+          <ListItem key={choice.label} disablePadding sx={{ height: "30px", display: "flex" }} onClick={choice.choose}>
+            <ListItemButton sx={{ p: "6px 10px" }}>
               <ListItemText
                 primary={
                   <MarkdownRender
                     sx={{
-                      fontSize: "15px",
+                      fontSize: "12px",
                       fontWeight: "500",
-                      color: props.comLeaderboardType === choice.label ? "#FF8134" : "inherit",
+                      color:
+                        COMMUNITY_LEADERBOARD_TYPES[props.comLeaderboardType] === choice.label ? "#FF8134" : "inherit",
                     }}
                     text={choice.label || ""}
                   />

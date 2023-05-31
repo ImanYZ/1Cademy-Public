@@ -1,15 +1,23 @@
 import { ExpandLess, ExpandMore } from "@mui/icons-material";
 import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
-import { Box } from "@mui/material";
+import { Box, Stack, Typography } from "@mui/material";
 import { getFirestore } from "firebase/firestore";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 
 import { loadReputationsData } from "@/lib/utils/Map.utils";
 
+import { DESIGN_SYSTEM_COLORS } from "../../../lib/theme/colors";
 import MultipleChoiceBtn from "../Sidebar/MultipleChoiceBtn";
 import { MemoizedComLeaderboardChip } from "./ComLeaderboardChip/ComLeaderboardChip";
 
-const comLBTypes = ["Weekly", "Monthly", "All Time", "Self-votes", "Others' Votes", "Others Monthly"];
+export const COMMUNITY_LEADERBOARD_TYPES: { [key: string]: string } = {
+  Weekly: "This Week Points",
+  Monthly: "This Month Points",
+  "All Time": "All Time Points",
+  "Self-votes": "Self-votes",
+  "Others' Votes": "Points by Others",
+  "Others Monthly": "Monthly Points by Others",
+};
 
 type CommunityLeaderboardProps = {
   userTagId: string;
@@ -181,7 +189,7 @@ const CommunityLeaderboard = ({
   }, []);
 
   const changeComLeaderboard = useCallback(
-    (comLType: any) => () => {
+    (comLType: string) => () => {
       setComLeaderboardType(comLType);
       setComLeaderboardTypeOpen(false);
     },
@@ -190,8 +198,8 @@ const CommunityLeaderboard = ({
 
   const choices = useMemo(
     () =>
-      comLBTypes.map(comLType => {
-        return { label: comLType, choose: changeComLeaderboard(comLType) };
+      Object.keys(COMMUNITY_LEADERBOARD_TYPES).map(key => {
+        return { label: COMMUNITY_LEADERBOARD_TYPES[key], choose: changeComLeaderboard(key) };
       }),
     [changeComLeaderboard]
   );
@@ -199,33 +207,56 @@ const CommunityLeaderboard = ({
   return (
     <Box
       id="ComLeaderboardMain"
-      className={comLeaderboardOpen ? undefined : "Minimized"}
-      sx={{ width: { xs: "100%", sm: "88%" }, opacity: disabled ? 0.8 : 1 }}
+      sx={{
+        width: { xs: comLeaderboardOpen ? "100%" : "35px", sm: comLeaderboardOpen ? "88%" : "35px" },
+        height: "68px",
+        display: "flex",
+        alignItems: "center",
+        position: "fixed",
+        right: "0px",
+        bottom: "0px",
+        zIndex: 1,
+        opacity: disabled ? 0.8 : 1,
+        transition: "width 1s ease-in-out",
+      }}
     >
-      <Box id="ComLeaderboardMinimizer">
-        <Box
-          onClick={openComLeaderboard}
-          sx={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "8px" }}
-        >
-          <Box sx={{ color: "ButtonHighlight", fontSize: "18px" }}>🏆</Box>
-          <Box>
-            {comLeaderboardOpen ? (
-              <ArrowForwardIosIcon
-                sx={{
-                  color: theme => (theme.palette.mode === "dark" ? "#CACACA" : "#98A2B3"),
-                }}
-              />
-            ) : (
-              <ArrowForwardIosIcon
-                sx={{
-                  transform: "rotate(180deg)",
-                  color: theme => (theme.palette.mode === "dark" ? "#CACACA" : "#98A2B3"),
-                }}
-              />
-            )}
-          </Box>
+      <Stack
+        id="ComLeaderboardMinimizer"
+        onClick={openComLeaderboard}
+        alignItems={"center"}
+        justifyContent={"center"}
+        spacing={"6px"}
+        sx={{
+          minWidth: "36px",
+          width: "36px",
+          height: "68px",
+          cursor: "pointer",
+          borderRadius: "8px 0px 0px 8px",
+          backgroundColor: ({ palette }) =>
+            palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookMainBlack : DESIGN_SYSTEM_COLORS.gray50,
+        }}
+      >
+        <Box sx={{ fontSize: "18px" }}>🏆</Box>
+        <Box>
+          {comLeaderboardOpen ? (
+            <ArrowForwardIosIcon
+              sx={{
+                color: theme => (theme.palette.mode === "dark" ? "#CACACA" : "#98A2B3"),
+                fontSize: "20px",
+              }}
+            />
+          ) : (
+            <ArrowForwardIosIcon
+              sx={{
+                transform: "rotate(180deg)",
+                color: theme => (theme.palette.mode === "dark" ? "#CACACA" : "#98A2B3"),
+                fontSize: "20px",
+              }}
+            />
+          )}
         </Box>
-      </Box>
+      </Stack>
+
       <Box
         id="ComLeaderboardContainer"
         className={
@@ -238,41 +269,46 @@ const CommunityLeaderboard = ({
             : ""
         }
         sx={{
+          height: "100%",
+          width: "100%",
           display: "flex",
           alignItems: "center",
           justifyContent: "flex-start",
-          gap: { xs: "5px", md: "16px" },
           background: theme =>
             theme.palette.mode === "dark" ? theme.palette.common.darkBackground : theme.palette.common.lightBackground,
         }}
       >
         <Box
           sx={{
+            p: "12px 16px",
             display: "flex",
             cursor: "pointer",
             alignItems: "center",
-            marginLeft: "10px",
+            width: "150px",
           }}
-          id="ComLeaderbaordChanger"
           onClick={openComLeaderboardTypes}
         >
-          <div id="ComLeaderbaordChangerText">{comLeaderboardType}</div>
+          <Typography sx={{ fontSize: "12px", fontWeight: 500 }}>
+            {COMMUNITY_LEADERBOARD_TYPES[comLeaderboardType]}
+          </Typography>
           {comLeaderboardTypeOpen ? (
             <ExpandMore
               sx={{
                 color: theme => (theme.palette.mode === "dark" ? "#eaecf0" : "#475467"),
+                fontSize: "20px",
               }}
             />
           ) : (
             <ExpandLess
               sx={{
                 color: theme => (theme.palette.mode === "dark" ? "#eaecf0" : "#475467"),
+                fontSize: "20px",
               }}
             />
           )}
         </Box>
         <Box
-          className="ComLeaderbaordItems"
+          className="scroll-styled"
           sx={{
             width: "100%",
             paddingRight: "80px",
@@ -281,6 +317,8 @@ const CommunityLeaderboard = ({
             alignItems: "center",
             gap: "10px",
             height: "inherit",
+            overflowX: "auto",
+            overflowY: "hidden",
           }}
         >
           {comLeaderboardTypeOpen && (
@@ -290,7 +328,16 @@ const CommunityLeaderboard = ({
               comLeaderboardType={comLeaderboardType}
             />
           )}
-          {!comPoints.length && <p>There are no points yet</p>}
+          {!comPoints.length && (
+            <Typography
+              sx={{
+                color: ({ palette }) =>
+                  palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.gray600 : DESIGN_SYSTEM_COLORS.gray200,
+              }}
+            >
+              There are no points yet
+            </Typography>
+          )}
           {comPoints.map((comObj, idx) => {
             return (
               <MemoizedComLeaderboardChip
