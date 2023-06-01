@@ -19,6 +19,7 @@ import {
   StudentStackedBarStats,
   StudentStackedBarStatsObject,
 } from "../../pages/instructors/dashboard";
+import { differentBetweenDays } from "./date.utils";
 
 export const calculateVoteStatPoints = (voteStat: ISemesterStudentVoteStat, semester: ISemester) => {
   return (voteStat.days || [])
@@ -76,11 +77,12 @@ const getInitialStudentsRate = (): StudentStackedBarStatsObject => ({
 export const getStackedBarStat = (
   data: SemesterStudentVoteStat[],
   students: ISemesterStudent[],
-  maxProposalsPoints: number,
-  maxQuestionsPoints: number,
-  maxDailyPractices: number
+  maxPr: number,
+  maxQu: number,
+  maxD: number,
+  semesterConfig: ISemester
 ): StackedBarStatsData => {
-  console.log({ daaaaata: data, students, maxProposalsPoints, maxQuestionsPoints, maxDailyPractices });
+  console.log({ daaaaata: data, students, semesterConfig });
   const stackedBarStats: StackedBarStats[] = [];
 
   const studentProposalsRate: StudentStackedBarStatsObject = getInitialStudentsRate();
@@ -98,6 +100,26 @@ export const getStackedBarStat = (
 
   // console.log({ sortedByProposals, sortedByQuestions, sortedByDailyPractices });
 
+  const maxProposalsPoints =
+    semesterConfig.nodeProposals.numProposalPerDay *
+    differentBetweenDays(
+      semesterConfig.nodeProposals.endDate.toDate(),
+      semesterConfig.nodeProposals.startDate.toDate()
+    );
+  const maxQuestionsPoints =
+    semesterConfig.questionProposals.numQuestionsPerDay *
+    differentBetweenDays(
+      semesterConfig.questionProposals.endDate.toDate(),
+      semesterConfig.questionProposals.startDate.toDate()
+    );
+  const maxDailyPractices =
+    semesterConfig.dailyPractice.numQuestionsPerDay *
+    differentBetweenDays(
+      semesterConfig.dailyPractice.endDate.toDate(),
+      semesterConfig.dailyPractice.startDate.toDate()
+    );
+
+  console.log({ maxProposalsPoints, maxQuestionsPoints, maxDailyPractices });
   data.forEach(studentData => {
     const student = students.find(student => student.uname === studentData.uname);
     if (!student) return;
@@ -105,18 +127,48 @@ export const getStackedBarStat = (
     const res = studentData.days.reduce(
       (a, c) => {
         return {
-          proposals: a.proposals + c.proposals,
-          questions: a.questions + c.questions,
-          correctPractices: a.correctPractices + c.correctPractices,
+          proposalsPoints:
+            a.proposalsPoints +
+            (c.proposals >= semesterConfig.nodeProposals.numProposalPerDay
+              ? semesterConfig.nodeProposals.numPoints
+              : 0),
+          questionsPoints:
+            a.questionsPoints +
+            (c.questionProposals >= semesterConfig.questionProposals.numQuestionsPerDay
+              ? semesterConfig.questionProposals.numPoints
+              : 0),
+          practicePoints:
+            a.practicePoints +
+            (c.correctPractices >= semesterConfig.dailyPractice.numQuestionsPerDay
+              ? semesterConfig.dailyPractice.numPoints
+              : 0),
         };
       },
-      { proposals: 0, questions: 0, correctPractices: 0 }
+      { proposalsPoints: 0, questionsPoints: 0, practicePoints: 0 }
     );
-    const { correctPractices, proposals, questions } = res;
-    console.log({ correctPractices, proposals, questions, maxProposalsPoints, maxQuestionsPoints, maxDailyPractices });
-    const proposalSubgroup = getStudentSubgroupInBars(proposals, maxProposalsPoints);
-    const questionsSubgroup = getStudentSubgroupInBars(questions, maxQuestionsPoints);
-    const totalPracticesSubgroup = getStudentSubgroupInBars(correctPractices, maxDailyPractices);
+
+    console.log({
+      name: student.fName,
+      pp: {
+        points: semesterConfig.nodeProposals.numProposalPerDay,
+        d: studentData.days.filter(c => c.proposals >= semesterConfig.nodeProposals.numProposalPerDay).length,
+      },
+      qq: {
+        points: semesterConfig.questionProposals.numQuestionsPerDay,
+        d: studentData.days.filter(c => c.questionProposals >= semesterConfig.questionProposals.numQuestionsPerDay)
+          .length,
+      },
+      dp: {
+        points: semesterConfig.dailyPractice.numQuestionsPerDay,
+        d: studentData.days.filter(c => c.correctPractices >= semesterConfig.dailyPractice.numQuestionsPerDay).length,
+      },
+    });
+
+    const { practicePoints, proposalsPoints, questionsPoints } = res;
+    console.log({ practicePoints, proposalsPoints, questionsPoints });
+    const proposalSubgroup = getStudentSubgroupInBars(proposalsPoints, maxProposalsPoints);
+    const questionsSubgroup = getStudentSubgroupInBars(questionsPoints, maxQuestionsPoints);
+    const totalPracticesSubgroup = getStudentSubgroupInBars(practicePoints, maxDailyPractices);
     console.log({ proposalSubgroup, questionsSubgroup, totalPracticesSubgroup });
     ProposalsRate[proposalSubgroup] += 1;
     QuestionsRate[questionsSubgroup] += 1;
@@ -140,54 +192,6 @@ export const getStackedBarStat = (
     if (existC) return;
     studentDailyPracticeRate[totalPracticesSubgroup as keyof StudentStackedBarStats].push(student);
   });
-  // sortedByProposals.map(d => {
-  //   const proposals = d?.proposalPoints ?? -1;
-  //   if (proposals < 0) return;
-
-  //   const proposalSubgroup = getStudentSubgroupInBars(proposals, maxProposalsPoints);
-  //   const student = students.find(student => student.uname === d.uname);
-  //   if (!student) return;
-
-  //   ProposalsRate[proposalSubgroup] += 1;
-  //   const exist = studentProposalsRate[proposalSubgroup as keyof StudentStackedBarStats].some(
-  //     e => e.uname === student.uname
-  //   );
-  //   if (exist) return;
-  //   studentProposalsRate[proposalSubgroup as keyof StudentStackedBarStats].push(student);
-  // });
-  // sortedByQuestions.map(d => {
-  //   const question = d?.questionPoints ?? -1;
-  //   if (question < 0) return;
-
-  //   const questionsSubgroup = getStudentSubgroupInBars(question, maxQuestionsPoints);
-  //   const student = students.find(student => student.uname === d.uname);
-  //   if (!student) return;
-
-  //   QuestionsRate[questionsSubgroup] += 1;
-  //   const exist = studentQuestionsRate[questionsSubgroup as keyof StudentStackedBarStats].some(
-  //     e => e.uname === student.uname
-  //   );
-  //   if (exist) return;
-
-  //   studentQuestionsRate[questionsSubgroup as keyof StudentStackedBarStats].push(student);
-  // });
-
-  // sortedByDailyPractices.map(d => {
-  //   const totalPractices = d.totalPractices!;
-  //   if (!totalPractices) return;
-
-  //   const totalPracticesSubgroup = getStudentSubgroupInBars(totalPractices, maxDailyPractices);
-  //   const student = students.find(student => student.uname === d.uname);
-  //   if (!student) return;
-
-  //   dailyPracticeRate[totalPracticesSubgroup] += 1;
-  //   const exist = studentDailyPracticeRate[totalPracticesSubgroup as keyof StudentStackedBarStats].some(
-  //     e => e.uname === student.uname
-  //   );
-  //   if (exist) return;
-
-  //   studentDailyPracticeRate[totalPracticesSubgroup as keyof StudentStackedBarStats].push(student);
-  // });
 
   stackedBarStats.push(ProposalsRate);
   stackedBarStats.push(QuestionsRate);

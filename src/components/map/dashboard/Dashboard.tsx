@@ -340,7 +340,7 @@ export const Dashboard = ({ user, currentSemester }: DashboardProps) => {
   // update data in stackbar
   useEffect(() => {
     // if (user.role !== "STUDENT") return;
-    if (!semesterStudentsVoteStats.length || !students) return setStackedBar([]);
+    if (!semesterStudentsVoteStats.length || !students || !semesterConfig) return setStackedBar([]);
 
     const {
       stackedBarStats,
@@ -352,7 +352,8 @@ export const Dashboard = ({ user, currentSemester }: DashboardProps) => {
       students,
       maxProposalsPoints,
       maxQuestionsPoints,
-      maxDailyPractices
+      maxDailyPractices,
+      semesterConfig
     );
     console.log({
       stackedBarStats,
@@ -364,7 +365,15 @@ export const Dashboard = ({ user, currentSemester }: DashboardProps) => {
     setProposalsStudents(studentStackedBarProposalsStats);
     setQuestionsStudents(studentStackedBarQuestionsStats);
     setDailyPracticeStudents(studentStackedBarDailyPracticeStats);
-  }, [maxDailyPractices, maxProposalsPoints, maxQuestionsPoints, semesterStudentsVoteStats, students, user.role]);
+  }, [
+    maxDailyPractices,
+    maxProposalsPoints,
+    maxQuestionsPoints,
+    semesterConfig,
+    semesterStudentsVoteStats,
+    students,
+    user.role,
+  ]);
 
   // set up semester snapshot to modify state
   useEffect(() => {
@@ -772,9 +781,9 @@ export const Dashboard = ({ user, currentSemester }: DashboardProps) => {
               <Box sx={{ alignSelf: "center" }}>
                 <PointsBarChart
                   data={stackedBar}
-                  proposalsStudents={user.role === "INSTRUCTOR" ? proposalsStudents : null}
-                  questionsStudents={user.role === "INSTRUCTOR" ? questionsStudents : null}
-                  dailyPracticeStudents={user.role === "INSTRUCTOR" ? dailyPracticeStudents : null}
+                  proposalsStudents={semesterConfig.isProposalRequired ? proposalsStudents : null}
+                  questionsStudents={semesterConfig.isQuestionProposalRequired ? questionsStudents : null}
+                  dailyPracticeStudents={semesterConfig.isDailyPracticeRequired ? dailyPracticeStudents : null}
                   maxAxisY={studentsCounter}
                   theme={theme.palette.mode === "dark" ? "Dark" : "Light"}
                   mobile={isMovil}
