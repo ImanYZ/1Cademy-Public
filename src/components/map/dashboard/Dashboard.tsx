@@ -22,6 +22,7 @@ import {
   getStackedBarStat,
   mapStudentsStatsDataByDates,
 } from "../../../lib/utils/charts.utils";
+import { differentBetweenDays } from "../../../lib/utils/date.utils";
 import { capitalizeFirstLetter } from "../../../lib/utils/string.utils";
 import {
   BoxStudentsStats,
@@ -165,6 +166,7 @@ export const Dashboard = ({ user, currentSemester }: DashboardProps) => {
   // setup sankey snapshot
 
   useEffect(() => {
+    console.log({ currentSemester, students });
     if (user?.role !== "INSTRUCTOR") return; // this chart is only visible to instructors
     if (!currentSemester || !currentSemester.tagId) return;
     if (!students || !students.length) return;
@@ -181,11 +183,14 @@ export const Dashboard = ({ user, currentSemester }: DashboardProps) => {
     );
     let _sankeyData: any[] = [];
     const snapShotFunc = onSnapshot(q, async snapshot => {
+      console.log("snapShotFunc");
       const docChanges = snapshot.docChanges();
       if (!docChanges.length) return;
 
+      console.log("s11");
       for (let change of docChanges) {
         const _semesterStudentSankey: SemesterStudentSankeys = change.doc.data() as SemesterStudentSankeys;
+        console.log("s12x", _semesterStudentSankey);
         if (change.type === "added") {
           for (const interaction of _semesterStudentSankey.interactions) {
             _sankeyData.push({
@@ -233,6 +238,7 @@ export const Dashboard = ({ user, currentSemester }: DashboardProps) => {
     const semesterRef = collection(db, "semesterStudentVoteStats");
     const q = query(semesterRef, where("tagId", "==", currentSemester.tagId), where("deleted", "==", false));
     let semesterStudentVoteStats: ISemesterStudentVoteStat[] = [];
+    console.log("sb01");
     const snapShotFunc = onSnapshot(q, async snapshot => {
       const docChanges = snapshot.docChanges();
       if (!docChanges.length) {
@@ -250,7 +256,7 @@ export const Dashboard = ({ user, currentSemester }: DashboardProps) => {
         });
         return;
       }
-
+      console.log("sb02");
       for (let change of docChanges) {
         if (change.type === "added") {
           const semesterStudentsVoteStats = change.doc.data() as ISemesterStudentVoteStat;
@@ -272,7 +278,7 @@ export const Dashboard = ({ user, currentSemester }: DashboardProps) => {
       }
 
       const res = mapStudentsStatsDataByDates(semesterStudentVoteStats);
-
+      console.log("sb03");
       const gg = getGeneralStats(res);
       const ts = res.reduce(
         (a: TrendStats, c): TrendStats => {
@@ -305,6 +311,7 @@ export const Dashboard = ({ user, currentSemester }: DashboardProps) => {
       setTrendStats(ts);
       setSemesterStats(gg);
       // semesterStudentsVoteStats
+      console.log("sb04", { semesterStudentVoteStats });
       setSemesterStudentVoteStats([...semesterStudentVoteStats]);
       // setSemesterStats(getSemStat(semester));
       setThereIsData(true);
@@ -347,6 +354,12 @@ export const Dashboard = ({ user, currentSemester }: DashboardProps) => {
       maxQuestionsPoints,
       maxDailyPractices
     );
+    console.log({
+      stackedBarStats,
+      studentStackedBarProposalsStats,
+      studentStackedBarQuestionsStats,
+      studentStackedBarDailyPracticeStats,
+    });
     setStackedBar(stackedBarStats);
     setProposalsStudents(studentStackedBarProposalsStats);
     setQuestionsStudents(studentStackedBarQuestionsStats);
@@ -1174,9 +1187,22 @@ const BoxLegend = ({ role }: { role: UserRole }) => {
 };
 
 const getMaxProposalsQuestionsPoints = (data: ISemester): MaxPoints => {
+  console.log({ semester: data });
+  const dailyPracticesTotalDays = differentBetweenDays(
+    data.dailyPractice.endDate.toDate(),
+    data.dailyPractice.startDate.toDate()
+  );
+  const questionsTotalDays = differentBetweenDays(
+    data.questionProposals.endDate.toDate(),
+    data.questionProposals.startDate.toDate()
+  );
+  const proposalsTotalDays = differentBetweenDays(
+    data.nodeProposals.endDate.toDate(),
+    data.nodeProposals.startDate.toDate()
+  );
   return {
-    maxProposalsPoints: data.nodeProposals.totalDaysOfCourse * data.nodeProposals.numPoints,
-    maxQuestionsPoints: data.questionProposals.totalDaysOfCourse * data.questionProposals.numPoints,
-    maxDailyPractices: data?.dailyPractice?.totalDaysOfCourse * data?.dailyPractice?.numPoints ?? 0,
+    maxProposalsPoints: proposalsTotalDays * data.nodeProposals.numPoints,
+    maxQuestionsPoints: questionsTotalDays * data.questionProposals.numPoints,
+    maxDailyPractices: dailyPracticesTotalDays * data?.dailyPractice?.numPoints ?? 0,
   };
 };

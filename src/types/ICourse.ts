@@ -37,7 +37,7 @@ export type ISemester = {
     endDate: Timestamp;
     numPoints: number;
     numProposalPerDay: number;
-    totalDaysOfCourse: number;
+    totalDaysOfCourse: number; // 💀 Remove this
   };
   questionProposals: {
     startDate: Timestamp;

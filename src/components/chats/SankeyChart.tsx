@@ -1,8 +1,11 @@
+import { Typography } from "@mui/material";
 import { Box } from "@mui/system";
 import * as d3 from "d3";
 import * as D3Collection from "d3-collection";
 import { useEffect, useRef } from "react";
 import Sankey from "src/lib/sankey";
+
+import { DESIGN_SYSTEM_COLORS } from "../../lib/theme/colors";
 
 export type SankeyData = {
   source: string;
@@ -19,6 +22,7 @@ type ISankeyChart = {
 };
 
 export function SankeyChart(props: ISankeyChart) {
+  console.log({ sankeyData: props.sankeyData });
   const svgRef = useRef(null);
 
   useEffect(() => {
@@ -224,7 +228,26 @@ export function SankeyChart(props: ISankeyChart) {
         },
       }}
     >
-      <svg ref={svgRef} />
+      {props.sankeyData.length ? (
+        <svg ref={svgRef} />
+      ) : (
+        <Box
+          sx={{
+            height: "200px",
+            display: "grid",
+            placeContent: "center",
+          }}
+        >
+          <Typography
+            sx={{
+              color: ({ palette }) =>
+                palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.gray600 : DESIGN_SYSTEM_COLORS.gray200,
+            }}
+          >
+            There is not data
+          </Typography>
+        </Box>
+      )}
     </Box>
   );
 }
