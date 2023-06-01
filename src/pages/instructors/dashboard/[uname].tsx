@@ -304,20 +304,21 @@ const StudentDashboard: InstructorLayoutPage = ({ user, currentSemester, setting
 
   useEffect(() => {
     // update data in stackbar
-    if (!semesterStudentsVoteStats.length || !students) return setStackedBar([]);
+    if (!semesterStudentsVoteStats.length || !students || !semesterConfig) return setStackedBar([]);
 
     const { stackedBarStats, studentStackedBarProposalsStats, studentStackedBarQuestionsStats } = getStackedBarStat(
       semesterStudentsVoteStats,
       students,
       maxProposalsPoints,
       maxQuestionsPoints,
-      100
+      100,
+      semesterConfig
     );
 
     setStackedBar(stackedBarStats);
     setProposalsStudents(studentStackedBarProposalsStats);
     setQuestionsStudents(studentStackedBarQuestionsStats);
-  }, [maxProposalsPoints, maxQuestionsPoints, semesterStudentsVoteStats, students]);
+  }, [maxProposalsPoints, maxQuestionsPoints, semesterConfig, semesterStudentsVoteStats, students]);
 
   // find student subgroup location in bars
   useEffect(() => {
