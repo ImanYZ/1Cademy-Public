@@ -22,6 +22,7 @@ import {
   getStackedBarStat,
   mapStudentsStatsDataByDates,
 } from "../../../lib/utils/charts.utils";
+import { differentBetweenDays } from "../../../lib/utils/date.utils";
 import { capitalizeFirstLetter } from "../../../lib/utils/string.utils";
 import {
   BoxStudentsStats,
@@ -165,6 +166,7 @@ export const Dashboard = ({ user, currentSemester }: DashboardProps) => {
   // setup sankey snapshot
 
   useEffect(() => {
+    console.log({ currentSemester, students });
     if (user?.role !== "INSTRUCTOR") return; // this chart is only visible to instructors
     if (!currentSemester || !currentSemester.tagId) return;
     if (!students || !students.length) return;
@@ -181,11 +183,14 @@ export const Dashboard = ({ user, currentSemester }: DashboardProps) => {
     );
     let _sankeyData: any[] = [];
     const snapShotFunc = onSnapshot(q, async snapshot => {
+      console.log("snapShotFunc");
       const docChanges = snapshot.docChanges();
       if (!docChanges.length) return;
 
+      console.log("s11");
       for (let change of docChanges) {
         const _semesterStudentSankey: SemesterStudentSankeys = change.doc.data() as SemesterStudentSankeys;
+        console.log("s12x", _semesterStudentSankey);
         if (change.type === "added") {
           for (const interaction of _semesterStudentSankey.interactions) {
             _sankeyData.push({
@@ -233,6 +238,7 @@ export const Dashboard = ({ user, currentSemester }: DashboardProps) => {
     const semesterRef = collection(db, "semesterStudentVoteStats");
     const q = query(semesterRef, where("tagId", "==", currentSemester.tagId), where("deleted", "==", false));
     let semesterStudentVoteStats: ISemesterStudentVoteStat[] = [];
+    console.log("sb01");
     const snapShotFunc = onSnapshot(q, async snapshot => {
       const docChanges = snapshot.docChanges();
       if (!docChanges.length) {
@@ -250,7 +256,7 @@ export const Dashboard = ({ user, currentSemester }: DashboardProps) => {
         });
         return;
       }
-
+      console.log("sb02");
       for (let change of docChanges) {
         if (change.type === "added") {
           const semesterStudentsVoteStats = change.doc.data() as ISemesterStudentVoteStat;
@@ -272,7 +278,7 @@ export const Dashboard = ({ user, currentSemester }: DashboardProps) => {
       }
 
       const res = mapStudentsStatsDataByDates(semesterStudentVoteStats);
-
+      console.log("sb03");
       const gg = getGeneralStats(res);
       const ts = res.reduce(
         (a: TrendStats, c): TrendStats => {
@@ -305,6 +311,7 @@ export const Dashboard = ({ user, currentSemester }: DashboardProps) => {
       setTrendStats(ts);
       setSemesterStats(gg);
       // semesterStudentsVoteStats
+      console.log("sb04", { semesterStudentVoteStats });
       setSemesterStudentVoteStats([...semesterStudentVoteStats]);
       // setSemesterStats(getSemStat(semester));
       setThereIsData(true);
@@ -333,7 +340,7 @@ export const Dashboard = ({ user, currentSemester }: DashboardProps) => {
   // update data in stackbar
   useEffect(() => {
     // if (user.role !== "STUDENT") return;
-    if (!semesterStudentsVoteStats.length || !students) return setStackedBar([]);
+    if (!semesterStudentsVoteStats.length || !students || !semesterConfig) return setStackedBar([]);
 
     const {
       stackedBarStats,
@@ -345,13 +352,28 @@ export const Dashboard = ({ user, currentSemester }: DashboardProps) => {
       students,
       maxProposalsPoints,
       maxQuestionsPoints,
-      maxDailyPractices
+      maxDailyPractices,
+      semesterConfig
     );
+    console.log({
+      stackedBarStats,
+      studentStackedBarProposalsStats,
+      studentStackedBarQuestionsStats,
+      studentStackedBarDailyPracticeStats,
+    });
     setStackedBar(stackedBarStats);
     setProposalsStudents(studentStackedBarProposalsStats);
     setQuestionsStudents(studentStackedBarQuestionsStats);
     setDailyPracticeStudents(studentStackedBarDailyPracticeStats);
-  }, [maxDailyPractices, maxProposalsPoints, maxQuestionsPoints, semesterStudentsVoteStats, students, user.role]);
+  }, [
+    maxDailyPractices,
+    maxProposalsPoints,
+    maxQuestionsPoints,
+    semesterConfig,
+    semesterStudentsVoteStats,
+    students,
+    user.role,
+  ]);
 
   // set up semester snapshot to modify state
   useEffect(() => {
@@ -748,9 +770,9 @@ export const Dashboard = ({ user, currentSemester }: DashboardProps) => {
                 <Legend
                   title={"Completion rate"}
                   options={[
-                    { title: " > 100%", color: "#388E3C" },
-                    { title: " > 10%", color: "#F9E2D0" },
-                    { title: " > 50%", color: "#A7D841" },
+                    { title: " >= 85%", color: "#388E3C" },
+                    { title: " <= 85%", color: "#A7D841" },
+                    { title: " <= 50%", color: "#F9E2D0" },
                     { title: " <= 10%", color: "rgba(255, 196, 153, 0.75)" },
                   ]}
                   sx={{ gridTemplateColumns: "16px 1fr 16px 1fr" }}
@@ -759,9 +781,9 @@ export const Dashboard = ({ user, currentSemester }: DashboardProps) => {
               <Box sx={{ alignSelf: "center" }}>
                 <PointsBarChart
                   data={stackedBar}
-                  proposalsStudents={user.role === "INSTRUCTOR" ? proposalsStudents : null}
-                  questionsStudents={user.role === "INSTRUCTOR" ? questionsStudents : null}
-                  dailyPracticeStudents={user.role === "INSTRUCTOR" ? dailyPracticeStudents : null}
+                  proposalsStudents={semesterConfig.isProposalRequired ? proposalsStudents : null}
+                  questionsStudents={semesterConfig.isQuestionProposalRequired ? questionsStudents : null}
+                  dailyPracticeStudents={semesterConfig.isDailyPracticeRequired ? dailyPracticeStudents : null}
                   maxAxisY={studentsCounter}
                   theme={theme.palette.mode === "dark" ? "Dark" : "Light"}
                   mobile={isMovil}
@@ -1174,9 +1196,22 @@ const BoxLegend = ({ role }: { role: UserRole }) => {
 };
 
 const getMaxProposalsQuestionsPoints = (data: ISemester): MaxPoints => {
+  console.log({ semester: data });
+  const dailyPracticesTotalDays = differentBetweenDays(
+    data.dailyPractice.endDate.toDate(),
+    data.dailyPractice.startDate.toDate()
+  );
+  const questionsTotalDays = differentBetweenDays(
+    data.questionProposals.endDate.toDate(),
+    data.questionProposals.startDate.toDate()
+  );
+  const proposalsTotalDays = differentBetweenDays(
+    data.nodeProposals.endDate.toDate(),
+    data.nodeProposals.startDate.toDate()
+  );
   return {
-    maxProposalsPoints: data.nodeProposals.totalDaysOfCourse * data.nodeProposals.numPoints,
-    maxQuestionsPoints: data.questionProposals.totalDaysOfCourse * data.questionProposals.numPoints,
-    maxDailyPractices: data?.dailyPractice?.totalDaysOfCourse * data?.dailyPractice?.numPoints ?? 0,
+    maxProposalsPoints: proposalsTotalDays * data.nodeProposals.numPoints,
+    maxQuestionsPoints: questionsTotalDays * data.questionProposals.numPoints,
+    maxDailyPractices: dailyPracticesTotalDays * data?.dailyPractice?.numPoints ?? 0,
   };
 };

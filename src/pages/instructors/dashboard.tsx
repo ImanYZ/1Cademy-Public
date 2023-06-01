@@ -434,19 +434,20 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
 
   useEffect(() => {
     // update data in stackbar
-    if (!semesterStudentVoteState.length || !students) return setStackedBar([]);
+    if (!semesterStudentVoteState.length || !students || !semesterConfig) return setStackedBar([]);
 
     const { stackedBarStats, studentStackedBarProposalsStats, studentStackedBarQuestionsStats } = getStackedBarStat(
       semesterStudentVoteState,
       students,
       maxProposalsPoints,
       maxQuestionsPoints,
-      100
+      100,
+      semesterConfig
     );
     setStackedBar(stackedBarStats);
     setProposalsStudents(studentStackedBarProposalsStats);
     setQuestionsStudents(studentStackedBarQuestionsStats);
-  }, [maxProposalsPoints, maxQuestionsPoints, semesterStudentVoteState, students]);
+  }, [maxProposalsPoints, maxQuestionsPoints, semesterConfig, semesterStudentVoteState, students]);
 
   //STATIC "MODIFTY"
   useEffect(() => {
