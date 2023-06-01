@@ -103,6 +103,8 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
       if (passageResponse) {
         const _passageResponse = passageResponse.data() as IAssistantPassageResponse;
         const assistantMessage = _passageResponse.response!;
+        // Saving conversation process to provide context of conversation in future
+        await saveConversation(assistantConversationRef, assistantConversation, conversationData);
         return res.status(200).json({
           conversationId: assistantConversationRef.id,
           message: assistantMessage.message,
@@ -135,7 +137,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
 
     if (payload.actionType === "TeachContent" || payload.actionType === "DirectQuestion") {
       commands = await getGPT4Queries(conversationData, payload.message);
-      const nodes = await getNodeResultFromCommands(commands, tagTitle, userData);
+      const nodes = await getNodeResultFromCommands(commands, tagTitle, userData, 8);
       prompt =
         payload.actionType === "TeachContent"
           ? createTeachMePrompt(payload.message, nodes)
