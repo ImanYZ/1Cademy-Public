@@ -7,6 +7,7 @@ import { INotebook } from "src/types/INotebook";
 export type IViewNodeOpenNodesPayload = {
   notebookId: string;
   visible: boolean;
+  selectSNode?: boolean;
   nodeIds: string[];
 };
 
@@ -17,7 +18,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
     }
 
     const { uname } = req.body?.data?.user?.userData;
-    const { notebookId, visible, nodeIds } = req.body as IViewNodeOpenNodesPayload;
+    const { notebookId, visible, nodeIds, selectSNode } = req.body as IViewNodeOpenNodesPayload;
     let batch = db.batch();
     let writeCounts = 0;
 
@@ -101,6 +102,13 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         }
         [batch, writeCounts] = await checkRestartBatchWriteCounts(batch, writeCounts);
       }
+    }
+
+    if (selectSNode) {
+      const userRef = db.collection("users").doc(uname);
+      await userRef.update({
+        sNode: nodeIds[0],
+      });
     }
 
     await commitBatch(batch);
