@@ -114,12 +114,13 @@ function drawChart(
   // const groups = data.map(d => d.month).flatMap(c => c);
 
   // remove axis if exists
-  svg.select("#axis-x").remove();
-  svg.select("#axis-y").remove();
-  svg.select("#bubbles").remove();
+  svg.select("#mesh").select("#axis-x").remove();
+  svg.select("#mesh").select("#axis-y").remove();
+  svg.select("#mesh").select("#bubbles").remove();
   // Add X axis
   const x = d3.scaleLinear().domain([minAxisX, maxAxisX]).range([0, widthProcessed]);
   svg
+    .select("#mesh")
     .append("g")
     .attr("id", "axis-x")
     .attr("transform", `translate(30, ${height + 30})`)
@@ -135,6 +136,7 @@ function drawChart(
     .domain([minAxisY, maxAxisY + 10])
     .range([height, 0]);
   svg
+    .select("#mesh")
     .append("g")
     .attr("id", "axis-y")
     .attr("transform", `translate(30, 30)`)
@@ -156,7 +158,7 @@ function drawChart(
     .attr("stroke-width", 1)
     .lower();
 
-  svg.selectAll("path").attr("stroke", "transparent").lower();
+  svg.select("#mesh").selectAll("path").attr("stroke", "transparent").lower();
 
   svg
     .selectAll("line")
@@ -174,6 +176,7 @@ function drawChart(
     .range([RED, LESS_EQUAL_THAN_10_COLOR, GREATER_THAN_10_COLOR, GREATER_THAN_50_COLOR, GREATER_THAN_100_COLOR]);
 
   svg
+    .select("#mesh")
     .append("g")
     .attr("id", "bubbles")
     .selectAll("circle")

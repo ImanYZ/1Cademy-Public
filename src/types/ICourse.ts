@@ -37,7 +37,7 @@ export type ISemester = {
     endDate: Timestamp;
     numPoints: number;
     numProposalPerDay: number;
-    totalDaysOfCourse: number;
+    totalDaysOfCourse: number; // 💀 Remove this
   };
   questionProposals: {
     startDate: Timestamp;
@@ -133,9 +133,9 @@ export type ISemesterStudentStat = {
 };
 
 export type ISemesterStudentVoteStatDay = {
-  proposals: number; // pending/accepted proposals
+  proposals: number; // pending/accepted proposals //PP
   questions: number; // accepted questions
-  questionProposals: number; // pending/accepted questions
+  questionProposals: number; // pending/accepted questions // QQ
   nodes: number; // pending/accepted questions
   links: number; // pending/accepted links
   agreementsWithInst: number;
@@ -145,7 +145,7 @@ export type ISemesterStudentVoteStatDay = {
   upVotes: number;
   downVotes: number;
   instVotes: number;
-  correctPractices: number;
+  correctPractices: number; // DP
   totalPractices: number;
   day: string; // YYYY-MM-DD
 };
