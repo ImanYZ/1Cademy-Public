@@ -180,6 +180,11 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
       assistantMessage.message = assistantMessage.gptMessage?.content || "";
     }
 
+    // converting current response to 404 is not nodes found
+    if (["DirectQuestion", "TeachContent"].includes(payload.actionType) && !(assistantMessage.nodes || []).length) {
+      assistantMessage.is404 = true;
+    }
+
     // Saving conversation process to provide context of conversation in future
     await saveConversation(assistantConversationRef, assistantConversation, conversationData);
 
