@@ -207,7 +207,7 @@ export const getStackedBarStat = (
 };
 
 export const getStudentSubgroupInBars = (points: number, maxPoints: number): keyof StackedBarStats => {
-  if (points > (100 * maxPoints) / 100) return "dgreaterHundred";
+  if (points >= (85 * maxPoints) / 100) return "dgreaterHundred";
   if (points > (50 * maxPoints) / 100) return "cgreaterFifty";
   if (points > (10 * maxPoints) / 100) return "bgreaterTen";
   return "alessEqualTen";

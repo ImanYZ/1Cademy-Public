@@ -770,9 +770,9 @@ export const Dashboard = ({ user, currentSemester }: DashboardProps) => {
                 <Legend
                   title={"Completion rate"}
                   options={[
-                    { title: " > 100%", color: "#388E3C" },
-                    { title: " > 10%", color: "#F9E2D0" },
-                    { title: " > 50%", color: "#A7D841" },
+                    { title: " >= 85%", color: "#388E3C" },
+                    { title: " <= 85%", color: "#A7D841" },
+                    { title: " <= 50%", color: "#F9E2D0" },
                     { title: " <= 10%", color: "rgba(255, 196, 153, 0.75)" },
                   ]}
                   sx={{ gridTemplateColumns: "16px 1fr 16px 1fr" }}
