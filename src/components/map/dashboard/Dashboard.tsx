@@ -22,6 +22,7 @@ import {
   getStackedBarStat,
   mapStudentsStatsDataByDates,
 } from "../../../lib/utils/charts.utils";
+import { getStudentLocationOnStackBar } from "../../../lib/utils/dashboard.utils";
 import { differentBetweenDays } from "../../../lib/utils/date.utils";
 import { capitalizeFirstLetter } from "../../../lib/utils/string.utils";
 import {
@@ -668,17 +669,16 @@ export const Dashboard = ({ user, currentSemester }: DashboardProps) => {
   useEffect(() => {
     if (user.role !== "STUDENT") return;
     if (!semesterStudentsVoteStats || !studentVoteStat) return;
+    if (!semesterConfig) return;
 
-    const sortedByProposals = [...semesterStudentsVoteStats].sort((x, y) => y.proposalPoints! - x.proposalPoints!);
-    const proposals = sortedByProposals.findIndex(s => s.uname === studentVoteStat?.uname);
-    const sortedByQuestions = [...semesterStudentsVoteStats].sort((x, y) => y.questionPoints! - x.questionPoints!);
-    const questions = sortedByQuestions.findIndex(s => s.uname === studentVoteStat?.uname);
-    const sortedByTotalDailyPractices = [...semesterStudentsVoteStats].sort(
-      (x, y) => y.totalPractices! - x.totalPractices!
+    const { practices, proposals, questions } = getStudentLocationOnStackBar(
+      semesterStudentsVoteStats,
+      semesterConfig,
+      user.uname
     );
-    const totalDailyPractices = sortedByTotalDailyPractices.findIndex(s => s.uname === studentVoteStat?.uname);
-    setStudentLocation({ proposals, questions, totalDailyPractices });
-  }, [semesterStudentsVoteStats, studentVoteStat, user.role]);
+
+    setStudentLocation({ proposals, questions, totalDailyPractices: practices });
+  }, [semesterConfig, semesterStudentsVoteStats, studentVoteStat, user.role, user.uname]);
 
   if (!thereIsData && !isLoading) return <NoDataMessage />;
 
