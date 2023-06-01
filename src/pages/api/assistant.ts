@@ -1,6 +1,7 @@
 import { admin, db } from "@/lib/firestoreServer/admin";
 import { Timestamp } from "firebase-admin/firestore";
 import { NextApiRequest, NextApiResponse } from "next";
+import { IAssistantPassageResponse } from "src/types/IAssistant";
 import {
   IAssistantConversation,
   IAssistantMessage,
@@ -24,12 +25,15 @@ import {
   sendMessageToGPT4V2,
   parseJSONObjectResponse,
   getAssistantNodesFromTitles,
+  findPassageResponse,
+  updatePassageResponse,
 } from "src/utils/assistant-helpers";
 
 export type IAssistantRequestPayload = {
   actionType: IAssitantRequestAction;
   message: string;
   conversationId?: string;
+  url?: string;
   // notebookId?: string;
 };
 
@@ -94,6 +98,22 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
       conversationData.createdAt = _assistantConversation.createdAt;
     }
 
+    if (payload.url && payload.actionType === "TeachContent") {
+      const passageResponse = await findPassageResponse(payload.message, payload.url);
+      if (passageResponse) {
+        const _passageResponse = passageResponse.data() as IAssistantPassageResponse;
+        const assistantMessage = _passageResponse.response!;
+        return res.status(200).json({
+          conversationId: assistantConversationRef.id,
+          message: assistantMessage.message,
+          actions: assistantMessage.actions,
+          nodes: assistantMessage.nodes,
+          is404: assistantMessage.is404,
+          request: payload.message,
+        } as IAssistantResponse);
+      }
+    }
+
     // sending knowledge graph definition
     if (!conversationData.messages.length) {
       conversationData.messages.push({
@@ -111,9 +131,10 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
         : payload.actionType === "ExplainMore"
         ? getExplainMorePrompt(conversationData, payload.message)
         : "";
+    let commands: string[] = [];
 
     if (payload.actionType === "TeachContent" || payload.actionType === "DirectQuestion") {
-      const commands = await getGPT4Queries(conversationData, payload.message);
+      commands = await getGPT4Queries(conversationData, payload.message);
       const nodes = await getNodeResultFromCommands(commands, tagTitle, userData);
       prompt =
         payload.actionType === "TeachContent"
@@ -161,6 +182,16 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
 
     // Saving conversation process to provide context of conversation in future
     await saveConversation(assistantConversationRef, assistantConversation, conversationData);
+
+    // Saving cache for response of passage
+    if (payload.url && payload.actionType === "TeachContent") {
+      await updatePassageResponse({
+        passage: payload.message.trim(),
+        url: payload.url,
+        queries: commands,
+        response: assistantMessage,
+      });
+    }
 
     // If was able to get information from knowledge graph
     return res.status(200).json({

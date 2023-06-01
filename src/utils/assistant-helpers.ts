@@ -1,8 +1,12 @@
 import { db } from "@/lib/firestoreServer/admin";
-import { getTypesenseClient } from "@/lib/typesense/typesense.config";
+import {
+  getTypesenseClient,
+  typesenseCollectionExists,
+  typesenseDocumentExists,
+} from "@/lib/typesense/typesense.config";
 import { google } from "googleapis";
 import { Configuration, OpenAIApi, ChatCompletionRequestMessage, CreateChatCompletionResponse } from "openai";
-import { TypesenseNodesSchema } from "src/knowledgeTypes";
+import { TypesenseAssistantResponseSchema, TypesenseNodesSchema } from "src/knowledgeTypes";
 import {
   FlashcardResponse,
   IAssistantChat,
@@ -17,6 +21,8 @@ import { IUser } from "src/types/IUser";
 import { IPractice } from "src/types/IPractice";
 import { Timestamp } from "firebase-admin/firestore";
 import moment from "moment";
+import { CollectionFieldSchema } from "typesense/lib/Typesense/Collection";
+import { IAssistantPassageResponse } from "src/types/IAssistant";
 
 export type BARD_RESULT_NODE = {
   title: string;
@@ -129,6 +135,65 @@ export const topTypesenseSearch = async (query: string, count: number, tagTitle?
     }
   }
   return Array.from(_nodeIds);
+};
+
+export const findPassageResponse = async (
+  passage: string,
+  url: string
+): Promise<FirebaseFirestore.QueryDocumentSnapshot<any> | undefined> => {
+  const _passageResponses = await db.collection("passageResponses").where("url", "==", url).get();
+  const passageResponses = _passageResponses.docs.filter(passageResponse => {
+    const passageResponseData = passageResponse.data() as IAssistantPassageResponse;
+    return passageResponseData.passage.includes(passage.trim()) || passage.trim().includes(passageResponseData.passage);
+  });
+
+  if (passageResponses.length) {
+    return passageResponses[0];
+  }
+};
+
+export const updatePassageResponse = async ({
+  passage,
+  queries,
+  response,
+  url,
+}: {
+  passage: string;
+  queries?: string[];
+  response?: IAssistantMessage;
+  url: string;
+}) => {
+  const _passageResponse = await findPassageResponse(passage, url);
+
+  const passageResponse: IAssistantPassageResponse = {
+    passage,
+    queries: queries || [],
+    url,
+  };
+  if (_passageResponse) {
+    const _passageResponseData = _passageResponse.data() as IAssistantPassageResponse;
+    passageResponse.queries = _passageResponseData.queries;
+    passageResponse.response = _passageResponseData.response;
+  }
+
+  if (queries) {
+    passageResponse.queries = queries;
+  }
+
+  if (response) {
+    passageResponse.response = response;
+  }
+
+  const passageResponseRef = _passageResponse
+    ? db.collection("passageResponses").doc(_passageResponse.id)
+    : db.collection("passageResponses").doc();
+
+  if (_passageResponse) {
+    await passageResponseRef.update(passageResponse);
+    return;
+  }
+
+  await passageResponseRef.set(passageResponse);
 };
 
 export const typesenseReferenceNodeSearch = async (query: string): Promise<string[]> => {
@@ -444,17 +509,18 @@ export const generateGpt4QueryResultV2 = async (nodeIds: string[], userData?: IU
 export const getNodeResultFromCommands = async (
   commands: string[],
   tagTitle?: string,
-  userData?: IUser
+  userData?: IUser,
+  count: number = 4
 ): Promise<IAssistantNode[]> => {
   const nodeIds: Set<string> = new Set();
 
   for (const command of commands) {
     let _nodeIds: string[] = [];
-    const googleNodeIds = await topGoogleSearchResults(command, 10, tagTitle);
+    const googleNodeIds = await topGoogleSearchResults(command, count, tagTitle);
     if (googleNodeIds.length) {
       _nodeIds = googleNodeIds;
     } else {
-      _nodeIds = await topTypesenseSearch(command, 10, tagTitle);
+      _nodeIds = await topTypesenseSearch(command, count, tagTitle);
     }
 
     for (const _nodeId of _nodeIds) {
