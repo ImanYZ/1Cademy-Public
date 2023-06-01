@@ -224,6 +224,12 @@ export type TypesenseNodesSchema = {
   versions: number; // typesense
 };
 
+export type TypesenseAssistantResponseSchema = {
+  passage: string;
+  response: string;
+  queries: string[];
+};
+
 export type TypesenseReferencesSchema = {
   id: string;
   node: string;

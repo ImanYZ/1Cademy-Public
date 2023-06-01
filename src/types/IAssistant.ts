@@ -1,3 +1,5 @@
+import { IAssistantMessage } from "./IAssitantConversation";
+
 export type IAssistantEventDetail =
   | {
       type: "SELECT_NOTEBOOK";
@@ -14,4 +16,11 @@ export type IAssistantEventDetail =
 export type INarrateWorkerMessage = {
   message?: string;
   messages: string[];
+};
+
+export type IAssistantPassageResponse = {
+  passage: string;
+  queries: string[];
+  response?: IAssistantMessage;
+  url: string;
 };
