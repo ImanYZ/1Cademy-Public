@@ -1,19 +1,24 @@
 import { SemesterStudentVoteStat } from "../../../src/instructorsTypes";
-import { getStudentLocationOnStackBar } from "../../../src/lib/utils/dashboard.utils";
+import {
+  getPracticePoints,
+  getProposalPoints,
+  getQuestionPoints,
+  getStudentLocationOnStackBar,
+} from "../../../src/lib/utils/dashboard.utils";
 import { ISemester } from "../../../src/types/ICourse";
 
-const DATE_2023_05_17 = "2023-05-17";
+// const DATE_2023_05_17 = "2023-05-17";
 
-jest.mock("../../../src/lib/utils/date.utils.ts", () => {
-  const originalModule = jest.requireActual("../../../src/lib/utils/date.utils.ts");
+// jest.mock("../../../src/lib/utils/date.utils.ts", () => {
+//   const originalModule = jest.requireActual("../../../src/lib/utils/date.utils.ts");
 
-  return {
-    ...originalModule,
-    getDateYYMMDDWithHyphens: jest.fn(() => {
-      return DATE_2023_05_17;
-    }),
-  };
-});
+//   return {
+//     ...originalModule,
+//     getDateYYMMDDWithHyphens: jest.fn(() => {
+//       return DATE_2023_05_17;
+//     }),
+//   };
+// });
 
 describe("should calculate student location on Stack bar", () => {
   it("Get user location from a user who has hightest proposals, questions and practices points", () => {
@@ -158,5 +163,86 @@ describe("should calculate student location on Stack bar", () => {
     expect(proposals).toBe(4);
     expect(questions).toBe(2);
     expect(practices).toBe(0);
+  });
+});
+
+describe("should get proposal points", () => {
+  it("get 4 proposal points from Shahbab-Ahmed", () => {
+    const UNAME = "Shahbab-Ahmed";
+    const semesterConfig = {
+      nodeProposals: { numProposalPerDay: 10, numPoints: 1 },
+      // questionProposals: { numQuestionsPerDay: 10, numPoints: 1 },
+      // dailyPractice: { numQuestionsPerDay: 10, numPoints: 1 },
+    } as ISemester;
+
+    const semesterStudentVoteStat = {
+      uname: UNAME,
+      days: [
+        { questionProposals: 10, correctPractices: 10, proposals: 10 },
+        { questionProposals: 10, correctPractices: 10, proposals: 10 },
+        { questionProposals: 10, correctPractices: 10, proposals: 9 },
+        { questionProposals: 10, correctPractices: 10, proposals: 10 },
+        { questionProposals: 10, correctPractices: 10, proposals: 10 },
+      ],
+    } as SemesterStudentVoteStat;
+
+    const { points, uname } = getProposalPoints(semesterStudentVoteStat, semesterConfig);
+
+    expect(points).toBe(4);
+    expect(uname).toBe(UNAME);
+  });
+});
+
+describe("should get question points", () => {
+  it("get 4 question points from Shahbab-Ahmed", () => {
+    const UNAME = "Shahbab-Ahmed";
+    const semesterConfig = {
+      // nodeProposals: { numProposalPerDay: 10, numPoints: 1 },
+      questionProposals: { numQuestionsPerDay: 10, numPoints: 1 },
+      // dailyPractice: { numQuestionsPerDay: 10, numPoints: 1 },
+    } as ISemester;
+
+    const semesterStudentVoteStat = {
+      uname: UNAME,
+      days: [
+        { questionProposals: 10, correctPractices: 10, proposals: 10 },
+        { questionProposals: 10, correctPractices: 10, proposals: 10 },
+        { questionProposals: 9, correctPractices: 10, proposals: 10 },
+        { questionProposals: 10, correctPractices: 10, proposals: 10 },
+        { questionProposals: 10, correctPractices: 10, proposals: 10 },
+      ],
+    } as SemesterStudentVoteStat;
+
+    const { points, uname } = getQuestionPoints(semesterStudentVoteStat, semesterConfig);
+
+    expect(points).toBe(4);
+    expect(uname).toBe(UNAME);
+  });
+});
+
+describe("should get practice points", () => {
+  it("get 4 practice points from Shahbab-Ahmed", () => {
+    const UNAME = "Shahbab-Ahmed";
+    const semesterConfig = {
+      // nodeProposals: { numProposalPerDay: 10, numPoints: 1 },
+      // questionProposals: { numQuestionsPerDay: 10, numPoints: 1 },
+      dailyPractice: { numQuestionsPerDay: 10, numPoints: 1 },
+    } as ISemester;
+
+    const semesterStudentVoteStat = {
+      uname: UNAME,
+      days: [
+        { questionProposals: 10, correctPractices: 10, proposals: 10 },
+        { questionProposals: 10, correctPractices: 10, proposals: 10 },
+        { questionProposals: 10, correctPractices: 9, proposals: 10 },
+        { questionProposals: 10, correctPractices: 10, proposals: 10 },
+        { questionProposals: 10, correctPractices: 10, proposals: 10 },
+      ],
+    } as SemesterStudentVoteStat;
+
+    const { points, uname } = getPracticePoints(semesterStudentVoteStat, semesterConfig);
+
+    expect(points).toBe(4);
+    expect(uname).toBe(UNAME);
   });
 });

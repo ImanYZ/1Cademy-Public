@@ -1,7 +1,7 @@
 import { SemesterStudentVoteStat } from "../../instructorsTypes";
 import { ISemester } from "../../types/ICourse";
 
-const getProposalPoints = (
+export const getProposalPoints = (
   semesterStudentsVoteStat: SemesterStudentVoteStat,
   semester: ISemester
 ): { uname: string; points: number } => {
@@ -13,29 +13,28 @@ const getProposalPoints = (
   return { uname: semesterStudentsVoteStat.uname, points: proposalPoints };
 };
 
-const getQuestionPoints = (
+export const getQuestionPoints = (
   semesterStudentsVoteStat: SemesterStudentVoteStat,
   semester: ISemester
 ): { uname: string; points: number } => {
   const questionPoints = semesterStudentsVoteStat.days.reduce(
     (acu, cur) =>
       acu +
-      (cur.proposals >= semester.questionProposals.numQuestionsPerDay
-        ? semester.questionProposals.numQuestionsPerDay
+      (cur.questionProposals >= semester.questionProposals.numQuestionsPerDay
+        ? semester.questionProposals.numPoints
         : 0),
     0
   );
   return { uname: semesterStudentsVoteStat.uname, points: questionPoints };
 };
 
-const getPracticePoints = (
+export const getPracticePoints = (
   semesterStudentsVoteStat: SemesterStudentVoteStat,
   semester: ISemester
 ): { uname: string; points: number } => {
   const practicePoints = semesterStudentsVoteStat.days.reduce(
     (acu, cur) =>
-      acu +
-      (cur.proposals >= semester.dailyPractice.numQuestionsPerDay ? semester.dailyPractice.numQuestionsPerDay : 0),
+      acu + (cur.correctPractices >= semester.dailyPractice.numQuestionsPerDay ? semester.dailyPractice.numPoints : 0),
     0
   );
   return { uname: semesterStudentsVoteStat.uname, points: practicePoints };
