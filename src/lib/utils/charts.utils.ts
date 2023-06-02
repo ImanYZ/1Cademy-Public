@@ -21,40 +21,44 @@ import {
 } from "../../pages/instructors/dashboard";
 import { differentBetweenDays } from "./date.utils";
 
-export const calculateVoteStatPoints = (voteStat: ISemesterStudentVoteStat, semester: ISemester) => {
+type VoteStatsPoints = { questionPoints: number; proposalPoints: number; votePoints: number };
+
+export const calculateVoteStatPoints = (voteStat: ISemesterStudentVoteStat, semester: ISemester): VoteStatsPoints => {
   return (voteStat.days || [])
     .map(statDay => {
+      const gotQuestionPoint = statDay.questionProposals >= semester.questionProposals.numQuestionsPerDay;
+      const gotNodeProposalsPoint = statDay.proposals >= semester.nodeProposals.numProposalPerDay;
+
+      const questionHasValidDates = () => {
+        const { startDate, endDate } = semester.questionProposals;
+        return currentDayIsBetween(startDate.toDate(), endDate.toDate());
+      };
+
+      const proposalsHasValidDates = () => {
+        const { startDate, endDate } = semester.nodeProposals;
+        return currentDayIsBetween(startDate.toDate(), endDate.toDate());
+      };
+
       return {
-        questionPoints:
-          moment(semester.questionProposals.startDate).isSameOrAfter(moment()) &&
-          moment(semester.questionProposals.endDate).isSameOrBefore(moment()) &&
-          statDay.questionProposals >= semester.questionProposals.numQuestionsPerDay
-            ? semester.questionProposals.numPoints
-            : 0,
-        proposalPoints:
-          moment(semester.nodeProposals.startDate).isSameOrAfter(moment()) &&
-          moment(semester.nodeProposals.endDate).isSameOrBefore(moment()) &&
-          statDay.proposals >= semester.nodeProposals.numProposalPerDay
-            ? semester.nodeProposals.numPoints
-            : 0,
+        questionPoints: questionHasValidDates() && gotQuestionPoint ? semester.questionProposals.numPoints : 0,
+        proposalPoints: proposalsHasValidDates() && gotNodeProposalsPoint ? semester.nodeProposals.numPoints : 0,
         votePoints:
           statDay.agreementsWithInst * semester.votes.pointIncrementOnAgreement -
           statDay.disagreementsWithInst * semester.votes.pointDecrementOnAgreement,
       };
     })
     .reduce(
-      (c, item) => ({
-        questionPoints: c.questionPoints + item.questionPoints,
-        proposalPoints: c.proposalPoints + item.proposalPoints,
-        votePoints: c.votePoints + item.votePoints,
+      (acu: VoteStatsPoints, cur) => ({
+        questionPoints: acu.questionPoints + cur.questionPoints,
+        proposalPoints: acu.proposalPoints + cur.proposalPoints,
+        votePoints: acu.votePoints + cur.votePoints,
       }),
-      {
-        questionPoints: 0,
-        proposalPoints: 0,
-        votePoints: 0,
-      }
+      { questionPoints: 0, proposalPoints: 0, votePoints: 0 }
     );
 };
+
+const currentDayIsBetween = (startDate: Date, endDate: Date) =>
+  moment(startDate).isSameOrAfter(moment()) && moment(endDate).isSameOrBefore(moment());
 
 // TODO: test
 
@@ -299,7 +303,11 @@ const sumPerDay = (day: ISemesterStudentVoteStatDay) => {
 };
 
 // TODO: test
+// TODO: check this is similar to 250
 
+/**
+ * Will map data into: { day1:{...}, day2:{...}, ...}
+ */
 export const mapStudentsStatsDataByDates = (data: ISemesterStudentVoteStat[]): MappedData[] => {
   // resByStudents: [{d1,d2},{d1,d3}]
 

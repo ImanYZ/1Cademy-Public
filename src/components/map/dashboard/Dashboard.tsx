@@ -280,8 +280,8 @@ export const Dashboard = ({ user, currentSemester }: DashboardProps) => {
 
       const res = mapStudentsStatsDataByDates(semesterStudentVoteStats);
       console.log("sb03");
-      const gg = getGeneralStats(res);
-      const ts = res.reduce(
+      const newSemesterStats = getGeneralStats(res);
+      const newTrendStats = res.reduce(
         (a: TrendStats, c): TrendStats => {
           return {
             childProposals: semesterConfig?.isProposalRequired
@@ -309,8 +309,8 @@ export const Dashboard = ({ user, currentSemester }: DashboardProps) => {
           votes: [],
         }
       );
-      setTrendStats(ts);
-      setSemesterStats(gg);
+      setTrendStats(newTrendStats);
+      setSemesterStats(newSemesterStats);
       // semesterStudentsVoteStats
       console.log("sb04", { semesterStudentVoteStats });
       setSemesterStudentVoteStats([...semesterStudentVoteStats]);
@@ -565,6 +565,7 @@ export const Dashboard = ({ user, currentSemester }: DashboardProps) => {
     const tagId = currentSemester?.tagId;
     if (!tagId) return;
     if (!semesterConfig) return;
+
     const semesterStudentVoteStatRef = collection(db, "semesterStudentVoteStats");
     const qByAll = query(semesterStudentVoteStatRef, where("tagId", "==", tagId));
     const qByStudent = query(semesterStudentVoteStatRef, where("uname", "==", user.uname), where("tagId", "==", tagId));
