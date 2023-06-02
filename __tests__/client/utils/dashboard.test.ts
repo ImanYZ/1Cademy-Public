@@ -7,19 +7,6 @@ import {
 } from "../../../src/lib/utils/dashboard.utils";
 import { ISemester } from "../../../src/types/ICourse";
 
-// const DATE_2023_05_17 = "2023-05-17";
-
-// jest.mock("../../../src/lib/utils/date.utils.ts", () => {
-//   const originalModule = jest.requireActual("../../../src/lib/utils/date.utils.ts");
-
-//   return {
-//     ...originalModule,
-//     getDateYYMMDDWithHyphens: jest.fn(() => {
-//       return DATE_2023_05_17;
-//     }),
-//   };
-// });
-
 describe("should calculate student location on Stack bar", () => {
   it("Get user location from a user who has hightest proposals, questions and practices points", () => {
     const UNAME = "Shahbab-Ahmed";
@@ -171,8 +158,6 @@ describe("should get proposal points", () => {
     const UNAME = "Shahbab-Ahmed";
     const semesterConfig = {
       nodeProposals: { numProposalPerDay: 10, numPoints: 1 },
-      // questionProposals: { numQuestionsPerDay: 10, numPoints: 1 },
-      // dailyPractice: { numQuestionsPerDay: 10, numPoints: 1 },
     } as ISemester;
 
     const semesterStudentVoteStat = {
@@ -197,9 +182,7 @@ describe("should get question points", () => {
   it("get 4 question points from Shahbab-Ahmed", () => {
     const UNAME = "Shahbab-Ahmed";
     const semesterConfig = {
-      // nodeProposals: { numProposalPerDay: 10, numPoints: 1 },
       questionProposals: { numQuestionsPerDay: 10, numPoints: 1 },
-      // dailyPractice: { numQuestionsPerDay: 10, numPoints: 1 },
     } as ISemester;
 
     const semesterStudentVoteStat = {
@@ -224,8 +207,6 @@ describe("should get practice points", () => {
   it("get 4 practice points from Shahbab-Ahmed", () => {
     const UNAME = "Shahbab-Ahmed";
     const semesterConfig = {
-      // nodeProposals: { numProposalPerDay: 10, numPoints: 1 },
-      // questionProposals: { numQuestionsPerDay: 10, numPoints: 1 },
       dailyPractice: { numQuestionsPerDay: 10, numPoints: 1 },
     } as ISemester;
 

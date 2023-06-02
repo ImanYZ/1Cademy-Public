@@ -217,18 +217,15 @@ export const getStudentSubgroupInBars = (points: number, maxPoints: number): key
   return "alessEqualTen";
 };
 
-const getInitialSumChapterPerDay = () => {
-  const init: any = {
-    childProposals: 0,
-    editProposals: 0,
-    links: 0,
-    nodes: 0,
-    questions: 0,
-    votes: 0,
-  };
-
-  return init;
-};
+const getInitialSumChapterPerDay = (): GeneralSemesterStudentsStats => ({
+  childProposals: 0,
+  editProposals: 0,
+  links: 0,
+  nodes: 0,
+  questions: 0,
+  votes: 0,
+  correctPractices: 0,
+});
 
 const sumChapterPerDay = (chapters: ISemesterStudentStatChapter[]) => {
   const initialValue = getInitialSumChapterPerDay();
@@ -306,7 +303,7 @@ const sumPerDay = (day: ISemesterStudentVoteStatDay) => {
 // TODO: check this is similar to 250
 
 /**
- * Will map data into: { day1:{...}, day2:{...}, ...}
+ * Will map data into: [ {date,value}, {date,value}, ...]
  */
 export const mapStudentsStatsDataByDates = (data: ISemesterStudentVoteStat[]): MappedData[] => {
   // resByStudents: [{d1,d2},{d1,d3}]
