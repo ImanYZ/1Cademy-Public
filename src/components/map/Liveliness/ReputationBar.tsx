@@ -9,6 +9,8 @@ import { IActionTrack } from "src/types/IActionTrack";
 
 import { DESIGN_SYSTEM_COLORS } from "@/lib/theme/colors";
 
+import { DEFAULT_AVATAR } from "../../../lib/utils/constants";
+
 type ILivelinessBarProps = {
   db: Firestore;
   onlineUsers: string[];
@@ -28,8 +30,6 @@ type UserInteractions = {
     actions: ActionTrackType[];
   };
 };
-
-const DEFAULT_AVATAR = "https://storage.googleapis.com/onecademy-1.appspot.com/ProfilePictures/no-img.png";
 
 const ReputationlinessBar = ({ open, setOpen, ...props }: ILivelinessBarProps) => {
   const { db, onlineUsers, openUserInfoSidebar, authEmail, user, disabled = false, windowHeight } = props;

@@ -1,12 +1,14 @@
 import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowUp";
-import { Box, Tooltip } from "@mui/material";
+import { Box, Tooltip, Typography } from "@mui/material";
 import { collection, Firestore, getDocs, limit, onSnapshot, query, Timestamp, where } from "firebase/firestore";
 import Image from "next/image";
 import React, { useEffect, useMemo, useState } from "react";
 import { ActionTrackType } from "src/knowledgeTypes";
 import { IActionTrack } from "src/types/IActionTrack";
 
+import { DESIGN_SYSTEM_COLORS } from "../../../lib/theme/colors";
+import { DEFAULT_AVATAR } from "../../../lib/utils/constants";
 import { MemoizedActionBubble } from "./ActionBubble";
 
 type ILivelinessBarProps = {
@@ -61,6 +63,8 @@ const LivelinessBar = ({ open, setOpen, disabled = false, ...props }: ILivelines
         const docChanges = snapshot.docChanges();
         for (const docChange of docChanges) {
           const actionTrackData = docChange.doc.data() as IActionTrack;
+
+          // TODO: get user data
           let doerEmail: string = "";
           if (docChange.type === "added") {
             if (!usersInteractions.hasOwnProperty(actionTrackData.doer)) {
@@ -349,7 +353,21 @@ const LivelinessBar = ({ open, setOpen, disabled = false, ...props }: ILivelines
                           })}
                         </Box>
                         <Box className="user-image">
-                          <Image src={usersInteractions[uname].imageUrl} width={28} height={28} objectFit="cover" />
+                          {usersInteractions[uname].imageUrl && usersInteractions[uname].imageUrl !== DEFAULT_AVATAR ? (
+                            <Image src={usersInteractions[uname].imageUrl} width={28} height={28} objectFit="cover" />
+                          ) : (
+                            <Box sx={{ width: "100%", height: "100%", display: "grid", placeItems: "center" }}>
+                              <Typography
+                                sx={{ fontSize: "12px", fontWeight: "600", color: DESIGN_SYSTEM_COLORS.baseWhite }}
+                              >
+                                NAME HERE
+                                {/* {`${users[uname].fullname.split(" ")[0].charAt(0).toUpperCase()}${users[uname].fullname
+                                  .split(" ")[1]
+                                  ?.charAt(0)
+                                  .toUpperCase()}`} */}
+                              </Typography>
+                            </Box>
+                          )}
                         </Box>
                         {onlineUsers.includes(uname) && (
                           <Box
