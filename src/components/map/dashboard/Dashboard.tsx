@@ -942,7 +942,7 @@ export const Dashboard = ({ user, currentSemester }: DashboardProps) => {
                       identifier="plot-1"
                       maxX={boxStats.proposalsPoints.max}
                       minX={boxStats.proposalsPoints.min}
-                      /* studentStats={studentBoxStat.proposalsPoints} */
+                      studentStats={user.role === "STUDENT" ? studentBoxStat.proposalsPoints : undefined}
                     />
                     {isMovil && <BoxLegend role={user.role} />}
                   </>
@@ -993,7 +993,7 @@ export const Dashboard = ({ user, currentSemester }: DashboardProps) => {
                       identifier="plot-2"
                       maxX={boxStats.questionsPoints.max}
                       minX={boxStats.questionsPoints.min}
-                      /* studentStats={studentBoxStat.questionsPoints} */
+                      studentStats={user.role === "STUDENT" ? studentBoxStat.questionsPoints : undefined}
                     />
                     {isMovil && <BoxLegend role={user.role} />}
                   </>
@@ -1043,7 +1043,7 @@ export const Dashboard = ({ user, currentSemester }: DashboardProps) => {
                       identifier="plot-3"
                       minX={boxStats.votesPoints.min}
                       maxX={boxStats.votesPoints.max}
-                      /* studentStats={studentBoxStat.votesPoints} */
+                      studentStats={user.role === "STUDENT" ? studentBoxStat.votesPoints : undefined}
                     />
                     {isMovil && <BoxLegend role={user.role} />}
                   </>
