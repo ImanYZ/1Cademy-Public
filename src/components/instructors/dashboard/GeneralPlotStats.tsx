@@ -94,7 +94,7 @@ export const GeneralPlotStats = ({ semesterConfig, semesterStats, student }: Gen
           {student ? `${formatNumber(student.questions)} / ` : ""}
           {formatNumber(semesterStats?.questions)}
         </span>
-        <span>Days to complete the practice</span>
+        <span>Practices</span>
         <span>
           {student ? `${formatNumber(student.correctPractices)} / ` : ""}
           {formatNumber(totalDaysAllowedToPractice)}
