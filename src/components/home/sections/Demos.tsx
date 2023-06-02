@@ -16,13 +16,13 @@ const DEMOS_ITEMS: Demo[] = [
     id: "01",
     demoName: "Introducing 1Cademy Assistant - Practice Tool",
     url: "https://www.youtube.com/embed/kU6ppO_WLC0",
-    previewImage: "/home/demos/practice-tool-demo.jpg",
+    previewImage: "/home/demos/practice-tool-demo.png",
   },
   {
     id: "02",
     demoName: "Introducing 1Cademy Assistant - Question Answering",
     url: "https://www.youtube.com/embed/Z8aVR459Kks",
-    previewImage: "/home/demos/question-answering-demo.jpg",
+    previewImage: "/home/demos/question-answering-demo.png",
   },
   {
     id: "03",
@@ -43,7 +43,7 @@ export const Demos = () => {
       <Box
         sx={{
           display: "grid",
-          gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr", md: "1fr 1fr 1fr", lg: "1fr 1fr 1fr 1fr" },
+          gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr", md: "1fr 1fr 1fr" },
           columnGap: "32px",
           rowGap: { xs: "32px", md: "64px" },
           // border: "solid 2px royalBlue",
@@ -66,19 +66,18 @@ export const Demos = () => {
                 justifyContent: "center",
                 alignItems: "center",
                 backgroundImage: `url(${cur.previewImage})`,
-                backgroundRepeat: "none",
+                backgroundRepeat: "no-repeat",
                 backgroundPosition: "center",
-                backgroundSize: "cover",
+                backgroundSize: "contain",
                 ":hover": {
                   cursor: "pointer",
-                  border: `solid 2px ${DESIGN_SYSTEM_COLORS.primary600}`,
                   svg: {
                     fill: DESIGN_SYSTEM_COLORS.primary600,
                   },
                 },
               }}
             >
-              <PlayCircleIcon sx={{ fontSize: "50px", color: DESIGN_SYSTEM_COLORS.baseGraphit }} />
+              <PlayCircleIcon sx={{ fontSize: "50px", color: DESIGN_SYSTEM_COLORS.baseWhite }} />
             </Box>
             <Typography
               sx={{
