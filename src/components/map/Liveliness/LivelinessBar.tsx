@@ -1,14 +1,12 @@
 import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowUp";
-import { Box, Tooltip, Typography } from "@mui/material";
+import { Box, Tooltip } from "@mui/material";
 import { collection, Firestore, getDocs, limit, onSnapshot, query, Timestamp, where } from "firebase/firestore";
-import Image from "next/image";
 import React, { useEffect, useMemo, useState } from "react";
 import { ActionTrackType } from "src/knowledgeTypes";
 import { IActionTrack } from "src/types/IActionTrack";
 
-import { DESIGN_SYSTEM_COLORS } from "../../../lib/theme/colors";
-import { DEFAULT_AVATAR } from "../../../lib/utils/constants";
+import OptimizedAvatar2 from "../../OptimizedAvatar2";
 import { MemoizedActionBubble } from "./ActionBubble";
 
 type ILivelinessBarProps = {
@@ -353,21 +351,12 @@ const LivelinessBar = ({ open, setOpen, disabled = false, ...props }: ILivelines
                           })}
                         </Box>
                         <Box className="user-image">
-                          {usersInteractions[uname].imageUrl && usersInteractions[uname].imageUrl !== DEFAULT_AVATAR ? (
-                            <Image src={usersInteractions[uname].imageUrl} width={28} height={28} objectFit="cover" />
-                          ) : (
-                            <Box sx={{ width: "100%", height: "100%", display: "grid", placeItems: "center" }}>
-                              <Typography
-                                sx={{ fontSize: "12px", fontWeight: "600", color: DESIGN_SYSTEM_COLORS.baseWhite }}
-                              >
-                                NAME HERE
-                                {/* {`${users[uname].fullname.split(" ")[0].charAt(0).toUpperCase()}${users[uname].fullname
-                                  .split(" ")[1]
-                                  ?.charAt(0)
-                                  .toUpperCase()}`} */}
-                              </Typography>
-                            </Box>
-                          )}
+                          <OptimizedAvatar2
+                            alt={usersInteractions[uname].fullname}
+                            imageUrl={usersInteractions[uname].imageUrl}
+                            size={28}
+                            sx={{ border: "none" }}
+                          />
                         </Box>
                         {onlineUsers.includes(uname) && (
                           <Box
