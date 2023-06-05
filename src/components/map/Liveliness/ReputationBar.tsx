@@ -1,13 +1,12 @@
 import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowUp";
-import { Box, Tooltip, Typography } from "@mui/material";
+import { Box, Tooltip } from "@mui/material";
 import { collection, Firestore, getDocs, limit, onSnapshot, query, Timestamp, where } from "firebase/firestore";
-import Image from "next/image";
 import React, { useEffect, useMemo, useState } from "react";
 import { ActionTrackType } from "src/knowledgeTypes";
 import { IActionTrack } from "src/types/IActionTrack";
 
-import { DESIGN_SYSTEM_COLORS } from "@/lib/theme/colors";
+import OptimizedAvatar2 from "../../OptimizedAvatar2";
 
 type ILivelinessBarProps = {
   db: Firestore;
@@ -28,8 +27,6 @@ type UserInteractions = {
     actions: ActionTrackType[];
   };
 };
-
-const DEFAULT_AVATAR = "https://storage.googleapis.com/onecademy-1.appspot.com/ProfilePictures/no-img.png";
 
 const ReputationlinessBar = ({ open, setOpen, ...props }: ILivelinessBarProps) => {
   const { db, onlineUsers, openUserInfoSidebar, authEmail, user, disabled = false, windowHeight } = props;
@@ -350,26 +347,12 @@ const ReputationlinessBar = ({ open, setOpen, ...props }: ILivelinessBarProps) =
                         }}
                       >
                         <Box className="user-image">
-                          {users[uname].imageUrl && users[uname].imageUrl !== DEFAULT_AVATAR ? (
-                            <Image
-                              src={users[uname].imageUrl}
-                              width={28}
-                              height={28}
-                              objectFit="cover"
-                              alt={`${users[uname].fullname}`}
-                            />
-                          ) : (
-                            <Box sx={{ width: "100%", height: "100%", display: "grid", placeItems: "center" }}>
-                              <Typography
-                                sx={{ fontSize: "12px", fontWeight: "600", color: DESIGN_SYSTEM_COLORS.baseWhite }}
-                              >
-                                {`${users[uname].fullname.split(" ")[0].charAt(0).toUpperCase()}${users[uname].fullname
-                                  .split(" ")[1]
-                                  ?.charAt(0)
-                                  .toUpperCase()}`}
-                              </Typography>
-                            </Box>
-                          )}
+                          <OptimizedAvatar2
+                            alt={users[uname].fullname}
+                            imageUrl={users[uname].imageUrl}
+                            size={28}
+                            sx={{ border: "none" }}
+                          />
                         </Box>
                         {onlineUsers.includes(uname) && (
                           <Box
