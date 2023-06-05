@@ -1,34 +1,32 @@
 import { Divider, Typography, useTheme } from "@mui/material";
 import { Box } from "@mui/system";
-import React, { useMemo } from "react";
+import React from "react";
 import { GeneralSemesterStudentsStats } from "src/instructorsTypes";
-import { ISemester } from "src/types/ICourse";
 
 import { DESIGN_SYSTEM_COLORS } from "@/lib/theme/colors";
 
 import { formatNumber } from "../../../lib/utils/number.utils";
 
 type GeneralPlotStatsProps = {
-  semesterStats: GeneralSemesterStudentsStats | null;
-  semesterConfig: ISemester | null;
-  student?: GeneralSemesterStudentsStats | null;
+  maxSemesterStats: GeneralSemesterStudentsStats | null;
+  studentStats?: GeneralSemesterStudentsStats | null;
 };
 
-export const GeneralPlotStats = ({ semesterConfig, semesterStats, student }: GeneralPlotStatsProps) => {
-  console.log("semesterStats", semesterStats);
+export const GeneralPlotStats = ({ maxSemesterStats, studentStats }: GeneralPlotStatsProps) => {
+  console.log("semesterStats", maxSemesterStats);
   const {
     palette: { mode },
   } = useTheme();
 
-  const totalDaysAllowedToPractice = useMemo(() => {
-    if (!semesterConfig || !semesterConfig.dailyPractice) return 0;
-    const startDate = semesterConfig.dailyPractice.startDate.toDate();
-    const endDate = semesterConfig.dailyPractice.endDate.toDate();
+  // const totalDaysAllowedToPractice = useMemo(() => {
+  //   if (!semesterConfig || !semesterConfig.dailyPractice) return 0;
+  //   const startDate = semesterConfig.dailyPractice.startDate.toDate();
+  //   const endDate = semesterConfig.dailyPractice.endDate.toDate();
 
-    const diffInMs = Math.abs(startDate.getTime() - endDate.getTime());
-    const diffInDays = Math.ceil(diffInMs / (1000 * 60 * 60 * 24));
-    return diffInDays;
-  }, [semesterConfig]);
+  //   const diffInMs = Math.abs(startDate.getTime() - endDate.getTime());
+  //   const diffInDays = Math.ceil(diffInMs / (1000 * 60 * 60 * 24));
+  //   return diffInDays;
+  // }, [semesterConfig]);
 
   return (
     <Box>
@@ -66,38 +64,38 @@ export const GeneralPlotStats = ({ semesterConfig, semesterStats, student }: Gen
         </span>
         <span>Child Proposals</span>
         <span>
-          {student ? `${formatNumber(student.childProposals)} / ` : ""}
-          {formatNumber(semesterStats?.childProposals)}
+          {studentStats ? `${formatNumber(studentStats.childProposals)} / ` : ""}
+          {formatNumber(maxSemesterStats?.childProposals)}
         </span>
         <span>Edit Proposals</span>
         <span>
-          {student ? `${formatNumber(student.editProposals)} / ` : ""}
-          {formatNumber(semesterStats?.editProposals)}
+          {studentStats ? `${formatNumber(studentStats.editProposals)} / ` : ""}
+          {formatNumber(maxSemesterStats?.editProposals)}
         </span>
         <span>Links</span>
         <span>
-          {student ? `${formatNumber(student.links)} / ` : ""}
-          {formatNumber(semesterStats?.links)}
+          {studentStats ? `${formatNumber(studentStats.links)} / ` : ""}
+          {formatNumber(maxSemesterStats?.links)}
         </span>
         <span>Nodes</span>
         <span>
-          {student ? `${formatNumber(student.nodes)} / ` : ""}
-          {formatNumber(semesterStats?.nodes)}
+          {studentStats ? `${formatNumber(studentStats.nodes)} / ` : ""}
+          {formatNumber(maxSemesterStats?.nodes)}
         </span>
         <span>Votes</span>
         <span>
-          {student ? `${formatNumber(student.votes)} / ` : ""}
-          {formatNumber(semesterStats?.votes)}
+          {studentStats ? `${formatNumber(studentStats.votes)} / ` : ""}
+          {formatNumber(maxSemesterStats?.votes)}
         </span>
         <span>Questions</span>
         <span>
-          {student ? `${formatNumber(student.questions)} / ` : ""}
-          {formatNumber(semesterStats?.questions)}
+          {studentStats ? `${formatNumber(studentStats.questions)} / ` : ""}
+          {formatNumber(maxSemesterStats?.questions)}
         </span>
         <span>Practices</span>
         <span>
-          {student ? `${formatNumber(student.correctPractices)} / ` : ""}
-          {formatNumber(totalDaysAllowedToPractice)}
+          {studentStats ? `${formatNumber(studentStats.correctPractices)} / ` : ""}
+          {formatNumber(maxSemesterStats?.correctPractices)}
         </span>
       </Box>
     </Box>

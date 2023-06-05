@@ -2,6 +2,8 @@ import { Timestamp } from "firebase/firestore";
 
 import { KnowledgeChoice } from "./knowledgeTypes";
 
+export type SnapshotChangesTypes = "added" | "modified" | "removed";
+
 export type NodeType =
   | "Relation"
   | "Concept"

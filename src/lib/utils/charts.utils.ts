@@ -18,7 +18,9 @@ import {
   StackedBarStatsData,
   StudentStackedBarStats,
   StudentStackedBarStatsObject,
+  TrendStats,
 } from "../../pages/instructors/dashboard";
+import { SnapshotChangesTypes } from "../../types";
 import { differentBetweenDays } from "./date.utils";
 
 type VoteStatsPoints = { questionPoints: number; proposalPoints: number; votePoints: number };
@@ -308,21 +310,7 @@ const sumPerDay = (day: ISemesterStudentVoteStatDay) => {
 export const mapStudentsStatsDataByDates = (data: ISemesterStudentVoteStat[]): MappedData[] => {
   // resByStudents: [{d1,d2},{d1,d3}]
 
-  const resByStudents = data.map(student => {
-    return student.days.reduce((acu: { [key: string]: GeneralSemesterStudentsStats }, cur) => {
-      const responseSumChapterPerDay = { day: cur.day, chaptersSum: sumPerDay(cur) };
-      const sum: GeneralSemesterStudentsStats = {
-        childProposals: responseSumChapterPerDay.chaptersSum.childProposals,
-        editProposals: responseSumChapterPerDay.chaptersSum.editProposals,
-        links: responseSumChapterPerDay.chaptersSum.links,
-        nodes: responseSumChapterPerDay.chaptersSum.nodes,
-        questions: responseSumChapterPerDay.chaptersSum.questions,
-        votes: responseSumChapterPerDay.chaptersSum.votes,
-        correctPractices: responseSumChapterPerDay.chaptersSum.correctPractices,
-      };
-      return { ...acu, [cur.day]: sum };
-    }, {});
-  });
+  const resByStudents = mapStudentStatsSumByStudents(data);
 
   // resByDay: {d1,d2,d3}
   const resByDay = resByStudents.reduce((acu, cur) => {
@@ -345,6 +333,54 @@ export const mapStudentsStatsDataByDates = (data: ISemesterStudentVoteStat[]): M
   return Object.entries(resByDay).map(([date, value]: any) => ({ date, value }));
 };
 
+/**
+ * Will map data into: [ {date,value}, {date,value}, ...]
+ */
+export const mapStudentsStatsDataByDates2 = (data: { [x: string]: GeneralSemesterStudentsStats }[]): MappedData[] => {
+  // resByDay: {d1,d2,d3}
+  const resByDay = data.reduce((acu, cur) => {
+    return Object.entries(cur).reduce((acuStudent: { [key: string]: GeneralSemesterStudentsStats }, [key, value]) => {
+      const prevStudent = acuStudent[key] ?? getInitialSumChapterPerDay();
+      const sumsStudents: GeneralSemesterStudentsStats = {
+        childProposals: prevStudent.childProposals + value.childProposals,
+        editProposals: prevStudent.editProposals + value.editProposals,
+        links: prevStudent.links + value.links,
+        nodes: prevStudent.nodes + value.nodes,
+        questions: prevStudent.questions + value.questions,
+        votes: prevStudent.votes + value.votes,
+        correctPractices: prevStudent.correctPractices + value.correctPractices,
+      };
+      return { ...acuStudent, [key]: sumsStudents };
+    }, acu);
+  }, {});
+
+  // [{date,value},{date,value},{date,value}]
+  return Object.entries(resByDay).map(([date, value]: any) => ({ date, value }));
+};
+
+export const mapStudentStatsSumByStudents = (
+  data: ISemesterStudentVoteStat[]
+): { [x: string]: GeneralSemesterStudentsStats }[] => {
+  // resByStudents: [{d1,d2},{d1,d3}]
+
+  const resByStudents = data.map(student => {
+    return student.days.reduce((acu: { [key: string]: GeneralSemesterStudentsStats }, cur) => {
+      const responseSumChapterPerDay = { day: cur.day, chaptersSum: sumPerDay(cur) };
+      const sum: GeneralSemesterStudentsStats = {
+        childProposals: responseSumChapterPerDay.chaptersSum.childProposals,
+        editProposals: responseSumChapterPerDay.chaptersSum.editProposals,
+        links: responseSumChapterPerDay.chaptersSum.links,
+        nodes: responseSumChapterPerDay.chaptersSum.nodes,
+        questions: responseSumChapterPerDay.chaptersSum.questions,
+        votes: responseSumChapterPerDay.chaptersSum.votes,
+        correctPractices: responseSumChapterPerDay.chaptersSum.correctPractices,
+      };
+      return { ...acu, [cur.day]: sum };
+    }, {});
+  });
+  return resByStudents;
+};
+
 export const getGeneralStats = (data: MappedData[]) => {
   return data.reduce((acu: GeneralSemesterStudentsStats, cur) => {
     const sumsStudents: GeneralSemesterStudentsStats = {
@@ -359,3 +395,76 @@ export const getGeneralStats = (data: MappedData[]) => {
     return sumsStudents;
   }, getInitialSumChapterPerDay());
 };
+
+export const getMaximumStudentPoints = (
+  sumStatsByStudents: { [x: string]: GeneralSemesterStudentsStats }[]
+): GeneralSemesterStudentsStats => {
+  const studentSumStats: GeneralSemesterStudentsStats[] = sumStatsByStudents.map(studentStats => {
+    return Object.keys(studentStats).reduce((acu: GeneralSemesterStudentsStats, key) => {
+      const stats: GeneralSemesterStudentsStats = studentStats[key];
+      const res: GeneralSemesterStudentsStats = {
+        childProposals: acu.childProposals + stats.childProposals,
+        correctPractices: acu.correctPractices + stats.correctPractices,
+        editProposals: acu.editProposals + stats.editProposals,
+        links: acu.links + stats.links,
+        nodes: acu.nodes + stats.nodes,
+        questions: acu.questions + stats.questions,
+        votes: acu.votes + stats.votes,
+      };
+      return res;
+    }, getInitialSumChapterPerDay());
+  });
+
+  const maxStudentStats = studentSumStats.reduce((acu: GeneralSemesterStudentsStats, cur) => {
+    return {
+      childProposals: Math.max(acu.childProposals, cur.childProposals),
+      correctPractices: Math.max(acu.correctPractices, cur.correctPractices),
+      editProposals: Math.max(acu.editProposals, cur.editProposals),
+      links: Math.max(acu.links, cur.links),
+      nodes: Math.max(acu.nodes, cur.nodes),
+      questions: Math.max(acu.questions, cur.questions),
+      votes: Math.max(acu.votes, cur.votes),
+    };
+  }, getInitialSumChapterPerDay());
+
+  return maxStudentStats;
+};
+
+export type SemesterStudentVoteStatChanges = { type: SnapshotChangesTypes; data: SemesterStudentVoteStat };
+
+export const mergeSemesterStudentVoteStat = (
+  previousStats: SemesterStudentVoteStat[],
+  newStats: SemesterStudentVoteStatChanges[]
+): SemesterStudentVoteStat[] => {
+  return newStats.reduce((acu, cur) => {
+    if (cur.type === "added") return [...acu, cur.data];
+    if (cur.type === "modified") return acu.map(c => (c.uname === cur.data.uname ? cur.data : c));
+    if (cur.type === "removed") return acu.filter(c => c.uname === cur.data.uname);
+    return acu;
+  }, previousStats);
+};
+
+export const getTrendsStats = (data: MappedData[], semesterConfig: ISemester) => {
+  const { isProposalRequired, isQuestionProposalRequired, isCastingVotesRequired } = semesterConfig;
+  const trendsStats = data.reduce((acu: TrendStats, cur): TrendStats => {
+    const date = new Date(cur.date);
+    return {
+      childProposals: isProposalRequired ? [...acu.childProposals, { date, num: cur.value.childProposals }] : [],
+      editProposals: isProposalRequired ? [...acu.editProposals, { date, num: cur.value.editProposals }] : [],
+      proposedLinks: [...acu.proposedLinks, { date, num: cur.value.links }],
+      nodes: [...acu.nodes, { date, num: cur.value.nodes }],
+      questions: isQuestionProposalRequired ? [...acu.questions, { date, num: cur.value.questions }] : [],
+      votes: isCastingVotesRequired ? [...acu.votes, { date, num: cur.value.votes }] : [],
+    };
+  }, getInitialTrendStats());
+  return trendsStats;
+};
+
+export const getInitialTrendStats = (): TrendStats => ({
+  childProposals: [],
+  editProposals: [],
+  proposedLinks: [],
+  nodes: [],
+  votes: [],
+  questions: [],
+});

@@ -582,8 +582,8 @@ const StudentDashboard: InstructorLayoutPage = ({ user, currentSemester, setting
           {isLoading && <GeneralPlotStatsSkeleton />}
           {!isLoading && (
             <GeneralPlotStats
-              semesterStats={semesterStats}
-              student={semesterStudentStats}
+              maxSemesterStats={semesterStats}
+              studentStats={semesterStudentStats}
               semesterConfig={semesterConfig}
             />
           )}

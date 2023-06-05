@@ -638,7 +638,7 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
           }}
         >
           {isLoading && <GeneralPlotStatsSkeleton />}
-          {!isLoading && <GeneralPlotStats semesterStats={semesterStats} semesterConfig={semesterConfig} />}
+          {!isLoading && <GeneralPlotStats maxSemesterStats={semesterStats} semesterConfig={semesterConfig} />}
         </Paper>
 
         <Paper
@@ -1069,7 +1069,7 @@ export const groupStudentPointsDayChapter = (
   agreementPoints = 1,
   disagreementPoints = 1
 ) => {
-  console.log({ userDailyStat });
+  // console.log({ userDailyStat });
   const groupedDays = userDailyStat.days.reduce((acuDayPerStudent: { [key: string]: number }, curDayPerStudent) => {
     const groupedChapters = curDayPerStudent.chapters.reduce((acuChapter: { [key: string]: number }, curChapter) => {
       if (type in curChapter) {
