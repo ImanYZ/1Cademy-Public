@@ -358,9 +358,7 @@ export const mapStudentsStatsDataByDates2 = (data: { [x: string]: GeneralSemeste
   return Object.entries(resByDay).map(([date, value]: any) => ({ date, value }));
 };
 
-export const mapStudentStatsSumByStudents = (
-  data: ISemesterStudentVoteStat[]
-): { [x: string]: GeneralSemesterStudentsStats }[] => {
+export const mapStudentStatsSumByStudents = (data: ISemesterStudentVoteStat[]): SumStudentStats[] => {
   // resByStudents: [{d1,d2},{d1,d3}]
 
   const resByStudents = data.map(student => {
@@ -396,9 +394,9 @@ export const getGeneralStats = (data: MappedData[]) => {
   }, getInitialSumChapterPerDay());
 };
 
-export const getMaximumStudentPoints = (
-  sumStatsByStudents: { [x: string]: GeneralSemesterStudentsStats }[]
-): GeneralSemesterStudentsStats => {
+export type SumStudentStats = { [date: string]: GeneralSemesterStudentsStats };
+
+export const getMaximumStudentPoints = (sumStatsByStudents: SumStudentStats[]): GeneralSemesterStudentsStats => {
   const studentSumStats: GeneralSemesterStudentsStats[] = sumStatsByStudents.map(studentStats => {
     return Object.keys(studentStats).reduce((acu: GeneralSemesterStudentsStats, key) => {
       const stats: GeneralSemesterStudentsStats = studentStats[key];
