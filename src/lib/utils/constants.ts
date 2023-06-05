@@ -1,5 +1,7 @@
 import { NodeType } from "src/types";
 
+export const DEFAULT_AVATAR = "https://storage.googleapis.com/onecademy-1.appspot.com/ProfilePictures/no-img.png";
+
 export const ZINDEX = {
   dashboard: 1500, // dashboard content to (student dashboard, practice tool and assistant floating animation)
   devtools: 5000,

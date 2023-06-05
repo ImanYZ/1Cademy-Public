@@ -5,6 +5,8 @@ import Image from "next/image";
 import React, { FC, useState } from "react";
 
 import { DESIGN_SYSTEM_COLORS } from "@/lib/theme/colors";
+
+import { DEFAULT_AVATAR } from "../lib/utils/constants";
 type Props = {
   imageUrl: string;
   alt: string;
@@ -34,15 +36,15 @@ const OptimizedAvatar2: FC<Props> = ({ imageUrl, alt, size, onClick, sx }) => {
         ...sx,
       }}
     >
-      {hasError ? (
+      {hasError || imageUrl === DEFAULT_AVATAR ? (
         <Avatar
           sx={{
             background: "linear-gradient(143.7deg, #FDC830 15.15%, #F37335 83.11%);",
             fontWeight: "500",
             fontSize: `${(size - 8) / 2}px`,
             color: common.white,
-            width: `${size - 2}px`,
-            height: `${size - 2}px`,
+            width: `${size}px`,
+            height: `${size}px`,
           }}
         >
           {alt
