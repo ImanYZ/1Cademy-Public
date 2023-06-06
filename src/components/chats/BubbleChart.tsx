@@ -66,7 +66,6 @@ function drawChart(
   student?: SemesterStudentVoteStat | null,
   role?: UserRole
 ) {
-  console.log("here", { width, margin });
   const htmlTooltip = (users: ISemesterStudent[]) => {
     const html = users.map(user => {
       return `<div class="students-tooltip-body ${theme === "Dark" ? "darkMode" : "lightMode"}">
@@ -93,7 +92,6 @@ function drawChart(
   height = 400 - margin.top - margin.bottom;
 
   svg
-    .attr("id", "www")
     .attr("width", width)
     .attr("height", height + margin.top + margin.bottom)
     .append("g")
@@ -234,7 +232,6 @@ export const BubbleChart = ({
   student,
   role,
 }: BubblePlotProps) => {
-  console.log({ bubbledata: data });
   const height = 400;
   const svg = useCallback(
     (svgRef: any) => {

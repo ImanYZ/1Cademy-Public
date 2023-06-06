@@ -383,7 +383,6 @@ export const PointsBarChart = ({
         proposalsStudents,
         questionsStudents,
         dailyPracticeStudents,
-
         theme,
         studentLocation,
         mobile,
@@ -410,9 +409,6 @@ export const PointsBarChart = ({
   return (
     <div style={{ position: "relative" }}>
       <svg ref={svg}>
-        {/* <text style={{ fontSize: "16px" }} fill={theme === "Dark" ? "white" : "black"} x={10} y={20}>
-          # of Students
-        </text> */}
         <g id="bars"></g>
         <path id="loc"></path>
         <g id="locations"></g>

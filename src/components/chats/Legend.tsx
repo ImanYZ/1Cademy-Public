@@ -1,7 +1,9 @@
 import { Box, Stack, SxProps, Theme, Typography } from "@mui/material";
 import React, { useMemo } from "react";
 
-type LegendProps = { title: string; options: { title: string; color: string }[]; sx?: SxProps<Theme> };
+export type LegendOptions = { title: string; color: string };
+
+type LegendProps = { title: string; options: LegendOptions[]; sx?: SxProps<Theme> };
 
 const Legend = ({ title, options, sx }: LegendProps) => {
   const reverseOptions = useMemo(() => [...options].reverse(), [options]);

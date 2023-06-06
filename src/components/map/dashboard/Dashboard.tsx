@@ -44,7 +44,7 @@ import {
 import { ICourseTag, ISemester, ISemesterStudent, ISemesterStudentStat } from "../../../types/ICourse";
 import { BoxChart } from "../../chats/BoxChart";
 import { BubbleChart, BubbleThreshold } from "../../chats/BubbleChart";
-import { LegendMemoized } from "../../chats/Legend";
+import { LegendMemoized, LegendOptions } from "../../chats/Legend";
 import { PointsBarChart } from "../../chats/PointsBarChart";
 import { SankeyChart, SankeyData } from "../../chats/SankeyChart";
 import { TrendPlot } from "../../chats/TrendPlot";
@@ -62,12 +62,21 @@ import { UserStatus } from "../../practiceTool/UserStatus";
 const db = getFirestore();
 
 const BUBBLE_CHARTS_THRESHOLDS: BubbleThreshold[] = [
-  { title: "< 0%", color: "#EF6820", divider: -1 },
-  { title: "= 0%", color: "#575757", divider: -0.01 },
-  { title: "<=10%", color: "#F7B27A", divider: 0.01 },
+  { title: "<0%", color: "#EF6820", divider: -1 },
+  { title: "=0%", color: "#575757", divider: -0.01 },
+  { title: ">0%", color: "#F7B27A", divider: 0.01 },
   { title: ">10%", color: "#FAC515", divider: 0.1 },
   { title: ">50%", color: "#A7D841", divider: 0.5 },
   { title: ">100%", color: "#388E3C", divider: 1 },
+];
+
+const STACK_BAR_CHART_THRESHOLDS: LegendOptions[] = [
+  { title: "<0%", color: "#EF6820" },
+  { title: ">=0%", color: "#575757" },
+  { title: ">10%", color: "#F7B27A" },
+  { title: ">40%", color: "#FAC515" },
+  { title: ">70%", color: "#A7D841" },
+  { title: ">85%", color: "#388E3C" },
 ];
 
 type SemesterStudentSankeys = {
@@ -606,6 +615,7 @@ export const Dashboard = ({ user, currentSemester }: DashboardProps) => {
           ref={stackBarWrapperRef}
           sx={{
             p: { sm: "10px", md: "16px" },
+            // maxWidth: "350px",
             display: "flex",
             flexDirection: "column",
             justifyContent: "center",
@@ -617,20 +627,15 @@ export const Dashboard = ({ user, currentSemester }: DashboardProps) => {
 
           {!isLoading && (semesterConfig?.isQuestionProposalRequired || semesterConfig?.isProposalRequired) && (
             <>
-              <Stack direction={"row"} spacing={"24px"}>
+              <Stack direction={"row"} justifyContent={"space-between"} sx={{ mb: "26px" }}>
                 <Box>
                   <Typography sx={{ fontSize: "19px", mb: "6px", lineHeight: "30px" }}>Points</Typography>
                   <Typography sx={{ fontSize: "12px", fontWeight: "500" }}>Nº of Students</Typography>
                 </Box>
                 <LegendMemoized
                   title={"Completion rate"}
-                  options={[
-                    { title: " >= 85%", color: "#388E3C" },
-                    { title: " <= 85%", color: "#A7D841" },
-                    { title: " <= 50%", color: "#F9E2D0" },
-                    { title: " <= 10%", color: "rgba(255, 196, 153, 0.75)" },
-                  ]}
-                  sx={{ gridTemplateColumns: "1fr 1fr" }}
+                  options={STACK_BAR_CHART_THRESHOLDS}
+                  sx={{ gridTemplateColumns: "1fr 1fr 1fr" }}
                 />
               </Stack>
               <Box sx={{ alignSelf: "center" }}>
@@ -705,14 +710,6 @@ export const Dashboard = ({ user, currentSemester }: DashboardProps) => {
                   <LegendMemoized
                     title={""}
                     options={BUBBLE_CHARTS_THRESHOLDS}
-                    // options={[
-                    //   { title: ">100%", color: "#388E3C" },
-                    //   { title: ">10%", color: "#FAC515" },
-                    //   { title: "< 0%", color: "#EF6820" },
-                    //   { title: ">50%", color: "#A7D841" },
-                    //   { title: "<=10%", color: "#F7B27A" },
-                    //   { title: "= 0%", color: "#575757" },
-                    // ]}
                     sx={{ gridTemplateColumns: "1fr 1fr 1fr", gridTemplateRows: "1fr 1fr" }}
                   />
                 </Box>
