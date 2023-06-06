@@ -117,11 +117,8 @@ export const UserStatus = ({
   }, [semester, semesterStudentVoteStats, weekInfo.dates]);
 
   const studentStrike: CalculateDailyStreakOutput = useMemo(() => {
-    console.log("x11");
     if (!semester) return { dailyStreak: 0, maxDailyStreak: 0 };
-    console.log("x12");
     if (!semesterStudentVoteStats) return { dailyStreak: 0, maxDailyStreak: 0 };
-    console.log("x13");
 
     return calculateDailyStreak(semesterStudentVoteStats, semester.dailyPractice.numQuestionsPerDay);
   }, [semester, semesterStudentVoteStats]);
