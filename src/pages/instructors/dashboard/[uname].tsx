@@ -12,7 +12,7 @@ import { capitalizeFirstLetter } from "@/lib/utils/string.utils";
 
 import { BubbleChart } from "../../../components/chats/BubbleChart";
 import { LegendMemoized } from "../../../components/chats/Legend";
-import { PointsBarChart } from "../../../components/chats/PointsBarChart";
+import { StackBarChart } from "../../../components/chats/StackBarChart";
 import { TrendPlot } from "../../../components/chats/TrendPlot";
 import { GeneralPlotStats } from "../../../components/instructors/dashboard/GeneralPlotStats";
 import { NoDataMessage } from "../../../components/instructors/NoDataMessage";
@@ -625,7 +625,7 @@ const StudentDashboard: InstructorLayoutPage = ({ user, currentSemester, setting
                 />
               </Box>
               <Box sx={{ alignSelf: "center" }}>
-                <PointsBarChart
+                <StackBarChart
                   data={stackedBar}
                   proposalsStudents={user.role === "INSTRUCTOR" ? proposalsStudents : null}
                   questionsStudents={user.role === "INSTRUCTOR" ? questionsStudents : null}

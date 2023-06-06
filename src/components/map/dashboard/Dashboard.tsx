@@ -43,8 +43,8 @@ import { ICourseTag, ISemester, ISemesterStudent, ISemesterStudentStat } from ".
 import { BoxChart } from "../../chats/BoxChart";
 import { BubbleChart, BubbleThreshold } from "../../chats/BubbleChart";
 import { LegendMemoized, LegendOptions } from "../../chats/Legend";
-import { PointsBarChart } from "../../chats/PointsBarChart";
 import { SankeyChart, SankeyData } from "../../chats/SankeyChart";
+import { StackBarChart } from "../../chats/StackBarChart";
 import { TrendPlot } from "../../chats/TrendPlot";
 import { GeneralPlotStats } from "../../instructors/dashboard/GeneralPlotStats";
 import { NoDataMessage } from "../../instructors/NoDataMessage";
@@ -608,7 +608,7 @@ export const Dashboard = ({ user, currentSemester }: DashboardProps) => {
                 />
               </Stack>
               <Box sx={{ alignSelf: "center" }}>
-                <PointsBarChart
+                <StackBarChart
                   data={stackedBar}
                   proposalsStudents={semesterConfig.isProposalRequired ? proposalsStudents : null}
                   questionsStudents={semesterConfig.isQuestionProposalRequired ? questionsStudents : null}

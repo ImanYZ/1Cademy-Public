@@ -30,7 +30,7 @@ import { capitalizeFirstLetter } from "@/lib/utils/string.utils";
 
 import { BoxChart } from "../../components/chats/BoxChart";
 import { LegendMemoized } from "../../components/chats/Legend";
-import { PointsBarChart } from "../../components/chats/PointsBarChart";
+import { StackBarChart } from "../../components/chats/StackBarChart";
 import { TrendPlot } from "../../components/chats/TrendPlot";
 import withAuthUser from "../../components/hoc/withAuthUser";
 import { GeneralPlotStats } from "../../components/instructors/dashboard/GeneralPlotStats";
@@ -679,7 +679,7 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
                 />
               </Box>
               <Box sx={{ alignSelf: "center" }}>
-                <PointsBarChart
+                <StackBarChart
                   data={stackedBar}
                   proposalsStudents={user.role === "INSTRUCTOR" ? proposalsStudents : null}
                   questionsStudents={user.role === "INSTRUCTOR" ? questionsStudents : null}

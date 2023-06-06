@@ -1,4 +1,3 @@
-import moment from "moment";
 import { ISemester, ISemesterStudent, ISemesterStudentVoteStat, ISemesterStudentVoteStatDay } from "src/types/ICourse";
 
 import {
@@ -19,24 +18,30 @@ import { differentBetweenDays } from "./date.utils";
 type VoteStatsPoints = { questionPoints: number; proposalPoints: number; votePoints: number };
 
 export const calculateVoteStatPoints = (voteStat: ISemesterStudentVoteStat, semester: ISemester): VoteStatsPoints => {
+  console.log({ voteStat, semester });
   return (voteStat.days || [])
     .map(statDay => {
       const gotQuestionPoint = statDay.questionProposals >= semester.questionProposals.numQuestionsPerDay;
       const gotNodeProposalsPoint = statDay.proposals >= semester.nodeProposals.numProposalPerDay;
 
-      const questionHasValidDates = () => {
-        const { startDate, endDate } = semester.questionProposals;
-        return currentDayIsBetween(startDate.toDate(), endDate.toDate());
-      };
+      // const questionHasValidDates = () => {
+      //   return true;
+      //   const { startDate, endDate } = semester.questionProposals;
+      //   return currentDayIsBetween(startDate.toDate(), endDate.toDate());
+      // };
 
-      const proposalsHasValidDates = () => {
-        const { startDate, endDate } = semester.nodeProposals;
-        return currentDayIsBetween(startDate.toDate(), endDate.toDate());
-      };
+      // const proposalsHasValidDates = () => {
+      //   return true;
+      //   const { startDate, endDate } = semester.nodeProposals;
+      //   return currentDayIsBetween(startDate.toDate(), endDate.toDate());
+      // };
+
+      // if data on DB is created in correct range, is not required validate
+      // in other case wont work when when current Date is greater than End Date
 
       return {
-        questionPoints: questionHasValidDates() && gotQuestionPoint ? semester.questionProposals.numPoints : 0,
-        proposalPoints: proposalsHasValidDates() && gotNodeProposalsPoint ? semester.nodeProposals.numPoints : 0,
+        questionPoints: gotQuestionPoint ? semester.questionProposals.numPoints : 0,
+        proposalPoints: gotNodeProposalsPoint ? semester.nodeProposals.numPoints : 0,
         votePoints:
           statDay.agreementsWithInst * semester.votes.pointIncrementOnAgreement -
           statDay.disagreementsWithInst * semester.votes.pointDecrementOnAgreement,
@@ -52,8 +57,8 @@ export const calculateVoteStatPoints = (voteStat: ISemesterStudentVoteStat, seme
     );
 };
 
-const currentDayIsBetween = (startDate: Date, endDate: Date) =>
-  moment(startDate).isSameOrAfter(moment()) && moment(endDate).isSameOrBefore(moment());
+// const currentDayIsBetween = (startDate: Date, endDate: Date) =>
+//   moment(startDate).isSameOrAfter(moment()) && moment(endDate).isSameOrBefore(moment());
 
 // TODO: test
 

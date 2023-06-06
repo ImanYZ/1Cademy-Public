@@ -333,7 +333,7 @@ function drawChart(
     // d.x - 0.72 * x.bandwidth()
   }
 }
-type StackedBarProps = {
+type StackBarProps = {
   data: StackedBarStats[];
   proposalsStudents: StudentStackedBarStatsObject | null;
   questionsStudents: StudentStackedBarStatsObject | null;
@@ -346,7 +346,7 @@ type StackedBarProps = {
   isProposalRequired?: boolean;
   isDailyPracticeRequired?: boolean;
 };
-export const PointsBarChart = ({
+export const StackBarChart = ({
   data,
   proposalsStudents,
   questionsStudents,
@@ -358,7 +358,7 @@ export const PointsBarChart = ({
   isQuestionRequired,
   isProposalRequired,
   isDailyPracticeRequired: isDailyPracticeRequired,
-}: StackedBarProps) => {
+}: StackBarProps) => {
   const svg = useCallback(
     (svgRef: any) => {
       drawChart(
