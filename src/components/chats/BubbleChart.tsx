@@ -11,12 +11,12 @@ import { BubbleStats, SemesterStudentVoteStat } from "../../instructorsTypes";
 
 // const columns = ["fruit", "vegetable"];
 
-const RED = "#E04F16";
+// const RED = "#E04F16";
 const GRAY = "#575757";
-const LESS_EQUAL_THAN_10_COLOR = "#F7B27A";
-const GREATER_THAN_10_COLOR = "#F9DBAF";
-const GREATER_THAN_50_COLOR = "#A7D841";
-const GREATER_THAN_100_COLOR = "#388E3C";
+// const LESS_EQUAL_THAN_10_COLOR = "#F7B27A";
+// const GREATER_THAN_10_COLOR = "#F9DBAF";
+// const GREATER_THAN_50_COLOR = "#A7D841";
+// const GREATER_THAN_100_COLOR = "#388E3C";
 
 // const data = [
 //   { students: 30, votes: 170, points: 40 },
@@ -41,6 +41,9 @@ const GREATER_THAN_100_COLOR = "#388E3C";
 
 // const chartWidth = 100;
 // const chartHeight = 100;
+
+export type BubbleThreshold = { title: string; color: string; divider: number };
+
 type BubbleMargin = {
   top: number;
   right: number;
@@ -59,6 +62,7 @@ function drawChart(
   maxAxisY: number,
   minAxisX: number,
   minAxisY: number,
+  threshold: BubbleThreshold[],
   student?: SemesterStudentVoteStat | null,
   role?: UserRole
 ) {
@@ -169,11 +173,21 @@ function drawChart(
   // color palette = one color per subgroup
   // const color = d3.scaleLinear().domain([]).range(["#FF8A33", "#F9E2D0", "#A7D841", "#388E3C"]);
 
+  console.log({
+    data,
+    minAxisY,
+    maxAxisY,
+    domain: threshold.map(c => (c.divider !== 0 ? maxAxisY * c.divider : 0)),
+    range: threshold.map(c => c.color),
+  });
   // @ts-ignore
   const color = d3
     .scaleThreshold()
-    .domain([0, maxAxisY / 10, maxAxisY / 2, maxAxisY]) // @ts-ignore
-    .range([RED, LESS_EQUAL_THAN_10_COLOR, GREATER_THAN_10_COLOR, GREATER_THAN_50_COLOR, GREATER_THAN_100_COLOR]);
+    // .domain([-0.01, 0.01, 14, 65, 145])
+    .domain(threshold.slice(1).map(c => maxAxisY * c.divider)) // @ts-ignore
+    .range(threshold.map(c => c.color));
+  // .domain([0, maxAxisY / 10, maxAxisY / 2, maxAxisY]) // @ts-ignore
+  // .range([RED, LESS_EQUAL_THAN_10_COLOR, GREATER_THAN_10_COLOR, GREATER_THAN_50_COLOR, GREATER_THAN_100_COLOR]);
 
   svg
     .select("#mesh")
@@ -269,6 +283,7 @@ type BubblePlotProps = {
   maxAxisY: number;
   minAxisX: number;
   minAxisY: number;
+  threshold: BubbleThreshold[];
   student?: SemesterStudentVoteStat | null;
   role?: UserRole;
 };
@@ -281,6 +296,7 @@ export const BubbleChart = ({
   maxAxisY,
   minAxisX,
   minAxisY,
+  threshold,
   student,
   role,
 }: BubblePlotProps) => {
@@ -288,9 +304,23 @@ export const BubbleChart = ({
   const height = 400;
   const svg = useCallback(
     (svgRef: any) => {
-      drawChart(svgRef, data, width, height, margin, theme, maxAxisX, maxAxisY, minAxisX, minAxisY, student, role);
+      drawChart(
+        svgRef,
+        data,
+        width,
+        height,
+        margin,
+        theme,
+        maxAxisX,
+        maxAxisY,
+        minAxisX,
+        minAxisY,
+        threshold,
+        student,
+        role
+      );
     },
-    [data, margin, maxAxisX, maxAxisY, minAxisX, minAxisY, role, student, theme, width]
+    [data, margin, maxAxisX, maxAxisY, minAxisX, minAxisY, role, student, theme, threshold, width]
   );
 
   return (

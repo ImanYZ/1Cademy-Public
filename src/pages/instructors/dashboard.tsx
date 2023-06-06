@@ -1012,6 +1012,7 @@ export const getBubbleStats = (
     if (votes < minVote) minVote = votes;
     if (votePoints < minVotePoints) minVotePoints = votePoints;
   });
+  console.log({ bubbleStats });
   return {
     bubbleStats,
     maxVote,

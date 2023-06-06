@@ -43,7 +43,7 @@ import {
 } from "../../../pages/instructors/dashboard";
 import { ICourseTag, ISemester, ISemesterStudent, ISemesterStudentStat } from "../../../types/ICourse";
 import { BoxChart } from "../../chats/BoxChart";
-import { BubbleChart } from "../../chats/BubbleChart";
+import { BubbleChart, BubbleThreshold } from "../../chats/BubbleChart";
 import { Legend } from "../../chats/Legend";
 import { PointsBarChart } from "../../chats/PointsBarChart";
 import { SankeyChart, SankeyData } from "../../chats/SankeyChart";
@@ -60,6 +60,15 @@ import Leaderboard from "../../practiceTool/Leaderboard";
 import { UserStatus } from "../../practiceTool/UserStatus";
 
 const db = getFirestore();
+
+const BUBBLE_CHARTS_THRESHOLDS: BubbleThreshold[] = [
+  { title: "< 0%", color: "#EF6820", divider: -1 },
+  { title: "= 0%", color: "#575757", divider: -0.01 },
+  { title: "<=10%", color: "#F7B27A", divider: 0.01 },
+  { title: ">10%", color: "#FAC515", divider: 0.1 },
+  { title: ">50%", color: "#A7D841", divider: 0.5 },
+  { title: ">100%", color: "#388E3C", divider: 1 },
+];
 
 type SemesterStudentSankeys = {
   createdAt: any;
@@ -695,14 +704,15 @@ export const Dashboard = ({ user, currentSemester }: DashboardProps) => {
                   <Typography sx={{ fontSize: "19px", alignSelf: "center" }}>Vote Leaderboard</Typography>
                   <Legend
                     title={""}
-                    options={[
-                      { title: ">100%", color: "#388E3C" },
-                      { title: ">10%", color: "#F9DBAF" },
-                      { title: "< 0%", color: "#E04F16" },
-                      { title: ">50%", color: "#A7D841" },
-                      { title: "<=10%", color: "#F7B27A" },
-                      { title: "= 0%", color: "#575757" },
-                    ]}
+                    options={BUBBLE_CHARTS_THRESHOLDS}
+                    // options={[
+                    //   { title: ">100%", color: "#388E3C" },
+                    //   { title: ">10%", color: "#FAC515" },
+                    //   { title: "< 0%", color: "#EF6820" },
+                    //   { title: ">50%", color: "#A7D841" },
+                    //   { title: "<=10%", color: "#F7B27A" },
+                    //   { title: "= 0%", color: "#575757" },
+                    // ]}
                     sx={{ gridTemplateColumns: "repeat(3,12px 1fr)" }}
                   />
                 </Box>
@@ -717,6 +727,7 @@ export const Dashboard = ({ user, currentSemester }: DashboardProps) => {
                   minAxisY={bubbleAxis.minAxisY}
                   role={user.role}
                   student={studentVoteStat}
+                  threshold={BUBBLE_CHARTS_THRESHOLDS}
                 />
                 {user.role === "STUDENT" && (
                   <Box sx={{ display: "flex", justifyContent: "center", gap: "6px", alignItems: "center" }}>
