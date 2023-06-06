@@ -473,9 +473,6 @@ export const generateGpt4QueryResult = async (nodeIds: string[], uname?: string)
 
 export const generateGpt4QueryResultV2 = async (nodeIds: string[], userData?: IUser) => {
   const nodes: IAssistantNode[] = [];
-  const practiceAnsweredByNodeIds: {
-    [nodeId: string]: number;
-  } = {};
   const nodeIdChunks = arrayToChunks(nodeIds, 10);
 
   for (const nodeIds of nodeIdChunks) {

@@ -27,6 +27,7 @@ import {
   getAssistantNodesFromTitles,
   findPassageResponse,
   updatePassageResponse,
+  generateGpt4QueryResultV2,
 } from "src/utils/assistant-helpers";
 
 export type IAssistantRequestPayload = {
@@ -102,6 +103,15 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
       const passageResponse = await findPassageResponse(payload.message, payload.url);
       if (passageResponse) {
         const _passageResponse = passageResponse.data() as IAssistantPassageResponse;
+
+        // replacing cached node data with current user's data
+        if (_passageResponse.response) {
+          const _nodes = _passageResponse.response.nodes || [];
+          const nodeIds = _nodes.map(node => node.node);
+          const nodes = await generateGpt4QueryResultV2(nodeIds, userData);
+          _passageResponse.response.nodes = nodes;
+        }
+
         const assistantMessage = _passageResponse.response!;
         // Saving conversation process to provide context of conversation in future
         await saveConversation(assistantConversationRef, assistantConversation, conversationData);
