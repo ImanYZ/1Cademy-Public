@@ -10,7 +10,6 @@ import {
   BubbleAxis,
   BubbleStats,
   GeneralSemesterStudentsStats,
-  MaxPoints,
   SemesterStudentStat,
   SemesterStudentVoteStat,
   StackedBarStats,
@@ -28,7 +27,6 @@ import {
   SemesterStudentVoteStatChanges,
 } from "../../../lib/utils/charts.utils";
 import { getStudentLocationOnStackBar } from "../../../lib/utils/dashboard.utils";
-import { differentBetweenDays } from "../../../lib/utils/date.utils";
 import { capitalizeFirstLetter } from "../../../lib/utils/string.utils";
 import {
   BoxStudentsStats,
@@ -103,7 +101,6 @@ export const Dashboard = ({ user, currentSemester }: DashboardProps) => {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [thereIsData, setThereIsData] = useState<boolean>(true);
   const [stackBarWidth, setStackBarWidth] = useState(0);
-  // const [studentsCounter, setStudentsCounter] = useState<number>(0);
   const [stackedBar, setStackedBar] = useState<StackedBarStats[]>([]);
   const [proposalsStudents, setProposalsStudents] = useState<StudentStackedBarStatsObject | null>(null);
   const [questionsStudents, setQuestionsStudents] = useState<StudentStackedBarStatsObject | null>(null);
@@ -114,9 +111,6 @@ export const Dashboard = ({ user, currentSemester }: DashboardProps) => {
   const [infoWidth, setInfoWidth] = useState(0);
   const [students, setStudents] = useState<ISemesterStudent[]>([]);
   const [semesterStudentsVoteStats, setSemesterStudentVoteStats] = useState<SemesterStudentVoteStat[]>([]);
-  const [maxProposalsPoints, setMaxProposalsPoints] = useState<number>(0);
-  const [maxQuestionsPoints, setMaxQuestionsPoints] = useState<number>(0);
-  const [maxDailyPractices, setMaxDailyPractices] = useState<number>(0);
 
   const [studentVoteStat, setStudentVoteStat] = useState<SemesterStudentVoteStat | null>(null);
   const [maxSemesterStats, setMaxSemesterStats] = useState<GeneralSemesterStudentsStats | null>(null);
@@ -272,27 +266,12 @@ export const Dashboard = ({ user, currentSemester }: DashboardProps) => {
       studentStackedBarProposalsStats,
       studentStackedBarQuestionsStats,
       studentStackedBarDailyPracticeStats,
-    } = getStackedBarStat(
-      semesterStudentsVoteStats,
-      students,
-      maxProposalsPoints,
-      maxQuestionsPoints,
-      maxDailyPractices,
-      semesterConfig
-    );
+    } = getStackedBarStat(semesterStudentsVoteStats, students, semesterConfig);
     setStackedBar(stackedBarStats);
     setProposalsStudents(studentStackedBarProposalsStats);
     setQuestionsStudents(studentStackedBarQuestionsStats);
     setDailyPracticeStudents(studentStackedBarDailyPracticeStats);
-  }, [
-    maxDailyPractices,
-    maxProposalsPoints,
-    maxQuestionsPoints,
-    semesterConfig,
-    semesterStudentsVoteStats,
-    students,
-    user.role,
-  ]);
+  }, [semesterConfig, semesterStudentsVoteStats, students, user.role]);
 
   // set up semester snapshot to modify state
   useEffect(() => {
@@ -303,24 +282,14 @@ export const Dashboard = ({ user, currentSemester }: DashboardProps) => {
       const docChanges = snapshot.docChanges();
       if (!docChanges.length) {
         setSemesterConfig(null);
-        // setStudentsCounter(0);
         setStudents([]);
-        setMaxProposalsPoints(0);
-        setMaxQuestionsPoints(0);
-        setMaxDailyPractices(0);
         setThereIsData(false);
         return;
       }
 
       for (let change of docChanges) {
         const semesterData = change.doc.data() as ISemester;
-        const { maxProposalsPoints, maxQuestionsPoints, maxDailyPractices } =
-          getMaxProposalsQuestionsPoints(semesterData);
         setSemesterConfig(semesterData);
-        // setStudentsCounter(semesterData.students.length);
-        setMaxProposalsPoints(maxProposalsPoints);
-        setMaxQuestionsPoints(maxQuestionsPoints);
-        setMaxDailyPractices(maxDailyPractices);
         setStudents(semesterData.students);
         setThereIsData(true);
       }
@@ -1043,22 +1012,22 @@ const BoxLegend = ({ role }: { role: UserRole }) => {
   );
 };
 
-const getMaxProposalsQuestionsPoints = (data: ISemester): MaxPoints => {
-  const dailyPracticesTotalDays = differentBetweenDays(
-    data.dailyPractice.endDate.toDate(),
-    data.dailyPractice.startDate.toDate()
-  );
-  const questionsTotalDays = differentBetweenDays(
-    data.questionProposals.endDate.toDate(),
-    data.questionProposals.startDate.toDate()
-  );
-  const proposalsTotalDays = differentBetweenDays(
-    data.nodeProposals.endDate.toDate(),
-    data.nodeProposals.startDate.toDate()
-  );
-  return {
-    maxProposalsPoints: proposalsTotalDays * data.nodeProposals.numPoints,
-    maxQuestionsPoints: questionsTotalDays * data.questionProposals.numPoints,
-    maxDailyPractices: dailyPracticesTotalDays * data?.dailyPractice?.numPoints ?? 0,
-  };
-};
+// const getMaxProposalsQuestionsPoints = (data: ISemester): MaxPoints => {
+//   const dailyPracticesTotalDays = differentBetweenDays(
+//     data.dailyPractice.endDate.toDate(),
+//     data.dailyPractice.startDate.toDate()
+//   );
+//   const questionsTotalDays = differentBetweenDays(
+//     data.questionProposals.endDate.toDate(),
+//     data.questionProposals.startDate.toDate()
+//   );
+//   const proposalsTotalDays = differentBetweenDays(
+//     data.nodeProposals.endDate.toDate(),
+//     data.nodeProposals.startDate.toDate()
+//   );
+//   return {
+//     maxProposalsPoints: proposalsTotalDays * data.nodeProposals.numPoints,
+//     maxQuestionsPoints: questionsTotalDays * data.questionProposals.numPoints,
+//     maxDailyPractices: dailyPracticesTotalDays * data?.dailyPractice?.numPoints ?? 0,
+//   };
+// };

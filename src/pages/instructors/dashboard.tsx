@@ -107,18 +107,19 @@ export type BoxData = {
 //   cgreaterFifty: number;
 //   dgreaterHundred: number;
 // };
-export type StudentStackedBarStats = {
-  alessEqualTen: string[];
-  bgreaterTen: string[];
-  cgreaterFifty: string[];
-  dgreaterHundred: string[];
-};
-export type StudentStackedBarStatsObject = {
-  alessEqualTen: ISemesterStudent[];
-  bgreaterTen: ISemesterStudent[];
-  cgreaterFifty: ISemesterStudent[];
-  dgreaterHundred: ISemesterStudent[];
-};
+
+export type StudentStackBarThresholds =
+  | "threshold1"
+  | "threshold2"
+  | "threshold3"
+  | "threshold4"
+  | "threshold5"
+  | "threshold6";
+
+export type StudentStackedBarStats = { [key in StudentStackBarThresholds]: string[] };
+
+export type StudentStackedBarStatsObject = { [key in StudentStackBarThresholds]: ISemesterStudent[] };
+
 export type StackedBarStatsData = {
   stackedBarStats: StackedBarStats[];
   studentStackedBarProposalsStats: StudentStackedBarStatsObject;

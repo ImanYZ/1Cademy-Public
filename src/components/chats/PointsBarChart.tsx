@@ -12,14 +12,6 @@ import {
 import { StackedBarStats } from "../../instructorsTypes";
 
 // const columns = ["fruit", "vegetable"];
-const LESS_EQUAL_THAN_10_COLOR = "#f4a869";
-const LESS_EQUAL_THAN_10_COLOR_ALPHA = "#F7B27A";
-const GREATER_THAN_10_COLOR = "#f8d198";
-const GREATER_THAN_10_COLOR_ALPHA = "#F9DBAE";
-const GREATER_THAN_50_COLOR = "#a4d734";
-const GREATER_THAN_50_COLOR_ALPHA = "#A7D841";
-const GREATER_THAN_100_COLOR = "#309135";
-const GREATER_THAN_100_COLOR_ALPHA = "#388E3C";
 
 //MOCK
 // const mockedData = [
@@ -59,7 +51,7 @@ function drawChart(
     .attr("transform", `translate(${margin.left},${margin.top})`);
 
   // List of subgroups = header of the csv files = soil condition here
-  const subgroups = ["index", "alessEqualTen", "bgreaterTen", "cgreaterFifty", "dgreaterHundred"].slice(1);
+  const subgroups = ["threshold1", "threshold2", "threshold3", "threshold4", "threshold5", "threshold6"];
 
   // List of groups = species here = value of the first column called group -> I show them on the X axis
   // const groups = data.map(d => d.index).flatMap(c => c);
@@ -107,19 +99,14 @@ function drawChart(
     .style("color", DESIGN_SYSTEM_COLORS.notebookG400);
 
   // color palette = one color per subgroup
-  const colorApha = d3
+  const colorAlpha = d3
     .scaleOrdinal()
     .domain(subgroups)
-    .range([
-      LESS_EQUAL_THAN_10_COLOR_ALPHA,
-      GREATER_THAN_10_COLOR_ALPHA,
-      GREATER_THAN_50_COLOR_ALPHA,
-      GREATER_THAN_100_COLOR_ALPHA,
-    ]);
+    .range(["#EF6820", "#575757", "#F7B27A", "#FAC515", "#A7D841", "#388E3C"]);
   const color = d3
     .scaleOrdinal()
     .domain(subgroups)
-    .range([LESS_EQUAL_THAN_10_COLOR, GREATER_THAN_10_COLOR, GREATER_THAN_50_COLOR, GREATER_THAN_100_COLOR]);
+    .range(["#ef6820e0", "#575757e0", "#F7B27Ae0", "#FAC515e0", "#A7D841e0", "#388E3Ce0"]);
 
   let locations = [
     {
@@ -147,7 +134,9 @@ function drawChart(
   if (isDailyPracticeRequiered) {
     chartData.push(data[2] || []);
   }
+  console.log({ subgroups, chartData });
   const stackedData = d3.stack().keys(subgroups)(chartData);
+  console.log({ stackedData });
 
   //tooltip
   const tooltip = d3.select("#boxplot-tooltip");
@@ -169,11 +158,7 @@ function drawChart(
         onerror="this.error=null;this.src='https://storage.googleapis.com/onecademy-1.appspot.com/ProfilePictures/no-img.png'"
         loading="lazy"
         />
-      <span>
-         ${user.fName}
-
-         ${user.lName}
-      </span></div>
+      <span>${user.fName} ${user.lName}</span></div>
       `;
     });
     const wrapper = `<div class="students-tooltip">
@@ -184,11 +169,11 @@ function drawChart(
 
   const tooltipElement = document.getElementById("boxplot-tooltip");
   let event: any = null;
-  let subgropup: string = "";
+  let subgroup: string = "";
 
   const retrieveEvent = (e: any, subgroupName: any) => {
     event = e;
-    subgropup = subgroupName;
+    subgroup = subgroupName;
   };
   tooltipElement?.addEventListener("mouseenter", () => {
     if (!event || !event.target) return;
@@ -196,7 +181,7 @@ function drawChart(
     tooltip.style("pointer-events", "auto");
     d3.select(`#${event.target.id}`)
       .transition()
-      .style("fill", color(subgropup) as string);
+      .style("fill", color(subgroup) as string);
   });
   tooltipElement?.addEventListener("touchstart", () => {
     console.log("touch");
@@ -206,7 +191,7 @@ function drawChart(
     tooltip.style("pointer-events", "auto");
     d3.select(`#${event.target.id}`)
       .transition()
-      .style("fill", color(subgropup) as string);
+      .style("fill", color(subgroup) as string);
   });
   tooltipElement?.addEventListener("mouseleave", () => {
     tooltip.style("pointer-events", "none").style("opacity", 0);
@@ -214,7 +199,7 @@ function drawChart(
 
     d3.select(`#${event.target.id}`)
       .transition()
-      .style("fill", colorApha(subgropup) as string);
+      .style("fill", colorAlpha(subgroup) as string);
   });
 
   window.addEventListener("click", e => {
@@ -228,7 +213,7 @@ function drawChart(
     tooltip.style("pointer-events", "auto").style("opacity", 1);
     d3.select(`#${event.target.id}`)
       .transition()
-      .style("fill", colorApha(subgropup) as string);
+      .style("fill", colorAlpha(subgroup) as string);
   });
 
   svg
@@ -237,7 +222,7 @@ function drawChart(
     // Enter in the stack data = loop key per key = group per group
     .data(stackedData)
     .join("g")
-    .attr("fill", d => colorApha(d.key) as string)
+    .attr("fill", d => colorAlpha(d.key) as string)
     .selectAll("rect")
     // enter a second time = loop subgroup per subgroup to add all rectangles
     .data(d => d)
@@ -250,13 +235,13 @@ function drawChart(
       const selectedNode = d3.select(parentNode) as any;
       const subgroupName = selectedNode.datum().key as keyof StudentStackedBarStatsObject;
       let html = "";
-      console.log({
-        indexxx: d.data.index,
-        subgroupName,
-        studentProposalsRate,
-        studentQuestionsRate,
-        studentDailyPracticeRate,
-      });
+      // console.log({
+      //   indexxx: d.data.index,
+      //   subgroupName,
+      //   studentProposalsRate,
+      //   studentQuestionsRate,
+      //   studentDailyPracticeRate,
+      // });
       if (d.data.index === 0 && studentProposalsRate) {
         // @ts-ignore
         html = htmlTooltip(studentProposalsRate[subgroupName]);
@@ -303,7 +288,7 @@ function drawChart(
       const subgroupName = selectedNode.datum().key;
       d3.select(this)
         .transition()
-        .style("fill", colorApha(subgroupName) as string);
+        .style("fill", colorAlpha(subgroupName) as string);
       retrieveEvent(e, subgroupName);
     })
     .attr("x", d => {

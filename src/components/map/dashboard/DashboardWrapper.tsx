@@ -71,7 +71,6 @@ export const DashboardWrapper = forwardRef<DashboardWrapperRef, DashboardWrapper
     setDisplayRightSidebar,
   } = props;
   const db = getFirestore();
-  console.log("Dashboard Wrapper");
 
   // const [semesters, setSemesters] = useState<string[]>([]);
   const [allCourses, setAllCourses] = useState<CoursesResult>({});
