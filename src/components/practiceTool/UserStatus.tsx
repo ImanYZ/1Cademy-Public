@@ -83,7 +83,7 @@ export const UserStatus = ({
   }, [weekInfo.dates]);
 
   const practiceDaysInfo: PracticeDayInfo = useMemo(() => {
-    if (!semester || !semesterStudentVoteStats) return { successPracticeDays: 0, totalPracticeDays: 0 };
+    if (!semester || !semesterStudentVoteStats) return { completedDays: 0, pendingDays: 0, totalDays: 0 };
     return getDaysInSemester(semester, semesterStudentVoteStats, semester.dailyPractice.numQuestionsPerDay);
   }, [semester, semesterStudentVoteStats]);
 
@@ -165,15 +165,15 @@ export const UserStatus = ({
               />
             </Box>
             <Stack spacing={"6px"}>
-              <Typography sx={{ fontWeight: 500, fontSize: "20px" }}>{`${user.fName} ${user.lName}`}</Typography>
               <Stack direction={"row"} spacing="12px">
+                <Typography sx={{ fontWeight: 500, fontSize: "20px" }}>{`${user.fName} ${user.lName}`}</Typography>
                 <PointsType points={semesterStudentVoteStats.totalPractices ?? 0} fontWeight={400}>
                   <CheckIcon sx={{ color: DESIGN_SYSTEM_COLORS.success600, fontSize: "16px" }} />
                 </PointsType>
               </Stack>
-              <Typography
-                fontWeight={"500"}
-              >{`Days in semester ${practiceDaysInfo.successPracticeDays}/${practiceDaysInfo.totalPracticeDays}`}</Typography>
+              <Typography fontWeight={"500"}>
+                {`Completed practice on ${practiceDaysInfo.completedDays} days. ${practiceDaysInfo.pendingDays} out of ${practiceDaysInfo.totalDays} days remaining.`}
+              </Typography>
             </Stack>
           </Stack>
           {displayHeaderStreak && (
@@ -392,7 +392,7 @@ const getWeeklyMetric = (
   }, {});
 };
 
-type PracticeDayInfo = { successPracticeDays: number; totalPracticeDays: number };
+type PracticeDayInfo = { completedDays: number; pendingDays: number; totalDays: number };
 
 const getDaysInSemester = (
   semester: ISemester,
@@ -401,11 +401,9 @@ const getDaysInSemester = (
 ): PracticeDayInfo => {
   const endDate = semester.dailyPractice.endDate.toDate();
   const startDate = semester.dailyPractice.startDate.toDate();
-  const totalPracticeDays = Math.abs(differentBetweenDays(endDate, startDate));
-  const successPracticeDays = semesterStudentStats.days.filter(
-    cur => cur.correctPractices >= numQuestionsPerDay
-  ).length;
-  return { successPracticeDays, totalPracticeDays };
+  const totalDays = Math.abs(differentBetweenDays(endDate, startDate));
+  const completedDays = semesterStudentStats.days.filter(cur => cur.correctPractices >= numQuestionsPerDay).length;
+  return { completedDays, totalDays, pendingDays: Math.abs(differentBetweenDays(endDate, new Date())) };
 };
 
 const getDailyCircleColor = (
