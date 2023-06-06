@@ -12,7 +12,7 @@ import { capitalizeFirstLetter } from "@/lib/utils/string.utils";
 
 import { BubbleChart } from "../../../components/chats/BubbleChart";
 import { LegendMemoized } from "../../../components/chats/Legend";
-import { StackBarChart } from "../../../components/chats/StackBarChart";
+import { StackBarChart } from "../../../components/chats/PointsBarChart";
 import { TrendPlot } from "../../../components/chats/TrendPlot";
 import { GeneralPlotStats } from "../../../components/instructors/dashboard/GeneralPlotStats";
 import { NoDataMessage } from "../../../components/instructors/NoDataMessage";
