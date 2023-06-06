@@ -29,7 +29,7 @@ import { BoxPlotStatsSkeleton } from "@/components/instructors/skeletons/BoxPlot
 import { capitalizeFirstLetter } from "@/lib/utils/string.utils";
 
 import { BoxChart } from "../../components/chats/BoxChart";
-import { Legend } from "../../components/chats/Legend";
+import { LegendMemoized } from "../../components/chats/Legend";
 import { PointsBarChart } from "../../components/chats/PointsBarChart";
 import { TrendPlot } from "../../components/chats/TrendPlot";
 import withAuthUser from "../../components/hoc/withAuthUser";
@@ -667,7 +667,7 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
                 <Box>
                   <Typography sx={{ fontSize: "19px" }}>Points</Typography>
                 </Box>
-                <Legend
+                <LegendMemoized
                   title={"Completion rate"}
                   options={[
                     { title: ">100%", color: "#388E3C" },
@@ -714,7 +714,7 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
                 }}
               >
                 <Typography sx={{ fontSize: "19px", mb: "40px" }}>Vote Leaderboard</Typography>
-                <Legend
+                <LegendMemoized
                   title={""}
                   options={[
                     { title: ">100%", color: "#388E3C" },
@@ -1015,10 +1015,10 @@ export const getBubbleStats = (
   console.log({ bubbleStats });
   return {
     bubbleStats,
-    maxVote,
-    maxVotePoints,
-    minVote,
-    minVotePoints,
+    maxVote: maxVote + 10,
+    maxVotePoints: maxVotePoints + 10,
+    minVote: minVote - 10,
+    minVotePoints: minVotePoints - 10,
   };
 };
 

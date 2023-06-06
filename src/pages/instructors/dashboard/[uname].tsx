@@ -11,7 +11,7 @@ import { StudentDailyPlotStatsSkeleton } from "@/components/instructors/skeleton
 import { capitalizeFirstLetter } from "@/lib/utils/string.utils";
 
 import { BubbleChart } from "../../../components/chats/BubbleChart";
-import { Legend } from "../../../components/chats/Legend";
+import { LegendMemoized } from "../../../components/chats/Legend";
 import { PointsBarChart } from "../../../components/chats/PointsBarChart";
 import { TrendPlot } from "../../../components/chats/TrendPlot";
 import { GeneralPlotStats } from "../../../components/instructors/dashboard/GeneralPlotStats";
@@ -614,7 +614,7 @@ const StudentDashboard: InstructorLayoutPage = ({ user, currentSemester, setting
                 <Box>
                   <Typography sx={{ fontSize: "19px" }}>Points</Typography>
                 </Box>
-                <Legend
+                <LegendMemoized
                   title={"Completion rate"}
                   options={[
                     { title: ">100%", color: "#388E3C" },
@@ -661,7 +661,7 @@ const StudentDashboard: InstructorLayoutPage = ({ user, currentSemester, setting
                 }}
               >
                 <Typography sx={{ fontSize: "19px", mb: "40px" }}>Vote Leaderboard</Typography>
-                <Legend
+                <LegendMemoized
                   title={""}
                   options={[
                     { title: ">100%", color: "#388E3C" },

@@ -66,6 +66,7 @@ function drawChart(
   student?: SemesterStudentVoteStat | null,
   role?: UserRole
 ) {
+  console.log("here", { width, margin });
   const htmlTooltip = (users: ISemesterStudent[]) => {
     const html = users.map(user => {
       return `<div class="students-tooltip-body ${theme === "Dark" ? "darkMode" : "lightMode"}">
@@ -87,35 +88,16 @@ function drawChart(
     return wrapper;
   };
   const tooltip = d3.select("#bubble-tool-tip");
-  //   const data = [12, 5, 6, 6, 9, 10];
-  //   const height = 120;
-  //   const width = 250;
   const svg = d3.select(svgRef);
-  // set the dimensions and margins of the graph
-  // const margin = { top: 10, right: 0, bottom: 20, left: 50 },
-  //   width = 500 - margin.left - margin.right,\
   const widthProcessed = width - margin.left - margin.right;
   height = 400 - margin.top - margin.bottom;
 
-  // append the svg object to the body of the page
-  //   const svg = d3
-  //     .select("#my_dataviz")
-  //     .append("svg")
-  //     .attr("width", width + margin.left + margin.right)
-  //     .attr("height", height + margin.top + margin.bottom)
-  //     .append("g")
-  //     .attr("transform", `translate(${margin.left},${margin.top})`);
   svg
+    .attr("id", "www")
     .attr("width", width)
     .attr("height", height + margin.top + margin.bottom)
     .append("g")
     .attr("transform", `translate(${margin.left},${margin.top})`);
-
-  // List of subgroups = header of the csv files = soil condition here
-  // const subgroups = ["month", "apples", "bananas", "cherries", "dates"].slice(1);
-
-  // List of groups = species here = value of the first column called group -> I show them on the X axis
-  // const groups = data.map(d => d.month).flatMap(c => c);
 
   // remove axis if exists
   svg.select("#mesh").select("#axis-x").remove();
@@ -128,23 +110,20 @@ function drawChart(
     .append("g")
     .attr("id", "axis-x")
     .attr("transform", `translate(30, ${height + 30})`)
-    .call(d3.axisBottom(x).tickSizeOuter(0).tickSize(-height).tickPadding(8).tickValues(x.ticks().slice(1)))
+    .call(d3.axisBottom(x).tickSizeOuter(0).tickSize(-height).tickPadding(8).tickValues(x.ticks()))
     .style("font-size", "12px")
     .selectAll("line")
     .style("color", DESIGN_SYSTEM_COLORS.notebookG400)
     .lower();
 
   // Add Y axis
-  const y = d3
-    .scaleLinear()
-    .domain([minAxisY, maxAxisY + 10])
-    .range([height, 0]);
+  const y = d3.scaleLinear().domain([minAxisY, maxAxisY]).range([height, 0]);
   svg
     .select("#mesh")
     .append("g")
     .attr("id", "axis-y")
     .attr("transform", `translate(30, 30)`)
-    .call(d3.axisLeft(y).tickSizeOuter(0).tickSize(-width).tickPadding(8).tickValues(y.ticks().slice(1)))
+    .call(d3.axisLeft(y).tickSizeOuter(0).tickSize(-widthProcessed).tickPadding(8).tickValues(y.ticks()))
     .style("font-size", "12px")
     .selectAll("line")
     .attr("stroke", DESIGN_SYSTEM_COLORS.notebookG400)
@@ -152,7 +131,7 @@ function drawChart(
 
   svg
     .select("#background")
-    .attr("width", width - 30.75)
+    .attr("width", widthProcessed)
     .attr("height", height)
     .attr("transform", `translate(30, 30)`)
     .attr("rx", "10px")
@@ -168,45 +147,22 @@ function drawChart(
     .selectAll("line")
     .attr("stroke", theme === "Dark" ? DESIGN_SYSTEM_COLORS.notebookG500 : DESIGN_SYSTEM_COLORS.gray250)
     .lower();
-  // svg.append("g").attr("class", "grid").call(d3.axisLeft(y).tickSize(-width));
 
-  // color palette = one color per subgroup
-  // const color = d3.scaleLinear().domain([]).range(["#FF8A33", "#F9E2D0", "#A7D841", "#388E3C"]);
-
-  console.log({
-    data,
-    minAxisY,
-    maxAxisY,
-    domain: threshold.map(c => (c.divider !== 0 ? maxAxisY * c.divider : 0)),
-    range: threshold.map(c => c.color),
-  });
-  // @ts-ignore
   const color = d3
     .scaleThreshold()
-    // .domain([-0.01, 0.01, 14, 65, 145])
     .domain(threshold.slice(1).map(c => maxAxisY * c.divider)) // @ts-ignore
     .range(threshold.map(c => c.color));
-  // .domain([0, maxAxisY / 10, maxAxisY / 2, maxAxisY]) // @ts-ignore
-  // .range([RED, LESS_EQUAL_THAN_10_COLOR, GREATER_THAN_10_COLOR, GREATER_THAN_50_COLOR, GREATER_THAN_100_COLOR]);
 
   svg
     .select("#mesh")
     .append("g")
     .attr("id", "bubbles")
     .selectAll("circle")
-
-    // Enter in the stack data = loop key per key = group per group
-    .data(data)
-
-    // .join("g")
+    .data(data) // Enter in the stack data = loop key per key = group per group
     .join("circle")
     .attr("fill", d => (d.points !== 0 ? color(d.points) : GRAY))
-    // .selectAll("rect")
-    // enter a second time = loop subgroup per subgroup to add all rectangles
-    // .data(d => d)
     .attr("cx", d => x(d.votes))
     .attr("cy", d => y(d.points))
-
     .attr("r", 7.5)
     .attr("stroke-width", 2)
     .attr("stroke", d => (d.points !== 0 ? color(d.points) : GRAY))
@@ -250,28 +206,6 @@ function drawChart(
       .attr("fill", "#EF5350")
       .raise();
   }
-  // svg
-  //   .select("#nums")
-  //   .selectAll("text")
-  //   // Enter in the stack data = loop key per key = group per group
-  //   .data(data)
-  //   .join("text")
-  //   .attr("fill", d => (d.points !== 0 ? borderColor(d.points) : GRAY))
-  //   .attr("x", d => x(d.votes))
-  //   .attr("y", d => y(d.points))
-  //   .attr("text-anchor", "middle")
-  //   .attr("alignment-baseline", "central")
-  //   .text(d => d.students)
-  //   .style("font-size", "24px")
-  //   .attr("transform", `translate(30, 5)`);
-
-  // d => (d.points !== 0 ? borderColor(d.points) : GRAY)
-  // .append("text")            // append text
-  // .style("fill", "black")      // make the text black
-  // .style("writing-mode", "tb") // set the writing mode
-  // .attr("x", 200)         // set x position of left side of text
-  // .attr("y", 100)         // set y position of bottom of text
-  // .text("Hello World");   // define the text to display
 }
 
 type BubblePlotProps = {

@@ -44,7 +44,7 @@ import {
 import { ICourseTag, ISemester, ISemesterStudent, ISemesterStudentStat } from "../../../types/ICourse";
 import { BoxChart } from "../../chats/BoxChart";
 import { BubbleChart, BubbleThreshold } from "../../chats/BubbleChart";
-import { Legend } from "../../chats/Legend";
+import { LegendMemoized } from "../../chats/Legend";
 import { PointsBarChart } from "../../chats/PointsBarChart";
 import { SankeyChart, SankeyData } from "../../chats/SankeyChart";
 import { TrendPlot } from "../../chats/TrendPlot";
@@ -622,7 +622,7 @@ export const Dashboard = ({ user, currentSemester }: DashboardProps) => {
                   <Typography sx={{ fontSize: "19px", mb: "6px", lineHeight: "30px" }}>Points</Typography>
                   <Typography sx={{ fontSize: "12px", fontWeight: "500" }}>Nº of Students</Typography>
                 </Box>
-                <Legend
+                <LegendMemoized
                   title={"Completion rate"}
                   options={[
                     { title: " >= 85%", color: "#388E3C" },
@@ -630,7 +630,7 @@ export const Dashboard = ({ user, currentSemester }: DashboardProps) => {
                     { title: " <= 50%", color: "#F9E2D0" },
                     { title: " <= 10%", color: "rgba(255, 196, 153, 0.75)" },
                   ]}
-                  sx={{ gridTemplateColumns: "16px 1fr 16px 1fr" }}
+                  sx={{ gridTemplateColumns: "1fr 1fr" }}
                 />
               </Stack>
               <Box sx={{ alignSelf: "center" }}>
@@ -702,7 +702,7 @@ export const Dashboard = ({ user, currentSemester }: DashboardProps) => {
                   }}
                 >
                   <Typography sx={{ fontSize: "19px", alignSelf: "center" }}>Vote Leaderboard</Typography>
-                  <Legend
+                  <LegendMemoized
                     title={""}
                     options={BUBBLE_CHARTS_THRESHOLDS}
                     // options={[
@@ -713,7 +713,7 @@ export const Dashboard = ({ user, currentSemester }: DashboardProps) => {
                     //   { title: "<=10%", color: "#F7B27A" },
                     //   { title: "= 0%", color: "#575757" },
                     // ]}
-                    sx={{ gridTemplateColumns: "repeat(3,12px 1fr)" }}
+                    sx={{ gridTemplateColumns: "1fr 1fr 1fr", gridTemplateRows: "1fr 1fr" }}
                   />
                 </Box>
                 <BubbleChart
