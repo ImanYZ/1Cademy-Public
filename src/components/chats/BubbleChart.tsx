@@ -66,26 +66,6 @@ function drawChart(
   student?: SemesterStudentVoteStat | null,
   role?: UserRole
 ) {
-  const htmlTooltip = (users: ISemesterStudent[]) => {
-    const html = users.map(user => {
-      return `<div class="students-tooltip-body ${theme === "Dark" ? "darkMode" : "lightMode"}">
-      <img
-        class="tooltip-student-image"
-        src="${user.imageUrl}"
-        onerror="this.error=null;this.src='https://storage.googleapis.com/onecademy-1.appspot.com/ProfilePictures/no-img.png'"
-        loading="lazy"
-        />
-      <span>
-         ${user.fName}
-         ${user.lName}
-      </span></div>
-      `;
-    });
-    const wrapper = `<div class="students-tooltip">
-      ${html.join(" ")}
-    </div>`;
-    return wrapper;
-  };
   const tooltip = d3.select("#bubble-tool-tip");
   const svg = d3.select(svgRef);
   const widthProcessed = width - margin.left - margin.right;
@@ -146,6 +126,11 @@ function drawChart(
     .attr("stroke", theme === "Dark" ? DESIGN_SYSTEM_COLORS.notebookG500 : DESIGN_SYSTEM_COLORS.gray250)
     .lower();
 
+  const colorAlpha = d3
+    .scaleThreshold()
+    .domain(threshold.slice(1).map(c => maxAxisY * c.divider)) // @ts-ignore
+    .range(["#ef68209a", "#5757579a", "#F7B27A9a", "#FAC5159a", "#A7D8419a", "#388E3C9a"]);
+
   const color = d3
     .scaleThreshold()
     .domain(threshold.slice(1).map(c => maxAxisY * c.divider)) // @ts-ignore
@@ -168,18 +153,19 @@ function drawChart(
     .on("mouseover", function (e, d) {
       const _this = this as any;
       if (!_this || !_this.parentNode) return;
+      d3.select(this)
+        .transition()
+        .style("fill", d.points !== 0 ? color(d.points) : GRAY);
       if (role === "INSTRUCTOR") {
-        let html = htmlTooltip(d.studentsList);
+        let html = htmlTooltip(d.studentsList, color(d.points), theme);
         tooltip
           .html(`${html}`)
           .style("opacity", 1)
           .style("top", `${e.offsetY + 20}px`)
           .style("left", `${x(d.votes) - 50}px`);
-      }
 
-      d3.select(this)
-        .transition()
-        .style("fill", d.points !== 0 ? color(d.points) : GRAY);
+        d3.select(this).transition().style("fill", colorAlpha(d.points));
+      }
     })
     .on("mouseout", function (e, d) {
       const _this = this as any;
@@ -273,4 +259,37 @@ export const BubbleChart = ({
       <div id="bubble-tool-tip" className={`tooltip-plot ${theme === "Light" ? "lightMode" : "darkMode"}`}></div>
     </div>
   );
+};
+
+const htmlTooltip = (users: ISemesterStudent[], color: any, theme: "Dark" | "Light") => {
+  const html = users.map(user => {
+    return `<div class="students-tooltip-body ${theme === "Dark" ? "darkMode" : "lightMode"}">
+    <img
+      class="tooltip-student-image"
+      src="${user.imageUrl}"
+      onerror="this.error=null;this.src='https://storage.googleapis.com/onecademy-1.appspot.com/ProfilePictures/no-img.png'"
+      loading="lazy"
+      />
+    <span>
+       ${user.fName}
+       ${user.lName}
+    </span></div>
+    `;
+  });
+  const wrapper = `<div class="students-tooltip" style="border: solid 2px ${color};border-radius:8px">
+    ${html.join(" ")}
+  </div>
+  <div style="
+           width: 0;
+           height: 0;
+           left: 68px;
+           top: -23px;
+           position: absolute;
+           border-top: 12px solid transparent;
+           border-bottom: 12px solid ${color};
+           border-right: solid 12px transparent;
+           border-left: solid 12px transparent;
+           "
+      ></div>`;
+  return wrapper;
 };

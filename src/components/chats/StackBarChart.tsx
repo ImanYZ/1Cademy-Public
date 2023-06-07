@@ -381,13 +381,13 @@ export const StackBarChart = ({
 };
 
 const htmlTooltip = (users: ISemesterStudent[], subgroupName: StudentStackBarThresholds, theme: "Dark" | "Light") => {
-  let border = "none";
-  if (subgroupName === "threshold1") border = STACK_BAR_CHART_THRESHOLDS[0].color;
-  if (subgroupName === "threshold2") border = STACK_BAR_CHART_THRESHOLDS[1].color;
-  if (subgroupName === "threshold3") border = STACK_BAR_CHART_THRESHOLDS[2].color;
-  if (subgroupName === "threshold4") border = STACK_BAR_CHART_THRESHOLDS[3].color;
-  if (subgroupName === "threshold5") border = STACK_BAR_CHART_THRESHOLDS[4].color;
-  if (subgroupName === "threshold6") border = STACK_BAR_CHART_THRESHOLDS[5].color;
+  let borderColor = "transparent";
+  if (subgroupName === "threshold1") borderColor = STACK_BAR_CHART_THRESHOLDS[0].color;
+  if (subgroupName === "threshold2") borderColor = STACK_BAR_CHART_THRESHOLDS[1].color;
+  if (subgroupName === "threshold3") borderColor = STACK_BAR_CHART_THRESHOLDS[2].color;
+  if (subgroupName === "threshold4") borderColor = STACK_BAR_CHART_THRESHOLDS[3].color;
+  if (subgroupName === "threshold5") borderColor = STACK_BAR_CHART_THRESHOLDS[4].color;
+  if (subgroupName === "threshold6") borderColor = STACK_BAR_CHART_THRESHOLDS[5].color;
   const html = users.map(user => {
     return `<div class="students-tooltip-body ${theme === "Dark" ? "darkMode" : "lightMode"}">
       <img
@@ -400,7 +400,7 @@ const htmlTooltip = (users: ISemesterStudent[], subgroupName: StudentStackBarThr
     </div>
     `;
   });
-  const wrapper = `<div class="students-tooltip scroll-styled" style="border: solid 2px ${border};border-radius:8px">
+  const wrapper = `<div class="students-tooltip scroll-styled" style="border: solid 2px ${borderColor};border-radius:8px">
     ${html.join(" ")}
   </div>
   <div style="
@@ -411,7 +411,7 @@ const htmlTooltip = (users: ISemesterStudent[], subgroupName: StudentStackBarThr
            position: absolute;
            border-top: 12px solid transparent;
            border-bottom: 12px solid transparent;
-           border-right: solid 12px ${border}
+           border-right: solid 12px ${borderColor}
            "
       ></div>
   `;
