@@ -173,11 +173,13 @@ export type BoxStudentsStats = {
   proposalsPoints: BoxTypeStat;
   questionsPoints: BoxTypeStat;
   votesPoints: BoxTypeStat;
+  practicePoints: BoxTypeStat;
 };
 export type BoxStudentStats = {
   proposalsPoints: BoxChapterStat;
   questionsPoints: BoxChapterStat;
   votesPoints: BoxChapterStat;
+  practicePoints: BoxChapterStat;
 };
 const BoxLegend = () => {
   return (
@@ -228,6 +230,7 @@ const Instructors: InstructorLayoutPage = ({ user, currentSemester, settings }) 
     proposalsPoints: { data: {}, min: 0, max: 1000 },
     questionsPoints: { data: {}, min: 0, max: 1000 },
     votesPoints: { data: {}, min: 0, max: 1000 },
+    practicePoints: { data: {}, min: 0, max: 1000 },
   });
 
   //TrendStats
