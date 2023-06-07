@@ -1,5 +1,7 @@
+import KeyboardArrowLeftIcon from "@mui/icons-material/KeyboardArrowLeft";
+import KeyboardArrowRightIcon from "@mui/icons-material/KeyboardArrowRight";
 import SquareIcon from "@mui/icons-material/Square";
-import { Box, Paper, Stack, Tab, Tabs, Typography, useMediaQuery, useTheme } from "@mui/material";
+import { Box, IconButton, Paper, Stack, Tab, Tabs, Typography, useMediaQuery, useTheme } from "@mui/material";
 import { collection, getFirestore, onSnapshot, query, where } from "firebase/firestore";
 import React, { useCallback, useEffect, useState } from "react";
 
@@ -727,6 +729,7 @@ export const Dashboard = ({ user, currentSemester }: DashboardProps) => {
       {/* box plot */}
       <Paper
         sx={{
+          position: "relative",
           display: "flex",
           flexDirection: "column",
           justifyContent: "center",
@@ -933,6 +936,43 @@ export const Dashboard = ({ user, currentSemester }: DashboardProps) => {
             </>
           )}
         </Box>
+        <Stack
+          direction={"row"}
+          spacing={"12px"}
+          alignItems={"center"}
+          sx={{ position: "absolute", bottom: "0px", left: "0px" }}
+        >
+          <IconButton
+            sx={{
+              border: theme =>
+                `solid 1px ${
+                  theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookG600 : DESIGN_SYSTEM_COLORS.gray300
+                }`,
+              p: "5px",
+            }}
+          >
+            <KeyboardArrowLeftIcon />
+          </IconButton>
+          <Typography
+            sx={{
+              color: ({ palette }) =>
+                palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.gray25 : DESIGN_SYSTEM_COLORS.gray900,
+            }}
+          >
+            1/2
+          </Typography>
+          <IconButton
+            sx={{
+              border: theme =>
+                `solid 1px ${
+                  theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookG600 : DESIGN_SYSTEM_COLORS.gray300
+                }`,
+              p: "5px",
+            }}
+          >
+            <KeyboardArrowRightIcon />
+          </IconButton>
+        </Stack>
         {!isMovil && !isLoading && <BoxLegend role={user.role} />}
       </Paper>
       {/* Sankey Chart */}

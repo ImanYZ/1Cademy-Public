@@ -271,6 +271,7 @@ function drawChart(
       { x1: widthProcessed, y1: heightProcessed, x2: widthProcessed, y2: 0 }, // right
       { x1: 0, y1: 0, x2: widthProcessed, y2: 0 }, // top
       { x1: 0, y1: heightProcessed, x2: 0, y2: 0 }, // left
+      { x1: widthProcessed / 2, y1: heightProcessed, x2: widthProcessed / 2, y2: 0 }, // center vertical
     ])
     .join("line")
     .attr("x1", d => d.x1)
