@@ -70,7 +70,7 @@ function drawChart(
         .axisBottom(x)
         .tickSizeOuter(0)
         .tickSize(0)
-        .tickPadding(10)
+        .tickPadding(8)
         .ticks(2)
         .tickFormat(d => `${d}p`)
     )
@@ -201,7 +201,7 @@ function drawChart(
     .attr("x2", d => x(d.median))
     .attr("y1", d => d.boxCenter - boxHeight / 2)
     .attr("y2", d => d.boxCenter + boxHeight / 2)
-    .attr("stroke", "#EC7115")
+    .attr("stroke", DESIGN_SYSTEM_COLORS.orange600)
     .attr("stroke-width", "2px")
     .attr("transform", `translate(${offsetX},${offsetY})`);
 

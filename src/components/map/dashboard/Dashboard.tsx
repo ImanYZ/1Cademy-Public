@@ -743,7 +743,7 @@ export const Dashboard = ({ user, currentSemester }: DashboardProps) => {
           flexDirection: "column",
           justifyContent: "center",
           alignItems: "center",
-          p: isMovil ? "10px" : "16px",
+          p: isMovil ? "10px" : "40px",
           backgroundColor: theme =>
             theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookMainBlack : DESIGN_SYSTEM_COLORS.gray50,
         }}
@@ -755,6 +755,7 @@ export const Dashboard = ({ user, currentSemester }: DashboardProps) => {
             justifyContent: "center",
             gap: isMovil ? "24px" : "0px",
             flexWrap: "wrap",
+            mb: "20px",
           }}
         >
           <Box sx={{ display: "flex", flexDirection: "column", gap: "32px", mr: "12px" }}>
@@ -1033,7 +1034,7 @@ const BoxLegend = ({ role }: { role: UserRole }) => {
   return (
     <Box sx={{ display: "flex", gap: "16px", alignItems: "center", alignSelf: "center" }}>
       <Box sx={{ display: "flex", gap: "6px", alignItems: "center" }}>
-        <SquareIcon sx={{ fill: "#EC7115", fontSize: "12px" }} />
+        <SquareIcon sx={{ fill: DESIGN_SYSTEM_COLORS.orange600, fontSize: "12px" }} />
         <Typography sx={{ fontSize: "12px" }}>Class Average</Typography>
       </Box>
       {role === "STUDENT" && (
