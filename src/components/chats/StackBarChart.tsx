@@ -6,10 +6,12 @@ import { ISemesterStudent } from "src/types/ICourse";
 import { DESIGN_SYSTEM_COLORS } from "@/lib/theme/colors";
 import {
   StudentBarsSubgroupLocation as StudentBarsSubgroupLocation,
+  StudentStackBarThresholds,
   StudentStackedBarStatsObject,
 } from "@/pages/instructors/dashboard";
 
 import { StackedBarStats } from "../../instructorsTypes";
+import { STACK_BAR_CHART_THRESHOLDS } from "../map/dashboard/Dashboard";
 
 // const columns = ["fruit", "vegetable"];
 
@@ -148,24 +150,6 @@ function drawChart(
   // .style("border-radius", "5px")
 
   // .style("padding", "10px");
-  const htmlTooltip = (users: ISemesterStudent[]) => {
-    // console.log("STUDENTS", users);
-    const html = users.map(user => {
-      return `<div class="students-tooltip-body ${theme === "Dark" ? "darkMode" : "lightMode"}">
-      <img
-        class="tooltip-student-image"
-        src="${user.imageUrl}"
-        onerror="this.error=null;this.src='https://storage.googleapis.com/onecademy-1.appspot.com/ProfilePictures/no-img.png'"
-        loading="lazy"
-        />
-      <span>${user.fName} ${user.lName}</span></div>
-      `;
-    });
-    const wrapper = `<div class="students-tooltip">
-      ${html.join(" ")}
-    </div>`;
-    return wrapper;
-  };
 
   const tooltipElement = document.getElementById("boxplot-tooltip");
   let event: any = null;
@@ -235,22 +219,14 @@ function drawChart(
       const selectedNode = d3.select(parentNode) as any;
       const subgroupName = selectedNode.datum().key as keyof StudentStackedBarStatsObject;
       let html = "";
-      // console.log({
-      //   indexxx: d.data.index,
-      //   subgroupName,
-      //   studentProposalsRate,
-      //   studentQuestionsRate,
-      //   studentDailyPracticeRate,
-      // });
       if (d.data.index === 0 && studentProposalsRate) {
-        // @ts-ignore
-        html = htmlTooltip(studentProposalsRate[subgroupName]);
-      } else if (d.data.index === 1 && studentQuestionsRate) {
-        // @ts-ignore
-        html = htmlTooltip(studentQuestionsRate[subgroupName]);
-      } else if (d.data.index === 2 && studentDailyPracticeRate) {
-        // @ts-ignore
-        html = htmlTooltip(studentDailyPracticeRate[subgroupName]);
+        html = htmlTooltip(studentProposalsRate[subgroupName], subgroupName, theme);
+      }
+      if (d.data.index === 1 && studentQuestionsRate) {
+        html = htmlTooltip(studentQuestionsRate[subgroupName], subgroupName, theme);
+      }
+      if (d.data.index === 2 && studentDailyPracticeRate) {
+        html = htmlTooltip(studentDailyPracticeRate[subgroupName], subgroupName, theme);
       }
       const middle = e.offsetY;
       d3.select(this)
@@ -330,7 +306,6 @@ function drawChart(
         (d, i) => `translate(${30 + (i + 1) * 0.369 * x.bandwidth() + i * x.bandwidth()},${y(d.y) + 30})`
       )
       .attr("fill", d => (d.y !== 0 ? "#C03938" : "transparent"));
-    // d.x - 0.72 * x.bandwidth()
   }
 }
 type StackBarProps = {
@@ -403,4 +378,42 @@ export const StackBarChart = ({
       <div id="boxplot-tooltip" className={`tooltip-plot ${theme === "Light" ? "lightMode" : "darkMode"}`}></div>
     </div>
   );
+};
+
+const htmlTooltip = (users: ISemesterStudent[], subgroupName: StudentStackBarThresholds, theme: "Dark" | "Light") => {
+  let border = "none";
+  if (subgroupName === "threshold1") border = STACK_BAR_CHART_THRESHOLDS[0].color;
+  if (subgroupName === "threshold2") border = STACK_BAR_CHART_THRESHOLDS[1].color;
+  if (subgroupName === "threshold3") border = STACK_BAR_CHART_THRESHOLDS[2].color;
+  if (subgroupName === "threshold4") border = STACK_BAR_CHART_THRESHOLDS[3].color;
+  if (subgroupName === "threshold5") border = STACK_BAR_CHART_THRESHOLDS[4].color;
+  if (subgroupName === "threshold6") border = STACK_BAR_CHART_THRESHOLDS[5].color;
+  const html = users.map(user => {
+    return `<div class="students-tooltip-body ${theme === "Dark" ? "darkMode" : "lightMode"}">
+      <img
+        class="tooltip-student-image"
+        src="${user.imageUrl}"
+        onerror="this.error=null;this.src='https://storage.googleapis.com/onecademy-1.appspot.com/ProfilePictures/no-img.png'"
+        loading="lazy"
+        />
+      <span>${user.fName} ${user.lName}</span>
+    </div>
+    `;
+  });
+  const wrapper = `<div class="students-tooltip scroll-styled" style="border: solid 2px ${border};border-radius:8px">
+    ${html.join(" ")}
+  </div>
+  <div style="
+           width: 0;
+           height: 0;
+           left: -12px;
+           top: 14px;
+           position: absolute;
+           border-top: 12px solid transparent;
+           border-bottom: 12px solid transparent;
+           border-right: solid 12px ${border}
+           "
+      ></div>
+  `;
+  return wrapper;
 };

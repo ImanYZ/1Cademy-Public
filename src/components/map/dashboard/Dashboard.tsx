@@ -70,7 +70,7 @@ const BUBBLE_CHARTS_THRESHOLDS: BubbleThreshold[] = [
   { title: ">100%", color: "#388E3C", divider: 1 },
 ];
 
-const STACK_BAR_CHART_THRESHOLDS: LegendOptions[] = [
+export const STACK_BAR_CHART_THRESHOLDS: LegendOptions[] = [
   { title: "<0%", color: "#EF6820" },
   { title: ">=0%", color: "#575757" },
   { title: ">10%", color: "#F7B27A" },
