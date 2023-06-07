@@ -149,6 +149,10 @@ export const Dashboard = ({ user, currentSemester }: DashboardProps) => {
   });
 
   const [trendStat, setTrendStat] = useState<keyof TrendStats>("childProposals");
+  const [boxPlotsControls, setBoxPlotControls] = useState<{ selectedChart: number; totalCharts: number }>({
+    selectedChart: 1,
+    totalCharts: 2,
+  });
 
   const trendPlotHeightTop = isMovil ? 150 : isTablet ? 250 : 354;
   const trendPlotHeightBottom = isMovil ? 80 : isTablet ? 120 : 160;
@@ -158,7 +162,7 @@ export const Dashboard = ({ user, currentSemester }: DashboardProps) => {
   const GRID_WIDTH = windowWidth - TOOLBAR_WIDTH - 2 * WRAPPER_PADDING;
   const bubbleChartWidth = isMovil ? windowWidth - 10 - 20 - 10 : GRID_WIDTH - infoWidth - stackBarWidth - 8 * 16;
   const trendPlotWith = isMovil ? windowWidth - 60 : isTablet ? GRID_WIDTH - 100 : GRID_WIDTH - 150;
-  const boxPlotWidth = isXlDesktop ? 300 : isLgDesktop ? 300 : isDesktop ? 230 : 220;
+  const boxPlotWidth = isXlDesktop ? 394 : isLgDesktop ? 370 : isDesktop ? 230 : 220;
 
   const infoWrapperRef = useCallback((element: HTMLDivElement) => {
     if (!element) return;
@@ -180,6 +184,11 @@ export const Dashboard = ({ user, currentSemester }: DashboardProps) => {
   // ---- ---- ---- ----
 
   // setup sankey snapshot
+
+  useEffect(() => {
+    if (isDesktop) setBoxPlotControls({ selectedChart: 1, totalCharts: 2 });
+    else setBoxPlotControls({ selectedChart: 1, totalCharts: 4 });
+  }, [isDesktop]);
 
   useEffect(() => {
     console.log({ currentSemester, students });
@@ -744,17 +753,14 @@ export const Dashboard = ({ user, currentSemester }: DashboardProps) => {
             display: "flex",
             flexDirection: "row",
             justifyContent: "center",
-            // alignItems: "center",
             gap: isMovil ? "24px" : "0px",
             flexWrap: "wrap",
           }}
         >
-          <Box sx={{ display: "flex", flexDirection: "column", gap: "32px" }}>
-            <Box sx={{ display: "grid", gridTemplateColumns: "1fr 1fr" }}>
-              <Typography sx={{ fontSize: "19px" }}>Chapters </Typography>
-            </Box>
+          <Box sx={{ display: "flex", flexDirection: "column", gap: "32px", mr: "12px" }}>
+            <Typography sx={{ fontSize: "19px", textAlign: "right" }}>Chapters</Typography>
 
-            <Stack spacing={"24px"} sx={{ width: "283px", py: "20px" }}>
+            <Stack spacing={"24px"} sx={{ width: { xs: "200px", md: "270px" }, py: "20px" }}>
               {Object.keys(boxStats.proposalsPoints.data).map((cur, idx) => (
                 <Typography
                   key={idx}
@@ -764,6 +770,7 @@ export const Dashboard = ({ user, currentSemester }: DashboardProps) => {
                     whiteSpace: "nowrap",
                     fontSize: "12px",
                     fontWeight: "400",
+                    textAlign: "right",
                     color: theme =>
                       theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.gray100 : DESIGN_SYSTEM_COLORS.gray700,
                   }}
@@ -773,180 +780,121 @@ export const Dashboard = ({ user, currentSemester }: DashboardProps) => {
               ))}
             </Stack>
           </Box>
-          {/* {isLoading && <BoxPlotStatsSkeleton width={boxPlotWidth} boxes={isLgDesktop ? 3 : isTablet ? 3 : 1} />} */}
-          {!isLoading && (
-            <>
-              <Box sx={{ display: "flex", flexDirection: "column", gap: "12px" }}>
-                {semesterConfig?.isProposalRequired ? (
-                  <>
-                    <Box sx={{ display: "flex", justifyContent: "space-around" }}>
-                      <Typography sx={{ fontSize: "19px" }}> Proposal Points</Typography>
-                    </Box>
 
-                    <BoxChart
-                      theme={theme.palette.mode === "dark" ? "Dark" : "Light"}
-                      data={boxStats.proposalsPoints.data}
-                      width={boxPlotWidth}
-                      boxHeight={25}
-                      margin={{ top: 0, right: 0, bottom: 10, left: 20 }}
-                      offsetX={isMovil ? 100 : 2}
-                      offsetY={40}
-                      identifier="plot-1"
-                      maxX={boxStats.proposalsPoints.max}
-                      minX={boxStats.proposalsPoints.min}
-                      studentStats={user.role === "STUDENT" ? studentBoxStat.proposalsPoints : undefined}
-                    />
-                    {isMovil && <BoxLegend role={user.role} />}
-                  </>
-                ) : (
-                  <Box sx={{ height: "100%", display: "grid", placeItems: "center", mx: "24px" }}>
-                    <Typography
-                      sx={{
-                        fontSize: "21px",
-                        fontWeight: "600",
-                        textAlign: "center",
-                        maxWidth: "325px",
-                        color: theme =>
-                          theme.palette.mode === "light" ? "rgba(67, 68, 69,.125)" : "rgba(224, 224, 224,.125)",
-                      }}
-                    >
-                      Proposal Box chart is not enabled
-                    </Typography>
-                  </Box>
-                )}
-              </Box>
+          <Stack direction={"row"} spacing={"10px"}>
+            {(isMovil
+              ? boxPlotsControls.selectedChart === 1 && boxPlotsControls.totalCharts === 4
+              : boxPlotsControls.selectedChart === 1 && boxPlotsControls.totalCharts === 2) && (
               <Box sx={{ display: "flex", flexDirection: "column", gap: "12px" }}>
-                {semesterConfig?.isQuestionProposalRequired ? (
-                  <>
-                    <Box sx={{ display: "flex", justifyContent: "space-around" }}>
-                      <Typography sx={{ fontSize: "19px" }}> Question Points</Typography>
-                    </Box>
+                <Box sx={{ display: "flex", justifyContent: "space-around" }}>
+                  <Typography sx={{ fontSize: "19px" }}> Proposal Points</Typography>
+                </Box>
 
-                    <BoxChart
-                      theme={theme.palette.mode === "dark" ? "Dark" : "Light"}
-                      data={boxStats.questionsPoints.data}
-                      // drawYAxis={isMovil}
-                      width={boxPlotWidth}
-                      boxHeight={25}
-                      margin={{ top: 0, right: 0, bottom: 10, left: 20 }}
-                      offsetX={isMovil ? 100 : 2}
-                      offsetY={40}
-                      identifier="plot-2"
-                      maxX={boxStats.questionsPoints.max}
-                      minX={boxStats.questionsPoints.min}
-                      studentStats={user.role === "STUDENT" ? studentBoxStat.questionsPoints : undefined}
-                    />
-                    {isMovil && <BoxLegend role={user.role} />}
-                  </>
-                ) : (
-                  <Box sx={{ height: "100%", display: "grid", placeItems: "center", mx: "32px" }}>
-                    <Typography
-                      sx={{
-                        fontSize: "21px",
-                        fontWeight: "600",
-                        textAlign: "center",
-                        maxWidth: "325px",
-                        color: theme =>
-                          theme.palette.mode === "light" ? "rgba(67, 68, 69,.125)" : "rgba(224, 224, 224,.125)",
-                      }}
-                    >
-                      Question Box chart is not enabled
-                    </Typography>
-                  </Box>
-                )}
+                <BoxChart
+                  theme={theme.palette.mode === "dark" ? "Dark" : "Light"}
+                  data={semesterConfig?.isProposalRequired ? boxStats.proposalsPoints.data : null}
+                  width={boxPlotWidth}
+                  boxHeight={25}
+                  margin={{ top: 0, right: 0, bottom: 10, left: 20 }}
+                  offsetX={0}
+                  offsetY={40}
+                  identifier="plot-1"
+                  maxX={boxStats.proposalsPoints.max}
+                  minX={boxStats.proposalsPoints.min}
+                  studentStats={user.role === "STUDENT" ? studentBoxStat.proposalsPoints : undefined}
+                  isLoading={isLoading}
+                />
               </Box>
+            )}
+
+            {(isMovil
+              ? boxPlotsControls.selectedChart === 2 && boxPlotsControls.totalCharts === 4
+              : boxPlotsControls.selectedChart === 1 && boxPlotsControls.totalCharts === 2) && (
               <Box sx={{ display: "flex", flexDirection: "column", gap: "12px" }}>
-                {semesterConfig?.isCastingVotesRequired ? (
-                  <>
-                    <Box sx={{ display: "flex", justifyContent: "space-around" }}>
-                      <Typography sx={{ fontSize: "19px" }}> Vote Points</Typography>
-                    </Box>
-                    <BoxChart
-                      theme={theme.palette.mode === "dark" ? "Dark" : "Light"}
-                      data={boxStats.votesPoints.data}
-                      // drawYAxis={isMovil}
-                      width={boxPlotWidth}
-                      boxHeight={25}
-                      margin={{ top: 0, right: 0, bottom: 10, left: 20 }}
-                      offsetX={isMovil ? 100 : 2}
-                      offsetY={40}
-                      identifier="plot-3"
-                      minX={boxStats.votesPoints.min}
-                      maxX={boxStats.votesPoints.max}
-                      studentStats={user.role === "STUDENT" ? studentBoxStat.votesPoints : undefined}
-                    />
-                    {isMovil && <BoxLegend role={user.role} />}
-                  </>
-                ) : (
-                  <Box sx={{ height: "200px", display: "grid", placeItems: "center", mx: "32px" }}>
-                    <Typography
-                      sx={{
-                        fontSize: "21px ",
-                        fontWeight: "600",
-                        textAlign: "center",
-                        maxWidth: "325px",
-                        color: theme =>
-                          theme.palette.mode === "light" ? "rgba(67, 68, 69,.125)" : "rgba(224, 224, 224,.125)",
-                      }}
-                    >
-                      Casting Votes Box chart is not enabled
-                    </Typography>
-                  </Box>
-                )}
+                <Box sx={{ display: "flex", justifyContent: "space-around" }}>
+                  <Typography sx={{ fontSize: "19px" }}> Question Points</Typography>
+                </Box>
+
+                <BoxChart
+                  theme={theme.palette.mode === "dark" ? "Dark" : "Light"}
+                  data={semesterConfig?.isQuestionProposalRequired ? boxStats.questionsPoints.data : null}
+                  width={boxPlotWidth}
+                  boxHeight={25}
+                  margin={{ top: 0, right: 0, bottom: 10, left: 20 }}
+                  offsetX={0}
+                  offsetY={40}
+                  identifier="plot-2"
+                  maxX={boxStats.questionsPoints.max}
+                  minX={boxStats.questionsPoints.min}
+                  studentStats={user.role === "STUDENT" ? studentBoxStat.questionsPoints : undefined}
+                  isLoading={isLoading}
+                />
               </Box>
+            )}
+
+            {(isMovil
+              ? boxPlotsControls.selectedChart === 3 && boxPlotsControls.totalCharts === 4
+              : boxPlotsControls.selectedChart === 2 && boxPlotsControls.totalCharts === 2) && (
               <Box sx={{ display: "flex", flexDirection: "column", gap: "12px" }}>
-                {semesterConfig?.isDailyPracticeRequired ? (
-                  <>
-                    <Box sx={{ display: "flex", justifyContent: "space-around" }}>
-                      <Typography sx={{ fontSize: "19px" }}> Questions Practiced</Typography>
-                    </Box>
-                    <BoxChart
-                      theme={theme.palette.mode === "dark" ? "Dark" : "Light"}
-                      data={boxStats.practicePoints.data}
-                      // drawYAxis={isMovil}
-                      width={boxPlotWidth}
-                      boxHeight={25}
-                      margin={{ top: 0, right: 0, bottom: 10, left: 20 }}
-                      offsetX={isMovil ? 100 : 2}
-                      offsetY={40}
-                      identifier="plot-4"
-                      minX={boxStats.practicePoints.min}
-                      maxX={boxStats.practicePoints.max}
-                      studentStats={user.role === "STUDENT" ? studentBoxStat.votesPoints : undefined}
-                    />
-                    {isMovil && <BoxLegend role={user.role} />}
-                  </>
-                ) : (
-                  <Box sx={{ height: "200px", display: "grid", placeItems: "center", mx: "32px" }}>
-                    <Typography
-                      sx={{
-                        fontSize: "21px ",
-                        fontWeight: "600",
-                        textAlign: "center",
-                        maxWidth: "325px",
-                        color: theme =>
-                          theme.palette.mode === "light" ? "rgba(67, 68, 69,.125)" : "rgba(224, 224, 224,.125)",
-                      }}
-                    >
-                      Casting Votes Box chart is not enabled
-                    </Typography>
-                  </Box>
-                )}
+                <Box sx={{ display: "flex", justifyContent: "space-around" }}>
+                  <Typography sx={{ fontSize: "19px" }}> Vote Points</Typography>
+                </Box>
+                <BoxChart
+                  theme={theme.palette.mode === "dark" ? "Dark" : "Light"}
+                  data={semesterConfig?.isCastingVotesRequired ? boxStats.votesPoints.data : null}
+                  width={boxPlotWidth}
+                  boxHeight={25}
+                  margin={{ top: 0, right: 0, bottom: 10, left: 20 }}
+                  offsetX={0}
+                  offsetY={40}
+                  identifier="plot-3"
+                  minX={boxStats.votesPoints.min}
+                  maxX={boxStats.votesPoints.max}
+                  studentStats={user.role === "STUDENT" ? studentBoxStat.votesPoints : undefined}
+                  isLoading={isLoading}
+                />
               </Box>
-            </>
-          )}
+            )}
+
+            {(isMovil
+              ? boxPlotsControls.selectedChart === 4 && boxPlotsControls.totalCharts === 4
+              : boxPlotsControls.selectedChart === 2 && boxPlotsControls.totalCharts === 2) && (
+              <Box sx={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+                <Box sx={{ display: "flex", justifyContent: "space-around" }}>
+                  <Typography sx={{ fontSize: "19px" }}> Questions Practiced</Typography>
+                </Box>
+                <BoxChart
+                  theme={theme.palette.mode === "dark" ? "Dark" : "Light"}
+                  data={semesterConfig?.isDailyPracticeRequired ? boxStats.practicePoints.data : null}
+                  // drawYAxis={isMovil}
+                  width={boxPlotWidth}
+                  boxHeight={25}
+                  margin={{ top: 0, right: 0, bottom: 10, left: 20 }}
+                  offsetX={0}
+                  offsetY={40}
+                  identifier="plot-4"
+                  minX={boxStats.practicePoints.min}
+                  maxX={boxStats.practicePoints.max}
+                  studentStats={user.role === "STUDENT" ? studentBoxStat.votesPoints : undefined}
+                  isLoading={isLoading}
+                />
+              </Box>
+            )}
+          </Stack>
         </Box>
+
         <Stack
           direction={"row"}
           spacing={"12px"}
           alignItems={"center"}
-          sx={{ position: "absolute", bottom: "0px", left: "0px" }}
+          sx={{ position: "absolute", bottom: "30px", left: "30px" }}
         >
           <IconButton
+            onClick={() => setBoxPlotControls(pre => ({ ...pre, selectedChart: Math.max(1, pre.selectedChart - 1) }))}
             sx={{
-              border: theme =>
+              border: ({ palette }) =>
                 `solid 1px ${
-                  theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookG600 : DESIGN_SYSTEM_COLORS.gray300
+                  palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookG600 : DESIGN_SYSTEM_COLORS.gray300
                 }`,
               p: "5px",
             }}
@@ -959,13 +907,16 @@ export const Dashboard = ({ user, currentSemester }: DashboardProps) => {
                 palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.gray25 : DESIGN_SYSTEM_COLORS.gray900,
             }}
           >
-            1/2
+            {boxPlotsControls.selectedChart}/{boxPlotsControls.totalCharts}
           </Typography>
           <IconButton
+            onClick={() =>
+              setBoxPlotControls(pre => ({ ...pre, selectedChart: Math.min(pre.totalCharts, pre.selectedChart + 1) }))
+            }
             sx={{
-              border: theme =>
+              border: ({ palette }) =>
                 `solid 1px ${
-                  theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookG600 : DESIGN_SYSTEM_COLORS.gray300
+                  palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookG600 : DESIGN_SYSTEM_COLORS.gray300
                 }`,
               p: "5px",
             }}
@@ -973,8 +924,9 @@ export const Dashboard = ({ user, currentSemester }: DashboardProps) => {
             <KeyboardArrowRightIcon />
           </IconButton>
         </Stack>
-        {!isMovil && !isLoading && <BoxLegend role={user.role} />}
+        <BoxLegend role={user.role} />
       </Paper>
+
       {/* Sankey Chart */}
       {user.role === "INSTRUCTOR" && (
         <Paper

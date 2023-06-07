@@ -1,4 +1,4 @@
-import { Box } from "@mui/material";
+import { Box, Typography } from "@mui/material";
 import * as d3 from "d3";
 import React, { useCallback } from "react";
 import { UserTheme } from "src/knowledgeTypes";
@@ -6,6 +6,7 @@ import { UserTheme } from "src/knowledgeTypes";
 import { DESIGN_SYSTEM_COLORS } from "@/lib/theme/colors";
 
 import { BoxChapterStat, Chapter } from "../../pages/instructors/dashboard";
+import { BoxPlotStatsSkeleton } from "../instructors/skeletons/BoxPlotStatsSkeleton";
 
 type boxPlotMargin = {
   top: number;
@@ -286,7 +287,7 @@ function drawChart(
 
 type BoxChartProps = {
   identifier: string;
-  data: Chapter;
+  data: Chapter | null;
   width: number;
   boxHeight: number;
   margin: boxPlotMargin;
@@ -295,6 +296,7 @@ type BoxChartProps = {
   theme: UserTheme;
   maxX: number;
   minX: number;
+  isLoading?: boolean;
   studentStats?: BoxChapterStat;
 };
 
@@ -309,14 +311,35 @@ export const BoxChart = ({
   theme,
   maxX,
   minX,
+  isLoading = false,
   studentStats,
 }: BoxChartProps) => {
   const svg = useCallback(
     (svgRef: any) => {
+      if (!data) return;
       drawChart(svgRef, identifier, data, width, boxHeight, margin, offsetX, offsetY, theme, maxX, minX, studentStats);
     },
     [identifier, data, width, boxHeight, margin, offsetX, offsetY, theme, maxX, minX, studentStats]
   );
+
+  if (isLoading) return <BoxPlotStatsSkeleton width={width} boxes={1} />;
+
+  if (!data)
+    return (
+      <Box sx={{ height: "200px", display: "grid", placeItems: "center", mx: "32px" }}>
+        <Typography
+          sx={{
+            fontSize: "21px ",
+            fontWeight: "600",
+            textAlign: "center",
+            maxWidth: "325px",
+            color: theme => (theme.palette.mode === "light" ? "rgba(67, 68, 69,.125)" : "rgba(224, 224, 224,.125)"),
+          }}
+        >
+          Casting Votes Box chart is not enabled
+        </Typography>
+      </Box>
+    );
 
   return (
     <Box sx={{ position: "relative" }}>
