@@ -37,6 +37,7 @@ import { postWithToken } from "@/lib/mapApi";
 import { DESIGN_SYSTEM_COLORS } from "@/lib/theme/colors";
 import { calculateVoteStatPoints } from "@/lib/utils/charts.utils";
 
+import { ZINDEX } from "../../../lib/utils/constants";
 import { SnapshotChangesTypes } from "../../../types";
 import { ToolbarView } from "./DashboardWrapper";
 
@@ -947,6 +948,7 @@ export const DashboardStudents = ({ currentSemester, onSelectUserHandler }: Dash
                           horizontal: "left",
                         }}
                         elevation={1}
+                        sx={{ zIndex: ZINDEX["dashboard"] + 1 }}
                       >
                         <Box
                           sx={{

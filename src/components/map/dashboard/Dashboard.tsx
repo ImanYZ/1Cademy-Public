@@ -212,10 +212,10 @@ export const Dashboard = ({ user, currentSemester }: DashboardProps) => {
       const docChanges = snapshot.docChanges();
       if (!docChanges.length) return;
 
-      console.log("s11");
+      // console.log("s11");
       for (let change of docChanges) {
         const _semesterStudentSankey: SemesterStudentSankeys = change.doc.data() as SemesterStudentSankeys;
-        console.log("s12x", _semesterStudentSankey);
+        // console.log("s12x", _semesterStudentSankey);
         if (change.type === "added") {
           for (const interaction of _semesterStudentSankey.interactions) {
             _sankeyData.push({
@@ -247,7 +247,7 @@ export const Dashboard = ({ user, currentSemester }: DashboardProps) => {
           );
         }
       }
-      console.log({ _sankeyData });
+      // console.log({ _sankeyData });
       setSankeyData([..._sankeyData]);
     });
     return () => snapShotFunc();
