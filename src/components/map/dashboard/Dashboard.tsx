@@ -162,7 +162,7 @@ export const Dashboard = ({ user, currentSemester }: DashboardProps) => {
   const GRID_WIDTH = windowWidth - TOOLBAR_WIDTH - 2 * WRAPPER_PADDING;
   const bubbleChartWidth = isMovil ? windowWidth - 10 - 20 - 10 : GRID_WIDTH - infoWidth - stackBarWidth - 8 * 16;
   const trendPlotWith = isMovil ? windowWidth - 60 : isTablet ? GRID_WIDTH - 100 : GRID_WIDTH - 150;
-  const boxPlotWidth = isXlDesktop ? 394 : isLgDesktop ? 370 : isDesktop ? 230 : 220;
+  const boxPlotWidth = isXlDesktop ? 394 : isLgDesktop ? 340 : isDesktop ? 230 : 220;
 
   const infoWrapperRef = useCallback((element: HTMLDivElement) => {
     if (!element) return;
@@ -760,7 +760,7 @@ export const Dashboard = ({ user, currentSemester }: DashboardProps) => {
           <Box sx={{ display: "flex", flexDirection: "column", gap: "32px", mr: "12px" }}>
             <Typography sx={{ fontSize: "19px", textAlign: "right" }}>Chapters</Typography>
 
-            <Stack spacing={"24px"} sx={{ width: { xs: "200px", md: "270px" }, py: "20px" }}>
+            <Stack spacing={"24px"} sx={{ width: { xs: "170px", md: "170px" }, py: "20px" }}>
               {Object.keys(boxStats.proposalsPoints.data).map((cur, idx) => (
                 <Typography
                   key={idx}
@@ -795,7 +795,7 @@ export const Dashboard = ({ user, currentSemester }: DashboardProps) => {
                   data={semesterConfig?.isProposalRequired ? boxStats.proposalsPoints.data : null}
                   width={boxPlotWidth}
                   boxHeight={25}
-                  margin={{ top: 0, right: 0, bottom: 10, left: 20 }}
+                  margin={{ top: 0, right: 0, bottom: 10, left: 0 }}
                   offsetX={0}
                   offsetY={40}
                   identifier="plot-1"
@@ -820,7 +820,7 @@ export const Dashboard = ({ user, currentSemester }: DashboardProps) => {
                   data={semesterConfig?.isQuestionProposalRequired ? boxStats.questionsPoints.data : null}
                   width={boxPlotWidth}
                   boxHeight={25}
-                  margin={{ top: 0, right: 0, bottom: 10, left: 20 }}
+                  margin={{ top: 0, right: 0, bottom: 10, left: 0 }}
                   offsetX={0}
                   offsetY={40}
                   identifier="plot-2"
@@ -844,7 +844,7 @@ export const Dashboard = ({ user, currentSemester }: DashboardProps) => {
                   data={semesterConfig?.isCastingVotesRequired ? boxStats.votesPoints.data : null}
                   width={boxPlotWidth}
                   boxHeight={25}
-                  margin={{ top: 0, right: 0, bottom: 10, left: 20 }}
+                  margin={{ top: 0, right: 0, bottom: 10, left: 0 }}
                   offsetX={0}
                   offsetY={40}
                   identifier="plot-3"
@@ -869,7 +869,7 @@ export const Dashboard = ({ user, currentSemester }: DashboardProps) => {
                   // drawYAxis={isMovil}
                   width={boxPlotWidth}
                   boxHeight={25}
-                  margin={{ top: 0, right: 0, bottom: 10, left: 20 }}
+                  margin={{ top: 0, right: 0, bottom: 10, left: 0 }}
                   offsetX={0}
                   offsetY={40}
                   identifier="plot-4"

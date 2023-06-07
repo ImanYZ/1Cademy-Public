@@ -37,7 +37,8 @@ function drawChart(
   // const margin = { top: 10, right: 0, bottom: 20, left: 40 };
   // const offsetY = 18;
   // width = width + OFFSET_X;
-  const height = 50 * Object.keys(data).length; // Height with padding and margin
+  const VERTICAL_OFFSET = 20;
+  const height = 50 * Object.keys(data).length + VERTICAL_OFFSET; // Height with padding and margin
   const widthProcessed = width - margin.left - margin.right;
   const heightProcessed = height - margin.top - margin.bottom;
   console.log({ widthProcessed });
@@ -57,16 +58,25 @@ function drawChart(
   // redraw svg
   const x = d3
     .scaleLinear()
-    .domain([minX, maxX + 5])
+    .domain([minX - 5, maxX + 5])
     .range([0, widthProcessed - offsetX]);
-  // svg
-  //   .append("g")
-  //   .attr("id", `axis-x`)
-  //   .attr("transform", `translate(${offsetX},${heightProcessed + 15})`)
-  //   .call(d3.axisBottom(x).tickSizeOuter(0).tickSize(0))
-  //   .style("font-size", "12px")
-  //   .selectAll("path")
-  //   .style("color", DESIGN_SYSTEM_COLORS.notebookG400);
+
+  svg
+    .append("g")
+    .attr("id", `axis-x`)
+    .attr("transform", `translate(${offsetX},${height - VERTICAL_OFFSET})`)
+    .call(
+      d3
+        .axisBottom(x)
+        .tickSizeOuter(0)
+        .tickSize(0)
+        .tickPadding(10)
+        .ticks(2)
+        .tickFormat(d => `${d}p`)
+    )
+    .style("font-size", "12px")
+    .selectAll("path")
+    .style("color", DESIGN_SYSTEM_COLORS.notebookG400);
 
   const y = d3
     .scaleBand()
@@ -75,42 +85,12 @@ function drawChart(
         .map(str => str.slice(0, 15) + (str.length > 15 ? "..." : ""))
         .reverse()
     )
-    .range([heightProcessed - 35, 0])
+    .range([heightProcessed - 55, 0])
     .padding(0.2);
 
   // const findLabel = (str: string) => {
   //   return Object.keys(data).find(x => x.includes(str.replace("...", "")));
   // };
-
-  // if (drawYAxis) {
-  //   const tooltip = d3.select(`#boxplot-label-tooltip-${identifier}`);
-  //   svg
-  //     .append("g")
-  //     .attr("id", `axis-y`)
-  //     .attr("transform", `translate(${offsetX},0)`)
-  //     .call(d3.axisLeft(y).tickSize(0))
-  //     .style("font-size", "12px")
-  //     .selectAll("path")
-  //     .style("color", DESIGN_SYSTEM_COLORS.notebookG400)
-  //     .on("mouseover", function (e) {
-  //       const _this = this as any;
-  //       d3.select(_this).style("cursor", "pointer");
-  //       tooltip
-  //         .html(`${findLabel(e.target.innerHTML)}`)
-  //         .style("opacity", 1)
-  //         .style("poiner-events", "none");
-
-  //       const tooltipHeight = (tooltip.node() as HTMLElement).offsetHeight;
-  //       const tooltipWidth = (tooltip.node() as HTMLElement).offsetWidth;
-
-  //       tooltip
-  //         .style("top", `${e.offsetY - (tooltipHeight + 14)}px`)
-  //         .style("left", `${e.offsetX - tooltipWidth / 2}px`);
-  //     })
-  //     .on("mouseout", function () {
-  //       tooltip.style("pointer-events", "none").style("opacity", 0);
-  //     });
-  // }
 
   const keys = Object.keys(data); /* .map(cur=>data[cur]) */
 
@@ -268,11 +248,11 @@ function drawChart(
     .selectAll("line")
     .data([
       // widthProcessed - offsetX
-      { x1: 0, y1: heightProcessed, x2: widthProcessed, y2: heightProcessed }, // bellow
-      { x1: widthProcessed, y1: heightProcessed, x2: widthProcessed, y2: 0 }, // right
+      { x1: 0, y1: height - VERTICAL_OFFSET - 4, x2: widthProcessed, y2: height - VERTICAL_OFFSET - 4 }, // bellow
+      { x1: widthProcessed, y1: height - VERTICAL_OFFSET - 4, x2: widthProcessed, y2: 0 }, // right
       { x1: 0, y1: 0, x2: widthProcessed, y2: 0 }, // top
-      { x1: 0, y1: heightProcessed, x2: 0, y2: 0 }, // left
-      { x1: widthProcessed / 2, y1: heightProcessed, x2: widthProcessed / 2, y2: 0 }, // center vertical
+      { x1: 0, y1: height - VERTICAL_OFFSET - 4, x2: 0, y2: 0 }, // left
+      { x1: widthProcessed / 2, y1: height - VERTICAL_OFFSET - 4, x2: widthProcessed / 2, y2: 0 }, // center vertical
     ])
     .join("line")
     .attr("x1", d => d.x1)
