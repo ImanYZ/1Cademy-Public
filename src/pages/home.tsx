@@ -92,11 +92,8 @@ export const Home = () => {
               <Papers sx={{ mb: "64px" }} />
             </>
           }
+          applySectionChildren={<JoinUs community={null} themeName="dark" />}
         />
-
-        <Box sx={{ py: { xs: "64px", sm: "96px" }, maxWidth: "1216px", m: "auto" }}>
-          <JoinUs community={null} themeName="dark" />
-        </Box>
 
         <AppFooter />
         <style>

@@ -18,6 +18,7 @@ type HomeWrapperProps = {
   topicsSectionChildren: ReactNode;
   systemSectionChildren: ReactNode;
   aboutSectionChildren: ReactNode;
+  applySectionChildren: ReactNode;
 };
 
 const HomeWrapper = ({
@@ -28,6 +29,7 @@ const HomeWrapper = ({
   topicsSectionChildren,
   systemSectionChildren,
   aboutSectionChildren,
+  applySectionChildren,
 }: HomeWrapperProps) => {
   const isScrolling = useRef(false);
   const timer = useRef<NodeJS.Timeout | null>(null);
@@ -41,6 +43,7 @@ const HomeWrapper = ({
   const { entry: topicsEntry, inView: topicsInView, ref: TopicsSectionRef } = useInView(observerOption);
   const { entry: systemsEntry, inView: systemsInView, ref: SystemSectionRef } = useInView(observerOption);
   const { entry: aboutEntry, inView: aboutInView, ref: AboutSectionRef } = useInView(observerOption);
+  const { entry: applyEntry, inView: applyInView, ref: ApplySectionRef } = useInView(observerOption);
 
   const { data: stats } = useQuery("stats", getStats);
 
@@ -65,12 +68,13 @@ const HomeWrapper = ({
     if (topicsInView) newSelectedSectionId = ONE_CADEMY_SECTIONS[4].id;
     if (systemsInView) newSelectedSectionId = ONE_CADEMY_SECTIONS[5].id;
     if (aboutInView) newSelectedSectionId = ONE_CADEMY_SECTIONS[6].id;
+    if (applyInView) newSelectedSectionId = ONE_CADEMY_SECTIONS[7].id;
 
     const newHash = newSelectedSectionId ? `#${newSelectedSectionId}` : "#";
 
     setSelectedSectionId(newHash);
     window.history.replaceState(null, "", newHash);
-  }, [aboutInView, benefitInView, magnitudeInView, mechanismInView, systemsInView, topicsInView]);
+  }, [aboutInView, applyInView, benefitInView, magnitudeInView, mechanismInView, systemsInView, topicsInView]);
 
   const onSwitchSection = (newSelectedSectionId: string) => {
     if (isScrolling.current) return;
@@ -87,9 +91,11 @@ const HomeWrapper = ({
 
     isScrolling.current = true;
 
+    console.log("ss1", sectionsHeight);
     setSelectedSectionId(newHash);
     const sectionIdx = sectionsHeight.findIndex(cur => cur.id === newSelectedSectionId);
     if (sectionIdx < 0) return;
+    console.log("ss2");
 
     const previousSections = sectionsHeight.slice(0, sectionIdx + 1);
     const cumulativeSectionHeight = previousSections.reduce((a, c) => ({ id: c.id, height: a.height + c.height }));
@@ -97,6 +103,7 @@ const HomeWrapper = ({
     scrollableContainer.scroll({ top: cumulativeSectionHeight.height, left: 0, behavior: "smooth" });
     window.history.replaceState(null, "", newHash);
 
+    console.log("ss3");
     timer.current = setTimeout(() => {
       isScrolling.current = false;
     }, 1000);
@@ -111,6 +118,7 @@ const HomeWrapper = ({
     if (!topicsEntry) return null;
     if (!systemsEntry) return null;
     if (!aboutEntry) return null;
+    if (!applyEntry) return null;
 
     return [
       { id: mechanismEntry.target.id, height: headerRef.current.clientHeight + heroSectionRef.current.clientHeight },
@@ -119,8 +127,9 @@ const HomeWrapper = ({
       { id: topicsEntry.target.id, height: benefitEntry.target.clientHeight },
       { id: systemsEntry.target.id, height: topicsEntry.target.clientHeight },
       { id: aboutEntry.target.id, height: systemsEntry.target.clientHeight },
+      { id: applyEntry.target.id, height: aboutEntry.target.clientHeight },
     ];
-  }, [aboutEntry, benefitEntry, magnitudeEntry, mechanismEntry, systemsEntry, topicsEntry]);
+  }, [aboutEntry, applyEntry, benefitEntry, magnitudeEntry, mechanismEntry, systemsEntry, topicsEntry]);
 
   return (
     <Box>
@@ -156,6 +165,10 @@ const HomeWrapper = ({
 
       <SectionWrapper ref={AboutSectionRef} section={ONE_CADEMY_SECTIONS[6]}>
         {aboutSectionChildren}
+      </SectionWrapper>
+
+      <SectionWrapper ref={ApplySectionRef} section={ONE_CADEMY_SECTIONS[7]}>
+        {applySectionChildren}
       </SectionWrapper>
     </Box>
   );
