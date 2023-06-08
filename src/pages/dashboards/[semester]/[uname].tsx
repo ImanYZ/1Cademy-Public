@@ -1,3 +1,4 @@
+import { Box } from "@mui/material";
 import { getFirestore } from "firebase/firestore";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
@@ -56,7 +57,7 @@ const StudentDashboard = () => {
       if (!resUser) return router.push(ROUTES.notebook);
 
       setSemester(resSemester);
-      setStudent(resUser);
+      setStudent({ ...resUser, role: "STUDENT" });
     };
     getData();
   }, [queryData, router]);
@@ -64,18 +65,22 @@ const StudentDashboard = () => {
   if (!queryData) return null;
   if (!student || !semester) return null;
 
-  // return (
-  //   <h1>
-  //     ss: {queryData.uname}:{queryData.semester}
-  //   </h1>
-  // );
-  return <Dashboard user={student} currentSemester={semester} />;
+  return (
+    <Box
+      className="wide scroll-styled"
+      sx={{
+        p: "32px",
+        height: "100vh",
+        overflowY: "auto",
+        backgroundColor: theme =>
+          theme.palette.mode === "dark"
+            ? theme.palette.common.darkGrayBackground
+            : theme.palette.common.lightGrayBackground,
+      }}
+    >
+      <Dashboard user={student} currentSemester={semester} />
+    </Box>
+  );
 };
-
-// This wrapper expose the shared variables from filters
-// const PageWrapper = () => {
-//   return <StudentsLayout>{props => <StudentDashboard {...props} />}</StudentsLayout>;
-// };
-// export default PageWrapper;
 
 export default StudentDashboard;
