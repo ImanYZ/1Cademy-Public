@@ -18,29 +18,27 @@ import {
 } from "../../../instructorsTypes";
 import { User, UserRole } from "../../../knowledgeTypes";
 import {
-  getGeneralStats,
-  getInitialTrendStats,
-  getMaximumStudentPoints,
-  getStackedBarStat,
-  getTrendsStats,
-  mapStudentsStatsDataByDates2,
-  mapStudentStatsSumByStudents,
-  mergeSemesterStudentVoteStat,
-  SemesterStudentVoteStatChanges,
-} from "../../../lib/utils/charts.utils";
-import { getStudentLocationOnStackBar } from "../../../lib/utils/dashboard.utils";
-import { capitalizeFirstLetter } from "../../../lib/utils/string.utils";
-import {
   BoxStudentsStats,
   BoxStudentStats,
   getBoxPlotData,
   getBubbleStats,
+  getGeneralStats,
+  getInitialTrendStats,
+  getMaximumStudentPoints,
   getMaxMinVoxPlotData,
+  getStackedBarStat,
+  getTrendsStats,
   groupStudentPointsDayChapter,
+  mapStudentsStatsDataByDates2,
+  mapStudentStatsSumByStudents,
+  mergeSemesterStudentVoteStat,
+  SemesterStudentVoteStatChanges,
   StudentBarsSubgroupLocation,
   StudentStackedBarStatsObject,
   TrendStats,
-} from "../../../pages/instructors/dashboard";
+} from "../../../lib/utils/charts.utils";
+import { getStudentLocationOnStackBar } from "../../../lib/utils/dashboard.utils";
+import { capitalizeFirstLetter } from "../../../lib/utils/string.utils";
 import { ICourseTag, ISemester, ISemesterStudent, ISemesterStudentStat } from "../../../types/ICourse";
 import { BoxChart } from "../../chats/BoxChart";
 import { BubbleChart, BubbleThreshold } from "../../chats/BubbleChart";

@@ -1,19 +1,85 @@
-import { ISemester, ISemesterStudent, ISemesterStudentVoteStat, ISemesterStudentVoteStatDay } from "src/types/ICourse";
+import {
+  ISemester,
+  ISemesterStudent,
+  ISemesterStudentStat,
+  ISemesterStudentStatChapter,
+  ISemesterStudentVoteStat,
+  ISemesterStudentVoteStatDay,
+} from "src/types/ICourse";
 
 import {
+  BubbleStats,
   GeneralSemesterStudentsStats,
   MappedData,
   SemesterStudentVoteStat,
   StackedBarStats,
+  Trends,
 } from "../../instructorsTypes";
-import {
-  StackedBarStatsData,
-  StudentStackBarThresholds,
-  StudentStackedBarStatsObject,
-  TrendStats,
-} from "../../pages/instructors/dashboard";
 import { SnapshotChangesTypes } from "../../types";
 import { differentBetweenDays } from "./date.utils";
+
+export type TrendStats = {
+  childProposals: Trends[];
+  editProposals: Trends[];
+  proposedLinks: Trends[];
+  nodes: Trends[];
+  votes: Trends[];
+  questions: Trends[];
+};
+
+export type StudentStackBarThresholds =
+  | "threshold1"
+  | "threshold2"
+  | "threshold3"
+  | "threshold4"
+  | "threshold5"
+  | "threshold6";
+
+export type StudentStackedBarStatsObject = { [key in StudentStackBarThresholds]: ISemesterStudent[] };
+
+export type StackedBarStatsData = {
+  stackedBarStats: StackedBarStats[];
+  studentStackedBarProposalsStats: StudentStackedBarStatsObject;
+  studentStackedBarQuestionsStats: StudentStackedBarStatsObject;
+  studentStackedBarDailyPracticeStats: StudentStackedBarStatsObject;
+};
+
+export type StudentBarsSubgroupLocation = {
+  proposals: number;
+  questions: number;
+  totalDailyPractices: number;
+};
+
+export type BoxChapterStat = {
+  [key: string]: number;
+};
+
+export type Chapter = {
+  [key: string]: number[];
+};
+
+export type BoxChapterStats = {
+  [key: string]: number[];
+};
+
+export type BoxTypeStat = {
+  data: BoxChapterStats;
+  min: number;
+  max: number;
+};
+
+export type BoxStudentsStats = {
+  proposalsPoints: BoxTypeStat;
+  questionsPoints: BoxTypeStat;
+  votesPoints: BoxTypeStat;
+  practicePoints: BoxTypeStat;
+};
+export type BoxStudentStats = {
+  proposalsPoints: BoxChapterStat;
+  questionsPoints: BoxChapterStat;
+  votesPoints: BoxChapterStat;
+  practicePoints: BoxChapterStat;
+};
 
 type VoteStatsPoints = { questionPoints: number; proposalPoints: number; votePoints: number };
 
@@ -376,3 +442,163 @@ export const getInitialTrendStats = (): TrendStats => ({
   votes: [],
   questions: [],
 });
+
+export const groupStudentPointsDayChapter = (
+  userDailyStat: ISemesterStudentStat,
+  type: string,
+  numPoints = 1,
+  numTypePerDay = 1,
+  agreementPoints = 1,
+  disagreementPoints = 1
+) => {
+  // console.log({ userDailyStat });
+  const groupedDays = userDailyStat.days.reduce((acuDayPerStudent: { [key: string]: number }, curDayPerStudent) => {
+    const groupedChapters = curDayPerStudent.chapters.reduce((acuChapter: { [key: string]: number }, curChapter) => {
+      if (type in curChapter) {
+        const dd = { data: curChapter[type as keyof ISemesterStudentStatChapter] as number, title: curChapter.title };
+        return { ...acuChapter, [dd.title]: (acuChapter[dd.title] ?? 0) + (dd.data * numPoints) / numTypePerDay };
+      } else if (type === "votes") {
+        const dd = {
+          data:
+            curChapter["agreementsWithInst"] * agreementPoints +
+            curChapter["disagreementsWithInst"] * disagreementPoints,
+          title: curChapter.title,
+        };
+        return { ...acuChapter, [dd.title]: (acuChapter[dd.title] ?? 0) + dd.data };
+      }
+      return { ...acuChapter };
+    }, {});
+    return Object.keys(groupedChapters).reduce(
+      (prev, key) => {
+        return { ...prev, [key]: (prev[key] ?? 0) + groupedChapters[key] };
+      },
+      { ...acuDayPerStudent }
+    );
+  }, {});
+
+  return groupedDays;
+};
+
+export const getBoxPlotData = (
+  userDailyStats: ISemesterStudentStat[],
+  type: string,
+  numPoints = 1,
+  numTypePerDay = 1,
+  agreementPoints = 1,
+  disagreementPoints = 1
+) => {
+  // days -> chapters -> data
+  //
+  // proposal=> chapters => [1,2,34,54]
+  // console.log({ userDailyStatssss: userDailyStats });
+  const res = userDailyStats.map(cur => {
+    // [{c1:1,c2:3},{c1:1,c2:3}]
+    const groupedDays = groupStudentPointsDayChapter(
+      cur,
+      type,
+      numPoints,
+      numTypePerDay,
+      agreementPoints,
+      disagreementPoints
+    );
+
+    return groupedDays;
+  });
+  const res2 = res.reduce((acu: { [key: string]: number[] }, cur) => {
+    // const prevData: number[] = acu[key] ?? [];
+    const merged = Object.keys(cur).reduce(
+      (prev: { [key: string]: number[] }, key) => {
+        const prevData: number[] = prev[key] ?? [];
+        return { ...prev, [key]: [...prevData, cur[key]] };
+      },
+      { ...acu }
+    );
+    return merged;
+    // {c1:[1,2,23],c2:[1,23,4]}
+  }, {});
+
+  return res2;
+};
+
+export const getMaxMinVoxPlotData = (boxPlotData: { [x: string]: number[] }) => {
+  return Object.keys(boxPlotData).reduce(
+    (acu, cur) => {
+      const minArray = Math.min(...boxPlotData[cur]);
+      const newMin = acu.min > minArray ? minArray : acu.min;
+      const maxArray = Math.max(...boxPlotData[cur]);
+      const newMax = acu.max < maxArray ? maxArray : acu.max;
+      return { min: newMin, max: newMax };
+    },
+    { min: 10000, max: 0 }
+  );
+};
+
+const findBubble = (bubbles: BubbleStats[], votes: number, votePoints: number): number => {
+  const index = bubbles.findIndex(b => b.points === votePoints && b.votes === votes);
+  return index;
+};
+
+type BubbleStatsData = {
+  bubbleStats: BubbleStats[];
+  maxVote: number;
+  maxVotePoints: number;
+  minVote: number;
+  minVotePoints: number;
+};
+
+export const getBubbleStats = (
+  data: SemesterStudentVoteStat[],
+  students: ISemesterStudent[] | null
+): BubbleStatsData => {
+  const bubbleStats: BubbleStats[] = [];
+  let maxVote: number = 0;
+  let maxVotePoints: number = 0;
+  let minVote: number = 1000;
+  let minVotePoints: number = 1000;
+
+  if (!students)
+    return {
+      bubbleStats,
+      maxVote,
+      maxVotePoints,
+      minVote,
+      minVotePoints,
+    };
+
+  data.map(d => {
+    let bubbleStat: BubbleStats = {
+      students: 0,
+      votes: 0,
+      points: 0,
+      studentsList: [],
+    };
+    const votes = d.agreementsWithInst + d.disagreementsWithInst;
+    const votePoints = d.votePoints!;
+    const index = findBubble(bubbleStats, votes, votePoints);
+
+    const studentObject: ISemesterStudent | undefined = students.find((user: any) => user.uname === d.uname);
+
+    if (index >= 0) {
+      bubbleStats[index].students += 1;
+      if (studentObject) bubbleStat.studentsList.push(studentObject);
+    } else {
+      bubbleStat.votes = votes;
+      bubbleStat.points = votePoints;
+      bubbleStat.students += 1;
+      if (studentObject) bubbleStat.studentsList = [studentObject];
+      bubbleStats.push(bubbleStat);
+    }
+    if (votes > maxVote) maxVote = votes;
+    if (votePoints > maxVotePoints) maxVotePoints = votePoints;
+    if (votes < minVote) minVote = votes;
+    if (votePoints < minVotePoints) minVotePoints = votePoints;
+  });
+  console.log({ bubbleStats });
+  return {
+    bubbleStats,
+    maxVote: maxVote + 10,
+    maxVotePoints: maxVotePoints + 10,
+    minVote: minVote - 10,
+    minVotePoints: minVotePoints - 10,
+  };
+};

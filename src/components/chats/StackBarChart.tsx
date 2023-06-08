@@ -4,13 +4,13 @@ import { UserTheme } from "src/knowledgeTypes";
 import { ISemesterStudent } from "src/types/ICourse";
 
 import { DESIGN_SYSTEM_COLORS } from "@/lib/theme/colors";
+
+import { StackedBarStats } from "../../instructorsTypes";
 import {
   StudentBarsSubgroupLocation as StudentBarsSubgroupLocation,
   StudentStackBarThresholds,
   StudentStackedBarStatsObject,
-} from "@/pages/instructors/dashboard";
-
-import { StackedBarStats } from "../../instructorsTypes";
+} from "../../lib/utils/charts.utils";
 import { STACK_BAR_CHART_THRESHOLDS } from "../map/dashboard/Dashboard";
 
 // const columns = ["fruit", "vegetable"];

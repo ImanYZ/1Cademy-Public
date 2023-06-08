@@ -7,8 +7,6 @@ import { DESIGN_SYSTEM_COLORS } from "@/lib/theme/colors";
 
 import { BubbleStats, SemesterStudentVoteStat } from "../../instructorsTypes";
 
-// import { BubbleStats } from "@/pages/instructors/dashboard";
-
 // const columns = ["fruit", "vegetable"];
 
 // const RED = "#E04F16";

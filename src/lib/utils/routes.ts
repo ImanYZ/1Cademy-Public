@@ -21,7 +21,7 @@ const ROUTES = {
   gdprPolicy: "/policy/gdpr",
   privacyPolicy: "/policy/privacy",
   termsPolicy: "/policy/terms",
-  studentDashboard: "dashboards",
+  studentDashboard: "/dashboards",
 };
 
 export default ROUTES;

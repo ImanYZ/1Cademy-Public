@@ -8,6 +8,7 @@ import {
   Box,
   Button,
   Chip,
+  Link,
   Paper,
   Popover,
   Stack,
@@ -152,13 +153,6 @@ export const DashboardStudents = ({ currentSemester }: DashboardStudentsProps) =
   const db = getFirestore();
 
   const id = open ? "simple-popover" : undefined;
-
-  const onOpenStudentDashboard = (semesterId: string, studentId: string) => {
-    if (typeof window === "undefined") return;
-    if (!window) return;
-
-    window.open(`${ROUTES.studentDashboard}/${semesterId}/${studentId}`, "_blank").focus();
-  };
 
   useEffect(() => {
     if (!currentSemester || !currentSemester.tagId) return;
@@ -1054,18 +1048,13 @@ export const DashboardStudents = ({ currentSemester }: DashboardStudentsProps) =
                         ) : (
                           <>
                             {["firstName", "lastName"].includes(colmn) ? (
-                              <Typography
-                                onClick={
-                                  () =>
-                                    onOpenStudentDashboard(
-                                      currentSemester.tagId,
-                                      row.username
-                                    ) /*  onSelectUserHandler(row.username, "DASHBOARD") */
-                                }
-                                sx={{ color: DESIGN_SYSTEM_COLORS.primary800, cursor: "pointer" }}
+                              <Link
+                                href={`${ROUTES.studentDashboard}/${currentSemester.tagId}/${row.username}`}
+                                target="_blank"
+                                rel="noreferrer"
                               >
                                 {row[colmn]}
-                              </Typography>
+                              </Link>
                             ) : (
                               <>{row[colmn]}</>
                             )}

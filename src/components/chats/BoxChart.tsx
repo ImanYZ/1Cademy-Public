@@ -5,7 +5,7 @@ import { UserTheme } from "src/knowledgeTypes";
 
 import { DESIGN_SYSTEM_COLORS } from "@/lib/theme/colors";
 
-import { BoxChapterStat, Chapter } from "../../pages/instructors/dashboard";
+import { BoxChapterStat, Chapter } from "../../lib/utils/charts.utils";
 import { BoxPlotStatsSkeleton } from "../instructors/skeletons/BoxPlotStatsSkeleton";
 
 type boxPlotMargin = {
