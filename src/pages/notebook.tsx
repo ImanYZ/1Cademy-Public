@@ -443,7 +443,7 @@ const Notebook = ({}: NotebookProps) => {
 
   const scrollToNode = useCallback(
     (nodeId: string, force = false, tries = 0) => {
-      console.log(">>scrollToNode");
+      // console.log(">>scrollToNode");
       if (tries === 10) return;
 
       if (!scrollToNodeInitialized.current) {
@@ -4392,7 +4392,7 @@ const Notebook = ({}: NotebookProps) => {
 
     userThresholdcurrentScale = (userThresholdPercentage * defaultScaleDevice) / 100;
 
-    console.log({ currentScale: mapInteractionValue.scale, userThresholdcurrentScale });
+    // console.log({ currentScale: mapInteractionValue.scale, userThresholdcurrentScale });
 
     return mapInteractionValue.scale < userThresholdcurrentScale;
   }, [mapInteractionValue.scale, user, windowWith]);
@@ -6375,7 +6375,6 @@ const Notebook = ({}: NotebookProps) => {
                 sidebarWidth={sidebarWidth()}
                 innerHeight={innerHeight}
                 innerWidth={windowWith}
-                disableSearcher={Boolean(["TT"].includes("SEARCHER_SIDEBAR"))}
                 enableElements={[]}
               />
               <MemoizedNotificationSidebar

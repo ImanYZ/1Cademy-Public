@@ -91,7 +91,7 @@ const SearcherSidebar = ({
   const [onlyTags /*setOnlyTags*/] = useState(true);
   const [showTagSelector, setShowTagSelector] = useState(false);
   const [nodeTypes, setNodeTypes] = useState(NODE_TYPES_ARRAY);
-  const [sortOption, setSortOption] = useState<SortValues>("NOT_SELECTED");
+  const [sortOption, setSortOption] = useState<SortValues>("");
   const [timeFilter, setTimeFilter] = useState<any>("ALL_TIME");
   const [sortDirection, setSortDirection] = useState<SortDirection>("DESCENDING");
   const [chosenTags, setChosenTags] = useState<ChosenTag[]>([]);
@@ -156,7 +156,7 @@ const SearcherSidebar = ({
           nodeTypes,
           tags: selectedTags.map(cur => cur.title),
           nodesUpdatedSince,
-          sortOption,
+          sortOption: !sortOption ? "NOT_SELECTED" : sortOption,
           sortDirection,
           page,
           onlyTitle: nodeBookState.searchByTitleOnly,
@@ -398,7 +398,7 @@ const SearcherSidebar = ({
         onSearch(1, search, sortOption, newSortDirection, nodeTypes);
       }
     },
-    [nodeTypes, onSearch, search, sortOption]
+    [nodeTypes, onSearch, search, sortOption, value]
   );
 
   const onSearchEnter = useCallback(

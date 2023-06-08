@@ -71,9 +71,23 @@ const SORT_OPTIONS: SortOptions[] = [
   },
 ];
 
-const RecentNodesList = (props: any) => {
+type RecentNodesListProps = {
+  id?: string;
+  recentNodes: any;
+  setRecentNodes: any;
+  onlyTags: any;
+  disabled: any;
+  sortDirection: any;
+  setSortDirection: any;
+  sortOption: SortValues;
+  setSortOption: (newSortOption: SortValues) => void;
+};
+
+const RecentNodesList = (props: RecentNodesListProps) => {
   const onChangeSortOption = (event: SelectChangeEvent) => {
-    props.setSortOption(event.target.value as SortValues);
+    const newValue = event.target.value as SortValues;
+    console.log({ sortOption: props.sortOption, newValue });
+    props.setSortOption(props.sortOption === newValue ? "" : newValue);
   };
 
   const onChangeSortDirection = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -136,7 +150,10 @@ const RecentNodesList = (props: any) => {
           value={props.sortOption}
           variant="outlined"
           onChange={onChangeSortOption}
-          renderValue={() => SORT_OPTIONS.filter(option => option.value === props.sortOption)[0]?.name || "Sort by"}
+          renderValue={() => {
+            const option = SORT_OPTIONS.filter(option => option.value === props.sortOption)[0];
+            return option?.name || "Sort by";
+          }}
         >
           {SORT_OPTIONS.map(cur => {
             const isSelected = props.sortOption === cur.value;

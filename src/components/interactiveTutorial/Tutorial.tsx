@@ -96,7 +96,7 @@ export const TooltipTutorial = ({
     let left = 0;
     let exceedTop = 0;
     let exceedLeft = 0;
-    console.log("TOOLTIP_CLIENT_RECT", { tutorialStep });
+    // console.log("TOOLTIP_CLIENT_RECT", { tutorialStep });
 
     if (!tooltipRef.current) return { top, left, exceedTop, exceedLeft };
     if (!tutorialStep) return { top, left, exceedTop, exceedLeft };

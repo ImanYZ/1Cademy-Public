@@ -97,7 +97,7 @@ const TimeFilter = (props: any) => {
           renderValue={() => TIME_OPTIONS.filter(option => option.value === props.timeFilter)[0]?.name}
         >
           {TIME_OPTIONS.map(cur => {
-            console.log({ timeFilter: props.timeFilter });
+            // console.log({ timeFilter: props.timeFilter });
             const isSelected = props.timeFilter === cur.value;
             return (
               <MenuItem key={cur.name} value={cur.value} sx={{ display: "flex", justifyContent: "space-between" }}>

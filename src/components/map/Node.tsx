@@ -780,8 +780,6 @@ const Node = ({
             placeItems: "center",
             height: "100%",
             width: "100%",
-            // "-webkit-line-clamp": 2,
-
             overflow: "hidden",
             textOverflow: "ellipsis",
             "& > p": {
@@ -790,9 +788,6 @@ const Node = ({
               maxHeight: "2.4em",
               overflow: "hidden",
               textOverflow: "ellipsis",
-              "-webkit-box-orient": "vertical",
-              "-webkit-line-clamp": 2,
-              display: "-webkit-box",
             },
           }}
         >
