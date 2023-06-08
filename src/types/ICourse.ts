@@ -168,8 +168,8 @@ export type ISemesterStudentVoteStat = {
   links: number; // pending/accepted links
   questions: number;
   questionProposals: number;
-  // questionPoints?: number; // 💀 depreciated
-  // proposalPoints?: number; // 💀 depreciated
+  questionPoints?: number; // 💀 deprecated
+  proposalPoints?: number; // 💀 deprecated
   votes?: number;
   votePoints?: number; // depreciated
   correctPractices: number;
