@@ -38,6 +38,7 @@ import { DESIGN_SYSTEM_COLORS } from "@/lib/theme/colors";
 import { calculateVoteStatPoints } from "@/lib/utils/charts.utils";
 
 import { ZINDEX } from "../../../lib/utils/constants";
+import ROUTES from "../../../lib/utils/routes";
 import { SnapshotChangesTypes } from "../../../types";
 import { ToolbarView } from "./DashboardWrapper";
 
@@ -120,7 +121,7 @@ type DashboardStudentsProps = {
   onSelectUserHandler: (uname: string, view: ToolbarView) => void;
 };
 
-export const DashboardStudents = ({ currentSemester, onSelectUserHandler }: DashboardStudentsProps) => {
+export const DashboardStudents = ({ currentSemester }: DashboardStudentsProps) => {
   const [keys, setKeys] = useState([...defaultKeys]);
   const [columns, setColumns] = useState([...defaultColumns]);
   const [rows, setRows] = useState<any>([]);
@@ -151,6 +152,13 @@ export const DashboardStudents = ({ currentSemester, onSelectUserHandler }: Dash
   const db = getFirestore();
 
   const id = open ? "simple-popover" : undefined;
+
+  const onOpenStudentDashboard = (semesterId: string, studentId: string) => {
+    if (typeof window === "undefined") return;
+    if (!window) return;
+
+    window.open(`${ROUTES.studentDashboard}/${semesterId}/${studentId}`, "_blank").focus();
+  };
 
   useEffect(() => {
     if (!currentSemester || !currentSemester.tagId) return;
@@ -1047,7 +1055,13 @@ export const DashboardStudents = ({ currentSemester, onSelectUserHandler }: Dash
                           <>
                             {["firstName", "lastName"].includes(colmn) ? (
                               <Typography
-                                onClick={() => onSelectUserHandler(row.username, "DASHBOARD")}
+                                onClick={
+                                  () =>
+                                    onOpenStudentDashboard(
+                                      currentSemester.tagId,
+                                      row.username
+                                    ) /*  onSelectUserHandler(row.username, "DASHBOARD") */
+                                }
                                 sx={{ color: DESIGN_SYSTEM_COLORS.primary800, cursor: "pointer" }}
                               >
                                 {row[colmn]}
