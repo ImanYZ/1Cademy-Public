@@ -494,7 +494,7 @@ export const generateGpt4QueryResultV2 = async (nodeIds: string[], userData?: IU
         responseNode.practice = await numOfPracticesAnsweredByNodeAndUser(_node.id, userData.uname);
       }
       const unitNo = findUnitNoFromNodeData(node);
-      if (unitNo !== undefined) {
+      if (unitNo) {
         responseNode.unit = unitNo;
       }
       nodes.push(responseNode);

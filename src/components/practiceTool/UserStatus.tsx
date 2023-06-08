@@ -4,10 +4,7 @@ import NavigateBeforeIcon from "@mui/icons-material/NavigateBefore";
 import NavigateNextIcon from "@mui/icons-material/NavigateNext";
 import { Box, Divider, IconButton, PaletteMode, Stack, Typography } from "@mui/material";
 import { getFirestore } from "firebase/firestore";
-import Image from "next/image";
 import React, { useEffect, useMemo, useState } from "react";
-
-import { getAvatarName } from "@/lib/utils/Map.utils";
 
 import { getSemesterById } from "../../client/firestore/semesters.firestore";
 import { getSemesterStudentVoteStatsByIdAndStudent } from "../../client/firestore/semesterStudentVoteStat.firestores";
@@ -27,10 +24,10 @@ import {
   differentBetweenDaysWithHyphens,
 } from "../../lib/utils/userStatus.utils";
 import { ISemester, ISemesterStudentVoteStat, ISemesterStudentVoteStatDay } from "../../types/ICourse";
+import OptimizedAvatar2 from "../OptimizedAvatar2";
 import { PointsType } from "../PointsType";
 
 const MAX_DAILY_VALUE = 24;
-const DEFAULT_AVATAR = "https://storage.googleapis.com/onecademy-1.appspot.com/ProfilePictures/no-img.png";
 
 type DailyPoint = {
   [key: string]: { value: number; gotPoint: boolean };
@@ -86,7 +83,7 @@ export const UserStatus = ({
   }, [weekInfo.dates]);
 
   const practiceDaysInfo: PracticeDayInfo = useMemo(() => {
-    if (!semester || !semesterStudentVoteStats) return { successPracticeDays: 0, totalPracticeDays: 0 };
+    if (!semester || !semesterStudentVoteStats) return { completedDays: 0, pendingDays: 0, totalDays: 0 };
     return getDaysInSemester(semester, semesterStudentVoteStats, semester.dailyPractice.numQuestionsPerDay);
   }, [semester, semesterStudentVoteStats]);
 
@@ -120,11 +117,8 @@ export const UserStatus = ({
   }, [semester, semesterStudentVoteStats, weekInfo.dates]);
 
   const studentStrike: CalculateDailyStreakOutput = useMemo(() => {
-    console.log("x11");
     if (!semester) return { dailyStreak: 0, maxDailyStreak: 0 };
-    console.log("x12");
     if (!semesterStudentVoteStats) return { dailyStreak: 0, maxDailyStreak: 0 };
-    console.log("x13");
 
     return calculateDailyStreak(semesterStudentVoteStats, semester.dailyPractice.numQuestionsPerDay);
   }, [semester, semesterStudentVoteStats]);
@@ -160,34 +154,23 @@ export const UserStatus = ({
                 mr: "20px",
               }}
             >
-              {user.imageUrl && user.imageUrl !== DEFAULT_AVATAR ? (
-                <Image
-                  src={user.imageUrl ?? ""}
-                  alt={`${user.uname} profile picture`}
-                  width="90px"
-                  height="90px"
-                  quality={80}
-                  objectFit="cover"
-                  style={{ borderRadius: "50%" }}
-                />
-              ) : (
-                <Box sx={{ width: "100%", height: "100%", display: "grid", placeItems: "center" }}>
-                  <Typography sx={{ fontSize: "32px", fontWeight: "600", color: DESIGN_SYSTEM_COLORS.baseWhite }}>
-                    {getAvatarName(user.fName ?? "", user.lName ?? "")}
-                  </Typography>
-                </Box>
-              )}
+              <OptimizedAvatar2
+                alt={`${user.fName ?? ""} ${user.lName ?? ""}`}
+                imageUrl={user.imageUrl ?? ""}
+                size={90}
+                quality={100}
+              />
             </Box>
             <Stack spacing={"6px"}>
-              <Typography sx={{ fontWeight: 500, fontSize: "20px" }}>{`${user.fName} ${user.lName}`}</Typography>
               <Stack direction={"row"} spacing="12px">
+                <Typography sx={{ fontWeight: 500, fontSize: "20px" }}>{`${user.fName} ${user.lName}`}</Typography>
                 <PointsType points={semesterStudentVoteStats.totalPractices ?? 0} fontWeight={400}>
                   <CheckIcon sx={{ color: DESIGN_SYSTEM_COLORS.success600, fontSize: "16px" }} />
                 </PointsType>
               </Stack>
-              <Typography
-                fontWeight={"500"}
-              >{`Days in semester ${practiceDaysInfo.successPracticeDays}/${practiceDaysInfo.totalPracticeDays}`}</Typography>
+              <Typography fontWeight={"500"}>
+                {`Completed practice on ${practiceDaysInfo.completedDays} days. ${practiceDaysInfo.pendingDays} out of ${practiceDaysInfo.totalDays} days remaining.`}
+              </Typography>
             </Stack>
           </Stack>
           {displayHeaderStreak && (
@@ -406,7 +389,7 @@ const getWeeklyMetric = (
   }, {});
 };
 
-type PracticeDayInfo = { successPracticeDays: number; totalPracticeDays: number };
+type PracticeDayInfo = { completedDays: number; pendingDays: number; totalDays: number };
 
 const getDaysInSemester = (
   semester: ISemester,
@@ -415,11 +398,9 @@ const getDaysInSemester = (
 ): PracticeDayInfo => {
   const endDate = semester.dailyPractice.endDate.toDate();
   const startDate = semester.dailyPractice.startDate.toDate();
-  const totalPracticeDays = Math.abs(differentBetweenDays(endDate, startDate));
-  const successPracticeDays = semesterStudentStats.days.filter(
-    cur => cur.correctPractices >= numQuestionsPerDay
-  ).length;
-  return { successPracticeDays, totalPracticeDays };
+  const totalDays = Math.abs(differentBetweenDays(endDate, startDate));
+  const completedDays = semesterStudentStats.days.filter(cur => cur.correctPractices >= numQuestionsPerDay).length;
+  return { completedDays, totalDays, pendingDays: Math.abs(differentBetweenDays(endDate, new Date())) };
 };
 
 const getDailyCircleColor = (

@@ -148,7 +148,7 @@ export const MenuHeader = forwardRef<HTMLDivElement, MenuHeaderProps>(
             {!isAuthenticated && page === "ONE_CADEMY" && (
               <Button
                 variant="contained"
-                onClick={() => window?.open(ROUTES.apply, "_blank")}
+                onClick={() => onSwitchSection("apply")}
                 sx={{
                   display: { xs: "flex", sm: "none" },
                   background: orangeDark,
