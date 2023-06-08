@@ -4,14 +4,14 @@ import { useQuery } from "react-query";
 
 import { useInView, UseInViewProps } from "../../hooks/useObserver";
 import { getStats } from "../../lib/knowledgeApi";
-import AppHeaderMemoized from "../Header/AppHeader";
+import AppHeaderMemoized, { HEADER_HEIGHT, HEADER_HEIGHT_MOBILE } from "../Header/AppHeader";
 import { SectionWrapper } from "./components/SectionWrapper";
+import { HeroMemoized } from "./sections/Hero";
 import { ONE_CADEMY_SECTIONS } from "./SectionsItems";
 
 const observerOption: UseInViewProps = { options: { root: null, rootMargin: "-480px 0px -380px 0px", threshold: 0 } };
 
 type HomeWrapperProps = {
-  heroSectionChildren: ReactNode;
   mechanismSectionChildren: ReactNode;
   magnitudeSectionChildren: ReactNode;
   benefitSectionChildren: ReactNode;
@@ -22,7 +22,6 @@ type HomeWrapperProps = {
 };
 
 const HomeWrapper = ({
-  heroSectionChildren,
   mechanismSectionChildren,
   magnitudeSectionChildren,
   benefitSectionChildren,
@@ -141,7 +140,13 @@ const HomeWrapper = ({
         onSwitchSection={onSwitchSection}
       />
 
-      <Box ref={heroSectionRef}>{heroSectionChildren}</Box>
+      <Box ref={heroSectionRef}>
+        <HeroMemoized
+          headerHeight={HEADER_HEIGHT}
+          headerHeightMobile={HEADER_HEIGHT_MOBILE}
+          onApply={() => onSwitchSection("apply")}
+        />
+      </Box>
 
       <SectionWrapper ref={MechanismSectionRef} section={ONE_CADEMY_SECTIONS[1]} textAlign="center">
         {mechanismSectionChildren}
