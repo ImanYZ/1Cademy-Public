@@ -145,6 +145,8 @@ const LivelinessBar = ({ open, setOpen, disabled = false, ...props }: ILivelines
     };
 
     setInterval(() => {
+      setIsInitialized(false);
+      setUsersInteractions({});
       snapshotInitializer();
     }, 1440000);
 
