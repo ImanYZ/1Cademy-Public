@@ -8,23 +8,7 @@ type BoxPlotSkeletonProps = {
 };
 export const BoxPlotStatsSkeleton = ({ width, boxes }: BoxPlotSkeletonProps) => {
   return (
-    <Box sx={{ display: "flex", gap: "8px" }}>
-      <Box
-        sx={{
-          display: "flex",
-          flexDirection: "column",
-          gap: "16px",
-          justifyContent: "space-evenly",
-        }}
-      >
-        {new Array(6).fill(1).map((x, i) => (
-          <Skeleton
-            key={i}
-            variant="rectangular"
-            sx={{ width: "120px", height: "16px", borderRadius: "20px", justifySelf: "end" }}
-          />
-        ))}
-      </Box>
+    <Box sx={{ display: "flex" }}>
       <Box
         sx={{
           display: "grid",

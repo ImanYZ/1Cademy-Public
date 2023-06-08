@@ -248,6 +248,7 @@ export const DashboardWrapper = forwardRef<DashboardWrapperRef, DashboardWrapper
   const onSelectUserHandler = (uname: string, view: ToolbarView) => {
     getSelectedStudent(uname);
     setSelectToolbarView(view);
+    // TODO: remove this function is not used anymore
   };
 
   // detect root (semester) to open practice tool automatically
