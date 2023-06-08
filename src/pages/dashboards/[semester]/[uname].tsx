@@ -1,4 +1,4 @@
-import { Box } from "@mui/material";
+import { Box, Typography } from "@mui/material";
 import { getFirestore } from "firebase/firestore";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
@@ -8,6 +8,7 @@ import { getUserByUname } from "../../../client/firestore/user.firestore";
 import { Dashboard } from "../../../components/map/dashboard/Dashboard";
 import { useAuth } from "../../../context/AuthContext";
 import { User } from "../../../knowledgeTypes";
+import { DESIGN_SYSTEM_COLORS } from "../../../lib/theme/colors";
 import ROUTES from "../../../lib/utils/routes";
 import { ISemester } from "../../../types/ICourse";
 
@@ -33,15 +34,9 @@ const StudentDashboard = () => {
       if (!user) return;
 
       const role = user?.role;
-
       if (!role) return router.push(ROUTES.notebook);
 
-      if (!["INSTRUCTOR", "STUDENT"].includes(role)) return router.push(ROUTES.notebook);
-
-      if (role === "STUDENT" && router.route !== ROUTES.instructorsDashboardStudents) return router.back();
-
-      if (role === "STUDENT" && queryData && user.uname !== queryData.uname)
-        return router.push(`${ROUTES.instructorsDashboard}/${user.uname}`);
+      if ("INSTRUCTOR" !== role) return router.push(ROUTES.notebook);
     };
     allowAccessByRole();
   }, [queryData, router, user, user?.role]);
@@ -63,6 +58,7 @@ const StudentDashboard = () => {
   }, [queryData, router]);
 
   if (!queryData) return null;
+
   if (!student || !semester) return null;
 
   return (
@@ -78,7 +74,18 @@ const StudentDashboard = () => {
             : theme.palette.common.lightGrayBackground,
       }}
     >
-      <Dashboard user={student} currentSemester={semester} />
+      {user?.role === "INSTRUCTOR" ? (
+        <Dashboard user={student} currentSemester={semester} />
+      ) : (
+        <Typography
+          sx={{
+            color: theme =>
+              theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.gray600 : DESIGN_SYSTEM_COLORS.gray200,
+          }}
+        >
+          Loading Student Dashboard ...
+        </Typography>
+      )}
     </Box>
   );
 };
