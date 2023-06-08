@@ -706,8 +706,8 @@ p {
   border-radius: 4px;
   opacity: 0;
   z-index: 999;
-  max-height: 350px;
-  overflow-y: auto;
+  /* max-height: 350px; */
+  /* overflow-y: auto; */
 }
 
 .tooltip-plot.darkMode {
@@ -720,7 +720,10 @@ p {
   width: 180px;
   padding: 2px;
   font-size: 12px;
+  max-height: 350px;
+  overflow-y: auto;
 }
+
 .students-tooltip .students-tooltip-body {
   display: flex;
   justify-content: flex-start;
@@ -747,8 +750,8 @@ p {
   text-overflow: ellipsis;
 }
 
-.tooltip-plot::-webkit-scrollbar {
-  /* CHECK: I add this to hide scroll and have functionality */
+/* .tooltip-plot::-webkit-scrollbar {
+  CHECK: I add this to hide scroll and have functionality
   width: 6px;
   height: 8px;
 }
@@ -756,7 +759,7 @@ p {
 .tooltip-plot::-webkit-scrollbar-thumb {
   background: rgba(113, 113, 113, 0.663);
   border-radius: 10px;
-}
+} */
 .label {
   position: absolute;
   top: 0;
