@@ -57,23 +57,25 @@ export const SectionWrapper = forwardRef(
           // border: "solid 2px royalBlue",
         }}
       >
-        <Box sx={{ mb: "64px" }}>
-          <Typography sx={{ fontSize: "36px", mb: "20px", textTransform: "uppercase", fontWeight: 600 }}>
-            {section.label}
-          </Typography>
+        {section.label && section.description && (
+          <Box sx={{ mb: "64px" }}>
+            <Typography sx={{ fontSize: "36px", mb: "20px", textTransform: "uppercase", fontWeight: 600 }}>
+              {section.label}
+            </Typography>
 
-          {getDescription(section, stats)
-            .split("\n")
-            .map((paragraph: string) => (
-              <Typography
-                key={paragraph}
-                color={theme => (theme.palette.mode === "dark" ? gray200 : gray600)}
-                sx={{ fontSize: "20px", maxWidth: textAlign === "left" ? "768px" : undefined }}
-              >
-                {wrapStringWithBoldTag(paragraph, RE_DETECT_NUMBERS_WITH_COMMAS)}
-              </Typography>
-            ))}
-        </Box>
+            {getDescription(section, stats)
+              .split("\n")
+              .map((paragraph: string) => (
+                <Typography
+                  key={paragraph}
+                  color={theme => (theme.palette.mode === "dark" ? gray200 : gray600)}
+                  sx={{ fontSize: "20px", maxWidth: textAlign === "left" ? "768px" : undefined }}
+                >
+                  {wrapStringWithBoldTag(paragraph, RE_DETECT_NUMBERS_WITH_COMMAS)}
+                </Typography>
+              ))}
+          </Box>
+        )}
         {children}
       </Box>
     );
