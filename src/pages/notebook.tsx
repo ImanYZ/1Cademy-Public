@@ -269,7 +269,7 @@ const Notebook = ({}: NotebookProps) => {
 
   const [openSidebar, setOpenSidebar] = useState<OpenLeftSidebar>(null);
   const [displaySidebar, setDisplaySidebar] = useState<OpenRightSidebar>(null);
-  const [buttonsOpen, setButtonsOpen] = useState<boolean>(true);
+  // const [buttonsOpen, setButtonsOpen] = useState<boolean>(true);
   const [ableToPropose, setAbleToPropose] = useState(false);
 
   // object of cluster boundaries
@@ -353,6 +353,8 @@ const Notebook = ({}: NotebookProps) => {
   const [openLivelinessBar, setOpenLivelinessBar] = useState(false);
   const [comLeaderboardOpen, setComLeaderboardOpen] = useState(false);
 
+  const [toolboxExpanded, setToolboxExpanded] = useState(false);
+
   //TUTORIAL STATES
   const {
     startTutorial,
@@ -413,7 +415,7 @@ const Notebook = ({}: NotebookProps) => {
 
   useEffect(() => {
     setInnerHeight(window.innerHeight);
-    setButtonsOpen(window.innerHeight > 399 ? true : false);
+    // setButtonsOpen(window.innerHeight > 399 ? true : false);
   }, [user?.uname]);
 
   const pathway = useMemo(() => {
@@ -4649,12 +4651,12 @@ const Notebook = ({}: NotebookProps) => {
 
       const newTargetId = nodeBookState.selectedNode ?? "";
       if (!newTargetId) return false;
-
+      console.log("t1");
       const thisNode = graph.nodes[newTargetId];
-
+      console.log("t2");
       if (!thisNode) return false;
       if (!targetIsValid(thisNode)) return false;
-
+      console.log("t3");
       startTutorial(tutorialName);
       setTargetId(newTargetId);
       if (forcedTutorial) {
@@ -4796,10 +4798,7 @@ const Notebook = ({}: NotebookProps) => {
 
       const nodesTutorialIsValid = (node: FullNodeData) => Boolean(node && node.open && !node.editable && !node.isNew);
 
-      if (
-        forcedTutorial === "nodes" ||
-        (!forcedTutorial && (userTutorial["nodes"].done || userTutorial["nodes"].skipped))
-      ) {
+      if (forcedTutorial === "nodes" || !forcedTutorial) {
         const result = detectAndCallTutorial("nodes", nodesTutorialIsValid);
         if (result) return;
       }
@@ -4871,6 +4870,7 @@ const Notebook = ({}: NotebookProps) => {
           ? forcedTutorial !== "tableOfContents"
           : userTutorial["tableOfContents"].done || userTutorial["tableOfContents"].skipped;
         if (!shouldIgnore) {
+          setToolboxExpanded(true);
           startTutorial("tableOfContents");
           return;
         }
@@ -4886,16 +4886,14 @@ const Notebook = ({}: NotebookProps) => {
         // if (nodeBookState.selectedNode) return;
 
         if (!shouldIgnore) {
-          if (buttonsOpen) return startTutorial("focusMode");
+          setToolboxExpanded(true);
+          return startTutorial("focusMode");
         }
       }
 
       if (forcedTutorial === "focusMode") {
-        if (buttonsOpen) {
-          return startTutorial("focusMode");
-        } else {
-          return setButtonsOpen(true);
-        }
+        setToolboxExpanded(true);
+        return startTutorial("focusMode");
       }
 
       // --------------------------
@@ -4906,16 +4904,14 @@ const Notebook = ({}: NotebookProps) => {
           userTutorial["redrawGraph"].done ||
           userTutorial["redrawGraph"].skipped;
         if (!shouldIgnore) {
-          if (buttonsOpen) return startTutorial("redrawGraph");
+          setToolboxExpanded(true);
+          return startTutorial("redrawGraph");
         }
       }
 
       if (forcedTutorial === "redrawGraph") {
-        if (buttonsOpen) {
-          return startTutorial("redrawGraph");
-        } else {
-          return setButtonsOpen(true);
-        }
+        setToolboxExpanded(true);
+        return startTutorial("redrawGraph");
       }
 
       // --------------------------
@@ -4927,16 +4923,14 @@ const Notebook = ({}: NotebookProps) => {
           userTutorial["scrollToNode"].skipped;
         // if (nodeBookState.selectedNode) return;
         if (!shouldIgnore) {
-          if (buttonsOpen) return startTutorial("scrollToNode");
+          setToolboxExpanded(true);
+          return startTutorial("scrollToNode");
         }
       }
 
       if (forcedTutorial === "scrollToNode") {
-        if (buttonsOpen) {
-          return startTutorial("scrollToNode");
-        } else {
-          return setButtonsOpen(true);
-        }
+        setToolboxExpanded(true);
+        return startTutorial("scrollToNode");
       }
 
       // --------------------------
@@ -5608,7 +5602,6 @@ const Notebook = ({}: NotebookProps) => {
 
     detectTriggerTutorial();
   }, [
-    buttonsOpen,
     comLeaderboardOpen,
     detectAndCallChildTutorial,
     detectAndCallSidebarTutorial,
@@ -5914,7 +5907,7 @@ const Notebook = ({}: NotebookProps) => {
     // --------------------------
 
     if (tutorial.name === "tableOfContents") {
-      if (!buttonsOpen) {
+      if (!toolboxExpanded) {
         setTutorial(null);
         setForcedTutorial(null);
       }
@@ -5923,7 +5916,7 @@ const Notebook = ({}: NotebookProps) => {
     // --------------------------
 
     if (tutorial.name === "focusMode") {
-      if (!buttonsOpen) {
+      if (!toolboxExpanded) {
         setTutorial(null);
         setForcedTutorial(null);
       }
@@ -5932,7 +5925,7 @@ const Notebook = ({}: NotebookProps) => {
     // --------------------------
 
     if (tutorial.name === "redrawGraph") {
-      if (!buttonsOpen) {
+      if (!toolboxExpanded) {
         setTutorial(null);
         setForcedTutorial(null);
       }
@@ -5941,7 +5934,7 @@ const Notebook = ({}: NotebookProps) => {
     // --------------------------
 
     if (tutorial.name === "scrollToNode") {
-      if (!buttonsOpen) {
+      if (!toolboxExpanded) {
         setTutorial(null);
         setForcedTutorial(null);
       }
@@ -6088,7 +6081,6 @@ const Notebook = ({}: NotebookProps) => {
       if (currentStep?.childTargetId) removeStyleFromTarget(currentStep.childTargetId, targetId);
     }
   }, [
-    buttonsOpen,
     comLeaderboardOpen,
     currentStep,
     detectAndRemoveTutorial,
@@ -6103,6 +6095,7 @@ const Notebook = ({}: NotebookProps) => {
     pathway,
     setTutorial,
     targetId,
+    toolboxExpanded,
     tutorial,
     userTutorialLoaded,
   ]);
@@ -6498,6 +6491,8 @@ const Notebook = ({}: NotebookProps) => {
           />
 
           <MemoizedToolbox
+            expanded={toolboxExpanded}
+            setExpanded={setToolboxExpanded}
             isLoading={isQueueWorking}
             sx={{
               position: "absolute",

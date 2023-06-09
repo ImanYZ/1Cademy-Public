@@ -76,7 +76,7 @@ type RecentNodesListProps = {
   recentNodes: any;
   setRecentNodes: any;
   onlyTags: any;
-  disabled: any;
+  disabled?: boolean;
   sortDirection: any;
   setSortDirection: any;
   sortOption: SortValues;

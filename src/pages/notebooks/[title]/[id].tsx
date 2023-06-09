@@ -141,6 +141,7 @@ const NodePage: NextPage<Props> = ({ notebook }) => {
   const [selectedNodeId, setSelectedNodeId] = useState("");
   const [displayFocusMode, setDisplayFocusMode] = useState(false);
   const [displayJoinMessage, setDisplayJoinMessage] = useState(false);
+  const [toolboxExpanded, setToolboxExpanded] = useState(false);
   //   ------------------------------ functions
 
   const setNodeParts = useCallback((nodeId: string, innerFunc: (thisNode: FullNodeData) => FullNodeData) => {
@@ -570,6 +571,8 @@ const NodePage: NextPage<Props> = ({ notebook }) => {
   return (
     <Box className="MapContainer" sx={{ position: "relative", overflow: "hidden" }}>
       <MemoizedToolbox
+        expanded={toolboxExpanded}
+        setExpanded={setToolboxExpanded}
         sx={{
           position: "absolute",
           right: "364px",
