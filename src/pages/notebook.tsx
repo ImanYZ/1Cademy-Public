@@ -4467,7 +4467,7 @@ const Notebook = ({}: NotebookProps) => {
     if (!currentStep) return;
     if (!tutorial) return;
 
-    devLog("ON_FINALIZE_TUTORIAL", { childTargetId: currentStep?.childTargetId, targetId });
+    devLog("ON_FINALIZE_TUTORIAL", { childTargetId: currentStep?.childTargetId, targetId }, "TUTORIAL");
 
     if (currentStep?.childTargetId) removeStyleFromTarget(currentStep.childTargetId, targetId);
 
@@ -4577,7 +4577,7 @@ const Notebook = ({}: NotebookProps) => {
       targetIsValid: (node: FullNodeData) => boolean,
       defaultStates: Partial<FullNodeData> = { open: true }
     ) => {
-      devLog("DETECT_AND_FORCE_TUTORIAL", { tutorialName, targetId });
+      devLog("DETECT_AND_FORCE_TUTORIAL", { tutorialName, targetId }, "TUTORIAL");
 
       const thisNode = graph.nodes[targetId];
       if (!targetIsValid(thisNode)) {
@@ -4628,7 +4628,11 @@ const Notebook = ({}: NotebookProps) => {
         : userTutorial[tutorialName].done || userTutorial[tutorialName].skipped;
       if (shouldIgnore) return false;
 
-      devLog("DETECT_AND_CALL_SIDEBAR_TUTORIAL", { tutorialName, sidebar, node: nodeBookState.selectedNode });
+      devLog(
+        "DETECT_AND_CALL_SIDEBAR_TUTORIAL",
+        { tutorialName, sidebar, node: nodeBookState.selectedNode },
+        "TUTORIAL"
+      );
       if (openSidebar !== sidebar) {
         setOpenSidebar(sidebar);
       }
@@ -4647,7 +4651,7 @@ const Notebook = ({}: NotebookProps) => {
       const shouldIgnore = !forcedTutorial && (userTutorial[tutorialName].done || userTutorial[tutorialName].skipped);
       if (shouldIgnore) return false;
 
-      devLog("DETECT_AND_CALL_TUTORIAL", { tutorialName, node: nodeBookState.selectedNode });
+      devLog("DETECT_AND_CALL_TUTORIAL", { tutorialName, node: nodeBookState.selectedNode }, "TUTORIAL");
 
       const newTargetId = nodeBookState.selectedNode ?? "";
       if (!newTargetId) return false;
@@ -4698,7 +4702,7 @@ const Notebook = ({}: NotebookProps) => {
       if (!isValidForcedTutorialChild) return false;
       if (!canDetect) return false;
 
-      devLog("DETECT_AND_CALL_CHILD_TUTORIAL", { tutorialName });
+      devLog("DETECT_AND_CALL_CHILD_TUTORIAL", { tutorialName }, "TUTORIAL");
 
       const newTargetId = nodeBookState.selectedNode ?? "";
       if (!newTargetId) return false;
