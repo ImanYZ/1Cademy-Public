@@ -96,13 +96,7 @@ const RecentNodesList = (props: RecentNodesListProps) => {
 
   return (
     <>
-      <FormControl
-        id={props.id}
-        disabled={props.disabled}
-        sx={{
-          width: "190px",
-        }}
-      >
+      <FormControl id={props.id} disabled={props.disabled}>
         <Select
           placeholder="Sort"
           MenuProps={{
@@ -139,8 +133,8 @@ const RecentNodesList = (props: RecentNodesListProps) => {
           sx={{
             height: "35px",
             "&> fieldset": {
-              maxWidth: "200px",
-              width: "200px",
+              // maxWidth: "200px",
+              // width: "200px",
               borderWidth: "1px",
               borderRadius: "4px",
               borderColor: theme =>

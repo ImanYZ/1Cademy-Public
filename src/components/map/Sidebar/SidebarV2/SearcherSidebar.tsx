@@ -795,16 +795,13 @@ const SearcherSidebar = ({
                   }}
                 />
               </Box>
-              <Box
+              <Stack
                 id="nodesUpdatedSinceContainer"
+                direction={"row"}
+                spacing={"4px"}
+                alignItems={"center"}
                 sx={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  alignItems: "center",
-                  fontSize: innerWidth > 410 ? "14px" : "11px",
-                  flexWrap: "wrap",
-                  gap: "10px",
-                  paddingTop: "13px",
+                  mt: "13px",
                   mb: "16px",
                 }}
               >
@@ -820,8 +817,8 @@ const SearcherSidebar = ({
                 />
 
                 <TimeFilter timeFilter={timeFilter} setTimeFilter={onChangeTimeFilter} />
-                <div
-                  style={{
+                <Box
+                  sx={{
                     ...(sidebarWidth < 350 && {
                       marginLeft: "auto",
                     }),
@@ -829,8 +826,8 @@ const SearcherSidebar = ({
                   id="SearchResutlsNum"
                 >
                   {shortenNumber(results, 2, false)} Results
-                </div>
-              </Box>
+                </Box>
+              </Stack>
             </>
           )}
           {!isMovil && showTagSelector && (
