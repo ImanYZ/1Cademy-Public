@@ -729,3 +729,4 @@ const SearchList = ({ openLinkedNode }: SearchListProps) => {
 };
 
 export default React.memo(SearchList);
+// TODO: check if this is used in all project

@@ -34,9 +34,15 @@ const TIME_OPTIONS: any[] = [
   },
 ];
 
-const TimeFilter = (props: any) => {
+type TimeFilterProps = {
+  id: string;
+  setTimeFilter: any;
+  timeFilter: any;
+  disabled?: boolean;
+};
+const TimeFilter = (props: TimeFilterProps) => {
   const onChangeTimeFilter = (event: SelectChangeEvent) => {
-    console.log({ event });
+    // console.log({ event });
     props.setTimeFilter(event.target.value);
   };
 

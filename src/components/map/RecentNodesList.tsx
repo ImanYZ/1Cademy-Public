@@ -72,7 +72,7 @@ const SORT_OPTIONS: SortOptions[] = [
 ];
 
 type RecentNodesListProps = {
-  id?: string;
+  id: string;
   recentNodes: any;
   setRecentNodes: any;
   onlyTags: any;

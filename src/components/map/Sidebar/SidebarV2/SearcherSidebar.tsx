@@ -737,6 +737,7 @@ const SearcherSidebar = ({
                             />
                           )}
                           <IconButton
+                            id="SearchIcon"
                             onClick={() => {
                               if (value === 0) {
                                 onSearch(1, search, sortOption, sortDirection, nodeTypes);
@@ -806,6 +807,7 @@ const SearcherSidebar = ({
                 }}
               >
                 <RecentNodesList
+                  id={"search-sort-options"}
                   recentNodes={searchResults}
                   setRecentNodes={setSearchResults}
                   onlyTags={onlyTags}
@@ -816,7 +818,7 @@ const SearcherSidebar = ({
                   setSortDirection={onChangeSortDirection}
                 />
 
-                <TimeFilter timeFilter={timeFilter} setTimeFilter={onChangeTimeFilter} />
+                <TimeFilter id="search-filter-options" timeFilter={timeFilter} setTimeFilter={onChangeTimeFilter} />
                 <Box
                   sx={{
                     ...(sidebarWidth < 350 && {
