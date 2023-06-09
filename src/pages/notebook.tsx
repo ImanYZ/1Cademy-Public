@@ -4766,7 +4766,7 @@ const Notebook = ({}: NotebookProps) => {
 
   useEffect(() => {
     /**
-     * This useEffect with detect conditions to call a tutorial
+     * This useEffect will detect conditions to call a tutorial
      * we need selected node over required node
      * This useEffect executed 2 times when we force tutorial
      * 1. first time will set up required states
@@ -4778,7 +4778,7 @@ const Notebook = ({}: NotebookProps) => {
       if (tutorial) return;
       if (focusView.isEnabled) return;
 
-      devLog("USE_EFFECT: DETECT_TRIGGER_TUTORIAL", { userTutorial });
+      devLog("USE_EFFECT: DETECT_TRIGGER_TUTORIAL", { userTutorial }, "TUTORIAL");
 
       // --------------------------
 
@@ -4787,6 +4787,10 @@ const Notebook = ({}: NotebookProps) => {
         // TODO: force 1cademy node  if there isn't nodes
         return;
       }
+
+      // --------------------------
+
+      if (hideNodeContent) return;
 
       // --------------------------
 
@@ -5615,6 +5619,7 @@ const Notebook = ({}: NotebookProps) => {
     forcedTutorial,
     getGraphOpenedNodes,
     graph.nodes,
+    hideNodeContent,
     nodeBookDispatch,
     nodeBookState.selectedNode,
     openLivelinessBar,
@@ -5622,7 +5627,7 @@ const Notebook = ({}: NotebookProps) => {
     openSidebar,
     parentWithChildren,
     parentWithMostChildren,
-    pathway,
+    pathway.node,
     scrollToNode,
     setTargetId,
     startTutorial,
@@ -5631,6 +5636,32 @@ const Notebook = ({}: NotebookProps) => {
     userTutorial,
     userTutorialLoaded,
   ]);
+  // buttonsOpen,
+  // comLeaderboardOpen,
+  // detectAndCallChildTutorial,
+  // detectAndCallSidebarTutorial,
+  // detectAndCallTutorial,
+  // detectAndForceTutorial,
+  // firstLoading,
+  // focusView.isEnabled,
+  // forcedTutorial,
+  // getGraphOpenedNodes,
+  // graph.nodes,
+  // nodeBookDispatch,
+  // nodeBookState.selectedNode,
+  // openLivelinessBar,
+  // openNodeHandler,
+  // openSidebar,
+  // parentWithChildren,
+  // parentWithMostChildren,
+  // pathway,
+  // scrollToNode,
+  // setTargetId,
+  // startTutorial,
+  // tutorial,
+  // user?.livelinessBar,
+  // userTutorial,
+  // userTutorialLoaded,
 
   useEffect(() => {
     if (!userTutorialLoaded) return;
@@ -5638,13 +5669,13 @@ const Notebook = ({}: NotebookProps) => {
     if (!tutorial) return;
     if (!currentStep) return;
 
-    if (focusView.isEnabled || hideNodeContent) {
+    if (focusView.isEnabled || (hideNodeContent && tutorial.name !== "navigation")) {
       setTutorial(null);
       setForcedTutorial(null);
       return;
     }
 
-    devLog("USE_EFFECT: DETECT_TO_REMOVE_TUTORIAL", tutorial);
+    devLog("USE_EFFECT: DETECT_TO_REMOVE_TUTORIAL", tutorial, "TUTORIAL");
 
     if (tutorial.name === "nodes") {
       const nodesTutorialIsValid = (node: FullNodeData) => node && node.open; // TODO: add other validations check parentsChildrenList

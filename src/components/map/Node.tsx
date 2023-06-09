@@ -426,9 +426,9 @@ const Node = ({
   const nodeClickHandler = useCallback(
     (event: any) => {
       let operation = "selectNode";
-      console.log({ rrrrrr: notebookRef.current });
+      // console.log({ rrrrrr: notebookRef.current });
       if (notebookRef.current.choosingNode && notebookRef.current.choosingNode.id !== identifier) {
-        console.log("-1");
+        // console.log("-1");
         // The first Nodes exist, Now is clicking the Chosen Node
 
         notebookRef.current.chosenNode = {
@@ -450,7 +450,7 @@ const Node = ({
         event.currentTarget.activeElement.nodeName !== "INPUT" &&
         !notebookRef.current.choosingNode
       ) {
-        console.log("-2");
+        // console.log("-2");
         nodeClicked(event, identifier, nodeType, setOpenPart);
       }
 
@@ -459,7 +459,7 @@ const Node = ({
         notebookRef.current.selectedNode !== identifier &&
         operation === "selectNode"
       ) {
-        console.log("-3");
+        // console.log("-3");
         const updatedNodeIds: string[] = [notebookRef.current.selectedNode!, identifier];
         notebookRef.current.selectedNode = identifier;
         nodeBookDispatch({ type: "setSelectedNode", payload: identifier });

@@ -50,7 +50,7 @@ export const useWorkerQueue = ({
   const isSameGraphRef = useRef(false);
   const workerRef = useRef<Worker | null>(null);
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [deferredTimer, setDeferredTimer] = useState<NodeJS.Timeout | null>(null);
+  // const [deferredTimer, setDeferredTimer] = useState<NodeJS.Timeout | null>(null);
 
   const recalculateGraphWithWorker = useCallback(
     (nodesToRecalculate: FullNodesData, edgesToRecalculate: any) => {
