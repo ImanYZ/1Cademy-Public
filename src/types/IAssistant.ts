@@ -1,4 +1,4 @@
-import { IAssistantMessage } from "./IAssitantConversation";
+import { Flashcard, IAssistantMessage } from "./IAssitantConversation";
 
 export type IAssistantEventDetail =
   | {
@@ -11,6 +11,10 @@ export type IAssistantEventDetail =
   | {
       type: "EXTENSION_ID";
       extensionId: string;
+    }
+  | {
+      type: "SEARCH_NODES";
+      query: string;
     };
 
 export type INarrateWorkerMessage = {
@@ -23,4 +27,11 @@ export type IAssistantPassageResponse = {
   queries: string[];
   response?: IAssistantMessage;
   url: string;
+};
+
+export type IAssistantNodePassage = {
+  flashcards: Flashcard[];
+  passage: string;
+  contextPassage: string;
+  urls: string[];
 };

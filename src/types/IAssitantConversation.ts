@@ -70,8 +70,14 @@ export type IAssistantChat = {
   updatedAt: Timestamp;
 };
 
-export type FlashcardResponse = {
+export type Flashcard = {
   title: string;
   type: "Relation" | "Concept";
+  passageId: string;
   content: string;
-}[];
+  proposed?: boolean;
+  proposer?: string;
+  node?: string;
+};
+
+export type FlashcardResponse = Flashcard[];

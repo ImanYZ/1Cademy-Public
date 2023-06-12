@@ -22,7 +22,7 @@ import { IPractice } from "src/types/IPractice";
 import { Timestamp } from "firebase-admin/firestore";
 import moment from "moment";
 import { CollectionFieldSchema } from "typesense/lib/Typesense/Collection";
-import { IAssistantPassageResponse } from "src/types/IAssistant";
+import { IAssistantNodePassage, IAssistantPassageResponse } from "src/types/IAssistant";
 
 export type BARD_RESULT_NODE = {
   title: string;
@@ -1001,6 +1001,22 @@ export const createChat = async (uname?: string) => {
     updatedAt: Timestamp.now(),
   } as IAssistantChat);
   return assistantChatRef.id;
+};
+
+export const findPassagesBySelection = async (
+  selection: string,
+  url: string
+): Promise<FirebaseFirestore.QueryDocumentSnapshot<any>[] | undefined> => {
+  const _selection = selection.trim();
+  const bookPassages = await db.collection("bookPassages").where("urls", "array-contains", url).get();
+  const _bookPassages = bookPassages.docs.filter(bookPassage => {
+    const bookPassageData = bookPassage.data() as IAssistantNodePassage;
+    return bookPassageData.passage.includes(_selection) || _selection.includes(bookPassageData.passage);
+  });
+
+  if (_bookPassages.length) {
+    return _bookPassages;
+  }
 };
 
 export const getFlashcardsFromPassage = async (passage: string): Promise<FlashcardResponse> => {

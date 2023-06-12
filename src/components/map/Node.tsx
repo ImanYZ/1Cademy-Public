@@ -427,6 +427,14 @@ const Node = ({
     (event: any) => {
       let operation = "selectNode";
       console.log({ rrrrrr: notebookRef.current });
+      const nodeClickEvent = new CustomEvent("node-selected", {
+        detail: {
+          id: identifier,
+          title,
+        },
+      });
+      window.dispatchEvent(nodeClickEvent);
+
       if (notebookRef.current.choosingNode && notebookRef.current.choosingNode.id !== identifier) {
         console.log("-1");
         // The first Nodes exist, Now is clicking the Chosen Node

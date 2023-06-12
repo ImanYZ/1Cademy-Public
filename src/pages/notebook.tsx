@@ -897,6 +897,11 @@ const Notebook = ({}: NotebookProps) => {
       const detail: IAssistantEventDetail = e.detail || {};
       if (detail.type === "SELECT_NOTEBOOK") {
         onChangeNotebook(detail.notebookId);
+      } else if (detail.type === "SEARCH_NODES") {
+        console.log({ type: "setSearchQuery", payload: detail.query }, "SEARCH_NODES");
+        setOpenSidebar("SEARCHER_SIDEBAR");
+        nodeBookDispatch({ type: "setSearchQuery", payload: detail.query });
+        nodeBookDispatch({ type: "setNodeTitleBlured", payload: true });
       }
     });
 
