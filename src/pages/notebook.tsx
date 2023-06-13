@@ -571,11 +571,12 @@ const Notebook = ({}: NotebookProps) => {
   }, [currentStep, graph.nodes, setTargetClientRect, nodeBookState.selectedNode, targetId]);
 
   const onCompleteWorker = useCallback(() => {
+    console.log("onCompleteWorker");
     setGraph(graph => {
       if (!nodeBookState.selectedNode) return graph;
       if (!graph.nodes[nodeBookState.selectedNode]) return graph;
 
-      scrollToNode(nodeBookState.selectedNode);
+      scrollToNode(nodeBookState.selectedNode, true);
 
       return graph;
     });
