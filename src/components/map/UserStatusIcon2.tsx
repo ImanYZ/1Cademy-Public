@@ -54,14 +54,14 @@ const UserStatusIcon = ({ nodeBookDispatch, smallVersion = true, ...props }: Use
       "totalPoints" in prevAmount &&
       "totalPoints" in props
     ) {
-      console.log("points");
+      // console.log("points");
       if (
         prevAmount.totalPoints < props.totalPoints ||
         prevAmount.totalPositives - prevAmount.totalNegatives < props.totalPositives - props.totalNegatives
       ) {
         setPointsGained(true);
         setTimeout(() => {
-          console.log("setPointsGained");
+          // console.log("setPointsGained");
           setPointsGained(false);
         }, 1000);
       } else if (
@@ -70,7 +70,7 @@ const UserStatusIcon = ({ nodeBookDispatch, smallVersion = true, ...props }: Use
       ) {
         setPointsLost(true);
         setTimeout(() => {
-          console.log("setPointsLost");
+          // console.log("setPointsLost");
           setPointsLost(false);
         }, 1000);
       }
