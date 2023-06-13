@@ -2,17 +2,17 @@ import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
 import ConstructionIcon from "@mui/icons-material/Construction";
 import { Box, CircularProgress, Collapse, Divider, IconButton, Stack } from "@mui/material";
 import { SxProps, Theme } from "@mui/material/styles";
-import React, { ReactNode, useState } from "react";
+import React, { ReactNode } from "react";
 
 type ToolboxProps = {
+  expanded: boolean;
+  setExpanded: (newValue: boolean) => void;
   children: ReactNode;
   isLoading?: boolean;
   sx?: SxProps<Theme>;
 };
 
-const Toolbox = ({ children, isLoading = false, sx }: ToolboxProps) => {
-  const [expanded, setExpanded] = useState(false);
-
+const Toolbox = ({ expanded, setExpanded, children, isLoading = false, sx }: ToolboxProps) => {
   return (
     <Box
       sx={{

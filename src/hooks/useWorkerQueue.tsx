@@ -50,7 +50,7 @@ export const useWorkerQueue = ({
   const isSameGraphRef = useRef(false);
   const workerRef = useRef<Worker | null>(null);
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [deferredTimer, setDeferredTimer] = useState<NodeJS.Timeout | null>(null);
+  // const [deferredTimer, setDeferredTimer] = useState<NodeJS.Timeout | null>(null);
 
   const recalculateGraphWithWorker = useCallback(
     (nodesToRecalculate: FullNodesData, edgesToRecalculate: any) => {
@@ -130,11 +130,11 @@ export const useWorkerQueue = ({
             //   return oldIsSameGraph && isSame;
             // });
             if (isSame) return true; // don't update graph for this node
-            console.log(`calc height ${nodeId}`, { nH: resultNode.height, H: nodesCopy[nodeId].height });
+            // console.log(`calc height ${nodeId}`, { nH: resultNode.height, H: nodesCopy[nodeId].height });
 
-            if (resultNode.height !== nodesCopy[nodeId].height) {
-              console.log(`calc height ${nodeId}`, { nH: resultNode.height, H: nodesCopy[nodeId].height });
-            }
+            // if (resultNode.height !== nodesCopy[nodeId].height) {
+            //   // console.log(`calc height ${nodeId}`, { nH: resultNode.height, H: nodesCopy[nodeId].height });
+            // }
             const overrideNode: FullNodeData = {
               ...nodesCopy[nodeId],
               left: resultNode.left,
