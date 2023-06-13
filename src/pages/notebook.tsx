@@ -4352,7 +4352,7 @@ const Notebook = ({}: NotebookProps) => {
     reloadPermanentGraph();
     if (notebookRef.current.selectedNode) scrollToNode(notebookRef.current.selectedNode);
     setOpenSidebar(null);
-  }, [setOpenSidebar, reloadPermanentGraph]);
+  }, [reloadPermanentGraph, scrollToNode]);
 
   const onRedrawGraph = useCallback(() => {
     setGraph(() => {
