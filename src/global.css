@@ -2023,18 +2023,7 @@ button.MuiTab-textColorInherit:focus {
 }
 
 #nodesUpdatedSinceContainer {
-  display: grid;
-  /* grid-template-columns: 205px 120px auto; */
-  grid-template-columns: 205px 1fr 1fr;
-  /* margin-top: 4px; */
   color: gray;
-}
-
-#nodesUpdatedSinceContainer .MuiFormControl-root {
-  /* max-width: 70px; */
-  margin-left: 3px;
-  margin-right: 3px;
-  margin-top: -5.2px;
 }
 
 #SearchNodesNum {

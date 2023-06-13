@@ -96,7 +96,7 @@ export const TooltipTutorial = ({
     let left = 0;
     let exceedTop = 0;
     let exceedLeft = 0;
-    console.log("TOOLTIP_CLIENT_RECT", { tutorialStep });
+    // console.log("TOOLTIP_CLIENT_RECT", { tutorialStep });
 
     if (!tooltipRef.current) return { top, left, exceedTop, exceedLeft };
     if (!tutorialStep) return { top, left, exceedTop, exceedLeft };
@@ -206,7 +206,13 @@ export const TooltipTutorial = ({
   if (!tutorialStep.currentStepName) return null;
 
   const OFFSET = isMobile ? "5px" : "10px";
-  let location = { top: OFFSET, bottom: OFFSET, left: OFFSET, right: OFFSET };
+  // let location = { top: '0px', bottom: '0px', left: '0px', right: '0px' };
+  let location: { top?: string; bottom?: string; left?: string; right?: string } = {
+    top: OFFSET,
+    bottom: OFFSET,
+    left: OFFSET,
+    right: OFFSET,
+  };
 
   if (tutorialStep.tooltipPosition === "topLeft") location = { ...location, bottom: "", right: isMobile ? "5px" : "" };
   else if (tutorialStep.tooltipPosition === "topRight")
@@ -215,11 +221,11 @@ export const TooltipTutorial = ({
     location = { ...location, top: "", right: isMobile ? "5px" : "" };
   else if (tutorialStep.tooltipPosition === "bottomRight")
     location = { ...location, top: "", left: isMobile ? "5px" : "" };
+  else location = { ...location, top: undefined, right: undefined };
 
   const tutorialsCompletePercentage = Math.round(
     (tutorialProgress.tutorialsComplete * 100) / tutorialProgress.totalTutorials
   );
-
   const wrapper = (children: ReactNode) => {
     if (
       targetClientRect.top === 0 &&
@@ -227,6 +233,7 @@ export const TooltipTutorial = ({
       targetClientRect.width === 0 &&
       targetClientRect.height === 0
     )
+      //  target is on portal
       return (
         <Box
           sx={{
@@ -237,7 +244,6 @@ export const TooltipTutorial = ({
             height: "auto",
             maxWidth: "450px",
             backgroundColor: "#55555500",
-
             transition: "top 1s ease-out,bottom 1s ease-out,left 1s ease-out,rigth 1s ease-out,height 1s ease-out",
             zIndex: 99999,
           }}
