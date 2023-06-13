@@ -182,12 +182,13 @@ export const fillDagre = (
         if (g.hasNode(cur.node)) {
           // g.nodes().forEach(function () {});
           // g.edges().forEach(function () {});
-          // PROBABLY you need to add hideNodeAndItsLinks, to update children and parents nodes
+          // PROBABLY you need to add hideNodeAndItsLinks, this is called into removeDagAllEdges
 
           // !IMPORTANT, Don't change the order, first remove edges then nodes
           tmpEdges = removeDagAllEdges(g, cur.node, acu.newEdges, updatedNodeIds);
           tmpNodes = removeDagNode(g, cur.node, acu.newNodes);
         } else {
+          // this simulate the pure functionally, when all flow is pure, we can remove this part
           // remove edges
           const oldEdges = { ...acu.newEdges };
 

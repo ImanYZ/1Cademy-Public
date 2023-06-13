@@ -571,7 +571,6 @@ const Notebook = ({}: NotebookProps) => {
   }, [currentStep, graph.nodes, setTargetClientRect, nodeBookState.selectedNode, targetId]);
 
   const onCompleteWorker = useCallback(() => {
-    console.log("onCompleteWorker");
     setGraph(graph => {
       if (!nodeBookState.selectedNode) return graph;
       if (!graph.nodes[nodeBookState.selectedNode]) return graph;
@@ -1914,75 +1913,85 @@ const Notebook = ({}: NotebookProps) => {
       if (notebookRef.current.choosingNode || !user) return;
 
       setGraph(graph => {
-        (async () => {
-          const updatedNodeIds: string[] = [];
-          const descendants = recursiveDescendants(nodeId);
+        const updatedNodeIds: string[] = [];
+        const descendants = recursiveDescendants(nodeId);
 
-          notebookRef.current.selectedNode = nodeId;
-          nodeBookDispatch({ type: "setSelectedNode", payload: nodeId });
+        notebookRef.current.selectedNode = nodeId;
+        nodeBookDispatch({ type: "setSelectedNode", payload: nodeId });
 
-          const batch = writeBatch(db);
-          try {
-            for (let descendant of descendants) {
-              const thisNode = graph.nodes[descendant];
-              const { nodeRef, userNodeRef } = initNodeStatusChange(descendant, thisNode.userNodeId);
-              const notebookIdx = (thisNode.notebooks ?? []).findIndex(cur => cur === selectedNotebookId);
-              if (notebookIdx < 0) return console.error("notebook property has invalid values");
-
-              const newExpands = (thisNode.expands ?? []).filter((c, idx) => idx !== notebookIdx);
-              const newNotebooks = (thisNode.notebooks ?? []).filter((c, idx) => idx !== notebookIdx);
-              const userNodeData = {
-                changed: thisNode.changed,
-                correct: thisNode.correct,
-                createdAt: Timestamp.fromDate(thisNode.firstVisit),
-                updatedAt: Timestamp.fromDate(new Date()),
-                deleted: false,
-                isStudied: thisNode.isStudied,
-                bookmarked: "bookmarked" in thisNode ? thisNode.bookmarked : false,
-                node: descendant,
-                notebooks: newNotebooks,
-                expands: newExpands,
-                // open: thisNode.open,
-                user: user.uname,
-                // visible: false,
-                wrong: thisNode.wrong,
-              };
-
-              userNodeRef ? batch.set(userNodeRef, userNodeData) : null;
-              const userNodeLogData: any = {
-                ...userNodeData,
-                createdAt: Timestamp.fromDate(new Date()),
-              };
-              const changeNode: any = {
-                viewers: (thisNode.viewers || 0) - 1,
-                updatedAt: Timestamp.fromDate(new Date()),
-              };
-              // INFO: this was commented because is not used
-              // if (userNodeData.open && "openHeight" in thisNode) {
-              //   changeNode.height = thisNode.openHeight;
-              //   userNodeLogData.height = thisNode.openHeight;
-              // } else if ("closedHeight" in thisNode) {
-              //   changeNode.closedHeight = thisNode.closedHeight;
-              //   userNodeLogData.closedHeight = thisNode.closedHeight;
-              // }
-              batch.update(nodeRef, changeNode);
-
-              const userNodeLogRef = collection(db, "userNodesLog");
-              batch.set(doc(userNodeLogRef), userNodeLogData);
+        const batch = writeBatch(db);
+        try {
+          for (let descendant of descendants) {
+            const thisNode = graph.nodes[descendant];
+            const { nodeRef, userNodeRef } = initNodeStatusChange(descendant, thisNode.userNodeId);
+            const notebookIdx = (thisNode.notebooks ?? []).findIndex(cur => cur === selectedNotebookId);
+            if (notebookIdx < 0) {
+              console.error("notebook property has invalid values");
+              continue;
             }
 
-            await batch.commit();
+            const newExpands = (thisNode.expands ?? []).filter((c, idx) => idx !== notebookIdx);
+            const newNotebooks = (thisNode.notebooks ?? []).filter((c, idx) => idx !== notebookIdx);
+            const userNodeData = {
+              changed: thisNode.changed,
+              correct: thisNode.correct,
+              createdAt: Timestamp.fromDate(thisNode.firstVisit),
+              updatedAt: Timestamp.fromDate(new Date()),
+              deleted: false,
+              isStudied: thisNode.isStudied,
+              bookmarked: "bookmarked" in thisNode ? thisNode.bookmarked : false,
+              node: descendant,
+              notebooks: newNotebooks,
+              expands: newExpands,
+              // open: thisNode.open,
+              user: user.uname,
+              // visible: false,
+              wrong: thisNode.wrong,
+            };
 
-            setNodeUpdates({
-              nodeIds: updatedNodeIds,
-              updatedAt: new Date(),
-            });
-          } catch (err) {
-            console.error(err);
+            userNodeRef ? batch.set(userNodeRef, userNodeData) : null;
+            const userNodeLogData: any = {
+              ...userNodeData,
+              createdAt: Timestamp.fromDate(new Date()),
+            };
+            const changeNode: any = {
+              viewers: (thisNode.viewers || 0) - 1,
+              updatedAt: Timestamp.fromDate(new Date()),
+            };
+            // INFO: this was commented because is not used
+            // if (userNodeData.open && "openHeight" in thisNode) {
+            //   changeNode.height = thisNode.openHeight;
+            //   userNodeLogData.height = thisNode.openHeight;
+            // } else if ("closedHeight" in thisNode) {
+            //   changeNode.closedHeight = thisNode.closedHeight;
+            //   userNodeLogData.closedHeight = thisNode.closedHeight;
+            // }
+            batch.update(nodeRef, changeNode);
+
+            const userNodeLogRef = collection(db, "userNodesLog");
+            batch.set(doc(userNodeLogRef), userNodeLogData);
           }
-        })();
+          batch.commit();
 
-        return graph;
+          setNodeUpdates({
+            nodeIds: updatedNodeIds,
+            updatedAt: new Date(),
+          });
+
+          // simulation
+          const { newEdges, newNodes } = descendants.reduce(
+            (acu: { newNodes: { [key: string]: any }; newEdges: { [key: string]: any } }, cur) => {
+              const tmpEdges = removeDagAllEdges(g.current, cur, acu.newEdges, []);
+              const tmpNodes = removeDagNode(g.current, cur, acu.newNodes);
+              return { newNodes: { ...tmpNodes }, newEdges: { ...tmpEdges } };
+            },
+            { newNodes: { ...graph.nodes }, newEdges: { ...graph.edges } }
+          );
+          return { edges: newEdges, nodes: newNodes };
+        } catch (err) {
+          console.error(err);
+          return graph;
+        }
       });
     },
     [recursiveDescendants, selectedNotebookId]
