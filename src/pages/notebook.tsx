@@ -571,7 +571,6 @@ const Notebook = ({}: NotebookProps) => {
   }, [currentStep, graph.nodes, setTargetClientRect, nodeBookState.selectedNode, targetId]);
 
   const onCompleteWorker = useCallback(() => {
-    console.log("");
     setGraph(graph => {
       if (!nodeBookState.selectedNode) return graph;
       if (!graph.nodes[nodeBookState.selectedNode]) return graph;
