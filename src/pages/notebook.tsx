@@ -893,18 +893,6 @@ const Notebook = ({}: NotebookProps) => {
 
   // called after first time map is rendered
   useEffect(() => {
-    window.addEventListener("assistant", (e: any) => {
-      const detail: IAssistantEventDetail = e.detail || {};
-      if (detail.type === "SELECT_NOTEBOOK") {
-        onChangeNotebook(detail.notebookId);
-      } else if (detail.type === "SEARCH_NODES") {
-        console.log({ type: "setSearchQuery", payload: detail.query }, "SEARCH_NODES");
-        setOpenSidebar("SEARCHER_SIDEBAR");
-        nodeBookDispatch({ type: "setSearchQuery", payload: detail.query });
-        nodeBookDispatch({ type: "setNodeTitleBlured", payload: true });
-      }
-    });
-
     window.location.hash = "no-back-button";
 
     // Again because Google Chrome doesn't insert
@@ -6182,6 +6170,40 @@ const Notebook = ({}: NotebookProps) => {
 
     duplicateNotebookFromParams();
   }, [db, onChangeNotebook, openNodesOnNotebook, router.query.nb, user]);
+
+  useEffect(() => {
+    window.addEventListener("assistant", (e: any) => {
+      const detail: IAssistantEventDetail = e.detail || {};
+      if (detail.type === "SELECT_NOTEBOOK") {
+        onChangeNotebook(detail.notebookId);
+      } else if (detail.type === "SEARCH_NODES") {
+        setOpenSidebar("SEARCHER_SIDEBAR");
+        nodeBookDispatch({ type: "setSearchQuery", payload: detail.query });
+        nodeBookDispatch({ type: "setNodeTitleBlured", payload: true });
+      } else if (detail.type === "IMPROVEMENT") {
+        proposeNodeImprovement(null, detail.selectedNode.id);
+        // to apply assistant potential improvement on node editor
+        setTimeout(() => {
+          setGraph(graph => {
+            let newGraph = {
+              ...graph,
+              nodes: { ...graph.nodes },
+            };
+            let newNode = { ...newGraph.nodes[detail.selectedNode.id] };
+            newNode.title = detail.selectedNode.title;
+            newNode.content = detail.selectedNode.content;
+            newGraph.nodes[detail.selectedNode.id] = newNode;
+
+            return newGraph;
+          });
+          setNodeUpdates({
+            nodeIds: [detail.selectedNode.id],
+            updatedAt: new Date(),
+          });
+        }, 1000);
+      }
+    });
+  }, [proposeNodeImprovement, nodeBookDispatch, onChangeNotebook, setOpenSidebar, setGraph]);
 
   return (
     <div className="MapContainer" style={{ overflow: "hidden" }}>

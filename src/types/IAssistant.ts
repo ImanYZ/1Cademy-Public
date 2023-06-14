@@ -15,6 +15,15 @@ export type IAssistantEventDetail =
   | {
       type: "SEARCH_NODES";
       query: string;
+    }
+  | {
+      type: "IMPROVEMENT";
+      selectedNode: {
+        id: string;
+        title: string;
+        content: string;
+        [key: string]: any;
+      };
     };
 
 export type INarrateWorkerMessage = {
