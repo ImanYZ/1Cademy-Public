@@ -3,12 +3,13 @@ import { doc, DocumentChange, DocumentData, Firestore, getDoc } from "firebase/f
 import { AllTagsTreeView } from "@/components/TagsSearcher";
 
 import {
+  EdgesData,
   FullNodeData,
   FullNodesData,
   NodeFireStore,
   NodesData,
   UserNodeChanges,
-  UserNodesData,
+  UserNodeFirestore,
 } from "../../nodeBookTypes";
 import {
   compare2Nodes,
@@ -24,7 +25,7 @@ export const getUserNodeChanges = (docChanges: DocumentChange<DocumentData>[]): 
   // if (!docChanges.length) return null
 
   return docChanges.map(change => {
-    const userNodeData: UserNodesData = change.doc.data() as UserNodesData;
+    const userNodeData: UserNodeFirestore = change.doc.data() as UserNodeFirestore;
     return {
       cType: change.type,
       uNodeId: change.doc.id,
@@ -134,13 +135,14 @@ export const mergeAllNodes = (newAllNodes: FullNodeData[], currentAllNodes: Full
 export const fillDagre = (
   g: dagre.graphlib.Graph<{}>,
   fullNodes: FullNodeData[],
-  currentNodes: any,
-  currentEdges: any,
+  currentNodes: FullNodesData,
+  currentEdges: EdgesData,
   withClusters: boolean,
-  allTags: AllTagsTreeView,
-  updatedNodeIds: string[]
-) => {
-  return fullNodes.reduce(
+  allTags: AllTagsTreeView
+  // updatedNodeIds: string[]
+): { result: { newNodes: FullNodesData; newEdges: EdgesData }; updatedNodeIds: string[] } => {
+  let updatedNodeIds: string[] = [];
+  const result = fullNodes.reduce(
     (acu: { newNodes: { [key: string]: any }; newEdges: { [key: string]: any } }, cur) => {
       let tmpNodes = {};
       let tmpEdges = {};
@@ -216,4 +218,5 @@ export const fillDagre = (
     },
     { newNodes: { ...currentNodes }, newEdges: { ...currentEdges } }
   );
+  return { result, updatedNodeIds };
 };

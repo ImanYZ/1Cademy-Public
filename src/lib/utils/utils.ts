@@ -1,4 +1,6 @@
 import dayjs from "dayjs";
+import { Timestamp } from "firebase/firestore";
+import { UserNodeFirestore } from "src/nodeBookTypes";
 import { URL } from "url";
 
 import { ONECADEMY_DOMAIN } from "@/lib/utils/1cademyConfig";
@@ -373,3 +375,30 @@ export const gtmEvent = (eventName: string, eventData: any): void => {
 export const momentDateToSeconds = (moment: any) => {
   return 60 * 60 * moment.hours() + 60 * moment.minutes() + moment.seconds();
 };
+
+type GenerateUserNodeInput = {
+  nodeId: string;
+  uname: string;
+  notebookId: string;
+  isMock?: boolean;
+};
+export const generateUserNode = ({
+  nodeId,
+  uname,
+  notebookId,
+  isMock = false,
+}: GenerateUserNodeInput): UserNodeFirestore => ({
+  changed: true,
+  correct: false,
+  createdAt: Timestamp.fromDate(new Date()),
+  updatedAt: Timestamp.fromDate(new Date()),
+  deleted: false,
+  isStudied: false,
+  bookmarked: false,
+  node: nodeId,
+  user: uname,
+  wrong: false,
+  notebooks: [notebookId],
+  expands: [true],
+  ...(isMock && { isMock: true }),
+});

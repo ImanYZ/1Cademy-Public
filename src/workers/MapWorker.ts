@@ -208,6 +208,11 @@ const layoutHandler = (
   };
 };
 
+/**
+ * This service worker is cached by service worker
+ * to update cache, increase SERVICE_WORKER_VERSION in service-worker.js
+ */
+
 onmessage = e => {
   const {
     /*mapChangedFlag,*/

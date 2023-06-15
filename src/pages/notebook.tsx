@@ -45,6 +45,7 @@ import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from "rea
 /* eslint-disable */ //This wrapper comments it to use react-map-interaction without types
 // @ts-ignore
 import { MapInteractionCSS } from "react-map-interaction";
+import { getUserNodesByForce } from "src/client/firestore/userNodes.firestore";
 import { IAssistantEventDetail } from "src/types/IAssistant";
 import { INodeType } from "src/types/INodeType";
 /* eslint-enable */
@@ -135,7 +136,7 @@ import {
   mergeAllNodes,
 } from "../lib/utils/nodesSyncronization.utils";
 import { getGroupTutorials, LivelinessBar } from "../lib/utils/tutorials/grouptutorials";
-import { gtmEvent, imageLoaded, isValidHttpUrl } from "../lib/utils/utils";
+import { generateUserNode, gtmEvent, imageLoaded, isValidHttpUrl } from "../lib/utils/utils";
 import {
   ChoosingType,
   EdgesData,
@@ -146,9 +147,9 @@ import {
   TNodeBookState,
   TNodeUpdates,
   TutorialTypeKeys,
+  UserNodeFirestore,
   // TutorialType,
-  UserNodes,
-  UserNodesData,
+  UserNodeSnapshot,
   UserTutorial,
   UserTutorials,
   VoiceAssistant,
@@ -217,7 +218,7 @@ const Notebook = ({}: NotebookProps) => {
   // ---------------------------------------------------------------------
 
   // used for triggering useEffect after nodes or usernodes change
-  const [userNodeChanges /*setUserNodeChanges*/] = useState<UserNodes[]>([]);
+  const [userNodeChanges /*setUserNodeChanges*/] = useState<UserNodeSnapshot[]>([]);
   const [nodeChanges /*setNodeChanges*/] = useState<NodeChanges[]>([]);
   // nodes: dictionary of all nodes visible on map for specific user
   // edges: dictionary of all edges visible on map for specific user
@@ -227,7 +228,8 @@ const Notebook = ({}: NotebookProps) => {
     updatedAt: new Date(),
   });
   // this allNodes is DEPRECATED
-  const [allNodes, setAllNodes] = useState<FullNodesData>({});
+  // const [allNodes, setAllNodes] = useState<FullNodesData>({});
+  const [preLoadedNodes, setPreLoadedNodes] = useState<FullNodesData>({});
   // as map grows, width and height grows based on the nodes shown on the map
   const [mapWidth, setMapWidth] = useState(700);
   const [mapHeight, setMapHeight] = useState(400);
@@ -708,12 +710,77 @@ const Notebook = ({}: NotebookProps) => {
   }, [notebooks, selectedNotebookId]);
 
   const openNodeHandler = useMemoizedCallback(
-    async (nodeId: string, openWithDefaultValues: Partial<UserNodesData> = {}) => {
+    async (nodeId: string, openWithDefaultValues: Partial<UserNodeFirestore> = {}) => {
       devLog("OPEN_NODE_HANDLER", { nodeId, openWithDefaultValues });
 
+      // update graph with preloaded data
+      setGraph(({ nodes, edges }) => {
+        console.log({ preLoadedNodes, nodeId });
+        if (!preLoadedNodes[nodeId]) return { nodes, edges };
+        console.log("4.5:Snapshot: graph", { nodes });
+        // const visibleFullNodesMerged = visibleFullNodes.map(cur => {
+        const visibleFullNodesMerged = [preLoadedNodes[nodeId]].map(cur => {
+          const tmpNode = nodes[cur.node];
+          if (tmpNode) {
+            if (tmpNode.hasOwnProperty("simulated")) {
+              delete tmpNode["simulated"];
+            }
+            if (tmpNode.hasOwnProperty("isNew")) {
+              delete tmpNode["isNew"];
+            }
+          }
+
+          const hasParent = cur.parents.length;
+          // IMPROVE: we need to pass the parent which open the node
+          // to use his current position
+          // in this case we are checking first parent
+          // if this doesn't exist will set top:0 and left: 0 + NODE_WIDTH + COLUMN_GAP
+          const nodeParent = hasParent ? nodes[cur.parents[0].node] : null;
+          const topParent = nodeParent?.top ?? 0;
+          const leftParent = nodeParent?.left ?? 0;
+          const notebookIdx = (cur?.notebooks ?? []).findIndex(c => c === selectedNotebookId);
+
+          return {
+            ...cur,
+            left: tmpNode?.left ?? leftParent + NODE_WIDTH + COLUMN_GAP,
+            top: tmpNode?.top ?? topParent,
+            visible: Boolean((cur.notebooks ?? [])[notebookIdx]),
+            open: Boolean((cur.expands ?? [])[notebookIdx]),
+            editable: tmpNode?.editable ?? false,
+          };
+        });
+
+        devLog("5:user Nodes Snapshot:visible Full Nodes Merged", visibleFullNodesMerged);
+        // const updatedNodeIds: string[] = [];
+        const { result, updatedNodeIds } = fillDagre(
+          g.current,
+          visibleFullNodesMerged,
+          nodes,
+          edges,
+          settings.showClusterOptions,
+          allTags
+          // updatedNodeIds
+        );
+        const { newNodes, newEdges } = result;
+
+        setNodeUpdates({
+          nodeIds: updatedNodeIds,
+          updatedAt: new Date(),
+        });
+
+        if (!Object.keys(newNodes).length) {
+          setNoNodesFoundMessage(true);
+        }
+        // TODO: set synchronizationIsWorking false
+        // setUserNodesLoaded(true);
+        console.log("set-graph-completed");
+        return { nodes: newNodes, edges: newEdges };
+      });
+
+      // update on DB
       let linkedNodeRef;
       let userNodeRef = null;
-      let userNodeData: UserNodesData | null = null;
+      let userNodeData: UserNodeFirestore | null = null;
 
       const nodeRef = doc(db, "nodes", nodeId);
       const nodeDoc = await getDoc(nodeRef);
@@ -738,7 +805,7 @@ const Notebook = ({}: NotebookProps) => {
             // if exist documents update the first
             userNodeId = userNodeDoc.docs[0].id;
             const userNodeRef = doc(db, "userNodes", userNodeId);
-            const userNodeDataTmp = userNodeDoc.docs[0].data() as UserNodesData;
+            const userNodeDataTmp = userNodeDoc.docs[0].data() as UserNodeFirestore;
 
             // console.log({ userNodeData });
             userNodeData = {
@@ -796,7 +863,7 @@ const Notebook = ({}: NotebookProps) => {
         }
       }
     },
-    [user, allTags, selectedNotebookId]
+    [user, allTags, selectedNotebookId, preLoadedNodes]
   );
 
   const setNodeParts = useCallback((nodeId: string, innerFunc: (thisNode: FullNodeData) => FullNodeData) => {
@@ -984,8 +1051,8 @@ const Notebook = ({}: NotebookProps) => {
     return () => unsubscribe();
   }, [user]);
 
-  const snapshot = useCallback(
-    (q: Query<DocumentData>) => {
+  const userNodesSnapshot = useCallback(
+    (q: Query<DocumentData>, uname: string, notebookId: string) => {
       const userNodesSnapshot = onSnapshot(
         q,
         async snapshot => {
@@ -1011,8 +1078,6 @@ const Notebook = ({}: NotebookProps) => {
           devLog("4:Snapshot:Full nodes", fullNodes);
 
           // const visibleFullNodes = fullNodes.filter(cur => cur.visible || cur.nodeChangeType === "modified");
-
-          setAllNodes(oldAllNodes => mergeAllNodes(fullNodes, oldAllNodes));
 
           setGraph(({ nodes, edges }) => {
             console.log("4.5:Snapshot: graph", { nodes });
@@ -1050,16 +1115,17 @@ const Notebook = ({}: NotebookProps) => {
             });
 
             devLog("5:user Nodes Snapshot:visible Full Nodes Merged", visibleFullNodesMerged);
-            const updatedNodeIds: string[] = [];
-            const { newNodes, newEdges } = fillDagre(
+            // const updatedNodeIds: string[] = [];
+            const { result, updatedNodeIds } = fillDagre(
               g.current,
               visibleFullNodesMerged,
               nodes,
               edges,
               settings.showClusterOptions,
-              allTags,
-              updatedNodeIds
+              allTags
+              // updatedNodeIds
             );
+            const { newNodes, newEdges } = result;
 
             setNodeUpdates({
               nodeIds: updatedNodeIds,
@@ -1073,13 +1139,31 @@ const Notebook = ({}: NotebookProps) => {
             // setUserNodesLoaded(true);
             return { nodes: newNodes, edges: newEdges };
           });
-          // devLog("USER_NODES_SUMMARY", {
-          //   userNodeChanges,
-          //   nodeIds,
-          //   nodesData,
-          //   fullNodes,
-          //   // visibleFullNodes,
-          // });
+
+          // preload data
+          const otherNodes = fullNodes.reduce(
+            (acu: string[], cur) => [
+              ...acu,
+              ...cur.parents.map(c => c.node),
+              ...cur.children.map(c => c.node),
+              ...cur.tagIds,
+              ...cur.referenceIds,
+            ],
+            []
+          );
+          console.log("ppqqpp1", { otherNodes });
+          const preUserNodes = await getUserNodesByForce(db, otherNodes, uname, notebookId);
+          const preNodesData = await getNodes(db, otherNodes);
+          console.log("ppqqpp2", { preUserNodes, preNodesData });
+          const preFullNodes = buildFullNodes(
+            preUserNodes.map(c => ({ cType: "added", uNodeId: c.id, uNodeData: c })),
+            preNodesData
+          );
+          setPreLoadedNodes(oldPreLoadedNodes => {
+            console.log("ppqqpp3", "setPreLoadedNodes", { fullNodes, preFullNodes, oldPreLoadedNodes });
+            // Info: keep of destructured parameters on mergeAllNodes
+            return mergeAllNodes([...preFullNodes, ...fullNodes], oldPreLoadedNodes);
+          });
         },
         error => console.error(error)
       );
@@ -1199,7 +1283,7 @@ const Notebook = ({}: NotebookProps) => {
       where("deleted", "==", false)
     );
 
-    const killSnapshot = snapshot(q);
+    const killSnapshot = userNodesSnapshot(q, user.uname, selectedNotebookId);
     return () => {
       // INFO: if nodes from notebooks are colliding, we cant add a state
       // to determine when synchronization is complete,
@@ -1222,7 +1306,7 @@ const Notebook = ({}: NotebookProps) => {
       killSnapshot();
     };
     // INFO: notebookChanged used in dependecies because of the redraw graph (magic wand button)
-  }, [allTagsLoaded, db, snapshot, user, userTutorialLoaded, notebookChanged, selectedNotebookId]);
+  }, [allTagsLoaded, db, userNodesSnapshot, user, userTutorialLoaded, notebookChanged, selectedNotebookId]);
 
   useEffect(() => {
     if (!db) return;
@@ -2530,20 +2614,7 @@ const Notebook = ({}: NotebookProps) => {
             delete userNodeData?.open;
           } else {
             // if NOT exist documents create a document
-            userNodeData = {
-              changed: true,
-              correct: false,
-              createdAt: Timestamp.fromDate(new Date()),
-              updatedAt: Timestamp.fromDate(new Date()),
-              deleted: false,
-              isStudied: false,
-              bookmarked: false,
-              node: nodeId,
-              user: user.uname,
-              wrong: false,
-              notebooks: [notebookId],
-              expands: [true],
-            };
+            userNodeData = generateUserNode({ nodeId, uname: user.uname, notebookId });
             userNodeRef = await addDoc(collection(db, "userNodes"), userNodeData);
           }
 
@@ -7130,7 +7201,7 @@ const Notebook = ({}: NotebookProps) => {
                 <Button onClick={() => console.log(selectedPreviousNotebookIdRef.current)}>
                   selectedPreviousNotebookIdRef
                 </Button>
-                <Button onClick={() => console.log(allNodes)}>All Nodes</Button>
+                <Button onClick={() => console.log(preLoadedNodes)}>Pre Loaded Nodes</Button>
                 <Button onClick={() => console.log(citations)}>citations</Button>
                 <Button onClick={() => console.log(clusterNodes)}>clusterNodes</Button>
                 <Button onClick={() => console.log(graph.nodes[nodeBookState.selectedNode ?? ""])}>SelectedNode</Button>
