@@ -130,10 +130,10 @@ import {
 import { newId } from "../lib/utils/newid";
 import {
   buildFullNodes,
-  fillDagre,
   getNodes,
   getUserNodeChanges,
   mergeAllNodes,
+  synchronizeGraph,
 } from "../lib/utils/nodesSyncronization.utils";
 import { getGroupTutorials, LivelinessBar } from "../lib/utils/tutorials/grouptutorials";
 import { generateUserNode, gtmEvent, imageLoaded, isValidHttpUrl } from "../lib/utils/utils";
@@ -227,9 +227,8 @@ const Notebook = ({}: NotebookProps) => {
     nodeIds: [],
     updatedAt: new Date(),
   });
-  // this allNodes is DEPRECATED
-  // const [allNodes, setAllNodes] = useState<FullNodesData>({});
-  const [preLoadedNodes, setPreLoadedNodes] = useState<FullNodesData>({});
+  // preLoadedNodes saves parents,children,tags and references from visible nodes, to reuse them without wait to DB
+  const preLoadedNodesRef = useRef<FullNodesData>({});
   // as map grows, width and height grows based on the nodes shown on the map
   const [mapWidth, setMapWidth] = useState(700);
   const [mapHeight, setMapHeight] = useState(400);
@@ -713,71 +712,21 @@ const Notebook = ({}: NotebookProps) => {
     async (nodeId: string, openWithDefaultValues: Partial<UserNodeFirestore> = {}) => {
       devLog("OPEN_NODE_HANDLER", { nodeId, openWithDefaultValues });
 
-      // update graph with preloaded data
-      setGraph(({ nodes, edges }) => {
-        console.log({ preLoadedNodes, nodeId });
-        if (!preLoadedNodes[nodeId]) return { nodes, edges };
-        console.log("4.5:Snapshot: graph", { nodes });
-        // const visibleFullNodesMerged = visibleFullNodes.map(cur => {
-        const visibleFullNodesMerged = [preLoadedNodes[nodeId]].map(cur => {
-          const tmpNode = nodes[cur.node];
-          if (tmpNode) {
-            if (tmpNode.hasOwnProperty("simulated")) {
-              delete tmpNode["simulated"];
-            }
-            if (tmpNode.hasOwnProperty("isNew")) {
-              delete tmpNode["isNew"];
-            }
-          }
-
-          const hasParent = cur.parents.length;
-          // IMPROVE: we need to pass the parent which open the node
-          // to use his current position
-          // in this case we are checking first parent
-          // if this doesn't exist will set top:0 and left: 0 + NODE_WIDTH + COLUMN_GAP
-          const nodeParent = hasParent ? nodes[cur.parents[0].node] : null;
-          const topParent = nodeParent?.top ?? 0;
-          const leftParent = nodeParent?.left ?? 0;
-          const notebookIdx = (cur?.notebooks ?? []).findIndex(c => c === selectedNotebookId);
-
-          return {
-            ...cur,
-            left: tmpNode?.left ?? leftParent + NODE_WIDTH + COLUMN_GAP,
-            top: tmpNode?.top ?? topParent,
-            visible: Boolean((cur.notebooks ?? [])[notebookIdx]),
-            open: Boolean((cur.expands ?? [])[notebookIdx]),
-            editable: tmpNode?.editable ?? false,
-          };
+      // update graph with preloaded data, to get changes immediately
+      setGraph(graph => {
+        if (!preLoadedNodesRef.current[nodeId]) return graph;
+        return synchronizeGraph({
+          g: g.current,
+          graph,
+          fullNodes: [preLoadedNodesRef.current[nodeId]],
+          selectedNotebookId,
+          allTags,
+          setNodeUpdates,
+          setNoNodesFoundMessage,
         });
-
-        devLog("5:user Nodes Snapshot:visible Full Nodes Merged", visibleFullNodesMerged);
-        // const updatedNodeIds: string[] = [];
-        const { result, updatedNodeIds } = fillDagre(
-          g.current,
-          visibleFullNodesMerged,
-          nodes,
-          edges,
-          settings.showClusterOptions,
-          allTags
-          // updatedNodeIds
-        );
-        const { newNodes, newEdges } = result;
-
-        setNodeUpdates({
-          nodeIds: updatedNodeIds,
-          updatedAt: new Date(),
-        });
-
-        if (!Object.keys(newNodes).length) {
-          setNoNodesFoundMessage(true);
-        }
-        // TODO: set synchronizationIsWorking false
-        // setUserNodesLoaded(true);
-        console.log("set-graph-completed");
-        return { nodes: newNodes, edges: newEdges };
       });
 
-      // update on DB
+      // update on DB, to save changes
       let linkedNodeRef;
       let userNodeRef = null;
       let userNodeData: UserNodeFirestore | null = null;
@@ -863,7 +812,7 @@ const Notebook = ({}: NotebookProps) => {
         }
       }
     },
-    [user, allTags, selectedNotebookId, preLoadedNodes]
+    [user, allTags, selectedNotebookId]
   );
 
   const setNodeParts = useCallback((nodeId: string, innerFunc: (thisNode: FullNodeData) => FullNodeData) => {
@@ -1051,7 +1000,7 @@ const Notebook = ({}: NotebookProps) => {
     return () => unsubscribe();
   }, [user]);
 
-  const userNodesSnapshot = useCallback(
+  const userNodesSnapshotFn = useCallback(
     (q: Query<DocumentData>, uname: string, notebookId: string) => {
       const userNodesSnapshot = onSnapshot(
         q,
@@ -1079,65 +1028,74 @@ const Notebook = ({}: NotebookProps) => {
 
           // const visibleFullNodes = fullNodes.filter(cur => cur.visible || cur.nodeChangeType === "modified");
 
-          setGraph(({ nodes, edges }) => {
-            console.log("4.5:Snapshot: graph", { nodes });
-            // const visibleFullNodesMerged = visibleFullNodes.map(cur => {
-            const visibleFullNodesMerged = fullNodes.map(cur => {
-              const tmpNode = nodes[cur.node];
-              if (tmpNode) {
-                if (tmpNode.hasOwnProperty("simulated")) {
-                  delete tmpNode["simulated"];
-                }
-                if (tmpNode.hasOwnProperty("isNew")) {
-                  delete tmpNode["isNew"];
-                }
-              }
-
-              const hasParent = cur.parents.length;
-              // IMPROVE: we need to pass the parent which open the node
-              // to use his current position
-              // in this case we are checking first parent
-              // if this doesn't exist will set top:0 and left: 0 + NODE_WIDTH + COLUMN_GAP
-              const nodeParent = hasParent ? nodes[cur.parents[0].node] : null;
-              const topParent = nodeParent?.top ?? 0;
-
-              const leftParent = nodeParent?.left ?? 0;
-              const notebookIdx = (cur?.notebooks ?? []).findIndex(c => c === selectedNotebookId);
-
-              return {
-                ...cur,
-                left: tmpNode?.left ?? leftParent + NODE_WIDTH + COLUMN_GAP,
-                top: tmpNode?.top ?? topParent,
-                visible: Boolean((cur.notebooks ?? [])[notebookIdx]),
-                open: Boolean((cur.expands ?? [])[notebookIdx]),
-                editable: tmpNode?.editable ?? false,
-              };
+          setGraph(graph => {
+            console.log("4.5:Snapshot: graph", { graph });
+            return synchronizeGraph({
+              g: g.current,
+              graph,
+              fullNodes,
+              selectedNotebookId: notebookId,
+              allTags,
+              setNodeUpdates,
+              setNoNodesFoundMessage,
             });
+            // // const visibleFullNodesMerged = visibleFullNodes.map(cur => {
+            // const visibleFullNodesMerged = fullNodes.map(cur => {
+            //   const tmpNode = nodes[cur.node];
+            //   if (tmpNode) {
+            //     if (tmpNode.hasOwnProperty("simulated")) {
+            //       delete tmpNode["simulated"];
+            //     }
+            //     if (tmpNode.hasOwnProperty("isNew")) {
+            //       delete tmpNode["isNew"];
+            //     }
+            //   }
 
-            devLog("5:user Nodes Snapshot:visible Full Nodes Merged", visibleFullNodesMerged);
-            // const updatedNodeIds: string[] = [];
-            const { result, updatedNodeIds } = fillDagre(
-              g.current,
-              visibleFullNodesMerged,
-              nodes,
-              edges,
-              settings.showClusterOptions,
-              allTags
-              // updatedNodeIds
-            );
-            const { newNodes, newEdges } = result;
+            //   const hasParent = cur.parents.length;
+            //   // IMPROVE: we need to pass the parent which open the node
+            //   // to use his current position
+            //   // in this case we are checking first parent
+            //   // if this doesn't exist will set top:0 and left: 0 + NODE_WIDTH + COLUMN_GAP
+            //   const nodeParent = hasParent ? nodes[cur.parents[0].node] : null;
+            //   const topParent = nodeParent?.top ?? 0;
 
-            setNodeUpdates({
-              nodeIds: updatedNodeIds,
-              updatedAt: new Date(),
-            });
+            //   const leftParent = nodeParent?.left ?? 0;
+            //   const notebookIdx = (cur?.notebooks ?? []).findIndex(c => c === notebookId);
 
-            if (!Object.keys(newNodes).length) {
-              setNoNodesFoundMessage(true);
-            }
-            // TODO: set synchronizationIsWorking false
-            // setUserNodesLoaded(true);
-            return { nodes: newNodes, edges: newEdges };
+            //   return {
+            //     ...cur,
+            //     left: tmpNode?.left ?? leftParent + NODE_WIDTH + COLUMN_GAP,
+            //     top: tmpNode?.top ?? topParent,
+            //     visible: Boolean((cur.notebooks ?? [])[notebookIdx]),
+            //     open: Boolean((cur.expands ?? [])[notebookIdx]),
+            //     editable: tmpNode?.editable ?? false,
+            //   };
+            // });
+
+            // devLog("5:user Nodes Snapshot:visible Full Nodes Merged", visibleFullNodesMerged);
+            // // const updatedNodeIds: string[] = [];
+            // const { result, updatedNodeIds } = fillDagre(
+            //   g.current,
+            //   visibleFullNodesMerged,
+            //   nodes,
+            //   edges,
+            //   settings.showClusterOptions,
+            //   allTags
+            //   // updatedNodeIds
+            // );
+            // const { newNodes, newEdges } = result;
+
+            // setNodeUpdates({
+            //   nodeIds: updatedNodeIds,
+            //   updatedAt: new Date(),
+            // });
+
+            // if (!Object.keys(newNodes).length) {
+            //   setNoNodesFoundMessage(true);
+            // }
+            // // TODO: set synchronizationIsWorking false
+            // // setUserNodesLoaded(true);
+            // return { nodes: newNodes, edges: newEdges };
           });
 
           // preload data
@@ -1151,26 +1109,24 @@ const Notebook = ({}: NotebookProps) => {
             ],
             []
           );
-          console.log("ppqqpp1", { otherNodes });
           const preUserNodes = await getUserNodesByForce(db, otherNodes, uname, notebookId);
           const preNodesData = await getNodes(db, otherNodes);
-          console.log("ppqqpp2", { preUserNodes, preNodesData });
           const preFullNodes = buildFullNodes(
             preUserNodes.map(c => ({ cType: "added", uNodeId: c.id, uNodeData: c })),
             preNodesData
           );
-          setPreLoadedNodes(oldPreLoadedNodes => {
-            console.log("ppqqpp3", "setPreLoadedNodes", { fullNodes, preFullNodes, oldPreLoadedNodes });
-            // Info: keep of destructured parameters on mergeAllNodes
-            return mergeAllNodes([...preFullNodes, ...fullNodes], oldPreLoadedNodes);
-          });
+          // Info: keep order of destructured parameters on mergeAllNodes
+          preLoadedNodesRef.current = mergeAllNodes([...preFullNodes, ...fullNodes], preLoadedNodesRef.current);
+          // setPreLoadedNodes(oldPreLoadedNodes => {
+
+          // });
         },
         error => console.error(error)
       );
 
       return () => userNodesSnapshot();
     },
-    [allTags, db, selectedNotebookId, settings.showClusterOptions]
+    [allTags, db]
   );
 
   // this useEffect manage states when sidebar is opened or closed
@@ -1283,7 +1239,7 @@ const Notebook = ({}: NotebookProps) => {
       where("deleted", "==", false)
     );
 
-    const killSnapshot = userNodesSnapshot(q, user.uname, selectedNotebookId);
+    const killSnapshot = userNodesSnapshotFn(q, user.uname, selectedNotebookId);
     return () => {
       // INFO: if nodes from notebooks are colliding, we cant add a state
       // to determine when synchronization is complete,
@@ -1306,7 +1262,7 @@ const Notebook = ({}: NotebookProps) => {
       killSnapshot();
     };
     // INFO: notebookChanged used in dependecies because of the redraw graph (magic wand button)
-  }, [allTagsLoaded, db, userNodesSnapshot, user, userTutorialLoaded, notebookChanged, selectedNotebookId]);
+  }, [allTagsLoaded, db, userNodesSnapshotFn, user, userTutorialLoaded, notebookChanged, selectedNotebookId]);
 
   useEffect(() => {
     if (!db) return;
@@ -2010,7 +1966,7 @@ const Notebook = ({}: NotebookProps) => {
             const { nodeRef, userNodeRef } = initNodeStatusChange(descendant, thisNode.userNodeId);
             const notebookIdx = (thisNode.notebooks ?? []).findIndex(cur => cur === selectedNotebookId);
             if (notebookIdx < 0) {
-              console.error("notebook property has invalid values");
+              console.error("'notebooks' property has invalid values");
               continue;
             }
 
@@ -7201,7 +7157,7 @@ const Notebook = ({}: NotebookProps) => {
                 <Button onClick={() => console.log(selectedPreviousNotebookIdRef.current)}>
                   selectedPreviousNotebookIdRef
                 </Button>
-                <Button onClick={() => console.log(preLoadedNodes)}>Pre Loaded Nodes</Button>
+                <Button onClick={() => console.log(preLoadedNodesRef.current)}>Pre Loaded Nodes</Button>
                 <Button onClick={() => console.log(citations)}>citations</Button>
                 <Button onClick={() => console.log(clusterNodes)}>clusterNodes</Button>
                 <Button onClick={() => console.log(graph.nodes[nodeBookState.selectedNode ?? ""])}>SelectedNode</Button>

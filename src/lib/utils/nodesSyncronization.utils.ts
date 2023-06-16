@@ -1,6 +1,8 @@
+import { graphlib } from "dagre";
 import { doc, DocumentChange, DocumentData, Firestore, getDoc } from "firebase/firestore";
 
 import { AllTagsTreeView } from "@/components/TagsSearcher";
+import { Graph } from "@/pages/notebook";
 
 import {
   EdgesData,
@@ -8,13 +10,16 @@ import {
   FullNodesData,
   NodeFireStore,
   NodesData,
+  TNodeUpdates,
   UserNodeChanges,
   UserNodeFirestore,
 } from "../../nodeBookTypes";
 import {
+  COLUMN_GAP,
   compare2Nodes,
   createOrUpdateNode,
   makeNodeVisibleInItsLinks,
+  NODE_WIDTH,
   removeDagAllEdges,
   removeDagNode,
 } from "./Map.utils";
@@ -219,4 +224,73 @@ export const fillDagre = (
     { newNodes: { ...currentNodes }, newEdges: { ...currentEdges } }
   );
   return { result, updatedNodeIds };
+};
+
+type SynchronizeGraphInput = {
+  g: graphlib.Graph<{}>;
+  graph: Graph;
+  fullNodes: FullNodeData[];
+  selectedNotebookId: string;
+  allTags: AllTagsTreeView;
+  setNodeUpdates: (newValue: TNodeUpdates) => void;
+  setNoNodesFoundMessage: (newValue: boolean) => void;
+};
+export const synchronizeGraph = ({
+  g,
+  graph,
+  fullNodes,
+  selectedNotebookId,
+  allTags,
+  setNodeUpdates,
+  setNoNodesFoundMessage,
+}: SynchronizeGraphInput): Graph => {
+  const { nodes, edges } = graph;
+  console.log({ selectedNotebookId });
+
+  const visibleFullNodesMerged = fullNodes.map(cur => {
+    const tmpNode = nodes[cur.node];
+    if (tmpNode) {
+      if (tmpNode.hasOwnProperty("simulated")) {
+        delete tmpNode["simulated"];
+      }
+      if (tmpNode.hasOwnProperty("isNew")) {
+        delete tmpNode["isNew"];
+      }
+    }
+
+    const hasParent = cur.parents.length;
+    // IMPROVE: we need to pass the parent which open the node
+    // to use his current position
+    // in this case we are checking first parent
+    // if this doesn't exist will set top:0 and left: 0 + NODE_WIDTH + COLUMN_GAP
+    const nodeParent = hasParent ? nodes[cur.parents[0].node] : null;
+    const topParent = nodeParent?.top ?? 0;
+
+    const leftParent = nodeParent?.left ?? 0;
+    const notebookIdx = (cur?.notebooks ?? []).findIndex(c => c === selectedNotebookId);
+
+    return {
+      ...cur,
+      left: tmpNode?.left ?? leftParent + NODE_WIDTH + COLUMN_GAP,
+      top: tmpNode?.top ?? topParent,
+      visible: Boolean((cur.notebooks ?? [])[notebookIdx]),
+      open: Boolean((cur.expands ?? [])[notebookIdx]),
+      editable: tmpNode?.editable ?? false,
+    };
+  });
+
+  const { result, updatedNodeIds } = fillDagre(g, visibleFullNodesMerged, nodes, edges, false, allTags);
+  const { newNodes, newEdges } = result;
+
+  setNodeUpdates({
+    nodeIds: updatedNodeIds,
+    updatedAt: new Date(),
+  });
+
+  if (!Object.keys(newNodes).length) {
+    setNoNodesFoundMessage(true);
+  }
+  // TODO: set synchronizationIsWorking false
+  // setUserNodesLoaded(true);
+  return { nodes: newNodes, edges: newEdges };
 };
