@@ -1070,14 +1070,6 @@ const Notebook = ({}: NotebookProps) => {
             []
           );
           preLoadNodes(otherNodes, fullNodes);
-          // const preUserNodes = await getUserNodesByForce(db, otherNodes, uname, notebookId);
-          // const preNodesData = await getNodes(db, otherNodes);
-          // const preFullNodes = buildFullNodes(
-          //   preUserNodes.map(c => ({ cType: "added", uNodeId: c.id, uNodeData: c })),
-          //   preNodesData
-          // );
-          // // Info: keep order of destructured parameters on mergeAllNodes
-          // preLoadedNodesRef.current = mergeAllNodes([...preFullNodes, ...fullNodes], preLoadedNodesRef.current);
         },
         error => console.error(error)
       );
