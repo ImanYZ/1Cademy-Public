@@ -1000,6 +1000,23 @@ const Notebook = ({}: NotebookProps) => {
     return () => unsubscribe();
   }, [user]);
 
+  const preLoadNodes = useCallback(
+    async (nodeIds: string[], fullNodes: FullNodeData[]) => {
+      if (!user?.uname) return;
+      if (!selectedNotebookId) return;
+
+      const preUserNodes = await getUserNodesByForce(db, nodeIds, user.uname, selectedNotebookId);
+      const preNodesData = await getNodes(db, nodeIds);
+      const preFullNodes = buildFullNodes(
+        preUserNodes.map(c => ({ cType: "added", uNodeId: c.id, uNodeData: c })),
+        preNodesData
+      );
+      // Info: keep order of destructured parameters on mergeAllNodes
+      preLoadedNodesRef.current = mergeAllNodes([...preFullNodes, ...fullNodes], preLoadedNodesRef.current);
+    },
+    [db, selectedNotebookId, user?.uname]
+  );
+
   const userNodesSnapshotFn = useCallback(
     (q: Query<DocumentData>, uname: string, notebookId: string) => {
       const userNodesSnapshot = onSnapshot(
@@ -1039,63 +1056,6 @@ const Notebook = ({}: NotebookProps) => {
               setNodeUpdates,
               setNoNodesFoundMessage,
             });
-            // // const visibleFullNodesMerged = visibleFullNodes.map(cur => {
-            // const visibleFullNodesMerged = fullNodes.map(cur => {
-            //   const tmpNode = nodes[cur.node];
-            //   if (tmpNode) {
-            //     if (tmpNode.hasOwnProperty("simulated")) {
-            //       delete tmpNode["simulated"];
-            //     }
-            //     if (tmpNode.hasOwnProperty("isNew")) {
-            //       delete tmpNode["isNew"];
-            //     }
-            //   }
-
-            //   const hasParent = cur.parents.length;
-            //   // IMPROVE: we need to pass the parent which open the node
-            //   // to use his current position
-            //   // in this case we are checking first parent
-            //   // if this doesn't exist will set top:0 and left: 0 + NODE_WIDTH + COLUMN_GAP
-            //   const nodeParent = hasParent ? nodes[cur.parents[0].node] : null;
-            //   const topParent = nodeParent?.top ?? 0;
-
-            //   const leftParent = nodeParent?.left ?? 0;
-            //   const notebookIdx = (cur?.notebooks ?? []).findIndex(c => c === notebookId);
-
-            //   return {
-            //     ...cur,
-            //     left: tmpNode?.left ?? leftParent + NODE_WIDTH + COLUMN_GAP,
-            //     top: tmpNode?.top ?? topParent,
-            //     visible: Boolean((cur.notebooks ?? [])[notebookIdx]),
-            //     open: Boolean((cur.expands ?? [])[notebookIdx]),
-            //     editable: tmpNode?.editable ?? false,
-            //   };
-            // });
-
-            // devLog("5:user Nodes Snapshot:visible Full Nodes Merged", visibleFullNodesMerged);
-            // // const updatedNodeIds: string[] = [];
-            // const { result, updatedNodeIds } = fillDagre(
-            //   g.current,
-            //   visibleFullNodesMerged,
-            //   nodes,
-            //   edges,
-            //   settings.showClusterOptions,
-            //   allTags
-            //   // updatedNodeIds
-            // );
-            // const { newNodes, newEdges } = result;
-
-            // setNodeUpdates({
-            //   nodeIds: updatedNodeIds,
-            //   updatedAt: new Date(),
-            // });
-
-            // if (!Object.keys(newNodes).length) {
-            //   setNoNodesFoundMessage(true);
-            // }
-            // // TODO: set synchronizationIsWorking false
-            // // setUserNodesLoaded(true);
-            // return { nodes: newNodes, edges: newEdges };
           });
 
           // preload data
@@ -1109,24 +1069,22 @@ const Notebook = ({}: NotebookProps) => {
             ],
             []
           );
-          const preUserNodes = await getUserNodesByForce(db, otherNodes, uname, notebookId);
-          const preNodesData = await getNodes(db, otherNodes);
-          const preFullNodes = buildFullNodes(
-            preUserNodes.map(c => ({ cType: "added", uNodeId: c.id, uNodeData: c })),
-            preNodesData
-          );
-          // Info: keep order of destructured parameters on mergeAllNodes
-          preLoadedNodesRef.current = mergeAllNodes([...preFullNodes, ...fullNodes], preLoadedNodesRef.current);
-          // setPreLoadedNodes(oldPreLoadedNodes => {
-
-          // });
+          preLoadNodes(otherNodes, fullNodes);
+          // const preUserNodes = await getUserNodesByForce(db, otherNodes, uname, notebookId);
+          // const preNodesData = await getNodes(db, otherNodes);
+          // const preFullNodes = buildFullNodes(
+          //   preUserNodes.map(c => ({ cType: "added", uNodeId: c.id, uNodeData: c })),
+          //   preNodesData
+          // );
+          // // Info: keep order of destructured parameters on mergeAllNodes
+          // preLoadedNodesRef.current = mergeAllNodes([...preFullNodes, ...fullNodes], preLoadedNodesRef.current);
         },
         error => console.error(error)
       );
 
       return () => userNodesSnapshot();
     },
-    [allTags, db]
+    [allTags, db, preLoadNodes]
   );
 
   // this useEffect manage states when sidebar is opened or closed
@@ -6441,6 +6399,7 @@ const Notebook = ({}: NotebookProps) => {
                 innerHeight={innerHeight}
                 innerWidth={windowWith}
                 enableElements={[]}
+                preLoadNodes={preLoadNodes}
               />
               <MemoizedNotificationSidebar
                 openLinkedNode={openLinkedNode}

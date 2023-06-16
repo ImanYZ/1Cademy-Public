@@ -36,10 +36,10 @@ import { DESIGN_SYSTEM_COLORS } from "@/lib/theme/colors";
 import { useNodeBook } from "../../../../context/NodeBookContext";
 import { useInView } from "../../../../hooks/useObserver";
 import { useTagsTreeView } from "../../../../hooks/useTagsTreeView";
-import { SearchNodesResponse, SearchNotebookResponse } from "../../../../knowledgeTypes";
+import { SearchNodesResponse, SearchNotebookResponse, SimpleNode } from "../../../../knowledgeTypes";
 import { Post } from "../../../../lib/mapApi";
 import shortenNumber from "../../../../lib/utils/shortenNumber";
-import { SortDirection, SortValues, TNodeBookState } from "../../../../nodeBookTypes";
+import { FullNodeData, SortDirection, SortValues, TNodeBookState } from "../../../../nodeBookTypes";
 import { NodeType } from "../../../../types";
 import NodeTypeIcon from "../../../NodeTypeIcon2";
 import { ChosenTag, MemoizedTagsSearcher, TagTreeView } from "../../../TagsSearcher";
@@ -48,6 +48,7 @@ import TimeFilter from "../../TimeFilter";
 import ValidatedInput from "../../ValidatedInput";
 import PendingProposalList from "../PendingProposalList";
 import { SidebarWrapper } from "./SidebarWrapper";
+
 dayjs.extend(relativeTime);
 
 type SearcherSidebarProps = {
@@ -60,6 +61,7 @@ type SearcherSidebarProps = {
   innerWidth: number;
   disableSearcher?: boolean;
   enableElements: string[];
+  preLoadNodes: (nodeIds: string[], fullNodes: FullNodeData[]) => Promise<void>;
 };
 
 type Pagination = {
@@ -82,6 +84,7 @@ const SearcherSidebar = ({
   innerWidth,
   disableSearcher,
   enableElements = [],
+  preLoadNodes,
 }: SearcherSidebarProps) => {
   const { nodeBookState, nodeBookDispatch } = useNodeBook();
   const { allTags, setAllTags } = useTagsTreeView();
@@ -162,7 +165,7 @@ const SearcherSidebar = ({
           onlyTitle: nodeBookState.searchByTitleOnly,
         });
 
-        const newData = page === 1 ? data.data : [...searchResults.data, ...data.data];
+        const newData: SimpleNode[] = page === 1 ? data.data : [...searchResults.data, ...data.data];
         const filteredData = daysAgo ? filterOnDaysAgo(newData, daysAgo) : newData;
         setSearchResults({
           data: filteredData,
@@ -171,12 +174,15 @@ const SearcherSidebar = ({
           totalResults: data.numResults,
         });
         setIsRetrieving(false);
+
+        const mostHelpfulNodes = filteredData.slice(0, 10).map(c => c.id);
+        preLoadNodes(mostHelpfulNodes, []);
       } catch (err) {
         console.error(err);
         setIsRetrieving(false);
       }
     },
-    [selectedTags, nodesUpdatedSince, nodeBookState.searchByTitleOnly, searchResults.data]
+    [selectedTags, nodesUpdatedSince, nodeBookState.searchByTitleOnly, searchResults.data, preLoadNodes]
   );
 
   // const onSearchNotebooks = useCallback(
