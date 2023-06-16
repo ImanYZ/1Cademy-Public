@@ -197,7 +197,7 @@ export const NodeItemFullEditor: FC<Props> = ({ node, image, references, tags, o
 
                       {/* questions */}
                       <FieldArray name="questions">
-                        {({ remove, push }) => (
+                        {({ remove, push }: any) => (
                           <Box sx={{ display: "flex", flexDirection: "column", gap: "8px" }}>
                             {values.questions.map(({ choice, feedback, correct }, idx) => (
                               <Box key={idx} sx={{ display: "flex" }}>
