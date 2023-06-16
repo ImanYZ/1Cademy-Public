@@ -9,6 +9,8 @@ import { IActionTrack } from "src/types/IActionTrack";
 import OptimizedAvatar2 from "../../OptimizedAvatar2";
 import { MemoizedActionBubble } from "./ActionBubble";
 
+const MILLISECONDS_OF_24_HOURS = 86400000;
+
 type ILivelinessBarProps = {
   db: Firestore;
   onlineUsers: string[];
@@ -45,7 +47,7 @@ const LivelinessBar = ({ open, setOpen, disabled = false, ...props }: ILivelines
     }
     if (disabled) return;
 
-    let t: any = null;
+    let timeOutId: NodeJS.Timeout | null = null;
     const unsubscribe: {
       finalizer: () => void;
     } = {
@@ -54,9 +56,9 @@ const LivelinessBar = ({ open, setOpen, disabled = false, ...props }: ILivelines
     const snapshotInitializer = () => {
       setUsersInteractions({});
       unsubscribe.finalizer();
-      const ts = new Date().getTime() - 86400000;
+      const timeInSeconds = new Date().getTime() - MILLISECONDS_OF_24_HOURS;
       const actionTracksCol = collection(db, "actionTracks");
-      const q = query(actionTracksCol, where("createdAt", ">=", Timestamp.fromDate(new Date(ts))));
+      const q = query(actionTracksCol, where("createdAt", ">=", Timestamp.fromDate(new Date(timeInSeconds))));
       unsubscribe.finalizer = onSnapshot(q, async snapshot => {
         const docChanges = snapshot.docChanges();
         for (const docChange of docChanges) {
@@ -127,10 +129,10 @@ const LivelinessBar = ({ open, setOpen, disabled = false, ...props }: ILivelines
           }
         }
         setUsersInteractions({ ...usersInteractions });
-        if (t) {
-          clearTimeout(t);
+        if (timeOutId) {
+          clearTimeout(timeOutId);
         }
-        t = setTimeout(() => {
+        timeOutId = setTimeout(() => {
           setUsersInteractions(usersInteractions => {
             let _usersInteractions = { ...usersInteractions } as UserInteractions;
             for (let uname in _usersInteractions) {
