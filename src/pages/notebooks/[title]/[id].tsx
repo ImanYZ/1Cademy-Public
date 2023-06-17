@@ -141,6 +141,7 @@ const NodePage: NextPage<Props> = ({ notebook }) => {
   const [selectedNodeId, setSelectedNodeId] = useState("");
   const [displayFocusMode, setDisplayFocusMode] = useState(false);
   const [displayJoinMessage, setDisplayJoinMessage] = useState(false);
+  const [toolboxExpanded, setToolboxExpanded] = useState(false);
   //   ------------------------------ functions
 
   const setNodeParts = useCallback((nodeId: string, innerFunc: (thisNode: FullNodeData) => FullNodeData) => {
@@ -245,15 +246,16 @@ const NodePage: NextPage<Props> = ({ notebook }) => {
 
             devLog("5:user Nodes Snapshot:visible Full Nodes Merged", visibleFullNodesMerged);
             const updatedNodeIds: string[] = [];
-            const { newNodes, newEdges } = fillDagre(
+            const { result } = fillDagre(
               g.current,
               visibleFullNodesMerged,
               nodes,
               edges,
               false,
-              {}, // INFO: we are not sending tags, because we don't need cluster in public view
-              updatedNodeIds
+              {} // INFO: we are not sending tags, because we don't need cluster in public view
             );
+
+            const { newNodes, newEdges } = result;
 
             setNodeUpdates({
               nodeIds: updatedNodeIds,
@@ -570,6 +572,8 @@ const NodePage: NextPage<Props> = ({ notebook }) => {
   return (
     <Box className="MapContainer" sx={{ position: "relative", overflow: "hidden" }}>
       <MemoizedToolbox
+        expanded={toolboxExpanded}
+        setExpanded={setToolboxExpanded}
         sx={{
           position: "absolute",
           right: "364px",

@@ -47,10 +47,9 @@ export const useWorkerQueue = ({
   const [queue, setQueue] = useState<Task[]>([]);
   const [isWorking, setIsWorking] = useState(false);
   const [didWork, setDidWork] = useState(false);
-  const isSameGraphRef = useRef(false);
   const workerRef = useRef<Worker | null>(null);
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [deferredTimer, setDeferredTimer] = useState<NodeJS.Timeout | null>(null);
+  // const [deferredTimer, setDeferredTimer] = useState<NodeJS.Timeout | null>(null);
 
   const recalculateGraphWithWorker = useCallback(
     (nodesToRecalculate: FullNodesData, edgesToRecalculate: any) => {
@@ -59,7 +58,6 @@ export const useWorkerQueue = ({
       let oldNodes = { ...nodesToRecalculate };
       let oldEdges = { ...edgesToRecalculate };
       setIsWorking(true);
-      isSameGraphRef.current = true;
       if (workerRef.current) {
         workerRef.current.terminate();
         workerRef.current = null;
@@ -124,17 +122,16 @@ export const useWorkerQueue = ({
               (c, k) => c && resultNode[k as keyof FullNodeData] === nodes[nodeId][k as keyof FullNodeData],
               true
             );
-            isSameGraphRef.current = isSameGraphRef.current && isSame;
             // setIsSameGraph(oldIsSameGraph => {
             //   console.log("isSame ", { oldIsSameGraph, isSame, total: oldIsSameGraph && isSame });
             //   return oldIsSameGraph && isSame;
             // });
             if (isSame) return true; // don't update graph for this node
-            console.log(`calc height ${nodeId}`, { nH: resultNode.height, H: nodesCopy[nodeId].height });
+            // console.log(`calc height ${nodeId}`, { nH: resultNode.height, H: nodesCopy[nodeId].height });
 
-            if (resultNode.height !== nodesCopy[nodeId].height) {
-              console.log(`calc height ${nodeId}`, { nH: resultNode.height, H: nodesCopy[nodeId].height });
-            }
+            // if (resultNode.height !== nodesCopy[nodeId].height) {
+            //   // console.log(`calc height ${nodeId}`, { nH: resultNode.height, H: nodesCopy[nodeId].height });
+            // }
             const overrideNode: FullNodeData = {
               ...nodesCopy[nodeId],
               left: resultNode.left,
@@ -169,7 +166,7 @@ export const useWorkerQueue = ({
 
           return { nodes: nodesCopy, edges: edgesCopy };
         });
-        if (!isSameGraphRef.current) onComplete();
+        onComplete();
         setIsWorking(false);
       };
     },

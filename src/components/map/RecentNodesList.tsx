@@ -1,10 +1,4 @@
 import { ArrowDownward, ArrowUpward } from "@mui/icons-material";
-import CloseIcon from "@mui/icons-material/Close";
-import CreateIcon from "@mui/icons-material/Create";
-import DoneIcon from "@mui/icons-material/Done";
-import EventAvailableIcon from "@mui/icons-material/EventAvailable";
-import RemoveIcon from "@mui/icons-material/Remove";
-import VisibilityIcon from "@mui/icons-material/Visibility";
 import {
   FormControl,
   FormControlLabel,
@@ -26,7 +20,7 @@ import { SortDirection, SortValues } from "../../nodeBookTypes";
 
 // import { SortDirection, SortValues } from "../../noteBookTypes";
 
-type SortOptions = { name: string; icon: JSX.Element; value: SortValues };
+type SortOptions = { name: string; value: SortValues };
 
 // const sortByTypeClick = (setSortByType: any) => /*(event: any) =>*/ setSortByType(prevValue => !prevValue);
 
@@ -35,45 +29,46 @@ dayjs.extend(relativeTime);
 const SORT_OPTIONS: SortOptions[] = [
   {
     name: "Last Viewed",
-    icon: <VisibilityIcon key={"Last Viewed icon"} />,
     value: "LAST_VIEWED",
   },
   {
     name: "Date Modified",
-    icon: <EventAvailableIcon key={"Date Modified icon"} />,
     value: "DATE_MODIFIED",
   },
   {
     name: "Proposals",
-    icon: <CreateIcon key={"Proposals icon"} />,
     value: "PROPOSALS",
   },
   {
     name: "Upvotes",
-    icon: <DoneIcon key={"Upvotes icon"} />,
     value: "UP_VOTES",
   },
   {
     name: "Downvotes",
-    icon: <CloseIcon key={"Downvotes icon"} />,
     value: "DOWN_VOTES",
   },
   {
     name: "Net Votes",
-    icon: (
-      <>
-        <DoneIcon />
-        <RemoveIcon />
-        <CloseIcon />
-      </>
-    ),
     value: "NET_NOTES",
   },
 ];
 
-const RecentNodesList = (props: any) => {
+type RecentNodesListProps = {
+  id: string;
+  recentNodes: any;
+  setRecentNodes: any;
+  onlyTags: any;
+  disabled?: boolean;
+  sortDirection: any;
+  setSortDirection: any;
+  sortOption: SortValues;
+  setSortOption: (newSortOption: SortValues) => void;
+};
+
+const RecentNodesList = (props: RecentNodesListProps) => {
   const onChangeSortOption = (event: SelectChangeEvent) => {
-    props.setSortOption(event.target.value as SortValues);
+    const newValue = event.target.value as SortValues;
+    props.setSortOption(newValue);
   };
 
   const onChangeSortDirection = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -82,13 +77,7 @@ const RecentNodesList = (props: any) => {
 
   return (
     <>
-      <FormControl
-        id={props.id}
-        disabled={props.disabled}
-        sx={{
-          width: "190px",
-        }}
-      >
+      <FormControl id={props.id} disabled={props.disabled}>
         <Select
           placeholder="Sort"
           MenuProps={{
@@ -125,8 +114,8 @@ const RecentNodesList = (props: any) => {
           sx={{
             height: "35px",
             "&> fieldset": {
-              maxWidth: "200px",
-              width: "200px",
+              // maxWidth: "200px",
+              // width: "200px",
               borderWidth: "1px",
               borderRadius: "4px",
               borderColor: theme =>
@@ -136,7 +125,12 @@ const RecentNodesList = (props: any) => {
           value={props.sortOption}
           variant="outlined"
           onChange={onChangeSortOption}
-          renderValue={() => SORT_OPTIONS.filter(option => option.value === props.sortOption)[0]?.name || "Sort by"}
+          native={false}
+          renderValue={() => {
+            const option = SORT_OPTIONS.filter(option => option.value === props.sortOption)[0];
+            console.log("sssss1", { option });
+            return option?.name || "Sort by";
+          }}
         >
           {SORT_OPTIONS.map(cur => {
             const isSelected = props.sortOption === cur.value;

@@ -301,7 +301,7 @@ const AppHeader = forwardRef(({ page, sections, selectedSectionId, onSwitchSecti
                 <Tooltip title="Apply to join 1Cademy">
                   <Button
                     variant="contained"
-                    onClick={() => window?.open(ROUTES.apply, "_blank")}
+                    onClick={() => onSwitchSection("apply")}
                     sx={{
                       display: { xs: "none", sm: "flex" },
                       p: { xs: "6px 10px", lg: undefined },

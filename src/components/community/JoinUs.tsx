@@ -56,6 +56,7 @@ const JoinUs = (props: JoinUsProps) => {
   const [email, setEmail] = useState("");
   const [survey, setSurvey] = useState(false);
   const router = useRouter();
+
   useEffect(() => {
     return auth.onAuthStateChanged(async (user: any) => {
       if (user) {

@@ -23,12 +23,21 @@ export type Trends = {
   num: number;
 };
 
+// export type StackedBarStats = {
+//   index: number;
+//   alessEqualTen: number;
+//   bgreaterTen: number;
+//   cgreaterFifty: number;
+//   dgreaterHundred: number;
+// };
 export type StackedBarStats = {
   index: number;
-  alessEqualTen: number;
-  bgreaterTen: number;
-  cgreaterFifty: number;
-  dgreaterHundred: number;
+  threshold1: number;
+  threshold2: number;
+  threshold3: number;
+  threshold4: number;
+  threshold5: number;
+  threshold6: number;
 };
 
 export type BubbleStats = {

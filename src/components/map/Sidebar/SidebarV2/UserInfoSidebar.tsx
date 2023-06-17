@@ -251,7 +251,7 @@ const UserInfoSidebar = ({ open, onClose, theme, openLinkedNode, username, selec
     };
   };
   const proposalsFiltered = useMemo(() => {
-    console.log({ proposalssss: proposals });
+    // console.log({ proposalssss: proposals });
     if (type === "all") return proposals;
 
     return proposals.filter(proposal => proposal.nodeType === type);

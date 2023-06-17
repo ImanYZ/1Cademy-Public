@@ -12,10 +12,11 @@ type Props = {
   alt: string;
   size: number;
   onClick?: () => void;
+  quality?: number;
   sx?: SxProps<Theme>;
 };
 
-const OptimizedAvatar2: FC<Props> = ({ imageUrl, alt, size, onClick, sx }) => {
+const OptimizedAvatar2: FC<Props> = ({ imageUrl, alt, size, onClick, quality = 50, sx }) => {
   const [hasError, setHasError] = useState(false);
 
   return (
@@ -59,7 +60,7 @@ const OptimizedAvatar2: FC<Props> = ({ imageUrl, alt, size, onClick, sx }) => {
           alt={alt}
           width={`${size}px`}
           height={`${size}px`}
-          quality={40}
+          quality={quality}
           objectFit="cover"
           style={{ borderRadius: "50%" }}
           onError={() => setHasError(true)}

@@ -282,7 +282,7 @@ export type StepReducerPayload = {
   callback?: () => void;
 };
 
-export type UserNodesData = {
+export type UserNodeFirestore = {
   // "firstVisit": Timestamp,//CHECK
   // "lastVisit": Timestamp,//CHECK
   // "userNodeId": string,//CHECK
@@ -301,12 +301,17 @@ export type UserNodesData = {
   notebooks: string[];
   expands: boolean[];
   nodeChanges?: any;
+  isMock?: boolean;
 };
 
-export type UserNodes = {
+export type UserNodeSnapshot = {
   cType: string;
   uNodeId: string;
-  uNodeData: UserNodesData;
+  uNodeData: UserNodeFirestore;
+};
+
+export type UserNode = UserNodeFirestore & {
+  id: string;
 };
 
 export type NodeBookNodes = {
@@ -382,11 +387,11 @@ export type NodeFireStore = {
   locked?: boolean;
 };
 
-export type UserNodeChanges = { cType: string; uNodeId: string; uNodeData: UserNodesData };
+export type UserNodeChanges = { cType: string; uNodeId: string; uNodeData: UserNodeFirestore };
 
 export type NodesData = { cType: string; nId: string; nData: NodeFireStore } | null;
 
-export type FullNodeData = Omit<UserNodesData, "changedAt" | "createdAt" | "updatedAt"> &
+export type FullNodeData = Omit<UserNodeFirestore, "changedAt" | "createdAt" | "updatedAt"> &
   Omit<NodeFireStore, "changedAt" | "createdAt" | "updatedAt"> & {
     editable: boolean;
     left: number;

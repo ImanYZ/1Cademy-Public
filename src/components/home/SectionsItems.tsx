@@ -115,4 +115,5 @@ This approach to learning empowers students to take an active role in their educ
     options: [],
   },
   { id: "about-us", title: "About Us", label: "About Us", description: "", options: [] },
+  { id: "apply", title: "", label: "", description: "", options: [] },
 ];
