@@ -1029,6 +1029,7 @@ export const getFlashcardsFromPassage = async (passage: string): Promise<Flashca
     passage +
     `\n'''` +
     `NEVER print any information beyond the provided text.\n` +
+    `Do not reference to any images, videos, or other resources in the title.` +
     `Print an array of flashcards, each flashcard as a JSON object with the following keys:\n` +
     `{\n` +
     `"title": The flashcard title as a string,\n` +
