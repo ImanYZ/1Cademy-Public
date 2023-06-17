@@ -35,6 +35,7 @@ const NodeVideo = ({ addVideo, videoData }: NodeVideoProps) => {
         style={{
           border: "0px",
         }}
+        allow="fullscreen;"
       ></iframe>
     </Box>
   );
