@@ -6,7 +6,7 @@ import { getAuth } from "firebase/auth";
 // import axios from "axios";
 import Head from "next/head";
 import { SnackbarProvider } from "notistack";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Hydrate, QueryClient, QueryClientProvider } from "react-query";
 import { ReactQueryDevtools } from "react-query/devtools";
 import { AppPropsWithLayout } from "src/knowledgeTypes";
@@ -51,6 +51,12 @@ const App = (props: AppPropsWithLayout) => {
   );
 
   const getLayout = Component.getLayout ?? (page => page);
+
+  useEffect(() => {
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker.register("/service-worker.js");
+    }
+  }, []);
 
   return (
     <QueryClientProvider client={queryClient}>

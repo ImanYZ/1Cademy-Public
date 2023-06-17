@@ -246,15 +246,16 @@ const NodePage: NextPage<Props> = ({ notebook }) => {
 
             devLog("5:user Nodes Snapshot:visible Full Nodes Merged", visibleFullNodesMerged);
             const updatedNodeIds: string[] = [];
-            const { newNodes, newEdges } = fillDagre(
+            const { result } = fillDagre(
               g.current,
               visibleFullNodesMerged,
               nodes,
               edges,
               false,
-              {}, // INFO: we are not sending tags, because we don't need cluster in public view
-              updatedNodeIds
+              {} // INFO: we are not sending tags, because we don't need cluster in public view
             );
+
+            const { newNodes, newEdges } = result;
 
             setNodeUpdates({
               nodeIds: updatedNodeIds,
