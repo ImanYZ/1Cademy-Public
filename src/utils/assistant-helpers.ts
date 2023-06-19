@@ -1022,17 +1022,16 @@ export const findPassagesBySelection = async (
 export const getFlashcardsFromPassage = async (passage: string): Promise<FlashcardResponse> => {
   const prompt =
     `Flashcards are in two types: Concept or Relation\n` +
-    `A "Concept" flashcard defines/explains a concept.\n` +
+    `A "Concept" flashcard defines/explains a single concept.The format of this flashcard should be in a single paragraph.\n` +
     `A "Relation" flashcard explains some relationships between multiple concepts.\n` +
-    `Print some flashcards of valuable information ONLY from the following triple-quoted text:` +
+    `Print as many flashcards as possible for students' learning  ONLY from the following triple-quoted text:` +
     `'''\n` +
     passage +
     `\n'''` +
     `NEVER print any information beyond the provided text.\n` +
-    `Do not reference to any images, videos, or other resources in the title.` +
     `Print an array of flashcards, each flashcard as a JSON object with the following keys:\n` +
     `{\n` +
-    `"title": The flashcard title as a string,\n` +
+    `"title": The flashcard title as a string. Each title should be stand-alone such that a student would understand it without any need to look up images or other resources.\n` +
     `"content": The flashcard content as a string,\n` +
     `"type": Concept or Relation\n` +
     `}\n` +
