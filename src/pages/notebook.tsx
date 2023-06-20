@@ -4642,12 +4642,12 @@ const Notebook = ({}: NotebookProps) => {
 
       const newTargetId = nodeBookState.selectedNode ?? "";
       if (!newTargetId) return false;
-      console.log("t1");
+      // console.log("t1");
       const thisNode = graph.nodes[newTargetId];
-      console.log("t2");
+      // console.log("t2");
       if (!thisNode) return false;
       if (!targetIsValid(thisNode)) return false;
-      console.log("t3");
+      // console.log("t3");
       startTutorial(tutorialName);
       setTargetId(newTargetId);
       if (forcedTutorial) {

@@ -27,7 +27,7 @@ import {
   NUMBER_POSSIBLE_OPTIONS,
   OPEN_PRACTICE_ERROR,
 } from "../../lib/utils/constants";
-import { getValidNumberOptions, newRecognition, recognizeInput2 } from "../../lib/utils/speechRecognitions.utils";
+import { getValidNumberOptions, newRecognition, recognizeInput3 } from "../../lib/utils/speechRecognitions.utils";
 import { delay } from "../../lib/utils/utils";
 import { Node, VoiceAssistant, VoiceAssistantType } from "../../nodeBookTypes";
 import { narrateLargeTexts } from "../../utils/helpers";
@@ -56,6 +56,8 @@ type AssistantProps = {
 const STATE_MACHINE_NAME = "State Machine 1";
 const SAD_TRIGGER = "trigger-sad";
 const HAPPY_TRIGGER = "trigger-happy";
+const DANCE_TRIGGER = "trigger-dance";
+const ANGRY_TRIGGER = "trigger-angry";
 const STATE = "state";
 
 export const Assistant = ({
@@ -83,6 +85,10 @@ export const Assistant = ({
   const abortNarratorPromise = useRef<(() => void) | null>(null);
   const originState = useRef("");
   const [tooltipOpen, setTooltipOpen] = useState(false);
+  const stateOfPracticeRef = useRef<{ isCorrect: boolean; consecutive: number }>({
+    isCorrect: true,
+    consecutive: 0,
+  });
 
   const { rive, RiveComponent: RiveComponentTouch } = useRive({
     src: "rive-voice-assistant/assistant-state-machine.riv",
@@ -92,6 +98,8 @@ export const Assistant = ({
   });
   const sadTrigger = useStateMachineInput(rive, STATE_MACHINE_NAME, SAD_TRIGGER);
   const happyTrigger = useStateMachineInput(rive, STATE_MACHINE_NAME, HAPPY_TRIGGER);
+  const danceTrigger = useStateMachineInput(rive, STATE_MACHINE_NAME, DANCE_TRIGGER);
+  const angryTrigger = useStateMachineInput(rive, STATE_MACHINE_NAME, ANGRY_TRIGGER);
   const stateInput = useStateMachineInput(rive, STATE_MACHINE_NAME, STATE);
 
   const getNoMatchPreviousMessage = (listenType: VoiceAssistantType, timesAssistantCantUnderstand: number) => {
@@ -163,10 +171,10 @@ export const Assistant = ({
 
   const askQuestion = useCallback(
     async (questionNode: SimpleQuestionNode, tagId: string) => {
-      if (!sadTrigger || !happyTrigger || !stateInput) return console.warn("Inputs for state machine are not valid");
+      if (!sadTrigger || !happyTrigger || !danceTrigger || !angryTrigger || !stateInput)
+        return console.warn("Inputs for state machine are not valid");
       if (!speechRef.current)
         return console.warn("Speech recognition doesn't exist on this browser, install last version of Chrome browser");
-
       const submittedAnswers = assistantRef.current?.getSubmittedAnswers() ?? [];
       let message =
         submittedAnswers.length > 1
@@ -260,8 +268,9 @@ export const Assistant = ({
         console.log("👉 2. listen", { message, preMessage, preTranscriptProcessed, origin, listenType });
         stateInput.value = 2;
         // setAssistantState("LISTEN");
-        const recognitionResult = await recognizeInput2(speechRef.current);
-        speechRef.current.stop(); // stop after get text
+        // const recognitionResult = await recognizeInput2(speechRef.current);
+        const recognitionResult = await recognizeInput3();
+        // speechRef.current.stop(); // stop after get text
 
         if (!recognitionResult) {
           console.error(
@@ -309,7 +318,7 @@ export const Assistant = ({
           continue;
         }
 
-        if (["stop", "install"].includes(transcript) || transcript.includes("stop")) {
+        if (["stop", "install"].includes(transcript) || transcript.includes("stop") || transcript === "top") {
           setVoiceAssistant(prev => {
             const emptyVoiceAssistant = { ...prev, questionNode: null };
             previousVoiceAssistant.current = emptyVoiceAssistant;
@@ -404,7 +413,21 @@ export const Assistant = ({
               submitOptions
             );
             console.log("will-fire", isCorrect);
-            isCorrect ? happyTrigger.fire() : sadTrigger.fire();
+            const sameResult = stateOfPracticeRef.current.isCorrect === isCorrect;
+            stateOfPracticeRef.current = {
+              consecutive: sameResult ? stateOfPracticeRef.current.consecutive + 1 : 1,
+              isCorrect,
+            };
+            console.log({ stateOfPracticeRef: stateOfPracticeRef.current });
+            if (isCorrect) {
+              if (stateOfPracticeRef.current.consecutive > 3) danceTrigger?.fire();
+              else happyTrigger.fire();
+            } else {
+              if (stateOfPracticeRef.current.consecutive > 3) angryTrigger?.fire();
+              else sadTrigger.fire();
+            }
+
+            //  isCorrect ? happyTrigger.fire() : sadTrigger.fire();
             await delay(500);
             message = messageFromConfirm;
             preMessage = "";
