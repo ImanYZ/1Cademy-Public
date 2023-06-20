@@ -26,6 +26,7 @@ import CourseDetail from "./CourseDetail";
 import { PracticeQuestion } from "./PracticeQuestion";
 
 const db = getFirestore();
+const MAX_INACTIVE_TIME = 30_000;
 
 type PracticeToolProps = {
   voiceAssistant: VoiceAssistant;
@@ -38,6 +39,7 @@ type PracticeToolProps = {
   startPractice: boolean;
   setStartPractice: Dispatch<SetStateAction<boolean>>;
   setDisplayRightSidebar: (newValue: OpenRightSidebar) => void;
+  setUserIsAnsweringPractice: (newValue: boolean) => void;
 };
 
 export type PracticeInfo = {
@@ -79,6 +81,7 @@ const PracticeTool = forwardRef<PracticeToolRef, PracticeToolProps>((props, ref)
     startPractice,
     setStartPractice,
     setDisplayRightSidebar,
+    setUserIsAnsweringPractice,
   } = props;
   console.log({ currentSemester });
 
@@ -93,6 +96,7 @@ const PracticeTool = forwardRef<PracticeToolRef, PracticeToolProps>((props, ref)
   const [submittedAnswers, setSubmittedAnswers] = useState<boolean[]>([]);
   const [loading, setLoading] = useState(true);
   const scrollableWrapper = useRef<HTMLElement | null>(null);
+  const timeInSecondsRef = useRef(0);
 
   const onRunPracticeTool = useCallback(() => {
     (start: boolean) => {
@@ -106,6 +110,8 @@ const PracticeTool = forwardRef<PracticeToolRef, PracticeToolProps>((props, ref)
     async (answers: boolean[], byVoice = false) => {
       if (!questionData) return;
 
+      // TODO: take time
+      timeInSecondsRef.current = 0;
       setSubmitAnswer(true);
       setSubmittedAnswers(answers);
       const payload: ICheckAnswerRequestParams = {
@@ -167,6 +173,26 @@ const PracticeTool = forwardRef<PracticeToolRef, PracticeToolProps>((props, ref)
       action,
     });
   };
+
+  useEffect(() => {
+    if (voiceAssistant.questionNode) return;
+    const intervalId = setInterval(() => {
+      timeInSecondsRef.current += 1000;
+      console.log("tick", timeInSecondsRef.current);
+      if (MAX_INACTIVE_TIME < timeInSecondsRef.current) {
+        setUserIsAnsweringPractice(false);
+        timeInSecondsRef.current = 0;
+      } else {
+        setUserIsAnsweringPractice(true);
+      }
+    }, 1000);
+
+    return () => {
+      console.log("..will change to true");
+      setUserIsAnsweringPractice(true);
+      clearInterval(intervalId);
+    };
+  }, [setUserIsAnsweringPractice, voiceAssistant.questionNode]);
 
   // this is executed the first time we get selected a semester
   useEffect(() => {

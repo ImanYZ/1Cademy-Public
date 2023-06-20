@@ -50,6 +50,7 @@ type DashboardWrapperProps = {
   setStartPractice: Dispatch<SetStateAction<boolean>>;
   root?: string;
   setDisplayRightSidebar: (newValue: OpenRightSidebar) => void;
+  setUserIsAnsweringPractice: (newValue: boolean) => void;
   sx?: SxProps<Theme>;
 };
 
@@ -69,6 +70,7 @@ export const DashboardWrapper = forwardRef<DashboardWrapperRef, DashboardWrapper
     startPractice,
     setStartPractice,
     setDisplayRightSidebar,
+    setUserIsAnsweringPractice,
   } = props;
   const db = getFirestore();
 
@@ -318,6 +320,7 @@ export const DashboardWrapper = forwardRef<DashboardWrapperRef, DashboardWrapper
                 startPractice={startPractice}
                 setStartPractice={setStartPractice}
                 setDisplayRightSidebar={setDisplayRightSidebar}
+                setUserIsAnsweringPractice={setUserIsAnsweringPractice}
               />
             )}
             {selectToolbarView === "SETTINGS" && <DashboardSettings currentSemester={currentSemester} />}

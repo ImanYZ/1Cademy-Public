@@ -51,6 +51,7 @@ type AssistantProps = {
   setRootQuery: Dispatch<SetStateAction<string | undefined>>;
   startPractice: boolean;
   uname: string;
+  userIsAnsweringPractice: boolean;
 };
 
 const STATE_MACHINE_NAME = "State Machine 1";
@@ -58,6 +59,9 @@ const SAD_TRIGGER = "trigger-sad";
 const HAPPY_TRIGGER = "trigger-happy";
 const DANCE_TRIGGER = "trigger-dance";
 const ANGRY_TRIGGER = "trigger-angry";
+const NOCKING_1_TRIGGER = "triger-nocking1";
+const NOCKING_2_TRIGGER = "trigger-nocking2";
+const SNORING_TRIGGER = "trigger-snoring";
 const STATE = "state";
 
 export const Assistant = ({
@@ -71,6 +75,7 @@ export const Assistant = ({
   setRootQuery,
   startPractice,
   uname,
+  userIsAnsweringPractice,
 }: AssistantProps) => {
   /**
    * Assistant narrate after that listen
@@ -100,6 +105,9 @@ export const Assistant = ({
   const happyTrigger = useStateMachineInput(rive, STATE_MACHINE_NAME, HAPPY_TRIGGER);
   const danceTrigger = useStateMachineInput(rive, STATE_MACHINE_NAME, DANCE_TRIGGER);
   const angryTrigger = useStateMachineInput(rive, STATE_MACHINE_NAME, ANGRY_TRIGGER);
+  const nocking1Trigger = useStateMachineInput(rive, STATE_MACHINE_NAME, NOCKING_1_TRIGGER);
+  const nocking2Trigger = useStateMachineInput(rive, STATE_MACHINE_NAME, NOCKING_2_TRIGGER);
+  const snoringTrigger = useStateMachineInput(rive, STATE_MACHINE_NAME, SNORING_TRIGGER);
   const stateInput = useStateMachineInput(rive, STATE_MACHINE_NAME, STATE);
 
   const getNoMatchPreviousMessage = (listenType: VoiceAssistantType, timesAssistantCantUnderstand: number) => {
@@ -524,6 +532,17 @@ export const Assistant = ({
   useEffect(() => {
     setTooltipOpen(!isIdle);
   }, [isIdle]);
+
+  useEffect(() => {
+    if (userIsAnsweringPractice) return;
+    if (voiceAssistant.questionNode) return;
+    if (!nocking1Trigger || !nocking2Trigger || !snoringTrigger) return;
+
+    const randomIndex = Math.floor((Math.random() * 1000) % 3);
+    if (randomIndex === 0) nocking1Trigger.fire();
+    if (randomIndex === 1) nocking2Trigger.fire();
+    if (randomIndex === 2) snoringTrigger.fire();
+  }, [nocking1Trigger, nocking2Trigger, snoringTrigger, userIsAnsweringPractice, voiceAssistant.questionNode]);
 
   if (!startPractice && !voiceAssistant.tagId) return null;
 
