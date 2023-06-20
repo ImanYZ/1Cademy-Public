@@ -27,7 +27,7 @@ import {
   NUMBER_POSSIBLE_OPTIONS,
   OPEN_PRACTICE_ERROR,
 } from "../../lib/utils/constants";
-import { getValidNumberOptions, newRecognition, recognizeInput3 } from "../../lib/utils/speechRecognitions.utils";
+import { getValidNumberOptions, recognizeInput3 } from "../../lib/utils/speechRecognitions.utils";
 import { delay } from "../../lib/utils/utils";
 import { Node, VoiceAssistant, VoiceAssistantType } from "../../nodeBookTypes";
 import { narrateLargeTexts } from "../../utils/helpers";
@@ -81,7 +81,7 @@ export const Assistant = ({
   const previousVoiceAssistant = useRef<VoiceAssistant>(voiceAssistant);
 
   const askingRef = useRef<boolean>(false);
-  const speechRef = useRef<SpeechRecognition | null>(newRecognition());
+  const speechRef = useRef<SpeechRecognition | null>(null);
   const abortNarratorPromise = useRef<(() => void) | null>(null);
   const originState = useRef("");
   const [tooltipOpen, setTooltipOpen] = useState(false);
@@ -173,8 +173,8 @@ export const Assistant = ({
     async (questionNode: SimpleQuestionNode, tagId: string) => {
       if (!sadTrigger || !happyTrigger || !danceTrigger || !angryTrigger || !stateInput)
         return console.warn("Inputs for state machine are not valid");
-      if (!speechRef.current)
-        return console.warn("Speech recognition doesn't exist on this browser, install last version of Chrome browser");
+      // if (!speechRef.current)
+      //   return console.warn("Speech recognition doesn't exist on this browser, install last version of Chrome browser");
       const submittedAnswers = assistantRef.current?.getSubmittedAnswers() ?? [];
       let message =
         submittedAnswers.length > 1
@@ -267,18 +267,17 @@ export const Assistant = ({
 
         console.log("👉 2. listen", { message, preMessage, preTranscriptProcessed, origin, listenType });
         stateInput.value = 2;
-        // setAssistantState("LISTEN");
-        // const recognitionResult = await recognizeInput2(speechRef.current);
-        const recognitionResult = await recognizeInput3();
-        // speechRef.current.stop(); // stop after get text
-
-        if (!recognitionResult) {
+        const res = recognizeInput3();
+        if (!res) {
           console.error(
             "This browser doesn't support speech recognition, install last version of chrome browser please"
           );
           askingRef.current = false;
           continue;
         }
+        const { speechRecognition, start } = res;
+        speechRef.current = speechRecognition;
+        const recognitionResult = await start();
 
         if (recognitionResult.error) {
           if (recognitionResult.error === "aborted") break;
@@ -418,7 +417,6 @@ export const Assistant = ({
               consecutive: sameResult ? stateOfPracticeRef.current.consecutive + 1 : 1,
               isCorrect,
             };
-            console.log({ stateOfPracticeRef: stateOfPracticeRef.current });
             if (isCorrect) {
               if (stateOfPracticeRef.current.consecutive > 3) danceTrigger?.fire();
               else happyTrigger.fire();
@@ -474,11 +472,12 @@ export const Assistant = ({
       if (assistantRef.current) {
         assistantRef.current.onSelectedQuestionAnswer(-1);
       }
-      // setAssistantState("IDLE");
     },
     [
+      angryTrigger,
       assistantRef,
       continuePracticing,
+      danceTrigger,
       happyTrigger,
       openNodesOnNotebook,
       sadTrigger,
@@ -507,7 +506,7 @@ export const Assistant = ({
 
   useEffect(() => {
     const run = async () => {
-      console.log("askQuestion", { ref: previousVoiceAssistant.current, voiceAssistant });
+      // console.log("askQuestion", { ref: previousVoiceAssistant.current, voiceAssistant });
       const isEqualsVoiceAssistant =
         previousVoiceAssistant.current.tagId === voiceAssistant.tagId &&
         previousVoiceAssistant.current.questionNode === voiceAssistant.questionNode;
@@ -528,20 +527,16 @@ export const Assistant = ({
 
   if (!startPractice && !voiceAssistant.tagId) return null;
 
-  console.log({ isIdle, tooltipAssistant });
   return (
     <Tooltip
       title={tooltipAssistant}
       placement="top"
       open={tooltipOpen}
       onOpen={() => {
-        console.log("onopen");
-        // isIdle ? undefined : true
         if (isIdle) return setTooltipOpen(true);
         return setTooltipOpen(true);
       }}
       onClose={() => {
-        console.log("onclose");
         if (isIdle) return setTooltipOpen(false);
         return setTooltipOpen(true);
       }}
