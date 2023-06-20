@@ -175,6 +175,7 @@ const PracticeTool = forwardRef<PracticeToolRef, PracticeToolProps>((props, ref)
   };
 
   useEffect(() => {
+    if (!questionData) return;
     if (voiceAssistant.questionNode) return;
     const intervalId = setInterval(() => {
       timeInSecondsRef.current += 1000;
@@ -192,7 +193,7 @@ const PracticeTool = forwardRef<PracticeToolRef, PracticeToolProps>((props, ref)
       setUserIsAnsweringPractice(true);
       clearInterval(intervalId);
     };
-  }, [setUserIsAnsweringPractice, voiceAssistant.questionNode]);
+  }, [questionData, setUserIsAnsweringPractice, voiceAssistant.questionNode]);
 
   // this is executed the first time we get selected a semester
   useEffect(() => {
@@ -277,7 +278,10 @@ const PracticeTool = forwardRef<PracticeToolRef, PracticeToolProps>((props, ref)
         byVoice: false,
         action: prev.questionNode ? "stop-assistant" : "start-assistant",
       });
-      if (prev.questionNode) return { ...prev, questionNode: null };
+      if (prev.questionNode) {
+        timeInSecondsRef.current = 0;
+        return { ...prev, questionNode: null };
+      }
       return { tagId: currentSemester.tagId, questionNode: questionData.question };
     });
   }, [currentSemester.tagId, questionData, setVoiceAssistant, user.uname]);
