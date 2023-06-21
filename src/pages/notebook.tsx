@@ -377,7 +377,7 @@ const Notebook = ({}: NotebookProps) => {
   const [notebooks, setNotebooks] = useState<Notebook[]>([]);
   const [selectedNotebookId, setSelectedNotebookId] = useState("");
   const selectedPreviousNotebookIdRef = useRef("");
-  const [userIsAnsweringPractice, setUserIsAnsweringPractice] = useState(true); // this is used to trigger assistant sleep animation
+  const [userIsAnsweringPractice, setUserIsAnsweringPractice] = useState<{ result: boolean }>({ result: true }); // this is used to trigger assistant sleep animation
 
   const onChangeTagOfNotebookById = (notebookId: string, data: { defaultTagId: string; defaultTagName: string }) => {
     setNotebooks(prev => {

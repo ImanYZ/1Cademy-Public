@@ -51,7 +51,7 @@ type AssistantProps = {
   setRootQuery: Dispatch<SetStateAction<string | undefined>>;
   startPractice: boolean;
   uname: string;
-  userIsAnsweringPractice: boolean;
+  userIsAnsweringPractice: { result: boolean };
 };
 
 const STATE_MACHINE_NAME = "State Machine 1";
@@ -61,7 +61,7 @@ const DANCE_TRIGGER = "trigger-dance";
 const ANGRY_TRIGGER = "trigger-angry";
 const NOCKING_1_TRIGGER = "triger-nocking1";
 const NOCKING_2_TRIGGER = "trigger-nocking2";
-const SNORING_TRIGGER = "trigger-snoring";
+// const SNORING_TRIGGER = "trigger-snoring";
 const STATE = "state";
 
 export const Assistant = ({
@@ -107,7 +107,7 @@ export const Assistant = ({
   const angryTrigger = useStateMachineInput(rive, STATE_MACHINE_NAME, ANGRY_TRIGGER);
   const nocking1Trigger = useStateMachineInput(rive, STATE_MACHINE_NAME, NOCKING_1_TRIGGER);
   const nocking2Trigger = useStateMachineInput(rive, STATE_MACHINE_NAME, NOCKING_2_TRIGGER);
-  const snoringTrigger = useStateMachineInput(rive, STATE_MACHINE_NAME, SNORING_TRIGGER);
+  // const snoringTrigger = useStateMachineInput(rive, STATE_MACHINE_NAME, SNORING_TRIGGER);
   const stateInput = useStateMachineInput(rive, STATE_MACHINE_NAME, STATE);
 
   const getNoMatchPreviousMessage = (listenType: VoiceAssistantType, timesAssistantCantUnderstand: number) => {
@@ -534,15 +534,20 @@ export const Assistant = ({
   }, [isIdle]);
 
   useEffect(() => {
-    if (userIsAnsweringPractice) return;
-    if (voiceAssistant.questionNode) return;
-    if (!nocking1Trigger || !nocking2Trigger || !snoringTrigger) return;
-
+    if (voiceAssistant.questionNode) return; // voice is active
+    if (!nocking1Trigger || !nocking2Trigger || !stateInput) return; // the set up is invalid
+    if (userIsAnsweringPractice.result) {
+      // user is interacting
+      stateInput.value = 0;
+      return;
+    }
+    if (stateInput.value === -1) return; // assistant is snoring, we can change it
+    // user is not interacting
     const randomIndex = Math.floor((Math.random() * 1000) % 3);
     if (randomIndex === 0) nocking1Trigger.fire();
     if (randomIndex === 1) nocking2Trigger.fire();
-    if (randomIndex === 2) snoringTrigger.fire();
-  }, [nocking1Trigger, nocking2Trigger, snoringTrigger, userIsAnsweringPractice, voiceAssistant.questionNode]);
+    if (randomIndex === 2) stateInput.value = -1;
+  }, [nocking1Trigger, nocking2Trigger, stateInput, userIsAnsweringPractice, voiceAssistant.questionNode]);
 
   if (!startPractice && !voiceAssistant.tagId) return null;
 

@@ -39,7 +39,7 @@ type PracticeToolProps = {
   startPractice: boolean;
   setStartPractice: Dispatch<SetStateAction<boolean>>;
   setDisplayRightSidebar: (newValue: OpenRightSidebar) => void;
-  setUserIsAnsweringPractice: (newValue: boolean) => void;
+  setUserIsAnsweringPractice: (newValue: { result: boolean }) => void;
 };
 
 export type PracticeInfo = {
@@ -83,7 +83,7 @@ const PracticeTool = forwardRef<PracticeToolRef, PracticeToolProps>((props, ref)
     setDisplayRightSidebar,
     setUserIsAnsweringPractice,
   } = props;
-  console.log({ currentSemester });
+  // console.log({ currentSemester });
 
   // const [startPractice, setStartPractice] = useState(false);
   const [questionData, setQuestionData] = useState<{ question: SimpleQuestionNode; flashcardId: string } | null>(null);
@@ -174,24 +174,49 @@ const PracticeTool = forwardRef<PracticeToolRef, PracticeToolProps>((props, ref)
     });
   };
 
+  // will execute a timer and check last interaction to see if user is not interacting
   useEffect(() => {
     if (!questionData) return;
     if (voiceAssistant.questionNode) return;
     const intervalId = setInterval(() => {
       timeInSecondsRef.current += 1000;
-      console.log("tick", timeInSecondsRef.current);
       if (MAX_INACTIVE_TIME < timeInSecondsRef.current) {
-        setUserIsAnsweringPractice(false);
+        setUserIsAnsweringPractice({ result: false });
         timeInSecondsRef.current = 0;
-      } else {
-        setUserIsAnsweringPractice(true);
       }
     }, 1000);
 
     return () => {
-      console.log("..will change to true");
-      setUserIsAnsweringPractice(true);
+      setUserIsAnsweringPractice({ result: true });
       clearInterval(intervalId);
+    };
+  }, [questionData, setUserIsAnsweringPractice, voiceAssistant.questionNode]);
+
+  // set up events to detect user actions and reset timers
+  useEffect(() => {
+    if (!questionData) return;
+    if (voiceAssistant.questionNode) return;
+
+    const handleMouseMove = () => {
+      timeInSecondsRef.current = 0;
+      setUserIsAnsweringPractice({ result: true });
+    };
+    const handleMouseClick = () => {
+      timeInSecondsRef.current = 0;
+      setUserIsAnsweringPractice({ result: true });
+    };
+    const handleMouseDbClick = () => {
+      timeInSecondsRef.current = 0;
+      setUserIsAnsweringPractice({ result: true });
+    };
+    document.addEventListener("mousemove", handleMouseMove);
+    document.addEventListener("click", handleMouseClick);
+    document.addEventListener("dblclick", handleMouseDbClick);
+
+    return () => {
+      document.removeEventListener("mousemove", handleMouseMove);
+      document.removeEventListener("click", handleMouseClick);
+      document.removeEventListener("dblclick", handleMouseDbClick);
     };
   }, [questionData, setUserIsAnsweringPractice, voiceAssistant.questionNode]);
 
@@ -212,7 +237,6 @@ const PracticeTool = forwardRef<PracticeToolRef, PracticeToolProps>((props, ref)
   }, [currentSemester.tagId, user.uname]);
 
   useEffect(() => {
-    console.log({ semesterConfig });
     if (!semesterConfig) return;
 
     const q = query(
@@ -226,16 +250,16 @@ const PracticeTool = forwardRef<PracticeToolRef, PracticeToolProps>((props, ref)
       const docChanges = snapshot.docChanges();
       for (const docChange of docChanges) {
         const semesterStudentVoteStat = docChange.doc.data() as ISemesterStudentVoteStat;
-        console.log({ semesterStudentVoteStat });
+        // console.log({ semesterStudentVoteStat });
         const currentDateYYMMDD = getDateYYMMDDWithHyphens();
-        console.log({ currentDateYYMMDD });
+        // console.log({ currentDateYYMMDD });
         const currentDayStats = semesterStudentVoteStat.days.find(cur => cur.day === currentDateYYMMDD);
-        console.log({ currentDayStats });
+        // console.log({ currentDayStats });
         // if (!currentDayStats) return;
         //
         const totalQuestions = semesterConfig.dailyPractice.numQuestionsPerDay;
         const questionsLeft = totalQuestions - (currentDayStats?.correctPractices ?? 0);
-        console.log({ questionsLeft });
+        // console.log({ questionsLeft });
         // setPracticeInfo(prev => ({ ...prev, questionsLeft }));
 
         const completedDays = Math.abs(differentBetweenDays(new Date(), semesterConfig.startDate.toDate()));
@@ -259,7 +283,7 @@ const PracticeTool = forwardRef<PracticeToolRef, PracticeToolProps>((props, ref)
   }, [currentSemester.tagId, semesterConfig, user.uname]);
 
   useEffect(() => {
-    console.log({ practiceInfo });
+    // console.log({ practiceInfo });
     if (!practiceInfo) return;
     if (!semesterConfig) return;
     if (!root) return;
@@ -268,7 +292,7 @@ const PracticeTool = forwardRef<PracticeToolRef, PracticeToolProps>((props, ref)
   }, [practiceInfo, root, semesterConfig, setStartPractice]);
 
   const onToggleAssistant = useCallback(() => {
-    console.log("onToggleAssistant", { questionData });
+    // console.log("onToggleAssistant", { questionData });
     if (!questionData) return;
 
     setVoiceAssistant(prev => {

@@ -50,7 +50,7 @@ type DashboardWrapperProps = {
   setStartPractice: Dispatch<SetStateAction<boolean>>;
   root?: string;
   setDisplayRightSidebar: (newValue: OpenRightSidebar) => void;
-  setUserIsAnsweringPractice: (newValue: boolean) => void;
+  setUserIsAnsweringPractice: (newValue: { result: boolean }) => void;
   sx?: SxProps<Theme>;
 };
 
