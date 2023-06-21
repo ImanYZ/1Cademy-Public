@@ -534,6 +534,10 @@ export const Assistant = ({
   }, [isIdle]);
 
   useEffect(() => {
+    // check first time if student does not complete their daily practice for a six days in a row
+  }, []);
+
+  useEffect(() => {
     if (voiceAssistant.questionNode) return; // voice is active
     if (!nocking1Trigger || !nocking2Trigger || !stateInput) return; // the set up is invalid
     if (userIsAnsweringPractice.result) {

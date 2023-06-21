@@ -410,7 +410,7 @@ type PracticeQuestionProps = {
   onSaveLog: (action: "open-leaderboard" | "open-user-status" | "open-notebook" | "display-tags") => void;
   // setLoading: (newValue: boolean) => void;
 };
-export const PracticeQuestion = ({
+const PracticeQuestion = ({
   question,
   practiceIsCompleted,
   onClose,
@@ -663,6 +663,8 @@ PracticeQuestionProps) => {
     </Box>
   );
 };
+
+export const PracticeQuestionMemoized = React.memo(PracticeQuestion);
 
 type CustomTextProps = { children: ReactNode };
 

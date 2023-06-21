@@ -4,6 +4,7 @@ import React, {
   Dispatch,
   forwardRef,
   SetStateAction,
+  startTransition,
   useCallback,
   useEffect,
   useImperativeHandle,
@@ -14,6 +15,8 @@ import { VoiceAssistant } from "src/nodeBookTypes";
 import { ISemester } from "src/types/ICourse";
 import { ISemesterStudentVoteStat } from "src/types/ICourse";
 
+import { getLastConsecutiveDaysWithoutGetDailyPoint } from "@/lib/utils/userStatus.utils";
+
 import { addPracticeToolLog } from "../../client/firestore/practiceToolLog.firestore";
 import { getSemesterById } from "../../client/firestore/semesters.firestore";
 import { CourseTag, SimpleQuestionNode } from "../../instructorsTypes";
@@ -23,7 +26,7 @@ import { differentBetweenDays, getDateYYMMDDWithHyphens } from "../../lib/utils/
 import { ICheckAnswerRequestParams } from "../../pages/api/checkAnswer";
 import { OpenRightSidebar } from "../../pages/notebook";
 import CourseDetail from "./CourseDetail";
-import { PracticeQuestion } from "./PracticeQuestion";
+import { PracticeQuestionMemoized } from "./PracticeQuestion";
 
 const db = getFirestore();
 const MAX_INACTIVE_TIME = 30_000;
@@ -67,6 +70,7 @@ export type PracticeToolRef = {
   getQuestionData: () => SimpleQuestionNode | null;
   onSelectedQuestionAnswer: (index: number) => void; // -10 value is used to select the node title
   getSubmittedAnswers: () => boolean[];
+  getAssistantInitialState: () => "IDLE" | "ANGRY";
 };
 
 const PracticeTool = forwardRef<PracticeToolRef, PracticeToolProps>((props, ref) => {
@@ -158,6 +162,9 @@ const PracticeTool = forwardRef<PracticeToolRef, PracticeToolProps>((props, ref)
     getQuestionData: () => questionData?.question ?? null,
     onSelectedQuestionAnswer: (index: number) => setNarratedAnswerIdx(index),
     getSubmittedAnswers: () => submittedAnswers,
+    getAssistantInitialState: () => {
+      return "ANGRY";
+    },
   }));
 
   const onViewNodeOnNodeBook = (nodeId: string) => {
@@ -199,15 +206,15 @@ const PracticeTool = forwardRef<PracticeToolRef, PracticeToolProps>((props, ref)
 
     const handleMouseMove = () => {
       timeInSecondsRef.current = 0;
-      setUserIsAnsweringPractice({ result: true });
+      startTransition(() => setUserIsAnsweringPractice({ result: true }));
     };
     const handleMouseClick = () => {
       timeInSecondsRef.current = 0;
-      setUserIsAnsweringPractice({ result: true });
+      startTransition(() => setUserIsAnsweringPractice({ result: true }));
     };
     const handleMouseDbClick = () => {
       timeInSecondsRef.current = 0;
-      setUserIsAnsweringPractice({ result: true });
+      startTransition(() => setUserIsAnsweringPractice({ result: true }));
     };
     document.addEventListener("mousemove", handleMouseMove);
     document.addEventListener("click", handleMouseClick);
@@ -267,6 +274,11 @@ const PracticeTool = forwardRef<PracticeToolRef, PracticeToolProps>((props, ref)
           differentBetweenDays(semesterConfig.endDate.toDate(), semesterConfig.startDate.toDate())
         );
         const remainingDays = totalDays - completedDays;
+        const lastLostConsecutiveDays = getLastConsecutiveDaysWithoutGetDailyPoint(
+          semesterStudentVoteStat,
+          totalQuestions
+        );
+        console.log({ lastLostConsecutiveDays });
         setPracticeInfo(prev => ({
           ...prev,
           questionsLeft,
@@ -343,7 +355,7 @@ const PracticeTool = forwardRef<PracticeToolRef, PracticeToolProps>((props, ref)
         zIndex: 2,
       }}
     >
-      <PracticeQuestion
+      <PracticeQuestionMemoized
         question={questionData?.question ?? null}
         practiceIsCompleted={practiceIsCompleted}
         onClose={onClose}

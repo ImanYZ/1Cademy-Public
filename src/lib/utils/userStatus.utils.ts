@@ -64,6 +64,34 @@ export const calculateDailyStreak = (
   return { dailyStreak: streak.dailyStreak, maxDailyStreak: streak.maxDailyStreak };
 };
 
+export const getLastConsecutiveDaysWithoutGetDailyPoint = (
+  semesterStudentStats: ISemesterStudentVoteStat,
+  questionPerDay: number
+): number => {
+  const dailyCorrectPractices = calcMetricPerDay(semesterStudentStats.days);
+  const sortedDailyCorrectPractices: DailyPoints = Object.fromEntries(
+    Object.entries(dailyCorrectPractices)
+      .sort(
+        ([keyA], [keyB]) => Number(new Date(keyA.replaceAll("-", "/"))) - Number(new Date(keyB.replaceAll("-", "/")))
+      )
+      .reverse() // today, yesterday, ...
+  );
+
+  const res = Object.keys(sortedDailyCorrectPractices).reduce(
+    (acu: { lastDate: string; consecutiveDays: number; ignore: boolean }, key) => {
+      if (acu.ignore) return acu;
+
+      const diff = differentBetweenDaysWithHyphens(acu.lastDate, key);
+      const gotThePoint = sortedDailyCorrectPractices[key] >= questionPerDay;
+      if (gotThePoint) return { ...acu, consecutiveDays: 0, ignore: true };
+      return { ...acu, lastDate: key, consecutiveDays: acu.consecutiveDays + diff };
+    },
+    { lastDate: getDateYYMMDDWithHyphens(), consecutiveDays: 0, ignore: false }
+  );
+
+  return res.consecutiveDays;
+};
+
 export const differentBetweenDaysWithHyphens = (hyphenDate1: string, hyphenDate2: string): number => {
   const date1 = new Date(hyphenDate1.replaceAll("-", "/"));
   const date2 = new Date(hyphenDate2.replaceAll("-", "/"));
