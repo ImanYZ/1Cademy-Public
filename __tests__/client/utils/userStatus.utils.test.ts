@@ -1,21 +1,28 @@
-import { calculateDailyStreak } from "../../../src/lib/utils/userStatus.utils";
+import { calculateDailyStreak, getDaysInAWeekWithoutGetDailyPoint } from "../../../src/lib/utils/userStatus.utils";
 import { ISemesterStudentVoteStat } from "../../../src/types/ICourse";
 
 const DATE_2023_05_17 = "2023-05-17";
 
-jest.mock("../../../src/lib/utils/date.utils.ts", () => {
-  const originalModule = jest.requireActual("../../../src/lib/utils/date.utils.ts");
+let originalDate: any;
 
-  return {
-    ...originalModule,
-    getDateYYMMDDWithHyphens: jest.fn(() => {
-      return DATE_2023_05_17;
-    }),
-  };
+beforeEach(() => {
+  originalDate = global.Date; // Store the original Date object
+
+  jest.spyOn(global, "Date").mockImplementation((...args) => {
+    if (args.length) {
+      return new originalDate(...args);
+    }
+    return new originalDate(2023, 4, 17, 10, 0, 0); // DATE_2023_05_17
+  });
+});
+
+afterEach(() => {
+  global.Date = originalDate; // Restore the original Date object
 });
 
 describe("should calculate daily streak", () => {
   it("with 0 days in a row that the student completely answered 10 questions correctly.", () => {
+    console.log({ d1: new Date(), d2: new Date("2023-01-01") });
     const semesterStudentStats = {
       uname: "student-core-econ",
       votePoints: 0,
@@ -420,5 +427,58 @@ describe("should calculate daily streak", () => {
     const { dailyStreak, maxDailyStreak } = calculateDailyStreak(semesterStudentStats, 10);
     expect(dailyStreak).toBe(0);
     expect(maxDailyStreak).toBe(2);
+  });
+});
+
+describe("should get days without get daily point in a week", () => {
+  it("with 0 days lost daily points in last week", () => {
+    const semesterStudentStats = {
+      days: [
+        {
+          correctPractices: 12,
+          day: "2023-05-15", // Monday
+        },
+        {
+          correctPractices: 12,
+          day: "2023-05-16", // Tuesday
+        },
+        {
+          correctPractices: 10,
+          day: DATE_2023_05_17, // Wednesday
+        },
+      ],
+    } as ISemesterStudentVoteStat;
+    const result = getDaysInAWeekWithoutGetDailyPoint(semesterStudentStats, 10);
+    expect(result).toBe(0);
+  });
+
+  it("with 2 days lost daily points in last week", () => {
+    const semesterStudentStats = {
+      days: [
+        {
+          correctPractices: 4,
+          day: "2023-05-16",
+        },
+        {
+          correctPractices: 10,
+          day: DATE_2023_05_17,
+        },
+      ],
+    } as ISemesterStudentVoteStat;
+    const result = getDaysInAWeekWithoutGetDailyPoint(semesterStudentStats, 10);
+    expect(result).toBe(2); // from monday and tuesday
+  });
+
+  it("with 3 days lost daily point, because days are out of last week", () => {
+    const semesterStudentStats = {
+      days: [
+        {
+          correctPractices: 4,
+          day: "2023-05-01",
+        },
+      ],
+    } as ISemesterStudentVoteStat;
+    const result = getDaysInAWeekWithoutGetDailyPoint(semesterStudentStats, 10);
+    expect(result).toBe(3);
   });
 });

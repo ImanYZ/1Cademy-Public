@@ -61,7 +61,7 @@ const DANCE_TRIGGER = "trigger-dance";
 const ANGRY_TRIGGER = "trigger-angry";
 const NOCKING_1_TRIGGER = "triger-nocking1";
 const NOCKING_2_TRIGGER = "trigger-nocking2";
-// const SNORING_TRIGGER = "trigger-snoring";
+const COMPLAINING_ANGRILY_TRIGGER = "trigger-complaining_angrily";
 const STATE = "state";
 
 export const Assistant = ({
@@ -107,7 +107,7 @@ export const Assistant = ({
   const angryTrigger = useStateMachineInput(rive, STATE_MACHINE_NAME, ANGRY_TRIGGER);
   const nocking1Trigger = useStateMachineInput(rive, STATE_MACHINE_NAME, NOCKING_1_TRIGGER);
   const nocking2Trigger = useStateMachineInput(rive, STATE_MACHINE_NAME, NOCKING_2_TRIGGER);
-  // const snoringTrigger = useStateMachineInput(rive, STATE_MACHINE_NAME, SNORING_TRIGGER);
+  const complainingAngrilyTrigger = useStateMachineInput(rive, STATE_MACHINE_NAME, COMPLAINING_ANGRILY_TRIGGER);
   const stateInput = useStateMachineInput(rive, STATE_MACHINE_NAME, STATE);
 
   const getNoMatchPreviousMessage = (listenType: VoiceAssistantType, timesAssistantCantUnderstand: number) => {
@@ -512,6 +512,27 @@ export const Assistant = ({
     return "";
   }, [isIdle, startPractice, voiceAssistant.questionNode]);
 
+  // useEffect(() => {
+  //   // if (!assistantRef.current) return;
+  //   if (!angryTrigger) return;
+
+  //   const intervalId = setInterval(() => {
+  //     console.log("try: getAssistantInitialState");
+  //     if (assistantRef?.current?.getAssistantInitialState) {
+  //       const assistantInitialState = assistantRef.current.getAssistantInitialState();
+  //       console.log({ assistantInitialState });
+  //       if (assistantInitialState !== "ANGRY") return;
+  //       angryTrigger.fire();
+  //       clearInterval(intervalId);
+  //     }
+  //   }, 1000);
+
+  //   return () => {
+  //     if (!intervalId) return;
+  //     clearInterval(intervalId);
+  //   };
+  // }, [angryTrigger, assistantRef]);
+
   useEffect(() => {
     const run = async () => {
       // console.log("askQuestion", { ref: previousVoiceAssistant.current, voiceAssistant });
@@ -534,10 +555,6 @@ export const Assistant = ({
   }, [isIdle]);
 
   useEffect(() => {
-    // check first time if student does not complete their daily practice for a six days in a row
-  }, []);
-
-  useEffect(() => {
     if (voiceAssistant.questionNode) return; // voice is active
     if (!nocking1Trigger || !nocking2Trigger || !stateInput) return; // the set up is invalid
     if (userIsAnsweringPractice.result) {
@@ -551,7 +568,31 @@ export const Assistant = ({
     if (randomIndex === 0) nocking1Trigger.fire();
     if (randomIndex === 1) nocking2Trigger.fire();
     if (randomIndex === 2) stateInput.value = -1;
-  }, [nocking1Trigger, nocking2Trigger, stateInput, userIsAnsweringPractice, voiceAssistant.questionNode]);
+  }, [
+    angryTrigger,
+    nocking1Trigger,
+    nocking2Trigger,
+    stateInput,
+    userIsAnsweringPractice,
+    voiceAssistant.questionNode,
+  ]);
+
+  // execute only first time when user doesn't got daily point in 6 days
+  useEffect(() => {
+    if (!complainingAngrilyTrigger) return;
+
+    const timeoutId = setTimeout(() => {
+      if (assistantRef.current?.getAssistantInitialState) {
+        if (assistantRef.current.getAssistantInitialState() === "ANGRY") {
+          complainingAngrilyTrigger.fire();
+        }
+      }
+    }, 2500);
+
+    return () => {
+      if (timeoutId) clearTimeout(timeoutId);
+    };
+  }, [complainingAngrilyTrigger, assistantRef]);
 
   if (!startPractice && !voiceAssistant.tagId) return null;
 

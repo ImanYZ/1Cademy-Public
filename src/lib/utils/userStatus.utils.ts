@@ -1,5 +1,5 @@
 import { ISemesterStudentVoteStat, ISemesterStudentVoteStatDay } from "../../types/ICourse";
-import { differentBetweenDays, getDateYYMMDDWithHyphens } from "./date.utils";
+import { differentBetweenDays, getDatesOfWeek, getDateYYMMDDWithHyphens } from "./date.utils";
 
 export type CalculateDailyStreakOutput = { dailyStreak: number; maxDailyStreak: number };
 
@@ -64,7 +64,7 @@ export const calculateDailyStreak = (
   return { dailyStreak: streak.dailyStreak, maxDailyStreak: streak.maxDailyStreak };
 };
 
-export const getLastConsecutiveDaysWithoutGetDailyPoint = (
+export const getDaysInAWeekWithoutGetDailyPoint = (
   semesterStudentStats: ISemesterStudentVoteStat,
   questionPerDay: number
 ): number => {
@@ -77,19 +77,20 @@ export const getLastConsecutiveDaysWithoutGetDailyPoint = (
       .reverse() // today, yesterday, ...
   );
 
-  const res = Object.keys(sortedDailyCorrectPractices).reduce(
-    (acu: { lastDate: string; consecutiveDays: number; ignore: boolean }, key) => {
-      if (acu.ignore) return acu;
+  const days = getDatesOfWeek(new Date());
+  const daysOfTheWeek = days.map(cur => getDateYYMMDDWithHyphens(cur));
+  const currentDayWithHyphens = getDateYYMMDDWithHyphens();
+  const totalValidDays = daysOfTheWeek.filter(
+    c => differentBetweenDaysWithHyphens(currentDayWithHyphens, c) >= 0
+  ).length;
+  const validDays = Object.keys(sortedDailyCorrectPractices)
+    .filter(key => daysOfTheWeek.includes(key))
+    .filter(key => differentBetweenDaysWithHyphens(currentDayWithHyphens, key) >= 0);
 
-      const diff = differentBetweenDaysWithHyphens(acu.lastDate, key);
-      const gotThePoint = sortedDailyCorrectPractices[key] >= questionPerDay;
-      if (gotThePoint) return { ...acu, consecutiveDays: 0, ignore: true };
-      return { ...acu, lastDate: key, consecutiveDays: acu.consecutiveDays + diff };
-    },
-    { lastDate: getDateYYMMDDWithHyphens(), consecutiveDays: 0, ignore: false }
+  return validDays.reduce(
+    (acu, key) => acu + (sortedDailyCorrectPractices[key] >= questionPerDay ? 0 : 1),
+    totalValidDays - validDays.length
   );
-
-  return res.consecutiveDays;
 };
 
 export const differentBetweenDaysWithHyphens = (hyphenDate1: string, hyphenDate2: string): number => {

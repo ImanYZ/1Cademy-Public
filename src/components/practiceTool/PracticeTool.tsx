@@ -15,7 +15,7 @@ import { VoiceAssistant } from "src/nodeBookTypes";
 import { ISemester } from "src/types/ICourse";
 import { ISemesterStudentVoteStat } from "src/types/ICourse";
 
-import { getLastConsecutiveDaysWithoutGetDailyPoint } from "@/lib/utils/userStatus.utils";
+import { getDaysInAWeekWithoutGetDailyPoint } from "@/lib/utils/userStatus.utils";
 
 import { addPracticeToolLog } from "../../client/firestore/practiceToolLog.firestore";
 import { getSemesterById } from "../../client/firestore/semesters.firestore";
@@ -101,6 +101,7 @@ const PracticeTool = forwardRef<PracticeToolRef, PracticeToolProps>((props, ref)
   const [loading, setLoading] = useState(true);
   const scrollableWrapper = useRef<HTMLElement | null>(null);
   const timeInSecondsRef = useRef(0);
+  const daysInAWeekWithoutGetDailyPointRef = useRef(0);
 
   const onRunPracticeTool = useCallback(() => {
     (start: boolean) => {
@@ -162,9 +163,7 @@ const PracticeTool = forwardRef<PracticeToolRef, PracticeToolProps>((props, ref)
     getQuestionData: () => questionData?.question ?? null,
     onSelectedQuestionAnswer: (index: number) => setNarratedAnswerIdx(index),
     getSubmittedAnswers: () => submittedAnswers,
-    getAssistantInitialState: () => {
-      return "ANGRY";
-    },
+    getAssistantInitialState: () => (daysInAWeekWithoutGetDailyPointRef.current >= 6 ? "ANGRY" : "IDLE"),
   }));
 
   const onViewNodeOnNodeBook = (nodeId: string) => {
@@ -274,11 +273,10 @@ const PracticeTool = forwardRef<PracticeToolRef, PracticeToolProps>((props, ref)
           differentBetweenDays(semesterConfig.endDate.toDate(), semesterConfig.startDate.toDate())
         );
         const remainingDays = totalDays - completedDays;
-        const lastLostConsecutiveDays = getLastConsecutiveDaysWithoutGetDailyPoint(
+        daysInAWeekWithoutGetDailyPointRef.current = getDaysInAWeekWithoutGetDailyPoint(
           semesterStudentVoteStat,
           totalQuestions
         );
-        console.log({ lastLostConsecutiveDays });
         setPracticeInfo(prev => ({
           ...prev,
           questionsLeft,

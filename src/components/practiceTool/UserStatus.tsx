@@ -7,7 +7,7 @@ import { getFirestore } from "firebase/firestore";
 import React, { useEffect, useMemo, useState } from "react";
 
 import { getSemesterById } from "../../client/firestore/semesters.firestore";
-import { getSemesterStudentVoteStatsByIdAndStudent } from "../../client/firestore/semesterStudentVoteStat.firestores";
+import { getSemesterStudentVoteStatsByIdAndStudent } from "../../client/firestore/semesterStudentVoteStats.firestores";
 import { User } from "../../knowledgeTypes";
 import { DESIGN_SYSTEM_COLORS } from "../../lib/theme/colors";
 import {
