@@ -8,6 +8,7 @@ import VolumeUpIcon from "@mui/icons-material/VolumeUp";
 import { Button, ClickAwayListener, Divider, IconButton, ListItem, Skeleton, Tooltip, Typography } from "@mui/material";
 import { Box, Stack } from "@mui/system";
 import React, { ReactNode, useCallback, useEffect, useMemo, useState } from "react";
+import { useRive } from "rive-react";
 
 import { SimpleQuestionNode } from "../../instructorsTypes";
 import { Post } from "../../lib/mapApi";
@@ -430,7 +431,14 @@ const PracticeQuestion = ({
   onSaveLog,
 }: // setLoading,
 PracticeQuestionProps) => {
-  console.log("------>", { loading });
+  const { RiveComponent: RiveComponentCymbals } = useRive({
+    src: "rive-practice/cymbalsStateMachine.riv",
+    stateMachines: "State Machine 1",
+    artboard: "New Artboard",
+    autoplay: true,
+  });
+
+  // console.log("------>", { loading });
   const onSubmitAnswer = useCallback(() => {
     onSaveAnswer(selectedAnswers);
   }, [onSaveAnswer, selectedAnswers]);
@@ -470,7 +478,22 @@ PracticeQuestionProps) => {
       {/* question node */}
       <Box sx={{ py: "45px" }}>
         {practiceIsCompleted && (
-          <Box sx={{ mt: "50px" }}>
+          <Stack justifyItems={"center"} alignItems={"center"} sx={{ mx: "auto", mt: "50px", width: "286px" }}>
+            {/* <Box sx={{ width: "150px", height: "150px", position: "relative" }}>
+              <Typography sx={{ position: "absolute", left: "0px", top: "0px" }}>10Q</Typography>
+              <Typography sx={{ position: "absolute", left: "20px", top: "20px" }}>/</Typography>
+              <Typography sx={{ position: "absolute", left: "40px", top: "40px" }}>1d</Typography>
+            </Box> */}
+            <Box sx={{ width: "200px", height: "200px" }}>
+              <RiveComponentCymbals />
+            </Box>
+            <Typography>240</Typography>
+            <Typography>day streak!</Typography>
+            <Typography>Congratulations!</Typography>
+            <Typography>You have earned your daily point.</Typography>
+            <Button variant="contained" sx={{ borderRadius: "26px" }} fullWidth>
+              Claim Today’s Point
+            </Button>
             <QuestionMessage
               messages={[
                 `Daily practice has been completed.`,
@@ -480,7 +503,7 @@ PracticeQuestionProps) => {
               totalQuestions={practiceInfo.totalQuestions}
               questionsCompleted={practiceInfo.totalQuestions - practiceInfo.questionsLeft}
             />
-          </Box>
+          </Stack>
         )}
         {loading && (
           <Box sx={{ width: "100%" }}>
