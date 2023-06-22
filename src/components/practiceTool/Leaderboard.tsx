@@ -25,7 +25,7 @@ type LeaderboardProps = {
 const DEFAULT_AVATAR = "https://storage.googleapis.com/onecademy-1.appspot.com/ProfilePictures/no-img.png";
 
 const Leaderboard = ({ semesterId, sxBody }: LeaderboardProps) => {
-  console.log({ semesterId });
+  // console.log({ semesterId });
   const db = getFirestore();
   const [usersInfo, setUsersInfo] = useState<UsersInfo>({});
   const [leaderBoardUsers, setLeaderBoardUSers] = useState<LeaderboardItem[]>([]);

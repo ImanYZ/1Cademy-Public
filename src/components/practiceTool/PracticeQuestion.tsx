@@ -487,22 +487,11 @@ PracticeQuestionProps) => {
             <Box sx={{ width: "200px", height: "200px" }}>
               <RiveComponentCymbals />
             </Box>
-            <Typography>240</Typography>
-            <Typography>day streak!</Typography>
-            <Typography>Congratulations!</Typography>
+            <Typography sx={{ fontSize: "30px", fontWeight: 600, mt: "12px" }}>Well done!</Typography>
             <Typography>You have earned your daily point.</Typography>
-            <Button variant="contained" sx={{ borderRadius: "26px" }} fullWidth>
-              Claim Today’s Point
+            <Button onClick={onNextQuestion} variant="contained" sx={{ mt: "20px", borderRadius: "26px" }} fullWidth>
+              Next
             </Button>
-            <QuestionMessage
-              messages={[
-                `Daily practice has been completed.`,
-                `You have completed ${practiceInfo.completedDays} days out of ${practiceInfo.totalDays} days of your review practice.`,
-                `${practiceInfo.remainingDays} days are remaining to the end of the semester.`,
-              ]}
-              totalQuestions={practiceInfo.totalQuestions}
-              questionsCompleted={practiceInfo.totalQuestions - practiceInfo.questionsLeft}
-            />
           </Stack>
         )}
         {loading && (
