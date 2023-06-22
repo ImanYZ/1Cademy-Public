@@ -27,7 +27,7 @@ import {
   NUMBER_POSSIBLE_OPTIONS,
   OPEN_PRACTICE_ERROR,
 } from "../../lib/utils/constants";
-import { getValidNumberOptions, newRecognition, recognizeInput2 } from "../../lib/utils/speechRecognitions.utils";
+import { getValidNumberOptions, recognizeInput3 } from "../../lib/utils/speechRecognitions.utils";
 import { delay } from "../../lib/utils/utils";
 import { Node, VoiceAssistant, VoiceAssistantType } from "../../nodeBookTypes";
 import { narrateLargeTexts } from "../../utils/helpers";
@@ -51,11 +51,17 @@ type AssistantProps = {
   setRootQuery: Dispatch<SetStateAction<string | undefined>>;
   startPractice: boolean;
   uname: string;
+  userIsAnsweringPractice: { result: boolean };
 };
 
 const STATE_MACHINE_NAME = "State Machine 1";
 const SAD_TRIGGER = "trigger-sad";
 const HAPPY_TRIGGER = "trigger-happy";
+const DANCE_TRIGGER = "trigger-dance";
+const ANGRY_TRIGGER = "trigger-angry";
+const NOCKING_1_TRIGGER = "triger-nocking1";
+const NOCKING_2_TRIGGER = "trigger-nocking2";
+const COMPLAINING_ANGRILY_TRIGGER = "trigger-complaining_angrily";
 const STATE = "state";
 
 export const Assistant = ({
@@ -69,6 +75,7 @@ export const Assistant = ({
   setRootQuery,
   startPractice,
   uname,
+  userIsAnsweringPractice,
 }: AssistantProps) => {
   /**
    * Assistant narrate after that listen
@@ -79,10 +86,14 @@ export const Assistant = ({
   const previousVoiceAssistant = useRef<VoiceAssistant>(voiceAssistant);
 
   const askingRef = useRef<boolean>(false);
-  const speechRef = useRef<SpeechRecognition | null>(newRecognition());
+  const speechRef = useRef<SpeechRecognition | null>(null);
   const abortNarratorPromise = useRef<(() => void) | null>(null);
   const originState = useRef("");
   const [tooltipOpen, setTooltipOpen] = useState(false);
+  const stateOfPracticeRef = useRef<{ isCorrect: boolean; consecutive: number }>({
+    isCorrect: true,
+    consecutive: 0,
+  });
 
   const { rive, RiveComponent: RiveComponentTouch } = useRive({
     src: "rive-voice-assistant/assistant-state-machine.riv",
@@ -92,6 +103,11 @@ export const Assistant = ({
   });
   const sadTrigger = useStateMachineInput(rive, STATE_MACHINE_NAME, SAD_TRIGGER);
   const happyTrigger = useStateMachineInput(rive, STATE_MACHINE_NAME, HAPPY_TRIGGER);
+  const danceTrigger = useStateMachineInput(rive, STATE_MACHINE_NAME, DANCE_TRIGGER);
+  const angryTrigger = useStateMachineInput(rive, STATE_MACHINE_NAME, ANGRY_TRIGGER);
+  const nocking1Trigger = useStateMachineInput(rive, STATE_MACHINE_NAME, NOCKING_1_TRIGGER);
+  const nocking2Trigger = useStateMachineInput(rive, STATE_MACHINE_NAME, NOCKING_2_TRIGGER);
+  const complainingAngrilyTrigger = useStateMachineInput(rive, STATE_MACHINE_NAME, COMPLAINING_ANGRILY_TRIGGER);
   const stateInput = useStateMachineInput(rive, STATE_MACHINE_NAME, STATE);
 
   const getNoMatchPreviousMessage = (listenType: VoiceAssistantType, timesAssistantCantUnderstand: number) => {
@@ -163,10 +179,10 @@ export const Assistant = ({
 
   const askQuestion = useCallback(
     async (questionNode: SimpleQuestionNode, tagId: string) => {
-      if (!sadTrigger || !happyTrigger || !stateInput) return console.warn("Inputs for state machine are not valid");
-      if (!speechRef.current)
-        return console.warn("Speech recognition doesn't exist on this browser, install last version of Chrome browser");
-
+      if (!sadTrigger || !happyTrigger || !danceTrigger || !angryTrigger || !stateInput)
+        return console.warn("Inputs for state machine are not valid");
+      // if (!speechRef.current)
+      //   return console.warn("Speech recognition doesn't exist on this browser, install last version of Chrome browser");
       const submittedAnswers = assistantRef.current?.getSubmittedAnswers() ?? [];
       let message =
         submittedAnswers.length > 1
@@ -259,17 +275,17 @@ export const Assistant = ({
 
         console.log("👉 2. listen", { message, preMessage, preTranscriptProcessed, origin, listenType });
         stateInput.value = 2;
-        // setAssistantState("LISTEN");
-        const recognitionResult = await recognizeInput2(speechRef.current);
-        speechRef.current.stop(); // stop after get text
-
-        if (!recognitionResult) {
+        const res = recognizeInput3();
+        if (!res) {
           console.error(
             "This browser doesn't support speech recognition, install last version of chrome browser please"
           );
           askingRef.current = false;
           continue;
         }
+        const { speechRecognition, start } = res;
+        speechRef.current = speechRecognition;
+        const recognitionResult = await start();
 
         if (recognitionResult.error) {
           if (recognitionResult.error === "aborted") break;
@@ -309,7 +325,7 @@ export const Assistant = ({
           continue;
         }
 
-        if (["stop", "install"].includes(transcript) || transcript.includes("stop")) {
+        if (["stop", "install"].includes(transcript) || transcript.includes("stop") || transcript === "top") {
           setVoiceAssistant(prev => {
             const emptyVoiceAssistant = { ...prev, questionNode: null };
             previousVoiceAssistant.current = emptyVoiceAssistant;
@@ -404,7 +420,20 @@ export const Assistant = ({
               submitOptions
             );
             console.log("will-fire", isCorrect);
-            isCorrect ? happyTrigger.fire() : sadTrigger.fire();
+            const sameResult = stateOfPracticeRef.current.isCorrect === isCorrect;
+            stateOfPracticeRef.current = {
+              consecutive: sameResult ? stateOfPracticeRef.current.consecutive + 1 : 1,
+              isCorrect,
+            };
+            if (isCorrect) {
+              if (stateOfPracticeRef.current.consecutive > 3) danceTrigger?.fire();
+              else happyTrigger.fire();
+            } else {
+              if (stateOfPracticeRef.current.consecutive > 3) angryTrigger?.fire();
+              else sadTrigger.fire();
+            }
+
+            //  isCorrect ? happyTrigger.fire() : sadTrigger.fire();
             await delay(500);
             message = messageFromConfirm;
             preMessage = "";
@@ -451,11 +480,12 @@ export const Assistant = ({
       if (assistantRef.current) {
         assistantRef.current.onSelectedQuestionAnswer(-1);
       }
-      // setAssistantState("IDLE");
     },
     [
+      angryTrigger,
       assistantRef,
       continuePracticing,
+      danceTrigger,
       happyTrigger,
       openNodesOnNotebook,
       sadTrigger,
@@ -482,9 +512,30 @@ export const Assistant = ({
     return "";
   }, [isIdle, startPractice, voiceAssistant.questionNode]);
 
+  // useEffect(() => {
+  //   // if (!assistantRef.current) return;
+  //   if (!angryTrigger) return;
+
+  //   const intervalId = setInterval(() => {
+  //     console.log("try: getAssistantInitialState");
+  //     if (assistantRef?.current?.getAssistantInitialState) {
+  //       const assistantInitialState = assistantRef.current.getAssistantInitialState();
+  //       console.log({ assistantInitialState });
+  //       if (assistantInitialState !== "ANGRY") return;
+  //       angryTrigger.fire();
+  //       clearInterval(intervalId);
+  //     }
+  //   }, 1000);
+
+  //   return () => {
+  //     if (!intervalId) return;
+  //     clearInterval(intervalId);
+  //   };
+  // }, [angryTrigger, assistantRef]);
+
   useEffect(() => {
     const run = async () => {
-      console.log("askQuestion", { ref: previousVoiceAssistant.current, voiceAssistant });
+      // console.log("askQuestion", { ref: previousVoiceAssistant.current, voiceAssistant });
       const isEqualsVoiceAssistant =
         previousVoiceAssistant.current.tagId === voiceAssistant.tagId &&
         previousVoiceAssistant.current.questionNode === voiceAssistant.questionNode;
@@ -503,22 +554,58 @@ export const Assistant = ({
     setTooltipOpen(!isIdle);
   }, [isIdle]);
 
+  useEffect(() => {
+    if (voiceAssistant.questionNode) return; // voice is active
+    if (!nocking1Trigger || !nocking2Trigger || !stateInput) return; // the set up is invalid
+    if (userIsAnsweringPractice.result) {
+      // user is interacting
+      stateInput.value = 0;
+      return;
+    }
+    if (stateInput.value === -1) return; // assistant is snoring, we can change it
+    // user is not interacting
+    const randomIndex = Math.floor((Math.random() * 1000) % 3);
+    if (randomIndex === 0) nocking1Trigger.fire();
+    if (randomIndex === 1) nocking2Trigger.fire();
+    if (randomIndex === 2) stateInput.value = -1;
+  }, [
+    angryTrigger,
+    nocking1Trigger,
+    nocking2Trigger,
+    stateInput,
+    userIsAnsweringPractice,
+    voiceAssistant.questionNode,
+  ]);
+
+  // execute only first time when user doesn't got daily point in 6 days
+  useEffect(() => {
+    if (!complainingAngrilyTrigger) return;
+
+    const timeoutId = setTimeout(() => {
+      if (assistantRef.current?.getAssistantInitialState) {
+        if (assistantRef.current.getAssistantInitialState() === "ANGRY") {
+          complainingAngrilyTrigger.fire();
+        }
+      }
+    }, 2500);
+
+    return () => {
+      if (timeoutId) clearTimeout(timeoutId);
+    };
+  }, [complainingAngrilyTrigger, assistantRef]);
+
   if (!startPractice && !voiceAssistant.tagId) return null;
 
-  console.log({ isIdle, tooltipAssistant });
   return (
     <Tooltip
       title={tooltipAssistant}
       placement="top"
       open={tooltipOpen}
       onOpen={() => {
-        console.log("onopen");
-        // isIdle ? undefined : true
         if (isIdle) return setTooltipOpen(true);
         return setTooltipOpen(true);
       }}
       onClose={() => {
-        console.log("onclose");
         if (isIdle) return setTooltipOpen(false);
         return setTooltipOpen(true);
       }}

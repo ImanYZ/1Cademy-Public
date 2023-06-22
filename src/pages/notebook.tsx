@@ -377,6 +377,7 @@ const Notebook = ({}: NotebookProps) => {
   const [notebooks, setNotebooks] = useState<Notebook[]>([]);
   const [selectedNotebookId, setSelectedNotebookId] = useState("");
   const selectedPreviousNotebookIdRef = useRef("");
+  const [userIsAnsweringPractice, setUserIsAnsweringPractice] = useState<{ result: boolean }>({ result: true }); // this is used to trigger assistant sleep animation
 
   const onChangeTagOfNotebookById = (notebookId: string, data: { defaultTagId: string; defaultTagName: string }) => {
     setNotebooks(prev => {
@@ -4642,12 +4643,12 @@ const Notebook = ({}: NotebookProps) => {
 
       const newTargetId = nodeBookState.selectedNode ?? "";
       if (!newTargetId) return false;
-      console.log("t1");
+      // console.log("t1");
       const thisNode = graph.nodes[newTargetId];
-      console.log("t2");
+      // console.log("t2");
       if (!thisNode) return false;
       if (!targetIsValid(thisNode)) return false;
-      console.log("t3");
+      // console.log("t3");
       startTutorial(tutorialName);
       setTargetId(newTargetId);
       if (forcedTutorial) {
@@ -6951,6 +6952,7 @@ const Notebook = ({}: NotebookProps) => {
             startPractice={startPractice}
             setStartPractice={setStartPractice}
             setDisplayRightSidebar={setDisplaySidebar}
+            setUserIsAnsweringPractice={setUserIsAnsweringPractice}
           />
         )}
 
@@ -6968,6 +6970,7 @@ const Notebook = ({}: NotebookProps) => {
               setVoiceAssistant={setVoiceAssistant}
               startPractice={startPractice}
               uname={user?.uname ?? ""}
+              userIsAnsweringPractice={userIsAnsweringPractice}
             />
           </Box>
         )}

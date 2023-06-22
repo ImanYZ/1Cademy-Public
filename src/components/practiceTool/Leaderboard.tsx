@@ -7,7 +7,7 @@ import React, { ReactNode, useEffect, useState } from "react";
 import { getAvatarName } from "@/lib/utils/Map.utils";
 
 import { getSemesterById } from "../../client/firestore/semesters.firestore";
-import { getSemesterStudentVoteStats } from "../../client/firestore/semesterStudentVoteStat.firestores";
+import { getSemesterStudentVoteStats } from "../../client/firestore/semesterStudentVoteStats.firestores";
 import { DESIGN_SYSTEM_COLORS } from "../../lib/theme/colors";
 import { NO_USER_IMAGE } from "../../lib/utils/constants";
 import { getWeekNumber } from "../../lib/utils/date.utils";
