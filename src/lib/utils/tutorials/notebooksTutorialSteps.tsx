@@ -10,7 +10,7 @@ const NOTEBOOKS_STEPS_CONFIG: TutorialStepConfig[] = [
     description: (
       <MarkdownRender
         text={
-          "The list of notebooks and its settings can be found here. It will only appear when you hover over the toolbar and click on the **Notebooks** button."
+          "Here you can view your notebooks. A notebook is a 1Cademy graph with the nodes you have opened. It can be save and shared so you can access it later or let others see it. You can open different notebooks to view different arrangements of nodes without having a ton of nodes open at one time."
         }
       />
     ),
@@ -24,7 +24,7 @@ const NOTEBOOKS_STEPS_CONFIG: TutorialStepConfig[] = [
     description: (
       <MarkdownRender
         text={
-          "In the notebook list, you can select a notebook by clicking on it, and it will display all of its nodes. You have additional options available in the three dots button, such as rename, duplicate, copy link, and delete. Finally, to create a new notebook, click on **Create New**."
+          "Here you can see a list of the notebooks that you have saved and switch between them. Anytime you switch notebooks, the notebook your were previously on is saved here. You can also create new notebooks. The ellipsis next to each notebook allows you to rename, duplicate, or delete a notebook as well as copying a URL to the notebook so you can share it with others."
         }
       />
     ),
