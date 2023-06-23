@@ -16,12 +16,7 @@ import {
   RECONCILING_NOT_ACCEPTED_PROPOSALS_STEPS_COMPLETE,
 } from "@/lib/utils/tutorials/reconcilingProposalsTutorialSteps";
 import { SEARCHER_STEPS_COMPLETE } from "@/lib/utils/tutorials/searcherTutorialSteps";
-import {
-  FOCUS_MODE_STEPS,
-  REDRAW_GRAPH_STEPS,
-  SCROLL_TO_NODE_STEPS,
-  TABLE_CONTENT_STEPS,
-} from "@/lib/utils/tutorials/toolbooxTutorialSteps";
+import { TOOLBOX_STEPS } from "@/lib/utils/tutorials/toolbooxTutorialSteps";
 import { USER_INFO_STEPS_COMPLETE } from "@/lib/utils/tutorials/userInfoTutorialSteps";
 import { USER_SETTINGS_STEPS_COMPLETE } from "@/lib/utils/tutorials/userSettingsTutorialSteps";
 
@@ -139,10 +134,7 @@ export const useInteractiveTutorial = ({ user }: useInteractiveTutorialProps) =>
     tmpTagsReferences: { currentStep: -1, done: false, skipped: false },
     tmpParentsChildrenList: { currentStep: -1, done: false, skipped: false },
     tmpPathways: { currentStep: -1, done: false, skipped: false },
-    tableOfContents: { currentStep: -1, done: false, skipped: false },
-    focusMode: { currentStep: -1, done: false, skipped: false },
-    redrawGraph: { currentStep: -1, done: false, skipped: false },
-    scrollToNode: { currentStep: -1, done: false, skipped: false },
+    toolbox: { currentStep: -1, done: false, skipped: false },
     collapseNode: { currentStep: -1, done: false, skipped: false },
     expandNode: { currentStep: -1, done: false, skipped: false },
     upVote: { currentStep: -1, done: false, skipped: false },
@@ -266,17 +258,8 @@ export const useInteractiveTutorial = ({ user }: useInteractiveTutorialProps) =>
       if (newTutorial === "childCode") {
         newSteps = CHILD_CODE_PROPOSAL_COMPLETE;
       }
-      if (newTutorial === "tableOfContents") {
-        newSteps = TABLE_CONTENT_STEPS;
-      }
-      if (newTutorial === "focusMode") {
-        newSteps = FOCUS_MODE_STEPS;
-      }
-      if (newTutorial === "redrawGraph") {
-        newSteps = REDRAW_GRAPH_STEPS;
-      }
-      if (newTutorial === "scrollToNode") {
-        newSteps = SCROLL_TO_NODE_STEPS;
+      if (newTutorial === "toolbox") {
+        newSteps = TOOLBOX_STEPS;
       }
       if (newTutorial === "collapseNode") {
         newSteps = COLLAPSE_STEPS_COMPLETE;
