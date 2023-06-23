@@ -4831,8 +4831,6 @@ const Notebook = ({}: NotebookProps) => {
         if (result) return;
       }
 
-      // ------------------------
-
       if (forcedTutorial === "tagsReferences") {
         const result = detectAndForceTutorial("tmpTagsReferences", "r98BjyFDCe4YyLA3U8ZE", node =>
           Boolean(node && node.open && !node.editable && node.localLinkingWords !== "References")
@@ -5418,36 +5416,29 @@ const Notebook = ({}: NotebookProps) => {
 
       // --------------------------
 
-      const nodesTaken = userTutorial["nodes"].done || userTutorial["nodes"].skipped;
-
-      const mostParent = parentWithMostChildren();
       const hideDescendantsTutorialIsValid = (node: FullNodeData) =>
         node && !node.editable && parentWithChildren(node.node) >= 2;
+      if (!forcedTutorial || forcedTutorial === "hideDescendants") {
+        const result = detectAndCallTutorial("hideDescendants", hideDescendantsTutorialIsValid);
+        if (result) return;
+      }
+
       const hideDescendantsTutorialForcedIsValid = (node: FullNodeData) => node && !node.editable;
-
-      if ((!forcedTutorial && mostParent.children >= 2) || forcedTutorial === "hideDescendants") {
-        const hideDescendantTaken = userTutorial["hideDescendants"].done || userTutorial["hideDescendants"].skipped;
-
-        const shouldIgnore = hideDescendantTaken || !nodesTaken;
-
-        if (!shouldIgnore || forcedTutorial) {
-          const result = detectAndForceTutorial(
-            "hideDescendants",
-            mostParent.edge || "r98BjyFDCe4YyLA3U8ZE",
-            mostParent.edge && mostParent.edge !== "r98BjyFDCe4YyLA3U8ZE"
-              ? hideDescendantsTutorialIsValid
-              : hideDescendantsTutorialForcedIsValid
-          );
-          if (result) {
-            if (!mostParent.edge || mostParent.edge === "r98BjyFDCe4YyLA3U8ZE") {
-              if (parentWithChildren("r98BjyFDCe4YyLA3U8ZE") >= 2) return;
-              openNodeHandler("LrUBGjpxuEV2W0shSLXf");
-              openNodeHandler("rWYUNisPIVMBoQEYXgNj");
-            }
-            return;
-          }
+      if (forcedTutorial === "hideDescendants") {
+        const result = detectAndForceTutorial(
+          "hideDescendants",
+          "r98BjyFDCe4YyLA3U8ZE",
+          hideDescendantsTutorialForcedIsValid
+        );
+        if (result && parentWithChildren("r98BjyFDCe4YyLA3U8ZE") < 2) {
+          openNodeHandler("LrUBGjpxuEV2W0shSLXf");
+          openNodeHandler("rWYUNisPIVMBoQEYXgNj");
+          return;
         }
       }
+      // --------------------------
+
+      const nodesTutorialCompleted = userTutorial["nodes"].done || userTutorial["nodes"].skipped;
 
       // --------------------------
 
@@ -5456,7 +5447,7 @@ const Notebook = ({}: NotebookProps) => {
       if (openedNodes >= 2 && !forcedTutorial) {
         const firstOpenedNode = Object.values(graph.nodes).find(node => node.open);
         const collapseNodeTaken = userTutorial["collapseNode"].skipped || userTutorial["collapseNode"].done;
-        const shouldIgnore = collapseNodeTaken || !nodesTaken;
+        const shouldIgnore = collapseNodeTaken || !nodesTutorialCompleted;
         if (firstOpenedNode && !shouldIgnore) {
           const takeOver = nodeBookState.selectedNode ?? firstOpenedNode.node;
           const result = detectAndForceTutorial("collapseNode", takeOver, closeNodeTutorialIsValid);
@@ -5474,7 +5465,7 @@ const Notebook = ({}: NotebookProps) => {
       if (Object.keys(graph.nodes).length > openedNodes && !forcedTutorial) {
         const firstClosedNode = Object.values(graph.nodes).find(node => !node.open);
         const expandNodeTaken = userTutorial["expandNode"].skipped || userTutorial["expandNode"].done;
-        const shouldIgnore = expandNodeTaken || !nodesTaken;
+        const shouldIgnore = expandNodeTaken || !nodesTutorialCompleted;
         if (firstClosedNode && !shouldIgnore) {
           const takeOver = nodeBookState.selectedNode ?? firstClosedNode.node;
           const result = detectAndForceTutorial("expandNode", takeOver, expandNodeTutorialIsValid);
@@ -5622,32 +5613,6 @@ const Notebook = ({}: NotebookProps) => {
     userTutorial,
     userTutorialLoaded,
   ]);
-  // buttonsOpen,
-  // comLeaderboardOpen,
-  // detectAndCallChildTutorial,
-  // detectAndCallSidebarTutorial,
-  // detectAndCallTutorial,
-  // detectAndForceTutorial,
-  // firstLoading,
-  // focusView.isEnabled,
-  // forcedTutorial,
-  // getGraphOpenedNodes,
-  // graph.nodes,
-  // nodeBookDispatch,
-  // nodeBookState.selectedNode,
-  // openLivelinessBar,
-  // openNodeHandler,
-  // openSidebar,
-  // parentWithChildren,
-  // parentWithMostChildren,
-  // pathway,
-  // scrollToNode,
-  // setTargetId,
-  // startTutorial,
-  // tutorial,
-  // user?.livelinessBar,
-  // userTutorial,
-  // userTutorialLoaded,
 
   useEffect(() => {
     if (!userTutorialLoaded) return;

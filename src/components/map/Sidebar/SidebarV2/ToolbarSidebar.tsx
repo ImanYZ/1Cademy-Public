@@ -145,7 +145,6 @@ export const ToolbarSidebar = ({
 }: // setCurrentTutorial,
 // enabledToolbarElements = [],
 MainSidebarProps) => {
-  console.log({ ref: toolbarRef });
   const { nodeBookState, nodeBookDispatch } = useNodeBook();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
