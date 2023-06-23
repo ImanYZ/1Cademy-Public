@@ -154,7 +154,10 @@ MainSidebarProps) => {
   const [notebookTitleIsEditable, setNotebookTitleEditable] = useState(false);
   // const titleInputRef = useRef<HTMLInputElement | null>(null);
 
-  const displayLargeToolbar = useMemo(() => isHovered || isMenuOpen, [isHovered, isMenuOpen]);
+  const displayLargeToolbar = useMemo(
+    () => isHovered || isMenuOpen || editableNotebook,
+    [isHovered, isMenuOpen, editableNotebook]
+  );
   // console.log({ displayLargeToolbar, isHovered, isMenuOpen });
 
   useEffect(() => {
@@ -905,7 +908,7 @@ MainSidebarProps) => {
         <Stack
           spacing={"10px"}
           direction="column"
-          alignItems={isHovered ? "flex-start" : "center"}
+          alignItems={displayLargeToolbar ? "flex-start" : "center"}
           sx={{
             paddingBottom: "20px",
 
@@ -1106,7 +1109,7 @@ MainSidebarProps) => {
         SidebarContent={toolbarContentMemoized}
         sx={{
           boxShadow: undefined,
-          width: { sm: isHovered ? "250px" : "80px" },
+          width: { sm: displayLargeToolbar ? "240px" : "80px" },
           ...(isMenuOpen && { width: "100%" }),
         }}
         sxContentWrapper={{
