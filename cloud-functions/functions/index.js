@@ -70,7 +70,7 @@ exports.onActionTrackCreated = functions.database.ref("/actionTracks/{id}").onCr
     const data = change.after.data();
     console.log("log:", { actionTracks });
     const actionTracksLogRef = db.collection("actionTracksLogs").doc();
-    await actionTracksLogRef.set(data);
+    return actionTracksLogRef.set(data);
   } catch (error) {
     console.log("error:", error);
   }
