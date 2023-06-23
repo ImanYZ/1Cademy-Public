@@ -162,7 +162,7 @@ MainSidebarProps) => {
   // const titleInputRef = useRef<HTMLInputElement | null>(null);
 
   const displayLargeToolbar = useMemo(
-    () => isHovered || isMenuOpen || editableNotebook,
+    () => isHovered || isMenuOpen || editableNotebook !== null,
     [isHovered, isMenuOpen, editableNotebook]
   );
   // console.log({ displayLargeToolbar, isHovered, isMenuOpen });
