@@ -8,11 +8,9 @@ import JoinUs from "@/components/community/JoinUs";
 import Benefits from "@/components/home/sections/Benefits";
 import { ONECADEMY_DOMAIN } from "@/lib/utils/1cademyConfig";
 
-import { HEADER_HEIGHT, HEADER_HEIGHT_MOBILE } from "../components/Header/AppHeader";
 import UniversitiesMap from "../components/home/components/UniversitiesMap/UniversitiesMap";
 import HomeWrapper from "../components/home/HomeWrapper";
 import About from "../components/home/sections/About";
-import { HeroMemoized } from "../components/home/sections/Hero";
 import Magnitude from "../components/home/sections/Magnitude";
 import Mechanism, { MECHANISM_ITEMS } from "../components/home/sections/Mechanism";
 import Papers from "../components/home/sections/Papers";
@@ -75,7 +73,6 @@ export const Home = () => {
         }}
       >
         <HomeWrapper
-          heroSectionChildren={<HeroMemoized headerHeight={HEADER_HEIGHT} headerHeightMobile={HEADER_HEIGHT_MOBILE} />}
           mechanismSectionChildren={<Mechanism mechanisms={MECHANISM_ITEMS} />}
           magnitudeSectionChildren={
             <>
@@ -92,11 +89,8 @@ export const Home = () => {
               <Papers sx={{ mb: "64px" }} />
             </>
           }
+          applySectionChildren={<JoinUs community={null} themeName="dark" />}
         />
-
-        <Box sx={{ py: { xs: "64px", sm: "96px" }, maxWidth: "1216px", m: "auto" }}>
-          <JoinUs community={null} themeName="dark" />
-        </Box>
 
         <AppFooter />
         <style>

@@ -35,7 +35,7 @@ import { OpenRightSidebar } from "../../../pages/notebook";
 import { ISemester } from "../../../types/ICourse";
 import { NoDataMessage } from "../../instructors/NoDataMessage";
 import PracticeTool, { PracticeToolRef } from "../../practiceTool/PracticeTool";
-import { DashboradToolbar } from "../Dashobard/DashboradToolbar";
+import { DashboardToolbar } from "../Dashobard/DashboradToolbar";
 import { Dashboard } from "./Dashboard";
 import { DashboardSettings } from "./DashboardSettings";
 import { DashboardStudents } from "./DashboardStudents";
@@ -50,6 +50,7 @@ type DashboardWrapperProps = {
   setStartPractice: Dispatch<SetStateAction<boolean>>;
   root?: string;
   setDisplayRightSidebar: (newValue: OpenRightSidebar) => void;
+  setUserIsAnsweringPractice: (newValue: { result: boolean }) => void;
   sx?: SxProps<Theme>;
 };
 
@@ -69,6 +70,7 @@ export const DashboardWrapper = forwardRef<DashboardWrapperRef, DashboardWrapper
     startPractice,
     setStartPractice,
     setDisplayRightSidebar,
+    setUserIsAnsweringPractice,
   } = props;
   const db = getFirestore();
 
@@ -89,13 +91,15 @@ export const DashboardWrapper = forwardRef<DashboardWrapperRef, DashboardWrapper
 
   useImperativeHandle(ref, () => ({
     onRunPracticeTool: (start: boolean) => console.log("start practice", start),
-    onSubmitAnswer: (answers: boolean[]) => practiceToolRef.current && practiceToolRef.current.onSubmitAnswer(answers),
+    onSubmitAnswer: (answers: boolean[], byVoice?: boolean) =>
+      practiceToolRef.current && practiceToolRef.current.onSubmitAnswer(answers, byVoice),
     onSelectAnswers: practiceToolRef.current ? practiceToolRef.current.onSelectAnswers : () => {},
     nextQuestion: practiceToolRef.current ? practiceToolRef.current.nextQuestion : () => {},
     getQuestionParents: practiceToolRef.current ? practiceToolRef.current.getQuestionParents : () => [],
     getQuestionData: practiceToolRef.current ? practiceToolRef.current.getQuestionData : () => null,
     onSelectedQuestionAnswer: practiceToolRef.current ? practiceToolRef.current.onSelectedQuestionAnswer : () => {},
     getSubmittedAnswers: practiceToolRef.current ? practiceToolRef.current.getSubmittedAnswers : () => [],
+    getAssistantInitialState: practiceToolRef.current ? practiceToolRef.current.getAssistantInitialState : () => "IDLE",
   }));
 
   const semesterByStudentSnapthot = useCallback(
@@ -247,6 +251,7 @@ export const DashboardWrapper = forwardRef<DashboardWrapperRef, DashboardWrapper
   const onSelectUserHandler = (uname: string, view: ToolbarView) => {
     getSelectedStudent(uname);
     setSelectToolbarView(view);
+    // TODO: remove this function is not used anymore
   };
 
   // detect root (semester) to open practice tool automatically
@@ -276,7 +281,7 @@ export const DashboardWrapper = forwardRef<DashboardWrapperRef, DashboardWrapper
           theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookG900 : DESIGN_SYSTEM_COLORS.gray100,
       }}
     >
-      <DashboradToolbar
+      <DashboardToolbar
         courses={currentSemester ? allCourses[currentSemester.tagId] ?? [] : []}
         selectedCourse={selectedCourse}
         onChangeSelectedCourseHandler={setSelectedCourse}
@@ -316,6 +321,7 @@ export const DashboardWrapper = forwardRef<DashboardWrapperRef, DashboardWrapper
                 startPractice={startPractice}
                 setStartPractice={setStartPractice}
                 setDisplayRightSidebar={setDisplayRightSidebar}
+                setUserIsAnsweringPractice={setUserIsAnsweringPractice}
               />
             )}
             {selectToolbarView === "SETTINGS" && <DashboardSettings currentSemester={currentSemester} />}

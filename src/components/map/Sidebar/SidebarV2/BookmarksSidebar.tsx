@@ -4,7 +4,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import { UserTheme } from "src/knowledgeTypes";
 
 import { buildFullNodes, getNodes } from "../../../../lib/utils/nodesSyncronization.utils";
-import { FullNodeData, FullNodesData, UserNodeChanges, UserNodesData } from "../../../../nodeBookTypes";
+import { FullNodeData, FullNodesData, UserNodeChanges, UserNodeFirestore } from "../../../../nodeBookTypes";
 import { BookmarksList } from "../BookmarksList";
 import { SidebarWrapper } from "./SidebarWrapper";
 
@@ -73,7 +73,7 @@ export const BookmarksSidebar = ({
         return {
           cType: cur.type,
           uNodeId: cur.doc.id,
-          uNodeData: cur.doc.data() as UserNodesData,
+          uNodeData: cur.doc.data() as UserNodeFirestore,
         };
       });
 

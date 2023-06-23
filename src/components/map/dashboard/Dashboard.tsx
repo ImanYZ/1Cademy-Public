@@ -1,5 +1,7 @@
+import KeyboardArrowLeftIcon from "@mui/icons-material/KeyboardArrowLeft";
+import KeyboardArrowRightIcon from "@mui/icons-material/KeyboardArrowRight";
 import SquareIcon from "@mui/icons-material/Square";
-import { Box, Paper, Stack, Tab, Tabs, Typography, useMediaQuery, useTheme } from "@mui/material";
+import { Box, IconButton, Paper, Stack, Tab, Tabs, Typography, useMediaQuery, useTheme } from "@mui/material";
 import { collection, getFirestore, onSnapshot, query, where } from "firebase/firestore";
 import React, { useCallback, useEffect, useState } from "react";
 
@@ -10,61 +12,84 @@ import {
   BubbleAxis,
   BubbleStats,
   GeneralSemesterStudentsStats,
-  MaxPoints,
   SemesterStudentStat,
   SemesterStudentVoteStat,
   StackedBarStats,
 } from "../../../instructorsTypes";
 import { User, UserRole } from "../../../knowledgeTypes";
 import {
-  calculateVoteStatPoints,
-  getGeneralStats,
-  getStackedBarStat,
-  mapStudentsStatsDataByDates,
-} from "../../../lib/utils/charts.utils";
-import { capitalizeFirstLetter } from "../../../lib/utils/string.utils";
-import {
   BoxStudentsStats,
   BoxStudentStats,
   getBoxPlotData,
   getBubbleStats,
+  getGeneralStats,
+  getInitialTrendStats,
+  getMaximumStudentPoints,
   getMaxMinVoxPlotData,
+  getStackedBarStat,
+  getTrendsStats,
   groupStudentPointsDayChapter,
-  StudenBarsSubgroupLocation,
+  mapStudentsStatsDataByDates2,
+  mapStudentStatsSumByStudents,
+  mergeSemesterStudentVoteStat,
+  SemesterStudentVoteStatChanges,
+  StudentBarsSubgroupLocation,
   StudentStackedBarStatsObject,
   TrendStats,
-} from "../../../pages/instructors/dashboard";
-import {
-  ICourseTag,
-  ISemester,
-  ISemesterStudent,
-  ISemesterStudentStat,
-  ISemesterStudentVoteStat,
-} from "../../../types/ICourse";
+} from "../../../lib/utils/charts.utils";
+import { getStudentLocationOnStackBar } from "../../../lib/utils/dashboard.utils";
+import { capitalizeFirstLetter } from "../../../lib/utils/string.utils";
+import { ICourseTag, ISemester, ISemesterStudent, ISemesterStudentStat } from "../../../types/ICourse";
 import { BoxChart } from "../../chats/BoxChart";
-import { BubbleChart } from "../../chats/BubbleChart";
-import { Legend } from "../../chats/Legend";
-import { PointsBarChart } from "../../chats/PointsBarChart";
-import { SankeyChart } from "../../chats/SankeyChart";
+import { BubbleChart, BubbleThreshold } from "../../chats/BubbleChart";
+import { LegendMemoized, LegendOptions } from "../../chats/Legend";
+import { SankeyChart, SankeyData } from "../../chats/SankeyChart";
+import { StackBarChart } from "../../chats/StackBarChart";
 import { TrendPlot } from "../../chats/TrendPlot";
 import { GeneralPlotStats } from "../../instructors/dashboard/GeneralPlotStats";
 import { NoDataMessage } from "../../instructors/NoDataMessage";
-import { BoxPlotStatsSkeleton } from "../../instructors/skeletons/BoxPlotStatsSkeleton";
+// import { BoxPlotStatsSkeleton } from "../../instructors/skeletons/BoxPlotStatsSkeleton";
 import { BubblePlotStatsSkeleton } from "../../instructors/skeletons/BubblePlotStatsSkeleton";
 import { GeneralPlotStatsSkeleton } from "../../instructors/skeletons/GeneralPlotStatsSkeleton";
+import { SankeyChartSkeleton } from "../../instructors/skeletons/SankeyChartSkeleton";
 import { StackedBarPlotStatsSkeleton } from "../../instructors/skeletons/StackedBarPlotStatsSkeleton";
 import { StudentDailyPlotStatsSkeleton } from "../../instructors/skeletons/StudentDailyPlotStatsSkeleton";
 import Leaderboard from "../../practiceTool/Leaderboard";
 import { UserStatus } from "../../practiceTool/UserStatus";
 
+const db = getFirestore();
+
+const BUBBLE_CHARTS_THRESHOLDS: BubbleThreshold[] = [
+  { title: "<0%", color: "#EF6820", divider: -1 },
+  { title: "=0%", color: "#575757", divider: -0.01 },
+  { title: ">0%", color: "#F7B27A", divider: 0.01 },
+  { title: ">10%", color: "#FAC515", divider: 0.1 },
+  { title: ">50%", color: "#A7D841", divider: 0.5 },
+  { title: ">100%", color: "#388E3C", divider: 1 },
+];
+
+export const STACK_BAR_CHART_THRESHOLDS: LegendOptions[] = [
+  { title: "<0%", color: "#EF6820" },
+  { title: ">=0%", color: "#575757" },
+  { title: ">10%", color: "#F7B27A" },
+  { title: ">40%", color: "#FAC515" },
+  { title: ">70%", color: "#A7D841" },
+  { title: ">85%", color: "#388E3C" },
+];
+
+type SemesterStudentSankeys = {
+  createdAt: any;
+  deleted: boolean;
+  interactions: { downVotes: number; uname: string; upVotes: number }[];
+  tagId: string;
+  uname: string;
+  updatedAt: any;
+};
+
 type DashboardProps = { user: User; currentSemester: ICourseTag };
 
 export const Dashboard = ({ user, currentSemester }: DashboardProps) => {
   const theme = useTheme();
-  const {
-    palette: { mode },
-  } = theme;
-  const db = getFirestore();
 
   const { width: windowWidth } = useWindowSize();
   const isMovil = useMediaQuery(theme.breakpoints.down("md"));
@@ -73,47 +98,44 @@ export const Dashboard = ({ user, currentSemester }: DashboardProps) => {
   const isLgDesktop = useMediaQuery(theme.breakpoints.up("lg"));
   const isXlDesktop = useMediaQuery(theme.breakpoints.up("xl"));
 
-  const [semesterStats, setSemesterStats] = useState<GeneralSemesterStudentsStats | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [thereIsData, setThereIsData] = useState<boolean>(true);
-  const [stackBarWidth, setstackBarWidth] = useState(0);
-  const [studentsCounter, setStudentsCounter] = useState<number>(0);
+  const [stackBarWidth, setStackBarWidth] = useState(0);
   const [stackedBar, setStackedBar] = useState<StackedBarStats[]>([]);
   const [proposalsStudents, setProposalsStudents] = useState<StudentStackedBarStatsObject | null>(null);
   const [questionsStudents, setQuestionsStudents] = useState<StudentStackedBarStatsObject | null>(null);
-  const [dailyPraticeStudents, setDailyPracitceStudents] = useState<StudentStackedBarStatsObject | null>(null);
+  const [dailyPracticeStudents, setDailyPracticeStudents] = useState<StudentStackedBarStatsObject | null>(null);
   const [bubble, setBubble] = useState<BubbleStats[]>([]);
   const [bubbleAxis, setBubbleAxis] = useState<BubbleAxis>({ maxAxisX: 0, maxAxisY: 0, minAxisX: 0, minAxisY: 0 });
   const [semesterConfig, setSemesterConfig] = useState<ISemester | null>(null);
   const [infoWidth, setInfoWidth] = useState(0);
-  const [students, setStudents] = useState<ISemesterStudent[] | null>(null);
+  const [students, setStudents] = useState<ISemesterStudent[]>([]);
   const [semesterStudentsVoteStats, setSemesterStudentVoteStats] = useState<SemesterStudentVoteStat[]>([]);
-  const [maxProposalsPoints, setMaxProposalsPoints] = useState<number>(0);
-  const [maxQuestionsPoints, setMaxQuestionsPoints] = useState<number>(0);
-  const [maxDailyPractices, setMaxDailyPractices] = useState<number>(0);
 
   const [studentVoteStat, setStudentVoteStat] = useState<SemesterStudentVoteStat | null>(null);
-  const [semesterStudentStats, setSemesterStudentStats] = useState<GeneralSemesterStudentsStats | null>(null);
-  const [studentLocation, setStudentLocation] = useState<StudenBarsSubgroupLocation>({
+  const [maxSemesterStats, setMaxSemesterStats] = useState<GeneralSemesterStudentsStats | null>(null);
+  const [studentStats, setStudentStats] = useState<GeneralSemesterStudentsStats | null>(null);
+  const [studentLocation, setStudentLocation] = useState<StudentBarsSubgroupLocation>({
     proposals: 0,
     questions: 0,
     totalDailyPractices: 0,
   });
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+
   const [studentBoxStat, setStudentBoxStat] = useState<BoxStudentStats>({
     proposalsPoints: {},
     questionsPoints: {},
     votesPoints: {},
+    practicePoints: {},
   });
   /// Box plot States
   const [boxStats, setBoxStats] = useState<BoxStudentsStats>({
     proposalsPoints: { data: {}, min: 0, max: 1000 },
     questionsPoints: { data: {}, min: 0, max: 1000 },
     votesPoints: { data: {}, min: 0, max: 1000 },
+    practicePoints: { data: {}, min: 0, max: 1000 },
   });
 
-  // TODO: show sankey data only if user is intructor
-  const [sankeyData, setSankeyData] = useState<any[]>([]);
+  const [sankeyData, setSankeyData] = useState<SankeyData[]>([]);
 
   const [trendStats, setTrendStats] = useState<TrendStats>({
     childProposals: [],
@@ -125,17 +147,20 @@ export const Dashboard = ({ user, currentSemester }: DashboardProps) => {
   });
 
   const [trendStat, setTrendStat] = useState<keyof TrendStats>("childProposals");
+  const [boxPlotsControls, setBoxPlotControls] = useState<{ selectedChart: number; totalCharts: number }>({
+    selectedChart: 1,
+    totalCharts: 2,
+  });
 
   const trendPlotHeightTop = isMovil ? 150 : isTablet ? 250 : 354;
   const trendPlotHeightBottom = isMovil ? 80 : isTablet ? 120 : 160;
-  // other consts
 
   const TOOLBAR_WIDTH = 200;
   const WRAPPER_PADDING = 32;
   const GRID_WIDTH = windowWidth - TOOLBAR_WIDTH - 2 * WRAPPER_PADDING;
   const bubbleChartWidth = isMovil ? windowWidth - 10 - 20 - 10 : GRID_WIDTH - infoWidth - stackBarWidth - 8 * 16;
   const trendPlotWith = isMovil ? windowWidth - 60 : isTablet ? GRID_WIDTH - 100 : GRID_WIDTH - 150;
-  const boxPlotWidth = isXlDesktop ? 300 : isLgDesktop ? 300 : isDesktop ? 230 : 220;
+  const boxPlotWidth = isXlDesktop ? 394 : isLgDesktop ? 340 : isDesktop ? 230 : 220;
 
   const infoWrapperRef = useCallback((element: HTMLDivElement) => {
     if (!element) return;
@@ -144,12 +169,12 @@ export const Dashboard = ({ user, currentSemester }: DashboardProps) => {
 
   const stackBarWrapperRef = useCallback((element: HTMLDivElement) => {
     if (!element) return;
-    setstackBarWidth(element.clientWidth);
+    setStackBarWidth(element.clientWidth);
   }, []);
 
-  const handleTabChange = (event: React.SyntheticEvent, newtrendStat: keyof TrendStats) => {
+  const handleTabChange = (event: React.SyntheticEvent, newTrendStat: keyof TrendStats) => {
     event.preventDefault();
-    setTrendStat(newtrendStat);
+    setTrendStat(newTrendStat);
   };
 
   // ---- ---- ---- ----
@@ -157,13 +182,18 @@ export const Dashboard = ({ user, currentSemester }: DashboardProps) => {
   // ---- ---- ---- ----
 
   // setup sankey snapshot
+
   useEffect(() => {
-    if (!user) return;
+    if (isDesktop) setBoxPlotControls({ selectedChart: 1, totalCharts: 2 });
+    else setBoxPlotControls({ selectedChart: 1, totalCharts: 4 });
+  }, [isDesktop]);
+
+  useEffect(() => {
+    console.log({ currentSemester, students });
+    if (user?.role !== "INSTRUCTOR") return; // this chart is only visible to instructors
     if (!currentSemester || !currentSemester.tagId) return;
-    if (!students || !students.length) return;
-    const studentNameByUname: {
-      [uname: string]: string;
-    } = {};
+    if (!students.length) return;
+    const studentNameByUname: { [uname: string]: string } = {};
     for (const student of students) {
       studentNameByUname[student.uname] = `${student.fName}|${student.lName}`;
     }
@@ -176,21 +206,22 @@ export const Dashboard = ({ user, currentSemester }: DashboardProps) => {
     );
     let _sankeyData: any[] = [];
     const snapShotFunc = onSnapshot(q, async snapshot => {
+      console.log("snapShotFunc");
       const docChanges = snapshot.docChanges();
-      if (!docChanges.length) {
-        setSankeyData([]);
-        return;
-      }
+      if (!docChanges.length) return;
+
+      // console.log("s11");
       for (let change of docChanges) {
-        const _semesterStudentSankey = change.doc.data();
+        const _semesterStudentSankey: SemesterStudentSankeys = change.doc.data() as SemesterStudentSankeys;
+        // console.log("s12x", _semesterStudentSankey);
         if (change.type === "added") {
-          for (const intraction of _semesterStudentSankey.intractions) {
+          for (const interaction of _semesterStudentSankey.interactions) {
             _sankeyData.push({
               source: studentNameByUname[_semesterStudentSankey.uname],
-              target: studentNameByUname[intraction.uname],
-              upVotes: intraction.upVote,
-              downVotes: intraction.downVote,
-              value: intraction.upVote + intraction.downVote,
+              target: studentNameByUname[interaction.uname],
+              upVotes: interaction.upVotes,
+              downVotes: interaction.downVotes,
+              value: interaction.upVotes + interaction.downVotes,
             });
           }
         } else if (change.type === "modified") {
@@ -198,13 +229,13 @@ export const Dashboard = ({ user, currentSemester }: DashboardProps) => {
             sankey => sankey.source !== studentNameByUname[_semesterStudentSankey.uname]
           );
           let newSankeyData: any[] = [];
-          for (const intraction of _semesterStudentSankey.intractions) {
+          for (const interaction of _semesterStudentSankey.interactions) {
             newSankeyData.push({
               source: studentNameByUname[_semesterStudentSankey.uname],
-              target: studentNameByUname[intraction.uname],
-              upVotes: intraction.upVote,
-              downVotes: intraction.downVote,
-              value: intraction.upVote + intraction.downVote,
+              target: studentNameByUname[interaction.uname],
+              upVotes: interaction.upVotes,
+              downVotes: interaction.downVotes,
+              value: interaction.upVotes + interaction.downVotes,
             });
           }
           _sankeyData = [...filterSankeyData, ...newSankeyData];
@@ -214,102 +245,12 @@ export const Dashboard = ({ user, currentSemester }: DashboardProps) => {
           );
         }
       }
+      // console.log({ _sankeyData });
       setSankeyData([..._sankeyData]);
     });
     return () => snapShotFunc();
-  }, [currentSemester, db, user, students]);
+  }, [currentSemester, user, students]);
 
-  // get semester student vote stats
-  useEffect(() => {
-    if (!user) return;
-    if (!currentSemester || !currentSemester.tagId) return;
-    if (!semesterConfig) return;
-
-    setIsLoading(true);
-    const semesterRef = collection(db, "semesterStudentVoteStats");
-    const q = query(semesterRef, where("tagId", "==", currentSemester.tagId), where("deleted", "==", false));
-    let semesterStudentVoteStats: ISemesterStudentVoteStat[] = [];
-    const snapShotFunc = onSnapshot(q, async snapshot => {
-      const docChanges = snapshot.docChanges();
-      if (!docChanges.length) {
-        setBubble([]);
-        setStackedBar([]);
-        setThereIsData(false);
-        setSemesterStudentVoteStats([]);
-        setTrendStats({
-          childProposals: [],
-          editProposals: [],
-          proposedLinks: [],
-          nodes: [],
-          votes: [],
-          questions: [],
-        });
-        return;
-      }
-
-      for (let change of docChanges) {
-        if (change.type === "added") {
-          const semesterStudentsVoteStats = change.doc.data() as ISemesterStudentVoteStat;
-          const points = calculateVoteStatPoints(semesterStudentsVoteStats, semesterConfig!);
-          semesterStudentVoteStats.push({ ...semesterStudentsVoteStats, ...points });
-        } else if (change.type === "modified") {
-          const index = semesterStudentVoteStats.findIndex(
-            (semester: ISemesterStudentVoteStat) => semester.uname === change.doc.data().uname
-          );
-          semesterStudentVoteStats[index] = change.doc.data() as ISemesterStudentVoteStat;
-          const points = calculateVoteStatPoints(semesterStudentVoteStats[index], semesterConfig!);
-          semesterStudentVoteStats[index] = { ...semesterStudentVoteStats[index], ...points };
-        } else if (change.type === "removed") {
-          const index = semesterStudentVoteStats.findIndex(
-            (semester: ISemesterStudentVoteStat) => semester.uname === change.doc.data().uname
-          );
-          semesterStudentVoteStats.splice(index, 1);
-        }
-      }
-
-      const res = mapStudentsStatsDataByDates(semesterStudentVoteStats);
-
-      const gg = getGeneralStats(res);
-      const ts = res.reduce(
-        (a: TrendStats, c): TrendStats => {
-          return {
-            childProposals: semesterConfig?.isProposalRequired
-              ? [...a.childProposals, { date: new Date(c.date), num: c.value.childProposals }]
-              : [],
-            editProposals: semesterConfig?.isProposalRequired
-              ? [...a.editProposals, { date: new Date(c.date), num: c.value.editProposals }]
-              : [],
-            proposedLinks: [...a.proposedLinks, { date: new Date(c.date), num: c.value.links }],
-            nodes: [...a.nodes, { date: new Date(c.date), num: c.value.nodes }],
-            questions: semesterConfig?.isQuestionProposalRequired
-              ? [...a.questions, { date: new Date(c.date), num: c.value.questions }]
-              : [],
-            votes: semesterConfig?.isCastingVotesRequired
-              ? [...a.votes, { date: new Date(c.date), num: c.value.votes }]
-              : [],
-          };
-        },
-        {
-          childProposals: [],
-          editProposals: [],
-          proposedLinks: [],
-          nodes: [],
-          questions: [],
-          votes: [],
-        }
-      );
-      setTrendStats(ts);
-      setSemesterStats(gg);
-      // semesterStudentsVoteStats
-      setSemesterStudentVoteStats([...semesterStudentVoteStats]);
-      // setSemesterStats(getSemStat(semester));
-      setThereIsData(true);
-    });
-
-    return () => snapShotFunc();
-  }, [semesterConfig, currentSemester, db, user]);
-
-  // update data in buble
   useEffect(() => {
     if (!semesterStudentsVoteStats.length) return setBubble([]);
 
@@ -326,28 +267,22 @@ export const Dashboard = ({ user, currentSemester }: DashboardProps) => {
     });
   }, [semesterStudentsVoteStats, students]);
 
-  // update data in stackbar
+  // update data in stack bar
   useEffect(() => {
     // if (user.role !== "STUDENT") return;
-    if (!semesterStudentsVoteStats.length || !students) return setStackedBar([]);
+    if (!semesterStudentsVoteStats.length || !students || !semesterConfig) return setStackedBar([]);
 
     const {
       stackedBarStats,
       studentStackedBarProposalsStats,
       studentStackedBarQuestionsStats,
       studentStackedBarDailyPracticeStats,
-    } = getStackedBarStat(
-      semesterStudentsVoteStats,
-      students,
-      maxProposalsPoints,
-      maxQuestionsPoints,
-      maxDailyPractices
-    );
+    } = getStackedBarStat(semesterStudentsVoteStats, students, semesterConfig);
     setStackedBar(stackedBarStats);
     setProposalsStudents(studentStackedBarProposalsStats);
     setQuestionsStudents(studentStackedBarQuestionsStats);
-    setDailyPracitceStudents(studentStackedBarDailyPracticeStats);
-  }, [maxDailyPractices, maxProposalsPoints, maxQuestionsPoints, semesterStudentsVoteStats, students, user.role]);
+    setDailyPracticeStudents(studentStackedBarDailyPracticeStats);
+  }, [semesterConfig, semesterStudentsVoteStats, students, user.role]);
 
   // set up semester snapshot to modify state
   useEffect(() => {
@@ -358,31 +293,20 @@ export const Dashboard = ({ user, currentSemester }: DashboardProps) => {
       const docChanges = snapshot.docChanges();
       if (!docChanges.length) {
         setSemesterConfig(null);
-        setStudentsCounter(0);
-        setStudents(null);
-        setMaxProposalsPoints(0);
-        setMaxQuestionsPoints(0);
-        setMaxDailyPractices(0);
+        setStudents([]);
         setThereIsData(false);
         return;
       }
 
       for (let change of docChanges) {
-        const semesterDoc = change.doc;
-        const { maxProposalsPoints, maxQuestionsPoints, maxDailyPractices } = getMaxProposalsQuestionsPoints(
-          semesterDoc.data() as ISemester
-        );
-        setSemesterConfig(semesterDoc.data() as ISemester);
-        setStudentsCounter((semesterDoc.data() as ISemester).students.length);
-        setMaxProposalsPoints(maxProposalsPoints);
-        setMaxQuestionsPoints(maxQuestionsPoints);
-        setMaxDailyPractices(maxDailyPractices);
-        setStudents(semesterDoc.data().students);
+        const semesterData = change.doc.data() as ISemester;
+        setSemesterConfig(semesterData);
+        setStudents(semesterData.students);
         setThereIsData(true);
       }
     });
     return () => snapShotFunc();
-  }, [currentSemester, db, user.role]);
+  }, [currentSemester, user.role]);
 
   useEffect(() => {
     if (!currentSemester || !currentSemester.tagId || !user.uname || !semesterConfig) return;
@@ -439,12 +363,18 @@ export const Dashboard = ({ user, currentSemester }: DashboardProps) => {
         semesterConfig?.votes.pointIncrementOnAgreement,
         semesterConfig?.votes.pointDecrementOnAgreement
       );
-      setStudentBoxStat({ proposalsPoints, questionsPoints, votesPoints });
+      const practicePoints = groupStudentPointsDayChapter(
+        userDailyStats[0],
+        "correctPractices",
+        semesterConfig?.dailyPractice.numPoints,
+        semesterConfig?.dailyPractice.numQuestionsPerDay
+      );
+      setStudentBoxStat({ proposalsPoints, questionsPoints, votesPoints, practicePoints });
       setThereIsData(true);
       setIsLoading(false);
     });
     return () => snapShotFunc();
-  }, [currentSemester, db, semesterConfig, user.uname]);
+  }, [currentSemester, semesterConfig, user.uname]);
 
   // set up semesterStudentStats snapshot to fill data on BoxPlot
   useEffect(() => {
@@ -459,6 +389,7 @@ export const Dashboard = ({ user, currentSemester }: DashboardProps) => {
           proposalsPoints: { data: {}, min: 0, max: 1000 },
           questionsPoints: { data: {}, min: 0, max: 1000 },
           votesPoints: { data: {}, min: 0, max: 1000 },
+          practicePoints: { data: {}, min: 0, max: 1000 },
         });
         setIsLoading(false);
         setThereIsData(false);
@@ -485,7 +416,6 @@ export const Dashboard = ({ user, currentSemester }: DashboardProps) => {
         return { ...cur, days: daysFixed };
       });
 
-      console.log({ userDailyStatsasdasdas: userDailyStats });
       if (userDailyStats.length <= 0) return;
       const proposalsPoints = getBoxPlotData(
         userDailyStats,
@@ -507,152 +437,107 @@ export const Dashboard = ({ user, currentSemester }: DashboardProps) => {
         semesterConfig?.votes.pointIncrementOnAgreement,
         semesterConfig?.votes.pointDecrementOnAgreement
       );
+      const practicesPoints = getBoxPlotData(
+        userDailyStats,
+        "correctPractices",
+        semesterConfig?.dailyPractice.numPoints,
+        semesterConfig?.dailyPractice.numQuestionsPerDay
+      );
+
+      console.log({ userDailyStats, semesterConfig });
+
       const { min: minP, max: maxP } = getMaxMinVoxPlotData(proposalsPoints);
       const { min: minQ, max: maxQ } = getMaxMinVoxPlotData(questionsPoints);
       const { min: minV, max: maxV } = getMaxMinVoxPlotData(votesPoints);
+      const { min: minPr, max: maxPr } = getMaxMinVoxPlotData(practicesPoints);
 
-      // setSemesterStats(prev => {
-      //   if (!prev) return null;
-      //   const res = {
-      //     ...prev,
-      //     newNodeProposals: getChildProposal(userDailyStats),
-      //     improvements: getEditProposals(userDailyStats),
-      //   };
-      //   return res;
-      // });
       setBoxStats({
         proposalsPoints: { data: proposalsPoints, min: minP, max: maxP },
         questionsPoints: { data: questionsPoints, min: minQ, max: maxQ },
         votesPoints: { data: votesPoints, min: minV, max: maxV },
+        practicePoints: { data: practicesPoints, min: minPr, max: maxPr },
       });
       setThereIsData(true);
 
       setIsLoading(false);
     });
     return () => snapShotFunc();
-  }, [currentSemester, db, semesterConfig]);
+  }, [currentSemester, semesterConfig]);
 
+  /**
+   * set up snapshot to get semester student vote stats
+   * - merge with previous semester student vote stats
+   * - calculate all required data from all students
+   * - if is student will calculate his data
+   */
   useEffect(() => {
-    if (!user.uname) return;
-    if (user.role && user.role !== "STUDENT") return;
-    const tagId = currentSemester?.tagId;
-    if (!tagId) return;
+    if (!user) return;
     if (!semesterConfig) return;
-    const semesterStudentVoteStatRef = collection(db, "semesterStudentVoteStats");
-    const qByAll = query(semesterStudentVoteStatRef, where("tagId", "==", tagId));
-    const qByStudent = query(semesterStudentVoteStatRef, where("uname", "==", user.uname), where("tagId", "==", tagId));
 
-    // const semesterStudentVoteStatAllDoc = await getDocs(qByAll);
-    let userDailyStats: ISemesterStudentVoteStat[] = [];
-    const snapShotFuncForAll = onSnapshot(qByAll, async snapshot => {
+    setIsLoading(true);
+    const semesterRef = collection(db, "semesterStudentVoteStats");
+    const q = query(semesterRef, where("tagId", "==", semesterConfig.tagId), where("deleted", "==", false));
+
+    const killSnapshot = onSnapshot(q, async snapshot => {
+      console.log("onSnapshot:semesterStudentVoteStats");
       const docChanges = snapshot.docChanges();
       if (!docChanges.length) {
-        setSemesterStats(null);
-        return;
-      }
-      for (let change of docChanges) {
-        if (change.type === "added") {
-          userDailyStats.push(change.doc.data() as ISemesterStudentVoteStat);
-        } else if (change.type === "modified") {
-          const index = userDailyStats.findIndex(
-            (userDailyStat: ISemesterStudentVoteStat) => userDailyStat.uname === change.doc.data().uname
-          );
-          userDailyStats[index] = change.doc.data() as ISemesterStudentVoteStat;
-        } else if (change.type === "removed") {
-          const index = userDailyStats.findIndex(
-            (userDailyStat: ISemesterStudentVoteStat) => userDailyStat.uname === change.doc.data().uname
-          );
-          userDailyStats.splice(index, 1);
-        }
-
-        const resAll = mapStudentsStatsDataByDates(userDailyStats);
-        const ggAll = getGeneralStats(resAll);
-        setSemesterStats(ggAll);
-      }
-    });
-
-    const snapShotFunc = onSnapshot(qByStudent, async snapshot => {
-      const docChanges = snapshot.docChanges();
-      if (!docChanges.length) {
+        setBubble([]);
+        setStackedBar([]);
         setThereIsData(false);
-        setSemesterStudentStats(null);
-        setTrendStats({
-          childProposals: [],
-          editProposals: [],
-          proposedLinks: [],
-          nodes: [],
-          votes: [],
-          questions: [],
-        });
+        setSemesterStudentVoteStats([]);
+        setTrendStats(getInitialTrendStats());
         return;
       }
-      for (let change of docChanges) {
-        if (change.type === "added" || change.type === "modified") {
-          const semesterStudentVoteStat = change.doc.data() as ISemesterStudentVoteStat;
-          const points = calculateVoteStatPoints(semesterStudentVoteStat, semesterConfig!);
-          setStudentVoteStat({
-            ...semesterStudentVoteStat,
-            ...points,
-          });
+      const newSemesterStudentStats: SemesterStudentVoteStatChanges[] = docChanges.map(cur => ({
+        type: cur.type,
+        data: cur.doc.data() as SemesterStudentVoteStat,
+      }));
 
-          const res = mapStudentsStatsDataByDates([semesterStudentVoteStat]);
-          const gg = getGeneralStats(res);
-          setSemesterStudentStats(gg);
-          const ts = res.reduce(
-            (a: TrendStats, c): TrendStats => {
-              return {
-                childProposals: semesterConfig?.isProposalRequired
-                  ? [...a.childProposals, { date: new Date(c.date), num: c.value.childProposals }]
-                  : [],
-                editProposals: semesterConfig?.isProposalRequired
-                  ? [...a.editProposals, { date: new Date(c.date), num: c.value.editProposals }]
-                  : [],
-                proposedLinks: [...a.proposedLinks, { date: new Date(c.date), num: c.value.links }],
-                nodes: [...a.nodes, { date: new Date(c.date), num: c.value.nodes }],
-                questions: semesterConfig?.isQuestionProposalRequired
-                  ? [...a.questions, { date: new Date(c.date), num: c.value.questions }]
-                  : [],
-                votes: semesterConfig?.isCastingVotesRequired
-                  ? [...a.votes, { date: new Date(c.date), num: c.value.votes }]
-                  : [],
-              };
-            },
-            {
-              childProposals: [],
-              editProposals: [],
-              proposedLinks: [],
-              nodes: [],
-              questions: [],
-              votes: [],
-            }
-          );
-          setTrendStats(ts);
-          setThereIsData(true);
-          return;
+      setSemesterStudentVoteStats(prev => {
+        const mergedSemesterStudentStats = mergeSemesterStudentVoteStat(prev, newSemesterStudentStats);
+        const sumStatsByStudents = mapStudentStatsSumByStudents(mergedSemesterStudentStats);
+        const maxStudentStats = getMaximumStudentPoints(sumStatsByStudents);
+
+        setMaxSemesterStats(maxStudentStats);
+        setThereIsData(true);
+
+        if (user.role === "INSTRUCTOR") {
+          const statsByDates = mapStudentsStatsDataByDates2(sumStatsByStudents);
+          const newTrendStats = getTrendsStats(statsByDates, semesterConfig);
+          setTrendStats(newTrendStats);
         }
-      }
+        if (user.role === "STUDENT") {
+          const studentStats = mergedSemesterStudentStats.filter(c => c.uname === user.uname);
+          const sumStatsByStudent = mapStudentStatsSumByStudents(studentStats);
+          const statsByDates = mapStudentsStatsDataByDates2(sumStatsByStudent);
+          const newTrendStats = getTrendsStats(statsByDates, semesterConfig);
+          const newStudentStats = getGeneralStats(statsByDates);
+          setStudentStats(newStudentStats);
+          setStudentVoteStat(mergedSemesterStudentStats.find(c => c.uname) ?? null);
+          setTrendStats(newTrendStats);
+        }
+
+        return mergedSemesterStudentStats;
+      });
     });
 
-    return () => {
-      snapShotFunc();
-      snapShotFuncForAll();
-    };
-  }, [semesterConfig, currentSemester?.tagId, db, user.uname, user.role]);
+    return () => killSnapshot();
+  }, [semesterConfig, user]);
 
   useEffect(() => {
     if (user.role !== "STUDENT") return;
     if (!semesterStudentsVoteStats || !studentVoteStat) return;
+    if (!semesterConfig) return;
 
-    const sortedByProposals = [...semesterStudentsVoteStats].sort((x, y) => y.proposalPoints! - x.proposalPoints!);
-    const proposals = sortedByProposals.findIndex(s => s.uname === studentVoteStat?.uname);
-    const sortedByQuestions = [...semesterStudentsVoteStats].sort((x, y) => y.questionPoints! - x.questionPoints!);
-    const questions = sortedByQuestions.findIndex(s => s.uname === studentVoteStat?.uname);
-    const sortedByTotalDailyPractices = [...semesterStudentsVoteStats].sort(
-      (x, y) => y.totalPractices! - x.totalPractices!
+    const { practices, proposals, questions } = getStudentLocationOnStackBar(
+      semesterStudentsVoteStats,
+      semesterConfig,
+      user.uname
     );
-    const totalDailyPractices = sortedByTotalDailyPractices.findIndex(s => s.uname === studentVoteStat?.uname);
-    setStudentLocation({ proposals, questions, totalDailyPractices });
-  }, [semesterStudentsVoteStats, studentVoteStat, user.role]);
+
+    setStudentLocation({ proposals, questions, totalDailyPractices: practices });
+  }, [semesterConfig, semesterStudentsVoteStats, studentVoteStat, user.role, user.uname]);
 
   if (!thereIsData && !isLoading) return <NoDataMessage />;
 
@@ -670,8 +555,8 @@ export const Dashboard = ({ user, currentSemester }: DashboardProps) => {
           <Paper
             sx={{
               p: { sm: "10px", md: "16px" },
-              backgroundColor:
-                mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookMainBlack : DESIGN_SYSTEM_COLORS.baseWhite,
+              backgroundColor: theme =>
+                theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookMainBlack : DESIGN_SYSTEM_COLORS.baseWhite,
             }}
           >
             <UserStatus
@@ -685,8 +570,8 @@ export const Dashboard = ({ user, currentSemester }: DashboardProps) => {
           <Paper
             sx={{
               p: { sm: "10px", md: "16px" },
-              backgroundColor:
-                mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookMainBlack : DESIGN_SYSTEM_COLORS.baseWhite,
+              backgroundColor: theme =>
+                theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookMainBlack : DESIGN_SYSTEM_COLORS.baseWhite,
             }}
           >
             <Leaderboard semesterId={currentSemester.tagId} sxBody={{ maxHeight: "435px" }} />
@@ -707,61 +592,53 @@ export const Dashboard = ({ user, currentSemester }: DashboardProps) => {
             display: "grid",
             placeItems: "center",
             p: { sm: "10px", md: "24px" },
-            backgroundColor: mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookMainBlack : DESIGN_SYSTEM_COLORS.gray50,
+            backgroundColor: theme =>
+              theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookMainBlack : DESIGN_SYSTEM_COLORS.gray50,
           }}
         >
           {isLoading && <GeneralPlotStatsSkeleton />}
-          {!isLoading && (
-            <GeneralPlotStats
-              semesterConfig={semesterConfig}
-              semesterStats={semesterStats}
-              student={semesterStudentStats}
-            />
-          )}
+          {!isLoading && <GeneralPlotStats maxSemesterStats={maxSemesterStats} studentStats={studentStats} />}
         </Paper>
 
         <Paper
           ref={stackBarWrapperRef}
           sx={{
             p: { sm: "10px", md: "16px" },
+            // maxWidth: "350px",
             display: "flex",
             flexDirection: "column",
             justifyContent: "center",
-            backgroundColor: mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookMainBlack : DESIGN_SYSTEM_COLORS.gray50,
+            backgroundColor: theme =>
+              theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookMainBlack : DESIGN_SYSTEM_COLORS.gray50,
           }}
         >
           {isLoading && <StackedBarPlotStatsSkeleton />}
 
           {!isLoading && (semesterConfig?.isQuestionProposalRequired || semesterConfig?.isProposalRequired) && (
             <>
-              <Stack direction={"row"} spacing={"24px"}>
+              <Stack direction={"row"} justifyContent={"space-between"} sx={{ mb: "26px" }}>
                 <Box>
                   <Typography sx={{ fontSize: "19px", mb: "6px", lineHeight: "30px" }}>Points</Typography>
                   <Typography sx={{ fontSize: "12px", fontWeight: "500" }}>Nº of Students</Typography>
                 </Box>
-                <Legend
+                <LegendMemoized
                   title={"Completion rate"}
-                  options={[
-                    { title: " > 100%", color: "#388E3C" },
-                    { title: " > 10%", color: "#F9E2D0" },
-                    { title: " > 50%", color: "#A7D841" },
-                    { title: " <= 10%", color: "rgba(255, 196, 153, 0.75)" },
-                  ]}
-                  sx={{ gridTemplateColumns: "16px 1fr 16px 1fr" }}
+                  options={STACK_BAR_CHART_THRESHOLDS}
+                  sx={{ gridTemplateColumns: "1fr 1fr 1fr" }}
                 />
               </Stack>
               <Box sx={{ alignSelf: "center" }}>
-                <PointsBarChart
+                <StackBarChart
                   data={stackedBar}
-                  proposalsStudents={user.role === "INSTRUCTOR" ? proposalsStudents : null}
-                  questionsStudents={user.role === "INSTRUCTOR" ? questionsStudents : null}
-                  dailyPracticeStudents={user.role === "INSTRUCTOR" ? dailyPraticeStudents : null}
-                  maxAxisY={studentsCounter}
+                  proposalsStudents={semesterConfig.isProposalRequired ? proposalsStudents : null}
+                  questionsStudents={semesterConfig.isQuestionProposalRequired ? questionsStudents : null}
+                  dailyPracticeStudents={semesterConfig.isDailyPracticeRequired ? dailyPracticeStudents : null}
+                  maxAxisY={students.length}
                   theme={theme.palette.mode === "dark" ? "Dark" : "Light"}
                   mobile={isMovil}
                   isQuestionRequired={semesterConfig?.isQuestionProposalRequired}
                   isProposalRequired={semesterConfig?.isProposalRequired}
-                  isDailyPracticeRequiered={true}
+                  isDailyPracticeRequired={true}
                   studentLocation={studentLocation}
                 />
               </Box>
@@ -788,7 +665,8 @@ export const Dashboard = ({ user, currentSemester }: DashboardProps) => {
             // className="test"
             sx={{
               p: isMovil ? "10px" : "16px",
-              backgroundColor: mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookMainBlack : DESIGN_SYSTEM_COLORS.gray50,
+              backgroundColor: theme =>
+                theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookMainBlack : DESIGN_SYSTEM_COLORS.gray50,
             }}
           >
             {isLoading && <BubblePlotStatsSkeleton />}
@@ -818,17 +696,10 @@ export const Dashboard = ({ user, currentSemester }: DashboardProps) => {
                   }}
                 >
                   <Typography sx={{ fontSize: "19px", alignSelf: "center" }}>Vote Leaderboard</Typography>
-                  <Legend
+                  <LegendMemoized
                     title={""}
-                    options={[
-                      { title: ">100%", color: "#388E3C" },
-                      { title: ">10%", color: "#F9DBAF" },
-                      { title: "< 0%", color: "#E04F16" },
-                      { title: ">50%", color: "#A7D841" },
-                      { title: "<=10%", color: "#F7B27A" },
-                      { title: "= 0%", color: "#575757" },
-                    ]}
-                    sx={{ gridTemplateColumns: "repeat(3,12px 1fr)" }}
+                    options={BUBBLE_CHARTS_THRESHOLDS}
+                    sx={{ gridTemplateColumns: "1fr 1fr 1fr", gridTemplateRows: "1fr 1fr" }}
                   />
                 </Box>
                 <BubbleChart
@@ -842,6 +713,7 @@ export const Dashboard = ({ user, currentSemester }: DashboardProps) => {
                   minAxisY={bubbleAxis.minAxisY}
                   role={user.role}
                   student={studentVoteStat}
+                  threshold={BUBBLE_CHARTS_THRESHOLDS}
                 />
                 {user.role === "STUDENT" && (
                   <Box sx={{ display: "flex", justifyContent: "center", gap: "6px", alignItems: "center" }}>
@@ -864,210 +736,215 @@ export const Dashboard = ({ user, currentSemester }: DashboardProps) => {
       {/* box plot */}
       <Paper
         sx={{
+          position: "relative",
           display: "flex",
           flexDirection: "column",
           justifyContent: "center",
           alignItems: "center",
-          p: isMovil ? "10px" : "16px",
-          backgroundColor: mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookMainBlack : DESIGN_SYSTEM_COLORS.gray50,
+          p: isMovil ? "10px" : "40px",
+          backgroundColor: theme =>
+            theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookMainBlack : DESIGN_SYSTEM_COLORS.gray50,
         }}
       >
         <Box
           sx={{
             display: "flex",
-            flexDirection: { sm: "column", md: "row" },
+            flexDirection: "row",
             justifyContent: "center",
-            alignItems: "center",
             gap: isMovil ? "24px" : "0px",
             flexWrap: "wrap",
+            mb: "20px",
           }}
         >
-          {isLoading && <BoxPlotStatsSkeleton width={boxPlotWidth} boxes={isLgDesktop ? 3 : isTablet ? 3 : 1} />}
-          {!isLoading && (
-            <>
-              <Box
-                sx={{
-                  display: "flex",
-                  flexDirection: "column",
-                  gap: "12px",
-                }}
-              >
-                {semesterConfig?.isProposalRequired ? (
-                  <>
-                    <Box sx={{ display: "grid", gridTemplateColumns: "1fr 1fr" }}>
-                      <Typography sx={{ fontSize: "16px", justifySelf: "center", alignSelf: "flex-end" }}>
-                        Chapters{" "}
-                      </Typography>
-                      <Typography sx={{ fontSize: "19px" }}> Proposal Points</Typography>
-                    </Box>
+          <Box sx={{ display: "flex", flexDirection: "column", gap: "32px", mr: "12px" }}>
+            <Typography sx={{ fontSize: "19px", textAlign: "right" }}>Chapters</Typography>
 
-                    <BoxChart
-                      theme={theme.palette.mode === "dark" ? "Dark" : "Light"}
-                      data={boxStats.proposalsPoints.data}
-                      width={boxPlotWidth}
-                      boxHeight={25}
-                      margin={{ top: 10, right: 0, bottom: 20, left: 8 }}
-                      offsetX={isMovil ? 100 : 100}
-                      offsetY={18}
-                      identifier="plot-1"
-                      maxX={boxStats.proposalsPoints.max}
-                      minX={boxStats.proposalsPoints.min}
-                      /* studentStats={studentBoxStat.proposalsPoints} */
-                    />
-                    {isMovil && <BoxLegend role={user.role} />}
-                  </>
-                ) : (
-                  <Box sx={{ height: "100%", display: "grid", placeItems: "center", mx: "24px" }}>
-                    <Typography
-                      sx={{
-                        fontSize: "21px",
-                        fontWeight: "600",
-                        textAlign: "center",
-                        maxWidth: "325px",
-                        color: theme =>
-                          theme.palette.mode === "light" ? "rgba(67, 68, 69,.125)" : "rgba(224, 224, 224,.125)",
-                      }}
-                    >
-                      Proposal Box chart is not enabled
-                    </Typography>
-                  </Box>
-                )}
-              </Box>
-              <Box
-                sx={{
-                  display: "flex",
-                  flexDirection: "column",
-                  gap: "12px",
-                }}
-              >
-                {semesterConfig?.isQuestionProposalRequired ? (
-                  <>
-                    <Box sx={{ display: "flex", justifyContent: "space-around" }}>
-                      {isMovil && (
-                        <Typography sx={{ fontSize: "16px", justifySelf: "center", alignSelf: "flex-end" }}>
-                          Chapters{" "}
-                        </Typography>
-                      )}
-                      <Typography sx={{ fontSize: "19px" }}> Question Points</Typography>
-                    </Box>
+            <Stack spacing={"24px"} sx={{ width: { xs: "170px", md: "170px" }, py: "20px" }}>
+              {Object.keys(boxStats.proposalsPoints.data).map((cur, idx) => (
+                <Typography
+                  key={idx}
+                  sx={{
+                    textOverflow: "ellipsis",
+                    overflow: "hidden",
+                    whiteSpace: "nowrap",
+                    fontSize: "12px",
+                    fontWeight: "400",
+                    textAlign: "right",
+                    color: theme =>
+                      theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.gray100 : DESIGN_SYSTEM_COLORS.gray700,
+                  }}
+                >
+                  {cur}
+                </Typography>
+              ))}
+            </Stack>
+          </Box>
 
-                    <BoxChart
-                      theme={theme.palette.mode === "dark" ? "Dark" : "Light"}
-                      data={boxStats.questionsPoints.data}
-                      drawYAxis={isMovil}
-                      width={boxPlotWidth}
-                      boxHeight={25}
-                      margin={{ top: 10, right: 0, bottom: 20, left: 10 }}
-                      offsetX={isMovil ? 100 : 2}
-                      offsetY={18}
-                      identifier="plot-2"
-                      maxX={boxStats.questionsPoints.max}
-                      minX={boxStats.questionsPoints.min}
-                      /* studentStats={studentBoxStat.questionsPoints} */
-                    />
-                    {isMovil && <BoxLegend role={user.role} />}
-                  </>
-                ) : (
-                  <Box sx={{ height: "100%", display: "grid", placeItems: "center", mx: "32px" }}>
-                    <Typography
-                      sx={{
-                        fontSize: "21px",
-                        fontWeight: "600",
-                        textAlign: "center",
-                        maxWidth: "325px",
-                        color: theme =>
-                          theme.palette.mode === "light" ? "rgba(67, 68, 69,.125)" : "rgba(224, 224, 224,.125)",
-                      }}
-                    >
-                      Question Box chart is not enabled
-                    </Typography>
-                  </Box>
-                )}
+          <Stack direction={"row"} spacing={"10px"}>
+            {(isMovil
+              ? boxPlotsControls.selectedChart === 1 && boxPlotsControls.totalCharts === 4
+              : boxPlotsControls.selectedChart === 1 && boxPlotsControls.totalCharts === 2) && (
+              <Box sx={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+                <Box sx={{ display: "flex", justifyContent: "space-around" }}>
+                  <Typography sx={{ fontSize: "19px" }}> Proposal Points</Typography>
+                </Box>
+
+                <BoxChart
+                  theme={theme.palette.mode === "dark" ? "Dark" : "Light"}
+                  data={semesterConfig?.isProposalRequired ? boxStats.proposalsPoints.data : null}
+                  width={boxPlotWidth}
+                  boxHeight={25}
+                  margin={{ top: 0, right: 0, bottom: 10, left: 0 }}
+                  offsetX={0}
+                  offsetY={40}
+                  identifier="plot-1"
+                  maxX={boxStats.proposalsPoints.max}
+                  minX={boxStats.proposalsPoints.min}
+                  studentStats={user.role === "STUDENT" ? studentBoxStat.proposalsPoints : undefined}
+                  isLoading={isLoading}
+                />
               </Box>
-              <Box
-                sx={{
-                  display: "flex",
-                  flexDirection: "column",
-                  gap: "12px",
-                }}
-              >
-                {semesterConfig?.isCastingVotesRequired ? (
-                  <>
-                    <Box sx={{ display: "flex", justifyContent: "space-around" }}>
-                      {isMovil && (
-                        <Typography sx={{ fontSize: "16px", justifySelf: "center", alignSelf: "flex-end" }}>
-                          Chapters{" "}
-                        </Typography>
-                      )}
-                      <Typography sx={{ fontSize: "19px" }}> Vote Points</Typography>
-                    </Box>
-                    <BoxChart
-                      theme={theme.palette.mode === "dark" ? "Dark" : "Light"}
-                      data={boxStats.votesPoints.data}
-                      drawYAxis={isMovil}
-                      width={boxPlotWidth}
-                      boxHeight={25}
-                      margin={{ top: 10, right: 0, bottom: 20, left: 10 }}
-                      offsetX={isMovil ? 100 : 2}
-                      offsetY={18}
-                      identifier="plot-3"
-                      minX={boxStats.votesPoints.min}
-                      maxX={boxStats.votesPoints.max}
-                      /* studentStats={studentBoxStat.votesPoints} */
-                    />
-                    {isMovil && <BoxLegend role={user.role} />}
-                  </>
-                ) : (
-                  <Box sx={{ height: "200px", display: "grid", placeItems: "center", mx: "32px" }}>
-                    <Typography
-                      sx={{
-                        fontSize: "21px ",
-                        fontWeight: "600",
-                        textAlign: "center",
-                        maxWidth: "325px",
-                        color: theme =>
-                          theme.palette.mode === "light" ? "rgba(67, 68, 69,.125)" : "rgba(224, 224, 224,.125)",
-                      }}
-                    >
-                      Casting Votes Box chart is not enabled
-                    </Typography>
-                  </Box>
-                )}
+            )}
+
+            {(isMovil
+              ? boxPlotsControls.selectedChart === 2 && boxPlotsControls.totalCharts === 4
+              : boxPlotsControls.selectedChart === 1 && boxPlotsControls.totalCharts === 2) && (
+              <Box sx={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+                <Box sx={{ display: "flex", justifyContent: "space-around" }}>
+                  <Typography sx={{ fontSize: "19px" }}> Question Points</Typography>
+                </Box>
+
+                <BoxChart
+                  theme={theme.palette.mode === "dark" ? "Dark" : "Light"}
+                  data={semesterConfig?.isQuestionProposalRequired ? boxStats.questionsPoints.data : null}
+                  width={boxPlotWidth}
+                  boxHeight={25}
+                  margin={{ top: 0, right: 0, bottom: 10, left: 0 }}
+                  offsetX={0}
+                  offsetY={40}
+                  identifier="plot-2"
+                  maxX={boxStats.questionsPoints.max}
+                  minX={boxStats.questionsPoints.min}
+                  studentStats={user.role === "STUDENT" ? studentBoxStat.questionsPoints : undefined}
+                  isLoading={isLoading}
+                />
               </Box>
-            </>
-          )}
+            )}
+
+            {(isMovil
+              ? boxPlotsControls.selectedChart === 3 && boxPlotsControls.totalCharts === 4
+              : boxPlotsControls.selectedChart === 2 && boxPlotsControls.totalCharts === 2) && (
+              <Box sx={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+                <Box sx={{ display: "flex", justifyContent: "space-around" }}>
+                  <Typography sx={{ fontSize: "19px" }}> Vote Points</Typography>
+                </Box>
+                <BoxChart
+                  theme={theme.palette.mode === "dark" ? "Dark" : "Light"}
+                  data={semesterConfig?.isCastingVotesRequired ? boxStats.votesPoints.data : null}
+                  width={boxPlotWidth}
+                  boxHeight={25}
+                  margin={{ top: 0, right: 0, bottom: 10, left: 0 }}
+                  offsetX={0}
+                  offsetY={40}
+                  identifier="plot-3"
+                  minX={boxStats.votesPoints.min}
+                  maxX={boxStats.votesPoints.max}
+                  studentStats={user.role === "STUDENT" ? studentBoxStat.votesPoints : undefined}
+                  isLoading={isLoading}
+                />
+              </Box>
+            )}
+
+            {(isMovil
+              ? boxPlotsControls.selectedChart === 4 && boxPlotsControls.totalCharts === 4
+              : boxPlotsControls.selectedChart === 2 && boxPlotsControls.totalCharts === 2) && (
+              <Box sx={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+                <Box sx={{ display: "flex", justifyContent: "space-around" }}>
+                  <Typography sx={{ fontSize: "19px" }}> Questions Practiced</Typography>
+                </Box>
+                <BoxChart
+                  theme={theme.palette.mode === "dark" ? "Dark" : "Light"}
+                  data={semesterConfig?.isDailyPracticeRequired ? boxStats.practicePoints.data : null}
+                  // drawYAxis={isMovil}
+                  width={boxPlotWidth}
+                  boxHeight={25}
+                  margin={{ top: 0, right: 0, bottom: 10, left: 0 }}
+                  offsetX={0}
+                  offsetY={40}
+                  identifier="plot-4"
+                  minX={boxStats.practicePoints.min}
+                  maxX={boxStats.practicePoints.max}
+                  studentStats={user.role === "STUDENT" ? studentBoxStat.votesPoints : undefined}
+                  isLoading={isLoading}
+                />
+              </Box>
+            )}
+          </Stack>
         </Box>
-        {!isMovil && !isLoading && <BoxLegend role={user.role} />}
+
+        <Stack
+          direction={"row"}
+          spacing={"12px"}
+          alignItems={"center"}
+          sx={{ position: "absolute", bottom: "30px", left: "30px" }}
+        >
+          <IconButton
+            onClick={() => setBoxPlotControls(pre => ({ ...pre, selectedChart: Math.max(1, pre.selectedChart - 1) }))}
+            sx={{
+              border: ({ palette }) =>
+                `solid 1px ${
+                  palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookG600 : DESIGN_SYSTEM_COLORS.gray300
+                }`,
+              p: "5px",
+            }}
+          >
+            <KeyboardArrowLeftIcon />
+          </IconButton>
+          <Typography
+            sx={{
+              color: ({ palette }) =>
+                palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.gray25 : DESIGN_SYSTEM_COLORS.gray900,
+            }}
+          >
+            {boxPlotsControls.selectedChart}/{boxPlotsControls.totalCharts}
+          </Typography>
+          <IconButton
+            onClick={() =>
+              setBoxPlotControls(pre => ({ ...pre, selectedChart: Math.min(pre.totalCharts, pre.selectedChart + 1) }))
+            }
+            sx={{
+              border: ({ palette }) =>
+                `solid 1px ${
+                  palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookG600 : DESIGN_SYSTEM_COLORS.gray300
+                }`,
+              p: "5px",
+            }}
+          >
+            <KeyboardArrowRightIcon />
+          </IconButton>
+        </Stack>
+        <BoxLegend role={user.role} />
       </Paper>
+
       {/* Sankey Chart */}
-      {sankeyData.length > 0 && (
+      {user.role === "INSTRUCTOR" && (
         <Paper
           sx={{
-            display: "flex",
-            flexDirection: "column",
-            justifyContent: "center",
-            alignItems: "center",
             p: isMovil ? "10px" : "16px",
-            backgroundColor: mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookMainBlack : DESIGN_SYSTEM_COLORS.gray50,
+            backgroundColor: theme =>
+              theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookMainBlack : DESIGN_SYSTEM_COLORS.gray50,
           }}
         >
+          <Typography sx={{ fontSize: "19px" }}>Collaborations</Typography>
+          {isLoading && <SankeyChartSkeleton />}
           {!isLoading && (
-            <>
-              <Box
-                sx={{
-                  paddingLeft: "10px",
-                  width: "100%",
-                  textAlign: "left",
-                }}
-              >
-                {"Collaborations"}
-              </Box>
+            <Box sx={{ width: "100%", display: "flex", justifyContent: "center" }}>
               <SankeyChart
                 innerWidth={GRID_WIDTH}
                 labelCounts={parseInt(String(students?.length))}
                 sankeyData={sankeyData}
               />
-            </>
+            </Box>
           )}
         </Paper>
       )}
@@ -1122,7 +999,8 @@ export const Dashboard = ({ user, currentSemester }: DashboardProps) => {
                 display: trendStats[trendStat].length > 0 ? "flex" : "none",
                 alignItems: "center",
                 justifyContent: "center",
-                backgroundColor: mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookMainBlack : DESIGN_SYSTEM_COLORS.gray50,
+                backgroundColor: theme =>
+                  theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookMainBlack : DESIGN_SYSTEM_COLORS.gray50,
                 borderRadius: "8px",
               }}
             >
@@ -1137,7 +1015,7 @@ export const Dashboard = ({ user, currentSemester }: DashboardProps) => {
                 labelX={"Day"}
                 scaleY={"linear"}
                 labelY={"# of edit Proposals"}
-                theme={mode === "dark" ? "Dark" : "Light"}
+                theme={theme.palette.mode === "dark" ? "Dark" : "Light"}
                 x="date"
                 y="num"
                 trendData={trendStats[trendStat]}
@@ -1154,7 +1032,7 @@ const BoxLegend = ({ role }: { role: UserRole }) => {
   return (
     <Box sx={{ display: "flex", gap: "16px", alignItems: "center", alignSelf: "center" }}>
       <Box sx={{ display: "flex", gap: "6px", alignItems: "center" }}>
-        <SquareIcon sx={{ fill: "#EC7115", fontSize: "12px" }} />
+        <SquareIcon sx={{ fill: DESIGN_SYSTEM_COLORS.orange600, fontSize: "12px" }} />
         <Typography sx={{ fontSize: "12px" }}>Class Average</Typography>
       </Box>
       {role === "STUDENT" && (
@@ -1172,12 +1050,4 @@ const BoxLegend = ({ role }: { role: UserRole }) => {
       )}
     </Box>
   );
-};
-
-const getMaxProposalsQuestionsPoints = (data: ISemester): MaxPoints => {
-  return {
-    maxProposalsPoints: data.nodeProposals.totalDaysOfCourse * data.nodeProposals.numPoints,
-    maxQuestionsPoints: data.questionProposals.totalDaysOfCourse * data.questionProposals.numPoints,
-    maxDailyPractices: data?.dailyPractice?.totalDaysOfCourse * data?.dailyPractice?.numPoints ?? 0,
-  };
 };

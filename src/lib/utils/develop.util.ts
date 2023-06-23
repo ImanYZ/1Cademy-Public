@@ -5,9 +5,11 @@
  * - logInUpperCase must be writer to sho log like this: FUNCTION_NAME
  */
 const disableLogsTemporally = false;
-export const devLog = (logInUpperCase: string, otherData = {}) => {
+const disableTutorialLogs = false;
+export const devLog = (logInUpperCase: string, otherData = {}, type?: "TUTORIAL") => {
   if (disableLogsTemporally) return;
   if (process.env.NODE_ENV !== "development") return;
+  if (type === "TUTORIAL" && disableTutorialLogs) return;
 
   console.log(`[${logInUpperCase.toUpperCase()}]`, otherData);
 };

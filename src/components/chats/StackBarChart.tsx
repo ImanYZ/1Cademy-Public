@@ -4,19 +4,16 @@ import { UserTheme } from "src/knowledgeTypes";
 import { ISemesterStudent } from "src/types/ICourse";
 
 import { DESIGN_SYSTEM_COLORS } from "@/lib/theme/colors";
-import { StudenBarsSubgroupLocation, StudentStackedBarStatsObject } from "@/pages/instructors/dashboard";
 
 import { StackedBarStats } from "../../instructorsTypes";
+import {
+  StudentBarsSubgroupLocation as StudentBarsSubgroupLocation,
+  StudentStackBarThresholds,
+  StudentStackedBarStatsObject,
+} from "../../lib/utils/charts.utils";
+import { STACK_BAR_CHART_THRESHOLDS } from "../map/dashboard/Dashboard";
 
 // const columns = ["fruit", "vegetable"];
-const LESS_EQUAL_THAN_10_COLOR = "#f4a869";
-const LESS_EQUAL_THAN_10_COLOR_ALPHA = "#F7B27A";
-const GREATER_THAN_10_COLOR = "#f8d198";
-const GREATER_THAN_10_COLOR_ALPHA = "#F9DBAE";
-const GREATER_THAN_50_COLOR = "#a4d734";
-const GREATER_THAN_50_COLOR_ALPHA = "#A7D841";
-const GREATER_THAN_100_COLOR = "#309135";
-const GREATER_THAN_100_COLOR_ALPHA = "#388E3C";
 
 //MOCK
 // const mockedData = [
@@ -33,7 +30,7 @@ function drawChart(
   studentQuestionsRate: StudentStackedBarStatsObject | null,
   studentDailyPracticeRate: StudentStackedBarStatsObject | null,
   theme: UserTheme,
-  studentLocation?: StudenBarsSubgroupLocation,
+  studentLocation?: StudentBarsSubgroupLocation,
   mobile?: boolean,
   isQuestionRequired?: boolean,
   isProposalRequired?: boolean,
@@ -56,7 +53,7 @@ function drawChart(
     .attr("transform", `translate(${margin.left},${margin.top})`);
 
   // List of subgroups = header of the csv files = soil condition here
-  const subgroups = ["index", "alessEqualTen", "bgreaterTen", "cgreaterFifty", "dgreaterHundred"].slice(1);
+  const subgroups = ["threshold1", "threshold2", "threshold3", "threshold4", "threshold5", "threshold6"];
 
   // List of groups = species here = value of the first column called group -> I show them on the X axis
   // const groups = data.map(d => d.index).flatMap(c => c);
@@ -104,19 +101,14 @@ function drawChart(
     .style("color", DESIGN_SYSTEM_COLORS.notebookG400);
 
   // color palette = one color per subgroup
-  const colorApha = d3
+  const colorAlpha = d3
     .scaleOrdinal()
     .domain(subgroups)
-    .range([
-      LESS_EQUAL_THAN_10_COLOR_ALPHA,
-      GREATER_THAN_10_COLOR_ALPHA,
-      GREATER_THAN_50_COLOR_ALPHA,
-      GREATER_THAN_100_COLOR_ALPHA,
-    ]);
+    .range(["#EF6820", "#575757", "#F7B27A", "#FAC515", "#A7D841", "#388E3C"]);
   const color = d3
     .scaleOrdinal()
     .domain(subgroups)
-    .range([LESS_EQUAL_THAN_10_COLOR, GREATER_THAN_10_COLOR, GREATER_THAN_50_COLOR, GREATER_THAN_100_COLOR]);
+    .range(["#ef6820e0", "#575757e0", "#F7B27Ae0", "#FAC515e0", "#A7D841e0", "#388E3Ce0"]);
 
   let locations = [
     {
@@ -144,7 +136,9 @@ function drawChart(
   if (isDailyPracticeRequiered) {
     chartData.push(data[2] || []);
   }
+  console.log({ subgroups, chartData });
   const stackedData = d3.stack().keys(subgroups)(chartData);
+  console.log({ stackedData });
 
   //tooltip
   const tooltip = d3.select("#boxplot-tooltip");
@@ -156,36 +150,14 @@ function drawChart(
   // .style("border-radius", "5px")
 
   // .style("padding", "10px");
-  const htmlTooltip = (users: ISemesterStudent[]) => {
-    console.log("STUDENTS", users);
-    const html = users.map(user => {
-      return `<div class="students-tooltip-body ${theme === "Dark" ? "darkMode" : "lightMode"}">
-      <img
-        class="tooltip-student-image"
-        src="${user.imageUrl}"
-        onerror="this.error=null;this.src='https://storage.googleapis.com/onecademy-1.appspot.com/ProfilePictures/no-img.png'"
-        loading="lazy"
-        />
-      <span>
-         ${user.fName}
-
-         ${user.lName}
-      </span></div>
-      `;
-    });
-    const wrapper = `<div class="students-tooltip">
-      ${html.join(" ")}
-    </div>`;
-    return wrapper;
-  };
 
   const tooltipElement = document.getElementById("boxplot-tooltip");
   let event: any = null;
-  let subgropup: string = "";
+  let subgroup: string = "";
 
   const retrieveEvent = (e: any, subgroupName: any) => {
     event = e;
-    subgropup = subgroupName;
+    subgroup = subgroupName;
   };
   tooltipElement?.addEventListener("mouseenter", () => {
     if (!event || !event.target) return;
@@ -193,7 +165,7 @@ function drawChart(
     tooltip.style("pointer-events", "auto");
     d3.select(`#${event.target.id}`)
       .transition()
-      .style("fill", color(subgropup) as string);
+      .style("fill", color(subgroup) as string);
   });
   tooltipElement?.addEventListener("touchstart", () => {
     console.log("touch");
@@ -203,7 +175,7 @@ function drawChart(
     tooltip.style("pointer-events", "auto");
     d3.select(`#${event.target.id}`)
       .transition()
-      .style("fill", color(subgropup) as string);
+      .style("fill", color(subgroup) as string);
   });
   tooltipElement?.addEventListener("mouseleave", () => {
     tooltip.style("pointer-events", "none").style("opacity", 0);
@@ -211,7 +183,7 @@ function drawChart(
 
     d3.select(`#${event.target.id}`)
       .transition()
-      .style("fill", colorApha(subgropup) as string);
+      .style("fill", colorAlpha(subgroup) as string);
   });
 
   window.addEventListener("click", e => {
@@ -225,7 +197,7 @@ function drawChart(
     tooltip.style("pointer-events", "auto").style("opacity", 1);
     d3.select(`#${event.target.id}`)
       .transition()
-      .style("fill", colorApha(subgropup) as string);
+      .style("fill", colorAlpha(subgroup) as string);
   });
 
   svg
@@ -234,7 +206,7 @@ function drawChart(
     // Enter in the stack data = loop key per key = group per group
     .data(stackedData)
     .join("g")
-    .attr("fill", d => colorApha(d.key) as string)
+    .attr("fill", d => colorAlpha(d.key) as string)
     .selectAll("rect")
     // enter a second time = loop subgroup per subgroup to add all rectangles
     .data(d => d)
@@ -248,14 +220,13 @@ function drawChart(
       const subgroupName = selectedNode.datum().key as keyof StudentStackedBarStatsObject;
       let html = "";
       if (d.data.index === 0 && studentProposalsRate) {
-        // @ts-ignore
-        html = htmlTooltip(studentProposalsRate[subgroupName]);
-      } else if (studentQuestionsRate) {
-        // @ts-ignore
-        html = htmlTooltip(studentQuestionsRate[subgroupName]);
-      } else if (studentDailyPracticeRate) {
-        // @ts-ignore
-        html = htmlTooltip(studentDailyPracticeRate[subgroupName]);
+        html = htmlTooltip(studentProposalsRate[subgroupName], subgroupName, theme);
+      }
+      if (d.data.index === 1 && studentQuestionsRate) {
+        html = htmlTooltip(studentQuestionsRate[subgroupName], subgroupName, theme);
+      }
+      if (d.data.index === 2 && studentDailyPracticeRate) {
+        html = htmlTooltip(studentDailyPracticeRate[subgroupName], subgroupName, theme);
       }
       const middle = e.offsetY;
       d3.select(this)
@@ -293,7 +264,7 @@ function drawChart(
       const subgroupName = selectedNode.datum().key;
       d3.select(this)
         .transition()
-        .style("fill", colorApha(subgroupName) as string);
+        .style("fill", colorAlpha(subgroupName) as string);
       retrieveEvent(e, subgroupName);
     })
     .attr("x", d => {
@@ -335,10 +306,9 @@ function drawChart(
         (d, i) => `translate(${30 + (i + 1) * 0.369 * x.bandwidth() + i * x.bandwidth()},${y(d.y) + 30})`
       )
       .attr("fill", d => (d.y !== 0 ? "#C03938" : "transparent"));
-    // d.x - 0.72 * x.bandwidth()
   }
 }
-type StackedBarProps = {
+type StackBarProps = {
   data: StackedBarStats[];
   proposalsStudents: StudentStackedBarStatsObject | null;
   questionsStudents: StudentStackedBarStatsObject | null;
@@ -346,12 +316,12 @@ type StackedBarProps = {
   maxAxisY: number;
   theme: UserTheme;
   mobile?: boolean;
-  studentLocation?: StudenBarsSubgroupLocation;
+  studentLocation?: StudentBarsSubgroupLocation;
   isQuestionRequired?: boolean;
   isProposalRequired?: boolean;
-  isDailyPracticeRequiered?: boolean;
+  isDailyPracticeRequired?: boolean;
 };
-export const PointsBarChart = ({
+export const StackBarChart = ({
   data,
   proposalsStudents,
   questionsStudents,
@@ -362,9 +332,8 @@ export const PointsBarChart = ({
   mobile,
   isQuestionRequired,
   isProposalRequired,
-  isDailyPracticeRequiered,
-}: StackedBarProps) => {
-  console.log({ daaaata: data, studentLocation });
+  isDailyPracticeRequired: isDailyPracticeRequired,
+}: StackBarProps) => {
   const svg = useCallback(
     (svgRef: any) => {
       drawChart(
@@ -374,13 +343,12 @@ export const PointsBarChart = ({
         proposalsStudents,
         questionsStudents,
         dailyPracticeStudents,
-
         theme,
         studentLocation,
         mobile,
         isQuestionRequired,
         isProposalRequired,
-        isDailyPracticeRequiered
+        isDailyPracticeRequired
       );
     },
     [
@@ -394,16 +362,13 @@ export const PointsBarChart = ({
       mobile,
       isQuestionRequired,
       isProposalRequired,
-      isDailyPracticeRequiered,
+      isDailyPracticeRequired,
     ]
   );
 
   return (
     <div style={{ position: "relative" }}>
       <svg ref={svg}>
-        {/* <text style={{ fontSize: "16px" }} fill={theme === "Dark" ? "white" : "black"} x={10} y={20}>
-          # of Students
-        </text> */}
         <g id="bars"></g>
         <path id="loc"></path>
         <g id="locations"></g>
@@ -413,4 +378,42 @@ export const PointsBarChart = ({
       <div id="boxplot-tooltip" className={`tooltip-plot ${theme === "Light" ? "lightMode" : "darkMode"}`}></div>
     </div>
   );
+};
+
+const htmlTooltip = (users: ISemesterStudent[], subgroupName: StudentStackBarThresholds, theme: "Dark" | "Light") => {
+  let borderColor = "transparent";
+  if (subgroupName === "threshold1") borderColor = STACK_BAR_CHART_THRESHOLDS[0].color;
+  if (subgroupName === "threshold2") borderColor = STACK_BAR_CHART_THRESHOLDS[1].color;
+  if (subgroupName === "threshold3") borderColor = STACK_BAR_CHART_THRESHOLDS[2].color;
+  if (subgroupName === "threshold4") borderColor = STACK_BAR_CHART_THRESHOLDS[3].color;
+  if (subgroupName === "threshold5") borderColor = STACK_BAR_CHART_THRESHOLDS[4].color;
+  if (subgroupName === "threshold6") borderColor = STACK_BAR_CHART_THRESHOLDS[5].color;
+  const html = users.map(user => {
+    return `<div class="students-tooltip-body ${theme === "Dark" ? "darkMode" : "lightMode"}">
+      <img
+        class="tooltip-student-image"
+        src="${user.imageUrl}"
+        onerror="this.error=null;this.src='https://storage.googleapis.com/onecademy-1.appspot.com/ProfilePictures/no-img.png'"
+        loading="lazy"
+        />
+      <span>${user.fName} ${user.lName}</span>
+    </div>
+    `;
+  });
+  const wrapper = `<div class="students-tooltip scroll-styled" style="border: solid 2px ${borderColor};border-radius:8px">
+    ${html.join(" ")}
+  </div>
+  <div style="
+           width: 0;
+           height: 0;
+           left: -12px;
+           top: 14px;
+           position: absolute;
+           border-top: 12px solid transparent;
+           border-bottom: 12px solid transparent;
+           border-right: solid 12px ${borderColor}
+           "
+      ></div>
+  `;
+  return wrapper;
 };

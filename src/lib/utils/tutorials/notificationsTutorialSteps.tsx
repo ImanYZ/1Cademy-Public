@@ -39,6 +39,20 @@ const NOTIFICATIONS_STEPS_CONFIG: TutorialStepConfig[] = [
     anchor: "Portal",
     outline: "inside",
   },
+  {
+    childTargetId: "notifications-tab-requests",
+    title: "Request Notifications",
+    description: (
+      <MarkdownRender
+        text={
+          "This is a list of request notifications. These are all the notifications that other user request access to your private notebooks."
+        }
+      />
+    ),
+    tooltipPosition: "bottom",
+    anchor: "Portal",
+    outline: "inside",
+  },
 ];
 
 export const NOTIFICATION_STEPS: TutorialStep[] = NOTIFICATIONS_STEPS_CONFIG.map((c, i, s) => {

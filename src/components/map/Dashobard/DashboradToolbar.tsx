@@ -29,7 +29,7 @@ type DashboardToolbarProps = {
   onClose: () => void;
 };
 
-export const DashboradToolbar = ({
+export const DashboardToolbar = ({
   user,
   semesters,
   courses,
@@ -45,7 +45,7 @@ export const DashboradToolbar = ({
     palette: { mode },
   } = useTheme();
   if (!user) return null;
-  console.log({ courses, currentSemester });
+  // console.log({ courses, currentSemester });
   return (
     <Paper
       sx={{

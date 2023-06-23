@@ -29,30 +29,30 @@ export const getGrammerByType = (grammerType: VoiceAssistantType): string | unde
   }
 };
 
-export const newRecognition = (grammerType?: VoiceAssistantType) => {
-  try {
-    if (!_SpeechRecognition) return null;
+// export const newRecognition = (grammerType?: VoiceAssistantType) => {
+//   try {
+//     if (!_SpeechRecognition) return null;
 
-    const recognition = new _SpeechRecognition();
-    recognition.continuous = false;
-    recognition.lang = "en-US";
-    recognition.interimResults = false;
-    recognition.maxAlternatives = 1;
+//     const recognition = new _SpeechRecognition();
+//     recognition.continuous = false;
+//     recognition.lang = "en-US";
+//     recognition.interimResults = false;
+//     recognition.maxAlternatives = 1;
 
-    if (grammerType && webkitSpeechGrammarList) {
-      const grammer = getGrammerByType(grammerType);
-      if (grammer) {
-        const speechRecognitionList = new webkitSpeechGrammarList();
-        speechRecognitionList.addFromString(grammer, 1);
-        recognition.grammars = speechRecognitionList;
-      }
-    }
+//     if (grammerType && webkitSpeechGrammarList) {
+//       const grammer = getGrammerByType(grammerType);
+//       if (grammer) {
+//         const speechRecognitionList = new webkitSpeechGrammarList();
+//         speechRecognitionList.addFromString(grammer, 1);
+//         recognition.grammars = speechRecognitionList;
+//       }
+//     }
 
-    return recognition;
-  } catch (error) {
-    return null;
-  }
-};
+//     return recognition;
+//   } catch (error) {
+//     return null;
+//   }
+// };
 
 export const getValidABCDOptions = (text: string): string | null => {
   const resultSimple = Array.from(text).filter(c => "abcd".includes(c));
@@ -74,7 +74,7 @@ export const getValidNumberOptions = (text: string): string => {
     .map(cur => {
       let possibleValue = "";
       (Object.keys(NUMBER_POSSIBLE_OPTIONS) as NumberOptionsKeys[]).forEach(key => {
-        console.log({ cur, key, options: NUMBER_POSSIBLE_OPTIONS[key] });
+        // console.log({ cur, key, options: NUMBER_POSSIBLE_OPTIONS[key] });
         if (key === cur) return (possibleValue = key);
         if (NUMBER_POSSIBLE_OPTIONS[key].includes(cur)) possibleValue = key;
       });
@@ -94,76 +94,141 @@ const forceCharacterToOptions = (character: string) => {
   return character;
 };
 
-export const recognizeInput = async (
-  listenType: VoiceAssistantType
-): Promise<
-  | {
-      transcript: string;
-      error: string;
-      nomatch: boolean;
-    }
-  | undefined
-> => {
-  const recognition = newRecognition(listenType);
-  if (!recognition) return;
+// export const recognizeInput = async (
+//   listenType: VoiceAssistantType
+// ): Promise<
+//   | {
+//       transcript: string;
+//       error: string;
+//       nomatch: boolean;
+//     }
+//   | undefined
+// > => {
+//   const recognition = newRecognition(listenType);
+//   if (!recognition) return;
 
-  return new Promise(resolve => {
-    const recogniseResponse = {
-      transcript: "",
-      error: "",
-      nomatch: false,
-    };
-    recognition.start();
+//   return new Promise(resolve => {
+//     const recogniseResponse = {
+//       transcript: "",
+//       error: "",
+//       nomatch: false,
+//     };
+//     recognition.start();
 
-    recognition.onresult = (event: any) => {
-      recogniseResponse.transcript = event.results?.[0]?.[0]?.transcript || "";
-    };
+//     recognition.onresult = (event: any) => {
+//       recogniseResponse.transcript = event.results?.[0]?.[0]?.transcript || "";
+//     };
 
-    recognition.onerror = (event: any) => {
-      recogniseResponse.error = event.error;
-    };
+//     recognition.onerror = (event: any) => {
+//       recogniseResponse.error = event.error;
+//     };
 
-    recognition.onnomatch = () => {
-      recogniseResponse.nomatch = true;
-    };
+//     recognition.onnomatch = () => {
+//       recogniseResponse.nomatch = true;
+//     };
 
-    recognition.onend = () => {
-      resolve(recogniseResponse);
-    };
-  });
+//     recognition.onend = () => {
+//       resolve(recogniseResponse);
+//     };
+//   });
+// };
+type RecognitionOutput = { transcript: string; error: string; nomatch: boolean };
+export const recognizeInput3 = (): {
+  speechRecognition: SpeechRecognition;
+  start: () => Promise<RecognitionOutput>;
+} | null => {
+  if (!_SpeechRecognition) return null;
+  const recognition = new _SpeechRecognition();
+  recognition.continuous = false;
+  // recognition.lang = "en-US";
+  recognition.interimResults = false;
+  recognition.maxAlternatives = 1;
+
+  const start = () =>
+    new Promise<RecognitionOutput>(resolve => {
+      const recogniseResponse = {
+        transcript: "",
+        error: "",
+        nomatch: false,
+      };
+
+      recognition.start();
+
+      recognition.onresult = function (event) {
+        console.log("recognizeInput2:onresult", { transcript: event.results[0][0].transcript });
+        recogniseResponse.transcript = event.results[0][0].transcript;
+      };
+
+      recognition.onerror = (event: any) => {
+        console.log("recognizeInput2:onerror", event);
+        recogniseResponse.error = event.error;
+      };
+
+      recognition.onnomatch = e => {
+        console.log("recognizeInput2:onnomatch", e);
+        recogniseResponse.nomatch = true;
+      };
+
+      recognition.onend = e => {
+        console.log("recognizeInput2:onend", e);
+        resolve(recogniseResponse);
+      };
+    });
+
+  return { speechRecognition: recognition, start };
 };
 
-export const recognizeInput2 = async (
-  recognition: SpeechRecognition
-): Promise<{ transcript: string; error: string; nomatch: boolean } | undefined> => {
-  // const recognition = newRecognition(listenType);
-  // if (!recognition) return;
+// export const recognizeInput2 = async (
+//   recognition: SpeechRecognition
+// ): Promise<{ transcript: string; error: string; nomatch: boolean } | undefined> => {
+//   // const recognition = newRecognition(listenType);
+//   // if (!recognition) return;
 
-  return new Promise(resolve => {
-    const recogniseResponse = {
-      transcript: "",
-      error: "",
-      nomatch: false,
-    };
-    recognition.abort();
-    recognition.stop();
-    // recognition.
-    recognition.start();
+//   return new Promise(resolve => {
+//     const recogniseResponse = {
+//       transcript: "",
+//       error: "",
+//       nomatch: false,
+//     };
+//     recognition.abort();
+//     recognition.stop();
+//     // recognition.
+//     recognition.start();
 
-    recognition.onresult = (event: any) => {
-      recogniseResponse.transcript = event.results?.[0]?.[0]?.transcript || "";
-    };
+//     recognition.onresult = (event: any) => {
+//       console.log("recognizeInput2:onresult", { transcript: event.results?.[0]?.[0]?.transcript });
+//       recogniseResponse.transcript = event.results?.[0]?.[0]?.transcript || "";
+//     };
 
-    recognition.onerror = (event: any) => {
-      recogniseResponse.error = event.error;
-    };
+//     recognition.onerror = (event: any) => {
+//       console.log("recognizeInput2:onerror", event);
+//       recogniseResponse.error = event.error;
+//     };
 
-    recognition.onnomatch = () => {
-      recogniseResponse.nomatch = true;
-    };
+//     recognition.onnomatch = e => {
+//       console.log("recognizeInput2:onnomatch", e);
+//       recogniseResponse.nomatch = true;
+//     };
 
-    recognition.onend = () => {
-      resolve(recogniseResponse);
-    };
-  });
-};
+//     recognition.onend = e => {
+//       console.log("recognizeInput2:onend", e);
+//       resolve(recogniseResponse);
+//     };
+//     recognition.onsoundstart = e => {
+//       console.log("recognizeInput2:onsoundstart", e);
+//       // resolve(recogniseResponse);
+//     };
+//     recognition.onsoundend = e => {
+//       console.log("recognizeInput2:onsoundend", e);
+//       // resolve(recogniseResponse);
+//     };
+//     recognition.onaudiostart = e => {
+//       console.log("recognizeInput2:onsoundend", e);
+//       // resolve(recogniseResponse);
+//     };
+//     recognition.onaudioend = e => {
+//       console.log("recognizeInput2:onaudioend", e);
+//       // resolve(recogniseResponse);
+//     };
+//   });
+// };

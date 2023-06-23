@@ -70,17 +70,7 @@ const NODES_STEPS: TutorialStepConfig[] = [
   },
   {
     targetId: "sidebar-wrapper-searcher",
-    childTargetId: "search-recently-input",
-    title: "Filter by Dates",
-    description: (
-      <MarkdownRender text={"You can also refine your search by how recently nodes were created or edited."} />
-    ),
-    tooltipPosition: "bottom",
-    anchor: "Portal",
-  },
-  {
-    targetId: "sidebar-wrapper-searcher",
-    childTargetId: "recentNodesList",
+    childTargetId: "search-sort-options",
     title: "Sort Options",
     description: (
       <MarkdownRender
@@ -88,6 +78,16 @@ const NODES_STEPS: TutorialStepConfig[] = [
           "Finally you can further sort by: last viewed, date modified, proposals, upvotes, downvotes, or net votes with this icon."
         }
       />
+    ),
+    tooltipPosition: "bottom",
+    anchor: "Portal",
+  },
+  {
+    targetId: "sidebar-wrapper-searcher",
+    childTargetId: "search-filter-options",
+    title: "Filter by Dates",
+    description: (
+      <MarkdownRender text={"You can also refine your search by how recently nodes were created or edited."} />
     ),
     tooltipPosition: "bottom",
     anchor: "Portal",

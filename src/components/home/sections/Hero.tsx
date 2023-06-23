@@ -9,9 +9,9 @@ import { useWindowSize } from "../../../hooks/useWindowSize";
 import Button from "../components/Button";
 import { RiveComponentMemoized } from "../components/temporals/RiveComponentExtended";
 
-type HeroProps = { headerHeight: number; headerHeightMobile: number };
+type HeroProps = { headerHeight: number; headerHeightMobile: number; onApply: () => void };
 
-const Hero = ({ headerHeight, headerHeightMobile }: HeroProps) => {
+const Hero = ({ headerHeight, headerHeightMobile, onApply }: HeroProps) => {
   const { height, width } = useWindowSize({ initialHeight: 1000, initialWidth: 0 });
 
   const getVirtualHeight = useMemo(() => {
@@ -78,7 +78,7 @@ const Hero = ({ headerHeight, headerHeightMobile }: HeroProps) => {
           variant="h2"
           sx={{ textAlign: "center", fontSize: { xs: "36px", md: "60px" }, fontWeight: 600, mb: "24px" }}
         >
-          Human-AI Collaborative Knowledge Graph
+          Human-AI Collaboration to Optimize Learning
         </Typography>
         <Typography color="white" variant="h5" sx={{ textAlign: "center", fontSize: { xs: "18px", md: "20px" } }}>
           At 1Cademy, we leverage the power of AI to foster collaboration and enhance the learning and research
@@ -87,9 +87,7 @@ const Hero = ({ headerHeight, headerHeightMobile }: HeroProps) => {
       </Box>
       <Button
         variant="contained"
-        component="a"
-        target="_blank"
-        href="/#JoinUsSection"
+        onClick={onApply}
         sx={{
           textTransform: "capitalize",
           bottom: `${getVirtualHeight}px`,

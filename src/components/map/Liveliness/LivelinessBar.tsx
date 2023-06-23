@@ -2,11 +2,11 @@ import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowUp";
 import { Box, Tooltip } from "@mui/material";
 import { collection, Firestore, getDocs, limit, onSnapshot, query, Timestamp, where } from "firebase/firestore";
-import Image from "next/image";
 import React, { useEffect, useMemo, useState } from "react";
 import { ActionTrackType } from "src/knowledgeTypes";
 import { IActionTrack } from "src/types/IActionTrack";
 
+import OptimizedAvatar2 from "../../OptimizedAvatar2";
 import { MemoizedActionBubble } from "./ActionBubble";
 
 type ILivelinessBarProps = {
@@ -61,6 +61,8 @@ const LivelinessBar = ({ open, setOpen, disabled = false, ...props }: ILivelines
         const docChanges = snapshot.docChanges();
         for (const docChange of docChanges) {
           const actionTrackData = docChange.doc.data() as IActionTrack;
+
+          // TODO: get user data
           let doerEmail: string = "";
           if (docChange.type === "added") {
             if (!usersInteractions.hasOwnProperty(actionTrackData.doer)) {
@@ -143,6 +145,8 @@ const LivelinessBar = ({ open, setOpen, disabled = false, ...props }: ILivelines
     };
 
     setInterval(() => {
+      setIsInitialized(false);
+      setUsersInteractions({});
       snapshotInitializer();
     }, 1440000);
 
@@ -349,7 +353,12 @@ const LivelinessBar = ({ open, setOpen, disabled = false, ...props }: ILivelines
                           })}
                         </Box>
                         <Box className="user-image">
-                          <Image src={usersInteractions[uname].imageUrl} width={28} height={28} objectFit="cover" />
+                          <OptimizedAvatar2
+                            alt={usersInteractions[uname].fullname}
+                            imageUrl={usersInteractions[uname].imageUrl}
+                            size={28}
+                            sx={{ border: "none" }}
+                          />
                         </Box>
                         {onlineUsers.includes(uname) && (
                           <Box
@@ -375,8 +384,8 @@ const LivelinessBar = ({ open, setOpen, disabled = false, ...props }: ILivelines
               top: "50%",
               transform: "translate(0px, -50%)",
               left: "-22px",
-              width: "22px",
-              height: "30px",
+              width: "28px",
+              height: "36px",
               color: theme => (theme.palette.mode === "dark" ? "#bebebe" : "rgba(0, 0, 0, 0.6)"),
               position: "absolute",
               alignItems: "center",

@@ -33,3 +33,12 @@ export const typesenseDocumentExists = async (collection: string, documentId: st
   } catch (e) {}
   return false;
 };
+
+export const typesenseCollectionExists = async (collection: string) => {
+  const typesense = getTypesenseClient();
+  try {
+    await typesense.collections(collection).retrieve();
+    return true;
+  } catch (e) {}
+  return false;
+};

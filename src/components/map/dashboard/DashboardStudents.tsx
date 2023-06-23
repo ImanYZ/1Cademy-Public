@@ -8,6 +8,7 @@ import {
   Box,
   Button,
   Chip,
+  Link,
   Paper,
   Popover,
   Stack,
@@ -37,6 +38,9 @@ import { postWithToken } from "@/lib/mapApi";
 import { DESIGN_SYSTEM_COLORS } from "@/lib/theme/colors";
 import { calculateVoteStatPoints } from "@/lib/utils/charts.utils";
 
+import { ZINDEX } from "../../../lib/utils/constants";
+import ROUTES from "../../../lib/utils/routes";
+import { SnapshotChangesTypes } from "../../../types";
 import { ToolbarView } from "./DashboardWrapper";
 
 const filterChoices: any = {
@@ -107,12 +111,18 @@ const keysColumns: any = {
   "Last Activity": "lastActivity",
 };
 
+type SemesterStudentVoteStatProcessed = ISemesterStudentVoteStat & {
+  questionProposals: number;
+  questionPoints: number;
+  proposalPoints: number;
+};
+
 type DashboardStudentsProps = {
   currentSemester: CourseTag | null;
   onSelectUserHandler: (uname: string, view: ToolbarView) => void;
 };
 
-export const DashboardStudents = ({ currentSemester, onSelectUserHandler }: DashboardStudentsProps) => {
+export const DashboardStudents = ({ currentSemester }: DashboardStudentsProps) => {
   const [keys, setKeys] = useState([...defaultKeys]);
   const [columns, setColumns] = useState([...defaultColumns]);
   const [rows, setRows] = useState<any>([]);
@@ -134,7 +144,7 @@ export const DashboardStudents = ({ currentSemester, onSelectUserHandler }: Dash
   const [selectedColumn, setSelectedColumn] = useState("");
   const [openedProfile /* setOpenedProfile */] = useState(tableRows.slice()[0]);
   const [savedTableState, setSavedTableState] = useState([]);
-  const [states, setStates] = useState<ISemesterStudentVoteStat[]>([]);
+  const [states, setStates] = useState<SemesterStudentVoteStatProcessed[]>([]);
   const [anchorEl, setAnchorEl] = useState(null);
   const [usersStatus, setUsersStatus] = useState<any>([]);
   const [newStudents, setNewStudents] = useState([]);
@@ -177,7 +187,7 @@ export const DashboardStudents = ({ currentSemester, onSelectUserHandler }: Dash
     const statusRef = collection(db, "status");
     const qeStatus = query(statusRef);
     let status: any = [];
-    let statsData: ISemesterStudentVoteStat[] = [];
+    // let statsData: ISemesterStudentVoteStat[] = [];
     const statusSnapShotFunc = onSnapshot(qeStatus, async snapshot => {
       const docChanges = snapshot.docChanges();
       if (!docChanges.length) {
@@ -207,22 +217,21 @@ export const DashboardStudents = ({ currentSemester, onSelectUserHandler }: Dash
       if (!docChanges.length) {
         return;
       }
-      for (const change of docChanges) {
-        const semesterStudentVoteDoc = change.doc;
-        const data = semesterStudentVoteDoc.data() as ISemesterStudentVoteStat;
-        if (change.type === "added") {
-          const points = calculateVoteStatPoints(data, semesterConfig!);
-          statsData.push({ ...data, ...points });
-        } else if (change.type === "modified") {
-          const index = statsData.findIndex((stsData: any) => stsData.uname === data.uname);
-          const points = calculateVoteStatPoints(data, semesterConfig!);
-          statsData[index] = { ...data, ...points };
-        } else if (change.type === "removed") {
-          const index = statsData.findIndex((stsData: any) => stsData.uname === data.uname);
-          statsData.splice(index, 1);
+
+      setStates(prev => {
+        let semesterStatsChanges: { type: SnapshotChangesTypes; data: ISemesterStudentVoteStat }[] = [];
+        for (const change of docChanges) {
+          semesterStatsChanges.push({ type: change.type, data: change.doc.data() as ISemesterStudentVoteStat });
         }
-      }
-      setStates([...statsData]);
+
+        return semesterStatsChanges.reduce((acu: SemesterStudentVoteStatProcessed[], { data, type }) => {
+          const points = calculateVoteStatPoints(data, semesterConfig);
+          if (type === "added") return [...acu, { ...data, ...points }];
+          if (type === "modified") return acu.map(c => (c.uname === data.uname ? { ...data, ...points } : c));
+          if (type === "removed") return acu.filter(c => c.uname !== data.uname);
+          return acu;
+        }, prev);
+      });
     });
 
     return () => {
@@ -325,7 +334,7 @@ export const DashboardStudents = ({ currentSemester, onSelectUserHandler }: Dash
           const { onReceiveVote, onReceiveDownVote, onReceiveStar } = docData.votes;
           const _rows: any = [];
           for (let student of _students) {
-            const stats: ISemesterStudentVoteStat | undefined = states.find(elm => elm.uname === student.uname);
+            const stats: SemesterStudentVoteStatProcessed | undefined = states.find(elm => elm.uname === student.uname);
             if (!stats) continue;
 
             const userStat: any = usersStatus.filter((elm: any) => elm.user === student.uname)[0];
@@ -341,15 +350,15 @@ export const DashboardStudents = ({ currentSemester, onSelectUserHandler }: Dash
                 (stats?.instVotes || 0) * onReceiveStar;
             }
             if (docData?.isCastingVotesRequired) {
-              votePoints = stats.votePoints!;
+              votePoints = stats.votePoints ?? 0;
               totalPoints += votePoints;
             }
             if (docData?.isQuestionProposalRequired) {
-              questionPoints = stats.questionPoints!;
+              questionPoints = stats.questionPoints;
               totalPoints += questionPoints;
             }
             if (docData?.isProposalRequired) {
-              proposalsPoints = stats.proposalPoints!;
+              proposalsPoints = stats.proposalPoints;
               totalPoints += proposalsPoints;
             }
             _rows.push({
@@ -386,7 +395,7 @@ export const DashboardStudents = ({ currentSemester, onSelectUserHandler }: Dash
     return () => {
       semestersSnapshot();
     };
-  }, [db, states, currentSemester, usersStatus, semesterConfig]);
+  }, [db, states, currentSemester, usersStatus, semesterConfig, keys, columns]);
 
   const handleOpenCloseFilter = () => setOpenFilter(!openFilter);
   const handleOpenCloseProfile = () => setOpenProfile(!openProfile);
@@ -941,6 +950,7 @@ export const DashboardStudents = ({ currentSemester, onSelectUserHandler }: Dash
                           horizontal: "left",
                         }}
                         elevation={1}
+                        sx={{ zIndex: ZINDEX["dashboard"] + 1 }}
                       >
                         <Box
                           sx={{
@@ -1038,12 +1048,13 @@ export const DashboardStudents = ({ currentSemester, onSelectUserHandler }: Dash
                         ) : (
                           <>
                             {["firstName", "lastName"].includes(colmn) ? (
-                              <Typography
-                                onClick={() => onSelectUserHandler(row.username, "DASHBOARD")}
-                                sx={{ color: DESIGN_SYSTEM_COLORS.primary800, cursor: "pointer" }}
+                              <Link
+                                href={`${ROUTES.studentDashboard}/${currentSemester.tagId}/${row.username}`}
+                                target="_blank"
+                                rel="noreferrer"
                               >
                                 {row[colmn]}
-                              </Typography>
+                              </Link>
                             ) : (
                               <>{row[colmn]}</>
                             )}

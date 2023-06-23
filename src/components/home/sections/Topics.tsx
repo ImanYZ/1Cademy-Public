@@ -5,7 +5,7 @@ import React from "react";
 const TOPICS_ITEMS = [
   {
     id: "ux-research-in-Cognitive-psychology-of-Learning",
-    title: "UX Research in Congnitive Psychology of Learning",
+    title: "UX Research in Cognitive Psychology of Learning",
     // image: "home/communities/01-ux-research-psychology-of-learning.jpg",
     image: "/static/Communities/Cognitive_Psychology.jpeg",
     link: "/community/ux-research-in-cognitive-psychology-of-Learning",

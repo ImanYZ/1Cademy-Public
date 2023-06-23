@@ -116,10 +116,8 @@ const AppHeader = forwardRef(({ page, sections, selectedSectionId, onSwitchSecti
         return;
       }
       const users = await getDocs(query(collection(dbExp, "users"), where("email", "==", uEmail)));
-      const usersStudentSurvey = await getDocs(
-        query(collection(dbExp, "usersStudentCoNoteSurvey"), where("email", "==", uEmail))
-      );
-      if (users.docs.length > 0 || usersStudentSurvey.docs.length > 0) {
+      const usersSurvey = await getDocs(query(collection(dbExp, "usersSurvey"), where("email", "==", uEmail)));
+      if (users.docs.length > 0 || usersSurvey.docs.length > 0) {
         setEmailExp(user.email.toLowerCase());
         setNameExp(user.displayName);
       } else {
@@ -179,6 +177,7 @@ const AppHeader = forwardRef(({ page, sections, selectedSectionId, onSwitchSecti
       )}
     </Menu>
   );
+  console.log(emailExp);
   return (
     <>
       <Box
@@ -302,7 +301,7 @@ const AppHeader = forwardRef(({ page, sections, selectedSectionId, onSwitchSecti
                 <Tooltip title="Apply to join 1Cademy">
                   <Button
                     variant="contained"
-                    onClick={() => window?.open(ROUTES.apply, "_blank")}
+                    onClick={() => onSwitchSection("apply")}
                     sx={{
                       display: { xs: "none", sm: "flex" },
                       p: { xs: "6px 10px", lg: undefined },

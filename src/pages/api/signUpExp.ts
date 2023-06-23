@@ -13,7 +13,7 @@ const shuffleArray = (array: any[]) => {
   return array;
 };
 const getAvailableFullname = async (fullname: string) => {
-  const userCollections = ["users", "usersStudentCoNoteSurvey", "usersInstructorCoNoteSurvey"];
+  const userCollections = ["users", "usersSurvey"];
 
   let _fullname = fullname;
   while (true) {
@@ -45,12 +45,9 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
     const fullName = await getAvailableFullname(`${firstName} ${lastName}`);
 
     let collectionName = "users";
-    if (surveyType === "student") {
-      collectionName = "usersStudentCoNoteSurvey";
-    } else if (surveyType === "instructor") {
-      collectionName = "usersInstructorCoNoteSurvey";
+    if (surveyType) {
+      collectionName = "usersSurvey";
     }
-
     const auth = getAuth(app);
 
     try {
