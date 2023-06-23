@@ -4869,63 +4869,6 @@ const Notebook = ({}: NotebookProps) => {
 
       // --------------------------
 
-      // if (forcedTutorial === "focusMode" || !forcedTutorial) {
-      //   const shouldIgnore =
-      //     (!forcedTutorial && !userTutorial["tableOfContents"].done && !userTutorial["tableOfContents"].skipped) ||
-      //     userTutorial["focusMode"].done ||
-      //     userTutorial["focusMode"].skipped;
-      //   // if (nodeBookState.selectedNode) return;
-
-      //   if (!shouldIgnore) {
-      //     setToolboxExpanded(true);
-      //     return startTutorial("focusMode");
-      //   }
-      // }
-
-      // if (forcedTutorial === "focusMode") {
-      //   setToolboxExpanded(true);
-      //   return startTutorial("focusMode");
-      // }
-
-      // --------------------------
-
-      // if (forcedTutorial === "redrawGraph" || !forcedTutorial) {
-      //   const shouldIgnore =
-      //     (!forcedTutorial && !userTutorial["focusMode"].done && !userTutorial["focusMode"].skipped) ||
-      //     userTutorial["redrawGraph"].done ||
-      //     userTutorial["redrawGraph"].skipped;
-      //   if (!shouldIgnore) {
-      //     setToolboxExpanded(true);
-      //     return startTutorial("redrawGraph");
-      //   }
-      // }
-
-      // if (forcedTutorial === "redrawGraph") {
-      //   setToolboxExpanded(true);
-      //   return startTutorial("redrawGraph");
-      // }
-
-      // // --------------------------
-
-      // if (forcedTutorial === "scrollToNode" || !forcedTutorial) {
-      //   const shouldIgnore =
-      //     (!forcedTutorial && !userTutorial["redrawGraph"].done && !userTutorial["redrawGraph"].skipped) ||
-      //     userTutorial["scrollToNode"].done ||
-      //     userTutorial["scrollToNode"].skipped;
-      //   // if (nodeBookState.selectedNode) return;
-      //   if (!shouldIgnore) {
-      //     setToolboxExpanded(true);
-      //     return startTutorial("scrollToNode");
-      //   }
-      // }
-
-      // if (forcedTutorial === "scrollToNode") {
-      //   setToolboxExpanded(true);
-      //   return startTutorial("scrollToNode");
-      // }
-
-      // --------------------------
-
       if (forcedTutorial === "proposal" || !forcedTutorial) {
         const result = detectAndCallTutorial("proposal", (thisNode: FullNodeData) =>
           Boolean(
@@ -5500,12 +5443,23 @@ const Notebook = ({}: NotebookProps) => {
 
       // --------------------------
 
-      const proposalNodesTaken = userTutorial["proposal"].done || userTutorial["proposal"].skipped;
+      const proposalNodesComplete = userTutorial["proposal"].done || userTutorial["proposal"].skipped;
+      const notebooksTutorialCompleted = userTutorial["notebooks"].done || userTutorial["notebooks"].skipped;
       const isNotProposingNodes = tempNodes.size + Object.keys(changedNodes).length === 0;
 
       // --------------------------
 
-      if (forcedTutorial === "leaderBoard" || (proposalNodesTaken && isNotProposingNodes && openSidebar === null)) {
+      if (forcedTutorial === "notebooks" || (proposalNodesComplete && isNotProposingNodes && openSidebar === null)) {
+        const result = detectAndCallSidebarTutorial("notebooks", null);
+        if (result) return;
+      }
+
+      // --------------------------
+
+      if (
+        forcedTutorial === "leaderBoard" ||
+        (notebooksTutorialCompleted && isNotProposingNodes && openSidebar === null)
+      ) {
         const result = detectAndCallSidebarTutorial("leaderBoard", null);
         if (result) return;
       }
@@ -5514,7 +5468,8 @@ const Notebook = ({}: NotebookProps) => {
 
       if (
         user?.livelinessBar === "reputation" &&
-        (forcedTutorial === "reputationLivenessBar" || (proposalNodesTaken && isNotProposingNodes && openLivelinessBar))
+        (forcedTutorial === "reputationLivenessBar" ||
+          (notebooksTutorialCompleted && isNotProposingNodes && openLivelinessBar))
       ) {
         const shouldIgnore = forcedTutorial
           ? forcedTutorial !== "reputationLivenessBar"
@@ -5531,7 +5486,7 @@ const Notebook = ({}: NotebookProps) => {
       if (
         user?.livelinessBar === "interaction" &&
         (forcedTutorial === "interactionLivenessBar" ||
-          (proposalNodesTaken && isNotProposingNodes && openLivelinessBar))
+          (notebooksTutorialCompleted && isNotProposingNodes && openLivelinessBar))
       ) {
         const shouldIgnore = forcedTutorial
           ? forcedTutorial !== "interactionLivenessBar"
@@ -5547,7 +5502,7 @@ const Notebook = ({}: NotebookProps) => {
 
       if (
         forcedTutorial === "communityLeaderBoard" ||
-        (proposalNodesTaken && isNotProposingNodes && comLeaderboardOpen)
+        (notebooksTutorialCompleted && isNotProposingNodes && comLeaderboardOpen)
       ) {
         const shouldIgnore = forcedTutorial
           ? forcedTutorial !== "communityLeaderBoard"
@@ -5561,7 +5516,7 @@ const Notebook = ({}: NotebookProps) => {
 
       // --------------------------
 
-      if (forcedTutorial === "pathways" || proposalNodesTaken) {
+      if (forcedTutorial === "pathways" || notebooksTutorialCompleted) {
         const shouldIgnore = forcedTutorial
           ? forcedTutorial !== "pathways"
           : userTutorial["pathways"].done || userTutorial["pathways"].skipped;
@@ -5970,6 +5925,15 @@ const Notebook = ({}: NotebookProps) => {
     // --------------------------
 
     if (tutorial.name === "leaderBoard") {
+      if (openSidebar === null) return;
+      setTutorial(null);
+      setForcedTutorial(null);
+      if (currentStep?.childTargetId) removeStyleFromTarget(currentStep.childTargetId, targetId);
+    }
+
+    // --------------------------
+
+    if (tutorial.name === "notebooks") {
       if (openSidebar === null) return;
       setTutorial(null);
       setForcedTutorial(null);

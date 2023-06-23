@@ -29,6 +29,7 @@ import { NODE_QUESTION } from "./nodeQuestionStepTutorialStep";
 import { NODE_REFERENCE } from "./nodeReferenceTutorialSteps";
 import { NODE_RELATION } from "./nodeRelationTutorialSteps";
 import { NODES_STEPS_COMPLETE } from "./nodeTutorialSteps";
+import { NOTEBOOKS_STEPS } from "./notebooksTutorialSteps";
 import { NOTIFICATION_STEPS } from "./notificationsTutorialSteps";
 import { PARENTS_CHILDREN_LIST_STEPS } from "./parentChildrenListTutorialSteps";
 import { PATHWAYS_STEPS } from "./pathwaysTutorialSteps";
@@ -311,6 +312,16 @@ export const getGroupTutorials = ({ livelinessBar }: GetGroupTutorialsInput): Gr
       {
         title: "Community Leaderboard",
         tutorialSteps: { tutorialKey: "communityLeaderBoard", steps: COMMUNITY_LEADER_BOARD_STEPS },
+        tutorials: [],
+      },
+    ],
+  },
+  {
+    title: "Notebooks",
+    tutorials: [
+      {
+        title: "Notebooks",
+        tutorialSteps: { tutorialKey: "notebooks", steps: NOTEBOOKS_STEPS },
         tutorials: [],
       },
     ],
