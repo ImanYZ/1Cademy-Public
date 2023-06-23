@@ -4858,73 +4858,73 @@ const Notebook = ({}: NotebookProps) => {
 
       // --------------------------
 
-      if (forcedTutorial === "tableOfContents" || userTutorial["nodes"].done || userTutorial["nodes"].skipped) {
+      if (forcedTutorial === "toolbox" || userTutorial["nodes"].done || userTutorial["nodes"].skipped) {
         const shouldIgnore = forcedTutorial
-          ? forcedTutorial !== "tableOfContents"
-          : userTutorial["tableOfContents"].done || userTutorial["tableOfContents"].skipped;
+          ? forcedTutorial !== "toolbox"
+          : userTutorial["toolbox"].done || userTutorial["toolbox"].skipped;
         if (!shouldIgnore) {
           setToolboxExpanded(true);
-          startTutorial("tableOfContents");
+          startTutorial("toolbox");
           return;
         }
       }
 
       // --------------------------
 
-      if (forcedTutorial === "focusMode" || !forcedTutorial) {
-        const shouldIgnore =
-          (!forcedTutorial && !userTutorial["tableOfContents"].done && !userTutorial["tableOfContents"].skipped) ||
-          userTutorial["focusMode"].done ||
-          userTutorial["focusMode"].skipped;
-        // if (nodeBookState.selectedNode) return;
+      // if (forcedTutorial === "focusMode" || !forcedTutorial) {
+      //   const shouldIgnore =
+      //     (!forcedTutorial && !userTutorial["tableOfContents"].done && !userTutorial["tableOfContents"].skipped) ||
+      //     userTutorial["focusMode"].done ||
+      //     userTutorial["focusMode"].skipped;
+      //   // if (nodeBookState.selectedNode) return;
 
-        if (!shouldIgnore) {
-          setToolboxExpanded(true);
-          return startTutorial("focusMode");
-        }
-      }
+      //   if (!shouldIgnore) {
+      //     setToolboxExpanded(true);
+      //     return startTutorial("focusMode");
+      //   }
+      // }
 
-      if (forcedTutorial === "focusMode") {
-        setToolboxExpanded(true);
-        return startTutorial("focusMode");
-      }
-
-      // --------------------------
-
-      if (forcedTutorial === "redrawGraph" || !forcedTutorial) {
-        const shouldIgnore =
-          (!forcedTutorial && !userTutorial["focusMode"].done && !userTutorial["focusMode"].skipped) ||
-          userTutorial["redrawGraph"].done ||
-          userTutorial["redrawGraph"].skipped;
-        if (!shouldIgnore) {
-          setToolboxExpanded(true);
-          return startTutorial("redrawGraph");
-        }
-      }
-
-      if (forcedTutorial === "redrawGraph") {
-        setToolboxExpanded(true);
-        return startTutorial("redrawGraph");
-      }
+      // if (forcedTutorial === "focusMode") {
+      //   setToolboxExpanded(true);
+      //   return startTutorial("focusMode");
+      // }
 
       // --------------------------
 
-      if (forcedTutorial === "scrollToNode" || !forcedTutorial) {
-        const shouldIgnore =
-          (!forcedTutorial && !userTutorial["redrawGraph"].done && !userTutorial["redrawGraph"].skipped) ||
-          userTutorial["scrollToNode"].done ||
-          userTutorial["scrollToNode"].skipped;
-        // if (nodeBookState.selectedNode) return;
-        if (!shouldIgnore) {
-          setToolboxExpanded(true);
-          return startTutorial("scrollToNode");
-        }
-      }
+      // if (forcedTutorial === "redrawGraph" || !forcedTutorial) {
+      //   const shouldIgnore =
+      //     (!forcedTutorial && !userTutorial["focusMode"].done && !userTutorial["focusMode"].skipped) ||
+      //     userTutorial["redrawGraph"].done ||
+      //     userTutorial["redrawGraph"].skipped;
+      //   if (!shouldIgnore) {
+      //     setToolboxExpanded(true);
+      //     return startTutorial("redrawGraph");
+      //   }
+      // }
 
-      if (forcedTutorial === "scrollToNode") {
-        setToolboxExpanded(true);
-        return startTutorial("scrollToNode");
-      }
+      // if (forcedTutorial === "redrawGraph") {
+      //   setToolboxExpanded(true);
+      //   return startTutorial("redrawGraph");
+      // }
+
+      // // --------------------------
+
+      // if (forcedTutorial === "scrollToNode" || !forcedTutorial) {
+      //   const shouldIgnore =
+      //     (!forcedTutorial && !userTutorial["redrawGraph"].done && !userTutorial["redrawGraph"].skipped) ||
+      //     userTutorial["scrollToNode"].done ||
+      //     userTutorial["scrollToNode"].skipped;
+      //   // if (nodeBookState.selectedNode) return;
+      //   if (!shouldIgnore) {
+      //     setToolboxExpanded(true);
+      //     return startTutorial("scrollToNode");
+      //   }
+      // }
+
+      // if (forcedTutorial === "scrollToNode") {
+      //   setToolboxExpanded(true);
+      //   return startTutorial("scrollToNode");
+      // }
 
       // --------------------------
 
@@ -5899,34 +5899,7 @@ const Notebook = ({}: NotebookProps) => {
     }
     // --------------------------
 
-    if (tutorial.name === "tableOfContents") {
-      if (!toolboxExpanded) {
-        setTutorial(null);
-        setForcedTutorial(null);
-      }
-    }
-
-    // --------------------------
-
-    if (tutorial.name === "focusMode") {
-      if (!toolboxExpanded) {
-        setTutorial(null);
-        setForcedTutorial(null);
-      }
-    }
-
-    // --------------------------
-
-    if (tutorial.name === "redrawGraph") {
-      if (!toolboxExpanded) {
-        setTutorial(null);
-        setForcedTutorial(null);
-      }
-    }
-
-    // --------------------------
-
-    if (tutorial.name === "scrollToNode") {
+    if (tutorial.name === "toolbox") {
       if (!toolboxExpanded) {
         setTutorial(null);
         setForcedTutorial(null);
@@ -6533,16 +6506,7 @@ const Notebook = ({}: NotebookProps) => {
                   padding: { xs: "2px", sm: "8px" },
                 }}
               >
-                <IconButton
-                  id="toolbox-redraw-graph"
-                  color="secondary"
-                  onClick={() => {
-                    onRedrawGraph();
-                    if (tutorial?.name === "redrawGraph") {
-                      onFinalizeTutorial();
-                    }
-                  }}
-                >
+                <IconButton id="toolbox-redraw-graph" color="secondary" onClick={() => onRedrawGraph()}>
                   <AutoFixHighIcon
                     sx={{
                       color: theme =>
@@ -6570,9 +6534,6 @@ const Notebook = ({}: NotebookProps) => {
                   color="error"
                   onClick={() => {
                     setOpenProgressBar(prev => !prev);
-                    if (tutorial?.name === "tableOfContents") {
-                      onFinalizeTutorial();
-                    }
                   }}
                 >
                   <HelpCenterIcon
@@ -6603,9 +6564,6 @@ const Notebook = ({}: NotebookProps) => {
                   onClick={() => {
                     setFocusView({ isEnabled: true, selectedNode: nodeBookState.selectedNode || "" });
                     setOpenProgressBar(false);
-                    if (tutorial?.name === "focusMode") {
-                      onFinalizeTutorial();
-                    }
                   }}
                   disabled={!nodeBookState.selectedNode ? true : false}
                   sx={{

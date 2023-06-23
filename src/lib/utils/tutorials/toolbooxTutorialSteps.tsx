@@ -2,7 +2,7 @@ import MarkdownRender from "../../../components/Markdown/MarkdownRender";
 import { TutorialStep, TutorialStepConfig } from "../../../nodeBookTypes";
 import { getBaseStepConfig } from "./tutorial.utils";
 
-const TABLE_CONTENT_STEPS_CONFIG: TutorialStepConfig[] = [
+const TOOLBOX_STEPS_CONFIG: TutorialStepConfig[] = [
   {
     title: "Tutorial Table of Contents",
     childTargetId: "toolbox-table-of-contents",
@@ -17,9 +17,6 @@ const TABLE_CONTENT_STEPS_CONFIG: TutorialStepConfig[] = [
     isClickable: true,
     tooltipPosition: "bottom",
   },
-];
-
-const FOCUS_MODE_STEPS_CONFIG: TutorialStepConfig[] = [
   {
     title: "Focus Mode",
     childTargetId: "toolbox-focus-mode",
@@ -35,9 +32,6 @@ const FOCUS_MODE_STEPS_CONFIG: TutorialStepConfig[] = [
     targetDelay: 800,
     tooltipPosition: "bottom",
   },
-];
-
-const REDRAW_GRAPH_STEPS_CONFIG: TutorialStepConfig[] = [
   {
     title: "Redraw Graph",
     childTargetId: "toolbox-redraw-graph",
@@ -53,9 +47,6 @@ const REDRAW_GRAPH_STEPS_CONFIG: TutorialStepConfig[] = [
     targetDelay: 800,
     tooltipPosition: "bottom",
   },
-];
-
-const SCROLL_TO_NODE_STEPS_CONFIG: TutorialStepConfig[] = [
   {
     title: "Scroll to Node",
     childTargetId: "toolbox-scroll-to-node",
@@ -73,18 +64,6 @@ const SCROLL_TO_NODE_STEPS_CONFIG: TutorialStepConfig[] = [
   },
 ];
 
-export const TABLE_CONTENT_STEPS: TutorialStep[] = TABLE_CONTENT_STEPS_CONFIG.map((c, i, s) => {
-  return { ...getBaseStepConfig(i + 1, s.length), ...c };
-});
-
-export const FOCUS_MODE_STEPS: TutorialStep[] = FOCUS_MODE_STEPS_CONFIG.map((c, i, s) => {
-  return { ...getBaseStepConfig(i + 1, s.length), ...c };
-});
-
-export const REDRAW_GRAPH_STEPS: TutorialStep[] = REDRAW_GRAPH_STEPS_CONFIG.map((c, i, s) => {
-  return { ...getBaseStepConfig(i + 1, s.length), ...c };
-});
-
-export const SCROLL_TO_NODE_STEPS: TutorialStep[] = SCROLL_TO_NODE_STEPS_CONFIG.map((c, i, s) => {
+export const TOOLBOX_STEPS: TutorialStep[] = TOOLBOX_STEPS_CONFIG.map((c, i, s) => {
   return { ...getBaseStepConfig(i + 1, s.length), ...c };
 });
