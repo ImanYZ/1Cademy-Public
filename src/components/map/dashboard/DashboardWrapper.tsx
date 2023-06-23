@@ -50,6 +50,7 @@ type DashboardWrapperProps = {
   setStartPractice: Dispatch<SetStateAction<boolean>>;
   root?: string;
   setDisplayRightSidebar: (newValue: OpenRightSidebar) => void;
+  setUserIsAnsweringPractice: (newValue: { result: boolean }) => void;
   sx?: SxProps<Theme>;
 };
 
@@ -69,6 +70,7 @@ export const DashboardWrapper = forwardRef<DashboardWrapperRef, DashboardWrapper
     startPractice,
     setStartPractice,
     setDisplayRightSidebar,
+    setUserIsAnsweringPractice,
   } = props;
   const db = getFirestore();
 
@@ -97,6 +99,7 @@ export const DashboardWrapper = forwardRef<DashboardWrapperRef, DashboardWrapper
     getQuestionData: practiceToolRef.current ? practiceToolRef.current.getQuestionData : () => null,
     onSelectedQuestionAnswer: practiceToolRef.current ? practiceToolRef.current.onSelectedQuestionAnswer : () => {},
     getSubmittedAnswers: practiceToolRef.current ? practiceToolRef.current.getSubmittedAnswers : () => [],
+    getAssistantInitialState: practiceToolRef.current ? practiceToolRef.current.getAssistantInitialState : () => "IDLE",
   }));
 
   const semesterByStudentSnapthot = useCallback(
@@ -318,6 +321,7 @@ export const DashboardWrapper = forwardRef<DashboardWrapperRef, DashboardWrapper
                 startPractice={startPractice}
                 setStartPractice={setStartPractice}
                 setDisplayRightSidebar={setDisplayRightSidebar}
+                setUserIsAnsweringPractice={setUserIsAnsweringPractice}
               />
             )}
             {selectToolbarView === "SETTINGS" && <DashboardSettings currentSemester={currentSemester} />}
