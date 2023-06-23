@@ -482,8 +482,6 @@ export const TooltipTutorial = ({
                   variant="contained"
                   onClick={() => {
                     handleCloseProgressBarMenu();
-                    // onNextStep();
-                    // ;
                     forcedTutorial && nextTutorial && !currentTutorialIsTemporal
                       ? setShowNextTutorialStep(true)
                       : onFinalize();
