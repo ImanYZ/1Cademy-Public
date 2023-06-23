@@ -66,6 +66,7 @@ import { MemoizedUserInfoSidebar } from "@/components/map/Sidebar/SidebarV2/User
 import { MemoizedUserSettingsSidebar } from "@/components/map/Sidebar/SidebarV2/UserSettigsSidebar";
 import { useAuth } from "@/context/AuthContext";
 import useEventListener from "@/hooks/useEventListener";
+import { useHover } from "@/hooks/userHover";
 // import usePrevious from "@/hooks/usePrevious";
 import { useTagsTreeView } from "@/hooks/useTagsTreeView";
 import { DESIGN_SYSTEM_COLORS } from "@/lib/theme/colors";
@@ -355,7 +356,7 @@ const Notebook = ({}: NotebookProps) => {
   const [comLeaderboardOpen, setComLeaderboardOpen] = useState(false);
 
   const [toolboxExpanded, setToolboxExpanded] = useState(false);
-
+  const { ref: toolbarRef, isHovered: toolbarIsHovered } = useHover();
   //TUTORIAL STATES
   const {
     startTutorial,
@@ -570,7 +571,7 @@ const Notebook = ({}: NotebookProps) => {
     return () => {
       if (timeoutId) clearTimeout(timeoutId);
     };
-  }, [currentStep, graph.nodes, setTargetClientRect, nodeBookState.selectedNode, targetId]);
+  }, [currentStep, graph.nodes, setTargetClientRect, nodeBookState.selectedNode, targetId, toolbarIsHovered]);
 
   const onCompleteWorker = useCallback(() => {
     setGraph(graph => {
@@ -6370,6 +6371,8 @@ const Notebook = ({}: NotebookProps) => {
                 setNotebooks={setNotebooks}
                 onDisplayInstructorPage={() => setDisplayDashboard(true)}
                 onChangeTagOfNotebookById={onChangeTagOfNotebookById}
+                isHovered={toolbarIsHovered}
+                toolbarRef={toolbarRef}
               />
 
               <MemoizedBookmarksSidebar

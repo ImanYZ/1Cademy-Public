@@ -53,7 +53,6 @@ import NotebookIcon from "../../../../../public/notebooks.svg";
 import NotificationIcon from "../../../../../public/notification.svg";
 // import SearchIcon from "../../../../../public/search.svg";
 import TagIcon from "../../../../../public/tag.svg";
-import { useHover } from "../../../../hooks/userHover";
 import { useWindowSize } from "../../../../hooks/useWindowSize";
 import { DispatchAuthActions, Reputation, ReputationSignal, User, UserTheme } from "../../../../knowledgeTypes";
 import { updateNotebookTag } from "../../../../lib/firestoreClient/notebooks.serverless";
@@ -110,6 +109,8 @@ type MainSidebarProps = {
   // setCurrentTutorial: Dispatch<SetStateAction<TutorialKeys>>;
   onDisplayInstructorPage: () => void;
   onChangeTagOfNotebookById: (notebookId: string, data: { defaultTagId: string; defaultTagName: string }) => void;
+  toolbarRef: (node?: HTMLElement | null | undefined) => void;
+  isHovered: boolean;
 };
 
 export const ToolbarSidebar = ({
@@ -139,9 +140,12 @@ export const ToolbarSidebar = ({
   openNodesOnNotebook,
   onDisplayInstructorPage,
   onChangeTagOfNotebookById,
+  toolbarRef,
+  isHovered,
 }: // setCurrentTutorial,
 // enabledToolbarElements = [],
 MainSidebarProps) => {
+  console.log({ ref: toolbarRef });
   const { nodeBookState, nodeBookDispatch } = useNodeBook();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
@@ -153,7 +157,7 @@ MainSidebarProps) => {
   const [leaderboardTypeOpen, setLeaderboardTypeOpen] = useState<boolean>(false);
   const [shouldShowTagSearcher, setShouldShowTagSearcher] = useState<boolean>(false);
   const [displayNotebooks, setDisplayNotebooks] = useState(false);
-  const { ref, isHovered } = useHover();
+
   const [isCreatingNotebook, setIsCreatingNotebook] = useState(false);
   const [editableNotebook, setEditableNotebook] = useState<Notebook | null>(null);
   const createNotebookButtonRef = useRef<any>(null);
@@ -487,7 +491,7 @@ MainSidebarProps) => {
       <Box
         id="toolbar"
         className={`toolbar ${isMenuOpen ? "toolbar-opened" : ""}`}
-        ref={ref}
+        ref={toolbarRef}
         sx={{
           minHeight: "100%",
           width: "inherit",
@@ -957,12 +961,12 @@ MainSidebarProps) => {
         {/* --------------- */}
 
         <Stack
+          id="toolbar-leaderboard"
           spacing={"10px"}
           direction="column"
           alignItems={displayLargeToolbar ? "flex-start" : "center"}
           sx={{
             paddingBottom: "20px",
-
             position: "relative",
             height: "100%",
             width: "inherit",
@@ -1046,7 +1050,7 @@ MainSidebarProps) => {
     );
   }, [
     isMenuOpen,
-    ref,
+    toolbarRef,
     displayLargeToolbar,
     user,
     reputation?.totalPoints,
@@ -1074,7 +1078,6 @@ MainSidebarProps) => {
     chosenTags,
     allTags,
     setAllTags,
-    isHovered,
     openLeaderboardTypes,
     leaderBoardType,
     leaderboardTypeOpen,
@@ -1096,6 +1099,7 @@ MainSidebarProps) => {
   const contentSignalState = useMemo(() => {
     return { updated: true };
   }, [
+    toolbarRef,
     user,
     selectedUser,
     isMenuOpen,
@@ -1130,6 +1134,7 @@ MainSidebarProps) => {
     editableNotebook,
     onOpenUserInfo,
     notebookTitleIsEditable,
+    isHovered,
     // titleInputRef.current,
   ]);
 
