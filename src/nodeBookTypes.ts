@@ -506,6 +506,7 @@ export type TutorialTypeKeys =
   | "bookmarks"
   | "userInfo"
   | "leaderBoard"
+  | "notebooks"
   | "pendingProposals"
   | "interactionLivenessBar"
   | "reputationLivenessBar"
