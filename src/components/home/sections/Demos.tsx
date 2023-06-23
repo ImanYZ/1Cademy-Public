@@ -14,21 +14,27 @@ type Demo = {
 const DEMOS_ITEMS: Demo[] = [
   {
     id: "01",
-    demoName: "Introducing 1Cademy Assistant - Practice Tool",
-    url: "https://www.youtube.com/embed/kU6ppO_WLC0",
-    previewImage: "/home/demos/practice-tool-demo.png",
-  },
-  {
-    id: "02",
     demoName: "Introducing 1Cademy Assistant - Question Answering",
     url: "https://www.youtube.com/embed/Z8aVR459Kks",
     previewImage: "/home/demos/question-answering-demo.png",
+  },
+  {
+    id: "02",
+    demoName: "Introducing 1Cademy Assistant - Practice Tool",
+    url: "https://www.youtube.com/embed/kU6ppO_WLC0",
+    previewImage: "/home/demos/practice-tool-demo.png",
   },
   {
     id: "03",
     demoName: "Introducing 1Cademy Assistant - Voice-based Practice",
     url: "https://www.youtube.com/embed/Un6s1rtfZVA",
     previewImage: "/home/demos/practice-preview.png",
+  },
+  {
+    id: "04",
+    demoName: "Introducing 1Cademy Instructor and Student Dashboards",
+    url: "https://youtu.be/9vWGSEBf8WQ",
+    previewImage: "/home/demos/introduction-instructor-ad-student-dashboard.png",
   },
 ];
 
