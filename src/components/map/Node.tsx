@@ -425,6 +425,7 @@ const Node = ({
 
   const nodeClickHandler = useCallback(
     (event: any) => {
+      if (openPart === "LinkingWords" || openPart === "Tags") return;
       let operation = "selectNode";
       // console.log({ rrrrrr: notebookRef.current });
       if (notebookRef.current.choosingNode && notebookRef.current.choosingNode.id !== identifier) {
