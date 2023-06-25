@@ -460,7 +460,8 @@ const Notebook = ({}: NotebookProps) => {
             if (!thisNode) return graph;
 
             const nodeInViewport = onNodeInViewport(nodeId, graph.nodes);
-            if (!force && nodeInViewport && !forcedTutorial) return graph;
+
+            if (!force && !forcedTutorial && nodeInViewport) return graph;
 
             if (
               originalNode &&
@@ -577,8 +578,9 @@ const Notebook = ({}: NotebookProps) => {
     setGraph(graph => {
       if (!nodeBookState.selectedNode) return graph;
       if (!graph.nodes[nodeBookState.selectedNode]) return graph;
-
-      scrollToNode(nodeBookState.selectedNode, true);
+      const operationIsFromSearchSidebar = lastNodeOperation.current?.name === "Searcher";
+      lastNodeOperation.current = null;
+      scrollToNode(nodeBookState.selectedNode, operationIsFromSearchSidebar);
 
       return graph;
     });

@@ -63,3 +63,15 @@ exports.onUserStatusChanged = functions.database.ref("/status/{uname}").onUpdate
     state,
   });
 });
+
+exports.onActionTrackCreated = functions.database.ref("/actionTracks/{id}").onCreate(async change => {
+  try {
+    // Get the data written to Realtime Database
+    const data = change.after.data();
+    console.log("log:", { actionTracks });
+    const actionTracksLogRef = db.collection("actionTracksLogs").doc();
+    return actionTracksLogRef.set(data);
+  } catch (error) {
+    console.log("error:", error);
+  }
+});
