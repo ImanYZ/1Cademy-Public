@@ -33,13 +33,13 @@ const DEMOS_ITEMS: Demo[] = [
   {
     id: "04",
     demoName: "1Cademy Instructor and Student Dashboards",
-    url: "https://youtu.be/9vWGSEBf8WQ",
+    url: "https://www.youtube.com/embed/9vWGSEBf8WQ",
     previewImage: "/home/demos/introduction-instructor-ad-student-dashboard.png",
   },
   {
-    id: "04",
+    id: "05",
     demoName: "1Cademy Auto-graded Assignments and Exams",
-    url: "https://youtu.be/E2ClCIX9g0g",
+    url: "https://www.youtube.com/embed/E2ClCIX9g0g",
     previewImage: "/home/demos/auto-graded-assignments-and-Exams.png",
   },
 ];
