@@ -1,5 +1,5 @@
 import { ISemesterStudentVoteStat, ISemesterStudentVoteStatDay } from "../../types/ICourse";
-import { differentBetweenDays, getDateYYMMDDWithHyphens } from "./date.utils";
+import { differentBetweenDays, getDatesOfWeek, getDateYYMMDDWithHyphens } from "./date.utils";
 
 export type CalculateDailyStreakOutput = { dailyStreak: number; maxDailyStreak: number };
 
@@ -62,6 +62,35 @@ export const calculateDailyStreak = (
   );
 
   return { dailyStreak: streak.dailyStreak, maxDailyStreak: streak.maxDailyStreak };
+};
+
+export const getDaysInAWeekWithoutGetDailyPoint = (
+  semesterStudentStats: ISemesterStudentVoteStat,
+  questionPerDay: number
+): number => {
+  const dailyCorrectPractices = calcMetricPerDay(semesterStudentStats.days);
+  const sortedDailyCorrectPractices: DailyPoints = Object.fromEntries(
+    Object.entries(dailyCorrectPractices)
+      .sort(
+        ([keyA], [keyB]) => Number(new Date(keyA.replaceAll("-", "/"))) - Number(new Date(keyB.replaceAll("-", "/")))
+      )
+      .reverse() // today, yesterday, ...
+  );
+
+  const days = getDatesOfWeek(new Date());
+  const daysOfTheWeek = days.map(cur => getDateYYMMDDWithHyphens(cur));
+  const currentDayWithHyphens = getDateYYMMDDWithHyphens();
+  const totalValidDays = daysOfTheWeek.filter(
+    c => differentBetweenDaysWithHyphens(currentDayWithHyphens, c) >= 0
+  ).length;
+  const validDays = Object.keys(sortedDailyCorrectPractices)
+    .filter(key => daysOfTheWeek.includes(key))
+    .filter(key => differentBetweenDaysWithHyphens(currentDayWithHyphens, key) >= 0);
+
+  return validDays.reduce(
+    (acu, key) => acu + (sortedDailyCorrectPractices[key] >= questionPerDay ? 0 : 1),
+    totalValidDays - validDays.length
+  );
 };
 
 export const differentBetweenDaysWithHyphens = (hyphenDate1: string, hyphenDate2: string): number => {

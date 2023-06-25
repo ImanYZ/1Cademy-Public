@@ -14,21 +14,33 @@ type Demo = {
 const DEMOS_ITEMS: Demo[] = [
   {
     id: "01",
-    demoName: "Introducing 1Cademy Assistant - Practice Tool",
-    url: "https://www.youtube.com/embed/kU6ppO_WLC0",
-    previewImage: "/home/demos/practice-tool-demo.png",
-  },
-  {
-    id: "02",
-    demoName: "Introducing 1Cademy Assistant - Question Answering",
+    demoName: "1Cademy Assistant - Question Answering",
     url: "https://www.youtube.com/embed/Z8aVR459Kks",
     previewImage: "/home/demos/question-answering-demo.png",
   },
   {
+    id: "02",
+    demoName: "1Cademy Assistant - Practice Tool",
+    url: "https://www.youtube.com/embed/kU6ppO_WLC0",
+    previewImage: "/home/demos/practice-tool-demo.png",
+  },
+  {
     id: "03",
-    demoName: "Introducing 1Cademy Assistant - Voice-based Practice",
+    demoName: "1Cademy Assistant - Voice-based Practice",
     url: "https://www.youtube.com/embed/Un6s1rtfZVA",
     previewImage: "/home/demos/practice-preview.png",
+  },
+  {
+    id: "04",
+    demoName: "1Cademy Instructor and Student Dashboards",
+    url: "https://www.youtube.com/embed/9vWGSEBf8WQ",
+    previewImage: "/home/demos/introduction-instructor-ad-student-dashboard.png",
+  },
+  {
+    id: "05",
+    demoName: "1Cademy Auto-graded Assignments and Exams",
+    url: "https://www.youtube.com/embed/E2ClCIX9g0g",
+    previewImage: "/home/demos/auto-graded-assignments-and-Exams.png",
   },
 ];
 
@@ -82,6 +94,7 @@ export const Demos = () => {
             <Typography
               sx={{
                 mb: "8px",
+                ml: "14px",
                 fontWeight: 600,
                 fontSize: "18px",
                 color: theme =>

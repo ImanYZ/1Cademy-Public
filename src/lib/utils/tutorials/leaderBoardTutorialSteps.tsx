@@ -5,17 +5,17 @@ import { getBaseStepConfig } from "./tutorial.utils";
 
 const LEADER_BOARD_STEPS_CONFIG: TutorialStepConfig[] = [
   {
-    childTargetId: "toolbar-leaderboard-button",
+    childTargetId: "toolbar-leaderboard",
     title: "Leaderboard",
     description: (
       <MarkdownRender
         text={
-          "This is the button for the Leaderboard. Here you can filter how the Leaderboard is displayed. You can choose to see the list weekly, monthly, or all time. You can also choose to see this list by all time or monthly, just based on other’s votes."
+          "The leaderboard and its settings can be found here. It will not appear until you hover over the toolbar and the options expand. Move your cursor over here to view the leaderboard. You can choose to view the weekly, monthly, and all time leaderboard. You can also adjust it to see the leaderboard based on all votes and only votes from others."
         }
       />
     ),
     tooltipPosition: "top",
-    targetDelay: 450,
+    // targetDelay: 450,
     anchor: "Portal",
     outline: "inside",
   },
@@ -28,7 +28,7 @@ const LEADER_BOARD_STEPS_CONFIG: TutorialStepConfig[] = [
       />
     ),
     tooltipPosition: "top",
-    targetDelay: 450,
+    // targetDelay: 450,
     anchor: "Portal",
     outline: "inside",
   },

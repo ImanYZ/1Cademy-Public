@@ -103,7 +103,7 @@ export const narrateLargeTexts = (message: string) => {
           console.log("will resolve", id);
           resolve(true);
         }
-      }, 1000);
+      }, 500);
 
       signal.addEventListener("abort", () => {
         // clearTimeout(timeoutId);

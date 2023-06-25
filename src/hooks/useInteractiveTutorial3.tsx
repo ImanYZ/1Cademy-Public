@@ -9,6 +9,7 @@ import {
   TAGS_REFERENCES_STEPS_COMPLETE,
 } from "@/lib/utils/tutorials/nodeActionsTutorialStep";
 import { HIDE_OFFSPRING_STEPS_COMPLETE } from "@/lib/utils/tutorials/nodeActionsTutorialStep";
+import { NOTEBOOKS_STEPS } from "@/lib/utils/tutorials/notebooksTutorialSteps";
 import { PENDING_PROPOSALS_STEPS_COMPLETE } from "@/lib/utils/tutorials/pendingProposalsTutorial";
 import { PROPOSAL_STEPS_COMPLETE } from "@/lib/utils/tutorials/proposalTutorialSteps";
 import {
@@ -16,12 +17,7 @@ import {
   RECONCILING_NOT_ACCEPTED_PROPOSALS_STEPS_COMPLETE,
 } from "@/lib/utils/tutorials/reconcilingProposalsTutorialSteps";
 import { SEARCHER_STEPS_COMPLETE } from "@/lib/utils/tutorials/searcherTutorialSteps";
-import {
-  FOCUS_MODE_STEPS,
-  REDRAW_GRAPH_STEPS,
-  SCROLL_TO_NODE_STEPS,
-  TABLE_CONTENT_STEPS,
-} from "@/lib/utils/tutorials/toolbooxTutorialSteps";
+import { TOOLBOX_STEPS } from "@/lib/utils/tutorials/toolbooxTutorialSteps";
 import { USER_INFO_STEPS_COMPLETE } from "@/lib/utils/tutorials/userInfoTutorialSteps";
 import { USER_SETTINGS_STEPS_COMPLETE } from "@/lib/utils/tutorials/userSettingsTutorialSteps";
 
@@ -139,10 +135,7 @@ export const useInteractiveTutorial = ({ user }: useInteractiveTutorialProps) =>
     tmpTagsReferences: { currentStep: -1, done: false, skipped: false },
     tmpParentsChildrenList: { currentStep: -1, done: false, skipped: false },
     tmpPathways: { currentStep: -1, done: false, skipped: false },
-    tableOfContents: { currentStep: -1, done: false, skipped: false },
-    focusMode: { currentStep: -1, done: false, skipped: false },
-    redrawGraph: { currentStep: -1, done: false, skipped: false },
-    scrollToNode: { currentStep: -1, done: false, skipped: false },
+    toolbox: { currentStep: -1, done: false, skipped: false },
     collapseNode: { currentStep: -1, done: false, skipped: false },
     expandNode: { currentStep: -1, done: false, skipped: false },
     upVote: { currentStep: -1, done: false, skipped: false },
@@ -152,6 +145,7 @@ export const useInteractiveTutorial = ({ user }: useInteractiveTutorialProps) =>
     userSettings: { currentStep: -1, done: false, skipped: false },
     notifications: { currentStep: -1, done: false, skipped: false },
     bookmarks: { currentStep: -1, done: false, skipped: false },
+    notebooks: { currentStep: -1, done: false, skipped: false },
     leaderBoard: { currentStep: -1, done: false, skipped: false },
     pendingProposals: { currentStep: -1, done: false, skipped: false },
     reputationLivenessBar: { currentStep: -1, done: false, skipped: false },
@@ -266,17 +260,8 @@ export const useInteractiveTutorial = ({ user }: useInteractiveTutorialProps) =>
       if (newTutorial === "childCode") {
         newSteps = CHILD_CODE_PROPOSAL_COMPLETE;
       }
-      if (newTutorial === "tableOfContents") {
-        newSteps = TABLE_CONTENT_STEPS;
-      }
-      if (newTutorial === "focusMode") {
-        newSteps = FOCUS_MODE_STEPS;
-      }
-      if (newTutorial === "redrawGraph") {
-        newSteps = REDRAW_GRAPH_STEPS;
-      }
-      if (newTutorial === "scrollToNode") {
-        newSteps = SCROLL_TO_NODE_STEPS;
+      if (newTutorial === "toolbox") {
+        newSteps = TOOLBOX_STEPS;
       }
       if (newTutorial === "collapseNode") {
         newSteps = COLLAPSE_STEPS_COMPLETE;
@@ -367,6 +352,9 @@ export const useInteractiveTutorial = ({ user }: useInteractiveTutorialProps) =>
         newSteps = TMP_PATHWAYS;
       }
       // others
+      if (newTutorial === "notebooks") {
+        newSteps = NOTEBOOKS_STEPS;
+      }
       if (newTutorial === "leaderBoard") {
         newSteps = LEADER_BOARD_STEPS;
       }

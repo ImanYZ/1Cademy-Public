@@ -172,3 +172,15 @@ export const onUserStatusChanged = functions.database.ref("/status/{uname}").onU
     state,
   });
 });
+
+exports.onActionTrackCreated = functions.database.ref("/actionTracks/{id}").onCreate(async change => {
+  try {
+    // Get the data written to Realtime Database
+    const data = change.val();
+    console.log("log:", { actionTracks });
+    const actionTracksLogRef = firestore.collection("actionTracksLogs").doc();
+    actionTracksLogRef.set(data);
+  } catch (error) {
+    console.log("error:", error);
+  }
+});
