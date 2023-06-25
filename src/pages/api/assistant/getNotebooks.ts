@@ -18,8 +18,8 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
       .status(200)
       .json(
         payload?.includeConversations
-          ? notebooks.docs.map(doc => ({ id: doc.id, ...doc.data() }))
-          : notebooks.docs.filter(doc => !doc.data()?.conversation).map(doc => ({ id: doc.id, ...doc.data() }))
+          ? notebooks.docs.map(doc => ({ documentId: doc.id, ...doc.data() }))
+          : notebooks.docs.filter(doc => !doc.data()?.conversation).map(doc => ({ documentId: doc.id, ...doc.data() }))
       );
   } catch (error) {
     console.error(error);

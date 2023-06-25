@@ -4,6 +4,7 @@ import React, { Dispatch } from "react";
 import { SimpleQuestionNode } from "./instructorsTypes";
 import { KnowledgeChoice } from "./knowledgeTypes";
 import { NodeType } from "./types";
+import { Flashcard } from "./types/IAssitantConversation";
 
 export type OpenPart = "LinkingWords" | "Tags" | "References" | undefined;
 
@@ -411,6 +412,7 @@ export type FullNodeData = Omit<UserNodeFirestore, "changedAt" | "createdAt" | "
     simulated?: boolean;
     disableVotes?: boolean;
     unaccepted?: boolean;
+    flashcard?: Flashcard;
     // left: number;
     // top: number;
     x?: number;

@@ -22,7 +22,7 @@ import { IPractice } from "src/types/IPractice";
 import { Timestamp } from "firebase-admin/firestore";
 import moment from "moment";
 import { CollectionFieldSchema } from "typesense/lib/Typesense/Collection";
-import { IAssistantPassageResponse } from "src/types/IAssistant";
+import { IAssistantNodePassage, IAssistantPassageResponse } from "src/types/IAssistant";
 
 export type BARD_RESULT_NODE = {
   title: string;
@@ -204,8 +204,8 @@ export const typesenseReferenceNodeSearch = async (query: string): Promise<strin
     sort_by: "",
     filter_by: "nodeType:=[Reference]",
     page: 1,
-    num_typos: "1",
-    typo_tokens_threshold: 1,
+    num_typos: "2",
+    typo_tokens_threshold: 2,
   };
 
   const searchResults = await getTypesenseClient()
@@ -1003,19 +1003,35 @@ export const createChat = async (uname?: string) => {
   return assistantChatRef.id;
 };
 
+export const findPassagesBySelection = async (
+  selection: string,
+  url: string
+): Promise<FirebaseFirestore.QueryDocumentSnapshot<any>[] | undefined> => {
+  const _selection = selection.trim();
+  const bookPassages = await db.collection("bookPassages").where("urls", "array-contains", url).get();
+  const _bookPassages = bookPassages.docs.filter(bookPassage => {
+    const bookPassageData = bookPassage.data() as IAssistantNodePassage;
+    return bookPassageData.passage.includes(_selection) || _selection.includes(bookPassageData.passage);
+  });
+
+  if (_bookPassages.length) {
+    return _bookPassages;
+  }
+};
+
 export const getFlashcardsFromPassage = async (passage: string): Promise<FlashcardResponse> => {
   const prompt =
     `Flashcards are in two types: Concept or Relation\n` +
-    `A "Concept" flashcard defines/explains a concept.\n` +
+    `A "Concept" flashcard defines/explains a single concept.The format of this flashcard should be in a single paragraph.\n` +
     `A "Relation" flashcard explains some relationships between multiple concepts.\n` +
-    `Print some flashcards of valuable information ONLY from the following triple-quoted text:` +
+    `Print as many flashcards as possible for students' learning  ONLY from the following triple-quoted text:` +
     `'''\n` +
     passage +
     `\n'''` +
     `NEVER print any information beyond the provided text.\n` +
     `Print an array of flashcards, each flashcard as a JSON object with the following keys:\n` +
     `{\n` +
-    `"title": The flashcard title as a string,\n` +
+    `"title": The flashcard title as a string. Each title should be stand-alone such that a student would understand it without any need to look up images or other resources.\n` +
     `"content": The flashcard content as a string,\n` +
     `"type": Concept or Relation\n` +
     `}\n` +
