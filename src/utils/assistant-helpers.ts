@@ -204,8 +204,8 @@ export const typesenseReferenceNodeSearch = async (query: string): Promise<strin
     sort_by: "",
     filter_by: "nodeType:=[Reference]",
     page: 1,
-    num_typos: "1",
-    typo_tokens_threshold: 1,
+    num_typos: "2",
+    typo_tokens_threshold: 2,
   };
 
   const searchResults = await getTypesenseClient()

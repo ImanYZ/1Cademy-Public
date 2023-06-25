@@ -20,7 +20,6 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
           const bookPassage = passage.data() as IAssistantNodePassage;
           for (const flashcard of bookPassage.flashcards) {
             flashcard.passageId = passage.id;
-            if (flashcard.proposed) continue;
             flashcards.push(flashcard);
           }
         }

@@ -490,7 +490,11 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       }
     });
 
-    return res.status(200).json({ success: true });
+    return res.status(200).json({
+      node: newVersion.node,
+      proposal: versionRef.id,
+      success: true,
+    });
   } catch (err) {
     console.error(err);
     return res.status(500).json({ err, success: false });

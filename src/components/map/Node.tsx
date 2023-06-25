@@ -431,6 +431,7 @@ const Node = ({
         detail: {
           id: identifier,
           title,
+          content,
         },
       });
       window.dispatchEvent(nodeClickEvent);
@@ -618,6 +619,7 @@ const Node = ({
     notebookRef.current.selectedNode = scrollTo;
     nodeBookDispatch({ type: "setSelectedNode", payload: scrollTo });
     setOperation("CancelProposals");
+    window.dispatchEvent(new CustomEvent("next-flashcard"));
     closeSideBar();
   };
 

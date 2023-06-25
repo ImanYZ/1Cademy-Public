@@ -99,7 +99,7 @@ import { useMemoizedCallback } from "../hooks/useMemoizedCallback";
 import { useWindowSize } from "../hooks/useWindowSize";
 import { useWorkerQueue } from "../hooks/useWorkerQueue";
 import { NodeChanges, ReputationSignal } from "../knowledgeTypes";
-import { idToken, retrieveAuthenticatedUser } from "../lib/firestoreClient/auth";
+import { getIdToken, idToken, retrieveAuthenticatedUser } from "../lib/firestoreClient/auth";
 import { Post, postWithToken } from "../lib/mapApi";
 import { NO_USER_IMAGE, ZINDEX } from "../lib/utils/constants";
 import { createGraph, dagreUtils } from "../lib/utils/dagre.util";
@@ -1508,13 +1508,15 @@ const Notebook = ({}: NotebookProps) => {
         setTimeout(() => reloadPermanentGraph(), 200);
       }
 
+      let response: any = null;
+
       try {
-        await postWithToken(mapURL, postData);
+        response = await postWithToken(mapURL, postData);
       } catch (err) {
         console.error(err);
         try {
           await idToken();
-          await postWithToken(mapURL, { ...postData });
+          response = await postWithToken(mapURL, { ...postData });
         } catch (err) {
           console.error(err);
           // window.location.reload();
@@ -1527,6 +1529,8 @@ const Notebook = ({}: NotebookProps) => {
       // setSelectedRelation(null);
       resetAddedRemovedParentsChildren();
       setIsSubmitting(false);
+
+      return response;
     },
     // TODO: check dependencies
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -3464,7 +3468,25 @@ const Notebook = ({}: NotebookProps) => {
             },
           };
 
-          getMapGraph("/proposeNodeImprovement", postData, !willBeApproved);
+          const flashcard = postData.flashcard;
+          delete postData.flashcard;
+
+          getMapGraph("/proposeNodeImprovement", postData, !willBeApproved).then(async (response: any) => {
+            if (!response) return;
+            // save flashcard data
+            window.dispatchEvent(
+              new CustomEvent("propose-flashcard", {
+                detail: {
+                  node: response.node,
+                  proposal: response.proposal,
+                  flashcard,
+                  token: await getIdToken(),
+                },
+              })
+            );
+          });
+
+          window.dispatchEvent(new CustomEvent("next-flashcard"));
 
           setTimeout(() => {
             scrollToNode(selectedNodeId);
@@ -3720,7 +3742,25 @@ const Notebook = ({}: NotebookProps) => {
 
         nodes = { ...nodes, [newNodeId]: { ...nodes[newNodeId], changedAt: new Date(), ...nodePartChanges } };
 
-        getMapGraph("/proposeChildNode", postData, !willBeApproved);
+        const flashcard = postData.flashcard;
+        delete postData.flashcard;
+
+        getMapGraph("/proposeChildNode", postData, !willBeApproved).then(async (response: any) => {
+          if (!response) return;
+          // save flashcard data
+          window.dispatchEvent(
+            new CustomEvent("propose-flashcard", {
+              detail: {
+                node: response.node,
+                proposal: response.proposal,
+                flashcard,
+                token: await getIdToken(),
+              },
+            })
+          );
+        });
+
+        window.dispatchEvent(new CustomEvent("next-flashcard"));
 
         setTimeout(() => {
           onComplete();
@@ -6187,7 +6227,7 @@ const Notebook = ({}: NotebookProps) => {
   }, [db, onChangeNotebook, openNodesOnNotebook, router.query.nb, user]);
 
   useEffect(() => {
-    window.addEventListener("assistant", (e: any) => {
+    const listener = (e: any) => {
       const detail: IAssistantEventDetail = e.detail || {};
       if (detail.type === "SELECT_NOTEBOOK") {
         onChangeNotebook(detail.notebookId);
@@ -6196,6 +6236,7 @@ const Notebook = ({}: NotebookProps) => {
         nodeBookDispatch({ type: "setSearchQuery", payload: detail.query });
         nodeBookDispatch({ type: "setNodeTitleBlured", payload: true });
       } else if (detail.type === "IMPROVEMENT") {
+        setOpenSidebar(null);
         proposeNodeImprovement(null, detail.selectedNode.id);
         // to apply assistant potential improvement on node editor
         setTimeout(() => {
@@ -6205,19 +6246,85 @@ const Notebook = ({}: NotebookProps) => {
               nodes: { ...graph.nodes },
             };
             let newNode = { ...newGraph.nodes[detail.selectedNode.id] };
-            newNode.title = detail.selectedNode.title;
-            newNode.content = detail.selectedNode.content;
+            newNode.title = detail.title;
+            newNode.content = detail.content;
+            newNode.flashcard = detail.flashcard;
+
+            if (detail.referenceNode) {
+              // adding reference of book
+              newNode.referenceIds = newNode.referenceIds || [];
+              newNode.referenceLabels = newNode.referenceLabels || [];
+              newNode.references = newNode.references || [];
+
+              const existingReference = newNode.referenceLabels.find(
+                referenceLabel => referenceLabel === detail.bookUrl
+              );
+              if (!existingReference) {
+                newNode.referenceIds.push(detail.referenceNode.id);
+                newNode.referenceLabels.push(detail.bookUrl);
+                newNode.references.push(detail.referenceNode.title);
+              }
+            }
+
             newGraph.nodes[detail.selectedNode.id] = newNode;
 
             return newGraph;
           });
+          setAbleToPropose(true);
           setNodeUpdates({
             nodeIds: [detail.selectedNode.id],
             updatedAt: new Date(),
           });
         }, 1000);
+      } else if (detail.type === "CHILD") {
+        setOpenSidebar(null);
+        notebookRef.current.selectedNode = detail.selectedNode.id;
+        proposeNewChild(null, detail.flashcard.type);
+        // to apply assistant potential improvement on node editor
+        setTimeout(() => {
+          const selectedNodeId = notebookRef.current.selectedNode!;
+
+          setGraph(graph => {
+            let newGraph = {
+              ...graph,
+              nodes: { ...graph.nodes },
+            };
+            let newNode = { ...newGraph.nodes[selectedNodeId] };
+
+            newNode.title = detail.title;
+            newNode.content = detail.content;
+            newNode.flashcard = detail.flashcard;
+
+            if (detail.referenceNode) {
+              // adding reference of book
+              newNode.referenceIds = newNode.referenceIds || [];
+              newNode.referenceLabels = newNode.referenceLabels || [];
+              newNode.references = newNode.references || [];
+
+              const existingReference = newNode.referenceLabels.find(
+                referenceLabel => referenceLabel === detail.bookUrl
+              );
+              if (!existingReference) {
+                newNode.referenceIds.push(detail.referenceNode.id);
+                newNode.referenceLabels.push(detail.bookUrl);
+                newNode.references.push(detail.referenceNode.title);
+              }
+            }
+
+            newGraph.nodes[selectedNodeId] = newNode;
+
+            return newGraph;
+          });
+          setAbleToPropose(true);
+          setNodeUpdates({
+            nodeIds: [selectedNodeId],
+            updatedAt: new Date(),
+          });
+        }, 1000);
       }
-    });
+    };
+    window.addEventListener("assistant", listener);
+    return () => window.removeEventListener("assistant", listener);
   }, [proposeNodeImprovement, nodeBookDispatch, onChangeNotebook, setOpenSidebar, setGraph]);
 
   return (
