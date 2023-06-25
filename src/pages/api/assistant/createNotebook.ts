@@ -8,6 +8,7 @@ import { IUser } from "src/types/IUser";
 import { generateNotebookTitleGpt4 } from "src/utils/assistant-helpers";
 
 export type IAssistantCreateNotebookRequestPayload = {
+  title?: string;
   message: string;
   conversationId: string;
 };
@@ -21,22 +22,14 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
     const tagData = tagDoc.data() as INode;
 
     const userData = req.body.data.user.userData as IUser;
-
-    const payload = req.body as IAssistantCreateNotebookRequestPayload;
-    const assistantConversationDoc = await db.collection("assistantConversations").doc(payload.conversationId).get();
-    if (!assistantConversationDoc.exists) {
-      throw new Error("Conversation doesn't exist");
-    }
-
-    const notebookTitle = await generateNotebookTitleGpt4(payload.message);
-
     const notebookRef = db.collection("notebooks").doc();
+
     const notebookData: INotebook = {
       owner: userData.uname,
       ownerChooseUname: userData.chooseUname,
       ownerFullName: `${userData.fName} ${userData.lName}`,
       ownerImgUrl: userData.imageUrl,
-      title: notebookTitle,
+      title: "",
       isPublic: "none",
       users: [userData.uname],
       usersInfo: {
@@ -47,7 +40,6 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
           role: "owner",
         },
       },
-      conversation: payload.conversationId,
       createdAt: Timestamp.now(),
       updatedAt: Timestamp.now(),
     };
@@ -56,6 +48,26 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
       notebookData.defaultTagId = tagId;
       notebookData.defaultTagName = tagData.title;
     }
+
+    const payload = req.body as IAssistantCreateNotebookRequestPayload;
+
+    if (payload.title) {
+      notebookData.title = payload.title;
+      await notebookRef.set(notebookData);
+      return res.status(200).json({
+        notebookId: notebookRef.id,
+        notebookTitle: notebookData.title,
+      });
+    }
+
+    const assistantConversationDoc = await db.collection("assistantConversations").doc(payload.conversationId).get();
+    if (!assistantConversationDoc.exists) {
+      throw new Error("Conversation doesn't exist");
+    }
+
+    const notebookTitle = await generateNotebookTitleGpt4(payload.message);
+    notebookData.title = notebookTitle;
+    notebookData.conversation = payload.conversationId;
     await notebookRef.set(notebookData);
 
     return res.status(200).json({

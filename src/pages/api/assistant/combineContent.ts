@@ -8,7 +8,7 @@ export type IAssistantCombineContentPayload = {
 async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
   try {
     const payload = req.body as IAssistantCombineContentPayload;
-    const content = combineContents(payload.passages || []);
+    const content = await combineContents(payload.passages || []);
     return res.status(200).json({
       content,
     });

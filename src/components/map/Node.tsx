@@ -426,7 +426,16 @@ const Node = ({
   const nodeClickHandler = useCallback(
     (event: any) => {
       let operation = "selectNode";
-      // console.log({ rrrrrr: notebookRef.current });
+      console.log({ rrrrrr: notebookRef.current });
+      const nodeClickEvent = new CustomEvent("node-selected", {
+        detail: {
+          id: identifier,
+          title,
+          content,
+        },
+      });
+      window.dispatchEvent(nodeClickEvent);
+
       if (notebookRef.current.choosingNode && notebookRef.current.choosingNode.id !== identifier) {
         // console.log("-1");
         // The first Nodes exist, Now is clicking the Chosen Node
@@ -610,6 +619,7 @@ const Node = ({
     notebookRef.current.selectedNode = scrollTo;
     nodeBookDispatch({ type: "setSelectedNode", payload: scrollTo });
     setOperation("CancelProposals");
+    window.dispatchEvent(new CustomEvent("next-flashcard"));
     closeSideBar();
   };
 
