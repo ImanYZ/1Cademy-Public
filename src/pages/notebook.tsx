@@ -13,8 +13,10 @@ import {
   Container,
   Divider,
   IconButton,
+  Input,
   Modal,
   Paper,
+  Stack,
   Tooltip,
   Typography,
   useTheme,
@@ -7200,7 +7202,8 @@ const Notebook = ({}: NotebookProps) => {
                 <Button onClick={() => nodeBookDispatch({ type: "setSelectionType", payload: "Proposals" })}>
                   Open Proposal
                 </Button>
-                <Button onClick={() => openNodeHandler("0JI7dmq1qFF18j4ZbKMw")}>Open Node Handler</Button>
+                {/* <Button onClick={() => openNodeHandler("0JI7dmq1qFF18j4ZbKMw")}>Open Node Handler</Button> */}
+                <OpenNode onOpenNode={openNodeHandler} />
                 <Button onClick={() => setShowRegion(prev => !prev)}>Show Region</Button>
                 <Button onClick={() => console.log({ openSidebar })}>Open Sidebar</Button>
               </Paper>
@@ -7221,3 +7224,15 @@ export default withAuthUser({
   shouldRedirectToLogin: true,
   shouldRedirectToHomeIfAuthenticated: false,
 })(NodeBook);
+
+const OpenNode = ({ onOpenNode }: { onOpenNode: (nodeId: string) => void }) => {
+  const [nodeId, setNodeId] = useState("");
+  return (
+    <Stack spacing={"12px"} direction={"row"}>
+      <Input value={nodeId} onChange={e => setNodeId(e.target.value)} fullWidth />
+      <Button onClick={() => onOpenNode(nodeId)} variant="contained">
+        Open
+      </Button>
+    </Stack>
+  );
+};
