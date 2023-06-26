@@ -21,7 +21,6 @@ import { gray25, gray50, gray100, gray300, gray850, orangeDark } from "@/pages/h
 import { wrapStringWithBoldTag } from "../../../lib/utils/JSX.utils";
 import { RiveComponentMemoized } from "../components/temporals/RiveComponentExtended";
 import whichValues, { TWhichValue } from "./constants/whichValues";
-import { Demos } from "./Demos";
 
 const Systems = () => {
   const theme = useTheme();
@@ -178,7 +177,6 @@ const Systems = () => {
 
         {getAnimation(selectedValue, { display: { xs: "none", sm: "block" }, flex: 1 })}
       </Stack>
-      <Demos />
     </Box>
   );
 };
