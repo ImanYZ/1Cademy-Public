@@ -6,6 +6,7 @@ import { gray200, gray600 } from "@/pages/home";
 
 import { useWindowSize } from "../../../hooks/useWindowSize";
 import { RiveComponentMemoized } from "../components/temporals/RiveComponentExtended";
+import { Demos } from "./Demos";
 
 export type TMechanisms = {
   id: string;
@@ -159,6 +160,7 @@ const Mechanism = ({ mechanisms }: IMechanism) => {
           </Box>
         </Stack>
       ))}
+      <Demos />
     </Box>
   );
 };
