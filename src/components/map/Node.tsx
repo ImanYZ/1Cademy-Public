@@ -890,7 +890,7 @@ const Node = ({
               </Box>
             )}
 
-            {!editable && !unaccepted && !notebookRef.current.choosingNode /* && !choosingNode */ && (
+            {!editable && !unaccepted && !simulated && !notebookRef.current.choosingNode && (
               <MemoizedNodeHeader
                 id={identifier}
                 open={open}
@@ -1420,7 +1420,7 @@ const Node = ({
         </>
       ) : (
         <div className="card-content">
-          {!notebookRef.current.choosingNode && (
+          {!notebookRef.current.choosingNode && !simulated && (
             <MemoizedNodeHeader
               id={identifier}
               // setFocusView={() => setFocusView({ isEnabled: true, selectedNode: identifier })}
