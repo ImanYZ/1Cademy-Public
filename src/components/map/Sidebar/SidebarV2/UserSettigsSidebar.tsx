@@ -984,12 +984,7 @@ const UserSettigsSidebar = ({
         title: "Account",
         content: (
           <Box height={"100%"} py="16px">
-            <Box
-              height={"100%"}
-              display={settingsValue !== -1 ? "none" : "flex"}
-              flexDirection={"column"}
-              justifyContent={"space-between"}
-            >
+            <Box height={"100%"} display={settingsValue !== -1 ? "none" : "flex"} flexDirection={"column"}>
               <Stack>
                 {ACCOUNT_OPTIONS.map((option, idx) => (
                   <Stack
@@ -1028,9 +1023,20 @@ const UserSettigsSidebar = ({
                   </Stack>
                 ))}
               </Stack>
-              <Button onClick={logoutClick} color="error">
-                Log out
-              </Button>
+              <Box sx={{ display: "flex", justifyContent: "center", mt: "50px" }}>
+                <Button
+                  variant="contained"
+                  onClick={logoutClick}
+                  color="error"
+                  sx={{
+                    borderRadius: "26px",
+                    width: "90px",
+                    backgroundColor: DESIGN_SYSTEM_COLORS.primary800,
+                  }}
+                >
+                  Log out
+                </Button>
+              </Box>
             </Box>
             <TabPanel value={settingsValue} index={0}>
               <ArrowBackButton text={ACCOUNT_OPTIONS[0].type} backwardsHandler={handleSettingsValue} />
