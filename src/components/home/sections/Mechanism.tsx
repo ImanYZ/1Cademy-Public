@@ -15,6 +15,7 @@ export type TMechanisms = {
   animation: {
     src: string;
     artboard: string;
+    padding: number;
   };
 };
 export const MECHANISM_ITEMS: TMechanisms[] = [
@@ -26,6 +27,7 @@ export const MECHANISM_ITEMS: TMechanisms[] = [
     animation: {
       src: "rive/micro-content-generation.riv",
       artboard: "New Artboard",
+      padding: 0,
     },
   },
   {
@@ -36,6 +38,7 @@ export const MECHANISM_ITEMS: TMechanisms[] = [
     animation: {
       src: "rive/linking.riv",
       artboard: "New Artboard",
+      padding: 0,
     },
   },
   {
@@ -46,6 +49,7 @@ export const MECHANISM_ITEMS: TMechanisms[] = [
     animation: {
       src: "rive/evaluating.riv",
       artboard: "New Artboard",
+      padding: 0,
     },
   },
   {
@@ -56,6 +60,7 @@ export const MECHANISM_ITEMS: TMechanisms[] = [
     animation: {
       src: "rive/improving.riv",
       artboard: "New Artboard",
+      padding: 0,
     },
   },
   {
@@ -66,6 +71,7 @@ export const MECHANISM_ITEMS: TMechanisms[] = [
     animation: {
       src: "rive/long-term-learning.riv",
       artboard: "New Artboard",
+      padding: 0,
     },
   },
   {
@@ -77,6 +83,7 @@ export const MECHANISM_ITEMS: TMechanisms[] = [
     animation: {
       src: "rive/contextualized-q-a.riv",
       artboard: "New Artboard",
+      padding: 0,
     },
   },
   {
@@ -88,6 +95,7 @@ export const MECHANISM_ITEMS: TMechanisms[] = [
     animation: {
       src: "rive/positive-reinforcement.riv",
       artboard: "New Artboard",
+      padding: 70,
     },
   },
 ];
@@ -146,17 +154,25 @@ const Mechanism = ({ mechanisms }: IMechanism) => {
             sx={{
               width: canvasDimensions.width,
               height: canvasDimensions.height,
-              display: "grid",
-              placeItems: "center",
+              padding: `${cur.animation.padding}px`,
             }}
           >
-            <RiveComponentMemoized
-              src={cur.animation.src}
-              artboard={cur.animation.artboard}
-              animations={["Timeline 1", theme.palette.mode]}
-              autoplay={true}
-              displayControls
-            />
+            <Box
+              sx={{
+                width: "100%",
+                height: "100%",
+                display: "grid",
+                placeItems: "center",
+              }}
+            >
+              <RiveComponentMemoized
+                src={cur.animation.src}
+                artboard={cur.animation.artboard}
+                animations={["Timeline 1", theme.palette.mode]}
+                autoplay={true}
+                displayControls
+              />
+            </Box>
           </Box>
         </Stack>
       ))}
