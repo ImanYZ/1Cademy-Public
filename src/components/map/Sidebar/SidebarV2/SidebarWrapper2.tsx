@@ -66,10 +66,6 @@ export const SidebarWrapper2 = ({
           background: theme => (theme.palette.mode === "dark" ? "#1B1A1A" : "#F9FAFB"),
           transition: "0.5s cubic-bezier(0.4, 0, 0.2, 1) !important",
           scrollBehavior: "smooth",
-          // "::-webkit-scrollbar-thumb": {
-          //   borderRadius: "4px",
-          // },
-          // "::-webkit-scrollbar ": { width: "4px", height: "4px" },
           borderRadius: "6px",
           ":hover": {
             "::-webkit-scrollbar-thumb": {
@@ -87,7 +83,7 @@ export const SidebarWrapper2 = ({
           <Typography
             component={"h2"}
             sx={{
-              fontSize: { xs: "24px", sm: "40px" },
+              fontSize: "24px",
               fontWeight: "700",
               lineHeight: "29.05px",
               marginBottom: headerImage ? "50px" : undefined,
@@ -104,7 +100,6 @@ export const SidebarWrapper2 = ({
         ref={sidebarContentRef}
         sx={{
           position: "relative",
-          height: "100%",
           overflowX: "hidden",
           overflowY: "auto",
           scrollBehavior: "smooth",

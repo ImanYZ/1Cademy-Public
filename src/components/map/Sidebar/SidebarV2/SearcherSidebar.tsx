@@ -71,7 +71,7 @@ type Pagination = {
   totalResults: number;
 };
 
-const NODE_TYPES_ARRAY: NodeType[] = ["Concept", "Code", "Reference", "Relation", "Question", "Idea"];
+export const NODE_TYPES_ARRAY: NodeType[] = ["Concept", "Code", "Reference", "Relation", "Question", "Idea"];
 const MAX_TAGS_IN_MOBILE = 2;
 
 const SearcherSidebar = ({
@@ -814,9 +814,9 @@ const SearcherSidebar = ({
               >
                 <RecentNodesList
                   id={"search-sort-options"}
-                  recentNodes={searchResults}
-                  setRecentNodes={setSearchResults}
-                  onlyTags={onlyTags}
+                  // recentNodes={searchResults}
+                  // setRecentNodes={setSearchResults}
+                  // onlyTags={onlyTags}
                   disabled={disableRecentNodeList}
                   sortOption={sortOption}
                   setSortOption={onChangeSortOptions}
