@@ -3,4 +3,4 @@ typesenseIndexer/*
 # TODO: uncomment this when fix linter errors in backend
 src/pages/api/*
 src/utils
-cloud-functions
+cloud-functions/*
