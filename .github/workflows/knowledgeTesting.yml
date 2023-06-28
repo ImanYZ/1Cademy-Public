@@ -60,6 +60,9 @@ jobs:
       - name: npm install and build
         run: |
           npm install --legacy-peer-deps
+          cd cloud-functions
+          npm install
+          cd ..
           npm run build
       - name: Unit tests
         run: NODE_OPTIONS="--max_old_space_size=8192" npm run test:ci
