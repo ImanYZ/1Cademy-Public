@@ -63,6 +63,7 @@ import { CitationsSidebar } from "@/components/map/Sidebar/SidebarV2/CitationsSi
 import { MemoizedNotificationSidebar } from "@/components/map/Sidebar/SidebarV2/NotificationSidebar";
 import { MemoizedPendingProposalSidebar } from "@/components/map/Sidebar/SidebarV2/PendingProposalSidebar";
 import { MemoizedProposalsSidebar } from "@/components/map/Sidebar/SidebarV2/ProposalsSidebar";
+import { ReferencesSidebarMemoized } from "@/components/map/Sidebar/SidebarV2/ReferencesSidebar";
 import { MemoizedSearcherSidebar } from "@/components/map/Sidebar/SidebarV2/SearcherSidebar";
 import { MemoizedUserInfoSidebar } from "@/components/map/Sidebar/SidebarV2/UserInfoSidebar";
 import { MemoizedUserSettingsSidebar } from "@/components/map/Sidebar/SidebarV2/UserSettigsSidebar";
@@ -104,7 +105,7 @@ import { useWorkerQueue } from "../hooks/useWorkerQueue";
 import { NodeChanges, ReputationSignal } from "../knowledgeTypes";
 import { getIdToken, idToken, retrieveAuthenticatedUser } from "../lib/firestoreClient/auth";
 import { Post, postWithToken } from "../lib/mapApi";
-import { NO_USER_IMAGE, ZINDEX } from "../lib/utils/constants";
+import { NO_USER_IMAGE, Z_INDEX } from "../lib/utils/constants";
 import { createGraph, dagreUtils } from "../lib/utils/dagre.util";
 import { devLog } from "../lib/utils/develop.util";
 import { getTypedCollections } from "../lib/utils/getTypedCollections";
@@ -171,6 +172,7 @@ export type OpenLeftSidebar =
   | "PROPOSALS"
   | "USER_SETTINGS"
   | "CITATIONS"
+  | "REFERENCES_SEARCH_ENGINE"
   | null;
 
 export type OpenRightSidebar = "LEADERBOARD" | "USER_STATUS" | null;
@@ -6516,6 +6518,12 @@ const Notebook = ({}: NotebookProps) => {
                   innerWidth={windowWith}
                 />
               )}
+
+              {/* referencesSidebar */}
+              <ReferencesSidebarMemoized
+                open={openSidebar === "REFERENCES_SEARCH_ENGINE"}
+                onClose={() => setOpenSidebar(null)}
+              />
             </Box>
           )}
 
@@ -6975,7 +6983,7 @@ const Notebook = ({}: NotebookProps) => {
               setVoiceAssistant(prev => ({ ...prev, questionNode: null }));
             }}
             openNodeHandler={openLinkedNode}
-            sx={{ position: "absolute", inset: "0px", zIndex: ZINDEX["dashboard"] }}
+            sx={{ position: "absolute", inset: "0px", zIndex: Z_INDEX["dashboard"] }}
             root={rootQuery}
             startPractice={startPractice}
             setStartPractice={setStartPractice}
@@ -6986,7 +6994,7 @@ const Notebook = ({}: NotebookProps) => {
 
         {/* assistant */}
         {voiceAssistant.tagId && (
-          <Box sx={{ position: "absolute", bottom: "10px", right: "50px", zIndex: ZINDEX["dashboard"] }}>
+          <Box sx={{ position: "absolute", bottom: "10px", right: "50px", zIndex: Z_INDEX["dashboard"] }}>
             <Assistant
               voiceAssistant={voiceAssistant}
               assistantRef={assistantRef}
@@ -7017,7 +7025,7 @@ const Notebook = ({}: NotebookProps) => {
                   theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookMainBlack : DESIGN_SYSTEM_COLORS.gray50,
                 borderRadius: "16px 0px 0px 0px",
                 transition: "right 0.4s",
-                zIndex: ZINDEX["dashboard"],
+                zIndex: Z_INDEX["dashboard"],
               }}
             >
               <IconButton
@@ -7049,7 +7057,7 @@ const Notebook = ({}: NotebookProps) => {
                   theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookMainBlack : DESIGN_SYSTEM_COLORS.gray50,
                 borderRadius: "16px 0px 0px 0px",
                 transition: "right 0.4s",
-                zIndex: ZINDEX["dashboard"],
+                zIndex: Z_INDEX["dashboard"],
               }}
             >
               <IconButton
@@ -7082,7 +7090,7 @@ const Notebook = ({}: NotebookProps) => {
                 left: "70px",
                 color: "white",
                 background: "royalBlue",
-                zIndex: ZINDEX["devtools"],
+                zIndex: Z_INDEX["devtools"],
                 ":hover": {
                   background: "#3352af",
                   // borderRadius: "8px",
@@ -7110,7 +7118,7 @@ const Notebook = ({}: NotebookProps) => {
                 overflowY: "auto",
                 backgroundColor: theme =>
                   theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.baseBlack : DESIGN_SYSTEM_COLORS.baseWhite,
-                zIndex: ZINDEX["devtools"],
+                zIndex: Z_INDEX["devtools"],
               }}
             >
               <Box>
@@ -7206,6 +7214,7 @@ const Notebook = ({}: NotebookProps) => {
                 <OpenNode onOpenNode={openNodeHandler} />
                 <Button onClick={() => setShowRegion(prev => !prev)}>Show Region</Button>
                 <Button onClick={() => console.log({ openSidebar })}>Open Sidebar</Button>
+                <Button onClick={() => setOpenSidebar("REFERENCES_SEARCH_ENGINE")}>Call Open Sidebar</Button>
               </Paper>
             </Box>
           </ClickAwayListener>
