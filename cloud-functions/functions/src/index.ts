@@ -173,7 +173,7 @@ export const onUserStatusChanged = functions.database.ref("/status/{uname}").onU
   });
 });
 
-exports.onActionTrackCreated = functions.database.ref("/actionTracks/{id}").onCreate(async change => {
+export const onActionTrackCreated = functions.database.ref("/actionTracks/{id}").onCreate(async change => {
   try {
     // Get the data written to Realtime Database
     const data = change.val();
