@@ -5,7 +5,7 @@ import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { SearchNodesResponse } from "src/knowledgeTypes";
-import { SortDirection, SortValues } from "src/nodeBookTypes";
+import { FullNodeData, SortDirection, SortValues } from "src/nodeBookTypes";
 
 import { ChosenTag, MemoizedTagsSearcher, TagTreeView } from "@/components/TagsSearcher";
 import { useTagsTreeView } from "@/hooks/useTagsTreeView";
@@ -23,19 +23,13 @@ import { SidebarWrapper2 } from "./SidebarWrapper2";
 dayjs.extend(relativeTime);
 
 type SearcherSidebarProps = {
-  //   notebookRef: MutableRefObject<TNodeBookState>;
-  //   openLinkedNode: any;
   open: boolean;
   onClose: () => void;
-  //   sidebarWidth: number;
-  //   innerHeight?: number;
-  //   innerWidth: number;
-  //   disableSearcher?: boolean;
-  //   enableElements: string[];
-  //   preLoadNodes: (nodeIds: string[], fullNodes: FullNodeData[]) => Promise<void>;
+  onChangeChosenNode: ({ nodeId, title }: { nodeId: string; title: string }) => void;
+  preLoadNodes: (nodeIds: string[], fullNodes: FullNodeData[]) => Promise<void>;
 };
 
-const ReferencesSidebar = ({ open, onClose }: SearcherSidebarProps) => {
+const ReferencesSidebar = ({ open, onClose, onChangeChosenNode, preLoadNodes }: SearcherSidebarProps) => {
   const [isLoading, setIsLoading] = useState(false);
   const [query, setQuery] = useState("");
   const [showTagSelector, setShowTagSelector] = useState(false);
@@ -82,8 +76,12 @@ const ReferencesSidebar = ({ open, onClose }: SearcherSidebarProps) => {
         totalResults: res.numResults,
       });
       setIsLoading(false);
+      preLoadNodes(
+        res.data.map(c => c.id),
+        []
+      );
     },
-    [selectedTags]
+    [preLoadNodes, selectedTags]
   );
 
   const onChangeSortDirection = useCallback(
@@ -292,12 +290,18 @@ const ReferencesSidebar = ({ open, onClose }: SearcherSidebarProps) => {
     () => (
       <Stack spacing={"8px"} sx={{ p: "16px" }}>
         {references.map(cur => (
-          <ReferenceItem key={cur.id} {...cur} />
+          <ReferenceItem
+            key={cur.id}
+            onClick={() => {
+              onChangeChosenNode({ nodeId: cur.id, title: cur.title });
+            }}
+            {...cur}
+          />
         ))}
         <Box sx={{ py: "10px", display: "flex", justifyContent: "center" }}>{isLoading && <CircularProgress />}</Box>
       </Stack>
     ),
-    [isLoading, references]
+    [isLoading, onChangeChosenNode, references]
   );
 
   useEffect(() => {

@@ -22,6 +22,7 @@ type ReferenceItemProps = {
   corrects: number;
   wrong: boolean;
   wrongs: number;
+  onClick: () => void;
 };
 export const ReferenceItem = ({
   id,
@@ -32,6 +33,7 @@ export const ReferenceItem = ({
   corrects,
   wrong,
   wrongs,
+  onClick,
 }: ReferenceItemProps) => {
   const [expandItem, setExpandItem] = useState(false);
 
@@ -39,11 +41,16 @@ export const ReferenceItem = ({
     <Stack
       key={id}
       spacing={"10px"}
+      onClick={onClick}
       sx={{
         borderRadius: "8px",
         p: "12px 16px 10px 16px",
         backgroundColor: theme =>
           theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookG700 : DESIGN_SYSTEM_COLORS.gray300,
+        cursor: "pointer",
+        ":hover": {
+          background: theme => (theme.palette.mode === "dark" ? "#2F2F2F" : "#EAECF0"),
+        },
       }}
     >
       <Box>
@@ -92,17 +99,17 @@ export const ReferenceItem = ({
           <Stack direction={"row"} alignItems={"center"}>
             <Tooltip title={"Vote to prevent further changes."} placement={"top"}>
               <Button
-                onClick={() => console.log("correct")}
+                // onClick={() => console.log("correct")}
                 // disabled={nodeCopy?.disableVotes}
                 sx={{
                   p: "0px 8px 0px 5px",
                   color: "inherit",
                   minWidth: "0px",
                   borderRadius: "16px 0px 0px 16px",
-                  ":hover": {
-                    backgroundColor: ({ palette }) =>
-                      palette.mode === "dark" ? palette.common.notebookG400 : palette.common.lightBackground2,
-                  },
+                  // ":hover": {
+                  //   backgroundColor: ({ palette }) =>
+                  //     palette.mode === "dark" ? palette.common.notebookG400 : palette.common.lightBackground2,
+                  // },
                 }}
               >
                 <Box sx={{ display: "flex", fontSize: "14px", alignItems: "center" }}>
@@ -122,17 +129,17 @@ export const ReferenceItem = ({
             />
             <Tooltip title={"Vote to delete node."} placement={"top"}>
               <Button
-                onClick={() => console.log("wrong")}
+                // onClick={() => console.log("wrong")}
                 // disabled={nodeCopy?.disableVotes}
                 sx={{
                   p: "0px 5px 0px 8px",
                   color: "inherit",
                   minWidth: "0px",
                   borderRadius: "0px 16px 16px 0px",
-                  ":hover": {
-                    backgroundColor: ({ palette }) =>
-                      palette.mode === "dark" ? palette.common.notebookG400 : palette.common.lightBackground2,
-                  },
+                  // ":hover": {
+                  //   backgroundColor: ({ palette }) =>
+                  //     palette.mode === "dark" ? palette.common.notebookG400 : palette.common.lightBackground2,
+                  // },
                 }}
               >
                 <Box sx={{ display: "flex", fontSize: "14px", alignItems: "center" }}>

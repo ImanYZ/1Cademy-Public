@@ -92,7 +92,7 @@ import Leaderboard from "../components/practiceTool/Leaderboard";
 import { UserStatus } from "../components/practiceTool/UserStatus";
 import { MemoizedTutorialTableOfContent } from "../components/tutorial/TutorialTableOfContent";
 import { NodeBookProvider, useNodeBook } from "../context/NodeBookContext";
-import { detectElements } from "../hooks/detectElements";
+import { detectElements as detectHtmlElements } from "../hooks/detectElements";
 import {
   getTutorialStep,
   removeStyleFromTarget,
@@ -717,7 +717,7 @@ const Notebook = ({}: NotebookProps) => {
   }, [notebooks, selectedNotebookId]);
 
   const openNodeHandler = useMemoizedCallback(
-    async (nodeId: string, openWithDefaultValues: Partial<UserNodeFirestore> = {}) => {
+    async (nodeId: string, openWithDefaultValues: Partial<UserNodeFirestore> = {}, selectNode = true) => {
       devLog("OPEN_NODE_HANDLER", { nodeId, openWithDefaultValues });
 
       // update graph with preloaded data, to get changes immediately
@@ -813,8 +813,10 @@ const Notebook = ({}: NotebookProps) => {
           batch.set(doc(userNodeLogRef), userNodeLogData);
           await batch.commit();
 
-          notebookRef.current.selectedNode = nodeId; // CHECK: THIS DOESN'T GUARANTY CORRECT SELECTED NODE, WE NEED TO DETECT WHEN GRAPH UPDATE HIS VALUES
-          nodeBookDispatch({ type: "setSelectedNode", payload: nodeId }); // CHECK: SAME FOR THIS
+          if (selectNode) {
+            notebookRef.current.selectedNode = nodeId; // CHECK: THIS DOESN'T GUARANTY CORRECT SELECTED NODE, WE NEED TO DETECT WHEN GRAPH UPDATE HIS VALUES
+            nodeBookDispatch({ type: "setSelectedNode", payload: nodeId }); // CHECK: SAME FOR THIS
+          }
         } catch (err) {
           console.error(err);
         }
@@ -1001,7 +1003,7 @@ const Notebook = ({}: NotebookProps) => {
     return () => unsubscribe();
   }, [user]);
 
-  const preLoadNodes = useCallback(
+  const onPreLoadNodes = useCallback(
     async (nodeIds: string[], fullNodes: FullNodeData[]) => {
       if (!user?.uname) return;
       if (!selectedNotebookId) return;
@@ -1070,14 +1072,14 @@ const Notebook = ({}: NotebookProps) => {
             ],
             []
           );
-          preLoadNodes(otherNodes, fullNodes);
+          onPreLoadNodes(otherNodes, fullNodes);
         },
         error => console.error(error)
       );
 
       return () => userNodesSnapshot();
     },
-    [allTags, db, preLoadNodes]
+    [allTags, db, onPreLoadNodes]
   );
 
   // this useEffect manage states when sidebar is opened or closed
@@ -1653,9 +1655,9 @@ const Notebook = ({}: NotebookProps) => {
           updatedNodeIds.push(nodeId);
           updatedNodeIds.push(notebookRef.current.choosingNode.id);
           // updatedNodeIds.push(notebookRef.current.chosenNode.id);
+          console.log("aa0");
           let choosingNodeCopy = copyNode(oldNodes[notebookRef.current.choosingNode.id]);
-          const chosenNodeObj = copyNode(oldNodes[notebookRef.current.chosenNode.id]);
-          console.log("aa", { thisNode: choosingNodeCopy });
+          let chosenNodeObj = copyNode(oldNodes[notebookRef.current.chosenNode.id]);
           let newEdges: EdgesData = oldEdges;
 
           const validLink =
@@ -1801,6 +1803,27 @@ const Notebook = ({}: NotebookProps) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [notebookRef.current.choosingNode, notebookRef.current.chosenNode]
     // [notebookRef.current.choosingNode, notebookRef.current.chosenNode]
+  );
+
+  // const onChangeReferenceChosenNode = () => {};
+
+  const onChangeChosenNode = useCallback(
+    async ({ nodeId, title }: { nodeId: string; title: string }) => {
+      console.log("onChangeChosenNode", 0);
+      if (!notebookRef.current.choosingNode) return;
+      if (notebookRef.current.choosingNode.id === nodeId) return;
+
+      notebookRef.current.chosenNode = { id: nodeId, title };
+      nodeBookDispatch({ type: "setChosenNode", payload: { id: nodeId, title } });
+      if (notebookRef.current.choosingNode.id === "Tag") return; //INFO: this is important to update a community
+
+      console.log("onChangeChosenNode", 1);
+      openNodeHandler(nodeId, {}, false);
+      await detectHtmlElements({ ids: [nodeId] });
+      chosenNodeChanged(nodeId);
+      setAbleToPropose(true);
+    },
+    [chosenNodeChanged, nodeBookDispatch, openNodeHandler]
   );
 
   const deleteLink = useCallback(
@@ -2315,7 +2338,7 @@ const Notebook = ({}: NotebookProps) => {
             notebookRef.current.selectedNode = nodeId;
             nodeBookDispatch({ type: "setSelectedNode", payload: nodeId });
             await batch.commit();
-            await detectElements({ ids: childrenNotInNotebook.map(c => c.node) });
+            await detectHtmlElements({ ids: childrenNotInNotebook.map(c => c.node) });
             isWritingOnDBRef.current = false;
           } catch (err) {
             isWritingOnDBRef.current = false;
@@ -2437,7 +2460,7 @@ const Notebook = ({}: NotebookProps) => {
             notebookRef.current.selectedNode = nodeId;
             nodeBookDispatch({ type: "setSelectedNode", payload: nodeId });
             await batch.commit();
-            await detectElements({ ids: parentsNotInNotebook.map(c => c.node) });
+            await detectHtmlElements({ ids: parentsNotInNotebook.map(c => c.node) });
             isWritingOnDBRef.current = false;
           } catch (err) {
             isWritingOnDBRef.current = false;
@@ -2546,7 +2569,7 @@ const Notebook = ({}: NotebookProps) => {
       );
       await Promise.all(batchArray.map(async batch => await batch.commit()));
       setSelectedNotebookId(notebookId);
-      await detectElements({ ids: nodeIds });
+      await detectHtmlElements({ ids: nodeIds });
       isWritingOnDBRef.current = false;
     },
     [db, user]
@@ -6437,7 +6460,7 @@ const Notebook = ({}: NotebookProps) => {
                 innerHeight={innerHeight}
                 innerWidth={windowWith}
                 enableElements={[]}
-                preLoadNodes={preLoadNodes}
+                preLoadNodes={onPreLoadNodes}
               />
               <MemoizedNotificationSidebar
                 openLinkedNode={openLinkedNode}
@@ -6526,6 +6549,8 @@ const Notebook = ({}: NotebookProps) => {
                   nodeBookDispatch({ type: "setChoosingNode", payload: null });
                   notebookRef.current.choosingNode = null;
                 }}
+                onChangeChosenNode={onChangeChosenNode}
+                preLoadNodes={onPreLoadNodes}
               />
             </Box>
           )}
