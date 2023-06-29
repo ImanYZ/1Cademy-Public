@@ -1,4 +1,5 @@
 import * as admin from "firebase-admin";
+import { Timestamp } from "firebase-admin/firestore";
 import * as functions from "firebase-functions";
 
 import { IActionTrack } from "./types/IActionTrack";
@@ -179,7 +180,13 @@ export const onActionTrackCreated = functions.firestore.document("/actionTracks/
     const data = change.data();
     console.log("log:", { actionTracks });
     const actionTracksLogRef = firestore.collection("actionTracks24h");
-    actionTracksLogRef.add(data);
+
+    const today = new Date();
+    const MILLISECONDS_IN_A_DAY = 86400000;
+    const twoDaysAgo = new Date(Number(today) - 2 * MILLISECONDS_IN_A_DAY);
+
+    // expired is 2 days ago, to remove document in 24h, because TTL remove in 72h
+    actionTracksLogRef.add({ ...data, expired: Timestamp.fromDate(twoDaysAgo) });
   } catch (error) {
     console.log("error:", error);
   }
