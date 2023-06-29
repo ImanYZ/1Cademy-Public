@@ -6,7 +6,6 @@ import relativeTime from "dayjs/plugin/relativeTime";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { SearchNodesResponse } from "src/knowledgeTypes";
 import { SortDirection, SortValues } from "src/nodeBookTypes";
-import { NodeType } from "src/types";
 
 import { ChosenTag, MemoizedTagsSearcher, TagTreeView } from "@/components/TagsSearcher";
 import { useTagsTreeView } from "@/hooks/useTagsTreeView";
@@ -22,20 +21,6 @@ import { Pagination } from "./SearcherSidebar";
 import { SidebarWrapper2 } from "./SidebarWrapper2";
 
 dayjs.extend(relativeTime);
-
-type ReferenceItem = {
-  id: string;
-  correctNum: number;
-  wrongNum: number;
-  nodeType: NodeType;
-  createdAt: Date;
-  correct: boolean;
-  corrects: number;
-  wrong: boolean;
-  wrongs: number;
-  title: string;
-  content: string;
-};
 
 type SearcherSidebarProps = {
   //   notebookRef: MutableRefObject<TNodeBookState>;

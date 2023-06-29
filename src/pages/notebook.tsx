@@ -6469,7 +6469,7 @@ const Notebook = ({}: NotebookProps) => {
 
               <MemoizedProposalsSidebar
                 theme={settings.theme}
-                open={openSidebar === "PROPOSALS"}
+                open={openSidebar === "PROPOSALS" && !["Reference"].includes(nodeBookState.choosingNode?.type ?? "")}
                 onClose={() => onCloseSidebar()}
                 clearInitialProposal={clearInitialProposal}
                 initialProposal={nodeBookState.initialProposal}
@@ -6521,8 +6521,11 @@ const Notebook = ({}: NotebookProps) => {
 
               {/* referencesSidebar */}
               <ReferencesSidebarMemoized
-                open={openSidebar === "REFERENCES_SEARCH_ENGINE"}
-                onClose={() => setOpenSidebar(null)}
+                open={nodeBookState.choosingNode?.type === "Reference"}
+                onClose={() => {
+                  nodeBookDispatch({ type: "setChoosingNode", payload: null });
+                  notebookRef.current.choosingNode = null;
+                }}
               />
             </Box>
           )}
