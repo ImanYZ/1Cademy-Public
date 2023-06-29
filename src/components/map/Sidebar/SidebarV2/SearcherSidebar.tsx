@@ -64,7 +64,7 @@ type SearcherSidebarProps = {
   preLoadNodes: (nodeIds: string[], fullNodes: FullNodeData[]) => Promise<void>;
 };
 
-type Pagination = {
+export type Pagination = {
   data: any[];
   lastPageLoaded: number;
   totalPage: number;

@@ -94,26 +94,30 @@ export const SidebarWrapper2 = ({
         </Box>
       )}
 
-      <Box id={`${id}-options`}>{SidebarOptions}</Box>
-      <Box
-        id={`${id}-content`}
-        ref={sidebarContentRef}
-        sx={{
-          position: "relative",
-          overflowX: "hidden",
-          overflowY: "auto",
-          scrollBehavior: "smooth",
-          "::-webkit-scrollbar-thumb": {
-            background: "rgba(119, 119, 119, 0.692)",
-            borderRadius: "4px",
-          },
-          "::-webkit-scrollbar ": { width: "4px", height: "4px" },
-          borderRadius: "6px",
-          ...sxContentWrapper,
-        }}
-      >
-        {SidebarContent}
-      </Box>
+      {open && (
+        <>
+          <Box id={`${id}-options`}>{SidebarOptions}</Box>
+          <Box
+            id={`${id}-content`}
+            ref={sidebarContentRef}
+            sx={{
+              position: "relative",
+              overflowX: "hidden",
+              overflowY: "auto",
+              scrollBehavior: "smooth",
+              "::-webkit-scrollbar-thumb": {
+                background: "rgba(119, 119, 119, 0.692)",
+                borderRadius: "4px",
+              },
+              "::-webkit-scrollbar ": { width: "4px", height: "4px" },
+              borderRadius: "6px",
+              ...sxContentWrapper,
+            }}
+          >
+            {SidebarContent}
+          </Box>
+        </>
+      )}
       {showScrollUpButton && (
         <Box
           sx={{
