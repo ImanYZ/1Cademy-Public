@@ -65,8 +65,8 @@ export const ReferenceItem = ({
                 display: "-webkit-box",
                 overflow: "hidden",
                 textOverflow: "ellipsis",
-                "-webkit-box-orient": "vertical",
-                "-webkit-line-clamp": "3" /* start showing ellipsis when 3rd line is reached */,
+                WebkitBoxOrient: "vertical",
+                WebkitLineClamp: 3 /* start showing ellipsis when 3rd line is reached */,
                 whiteSpace: "pre-wrap" /* let the text wrap preserving spaces */,
               }),
             }}

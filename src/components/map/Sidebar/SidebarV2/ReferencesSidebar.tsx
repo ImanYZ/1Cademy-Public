@@ -8,6 +8,7 @@ import { SearchNodesResponse } from "src/knowledgeTypes";
 import { FullNodeData, SortDirection, SortValues } from "src/nodeBookTypes";
 
 import { ChosenTag, MemoizedTagsSearcher, TagTreeView } from "@/components/TagsSearcher";
+import { useInView } from "@/hooks/useObserver";
 import { useTagsTreeView } from "@/hooks/useTagsTreeView";
 import { Post } from "@/lib/mapApi";
 import { DESIGN_SYSTEM_COLORS } from "@/lib/theme/colors";
@@ -40,6 +41,7 @@ const ReferencesSidebar = ({ open, onClose, onChangeChosenNode, preLoadNodes }: 
   const [searchResults, setSearchResults] = useState<Pagination>(INITIAL_SEARCH_RESULT);
 
   const { allTags, setAllTags, resetSelectedTags } = useTagsTreeView();
+  const { ref: refInfinityLoaderTrigger, inView: inViewInfinityLoaderTrigger } = useInView();
 
   const selectedTags = useMemo<TagTreeView[]>(() => Object.values(allTags).filter(tag => tag.checked), [allTags]);
 
@@ -57,6 +59,7 @@ const ReferencesSidebar = ({ open, onClose, onChangeChosenNode, preLoadNodes }: 
       nodesUpdatedSince: number;
       page?: number;
     }) => {
+      console.log(" -> SEARCH");
       setIsLoading(true);
       if (page < 2) setSearchResults(INITIAL_SEARCH_RESULT);
       const res = await Post<SearchNodesResponse>("/searchNodesInNotebook", {
@@ -69,12 +72,12 @@ const ReferencesSidebar = ({ open, onClose, onChangeChosenNode, preLoadNodes }: 
         page,
         onlyTitle: false,
       });
-      setSearchResults({
-        data: res.data,
+      setSearchResults(prev => ({
+        data: page === 1 ? res.data : [...prev.data, ...res.data],
         lastPageLoaded: res.page,
         totalPage: Math.ceil((res.numResults || 0) / (res.perPage || 10)),
         totalResults: res.numResults,
-      });
+      }));
       setIsLoading(false);
       preLoadNodes(
         res.data.map(c => c.id),
@@ -126,6 +129,27 @@ const ReferencesSidebar = ({ open, onClose, onChangeChosenNode, preLoadNodes }: 
   const references = useMemo(() => {
     return searchResults.data;
   }, [searchResults.data]);
+
+  useEffect(() => {
+    if (!inViewInfinityLoaderTrigger) return;
+    if (isLoading) return;
+    onSearchQuery({
+      q: query,
+      sortOption,
+      sortDirection,
+      nodesUpdatedSince: mapTimeFilterToDays(timeFilter),
+      page: searchResults.lastPageLoaded + 1,
+    });
+  }, [
+    inViewInfinityLoaderTrigger,
+    isLoading,
+    onSearchQuery,
+    query,
+    searchResults.lastPageLoaded,
+    sortDirection,
+    sortOption,
+    timeFilter,
+  ]);
 
   const sidebarOptionsMemo = useMemo(
     () => (
@@ -298,10 +322,22 @@ const ReferencesSidebar = ({ open, onClose, onChangeChosenNode, preLoadNodes }: 
             {...cur}
           />
         ))}
-        <Box sx={{ py: "10px", display: "flex", justifyContent: "center" }}>{isLoading && <CircularProgress />}</Box>
+        <Box sx={{ py: "10px", display: "flex", justifyContent: "center" }}>
+          {isLoading && <CircularProgress />}
+          {!isLoading && searchResults.lastPageLoaded < searchResults.totalPage && (
+            <Box id="ContinueButton" ref={refInfinityLoaderTrigger}></Box>
+          )}
+        </Box>
       </Stack>
     ),
-    [isLoading, onChangeChosenNode, references]
+    [
+      isLoading,
+      onChangeChosenNode,
+      refInfinityLoaderTrigger,
+      references,
+      searchResults.lastPageLoaded,
+      searchResults.totalPage,
+    ]
   );
 
   useEffect(() => {
