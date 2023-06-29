@@ -55,7 +55,7 @@ const ReferencesSidebar = ({ open, onClose }: SearcherSidebarProps) => {
   const [query, setQuery] = useState("");
   const [showTagSelector, setShowTagSelector] = useState(false);
   const [chosenTags, setChosenTags] = useState<ChosenTag[]>([]);
-  const [timeFilter, setTimeFilter] = useState<any>("ALL_TIME");
+  const [timeFilter, setTimeFilter] = useState<string>("ALL_TIME");
   const [sortOption, setSortOption] = useState<SortValues>("NOT_SELECTED");
   const [sortDirection, setSortDirection] = useState<SortDirection>("DESCENDING");
   const [searchResults, setSearchResults] = useState<Pagination>(INITIAL_SEARCH_RESULT);
@@ -144,7 +144,7 @@ const ReferencesSidebar = ({ open, onClose }: SearcherSidebarProps) => {
     return searchResults.data;
   }, [searchResults.data]);
 
-  const searcherOptionsMemo = useMemo(
+  const sidebarOptionsMemo = useMemo(
     () => (
       <Box>
         <Box
@@ -325,11 +325,11 @@ const ReferencesSidebar = ({ open, onClose }: SearcherSidebarProps) => {
 
   return (
     <SidebarWrapper2
-      id="sidebar-wrapper-searcher"
+      id="references-sidebar-wrapper"
       title="References to link"
       open={open}
       onClose={onClose}
-      SidebarOptions={searcherOptionsMemo}
+      SidebarOptions={sidebarOptionsMemo}
       SidebarContent={sidebarContentMemo}
       sx={{ boxShadow: "none" }}
       sxContentWrapper={{
@@ -339,7 +339,6 @@ const ReferencesSidebar = ({ open, onClose }: SearcherSidebarProps) => {
     />
   );
 };
-export const MemoizedSearcherSidebar = React.memo(ReferencesSidebar);
 
 export const ReferencesSidebarMemoized = React.memo(ReferencesSidebar);
 
