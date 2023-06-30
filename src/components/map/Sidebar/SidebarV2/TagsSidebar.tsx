@@ -6,7 +6,7 @@ import relativeTime from "dayjs/plugin/relativeTime";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { SearchNodesResponse } from "src/knowledgeTypes";
 import { FullNodeData, SortDirection, SortValues } from "src/nodeBookTypes";
-import { SimpleNode2 } from "src/types";
+import { NodeType } from "src/types";
 
 import { ChosenTag, MemoizedTagsSearcher, TagTreeView } from "@/components/TagsSearcher";
 import { useInView } from "@/hooks/useObserver";
@@ -19,19 +19,19 @@ import RecentNodesList from "../../RecentNodesList";
 import TimeFilter from "../../TimeFilter";
 import { SearchInput } from "../SearchInput";
 import { SidebarNodeLink } from "../SidebarNodeLink";
-import { Pagination } from "./SearcherSidebar";
+import { NODE_TYPES_ARRAY, Pagination } from "./SearcherSidebar";
 import { SidebarWrapper2 } from "./SidebarWrapper2";
 
 dayjs.extend(relativeTime);
 
-type ReferencesSidebarProps = {
+type TagsSidebarProps = {
   open: boolean;
   onClose: () => void;
   onChangeChosenNode: ({ nodeId, title }: { nodeId: string; title: string }) => void;
   preLoadNodes: (nodeIds: string[], fullNodes: FullNodeData[]) => Promise<void>;
 };
 
-const ReferencesSidebar = ({ open, onClose, onChangeChosenNode, preLoadNodes }: ReferencesSidebarProps) => {
+const TagsSidebar = ({ open, onClose, onChangeChosenNode, preLoadNodes }: TagsSidebarProps) => {
   const [isLoading, setIsLoading] = useState(false);
   const [query, setQuery] = useState("");
   const [showTagSelector, setShowTagSelector] = useState(false);
@@ -39,6 +39,7 @@ const ReferencesSidebar = ({ open, onClose, onChangeChosenNode, preLoadNodes }: 
   const [timeFilter, setTimeFilter] = useState<string>("ALL_TIME");
   const [sortOption, setSortOption] = useState<SortValues>("NOT_SELECTED");
   const [sortDirection, setSortDirection] = useState<SortDirection>("DESCENDING");
+  const [nodeTypes, setNodeTypes] = useState(NODE_TYPES_ARRAY);
   const [searchResults, setSearchResults] = useState<Pagination>(INITIAL_SEARCH_RESULT);
 
   const { allTags, setAllTags, resetSelectedTags } = useTagsTreeView();
@@ -52,12 +53,14 @@ const ReferencesSidebar = ({ open, onClose, onChangeChosenNode, preLoadNodes }: 
       sortOption,
       sortDirection,
       nodesUpdatedSince,
+      nodeTypes,
       page = 1,
     }: {
       q: string;
       sortOption: SortValues;
       sortDirection: SortDirection;
       nodesUpdatedSince: number;
+      nodeTypes: NodeType[];
       page?: number;
     }) => {
       console.log(" -> SEARCH");
@@ -65,7 +68,7 @@ const ReferencesSidebar = ({ open, onClose, onChangeChosenNode, preLoadNodes }: 
       if (page < 2) setSearchResults(INITIAL_SEARCH_RESULT);
       const res = await Post<SearchNodesResponse>("/searchNodesInNotebook", {
         q,
-        nodeTypes: ["Reference"],
+        nodeTypes,
         tags: selectedTags.map(c => c.title),
         nodesUpdatedSince,
         sortOption: !sortOption ? "NOT_SELECTED" : sortOption,
@@ -74,7 +77,7 @@ const ReferencesSidebar = ({ open, onClose, onChangeChosenNode, preLoadNodes }: 
         onlyTitle: false,
       });
       setSearchResults(prev => ({
-        data: page === 1 ? res.data : [...prev.data, ...res.data],
+        data: prev.lastPageLoaded === 1 ? res.data : [...prev.data, ...res.data],
         lastPageLoaded: res.page,
         totalPage: Math.ceil((res.numResults || 0) / (res.perPage || 10)),
         totalResults: res.numResults,
@@ -95,10 +98,11 @@ const ReferencesSidebar = ({ open, onClose, onChangeChosenNode, preLoadNodes }: 
         q: query,
         sortOption,
         sortDirection: newSortDirection,
+        nodeTypes,
         nodesUpdatedSince: mapTimeFilterToDays(timeFilter),
       });
     },
-    [onSearchQuery, query, sortOption, timeFilter]
+    [nodeTypes, onSearchQuery, query, sortOption, timeFilter]
   );
 
   const onChangeSortOptions = useCallback(
@@ -108,10 +112,11 @@ const ReferencesSidebar = ({ open, onClose, onChangeChosenNode, preLoadNodes }: 
         q: query,
         sortOption: newSortOption,
         sortDirection,
+        nodeTypes,
         nodesUpdatedSince: mapTimeFilterToDays(timeFilter),
       });
     },
-    [onSearchQuery, query, sortDirection, timeFilter]
+    [nodeTypes, onSearchQuery, query, sortDirection, timeFilter]
   );
 
   const onChangeTimeFilter = useCallback(
@@ -121,13 +126,29 @@ const ReferencesSidebar = ({ open, onClose, onChangeChosenNode, preLoadNodes }: 
         q: query,
         sortOption,
         sortDirection,
+        nodeTypes,
         nodesUpdatedSince: mapTimeFilterToDays(newTimeFilter),
       });
     },
-    [onSearchQuery, query, sortDirection, sortOption]
+    [nodeTypes, onSearchQuery, query, sortDirection, sortOption]
   );
 
-  const references: SimpleNode2[] = useMemo(() => {
+  const onChangeNodeType = useCallback(
+    (newNodeTypes: NodeType[]) => {
+      console.log("onChangeNodeType:", { newNodeTypes });
+      setNodeTypes(newNodeTypes);
+      onSearchQuery({
+        q: query,
+        sortOption,
+        sortDirection,
+        nodeTypes: newNodeTypes,
+        nodesUpdatedSince: mapTimeFilterToDays(timeFilter),
+      });
+    },
+    [onSearchQuery, query, sortDirection, sortOption, timeFilter]
+  );
+
+  const references = useMemo(() => {
     return searchResults.data;
   }, [searchResults.data]);
 
@@ -138,12 +159,14 @@ const ReferencesSidebar = ({ open, onClose, onChangeChosenNode, preLoadNodes }: 
       q: query,
       sortOption,
       sortDirection,
+      nodeTypes,
       nodesUpdatedSince: mapTimeFilterToDays(timeFilter),
       page: searchResults.lastPageLoaded + 1,
     });
   }, [
     inViewInfinityLoaderTrigger,
     isLoading,
+    nodeTypes,
     onSearchQuery,
     query,
     searchResults.lastPageLoaded,
@@ -244,10 +267,12 @@ const ReferencesSidebar = ({ open, onClose, onChangeChosenNode, preLoadNodes }: 
                   q: query,
                   sortOption,
                   sortDirection,
+                  nodeTypes,
                   nodesUpdatedSince: mapTimeFilterToDays(timeFilter),
                 })
               }
               placeholder="Nodes search"
+              nodeTypeProps={{ value: nodeTypes, onChange: onChangeNodeType }}
             />
           )}
 
@@ -295,6 +320,8 @@ const ReferencesSidebar = ({ open, onClose, onChangeChosenNode, preLoadNodes }: 
     [
       allTags,
       chosenTags,
+      nodeTypes,
+      onChangeNodeType,
       onChangeSortDirection,
       onChangeSortOptions,
       onChangeTimeFilter,
@@ -317,10 +344,8 @@ const ReferencesSidebar = ({ open, onClose, onChangeChosenNode, preLoadNodes }: 
           <SidebarNodeLink
             key={cur.id}
             onClick={() => {
-              onChangeChosenNode({ nodeId: cur.id, title: cur.title ?? "" });
+              onChangeChosenNode({ nodeId: cur.id, title: cur.title });
             }}
-            correct={false}
-            wrong={false}
             {...cur}
           />
         ))}
@@ -352,8 +377,8 @@ const ReferencesSidebar = ({ open, onClose, onChangeChosenNode, preLoadNodes }: 
 
   return (
     <SidebarWrapper2
-      id="references-sidebar-wrapper"
-      title="References to link"
+      id="tags-sidebar-wrapper"
+      title="Tags to link"
       open={open}
       onClose={onClose}
       SidebarOptions={sidebarOptionsMemo}
@@ -367,7 +392,7 @@ const ReferencesSidebar = ({ open, onClose, onChangeChosenNode, preLoadNodes }: 
   );
 };
 
-export const ReferencesSidebarMemoized = React.memo(ReferencesSidebar);
+export const TagsSidebarMemoized = React.memo(TagsSidebar);
 
 const mapTimeFilterToDays = (timeFilter: string): number => {
   if (timeFilter === "LAST_DAY") return 1;

@@ -65,6 +65,7 @@ import { MemoizedPendingProposalSidebar } from "@/components/map/Sidebar/Sidebar
 import { MemoizedProposalsSidebar } from "@/components/map/Sidebar/SidebarV2/ProposalsSidebar";
 import { ReferencesSidebarMemoized } from "@/components/map/Sidebar/SidebarV2/ReferencesSidebar";
 import { MemoizedSearcherSidebar } from "@/components/map/Sidebar/SidebarV2/SearcherSidebar";
+import { TagsSidebarMemoized } from "@/components/map/Sidebar/SidebarV2/TagsSidebar";
 import { MemoizedUserInfoSidebar } from "@/components/map/Sidebar/SidebarV2/UserInfoSidebar";
 import { MemoizedUserSettingsSidebar } from "@/components/map/Sidebar/SidebarV2/UserSettigsSidebar";
 import { useAuth } from "@/context/AuthContext";
@@ -6492,7 +6493,9 @@ const Notebook = ({}: NotebookProps) => {
 
               <MemoizedProposalsSidebar
                 theme={settings.theme}
-                open={openSidebar === "PROPOSALS" && !["Reference"].includes(nodeBookState.choosingNode?.type ?? "")}
+                open={
+                  openSidebar === "PROPOSALS" && !["Reference", "Tag"].includes(nodeBookState.choosingNode?.type ?? "")
+                }
                 onClose={() => onCloseSidebar()}
                 clearInitialProposal={clearInitialProposal}
                 initialProposal={nodeBookState.initialProposal}
@@ -6542,9 +6545,17 @@ const Notebook = ({}: NotebookProps) => {
                 />
               )}
 
-              {/* referencesSidebar */}
               <ReferencesSidebarMemoized
                 open={nodeBookState.choosingNode?.type === "Reference"}
+                onClose={() => {
+                  nodeBookDispatch({ type: "setChoosingNode", payload: null });
+                  notebookRef.current.choosingNode = null;
+                }}
+                onChangeChosenNode={onChangeChosenNode}
+                preLoadNodes={onPreLoadNodes}
+              />
+              <TagsSidebarMemoized
+                open={nodeBookState.choosingNode?.type === "Tag"}
                 onClose={() => {
                   nodeBookDispatch({ type: "setChoosingNode", payload: null });
                   notebookRef.current.choosingNode = null;

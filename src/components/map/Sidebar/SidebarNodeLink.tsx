@@ -5,6 +5,7 @@ import { Box, Button, Divider, Stack, Tooltip, Typography } from "@mui/material"
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import React, { useState } from "react";
+import { NodeType } from "src/types";
 
 import NodeTypeIcon from "@/components/NodeTypeIcon2";
 import { DESIGN_SYSTEM_COLORS } from "@/lib/theme/colors";
@@ -13,28 +14,30 @@ import shortenNumber from "@/lib/utils/shortenNumber";
 import { CustomWrapperButton } from "../Buttons/Buttons";
 dayjs.extend(relativeTime);
 
-type ReferenceItemProps = {
+type SidebarNodeLinkProps = {
   id: string;
   title: string;
   content: string;
-  createdAt: Date;
+  changedAt: string;
   correct: boolean;
   corrects: number;
   wrong: boolean;
   wrongs: number;
+  nodeType: NodeType;
   onClick: () => void;
 };
-export const ReferenceItem = ({
+export const SidebarNodeLink = ({
   id,
   title,
   content,
-  createdAt,
+  changedAt,
   correct,
   corrects,
   wrong,
   wrongs,
+  nodeType,
   onClick,
-}: ReferenceItemProps) => {
+}: SidebarNodeLinkProps) => {
   const [expandItem, setExpandItem] = useState(false);
 
   return (
@@ -84,7 +87,7 @@ export const ReferenceItem = ({
       </Box>
       <Stack direction={"row"} justifyContent={"space-between"}>
         <Stack direction={"row"} justifyContent={"space-between"} alignItems={"center"} spacing={"6px"}>
-          <NodeTypeIcon nodeType={"Code"} fontSize="inherit" />
+          <NodeTypeIcon nodeType={nodeType} fontSize="inherit" />
           <Typography
             sx={{
               fontSize: "12px",
@@ -92,7 +95,7 @@ export const ReferenceItem = ({
                 theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookG200 : DESIGN_SYSTEM_COLORS.gray500,
             }}
           >
-            {dayjs(createdAt).fromNow()}
+            {dayjs(changedAt).fromNow()}
           </Typography>
         </Stack>
         <CustomWrapperButton id={`${id}-node-footer-votes`}>

@@ -12,6 +12,7 @@ import {
   Stack,
 } from "@mui/material";
 import { useCallback } from "react";
+import { NodeType } from "src/types";
 
 import NodeTypeIcon from "@/components/NodeTypeIcon2";
 import { DESIGN_SYSTEM_COLORS } from "@/lib/theme/colors";
@@ -24,9 +25,9 @@ type SearchInputProps = {
   handleChange: (newValue: string) => void;
   handleSearch: () => void;
   placeholder: string;
-  nodeTypeProps: {
+  nodeTypeProps?: {
     value: any;
-    onChange: (newValue: any) => void;
+    onChange: (newValue: NodeType[]) => void;
   } | null;
 };
 
@@ -36,7 +37,7 @@ export const SearchInput = ({
   handleChange,
   handleSearch,
   placeholder,
-  nodeTypeProps,
+  nodeTypeProps = null,
 }: SearchInputProps) => {
   const onEnterKey = useCallback(
     (event: React.KeyboardEvent<HTMLDivElement>) => {
@@ -53,6 +54,16 @@ export const SearchInput = ({
       onChange={e => handleChange(e.target.value)}
       onKeyDownCapture={onEnterKey}
       fullWidth
+      sx={{
+        borderRadius: "4px",
+        border: theme =>
+          `solid 1px ${
+            theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookG500 : DESIGN_SYSTEM_COLORS.gray300
+          }`,
+      }}
+      inputProps={{
+        style: { padding: "10px 14px" },
+      }}
       startAdornment={
         nodeTypeProps ? (
           <Select
@@ -90,22 +101,14 @@ export const SearchInput = ({
             variant="outlined"
             displayEmpty
             renderValue={() => "Types"}
-            onChange={nodeTypeProps.onChange}
+            onChange={e => nodeTypeProps.onChange(e.target.value as NodeType[])}
             sx={{
-              padding: {
-                xs: "2px 0px",
-                sm: "0px",
-              },
-              height: {
-                xs: "31px",
-                sm: "46px",
-              },
-              marginLeft: "-14px",
+              padding: "0px",
+              height: "46px",
               zIndex: "99",
               borderRadius: "4px 0 0 4px",
               background: theme =>
                 theme.palette.mode === "dark" ? theme.palette.common.notebookG700 : theme.palette.common.gray100,
-
               ":hover .MuiOutlinedInput-notchedOutline": {
                 borderColor: theme => theme.palette.common.orange,
               },
@@ -160,14 +163,6 @@ export const SearchInput = ({
           </IconButton>
         </Stack>
       }
-      sx={{
-        p: "10px 14px",
-        borderRadius: "4px",
-        border: theme =>
-          `solid 1px ${
-            theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookG500 : DESIGN_SYSTEM_COLORS.gray300
-          }`,
-      }}
     />
   );
 };
