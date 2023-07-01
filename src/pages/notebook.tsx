@@ -6153,6 +6153,8 @@ const Notebook = ({}: NotebookProps) => {
         setOpenSidebar("SEARCHER_SIDEBAR");
         nodeBookDispatch({ type: "setSearchQuery", payload: detail.query });
         nodeBookDispatch({ type: "setNodeTitleBlured", payload: true });
+      } else if (detail.type === "OPEN_NODE") {
+        openNodeHandler(detail.nodeId);
       } else if (detail.type === "IMPROVEMENT") {
         setOpenSidebar(null);
         proposeNodeImprovement(null, detail.selectedNode.id);
