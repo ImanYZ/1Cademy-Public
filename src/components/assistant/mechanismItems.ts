@@ -9,6 +9,7 @@ export const ASSISTANT_MECHANISMS: TMechanisms[] = [
     animation: {
       src: "rive-assistant/assistant-1.riv",
       artboard: "artboard-1",
+      padding: 0,
     },
   },
   {
@@ -18,6 +19,7 @@ export const ASSISTANT_MECHANISMS: TMechanisms[] = [
     animation: {
       src: "rive-assistant/assistant-2.riv",
       artboard: "artboard-2",
+      padding: 0,
     },
   },
   {
@@ -27,6 +29,7 @@ export const ASSISTANT_MECHANISMS: TMechanisms[] = [
     animation: {
       src: "rive-assistant/assistant-3.riv",
       artboard: "artboard-3",
+      padding: 0,
     },
   },
 ];

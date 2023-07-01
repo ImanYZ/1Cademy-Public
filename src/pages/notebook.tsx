@@ -13,8 +13,10 @@ import {
   Container,
   Divider,
   IconButton,
+  Input,
   Modal,
   Paper,
+  Stack,
   Tooltip,
   Typography,
   useTheme,
@@ -2980,8 +2982,18 @@ const Notebook = ({}: NotebookProps) => {
           edges = removeDagAllEdges(g.current, nodeId, edges, updatedNodeIds);
           nodes = removeDagNode(g.current, nodeId, nodes);
 
+          node.parents.forEach(cur => {
+            const newChildren = nodes[cur.node].children.filter(c => c.node !== nodeId);
+            nodes[cur.node].children = newChildren;
+          });
+          node.children.forEach(cur => {
+            const newParents = nodes[cur.node].parents.filter(c => c.node !== nodeId);
+            nodes[cur.node].children = newParents;
+          });
+
           notebookRef.current.selectedNode = node.parents[0]?.node ?? null;
           updatedNodeIds.push(notebookRef.current.selectedNode!);
+          node.parents.forEach(c => updatedNodeIds.push(c.node));
           nodeBookDispatch({ type: "setSelectedNode", payload: node.parents[0]?.node ?? null });
         } else {
           nodes[nodeId] = {
@@ -6141,6 +6153,8 @@ const Notebook = ({}: NotebookProps) => {
         setOpenSidebar("SEARCHER_SIDEBAR");
         nodeBookDispatch({ type: "setSearchQuery", payload: detail.query });
         nodeBookDispatch({ type: "setNodeTitleBlured", payload: true });
+      } else if (detail.type === "OPEN_NODE") {
+        openNodeHandler(detail.nodeId);
       } else if (detail.type === "IMPROVEMENT") {
         setOpenSidebar(null);
         proposeNodeImprovement(null, detail.selectedNode.id);
@@ -7200,7 +7214,8 @@ const Notebook = ({}: NotebookProps) => {
                 <Button onClick={() => nodeBookDispatch({ type: "setSelectionType", payload: "Proposals" })}>
                   Open Proposal
                 </Button>
-                <Button onClick={() => openNodeHandler("0JI7dmq1qFF18j4ZbKMw")}>Open Node Handler</Button>
+                {/* <Button onClick={() => openNodeHandler("0JI7dmq1qFF18j4ZbKMw")}>Open Node Handler</Button> */}
+                <OpenNode onOpenNode={openNodeHandler} />
                 <Button onClick={() => setShowRegion(prev => !prev)}>Show Region</Button>
                 <Button onClick={() => console.log({ openSidebar })}>Open Sidebar</Button>
               </Paper>
@@ -7221,3 +7236,15 @@ export default withAuthUser({
   shouldRedirectToLogin: true,
   shouldRedirectToHomeIfAuthenticated: false,
 })(NodeBook);
+
+const OpenNode = ({ onOpenNode }: { onOpenNode: (nodeId: string) => void }) => {
+  const [nodeId, setNodeId] = useState("");
+  return (
+    <Stack spacing={"12px"} direction={"row"}>
+      <Input value={nodeId} onChange={e => setNodeId(e.target.value)} fullWidth />
+      <Button onClick={() => onOpenNode(nodeId)} variant="contained">
+        Open
+      </Button>
+    </Stack>
+  );
+};
