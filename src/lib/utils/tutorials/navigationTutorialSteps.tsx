@@ -85,7 +85,7 @@ const NAVIGATION_STEPS: TutorialStepConfig[] = [
       <>
         <MarkdownRender
           text={
-            "- If you use a trackpad: to **zoom in**, you can slide two fingers away from each other on the trackpad, and to **zoom out**, you can slide to fingers toward each other on the track.  - If you use an external mouse: you can press and hold the Alt button in PC (Option button in Mac) and rotate the mouse wheel."
+            "- If you use a trackpad: to **zoom in**, you can slide two fingers away from each other on the trackpad, and to **zoom out**, you can slide to fingers toward each other on the track.  \n\n- If you use an external mouse: you can press and hold the Alt button in PC (Option button in Mac) and rotate the mouse wheel."
           }
         />
         <Box width="380px" height="200px" m="0 auto" mt="8px">
