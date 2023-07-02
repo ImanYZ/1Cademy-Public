@@ -50,6 +50,8 @@ function authReducer(state: AuthState, action: DispatchAuthActions): AuthState {
       return { ...state, reputation: action.payload };
     case "setView":
       return { ...state, settings: { ...state.settings, view: action.payload } };
+    case "setIsLoading":
+      return { ...state, isLoading: action.payload };
   }
 }
 const toggleThemeHTML = (theme: UserTheme) => {

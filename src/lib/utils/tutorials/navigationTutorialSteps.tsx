@@ -63,7 +63,7 @@ const NAVIGATION_STEPS: TutorialStepConfig[] = [
       <>
         <MarkdownRender
           text={
-            "You can manipulate your field of view by panning the screen by sliding two fingers on the trackpad or clicking, sliding with either a finger or the mouse."
+            "You can manipulate your field of view by panning the screen through sliding two fingers on the trackpad or clicking and dragging the mouse."
           }
         />
         <Box width="380px" height="200px" m="0 auto" mt="8px">
@@ -80,12 +80,12 @@ const NAVIGATION_STEPS: TutorialStepConfig[] = [
     anchor: "Portal",
   },
   {
-    title: "Zooming In and Zooming out",
+    title: "Zooming In and out",
     description: (
       <>
         <MarkdownRender
           text={
-            "To **zoom in**, you can slide two fingers away from each other on the track pad or press control (command Mac) + and to **zoom out**, you can slide to fingers toward each other on the track or press control (command Mac) -"
+            "- If you use a trackpad: to **zoom in**, you can slide two fingers away from each other on the trackpad, and to **zoom out**, you can slide to fingers toward each other on the track.  \n\n- If you use an external mouse: you can press and hold the Alt button in PC (Option button in Mac) and rotate the mouse wheel."
           }
         />
         <Box width="380px" height="200px" m="0 auto" mt="8px">

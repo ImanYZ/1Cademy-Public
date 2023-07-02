@@ -22,6 +22,7 @@ const ROUTES = {
   privacyPolicy: "/policy/privacy",
   termsPolicy: "/policy/terms",
   studentDashboard: "/dashboards",
+  tutorial: "/tutorial",
 };
 
 export default ROUTES;
