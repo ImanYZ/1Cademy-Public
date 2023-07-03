@@ -12,6 +12,7 @@ export const INITIAL_STATE: AuthState = {
     showClusterOptions: false,
     showClusters: false,
   },
+  isLoading: false,
 };
 
 function authReducer(state: AuthState, action: DispatchAuthActions): AuthState {
