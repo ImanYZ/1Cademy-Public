@@ -7291,11 +7291,9 @@ const Notebook = ({}: NotebookProps) => {
                 <Button onClick={() => nodeBookDispatch({ type: "setSelectionType", payload: "Proposals" })}>
                   Open Proposal
                 </Button>
-                {/* <Button onClick={() => openNodeHandler("0JI7dmq1qFF18j4ZbKMw")}>Open Node Handler</Button> */}
                 <OpenNode onOpenNode={openNodeHandler} />
                 <Button onClick={() => setShowRegion(prev => !prev)}>Show Region</Button>
                 <Button onClick={() => console.log({ openSidebar })}>Open Sidebar</Button>
-                <Button onClick={() => setOpenSidebar("REFERENCES_SEARCH_ENGINE")}>Call Open Sidebar</Button>
               </Paper>
             </Box>
           </ClickAwayListener>
