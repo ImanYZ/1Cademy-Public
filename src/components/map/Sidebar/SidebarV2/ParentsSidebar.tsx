@@ -344,8 +344,7 @@ const ParentsSidebar = ({ open, onClose, onChangeChosenNode, preLoadNodes }: Par
           <SidebarNodeLink
             key={cur.id}
             onClick={() => onChangeChosenNode({ nodeId: cur.id, title: cur.title })}
-            correct={false}
-            wrong={false}
+            linkMessage="Link it"
             {...cur}
           />
         ))}

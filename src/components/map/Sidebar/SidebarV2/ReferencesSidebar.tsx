@@ -319,8 +319,7 @@ const ReferencesSidebar = ({ open, onClose, onChangeChosenNode, preLoadNodes }: 
             onClick={() => {
               onChangeChosenNode({ nodeId: cur.id, title: cur.title ?? "" });
             }}
-            correct={false}
-            wrong={false}
+            linkMessage="Cite it"
             {...cur}
           />
         ))}
