@@ -64,6 +64,7 @@ const AuthProvider: FC<Props> = ({ children, store }) => {
     const auth = getAuth();
 
     const unsubscriber = onAuthStateChanged(auth, async user => {
+      dispatch({ type: "setIsLoading", payload: false });
       if (user) {
         const res = await user.getIdTokenResult(true);
         const role: UserRole = res.claims["instructor"] ? "INSTRUCTOR" : res.claims["student"] ? "STUDENT" : null;
