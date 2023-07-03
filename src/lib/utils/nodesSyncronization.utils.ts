@@ -185,6 +185,7 @@ export const fillDagre = (
       }
       // so the NO visible nodes will come as modified and !visible
       if (cur.nodeChangeType === "removed" || (cur.nodeChangeType === "modified" && !cur.visible)) {
+        console.log("----->removed", cur.node);
         updatedNodeIds.push(cur.node);
         if (g.hasNode(cur.node)) {
           // g.nodes().forEach(function () {});
@@ -234,6 +235,7 @@ type SynchronizeGraphInput = {
   allTags: AllTagsTreeView;
   setNodeUpdates: (newValue: TNodeUpdates) => void;
   setNoNodesFoundMessage: (newValue: boolean) => void;
+  nodesInEdition?: string[];
 };
 export const synchronizeGraph = ({
   g,
@@ -243,6 +245,7 @@ export const synchronizeGraph = ({
   allTags,
   setNodeUpdates,
   setNoNodesFoundMessage,
+  nodesInEdition = [],
 }: SynchronizeGraphInput): Graph => {
   const { nodes, edges } = graph;
   console.log({ selectedNotebookId });
@@ -269,6 +272,7 @@ export const synchronizeGraph = ({
     const leftParent = nodeParent?.left ?? 0;
     const notebookIdx = (cur?.notebooks ?? []).findIndex(c => c === selectedNotebookId);
 
+    const isLinkedByEditedNode = tmpNode?.node && nodesInEdition.includes(tmpNode.node);
     return {
       ...cur,
       left: tmpNode?.left ?? leftParent + NODE_WIDTH + COLUMN_GAP,
@@ -276,6 +280,8 @@ export const synchronizeGraph = ({
       visible: Boolean((cur.notebooks ?? [])[notebookIdx]),
       open: Boolean((cur.expands ?? [])[notebookIdx]),
       editable: tmpNode?.editable ?? false,
+      parents: isLinkedByEditedNode ? tmpNode.parents : cur.parents,
+      children: isLinkedByEditedNode ? tmpNode.children : cur.children,
     };
   });
 
