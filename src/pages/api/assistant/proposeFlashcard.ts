@@ -53,7 +53,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
         });
       }
     }
-    if (payload.tempflashcard && payload.tempflashcard.flashcardId) {
+    if (payload.tempflashcard && payload.tempflashcard.flashcardId && payload.node) {
       const tempFlashcardRef = db.collection("tempFlashcards").doc(payload.tempflashcard.flashcardId);
       const tempFlashcard = await tempFlashcardRef.get();
       const tempFlashcards = tempFlashcard.data()?.flashcards;
@@ -69,6 +69,20 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
       console.log(tempFlashcards[flashcardIndex]);
       await tempFlashcardRef.update({
         flashcards: tempFlashcards,
+      });
+
+      const nodeRef = db.collection("nodes").doc(payload.node);
+      const node: any = await nodeRef.get();
+      const linkedFlashcards = node.hasOwnProperty("linkedFlashcard") ? node.linkedFlashcard : [];
+      const findIndex = linkedFlashcards.findIndex((flashcard: any) => flashcard.id === payload.tempflashcard.id);
+      if (findIndex === -1) {
+        linkedFlashcards.push({
+          id: payload.tempflashcard.id,
+          documentId: payload.tempflashcard.flashcardId,
+        });
+      }
+      nodeRef.update({
+        linkedFlashcards,
       });
     }
     return res.status(200).json({});

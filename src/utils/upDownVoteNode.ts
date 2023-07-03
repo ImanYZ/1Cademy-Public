@@ -17,6 +17,7 @@ import {
   signalNodeDeleteToTypesense,
   signalNodeVoteToTypesense,
   updateNodeContributions,
+  signalFlashcardChanges,
 } from "./version-helpers";
 import { IActionTrack } from "src/types/IActionTrack";
 import { IUser } from "src/types/IUser";
@@ -567,6 +568,18 @@ export const UpDownVoteNode = async ({
   };
   if (deleteNode) {
     nodeChanges.deleted = true;
+    //signal the flashcards to ignore the linked proposed node
+    await detach(async () => {
+      let batch = db.batch();
+      let writeCounts = 0;
+      [batch, writeCounts] = await signalFlashcardChanges({
+        batch,
+        nodeId,
+        currentTimestamp,
+        writeCounts,
+      });
+      await commitBatch(batch);
+    });
   } else {
     // TODO: move these to queue
     await detach(async () => {
