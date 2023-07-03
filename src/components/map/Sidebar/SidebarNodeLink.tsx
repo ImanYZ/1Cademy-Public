@@ -5,25 +5,21 @@ import { Box, Button, Divider, Stack, Tooltip, Typography } from "@mui/material"
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import React, { useState } from "react";
-import { NodeType } from "src/types";
+import { SimpleNode2 } from "src/types";
 
+import MarkdownRender from "@/components/Markdown/MarkdownRender";
 import NodeTypeIcon from "@/components/NodeTypeIcon2";
 import { DESIGN_SYSTEM_COLORS } from "@/lib/theme/colors";
 import shortenNumber from "@/lib/utils/shortenNumber";
+import { getVideoDataByUrl } from "@/lib/utils/utils";
 
 import { CustomWrapperButton } from "../Buttons/Buttons";
+import { MemoizedNodeVideo } from "../Node/NodeVideo";
 dayjs.extend(relativeTime);
 
-type SidebarNodeLinkProps = {
-  id: string;
-  title: string;
-  content: string;
-  changedAt: string;
+type SidebarNodeLinkProps = SimpleNode2 & {
   correct: boolean;
-  corrects: number;
   wrong: boolean;
-  wrongs: number;
-  nodeType: NodeType;
   onClick: () => void;
 };
 export const SidebarNodeLink = ({
@@ -36,6 +32,8 @@ export const SidebarNodeLink = ({
   wrong,
   wrongs,
   nodeType,
+  nodeImage,
+  nodeVideo,
   onClick,
 }: SidebarNodeLinkProps) => {
   const [expandItem, setExpandItem] = useState(false);
@@ -49,33 +47,29 @@ export const SidebarNodeLink = ({
         borderRadius: "8px",
         p: "12px 16px 10px 16px",
         backgroundColor: theme =>
-          theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookG700 : DESIGN_SYSTEM_COLORS.gray300,
+          theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookG700 : DESIGN_SYSTEM_COLORS.gray100,
         cursor: "pointer",
-        ":hover": {
-          background: theme => (theme.palette.mode === "dark" ? "#2F2F2F" : "#EAECF0"),
-        },
       }}
     >
       <Box>
-        <Typography sx={{ fontSize: "16px", fontWeight: 500, mb: "8px" }}>{title}</Typography>
-        <Box sx={{ height: expandItem ? undefined : "59px" }}>
+        <MarkdownRender
+          text={title}
+          customClass={"custom-react-markdown"}
+          sx={{ fontSize: "16px", fontWeight: 500, letterSpacing: "inherit" }}
+        />
+        {/* <Typography sx={{ fontSize: "16px", fontWeight: 500, mb: "8px" }}>{title}</Typography> */}
+        <Box sx={{ height: expandItem ? undefined : "59px", mt: "8px", overflowY: "hidden" }}>
           {/* height in Box enable multiline ellipsis */}
-          <Typography
-            sx={{
-              fontSize: "14px",
-              fontWeight: 400,
-              ...(!expandItem && {
-                display: "-webkit-box",
-                overflow: "hidden",
-                textOverflow: "ellipsis",
-                WebkitBoxOrient: "vertical",
-                WebkitLineClamp: 3 /* start showing ellipsis when 3rd line is reached */,
-                whiteSpace: "pre-wrap" /* let the text wrap preserving spaces */,
-              }),
-            }}
-          >
-            {content}
-          </Typography>
+          <MarkdownRender
+            text={content}
+            customClass={"custom-react-markdown"}
+            sx={{ fontSize: "14px", fontWeight: 400, letterSpacing: "inherit" }}
+          />
+          {nodeImage && (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src={nodeImage} alt="Node image" className="responsive-img NodeImage" />
+          )}
+          {nodeVideo && <MemoizedNodeVideo addVideo={true} videoData={getVideoDataByUrl(nodeVideo)} />}
         </Box>
 
         {!expandItem && (
@@ -98,7 +92,13 @@ export const SidebarNodeLink = ({
             {dayjs(changedAt).fromNow()}
           </Typography>
         </Stack>
-        <CustomWrapperButton id={`${id}-node-footer-votes`}>
+        <CustomWrapperButton
+          id={`${id}-node-footer-votes`}
+          sx={{
+            background: theme =>
+              theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookG500 : DESIGN_SYSTEM_COLORS.gray250,
+          }}
+        >
           <Stack direction={"row"} alignItems={"center"}>
             <Tooltip title={"Vote to prevent further changes."} placement={"top"}>
               <Button

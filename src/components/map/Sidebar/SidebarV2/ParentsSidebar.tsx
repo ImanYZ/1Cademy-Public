@@ -6,7 +6,7 @@ import relativeTime from "dayjs/plugin/relativeTime";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { SearchNodesResponse } from "src/knowledgeTypes";
 import { FullNodeData, SortDirection, SortValues } from "src/nodeBookTypes";
-import { NodeType } from "src/types";
+import { NodeType, SimpleNode2 } from "src/types";
 
 import { ChosenTag, MemoizedTagsSearcher, TagTreeView } from "@/components/TagsSearcher";
 import { useInView } from "@/hooks/useObserver";
@@ -148,7 +148,7 @@ const ParentsSidebar = ({ open, onClose, onChangeChosenNode, preLoadNodes }: Par
     [onSearchQuery, query, sortDirection, sortOption, timeFilter]
   );
 
-  const references = useMemo(() => {
+  const parents: SimpleNode2[] = useMemo(() => {
     return searchResults.data;
   }, [searchResults.data]);
 
@@ -340,12 +340,12 @@ const ParentsSidebar = ({ open, onClose, onChangeChosenNode, preLoadNodes }: Par
   const sidebarContentMemo = useMemo(
     () => (
       <Stack spacing={"8px"} sx={{ p: "16px" }}>
-        {references.map(cur => (
+        {parents.map(cur => (
           <SidebarNodeLink
             key={cur.id}
-            onClick={() => {
-              onChangeChosenNode({ nodeId: cur.id, title: cur.title });
-            }}
+            onClick={() => onChangeChosenNode({ nodeId: cur.id, title: cur.title })}
+            correct={false}
+            wrong={false}
             {...cur}
           />
         ))}
@@ -361,7 +361,7 @@ const ParentsSidebar = ({ open, onClose, onChangeChosenNode, preLoadNodes }: Par
       isLoading,
       onChangeChosenNode,
       refInfinityLoaderTrigger,
-      references,
+      parents,
       searchResults.lastPageLoaded,
       searchResults.totalPage,
     ]

@@ -68,6 +68,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<SearchNodesResp
           content: el.document.content ?? "",
           nodeType: el.document.nodeType as NodeType,
           nodeImage: el.document.nodeImage || "",
+          nodeVideo: el.document.nodeVideo || "",
           corrects: el.document.corrects ?? 0,
           wrongs: el.document.wrongs ?? 0,
           tags: el.document.tags,

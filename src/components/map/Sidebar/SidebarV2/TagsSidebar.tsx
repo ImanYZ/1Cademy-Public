@@ -346,6 +346,8 @@ const TagsSidebar = ({ open, onClose, onChangeChosenNode, preLoadNodes }: TagsSi
             onClick={() => {
               onChangeChosenNode({ nodeId: cur.id, title: cur.title });
             }}
+            correct={false}
+            wrong={false}
             {...cur}
           />
         ))}

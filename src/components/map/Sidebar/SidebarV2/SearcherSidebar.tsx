@@ -65,7 +65,7 @@ type SearcherSidebarProps = {
 };
 
 export type Pagination = {
-  data: any[];
+  data: SimpleNode2[];
   lastPageLoaded: number;
   totalPage: number;
   totalResults: number;

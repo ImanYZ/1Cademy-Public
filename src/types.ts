@@ -24,6 +24,7 @@ export type SimpleNode2 = {
   choices: KnowledgeChoice[];
   nodeType: NodeType;
   nodeImage?: string;
+  nodeVideo?: string;
   corrects: number;
   wrongs: number;
   tags: string[];

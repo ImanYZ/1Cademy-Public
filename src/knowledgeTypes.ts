@@ -216,6 +216,7 @@ export type TypesenseNodesSchema = {
   isTag: boolean; // typesense
   labelsReferences: string[]; // typesense
   nodeImage?: string;
+  nodeVideo?: string;
   nodeType: NodeType; // typesense
   tags: string[]; // typesense
   title: string; // typesense
