@@ -24,14 +24,21 @@ import { SidebarWrapper2 } from "./SidebarWrapper2";
 
 dayjs.extend(relativeTime);
 
-type ParentsSidebarProps = {
+type ParentsChildrenSidebarProps = {
+  title: string;
   open: boolean;
   onClose: () => void;
   onChangeChosenNode: ({ nodeId, title }: { nodeId: string; title: string }) => void;
   preLoadNodes: (nodeIds: string[], fullNodes: FullNodeData[]) => Promise<void>;
 };
 
-const ParentsSidebar = ({ open, onClose, onChangeChosenNode, preLoadNodes }: ParentsSidebarProps) => {
+const ParentsChildrenSidebar = ({
+  title,
+  open,
+  onClose,
+  onChangeChosenNode,
+  preLoadNodes,
+}: ParentsChildrenSidebarProps) => {
   const [isLoading, setIsLoading] = useState(false);
   const [query, setQuery] = useState("");
   const [showTagSelector, setShowTagSelector] = useState(false);
@@ -377,7 +384,7 @@ const ParentsSidebar = ({ open, onClose, onChangeChosenNode, preLoadNodes }: Par
   return (
     <SidebarWrapper2
       id="parents-sidebar-wrapper"
-      title="Parents to link"
+      title={title}
       open={open}
       onClose={onClose}
       SidebarOptions={sidebarOptionsMemo}
@@ -391,7 +398,7 @@ const ParentsSidebar = ({ open, onClose, onChangeChosenNode, preLoadNodes }: Par
   );
 };
 
-export const ParentsSidebarMemoized = React.memo(ParentsSidebar);
+export const ParentsSidebarMemoized = React.memo(ParentsChildrenSidebar);
 
 const mapTimeFilterToDays = (timeFilter: string): number => {
   if (timeFilter === "LAST_DAY") return 1;

@@ -61,7 +61,7 @@ import { MemoizedReputationlinessBar } from "@/components/map/Liveliness/Reputat
 import { MemoizedBookmarksSidebar } from "@/components/map/Sidebar/SidebarV2/BookmarksSidebar";
 import { CitationsSidebar } from "@/components/map/Sidebar/SidebarV2/CitationsSidebar";
 import { MemoizedNotificationSidebar } from "@/components/map/Sidebar/SidebarV2/NotificationSidebar";
-import { ParentsSidebarMemoized } from "@/components/map/Sidebar/SidebarV2/ParentsSidebar";
+import { ParentsSidebarMemoized } from "@/components/map/Sidebar/SidebarV2/ParentsChildrenSidebar";
 import { MemoizedPendingProposalSidebar } from "@/components/map/Sidebar/SidebarV2/PendingProposalSidebar";
 import { MemoizedProposalsSidebar } from "@/components/map/Sidebar/SidebarV2/ProposalsSidebar";
 import { ReferencesSidebarMemoized } from "@/components/map/Sidebar/SidebarV2/ReferencesSidebar";
@@ -6524,7 +6524,7 @@ const Notebook = ({}: NotebookProps) => {
                 theme={settings.theme}
                 open={
                   openSidebar === "PROPOSALS" &&
-                  !["Reference", "Tag", "Parent"].includes(nodeBookState.choosingNode?.type ?? "")
+                  !["Reference", "Tag", "Parent", "Child"].includes(nodeBookState.choosingNode?.type ?? "")
                 }
                 onClose={() => onCloseSidebar()}
                 clearInitialProposal={clearInitialProposal}
@@ -6596,7 +6596,8 @@ const Notebook = ({}: NotebookProps) => {
               />
 
               <ParentsSidebarMemoized
-                open={nodeBookState.choosingNode?.type === "Parent"}
+                title={nodeBookState.choosingNode?.type === "Parent" ? "Parents to Link" : "Children to Link"}
+                open={nodeBookState.choosingNode?.type === "Parent" || nodeBookState.choosingNode?.type === "Child"}
                 onClose={() => {
                   nodeBookDispatch({ type: "setChoosingNode", payload: null });
                   notebookRef.current.choosingNode = null;
