@@ -3,10 +3,13 @@ import { Chip, CircularProgress, Stack, Typography } from "@mui/material";
 import { Box } from "@mui/system";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
+import { getFirestore } from "firebase/firestore";
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { getMostUsedNodeIdsByUser } from "src/client/firestore/mostUsedNodesByUser.firestore";
+import { getNodes } from "src/client/firestore/nodes.firestore";
 import { SearchNodesResponse } from "src/knowledgeTypes";
 import { FullNodeData, SortDirection, SortValues } from "src/nodeBookTypes";
-import { SimpleNode2 } from "src/types";
+import { NodeType, SimpleNode2 } from "src/types";
 
 import { ChosenTag, MemoizedTagsSearcher, TagTreeView } from "@/components/TagsSearcher";
 import { useInView } from "@/hooks/useObserver";
@@ -25,13 +28,15 @@ import { SidebarWrapper2 } from "./SidebarWrapper2";
 dayjs.extend(relativeTime);
 
 type ReferencesSidebarProps = {
+  username: string;
   open: boolean;
   onClose: () => void;
   onChangeChosenNode: ({ nodeId, title }: { nodeId: string; title: string }) => void;
   preLoadNodes: (nodeIds: string[], fullNodes: FullNodeData[]) => Promise<void>;
 };
 
-const ReferencesSidebar = ({ open, onClose, onChangeChosenNode, preLoadNodes }: ReferencesSidebarProps) => {
+const ReferencesSidebar = ({ username, open, onClose, onChangeChosenNode, preLoadNodes }: ReferencesSidebarProps) => {
+  const db = getFirestore();
   const [isLoading, setIsLoading] = useState(false);
   const [query, setQuery] = useState("");
   const [showTagSelector, setShowTagSelector] = useState(false);
@@ -40,12 +45,48 @@ const ReferencesSidebar = ({ open, onClose, onChangeChosenNode, preLoadNodes }: 
   const [sortOption, setSortOption] = useState<SortValues>("NOT_SELECTED");
   const [sortDirection, setSortDirection] = useState<SortDirection>("DESCENDING");
   const [searchResults, setSearchResults] = useState<Pagination>(INITIAL_SEARCH_RESULT);
+  const [, /* mostUsedNode */ setMostUsedNodes] = useState<SimpleNode2[]>([]);
 
   const { allTags, setAllTags, resetSelectedTags } = useTagsTreeView();
   const { ref: refInfinityLoaderTrigger, inView: inViewInfinityLoaderTrigger } = useInView();
   const previousOpenRef = useRef(false);
 
   const selectedTags = useMemo<TagTreeView[]>(() => Object.values(allTags).filter(tag => tag.checked), [allTags]);
+
+  const onGetTheMostUsedNodes = useCallback(async () => {
+    console.log("onGetTheMostUsedNodes");
+    const nodeIds = await getMostUsedNodeIdsByUser(db, username);
+    const nodes = await getNodes(db, nodeIds);
+    const newMostUsedNodes = nodes
+      .flatMap(c => c || [])
+      .map(
+        (cur): SimpleNode2 => ({
+          id: cur.id,
+          title: cur.title ?? "",
+          changedAt: `${cur.changedAt?.toMillis() || 0}`,
+          content: cur.content ?? "",
+          nodeType: cur.nodeType as NodeType,
+          nodeImage: cur.nodeImage || "",
+          nodeVideo: cur.nodeVideo || "",
+          corrects: cur.corrects ?? 0,
+          wrongs: cur.wrongs ?? 0,
+          tags: cur.tags,
+          contributors: Object.keys(cur.contributors).map(key => ({
+            fullName: cur.contributors[key].fullname,
+            imageUrl: cur.contributors[key].imageUrl,
+            username: username,
+          })),
+          institutions: Object.entries(cur.institutions || {})
+            .map(cur => ({ name: cur[0], reputation: cur[1].reputation || 0 }))
+            .sort((a, b) => b.reputation - a.reputation)
+            .map(institution => ({ name: institution.name })),
+          choices: cur.choices || [],
+          versions: cur.versions ?? 0,
+        })
+      );
+
+    setMostUsedNodes(newMostUsedNodes);
+  }, [db, username]);
 
   const onSearchQuery = useCallback(
     async ({
@@ -352,14 +393,16 @@ const ReferencesSidebar = ({ open, onClose, onChangeChosenNode, preLoadNodes }: 
     setIsLoading(false);
     setQuery("");
     resetSelectedTags();
-    onSearchQuery({
-      q: "",
-      sortOption: "NOT_SELECTED",
-      sortDirection: "DESCENDING",
-      nodesUpdatedSince: mapTimeFilterToDays("ALL_TIME"),
-      page: 1,
-    });
-  }, [onSearchQuery, open, resetSelectedTags]);
+    onGetTheMostUsedNodes();
+
+    // onSearchQuery({
+    //   q: "",
+    //   sortOption: "NOT_SELECTED",
+    //   sortDirection: "DESCENDING",
+    //   nodesUpdatedSince: mapTimeFilterToDays("ALL_TIME"),
+    //   page: 1,
+    // });
+  }, [onGetTheMostUsedNodes, open, resetSelectedTags]);
 
   return (
     <SidebarWrapper2
