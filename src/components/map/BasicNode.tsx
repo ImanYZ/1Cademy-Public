@@ -273,11 +273,11 @@ BasicNodeProps) => {
         }}
       >
         {open ? (
-          <IconButton onClick={onToggleNode} color="inherit" aria-label="Close the node" size="small">
+          <IconButton onClick={onToggleNode} color="inherit" aria-label="Collapse the node." size="small">
             <RemoveIcon fontSize="inherit" />
           </IconButton>
         ) : (
-          <IconButton onClick={onToggleNode} color="inherit" aria-label="open the node" size="small">
+          <IconButton onClick={onToggleNode} color="inherit" aria-label="Open the node." size="small">
             <FullscreenIcon fontSize="inherit" />
           </IconButton>
         )}

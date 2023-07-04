@@ -1,7 +1,7 @@
 import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowUp";
 import { Box, Tooltip } from "@mui/material";
-import { collection, Firestore, getDocs, limit, onSnapshot, query, Timestamp, where } from "firebase/firestore";
+import { collection, Firestore, getDocs, limit, onSnapshot, query, where } from "firebase/firestore";
 import React, { useEffect, useMemo, useState } from "react";
 import { ActionTrackType } from "src/knowledgeTypes";
 import { IActionTrack } from "src/types/IActionTrack";
@@ -54,9 +54,8 @@ const LivelinessBar = ({ open, setOpen, disabled = false, ...props }: ILivelines
     const snapshotInitializer = () => {
       setUsersInteractions({});
       unsubscribe.finalizer();
-      const ts = new Date().getTime() - 86400000;
-      const actionTracksCol = collection(db, "actionTracks");
-      const q = query(actionTracksCol, where("createdAt", ">=", Timestamp.fromDate(new Date(ts))));
+      const actionTracksCol = collection(db, "actionTracks24h");
+      const q = query(actionTracksCol);
       unsubscribe.finalizer = onSnapshot(q, async snapshot => {
         const docChanges = snapshot.docChanges();
         for (const docChange of docChanges) {

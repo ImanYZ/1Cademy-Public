@@ -3,9 +3,9 @@ import { NextApiRequest, NextApiResponse } from "next";
 import { getTypesenseClient } from "@/lib/typesense/typesense.config";
 import { homePageSortByDefaults } from "@/lib/utils/utils";
 
-import { SearchNodesResponse, SimpleNode, TypesenseNodesSchema } from "../../knowledgeTypes";
+import { SearchNodesResponse, TypesenseNodesSchema } from "../../knowledgeTypes";
 // import { SortDirection, SortValues } from "../../noteBookTypes";
-import { NodeType } from "../../types";
+import { NodeType, SimpleNode2 } from "../../types";
 import { SortDirection, SortValues } from "../../nodeBookTypes";
 import { db } from "@/lib/firestoreServer/admin";
 import fbAuth from "src/middlewares/fbAuth";
@@ -38,7 +38,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<SearchNodesResp
       queryFields.push("content");
     }
 
-    let allPostsData: SimpleNode[] = [];
+    let allPostsData: SimpleNode2[] = [];
     let found: number = 0;
     let currentPage: number = 0;
 
@@ -61,15 +61,16 @@ async function handler(req: NextApiRequest, res: NextApiResponse<SearchNodesResp
       currentPage = Math.max(currentPage, searchResults.page);
 
       const _allPostsData = (searchResults.hits ?? []).map(
-        (el): SimpleNode => ({
+        (el): SimpleNode2 => ({
           id: el.document.id,
-          title: el.document.title,
+          title: el.document.title ?? "",
           changedAt: el.document.changedAt,
-          content: el.document.content,
-          nodeType: el.document.nodeType,
+          content: el.document.content ?? "",
+          nodeType: el.document.nodeType as NodeType,
           nodeImage: el.document.nodeImage || "",
-          corrects: el.document.corrects,
-          wrongs: el.document.wrongs,
+          nodeVideo: el.document.nodeVideo || "",
+          corrects: el.document.corrects ?? 0,
+          wrongs: el.document.wrongs ?? 0,
           tags: el.document.tags,
           contributors: el.document.contributors,
           institutions: el.document.institutions,

@@ -18,14 +18,15 @@ export type NodeType =
   | "Private";
 export type SimpleNode2 = {
   id: string;
-  title?: string;
-  changedAt?: string;
-  content?: string;
+  title: string;
+  changedAt: string;
+  content: string;
   choices: KnowledgeChoice[];
   nodeType: NodeType;
   nodeImage?: string;
-  corrects?: number;
-  wrongs?: number;
+  nodeVideo?: string;
+  corrects: number;
+  wrongs: number;
   tags: string[];
   contributors: { fullName: string; imageUrl: string; username: string }[];
   institutions: { name: string }[];

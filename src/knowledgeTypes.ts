@@ -4,6 +4,8 @@ import { AppProps } from "next/app";
 import { NextPage } from "next/types";
 import { Dispatch, ReactElement, ReactNode, SetStateAction } from "react";
 
+import { SimpleNode2 } from "./types";
+
 export enum NodeType {
   "Relation" = "Relation",
   "Concept" = "Concept",
@@ -152,14 +154,14 @@ export type KnowledgeNode = Omit<
 
 export type SimpleNode = {
   id: string;
-  title?: string;
-  changedAt?: string;
-  content?: string;
+  title: string;
+  changedAt: string;
+  content: string;
   choices: KnowledgeChoice[];
   nodeType: NodeType;
   nodeImage?: string;
-  corrects?: number;
-  wrongs?: number;
+  corrects: number;
+  wrongs: number;
   tags: string[];
   contributors: { fullName: string; imageUrl: string; username: string }[];
   institutions: { name: string }[];
@@ -214,6 +216,7 @@ export type TypesenseNodesSchema = {
   isTag: boolean; // typesense
   labelsReferences: string[]; // typesense
   nodeImage?: string;
+  nodeVideo?: string;
   nodeType: NodeType; // typesense
   tags: string[]; // typesense
   title: string; // typesense
@@ -314,14 +317,14 @@ export type StatsSchema = {
 };
 
 export type SearchNodesResponse = {
-  data: SimpleNode[];
+  data: SimpleNode2[];
   page: number;
   numResults: number;
   perPage: number;
 };
 
 export type SearchNotebookResponse = {
-  data: SimpleNode[];
+  data: SimpleNode2[];
   page: number;
   numResults: number;
   perPage: number;

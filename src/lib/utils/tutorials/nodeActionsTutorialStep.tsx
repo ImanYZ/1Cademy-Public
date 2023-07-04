@@ -21,7 +21,7 @@ const PARENT_CHILDREN_STEPS: TutorialStepConfig[] = [
     description: (
       <MarkdownRender
         text={
-          "Here is a list of parent nodes. Parent nodes are superordinate concepts that provide prerequisite information for the current node."
+          "Here is a list of parent nodes. Parent or superordinate nodes provide prerequisite knowledge to learn the current node."
         }
       />
     ),
@@ -31,7 +31,7 @@ const PARENT_CHILDREN_STEPS: TutorialStepConfig[] = [
     childTargetId: "children-list",
     description: (
       <MarkdownRender
-        text={"This is the list of child nodes. It contains all the nodes that are subordinate to this node."}
+        text={"This is the list of child nodes. It contains all the subordinate nodes that one can learn after learning this node."}
       />
     ),
   },
@@ -107,11 +107,29 @@ const UPTOVE_STEPS: TutorialStepConfig[] = [
     description: (node: FullNodeData) => (
       <Stack>
         <Typography>
-          You can <b>upvote</b> if this node is helpful, the node currently has {node.corrects}
-          <CheckIcon fontSize="small" color="success" sx={{ verticalAlign: "text-top" }} />. Upvoting will increase the
+          You can <b>upvote</b> the node if you think it is so good that you don't like to see any changes to it. The node currently has {node.corrects}
+          <CheckIcon fontSize="small" color="success" sx={{ verticalAlign: "text-top" }} /> {node.corrects == 1 ? "" : "s"}. Your upvote will increase the
           count to {node.corrects + 1}
           <CheckIcon fontSize="small" color="success" sx={{ verticalAlign: "text-top" }} />, ensuring the quality of the
           node.
+        </Typography>
+        <Typography>The node will be locked and all new proposals to change it will go to it pending list for further review, if:</Typography>
+
+        <MarkdownRender
+          text={`${String.raw`$$\text{Upvotes} > \text{2}$$`}`}
+          sx={{ my: "4px", alignSelf: "center" }}
+        />
+        <Typography>If you upvote it:</Typography>
+        <MarkdownRender
+          text={`$$${String.raw`\text{${node.corrects + 1}}`}${
+            node.corrects + 1 > 2 ? " > " : " &#8804; "
+          }${String.raw`\text{2}`}$$`}
+          sx={{ alignSelf: "center" }}
+        />
+        <Typography>
+          {node.corrects + 1 > 2
+            ? "So, the node will be locked."
+            : "So, the node won't be locked."}
         </Typography>
       </Stack>
     ),
@@ -125,8 +143,8 @@ const DOWNVOTE_STEPS: TutorialStepConfig[] = [
     description: (node: FullNodeData) => (
       <Stack>
         <Typography>
-          You can downvote if this node is unhelpful, the node currently has {node.wrongs}
-          <CloseIcon fontSize="small" color="error" sx={{ verticalAlign: "text-top" }} /> downvotes. your downvote will
+          You can <b>downvote</b> the node if you think it is not helpful to anyone's learning. The node currently has {node.wrongs}
+          <CloseIcon fontSize="small" color="error" sx={{ verticalAlign: "text-top" }} /> downvote{node.wrongs == 1 ? "" : "s"}. Your downvote will
           increase the count to {node.wrongs + 1}
           <CloseIcon fontSize="small" color="error" sx={{ verticalAlign: "text-top" }} />.
         </Typography>
@@ -136,17 +154,17 @@ const DOWNVOTE_STEPS: TutorialStepConfig[] = [
           text={`${String.raw`$$\text{Downvotes} > \text{Upvotes}$$`}`}
           sx={{ my: "4px", alignSelf: "center" }}
         />
-        <Typography>In this case:</Typography>
+        <Typography>If you downvote it:</Typography>
         <MarkdownRender
           text={`$$${String.raw`\text{${node.wrongs + 1}}`}${
-            node.wrongs + 1 > node.corrects ? " > " : " < "
+            node.wrongs + 1 > node.corrects ? " > " : " &#8804; "
           }${String.raw`\text{${node.corrects}}`}$$`}
           sx={{ alignSelf: "center" }}
         />
         <Typography>
           {node.wrongs + 1 > node.corrects
-            ? "The node will be removed from the map."
-            : "The node won't be removed from the map."}
+            ? "So, the node will be deleted."
+            : "So, the node won't be deleted."}
         </Typography>
       </Stack>
     ),
@@ -160,7 +178,7 @@ const HIDE_STEPS: TutorialStepConfig[] = [
     description: (
       <MarkdownRender
         text={
-          "This button allows you to remove a node from your personalized view of the knowledge graph. This button does not delete or remove a node, it just hides it from view. This allows you to keep your map tidy and only display nodes of immediate interest."
+          "This button allows you to remove the node from your current notebook (personalized view of the knowledge graph). This button does not delete or remove the node; it just hides it in your notebook. This allows you to keep your notebook tidy and only display nodes of immediate interest."
         }
       />
     ),
@@ -175,7 +193,7 @@ const HIDE_OFFSPRING_STEPS: TutorialStepConfig[] = [
     description: (
       <MarkdownRender
         text={
-          "This button is like the hide node button but allows you to hide whole strings of nodes. By clicking this button you will hide all the displayed children of the node you are clicking on."
+          "This button is like the hide node button, but allows you to hide whole descendents of the node. By clicking this button you will hide all the displayed children of the node, its grand children, and so on."
         }
       />
     ),
@@ -190,7 +208,7 @@ const EXPAND_STEPS: TutorialStepConfig[] = [
     childTargetId: "open-button",
     description: (
       <MarkdownRender
-        text={"This button allows you to expand the node that has been closed and see all of its content."}
+        text={"This button allows you to expand the node that has been collapsed and see all of its content."}
       />
     ),
     isClickable: true,
@@ -203,7 +221,7 @@ const COLLAPSE_STEPS: TutorialStepConfig[] = [
     title: "Collapsing the Node",
     childTargetId: "close-button",
     description: (
-      <MarkdownRender text={"this button allows you to close a node so that only the title is displayed."} />
+      <MarkdownRender text={"This button allows you to collapse the node so that only its title would be displayed."} />
     ),
     isClickable: true,
     outline: "inside",
