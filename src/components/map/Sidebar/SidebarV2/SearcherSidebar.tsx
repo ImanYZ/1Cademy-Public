@@ -36,11 +36,11 @@ import { DESIGN_SYSTEM_COLORS } from "@/lib/theme/colors";
 import { useNodeBook } from "../../../../context/NodeBookContext";
 import { useInView } from "../../../../hooks/useObserver";
 import { useTagsTreeView } from "../../../../hooks/useTagsTreeView";
-import { SearchNodesResponse, SearchNotebookResponse, SimpleNode } from "../../../../knowledgeTypes";
+import { SearchNodesResponse, SearchNotebookResponse } from "../../../../knowledgeTypes";
 import { Post } from "../../../../lib/mapApi";
 import shortenNumber from "../../../../lib/utils/shortenNumber";
 import { FullNodeData, SortDirection, SortValues, TNodeBookState } from "../../../../nodeBookTypes";
-import { NodeType } from "../../../../types";
+import { NodeType, SimpleNode2 } from "../../../../types";
 import NodeTypeIcon from "../../../NodeTypeIcon2";
 import { ChosenTag, MemoizedTagsSearcher, TagTreeView } from "../../../TagsSearcher";
 import RecentNodesList from "../../RecentNodesList";
@@ -64,14 +64,14 @@ type SearcherSidebarProps = {
   preLoadNodes: (nodeIds: string[], fullNodes: FullNodeData[]) => Promise<void>;
 };
 
-type Pagination = {
-  data: any[];
+export type Pagination = {
+  data: SimpleNode2[];
   lastPageLoaded: number;
   totalPage: number;
   totalResults: number;
 };
 
-const NODE_TYPES_ARRAY: NodeType[] = ["Concept", "Code", "Reference", "Relation", "Question", "Idea"];
+export const NODE_TYPES_ARRAY: NodeType[] = ["Concept", "Code", "Reference", "Relation", "Question", "Idea"];
 const MAX_TAGS_IN_MOBILE = 2;
 
 const SearcherSidebar = ({
@@ -165,7 +165,7 @@ const SearcherSidebar = ({
           onlyTitle: nodeBookState.searchByTitleOnly,
         });
 
-        const newData: SimpleNode[] = page === 1 ? data.data : [...searchResults.data, ...data.data];
+        const newData: SimpleNode2[] = page === 1 ? data.data : [...searchResults.data, ...data.data];
         const filteredData = daysAgo ? filterOnDaysAgo(newData, daysAgo) : newData;
         setSearchResults({
           data: filteredData,
@@ -814,9 +814,9 @@ const SearcherSidebar = ({
               >
                 <RecentNodesList
                   id={"search-sort-options"}
-                  recentNodes={searchResults}
-                  setRecentNodes={setSearchResults}
-                  onlyTags={onlyTags}
+                  // recentNodes={searchResults}
+                  // setRecentNodes={setSearchResults}
+                  // onlyTags={onlyTags}
                   disabled={disableRecentNodeList}
                   sortOption={sortOption}
                   setSortOption={onChangeSortOptions}

@@ -838,6 +838,10 @@ export const createOrUpdateNode = (
 // don't work in worker
 export const copyNode = (node: FullNodeData): FullNodeData => {
   let newNode = { ...node };
+  newNode.notebooks = [];
+  node.notebooks.forEach(c => newNode.notebooks.push(c));
+  newNode.expands = [];
+  node.expands.forEach(c => newNode.expands.push(c));
   newNode.parents = [];
   for (let parent of node.parents) {
     newNode.parents.push({ ...parent });
