@@ -3,7 +3,7 @@ import { Chip, CircularProgress, Stack, Typography } from "@mui/material";
 import { Box } from "@mui/system";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { SearchNodesResponse } from "src/knowledgeTypes";
 import { FullNodeData, SortDirection, SortValues } from "src/nodeBookTypes";
 import { NodeType } from "src/types";
@@ -44,6 +44,7 @@ const TagsSidebar = ({ open, onClose, onChangeChosenNode, preLoadNodes }: TagsSi
 
   const { allTags, setAllTags, resetSelectedTags } = useTagsTreeView();
   const { ref: refInfinityLoaderTrigger, inView: inViewInfinityLoaderTrigger } = useInView();
+  const previousOpenRef = useRef(false);
 
   const selectedTags = useMemo<TagTreeView[]>(() => Object.values(allTags).filter(tag => tag.checked), [allTags]);
 
@@ -369,12 +370,25 @@ const TagsSidebar = ({ open, onClose, onChangeChosenNode, preLoadNodes }: TagsSi
   );
 
   useEffect(() => {
-    if (open) return;
+    if (open === previousOpenRef.current) return;
+
+    previousOpenRef.current = open;
+    if (!open) return;
+
     setSearchResults(INITIAL_SEARCH_RESULT);
     setIsLoading(false);
     setQuery("");
     resetSelectedTags();
-  }, [open, resetSelectedTags]);
+
+    onSearchQuery({
+      q: "",
+      sortOption: "NOT_SELECTED",
+      sortDirection: "DESCENDING",
+      nodeTypes: NODE_TYPES_ARRAY,
+      nodesUpdatedSince: mapTimeFilterToDays("ALL_TIME"),
+      page: 1,
+    });
+  }, [onSearchQuery, open, resetSelectedTags]);
 
   return (
     <SidebarWrapper2
