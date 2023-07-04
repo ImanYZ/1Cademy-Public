@@ -488,6 +488,7 @@ export interface AuthState {
   readonly user: User | null;
   readonly reputation: Reputation | null;
   readonly settings: UserSettings;
+  readonly isLoading: boolean;
 }
 
 export type AuthActions = {
@@ -543,6 +544,10 @@ export type SetViewAction = {
   type: "setView";
   payload: UserView;
 };
+export type SetIsLoadingAction = {
+  type: "setIsLoading";
+  payload: boolean;
+};
 
 export type SetReputationAction = {
   type: "setReputation";
@@ -557,7 +562,8 @@ export type DispatchAuthActions =
   | SetShowClustersAction
   | SetAuthUserAction
   | SetViewAction
-  | SetReputationAction;
+  | SetReputationAction
+  | SetIsLoadingAction;
 export type SignUpValidation = {
   uname?: string;
   email?: string;

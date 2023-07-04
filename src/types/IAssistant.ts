@@ -41,6 +41,10 @@ export type IAssistantEventDetail =
         content: string;
       };
       bookUrl: string;
+    }
+  | {
+      type: "OPEN_NODE";
+      nodeId: string;
     };
 
 export type INarrateWorkerMessage = {

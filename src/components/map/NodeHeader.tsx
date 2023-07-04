@@ -60,7 +60,7 @@ const NodeHeader = ({
               id={closeButtonId}
               color="inherit"
               onClick={onToggleNode}
-              aria-label="Close the node"
+              aria-label="Collapse the node."
               size="small"
             >
               <RemoveIcon fontSize="inherit" />
@@ -71,7 +71,7 @@ const NodeHeader = ({
               id={openButtonId}
               color="inherit"
               onClick={onToggleNode}
-              aria-label="open the node"
+              aria-label="Open the node."
               size="small"
             >
               <FullscreenIcon fontSize="inherit" />

@@ -79,6 +79,8 @@ export type Flashcard = {
   proposer?: string;
   node?: string;
   proposal?: string;
+  flashcardId?: string;
+  id?: string;
 };
 
 export type FlashcardResponse = Flashcard[];

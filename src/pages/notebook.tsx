@@ -3042,8 +3042,18 @@ const Notebook = ({}: NotebookProps) => {
           edges = removeDagAllEdges(g.current, nodeId, edges, updatedNodeIds);
           nodes = removeDagNode(g.current, nodeId, nodes);
 
+          node.parents.forEach(cur => {
+            const newChildren = nodes[cur.node].children.filter(c => c.node !== nodeId);
+            nodes[cur.node].children = newChildren;
+          });
+          node.children.forEach(cur => {
+            const newParents = nodes[cur.node].parents.filter(c => c.node !== nodeId);
+            nodes[cur.node].children = newParents;
+          });
+
           notebookRef.current.selectedNode = node.parents[0]?.node ?? null;
           updatedNodeIds.push(notebookRef.current.selectedNode!);
+          node.parents.forEach(c => updatedNodeIds.push(c.node));
           nodeBookDispatch({ type: "setSelectedNode", payload: node.parents[0]?.node ?? null });
         } else {
           nodes[nodeId] = {
@@ -6198,6 +6208,8 @@ const Notebook = ({}: NotebookProps) => {
         setOpenSidebar("SEARCHER_SIDEBAR");
         nodeBookDispatch({ type: "setSearchQuery", payload: detail.query });
         nodeBookDispatch({ type: "setNodeTitleBlured", payload: true });
+      } else if (detail.type === "OPEN_NODE") {
+        openNodeHandler(detail.nodeId);
       } else if (detail.type === "IMPROVEMENT") {
         setOpenSidebar(null);
         proposeNodeImprovement(null, detail.selectedNode.id);
