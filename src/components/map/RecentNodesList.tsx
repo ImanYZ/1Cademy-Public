@@ -55,9 +55,9 @@ const SORT_OPTIONS: SortOptions[] = [
 
 type RecentNodesListProps = {
   id: string;
-  recentNodes: any;
-  setRecentNodes: any;
-  onlyTags: any;
+  // recentNodes: any;
+  // setRecentNodes: any;
+  // onlyTags: any;
   disabled?: boolean;
   sortDirection: any;
   setSortDirection: any;

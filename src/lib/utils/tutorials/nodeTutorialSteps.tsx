@@ -83,7 +83,7 @@ const NODES_STEPS: TutorialStepConfig[] = [
     description: (
       <MarkdownRender
         text={
-          "Here you can see the top contributor to a node. 1Cademy is a collaborative platform, many people contribute to the content. However, the system identifies who contributes most to a node and their profile is displayed on the node."
+          "Here you can see the top contributor to a node. 1Cademy is a collaborative platform, many people contribute to the content. However, the system identifies whose contributions have been the most helpful to each node and their profile picture is displayed on the node."
         }
       />
     ),
@@ -150,7 +150,7 @@ const NODES_STEPS: TutorialStepConfig[] = [
             <NodeTypeIconButton>
               <LockIcon color="inherit" fontSize="small" />
             </NodeTypeIconButton>
-            <Typography fontSize={"inherit"}>Lock</Typography>
+            <Typography fontSize={"inherit"}>Locked</Typography>
           </Stack>
         </Stack>
       </>
@@ -193,7 +193,7 @@ const NODES_STEPS: TutorialStepConfig[] = [
     description: (
       <MarkdownRender
         text={
-          "This is the downvote button. You can downvote nodes that you think are inaccurate. A downvote is a vote to remove a node and it lowers the threshold of approvals needed for a proposed change to that node."
+          "This is the downvote button. You can downvote nodes that you think are not helpful to anyone's learning. A downvote is a vote to remove a node and it lowers the threshold of approvals needed for a proposed change to that node."
         }
       />
     ),
@@ -206,7 +206,7 @@ const NODES_STEPS: TutorialStepConfig[] = [
     description: (
       <MarkdownRender
         text={
-          "This is the upvote button. You can upvote nodes that you think are good. An upvote is a vote to not change a node because upvotes make it more difficult to delete or change a node."
+          "This is the upvote button. You can upvote nodes that you think are so good that you don't like to see any changes to them. By upvoting, you vote to lock a node from further changes because upvotes make it more difficult to delete or change a node."
         }
       />
     ),
@@ -219,7 +219,7 @@ const NODES_STEPS: TutorialStepConfig[] = [
     description: (
       <Stack>
         <Typography>
-          Netvotes determines how many or few approving votes a proposal needs in order to make the proposed changes to
+          Netvotes determine how many or few approving votes a proposal needs in order to make the proposed changes to
           the node.
         </Typography>
         <MarkdownRender
@@ -237,7 +237,7 @@ const NODES_STEPS: TutorialStepConfig[] = [
     description: (
       <MarkdownRender
         text={
-          "This button is for tags and citations. When you click on it you see a panel that contains the sources used to create the node and a panel that shows all the tags for the node."
+          "This button is for tags and citations. When you click it, you see the left panel that contains the references cited in the node and the right panel that shows all the tags for the node."
         }
       />
     ),
@@ -263,7 +263,7 @@ const NODES_STEPS: TutorialStepConfig[] = [
     description: (
       <MarkdownRender
         text={
-          "This button gives you the options to bookmark and mark a node as studied. It also gives you the option to have a node narrated and to share a node on social media."
+          "This button gives you the options to bookmark and mark the node as studied. It also gives you the option to share the node on social media."
         }
       />
     ),

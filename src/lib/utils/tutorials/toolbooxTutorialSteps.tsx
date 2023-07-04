@@ -9,7 +9,7 @@ const TOOLBOX_STEPS_CONFIG: TutorialStepConfig[] = [
     description: (
       <MarkdownRender
         text={
-          "You can click this button to view a full list of the tutorials for 1Cademy. It indicates which ones you have and have not completed. You can click on any of the listed tutorials to take them again if you need a refresher on any of 1Cademy’s features."
+          "You can click this button to view a full list of the 1Cademy tutorials. It indicates which ones you have or have not completed. You can click any of the listed tutorial steps to review them if you need a refresher on any of the 1Cademy’s tools or features."
         }
       />
     ),

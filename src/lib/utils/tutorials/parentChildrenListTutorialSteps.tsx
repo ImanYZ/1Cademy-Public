@@ -10,7 +10,7 @@ const PARENTS_CHILDREN_LIST_STEPS_CONFIG: TutorialStepConfig[] = [
     description: (
       <MarkdownRender
         text={
-          "Here is a list of parent nodes. Parent nodes are superordinate concepts that provide prerequisite information for the current node."
+          "Here is a list of parent nodes. Parent or superordinate nodes provide prerequisite knowledge to learn the current node."
         }
       />
     ),
@@ -23,7 +23,7 @@ const PARENTS_CHILDREN_LIST_STEPS_CONFIG: TutorialStepConfig[] = [
     title: "List Of Children",
     description: (
       <MarkdownRender
-        text={"This is the list of child nodes. It contains all the nodes that are subordinate to this node."}
+        text={"This is the list of child nodes. It contains all the subordinate nodes that one can learn after learning this node."}
       />
     ),
     tooltipPosition: "top",

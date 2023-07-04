@@ -2489,3 +2489,33 @@ export const addToPendingPropsNumsExcludingVoters = async ({
   });
   return [newBatch, writeCounts];
 };
+
+export const signalFlashcardChanges = async ({ nodeId, batch, writeCounts, currentTimestamp }: any) => {
+  let newBatch = batch;
+  console.log("signalFlashcardChanges");
+  const nodeDoc = await db.collection("nodes").doc(nodeId).get();
+  const nodeData = nodeDoc.data();
+  if (nodeData && nodeData.hasOwnProperty("linkedFlashcards")) {
+    const linkedFlashcards = nodeData.linkedFlashcards;
+    for (let linkedF of linkedFlashcards) {
+      const tempFlashcardRef = db.collection("tempFlashcards").doc(linkedF.documentId);
+      const tempFlashcardDoc = await tempFlashcardRef.get();
+      const tempFlashcardData = tempFlashcardDoc.data();
+      const flashcards = tempFlashcardData?.flashcards;
+      let needUpdate = false;
+      flashcards.forEach((flashcard: any) => {
+        if (flashcard.nodeId === nodeId) {
+          needUpdate = true;
+          flashcard.proposed = false;
+          flashcard.nodeId = "";
+        }
+      });
+      console.log("signalFlashcardChanges", needUpdate, flashcards);
+      if (needUpdate) {
+        newBatch.update(tempFlashcardRef, { flashcards, updatedAt: currentTimestamp });
+        [newBatch, writeCounts] = await checkRestartBatchWriteCounts(newBatch, writeCounts);
+      }
+    }
+  }
+  return [newBatch, writeCounts];
+};

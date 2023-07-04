@@ -7,6 +7,7 @@ type CustomIconButtonProps = {
   onClick?: () => void;
   onClickOnDisable?: () => void;
   disabled?: boolean;
+  size?: "md" | "sm";
   sx?: SxProps<Theme>;
 };
 
@@ -15,6 +16,7 @@ export const CustomWrapperButton = ({
   children,
   sx,
   disabled,
+  size = "sm",
   onClickOnWrapper,
 }: CustomIconButtonProps & { onClickOnWrapper?: () => void }) => {
   return (
@@ -22,7 +24,7 @@ export const CustomWrapperButton = ({
       id={id}
       onClick={onClickOnWrapper}
       sx={{
-        height: "30px",
+        height: size === "md" ? "30px" : "24px",
         // p: "6px 8px",
         display: "flex",
         alignItems: "center",

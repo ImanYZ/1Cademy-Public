@@ -1,5 +1,5 @@
 import { collection, DocumentChange, DocumentData, getFirestore, onSnapshot, query } from "firebase/firestore";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 import { AllTagsTreeView } from "../components/TagsSearcher";
 import { Tag } from "../knowledgeTypes";
@@ -24,6 +24,18 @@ export const useTagsTreeView = (chosenTags: string[] = []) => {
   const [allTagsLoaded, setAllTagsLoaded] = useState(false);
   const [tagsTreeView, setTagsTreeView] = useState<AllTagsTreeView>(initializeTagsTreeView(chosenTags));
 
+  const resetSelectedTags = useCallback(
+    () =>
+      setTagsTreeView(pre => {
+        const newTags = { ...pre };
+        Object.keys(pre).forEach(key => {
+          newTags[key] = { ...pre[key], checked: false };
+        });
+        return newTags;
+      }),
+    []
+  );
+
   useEffect(() => {
     const db = getFirestore();
     const tagsRef = collection(db, "tags");
@@ -41,7 +53,7 @@ export const useTagsTreeView = (chosenTags: string[] = []) => {
     return () => unsubscribe();
   }, [setTagsTreeView]);
 
-  return { allTags: tagsTreeView, setAllTags: setTagsTreeView, allTagsLoaded };
+  return { allTags: tagsTreeView, setAllTags: setTagsTreeView, resetSelectedTags, allTagsLoaded };
 };
 
 // ------------------------------------------

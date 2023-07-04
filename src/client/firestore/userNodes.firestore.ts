@@ -15,7 +15,16 @@ export const getUserNodeByForce = async (
   if (!userNodeDoc.docs.length) {
     return { ...generateUserNode({ nodeId, uname, notebookId, isMock: true }), id: doc(ref).id };
   }
-  const thisUserNode: UserNode = { ...(userNodeDoc.docs[0].data() as UserNodeFirestore), id: nodeId };
+  let userNodeDocument = userNodeDoc.docs[0].data() as UserNodeFirestore;
+  if (!userNodeDocument.notebooks.length) {
+    userNodeDocument.notebooks = [notebookId];
+    userNodeDocument.expands = [true];
+  }
+  if (!userNodeDocument.notebooks.includes(notebookId)) {
+    userNodeDocument.notebooks.push(notebookId);
+    userNodeDocument.expands.push(true);
+  }
+  const thisUserNode: UserNode = { ...userNodeDocument, id: userNodeDoc.docs[0].id };
   return thisUserNode;
 };
 

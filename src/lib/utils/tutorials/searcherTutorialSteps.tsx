@@ -17,7 +17,7 @@ const NODES_STEPS: TutorialStepConfig[] = [
     title: "Search Engine",
     description: (
       <MarkdownRender
-        text={"1Cademy has a search engine that can be used to help you find a node, reference, or topic."}
+        text={"1Cademy has a search engine that can be used to help you find nodes in its databse, based on tags, filters, and queries."}
       />
     ),
 
@@ -31,7 +31,7 @@ const NODES_STEPS: TutorialStepConfig[] = [
     targetId: "sidebar-wrapper-searcher",
     childTargetId: "search-input",
     title: "Search Query",
-    description: <MarkdownRender text={"To search enter your query"} />,
+    description: <MarkdownRender text={"To search, simply enter what you're looking for."} />,
     tooltipPosition: "bottom",
     anchor: "Portal",
   },
@@ -40,7 +40,7 @@ const NODES_STEPS: TutorialStepConfig[] = [
     targetId: "sidebar-wrapper-searcher",
     childTargetId: "SearchIcon",
     title: "How to search",
-    description: <MarkdownRender text={"**Click** on this search icon."} />,
+    description: <MarkdownRender text={"To start searching, **Click** this icon."} />,
     tooltipPosition: "bottom",
     isClickable: true,
     anchor: "Portal",
@@ -49,7 +49,7 @@ const NODES_STEPS: TutorialStepConfig[] = [
     targetId: "sidebar-wrapper-searcher",
     childTargetId: "searcher-sidebar-options",
     title: "Options",
-    description: <MarkdownRender text={"Beyond searching terms there are a number of ways to refine your search."} />,
+    description: <MarkdownRender text={"There are a number of ways to refine your search."} />,
     tooltipPosition: "bottom",
     anchor: "Portal",
     outline: "inside",
@@ -61,7 +61,7 @@ const NODES_STEPS: TutorialStepConfig[] = [
     description: (
       <MarkdownRender
         text={
-          "You can search by tags by clicking this icon and refining your search to one or more selected tags representing information domains and communities."
+          "Click this icon to refine your search to one or more selected tags, representing knowledge domains and communities."
         }
       />
     ),
@@ -71,11 +71,11 @@ const NODES_STEPS: TutorialStepConfig[] = [
   {
     targetId: "sidebar-wrapper-searcher",
     childTargetId: "search-sort-options",
-    title: "Sort Options",
+    title: "Sort options",
     description: (
       <MarkdownRender
         text={
-          "Finally you can further sort by: last viewed, date modified, proposals, upvotes, downvotes, or net votes with this icon."
+          "By clicking this icon, you can sort the search results by: last viewed, date modified, proposals, upvotes, downvotes, and net votes."
         }
       />
     ),
@@ -85,7 +85,7 @@ const NODES_STEPS: TutorialStepConfig[] = [
   {
     targetId: "sidebar-wrapper-searcher",
     childTargetId: "search-filter-options",
-    title: "Filter by Dates",
+    title: "Filter by dates",
     description: (
       <MarkdownRender text={"You can also refine your search by how recently nodes were created or edited."} />
     ),
@@ -95,11 +95,11 @@ const NODES_STEPS: TutorialStepConfig[] = [
   {
     targetId: "sidebar-wrapper-searcher",
     childTargetId: "sidebar-wrapper-searcher-content",
-    title: "Search Results",
+    title: "Search results",
     description: (
       <MarkdownRender
         text={
-          "After entering search terms, you can select one of the nodes that are retrieved in this list and it will take you to that node."
+          "This list would show your search results. Clicking each item would open the node in your current notebook and scroll to show you that node."
         }
       />
     ),
