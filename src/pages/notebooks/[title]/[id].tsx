@@ -34,7 +34,12 @@ import { brandingLightTheme } from "../../../lib/theme/brandingTheme";
 import { dagreUtils } from "../../../lib/utils/dagre.util";
 import { devLog } from "../../../lib/utils/develop.util";
 import { COLUMN_GAP, copyNode, NODE_WIDTH } from "../../../lib/utils/Map.utils";
-import { buildFullNodes, fillDagre, getNodes, getUserNodeChanges } from "../../../lib/utils/nodesSyncronization.utils";
+import {
+  buildFullNodes,
+  fillDagre,
+  getNodesPromises,
+  getUserNodeChanges,
+} from "../../../lib/utils/nodesSyncronization.utils";
 import ROUTES from "../../../lib/utils/routes";
 import { FullNodeData, FullNodesData, OpenPart, SelectedUser, TNodeUpdates } from "../../../nodeBookTypes";
 import { Notebook } from "../../../types";
@@ -201,7 +206,7 @@ const NodePage: NextPage<Props> = ({ notebook }) => {
           devLog("2:Snapshot:Nodes Data", userNodeChanges);
 
           const nodeIds = userNodeChanges.map(cur => cur.uNodeData.node);
-          const nodesData = await getNodes(db, nodeIds);
+          const nodesData = await getNodesPromises(db, nodeIds);
           devLog("3:Snapshot:Nodes Data", nodesData);
 
           const fullNodes = buildFullNodes(userNodeChanges, nodesData);

@@ -3,7 +3,7 @@ import { collection, getFirestore, onSnapshot, query, where } from "firebase/fir
 import React, { useEffect, useMemo, useState } from "react";
 import { UserTheme } from "src/knowledgeTypes";
 
-import { buildFullNodes, getNodes } from "../../../../lib/utils/nodesSyncronization.utils";
+import { buildFullNodes, getNodesPromises } from "../../../../lib/utils/nodesSyncronization.utils";
 import { FullNodeData, FullNodesData, UserNodeChanges, UserNodeFirestore } from "../../../../nodeBookTypes";
 import { BookmarksList } from "../BookmarksList";
 import { SidebarWrapper } from "./SidebarWrapper";
@@ -78,7 +78,7 @@ export const BookmarksSidebar = ({
       });
 
       const bookmarksNodeIds = bookmarksUserNodes.map(cur => cur.uNodeData.node);
-      const bookmarksNodesData = await getNodes(db, bookmarksNodeIds);
+      const bookmarksNodesData = await getNodesPromises(db, bookmarksNodeIds);
       const fullNodes = buildFullNodes(bookmarksUserNodes, bookmarksNodesData);
       setBookmarks(oldFullNodes => mergeAllNodes(fullNodes, oldFullNodes));
     });

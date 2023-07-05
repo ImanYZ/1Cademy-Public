@@ -9,13 +9,14 @@ import { getNodes } from "src/client/firestore/nodes.firestore";
 import { getRecentUserNodesByUser } from "src/client/firestore/recentUserNodes.firestore";
 import { SearchNodesResponse } from "src/knowledgeTypes";
 import { FullNodeData, SortDirection, SortValues } from "src/nodeBookTypes";
-import { NodeType, SimpleNode2 } from "src/types";
+import { SimpleNode2 } from "src/types";
 
 import { ChosenTag, MemoizedTagsSearcher, TagTreeView } from "@/components/TagsSearcher";
 import { useInView } from "@/hooks/useObserver";
 import { useTagsTreeView } from "@/hooks/useTagsTreeView";
 import { Post } from "@/lib/mapApi";
 import { DESIGN_SYSTEM_COLORS } from "@/lib/theme/colors";
+import { mapNodeToSimpleNode } from "@/lib/utils/maps.utils";
 
 import shortenNumber from "../../../../lib/utils/shortenNumber";
 import RecentNodesList from "../../RecentNodesList";
@@ -60,31 +61,7 @@ const ReferencesSidebar = ({ username, open, onClose, onChangeChosenNode, preLoa
     const referenceNodes = nodes.filter(c => c?.nodeType === "Reference");
     const newMostUsedNodes = referenceNodes
       .flatMap(c => c || [])
-      .map(
-        (cur): SimpleNode2 => ({
-          id: cur.id,
-          title: cur.title ?? "",
-          changedAt: cur.changedAt.toDate().toISOString(),
-          content: cur.content ?? "",
-          nodeType: cur.nodeType as NodeType,
-          nodeImage: cur.nodeImage || "",
-          nodeVideo: cur.nodeVideo || "",
-          corrects: cur.corrects ?? 0,
-          wrongs: cur.wrongs ?? 0,
-          tags: cur.tags,
-          contributors: Object.keys(cur.contributors).map(key => ({
-            fullName: cur.contributors[key].fullname,
-            imageUrl: cur.contributors[key].imageUrl,
-            username: username,
-          })),
-          institutions: Object.entries(cur.institutions || {})
-            .map(cur => ({ name: cur[0], reputation: cur[1].reputation || 0 }))
-            .sort((a, b) => b.reputation - a.reputation)
-            .map(institution => ({ name: institution.name })),
-          choices: cur.choices || [],
-          versions: cur.versions ?? 0,
-        })
-      );
+      .map((cur): SimpleNode2 => mapNodeToSimpleNode(cur, username));
 
     setSearchResults({
       data: newMostUsedNodes,
@@ -179,27 +156,6 @@ const ReferencesSidebar = ({ username, open, onClose, onChangeChosenNode, preLoa
   const references: SimpleNode2[] = useMemo(() => {
     return searchResults.data;
   }, [searchResults.data]);
-
-  useEffect(() => {
-    if (!inViewInfinityLoaderTrigger) return;
-    if (isLoading) return;
-    onSearchQuery({
-      q: query,
-      sortOption,
-      sortDirection,
-      nodesUpdatedSince: mapTimeFilterToDays(timeFilter),
-      page: searchResults.lastPageLoaded + 1,
-    });
-  }, [
-    inViewInfinityLoaderTrigger,
-    isLoading,
-    onSearchQuery,
-    query,
-    searchResults.lastPageLoaded,
-    sortDirection,
-    sortOption,
-    timeFilter,
-  ]);
 
   const sidebarOptionsMemo = useMemo(
     () => (
@@ -389,6 +345,27 @@ const ReferencesSidebar = ({ username, open, onClose, onChangeChosenNode, preLoa
       searchResults.totalPage,
     ]
   );
+
+  useEffect(() => {
+    if (!inViewInfinityLoaderTrigger) return;
+    if (isLoading) return;
+    onSearchQuery({
+      q: query,
+      sortOption,
+      sortDirection,
+      nodesUpdatedSince: mapTimeFilterToDays(timeFilter),
+      page: searchResults.lastPageLoaded + 1,
+    });
+  }, [
+    inViewInfinityLoaderTrigger,
+    isLoading,
+    onSearchQuery,
+    query,
+    searchResults.lastPageLoaded,
+    sortDirection,
+    sortOption,
+    timeFilter,
+  ]);
 
   useEffect(() => {
     if (open === previousOpenRef.current) return;
