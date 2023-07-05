@@ -187,10 +187,10 @@ export const onActionTrackCreated = functions.firestore.document("/actionTracks/
     actionTracksLogRef.add({ ...data, expired: Timestamp.fromDate(twoDaysAgo) });
 
     // create recentUserNodes
-    const ref = firestore.collection("recentUserNodes").doc(data.doer);
+    const recentUserNodesRef = firestore.collection("recentUserNodes");
     // expired is +2 days ago, to remove document in 5 days, because TTL remove in 72h
     const fiveDaysAgo = new Date(Number(today) + 2 * MILLISECONDS_IN_A_DAY);
-    await ref.set({ nodeId: data.node, expired: Timestamp.fromDate(fiveDaysAgo) });
+    recentUserNodesRef.add({ user: data.doer, nodeId: data.nodeId, expired: Timestamp.fromDate(fiveDaysAgo) });
   } catch (error) {
     console.log("error:", error);
   }

@@ -547,3 +547,9 @@ export type ActionTracksDocument = {
   receivers: string[];
   type: ActionTrackType;
 };
+
+export type RecentUserNodesDocument = {
+  user: string;
+  nodeId: string;
+  expired: Timestamp;
+};

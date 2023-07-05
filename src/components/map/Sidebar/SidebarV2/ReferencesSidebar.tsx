@@ -5,8 +5,8 @@ import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import { getFirestore } from "firebase/firestore";
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { getMostUsedNodeIdsByUser } from "src/client/firestore/mostUsedNodesByUser.firestore";
 import { getNodes } from "src/client/firestore/nodes.firestore";
+import { getRecentUserNodesByUser } from "src/client/firestore/recentUserNodes.firestore";
 import { SearchNodesResponse } from "src/knowledgeTypes";
 import { FullNodeData, SortDirection, SortValues } from "src/nodeBookTypes";
 import { NodeType, SimpleNode2 } from "src/types";
@@ -45,7 +45,6 @@ const ReferencesSidebar = ({ username, open, onClose, onChangeChosenNode, preLoa
   const [sortOption, setSortOption] = useState<SortValues>("NOT_SELECTED");
   const [sortDirection, setSortDirection] = useState<SortDirection>("DESCENDING");
   const [searchResults, setSearchResults] = useState<Pagination>(INITIAL_SEARCH_RESULT);
-  const [, /* mostUsedNode */ setMostUsedNodes] = useState<SimpleNode2[]>([]);
 
   const { allTags, setAllTags, resetSelectedTags } = useTagsTreeView();
   const { ref: refInfinityLoaderTrigger, inView: inViewInfinityLoaderTrigger } = useInView();
@@ -54,16 +53,18 @@ const ReferencesSidebar = ({ username, open, onClose, onChangeChosenNode, preLoa
   const selectedTags = useMemo<TagTreeView[]>(() => Object.values(allTags).filter(tag => tag.checked), [allTags]);
 
   const onGetTheMostUsedNodes = useCallback(async () => {
-    console.log("onGetTheMostUsedNodes");
-    const nodeIds = await getMostUsedNodeIdsByUser(db, username);
-    const nodes = await getNodes(db, nodeIds);
-    const newMostUsedNodes = nodes
+    setIsLoading(true);
+    const nodeIds = await getRecentUserNodesByUser(db, username);
+    const uniqueNodesIds = Array.from(new Set(nodeIds));
+    const nodes = await getNodes(db, uniqueNodesIds);
+    const referenceNodes = nodes.filter(c => c?.nodeType === "Reference");
+    const newMostUsedNodes = referenceNodes
       .flatMap(c => c || [])
       .map(
         (cur): SimpleNode2 => ({
           id: cur.id,
           title: cur.title ?? "",
-          changedAt: `${cur.changedAt?.toMillis() || 0}`,
+          changedAt: cur.changedAt.toDate().toISOString(),
           content: cur.content ?? "",
           nodeType: cur.nodeType as NodeType,
           nodeImage: cur.nodeImage || "",
@@ -85,7 +86,13 @@ const ReferencesSidebar = ({ username, open, onClose, onChangeChosenNode, preLoa
         })
       );
 
-    setMostUsedNodes(newMostUsedNodes);
+    setSearchResults({
+      data: newMostUsedNodes,
+      lastPageLoaded: 1,
+      totalPage: 1,
+      totalResults: newMostUsedNodes.length,
+    });
+    setIsLoading(false);
   }, [db, username]);
 
   const onSearchQuery = useCallback(
@@ -394,14 +401,6 @@ const ReferencesSidebar = ({ username, open, onClose, onChangeChosenNode, preLoa
     setQuery("");
     resetSelectedTags();
     onGetTheMostUsedNodes();
-
-    // onSearchQuery({
-    //   q: "",
-    //   sortOption: "NOT_SELECTED",
-    //   sortDirection: "DESCENDING",
-    //   nodesUpdatedSince: mapTimeFilterToDays("ALL_TIME"),
-    //   page: 1,
-    // });
   }, [onGetTheMostUsedNodes, open, resetSelectedTags]);
 
   return (
