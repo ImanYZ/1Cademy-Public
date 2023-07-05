@@ -516,7 +516,8 @@ export type TutorialTypeKeys =
   | "tagsReferences"
   | "parentsChildrenList"
   | "pathways"
-  | "knowledgeGraph";
+  | "knowledgeGraph"
+  | "nodeInteractions";
 
 export type UserTutorial = {
   currentStep: number;

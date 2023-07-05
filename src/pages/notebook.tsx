@@ -730,16 +730,33 @@ const Notebook = ({}: NotebookProps) => {
    * 2. needs to update the DB
    */
   const openNodeHandler = useMemoizedCallback(
-    async (nodeId: string, openWithDefaultValues: Partial<UserNodeFirestore> = {}, selectNode = true) => {
+    async (
+      nodeId: string,
+      openWithDefaultValues: Partial<UserNodeFirestore> = {},
+      selectNode = true,
+      expanded = true
+    ) => {
       devLog("OPEN_NODE_HANDLER", { nodeId, openWithDefaultValues });
 
       // update graph with preloaded data, to get changes immediately
       setGraph(graph => {
-        if (!preLoadedNodesRef.current[nodeId]) return graph;
+        const preloadedNode = preLoadedNodesRef.current[nodeId];
+        if (!preloadedNode) return graph;
+        const selectedNotebookIdx = preloadedNode.notebooks.findIndex(c => c === selectedNotebookId);
+        if (selectedNotebookIdx < 0) {
+          console.error("selectedNotebook property doesn't exist into notebooks property!");
+          return graph;
+        }
+
         return synchronizeGraph({
           g: g.current,
           graph,
-          fullNodes: [preLoadedNodesRef.current[nodeId]],
+          fullNodes: [
+            {
+              ...preloadedNode,
+              expands: preloadedNode.expands.map((c, i) => (i === selectedNotebookIdx ? expanded : c)),
+            },
+          ],
           selectedNotebookId,
           allTags,
           setNodeUpdates,
@@ -782,10 +799,14 @@ const Notebook = ({}: NotebookProps) => {
               ...userNodeDataTmp,
               ...openWithDefaultValues,
             };
-            const existNotebooks = (userNodeData.notebooks ?? []).find(c => c === selectedNotebookId);
-            if (!existNotebooks) {
+            const selectedNotebookIdx = (userNodeData.notebooks ?? []).findIndex(c => c === selectedNotebookId);
+            if (selectedNotebookIdx <= 0) {
               userNodeData.notebooks = [...(userNodeData.notebooks ?? []), selectedNotebookId];
-              userNodeData.expands = [...(userNodeData.expands ?? []), true];
+              userNodeData.expands = [...(userNodeData.expands ?? []), expanded];
+            } else {
+              userNodeData.expands = (userNodeData.expands ?? []).map((c, i) =>
+                i === selectedNotebookIdx ? expanded : c
+              );
             }
             userNodeData.updatedAt = Timestamp.fromDate(new Date());
             delete userNodeData?.visible;
@@ -805,7 +826,7 @@ const Notebook = ({}: NotebookProps) => {
               user: user.uname,
               wrong: false,
               notebooks: [selectedNotebookId],
-              expands: [true],
+              expands: [expanded],
             };
             userNodeRef = collection(db, "userNodes");
             const preloadedUserNodeId = preLoadedNodesRef.current[nodeId]?.userNodeId;
@@ -4673,7 +4694,7 @@ const Notebook = ({}: NotebookProps) => {
       const thisNode = graph.nodes[targetId];
       if (!targetIsValid(thisNode)) {
         if (!tutorialStateWasSetUpRef.current) {
-          openNodeHandler(targetId, defaultStates);
+          openNodeHandler(targetId, defaultStates, true, false);
           tutorialStateWasSetUpRef.current = true;
         }
         return true;
@@ -4926,15 +4947,29 @@ const Notebook = ({}: NotebookProps) => {
 
       // --------------------------
 
-      const knowledgeGraphTutorialIsValid = () => userTutorial["nodes"].done || userTutorial["nodes"].skipped;
+      const nodesTutorialIsCompleted = () => userTutorial["nodes"].done || userTutorial["nodes"].skipped;
       // Boolean(node && node.open && !node.editable && !node.isNew);
 
       if (!userTutorial["knowledgeGraph"].done && !userTutorial["knowledgeGraph"].skipped && !forcedTutorial) {
-        if (knowledgeGraphTutorialIsValid()) return startTutorial("knowledgeGraph");
+        if (nodesTutorialIsCompleted()) return startTutorial("knowledgeGraph");
       }
 
       if (forcedTutorial === "knowledgeGraph") {
         startTutorial("knowledgeGraph");
+        return;
+      }
+
+      // --------------------------
+
+      // const knowledgeGraphTutorialIsValid = () => userTutorial["nodes"].done || userTutorial["nodes"].skipped;
+      // // Boolean(node && node.open && !node.editable && !node.isNew);
+
+      // if (!userTutorial["knowledgeGraph"].done && !userTutorial["knowledgeGraph"].skipped && !forcedTutorial) {
+      //   if (knowledgeGraphTutorialIsValid()) return startTutorial("knowledgeGraph");
+      // }
+
+      if (forcedTutorial === "nodeInteractions") {
+        startTutorial("nodeInteractions");
         return;
       }
 
