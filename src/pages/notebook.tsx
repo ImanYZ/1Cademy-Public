@@ -136,7 +136,7 @@ import {
 import { newId } from "../lib/utils/newid";
 import {
   buildFullNodes,
-  getNodes,
+  getNodesPromises,
   getUserNodeChanges,
   mergeAllNodes,
   synchronizeGraph,
@@ -1023,7 +1023,7 @@ const Notebook = ({}: NotebookProps) => {
       if (!selectedNotebookId) return;
 
       const preUserNodes = await getUserNodesByForce(db, nodeIds, user.uname, selectedNotebookId);
-      const preNodesData = await getNodes(db, nodeIds);
+      const preNodesData = await getNodesPromises(db, nodeIds);
       const preFullNodes = buildFullNodes(
         preUserNodes.map(c => ({ cType: "added", uNodeId: c.id, uNodeData: c })),
         preNodesData
@@ -1054,7 +1054,7 @@ const Notebook = ({}: NotebookProps) => {
           devLog("2:Snapshot:userNodes Data", userNodeChanges);
 
           const nodeIds = userNodeChanges.map(cur => cur.uNodeData.node);
-          const nodesData = await getNodes(db, nodeIds);
+          const nodesData = await getNodesPromises(db, nodeIds);
           devLog("3:Snapshot:Nodes Data", nodesData);
 
           const fullNodes = buildFullNodes(userNodeChanges, nodesData);
@@ -3233,6 +3233,9 @@ const Notebook = ({}: NotebookProps) => {
       sidebarType = "Media";
     }
 
+    notebookRef.current.choosingNode = null;
+    notebookRef.current.chosenNode = null;
+    notebookRef.current.selectionType = null;
     nodeBookDispatch({ type: "setChoosingNode", payload: null });
     nodeBookDispatch({ type: "setChosenNode", payload: null });
     nodeBookDispatch({ type: "setSelectionType", payload: null });
@@ -6600,6 +6603,7 @@ const Notebook = ({}: NotebookProps) => {
 
               <TagsSidebarMemoized
                 open={nodeBookState.choosingNode?.type === "Tag"}
+                username={user.uname}
                 onClose={() => {
                   nodeBookDispatch({ type: "setChoosingNode", payload: null });
                   notebookRef.current.choosingNode = null;
@@ -6611,6 +6615,7 @@ const Notebook = ({}: NotebookProps) => {
               <ParentsSidebarMemoized
                 title={nodeBookState.choosingNode?.type === "Parent" ? "Parents to Link" : "Children to Link"}
                 open={nodeBookState.choosingNode?.type === "Parent" || nodeBookState.choosingNode?.type === "Child"}
+                username={user.uname}
                 onClose={() => {
                   nodeBookDispatch({ type: "setChoosingNode", payload: null });
                   notebookRef.current.choosingNode = null;
