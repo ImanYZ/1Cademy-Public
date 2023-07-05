@@ -3,10 +3,13 @@ import { Chip, CircularProgress, Stack, Typography } from "@mui/material";
 import { Box } from "@mui/system";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
+import { getFirestore } from "firebase/firestore";
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { getNodes } from "src/client/firestore/nodes.firestore";
+import { getRecentUserNodesByUser } from "src/client/firestore/recentUserNodes.firestore";
 import { SearchNodesResponse } from "src/knowledgeTypes";
 import { FullNodeData, SortDirection, SortValues } from "src/nodeBookTypes";
-import { SimpleNode2 } from "src/types";
+import { NodeType, SimpleNode2 } from "src/types";
 
 import { ChosenTag, MemoizedTagsSearcher, TagTreeView } from "@/components/TagsSearcher";
 import { useInView } from "@/hooks/useObserver";
@@ -25,13 +28,15 @@ import { SidebarWrapper2 } from "./SidebarWrapper2";
 dayjs.extend(relativeTime);
 
 type ReferencesSidebarProps = {
+  username: string;
   open: boolean;
   onClose: () => void;
   onChangeChosenNode: ({ nodeId, title }: { nodeId: string; title: string }) => void;
   preLoadNodes: (nodeIds: string[], fullNodes: FullNodeData[]) => Promise<void>;
 };
 
-const ReferencesSidebar = ({ open, onClose, onChangeChosenNode, preLoadNodes }: ReferencesSidebarProps) => {
+const ReferencesSidebar = ({ username, open, onClose, onChangeChosenNode, preLoadNodes }: ReferencesSidebarProps) => {
+  const db = getFirestore();
   const [isLoading, setIsLoading] = useState(false);
   const [query, setQuery] = useState("");
   const [showTagSelector, setShowTagSelector] = useState(false);
@@ -46,6 +51,49 @@ const ReferencesSidebar = ({ open, onClose, onChangeChosenNode, preLoadNodes }: 
   const previousOpenRef = useRef(false);
 
   const selectedTags = useMemo<TagTreeView[]>(() => Object.values(allTags).filter(tag => tag.checked), [allTags]);
+
+  const onGetTheMostUsedNodes = useCallback(async () => {
+    setIsLoading(true);
+    const nodeIds = await getRecentUserNodesByUser(db, username);
+    const uniqueNodesIds = Array.from(new Set(nodeIds));
+    const nodes = await getNodes(db, uniqueNodesIds);
+    const referenceNodes = nodes.filter(c => c?.nodeType === "Reference");
+    const newMostUsedNodes = referenceNodes
+      .flatMap(c => c || [])
+      .map(
+        (cur): SimpleNode2 => ({
+          id: cur.id,
+          title: cur.title ?? "",
+          changedAt: cur.changedAt.toDate().toISOString(),
+          content: cur.content ?? "",
+          nodeType: cur.nodeType as NodeType,
+          nodeImage: cur.nodeImage || "",
+          nodeVideo: cur.nodeVideo || "",
+          corrects: cur.corrects ?? 0,
+          wrongs: cur.wrongs ?? 0,
+          tags: cur.tags,
+          contributors: Object.keys(cur.contributors).map(key => ({
+            fullName: cur.contributors[key].fullname,
+            imageUrl: cur.contributors[key].imageUrl,
+            username: username,
+          })),
+          institutions: Object.entries(cur.institutions || {})
+            .map(cur => ({ name: cur[0], reputation: cur[1].reputation || 0 }))
+            .sort((a, b) => b.reputation - a.reputation)
+            .map(institution => ({ name: institution.name })),
+          choices: cur.choices || [],
+          versions: cur.versions ?? 0,
+        })
+      );
+
+    setSearchResults({
+      data: newMostUsedNodes,
+      lastPageLoaded: 1,
+      totalPage: 1,
+      totalResults: newMostUsedNodes.length,
+    });
+    setIsLoading(false);
+  }, [db, username]);
 
   const onSearchQuery = useCallback(
     async ({
@@ -352,14 +400,8 @@ const ReferencesSidebar = ({ open, onClose, onChangeChosenNode, preLoadNodes }: 
     setIsLoading(false);
     setQuery("");
     resetSelectedTags();
-    onSearchQuery({
-      q: "",
-      sortOption: "NOT_SELECTED",
-      sortDirection: "DESCENDING",
-      nodesUpdatedSince: mapTimeFilterToDays("ALL_TIME"),
-      page: 1,
-    });
-  }, [onSearchQuery, open, resetSelectedTags]);
+    onGetTheMostUsedNodes();
+  }, [onGetTheMostUsedNodes, open, resetSelectedTags]);
 
   return (
     <SidebarWrapper2

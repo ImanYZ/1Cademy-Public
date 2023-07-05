@@ -6589,6 +6589,7 @@ const Notebook = ({}: NotebookProps) => {
 
               <ReferencesSidebarMemoized
                 open={nodeBookState.choosingNode?.type === "Reference"}
+                username={user.uname}
                 onClose={() => {
                   nodeBookDispatch({ type: "setChoosingNode", payload: null });
                   notebookRef.current.choosingNode = null;
