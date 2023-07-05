@@ -10,6 +10,7 @@ import {
   CHILD_RELATION_PROPOSAL_COMPLETE,
 } from "./childrenProposalTutorialStep";
 import { COMMUNITY_LEADER_BOARD_STEPS } from "./communityLeaderBoardTutorialSteps";
+import { KNOWLEDGE_GRAPH_CONFIG } from "./knowledgeGraphSteps";
 import { LEADER_BOARD_STEPS } from "./leaderBoardTutorialSteps";
 import { INTERACTION_LIVENESS_BAR_STEPS, REPUTATION_LIVENESS_BAR_STEPS } from "./livenessBarTutorialSteps";
 import { NAVIGATION_STEPS_COMPLETE } from "./navigationTutorialSteps";
@@ -67,6 +68,11 @@ export const getGroupTutorials = ({ livelinessBar }: GetGroupTutorialsInput): Gr
       {
         title: "Nodes",
         tutorialSteps: { tutorialKey: "nodes", steps: NODES_STEPS_COMPLETE },
+        tutorials: [],
+      },
+      {
+        title: "The Knowledge Graph",
+        tutorialSteps: { tutorialKey: "knowledgeGraph", steps: KNOWLEDGE_GRAPH_CONFIG },
         tutorials: [],
       },
       {

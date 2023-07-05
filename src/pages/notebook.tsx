@@ -4926,6 +4926,20 @@ const Notebook = ({}: NotebookProps) => {
 
       // --------------------------
 
+      const knowledgeGraphTutorialIsValid = () => userTutorial["nodes"].done || userTutorial["nodes"].skipped;
+      // Boolean(node && node.open && !node.editable && !node.isNew);
+
+      if (!userTutorial["knowledgeGraph"].done && !userTutorial["knowledgeGraph"].skipped && !forcedTutorial) {
+        if (knowledgeGraphTutorialIsValid()) return startTutorial("knowledgeGraph");
+      }
+
+      if (forcedTutorial === "knowledgeGraph") {
+        startTutorial("knowledgeGraph");
+        return;
+      }
+
+      // --------------------------
+
       if (!forcedTutorial || forcedTutorial === "tagsReferences") {
         const result = detectAndCallTutorial("tagsReferences", node =>
           Boolean(node && node.open && !node.editable && node.localLinkingWords === "References")

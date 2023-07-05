@@ -5,6 +5,7 @@ export const DEFAULT_AVATAR = "https://storage.googleapis.com/onecademy-1.appspo
 export const Z_INDEX = {
   sidebars: 999,
   dashboard: 1500, // dashboard content to (student dashboard, practice tool and assistant floating animation)
+  tutorials: 4500,
   devtools: 5000,
 };
 

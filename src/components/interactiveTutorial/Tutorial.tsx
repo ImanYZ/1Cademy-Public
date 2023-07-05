@@ -2,6 +2,7 @@ import { Box, Button, Stack, Typography, useMediaQuery } from "@mui/material";
 import React, { ReactNode, useCallback, useMemo, useRef, useState } from "react";
 
 import { useWindowSize } from "@/hooks/useWindowSize";
+import { Z_INDEX } from "@/lib/utils/constants";
 import { gray50, gray200, gray400, gray500, gray700, gray800 } from "@/pages/home";
 
 import { TargetClientRect, Tutorial } from "../../hooks/useInteractiveTutorial3";
@@ -41,7 +42,7 @@ export const TooltipTutorial = ({
   onFinalize,
   stepsLength,
   node,
-  forcedTutorial: forcedTutorial,
+  forcedTutorial,
   groupTutorials,
   isOnPortal,
   onForceTutorial,
@@ -245,7 +246,7 @@ export const TooltipTutorial = ({
             maxWidth: "450px",
             backgroundColor: "#55555500",
             transition: "top 1s ease-out,bottom 1s ease-out,left 1s ease-out,rigth 1s ease-out,height 1s ease-out",
-            zIndex: 99999,
+            zIndex: Z_INDEX.tutorials,
           }}
         >
           <Box
@@ -257,9 +258,8 @@ export const TooltipTutorial = ({
               border: theme => `2px solid ${theme.palette.mode === "dark" ? "#667085" : gray400}`,
               color: theme => (theme.palette.mode === "dark" ? gray50 : gray800),
               borderRadius: "12px",
-
               transition: "top 1s ease-out,left 1s ease-out",
-              zIndex: 99999,
+              zIndex: Z_INDEX.tutorials,
             }}
           >
             {children}
@@ -283,7 +283,7 @@ export const TooltipTutorial = ({
           borderRadius: "12px",
           border: theme => `2px solid ${theme.palette.mode === "dark" ? "#667085" : gray400}`,
           color: theme => (theme.palette.mode === "dark" ? gray50 : gray800),
-          zIndex: 99999,
+          zIndex: Z_INDEX.tutorials,
 
           ":after": {
             position: "absolute",
@@ -463,7 +463,6 @@ export const TooltipTutorial = ({
                 <Button
                   variant="contained"
                   onClick={onNextStep}
-                  style={{ zIndex: 898999 }}
                   sx={{
                     borderRadius: "32px",
                     p: "8px 32px",
