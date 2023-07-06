@@ -233,7 +233,8 @@ export const TooltipTutorial = ({
       targetClientRect.left === 0 &&
       targetClientRect.width === 0 &&
       targetClientRect.height === 0
-    )
+    ) {
+      console.log("wrapper:1");
       //  target is on portal
       return (
         <Box
@@ -245,7 +246,7 @@ export const TooltipTutorial = ({
             height: "auto",
             maxWidth: "450px",
             backgroundColor: "#55555500",
-            transition: "top 1s ease-out,bottom 1s ease-out,left 1s ease-out,rigth 1s ease-out,height 1s ease-out",
+            transition: "top 1s ease-out,bottom 1s ease-out,left 1s ease-out,right 1s ease-out,height 1s ease-out",
             zIndex: Z_INDEX.tutorials,
           }}
         >
@@ -266,6 +267,8 @@ export const TooltipTutorial = ({
           </Box>
         </Box>
       );
+    }
+    console.log("wrapper:2", targetClientRect);
 
     return (
       <Box

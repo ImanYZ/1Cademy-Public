@@ -8,18 +8,9 @@ export const INITIAL_NODE_TUTORIAL_STATE: TutorialState = null;
 
 const NODE_INTERACTIONS_STEPS: TutorialStepConfig[] = [
   {
-    title: "The Knowledge Graph",
+    title: "Node Interactions",
     description: (
-      <MemoizedNodeVideo addVideo={true} videoData={getVideoDataByUrl("https://www.youtube.com/watch?v=CSO-TleAge0")} />
-    ),
-    tooltipPosition: "bottomLeft",
-    anchor: "Portal",
-  },
-
-  {
-    title: "The Knowledge Graph",
-    description: (
-      <MemoizedNodeVideo addVideo={true} videoData={getVideoDataByUrl("https://www.youtube.com/watch?v=OyUSCZ3YcCk")} />
+      <MemoizedNodeVideo addVideo={true} videoData={getVideoDataByUrl("https://www.youtube.com/watch?v=rcOqKCGmljY")} />
     ),
     tooltipPosition: "bottomLeft",
     anchor: "Portal",
