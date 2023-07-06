@@ -531,7 +531,7 @@ const Notebook = ({}: NotebookProps) => {
       devLog("GET_TOOLTIP_CLIENT_RECT", { currentStep, targetId });
 
       if (currentStep.anchor) {
-        if (!currentStep.childTargetId) return;
+        if (!currentStep.childTargetId) return setTargetClientRect({ width: 0, height: 0, top: 0, left: 0 });
 
         const targetElement = document.getElementById(currentStep.childTargetId);
         if (!targetElement) return;
