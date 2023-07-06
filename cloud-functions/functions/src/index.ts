@@ -1,4 +1,5 @@
 import * as admin from "firebase-admin";
+import { Timestamp } from "firebase-admin/firestore";
 import * as functions from "firebase-functions";
 
 import { IActionTrack } from "./types/IActionTrack";
@@ -173,13 +174,23 @@ export const onUserStatusChanged = functions.database.ref("/status/{uname}").onU
   });
 });
 
-exports.onActionTrackCreated = functions.database.ref("/actionTracks/{id}").onCreate(async change => {
+export const onActionTrackCreated = functions.firestore.document("/actionTracks/{id}").onCreate(async change => {
   try {
-    // Get the data written to Realtime Database
-    const data = change.val();
-    console.log("log:", { actionTracks });
-    const actionTracksLogRef = firestore.collection("actionTracksLogs").doc();
-    actionTracksLogRef.set(data);
+    const data = change.data();
+
+    // create actionTracks
+    const actionTracksLogRef = firestore.collection("actionTracks24h");
+    const today = new Date();
+    const MILLISECONDS_IN_A_DAY = 86400000;
+    // expired is -2 days ago, to remove document in 24h, because TTL remove in 72h
+    const twoDaysAgo = new Date(Number(today) - 2 * MILLISECONDS_IN_A_DAY);
+    actionTracksLogRef.add({ ...data, expired: Timestamp.fromDate(twoDaysAgo) });
+
+    // create recentUserNodes
+    const recentUserNodesRef = firestore.collection("recentUserNodes");
+    // expired is +2 days ago, to remove document in 5 days, because TTL remove in 72h
+    const fiveDaysAgo = new Date(Number(today) + 2 * MILLISECONDS_IN_A_DAY);
+    recentUserNodesRef.add({ user: data.doer, nodeId: data.nodeId, expired: Timestamp.fromDate(fiveDaysAgo) });
   } catch (error) {
     console.log("error:", error);
   }

@@ -12,7 +12,8 @@ import {
   homePageSortByDefaults,
 } from "@/lib/utils/utils";
 
-import { SearchNodesResponse, SimpleNode, TimeWindowOption, TypesenseNodesSchema } from "../../knowledgeTypes";
+import { SearchNodesResponse, TimeWindowOption, TypesenseNodesSchema } from "../../knowledgeTypes";
+import { NodeType, SimpleNode2 } from "src/types";
 
 // Logic
 // - finding nodes from typesense with some query parameters
@@ -47,12 +48,12 @@ async function handler(req: NextApiRequest, res: NextApiResponse<SearchNodesResp
     const searchResults = await client.collections<TypesenseNodesSchema>("nodes").documents().search(searchParameters);
 
     const allPostsData = searchResults.hits?.map(
-      (el): SimpleNode => ({
+      (el): SimpleNode2 => ({
         id: el.document.id,
         title: el.document.title,
         changedAt: el.document.changedAt,
         content: el.document.content,
-        nodeType: el.document.nodeType,
+        nodeType: el.document.nodeType as NodeType,
         nodeImage: el.document.nodeImage || "",
         corrects: el.document.corrects,
         wrongs: el.document.wrongs,

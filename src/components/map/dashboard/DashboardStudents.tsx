@@ -38,7 +38,7 @@ import { postWithToken } from "@/lib/mapApi";
 import { DESIGN_SYSTEM_COLORS } from "@/lib/theme/colors";
 import { calculateVoteStatPoints } from "@/lib/utils/charts.utils";
 
-import { ZINDEX } from "../../../lib/utils/constants";
+import { Z_INDEX } from "../../../lib/utils/constants";
 import ROUTES from "../../../lib/utils/routes";
 import { SnapshotChangesTypes } from "../../../types";
 import { ToolbarView } from "./DashboardWrapper";
@@ -950,7 +950,7 @@ export const DashboardStudents = ({ currentSemester }: DashboardStudentsProps) =
                           horizontal: "left",
                         }}
                         elevation={1}
-                        sx={{ zIndex: ZINDEX["dashboard"] + 1 }}
+                        sx={{ zIndex: Z_INDEX["dashboard"] + 1 }}
                       >
                         <Box
                           sx={{

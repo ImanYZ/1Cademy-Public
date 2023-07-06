@@ -1,6 +1,6 @@
 import LocalLibraryIcon from "@mui/icons-material/LocalLibrary";
 import ShareIcon from "@mui/icons-material/Share";
-import { Stack } from "@mui/material";
+import { Stack, Typography } from "@mui/material";
 
 import MarkdownRender from "../../../components/Markdown/MarkdownRender";
 import { TutorialStep, TutorialStepConfig } from "../../../nodeBookTypes";

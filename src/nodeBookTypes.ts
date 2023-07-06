@@ -2,7 +2,7 @@ import { Timestamp } from "firebase/firestore";
 import React, { Dispatch } from "react";
 
 import { SimpleQuestionNode } from "./instructorsTypes";
-import { KnowledgeChoice } from "./knowledgeTypes";
+import { ActionTrackType, KnowledgeChoice } from "./knowledgeTypes";
 import { NodeType } from "./types";
 import { Flashcard } from "./types/IAssitantConversation";
 
@@ -533,4 +533,23 @@ export type VoiceAssistantType = "ANSWERING" | "CONFIRM" | "NEXT_ACTION" | "NOTE
 export type VoiceAssistant = {
   tagId: string;
   questionNode: SimpleQuestionNode | null;
+};
+
+export type ActionTracksDocument = {
+  accepted: true;
+  action: string;
+  chooseUname: boolean;
+  createdAt: string;
+  doer: string;
+  fullname: string;
+  imageUrl: string;
+  nodeId: string;
+  receivers: string[];
+  type: ActionTrackType;
+};
+
+export type RecentUserNodesDocument = {
+  user: string;
+  nodeId: string;
+  expired: Timestamp;
 };
