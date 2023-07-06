@@ -8,10 +8,12 @@ import ShareIcon from "@mui/icons-material/Share";
 import { Box, Stack, SxProps, Theme, Typography } from "@mui/material";
 import { ReactNode } from "react";
 
+import { MemoizedNodeVideo } from "@/components/map/Node/NodeVideo";
 import MarkdownRender from "@/components/Markdown/MarkdownRender";
 import { gray100, gray700 } from "@/pages/home";
 
 import { TutorialState, TutorialStep, TutorialStepConfig } from "../../../nodeBookTypes";
+import { getVideoDataByUrl } from "../utils";
 import { getBaseStepConfig } from "./tutorial.utils";
 
 export const INITIAL_NODE_TUTORIAL_STATE: TutorialState = null;
@@ -41,6 +43,13 @@ export const NodeTypeIconButton = ({ children, sx }: NodeTypeIconButtonProps) =>
 };
 
 const NODES_STEPS: TutorialStepConfig[] = [
+  {
+    title: "What is a Node",
+    description: (
+      <MemoizedNodeVideo addVideo={true} videoData={getVideoDataByUrl("https://www.youtube.com/watch?v=pOzQ81TW8Os")} />
+    ),
+  },
+
   {
     title: "What is a Node",
     description: (
