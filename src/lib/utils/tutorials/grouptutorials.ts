@@ -112,17 +112,17 @@ export const getGroupTutorials = ({ livelinessBar }: GetGroupTutorialsInput): Gr
     title: "Learning Pathways",
     tutorials: [
       {
-        title: "Parent/Children Nodes",
+        title: "Links to Parents/Children",
         tutorialSteps: { tutorialKey: "parentsChildrenList", steps: PARENTS_CHILDREN_LIST_STEPS },
         tutorials: [],
       },
       {
-        title: "Tags and References",
+        title: "Cited Tags and References",
         tutorialSteps: { tutorialKey: "tagsReferences", steps: TAGS_REFERENCES_STEPS_COMPLETE },
         tutorials: [],
       },
       {
-        title: "Pathways",
+        title: "Learning Pathways",
         tutorialSteps: { tutorialKey: "pathways", steps: PATHWAYS_STEPS },
         tutorials: [],
       },

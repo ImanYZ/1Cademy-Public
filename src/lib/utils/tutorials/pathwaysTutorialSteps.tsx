@@ -7,11 +7,11 @@ import { getBaseStepConfig } from "./tutorial.utils";
 
 const PATHWAYS_STEPS_CONFIG: TutorialStepConfig[] = [
   {
-    title: "Pathways",
+    title: "Learning pathways",
     description: (
       <MarkdownRender
         text={
-          "1Cademy is designed to allow you to create learning pathways. Learning pathways are concepts arranged and displayed in order to allow you to learn from basic concepts to deeper ones. Because they are arranged in prerequisite order, you get foundational information with the first nodes and more specific knowledge as you read farther along the path."
+          "1Cademy simplifies the development of learning pathways: nodes in the knowledge graph that guide you from basic to complex concepts. Presented in prerequisite order, the pathways offer foundational knowledge at the outset, advancing to more specialized knowledge as you progress."
         }
       />
     ),
@@ -19,18 +19,14 @@ const PATHWAYS_STEPS_CONFIG: TutorialStepConfig[] = [
     outline: "inside",
   },
   {
-    title: "Pathways",
+    title: "Parents/prerequisites",
     description: (node, nodeParent) => (
       <Typography>
-        This is the{" "}
-        <Typography component={"b"} fontWeight="bold">
-          {node.title}
-        </Typography>{" "}
-        node. In order to understand it, you need to understand what{" "}
+        One would be able to better learn a node, if they first learn its parent/prerequisite nodes. For example, the node about{' "'}
         <Typography component={"b"} fontWeight="bold">
           {nodeParent ? nodeParent.title : "the Parent"}
-        </Typography>{" "}
-        is.
+        </Typography>{'" '}
+        is a parent of the current node.
         {/* You can open the {nodeParent?.title} node to get the foundational information. */}
       </Typography>
     ),
@@ -46,52 +42,46 @@ const PATHWAYS_STEPS_CONFIG: TutorialStepConfig[] = [
   //   outline: "inside",
   // },
   {
-    title: "Pathways",
+    title: "Children/follow-ups",
     description: (node, parent, child) => (
       <Typography>
-        A child node is a more specific node. The reader needs to understand{" "}
-        <Typography component={"b"} fontWeight="bold">
-          {node.title}
-        </Typography>{" "}
-        to understand the{" "}
+        A child node is usually about a more specific/advanced topic. One would better learn a child node if they first learn its parent/prerequisite node(s). For example, it is better to learn the current node before learning its child node about {' "'}
         <Typography component={"b"} fontWeight="bold">
           {child ? child.title : "the Child"}
-        </Typography>{" "}
-        node.
+        </Typography>{'"'}
       </Typography>
     ),
     tooltipPosition: "top",
     outline: "inside",
   },
   {
-    title: "Pathways",
+    title: "Learning pathways example",
     description: (node, parent, child) => (
       <Typography>
-        These nodes are in an ordered series where they flow from broad to specific. The reader can start with{" "}
+        These nodes are in an ordered series where they flow from basic to advanced, or broad to specific. The learner can start with the node about{' "'}
         <Typography component={"b"} fontWeight="bold">
-          {" "}
           {parent ? parent.title : "the Parent"}
-        </Typography>{" "}
-        and have the requisite knowledge to understand{" "}
+        </Typography>{'" '}
+        Only after gaining the prerequisite knowledge, they can continue with learning about{' "'}
         <Typography component={"b"} fontWeight="bold">
-          {node.title}
+          {node.title}{'"'}
         </Typography>
-        , and then, in turn, they have enough knowledge to understand{" "}
+        , and then, in turn, they would have enough knowledge to learn about{' "'}
         <Typography component={"b"} fontWeight="bold">
           {child ? child.title : "the Child"}
-        </Typography>
-        . This ordered series is a learning pathway.
+        </Typography>{'" '}
+        This ordered series is a learning pathway.
       </Typography>
     ),
     tooltipPosition: "top",
     outline: "inside",
   },
   {
-    title: "Pathways",
+    title: "Stepwise learning",
     description: (
       <Typography>
-        Learning pathways allow us to learn multiple concepts in a progressive manner where we have the necessary
-        foundational information to understand each subsequent node.
+        Learning pathways allow us to learn multiple concepts in a progressive manner where we first gain the necessary
+        foundational knowledge to be able to learn each subsequent node. At each step, learners gain the knowledge of one step further in their Zone of Proximal Development.
       </Typography>
     ),
     tooltipPosition: "top",

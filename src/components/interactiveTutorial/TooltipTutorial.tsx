@@ -366,14 +366,13 @@ export const TooltipTutorial = ({
             component={"h2"}
             sx={{ fontSize: "18px", fontWeight: "bold", display: "inline-block", mb: "10px" }}
           >
-            {`You have completed ${tutorialProgress.tutorialsComplete} out ${tutorialProgress.totalTutorials} tutorials!`}
+            {`You have completed ${tutorialProgress.tutorialsComplete} out of ${tutorialProgress.totalTutorials} tutorials!`}
           </Typography>
-          <Typography>{`Would you like to proceed to the next tutorial?`}</Typography>
+          <Typography>{`Would you like to proceed to the next tutorial about `}</Typography>
           <Typography sx={{ mb: "16px" }}>
-            Next tutorial:{" "}
             <Typography component={"b"} sx={{ fontWeight: "bold" }}>
               {nextTutorial.title}
-            </Typography>
+            </Typography>?
           </Typography>
 
           <Stack direction={"row"} spacing="8px">
