@@ -234,7 +234,6 @@ export const TooltipTutorial = ({
       targetClientRect.width === 0 &&
       targetClientRect.height === 0
     ) {
-      console.log("wrapper:1");
       //  target is on portal
       return (
         <Box
@@ -268,7 +267,6 @@ export const TooltipTutorial = ({
         </Box>
       );
     }
-    console.log("wrapper:2", targetClientRect);
 
     return (
       <Box
@@ -372,7 +370,8 @@ export const TooltipTutorial = ({
           <Typography sx={{ mb: "16px" }}>
             <Typography component={"b"} sx={{ fontWeight: "bold" }}>
               {nextTutorial.title}
-            </Typography>?
+            </Typography>
+            ?
           </Typography>
 
           <Stack direction={"row"} spacing="8px">

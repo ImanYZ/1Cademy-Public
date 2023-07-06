@@ -4921,25 +4921,21 @@ const Notebook = ({}: NotebookProps) => {
       const nodesTutorialIsValid = (node: FullNodeData) => Boolean(node && node.open && !node.editable && !node.isNew);
 
       if (forcedTutorial === "nodes" || !forcedTutorial) {
-        console.log("fnt:01");
         const result = detectAndCallTutorial("nodes", nodesTutorialIsValid);
         if (result) return;
       }
 
       if (forcedTutorial === "nodes") {
-        console.log("fnt:02");
         const defaultStates = { open: true };
         const newTargetId = "r98BjyFDCe4YyLA3U8ZE";
         const thisNode = graph.nodes[newTargetId];
         if (!nodesTutorialIsValid(thisNode)) {
           if (!tutorialStateWasSetUpRef.current) {
-            console.log("fnt:03");
             openNodeHandler(newTargetId, defaultStates);
             tutorialStateWasSetUpRef.current = true;
           }
           return;
         }
-        console.log("fnt:04");
         tutorialStateWasSetUpRef.current = false;
         nodeBookDispatch({ type: "setSelectedNode", payload: newTargetId });
         notebookRef.current.selectedNode = newTargetId;
@@ -4957,7 +4953,6 @@ const Notebook = ({}: NotebookProps) => {
       // --------------------------
 
       const nodesTutorialIsCompleted = () => userTutorial["nodes"].done || userTutorial["nodes"].skipped;
-      // Boolean(node && node.open && !node.editable && !node.isNew);
 
       if (!userTutorial["knowledgeGraph"].done && !userTutorial["knowledgeGraph"].skipped && !forcedTutorial) {
         if (nodesTutorialIsCompleted()) return startTutorial("knowledgeGraph");
@@ -4969,13 +4964,6 @@ const Notebook = ({}: NotebookProps) => {
       }
 
       // --------------------------
-
-      // const knowledgeGraphTutorialIsValid = () => userTutorial["nodes"].done || userTutorial["nodes"].skipped;
-      // // Boolean(node && node.open && !node.editable && !node.isNew);
-
-      // if (!userTutorial["knowledgeGraph"].done && !userTutorial["knowledgeGraph"].skipped && !forcedTutorial) {
-      //   if (knowledgeGraphTutorialIsValid()) return startTutorial("knowledgeGraph");
-      // }
 
       if (forcedTutorial === "nodeInteractions") {
         startTutorial("nodeInteractions");
