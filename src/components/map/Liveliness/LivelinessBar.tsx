@@ -39,10 +39,9 @@ const LivelinessBar = ({ open, setOpen, disabled = false, ...props }: ILivelines
   const [usersInteractions, setUsersInteractions] = useState<UserInteractions>({});
   const [barHeight, setBarHeight] = useState<number>(0);
   // const theme = useTheme();
+
   useEffect(() => {
-    if (window && window.innerWidth > 768 && window.innerHeight >= 797) {
-      setOpen(true);
-    }
+    if (window && window.innerWidth > 768 && window.innerHeight >= 797) setOpen(true);
     if (disabled) return;
 
     let t: any = null;
@@ -51,6 +50,7 @@ const LivelinessBar = ({ open, setOpen, disabled = false, ...props }: ILivelines
     } = {
       finalizer: () => {},
     };
+
     const snapshotInitializer = () => {
       setUsersInteractions({});
       unsubscribe.finalizer();
@@ -60,7 +60,6 @@ const LivelinessBar = ({ open, setOpen, disabled = false, ...props }: ILivelines
         const docChanges = snapshot.docChanges();
         for (const docChange of docChanges) {
           const actionTrackData = docChange.doc.data() as IActionTrack;
-
           // TODO: get user data
           let doerEmail: string = "";
           if (docChange.type === "added") {
@@ -119,8 +118,8 @@ const LivelinessBar = ({ open, setOpen, disabled = false, ...props }: ILivelines
           if (docChange.type === "removed") {
             if (usersInteractions.hasOwnProperty(actionTrackData.doer)) {
               usersInteractions[actionTrackData.doer].count -= 1;
-              if (usersInteractions[actionTrackData.doer].count < 0) {
-                usersInteractions[actionTrackData.doer].count = 0;
+              if (usersInteractions[actionTrackData.doer].count <= 0) {
+                delete usersInteractions[actionTrackData.doer];
               }
             }
           }
@@ -181,6 +180,7 @@ const LivelinessBar = ({ open, setOpen, disabled = false, ...props }: ILivelines
       )
     );
   }, [usersInteractions, minActions]);
+
   return (
     <>
       <Box
