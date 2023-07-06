@@ -3624,6 +3624,8 @@ const Notebook = ({}: NotebookProps) => {
           createdAt: new Date(),
           firstVisit: new Date(),
           lastVisit: new Date(),
+          notebooks: [selectedNotebookId],
+          expands: [true],
           versions: 1,
           viewers: 1,
           children: [],
