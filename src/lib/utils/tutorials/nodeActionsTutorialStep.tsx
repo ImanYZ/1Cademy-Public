@@ -74,12 +74,12 @@ const REFERENCES_TAGS_STEPS: TutorialStepConfig[] = [
     isClickable: true,
   },
   {
-    title: "List of Tags",
+    title: "List of tags",
     childTargetId: "node-tags",
     description: (
       <MarkdownRender
         text={
-          "This is the list of tags for this node. Default tags correspond with the community tag of the node creator by default. They show the various subject areas covered by a node."
+          "This is the list of tags cited on this node. Each tag represents a community/course/chapter. The tags show the various subject areas covered by a node."
         }
       />
     ),
@@ -88,7 +88,7 @@ const REFERENCES_TAGS_STEPS: TutorialStepConfig[] = [
 ];
 const TAG_NODE_STEPS: TutorialStepConfig[] = [
   {
-    title: "List of References",
+    title: "List of references",
     childTargetId: "tag-node",
     description: (
       <MarkdownRender
@@ -218,7 +218,7 @@ const EXPAND_STEPS: TutorialStepConfig[] = [
 
 const COLLAPSE_STEPS: TutorialStepConfig[] = [
   {
-    title: "Collapsing the Node",
+    title: "Collapsing the node",
     childTargetId: "close-button",
     description: (
       <MarkdownRender text={"This button allows you to collapse the node so that only its title would be displayed."} />
@@ -230,12 +230,12 @@ const COLLAPSE_STEPS: TutorialStepConfig[] = [
 
 const TAGS_REFERENCES_STEPS: TutorialStepConfig[] = [
   {
-    title: "List of References",
+    title: "List of references",
     childTargetId: "node-references",
     description: (
       <MarkdownRender
         text={
-          "This is the list of references for this node. This displays the reference nodes (which contain information about source material) used to create this node."
+          "This is the list of references cited on this node. Each reference node contains the information about source material used to create the current node."
         }
       />
     ),
@@ -243,12 +243,12 @@ const TAGS_REFERENCES_STEPS: TutorialStepConfig[] = [
     outline: "shallow",
   },
   {
-    title: "List of Tags",
+    title: "List of tags",
     childTargetId: "node-tags",
     description: (
       <MarkdownRender
         text={
-          "This is the list of tags for this node. Default tags correspond with the community tag of the node creator by default. They show the various subject areas covered by a node."
+          "This is the list of tags cited on this node. Each tag represents a community/course/chapter. The tags show the various subject areas covered by a node."
         }
       />
     ),
