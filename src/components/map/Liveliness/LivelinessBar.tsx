@@ -60,7 +60,6 @@ const LivelinessBar = ({ open, setOpen, disabled = false, ...props }: ILivelines
         const docChanges = snapshot.docChanges();
         for (const docChange of docChanges) {
           const actionTrackData = docChange.doc.data() as IActionTrack;
-          console.log("sn:actionTracks24h", { docChange });
           // TODO: get user data
           let doerEmail: string = "";
           if (docChange.type === "added") {
