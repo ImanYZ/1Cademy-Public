@@ -4693,7 +4693,7 @@ const Notebook = ({}: NotebookProps) => {
       const thisNode = graph.nodes[targetId];
       if (!targetIsValid(thisNode)) {
         if (!tutorialStateWasSetUpRef.current) {
-          openNodeHandler(targetId, defaultStates, true, Boolean(defaultStates.open));
+          openNodeHandler(targetId, defaultStates, true);
           tutorialStateWasSetUpRef.current = true;
         }
         return true;
