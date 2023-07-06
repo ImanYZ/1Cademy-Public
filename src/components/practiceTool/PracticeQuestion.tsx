@@ -474,8 +474,8 @@ PracticeQuestionProps) => {
             <QuestionMessage
               messages={[
                 `Daily practice has been completed.`,
-                `You have completed ${practiceInfo.completedDays} days out of ${practiceInfo.totalDays} days of your review practice.`,
-                `${practiceInfo.remainingDays} days are remaining to the end of the semester.`,
+                `You have completed ${practiceInfo.completedDays} days out of ${practiceInfo.totalDays} days of your practice.`,
+                `${practiceInfo.remainingDays} days are remaining in this semester.`,
               ]}
               totalQuestions={practiceInfo.totalQuestions}
               questionsCompleted={practiceInfo.totalQuestions - practiceInfo.questionsLeft}
@@ -516,10 +516,10 @@ PracticeQuestionProps) => {
                   practiceInfo.completedDays > 1 ? "s" : ""
                 } out of ${practiceInfo.totalDays} day${
                   practiceInfo.totalDays > 1 ? "s" : ""
-                } of your review practice.`,
+                } of your practice.`,
                 `${practiceInfo.remainingDays} day${
                   practiceInfo.remainingDays > 1 ? "s" : ""
-                } are remaining to the end of the semester.`,
+                } are remaining in this semester.`,
               ]}
               totalQuestions={practiceInfo.totalQuestions}
               questionsCompleted={practiceInfo.totalQuestions - practiceInfo.questionsLeft}
