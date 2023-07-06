@@ -6804,7 +6804,7 @@ const Notebook = ({}: NotebookProps) => {
 
           {/* end Data from map */}
 
-          {window.innerHeight > 399 && user?.livelinessBar === "reputation" && (
+          {window.innerHeight > 399 && user?.livelinessBar === "interaction" && (
             <MemoizedLivelinessBar
               authEmail={user?.email}
               openUserInfoSidebar={openUserInfoSidebar}
@@ -6816,7 +6816,7 @@ const Notebook = ({}: NotebookProps) => {
             />
           )}
 
-          {window.innerHeight > 399 && user?.livelinessBar === "interaction" && (
+          {window.innerHeight > 399 && user?.livelinessBar === "reputation" && (
             <MemoizedReputationlinessBar
               authEmail={user?.email}
               openUserInfoSidebar={openUserInfoSidebar}
