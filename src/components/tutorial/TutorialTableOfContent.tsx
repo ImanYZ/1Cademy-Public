@@ -15,6 +15,7 @@ import {
 import { Stack } from "@mui/system";
 import React, { useCallback, useState } from "react";
 
+import { Z_INDEX } from "@/lib/utils/constants";
 import { gray50, gray100, gray200, gray300, gray500, gray600, gray700 } from "@/pages/home";
 
 import { TutorialStep, TutorialTypeKeys, UserTutorials } from "../../nodeBookTypes";
@@ -87,7 +88,7 @@ const TutorialTableOfContent = ({
         bottom: "7px",
         right: `${open ? "7px" : "-400px"}`,
         transition: "right 300ms ease-out",
-        zIndex: 99999,
+        zIndex: Z_INDEX.tutorialTableOfContent,
       }}
     >
       <Box
