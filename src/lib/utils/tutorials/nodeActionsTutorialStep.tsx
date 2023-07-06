@@ -21,7 +21,7 @@ const PARENT_CHILDREN_STEPS: TutorialStepConfig[] = [
     description: (
       <MarkdownRender
         text={
-          "Here is a list of parent nodes. Parent or superordinate nodes provide prerequisite knowledge to learn the current node."
+          "Here is the list of parent or superordinate nodes that provide prerequisite knowledge to learn the current node."
         }
       />
     ),
@@ -31,7 +31,7 @@ const PARENT_CHILDREN_STEPS: TutorialStepConfig[] = [
     childTargetId: "children-list",
     description: (
       <MarkdownRender
-        text={"This is the list of child nodes. It contains all the subordinate nodes that one can learn after learning this node."}
+        text={"This is the list of child or subordinate nodes that one can learn after learning the current node."}
       />
     ),
   },
@@ -62,24 +62,24 @@ const CHILD_STEPS: TutorialStepConfig[] = [
 ];
 const REFERENCES_TAGS_STEPS: TutorialStepConfig[] = [
   {
-    title: "List of References",
+    title: "List of references",
     childTargetId: "node-references",
     description: (
       <MarkdownRender
         text={
-          "This is the list of references for this node. This displays the reference nodes (which contain information about source material) used to create this node."
+          "This is the list of references cited on this node. Each reference node contains the information about source material used to create the current node."
         }
       />
     ),
     isClickable: true,
   },
   {
-    title: "List of Tags",
+    title: "List of tags",
     childTargetId: "node-tags",
     description: (
       <MarkdownRender
         text={
-          "This is the list of tags for this node. Default tags correspond with the community tag of the node creator by default. They show the various subject areas covered by a node."
+          "This is the list of tags cited on this node. Each tag represents a community/course/chapter. The tags show the various subject areas covered by a node."
         }
       />
     ),
@@ -88,7 +88,7 @@ const REFERENCES_TAGS_STEPS: TutorialStepConfig[] = [
 ];
 const TAG_NODE_STEPS: TutorialStepConfig[] = [
   {
-    title: "List of References",
+    title: "List of references",
     childTargetId: "tag-node",
     description: (
       <MarkdownRender
@@ -107,7 +107,7 @@ const UPTOVE_STEPS: TutorialStepConfig[] = [
     description: (node: FullNodeData) => (
       <Stack>
         <Typography>
-          You can <b>upvote</b> the node if you think it is so good that you don't like to see any changes to it. The node currently has {node.corrects}
+          You can <strong>upvote</strong> the node if you think it is so good that you don't like to see any changes to it. The node currently has {node.corrects}
           <CheckIcon fontSize="small" color="success" sx={{ verticalAlign: "text-top" }} /> {node.corrects == 1 ? "" : "s"}. Your upvote will increase the
           count to {node.corrects + 1}
           <CheckIcon fontSize="small" color="success" sx={{ verticalAlign: "text-top" }} />, ensuring the quality of the
@@ -143,7 +143,7 @@ const DOWNVOTE_STEPS: TutorialStepConfig[] = [
     description: (node: FullNodeData) => (
       <Stack>
         <Typography>
-          You can <b>downvote</b> the node if you think it is not helpful to anyone's learning. The node currently has {node.wrongs}
+          You can <strong>downvote</strong> the node if you think it is not helpful to anyone's learning. The node currently has {node.wrongs}
           <CloseIcon fontSize="small" color="error" sx={{ verticalAlign: "text-top" }} /> downvote{node.wrongs == 1 ? "" : "s"}. Your downvote will
           increase the count to {node.wrongs + 1}
           <CloseIcon fontSize="small" color="error" sx={{ verticalAlign: "text-top" }} />.
@@ -173,7 +173,7 @@ const DOWNVOTE_STEPS: TutorialStepConfig[] = [
 ];
 const HIDE_STEPS: TutorialStepConfig[] = [
   {
-    title: "Hiding a Node",
+    title: "Hiding a node",
     childTargetId: "hidden-button",
     description: (
       <MarkdownRender
@@ -204,7 +204,7 @@ const HIDE_OFFSPRING_STEPS: TutorialStepConfig[] = [
 
 const EXPAND_STEPS: TutorialStepConfig[] = [
   {
-    title: "Expanding the Node",
+    title: "Expanding the node",
     childTargetId: "open-button",
     description: (
       <MarkdownRender
@@ -218,7 +218,7 @@ const EXPAND_STEPS: TutorialStepConfig[] = [
 
 const COLLAPSE_STEPS: TutorialStepConfig[] = [
   {
-    title: "Collapsing the Node",
+    title: "Collapsing the node",
     childTargetId: "close-button",
     description: (
       <MarkdownRender text={"This button allows you to collapse the node so that only its title would be displayed."} />
@@ -230,12 +230,12 @@ const COLLAPSE_STEPS: TutorialStepConfig[] = [
 
 const TAGS_REFERENCES_STEPS: TutorialStepConfig[] = [
   {
-    title: "List of References",
+    title: "List of references",
     childTargetId: "node-references",
     description: (
       <MarkdownRender
         text={
-          "This is the list of references for this node. This displays the reference nodes (which contain information about source material) used to create this node."
+          "This is the list of references cited on this node. Each reference node contains the information about source material used to create the current node."
         }
       />
     ),
@@ -243,12 +243,12 @@ const TAGS_REFERENCES_STEPS: TutorialStepConfig[] = [
     outline: "shallow",
   },
   {
-    title: "List of Tags",
+    title: "List of tags",
     childTargetId: "node-tags",
     description: (
       <MarkdownRender
         text={
-          "This is the list of tags for this node. Default tags correspond with the community tag of the node creator by default. They show the various subject areas covered by a node."
+          "This is the list of tags cited on this node. Each tag represents a community/course/chapter. The tags show the various subject areas covered by a node."
         }
       />
     ),

@@ -3,7 +3,10 @@ import { Chip, CircularProgress, Stack, Typography } from "@mui/material";
 import { Box } from "@mui/system";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
+import { getFirestore } from "firebase/firestore";
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { getNodes } from "src/client/firestore/nodes.firestore";
+import { getRecentUserNodesByUser } from "src/client/firestore/recentUserNodes.firestore";
 import { SearchNodesResponse } from "src/knowledgeTypes";
 import { FullNodeData, SortDirection, SortValues } from "src/nodeBookTypes";
 import { NodeType, SimpleNode2 } from "src/types";
@@ -13,6 +16,7 @@ import { useInView } from "@/hooks/useObserver";
 import { useTagsTreeView } from "@/hooks/useTagsTreeView";
 import { Post } from "@/lib/mapApi";
 import { DESIGN_SYSTEM_COLORS } from "@/lib/theme/colors";
+import { mapNodeToSimpleNode } from "@/lib/utils/maps.utils";
 
 import shortenNumber from "../../../../lib/utils/shortenNumber";
 import RecentNodesList from "../../RecentNodesList";
@@ -26,6 +30,7 @@ dayjs.extend(relativeTime);
 
 type ParentsChildrenSidebarProps = {
   title: string;
+  username: string;
   open: boolean;
   onClose: () => void;
   onChangeChosenNode: ({ nodeId, title }: { nodeId: string; title: string }) => void;
@@ -35,10 +40,12 @@ type ParentsChildrenSidebarProps = {
 const ParentsChildrenSidebar = ({
   title,
   open,
+  username,
   onClose,
   onChangeChosenNode,
   preLoadNodes,
 }: ParentsChildrenSidebarProps) => {
+  const db = getFirestore();
   const [isLoading, setIsLoading] = useState(false);
   const [query, setQuery] = useState("");
   const [showTagSelector, setShowTagSelector] = useState(false);
@@ -54,6 +61,22 @@ const ParentsChildrenSidebar = ({
   const previousOpenRef = useRef(false);
 
   const selectedTags = useMemo<TagTreeView[]>(() => Object.values(allTags).filter(tag => tag.checked), [allTags]);
+
+  const onGetTheMostUsedNodes = useCallback(async () => {
+    setIsLoading(true);
+    const nodeIds = await getRecentUserNodesByUser(db, username);
+    const uniqueNodesIds = Array.from(new Set(nodeIds));
+    const nodes = await getNodes(db, uniqueNodesIds);
+    const newMostUsedNodes = nodes.flatMap(c => c || []).map((cur): SimpleNode2 => mapNodeToSimpleNode(cur, username));
+
+    setSearchResults({
+      data: newMostUsedNodes,
+      lastPageLoaded: 1,
+      totalPage: 1,
+      totalResults: newMostUsedNodes.length,
+    });
+    setIsLoading(false);
+  }, [db, username]);
 
   const onSearchQuery = useCallback(
     async ({
@@ -159,29 +182,6 @@ const ParentsChildrenSidebar = ({
   const parents: SimpleNode2[] = useMemo(() => {
     return searchResults.data;
   }, [searchResults.data]);
-
-  useEffect(() => {
-    if (!inViewInfinityLoaderTrigger) return;
-    if (isLoading) return;
-    onSearchQuery({
-      q: query,
-      sortOption,
-      sortDirection,
-      nodeTypes,
-      nodesUpdatedSince: mapTimeFilterToDays(timeFilter),
-      page: searchResults.lastPageLoaded + 1,
-    });
-  }, [
-    inViewInfinityLoaderTrigger,
-    isLoading,
-    nodeTypes,
-    onSearchQuery,
-    query,
-    searchResults.lastPageLoaded,
-    sortDirection,
-    sortOption,
-    timeFilter,
-  ]);
 
   const sidebarOptionsMemo = useMemo(
     () => (
@@ -375,6 +375,29 @@ const ParentsChildrenSidebar = ({
   );
 
   useEffect(() => {
+    if (!inViewInfinityLoaderTrigger) return;
+    if (isLoading) return;
+    onSearchQuery({
+      q: query,
+      sortOption,
+      sortDirection,
+      nodeTypes,
+      nodesUpdatedSince: mapTimeFilterToDays(timeFilter),
+      page: searchResults.lastPageLoaded + 1,
+    });
+  }, [
+    inViewInfinityLoaderTrigger,
+    isLoading,
+    nodeTypes,
+    onSearchQuery,
+    query,
+    searchResults.lastPageLoaded,
+    sortDirection,
+    sortOption,
+    timeFilter,
+  ]);
+
+  useEffect(() => {
     if (open === previousOpenRef.current) return;
 
     previousOpenRef.current = open;
@@ -384,15 +407,8 @@ const ParentsChildrenSidebar = ({
     setIsLoading(false);
     setQuery("");
     resetSelectedTags();
-    onSearchQuery({
-      q: "",
-      sortOption: "NOT_SELECTED",
-      sortDirection: "DESCENDING",
-      nodeTypes: NODE_TYPES_ARRAY,
-      nodesUpdatedSince: mapTimeFilterToDays("ALL_TIME"),
-      page: 1,
-    });
-  }, [onSearchQuery, open, resetSelectedTags]);
+    onGetTheMostUsedNodes();
+  }, [onGetTheMostUsedNodes, onSearchQuery, open, resetSelectedTags]);
 
   return (
     <SidebarWrapper2

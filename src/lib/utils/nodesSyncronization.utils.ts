@@ -39,7 +39,7 @@ export const getUserNodeChanges = (docChanges: DocumentChange<DocumentData>[]): 
   });
 };
 
-export const getNodes = async (db: Firestore, nodeIds: string[]): Promise<NodesData[]> => {
+export const getNodesPromises = async (db: Firestore, nodeIds: string[]): Promise<NodesData[]> => {
   // console.log("[GET NODES]");
   const nodeDocsPromises = nodeIds.map(nodeId => {
     const nodeRef = doc(db, "nodes", nodeId);

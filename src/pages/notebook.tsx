@@ -77,7 +77,7 @@ import { useTagsTreeView } from "@/hooks/useTagsTreeView";
 import { DESIGN_SYSTEM_COLORS } from "@/lib/theme/colors";
 
 import LoadingImg from "../../public/animated-icon-1cademy.gif";
-import { TooltipTutorial } from "../components/interactiveTutorial/Tutorial";
+import { TooltipTutorial } from "../components/interactiveTutorial/TooltipTutorial";
 import { Assistant } from "../components/map/Assistant";
 // import nodesData from "../../testUtils/mockCollections/nodes.data";
 // import { Tutorial } from "../components/interactiveTutorial/Tutorial";
@@ -136,7 +136,7 @@ import {
 import { newId } from "../lib/utils/newid";
 import {
   buildFullNodes,
-  getNodes,
+  getNodesPromises,
   getUserNodeChanges,
   mergeAllNodes,
   synchronizeGraph,
@@ -531,7 +531,7 @@ const Notebook = ({}: NotebookProps) => {
       devLog("GET_TOOLTIP_CLIENT_RECT", { currentStep, targetId });
 
       if (currentStep.anchor) {
-        if (!currentStep.childTargetId) return;
+        if (!currentStep.childTargetId) return setTargetClientRect({ width: 0, height: 0, top: 0, left: 0 });
 
         const targetElement = document.getElementById(currentStep.childTargetId);
         if (!targetElement) return;
@@ -733,13 +733,27 @@ const Notebook = ({}: NotebookProps) => {
     async (nodeId: string, openWithDefaultValues: Partial<UserNodeFirestore> = {}, selectNode = true) => {
       devLog("OPEN_NODE_HANDLER", { nodeId, openWithDefaultValues });
 
+      const expanded = Boolean(openWithDefaultValues.open);
       // update graph with preloaded data, to get changes immediately
       setGraph(graph => {
-        if (!preLoadedNodesRef.current[nodeId]) return graph;
+        const preloadedNode = preLoadedNodesRef.current[nodeId];
+        if (!preloadedNode) return graph;
+        const selectedNotebookIdx = preloadedNode.notebooks.findIndex(c => c === selectedNotebookId);
+        if (selectedNotebookIdx < 0) {
+          console.error("selectedNotebook property doesn't exist into notebooks property!");
+          return graph;
+        }
+
         return synchronizeGraph({
           g: g.current,
           graph,
-          fullNodes: [preLoadedNodesRef.current[nodeId]],
+          fullNodes: [
+            {
+              ...preloadedNode,
+              ...(openWithDefaultValues.open && { open: true }),
+              expands: preloadedNode.expands.map((c, i) => (i === selectedNotebookIdx ? expanded : c)),
+            },
+          ],
           selectedNotebookId,
           allTags,
           setNodeUpdates,
@@ -782,10 +796,14 @@ const Notebook = ({}: NotebookProps) => {
               ...userNodeDataTmp,
               ...openWithDefaultValues,
             };
-            const existNotebooks = (userNodeData.notebooks ?? []).find(c => c === selectedNotebookId);
-            if (!existNotebooks) {
+            const selectedNotebookIdx = (userNodeData.notebooks ?? []).findIndex(c => c === selectedNotebookId);
+            if (selectedNotebookIdx <= 0) {
               userNodeData.notebooks = [...(userNodeData.notebooks ?? []), selectedNotebookId];
-              userNodeData.expands = [...(userNodeData.expands ?? []), true];
+              userNodeData.expands = [...(userNodeData.expands ?? []), expanded];
+            } else {
+              userNodeData.expands = (userNodeData.expands ?? []).map((c, i) =>
+                i === selectedNotebookIdx ? expanded : c
+              );
             }
             userNodeData.updatedAt = Timestamp.fromDate(new Date());
             delete userNodeData?.visible;
@@ -805,7 +823,7 @@ const Notebook = ({}: NotebookProps) => {
               user: user.uname,
               wrong: false,
               notebooks: [selectedNotebookId],
-              expands: [true],
+              expands: [expanded],
             };
             userNodeRef = collection(db, "userNodes");
             const preloadedUserNodeId = preLoadedNodesRef.current[nodeId]?.userNodeId;
@@ -1023,7 +1041,7 @@ const Notebook = ({}: NotebookProps) => {
       if (!selectedNotebookId) return;
 
       const preUserNodes = await getUserNodesByForce(db, nodeIds, user.uname, selectedNotebookId);
-      const preNodesData = await getNodes(db, nodeIds);
+      const preNodesData = await getNodesPromises(db, nodeIds);
       const preFullNodes = buildFullNodes(
         preUserNodes.map(c => ({ cType: "added", uNodeId: c.id, uNodeData: c })),
         preNodesData
@@ -1054,7 +1072,7 @@ const Notebook = ({}: NotebookProps) => {
           devLog("2:Snapshot:userNodes Data", userNodeChanges);
 
           const nodeIds = userNodeChanges.map(cur => cur.uNodeData.node);
-          const nodesData = await getNodes(db, nodeIds);
+          const nodesData = await getNodesPromises(db, nodeIds);
           devLog("3:Snapshot:Nodes Data", nodesData);
 
           const fullNodes = buildFullNodes(userNodeChanges, nodesData);
@@ -3233,6 +3251,9 @@ const Notebook = ({}: NotebookProps) => {
       sidebarType = "Media";
     }
 
+    notebookRef.current.choosingNode = null;
+    notebookRef.current.chosenNode = null;
+    notebookRef.current.selectionType = null;
     nodeBookDispatch({ type: "setChoosingNode", payload: null });
     nodeBookDispatch({ type: "setChosenNode", payload: null });
     nodeBookDispatch({ type: "setSelectionType", payload: null });
@@ -4527,6 +4548,7 @@ const Notebook = ({}: NotebookProps) => {
 
     const userTutorialUpdated = { ...userTutorial, [tutorial.name]: tutorialUpdated };
     const wasForcedTutorial = tutorial.name === forcedTutorial;
+    tutorialStateWasSetUpRef.current = false;
     setUserTutorial(userTutorialUpdated);
     setOpenSidebar(null);
     setTutorial(null);
@@ -4621,6 +4643,7 @@ const Notebook = ({}: NotebookProps) => {
     setTutorial(null);
     setUserTutorial(userTutorialUpdated);
     setTargetId("");
+    tutorialStateWasSetUpRef.current = false;
 
     if (wasForcedTutorial) setForcedTutorial(null);
 
@@ -4675,7 +4698,7 @@ const Notebook = ({}: NotebookProps) => {
       const thisNode = graph.nodes[targetId];
       if (!targetIsValid(thisNode)) {
         if (!tutorialStateWasSetUpRef.current) {
-          openNodeHandler(targetId, defaultStates);
+          openNodeHandler(targetId, defaultStates, true);
           tutorialStateWasSetUpRef.current = true;
         }
         return true;
@@ -4855,7 +4878,7 @@ const Notebook = ({}: NotebookProps) => {
     [graph.edges]
   );
 
-  const getGraphOpenedNodes = useCallback(() => {
+  const getGraphOpenedNodes = useCallback((): number => {
     const nodesOpened = Object.values(graph.nodes).reduce((acc: number, node: FullNodeData) => {
       return node.open ? acc + 1 : acc;
     }, 0);
@@ -4877,7 +4900,11 @@ const Notebook = ({}: NotebookProps) => {
       if (tutorial) return;
       if (focusView.isEnabled) return;
 
-      devLog("USE_EFFECT: DETECT_TRIGGER_TUTORIAL", { userTutorial }, "TUTORIAL");
+      devLog(
+        "USE_EFFECT: DETECT_TRIGGER_TUTORIAL",
+        { userTutorial, tutorialStateWasSetUpRef: tutorialStateWasSetUpRef.current },
+        "TUTORIAL"
+      );
 
       // --------------------------
 
@@ -4911,7 +4938,6 @@ const Notebook = ({}: NotebookProps) => {
           }
           return;
         }
-
         tutorialStateWasSetUpRef.current = false;
         nodeBookDispatch({ type: "setSelectedNode", payload: newTargetId });
         notebookRef.current.selectedNode = newTargetId;
@@ -4923,6 +4949,26 @@ const Notebook = ({}: NotebookProps) => {
           updatedAt: new Date(),
         });
 
+        return;
+      }
+
+      // --------------------------
+
+      const nodesTutorialIsCompleted = () => userTutorial["nodes"].done || userTutorial["nodes"].skipped;
+
+      if (!userTutorial["knowledgeGraph"].done && !userTutorial["knowledgeGraph"].skipped && !forcedTutorial) {
+        if (nodesTutorialIsCompleted()) return startTutorial("knowledgeGraph");
+      }
+
+      if (forcedTutorial === "knowledgeGraph") {
+        startTutorial("knowledgeGraph");
+        return;
+      }
+
+      // --------------------------
+
+      if (forcedTutorial === "nodeInteractions") {
+        startTutorial("nodeInteractions");
         return;
       }
 
@@ -6591,6 +6637,7 @@ const Notebook = ({}: NotebookProps) => {
 
               <ReferencesSidebarMemoized
                 open={nodeBookState.choosingNode?.type === "Reference"}
+                username={user.uname}
                 onClose={() => {
                   nodeBookDispatch({ type: "setChoosingNode", payload: null });
                   notebookRef.current.choosingNode = null;
@@ -6601,6 +6648,7 @@ const Notebook = ({}: NotebookProps) => {
 
               <TagsSidebarMemoized
                 open={nodeBookState.choosingNode?.type === "Tag"}
+                username={user.uname}
                 onClose={() => {
                   nodeBookDispatch({ type: "setChoosingNode", payload: null });
                   notebookRef.current.choosingNode = null;
@@ -6612,6 +6660,7 @@ const Notebook = ({}: NotebookProps) => {
               <ParentsSidebarMemoized
                 title={nodeBookState.choosingNode?.type === "Parent" ? "Parents to Link" : "Children to Link"}
                 open={nodeBookState.choosingNode?.type === "Parent" || nodeBookState.choosingNode?.type === "Child"}
+                username={user.uname}
                 onClose={() => {
                   nodeBookDispatch({ type: "setChoosingNode", payload: null });
                   notebookRef.current.choosingNode = null;
@@ -7294,6 +7343,9 @@ const Notebook = ({}: NotebookProps) => {
                 <Button onClick={() => console.log(userTutorial)}>userTutorial</Button>
                 <Button onClick={() => console.log(targetId)}>targetId</Button>
                 <Button onClick={() => console.log(forcedTutorial)}>forcedTutorial</Button>
+                <Button onClick={() => console.log({ tutorialStateWasSetUpRef: tutorialStateWasSetUpRef.current })}>
+                  tutorialStateWasSetUpRef
+                </Button>
               </Paper>
 
               <Paper>

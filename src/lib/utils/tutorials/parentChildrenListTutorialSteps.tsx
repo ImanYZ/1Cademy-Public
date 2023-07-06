@@ -6,11 +6,11 @@ import { getBaseStepConfig } from "./tutorial.utils";
 const PARENTS_CHILDREN_LIST_STEPS_CONFIG: TutorialStepConfig[] = [
   {
     childTargetId: "parents-list",
-    title: "List Of Parents",
+    title: "List of parents",
     description: (
       <MarkdownRender
         text={
-          "Here is a list of parent nodes. Parent or superordinate nodes provide prerequisite knowledge to learn the current node."
+          "Here is the list of parent or superordinate nodes that provide prerequisite knowledge to learn the current node."
         }
       />
     ),
@@ -20,10 +20,10 @@ const PARENTS_CHILDREN_LIST_STEPS_CONFIG: TutorialStepConfig[] = [
   },
   {
     childTargetId: "children-list",
-    title: "List Of Children",
+    title: "List of children",
     description: (
       <MarkdownRender
-        text={"This is the list of child nodes. It contains all the subordinate nodes that one can learn after learning this node."}
+        text={"This is the list of child or subordinate nodes that one can learn after learning the current node."}
       />
     ),
     tooltipPosition: "top",
