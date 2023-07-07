@@ -12,13 +12,13 @@ const NODE_RELATION_STEPS_CONFIG: TutorialStepConfig[] = [
     title: "What is a Relation Node",
     description: (
       <Stack>
-        <MarkdownRender text={"This is a **Relation** node. It can be identified by this icon."} />
+        <MarkdownRender text={"This is a **Relation** node. It can be identified by this icon:"} />
         <NodeTypeIconButton sx={{ alignSelf: "center", my: "4px" }}>
           <ShareIcon fontSize="small" />
         </NodeTypeIconButton>
         <MarkdownRender
           text={
-            "A Relation explains the relationship between different Concept nodes, without defining/explaining any of them. For example, you can list a number of node titles to group them in a Relation node. Another example is a Relation node that compared/contrasts two or more nodes."
+            "A Relation node explains the relationship between different Concept nodes, without defining/explaining any of them. For example, you can list a number of node titles to group them in a Relation node. Another example is a Relation node that compares/contrasts two or more nodes."
           }
         />
       </Stack>
@@ -26,7 +26,7 @@ const NODE_RELATION_STEPS_CONFIG: TutorialStepConfig[] = [
     isClickable: true,
   },
   {
-    title: "Concept Node vs Relation Node",
+    title: "Concept Node vs. Relation Node",
     description: (
       <>
         <Stack direction={"row"} justifyContent={"center"} alignItems={"center"} spacing="24px" mt="4px">
@@ -39,7 +39,7 @@ const NODE_RELATION_STEPS_CONFIG: TutorialStepConfig[] = [
         </Stack>
         <MarkdownRender
           text={
-            "Relation nodes allow you to divide child nodes into thematic categories. This helps readers understand how information is related to a given node. They do not define those concepts because they are defined in their own individual concept nodes."
+            "Concept and relation nodes are very common. While each Concept node defines/explains a unique concept, each Relation node explains the relationship between different Concept nodes, without defining/explaining any of them."
           }
         />
       </>

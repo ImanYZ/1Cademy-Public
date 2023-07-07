@@ -8,7 +8,7 @@ export const INITIAL_NODE_TUTORIAL_STATE: TutorialState = null;
 
 const KNOWLEDGE_GRAPH_STEPS: TutorialStepConfig[] = [
   {
-    title: "The Knowledge Graph",
+    title: "The Shared Knowledge Graph",
     description: (
       <MemoizedNodeVideo addVideo={true} videoData={getVideoDataByUrl("https://www.youtube.com/watch?v=CSO-TleAge0")} />
     ),
@@ -17,7 +17,7 @@ const KNOWLEDGE_GRAPH_STEPS: TutorialStepConfig[] = [
   },
 
   {
-    title: "The Knowledge Graph",
+    title: "Notebook: Personalized Map View",
     description: (
       <MemoizedNodeVideo addVideo={true} videoData={getVideoDataByUrl("https://www.youtube.com/watch?v=OyUSCZ3YcCk")} />
     ),

@@ -7,7 +7,7 @@ import { getAssistantExtensionId } from "@/lib/utils/assistant.utils";
 export const Iframe = () => {
   useEffect(() => {
     // following event listener will help use sending id token to 1Cademy Assistant
-    window.addEventListener("assistant", (e: any) => {
+    const listener = (e: any) => {
       const detail: IAssistantEventDetail = e.detail || {};
       if (detail.type === "REQUEST_ID_TOKEN") {
         (async () => {
@@ -20,7 +20,9 @@ export const Iframe = () => {
       } else if (detail.type === "EXTENSION_ID") {
         localStorage.setItem("ASSISTANT_EXTENSION_ID", detail.extensionId);
       }
-    });
+    };
+    window.addEventListener("assistant", listener);
+    return () => window.removeEventListener("assistant", listener);
   }, []);
   return <div></div>;
 };

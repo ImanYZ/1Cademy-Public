@@ -75,6 +75,7 @@ import { useHover } from "@/hooks/userHover";
 // import usePrevious from "@/hooks/usePrevious";
 import { useTagsTreeView } from "@/hooks/useTagsTreeView";
 import { DESIGN_SYSTEM_COLORS } from "@/lib/theme/colors";
+import { getAssistantExtensionId } from "@/lib/utils/assistant.utils";
 
 import LoadingImg from "../../public/animated-icon-1cademy.gif";
 import { TooltipTutorial } from "../components/interactiveTutorial/TooltipTutorial";
@@ -170,6 +171,10 @@ type UpdateLinks = {
   addedChildren: string[];
   removedParents: string[];
   removedChildren: string[];
+};
+export type QuerySideBarSearch = {
+  query: string;
+  forced: boolean;
 };
 // when proposing improvements, lists of added/removed parent/child links
 const getInitialUpdateLinks = (): UpdateLinks => ({
@@ -282,6 +287,8 @@ const Notebook = ({}: NotebookProps) => {
     showContributors: false,
   });
 
+  const assistantSelectNode = useRef<Boolean>(false);
+
   // scale and translation of the viewport over the map for the map interactions module
   const [mapInteractionValue, setMapInteractionValue] = useState({
     scale: 1,
@@ -392,6 +399,12 @@ const Notebook = ({}: NotebookProps) => {
   const [selectedNotebookId, setSelectedNotebookId] = useState("");
   const selectedPreviousNotebookIdRef = useRef("");
   const [userIsAnsweringPractice, setUserIsAnsweringPractice] = useState<{ result: boolean }>({ result: true }); // this is used to trigger assistant sleep animation
+
+  //states for the searcrh bar
+  const [queryParentChildren, setQueryParentChildren] = useState<QuerySideBarSearch>({
+    query: "",
+    forced: false,
+  });
 
   const onChangeTagOfNotebookById = (notebookId: string, data: { defaultTagId: string; defaultTagName: string }) => {
     setNotebooks(prev => {
@@ -1124,9 +1137,6 @@ const Notebook = ({}: NotebookProps) => {
 
   // this useEffect manage states when sidebar is opened or closed
   useEffect(() => {
-    if (!openSidebar) {
-      nodeBookDispatch({ type: "setChoosingNode", payload: null });
-    }
     if (openSidebar !== "PROPOSALS") {
       setOpenProposal("");
     }
@@ -1856,7 +1866,37 @@ const Notebook = ({}: NotebookProps) => {
     // [notebookRef.current.choosingNode, notebookRef.current.chosenNode]
   );
 
+  useEffect(() => {
+    // following event listener will help use sending id token to 1Cademy Assistant
+    const listener = (e: any) => {
+      const detail: IAssistantEventDetail = e.detail || {};
+      if (detail.type === "REQUEST_ID_TOKEN") {
+        (async () => {
+          const idToken = await getIdToken();
+          chrome.runtime.sendMessage(getAssistantExtensionId(), {
+            type: "NOTEBOOK_ID_TOKEN",
+            token: idToken,
+          });
+        })();
+      } else if (detail.type === "EXTENSION_ID") {
+        localStorage.setItem("ASSISTANT_EXTENSION_ID", detail.extensionId);
+      }
+    };
+    window.addEventListener("assistant", listener);
+    return () => window.removeEventListener("assistant", listener);
+  }, []);
   // const onChangeReferenceChosenNode = () => {};
+  useEffect(() => {
+    const listener = (e: any) => {
+      console.log("e.detail ______", e.detail);
+      assistantSelectNode.current = true;
+      setOpenSidebar(null);
+      notebookRef.current.choosingNode = { id: "", type: e.detail.type };
+      nodeBookDispatch({ type: "setChoosingNode", payload: { id: "", type: e.detail.type } });
+    };
+    window.addEventListener("node-selection", listener);
+    return () => window.removeEventListener("node-selection", listener);
+  }, [nodeBookDispatch]);
 
   const onChangeChosenNode = useCallback(
     async ({ nodeId, title }: { nodeId: string; title: string }) => {
@@ -1866,16 +1906,28 @@ const Notebook = ({}: NotebookProps) => {
 
       notebookRef.current.chosenNode = { id: nodeId, title };
       nodeBookDispatch({ type: "setChosenNode", payload: { id: nodeId, title } });
+      const nodeClickEvent = new CustomEvent("node-selected", {
+        detail: {
+          id: nodeId,
+          title,
+          content: "",
+        },
+      });
+      window.dispatchEvent(nodeClickEvent);
       if (notebookRef.current.choosingNode.id === "Tag") return; //INFO: this is important to update a community
 
       console.log("onChangeChosenNode", 1);
-      openNodeHandler(nodeId, {}, false);
+      openNodeHandler(nodeId, { open: true }, false);
       await detectHtmlElements({ ids: [nodeId] });
       await delay(500);
       console.log("onChangeChosenNode", {
         choosingNode: notebookRef.current?.choosingNode?.id,
         chosenNode: notebookRef.current?.chosenNode?.id,
       });
+      if (assistantSelectNode) {
+        assistantSelectNode.current = false;
+        return;
+      }
       chosenNodeChanged(nodeId);
       setAbleToPropose(true);
     },
@@ -2728,7 +2780,7 @@ const Notebook = ({}: NotebookProps) => {
   const openNodePart = useCallback(
     (event: any, nodeId: string, partType: any, openPart: any, setOpenPart: any) => {
       lastNodeOperation.current = { name: partType, data: "" };
-      if (notebookRef.current.choosingNode) return;
+      if (notebookRef.current.choosingNode?.id === nodeId) return;
 
       if (partType === "PendingProposals") {
         // TODO: refactor to use only one state to open node options
@@ -6254,12 +6306,15 @@ const Notebook = ({}: NotebookProps) => {
         onChangeNotebook(detail.notebookId);
       } else if (detail.type === "SEARCH_NODES") {
         setOpenSidebar("SEARCHER_SIDEBAR");
+        setQueryParentChildren({ query: detail.query, forced: true });
         nodeBookDispatch({ type: "setSearchQuery", payload: detail.query });
         nodeBookDispatch({ type: "setNodeTitleBlured", payload: true });
       } else if (detail.type === "OPEN_NODE") {
         openNodeHandler(detail.nodeId);
       } else if (detail.type === "IMPROVEMENT") {
         setOpenSidebar(null);
+        nodeBookDispatch({ type: "setChoosingNode", payload: { id: "", type: null } });
+        notebookRef.current.choosingNode = { id: "", type: null };
         proposeNodeImprovement(null, detail.selectedNode.id);
         // to apply assistant potential improvement on node editor
         setTimeout(() => {
@@ -6272,6 +6327,7 @@ const Notebook = ({}: NotebookProps) => {
             newNode.title = detail.title;
             newNode.content = detail.content;
             newNode.flashcard = detail.flashcard;
+            newNode.open = true;
 
             if (detail.referenceNode) {
               // adding reference of book
@@ -6301,7 +6357,10 @@ const Notebook = ({}: NotebookProps) => {
         }, 1000);
       } else if (detail.type === "CHILD") {
         setOpenSidebar(null);
+        nodeBookDispatch({ type: "setChoosingNode", payload: { id: "", type: null } });
+        notebookRef.current.choosingNode = { id: "", type: null };
         notebookRef.current.selectedNode = detail.selectedNode.id;
+        nodeBookDispatch({ type: "setSelectedNode", payload: detail.selectedNode.id });
         proposeNewChild(null, detail.flashcard.type);
         // to apply assistant potential improvement on node editor
         setTimeout(() => {
@@ -6344,12 +6403,22 @@ const Notebook = ({}: NotebookProps) => {
             updatedAt: new Date(),
           });
         }, 1000);
+      } else if (detail.type === "CLEAR") {
+        nodeBookDispatch({ type: "setChoosingNode", payload: { id: "", type: null } });
+        notebookRef.current.choosingNode = { id: "", type: null };
       }
     };
     window.addEventListener("assistant", listener);
     return () => window.removeEventListener("assistant", listener);
-  }, [proposeNodeImprovement, nodeBookDispatch, onChangeNotebook, setOpenSidebar, setGraph]);
-
+  }, [
+    proposeNodeImprovement,
+    nodeBookDispatch,
+    onChangeNotebook,
+    setOpenSidebar,
+    setGraph,
+    openNodeHandler,
+    proposeNewChild,
+  ]);
   return (
     <div className="MapContainer" style={{ overflow: "hidden" }}>
       {currentStep?.anchor && (
@@ -6656,17 +6725,29 @@ const Notebook = ({}: NotebookProps) => {
                 onChangeChosenNode={onChangeChosenNode}
                 preLoadNodes={onPreLoadNodes}
               />
-
               <ParentsSidebarMemoized
-                title={nodeBookState.choosingNode?.type === "Parent" ? "Parents to Link" : "Children to Link"}
-                open={nodeBookState.choosingNode?.type === "Parent" || nodeBookState.choosingNode?.type === "Child"}
-                username={user.uname}
+                title={
+                  nodeBookState.choosingNode?.type === "Parent"
+                    ? "Parents to Link"
+                    : nodeBookState.choosingNode?.type === "Child"
+                    ? "Children to Link"
+                    : "Nodes to Improve"
+                }
+                open={
+                  nodeBookState.choosingNode?.type === "Parent" ||
+                  nodeBookState.choosingNode?.type === "Child" ||
+                  nodeBookState.choosingNode?.type === "Improvement"
+                }
                 onClose={() => {
                   nodeBookDispatch({ type: "setChoosingNode", payload: null });
                   notebookRef.current.choosingNode = null;
                 }}
+                linkMessage={nodeBookState.choosingNode?.type === "Improvement" ? "Improve it" : "Link it"}
                 onChangeChosenNode={onChangeChosenNode}
                 preLoadNodes={onPreLoadNodes}
+                setQueryParentChildren={setQueryParentChildren}
+                queryParentChildren={queryParentChildren}
+                username={""}
               />
             </Box>
           )}
