@@ -8,16 +8,16 @@ import { getBaseStepConfig } from "./tutorial.utils";
 
 const NODE_IDEA_STEPS_CONFIG: TutorialStepConfig[] = [
   {
-    title: "What is a Idea node",
+    title: "What is an Idea Node?",
     description: (
       <Stack>
-        <MarkdownRender text={"This is an **Idea** node. It can be identified by this icon."} />
+        <MarkdownRender text={"This is an **Idea** node. It can be identified by this icon:"} />
         <NodeTypeIconButton sx={{ alignSelf: "center", my: "4px" }}>
           <EmojiObjectsIcon fontSize="small" />
         </NodeTypeIconButton>
         <MarkdownRender
           text={
-            "Idea nodes are used to state an idea like potential concepts to add or a conclusion drawn from a collection of nodes. They are the creator’s ideas and do not have a citation."
+            "Idea nodes are used to state an idea like potential concepts to add or a conclusion drawn from a collection of nodes. They are the creator’s ideas and do not need any citations."
           }
         />
       </Stack>

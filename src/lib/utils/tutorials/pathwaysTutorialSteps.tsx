@@ -7,7 +7,7 @@ import { getBaseStepConfig } from "./tutorial.utils";
 
 const PATHWAYS_STEPS_CONFIG: TutorialStepConfig[] = [
   {
-    title: "Learning pathways",
+    title: "Learning Pathways",
     description: (
       <MarkdownRender
         text={
@@ -19,7 +19,7 @@ const PATHWAYS_STEPS_CONFIG: TutorialStepConfig[] = [
     outline: "inside",
   },
   {
-    title: "Parents/prerequisites",
+    title: "Parents/Prerequisites",
     description: (node, nodeParent) => (
       <Typography>
         One would be able to better learn a node, if they first learn its parent/prerequisite nodes. For example, the node about{' "'}
@@ -42,7 +42,7 @@ const PATHWAYS_STEPS_CONFIG: TutorialStepConfig[] = [
   //   outline: "inside",
   // },
   {
-    title: "Children/follow-ups",
+    title: "Children/Follow-ups",
     description: (node, parent, child) => (
       <Typography>
         A child node is usually about a more specific/advanced topic. One would better learn a child node if they first learn its parent/prerequisite node(s). For example, it is better to learn the current node before learning its child node about {' "'}
@@ -55,7 +55,7 @@ const PATHWAYS_STEPS_CONFIG: TutorialStepConfig[] = [
     outline: "inside",
   },
   {
-    title: "Learning pathways example",
+    title: "Learning Pathways Example",
     description: (node, parent, child) => (
       <Typography>
         These nodes are in an ordered series where they flow from basic to advanced, or broad to specific. The learner can start with the node about{' "'}
@@ -77,7 +77,7 @@ const PATHWAYS_STEPS_CONFIG: TutorialStepConfig[] = [
     outline: "inside",
   },
   {
-    title: "Stepwise learning",
+    title: "Stepwise Learning",
     description: (
       <Typography>
         Learning pathways allow us to learn multiple concepts in a progressive manner where we first gain the necessary

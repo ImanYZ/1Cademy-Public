@@ -8,15 +8,15 @@ import { getBaseStepConfig } from "./tutorial.utils";
 
 const NODE_QUESTION_STEPS_CONFIG: TutorialStepConfig[] = [
   {
-    title: "What is a Question node",
+    title: "What is a Question node?",
     description: (
       <Stack>
-        <MarkdownRender text={"This is a **Question** node. It can be identified by this icon."} />
+        <MarkdownRender text={"This is a **Question** node. It can be identified by this icon:"} />
         <NodeTypeIconButton sx={{ alignSelf: "center", my: "4px" }}>
           <HelpOutlineIcon fontSize="small" />
         </NodeTypeIconButton>
         <MarkdownRender
-          text={"Question nodes contain multiple choice questions that are intended to help people study a topic."}
+          text={"Question nodes contain multiple choice questions that are intended to help people study a topic. If you have a question about a node, it should NOT be made into a question node."}
         />
       </Stack>
     ),

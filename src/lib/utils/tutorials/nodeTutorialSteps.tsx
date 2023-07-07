@@ -80,7 +80,7 @@ const NODES_STEPS: TutorialStepConfig[] = [
     description: (
       <MarkdownRender
         text={
-          "Here is the content of a node. It describes the idea stated in the title. It needs to be descriptive and concise. You can also include images or video in a node’s content."
+          "Here is the content of a node. It describes the idea stated in the title. It needs to be descriptive and concise. You can also include an image or video in a node’s content."
         }
       />
     ),
@@ -92,7 +92,7 @@ const NODES_STEPS: TutorialStepConfig[] = [
     description: (
       <MarkdownRender
         text={
-          "Here you can see the top contributor to a node. 1Cademy is a collaborative platform, many people contribute to the content. However, the system identifies whose contributions have been the most helpful to each node and their profile picture is displayed on the node."
+          "Here you can see the top contributor to a node. 1Cademy is a collaborative platform. Many people contribute to the content. However, the system identifies whose contributions have been the most helpful to each node and their profile picture is displayed on the node."
         }
       />
     ),
@@ -168,17 +168,17 @@ const NODES_STEPS: TutorialStepConfig[] = [
 
   {
     childTargetId: "node-footer-timestamp",
-    title: "Last update",
+    title: "Last Update",
     description: <MarkdownRender text={"The third icon indicates how long ago the node was updated."} />,
   },
 
   {
     childTargetId: "node-footer-propose",
-    title: "Node Footer",
+    title: "Propose/Evaluate Button",
     description: (
       <MarkdownRender
         text={
-          "This button is to propose a new node or evaluate versions of the current node. This is where you go to add a new node, edit the current node, or evaluate other proposed edits to the node."
+          "This button is to propose a new node or evaluate versions of the current node. This is where you go to add a new node, edit the current node, or evaluate other's proposed edits to the node."
         }
       />
     ),

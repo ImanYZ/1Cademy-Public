@@ -17,6 +17,7 @@ import { useTagsTreeView } from "@/hooks/useTagsTreeView";
 import { Post } from "@/lib/mapApi";
 import { DESIGN_SYSTEM_COLORS } from "@/lib/theme/colors";
 import { mapNodeToSimpleNode } from "@/lib/utils/maps.utils";
+import { QuerySideBarSearch } from "@/pages/notebook";
 
 import shortenNumber from "../../../../lib/utils/shortenNumber";
 import RecentNodesList from "../../RecentNodesList";
@@ -35,6 +36,9 @@ type ParentsChildrenSidebarProps = {
   onClose: () => void;
   onChangeChosenNode: ({ nodeId, title }: { nodeId: string; title: string }) => void;
   preLoadNodes: (nodeIds: string[], fullNodes: FullNodeData[]) => Promise<void>;
+  linkMessage: string;
+  queryParentChildren: QuerySideBarSearch;
+  setQueryParentChildren: (q: QuerySideBarSearch) => void;
 };
 
 const ParentsChildrenSidebar = ({
@@ -44,10 +48,12 @@ const ParentsChildrenSidebar = ({
   onClose,
   onChangeChosenNode,
   preLoadNodes,
+  linkMessage,
+  queryParentChildren,
+  setQueryParentChildren,
 }: ParentsChildrenSidebarProps) => {
   const db = getFirestore();
   const [isLoading, setIsLoading] = useState(false);
-  const [query, setQuery] = useState("");
   const [showTagSelector, setShowTagSelector] = useState(false);
   const [chosenTags, setChosenTags] = useState<ChosenTag[]>([]);
   const [timeFilter, setTimeFilter] = useState<string>("ALL_TIME");
@@ -126,42 +132,42 @@ const ParentsChildrenSidebar = ({
     (newSortDirection: SortDirection) => {
       setSortDirection(newSortDirection);
       onSearchQuery({
-        q: query,
+        q: queryParentChildren.query,
         sortOption,
         sortDirection: newSortDirection,
         nodeTypes,
         nodesUpdatedSince: mapTimeFilterToDays(timeFilter),
       });
     },
-    [nodeTypes, onSearchQuery, query, sortOption, timeFilter]
+    [nodeTypes, onSearchQuery, queryParentChildren, sortOption, timeFilter]
   );
 
   const onChangeSortOptions = useCallback(
     (newSortOption: SortValues) => {
       setSortOption(newSortOption);
       onSearchQuery({
-        q: query,
+        q: queryParentChildren.query,
         sortOption: newSortOption,
         sortDirection,
         nodeTypes,
         nodesUpdatedSince: mapTimeFilterToDays(timeFilter),
       });
     },
-    [nodeTypes, onSearchQuery, query, sortDirection, timeFilter]
+    [nodeTypes, onSearchQuery, queryParentChildren, sortDirection, timeFilter]
   );
 
   const onChangeTimeFilter = useCallback(
     (newTimeFilter: string) => {
       setTimeFilter(newTimeFilter);
       onSearchQuery({
-        q: query,
+        q: queryParentChildren.query,
         sortOption,
         sortDirection,
         nodeTypes,
         nodesUpdatedSince: mapTimeFilterToDays(newTimeFilter),
       });
     },
-    [nodeTypes, onSearchQuery, query, sortDirection, sortOption]
+    [nodeTypes, onSearchQuery, queryParentChildren, sortDirection, sortOption]
   );
 
   const onChangeNodeType = useCallback(
@@ -169,19 +175,42 @@ const ParentsChildrenSidebar = ({
       console.log("onChangeNodeType:", { newNodeTypes });
       setNodeTypes(newNodeTypes);
       onSearchQuery({
-        q: query,
+        q: queryParentChildren.query,
         sortOption,
         sortDirection,
         nodeTypes: newNodeTypes,
         nodesUpdatedSince: mapTimeFilterToDays(timeFilter),
       });
     },
-    [onSearchQuery, query, sortDirection, sortOption, timeFilter]
+    [onSearchQuery, queryParentChildren, sortDirection, sortOption, timeFilter]
   );
 
   const parents: SimpleNode2[] = useMemo(() => {
     return searchResults.data;
   }, [searchResults.data]);
+
+  useEffect(() => {
+    if (!inViewInfinityLoaderTrigger) return;
+    if (isLoading) return;
+    onSearchQuery({
+      q: queryParentChildren.query,
+      sortOption,
+      sortDirection,
+      nodeTypes,
+      nodesUpdatedSince: mapTimeFilterToDays(timeFilter),
+      page: searchResults.lastPageLoaded + 1,
+    });
+  }, [
+    inViewInfinityLoaderTrigger,
+    isLoading,
+    nodeTypes,
+    onSearchQuery,
+    queryParentChildren,
+    searchResults.lastPageLoaded,
+    sortDirection,
+    sortOption,
+    timeFilter,
+  ]);
 
   const sidebarOptionsMemo = useMemo(
     () => (
@@ -268,11 +297,11 @@ const ParentsChildrenSidebar = ({
           {!showTagSelector && (
             <SearchInput
               id="reference-search-input"
-              value={query}
-              handleChange={setQuery}
+              value={queryParentChildren.query}
+              handleChange={newQuery => setQueryParentChildren({ query: newQuery, forced: false })}
               handleSearch={() =>
                 onSearchQuery({
-                  q: query,
+                  q: queryParentChildren.query,
                   sortOption,
                   sortDirection,
                   nodeTypes,
@@ -334,10 +363,11 @@ const ParentsChildrenSidebar = ({
       onChangeSortOptions,
       onChangeTimeFilter,
       onSearchQuery,
-      query,
+      queryParentChildren,
       searchResults.totalResults,
       selectedTags,
       setAllTags,
+      setQueryParentChildren,
       showTagSelector,
       sortDirection,
       sortOption,
@@ -352,7 +382,7 @@ const ParentsChildrenSidebar = ({
           <SidebarNodeLink
             key={cur.id}
             onClick={() => onChangeChosenNode({ nodeId: cur.id, title: cur.title })}
-            linkMessage="Link it"
+            linkMessage={linkMessage}
             {...cur}
           />
         ))}
@@ -365,12 +395,13 @@ const ParentsChildrenSidebar = ({
       </Stack>
     ),
     [
-      isLoading,
-      onChangeChosenNode,
-      refInfinityLoaderTrigger,
       parents,
+      isLoading,
       searchResults.lastPageLoaded,
       searchResults.totalPage,
+      refInfinityLoaderTrigger,
+      linkMessage,
+      onChangeChosenNode,
     ]
   );
 
@@ -378,7 +409,7 @@ const ParentsChildrenSidebar = ({
     if (!inViewInfinityLoaderTrigger) return;
     if (isLoading) return;
     onSearchQuery({
-      q: query,
+      q: queryParentChildren.query,
       sortOption,
       sortDirection,
       nodeTypes,
@@ -390,7 +421,7 @@ const ParentsChildrenSidebar = ({
     isLoading,
     nodeTypes,
     onSearchQuery,
-    query,
+    queryParentChildren,
     searchResults.lastPageLoaded,
     sortDirection,
     sortOption,
@@ -405,10 +436,19 @@ const ParentsChildrenSidebar = ({
 
     setSearchResults(INITIAL_SEARCH_RESULT);
     setIsLoading(false);
-    setQuery("");
+    if (!queryParentChildren.forced) {
+      setQueryParentChildren({ query: "", forced: true });
+    }
     resetSelectedTags();
     onGetTheMostUsedNodes();
-  }, [onGetTheMostUsedNodes, onSearchQuery, open, resetSelectedTags]);
+  }, [
+    onGetTheMostUsedNodes,
+    onSearchQuery,
+    open,
+    queryParentChildren.forced,
+    resetSelectedTags,
+    setQueryParentChildren,
+  ]);
 
   return (
     <SidebarWrapper2

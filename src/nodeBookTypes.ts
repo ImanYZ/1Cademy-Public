@@ -8,7 +8,7 @@ import { Flashcard } from "./types/IAssitantConversation";
 
 export type OpenPart = "LinkingWords" | "Tags" | "References" | undefined;
 
-export type ChoosingType = "Reference" | "Tag" | "Parent" | "Child" | null;
+export type ChoosingType = "Reference" | "Tag" | "Parent" | "Child" | "Improvement" | null;
 
 export type ChoosingNode = {
   id: string;
