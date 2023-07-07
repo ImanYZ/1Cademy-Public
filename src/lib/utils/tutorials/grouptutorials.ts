@@ -10,6 +10,7 @@ import {
   CHILD_RELATION_PROPOSAL_COMPLETE,
 } from "./childrenProposalTutorialStep";
 import { COMMUNITY_LEADER_BOARD_STEPS } from "./communityLeaderBoardTutorialSteps";
+import { KNOWLEDGE_GRAPH_CONFIG } from "./knowledgeGraphSteps";
 import { LEADER_BOARD_STEPS } from "./leaderBoardTutorialSteps";
 import { INTERACTION_LIVENESS_BAR_STEPS, REPUTATION_LIVENESS_BAR_STEPS } from "./livenessBarTutorialSteps";
 import { NAVIGATION_STEPS_COMPLETE } from "./navigationTutorialSteps";
@@ -25,6 +26,7 @@ import {
 import { NODE_CODE } from "./nodeCodeTutorialSteps";
 import { NODE_CONCEPT } from "./nodeConceptTutorialStep";
 import { NODE_IDEA } from "./nodeIdeaTutorialSteps";
+import { NODE_INTERACTIONS_CONFIG } from "./nodeInteractionsSteps";
 import { NODE_QUESTION } from "./nodeQuestionStepTutorialStep";
 import { NODE_REFERENCE } from "./nodeReferenceTutorialSteps";
 import { NODE_RELATION } from "./nodeRelationTutorialSteps";
@@ -70,8 +72,18 @@ export const getGroupTutorials = ({ livelinessBar }: GetGroupTutorialsInput): Gr
         tutorials: [],
       },
       {
+        title: "The Knowledge Graph",
+        tutorialSteps: { tutorialKey: "knowledgeGraph", steps: KNOWLEDGE_GRAPH_CONFIG },
+        tutorials: [],
+      },
+      {
         title: "Search Engine",
         tutorialSteps: { tutorialKey: "searcher", steps: SEARCHER_STEPS_COMPLETE },
+        tutorials: [],
+      },
+      {
+        title: "Node Interactions",
+        tutorialSteps: { tutorialKey: "nodeInteractions", steps: NODE_INTERACTIONS_CONFIG },
         tutorials: [],
       },
       {

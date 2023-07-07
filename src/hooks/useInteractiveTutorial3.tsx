@@ -1,6 +1,7 @@
 import { doc, getDoc, getFirestore } from "firebase/firestore";
 import { ReactNode, useCallback, useEffect, useMemo, useRef, useState } from "react";
 
+import { KNOWLEDGE_GRAPH_CONFIG } from "@/lib/utils/tutorials/knowledgeGraphSteps";
 import { NAVIGATION_STEPS_COMPLETE } from "@/lib/utils/tutorials/navigationTutorialSteps";
 import {
   COLLAPSE_STEPS_COMPLETE,
@@ -9,6 +10,7 @@ import {
   TAGS_REFERENCES_STEPS_COMPLETE,
 } from "@/lib/utils/tutorials/nodeActionsTutorialStep";
 import { HIDE_OFFSPRING_STEPS_COMPLETE } from "@/lib/utils/tutorials/nodeActionsTutorialStep";
+import { NODE_INTERACTIONS_CONFIG } from "@/lib/utils/tutorials/nodeInteractionsSteps";
 import { NOTEBOOKS_STEPS } from "@/lib/utils/tutorials/notebooksTutorialSteps";
 import { PENDING_PROPOSALS_STEPS_COMPLETE } from "@/lib/utils/tutorials/pendingProposalsTutorial";
 import { PROPOSAL_STEPS_COMPLETE } from "@/lib/utils/tutorials/proposalTutorialSteps";
@@ -155,6 +157,8 @@ export const useInteractiveTutorial = ({ user }: useInteractiveTutorialProps) =>
     tagsReferences: { currentStep: -1, done: false, skipped: false },
     parentsChildrenList: { currentStep: -1, done: false, skipped: false },
     pathways: { currentStep: -1, done: false, skipped: false },
+    knowledgeGraph: { currentStep: -1, done: false, skipped: false },
+    nodeInteractions: { currentStep: -1, done: false, skipped: false },
   });
 
   // flag for whether tutorial state was loaded
@@ -297,6 +301,12 @@ export const useInteractiveTutorial = ({ user }: useInteractiveTutorialProps) =>
       }
       if (newTutorial === "userInfo") {
         newSteps = USER_INFO_STEPS_COMPLETE;
+      }
+      if (newTutorial === "knowledgeGraph") {
+        newSteps = KNOWLEDGE_GRAPH_CONFIG;
+      }
+      if (newTutorial === "nodeInteractions") {
+        newSteps = NODE_INTERACTIONS_CONFIG;
       }
 
       // node actions
