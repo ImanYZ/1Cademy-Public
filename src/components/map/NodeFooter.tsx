@@ -123,6 +123,8 @@ type NodeFooterProps = {
   enableChildElements?: string[];
   showProposeTutorial?: boolean;
   setAbleToPropose: any;
+  choosingNode: any;
+  nodeClickHandler: any;
 };
 
 const NodeFooter = ({
@@ -187,6 +189,8 @@ const NodeFooter = ({
   disabled,
   enableChildElements = [],
   setAbleToPropose,
+  choosingNode,
+  nodeClickHandler,
 }: NodeFooterProps) => {
   const router = useRouter();
   const db = getFirestore();
@@ -535,7 +539,7 @@ const NodeFooter = ({
                   : `${dayjs(new Date(changedAt)).fromNow()}`}
               </span>
             </Tooltip>
-            {open && (
+            {open && !choosingNode && (
               <Box sx={{ display: editable || simulated ? "none" : "flex", alignItems: "center", marginLeft: "10px" }}>
                 <ContainedButton
                   id={proposeButtonId}
@@ -808,7 +812,7 @@ const NodeFooter = ({
                   )}
                 </>
               )}
-              {!editable && !unaccepted && nodeType === "Reference" ? (
+              {!editable && !unaccepted && nodeType === "Reference" && !choosingNode ? (
                 <>
                   <Box
                     sx={{
@@ -1176,7 +1180,7 @@ const NodeFooter = ({
                             : theme.palette.common.lightBackground2,
                       },
                     }}
-                    disabled={disableParentChildrenButton}
+                    // disabled={disableParentChildrenButton}
                   >
                     <Box sx={{ display: "flex", alignItems: "center", gap: "4px", fill: "inherit" }}>
                       <span className="FooterParentNodesOpen">{shortenNumber(parents.length, 2, false)}</span>
@@ -1187,7 +1191,7 @@ const NodeFooter = ({
                 </Box>
               )}
 
-              {!editable && (
+              {!editable && !choosingNode?.type && choosingNode?.id !== identifier && (
                 <IconButton
                   aria-label="more"
                   id={moreOptionsButtonId}
@@ -1721,7 +1725,10 @@ const NodeFooter = ({
                 <Box sx={{ display: "flex", alignItems: "center", gap: "4px", fill: "inherit" }}>
                   {bookmarked ? (
                     <BookmarkIcon
-                      sx={{ fontSize: "18px", color: theme => (theme.palette.mode === "dark" ? "#FF6D00" : "#FF8134") }}
+                      sx={{
+                        fontSize: "18px",
+                        color: theme => (theme.palette.mode === "dark" ? "#FF6D00" : "#FF8134"),
+                      }}
                     />
                   ) : (
                     <BookmarkIcon color={"inherit"} sx={{ fontSize: "16px" }} />
@@ -1754,6 +1761,31 @@ const NodeFooter = ({
             </Box>
           )}
         </Box>
+        {choosingNode && choosingNode?.type && choosingNode?.id !== identifier && (
+          <Button
+            variant="contained"
+            onClick={nodeClickHandler}
+            color="error"
+            sx={{
+              borderRadius: "26px",
+              // backgroundColor: DESIGN_SYSTEM_COLORS.primary800,
+              mt: "5px",
+              display: choosingNode?.type === "Reference" && choosingNode.type !== nodeType ? "none" : "block",
+            }}
+          >
+            {choosingNode?.type === "Reference"
+              ? "Cite this reference node"
+              : choosingNode?.type === "Tag"
+              ? "Cite this node as a tag"
+              : choosingNode?.type === "Child"
+              ? "Link this node as a child"
+              : choosingNode?.type === "Parent"
+              ? "Link this node as a parent"
+              : choosingNode?.type === "Improvement"
+              ? "Improve this node"
+              : null}
+          </Button>
+        )}
       </Box>
       {openSidebar === "USER_INFO" &&
         notebookRef.current.contributorsNodeId?.showContributors &&
