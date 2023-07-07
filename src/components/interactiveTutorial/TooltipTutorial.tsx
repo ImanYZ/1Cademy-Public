@@ -252,7 +252,6 @@ export const TooltipTutorial = ({
             backgroundColor: "#55555500",
             transition: "top 1s ease-out,bottom 1s ease-out,left 1s ease-out,right 1s ease-out,height 1s ease-out",
             zIndex: Z_INDEX.tutorials,
-            border: "dashed 2px red",
           }}
         >
           <Box
@@ -490,6 +489,12 @@ export const TooltipTutorial = ({
                   variant="contained"
                   onClick={() => {
                     handleCloseProgressBarMenu();
+                    console.log({
+                      tt: forcedTutorial && nextTutorial && !currentTutorialIsTemporal,
+                      forcedTutorial,
+                      nextTutorial,
+                      currentTutorialIsTemporal,
+                    });
                     forcedTutorial && nextTutorial && !currentTutorialIsTemporal
                       ? setShowNextTutorialStep(true)
                       : onFinalize();

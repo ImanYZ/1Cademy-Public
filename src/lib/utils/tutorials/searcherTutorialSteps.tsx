@@ -17,12 +17,12 @@ const NODES_STEPS: TutorialStepConfig[] = [
     title: "Search Engine",
     description: (
       <MarkdownRender
-        text={"1Cademy has a search engine that can be used to help you find nodes in its databse, based on tags, filters, and queries."}
+        text={
+          "1Cademy has a search engine that can be used to help you find nodes in its databse, based on tags, filters, and queries."
+        }
       />
     ),
-
     tooltipPosition: "right",
-    targetDelay: 450,
     anchor: "Portal",
     outline: "inside",
   },
@@ -33,6 +33,7 @@ const NODES_STEPS: TutorialStepConfig[] = [
     title: "Search Query",
     description: <MarkdownRender text={"To search, simply enter what you're looking for."} />,
     tooltipPosition: "bottom",
+    targetDelay: 10,
     anchor: "Portal",
   },
 
