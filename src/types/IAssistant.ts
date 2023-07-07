@@ -45,6 +45,9 @@ export type IAssistantEventDetail =
   | {
       type: "OPEN_NODE";
       nodeId: string;
+    }
+  | {
+      type: "CLEAR";
     };
 
 export type INarrateWorkerMessage = {

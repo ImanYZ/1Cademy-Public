@@ -314,9 +314,11 @@ const SearcherSidebar = ({
     nodeBookState.nodeTitleBlured,
     nodeBookState.searchQuery,
     nodeTypes,
+    notebookRef,
     onSearch,
     sortDirection,
     sortOption,
+    value,
   ]);
 
   // add tags by changing a chosenNode
@@ -343,6 +345,7 @@ const SearcherSidebar = ({
     nodeBookDispatch,
     nodeBookState.choosingNode?.id,
     nodeBookState.chosenNode,
+    notebookRef,
     setAllTags,
     showTagSelector,
   ]);
