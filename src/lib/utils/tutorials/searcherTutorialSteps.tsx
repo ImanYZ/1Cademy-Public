@@ -39,7 +39,7 @@ const NODES_STEPS: TutorialStepConfig[] = [
   {
     targetId: "sidebar-wrapper-searcher",
     childTargetId: "SearchIcon",
-    title: "How to search",
+    title: "How to Search",
     description: <MarkdownRender text={"To start searching, **Click** this icon."} />,
     tooltipPosition: "bottom",
     isClickable: true,
@@ -57,11 +57,11 @@ const NODES_STEPS: TutorialStepConfig[] = [
   {
     targetId: "sidebar-wrapper-searcher",
     childTargetId: "searcher-tags-button",
-    title: "Filter by tags",
+    title: "Filter by Tags",
     description: (
       <MarkdownRender
         text={
-          "Click this icon to refine your search to one or more selected tags, representing knowledge domains and communities."
+          "Click this icon to refine your search to one or more selected tags that represents knowledge domains, communities, courses, and chapters."
         }
       />
     ),
@@ -71,7 +71,7 @@ const NODES_STEPS: TutorialStepConfig[] = [
   {
     targetId: "sidebar-wrapper-searcher",
     childTargetId: "search-sort-options",
-    title: "Sort options",
+    title: "Sort Options",
     description: (
       <MarkdownRender
         text={
@@ -85,7 +85,7 @@ const NODES_STEPS: TutorialStepConfig[] = [
   {
     targetId: "sidebar-wrapper-searcher",
     childTargetId: "search-filter-options",
-    title: "Filter by dates",
+    title: "Filter by Dates",
     description: (
       <MarkdownRender text={"You can also refine your search by how recently nodes were created or edited."} />
     ),
@@ -95,11 +95,11 @@ const NODES_STEPS: TutorialStepConfig[] = [
   {
     targetId: "sidebar-wrapper-searcher",
     childTargetId: "sidebar-wrapper-searcher-content",
-    title: "Search results",
+    title: "Search Results",
     description: (
       <MarkdownRender
         text={
-          "This list would show your search results. Clicking each item would open the node in your current notebook and scroll to show you that node."
+          "This list would show your search results. Clicking each item would open the node in your current notebook and pan to show you that node."
         }
       />
     ),

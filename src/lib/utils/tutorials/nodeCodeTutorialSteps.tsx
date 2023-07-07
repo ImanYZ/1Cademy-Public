@@ -8,10 +8,10 @@ import { getBaseStepConfig } from "./tutorial.utils";
 
 const NODE_CODE_STEPS_CONFIG: TutorialStepConfig[] = [
   {
-    title: "What is a Code node",
+    title: "What is a Code node?",
     description: (
       <Stack>
-        <MarkdownRender text={"This is a **Code** node. It can be identified by this icon."} />
+        <MarkdownRender text={"This is a **Code** node. It can be identified by this icon:"} />
         <NodeTypeIconButton sx={{ mb: "4px", alignSelf: "center" }}>
           <CodeIcon fontSize="small" />
         </NodeTypeIconButton>

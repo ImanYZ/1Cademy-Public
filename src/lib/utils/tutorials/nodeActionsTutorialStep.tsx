@@ -173,7 +173,7 @@ const DOWNVOTE_STEPS: TutorialStepConfig[] = [
 ];
 const HIDE_STEPS: TutorialStepConfig[] = [
   {
-    title: "Hiding a node",
+    title: "Hiding a Node",
     childTargetId: "hidden-button",
     description: (
       <MarkdownRender
@@ -188,12 +188,12 @@ const HIDE_STEPS: TutorialStepConfig[] = [
 ];
 const HIDE_OFFSPRING_STEPS: TutorialStepConfig[] = [
   {
-    title: "Hiding descendants",
+    title: "Hiding Descendants",
     childTargetId: "hide-descendants-button",
     description: (
       <MarkdownRender
         text={
-          "This button is like the hide node button, but allows you to hide whole descendents of the node. By clicking this button you will hide all the displayed children of the node, its grand children, and so on."
+          "This button is like the hide node button, but allows you to hide all the descendents of the node. By clicking this button you will hide all the displayed children of the node, its grand children, and so on."
         }
       />
     ),
@@ -204,7 +204,7 @@ const HIDE_OFFSPRING_STEPS: TutorialStepConfig[] = [
 
 const EXPAND_STEPS: TutorialStepConfig[] = [
   {
-    title: "Expanding the node",
+    title: "Expanding the Node",
     childTargetId: "open-button",
     description: (
       <MarkdownRender
@@ -218,7 +218,7 @@ const EXPAND_STEPS: TutorialStepConfig[] = [
 
 const COLLAPSE_STEPS: TutorialStepConfig[] = [
   {
-    title: "Collapsing the node",
+    title: "Collapsing the Node",
     childTargetId: "close-button",
     description: (
       <MarkdownRender text={"This button allows you to collapse the node so that only its title would be displayed."} />
@@ -230,7 +230,7 @@ const COLLAPSE_STEPS: TutorialStepConfig[] = [
 
 const TAGS_REFERENCES_STEPS: TutorialStepConfig[] = [
   {
-    title: "List of references",
+    title: "List of References",
     childTargetId: "node-references",
     description: (
       <MarkdownRender
