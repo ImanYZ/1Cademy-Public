@@ -8,7 +8,7 @@ const PROPOSING_QUESTION_EDIT: TutorialStepConfig[] = [
     description: (
       <MarkdownRender
         text={
-          "For a **question** node, you you will want to make a question to quiz someone about the information in the previous node (nodes). It should be a multiple choice question that can have more than one correct answer. To make your own edits, you just need to add edits to the fields you can change and then click the green propose button at the bottom right."
+          'Instructors create **question** node to quiz their students about the parent node(s). It should be a multiple-choice question that can have more than one correct answer. You can edit the fields and then click the green "Propose" button at the bottom right.'
         }
       />
     ),

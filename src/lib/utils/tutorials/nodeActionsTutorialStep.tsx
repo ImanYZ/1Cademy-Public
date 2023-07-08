@@ -113,8 +113,7 @@ const UPTOVE_STEPS: TutorialStepConfig[] = [
           <CheckIcon fontSize="small" color="success" sx={{ verticalAlign: "text-top" }} />, ensuring the quality of the
           node.
         </Typography>
-        <Typography>The node will be locked and all new proposals to change it will go to it pending list for further review, if:</Typography>
-
+        <Typography>The node will be locked and all new proposals to change it will go to its pending list for further review, if:</Typography>
         <MarkdownRender
           text={`${String.raw`$$\text{Upvotes} > \text{2}$$`}`}
           sx={{ my: "4px", alignSelf: "center" }}
@@ -243,7 +242,7 @@ const TAGS_REFERENCES_STEPS: TutorialStepConfig[] = [
     outline: "shallow",
   },
   {
-    title: "List of tags",
+    title: "List of Tags",
     childTargetId: "node-tags",
     description: (
       <MarkdownRender

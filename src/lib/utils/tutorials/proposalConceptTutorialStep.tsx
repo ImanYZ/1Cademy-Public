@@ -8,7 +8,7 @@ const PROPOSING_CONCEPT_EDIT: TutorialStepConfig[] = [
     description: (
       <MarkdownRender
         text={
-          "For a **concept** node, you can make changes to the title, content, references, tags, note type, parents and children, and you can view proposed changes to the node on the side bar. To make your own edits, you just need to add edits to the fields you can change and then click the green propose button at the bottom right."
+          'A **concept** node should define a single, descrete concept. So, if you can break down a concept node into multiple stand-alone nodes, we highly recommend you do that. You can make changes to the title, content, references, tags, node types, parents and children, and you can view proposed changes to the node on the side bar. To make your own edits, you just need to add edits to the fields you can change and then click the green "Propose" button at the bottom right.'
         }
       />
     ),
