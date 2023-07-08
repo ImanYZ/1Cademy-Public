@@ -333,6 +333,7 @@ const Node = ({
   });
 
   const [toBeElligible, setToBeElligible] = useState(false);
+  const assistantSelectNode = useRef<Boolean>(false);
 
   const disableTitle = disabled && !enableChildElements.includes(`${identifier}-node-title`);
   const disableContent = disabled && !enableChildElements.includes(`${identifier}-node-content`);
@@ -423,19 +424,35 @@ const Node = ({
     };
   }, [identifier]);
 
+  useEffect(() => {
+    const listener = (e: any) => {
+      notebookRef.current.choosingNode = { id: "", type: e.detail.type };
+      notebookRef.current.chosenNode = null;
+      nodeBookDispatch({ type: "setChoosingNode", payload: { id: "", type: e.detail.type } });
+      nodeBookDispatch({ type: "setChosenNode", payload: null });
+      assistantSelectNode.current = true;
+    };
+    window.addEventListener("node-selection", listener);
+    return () => window.removeEventListener("node-selection", listener);
+  }, [nodeBookDispatch, notebookRef]);
+
   const nodeClickHandler = useCallback(
     (event: any) => {
       let operation = "selectNode";
-      console.log({ rrrrrr: notebookRef.current });
-      const nodeClickEvent = new CustomEvent("node-selected", {
-        detail: {
-          id: identifier,
-          title,
-          content,
-        },
-      });
-      window.dispatchEvent(nodeClickEvent);
-
+      if (assistantSelectNode.current) {
+        const nodeClickEvent = new CustomEvent("node-selected", {
+          detail: {
+            id: identifier,
+            title,
+            content,
+          },
+        });
+        window.dispatchEvent(nodeClickEvent);
+        setTimeout(() => {
+          assistantSelectNode.current = false;
+        }, 1000);
+        return;
+      }
       if (notebookRef.current.choosingNode && notebookRef.current.choosingNode.id !== identifier) {
         // console.log("-1");
         // The first Nodes exist, Now is clicking the Chosen Node
@@ -468,7 +485,6 @@ const Node = ({
         notebookRef.current.selectedNode !== identifier &&
         operation === "selectNode"
       ) {
-        // console.log("-3");
         const updatedNodeIds: string[] = [notebookRef.current.selectedNode!, identifier];
         notebookRef.current.selectedNode = identifier;
         nodeBookDispatch({ type: "setSelectedNode", payload: identifier });
@@ -617,7 +633,13 @@ const Node = ({
     const scrollTo = isNew ? firstParentId.node ?? undefined : identifier;
     if (!scrollTo) return;
     notebookRef.current.selectedNode = scrollTo;
+    notebookRef.current.choosingNode = null;
+    notebookRef.current.selectedNode = null;
+    notebookRef.current.chosenNode = null;
     nodeBookDispatch({ type: "setSelectedNode", payload: scrollTo });
+    nodeBookDispatch({ type: "setChoosingNode", payload: null });
+    nodeBookDispatch({ type: "setSelectedNode", payload: null });
+    nodeBookDispatch({ type: "setChosenNode", payload: null });
     setOperation("CancelProposals");
     window.dispatchEvent(new CustomEvent("next-flashcard"));
     closeSideBar();
@@ -1334,6 +1356,8 @@ const Node = ({
               disabled={disabled}
               enableChildElements={enableChildElements}
               setAbleToPropose={setAbleToPropose}
+              choosingNode={notebookRef.current.choosingNode}
+              nodeClickHandler={nodeClickHandler}
             />
           </div>
           {(openPart === "LinkingWords" || openPart === "Tags" || openPart === "References") && (
@@ -1508,6 +1532,8 @@ const Node = ({
               proposeNodeImprovement={proposeNodeImprovement}
               disabled={disabled}
               setAbleToPropose={setAbleToPropose}
+              choosingNode={notebookRef.current.choosingNode}
+              nodeClickHandler={nodeClickHandler}
             />
           </div>
         </div>
