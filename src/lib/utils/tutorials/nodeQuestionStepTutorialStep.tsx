@@ -8,7 +8,7 @@ import { getBaseStepConfig } from "./tutorial.utils";
 
 const NODE_QUESTION_STEPS_CONFIG: TutorialStepConfig[] = [
   {
-    title: "What is a Question node?",
+    title: "What is a Question Node?",
     description: (
       <Stack>
         <MarkdownRender text={"This is a **Question** node. It can be identified by this icon:"} />

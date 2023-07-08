@@ -20,7 +20,7 @@ const TMP_EDIT_NODE_CONFIG: TutorialStepConfig[] = [
     description: (
       <MarkdownRender
         text={
-          "This button allows you to edit and evaluate this node. By **clicking** on this button you can make changes to the title, content, references, tags, note type, parents and children, and you can view proposed changes to the node on the side bar."
+          "This button allows you to propose and evaluate child nodes and improvements to this node. By **clicking** this button, you can make changes to the title, content, references, tags, node type, parents, and children of the node. You can also view proposed changes to the node on the sidebar to evaluate them."
         }
       />
     ),
@@ -31,11 +31,11 @@ const TMP_EDIT_NODE_CONFIG: TutorialStepConfig[] = [
 
 const TMP_PROPOSE_CHILD_CONCEPT_CONFIG: TutorialStepConfig[] = [
   {
-    title: "Propose Child - Concept",
+    title: "Propose a Child Node",
     description: (
       <MarkdownRender
         text={
-          "Once you have a prerequisite, you will need to click this button. Instead of editing the node content, you will **click** the concept node icon on the right."
+          "To propose a child node, you should first identify the appropriate prerequisite; click the pencil (edit) button on the prerequisite node; click one of the buttons below depending on the type of the child node you'd like to propose; fill out the fields of the child node that gets created on the right; and finally click the Propose button."
         }
       />
     ),
