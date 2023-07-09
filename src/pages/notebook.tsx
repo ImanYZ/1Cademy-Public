@@ -6475,7 +6475,7 @@ const Notebook = ({}: NotebookProps) => {
               nodeBookDispatch({ type: "setChosenNode", payload: null });
             }}
           >
-            Click the node you'd like to link to...
+            Cancel
           </NotebookPopup>
         )}
 
@@ -6743,7 +6743,7 @@ const Notebook = ({}: NotebookProps) => {
                   nodeBookDispatch({ type: "setChoosingNode", payload: null });
                   notebookRef.current.choosingNode = null;
                 }}
-                linkMessage={nodeBookState.choosingNode?.type === "Improvement" ? "Improve it" : "Link it"}
+                linkMessage={nodeBookState.choosingNode?.type === "Improvement" ? "Choose to improve" : "Link it"}
                 onChangeChosenNode={onChangeChosenNode}
                 preLoadNodes={onPreLoadNodes}
                 setQueryParentChildren={setQueryParentChildren}
