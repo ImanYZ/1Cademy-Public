@@ -35,7 +35,7 @@ const PROPOSING_EDITS_STEPS: TutorialStepConfig[] = [
     description: (
       <MarkdownRender
         text={
-          "This is the profile picture for the top contributor of this node. Among all the contributors who submitted proposals on this node, this person received higher netvotes on their proposals on this node."
+          "This is the profile picture for the top contributor of this node. Among all the contributors who submitted proposals on this node, this person received higher netvotes on their proposals for this node."
         }
       />
     ),
@@ -51,7 +51,7 @@ const PROPOSING_EDITS_STEPS: TutorialStepConfig[] = [
     description: (
       <MarkdownRender
         text={
-          "Click this button is you'd like to upload an image into the node. It is usually helpful to have some text explaining the image. You should also offer a citation crediting the creator of the image if it is not your own. Note that you're not allowed to upload an image if the creator has not given you the permission to distribute it."
+          "Click this button if you'd like to upload an image into the node. It is usually helpful to have some text explaining the image. You should also offer a citation crediting the creator of the image if it is not your own. Note that you're not allowed to upload an image if the creator has not given you the permission to distribute it."
         }
       />
     ),
@@ -88,7 +88,7 @@ const PROPOSING_EDITS_STEPS: TutorialStepConfig[] = [
   },
   {
     childTargetId: "button-cancel-proposal",
-    title: "Proposing Edits - Cancel Propose",
+    title: "Proposing Edits - Cancel Proposal",
     description: (
       <MarkdownRender
         text={
@@ -114,11 +114,11 @@ const PROPOSING_EDITS_STEPS: TutorialStepConfig[] = [
   },
   {
     childTargetId: "new-children-nodes-buttons",
-    title: "Propose New Children Node",
+    title: "Propose a New Child Node",
     description: (
       <MarkdownRender
         text={
-          "To the right of the node you are proposing an edit to, you will see six circles with icons in them. These give you the option to add a new child node to the node you are proposing, rather than editing it’s content. To add a new child node, you need to click on the icon for the type of new node you would like to create."
+          "To the right of the node you are proposing an edit to, you will see six circles with icons in them. These give you the option to add a new child node to the node you are proposing, rather than editing its content. To add a new child node, you need to click the icon corresponding to the type of the child node."
         }
       />
     ),

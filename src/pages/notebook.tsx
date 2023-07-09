@@ -3471,7 +3471,7 @@ const Notebook = ({}: NotebookProps) => {
   );
 
   const saveProposedImprovement = useCallback(
-    (summary: any, reason: any, onFail: any) => {
+    (summary: string, reason: string, onFail: () => void) => {
       if (!notebookRef.current.selectedNode) return;
 
       notebookRef.current.chosenNode = null;
@@ -3663,7 +3663,7 @@ const Notebook = ({}: NotebookProps) => {
         return updatedLinks;
       });
     },
-    [isPlayingTheTutorialRef, nodeBookDispatch, getMapGraph, scrollToNode]
+    [nodeBookDispatch, getMapGraph, scrollToNode]
   );
 
   const proposeNewChild = useCallback(
@@ -6367,6 +6367,7 @@ const Notebook = ({}: NotebookProps) => {
         setOpenSidebar(null);
         nodeBookDispatch({ type: "setChoosingNode", payload: { id: "", type: null } });
         notebookRef.current.choosingNode = { id: "", type: null };
+        console.log("detail.selectedNode.id", detail.selectedNode.id);
         notebookRef.current.selectedNode = detail.selectedNode.id;
         nodeBookDispatch({ type: "setSelectedNode", payload: detail.selectedNode.id });
         proposeNewChild(null, detail.flashcard.type);

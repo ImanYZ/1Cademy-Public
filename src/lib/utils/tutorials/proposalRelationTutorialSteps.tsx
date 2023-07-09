@@ -8,7 +8,7 @@ const PROPOSING_RELATION_EDIT: TutorialStepConfig[] = [
     description: (
       <MarkdownRender
         text={
-          "For a **relation** node, you will want to be sure that it includes several concepts that are not defined. To make your own edits, you just need to add edits to the fields you can change and then click the green propose button at the bottom right."
+          'In a **relation** node, we explain the relationship betweeb differnt concepts, but do not define any of them. To make your own edits, you just need to add edits to the fields you can change and then click the green "Propose" button at the bottom right.'
         }
       />
     ),

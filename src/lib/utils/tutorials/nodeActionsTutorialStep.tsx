@@ -115,14 +115,13 @@ const UPTOVE_STEPS: TutorialStepConfig[] = [
           node.
         </Typography>
         <Typography>
-          The node will be locked and all new proposals to change it will go to it pending list for further review, if:
+          The node will be locked and all new proposals to change it will go to its pending list for further review, if:
         </Typography>
-
         <MarkdownRender text={`${String.raw`$$\text{Upvotes} > \text{2}$$`}`} sx={{ my: "4px", alignSelf: "center" }} />
         <Typography>If you upvote it:</Typography>
         <MarkdownRender
           text={`$$${String.raw`\text{${node.corrects + 1}}`}${
-            node.corrects + 1 > 2 ? " > " : " &#8804; "
+            node.corrects + 1 > 2 ? " > " : " <= "
           }${String.raw`\text{2}`}$$`}
           sx={{ alignSelf: "center" }}
         />
@@ -240,7 +239,7 @@ const TAGS_REFERENCES_STEPS: TutorialStepConfig[] = [
     outline: "shallow",
   },
   {
-    title: "List of tags",
+    title: "List of Tags",
     childTargetId: "node-tags",
     description: (
       <MarkdownRender

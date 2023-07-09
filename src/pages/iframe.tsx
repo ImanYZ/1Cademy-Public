@@ -1,3 +1,4 @@
+import { getAuth, User } from "firebase/auth";
 import React, { useEffect } from "react";
 import { IAssistantEventDetail } from "src/types/IAssistant";
 
@@ -22,7 +23,18 @@ export const Iframe = () => {
       }
     };
     window.addEventListener("assistant", listener);
-    return () => window.removeEventListener("assistant", listener);
+
+    const auth = getAuth();
+    const authUnsubscribe = auth.onAuthStateChanged((user: User | null) => {
+      if (user && chrome?.runtime?.sendMessage) {
+        chrome.runtime.sendMessage("REQUEST_ID_TOKEN");
+      }
+    });
+
+    return () => {
+      authUnsubscribe();
+      window.removeEventListener("assistant", listener);
+    };
   }, []);
   return <div></div>;
 };

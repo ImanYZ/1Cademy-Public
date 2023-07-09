@@ -8,7 +8,7 @@ const PROPOSING_REFERENCE_EDIT: TutorialStepConfig[] = [
     description: (
       <MarkdownRender
         text={
-          "For a **reference** node, you will want to add the title of the work your are citing to the title field and the APA citation to the content field. You should not add page numbers, time stamps, or URLs in a reference node. To make your own edits, you just need to add edits to the fields you can change and then click the green propose button at the bottom right."
+          '**Reference** nodes are what you use to cite a source in other node types (with the exception of idea and reference nodes). In a reference node you just want the title of the source and its APA citation in the content. Page numbers, URLs, and time stamps are added when a reference node is cited by another node; they should not be added into individual reference nodes. You can edit the fields and then click the green "Propose" button at the bottom right.'
         }
       />
     ),

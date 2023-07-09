@@ -167,12 +167,12 @@ export const getGroupTutorials = ({ livelinessBar }: GetGroupTutorialsInput): Gr
     title: "Evaluation",
     tutorials: [
       {
-        title: "Upvoting helpful content",
+        title: "Upvoting Helpful Content",
         tutorialSteps: { tutorialKey: "upVote", steps: UPTOVE_STEPS_COMPLETE },
         tutorials: [],
       },
       {
-        title: "Downvoting to delete content",
+        title: "Downvoting to Delete Content",
         tutorialSteps: { tutorialKey: "downVote", steps: DOWNVOTE_STEPS_COMPLETE },
         tutorials: [],
       },
@@ -188,7 +188,7 @@ export const getGroupTutorials = ({ livelinessBar }: GetGroupTutorialsInput): Gr
         tutorials: [],
       },
       {
-        title: "Reconciling Accepted Proposals",
+        title: "Reconciling Approved Proposals",
         tutorialSteps: {
           tutorialKey: "reconcilingAcceptedProposal",
           steps: RECONCILING_ACCEPTED_PROPOSALS_STEPS_COMPLETE,
@@ -196,7 +196,7 @@ export const getGroupTutorials = ({ livelinessBar }: GetGroupTutorialsInput): Gr
         tutorials: [],
       },
       {
-        title: "Reconciling Not Accepted Proposal",
+        title: "Reconciling Pending Proposal",
         tutorialSteps: {
           tutorialKey: "reconcilingNotAcceptedProposal",
           steps: RECONCILING_NOT_ACCEPTED_PROPOSALS_STEPS_COMPLETE,
