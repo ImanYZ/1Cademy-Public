@@ -4,7 +4,6 @@ import { getTypesenseClient } from "@/lib/typesense/typesense.config";
 import { homePageSortByDefaults } from "@/lib/utils/utils";
 
 import { SearchNodesResponse, TypesenseNodesSchema } from "../../knowledgeTypes";
-// import { SortDirection, SortValues } from "../../noteBookTypes";
 import { NodeType, SimpleNode2 } from "../../types";
 import { SortDirection, SortValues } from "../../nodeBookTypes";
 import { db } from "@/lib/firestoreServer/admin";
@@ -16,6 +15,7 @@ import { QueryDocumentSnapshot, Timestamp } from "firebase-admin/firestore";
 import { detach } from "src/utils/helpers";
 import { IUser } from "src/types/IUser";
 import { IActionTrack } from "src/types/IActionTrack";
+import { topGoogleSearchResults } from "src/utils/assistant-helpers";
 
 async function handler(req: NextApiRequest, res: NextApiResponse<SearchNodesResponse>) {
   const {
@@ -27,6 +27,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<SearchNodesResp
     sortDirection,
     page,
     onlyTitle,
+    gCustomSearch,
   } = req.body;
   const { uname } = req.body.data?.user?.userData;
 
@@ -42,47 +43,56 @@ async function handler(req: NextApiRequest, res: NextApiResponse<SearchNodesResp
     let found: number = 0;
     let currentPage: number = 0;
 
-    for (const queryField of queryFields) {
-      const searchParameters: SearchParams = {
-        q,
-        query_by: queryField,
-        sort_by: buildSort(sortOption, sortDirection),
-        filter_by: buildFilter(nodeTypes, tags, nodesUpdatedSince),
-        page,
-        num_typos: `2`,
-        typo_tokens_threshold: 2,
-      };
+    if (!gCustomSearch) {
+      for (const queryField of queryFields) {
+        const searchParameters: SearchParams = {
+          q,
+          query_by: queryField,
+          sort_by: buildSort(sortOption, sortDirection),
+          filter_by: buildFilter(nodeTypes, tags, nodesUpdatedSince),
+          page,
+          num_typos: `2`,
+          typo_tokens_threshold: 2,
+        };
 
-      const searchResults = await typesenseClient
-        .collections<TypesenseNodesSchema>("nodes")
-        .documents()
-        .search(searchParameters);
-      found = Math.max(found, searchResults.found);
-      currentPage = Math.max(currentPage, searchResults.page);
+        const searchResults = await typesenseClient
+          .collections<TypesenseNodesSchema>("nodes")
+          .documents()
+          .search(searchParameters);
+        found = Math.max(found, searchResults.found);
+        currentPage = Math.max(currentPage, searchResults.page);
 
-      const _allPostsData = (searchResults.hits ?? []).map(
-        (el): SimpleNode2 => ({
-          id: el.document.id,
-          title: el.document.title ?? "",
-          changedAt: el.document.changedAt,
-          content: el.document.content ?? "",
-          nodeType: el.document.nodeType as NodeType,
-          nodeImage: el.document.nodeImage || "",
-          nodeVideo: el.document.nodeVideo || "",
-          corrects: el.document.corrects ?? 0,
-          wrongs: el.document.wrongs ?? 0,
-          tags: el.document.tags,
-          contributors: el.document.contributors,
-          institutions: el.document.institutions,
-          choices: el.document.choices || [],
-          versions: el.document.versions,
-        })
-      );
-      for (const postData of _allPostsData) {
-        const idx = allPostsData.findIndex(_postData => _postData.id === postData.id);
-        if (idx === -1) {
-          allPostsData.push(postData);
+        const _allPostsData = (searchResults.hits ?? []).map(
+          (el): SimpleNode2 => ({
+            id: el.document.id,
+            title: el.document.title ?? "",
+            changedAt: el.document.changedAt,
+            content: el.document.content ?? "",
+            nodeType: el.document.nodeType as NodeType,
+            nodeImage: el.document.nodeImage || "",
+            nodeVideo: el.document.nodeVideo || "",
+            corrects: el.document.corrects ?? 0,
+            wrongs: el.document.wrongs ?? 0,
+            tags: el.document.tags,
+            contributors: el.document.contributors,
+            institutions: el.document.institutions,
+            choices: el.document.choices || [],
+            versions: el.document.versions,
+          })
+        );
+        for (const postData of _allPostsData) {
+          const idx = allPostsData.findIndex(_postData => _postData.id === postData.id);
+          if (idx === -1) {
+            allPostsData.push(postData);
+          }
         }
+      }
+    } else {
+      const nodeIds = await topGoogleSearchResults(q, 10);
+      for (const nodeId of nodeIds) {
+        allPostsData.push({
+          id: nodeId,
+        } as SimpleNode2);
       }
     }
 
