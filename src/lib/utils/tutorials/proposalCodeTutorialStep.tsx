@@ -8,7 +8,7 @@ const PROPOSING_CODE_EDIT: TutorialStepConfig[] = [
     description: (
       <MarkdownRender
         text={
-          "For a **code** node you will want to add a snippet of programming language code. Make sure that it is formatted correctly and that it includes the correct language name. To make your own edits, you just need to add edits to the fields you can change and then click the green propose button at the bottom right."
+          'In a **code** node you can add a programming code snippet encosed by three backticks (```). Right after the starting three backticks, add the language name. This will ensure that 1Cademy can interpret your code and color-code it to improve its readability. You can edit the fields and then click the green "Propose" button at the bottom right.'
         }
       />
     ),
