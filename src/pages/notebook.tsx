@@ -4638,13 +4638,15 @@ const Notebook = ({}: NotebookProps) => {
   ]);
 
   const onFinalizeTutorial = useCallback(async () => {
+    console.log("first", { user, currentStep, tutorial });
     if (!user) return;
     if (!currentStep) return;
     if (!tutorial) return;
 
     devLog("ON_FINALIZE_TUTORIAL", { childTargetId: currentStep?.childTargetId, targetId }, "TUTORIAL");
 
-    if (currentStep?.childTargetId) removeStyleFromTarget(currentStep.childTargetId, targetId);
+    if (currentStep?.childTargetId)
+      removeStyleFromTarget(currentStep.childTargetId, currentStep.anchor ? currentStep.targetId : targetId);
 
     if (tutorial.name === "tmpEditNode") {
       if (currentStep.isClickable) {
@@ -6446,9 +6448,7 @@ const Notebook = ({}: NotebookProps) => {
               node={graph.nodes[targetId]}
               forcedTutorial={forcedTutorial}
               groupTutorials={tutorialGroup}
-              onForceTutorial={keyTutorial => {
-                setForcedTutorial(keyTutorial);
-              }}
+              onForceTutorial={setForcedTutorial}
               tutorialProgress={tutorialProgress}
               isOnPortal
             />

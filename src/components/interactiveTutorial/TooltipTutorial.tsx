@@ -403,6 +403,7 @@ export const TooltipTutorial = ({
             <Button
               variant="contained"
               onClick={() => {
+                console.log("proced");
                 handleCloseProgressBarMenu();
                 onFinalize();
                 setShowNextTutorialStep(false);
@@ -489,12 +490,6 @@ export const TooltipTutorial = ({
                   variant="contained"
                   onClick={() => {
                     handleCloseProgressBarMenu();
-                    console.log({
-                      tt: forcedTutorial && nextTutorial && !currentTutorialIsTemporal,
-                      forcedTutorial,
-                      nextTutorial,
-                      currentTutorialIsTemporal,
-                    });
                     forcedTutorial && nextTutorial && !currentTutorialIsTemporal
                       ? setShowNextTutorialStep(true)
                       : onFinalize();

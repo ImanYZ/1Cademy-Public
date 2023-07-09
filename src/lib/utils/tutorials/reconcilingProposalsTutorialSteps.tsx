@@ -85,7 +85,7 @@ const RECONCILING_NOT_ACCEPTED_PROPOSALS_STEPS: TutorialStepConfig[] = [
   // },
 
   {
-    targetId: "sidebar-wrapper-proposals",
+    // targetId: "sidebar-wrapper-proposals",
     childTargetId: "sidebar-wrapper-proposals",
     title: "Reconciling Pending Proposals",
     description: (node: FullNodeData) => (
@@ -152,7 +152,7 @@ const RECONCILING_NOT_ACCEPTED_PROPOSALS_STEPS: TutorialStepConfig[] = [
     targetDelay: 300,
   },
   {
-    targetId: "sidebar-wrapper-proposals",
+    // targetId: "sidebar-wrapper-proposals",
     childTargetId: "sidebar-wrapper-proposals",
     title: "Approving Pending Proposals",
     description: (

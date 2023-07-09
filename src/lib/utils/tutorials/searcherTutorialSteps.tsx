@@ -95,7 +95,7 @@ const NODES_STEPS: TutorialStepConfig[] = [
   },
   {
     targetId: "sidebar-wrapper-searcher",
-    childTargetId: "sidebar-wrapper-searcher-content",
+    childTargetId: "content",
     title: "Search Results",
     description: (
       <MarkdownRender
