@@ -16,7 +16,7 @@ export const getUserNodeByForce = async (
     return { ...generateUserNode({ nodeId, uname, notebookId, isMock: true }), id: doc(ref).id };
   }
   let userNodeDocument = userNodeDoc.docs[0].data() as UserNodeFirestore;
-  if (!userNodeDocument.notebooks?.length) {
+  if (!userNodeDocument?.notebooks?.length) {
     userNodeDocument.notebooks = [notebookId];
     userNodeDocument.expands = [true];
   }
