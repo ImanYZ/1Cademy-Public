@@ -51,19 +51,21 @@ const UserDetails = ({ id, imageUrl, fName, lName, uname, chooseUname, points }:
         )}
       </Box>
       <Box>
-        <Typography id={`${id}-username`} sx={{ fontSize: "20px", fontWeight: "700", borderRadius: "4px" }}>
-          {chooseUname ? uname : `${fName} ${lName}`}
-        </Typography>
-        <Typography
-          sx={{
-            fontSize: "14px",
-            mb: "8px",
-            color: theme =>
-              theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.gray300 : DESIGN_SYSTEM_COLORS.gray500,
-          }}
-        >
-          @{uname}
-        </Typography>
+        <Box id={`${id}-username`}>
+          <Typography sx={{ fontSize: "20px", fontWeight: "700", borderRadius: "4px" }}>
+            {chooseUname ? uname : `${fName} ${lName}`}
+          </Typography>
+          <Typography
+            sx={{
+              fontSize: "14px",
+              mb: "8px",
+              color: theme =>
+                theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.gray300 : DESIGN_SYSTEM_COLORS.gray500,
+            }}
+          >
+            @{uname}
+          </Typography>
+        </Box>
         <Stack id={`${id}-statistics`} direction={"row"} spacing={"12px"} borderRadius={"4px"}>
           <PointsType points={points.positives}>
             <DoneRoundedIcon sx={{ color: DESIGN_SYSTEM_COLORS.success600, fontSize: "16px" }} />

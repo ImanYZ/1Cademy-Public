@@ -16,7 +16,9 @@ const NODE_QUESTION_STEPS_CONFIG: TutorialStepConfig[] = [
           <HelpOutlineIcon fontSize="small" />
         </NodeTypeIconButton>
         <MarkdownRender
-          text={"Question nodes contain multiple choice questions that are intended to help people study a topic. If you have a question about a node, it should NOT be made into a question node."}
+          text={
+            "Question nodes contain multiple choice questions that are intended to help people study a topic. If you have a question about a node, it should NOT be made into a question node."
+          }
         />
       </Stack>
     ),

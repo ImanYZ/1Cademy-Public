@@ -18,7 +18,9 @@ const RECONCILING_ACCEPTED_PROPOSALS_STEPS: TutorialStepConfig[] = [
     title: "Reconciling Proposals",
     description: (
       <MarkdownRender
-        text={"Instructors have the authority to propose child nodes and improvements on all nodes tagged by their respective courses. Similarly, students also have the ability to suggest child nodes and improvements, though their submissions must be reviewed by course instructors prior to sharing with the entire class. Researchers are also eligible to propose child nodes and suggest improvements. Their proposals would be accepted instantly only if the original node, where the proposal is submitted, holds a net vote of 2 or fewer, calculated by subtracting downvotes from upvotes. If the score exceeds this limit, their proposal would be placed in the pending proposals list for that node, waiting for the community members to review. Note that any improvement or child node proposal tagged with a specific course will remain in the pending proposals list of the original node until the course instructors evaluate and decide on the proposal."}
+        text={
+          "Instructors have the authority to propose child nodes and improvements on all nodes tagged by their respective courses. Similarly, students also have the ability to suggest child nodes and improvements, though their submissions must be reviewed by course instructors prior to sharing with the entire class. Researchers are also eligible to propose child nodes and suggest improvements. Their proposals would be accepted instantly only if the original node, where the proposal is submitted, holds a net vote of 2 or fewer, calculated by subtracting downvotes from upvotes. If the score exceeds this limit, their proposal would be placed in the pending proposals list for that node, waiting for the community members to review. Note that any improvement or child node proposal tagged with a specific course will remain in the pending proposals list of the original node until the course instructors evaluate and decide on the proposal."
+        }
       />
     ),
   },
@@ -83,7 +85,7 @@ const RECONCILING_NOT_ACCEPTED_PROPOSALS_STEPS: TutorialStepConfig[] = [
   // },
 
   {
-    targetId: "sidebar-wrapper-proposals",
+    // targetId: "sidebar-wrapper-proposals",
     childTargetId: "sidebar-wrapper-proposals",
     title: "Reconciling Pending Proposals",
     description: (node: FullNodeData) => (
@@ -103,8 +105,8 @@ const RECONCILING_NOT_ACCEPTED_PROPOSALS_STEPS: TutorialStepConfig[] = [
 
         <MarkdownRender text=" " sx={{ fontSize: "14px" }} />
         <Typography>
-          For example, a proposal with <b>1</b> up-vote and <b>0</b> down-votes for this node with <b>{node.corrects}</b>{" "}
-          up-vote{node.corrects > 1 && "s"} and <b>{node.wrongs}</b> down-vote
+          For example, a proposal with <b>1</b> up-vote and <b>0</b> down-votes for this node with{" "}
+          <b>{node.corrects}</b> up-vote{node.corrects > 1 && "s"} and <b>{node.wrongs}</b> down-vote
           {node.wrongs > 1 && "s"} will show up in this list because:
         </Typography>
 
@@ -150,7 +152,7 @@ const RECONCILING_NOT_ACCEPTED_PROPOSALS_STEPS: TutorialStepConfig[] = [
     targetDelay: 300,
   },
   {
-    targetId: "sidebar-wrapper-proposals",
+    // targetId: "sidebar-wrapper-proposals",
     childTargetId: "sidebar-wrapper-proposals",
     title: "Approving Pending Proposals",
     description: (
@@ -161,7 +163,9 @@ const RECONCILING_NOT_ACCEPTED_PROPOSALS_STEPS: TutorialStepConfig[] = [
           sx={{ alignSelf: "center" }}
         />
         <MarkdownRender
-          text={"The proposal will be implemented in the **knowledge graph** and will be moved to the **apptoved proposals list**."}
+          text={
+            "The proposal will be implemented in the **knowledge graph** and will be moved to the **apptoved proposals list**."
+          }
         />
       </Stack>
     ),
