@@ -555,8 +555,8 @@ const NodePage: NextPage<Props> = ({ notebook }) => {
     const q = query(
       userNodesRef,
       where("user", "==", notebook.owner),
-      where("notebooks", "array-contains", notebook.id)
-      // where("deleted", "==", false)
+      where("notebooks", "array-contains", notebook.id),
+      where("deleted", "==", false)
     );
 
     const killSnapshot = userNodesSnapshot(q);

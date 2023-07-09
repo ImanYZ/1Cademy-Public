@@ -795,7 +795,13 @@ const Notebook = ({}: NotebookProps) => {
             batch.update(linkedNodeRef, { updatedAt: Timestamp.fromDate(new Date()) });
           }
           const userNodesRef = collection(db, "userNodes");
-          const q = query(userNodesRef, where("node", "==", nodeId), where("user", "==", user.uname), limit(1));
+          const q = query(
+            userNodesRef,
+            where("node", "==", nodeId),
+            where("user", "==", user.uname),
+            where("delete", "==", false),
+            limit(1)
+          );
           const userNodeDoc = await getDocs(q);
           let userNodeId = null;
           if (userNodeDoc.docs.length > 0) {
@@ -810,7 +816,7 @@ const Notebook = ({}: NotebookProps) => {
               ...openWithDefaultValues,
             };
             const selectedNotebookIdx = (userNodeData.notebooks ?? []).findIndex(c => c === selectedNotebookId);
-            if (selectedNotebookIdx <= 0) {
+            if (selectedNotebookIdx < 0) {
               userNodeData.notebooks = [...(userNodeData.notebooks ?? []), selectedNotebookId];
               userNodeData.expands = [...(userNodeData.expands ?? []), expanded];
             } else {
@@ -2513,6 +2519,7 @@ const Notebook = ({}: NotebookProps) => {
                 userNodesRef,
                 where("node", "==", linkedNodeId),
                 where("user", "==", user.uname),
+                where("delete", "==", false),
                 limit(1)
               );
               const userNodeDoc = await getDocs(userNodeQuery);
@@ -2636,6 +2643,7 @@ const Notebook = ({}: NotebookProps) => {
             userNodesRef,
             where("node", "==", nodeId),
             where("user", "==", user.uname),
+            where("delete", "==", false),
             limit(1)
           );
           const userNodeDoc = await getDocs(userNodeQuery);
@@ -6437,7 +6445,9 @@ const Notebook = ({}: NotebookProps) => {
               node={graph.nodes[targetId]}
               forcedTutorial={forcedTutorial}
               groupTutorials={tutorialGroup}
-              onForceTutorial={setForcedTutorial}
+              onForceTutorial={keyTutorial => {
+                setForcedTutorial(keyTutorial);
+              }}
               tutorialProgress={tutorialProgress}
               isOnPortal
             />
@@ -7153,7 +7163,10 @@ const Notebook = ({}: NotebookProps) => {
             groupTutorials={tutorialGroup}
             userTutorialState={userTutorial}
             onCancelTutorial={onCancelTutorial}
-            onForceTutorial={setForcedTutorial}
+            onForceTutorial={tutorialKey => {
+              setForcedTutorial(tutorialKey);
+              tutorialStateWasSetUpRef.current = false;
+            }}
             tutorialProgress={tutorialProgress}
           />
         </Box>
