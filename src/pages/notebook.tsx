@@ -4735,11 +4735,13 @@ const Notebook = ({}: NotebookProps) => {
   ]);
 
   useEventListener({
-    stepId: currentStep?.childTargetId ?? currentStep?.targetId,
+    stepId: currentStep?.childTargetId
+      ? `${nodeBookState.selectedNode}-${currentStep?.childTargetId}`
+      : currentStep?.targetId,
     cb: currentStep?.isClickable
       ? tutorial && tutorial.step === tutorial?.steps.length
-        ? onNextStep
-        : onFinalizeTutorial
+        ? onFinalizeTutorial
+        : onNextStep
       : undefined,
   });
 
