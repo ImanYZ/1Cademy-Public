@@ -12,6 +12,7 @@ const KNOWLEDGE_GRAPH_STEPS: TutorialStepConfig[] = [
     description: (
       <MemoizedNodeVideo addVideo={true} videoData={getVideoDataByUrl("https://www.youtube.com/watch?v=CSO-TleAge0")} />
     ),
+    tooltipSize: "lg",
     tooltipPosition: "bottomLeft",
     anchor: "Portal",
   },
@@ -21,6 +22,7 @@ const KNOWLEDGE_GRAPH_STEPS: TutorialStepConfig[] = [
     description: (
       <MemoizedNodeVideo addVideo={true} videoData={getVideoDataByUrl("https://www.youtube.com/watch?v=OyUSCZ3YcCk")} />
     ),
+    tooltipSize: "lg",
     tooltipPosition: "bottomLeft",
     anchor: "Portal",
   },

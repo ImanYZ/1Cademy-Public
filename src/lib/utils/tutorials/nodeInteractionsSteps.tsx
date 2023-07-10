@@ -12,6 +12,7 @@ const NODE_INTERACTIONS_STEPS: TutorialStepConfig[] = [
     description: (
       <MemoizedNodeVideo addVideo={true} videoData={getVideoDataByUrl("https://www.youtube.com/watch?v=rcOqKCGmljY")} />
     ),
+    tooltipSize: "lg",
     tooltipPosition: "bottomLeft",
     anchor: "Portal",
   },

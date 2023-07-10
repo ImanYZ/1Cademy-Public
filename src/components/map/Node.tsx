@@ -61,6 +61,15 @@ dayjs.extend(relativeTime);
 
 type EditorOptions = "EDIT" | "PREVIEW";
 type ProposedChildTypesIcons = "Concept" | "Relation" | "Question" | "Code" | "Reference" | "Idea";
+
+type Parent = {
+  node: string;
+  label: string;
+  title: string;
+  type: string;
+  visible: boolean;
+};
+
 type NodeProps = {
   identifier: string;
   nodeBookDispatch: React.Dispatch<DispatchNodeBookActions>;
@@ -95,7 +104,7 @@ type NodeProps = {
   references: string[];
   disableVotes: boolean;
   tags: string[] | { node: string; title?: string; label?: string }[];
-  parents: string[];
+  parents: Parent[];
   nodesChildren: string[] | { node: string; title?: string; label?: string }[];
   choices: KnowledgeChoice[];
   commentsNum: number;
@@ -302,7 +311,7 @@ const Node = ({
   const [isHiding, setIsHiding] = useState(false);
   const [imageLoaded, setImageLoaded] = useState(false);
   const [isFetching, setIsFetching] = useState<boolean>(false);
-  const [reason, setReason] = useState("");
+  const [reason, setReason] = useState<string>("");
   const [addVideo, setAddVideo] = useState(!!nodeVideo);
   const [videoUrl, setVideoUrl] = useState(nodeVideo);
   const [videoStartTime, setVideoStartTime] = useState<any>(nodeVideoStartTime ? nodeVideoStartTime : 0);
@@ -333,7 +342,7 @@ const Node = ({
   });
 
   const [toBeElligible, setToBeElligible] = useState(false);
-  const assistantSelectNode = useRef<Boolean>(false);
+  const [assistantSelectNode, setAssistantSelectNode] = useState<Boolean>(false);
 
   const disableTitle = disabled && !enableChildElements.includes(`${identifier}-node-title`);
   const disableContent = disabled && !enableChildElements.includes(`${identifier}-node-content`);
@@ -430,7 +439,7 @@ const Node = ({
       notebookRef.current.chosenNode = null;
       nodeBookDispatch({ type: "setChoosingNode", payload: { id: "", type: e.detail.type } });
       nodeBookDispatch({ type: "setChosenNode", payload: null });
-      assistantSelectNode.current = true;
+      setAssistantSelectNode(true);
     };
     window.addEventListener("node-selection", listener);
     return () => window.removeEventListener("node-selection", listener);
@@ -439,18 +448,23 @@ const Node = ({
   const nodeClickHandler = useCallback(
     (event: any) => {
       let operation = "selectNode";
-      if (assistantSelectNode.current) {
-        const nodeClickEvent = new CustomEvent("node-selected", {
-          detail: {
-            id: identifier,
-            title,
-            content,
-          },
-        });
-        window.dispatchEvent(nodeClickEvent);
-        setTimeout(() => {
-          assistantSelectNode.current = false;
-        }, 1000);
+      if (editable) return;
+      if (assistantSelectNode) {
+        if (notebookRef?.current?.choosingNode?.type) {
+          const nodeClickEvent = new CustomEvent("node-selected", {
+            detail: {
+              id: identifier,
+              title,
+              content,
+              nodeSelectionType: notebookRef?.current?.choosingNode?.type,
+            },
+          });
+          window.dispatchEvent(nodeClickEvent);
+        }
+        nodeBookDispatch({ type: "setChoosingNode", payload: null });
+        notebookRef.current.choosingNode = null;
+        setAssistantSelectNode(false);
+        // // assistantSelectNode.current = false;
         return;
       }
       if (notebookRef.current.choosingNode && notebookRef.current.choosingNode.id !== identifier) {
@@ -494,7 +508,21 @@ const Node = ({
         });
       }
     },
-    [identifier, title, nodeClicked, nodeType]
+    [
+      editable,
+      assistantSelectNode,
+      notebookRef,
+      identifier,
+      title,
+      content,
+      nodeBookDispatch,
+      chosenNodeChanged,
+      setAbleToPropose,
+      nodeClicked,
+      nodeType,
+      setOpenPart,
+      setNodeUpdates,
+    ]
   );
 
   const hideNodeHandler = useCallback(
@@ -605,7 +633,7 @@ const Node = ({
     () => {
       // here disable button
       setTimeout(() => {
-        const firstParentId: any = parents[0];
+        const firstParentId: Parent = parents[0];
 
         if (isNew) {
           console.log("PROPOSE NEW");
@@ -841,7 +869,7 @@ const Node = ({
       </div>
     );
   }
-
+  console.log("choosingNode", notebookRef.current.choosingNode);
   return (
     <div
       ref={nodeRef}

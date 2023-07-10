@@ -48,6 +48,7 @@ const NODES_STEPS: TutorialStepConfig[] = [
     description: (
       <MemoizedNodeVideo addVideo={true} videoData={getVideoDataByUrl("https://www.youtube.com/watch?v=pOzQ81TW8Os")} />
     ),
+    tooltipSize: "lg",
   },
 
   {
