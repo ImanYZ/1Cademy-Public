@@ -108,6 +108,16 @@ export const getGroupTutorials = ({ livelinessBar }: GetGroupTutorialsInput): Gr
       },
     ],
   },
+  // {
+  //   title: "Notebooks",
+  //   tutorials: [
+  //     {
+  //       title: "Notebooks",
+  //       tutorialSteps: { tutorialKey: "notebooks", steps: NOTEBOOKS_STEPS },
+  //       tutorials: [],
+  //     },
+  //   ],
+  // },
   {
     title: "Learning Pathways",
     tutorials: [
@@ -306,38 +316,28 @@ export const getGroupTutorials = ({ livelinessBar }: GetGroupTutorialsInput): Gr
         tutorials: [],
       },
       {
-        title: "User Information",
+        title: "User Mini-Profiles",
         tutorialSteps: { tutorialKey: "userInfo", steps: USER_INFO_STEPS_COMPLETE },
         tutorials: [],
       },
-    ],
-  },
-  {
-    title: "Building Reputation",
-    tutorials: [
       {
-        title: "Leaderboard",
+        title: "Leaderboards",
         tutorialSteps: { tutorialKey: "leaderBoard", steps: LEADER_BOARD_STEPS },
         tutorials: [],
       },
-      ...getLivelinessBar(livelinessBar),
-      {
-        title: "Community Leaderboard",
-        tutorialSteps: { tutorialKey: "communityLeaderBoard", steps: COMMUNITY_LEADER_BOARD_STEPS },
-        tutorials: [],
-      },
     ],
   },
-  {
-    title: "Notebooks",
-    tutorials: [
-      {
-        title: "Notebooks",
-        tutorialSteps: { tutorialKey: "notebooks", steps: NOTEBOOKS_STEPS },
-        tutorials: [],
-      },
-    ],
-  },
+  // {
+  //   title: "Building Reputation",
+  //   tutorials: [
+  //     ...getLivelinessBar(livelinessBar),
+  //     {
+  //       title: "Community Leaderboard",
+  //       tutorialSteps: { tutorialKey: "communityLeaderBoard", steps: COMMUNITY_LEADER_BOARD_STEPS },
+  //       tutorials: [],
+  //     },
+  //   ],
+  // },
 ];
 
 const getLivelinessBar = (livelinessBar: LivelinessBar): GroupTutorial[] => {

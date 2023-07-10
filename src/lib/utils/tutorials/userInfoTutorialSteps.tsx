@@ -17,7 +17,7 @@ const USER_INFO_STEPS: TutorialStepConfig[] = [
     description: (
       <MarkdownRender
         text={
-          "Here you can see the number and which types of nodes another user you have selected has made. This includes a graph of their proposals over time."
+          "When you click another user's profile picture, you can see the history of their engagement, detailing their cumulative points across various node types as well as a complete inventory of proposals they've previously submitted."
         }
       />
     ),
@@ -27,10 +27,10 @@ const USER_INFO_STEPS: TutorialStepConfig[] = [
   },
   {
     childTargetId: "user-info-proposals",
-    title: "Proposals",
+    title: "Proposals History",
     description: (
       <MarkdownRender
-        text={"On this page you can click the proposals tab and view all their currently pending proposals."}
+        text={"Under this tab, you can find the list of all the proposals this user has submitted in chronological order. Clicking each of these proposals would navigate to the corresponding node in your current notebook. You can filter the list to show only proposals on specific node types."}
       />
     ),
     tooltipPosition: "top",
