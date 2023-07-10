@@ -1,14 +1,5 @@
 import { GroupTutorial } from "../../../components/tutorial/TutorialTableOfContent";
 import { BOOKMARKS_STEPS } from "./bookmarksTutorialSteps";
-import {
-  CHILD_CODE_PROPOSAL_COMPLETE,
-  CHILD_CONCEPT_PROPOSAL_COMPLETE,
-  CHILD_IDEA_PROPOSAL_COMPLETE,
-  // CHILD_PROPOSAL_COMPLETE,
-  CHILD_QUESTION_PROPOSAL_COMPLETE,
-  CHILD_REFERENCE_PROPOSAL_COMPLETE,
-  CHILD_RELATION_PROPOSAL_COMPLETE,
-} from "./childrenProposalTutorialStep";
 import { COMMUNITY_LEADER_BOARD_STEPS } from "./communityLeaderBoardTutorialSteps";
 import { KNOWLEDGE_GRAPH_CONFIG } from "./knowledgeGraphSteps";
 import { LEADER_BOARD_STEPS } from "./leaderBoardTutorialSteps";
