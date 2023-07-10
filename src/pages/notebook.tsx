@@ -746,7 +746,7 @@ const Notebook = ({}: NotebookProps) => {
     async (nodeId: string, openWithDefaultValues: Partial<UserNodeFirestore> = {}, selectNode = true) => {
       devLog("OPEN_NODE_HANDLER", { nodeId, openWithDefaultValues });
 
-      const expanded = Boolean(openWithDefaultValues.open);
+      const expanded = openWithDefaultValues.hasOwnProperty("open") ? Boolean(openWithDefaultValues.open) : true;
       // update graph with preloaded data, to get changes immediately
       setGraph(graph => {
         const preloadedNode = preLoadedNodesRef.current[nodeId];
@@ -763,7 +763,7 @@ const Notebook = ({}: NotebookProps) => {
           fullNodes: [
             {
               ...preloadedNode,
-              ...(openWithDefaultValues.open && { open: true }),
+              open: expanded,
               expands: preloadedNode.expands.map((c, i) => (i === selectedNotebookIdx ? expanded : c)),
             },
           ],
