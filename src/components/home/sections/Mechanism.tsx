@@ -78,7 +78,7 @@ export const MECHANISM_ITEMS: TMechanisms[] = [
     id: "contextualized-q-a",
     title: "Course-specific Question Answering",
     description: 
-      "1Cademy AI Assistant provides answers exclusively based on its knowledge graph, populated with instructor-curated course content. It closely examines each student's response history, understanding prerequisite topic relationships, which aids in identifying root issues causing academic struggles. 1Cademy also offers instructors comprehensive student conversation reports, facilitating more effective teaching strategy refinement.",
+      "1Cademy AI Assistant provides answers exclusively based on its knowledge graph, populated with instructor-curated course content. It closely examines each student's response history, understanding prerequisite topic relationships, which aids in identifying root issues causing academic struggles. Furthermore, it visualizes prerequisite pathways to deepen students' learning. 1Cademy also offers instructors comprehensive student conversation reports, facilitating more effective teaching strategy refinement.",
     animation: {
       src: "rive/contextualized-q-a.riv",
       artboard: "New Artboard",
@@ -90,6 +90,18 @@ export const MECHANISM_ITEMS: TMechanisms[] = [
     title: "Positive Reinforcement",
     description: `
     The 1Cademy Assistant engages learners in recognizing their progress by providing immediate feedback, celebrating correct answers, and tracking their progress throughout their academic journey. This feedback cycle, embedded at critical moments within the learning material interactions, utilizes interactive, concise, and encouraging animations illustrated by the 1Cademy Assistant character. On completing each piece of micro-content, learners receive an enhanced level of positive reinforcement through awards and reputation points, keeping the brain engaged and facilitating increased learning through consistent encouragement for small achievements.
+    `,
+    animation: {
+      src: "rive/positive-reinforcement.riv",
+      artboard: "New Artboard",
+      padding: 70,
+    },
+  },
+  {
+    id: "ai-enhanced-grading",
+    title: "AI-Enhanced Grading",
+    description: `
+    1Cademy empowers instructors to efficiently manage assignments and exams by offering tools to create, schedule, review, and auto-grade them, all under their control. It enables instructors to personalize questions, assign points, and tag or revise them. Students benefit from completing assignments, receiving instant constructive feedback, and reviewing grades with metacognitive learning analytics, fostering transparency in the learning process.
     `,
     animation: {
       src: "rive/positive-reinforcement.riv",
