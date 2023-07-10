@@ -21,7 +21,8 @@ export const ONE_CADEMY_SECTIONS: HomepageSection[] = [
     title: "Mechanisms",
     label: "Mechanisms",
     description:
-      "Through human-AI collaboration, we summarize, link, evaluate, improve, and learn science for long-term.",
+      // "Through human-AI collaboration, we summarize, link, evaluate, improve, and learn science for long-term.",
+      "",
     options: [],
   },
   {

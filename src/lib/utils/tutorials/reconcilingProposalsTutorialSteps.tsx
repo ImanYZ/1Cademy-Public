@@ -58,7 +58,7 @@ const RECONCILING_ACCEPTED_PROPOSALS_STEPS: TutorialStepConfig[] = [
         </Stack>
         <MarkdownRender
           text={
-            "The proposal gets **Approved Automatically** then it will be implemented on the **Map**. Otherwise, it'll go to the **pending proposals** list of the node. Exceptions: 1) Only if you are an instructor of a course tagged on this node, all your proposals will be approved immediately and you won't need to worry about the number of votes on the node. 2) If a node has a course tag, regardlesss of its votes, all improvement and child proposals on this node require the instructor's approval."
+            "The proposal gets **Approved Automatically** then it will be implemented on the **knowledge graph**. Otherwise, it'll go to the **pending proposals** list of the node. \n\n**Exceptions:** \n\n- Only if you are an instructor of a course tagged on this node, all your proposals will be approved immediately and you won't need to worry about the number of votes on the node. \n\n- If a node has a course tag, regardless of its votes, all improvement and child proposals on this node require approval from at least one of the instructors of the course. \n\n- Similarly, if a proposal has a course tag, regardless of the tags or votes on its corresponding node, the proposal requires approval from at least one of the instructors of the course. \n\n- As an instructor of a course, you can approve the pending proposals with your course tag, by simply upvoting them. \n\n- If someone submits a proposal with tags of multiple courses, or the proposal is on a node that has tags of multiple courses, at least one instructor from each of the courses should approve the proposal to be implemented."
           }
         />
 

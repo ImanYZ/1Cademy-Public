@@ -78,11 +78,15 @@ const Hero = ({ headerHeight, headerHeightMobile, onApply }: HeroProps) => {
           variant="h2"
           sx={{ textAlign: "center", fontSize: { xs: "36px", md: "60px" }, fontWeight: 600, mb: "24px" }}
         >
-          Human-AI Collaboration to Optimize Learning
+          Optimize Scalable Learning and Teaching
         </Typography>
         <Typography color="white" variant="h5" sx={{ textAlign: "center", fontSize: { xs: "18px", md: "20px" } }}>
-          At 1Cademy, we leverage the power of AI to foster collaboration and enhance the learning and research
-          experiences for students, instructors, and researchers alike.
+          &#x2022; Motivating to space out practice over many days
+          &#x2022; AI-enhanced grading all types of questions
+          &#x2022; AI-driven question-answering only based on course content
+          &#x2022; Visualizing prerequisite learning pathways
+          &#x2022; Learning analytics of micro learning activities
+          &#x2022; Positive reinforcement of learning
         </Typography>
       </Box>
       <Button

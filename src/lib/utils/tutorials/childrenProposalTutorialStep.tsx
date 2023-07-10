@@ -18,6 +18,17 @@ const CHILD_PROPOSAL_STEPS: TutorialStepConfig[] = [
     description: (
       <MarkdownRender
         text={
+          "While you are making a node, you cannot add further children nodes or parent nodes to it. All nodes are made individually and further nodes are added through the same process of proposing an edit to an existing prerequisite node and selecting to add a new node."
+        }
+      />
+    ),
+    isClickable: true,
+  },
+  {
+    title: "Proposing Child Nodes",
+    description: (
+      <MarkdownRender
+        text={
           "You also cannot propose to add a parent node. All new nodes are added as children nodes. However, you can edit parent/child links in a node which can allow you add an existing node as a parent to another existing node."
         }
       />

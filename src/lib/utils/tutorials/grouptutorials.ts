@@ -240,41 +240,41 @@ export const getGroupTutorials = ({ livelinessBar }: GetGroupTutorialsInput): Gr
       },
     ],
   },
-  {
-    title: "Proposing New Nodes",
-    tutorials: [
-      {
-        title: "New Concept Node",
-        tutorialSteps: { tutorialKey: "childConcept", steps: CHILD_CONCEPT_PROPOSAL_COMPLETE },
-        tutorials: [],
-      },
-      {
-        title: "New Relation Node",
-        tutorialSteps: { tutorialKey: "childRelation", steps: CHILD_RELATION_PROPOSAL_COMPLETE },
-        tutorials: [],
-      },
-      {
-        title: "New Reference Node",
-        tutorialSteps: { tutorialKey: "childReference", steps: CHILD_REFERENCE_PROPOSAL_COMPLETE },
-        tutorials: [],
-      },
-      {
-        title: "New Question Node",
-        tutorialSteps: { tutorialKey: "childQuestion", steps: CHILD_QUESTION_PROPOSAL_COMPLETE },
-        tutorials: [],
-      },
-      {
-        title: "New Code Node",
-        tutorials: [],
-        tutorialSteps: { tutorialKey: "childCode", steps: CHILD_CODE_PROPOSAL_COMPLETE },
-      },
-      {
-        title: "New Idea Node",
-        tutorialSteps: { tutorialKey: "childIdea", steps: CHILD_IDEA_PROPOSAL_COMPLETE },
-        tutorials: [],
-      },
-    ],
-  },
+  // {
+  //   title: "Proposing New Nodes",
+  //   tutorials: [
+  //     {
+  //       title: "New Concept Node",
+  //       tutorialSteps: { tutorialKey: "childConcept", steps: CHILD_CONCEPT_PROPOSAL_COMPLETE },
+  //       tutorials: [],
+  //     },
+  //     {
+  //       title: "New Relation Node",
+  //       tutorialSteps: { tutorialKey: "childRelation", steps: CHILD_RELATION_PROPOSAL_COMPLETE },
+  //       tutorials: [],
+  //     },
+  //     {
+  //       title: "New Reference Node",
+  //       tutorialSteps: { tutorialKey: "childReference", steps: CHILD_REFERENCE_PROPOSAL_COMPLETE },
+  //       tutorials: [],
+  //     },
+  //     {
+  //       title: "New Question Node",
+  //       tutorialSteps: { tutorialKey: "childQuestion", steps: CHILD_QUESTION_PROPOSAL_COMPLETE },
+  //       tutorials: [],
+  //     },
+  //     {
+  //       title: "New Code Node",
+  //       tutorials: [],
+  //       tutorialSteps: { tutorialKey: "childCode", steps: CHILD_CODE_PROPOSAL_COMPLETE },
+  //     },
+  //     {
+  //       title: "New Idea Node",
+  //       tutorialSteps: { tutorialKey: "childIdea", steps: CHILD_IDEA_PROPOSAL_COMPLETE },
+  //       tutorials: [],
+  //     },
+  //   ],
+  // },
   {
     title: "Siderbars",
     tutorials: [
