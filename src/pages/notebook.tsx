@@ -142,7 +142,7 @@ import {
   mergeAllNodes,
   synchronizeGraph,
 } from "../lib/utils/nodesSyncronization.utils";
-import { getGroupTutorials } from "../lib/utils/tutorials/grouptutorials";
+import { getGroupTutorials, LivelinessBar } from "../lib/utils/tutorials/grouptutorials";
 import { delay, generateUserNode, gtmEvent, imageLoaded, isValidHttpUrl } from "../lib/utils/utils";
 import {
   ChoosingType,
@@ -6242,8 +6242,8 @@ const Notebook = ({}: NotebookProps) => {
   }, [graph.nodes, setTargetId, targetId, tutorial]);
 
   const tutorialGroup = useMemo(() => {
-    return getGroupTutorials();
-  }, []);
+    return getGroupTutorials({ livelinessBar: (user?.livelinessBar as LivelinessBar) ?? null });
+  }, [user?.livelinessBar]);
 
   const tutorialProgress = useMemo(() => {
     const tutorialsOfTOC = tutorialGroup.flatMap(cur => cur.tutorials);

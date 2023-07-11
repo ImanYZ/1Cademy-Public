@@ -1,6 +1,3 @@
-import CheckIcon from "@mui/icons-material/Check";
-import CloseIcon from "@mui/icons-material/Close";
-import { Stack, Typography } from "@mui/material";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 
@@ -34,9 +31,7 @@ const USER_SETTINGS_STEPS: TutorialStepConfig[] = [
     title: "Username/Full name",
     description: (
       <MarkdownRender
-        text={
-          "On 1Cademy, your identity is defined by either your username or your full name, depending on your preference. You have the option to specify which of these identifiers is displayed throughout the platform. This can be accomplished by navigating to the account tab on this sidebar. Additionally, under the same account tab, you can make revisions to your username and full name at any time."
-        }
+        text={"On 1Cademy, your identity is defined by either your username or your full name, depending on your preference. You have the option to specify which of these identifiers is displayed throughout the platform. This can be accomplished by navigating to the account tab on this sidebar. Additionally, under the same account tab, you can make revisions to your username and full name at any time."}
       />
     ),
 
@@ -49,15 +44,13 @@ const USER_SETTINGS_STEPS: TutorialStepConfig[] = [
     title: "Total Votes Received",
     description: (
       <Stack spacing={"8px"}>
-        <MarkdownRender
-          text={
-            "This displays the total number of votes of different types that you have received in the current community:"
-          }
-        />
-        <CheckIcon color="success" />
-        <Typography>: The number of upvotes you have earned in this community.</Typography>
-        <CloseIcon color="error" />
-        <Typography>: The number of downvotes you have received in this community.</Typography>
+      <MarkdownRender
+        text={"This displays the total number of votes of different types that you have received in the current community:"}
+      />
+      <CheckIcon color="success" />
+      <Typography>: The number of upvotes you have earned in this community.</Typography>
+      <CloseIcon color="error" />
+      <Typography>: The number of downvotes you have received in this community.</Typography>
       </Stack>
     ),
 
@@ -95,9 +88,7 @@ const USER_SETTINGS_STEPS: TutorialStepConfig[] = [
     title: "Trends",
     description: (
       <MarkdownRender
-        text={
-          "This tab allows you to keep track of the number of proposals you submitted over time in your community. It also displays the number of points you have earned for each node type in your community."
-        }
+        text={"This tab allows you to keep track of the number of proposals you submitted over time in your community. It also displays the number of points you have earned for each node type in your community."}
       />
     ),
 
@@ -110,9 +101,7 @@ const USER_SETTINGS_STEPS: TutorialStepConfig[] = [
     title: "Points by Node Types",
     description: (
       <MarkdownRender
-        text={
-          "This displays the total number of points that you have received, divided by the node type, in your community."
-        }
+        text={"This displays the total number of points that you have received, divided by the node type, in your community."}
       />
     ),
 
@@ -124,13 +113,7 @@ const USER_SETTINGS_STEPS: TutorialStepConfig[] = [
   {
     childTargetId: "user-settings-proposals",
     title: "Proposals",
-    description: (
-      <MarkdownRender
-        text={
-          "The proposals tab displays all the proposals that you have made, sorted chronologically. Clicking each proposal would navigate to the corresponding node in your notebook."
-        }
-      />
-    ),
+    description: <MarkdownRender text={"The proposals tab displays all the proposals that you have made, sorted chronologically. Clicking each proposal would navigate to the corresponding node in your notebook."} />,
 
     tooltipPosition: "bottom",
     anchor: "Portal",
