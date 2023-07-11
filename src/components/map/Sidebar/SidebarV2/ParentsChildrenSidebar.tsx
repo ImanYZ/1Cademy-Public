@@ -189,6 +189,30 @@ const ParentsChildrenSidebar = ({
     return searchResults.data;
   }, [searchResults.data]);
 
+  // when it's open and we have another query, and it's forced to search
+  useEffect(() => {
+    if (!queryParentChildren.forced) return;
+    if (!open) return;
+    onSearchQuery({
+      q: queryParentChildren.query,
+      sortOption,
+      sortDirection,
+      nodeTypes,
+      nodesUpdatedSince: mapTimeFilterToDays(timeFilter),
+      page: 1,
+    });
+  }, [
+    nodeTypes,
+    onSearchQuery,
+    open,
+    queryParentChildren.forced,
+    queryParentChildren.query,
+    sortDirection,
+    sortOption,
+    timeFilter,
+  ]);
+
+  // this will search nodes when infinite scroll is visible
   useEffect(() => {
     if (!inViewInfinityLoaderTrigger) return;
     if (isLoading) return;

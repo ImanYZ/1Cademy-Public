@@ -1,3 +1,6 @@
+import CheckIcon from "@mui/icons-material/Check";
+import CloseIcon from "@mui/icons-material/Close";
+import { Stack, Typography } from "@mui/material";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 
@@ -13,11 +16,11 @@ dayjs.extend(relativeTime);
 const USER_SETTINGS_STEPS: TutorialStepConfig[] = [
   {
     childTargetId: "user-settings-picture",
-    title: "User Picture",
+    title: "User Profile Picture",
     description: (
       <MarkdownRender
         text={
-          "This is your user picture. This helps other people see that they are interacting with other real people around the world. You can click on your picture to upload a new picture from your device."
+          "Your profile picture, displayed here, serves as a visual identifier for your contributions and earned reputation points across 1Cademy. You have the option to upload a new profile picture by navigating to the account tab on this sidebar."
         }
       />
     ),
@@ -28,10 +31,12 @@ const USER_SETTINGS_STEPS: TutorialStepConfig[] = [
   },
   {
     childTargetId: "user-settings-username",
-    title: "Username",
+    title: "Username/Full name",
     description: (
       <MarkdownRender
-        text={"This is your username. If you need to change this, you can edit it on this page under the account tab."}
+        text={
+          "On 1Cademy, your identity is defined by either your username or your full name, depending on your preference. You have the option to specify which of these identifiers is displayed throughout the platform. This can be accomplished by navigating to the account tab on this sidebar. Additionally, under the same account tab, you can make revisions to your username and full name at any time."
+        }
       />
     ),
 
@@ -41,11 +46,19 @@ const USER_SETTINGS_STEPS: TutorialStepConfig[] = [
   },
   {
     childTargetId: "user-settings-statistics",
-    title: "Total Points",
+    title: "Total Votes Received",
     description: (
-      <MarkdownRender
-        text={"This displays the total number of points that you have received in the current community."}
-      />
+      <Stack spacing={"8px"}>
+        <MarkdownRender
+          text={
+            "This displays the total number of votes of different types that you have received in the current community:"
+          }
+        />
+        <CheckIcon color="success" />
+        <Typography>: The number of upvotes you have earned in this community.</Typography>
+        <CloseIcon color="error" />
+        <Typography>: The number of downvotes you have received in this community.</Typography>
+      </Stack>
     ),
 
     tooltipPosition: "bottom",
@@ -54,8 +67,8 @@ const USER_SETTINGS_STEPS: TutorialStepConfig[] = [
   },
   {
     childTargetId: "MiniUserPrifileInstitution",
-    title: "University",
-    description: <MarkdownRender text={"This displays the university that you are enrolled at."} />,
+    title: "Institution",
+    description: <MarkdownRender text={"This displays the institution that you are affiliated with."} />,
 
     tooltipPosition: "bottom",
     anchor: "Portal",
@@ -67,7 +80,7 @@ const USER_SETTINGS_STEPS: TutorialStepConfig[] = [
     description: (
       <MarkdownRender
         text={
-          "Here is the community description. It says the community that you are a part of. This will automatically tag any node you make with the community you have selected. You can change your active community by clicking on the community name. You will be prompted to search for and select a new community to choose as your active community if you do so."
+          "This is your community tag. It is the default tag that will be given to any proposal you submit. This means that any new nodes you propose will have this tag. The community tag should correspond with the community you are working with or your current focus on 1Cademy. A community tag can also be a course or chapter of a course that you are studying."
         }
       />
     ),
@@ -79,10 +92,12 @@ const USER_SETTINGS_STEPS: TutorialStepConfig[] = [
 
   {
     childTargetId: "user-settings-trends",
-    title: "Account",
+    title: "Trends",
     description: (
       <MarkdownRender
-        text={"The Trends tab allows you to keep track of your activity and general starts under 1Cademy."}
+        text={
+          "This tab allows you to keep track of the number of proposals you submitted over time in your community. It also displays the number of points you have earned for each node type in your community."
+        }
       />
     ),
 
@@ -95,7 +110,9 @@ const USER_SETTINGS_STEPS: TutorialStepConfig[] = [
     title: "Points by Node Types",
     description: (
       <MarkdownRender
-        text={"This displays the total number of points that you have received in the current community."}
+        text={
+          "This displays the total number of points that you have received, divided by the node type, in your community."
+        }
       />
     ),
 
@@ -107,7 +124,13 @@ const USER_SETTINGS_STEPS: TutorialStepConfig[] = [
   {
     childTargetId: "user-settings-proposals",
     title: "Proposals",
-    description: <MarkdownRender text={"The proposals tab displays all the proposals that you have made."} />,
+    description: (
+      <MarkdownRender
+        text={
+          "The proposals tab displays all the proposals that you have made, sorted chronologically. Clicking each proposal would navigate to the corresponding node in your notebook."
+        }
+      />
+    ),
 
     tooltipPosition: "bottom",
     anchor: "Portal",
@@ -119,7 +142,7 @@ const USER_SETTINGS_STEPS: TutorialStepConfig[] = [
     description: (
       <MarkdownRender
         text={
-          "The account tab allows you to make adjustments to your personal view of the 1Cademy. You can switch between light and dark mode, change background and graph display, whether your name is displayed or not, and whether the nodes are clustered by tags or not."
+          "The account tab allows you to make adjustments to your notebook (personalized map view). You can switch between light and dark mode, change background and visualization type, displaying your full name or username, and whether the nodes are clustered by tags or not."
         }
       />
     ),

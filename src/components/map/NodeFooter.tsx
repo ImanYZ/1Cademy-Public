@@ -1782,7 +1782,7 @@ const NodeFooter = ({
               : choosingNode?.type === "Parent"
               ? "Link this node as a parent"
               : choosingNode?.type === "Improvement"
-              ? "Improve this node"
+              ? "Choose to improve"
               : null}
           </Button>
         )}

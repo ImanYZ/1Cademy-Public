@@ -8,11 +8,11 @@ export const INITIAL_NODE_TUTORIAL_STATE: TutorialState = null;
 const PROPOSING_EDITS_STEPS: TutorialStepConfig[] = [
   {
     childTargetId: "node-title",
-    title: "Proposing Edits - Edit Title",
+    title: "Proposing Edits - Edit Title and Content",
     description: (
       <MarkdownRender
         text={
-          "This field allows you to edit the title. It is important to remember that titles need to be concise but descriptive enough to uniquely identify the concept or group of concepts described in the node."
+          "These two fields allow you to edit the title and content. It is important to remember that both the title and content should be concise but descriptive enough to uniquely identify the topic described in the node. \n\nIn both title and content, you can add mathematical formulas, bold and italic fonts, and numberred and bulletted lists. \n\nTo enter a mathimatical formula, you can [use LaTeX](https://math.meta.stackexchange.com/questions/5020/mathjax-basic-tutorial-and-quick-reference) enclosed by two dollar signs ($). \n\nTo enter bold or italic text, you can enclose the piece of text by double stars (**) or a single star (*), respectively. \n\nFinally, to enter bulleted or numbered lists, you should start each item with '- ' or '1. ' ('2. ', '3. ', ...), respectively. Each item should be written on a separate line."
         }
       />
     ),
@@ -118,7 +118,7 @@ const PROPOSING_EDITS_STEPS: TutorialStepConfig[] = [
     description: (
       <MarkdownRender
         text={
-          "To the right of the node you are proposing an edit to, you will see six circles with icons in them. These give you the option to add a new child node to the node you are proposing, rather than editing its content. To add a new child node, you need to click the icon corresponding to the type of the child node."
+          "To propose a child node, you should follow these steps: \n\n1. Identify the most direct prerequisite node \n\n2. Click the pencil (edit) button on the prerequisite node \n\n3. On the right side of the prerequisite node, click one of the buttons below depending on the type of the child node you'd like to propose \n\n4. Fill out the fields of the child node that gets created on the right \n\n5. Finally, click the Propose button."
         }
       />
     ),

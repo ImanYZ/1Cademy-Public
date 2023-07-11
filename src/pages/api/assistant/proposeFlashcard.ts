@@ -85,7 +85,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
         linkedFlashcards,
       });
     }
-    return res.status(200).json({});
+    return res.status(200).json({ nodeId: payload.node });
   } catch (error) {
     console.error(error);
     return res.status(500).send({

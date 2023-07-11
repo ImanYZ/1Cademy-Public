@@ -35,8 +35,6 @@ import { nodeToNarration } from "../../utils/node.utils";
 // import { RiveComponentMemoized } from "../home/components/temporals/RiveComponentExtended";
 import { PracticeToolRef } from "../practiceTool/PracticeTool";
 
-const db = getFirestore();
-
 // type AssistantReaction = "IDLE" | "LISTENING" | "HAPPY" | "SAD" | /* "SNORING" | */ "TALKING";
 
 type SelectedAnswer = { choice: KnowledgeChoice; option: string };
@@ -77,6 +75,7 @@ export const Assistant = ({
   uname,
   userIsAnsweringPractice,
 }: AssistantProps) => {
+  const db = getFirestore();
   /**
    * Assistant narrate after that listen
    * there is only 1 narrate and 1 listener

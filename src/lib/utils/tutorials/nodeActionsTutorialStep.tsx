@@ -107,28 +107,26 @@ const UPTOVE_STEPS: TutorialStepConfig[] = [
     description: (node: FullNodeData) => (
       <Stack>
         <Typography>
-          You can <strong>upvote</strong> the node if you think it is so good that you don't like to see any changes to it. The node currently has {node.corrects}
-          <CheckIcon fontSize="small" color="success" sx={{ verticalAlign: "text-top" }} /> {node.corrects == 1 ? "" : "s"}. Your upvote will increase the
-          count to {node.corrects + 1}
+          You can <strong>upvote</strong> the node if you think it is so good that you don't like to see any changes to
+          it. The node currently has {node.corrects}
+          <CheckIcon fontSize="small" color="success" sx={{ verticalAlign: "text-top" }} />{" "}
+          {node.corrects == 1 ? "" : "s"}. Your upvote will increase the count to {node.corrects + 1}
           <CheckIcon fontSize="small" color="success" sx={{ verticalAlign: "text-top" }} />, ensuring the quality of the
           node.
         </Typography>
-        <Typography>The node will be locked and all new proposals to change it will go to its pending list for further review, if:</Typography>
-        <MarkdownRender
-          text={`${String.raw`$$\text{Upvotes} > \text{2}$$`}`}
-          sx={{ my: "4px", alignSelf: "center" }}
-        />
+        <Typography>
+          The node will be locked and all new proposals to change it will go to its pending list for further review, if:
+        </Typography>
+        <MarkdownRender text={`${String.raw`$$\text{Upvotes} > \text{2}$$`}`} sx={{ my: "4px", alignSelf: "center" }} />
         <Typography>If you upvote it:</Typography>
         <MarkdownRender
           text={`$$${String.raw`\text{${node.corrects + 1}}`}${
-            node.corrects + 1 > 2 ? " > " : " &#8804; "
+            node.corrects + 1 > 2 ? " > " : " <= "
           }${String.raw`\text{2}`}$$`}
           sx={{ alignSelf: "center" }}
         />
         <Typography>
-          {node.corrects + 1 > 2
-            ? "So, the node will be locked."
-            : "So, the node won't be locked."}
+          {node.corrects + 1 > 2 ? "So, the node will be locked." : "So, the node won't be locked."}
         </Typography>
       </Stack>
     ),
@@ -142,9 +140,10 @@ const DOWNVOTE_STEPS: TutorialStepConfig[] = [
     description: (node: FullNodeData) => (
       <Stack>
         <Typography>
-          You can <strong>downvote</strong> the node if you think it is not helpful to anyone's learning. The node currently has {node.wrongs}
-          <CloseIcon fontSize="small" color="error" sx={{ verticalAlign: "text-top" }} /> downvote{node.wrongs == 1 ? "" : "s"}. Your downvote will
-          increase the count to {node.wrongs + 1}
+          You can <strong>downvote</strong> the node if you think it is not helpful to anyone's learning. The node
+          currently has {node.wrongs}
+          <CloseIcon fontSize="small" color="error" sx={{ verticalAlign: "text-top" }} /> downvote
+          {node.wrongs == 1 ? "" : "s"}. Your downvote will increase the count to {node.wrongs + 1}
           <CloseIcon fontSize="small" color="error" sx={{ verticalAlign: "text-top" }} />.
         </Typography>
         <Typography>The node will be removed if:</Typography>
@@ -156,14 +155,12 @@ const DOWNVOTE_STEPS: TutorialStepConfig[] = [
         <Typography>If you downvote it:</Typography>
         <MarkdownRender
           text={`$$${String.raw`\text{${node.wrongs + 1}}`}${
-            node.wrongs + 1 > node.corrects ? " > " : " &#8804; "
+            node.wrongs + 1 > node.corrects ? " > " : " <= "
           }${String.raw`\text{${node.corrects}}`}$$`}
           sx={{ alignSelf: "center" }}
         />
         <Typography>
-          {node.wrongs + 1 > node.corrects
-            ? "So, the node will be deleted."
-            : "So, the node won't be deleted."}
+          {node.wrongs + 1 > node.corrects ? "So, the node will be deleted." : "So, the node won't be deleted."}
         </Typography>
       </Stack>
     ),

@@ -11,11 +11,11 @@ dayjs.extend(relativeTime);
 const BOOKMARKS_STEPS_CONFIG: TutorialStepConfig[] = [
   {
     childTargetId: "bookmarks-tab-updated",
-    title: "Updated Bookmarks",
+    title: "Bookmarked Updates",
     description: (
       <MarkdownRender
         text={
-          "Here is a list of updated bookmarked nodes. You can bookmark nodes to return to them. If these nodes have been edited, they will show up in this list."
+          "If you wish to receive alerts for updates on specific nodes, simply bookmark them. Any modifications to these nodes will trigger a notification, visible under this tab. Clicking on each notification will direct you to the corresponding node in your current notebook, allowing you to view the updated version."
         }
       />
     ),
@@ -29,7 +29,7 @@ const BOOKMARKS_STEPS_CONFIG: TutorialStepConfig[] = [
     description: (
       <MarkdownRender
         text={
-          "Here is a list of studied nodes. If you bookmark a node and it has not been changed, then it will appear in this list."
+          "In your collection of bookmarked nodes, you may have categorized certain ones as 'Studied.' These nodes are then highlighted in yellow and will appear under this tab. Please note, if any of these nodes receive updates, they will no longer maintain their 'Studied' status. Consequently, their color will change to red, and they will be relocated from this tab to the 'Updated' tab."
         }
       />
     ),
