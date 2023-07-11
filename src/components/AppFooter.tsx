@@ -71,7 +71,7 @@ const AppFooter = ({ prevPage = "", sx }: AppFooterProps) => {
                 1Cademy
               </Box>
             </Stack>
-            <Typography color={color}> We Synthesize Books & Research Papers Together</Typography>
+            <Typography color={color}> Optimize Scalable Learning and Teaching</Typography>
           </Box>
           <Box>
             <Stack spacing={"12px"}>

@@ -23,7 +23,6 @@ import { useRouter } from "next/router";
 import React, { forwardRef, useEffect, useState } from "react";
 
 import useThemeChange from "@/hooks/useThemeChange";
-import { orange900, orangeDark } from "@/pages/home";
 
 import oneCademyLogo from "../../../public/DarkmodeLogo.png";
 import oneCademyLogoExtended from "../../../public/logo-extended.png";
@@ -297,7 +296,7 @@ const AppHeader = forwardRef(({ page, sections, selectedSectionId, onSwitchSecti
             </Tooltip>
 
             <Stack display={"flex"} direction={"row"} justifyContent="flex-end" alignItems="center" spacing={"8px"}>
-              {page === "ONE_CADEMY" && !isAuthenticated && (
+              {/* {page === "ONE_CADEMY" && !isAuthenticated && (
                 <Tooltip title="Apply to join 1Cademy">
                   <Button
                     variant="contained"
@@ -320,7 +319,7 @@ const AppHeader = forwardRef(({ page, sections, selectedSectionId, onSwitchSecti
                     Apply
                   </Button>
                 </Tooltip>
-              )}
+              )} */}
 
               {page === "ONE_CADEMY" && isAuthenticated && user && (
                 <Tooltip title={capitalizeString(user.chooseUname ? user.uname : user.fName ?? "")}>

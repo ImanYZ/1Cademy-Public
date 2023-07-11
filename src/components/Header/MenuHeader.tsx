@@ -8,7 +8,7 @@ import { forwardRef, ReactNode, useState } from "react";
 import oneCademyLogoExtended from "../../../public/logo-extended.png";
 import { useAuth } from "../../context/AuthContext";
 import ROUTES from "../../lib/utils/routes";
-import { gray200, orange900, orangeDark } from "../../pages/home";
+import { gray200 } from "../../pages/home";
 import { HomepageSection } from "../home/SectionsItems";
 import { ActiveLink } from "./ActiveLink";
 import { HEADER_HEIGHT, HEADER_HEIGHT_MOBILE, HeaderPage } from "./AppHeader";
@@ -145,7 +145,7 @@ export const MenuHeader = forwardRef<HTMLDivElement, MenuHeaderProps>(
               </Button>
             )}
 
-            {!isAuthenticated && page === "ONE_CADEMY" && (
+            {/* {!isAuthenticated && page === "ONE_CADEMY" && (
               <Button
                 variant="contained"
                 onClick={() => onSwitchSection("apply")}
@@ -162,7 +162,7 @@ export const MenuHeader = forwardRef<HTMLDivElement, MenuHeaderProps>(
               >
                 Apply to join
               </Button>
-            )}
+            )} */}
 
             {otherOptions}
           </Stack>
