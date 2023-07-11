@@ -18,7 +18,7 @@ export type TMechanisms = {
     artboard: string;
     padding: number;
   };
-  video: { url: string; thumbnail: string }[];
+  video?: { url: string; thumbnail: string }[];
 };
 export const MECHANISM_ITEMS: TMechanisms[] = [
   {
