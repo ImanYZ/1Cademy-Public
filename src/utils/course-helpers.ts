@@ -1352,7 +1352,6 @@ export const checkInstantApprovalForProposal = async (tagIds: string[], uname: s
 export const checkInstantApprovalForProposalVote = async (
   tagIds: string[],
   uname: string,
-  vote: boolean, // true = correct, false = wrong
   verisonType: INodeType,
   versionId: string
 ) => {
@@ -1370,12 +1369,45 @@ export const checkInstantApprovalForProposalVote = async (
     semester.instructors.forEach(instructor => (instructorVotes[instructor] = false));
   }
 
-  instructorVotes[uname] = vote;
+  instructorVotes[uname] = true;
 
   for (const userVersion of userVersions.docs) {
     const userVersionData = userVersion.data() as IUserNodeVersion;
     if (instructorVotes.hasOwnProperty(userVersionData.user) && userVersionData.correct) {
       instructorVotes[userVersionData.user] = true;
+    }
+  }
+
+  for (const semesterId in semestersByIds) {
+    const semester = semestersByIds[semesterId];
+    if (!semester.instructors.some(instructor => instructorVotes[instructor])) {
+      return false;
+    }
+  }
+
+  return true;
+};
+
+export const checkInstantDeleteForNode = async (tagIds: string[], uname: string, nodeId: string) => {
+  const semestersByIds = await getSemestersByIds(tagIds);
+
+  const userNodes = await db.collection("userNodes").where("node", "==", nodeId).get();
+
+  const instructorVotes: {
+    [uname: string]: boolean;
+  } = {};
+
+  for (const semesterId in semestersByIds) {
+    const semester = semestersByIds[semesterId];
+    semester.instructors.forEach(instructor => (instructorVotes[instructor] = false));
+  }
+
+  instructorVotes[uname] = true;
+
+  for (const userNode of userNodes.docs) {
+    const userNodeData = userNode.data() as IUserNode;
+    if (instructorVotes.hasOwnProperty(userNodeData.user) && userNodeData.wrong) {
+      instructorVotes[userNodeData.user] = true;
     }
   }
 
