@@ -28,6 +28,7 @@ export type IAssistantEventDetail =
       };
       title: string;
       content: string;
+      choices: any[];
       flashcard: {
         passageId: string;
         title: string;

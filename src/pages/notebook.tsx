@@ -287,8 +287,6 @@ const Notebook = ({}: NotebookProps) => {
     showContributors: false,
   });
 
-  const assistantSelectNode = useRef<Boolean>(false);
-
   // scale and translation of the viewport over the map for the map interactions module
   const [mapInteractionValue, setMapInteractionValue] = useState({
     scale: 1,
@@ -374,6 +372,7 @@ const Notebook = ({}: NotebookProps) => {
 
   const [openLivelinessBar, setOpenLivelinessBar] = useState(false);
   const [comLeaderboardOpen, setComLeaderboardOpen] = useState(false);
+  const [assistantSelectNode, setAssistantSelectNode] = useState<boolean>(false);
 
   const [toolboxExpanded, setToolboxExpanded] = useState(false);
   const { ref: toolbarRef, isHovered: toolbarIsHovered } = useHover();
@@ -1894,15 +1893,16 @@ const Notebook = ({}: NotebookProps) => {
   // const onChangeReferenceChosenNode = () => {};
   useEffect(() => {
     const listener = (e: any) => {
-      console.log("e.detail ______", e.detail);
-      assistantSelectNode.current = true;
-      setOpenSidebar(null);
       notebookRef.current.choosingNode = { id: "", type: e.detail.type };
+      notebookRef.current.chosenNode = null;
       nodeBookDispatch({ type: "setChoosingNode", payload: { id: "", type: e.detail.type } });
+      nodeBookDispatch({ type: "setChosenNode", payload: null });
+      setAssistantSelectNode(true);
+      setOpenSidebar(null);
     };
     window.addEventListener("node-selection", listener);
     return () => window.removeEventListener("node-selection", listener);
-  }, [nodeBookDispatch]);
+  }, [nodeBookDispatch, notebookRef]);
 
   const onChangeChosenNode = useCallback(
     async ({ nodeId, title }: { nodeId: string; title: string }) => {
@@ -1912,26 +1912,37 @@ const Notebook = ({}: NotebookProps) => {
 
       notebookRef.current.chosenNode = { id: nodeId, title };
       nodeBookDispatch({ type: "setChosenNode", payload: { id: nodeId, title } });
-      const nodeClickEvent = new CustomEvent("node-selected", {
-        detail: {
-          id: nodeId,
-          title,
-          content: "",
-        },
-      });
-      window.dispatchEvent(nodeClickEvent);
-      if (notebookRef.current.choosingNode.id === "Tag") return; //INFO: this is important to update a community
 
+      if (notebookRef.current.choosingNode.id === "Tag") return; //INFO: this is important to update a community
+      console.log("onChangeChosenNode", nodeId);
       console.log("onChangeChosenNode", 1);
       openNodeHandler(nodeId, { open: true }, false);
       await detectHtmlElements({ ids: [nodeId] });
       await delay(500);
+      if (assistantSelectNode) {
+        if (notebookRef?.current?.choosingNode?.type) {
+          const nodeClickEvent = new CustomEvent("node-selected", {
+            detail: {
+              id: nodeId,
+              title,
+              content: "",
+              nodeSelectionType: notebookRef?.current?.choosingNode?.type,
+            },
+          });
+          window.dispatchEvent(nodeClickEvent);
+        }
+        nodeBookDispatch({ type: "setChoosingNode", payload: null });
+        notebookRef.current.choosingNode = null;
+        setAssistantSelectNode(false);
+        // // assistantSelectNode.current = false;
+        return;
+      }
       console.log("onChangeChosenNode", {
         choosingNode: notebookRef.current?.choosingNode?.id,
         chosenNode: notebookRef.current?.chosenNode?.id,
       });
       if (assistantSelectNode) {
-        assistantSelectNode.current = false;
+        setAssistantSelectNode(false);
         return;
       }
       chosenNodeChanged(nodeId);
@@ -3627,7 +3638,8 @@ const Notebook = ({}: NotebookProps) => {
 
           const flashcard = postData.flashcard;
           delete postData.flashcard;
-
+          const loadingEvent = new CustomEvent("proposed-node-loading");
+          window.dispatchEvent(loadingEvent);
           getMapGraph("/proposeNodeImprovement", postData, !willBeApproved).then(async (response: any) => {
             if (!response) return;
             // save flashcard data
@@ -3637,6 +3649,7 @@ const Notebook = ({}: NotebookProps) => {
                   node: response.node,
                   proposal: response.proposal,
                   flashcard,
+                  proposedType: "Improvement",
                   token: await getIdToken(),
                 },
               })
@@ -3903,20 +3916,28 @@ const Notebook = ({}: NotebookProps) => {
 
         const flashcard = postData.flashcard;
         delete postData.flashcard;
+        const loadingEvent = new CustomEvent("proposed-node-loading");
+        window.dispatchEvent(loadingEvent);
 
         getMapGraph("/proposeChildNode", postData, !willBeApproved).then(async (response: any) => {
           if (!response) return;
           // save flashcard data
-          window.dispatchEvent(
-            new CustomEvent("propose-flashcard", {
-              detail: {
-                node: response.node,
-                proposal: response.proposal,
-                flashcard,
-                token: await getIdToken(),
-              },
-            })
-          );
+          if (postData.nodeType !== "Question") {
+            window.dispatchEvent(
+              new CustomEvent("propose-flashcard", {
+                detail: {
+                  node: response.node,
+                  proposal: response.proposal,
+                  flashcard,
+                  proposedType: "Parent",
+                  token: await getIdToken(),
+                },
+              })
+            );
+          }
+          if (postData.nodeType === "Question") {
+            window.dispatchEvent(new CustomEvent("question-node-proposed"));
+          }
         });
 
         window.dispatchEvent(new CustomEvent("next-flashcard"));
@@ -6322,7 +6343,9 @@ const Notebook = ({}: NotebookProps) => {
       } else if (detail.type === "OPEN_NODE") {
         openNodeHandler(detail.nodeId);
       } else if (detail.type === "IMPROVEMENT") {
+        setQueryParentChildren({ query: detail.flashcard.title, forced: true });
         setOpenSidebar(null);
+        notebookRef.current.choosingNode = null;
         nodeBookDispatch({ type: "setChoosingNode", payload: { id: "", type: null } });
         notebookRef.current.choosingNode = { id: "", type: null };
         proposeNodeImprovement(null, detail.selectedNode.id);
@@ -6366,7 +6389,9 @@ const Notebook = ({}: NotebookProps) => {
           });
         }, 1000);
       } else if (detail.type === "CHILD") {
+        setQueryParentChildren({ query: detail.flashcard.title, forced: true });
         setOpenSidebar(null);
+        notebookRef.current.choosingNode = null;
         nodeBookDispatch({ type: "setChoosingNode", payload: { id: "", type: null } });
         notebookRef.current.choosingNode = { id: "", type: null };
         console.log("detail.selectedNode.id", detail.selectedNode.id);
@@ -6387,7 +6412,9 @@ const Notebook = ({}: NotebookProps) => {
             newNode.title = detail.title;
             newNode.content = detail.content;
             newNode.flashcard = detail.flashcard;
-
+            if (detail.choices) {
+              newNode.choices = detail.choices;
+            }
             if (detail.referenceNode) {
               // adding reference of book
               newNode.referenceIds = newNode.referenceIds || [];
@@ -6485,7 +6512,7 @@ const Notebook = ({}: NotebookProps) => {
               nodeBookDispatch({ type: "setChosenNode", payload: null });
             }}
           >
-            Click the node you'd like to link to...
+            Cancel
           </NotebookPopup>
         )}
 
@@ -6753,7 +6780,7 @@ const Notebook = ({}: NotebookProps) => {
                   nodeBookDispatch({ type: "setChoosingNode", payload: null });
                   notebookRef.current.choosingNode = null;
                 }}
-                linkMessage={nodeBookState.choosingNode?.type === "Improvement" ? "Improve it" : "Link it"}
+                linkMessage={nodeBookState.choosingNode?.type === "Improvement" ? "Choose to improve" : "Link it"}
                 onChangeChosenNode={onChangeChosenNode}
                 preLoadNodes={onPreLoadNodes}
                 setQueryParentChildren={setQueryParentChildren}
@@ -7039,6 +7066,8 @@ const Notebook = ({}: NotebookProps) => {
                   setOpenPart={onChangeNodePart}
                   // selectedNotebookId={selectedNotebookId}
                   hideNode={hideNodeContent}
+                  setAssistantSelectNode={setAssistantSelectNode}
+                  assistantSelectNode={assistantSelectNode}
                 />
               </MapInteractionCSS>
 

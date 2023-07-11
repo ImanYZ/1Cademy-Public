@@ -178,6 +178,16 @@ MainSidebarProps) => {
     }
   }, [allTags, chosenTags, nodeBookDispatch]);
 
+  useEffect(() => {
+    const listener = (e: any) => {
+      console.log("e.detail ______", e.detail);
+      console.log({ Notebook: e.detail });
+      onChangeNotebook(e.detail.id);
+    };
+    window.addEventListener("Notebook-selection", listener);
+    return () => window.removeEventListener("Notebook-selection", listener);
+  }, [onChangeNotebook]);
+
   // this useEffect updated the defaultTag when chosen node change
   useEffect(() => {
     const setDefaultTag = async () => {
