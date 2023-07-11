@@ -25,11 +25,11 @@ const HomeWrapper = ({
   mechanismSectionChildren,
   magnitudeSectionChildren,
   benefitSectionChildren,
-  topicsSectionChildren,
-  systemSectionChildren,
+  // topicsSectionChildren,
+  // systemSectionChildren,
   aboutSectionChildren,
-  applySectionChildren,
-}: HomeWrapperProps) => {
+}: // applySectionChildren,
+HomeWrapperProps) => {
   const isScrolling = useRef(false);
   const timer = useRef<NodeJS.Timeout | null>(null);
 
@@ -39,10 +39,10 @@ const HomeWrapper = ({
   const { entry: mechanismEntry, inView: mechanismInView, ref: MechanismSectionRef } = useInView(observerOption);
   const { entry: magnitudeEntry, inView: magnitudeInView, ref: MagnitudeSectionRef } = useInView(observerOption);
   const { entry: benefitEntry, inView: benefitInView, ref: BenefitSectionRef } = useInView(observerOption);
-  const { entry: topicsEntry, inView: topicsInView, ref: TopicsSectionRef } = useInView(observerOption);
-  const { entry: systemsEntry, inView: systemsInView, ref: SystemSectionRef } = useInView(observerOption);
+  // const { entry: topicsEntry, inView: topicsInView, ref: TopicsSectionRef } = useInView(observerOption);
+  // const { entry: systemsEntry, inView: systemsInView, ref: SystemSectionRef } = useInView(observerOption);
   const { entry: aboutEntry, inView: aboutInView, ref: AboutSectionRef } = useInView(observerOption);
-  const { entry: applyEntry, inView: applyInView, ref: ApplySectionRef } = useInView(observerOption);
+  // const { entry: applyEntry, inView: applyInView, ref: ApplySectionRef } = useInView(observerOption);
 
   const { data: stats } = useQuery("stats", getStats);
 
@@ -58,22 +58,23 @@ const HomeWrapper = ({
   }, []);
 
   useEffect(() => {
+    console.log("ss:01");
     if (isScrolling.current) return;
-
+    console.log("ss:02");
     let newSelectedSectionId = "";
     if (mechanismInView) newSelectedSectionId = ONE_CADEMY_SECTIONS[1].id;
     if (magnitudeInView) newSelectedSectionId = ONE_CADEMY_SECTIONS[2].id;
     if (benefitInView) newSelectedSectionId = ONE_CADEMY_SECTIONS[3].id;
-    if (topicsInView) newSelectedSectionId = ONE_CADEMY_SECTIONS[4].id;
-    if (systemsInView) newSelectedSectionId = ONE_CADEMY_SECTIONS[5].id;
-    if (aboutInView) newSelectedSectionId = ONE_CADEMY_SECTIONS[6].id;
-    if (applyInView) newSelectedSectionId = ONE_CADEMY_SECTIONS[7].id;
-
+    // if (topicsInView) newSelectedSectionId = ONE_CADEMY_SECTIONS[4].id;
+    // if (systemsInView) newSelectedSectionId = ONE_CADEMY_SECTIONS[5].id;
+    if (aboutInView) newSelectedSectionId = ONE_CADEMY_SECTIONS[4].id;
+    // if (applyInView) newSelectedSectionId = ONE_CADEMY_SECTIONS[7].id;
+    console.log("ss:03");
     const newHash = newSelectedSectionId ? `#${newSelectedSectionId}` : "#";
-
+    console.log("ss:04");
     setSelectedSectionId(newHash);
     window.history.replaceState(null, "", newHash);
-  }, [aboutInView, applyInView, benefitInView, magnitudeInView, mechanismInView, systemsInView, topicsInView]);
+  }, [aboutInView, benefitInView, magnitudeInView, mechanismInView]);
 
   const onSwitchSection = (newSelectedSectionId: string) => {
     if (isScrolling.current) return;
@@ -109,26 +110,29 @@ const HomeWrapper = ({
   };
 
   const getSectionHeights = useCallback(() => {
+    console.log("ttt:01");
     if (!headerRef?.current) return null;
     if (!heroSectionRef?.current) return null;
+    console.log("ttt:02");
     if (!mechanismEntry) return null;
     if (!magnitudeEntry) return null;
     if (!benefitEntry) return null;
-    if (!topicsEntry) return null;
-    if (!systemsEntry) return null;
+    // if (!topicsEntry) return null;
+    // if (!systemsEntry) return null;
     if (!aboutEntry) return null;
-    if (!applyEntry) return null;
+    // if (!applyEntry) return null;
+    console.log("ttt:03");
 
     return [
       { id: mechanismEntry.target.id, height: headerRef.current.clientHeight + heroSectionRef.current.clientHeight },
       { id: magnitudeEntry.target.id, height: mechanismEntry.target.clientHeight },
       { id: benefitEntry.target.id, height: magnitudeEntry.target.clientHeight },
-      { id: topicsEntry.target.id, height: benefitEntry.target.clientHeight },
-      { id: systemsEntry.target.id, height: topicsEntry.target.clientHeight },
-      { id: aboutEntry.target.id, height: systemsEntry.target.clientHeight },
-      { id: applyEntry.target.id, height: aboutEntry.target.clientHeight },
+      // { id: topicsEntry.target.id, height: benefitEntry.target.clientHeight },
+      // { id: systemsEntry.target.id, height: topicsEntry.target.clientHeight },
+      { id: aboutEntry.target.id, height: benefitEntry.target.clientHeight },
+      // { id: applyEntry.target.id, height: aboutEntry.target.clientHeight },
     ];
-  }, [aboutEntry, applyEntry, benefitEntry, magnitudeEntry, mechanismEntry, systemsEntry, topicsEntry]);
+  }, [aboutEntry, benefitEntry, magnitudeEntry, mechanismEntry]);
 
   return (
     <Box>
@@ -160,21 +164,21 @@ const HomeWrapper = ({
         {benefitSectionChildren}
       </SectionWrapper>
 
-      <SectionWrapper ref={TopicsSectionRef} section={ONE_CADEMY_SECTIONS[4]}>
+      {/* <SectionWrapper ref={TopicsSectionRef} section={ONE_CADEMY_SECTIONS[4]}>
         {topicsSectionChildren}
-      </SectionWrapper>
-
+      </SectionWrapper> */}
+      {/* 
       <SectionWrapper ref={SystemSectionRef} section={ONE_CADEMY_SECTIONS[5]}>
         {systemSectionChildren}
-      </SectionWrapper>
+      </SectionWrapper> */}
 
-      <SectionWrapper ref={AboutSectionRef} section={ONE_CADEMY_SECTIONS[6]}>
+      <SectionWrapper ref={AboutSectionRef} section={ONE_CADEMY_SECTIONS[4]}>
         {aboutSectionChildren}
       </SectionWrapper>
 
-      <SectionWrapper ref={ApplySectionRef} section={ONE_CADEMY_SECTIONS[7]}>
+      {/* <SectionWrapper ref={ApplySectionRef} section={ONE_CADEMY_SECTIONS[7]}>
         {applySectionChildren}
-      </SectionWrapper>
+      </SectionWrapper> */}
     </Box>
   );
 };
