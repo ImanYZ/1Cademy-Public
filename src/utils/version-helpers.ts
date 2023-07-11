@@ -1769,6 +1769,7 @@ export const versionCreateUpdate = async ({
   nodeData,
   nodeRef,
   nodeType,
+  instantApprove,
   versionId,
   versionData,
   // Boolean
@@ -1894,7 +1895,8 @@ export const versionCreateUpdate = async ({
     //  corrects and wrongs are 0 since this was just created
     // The data of the original node that an improvement proposal is on it, or
     // the parent node where the pending proposal for the child node exists.
-    const nodeDataDoc = isVersionApproved({ corrects: versionCorrects, wrongs: versionWrongs, nodeData });
+    const nodeDataDoc =
+      instantApprove || isVersionApproved({ corrects: versionCorrects, wrongs: versionWrongs, nodeData });
     versionData.accepted = nodeDataDoc ? true : false;
     // If the version was accepted previously, accepted === true.
     // If the version is determined to be approved right now, versionData.accepted === true.
