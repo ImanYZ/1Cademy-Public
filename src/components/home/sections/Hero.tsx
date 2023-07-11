@@ -1,39 +1,37 @@
 import { Stack, Typography } from "@mui/material";
 import Box from "@mui/material/Box";
-import React, { useMemo } from "react";
-
-import { orange900, orangeDark } from "@/pages/home";
+import React from "react";
 
 import backgroundImageDarkMode from "../../../../public/darkModeLibraryBackground.jpg";
 import { useWindowSize } from "../../../hooks/useWindowSize";
-import Button from "../components/Button";
 import { RiveComponentMemoized } from "../components/temporals/RiveComponentExtended";
 
 type HeroProps = { headerHeight: number; headerHeightMobile: number; onApply: () => void };
 
-const Hero = ({ headerHeight, headerHeightMobile, onApply }: HeroProps) => {
-  const { height, width } = useWindowSize({ initialHeight: 1000, initialWidth: 0 });
+// TODO: remove onApply
+const Hero = ({ headerHeight, headerHeightMobile }: HeroProps) => {
+  const { width } = useWindowSize({ initialHeight: 1000, initialWidth: 0 });
 
-  const getVirtualHeight = useMemo(() => {
-    let pos = 0;
-    const percentage = 27;
-    const imageWidth = 1920;
-    const imageHeight = 1450;
+  // const getVirtualHeight = useMemo(() => {
+  //   let pos = 0;
+  //   const percentage = 27;
+  //   const imageWidth = 1920;
+  //   const imageHeight = 1450;
 
-    if (width >= height) {
-      const virtualHeight = (width * imageHeight) / imageWidth;
-      const offset = (virtualHeight - height) / 2;
-      pos = (virtualHeight * percentage) / 100;
+  //   if (width >= height) {
+  //     const virtualHeight = (width * imageHeight) / imageWidth;
+  //     const offset = (virtualHeight - height) / 2;
+  //     pos = (virtualHeight * percentage) / 100;
 
-      const tt = pos - offset;
-      const desplazamiento = (0.5 * virtualHeight) / 100;
-      pos = tt - desplazamiento - 36;
-    } else {
-      pos = 80;
-    }
+  //     const tt = pos - offset;
+  //     const desplazamiento = (0.5 * virtualHeight) / 100;
+  //     pos = tt - desplazamiento - 36;
+  //   } else {
+  //     pos = 80;
+  //   }
 
-    return pos;
-  }, [height, width]);
+  //   return pos;
+  // }, [height, width]);
 
   return (
     <Stack
@@ -80,16 +78,52 @@ const Hero = ({ headerHeight, headerHeightMobile, onApply }: HeroProps) => {
         >
           Optimize Scalable Learning and Teaching
         </Typography>
-        <Typography color="white" variant="h5" sx={{ textAlign: "center", fontSize: { xs: "18px", md: "20px" } }}>
-          &#x2022; Motivating to space out practice over many days
-          &#x2022; AI-enhanced grading all types of questions
-          &#x2022; AI-driven question-answering only based on course content
-          &#x2022; Visualizing prerequisite learning pathways
-          &#x2022; Learning analytics of micro learning activities
-          &#x2022; Positive reinforcement of learning
-        </Typography>
+        <ul>
+          <Typography
+            color="white"
+            variant="h5"
+            sx={{ textAlign: "center", fontSize: { xs: "14px", md: "18px" }, mb: "8px" }}
+          >
+            Motivating to space out practice over many days
+          </Typography>
+          <Typography
+            color="white"
+            variant="h5"
+            sx={{ textAlign: "center", fontSize: { xs: "14px", md: "18px" }, mb: "8px" }}
+          >
+            AI-enhanced grading all types of questions
+          </Typography>
+          <Typography
+            color="white"
+            variant="h5"
+            sx={{ textAlign: "center", fontSize: { xs: "14px", md: "18px" }, mb: "8px" }}
+          >
+            AI-driven question-answering only based on course content
+          </Typography>
+          <Typography
+            color="white"
+            variant="h5"
+            sx={{ textAlign: "center", fontSize: { xs: "14px", md: "18px" }, mb: "8px" }}
+          >
+            Visualizing prerequisite learning pathways
+          </Typography>
+          <Typography
+            color="white"
+            variant="h5"
+            sx={{ textAlign: "center", fontSize: { xs: "14px", md: "18px" }, mb: "8px" }}
+          >
+            Learning analytics of micro learning activities
+          </Typography>
+          <Typography
+            color="white"
+            variant="h5"
+            sx={{ textAlign: "center", fontSize: { xs: "14px", md: "18px" }, mb: "8px" }}
+          >
+            Positive reinforcement of learning
+          </Typography>
+        </ul>
       </Box>
-      <Button
+      {/* <Button
         variant="contained"
         onClick={onApply}
         sx={{
@@ -108,7 +142,7 @@ const Hero = ({ headerHeight, headerHeightMobile, onApply }: HeroProps) => {
         }}
       >
         Apply
-      </Button>
+      </Button> */}
     </Stack>
   );
 };

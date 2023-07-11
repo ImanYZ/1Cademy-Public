@@ -1,9 +1,9 @@
-import { StatsSchema } from "../../knowledgeTypes";
-
 export type HomepageSection = {
   id: string;
   title: string;
   label: string;
+  image?: string;
+  imageDark?: string;
   description: string;
   getDescription?: any;
   options: { title: string; description: string; link: string }[];
@@ -27,20 +27,18 @@ export const ONE_CADEMY_SECTIONS: HomepageSection[] = [
   },
   {
     id: "magnitude",
-    title: "Magnitude",
-    label: "Magnitude",
-    description: `Over the past two years, ${1543} students and researchers from ${183} institutions have participated in a large-scale collaboration effort through 1Cademy. This collaboration has resulted in the creation of ${44665} nodes and ${235674} prerequisite links between them, which have been proposed through [${88167}] proposals.
-    It is truly inspiring to witness the collaborative learning environment that has been fostered at 1Cademy, where students from both top-ranked and low-ranked schools can come together regardless of their background, ethnicity, or socio-economic status.
-Through this platform, students are able to share their unique learning pathways, making difficult concepts more accessible to those who may be struggling. The simplified learning pathways offered on 1Cademy have been a valuable resource for those seeking to deepen their understanding of complex subject matter.
-Students are able to engage with the content by voting and commenting on the nodes and links that have been created, which not only helps to acknowledge the valuable contributions of their peers but also encourages meaningful collaboration within the learning community.
-This approach to learning empowers students to take an active role in their education, making it a more enjoyable and fulfilling experience. By helping one another, students are able to take pride in their contributions to the larger learning community and are able to learn from one another in a truly collaborative way.
-    `,
-    getDescription: ({ users, institutions, nodes, links, proposals }: StatsSchema) =>
-      `Over the past two years, [${users}] students and researchers from [${institutions}] institutions have participated in a large-scale collaboration effort through 1Cademy. This collaboration has resulted in the creation of [${nodes}] nodes and [${links}] prerequisite links between them, which have been proposed through [${proposals}] proposals.
-      It is truly inspiring to witness the collaborative learning environment that has been fostered at 1Cademy, where students from both top-ranked and low-ranked schools can come together regardless of their background, ethnicity, or socio-economic status.
-Through this platform, students are able to share their unique learning pathways, making difficult concepts more accessible to those who may be struggling. The simplified learning pathways offered on 1Cademy have been a valuable resource for those seeking to deepen their understanding of complex subject matter.
-Students are able to engage with the content by voting and commenting on the nodes and links that have been created, which not only helps to acknowledge the valuable contributions of their peers but also encourages meaningful collaboration within the learning community.
-This approach to learning empowers students to take an active role in their education, making it a more enjoyable and fulfilling experience. By helping one another, students are able to take pride in their contributions to the larger learning community and are able to learn from one another in a truly collaborative way.`,
+    title: "Research Communities",
+    label: "Research Communities",
+    image: "Research_Communities.svg",
+    imageDark: "Research_Communities.svg",
+    description:
+      "1Cademy has fostered the development of communities of enthusiasts for various scientific subjects, comprising individuals from diverse educational institutions and research organizations. These enthusiasts share their discoveries and insights on 1Cademy and come together on a weekly basis to delve deeper into their areas of interest. Through these interactions, we gain insight into the cutting-edge research and learning taking place at our collaborators' institutions and are able to draw connections that inspire new research ideas.",
+    //     getDescription: ({ users, institutions, nodes, links, proposals }: StatsSchema) =>
+    //       `Over the past two years, [${users}] students and researchers from [${institutions}] institutions have participated in a large-scale collaboration effort through 1Cademy. This collaboration has resulted in the creation of [${nodes}] nodes and [${links}] prerequisite links between them, which have been proposed through [${proposals}] proposals.
+    //       It is truly inspiring to witness the collaborative learning environment that has been fostered at 1Cademy, where students from both top-ranked and low-ranked schools can come together regardless of their background, ethnicity, or socio-economic status.
+    // Through this platform, students are able to share their unique learning pathways, making difficult concepts more accessible to those who may be struggling. The simplified learning pathways offered on 1Cademy have been a valuable resource for those seeking to deepen their understanding of complex subject matter.
+    // Students are able to engage with the content by voting and commenting on the nodes and links that have been created, which not only helps to acknowledge the valuable contributions of their peers but also encourages meaningful collaboration within the learning community.
+    // This approach to learning empowers students to take an active role in their education, making it a more enjoyable and fulfilling experience. By helping one another, students are able to take pride in their contributions to the larger learning community and are able to learn from one another in a truly collaborative way.`,
     options: [],
   },
   {

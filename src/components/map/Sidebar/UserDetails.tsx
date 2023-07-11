@@ -1,6 +1,5 @@
 import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
 import DoneRoundedIcon from "@mui/icons-material/DoneRounded";
-import StarRoundedIcon from "@mui/icons-material/StarRounded";
 import { Avatar, Box, Stack, Typography } from "@mui/material";
 import Image from "next/image";
 import React from "react";
@@ -73,9 +72,9 @@ const UserDetails = ({ id, imageUrl, fName, lName, uname, chooseUname, points }:
           <PointsType points={points.negatives}>
             <CloseRoundedIcon sx={{ color: DESIGN_SYSTEM_COLORS.orange600, fontSize: "16px" }} />
           </PointsType>
-          <PointsType points={points.stars}>
+          {/* <PointsType points={points.stars}>
             <StarRoundedIcon sx={{ color: DESIGN_SYSTEM_COLORS.yellow400, fontSize: "16px" }} />
-          </PointsType>
+          </PointsType> */}
         </Stack>
       </Box>
     </Stack>
