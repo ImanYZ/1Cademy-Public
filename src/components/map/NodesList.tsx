@@ -63,6 +63,8 @@ type NodeListProps = {
   setAbleToPropose: (newValue: boolean) => void;
   setOpenPart: (nodeId: string, newOpenPart: OpenPart) => void;
   hideNode: boolean;
+  setAssistantSelectNode: (newValue: boolean) => void;
+  assistantSelectNode: boolean;
 };
 
 const NodesList = ({
@@ -119,6 +121,8 @@ const NodesList = ({
   setAbleToPropose,
   setOpenPart,
   hideNode,
+  setAssistantSelectNode,
+  assistantSelectNode,
 }: NodeListProps) => {
   const { nodeBookDispatch } = useNodeBook();
 
@@ -289,6 +293,8 @@ const NodesList = ({
             open={nodes[nId].open}
             hideNode={hideNode}
             nodeHeigth={nodes[nId].height}
+            setAssistantSelectNode={setAssistantSelectNode}
+            assistantSelectNode={assistantSelectNode}
           />
         );
       })}
