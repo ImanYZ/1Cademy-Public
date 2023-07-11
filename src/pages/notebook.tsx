@@ -48,6 +48,7 @@ import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from "rea
 // @ts-ignore
 import { MapInteractionCSS } from "react-map-interaction";
 import { getUserNodesByForce } from "src/client/firestore/userNodes.firestore";
+import { Instructor } from "src/instructorsTypes";
 import { IAssistantEventDetail } from "src/types/IAssistant";
 import { INodeType } from "src/types/INodeType";
 /* eslint-enable */
@@ -406,6 +407,9 @@ const Notebook = ({}: NotebookProps) => {
     forced: false,
   });
 
+  //instructor state
+  const [instructor, setInstructor] = useState<Instructor | null>(null);
+
   const onChangeTagOfNotebookById = (notebookId: string, data: { defaultTagId: string; defaultTagName: string }) => {
     setNotebooks(prev => {
       return prev.map(
@@ -441,6 +445,31 @@ const Notebook = ({}: NotebookProps) => {
     },
     [mapInteractionValue.scale, windowHeight, windowInnerLeft, windowInnerRight, windowInnerTop, windowWith]
   );
+
+  //check if the user is instructor
+  useEffect(() => {
+    if (!user) return console.warn("Not user found, wait please");
+
+    const instructorsRef = collection(db, "instructors");
+    const q = query(instructorsRef, where("uname", "==", user.uname));
+
+    const killSnapshot = onSnapshot(
+      q,
+      async snapshot => {
+        const docChanges = snapshot.docChanges();
+        if (!docChanges.length) {
+          return null;
+        }
+        const intructor = docChanges[0].doc.data() as Instructor;
+        console.log(":: ::intructor :: ::", intructor);
+        setInstructor(intructor);
+      },
+      error => {
+        console.error(error);
+      }
+    );
+    return () => killSnapshot();
+  }, [db, router, user]);
 
   useEffect(() => {
     setInnerHeight(window.innerHeight);
@@ -1052,7 +1081,7 @@ const Notebook = ({}: NotebookProps) => {
       setUsersOnlineStatusLoaded(true);
     });
     return () => unsubscribe();
-  }, [user]);
+  }, [db, user]);
 
   const onPreLoadNodes = useCallback(
     async (nodeIds: string[], fullNodes: FullNodeData[]) => {
@@ -1949,7 +1978,7 @@ const Notebook = ({}: NotebookProps) => {
       chosenNodeChanged(nodeId);
       setAbleToPropose(true);
     },
-    [chosenNodeChanged, nodeBookDispatch, openNodeHandler]
+    [assistantSelectNode, chosenNodeChanged, nodeBookDispatch, openNodeHandler]
   );
 
   const deleteLink = useCallback(
@@ -2025,18 +2054,24 @@ const Notebook = ({}: NotebookProps) => {
     [setGraph]
   );
 
-  const nodeClicked = useCallback((event: any, nodeId: string, nodeType: any, setOpenPart: any) => {
-    devLog("node Clicked");
-    if (notebookRef.current.selectionType === "AcceptedProposals" || notebookRef.current.selectionType === "Proposals")
-      return;
-    notebookRef.current.selectedNode = nodeId;
-    nodeBookDispatch({ type: "setSelectedNode", payload: nodeId });
+  const nodeClicked = useCallback(
+    (event: any, nodeId: string, nodeType: any, setOpenPart: any) => {
+      devLog("node Clicked");
+      if (
+        notebookRef.current.selectionType === "AcceptedProposals" ||
+        notebookRef.current.selectionType === "Proposals"
+      )
+        return;
+      notebookRef.current.selectedNode = nodeId;
+      nodeBookDispatch({ type: "setSelectedNode", payload: nodeId });
 
-    setSelectedNodeType(nodeType);
-    setOpenPart("LinkingWords");
+      setSelectedNodeType(nodeType);
+      setOpenPart("LinkingWords");
 
-    processHeightChange(nodeId);
-  }, []);
+      processHeightChange(nodeId);
+    },
+    [nodeBookDispatch, processHeightChange]
+  );
 
   const recursiveDescendants = useCallback((nodeId: string): any[] => {
     // CHECK: this could be improve changing recursive function to iterative
@@ -3078,7 +3113,7 @@ const Notebook = ({}: NotebookProps) => {
       event.currentTarget.blur();
       lastNodeOperation.current = { name: "upvote", data: "" };
     },
-    [getMapGraph, setNodeParts, setReputationSignal]
+    [db, getMapGraph, nodeBookDispatch, setNodeParts, user]
   );
 
   const wrongNode = useCallback(
@@ -3176,7 +3211,7 @@ const Notebook = ({}: NotebookProps) => {
         return { nodes, edges };
       });
     },
-    [getMapGraph, setNodeParts]
+    [db, getMapGraph, nodeBookDispatch, setNodeParts, user]
   );
 
   /////////////////////////////////////////////////////
@@ -3604,8 +3639,7 @@ const Notebook = ({}: NotebookProps) => {
           delete postData.top;
           delete postData.height;
 
-          const willBeApproved = isVersionApproved({ corrects: 1, wrongs: 0, nodeData: newNode });
-
+          let willBeApproved = isVersionApproved({ corrects: 1, wrongs: 0, nodeData: newNode, instructor });
           lastNodeOperation.current = { name: "ProposeProposals", data: willBeApproved ? "accepted" : "notAccepted" };
 
           if (willBeApproved) {
@@ -3637,25 +3671,25 @@ const Notebook = ({}: NotebookProps) => {
             },
           };
 
-          const flashcard = postData.flashcard;
-          delete postData.flashcard;
-          const loadingEvent = new CustomEvent("proposed-node-loading");
-          window.dispatchEvent(loadingEvent);
-          getMapGraph("/proposeNodeImprovement", postData, !willBeApproved).then(async (response: any) => {
-            if (!response) return;
-            // save flashcard data
-            window.dispatchEvent(
-              new CustomEvent("propose-flashcard", {
-                detail: {
-                  node: response.node,
-                  proposal: response.proposal,
-                  flashcard,
-                  proposedType: "Improvement",
-                  token: await getIdToken(),
-                },
-              })
-            );
-          });
+          // const flashcard = postData.flashcard;
+          // delete postData.flashcard;
+          // const loadingEvent = new CustomEvent("proposed-node-loading");
+          // window.dispatchEvent(loadingEvent);
+          // getMapGraph("/proposeNodeImprovement", postData, !willBeApproved).then(async (response: any) => {
+          //   if (!response) return;
+          //   // save flashcard data
+          //   window.dispatchEvent(
+          //     new CustomEvent("propose-flashcard", {
+          //       detail: {
+          //         node: response.node,
+          //         proposal: response.proposal,
+          //         flashcard,
+          //         proposedType: "Improvement",
+          //         token: await getIdToken(),
+          //       },
+          //     })
+          //   );
+          // });
 
           window.dispatchEvent(new CustomEvent("next-flashcard"));
 
@@ -3677,7 +3711,7 @@ const Notebook = ({}: NotebookProps) => {
         return updatedLinks;
       });
     },
-    [nodeBookDispatch, getMapGraph, scrollToNode]
+    [nodeBookDispatch, instructor, scrollToNode]
   );
 
   const proposeNewChild = useCallback(
@@ -3785,17 +3819,29 @@ const Notebook = ({}: NotebookProps) => {
         return { nodes: newNodes, edges: newEdges };
       });
     },
-    [user, reloadPermanentGraph, db, allTags, settings.showClusterOptions, nodeBookDispatch, scrollToNode]
+    [
+      user,
+      reloadPermanentGraph,
+      db,
+      selectedNotebookId,
+      allTags,
+      settings.showClusterOptions,
+      nodeBookDispatch,
+      scrollToNode,
+    ]
   );
 
-  const onNodeTitleBlur = useCallback(async (newTitle: string) => {
-    setOpenSidebar("SEARCHER_SIDEBAR");
+  const onNodeTitleBlur = useCallback(
+    async (newTitle: string) => {
+      setOpenSidebar("SEARCHER_SIDEBAR");
 
-    notebookRef.current.nodeTitleBlured = true;
-    notebookRef.current.searchQuery = newTitle;
-    nodeBookDispatch({ type: "setNodeTitleBlured", payload: true });
-    nodeBookDispatch({ type: "setSearchQuery", payload: newTitle });
-  }, []);
+      notebookRef.current.nodeTitleBlured = true;
+      notebookRef.current.searchQuery = newTitle;
+      nodeBookDispatch({ type: "setNodeTitleBlured", payload: true });
+      nodeBookDispatch({ type: "setSearchQuery", payload: newTitle });
+    },
+    [nodeBookDispatch]
+  );
 
   const saveProposedChildNode = useCallback(
     (newNodeId: string, summary: string, reason: string, onComplete: () => void) => {
@@ -4570,7 +4616,7 @@ const Notebook = ({}: NotebookProps) => {
       nodeBookDispatch({ type: "setSelectedNode", payload: nodeId });
       scrollToNode(nodeId);
     },
-    [nodeBookDispatch]
+    [nodeBookDispatch, scrollToNode]
   );
 
   const hideNodeContent = useMemo(() => {
@@ -6226,6 +6272,7 @@ const Notebook = ({}: NotebookProps) => {
     detectAndRemoveTutorial,
     firstLoading,
     focusView.isEnabled,
+    forcedTutorial,
     graph.nodes,
     hideNodeContent,
     nodeBookState.selectedNode,

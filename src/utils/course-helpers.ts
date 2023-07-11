@@ -1334,3 +1334,33 @@ export const updateStatsOnPractice = async ({ tagIds, correct, uname }: IUpdateS
     });
   }
 };
+
+//we call this function to check if an instructor is creating a new version of a node
+//if yes we approve the version automatically
+export const checkInstantApprovalForProposal = async (tagIds: string[], uname: string) => {
+  const semesterIds = await getSemestersByIds(tagIds);
+  for (const semester of Object.values(semesterIds)) {
+    if (!semester.instructors.includes(uname)) {
+      return false;
+    }
+  }
+  return true;
+};
+
+//we call this function to check if an instructor is votig on a proposal
+//if yes then we approve the proposal of the node automatically
+export const checkInstantApprovalForProposalVote = async (
+  tagIds: string[],
+  uname: string,
+  verisonType: INodeType,
+  versionId: string
+) => {
+  const semesterIds = await getSemestersByIds(tagIds);
+  const { userVersionsColl } = getTypedCollections({ nodeType: verisonType });
+
+  const userVersionDoc = await userVersionsColl.where("version", "==", versionId).get();
+
+  const neededInstrutorsVotes = [];
+  for (const semester of Object.values(semesterIds)) {
+  }
+};
