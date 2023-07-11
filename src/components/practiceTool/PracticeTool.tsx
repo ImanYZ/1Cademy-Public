@@ -28,7 +28,6 @@ import { OpenRightSidebar } from "../../pages/notebook";
 import CourseDetail from "./CourseDetail";
 import { PracticeQuestionMemoized } from "./PracticeQuestion";
 
-const db = getFirestore();
 const MAX_INACTIVE_TIME = 30_000;
 
 type PracticeToolProps = {
@@ -88,6 +87,7 @@ const PracticeTool = forwardRef<PracticeToolRef, PracticeToolProps>((props, ref)
     setUserIsAnsweringPractice,
   } = props;
   // console.log({ currentSemester });
+  const db = getFirestore();
 
   // const [startPractice, setStartPractice] = useState(false);
   const [questionData, setQuestionData] = useState<{ question: SimpleQuestionNode; flashcardId: string } | null>(null);

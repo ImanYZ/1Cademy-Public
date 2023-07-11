@@ -38,6 +38,7 @@ import NextImage from "next/image";
 import { useRouter } from "next/router";
 import React, { MutableRefObject, ReactNode, useCallback, useEffect, useMemo, useRef, useState } from "react";
 
+import { DESIGN_SYSTEM_COLORS } from "@/lib/theme/colors";
 import { OpenLeftSidebar } from "@/pages/notebook";
 
 import ReferenceIcon from "../../../public/reference.svg";
@@ -1765,10 +1766,9 @@ const NodeFooter = ({
           <Button
             variant="contained"
             onClick={nodeClickHandler}
-            color="error"
             sx={{
               borderRadius: "26px",
-              // backgroundColor: DESIGN_SYSTEM_COLORS.primary800,
+              backgroundColor: DESIGN_SYSTEM_COLORS.primary800,
               mt: "5px",
               display: choosingNode?.type === "Reference" && choosingNode.type !== nodeType ? "none" : "block",
             }}
