@@ -334,6 +334,7 @@ const Notebook = ({}: NotebookProps) => {
   // const forcedTutorial = useRef<TutorialTypeKeys | null>(null);
   const [forcedTutorial, setForcedTutorial] = useState<TutorialTypeKeys | null>(null);
   const [firstLoading, setFirstLoading] = useState(true);
+  const [showNextTutorialStep, setShowNextTutorialStep] = useState(false);
   const [pendingProposalsLoaded /* , setPendingProposalsLoaded */] = useState(true);
 
   const previousLengthNodes = useRef(0);
@@ -4734,15 +4735,22 @@ const Notebook = ({}: NotebookProps) => {
     userTutorial,
   ]);
 
+  const tutorialTargetCallback = useMemo(() => {
+    console.log("11");
+    if (!currentStep?.isClickable) return undefined;
+    console.log("22");
+    if (tutorial && tutorial.step !== tutorial?.steps.length) return onNextStep;
+    console.log("33");
+    if (forcedTutorial) return () => setShowNextTutorialStep(true);
+    console.log("44");
+    return onFinalizeTutorial;
+  }, [currentStep?.isClickable, forcedTutorial, onFinalizeTutorial, onNextStep, tutorial]);
+
   useEventListener({
     stepId: currentStep?.childTargetId
       ? `${nodeBookState.selectedNode}-${currentStep?.childTargetId}`
       : currentStep?.targetId,
-    cb: currentStep?.isClickable
-      ? tutorial && tutorial.step === tutorial?.steps.length
-        ? onFinalizeTutorial
-        : onNextStep
-      : undefined,
+    cb: tutorialTargetCallback,
   });
 
   /**
@@ -5832,7 +5840,8 @@ const Notebook = ({}: NotebookProps) => {
     // --------------------------
 
     if (tutorial.name === "collapseNode") {
-      const collapseNodeTutorialIsValid = (node: FullNodeData) => Boolean(node) && node.open && !node.editable;
+      const collapseNodeTutorialIsValid = (node: FullNodeData) =>
+        Boolean(node) && (forcedTutorial ? true : node.open) && !node.editable;
       const node = graph.nodes[targetId];
       if (!collapseNodeTutorialIsValid(node)) {
         setTutorial(null);
@@ -5843,7 +5852,8 @@ const Notebook = ({}: NotebookProps) => {
     // --------------------------
 
     if (tutorial.name === "expandNode") {
-      const expandNodeTutorialIsValid = (node: FullNodeData) => Boolean(node) && !node.open && !node.editable;
+      const expandNodeTutorialIsValid = (node: FullNodeData) =>
+        Boolean(node) && (forcedTutorial ? true : !node.open) && !node.editable;
       const node = graph.nodes[targetId];
       if (!expandNodeTutorialIsValid(node)) {
         setTutorial(null);
@@ -5854,7 +5864,7 @@ const Notebook = ({}: NotebookProps) => {
     // --------------------------
 
     if (tutorial.name === "hideNode") {
-      const HideNodeTutorialIsValid = (node: FullNodeData) => Boolean(node);
+      const HideNodeTutorialIsValid = (node: FullNodeData) => (forcedTutorial ? true : Boolean(node));
       const node = graph.nodes[targetId];
       if (!HideNodeTutorialIsValid(node)) {
         setTutorial(null);
@@ -6452,6 +6462,8 @@ const Notebook = ({}: NotebookProps) => {
               groupTutorials={tutorialGroup}
               onForceTutorial={setForcedTutorial}
               tutorialProgress={tutorialProgress}
+              showNextTutorialStep={showNextTutorialStep}
+              setShowNextTutorialStep={setShowNextTutorialStep}
               isOnPortal
             />
           )}
@@ -6976,6 +6988,8 @@ const Notebook = ({}: NotebookProps) => {
                     parent={graph.nodes[pathway.parent]}
                     child={graph.nodes[pathway.child]}
                     tutorialProgress={tutorialProgress}
+                    showNextTutorialStep={showNextTutorialStep}
+                    setShowNextTutorialStep={setShowNextTutorialStep}
                   />
                 )}
                 {settings.showClusterOptions && settings.showClusters && (

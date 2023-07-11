@@ -1,5 +1,5 @@
 import { Box, Button, Stack, Typography, useMediaQuery } from "@mui/material";
-import React, { ReactNode, useCallback, useMemo, useRef, useState } from "react";
+import React, { ReactNode, useCallback, useMemo, useRef } from "react";
 
 import { useWindowSize } from "@/hooks/useWindowSize";
 import { Z_INDEX } from "@/lib/utils/constants";
@@ -31,6 +31,8 @@ type TutorialProps = {
   groupTutorials: GroupTutorial[];
   onForceTutorial: (keyTutorial: TutorialTypeKeys) => void;
   tutorialProgress: { tutorialsComplete: number; totalTutorials: number };
+  showNextTutorialStep: boolean;
+  setShowNextTutorialStep: (newValue: boolean) => void;
   isOnPortal?: boolean;
   parent?: FullNodeData;
   child?: FullNodeData;
@@ -49,6 +51,8 @@ export const TooltipTutorial = ({
   node,
   forcedTutorial,
   groupTutorials,
+  showNextTutorialStep,
+  setShowNextTutorialStep,
   isOnPortal,
   onForceTutorial,
   tutorialProgress,
@@ -60,7 +64,6 @@ export const TooltipTutorial = ({
   const { width: windowWidth, height: windowHeight } = useWindowSize();
 
   const isMobile = useMediaQuery("(max-width:600px)");
-  const [showNextTutorialStep, setShowNextTutorialStep] = useState(false);
 
   const nextTutorial = useMemo(() => {
     const tutorialsSorted = groupTutorials
