@@ -244,6 +244,8 @@ export interface NodeTutorialState {
   largeTarget?: boolean;
 }
 
+export type TOOLTIP_SIZE = "md" | "lg";
+
 export type TutorialStepConfig = {
   targetId?: string;
   childTargetId?: string;
@@ -252,6 +254,7 @@ export type TutorialStepConfig = {
     | React.ReactNode
     | ((node: FullNodeData, nodeParent?: FullNodeData, nodeChild?: FullNodeData) => React.ReactNode);
   anchor?: string;
+  tooltipSize?: TOOLTIP_SIZE;
   tooltipPosition?: "top" | "bottom" | "left" | "right" | "topLeft" | "topRight" | "bottomLeft" | "bottomRight";
   targetDelay?: number;
   outline?: "shallow" | "outside" | "inside";
@@ -271,6 +274,7 @@ export type TutorialStep = {
   currentStepName: number;
   nextStepName: number;
   previousStepName: number;
+  tooltipSize: TOOLTIP_SIZE;
   tooltipPosition: "top" | "bottom" | "left" | "right" | "topLeft" | "topRight" | "bottomLeft" | "bottomRight";
   targetDelay?: number;
   outline?: "shallow" | "outside" | "inside";

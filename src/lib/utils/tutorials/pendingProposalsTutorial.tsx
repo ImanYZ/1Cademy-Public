@@ -31,7 +31,7 @@ const PENDING_PROPOSALS_STEPS: TutorialStepConfig[] = [
     description: (
       <MarkdownRender
         text={
-          "You can click on any of the proposals to see the node that it is proposing to change. You can also upvote or downvote the proposal. This will help determine if the proposal is accepted or not."
+          "You can explore each of the pending proposals by clicking on them to reveal the node they suggest to modify. Once you've opened a proposal, you have the opportunity to assess its potential value by casting an upvote or downvote. The implementation of a proposal will be approved if it accumulates a net vote count that is greater than or equal to half the net votes of the associated node. Please be aware that if a proposal or its linked node carries a course tag, approval authority is exclusive to the course's instructors."
         }
       />
     ),

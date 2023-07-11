@@ -108,6 +108,16 @@ export const getGroupTutorials = ({ livelinessBar }: GetGroupTutorialsInput): Gr
       },
     ],
   },
+  // {
+  //   title: "Notebooks",
+  //   tutorials: [
+  //     {
+  //       title: "Notebooks",
+  //       tutorialSteps: { tutorialKey: "notebooks", steps: NOTEBOOKS_STEPS },
+  //       tutorials: [],
+  //     },
+  //   ],
+  // },
   {
     title: "Learning Pathways",
     tutorials: [
@@ -240,41 +250,41 @@ export const getGroupTutorials = ({ livelinessBar }: GetGroupTutorialsInput): Gr
       },
     ],
   },
-  {
-    title: "Proposing New Nodes",
-    tutorials: [
-      {
-        title: "New Concept Node",
-        tutorialSteps: { tutorialKey: "childConcept", steps: CHILD_CONCEPT_PROPOSAL_COMPLETE },
-        tutorials: [],
-      },
-      {
-        title: "New Relation Node",
-        tutorialSteps: { tutorialKey: "childRelation", steps: CHILD_RELATION_PROPOSAL_COMPLETE },
-        tutorials: [],
-      },
-      {
-        title: "New Reference Node",
-        tutorialSteps: { tutorialKey: "childReference", steps: CHILD_REFERENCE_PROPOSAL_COMPLETE },
-        tutorials: [],
-      },
-      {
-        title: "New Question Node",
-        tutorialSteps: { tutorialKey: "childQuestion", steps: CHILD_QUESTION_PROPOSAL_COMPLETE },
-        tutorials: [],
-      },
-      {
-        title: "New Code Node",
-        tutorials: [],
-        tutorialSteps: { tutorialKey: "childCode", steps: CHILD_CODE_PROPOSAL_COMPLETE },
-      },
-      {
-        title: "New Idea Node",
-        tutorialSteps: { tutorialKey: "childIdea", steps: CHILD_IDEA_PROPOSAL_COMPLETE },
-        tutorials: [],
-      },
-    ],
-  },
+  // {
+  //   title: "Proposing New Nodes",
+  //   tutorials: [
+  //     {
+  //       title: "New Concept Node",
+  //       tutorialSteps: { tutorialKey: "childConcept", steps: CHILD_CONCEPT_PROPOSAL_COMPLETE },
+  //       tutorials: [],
+  //     },
+  //     {
+  //       title: "New Relation Node",
+  //       tutorialSteps: { tutorialKey: "childRelation", steps: CHILD_RELATION_PROPOSAL_COMPLETE },
+  //       tutorials: [],
+  //     },
+  //     {
+  //       title: "New Reference Node",
+  //       tutorialSteps: { tutorialKey: "childReference", steps: CHILD_REFERENCE_PROPOSAL_COMPLETE },
+  //       tutorials: [],
+  //     },
+  //     {
+  //       title: "New Question Node",
+  //       tutorialSteps: { tutorialKey: "childQuestion", steps: CHILD_QUESTION_PROPOSAL_COMPLETE },
+  //       tutorials: [],
+  //     },
+  //     {
+  //       title: "New Code Node",
+  //       tutorials: [],
+  //       tutorialSteps: { tutorialKey: "childCode", steps: CHILD_CODE_PROPOSAL_COMPLETE },
+  //     },
+  //     {
+  //       title: "New Idea Node",
+  //       tutorialSteps: { tutorialKey: "childIdea", steps: CHILD_IDEA_PROPOSAL_COMPLETE },
+  //       tutorials: [],
+  //     },
+  //   ],
+  // },
   {
     title: "Siderbars",
     tutorials: [
@@ -306,38 +316,28 @@ export const getGroupTutorials = ({ livelinessBar }: GetGroupTutorialsInput): Gr
         tutorials: [],
       },
       {
-        title: "User Information",
+        title: "User Mini-Profiles",
         tutorialSteps: { tutorialKey: "userInfo", steps: USER_INFO_STEPS_COMPLETE },
         tutorials: [],
       },
-    ],
-  },
-  {
-    title: "Building Reputation",
-    tutorials: [
       {
-        title: "Leaderboard",
+        title: "Leaderboards",
         tutorialSteps: { tutorialKey: "leaderBoard", steps: LEADER_BOARD_STEPS },
         tutorials: [],
       },
-      ...getLivelinessBar(livelinessBar),
-      {
-        title: "Community Leaderboard",
-        tutorialSteps: { tutorialKey: "communityLeaderBoard", steps: COMMUNITY_LEADER_BOARD_STEPS },
-        tutorials: [],
-      },
     ],
   },
-  {
-    title: "Notebooks",
-    tutorials: [
-      {
-        title: "Notebooks",
-        tutorialSteps: { tutorialKey: "notebooks", steps: NOTEBOOKS_STEPS },
-        tutorials: [],
-      },
-    ],
-  },
+  // {
+  //   title: "Building Reputation",
+  //   tutorials: [
+  //     ...getLivelinessBar(livelinessBar),
+  //     {
+  //       title: "Community Leaderboard",
+  //       tutorialSteps: { tutorialKey: "communityLeaderBoard", steps: COMMUNITY_LEADER_BOARD_STEPS },
+  //       tutorials: [],
+  //     },
+  //   ],
+  // },
 ];
 
 const getLivelinessBar = (livelinessBar: LivelinessBar): GroupTutorial[] => {

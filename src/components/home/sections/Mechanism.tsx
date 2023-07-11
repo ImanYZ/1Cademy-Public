@@ -65,9 +65,9 @@ export const MECHANISM_ITEMS: TMechanisms[] = [
   },
   {
     id: "long-term-learning",
-    title: "Long-term Learning",
+    title: "Personalized Daily Retrieval Practice",
     description:
-      "The 1Cademy AI Assistant employs a personalized question-asking strategy. This strategy leverages the prerequisite relations existing in the 1Cademy knowledge graph in conjunction with the student's previous responses. Correct answers guide students towards more advanced topics, whereas incorrect answers trigger a review of the topic's prerequisites to ensure a solid foundation before proceeding. Daily points are earned for answering ten questions correctly, a method proven through carefully controlled experiments to bolster motivation and facilitate regular, spaced-out practice throughout the term. The inclusion of the 1Cademy knowledge graph, personalized practice, and daily point incentives fosters a significant enhancement in students' long-term learning, with research revealing marked improvements in exam scores especially amongst students with lower GPAs.",
+      "1Cademy AI Assistant integrates student's previous responses with the knowledge graph's prerequisite relations. Correct answers guide students toward more advanced topics, whereas incorrect answers trigger a review of the prerequisites. Students earn daily points to motivate spaced practice. The 1Cademy knowledge graph, personalized practice, and daily point incentives foster students' long-term learning, with our large controlled experiments revealing significant increase in exam scores especially amongst students with lower GPAs.",
     animation: {
       src: "rive/long-term-learning.riv",
       artboard: "New Artboard",
@@ -76,10 +76,9 @@ export const MECHANISM_ITEMS: TMechanisms[] = [
   },
   {
     id: "contextualized-q-a",
-    title: "Contextualized Q&A",
-    description: `
-    1Cademy Assistant is an advanced system that harnesses the power of the 1Cademy knowledge graph to answer queries from students. The system scrutinizes each learner's history of responses to practice questions and grasps the prerequisite relationships between the topics covered in the study material. It delivers context-specific guidance, broadening learners' understanding of not just their courses' content but also the knowledge beyond them. Moreover, the 1Cademy Assistant fosters the development of metacognitive skills by offering insights into root causes of struggle with specific concepts. The issues can be tracked back to prerequisite topics that students initially struggled with, providing them a more holistic comprehension of the subject. The system further presents teachers with detailed reports about each student's conversation history and a customized learning journey, enabling them to refine their teaching strategies to best meet their students' needs.
-    `,
+    title: "Course-specific Question Answering",
+    description: 
+      "1Cademy AI Assistant provides answers exclusively based on its knowledge graph, populated with instructor-curated course content. It closely examines each student's response history, understanding prerequisite topic relationships, which aids in identifying root issues causing academic struggles. Furthermore, it visualizes prerequisite pathways to deepen students' learning. 1Cademy also offers instructors comprehensive student conversation reports, facilitating more effective teaching strategy refinement.",
     animation: {
       src: "rive/contextualized-q-a.riv",
       artboard: "New Artboard",
@@ -91,6 +90,18 @@ export const MECHANISM_ITEMS: TMechanisms[] = [
     title: "Positive Reinforcement",
     description: `
     The 1Cademy Assistant engages learners in recognizing their progress by providing immediate feedback, celebrating correct answers, and tracking their progress throughout their academic journey. This feedback cycle, embedded at critical moments within the learning material interactions, utilizes interactive, concise, and encouraging animations illustrated by the 1Cademy Assistant character. On completing each piece of micro-content, learners receive an enhanced level of positive reinforcement through awards and reputation points, keeping the brain engaged and facilitating increased learning through consistent encouragement for small achievements.
+    `,
+    animation: {
+      src: "rive/positive-reinforcement.riv",
+      artboard: "New Artboard",
+      padding: 70,
+    },
+  },
+  {
+    id: "ai-enhanced-grading",
+    title: "AI-Enhanced Grading",
+    description: `
+    1Cademy empowers instructors to efficiently manage assignments and exams by offering tools to create, schedule, review, and auto-grade them, all under their control. It enables instructors to personalize questions, assign points, and tag or revise them. Students benefit from completing assignments, receiving instant constructive feedback, and reviewing grades with metacognitive learning analytics, fostering transparency in the learning process.
     `,
     animation: {
       src: "rive/positive-reinforcement.riv",

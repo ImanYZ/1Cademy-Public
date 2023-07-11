@@ -6,11 +6,16 @@ import { Z_INDEX } from "@/lib/utils/constants";
 import { gray50, gray200, gray400, gray500, gray700, gray800 } from "@/pages/home";
 
 import { TargetClientRect, Tutorial } from "../../hooks/useInteractiveTutorial3";
-import { FullNodeData, TutorialStep, TutorialTypeKeys } from "../../nodeBookTypes";
+import { FullNodeData, TOOLTIP_SIZE, TutorialStep, TutorialTypeKeys } from "../../nodeBookTypes";
 import { GroupTutorial } from "../tutorial/TutorialTableOfContent";
 
 const TOOLTIP_OFFSET = 20;
 const TOOLTIP_TALE_SIZE = 10;
+const TOOLTIP_WIDTH: { [key in TOOLTIP_SIZE]: number } = {
+  md: 450,
+  lg: 600,
+};
+
 type TutorialProps = {
   tutorial: Tutorial;
   tutorialStep: TutorialStep | null;
@@ -241,9 +246,9 @@ export const TooltipTutorial = ({
             boxSizing: "border-box",
             position: "absolute",
             ...location,
-            width: isOnPortal ? "auto" : "450px",
+            width: TOOLTIP_WIDTH[tutorialStep.tooltipSize],
             height: "auto",
-            maxWidth: "450px",
+            maxWidth: TOOLTIP_WIDTH[tutorialStep.tooltipSize],
             backgroundColor: "#55555500",
             transition: "top 1s ease-out,bottom 1s ease-out,left 1s ease-out,right 1s ease-out,height 1s ease-out",
             zIndex: Z_INDEX.tutorials,
@@ -277,8 +282,8 @@ export const TooltipTutorial = ({
           left: isOnPortal && isMobile ? "5px" : `${tooltipRect.left}px`,
           right: isMobile ? "5px" : undefined,
           transition: "top 750ms ease-out,left 750ms ease-out, border-color 1s linear",
-          maxWidth: "450px",
-          width: isOnPortal ? (isMobile ? "auto" : "100%") : "450px",
+          maxWidth: TOOLTIP_WIDTH[tutorialStep.tooltipSize],
+          width: isOnPortal ? (isMobile ? "auto" : "100%") : TOOLTIP_WIDTH[tutorialStep.tooltipSize],
           backgroundColor: theme => (theme.palette.mode === "dark" ? gray500 : "#C5D0DF"),
           p: "24px 32px",
           borderRadius: "12px",
@@ -328,6 +333,7 @@ export const TooltipTutorial = ({
 
   return wrapper(
     <>
+      {/* display message to go to next tutorial */}
       {showNextTutorialStep && nextTutorial && !currentTutorialIsTemporal && (
         <Stack alignItems={"center"}>
           {/* <HelpIcon sx={{ mb: "12px", fontSize: "32px" }} /> */}
@@ -397,6 +403,7 @@ export const TooltipTutorial = ({
             <Button
               variant="contained"
               onClick={() => {
+                console.log("proced");
                 handleCloseProgressBarMenu();
                 onFinalize();
                 setShowNextTutorialStep(false);
@@ -417,6 +424,7 @@ export const TooltipTutorial = ({
           </Stack>
         </Stack>
       )}
+      {/* display steps from a tutorial */}
       {(!showNextTutorialStep || !nextTutorial) && (
         <>
           {" "}

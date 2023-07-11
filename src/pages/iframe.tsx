@@ -1,4 +1,4 @@
-import { getAuth,User } from "firebase/auth";
+import { getAuth, User } from "firebase/auth";
 import React, { useEffect } from "react";
 import { IAssistantEventDetail } from "src/types/IAssistant";
 

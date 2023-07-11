@@ -16,7 +16,7 @@ const NOTIFICATIONS_STEPS_CONFIG: TutorialStepConfig[] = [
     description: (
       <MarkdownRender
         text={
-          "These are unread notifications. These are new notifications that you have not marked as read. In here you will receive notifications if a node you have made is edited or deleted. You also receive notifications if a proposal that you have made is accepted"
+          "These represent new or unread notifications. Notifications will be sent to you if any proposal you submitted receives a vote or approval. Additionally, you will be notified if a node you've contributed to is voted on or is deleted."
         }
       />
     ),
@@ -31,7 +31,7 @@ const NOTIFICATIONS_STEPS_CONFIG: TutorialStepConfig[] = [
     description: (
       <MarkdownRender
         text={
-          "This is a list of read notifications. These are all the notifications that you have received and marked as read."
+          "This list includes all the notifications that you have received and marked as read."
         }
       />
     ),
@@ -45,7 +45,7 @@ const NOTIFICATIONS_STEPS_CONFIG: TutorialStepConfig[] = [
     description: (
       <MarkdownRender
         text={
-          "This is a list of request notifications. These are all the notifications that other user request access to your private notebooks."
+          "When other users seek access to your notebooks, the related notifications will be displayed under this tab."
         }
       />
     ),
