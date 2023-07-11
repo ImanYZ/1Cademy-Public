@@ -11,6 +11,12 @@ export const ASSISTANT_MECHANISMS: TMechanisms[] = [
       artboard: "artboard-1",
       padding: 0,
     },
+    video: [
+      {
+        url: "",
+        thumbnail: "",
+      },
+    ],
   },
   {
     id: "meetings",
@@ -21,6 +27,12 @@ export const ASSISTANT_MECHANISMS: TMechanisms[] = [
       artboard: "artboard-2",
       padding: 0,
     },
+    video: [
+      {
+        url: "",
+        thumbnail: "",
+      },
+    ],
   },
   {
     id: "goals",
@@ -31,5 +43,11 @@ export const ASSISTANT_MECHANISMS: TMechanisms[] = [
       artboard: "artboard-3",
       padding: 0,
     },
+    video: [
+      {
+        url: "",
+        thumbnail: "",
+      },
+    ],
   },
 ];
