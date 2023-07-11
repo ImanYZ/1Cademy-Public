@@ -1,9 +1,8 @@
 import { GroupTutorial } from "../../../components/tutorial/TutorialTableOfContent";
 import { BOOKMARKS_STEPS } from "./bookmarksTutorialSteps";
-import { COMMUNITY_LEADER_BOARD_STEPS } from "./communityLeaderBoardTutorialSteps";
 import { KNOWLEDGE_GRAPH_CONFIG } from "./knowledgeGraphSteps";
 import { LEADER_BOARD_STEPS } from "./leaderBoardTutorialSteps";
-import { INTERACTION_LIVENESS_BAR_STEPS, REPUTATION_LIVENESS_BAR_STEPS } from "./livenessBarTutorialSteps";
+// import { INTERACTION_LIVENESS_BAR_STEPS, REPUTATION_LIVENESS_BAR_STEPS } from "./livenessBarTutorialSteps";
 import { NAVIGATION_STEPS_COMPLETE } from "./navigationTutorialSteps";
 import {
   COLLAPSE_STEPS_COMPLETE,
@@ -22,7 +21,6 @@ import { NODE_QUESTION } from "./nodeQuestionStepTutorialStep";
 import { NODE_REFERENCE } from "./nodeReferenceTutorialSteps";
 import { NODE_RELATION } from "./nodeRelationTutorialSteps";
 import { NODES_STEPS_COMPLETE } from "./nodeTutorialSteps";
-import { NOTEBOOKS_STEPS } from "./notebooksTutorialSteps";
 import { NOTIFICATION_STEPS } from "./notificationsTutorialSteps";
 import { PARENTS_CHILDREN_LIST_STEPS } from "./parentChildrenListTutorialSteps";
 import { PATHWAYS_STEPS } from "./pathwaysTutorialSteps";
@@ -48,7 +46,7 @@ type GetGroupTutorialsInput = {
   livelinessBar: LivelinessBar;
 };
 
-export const getGroupTutorials = ({ livelinessBar }: GetGroupTutorialsInput): GroupTutorial[] => [
+export const getGroupTutorials = ({}: GetGroupTutorialsInput): GroupTutorial[] => [
   {
     title: "Basics",
     tutorials: [
@@ -331,24 +329,24 @@ export const getGroupTutorials = ({ livelinessBar }: GetGroupTutorialsInput): Gr
   // },
 ];
 
-const getLivelinessBar = (livelinessBar: LivelinessBar): GroupTutorial[] => {
-  if (livelinessBar === "reputation")
-    return [
-      {
-        title: "Reputation Liveliness Bar",
-        tutorialSteps: { tutorialKey: "reputationLivenessBar", steps: REPUTATION_LIVENESS_BAR_STEPS },
-        tutorials: [],
-      },
-    ];
+// const getLivelinessBar = (livelinessBar: LivelinessBar): GroupTutorial[] => {
+//   if (livelinessBar === "reputation")
+//     return [
+//       {
+//         title: "Reputation Liveliness Bar",
+//         tutorialSteps: { tutorialKey: "reputationLivenessBar", steps: REPUTATION_LIVENESS_BAR_STEPS },
+//         tutorials: [],
+//       },
+//     ];
 
-  if (livelinessBar === "interaction")
-    return [
-      {
-        title: "Interaction Liveliness Bar",
-        tutorialSteps: { tutorialKey: "interactionLivenessBar", steps: INTERACTION_LIVENESS_BAR_STEPS },
-        tutorials: [],
-      },
-    ];
+//   if (livelinessBar === "interaction")
+//     return [
+//       {
+//         title: "Interaction Liveliness Bar",
+//         tutorialSteps: { tutorialKey: "interactionLivenessBar", steps: INTERACTION_LIVENESS_BAR_STEPS },
+//         tutorials: [],
+//       },
+//     ];
 
-  return [];
-};
+//   return [];
+// };
