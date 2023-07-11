@@ -1,9 +1,9 @@
 import { MemoizedNodeVideo } from "@/components/map/Node/NodeVideo";
+import MarkdownRender from "@/components/Markdown/MarkdownRender";
 
 import { TutorialState, TutorialStep, TutorialStepConfig } from "../../../nodeBookTypes";
 import { getVideoDataByUrl } from "../utils";
 import { getBaseStepConfig } from "./tutorial.utils";
-import MarkdownRender from "@/components/Markdown/MarkdownRender";
 
 export const INITIAL_NODE_TUTORIAL_STATE: TutorialState = null;
 
