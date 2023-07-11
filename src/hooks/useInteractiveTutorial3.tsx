@@ -26,15 +26,7 @@ import { USER_SETTINGS_STEPS_COMPLETE } from "@/lib/utils/tutorials/userSettings
 import { User } from "../knowledgeTypes";
 import { devLog } from "../lib/utils/develop.util";
 import { BOOKMARKS_STEPS } from "../lib/utils/tutorials/bookmarksTutorialSteps";
-import {
-  CHILD_CODE_PROPOSAL_COMPLETE,
-  CHILD_CONCEPT_PROPOSAL_COMPLETE,
-  CHILD_IDEA_PROPOSAL_COMPLETE,
-  CHILD_PROPOSAL_COMPLETE,
-  CHILD_QUESTION_PROPOSAL_COMPLETE,
-  CHILD_REFERENCE_PROPOSAL_COMPLETE,
-  CHILD_RELATION_PROPOSAL_COMPLETE,
-} from "../lib/utils/tutorials/childrenProposalTutorialStep";
+import { CHILD_PROPOSAL_COMPLETE } from "../lib/utils/tutorials/childrenProposalTutorialStep";
 import { COMMUNITY_LEADER_BOARD_STEPS } from "../lib/utils/tutorials/communityLeaderBoardTutorialSteps";
 import { LEADER_BOARD_STEPS } from "../lib/utils/tutorials/leaderBoardTutorialSteps";
 import {
@@ -247,22 +239,22 @@ export const useInteractiveTutorial = ({ user }: useInteractiveTutorialProps) =>
         newSteps = CHILD_PROPOSAL_COMPLETE;
       }
       if (newTutorial === "childConcept") {
-        newSteps = CHILD_CONCEPT_PROPOSAL_COMPLETE;
+        newSteps = PROPOSING_CONCEPT_EDIT_COMPLETE;
       }
       if (newTutorial === "childRelation") {
-        newSteps = CHILD_RELATION_PROPOSAL_COMPLETE;
+        newSteps = PROPOSING_RELATION_EDIT_COMPLETE;
       }
       if (newTutorial === "childReference") {
-        newSteps = CHILD_REFERENCE_PROPOSAL_COMPLETE;
+        newSteps = PROPOSING_REFERENCE_EDIT_COMPLETE;
       }
       if (newTutorial === "childQuestion") {
-        newSteps = CHILD_QUESTION_PROPOSAL_COMPLETE;
+        newSteps = PROPOSING_QUESTION_EDIT_COMPLETE;
       }
       if (newTutorial === "childIdea") {
-        newSteps = CHILD_IDEA_PROPOSAL_COMPLETE;
+        newSteps = PROPOSING_IDEA_EDIT_COMPLETE;
       }
       if (newTutorial === "childCode") {
-        newSteps = CHILD_CODE_PROPOSAL_COMPLETE;
+        newSteps = PROPOSING_CODE_EDIT_COMPLETE;
       }
       if (newTutorial === "toolbox") {
         newSteps = TOOLBOX_STEPS;

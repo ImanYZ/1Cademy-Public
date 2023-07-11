@@ -13,13 +13,13 @@ const values: WhyItem[] = [
     imageDark: "Dark_Learning_Like_Researchers.svg",
     padding: "4px 40px 0px 40px",
   },
-  {
-    name: "Research Communities",
-    body: "1Cademy has fostered the development of communities of enthusiasts for various scientific subjects, comprising individuals from diverse educational institutions and research organizations. These enthusiasts share their discoveries and insights on 1Cademy and come together on a weekly basis to delve deeper into their areas of interest.\nThrough these interactions, we gain insight into the cutting-edge research and learning taking place at our collaborators' institutions and are able to draw connections that inspire new research ideas.",
-    // image: "Research_Communities.png",
-    image: "Research_Communities.svg",
-    imageDark: "Research_Communities.svg",
-  },
+  // {
+  //   name: "Research Communities",
+  //   body: "1Cademy has fostered the development of communities of enthusiasts for various scientific subjects, comprising individuals from diverse educational institutions and research organizations. These enthusiasts share their discoveries and insights on 1Cademy and come together on a weekly basis to delve deeper into their areas of interest.\nThrough these interactions, we gain insight into the cutting-edge research and learning taking place at our collaborators' institutions and are able to draw connections that inspire new research ideas.",
+  //   // image: "Research_Communities.png",
+  //   image: "Research_Communities.svg",
+  //   imageDark: "Research_Communities.svg",
+  // },
   {
     name: "Learning Deeply",
     body: "The process of meticulously considering the prerequisites for each concept when adding them to 1Cademy not only improves the quality of our learning, but also helps us uncover novel learning pathways to grasp complex concepts that we previously thought were unattainable.",

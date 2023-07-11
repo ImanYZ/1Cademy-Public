@@ -872,7 +872,7 @@ const Node = ({
       </div>
     );
   }
-  console.log("choosingNode", notebookRef.current.choosingNode);
+
   return (
     <div
       ref={nodeRef}
