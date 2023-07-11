@@ -181,6 +181,8 @@ type NodeProps = {
   open: boolean;
   nodeHeigth: number;
   hideNode: boolean;
+  setAssistantSelectNode: (newValue: boolean) => void;
+  assistantSelectNode: boolean;
 };
 
 const proposedChildTypesIcons: { [key in ProposedChildTypesIcons]: string } = {
@@ -302,6 +304,8 @@ const Node = ({
   setOpenPart,
   hideNode,
   nodeHeigth,
+  setAssistantSelectNode,
+  assistantSelectNode,
 }: NodeProps) => {
   const [{ user }] = useAuth();
   const { nodeBookState } = useNodeBook();
@@ -342,7 +346,6 @@ const Node = ({
   });
 
   const [toBeElligible, setToBeElligible] = useState(false);
-  const [assistantSelectNode, setAssistantSelectNode] = useState<Boolean>(false);
 
   const disableTitle = disabled && !enableChildElements.includes(`${identifier}-node-title`);
   const disableContent = disabled && !enableChildElements.includes(`${identifier}-node-content`);
