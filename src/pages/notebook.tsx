@@ -70,7 +70,6 @@ import { TagsSidebarMemoized } from "@/components/map/Sidebar/SidebarV2/TagsSide
 import { MemoizedUserInfoSidebar } from "@/components/map/Sidebar/SidebarV2/UserInfoSidebar";
 import { MemoizedUserSettingsSidebar } from "@/components/map/Sidebar/SidebarV2/UserSettigsSidebar";
 import { useAuth } from "@/context/AuthContext";
-import useEventListener from "@/hooks/useEventListener";
 import { useHover } from "@/hooks/userHover";
 // import usePrevious from "@/hooks/usePrevious";
 import { useTagsTreeView } from "@/hooks/useTagsTreeView";
@@ -4767,12 +4766,22 @@ const Notebook = ({}: NotebookProps) => {
     return onFinalizeTutorial;
   }, [currentStep?.isClickable, forcedTutorial, onFinalizeTutorial, onNextStep, tutorial]);
 
-  useEventListener({
-    stepId: currentStep?.childTargetId
-      ? `${nodeBookState.selectedNode}-${currentStep?.childTargetId}`
-      : currentStep?.targetId,
-    cb: tutorialTargetCallback,
-  });
+  const tutorialTargetId = useMemo(
+    () => {
+      if (!currentStep) return undefined;
+      if (currentStep?.anchor) {
+        if (currentStep.targetId) return `${currentStep.targetId}-${currentStep?.childTargetId}`;
+        return currentStep.childTargetId;
+      }
+      if (currentStep?.targetId) return `${currentStep.targetId}-${currentStep?.childTargetId}`;
+      return `${nodeBookState.selectedNode}-${currentStep?.childTargetId}`;
+    },
+    [currentStep, nodeBookState.selectedNode]
+    // currentStep?.childTargetId
+    //   ? `${nodeBookState.selectedNode}-${currentStep?.childTargetId}`
+    //   : currentStep?.targetId,
+    // [currentStep?.childTargetId, currentStep?.targetId, nodeBookState.selectedNode]
+  );
 
   /**
    * Detect the trigger to call a tutorial
@@ -5617,8 +5626,9 @@ const Notebook = ({}: NotebookProps) => {
           hideDescendantsTutorialForcedIsValid
         );
         if (result && parentWithChildren("r98BjyFDCe4YyLA3U8ZE") < 2) {
-          openNodeHandler("LrUBGjpxuEV2W0shSLXf");
-          openNodeHandler("rWYUNisPIVMBoQEYXgNj");
+          openNodeHandler("LrUBGjpxuEV2W0shSLXf", {}, false);
+          openNodeHandler("rWYUNisPIVMBoQEYXgNj", {}, false);
+
           return;
         }
       }
@@ -6469,8 +6479,43 @@ const Notebook = ({}: NotebookProps) => {
     openNodeHandler,
     proposeNewChild,
   ]);
+
+  // set up event delegation to manage click event on target elements from tutorial
+  useEffect(() => {
+    if (!tutorialTargetCallback) return;
+    if (!tutorialTargetId) return;
+
+    const mapContainerHtml = document.getElementById("map-container");
+    if (!mapContainerHtml) return console.warn("this #map-container doesn't exist");
+
+    const clickHandler = (event: any) => {
+      // console.log("WII:run", {
+      //   tutorialTargetId,
+      //   tutorialTargetCallback,
+      //   match: event.target.matches(`#${tutorialTargetId}`),
+      //   t: event.target,
+      //   tt: event.target.id,
+      //   ttt: event.currentTarget,
+      //   pp: event.target?.parentNode?.id,
+      // });
+      if (
+        event.target?.id === tutorialTargetId ||
+        event.target?.parentNode?.id === tutorialTargetId ||
+        event.target?.parentNode?.parentNode?.id === tutorialTargetId ||
+        event.currentTarget?.id === tutorialTargetId
+      ) {
+        tutorialTargetCallback();
+      }
+    };
+    mapContainerHtml.addEventListener("click", clickHandler);
+
+    return () => {
+      if (mapContainerHtml) mapContainerHtml.removeEventListener("click", clickHandler);
+    };
+  }, [tutorialTargetCallback, tutorialTargetId]);
+
   return (
-    <div className="MapContainer" style={{ overflow: "hidden" }}>
+    <div id="map-container" className="MapContainer" style={{ overflow: "hidden" }}>
       {currentStep?.anchor && (
         <Portal anchor="portal">
           {tutorial && (
