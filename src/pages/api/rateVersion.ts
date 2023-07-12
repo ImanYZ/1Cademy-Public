@@ -5,7 +5,7 @@ import { INodeType } from "src/types/INodeType";
 import { INodeVersion } from "src/types/INodeVersion";
 import { IUser } from "src/types/IUser";
 import { IUserNode } from "src/types/IUserNode";
-import { updateStatsOnVersionVote } from "src/utils/course-helpers";
+import { checkInstantApprovalForProposalVote, updateStatsOnVersionVote } from "src/utils/course-helpers";
 import { detach, isVersionApproved } from "src/utils/helpers";
 import { signalNodeToTypesense, updateNodeContributions } from "src/utils/version-helpers";
 
@@ -219,6 +219,14 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         wrongs: versionData.wrongs + wrong,
         nodeData,
       });
+      const { courseExist, instantApprove }: { courseExist: boolean; instantApprove: boolean } =
+        await checkInstantApprovalForProposalVote(
+          nodeData?.tagIds || [],
+          uname,
+          nodeType as INodeType,
+          req.body.versionId
+        );
+      const _instantApprove = correct === 1 ? instantApprove : false;
 
       //  if user already has an interaction with the version
       await versionCreateUpdate({
@@ -228,6 +236,8 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         nodeData,
         nodeRef,
         nodeType: nodeType,
+        instantApprove: _instantApprove,
+        courseExist,
         versionId: req.body.versionId,
         versionData,
         newVersion: false,

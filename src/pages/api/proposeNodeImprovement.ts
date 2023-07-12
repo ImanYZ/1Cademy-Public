@@ -22,7 +22,7 @@ import { generateTagsOfTagsWithNodes, signalNodeToTypesense, updateNodeContribut
 import { getTypesenseClient, typesenseDocumentExists } from "@/lib/typesense/typesense.config";
 import { INodeVersion } from "src/types/INodeVersion";
 import { IActionTrack } from "src/types/IActionTrack";
-import { updateStatsOnProposal } from "src/utils/course-helpers";
+import { checkInstantApprovalForProposal, updateStatsOnProposal } from "src/utils/course-helpers";
 
 // Logic
 // - getting versionsColl, userVersionsColl based on nodeType
@@ -179,12 +179,15 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       versionData.changedNodeType = true;
     }
 
+    const instantApprove = await checkInstantApprovalForProposal(nodeData?.tagIds || [], userData.uname);
+
     [batch, writeCounts] = await versionCreateUpdate({
       batch,
       nodeId: id,
       nodeData,
       nodeRef,
       nodeType: nodeType,
+      instantApprove,
       versionId: versionRef.id,
       versionData,
       newVersion: true,
