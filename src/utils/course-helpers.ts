@@ -1338,8 +1338,11 @@ export const updateStatsOnPractice = async ({ tagIds, correct, uname }: IUpdateS
 //we call this function to check if an instructor is creating a new version of a node
 //if yes we approve the version automatically
 export const checkInstantApprovalForProposal = async (tagIds: string[], uname: string) => {
-  const semesterIds = await getSemestersByIds(tagIds);
-  for (const semester of Object.values(semesterIds)) {
+  const semestersByIds = await getSemestersByIds(tagIds);
+  if (!Object.keys(semestersByIds).length) {
+    return false;
+  }
+  for (const semester of Object.values(semestersByIds)) {
     if (!semester.instructors.includes(uname)) {
       return false;
     }
@@ -1356,6 +1359,9 @@ export const checkInstantApprovalForProposalVote = async (
   versionId: string
 ) => {
   const semestersByIds = await getSemestersByIds(tagIds);
+  if (!Object.keys(semestersByIds).length) {
+    return false;
+  }
   const { userVersionsColl } = getTypedCollections({ nodeType: verisonType });
 
   const userVersions = await userVersionsColl.where("version", "==", versionId).get();
@@ -1390,7 +1396,9 @@ export const checkInstantApprovalForProposalVote = async (
 
 export const checkInstantDeleteForNode = async (tagIds: string[], uname: string, nodeId: string) => {
   const semestersByIds = await getSemestersByIds(tagIds);
-
+  if (!Object.keys(semestersByIds).length) {
+    return false;
+  }
   const userNodes = await db.collection("userNodes").where("node", "==", nodeId).get();
 
   const instructorVotes: {
@@ -1417,6 +1425,5 @@ export const checkInstantDeleteForNode = async (tagIds: string[], uname: string,
       return false;
     }
   }
-
   return true;
 };

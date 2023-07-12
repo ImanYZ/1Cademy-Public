@@ -3138,11 +3138,25 @@ const Notebook = ({}: NotebookProps) => {
       const _corrects = corrects + correctChange;
       const _wrongs = wrongs + wrongChange;
 
+      setNodeParts(nodeId, node => {
+        return { ...node, disableVotes: true };
+      });
+      const { canInstantDelete }: { canInstantDelete: boolean } = await Post(
+        "/api/instructor/course/checkInstantDeleteForNode",
+        {
+          nodeId,
+        }
+      );
+      setNodeParts(nodeId, node => {
+        return { ...node, disableVotes: false };
+      });
+
       setGraph(graph => {
         const updatedNodeIds: string[] = [nodeId];
         const node = graph.nodes[nodeId];
 
-        const willRemoveNode = doNeedToDeleteNode(_corrects, _wrongs, locked);
+        const willRemoveNode = canInstantDelete || doNeedToDeleteNode(_corrects, _wrongs, locked);
+
         lastNodeOperation.current = { name: "downvote", data: willRemoveNode ? "removed" : "" };
         if (willRemoveNode) {
           if (node?.children.length > 0) {
@@ -3671,25 +3685,25 @@ const Notebook = ({}: NotebookProps) => {
             },
           };
 
-          // const flashcard = postData.flashcard;
-          // delete postData.flashcard;
-          // const loadingEvent = new CustomEvent("proposed-node-loading");
-          // window.dispatchEvent(loadingEvent);
-          // getMapGraph("/proposeNodeImprovement", postData, !willBeApproved).then(async (response: any) => {
-          //   if (!response) return;
-          //   // save flashcard data
-          //   window.dispatchEvent(
-          //     new CustomEvent("propose-flashcard", {
-          //       detail: {
-          //         node: response.node,
-          //         proposal: response.proposal,
-          //         flashcard,
-          //         proposedType: "Improvement",
-          //         token: await getIdToken(),
-          //       },
-          //     })
-          //   );
-          // });
+          const flashcard = postData.flashcard;
+          delete postData.flashcard;
+          const loadingEvent = new CustomEvent("proposed-node-loading");
+          window.dispatchEvent(loadingEvent);
+          getMapGraph("/proposeNodeImprovement", postData, !willBeApproved).then(async (response: any) => {
+            if (!response) return;
+            // save flashcard data
+            window.dispatchEvent(
+              new CustomEvent("propose-flashcard", {
+                detail: {
+                  node: response.node,
+                  proposal: response.proposal,
+                  flashcard,
+                  proposedType: "Improvement",
+                  token: await getIdToken(),
+                },
+              })
+            );
+          });
 
           window.dispatchEvent(new CustomEvent("next-flashcard"));
 
@@ -4526,9 +4540,19 @@ const Notebook = ({}: NotebookProps) => {
           console.error(error);
         }
         const updatedNodeIds: string[] = [nodeBookState.selectedNode!, newNodeId];
+
+        const { canInstantApprove }: { canInstantApprove: boolean } = await Post(
+          "/api/instructor/course/checkInstantApprovalForProposalVote",
+          {
+            nodeId: nodeBookState.selectedNode,
+            verisonType: proposalsTemp[proposalIdx],
+            versionId: proposalId,
+          }
+        );
         setGraph(({ nodes: oldNodes, edges }) => {
           if (!nodeBookState.selectedNode) return { nodes: oldNodes, edges };
           if (
+            canInstantApprove ||
             isVersionApproved({
               corrects: proposalsTemp[proposalIdx].corrects,
               wrongs: proposalsTemp[proposalIdx].wrongs,
