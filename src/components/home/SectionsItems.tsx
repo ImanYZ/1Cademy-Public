@@ -18,8 +18,8 @@ export const ONE_CADEMY_SECTIONS: HomepageSection[] = [
   },
   {
     id: "mechanism",
-    title: "Mechanisms",
-    label: "Mechanisms",
+    title: "How It Works",
+    label: "How It Works",
     description:
       // "Through human-AI collaboration, we summarize, link, evaluate, improve, and learn science for long-term.",
       "Dive into the future of education with 1Cademy, where technology and pedagogy align to elevate the learning experience to unprecedented heights. Your journey towards effective and efficient online education starts here!",
