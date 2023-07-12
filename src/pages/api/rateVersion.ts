@@ -239,6 +239,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         nodeRef,
         nodeType: nodeType,
         isApproved,
+        courseExist,
         versionId: req.body.versionId,
         versionData,
         newVersion: false,
