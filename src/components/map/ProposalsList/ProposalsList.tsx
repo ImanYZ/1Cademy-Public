@@ -6,6 +6,7 @@ import { Box } from "@mui/system";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import React, { useCallback } from "react";
+import { INodeVersion } from "src/types/INodeVersion";
 
 import { Editor } from "@/components/Editor";
 import NodeTypeIcon from "@/components/NodeTypeIcon2";
@@ -19,7 +20,7 @@ import ProposalItem from "./ProposalItem/ProposalItem";
 dayjs.extend(relativeTime);
 
 type ProposalsListProps = {
-  proposals: any[];
+  proposals: INodeVersion[];
   setProposals: any;
   proposeNodeImprovement: any;
   fetchProposals: any;
@@ -28,25 +29,25 @@ type ProposalsListProps = {
   deleteProposal: any;
   editHistory: boolean;
   proposeNewChild: any;
-  openProposal: any;
+  openProposal: string;
   isAdmin: boolean;
   username: string;
 };
 
 const ProposalsList = ({ username, ...props }: ProposalsListProps) => {
+  console.log("props.openProposal", props.openProposal);
   const rateProposalClick = useCallback(
-    (e: any, proposal: any, proposalIdx: any, correct: any, wrong: any, award: any) => {
-      return props.rateProposal(
-        e,
-        props.proposals,
-        props.setProposals,
-        proposal.id,
-        proposalIdx,
-        correct,
-        wrong,
-        award,
-        proposal.newNodeId
-      );
+    (proposal: INodeVersion, proposalIdx: number, correct: boolean, wrong: boolean, award: boolean) => {
+      return props.rateProposal({
+        proposals: props.proposals,
+        setProposals: props.setProposals,
+        proposalId: proposal.id,
+        proposalIdx: proposalIdx,
+        correct: correct,
+        wrong: wrong,
+        award: award,
+        newNodeId: proposal.newNodeId,
+      });
     },
     [props]
   );
@@ -69,7 +70,7 @@ const ProposalsList = ({ username, ...props }: ProposalsListProps) => {
   const shouldDisableButton = (proposal: any, isAdmin: boolean, username: string) => {
     return !isAdmin || proposal.proposer === username;
   };
-
+  console.log("props.proposals :: ::", props.proposals);
   return (
     <>
       {props.proposals.map((proposal: any, proposalIdx: number) => {
@@ -203,7 +204,7 @@ const ProposalsList = ({ username, ...props }: ProposalsListProps) => {
                           title="Click if you find this proposal helpful."
                           onClick={(e: any) => {
                             e.stopPropagation();
-                            rateProposalClick(e, proposal, proposalIdx, true, false, false);
+                            rateProposalClick(proposal, proposalIdx, true, false, false);
                           }}
                           sx={{
                             borderRadius: "52px 0px 0px 52px",
@@ -238,7 +239,7 @@ const ProposalsList = ({ username, ...props }: ProposalsListProps) => {
                           title="Click if you find this proposal Unhelpful."
                           onClick={(e: any) => {
                             e.stopPropagation();
-                            rateProposalClick(e, proposal, proposalIdx, false, true, false);
+                            rateProposalClick(proposal, proposalIdx, false, true, false);
                           }}
                           sx={{
                             borderRadius: "0px",
@@ -279,7 +280,7 @@ const ProposalsList = ({ username, ...props }: ProposalsListProps) => {
                             e.stopPropagation();
                             !props.isAdmin || proposal.proposer === username
                               ? false
-                              : rateProposalClick(e, proposal, proposalIdx, false, false, true);
+                              : rateProposalClick(proposal, proposalIdx, false, false, true);
                           }}
                           disabled={isDisabled}
                           sx={{
