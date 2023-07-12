@@ -226,7 +226,9 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           nodeType as INodeType,
           req.body.versionId
         );
-      const _instantApprove = correct === 1 ? instantApprove : false;
+      if (courseExist) {
+        isApproved = instantApprove;
+      }
 
       //  if user already has an interaction with the version
       await versionCreateUpdate({
@@ -236,7 +238,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         nodeData,
         nodeRef,
         nodeType: nodeType,
-        instantApprove: _instantApprove,
+        isApproved,
         courseExist,
         versionId: req.body.versionId,
         versionData,
