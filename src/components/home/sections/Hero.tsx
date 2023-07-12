@@ -1,6 +1,8 @@
-import { Stack, Typography } from "@mui/material";
+import { Button, Stack, Typography } from "@mui/material";
 import Box from "@mui/material/Box";
-import React from "react";
+import React, { useMemo } from "react";
+
+import { orange900, orangeDark } from "@/pages/home";
 
 import backgroundImageDarkMode from "../../../../public/darkModeLibraryBackground.jpg";
 import { useWindowSize } from "../../../hooks/useWindowSize";
@@ -10,28 +12,28 @@ type HeroProps = { headerHeight: number; headerHeightMobile: number; onApply: ()
 
 // TODO: remove onApply
 const Hero = ({ headerHeight, headerHeightMobile }: HeroProps) => {
-  const { width } = useWindowSize({ initialHeight: 1000, initialWidth: 0 });
+  const { width, height } = useWindowSize({ initialHeight: 1000, initialWidth: 0 });
 
-  // const getVirtualHeight = useMemo(() => {
-  //   let pos = 0;
-  //   const percentage = 27;
-  //   const imageWidth = 1920;
-  //   const imageHeight = 1450;
+  const getVirtualHeight = useMemo(() => {
+    let pos = 0;
+    const percentage = 27;
+    const imageWidth = 1920;
+    const imageHeight = 1450;
 
-  //   if (width >= height) {
-  //     const virtualHeight = (width * imageHeight) / imageWidth;
-  //     const offset = (virtualHeight - height) / 2;
-  //     pos = (virtualHeight * percentage) / 100;
+    if (width >= height) {
+      const virtualHeight = (width * imageHeight) / imageWidth;
+      const offset = (virtualHeight - height) / 2;
+      pos = (virtualHeight * percentage) / 100;
 
-  //     const tt = pos - offset;
-  //     const desplazamiento = (0.5 * virtualHeight) / 100;
-  //     pos = tt - desplazamiento - 36;
-  //   } else {
-  //     pos = 80;
-  //   }
+      const tt = pos - offset;
+      const desplazamiento = (0.5 * virtualHeight) / 100;
+      pos = tt - desplazamiento - 36;
+    } else {
+      pos = 80;
+    }
 
-  //   return pos;
-  // }, [height, width]);
+    return pos;
+  }, [height, width]);
 
   return (
     <Stack
@@ -78,7 +80,15 @@ const Hero = ({ headerHeight, headerHeightMobile }: HeroProps) => {
         >
           Optimize Scalable Learning and Teaching
         </Typography>
-        <ul>
+        <Typography
+          color="white"
+          // variant="p"
+          sx={{ textAlign: "center", fontSize: { xs: "36px", md: "30px" }, fontWeight: 400, mb: "24px" }}
+        >
+          Integrate 1Cademy AI Assistant into Your e-Books and Course Curriculum!
+        </Typography>
+
+        {/* <ul>
           <Typography
             color="white"
             variant="h5"
@@ -121,18 +131,20 @@ const Hero = ({ headerHeight, headerHeightMobile }: HeroProps) => {
           >
             Positive reinforcement of learning
           </Typography>
-        </ul>
+        </ul> */}
       </Box>
-      {/* <Button
+      <Button
         variant="contained"
-        onClick={onApply}
+        href="https://1cademy.us/ScheduleInstructor"
+        target="_blank"
+        rel="noopener"
         sx={{
           textTransform: "capitalize",
           bottom: `${getVirtualHeight}px`,
           m: "0px",
-          width: { xs: "100%", md: "107px" },
+          // width: {  },
           maxWidth: { xs: "343px" },
-          height: "60px",
+          height: "40px",
           background: orangeDark,
           fontSize: "18px",
           borderRadius: "26px",
@@ -141,8 +153,8 @@ const Hero = ({ headerHeight, headerHeightMobile }: HeroProps) => {
           },
         }}
       >
-        Apply
-      </Button> */}
+        Schedule a Demo
+      </Button>
     </Stack>
   );
 };
