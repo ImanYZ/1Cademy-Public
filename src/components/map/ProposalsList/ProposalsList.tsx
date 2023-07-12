@@ -35,7 +35,6 @@ type ProposalsListProps = {
 };
 
 const ProposalsList = ({ username, ...props }: ProposalsListProps) => {
-  console.log("props.openProposal", props.openProposal);
   const rateProposalClick = useCallback(
     (proposal: INodeVersion, proposalIdx: number, correct: boolean, wrong: boolean, award: boolean) => {
       return props.rateProposal({
@@ -70,7 +69,7 @@ const ProposalsList = ({ username, ...props }: ProposalsListProps) => {
   const shouldDisableButton = (proposal: any, isAdmin: boolean, username: string) => {
     return !isAdmin || proposal.proposer === username;
   };
-  console.log("props.proposals :: ::", props.proposals);
+
   return (
     <>
       {props.proposals.map((proposal: any, proposalIdx: number) => {
