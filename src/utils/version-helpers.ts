@@ -1769,7 +1769,7 @@ export const versionCreateUpdate = async ({
   nodeData,
   nodeRef,
   nodeType,
-  instantApprove,
+  isApproved,
   courseExist,
   versionId,
   versionData,
@@ -1898,7 +1898,7 @@ export const versionCreateUpdate = async ({
     // the parent node where the pending proposal for the child node exists.
 
     if (courseExist) {
-      versionData.accepted = instantApprove;
+      versionData.accepted = isApproved;
     } else {
       versionData.accepted = isVersionApproved({ corrects: versionCorrects, wrongs: versionWrongs, nodeData })
         ? true
