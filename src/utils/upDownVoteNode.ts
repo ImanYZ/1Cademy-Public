@@ -22,6 +22,7 @@ import {
 import { IActionTrack } from "src/types/IActionTrack";
 import { IUser } from "src/types/IUser";
 import { IComReputationUpdates } from "./reputations";
+import { checkInstantDeleteForNode } from "./course-helpers";
 
 export const setOrIncrementNotificationNums = async ({
   batch,
@@ -116,9 +117,20 @@ export const UpDownVoteNode = async ({
     correctChange = !wrong && correct ? -1 : 0;
     wrongChange = wrong ? -1 : 1;
   }
+  const { courseExist, instantDelete } = await checkInstantDeleteForNode(nodeData?.tagIds || [], uname, nodeId);
+  let willRemoveNode = false;
+  if (courseExist) {
+    willRemoveNode = instantDelete;
+  } else {
+    willRemoveNode = doNeedToDeleteNode(
+      nodeData.corrects + correctChange,
+      nodeData.wrongs + wrongChange,
+      !!nodeData?.locked
+    );
+  }
   //  if the new change yields node with more downvotes than upvotes, DELETE
   // node should not be deleted if its a locked node
-  if (doNeedToDeleteNode(nodeData.corrects + correctChange, nodeData.wrongs + wrongChange, !!nodeData?.locked)) {
+  if (willRemoveNode) {
     // signal search about deletion of node
     await indexNodeChange(nodeId, nodeData.title, "DELETE");
 

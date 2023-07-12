@@ -7,7 +7,7 @@ import { INodeType } from "src/types/INodeType";
 import { IQuestionChoice } from "src/types/IQuestionChoice";
 import { IUser } from "src/types/IUser";
 import { IUserNode } from "src/types/IUserNode";
-import { updateStatsOnProposal } from "src/utils/course-helpers";
+import { checkInstantApprovalForProposal, updateStatsOnProposal } from "src/utils/course-helpers";
 import { detach } from "src/utils/helpers";
 import { IComReputationUpdates } from "src/utils/reputations";
 import { generateTagsOfTagsWithNodes, signalNodeToTypesense, updateNodeContributions } from "src/utils/version-helpers";
@@ -143,11 +143,14 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
     if (req.body.data.nodeType === "Question") {
       newVersion.choices = req.body.data.choices;
     }
-    const parentNodeData = await isVersionApproved({
-      corrects: newVersion.corrects,
-      wrongs: newVersion.wrongs,
-      nodeData,
-    });
+    const instantApprove = await checkInstantApprovalForProposal(nodeData?.tagIds || [], userData.uname);
+    const parentNodeData = instantApprove
+      ? nodeData
+      : await isVersionApproved({
+          corrects: newVersion.corrects,
+          wrongs: newVersion.wrongs,
+          nodeData,
+        });
 
     // TODO: i think we should run transaction here
     const reputationTypes: string[] = ["All Time", "Monthly", "Weekly", "Others", "Others Monthly", "Others Weekly"];
