@@ -4236,6 +4236,8 @@ const Notebook = ({}: NotebookProps) => {
               user: user.uname,
               admin: proposal.proposer,
               aImgUrl: proposal.imageUrl,
+              notebooks: [selectedNotebookId],
+              expands: [true],
               aChooseUname: proposal.chooseUname,
               aFullname: proposal.fullname,
               visible: true,
