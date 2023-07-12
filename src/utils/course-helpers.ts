@@ -1398,7 +1398,7 @@ export const checkInstantApprovalForProposalVote = async (
   }
 
   return {
-    courseExist: false,
+    courseExist: true,
     instantApprove: true,
   };
 };
