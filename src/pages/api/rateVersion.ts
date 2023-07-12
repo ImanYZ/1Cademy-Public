@@ -219,16 +219,14 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         wrongs: versionData.wrongs + wrong,
         nodeData,
       });
-
-      const instantApprove =
-        correct === 1
-          ? await checkInstantApprovalForProposalVote(
-              nodeData?.tagIds || [],
-              uname,
-              nodeType as INodeType,
-              req.body.versionId
-            )
-          : false;
+      const { courseExist, instantApprove }: { courseExist: boolean; instantApprove: boolean } =
+        await checkInstantApprovalForProposalVote(
+          nodeData?.tagIds || [],
+          uname,
+          nodeType as INodeType,
+          req.body.versionId
+        );
+      const _instantApprove = correct === 1 ? instantApprove : false;
 
       //  if user already has an interaction with the version
       await versionCreateUpdate({
@@ -238,7 +236,8 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         nodeData,
         nodeRef,
         nodeType: nodeType,
-        instantApprove,
+        instantApprove: _instantApprove,
+        courseExist,
         versionId: req.body.versionId,
         versionData,
         newVersion: false,

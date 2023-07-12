@@ -1360,7 +1360,10 @@ export const checkInstantApprovalForProposalVote = async (
 ) => {
   const semestersByIds = await getSemestersByIds(tagIds);
   if (!Object.keys(semestersByIds).length) {
-    return false;
+    return {
+      courseExist: false,
+      instantApprove: false,
+    };
   }
   const { userVersionsColl } = getTypedCollections({ nodeType: verisonType });
 
@@ -1387,17 +1390,26 @@ export const checkInstantApprovalForProposalVote = async (
   for (const semesterId in semestersByIds) {
     const semester = semestersByIds[semesterId];
     if (!semester.instructors.some(instructor => instructorVotes[instructor])) {
-      return false;
+      return {
+        courseExist: true,
+        instantApprove: false,
+      };
     }
   }
 
-  return true;
+  return {
+    courseExist: false,
+    instantApprove: true,
+  };
 };
 
 export const checkInstantDeleteForNode = async (tagIds: string[], uname: string, nodeId: string) => {
   const semestersByIds = await getSemestersByIds(tagIds);
   if (!Object.keys(semestersByIds).length) {
-    return false;
+    return {
+      courseExist: false,
+      instantDelete: true,
+    };
   }
   const userNodes = await db.collection("userNodes").where("node", "==", nodeId).get();
 
@@ -1422,8 +1434,14 @@ export const checkInstantDeleteForNode = async (tagIds: string[], uname: string,
   for (const semesterId in semestersByIds) {
     const semester = semestersByIds[semesterId];
     if (!semester.instructors.some(instructor => instructorVotes[instructor])) {
-      return false;
+      return {
+        courseExist: true,
+        instantDelete: false,
+      };
     }
   }
-  return true;
+  return {
+    courseExist: true,
+    instantDelete: true,
+  };
 };

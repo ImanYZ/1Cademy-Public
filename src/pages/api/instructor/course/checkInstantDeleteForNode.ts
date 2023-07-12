@@ -10,8 +10,8 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
     const { uname } = req?.body?.data?.user?.userData as IUser;
     const nodeDoc = await db.collection("nodes").doc(nodeId).get();
     const tagIds = nodeDoc.data()?.tagIds;
-    const canInstantDelete = await checkInstantDeleteForNode(tagIds, uname, nodeId);
-    return res.status(200).json({ canInstantDelete });
+    const { courseExist, instantDelete } = await checkInstantDeleteForNode(tagIds, uname, nodeId);
+    return res.status(200).json({ courseExist, instantDelete });
   } catch (error) {
     return res.status(500).json({ error: true });
   }

@@ -3113,7 +3113,8 @@ const Notebook = ({}: NotebookProps) => {
       event.currentTarget.blur();
       lastNodeOperation.current = { name: "upvote", data: "" };
     },
-    [db, getMapGraph, nodeBookDispatch, setNodeParts, user]
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [getMapGraph, setNodeParts]
   );
 
   const wrongNode = useCallback(
@@ -3127,105 +3128,120 @@ const Notebook = ({}: NotebookProps) => {
       corrects: number,
       locked: boolean
     ) => {
-      if (notebookRef.current.choosingNode) return;
+      try {
+        if (notebookRef.current.choosingNode) return;
 
-      let deleteOK = true;
-      notebookRef.current.selectedNode = nodeId;
-      nodeBookDispatch({ type: "setSelectedNode", payload: nodeId });
+        let deleteOK = true;
+        notebookRef.current.selectedNode = nodeId;
+        nodeBookDispatch({ type: "setSelectedNode", payload: nodeId });
 
-      const correctChange = !wrong && correct ? -1 : 0;
-      const wrongChange = wrong ? -1 : 1;
-      const _corrects = corrects + correctChange;
-      const _wrongs = wrongs + wrongChange;
+        const correctChange = !wrong && correct ? -1 : 0;
+        const wrongChange = wrong ? -1 : 1;
+        const _corrects = corrects + correctChange;
+        const _wrongs = wrongs + wrongChange;
 
-      setNodeParts(nodeId, node => {
-        return { ...node, disableVotes: true };
-      });
-      const { canInstantDelete }: { canInstantDelete: boolean } = await Post(
-        "/api/instructor/course/checkInstantDeleteForNode",
-        {
-          nodeId,
-        }
-      );
-      setNodeParts(nodeId, node => {
-        return { ...node, disableVotes: false };
-      });
-
-      setGraph(graph => {
-        const updatedNodeIds: string[] = [nodeId];
-        const node = graph.nodes[nodeId];
-
-        const willRemoveNode = canInstantDelete || doNeedToDeleteNode(_corrects, _wrongs, locked);
-
-        lastNodeOperation.current = { name: "downvote", data: willRemoveNode ? "removed" : "" };
-        if (willRemoveNode) {
-          if (node?.children.length > 0) {
-            window.alert(
-              "To be able to delete this node, you should first delete its children or move them under other parent node."
-            );
-            deleteOK = false;
-          } else {
-            deleteOK = window.confirm("You are going to permanently delete this node by downvoting it. Are you sure?");
-          }
-        }
-
-        if (!deleteOK) return graph;
-
-        if (node?.locked) return graph;
-        generateReputationSignal(db, node, user, wrongChange, "Wrong", nodeId, setReputationSignal);
-
-        let nodes = graph.nodes;
-        let edges = graph.edges;
-
-        if (willRemoveNode) {
-          edges = removeDagAllEdges(g.current, nodeId, edges, updatedNodeIds);
-          nodes = removeDagNode(g.current, nodeId, nodes);
-
-          node.parents.forEach(cur => {
-            const newChildren = nodes[cur.node].children.filter(c => c.node !== nodeId);
-            nodes[cur.node].children = newChildren;
-          });
-          node.children.forEach(cur => {
-            const newParents = nodes[cur.node].parents.filter(c => c.node !== nodeId);
-            nodes[cur.node].children = newParents;
-          });
-
-          notebookRef.current.selectedNode = node.parents[0]?.node ?? null;
-          updatedNodeIds.push(notebookRef.current.selectedNode!);
-          node.parents.forEach(c => updatedNodeIds.push(c.node));
-          nodeBookDispatch({ type: "setSelectedNode", payload: node.parents[0]?.node ?? null });
-        } else {
-          nodes[nodeId] = {
-            ...node,
-            wrong: !wrong,
-            correct: false,
-            wrongs: _wrongs,
-            corrects: _corrects,
-            disableVotes: true,
-          };
-        }
-
-        (async () => {
-          try {
-            await idToken();
-            await getMapGraph(`/wrongNode/${nodeId}`);
-          } catch (e) {}
-
-          if (!willRemoveNode) {
-            setNodeParts(nodeId, node => {
-              return { ...node, disableVotes: false };
-            });
-          }
-        })();
-
-        setNodeUpdates({
-          nodeIds: updatedNodeIds,
-          updatedAt: new Date(),
+        setNodeParts(nodeId, node => {
+          return { ...node, disableVotes: true };
         });
-        return { nodes, edges };
-      });
+        const { courseExist, instantDelete }: { courseExist: boolean; instantDelete: boolean } = await Post(
+          "/instructor/course/checkInstantDeleteForNode",
+          {
+            nodeId,
+          }
+        );
+        console.log(instantDelete);
+        setNodeParts(nodeId, node => {
+          return { ...node, disableVotes: false };
+        });
+
+        setGraph(graph => {
+          const updatedNodeIds: string[] = [nodeId];
+          const node = graph.nodes[nodeId];
+          let willRemoveNode = false;
+          if (courseExist) {
+            willRemoveNode = instantDelete;
+          } else {
+            willRemoveNode = doNeedToDeleteNode(_corrects, _wrongs, locked);
+          }
+          lastNodeOperation.current = { name: "downvote", data: willRemoveNode ? "removed" : "" };
+          if (willRemoveNode) {
+            if (node?.children.length > 0) {
+              window.alert(
+                "To be able to delete this node, you should first delete its children or move them under other parent node."
+              );
+              deleteOK = false;
+            } else {
+              deleteOK = window.confirm(
+                "You are going to permanently delete this node by downvoting it. Are you sure?"
+              );
+            }
+          }
+
+          if (!deleteOK) return graph;
+
+          if (node?.locked) return graph;
+          console.log("nodeId", nodeId, node);
+          if (!node) return graph;
+          generateReputationSignal(db, node, user, wrongChange, "Wrong", nodeId, setReputationSignal);
+
+          let nodes = graph.nodes;
+          let edges = graph.edges;
+
+          if (willRemoveNode) {
+            console.log("nodeId 1", willRemoveNode);
+            edges = removeDagAllEdges(g.current, nodeId, edges, updatedNodeIds);
+            nodes = removeDagNode(g.current, nodeId, nodes);
+
+            node.parents.forEach(cur => {
+              const newChildren = nodes[cur.node].children.filter(c => c.node !== nodeId);
+              nodes[cur.node].children = newChildren;
+            });
+            node.children.forEach(cur => {
+              const newParents = nodes[cur.node].parents.filter(c => c.node !== nodeId);
+              nodes[cur.node].children = newParents;
+            });
+
+            notebookRef.current.selectedNode = node.parents[0]?.node ?? null;
+            updatedNodeIds.push(notebookRef.current.selectedNode!);
+            node.parents.forEach(c => updatedNodeIds.push(c.node));
+            nodeBookDispatch({ type: "setSelectedNode", payload: node.parents[0]?.node ?? null });
+          } else {
+            nodes[nodeId] = {
+              ...node,
+              wrong: !wrong,
+              correct: false,
+              wrongs: _wrongs,
+              corrects: _corrects,
+              disableVotes: true,
+            };
+          }
+
+          (async () => {
+            try {
+              console.log("wrongNode api call");
+              await idToken();
+              await getMapGraph(`/wrongNode/${nodeId}`);
+            } catch (e) {}
+
+            if (!willRemoveNode) {
+              setNodeParts(nodeId, node => {
+                return { ...node, disableVotes: false };
+              });
+            }
+          })();
+
+          setNodeUpdates({
+            nodeIds: updatedNodeIds,
+            updatedAt: new Date(),
+          });
+          return { nodes, edges };
+        });
+      } catch (error) {
+        console.log(error);
+      }
     },
-    [db, getMapGraph, nodeBookDispatch, setNodeParts, user]
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [getMapGraph, setNodeParts]
   );
 
   /////////////////////////////////////////////////////
@@ -3833,16 +3849,8 @@ const Notebook = ({}: NotebookProps) => {
         return { nodes: newNodes, edges: newEdges };
       });
     },
-    [
-      user,
-      reloadPermanentGraph,
-      db,
-      selectedNotebookId,
-      allTags,
-      settings.showClusterOptions,
-      nodeBookDispatch,
-      scrollToNode,
-    ]
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [user, reloadPermanentGraph, db, allTags, settings.showClusterOptions, nodeBookDispatch, scrollToNode]
   );
 
   const onNodeTitleBlur = useCallback(
@@ -3858,7 +3866,7 @@ const Notebook = ({}: NotebookProps) => {
   );
 
   const saveProposedChildNode = useCallback(
-    (newNodeId: string, summary: string, reason: string, onComplete: () => void) => {
+    async (newNodeId: string, summary: string, reason: string, onComplete: () => void) => {
       if (!selectedNotebookId) return;
 
       devLog("SAVE_PROPOSED_CHILD_NODE", { selectedNotebookId, newNodeId, summary, reason });
@@ -3867,6 +3875,12 @@ const Notebook = ({}: NotebookProps) => {
       nodeBookDispatch({ type: "setChoosingNode", payload: null });
       nodeBookDispatch({ type: "setChosenNode", payload: null });
 
+      const { instantApprove }: { instantApprove: boolean } = await Post(
+        "/instructor/course/checkInstantApprovalForProposal",
+        {
+          nodeId: newNodeId,
+        }
+      );
       setGraph(graph => {
         const updatedNodeIds: string[] = [newNodeId];
         const newNode = graph.nodes[newNodeId];
@@ -3954,7 +3968,8 @@ const Notebook = ({}: NotebookProps) => {
         delete postData.height;
 
         const parentNode = graph.nodes[newNode.parents[0].node];
-        const willBeApproved = isVersionApproved({ corrects: 1, wrongs: 0, nodeData: parentNode });
+
+        const willBeApproved = instantApprove || isVersionApproved({ corrects: 1, wrongs: 0, nodeData: parentNode });
 
         const nodePartChanges = {
           editable: false,
@@ -4541,24 +4556,28 @@ const Notebook = ({}: NotebookProps) => {
         }
         const updatedNodeIds: string[] = [nodeBookState.selectedNode!, newNodeId];
 
-        const { canInstantApprove }: { canInstantApprove: boolean } = await Post(
-          "/api/instructor/course/checkInstantApprovalForProposalVote",
+        const { courseExist, instantApprove }: { courseExist: boolean; instantApprove: boolean } = await Post(
+          "/instructor/course/checkInstantApprovalForProposalVote",
           {
             nodeId: nodeBookState.selectedNode,
             verisonType: proposalsTemp[proposalIdx],
             versionId: proposalId,
           }
         );
+
         setGraph(({ nodes: oldNodes, edges }) => {
           if (!nodeBookState.selectedNode) return { nodes: oldNodes, edges };
-          if (
-            canInstantApprove ||
-            isVersionApproved({
+          let willBeApproved: boolean = false;
+          if (courseExist) {
+            willBeApproved = instantApprove;
+          } else {
+            willBeApproved = isVersionApproved({
               corrects: proposalsTemp[proposalIdx].corrects,
               wrongs: proposalsTemp[proposalIdx].wrongs,
               nodeData: oldNodes[nodeBookState.selectedNode],
-            })
-          ) {
+            });
+          }
+          if (willBeApproved) {
             proposalsTemp[proposalIdx].accepted = true;
             if (changedNodes.hasOwnProperty(nodeBookState.selectedNode)) {
               delete changedNodes[nodeBookState.selectedNode];
@@ -6290,13 +6309,13 @@ const Notebook = ({}: NotebookProps) => {
       setForcedTutorial(null);
       if (currentStep?.childTargetId) removeStyleFromTarget(currentStep.childTargetId, targetId);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     comLeaderboardOpen,
     currentStep,
     detectAndRemoveTutorial,
     firstLoading,
     focusView.isEnabled,
-    forcedTutorial,
     graph.nodes,
     hideNodeContent,
     nodeBookState.selectedNode,

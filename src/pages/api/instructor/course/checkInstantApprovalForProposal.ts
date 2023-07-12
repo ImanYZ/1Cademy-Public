@@ -2,13 +2,17 @@ import { NextApiRequest, NextApiResponse } from "next";
 import fbAuth from "src/middlewares/fbAuth";
 import { IUser } from "src/types/IUser";
 import { checkInstantApprovalForProposal } from "src/utils/course-helpers";
+import { db } from "@/lib/firestoreServer/admin";
 
 async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
   try {
-    const { tagIds } = req.body;
+    const { nodeId } = req.body;
     const { uname } = req?.body?.data?.user?.userData as IUser;
-    const canInstantApprove = await checkInstantApprovalForProposal(tagIds, uname);
-    return res.status(200).json({ canInstantApprove });
+    const nodeDoc = await db.collection("nodes").doc(nodeId).get();
+    const tagIds = nodeDoc.data()?.tagIds;
+
+    const instantApprove = await checkInstantApprovalForProposal(tagIds, uname);
+    return res.status(200).json({ instantApprove });
   } catch (error) {
     return res.status(500).json({ error: true });
   }
