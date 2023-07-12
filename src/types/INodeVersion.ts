@@ -65,4 +65,8 @@ export type INodeVersion = {
   createdAt: Date | Timestamp;
   tags: string[];
   tagIds: string[];
+  newNodeId?: string;
+  correct?: boolean;
+  wrong?: boolean;
+  award?: boolean;
 };
