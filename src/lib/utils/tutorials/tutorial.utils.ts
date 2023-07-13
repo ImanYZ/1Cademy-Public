@@ -13,7 +13,7 @@ export const getBaseStepConfig = (step: number, max: number): TutorialStep => {
   // DON'T CHANGE THIS, THIS WILL OVERRIDE ALL STEPS 🚨
 
   return {
-    targetId: "",
+    // targetId: "",
     title: "",
     description: null,
     anchor: "",
@@ -27,15 +27,19 @@ export const getBaseStepConfig = (step: number, max: number): TutorialStep => {
   };
 };
 
-export const getTutorialTargetIdFromCurrentStep = (currentStep: TutorialStep | null, selectedNode: string | null) => {
+export const getTutorialTargetIdFromCurrentStep = (
+  currentStep: TutorialStep | null,
+  dynamicTargetId: string | null
+) => {
   if (!currentStep) return undefined;
-  if (currentStep?.anchor) {
-    if (currentStep.targetId) return `${currentStep.targetId}-${currentStep?.childTargetId}`;
-    return currentStep.childTargetId;
-  }
-  if (currentStep?.targetId) return `${currentStep.targetId}-${currentStep?.childTargetId}`;
-  if (!selectedNode) return undefined;
-  return currentStep?.childTargetId ? `${selectedNode}-${currentStep?.childTargetId}` : selectedNode;
+  // if (currentStep?.anchor) {
+  if (!currentStep?.childTargetId) return undefined;
+  return dynamicTargetId ? `${dynamicTargetId}-${currentStep.childTargetId}` : currentStep.childTargetId;
+  // }
+  //  // if (currentStep?.targetId) return `${currentStep.targetId}-${currentStep?.childTargetId}`;
+  // if (dynamicTargetId) return `${dynamicTargetId}-${currentStep?.childTargetId}`;
+  // if (!dynamicTargetId) return undefined;
+  // return currentStep?.childTargetId ? `${dynamicTargetId}-${currentStep?.childTargetId}` : dynamicTargetId;
 };
 
 export const removeStyleFromTarget = (targetId: string) => {

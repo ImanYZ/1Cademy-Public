@@ -80,7 +80,7 @@ import { getAssistantExtensionId } from "@/lib/utils/assistant.utils";
 import { getTutorialTargetIdFromCurrentStep, removeStyleFromTarget } from "@/lib/utils/tutorials/tutorial.utils";
 
 import LoadingImg from "../../public/animated-icon-1cademy.gif";
-import { TooltipTutorial } from "../components/interactiveTutorial/TooltipTutorial";
+import { TargetClientRect, TooltipTutorial } from "../components/interactiveTutorial/TooltipTutorial";
 import { Assistant } from "../components/map/Assistant";
 // import nodesData from "../../testUtils/mockCollections/nodes.data";
 // import { Tutorial } from "../components/interactiveTutorial/Tutorial";
@@ -98,7 +98,7 @@ import { UserStatus } from "../components/practiceTool/UserStatus";
 import { MemoizedTutorialTableOfContent } from "../components/tutorial/TutorialTableOfContent";
 import { NodeBookProvider, useNodeBook } from "../context/NodeBookContext";
 import { detectElements as detectHtmlElements } from "../hooks/detectElements";
-import { getTutorialStep, TargetClientRect, useInteractiveTutorial } from "../hooks/useInteractiveTutorial3";
+import { getTutorialStep, useInteractiveTutorial } from "../hooks/useInteractiveTutorial3";
 import { useMemoizedCallback } from "../hooks/useMemoizedCallback";
 import { useWindowSize } from "../hooks/useWindowSize";
 import { useWorkerQueue } from "../hooks/useWorkerQueue";
@@ -864,6 +864,7 @@ const Notebook = ({}: NotebookProps) => {
             userNodeData.updatedAt = Timestamp.fromDate(new Date());
             delete userNodeData?.visible;
             delete userNodeData?.open;
+            console.log("tt:update", userNodeData);
             batch.update(userNodeRef, userNodeData);
           } else {
             userNodeData = {
@@ -881,6 +882,7 @@ const Notebook = ({}: NotebookProps) => {
               notebooks: [selectedNotebookId],
               expands: [expanded],
             };
+            console.log("tt:create:", userNodeData);
             userNodeRef = collection(db, "userNodes");
             const preloadedUserNodeId = preLoadedNodesRef.current[nodeId]?.userNodeId;
             preloadedUserNodeId

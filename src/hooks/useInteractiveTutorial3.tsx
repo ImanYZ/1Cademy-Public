@@ -1,5 +1,5 @@
 import { doc, getDoc, getFirestore } from "firebase/firestore";
-import { ReactNode, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { KNOWLEDGE_GRAPH_CONFIG } from "@/lib/utils/tutorials/knowledgeGraphSteps";
 import { NAVIGATION_STEPS_COMPLETE } from "@/lib/utils/tutorials/navigationTutorialSteps";
@@ -65,19 +65,6 @@ import {
 import { TutorialStep, TutorialTypeKeys, UserTutorials } from "../nodeBookTypes";
 
 export const DEFAULT_NUMBER_OF_TRIES = 5;
-
-export type Step = {
-  targetId: string;
-  childTargetId?: string;
-  title: string;
-  description: ReactNode;
-  tooltipPos: "top" | "bottom" | "left" | "right";
-  anchor: string;
-  callback?: () => void;
-  disabledElements: string[];
-};
-
-export type TargetClientRect = { width: number; height: number; top: number; left: number };
 
 type useInteractiveTutorialProps = {
   user: User | null;
@@ -399,7 +386,6 @@ export const useInteractiveTutorial = ({ user }: useInteractiveTutorialProps) =>
       if (!currentStep) return null;
       if (prevTutorial.step >= prevTutorial.steps.length) return prevTutorial;
 
-      // if (currentStep?.childTargetId) removeStyleFromTarget(currentStep.childTargetId, targetId);
       const newStep = prevTutorial.step + 1;
       setUserTutorial(prevUserTutorial => ({
         ...prevUserTutorial,
@@ -415,7 +401,6 @@ export const useInteractiveTutorial = ({ user }: useInteractiveTutorialProps) =>
       if (!currentStep) return null;
       if (prevTutorial.step <= 1) return prevTutorial;
 
-      // if (currentStep?.childTargetId) removeStyleFromTarget(currentStep.childTargetId, targetId);
       const newStep = prevTutorial.step - 1;
       setUserTutorial(prevUserTutorial => ({
         ...prevUserTutorial,
