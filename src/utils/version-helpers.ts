@@ -1769,8 +1769,9 @@ export const versionCreateUpdate = async ({
   nodeData,
   nodeRef,
   nodeType,
-  isApproved,
+  instantApprove,
   courseExist,
+  isInstructor,
   versionId,
   versionData,
   // Boolean
@@ -1894,8 +1895,8 @@ export const versionCreateUpdate = async ({
     // The data of the original node that an improvement proposal is on it, or
     // the parent node where the pending proposal for the child node exists.
 
-    if (courseExist) {
-      versionData.accepted = isApproved;
+    if (courseExist && isInstructor) {
+      versionData.accepted = instantApprove;
     } else {
       versionData.accepted = isVersionApproved({ corrects: versionCorrects, wrongs: versionWrongs, nodeData })
         ? true
@@ -2498,7 +2499,7 @@ export const addToPendingPropsNumsExcludingVoters = async ({
 
 export const signalFlashcardChanges = async ({ nodeId, batch, writeCounts, currentTimestamp }: any) => {
   let newBatch = batch;
-  console.log("signalFlashcardChanges");
+
   const nodeDoc = await db.collection("nodes").doc(nodeId).get();
   const nodeData = nodeDoc.data();
   if (nodeData && nodeData.hasOwnProperty("linkedFlashcards")) {

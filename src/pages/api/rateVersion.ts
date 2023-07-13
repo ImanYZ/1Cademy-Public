@@ -151,6 +151,10 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         t,
       }));
 
+      if (!versionData.nodeImage) {
+        versionData.nodeImage = "";
+      }
+
       const previouslyAccepted = versionData.accepted;
       let childType = "childType" in versionData ? versionData.childType : false;
 
@@ -238,7 +242,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         nodeData,
         nodeRef,
         nodeType: nodeType,
-        isApproved,
+        instantApprove: isApproved,
         courseExist,
         versionId: req.body.versionId,
         versionData,

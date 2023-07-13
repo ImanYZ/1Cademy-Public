@@ -12,7 +12,7 @@ export const mapNodeToSimpleNode = (cur: Node, username: string): SimpleNode2 =>
   corrects: cur.corrects ?? 0,
   wrongs: cur.wrongs ?? 0,
   tags: cur.tags,
-  contributors: Object.keys(cur.contributors).map(key => ({
+  contributors: Object.keys(cur.contributors || {}).map(key => ({
     fullName: cur.contributors[key].fullname,
     imageUrl: cur.contributors[key].imageUrl,
     username: username,

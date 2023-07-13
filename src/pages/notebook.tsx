@@ -3160,7 +3160,7 @@ const Notebook = ({}: NotebookProps) => {
             nodeId,
           }
         );
-        console.log(instantDelete);
+
         setNodeParts(nodeId, node => {
           return { ...node, disableVotes: false };
         });
@@ -3559,7 +3559,7 @@ const Notebook = ({}: NotebookProps) => {
   );
 
   const saveProposedImprovement = useCallback(
-    (summary: string, reason: string, onFail: () => void) => {
+    async (summary: string, reason: string, onFail: () => void) => {
       if (!notebookRef.current.selectedNode) return;
 
       notebookRef.current.chosenNode = null;
@@ -3567,7 +3567,12 @@ const Notebook = ({}: NotebookProps) => {
       nodeBookDispatch({ type: "setChosenNode", payload: null });
       nodeBookDispatch({ type: "setChoosingNode", payload: null });
       let referencesOK = true;
-
+      const { isInstructor, instantApprove }: { isInstructor: boolean; instantApprove: boolean } = await Post(
+        "/instructor/course/checkInstantApprovalForProposal",
+        {
+          nodeId: notebookRef.current.selectedNode,
+        }
+      );
       setUpdatedLinks(updatedLinks => {
         setGraph(graph => {
           const selectedNodeId = notebookRef.current.selectedNode!;
@@ -3680,7 +3685,8 @@ const Notebook = ({}: NotebookProps) => {
           delete postData.top;
           delete postData.height;
 
-          let willBeApproved = isVersionApproved({ corrects: 1, wrongs: 0, nodeData: newNode, instructor });
+          let willBeApproved =
+            (instantApprove && isInstructor) || isVersionApproved({ corrects: 1, wrongs: 0, nodeData: newNode });
           lastNodeOperation.current = { name: "ProposeProposals", data: willBeApproved ? "accepted" : "notAccepted" };
 
           if (willBeApproved) {
@@ -3886,7 +3892,7 @@ const Notebook = ({}: NotebookProps) => {
       nodeBookDispatch({ type: "setChoosingNode", payload: null });
       nodeBookDispatch({ type: "setChosenNode", payload: null });
 
-      const { instantApprove }: { instantApprove: boolean } = await Post(
+      const { courseExist, instantApprove }: { courseExist: boolean; instantApprove: boolean } = await Post(
         "/instructor/course/checkInstantApprovalForProposal",
         {
           nodeId: newNodeId,
@@ -3980,7 +3986,12 @@ const Notebook = ({}: NotebookProps) => {
 
         const parentNode = graph.nodes[newNode.parents[0].node];
 
-        const willBeApproved = instantApprove || isVersionApproved({ corrects: 1, wrongs: 0, nodeData: parentNode });
+        let willBeApproved = instantApprove;
+        if (courseExist) {
+          willBeApproved = instantApprove;
+        } else {
+          willBeApproved = isVersionApproved({ corrects: 1, wrongs: 0, nodeData: parentNode });
+        }
 
         const nodePartChanges = {
           editable: false,
@@ -4214,7 +4225,6 @@ const Notebook = ({}: NotebookProps) => {
   // Inner functions
   const selectProposal = useMemoizedCallback(
     (event, proposal, newNodeId: string) => {
-      debugger;
       console.log("newNodeId", newNodeId);
       if (proposalTimer.current) {
         clearTimeout(proposalTimer.current);
@@ -4276,7 +4286,7 @@ const Notebook = ({}: NotebookProps) => {
               wrongs: 0,
               corrects: 1,
               content: proposal.content,
-              nodeImage: proposal.nodeImage,
+              nodeImage: proposal.nodeImage || "",
               nodeVideo: proposal.nodeVideo,
               videoStartTime: proposal.nodeVideoStartTime,
               videoEndTime: proposal.nodeVideoEndTime,
@@ -4495,7 +4505,6 @@ const Notebook = ({}: NotebookProps) => {
 
   const rateProposal = useCallback(
     async ({ proposals, setProposals, proposalId, proposalIdx, correct, wrong, award, newNodeId }: RateProosale) => {
-      debugger;
       if (!selectedNotebookId) return;
       if (!user) return;
       if (!nodeBookState.selectedNode) return;
