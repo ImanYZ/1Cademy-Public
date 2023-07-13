@@ -11,8 +11,8 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
     const nodeDoc = await db.collection("nodes").doc(nodeId).get();
     const tagIds = nodeDoc.data()?.tagIds;
 
-    const instantApprove = await checkInstantApprovalForProposal(tagIds, uname);
-    return res.status(200).json({ instantApprove });
+    const { isInstructor, courseExist, instantApprove } = await checkInstantApprovalForProposal(tagIds, uname);
+    return res.status(200).json({ isInstructor, courseExist, instantApprove });
   } catch (error) {
     return res.status(500).json({ error: true });
   }

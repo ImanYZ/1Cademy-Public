@@ -2,11 +2,14 @@ import { NextApiRequest, NextApiResponse } from "next";
 import fbAuth from "src/middlewares/fbAuth";
 import { IUser } from "src/types/IUser";
 import { checkInstantApprovalForProposalVote } from "src/utils/course-helpers";
+import { db } from "@/lib/firestoreServer/admin";
 
 async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
   try {
-    const { tagIds, verisonType, versionId } = req.body;
+    const { nodeId, verisonType, versionId } = req.body;
     const { uname } = req?.body?.data?.user?.userData as IUser;
+    const nodeDoc = await db.collection("nodes").doc(nodeId).get();
+    const tagIds = nodeDoc.data()?.tagIds;
     const { courseExist, instantApprove } = await checkInstantApprovalForProposalVote(
       tagIds,
       uname,
