@@ -33,8 +33,11 @@ export const getTutorialTargetIdFromCurrentStep = (
 ) => {
   if (!currentStep) return undefined;
   // if (currentStep?.anchor) {
-  if (!currentStep?.childTargetId) return undefined;
-  return dynamicTargetId ? `${dynamicTargetId}-${currentStep.childTargetId}` : currentStep.childTargetId;
+  if (!currentStep.childTargetId && dynamicTargetId) return dynamicTargetId;
+  if (!dynamicTargetId && currentStep.childTargetId) return currentStep.childTargetId;
+  if (currentStep.childTargetId && dynamicTargetId)
+    return dynamicTargetId ? `${dynamicTargetId}-${currentStep.childTargetId}` : currentStep.childTargetId;
+  return undefined;
   // }
   //  // if (currentStep?.targetId) return `${currentStep.targetId}-${currentStep?.childTargetId}`;
   // if (dynamicTargetId) return `${dynamicTargetId}-${currentStep?.childTargetId}`;
