@@ -76,6 +76,7 @@ import { useHover } from "@/hooks/userHover";
 import { useTagsTreeView } from "@/hooks/useTagsTreeView";
 import { DESIGN_SYSTEM_COLORS } from "@/lib/theme/colors";
 import { getAssistantExtensionId } from "@/lib/utils/assistant.utils";
+import { getTutorialTargetIdFromCurrentStep, removeStyleFromTarget } from "@/lib/utils/tutorials/tutorial.utils";
 
 import LoadingImg from "../../public/animated-icon-1cademy.gif";
 import { TooltipTutorial } from "../components/interactiveTutorial/TooltipTutorial";
@@ -96,12 +97,7 @@ import { UserStatus } from "../components/practiceTool/UserStatus";
 import { MemoizedTutorialTableOfContent } from "../components/tutorial/TutorialTableOfContent";
 import { NodeBookProvider, useNodeBook } from "../context/NodeBookContext";
 import { detectElements as detectHtmlElements } from "../hooks/detectElements";
-import {
-  getTutorialStep,
-  removeStyleFromTarget,
-  TargetClientRect,
-  useInteractiveTutorial,
-} from "../hooks/useInteractiveTutorial3";
+import { getTutorialStep, TargetClientRect, useInteractiveTutorial } from "../hooks/useInteractiveTutorial3";
 import { useMemoizedCallback } from "../hooks/useMemoizedCallback";
 import { useWindowSize } from "../hooks/useWindowSize";
 import { useWorkerQueue } from "../hooks/useWorkerQueue";
@@ -386,8 +382,8 @@ const Notebook = ({}: NotebookProps) => {
     onNextStep,
     onPreviousStep,
     isPlayingTheTutorialRef,
-    setTargetId,
-    targetId,
+    setDynamicTargetId,
+    dynamicTargetId,
     userTutorialLoaded,
     setUserTutorial,
     userTutorial,
@@ -568,48 +564,68 @@ const Notebook = ({}: NotebookProps) => {
   useEffect(() => {
     const getTooltipClientRect = () => {
       if (!currentStep) return setTargetClientRect({ width: 0, height: 0, top: 0, left: 0 });
+      if (!tutorialTargetId) return setTargetClientRect({ width: 0, height: 0, top: 0, left: 0 });
+      devLog("GET_TOOLTIP_CLIENT_RECT", { currentStep, targetId: dynamicTargetId, tutorialTargetId });
 
-      devLog("GET_TOOLTIP_CLIENT_RECT", { currentStep, targetId });
+      const targetElement = document.getElementById(tutorialTargetId);
+      if (!targetElement) return;
 
+      targetElement.classList.add(`tutorial-target-${currentStep.outline}`);
       if (currentStep.anchor) {
-        if (!currentStep.childTargetId) return setTargetClientRect({ width: 0, height: 0, top: 0, left: 0 });
-
-        const targetElement = document.getElementById(currentStep.childTargetId);
-        if (!targetElement) return;
-
-        targetElement.classList.add(`tutorial-target-${currentStep.outline}`);
         const { width, height, top, left } = targetElement.getBoundingClientRect();
-
         setTargetClientRect({ width, height, top, left });
         return;
       }
 
-      // console.log(22);
-      if (!targetId) return;
-
-      // console.log(23);
-      const thisNode = graph.nodes[targetId];
-      if (!thisNode) return;
-
-      // console.log(24);
-      let { top, left, width = NODE_WIDTH, height = 0 } = thisNode;
       let offsetChildTop = 0;
       let offsetChildLeft = 0;
+      const thisNode = graph.nodes[dynamicTargetId];
+      if (!thisNode) return;
 
+      let { top, left, width = NODE_WIDTH, height = 0 } = thisNode;
       if (currentStep.childTargetId) {
-        const targetElement = document.getElementById(`${targetId}-${currentStep.childTargetId}`);
-        if (!targetElement) return;
-
-        targetElement.classList.add(`tutorial-target-${currentStep.outline}`);
-
         const { offsetTop, offsetLeft, clientWidth, clientHeight } = targetElement;
-        // const { height: childrenHeight, width: childrenWidth } = targetElement.getBoundingClientRect();
-
         offsetChildTop = offsetTop + currentStep.topOffset;
         offsetChildLeft = offsetLeft + currentStep.leftOffset;
         height = clientHeight;
         width = clientWidth;
       }
+
+      // if (currentStep.anchor) {
+      //   if (!currentStep.childTargetId) return setTargetClientRect({ width: 0, height: 0, top: 0, left: 0 });
+
+      //   const targetElement = document.getElementById(currentStep.childTargetId);
+      //   if (!targetElement) return;
+
+      //   targetElement.classList.add(`tutorial-target-${currentStep.outline}`);
+      //   const { width, height, top, left } = targetElement.getBoundingClientRect();
+
+      //   setTargetClientRect({ width, height, top, left });
+      //   return;
+      // }
+
+      // if (!targetId) return;
+
+      // const thisNode = graph.nodes[targetId];
+      // if (!thisNode) return;
+
+      // let { top, left, width = NODE_WIDTH, height = 0 } = thisNode;
+      // let offsetChildTop = 0;
+      // let offsetChildLeft = 0;
+
+      // if (currentStep.childTargetId) {
+      //   const targetElement = document.getElementById(`${targetId}-${currentStep.childTargetId}`);
+      //   if (!targetElement) return;
+
+      //   targetElement.classList.add(`tutorial-target-${currentStep.outline}`);
+
+      //   const { offsetTop, offsetLeft, clientWidth, clientHeight } = targetElement;
+
+      //   offsetChildTop = offsetTop + currentStep.topOffset;
+      //   offsetChildLeft = offsetLeft + currentStep.leftOffset;
+      //   height = clientHeight;
+      //   width = clientWidth;
+      // }
       setTargetClientRect({
         top: top + offsetChildTop,
         left: left + offsetChildLeft,
@@ -626,7 +642,7 @@ const Notebook = ({}: NotebookProps) => {
     return () => {
       if (timeoutId) clearTimeout(timeoutId);
     };
-  }, [currentStep, graph.nodes, setTargetClientRect, nodeBookState.selectedNode, targetId, toolbarIsHovered]);
+  }, [currentStep, graph.nodes, setTargetClientRect, nodeBookState.selectedNode, dynamicTargetId, toolbarIsHovered]);
 
   const onCompleteWorker = useCallback(() => {
     setGraph(graph => {
@@ -4689,16 +4705,25 @@ const Notebook = ({}: NotebookProps) => {
     setOpenProgressBarMenu(false);
   }, []);
 
+  const tutorialTargetId = useMemo(
+    () => getTutorialTargetIdFromCurrentStep(currentStep, dynamicTargetId),
+    [currentStep, dynamicTargetId]
+    // currentStep?.childTargetId
+    //   ? `${nodeBookState.selectedNode}-${currentStep?.childTargetId}`
+    //   : currentStep?.targetId,
+    // [currentStep?.childTargetId, currentStep?.targetId, nodeBookState.selectedNode]
+  );
+
   const onCancelTutorial = useCallback(
     () =>
       setTutorial(p => {
         const previousStep = getTutorialStep(p);
         console.log({ previousStep });
-        if (previousStep?.childTargetId) removeStyleFromTarget(previousStep.childTargetId, targetId); // TODO: check this
+        if (tutorialTargetId) removeStyleFromTarget(tutorialTargetId);
 
         return null;
       }),
-    [setTutorial, targetId]
+    [setTutorial, tutorialTargetId]
   );
 
   const onCloseTableOfContent = useCallback(() => {
@@ -4716,7 +4741,7 @@ const Notebook = ({}: NotebookProps) => {
       skipped: true,
     };
 
-    if (currentStep?.childTargetId) removeStyleFromTarget(currentStep.childTargetId, targetId);
+    if (tutorialTargetId) removeStyleFromTarget(tutorialTargetId);
 
     const userTutorialUpdated = { ...userTutorial, [tutorial.name]: tutorialUpdated };
     const wasForcedTutorial = tutorial.name === forcedTutorial;
@@ -4724,7 +4749,7 @@ const Notebook = ({}: NotebookProps) => {
     setUserTutorial(userTutorialUpdated);
     setOpenSidebar(null);
     setTutorial(null);
-    setTargetId("");
+    setDynamicTargetId("");
 
     if (wasForcedTutorial) setForcedTutorial(null);
 
@@ -4741,13 +4766,23 @@ const Notebook = ({}: NotebookProps) => {
     currentStep,
     tutorial,
     userTutorial,
-    targetId,
+    tutorialTargetId,
     forcedTutorial,
     setUserTutorial,
     setTutorial,
-    setTargetId,
+    setDynamicTargetId,
     db,
   ]);
+
+  const onNextTutorialStep = useCallback(() => {
+    if (tutorialTargetId) removeStyleFromTarget(tutorialTargetId);
+    onNextStep();
+  }, [onNextStep, tutorialTargetId]);
+
+  const onPreviousTutorialStep = useCallback(() => {
+    if (tutorialTargetId) removeStyleFromTarget(tutorialTargetId);
+    onPreviousStep();
+  }, [onPreviousStep, tutorialTargetId]);
 
   const onFinalizeTutorial = useCallback(async () => {
     console.log("first", { user, currentStep, tutorial });
@@ -4755,14 +4790,17 @@ const Notebook = ({}: NotebookProps) => {
     if (!currentStep) return;
     if (!tutorial) return;
 
-    devLog("ON_FINALIZE_TUTORIAL", { childTargetId: currentStep?.childTargetId, targetId }, "TUTORIAL");
+    devLog(
+      "ON_FINALIZE_TUTORIAL",
+      { childTargetId: currentStep?.childTargetId, targetId: dynamicTargetId },
+      "TUTORIAL"
+    );
 
-    if (currentStep?.childTargetId)
-      removeStyleFromTarget(currentStep.childTargetId, currentStep.anchor ? currentStep.targetId : targetId);
+    if (tutorialTargetId) removeStyleFromTarget(tutorialTargetId);
 
     if (tutorial.name === "tmpEditNode") {
       if (currentStep.isClickable) {
-        proposeNodeImprovement(null, targetId);
+        proposeNodeImprovement(null, dynamicTargetId);
       }
       setTutorial(null);
       return;
@@ -4816,7 +4854,7 @@ const Notebook = ({}: NotebookProps) => {
 
     setTutorial(null);
     setUserTutorial(userTutorialUpdated);
-    setTargetId("");
+    setDynamicTargetId("");
     tutorialStateWasSetUpRef.current = false;
 
     if (wasForcedTutorial) setForcedTutorial(null);
@@ -4830,20 +4868,21 @@ const Notebook = ({}: NotebookProps) => {
       await setDoc(tutorialRef, userTutorialUpdated);
     }
   }, [
+    user,
     currentStep,
-    db,
+    tutorial,
+    dynamicTargetId,
+    tutorialTargetId,
+    userTutorial,
     forcedTutorial,
-    onChangeNodePart,
-    openNodeHandler,
-    proposeNewChild,
-    proposeNodeImprovement,
-    setTargetId,
     setTutorial,
     setUserTutorial,
-    targetId,
-    tutorial,
-    user,
-    userTutorial,
+    setDynamicTargetId,
+    db,
+    proposeNodeImprovement,
+    proposeNewChild,
+    onChangeNodePart,
+    openNodeHandler,
   ]);
 
   const tutorialTargetCallback = useMemo(() => {
@@ -4856,23 +4895,6 @@ const Notebook = ({}: NotebookProps) => {
     console.log("44");
     return onFinalizeTutorial;
   }, [currentStep?.isClickable, forcedTutorial, onFinalizeTutorial, onNextStep, tutorial]);
-
-  const tutorialTargetId = useMemo(
-    () => {
-      if (!currentStep) return undefined;
-      if (currentStep?.anchor) {
-        if (currentStep.targetId) return `${currentStep.targetId}-${currentStep?.childTargetId}`;
-        return currentStep.childTargetId;
-      }
-      if (currentStep?.targetId) return `${currentStep.targetId}-${currentStep?.childTargetId}`;
-      return `${nodeBookState.selectedNode}-${currentStep?.childTargetId}`;
-    },
-    [currentStep, nodeBookState.selectedNode]
-    // currentStep?.childTargetId
-    //   ? `${nodeBookState.selectedNode}-${currentStep?.childTargetId}`
-    //   : currentStep?.targetId,
-    // [currentStep?.childTargetId, currentStep?.targetId, nodeBookState.selectedNode]
-  );
 
   /**
    * Detect the trigger to call a tutorial
@@ -4899,7 +4921,7 @@ const Notebook = ({}: NotebookProps) => {
       tutorialStateWasSetUpRef.current = false;
 
       startTutorial(tutorialName);
-      setTargetId(targetId);
+      setDynamicTargetId(targetId);
 
       nodeBookDispatch({ type: "setSelectedNode", payload: targetId });
       notebookRef.current.selectedNode = targetId;
@@ -4913,7 +4935,7 @@ const Notebook = ({}: NotebookProps) => {
       return true;
     },
 
-    [graph.nodes, nodeBookDispatch, openNodeHandler, scrollToNode, setTargetId, startTutorial]
+    [graph.nodes, nodeBookDispatch, openNodeHandler, scrollToNode, setDynamicTargetId, startTutorial]
   );
 
   const detectAndRemoveTutorial = useCallback(
@@ -4921,13 +4943,13 @@ const Notebook = ({}: NotebookProps) => {
       if (!tutorial) return;
       if (tutorial.name !== tutorialName) return;
 
-      const node = graph.nodes[targetId];
+      const node = graph.nodes[dynamicTargetId];
       if (!targetIsValid(node)) {
         setTutorial(null);
         setForcedTutorial(null);
       }
     },
-    [graph.nodes, setTutorial, targetId, tutorial]
+    [graph.nodes, setTutorial, dynamicTargetId, tutorial]
   );
 
   const detectAndCallSidebarTutorial = useCallback(
@@ -4971,7 +4993,7 @@ const Notebook = ({}: NotebookProps) => {
       if (!targetIsValid(thisNode)) return false;
       // console.log("t3");
       startTutorial(tutorialName);
-      setTargetId(newTargetId);
+      setDynamicTargetId(newTargetId);
       if (forcedTutorial) {
         nodeBookDispatch({ type: "setSelectedNode", payload: newTargetId });
         notebookRef.current.selectedNode = newTargetId;
@@ -4985,7 +5007,7 @@ const Notebook = ({}: NotebookProps) => {
       nodeBookDispatch,
       nodeBookState.selectedNode,
       scrollToNode,
-      setTargetId,
+      setDynamicTargetId,
       startTutorial,
       userTutorial,
     ]
@@ -5021,7 +5043,7 @@ const Notebook = ({}: NotebookProps) => {
       if (!targetIsValid(thisNode)) return false;
 
       startTutorial(tutorialName);
-      setTargetId(newTargetId);
+      setDynamicTargetId(newTargetId);
       if (forcedTutorial) {
         nodeBookDispatch({ type: "setSelectedNode", payload: newTargetId });
         notebookRef.current.selectedNode = newTargetId;
@@ -5035,7 +5057,7 @@ const Notebook = ({}: NotebookProps) => {
       nodeBookDispatch,
       nodeBookState.selectedNode,
       scrollToNode,
-      setTargetId,
+      setDynamicTargetId,
       startTutorial,
       userTutorial,
     ]
@@ -5135,7 +5157,7 @@ const Notebook = ({}: NotebookProps) => {
         nodeBookDispatch({ type: "setSelectedNode", payload: newTargetId });
         notebookRef.current.selectedNode = newTargetId;
         startTutorial("nodes");
-        setTargetId(newTargetId);
+        setDynamicTargetId(newTargetId);
 
         setNodeUpdates({
           nodeIds: [newTargetId],
@@ -5866,7 +5888,7 @@ const Notebook = ({}: NotebookProps) => {
           : userTutorial["pathways"].done || userTutorial["pathways"].skipped;
         if (!shouldIgnore) {
           if (pathway.node) {
-            setTargetId(pathway.node);
+            setDynamicTargetId(pathway.node);
             nodeBookDispatch({ type: "setSelectedNode", payload: pathway.node });
             notebookRef.current.selectedNode = pathway.node;
             scrollToNode(pathway.node);
@@ -5905,7 +5927,7 @@ const Notebook = ({}: NotebookProps) => {
     parentWithMostChildren,
     pathway.node,
     scrollToNode,
-    setTargetId,
+    setDynamicTargetId,
     startTutorial,
     tutorial,
     user?.livelinessBar,
@@ -5929,7 +5951,7 @@ const Notebook = ({}: NotebookProps) => {
 
     if (tutorial.name === "nodes") {
       const nodesTutorialIsValid = (node: FullNodeData) => node && node.open; // TODO: add other validations check parentsChildrenList
-      const node = graph.nodes[targetId];
+      const node = graph.nodes[dynamicTargetId];
       if (!nodesTutorialIsValid(node)) {
         setTutorial(null);
         setForcedTutorial(null);
@@ -5941,7 +5963,7 @@ const Notebook = ({}: NotebookProps) => {
     if (tutorial.name === "parentsChildrenList") {
       const nodesTutorialIsValid = (node: FullNodeData) =>
         node && node.open && !node.editable && !node.isNew && node.localLinkingWords === "LinkingWords";
-      const node = graph.nodes[targetId];
+      const node = graph.nodes[dynamicTargetId];
       if (!nodesTutorialIsValid(node)) {
         setTutorial(null);
         setForcedTutorial(null);
@@ -5952,7 +5974,7 @@ const Notebook = ({}: NotebookProps) => {
 
     if (tutorial.name === "hideDescendants") {
       const hideDescendantsNodeTutorialIsValid = (node: FullNodeData) => Boolean(node) && !node.editable;
-      const node = graph.nodes[targetId];
+      const node = graph.nodes[dynamicTargetId];
       if (!hideDescendantsNodeTutorialIsValid(node)) {
         setTutorial(null);
         setForcedTutorial(null);
@@ -5964,7 +5986,7 @@ const Notebook = ({}: NotebookProps) => {
     if (tutorial.name === "collapseNode") {
       const collapseNodeTutorialIsValid = (node: FullNodeData) =>
         Boolean(node) && (forcedTutorial ? true : node.open) && !node.editable;
-      const node = graph.nodes[targetId];
+      const node = graph.nodes[dynamicTargetId];
       if (!collapseNodeTutorialIsValid(node)) {
         setTutorial(null);
         setForcedTutorial(null);
@@ -5976,7 +5998,7 @@ const Notebook = ({}: NotebookProps) => {
     if (tutorial.name === "expandNode") {
       const expandNodeTutorialIsValid = (node: FullNodeData) =>
         Boolean(node) && (forcedTutorial ? true : !node.open) && !node.editable;
-      const node = graph.nodes[targetId];
+      const node = graph.nodes[dynamicTargetId];
       if (!expandNodeTutorialIsValid(node)) {
         setTutorial(null);
         setForcedTutorial(null);
@@ -5987,7 +6009,7 @@ const Notebook = ({}: NotebookProps) => {
 
     if (tutorial.name === "hideNode") {
       const HideNodeTutorialIsValid = (node: FullNodeData) => (forcedTutorial ? true : Boolean(node));
-      const node = graph.nodes[targetId];
+      const node = graph.nodes[dynamicTargetId];
       if (!HideNodeTutorialIsValid(node)) {
         setTutorial(null);
         setForcedTutorial(null);
@@ -6073,7 +6095,7 @@ const Notebook = ({}: NotebookProps) => {
       const childConceptProposalIsValid = (node: FullNodeData) =>
         Boolean(node && Boolean(node.isNew) && node.open && node.editable && node.nodeType === "Concept");
 
-      const node = graph.nodes[targetId];
+      const node = graph.nodes[dynamicTargetId];
       if (!childConceptProposalIsValid(node)) {
         setTutorial(null);
         setForcedTutorial(null);
@@ -6084,10 +6106,10 @@ const Notebook = ({}: NotebookProps) => {
 
     if (tutorial.name === "tmpEditNode") {
       const tmpEditNodeIsValid = (node: FullNodeData) => Boolean(node && node.open && !node.editable);
-      const node = graph.nodes[targetId];
+      const node = graph.nodes[dynamicTargetId];
       if (!tmpEditNodeIsValid(node)) {
         setTutorial(null);
-        if (currentStep?.childTargetId) removeStyleFromTarget(currentStep.childTargetId, targetId);
+        if (tutorialTargetId) removeStyleFromTarget(tutorialTargetId);
         if (node && node.editable) return;
 
         setForcedTutorial(null);
@@ -6105,7 +6127,7 @@ const Notebook = ({}: NotebookProps) => {
       tutorial.name === "tmpProposalCodeChild"
     ) {
       const isValid = (node: FullNodeData) => node && node.open && node.editable && !Boolean(node.isNew);
-      const node = graph.nodes[targetId];
+      const node = graph.nodes[dynamicTargetId];
       if (!isValid(node)) {
         setTutorial(null);
         if (node && !node.editable) return;
@@ -6118,12 +6140,12 @@ const Notebook = ({}: NotebookProps) => {
     if (tutorial.name === "tmpParentsChildrenList") {
       const isValid = (node: FullNodeData) =>
         node && node.open && !node.editable && !Boolean(node.isNew) && node.localLinkingWords !== "LinkingWords";
-      const node = graph.nodes[targetId];
+      const node = graph.nodes[dynamicTargetId];
       if (!isValid(node)) {
         setTutorial(null);
         if (node && node.localLinkingWords === "LinkingWords") return;
         setForcedTutorial(null);
-        if (currentStep?.childTargetId) removeStyleFromTarget(currentStep.childTargetId, targetId);
+        if (tutorialTargetId) removeStyleFromTarget(tutorialTargetId);
       }
     }
     // --------------------------
@@ -6131,13 +6153,13 @@ const Notebook = ({}: NotebookProps) => {
     if (tutorial.name === "tmpTagsReferences") {
       const isValid = (node: FullNodeData) =>
         node && node.open && !node.editable && !Boolean(node.isNew) && node.localLinkingWords !== "References";
-      const node = graph.nodes[targetId];
+      const node = graph.nodes[dynamicTargetId];
       if (!isValid(node)) {
         setTutorial(null);
 
         if (node && node.localLinkingWords === "References") return;
         setForcedTutorial(null);
-        if (currentStep?.childTargetId) removeStyleFromTarget(currentStep.childTargetId, targetId);
+        if (tutorialTargetId) removeStyleFromTarget(tutorialTargetId);
       }
     }
     // --------------------------
@@ -6145,12 +6167,12 @@ const Notebook = ({}: NotebookProps) => {
     if (tutorial.name === "pathways") {
       const isValid = (node: FullNodeData) =>
         node && !node.editable && !Boolean(node.isNew) && pathway.child && pathway.parent;
-      const node = graph.nodes[targetId];
+      const node = graph.nodes[dynamicTargetId];
       if (!isValid(node)) {
         setTutorial(null);
         setForcedTutorial(null);
         pathwayRef.current = { node: "", parent: "", child: "" };
-        if (currentStep?.childTargetId) removeStyleFromTarget(currentStep.childTargetId, targetId);
+        if (tutorialTargetId) removeStyleFromTarget(tutorialTargetId);
       }
     }
     // --------------------------
@@ -6158,7 +6180,7 @@ const Notebook = ({}: NotebookProps) => {
     if (tutorial.name === "tmpPathways") {
       const isValid = (node: FullNodeData) =>
         node && !node.editable && !Boolean(node.isNew) && !pathway.child && !pathway.parent;
-      const node = graph.nodes[targetId];
+      const node = graph.nodes[dynamicTargetId];
       if (!isValid(node)) {
         setTutorial(null);
       }
@@ -6178,7 +6200,7 @@ const Notebook = ({}: NotebookProps) => {
       const reconcilingAcceptedProposalIsValid = (node: FullNodeData) =>
         node && node.open && isVersionApproved({ corrects: 1, wrongs: 0, nodeData: node });
 
-      const node = graph.nodes[targetId];
+      const node = graph.nodes[dynamicTargetId];
       if (!reconcilingAcceptedProposalIsValid(node)) {
         setTutorial(null);
         setForcedTutorial(null);
@@ -6194,7 +6216,7 @@ const Notebook = ({}: NotebookProps) => {
         !isVersionApproved({ corrects: 1, wrongs: 0, nodeData: node }) &&
         openSidebar === "PROPOSALS";
 
-      const node = graph.nodes[targetId];
+      const node = graph.nodes[dynamicTargetId];
       if (!reconcilingNotAcceptedProposalIsValid(node)) {
         setOpenSidebar(null);
         setTutorial(null);
@@ -6206,7 +6228,7 @@ const Notebook = ({}: NotebookProps) => {
 
     if (tutorial.name === "upVote") {
       const upvoteIsValid = (node: FullNodeData) => node && node.open;
-      const node = graph.nodes[targetId];
+      const node = graph.nodes[dynamicTargetId];
       if (!upvoteIsValid(node)) {
         setTutorial(null);
         setForcedTutorial(null);
@@ -6217,7 +6239,7 @@ const Notebook = ({}: NotebookProps) => {
 
     if (tutorial.name === "downVote") {
       const downvoteIsValid = (node: FullNodeData) => node && node.open;
-      const node = graph.nodes[targetId];
+      const node = graph.nodes[dynamicTargetId];
       if (!downvoteIsValid(node)) {
         setTutorial(null);
         setForcedTutorial(null);
@@ -6229,7 +6251,7 @@ const Notebook = ({}: NotebookProps) => {
       if (openSidebar === "USER_SETTINGS") return;
       setTutorial(null);
       setForcedTutorial(null);
-      if (currentStep?.childTargetId) removeStyleFromTarget(currentStep.childTargetId, targetId);
+      if (tutorialTargetId) removeStyleFromTarget(tutorialTargetId);
     }
 
     // --------------------------
@@ -6238,7 +6260,7 @@ const Notebook = ({}: NotebookProps) => {
       if (openSidebar === "SEARCHER_SIDEBAR") return;
       setTutorial(null);
       setForcedTutorial(null);
-      if (currentStep?.childTargetId) removeStyleFromTarget(currentStep.childTargetId, targetId);
+      if (tutorialTargetId) removeStyleFromTarget(tutorialTargetId);
     }
 
     // --------------------------
@@ -6247,7 +6269,7 @@ const Notebook = ({}: NotebookProps) => {
       if (openSidebar === "NOTIFICATION_SIDEBAR") return;
       setTutorial(null);
       setForcedTutorial(null);
-      if (currentStep?.childTargetId) removeStyleFromTarget(currentStep.childTargetId, targetId);
+      if (tutorialTargetId) removeStyleFromTarget(tutorialTargetId);
     }
 
     // --------------------------
@@ -6256,7 +6278,7 @@ const Notebook = ({}: NotebookProps) => {
       if (openSidebar === "BOOKMARKS_SIDEBAR") return;
       setTutorial(null);
       setForcedTutorial(null);
-      if (currentStep?.childTargetId) removeStyleFromTarget(currentStep.childTargetId, targetId);
+      if (tutorialTargetId) removeStyleFromTarget(tutorialTargetId);
     }
 
     // --------------------------
@@ -6265,7 +6287,7 @@ const Notebook = ({}: NotebookProps) => {
       if (openSidebar === "PENDING_PROPOSALS") return;
       setTutorial(null);
       setForcedTutorial(null);
-      if (currentStep?.childTargetId) removeStyleFromTarget(currentStep.childTargetId, targetId);
+      if (tutorialTargetId) removeStyleFromTarget(tutorialTargetId);
     }
 
     // --------------------------
@@ -6274,7 +6296,7 @@ const Notebook = ({}: NotebookProps) => {
       if (openSidebar === null) return;
       setTutorial(null);
       setForcedTutorial(null);
-      if (currentStep?.childTargetId) removeStyleFromTarget(currentStep.childTargetId, targetId);
+      if (tutorialTargetId) removeStyleFromTarget(tutorialTargetId);
     }
 
     // --------------------------
@@ -6283,7 +6305,7 @@ const Notebook = ({}: NotebookProps) => {
       if (openSidebar === null) return;
       setTutorial(null);
       setForcedTutorial(null);
-      if (currentStep?.childTargetId) removeStyleFromTarget(currentStep.childTargetId, targetId);
+      if (tutorialTargetId) removeStyleFromTarget(tutorialTargetId);
     }
 
     // --------------------------
@@ -6292,7 +6314,7 @@ const Notebook = ({}: NotebookProps) => {
       if (openLivelinessBar) return;
       setTutorial(null);
       setForcedTutorial(null);
-      if (currentStep?.childTargetId) removeStyleFromTarget(currentStep.childTargetId, targetId);
+      if (tutorialTargetId) removeStyleFromTarget(tutorialTargetId);
     }
 
     // --------------------------
@@ -6301,7 +6323,7 @@ const Notebook = ({}: NotebookProps) => {
       if (openLivelinessBar) return;
       setTutorial(null);
       setForcedTutorial(null);
-      if (currentStep?.childTargetId) removeStyleFromTarget(currentStep.childTargetId, targetId);
+      if (tutorialTargetId) removeStyleFromTarget(tutorialTargetId);
     }
 
     // --------------------------
@@ -6310,7 +6332,7 @@ const Notebook = ({}: NotebookProps) => {
       if (comLeaderboardOpen) return;
       setTutorial(null);
       setForcedTutorial(null);
-      if (currentStep?.childTargetId) removeStyleFromTarget(currentStep.childTargetId, targetId);
+      if (tutorialTargetId) removeStyleFromTarget(tutorialTargetId);
     }
 
     // --------------------------
@@ -6319,7 +6341,7 @@ const Notebook = ({}: NotebookProps) => {
       if (openSidebar === "USER_INFO") return;
       setTutorial(null);
       setForcedTutorial(null);
-      if (currentStep?.childTargetId) removeStyleFromTarget(currentStep.childTargetId, targetId);
+      if (tutorialTargetId) removeStyleFromTarget(tutorialTargetId);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
@@ -6336,7 +6358,7 @@ const Notebook = ({}: NotebookProps) => {
     openSidebar,
     pathway,
     setTutorial,
-    targetId,
+    dynamicTargetId,
     toolboxExpanded,
     tutorial,
     userTutorialLoaded,
@@ -6345,15 +6367,15 @@ const Notebook = ({}: NotebookProps) => {
   useEffect(() => {
     if (!tutorial) return;
     if (tutorial.name === "childProposal") {
-      const thisNode = graph.nodes[targetId];
+      const thisNode = graph.nodes[dynamicTargetId];
       if (!thisNode) return;
 
       const childTargetId = thisNode.children.map(cur => cur.node).find(cur => tempNodes.has(cur));
       if (!childTargetId) return;
 
-      setTargetId(childTargetId);
+      setDynamicTargetId(childTargetId);
     }
-  }, [graph.nodes, setTargetId, targetId, tutorial]);
+  }, [graph.nodes, setDynamicTargetId, dynamicTargetId, tutorial]);
 
   const tutorialGroup = useMemo(() => {
     return getGroupTutorials({ livelinessBar: (user?.livelinessBar as LivelinessBar) ?? null });
@@ -6618,10 +6640,10 @@ const Notebook = ({}: NotebookProps) => {
               handleCloseProgressBarMenu={handleCloseProgressBarMenu}
               onSkip={onSkipTutorial}
               onFinalize={onFinalizeTutorial}
-              onNextStep={onNextStep}
-              onPreviousStep={onPreviousStep}
+              onNextStep={onNextTutorialStep}
+              onPreviousStep={onPreviousTutorialStep}
               stepsLength={tutorial.steps.length}
-              node={graph.nodes[targetId]}
+              node={graph.nodes[dynamicTargetId]}
               forcedTutorial={forcedTutorial}
               groupTutorials={tutorialGroup}
               onForceTutorial={setForcedTutorial}
@@ -7142,10 +7164,10 @@ const Notebook = ({}: NotebookProps) => {
                     handleCloseProgressBarMenu={handleCloseProgressBarMenu}
                     onSkip={onSkipTutorial}
                     onFinalize={onFinalizeTutorial}
-                    onNextStep={onNextStep}
-                    onPreviousStep={onPreviousStep}
+                    onNextStep={onNextTutorialStep}
+                    onPreviousStep={onPreviousTutorialStep}
                     stepsLength={tutorial.steps.length}
-                    node={graph.nodes[targetId]}
+                    node={graph.nodes[dynamicTargetId]}
                     forcedTutorial={forcedTutorial}
                     groupTutorials={tutorialGroup}
                     onForceTutorial={setForcedTutorial}
@@ -7618,7 +7640,9 @@ const Notebook = ({}: NotebookProps) => {
                 <Divider>Tutorial</Divider>
                 <Button onClick={() => console.log(tutorial)}>Tutorial</Button>
                 <Button onClick={() => console.log(userTutorial)}>userTutorial</Button>
-                <Button onClick={() => console.log(targetId)}>targetId</Button>
+                <Button onClick={() => console.log({ currentStep })}>currentStep</Button>
+                <Button onClick={() => console.log(dynamicTargetId)}>dynamicTargetId</Button>
+                <Button onClick={() => console.log(tutorialTargetId)}>tutorialTargetId</Button>
                 <Button onClick={() => console.log(forcedTutorial)}>forcedTutorial</Button>
                 <Button onClick={() => console.log({ tutorialStateWasSetUpRef: tutorialStateWasSetUpRef.current })}>
                   tutorialStateWasSetUpRef

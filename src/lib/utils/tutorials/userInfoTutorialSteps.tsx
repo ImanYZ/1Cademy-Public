@@ -21,7 +21,7 @@ const USER_INFO_STEPS: TutorialStepConfig[] = [
         }
       />
     ),
-    tooltipPosition: "top",
+    tooltipPosition: "bottom",
     anchor: "Portal",
     outline: "inside",
   },
@@ -30,10 +30,12 @@ const USER_INFO_STEPS: TutorialStepConfig[] = [
     title: "Proposals History",
     description: (
       <MarkdownRender
-        text={"Under this tab, you can find the list of all the proposals this user has submitted in chronological order. Clicking each of these proposals would navigate to the corresponding node in your current notebook. You can filter the list to show only proposals on specific node types."}
+        text={
+          "Under this tab, you can find the list of all the proposals this user has submitted in chronological order. Clicking each of these proposals would navigate to the corresponding node in your current notebook. You can filter the list to show only proposals on specific node types."
+        }
       />
     ),
-    tooltipPosition: "top",
+    tooltipPosition: "bottom",
     anchor: "Portal",
     outline: "inside",
   },

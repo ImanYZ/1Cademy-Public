@@ -12,7 +12,7 @@ dayjs.extend(relativeTime);
 
 const NODES_STEPS: TutorialStepConfig[] = [
   {
-    targetId: "sidebar-wrapper-searcher--options-content",
+    // targetId: "sidebar-wrapper-searcher",
     childTargetId: "sidebar-wrapper-searcher",
     title: "Search Engine",
     description: (
@@ -28,7 +28,7 @@ const NODES_STEPS: TutorialStepConfig[] = [
   },
 
   {
-    targetId: "sidebar-wrapper-searcher",
+    // targetId: "sidebar-wrapper-searcher",
     childTargetId: "search-input",
     title: "Search Query",
     description: <MarkdownRender text={"To search, simply enter what you're looking for."} />,
@@ -38,7 +38,7 @@ const NODES_STEPS: TutorialStepConfig[] = [
   },
 
   {
-    targetId: "sidebar-wrapper-searcher",
+    // targetId: "sidebar-wrapper-searcher",
     childTargetId: "SearchIcon",
     title: "How to Search",
     description: <MarkdownRender text={"To start searching, **Click** this icon."} />,
@@ -47,7 +47,7 @@ const NODES_STEPS: TutorialStepConfig[] = [
     anchor: "Portal",
   },
   {
-    targetId: "sidebar-wrapper-searcher",
+    // targetId: "sidebar-wrapper-searcher",
     childTargetId: "searcher-sidebar-options",
     title: "Options",
     description: <MarkdownRender text={"There are a number of ways to refine your search."} />,
@@ -56,7 +56,7 @@ const NODES_STEPS: TutorialStepConfig[] = [
     outline: "inside",
   },
   {
-    targetId: "sidebar-wrapper-searcher",
+    // targetId: "sidebar-wrapper-searcher",
     childTargetId: "searcher-tags-button",
     title: "Filter by Tags",
     description: (
@@ -70,7 +70,7 @@ const NODES_STEPS: TutorialStepConfig[] = [
     anchor: "Portal",
   },
   {
-    targetId: "sidebar-wrapper-searcher",
+    // targetId: "sidebar-wrapper-searcher",
     childTargetId: "search-sort-options",
     title: "Sort Options",
     description: (
@@ -84,7 +84,7 @@ const NODES_STEPS: TutorialStepConfig[] = [
     anchor: "Portal",
   },
   {
-    targetId: "sidebar-wrapper-searcher",
+    // targetId: "sidebar-wrapper-searcher",
     childTargetId: "search-filter-options",
     title: "Filter by Dates",
     description: (
@@ -94,8 +94,8 @@ const NODES_STEPS: TutorialStepConfig[] = [
     anchor: "Portal",
   },
   {
-    targetId: "sidebar-wrapper-searcher",
-    childTargetId: "content",
+    // targetId: "sidebar-wrapper-searcher",
+    childTargetId: "sidebar-wrapper-searcher-content",
     title: "Search Results",
     description: (
       <MarkdownRender
