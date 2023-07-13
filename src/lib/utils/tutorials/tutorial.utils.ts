@@ -9,10 +9,10 @@ export const getStepsValues = (step: number, max: number) => {
   };
 };
 
-export const getBaseStepConfig = (step: number, max: number) => {
+export const getBaseStepConfig = (step: number, max: number): TutorialStep => {
   // DON'T CHANGE THIS, THIS WILL OVERRIDE ALL STEPS 🚨
 
-  const tt: TutorialStep = {
+  return {
     targetId: "",
     title: "",
     description: null,
@@ -25,8 +25,6 @@ export const getBaseStepConfig = (step: number, max: number) => {
     leftOffset: 0,
     topOffset: 0,
   };
-
-  return tt;
 };
 
 export const getTutorialTargetIdFromCurrentStep = (currentStep: TutorialStep | null, selectedNode: string | null) => {

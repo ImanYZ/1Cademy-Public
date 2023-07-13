@@ -561,6 +561,11 @@ const Notebook = ({}: NotebookProps) => {
     [forcedTutorial, onNodeInViewport, windowHeight, windowInnerLeft, windowInnerRight, windowInnerTop, windowWith]
   );
 
+  const tutorialTargetId = useMemo(
+    () => getTutorialTargetIdFromCurrentStep(currentStep, dynamicTargetId),
+    [currentStep, dynamicTargetId]
+  );
+
   useEffect(() => {
     const getTooltipClientRect = () => {
       if (!currentStep) return setTargetClientRect({ width: 0, height: 0, top: 0, left: 0 });
@@ -590,42 +595,6 @@ const Notebook = ({}: NotebookProps) => {
         height = clientHeight;
         width = clientWidth;
       }
-
-      // if (currentStep.anchor) {
-      //   if (!currentStep.childTargetId) return setTargetClientRect({ width: 0, height: 0, top: 0, left: 0 });
-
-      //   const targetElement = document.getElementById(currentStep.childTargetId);
-      //   if (!targetElement) return;
-
-      //   targetElement.classList.add(`tutorial-target-${currentStep.outline}`);
-      //   const { width, height, top, left } = targetElement.getBoundingClientRect();
-
-      //   setTargetClientRect({ width, height, top, left });
-      //   return;
-      // }
-
-      // if (!targetId) return;
-
-      // const thisNode = graph.nodes[targetId];
-      // if (!thisNode) return;
-
-      // let { top, left, width = NODE_WIDTH, height = 0 } = thisNode;
-      // let offsetChildTop = 0;
-      // let offsetChildLeft = 0;
-
-      // if (currentStep.childTargetId) {
-      //   const targetElement = document.getElementById(`${targetId}-${currentStep.childTargetId}`);
-      //   if (!targetElement) return;
-
-      //   targetElement.classList.add(`tutorial-target-${currentStep.outline}`);
-
-      //   const { offsetTop, offsetLeft, clientWidth, clientHeight } = targetElement;
-
-      //   offsetChildTop = offsetTop + currentStep.topOffset;
-      //   offsetChildLeft = offsetLeft + currentStep.leftOffset;
-      //   height = clientHeight;
-      //   width = clientWidth;
-      // }
       setTargetClientRect({
         top: top + offsetChildTop,
         left: left + offsetChildLeft,
@@ -635,14 +604,26 @@ const Notebook = ({}: NotebookProps) => {
     };
 
     let timeoutId: any;
-    timeoutId = setTimeout(() => {
-      getTooltipClientRect();
-    }, currentStep?.targetDelay || 500);
+    timeoutId = setTimeout(
+      () => {
+        getTooltipClientRect();
+      },
+      currentStep?.targetDelay || (tutorial?.step ?? 0) > 1 ? 100 : 500
+    );
 
     return () => {
       if (timeoutId) clearTimeout(timeoutId);
     };
-  }, [currentStep, graph.nodes, setTargetClientRect, nodeBookState.selectedNode, dynamicTargetId, toolbarIsHovered]);
+  }, [
+    currentStep,
+    graph.nodes,
+    setTargetClientRect,
+    nodeBookState.selectedNode,
+    dynamicTargetId,
+    toolbarIsHovered,
+    tutorialTargetId,
+    tutorial?.step,
+  ]);
 
   const onCompleteWorker = useCallback(() => {
     setGraph(graph => {
@@ -4704,15 +4685,6 @@ const Notebook = ({}: NotebookProps) => {
   const handleCloseProgressBarMenu = useCallback(() => {
     setOpenProgressBarMenu(false);
   }, []);
-
-  const tutorialTargetId = useMemo(
-    () => getTutorialTargetIdFromCurrentStep(currentStep, dynamicTargetId),
-    [currentStep, dynamicTargetId]
-    // currentStep?.childTargetId
-    //   ? `${nodeBookState.selectedNode}-${currentStep?.childTargetId}`
-    //   : currentStep?.targetId,
-    // [currentStep?.childTargetId, currentStep?.targetId, nodeBookState.selectedNode]
-  );
 
   const onCancelTutorial = useCallback(
     () =>
