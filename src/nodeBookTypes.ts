@@ -247,7 +247,7 @@ export interface NodeTutorialState {
 export type TOOLTIP_SIZE = "md" | "lg";
 
 export type TutorialStepConfig = {
-  targetId?: string;
+  // targetId?: string;
   childTargetId?: string;
   title: string;
   description:
@@ -264,7 +264,7 @@ export type TutorialStepConfig = {
 };
 
 export type TutorialStep = {
-  targetId: string;
+  // targetId: string;
   childTargetId?: string;
   title: string;
   description:

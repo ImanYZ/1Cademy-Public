@@ -25,7 +25,7 @@ const USER_SETTINGS_STEPS: TutorialStepConfig[] = [
       />
     ),
     tooltipPosition: "bottom",
-    targetDelay: 450,
+    // targetDelay: 450,
     anchor: "Portal",
     outline: "shallow",
   },

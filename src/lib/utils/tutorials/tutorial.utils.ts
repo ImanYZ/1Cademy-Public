@@ -9,11 +9,11 @@ export const getStepsValues = (step: number, max: number) => {
   };
 };
 
-export const getBaseStepConfig = (step: number, max: number) => {
+export const getBaseStepConfig = (step: number, max: number): TutorialStep => {
   // DON'T CHANGE THIS, THIS WILL OVERRIDE ALL STEPS 🚨
 
-  const tt: TutorialStep = {
-    targetId: "",
+  return {
+    // targetId: "",
     title: "",
     description: null,
     anchor: "",
@@ -25,6 +25,34 @@ export const getBaseStepConfig = (step: number, max: number) => {
     leftOffset: 0,
     topOffset: 0,
   };
+};
 
-  return tt;
+export const getTutorialTargetIdFromCurrentStep = (
+  currentStep: TutorialStep | null,
+  dynamicTargetId: string | null
+) => {
+  if (!currentStep) return undefined;
+  // if (currentStep?.anchor) {
+  if (!currentStep.childTargetId && dynamicTargetId) return dynamicTargetId;
+  if (!dynamicTargetId && currentStep.childTargetId) return currentStep.childTargetId;
+  if (currentStep.childTargetId && dynamicTargetId)
+    return dynamicTargetId ? `${dynamicTargetId}-${currentStep.childTargetId}` : currentStep.childTargetId;
+  return undefined;
+  // }
+  //  // if (currentStep?.targetId) return `${currentStep.targetId}-${currentStep?.childTargetId}`;
+  // if (dynamicTargetId) return `${dynamicTargetId}-${currentStep?.childTargetId}`;
+  // if (!dynamicTargetId) return undefined;
+  // return currentStep?.childTargetId ? `${dynamicTargetId}-${currentStep?.childTargetId}` : dynamicTargetId;
+};
+
+export const removeStyleFromTarget = (targetId: string) => {
+  if (!targetId) return;
+  const element = document.getElementById(targetId);
+  if (element) {
+    element.classList.remove("tutorial-target");
+    element.classList.remove("tutorial-target-shallow");
+    element.classList.remove("tutorial-target-outside");
+    element.classList.remove("tutorial-target-inside");
+    element.classList.remove("tutorial-target-pulse");
+  }
 };

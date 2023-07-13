@@ -29,7 +29,7 @@ const TOOLBOX_STEPS_CONFIG: TutorialStepConfig[] = [
     ),
     anchor: "Portal",
     isClickable: true,
-    targetDelay: 800,
+    // targetDelay: 800,
     tooltipPosition: "bottom",
   },
   {
@@ -44,7 +44,7 @@ const TOOLBOX_STEPS_CONFIG: TutorialStepConfig[] = [
     ),
     anchor: "Portal",
     isClickable: true,
-    targetDelay: 800,
+    // targetDelay: 800,
     tooltipPosition: "bottom",
   },
   {
@@ -59,7 +59,7 @@ const TOOLBOX_STEPS_CONFIG: TutorialStepConfig[] = [
     ),
     anchor: "Portal",
     isClickable: true,
-    targetDelay: 800,
+    // targetDelay: 800,
     tooltipPosition: "bottom",
   },
 ];

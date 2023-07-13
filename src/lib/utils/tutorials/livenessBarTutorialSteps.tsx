@@ -15,7 +15,6 @@ const INTERACTION_LIVENESS_BAR_STEPS_CONFIG: TutorialStepConfig[] = [
       />
     ),
     tooltipPosition: "left",
-    targetDelay: 450,
     anchor: "Portal",
     outline: "inside",
   },
@@ -33,7 +32,6 @@ const REPUTATION_LIVENESS_BAR_STEPS_CONFIG: TutorialStepConfig[] = [
       />
     ),
     tooltipPosition: "top",
-    targetDelay: 450,
     anchor: "Portal",
     outline: "inside",
   },
