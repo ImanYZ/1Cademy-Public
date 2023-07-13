@@ -1379,7 +1379,7 @@ export const checkInstantApprovalForProposalVote = async (
   if (!Object.keys(semestersByIds).length) {
     return {
       courseExist: false,
-      instantApprove: true,
+      instantApprove: false,
     };
   }
   const { userVersionsColl } = getTypedCollections({ nodeType: verisonType });
