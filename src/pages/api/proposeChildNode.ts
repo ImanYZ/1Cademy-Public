@@ -147,9 +147,9 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       nodeData?.tagIds || [],
       userData.uname
     );
-    let parentNodeData = false;
+    let parentNodeData = null;
     if (courseExist) {
-      parentNodeData = instantApprove ? nodeData : false;
+      parentNodeData = instantApprove ? nodeData : null;
     } else {
       parentNodeData = await isVersionApproved({
         corrects: newVersion.corrects,

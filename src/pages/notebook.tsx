@@ -3892,7 +3892,7 @@ const Notebook = ({}: NotebookProps) => {
       nodeBookDispatch({ type: "setChoosingNode", payload: null });
       nodeBookDispatch({ type: "setChosenNode", payload: null });
 
-      const { courseExist, instantApprove }: { instantApprove: boolean } = await Post(
+      const { courseExist, instantApprove }: { courseExist: boolean; instantApprove: boolean } = await Post(
         "/instructor/course/checkInstantApprovalForProposal",
         {
           nodeId: newNodeId,
