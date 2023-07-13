@@ -10,8 +10,8 @@ export const ONE_ASSISTANT_SECTIONS: HomepageSection[] = [
   },
   {
     id: "mechanism",
-    title: "Mechanism",
-    label: "Mechanism",
+    title: "How It Works",
+    label: "How It Works",
     description: "",
     options: [],
   },

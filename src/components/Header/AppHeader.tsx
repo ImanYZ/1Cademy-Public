@@ -23,6 +23,7 @@ import { useRouter } from "next/router";
 import React, { forwardRef, useEffect, useState } from "react";
 
 import useThemeChange from "@/hooks/useThemeChange";
+import { orange900, orangeDark } from "@/pages/home";
 
 import oneCademyLogo from "../../../public/DarkmodeLogo.png";
 import oneCademyLogoExtended from "../../../public/logo-extended.png";
@@ -296,30 +297,30 @@ const AppHeader = forwardRef(({ page, sections, selectedSectionId, onSwitchSecti
             </Tooltip>
 
             <Stack display={"flex"} direction={"row"} justifyContent="flex-end" alignItems="center" spacing={"8px"}>
-              {/* {page === "ONE_CADEMY" && !isAuthenticated && (
-                <Tooltip title="Apply to join 1Cademy">
-                  <Button
-                    variant="contained"
-                    onClick={() => onSwitchSection("apply")}
-                    sx={{
-                      display: { xs: "none", sm: "flex" },
-                      p: { xs: "6px 10px", lg: undefined },
-                      minWidth: "54px",
-                      background: orangeDark,
-                      fontSize: 16,
-                      borderRadius: 40,
-                      height: "25px",
-                      // width: "60px",
-                      textTransform: "capitalize",
-                      ":hover": {
-                        background: orange900,
-                      },
-                    }}
-                  >
-                    Apply
-                  </Button>
-                </Tooltip>
-              )} */}
+              {page === "ONE_CADEMY" && !isAuthenticated && (
+                <Button
+                  variant="contained"
+                  href="https://1cademy.us/ScheduleInstructor"
+                  target="_blank"
+                  rel="noopener"
+                  sx={{
+                    display: { xs: "none", sm: "flex" },
+                    p: { xs: "6px 10px", lg: undefined },
+                    minWidth: "133px",
+                    background: orangeDark,
+                    fontSize: 16,
+                    borderRadius: 40,
+                    height: "25px",
+                    // width: "60px",
+                    textTransform: "capitalize",
+                    ":hover": {
+                      background: orange900,
+                    },
+                  }}
+                >
+                  Schedule Demo
+                </Button>
+              )}
 
               {page === "ONE_CADEMY" && isAuthenticated && user && (
                 <Tooltip title={capitalizeString(user.chooseUname ? user.uname : user.fName ?? "")}>
