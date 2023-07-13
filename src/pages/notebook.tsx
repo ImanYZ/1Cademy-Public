@@ -5745,8 +5745,8 @@ const Notebook = ({}: NotebookProps) => {
         const collapseNodeTaken = userTutorial["collapseNode"].skipped || userTutorial["collapseNode"].done;
         const shouldIgnore = collapseNodeTaken || !nodesTutorialCompleted;
         if (firstOpenedNode && !shouldIgnore) {
-          const takeOver = nodeBookState.selectedNode ?? firstOpenedNode.node;
-          const result = detectAndForceTutorial("collapseNode", takeOver, closeNodeTutorialIsValid);
+          // const takeOver = nodeBookState.selectedNode ?? firstOpenedNode.node;
+          const result = detectAndCallTutorial("collapseNode", closeNodeTutorialIsValid);
           if (result) return;
         }
       }
@@ -5763,8 +5763,8 @@ const Notebook = ({}: NotebookProps) => {
         const expandNodeTaken = userTutorial["expandNode"].skipped || userTutorial["expandNode"].done;
         const shouldIgnore = expandNodeTaken || !nodesTutorialCompleted;
         if (firstClosedNode && !shouldIgnore) {
-          const takeOver = nodeBookState.selectedNode ?? firstClosedNode.node;
-          const result = detectAndForceTutorial("expandNode", takeOver, expandNodeTutorialIsValid);
+          // const takeOver = nodeBookState.selectedNode ?? firstClosedNode.node;
+          const result = detectAndCallTutorial("expandNode", expandNodeTutorialIsValid);
           if (result) return;
         }
       }
