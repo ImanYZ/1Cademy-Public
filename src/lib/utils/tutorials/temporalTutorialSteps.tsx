@@ -91,7 +91,7 @@ const TMP_PROPOSE_CHILD_QUESTION_CONFIG: TutorialStepConfig[] = [
     ),
     childTargetId: "propose-question-child",
     isClickable: true,
-    targetDelay: 500,
+    // targetDelay: 500,
     leftOffset: NODE_WIDTH + LEFT_OFFSET_NEW_CHILDREN_BUTTON,
     topOffset: TMP_OFFSET_TOP_CHILDREN_BUTTON,
   },

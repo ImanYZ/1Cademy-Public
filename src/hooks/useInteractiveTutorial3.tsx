@@ -1,5 +1,5 @@
 import { doc, getDoc, getFirestore } from "firebase/firestore";
-import { ReactNode, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { KNOWLEDGE_GRAPH_CONFIG } from "@/lib/utils/tutorials/knowledgeGraphSteps";
 import { NAVIGATION_STEPS_COMPLETE } from "@/lib/utils/tutorials/navigationTutorialSteps";
@@ -66,19 +66,6 @@ import { TutorialStep, TutorialTypeKeys, UserTutorials } from "../nodeBookTypes"
 
 export const DEFAULT_NUMBER_OF_TRIES = 5;
 
-export type Step = {
-  targetId: string;
-  childTargetId?: string;
-  title: string;
-  description: ReactNode;
-  tooltipPos: "top" | "bottom" | "left" | "right";
-  anchor: string;
-  callback?: () => void;
-  disabledElements: string[];
-};
-
-export type TargetClientRect = { width: number; height: number; top: number; left: number };
-
 type useInteractiveTutorialProps = {
   user: User | null;
 };
@@ -90,7 +77,8 @@ export const useInteractiveTutorial = ({ user }: useInteractiveTutorialProps) =>
   const isPlayingTheTutorialRef = useRef(false);
   // const [currentStep, setCurrentStep] = useState<TutorialStep | null>(null);
   const [tutorial, setTutorial] = useState<Tutorial>(null);
-  const [targetId, setTargetId] = useState("");
+  // this target will have the id of the html element which has the correct state in the required moment
+  const [dynamicTargetId, setDynamicTargetId] = useState("");
   // const [initialStep, setInitialStep] = useState(0);
 
   const [userTutorial, setUserTutorial] = useState<UserTutorials>({
@@ -274,7 +262,7 @@ export const useInteractiveTutorial = ({ user }: useInteractiveTutorialProps) =>
 
       if (newTutorial === "searcher") {
         newSteps = SEARCHER_STEPS_COMPLETE;
-        setTargetId("");
+        setDynamicTargetId("");
       }
       if (newTutorial === "userSettings") {
         newSteps = USER_SETTINGS_STEPS_COMPLETE;
@@ -398,7 +386,6 @@ export const useInteractiveTutorial = ({ user }: useInteractiveTutorialProps) =>
       if (!currentStep) return null;
       if (prevTutorial.step >= prevTutorial.steps.length) return prevTutorial;
 
-      if (currentStep?.childTargetId) removeStyleFromTarget(currentStep.childTargetId, targetId);
       const newStep = prevTutorial.step + 1;
       setUserTutorial(prevUserTutorial => ({
         ...prevUserTutorial,
@@ -406,7 +393,7 @@ export const useInteractiveTutorial = ({ user }: useInteractiveTutorialProps) =>
       }));
       return { ...prevTutorial, step: newStep };
     });
-  }, [currentStep, targetId]);
+  }, [currentStep]);
 
   const onPreviousStep = useCallback(() => {
     setTutorial(prevTutorial => {
@@ -414,7 +401,6 @@ export const useInteractiveTutorial = ({ user }: useInteractiveTutorialProps) =>
       if (!currentStep) return null;
       if (prevTutorial.step <= 1) return prevTutorial;
 
-      if (currentStep?.childTargetId) removeStyleFromTarget(currentStep.childTargetId, targetId);
       const newStep = prevTutorial.step - 1;
       setUserTutorial(prevUserTutorial => ({
         ...prevUserTutorial,
@@ -422,7 +408,7 @@ export const useInteractiveTutorial = ({ user }: useInteractiveTutorialProps) =>
       }));
       return { ...prevTutorial, step: newStep };
     });
-  }, [currentStep, targetId]);
+  }, [currentStep]);
 
   return {
     startTutorial,
@@ -432,8 +418,8 @@ export const useInteractiveTutorial = ({ user }: useInteractiveTutorialProps) =>
     onNextStep,
     onPreviousStep,
     isPlayingTheTutorialRef,
-    setTargetId,
-    targetId,
+    setDynamicTargetId,
+    dynamicTargetId,
     userTutorial,
     userTutorialLoaded,
     setUserTutorial,
@@ -441,21 +427,6 @@ export const useInteractiveTutorial = ({ user }: useInteractiveTutorialProps) =>
 };
 
 export const STEPS_NODE_TUTORIAL = [];
-
-export const removeStyleFromTarget = (childTargetId: string, targetId?: string) => {
-  if (childTargetId) {
-    const elementId = targetId ? `${targetId}-${childTargetId}` : childTargetId;
-    console.log({ elementId });
-    const element = document.getElementById(elementId);
-    if (element) {
-      element.classList.remove("tutorial-target");
-      element.classList.remove("tutorial-target-shallow");
-      element.classList.remove("tutorial-target-outside");
-      element.classList.remove("tutorial-target-inside");
-      element.classList.remove("tutorial-target-pulse");
-    }
-  }
-};
 
 export const getTutorialStep = (tutorial: Tutorial) => {
   if (!tutorial) return null;

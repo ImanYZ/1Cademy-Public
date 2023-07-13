@@ -5,7 +5,7 @@ import { useWindowSize } from "@/hooks/useWindowSize";
 import { Z_INDEX } from "@/lib/utils/constants";
 import { gray50, gray200, gray400, gray500, gray700, gray800 } from "@/pages/home";
 
-import { TargetClientRect, Tutorial } from "../../hooks/useInteractiveTutorial3";
+import { Tutorial } from "../../hooks/useInteractiveTutorial3";
 import { FullNodeData, TOOLTIP_SIZE, TutorialStep, TutorialTypeKeys } from "../../nodeBookTypes";
 import { GroupTutorial } from "../tutorial/TutorialTableOfContent";
 
@@ -15,6 +15,8 @@ const TOOLTIP_WIDTH: { [key in TOOLTIP_SIZE]: number } = {
   md: 450,
   lg: 600,
 };
+
+export type TargetClientRect = { width: number; height: number; top: number; left: number };
 
 type TutorialProps = {
   tutorial: Tutorial;
