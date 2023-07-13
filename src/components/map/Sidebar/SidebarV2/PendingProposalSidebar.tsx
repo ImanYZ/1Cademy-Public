@@ -95,7 +95,9 @@ PendingProposalSidebarProps) => {
                 };
               }
             }
-            versions[versionId]["nodeType"] = nodeType;
+            if (versions[versionId]) {
+              versions[versionId]["nodeType"] = nodeType;
+            }
           }
 
           const pendingProposals = { ...versions };
@@ -177,13 +179,11 @@ PendingProposalSidebarProps) => {
                 setType(e.target.value);
               }}
             >
-              <MenuItem value="all">All</MenuItem>
-              <MenuItem value="Concept">Concepts</MenuItem>
-              <MenuItem value="Relation">Relations</MenuItem>
-              <MenuItem value="Question">Questions</MenuItem>
-              <MenuItem value="Idea">Ideas</MenuItem>
-              <MenuItem value="Code">Codes</MenuItem>
-              <MenuItem value="Reference">References</MenuItem>
+              {FILTER_NODE_TYPES.map(type => (
+                <MenuItem key={type.value} value={type.value}>
+                  {type.label}
+                </MenuItem>
+              ))}
             </Select>
           </Box>
           <PendingProposalList
@@ -195,4 +195,16 @@ PendingProposalSidebarProps) => {
     />
   );
 };
+
+type FilterNodeType = { label: string; value: string }[];
+const FILTER_NODE_TYPES: FilterNodeType = [
+  { label: "All", value: "all" },
+  { label: "Concept", value: "Concepts" },
+  { label: "Relation", value: "Relations" },
+  { label: "Question", value: "Questions" },
+  { label: "Idea", value: "Ideas" },
+  { label: "Reference", value: "Codes" },
+  { label: "Code", value: "References" },
+];
+
 export const MemoizedPendingProposalSidebar = React.memo(PendingProposalSidebar);

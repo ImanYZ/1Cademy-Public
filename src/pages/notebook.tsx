@@ -51,6 +51,7 @@ import { getUserNodesByForce } from "src/client/firestore/userNodes.firestore";
 import { Instructor } from "src/instructorsTypes";
 import { IAssistantEventDetail } from "src/types/IAssistant";
 import { INodeType } from "src/types/INodeType";
+import { INodeVersion } from "src/types/INodeVersion";
 /* eslint-enable */
 import { INotificationNum } from "src/types/INotification";
 
@@ -171,6 +172,17 @@ type UpdateLinks = {
 export type QuerySideBarSearch = {
   query: string;
   forced: boolean;
+};
+
+type RateProosale = {
+  proposals: INodeVersion[];
+  setProposals: (proposals: INodeVersion[]) => void;
+  proposalId: string;
+  proposalIdx: number;
+  correct: boolean;
+  wrong: boolean;
+  award: boolean;
+  newNodeId: string;
 };
 // when proposing improvements, lists of added/removed parent/child links
 const getInitialUpdateLinks = (): UpdateLinks => ({
@@ -4199,6 +4211,7 @@ const Notebook = ({}: NotebookProps) => {
   // Inner functions
   const selectProposal = useMemoizedCallback(
     (event, proposal, newNodeId: string) => {
+      console.log("newNodeId", newNodeId);
       if (proposalTimer.current) {
         clearTimeout(proposalTimer.current);
       }
@@ -4259,7 +4272,7 @@ const Notebook = ({}: NotebookProps) => {
               wrongs: 0,
               corrects: 1,
               content: proposal.content,
-              nodeImage: proposal.nodeImage,
+              nodeImage: proposal.nodeImage || "",
               nodeVideo: proposal.nodeVideo,
               videoStartTime: proposal.nodeVideoStartTime,
               videoEndTime: proposal.nodeVideoEndTime,
@@ -4270,6 +4283,7 @@ const Notebook = ({}: NotebookProps) => {
               width: NODE_WIDTH,
               node: newNodeId,
               simulated: true,
+              versionId: proposal.id,
             };
             if (proposal.childType === "Question") {
               newChildNode.choices = proposal.choices;
@@ -4476,19 +4490,11 @@ const Notebook = ({}: NotebookProps) => {
   );
 
   const rateProposal = useCallback(
-    async (
-      e: any,
-      proposals: any,
-      setProposals: any,
-      proposalId: string,
-      proposalIdx: number,
-      correct: any,
-      wrong: any,
-      award: any,
-      newNodeId: string
-    ) => {
+    async ({ proposals, setProposals, proposalId, proposalIdx, correct, wrong, award, newNodeId }: RateProosale) => {
       if (!selectedNotebookId) return;
       if (!user) return;
+      if (!nodeBookState.selectedNode) return;
+      if (!selectedNodeType) return;
 
       devLog("RATE_PROPOSAL", { proposals, setProposals, proposalId, proposalIdx, correct, wrong, award, newNodeId });
 
@@ -4553,14 +4559,20 @@ const Notebook = ({}: NotebookProps) => {
           console.error(error);
         }
         const updatedNodeIds: string[] = [nodeBookState.selectedNode!, newNodeId];
+        type CheckInstantApproval = {
+          nodeId: string;
+          verisonType: INodeType;
+          versionId: string;
+        };
 
+        const checkInstantApproval: CheckInstantApproval = {
+          nodeId: nodeBookState.selectedNode,
+          verisonType: selectedNodeType,
+          versionId: proposalId,
+        };
         const { courseExist, instantApprove }: { courseExist: boolean; instantApprove: boolean } = await Post(
           "/instructor/course/checkInstantApprovalForProposalVote",
-          {
-            nodeId: nodeBookState.selectedNode,
-            verisonType: proposalsTemp[proposalIdx],
-            versionId: proposalId,
-          }
+          checkInstantApproval
         );
 
         setGraph(({ nodes: oldNodes, edges }) => {
@@ -4580,8 +4592,11 @@ const Notebook = ({}: NotebookProps) => {
             if (changedNodes.hasOwnProperty(nodeBookState.selectedNode)) {
               delete changedNodes[nodeBookState.selectedNode];
             }
-            if ("childType" in proposalsTemp[proposalIdx] && proposalsTemp[proposalIdx].childType !== "") {
-              oldNodes[newNodeId] = { ...oldNodes[newNodeId], unaccepted: false, simulated: true };
+            if (proposalsTemp[proposalIdx].hasOwnProperty("childType") && proposalsTemp[proposalIdx].childType) {
+              const previewNode = Object.values(oldNodes).find((node: any) => node.versionId === proposalId);
+              if (previewNode) {
+                oldNodes[newNodeId] = { ...oldNodes[previewNode.node], unaccepted: false, simulated: true };
+              }
               if (tempNodes.has(newNodeId)) {
                 tempNodes.delete(newNodeId);
               }

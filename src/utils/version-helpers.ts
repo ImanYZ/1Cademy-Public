@@ -1820,11 +1820,8 @@ export const versionCreateUpdate = async ({
     accepted,
   } = versionData;
 
-  let choices: IQuestionChoice[] = [];
   let newBatch = batch;
-  if (nodeType === "Question") {
-    choices = versionData.choices as IQuestionChoice[];
-  }
+
   // If the version is deleted, the user should have not been able to vote on it.
   if (!deleted) {
     const reputationTypes: string[] = ["All Time", "Monthly", "Weekly", "Others", "Others Monthly", "Others Weekly"];
@@ -2013,7 +2010,7 @@ export const versionCreateUpdate = async ({
             versions: nodeData.versions + (newVersion ? 1 : 0),
           };
           if (nodeType === "Question") {
-            nodeUpdates.choices = choices;
+            nodeUpdates.choices = versionData.choices;
           }
           [newBatch, writeCounts] = await generateTagsData({
             batch: newBatch,
@@ -2177,7 +2174,7 @@ export const versionCreateUpdate = async ({
             updatedAt: currentTimestamp,
           };
           if (childType === "Question") {
-            childNode.choices = choices;
+            childNode.choices = versionData.choices;
           }
           const { versionsColl, userVersionsColl }: any = getTypedCollections({ nodeType: childType });
           const versionRef = versionsColl.doc();
