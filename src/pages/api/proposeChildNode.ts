@@ -143,14 +143,20 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
     if (req.body.data.nodeType === "Question") {
       newVersion.choices = req.body.data.choices;
     }
-    const instantApprove = await checkInstantApprovalForProposal(nodeData?.tagIds || [], userData.uname);
-    const parentNodeData = instantApprove
-      ? nodeData
-      : await isVersionApproved({
-          corrects: newVersion.corrects,
-          wrongs: newVersion.wrongs,
-          nodeData,
-        });
+    const { courseExist, instantApprove } = await checkInstantApprovalForProposal(
+      nodeData?.tagIds || [],
+      userData.uname
+    );
+    let parentNodeData = null;
+    if (courseExist) {
+      parentNodeData = instantApprove ? nodeData : null;
+    } else {
+      parentNodeData = await isVersionApproved({
+        corrects: newVersion.corrects,
+        wrongs: newVersion.wrongs,
+        nodeData,
+      });
+    }
 
     // TODO: i think we should run transaction here
     const reputationTypes: string[] = ["All Time", "Monthly", "Weekly", "Others", "Others Monthly", "Others Weekly"];
