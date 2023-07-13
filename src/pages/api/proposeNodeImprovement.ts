@@ -179,7 +179,10 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       versionData.changedNodeType = true;
     }
 
-    const instantApprove = await checkInstantApprovalForProposal(nodeData?.tagIds || [], userData.uname);
+    const { isInstructor, courseExist, instantApprove } = await checkInstantApprovalForProposal(
+      tagUpdates.tagIds || [],
+      userData.uname
+    );
 
     [batch, writeCounts] = await versionCreateUpdate({
       batch,
@@ -188,6 +191,8 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       nodeRef,
       nodeType: nodeType,
       instantApprove,
+      courseExist,
+      isInstructor,
       versionId: versionRef.id,
       versionData,
       newVersion: true,

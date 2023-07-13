@@ -1339,15 +1339,32 @@ export const updateStatsOnPractice = async ({ tagIds, correct, uname }: IUpdateS
 //if yes we approve the version automatically
 export const checkInstantApprovalForProposal = async (tagIds: string[], uname: string) => {
   const semestersByIds = await getSemestersByIds(tagIds);
+  let isInstructor = false;
+  const instructorDocs = await db.collection("instructors").where("uname", "==", uname).get();
+  if (instructorDocs.docs.length > 0) {
+    isInstructor = true;
+  }
   if (!Object.keys(semestersByIds).length) {
-    return false;
+    return {
+      isInstructor,
+      courseExist: false,
+      instantApprove: true,
+    };
   }
   for (const semester of Object.values(semestersByIds)) {
     if (!semester.instructors.includes(uname)) {
-      return false;
+      return {
+        isInstructor,
+        courseExist: true,
+        instantApprove: false,
+      };
     }
   }
-  return true;
+  return {
+    isInstructor,
+    courseExist: true,
+    instantApprove: true,
+  };
 };
 
 //we call this function to check if an instructor is votig on a proposal
@@ -1362,7 +1379,7 @@ export const checkInstantApprovalForProposalVote = async (
   if (!Object.keys(semestersByIds).length) {
     return {
       courseExist: false,
-      instantApprove: false,
+      instantApprove: true,
     };
   }
   const { userVersionsColl } = getTypedCollections({ nodeType: verisonType });
@@ -1403,12 +1420,13 @@ export const checkInstantApprovalForProposalVote = async (
   };
 };
 
+//we call this function to check if an instructor is deleting a node
 export const checkInstantDeleteForNode = async (tagIds: string[], uname: string, nodeId: string) => {
   const semestersByIds = await getSemestersByIds(tagIds);
   if (!Object.keys(semestersByIds).length) {
     return {
       courseExist: false,
-      instantDelete: true,
+      instantDelete: false,
     };
   }
   const userNodes = await db.collection("userNodes").where("node", "==", nodeId).get();
