@@ -4214,7 +4214,6 @@ const Notebook = ({}: NotebookProps) => {
   // Inner functions
   const selectProposal = useMemoizedCallback(
     (event, proposal, newNodeId: string) => {
-      debugger;
       console.log("newNodeId", newNodeId);
       if (proposalTimer.current) {
         clearTimeout(proposalTimer.current);
@@ -4276,7 +4275,7 @@ const Notebook = ({}: NotebookProps) => {
               wrongs: 0,
               corrects: 1,
               content: proposal.content,
-              nodeImage: proposal.nodeImage,
+              nodeImage: proposal.nodeImage || "",
               nodeVideo: proposal.nodeVideo,
               videoStartTime: proposal.nodeVideoStartTime,
               videoEndTime: proposal.nodeVideoEndTime,
@@ -4495,7 +4494,6 @@ const Notebook = ({}: NotebookProps) => {
 
   const rateProposal = useCallback(
     async ({ proposals, setProposals, proposalId, proposalIdx, correct, wrong, award, newNodeId }: RateProosale) => {
-      debugger;
       if (!selectedNotebookId) return;
       if (!user) return;
       if (!nodeBookState.selectedNode) return;
