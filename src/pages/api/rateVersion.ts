@@ -233,7 +233,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       if (courseExist) {
         isApproved = instantApprove;
       }
-      console.log({ courseExist, instantApprove });
+
       //  if user already has an interaction with the version
       await versionCreateUpdate({
         versionNodeId: req.body.versionNodeId,

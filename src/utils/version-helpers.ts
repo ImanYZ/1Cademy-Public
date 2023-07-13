@@ -2499,7 +2499,7 @@ export const addToPendingPropsNumsExcludingVoters = async ({
 
 export const signalFlashcardChanges = async ({ nodeId, batch, writeCounts, currentTimestamp }: any) => {
   let newBatch = batch;
-  console.log("signalFlashcardChanges");
+
   const nodeDoc = await db.collection("nodes").doc(nodeId).get();
   const nodeData = nodeDoc.data();
   if (nodeData && nodeData.hasOwnProperty("linkedFlashcards")) {

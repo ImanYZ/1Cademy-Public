@@ -3892,7 +3892,7 @@ const Notebook = ({}: NotebookProps) => {
       nodeBookDispatch({ type: "setChoosingNode", payload: null });
       nodeBookDispatch({ type: "setChosenNode", payload: null });
 
-      const { instantApprove }: { instantApprove: boolean } = await Post(
+      const { courseExist, instantApprove }: { instantApprove: boolean } = await Post(
         "/instructor/course/checkInstantApprovalForProposal",
         {
           nodeId: newNodeId,
@@ -3986,7 +3986,12 @@ const Notebook = ({}: NotebookProps) => {
 
         const parentNode = graph.nodes[newNode.parents[0].node];
 
-        const willBeApproved = instantApprove || isVersionApproved({ corrects: 1, wrongs: 0, nodeData: parentNode });
+        let willBeApproved = instantApprove;
+        if (courseExist) {
+          willBeApproved = instantApprove;
+        } else {
+          willBeApproved = isVersionApproved({ corrects: 1, wrongs: 0, nodeData: parentNode });
+        }
 
         const nodePartChanges = {
           editable: false,

@@ -1348,7 +1348,7 @@ export const checkInstantApprovalForProposal = async (tagIds: string[], uname: s
     return {
       isInstructor,
       courseExist: false,
-      instantApprove: true,
+      instantApprove: false,
     };
   }
   for (const semester of Object.values(semestersByIds)) {
