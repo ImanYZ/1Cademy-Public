@@ -367,9 +367,8 @@ export const DashboardSettings = ({ currentSemester }: DashboardSettingsProps) =
       }
 
       let payload = { ...baseSemester, syllabus: chaptersData };
-      let response = await Post("/instructor/students/" + currentSemester?.tagId + "/setting", payload);
+      await Post("/instructor/students/" + currentSemester?.tagId + "/setting", payload);
       setRequestLoader(false);
-      console.log(response, "response");
     } catch (error: any) {
       setRequestLoader(false);
     }

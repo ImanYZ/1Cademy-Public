@@ -22,7 +22,6 @@ type ISankeyChart = {
 };
 
 export function SankeyChart(props: ISankeyChart) {
-  console.log({ sankeyData: props.sankeyData });
   const svgRef = useRef(null);
 
   useEffect(() => {

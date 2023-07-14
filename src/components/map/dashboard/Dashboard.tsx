@@ -189,7 +189,6 @@ export const Dashboard = ({ user, currentSemester }: DashboardProps) => {
   }, [isDesktop]);
 
   useEffect(() => {
-    console.log({ currentSemester, students });
     if (user?.role !== "INSTRUCTOR") return; // this chart is only visible to instructors
     if (!currentSemester || !currentSemester.tagId) return;
     if (!students.length) return;
@@ -206,14 +205,11 @@ export const Dashboard = ({ user, currentSemester }: DashboardProps) => {
     );
     let _sankeyData: any[] = [];
     const snapShotFunc = onSnapshot(q, async snapshot => {
-      console.log("snapShotFunc");
       const docChanges = snapshot.docChanges();
       if (!docChanges.length) return;
 
-      // console.log("s11");
       for (let change of docChanges) {
         const _semesterStudentSankey: SemesterStudentSankeys = change.doc.data() as SemesterStudentSankeys;
-        // console.log("s12x", _semesterStudentSankey);
         if (change.type === "added") {
           for (const interaction of _semesterStudentSankey.interactions) {
             _sankeyData.push({
@@ -245,7 +241,6 @@ export const Dashboard = ({ user, currentSemester }: DashboardProps) => {
           );
         }
       }
-      // console.log({ _sankeyData });
       setSankeyData([..._sankeyData]);
     });
     return () => snapShotFunc();
@@ -340,7 +335,6 @@ export const Dashboard = ({ user, currentSemester }: DashboardProps) => {
         const daysFixed = cur.days.map(c => ({ day: c.day, chapters: c.chapters ?? [] }));
         return { ...cur, days: daysFixed };
       });
-      console.log({ userDailyStatsIncomplete });
       if (userDailyStats.length <= 0) return;
 
       const proposalsPoints = groupStudentPointsDayChapter(
@@ -444,8 +438,6 @@ export const Dashboard = ({ user, currentSemester }: DashboardProps) => {
         semesterConfig?.dailyPractice.numQuestionsPerDay
       );
 
-      console.log({ userDailyStats, semesterConfig });
-
       const { min: minP, max: maxP } = getMaxMinVoxPlotData(proposalsPoints);
       const { min: minQ, max: maxQ } = getMaxMinVoxPlotData(questionsPoints);
       const { min: minV, max: maxV } = getMaxMinVoxPlotData(votesPoints);
@@ -479,7 +471,6 @@ export const Dashboard = ({ user, currentSemester }: DashboardProps) => {
     const q = query(semesterRef, where("tagId", "==", semesterConfig.tagId), where("deleted", "==", false));
 
     const killSnapshot = onSnapshot(q, async snapshot => {
-      console.log("onSnapshot:semesterStudentVoteStats");
       const docChanges = snapshot.docChanges();
       if (!docChanges.length) {
         setBubble([]);

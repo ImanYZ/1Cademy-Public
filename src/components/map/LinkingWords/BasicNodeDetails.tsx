@@ -228,7 +228,6 @@ const BasicNodeDetails = (props: BasicNodeDetailsProps) => {
 export const MemoizedBasicNodeDetails = React.memo(BasicNodeDetails);
 
 const separateURL = (text: string, url: string): [boolean, any] => {
-  // console.log("separateURL", text);
   const urlRegex = /(https?:\/\/[^\s]+)/g;
   const matches = url.match(urlRegex);
   if (matches && matches.length > 0) {

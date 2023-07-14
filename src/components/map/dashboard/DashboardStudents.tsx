@@ -530,7 +530,7 @@ export const DashboardStudents = ({ currentSemester }: DashboardStudentsProps) =
       await postWithToken(mapUrl, payloadAPI);
       setNewStudents([]);
     } catch (error) {
-      console.log(error);
+      console.error(error);
     }
     setDisableEdit(false);
     return;

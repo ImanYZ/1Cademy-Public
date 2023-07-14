@@ -222,7 +222,7 @@ const NotificationSidebar = ({
         });
         setIsLoading({ state: "waiting", loading: false });
       } catch (error) {
-        console.log(error);
+        console.error(error);
         setIsLoading({ state: "waiting", loading: false });
       }
     },

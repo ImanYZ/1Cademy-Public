@@ -57,7 +57,6 @@ function drawChart(
 
   // List of groups = species here = value of the first column called group -> I show them on the X axis
   // const groups = data.map(d => d.index).flatMap(c => c);
-  // console.log({ groups });
 
   const columns: string[] = [];
 
@@ -136,9 +135,7 @@ function drawChart(
   if (isDailyPracticeRequiered) {
     chartData.push(data[2] || []);
   }
-  console.log({ subgroups, chartData });
   const stackedData = d3.stack().keys(subgroups)(chartData);
-  console.log({ stackedData });
 
   //tooltip
   const tooltip = d3.select("#boxplot-tooltip");
@@ -168,7 +165,6 @@ function drawChart(
       .style("fill", color(subgroup) as string);
   });
   tooltipElement?.addEventListener("touchstart", () => {
-    console.log("touch");
     if (!event || !event.target) return;
 
     event.preventDefault();

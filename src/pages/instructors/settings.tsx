@@ -345,7 +345,7 @@ const CourseSetting: InstructorLayoutPage = ({ selectedSemester, selectedCourse,
       let payload = { ...semester, syllabus: chaptersData };
       let response = await Post("/instructor/students/" + currentSemester?.tagId + "/setting", payload);
       setRequestLoader(false);
-      console.log(response, "response");
+      console.error(response, "response");
     } catch (error: any) {
       setRequestLoader(false);
     }

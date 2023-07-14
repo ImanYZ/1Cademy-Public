@@ -173,7 +173,6 @@ BasicNodeFooterProps) => {
   // const selectPendingProposals = useCallback(
   //   (event: any) => {
   //     // if (nodeBookState.selectedNode === identifier) {
-  //     //   console.log("this is selected");
   //     // }
   //     // TODO: remove openEditButton and nodeId global states
   //     // openNodePart(event, "PendingProposals");

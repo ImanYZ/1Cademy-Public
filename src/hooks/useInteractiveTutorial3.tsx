@@ -168,214 +168,210 @@ export const useInteractiveTutorial = ({ user }: useInteractiveTutorialProps) =>
   }, [db, user, userTutorialLoaded]);
 
   const startTutorial = useCallback((newTutorial: TutorialTypeKeys) => {
-    setTutorial(prevTutorial => {
-      console.log({ prevTutorial });
+    let newSteps: TutorialStep[] = [];
+    if (newTutorial === "navigation") {
+      newSteps = NAVIGATION_STEPS_COMPLETE;
+    }
+    if (newTutorial === "nodes") {
+      newSteps = NODES_STEPS_COMPLETE;
+    }
+    if (newTutorial === "concept") {
+      newSteps = NODE_CONCEPT;
+    }
+    if (newTutorial === "relation") {
+      newSteps = NODE_RELATION;
+    }
+    if (newTutorial === "reference") {
+      newSteps = NODE_REFERENCE;
+    }
+    if (newTutorial === "question") {
+      newSteps = NODE_QUESTION;
+    }
+    if (newTutorial === "idea") {
+      newSteps = NODE_IDEA;
+    }
+    if (newTutorial === "code") {
+      newSteps = NODE_CODE;
+    }
+    if (newTutorial === "proposal") {
+      newSteps = PROPOSAL_STEPS_COMPLETE;
+    }
+    if (newTutorial === "proposalConcept") {
+      newSteps = PROPOSING_CONCEPT_EDIT_COMPLETE;
+    }
+    if (newTutorial === "proposalReference") {
+      newSteps = PROPOSING_REFERENCE_EDIT_COMPLETE;
+    }
+    if (newTutorial === "proposalRelation") {
+      newSteps = PROPOSING_RELATION_EDIT_COMPLETE;
+    }
+    if (newTutorial === "proposalIdea") {
+      newSteps = PROPOSING_IDEA_EDIT_COMPLETE;
+    }
+    if (newTutorial === "proposalQuestion") {
+      newSteps = PROPOSING_QUESTION_EDIT_COMPLETE;
+    }
+    if (newTutorial === "proposalCode") {
+      newSteps = PROPOSING_CODE_EDIT_COMPLETE;
+    }
+    if (newTutorial === "reconcilingAcceptedProposal") {
+      newSteps = RECONCILING_ACCEPTED_PROPOSALS_STEPS_COMPLETE;
+    }
+    if (newTutorial === "reconcilingNotAcceptedProposal") {
+      newSteps = RECONCILING_NOT_ACCEPTED_PROPOSALS_STEPS_COMPLETE;
+    }
+    if (newTutorial === "childProposal") {
+      newSteps = CHILD_PROPOSAL_COMPLETE;
+    }
+    if (newTutorial === "childConcept") {
+      newSteps = PROPOSING_CONCEPT_EDIT_COMPLETE;
+    }
+    if (newTutorial === "childRelation") {
+      newSteps = PROPOSING_RELATION_EDIT_COMPLETE;
+    }
+    if (newTutorial === "childReference") {
+      newSteps = PROPOSING_REFERENCE_EDIT_COMPLETE;
+    }
+    if (newTutorial === "childQuestion") {
+      newSteps = PROPOSING_QUESTION_EDIT_COMPLETE;
+    }
+    if (newTutorial === "childIdea") {
+      newSteps = PROPOSING_IDEA_EDIT_COMPLETE;
+    }
+    if (newTutorial === "childCode") {
+      newSteps = PROPOSING_CODE_EDIT_COMPLETE;
+    }
+    if (newTutorial === "toolbox") {
+      newSteps = TOOLBOX_STEPS;
+    }
+    if (newTutorial === "collapseNode") {
+      newSteps = COLLAPSE_STEPS_COMPLETE;
+    }
+    if (newTutorial === "expandNode") {
+      newSteps = EXPAND_STEPS_COMPLETE;
+    }
 
-      let newSteps: TutorialStep[] = [];
-      if (newTutorial === "navigation") {
-        newSteps = NAVIGATION_STEPS_COMPLETE;
-      }
-      if (newTutorial === "nodes") {
-        newSteps = NODES_STEPS_COMPLETE;
-      }
-      if (newTutorial === "concept") {
-        newSteps = NODE_CONCEPT;
-      }
-      if (newTutorial === "relation") {
-        newSteps = NODE_RELATION;
-      }
-      if (newTutorial === "reference") {
-        newSteps = NODE_REFERENCE;
-      }
-      if (newTutorial === "question") {
-        newSteps = NODE_QUESTION;
-      }
-      if (newTutorial === "idea") {
-        newSteps = NODE_IDEA;
-      }
-      if (newTutorial === "code") {
-        newSteps = NODE_CODE;
-      }
-      if (newTutorial === "proposal") {
-        newSteps = PROPOSAL_STEPS_COMPLETE;
-      }
-      if (newTutorial === "proposalConcept") {
-        newSteps = PROPOSING_CONCEPT_EDIT_COMPLETE;
-      }
-      if (newTutorial === "proposalReference") {
-        newSteps = PROPOSING_REFERENCE_EDIT_COMPLETE;
-      }
-      if (newTutorial === "proposalRelation") {
-        newSteps = PROPOSING_RELATION_EDIT_COMPLETE;
-      }
-      if (newTutorial === "proposalIdea") {
-        newSteps = PROPOSING_IDEA_EDIT_COMPLETE;
-      }
-      if (newTutorial === "proposalQuestion") {
-        newSteps = PROPOSING_QUESTION_EDIT_COMPLETE;
-      }
-      if (newTutorial === "proposalCode") {
-        newSteps = PROPOSING_CODE_EDIT_COMPLETE;
-      }
-      if (newTutorial === "reconcilingAcceptedProposal") {
-        newSteps = RECONCILING_ACCEPTED_PROPOSALS_STEPS_COMPLETE;
-      }
-      if (newTutorial === "reconcilingNotAcceptedProposal") {
-        newSteps = RECONCILING_NOT_ACCEPTED_PROPOSALS_STEPS_COMPLETE;
-      }
-      if (newTutorial === "childProposal") {
-        newSteps = CHILD_PROPOSAL_COMPLETE;
-      }
-      if (newTutorial === "childConcept") {
-        newSteps = PROPOSING_CONCEPT_EDIT_COMPLETE;
-      }
-      if (newTutorial === "childRelation") {
-        newSteps = PROPOSING_RELATION_EDIT_COMPLETE;
-      }
-      if (newTutorial === "childReference") {
-        newSteps = PROPOSING_REFERENCE_EDIT_COMPLETE;
-      }
-      if (newTutorial === "childQuestion") {
-        newSteps = PROPOSING_QUESTION_EDIT_COMPLETE;
-      }
-      if (newTutorial === "childIdea") {
-        newSteps = PROPOSING_IDEA_EDIT_COMPLETE;
-      }
-      if (newTutorial === "childCode") {
-        newSteps = PROPOSING_CODE_EDIT_COMPLETE;
-      }
-      if (newTutorial === "toolbox") {
-        newSteps = TOOLBOX_STEPS;
-      }
-      if (newTutorial === "collapseNode") {
-        newSteps = COLLAPSE_STEPS_COMPLETE;
-      }
-      if (newTutorial === "expandNode") {
-        newSteps = EXPAND_STEPS_COMPLETE;
-      }
+    if (newTutorial === "hideDescendants") {
+      newSteps = HIDE_OFFSPRING_STEPS_COMPLETE;
+    }
 
-      if (newTutorial === "hideDescendants") {
-        newSteps = HIDE_OFFSPRING_STEPS_COMPLETE;
-      }
+    // sidebars
 
-      // sidebars
+    if (newTutorial === "searcher") {
+      newSteps = SEARCHER_STEPS_COMPLETE;
+      setDynamicTargetId("");
+    }
+    if (newTutorial === "userSettings") {
+      newSteps = USER_SETTINGS_STEPS_COMPLETE;
+    }
 
-      if (newTutorial === "searcher") {
-        newSteps = SEARCHER_STEPS_COMPLETE;
-        setDynamicTargetId("");
-      }
-      if (newTutorial === "userSettings") {
-        newSteps = USER_SETTINGS_STEPS_COMPLETE;
-      }
+    if (newTutorial === "notifications") {
+      newSteps = NOTIFICATION_STEPS;
+    }
 
-      if (newTutorial === "notifications") {
-        newSteps = NOTIFICATION_STEPS;
-      }
+    if (newTutorial === "bookmarks") {
+      newSteps = BOOKMARKS_STEPS;
+    }
 
-      if (newTutorial === "bookmarks") {
-        newSteps = BOOKMARKS_STEPS;
-      }
+    if (newTutorial === "pendingProposals") {
+      newSteps = PENDING_PROPOSALS_STEPS_COMPLETE;
+    }
+    if (newTutorial === "userInfo") {
+      newSteps = USER_INFO_STEPS_COMPLETE;
+    }
+    if (newTutorial === "knowledgeGraph") {
+      newSteps = KNOWLEDGE_GRAPH_CONFIG;
+    }
+    if (newTutorial === "nodeInteractions") {
+      newSteps = NODE_INTERACTIONS_CONFIG;
+    }
 
-      if (newTutorial === "pendingProposals") {
-        newSteps = PENDING_PROPOSALS_STEPS_COMPLETE;
-      }
-      if (newTutorial === "userInfo") {
-        newSteps = USER_INFO_STEPS_COMPLETE;
-      }
-      if (newTutorial === "knowledgeGraph") {
-        newSteps = KNOWLEDGE_GRAPH_CONFIG;
-      }
-      if (newTutorial === "nodeInteractions") {
-        newSteps = NODE_INTERACTIONS_CONFIG;
-      }
+    // node actions
 
-      // node actions
+    if (newTutorial === "upVote") {
+      newSteps = UPTOVE_STEPS_COMPLETE;
+    }
 
-      if (newTutorial === "upVote") {
-        newSteps = UPTOVE_STEPS_COMPLETE;
-      }
+    if (newTutorial === "downVote") {
+      newSteps = DOWNVOTE_STEPS_COMPLETE;
+    }
 
-      if (newTutorial === "downVote") {
-        newSteps = DOWNVOTE_STEPS_COMPLETE;
-      }
+    if (newTutorial === "hideNode") {
+      newSteps = HIDE_STEPS_COMPLETE;
+    }
+    // node footer actions
 
-      if (newTutorial === "hideNode") {
-        newSteps = HIDE_STEPS_COMPLETE;
-      }
-      // node footer actions
+    if (newTutorial === "tagsReferences") {
+      newSteps = TAGS_REFERENCES_STEPS_COMPLETE;
+    }
 
-      if (newTutorial === "tagsReferences") {
-        newSteps = TAGS_REFERENCES_STEPS_COMPLETE;
-      }
+    if (newTutorial === "tmpTagsReferences") {
+      newSteps = TMP_TAGS_REFERENCES;
+    }
+    //----------------- tmp nodes
 
-      if (newTutorial === "tmpTagsReferences") {
-        newSteps = TMP_TAGS_REFERENCES;
-      }
-      //----------------- tmp nodes
+    if (newTutorial === "tmpEditNode") {
+      newSteps = TMP_EDIT_NODE;
+    }
 
-      if (newTutorial === "tmpEditNode") {
-        newSteps = TMP_EDIT_NODE;
-      }
+    if (newTutorial === "tmpProposalConceptChild") {
+      newSteps = TMP_PROPOSE_CHILD_CONCEPT;
+    }
+    if (newTutorial === "tmpProposalRelationChild") {
+      newSteps = TMP_PROPOSE_CHILD_RELATION;
+    }
+    if (newTutorial === "tmpProposalReferenceChild") {
+      newSteps = TMP_PROPOSE_CHILD_REFERENCE;
+    }
+    if (newTutorial === "tmpProposalQuestionChild") {
+      newSteps = TMP_PROPOSE_CHILD_QUESTION;
+    }
+    if (newTutorial === "tmpProposalIdeaChild") {
+      newSteps = TMP_PROPOSE_CHILD_IDEA;
+    }
+    if (newTutorial === "tmpProposalCodeChild") {
+      newSteps = TMP_PROPOSE_CHILD_CODE;
+    }
+    if (newTutorial === "tmpParentsChildrenList") {
+      newSteps = TMP_OPEN_PARENT_CHILDREN;
+    }
+    if (newTutorial === "tmpPathways") {
+      newSteps = TMP_PATHWAYS;
+    }
+    // others
+    if (newTutorial === "notebooks") {
+      newSteps = NOTEBOOKS_STEPS;
+    }
+    if (newTutorial === "leaderBoard") {
+      newSteps = LEADER_BOARD_STEPS;
+    }
 
-      if (newTutorial === "tmpProposalConceptChild") {
-        newSteps = TMP_PROPOSE_CHILD_CONCEPT;
-      }
-      if (newTutorial === "tmpProposalRelationChild") {
-        newSteps = TMP_PROPOSE_CHILD_RELATION;
-      }
-      if (newTutorial === "tmpProposalReferenceChild") {
-        newSteps = TMP_PROPOSE_CHILD_REFERENCE;
-      }
-      if (newTutorial === "tmpProposalQuestionChild") {
-        newSteps = TMP_PROPOSE_CHILD_QUESTION;
-      }
-      if (newTutorial === "tmpProposalIdeaChild") {
-        newSteps = TMP_PROPOSE_CHILD_IDEA;
-      }
-      if (newTutorial === "tmpProposalCodeChild") {
-        newSteps = TMP_PROPOSE_CHILD_CODE;
-      }
-      if (newTutorial === "tmpParentsChildrenList") {
-        newSteps = TMP_OPEN_PARENT_CHILDREN;
-      }
-      if (newTutorial === "tmpPathways") {
-        newSteps = TMP_PATHWAYS;
-      }
-      // others
-      if (newTutorial === "notebooks") {
-        newSteps = NOTEBOOKS_STEPS;
-      }
-      if (newTutorial === "leaderBoard") {
-        newSteps = LEADER_BOARD_STEPS;
-      }
+    if (newTutorial === "interactionLivenessBar") {
+      newSteps = INTERACTION_LIVENESS_BAR_STEPS;
+    }
 
-      if (newTutorial === "interactionLivenessBar") {
-        newSteps = INTERACTION_LIVENESS_BAR_STEPS;
-      }
+    if (newTutorial === "reputationLivenessBar") {
+      newSteps = REPUTATION_LIVENESS_BAR_STEPS;
+    }
 
-      if (newTutorial === "reputationLivenessBar") {
-        newSteps = REPUTATION_LIVENESS_BAR_STEPS;
-      }
+    if (newTutorial === "communityLeaderBoard") {
+      newSteps = COMMUNITY_LEADER_BOARD_STEPS;
+    }
 
-      if (newTutorial === "communityLeaderBoard") {
-        newSteps = COMMUNITY_LEADER_BOARD_STEPS;
-      }
+    if (newTutorial === "parentsChildrenList") {
+      newSteps = PARENTS_CHILDREN_LIST_STEPS;
+    }
 
-      if (newTutorial === "parentsChildrenList") {
-        newSteps = PARENTS_CHILDREN_LIST_STEPS;
-      }
+    if (newTutorial === "pathways") {
+      newSteps = PATHWAYS_STEPS;
+    }
 
-      if (newTutorial === "pathways") {
-        newSteps = PATHWAYS_STEPS;
-      }
+    setUserTutorial(prev => ({
+      ...prev,
+      [newTutorial]: { ...prev[newTutorial], currentStep: 1 },
+    }));
 
-      setUserTutorial(prev => ({
-        ...prev,
-        [newTutorial]: { ...prev[newTutorial], currentStep: 1 },
-      }));
-
-      return { name: newTutorial, steps: newSteps, step: 1 };
-    });
+    setTutorial({ name: newTutorial, steps: newSteps, step: 1 });
   }, []);
 
   const currentStep = useMemo(() => getTutorialStep(tutorial), [tutorial]);
@@ -428,7 +424,7 @@ export const useInteractiveTutorial = ({ user }: useInteractiveTutorialProps) =>
 
 export const STEPS_NODE_TUTORIAL = [];
 
-export const getTutorialStep = (tutorial: Tutorial) => {
+const getTutorialStep = (tutorial: Tutorial) => {
   if (!tutorial) return null;
   return tutorial.steps[tutorial.step - 1];
 };

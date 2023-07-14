@@ -12,6 +12,8 @@ import React, {
 } from "react";
 import { useRive, useStateMachineInput } from "rive-react";
 
+import { devLog } from "@/lib/utils/develop.util";
+
 import { getNode } from "../../client/firestore/nodes.firestore";
 import { addPracticeToolLog } from "../../client/firestore/practiceToolLog.firestore";
 import { detectElements } from "../../hooks/detectElements";
@@ -144,7 +146,6 @@ export const Assistant = ({
 
   const continuePracticing = useCallback(
     (tagId: string) => {
-      console.log("continuePracticing");
       setRootQuery(tagId);
       setDisplayDashboard(true);
     },
@@ -153,11 +154,9 @@ export const Assistant = ({
 
   const stopAssistant = useCallback(
     async (narrateStop: boolean) => {
-      console.log("stopAssistant");
       // narrate stop only when assistant is stopped by user (by voice or button)
       window.speechSynthesis.cancel();
       if (abortNarratorPromise.current) {
-        console.log("will abort");
         abortNarratorPromise.current();
       }
       if (narrateStop) {
@@ -194,12 +193,12 @@ export const Assistant = ({
       askingRef.current = true;
       originState.current = "narrate-question";
       while (askingRef.current) {
-        console.log("👉 1. narrate", { message, preMessage, preTranscriptProcessed, origin, listenType });
+        devLog("👉 1_NARRATE", { message, preMessage, preTranscriptProcessed, origin, listenType });
 
         stateInput.value = 1;
         // setAssistantState("NARRATE");
         if (listenType === "ANSWERING" && originState.current === "narrate-question") {
-          if (!assistantRef.current) return console.log("cant execute operations with assistantRef");
+          if (!assistantRef.current) return console.warn("cant execute operations with assistantRef");
 
           assistantRef.current.onSelectedQuestionAnswer(-10);
           scrollToHtmlElement("question-title");
@@ -272,7 +271,7 @@ export const Assistant = ({
         }
         if (!askingRef.current) break; // should finish without make nothing
 
-        console.log("👉 2. listen", { message, preMessage, preTranscriptProcessed, origin, listenType });
+        devLog("👉 1_LISTEN", { message, preMessage, preTranscriptProcessed, origin, listenType });
         stateInput.value = 2;
         const res = recognizeInput3();
         if (!res) {
@@ -288,7 +287,7 @@ export const Assistant = ({
 
         if (recognitionResult.error) {
           if (recognitionResult.error === "aborted") break;
-          console.log("onerror:", recognitionResult.error);
+          console.error("onerror:recognitionResult.error", recognitionResult.error);
           originState.current = "onerror";
 
           preMessage =
@@ -298,12 +297,10 @@ export const Assistant = ({
           if (listenType === "NOTEBOOK_ACTIONS") timesAssistantCantUnderstand++;
           timesAssistantCantUnderstand++;
           message = "";
-          console.log("onerror", { origin: originState.current, preMessage, message });
           continue;
         }
 
         if (recognitionResult.nomatch) {
-          console.log("onnomatch");
           originState.current = "nomatch";
           preMessage = getNoMatchPreviousMessage(listenType, timesAssistantCantUnderstand);
           timesAssistantCantUnderstand++;
@@ -313,7 +310,6 @@ export const Assistant = ({
         }
 
         const transcript = recognitionResult.transcript.toLowerCase();
-        console.log("----> result", { transcript, listenType });
         // action
 
         if (transcript === "repeat question") {
@@ -335,7 +331,6 @@ export const Assistant = ({
         }
 
         const transcriptProcessed = getTranscriptProcessed(transcript, listenType);
-        console.log("----> transcriptProcessed", { transcriptProcessed });
         if (!transcriptProcessed && listenType !== "CONFIRM") {
           // on CONFIRM, we will manage in different way
           originState.current = "nomatch";
@@ -348,7 +343,6 @@ export const Assistant = ({
         timesAssistantCantUnderstand = 0; // restart this to say again complete error phrase
 
         if (transcriptProcessed === OPEN_NOTEBOOK) {
-          console.log("NEXT_ACTION:open notebook");
           const parents = questionNode.parents;
           setDisplayDashboard(false);
           openNodesOnNotebook(selectedNotebookId, parents);
@@ -390,7 +384,6 @@ export const Assistant = ({
         }
 
         if (listenType === "ANSWERING") {
-          console.log("ANSWERING");
           if (!assistantRef.current) break; // CHECK if we need to stop
 
           const submitOptions = getAnswersLettersOptions(transcriptProcessed, questionNode.choices.length);
@@ -404,12 +397,10 @@ export const Assistant = ({
           listenType = answerIsValid ? "CONFIRM" : "ANSWERING";
           originState.current = "from-answering";
           message = newMessage;
-          console.log("ANSWERING", { answerIsValid, message, listenType });
           continue;
         }
 
         if (listenType === "CONFIRM") {
-          console.log("CONFIRM");
           if (["y"].includes(transcriptProcessed)) {
             const submitOptions = getAnswersLettersOptions(preTranscriptProcessed, questionNode.choices.length);
             assistantRef.current?.onSubmitAnswer(submitOptions, true);
@@ -418,7 +409,6 @@ export const Assistant = ({
               questionNode.choices,
               submitOptions
             );
-            console.log("will-fire", isCorrect);
             const sameResult = stateOfPracticeRef.current.isCorrect === isCorrect;
             stateOfPracticeRef.current = {
               consecutive: sameResult ? stateOfPracticeRef.current.consecutive + 1 : 1,
@@ -438,27 +428,22 @@ export const Assistant = ({
             preMessage = "";
             listenType = "NEXT_ACTION";
             originState.current = isCorrect ? CORRECT_ANSWER_REACTION : WRONG_ANSWER_REACTION;
-            console.log("CONFIRM", { message, submitOptions });
           } else {
-            console.log("confirm-error");
             preMessage = ANSWERING_ERROR;
             message = "";
             originState.current = "confirm-error";
             listenType = "ANSWERING";
-            console.log("CONFIRM:confirm-error", { message });
           }
           continue;
         }
 
         if (listenType === "NEXT_ACTION") {
           if (transcriptProcessed === NEXT_ACTION) {
-            console.log("NEXT_ACTION:next action");
             assistantRef.current?.nextQuestion();
             askingRef.current = false;
             continue;
           }
 
-          console.log("NEXT_ACTION:No action");
           preMessage = `Sorry, I didn't get your choices. ${NEXT_ACTION_ERROR}`;
           message = "";
           originState.current = "next-action-error";
@@ -466,7 +451,6 @@ export const Assistant = ({
 
         if (listenType === "NOTEBOOK_ACTIONS") {
           if (transcriptProcessed === OPEN_PRACTICE) {
-            // console.log("continue practicing", { transcriptProcessed });
             continuePracticing(tagId);
             break;
           }
@@ -516,10 +500,8 @@ export const Assistant = ({
   //   if (!angryTrigger) return;
 
   //   const intervalId = setInterval(() => {
-  //     console.log("try: getAssistantInitialState");
   //     if (assistantRef?.current?.getAssistantInitialState) {
   //       const assistantInitialState = assistantRef.current.getAssistantInitialState();
-  //       console.log({ assistantInitialState });
   //       if (assistantInitialState !== "ANGRY") return;
   //       angryTrigger.fire();
   //       clearInterval(intervalId);
@@ -534,7 +516,6 @@ export const Assistant = ({
 
   useEffect(() => {
     const run = async () => {
-      // console.log("askQuestion", { ref: previousVoiceAssistant.current, voiceAssistant });
       const isEqualsVoiceAssistant =
         previousVoiceAssistant.current.tagId === voiceAssistant.tagId &&
         previousVoiceAssistant.current.questionNode === voiceAssistant.questionNode;
@@ -656,7 +637,6 @@ const getMessageFromUserAnswering = (
   questionsAmount: number
 ): { answerIsValid: boolean; message: string } => {
   const possibleOptions = Object.keys(NUMBER_POSSIBLE_OPTIONS).slice(0, questionsAmount);
-  console.log({ possibleOptions, transcriptProcessed });
   const answerIsValid = transcriptProcessed.split(" ").reduce((acu, cur) => acu && possibleOptions.includes(cur), true);
 
   if (!answerIsValid) return { answerIsValid: false, message: ANSWERING_ERROR };

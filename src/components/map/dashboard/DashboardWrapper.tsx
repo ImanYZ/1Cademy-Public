@@ -90,7 +90,7 @@ export const DashboardWrapper = forwardRef<DashboardWrapperRef, DashboardWrapper
   const practiceToolRef = useRef<PracticeToolRef | null>(null);
 
   useImperativeHandle(ref, () => ({
-    onRunPracticeTool: (start: boolean) => console.log("start practice", start),
+    onRunPracticeTool: (start: boolean) => console.warn("here should start practice", start), // TODO: check this and remove if is not used
     onSubmitAnswer: (answers: boolean[], byVoice?: boolean) =>
       practiceToolRef.current && practiceToolRef.current.onSubmitAnswer(answers, byVoice),
     onSelectAnswers: practiceToolRef.current ? practiceToolRef.current.onSelectAnswers : () => {},
@@ -259,13 +259,11 @@ export const DashboardWrapper = forwardRef<DashboardWrapperRef, DashboardWrapper
     if (!root) return;
     const rootSemester = allSemesters.find(semester => semester.tagId === root);
     if (!rootSemester) return;
-    console.log({ rootSemester });
     const { cTagId, cTitle, pTagId, pTitle, tagId, title, uTagId, uTitle } = rootSemester;
 
     setCurrentSemester({ cTagId, cTitle, pTagId, pTitle, tagId, title, uTagId, uTitle });
     setSelectToolbarView("PRACTICE");
     setRootFound(true);
-    // console.log("currentsssss ", practiceToolRef.current);
     // practiceToolRef.current?.onRunPracticeTool(true);
   }, [allSemesters, root]);
 

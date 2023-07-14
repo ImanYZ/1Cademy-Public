@@ -440,7 +440,6 @@ const SearcherSidebar = ({
   );
 
   // const setRecoverDefaultTags = useCallback(() => {
-  //   // console.log("setRecoverDefaultTwgs");
   //   // setOnlyTags(true);
   //   // setAllTags(oldAllTags => {
   //   //   return { ...oldAllTags, [tag.node]: { ...oldAllTags[tag.node], checked: true } };

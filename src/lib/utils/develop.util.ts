@@ -4,12 +4,12 @@
  * - this will print [FUNCTION_NAME]
  * - logInUpperCase must be writer to sho log like this: FUNCTION_NAME
  */
-const disableLogsTemporally = false;
-const disableTutorialLogs = false;
+const disableLogsTemporally = true;
+const disableTutorialLogs = true;
 export const devLog = (logInUpperCase: string, otherData = {}, type?: "TUTORIAL") => {
   if (disableLogsTemporally) return;
   if (process.env.NODE_ENV !== "development") return;
   if (type === "TUTORIAL" && disableTutorialLogs) return;
 
-  console.log(`[${logInUpperCase.toUpperCase()}]`, otherData);
+  console.info(`[${logInUpperCase.toUpperCase()}]`, otherData);
 };

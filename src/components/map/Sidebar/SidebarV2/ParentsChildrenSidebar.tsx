@@ -100,7 +100,6 @@ const ParentsChildrenSidebar = ({
       nodeTypes: NodeType[];
       page?: number;
     }) => {
-      console.log(" -> SEARCH");
       setIsLoading(true);
       if (page < 2) setSearchResults(INITIAL_SEARCH_RESULT);
       const res = await Post<SearchNodesResponse>("/searchNodesInNotebook", {
@@ -172,7 +171,6 @@ const ParentsChildrenSidebar = ({
 
   const onChangeNodeType = useCallback(
     (newNodeTypes: NodeType[]) => {
-      console.log("onChangeNodeType:", { newNodeTypes });
       setNodeTypes(newNodeTypes);
       onSearchQuery({
         q: queryParentChildren.query,

@@ -128,7 +128,6 @@ const RecentNodesList = (props: RecentNodesListProps) => {
           native={false}
           renderValue={() => {
             const option = SORT_OPTIONS.filter(option => option.value === props.sortOption)[0];
-            console.log("sssss1", { option });
             return option?.name || "Sort by";
           }}
         >

@@ -13,7 +13,6 @@ type GeneralPlotStatsProps = {
 };
 
 export const GeneralPlotStats = ({ maxSemesterStats, studentStats }: GeneralPlotStatsProps) => {
-  console.log("semesterStats", maxSemesterStats);
   const {
     palette: { mode },
   } = useTheme();

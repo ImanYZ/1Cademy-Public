@@ -138,7 +138,6 @@ const Tutorial = () => {
           }
         }
       }
-      console.log({ quests });
       setQuestions(quests);
       if (tutorialDoc.exists()) {
         changeExpand(tutorialData.completed + 1, tutorialRef, tutorialDoc, oAttempts);
@@ -304,7 +303,7 @@ const Tutorial = () => {
         }
       }
     } catch (error) {
-      console.log(error);
+      console.error(error);
     }
   };
 
@@ -364,7 +363,7 @@ const Tutorial = () => {
       }
     } catch (error) {
       setSnackbarMessage("There was an issue submitting your feedback about this question. Please try again!");
-      console.log(error);
+      console.error(error);
     }
   };
 

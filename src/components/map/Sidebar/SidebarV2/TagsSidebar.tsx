@@ -86,7 +86,6 @@ const TagsSidebar = ({ username, open, onClose, onChangeChosenNode, preLoadNodes
       nodeTypes: NodeType[];
       page?: number;
     }) => {
-      console.log(" -> SEARCH");
       setIsLoading(true);
       if (page < 2) setSearchResults(INITIAL_SEARCH_RESULT);
       const res = await Post<SearchNodesResponse>("/searchNodesInNotebook", {
@@ -158,7 +157,6 @@ const TagsSidebar = ({ username, open, onClose, onChangeChosenNode, preLoadNodes
 
   const onChangeNodeType = useCallback(
     (newNodeTypes: NodeType[]) => {
-      console.log("onChangeNodeType:", { newNodeTypes });
       setNodeTypes(newNodeTypes);
       onSearchQuery({
         q: query,

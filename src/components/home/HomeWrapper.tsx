@@ -58,9 +58,7 @@ HomeWrapperProps) => {
   }, []);
 
   useEffect(() => {
-    console.log("ss:01");
     if (isScrolling.current) return;
-    console.log("ss:02");
     let newSelectedSectionId = "";
     if (mechanismInView) newSelectedSectionId = ONE_CADEMY_SECTIONS[1].id;
     if (magnitudeInView) newSelectedSectionId = ONE_CADEMY_SECTIONS[2].id;
@@ -69,9 +67,7 @@ HomeWrapperProps) => {
     // if (systemsInView) newSelectedSectionId = ONE_CADEMY_SECTIONS[5].id;
     if (aboutInView) newSelectedSectionId = ONE_CADEMY_SECTIONS[4].id;
     // if (applyInView) newSelectedSectionId = ONE_CADEMY_SECTIONS[7].id;
-    console.log("ss:03");
     const newHash = newSelectedSectionId ? `#${newSelectedSectionId}` : "#";
-    console.log("ss:04");
     setSelectedSectionId(newHash);
     window.history.replaceState(null, "", newHash);
   }, [aboutInView, benefitInView, magnitudeInView, mechanismInView]);
@@ -91,11 +87,9 @@ HomeWrapperProps) => {
 
     isScrolling.current = true;
 
-    console.log("ss1", sectionsHeight);
     setSelectedSectionId(newHash);
     const sectionIdx = sectionsHeight.findIndex(cur => cur.id === newSelectedSectionId);
     if (sectionIdx < 0) return;
-    console.log("ss2");
 
     const previousSections = sectionsHeight.slice(0, sectionIdx + 1);
     const cumulativeSectionHeight = previousSections.reduce((a, c) => ({ id: c.id, height: a.height + c.height }));
@@ -103,17 +97,14 @@ HomeWrapperProps) => {
     scrollableContainer.scroll({ top: cumulativeSectionHeight.height, left: 0, behavior: "smooth" });
     window.history.replaceState(null, "", newHash);
 
-    console.log("ss3");
     timer.current = setTimeout(() => {
       isScrolling.current = false;
     }, 1000);
   };
 
   const getSectionHeights = useCallback(() => {
-    console.log("ttt:01");
     if (!headerRef?.current) return null;
     if (!heroSectionRef?.current) return null;
-    console.log("ttt:02");
     if (!mechanismEntry) return null;
     if (!magnitudeEntry) return null;
     if (!benefitEntry) return null;
@@ -121,7 +112,6 @@ HomeWrapperProps) => {
     // if (!systemsEntry) return null;
     if (!aboutEntry) return null;
     // if (!applyEntry) return null;
-    console.log("ttt:03");
 
     return [
       { id: mechanismEntry.target.id, height: headerRef.current.clientHeight + heroSectionRef.current.clientHeight },

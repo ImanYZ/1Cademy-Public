@@ -273,7 +273,6 @@ const NodeFooter = ({
   const selectPendingProposals = useCallback(
     (event: any) => {
       // if (nodeBookState.selectedNode === identifier) {
-      //   console.log("this is selected");
       // }
       // TODO: remove openEditButton and nodeId global states
       // openNodePart(event, "PendingProposals");
@@ -1292,7 +1291,6 @@ const NodeFooter = ({
                           menuItemProps={
                             {
                               // onMouseOver: () => {
-                              //   console.log("onMouseOver");
                               //   setOpenSocialMenu(true);
                               // },
                               // onMouseOut: () => setOpenSocialMenu(false),
@@ -1866,7 +1864,6 @@ export const CustomMenuItem = ({
       // disabled={menuItemProps.disabled}
       {...menuItemProps}
       onMouseOver={() => {
-        console.log("onMouseOver");
         setShowMenu(true);
       }}
       onMouseOut={() => setShowMenu(false)}
@@ -1898,7 +1895,6 @@ export const CustomMenuItem = ({
             <Box
               sx={{ display: "flex", alignItems: "center" }}
               // onMouseOver={() => {
-              //   console.log("onMouseOver");
               //   setShowMenu(true);
               // }}
               // onMouseOut={() => setShowMenu(false)}
