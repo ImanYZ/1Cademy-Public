@@ -90,7 +90,7 @@ export const DashboardWrapper = forwardRef<DashboardWrapperRef, DashboardWrapper
   const practiceToolRef = useRef<PracticeToolRef | null>(null);
 
   useImperativeHandle(ref, () => ({
-    onRunPracticeTool: (start: boolean) => console.log("start practice", start),
+    onRunPracticeTool: (start: boolean) => console.warn("here should start practice", start), // TODO: check this and remove if is not used
     onSubmitAnswer: (answers: boolean[], byVoice?: boolean) =>
       practiceToolRef.current && practiceToolRef.current.onSubmitAnswer(answers, byVoice),
     onSelectAnswers: practiceToolRef.current ? practiceToolRef.current.onSelectAnswers : () => {},

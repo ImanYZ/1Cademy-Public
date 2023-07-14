@@ -98,7 +98,7 @@ import { UserStatus } from "../components/practiceTool/UserStatus";
 import { MemoizedTutorialTableOfContent } from "../components/tutorial/TutorialTableOfContent";
 import { NodeBookProvider, useNodeBook } from "../context/NodeBookContext";
 import { detectElements as detectHtmlElements } from "../hooks/detectElements";
-import { getTutorialStep, useInteractiveTutorial } from "../hooks/useInteractiveTutorial3";
+import { useInteractiveTutorial } from "../hooks/useInteractiveTutorial3";
 import { useMemoizedCallback } from "../hooks/useMemoizedCallback";
 import { useWindowSize } from "../hooks/useWindowSize";
 import { useWorkerQueue } from "../hooks/useWorkerQueue";
@@ -4671,17 +4671,10 @@ const Notebook = ({}: NotebookProps) => {
     setOpenProgressBarMenu(false);
   }, []);
 
-  const onCancelTutorial = useCallback(
-    () =>
-      setTutorial(p => {
-        const previousStep = getTutorialStep(p);
-        console.log({ previousStep });
-        if (tutorialTargetId) removeStyleFromTarget(tutorialTargetId);
-
-        return null;
-      }),
-    [setTutorial, tutorialTargetId]
-  );
+  const onCancelTutorial = useCallback(() => {
+    if (tutorialTargetId) removeStyleFromTarget(tutorialTargetId);
+    setTutorial(null);
+  }, [setTutorial, tutorialTargetId]);
 
   const onCloseTableOfContent = useCallback(() => {
     setOpenProgressBar(false);
@@ -6349,13 +6342,12 @@ const Notebook = ({}: NotebookProps) => {
     if (!user) return;
     if (!user.role) return;
 
-    const notebook = router.query.nb as string;
+    // const notebook = router.query.nb as string;
     const root = router.query.root as string;
     if (!root) return;
 
     setRootQuery(root);
     setDisplayDashboard(true);
-    console.log({ notebook, root });
   }, [displayDashboard, router.query.nb, router.query.root, user]);
 
   useEffect(() => {

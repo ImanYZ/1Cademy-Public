@@ -407,7 +407,7 @@ const UsersStatusList = ({ nodeBookDispatch, isSmaller = true, disabled = false,
             online={online}
             // inUserBar={false}
             // inNodeFooter={false}
-            reloadPermanentGrpah={() => console.log("props.reloadPermanentGrpah")}
+            reloadPermanentGrpah={() => console.warn("here should call props.reloadPermanentGrpah")}
             tagTitle={user.tag}
             setOpenSideBar={props.setOpenSideBar}
             sx={{ ...props.sxUserStatus }}

@@ -134,7 +134,7 @@ const NodePage: NextPage<Props> = ({ notebook }) => {
     mapWidth,
     mapHeight,
     allTags: {},
-    onComplete: () => console.log("onComplete worker"),
+    onComplete: () => {},
     setClusterNodes,
     withClusters: false,
   });
