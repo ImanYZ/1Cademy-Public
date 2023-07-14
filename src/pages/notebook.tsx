@@ -468,7 +468,6 @@ const Notebook = ({}: NotebookProps) => {
           return null;
         }
         const intructor = docChanges[0].doc.data() as Instructor;
-        console.log(":: ::intructor :: ::", intructor);
         setInstructor(intructor);
       },
       error => {
@@ -510,7 +509,6 @@ const Notebook = ({}: NotebookProps) => {
 
   const scrollToNode = useCallback(
     (nodeId: string, force = false, tries = 0) => {
-      // console.log(">>scrollToNode");
       if (tries === 10) return;
 
       if (!scrollToNodeInitialized.current) {
@@ -847,7 +845,6 @@ const Notebook = ({}: NotebookProps) => {
             const userNodeRef = doc(db, "userNodes", userNodeId);
             const userNodeDataTmp = userNodeDoc.docs[0].data() as UserNodeFirestore;
 
-            // console.log({ userNodeData });
             userNodeData = {
               ...userNodeDataTmp,
               ...openWithDefaultValues,
@@ -864,7 +861,6 @@ const Notebook = ({}: NotebookProps) => {
             userNodeData.updatedAt = Timestamp.fromDate(new Date());
             delete userNodeData?.visible;
             delete userNodeData?.open;
-            console.log("tt:update", userNodeData);
             batch.update(userNodeRef, userNodeData);
           } else {
             userNodeData = {
@@ -882,7 +878,6 @@ const Notebook = ({}: NotebookProps) => {
               notebooks: [selectedNotebookId],
               expands: [expanded],
             };
-            console.log("tt:create:", userNodeData);
             userNodeRef = collection(db, "userNodes");
             const preloadedUserNodeId = preLoadedNodesRef.current[nodeId]?.userNodeId;
             preloadedUserNodeId
@@ -929,7 +924,6 @@ const Notebook = ({}: NotebookProps) => {
   }, []);
 
   const onChangeNotebook = useCallback((notebookId: string) => {
-    console.log("onChangeNotebook", { notebookId });
     setSelectedNotebookId(notebookId);
   }, []);
 
@@ -1143,7 +1137,6 @@ const Notebook = ({}: NotebookProps) => {
               ...updatedLinksRef.current.addedChildren,
               ...updatedLinksRef.current.removedChildren,
             ];
-            console.log("4.5:Snapshot: graph", { graph, nodesInEdition });
 
             const res = synchronizeGraph({
               g: g.current,
@@ -1155,7 +1148,7 @@ const Notebook = ({}: NotebookProps) => {
               setNoNodesFoundMessage,
               nodesInEdition,
             });
-            console.log({ res });
+            devLog("4:Snapshot:sync result", res);
             return res;
           });
 
@@ -1242,7 +1235,6 @@ const Notebook = ({}: NotebookProps) => {
     if (!selectedNotebook.defaultTagId || !selectedNotebook.defaultTagName) return;
     if (user.tagId === selectedNotebook.defaultTagId) return; // is updated
 
-    console.log("Update tag when a notebook is changed", user.tagId, selectedNotebook.defaultTagId);
     const updateDefaultTag = async (defaultTagId: string, defaultTagName: string) => {
       try {
         dispatch({
@@ -1294,9 +1286,7 @@ const Notebook = ({}: NotebookProps) => {
       // to remove snapshot with previous Graph (nodes, edges)
       // and add snapshot with new Notebook Id
       if (selectedPreviousNotebookIdRef.current !== selectedNotebookId) {
-        console.log("userNodesSnapshot:clean");
         // if we change notebook, we need to clean graph
-        // console.log("reset", { p: selectedPreviousNotebookIdRef.current, n: selectedNotebookId });
         selectedPreviousNotebookIdRef.current = selectedNotebookId;
 
         g.current = createGraph();
@@ -1308,7 +1298,6 @@ const Notebook = ({}: NotebookProps) => {
           return { nodes: {}, edges: {} };
         });
       }
-      console.log("userNodesSnapshot:killSnapshot");
       killSnapshot();
     };
     // INFO: notebookChanged used in dependecies because of the redraw graph (magic wand button)
@@ -1740,20 +1729,14 @@ const Notebook = ({}: NotebookProps) => {
         chosenNode: notebookRef.current?.chosenNode?.id,
       });
       setGraph(({ nodes: oldNodes, edges: oldEdges }) => {
-        console.log("setGraph", {
-          choosingNode: notebookRef.current?.choosingNode?.id,
-          chosenNode: notebookRef.current?.chosenNode?.id,
-        });
         const updatedNodeIds: string[] = [];
         if (!notebookRef.current.choosingNode || !notebookRef.current.chosenNode)
           return { nodes: oldNodes, edges: oldEdges };
         if (nodeId === notebookRef.current.choosingNode.id) return { nodes: oldNodes, edges: oldEdges };
 
-        // console.log({ cn: nodeId, ching: notebookRef.current.choosingNode.id });
         updatedNodeIds.push(nodeId);
         updatedNodeIds.push(notebookRef.current.choosingNode.id);
         // updatedNodeIds.push(notebookRef.current.chosenNode.id);
-        console.log("aa0");
         let choosingNodeCopy = copyNode(oldNodes[notebookRef.current.choosingNode.id]);
         let chosenNodeObj = copyNode(oldNodes[notebookRef.current.chosenNode.id]);
         let newEdges: EdgesData = oldEdges;
@@ -1771,14 +1754,12 @@ const Notebook = ({}: NotebookProps) => {
           (notebookRef.current.choosingNode.type === "Child" &&
             notebookRef.current.choosingNode.id !== notebookRef.current.chosenNode.id &&
             choosingNodeCopy.children.filter((l: any) => l.node === notebookRef.current.chosenNode?.id).length === 0);
-        console.log({ validLink });
 
         if (!validLink) return { nodes: oldNodes, edges: oldEdges };
 
         const chosenNodeId = notebookRef.current.chosenNode.id;
         const chosingNodeId = notebookRef.current.choosingNode.id;
 
-        console.log("bb");
         if (notebookRef.current.choosingNode.type === "Reference") {
           choosingNodeCopy.references = [...choosingNodeCopy.references, chosenNodeObj.title];
           choosingNodeCopy.referenceIds = [...choosingNodeCopy.referenceIds, notebookRef.current.chosenNode.id];
@@ -1787,7 +1768,6 @@ const Notebook = ({}: NotebookProps) => {
           choosingNodeCopy.tags = [...choosingNodeCopy.tags, chosenNodeObj.title];
           choosingNodeCopy.tagIds = [...choosingNodeCopy.tagIds, notebookRef.current.chosenNode.id];
         } else if (notebookRef.current.choosingNode.type === "Parent") {
-          console.log("Parent:01", choosingNodeCopy.parents);
           choosingNodeCopy.parents = [
             ...choosingNodeCopy.parents,
             {
@@ -1797,8 +1777,6 @@ const Notebook = ({}: NotebookProps) => {
               type: chosenNodeObj.nodeType,
             },
           ];
-          console.log("Parent:02");
-          // console.log("Parent after", choosingNodeCopy.parents);
           // if (!(notebookRef.current.chosenNode.id in changedNodes)) {
           //   changedNodes[notebookRef.current.chosenNode.id] = copyNode(oldNodes[notebookRef.current.chosenNode.id]);
           // }
@@ -1806,7 +1784,6 @@ const Notebook = ({}: NotebookProps) => {
           if (!(notebookRef.current.choosingNode.id in changedNodes)) {
             changedNodes[notebookRef.current.choosingNode.id] = copyNode(oldNodes[notebookRef.current.choosingNode.id]);
           }
-          console.log("Parent:03");
           chosenNodeObj.children = [
             ...chosenNodeObj.children,
             {
@@ -1836,7 +1813,6 @@ const Notebook = ({}: NotebookProps) => {
             );
           }
         } else if (notebookRef.current.choosingNode.type === "Child") {
-          console.log("Child");
           choosingNodeCopy.children = [
             ...choosingNodeCopy.children,
             {
@@ -1880,13 +1856,11 @@ const Notebook = ({}: NotebookProps) => {
           }
         }
 
-        console.log("chosenNodeChange:result", { oldNodes, choosingNodeCopy, chosenNodeObj });
         const newNodesObj = {
           ...oldNodes,
           [chosingNodeId]: choosingNodeCopy,
           [chosenNodeId]: chosenNodeObj,
         };
-        console.log({ newNodesObj });
         setTimeout(() => {
           setNodeUpdates({
             nodeIds: updatedNodeIds,
@@ -1900,7 +1874,6 @@ const Notebook = ({}: NotebookProps) => {
         return { nodes: newNodesObj, edges: newEdges };
       });
       // setUpdatedLinks(updatedLinks => {
-      //   console.log("setUpdatedLinks");
 
       //   return { ...updatedLinks };
       // });
@@ -1946,7 +1919,6 @@ const Notebook = ({}: NotebookProps) => {
 
   const onChangeChosenNode = useCallback(
     async ({ nodeId, title }: { nodeId: string; title: string }) => {
-      console.log("onChangeChosenNode", 0);
       if (!notebookRef.current.choosingNode) return;
       if (notebookRef.current.choosingNode.id === nodeId) return;
 
@@ -1954,8 +1926,6 @@ const Notebook = ({}: NotebookProps) => {
       nodeBookDispatch({ type: "setChosenNode", payload: { id: nodeId, title } });
 
       if (notebookRef.current.choosingNode.id === "Tag") return; //INFO: this is important to update a community
-      console.log("onChangeChosenNode", nodeId);
-      console.log("onChangeChosenNode", 1);
       openNodeHandler(nodeId, { open: true }, false);
       await detectHtmlElements({ ids: [nodeId] });
       await delay(500);
@@ -1977,10 +1947,6 @@ const Notebook = ({}: NotebookProps) => {
         // // assistantSelectNode.current = false;
         return;
       }
-      console.log("onChangeChosenNode", {
-        choosingNode: notebookRef.current?.choosingNode?.id,
-        chosenNode: notebookRef.current?.chosenNode?.id,
-      });
       if (assistantSelectNode) {
         setAssistantSelectNode(false);
         return;
@@ -2423,10 +2389,8 @@ const Notebook = ({}: NotebookProps) => {
               visible?: boolean | undefined;
             }[] = [];
             thisNode.children.forEach(child => {
-              // console.log({ child });
               if (!document.getElementById(child.node)) childrenNotInNotebook.push(child);
             });
-            // console.log({ childrenNotInNotebook });
             // for (const child of thisNode.children) {
             for (const child of childrenNotInNotebook) {
               linkedNodeId = child.node as string;
@@ -3190,7 +3154,6 @@ const Notebook = ({}: NotebookProps) => {
           if (!deleteOK) return graph;
 
           if (node?.locked) return graph;
-          console.log("nodeId", nodeId, node);
           if (!node) return graph;
           generateReputationSignal(db, node, user, wrongChange, "Wrong", nodeId, setReputationSignal);
 
@@ -3198,7 +3161,6 @@ const Notebook = ({}: NotebookProps) => {
           let edges = graph.edges;
 
           if (willRemoveNode) {
-            console.log("nodeId 1", willRemoveNode);
             edges = removeDagAllEdges(g.current, nodeId, edges, updatedNodeIds);
             nodes = removeDagNode(g.current, nodeId, nodes);
 
@@ -3228,7 +3190,6 @@ const Notebook = ({}: NotebookProps) => {
 
           (async () => {
             try {
-              console.log("wrongNode api call");
               await idToken();
               await getMapGraph(`/wrongNode/${nodeId}`);
             } catch (e) {}
@@ -3247,7 +3208,7 @@ const Notebook = ({}: NotebookProps) => {
           return { nodes, edges };
         });
       } catch (error) {
-        console.log(error);
+        console.error(error);
       }
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -3851,7 +3812,6 @@ const Notebook = ({}: NotebookProps) => {
         const newEdges = setDagEdge(g.current, selectedNodeId, newNodeId, { label: "" }, { ...edges });
         updatedNodeIds.push(selectedNodeId, newNodeId);
 
-        console.log("willupdateselectedNode");
         notebookRef.current.selectedNode = newNodeId;
         nodeBookDispatch({ type: "setSelectedNode", payload: newNodeId });
         setTimeout(() => {
@@ -4224,7 +4184,6 @@ const Notebook = ({}: NotebookProps) => {
   // Inner functions
   const selectProposal = useMemoizedCallback(
     (event, proposal, newNodeId: string) => {
-      console.log("newNodeId", newNodeId);
       if (proposalTimer.current) {
         clearTimeout(proposalTimer.current);
       }
@@ -4234,7 +4193,7 @@ const Notebook = ({}: NotebookProps) => {
           reloadPermanentGraph();
           return;
         }
-        devLog("SELECT PROPOSAL", { proposal });
+        devLog("SELECT PROPOSAL", { proposal, newNodeId });
         if (!user?.uname) return;
         event.preventDefault();
         setOpenProposal(proposal.id);
@@ -4705,8 +4664,6 @@ const Notebook = ({}: NotebookProps) => {
 
     userThresholdcurrentScale = (userThresholdPercentage * defaultScaleDevice) / 100;
 
-    // console.log({ currentScale: mapInteractionValue.scale, userThresholdcurrentScale });
-
     return mapInteractionValue.scale < userThresholdcurrentScale;
   }, [mapInteractionValue.scale, user, windowWith]);
 
@@ -4785,7 +4742,6 @@ const Notebook = ({}: NotebookProps) => {
   }, [onPreviousStep, tutorialTargetId]);
 
   const onFinalizeTutorial = useCallback(async () => {
-    console.log("first", { user, currentStep, tutorial });
     if (!user) return;
     if (!currentStep) return;
     if (!tutorial) return;
@@ -4886,13 +4842,9 @@ const Notebook = ({}: NotebookProps) => {
   ]);
 
   const tutorialTargetCallback = useMemo(() => {
-    console.log("11");
     if (!currentStep?.isClickable) return undefined;
-    console.log("22");
     if (tutorial && tutorial.step !== tutorial?.steps.length) return onNextStep;
-    console.log("33");
     if (forcedTutorial) return () => setShowNextTutorialStep(true);
-    console.log("44");
     return onFinalizeTutorial;
   }, [currentStep?.isClickable, forcedTutorial, onFinalizeTutorial, onNextStep, tutorial]);
 
@@ -4986,12 +4938,9 @@ const Notebook = ({}: NotebookProps) => {
 
       const newTargetId = nodeBookState.selectedNode ?? "";
       if (!newTargetId) return false;
-      // console.log("t1");
       const thisNode = graph.nodes[newTargetId];
-      // console.log("t2");
       if (!thisNode) return false;
       if (!targetIsValid(thisNode)) return false;
-      // console.log("t3");
       startTutorial(tutorialName);
       setDynamicTargetId(newTargetId);
       if (forcedTutorial) {
@@ -6530,7 +6479,6 @@ const Notebook = ({}: NotebookProps) => {
         notebookRef.current.choosingNode = null;
         nodeBookDispatch({ type: "setChoosingNode", payload: { id: "", type: null } });
         notebookRef.current.choosingNode = { id: "", type: null };
-        console.log("detail.selectedNode.id", detail.selectedNode.id);
         notebookRef.current.selectedNode = detail.selectedNode.id;
         nodeBookDispatch({ type: "setSelectedNode", payload: detail.selectedNode.id });
         proposeNewChild(null, detail.flashcard.type);
@@ -6603,15 +6551,6 @@ const Notebook = ({}: NotebookProps) => {
     if (!mapContainerHtml) return console.warn("this #map-container doesn't exist");
 
     const clickHandler = (event: any) => {
-      // console.log("WII:run", {
-      //   tutorialTargetId,
-      //   tutorialTargetCallback,
-      //   match: event.target.matches(`#${tutorialTargetId}`),
-      //   t: event.target,
-      //   tt: event.target.id,
-      //   ttt: event.currentTarget,
-      //   pp: event.target?.parentNode?.id,
-      // });
       if (
         event.target?.id === tutorialTargetId ||
         event.target?.parentNode?.id === tutorialTargetId ||

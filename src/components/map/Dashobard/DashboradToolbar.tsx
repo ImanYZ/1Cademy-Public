@@ -45,7 +45,6 @@ export const DashboardToolbar = ({
     palette: { mode },
   } = useTheme();
   if (!user) return null;
-  // console.log({ courses, currentSemester });
   return (
     <Paper
       sx={{

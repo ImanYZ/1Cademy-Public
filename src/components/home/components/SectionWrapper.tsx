@@ -32,17 +32,14 @@ export const SectionWrapper = forwardRef(
     // const { inView, ref: refTT } = useInView(observerOption);
     // const router = useRouter();
 
-    // console.log(inView, router.asPath, `#${section.id}`);
-
     // useEffect(() => {
-    //   // console.log({ inView });
     //   // if (typeof window !== "undefined") return;
     //   if (router.asPath.includes(`#${section.id}`)) return;
     //   if (!inView) return;
 
     //   router
     //     .push({ pathname: "/", hash: `#${section.id}` }, undefined, { shallow: true, scroll: false })
-    //     .catch(err => console.log(err));
+    //     .catch(err => console.error(err));
     // }, [inView, router, section.id]);
 
     return (

@@ -13,8 +13,6 @@ export const useComponentSize = ({ componentRef }: UseComponentSizeProps) => {
   });
 
   const onChangeWindowSize = useCallback(() => {
-    //
-    console.log("onChangeWindowSize", componentRef.current);
     if (!componentRef.current) {
       setComponentSize({ clientWidth: 0, clientHeight: 0 });
       return;
@@ -27,7 +25,6 @@ export const useComponentSize = ({ componentRef }: UseComponentSizeProps) => {
 
   // useEffect(() => {
   //   // in first render we need to set default values
-  //   console.log("componentRef.current", componentRef.current);
   //   if (firstRender) {
   //     setComponentSize({
   //       clientWidth: isSSR ? 0 : componentRef.current?.clientWidth ?? 0,

@@ -51,7 +51,6 @@ export const Editor = ({
     }
   };
   // const handleMouseDown = (event: any) => {
-  //   console.log('click in input', event)
   //   // event.target.focus()
   //   // event.target.select()
   //   if (event && event.button == 2) {

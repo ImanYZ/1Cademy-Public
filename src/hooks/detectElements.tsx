@@ -23,7 +23,6 @@ export const detectElements = ({
 
     const interval = setInterval(() => {
       try {
-        console.log("tick");
         tryNumber += 1;
         ids.forEach((cur, idx) => {
           if (elementsRef[idx]) return;

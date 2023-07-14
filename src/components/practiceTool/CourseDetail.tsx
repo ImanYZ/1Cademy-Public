@@ -44,7 +44,6 @@ type PracticeData = {
 };
 
 const CourseDetail = ({ user, currentSemester, onStartPractice }: CourseDetailProps) => {
-  console.log({ currentSemester });
   const db = getFirestore();
   const [semesterNodes, setSemesterNodes] = useState<Set<string>>(new Set());
   const [studentNodesLearnt, setStudentNodesLearnt] = useState<Set<string>>(new Set());
@@ -59,7 +58,6 @@ const CourseDetail = ({ user, currentSemester, onStartPractice }: CourseDetailPr
   }, []);
 
   useEffect(() => {
-    console.log("call use effect");
     const q = query(collection(db, "practice"), where("tagId", "==", currentSemester.tagId));
 
     const unsub = onSnapshot(q, snapshot => {
@@ -77,7 +75,6 @@ const CourseDetail = ({ user, currentSemester, onStartPractice }: CourseDetailPr
   }, [currentSemester.tagId, db]);
 
   useEffect(() => {
-    console.log("call use effect");
     const q = query(
       collection(db, "practice"),
       where("user", "==", user.uname),
@@ -98,7 +95,6 @@ const CourseDetail = ({ user, currentSemester, onStartPractice }: CourseDetailPr
         return snapshot.docChanges().reduce((ids: Set<string>, docChange) => {
           const practiceItem = docChange.doc.data() as PracticeData;
           const date = practiceItem.nextDate.toDate();
-          console.log({ datesss: date < new Date() });
           if (date < new Date()) ids.add(docChange.doc.id);
 
           return ids;

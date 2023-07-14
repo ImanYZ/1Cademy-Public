@@ -42,7 +42,6 @@ type TimeFilterProps = {
 };
 const TimeFilter = (props: TimeFilterProps) => {
   const onChangeTimeFilter = (event: SelectChangeEvent) => {
-    // console.log({ event });
     props.setTimeFilter(event.target.value);
   };
 
@@ -103,7 +102,6 @@ const TimeFilter = (props: TimeFilterProps) => {
           renderValue={() => TIME_OPTIONS.filter(option => option.value === props.timeFilter)[0]?.name}
         >
           {TIME_OPTIONS.map(cur => {
-            // console.log({ timeFilter: props.timeFilter });
             const isSelected = props.timeFilter === cur.value;
             return (
               <MenuItem key={cur.name} value={cur.value} sx={{ display: "flex", justifyContent: "space-between" }}>

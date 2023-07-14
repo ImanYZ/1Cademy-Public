@@ -471,7 +471,6 @@ const Node = ({
         return;
       }
       if (notebookRef.current.choosingNode && notebookRef.current.choosingNode.id !== identifier) {
-        // console.log("-1");
         // The first Nodes exist, Now is clicking the Chosen Node
 
         notebookRef.current.chosenNode = {
@@ -493,7 +492,6 @@ const Node = ({
         event.currentTarget.activeElement.nodeName !== "INPUT" &&
         !notebookRef.current.choosingNode
       ) {
-        // console.log("-2");
         nodeClicked(event, identifier, nodeType, setOpenPart);
       }
 
@@ -558,7 +556,6 @@ const Node = ({
 
   // const open = useMemo(() => {
   //   const idx = notebooks.findIndex(notebook => notebook === selectedNotebook);
-  //   console.log({ idx, notebooks, selectedNotebook });
   //   return expands[idx];
   // }, [expands, notebooks, selectedNotebook]);
 
@@ -639,14 +636,12 @@ const Node = ({
         const firstParentId: Parent = parents[0];
 
         if (isNew) {
-          console.log("PROPOSE NEW");
           saveProposedChildNode(identifier, "", reason, () => setAbleToPropose(true));
           if (!firstParentId) return;
           notebookRef.current.selectedNode = firstParentId.node;
           nodeBookDispatch({ type: "setSelectedNode", payload: firstParentId.node });
           return;
         }
-        console.log("PROPOSE");
 
         saveProposedImprovement("", reason, () => setAbleToPropose(true));
         notebookRef.current.selectedNode = identifier;
@@ -1649,9 +1644,6 @@ export const MemoizedNode = React.memo(Node, (prev, next) => {
     (prev.nodeUpdates.updatedAt !== next.nodeUpdates.updatedAt && prev.nodeUpdates.nodeIds.includes(prev.identifier)) ||
     (prev.nodeUpdates.updatedAt !== next.nodeUpdates.updatedAt && next.nodeUpdates.nodeIds.includes(next.identifier))
   ) {
-    if (next.identifier === "pQbAryhwz1QQSCLz2p7P") {
-      console.log("chosenNode children", next.references);
-    }
     return false;
   }
 

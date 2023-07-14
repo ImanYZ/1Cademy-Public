@@ -259,13 +259,11 @@ export const DashboardWrapper = forwardRef<DashboardWrapperRef, DashboardWrapper
     if (!root) return;
     const rootSemester = allSemesters.find(semester => semester.tagId === root);
     if (!rootSemester) return;
-    console.log({ rootSemester });
     const { cTagId, cTitle, pTagId, pTitle, tagId, title, uTagId, uTitle } = rootSemester;
 
     setCurrentSemester({ cTagId, cTitle, pTagId, pTitle, tagId, title, uTagId, uTitle });
     setSelectToolbarView("PRACTICE");
     setRootFound(true);
-    // console.log("currentsssss ", practiceToolRef.current);
     // practiceToolRef.current?.onRunPracticeTool(true);
   }, [allSemesters, root]);
 

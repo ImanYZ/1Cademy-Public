@@ -43,7 +43,6 @@ export const SemesterFilter = ({
   role,
   uname,
 }: SemesterFilterProps) => {
-  console.log("selectedSemester", selectedSemester, currentSemester);
   const db = getFirestore();
   const theme = useTheme();
   const matches = useMediaQuery(theme.breakpoints.down("sm"));

@@ -44,7 +44,7 @@ const StudentDashboard = () => {
   useEffect(() => {
     if (!queryData?.semester || !queryData.uname) return;
     const getData = async () => {
-      console.log({ queryData });
+      console.error({ queryData });
       const resSemester = await getSemesterById(db, queryData.semester);
       if (!resSemester) return router.push(ROUTES.notebook);
 

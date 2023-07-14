@@ -29,7 +29,6 @@ export const UserSettingsProfessionalInfo = ({ user }: UserSettingsProfessionalI
 
   const upadteUserFieldLog = async (username: string, attributeName: string, newValue: any) => {
     const userFieldLog = `user${capitalizeFirstLetter(attributeName)}Log`;
-    // console.log("FIELD LOG: ", userFieldLog);
     const userFieldLogRef = doc(collection(db, userFieldLog));
     await setDoc(userFieldLogRef, {
       uname: username,
@@ -43,7 +42,7 @@ export const UserSettingsProfessionalInfo = ({ user }: UserSettingsProfessionalI
     await updateUserField(user.uname, attributeName, newValue);
     await upadteUserFieldLog(user.uname, attributeName, newValue);
     // } catch (error) {
-    //   console.log(error);
+    //   console.error(error);
     // }
   };
 
@@ -51,10 +50,9 @@ export const UserSettingsProfessionalInfo = ({ user }: UserSettingsProfessionalI
     //try {
     await updateUserField(user.uname, attributeName, newValue);
     await upadteUserFieldLog(user.uname, attributeName, newValue);
-    // console.log("NEW VALUE: ", newValue);
     dispatch({ type: "setAuthUser", payload: { ...user, [attributeName]: newValue } });
     // } catch (error) {
-    //   console.log(error);
+    //   console.error(error);
     // }
   };
 

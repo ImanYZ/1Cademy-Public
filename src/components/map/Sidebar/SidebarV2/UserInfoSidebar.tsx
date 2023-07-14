@@ -53,7 +53,6 @@ const UserInfoSidebar = ({ open, onClose, theme, openLinkedNode, username, selec
     if (!db || !sUserObj) return;
 
     if ("deInstit" in sUserObj && !("instLogo" in sUserObj)) {
-      // console.log("useEffect:", sUserObj);
       const fetchInstitution = async () => {
         const institutionsQuery = query(collection(db, "institutions"), where("name", "==", sUserObj.deInstit));
 
@@ -231,7 +230,6 @@ const UserInfoSidebar = ({ open, onClose, theme, openLinkedNode, username, selec
           value = shortenNumber(sUserObj.cdCorrects - sUserObj.cdWrongs, 2, false);
           stats.set("Code", value);
       }
-      console.log("map value", { value, key });
     });
     return stats;
   }, [sUserObj]);
@@ -251,7 +249,6 @@ const UserInfoSidebar = ({ open, onClose, theme, openLinkedNode, username, selec
     };
   };
   const proposalsFiltered = useMemo(() => {
-    // console.log({ proposalssss: proposals });
     if (type === "all") return proposals;
 
     return proposals.filter(proposal => proposal.nodeType === type);

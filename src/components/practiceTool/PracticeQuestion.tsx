@@ -430,7 +430,6 @@ const PracticeQuestion = ({
   onSaveLog,
 }: // setLoading,
 PracticeQuestionProps) => {
-  console.log("------>", { loading });
   const onSubmitAnswer = useCallback(() => {
     onSaveAnswer(selectedAnswers);
   }, [onSaveAnswer, selectedAnswers]);
@@ -514,9 +513,7 @@ PracticeQuestionProps) => {
                   : "You've got today's practice point!",
                 `You have completed ${practiceInfo.completedDays} day${
                   practiceInfo.completedDays > 1 ? "s" : ""
-                } out of ${practiceInfo.totalDays} day${
-                  practiceInfo.totalDays > 1 ? "s" : ""
-                } of your practice.`,
+                } out of ${practiceInfo.totalDays} day${practiceInfo.totalDays > 1 ? "s" : ""} of your practice.`,
                 `${practiceInfo.remainingDays} day${
                   practiceInfo.remainingDays > 1 ? "s" : ""
                 } are remaining in this semester.`,
