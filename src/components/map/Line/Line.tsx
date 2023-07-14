@@ -1,19 +1,23 @@
 // import "./Line.css";
 
 import { Box } from "@mui/material";
-import React from "react";
+import React, { useEffect } from "react";
+
+import { onForceRecalculateGraphInput } from "@/pages/notebook";
 
 import { Point } from "../../../knowledgeTypes";
 
 type LineProps = {
+  id: string;
   from: Point;
   to: Point;
   label?: string;
   leftDirection?: boolean;
   color: string;
+  onForceRecalculateGraph: (props: onForceRecalculateGraphInput) => void;
 };
 
-const Line = (props: LineProps) => {
+const Line = ({ id, onForceRecalculateGraph, ...props }: LineProps) => {
   let from = props.from;
   let to = props.to;
   if (!props.leftDirection && to.x < from.x) {
@@ -35,6 +39,14 @@ const Line = (props: LineProps) => {
   const rightArrowStyle: any = {
     borderLeft: `10px solid ${props.color}`,
   };
+
+  /**
+   * when edge is added or removed, the graph is force to recalculate
+   */
+  useEffect(() => {
+    onForceRecalculateGraph({ id, by: "add-edge" }); // edge is added
+    return () => onForceRecalculateGraph({ id, by: "remove-edge" }); // edge is removed
+  }, [id, onForceRecalculateGraph]);
 
   if (props.leftDirection) {
     rightArrowStyle.float = "left";

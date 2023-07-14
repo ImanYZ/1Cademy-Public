@@ -175,6 +175,9 @@ export type QuerySideBarSearch = {
   forced: boolean;
 };
 
+type ForceRecalculateType = "remove-nodes" | "add-edge" | "remove-edge";
+export type onForceRecalculateGraphInput = { id: string; by: ForceRecalculateType };
+
 type RateProosale = {
   proposals: INodeVersion[];
   setProposals: (proposals: INodeVersion[]) => void;
@@ -344,8 +347,8 @@ const Notebook = ({}: NotebookProps) => {
   const [showNextTutorialStep, setShowNextTutorialStep] = useState(false);
   const [pendingProposalsLoaded /* , setPendingProposalsLoaded */] = useState(true);
 
-  const previousLengthNodes = useRef(0);
-  const previousLengthEdges = useRef(0);
+  // const previousLengthNodes = useRef(0);
+  // const previousLengthEdges = useRef(0);
   const g = useRef(dagreUtils.createGraph());
 
   const [targetClientRect, setTargetClientRect] = useState<TargetClientRect>({ width: 0, height: 0, top: 0, left: 0 });
@@ -508,9 +511,15 @@ const Notebook = ({}: NotebookProps) => {
     return pathways;
   }, [graph.edges]);
 
+  /**
+   * - scroll to node will try n times to try to access to the html element
+   * get the properties and calculate the positions to make scroll to node
+   * - this functions fits correctly when backend result is simulated on frontend,
+   *  you don't need to set up setTimeouts
+   */
   const scrollToNode = useCallback(
     async (nodeId: string, force = false, tries = 0) => {
-      if (tries === 10) return;
+      if (tries === 12) return;
       if (scrollToNodeInitialized.current) return;
 
       await delay(100);
@@ -531,9 +540,7 @@ const Notebook = ({}: NotebookProps) => {
       }
 
       setGraph(graph => {
-        // const originalNode = document.getElementById(nodeId);
         const thisNode = graph.nodes[nodeId];
-        // if (!originalNode) return graph;
         if (!thisNode) return graph;
         const nodeInViewport = onNodeInViewport(nodeId, graph.nodes);
 
@@ -1402,7 +1409,7 @@ const Notebook = ({}: NotebookProps) => {
       });
       versionsSnapshots.push(versionsSnapshot);
     }
-    ``;
+
     return () => {
       for (let vSnapshot of versionsSnapshots) {
         vSnapshot();
@@ -1436,14 +1443,14 @@ const Notebook = ({}: NotebookProps) => {
     };
   }, [db, user?.uname, allTagsLoaded, currentStep]);
 
-  useEffect(() => {
-    const currentLengthNodes = Object.keys(graph.nodes).length;
-    if (currentLengthNodes !== previousLengthNodes.current) {
-      devLog("CHANGE NH 🚀", `recalculate by length nodes: ${currentLengthNodes},${previousLengthNodes.current}`);
-      addTask(null);
-    }
-    previousLengthNodes.current = currentLengthNodes;
-  }, [addTask, graph.nodes]);
+  // useEffect(() => {
+  //   const currentLengthNodes = Object.keys(graph.nodes).length;
+  //   if (currentLengthNodes !== previousLengthNodes.current) {
+  //     devLog("CHANGE NH 🚀", `recalculate by length nodes: ${currentLengthNodes},${previousLengthNodes.current}`);
+  //     addTask(null);
+  //   }
+  //   previousLengthNodes.current = currentLengthNodes;
+  // }, [addTask, graph.nodes]);
 
   useEffect(() => {
     g.current = createGraph();
@@ -1455,14 +1462,22 @@ const Notebook = ({}: NotebookProps) => {
     devLog("CHANGE NH 🚀", { showClusterOptions: settings.showClusterOptions });
   }, [settings.showClusterOptions]);
 
-  useEffect(() => {
-    const currentLengthEdges = Object.keys(graph.edges).length;
-    if (currentLengthEdges !== previousLengthEdges.current) {
-      devLog("CHANGE NH 🚀", `recalculate by length edges: ${currentLengthEdges},${previousLengthEdges}`);
+  // useEffect(() => {
+  //   const currentLengthEdges = Object.keys(graph.edges).length;
+  //   if (currentLengthEdges !== previousLengthEdges.current) {
+  //     devLog("CHANGE NH 🚀", `recalculate by length edges: ${currentLengthEdges},${previousLengthEdges}`);
+  //     addTask(null);
+  //   }
+  //   previousLengthEdges.current = currentLengthEdges;
+  // }, [addTask, graph.edges]);
+
+  const onForceRecalculateGraph = useCallback(
+    ({ id, by }: onForceRecalculateGraphInput) => {
+      devLog("FORCE_RECALCULATE_GRAPH🚀", { id, by });
       addTask(null);
-    }
-    previousLengthEdges.current = currentLengthEdges;
-  }, [addTask, graph.edges]);
+    },
+    [addTask]
+  );
 
   // called whenever isSubmitting changes
   // changes style of cursor
@@ -2190,9 +2205,6 @@ const Notebook = ({}: NotebookProps) => {
         nodeBookDispatch({ type: "setPreviousNode", payload: notebookRef.current.selectedNode });
         notebookRef.current.selectedNode = linkedNodeID;
         nodeBookDispatch({ type: "setSelectedNode", payload: linkedNodeID });
-        setTimeout(() => {
-          scrollToNode(linkedNodeID);
-        }, 1500);
       } else {
         nodeBookDispatch({ type: "setPreviousNode", payload: notebookRef.current.selectedNode });
         // openNodeHandler(linkedNodeID, isInitialProposal ? typeOperation : "Searcher");
@@ -2209,7 +2221,6 @@ const Notebook = ({}: NotebookProps) => {
       isPlayingTheTutorialRef,
       nodeBookDispatch,
       openNodeHandler,
-      scrollToNode,
       user?.chooseUname,
       user?.fName,
       user?.imageUrl,
@@ -7104,7 +7115,11 @@ const Notebook = ({}: NotebookProps) => {
                 {settings.showClusterOptions && settings.showClusters && (
                   <MemoizedClustersList clusterNodes={clusterNodes} />
                 )}
-                <MemoizedLinksList edgeIds={edgeIds} edges={graph.edges} />
+                <MemoizedLinksList
+                  edgeIds={edgeIds}
+                  edges={graph.edges}
+                  onForceRecalculateGraph={onForceRecalculateGraph}
+                />
                 <MemoizedNodeList
                   nodeUpdates={nodeUpdates}
                   notebookRef={notebookRef}
@@ -7166,6 +7181,7 @@ const Notebook = ({}: NotebookProps) => {
                   hideNode={hideNodeContent}
                   setAssistantSelectNode={setAssistantSelectNode}
                   assistantSelectNode={assistantSelectNode}
+                  onForceRecalculateGraph={onForceRecalculateGraph}
                 />
               </MapInteractionCSS>
 

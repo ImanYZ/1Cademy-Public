@@ -34,7 +34,7 @@ import { DispatchNodeBookActions, FullNodeData, OpenPart, TNodeUpdates } from "s
 import { useNodeBook } from "@/context/NodeBookContext";
 import { Post } from "@/lib/mapApi";
 import { getVideoDataByUrl, momentDateToSeconds } from "@/lib/utils/utils";
-import { OpenLeftSidebar } from "@/pages/notebook";
+import { onForceRecalculateGraphInput, OpenLeftSidebar } from "@/pages/notebook";
 
 import { useAuth } from "../../context/AuthContext";
 import { KnowledgeChoice } from "../../knowledgeTypes";
@@ -183,6 +183,7 @@ type NodeProps = {
   hideNode: boolean;
   setAssistantSelectNode: (newValue: boolean) => void;
   assistantSelectNode: boolean;
+  onForceRecalculateGraph: (props: onForceRecalculateGraphInput) => void;
 };
 
 const proposedChildTypesIcons: { [key in ProposedChildTypesIcons]: string } = {
@@ -306,6 +307,7 @@ const Node = ({
   nodeHeigth,
   setAssistantSelectNode,
   assistantSelectNode,
+  onForceRecalculateGraph,
 }: NodeProps) => {
   const [{ user }] = useAuth();
   const { nodeBookState } = useNodeBook();
@@ -681,6 +683,13 @@ const Node = ({
     [setOpenPart, setReason, cleanEditorLink]
   );
 
+  /**
+   * when node is removed, force dagre recalculate because there are not changes on nodes height
+   */
+  useEffect(() => {
+    return () => onForceRecalculateGraph({ id: identifier, by: "remove-nodes" });
+  }, [identifier, onForceRecalculateGraph]);
+
   useEffect(() => {
     if (!editable) {
       if (searchResults.data.length > 0) {
@@ -899,10 +908,6 @@ const Node = ({
       {open ? (
         <>
           <div className="card-content">
-            {/* <div className="card-title" data-hoverable={true}> */}
-
-            {/* CHECK: I commented this */}
-
             {editable && (
               <Box sx={{ display: "flex", justifyContent: "end" }}>
                 <Box
