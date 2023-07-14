@@ -121,6 +121,7 @@ import {
   copyNode,
   createActionTrack,
   generateReputationSignal,
+  getInteractiveMapDefaultScale,
   getSelectionText,
   NODE_WIDTH,
   removeDagAllEdges,
@@ -508,65 +509,56 @@ const Notebook = ({}: NotebookProps) => {
   }, [graph.edges]);
 
   const scrollToNode = useCallback(
-    (nodeId: string, force = false, tries = 0) => {
+    async (nodeId: string, force = false, tries = 0) => {
       if (tries === 10) return;
+      if (scrollToNodeInitialized.current) return;
 
-      if (!scrollToNodeInitialized.current) {
-        setTimeout(() => {
-          setGraph(graph => {
-            const originalNode = document.getElementById(nodeId);
-            const thisNode = graph.nodes[nodeId];
-            if (!originalNode) return graph;
-            if (!thisNode) return graph;
+      await delay(100);
+      devLog("SCROLL_TO_NODE", { nodeId, tries });
+      const originalNode = document.getElementById(nodeId);
+      if (!originalNode) return scrollToNode(nodeId, force, tries + 1);
 
-            const nodeInViewport = onNodeInViewport(nodeId, graph.nodes);
+      const INITIAL_OFFSET_LEFT = 770;
+      const INITIAL_OFFSET_TOP = 1000;
+      const nodeGotCalculatedPosition =
+        originalNode &&
+        originalNode?.offsetLeft !== INITIAL_OFFSET_LEFT &&
+        originalNode?.offsetTop !== INITIAL_OFFSET_TOP;
 
-            if (!force && !forcedTutorial && nodeInViewport) return graph;
-
-            if (
-              originalNode &&
-              "offsetLeft" in originalNode &&
-              originalNode.offsetLeft !== 0 &&
-              "offsetTop" in originalNode &&
-              originalNode.offsetTop !== 0
-            ) {
-              scrollToNodeInitialized.current = true;
-              setTimeout(() => {
-                scrollToNodeInitialized.current = false;
-              }, 1300);
-
-              setMapInteractionValue(() => {
-                const windowSize = window.innerWidth;
-                let defaultScale;
-                if (windowSize < 400) {
-                  defaultScale = 0.45;
-                } else if (windowSize < 600) {
-                  defaultScale = 0.575;
-                } else if (windowSize < 1260) {
-                  defaultScale = 0.8;
-                } else {
-                  defaultScale = 0.92;
-                }
-                const regionWidth = windowWith - windowInnerLeft - windowInnerRight;
-                const regionHeight = windowHeight - windowInnerTop - windowInnerBottom;
-
-                return {
-                  scale: defaultScale,
-                  translation: {
-                    x:
-                      windowInnerLeft + regionWidth / 2 - (thisNode.left + originalNode.offsetWidth / 2) * defaultScale,
-                    y:
-                      windowInnerTop + regionHeight / 2 - (thisNode.top + originalNode.offsetHeight / 2) * defaultScale,
-                  },
-                };
-              });
-            } else {
-              scrollToNode(nodeId, force, tries + 1);
-            }
-            return graph;
-          });
-        }, 400);
+      if (!nodeGotCalculatedPosition) {
+        console.warn("node is not on graph state, cant make scrollToNode");
+        return scrollToNode(nodeId, force, tries + 1);
       }
+
+      setGraph(graph => {
+        // const originalNode = document.getElementById(nodeId);
+        const thisNode = graph.nodes[nodeId];
+        // if (!originalNode) return graph;
+        if (!thisNode) return graph;
+        const nodeInViewport = onNodeInViewport(nodeId, graph.nodes);
+
+        const shouldIgnoreScrollToNode = !force && !forcedTutorial && nodeInViewport;
+        if (shouldIgnoreScrollToNode) return graph;
+
+        scrollToNodeInitialized.current = true;
+        setTimeout(() => (scrollToNodeInitialized.current = false), 1300);
+
+        setMapInteractionValue(() => {
+          const windowSize = window.innerWidth;
+
+          const regionWidth = windowWith - windowInnerLeft - windowInnerRight;
+          const regionHeight = windowHeight - windowInnerTop - windowInnerBottom;
+          const defaultScale = getInteractiveMapDefaultScale(windowSize);
+          return {
+            scale: defaultScale,
+            translation: {
+              x: windowInnerLeft + regionWidth / 2 - (thisNode.left + originalNode.offsetWidth / 2) * defaultScale,
+              y: windowInnerTop + regionHeight / 2 - (thisNode.top + originalNode.offsetHeight / 2) * defaultScale,
+            },
+          };
+        });
+        return graph;
+      });
     },
     [forcedTutorial, onNodeInViewport, windowHeight, windowInnerLeft, windowInnerRight, windowInnerTop, windowWith]
   );
@@ -1466,7 +1458,7 @@ const Notebook = ({}: NotebookProps) => {
   useEffect(() => {
     const currentLengthEdges = Object.keys(graph.edges).length;
     if (currentLengthEdges !== previousLengthEdges.current) {
-      devLog("CHANGE NH 🚀", "recalculate by length edges");
+      devLog("CHANGE NH 🚀", `recalculate by length edges: ${currentLengthEdges},${previousLengthEdges}`);
       addTask(null);
     }
     previousLengthEdges.current = currentLengthEdges;

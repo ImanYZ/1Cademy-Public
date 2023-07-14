@@ -1499,3 +1499,10 @@ export const getAvatarName = (fName: string, lName: string) => {
   //   return isTheSame;
   // };
 }
+
+export const getInteractiveMapDefaultScale = (windowWidth: number): number => {
+  if (windowWidth < 400) return 0.45;
+  if (windowWidth < 600) return 0.575;
+  if (windowWidth < 1260) return 0.8;
+  return 0.92;
+};
