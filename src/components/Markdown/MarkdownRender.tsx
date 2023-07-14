@@ -45,7 +45,6 @@ const MarkdownRender: FC<Props> = ({ text, customClass, sx = { fontSize: "inheri
                 overflow: "overlay",
                 background: theme => (theme.palette.mode === "dark" ? "#363636" : "#d6d6d6"),
                 borderRadius: "6px",
-                border: "solid 1px royalblue",
               }}
             >
               <code {...props}>{children || ""}</code>

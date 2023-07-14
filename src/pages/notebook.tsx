@@ -6624,10 +6624,8 @@ const Notebook = ({}: NotebookProps) => {
               onClick={() => {
                 notebookRef.current.selectedNode = nodeBookState.previousNode;
                 nodeBookDispatch({ type: "setSelectedNode", payload: nodeBookState.previousNode });
-                setTimeout(() => {
-                  scrollToNode(nodeBookState.previousNode);
-                }, 1500);
                 nodeBookDispatch({ type: "setPreviousNode", payload: null });
+                scrollToNode(nodeBookState.previousNode);
               }}
               sx={{
                 display: "flex",
