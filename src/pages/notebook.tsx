@@ -7511,48 +7511,50 @@ const Notebook = ({}: NotebookProps) => {
 
               <Paper>
                 <Divider>Global states</Divider>
-                <Button onClick={() => console.log(nodeBookState)}>nodeBookState</Button>
-                <Button onClick={() => console.log(graph.nodes)}>nodes</Button>
-                <Button onClick={() => console.log(graph.edges)}>edges</Button>
-                <Button onClick={() => console.log("DAGGER", g)}>Dagre</Button>
-                <Button onClick={() => console.log(allTags)}>allTags</Button>
-                <Button onClick={() => console.log(notebookRef)}>notebookRef</Button>
+                <Button onClick={() => console.info(nodeBookState)}>nodeBookState</Button>
+                <Button onClick={() => console.info(graph.nodes)}>nodes</Button>
+                <Button onClick={() => console.info(graph.edges)}>edges</Button>
+                <Button onClick={() => console.info("DAGGER", g)}>Dagre</Button>
+                <Button onClick={() => console.info(allTags)}>allTags</Button>
+                <Button onClick={() => console.info(notebookRef)}>notebookRef</Button>
                 <Divider />
-                <Button onClick={() => console.log(user)}>user</Button>
-                <Button onClick={() => console.log(settings)}>setting</Button>
-                <Button onClick={() => console.log(reputation)}>reputation</Button>
+                <Button onClick={() => console.info(user)}>user</Button>
+                <Button onClick={() => console.info(settings)}>setting</Button>
+                <Button onClick={() => console.info(reputation)}>reputation</Button>
               </Paper>
 
               <Paper>
                 <Divider>Local states</Divider>
-                <Button onClick={() => console.log(selectedNotebookId)}>selectedNotebookId</Button>
-                <Button onClick={() => console.log(selectedPreviousNotebookIdRef.current)}>
+                <Button onClick={() => console.info(selectedNotebookId)}>selectedNotebookId</Button>
+                <Button onClick={() => console.info(selectedPreviousNotebookIdRef.current)}>
                   selectedPreviousNotebookIdRef
                 </Button>
-                <Button onClick={() => console.log(preLoadedNodesRef.current)}>Pre Loaded Nodes</Button>
-                <Button onClick={() => console.log(citations)}>citations</Button>
-                <Button onClick={() => console.log(clusterNodes)}>clusterNodes</Button>
-                <Button onClick={() => console.log(graph.nodes[nodeBookState.selectedNode ?? ""])}>SelectedNode</Button>
-                <Button onClick={() => console.log({ lastOperation: lastNodeOperation.current })}>
+                <Button onClick={() => console.info(preLoadedNodesRef.current)}>Pre Loaded Nodes</Button>
+                <Button onClick={() => console.info(citations)}>citations</Button>
+                <Button onClick={() => console.info(clusterNodes)}>clusterNodes</Button>
+                <Button onClick={() => console.info(graph.nodes[nodeBookState.selectedNode ?? ""])}>
+                  SelectedNode
+                </Button>
+                <Button onClick={() => console.info({ lastOperation: lastNodeOperation.current })}>
                   lastNodeOperation
                 </Button>
-                <Button onClick={() => console.log(isWritingOnDBRef.current)}>isWritingOnDBRef</Button>
-                <Button onClick={() => console.log(openSidebar)}>openSidebar</Button>
-                <Button onClick={() => console.log(displaySidebar)}>displaySidebar</Button>
+                <Button onClick={() => console.info(isWritingOnDBRef.current)}>isWritingOnDBRef</Button>
+                <Button onClick={() => console.info(openSidebar)}>openSidebar</Button>
+                <Button onClick={() => console.info(displaySidebar)}>displaySidebar</Button>
               </Paper>
 
               <Paper>
                 <Divider>Proposals</Divider>
-                <Button onClick={() => console.log(tempNodes)}>tempNodes</Button>
-                <Button onClick={() => console.log({ ...changedNodes })}>changedNodes</Button>
-                <Button onClick={() => console.log({ updatedLinks: updatedLinksRef.current })}>updatedLinks</Button>
+                <Button onClick={() => console.info(tempNodes)}>tempNodes</Button>
+                <Button onClick={() => console.info({ ...changedNodes })}>changedNodes</Button>
+                <Button onClick={() => console.info({ updatedLinks: updatedLinksRef.current })}>updatedLinks</Button>
               </Paper>
 
               <Paper>
                 <Divider>Render</Divider>
-                <Button onClick={() => console.log(nodeChanges)}>node changes</Button>
-                <Button onClick={() => console.log(mapRendered)}>map rendered</Button>
-                <Button onClick={() => console.log(userNodeChanges)}>user node changes</Button>
+                <Button onClick={() => console.info(nodeChanges)}>node changes</Button>
+                <Button onClick={() => console.info(mapRendered)}>map rendered</Button>
+                <Button onClick={() => console.info(userNodeChanges)}>user node changes</Button>
               </Paper>
 
               <Paper>
@@ -7571,27 +7573,27 @@ const Notebook = ({}: NotebookProps) => {
 
               <Paper>
                 <Divider>Assistant</Divider>
-                <Button onClick={() => console.log({ voiceAssistant })}>voiceAssistant</Button>
-                <Button onClick={() => console.log({ startPractice })}>startPractice</Button>
+                <Button onClick={() => console.info({ voiceAssistant })}>voiceAssistant</Button>
+                <Button onClick={() => console.info({ startPractice })}>startPractice</Button>
               </Paper>
 
               <Paper>
                 <Divider>Tutorial</Divider>
-                <Button onClick={() => console.log(tutorial)}>Tutorial</Button>
-                <Button onClick={() => console.log(userTutorial)}>userTutorial</Button>
-                <Button onClick={() => console.log({ currentStep })}>currentStep</Button>
-                <Button onClick={() => console.log(dynamicTargetId)}>dynamicTargetId</Button>
-                <Button onClick={() => console.log(tutorialTargetId)}>tutorialTargetId</Button>
-                <Button onClick={() => console.log(forcedTutorial)}>forcedTutorial</Button>
-                <Button onClick={() => console.log({ tutorialStateWasSetUpRef: tutorialStateWasSetUpRef.current })}>
+                <Button onClick={() => console.info(tutorial)}>Tutorial</Button>
+                <Button onClick={() => console.info(userTutorial)}>userTutorial</Button>
+                <Button onClick={() => console.info({ currentStep })}>currentStep</Button>
+                <Button onClick={() => console.info(dynamicTargetId)}>dynamicTargetId</Button>
+                <Button onClick={() => console.info(tutorialTargetId)}>tutorialTargetId</Button>
+                <Button onClick={() => console.info(forcedTutorial)}>forcedTutorial</Button>
+                <Button onClick={() => console.info({ tutorialStateWasSetUpRef: tutorialStateWasSetUpRef.current })}>
                   tutorialStateWasSetUpRef
                 </Button>
               </Paper>
 
               <Paper>
                 <Divider>Functions</Divider>
-                <Button onClick={() => console.log(parentWithMostChildren())}>Most Parent</Button>
-                <Button onClick={() => console.log(parentWithChildren("r98BjyFDCe4YyLA3U8ZE"))}>hisParent</Button>
+                <Button onClick={() => console.info(parentWithMostChildren())}>Most Parent</Button>
+                <Button onClick={() => console.info(parentWithChildren("r98BjyFDCe4YyLA3U8ZE"))}>hisParent</Button>
                 <Button onClick={() => nodeBookDispatch({ type: "setSelectionType", payload: "Proposals" })}>
                   Toggle Open proposals
                 </Button>
@@ -7600,7 +7602,7 @@ const Notebook = ({}: NotebookProps) => {
                 </Button>
                 <OpenNode onOpenNode={openNodeHandler} />
                 <Button onClick={() => setShowRegion(prev => !prev)}>Show Region</Button>
-                <Button onClick={() => console.log({ openSidebar })}>Open Sidebar</Button>
+                <Button onClick={() => console.info({ openSidebar })}>Open Sidebar</Button>
               </Paper>
             </Box>
           </ClickAwayListener>
