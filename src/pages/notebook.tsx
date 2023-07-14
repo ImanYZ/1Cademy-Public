@@ -1443,15 +1443,6 @@ const Notebook = ({}: NotebookProps) => {
     };
   }, [db, user?.uname, allTagsLoaded, currentStep]);
 
-  // useEffect(() => {
-  //   const currentLengthNodes = Object.keys(graph.nodes).length;
-  //   if (currentLengthNodes !== previousLengthNodes.current) {
-  //     devLog("CHANGE NH 🚀", `recalculate by length nodes: ${currentLengthNodes},${previousLengthNodes.current}`);
-  //     addTask(null);
-  //   }
-  //   previousLengthNodes.current = currentLengthNodes;
-  // }, [addTask, graph.nodes]);
-
   useEffect(() => {
     g.current = createGraph();
     setGraph({ nodes: {}, edges: {} });
@@ -1462,18 +1453,9 @@ const Notebook = ({}: NotebookProps) => {
     devLog("CHANGE NH 🚀", { showClusterOptions: settings.showClusterOptions });
   }, [settings.showClusterOptions]);
 
-  // useEffect(() => {
-  //   const currentLengthEdges = Object.keys(graph.edges).length;
-  //   if (currentLengthEdges !== previousLengthEdges.current) {
-  //     devLog("CHANGE NH 🚀", `recalculate by length edges: ${currentLengthEdges},${previousLengthEdges}`);
-  //     addTask(null);
-  //   }
-  //   previousLengthEdges.current = currentLengthEdges;
-  // }, [addTask, graph.edges]);
-
   const onForceRecalculateGraph = useCallback(
     ({ id, by }: onForceRecalculateGraphInput) => {
-      devLog("FORCE_RECALCULATE_GRAPH🚀", { id, by });
+      devLog("FORCE_RECALCULATE_GRAPH 🚀", { id, by });
       addTask(null);
     },
     [addTask]
