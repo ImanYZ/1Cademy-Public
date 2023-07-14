@@ -905,591 +905,528 @@ const Node = ({
         <Typography sx={{ position: "absolute", top: "-2px" }}>{identifier}</Typography>
       )}
 
-      {open ? (
-        <>
-          <div className="card-content">
+      <Box sx={{ float: "right" }}>
+        {!editable && !unaccepted && !simulated && !notebookRef.current.choosingNode && (
+          <MemoizedNodeHeader
+            id={identifier}
+            open={open}
+            onToggleNode={toggleNodeHandler}
+            onHideDescendants={hideDescendantsHandler}
+            onHideNodeHandler={hideNodeHandler}
+            disabled={disabled}
+            enableChildElements={enableChildElements}
+          />
+        )}
+      </Box>
+      <div className="card-content">
+        {/* preview edit options */}
+        {open && editable && (
+          <Box sx={{ display: "flex", justifyContent: "end" }}>
+            <Box
+              id={`${identifier}-preview-edit`}
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                position: "relative",
+                top: "-5px",
+                borderRadius: "10px",
+              }}
+            >
+              <Typography
+                onClick={() => setOption("PREVIEW")}
+                sx={{ cursor: "pointer", fontSize: "14px", fontWeight: 490, color: "inherit" }}
+              >
+                Preview
+              </Typography>
+              <Switch
+                disabled={disableSwitchPreview}
+                checked={option === "EDIT"}
+                onClick={() => onChangeOption(option === "EDIT")}
+                size="small"
+                onKeyDown={onKeyEnter}
+              />
+              <Typography
+                onClick={() => setOption("EDIT")}
+                sx={{ cursor: "pointer", fontSize: "14px", fontWeight: 490, color: "inherit" }}
+              >
+                Edit
+              </Typography>
+            </Box>
+          </Box>
+        )}
+
+        {open && (
+          <Box id={`${identifier}-node-body`} className="NodeContent">
+            <Editor
+              id={`${identifier}-node-title`}
+              label="Enter the node title:"
+              value={titleCopy}
+              setValue={onSetTitle}
+              onBlurCallback={onBlurNodeTitle}
+              readOnly={!editable}
+              sxPreview={{ fontSize: "25px", fontWeight: 300 }}
+              showEditPreviewSection={false}
+              editOption={option}
+              disabled={disableTitle}
+            />
             {editable && (
-              <Box sx={{ display: "flex", justifyContent: "end" }}>
-                <Box
-                  id={`${identifier}-preview-edit`}
-                  sx={{
-                    display: "flex",
-                    alignItems: "center",
-                    position: "relative",
-                    top: "-5px",
-                    borderRadius: "10px",
-                  }}
-                >
-                  <Typography
-                    onClick={() => setOption("PREVIEW")}
-                    sx={{ cursor: "pointer", fontSize: "14px", fontWeight: 490, color: "inherit" }}
+              <Box sx={{ marginTop: "5px" }}>
+                {!isFetching && searchResults.data.length > 0 && (
+                  <Accordion
+                    sx={{ background: "transparent" }}
+                    expanded={showSimilarNodes}
+                    onChange={() => setShowSimilarNodes(!showSimilarNodes)}
                   >
-                    Preview
-                  </Typography>
-                  <Switch
-                    disabled={disableSwitchPreview}
-                    checked={option === "EDIT"}
-                    onClick={() => onChangeOption(option === "EDIT")}
-                    size="small"
-                    onKeyDown={onKeyEnter}
-                  />
-                  <Typography
-                    onClick={() => setOption("EDIT")}
-                    sx={{ cursor: "pointer", fontSize: "14px", fontWeight: 490, color: "inherit" }}
-                  >
-                    Edit
-                  </Typography>
-                </Box>
-              </Box>
-            )}
-
-            {!editable && !unaccepted && !simulated && !notebookRef.current.choosingNode && (
-              <MemoizedNodeHeader
-                id={identifier}
-                open={open}
-                onToggleNode={toggleNodeHandler}
-                onHideDescendants={hideDescendantsHandler}
-                onHideNodeHandler={hideNodeHandler}
-                disabled={disabled}
-                enableChildElements={enableChildElements}
-                sx={{ float: "right" }}
-                // sx={{ position: "absolute", right: "10px", top: "0px" }}
-              />
-            )}
-
-            <div id={`${identifier}-node-body`} className="NodeContent" data-hoverable={true}>
-              <Editor
-                id={`${identifier}-node-title`}
-                label="Enter the node title:"
-                value={titleCopy}
-                setValue={onSetTitle}
-                onBlurCallback={onBlurNodeTitle}
-                readOnly={!editable}
-                sxPreview={{ fontSize: "25px", fontWeight: 300 }}
-                showEditPreviewSection={false}
-                editOption={option}
-                disabled={disableTitle}
-              />
-              {editable && (
-                <Box sx={{ marginTop: "5px" }}>
-                  {!isFetching && searchResults.data.length > 0 && (
-                    <Accordion
-                      sx={{ background: "transparent" }}
-                      expanded={showSimilarNodes}
-                      onChange={() => setShowSimilarNodes(!showSimilarNodes)}
+                    <AccordionSummary
+                      expandIcon={<ExpandMoreIcon />}
+                      aria-controls="panel1d-content"
+                      id="panel1d-header"
+                      sx={{
+                        border: theme => (theme.palette.mode === "dark" ? "solid 1px #404040" : "solid 1px #D0D5DD"),
+                        minHeight: "50px!important",
+                        height: "50px",
+                      }}
                     >
-                      <AccordionSummary
-                        expandIcon={<ExpandMoreIcon />}
-                        aria-controls="panel1d-content"
-                        id="panel1d-header"
+                      <Typography>Similar Nodes</Typography>
+                    </AccordionSummary>
+                    <AccordionDetails
+                      sx={{
+                        borderWidth: "0px 1px 1px 1px",
+                        borderStyle: "solid",
+                        borderColor: theme => (theme.palette.mode === "dark" ? "#404040" : "#D0D5DD"),
+                      }}
+                    >
+                      <Typography
                         sx={{
-                          border: theme => (theme.palette.mode === "dark" ? "solid 1px #404040" : "solid 1px #D0D5DD"),
-                          minHeight: "50px!important",
-                          height: "50px",
+                          color: theme =>
+                            theme.palette.mode === "dark" ? theme.palette.common.white : theme.palette.common.black,
+                          fontSize: "17px",
+                          marginY: "5px",
+                        }}
+                        variant="h4"
+                      >
+                        Make sure the node title you propose is different from the following:
+                      </Typography>
+                      <Box
+                        className="node-suggestions"
+                        sx={{
+                          height: "150px",
+                          overflowY: "scroll",
                         }}
                       >
-                        <Typography>Similar Nodes</Typography>
-                      </AccordionSummary>
-                      <AccordionDetails
-                        sx={{
-                          borderWidth: "0px 1px 1px 1px",
-                          borderStyle: "solid",
-                          borderColor: theme => (theme.palette.mode === "dark" ? "#404040" : "#D0D5DD"),
-                        }}
-                      >
-                        <Typography
-                          sx={{
-                            color: theme =>
-                              theme.palette.mode === "dark" ? theme.palette.common.white : theme.palette.common.black,
-                            fontSize: "17px",
-                            marginY: "5px",
-                          }}
-                          variant="h4"
-                        >
-                          Make sure the node title you propose is different from the following:
-                        </Typography>
-                        <Box
-                          className="node-suggestions"
-                          sx={{
-                            height: "150px",
-                            overflowY: "scroll",
-                          }}
-                        >
-                          {searchResults.data.map((resNode, idx) => {
-                            return (
-                              <Paper
-                                elevation={3}
-                                key={`resNode${idx}`}
-                                onClick={() => {
-                                  openLinkedNode(resNode.id, "Searcher");
-                                }}
+                        {searchResults.data.map((resNode, idx) => {
+                          return (
+                            <Paper
+                              elevation={3}
+                              key={`resNode${idx}`}
+                              onClick={() => {
+                                openLinkedNode(resNode.id, "Searcher");
+                              }}
+                              sx={{
+                                listStyle: "none",
+                                padding: "10px",
+                                borderLeft:
+                                  "studied" in resNode && resNode.studied ? "solid 6px #EAAA08" : "solid 6px #FD7373",
+                                cursor: "pointer",
+                                opacity: "1",
+                                borderRadius: "8px",
+                                margin: "5px 2px 0px 0px",
+                                background: theme => (theme.palette.mode === "dark" ? "#2F2F2F" : "#F2F4F7"),
+                              }}
+                            >
+                              <Box
                                 sx={{
-                                  listStyle: "none",
-                                  padding: "10px",
-                                  borderLeft:
-                                    "studied" in resNode && resNode.studied ? "solid 6px #EAAA08" : "solid 6px #FD7373",
-                                  cursor: "pointer",
-                                  opacity: "1",
-                                  borderRadius: "8px",
-                                  margin: "5px 2px 0px 0px",
-                                  background: theme => (theme.palette.mode === "dark" ? "#2F2F2F" : "#F2F4F7"),
+                                  display: "flex",
+                                  justifyContent: "space-between",
                                 }}
+                                className="SearchResultTitle"
                               >
+                                {/* CHECK: here is causing problems to hide scroll */}
+                                <Editor
+                                  sxPreview={{
+                                    fontSize: {
+                                      xs: "14px",
+                                      sm: "16px",
+                                    },
+                                  }}
+                                  label=""
+                                  readOnly={true}
+                                  setValue={() => {}}
+                                  value={resNode.title}
+                                />
                                 <Box
                                   sx={{
+                                    width: "25px",
+                                    height: "25px",
+                                    borderRadius: "50%",
+                                    background: theme => (theme.palette.mode === "dark" ? "#404040" : "#EAECF0"),
                                     display: "flex",
-                                    justifyContent: "space-between",
+                                    justifyContent: "center",
+                                    alignItems: "center",
                                   }}
-                                  className="SearchResultTitle"
                                 >
-                                  {/* CHECK: here is causing problems to hide scroll */}
-                                  <Editor
-                                    sxPreview={{
-                                      fontSize: {
-                                        xs: "14px",
-                                        sm: "16px",
-                                      },
-                                    }}
-                                    label=""
-                                    readOnly={true}
-                                    setValue={() => {}}
-                                    value={resNode.title}
-                                  />
-                                  <Box
-                                    sx={{
-                                      width: "25px",
-                                      height: "25px",
-                                      borderRadius: "50%",
-                                      background: theme => (theme.palette.mode === "dark" ? "#404040" : "#EAECF0"),
-                                      display: "flex",
-                                      justifyContent: "center",
-                                      alignItems: "center",
-                                    }}
-                                  >
-                                    <NodeTypeIcon nodeType={resNode.nodeType} fontSize="inherit" />
-                                  </Box>
+                                  <NodeTypeIcon nodeType={resNode.nodeType} fontSize="inherit" />
                                 </Box>
-                              </Paper>
-                            );
-                          })}
-                        </Box>
-                      </AccordionDetails>
-                    </Accordion>
-                  )}
-
-                  {isFetching && (
-                    <Box sx={{ marginTop: "20px", textAlign: "center" }}>
-                      <CircularProgress />
-                    </Box>
-                  )}
-                </Box>
-              )}
-              {/* </div> */}
-
-              <Box
-                sx={{
-                  mt: editable ? "12px" : undefined,
-                }}
-                id={`${identifier}-node-content`}
-              >
-                <Editor
-                  label="Edit the node content:"
-                  value={contentCopy}
-                  setValue={onSetContent}
-                  onBlurCallback={value => onBlurContent(value)}
-                  readOnly={!editable}
-                  sxPreview={{ marginTop: "13px" }}
-                  showEditPreviewSection={false}
-                  editOption={option}
-                  disabled={disableContent}
-                />
-                {editable && <Box sx={{ mb: "12px" }}></Box>}
-
-                <div id={`${identifier}-node-content-media`}>
-                  {nodeImage !== "" && (
-                    <>
-                      {editable && (
-                        <div className="RemoveImageDIV">
-                          <MemoizedMetaButton onClick={removeImageHandler} tooltip="Click to remove the image.">
-                            <DeleteForeverIcon sx={{ fontSize: "16px" }} />
-                          </MemoizedMetaButton>
-                        </div>
-                      )}
-
-                      {/* TODO: change to Next Image */}
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img
-                        src={nodeImage}
-                        alt="Node image"
-                        className="responsive-img NodeImage"
-                        onLoad={onImageLoad}
-                        onClick={onImageClick}
-                      />
-                    </>
-                  )}
-                  {nodeType === "Question" && (
-                    <Box sx={{ display: "flex", flexDirection: "column" }}>
-                      <ul className="collapsible" style={{ padding: "0px" }}>
-                        {choices.map((choice, idx) => {
-                          return (
-                            <QuestionChoices
-                              key={identifier + "Choice" + idx}
-                              identifier={identifier}
-                              nodeRef={nodeRef}
-                              editable={editable}
-                              choices={choices}
-                              idx={idx}
-                              choicesNum={choices.length}
-                              choice={choice}
-                              deleteChoice={deleteChoice}
-                              switchChoice={switchChoice}
-                              changeChoice={changeChoice}
-                              changeFeedback={changeFeedback}
-                              option={option}
-                            />
+                              </Box>
+                            </Paper>
                           );
                         })}
-                      </ul>
-                      {editable && (
-                        <Box sx={{ alignSelf: "flex-end" }}>
-                          <MemoizedMetaButton
-                            onClick={addChoiceHandler}
-                            tooltip="Click to add a new choice to this question."
-                          >
-                            <>
-                              <AddIcon className="green-text" sx={{ fontSize: "16px" }} />
-                              <span>Add Choice</span>
-                            </>
-                          </MemoizedMetaButton>
-                        </Box>
-                      )}
-                    </Box>
-                  )}
-                  {!editable && nodeVideo && (
-                    <>
-                      <MemoizedNodeVideo addVideo={true} videoData={videoData} />
-                      <Box sx={{ mb: "12px" }}></Box>
-                    </>
-                  )}
-                </div>
-              </Box>
+                      </Box>
+                    </AccordionDetails>
+                  </Accordion>
+                )}
 
-              {editable && (
-                <>
-                  <Editor
-                    id={`${identifier}-node-why`}
-                    label={
-                      "Explain why you propose this " +
-                      (isNew ? nodeType + " child node" : "new version") +
-                      " to expedite your proposal review:"
-                    }
-                    value={reason}
-                    setValue={setReason}
-                    readOnly={false}
-                    showEditPreviewSection={false}
-                    editOption={option}
-                    disabled={disableWhy}
-                  />
-                </>
-              )}
-
-              {editable && addVideo && (
-                <>
-                  <Box sx={{ mb: "12px" }}></Box>
-                  <TextField
-                    label={"Enter a YouTube URL:"}
-                    onChange={e => setVideoUrl(e.target.value)}
-                    onBlur={() => {
-                      if (videoUrl !== nodeVideo) {
-                        setNodeParts(identifier, node => ({ ...node, nodeVideo: videoUrl }));
-                      }
-                    }}
-                    value={videoUrl}
-                    variant="outlined"
-                    fullWidth
-                    sx={{ p: "0px", m: "0px", fontWeight: 400, lineHeight: "24px" }}
-                  />
-                  <Box sx={{ mb: "12px" }}></Box>
-                  <Box
-                    sx={{
-                      display: "flex",
-                      flexWrap: "wrap",
-                      justifyContent: "space-around",
-                    }}
-                  >
-                    <Box
-                      sx={{
-                        width: "49.5%",
-                      }}
-                    >
-                      {/* <TextField
-                        type={"number"}
-                        label={"Start Time:"}
-                        onChange={e => {
-                          let startTime = parseInt(e.target.value);
-                          setVideoStartTime(!isNaN(startTime) ? startTime : "");
-                        }}
-                        onBlur={() => {
-                          if (nodeVideoStartTime !== videoStartTime) {
-                            setNodeParts(identifier, node => ({ ...node, nodeVideoStartTime: videoStartTime }));
-                          }
-                        }}
-                        value={videoStartTime}
-                        variant="outlined"
-                        fullWidth
-                        sx={{ p: "0px", m: "0px", fontWeight: 400, lineHeight: "24px" }}
-                      /> */}
-                      <LocalizationProvider dateAdapter={AdapterMomentJs}>
-                        <TimePicker
-                          ampm={false}
-                          openTo="hours"
-                          views={["hours", "minutes", "seconds"]}
-                          inputFormat="HH:mm:ss"
-                          mask="__:__:__"
-                          label="Start Time"
-                          value={startTimeValue}
-                          onChange={newValue => {
-                            setStartTimeValue(newValue);
-                            startTransition(() => {
-                              if (nodeVideoStartTime !== momentDateToSeconds(moment(newValue))) {
-                                setNodeParts(identifier, node => ({
-                                  ...node,
-                                  nodeVideoStartTime: momentDateToSeconds(moment(newValue)),
-                                }));
-                              }
-                            });
-                          }}
-                          renderInput={params => <TextField {...params} />}
-                        />
-                      </LocalizationProvider>
-                    </Box>
-
-                    <Box
-                      sx={{
-                        width: "49.5%",
-                      }}
-                    >
-                      {/* <TextField
-                        type={"number"}
-                        label={"End Time:"}
-                        onChange={e => {
-                          let endTime = parseInt(e.target.value);
-                          setVideoEndTime(!isNaN(endTime) ? endTime : "");
-                        }}
-                        onBlur={() => {
-                          if (nodeVideoEndTime !== videoEndTime) {
-                            setNodeParts(identifier, node => ({ ...node, nodeVideoEndTime: videoEndTime }));
-                          }
-                        }}
-                        value={videoEndTime}
-                        variant="outlined"
-                        fullWidth
-                        sx={{ p: "0px", m: "0px", fontWeight: 400, lineHeight: "24px" }}
-                      /> */}
-
-                      <LocalizationProvider dateAdapter={AdapterMomentJs}>
-                        <TimePicker
-                          ampm={false}
-                          openTo="hours"
-                          views={["hours", "minutes", "seconds"]}
-                          inputFormat="HH:mm:ss"
-                          mask="__:__:__"
-                          label="End Time"
-                          value={endTimeValue}
-                          onChange={newValue => {
-                            setEndTimeValue(newValue);
-                            startTransition(() => {
-                              if (nodeVideoEndTime !== momentDateToSeconds(moment(newValue))) {
-                                setNodeParts(identifier, node => ({
-                                  ...node,
-                                  nodeVideoEndTime: momentDateToSeconds(moment(newValue)),
-                                }));
-                              }
-                            });
-                          }}
-                          renderInput={params => (
-                            <TextField
-                              {...params}
-                              error={timePickerError}
-                              helperText={timePickerError ? "Should be greater than start time" : ""}
-                            />
-                          )}
-                        />
-                      </LocalizationProvider>
-                    </Box>
+                {isFetching && (
+                  <Box sx={{ marginTop: "20px", textAlign: "center" }}>
+                    <CircularProgress />
                   </Box>
-                  <Box sx={{ mb: "12px" }}></Box>
-                  <MemoizedNodeVideo addVideo={addVideo} videoData={videoData} />
-                </>
-              )}
-            </div>
-            <MemoizedNodeFooter
-              open={true}
-              addVideo={addVideo}
-              setAddVideo={setAddVideo}
-              identifier={identifier}
-              notebookRef={notebookRef}
-              nodeBookDispatch={nodeBookDispatch}
-              activeNode={activeNode}
-              citationsSelected={citationsSelected}
-              proposalsSelected={proposalsSelected}
-              acceptedProposalsSelected={acceptedProposalsSelected}
-              commentsSelected={commentsSelected}
-              editable={editable}
-              setNodeParts={setNodeParts}
-              title={title}
-              content={content}
-              unaccepted={unaccepted}
-              openPart={openPart}
-              nodeType={nodeType}
-              isNew={isNew}
-              admin={admin}
-              aImgUrl={aImgUrl}
-              aFullname={aFullname}
-              aChooseUname={aChooseUname}
-              viewers={viewers}
-              correctNum={correctNum}
-              markedCorrect={markedCorrect}
-              wrongNum={wrongNum}
-              markedWrong={markedWrong}
-              references={references}
-              tags={tags}
-              parents={parents}
-              nodesChildren={nodesChildren}
-              commentsNum={commentsNum}
-              proposalsNum={proposalsNum}
-              studied={studied}
-              isStudied={isStudied}
-              changed={changed}
-              changedAt={changedAt}
-              simulated={simulated}
-              bookmarked={bookmarked}
-              bookmarks={bookmarks}
-              reloadPermanentGrpah={reloadPermanentGrpah}
-              onNodeShare={onNodeShare}
-              markStudied={markStudiedHandler}
-              bookmark={bookmarkHandler}
-              openNodePart={openNodePartHandler}
-              selectNode={selectNodeHandler}
-              correctNode={correctNodeHandler}
-              wrongNode={wrongNodeHandler}
-              disableVotes={disableVotes}
-              uploadNodeImage={uploadNodeImageHandler}
-              user={user}
-              citations={citations}
-              setOpenSideBar={setOpenSideBar}
-              locked={locked}
-              openSidebar={openSidebar}
-              contributors={contributors}
-              institutions={institutions}
-              openUserInfoSidebar={openUserInfoSidebar}
-              proposeNodeImprovement={proposeNodeImprovementHandler}
-              disabled={disabled}
-              enableChildElements={enableChildElements}
-              setAbleToPropose={setAbleToPropose}
-              choosingNode={notebookRef.current.choosingNode}
-              nodeClickHandler={nodeClickHandler}
-            />
-          </div>
-          {(openPart === "LinkingWords" || openPart === "Tags" || openPart === "References") && (
-            <LinkingWords
-              identifier={identifier}
-              notebookRef={notebookRef}
-              nodeBookDispatch={nodeBookDispatch}
-              editable={editable}
-              isNew={isNew}
-              openPart={openPart}
-              title={title}
-              reason={reason}
-              references={references}
-              tags={tags}
-              parents={parents}
-              nodesChildren={nodesChildren}
-              chosenNodeChanged={chosenNodeChanged}
-              referenceLabelChange={referenceLabelChange}
-              deleteLink={deleteLinkHandler}
-              openLinkedNode={openLinkedNode}
-              openAllChildren={openAllChildren}
-              openAllParent={openAllParent}
-              saveProposedChildNode={saveProposedChildNode}
-              saveProposedImprovement={saveProposedImprovement}
-              closeSideBar={closeSideBar}
-              setAbleToPropose={setAbleToPropose}
-              ableToPropose={ableToPropose}
-              isLoading={isLoading}
-              onResetButton={newValue => setAbleToPropose(newValue)}
-              setOperation={setOperation}
-              disabled={disabled}
-              enableChildElements={enableChildElements}
-              nodeType={nodeType}
-            />
-          )}
-          {editable && (
-            <>
-              <Box
-                sx={{
-                  mx: "10px",
-                  borderTop: theme =>
-                    theme.palette.mode === "dark" ? `solid 1px ${theme.palette.common.borderColor}` : "solid 1px",
-                }}
+                )}
+              </Box>
+            )}
+
+            <Box sx={{ mt: editable ? "12px" : undefined }} id={`${identifier}-node-content`}>
+              <Editor
+                label="Edit the node content:"
+                value={contentCopy}
+                setValue={onSetContent}
+                onBlurCallback={value => onBlurContent(value)}
+                readOnly={!editable}
+                sxPreview={{ marginTop: "13px" }}
+                showEditPreviewSection={false}
+                editOption={option}
+                disabled={disableContent}
               />
-              <Box
-                id={`${identifier}-button-propose-cancel`}
-                className="ProposalCommentSubmitButton"
+              {editable && <Box sx={{ mb: "12px" }}></Box>}
+
+              <div id={`${identifier}-node-content-media`}>
+                {nodeImage !== "" && (
+                  <>
+                    {editable && (
+                      <div className="RemoveImageDIV">
+                        <MemoizedMetaButton onClick={removeImageHandler} tooltip="Click to remove the image.">
+                          <DeleteForeverIcon sx={{ fontSize: "16px" }} />
+                        </MemoizedMetaButton>
+                      </div>
+                    )}
+
+                    {/* TODO: change to Next Image */}
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={nodeImage}
+                      alt="Node image"
+                      className="responsive-img NodeImage"
+                      onLoad={onImageLoad}
+                      onClick={onImageClick}
+                    />
+                  </>
+                )}
+                {nodeType === "Question" && (
+                  <Box sx={{ display: "flex", flexDirection: "column" }}>
+                    <ul className="collapsible" style={{ padding: "0px" }}>
+                      {choices.map((choice, idx) => {
+                        return (
+                          <QuestionChoices
+                            key={identifier + "Choice" + idx}
+                            identifier={identifier}
+                            nodeRef={nodeRef}
+                            editable={editable}
+                            choices={choices}
+                            idx={idx}
+                            choicesNum={choices.length}
+                            choice={choice}
+                            deleteChoice={deleteChoice}
+                            switchChoice={switchChoice}
+                            changeChoice={changeChoice}
+                            changeFeedback={changeFeedback}
+                            option={option}
+                          />
+                        );
+                      })}
+                    </ul>
+                    {editable && (
+                      <Box sx={{ alignSelf: "flex-end" }}>
+                        <MemoizedMetaButton
+                          onClick={addChoiceHandler}
+                          tooltip="Click to add a new choice to this question."
+                        >
+                          <>
+                            <AddIcon className="green-text" sx={{ fontSize: "16px" }} />
+                            <span>Add Choice</span>
+                          </>
+                        </MemoizedMetaButton>
+                      </Box>
+                    )}
+                  </Box>
+                )}
+                {!editable && nodeVideo && (
+                  <>
+                    <MemoizedNodeVideo addVideo={true} videoData={videoData} />
+                    <Box sx={{ mb: "12px" }}></Box>
+                  </>
+                )}
+              </div>
+            </Box>
+
+            {editable && (
+              <Editor
+                id={`${identifier}-node-why`}
+                label={
+                  "Explain why you propose this " +
+                  (isNew ? nodeType + " child node" : "new version") +
+                  " to expedite your proposal review:"
+                }
+                value={reason}
+                setValue={setReason}
+                readOnly={false}
+                showEditPreviewSection={false}
+                editOption={option}
+                disabled={disableWhy}
+              />
+            )}
+
+            {editable && addVideo && (
+              <>
+                <Box sx={{ mb: "12px" }}></Box>
+                <TextField
+                  label={"Enter a YouTube URL:"}
+                  onChange={e => setVideoUrl(e.target.value)}
+                  onBlur={() => {
+                    if (videoUrl !== nodeVideo) {
+                      setNodeParts(identifier, node => ({ ...node, nodeVideo: videoUrl }));
+                    }
+                  }}
+                  value={videoUrl}
+                  variant="outlined"
+                  fullWidth
+                  sx={{ p: "0px", m: "0px", fontWeight: 400, lineHeight: "24px" }}
+                />
+                <Box sx={{ mb: "12px" }}></Box>
+                <Box
+                  sx={{
+                    display: "flex",
+                    flexWrap: "wrap",
+                    justifyContent: "space-around",
+                  }}
+                >
+                  <Box sx={{ width: "49.5%" }}>
+                    <LocalizationProvider dateAdapter={AdapterMomentJs}>
+                      <TimePicker
+                        ampm={false}
+                        openTo="hours"
+                        views={["hours", "minutes", "seconds"]}
+                        inputFormat="HH:mm:ss"
+                        mask="__:__:__"
+                        label="Start Time"
+                        value={startTimeValue}
+                        onChange={newValue => {
+                          setStartTimeValue(newValue);
+                          startTransition(() => {
+                            if (nodeVideoStartTime !== momentDateToSeconds(moment(newValue))) {
+                              setNodeParts(identifier, node => ({
+                                ...node,
+                                nodeVideoStartTime: momentDateToSeconds(moment(newValue)),
+                              }));
+                            }
+                          });
+                        }}
+                        renderInput={params => <TextField {...params} />}
+                      />
+                    </LocalizationProvider>
+                  </Box>
+
+                  <Box sx={{ width: "49.5%" }}>
+                    <LocalizationProvider dateAdapter={AdapterMomentJs}>
+                      <TimePicker
+                        ampm={false}
+                        openTo="hours"
+                        views={["hours", "minutes", "seconds"]}
+                        inputFormat="HH:mm:ss"
+                        mask="__:__:__"
+                        label="End Time"
+                        value={endTimeValue}
+                        onChange={newValue => {
+                          setEndTimeValue(newValue);
+                          startTransition(() => {
+                            if (nodeVideoEndTime !== momentDateToSeconds(moment(newValue))) {
+                              setNodeParts(identifier, node => ({
+                                ...node,
+                                nodeVideoEndTime: momentDateToSeconds(moment(newValue)),
+                              }));
+                            }
+                          });
+                        }}
+                        renderInput={params => (
+                          <TextField
+                            {...params}
+                            error={timePickerError}
+                            helperText={timePickerError ? "Should be greater than start time" : ""}
+                          />
+                        )}
+                      />
+                    </LocalizationProvider>
+                  </Box>
+                </Box>
+                <Box sx={{ mb: "12px" }}></Box>
+                <MemoizedNodeVideo addVideo={addVideo} videoData={videoData} />
+              </>
+            )}
+          </Box>
+        )}
+
+        {open && (
+          <MemoizedNodeFooter
+            open={true}
+            addVideo={addVideo}
+            setAddVideo={setAddVideo}
+            identifier={identifier}
+            notebookRef={notebookRef}
+            nodeBookDispatch={nodeBookDispatch}
+            activeNode={activeNode}
+            citationsSelected={citationsSelected}
+            proposalsSelected={proposalsSelected}
+            acceptedProposalsSelected={acceptedProposalsSelected}
+            commentsSelected={commentsSelected}
+            editable={editable}
+            setNodeParts={setNodeParts}
+            title={title}
+            content={content}
+            unaccepted={unaccepted}
+            openPart={openPart}
+            nodeType={nodeType}
+            isNew={isNew}
+            admin={admin}
+            aImgUrl={aImgUrl}
+            aFullname={aFullname}
+            aChooseUname={aChooseUname}
+            viewers={viewers}
+            correctNum={correctNum}
+            markedCorrect={markedCorrect}
+            wrongNum={wrongNum}
+            markedWrong={markedWrong}
+            references={references}
+            tags={tags}
+            parents={parents}
+            nodesChildren={nodesChildren}
+            commentsNum={commentsNum}
+            proposalsNum={proposalsNum}
+            studied={studied}
+            isStudied={isStudied}
+            changed={changed}
+            changedAt={changedAt}
+            simulated={simulated}
+            bookmarked={bookmarked}
+            bookmarks={bookmarks}
+            reloadPermanentGrpah={reloadPermanentGrpah}
+            onNodeShare={onNodeShare}
+            markStudied={markStudiedHandler}
+            bookmark={bookmarkHandler}
+            openNodePart={openNodePartHandler}
+            selectNode={selectNodeHandler}
+            correctNode={correctNodeHandler}
+            wrongNode={wrongNodeHandler}
+            disableVotes={disableVotes}
+            uploadNodeImage={uploadNodeImageHandler}
+            user={user}
+            citations={citations}
+            setOpenSideBar={setOpenSideBar}
+            locked={locked}
+            openSidebar={openSidebar}
+            contributors={contributors}
+            institutions={institutions}
+            openUserInfoSidebar={openUserInfoSidebar}
+            proposeNodeImprovement={proposeNodeImprovementHandler}
+            disabled={disabled}
+            enableChildElements={enableChildElements}
+            setAbleToPropose={setAbleToPropose}
+            choosingNode={notebookRef.current.choosingNode}
+            nodeClickHandler={nodeClickHandler}
+          />
+        )}
+
+        {open && (openPart === "LinkingWords" || openPart === "Tags" || openPart === "References") && (
+          <LinkingWords
+            identifier={identifier}
+            notebookRef={notebookRef}
+            nodeBookDispatch={nodeBookDispatch}
+            editable={editable}
+            isNew={isNew}
+            openPart={openPart}
+            title={title}
+            reason={reason}
+            references={references}
+            tags={tags}
+            parents={parents}
+            nodesChildren={nodesChildren}
+            chosenNodeChanged={chosenNodeChanged}
+            referenceLabelChange={referenceLabelChange}
+            deleteLink={deleteLinkHandler}
+            openLinkedNode={openLinkedNode}
+            openAllChildren={openAllChildren}
+            openAllParent={openAllParent}
+            saveProposedChildNode={saveProposedChildNode}
+            saveProposedImprovement={saveProposedImprovement}
+            closeSideBar={closeSideBar}
+            setAbleToPropose={setAbleToPropose}
+            ableToPropose={ableToPropose}
+            isLoading={isLoading}
+            onResetButton={newValue => setAbleToPropose(newValue)}
+            setOperation={setOperation}
+            disabled={disabled}
+            enableChildElements={enableChildElements}
+            nodeType={nodeType}
+          />
+        )}
+
+        {open && editable && (
+          <>
+            <Box
+              sx={{
+                mx: "10px",
+                borderTop: theme =>
+                  theme.palette.mode === "dark" ? `solid 1px ${theme.palette.common.borderColor}` : "solid 1px",
+              }}
+            />
+            <Box
+              id={`${identifier}-button-propose-cancel`}
+              className="ProposalCommentSubmitButton"
+              sx={{
+                textAlign: "center",
+                display: "flex",
+                margin: "10px",
+                justifyContent: "space-between",
+              }}
+            >
+              <Button
+                id={`${identifier}-button-cancel-proposal`}
+                color="error"
+                variant="contained"
+                className="btn waves-effect waves-light hoverable red"
+                onClick={onCancelProposal}
+                disabled={disableCancelButton}
                 sx={{
-                  textAlign: "center",
-                  display: "flex",
-                  margin: "10px",
-                  justifyContent: "space-between",
+                  padding: "6px",
                 }}
               >
-                <Button
-                  id={`${identifier}-button-cancel-proposal`}
-                  color="error"
-                  variant="contained"
-                  className="btn waves-effect waves-light hoverable red"
-                  onClick={onCancelProposal}
-                  disabled={disableCancelButton}
-                  sx={{
-                    padding: "6px",
-                  }}
-                >
-                  Cancel
-                </Button>
-                <Button
-                  id={`${identifier}-button-propose-proposal`}
-                  color="success"
-                  variant="contained"
-                  className="btn waves-effect waves-light hoverable green"
-                  onClick={proposalSubmit}
-                  disabled={(!ableToPropose ?? false) || disableProposeButton}
-                  sx={{
-                    padding: "6px",
-                  }}
-                >
-                  Propose
-                </Button>
-              </Box>
-            </>
-          )}
-        </>
-      ) : (
-        <div className="card-content">
-          {!notebookRef.current.choosingNode && !simulated && (
-            <MemoizedNodeHeader
-              id={identifier}
-              // setFocusView={() => setFocusView({ isEnabled: true, selectedNode: identifier })}
-              open={open}
-              onToggleNode={toggleNodeHandler}
-              onHideDescendants={hideDescendantsHandler}
-              onHideNodeHandler={hideNodeHandler}
-              disabled={disabled}
-              enableChildElements={enableChildElements}
-              sx={{ float: "right" }}
-              // sx={{ position: "absolute", right: "10px", top: "0px" }}
-            />
-          )}
-          {/* <div className="card-title"> */}
+                Cancel
+              </Button>
+              <Button
+                id={`${identifier}-button-propose-proposal`}
+                color="success"
+                variant="contained"
+                className="btn waves-effect waves-light hoverable green"
+                onClick={proposalSubmit}
+                disabled={(!ableToPropose ?? false) || disableProposeButton}
+                sx={{
+                  padding: "6px",
+                }}
+              >
+                Propose
+              </Button>
+            </Box>
+          </>
+        )}
+
+        {!open && (
           <div className="NodeTitleClosed">
             <Editor
               disabled={disabled}
@@ -1500,6 +1437,9 @@ const Node = ({
               sxPreview={{ fontSize: "25px" }}
             />
           </div>
+        )}
+
+        {!open && (
           <div className="footer">
             <MemoizedNodeFooter
               open={false}
@@ -1567,8 +1507,8 @@ const Node = ({
               nodeClickHandler={nodeClickHandler}
             />
           </div>
-        </div>
-      )}
+        )}
+      </div>
       {!isNew && nodeType !== "Reference" && editable && (
         <Box
           id={`${identifier}-new-children-nodes-buttons`}
