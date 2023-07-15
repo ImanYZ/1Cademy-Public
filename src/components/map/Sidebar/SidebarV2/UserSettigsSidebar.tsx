@@ -75,8 +75,8 @@ import { getTypedCollections } from "@/lib/utils/getTypedCollections";
 import { justADate } from "@/lib/utils/justADate";
 import shortenNumber from "@/lib/utils/shortenNumber";
 import { ToUpperCaseEveryWord } from "@/lib/utils/utils";
-import { gray200 } from "@/pages/home";
 
+// import { gray200 } from "@/pages/home";
 import darkModeLibraryBackground from "../../../../../public/darkModeLibraryBackground.jpg";
 import LightmodeLibraryBackground from "../../../../../public/lightModeLibraryBackground.png";
 import { updateNotebookTag } from "../../../../lib/firestoreClient/notebooks.serverless";
@@ -1240,7 +1240,7 @@ const UserSettigsSidebar = ({
                   onChangeCommitted={onHandleChangeSlider}
                   sx={{ my: "32px" }}
                 />
-                <Typography fontWeight={"500"}>Nodes view</Typography>
+                {/* <Typography fontWeight={"500"}>Nodes view</Typography>
                 <Stack direction={"row"} alignItems={"center"} justifyContent={"space-evenly"} mt="12px">
                   <Box
                     sx={{
@@ -1327,7 +1327,7 @@ const UserSettigsSidebar = ({
                       Masonry
                     </Typography>
                   </Box>
-                </Stack>
+                </Stack> */}
                 <Paper
                   sx={{
                     borderRadius: "8px",
