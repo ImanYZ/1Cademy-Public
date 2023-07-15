@@ -43,6 +43,7 @@ import {
 import ROUTES from "../../../lib/utils/routes";
 import { FullNodeData, FullNodesData, OpenPart, SelectedUser, TNodeUpdates } from "../../../nodeBookTypes";
 import { Notebook } from "../../../types";
+import { onForceRecalculateGraphInput } from "../../notebook";
 import { Graph } from "../../notebook";
 
 type Props = {
@@ -371,6 +372,14 @@ const NodePage: NextPage<Props> = ({ notebook }) => {
       }, 200);
     },
     [setGraph, getColumnRows]
+  );
+
+  const onForceRecalculateGraph = useCallback(
+    ({ id, by }: onForceRecalculateGraphInput) => {
+      devLog("FORCE_RECALCULATE_GRAPH 🚀", { id, by });
+      addTask(null);
+    },
+    [addTask]
   );
 
   const onChangeNodePart = useCallback(
@@ -821,7 +830,11 @@ const NodePage: NextPage<Props> = ({ notebook }) => {
               value={mapInteractionValue}
               onChange={navigateWhenNotScrolling}
             >
-              <MemoizedLinksList edgeIds={edgeIds} edges={graph.edges} />
+              <MemoizedLinksList
+                edgeIds={edgeIds}
+                edges={graph.edges}
+                onForceRecalculateGraph={onForceRecalculateGraph}
+              />
               {nodeList}
             </MapInteractionCSS>
 

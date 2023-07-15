@@ -518,7 +518,7 @@ const Notebook = ({}: NotebookProps) => {
    *  you don't need to set up setTimeouts
    */
   const scrollToNode = useCallback(
-    async (nodeId: string, force = false, tries = 0) => {
+    async (nodeId: string, force = false, tries = 0): Promise<void> => {
       if (tries === 12) return;
       if (scrollToNodeInitialized.current) return;
 
