@@ -237,7 +237,7 @@ const SignUpExpPage = () => {
     try {
       await signInWithEmailAndPassword(auth, loweredEmail, password);
     } catch (err: any) {
-      console.log({ err });
+      console.error({ err });
       // err.message is "There is no user record corresponding to this identifier. The user may have been deleted."
       if (err.code !== "auth/user-not-found") {
         setInvalidAuth(err.message);
@@ -302,7 +302,7 @@ const SignUpExpPage = () => {
           setNameFromInstitutionSelected({});
         }
       } catch (err) {
-        console.log("err", err);
+        console.error("err", err);
       }
     };
     checkEmailInstitution();

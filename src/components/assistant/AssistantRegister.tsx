@@ -79,7 +79,7 @@ const AssistantForm = forwardRef<Ref, FeedbackProps>(({ onSuccessFeedback, sx },
         localStorage.setItem("assistantRegisterEmail", "");
         localStorage.setItem("assistantRegisterPhoneNumber", "");
       } catch (err) {
-        console.log(err);
+        console.error(err);
       }
     },
   });

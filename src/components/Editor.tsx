@@ -51,7 +51,6 @@ export const Editor = ({
     }
   };
   // const handleMouseDown = (event: any) => {
-  //   console.log('click in input', event)
   //   // event.target.focus()
   //   // event.target.select()
   //   if (event && event.button == 2) {
@@ -100,7 +99,7 @@ export const Editor = ({
 
   return (
     <Box id={id} className={readOnly ? "HyperEditor ReadOnlyEditor" : "HyperEditor"} sx={{ width: "100%" }}>
-      <Box sx={{ display: "flex", flexDirection: "column-reverse" }}>
+      <Box sx={{ width: "100%", display: "flex", flexDirection: "column-reverse" }}>
         <Box>
           {option === "EDIT" && !readOnly ? (
             <TextField

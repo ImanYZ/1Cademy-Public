@@ -86,7 +86,6 @@ const PracticeTool = forwardRef<PracticeToolRef, PracticeToolProps>((props, ref)
     setDisplayRightSidebar,
     setUserIsAnsweringPractice,
   } = props;
-  // console.log({ currentSemester });
   const db = getFirestore();
 
   // const [startPractice, setStartPractice] = useState(false);
@@ -256,16 +255,12 @@ const PracticeTool = forwardRef<PracticeToolRef, PracticeToolProps>((props, ref)
       const docChanges = snapshot.docChanges();
       for (const docChange of docChanges) {
         const semesterStudentVoteStat = docChange.doc.data() as ISemesterStudentVoteStat;
-        // console.log({ semesterStudentVoteStat });
         const currentDateYYMMDD = getDateYYMMDDWithHyphens();
-        // console.log({ currentDateYYMMDD });
         const currentDayStats = semesterStudentVoteStat.days.find(cur => cur.day === currentDateYYMMDD);
-        // console.log({ currentDayStats });
         // if (!currentDayStats) return;
         //
         const totalQuestions = semesterConfig.dailyPractice.numQuestionsPerDay;
         const questionsLeft = totalQuestions - (currentDayStats?.correctPractices ?? 0);
-        // console.log({ questionsLeft });
         // setPracticeInfo(prev => ({ ...prev, questionsLeft }));
 
         const completedDays = Math.abs(differentBetweenDays(new Date(), semesterConfig.startDate.toDate()));
@@ -293,7 +288,6 @@ const PracticeTool = forwardRef<PracticeToolRef, PracticeToolProps>((props, ref)
   }, [currentSemester.tagId, semesterConfig, user.uname]);
 
   useEffect(() => {
-    // console.log({ practiceInfo });
     if (!practiceInfo) return;
     if (!semesterConfig) return;
     if (!root) return;
@@ -302,7 +296,6 @@ const PracticeTool = forwardRef<PracticeToolRef, PracticeToolProps>((props, ref)
   }, [practiceInfo, root, semesterConfig, setStartPractice]);
 
   const onToggleAssistant = useCallback(() => {
-    // console.log("onToggleAssistant", { questionData });
     if (!questionData) return;
 
     setVoiceAssistant(prev => {

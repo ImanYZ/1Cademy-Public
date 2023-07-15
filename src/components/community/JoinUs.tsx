@@ -61,7 +61,6 @@ const JoinUs = (props: JoinUsProps) => {
     return auth.onAuthStateChanged(async (user: any) => {
       if (user) {
         const uEmail = user.email.toLowerCase();
-        console.log("user", uEmail);
         let userDocs = await getDocs(query(collection(dbExp, "users"), where("email", "==", uEmail)));
         if (userDocs.docs.length === 0) {
           userDocs = await getDocs(query(collection(dbExp, "usersSurvey"), where("email", "==", uEmail)));
@@ -113,7 +112,6 @@ const JoinUs = (props: JoinUsProps) => {
           }
         }
       } else {
-        console.log("Signing out!");
         setFullname("");
         setEmail("");
         setHasScheduled(false);

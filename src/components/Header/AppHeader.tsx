@@ -109,7 +109,6 @@ const AppHeader = forwardRef(({ page, sections, selectedSectionId, onSwitchSecti
   useEffect(() => {
     return auth.onAuthStateChanged(async (user: any) => {
       const uEmail = user?.email?.toLowerCase();
-      console.log(user);
       if (!uEmail || !user.emailVerified) {
         setEmailExp("");
         setNameExp("");
@@ -149,7 +148,6 @@ const AppHeader = forwardRef(({ page, sections, selectedSectionId, onSwitchSecti
     router.push(ROUTES.signUpExp);
   };
   const signOut1 = async () => {
-    console.log("Signing out!");
     await auth.signOut();
   };
   const renderProfileMenuExp = (
@@ -177,7 +175,6 @@ const AppHeader = forwardRef(({ page, sections, selectedSectionId, onSwitchSecti
       )}
     </Menu>
   );
-  console.log(emailExp);
   return (
     <>
       <Box

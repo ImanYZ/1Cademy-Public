@@ -1,16 +1,19 @@
 import { useTheme } from "@mui/material";
 import React from "react";
 
+import { onForceRecalculateGraphInput } from "@/pages/notebook";
+
 import { compareEdgeIds, compareEdges } from "../../lib/utils/Map.utils";
 import Line from "./Line/Line";
 
 type LinkListProps = {
   edgeIds: string[];
   edges: any;
+  onForceRecalculateGraph: (props: onForceRecalculateGraphInput) => void;
   // selectedRelation: string | null;
 };
 
-export const LinksList = ({ edgeIds, edges }: LinkListProps) => {
+export const LinksList = ({ edgeIds, edges, onForceRecalculateGraph }: LinkListProps) => {
   const theme = useTheme();
   return (
     <>
@@ -18,10 +21,12 @@ export const LinksList = ({ edgeIds, edges }: LinkListProps) => {
         return (
           <Line
             key={eId}
+            id={eId}
             label={edges[eId].label}
             from={{ x: edges[eId].fromX, y: edges[eId].fromY - 1 }}
             to={{ x: edges[eId].toX, y: edges[eId].toY - 1 }}
             color={theme.palette.mode === "dark" ? "#01d36a" : "#1CAC44"}
+            onForceRecalculateGraph={onForceRecalculateGraph}
           />
         );
       })}

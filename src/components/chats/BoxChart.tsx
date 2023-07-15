@@ -30,7 +30,6 @@ function drawChart(
   minX: number,
   studentStats?: BoxChapterStat
 ) {
-  console.log({ width });
   const svg = d3.select(svgRef);
 
   // set the dimensions and margins of the graph
@@ -41,7 +40,6 @@ function drawChart(
   const height = 50 * Object.keys(data).length + VERTICAL_OFFSET; // Height with padding and margin
   const widthProcessed = width - margin.left - margin.right;
   const heightProcessed = height - margin.top - margin.bottom;
-  console.log({ widthProcessed });
 
   // configure SVG's size and position
   svg.attr("width", width).attr("height", height);

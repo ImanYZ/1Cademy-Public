@@ -168,7 +168,6 @@ MainSidebarProps) => {
     () => isHovered || isMenuOpen || editableNotebook !== null,
     [isHovered, isMenuOpen, editableNotebook]
   );
-  // console.log({ displayLargeToolbar, isHovered, isMenuOpen });
 
   useEffect(() => {
     if (chosenTags.length > 0 && chosenTags[0].id in allTags) {
@@ -180,8 +179,6 @@ MainSidebarProps) => {
 
   useEffect(() => {
     const listener = (e: any) => {
-      console.log("e.detail ______", e.detail);
-      console.log({ Notebook: e.detail });
       onChangeNotebook(e.detail.id);
     };
     window.addEventListener("Notebook-selection", listener);
@@ -423,7 +420,6 @@ MainSidebarProps) => {
       const userNodesDocs = await getDocs(q);
       const nodeIds: string[] = [];
       userNodesDocs.forEach(doc => nodeIds.push(doc.data().node));
-      // console.log({ nodeIds });
       await openNodesOnNotebook(docRef.id, nodeIds);
       // if (titleInputRef.current) titleInputRef.current.focus();
     } catch (error) {
@@ -457,7 +453,6 @@ MainSidebarProps) => {
       setNotebookTitleEditable(false);
       await Delete("/notebooks/delete", { notebookId: editableNotebook.id });
       // onChangeNotebook("");
-      console.log("deleted complete");
     } catch (error) {
       console.error("Cant remove notebook", error);
     } finally {

@@ -27,7 +27,6 @@ import LinkingButton from "./LinkingButton";
 import { ReferenceLabelInput } from "./ReferenceLabelInput";
 
 const separateURL = (text: string, url: string): [boolean, any] => {
-  // console.log("separateURL", text);
   const urlRegex = /(https?:\/\/[^\s]+)/g;
   const matches = url.match(urlRegex);
   if (matches && matches.length > 0) {
@@ -102,7 +101,6 @@ const LinkingWords = ({
   // const referenceLabelChangeHandler = useCallback(
   //   (idx: any) => {
   //     return (event: any) => {
-  //       console.log("is called");
   //       return props.referenceLabelChange(event, idx);
   //     };
   //   },

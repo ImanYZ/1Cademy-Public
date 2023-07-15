@@ -24,7 +24,6 @@ const MarkdownRender: FC<Props> = ({ text, customClass, sx = { fontSize: "inheri
           <Typography lineHeight={"inherit"} {...props} sx={{ p: "0px", wordBreak: "break-word", ...sx }} />
         ),
         a: ({ ...props }) => {
-          // console.log(props);
           return (
             <Link href={props.href} target="_blank" rel="noopener">
               {props.children}
@@ -46,7 +45,6 @@ const MarkdownRender: FC<Props> = ({ text, customClass, sx = { fontSize: "inheri
                 overflow: "overlay",
                 background: theme => (theme.palette.mode === "dark" ? "#363636" : "#d6d6d6"),
                 borderRadius: "6px",
-                border: "solid 1px royalblue",
               }}
             >
               <code {...props}>{children || ""}</code>

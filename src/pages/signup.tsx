@@ -324,7 +324,6 @@ const SignUpPage: NextPageWithLayout = () => {
         })}
       </Stepper>
       <form data-testid="signup-form" onSubmit={formik.handleSubmit}>
-        {/* <Button onClick={() => console.log(formik.values, formik.errors, formik.touched)}>Show: Values, Errors</Button> */}
         {activeStep === 1 && <SignUpBasicInfo formikProps={formik} />}
         {activeStep === 2 && <SignUpPersonalInfo formikProps={formik} />}
         {activeStep === 3 && <SignUpProfessionalInfo formikProps={formik} />}

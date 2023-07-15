@@ -55,7 +55,6 @@ export const CSVBtn = ({ BtnText, addNewData, buttonStyles, disabled }: any) => 
   };
 
   const handleAddData = () => {
-    console.log({ CSVData });
     addNewData(CSVData);
     setOpenUploadModal(false);
   };

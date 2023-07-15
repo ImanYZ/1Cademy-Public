@@ -110,7 +110,6 @@ const Chapter: FC<Props> = ({ chapters, setChapters, selectedCourse }) => {
     setChapters((current: any) => {
       return current.map((prevChap: any) => {
         if (prevChap.node == chapterId) {
-          console.log(prevChap, "prevChap");
           prevChap.children.map((subChap: any) => {
             subChap["editable"] = false;
           });

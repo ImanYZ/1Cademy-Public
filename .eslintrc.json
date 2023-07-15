@@ -15,6 +15,12 @@
       "files": ["**/__tests__/**/*.[jt]s?(x)", "**/?(*.)+(spec|test).[jt]s?(x)"],
       "excludedFiles": ["cypress/**/*.[jt]s?(x)"],
       "extends": ["plugin:testing-library/react"]
+    },
+    {
+      "files": ["*.tsx"],
+      "rules": {
+        "no-console": ["error", { "allow": ["info", "warn", "error"] }]
+      }
     }
   ]
 }

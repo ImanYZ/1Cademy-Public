@@ -30,7 +30,6 @@ const HomeSearch = forwardRef<HomeSearchRef, HomeSearchProps>(({ sx, onSearch, s
 
   useImperativeHandle(ref, () => ({
     scroll: () => {
-      console.log("will scroll");
       const clientPosition = beginFiltersRef.current?.getBoundingClientRect();
       const yPosition = clientPosition ? clientPosition.y + clientPosition.height - 40 : 500;
       setTimeout(() => window.scrollBy({ top: yPosition, behavior: "smooth" }), 150);

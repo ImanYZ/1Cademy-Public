@@ -43,6 +43,7 @@ import {
 import ROUTES from "../../../lib/utils/routes";
 import { FullNodeData, FullNodesData, OpenPart, SelectedUser, TNodeUpdates } from "../../../nodeBookTypes";
 import { Notebook } from "../../../types";
+import { onForceRecalculateGraphInput } from "../../notebook";
 import { Graph } from "../../notebook";
 
 type Props = {
@@ -134,7 +135,7 @@ const NodePage: NextPage<Props> = ({ notebook }) => {
     mapWidth,
     mapHeight,
     allTags: {},
-    onComplete: () => console.log("onComplete worker"),
+    onComplete: () => {},
     setClusterNodes,
     withClusters: false,
   });
@@ -150,13 +151,10 @@ const NodePage: NextPage<Props> = ({ notebook }) => {
   //   ------------------------------ functions
 
   const setNodeParts = useCallback((nodeId: string, innerFunc: (thisNode: FullNodeData) => FullNodeData) => {
-    console.log("setNodeParts..");
     setGraph(({ nodes: oldNodes, edges }) => {
       // setSelectedNodeType(oldNodes[nodeId].nodeType);
-      console.log("set graph");
       const thisNode = { ...oldNodes[nodeId] };
       const newNode = { ...oldNodes, [nodeId]: innerFunc(thisNode) };
-      console.log({ thisNode, newNode });
       return { nodes: newNode, edges };
     });
     setNodeUpdates({
@@ -376,6 +374,14 @@ const NodePage: NextPage<Props> = ({ notebook }) => {
     [setGraph, getColumnRows]
   );
 
+  const onForceRecalculateGraph = useCallback(
+    ({ id, by }: onForceRecalculateGraphInput) => {
+      devLog("FORCE_RECALCULATE_GRAPH 🚀", { id, by });
+      addTask(null);
+    },
+    [addTask]
+  );
+
   const onChangeNodePart = useCallback(
     (nodeId: string, newOpenPart: OpenPart) => {
       setNodeParts(nodeId, node => {
@@ -389,7 +395,6 @@ const NodePage: NextPage<Props> = ({ notebook }) => {
   const toggleNode = useCallback(
     (event: any, nodeId: string) => {
       setNodeParts(nodeId, node => {
-        console.log("set node parts");
         const notebookIdx = node.notebooks.findIndex(cur => cur === notebook.id);
         if (notebookIdx < 0) return node;
 
@@ -524,7 +529,6 @@ const NodePage: NextPage<Props> = ({ notebook }) => {
           onSelecteNode={setSelectedNodeId}
           selectedNodeId={selectedNodeId}
           displayJoinMessage={() => {
-            console.log("display join message");
             setDisplayJoinMessage(true);
           }}
         />
@@ -538,7 +542,6 @@ const NodePage: NextPage<Props> = ({ notebook }) => {
     if (user) {
       router.push(`${ROUTES.notebook}?nb=${notebook.id}`);
     }
-    // console.log({ userAuthObj, query: router.query });
   }, [notebook.id, router, user]);
 
   useEffect(() => {
@@ -827,7 +830,11 @@ const NodePage: NextPage<Props> = ({ notebook }) => {
               value={mapInteractionValue}
               onChange={navigateWhenNotScrolling}
             >
-              <MemoizedLinksList edgeIds={edgeIds} edges={graph.edges} />
+              <MemoizedLinksList
+                edgeIds={edgeIds}
+                edges={graph.edges}
+                onForceRecalculateGraph={onForceRecalculateGraph}
+              />
               {nodeList}
             </MapInteractionCSS>
 

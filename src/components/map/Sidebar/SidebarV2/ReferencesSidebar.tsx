@@ -86,7 +86,6 @@ const ReferencesSidebar = ({ username, open, onClose, onChangeChosenNode, preLoa
       nodesUpdatedSince: number;
       page?: number;
     }) => {
-      console.log(" -> SEARCH");
       setIsLoading(true);
       if (page < 2) setSearchResults(INITIAL_SEARCH_RESULT);
       const res = await Post<SearchNodesResponse>("/searchNodesInNotebook", {

@@ -123,7 +123,6 @@ const UserStatusIcon = ({ nodeBookDispatch, disabled = false, ...props }: UserSt
         createdAt: Timestamp.fromDate(new Date()),
       });
     }
-    // console.log("openUserInfo");
   }, [db, nodeBookDispatch, props, user]);
 
   const getTooltipTitle = (): JSX.Element => {

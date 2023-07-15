@@ -61,7 +61,6 @@ const QuestionChoices = (props: QuestionChoicesProps) => {
   };
 
   const choiceClick = useCallback(() => {
-    // console.log("choiceClick");
     const choices = [...choicesOpen];
     choices[props.idx] = !choices[props.idx];
     setChoicesOpen(choices);

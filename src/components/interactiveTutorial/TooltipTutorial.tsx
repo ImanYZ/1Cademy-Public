@@ -107,7 +107,6 @@ export const TooltipTutorial = ({
     let left = 0;
     let exceedTop = 0;
     let exceedLeft = 0;
-    // console.log("TOOLTIP_CLIENT_RECT", { tutorialStep });
 
     if (!tooltipRef.current) return { top, left, exceedTop, exceedLeft };
     if (!tutorialStep) return { top, left, exceedTop, exceedLeft };
@@ -408,7 +407,6 @@ export const TooltipTutorial = ({
             <Button
               variant="contained"
               onClick={() => {
-                console.log("proced");
                 handleCloseProgressBarMenu();
                 onFinalize();
                 setShowNextTutorialStep(false);

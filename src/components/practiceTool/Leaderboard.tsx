@@ -25,7 +25,6 @@ type LeaderboardProps = {
 const DEFAULT_AVATAR = "https://storage.googleapis.com/onecademy-1.appspot.com/ProfilePictures/no-img.png";
 
 const Leaderboard = ({ semesterId, sxBody }: LeaderboardProps) => {
-  console.log({ semesterId });
   const db = getFirestore();
   const [usersInfo, setUsersInfo] = useState<UsersInfo>({});
   const [leaderBoardUsers, setLeaderBoardUSers] = useState<LeaderboardItem[]>([]);
@@ -35,7 +34,6 @@ const Leaderboard = ({ semesterId, sxBody }: LeaderboardProps) => {
   useEffect(() => {
     const getStudentsStatsBySemester = async () => {
       const res = await getSemesterStudentVoteStats(db, semesterId);
-      console.log("1ress", { res });
       setStudentStatsBySemester(res);
     };
 
@@ -63,7 +61,6 @@ const Leaderboard = ({ semesterId, sxBody }: LeaderboardProps) => {
   useEffect(() => {
     const res = mapSemesterStudentVoteStatToLeaderboard(studentStatsBySemester, selectedLeaderboardOption);
     const resSortedByPoints = res.sort((a, b) => b.totalPoints - a.totalPoints);
-    console.log("2ress", { resSortedByPoints });
     setLeaderBoardUSers(resSortedByPoints);
   }, [selectedLeaderboardOption, studentStatsBySemester]);
 
@@ -290,9 +287,7 @@ const mapSemesterStudentVoteStatToLeaderboard = (
   // move to backend to not get unused data
   return stats.map(cur => {
     const statDaysFiltered = filterDaysStatsByOption(option, cur.days);
-    // console.log({ statDaysFiltered });
     const totalPoints = statDaysFiltered.reduce((acu, cur) => acu + (cur?.totalPractices ?? 0), 0);
-    // console.log({ totalPoints });
     return { uname: cur.uname, totalPoints };
   });
 };

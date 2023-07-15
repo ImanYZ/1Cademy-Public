@@ -38,7 +38,6 @@ const SearchInput = forwardRef<SearchInputRef, SearchInputProps>(({ onSearch }, 
 
   useImperativeHandle(ref, () => ({
     setFocusOnInput: () => {
-      console.log("on focus", inputRef);
       if (!inputRef.current) return;
       inputRef.current.focus({ preventScroll: true });
     },

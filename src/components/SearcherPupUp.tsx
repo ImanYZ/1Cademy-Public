@@ -25,7 +25,6 @@ const SearcherPupUp = ({ onClose }: SearcherPupUpProps) => {
       <ClickAwayListener
         onClickAway={() => {
           onClose(false);
-          console.log("click away");
         }}
       >
         <Box>
