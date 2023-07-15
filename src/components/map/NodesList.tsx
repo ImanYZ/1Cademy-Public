@@ -3,7 +3,7 @@ import { FullNodeData, OpenPart, TNodeBookState, TNodeUpdates } from "src/nodeBo
 
 import { useNodeBook } from "@/context/NodeBookContext";
 import { NODE_WIDTH } from "@/lib/utils/Map.utils";
-import { OpenLeftSidebar } from "@/pages/notebook";
+import { onForceRecalculateGraphInput, OpenLeftSidebar } from "@/pages/notebook";
 
 import { MemoizedNode } from "./Node";
 
@@ -65,6 +65,7 @@ type NodeListProps = {
   hideNode: boolean;
   setAssistantSelectNode: (newValue: boolean) => void;
   assistantSelectNode: boolean;
+  onForceRecalculateGraph: (props: onForceRecalculateGraphInput) => void;
 };
 
 const NodesList = ({
@@ -123,6 +124,7 @@ const NodesList = ({
   hideNode,
   setAssistantSelectNode,
   assistantSelectNode,
+  onForceRecalculateGraph,
 }: NodeListProps) => {
   const { nodeBookDispatch } = useNodeBook();
 
@@ -295,6 +297,7 @@ const NodesList = ({
             nodeHeigth={nodes[nId].height}
             setAssistantSelectNode={setAssistantSelectNode}
             assistantSelectNode={assistantSelectNode}
+            onForceRecalculateGraph={onForceRecalculateGraph}
           />
         );
       })}

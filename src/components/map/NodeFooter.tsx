@@ -1772,13 +1772,13 @@ const NodeFooter = ({
             }}
           >
             {choosingNode?.type === "Reference"
-              ? "Cite this reference node"
+              ? "Cite It"
               : choosingNode?.type === "Tag"
-              ? "Cite this node as a tag"
+              ? "Tag it"
               : choosingNode?.type === "Child"
-              ? "Link this node as a child"
+              ? "Link it"
               : choosingNode?.type === "Parent"
-              ? "Link this node as a parent"
+              ? "Link it"
               : choosingNode?.type === "Improvement"
               ? "Choose to improve"
               : null}

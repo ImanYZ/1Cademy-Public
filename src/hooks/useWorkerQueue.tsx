@@ -188,39 +188,19 @@ export const useWorkerQueue = ({
     if (!g?.current) return;
     if (!Object.keys(graph.nodes).length) return setQueue([]); // when nodes are removed we need to clean queue
     // CREATE WORKER with Nodes and Nodes changed
-    const individualNodeChanges: FullNodeData[] = queue
-      .map(cur => {
-        if (!cur) return null;
-        if (!graph.nodes[cur.id]) return null; // when graph was modified and queue has old values
-        return { ...graph.nodes[cur.id], height: cur.height };
-      })
-      .flatMap(cur => cur || []);
 
-    const nodesToRecalculate = setDagNodes(g.current, individualNodeChanges, graph.nodes, allTags, withClusters);
-
-    recalculateGraphWithWorker(nodesToRecalculate, graph.edges);
-    setQueue([]);
-
-    // // Implemention of executing only last
-    // setDeferredTimer(deferredTimer => {
-    //   const t = setTimeout(() => {
-    //     if (deferredTimer) {
-    //       clearTimeout(deferredTimer);
-    //     }
-    //     // CREATE WORKER with Nodes and Nodes changed
-    //     const individualNodeChanges: FullNodeData[] = queue
-    //       .map(cur => {
-    //         if (!cur) return null;
-    //         return { ...graph.nodes[cur.id], height: cur.height };
-    //       })
-    //       .flatMap(cur => cur || []);
-    //     const nodesToRecalculate = setDagNodes(g.current, individualNodeChanges, graph.nodes, allTags, withClusters);
-
-    //     recalculateGraphWithWorker(nodesToRecalculate, graph.edges);
-    //     setQueue([]);
-    //   }, 100);
-    //   return t;
-    // });
+    setQueue(prevQueue => {
+      const individualNodeChanges: FullNodeData[] = prevQueue
+        .map(cur => {
+          if (!cur) return null;
+          if (!graph.nodes[cur.id]) return null; // when graph was modified and queue has old values
+          return { ...graph.nodes[cur.id], height: cur.height };
+        })
+        .flatMap(cur => cur || []);
+      const nodesToRecalculate = setDagNodes(g.current, individualNodeChanges, graph.nodes, allTags, withClusters);
+      recalculateGraphWithWorker(nodesToRecalculate, graph.edges);
+      return [];
+    });
   }, [allTags, g, graph, isWorking, queue, recalculateGraphWithWorker, withClusters]);
 
   const addTask = useCallback(

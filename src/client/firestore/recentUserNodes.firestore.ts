@@ -7,5 +7,5 @@ export const getRecentUserNodesByUser = async (db: Firestore, username: string):
   const documents = await getDocs(q);
   const result: RecentUserNodesDocument[] = [];
   documents.forEach(c => c.exists() && result.push(c.data() as RecentUserNodesDocument));
-  return result.map(c => c.nodeId);
+  return result.map(c => c.nodeId).filter(c => c);
 };

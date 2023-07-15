@@ -121,6 +121,7 @@ import {
   copyNode,
   createActionTrack,
   generateReputationSignal,
+  getInteractiveMapDefaultScale,
   getSelectionText,
   NODE_WIDTH,
   removeDagAllEdges,
@@ -173,6 +174,9 @@ export type QuerySideBarSearch = {
   query: string;
   forced: boolean;
 };
+
+type ForceRecalculateType = "remove-nodes" | "add-edge" | "remove-edge";
+export type onForceRecalculateGraphInput = { id: string; by: ForceRecalculateType };
 
 type RateProosale = {
   proposals: INodeVersion[];
@@ -343,8 +347,8 @@ const Notebook = ({}: NotebookProps) => {
   const [showNextTutorialStep, setShowNextTutorialStep] = useState(false);
   const [pendingProposalsLoaded /* , setPendingProposalsLoaded */] = useState(true);
 
-  const previousLengthNodes = useRef(0);
-  const previousLengthEdges = useRef(0);
+  // const previousLengthNodes = useRef(0);
+  // const previousLengthEdges = useRef(0);
   const g = useRef(dagreUtils.createGraph());
 
   const [targetClientRect, setTargetClientRect] = useState<TargetClientRect>({ width: 0, height: 0, top: 0, left: 0 });
@@ -507,66 +511,61 @@ const Notebook = ({}: NotebookProps) => {
     return pathways;
   }, [graph.edges]);
 
+  /**
+   * - scroll to node will try n times to try to access to the html element
+   * get the properties and calculate the positions to make scroll to node
+   * - this functions fits correctly when backend result is simulated on frontend,
+   *  you don't need to set up setTimeouts
+   */
   const scrollToNode = useCallback(
-    (nodeId: string, force = false, tries = 0) => {
-      if (tries === 10) return;
+    async (nodeId: string, force = false, tries = 0): Promise<void> => {
+      if (tries === 12) return;
+      if (scrollToNodeInitialized.current) return;
 
-      if (!scrollToNodeInitialized.current) {
-        setTimeout(() => {
-          setGraph(graph => {
-            const originalNode = document.getElementById(nodeId);
-            const thisNode = graph.nodes[nodeId];
-            if (!originalNode) return graph;
-            if (!thisNode) return graph;
+      await delay(100);
+      devLog("SCROLL_TO_NODE", { nodeId, tries });
+      const originalNode = document.getElementById(nodeId);
+      if (!originalNode) return scrollToNode(nodeId, force, tries + 1);
 
-            const nodeInViewport = onNodeInViewport(nodeId, graph.nodes);
+      const INITIAL_OFFSET_LEFT = 770;
+      const INITIAL_OFFSET_TOP = 1000;
+      const nodeGotCalculatedPosition =
+        originalNode &&
+        originalNode?.offsetLeft !== INITIAL_OFFSET_LEFT &&
+        originalNode?.offsetTop !== INITIAL_OFFSET_TOP;
 
-            if (!force && !forcedTutorial && nodeInViewport) return graph;
-
-            if (
-              originalNode &&
-              "offsetLeft" in originalNode &&
-              originalNode.offsetLeft !== 0 &&
-              "offsetTop" in originalNode &&
-              originalNode.offsetTop !== 0
-            ) {
-              scrollToNodeInitialized.current = true;
-              setTimeout(() => {
-                scrollToNodeInitialized.current = false;
-              }, 1300);
-
-              setMapInteractionValue(() => {
-                const windowSize = window.innerWidth;
-                let defaultScale;
-                if (windowSize < 400) {
-                  defaultScale = 0.45;
-                } else if (windowSize < 600) {
-                  defaultScale = 0.575;
-                } else if (windowSize < 1260) {
-                  defaultScale = 0.8;
-                } else {
-                  defaultScale = 0.92;
-                }
-                const regionWidth = windowWith - windowInnerLeft - windowInnerRight;
-                const regionHeight = windowHeight - windowInnerTop - windowInnerBottom;
-
-                return {
-                  scale: defaultScale,
-                  translation: {
-                    x:
-                      windowInnerLeft + regionWidth / 2 - (thisNode.left + originalNode.offsetWidth / 2) * defaultScale,
-                    y:
-                      windowInnerTop + regionHeight / 2 - (thisNode.top + originalNode.offsetHeight / 2) * defaultScale,
-                  },
-                };
-              });
-            } else {
-              scrollToNode(nodeId, force, tries + 1);
-            }
-            return graph;
-          });
-        }, 400);
+      if (!nodeGotCalculatedPosition) {
+        console.warn("node is not on graph state, cant make scrollToNode");
+        return scrollToNode(nodeId, force, tries + 1);
       }
+
+      setGraph(graph => {
+        const thisNode = graph.nodes[nodeId];
+        if (!thisNode) return graph;
+        const nodeInViewport = onNodeInViewport(nodeId, graph.nodes);
+
+        const shouldIgnoreScrollToNode = !force && !forcedTutorial && nodeInViewport;
+        if (shouldIgnoreScrollToNode) return graph;
+
+        scrollToNodeInitialized.current = true;
+        setTimeout(() => (scrollToNodeInitialized.current = false), 1300);
+
+        setMapInteractionValue(() => {
+          const windowSize = window.innerWidth;
+
+          const regionWidth = windowWith - windowInnerLeft - windowInnerRight;
+          const regionHeight = windowHeight - windowInnerTop - windowInnerBottom;
+          const defaultScale = getInteractiveMapDefaultScale(windowSize);
+          return {
+            scale: defaultScale,
+            translation: {
+              x: windowInnerLeft + regionWidth / 2 - (thisNode.left + originalNode.offsetWidth / 2) * defaultScale,
+              y: windowInnerTop + regionHeight / 2 - (thisNode.top + originalNode.offsetHeight / 2) * defaultScale,
+            },
+          };
+        });
+        return graph;
+      });
     },
     [forcedTutorial, onNodeInViewport, windowHeight, windowInnerLeft, windowInnerRight, windowInnerTop, windowWith]
   );
@@ -1410,7 +1409,7 @@ const Notebook = ({}: NotebookProps) => {
       });
       versionsSnapshots.push(versionsSnapshot);
     }
-    ``;
+
     return () => {
       for (let vSnapshot of versionsSnapshots) {
         vSnapshot();
@@ -1445,15 +1444,6 @@ const Notebook = ({}: NotebookProps) => {
   }, [db, user?.uname, allTagsLoaded, currentStep]);
 
   useEffect(() => {
-    const currentLengthNodes = Object.keys(graph.nodes).length;
-    if (currentLengthNodes !== previousLengthNodes.current) {
-      devLog("CHANGE NH 🚀", `recalculate by length nodes: ${currentLengthNodes},${previousLengthNodes.current}`);
-      addTask(null);
-    }
-    previousLengthNodes.current = currentLengthNodes;
-  }, [addTask, graph.nodes]);
-
-  useEffect(() => {
     g.current = createGraph();
     setGraph({ nodes: {}, edges: {} });
     setNodeUpdates({
@@ -1463,14 +1453,13 @@ const Notebook = ({}: NotebookProps) => {
     devLog("CHANGE NH 🚀", { showClusterOptions: settings.showClusterOptions });
   }, [settings.showClusterOptions]);
 
-  useEffect(() => {
-    const currentLengthEdges = Object.keys(graph.edges).length;
-    if (currentLengthEdges !== previousLengthEdges.current) {
-      devLog("CHANGE NH 🚀", "recalculate by length edges");
+  const onForceRecalculateGraph = useCallback(
+    ({ id, by }: onForceRecalculateGraphInput) => {
+      devLog("FORCE_RECALCULATE_GRAPH 🚀", { id, by });
       addTask(null);
-    }
-    previousLengthEdges.current = currentLengthEdges;
-  }, [addTask, graph.edges]);
+    },
+    [addTask]
+  );
 
   // called whenever isSubmitting changes
   // changes style of cursor
@@ -2198,9 +2187,6 @@ const Notebook = ({}: NotebookProps) => {
         nodeBookDispatch({ type: "setPreviousNode", payload: notebookRef.current.selectedNode });
         notebookRef.current.selectedNode = linkedNodeID;
         nodeBookDispatch({ type: "setSelectedNode", payload: linkedNodeID });
-        setTimeout(() => {
-          scrollToNode(linkedNodeID);
-        }, 1500);
       } else {
         nodeBookDispatch({ type: "setPreviousNode", payload: notebookRef.current.selectedNode });
         // openNodeHandler(linkedNodeID, isInitialProposal ? typeOperation : "Searcher");
@@ -2217,7 +2203,6 @@ const Notebook = ({}: NotebookProps) => {
       isPlayingTheTutorialRef,
       nodeBookDispatch,
       openNodeHandler,
-      scrollToNode,
       user?.chooseUname,
       user?.fName,
       user?.imageUrl,
@@ -6639,10 +6624,8 @@ const Notebook = ({}: NotebookProps) => {
               onClick={() => {
                 notebookRef.current.selectedNode = nodeBookState.previousNode;
                 nodeBookDispatch({ type: "setSelectedNode", payload: nodeBookState.previousNode });
-                setTimeout(() => {
-                  scrollToNode(nodeBookState.previousNode);
-                }, 1500);
                 nodeBookDispatch({ type: "setPreviousNode", payload: null });
+                scrollToNode(nodeBookState.previousNode);
               }}
               sx={{
                 display: "flex",
@@ -7112,7 +7095,11 @@ const Notebook = ({}: NotebookProps) => {
                 {settings.showClusterOptions && settings.showClusters && (
                   <MemoizedClustersList clusterNodes={clusterNodes} />
                 )}
-                <MemoizedLinksList edgeIds={edgeIds} edges={graph.edges} />
+                <MemoizedLinksList
+                  edgeIds={edgeIds}
+                  edges={graph.edges}
+                  onForceRecalculateGraph={onForceRecalculateGraph}
+                />
                 <MemoizedNodeList
                   nodeUpdates={nodeUpdates}
                   notebookRef={notebookRef}
@@ -7174,6 +7161,7 @@ const Notebook = ({}: NotebookProps) => {
                   hideNode={hideNodeContent}
                   setAssistantSelectNode={setAssistantSelectNode}
                   assistantSelectNode={assistantSelectNode}
+                  onForceRecalculateGraph={onForceRecalculateGraph}
                 />
               </MapInteractionCSS>
 
