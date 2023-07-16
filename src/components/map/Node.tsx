@@ -79,7 +79,7 @@ type NodeProps = {
   setFocusView: (state: { selectedNode: string; isEnabled: boolean }) => void;
   activeNode: any;
   citationsSelected: any;
-  proposalsSelected: any;
+  proposalsSelected: boolean;
   acceptedProposalsSelected: any;
   commentsSelected: any;
   left: number;
@@ -968,6 +968,7 @@ const Node = ({
               showEditPreviewSection={false}
               editOption={option}
               disabled={disableTitle}
+              proposalsSelected={proposalsSelected}
             />
             {editable && (
               <Box sx={{ marginTop: "5px" }}>
@@ -1095,6 +1096,7 @@ const Node = ({
                 showEditPreviewSection={false}
                 editOption={option}
                 disabled={disableContent}
+                proposalsSelected={proposalsSelected}
               />
               {editable && <Box sx={{ mb: "12px" }}></Box>}
 

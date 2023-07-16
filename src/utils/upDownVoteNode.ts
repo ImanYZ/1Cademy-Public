@@ -119,7 +119,7 @@ export const UpDownVoteNode = async ({
   }
   const { courseExist, instantDelete } = await checkInstantDeleteForNode(nodeData?.tagIds || [], uname, nodeId);
   let willRemoveNode = false;
-  if (courseExist) {
+  if (courseExist && wrongChange === 1) {
     willRemoveNode = instantDelete;
   } else {
     willRemoveNode = doNeedToDeleteNode(

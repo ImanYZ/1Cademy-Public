@@ -6,6 +6,7 @@ import { INode } from "src/types/INode";
 import { INodeType } from "src/types/INodeType";
 import { splitSentenceIntoChunks } from "../lib/utils/string.utils";
 import { delay } from "../lib/utils/utils";
+import { diffChars } from "diff";
 
 export const firstWeekMonthDays = (thisDate?: any) => {
   let today = new Date();
@@ -136,4 +137,42 @@ export const narrateText = async (message: string) => {
     window.speechSynthesis.cancel();
     window.speechSynthesis.speak(speech);
   });
+};
+
+export const showDifferences = (oldText: string, proposalText: string): string => {
+  const diffContent = diffChars(oldText, proposalText);
+  let newText = "";
+  diffContent.forEach((part: any) => {
+    const color = part.added ? "green" : part.removed ? "red" : "gray";
+
+    if (part.removed) {
+      newText += `<del style="color: ${color}; text-decoration: line-through; text-decoration-color: black;">${part.value}</del>`;
+    } else {
+      newText += `<span style="color: ${color}">${part.value}</span>`;
+    }
+  });
+  return newText;
+};
+
+export const childrenParentsDifferences = (current: any[], proposal: any[]): any => {
+  console.log({ current, proposal });
+  const added = proposal.filter((c: any) => !current.find((cp: any) => c.node === cp.node));
+  added.forEach((c: any) => {
+    c.added = true;
+  });
+  const _current = [...current, ...added];
+
+  for (let c of _current) {
+    if (!proposal.find((cp: any) => c.node === cp.node)) {
+      c.removed = true;
+    }
+  }
+
+  return _current;
+};
+
+export const tagsRefDifferences = (current: any, proposal: any): any => {
+  const removed = current.filter((t: any) => !proposal.includes(t));
+  const added = proposal.filter((t: any) => !current.includes(t));
+  return { added, removed };
 };
