@@ -117,17 +117,21 @@ export const UpDownVoteNode = async ({
     correctChange = !wrong && correct ? -1 : 0;
     wrongChange = wrong ? -1 : 1;
   }
-  const { courseExist, instantDelete } = await checkInstantDeleteForNode(nodeData?.tagIds || [], uname, nodeId);
+
   let willRemoveNode = false;
-  if (courseExist && wrongChange === 1) {
-    willRemoveNode = instantDelete;
-  } else {
-    willRemoveNode = doNeedToDeleteNode(
-      nodeData.corrects + correctChange,
-      nodeData.wrongs + wrongChange,
-      !!nodeData?.locked
-    );
+  if (wrongChange === 1) {
+    const { courseExist, instantDelete } = await checkInstantDeleteForNode(nodeData?.tagIds || [], uname, nodeId);
+    if (courseExist) {
+      willRemoveNode = instantDelete;
+    } else {
+      willRemoveNode = doNeedToDeleteNode(
+        nodeData.corrects + correctChange,
+        nodeData.wrongs + wrongChange,
+        !!nodeData?.locked
+      );
+    }
   }
+
   //  if the new change yields node with more downvotes than upvotes, DELETE
   // node should not be deleted if its a locked node
   if (willRemoveNode) {
