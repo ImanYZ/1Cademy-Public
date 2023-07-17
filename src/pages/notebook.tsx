@@ -1899,9 +1899,11 @@ const Notebook = ({}: NotebookProps) => {
     window.addEventListener("assistant", listener);
     return () => window.removeEventListener("assistant", listener);
   }, []);
-  // const onChangeReferenceChosenNode = () => {};
+
+  // assistant will allow to select a node
   useEffect(() => {
     const listener = (e: any) => {
+      if (!e.detail.type) return;
       notebookRef.current.choosingNode = { id: "", type: e.detail.type };
       notebookRef.current.chosenNode = null;
       nodeBookDispatch({ type: "setChoosingNode", payload: { id: "", type: e.detail.type } });
@@ -1939,11 +1941,8 @@ const Notebook = ({}: NotebookProps) => {
         }
         nodeBookDispatch({ type: "setChoosingNode", payload: null });
         notebookRef.current.choosingNode = null;
-        setAssistantSelectNode(false);
-        // // assistantSelectNode.current = false;
-        return;
-      }
-      if (assistantSelectNode) {
+        nodeBookDispatch({ type: "setChosenNode", payload: null });
+        notebookRef.current.chosenNode = null;
         setAssistantSelectNode(false);
         return;
       }
@@ -6433,8 +6432,8 @@ const Notebook = ({}: NotebookProps) => {
         setQueryParentChildren({ query: detail.flashcard.title, forced: true });
         setOpenSidebar(null);
         notebookRef.current.choosingNode = null;
-        nodeBookDispatch({ type: "setChoosingNode", payload: { id: "", type: null } });
-        notebookRef.current.choosingNode = { id: "", type: null };
+        nodeBookDispatch({ type: "setChoosingNode", payload: null });
+        notebookRef.current.choosingNode = null;
         proposeNodeImprovement(null, detail.selectedNode.id);
         // to apply assistant potential improvement on node editor
         setTimeout(() => {
@@ -6479,8 +6478,8 @@ const Notebook = ({}: NotebookProps) => {
         setQueryParentChildren({ query: detail.flashcard.title, forced: true });
         setOpenSidebar(null);
         notebookRef.current.choosingNode = null;
-        nodeBookDispatch({ type: "setChoosingNode", payload: { id: "", type: null } });
-        notebookRef.current.choosingNode = { id: "", type: null };
+        nodeBookDispatch({ type: "setChoosingNode", payload: null });
+        notebookRef.current.choosingNode = null;
         notebookRef.current.selectedNode = detail.selectedNode.id;
         nodeBookDispatch({ type: "setSelectedNode", payload: detail.selectedNode.id });
         proposeNewChild(null, detail.flashcard.type);
@@ -6528,8 +6527,12 @@ const Notebook = ({}: NotebookProps) => {
           });
         }, 1000);
       } else if (detail.type === "CLEAR") {
-        nodeBookDispatch({ type: "setChoosingNode", payload: { id: "", type: null } });
-        notebookRef.current.choosingNode = { id: "", type: null };
+        nodeBookDispatch({ type: "setChoosingNode", payload: null });
+        notebookRef.current.choosingNode = null;
+        nodeBookDispatch({ type: "setChosenNode", payload: null });
+        notebookRef.current.chosenNode = null;
+        // reloadPermanentGraph();
+        // setOpenSidebar(null);
       }
     };
     window.addEventListener("assistant", listener);
@@ -6542,6 +6545,7 @@ const Notebook = ({}: NotebookProps) => {
     setGraph,
     openNodeHandler,
     proposeNewChild,
+    reloadPermanentGraph,
   ]);
 
   // set up event delegation to manage click event on target elements from tutorial
