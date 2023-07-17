@@ -127,7 +127,11 @@ export const Editor = ({
               {proposalsSelected ? (
                 <div dangerouslySetInnerHTML={{ __html: value }} style={{ color: added ? "green" : "" }} />
               ) : (
-                <MarkdownRender text={value} customClass={"custom-react-markdown"} />
+                <MarkdownRender
+                  text={value}
+                  customClass={"custom-react-markdown"}
+                  sx={{ ...sxPreview, fontWeight: 400, letterSpacing: "inherit" }}
+                />
               )}
             </Box>
           )}
