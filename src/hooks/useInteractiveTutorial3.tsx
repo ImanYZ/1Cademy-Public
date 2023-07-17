@@ -11,7 +11,6 @@ import {
 } from "@/lib/utils/tutorials/nodeActionsTutorialStep";
 import { HIDE_OFFSPRING_STEPS_COMPLETE } from "@/lib/utils/tutorials/nodeActionsTutorialStep";
 import { NODE_INTERACTIONS_CONFIG } from "@/lib/utils/tutorials/nodeInteractionsSteps";
-import { NOTEBOOKS_STEPS } from "@/lib/utils/tutorials/notebooksTutorialSteps";
 import { PENDING_PROPOSALS_STEPS_COMPLETE } from "@/lib/utils/tutorials/pendingProposalsTutorial";
 import { PROPOSAL_STEPS_COMPLETE } from "@/lib/utils/tutorials/proposalTutorialSteps";
 import {
@@ -127,7 +126,7 @@ export const useInteractiveTutorial = ({ user }: useInteractiveTutorialProps) =>
     userSettings: { currentStep: -1, done: false, skipped: false },
     notifications: { currentStep: -1, done: false, skipped: false },
     bookmarks: { currentStep: -1, done: false, skipped: false },
-    notebooks: { currentStep: -1, done: false, skipped: false },
+    // notebooks: { currentStep: -1, done: false, skipped: false },
     leaderBoard: { currentStep: -1, done: false, skipped: false },
     pendingProposals: { currentStep: -1, done: false, skipped: false },
     reputationLivenessBar: { currentStep: -1, done: false, skipped: false },
@@ -339,9 +338,9 @@ export const useInteractiveTutorial = ({ user }: useInteractiveTutorialProps) =>
       newSteps = TMP_PATHWAYS;
     }
     // others
-    if (newTutorial === "notebooks") {
-      newSteps = NOTEBOOKS_STEPS;
-    }
+    // if (newTutorial === "notebooks") {
+    //   newSteps = NOTEBOOKS_STEPS;
+    // }
     if (newTutorial === "leaderBoard") {
       newSteps = LEADER_BOARD_STEPS;
     }

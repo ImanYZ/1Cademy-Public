@@ -5760,22 +5760,23 @@ const Notebook = ({}: NotebookProps) => {
 
       // --------------------------
 
-      const proposalNodesComplete = userTutorial["proposal"].done || userTutorial["proposal"].skipped;
-      const notebooksTutorialCompleted = userTutorial["notebooks"].done || userTutorial["notebooks"].skipped;
+      // const proposalNodesComplete = userTutorial["proposal"].done || userTutorial["proposal"].skipped;
+      const knowledgeGraphTutorialCompleted =
+        userTutorial["knowledgeGraph"].done || userTutorial["knowledgeGraph"].skipped;
       const isNotProposingNodes = tempNodes.size + Object.keys(changedNodes).length === 0;
 
       // --------------------------
 
-      if (forcedTutorial === "notebooks" || (proposalNodesComplete && isNotProposingNodes && openSidebar === null)) {
-        const result = detectAndCallSidebarTutorial("notebooks", null);
-        if (result) return;
-      }
+      // if (forcedTutorial === "notebooks" || (proposalNodesComplete && isNotProposingNodes && openSidebar === null)) {
+      //   const result = detectAndCallSidebarTutorial("notebooks", null);
+      //   if (result) return;
+      // }
 
       // --------------------------
 
       if (
         forcedTutorial === "leaderBoard" ||
-        (notebooksTutorialCompleted && isNotProposingNodes && openSidebar === null)
+        (knowledgeGraphTutorialCompleted && isNotProposingNodes && openSidebar === null)
       ) {
         const result = detectAndCallSidebarTutorial("leaderBoard", null);
         if (result) return;
@@ -5786,7 +5787,7 @@ const Notebook = ({}: NotebookProps) => {
       if (
         user?.livelinessBar === "reputation" &&
         (forcedTutorial === "reputationLivenessBar" ||
-          (notebooksTutorialCompleted && isNotProposingNodes && openLivelinessBar))
+          (knowledgeGraphTutorialCompleted && isNotProposingNodes && openLivelinessBar))
       ) {
         const shouldIgnore = forcedTutorial
           ? forcedTutorial !== "reputationLivenessBar"
@@ -5803,7 +5804,7 @@ const Notebook = ({}: NotebookProps) => {
       if (
         user?.livelinessBar === "interaction" &&
         (forcedTutorial === "interactionLivenessBar" ||
-          (notebooksTutorialCompleted && isNotProposingNodes && openLivelinessBar))
+          (knowledgeGraphTutorialCompleted && isNotProposingNodes && openLivelinessBar))
       ) {
         const shouldIgnore = forcedTutorial
           ? forcedTutorial !== "interactionLivenessBar"
@@ -5819,7 +5820,7 @@ const Notebook = ({}: NotebookProps) => {
 
       if (
         forcedTutorial === "communityLeaderBoard" ||
-        (notebooksTutorialCompleted && isNotProposingNodes && comLeaderboardOpen)
+        (knowledgeGraphTutorialCompleted && isNotProposingNodes && comLeaderboardOpen)
       ) {
         const shouldIgnore = forcedTutorial
           ? forcedTutorial !== "communityLeaderBoard"
@@ -5833,7 +5834,7 @@ const Notebook = ({}: NotebookProps) => {
 
       // --------------------------
 
-      if (forcedTutorial === "pathways" || notebooksTutorialCompleted) {
+      if (forcedTutorial === "pathways" || knowledgeGraphTutorialCompleted) {
         const shouldIgnore = forcedTutorial
           ? forcedTutorial !== "pathways"
           : userTutorial["pathways"].done || userTutorial["pathways"].skipped;
@@ -6252,12 +6253,12 @@ const Notebook = ({}: NotebookProps) => {
 
     // --------------------------
 
-    if (tutorial.name === "notebooks") {
-      if (openSidebar === null) return;
-      setTutorial(null);
-      setForcedTutorial(null);
-      if (tutorialTargetId) removeStyleFromTarget(tutorialTargetId);
-    }
+    // if (tutorial.name === "notebooks") {
+    //   if (openSidebar === null) return;
+    //   setTutorial(null);
+    //   setForcedTutorial(null);
+    //   if (tutorialTargetId) removeStyleFromTarget(tutorialTargetId);
+    // }
 
     // --------------------------
 
