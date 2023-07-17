@@ -438,18 +438,6 @@ const Node = ({
     };
   }, [identifier]);
 
-  useEffect(() => {
-    const listener = (e: any) => {
-      notebookRef.current.choosingNode = { id: "", type: e.detail.type };
-      notebookRef.current.chosenNode = null;
-      nodeBookDispatch({ type: "setChoosingNode", payload: { id: "", type: e.detail.type } });
-      nodeBookDispatch({ type: "setChosenNode", payload: null });
-      setAssistantSelectNode(true);
-    };
-    window.addEventListener("node-selection", listener);
-    return () => window.removeEventListener("node-selection", listener);
-  }, [nodeBookDispatch, notebookRef]);
-
   const nodeClickHandler = useCallback(
     (event: any) => {
       let operation = "selectNode";
@@ -468,6 +456,8 @@ const Node = ({
         }
         nodeBookDispatch({ type: "setChoosingNode", payload: null });
         notebookRef.current.choosingNode = null;
+        nodeBookDispatch({ type: "setChosenNode", payload: null });
+        notebookRef.current.chosenNode = null;
         setAssistantSelectNode(false);
         // // assistantSelectNode.current = false;
         return;
@@ -525,6 +515,7 @@ const Node = ({
       nodeType,
       setOpenPart,
       setNodeUpdates,
+      setAssistantSelectNode,
     ]
   );
 

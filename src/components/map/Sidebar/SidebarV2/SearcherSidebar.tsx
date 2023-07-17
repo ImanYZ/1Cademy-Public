@@ -1,7 +1,6 @@
 import CloseIcon from "@mui/icons-material/Close";
 import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
 import ControlPointIcon from "@mui/icons-material/ControlPoint";
-import DoneIcon from "@mui/icons-material/Done";
 import SearchIcon from "@mui/icons-material/Search";
 import {
   Checkbox,
@@ -13,13 +12,11 @@ import {
   ListItemIcon,
   ListItemText,
   MenuItem,
-  Paper,
   Select,
   SelectChangeEvent,
   Stack,
   Tab,
   Tabs,
-  Tooltip,
   Typography,
   useMediaQuery,
   useTheme,
@@ -47,6 +44,7 @@ import RecentNodesList from "../../RecentNodesList";
 import TimeFilter from "../../TimeFilter";
 import ValidatedInput from "../../ValidatedInput";
 import PendingProposalList from "../PendingProposalList";
+import { SidebarNodeLink } from "../SidebarNodeLink";
 import { SidebarWrapper } from "./SidebarWrapper";
 
 dayjs.extend(relativeTime);
@@ -133,7 +131,7 @@ const SearcherSidebar = ({
   const disableSearchIcon = disableSearcher && !enableElements.includes("SearchIcon");
   // const disableEditedInThePast = disableSearcher && !enableElements.includes("search-recently-input");
   const disableRecentNodeList = disableSearcher && !enableElements.includes("recentNodesList");
-  const disableSearchItem = disableSearcher && !enableElements.includes("search-item");
+  // const disableSearchItem = disableSearcher && !enableElements.includes("search-item");
 
   const onSearch = useCallback(
     async (
@@ -1021,192 +1019,17 @@ const SearcherSidebar = ({
                     </Typography>
                   </Box>
                 )}
-                {searchResults.data.map((resNode, idx) => {
-                  return (
-                    <Paper
-                      elevation={3}
-                      key={`resNode${idx}`}
-                      onClick={
-                        disableSearchItem
-                          ? () => {}
-                          : () => {
-                              openLinkedNode(resNode.id, "Searcher");
-                            }
-                      }
-                      sx={{
-                        overflow: "hidden",
-                        listStyle: "none",
-                        padding: {
-                          xs: "5px 10px",
-                          sm: "12px 16px 10px 16px",
-                        },
-                        background: theme =>
-                          theme.palette.mode === "dark"
-                            ? theme.palette.common.notebookG700
-                            : theme.palette.common.gray100,
-                        borderRadius: "8px",
-                        borderLeft:
-                          "studied" in resNode && resNode.studied ? "solid 6px #fdc473" : " solid 6px #fd7373",
-                        cursor: disableSearchItem ? "not-allowed" : "pointer",
-                        opacity: disableSearchItem ? "0.5" : "1",
-                      }}
-                    >
-                      {/* {innerWidth > theme.breakpoints.values.sm && (
-                    <Box
-                      className="SidebarNodeTypeIcon"
-                      style={{ display: "flex", justifyContent: "space-between", fontSize: "16px" }}
-                    >
-                      <NodeTypeIcon nodeType={resNode.nodeType} fontSize="inherit" />
-                      <div className="right" style={{ display: "flex", gap: "10px" }}>
-                        <MemoizedMetaButton>
-                          <>
-                            <EventAvailableIcon className="material-icons grey-text" sx={{ fontSize: "inherit" }} />
-                            <span>{dayjs(resNode.changedAt).fromNow()}</span>
-                          </>
-                        </MemoizedMetaButton>
-                        <MemoizedMetaButton>
-                          <>
-                            <CreateIcon className="material-icons grey-text" sx={{ fontSize: "inherit" }} />
-                            <span>{shortenNumber(resNode.versions, 2, false)}</span>
-                          </>
-                        </MemoizedMetaButton>
-                        <MemoizedMetaButton>
-                          <>
-                            <CloseIcon className="material-icons grey-text" sx={{ fontSize: "inherit" }} />
-                            <span>{shortenNumber(resNode.wrongs, 2, false)}</span>
-                          </>
-                        </MemoizedMetaButton>
-                        <MemoizedMetaButton>
-                          <>
-                            <DoneIcon className="material-icons DoneIcon grey-text" sx={{ fontSize: "inherit" }} />
-                            <span>{shortenNumber(resNode.corrects, 2, false)}</span>
-                          </>
-                        </MemoizedMetaButton>
-                      </div>
-                    </Box>
-                  )} */}
-                      <Typography
-                        sx={{
-                          fontSize: "16px",
-                          fontWeight: "500",
-                          lineHeight: "24px",
-                        }}
-                      >
-                        {resNode.title}
-                      </Typography>
-                      <Box
-                        sx={{
-                          marginTop: "10px",
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "space-between",
-                        }}
-                      >
-                        <Box
-                          sx={{
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent: "space-between",
-                          }}
-                        >
-                          <Box
-                            sx={{
-                              width: "28px",
-                              height: "28px",
-                              borderRadius: "50%",
-                              background: theme =>
-                                theme.palette.mode === "dark"
-                                  ? theme.palette.common.notebookG500
-                                  : theme.palette.common.gray200,
-                              display: "flex",
-                              justifyContent: "center",
-                              alignItems: "center",
-                            }}
-                          >
-                            <NodeTypeIcon nodeType={resNode.nodeType || ""} fontSize="inherit" />
-                          </Box>
-                          <Box
-                            sx={{
-                              fontSize: "12px",
-                              marginLeft: "5px",
-                              color: theme =>
-                                theme.palette.mode === "dark"
-                                  ? theme.palette.common.notebookG200
-                                  : theme.palette.common.gray500,
-                            }}
-                          >
-                            {dayjs(new Date(resNode.changedAt)).fromNow()}
-                          </Box>
-                        </Box>
-                        <Box
-                          className="tab-double-button-node-footer"
-                          sx={{
-                            background: (theme: any) =>
-                              theme.palette.mode === "dark"
-                                ? theme.palette.common.notebookG500
-                                : theme.palette.common.gray200,
-                            display: "flex",
-                            alignItems: "center",
-                            marginRight: "0px",
-                            cursor: "auto",
-                          }}
-                        >
-                          <Box
-                            sx={{
-                              padding: "2px 10px 2px 10px",
-                              borderRadius: "52px 0px 0px 52px",
-                            }}
-                          >
-                            <Tooltip title={"Correct votes"} placement={"top"}>
-                              <Box
-                                sx={{
-                                  display: "flex",
-                                  fontSize: "14px",
-                                  alignItems: "center",
-                                }}
-                              >
-                                <DoneIcon sx={{ fontSize: "18px", color: "inherit" }} />
-                                <span>{shortenNumber(resNode.corrects, 2, false)}</span>
-                              </Box>
-                            </Tooltip>
-                          </Box>
-                          <Divider
-                            orientation="vertical"
-                            variant="middle"
-                            flexItem
-                            sx={{
-                              background: theme => (theme.palette.mode === "dark" ? "#D3D3D3" : "inherit"),
-                            }}
-                          />
-                          <Box
-                            sx={{
-                              padding: "2px 10px 2px 10px",
-                              borderRadius: "0px 52px 52px 0px",
-                            }}
-                          >
-                            <Tooltip title={"Wrong votes"} placement={"top"}>
-                              <Box
-                                sx={{
-                                  display: "flex",
-                                  fontSize: "14px",
-                                  alignItems: "center",
-                                }}
-                              >
-                                <CloseIcon
-                                  sx={{
-                                    fontSize: "18px",
-                                    color: "inherit",
-                                  }}
-                                />
-                                <span>{shortenNumber(resNode.wrongs, 2, false)}</span>
-                              </Box>
-                            </Tooltip>
-                          </Box>
-                        </Box>
-                      </Box>
-                    </Paper>
-                  );
-                })}
+                {searchResults.data.map(resNode => (
+                  <SidebarNodeLink
+                    key={resNode.id}
+                    onClick={() => openLinkedNode(resNode.id, "Searcher")}
+                    linkMessage={"Open"}
+                    {...resNode}
+                    sx={{
+                      borderLeft: "studied" in resNode && resNode.studied ? "solid 6px #fdc473" : " solid 6px #fd7373",
+                    }}
+                  />
+                ))}
               </Box>
               {isRetrieving && (
                 <Box sx={{ py: "10px", display: "flex", justifyContent: "center" }}>

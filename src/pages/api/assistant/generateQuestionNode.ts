@@ -23,34 +23,34 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
     prompt += `"${nodeContent}"\n`;
     prompt += `'''\n`;
     const question = await generateQuestionNode(nodeTitle, nodeContent, []);
-    // const q = {
+    // const question = {
     //   Stem: "question?",
     //   Choices: [
     //     {
     //       choice:
     //         "a. Choice A",
-    //       correct: "true",
+    //       correct: true,
     //       feedback:
     //         "Feedback A",
     //     },
     //     {
     //       choice:
     //         "b. Choice B",
-    //       correct: "false",
+    //       correct: false,
     //       feedback:
     //         "Feedback B",
     //     },
     //     {
     //       choice:
     //         "c. Choice C",
-    //       correct: "false",
+    //       correct: false,
     //       feedback:
     //         "Feedback C.",
     //     },
     //     {
     //       choice:
     //         "d. Choice D",
-    //       correct: "false",
+    //       correct: false,
     //       feedback:
     //         "Feedback D.",
     //     },

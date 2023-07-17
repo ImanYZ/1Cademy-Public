@@ -1899,9 +1899,11 @@ const Notebook = ({}: NotebookProps) => {
     window.addEventListener("assistant", listener);
     return () => window.removeEventListener("assistant", listener);
   }, []);
-  // const onChangeReferenceChosenNode = () => {};
+
+  // assistant will allow to select a node
   useEffect(() => {
     const listener = (e: any) => {
+      if (!e.detail.type) return;
       notebookRef.current.choosingNode = { id: "", type: e.detail.type };
       notebookRef.current.chosenNode = null;
       nodeBookDispatch({ type: "setChoosingNode", payload: { id: "", type: e.detail.type } });
@@ -1939,11 +1941,8 @@ const Notebook = ({}: NotebookProps) => {
         }
         nodeBookDispatch({ type: "setChoosingNode", payload: null });
         notebookRef.current.choosingNode = null;
-        setAssistantSelectNode(false);
-        // // assistantSelectNode.current = false;
-        return;
-      }
-      if (assistantSelectNode) {
+        nodeBookDispatch({ type: "setChosenNode", payload: null });
+        notebookRef.current.chosenNode = null;
         setAssistantSelectNode(false);
         return;
       }
@@ -5760,22 +5759,23 @@ const Notebook = ({}: NotebookProps) => {
 
       // --------------------------
 
-      const proposalNodesComplete = userTutorial["proposal"].done || userTutorial["proposal"].skipped;
-      const notebooksTutorialCompleted = userTutorial["notebooks"].done || userTutorial["notebooks"].skipped;
+      // const proposalNodesComplete = userTutorial["proposal"].done || userTutorial["proposal"].skipped;
+      const knowledgeGraphTutorialCompleted =
+        userTutorial["knowledgeGraph"].done || userTutorial["knowledgeGraph"].skipped;
       const isNotProposingNodes = tempNodes.size + Object.keys(changedNodes).length === 0;
 
       // --------------------------
 
-      if (forcedTutorial === "notebooks" || (proposalNodesComplete && isNotProposingNodes && openSidebar === null)) {
-        const result = detectAndCallSidebarTutorial("notebooks", null);
-        if (result) return;
-      }
+      // if (forcedTutorial === "notebooks" || (proposalNodesComplete && isNotProposingNodes && openSidebar === null)) {
+      //   const result = detectAndCallSidebarTutorial("notebooks", null);
+      //   if (result) return;
+      // }
 
       // --------------------------
 
       if (
         forcedTutorial === "leaderBoard" ||
-        (notebooksTutorialCompleted && isNotProposingNodes && openSidebar === null)
+        (knowledgeGraphTutorialCompleted && isNotProposingNodes && openSidebar === null)
       ) {
         const result = detectAndCallSidebarTutorial("leaderBoard", null);
         if (result) return;
@@ -5786,7 +5786,7 @@ const Notebook = ({}: NotebookProps) => {
       if (
         user?.livelinessBar === "reputation" &&
         (forcedTutorial === "reputationLivenessBar" ||
-          (notebooksTutorialCompleted && isNotProposingNodes && openLivelinessBar))
+          (knowledgeGraphTutorialCompleted && isNotProposingNodes && openLivelinessBar))
       ) {
         const shouldIgnore = forcedTutorial
           ? forcedTutorial !== "reputationLivenessBar"
@@ -5803,7 +5803,7 @@ const Notebook = ({}: NotebookProps) => {
       if (
         user?.livelinessBar === "interaction" &&
         (forcedTutorial === "interactionLivenessBar" ||
-          (notebooksTutorialCompleted && isNotProposingNodes && openLivelinessBar))
+          (knowledgeGraphTutorialCompleted && isNotProposingNodes && openLivelinessBar))
       ) {
         const shouldIgnore = forcedTutorial
           ? forcedTutorial !== "interactionLivenessBar"
@@ -5819,7 +5819,7 @@ const Notebook = ({}: NotebookProps) => {
 
       if (
         forcedTutorial === "communityLeaderBoard" ||
-        (notebooksTutorialCompleted && isNotProposingNodes && comLeaderboardOpen)
+        (knowledgeGraphTutorialCompleted && isNotProposingNodes && comLeaderboardOpen)
       ) {
         const shouldIgnore = forcedTutorial
           ? forcedTutorial !== "communityLeaderBoard"
@@ -5833,7 +5833,7 @@ const Notebook = ({}: NotebookProps) => {
 
       // --------------------------
 
-      if (forcedTutorial === "pathways" || notebooksTutorialCompleted) {
+      if (forcedTutorial === "pathways" || knowledgeGraphTutorialCompleted) {
         const shouldIgnore = forcedTutorial
           ? forcedTutorial !== "pathways"
           : userTutorial["pathways"].done || userTutorial["pathways"].skipped;
@@ -6252,12 +6252,12 @@ const Notebook = ({}: NotebookProps) => {
 
     // --------------------------
 
-    if (tutorial.name === "notebooks") {
-      if (openSidebar === null) return;
-      setTutorial(null);
-      setForcedTutorial(null);
-      if (tutorialTargetId) removeStyleFromTarget(tutorialTargetId);
-    }
+    // if (tutorial.name === "notebooks") {
+    //   if (openSidebar === null) return;
+    //   setTutorial(null);
+    //   setForcedTutorial(null);
+    //   if (tutorialTargetId) removeStyleFromTarget(tutorialTargetId);
+    // }
 
     // --------------------------
 
@@ -6432,8 +6432,8 @@ const Notebook = ({}: NotebookProps) => {
         setQueryParentChildren({ query: detail.flashcard.title, forced: true });
         setOpenSidebar(null);
         notebookRef.current.choosingNode = null;
-        nodeBookDispatch({ type: "setChoosingNode", payload: { id: "", type: null } });
-        notebookRef.current.choosingNode = { id: "", type: null };
+        nodeBookDispatch({ type: "setChoosingNode", payload: null });
+        notebookRef.current.choosingNode = null;
         proposeNodeImprovement(null, detail.selectedNode.id);
         // to apply assistant potential improvement on node editor
         setTimeout(() => {
@@ -6478,8 +6478,8 @@ const Notebook = ({}: NotebookProps) => {
         setQueryParentChildren({ query: detail.flashcard.title, forced: true });
         setOpenSidebar(null);
         notebookRef.current.choosingNode = null;
-        nodeBookDispatch({ type: "setChoosingNode", payload: { id: "", type: null } });
-        notebookRef.current.choosingNode = { id: "", type: null };
+        nodeBookDispatch({ type: "setChoosingNode", payload: null });
+        notebookRef.current.choosingNode = null;
         notebookRef.current.selectedNode = detail.selectedNode.id;
         nodeBookDispatch({ type: "setSelectedNode", payload: detail.selectedNode.id });
         proposeNewChild(null, detail.flashcard.type);
@@ -6527,8 +6527,12 @@ const Notebook = ({}: NotebookProps) => {
           });
         }, 1000);
       } else if (detail.type === "CLEAR") {
-        nodeBookDispatch({ type: "setChoosingNode", payload: { id: "", type: null } });
-        notebookRef.current.choosingNode = { id: "", type: null };
+        nodeBookDispatch({ type: "setChoosingNode", payload: null });
+        notebookRef.current.choosingNode = null;
+        nodeBookDispatch({ type: "setChosenNode", payload: null });
+        notebookRef.current.chosenNode = null;
+        // reloadPermanentGraph();
+        // setOpenSidebar(null);
       }
     };
     window.addEventListener("assistant", listener);
@@ -6541,6 +6545,7 @@ const Notebook = ({}: NotebookProps) => {
     setGraph,
     openNodeHandler,
     proposeNewChild,
+    reloadPermanentGraph,
   ]);
 
   // set up event delegation to manage click event on target elements from tutorial

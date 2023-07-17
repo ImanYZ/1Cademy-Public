@@ -1,4 +1,4 @@
-import { Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle } from "@mui/material";
+import { Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Link } from "@mui/material";
 import { Box } from "@mui/system";
 import React from "react";
 
@@ -61,18 +61,24 @@ const CookiePolicyContent = () => {
       <p>To adjust your browser settings to control cookies, follow the instructions for your specific browser:</p>
       <ul>
         <li>
-          <a href="https://support.google.com/chrome/answer/95647?co=GENIE.Platform%3DDesktop&hl=en">Google Chrome</a>
+          <Link href="https://support.google.com/chrome/answer/95647?co=GENIE.Platform%3DDesktop&hl=en">
+            Google Chrome
+          </Link>
         </li>
         <li>
-          <a href="https://support.microsoft.com/en-us/help/17442/windows-internet-explorer-delete-manage-cookies">
+          <Link href="https://support.microsoft.com/en-us/help/17442/windows-internet-explorer-delete-manage-cookies">
             Internet Explorer
-          </a>
+          </Link>
         </li>
         <li>
-          <a href="https://support.mozilla.org/en-US/kb/enable-and-disable-cookies-website-preferences">Firefox</a>
+          <Link href="https://support.mozilla.org/en-US/kb/enable-and-disable-cookies-website-preferences">
+            Firefox
+          </Link>
         </li>
         <li>
-          <a href="https://support.apple.com/guide/safari/manage-cookies-and-website-data-sfri11471/mac">Safari</a>
+          <Link href="https://support.apple.com/guide/safari/manage-cookies-and-website-data-sfri11471/mac">
+            Safari
+          </Link>
         </li>
       </ul>
     </Box>
