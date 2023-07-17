@@ -33,7 +33,7 @@ const KNOWLEDGE_GRAPH_STEPS: TutorialStepConfig[] = [
     description: (
       <MarkdownRender
         text={
-          "Notebooks are personalized views of the knowledge graph that are stored, can be switched between, and can be shared with others. Here you can find the list of the notebooks you have created or shared with you. You can switch to another notebook by simply clicking it. If you share the public link to a notebook with others, they can only navigate through its content, without being able to modify it. If they like to collaboratively add/remove nodes in the notebook, they would send you an edit access and you can decide whether to grant that access to them."
+          "Notebooks are personalized views of the knowledge graph. Below is a list of your notebooks, both created by you and shared with you. Switch to another notebook by clicking on it. Public notebook links allow others to view content without modification privileges. For collaborative editing such as adding/removing nodes, others must request edit access from you, granting of which is at your discretion."
         }
       />
     ),
