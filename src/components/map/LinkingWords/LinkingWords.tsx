@@ -214,6 +214,8 @@ const LinkingWords = ({
                       nodeType={parent.type}
                       visible={parent.visible}
                       disabled={disabled && !enableChildElements.includes(`${props.identifier}-parent-button-${idx}`)}
+                      removed={parent.removed}
+                      added={parent.added}
                     />
                     {props.editable && props.parents.length > 1 && (
                       <Tooltip
@@ -308,6 +310,8 @@ const LinkingWords = ({
                         disabled={
                           disabled && !enableChildElements.includes(`${props.identifier}-reference-button-${idx}`)
                         }
+                        removed={reference.removed}
+                        added={reference.added}
                       />
                     </Box>
                     {props.editable && (
@@ -417,6 +421,8 @@ const LinkingWords = ({
                       linkedNodeType="tag"
                       iClassName="local_offer"
                       disabled={disabled && !enableChildElements.includes(`${props.identifier}-tag-button-${idx}`)}
+                      removed={tag.removed}
+                      added={tag.added}
                     />
                     {props.editable && (
                       <Tooltip
@@ -470,6 +476,8 @@ const LinkingWords = ({
                       linkedNodeType="tag"
                       iClassName="local_offer"
                       disabled={disabled && !enableChildElements.includes(`${props.identifier}-tag-button-${idx}`)}
+                      removed={tag.removed}
+                      added={tag.added}
                     />
                     {props.editable && (
                       <div className="LinkDeleteButton">
@@ -512,6 +520,8 @@ const LinkingWords = ({
                       nodeType={child.type}
                       visible={child.visible}
                       disabled={disabled && !enableChildElements.includes(`${props.identifier}-child-button-${idx}`)}
+                      removed={child.removed}
+                      added={child.added}
                     />
                     {props.editable && (
                       <Tooltip

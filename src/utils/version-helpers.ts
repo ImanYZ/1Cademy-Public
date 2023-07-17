@@ -1906,7 +1906,7 @@ export const versionCreateUpdate = async ({
     // If the version was accepted previously, accepted === true.
     // If the version is determined to be approved right now, versionData.accepted === true.
 
-    if (versionData.accepted || accepted) {
+    if (versionData.accepted || (accepted && !courseExist)) {
       const { newMaxVersionRating, adminPoints, nodeAdmin, aImgUrl, aFullname, aChooseUname } =
         await getCumulativeProposerVersionRatingsOnNode({
           nodeId,

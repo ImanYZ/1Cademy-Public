@@ -422,6 +422,10 @@ export type FullNodeData = Omit<UserNodeFirestore, "changedAt" | "createdAt" | "
     x?: number;
     y?: number;
     localLinkingWords?: OpenPart;
+    addedTags?: string[];
+    removedTags?: string[];
+    addedReferences?: string[];
+    removedReferences?: string[];
   };
 
 export type EdgeData = {
