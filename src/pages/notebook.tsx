@@ -160,7 +160,14 @@ import {
   VoiceAssistant,
 } from "../nodeBookTypes";
 import { NodeType, Notebook, NotebookDocument, SimpleNode2 } from "../types";
-import { doNeedToDeleteNode, getNodeTypesFromNode, isVersionApproved } from "../utils/helpers";
+import {
+  childrenParentsDifferences,
+  doNeedToDeleteNode,
+  getNodeTypesFromNode,
+  isVersionApproved,
+  showDifferences,
+  tagsRefDifferences,
+} from "../utils/helpers";
 
 type NotebookProps = {};
 
@@ -4284,17 +4291,33 @@ const Notebook = ({}: NotebookProps) => {
               proposal,
               edges
             );
+            const newChildren = childrenParentsDifferences(thisNode.children, proposal.children);
+            const newParents = childrenParentsDifferences(thisNode.parents, proposal.parents);
+            const newTags = tagsRefDifferences(thisNode.tagIds, proposal.tagIds);
+            const newRefrences = tagsRefDifferences(thisNode.referenceIds, proposal.referenceIds);
+            devLog("NEWREFRENCES", {
+              newRefrences,
+              referenceIds: Array.from(new Set([...thisNode.referenceIds, ...proposal.referenceIds])),
+            });
+
             thisNode.nodeType = proposal.nodeType || thisNode.nodeType;
-            thisNode.title = proposal.title;
-            thisNode.content = proposal.content;
+            thisNode.title = showDifferences(thisNode.title, proposal.title); /* proposal.title */
+            thisNode.content = showDifferences(thisNode.content, proposal.content) /* proposal.content */;
             thisNode.nodeVideo = proposal.nodeVideo;
             thisNode.nodeVideoStartTime = proposal.nodeVideoStartTime;
             thisNode.nodeVideoEndTime = proposal.nodeVideoEndTime;
             thisNode.nodeImage = proposal.nodeImage;
-            thisNode.references = proposal.references;
-            thisNode.children = proposal.children;
-            thisNode.parents = proposal.parents;
-            thisNode.tags = proposal.tags;
+            thisNode.children = newChildren;
+            thisNode.parents = newParents;
+            thisNode.addedTags = newTags.added;
+            thisNode.removedTags = newTags.removed;
+            thisNode.references = Array.from(new Set([...thisNode.references, ...proposal.references]));
+            thisNode.referenceIds = Array.from(new Set([...thisNode.referenceIds, ...proposal.referenceIds]));
+            thisNode.tags = Array.from(new Set([...thisNode.tags, ...proposal.tags]));
+            thisNode.tagIds = Array.from(new Set([...thisNode.tagIds, ...proposal.tagIds]));
+            thisNode.referenceLabels = ["", ""];
+            thisNode.addedReferences = newRefrences.added;
+            thisNode.removedReferences = newRefrences.removed;
             if (proposal.nodeType === "Question") {
               thisNode.choices = proposal.choices;
             }
@@ -4532,6 +4555,7 @@ const Notebook = ({}: NotebookProps) => {
           checkInstantApproval
         );
 
+        devLog("COURSEEXIST, INSTANTAPPROVE", { courseExist, instantApprove });
         setGraph(({ nodes: oldNodes, edges }) => {
           if (!nodeBookState.selectedNode) return { nodes: oldNodes, edges };
           let willBeApproved: boolean = false;

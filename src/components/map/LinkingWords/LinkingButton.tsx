@@ -23,6 +23,9 @@ type LinkingButtonProps = {
   iClassName?: string;
   disabled?: boolean;
   onClickOnDisable?: () => void;
+  removed?: boolean;
+  added?: boolean;
+  proposalsSelected?: boolean;
 };
 
 const LinkingButton = ({ disabled = false, id, onClickOnDisable, ...props }: LinkingButtonProps) => {
@@ -44,7 +47,14 @@ const LinkingButton = ({ disabled = false, id, onClickOnDisable, ...props }: Lin
       }
       disableInteractive
     >
-      <LinkingButtonWrapper id={id} onClick={linkedNodeClick} onClickOnDisable={onClickOnDisable} disabled={disabled}>
+      <LinkingButtonWrapper
+        id={id}
+        onClick={linkedNodeClick}
+        onClickOnDisable={onClickOnDisable}
+        disabled={disabled}
+        removed={props?.removed}
+        added={props?.added}
+      >
         <Box sx={{ display: "flex", alignItems: "center", fontSize: "16px", justifyContent: "space-between" }}>
           {props.iClassName == "local_offer" ? (
             <NextImage height={"20px"} width={"22px"} src={TagYellowIcon} alt="tag icon" />
@@ -74,6 +84,8 @@ const LinkingButton = ({ disabled = false, id, onClickOnDisable, ...props }: Lin
             value={props.linkedNodeTitle}
             disabled={disabled}
             sxPreview={{ fontSize: "14px", lineHeight: "1.5", marginLeft: "8px" }}
+            added={props?.added}
+            proposalsSelected={props.removed || props.added}
           />
         </Box>
       </LinkingButtonWrapper>
@@ -87,6 +99,8 @@ type LinkingButtonWrapperProps = {
   onClick: () => void;
   onClickOnDisable?: () => void;
   disabled?: boolean;
+  removed?: boolean;
+  added?: boolean;
 };
 
 const LinkingButtonWrapper = ({
@@ -95,6 +109,8 @@ const LinkingButtonWrapper = ({
   disabled = false,
   onClick,
   onClickOnDisable,
+  removed,
+  added,
 }: LinkingButtonWrapperProps) => {
   if (disabled)
     return (
@@ -110,6 +126,10 @@ const LinkingButtonWrapper = ({
         justifyContent: "stretch",
         textAlign: "inherit",
         padding: "5px",
+        textDecoration: removed ? "line-through" : "none",
+        textDecorationColor: "black",
+        color: added ? "darkgreen" : "",
+        border: added ? "2px solid darkgreen" : removed ? "2px solid red" : "2px solid transparent",
         ":hover": {
           background: theme => (theme.palette.mode === "dark" ? "#404040" : "#D0D5DD"),
         },

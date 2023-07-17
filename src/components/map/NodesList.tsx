@@ -213,10 +213,14 @@ const NodesList = ({
               title: cur,
               node: nodes[nId].referenceIds[idx],
               label: nodes[nId].referenceLabels[idx],
+              added: (nodes[nId]?.addedReferences || []).includes(nodes[nId].referenceIds[idx]),
+              removed: (nodes[nId]?.removedReferences || []).includes(nodes[nId].referenceIds[idx]),
             }))}
             tags={nodes[nId].tags.map((cur: string, idx: number) => ({
               node: nodes[nId].tagIds[idx],
               title: cur,
+              added: (nodes[nId]?.addedTags || []).includes(nodes[nId].tagIds[idx]),
+              removed: (nodes[nId]?.removedTags || []).includes(nodes[nId].tagIds[idx]),
             }))}
             parents={nodes[nId].parents}
             nodesChildren={nodes[nId].children}

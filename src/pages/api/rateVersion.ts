@@ -230,7 +230,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           nodeType as INodeType,
           req.body.versionId
         );
-      if (courseExist) {
+      if (courseExist && correct === 1) {
         isApproved = instantApprove;
       }
 
