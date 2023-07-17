@@ -36,6 +36,14 @@ const QuestionChoices = (props: QuestionChoicesProps) => {
   const [choiceCopy, setChoiceCopy] = useState(props.choice.choice);
   const [feedbackCopy, setFeedbackCopy] = useState(props.choice.feedback);
 
+  // update choices
+  useEffect(() => {
+    startTransition(() => {
+      setChoiceCopy(props.choice.choice);
+      setFeedbackCopy(props.choice.feedback);
+    });
+  }, [props.choice.choice, props.choice.feedback]);
+
   useEffect(() => {
     const choices: boolean[] = [];
     for (let i = 0; i < props.choices.length; i++) {

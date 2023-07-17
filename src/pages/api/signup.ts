@@ -443,7 +443,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
     const creditsRef = db.collection("credits").where("tagId", "==", tagId).limit(1);
     const creditsData = await creditsRef.get();
 
-    credits = creditsData.docs[0].data();
+    credits = creditsData.docs[0] ? creditsData.docs[0].data() : {};
     delete credits.createdAt;
     delete credits.credits;
     delete credits.tag;
