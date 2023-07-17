@@ -1,5 +1,5 @@
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
-import { Box, Button, Stack, Typography } from "@mui/material";
+import { Box, Button, Stack, SxProps, Theme, Typography } from "@mui/material";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import React, { useState } from "react";
@@ -16,6 +16,7 @@ dayjs.extend(relativeTime);
 type SidebarNodeLinkProps = SimpleNode2 & {
   linkMessage: string;
   onClick: () => void;
+  sx?: SxProps<Theme>;
 };
 export const SidebarNodeLink = ({
   id,
@@ -27,6 +28,7 @@ export const SidebarNodeLink = ({
   nodeVideo,
   linkMessage,
   onClick,
+  sx,
 }: SidebarNodeLinkProps) => {
   const [expandItem, setExpandItem] = useState(false);
 
@@ -39,6 +41,7 @@ export const SidebarNodeLink = ({
         p: "12px 16px 10px 16px",
         backgroundColor: theme =>
           theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookG700 : DESIGN_SYSTEM_COLORS.gray100,
+        ...sx,
       }}
     >
       <Box>
