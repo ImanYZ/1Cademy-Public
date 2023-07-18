@@ -850,10 +850,28 @@ const Node = ({
             },
           }}
         >
-          <MarkdownRender
-            text={titleCopy}
-            sx={{ fontSize: "25px", fontWeight: 500, textAlign: "center", textOverflow: "ellipsis" }}
-          />
+          {proposalsSelected && (
+            <Box
+              dangerouslySetInnerHTML={{ __html: titleCopy }}
+              sx={{
+                fontSize: "25px",
+                fontWeight: 500,
+                textAlign: "center",
+                textOverflow: "ellipsis",
+              }}
+            />
+          )}
+          {!proposalsSelected && (
+            <MarkdownRender
+              text={titleCopy}
+              sx={{
+                fontSize: "25px",
+                fontWeight: 500,
+                textAlign: "center",
+                textOverflow: "ellipsis",
+              }}
+            />
+          )}
           <NodeTypeIcon
             nodeType={nodeType}
             tooltipPlacement="bottom"
