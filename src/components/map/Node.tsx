@@ -43,6 +43,7 @@ import { TNodeBookState } from "../../nodeBookTypes";
 import { NodeType } from "../../types";
 // import { FullNodeData } from "../../noteBookTypes";
 import { Editor } from "../Editor";
+import MarkdownRender from "../Markdown/MarkdownRender";
 import NodeTypeIcon from "../NodeTypeIcon2";
 // import LeaderboardChip from "../LeaderboardChip";
 // import NodeTypeIcon from "../NodeTypeIcon";
@@ -436,7 +437,7 @@ const Node = ({
       if (!observer.current) return;
       return observer.current.disconnect();
     };
-  }, [identifier]);
+  }, [changeNodeHight, identifier]);
 
   const nodeClickHandler = useCallback(
     (event: any) => {
@@ -849,15 +850,28 @@ const Node = ({
             },
           }}
         >
-          <Typography
-            component={"p"}
-            fontSize={`${14 / 0.32}px`}
-            fontWeight={500}
-            textAlign={"center"}
-            textOverflow={"ellipsis"}
-          >
-            {title}
-          </Typography>
+          {proposalsSelected && (
+            <Box
+              dangerouslySetInnerHTML={{ __html: titleCopy }}
+              sx={{
+                fontSize: "25px",
+                fontWeight: 500,
+                textAlign: "center",
+                textOverflow: "ellipsis",
+              }}
+            />
+          )}
+          {!proposalsSelected && (
+            <MarkdownRender
+              text={titleCopy}
+              sx={{
+                fontSize: "25px",
+                fontWeight: 500,
+                textAlign: "center",
+                textOverflow: "ellipsis",
+              }}
+            />
+          )}
           <NodeTypeIcon
             nodeType={nodeType}
             tooltipPlacement="bottom"

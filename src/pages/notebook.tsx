@@ -908,7 +908,6 @@ const Notebook = ({}: NotebookProps) => {
           if (selectNode) {
             notebookRef.current.selectedNode = nodeId; // CHECK: THIS DOESN'T GUARANTY CORRECT SELECTED NODE, WE NEED TO DETECT WHEN GRAPH UPDATE HIS VALUES
             nodeBookDispatch({ type: "setSelectedNode", payload: nodeId }); // CHECK: SAME FOR THIS
-            addTask(null);
           }
         } catch (err) {
           console.error(err);
@@ -2190,13 +2189,12 @@ const Notebook = ({}: NotebookProps) => {
         notebookRef.current.initialProposal = String(typeOperation).replace("initialProposal-", "");
         setOpenSidebar("PROPOSALS");
       }
-
-      if (linkedNode && typeOperation !== "Searcher") {
-        nodeBookDispatch({ type: "setPreviousNode", payload: notebookRef.current.selectedNode });
+      nodeBookDispatch({ type: "setPreviousNode", payload: notebookRef.current.selectedNode });
+      if (linkedNode) {
         notebookRef.current.selectedNode = linkedNodeID;
         nodeBookDispatch({ type: "setSelectedNode", payload: linkedNodeID });
+        scrollToNode(linkedNodeID, true);
       } else {
-        nodeBookDispatch({ type: "setPreviousNode", payload: notebookRef.current.selectedNode });
         // openNodeHandler(linkedNodeID, isInitialProposal ? typeOperation : "Searcher");
         openNodeHandler(linkedNodeID);
       }
@@ -2211,6 +2209,7 @@ const Notebook = ({}: NotebookProps) => {
       isPlayingTheTutorialRef,
       nodeBookDispatch,
       openNodeHandler,
+      scrollToNode,
       user?.chooseUname,
       user?.fName,
       user?.imageUrl,
