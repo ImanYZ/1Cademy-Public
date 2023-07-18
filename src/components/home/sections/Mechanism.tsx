@@ -57,7 +57,7 @@ export const MECHANISM_ITEMS: TMechanisms[] = [
   },
   {
     id: "ai-enhanced-grading",
-    title: "AI-Enhanced Grading",
+    title: "AI-Enhanced Assignments/Exams",
     description: `
     1Cademy empowers instructors to efficiently manage assignments and exams by offering tools to create, schedule, review, and auto-grade them, all under their control. It enables instructors to personalize questions, assign points, and tag or revise them. Students benefit from completing assignments, receiving instant constructive feedback, and reviewing grades with metacognitive learning analytics, fostering transparency in the learning process.
     `,
@@ -69,7 +69,11 @@ export const MECHANISM_ITEMS: TMechanisms[] = [
     video: [
       {
         url: "https://www.youtube.com/embed/E2ClCIX9g0g",
-        thumbnail: "/home/demos/auto-graded-assignments-and-Exams.png",
+        thumbnail: "/home/demos/ai_assisted-assignments-and-exams.png",
+      },
+      {
+        url: "https://www.youtube.com/embed/uj8fqLV-S1M",
+        thumbnail: "/home/demos/ai-assisted-grading-conceptual-and-essay-questions.png",
       },
     ],
   },

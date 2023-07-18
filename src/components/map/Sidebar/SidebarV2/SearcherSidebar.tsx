@@ -517,7 +517,7 @@ const SearcherSidebar = ({
         <Box
           id="searcher-sidebar-options"
           sx={{
-            marginTop: "20px",
+            marginTop: "8px",
             p: {
               xs: "10px",
               sm: innerHeight && innerHeight < 600 ? "20px 10px 10px 10px" : "0px 15px 10px 15px",
