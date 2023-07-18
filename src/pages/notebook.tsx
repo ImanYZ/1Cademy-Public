@@ -645,6 +645,7 @@ const Notebook = ({}: NotebookProps) => {
     setGraph(graph => {
       if (!nodeBookState.selectedNode) return graph;
       if (!graph.nodes[nodeBookState.selectedNode]) return graph;
+
       const operationIsFromSearchSidebar = lastNodeOperation.current?.name === "Searcher";
       lastNodeOperation.current = null;
       scrollToNode(nodeBookState.selectedNode, operationIsFromSearchSidebar);
@@ -907,6 +908,7 @@ const Notebook = ({}: NotebookProps) => {
           if (selectNode) {
             notebookRef.current.selectedNode = nodeId; // CHECK: THIS DOESN'T GUARANTY CORRECT SELECTED NODE, WE NEED TO DETECT WHEN GRAPH UPDATE HIS VALUES
             nodeBookDispatch({ type: "setSelectedNode", payload: nodeId }); // CHECK: SAME FOR THIS
+            addTask(null);
           }
         } catch (err) {
           console.error(err);
@@ -2189,7 +2191,7 @@ const Notebook = ({}: NotebookProps) => {
         setOpenSidebar("PROPOSALS");
       }
 
-      if (linkedNode) {
+      if (linkedNode && typeOperation !== "Searcher") {
         nodeBookDispatch({ type: "setPreviousNode", payload: notebookRef.current.selectedNode });
         notebookRef.current.selectedNode = linkedNodeID;
         nodeBookDispatch({ type: "setSelectedNode", payload: linkedNodeID });
