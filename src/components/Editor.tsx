@@ -123,10 +123,11 @@ export const Editor = ({
               helperText={helperText}
             />
           ) : (
-            <Box sx={{ ...sxPreview, fontWeight: 400, letterSpacing: "inherit" }}>
-              {proposalsSelected ? (
-                <div dangerouslySetInnerHTML={{ __html: value }} style={{ color: added ? "green" : "" }} />
-              ) : (
+            <Box>
+              {proposalsSelected && (
+                <Box dangerouslySetInnerHTML={{ __html: value }} sx={{ ...sxPreview, color: added ? "green" : "" }} />
+              )}
+              {!proposalsSelected && (
                 <MarkdownRender
                   text={value}
                   customClass={"custom-react-markdown"}
