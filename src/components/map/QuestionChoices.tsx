@@ -42,7 +42,7 @@ const QuestionChoices = (props: QuestionChoicesProps) => {
       setChoiceCopy(props.choice.choice);
       setFeedbackCopy(props.choice.feedback);
     });
-  }, [props.choice.choice, props.choice.feedback]);
+  }, [props.choice]);
 
   useEffect(() => {
     const choices: boolean[] = [];

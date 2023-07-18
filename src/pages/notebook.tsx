@@ -6526,6 +6526,7 @@ const Notebook = ({}: NotebookProps) => {
             updatedAt: new Date(),
           });
         }, 1000);
+        if (detail.choices) window.dispatchEvent(new CustomEvent("stop-loader"));
       } else if (detail.type === "CLEAR") {
         nodeBookDispatch({ type: "setChoosingNode", payload: null });
         notebookRef.current.choosingNode = null;
