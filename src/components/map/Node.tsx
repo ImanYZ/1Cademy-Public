@@ -437,7 +437,7 @@ const Node = ({
       if (!observer.current) return;
       return observer.current.disconnect();
     };
-  }, [identifier]);
+  }, [changeNodeHight, identifier]);
 
   const nodeClickHandler = useCallback(
     (event: any) => {
