@@ -27,32 +27,24 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
     //   Stem: "question?",
     //   Choices: [
     //     {
-    //       choice:
-    //         "a. Choice A",
+    //       choice: "a. Choice A",
     //       correct: true,
-    //       feedback:
-    //         "Feedback A",
+    //       feedback: "Feedback A",
     //     },
     //     {
-    //       choice:
-    //         "b. Choice B",
+    //       choice: "b. Choice B",
     //       correct: false,
-    //       feedback:
-    //         "Feedback B",
+    //       feedback: "Feedback B",
     //     },
     //     {
-    //       choice:
-    //         "c. Choice C",
+    //       choice: "c. Choice C",
     //       correct: false,
-    //       feedback:
-    //         "Feedback C.",
+    //       feedback: "Feedback C.",
     //     },
     //     {
-    //       choice:
-    //         "d. Choice D",
-    //       correct: false,
-    //       feedback:
-    //         "Feedback D.",
+    //       choice: "d. Choice D",
+    //       correct: true,
+    //       feedback: "Feedback D.",
     //     },
     //   ],
     // };
