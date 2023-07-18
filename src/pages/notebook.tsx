@@ -4614,9 +4614,9 @@ const Notebook = ({}: NotebookProps) => {
     }
   };
 
-  const onOpenSideBar = (sidebar: OpenLeftSidebar) => {
+  const onOpenSideBar = useCallback((sidebar: OpenLeftSidebar) => {
     setOpenSidebar(sidebar);
-  };
+  }, []);
 
   // this method was required to cleanup editor added, removed child and parent list
   const cleanEditorLink = useCallback(() => {
