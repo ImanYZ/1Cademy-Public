@@ -122,24 +122,24 @@ const SignUpPage: NextPageWithLayout = () => {
       .date()
       .min(minDate, "Your age should be less than or equal to 100 years")
       .max(maxDate, "Your age should be greater than or equal to 10 years")
-      .required("Please enter your birth date")
+      // .required("Please enter your birth date")
       .nullable(),
-    gender: yup.string().required("Please enter your gender").nullable(true),
+    // gender: yup.string().required("Please enter your gender").nullable(true),
     genderOtherValue: yup.string().when("gender", {
       is: (genderValue: string) => genderValue === "Not listed (Please specify)",
       then: yup.string().required("Required"),
     }),
-    ethnicity: yup
-      .array()
-      .min(1, "Please select at least 1 option")
-      .of(yup.string().required("Please enter your ethnicity")),
+    // ethnicity: yup
+    //   .array()
+    //   .min(1, "Please select at least 1 option")
+    //   .of(yup.string().required("Please enter your ethnicity")),
     ethnicityOtherValue: yup.string().when("ethnicity", {
       is: (ethnicityValue: string[]) => ethnicityValue.includes("Not listed (Please specify)"),
       then: yup.string().required("Required"),
     }),
-    country: yup.string().required("Please enter your country").nullable(true),
-    state: yup.string().required("Please enter your state").nullable(true),
-    city: yup.string().required("Please enter your city").nullable(true),
+    // country: yup.string().required("Please enter your country").nullable(true),
+    // state: yup.string().required("Please enter your state").nullable(true),
+    // city: yup.string().required("Please enter your city").nullable(true),
     reason: yup.string().required("Please enter your reason for joining 1Cademy"),
     foundFrom: yup.string().required("Please enter how you heard about us").nullable(true),
     foundFromOtherValue: yup.string().when("foundFrom", {
