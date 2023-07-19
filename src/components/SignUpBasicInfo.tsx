@@ -1,6 +1,18 @@
-import { Box, FormControlLabel, FormGroup, Switch, TextField, Typography } from "@mui/material";
+import {
+  Backdrop,
+  Box,
+  Checkbox,
+  CircularProgress,
+  FormControlLabel,
+  FormGroup,
+  FormHelperText,
+  Link,
+  Switch,
+  TextField,
+  Typography,
+} from "@mui/material";
 import { FormikProps } from "formik";
-import React, { useEffect, useState } from "react";
+import React, { lazy, Suspense, useEffect, useState } from "react";
 import { SignUpFormValues } from "src/knowledgeTypes";
 
 import { useAuth } from "../context/AuthContext";
@@ -8,12 +20,22 @@ import { useTagsTreeView } from "../hooks/useTagsTreeView";
 import { ToUpperCaseEveryWord } from "../lib/utils/utils";
 import { ChosenTag, MemoizedTagsSearcher } from "./TagsSearcher";
 
+const CookiePolicy = lazy(() => import("./modals/CookiePolicy"));
+const GDPRPolicy = lazy(() => import("./modals/GDPRPolicy"));
+const PrivacyPolicy = lazy(() => import("./modals/PrivacyPolicy"));
+const TermsOfUse = lazy(() => import("./modals/TermsOfUse"));
+const InformedConsent = lazy(() => import("./modals/InformedConsent"));
 export type SignUpBasicInformationProps = {
   formikProps: FormikProps<SignUpFormValues>;
 };
 
 export const SignUpBasicInfo = ({ formikProps }: SignUpBasicInformationProps) => {
   const [, { dispatch }] = useAuth();
+  const [openInformedConsent, setOpenInformedConsent] = useState(false);
+  const [openGDPRPolicy, setOpenGDPRPolicy] = useState(false);
+  const [openTermOfUse, setOpenTermsOfUse] = useState(false);
+  const [openPrivacyPolicy, setOpenPrivacyPolicy] = useState(false);
+  const [openCookiePolicy, setOpenCookiePolicy] = useState(false);
   const { values, errors, touched, handleChange, handleBlur, setFieldValue } = formikProps;
   const { allTags, setAllTags } = useTagsTreeView(values.tagId ? [values.tagId] : []);
 
@@ -182,6 +204,187 @@ export const SignUpBasicInfo = ({ formikProps }: SignUpBasicInformationProps) =>
           sx={{ maxHeight: "200px", height: "200px" }}
         />
       </FormGroup>
+      <Box sx={{ mb: "16px", display: "flex", alignItems: "center" }}>
+        <Checkbox checked={values.signUpAgreement} onChange={(_, value) => setFieldValue("signUpAgreement", value)} />
+        <Box>
+          <Box>
+            <Typography>
+              I acknowledge and agree that any data generated from my use of 1Cademy may be utilized for research
+              purposes by the investigators at 1Cademy, the University of Michigan School of Information.
+            </Typography>
+          </Box>
+          {Boolean(errors.signUpAgreement) && Boolean(touched.signUpAgreement) && (
+            <FormHelperText sx={{ color: theme => theme.palette.error.main }}>
+              {touched.signUpAgreement && errors.signUpAgreement}
+            </FormHelperText>
+          )}
+        </Box>
+      </Box>
+
+      <Box sx={{ mb: "16px", display: "flex", alignItems: "center" }}>
+        <Checkbox
+          checked={values.GDPRPolicyAgreement}
+          onChange={(_, value) => setFieldValue("GDPRPolicyAgreement", value)}
+        />
+        <Box>
+          <Box>
+            <Typography>I acknowledge and agree to</Typography>
+            <Link
+              onClick={() => {
+                setFieldValue("clickedGDPR", true);
+                setOpenGDPRPolicy(true);
+              }}
+              sx={{ cursor: "pointer", textDecoration: "none" }}
+            >
+              1Cademy's General Data Protection Regulation (GDPR) Policy.
+            </Link>
+          </Box>
+          {Boolean(errors.GDPRPolicyAgreement) && Boolean(touched.GDPRPolicyAgreement) && (
+            <FormHelperText sx={{ color: theme => theme.palette.error.main }}>
+              {touched.GDPRPolicyAgreement && errors.GDPRPolicyAgreement}
+            </FormHelperText>
+          )}
+        </Box>
+      </Box>
+
+      <Box sx={{ mb: "16px", display: "flex", alignItems: "center" }}>
+        <Checkbox
+          checked={values.termsOfServiceAgreement}
+          onChange={(_, value) => setFieldValue("termsOfServiceAgreement", value)}
+        />
+        <Box>
+          <Box>
+            <Typography>I acknowledge and agree to</Typography>
+            <Link
+              onClick={() => {
+                setFieldValue("clickedTOS", true);
+                setOpenTermsOfUse(true);
+              }}
+              sx={{ cursor: "pointer", textDecoration: "none" }}
+            >
+              1Cademy's Terms of Service.
+            </Link>
+          </Box>
+          {Boolean(errors.termsOfServiceAgreement) && Boolean(touched.termsOfServiceAgreement) && (
+            <FormHelperText sx={{ color: theme => theme.palette.error.main }}>
+              {touched.termsOfServiceAgreement && errors.termsOfServiceAgreement}
+            </FormHelperText>
+          )}
+        </Box>
+      </Box>
+
+      <Box sx={{ mb: "16px", display: "flex", alignItems: "center" }}>
+        <Checkbox
+          checked={values.privacyPolicyAgreement}
+          onChange={(_, value) => setFieldValue("privacyPolicyAgreement", value)}
+        />
+        <Box>
+          <Box>
+            <Typography>I acknowledge and agree to</Typography>
+            <Link
+              onClick={() => {
+                setFieldValue("clickedPP", true);
+                setOpenPrivacyPolicy(true);
+              }}
+              sx={{ cursor: "pointer", textDecoration: "none" }}
+            >
+              1Cademy's Privacy Policy.
+            </Link>
+          </Box>
+          {Boolean(errors.privacyPolicyAgreement) && Boolean(touched.privacyPolicyAgreement) && (
+            <FormHelperText sx={{ color: theme => theme.palette.error.main }}>
+              {touched.privacyPolicyAgreement && errors.privacyPolicyAgreement}
+            </FormHelperText>
+          )}
+        </Box>
+      </Box>
+
+      <Box sx={{ mb: "16px", display: "flex", alignItems: "center" }}>
+        <Checkbox checked={values.cookiesAgreement} onChange={(_, value) => setFieldValue("cookiesAgreement", value)} />
+        <Box>
+          <Box>
+            <Typography>I acknowledge and agree to</Typography>
+            <Link
+              onClick={() => {
+                setFieldValue("clickedCP", true);
+                setOpenCookiePolicy(true);
+              }}
+              sx={{ cursor: "pointer", textDecoration: "none" }}
+            >
+              1Cademy's Cookies Policy.
+            </Link>
+          </Box>
+          {Boolean(errors.cookiesAgreement) && Boolean(touched.cookiesAgreement) && (
+            <FormHelperText sx={{ color: theme => theme.palette.error.main }}>
+              {touched.cookiesAgreement && errors.cookiesAgreement}
+            </FormHelperText>
+          )}
+        </Box>
+      </Box>
+
+      {/* <Box sx={{ mb: "16px", display: "flex", alignItems: "center" }}>
+        <Checkbox checked={values.ageAgreement} onChange={(_, value) => setFieldValue("ageAgreement", value)} />
+        <Box>
+          <Box>
+            <Typography>I confirm that I am 18 years of age or older.</Typography>
+          </Box>
+          {Boolean(errors.ageAgreement) && Boolean(touched.ageAgreement) && (
+            <FormHelperText sx={{ color: theme => theme.palette.error.main }}>
+              {touched.ageAgreement && errors.ageAgreement}
+            </FormHelperText>
+          )}
+        </Box>
+      </Box> */}
+
+      {/* <Box sx={{ mb: "16px" }}>
+        <Typography>By clicking "Sign Up," you acknowledge that you agree to 1Cademy's </Typography>
+        <Link
+          onClick={() => {
+            setFieldValue("clickedTOS", true);
+            setOpenTermsOfUse(true);
+          }}
+          sx={{ cursor: "pointer", textDecoration: "none" }}
+        >
+          Terms of Use
+        </Link>
+        ,{" "}
+        <Link
+          onClick={() => {
+            setFieldValue("clickedPP", true);
+            setOpenPrivacyPolicy(true);
+          }}
+          sx={{ cursor: "pointer", textDecoration: "none" }}
+        >
+          Privacy Policy
+        </Link>{" "}
+        and{" "}
+        <Link
+          onClick={() => {
+            setFieldValue("clickedCP", true);
+            setOpenCookiePolicy(true);
+          }}
+          sx={{ cursor: "pointer", textDecoration: "none" }}
+        >
+          Cookie Policy
+        </Link>
+        .
+      </Box> */}
+
+      <Suspense
+        fallback={
+          <Backdrop sx={{ color: "#fff", zIndex: theme => theme.zIndex.drawer + 1 }} open={true}>
+            <CircularProgress color="inherit" />
+          </Backdrop>
+        }
+      >
+        <>
+          <InformedConsent open={openInformedConsent} handleClose={() => setOpenInformedConsent(false)} />
+          <GDPRPolicy open={openGDPRPolicy} handleClose={() => setOpenGDPRPolicy(false)} />
+          <CookiePolicy open={openCookiePolicy} handleClose={() => setOpenCookiePolicy(false)} />
+          <PrivacyPolicy open={openPrivacyPolicy} handleClose={() => setOpenPrivacyPolicy(false)} />
+          <TermsOfUse open={openTermOfUse} handleClose={() => setOpenTermsOfUse(false)} />
+        </>
+      </Suspense>
     </Box>
   );
 };
