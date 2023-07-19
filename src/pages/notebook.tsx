@@ -333,7 +333,7 @@ const Notebook = ({}: NotebookProps) => {
   const [selectedUser, setSelectedUser] = useState(null);
 
   // proposal id of open proposal (proposal whose content and changes reflected on the map are shown)
-  const [openProposal, setOpenProposal] = useState<string>("");
+  const [selectedProposalId, setSelectedProposalId] = useState("");
 
   const updatedLinksRef = useRef<UpdateLinks>(getInitialUpdateLinks());
 
@@ -1183,8 +1183,16 @@ const Notebook = ({}: NotebookProps) => {
   // this useEffect manage states when sidebar is opened or closed
   useEffect(() => {
     if (openSidebar !== "PROPOSALS") {
-      setOpenProposal("");
+      setSelectedProposalId("");
     }
+  }, [nodeBookDispatch, openSidebar]);
+
+  // will listen when sidebar is closed
+  useEffect(() => {
+    if (openSidebar) return;
+    notebookRef.current.selectionType = null;
+    nodeBookDispatch({ type: "setSelectionType", payload: null });
+    setSelectedProposalId("");
   }, [nodeBookDispatch, openSidebar]);
 
   useEffect(() => {
@@ -2028,7 +2036,7 @@ const Notebook = ({}: NotebookProps) => {
 
   const nodeClicked = useCallback(
     (event: any, nodeId: string, nodeType: any, setOpenPart: any) => {
-      devLog("node Clicked");
+      devLog("NODE_CLICKED", { nodeId });
       if (
         notebookRef.current.selectionType === "AcceptedProposals" ||
         notebookRef.current.selectionType === "Proposals"
@@ -3368,7 +3376,7 @@ const Notebook = ({}: NotebookProps) => {
     setOpenRecentNodes(false);
     setOpenTrends(false);
     setOpenMedia(false);
-    setOpenProposal("");
+    setSelectedProposalId("");
     if (
       nodeBookState.selectedNode &&
       nodeBookState.selectedNode !== "" &&
@@ -3410,7 +3418,7 @@ const Notebook = ({}: NotebookProps) => {
       // event.preventDefault();
       const selectedNode = nodeId || notebookRef.current.selectedNode;
       if (!selectedNode) return;
-      setOpenProposal("ProposeEditTo" + selectedNode);
+      setSelectedProposalId("ProposeEditTo" + selectedNode);
       reloadPermanentGraph();
 
       setGraph(({ nodes: oldNodes, edges }) => {
@@ -3453,13 +3461,14 @@ const Notebook = ({}: NotebookProps) => {
         notebookRef.current.selectionType === "AcceptedProposals" ||
         notebookRef.current.selectionType === "Proposals"
       ) {
+        setSelectedProposalId("");
+        notebookRef.current.selectionType = null;
         reloadPermanentGraph();
       }
 
       if (chosenType === "Proposals") {
         setOpenSidebar("PROPOSALS");
         setSelectedNodeType(nodeType);
-        notebookRef.current.selectionType = chosenType;
         notebookRef.current.selectedNode = nodeId;
         nodeBookDispatch({ type: "setSelectionType", payload: chosenType });
         nodeBookDispatch({ type: "setSelectedNode", payload: nodeId });
@@ -3720,7 +3729,7 @@ const Notebook = ({}: NotebookProps) => {
 
       devLog("PROPOSE_NEW_CHILD", { childNodeType });
       event && event.preventDefault();
-      setOpenProposal("ProposeNew" + childNodeType + "ChildNode");
+      setSelectedProposalId("ProposeNew" + childNodeType + "ChildNode");
       reloadPermanentGraph();
       const newNodeId = newId(db);
       setGraph(graph => {
@@ -4181,14 +4190,16 @@ const Notebook = ({}: NotebookProps) => {
       }
       proposalTimer.current = setTimeout(() => {
         if (!proposal) {
-          setOpenProposal("");
+          setSelectedProposalId("");
           reloadPermanentGraph();
+          notebookRef.current.selectionType = null;
           return;
         }
         devLog("SELECT PROPOSAL", { proposal, newNodeId });
         if (!user?.uname) return;
         event.preventDefault();
-        setOpenProposal(proposal.id);
+        notebookRef.current.selectionType = "Proposals";
+        setSelectedProposalId(proposal.id);
         reloadPermanentGraph();
 
         const updatedNodeIds: string[] = [nodeBookState.selectedNode!, newNodeId];
@@ -6822,7 +6833,7 @@ const Notebook = ({}: NotebookProps) => {
                 selectProposal={selectProposal}
                 deleteProposal={deleteProposal}
                 proposeNewChild={proposeNewChild}
-                openProposal={openProposal}
+                openProposal={selectedProposalId}
                 db={db}
                 sidebarWidth={sidebarWidth()}
                 innerHeight={innerHeight}
@@ -7193,6 +7204,7 @@ const Notebook = ({}: NotebookProps) => {
                   setAssistantSelectNode={setAssistantSelectNode}
                   assistantSelectNode={assistantSelectNode}
                   onForceRecalculateGraph={onForceRecalculateGraph}
+                  setSelectedProposalId={setSelectedProposalId}
                 />
               </MapInteractionCSS>
 
@@ -7552,6 +7564,7 @@ const Notebook = ({}: NotebookProps) => {
                 <Button onClick={() => console.info(isWritingOnDBRef.current)}>isWritingOnDBRef</Button>
                 <Button onClick={() => console.info(openSidebar)}>openSidebar</Button>
                 <Button onClick={() => console.info(displaySidebar)}>displaySidebar</Button>
+                <Button onClick={() => console.info(selectedProposalId)}>openProposal</Button>
               </Paper>
 
               <Paper>

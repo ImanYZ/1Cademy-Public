@@ -185,6 +185,7 @@ type NodeProps = {
   setAssistantSelectNode: (newValue: boolean) => void;
   assistantSelectNode: boolean;
   onForceRecalculateGraph: (props: onForceRecalculateGraphInput) => void;
+  setSelectedProposalId: (newValue: string) => void;
 };
 
 const proposedChildTypesIcons: { [key in ProposedChildTypesIcons]: string } = {
@@ -309,6 +310,7 @@ const Node = ({
   setAssistantSelectNode,
   assistantSelectNode,
   onForceRecalculateGraph,
+  setSelectedProposalId,
 }: NodeProps) => {
   const [{ user }] = useAuth();
   const { nodeBookState } = useNodeBook();
@@ -336,7 +338,7 @@ const Node = ({
     totalResults: 0,
   });
 
-  const [openProposal, setOpenProposal] = useState<any>(false);
+  const [openProposalType, setOpenProposalType] = useState<any>(false);
   const [startTimeValue, setStartTimeValue] = React.useState<any>(moment.utc(nodeVideoStartTime * 1000));
   const [endTimeValue, setEndTimeValue] = React.useState<any>(moment.utc(nodeVideoEndTime * 1000));
   const [timePickerError, setTimePickerError] = React.useState<any>(false);
@@ -500,6 +502,12 @@ const Node = ({
           nodeIds: updatedNodeIds,
           updatedAt: new Date(),
         });
+        if (openSidebar === "PROPOSALS") {
+          reloadPermanentGrpah();
+          notebookRef.current.selectionType = null;
+          nodeBookDispatch({ type: "setSelectionType", payload: null });
+          setSelectedProposalId("");
+        }
       }
     },
     [
@@ -507,16 +515,19 @@ const Node = ({
       assistantSelectNode,
       notebookRef,
       identifier,
+      nodeBookDispatch,
+      setAssistantSelectNode,
       title,
       content,
-      nodeBookDispatch,
       chosenNodeChanged,
       setAbleToPropose,
       nodeClicked,
       nodeType,
       setOpenPart,
       setNodeUpdates,
-      setAssistantSelectNode,
+      openSidebar,
+      reloadPermanentGrpah,
+      setSelectedProposalId,
     ]
   );
 
@@ -1545,8 +1556,8 @@ const Node = ({
                     }}
                     aria-label="add"
                     onClick={(event: any) => {
-                      return openProposal !== "ProposeNew" + childNodeType + "ChildNode"
-                        ? proposeNewChild(event, childNodeType, setOpenProposal)
+                      return openProposalType !== "ProposeNew" + childNodeType + "ChildNode"
+                        ? proposeNewChild(event, childNodeType, setOpenProposalType)
                         : undefined;
                     }}
                   >

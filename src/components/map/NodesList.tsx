@@ -66,6 +66,7 @@ type NodeListProps = {
   setAssistantSelectNode: (newValue: boolean) => void;
   assistantSelectNode: boolean;
   onForceRecalculateGraph: (props: onForceRecalculateGraphInput) => void;
+  setSelectedProposalId: (newValue: string) => void;
 };
 
 const NodesList = ({
@@ -125,6 +126,7 @@ const NodesList = ({
   setAssistantSelectNode,
   assistantSelectNode,
   onForceRecalculateGraph,
+  setSelectedProposalId,
 }: NodeListProps) => {
   const { nodeBookDispatch } = useNodeBook();
 
@@ -302,6 +304,7 @@ const NodesList = ({
             setAssistantSelectNode={setAssistantSelectNode}
             assistantSelectNode={assistantSelectNode}
             onForceRecalculateGraph={onForceRecalculateGraph}
+            setSelectedProposalId={setSelectedProposalId}
           />
         );
       })}
