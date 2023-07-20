@@ -24,7 +24,7 @@ type UserStatusIconProps = {
   online: boolean;
   inUserBar: boolean;
   inNodeFooter: boolean;
-  reloadPermanentGrpah: any;
+  reloadPermanentGraph: any;
   totalPositives?: any;
   totalNegatives?: any;
   totalPoints?: any;
@@ -83,46 +83,27 @@ const UserStatusIcon = ({ nodeBookDispatch, disabled = false, ...props }: UserSt
 
     const userUserInfoCollection = collection(db, "userUserInfoLog");
 
-    // const userUserInfoLogRef = firebase.db.collection("userUserInfoLog").doc();
-    if (props.inUserBar) {
-      // Open Toollbar (user setting sidebar)
-      nodeBookDispatch({ type: "setOpenToolbar", payload: true });
-      // setOpenToolbar(true);
-
-      addDoc(userUserInfoCollection, {
-        uname: user.uname,
-        uInfo: user.uname,
-        createdAt: Timestamp.fromDate(new Date()),
-      });
-    } else {
-      // Open user info sidebar
-      nodeBookDispatch({
-        type: "setSelectedUser",
-        payload: {
-          username: props.uname,
-          imageUrl: props.imageUrl,
-          fullName: props.fullname,
-          chooseUname: props.chooseUname,
-        },
-      });
-
-      // setSelectedUser(props.uname);
-      // setSelectedUserImageURL(props.imageUrl);
-      // setSelectedUserFullname(props.fullname);
-      // setSelectedUserChooseUname(props.chooseUname);
-      nodeBookDispatch({
-        type: "setSelectionType",
-        payload: "UserInfo",
-      });
-      // setSelectionType("UserInfo");
-      props.setOpenSideBar("USER_INFO");
-      props.reloadPermanentGrpah();
-      addDoc(userUserInfoCollection, {
-        uname: user.uname,
-        uInfo: props.uname,
-        createdAt: Timestamp.fromDate(new Date()),
-      });
-    }
+    nodeBookDispatch({
+      type: "setSelectedUser",
+      payload: {
+        username: props.uname,
+        imageUrl: props.imageUrl,
+        fullName: props.fullname,
+        chooseUname: props.chooseUname,
+      },
+    });
+    nodeBookDispatch({
+      type: "setSelectionType",
+      payload: "UserInfo",
+    });
+    // setSelectionType("UserInfo");
+    props.setOpenSideBar("USER_INFO");
+    props.reloadPermanentGraph();
+    addDoc(userUserInfoCollection, {
+      uname: user.uname,
+      uInfo: props.uname,
+      createdAt: Timestamp.fromDate(new Date()),
+    });
   }, [db, nodeBookDispatch, props, user]);
 
   const getTooltipTitle = (): JSX.Element => {
