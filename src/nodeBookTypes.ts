@@ -128,10 +128,10 @@ export type SetSelectedTagsAction = {
   payload: string[];
 };
 
-export type SetOpenToolbar = {
-  type: "setOpenToolbar";
-  payload: boolean;
-};
+// export type SetOpenToolbar = {
+//   type: "setOpenToolbar";
+//   payload: boolean;
+// };
 
 export type SetSelectedUserAction = {
   type: "setSelectedUser";
@@ -190,7 +190,7 @@ export type DispatchNodeBookActions =
   | SetSelectedNodeAction
   | SetSelectionTypeAction
   | SetSelectedTagsAction
-  | SetOpenToolbar
+  // | SetOpenToolbar
   | SetSelectedUserAction
   | SetSearchQueryAction
   | SetNodeTitleBluredAction
@@ -397,7 +397,7 @@ export type UserNodeChanges = { cType: string; uNodeId: string; uNodeData: UserN
 export type NodesData = { cType: string; nId: string; nData: NodeFireStore } | null;
 
 export type FullNodeData = Omit<UserNodeFirestore, "changedAt" | "createdAt" | "updatedAt"> &
-  Omit<NodeFireStore, "changedAt" | "createdAt" | "updatedAt"> & {
+  Omit<NodeFireStore, "changedAt" | "createdAt" | "updatedAt" | "bookmarks"> & {
     editable: boolean;
     left: number;
     openHeight?: number;
@@ -426,6 +426,7 @@ export type FullNodeData = Omit<UserNodeFirestore, "changedAt" | "createdAt" | "
     removedTags?: string[];
     addedReferences?: string[];
     removedReferences?: string[];
+    bookmarks: number;
   };
 
 export type EdgeData = {

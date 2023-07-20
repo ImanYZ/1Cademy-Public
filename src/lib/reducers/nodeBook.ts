@@ -43,8 +43,8 @@ function nodeBookReducer(state: NodeBookState, action: DispatchNodeBookActions):
       return { ...state, selectionType: action.payload };
     case "setSelectedTags":
       return { ...state, selectedTags: action.payload };
-    case "setOpenToolbar":
-      return { ...state, openToolbar: action.payload };
+    // case "setOpenToolbar":
+    //   return { ...state, openToolbar: action.payload };
     case "setSelectedUser":
       return { ...state, selectedUser: action.payload };
     case "setSearchQuery":

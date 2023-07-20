@@ -34,7 +34,7 @@ import { DispatchNodeBookActions, FullNodeData, OpenPart, TNodeUpdates } from "s
 import { useNodeBook } from "@/context/NodeBookContext";
 import { Post } from "@/lib/mapApi";
 import { getVideoDataByUrl, momentDateToSeconds } from "@/lib/utils/utils";
-import { onForceRecalculateGraphInput, OpenLeftSidebar } from "@/pages/notebook";
+import { ChosenType, onForceRecalculateGraphInput, OnSelectNodeInput, OpenLeftSidebar } from "@/pages/notebook";
 
 import { useAuth } from "../../context/AuthContext";
 import { KnowledgeChoice } from "../../knowledgeTypes";
@@ -79,15 +79,15 @@ type NodeProps = {
   notebookRef: MutableRefObject<TNodeBookState>;
   setFocusView: (state: { selectedNode: string; isEnabled: boolean }) => void;
   activeNode: any;
-  citationsSelected: any;
-  proposalsSelected: boolean;
-  acceptedProposalsSelected: any;
-  commentsSelected: any;
+  // citationsSelected: any;
+  isProposalsSelected: boolean;
+  // acceptedProposalsSelected: any;
+  // commentsSelected: any;
   left: number;
   top: number;
   width: number;
   editable: boolean;
-  unaccepted: any;
+  unaccepted: boolean;
   nodeType: any;
   isTag: boolean;
   isNew: any;
@@ -135,7 +135,7 @@ type NodeProps = {
   toggleNode: (event: any, id: string) => void;
   openNodePart: (event: any, id: string, partType: any, openPart: any, setOpenPart: any, tags: any) => void; //
   onNodeShare: (nodeId: string, platform: string) => void;
-  selectNode: any;
+  selectNode: (params: OnSelectNodeInput) => void;
   nodeClicked: any;
   correctNode: any;
   wrongNode: any;
@@ -152,9 +152,9 @@ type NodeProps = {
   saveProposedChildNode: any;
   saveProposedImprovement: any;
   closeSideBar: any;
-  reloadPermanentGrpah: any;
+  reloadPermanentGraph: any;
   setOpenMedia: (imagUrl: string) => void;
-  setOpenSearch: any;
+  // setOpenSearch: any;
   setNodeParts: (nodeId: string, callback: (thisNode: FullNodeData) => FullNodeData) => void;
   citations: { [key: string]: Set<string> };
   setOpenSideBar: (sidebar: OpenLeftSidebar) => void;
@@ -212,10 +212,10 @@ const Node = ({
   setNodeUpdates,
   notebookRef,
   activeNode,
-  citationsSelected,
-  proposalsSelected,
-  acceptedProposalsSelected,
-  commentsSelected,
+  // citationsSelected,
+  isProposalsSelected,
+  // acceptedProposalsSelected,
+  // commentsSelected,
   left,
   top,
   width,
@@ -281,7 +281,7 @@ const Node = ({
   saveProposedChildNode,
   saveProposedImprovement,
   closeSideBar,
-  reloadPermanentGrpah,
+  reloadPermanentGraph,
   setOpenMedia,
   setNodeParts,
   citations,
@@ -350,7 +350,7 @@ const Node = ({
     to: { left: "600px", zIndex: 0 },
   });
 
-  const [toBeElligible, setToBeElligible] = useState(false);
+  const [toBeEligible, setToBeEligible] = useState(false);
 
   const disableTitle = disabled && !enableChildElements.includes(`${identifier}-node-title`);
   const disableContent = disabled && !enableChildElements.includes(`${identifier}-node-content`);
@@ -503,7 +503,7 @@ const Node = ({
           updatedAt: new Date(),
         });
         if (openSidebar === "PROPOSALS") {
-          reloadPermanentGrpah();
+          reloadPermanentGraph();
           notebookRef.current.selectionType = null;
           nodeBookDispatch({ type: "setSelectionType", payload: null });
           setSelectedProposalId("");
@@ -526,7 +526,7 @@ const Node = ({
       setOpenPart,
       setNodeUpdates,
       openSidebar,
-      reloadPermanentGrpah,
+      reloadPermanentGraph,
       setSelectedProposalId,
     ]
   );
@@ -608,7 +608,7 @@ const Node = ({
   );
 
   const selectNodeHandler = useCallback(
-    (event: any, chosenType: any) => selectNode(event, identifier, chosenType, nodeType),
+    (chosenType: ChosenType) => selectNode({ chosenType, nodeId: identifier, nodeType }),
     [selectNode, identifier, nodeType]
   );
 
@@ -798,16 +798,16 @@ const Node = ({
     if (notebookRef.current.choosingNode.id === identifier) return;
 
     if (notebookRef.current.choosingNode.type === "Reference" && nodeType !== "Reference") {
-      setToBeElligible(false);
+      setToBeEligible(false);
       return;
     }
 
-    setToBeElligible(true);
+    setToBeEligible(true);
   };
 
   const onMouseLeaveHandler = () => {
     if (notebookRef.current.choosingNode && notebookRef.current.choosingNode.id !== identifier) {
-      setToBeElligible(false);
+      setToBeEligible(false);
     }
   };
   if (!user) {
@@ -861,7 +861,7 @@ const Node = ({
             },
           }}
         >
-          {proposalsSelected && (
+          {isProposalsSelected && (
             <Box
               dangerouslySetInnerHTML={{ __html: titleCopy }}
               sx={{
@@ -872,7 +872,7 @@ const Node = ({
               }}
             />
           )}
-          {!proposalsSelected && (
+          {!isProposalsSelected && (
             <MarkdownRender
               text={titleCopy}
               sx={{
@@ -906,7 +906,7 @@ const Node = ({
         (activeNode ? " active" : "") +
         (changed || !isStudied ? " Changed" : "") +
         (isHiding ? " IsHiding" : "") +
-        (toBeElligible ? " Choosable" : " ")
+        (toBeEligible ? " Choosable" : " ")
       }
       style={{
         left: left ? left : 1000,
@@ -984,7 +984,7 @@ const Node = ({
               showEditPreviewSection={false}
               editOption={option}
               disabled={disableTitle}
-              proposalsSelected={proposalsSelected}
+              proposalsSelected={isProposalsSelected}
             />
             {editable && (
               <Box sx={{ marginTop: "5px" }}>
@@ -1112,7 +1112,7 @@ const Node = ({
                 showEditPreviewSection={false}
                 editOption={option}
                 disabled={disableContent}
-                proposalsSelected={proposalsSelected}
+                proposalsSelected={isProposalsSelected}
               />
               {editable && <Box sx={{ mb: "12px" }}></Box>}
 
@@ -1299,11 +1299,11 @@ const Node = ({
             identifier={identifier}
             notebookRef={notebookRef}
             nodeBookDispatch={nodeBookDispatch}
-            activeNode={activeNode}
-            citationsSelected={citationsSelected}
-            proposalsSelected={proposalsSelected}
-            acceptedProposalsSelected={acceptedProposalsSelected}
-            commentsSelected={commentsSelected}
+            // activeNode={activeNode}
+            // citationsSelected={citationsSelected}
+            proposalsSelected={isProposalsSelected}
+            // acceptedProposalsSelected={acceptedProposalsSelected}
+            // commentsSelected={commentsSelected}
             editable={editable}
             setNodeParts={setNodeParts}
             title={title}
@@ -1334,7 +1334,7 @@ const Node = ({
             simulated={simulated}
             bookmarked={bookmarked}
             bookmarks={bookmarks}
-            reloadPermanentGrpah={reloadPermanentGrpah}
+            reloadPermanentGrpah={reloadPermanentGraph}
             onNodeShare={onNodeShare}
             markStudied={markStudiedHandler}
             bookmark={bookmarkHandler}
@@ -1466,11 +1466,11 @@ const Node = ({
               identifier={identifier}
               notebookRef={notebookRef}
               nodeBookDispatch={nodeBookDispatch}
-              activeNode={activeNode}
-              citationsSelected={citationsSelected}
-              proposalsSelected={proposalsSelected}
-              acceptedProposalsSelected={acceptedProposalsSelected}
-              commentsSelected={commentsSelected}
+              // activeNode={activeNode}
+              // citationsSelected={citationsSelected}
+              proposalsSelected={isProposalsSelected}
+              // acceptedProposalsSelected={acceptedProposalsSelected}
+              // commentsSelected={commentsSelected}
               editable={editable}
               setNodeParts={setNodeParts}
               title={title}
@@ -1500,7 +1500,7 @@ const Node = ({
               changedAt={changedAt}
               bookmarked={bookmarked}
               bookmarks={bookmarks}
-              reloadPermanentGrpah={reloadPermanentGrpah}
+              reloadPermanentGrpah={reloadPermanentGraph}
               onNodeShare={onNodeShare}
               markStudied={markStudiedHandler}
               bookmark={bookmarkHandler}
@@ -1593,9 +1593,9 @@ export const MemoizedNode = React.memo(Node, (prev, next) => {
     prev.top === next.top &&
     prev.left === next.left &&
     prev.activeNode === next.activeNode &&
-    prev.proposalsSelected === next.proposalsSelected &&
-    prev.acceptedProposalsSelected === next.acceptedProposalsSelected &&
-    prev.commentsSelected === next.commentsSelected &&
+    prev.isProposalsSelected === next.isProposalsSelected &&
+    // prev.acceptedProposalsSelected === next.acceptedProposalsSelected &&
+    // prev.commentsSelected === next.commentsSelected &&
     prev.unaccepted === next.unaccepted &&
     prev.disableVotes === next.disableVotes &&
     prev.openPart === next.openPart &&

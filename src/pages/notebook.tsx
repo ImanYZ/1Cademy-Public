@@ -184,6 +184,8 @@ export type QuerySideBarSearch = {
 
 type ForceRecalculateType = "remove-nodes" | "add-edge" | "remove-edge";
 export type onForceRecalculateGraphInput = { id: string; by: ForceRecalculateType };
+export type ChosenType = "Proposals" | "Citations";
+export type OnSelectNodeInput = { nodeId: string; chosenType: ChosenType; nodeType: any };
 
 type RateProosale = {
   proposals: INodeVersion[];
@@ -696,31 +698,31 @@ const Notebook = ({}: NotebookProps) => {
   // const [openProposals, setOpenProposals] = useState(false);
 
   // flag for if pending proposals for a selected node is open
-  const [openPendingProposals, setOpenPendingProposals] = useState(false);
+  // const [openPendingProposals, setOpenPendingProposals] = useState(false);
 
   // flag for if chat is open
-  const [openChat, setOpenChat] = useState(false);
+  // const [openChat, setOpenChat] = useState(false);
 
   // flag for if notifications is open
-  const [openNotifications, setOpenNotifications] = useState(false);
+  // const [openNotifications, setOpenNotifications] = useState(false);
 
   // flag for if presentations is open
-  const [openPresentations, setOpenPresentations] = useState(false);
+  // const [openPresentations, setOpenPresentations] = useState(false);
 
   // // flag for is search is open
   // const [openToolbar, setOpenToolbar] = useState(false);
 
   // flag for is search is open
-  const [openSearch, setOpenSearch] = useState(false);
+  // const [openSearch, setOpenSearch] = useState(false);
 
   // flag for whether bookmarks is open
-  const [openBookmarks, setOpenBookmarks] = useState(false);
+  // const [openBookmarks, setOpenBookmarks] = useState(false);
 
   // flag for whether recentNodes is open
-  const [openRecentNodes, setOpenRecentNodes] = useState(false);
+  // const [openRecentNodes, setOpenRecentNodes] = useState(false);
 
   // flag for whether trends is open
-  const [openTrends, setOpenTrends] = useState(false);
+  // const [openTrends, setOpenTrends] = useState(false);
 
   // flag for whether media is full-screen
   const [openMedia, setOpenMedia] = useState<string | boolean>(false);
@@ -2830,14 +2832,14 @@ const Notebook = ({}: NotebookProps) => {
             createdAt: Timestamp.fromDate(new Date()),
           });
         }
-        if (
-          partType === "Tags" &&
-          notebookRef.current.selectionType !== "AcceptedProposals" &&
-          notebookRef.current.selectionType !== "Proposals"
-        ) {
-          // tags;
-          setOpenRecentNodes(true);
-        }
+        // if (
+        //   partType === "Tags" &&
+        //   notebookRef.current.selectionType !== "AcceptedProposals" &&
+        //   notebookRef.current.selectionType !== "Proposals"
+        // ) {
+        //   // tags;
+        //   setOpenRecentNodes(true);
+        // }
       }
 
       processHeightChange(nodeId);
@@ -3331,33 +3333,9 @@ const Notebook = ({}: NotebookProps) => {
 
     // TODO: call closeSidebar every close sidebar action
     if (!user) return;
+    if (!openSidebar) return;
 
-    if (tempNodes.size || nodeChanges) {
-      reloadPermanentGraph();
-    }
-    let sidebarType: any = nodeBookState.selectionType;
-    if (openPendingProposals) {
-      sidebarType = "PendingProposals";
-    } else if (openChat) {
-      sidebarType = "Chat";
-    } else if (openNotifications) {
-      sidebarType = "Notifications";
-    } else if (openPresentations) {
-      sidebarType = "Presentations";
-      // } else if (openToolbar) {
-    } else if (nodeBookState.openToolbar) {
-      sidebarType = "UserSettings";
-    } else if (openSearch) {
-      sidebarType = "Search";
-    } else if (openBookmarks) {
-      sidebarType = "Bookmarks";
-    } else if (openRecentNodes) {
-      sidebarType = "RecentNodes";
-    } else if (openTrends) {
-      sidebarType = "Trends";
-    } else if (openMedia) {
-      sidebarType = "Media";
-    }
+    if (tempNodes.size || nodeChanges) reloadPermanentGraph();
 
     notebookRef.current.choosingNode = null;
     notebookRef.current.chosenNode = null;
@@ -3366,47 +3344,29 @@ const Notebook = ({}: NotebookProps) => {
     nodeBookDispatch({ type: "setChosenNode", payload: null });
     nodeBookDispatch({ type: "setSelectionType", payload: null });
     setSelectedUser(null);
-    setOpenPendingProposals(false);
-    setOpenChat(false);
-    setOpenNotifications(false);
-    setOpenPresentations(false);
-    nodeBookDispatch({ type: "setOpenToolbar", payload: false });
-    setOpenSearch(false);
-    setOpenBookmarks(false);
-    setOpenRecentNodes(false);
-    setOpenTrends(false);
+    // nodeBookDispatch({ type: "setOpenToolbar", payload: false });
     setOpenMedia(false);
     setSelectedProposalId("");
-    if (
-      nodeBookState.selectedNode &&
-      nodeBookState.selectedNode !== "" &&
-      g.current.hasNode(nodeBookState.selectedNode)
-    ) {
+    if (nodeBookState.selectedNode && g.current.hasNode(nodeBookState.selectedNode)) {
       scrollToNode(nodeBookState.selectedNode);
     }
 
     const userClosedSidebarLogRef = collection(db, "userClosedSidebarLog");
     setDoc(doc(userClosedSidebarLogRef), {
       uname: user.uname,
-      sidebarType,
+      openSidebar,
       createdAt: Timestamp.fromDate(new Date()),
     });
+    setOpenSidebar(null);
   }, [
     user,
     graph.nodes,
     nodeBookState.selectedNode,
     nodeBookState.selectionType,
-    openPendingProposals,
-    openChat,
-    openNotifications,
-    openPresentations,
-    nodeBookState.openToolbar,
-    openSearch,
-    openBookmarks,
-    openRecentNodes,
-    openTrends,
+    // nodeBookState.openToolbar,
     openMedia,
     reloadPermanentGraph,
+    openSidebar,
   ]);
 
   /////////////////////////////////////////////////////
@@ -3446,15 +3406,10 @@ const Notebook = ({}: NotebookProps) => {
     [processHeightChange, reloadPermanentGraph, scrollToNode]
   );
 
-  const selectNode = useCallback(
-    (event: any, nodeId: string, chosenType: any, nodeType: any) => {
-      devLog("SELECT_NODE", {
-        choosingNode: notebookRef.current.choosingNode,
-        nodeId,
-        chosenType,
-        nodeType,
-        openSidebar,
-      });
+  const onSelectNode = useCallback(
+    ({ chosenType, nodeId, nodeType }: OnSelectNodeInput) => {
+      // (event: any, nodeId: string, chosenType: "Proposals" | "Citations", nodeType: any) => {
+      devLog("SELECT_NODE", { nodeId, chosenType, nodeType, openSidebar });
       if (notebookRef.current.choosingNode) return;
 
       if (
@@ -3472,7 +3427,6 @@ const Notebook = ({}: NotebookProps) => {
         notebookRef.current.selectedNode = nodeId;
         nodeBookDispatch({ type: "setSelectionType", payload: chosenType });
         nodeBookDispatch({ type: "setSelectedNode", payload: nodeId });
-
         return;
       }
 
@@ -3495,18 +3449,17 @@ const Notebook = ({}: NotebookProps) => {
         notebookRef.current.selectionType = null;
         nodeBookDispatch({ type: "setSelectionType", payload: null });
         setSelectedNodeType(null);
-        setOpenPendingProposals(false);
-        setOpenChat(false);
-        setOpenNotifications(false);
-        notebookRef.current.openToolbar = false;
-        nodeBookDispatch({ type: "setOpenToolbar", payload: false });
-        setOpenSearch(false);
-        setOpenRecentNodes(false);
-        setOpenTrends(false);
+        // setOpenPendingProposals(false);
+        // setOpenChat(false);
+        // setOpenNotifications(false);
+        // notebookRef.current.openToolbar = false;
+        // nodeBookDispatch({ type: "setOpenToolbar", payload: false });
+        // setOpenSearch(false);
+        // setOpenRecentNodes(false);
+        // setOpenTrends(false);
         setOpenMedia(false);
         resetAddedRemovedParentsChildren();
         setOpenSidebar(null);
-        event.currentTarget.blur();
       } else {
         setOpenSidebar("PROPOSALS");
         setSelectedNodeType(nodeType);
@@ -7162,7 +7115,7 @@ const Notebook = ({}: NotebookProps) => {
                   toggleNode={toggleNode}
                   openNodePart={openNodePart}
                   onNodeShare={onNodeShare}
-                  selectNode={selectNode}
+                  selectNode={onSelectNode}
                   nodeClicked={nodeClicked} // CHECK when is used
                   correctNode={correctNode}
                   wrongNode={wrongNode}
@@ -7178,11 +7131,11 @@ const Notebook = ({}: NotebookProps) => {
                   deleteChoice={deleteChoice}
                   addChoice={addChoice}
                   onNodeTitleBlur={onNodeTitleBlur}
-                  setOpenSearch={setOpenSearch}
+                  // setOpenSearch={setOpenSearch}
                   saveProposedChildNode={saveProposedChildNode}
                   saveProposedImprovement={saveProposedImprovement}
                   closeSideBar={closeSideBar}
-                  reloadPermanentGrpah={reloadPermanentGraph}
+                  reloadPermanentGraph={reloadPermanentGraph}
                   setNodeParts={setNodeParts}
                   citations={citations}
                   setOpenSideBar={setOpenSidebar}
