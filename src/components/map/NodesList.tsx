@@ -3,7 +3,7 @@ import { FullNodeData, OpenPart, TNodeBookState, TNodeUpdates } from "src/nodeBo
 
 import { useNodeBook } from "@/context/NodeBookContext";
 import { NODE_WIDTH } from "@/lib/utils/Map.utils";
-import { onForceRecalculateGraphInput, OpenLeftSidebar } from "@/pages/notebook";
+import { onForceRecalculateGraphInput, OnSelectNodeInput, OpenLeftSidebar } from "@/pages/notebook";
 
 import { MemoizedNode } from "./Node";
 
@@ -26,7 +26,7 @@ type NodeListProps = {
   toggleNode: (event: any, id: string) => void;
   openNodePart: any;
   onNodeShare: (nodeId: string, platform: string) => void;
-  selectNode: any;
+  selectNode: (params: OnSelectNodeInput) => void;
   nodeClicked: any;
   correctNode: any;
   wrongNode: any;
@@ -40,11 +40,11 @@ type NodeListProps = {
   addChoice: any;
   cleanEditorLink: () => void;
   onNodeTitleBlur: (newTitle: string) => void;
-  setOpenSearch: any;
+  // setOpenSearch: any;
   saveProposedChildNode: any;
   saveProposedImprovement: any;
   closeSideBar: any;
-  reloadPermanentGrpah: any;
+  reloadPermanentGraph: any;
   setOpenMedia: (imagUrl: string) => void;
   setNodeParts: (nodeId: string, callback: (thisNode: FullNodeData) => FullNodeData) => void;
   citations: { [key: string]: Set<string> };
@@ -66,6 +66,7 @@ type NodeListProps = {
   setAssistantSelectNode: (newValue: boolean) => void;
   assistantSelectNode: boolean;
   onForceRecalculateGraph: (props: onForceRecalculateGraphInput) => void;
+  setSelectedProposalId: (newValue: string) => void;
 };
 
 const NodesList = ({
@@ -100,11 +101,11 @@ const NodesList = ({
   deleteChoice,
   addChoice,
   onNodeTitleBlur,
-  setOpenSearch,
+  // setOpenSearch,
   saveProposedChildNode,
   saveProposedImprovement,
   closeSideBar,
-  reloadPermanentGrpah,
+  reloadPermanentGraph,
   setOpenMedia,
   setNodeParts,
   cleanEditorLink,
@@ -125,6 +126,7 @@ const NodesList = ({
   setAssistantSelectNode,
   assistantSelectNode,
   onForceRecalculateGraph,
+  setSelectedProposalId,
 }: NodeListProps) => {
   const { nodeBookDispatch } = useNodeBook();
 
@@ -136,45 +138,6 @@ const NodesList = ({
   return (
     <>
       {Object.keys(nodes).map(nId => {
-        let unaccepted = false;
-        if ("unaccepted" in nodes[nId]) {
-          unaccepted = nodes[nId].unaccepted;
-        }
-        let bookmarks = 0;
-        if ("bookmarks" in nodes[nId] && Number(nodes[nId].bookmarks)) {
-          bookmarks = nodes[nId].bookmarks;
-        }
-        let bookmarked = false;
-        if ("bookmarked" in nodes[nId]) {
-          bookmarked = nodes[nId].bookmarked;
-        }
-        let activeNode = false;
-        if (notebookRef.current.selectedNode === nId) {
-          activeNode = true;
-        }
-        let citationsSelected = false;
-        if (notebookRef.current.selectedNode === nId && notebookRef.current.selectionType === "Citations") {
-          citationsSelected = true;
-        }
-        let proposalsSelected = false;
-        if (notebookRef.current.selectedNode === nId && notebookRef.current.selectionType === "Proposals") {
-          proposalsSelected = true;
-        }
-        let acceptedProposalsSelected = false;
-        if (notebookRef.current.selectedNode === nId && notebookRef.current.selectionType === "AcceptedProposals") {
-          acceptedProposalsSelected = true;
-        }
-        let commentsSelected = false;
-        if (notebookRef.current.selectedNode === nId && notebookRef.current.selectionType === "Comments") {
-          commentsSelected = true;
-        }
-
-        // const notebookIdx = (nodes[nId].notebooks ?? []).findIndex((cur: string) => cur === selectedNotebookId);
-        // if (notebookIdx < 0) return null;
-
-        // const open = (nodes[nId].expands ?? [])[notebookIdx];
-        // if (open === undefined) return null;
-
         return (
           <MemoizedNode
             key={nId}
@@ -184,17 +147,19 @@ const NodesList = ({
             setNodeUpdates={setNodeUpdates}
             notebookRef={notebookRef}
             setFocusView={setFocusView}
-            activeNode={activeNode}
-            citationsSelected={citationsSelected}
-            proposalsSelected={proposalsSelected}
-            acceptedProposalsSelected={acceptedProposalsSelected}
-            commentsSelected={commentsSelected}
+            activeNode={notebookRef.current.selectedNode === nId}
+            // citationsSelected={citationsSelected}
+            isProposalsSelected={
+              notebookRef.current.selectedNode === nId && notebookRef.current.selectionType === "Proposals"
+            }
+            // acceptedProposalsSelected={acceptedProposalsSelected}
+            // commentsSelected={commentsSelected}
             left={nodes[nId].left}
             top={nodes[nId].top}
             width={NODE_WIDTH}
             editable={nodes[nId].editable}
             cleanEditorLink={cleanEditorLink}
-            unaccepted={unaccepted}
+            unaccepted={Boolean(nodes[nId].unaccepted)}
             nodeType={nodes[nId].nodeType}
             isTag={nodes[nId].hasOwnProperty("isTag") && nodes[nId].isTag}
             isNew={nodes[nId].hasOwnProperty("isNew") && nodes[nId].isNew}
@@ -237,8 +202,8 @@ const NodesList = ({
             changed={nodes[nId].changed}
             changedAt={nodes[nId].changedAt}
             simulated={nodes[nId]?.simulated}
-            bookmarked={bookmarked}
-            bookmarks={bookmarks}
+            bookmarked={Boolean(nodes[nId].bookmarked)}
+            bookmarks={nodes[nId].bookmarks}
             bookmark={bookmark}
             markStudied={markStudied}
             chosenNodeChanged={chosenNodeChanged}
@@ -265,11 +230,11 @@ const NodesList = ({
             deleteChoice={deleteChoice}
             addChoice={addChoice}
             onNodeTitleBLur={onNodeTitleBlur}
-            setOpenSearch={setOpenSearch}
+            // setOpenSearch={setOpenSearch}
             saveProposedChildNode={saveProposedChildNode}
             saveProposedImprovement={saveProposedImprovement}
             closeSideBar={closeSideBar}
-            reloadPermanentGrpah={reloadPermanentGrpah}
+            reloadPermanentGraph={reloadPermanentGraph}
             setOpenMedia={setOpenMedia}
             setNodeParts={setNodeParts}
             citations={citations}
@@ -302,6 +267,7 @@ const NodesList = ({
             setAssistantSelectNode={setAssistantSelectNode}
             assistantSelectNode={assistantSelectNode}
             onForceRecalculateGraph={onForceRecalculateGraph}
+            setSelectedProposalId={setSelectedProposalId}
           />
         );
       })}
@@ -352,7 +318,7 @@ export const MemoizedNodeList = React.memo(NodesList, (prev, next) => {
     prev.saveProposedChildNode === next.saveProposedChildNode &&
     prev.saveProposedImprovement === next.saveProposedImprovement &&
     prev.closeSideBar === next.closeSideBar &&
-    prev.reloadPermanentGrpah === next.reloadPermanentGrpah &&
+    prev.reloadPermanentGraph === next.reloadPermanentGraph &&
     prev.setOpenPart === next.setOpenPart &&
     prev.openSidebar === prev.openSidebar && // TODO: check this
     // prev.showProposeTutorial === next.showProposeTutorial &&
