@@ -623,11 +623,11 @@ select:-webkit-autofill:focus {
   -webkit-text-fill-color: #454545;
 }
 
-.MuiListItem-root .MuiSvgIcon-root,
+/* .MuiListItem-root .MuiSvgIcon-root,
 .MuiAutocomplete-option .MuiSvgIcon-root,
 .MuiTreeItem-root .MuiSvgIcon-root {
-  /* fill: #f0f0f0; */
-}
+   fill: #f0f0f0; 
+} */
 
 .LightMode .MuiListItem-root .MuiSvgIcon-root,
 .LightMode .MuiAutocomplete-option .MuiSvgIcon-root,
@@ -651,10 +651,10 @@ select:-webkit-autofill:focus {
   text-decoration: line-through grey;
 }
 
-.modelInSearchTags {
+/* .modelInSearchTags {
   margin-top: 5px !important;
   height: 235px;
-}
+} */
 
 .edit-improve-area {
   display: flex;

@@ -16,6 +16,7 @@ import {
   ListItem,
   ListItemButton,
   ListItemText,
+  Modal,
   Stack,
   TextField,
   Tooltip,
@@ -41,6 +42,7 @@ import React, { Dispatch, SetStateAction, Suspense, useCallback, useEffect, useM
 import { ChosenTag, MemoizedTagsSearcher } from "@/components/TagsSearcher";
 import { useNodeBook } from "@/context/NodeBookContext";
 import { useTagsTreeView } from "@/hooks/useTagsTreeView";
+import { useTraceUpdate } from "@/hooks/useTraceUpdate";
 import { retrieveAuthenticatedUser } from "@/lib/firestoreClient/auth";
 import { Delete, Post } from "@/lib/mapApi";
 
@@ -63,7 +65,7 @@ import { OpenLeftSidebar } from "../../../../pages/notebook";
 import { Notebook, NotebookDocument } from "../../../../types";
 import { Portal } from "../../../Portal";
 import { CustomBadge, CustomSmallBadge } from "../../CustomBudge";
-import CustomModal from "../../Modal/Modal";
+// import Modal from "../../Modal/Modal";
 import { SidebarButton } from "../../SidebarButtons";
 import { MemoizedUserStatusSettings } from "../../UserStatusSettings2";
 import MultipleChoiceBtn from "../MultipleChoiceBtn";
@@ -113,38 +115,38 @@ type MainSidebarProps = {
   isHovered: boolean;
 };
 
-export const ToolbarSidebar = ({
-  notebookRef,
-  open,
-  onClose,
-  reloadPermanentGrpah,
-  user,
-  reputation,
-  // theme,
-  setOpenSideBar,
-  selectedUser,
-  uncheckedNotificationsNum = 0,
-  bookmarkUpdatesNum = 0,
-  pendingProposalsNum = 0,
-  windowHeight,
-  reputationSignal,
-  onlineUsers,
-  usersOnlineStatusLoaded,
-  disableToolbar = false,
-  userTutorial,
-  dispatch,
-  notebooks,
-  setNotebooks,
-  onChangeNotebook,
-  selectedNotebook,
-  openNodesOnNotebook,
-  onDisplayInstructorPage,
-  onChangeTagOfNotebookById,
-  toolbarRef,
-  isHovered,
-}: // setCurrentTutorial,
-// enabledToolbarElements = [],
-MainSidebarProps) => {
+export const ToolbarSidebar = (props: MainSidebarProps) => {
+  const {
+    notebookRef,
+    open,
+    onClose,
+    reloadPermanentGrpah,
+    user,
+    reputation,
+    // theme,
+    setOpenSideBar,
+    selectedUser,
+    uncheckedNotificationsNum = 0,
+    bookmarkUpdatesNum = 0,
+    pendingProposalsNum = 0,
+    windowHeight,
+    reputationSignal,
+    onlineUsers,
+    usersOnlineStatusLoaded,
+    disableToolbar = false,
+    userTutorial,
+    dispatch,
+    notebooks,
+    setNotebooks,
+    onChangeNotebook,
+    selectedNotebook,
+    openNodesOnNotebook,
+    onDisplayInstructorPage,
+    onChangeTagOfNotebookById,
+    toolbarRef,
+    isHovered,
+  } = props;
+  useTraceUpdate(props);
   const { nodeBookState, nodeBookDispatch } = useNodeBook();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
@@ -154,7 +156,7 @@ MainSidebarProps) => {
   const [chosenTags, setChosenTags] = useState<ChosenTag[]>([]);
   const { allTags, setAllTags } = useTagsTreeView(user.tagId ? [user.tagId] : []);
   const [leaderboardTypeOpen, setLeaderboardTypeOpen] = useState<boolean>(false);
-  const [shouldShowTagSearcher, setShouldShowTagSearcher] = useState<boolean>(false);
+  const [displayTagSearcher, setDisplayTagSearcher] = useState<boolean>(false);
   const [displayNotebooks, setDisplayNotebooks] = useState(false);
 
   const [isCreatingNotebook, setIsCreatingNotebook] = useState(false);
@@ -162,18 +164,21 @@ MainSidebarProps) => {
   const createNotebookButtonRef = useRef<any>(null);
   const { height } = useWindowSize();
   const [notebookTitleIsEditable, setNotebookTitleEditable] = useState(false);
-  // const titleInputRef = useRef<HTMLInputElement | null>(null);
 
   const displayLargeToolbar = useMemo(
-    () => isHovered || isMenuOpen || editableNotebook !== null,
-    [isHovered, isMenuOpen, editableNotebook]
+    () => isHovered || isMenuOpen || editableNotebook !== null || displayTagSearcher,
+    [isHovered, isMenuOpen, editableNotebook, displayTagSearcher]
   );
+
+  const onCloseTagSearcher = () => setDisplayTagSearcher(false);
+
+  const onRenameNotebook = () => setNotebookTitleEditable(true);
 
   useEffect(() => {
     if (chosenTags.length > 0 && chosenTags[0].id in allTags) {
       notebookRef.current.chosenNode = { id: chosenTags[0].id, title: chosenTags[0].title };
       nodeBookDispatch({ type: "setChosenNode", payload: { id: chosenTags[0].id, title: chosenTags[0].title } });
-      setShouldShowTagSearcher(false);
+      onCloseTagSearcher();
     }
   }, [allTags, chosenTags, nodeBookDispatch]);
 
@@ -217,7 +222,7 @@ MainSidebarProps) => {
 
           dispatch({ type: "setReputation", payload: reputation });
           dispatch({ type: "setAuthUser", payload: userUpdated });
-          setShouldShowTagSearcher(false);
+          setDisplayTagSearcher(false);
         } catch (err) {
           console.error(err);
         }
@@ -267,7 +272,7 @@ MainSidebarProps) => {
     notebookRef.current.choosingNode = null;
     nodeBookDispatch({ type: "setChosenNode", payload: null });
     nodeBookDispatch({ type: "setChoosingNode", payload: null });
-    setShouldShowTagSearcher(false);
+    setDisplayTagSearcher(false);
   }, [nodeBookDispatch]);
 
   const onOpenUserSettingsSidebar = useCallback(() => {
@@ -546,7 +551,7 @@ MainSidebarProps) => {
             imageUrl={user.imageUrl || ""}
             online={true} // TODO: get online state from useUserState useEffect
             onClick={onOpenUserSettingsSidebar}
-            smallVersion={!displayLargeToolbar}
+            completeVersion={displayLargeToolbar}
           />
 
           <Stack
@@ -761,7 +766,7 @@ MainSidebarProps) => {
               },
             }}
             onClick={() => {
-              setShouldShowTagSearcher(true);
+              setDisplayTagSearcher(true);
               choosingNodeClick("Tag");
             }}
           >
@@ -798,17 +803,17 @@ MainSidebarProps) => {
                   width: "263px",
                   position: "absolute",
                   top: `${height / 2 - 200}px`,
-                  left: "255px",
+                  left: "240px",
                   zIndex: 10000,
                   backgroundColor: theme =>
-                    theme.palette.mode === "dark"
-                      ? theme.palette.common.notebookMainBlack
-                      : theme.palette.common.gray50,
+                    theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.gray850 : theme.palette.common.gray50,
+                  borderRadius: "8px",
                 }}
               >
                 <Stack direction={"row"} alignItems="center" sx={{ p: "14px 12px" }}>
                   {notebookTitleIsEditable ? (
                     <TextField
+                      autoFocus
                       // ref={titleInputRef}
                       id="notebook-title"
                       label=""
@@ -829,10 +834,11 @@ MainSidebarProps) => {
                             </IconButton>
                           </InputAdornment>
                         ),
-                        sx: { p: "10px 14px", fontSize: "12px" },
+                        sx: { p: "10px 14px", fontSize: "18px", fontWeight: "bold" },
                       }}
                       inputProps={{ sx: {} }}
                       sx={{
+                        border: "solid 1px pink",
                         "& .Mui-focused .MuiOutlinedInput-notchedOutline": {
                           borderColor: theme =>
                             theme.palette.mode === "dark"
@@ -851,7 +857,9 @@ MainSidebarProps) => {
                       fullWidth
                     />
                   ) : (
-                    <Typography sx={{ fontSize: "14px" }}>{editableNotebook.title}</Typography>
+                    <Typography sx={{ fontSize: "18px", width: "100%", fontWeight: "bold" }}>
+                      {editableNotebook.title}
+                    </Typography>
                   )}
                   <Box
                     onClick={onOpenUserInfo}
@@ -882,7 +890,7 @@ MainSidebarProps) => {
                   {/* TODO: remove type undefined on validation, Ameer will update with default */}
                   {(!editableNotebook.type || editableNotebook.type === "default") && (
                     <ListItem disablePadding>
-                      <ListItemButton onClick={() => setNotebookTitleEditable(true)} sx={{ p: "12px 14px" }}>
+                      <ListItemButton onClick={onRenameNotebook} sx={{ p: "12px 14px" }}>
                         <ListItemText primary="Rename" />
                       </ListItemButton>
                     </ListItem>
@@ -912,26 +920,20 @@ MainSidebarProps) => {
           )}
         </Portal>
 
-        {shouldShowTagSearcher && (
+        {displayTagSearcher && (
           <Suspense fallback={<div>loading...</div>}>
-            <Box
-              sx={{
-                position: "fixed",
-                left: "270px",
-                top: "114px",
-              }}
-            >
-              <CustomModal
-                className="tagSelectorModalUserSetting ModalBody"
-                onClick={closeTagSelector}
-                returnDown={false}
-                noBackground={true}
-                style={{
-                  width: "441px",
-                  height: "495px",
-                }}
-                contentStyle={{
-                  height: "500px",
+            <ClickAwayListener onClickAway={onCloseTagSearcher}>
+              <Modal
+                open={displayTagSearcher}
+                disablePortal
+                hideBackdrop
+                sx={{
+                  "&.MuiModal-root": {
+                    top: "100px",
+                    left: "240px",
+                    right: "unset",
+                    bottom: "unset",
+                  },
                 }}
               >
                 <MemoizedTagsSearcher
@@ -940,10 +942,12 @@ MainSidebarProps) => {
                   chosenTags={chosenTags}
                   allTags={allTags}
                   setAllTags={setAllTags}
-                  sx={{ maxHeight: "339px", height: "339px" }}
+                  width={"440px"}
+                  height={"440px"}
+                  onClose={onCloseTagSearcher}
                 />
-              </CustomModal>
-            </Box>
+              </Modal>
+            </ClickAwayListener>
           </Suspense>
         )}
 
@@ -1077,7 +1081,7 @@ MainSidebarProps) => {
     onDuplicateNotebook,
     onCopyNotebookUrl,
     onDeleteNotebook,
-    shouldShowTagSearcher,
+    displayTagSearcher,
     closeTagSelector,
     chosenTags,
     allTags,
@@ -1127,7 +1131,7 @@ MainSidebarProps) => {
     userTutorial.searcher.skipped,
     leaderboardTypeOpen,
     leaderBoardType,
-    shouldShowTagSearcher,
+    displayTagSearcher,
     setChosenTags,
     chosenTags,
     displayNotebooks,
@@ -1170,7 +1174,7 @@ MainSidebarProps) => {
       <SidebarWrapper
         id="sidebar-wrapper-toolbar"
         title=""
-        open={open}
+        open={open || displayTagSearcher}
         onClose={onClose}
         width={80}
         showCloseButton={false}

@@ -146,10 +146,10 @@ const SignUpPage: NextPageWithLayout = () => {
       is: (foundFromValue: string) => foundFromValue === "Not listed (Please specify)",
       then: yup.string().required("Required"),
     }),
-    occupation: yup.string().required("Please enter your occupation"),
-    education: yup.string().required("Please enter your educational status").nullable(true),
+    // occupation: yup.string().required("Please enter your occupation"),
+    // education: yup.string().required("Please enter your educational status").nullable(true),
     institution: yup.string().required("Please enter your institution").nullable(),
-    major: yup.string().required("Please enter your major").nullable(),
+    // major: yup.string().required("Please enter your major").nullable(),
     // fieldOfInterest: yup.string().required("Please enter your field of interest"),
     signUpAgreement: yup.boolean().isTrue("Please accept the Informed Consent to continue"),
     GDPRPolicyAgreement: yup.boolean().isTrue("Please accept the GDPR Policy to continue"),
@@ -259,7 +259,12 @@ const SignUpPage: NextPageWithLayout = () => {
       Boolean(formik.errors.username) ||
       Boolean(formik.errors.password) ||
       Boolean(formik.errors.passwordConfirmation) ||
-      !Boolean(formik.values.firstName)
+      !Boolean(formik.values.firstName) ||
+      !Boolean(formik.values.cookiesAgreement) ||
+      !Boolean(formik.values.privacyPolicyAgreement) ||
+      !Boolean(formik.values.GDPRPolicyAgreement) ||
+      !Boolean(formik.values.termsOfServiceAgreement) ||
+      !Boolean(formik.values.signUpAgreement)
     );
   };
 
