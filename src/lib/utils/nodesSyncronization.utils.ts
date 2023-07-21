@@ -105,6 +105,7 @@ export const buildFullNodes = (userNodesChanges: UserNodeChanges[], nodesData: N
         contribNames: nodeDataFound.nData.contribNames ?? [],
         institutions: nodeDataFound.nData.institutions ?? {},
         institNames: nodeDataFound.nData.institNames ?? [],
+        bookmarks: nodeDataFound.nData.bookmarks ? Number(nodeDataFound.nData.bookmarks) : 0,
         // parents:nodeDataFound.nData.parents??[],
         // children:node
       };

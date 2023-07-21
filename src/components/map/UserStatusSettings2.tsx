@@ -19,12 +19,12 @@ type UserStatusSettingsProps = {
   totalPositives?: any;
   totalNegatives?: any;
   totalPoints?: any;
-  smallVersion?: boolean;
+  completeVersion?: boolean;
   user: User;
   sx?: SxProps<Theme>;
 };
 
-const UserStatusSettings = ({ onClick, smallVersion = true, sx, ...props }: UserStatusSettingsProps) => {
+const UserStatusSettings = ({ onClick, completeVersion = false, sx, ...props }: UserStatusSettingsProps) => {
   const [pointsGained, setPointsGained] = useState(false);
   const [pointsLost, setPointsLost] = useState(false);
 
@@ -97,8 +97,8 @@ const UserStatusSettings = ({ onClick, smallVersion = true, sx, ...props }: User
           // height: "52px",
           display: "flex",
           alignItems: "center",
-          justifyContent: smallVersion ? "center" : "flex-start",
-          p: smallVersion ? "6px" : "8px 6px",
+          justifyContent: completeVersion ? "flex-start" : "center",
+          p: completeVersion ? "8px 6px" : "6px",
           gap: "6px",
           cursor: "pointer",
           background: theme => (theme.palette.mode === "dark" ? "#242425" : "#F2F4F7"),
@@ -111,10 +111,10 @@ const UserStatusSettings = ({ onClick, smallVersion = true, sx, ...props }: User
           <OptimizedAvatar2
             imageUrl={props.imageUrl}
             alt={`${props.user.fName} ${props.user.lName}`}
-            size={smallVersion ? 40 : 48}
+            size={completeVersion ? 48 : 40}
           />
         </div>
-        {!smallVersion && (
+        {completeVersion && (
           <Box className={"customUserStatusTotalPoints"}>
             <Box sx={{ display: "flex", flexDirection: "column" }}>
               <Typography

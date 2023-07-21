@@ -39,7 +39,7 @@ import { useRouter } from "next/router";
 import React, { MutableRefObject, ReactNode, useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { DESIGN_SYSTEM_COLORS } from "@/lib/theme/colors";
-import { OpenLeftSidebar } from "@/pages/notebook";
+import { ChosenType, OpenLeftSidebar } from "@/pages/notebook";
 
 import ReferenceIcon from "../../../public/reference.svg";
 import ReferenceDarkIcon from "../../../public/reference-dark.svg";
@@ -66,16 +66,16 @@ type NodeFooterProps = {
   identifier: any;
   notebookRef: MutableRefObject<TNodeBookState>;
   nodeBookDispatch: React.Dispatch<DispatchNodeBookActions>;
-  activeNode: any;
-  citationsSelected: any;
+  // activeNode: any;
+  // citationsSelected: any;
   proposalsSelected: any;
-  acceptedProposalsSelected: any;
-  commentsSelected: any;
+  // acceptedProposalsSelected: any;
+  // commentsSelected: any;
   editable: any;
   setNodeParts: (nodeId: string, callback: (thisNode: FullNodeData) => FullNodeData) => void;
-  title: any;
-  content: any;
-  unaccepted: any;
+  title: string;
+  content: string;
+  unaccepted: boolean;
   openPart: OpenPart;
   nodeType: any;
   isNew: any;
@@ -106,7 +106,7 @@ type NodeFooterProps = {
   markStudied: any;
   bookmark: any;
   openNodePart: any;
-  selectNode: any;
+  selectNode: (chosenType: ChosenType) => void;
   correctNode: any;
   wrongNode: any;
   disableVotes: boolean;
@@ -270,27 +270,6 @@ const NodeFooter = ({
     },
     [openNodePart]
   );
-  const selectPendingProposals = useCallback(
-    (event: any) => {
-      // if (nodeBookState.selectedNode === identifier) {
-      // }
-      // TODO: remove openEditButton and nodeId global states
-      // openNodePart(event, "PendingProposals");
-      // if (nodeBookState.nodeId != identifier) {
-      //   nodeBookDispatch({
-      //     type: "setOpenEditButton",
-      //     payload: { status: true, nodeId: identifier },
-      //   });
-      // } else {
-      //   nodeBookDispatch({
-      //     type: "setOpenEditButton",
-      //     payload: { status: !nodeBookState.openEditButton, nodeId: identifier },
-      //   });
-      // }
-      selectNode(event, "Proposals"); // Pass correct data
-    },
-    [selectNode]
-  );
   const uploadNodeImageHandler = useCallback(
     (event: any) => uploadNodeImage(event, isUploading, setIsUploading, setPercentageUploaded),
     [uploadNodeImage, isUploading]
@@ -318,13 +297,6 @@ const NodeFooter = ({
   const uploadImageClicked = useCallback(() => {
     inputEl?.current?.click();
   }, [inputEl]);
-
-  const selectCitations = useCallback(
-    (event: any) => {
-      selectNode(event, "Citations");
-    },
-    [selectNode]
-  );
 
   const openUserInfo = useCallback(
     (idx: any) => {
@@ -427,12 +399,12 @@ const NodeFooter = ({
 
   const proposeNodeImprovementClick = useCallback(
     (event: any) => {
-      selectPendingProposals(event);
+      selectNode("Proposals");
       notebookRef.current.selectedNode = identifier;
       nodeBookDispatch({ type: "setSelectedNode", payload: identifier });
       proposeNodeImprovement(event, identifier);
     },
-    [identifier, nodeBookDispatch, notebookRef, proposeNodeImprovement, selectPendingProposals]
+    [identifier, nodeBookDispatch, notebookRef, proposeNodeImprovement, selectNode]
   );
   return (
     <>
@@ -460,7 +432,7 @@ const NodeFooter = ({
                   online={false}
                   inUserBar={false}
                   inNodeFooter={true}
-                  reloadPermanentGrpah={reloadPermanentGrpah}
+                  reloadPermanentGraph={reloadPermanentGrpah}
                   setOpenSideBar={setOpenSideBar}
                   disabled={disableUserPicture}
                 />
@@ -477,7 +449,7 @@ const NodeFooter = ({
                   online={false}
                   inUserBar={false}
                   inNodeFooter={true}
-                  reloadPermanentGrpah={reloadPermanentGrpah}
+                  reloadPermanentGraph={reloadPermanentGrpah}
                   setOpenSideBar={setOpenSideBar}
                   disabled={disableUserPicture}
                 />
@@ -825,7 +797,7 @@ const NodeFooter = ({
                     <ContainedButton
                       id={`${identifier}-node-footer-tags-referecnes`}
                       title="View nodes that have cited this node."
-                      onClick={selectCitations}
+                      onClick={() => selectNode("Citations")}
                       tooltipPosition="top"
                       sx={{
                         background: (theme: any) => (theme.palette.mode === "dark" ? "#404040" : "#EAECF0"),

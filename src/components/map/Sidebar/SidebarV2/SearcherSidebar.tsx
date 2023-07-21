@@ -869,7 +869,7 @@ const SearcherSidebar = ({
                 chosenTags={chosenTags}
                 allTags={allTags}
                 setAllTags={setAllTags}
-                sx={{ maxHeight: "450px", height: "450px" }}
+                height={"450px"}
                 multiple
               />
             </Box>
@@ -880,7 +880,7 @@ const SearcherSidebar = ({
               setAllTags={setAllTags}
               chosenTags={chosenTags}
               setChosenTags={setChosenTagsCallback}
-              sx={{ maxHeight: "235px", height: "235px" }}
+              height="235px"
               multiple
             />
           )}

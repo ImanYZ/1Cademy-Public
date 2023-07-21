@@ -308,7 +308,7 @@ const TagsSidebar = ({ username, open, onClose, onChangeChosenNode, preLoadNodes
               setAllTags={setAllTags}
               chosenTags={chosenTags}
               setChosenTags={setChosenTags}
-              sx={{ maxHeight: "235px", height: "235px" }}
+              height="235px"
               multiple
             />
           )}
