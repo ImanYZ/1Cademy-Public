@@ -369,7 +369,7 @@ const ParentsChildrenSidebar = ({
               setAllTags={setAllTags}
               chosenTags={chosenTags}
               setChosenTags={setChosenTags}
-              sx={{ maxHeight: "235px", height: "235px" }}
+              height="235px"
               multiple
             />
           )}

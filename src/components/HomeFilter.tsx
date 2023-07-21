@@ -110,7 +110,7 @@ const HomeFilter = forwardRef<HomeFilterRef, HomeFilterProps>(
               setAllTags={setAllTags}
               chosenTags={chosenTags}
               setChosenTags={setChosenTags}
-              sx={{ maxHeight: "200px", height: "200px" }}
+              height="200px"
               multiple
             />
           </Box>

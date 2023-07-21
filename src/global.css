@@ -2670,19 +2670,19 @@ right: 5px; */
 /* ----------------------------- */
 /* custom overrides */
 
-.customUserStatusTotalPoints {
+/* .customUserStatusTotalPoints {
   display: none;
 }
 
 .toolbar-opened .customUserStatusTotalPoints {
   display: flex;
   align-items: center;
-}
+} */
 
-#SidebarButtonsContainer:hover .customUserStatusTotalPoints {
+/* #SidebarButtonsContainer:hover .customUserStatusTotalPoints {
   display: flex;
   align-items: center;
-}
+} */
 
 .customUserTotalPoints {
   display: none;
@@ -2736,11 +2736,11 @@ right: 5px; */
   -moz-transition: visibility 1s, line-height 1s, height 1s; /* Firefox */
   -webkit-transition: visibility 1s, line-height 1s, height 1s; /*safari and chrome */
 }
-.toolbar:focus .customUserStatusTotalPoints,
+/* .toolbar:focus .customUserStatusTotalPoints,
 .toolbar:hover .customUserStatusTotalPoints {
   display: flex;
   align-items: center;
-}
+} */
 
 .toolbar:focus .customUserTotalPoints,
 .toolbar:hover .customUserTotalPoints {
