@@ -17,6 +17,7 @@ import {
   FormGroup,
   LinearProgress,
   MenuItem,
+  Modal,
   Paper,
   Select,
   Stack,
@@ -83,7 +84,6 @@ import { updateNotebookTag } from "../../../../lib/firestoreClient/notebooks.ser
 import { DESIGN_SYSTEM_COLORS } from "../../../../lib/theme/colors";
 import { MemoizedInputSave } from "../../InputSave";
 import { MemoizedMetaButton } from "../../MetaButton";
-import Modal from "../../Modal/Modal";
 import ProposalItem from "../../ProposalsList/ProposalItem/ProposalItem";
 import LevelSlider from "../LevelSlider";
 import NodeTypeTrends from "../NodeTypeTrends";
@@ -1904,31 +1904,30 @@ const UserSettigsSidebar = ({
             </MemoizedMetaButton>
             {shouldShowTagSearcher && (
               <Suspense fallback={<div></div>}>
-                <div id="tagModal">
-                  <Modal
-                    className="ModalBody"
-                    onClick={closeTagSelector}
-                    returnDown={false}
-                    noBackground={true}
-                    style={{
-                      width: "441px",
-                      height: "495px",
-                      left: window.innerWidth <= 500 ? "28px" : "420px",
-                    }}
-                    contentStyle={{
-                      height: "500px",
-                    }}
-                  >
-                    <MemoizedTagsSearcher
-                      id="user-settings-tag-searcher"
-                      setChosenTags={setChosenTags}
-                      chosenTags={chosenTags}
-                      allTags={allTags}
-                      setAllTags={setAllTags}
-                      height="440px"
-                    />
-                  </Modal>
-                </div>
+                <Modal
+                  open={shouldShowTagSearcher}
+                  disablePortal
+                  hideBackdrop
+                  sx={{
+                    "&.MuiModal-root": {
+                      top: "100px",
+                      left: "430px",
+                      right: "unset",
+                      bottom: "unset",
+                    },
+                  }}
+                >
+                  <MemoizedTagsSearcher
+                    id="user-settings-tag-searcher"
+                    setChosenTags={setChosenTags}
+                    chosenTags={chosenTags}
+                    allTags={allTags}
+                    setAllTags={setAllTags}
+                    width={"440px"}
+                    height={"440px"}
+                    onClose={closeTagSelector}
+                  />
+                </Modal>
               </Suspense>
             )}
           </div>

@@ -256,7 +256,6 @@ const TagsSearcher = ({
           theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.gray850 : DESIGN_SYSTEM_COLORS.gray25,
         ".MuiAutocomplete-popperDisablePortal": {
           left: "0px",
-          border: "dashed 2px pink",
           transform: "translate3d(20px,114px,0px) !important",
         },
       }}
@@ -278,7 +277,7 @@ const TagsSearcher = ({
         value={Object.values(allTags).filter((tag: any) => tag.checked)}
         onChange={setAutocomplete}
         ChipProps={{ className: "chip", variant: "outlined" }}
-        ListboxProps={{ id: "autocompleteList", style: { height, maxHeight: height, border: "solid 1px yellow" } }}
+        ListboxProps={{ id: "autocompleteList", style: { height, maxHeight: height } }}
         options={Object.values(allTags).filter(c => c.title)}
         getOptionLabel={(tag: TagTreeView) => tag.title}
         renderOption={setAutocompleteOptions}
