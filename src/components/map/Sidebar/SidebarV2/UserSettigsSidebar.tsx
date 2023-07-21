@@ -1925,7 +1925,7 @@ const UserSettigsSidebar = ({
                       chosenTags={chosenTags}
                       allTags={allTags}
                       setAllTags={setAllTags}
-                      sx={{ maxHeight: "339px", height: "339px" }}
+                      height="440px"
                     />
                   </Modal>
                 </div>

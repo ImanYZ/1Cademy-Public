@@ -395,7 +395,9 @@ const Notebook = ({}: NotebookProps) => {
   const [assistantSelectNode, setAssistantSelectNode] = useState<boolean>(false);
 
   const [toolboxExpanded, setToolboxExpanded] = useState(false);
-  const { ref: toolbarRef, isHovered: toolbarIsHovered } = useHover();
+  const { ref: toolbarRef, isHovered } = useHover();
+
+  const toolbarIsHovered = useMemo(() => isHovered, [isHovered]);
   //TUTORIAL STATES
   const {
     startTutorial,
@@ -428,14 +430,19 @@ const Notebook = ({}: NotebookProps) => {
   //instructor state
   const [instructor, setInstructor] = useState<Instructor | null>(null);
 
-  const onChangeTagOfNotebookById = (notebookId: string, data: { defaultTagId: string; defaultTagName: string }) => {
-    setNotebooks(prev => {
-      return prev.map(
-        (cur): Notebook =>
-          cur.id === notebookId ? { ...cur, defaultTagId: data.defaultTagId, defaultTagName: data.defaultTagName } : cur
-      );
-    });
-  };
+  const onChangeTagOfNotebookById = useCallback(
+    (notebookId: string, data: { defaultTagId: string; defaultTagName: string }) => {
+      setNotebooks(prev => {
+        return prev.map(
+          (cur): Notebook =>
+            cur.id === notebookId
+              ? { ...cur, defaultTagId: data.defaultTagId, defaultTagName: data.defaultTagName }
+              : cur
+        );
+      });
+    },
+    []
+  );
 
   const onNodeInViewport = useCallback(
     (nodeId: string, nodes: FullNodesData) => {
@@ -4370,11 +4377,8 @@ const Notebook = ({}: NotebookProps) => {
     [nodeBookState.choosingNode, nodeBookState.selectedNode, reloadPermanentGraph, scrollToNode, selectedNodeType]
   );
   const mapContentMouseOver = useCallback((event: any) => {
-    if (event.target?.parentNode?.parentNode?.getAttribute("id") !== "MapContent") {
-      setMapHovered(true);
-    } else {
-      setMapHovered(false);
-    }
+    const isPartOfNodeComponent = event.target?.parentNode?.parentNode?.getAttribute("id") !== "MapContent";
+    setMapHovered(isPartOfNodeComponent);
   }, []);
 
   const onMouseClick = useCallback((e: any) => {
@@ -4689,6 +4693,9 @@ const Notebook = ({}: NotebookProps) => {
   const onCloseTableOfContent = useCallback(() => {
     setOpenProgressBar(false);
   }, []);
+
+  const onOnlyCloseSidebar = useCallback(() => setOpenSidebar(null), []);
+  const onDisplayInstructorPage = useCallback(() => setDisplayDashboard(true), []);
 
   const onSkipTutorial = useCallback(async () => {
     if (!user) return;
@@ -6622,7 +6629,7 @@ const Notebook = ({}: NotebookProps) => {
           <NotebookPopup showIcon={false}>This notebook has no nodes</NotebookPopup>
         )}
 
-        {nodeBookState.choosingNode && (
+        {nodeBookState.choosingNode?.type && (
           <NotebookPopup
             onClose={() => {
               notebookRef.current.choosingNode = null;
@@ -6633,7 +6640,7 @@ const Notebook = ({}: NotebookProps) => {
               nodeBookDispatch({ type: "setChosenNode", payload: null });
             }}
           >
-            Cancel
+            Cancel Adding a {nodeBookState.choosingNode.type}
           </NotebookPopup>
         )}
 
@@ -6726,7 +6733,7 @@ const Notebook = ({}: NotebookProps) => {
               <MemoizedToolbarSidebar
                 notebookRef={notebookRef}
                 open={true}
-                onClose={() => setOpenSidebar(null)}
+                onClose={onOnlyCloseSidebar}
                 reloadPermanentGrpah={reloadPermanentGraph}
                 user={user}
                 reputationSignal={reputationSignal}
@@ -6750,7 +6757,7 @@ const Notebook = ({}: NotebookProps) => {
                 selectedNotebook={selectedNotebookId}
                 openNodesOnNotebook={openNodesOnNotebook}
                 setNotebooks={setNotebooks}
-                onDisplayInstructorPage={() => setDisplayDashboard(true)}
+                onDisplayInstructorPage={onDisplayInstructorPage}
                 onChangeTagOfNotebookById={onChangeTagOfNotebookById}
                 isHovered={toolbarIsHovered}
                 toolbarRef={toolbarRef}

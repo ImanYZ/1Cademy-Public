@@ -179,7 +179,7 @@ export const SignUpBasicInfo = ({ formikProps }: SignUpBasicInformationProps) =>
           setAllTags={setAllTags}
           chosenTags={chosenTags}
           setChosenTags={setChosenTags}
-          sx={{ maxHeight: "200px", height: "200px" }}
+          height="200px"
         />
       </FormGroup>
     </Box>

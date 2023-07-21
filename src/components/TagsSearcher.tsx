@@ -1,4 +1,5 @@
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
+import CloseIcon from "@mui/icons-material/Close";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import SearchRoundedIcon from "@mui/icons-material/SearchRounded";
 import { TreeItem, TreeView } from "@mui/lab";
@@ -10,10 +11,12 @@ import {
   Checkbox,
   createFilterOptions,
   FormControlLabel,
+  IconButton,
   TextField,
+  Typography,
 } from "@mui/material";
 import { Box, SxProps, Theme } from "@mui/system";
-import React, { useCallback } from "react";
+import React, { useCallback, useState } from "react";
 
 import { DESIGN_SYSTEM_COLORS } from "@/lib/theme/colors";
 
@@ -35,9 +38,12 @@ type TagsExploratorySearcherProps = {
   setAllTags: React.Dispatch<React.SetStateAction<AllTagsTreeView>>;
   chosenTags: ChosenTag[];
   setChosenTags: (newChosenTags: ChosenTag[]) => void;
+  width?: string;
+  height?: string;
   multiple?: boolean;
   sx?: SxProps<Theme>;
   id?: string;
+  onClose?: () => void;
 };
 
 /**
@@ -51,9 +57,15 @@ const TagsSearcher = ({
   chosenTags,
   setChosenTags,
   multiple = false,
+  width = "100%",
+  height = "200px",
   sx,
+  onClose,
 }: TagsExploratorySearcherProps) => {
   // const [chosenTags, setChosenTags] = useState<{ id: string; title: string }[]>([]);
+
+  const [displayTagTree, setDisplayTarTree] = useState(true);
+
   const setAutocompleteInput = useCallback(
     (params: any) => (
       <TextField
@@ -234,16 +246,40 @@ const TagsSearcher = ({
   );
 
   return (
-    <Box id={id} data-testid="tree-view">
+    <Box
+      id={id}
+      data-testid="tree-view"
+      sx={{
+        width,
+        p: "20px",
+        background: theme =>
+          theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.gray850 : DESIGN_SYSTEM_COLORS.gray25,
+        ".MuiAutocomplete-popperDisablePortal": {
+          left: "0px",
+          border: "dashed 2px pink",
+          transform: "translate3d(20px,114px,0px) !important",
+        },
+      }}
+    >
+      {onClose && (
+        <Box>
+          <Typography sx={{ mb: "14px", position: "relative", textAlign: "center" }}>Search for tags</Typography>
+          <IconButton onClick={onClose} sx={{ position: "absolute", right: "10px", top: "10px" }}>
+            <CloseIcon />
+          </IconButton>
+        </Box>
+      )}
+
       <Autocomplete
         multiple
         disableCloseOnSelect
+        disablePortal
         id="autocompleteTagSearch"
         value={Object.values(allTags).filter((tag: any) => tag.checked)}
         onChange={setAutocomplete}
         ChipProps={{ className: "chip", variant: "outlined" }}
-        ListboxProps={{ id: "autocompleteList", className: "modelInSearchTags" }}
-        options={Object.values(allTags)}
+        ListboxProps={{ id: "autocompleteList", style: { height, maxHeight: height, border: "solid 1px yellow" } }}
+        options={Object.values(allTags).filter(c => c.title)}
         getOptionLabel={(tag: TagTreeView) => tag.title}
         renderOption={setAutocompleteOptions}
         renderTags={() => ""}
@@ -253,48 +289,58 @@ const TagsSearcher = ({
           matchFrom: "any",
           limit: 10,
         })}
-        sx={{ marginTop: "5px", marginBottom: "16px" }}
-      />
-      <Box
-        id="FilterTagsTreeView"
+        onOpen={() => setDisplayTarTree(false)}
+        onClose={() => setDisplayTarTree(true)}
         sx={{
-          pr: "2px",
-          border: theme =>
-            `1px solid ${theme.palette.mode === "light" ? "rgba(0, 0, 0, 0.23)" : "rgba(255, 255, 255, 0.23)"}`,
-          borderRadius: theme => `${theme.shape.borderRadius}px`,
+          marginTop: "5px",
+          marginBottom: "16px",
         }}
-      >
-        <TreeView
-          id="TreeViewRoot"
-          defaultCollapseIcon={<ExpandMoreIcon />}
-          defaultExpandIcon={<ChevronRightIcon />}
-          multiSelect
+      />
+      {displayTagTree && (
+        <Box
+          id="FilterTagsTreeView"
           sx={{
-            marginTop: "15px",
-            overflowY: "auto",
-            backgroundColor: theme =>
-              theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookG900 : DESIGN_SYSTEM_COLORS.gray100,
-            "&::-webkit-scrollbar": {
-              width: "4px",
-            },
-            "&::-webkit-scrollbar-thumb": {
-              background: theme =>
-                theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookG400 : DESIGN_SYSTEM_COLORS.notebookG100,
-              borderRadius: "2px",
-              marginRight: "4px",
-              "&:hover": {
-                background: "#999",
-              },
-            },
-            mt: "1px",
-            ...sx,
+            pr: "2px",
+            border: theme =>
+              `1px solid ${theme.palette.mode === "light" ? "rgba(0, 0, 0, 0.23)" : "rgba(255, 255, 255, 0.23)"}`,
+            borderRadius: theme => `${theme.shape.borderRadius}px`,
+            // width,
           }}
         >
-          {Object.keys(allTags).map((nodeId: string) => {
-            return allTags[nodeId].tags.length === 0 && tagsTreeView(allTags[nodeId]);
-          })}
-        </TreeView>
-      </Box>
+          <TreeView
+            id="TreeViewRoot"
+            defaultCollapseIcon={<ExpandMoreIcon />}
+            defaultExpandIcon={<ChevronRightIcon />}
+            multiSelect
+            sx={{
+              marginTop: "15px",
+              overflowY: "auto",
+              backgroundColor: theme =>
+                theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookG900 : DESIGN_SYSTEM_COLORS.gray100,
+              "&::-webkit-scrollbar": {
+                width: "4px",
+              },
+              "&::-webkit-scrollbar-thumb": {
+                background: theme =>
+                  theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookG400 : DESIGN_SYSTEM_COLORS.notebookG100,
+                borderRadius: "2px",
+                marginRight: "4px",
+                "&:hover": {
+                  background: "#999",
+                },
+              },
+              mt: "1px",
+              ...sx,
+              height,
+              maxHeight: height,
+            }}
+          >
+            {Object.keys(allTags).map((nodeId: string) => {
+              return allTags[nodeId].tags.length === 0 && tagsTreeView(allTags[nodeId]);
+            })}
+          </TreeView>
+        </Box>
+      )}
     </Box>
   );
 };
