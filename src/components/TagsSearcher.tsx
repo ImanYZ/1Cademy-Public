@@ -253,7 +253,7 @@ const TagsSearcher = ({
         width,
         p: "20px",
         background: theme =>
-          theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.gray850 : DESIGN_SYSTEM_COLORS.gray25,
+          theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.gray850 : DESIGN_SYSTEM_COLORS.gray250,
         ".MuiAutocomplete-popperDisablePortal": {
           left: "0px",
           transform: "translate3d(20px,114px,0px) !important",
