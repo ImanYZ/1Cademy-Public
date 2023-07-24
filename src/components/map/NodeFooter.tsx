@@ -125,7 +125,7 @@ type NodeFooterProps = {
   showProposeTutorial?: boolean;
   setAbleToPropose: any;
   choosingNode: any;
-  nodeClickHandler: any;
+  onChangeChosenNode: () => void;
 };
 
 const NodeFooter = ({
@@ -191,7 +191,7 @@ const NodeFooter = ({
   enableChildElements = [],
   setAbleToPropose,
   choosingNode,
-  nodeClickHandler,
+  onChangeChosenNode,
 }: NodeFooterProps) => {
   const router = useRouter();
   const db = getFirestore();
@@ -1735,7 +1735,7 @@ const NodeFooter = ({
         {choosingNode && choosingNode?.type && choosingNode?.id !== identifier && (
           <Button
             variant="contained"
-            onClick={nodeClickHandler}
+            onClick={onChangeChosenNode}
             sx={{
               borderRadius: "26px",
               backgroundColor: DESIGN_SYSTEM_COLORS.primary800,
