@@ -1935,7 +1935,7 @@ const Notebook = ({}: NotebookProps) => {
   }, [nodeBookDispatch, notebookRef]);
 
   const onChangeChosenNode = useCallback(
-    async ({ nodeId, title }: onChangeChosenNode) => {
+    async ({ nodeId, title }: OnChangeChosenNode) => {
       if (!notebookRef.current.choosingNode) return;
       if (notebookRef.current.choosingNode.id === nodeId) return;
 
