@@ -3,7 +3,7 @@ import { FullNodeData, OpenPart, TNodeBookState, TNodeUpdates } from "src/nodeBo
 
 import { useNodeBook } from "@/context/NodeBookContext";
 import { NODE_WIDTH } from "@/lib/utils/Map.utils";
-import { onForceRecalculateGraphInput, OnSelectNodeInput, OpenLeftSidebar } from "@/pages/notebook";
+import { OnChangeChosenNode, onForceRecalculateGraphInput, OnSelectNodeInput, OpenLeftSidebar } from "@/pages/notebook";
 
 import { MemoizedNode } from "./Node";
 
@@ -67,6 +67,7 @@ type NodeListProps = {
   assistantSelectNode: boolean;
   onForceRecalculateGraph: (props: onForceRecalculateGraphInput) => void;
   setSelectedProposalId: (newValue: string) => void;
+  onChangeChosenNode: (props: OnChangeChosenNode) => void;
 };
 
 const NodesList = ({
@@ -127,6 +128,7 @@ const NodesList = ({
   assistantSelectNode,
   onForceRecalculateGraph,
   setSelectedProposalId,
+  onChangeChosenNode,
 }: NodeListProps) => {
   const { nodeBookDispatch } = useNodeBook();
 
@@ -268,6 +270,7 @@ const NodesList = ({
             assistantSelectNode={assistantSelectNode}
             onForceRecalculateGraph={onForceRecalculateGraph}
             setSelectedProposalId={setSelectedProposalId}
+            onChangeChosenNode={onChangeChosenNode}
           />
         );
       })}

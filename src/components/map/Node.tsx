@@ -34,7 +34,13 @@ import { DispatchNodeBookActions, FullNodeData, OpenPart, TNodeUpdates } from "s
 import { useNodeBook } from "@/context/NodeBookContext";
 import { Post } from "@/lib/mapApi";
 import { getVideoDataByUrl, momentDateToSeconds } from "@/lib/utils/utils";
-import { ChosenType, onForceRecalculateGraphInput, OnSelectNodeInput, OpenLeftSidebar } from "@/pages/notebook";
+import {
+  ChosenType,
+  OnChangeChosenNode,
+  onForceRecalculateGraphInput,
+  OnSelectNodeInput,
+  OpenLeftSidebar,
+} from "@/pages/notebook";
 
 import { useAuth } from "../../context/AuthContext";
 import { KnowledgeChoice } from "../../knowledgeTypes";
@@ -186,6 +192,7 @@ type NodeProps = {
   assistantSelectNode: boolean;
   onForceRecalculateGraph: (props: onForceRecalculateGraphInput) => void;
   setSelectedProposalId: (newValue: string) => void;
+  onChangeChosenNode: (props: OnChangeChosenNode) => void;
 };
 
 const proposedChildTypesIcons: { [key in ProposedChildTypesIcons]: string } = {
@@ -311,6 +318,7 @@ const Node = ({
   assistantSelectNode,
   onForceRecalculateGraph,
   setSelectedProposalId,
+  onChangeChosenNode,
 }: NodeProps) => {
   const [{ user }] = useAuth();
   const { nodeBookState } = useNodeBook();
@@ -810,6 +818,42 @@ const Node = ({
       setToBeEligible(false);
     }
   };
+
+  const onChangeChosenNodeHandler = useCallback(() => {
+    if (editable) return;
+    if (assistantSelectNode) {
+      if (notebookRef?.current?.choosingNode?.type) {
+        const nodeClickEvent = new CustomEvent("node-selected", {
+          detail: {
+            id: identifier,
+            title,
+            content,
+            nodeSelectionType: notebookRef?.current?.choosingNode?.type,
+          },
+        });
+        window.dispatchEvent(nodeClickEvent);
+      }
+      nodeBookDispatch({ type: "setChoosingNode", payload: null });
+      notebookRef.current.choosingNode = null;
+      nodeBookDispatch({ type: "setChosenNode", payload: null });
+      notebookRef.current.chosenNode = null;
+      setAssistantSelectNode(false);
+      // // assistantSelectNode.current = false;
+      return;
+    }
+    onChangeChosenNode({ nodeId: identifier, title });
+  }, [
+    assistantSelectNode,
+    content,
+    editable,
+    identifier,
+    nodeBookDispatch,
+    notebookRef,
+    onChangeChosenNode,
+    setAssistantSelectNode,
+    title,
+  ]);
+
   if (!user) {
     return null;
   }
@@ -1357,7 +1401,7 @@ const Node = ({
             enableChildElements={enableChildElements}
             setAbleToPropose={setAbleToPropose}
             choosingNode={notebookRef.current.choosingNode}
-            nodeClickHandler={nodeClickHandler}
+            onChangeChosenNode={onChangeChosenNodeHandler}
           />
         )}
 
@@ -1522,7 +1566,7 @@ const Node = ({
               disabled={disabled}
               setAbleToPropose={setAbleToPropose}
               choosingNode={notebookRef.current.choosingNode}
-              nodeClickHandler={nodeClickHandler}
+              onChangeChosenNode={onChangeChosenNodeHandler}
             />
           </div>
         )}
