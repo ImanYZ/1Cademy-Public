@@ -186,6 +186,7 @@ type ForceRecalculateType = "remove-nodes" | "add-edge" | "remove-edge";
 export type onForceRecalculateGraphInput = { id: string; by: ForceRecalculateType };
 export type ChosenType = "Proposals" | "Citations";
 export type OnSelectNodeInput = { nodeId: string; chosenType: ChosenType; nodeType: any };
+export type OnChangeChosenNode = { nodeId: string; title: string };
 
 type RateProosale = {
   proposals: INodeVersion[];
@@ -1934,7 +1935,7 @@ const Notebook = ({}: NotebookProps) => {
   }, [nodeBookDispatch, notebookRef]);
 
   const onChangeChosenNode = useCallback(
-    async ({ nodeId, title }: { nodeId: string; title: string }) => {
+    async ({ nodeId, title }: onChangeChosenNode) => {
       if (!notebookRef.current.choosingNode) return;
       if (notebookRef.current.choosingNode.id === nodeId) return;
 
@@ -7145,6 +7146,7 @@ const Notebook = ({}: NotebookProps) => {
                   assistantSelectNode={assistantSelectNode}
                   onForceRecalculateGraph={onForceRecalculateGraph}
                   setSelectedProposalId={setSelectedProposalId}
+                  onChangeChosenNode={onChangeChosenNode}
                 />
               </MapInteractionCSS>
 
