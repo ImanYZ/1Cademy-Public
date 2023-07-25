@@ -1,3 +1,4 @@
+import AddIcon from "@mui/icons-material/Add";
 import AutoFixHighIcon from "@mui/icons-material/AutoFixHigh";
 import CenterFocusStrongIcon from "@mui/icons-material/CenterFocusStrong";
 import CloseIcon from "@mui/icons-material/Close";
@@ -1940,11 +1941,9 @@ const Notebook = ({}: NotebookProps) => {
     async ({ nodeId, title }: OnChangeChosenNode) => {
       if (!notebookRef.current.choosingNode) return;
       if (notebookRef.current.choosingNode.id === nodeId) return;
-
       notebookRef.current.chosenNode = { id: nodeId, title };
       nodeBookDispatch({ type: "setChosenNode", payload: { id: nodeId, title } });
-
-      if (notebookRef.current.choosingNode.id === "Tag") return; //INFO: this is important to update a community
+      if (notebookRef.current.choosingNode.id === "Tag") return;
       openNodeHandler(nodeId, { open: true }, false);
       await detectHtmlElements({ ids: [nodeId] });
       await delay(500);
@@ -3398,6 +3397,126 @@ const Notebook = ({}: NotebookProps) => {
     [processHeightChange, reloadPermanentGraph, scrollToNode]
   );
 
+  const proposeNewParent = useCallback(
+    (event: any, parentNodeType: string = "Concept", ignoreLinks: boolean = false) => {
+      // TODO: add types ChildNodeType
+      if (!user) return;
+
+      devLog("PROPOSE_NEW_PARENT", { parentNodeType });
+      event && event.preventDefault();
+      setSelectedProposalId("ProposeNew" + parentNodeType + "ParentNode");
+      reloadPermanentGraph();
+      const newNodeId = newId(db);
+      setGraph(graph => {
+        const updatedNodeIds: string[] = [];
+
+        const { nodes: oldNodes, edges } = graph;
+        const selectedNodeId = notebookRef.current.selectedNode!;
+        if (!selectedNodeId && !ignoreLinks) return graph;
+
+        if (!(selectedNodeId in changedNodes) && !ignoreLinks) {
+          changedNodes[selectedNodeId] = copyNode(oldNodes[selectedNodeId]);
+        }
+        if (!tempNodes.has(newNodeId)) {
+          tempNodes.add(newNodeId);
+        }
+        const thisNode = !ignoreLinks ? copyNode(oldNodes[selectedNodeId]) : null;
+
+        const newParentNode: any = {
+          isStudied: true,
+          bookmarked: false,
+          isNew: true,
+          newParent: true,
+          correct: true,
+          updatedAt: new Date(),
+          open: true,
+          user: user.uname,
+          visible: true,
+          deleted: false,
+          wrong: false,
+          createdAt: new Date(),
+          firstVisit: new Date(),
+          lastVisit: new Date(),
+          notebooks: [selectedNotebookId],
+          expands: [true],
+          versions: 1,
+          viewers: 1,
+          children: thisNode
+            ? [{ node: selectedNodeId, label: "", title: thisNode.title, type: thisNode.nodeType }]
+            : [],
+          nodeType: parentNodeType,
+          parents: [],
+          comments: 0,
+          tags: thisNode
+            ? thisNode?.tags.filter(tag => tag === user.tag).length > 0
+              ? thisNode.tags
+              : [...thisNode.tags, user.tag]
+            : [user.tag],
+          tagIds: thisNode
+            ? thisNode?.tagIds.filter(tagId => tagId === user.tagId).length > 0
+              ? thisNode.tagIds
+              : [...thisNode.tagIds, user.tagId]
+            : [user.tagId],
+          title: "",
+          wrongs: 0,
+          corrects: 1,
+          content: "",
+          nodeImage: "",
+          studied: 1,
+          references: [],
+          referenceIds: [],
+          referenceLabels: [],
+          choices: [],
+          editable: true,
+          width: NODE_WIDTH,
+          node: newNodeId,
+          left: thisNode ? thisNode.left + NODE_WIDTH + COLUMN_GAP : 0,
+          top: thisNode ? thisNode.top : 0,
+        };
+        if (parentNodeType === "Question") {
+          newParentNode.choices = [
+            {
+              choice: "",
+              correct: true,
+              feedback: "",
+            },
+          ];
+        }
+
+        const newNodes = setDagNode(
+          g.current,
+          newNodeId,
+          newParentNode,
+          { ...oldNodes },
+          { ...allTags },
+          settings.showClusterOptions,
+          () => {}
+        );
+        if (!selectedNodeId) return { nodes: newNodes, edges };
+        let newEdges = edges;
+        if (!ignoreLinks) {
+          newEdges = setDagEdge(g.current, newNodeId, selectedNodeId, { label: "" }, { ...edges });
+        }
+
+        updatedNodeIds.push(selectedNodeId, newNodeId);
+
+        notebookRef.current.selectedNode = newNodeId;
+        nodeBookDispatch({ type: "setSelectedNode", payload: newNodeId });
+        setTimeout(() => {
+          scrollToNode(newNodeId);
+        }, 3500);
+
+        setNodeUpdates({
+          nodeIds: updatedNodeIds,
+          updatedAt: new Date(),
+        });
+        return { nodes: newNodes, edges: newEdges };
+      });
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [user, reloadPermanentGraph, db, allTags, settings.showClusterOptions, nodeBookDispatch, scrollToNode]
+  );
+
   const onSelectNode = useCallback(
     ({ chosenType, nodeId, nodeType }: OnSelectNodeInput) => {
       // (event: any, nodeId: string, chosenType: "Proposals" | "Citations", nodeType: any) => {
@@ -3473,7 +3592,11 @@ const Notebook = ({}: NotebookProps) => {
       nodeBookDispatch({ type: "setChosenNode", payload: null });
       nodeBookDispatch({ type: "setChoosingNode", payload: null });
       let referencesOK = true;
-      const { isInstructor, instantApprove }: { isInstructor: boolean; instantApprove: boolean } = await Post(
+      const {
+        courseExist,
+        isInstructor,
+        instantApprove,
+      }: { courseExist: boolean; isInstructor: boolean; instantApprove: boolean } = await Post(
         "/instructor/course/checkInstantApprovalForProposal",
         {
           nodeId: notebookRef.current.selectedNode,
@@ -3590,9 +3713,12 @@ const Notebook = ({}: NotebookProps) => {
           delete postData.left;
           delete postData.top;
           delete postData.height;
-
-          let willBeApproved =
-            (instantApprove && isInstructor) || isVersionApproved({ corrects: 1, wrongs: 0, nodeData: newNode });
+          let willBeApproved = false;
+          if (courseExist || isInstructor) {
+            willBeApproved = instantApprove;
+          } else {
+            willBeApproved = isVersionApproved({ corrects: 1, wrongs: 0, nodeData: newNode });
+          }
           lastNodeOperation.current = { name: "ProposeProposals", data: willBeApproved ? "accepted" : "notAccepted" };
 
           if (willBeApproved) {
@@ -3787,6 +3913,177 @@ const Notebook = ({}: NotebookProps) => {
     [nodeBookDispatch]
   );
 
+  const saveProposedParentNode = useCallback(
+    async (newNodeId: string, summary: string, reason: string, onComplete: () => void) => {
+      if (!selectedNotebookId) return;
+
+      devLog("SAVE_PROPOSED_CHILD_NODE", { selectedNotebookId, newNodeId, summary, reason });
+      notebookRef.current.choosingNode = null;
+      notebookRef.current.chosenNode = null;
+      nodeBookDispatch({ type: "setChoosingNode", payload: null });
+      nodeBookDispatch({ type: "setChosenNode", payload: null });
+
+      const {
+        isInstructor,
+        courseExist,
+        instantApprove,
+      }: { isInstructor: boolean; courseExist: boolean; instantApprove: boolean } = await Post(
+        "/instructor/course/checkInstantApprovalForProposal",
+        {
+          nodeId: newNodeId,
+        }
+      );
+      setGraph(graph => {
+        const updatedNodeIds: string[] = [newNodeId];
+        const newNode = graph.nodes[newNodeId];
+
+        if (!newNode.title) {
+          console.error("title required");
+          return graph;
+        }
+
+        if (newNode.nodeType === "Question" && !Boolean(newNode.choices.length)) {
+          console.error("choices required");
+          return graph;
+        }
+
+        if (!newNodeId) {
+          return graph;
+        }
+
+        let referencesOK = true;
+        if (
+          (newNode.nodeType === "Concept" ||
+            newNode.nodeType === "Relation" ||
+            newNode.nodeType === "Question" ||
+            newNode.nodeType === "News") &&
+          newNode.references.length === 0
+        ) {
+          referencesOK = window.confirm("You are proposing a node without citing any reference. Are you sure?");
+        }
+
+        if (!referencesOK) {
+          return graph;
+        }
+
+        if (newNode.tags.length == 0) {
+          setTimeout(() => {
+            window.alert("Please add relevant tag(s) to your proposed node.");
+          });
+          return graph;
+        }
+
+        if (newNode.title === "" || newNode.title === "Replace this new node title!") return graph;
+
+        gtmEvent("Propose", {
+          customType: "newChild",
+        });
+        gtmEvent("Interaction", {
+          customType: "newChild",
+        });
+        gtmEvent("Reputation", {
+          value: 1,
+        });
+
+        let { nodes, edges } = graph;
+
+        const postData: any = {
+          ...newNode,
+          summary: summary,
+          proposal: reason,
+          versionNodeId: newNodeId,
+          notebookId: selectedNotebookId,
+        };
+        delete postData.isStudied;
+        delete postData.bookmarked;
+        delete postData.isNew;
+        delete postData.correct;
+        delete postData.updatedAt;
+        delete postData.open;
+        delete postData.visible;
+        delete postData.deleted;
+        delete postData.wrong;
+        delete postData.createdAt;
+        delete postData.firstVisit;
+        delete postData.lastVisit;
+        delete postData.versions;
+        delete postData.viewers;
+        delete postData.comments;
+        delete postData.wrongs;
+        delete postData.corrects;
+        delete postData.studied;
+        delete postData.editable;
+        delete postData.left;
+        delete postData.top;
+        delete postData.height;
+
+        let willBeApproved = false;
+        if (courseExist) {
+          willBeApproved = instantApprove;
+        } else if (isInstructor && !courseExist) {
+          willBeApproved = true;
+        }
+        const nodePartChanges = {
+          editable: false,
+          unaccepted: true,
+          simulated: false,
+        };
+        // if version is approved from simulation then remove it from changedNodes and tempNodes
+        if (willBeApproved) {
+          if (tempNodes.has(newNodeId)) {
+            tempNodes.delete(newNodeId);
+          }
+          // if (changedNodes.hasOwnProperty(newNode.parents[0].node)) {
+          //   delete changedNodes[newNode.parents[0].node];
+          // }
+          nodePartChanges.unaccepted = false;
+          nodePartChanges.simulated = true;
+        }
+
+        nodes = { ...nodes, [newNodeId]: { ...nodes[newNodeId], changedAt: new Date(), ...nodePartChanges } };
+
+        const flashcard = postData.flashcard;
+        delete postData.flashcard;
+        const loadingEvent = new CustomEvent("proposed-node-loading");
+        window.dispatchEvent(loadingEvent);
+
+        getMapGraph("/proposeParentNode", postData, !willBeApproved).then(async (response: any) => {
+          if (!response) return;
+          // save flashcard data
+          if (postData.nodeType !== "Question") {
+            window.dispatchEvent(
+              new CustomEvent("propose-flashcard", {
+                detail: {
+                  node: response.node,
+                  proposal: response.proposal,
+                  flashcard,
+                  proposedType: "Parent",
+                  token: await getIdToken(),
+                },
+              })
+            );
+          }
+          if (postData.nodeType === "Question") {
+            window.dispatchEvent(new CustomEvent("question-node-proposed"));
+          }
+        });
+
+        window.dispatchEvent(new CustomEvent("next-flashcard"));
+
+        setTimeout(() => {
+          onComplete();
+        }, 200);
+        setNodeUpdates({
+          nodeIds: updatedNodeIds,
+          updatedAt: new Date(),
+        });
+        scrollToNode(newNodeId);
+        return { nodes, edges };
+      });
+    },
+    [selectedNotebookId, nodeBookDispatch, getMapGraph, scrollToNode]
+  );
+
   const saveProposedChildNode = useCallback(
     async (newNodeId: string, summary: string, reason: string, onComplete: () => void) => {
       if (!selectedNotebookId) return;
@@ -3859,8 +4156,8 @@ const Notebook = ({}: NotebookProps) => {
 
         const postData: any = {
           ...newNode,
-          parentId: newNode.parents[0].node,
-          parentType: graph.nodes[newNode.parents[0].node].nodeType,
+          parentId: newNode.parents[0]?.node || "",
+          parentType: graph.nodes[newNode.parents[0]?.node]?.nodeType || "",
           summary: summary,
           proposal: reason,
           versionNodeId: newNodeId,
@@ -6865,6 +7162,32 @@ const Notebook = ({}: NotebookProps) => {
             }}
           >
             <>
+              {" "}
+              {user && user?.role === "INSTRUCTOR" && (
+                <Tooltip title="Create a new Parent Node" placement="bottom">
+                  <IconButton
+                    id="toolbox-scroll-to-node"
+                    color="secondary"
+                    onClick={(e: any) => proposeNewParent(e, "Concept", true)}
+                    // disabled={!nodeBookState.selectedNode ? true : false}
+                    sx={{
+                      ":hover": {
+                        background: theme.palette.mode === "dark" ? "#404040" : "#EAECF0",
+                      },
+                      padding: { xs: "2px", sm: "8px" },
+                    }}
+                  >
+                    <AddIcon
+                      sx={{
+                        color: theme =>
+                          theme.palette.mode === "dark"
+                            ? theme.palette.common.notebookG100
+                            : theme.palette.common.gray500,
+                      }}
+                    />
+                  </IconButton>
+                </Tooltip>
+              )}
               <Tooltip title="Scroll to last Selected Node" placement="bottom">
                 <IconButton
                   id="toolbox-scroll-to-node"
@@ -6872,6 +7195,9 @@ const Notebook = ({}: NotebookProps) => {
                   onClick={onScrollToLastNode}
                   disabled={!nodeBookState.selectedNode ? true : false}
                   sx={{
+                    ":hover": {
+                      background: theme.palette.mode === "dark" ? "#404040" : "#EAECF0",
+                    },
                     opacity: !nodeBookState.selectedNode ? 0.5 : undefined,
                     padding: { xs: "2px", sm: "8px" },
                   }}
@@ -6886,7 +7212,6 @@ const Notebook = ({}: NotebookProps) => {
                   />
                 </IconButton>
               </Tooltip>
-
               <Tooltip
                 title="Redraw graph"
                 placement="bottom"
@@ -6909,7 +7234,6 @@ const Notebook = ({}: NotebookProps) => {
                   />
                 </IconButton>
               </Tooltip>
-
               <Tooltip
                 title="Start tutorial"
                 placement="bottom"
@@ -6938,7 +7262,6 @@ const Notebook = ({}: NotebookProps) => {
                   />
                 </IconButton>
               </Tooltip>
-
               <Tooltip
                 title="Focused view for selected node"
                 placement="bottom"
@@ -7104,6 +7427,7 @@ const Notebook = ({}: NotebookProps) => {
                   onNodeTitleBlur={onNodeTitleBlur}
                   // setOpenSearch={setOpenSearch}
                   saveProposedChildNode={saveProposedChildNode}
+                  saveProposedParentNode={saveProposedParentNode}
                   saveProposedImprovement={saveProposedImprovement}
                   closeSideBar={closeSideBar}
                   reloadPermanentGraph={reloadPermanentGraph}
@@ -7112,6 +7436,7 @@ const Notebook = ({}: NotebookProps) => {
                   setOpenSideBar={setOpenSidebar}
                   proposeNodeImprovement={proposeNodeImprovement}
                   proposeNewChild={proposeNewChild}
+                  proposeNewParent={proposeNewParent}
                   scrollToNode={scrollToNode}
                   openSidebar={openSidebar}
                   setOperation={setOperation}

@@ -41,6 +41,7 @@ type NodeListProps = {
   onNodeTitleBlur: (newTitle: string) => void;
   // setOpenSearch: any;
   saveProposedChildNode: any;
+  saveProposedParentNode: any;
   saveProposedImprovement: any;
   closeSideBar: any;
   reloadPermanentGraph: any;
@@ -50,6 +51,7 @@ type NodeListProps = {
   setOpenSideBar: (sidebar: OpenLeftSidebar) => void;
   proposeNodeImprovement: any;
   proposeNewChild: any;
+  proposeNewParent: any;
   scrollToNode: any;
   openSidebar: OpenLeftSidebar;
   setOperation: (operation: string) => void;
@@ -104,6 +106,7 @@ const NodesList = ({
   onNodeTitleBlur,
   // setOpenSearch,
   saveProposedChildNode,
+  saveProposedParentNode,
   saveProposedImprovement,
   closeSideBar,
   reloadPermanentGraph,
@@ -114,6 +117,7 @@ const NodesList = ({
   setOpenSideBar,
   proposeNodeImprovement,
   proposeNewChild,
+  proposeNewParent,
   scrollToNode,
   openSidebar,
   setOperation,
@@ -167,6 +171,7 @@ const NodesList = ({
             nodeType={nodes[nId].nodeType}
             isTag={nodes[nId].hasOwnProperty("isTag") && nodes[nId].isTag}
             isNew={nodes[nId].hasOwnProperty("isNew") && nodes[nId].isNew}
+            newParent={nodes[nId].hasOwnProperty("newParent") && nodes[nId].newParent}
             title={nodes[nId].title}
             content={nodes[nId].content}
             nodeImage={nodes[nId].nodeImage}
@@ -235,6 +240,7 @@ const NodesList = ({
             onNodeTitleBLur={onNodeTitleBlur}
             // setOpenSearch={setOpenSearch}
             saveProposedChildNode={saveProposedChildNode}
+            saveProposedParentNode={saveProposedParentNode}
             saveProposedImprovement={saveProposedImprovement}
             closeSideBar={closeSideBar}
             reloadPermanentGraph={reloadPermanentGraph}
@@ -244,6 +250,7 @@ const NodesList = ({
             setOpenSideBar={setOpenSideBar}
             proposeNodeImprovement={proposeNodeImprovement}
             proposeNewChild={proposeNewChild}
+            proposeNewParent={proposeNewParent}
             scrollToNode={scrollToNode}
             openSidebar={openSidebar}
             locked={nodes[nId].locked}
