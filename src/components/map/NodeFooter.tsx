@@ -397,14 +397,18 @@ const NodeFooter = ({
     }
   }, [nodeBookDispatch]);
 
+  const displayProposals = useCallback(() => {
+    selectNode("Proposals");
+    notebookRef.current.selectedNode = identifier;
+    nodeBookDispatch({ type: "setSelectedNode", payload: identifier });
+  }, [identifier, nodeBookDispatch, notebookRef, selectNode]);
+
   const proposeNodeImprovementClick = useCallback(
     (event: any) => {
-      selectNode("Proposals");
-      notebookRef.current.selectedNode = identifier;
-      nodeBookDispatch({ type: "setSelectedNode", payload: identifier });
+      displayProposals();
       proposeNodeImprovement(event, identifier);
     },
-    [identifier, nodeBookDispatch, notebookRef, proposeNodeImprovement, selectNode]
+    [displayProposals, identifier, proposeNodeImprovement]
   );
   return (
     <>
@@ -498,18 +502,25 @@ const NodeFooter = ({
               }/${dayjs(new Date(changedAt)).year()}`}
               placement={"top"}
             >
-              <span
+              <Box
                 id={`${identifier}-node-footer-timestamp`}
-                style={{
+                component={"span"}
+                sx={{
                   marginLeft: "10px",
                   display: editable ? "none" : "block",
                   lineHeight: "normal",
+                  cursor: "pointer",
+                  ":hover": {
+                    color:
+                      theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.orange400 : DESIGN_SYSTEM_COLORS.orange500,
+                  },
                 }}
+                onClick={displayProposals}
               >
                 {dayjs(new Date(changedAt)).fromNow().includes("NaN")
                   ? "a few minutes ago"
                   : `${dayjs(new Date(changedAt)).fromNow()}`}
-              </span>
+              </Box>
             </Tooltip>
             {open && !choosingNode && (
               <Box sx={{ display: editable || simulated ? "none" : "flex", alignItems: "center", marginLeft: "10px" }}>
