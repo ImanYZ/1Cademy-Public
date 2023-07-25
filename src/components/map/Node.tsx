@@ -142,7 +142,6 @@ type NodeProps = {
   openNodePart: (event: any, id: string, partType: any, openPart: any, setOpenPart: any, tags: any) => void; //
   onNodeShare: (nodeId: string, platform: string) => void;
   selectNode: (params: OnSelectNodeInput) => void;
-  nodeClicked: any;
   correctNode: any;
   wrongNode: any;
   uploadNodeImage: any;
@@ -193,6 +192,8 @@ type NodeProps = {
   onForceRecalculateGraph: (props: onForceRecalculateGraphInput) => void;
   setSelectedProposalId: (newValue: string) => void;
   onChangeChosenNode: (props: OnChangeChosenNode) => void;
+  editingModeNode: boolean;
+  setEditingModeNode: (newValue: boolean) => void;
 };
 
 const proposedChildTypesIcons: { [key in ProposedChildTypesIcons]: string } = {
@@ -274,7 +275,6 @@ const Node = ({
   openNodePart,
   onNodeShare,
   selectNode,
-  nodeClicked,
   correctNode,
   wrongNode,
   uploadNodeImage,
@@ -319,6 +319,8 @@ const Node = ({
   onForceRecalculateGraph,
   setSelectedProposalId,
   onChangeChosenNode,
+  editingModeNode,
+  setEditingModeNode,
 }: NodeProps) => {
   const [{ user }] = useAuth();
   const { nodeBookState } = useNodeBook();
@@ -449,95 +451,33 @@ const Node = ({
     };
   }, [changeNodeHight, identifier]);
 
-  const nodeClickHandler = useCallback(
-    (event: any) => {
-      let operation = "selectNode";
-      if (editable) return;
-      if (assistantSelectNode) {
-        if (notebookRef?.current?.choosingNode?.type) {
-          const nodeClickEvent = new CustomEvent("node-selected", {
-            detail: {
-              id: identifier,
-              title,
-              content,
-              nodeSelectionType: notebookRef?.current?.choosingNode?.type,
-            },
-          });
-          window.dispatchEvent(nodeClickEvent);
-        }
-        nodeBookDispatch({ type: "setChoosingNode", payload: null });
-        notebookRef.current.choosingNode = null;
-        nodeBookDispatch({ type: "setChosenNode", payload: null });
-        notebookRef.current.chosenNode = null;
-        setAssistantSelectNode(false);
-        // // assistantSelectNode.current = false;
-        return;
+  const nodeClickHandler = useCallback(() => {
+    if (editingModeNode) return;
+    if (!notebookRef.current.choosingNode && notebookRef.current.selectedNode !== identifier) {
+      const updatedNodeIds: string[] = [notebookRef.current.selectedNode!, identifier];
+      notebookRef.current.selectedNode = identifier;
+      nodeBookDispatch({ type: "setSelectedNode", payload: identifier });
+      setNodeUpdates({
+        nodeIds: updatedNodeIds,
+        updatedAt: new Date(),
+      });
+      if (openSidebar === "PROPOSALS") {
+        reloadPermanentGraph();
+        notebookRef.current.selectionType = null;
+        nodeBookDispatch({ type: "setSelectionType", payload: null });
+        setSelectedProposalId("");
       }
-      if (notebookRef.current.choosingNode && notebookRef.current.choosingNode.id !== identifier) {
-        // The first Nodes exist, Now is clicking the Chosen Node
-
-        notebookRef.current.chosenNode = {
-          id: identifier,
-          title,
-        };
-        nodeBookDispatch({ type: "setChosenNode", payload: { id: identifier, title } });
-
-        if (notebookRef.current.choosingNode.id === "Tag") return; //INFO: this is important to update a community
-        chosenNodeChanged(identifier);
-        // chosenNodeChanged(notebookRef.current.choosingNode.id);
-
-        setAbleToPropose(true);
-        // scrollToNode(notebookRef.current.selectedNode);
-        operation = "chooseNode";
-      } else if (
-        "activeElement" in event.currentTarget &&
-        "nodeName" in event.currentTarget.activeElement &&
-        event.currentTarget.activeElement.nodeName !== "INPUT" &&
-        !notebookRef.current.choosingNode
-      ) {
-        nodeClicked(event, identifier, nodeType, setOpenPart);
-      }
-
-      if (
-        !notebookRef.current.choosingNode &&
-        notebookRef.current.selectedNode !== identifier &&
-        operation === "selectNode"
-      ) {
-        const updatedNodeIds: string[] = [notebookRef.current.selectedNode!, identifier];
-        notebookRef.current.selectedNode = identifier;
-        nodeBookDispatch({ type: "setSelectedNode", payload: identifier });
-        setNodeUpdates({
-          nodeIds: updatedNodeIds,
-          updatedAt: new Date(),
-        });
-        if (openSidebar === "PROPOSALS") {
-          reloadPermanentGraph();
-          notebookRef.current.selectionType = null;
-          nodeBookDispatch({ type: "setSelectionType", payload: null });
-          setSelectedProposalId("");
-        }
-      }
-    },
-    [
-      editable,
-      assistantSelectNode,
-      notebookRef,
-      identifier,
-      nodeBookDispatch,
-      setAssistantSelectNode,
-      title,
-      content,
-      chosenNodeChanged,
-      setAbleToPropose,
-      nodeClicked,
-      nodeType,
-      setOpenPart,
-      setNodeUpdates,
-      openSidebar,
-      reloadPermanentGraph,
-      setSelectedProposalId,
-    ]
-  );
+    }
+  }, [
+    editingModeNode,
+    notebookRef,
+    identifier,
+    nodeBookDispatch,
+    setNodeUpdates,
+    openSidebar,
+    reloadPermanentGraph,
+    setSelectedProposalId,
+  ]);
 
   const hideNodeHandler = useCallback(
     (event: any) => {
@@ -647,7 +587,7 @@ const Node = ({
       // here disable button
       setTimeout(() => {
         const firstParentId: Parent = parents[0];
-
+        setEditingModeNode(false);
         if (isNew) {
           saveProposedChildNode(identifier, "", reason, () => setAbleToPropose(true));
           if (!firstParentId) return;
@@ -680,6 +620,7 @@ const Node = ({
     nodeBookDispatch({ type: "setSelectedNode", payload: null });
     nodeBookDispatch({ type: "setChosenNode", payload: null });
     setOperation("CancelProposals");
+    setEditingModeNode(false);
     window.dispatchEvent(new CustomEvent("next-flashcard"));
     closeSideBar();
   };

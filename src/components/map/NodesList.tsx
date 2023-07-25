@@ -27,7 +27,6 @@ type NodeListProps = {
   openNodePart: any;
   onNodeShare: (nodeId: string, platform: string) => void;
   selectNode: (params: OnSelectNodeInput) => void;
-  nodeClicked: any;
   correctNode: any;
   wrongNode: any;
   uploadNodeImage: any;
@@ -68,6 +67,8 @@ type NodeListProps = {
   onForceRecalculateGraph: (props: onForceRecalculateGraphInput) => void;
   setSelectedProposalId: (newValue: string) => void;
   onChangeChosenNode: (props: OnChangeChosenNode) => void;
+  editingModeNode: boolean;
+  setEditingModeNode: (newValue: boolean) => void;
 };
 
 const NodesList = ({
@@ -90,7 +91,6 @@ const NodesList = ({
   openNodePart,
   onNodeShare,
   selectNode,
-  nodeClicked,
   correctNode,
   wrongNode,
   uploadNodeImage,
@@ -129,6 +129,8 @@ const NodesList = ({
   onForceRecalculateGraph,
   setSelectedProposalId,
   onChangeChosenNode,
+  editingModeNode,
+  setEditingModeNode,
 }: NodeListProps) => {
   const { nodeBookDispatch } = useNodeBook();
 
@@ -220,7 +222,6 @@ const NodesList = ({
             openNodePart={openNodePart}
             onNodeShare={onNodeShare}
             selectNode={selectNode}
-            nodeClicked={nodeClicked}
             correctNode={correctNode}
             wrongNode={wrongNode}
             uploadNodeImage={uploadNodeImage}
@@ -271,6 +272,8 @@ const NodesList = ({
             onForceRecalculateGraph={onForceRecalculateGraph}
             setSelectedProposalId={setSelectedProposalId}
             onChangeChosenNode={onChangeChosenNode}
+            editingModeNode={editingModeNode}
+            setEditingModeNode={setEditingModeNode}
           />
         );
       })}
@@ -308,7 +311,6 @@ export const MemoizedNodeList = React.memo(NodesList, (prev, next) => {
     prev.toggleNode === next.toggleNode &&
     prev.openNodePart === next.openNodePart &&
     prev.selectNode === next.selectNode &&
-    prev.nodeClicked === next.nodeClicked &&
     prev.correctNode === next.correctNode &&
     prev.wrongNode === next.wrongNode &&
     prev.uploadNodeImage === next.uploadNodeImage &&
