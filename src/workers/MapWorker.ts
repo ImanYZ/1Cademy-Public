@@ -194,7 +194,7 @@ const layoutHandler = (
   // }
   const graph = dagreUtils.mapGraphToObject(g);
   const endTimer = performance.now();
-  devLog("⌚:Map Worker", `${endTimer - startTimer}ms`);
+  devLog("⌚:Map Worker", `${endTimer - startTimer}ms`, "WORKER");
 
   return {
     /*mapChangedFlag,*/

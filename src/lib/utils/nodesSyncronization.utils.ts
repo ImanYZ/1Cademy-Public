@@ -186,7 +186,7 @@ export const fillDagre = (
       }
       // so the NO visible nodes will come as modified and !visible
       if (cur.nodeChangeType === "removed" || (cur.nodeChangeType === "modified" && !cur.visible)) {
-        console.log("----->removed", cur.node);
+        // console.log("----->removed", cur.node);
         updatedNodeIds.push(cur.node);
         if (g.hasNode(cur.node)) {
           // g.nodes().forEach(function () {});
@@ -249,7 +249,7 @@ export const synchronizeGraph = ({
   nodesInEdition = [],
 }: SynchronizeGraphInput): Graph => {
   const { nodes, edges } = graph;
-  console.log({ selectedNotebookId });
+  // console.log({ selectedNotebookId });
 
   const visibleFullNodesMerged = fullNodes.map(cur => {
     const tmpNode = nodes[cur.node];

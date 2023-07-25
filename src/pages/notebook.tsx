@@ -1479,12 +1479,12 @@ const Notebook = ({}: NotebookProps) => {
       nodeIds: [],
       updatedAt: new Date(),
     });
-    devLog("CHANGE NH 🚀", { showClusterOptions: settings.showClusterOptions });
+    devLog("CHANGE NH 🚀", { showClusterOptions: settings.showClusterOptions }, "WORKER");
   }, [settings.showClusterOptions]);
 
   const onForceRecalculateGraph = useCallback(
     ({ id, by }: onForceRecalculateGraphInput) => {
-      devLog("FORCE_RECALCULATE_GRAPH 🚀", { id, by });
+      devLog("FORCE_RECALCULATE_GRAPH 🚀", { id, by }, "WORKER");
       addTask(null);
     },
     [addTask]
@@ -3215,7 +3215,7 @@ const Notebook = ({}: NotebookProps) => {
    */
   const changeNodeHight = useCallback(
     (nodeId: string, height: number) => {
-      devLog("CHANGE 🚀", `H:${height.toFixed(1)}, nId:${nodeId}`);
+      devLog("CHANGE 🚀", `H:${height.toFixed(1)}, nId:${nodeId}`, "WORKER");
       addTask({ id: nodeId, height });
     },
     [addTask]

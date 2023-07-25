@@ -17,7 +17,6 @@ export const useHover = <T extends HTMLElement>() => {
   // wouldn't cause a rerender and thus the effect would run again.
   const ref = useCallback<(node?: null | T) => void>(
     node => {
-      console.log("useCallback", { node });
       if (refElement.current) {
         refElement.current.removeEventListener("mouseenter", handleMouseEnter);
         refElement.current.removeEventListener("mouseleave", handleMouseLeave);
