@@ -128,7 +128,7 @@ const NodesList = ({
   onForceRecalculateGraph,
   setSelectedProposalId,
 }: NodeListProps) => {
-  const { nodeBookDispatch } = useNodeBook();
+  const { nodeBookState, nodeBookDispatch } = useNodeBook();
 
   const setOpenPartNode = useCallback(
     (nodeId: string) => (newOpenPart: OpenPart) => setOpenPart(nodeId, newOpenPart),
@@ -149,8 +149,9 @@ const NodesList = ({
             setFocusView={setFocusView}
             activeNode={notebookRef.current.selectedNode === nId}
             // citationsSelected={citationsSelected}
-            isProposalsSelected={
-              notebookRef.current.selectedNode === nId && notebookRef.current.selectionType === "Proposals"
+            isProposalsSelected={nodeBookState.selectedNode === nId && nodeBookState.selectionType === "Proposals"}
+            isAcceptedProposalSelected={
+              nodeBookState.selectedNode === nId && nodeBookState.selectionType === "AcceptedProposals"
             }
             // acceptedProposalsSelected={acceptedProposalsSelected}
             // commentsSelected={commentsSelected}

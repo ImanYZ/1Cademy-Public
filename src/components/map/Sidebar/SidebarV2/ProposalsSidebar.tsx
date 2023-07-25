@@ -81,7 +81,7 @@ const ProposalsSidebar = ({
         selectProposal({ preventDefault: () => {} }, proposal, proposal.newNodeId);
       }
     }
-  }, [isRetrieving, initialProposal, selectedNode, open, proposalsWithId, clearInitialProposal]);
+  }, [isRetrieving, initialProposal, selectedNode, open, proposalsWithId, clearInitialProposal, selectProposal]);
 
   const a11yProps = (index: number) => {
     return {

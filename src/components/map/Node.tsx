@@ -81,6 +81,7 @@ type NodeProps = {
   activeNode: any;
   // citationsSelected: any;
   isProposalsSelected: boolean;
+  isAcceptedProposalSelected: boolean;
   // acceptedProposalsSelected: any;
   // commentsSelected: any;
   left: number;
@@ -1594,7 +1595,7 @@ export const MemoizedNode = React.memo(Node, (prev, next) => {
     prev.left === next.left &&
     prev.activeNode === next.activeNode &&
     prev.isProposalsSelected === next.isProposalsSelected &&
-    // prev.acceptedProposalsSelected === next.acceptedProposalsSelected &&
+    prev.isAcceptedProposalSelected === next.isAcceptedProposalSelected &&
     // prev.commentsSelected === next.commentsSelected &&
     prev.unaccepted === next.unaccepted &&
     prev.disableVotes === next.disableVotes &&

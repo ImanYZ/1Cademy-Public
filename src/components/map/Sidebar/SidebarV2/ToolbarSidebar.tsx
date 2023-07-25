@@ -42,7 +42,6 @@ import React, { Dispatch, SetStateAction, Suspense, useCallback, useEffect, useM
 import { ChosenTag, MemoizedTagsSearcher } from "@/components/TagsSearcher";
 import { useNodeBook } from "@/context/NodeBookContext";
 import { useTagsTreeView } from "@/hooks/useTagsTreeView";
-import { useTraceUpdate } from "@/hooks/useTraceUpdate";
 import { retrieveAuthenticatedUser } from "@/lib/firestoreClient/auth";
 import { Delete, Post } from "@/lib/mapApi";
 
@@ -115,38 +114,36 @@ type MainSidebarProps = {
   isHovered: boolean;
 };
 
-export const ToolbarSidebar = (props: MainSidebarProps) => {
-  const {
-    notebookRef,
-    open,
-    onClose,
-    reloadPermanentGrpah,
-    user,
-    reputation,
-    // theme,
-    setOpenSideBar,
-    selectedUser,
-    uncheckedNotificationsNum = 0,
-    bookmarkUpdatesNum = 0,
-    pendingProposalsNum = 0,
-    windowHeight,
-    reputationSignal,
-    onlineUsers,
-    usersOnlineStatusLoaded,
-    disableToolbar = false,
-    userTutorial,
-    dispatch,
-    notebooks,
-    setNotebooks,
-    onChangeNotebook,
-    selectedNotebook,
-    openNodesOnNotebook,
-    onDisplayInstructorPage,
-    onChangeTagOfNotebookById,
-    toolbarRef,
-    isHovered,
-  } = props;
-  useTraceUpdate(props);
+export const ToolbarSidebar = ({
+  notebookRef,
+  open,
+  onClose,
+  reloadPermanentGrpah,
+  user,
+  reputation,
+  // theme,
+  setOpenSideBar,
+  selectedUser,
+  uncheckedNotificationsNum = 0,
+  bookmarkUpdatesNum = 0,
+  pendingProposalsNum = 0,
+  windowHeight,
+  reputationSignal,
+  onlineUsers,
+  usersOnlineStatusLoaded,
+  disableToolbar = false,
+  userTutorial,
+  dispatch,
+  notebooks,
+  setNotebooks,
+  onChangeNotebook,
+  selectedNotebook,
+  openNodesOnNotebook,
+  onDisplayInstructorPage,
+  onChangeTagOfNotebookById,
+  toolbarRef,
+  isHovered,
+}: MainSidebarProps) => {
   const { nodeBookState, nodeBookDispatch } = useNodeBook();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));

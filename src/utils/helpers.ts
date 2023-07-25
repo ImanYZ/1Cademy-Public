@@ -155,7 +155,7 @@ export const showDifferences = (oldText: string, proposalText: string): string =
 };
 
 export const childrenParentsDifferences = (current: any[], proposal: any[]): any => {
-  console.log({ current, proposal });
+  // console.log({ current, proposal });
   const added = proposal.filter((c: any) => !current.find((cp: any) => c.node === cp.node));
   added.forEach((c: any) => {
     c.added = true;
