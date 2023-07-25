@@ -1,7 +1,6 @@
 // import "./ProposalItem.css";
 import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
 import DoneRoundedIcon from "@mui/icons-material/DoneRounded";
-import StarRoundedIcon from "@mui/icons-material/StarRounded";
 import { Box, Divider, Paper, Tooltip, Typography } from "@mui/material";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
@@ -204,30 +203,6 @@ const ProposalItem = ({ isClickable = true, ...props }: ProposalItemProps) => {
                   }}
                 >
                   {shortenNumber(props.proposal.wrongs, 2, false)}
-                </Typography>
-              </Box>
-            </Tooltip>
-            <Divider
-              orientation="vertical"
-              variant="middle"
-              flexItem
-              sx={{
-                borderColor: DESIGN_SYSTEM_COLORS.notebookG300,
-              }}
-            />
-
-            <Tooltip title="# of 1Admins who have awarded this proposal." placement="bottom-start">
-              <Box style={{ display: "flex", alignItems: "center", gap: "4px", fontSize: "16px" }}>
-                <StarRoundedIcon
-                  fontSize="small"
-                  sx={{ color: theme => (theme.palette.mode === "dark" ? "#F9FAFB" : "#475467") }}
-                />
-                <Typography
-                  sx={{
-                    color: theme => (theme.palette.mode === "dark" ? "#F9FAFB" : "#475467"),
-                  }}
-                >
-                  {shortenNumber(props.proposal.awards, 2, false)}
                 </Typography>
               </Box>
             </Tooltip>
