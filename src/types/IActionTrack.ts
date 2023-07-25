@@ -4,6 +4,7 @@ export type IActionTrackType =
   | "NodeVote"
   | "Improvement"
   | "ChildNode"
+  | "ParentNode"
   | "RateVersion"
   | "NodeOpen"
   | "NodeHide"

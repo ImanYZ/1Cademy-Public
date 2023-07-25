@@ -254,26 +254,29 @@ export const UpDownVoteNode = async ({
 
     //  Iterate through tags in nodeData and obtain other nodes with the same tag that are not deleted
     //  if such nodes exist, set isTag property to false
-    for (let tagId of nodeData.tagIds) {
-      const taggedNodeDocs = await db
-        .collection("nodes")
-        .where("tagIds", "array-contains", tagId)
-        .where("deleted", "==", false)
-        .limit(2)
-        .get();
-      if (taggedNodeDocs.docs.length <= 1) {
-        [batch, writeCounts] = await deleteTagCommunityAndTagsOfTags({
-          batch,
-          nodeId: tagId,
-          writeCounts,
-          t,
-          tWriteOperations,
-        });
-        const tagNodeRef = db.collection("nodes").doc(tagId);
-        batch.update(tagNodeRef, { isTag: false, updatedAt: currentTimestamp });
-        [batch, writeCounts] = await checkRestartBatchWriteCounts(batch, writeCounts);
+    await detach(async () => {
+      let batch = db.batch();
+      let writeCounts = 0;
+      for (let tagId of nodeData.tagIds) {
+        const taggedNodeDocs = await db
+          .collection("nodes")
+          .where("tagIds", "array-contains", tagId)
+          .where("deleted", "==", false)
+          .limit(2)
+          .get();
+        if (taggedNodeDocs.docs.length <= 1) {
+          [batch, writeCounts] = await deleteTagCommunityAndTagsOfTags({
+            batch,
+            nodeId: tagId,
+            writeCounts,
+          });
+          const tagNodeRef = db.collection("nodes").doc(tagId);
+          batch.update(tagNodeRef, { isTag: false, updatedAt: currentTimestamp });
+          [batch, writeCounts] = await checkRestartBatchWriteCounts(batch, writeCounts);
+        }
       }
-    }
+      await commitBatch(batch);
+    });
 
     //  query all the nodes that are referencing current node with nodeId
     if (nodeData.nodeType === "Reference") {
