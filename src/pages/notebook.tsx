@@ -373,7 +373,7 @@ const Notebook = ({}: NotebookProps) => {
   const proposalTimer = useRef<any>(null);
 
   const [openProgressBar, setOpenProgressBar] = useState(false);
-  const [, /* openProgressBarMenu */ setOpenProgressBarMenu] = useState(false);
+  // const [ openProgressBarMenu,  setOpenProgressBarMenu] = useState(false);
   const [displayDashboard, setDisplayDashboard] = useState(false);
   const [rootQuery, setRootQuery] = useState<string | undefined>(undefined);
 
@@ -2705,7 +2705,7 @@ const Notebook = ({}: NotebookProps) => {
     (event: any, nodeId: string) => {
       if (notebookRef.current.choosingNode) return;
 
-      notebookRef.current.selectedNode = nodeId;
+      notebookRef.current.selectedNode = nodeId; // CHECK: should we remove? the same code bellow in the setState and this doesn't have the dispatch
 
       setGraph(({ nodes: oldNodes, edges }) => {
         const thisNode = oldNodes[nodeId];
@@ -4425,24 +4425,25 @@ const Notebook = ({}: NotebookProps) => {
 
   /////////////////////////////////////////////////////
   // Inner functions
-  const selectProposal = useMemoizedCallback(
+  const onSelectProposal = useMemoizedCallback(
     (event, proposal, newNodeId: string) => {
       if (proposalTimer.current) {
         clearTimeout(proposalTimer.current);
       }
-      proposalTimer.current = setTimeout(() => {
+      proposalTimer.current = setTimeout(async () => {
         if (!proposal) {
           setSelectedProposalId("");
           reloadPermanentGraph();
           notebookRef.current.selectionType = null;
           return;
         }
-        devLog("SELECT PROPOSAL", { proposal, newNodeId });
+        devLog("ON_SELECT_PROPOSAL", { proposal, newNodeId });
         if (!user?.uname) return;
         event.preventDefault();
         notebookRef.current.selectionType = "Proposals";
         setSelectedProposalId(proposal.id);
         reloadPermanentGraph();
+        await delay(1000); // INFO: this is required to give some time to update correctly the consecutive setGraph states (1.reload permanent graph, 2. setGraph)
 
         const updatedNodeIds: string[] = [nodeBookState.selectedNode!, newNodeId];
         setGraph(({ nodes: oldNodes, edges }) => {
@@ -4547,11 +4548,7 @@ const Notebook = ({}: NotebookProps) => {
             const newChildren = childrenParentsDifferences(thisNode.children, proposal.children);
             const newParents = childrenParentsDifferences(thisNode.parents, proposal.parents);
             const newTags = tagsRefDifferences(thisNode.tagIds, proposal.tagIds);
-            const newRefrences = tagsRefDifferences(thisNode.referenceIds, proposal.referenceIds);
-            devLog("NEWREFRENCES", {
-              newRefrences,
-              referenceIds: Array.from(new Set([...thisNode.referenceIds, ...proposal.referenceIds])),
-            });
+            const newReferences = tagsRefDifferences(thisNode.referenceIds, proposal.referenceIds);
 
             thisNode.nodeType = proposal.nodeType || thisNode.nodeType;
             thisNode.title = showDifferences(thisNode.title, proposal.title); /* proposal.title */
@@ -4569,8 +4566,9 @@ const Notebook = ({}: NotebookProps) => {
             thisNode.tags = Array.from(new Set([...thisNode.tags, ...proposal.tags]));
             thisNode.tagIds = Array.from(new Set([...thisNode.tagIds, ...proposal.tagIds]));
             thisNode.referenceLabels = ["", ""];
-            thisNode.addedReferences = newRefrences.added;
-            thisNode.removedReferences = newRefrences.removed;
+            thisNode.addedReferences = newReferences.added;
+            thisNode.removedReferences = newReferences.removed;
+
             if (proposal.nodeType === "Question") {
               thisNode.choices = proposal.choices;
             }
@@ -4926,9 +4924,9 @@ const Notebook = ({}: NotebookProps) => {
     return mapInteractionValue.scale < userThresholdcurrentScale;
   }, [mapInteractionValue.scale, user, windowWith]);
 
-  const handleCloseProgressBarMenu = useCallback(() => {
-    setOpenProgressBarMenu(false);
-  }, []);
+  // const handleCloseProgressBarMenu = useCallback(() => {
+  //   setOpenProgressBarMenu(false);
+  // }, []);
 
   const onCancelTutorial = useCallback(() => {
     if (tutorialTargetId) removeStyleFromTarget(tutorialTargetId);
@@ -6817,7 +6815,7 @@ const Notebook = ({}: NotebookProps) => {
               tutorialStep={currentStep}
               tutorial={tutorial}
               targetClientRect={targetClientRect}
-              handleCloseProgressBarMenu={handleCloseProgressBarMenu}
+              // handleCloseProgressBarMenu={handleCloseProgressBarMenu}
               onSkip={onSkipTutorial}
               onFinalize={onFinalizeTutorial}
               onNextStep={onNextTutorialStep}
@@ -7052,7 +7050,7 @@ const Notebook = ({}: NotebookProps) => {
                 fetchProposals={fetchProposals}
                 selectedNode={nodeBookState.selectedNode}
                 rateProposal={rateProposal}
-                selectProposal={selectProposal}
+                selectProposal={onSelectProposal}
                 deleteProposal={deleteProposal}
                 proposeNewChild={proposeNewChild}
                 openProposal={selectedProposalId}
@@ -7365,7 +7363,7 @@ const Notebook = ({}: NotebookProps) => {
                     tutorial={tutorial}
                     tutorialStep={currentStep}
                     targetClientRect={targetClientRect}
-                    handleCloseProgressBarMenu={handleCloseProgressBarMenu}
+                    // handleCloseProgressBarMenu={handleCloseProgressBarMenu}
                     onSkip={onSkipTutorial}
                     onFinalize={onFinalizeTutorial}
                     onNextStep={onNextTutorialStep}

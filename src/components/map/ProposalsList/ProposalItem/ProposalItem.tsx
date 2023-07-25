@@ -42,9 +42,8 @@ const ProposalItem = ({ isClickable = true, ...props }: ProposalItemProps) => {
         props.openLinkedNode(proposal.node);
       }
     },
-    // TODO: check dependencies to remove eslint-disable-next-line
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [props.openLinkedNode, props.shouldSelectProposal, props.selectProposal]
+    [props]
+    // [props.openLinkedNode, props.shouldSelectProposal, props.selectProposal]
   );
 
   let proposalSummaries;
