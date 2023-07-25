@@ -5,11 +5,11 @@ import { LEADER_BOARD_STEPS } from "./leaderBoardTutorialSteps";
 // import { INTERACTION_LIVENESS_BAR_STEPS, REPUTATION_LIVENESS_BAR_STEPS } from "./livenessBarTutorialSteps";
 import { NAVIGATION_STEPS_COMPLETE } from "./navigationTutorialSteps";
 import {
-  COLLAPSE_STEPS_COMPLETE,
+  // COLLAPSE_STEPS_COMPLETE,
   DOWNVOTE_STEPS_COMPLETE,
-  EXPAND_STEPS_COMPLETE,
-  HIDE_OFFSPRING_STEPS_COMPLETE,
-  HIDE_STEPS_COMPLETE,
+  // EXPAND_STEPS_COMPLETE,
+  // HIDE_OFFSPRING_STEPS_COMPLETE,
+  // HIDE_STEPS_COMPLETE,
   TAGS_REFERENCES_STEPS_COMPLETE,
   UPTOVE_STEPS_COMPLETE,
 } from "./nodeActionsTutorialStep";
@@ -66,33 +66,33 @@ export const getGroupTutorials = ({}: GetGroupTutorialsInput): GroupTutorial[] =
         tutorials: [],
       },
       {
-        title: "Search Engine",
-        tutorialSteps: { tutorialKey: "searcher", steps: SEARCHER_STEPS_COMPLETE },
-        tutorials: [],
-      },
-      {
         title: "Node Interactions",
         tutorialSteps: { tutorialKey: "nodeInteractions", steps: NODE_INTERACTIONS_CONFIG },
         tutorials: [],
       },
+      // {
+      //   title: "Hide Descendants",
+      //   tutorialSteps: { tutorialKey: "hideDescendants", steps: HIDE_OFFSPRING_STEPS_COMPLETE },
+      //   tutorials: [],
+      // },
+      // {
+      //   title: "Collapse the Node",
+      //   tutorialSteps: { tutorialKey: "collapseNode", steps: COLLAPSE_STEPS_COMPLETE },
+      //   tutorials: [],
+      // },
+      // {
+      //   title: "Expand the Node",
+      //   tutorialSteps: { tutorialKey: "expandNode", steps: EXPAND_STEPS_COMPLETE },
+      //   tutorials: [],
+      // },
+      // {
+      //   title: "Hide the Node",
+      //   tutorialSteps: { tutorialKey: "hideNode", steps: HIDE_STEPS_COMPLETE },
+      //   tutorials: [],
+      // },
       {
-        title: "Hide Descendants",
-        tutorialSteps: { tutorialKey: "hideDescendants", steps: HIDE_OFFSPRING_STEPS_COMPLETE },
-        tutorials: [],
-      },
-      {
-        title: "Collapse the Node",
-        tutorialSteps: { tutorialKey: "collapseNode", steps: COLLAPSE_STEPS_COMPLETE },
-        tutorials: [],
-      },
-      {
-        title: "Expand the Node",
-        tutorialSteps: { tutorialKey: "expandNode", steps: EXPAND_STEPS_COMPLETE },
-        tutorials: [],
-      },
-      {
-        title: "Hide the Node",
-        tutorialSteps: { tutorialKey: "hideNode", steps: HIDE_STEPS_COMPLETE },
+        title: "Search Engine",
+        tutorialSteps: { tutorialKey: "searcher", steps: SEARCHER_STEPS_COMPLETE },
         tutorials: [],
       },
     ],

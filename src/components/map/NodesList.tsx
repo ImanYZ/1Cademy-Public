@@ -3,7 +3,7 @@ import { FullNodeData, OpenPart, TNodeBookState, TNodeUpdates } from "src/nodeBo
 
 import { useNodeBook } from "@/context/NodeBookContext";
 import { NODE_WIDTH } from "@/lib/utils/Map.utils";
-import { onForceRecalculateGraphInput, OnSelectNodeInput, OpenLeftSidebar } from "@/pages/notebook";
+import { OnChangeChosenNode, onForceRecalculateGraphInput, OnSelectNodeInput, OpenLeftSidebar } from "@/pages/notebook";
 
 import { MemoizedNode } from "./Node";
 
@@ -27,7 +27,6 @@ type NodeListProps = {
   openNodePart: any;
   onNodeShare: (nodeId: string, platform: string) => void;
   selectNode: (params: OnSelectNodeInput) => void;
-  nodeClicked: any;
   correctNode: any;
   wrongNode: any;
   uploadNodeImage: any;
@@ -42,6 +41,7 @@ type NodeListProps = {
   onNodeTitleBlur: (newTitle: string) => void;
   // setOpenSearch: any;
   saveProposedChildNode: any;
+  saveProposedParentNode: any;
   saveProposedImprovement: any;
   closeSideBar: any;
   reloadPermanentGraph: any;
@@ -51,6 +51,7 @@ type NodeListProps = {
   setOpenSideBar: (sidebar: OpenLeftSidebar) => void;
   proposeNodeImprovement: any;
   proposeNewChild: any;
+  proposeNewParent: any;
   scrollToNode: any;
   openSidebar: OpenLeftSidebar;
   setOperation: (operation: string) => void;
@@ -67,6 +68,9 @@ type NodeListProps = {
   assistantSelectNode: boolean;
   onForceRecalculateGraph: (props: onForceRecalculateGraphInput) => void;
   setSelectedProposalId: (newValue: string) => void;
+  onChangeChosenNode: (props: OnChangeChosenNode) => void;
+  editingModeNode: boolean;
+  setEditingModeNode: (newValue: boolean) => void;
 };
 
 const NodesList = ({
@@ -89,7 +93,6 @@ const NodesList = ({
   openNodePart,
   onNodeShare,
   selectNode,
-  nodeClicked,
   correctNode,
   wrongNode,
   uploadNodeImage,
@@ -103,6 +106,7 @@ const NodesList = ({
   onNodeTitleBlur,
   // setOpenSearch,
   saveProposedChildNode,
+  saveProposedParentNode,
   saveProposedImprovement,
   closeSideBar,
   reloadPermanentGraph,
@@ -113,6 +117,7 @@ const NodesList = ({
   setOpenSideBar,
   proposeNodeImprovement,
   proposeNewChild,
+  proposeNewParent,
   scrollToNode,
   openSidebar,
   setOperation,
@@ -127,6 +132,9 @@ const NodesList = ({
   assistantSelectNode,
   onForceRecalculateGraph,
   setSelectedProposalId,
+  onChangeChosenNode,
+  editingModeNode,
+  setEditingModeNode,
 }: NodeListProps) => {
   const { nodeBookState, nodeBookDispatch } = useNodeBook();
 
@@ -164,6 +172,7 @@ const NodesList = ({
             nodeType={nodes[nId].nodeType}
             isTag={nodes[nId].hasOwnProperty("isTag") && nodes[nId].isTag}
             isNew={nodes[nId].hasOwnProperty("isNew") && nodes[nId].isNew}
+            newParent={nodes[nId].hasOwnProperty("newParent") && nodes[nId].newParent}
             title={nodes[nId].title}
             content={nodes[nId].content}
             nodeImage={nodes[nId].nodeImage}
@@ -219,7 +228,6 @@ const NodesList = ({
             openNodePart={openNodePart}
             onNodeShare={onNodeShare}
             selectNode={selectNode}
-            nodeClicked={nodeClicked}
             correctNode={correctNode}
             wrongNode={wrongNode}
             uploadNodeImage={uploadNodeImage}
@@ -233,6 +241,7 @@ const NodesList = ({
             onNodeTitleBLur={onNodeTitleBlur}
             // setOpenSearch={setOpenSearch}
             saveProposedChildNode={saveProposedChildNode}
+            saveProposedParentNode={saveProposedParentNode}
             saveProposedImprovement={saveProposedImprovement}
             closeSideBar={closeSideBar}
             reloadPermanentGraph={reloadPermanentGraph}
@@ -242,6 +251,7 @@ const NodesList = ({
             setOpenSideBar={setOpenSideBar}
             proposeNodeImprovement={proposeNodeImprovement}
             proposeNewChild={proposeNewChild}
+            proposeNewParent={proposeNewParent}
             scrollToNode={scrollToNode}
             openSidebar={openSidebar}
             locked={nodes[nId].locked}
@@ -269,6 +279,9 @@ const NodesList = ({
             assistantSelectNode={assistantSelectNode}
             onForceRecalculateGraph={onForceRecalculateGraph}
             setSelectedProposalId={setSelectedProposalId}
+            onChangeChosenNode={onChangeChosenNode}
+            editingModeNode={editingModeNode}
+            setEditingModeNode={setEditingModeNode}
           />
         );
       })}
@@ -306,7 +319,6 @@ export const MemoizedNodeList = React.memo(NodesList, (prev, next) => {
     prev.toggleNode === next.toggleNode &&
     prev.openNodePart === next.openNodePart &&
     prev.selectNode === next.selectNode &&
-    prev.nodeClicked === next.nodeClicked &&
     prev.correctNode === next.correctNode &&
     prev.wrongNode === next.wrongNode &&
     prev.uploadNodeImage === next.uploadNodeImage &&

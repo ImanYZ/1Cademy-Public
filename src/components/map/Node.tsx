@@ -34,7 +34,13 @@ import { DispatchNodeBookActions, FullNodeData, OpenPart, TNodeUpdates } from "s
 import { useNodeBook } from "@/context/NodeBookContext";
 import { Post } from "@/lib/mapApi";
 import { getVideoDataByUrl, momentDateToSeconds } from "@/lib/utils/utils";
-import { ChosenType, onForceRecalculateGraphInput, OnSelectNodeInput, OpenLeftSidebar } from "@/pages/notebook";
+import {
+  ChosenType,
+  OnChangeChosenNode,
+  onForceRecalculateGraphInput,
+  OnSelectNodeInput,
+  OpenLeftSidebar,
+} from "@/pages/notebook";
 
 import { useAuth } from "../../context/AuthContext";
 import { KnowledgeChoice } from "../../knowledgeTypes";
@@ -91,7 +97,8 @@ type NodeProps = {
   unaccepted: boolean;
   nodeType: any;
   isTag: boolean;
-  isNew: any;
+  isNew: boolean;
+  newParent: boolean;
   title: string;
   content: string;
   nodeImage: string;
@@ -105,9 +112,21 @@ type NodeProps = {
   markedWrong: any;
   references: string[];
   disableVotes: boolean;
-  tags: string[] | { node: string; title?: string; label?: string }[];
+  tags:
+    | string[]
+    | {
+        node: string;
+        title?: string;
+        label?: string;
+      }[];
   parents: Parent[];
-  nodesChildren: string[] | { node: string; title?: string; label?: string }[];
+  nodesChildren:
+    | string[]
+    | {
+        node: string;
+        title?: string;
+        label?: string;
+      }[];
   choices: KnowledgeChoice[];
   commentsNum: number;
   proposalsNum: number;
@@ -137,7 +156,6 @@ type NodeProps = {
   openNodePart: (event: any, id: string, partType: any, openPart: any, setOpenPart: any, tags: any) => void; //
   onNodeShare: (nodeId: string, platform: string) => void;
   selectNode: (params: OnSelectNodeInput) => void;
-  nodeClicked: any;
   correctNode: any;
   wrongNode: any;
   uploadNodeImage: any;
@@ -151,6 +169,7 @@ type NodeProps = {
   cleanEditorLink: () => void;
   onNodeTitleBLur: (newTitle: string) => void;
   saveProposedChildNode: any;
+  saveProposedParentNode: any;
   saveProposedImprovement: any;
   closeSideBar: any;
   reloadPermanentGraph: any;
@@ -161,6 +180,7 @@ type NodeProps = {
   setOpenSideBar: (sidebar: OpenLeftSidebar) => void;
   proposeNodeImprovement: any;
   proposeNewChild: any;
+  proposeNewParent: any;
   scrollToNode: any;
   openSidebar: OpenLeftSidebar;
   locked: boolean;
@@ -187,6 +207,9 @@ type NodeProps = {
   assistantSelectNode: boolean;
   onForceRecalculateGraph: (props: onForceRecalculateGraphInput) => void;
   setSelectedProposalId: (newValue: string) => void;
+  onChangeChosenNode: (props: OnChangeChosenNode) => void;
+  editingModeNode: boolean;
+  setEditingModeNode: (newValue: boolean) => void;
 };
 
 const proposedChildTypesIcons: { [key in ProposedChildTypesIcons]: string } = {
@@ -224,6 +247,7 @@ const Node = ({
   unaccepted,
   nodeType,
   isNew,
+  newParent,
   title,
   content,
   nodeImage,
@@ -268,7 +292,6 @@ const Node = ({
   openNodePart,
   onNodeShare,
   selectNode,
-  nodeClicked,
   correctNode,
   wrongNode,
   uploadNodeImage,
@@ -280,6 +303,7 @@ const Node = ({
   deleteChoice,
   addChoice,
   saveProposedChildNode,
+  saveProposedParentNode,
   saveProposedImprovement,
   closeSideBar,
   reloadPermanentGraph,
@@ -289,6 +313,7 @@ const Node = ({
   setOpenSideBar,
   proposeNodeImprovement,
   proposeNewChild,
+  proposeNewParent,
   cleanEditorLink,
   openSidebar,
   locked,
@@ -312,6 +337,9 @@ const Node = ({
   assistantSelectNode,
   onForceRecalculateGraph,
   setSelectedProposalId,
+  onChangeChosenNode,
+  editingModeNode,
+  setEditingModeNode,
 }: NodeProps) => {
   const [{ user }] = useAuth();
   const { nodeBookState } = useNodeBook();
@@ -442,95 +470,33 @@ const Node = ({
     };
   }, [changeNodeHight, identifier]);
 
-  const nodeClickHandler = useCallback(
-    (event: any) => {
-      let operation = "selectNode";
-      if (editable) return;
-      if (assistantSelectNode) {
-        if (notebookRef?.current?.choosingNode?.type) {
-          const nodeClickEvent = new CustomEvent("node-selected", {
-            detail: {
-              id: identifier,
-              title,
-              content,
-              nodeSelectionType: notebookRef?.current?.choosingNode?.type,
-            },
-          });
-          window.dispatchEvent(nodeClickEvent);
-        }
-        nodeBookDispatch({ type: "setChoosingNode", payload: null });
-        notebookRef.current.choosingNode = null;
-        nodeBookDispatch({ type: "setChosenNode", payload: null });
-        notebookRef.current.chosenNode = null;
-        setAssistantSelectNode(false);
-        // // assistantSelectNode.current = false;
-        return;
+  const nodeClickHandler = useCallback(() => {
+    if (editingModeNode) return;
+    if (!notebookRef.current.choosingNode && notebookRef.current.selectedNode !== identifier) {
+      const updatedNodeIds: string[] = [notebookRef.current.selectedNode!, identifier];
+      notebookRef.current.selectedNode = identifier;
+      nodeBookDispatch({ type: "setSelectedNode", payload: identifier });
+      setNodeUpdates({
+        nodeIds: updatedNodeIds,
+        updatedAt: new Date(),
+      });
+      if (openSidebar === "PROPOSALS") {
+        reloadPermanentGraph();
+        notebookRef.current.selectionType = null;
+        nodeBookDispatch({ type: "setSelectionType", payload: null });
+        setSelectedProposalId("");
       }
-      if (notebookRef.current.choosingNode && notebookRef.current.choosingNode.id !== identifier) {
-        // The first Nodes exist, Now is clicking the Chosen Node
-
-        notebookRef.current.chosenNode = {
-          id: identifier,
-          title,
-        };
-        nodeBookDispatch({ type: "setChosenNode", payload: { id: identifier, title } });
-
-        if (notebookRef.current.choosingNode.id === "Tag") return; //INFO: this is important to update a community
-        chosenNodeChanged(identifier);
-        // chosenNodeChanged(notebookRef.current.choosingNode.id);
-
-        setAbleToPropose(true);
-        // scrollToNode(notebookRef.current.selectedNode);
-        operation = "chooseNode";
-      } else if (
-        "activeElement" in event.currentTarget &&
-        "nodeName" in event.currentTarget.activeElement &&
-        event.currentTarget.activeElement.nodeName !== "INPUT" &&
-        !notebookRef.current.choosingNode
-      ) {
-        nodeClicked(event, identifier, nodeType, setOpenPart);
-      }
-
-      if (
-        !notebookRef.current.choosingNode &&
-        notebookRef.current.selectedNode !== identifier &&
-        operation === "selectNode"
-      ) {
-        const updatedNodeIds: string[] = [notebookRef.current.selectedNode!, identifier];
-        notebookRef.current.selectedNode = identifier;
-        nodeBookDispatch({ type: "setSelectedNode", payload: identifier });
-        setNodeUpdates({
-          nodeIds: updatedNodeIds,
-          updatedAt: new Date(),
-        });
-        if (openSidebar === "PROPOSALS") {
-          reloadPermanentGraph();
-          notebookRef.current.selectionType = null;
-          nodeBookDispatch({ type: "setSelectionType", payload: null });
-          setSelectedProposalId("");
-        }
-      }
-    },
-    [
-      editable,
-      assistantSelectNode,
-      notebookRef,
-      identifier,
-      nodeBookDispatch,
-      setAssistantSelectNode,
-      title,
-      content,
-      chosenNodeChanged,
-      setAbleToPropose,
-      nodeClicked,
-      nodeType,
-      setOpenPart,
-      setNodeUpdates,
-      openSidebar,
-      reloadPermanentGraph,
-      setSelectedProposalId,
-    ]
-  );
+    }
+  }, [
+    editingModeNode,
+    notebookRef,
+    identifier,
+    nodeBookDispatch,
+    setNodeUpdates,
+    openSidebar,
+    reloadPermanentGraph,
+    setSelectedProposalId,
+  ]);
 
   const hideNodeHandler = useCallback(
     (event: any) => {
@@ -640,6 +606,12 @@ const Node = ({
       // here disable button
       setTimeout(() => {
         const firstParentId: Parent = parents[0];
+        setEditingModeNode(false);
+
+        if (newParent) {
+          saveProposedParentNode(identifier, "", reason, () => setAbleToPropose(true));
+          return;
+        }
 
         if (isNew) {
           saveProposedChildNode(identifier, "", reason, () => setAbleToPropose(true));
@@ -661,18 +633,23 @@ const Node = ({
   );
 
   const onCancelProposal = () => {
+    reloadPermanentGraph();
     const firstParentId: any = parents[0];
-    const scrollTo = isNew ? firstParentId.node ?? undefined : identifier;
-    if (!scrollTo) return;
-    notebookRef.current.selectedNode = scrollTo;
-    notebookRef.current.choosingNode = null;
-    notebookRef.current.selectedNode = null;
-    notebookRef.current.chosenNode = null;
-    nodeBookDispatch({ type: "setSelectedNode", payload: scrollTo });
+    if (firstParentId) {
+      const scrollTo = isNew ? firstParentId.node ?? undefined : identifier;
+      if (scrollTo) {
+        notebookRef.current.selectedNode = scrollTo;
+        notebookRef.current.choosingNode = null;
+        notebookRef.current.selectedNode = null;
+        notebookRef.current.chosenNode = null;
+        nodeBookDispatch({ type: "setSelectedNode", payload: scrollTo });
+      }
+    }
     nodeBookDispatch({ type: "setChoosingNode", payload: null });
     nodeBookDispatch({ type: "setSelectedNode", payload: null });
     nodeBookDispatch({ type: "setChosenNode", payload: null });
     setOperation("CancelProposals");
+    setEditingModeNode(false);
     window.dispatchEvent(new CustomEvent("next-flashcard"));
     closeSideBar();
   };
@@ -811,6 +788,42 @@ const Node = ({
       setToBeEligible(false);
     }
   };
+
+  const onChangeChosenNodeHandler = useCallback(() => {
+    if (editable) return;
+    if (assistantSelectNode) {
+      if (notebookRef?.current?.choosingNode?.type) {
+        const nodeClickEvent = new CustomEvent("node-selected", {
+          detail: {
+            id: identifier,
+            title,
+            content,
+            nodeSelectionType: notebookRef?.current?.choosingNode?.type,
+          },
+        });
+        window.dispatchEvent(nodeClickEvent);
+      }
+      nodeBookDispatch({ type: "setChoosingNode", payload: null });
+      notebookRef.current.choosingNode = null;
+      nodeBookDispatch({ type: "setChosenNode", payload: null });
+      notebookRef.current.chosenNode = null;
+      setAssistantSelectNode(false);
+      // // assistantSelectNode.current = false;
+      return;
+    }
+    onChangeChosenNode({ nodeId: identifier, title });
+  }, [
+    assistantSelectNode,
+    content,
+    editable,
+    identifier,
+    nodeBookDispatch,
+    notebookRef,
+    onChangeChosenNode,
+    setAssistantSelectNode,
+    title,
+  ]);
+
   if (!user) {
     return null;
   }
@@ -1358,7 +1371,7 @@ const Node = ({
             enableChildElements={enableChildElements}
             setAbleToPropose={setAbleToPropose}
             choosingNode={notebookRef.current.choosingNode}
-            nodeClickHandler={nodeClickHandler}
+            onChangeChosenNode={onChangeChosenNodeHandler}
           />
         )}
 
@@ -1523,11 +1536,69 @@ const Node = ({
               disabled={disabled}
               setAbleToPropose={setAbleToPropose}
               choosingNode={notebookRef.current.choosingNode}
-              nodeClickHandler={nodeClickHandler}
+              onChangeChosenNode={onChangeChosenNodeHandler}
             />
           </div>
         )}
       </div>
+      {!isNew && nodeType !== "Reference" && editable && user && user.role === "INSTRUCTOR" && (
+        <Box
+          id={`${identifier}-new-parent-nodes-buttons`}
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            gap: "10px",
+            position: "absolute",
+            top: (parseFloat(String(document.getElementById(identifier)?.clientHeight)) - 396) * 0.5 + "px",
+            animation: `${childNodeButtonsAnimation} 1s backwards`,
+            borderRadius: "25px",
+            right: "590px",
+          }}
+        >
+          {(Object.keys(proposedChildTypesIcons) as ProposedChildTypesIcons[]).map(
+            (parentNodeType: ProposedChildTypesIcons, index: number) => {
+              return (
+                <Tooltip title={`Propose a ${parentNodeType} parent`} placement="left" key={index}>
+                  <Fab
+                    id={`${identifier}-propose-${parentNodeType.toLowerCase()}-parent`}
+                    disabled={disabled}
+                    color="primary"
+                    sx={{
+                      background: "#1F1F1F",
+                      ":hover": {
+                        background: "#525151",
+                      },
+                    }}
+                    aria-label="add"
+                    onClick={(event: any) => {
+                      return openProposalType !== "ProposeNew" + parentNodeType + "ParentNode"
+                        ? proposeNewParent(event, parentNodeType, false, setOpenProposalType)
+                        : undefined;
+                    }}
+                  >
+                    <>
+                      {proposedChildTypesIcons[parentNodeType] === "local_library" && (
+                        <LocalLibraryIcon sx={{ color: "white!important" }} />
+                      )}
+                      {proposedChildTypesIcons[parentNodeType] === "help_outline" && (
+                        <HelpOutlineIcon sx={{ color: "#fff" }} />
+                      )}
+                      {proposedChildTypesIcons[parentNodeType] === "code" && <CodeIcon sx={{ color: "#fff" }} />}
+                      {proposedChildTypesIcons[parentNodeType] === "share" && <ShareIcon sx={{ color: "#fff" }} />}
+                      {proposedChildTypesIcons[parentNodeType] === "menu_book" && (
+                        <MenuBookIcon sx={{ color: "#fff" }} />
+                      )}
+                      {proposedChildTypesIcons[parentNodeType] === "emoji_objects" && (
+                        <EmojiObjectsIcon sx={{ color: "#fff" }} />
+                      )}
+                    </>
+                  </Fab>
+                </Tooltip>
+              );
+            }
+          )}
+        </Box>
+      )}
       {!isNew && nodeType !== "Reference" && editable && (
         <Box
           id={`${identifier}-new-children-nodes-buttons`}
