@@ -24,7 +24,7 @@ type TutorialProps = {
   onNextStep: () => void;
   onPreviousStep: () => void;
   targetClientRect: TargetClientRect;
-  handleCloseProgressBarMenu: () => void;
+  // handleCloseProgressBarMenu: () => void;
   onSkip: () => void;
   onFinalize: () => void;
   stepsLength: number;
@@ -46,7 +46,7 @@ export const TooltipTutorial = ({
   targetClientRect,
   onNextStep,
   onPreviousStep,
-  handleCloseProgressBarMenu,
+  // handleCloseProgressBarMenu,
   onSkip,
   onFinalize,
   stepsLength,
@@ -388,7 +388,7 @@ export const TooltipTutorial = ({
             <Button
               variant="outlined"
               onClick={() => {
-                handleCloseProgressBarMenu();
+                // handleCloseProgressBarMenu();
                 onFinalize();
                 setShowNextTutorialStep(false);
               }}
@@ -407,7 +407,7 @@ export const TooltipTutorial = ({
             <Button
               variant="contained"
               onClick={() => {
-                handleCloseProgressBarMenu();
+                // handleCloseProgressBarMenu();
                 onFinalize();
                 setShowNextTutorialStep(false);
                 onForceTutorial(nextTutorial.key);
@@ -492,7 +492,7 @@ export const TooltipTutorial = ({
                 <Button
                   variant="contained"
                   onClick={() => {
-                    handleCloseProgressBarMenu();
+                    // handleCloseProgressBarMenu();
                     forcedTutorial && nextTutorial && !currentTutorialIsTemporal
                       ? setShowNextTutorialStep(true)
                       : onFinalize();
@@ -515,7 +515,7 @@ export const TooltipTutorial = ({
               <Button
                 variant="text"
                 onClick={() => {
-                  handleCloseProgressBarMenu();
+                  // handleCloseProgressBarMenu();
                   onSkip();
                 }}
                 sx={{

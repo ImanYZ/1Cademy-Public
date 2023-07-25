@@ -42,11 +42,14 @@ const getActionIcon = (actionType: ActionTrackType) => {
   if (actionType === "NodeBookmark") return BookmarkIcon;
   if (actionType === "NodeShare") return ReplyIcon;
   if (actionType === "Search") return SearchIcon;
-  throw new Error("Unidentified aciontType");
+  console.error("Unidentified aciontType");
+  return null;
+  // throw new Error("Unidentified aciontType");
 };
 
 const ActionBubble = ({ actionType }: ActionBubbleProps) => {
   const Icon = getActionIcon(actionType);
+
   const [showIcon, setShowIcon] = useState(true);
   useEffect(() => {
     setShowIcon(true);
@@ -55,6 +58,9 @@ const ActionBubble = ({ actionType }: ActionBubbleProps) => {
     }, 3000);
   }, [actionType]);
   const isVote = actionType === "Correct" || actionType === "Wrong";
+
+  if (!Icon) return null;
+
   return showIcon ? (
     <Box
       sx={{
