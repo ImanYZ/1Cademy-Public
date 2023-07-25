@@ -6,10 +6,12 @@
  */
 const disableLogsTemporally = false;
 const disableTutorialLogs = true;
-export const devLog = (logInUpperCase: string, otherData = {}, type?: "TUTORIAL") => {
+const disableWorkerLogs = true;
+export const devLog = (logInUpperCase: string, otherData = {}, type?: "TUTORIAL" | "WORKER") => {
   if (disableLogsTemporally) return;
   if (process.env.NODE_ENV !== "development") return;
   if (type === "TUTORIAL" && disableTutorialLogs) return;
+  if (type === "WORKER" && disableWorkerLogs) return;
 
   console.info(`[${logInUpperCase.toUpperCase()}]`, otherData);
 };
