@@ -292,7 +292,7 @@ const NodePage: NextPage<Props> = ({ notebook }) => {
    */
   const changeNodeHight = useCallback(
     (nodeId: string, height: number) => {
-      devLog("CHANGE 🚀", `H:${height.toFixed(1)}, nId:${nodeId}`);
+      devLog("CHANGE 🚀", `H:${height.toFixed(1)}, nId:${nodeId}`, "WORKER");
       addTask({ id: nodeId, height });
     },
     [addTask]
@@ -376,7 +376,7 @@ const NodePage: NextPage<Props> = ({ notebook }) => {
 
   const onForceRecalculateGraph = useCallback(
     ({ id, by }: onForceRecalculateGraphInput) => {
-      devLog("FORCE_RECALCULATE_GRAPH 🚀", { id, by });
+      devLog("FORCE_RECALCULATE_GRAPH 🚀", { id, by }, "WORKER");
       addTask(null);
     },
     [addTask]
