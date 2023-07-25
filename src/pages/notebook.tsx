@@ -433,6 +433,8 @@ const Notebook = ({}: NotebookProps) => {
   //instructor state
   const [instructor, setInstructor] = useState<Instructor | null>(null);
 
+  const [editingModeNode, setEditingModeNode] = useState(false);
+
   const onChangeTagOfNotebookById = useCallback(
     (notebookId: string, data: { defaultTagId: string; defaultTagName: string }) => {
       setNotebooks(prev => {
@@ -2044,25 +2046,6 @@ const Notebook = ({}: NotebookProps) => {
     [setGraph]
   );
 
-  const nodeClicked = useCallback(
-    (event: any, nodeId: string, nodeType: any, setOpenPart: any) => {
-      devLog("NODE_CLICKED", { nodeId });
-      if (
-        notebookRef.current.selectionType === "AcceptedProposals" ||
-        notebookRef.current.selectionType === "Proposals"
-      )
-        return;
-      notebookRef.current.selectedNode = nodeId;
-      nodeBookDispatch({ type: "setSelectedNode", payload: nodeId });
-
-      setSelectedNodeType(nodeType);
-      setOpenPart("LinkingWords");
-
-      processHeightChange(nodeId);
-    },
-    [nodeBookDispatch, processHeightChange]
-  );
-
   const recursiveDescendants = useCallback((nodeId: string): any[] => {
     // CHECK: this could be improve changing recursive function to iterative
     // because the recursive has a limit of call in stack memory
@@ -3386,6 +3369,7 @@ const Notebook = ({}: NotebookProps) => {
       // event.preventDefault();
       const selectedNode = nodeId || notebookRef.current.selectedNode;
       if (!selectedNode) return;
+      setEditingModeNode(true);
       setSelectedProposalId("ProposeEditTo" + selectedNode);
       reloadPermanentGraph();
 
@@ -7104,7 +7088,6 @@ const Notebook = ({}: NotebookProps) => {
                   openNodePart={openNodePart}
                   onNodeShare={onNodeShare}
                   selectNode={onSelectNode}
-                  nodeClicked={nodeClicked} // CHECK when is used
                   correctNode={correctNode}
                   wrongNode={wrongNode}
                   uploadNodeImage={uploadNodeImage}
@@ -7147,6 +7130,8 @@ const Notebook = ({}: NotebookProps) => {
                   onForceRecalculateGraph={onForceRecalculateGraph}
                   setSelectedProposalId={setSelectedProposalId}
                   onChangeChosenNode={onChangeChosenNode}
+                  editingModeNode={editingModeNode}
+                  setEditingModeNode={setEditingModeNode}
                 />
               </MapInteractionCSS>
 
