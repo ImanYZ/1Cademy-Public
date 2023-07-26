@@ -29,7 +29,7 @@ import oneCademyLogo from "../../../public/DarkmodeLogo.png";
 import oneCademyLogoExtended from "../../../public/logo-extended.png";
 import { useAuth } from "../../context/AuthContext";
 import { auth, dbExp } from "../../lib/firestoreClient/firestoreClient.config";
-import { postWithToken } from "../../lib/mapApi";
+import { Post } from "../../lib/mapApi";
 import ROUTES from "../../lib/utils/routes";
 import { capitalizeString } from "../../lib/utils/string.utils";
 import AppHeaderSearchBar from "../AppHeaderSearchBar2";
@@ -102,7 +102,7 @@ const AppHeader = forwardRef(({ page, sections, selectedSectionId, onSwitchSecti
 
   useEffect(() => {
     if (isAuthenticated && router.query?.course) {
-      postWithToken("/assignCourseToUser", { course: router.query?.course });
+      Post("/assignCourseToUser", { course: router.query?.course });
     }
   }, [isAuthenticated, router.query?.course]);
 

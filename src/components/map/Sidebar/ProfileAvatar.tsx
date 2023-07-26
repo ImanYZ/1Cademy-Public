@@ -5,10 +5,10 @@ import { getDownloadURL, getStorage, ref, uploadBytesResumable } from "firebase/
 import Image from "next/image";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 
+import { Post } from "@/lib/mapApi";
 import { getAvatarName } from "@/lib/utils/Map.utils";
 import { addSuffixToUrlGMT } from "@/lib/utils/string.utils";
 
-import { postWithToken } from "../../../lib/mapApi";
 import { imageLoaded, isValidHttpUrl } from "../../../lib/utils/utils";
 import PercentageLoader from "../PercentageLoader";
 
@@ -96,7 +96,7 @@ const ProfileAvatar = ({ id, userId, userImage, setUserImage, name, lastName }: 
               setIsUploading(false);
               setUserImage(imageGeneratedUrl);
               setPercentageUploaded(100);
-              await postWithToken("/updateUserImageInDB", { imageUrl: imageGeneratedUrl });
+              await Post("/updateUserImageInDB", { imageUrl: imageGeneratedUrl });
             }
           );
         }

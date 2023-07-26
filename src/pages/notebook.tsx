@@ -48,6 +48,7 @@ import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from "rea
 /* eslint-disable */ //This wrapper comments it to use react-map-interaction without types
 // @ts-ignore
 import { MapInteractionCSS } from "react-map-interaction";
+import { addClientErrorLog } from "src/client/firestore/errors.firestore";
 import { getUserNodesByForce } from "src/client/firestore/userNodes.firestore";
 import { Instructor } from "src/instructorsTypes";
 import { IAssistantEventDetail } from "src/types/IAssistant";
@@ -104,8 +105,8 @@ import { useMemoizedCallback } from "../hooks/useMemoizedCallback";
 import { useWindowSize } from "../hooks/useWindowSize";
 import { useWorkerQueue } from "../hooks/useWorkerQueue";
 import { NodeChanges, ReputationSignal } from "../knowledgeTypes";
-import { getIdToken, idToken, retrieveAuthenticatedUser } from "../lib/firestoreClient/auth";
-import { Post, postWithToken } from "../lib/mapApi";
+import { getIdToken, retrieveAuthenticatedUser } from "../lib/firestoreClient/auth";
+import { Post } from "../lib/mapApi";
 import { NO_USER_IMAGE, Z_INDEX } from "../lib/utils/constants";
 import { createGraph, dagreUtils } from "../lib/utils/dagre.util";
 import { devLog } from "../lib/utils/develop.util";
@@ -286,7 +287,6 @@ const Notebook = ({}: NotebookProps) => {
   const [mapRendered, setMapRendered] = useState(false);
   // const [isWritingOnDB, setIsWritingOnDB] = useState(false);
   const isWritingOnDBRef = useRef(false);
-
   const notebookRef = useRef<TNodeBookState>({
     sNode: null,
     isSubmitting: false,
@@ -924,6 +924,13 @@ const Notebook = ({}: NotebookProps) => {
           }
         } catch (err) {
           console.error(err);
+          const errorData = {
+            nodeId,
+            openWithDefaultValues,
+            selectNode,
+            errorMessage: err instanceof Error ? err.message : "",
+          };
+          addClientErrorLog(db, { title: "OPEN_NODE", user: user.uname, data: errorData });
         }
       }
     },
@@ -1281,6 +1288,12 @@ const Notebook = ({}: NotebookProps) => {
         dispatch({ type: "setAuthUser", payload: userUpdated });
       } catch (error) {
         console.error(error);
+        const errorData = {
+          defaultTagId,
+          defaultTagName,
+          errorMessage: error instanceof Error ? error.message : "",
+        };
+        addClientErrorLog(db, { title: "UPDATE_DEFAULT_TAG", user: user.uname, data: errorData });
       }
     };
 
@@ -1525,7 +1538,7 @@ const Notebook = ({}: NotebookProps) => {
   /**
    * Will revert the graph from last changes (temporal Nodes or other changes)
    */
-  const reloadPermanentGraph = useCallback(() => {
+  const revertNodesOnGraph = useCallback(() => {
     devLog("RELOAD PERMANENT GRAPH");
 
     setGraph(({ nodes: oldNodes, edges: oldEdges }) => {
@@ -1596,55 +1609,38 @@ const Notebook = ({}: NotebookProps) => {
         payload: "UserInfo",
       });
       setOpenSidebar("USER_INFO");
-      reloadPermanentGraph();
+      revertNodesOnGraph();
       addDoc(userUserInfoCollection, {
         uname: user?.uname,
         uInfo: uname,
         createdAt: Timestamp.fromDate(new Date()),
       });
     },
-    [db, nodeBookDispatch, user?.uname, setOpenSidebar, reloadPermanentGraph]
+    [db, nodeBookDispatch, user?.uname, setOpenSidebar, revertNodesOnGraph]
   );
-
-  const resetAddedRemovedParentsChildren = useCallback(() => {
-    // CHECK: this could be improve merging this 4 states in 1 state object
-    // so we reduce the rerenders, also we can set only the empty array here
-    updatedLinksRef.current = getInitialUpdateLinks();
-  }, []);
 
   const getMapGraph = useCallback(
     async (mapURL: string, postData: any = false, resetGraph: boolean = true) => {
       if (resetGraph) {
-        setTimeout(() => reloadPermanentGraph(), 200);
+        setTimeout(() => revertNodesOnGraph(), 200);
       }
 
       let response: any = null;
 
-      try {
-        response = await postWithToken(mapURL, postData);
-      } catch (err) {
-        console.error(err);
-        try {
-          await idToken();
-          response = await postWithToken(mapURL, { ...postData });
-        } catch (err) {
-          console.error(err);
-          // window.location.reload();
-        }
-      }
+      response = await Post(mapURL, postData);
       let { reputation } = await retrieveAuthenticatedUser(user!.userId, null);
       if (reputation) {
         dispatch({ type: "setReputation", payload: reputation });
       }
       // setSelectedRelation(null);
-      resetAddedRemovedParentsChildren();
+      updatedLinksRef.current = getInitialUpdateLinks();
       setIsSubmitting(false);
 
       return response;
     },
     // TODO: check dependencies
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [resetAddedRemovedParentsChildren]
+    []
   );
 
   const getFirstParent = (childId: string) => {
@@ -2141,6 +2137,12 @@ const Notebook = ({}: NotebookProps) => {
           return { edges: newEdges, nodes: newNodes };
         } catch (err) {
           console.error(err);
+          const errorData = {
+            nodeId,
+            descendants,
+            errorMessage: err instanceof Error ? err.message : "",
+          };
+          addClientErrorLog(db, { title: "HIDE_DESCENDANTS", user: user.uname, data: errorData });
           return graph;
         }
       });
@@ -2467,6 +2469,11 @@ const Notebook = ({}: NotebookProps) => {
           } catch (err) {
             isWritingOnDBRef.current = false;
             console.error(err);
+            const errorData = {
+              nodeId,
+              errorMessage: err instanceof Error ? err.message : "",
+            };
+            addClientErrorLog(db, { title: "OPEN_ALL_CHILDREN", user: user.uname, data: errorData });
           }
         })();
 
@@ -2590,6 +2597,8 @@ const Notebook = ({}: NotebookProps) => {
           } catch (err) {
             isWritingOnDBRef.current = false;
             console.error(err);
+            const errorData = { nodeId, errorMessage: err instanceof Error ? err.message : "" };
+            addClientErrorLog(db, { title: "OPEN_ALL_PARENTS", user: user.uname, data: errorData });
           }
         })();
 
@@ -3051,18 +3060,13 @@ const Notebook = ({}: NotebookProps) => {
   );
 
   const correctNode = useCallback(
-    (event: any, nodeId: string) => {
+    async (event: any, nodeId: string) => {
       devLog("CORRECT NODE", { nodeId });
       if (notebookRef.current.choosingNode) return;
 
       notebookRef.current.selectedNode = nodeId;
       nodeBookDispatch({ type: "setSelectedNode", payload: nodeId });
 
-      getMapGraph(`/correctNode/${nodeId}`).then(() => {
-        setNodeParts(nodeId, node => {
-          return { ...node, disableVotes: false };
-        });
-      });
       setNodeParts(nodeId, node => {
         const correct = node.correct;
         const wrong = node.wrong;
@@ -3078,9 +3082,14 @@ const Notebook = ({}: NotebookProps) => {
       });
       event.currentTarget.blur();
       lastNodeOperation.current = { name: "upvote", data: "" };
+      // revertNodesOnGraph(); // CHECK: should we remove this?
+      await Post(`/correctNode/${nodeId}`);
+      setNodeParts(nodeId, node => {
+        return { ...node, disableVotes: false };
+      });
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [getMapGraph, setNodeParts]
+    [setNodeParts]
   );
 
   const wrongNode = useCallback(
@@ -3180,18 +3189,14 @@ const Notebook = ({}: NotebookProps) => {
             };
           }
 
-          (async () => {
-            try {
-              await idToken();
-              await getMapGraph(`/wrongNode/${nodeId}`);
-            } catch (e) {}
+          Post(`/wrongNode/${nodeId}`);
 
-            if (!willRemoveNode) {
-              setNodeParts(nodeId, node => {
-                return { ...node, disableVotes: false };
-              });
-            }
-          })();
+          if (!willRemoveNode) {
+            setNodeParts(nodeId, node => ({ ...node, disableVotes: false }));
+          } else {
+            // TODO:now: check getInitialUpdateLinks
+            updatedLinksRef.current = getInitialUpdateLinks();
+          }
 
           setNodeUpdates({
             nodeIds: updatedNodeIds,
@@ -3204,7 +3209,7 @@ const Notebook = ({}: NotebookProps) => {
       }
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [getMapGraph, setNodeParts]
+    [setNodeParts]
   );
 
   /////////////////////////////////////////////////////
@@ -3325,7 +3330,7 @@ const Notebook = ({}: NotebookProps) => {
     if (!user) return;
     if (!openSidebar) return;
 
-    if (tempNodes.size || nodeChanges) reloadPermanentGraph();
+    if (tempNodes.size || nodeChanges) revertNodesOnGraph();
 
     notebookRef.current.choosingNode = null;
     notebookRef.current.chosenNode = null;
@@ -3355,7 +3360,7 @@ const Notebook = ({}: NotebookProps) => {
     nodeBookState.selectionType,
     // nodeBookState.openToolbar,
     openMedia,
-    reloadPermanentGraph,
+    revertNodesOnGraph,
     openSidebar,
   ]);
 
@@ -3370,7 +3375,7 @@ const Notebook = ({}: NotebookProps) => {
       if (!selectedNode) return;
       setEditingModeNode(true);
       setSelectedProposalId("ProposeEditTo" + selectedNode);
-      reloadPermanentGraph();
+      revertNodesOnGraph();
 
       setGraph(({ nodes: oldNodes, edges }) => {
         if (!selectedNode) return { nodes: oldNodes, edges };
@@ -3394,7 +3399,7 @@ const Notebook = ({}: NotebookProps) => {
       //setOpenSidebar(null);
       scrollToNode(selectedNode);
     },
-    [processHeightChange, reloadPermanentGraph, scrollToNode]
+    [processHeightChange, revertNodesOnGraph, scrollToNode]
   );
 
   const proposeNewParent = useCallback(
@@ -3405,7 +3410,7 @@ const Notebook = ({}: NotebookProps) => {
       devLog("PROPOSE_NEW_PARENT", { parentNodeType });
       event && event.preventDefault();
       setSelectedProposalId("ProposeNew" + parentNodeType + "ParentNode");
-      reloadPermanentGraph();
+      revertNodesOnGraph();
       const newNodeId = newId(db);
       setGraph(graph => {
         const updatedNodeIds: string[] = [];
@@ -3514,7 +3519,7 @@ const Notebook = ({}: NotebookProps) => {
       });
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [user, reloadPermanentGraph, db, allTags, settings.showClusterOptions, nodeBookDispatch, scrollToNode]
+    [user, revertNodesOnGraph, db, allTags, settings.showClusterOptions, nodeBookDispatch, scrollToNode]
   );
 
   const onSelectNode = useCallback(
@@ -3529,7 +3534,7 @@ const Notebook = ({}: NotebookProps) => {
       ) {
         setSelectedProposalId("");
         notebookRef.current.selectionType = null;
-        reloadPermanentGraph();
+        revertNodesOnGraph();
       }
 
       if (chosenType === "Proposals") {
@@ -3569,7 +3574,7 @@ const Notebook = ({}: NotebookProps) => {
         // setOpenRecentNodes(false);
         // setOpenTrends(false);
         setOpenMedia(false);
-        resetAddedRemovedParentsChildren();
+        updatedLinksRef.current = getInitialUpdateLinks();
         setOpenSidebar(null);
       } else {
         setOpenSidebar("PROPOSALS");
@@ -3580,7 +3585,7 @@ const Notebook = ({}: NotebookProps) => {
         nodeBookDispatch({ type: "setSelectedNode", payload: nodeId });
       }
     },
-    [openSidebar, reloadPermanentGraph, nodeBookDispatch, resetAddedRemovedParentsChildren]
+    [openSidebar, revertNodesOnGraph, nodeBookDispatch]
   );
 
   const saveProposedImprovement = useCallback(
@@ -3744,31 +3749,30 @@ const Notebook = ({}: NotebookProps) => {
 
           const nodes = {
             ...graph.nodes,
-            [selectedNodeId]: {
-              ...graph.nodes[selectedNodeId],
-              editable: false,
-            },
+            [selectedNodeId]: { ...graph.nodes[selectedNodeId], editable: false },
           };
 
           const flashcard = postData.flashcard;
           delete postData.flashcard;
           const loadingEvent = new CustomEvent("proposed-node-loading");
           window.dispatchEvent(loadingEvent);
-          getMapGraph("/proposeNodeImprovement", postData, !willBeApproved).then(async (response: any) => {
-            if (!response) return;
-            // save flashcard data
-            window.dispatchEvent(
-              new CustomEvent("propose-flashcard", {
-                detail: {
-                  node: response.node,
-                  proposal: response.proposal,
-                  flashcard,
-                  proposedType: "Improvement",
-                  token: await getIdToken(),
-                },
-              })
-            );
-          });
+          ProposeNodeImprovement({ postData, flashcard });
+          updatedLinksRef.current = getInitialUpdateLinks();
+          if (!willBeApproved) revertNodesOnGraph();
+          // const response =  Post("/proposeNodeImprovement", postData, !willBeApproved)
+          // if (!response) return;
+          //   // save flashcard data
+          //   window.dispatchEvent(
+          //     new CustomEvent("propose-flashcard", {
+          //       detail: {
+          //         node: response.node,
+          //         proposal: response.proposal,
+          //         flashcard,
+          //         proposedType: "Improvement",
+          //         token: await getIdToken(),
+          //       },
+          //     })
+          //   );
 
           window.dispatchEvent(new CustomEvent("next-flashcard"));
 
@@ -3793,6 +3797,22 @@ const Notebook = ({}: NotebookProps) => {
     [nodeBookDispatch, instructor, scrollToNode]
   );
 
+  const ProposeNodeImprovement = async ({ postData, flashcard }: any) => {
+    const response: any = await Post("/proposeNodeImprovement", postData);
+    if (!response) return;
+    window.dispatchEvent(
+      new CustomEvent("propose-flashcard", {
+        detail: {
+          node: response.node,
+          proposal: response.proposal,
+          flashcard,
+          proposedType: "Improvement",
+          token: await getIdToken(),
+        },
+      })
+    );
+  };
+
   const proposeNewChild = useCallback(
     (event: any, childNodeType: string) => {
       // TODO: add types ChildNodeType
@@ -3801,7 +3821,7 @@ const Notebook = ({}: NotebookProps) => {
       devLog("PROPOSE_NEW_CHILD", { childNodeType });
       event && event.preventDefault();
       setSelectedProposalId("ProposeNew" + childNodeType + "ChildNode");
-      reloadPermanentGraph();
+      revertNodesOnGraph();
       const newNodeId = newId(db);
       setGraph(graph => {
         const updatedNodeIds: string[] = [];
@@ -3898,7 +3918,7 @@ const Notebook = ({}: NotebookProps) => {
       });
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [user, reloadPermanentGraph, db, allTags, settings.showClusterOptions, nodeBookDispatch, scrollToNode]
+    [user, revertNodesOnGraph, db, allTags, settings.showClusterOptions, nodeBookDispatch, scrollToNode]
   );
 
   const onNodeTitleBlur = useCallback(
@@ -4047,32 +4067,13 @@ const Notebook = ({}: NotebookProps) => {
         const loadingEvent = new CustomEvent("proposed-node-loading");
         window.dispatchEvent(loadingEvent);
 
-        getMapGraph("/proposeParentNode", postData, !willBeApproved).then(async (response: any) => {
-          if (!response) return;
-          // save flashcard data
-          if (postData.nodeType !== "Question") {
-            window.dispatchEvent(
-              new CustomEvent("propose-flashcard", {
-                detail: {
-                  node: response.node,
-                  proposal: response.proposal,
-                  flashcard,
-                  proposedType: "Parent",
-                  token: await getIdToken(),
-                },
-              })
-            );
-          }
-          if (postData.nodeType === "Question") {
-            window.dispatchEvent(new CustomEvent("question-node-proposed"));
-          }
-        });
+        if (!willBeApproved) revertNodesOnGraph();
+        proposeParentNode({ postData, flashcard });
+        // proposeParentNode("/proposeParentNode", postData, !willBeApproved).then(async (response: any) => {});
 
         window.dispatchEvent(new CustomEvent("next-flashcard"));
 
-        setTimeout(() => {
-          onComplete();
-        }, 200);
+        setTimeout(() => onComplete(), 200);
         setNodeUpdates({
           nodeIds: updatedNodeIds,
           updatedAt: new Date(),
@@ -4081,8 +4082,30 @@ const Notebook = ({}: NotebookProps) => {
         return { nodes, edges };
       });
     },
-    [selectedNotebookId, nodeBookDispatch, getMapGraph, scrollToNode]
+    [selectedNotebookId, nodeBookDispatch, scrollToNode]
   );
+
+  const proposeParentNode = async ({ postData, flashcard }: any) => {
+    const response: any = await Post("/proposeParentNode", postData);
+    if (!response) return;
+    // save flashcard data
+    if (postData.nodeType !== "Question") {
+      window.dispatchEvent(
+        new CustomEvent("propose-flashcard", {
+          detail: {
+            node: response.node,
+            proposal: response.proposal,
+            flashcard,
+            proposedType: "Parent",
+            token: await getIdToken(),
+          },
+        })
+      );
+    }
+    if (postData.nodeType === "Question") {
+      window.dispatchEvent(new CustomEvent("question-node-proposed"));
+    }
+  };
 
   const saveProposedChildNode = useCallback(
     async (newNodeId: string, summary: string, reason: string, onComplete: () => void) => {
@@ -4219,26 +4242,28 @@ const Notebook = ({}: NotebookProps) => {
         const loadingEvent = new CustomEvent("proposed-node-loading");
         window.dispatchEvent(loadingEvent);
 
-        getMapGraph("/proposeChildNode", postData, !willBeApproved).then(async (response: any) => {
-          if (!response) return;
-          // save flashcard data
-          if (postData.nodeType !== "Question") {
-            window.dispatchEvent(
-              new CustomEvent("propose-flashcard", {
-                detail: {
-                  node: response.node,
-                  proposal: response.proposal,
-                  flashcard,
-                  proposedType: "Parent",
-                  token: await getIdToken(),
-                },
-              })
-            );
-          }
-          if (postData.nodeType === "Question") {
-            window.dispatchEvent(new CustomEvent("question-node-proposed"));
-          }
-        });
+        if (!willBeApproved) revertNodesOnGraph();
+        proposeChildNode({ postData, flashcard });
+        // Post("/proposeChildNode", postData, ).then(async (response: any) => {
+        //   if (!response) return;
+        //   // save flashcard data
+        //   if (postData.nodeType !== "Question") {
+        //     window.dispatchEvent(
+        //       new CustomEvent("propose-flashcard", {
+        //         detail: {
+        //           node: response.node,
+        //           proposal: response.proposal,
+        //           flashcard,
+        //           proposedType: "Parent",
+        //           token: await getIdToken(),
+        //         },
+        //       })
+        //     );
+        //   }
+        //   if (postData.nodeType === "Question") {
+        //     window.dispatchEvent(new CustomEvent("question-node-proposed"));
+        //   }
+        // });
 
         window.dispatchEvent(new CustomEvent("next-flashcard"));
 
@@ -4255,6 +4280,28 @@ const Notebook = ({}: NotebookProps) => {
     },
     [selectedNotebookId, nodeBookDispatch, getMapGraph, scrollToNode]
   );
+
+  const proposeChildNode = async ({ postData, flashcard }: any) => {
+    const response: any = await Post("/proposeChildNode", postData);
+    if (!response) return;
+    // save flashcard data
+    if (postData.nodeType !== "Question") {
+      window.dispatchEvent(
+        new CustomEvent("propose-flashcard", {
+          detail: {
+            node: response.node,
+            proposal: response.proposal,
+            flashcard,
+            proposedType: "Parent",
+            token: await getIdToken(),
+          },
+        })
+      );
+    }
+    if (postData.nodeType === "Question") {
+      window.dispatchEvent(new CustomEvent("question-node-proposed"));
+    }
+  };
 
   const fetchProposals = useCallback(
     async (
@@ -4433,7 +4480,7 @@ const Notebook = ({}: NotebookProps) => {
       proposalTimer.current = setTimeout(async () => {
         if (!proposal) {
           setSelectedProposalId("");
-          reloadPermanentGraph();
+          revertNodesOnGraph();
           notebookRef.current.selectionType = null;
           return;
         }
@@ -4442,7 +4489,7 @@ const Notebook = ({}: NotebookProps) => {
         event.preventDefault();
         notebookRef.current.selectionType = "Proposals";
         setSelectedProposalId(proposal.id);
-        reloadPermanentGraph();
+        revertNodesOnGraph();
         await delay(1000); // INFO: this is required to give some time to update correctly the consecutive setGraph states (1.reload permanent graph, 2. setGraph)
 
         const updatedNodeIds: string[] = [nodeBookState.selectedNode!, newNodeId];
@@ -4594,21 +4641,21 @@ const Notebook = ({}: NotebookProps) => {
         if (nodeBookState.selectedNode) scrollToNode(nodeBookState.selectedNode);
       }, 1000);
     },
-    [user?.uname, nodeBookState.selectedNode, allTags, reloadPermanentGraph, settings.showClusterOptions]
+    [user?.uname, nodeBookState.selectedNode, allTags, revertNodesOnGraph, settings.showClusterOptions]
   );
 
   const deleteProposal = useCallback(
     async (event: any, proposals: any, setProposals: any, proposalId: string, proposalIdx: number) => {
       if (!nodeBookState.choosingNode) {
         if (!nodeBookState.selectedNode) return;
-        reloadPermanentGraph();
+        revertNodesOnGraph();
         const postData = {
           versionId: proposalId,
           nodeType: selectedNodeType,
           nodeId: nodeBookState.selectedNode,
         };
         // setIsSubmitting(true);
-        await postWithToken("/deleteVersion", postData);
+        await Post("/deleteVersion", postData);
 
         let proposalsTemp = [...proposals];
         proposalsTemp.splice(proposalIdx, 1);
@@ -4617,7 +4664,7 @@ const Notebook = ({}: NotebookProps) => {
         scrollToNode(nodeBookState.selectedNode);
       }
     },
-    [nodeBookState.choosingNode, nodeBookState.selectedNode, reloadPermanentGraph, scrollToNode, selectedNodeType]
+    [nodeBookState.choosingNode, nodeBookState.selectedNode, revertNodesOnGraph, scrollToNode, selectedNodeType]
   );
   const mapContentMouseOver = useCallback((event: any) => {
     const isPartOfNodeComponent = event.target?.parentNode?.parentNode?.getAttribute("id") !== "MapContent";
@@ -4876,10 +4923,10 @@ const Notebook = ({}: NotebookProps) => {
   };
 
   const onCloseSidebar = useCallback(() => {
-    reloadPermanentGraph();
+    revertNodesOnGraph();
     if (notebookRef.current.selectedNode) scrollToNode(notebookRef.current.selectedNode);
     setOpenSidebar(null);
-  }, [reloadPermanentGraph, scrollToNode]);
+  }, [revertNodesOnGraph, scrollToNode]);
 
   const onRedrawGraph = useCallback(() => {
     setGraph(() => {
@@ -6778,7 +6825,7 @@ const Notebook = ({}: NotebookProps) => {
     setGraph,
     openNodeHandler,
     proposeNewChild,
-    reloadPermanentGraph,
+    revertNodesOnGraph,
   ]);
 
   // set up event delegation to manage click event on target elements from tutorial
@@ -6957,7 +7004,7 @@ const Notebook = ({}: NotebookProps) => {
                 notebookRef={notebookRef}
                 open={true}
                 onClose={onOnlyCloseSidebar}
-                reloadPermanentGrpah={reloadPermanentGraph}
+                reloadPermanentGrpah={revertNodesOnGraph}
                 user={user}
                 reputationSignal={reputationSignal}
                 reputation={reputation}
@@ -7428,7 +7475,7 @@ const Notebook = ({}: NotebookProps) => {
                   saveProposedParentNode={saveProposedParentNode}
                   saveProposedImprovement={saveProposedImprovement}
                   closeSideBar={closeSideBar}
-                  reloadPermanentGraph={reloadPermanentGraph}
+                  reloadPermanentGraph={revertNodesOnGraph}
                   setNodeParts={setNodeParts}
                   citations={citations}
                   setOpenSideBar={setOpenSidebar}
@@ -7575,7 +7622,7 @@ const Notebook = ({}: NotebookProps) => {
           )}
           <MemoizedTutorialTableOfContent
             open={openProgressBar}
-            reloadPermanentGraph={reloadPermanentGraph}
+            reloadPermanentGraph={revertNodesOnGraph}
             handleCloseProgressBar={onCloseTableOfContent}
             groupTutorials={tutorialGroup}
             userTutorialState={userTutorial}
