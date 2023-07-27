@@ -210,6 +210,7 @@ type NodeProps = {
   onChangeChosenNode: (props: OnChangeChosenNode) => void;
   editingModeNode: boolean;
   setEditingModeNode: (newValue: boolean) => void;
+  displayParentOptions: boolean;
 };
 
 const proposedChildTypesIcons: { [key in ProposedChildTypesIcons]: string } = {
@@ -340,6 +341,7 @@ const Node = ({
   onChangeChosenNode,
   editingModeNode,
   setEditingModeNode,
+  displayParentOptions,
 }: NodeProps) => {
   const [{ user }] = useAuth();
   const { nodeBookState } = useNodeBook();
@@ -622,6 +624,7 @@ const Node = ({
         }
 
         saveProposedImprovement("", reason, () => setAbleToPropose(true));
+        notebookRef.current.selectedNode = identifier;
         notebookRef.current.selectedNode = identifier;
         nodeBookDispatch({ type: "setSelectedNode", payload: identifier });
       }, 500);
@@ -1541,7 +1544,7 @@ const Node = ({
           </div>
         )}
       </div>
-      {!isNew && nodeType !== "Reference" && editable && user && user.role === "INSTRUCTOR" && (
+      {!isNew && nodeType !== "Reference" && editable && user && displayParentOptions && (
         <Box
           id={`${identifier}-new-parent-nodes-buttons`}
           sx={{

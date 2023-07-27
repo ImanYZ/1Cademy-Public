@@ -1619,30 +1619,6 @@ const Notebook = ({}: NotebookProps) => {
     [db, nodeBookDispatch, user?.uname, setOpenSidebar, revertNodesOnGraph]
   );
 
-  const getMapGraph = useCallback(
-    async (mapURL: string, postData: any = false, resetGraph: boolean = true) => {
-      if (resetGraph) {
-        setTimeout(() => revertNodesOnGraph(), 200);
-      }
-
-      let response: any = null;
-
-      response = await Post(mapURL, postData);
-      let { reputation } = await retrieveAuthenticatedUser(user!.userId, null);
-      if (reputation) {
-        dispatch({ type: "setReputation", payload: reputation });
-      }
-      // setSelectedRelation(null);
-      updatedLinksRef.current = getInitialUpdateLinks();
-      setIsSubmitting(false);
-
-      return response;
-    },
-    // TODO: check dependencies
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    []
-  );
-
   const getFirstParent = (childId: string) => {
     const parents: any = g.current.predecessors(childId);
 
@@ -3591,210 +3567,223 @@ const Notebook = ({}: NotebookProps) => {
   const saveProposedImprovement = useCallback(
     async (summary: string, reason: string, onFail: () => void) => {
       if (!notebookRef.current.selectedNode) return;
+      if (!user) return;
 
-      notebookRef.current.chosenNode = null;
-      notebookRef.current.choosingNode = null;
-      nodeBookDispatch({ type: "setChosenNode", payload: null });
-      nodeBookDispatch({ type: "setChoosingNode", payload: null });
-      let referencesOK = true;
-      const {
-        courseExist,
-        isInstructor,
-        instantApprove,
-      }: { courseExist: boolean; isInstructor: boolean; instantApprove: boolean } = await Post(
-        "/instructor/course/checkInstantApprovalForProposal",
-        {
-          nodeId: notebookRef.current.selectedNode,
-        }
-      );
-      setUpdatedLinks(updatedLinks => {
-        setGraph(graph => {
-          const selectedNodeId = notebookRef.current.selectedNode!;
-          const updatedNodeIds: string[] = [selectedNodeId];
-
-          if (
-            (graph.nodes[selectedNodeId].nodeType === "Concept" ||
-              graph.nodes[selectedNodeId].nodeType === "Relation" ||
-              graph.nodes[selectedNodeId].nodeType === "Question" ||
-              graph.nodes[selectedNodeId].nodeType === "News") &&
-            graph.nodes[selectedNodeId].references.length === 0
-          ) {
-            referencesOK = window.confirm("You are proposing a node without any reference. Are you sure?");
+      let postData: any = {};
+      try {
+        notebookRef.current.chosenNode = null;
+        notebookRef.current.choosingNode = null;
+        nodeBookDispatch({ type: "setChosenNode", payload: null });
+        nodeBookDispatch({ type: "setChoosingNode", payload: null });
+        let referencesOK = true;
+        const {
+          courseExist,
+          isInstructor,
+          instantApprove,
+        }: { courseExist: boolean; isInstructor: boolean; instantApprove: boolean } = await Post(
+          "/instructor/course/checkInstantApprovalForProposal",
+          {
+            nodeId: notebookRef.current.selectedNode,
           }
+        );
+        setUpdatedLinks(updatedLinks => {
+          setGraph(graph => {
+            const selectedNodeId = notebookRef.current.selectedNode!;
+            const updatedNodeIds: string[] = [selectedNodeId];
 
-          if (!referencesOK) return graph;
-
-          gtmEvent("Propose", {
-            customType: "improvement",
-          });
-          gtmEvent("Interaction", {
-            customType: "improvement",
-          });
-          gtmEvent("Reputation", {
-            value: 1,
-          });
-
-          const newNode = { ...graph.nodes[selectedNodeId] };
-          if (newNode.children.length > 0) {
-            const newChildren = [];
-            for (let child of newNode.children) {
-              newChildren.push({
-                node: child.node,
-                title: child.title,
-                label: child.label,
-                type: child.type,
-              });
+            if (
+              (graph.nodes[selectedNodeId].nodeType === "Concept" ||
+                graph.nodes[selectedNodeId].nodeType === "Relation" ||
+                graph.nodes[selectedNodeId].nodeType === "Question" ||
+                graph.nodes[selectedNodeId].nodeType === "News") &&
+              graph.nodes[selectedNodeId].references.length === 0
+            ) {
+              referencesOK = window.confirm("You are proposing a node without any reference. Are you sure?");
             }
-            newNode.children = newChildren;
-            const newParents = [];
-            for (let parent of newNode.parents) {
-              newParents.push({
-                node: parent.node,
-                title: parent.title,
-                label: parent.label,
-                type: parent.type,
-              });
-            }
-            newNode.parents = newParents;
-          }
-          const keyFound = changedNodes.hasOwnProperty(selectedNodeId);
-          if (!keyFound) return graph;
 
-          const oldNode = changedNodes[selectedNodeId] as FullNodeData;
-          let isTheSame =
-            newNode.title === oldNode.title &&
-            newNode.content === oldNode.content &&
-            newNode.nodeType === oldNode.nodeType;
-          isTheSame = isTheSame && compareProperty(oldNode, newNode, "nodeImage");
-          if (
-            ("nodeVideo" in oldNode && "nodeVideo" in newNode) ||
-            (!("nodeVideo" in oldNode) && newNode["nodeVideo"] !== "")
-          ) {
-            isTheSame = isTheSame && compareProperty(oldNode, newNode, "nodeVideo");
-          }
-          isTheSame = compareFlatLinks(oldNode.tagIds, newNode.tagIds, isTheSame); // CHECK: O checked only ID changes
-          isTheSame = compareFlatLinks(oldNode.referenceIds, newNode.referenceIds, isTheSame); // CHECK: O checked only ID changes
-          isTheSame = compareLinks(oldNode.parents, newNode.parents, isTheSame, false);
-          isTheSame = compareLinks(oldNode.children, newNode.children, isTheSame, false);
-          isTheSame = compareFlatLinks(oldNode.referenceLabels, newNode.referenceLabels, isTheSame);
+            if (!referencesOK) return graph;
 
-          isTheSame = compareChoices(oldNode, newNode, isTheSame);
-          if (isTheSame) {
-            onFail();
-            setTimeout(() => {
-              window.alert("You've not changed anything yet!");
+            gtmEvent("Propose", {
+              customType: "improvement",
             });
-            return graph;
-          }
+            gtmEvent("Interaction", {
+              customType: "improvement",
+            });
+            gtmEvent("Reputation", {
+              value: 1,
+            });
 
-          const postData: any = {
-            ...newNode,
-            id: notebookRef.current.selectedNode,
-            summary: summary,
-            proposal: reason,
-            addedParents: updatedLinks.addedParents,
-            addedChildren: updatedLinks.addedChildren,
-            removedParents: updatedLinks.removedParents,
-            removedChildren: updatedLinks.removedChildren,
-          };
-          delete postData.isStudied;
-          delete postData.bookmarked;
-          delete postData.correct;
-          delete postData.updatedAt;
-          delete postData.open;
-          delete postData.visible;
-          delete postData.deleted;
-          delete postData.wrong;
-          delete postData.createdAt;
-          delete postData.firstVisit;
-          delete postData.lastVisit;
-          delete postData.versions;
-          delete postData.viewers;
-          delete postData.comments;
-          delete postData.wrongs;
-          delete postData.corrects;
-          delete postData.studied;
-          delete postData.editable;
-          delete postData.left;
-          delete postData.top;
-          delete postData.height;
-          let willBeApproved = false;
-          if (courseExist || isInstructor) {
-            willBeApproved = instantApprove;
-          } else {
-            willBeApproved = isVersionApproved({ corrects: 1, wrongs: 0, nodeData: newNode });
-          }
-          lastNodeOperation.current = { name: "ProposeProposals", data: willBeApproved ? "accepted" : "notAccepted" };
-
-          if (willBeApproved) {
-            const newParentIds: string[] = newNode.parents.map(parent => parent.node);
-            const newChildIds: string[] = newNode.children.map(child => child.node);
-            const oldParentIds: string[] = oldNode.parents.map(parent => parent.node);
-            const oldChildIds: string[] = oldNode.children.map(child => child.node);
-            const idsToBeRemoved = Array.from(
-              new Set<string>([
-                ...newParentIds,
-                ...newChildIds,
-                notebookRef.current.selectedNode!,
-                ...oldParentIds,
-                ...oldChildIds,
-              ])
-            );
-            idsToBeRemoved.forEach(idToBeRemoved => {
-              if (changedNodes.hasOwnProperty(idToBeRemoved)) {
-                delete changedNodes[idToBeRemoved];
+            const newNode = { ...graph.nodes[selectedNodeId] };
+            if (newNode.children.length > 0) {
+              const newChildren = [];
+              for (let child of newNode.children) {
+                newChildren.push({
+                  node: child.node,
+                  title: child.title,
+                  label: child.label,
+                  type: child.type,
+                });
               }
+              newNode.children = newChildren;
+              const newParents = [];
+              for (let parent of newNode.parents) {
+                newParents.push({
+                  node: parent.node,
+                  title: parent.title,
+                  label: parent.label,
+                  type: parent.type,
+                });
+              }
+              newNode.parents = newParents;
+            }
+            const keyFound = changedNodes.hasOwnProperty(selectedNodeId);
+            if (!keyFound) return graph;
+
+            const oldNode = changedNodes[selectedNodeId] as FullNodeData;
+            let isTheSame =
+              newNode.title === oldNode.title &&
+              newNode.content === oldNode.content &&
+              newNode.nodeType === oldNode.nodeType;
+            isTheSame = isTheSame && compareProperty(oldNode, newNode, "nodeImage");
+            if (
+              ("nodeVideo" in oldNode && "nodeVideo" in newNode) ||
+              (!("nodeVideo" in oldNode) && newNode["nodeVideo"] !== "")
+            ) {
+              isTheSame = isTheSame && compareProperty(oldNode, newNode, "nodeVideo");
+            }
+            isTheSame = compareFlatLinks(oldNode.tagIds, newNode.tagIds, isTheSame); // CHECK: O checked only ID changes
+            isTheSame = compareFlatLinks(oldNode.referenceIds, newNode.referenceIds, isTheSame); // CHECK: O checked only ID changes
+            isTheSame = compareLinks(oldNode.parents, newNode.parents, isTheSame, false);
+            isTheSame = compareLinks(oldNode.children, newNode.children, isTheSame, false);
+            isTheSame = compareFlatLinks(oldNode.referenceLabels, newNode.referenceLabels, isTheSame);
+
+            isTheSame = compareChoices(oldNode, newNode, isTheSame);
+            if (isTheSame) {
+              onFail();
+              setTimeout(() => {
+                window.alert("You've not changed anything yet!");
+              });
+              return graph;
+            }
+
+            postData = {
+              ...newNode,
+              id: notebookRef.current.selectedNode,
+              summary: summary,
+              proposal: reason,
+              addedParents: updatedLinks.addedParents,
+              addedChildren: updatedLinks.addedChildren,
+              removedParents: updatedLinks.removedParents,
+              removedChildren: updatedLinks.removedChildren,
+            };
+            delete postData.isStudied;
+            delete postData.bookmarked;
+            delete postData.correct;
+            delete postData.updatedAt;
+            delete postData.open;
+            delete postData.visible;
+            delete postData.deleted;
+            delete postData.wrong;
+            delete postData.createdAt;
+            delete postData.firstVisit;
+            delete postData.lastVisit;
+            delete postData.versions;
+            delete postData.viewers;
+            delete postData.comments;
+            delete postData.wrongs;
+            delete postData.corrects;
+            delete postData.studied;
+            delete postData.editable;
+            delete postData.left;
+            delete postData.top;
+            delete postData.height;
+            let willBeApproved = false;
+            if (courseExist || isInstructor) {
+              willBeApproved = instantApprove;
+            } else {
+              willBeApproved = isVersionApproved({ corrects: 1, wrongs: 0, nodeData: newNode });
+            }
+            lastNodeOperation.current = { name: "ProposeProposals", data: willBeApproved ? "accepted" : "notAccepted" };
+
+            if (willBeApproved) {
+              const newParentIds: string[] = newNode.parents.map(parent => parent.node);
+              const newChildIds: string[] = newNode.children.map(child => child.node);
+              const oldParentIds: string[] = oldNode.parents.map(parent => parent.node);
+              const oldChildIds: string[] = oldNode.children.map(child => child.node);
+              const idsToBeRemoved = Array.from(
+                new Set<string>([
+                  ...newParentIds,
+                  ...newChildIds,
+                  notebookRef.current.selectedNode!,
+                  ...oldParentIds,
+                  ...oldChildIds,
+                ])
+              );
+              idsToBeRemoved.forEach(idToBeRemoved => {
+                if (changedNodes.hasOwnProperty(idToBeRemoved)) {
+                  delete changedNodes[idToBeRemoved];
+                }
+              });
+            }
+
+            const nodes = {
+              ...graph.nodes,
+              [selectedNodeId]: { ...graph.nodes[selectedNodeId], editable: false },
+            };
+
+            const flashcard = postData.flashcard;
+            delete postData.flashcard;
+            const loadingEvent = new CustomEvent("proposed-node-loading");
+            window.dispatchEvent(loadingEvent);
+            ProposeNodeImprovement({ postData, flashcard });
+            updatedLinksRef.current = getInitialUpdateLinks();
+            notebookRef.current.selectionType = null;
+            nodeBookDispatch({ type: "setSelectionType", payload: null });
+            if (!willBeApproved) revertNodesOnGraph();
+            // const response =  Post("/proposeNodeImprovement", postData, !willBeApproved)
+            // if (!response) return;
+            //   // save flashcard data
+            //   window.dispatchEvent(
+            //     new CustomEvent("propose-flashcard", {
+            //       detail: {
+            //         node: response.node,
+            //         proposal: response.proposal,
+            //         flashcard,
+            //         proposedType: "Improvement",
+            //         token: await getIdToken(),
+            //       },
+            //     })
+            //   );
+
+            window.dispatchEvent(new CustomEvent("next-flashcard"));
+
+            setTimeout(() => {
+              scrollToNode(selectedNodeId);
+            }, 200);
+
+            setNodeUpdates({
+              nodeIds: updatedNodeIds,
+              updatedAt: new Date(),
             });
-          }
 
-          const nodes = {
-            ...graph.nodes,
-            [selectedNodeId]: { ...graph.nodes[selectedNodeId], editable: false },
-          };
-
-          const flashcard = postData.flashcard;
-          delete postData.flashcard;
-          const loadingEvent = new CustomEvent("proposed-node-loading");
-          window.dispatchEvent(loadingEvent);
-          ProposeNodeImprovement({ postData, flashcard });
-          updatedLinksRef.current = getInitialUpdateLinks();
-          if (!willBeApproved) revertNodesOnGraph();
-          // const response =  Post("/proposeNodeImprovement", postData, !willBeApproved)
-          // if (!response) return;
-          //   // save flashcard data
-          //   window.dispatchEvent(
-          //     new CustomEvent("propose-flashcard", {
-          //       detail: {
-          //         node: response.node,
-          //         proposal: response.proposal,
-          //         flashcard,
-          //         proposedType: "Improvement",
-          //         token: await getIdToken(),
-          //       },
-          //     })
-          //   );
-
-          window.dispatchEvent(new CustomEvent("next-flashcard"));
-
-          setTimeout(() => {
-            scrollToNode(selectedNodeId);
-          }, 200);
-
-          setNodeUpdates({
-            nodeIds: updatedNodeIds,
-            updatedAt: new Date(),
+            return {
+              nodes,
+              edges: graph.edges,
+            };
           });
 
-          return {
-            nodes,
-            edges: graph.edges,
-          };
+          return updatedLinks;
         });
-
-        return updatedLinks;
-      });
+      } catch (err) {
+        console.error(err);
+        const errorData = {
+          postData,
+          errorMessage: err instanceof Error ? err.message : "",
+        };
+        addClientErrorLog(db, { title: "SAVE_PROPOSED_IMPROVEMENT", user: user.uname, data: errorData });
+      }
     },
-    [nodeBookDispatch, instructor, scrollToNode]
+    [db, nodeBookDispatch, revertNodesOnGraph, scrollToNode, user]
   );
 
   const ProposeNodeImprovement = async ({ postData, flashcard }: any) => {
@@ -3935,154 +3924,162 @@ const Notebook = ({}: NotebookProps) => {
 
   const saveProposedParentNode = useCallback(
     async (newNodeId: string, summary: string, reason: string, onComplete: () => void) => {
-      if (!selectedNotebookId) return;
+      let postData: any = {};
+      if (!user) return;
+      try {
+        if (!selectedNotebookId) return;
 
-      devLog("SAVE_PROPOSED_CHILD_NODE", { selectedNotebookId, newNodeId, summary, reason });
-      notebookRef.current.choosingNode = null;
-      notebookRef.current.chosenNode = null;
-      nodeBookDispatch({ type: "setChoosingNode", payload: null });
-      nodeBookDispatch({ type: "setChosenNode", payload: null });
+        devLog("SAVE_PROPOSED_CHILD_NODE", { selectedNotebookId, newNodeId, summary, reason });
+        notebookRef.current.choosingNode = null;
+        notebookRef.current.chosenNode = null;
+        nodeBookDispatch({ type: "setChoosingNode", payload: null });
+        nodeBookDispatch({ type: "setChosenNode", payload: null });
 
-      const {
-        isInstructor,
-        courseExist,
-        instantApprove,
-      }: { isInstructor: boolean; courseExist: boolean; instantApprove: boolean } = await Post(
-        "/instructor/course/checkInstantApprovalForProposal",
-        {
-          nodeId: newNodeId,
-        }
-      );
-      setGraph(graph => {
-        const updatedNodeIds: string[] = [newNodeId];
-        const newNode = graph.nodes[newNodeId];
+        type CheckInstantApprovalForProposal = { isInstructor: boolean; courseExist: boolean; instantApprove: boolean };
+        const { isInstructor, courseExist, instantApprove } = await Post<CheckInstantApprovalForProposal>(
+          "/instructor/course/checkInstantApprovalForProposal",
+          { nodeId: newNodeId }
+        );
+        setGraph(graph => {
+          const updatedNodeIds: string[] = [newNodeId];
+          const newNode = graph.nodes[newNodeId];
 
-        if (!newNode.title) {
-          console.error("title required");
-          return graph;
-        }
-
-        if (newNode.nodeType === "Question" && !Boolean(newNode.choices.length)) {
-          console.error("choices required");
-          return graph;
-        }
-
-        if (!newNodeId) {
-          return graph;
-        }
-
-        let referencesOK = true;
-        if (
-          (newNode.nodeType === "Concept" ||
-            newNode.nodeType === "Relation" ||
-            newNode.nodeType === "Question" ||
-            newNode.nodeType === "News") &&
-          newNode.references.length === 0
-        ) {
-          referencesOK = window.confirm("You are proposing a node without citing any reference. Are you sure?");
-        }
-
-        if (!referencesOK) {
-          return graph;
-        }
-
-        if (newNode.tags.length == 0) {
-          setTimeout(() => {
-            window.alert("Please add relevant tag(s) to your proposed node.");
-          });
-          return graph;
-        }
-
-        if (newNode.title === "" || newNode.title === "Replace this new node title!") return graph;
-
-        gtmEvent("Propose", {
-          customType: "newChild",
-        });
-        gtmEvent("Interaction", {
-          customType: "newChild",
-        });
-        gtmEvent("Reputation", {
-          value: 1,
-        });
-
-        let { nodes, edges } = graph;
-
-        const postData: any = {
-          ...newNode,
-          summary: summary,
-          proposal: reason,
-          versionNodeId: newNodeId,
-          notebookId: selectedNotebookId,
-        };
-        delete postData.isStudied;
-        delete postData.bookmarked;
-        delete postData.isNew;
-        delete postData.correct;
-        delete postData.updatedAt;
-        delete postData.open;
-        delete postData.visible;
-        delete postData.deleted;
-        delete postData.wrong;
-        delete postData.createdAt;
-        delete postData.firstVisit;
-        delete postData.lastVisit;
-        delete postData.versions;
-        delete postData.viewers;
-        delete postData.comments;
-        delete postData.wrongs;
-        delete postData.corrects;
-        delete postData.studied;
-        delete postData.editable;
-        delete postData.left;
-        delete postData.top;
-        delete postData.height;
-
-        let willBeApproved = false;
-        if (courseExist) {
-          willBeApproved = instantApprove;
-        } else if (isInstructor && !courseExist) {
-          willBeApproved = true;
-        }
-        const nodePartChanges = {
-          editable: false,
-          unaccepted: true,
-          simulated: false,
-        };
-        // if version is approved from simulation then remove it from changedNodes and tempNodes
-        if (willBeApproved) {
-          if (tempNodes.has(newNodeId)) {
-            tempNodes.delete(newNodeId);
+          if (!newNode.title) {
+            console.error("title required");
+            return graph;
           }
-          // if (changedNodes.hasOwnProperty(newNode.parents[0].node)) {
-          //   delete changedNodes[newNode.parents[0].node];
-          // }
-          nodePartChanges.unaccepted = false;
-          nodePartChanges.simulated = true;
-        }
 
-        nodes = { ...nodes, [newNodeId]: { ...nodes[newNodeId], changedAt: new Date(), ...nodePartChanges } };
+          if (newNode.nodeType === "Question" && !Boolean(newNode.choices.length)) {
+            console.error("choices required");
+            return graph;
+          }
 
-        const flashcard = postData.flashcard;
-        delete postData.flashcard;
-        const loadingEvent = new CustomEvent("proposed-node-loading");
-        window.dispatchEvent(loadingEvent);
+          if (!newNodeId) {
+            return graph;
+          }
 
-        if (!willBeApproved) revertNodesOnGraph();
-        proposeParentNode({ postData, flashcard });
-        // proposeParentNode("/proposeParentNode", postData, !willBeApproved).then(async (response: any) => {});
+          let referencesOK = true;
+          if (
+            (newNode.nodeType === "Concept" ||
+              newNode.nodeType === "Relation" ||
+              newNode.nodeType === "Question" ||
+              newNode.nodeType === "News") &&
+            newNode.references.length === 0
+          ) {
+            referencesOK = window.confirm("You are proposing a node without citing any reference. Are you sure?");
+          }
 
-        window.dispatchEvent(new CustomEvent("next-flashcard"));
+          if (!referencesOK) {
+            return graph;
+          }
 
-        setTimeout(() => onComplete(), 200);
-        setNodeUpdates({
-          nodeIds: updatedNodeIds,
-          updatedAt: new Date(),
+          if (newNode.tags.length == 0) {
+            setTimeout(() => {
+              window.alert("Please add relevant tag(s) to your proposed node.");
+            });
+            return graph;
+          }
+
+          if (newNode.title === "" || newNode.title === "Replace this new node title!") return graph;
+
+          gtmEvent("Propose", {
+            customType: "newChild",
+          });
+          gtmEvent("Interaction", {
+            customType: "newChild",
+          });
+          gtmEvent("Reputation", {
+            value: 1,
+          });
+
+          let { nodes, edges } = graph;
+
+          postData = {
+            ...newNode,
+            summary: summary,
+            proposal: reason,
+            versionNodeId: newNodeId,
+            notebookId: selectedNotebookId,
+          };
+          delete postData.isStudied;
+          delete postData.bookmarked;
+          delete postData.isNew;
+          delete postData.correct;
+          delete postData.updatedAt;
+          delete postData.open;
+          delete postData.visible;
+          delete postData.deleted;
+          delete postData.wrong;
+          delete postData.createdAt;
+          delete postData.firstVisit;
+          delete postData.lastVisit;
+          delete postData.versions;
+          delete postData.viewers;
+          delete postData.comments;
+          delete postData.wrongs;
+          delete postData.corrects;
+          delete postData.studied;
+          delete postData.editable;
+          delete postData.left;
+          delete postData.top;
+          delete postData.height;
+
+          let willBeApproved = false;
+          if (courseExist) {
+            willBeApproved = instantApprove;
+          } else if (isInstructor && !courseExist) {
+            willBeApproved = true;
+          }
+          const nodePartChanges = {
+            editable: false,
+            unaccepted: true,
+            simulated: false,
+          };
+          // if version is approved from simulation then remove it from changedNodes and tempNodes
+          if (willBeApproved) {
+            if (tempNodes.has(newNodeId)) {
+              tempNodes.delete(newNodeId);
+            }
+            // if (changedNodes.hasOwnProperty(newNode.parents[0].node)) {
+            //   delete changedNodes[newNode.parents[0].node];
+            // }
+            nodePartChanges.unaccepted = false;
+            nodePartChanges.simulated = true;
+          }
+
+          nodes = { ...nodes, [newNodeId]: { ...nodes[newNodeId], changedAt: new Date(), ...nodePartChanges } };
+
+          const flashcard = postData.flashcard;
+          delete postData.flashcard;
+          const loadingEvent = new CustomEvent("proposed-node-loading");
+          window.dispatchEvent(loadingEvent);
+
+          if (!willBeApproved) revertNodesOnGraph();
+          notebookRef.current.selectionType = null;
+          nodeBookDispatch({ type: "setSelectionType", payload: null });
+          proposeParentNode({ postData, flashcard });
+          // proposeParentNode("/proposeParentNode", postData, !willBeApproved).then(async (response: any) => {});
+
+          window.dispatchEvent(new CustomEvent("next-flashcard"));
+
+          setTimeout(() => onComplete(), 200);
+          setNodeUpdates({
+            nodeIds: updatedNodeIds,
+            updatedAt: new Date(),
+          });
+          scrollToNode(newNodeId);
+          return { nodes, edges };
         });
-        scrollToNode(newNodeId);
-        return { nodes, edges };
-      });
+      } catch (err) {
+        console.error(err);
+        const errorData = {
+          postData,
+          errorMessage: err instanceof Error ? err.message : "",
+        };
+        addClientErrorLog(db, { title: "SAVE_PROPOSED_PARENT_NODE", user: user.uname, data: errorData });
+      }
     },
-    [selectedNotebookId, nodeBookDispatch, scrollToNode]
+    [user, selectedNotebookId, nodeBookDispatch, revertNodesOnGraph, scrollToNode, db]
   );
 
   const proposeParentNode = async ({ postData, flashcard }: any) => {
@@ -4110,175 +4107,187 @@ const Notebook = ({}: NotebookProps) => {
   const saveProposedChildNode = useCallback(
     async (newNodeId: string, summary: string, reason: string, onComplete: () => void) => {
       if (!selectedNotebookId) return;
+      if (!user) return;
 
-      devLog("SAVE_PROPOSED_CHILD_NODE", { selectedNotebookId, newNodeId, summary, reason });
-      notebookRef.current.choosingNode = null;
-      notebookRef.current.chosenNode = null;
-      nodeBookDispatch({ type: "setChoosingNode", payload: null });
-      nodeBookDispatch({ type: "setChosenNode", payload: null });
+      let postData: any = {};
+      try {
+        devLog("SAVE_PROPOSED_CHILD_NODE", { selectedNotebookId, newNodeId, summary, reason });
+        notebookRef.current.choosingNode = null;
+        notebookRef.current.chosenNode = null;
+        nodeBookDispatch({ type: "setChoosingNode", payload: null });
+        nodeBookDispatch({ type: "setChosenNode", payload: null });
 
-      const { courseExist, instantApprove }: { courseExist: boolean; instantApprove: boolean } = await Post(
-        "/instructor/course/checkInstantApprovalForProposal",
-        {
-          nodeId: newNodeId,
-        }
-      );
-      setGraph(graph => {
-        const updatedNodeIds: string[] = [newNodeId];
-        const newNode = graph.nodes[newNodeId];
+        const { courseExist, instantApprove }: { courseExist: boolean; instantApprove: boolean } = await Post(
+          "/instructor/course/checkInstantApprovalForProposal",
+          {
+            nodeId: newNodeId,
+          }
+        );
+        setGraph(graph => {
+          const updatedNodeIds: string[] = [newNodeId];
+          const newNode = graph.nodes[newNodeId];
 
-        if (!newNode.title) {
-          console.error("title required");
-          return graph;
-        }
+          if (!newNode.title) {
+            console.error("title required");
+            return graph;
+          }
 
-        if (newNode.nodeType === "Question" && !Boolean(newNode.choices.length)) {
-          console.error("choices required");
-          return graph;
-        }
+          if (newNode.nodeType === "Question" && !Boolean(newNode.choices.length)) {
+            console.error("choices required");
+            return graph;
+          }
 
-        if (!newNodeId) {
-          return graph;
-        }
+          if (!newNodeId) {
+            return graph;
+          }
 
-        let referencesOK = true;
-        if (
-          (newNode.nodeType === "Concept" ||
-            newNode.nodeType === "Relation" ||
-            newNode.nodeType === "Question" ||
-            newNode.nodeType === "News") &&
-          newNode.references.length === 0
-        ) {
-          referencesOK = window.confirm("You are proposing a node without citing any reference. Are you sure?");
-        }
+          let referencesOK = true;
+          if (
+            (newNode.nodeType === "Concept" ||
+              newNode.nodeType === "Relation" ||
+              newNode.nodeType === "Question" ||
+              newNode.nodeType === "News") &&
+            newNode.references.length === 0
+          ) {
+            referencesOK = window.confirm("You are proposing a node without citing any reference. Are you sure?");
+          }
 
-        if (!referencesOK) {
-          return graph;
-        }
+          if (!referencesOK) {
+            return graph;
+          }
 
-        if (newNode.tags.length == 0) {
-          setTimeout(() => {
-            window.alert("Please add relevant tag(s) to your proposed node.");
+          if (newNode.tags.length == 0) {
+            setTimeout(() => {
+              window.alert("Please add relevant tag(s) to your proposed node.");
+            });
+            return graph;
+          }
+
+          if (newNode.title === "" || newNode.title === "Replace this new node title!") return graph;
+
+          gtmEvent("Propose", {
+            customType: "newChild",
           });
-          return graph;
-        }
+          gtmEvent("Interaction", {
+            customType: "newChild",
+          });
+          gtmEvent("Reputation", {
+            value: 1,
+          });
 
-        if (newNode.title === "" || newNode.title === "Replace this new node title!") return graph;
+          let { nodes, edges } = graph;
 
-        gtmEvent("Propose", {
-          customType: "newChild",
-        });
-        gtmEvent("Interaction", {
-          customType: "newChild",
-        });
-        gtmEvent("Reputation", {
-          value: 1,
-        });
+          postData = {
+            ...newNode,
+            parentId: newNode.parents[0]?.node || "",
+            parentType: graph.nodes[newNode.parents[0]?.node]?.nodeType || "",
+            summary: summary,
+            proposal: reason,
+            versionNodeId: newNodeId,
+            notebookId: selectedNotebookId,
+          };
+          delete postData.isStudied;
+          delete postData.bookmarked;
+          delete postData.isNew;
+          delete postData.correct;
+          delete postData.updatedAt;
+          delete postData.open;
+          delete postData.visible;
+          delete postData.deleted;
+          delete postData.wrong;
+          delete postData.createdAt;
+          delete postData.firstVisit;
+          delete postData.lastVisit;
+          delete postData.versions;
+          delete postData.viewers;
+          delete postData.comments;
+          delete postData.wrongs;
+          delete postData.corrects;
+          delete postData.studied;
+          delete postData.editable;
+          delete postData.left;
+          delete postData.top;
+          delete postData.height;
 
-        let { nodes, edges } = graph;
+          const parentNode = graph.nodes[newNode.parents[0].node];
 
-        const postData: any = {
-          ...newNode,
-          parentId: newNode.parents[0]?.node || "",
-          parentType: graph.nodes[newNode.parents[0]?.node]?.nodeType || "",
-          summary: summary,
-          proposal: reason,
-          versionNodeId: newNodeId,
-          notebookId: selectedNotebookId,
-        };
-        delete postData.isStudied;
-        delete postData.bookmarked;
-        delete postData.isNew;
-        delete postData.correct;
-        delete postData.updatedAt;
-        delete postData.open;
-        delete postData.visible;
-        delete postData.deleted;
-        delete postData.wrong;
-        delete postData.createdAt;
-        delete postData.firstVisit;
-        delete postData.lastVisit;
-        delete postData.versions;
-        delete postData.viewers;
-        delete postData.comments;
-        delete postData.wrongs;
-        delete postData.corrects;
-        delete postData.studied;
-        delete postData.editable;
-        delete postData.left;
-        delete postData.top;
-        delete postData.height;
-
-        const parentNode = graph.nodes[newNode.parents[0].node];
-
-        let willBeApproved = instantApprove;
-        if (courseExist) {
-          willBeApproved = instantApprove;
-        } else {
-          willBeApproved = isVersionApproved({ corrects: 1, wrongs: 0, nodeData: parentNode });
-        }
-
-        const nodePartChanges = {
-          editable: false,
-          unaccepted: true,
-          simulated: false,
-        };
-        // if version is approved from simulation then remove it from changedNodes and tempNodes
-        if (willBeApproved) {
-          if (tempNodes.has(newNodeId)) {
-            tempNodes.delete(newNodeId);
+          let willBeApproved = instantApprove;
+          if (courseExist) {
+            willBeApproved = instantApprove;
+          } else {
+            willBeApproved = isVersionApproved({ corrects: 1, wrongs: 0, nodeData: parentNode });
           }
-          if (changedNodes.hasOwnProperty(newNode.parents[0].node)) {
-            delete changedNodes[newNode.parents[0].node];
+
+          const nodePartChanges = {
+            editable: false,
+            unaccepted: true,
+            simulated: false,
+          };
+          // if version is approved from simulation then remove it from changedNodes and tempNodes
+          if (willBeApproved) {
+            if (tempNodes.has(newNodeId)) {
+              tempNodes.delete(newNodeId);
+            }
+            if (changedNodes.hasOwnProperty(newNode.parents[0].node)) {
+              delete changedNodes[newNode.parents[0].node];
+            }
+            nodePartChanges.unaccepted = false;
+            nodePartChanges.simulated = true;
           }
-          nodePartChanges.unaccepted = false;
-          nodePartChanges.simulated = true;
-        }
 
-        nodes = { ...nodes, [newNodeId]: { ...nodes[newNodeId], changedAt: new Date(), ...nodePartChanges } };
+          nodes = { ...nodes, [newNodeId]: { ...nodes[newNodeId], changedAt: new Date(), ...nodePartChanges } };
 
-        const flashcard = postData.flashcard;
-        delete postData.flashcard;
-        const loadingEvent = new CustomEvent("proposed-node-loading");
-        window.dispatchEvent(loadingEvent);
+          const flashcard = postData.flashcard;
+          delete postData.flashcard;
+          const loadingEvent = new CustomEvent("proposed-node-loading");
+          window.dispatchEvent(loadingEvent);
+          notebookRef.current.selectionType = null;
+          nodeBookDispatch({ type: "setSelectionType", payload: null });
+          if (!willBeApproved) revertNodesOnGraph();
+          proposeChildNode({ postData, flashcard });
+          // Post("/proposeChildNode", postData, ).then(async (response: any) => {
+          //   if (!response) return;
+          //   // save flashcard data
+          //   if (postData.nodeType !== "Question") {
+          //     window.dispatchEvent(
+          //       new CustomEvent("propose-flashcard", {
+          //         detail: {
+          //           node: response.node,
+          //           proposal: response.proposal,
+          //           flashcard,
+          //           proposedType: "Parent",
+          //           token: await getIdToken(),
+          //         },
+          //       })
+          //     );
+          //   }
+          //   if (postData.nodeType === "Question") {
+          //     window.dispatchEvent(new CustomEvent("question-node-proposed"));
+          //   }
+          // });
 
-        if (!willBeApproved) revertNodesOnGraph();
-        proposeChildNode({ postData, flashcard });
-        // Post("/proposeChildNode", postData, ).then(async (response: any) => {
-        //   if (!response) return;
-        //   // save flashcard data
-        //   if (postData.nodeType !== "Question") {
-        //     window.dispatchEvent(
-        //       new CustomEvent("propose-flashcard", {
-        //         detail: {
-        //           node: response.node,
-        //           proposal: response.proposal,
-        //           flashcard,
-        //           proposedType: "Parent",
-        //           token: await getIdToken(),
-        //         },
-        //       })
-        //     );
-        //   }
-        //   if (postData.nodeType === "Question") {
-        //     window.dispatchEvent(new CustomEvent("question-node-proposed"));
-        //   }
-        // });
+          window.dispatchEvent(new CustomEvent("next-flashcard"));
 
-        window.dispatchEvent(new CustomEvent("next-flashcard"));
-
-        setTimeout(() => {
-          onComplete();
-        }, 200);
-        setNodeUpdates({
-          nodeIds: updatedNodeIds,
-          updatedAt: new Date(),
+          setTimeout(() => {
+            onComplete();
+          }, 200);
+          setNodeUpdates({
+            nodeIds: updatedNodeIds,
+            updatedAt: new Date(),
+          });
+          scrollToNode(newNodeId);
+          return { nodes, edges };
         });
-        scrollToNode(newNodeId);
-        return { nodes, edges };
-      });
+      } catch (err) {
+        console.error(err);
+        const errorData = {
+          postData,
+          errorMessage: err instanceof Error ? err.message : "",
+        };
+        addClientErrorLog(db, { title: "SAVE_PROPOSED_CHILD_NODE", user: user.uname, data: errorData });
+      }
     },
-    [selectedNotebookId, nodeBookDispatch, getMapGraph, scrollToNode]
+    [selectedNotebookId, user, nodeBookDispatch, revertNodesOnGraph, scrollToNode, db]
   );
 
   const proposeChildNode = async ({ postData, flashcard }: any) => {
@@ -7208,7 +7217,7 @@ const Notebook = ({}: NotebookProps) => {
           >
             <>
               {" "}
-              {user && user?.role === "INSTRUCTOR" && (
+              {instructor && user?.role === "INSTRUCTOR" && (
                 <Tooltip title="Create a new Parent Node" placement="bottom">
                   <IconButton
                     id="toolbox-scroll-to-node"
@@ -7502,6 +7511,7 @@ const Notebook = ({}: NotebookProps) => {
                   onChangeChosenNode={onChangeChosenNode}
                   editingModeNode={editingModeNode}
                   setEditingModeNode={setEditingModeNode}
+                  displayParentOptions={!!instructor && user?.role === "INSTRUCTOR"}
                 />
               </MapInteractionCSS>
 
