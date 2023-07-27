@@ -11,6 +11,7 @@ import { Hydrate, QueryClient, QueryClientProvider } from "react-query";
 import { ReactQueryDevtools } from "react-query/devtools";
 import { AppPropsWithLayout } from "src/knowledgeTypes";
 
+import ErrorBoundary from "@/components/ErrorBoundary";
 import { AuthProvider } from "@/context/AuthContext";
 import { ThemeProvider } from "@/context/ThemeContext";
 import { initFirebaseClientSDK } from "@/lib/firestoreClient/firestoreClient.config";
@@ -59,33 +60,35 @@ const App = (props: AppPropsWithLayout) => {
   }, []);
 
   return (
-    <QueryClientProvider client={queryClient}>
-      <Hydrate state={pageProps.dehydratedState}>
-        <CacheProvider value={emotionCache}>
-          <Head>
-            <meta name="viewport" content="initial-scale=1, width=device-width" />
-          </Head>
-          {/* <ThemeProvider> */}
-          <SnackbarProvider
-            anchorOrigin={{
-              vertical: "top",
-              horizontal: "center",
-            }}
-            maxSnack={3}
-          >
-            <AuthProvider>
-              <ThemeProvider>
-                <CssBaseline />
-                {getLayout(<Component {...pageProps} />)}
-                <div id="portal"></div>
-              </ThemeProvider>
-            </AuthProvider>
-          </SnackbarProvider>
-          {/* </ThemeProvider> */}
-        </CacheProvider>
-      </Hydrate>
-      <ReactQueryDevtools />
-    </QueryClientProvider>
+    <ErrorBoundary>
+      <QueryClientProvider client={queryClient}>
+        <Hydrate state={pageProps.dehydratedState}>
+          <CacheProvider value={emotionCache}>
+            <Head>
+              <meta name="viewport" content="initial-scale=1, width=device-width" />
+            </Head>
+            {/* <ThemeProvider> */}
+            <SnackbarProvider
+              anchorOrigin={{
+                vertical: "top",
+                horizontal: "center",
+              }}
+              maxSnack={3}
+            >
+              <AuthProvider>
+                <ThemeProvider>
+                  <CssBaseline />
+                  {getLayout(<Component {...pageProps} />)}
+                  <div id="portal"></div>
+                </ThemeProvider>
+              </AuthProvider>
+            </SnackbarProvider>
+            {/* </ThemeProvider> */}
+          </CacheProvider>
+        </Hydrate>
+        <ReactQueryDevtools />
+      </QueryClientProvider>
+    </ErrorBoundary>
   );
 };
 

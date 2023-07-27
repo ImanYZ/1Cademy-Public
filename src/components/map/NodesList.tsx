@@ -71,6 +71,7 @@ type NodeListProps = {
   onChangeChosenNode: (props: OnChangeChosenNode) => void;
   editingModeNode: boolean;
   setEditingModeNode: (newValue: boolean) => void;
+  displayParentOptions: boolean;
 };
 
 const NodesList = ({
@@ -135,6 +136,7 @@ const NodesList = ({
   onChangeChosenNode,
   editingModeNode,
   setEditingModeNode,
+  displayParentOptions,
 }: NodeListProps) => {
   const { nodeBookState, nodeBookDispatch } = useNodeBook();
 
@@ -282,6 +284,7 @@ const NodesList = ({
             onChangeChosenNode={onChangeChosenNode}
             editingModeNode={editingModeNode}
             setEditingModeNode={setEditingModeNode}
+            displayParentOptions={displayParentOptions}
           />
         );
       })}

@@ -41,3 +41,22 @@ we have 3 modules `notebook` , `instructors` and `public search of 1cademy`
 - Should work with defined themes
 - Should has skeleton component
 - Show message when doesn't have data
+
+## Error manage
+
+the repository has a error boundary setup in the app, to display correctly the fallback component of the boundary you need to call `CustomError` like this:
+
+```tsx
+throw new CustomError("error-j01", {
+  title: "TEST-ON-DEVELOP",
+  data: {},
+  level: "INFO",
+  origin: "COMPONENT",
+  originName: "notebook.tsx",
+  user: user?.uname ?? "",
+});
+```
+
+- To manage error on components you need to call `CustomError`
+
+- To manage error on functions you need to wrap in try catch and call `addClientErrorLog` on catch scope
