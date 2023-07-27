@@ -22,7 +22,6 @@ afterEach(() => {
 
 describe("should calculate daily streak", () => {
   it("with 0 days in a row that the student completely answered 10 questions correctly.", () => {
-    console.log({ d1: new Date(), d2: new Date("2023-01-01") });
     const semesterStudentStats = {
       uname: "student-core-econ",
       votePoints: 0,

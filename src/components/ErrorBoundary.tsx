@@ -3,8 +3,8 @@ import { getFirestore } from "firebase/firestore";
 import React, { ReactNode } from "react";
 import { addClientErrorLog } from "src/client/firestore/errors.firestore";
 
+import { DESIGN_SYSTEM_COLORS } from "@/lib/theme/colors";
 import { CustomError } from "@/lib/utils/customError";
-import { orange900, orangeDark } from "@/pages/home";
 
 type ErrorBoundaryProps = { children: ReactNode };
 type ErrorBoundaryState = { hasError: boolean };
@@ -51,12 +51,12 @@ class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoundarySta
             onClick={() => location.reload()}
             variant="contained"
             sx={{
-              background: orangeDark,
+              background: DESIGN_SYSTEM_COLORS.primary800,
               fontSize: 16,
               borderRadius: 40,
               textTransform: "capitalize",
               ":hover": {
-                background: orange900,
+                background: DESIGN_SYSTEM_COLORS.primary900,
               },
             }}
           >
