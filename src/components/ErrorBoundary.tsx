@@ -48,7 +48,7 @@ class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoundarySta
             Our team is actively working to fix the issue. Please try again later. Thank you for your patience.
           </Typography>
           <Button
-            onClick={() => this.setState({ hasError: false })}
+            onClick={() => location.reload()}
             variant="contained"
             sx={{
               background: orangeDark,
