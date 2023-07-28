@@ -1,4 +1,5 @@
 import ArrowForwardIosRoundedIcon from "@mui/icons-material/ArrowForwardIosRounded";
+import DescriptionIcon from "@mui/icons-material/Description";
 import GroupsRoundedIcon from "@mui/icons-material/GroupsRounded";
 import HomeRoundedIcon from "@mui/icons-material/HomeRounded";
 import InsightsRoundedIcon from "@mui/icons-material/InsightsRounded";
@@ -121,6 +122,13 @@ export const DashboardToolbar = ({
                 active={view === "STUDENTS"}
                 IconButton={<GroupsRoundedIcon sx={{ color: DESIGN_SYSTEM_COLORS.orange400 }} />}
                 onChangeToolbarView={() => onChangeToolbarView("STUDENTS")}
+              />{" "}
+              <DashboardToolbarViewButton
+                name="Assignments"
+                view="ASSIGNMENTS"
+                active={view === "ASSIGNMENTS"}
+                IconButton={<DescriptionIcon sx={{ color: DESIGN_SYSTEM_COLORS.orange400 }} />}
+                onChangeToolbarView={() => onChangeToolbarView("ASSIGNMENTS")}
               />
               <DashboardToolbarViewButton
                 name="Settings"
