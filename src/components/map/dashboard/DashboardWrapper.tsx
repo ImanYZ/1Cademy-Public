@@ -36,7 +36,7 @@ import { ISemester } from "../../../types/ICourse";
 import { NoDataMessage } from "../../instructors/NoDataMessage";
 import PracticeTool, { PracticeToolRef } from "../../practiceTool/PracticeTool";
 import { DashboardToolbar } from "../Dashobard/DashboradToolbar";
-import { Assignments } from "./assignments";
+import { Assignments } from "./Assignments";
 import { Dashboard } from "./Dashboard";
 import { DashboardSettings } from "./DashboardSettings";
 import { DashboardStudents } from "./DashboardStudents";

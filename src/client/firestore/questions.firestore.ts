@@ -1,6 +1,6 @@
 import { collection, doc, Firestore, setDoc, Timestamp } from "firebase/firestore";
 
-export type Rubrick = {
+export type Rubrics = {
   prompt: string;
   upvotes: number;
   downvotes: number;
@@ -10,7 +10,7 @@ export type AddQuestionInput = {
   title: string;
   description: string;
   imageUrl: string;
-  rubricks: Rubrick[];
+  rubrics: Rubrics[];
 };
 
 type QuestionDocument = {
@@ -18,11 +18,7 @@ type QuestionDocument = {
   description: string;
   imageUrl: string;
   createdAt: Date;
-  rubricks: {
-    promt: string;
-    upvotes: number;
-    downvotes: number;
-  }[];
+  rubrics: Rubrics[];
 };
 export type Question = { id: string } & QuestionDocument;
 

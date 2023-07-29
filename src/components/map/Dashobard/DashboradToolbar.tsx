@@ -122,7 +122,7 @@ export const DashboardToolbar = ({
                 active={view === "STUDENTS"}
                 IconButton={<GroupsRoundedIcon sx={{ color: DESIGN_SYSTEM_COLORS.orange400 }} />}
                 onChangeToolbarView={() => onChangeToolbarView("STUDENTS")}
-              />{" "}
+              />
               <DashboardToolbarViewButton
                 name="Assignments"
                 view="ASSIGNMENTS"
