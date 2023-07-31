@@ -34,7 +34,7 @@ import CSVBtn from "@/components/CSVBtn";
 import DeleteButton from "@/components/DeleteButton";
 import { StudentFilters, StudentsProfile } from "@/components/instructors/Drawers";
 import OptimizedAvatar from "@/components/OptimizedAvatar";
-import { postWithToken } from "@/lib/mapApi";
+import { Post } from "@/lib/mapApi";
 import { DESIGN_SYSTEM_COLORS } from "@/lib/theme/colors";
 import { calculateVoteStatPoints } from "@/lib/utils/charts.utils";
 
@@ -525,9 +525,8 @@ export const DashboardStudents = ({ currentSemester }: DashboardStudentsProps) =
     const payloadAPI = { students };
     setEditMode(!editMode);
     if (!currentSemester) return;
-    const mapUrl = "/instructor/students/" + currentSemester.tagId + "/signup";
     try {
-      await postWithToken(mapUrl, payloadAPI);
+      await Post("/instructor/students/" + currentSemester.tagId + "/signup", payloadAPI);
       setNewStudents([]);
     } catch (error) {
       console.error(error);

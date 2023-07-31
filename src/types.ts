@@ -61,3 +61,17 @@ export type NotebookDocument = {
 export type Notebook = NotebookDocument & {
   id: string;
 };
+
+export type ClientErrorType =
+  | "TEST_ON_DEVELOP" // 'TEST-ON-DEVELOP' should be ignored, it is used only in develop
+  | "OPEN_NODE"
+  | "UPDATE_DEFAULT_TAG"
+  | "HIDE_DESCENDANTS"
+  | "OPEN_ALL_CHILDREN"
+  | "OPEN_ALL_PARENTS"
+  | "RATE_PROPOSAL"
+  | "WRONG_NODES"
+  | "IMAGE_UPLOAD"
+  | "SAVE_PROPOSED_IMPROVEMENT"
+  | "SAVE_PROPOSED_CHILD_NODE"
+  | "SAVE_PROPOSED_PARENT_NODE";

@@ -149,7 +149,8 @@ const RECONCILING_NOT_ACCEPTED_PROPOSALS_STEPS: TutorialStepConfig[] = [
     ),
     anchor: "Portal",
     tooltipPosition: "bottom",
-    // targetDelay: 300,
+    outline: "inside",
+    targetDelay: 600,
   },
   {
     // targetId: "sidebar-wrapper-proposals",
@@ -170,9 +171,8 @@ const RECONCILING_NOT_ACCEPTED_PROPOSALS_STEPS: TutorialStepConfig[] = [
       </Stack>
     ),
     tooltipPosition: "bottom",
-
     anchor: "Portal",
-    // targetDelay: 300,
+    outline: "inside",
   },
 ];
 export const RECONCILING_ACCEPTED_PROPOSALS_STEPS_COMPLETE: TutorialStep[] = RECONCILING_ACCEPTED_PROPOSALS_STEPS.map(
