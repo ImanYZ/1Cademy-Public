@@ -79,12 +79,14 @@ export const Assignments = ({ username }: AssignmentsProps) => {
 
   const syncQuestions = (questionChanges: QuestionChanges[]) => {
     setQuestions(prev => {
-      return questionChanges.reduce((acu: Question[], cur) => {
+      const tt = questionChanges.reduce((acu: Question[], cur) => {
         if (cur.type === "added") return [...acu, cur.data];
         if (cur.type === "modified") return acu.map(c => (c.id === cur.data.id ? cur.data : c));
         if (cur.type === "removed") return acu.filter(c => c.id !== cur.data.id);
         return acu;
       }, prev);
+      setSelectedQuestion(prev => (prev ? tt.find(c => c.id === prev.id) ?? null : null));
+      return tt;
     });
   };
 

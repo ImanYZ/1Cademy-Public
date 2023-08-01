@@ -3,7 +3,7 @@ import CloseIcon from "@mui/icons-material/Close";
 import EditIcon from "@mui/icons-material/Edit";
 import { Box, Button, Divider, IconButton, Stack, TextField, Tooltip, Typography } from "@mui/material";
 import { getFirestore } from "firebase/firestore";
-import { FormikHelpers, useFormik } from "formik";
+import { useFormik } from "formik";
 import React, { useState } from "react";
 import { Question, Rubric, updateQuestion } from "src/client/firestore/questions.firestore";
 import * as yup from "yup";
@@ -16,29 +16,31 @@ type RubricsEditorProps = {
   onReturnToQuestions: () => void;
 };
 
-type RubricsForm = { rubrics: Rubric[] };
-
 const generateEmptyRubric = (): Rubric => ({ id: "", prompt: "", downvotes: 0, upvotes: 0 });
 
 export const RubricsEditor = ({ question, onReturnToQuestions }: RubricsEditorProps) => {
   const db = getFirestore();
-  const validationSchema = yup.array(yup.object({ prompt: yup.string().required() }));
-  // const newRubricId = useRef("");
-  // const [newRubricId, setNewRubricId] = useState("");
-  const [editedRubric, setEditedRubric] = useState<{ data: Rubric; isNew: boolean } | null>(null);
 
-  const onSubmit = async (values: RubricsForm, formikHelpers: FormikHelpers<RubricsForm>) => {
-    formikHelpers.setSubmitting(true);
-    await updateQuestion(db, question.id, { rubrics: values.rubrics });
-    formikHelpers.setSubmitting(false);
-    // id is truthy ? update : add (uuidv4())
-    onReturnToQuestions();
+  const [editedRubric, setEditedRubric] = useState<{ data: Rubric; isNew: boolean; isLoading: boolean } | null>(null);
+
+  const validationSchema = yup.array(yup.object({ prompt: yup.string().required() }));
+
+  const onSaveRubric = async (idx: number) => {
+    if (idx < question.rubrics.length) {
+    }
+    const newRubrics =
+      idx < question.rubrics.length
+        ? question.rubrics.map((c, i) => (i === idx ? formik.values.rubrics[idx] : c))
+        : [...question.rubrics, formik.values.rubrics[idx]];
+    setEditedRubric(prev => (prev ? { ...prev, isLoading: true } : null));
+    await updateQuestion(db, question.id, { rubrics: newRubrics });
+    setEditedRubric(null);
   };
 
   const formik = useFormik({
     initialValues: { rubrics: question.rubrics },
     validationSchema,
-    onSubmit,
+    onSubmit: () => {},
   });
 
   const onAddRubric = () => {
@@ -46,21 +48,32 @@ export const RubricsEditor = ({ question, onReturnToQuestions }: RubricsEditorPr
     // setNewRubricId(id);
     const newRubric = { ...generateEmptyRubric(), id };
     const rubricsUpdated = [...formik.values.rubrics, newRubric];
-    setEditedRubric({ data: newRubric, isNew: true });
+    setEditedRubric({ data: newRubric, isNew: true, isLoading: false });
     formik.setValues({ rubrics: rubricsUpdated });
   };
 
-  const onCancelRubric = (idx: number) => {
-    // is new ? remove : revert changes
-    const rubric = formik.values.rubrics[idx];
-    if (!rubric) return;
-    if (editedRubric) {
-      // if (rubric.id === newRubricId) {
-      formik.setValues({ rubrics: formik.values.rubrics.filter(c => c.id) });
-      setEditedRubric(null);
-      // newRubricId.current = "";
-      // setNewRubricId("");
+  const onEditRubric = (rubric: Rubric) => {
+    if (editedRubric?.isNew) {
+      // if previous was new, we remove it
+      formik.setValues({ rubrics: formik.values.rubrics.filter(c => c.id !== editedRubric.data.id) });
     }
+    if (editedRubric) {
+      formik.setValues({
+        rubrics: formik.values.rubrics.map(c => (c.id === editedRubric.data.id ? editedRubric.data : c)),
+      });
+    }
+    setEditedRubric({ data: rubric, isNew: false, isLoading: false });
+  };
+
+  const onCancelRubric = () => {
+    // is new ? remove : revert changes
+    if (!editedRubric) return;
+
+    const rubricsProcessed = editedRubric.isNew
+      ? formik.values.rubrics.filter(c => c.id !== editedRubric.data.id)
+      : formik.values.rubrics.map(c => (c.id === editedRubric.data.id ? editedRubric.data : c));
+    formik.setValues({ rubrics: rubricsProcessed });
+    setEditedRubric(null);
   };
 
   // const onSaveRubric = (idx: number) => {
@@ -143,6 +156,7 @@ export const RubricsEditor = ({ question, onReturnToQuestions }: RubricsEditorPr
                 onBlur={(event: React.FocusEvent<HTMLInputElement>) => {
                   formik.handleBlur(event);
                 }}
+                disabled={editedRubric?.data.id !== cur.id}
               />
               {editedRubric?.data.id !== cur.id && (
                 <Stack direction={"row"} justifyContent={"space-between"} alignItems={"center"} sx={{ width: "100%" }}>
@@ -150,7 +164,7 @@ export const RubricsEditor = ({ question, onReturnToQuestions }: RubricsEditorPr
                     <Button variant="contained">Choose it</Button>
                     <Button variant="contained">Try it</Button>
                   </Stack>
-                  <Tooltip title="Edit Rubric">
+                  <Tooltip title="Edit Rubric" onClick={() => onEditRubric(cur)}>
                     <IconButton>
                       <EditIcon />
                     </IconButton>
@@ -162,7 +176,8 @@ export const RubricsEditor = ({ question, onReturnToQuestions }: RubricsEditorPr
                 <Stack direction={"row"} justifyContent={"right"} spacing={"8px"} sx={{ width: "100%" }}>
                   <Button
                     variant="contained"
-                    onClick={() => onCancelRubric(idx)}
+                    onClick={onCancelRubric}
+                    disabled={editedRubric.isLoading}
                     sx={{
                       border: `solid 1px ${DESIGN_SYSTEM_COLORS.gray300}`,
                       borderRadius: "26px",
@@ -181,6 +196,8 @@ export const RubricsEditor = ({ question, onReturnToQuestions }: RubricsEditorPr
                   <Button
                     variant="contained"
                     type="submit"
+                    onClick={() => onSaveRubric(idx)}
+                    disabled={editedRubric.isLoading}
                     sx={{
                       borderRadius: "26px",
                       backgroundColor: DESIGN_SYSTEM_COLORS.primary800,
@@ -192,7 +209,7 @@ export const RubricsEditor = ({ question, onReturnToQuestions }: RubricsEditorPr
                       },
                     }}
                   >
-                    Propose
+                    {editedRubric.isLoading ? "Proposing ..." : "Propose"}
                   </Button>
                 </Stack>
               )}
@@ -200,7 +217,7 @@ export const RubricsEditor = ({ question, onReturnToQuestions }: RubricsEditorPr
           );
         })}
 
-        {editedRubric?.isNew && (
+        {!editedRubric?.isNew && (
           <Button type="button" variant="contained" onClick={onAddRubric}>
             Add Rubric <AddIcon />
           </Button>
