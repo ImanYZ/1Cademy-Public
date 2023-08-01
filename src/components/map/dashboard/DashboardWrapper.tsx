@@ -327,7 +327,7 @@ export const DashboardWrapper = forwardRef<DashboardWrapperRef, DashboardWrapper
             {selectToolbarView === "STUDENTS" && (
               <DashboardStudents currentSemester={currentSemester} onSelectUserHandler={onSelectUserHandler} />
             )}
-            {selectToolbarView === "ASSIGNMENTS" && <Assignments />}
+            {selectToolbarView === "ASSIGNMENTS" && <Assignments username={user.uname} />}
           </>
         ) : (
           <NoDataMessage message="No data in this semester" />

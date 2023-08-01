@@ -1,19 +1,26 @@
 import AddIcon from "@mui/icons-material/Add";
 import ImageIcon from "@mui/icons-material/Image";
-import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import { Box, Button, Divider, Stack, TextField, Typography } from "@mui/material";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import { getFirestore } from "firebase/firestore";
 import { getStorage } from "firebase/storage";
 import { Formik, FormikHelpers } from "formik";
-import React, { useCallback, useRef, useState /* , { useState } */ } from "react";
-import { addQuestion, AddQuestionInput, Question } from "src/client/firestore/questions.firestore";
+import React, { useCallback, useEffect, useRef, useState /* , { useState } */ } from "react";
+import {
+  addQuestion,
+  AddQuestionInput,
+  getQuestionSnapshot,
+  Question,
+  QuestionChanges,
+} from "src/client/firestore/questions.firestore";
 import * as yup from "yup";
 
 import { useUploadImage } from "@/hooks/useUploadImage";
-import { DESIGN_SYSTEM_COLORS } from "@/lib/theme/colors";
 import { isValidHttpUrl } from "@/lib/utils/utils";
+
+import { QuestionItem } from "./QuestionItem";
+import { RubricsEditor } from "./RubricsEditor";
 
 dayjs.extend(relativeTime);
 
@@ -29,23 +36,22 @@ dayjs.extend(relativeTime);
 //   errorText: "",
 // };
 
-type AssignmentsProps = {};
+type AssignmentsProps = { username: string };
 
-const INITIAL_VALUES: AddQuestionInput = {
+type QuestionForm = Omit<AddQuestionInput, "user">;
+
+const INITIAL_VALUES: QuestionForm = {
   title: "",
   description: "",
   imageUrl: "",
   rubrics: [],
 };
 
-const QUESTIONS: Question[] = [
-  { id: "01", createdAt: new Date(), description: "description 01", imageUrl: "", rubrics: [], title: "question 01" },
-  { id: "02", createdAt: new Date(), description: "description 02", imageUrl: "", rubrics: [], title: "question 02" },
-];
-
 // const EMPTY_RUBRIC: Rubrics = { prompt: "", upvotes: 0, downvotes: 0 };
 
-export const Assignments = ({}: AssignmentsProps) => {
+export const Assignments = ({ username }: AssignmentsProps) => {
+  const [questions, setQuestions] = useState<Question[]>([]);
+  const [selectedQuestion, setSelectedQuestion] = useState<Question | null>(null);
   const [displayQuestionForm, setDisplayQuestionForm] = useState<boolean>(false);
 
   const db = getFirestore();
@@ -54,26 +60,41 @@ export const Assignments = ({}: AssignmentsProps) => {
     title: yup.string().required("Required"),
     description: yup.string().required("Required"),
     imageUrl: yup.string(),
-    rubrics: yup.array(
-      yup.object({
-        prompt: yup.string().required(),
-      })
-    ),
+    rubrics: yup.array(yup.object({ prompt: yup.string().required() })),
   });
   const oneDisplayQuestionForm = () => {
     setDisplayQuestionForm(prev => !prev);
   };
 
-  const onSubmit = async (values: AddQuestionInput, { setSubmitting, setTouched }: FormikHelpers<AddQuestionInput>) => {
+  const onSubmit = async (values: QuestionForm, { setSubmitting, setTouched }: FormikHelpers<QuestionForm>) => {
     setSubmitting(true);
     setTouched({
       title: true,
       description: true,
     });
-    await addQuestion(db, values);
+    await addQuestion(db, { ...values, user: username });
     setSubmitting(false);
     // TODO: restart values or change to the question list
   };
+
+  const syncQuestions = (questionChanges: QuestionChanges[]) => {
+    setQuestions(prev => {
+      return questionChanges.reduce((acu: Question[], cur) => {
+        if (cur.type === "added") return [...acu, cur.data];
+        if (cur.type === "modified") return acu.map(c => (c.id === cur.data.id ? cur.data : c));
+        if (cur.type === "removed") return acu.filter(c => c.id !== cur.data.id);
+        return acu;
+      }, prev);
+    });
+  };
+
+  useEffect(() => {
+    getQuestionSnapshot(db, { username }, syncQuestions);
+  }, [db, username]);
+
+  if (selectedQuestion) {
+    return <RubricsEditor question={selectedQuestion} onReturnToQuestions={() => setSelectedQuestion(null)} />;
+  }
 
   return (
     <Box sx={{ px: { xs: "10px", md: "20px" }, py: "10px" }}>
@@ -94,27 +115,8 @@ export const Assignments = ({}: AssignmentsProps) => {
 
       {!displayQuestionForm && (
         <Stack spacing={"16px"}>
-          {QUESTIONS.map(cur => (
-            <Box
-              key={cur.id}
-              sx={{
-                p: "32px",
-                background: ({ palette }) =>
-                  palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookMainBlack : DESIGN_SYSTEM_COLORS.gray50,
-                borderRadius: "8px",
-              }}
-            >
-              <Typography sx={{ fontWeight: 700, fontSize: "20px" }}>{cur.title}</Typography>
-              <Button>
-                Show more <KeyboardArrowDownIcon></KeyboardArrowDownIcon>
-              </Button>
-              <Typography>
-                {" "}
-                {dayjs(cur.createdAt).fromNow().includes("NaN")
-                  ? "a few minutes ago"
-                  : `${dayjs(cur.createdAt).fromNow()}`}
-              </Typography>
-            </Box>
+          {questions.map(cur => (
+            <QuestionItem key={cur.id} question={cur} onSelectQuestion={setSelectedQuestion} />
           ))}
         </Stack>
       )}
