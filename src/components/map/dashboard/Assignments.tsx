@@ -25,18 +25,6 @@ import { RubricsEditor } from "./RubricsEditor";
 
 dayjs.extend(relativeTime);
 
-// const initialErrorsState = {
-//   startDate: false,
-//   endDate: false,
-//   nodeProposalStartDate: false,
-//   nodeProposalEndDate: false,
-//   questionProposalStartDate: false,
-//   questionProposalEndDate: false,
-//   dailyPracticeStartDate: false,
-//   dailyPracticeEndDate: false,
-//   errorText: "",
-// };
-
 type AssignmentsProps = { username: string };
 
 type QuestionForm = Omit<AddQuestionInput, "user">;
@@ -94,7 +82,13 @@ export const Assignments = ({ username }: AssignmentsProps) => {
   }, [db, username]);
 
   if (selectedQuestion) {
-    return <RubricsEditor question={selectedQuestion} onReturnToQuestions={() => setSelectedQuestion(null)} />;
+    return (
+      <RubricsEditor
+        question={selectedQuestion}
+        onReturnToQuestions={() => setSelectedQuestion(null)}
+        onSetQuestions={setSelectedQuestion}
+      />
+    );
   }
 
   return (

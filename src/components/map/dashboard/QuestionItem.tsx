@@ -18,7 +18,7 @@ export const QuestionItem = ({ question, onSelectQuestion }: QuestionItemProps) 
     <Box
       sx={{
         p: "32px",
-        background: ({ palette }) =>
+        backgroundColor: ({ palette }) =>
           palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookMainBlack : DESIGN_SYSTEM_COLORS.gray50,
         borderRadius: "8px",
       }}

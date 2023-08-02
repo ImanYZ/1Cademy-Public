@@ -6,7 +6,7 @@ import { UserTheme } from "src/knowledgeTypes";
 
 import NoProposalDarkIcon from "../../../../../public/no-proposals-dark-mode.svg";
 import NoProposalLightIcon from "../../../../../public/no-proposals-light-mode.svg";
-import { newId } from "../../../../lib/utils/newid";
+import { newId } from "../../../../lib/utils/newId";
 import ProposalsList from "../../ProposalsList/ProposalsList";
 import { SidebarWrapper } from "./SidebarWrapper";
 

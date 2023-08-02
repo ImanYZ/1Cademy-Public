@@ -135,7 +135,7 @@ import {
   setNewParentChildrenEdges,
   tempNodes,
 } from "../lib/utils/Map.utils";
-import { newId } from "../lib/utils/newid";
+import { newId } from "../lib/utils/newId";
 import {
   buildFullNodes,
   getNodesPromises,
