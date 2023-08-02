@@ -293,7 +293,7 @@ export const allCommunities = [
     leaders: [
       {
         name: "Lewis Truong",
-        image: "Lewis_Truong.jpeg",
+        image: "Lewis_Truong.jpg",
         about: ``,
         websites: [
           {
