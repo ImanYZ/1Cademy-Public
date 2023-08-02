@@ -230,13 +230,13 @@ export const allCommunities = [
     width: "34%",
     leaders: [
       {
-        name: "Jolie Safier Smith",
-        image: "Jolie_Safier_Smith.jpeg",
+        name: "Isabella Griesmaier",
+        image: "Isabella_Griesmaier.jpeg",
         about: ``,
         websites: [
           {
             name: "LinkedIn",
-            url: "https://www.linkedin.com/in/jolie-smith-0200ba243/",
+            url: "https://www.linkedin.com/in/isabella-griesmaier-090900",
           },
         ],
       },
