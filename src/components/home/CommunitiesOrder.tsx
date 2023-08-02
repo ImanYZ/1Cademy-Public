@@ -230,13 +230,13 @@ export const allCommunities = [
     width: "34%",
     leaders: [
       {
-        name: "Jolie Safier Smith",
-        image: "Jolie_Safier_Smith.jpeg",
+        name: "Isabella Griesmaier",
+        image: "Isabella_Griesmaier.jpeg",
         about: ``,
         websites: [
           {
             name: "LinkedIn",
-            url: "https://www.linkedin.com/in/jolie-smith-0200ba243/",
+            url: "https://www.linkedin.com/in/isabella-griesmaier-090900",
           },
         ],
       },
@@ -281,8 +281,8 @@ export const allCommunities = [
     name: "AI_Language_Models_in_Education",
     tags: [
       {
-        title: "Disability Studies",
-        node: "Y4HihWopCsKNaVZSr6s0",
+        title: "Natural language processing",
+        node: "khCWqIXa9xQiojnEqHCT",
       },
     ],
     allTime: [],
