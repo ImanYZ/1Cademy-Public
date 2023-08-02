@@ -277,6 +277,86 @@ export const allCommunities = [
     ],
   },
   {
+    id: "ai-language-models-in-education",
+    name: "AI_Language_Models_in_Education",
+    tags: [
+      {
+        title: "Disability Studies",
+        node: "Y4HihWopCsKNaVZSr6s0",
+      },
+    ],
+    allTime: [],
+    weekly: [],
+    url: "/static/Communities/AI_Language Models_in_Education.png",
+    title: "AI Language Models in Education",
+    width: "33%",
+    leaders: [
+      {
+        name: "Lewis Truong",
+        image: "Lewis_Truong.jpeg",
+        about: ``,
+        websites: [
+          {
+            name: "LinkedIn",
+            url: "https://www.linkedin.com/in/lewisdadude/",
+          },
+        ],
+      },
+      {
+        name: "Billy Wang",
+        image: "Billy_Wang.jpeg",
+        about: `A driven, resilient scholar of the humanities that offers critical, constructive, and creative contributions to the collaborative community. Looking forward to making a difference harnessing the power of my analytical skills, writing prowess, and communicative disposition.`,
+        websites: [
+          {
+            name: "LinkedIn",
+            url: "https://www.linkedin.com/in/billy-wang-5593a122a/",
+          },
+        ],
+      },
+    ],
+    YouTube: "tLYj1Ts8_F0",
+
+    description: (
+      <>
+        <p>
+          As a community of researchers, we aim to explore the applications of AI language models in education. LLMs,
+          also known as large language models, are a powerful type of artificial intelligence trained to comprehend
+          massive repositories of texts & designed to mimic sophisticated human language patterns. We encourage interns
+          to delve into research that applies LLMs in educational settings through interactive learning, personalized
+          tutoring, automated grading, etc
+        </p>
+        After learning how to navigate the 1Cademy platform, researchers should break down complex research articles,
+        present them as digestible pieces of information, and communicate their findings with the larger community.
+        Ultimately, the internship is designed to encourage independent inquiry, cultivate research skills like
+        analyzing and interpreting data, and work towards advancing research.
+        <p></p>
+      </>
+    ),
+    accomplishments: ``,
+    gains: [
+      `Work remotely with an interdisciplinary community of talented students and researchers from different schools (5-10 hours per week).`,
+      `Gain experience using crucial skills in research including paper analysis, summarization, and making connections between disciplines.`,
+      `Collaborate with others to review and summarize existing research and identify topics for further study.`,
+      `Work towards publishing research on the application of LLMs in modern education.`,
+      `Have opportunities to take on leadership roles within the community.`,
+    ],
+    requirements: `In addition to the 1Cademy general application process, we require our interns to submit both their most current resume and unofficial transcripts, with GPA included on those transcripts. We require our interns to have a minimum of a 3.5 GPA to apply for this position. All majors are welcome to apply. A personal or academic interest in disability is highly preferred, and answer our quiz questions to evaluate their domain knowledge.`,
+    hasTest: true,
+    qualifications: [
+      `A strong academic background in topics related to computer science, education, linguistics,`,
+      `psychology, statistics, or mathematics.`,
+      `Fluency in writing and reading in English.`,
+    ],
+    responsibilities: [
+      `Read and summarize textbook chapters and scientific journal articles.`,
+      `Make connections between different ideas and concepts.`,
+      `Contribute concise summaries of information to the online 1Cademy platform.`,
+      `Attend weekly online meetings.`,
+      `Contribute to meetings by presenting work and engaging in discussions.`,
+      `All interactions, task fulfillment, and communications will be remote.`,
+    ],
+  },
+  {
     id: "disability-studies",
     name: "Disability_Studies",
     tags: [
