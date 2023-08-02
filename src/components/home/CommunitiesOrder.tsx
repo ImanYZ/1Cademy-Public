@@ -281,8 +281,8 @@ export const allCommunities = [
     name: "AI_Language_Models_in_Education",
     tags: [
       {
-        title: "Disability Studies",
-        node: "Y4HihWopCsKNaVZSr6s0",
+        title: "Natural language processing",
+        node: "khCWqIXa9xQiojnEqHCT",
       },
     ],
     allTime: [],
