@@ -88,6 +88,7 @@ export const Assignments = ({ username }: AssignmentsProps) => {
           question={selectedQuestion}
           onReturnToQuestions={() => setSelectedQuestion(null)}
           onSetQuestions={setSelectedQuestion}
+          username={username}
         />
       )}
       {!selectedQuestion && (

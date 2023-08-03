@@ -1,7 +1,9 @@
 import AddIcon from "@mui/icons-material/Add";
+import CloseIcon from "@mui/icons-material/Close";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import DeleteIcon from "@mui/icons-material/Delete";
-import { Box, IconButton, Stack, TextField, Tooltip, Typography } from "@mui/material";
+import DoneIcon from "@mui/icons-material/Done";
+import { Box, Button, Divider, IconButton, Stack, TextField, Tooltip, Typography } from "@mui/material";
 import { FieldArray, Form, Formik, FormikHelpers } from "formik";
 import React from "react";
 import { Rubric } from "src/client/firestore/questions.firestore";
@@ -9,8 +11,9 @@ import * as yup from "yup";
 
 import MarkdownRender from "@/components/Markdown/MarkdownRender";
 import { DESIGN_SYSTEM_COLORS } from "@/lib/theme/colors";
+import shortenNumber from "@/lib/utils/shortenNumber";
 
-import { CustomButton } from "../Buttons/Buttons";
+import { CustomButton, CustomWrapperButton } from "../Buttons/Buttons";
 
 const NO_RUBRICS_MESSAGE = "No Rubric Items";
 
@@ -50,11 +53,54 @@ export const RubricItem = ({ rubric, onDuplicateRubric, onTryIt }: RubricItemPro
             Try it
           </CustomButton>
         </Stack>
-        <Tooltip title="DuplicateRubric">
-          <IconButton onClick={onDuplicateRubric}>
-            <ContentCopyIcon />
-          </IconButton>
-        </Tooltip>
+        <Stack direction={"row"} alignItems={"center"} spacing={"8px"}>
+          <CustomWrapperButton
+          // id={`${identifier}-node-footer-votes`}
+          // onClickOnWrapper={displayJoinMessage}
+          // disabled={disableUpvoteButton && disableDownvoteButton}
+          >
+            <Stack direction={"row"} alignItems={"center"}>
+              <Tooltip title={"Vote to prevent further changes."} placement={"top"}>
+                <Button
+                  // id={downvoteButtonId}
+                  // disabled={disableUpvoteButton}
+                  sx={{ padding: "0px", color: "inherit", minWidth: "0px" }}
+                >
+                  <Box sx={{ display: "flex", fontSize: "14px", alignItems: "center" }}>
+                    <DoneIcon sx={{ fontSize: "18px" }} />
+                    <span style={{ marginLeft: "2px" }}>{shortenNumber(rubric.upvotesBy.length, 2, false)}</span>
+                  </Box>
+                </Button>
+              </Tooltip>
+              <Divider
+                orientation="vertical"
+                variant="middle"
+                flexItem
+                sx={{
+                  borderColor: theme => (theme.palette.mode === "dark" ? "#D3D3D3" : "inherit"),
+                  mx: "4px",
+                }} /* sx={{ borderColor: "#6A6A6A" }}  */
+              />
+              <Tooltip title={"Vote to delete node."} placement={"top"}>
+                <Button
+                  // id={upvoteButtonId}
+                  // disabled={disableDownvoteButton}
+                  sx={{ padding: "0px", color: "inherit", minWidth: "0px" }}
+                >
+                  <Box sx={{ display: "flex", fontSize: "14px", alignItems: "center" }}>
+                    <CloseIcon sx={{ fontSize: "18px" }} />
+                    <span style={{ marginLeft: "2px" }}>{shortenNumber(rubric.downvotesBy.length, 2, false)}</span>
+                  </Box>
+                </Button>
+              </Tooltip>
+            </Stack>
+          </CustomWrapperButton>
+          <Tooltip title="DuplicateRubric">
+            <IconButton onClick={onDuplicateRubric}>
+              <ContentCopyIcon />
+            </IconButton>
+          </Tooltip>
+        </Stack>
       </Stack>
     </Box>
   );

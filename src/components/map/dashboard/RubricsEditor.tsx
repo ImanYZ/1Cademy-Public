@@ -18,22 +18,23 @@ type RubricsEditorProps = {
   question: Question;
   onSetQuestions: React.Dispatch<React.SetStateAction<Question | null>>;
   onReturnToQuestions: () => void;
+  username: string;
 };
 
 export type UserAnswer = { user: string; userImage: string; answer: string };
 
 export type UserAnswerProcessed = UserAnswer & { points: number };
 
-const generateEmptyRubric = (questionId: string): Rubric => ({
+const generateEmptyRubric = (questionId: string, username: string): Rubric => ({
   id: "",
   questionId,
   points: 1,
   prompts: [],
-  downvotes: 0,
-  upvotes: 0,
+  downvotesBy: [],
+  upvotesBy: [username],
 });
 
-export const RubricsEditor = ({ question, onReturnToQuestions, onSetQuestions }: RubricsEditorProps) => {
+export const RubricsEditor = ({ question, username, onReturnToQuestions, onSetQuestions }: RubricsEditorProps) => {
   const db = getFirestore();
 
   const [rubrics, setRubrics] = useState<Rubric[]>(question.rubrics);
@@ -43,7 +44,7 @@ export const RubricsEditor = ({ question, onReturnToQuestions, onSetQuestions }:
 
   const onAddRubric = () => {
     const id = newId(db);
-    const newRubric = { ...generateEmptyRubric(question.id), id };
+    const newRubric = { ...generateEmptyRubric(question.id, username), id };
     setRubrics(prev => [...prev, newRubric]);
     setEditedRubric({ data: newRubric, isNew: true, isLoading: false });
   };
@@ -75,7 +76,8 @@ export const RubricsEditor = ({ question, onReturnToQuestions, onSetQuestions }:
 
   const onDuplicateRubric = async (rubric: Rubric) => {
     const newRubric: Rubric = { ...rubric, questionId: question.id, id: newId(db) };
-    await updateQuestion(db, question.id, { rubrics: [...rubrics, newRubric] });
+    setRubrics(prev => [...prev, newRubric]);
+    setEditedRubric({ data: newRubric, isNew: true, isLoading: false });
   };
 
   const onCancelRubric = () => {
@@ -83,6 +85,11 @@ export const RubricsEditor = ({ question, onReturnToQuestions, onSetQuestions }:
     if (newRubric) onSetQuestions(prev => (prev ? { ...prev, rubrics: removeRubric(prev.rubrics, newRubric) } : null));
     setEditedRubric(null);
   };
+
+  const rubricsSortedByUpvotes = useMemo(
+    () => rubrics.sort((a, b) => b.upvotesBy.length - a.upvotesBy.length),
+    [rubrics]
+  );
 
   useEffect(() => setRubrics(question.rubrics), [question.rubrics]);
 
@@ -128,7 +135,7 @@ export const RubricsEditor = ({ question, onReturnToQuestions, onSetQuestions }:
           <Typography sx={{ fontWeight: 600, fontSize: "18px", mb: "32px" }}>Alternative rubrics</Typography>
 
           <Stack spacing={"28px"}>
-            {rubrics.map(cur =>
+            {rubricsSortedByUpvotes.map(cur =>
               editedRubric && cur.id === editedRubric.data.id ? (
                 <RubricForm key={cur.id} rubric={editedRubric.data} onSave={onSaveRubric} cancelFn={onCancelRubric} />
               ) : (

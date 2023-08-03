@@ -4,7 +4,7 @@ import { ReactNode } from "react";
 import { DESIGN_SYSTEM_COLORS } from "@/lib/theme/colors";
 
 type CustomIconButtonProps = {
-  id: string;
+  id?: string;
   children: ReactNode;
   onClick?: () => void;
   onClickOnDisable?: () => void;
