@@ -97,6 +97,11 @@ export const RubricsEditor = ({ question, username, onReturnToQuestions, onSetQu
 
   useEffect(() => setRubrics(question.rubrics), [question.rubrics]);
 
+  // const tryRubrics = async (rubrics: any) => {
+  //   console.log(rubrics);
+  //   await Post("/assignment/tryRubric", { essayText: "hello", rubrics });
+  // };
+
   return (
     <Box
       sx={{
