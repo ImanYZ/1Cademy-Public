@@ -134,7 +134,7 @@ import {
   setNewParentChildrenEdges,
   tempNodes,
 } from "../lib/utils/Map.utils";
-import { newId } from "../lib/utils/newId";
+import { newId } from "../lib/utils/newFirestoreId";
 import {
   buildFullNodes,
   getNodesPromises,
