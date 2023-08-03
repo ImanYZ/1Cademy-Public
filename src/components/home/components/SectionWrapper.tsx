@@ -64,17 +64,19 @@ export const SectionWrapper = forwardRef(
               </Typography>
 
               {/* description */}
-              {getDescription(section, stats)
-                .split("\n")
-                .map((paragraph: string) => (
-                  <Typography
-                    key={paragraph}
-                    color={theme => (theme.palette.mode === "dark" ? gray200 : gray600)}
-                    sx={{ fontSize: "20px", maxWidth: textAlign === "left" ? "500px" : undefined }}
-                  >
-                    {wrapStringWithBoldTag(paragraph, RE_DETECT_NUMBERS_WITH_COMMAS)}
-                  </Typography>
-                ))}
+              {typeof section.description === "string"
+                ? getDescription(section, stats)
+                    .split("\n")
+                    .map((paragraph: string) => (
+                      <Typography
+                        key={paragraph}
+                        color={theme => (theme.palette.mode === "dark" ? gray200 : gray600)}
+                        sx={{ fontSize: "20px", maxWidth: textAlign === "left" ? "500px" : undefined }}
+                      >
+                        {wrapStringWithBoldTag(paragraph, RE_DETECT_NUMBERS_WITH_COMMAS)}
+                      </Typography>
+                    ))
+                : section.description}
             </Box>
 
             {/* image */}
