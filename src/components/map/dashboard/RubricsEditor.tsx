@@ -66,11 +66,16 @@ export const RubricsEditor = ({ question, onReturnToQuestions, onSetQuestions }:
     }, null);
   }, [question.rubrics, rubrics]);
 
-  const onDisplayForm = (selectedRubric: Rubric) => {
-    setEditedRubric({ data: selectedRubric, isLoading: false, isNew: false });
+  // const onDisplayForm = (selectedRubric: Rubric) => {
+  //   setEditedRubric({ data: selectedRubric, isLoading: false, isNew: false });
 
-    const removeRubric = (rubrics: Rubric[], rubricToRemove: Rubric) => rubrics.filter(c => c.id !== rubricToRemove.id);
-    if (newRubric) onSetQuestions(prev => (prev ? { ...prev, rubrics: removeRubric(prev.rubrics, newRubric) } : null));
+  //   const removeRubric = (rubrics: Rubric[], rubricToRemove: Rubric) => rubrics.filter(c => c.id !== rubricToRemove.id);
+  //   if (newRubric) onSetQuestions(prev => (prev ? { ...prev, rubrics: removeRubric(prev.rubrics, newRubric) } : null));
+  // };
+
+  const onDuplicateRubric = async (rubric: Rubric) => {
+    const newRubric: Rubric = { ...rubric, questionId: question.id, id: newId(db) };
+    await updateQuestion(db, question.id, { rubrics: [...rubrics, newRubric] });
   };
 
   const onCancelRubric = () => {
@@ -124,12 +129,12 @@ export const RubricsEditor = ({ question, onReturnToQuestions, onSetQuestions }:
 
           <Stack spacing={"28px"}>
             {rubrics.map(cur =>
-              cur.id === editedRubric?.data.id ? (
+              editedRubric && cur.id === editedRubric.data.id ? (
                 <RubricForm key={cur.id} rubric={editedRubric.data} onSave={onSaveRubric} cancelFn={onCancelRubric} />
               ) : (
                 <RubricItem
                   key={cur.id}
-                  onDisplayForm={() => onDisplayForm(cur)}
+                  onDuplicateRubric={() => onDuplicateRubric(cur)}
                   rubric={cur}
                   onTryIt={() => setTryRubrics(cur)}
                 />

@@ -1,6 +1,6 @@
 import AddIcon from "@mui/icons-material/Add";
+import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import DeleteIcon from "@mui/icons-material/Delete";
-import EditIcon from "@mui/icons-material/Edit";
 import { Box, IconButton, Stack, TextField, Tooltip, Typography } from "@mui/material";
 import { FieldArray, Form, Formik, FormikHelpers } from "formik";
 import React from "react";
@@ -14,8 +14,8 @@ import { CustomButton } from "../Buttons/Buttons";
 
 const NO_RUBRICS_MESSAGE = "No Rubric Items";
 
-type RubricItemProps = { rubric: Rubric; onDisplayForm: () => void; onTryIt: () => void };
-export const RubricItem = ({ rubric, onDisplayForm, onTryIt }: RubricItemProps) => {
+type RubricItemProps = { rubric: Rubric; onDuplicateRubric: () => void; onTryIt: () => void };
+export const RubricItem = ({ rubric, onDuplicateRubric, onTryIt }: RubricItemProps) => {
   return (
     <Box
       sx={{
@@ -50,9 +50,9 @@ export const RubricItem = ({ rubric, onDisplayForm, onTryIt }: RubricItemProps) 
             Try it
           </CustomButton>
         </Stack>
-        <Tooltip title="Edit Rubric">
-          <IconButton onClick={onDisplayForm}>
-            <EditIcon />
+        <Tooltip title="DuplicateRubric">
+          <IconButton onClick={onDuplicateRubric}>
+            <ContentCopyIcon />
           </IconButton>
         </Tooltip>
       </Stack>
