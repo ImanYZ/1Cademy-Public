@@ -1,10 +1,15 @@
+import { Link, Typography } from "@mui/material";
+import { ReactNode } from "react";
+
+import { DESIGN_SYSTEM_COLORS } from "@/lib/theme/colors";
+
 export type HomepageSection = {
   id: string;
   title: string;
   label: string;
   image?: string;
   imageDark?: string;
-  description: string;
+  description: ReactNode;
   getDescription?: any;
   options: { title: string; description: string; link: string }[];
 };
@@ -31,8 +36,22 @@ export const ONE_CADEMY_SECTIONS: HomepageSection[] = [
     label: "Research Communities",
     image: "Research_Communities.svg",
     imageDark: "Research_Communities.svg",
-    description:
-      "1Cademy has fostered the development of communities of enthusiasts for various scientific subjects, comprising individuals from diverse educational institutions and research organizations. These enthusiasts share their discoveries and insights on 1Cademy and come together on a weekly basis to delve deeper into their areas of interest. Through these interactions, we gain insight into the cutting-edge research and learning taking place at our collaborators' institutions and are able to draw connections that inspire new research ideas.",
+    description: (
+      <Typography
+        color={theme => (theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.gray200 : DESIGN_SYSTEM_COLORS.gray600)}
+        sx={{ fontSize: "20px", maxWidth: "500px" }}
+      >
+        1Cademy has fostered the development of communities of enthusiasts for{" "}
+        <Link href="https://1cademy.com/community/education-and-psychology-research" target="_blank" rel="noopener">
+          various scientific subjects
+        </Link>
+        , comprising individuals from diverse educational institutions and research organizations. These enthusiasts
+        share their discoveries and insights on 1Cademy and come together on a weekly basis to delve deeper into their
+        areas of interest. Through these interactions, we gain insight into the cutting-edge research and learning
+        taking place at our collaborators' institutions and are able to draw connections that inspire new research
+        ideas.
+      </Typography>
+    ),
     //     getDescription: ({ users, institutions, nodes, links, proposals }: StatsSchema) =>
     //       `Over the past two years, [${users}] students and researchers from [${institutions}] institutions have participated in a large-scale collaboration effort through 1Cademy. This collaboration has resulted in the creation of [${nodes}] nodes and [${links}] prerequisite links between them, which have been proposed through [${proposals}] proposals.
     //       It is truly inspiring to witness the collaborative learning environment that has been fostered at 1Cademy, where students from both top-ranked and low-ranked schools can come together regardless of their background, ethnicity, or socio-economic status.
