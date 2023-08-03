@@ -7,7 +7,11 @@ import { RE_DETECT_NUMBERS_WITH_COMMAS } from "../../../lib/utils/RE";
 import { gray200, gray600 } from "../../../pages/home";
 import { HomepageSection } from "../SectionsItems";
 
+// TODO: improve this to change the description as React Node and send styles from section Wrapper
+// so we don't need to validate if is string, if is function or if is component
+// ad we can set up links and other values into description
 const getDescription = (section: HomepageSection, stats?: StatsSchema): string => {
+  if (typeof section.description !== "string") return "";
   const statsCopy = { ...stats };
   if (!section.getDescription) return section.description;
   if (!stats) return section.description;
