@@ -8,7 +8,6 @@ import {
   Timestamp,
   Unsubscribe,
   updateDoc,
-  where,
 } from "firebase/firestore";
 import { SnapshotChangesTypes } from "src/types";
 
@@ -61,12 +60,14 @@ export const updateQuestion = async (db: Firestore, id: string, data: UpdateQues
 
 export const getQuestionSnapshot = (
   db: Firestore,
-  data: { username: string },
+  data: {
+    /*  username: string */
+  },
   callback: (questions: QuestionChanges[]) => void
 ): Unsubscribe => {
   const questionsRef = collection(db, "questions");
   // INFO: when create assignments, change user to assignment and update DB with a script
-  const q = query(questionsRef, where("user", "==", data.username));
+  const q = query(questionsRef /* , where("user", "==", data.username) */);
   const killSnapshot = onSnapshot(q, snapshot => {
     const docChanges = snapshot.docChanges();
 

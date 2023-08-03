@@ -17,8 +17,31 @@ import { CustomButton, CustomWrapperButton } from "../Buttons/Buttons";
 
 const NO_RUBRICS_MESSAGE = "No Rubric Items";
 
-type RubricItemProps = { rubric: Rubric; onDuplicateRubric: () => void; onTryIt: () => void };
-export const RubricItem = ({ rubric, onDuplicateRubric, onTryIt }: RubricItemProps) => {
+type RubricItemProps = {
+  rubric: Rubric;
+  username: string;
+  onDuplicateRubric: () => void;
+  onTryIt: () => void;
+  onSave: (newRubric: Rubric) => Promise<void>;
+};
+
+export const RubricItem = ({ rubric, username, onDuplicateRubric, onTryIt, onSave }: RubricItemProps) => {
+  const onUpVoteRubric = async () => {
+    const wasUpVoted = rubric.upvotesBy.includes(username);
+    const newUpvotes = wasUpVoted ? rubric.upvotesBy.filter(c => c !== username) : [...rubric.upvotesBy, username];
+    const newDownVotes = rubric.downvotesBy.filter(c => c !== username);
+    const newRubric: Rubric = { ...rubric, upvotesBy: newUpvotes, downvotesBy: newDownVotes };
+    await onSave(newRubric);
+  };
+
+  const onDownVoteRubric = async () => {
+    const wasVoted = rubric.downvotesBy.includes(username);
+    const newDownVotes = wasVoted ? rubric.downvotesBy.filter(c => c !== username) : [...rubric.downvotesBy, username];
+    const newUpVotes = rubric.upvotesBy.filter(c => c !== username);
+    const newRubric: Rubric = { ...rubric, downvotesBy: newDownVotes, upvotesBy: newUpVotes };
+    await onSave(newRubric);
+  };
+
   return (
     <Box
       sx={{
@@ -54,20 +77,14 @@ export const RubricItem = ({ rubric, onDuplicateRubric, onTryIt }: RubricItemPro
           </CustomButton>
         </Stack>
         <Stack direction={"row"} alignItems={"center"} spacing={"8px"}>
-          <CustomWrapperButton
-          // id={`${identifier}-node-footer-votes`}
-          // onClickOnWrapper={displayJoinMessage}
-          // disabled={disableUpvoteButton && disableDownvoteButton}
-          >
+          <CustomWrapperButton>
             <Stack direction={"row"} alignItems={"center"}>
-              <Tooltip title={"Vote to prevent further changes."} placement={"top"}>
-                <Button
-                  // id={downvoteButtonId}
-                  // disabled={disableUpvoteButton}
-                  sx={{ padding: "0px", color: "inherit", minWidth: "0px" }}
-                >
+              <Tooltip title={"Up-vote rubric"} placement={"top"}>
+                <Button onClick={onUpVoteRubric} sx={{ padding: "0px 4px", color: "inherit", minWidth: "0px" }}>
                   <Box sx={{ display: "flex", fontSize: "14px", alignItems: "center" }}>
-                    <DoneIcon sx={{ fontSize: "18px" }} />
+                    <DoneIcon
+                      sx={{ fontSize: "18px", color: rubric.upvotesBy.includes(username) ? "#00E676" : undefined }}
+                    />
                     <span style={{ marginLeft: "2px" }}>{shortenNumber(rubric.upvotesBy.length, 2, false)}</span>
                   </Box>
                 </Button>
@@ -79,16 +96,14 @@ export const RubricItem = ({ rubric, onDuplicateRubric, onTryIt }: RubricItemPro
                 sx={{
                   borderColor: theme => (theme.palette.mode === "dark" ? "#D3D3D3" : "inherit"),
                   mx: "4px",
-                }} /* sx={{ borderColor: "#6A6A6A" }}  */
+                }}
               />
-              <Tooltip title={"Vote to delete node."} placement={"top"}>
-                <Button
-                  // id={upvoteButtonId}
-                  // disabled={disableDownvoteButton}
-                  sx={{ padding: "0px", color: "inherit", minWidth: "0px" }}
-                >
+              <Tooltip title={"Down-vote rubric"} placement={"top"}>
+                <Button onClick={onDownVoteRubric} sx={{ padding: "0px 4px", color: "inherit", minWidth: "0px" }}>
                   <Box sx={{ display: "flex", fontSize: "14px", alignItems: "center" }}>
-                    <CloseIcon sx={{ fontSize: "18px" }} />
+                    <CloseIcon
+                      sx={{ fontSize: "18px", color: rubric.downvotesBy.includes(username) ? "red" : undefined }}
+                    />
                     <span style={{ marginLeft: "2px" }}>{shortenNumber(rubric.downvotesBy.length, 2, false)}</span>
                   </Box>
                 </Button>

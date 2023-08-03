@@ -78,8 +78,8 @@ export const Assignments = ({ username }: AssignmentsProps) => {
   };
 
   useEffect(() => {
-    getQuestionSnapshot(db, { username }, syncQuestions);
-  }, [db, username]);
+    getQuestionSnapshot(db, {}, syncQuestions);
+  }, [db]);
 
   return (
     <Box sx={{}}>

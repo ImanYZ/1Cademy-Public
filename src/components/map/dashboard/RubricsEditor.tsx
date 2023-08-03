@@ -86,8 +86,12 @@ export const RubricsEditor = ({ question, username, onReturnToQuestions, onSetQu
     setEditedRubric(null);
   };
 
-  const rubricsSortedByUpvotes = useMemo(
-    () => rubrics.sort((a, b) => b.upvotesBy.length - a.upvotesBy.length),
+  /**
+   * valuable = upvotes - downvotes
+   */
+  const rubricsSortedByValuable = useMemo(
+    () =>
+      rubrics.sort((a, b) => b.upvotesBy.length - b.downvotesBy.length - (a.upvotesBy.length - a.downvotesBy.length)),
     [rubrics]
   );
 
@@ -135,15 +139,17 @@ export const RubricsEditor = ({ question, username, onReturnToQuestions, onSetQu
           <Typography sx={{ fontWeight: 600, fontSize: "18px", mb: "32px" }}>Alternative rubrics</Typography>
 
           <Stack spacing={"28px"}>
-            {rubricsSortedByUpvotes.map(cur =>
+            {rubricsSortedByValuable.map(cur =>
               editedRubric && cur.id === editedRubric.data.id ? (
                 <RubricForm key={cur.id} rubric={editedRubric.data} onSave={onSaveRubric} cancelFn={onCancelRubric} />
               ) : (
                 <RubricItem
                   key={cur.id}
+                  username={username}
                   onDuplicateRubric={() => onDuplicateRubric(cur)}
                   rubric={cur}
                   onTryIt={() => setTryRubrics(cur)}
+                  onSave={onSaveRubric}
                 />
               )
             )}
