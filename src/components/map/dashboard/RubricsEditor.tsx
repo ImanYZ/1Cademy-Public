@@ -170,10 +170,6 @@ export const RubricsEditor = ({ question, onReturnToQuestions, onSetQuestions }:
                   <AddIcon sx={{ fontSize: "14px" }} />
                 </IconButton>
               </Stack>
-              {/* <CustomButton variant="contained" color="secondary">
-              <UploadIcon sx={{ mr: "8px" }} />
-              Upload User Answers
-            </CustomButton> */}
               <CsvButton
                 BtnText={
                   <>
@@ -246,7 +242,10 @@ export const RubricsEditor = ({ question, onReturnToQuestions, onSetQuestions }:
 
             // </CustomButton>
           )}
-          <UserListAnswers userAnswersProcessed={usersAnswers.map(c => ({ ...c, points: 1 }))} />
+          <UserListAnswers
+            setUserAnswers={setUserAnswers}
+            userAnswersProcessed={usersAnswers.map(c => ({ ...c, points: 1 }))}
+          />
         </Box>
       )}
 

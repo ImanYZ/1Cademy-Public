@@ -1,8 +1,10 @@
 import KeyboardArrowLeftIcon from "@mui/icons-material/KeyboardArrowLeft";
+import UploadIcon from "@mui/icons-material/Upload";
 import { Box, Divider, Stack, Typography } from "@mui/material";
 import React from "react";
 import { Rubric } from "src/client/firestore/questions.firestore";
 
+import CsvButton from "@/components/CSVBtn";
 import OptimizedAvatar2 from "@/components/OptimizedAvatar2";
 import { DESIGN_SYSTEM_COLORS } from "@/lib/theme/colors";
 
@@ -49,12 +51,42 @@ export const UserAnswers = ({ userAnswers, rubric }: UserAnswersProps) => {
   );
 };
 
-type UserListAnswersProps = { userAnswersProcessed: UserAnswerProcessed[] };
-export const UserListAnswers = ({ userAnswersProcessed }: UserListAnswersProps) => {
+type UserListAnswersProps = {
+  userAnswersProcessed: UserAnswerProcessed[];
+  setUserAnswers: (data: UserAnswer[]) => void;
+};
+export const UserListAnswers = ({ userAnswersProcessed, setUserAnswers }: UserListAnswersProps) => {
   return (
     <Box>
       <Typography sx={{ fontWeight: 600 }}>Random Grading of 10 students</Typography>
       <Stack spacing={"12px"} sx={{ p: "0px" }}>
+        {!userAnswersProcessed.length && (
+          <Stack sx={{ p: "100px" }} alignItems={"center"} justifyContent={"center"} spacing={"20px"}>
+            <Typography>No users found</Typography>
+            <CsvButton
+              BtnText={
+                <>
+                  <UploadIcon sx={{ mr: "8px" }} />
+                  Upload User Answers
+                </>
+              }
+              addNewData={data => setUserAnswers(data.rows as UserAnswer[])}
+              sx={{
+                border: `solid 1px ${DESIGN_SYSTEM_COLORS.gray300}`,
+                backgroundColor: theme =>
+                  theme.palette.mode === "dark"
+                    ? DESIGN_SYSTEM_COLORS.notebookMainBlack
+                    : DESIGN_SYSTEM_COLORS.baseWhite,
+                color: theme =>
+                  theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.gray200 : DESIGN_SYSTEM_COLORS.gray700,
+                ":hover": {
+                  backgroundColor: theme =>
+                    theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.baseGraphit : DESIGN_SYSTEM_COLORS.gray300,
+                },
+              }}
+            />
+          </Stack>
+        )}
         {userAnswersProcessed.map((cur, idx) => (
           <Stack
             key={idx}
