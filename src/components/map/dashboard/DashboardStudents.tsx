@@ -30,7 +30,7 @@ import { CourseTag } from "src/instructorsTypes";
 import { ISemester, ISemesterStudentVoteStat } from "src/types/ICourse";
 import { v4 as uuidv4 } from "uuid";
 
-import CSVBtn from "@/components/CSVBtn";
+import CsvButton from "@/components/CSVBtn";
 import DeleteButton from "@/components/DeleteButton";
 import { StudentFilters, StudentsProfile } from "@/components/instructors/Drawers";
 import OptimizedAvatar from "@/components/OptimizedAvatar";
@@ -1093,11 +1093,11 @@ export const DashboardStudents = ({ currentSemester }: DashboardStudentsProps) =
             <Box sx={{ display: "flex", justifyContent: "space-between", paddingTop: "25px" }}>
               {!disableEdit && (
                 <Box>
-                  <CSVBtn
+                  <CsvButton
                     variant="text"
                     addNewData={addNewData}
                     disabled={disableEdit}
-                    buttonStyles={{
+                    sx={{
                       ":hover": {
                         backgroundColor: "#bdbdbd",
                       },

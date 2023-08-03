@@ -1,19 +1,28 @@
-import { Button } from "@mui/material";
+import { Button, SxProps, Theme } from "@mui/material";
 import Dialog from "@mui/material/Dialog";
 import DialogActions from "@mui/material/DialogActions";
 import DialogContent from "@mui/material/DialogContent";
 import DialogContentText from "@mui/material/DialogContentText";
 import DialogTitle from "@mui/material/DialogTitle";
 import Typography from "@mui/material/Typography";
-import React, { useEffect, useState } from "react";
+import React, { ReactNode, useEffect, useState } from "react";
 
-export const CSVBtn = ({ BtnText, addNewData, buttonStyles, disabled }: any) => {
+export type CsvData = { columns: string[]; rows: { [key: string]: string }[] };
+
+type CSVButtonProps = {
+  BtnText: ReactNode;
+  addNewData: (csvData: CsvData) => void;
+  sx?: SxProps<Theme>;
+  disabled?: boolean;
+};
+export const CsvButton = ({ BtnText, addNewData, sx, disabled = false }: CSVButtonProps) => {
   const fileReader = new FileReader();
-  const [CSVData, setCSVData] = useState<any>({
+  const [CSVData, setCSVData] = useState<CsvData>({
     columns: [],
     rows: [],
   });
   const [openUploadModal, setOpenUploadModal] = useState(false);
+  const [fileError, setFileError] = useState("");
 
   useEffect(() => {
     if (!openUploadModal) {
@@ -29,29 +38,19 @@ export const CSVBtn = ({ BtnText, addNewData, buttonStyles, disabled }: any) => 
     const file = e.target.files[0];
     if (file) {
       fileReader.onload = function (event: any) {
-        const text = event.target.result;
-        csvFileToArray(text);
+        try {
+          const text = event.target.result;
+          const csvData = csvFileToArray(text);
+          const isValid = validateCsvData(csvData);
+          if (!isValid) return setFileError("The file has invalid data");
+
+          setCSVData(csvData);
+        } catch (err) {
+          setFileError("The file has errors");
+        }
       };
       fileReader.readAsText(file);
     }
-  };
-
-  const csvFileToArray = (string: any) => {
-    const csvHeader = string.slice(0, string.indexOf("\n")).split(",");
-    const csvRows = string.slice(string.indexOf("\n") + 1).split("\n");
-
-    const array = csvRows.map((i: any) => {
-      const values = i.split(",");
-      const obj = csvHeader.reduce((object: any, header: any, index: any) => {
-        const cleanHeader = header.trim();
-        object[cleanHeader] = values[index];
-        return object;
-      }, {});
-      return obj;
-    });
-    const headerKeys = Object.keys(Object.assign({}, ...array));
-    const cleanHeaderKeys = headerKeys.map(x => x.replace("\r", "").trim());
-    setCSVData({ columns: cleanHeaderKeys, rows: array });
   };
 
   const handleAddData = () => {
@@ -60,10 +59,10 @@ export const CSVBtn = ({ BtnText, addNewData, buttonStyles, disabled }: any) => 
   };
 
   return (
-    <>
-      <Dialog open={openUploadModal} onClose={() => setOpenUploadModal(false)}>
+    <div>
+      <Dialog open={openUploadModal} onClose={() => setOpenUploadModal(false)} sx={{ zIndex: 2200 }}>
         <DialogTitle>
-          <Typography variant="h3" fontWeight={"bold"} component="h2">
+          <Typography variant="h3" fontWeight={"bold"} component="p">
             Add students from a csv file
           </Typography>
         </DialogTitle>
@@ -71,6 +70,7 @@ export const CSVBtn = ({ BtnText, addNewData, buttonStyles, disabled }: any) => 
           <DialogContentText>
             <input type={"file"} id={"csvFileInput"} accept={".csv"} onChange={handleOnChange} />
           </DialogContentText>
+          {fileError && <Typography sx={{ color: theme => theme.palette.error.main }}>{fileError}</Typography>}
         </DialogContent>
         <DialogActions>
           <Button disabled={CSVData?.rows?.length <= 0} variant="contained" onClick={handleAddData}>
@@ -86,14 +86,42 @@ export const CSVBtn = ({ BtnText, addNewData, buttonStyles, disabled }: any) => 
         disabled={disabled}
         sx={{
           color: theme => theme.palette.common.black,
-          ...buttonStyles,
+          ...sx,
         }}
         onClick={() => setOpenUploadModal(true)}
       >
         {BtnText}
       </Button>
-    </>
+    </div>
   );
 };
 
-export default CSVBtn;
+export default CsvButton;
+
+const csvFileToArray = (string: any) => {
+  const csvHeader = string.slice(0, string.indexOf("\n")).split(",");
+  const csvRows = string.slice(string.indexOf("\n") + 1).split("\n");
+
+  const array: { [key: string]: string }[] = csvRows.map((i: any) => {
+    const values = i.split(",");
+    const obj = csvHeader.reduce((object: any, header: any, index: number) => {
+      const cleanHeader = header.trim();
+      object[cleanHeader] = values[index];
+      return object;
+    }, {});
+    return obj;
+  });
+  const headerKeys = Object.keys(Object.assign({}, ...array));
+  const cleanHeaderKeys = headerKeys.map(x => x.replace("\r", "").trim());
+  return { columns: cleanHeaderKeys, rows: array };
+};
+
+const validateCsvData = (data: CsvData) => {
+  const checkPropertiesIsOnObject = (properties: string[], myObject: { [key: string]: string }) => {
+    return properties.reduce((acu, cur) => acu && myObject.hasOwnProperty(cur), true);
+  };
+  return data.rows.reduce((acu, cur) => {
+    const tt = checkPropertiesIsOnObject(data.columns, cur);
+    return acu && tt;
+  }, true);
+};

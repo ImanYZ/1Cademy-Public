@@ -81,90 +81,91 @@ export const Assignments = ({ username }: AssignmentsProps) => {
     getQuestionSnapshot(db, { username }, syncQuestions);
   }, [db, username]);
 
-  if (selectedQuestion) {
-    return (
-      <RubricsEditor
-        question={selectedQuestion}
-        onReturnToQuestions={() => setSelectedQuestion(null)}
-        onSetQuestions={setSelectedQuestion}
-      />
-    );
-  }
-
   return (
-    <Box sx={{ px: { xs: "10px", md: "20px" }, py: "10px" }}>
-      <Box sx={{ display: "flex", justifyContent: "space-between" }}>
-        <Typography variant="h1">Questions</Typography>
-        <CustomButton variant="contained" onClick={onToggleQuestionForm}>
-          {displayQuestionForm ? (
-            "Show Questions"
-          ) : (
-            <>
-              {"Add Question"} <AddIcon />
-            </>
-          )}
-        </CustomButton>
-      </Box>
-
-      <Divider sx={{ my: "12px" }} />
-
-      {!displayQuestionForm && (
-        <Stack spacing={"16px"}>
-          {questions.map(cur => (
-            <QuestionItem key={cur.id} question={cur} onSelectQuestion={setSelectedQuestion} />
-          ))}
-        </Stack>
+    <Box sx={{}}>
+      {selectedQuestion && (
+        <RubricsEditor
+          question={selectedQuestion}
+          onReturnToQuestions={() => setSelectedQuestion(null)}
+          onSetQuestions={setSelectedQuestion}
+        />
       )}
+      {!selectedQuestion && (
+        <Box sx={{ maxWidth: "788px", mx: "auto", px: { xs: "10px", md: "20px" }, py: "10px" }}>
+          <Box sx={{ display: "flex", justifyContent: "space-between" }}>
+            <Typography variant="h1">Questions</Typography>
+            <CustomButton variant="contained" onClick={onToggleQuestionForm}>
+              {displayQuestionForm ? (
+                "Show Questions"
+              ) : (
+                <>
+                  {"Add Question"} <AddIcon />
+                </>
+              )}
+            </CustomButton>
+          </Box>
 
-      {displayQuestionForm && (
-        <Formik initialValues={INITIAL_VALUES} validationSchema={validationSchema} onSubmit={onSubmit}>
-          {formik => {
-            return (
-              <Stack
-                component="form"
-                onSubmit={formik.handleSubmit}
-                direction="column"
-                spacing={5}
-                alignItems={"center"}
-                my={2}
-              >
-                <TextField
-                  label="Title"
-                  id="title"
-                  name="title"
-                  fullWidth
-                  onChange={formik.handleChange}
-                  value={formik.values.title}
-                  error={formik.touched.title && Boolean(formik.errors.title)}
-                  helperText={formik.touched.title && formik.errors.title}
-                  onBlur={(event: React.FocusEvent<HTMLInputElement>) => {
-                    formik.handleBlur(event);
-                  }}
-                />
-                <TextField
-                  label="Description"
-                  id="description"
-                  name="description"
-                  fullWidth
-                  onChange={formik.handleChange}
-                  value={formik.values.description}
-                  error={formik.touched.description && Boolean(formik.errors.description)}
-                  helperText={formik.touched.description && formik.errors.description}
-                  onBlur={(event: React.FocusEvent<HTMLInputElement>) => {
-                    formik.handleBlur(event);
-                  }}
-                />
-                <ImageInput
-                  imageUrl={formik.values.imageUrl}
-                  updateImageUrl={url => formik.setFieldValue("imageUrl", url)}
-                />
-                <CustomButton variant="contained" type="submit" disabled={formik.isSubmitting}>
-                  {formik.isSubmitting ? "Saving ..." : "Save"}
-                </CustomButton>
-              </Stack>
-            );
-          }}
-        </Formik>
+          <Divider sx={{ my: "12px" }} />
+
+          {!displayQuestionForm && (
+            <Stack spacing={"16px"}>
+              {questions.map(cur => (
+                <QuestionItem key={cur.id} question={cur} onSelectQuestion={setSelectedQuestion} />
+              ))}
+            </Stack>
+          )}
+
+          {displayQuestionForm && (
+            <Formik initialValues={INITIAL_VALUES} validationSchema={validationSchema} onSubmit={onSubmit}>
+              {formik => {
+                return (
+                  <Stack
+                    component="form"
+                    onSubmit={formik.handleSubmit}
+                    direction="column"
+                    spacing={5}
+                    alignItems={"center"}
+                    my={2}
+                  >
+                    <TextField
+                      label="Title"
+                      id="title"
+                      name="title"
+                      fullWidth
+                      onChange={formik.handleChange}
+                      value={formik.values.title}
+                      error={formik.touched.title && Boolean(formik.errors.title)}
+                      helperText={formik.touched.title && formik.errors.title}
+                      onBlur={(event: React.FocusEvent<HTMLInputElement>) => {
+                        formik.handleBlur(event);
+                      }}
+                    />
+                    <TextField
+                      label="Description"
+                      id="description"
+                      name="description"
+                      fullWidth
+                      onChange={formik.handleChange}
+                      value={formik.values.description}
+                      error={formik.touched.description && Boolean(formik.errors.description)}
+                      helperText={formik.touched.description && formik.errors.description}
+                      onBlur={(event: React.FocusEvent<HTMLInputElement>) => {
+                        formik.handleBlur(event);
+                      }}
+                    />
+                    <ImageInput
+                      imageUrl={formik.values.imageUrl}
+                      updateImageUrl={url => formik.setFieldValue("imageUrl", url)}
+                    />
+                    <CustomButton variant="contained" type="submit" disabled={formik.isSubmitting}>
+                      {formik.isSubmitting ? "Saving ..." : "Save"}
+                    </CustomButton>
+                  </Stack>
+                );
+              }}
+            </Formik>
+          )}
+        </Box>
       )}
     </Box>
   );

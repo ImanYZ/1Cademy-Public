@@ -14,8 +14,8 @@ import { CustomButton } from "../Buttons/Buttons";
 
 const NO_RUBRICS_MESSAGE = "No Rubric Items";
 
-type RubricItemProps = { rubric: Rubric; onDisplayForm: () => void };
-export const RubricItem = ({ rubric, onDisplayForm }: RubricItemProps) => {
+type RubricItemProps = { rubric: Rubric; onDisplayForm: () => void; onTryIt: () => void };
+export const RubricItem = ({ rubric, onDisplayForm, onTryIt }: RubricItemProps) => {
   return (
     <Box
       sx={{
@@ -46,7 +46,9 @@ export const RubricItem = ({ rubric, onDisplayForm }: RubricItemProps) => {
           <CustomButton variant="contained" color="secondary">
             Choose it
           </CustomButton>
-          <CustomButton variant="contained">Try it</CustomButton>
+          <CustomButton variant="contained" onClick={onTryIt}>
+            Try it
+          </CustomButton>
         </Stack>
         <Tooltip title="Edit Rubric">
           <IconButton onClick={onDisplayForm}>
@@ -121,8 +123,8 @@ export const RubricForm = ({ rubric, onSave, cancelFn }: RubricFormProps) => {
                 />
                 <Typography display={"inline"}>
                   {" "}
-                  point{formik.values.points === 1 ? "" : "s"} for mentioning each of the following points in their
-                  answer:
+                  point{formik.values.points === 1 ? "" : "s"} for mentioning each of the following rubric items in
+                  their answer:
                 </Typography>
               </Box>
               {!formik.values.prompts.length && (

@@ -37,7 +37,7 @@ const OptimizedAvatar2: FC<Props> = ({ imageUrl, alt, size, onClick, quality = 5
         ...sx,
       }}
     >
-      {hasError || imageUrl === DEFAULT_AVATAR ? (
+      {hasError || !imageUrl || imageUrl === DEFAULT_AVATAR ? (
         <Avatar
           sx={{
             background: "linear-gradient(143.7deg, #FDC830 15.15%, #F37335 83.11%);",

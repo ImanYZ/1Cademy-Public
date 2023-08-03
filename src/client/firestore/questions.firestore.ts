@@ -12,7 +12,14 @@ import {
 } from "firebase/firestore";
 import { SnapshotChangesTypes } from "src/types";
 
-export type Rubric = { id: string; points: number; prompts: string[]; upvotes: number; downvotes: number };
+export type Rubric = {
+  id: string;
+  questionId: string;
+  points: number;
+  prompts: string[];
+  upvotes: number;
+  downvotes: number;
+};
 
 export type AddQuestionInput = {
   user: string;
