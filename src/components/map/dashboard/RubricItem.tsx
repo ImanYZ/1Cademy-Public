@@ -3,6 +3,7 @@ import CloseIcon from "@mui/icons-material/Close";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import DeleteIcon from "@mui/icons-material/Delete";
 import DoneIcon from "@mui/icons-material/Done";
+import EditIcon from "@mui/icons-material/Edit";
 import { Box, Button, Divider, IconButton, Stack, TextField, Tooltip, Typography } from "@mui/material";
 import { FieldArray, Form, Formik, FormikHelpers } from "formik";
 import React from "react";
@@ -23,9 +24,19 @@ type RubricItemProps = {
   onDuplicateRubric: () => void;
   onTryIt: () => void;
   onSave: (newRubric: Rubric) => Promise<void>;
+  onDisplayForm?: () => void;
+  onRemoveRubric?: () => void;
 };
 
-export const RubricItem = ({ rubric, username, onDuplicateRubric, onTryIt, onSave }: RubricItemProps) => {
+export const RubricItem = ({
+  rubric,
+  username,
+  onDuplicateRubric,
+  onTryIt,
+  onSave,
+  onDisplayForm,
+  onRemoveRubric,
+}: RubricItemProps) => {
   const onUpVoteRubric = async () => {
     const wasUpVoted = rubric.upvotesBy.includes(username);
     const newUpvotes = wasUpVoted ? rubric.upvotesBy.filter(c => c !== username) : [...rubric.upvotesBy, username];
@@ -115,6 +126,20 @@ export const RubricItem = ({ rubric, username, onDuplicateRubric, onTryIt, onSav
               <ContentCopyIcon />
             </IconButton>
           </Tooltip>
+          {onDisplayForm && (
+            <Tooltip title="Edit Rubric" onClick={onDisplayForm}>
+              <IconButton>
+                <EditIcon />
+              </IconButton>
+            </Tooltip>
+          )}
+          {onRemoveRubric && (
+            <Tooltip title="Remove Rubric" onClick={onRemoveRubric}>
+              <IconButton>
+                <DeleteIcon />
+              </IconButton>
+            </Tooltip>
+          )}
         </Stack>
       </Stack>
     </Box>

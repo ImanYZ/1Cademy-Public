@@ -34,6 +34,7 @@ const generateEmptyRubric = (questionId: string, username: string): Rubric => ({
   prompts: [],
   downvotesBy: [],
   upvotesBy: [username],
+  createdBy: username,
 });
 
 export const RubricsEditor = ({ question, username, onReturnToQuestions, onSetQuestions }: RubricsEditorProps) => {
@@ -72,15 +73,15 @@ export const RubricsEditor = ({ question, username, onReturnToQuestions, onSetQu
     }, null);
   }, [question.rubrics, rubrics]);
 
-  // const onDisplayForm = (selectedRubric: Rubric) => {
-  //   setEditedRubric({ data: selectedRubric, isLoading: false, isNew: false });
+  const onDisplayForm = (selectedRubric: Rubric) => {
+    setEditedRubric({ data: selectedRubric, isLoading: false, isNew: false });
 
-  //   const removeRubric = (rubrics: Rubric[], rubricToRemove: Rubric) => rubrics.filter(c => c.id !== rubricToRemove.id);
-  //   if (newRubric) onSetQuestions(prev => (prev ? { ...prev, rubrics: removeRubric(prev.rubrics, newRubric) } : null));
-  // };
+    const removeRubric = (rubrics: Rubric[], rubricToRemove: Rubric) => rubrics.filter(c => c.id !== rubricToRemove.id);
+    if (newRubric) onSetQuestions(prev => (prev ? { ...prev, rubrics: removeRubric(prev.rubrics, newRubric) } : null));
+  };
 
   const onDuplicateRubric = async (rubric: Rubric) => {
-    const newRubric: Rubric = { ...rubric, questionId: question.id, id: newId(db) };
+    const newRubric: Rubric = { ...rubric, questionId: question.id, id: newId(db), createdBy: username };
     setRubrics(prev => [...prev, newRubric]);
     setEditedRubric({ data: newRubric, isNew: true, isLoading: false });
   };
@@ -176,6 +177,22 @@ export const RubricsEditor = ({ question, username, onReturnToQuestions, onSetQu
                   rubric={cur}
                   onTryIt={() => setTryRubric(cur)}
                   onSave={onSaveRubric}
+                  onDisplayForm={
+                    username === cur.createdBy &&
+                    cur.upvotesBy.length === 1 &&
+                    cur.upvotesBy[0] === username &&
+                    !cur.downvotesBy.length
+                      ? () => onDisplayForm(cur)
+                      : undefined
+                  }
+                  onRemoveRubric={
+                    username === cur.createdBy &&
+                    cur.upvotesBy.length === 1 &&
+                    cur.upvotesBy[0] === username &&
+                    !cur.downvotesBy.length
+                      ? () => onDisplayForm(cur)
+                      : undefined
+                  }
                 />
               )
             )}

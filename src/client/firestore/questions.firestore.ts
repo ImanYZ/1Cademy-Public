@@ -18,6 +18,7 @@ export type Rubric = {
   prompts: string[];
   upvotesBy: string[];
   downvotesBy: string[];
+  createdBy: string;
 };
 
 export type AddQuestionInput = {
