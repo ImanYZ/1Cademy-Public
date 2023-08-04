@@ -149,9 +149,9 @@ export const UserListAnswers = ({
             <Stack spacing={"6px"} sx={{ width: "100%" }}>
               <Stack spacing={"6px"} direction={"row"} alignItems={"center"} justifyContent={"space-between"}>
                 <Typography sx={{ fontSize: "14px", fontWeight: 600 }}>{cur.user}</Typography>
-                <Typography sx={{ fontSize: "12px", fontWeight: 400, color: DESIGN_SYSTEM_COLORS.gray500 }}>
+                {/* <Typography sx={{ fontSize: "12px", fontWeight: 400, color: DESIGN_SYSTEM_COLORS.gray500 }}>
                   {cur.points} point{cur.points !== 1 && "s"}
-                </Typography>
+                </Typography> */}
               </Stack>
               <Typography
                 sx={{

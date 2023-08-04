@@ -80,9 +80,6 @@ export const RubricItem = ({
       </Box>
       <Stack direction={"row"} justifyContent={"space-between"} alignItems={"center"}>
         <Stack direction={"row"} alignItems={"center"} spacing={"8px"}>
-          <CustomButton variant="contained" color="secondary">
-            Choose it
-          </CustomButton>
           <CustomButton variant="contained" onClick={onTryIt}>
             Try it
           </CustomButton>

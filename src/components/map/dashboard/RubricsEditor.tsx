@@ -184,22 +184,8 @@ export const RubricsEditor = ({ question, username, onReturnToQuestions, onSetQu
                   rubric={cur}
                   onTryIt={() => setTryRubric(cur)}
                   onSave={onSaveRubric}
-                  onDisplayForm={
-                    username === cur.createdBy &&
-                    cur.upvotesBy.length === 1 &&
-                    cur.upvotesBy[0] === username &&
-                    !cur.downvotesBy.length
-                      ? () => onDisplayForm(cur)
-                      : undefined
-                  }
-                  onRemoveRubric={
-                    username === cur.createdBy &&
-                    cur.upvotesBy.length === 1 &&
-                    cur.upvotesBy[0] === username &&
-                    !cur.downvotesBy.length
-                      ? () => onRemoveRubric(cur.id)
-                      : undefined
-                  }
+                  onDisplayForm={rubricIsEditable(cur, username) ? () => onDisplayForm(cur) : undefined}
+                  onRemoveRubric={cur.createdBy === username ? () => onRemoveRubric(cur.id) : undefined}
                 />
               )
             )}
@@ -275,7 +261,7 @@ export const RubricsEditor = ({ question, username, onReturnToQuestions, onSetQu
           {!tryUserAnswer && (
             <UserListAnswers
               setUserAnswers={setUserAnswers}
-              userAnswersProcessed={usersAnswers.map(c => ({ ...c, points: 1 }))}
+              userAnswersProcessed={getRandomValuesFromArray(usersAnswers, 10).map(c => ({ ...c, points: 1 }))}
               onTryRubricOnAnswer={onTryRubricOnAnswer}
             />
           )}
@@ -342,3 +328,29 @@ export const RubricsEditor = ({ question, username, onReturnToQuestions, onSetQu
     </Box>
   );
 };
+
+const rubricIsEditable = (rubric: Rubric, userName: string) =>
+  rubric.createdBy === userName && rubric.upvotesBy.length - rubric.upvotesBy.length <= 1;
+
+function getRandomValuesFromArray(arr: any[], count: number) {
+  const randomValues: any[] = [];
+  const arrLength = arr.length;
+
+  // Check if the count is not greater than the array length
+  // if (count > arrLength) {
+  //   console.warn("Requested count is greater than array length.");
+  //   return [];
+  // }
+
+  const minCount = Math.min(arrLength, count);
+  while (randomValues.length < minCount) {
+    const randomIndex = Math.floor(Math.random() * arrLength);
+
+    // Check if the index is unique
+    if (!randomValues.includes(arr[randomIndex])) {
+      randomValues.push(arr[randomIndex]);
+    }
+  }
+
+  return randomValues;
+}
