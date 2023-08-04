@@ -8,16 +8,11 @@ const extractArray = (arrayString: string) => {
   return jsonArrayString;
 };
 
-type IGenerateRubricsPayload = {
-  phrase: string;
-  explanation: string;
-};
-
-async function handler(req: NextApiRequest, res: NextApiResponse<IGenerateRubricsPayload[]>) {
+async function handler(req: NextApiRequest, res: NextApiResponse<string[]>) {
   try {
     const { questionDescription } = req.body;
     const prompt =
-      `Write key phrases, each with a complete explanation, that a student should mention in their response to the following question to receive a point per key phrase in a JSON array:\n` +
+      `Write key sentences that a student should mention in their response to the following question to receive a point per key phrase in an array of strings format the response js:\n` +
       `‘’'\n${questionDescription}‘’'\n`;
 
     const completion = await sendGPTPrompt("gpt-3.5-turbo", [
