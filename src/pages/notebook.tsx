@@ -135,7 +135,7 @@ import {
   setNewParentChildrenEdges,
   tempNodes,
 } from "../lib/utils/Map.utils";
-import { newId } from "../lib/utils/newId";
+import { newId } from "../lib/utils/newFirestoreId";
 import {
   buildFullNodes,
   getNodesPromises,
@@ -420,7 +420,7 @@ const Notebook = ({}: NotebookProps) => {
     userTutorial,
   } = useInteractiveTutorial({ user });
 
-  const pathwayRef = useRef({ node: "", parent: "", child: "" });
+  // const pathwayRef = useRef({ node: "", parent: "", child: "" });
 
   const [notebooks, setNotebooks] = useState<Notebook[]>([]);
   const [selectedNotebookId, setSelectedNotebookId] = useState("");
@@ -518,7 +518,6 @@ const Notebook = ({}: NotebookProps) => {
     const parents = edgeObjects.reduce((acu: { [key: string]: string[] }, cur) => {
       return { ...acu, [cur.parent]: acu[cur.parent] ? [...acu[cur.parent], cur.child] : [cur.child] };
     }, {});
-
     const pathways = edgeObjects.reduce(
       (acu: { node: string; parent: string; child: string }, cur) => {
         if (acu.node) return acu;
@@ -527,11 +526,12 @@ const Notebook = ({}: NotebookProps) => {
       },
       { node: "", parent: "", child: "" }
     );
-    if (pathwayRef.current.node !== pathways.node && pathwayRef.current.node) {
-      return { node: "", parent: "", child: "" };
-    }
+    // console.log("03", { pathways, node: pathwayRef.current.node });
+    // if (pathwayRef.current.node !== pathways.node && pathwayRef.current.node) {
+    //   return { node: "", parent: "", child: "" };
+    // }
 
-    pathwayRef.current = pathways;
+    // pathwayRef.current = pathways;
     return pathways;
   }, [graph.edges]);
 
@@ -5213,42 +5213,42 @@ const Notebook = ({}: NotebookProps) => {
    * if graph is invalid, DB is modified with correct state
    * then we wait until graph has correct state to call tutorial
    */
-  // const detectAndForceTutorial = useCallback(
-  //   (
-  //     tutorialName: TutorialTypeKeys,
-  //     targetId: string,
-  //     targetIsValid: (node: FullNodeData) => boolean,
-  //     defaultStates: Partial<FullNodeData> = { open: true }
-  //   ) => {
-  //     devLog("DETECT_AND_FORCE_TUTORIAL", { tutorialName, targetId }, "TUTORIAL");
+  const detectAndForceTutorial = useCallback(
+    (
+      tutorialName: TutorialTypeKeys,
+      targetId: string,
+      targetIsValid: (node: FullNodeData) => boolean,
+      defaultStates: Partial<FullNodeData> = { open: true }
+    ) => {
+      devLog("DETECT_AND_FORCE_TUTORIAL", { tutorialName, targetId }, "TUTORIAL");
 
-  //     const thisNode = graph.nodes[targetId];
-  //     if (!targetIsValid(thisNode)) {
-  //       if (!tutorialStateWasSetUpRef.current) {
-  //         openNodeHandler(targetId, defaultStates, true);
-  //         tutorialStateWasSetUpRef.current = true;
-  //       }
-  //       return true;
-  //     }
-  //     tutorialStateWasSetUpRef.current = false;
+      const thisNode = graph.nodes[targetId];
+      if (!targetIsValid(thisNode)) {
+        if (!tutorialStateWasSetUpRef.current) {
+          openNodeHandler(targetId, defaultStates, true);
+          tutorialStateWasSetUpRef.current = true;
+        }
+        return true;
+      }
+      tutorialStateWasSetUpRef.current = false;
 
-  //     startTutorial(tutorialName);
-  //     setDynamicTargetId(targetId);
+      startTutorial(tutorialName);
+      setDynamicTargetId(targetId);
 
-  //     nodeBookDispatch({ type: "setSelectedNode", payload: targetId });
-  //     notebookRef.current.selectedNode = targetId;
-  //     scrollToNode(targetId);
+      nodeBookDispatch({ type: "setSelectedNode", payload: targetId });
+      notebookRef.current.selectedNode = targetId;
+      scrollToNode(targetId);
 
-  //     setNodeUpdates({
-  //       nodeIds: [targetId],
-  //       updatedAt: new Date(),
-  //     });
+      setNodeUpdates({
+        nodeIds: [targetId],
+        updatedAt: new Date(),
+      });
 
-  //     return true;
-  //   },
+      return true;
+    },
 
-  //   [graph.nodes, nodeBookDispatch, openNodeHandler, scrollToNode, setDynamicTargetId, startTutorial]
-  // );
+    [graph.nodes, nodeBookDispatch, openNodeHandler, scrollToNode, setDynamicTargetId, startTutorial]
+  );
 
   const detectAndRemoveTutorial = useCallback(
     (tutorialName: TutorialTypeKeys, targetIsValid: (node: FullNodeData) => boolean) => {
@@ -5264,30 +5264,30 @@ const Notebook = ({}: NotebookProps) => {
     [graph.nodes, setTutorial, dynamicTargetId, tutorial]
   );
 
-  // const detectAndCallSidebarTutorial = useCallback(
-  //   (tutorialName: TutorialTypeKeys, sidebar: OpenLeftSidebar) => {
-  //     const shouldIgnore = forcedTutorial
-  //       ? forcedTutorial !== tutorialName
-  //       : userTutorial[tutorialName].done || userTutorial[tutorialName].skipped;
-  //     if (shouldIgnore) return false;
+  const detectAndCallSidebarTutorial = useCallback(
+    (tutorialName: TutorialTypeKeys, sidebar: OpenLeftSidebar) => {
+      const shouldIgnore = forcedTutorial
+        ? forcedTutorial !== tutorialName
+        : userTutorial[tutorialName].done || userTutorial[tutorialName].skipped;
+      if (shouldIgnore) return false;
 
-  //     devLog(
-  //       "DETECT_AND_CALL_SIDEBAR_TUTORIAL",
-  //       { tutorialName, sidebar, node: nodeBookState.selectedNode },
-  //       "TUTORIAL"
-  //     );
-  //     if (openSidebar !== sidebar) {
-  //       setOpenSidebar(sidebar);
-  //     }
+      devLog(
+        "DETECT_AND_CALL_SIDEBAR_TUTORIAL",
+        { tutorialName, sidebar, node: nodeBookState.selectedNode },
+        "TUTORIAL"
+      );
+      if (openSidebar !== sidebar) {
+        setOpenSidebar(sidebar);
+      }
 
-  //     if (sidebar === null) {
-  //       nodeBookDispatch({ type: "setIsMenuOpen", payload: true });
-  //     }
-  //     startTutorial(tutorialName);
-  //     return true;
-  //   },
-  //   [forcedTutorial, nodeBookDispatch, nodeBookState.selectedNode, openSidebar, startTutorial, userTutorial]
-  // );
+      if (sidebar === null) {
+        nodeBookDispatch({ type: "setIsMenuOpen", payload: true });
+      }
+      startTutorial(tutorialName);
+      return true;
+    },
+    [forcedTutorial, nodeBookDispatch, nodeBookState.selectedNode, openSidebar, startTutorial, userTutorial]
+  );
 
   const detectAndCallTutorial = useCallback(
     (tutorialName: TutorialTypeKeys, targetIsValid: (node: FullNodeData) => boolean) => {
@@ -5498,35 +5498,35 @@ const Notebook = ({}: NotebookProps) => {
 
       // --------------------------
 
-      // if (!forcedTutorial || forcedTutorial === "tagsReferences") {
-      //   const result = detectAndCallTutorial("tagsReferences", node =>
-      //     Boolean(node && node.open && !node.editable && node.localLinkingWords === "References")
-      //   );
-      //   if (result) return;
-      // }
+      if (/* !forcedTutorial || */ forcedTutorial === "tagsReferences") {
+        const result = detectAndCallTutorial("tagsReferences", node =>
+          Boolean(node && node.open && !node.editable && node.localLinkingWords === "References")
+        );
+        if (result) return;
+      }
 
-      // if (forcedTutorial === "tagsReferences") {
-      //   const result = detectAndForceTutorial("tmpTagsReferences", "r98BjyFDCe4YyLA3U8ZE", node =>
-      //     Boolean(node && node.open && !node.editable && node.localLinkingWords !== "References")
-      //   );
-      //   if (result) return;
-      // }
+      if (forcedTutorial === "tagsReferences") {
+        const result = detectAndForceTutorial("tmpTagsReferences", "r98BjyFDCe4YyLA3U8ZE", node =>
+          Boolean(node && node.open && !node.editable && node.localLinkingWords !== "References")
+        );
+        if (result) return;
+      }
       // --------------------------
 
-      // const parentsChildrenListTutorialIsValid = (node: FullNodeData) =>
-      //   Boolean(node && node.open && !node.editable && !node.isNew && node.localLinkingWords === "LinkingWords");
+      const parentsChildrenListTutorialIsValid = (node: FullNodeData) =>
+        Boolean(node && node.open && !node.editable && !node.isNew && node.localLinkingWords === "LinkingWords");
 
-      // if (forcedTutorial === "parentsChildrenList" || !forcedTutorial) {
-      //   const result = detectAndCallTutorial("parentsChildrenList", parentsChildrenListTutorialIsValid);
-      //   if (result) return;
-      // }
+      if (forcedTutorial === "parentsChildrenList" /*  || !forcedTutorial */) {
+        const result = detectAndCallTutorial("parentsChildrenList", parentsChildrenListTutorialIsValid);
+        if (result) return;
+      }
 
-      // if (forcedTutorial === "parentsChildrenList") {
-      //   const result = detectAndForceTutorial("tmpParentsChildrenList", "r98BjyFDCe4YyLA3U8ZE", (node: FullNodeData) =>
-      //     Boolean(node && node.open && !node.editable && node.localLinkingWords !== "LinkingWords")
-      //   );
-      //   if (result) return; /* (lastNodeOperation.current?.name = "LinkingWords"); */
-      // }
+      if (forcedTutorial === "parentsChildrenList") {
+        const result = detectAndForceTutorial("tmpParentsChildrenList", "r98BjyFDCe4YyLA3U8ZE", (node: FullNodeData) =>
+          Boolean(node && node.open && !node.editable && node.localLinkingWords !== "LinkingWords")
+        );
+        if (result) return; /* (lastNodeOperation.current?.name = "LinkingWords"); */
+      }
 
       // --------------------------
 
@@ -5543,185 +5543,185 @@ const Notebook = ({}: NotebookProps) => {
 
       // --------------------------
 
-      // if (forcedTutorial === "proposal" || !forcedTutorial) {
-      //   const result = detectAndCallTutorial("proposal", (thisNode: FullNodeData) =>
-      //     Boolean(
-      //       thisNode && thisNode.open && thisNode.editable && !thisNode.isNew && thisNode.nodeType !== "Reference"
-      //     )
-      //   );
-      //   if (result) return;
-      // }
+      if (forcedTutorial === "proposal" /*  || !forcedTutorial */) {
+        const result = detectAndCallTutorial("proposal", (thisNode: FullNodeData) =>
+          Boolean(
+            thisNode && thisNode.open && thisNode.editable && !thisNode.isNew && thisNode.nodeType !== "Reference"
+          )
+        );
+        if (result) return;
+      }
 
       // --------------------------
 
-      // if (forcedTutorial === "proposalCode" || !forcedTutorial) {
-      //   const codeProposalTutorialIsValid = (node: FullNodeData) =>
-      //     Boolean(node && node.open && node.editable && node.nodeType === "Code");
-      //   const result = detectAndCallTutorial("proposalCode", codeProposalTutorialIsValid);
-      //   if (result) return;
-      // }
+      if (forcedTutorial === "proposalCode" /*  || !forcedTutorial */) {
+        const codeProposalTutorialIsValid = (node: FullNodeData) =>
+          Boolean(node && node.open && node.editable && node.nodeType === "Code");
+        const result = detectAndCallTutorial("proposalCode", codeProposalTutorialIsValid);
+        if (result) return;
+      }
 
-      // // --------------------------
+      // --------------------------
 
-      // if (forcedTutorial === "proposalConcept" || !forcedTutorial) {
-      //   const conceptProposalTutorialIsValid = (node: FullNodeData) =>
-      //     Boolean(node && node.open && node.editable && node.nodeType === "Concept");
+      if (forcedTutorial === "proposalConcept" /* || !forcedTutorial */) {
+        const conceptProposalTutorialIsValid = (node: FullNodeData) =>
+          Boolean(node && node.open && node.editable && node.nodeType === "Concept");
 
-      //   const result = detectAndCallTutorial("proposalConcept", conceptProposalTutorialIsValid);
-      //   if (result) return;
-      // }
+        const result = detectAndCallTutorial("proposalConcept", conceptProposalTutorialIsValid);
+        if (result) return;
+      }
 
-      // // --------------------------
+      // --------------------------
 
-      // const relationProposalTutorialIsValid = (node: FullNodeData) =>
-      //   Boolean(node && node.open && node.editable && node.nodeType === "Relation");
+      const relationProposalTutorialIsValid = (node: FullNodeData) =>
+        Boolean(node && node.open && node.editable && node.nodeType === "Relation");
 
-      // if (forcedTutorial === "proposalRelation" || !forcedTutorial) {
-      //   const relationProposalTutorialLaunched = detectAndCallTutorial(
-      //     "proposalRelation",
-      //     relationProposalTutorialIsValid
-      //   );
-      //   if (relationProposalTutorialLaunched) return;
-      // }
+      if (forcedTutorial === "proposalRelation" /*  || !forcedTutorial */) {
+        const relationProposalTutorialLaunched = detectAndCallTutorial(
+          "proposalRelation",
+          relationProposalTutorialIsValid
+        );
+        if (relationProposalTutorialLaunched) return;
+      }
 
-      // // --------------------------
+      // --------------------------
 
-      // const referenceProposalTutorialIsValid = (node: FullNodeData) =>
-      //   Boolean(node && node.open && node.editable && node.nodeType === "Reference");
+      const referenceProposalTutorialIsValid = (node: FullNodeData) =>
+        Boolean(node && node.open && node.editable && node.nodeType === "Reference");
 
-      // if (forcedTutorial === "proposalReference" || !forcedTutorial) {
-      //   const referenceProposalTutorialLaunched = detectAndCallTutorial(
-      //     "proposalReference",
-      //     referenceProposalTutorialIsValid
-      //   );
-      //   if (referenceProposalTutorialLaunched) return;
-      // }
+      if (forcedTutorial === "proposalReference" /*  || !forcedTutorial */) {
+        const referenceProposalTutorialLaunched = detectAndCallTutorial(
+          "proposalReference",
+          referenceProposalTutorialIsValid
+        );
+        if (referenceProposalTutorialLaunched) return;
+      }
 
-      // // --------------------------
+      // --------------------------
 
-      // const questionProposalTutorialIsValid = (node: FullNodeData) =>
-      //   Boolean(node && node.open && node.editable && node.nodeType === "Question");
+      const questionProposalTutorialIsValid = (node: FullNodeData) =>
+        Boolean(node && node.open && node.editable && node.nodeType === "Question");
 
-      // if (forcedTutorial === "proposalQuestion" || !forcedTutorial) {
-      //   const result = detectAndCallTutorial("proposalQuestion", questionProposalTutorialIsValid);
-      //   if (result) return;
-      // }
+      if (forcedTutorial === "proposalQuestion" /*  || !forcedTutorial */) {
+        const result = detectAndCallTutorial("proposalQuestion", questionProposalTutorialIsValid);
+        if (result) return;
+      }
 
-      // // --------------------------
+      // --------------------------
 
-      // const ideaProposalTutorialIsValid = (node: FullNodeData) =>
-      //   Boolean(node && node.open && node.editable && node.nodeType === "Idea");
+      const ideaProposalTutorialIsValid = (node: FullNodeData) =>
+        Boolean(node && node.open && node.editable && node.nodeType === "Idea");
 
-      // if (forcedTutorial === "proposalIdea" || !forcedTutorial) {
-      //   const result = detectAndCallTutorial("proposalIdea", ideaProposalTutorialIsValid);
-      //   if (result) return;
-      // }
+      if (forcedTutorial === "proposalIdea" /* || !forcedTutorial */) {
+        const result = detectAndCallTutorial("proposalIdea", ideaProposalTutorialIsValid);
+        if (result) return;
+      }
 
-      // // --------------------------
+      // --------------------------
 
-      // const conceptTutorialIsValid = (thisNode: FullNodeData) =>
-      //   Boolean(thisNode && thisNode.open && thisNode.nodeType === "Concept");
+      const conceptTutorialIsValid = (thisNode: FullNodeData) =>
+        Boolean(thisNode && thisNode.open && thisNode.nodeType === "Concept");
 
-      // if (forcedTutorial === "concept" || !forcedTutorial) {
-      //   const result = detectAndCallTutorial("concept", conceptTutorialIsValid);
-      //   if (result) return;
-      // }
+      if (forcedTutorial === "concept" /* || !forcedTutorial */) {
+        const result = detectAndCallTutorial("concept", conceptTutorialIsValid);
+        if (result) return;
+      }
 
-      // if (forcedTutorial === "concept") {
-      //   const conceptForcedTutorialLaunched = detectAndForceTutorial(
-      //     "concept",
-      //     "r98BjyFDCe4YyLA3U8ZE",
-      //     conceptTutorialIsValid
-      //   );
-      //   if (conceptForcedTutorialLaunched) return;
-      // }
-      // // --------------------------
+      if (forcedTutorial === "concept") {
+        const conceptForcedTutorialLaunched = detectAndForceTutorial(
+          "concept",
+          "r98BjyFDCe4YyLA3U8ZE",
+          conceptTutorialIsValid
+        );
+        if (conceptForcedTutorialLaunched) return;
+      }
+      // --------------------------
 
-      // const relationTutorialIsValid = (thisNode: FullNodeData) =>
-      //   Boolean(thisNode && thisNode.open && thisNode.nodeType === "Relation");
+      const relationTutorialIsValid = (thisNode: FullNodeData) =>
+        Boolean(thisNode && thisNode.open && thisNode.nodeType === "Relation");
 
-      // if (forcedTutorial === "relation" || !forcedTutorial) {
-      //   const result = detectAndCallTutorial("relation", relationTutorialIsValid);
-      //   if (result) return;
-      // }
+      if (forcedTutorial === "relation" /*  || !forcedTutorial */) {
+        const result = detectAndCallTutorial("relation", relationTutorialIsValid);
+        if (result) return;
+      }
 
-      // if (forcedTutorial === "relation") {
-      //   const relationForcedTutorialLaunched = detectAndForceTutorial(
-      //     "relation",
-      //     "zYYmaXvhab7hH2uRI9Up",
-      //     relationTutorialIsValid
-      //   );
-      //   if (relationForcedTutorialLaunched) return;
-      // }
+      if (forcedTutorial === "relation") {
+        const relationForcedTutorialLaunched = detectAndForceTutorial(
+          "relation",
+          "zYYmaXvhab7hH2uRI9Up",
+          relationTutorialIsValid
+        );
+        if (relationForcedTutorialLaunched) return;
+      }
 
-      // // --------------------------
-      // const referenceTutorialIsValid = (thisNode: FullNodeData) =>
-      //   Boolean(thisNode && thisNode.open && thisNode.nodeType === "Reference");
+      // --------------------------
+      const referenceTutorialIsValid = (thisNode: FullNodeData) =>
+        Boolean(thisNode && thisNode.open && thisNode.nodeType === "Reference");
 
-      // if (forcedTutorial === "reference" || !forcedTutorial) {
-      //   const result = detectAndCallTutorial("reference", referenceTutorialIsValid);
-      //   if (result) return;
-      // }
+      if (forcedTutorial === "reference" /* || !forcedTutorial */) {
+        const result = detectAndCallTutorial("reference", referenceTutorialIsValid);
+        if (result) return;
+      }
 
-      // if (forcedTutorial === "reference") {
-      //   const referenceForcedTutorialLaunched = detectAndForceTutorial(
-      //     "reference",
-      //     "P631lWeKsBtszZRDlmsM",
-      //     referenceTutorialIsValid
-      //   );
-      //   if (referenceForcedTutorialLaunched) return;
-      // }
+      if (forcedTutorial === "reference") {
+        const referenceForcedTutorialLaunched = detectAndForceTutorial(
+          "reference",
+          "P631lWeKsBtszZRDlmsM",
+          referenceTutorialIsValid
+        );
+        if (referenceForcedTutorialLaunched) return;
+      }
 
-      // // --------------------------
+      // --------------------------
 
-      // const questionTutorialIsValid = (thisNode: FullNodeData) =>
-      //   Boolean(thisNode && thisNode.open && thisNode.nodeType === "Question");
+      const questionTutorialIsValid = (thisNode: FullNodeData) =>
+        Boolean(thisNode && thisNode.open && thisNode.nodeType === "Question");
 
-      // if (forcedTutorial === "question" || !forcedTutorial) {
-      //   const result = detectAndCallTutorial("question", questionTutorialIsValid);
-      //   if (result) return;
-      // }
+      if (forcedTutorial === "question" /*  || !forcedTutorial */) {
+        const result = detectAndCallTutorial("question", questionTutorialIsValid);
+        if (result) return;
+      }
 
-      // if (forcedTutorial === "question") {
-      //   const questionForcedTutorialLaunched = detectAndForceTutorial(
-      //     "question",
-      //     "qO9uK6UdYRLWm4Olihlw",
-      //     questionTutorialIsValid
-      //   );
-      //   if (questionForcedTutorialLaunched) return;
-      // }
+      if (forcedTutorial === "question") {
+        const questionForcedTutorialLaunched = detectAndForceTutorial(
+          "question",
+          "qO9uK6UdYRLWm4Olihlw",
+          questionTutorialIsValid
+        );
+        if (questionForcedTutorialLaunched) return;
+      }
 
-      // // --------------------------
+      // --------------------------
 
-      // const ideaTutorialIsValid = (thisNode: FullNodeData) =>
-      //   Boolean(thisNode && thisNode.open && thisNode.nodeType === "Idea");
+      const ideaTutorialIsValid = (thisNode: FullNodeData) =>
+        Boolean(thisNode && thisNode.open && thisNode.nodeType === "Idea");
 
-      // if (forcedTutorial === "idea" || !forcedTutorial) {
-      //   const result = detectAndCallTutorial("idea", ideaTutorialIsValid);
-      //   if (result) return;
-      // }
+      if (forcedTutorial === "idea" /*  || !forcedTutorial */) {
+        const result = detectAndCallTutorial("idea", ideaTutorialIsValid);
+        if (result) return;
+      }
 
-      // if (forcedTutorial === "idea") {
-      //   const ideaForcedTutorialLaunched = detectAndForceTutorial("idea", "v9wGPxRCI4DRq11o7uH2", ideaTutorialIsValid);
-      //   if (ideaForcedTutorialLaunched) return;
-      // }
+      if (forcedTutorial === "idea") {
+        const ideaForcedTutorialLaunched = detectAndForceTutorial("idea", "v9wGPxRCI4DRq11o7uH2", ideaTutorialIsValid);
+        if (ideaForcedTutorialLaunched) return;
+      }
 
-      // // --------------------------
+      // --------------------------
 
-      // const codeTutorialIsValid = (thisNode: FullNodeData) =>
-      //   Boolean(thisNode && thisNode.open && thisNode.nodeType === "Code");
+      const codeTutorialIsValid = (thisNode: FullNodeData) =>
+        Boolean(thisNode && thisNode.open && thisNode.nodeType === "Code");
 
-      // if (forcedTutorial === "code" || !forcedTutorial) {
-      //   const result = detectAndCallTutorial("code", codeTutorialIsValid);
-      //   if (result) return;
-      // }
+      if (forcedTutorial === "code" /*  || !forcedTutorial */) {
+        const result = detectAndCallTutorial("code", codeTutorialIsValid);
+        if (result) return;
+      }
 
-      // if (forcedTutorial === "code") {
-      //   const codeForcedTutorialLaunched = detectAndForceTutorial("code", "E1nIWQ7RIC3pRLvk0Bk5", codeTutorialIsValid);
-      //   if (codeForcedTutorialLaunched) return;
-      // }
+      if (forcedTutorial === "code") {
+        const codeForcedTutorialLaunched = detectAndForceTutorial("code", "E1nIWQ7RIC3pRLvk0Bk5", codeTutorialIsValid);
+        if (codeForcedTutorialLaunched) return;
+      }
 
-      // // ------------------------
+      // ------------------------
 
       // if (forcedTutorial === "childProposal" || !forcedTutorial) {
       //   const result = detectAndCallChildTutorial("childProposal", (node: FullNodeData) =>
@@ -5841,49 +5841,49 @@ const Notebook = ({}: NotebookProps) => {
 
       // // ------------------------
 
-      // const tmpEditNodeIsValid = (node: FullNodeData) => Boolean(node && node.open && !node.editable);
+      const tmpEditNodeIsValid = (node: FullNodeData) => Boolean(node && node.open && !node.editable);
 
-      // const proposalForcedValues = new Map<
-      //   TutorialTypeKeys,
-      //   { targetId: string; validator: (node: FullNodeData) => boolean }
-      // >();
-      // proposalForcedValues.set("proposal", {
-      //   targetId: "r98BjyFDCe4YyLA3U8ZE",
-      //   validator: (node: FullNodeData) => tmpEditNodeIsValid(node),
-      // });
-      // proposalForcedValues.set("proposalConcept", {
-      //   targetId: "r98BjyFDCe4YyLA3U8ZE",
-      //   validator: (node: FullNodeData) => tmpEditNodeIsValid(node) && node.nodeType === "Concept",
-      // });
-      // proposalForcedValues.set("proposalCode", {
-      //   targetId: "E1nIWQ7RIC3pRLvk0Bk5",
-      //   validator: (node: FullNodeData) => tmpEditNodeIsValid(node) && node.nodeType === "Code",
-      // });
-      // proposalForcedValues.set("proposalRelation", {
-      //   targetId: "zYYmaXvhab7hH2uRI9Up",
-      //   validator: (node: FullNodeData) => tmpEditNodeIsValid(node) && node.nodeType === "Relation",
-      // });
-      // proposalForcedValues.set("proposalReference", {
-      //   targetId: "P631lWeKsBtszZRDlmsM",
-      //   validator: (node: FullNodeData) => tmpEditNodeIsValid(node) && node.nodeType === "Reference",
-      // });
-      // proposalForcedValues.set("proposalQuestion", {
-      //   targetId: "qO9uK6UdYRLWm4Olihlw",
-      //   validator: (node: FullNodeData) => tmpEditNodeIsValid(node) && node.nodeType === "Question",
-      // });
-      // proposalForcedValues.set("proposalIdea", {
-      //   targetId: "v9wGPxRCI4DRq11o7uH2",
-      //   validator: (node: FullNodeData) => tmpEditNodeIsValid(node) && node.nodeType === "Idea",
-      // });
+      const proposalForcedValues = new Map<
+        TutorialTypeKeys,
+        { targetId: string; validator: (node: FullNodeData) => boolean }
+      >();
+      proposalForcedValues.set("proposal", {
+        targetId: "r98BjyFDCe4YyLA3U8ZE",
+        validator: (node: FullNodeData) => tmpEditNodeIsValid(node),
+      });
+      proposalForcedValues.set("proposalConcept", {
+        targetId: "r98BjyFDCe4YyLA3U8ZE",
+        validator: (node: FullNodeData) => tmpEditNodeIsValid(node) && node.nodeType === "Concept",
+      });
+      proposalForcedValues.set("proposalCode", {
+        targetId: "E1nIWQ7RIC3pRLvk0Bk5",
+        validator: (node: FullNodeData) => tmpEditNodeIsValid(node) && node.nodeType === "Code",
+      });
+      proposalForcedValues.set("proposalRelation", {
+        targetId: "zYYmaXvhab7hH2uRI9Up",
+        validator: (node: FullNodeData) => tmpEditNodeIsValid(node) && node.nodeType === "Relation",
+      });
+      proposalForcedValues.set("proposalReference", {
+        targetId: "P631lWeKsBtszZRDlmsM",
+        validator: (node: FullNodeData) => tmpEditNodeIsValid(node) && node.nodeType === "Reference",
+      });
+      proposalForcedValues.set("proposalQuestion", {
+        targetId: "qO9uK6UdYRLWm4Olihlw",
+        validator: (node: FullNodeData) => tmpEditNodeIsValid(node) && node.nodeType === "Question",
+      });
+      proposalForcedValues.set("proposalIdea", {
+        targetId: "v9wGPxRCI4DRq11o7uH2",
+        validator: (node: FullNodeData) => tmpEditNodeIsValid(node) && node.nodeType === "Idea",
+      });
 
-      // if (forcedTutorial && proposalForcedValues.has(forcedTutorial)) {
-      //   const tt = proposalForcedValues.get(forcedTutorial);
-      //   if (!tt) return;
+      if (forcedTutorial && proposalForcedValues.has(forcedTutorial)) {
+        const tt = proposalForcedValues.get(forcedTutorial);
+        if (!tt) return;
 
-      //   const { targetId, validator } = tt;
-      //   const result = detectAndForceTutorial("tmpEditNode", targetId, validator);
-      //   if (result) return;
-      // }
+        const { targetId, validator } = tt;
+        const result = detectAndForceTutorial("tmpEditNode", targetId, validator);
+        if (result) return;
+      }
 
       // // ------------------------
 
@@ -5902,134 +5902,137 @@ const Notebook = ({}: NotebookProps) => {
       //   if (result) return;
       // }
 
-      // // ------------------------
+      // ------------------------
 
-      // if (
-      //   forcedTutorial === "reconcilingAcceptedProposal" ||
-      //   (lastNodeOperation.current &&
-      //     lastNodeOperation.current.name === "ProposeProposals" &&
-      //     lastNodeOperation.current.data === "accepted")
-      // ) {
-      //   const acceptedProposalLaunched = detectAndCallTutorial(
-      //     "reconcilingAcceptedProposal",
-      //     node => node && node.open && isVersionApproved({ corrects: 1, wrongs: 0, nodeData: node })
-      //   );
-      //   if (acceptedProposalLaunched) return;
-      // }
-      // if (forcedTutorial === "reconcilingAcceptedProposal") {
-      //   const result = detectAndForceTutorial("reconcilingAcceptedProposal", "zYYmaXvhab7hH2uRI9Up", node =>
-      //     Boolean(node && node.open)
-      //   );
-      //   if (result) return;
-      // }
-      // // ------------------------
+      if (
+        forcedTutorial === "reconcilingAcceptedProposal" /*  ||
+        (lastNodeOperation.current &&
+          lastNodeOperation.current.name === "ProposeProposals" &&
+          lastNodeOperation.current.data === "accepted") */
+      ) {
+        const acceptedProposalLaunched = detectAndCallTutorial(
+          "reconcilingAcceptedProposal",
+          node => node && node.open && isVersionApproved({ corrects: 1, wrongs: 0, nodeData: node })
+        );
+        if (acceptedProposalLaunched) return;
+      }
+      if (forcedTutorial === "reconcilingAcceptedProposal") {
+        const result = detectAndForceTutorial("reconcilingAcceptedProposal", "zYYmaXvhab7hH2uRI9Up", node =>
+          Boolean(node && node.open)
+        );
+        if (result) return;
+      }
+      // ------------------------
 
-      // if (
-      //   forcedTutorial === "reconcilingNotAcceptedProposal" ||
-      //   (lastNodeOperation.current &&
-      //     lastNodeOperation.current.name === "ProposeProposals" &&
-      //     lastNodeOperation.current.data === "notAccepted")
-      // ) {
-      //   const notAcceptedProposalLaunched = detectAndCallTutorial("reconcilingNotAcceptedProposal", node =>
-      //     Boolean(node && node.open && !isVersionApproved({ corrects: 1, wrongs: 0, nodeData: node }))
-      //   );
-      //   setOpenSidebar("PROPOSALS");
-      //   if (notAcceptedProposalLaunched) return;
-      // }
+      if (
+        forcedTutorial === "reconcilingNotAcceptedProposal" /* ||
+        (lastNodeOperation.current &&
+          lastNodeOperation.current.name === "ProposeProposals" &&
+          lastNodeOperation.current.data === "notAccepted") */
+      ) {
+        const notAcceptedProposalLaunched = detectAndCallTutorial("reconcilingNotAcceptedProposal", node =>
+          Boolean(node && node.open && !isVersionApproved({ corrects: 1, wrongs: 0, nodeData: node }))
+        );
+        setOpenSidebar("PROPOSALS");
+        // setDynamicTargetId('')
+        if (notAcceptedProposalLaunched) return;
+      }
 
-      // if (forcedTutorial === "reconcilingNotAcceptedProposal") {
-      //   const result = detectAndForceTutorial("reconcilingNotAcceptedProposal", "r98BjyFDCe4YyLA3U8ZE", node =>
-      //     Boolean(node && node.open)
-      //   );
-      //   if (result) return;
-      // }
+      if (forcedTutorial === "reconcilingNotAcceptedProposal") {
+        const result = detectAndForceTutorial("reconcilingNotAcceptedProposal", "r98BjyFDCe4YyLA3U8ZE", node =>
+          Boolean(node && node.open)
+        );
+        if (result) return;
+      }
 
-      // // --------------------------
+      // --------------------------
 
-      // if (forcedTutorial === "upVote" || !forcedTutorial) {
-      //   const shouldIgnore =
-      //     (!forcedTutorial && !userTutorial["nodes"].done && !userTutorial["nodes"].skipped) ||
-      //     userTutorial["upVote"].done ||
-      //     userTutorial["upVote"].skipped;
-      //   if (!shouldIgnore) {
-      //     const upvoteLaunched = detectAndCallTutorial("upVote", node => Boolean(node && node.open));
-      //     if (upvoteLaunched) return;
-      //   }
-      // }
+      if (forcedTutorial === "upVote" /*  || !forcedTutorial */) {
+        const shouldIgnore =
+          (!forcedTutorial && !userTutorial["nodes"].done && !userTutorial["nodes"].skipped) ||
+          userTutorial["upVote"].done ||
+          userTutorial["upVote"].skipped;
+        if (!shouldIgnore) {
+          const upvoteLaunched = detectAndCallTutorial("upVote", node => Boolean(node && node.open));
+          if (upvoteLaunched) return;
+        }
+      }
 
-      // if (forcedTutorial === "upVote") {
-      //   const result = detectAndForceTutorial("upVote", "r98BjyFDCe4YyLA3U8ZE", node => Boolean(node && node.open));
-      //   if (result) return;
-      // }
+      if (forcedTutorial === "upVote") {
+        const result = detectAndForceTutorial("upVote", "r98BjyFDCe4YyLA3U8ZE", node => Boolean(node && node.open));
+        if (result) return;
+      }
 
-      // // --------------------------
+      // --------------------------
 
-      // if (forcedTutorial === "downVote" || !forcedTutorial) {
-      //   const shouldIgnore =
-      //     (!forcedTutorial && !userTutorial["nodes"].done && !userTutorial["nodes"].skipped) ||
-      //     userTutorial["downVote"].done ||
-      //     userTutorial["downVote"].skipped;
-      //   if (!shouldIgnore) {
-      //     const upvoteLaunched = detectAndCallTutorial("downVote", node => Boolean(node && node.open));
-      //     if (upvoteLaunched) return;
-      //   }
-      // }
+      if (forcedTutorial === "downVote" /* || !forcedTutorial */) {
+        const shouldIgnore =
+          (!forcedTutorial && !userTutorial["nodes"].done && !userTutorial["nodes"].skipped) ||
+          userTutorial["downVote"].done ||
+          userTutorial["downVote"].skipped;
+        if (!shouldIgnore) {
+          const upvoteLaunched = detectAndCallTutorial("downVote", node => Boolean(node && node.open));
+          if (upvoteLaunched) return;
+        }
+      }
 
-      // if (forcedTutorial === "downVote") {
-      //   const result = detectAndForceTutorial("downVote", "r98BjyFDCe4YyLA3U8ZE", node => Boolean(node && node.open));
-      //   if (result) return;
-      // }
+      if (forcedTutorial === "downVote") {
+        const result = detectAndForceTutorial("downVote", "r98BjyFDCe4YyLA3U8ZE", node => Boolean(node && node.open));
+        if (result) return;
+      }
 
-      // // --------------------------
+      // --------------------------
 
-      // if (forcedTutorial === "searcher" || openSidebar === "SEARCHER_SIDEBAR") {
-      //   const result = detectAndCallSidebarTutorial("searcher", "SEARCHER_SIDEBAR");
-      //   if (result) return;
-      // }
+      if (forcedTutorial === "searcher" /*  || openSidebar === "SEARCHER_SIDEBAR" */) {
+        const result = detectAndCallSidebarTutorial("searcher", "SEARCHER_SIDEBAR");
+        if (result) return;
+      }
 
-      // if (forcedTutorial === "userSettings" || openSidebar === "USER_SETTINGS") {
-      //   const result = detectAndCallSidebarTutorial("userSettings", "USER_SETTINGS");
-      //   if (result) return;
-      // }
-      // // --------------------------
+      if (forcedTutorial === "userSettings" /* || openSidebar === "USER_SETTINGS" */) {
+        const result = detectAndCallSidebarTutorial("userSettings", "USER_SETTINGS");
+        if (result) return;
+      }
+      // --------------------------
 
-      // if (forcedTutorial === "notifications" || openSidebar === "NOTIFICATION_SIDEBAR") {
-      //   const result = detectAndCallSidebarTutorial("notifications", "NOTIFICATION_SIDEBAR");
-      //   if (result) return;
-      // }
+      if (forcedTutorial === "notifications" /*  || openSidebar === "NOTIFICATION_SIDEBAR" */) {
+        const result = detectAndCallSidebarTutorial("notifications", "NOTIFICATION_SIDEBAR");
+        if (result) return;
+      }
 
-      // // --------------------------
+      // --------------------------
 
-      // if (forcedTutorial === "bookmarks" || openSidebar === "BOOKMARKS_SIDEBAR") {
-      //   const result = detectAndCallSidebarTutorial("bookmarks", "BOOKMARKS_SIDEBAR");
-      //   if (result) return;
-      // }
-      // // --------------------------
+      if (forcedTutorial === "bookmarks" /*  || openSidebar === "BOOKMARKS_SIDEBAR" */) {
+        const result = detectAndCallSidebarTutorial("bookmarks", "BOOKMARKS_SIDEBAR");
+        if (result) return;
+      }
 
-      // if (forcedTutorial === "pendingProposals" || openSidebar === "PENDING_PROPOSALS") {
-      //   const result = detectAndCallSidebarTutorial("pendingProposals", "PENDING_PROPOSALS");
-      //   if (result) return;
-      // }
-      // // --------------------------
+      // --------------------------
 
-      // if (openSidebar === "USER_INFO") {
-      //   const result = detectAndCallSidebarTutorial("userInfo", "USER_INFO");
-      //   if (result) return;
-      // }
-      // if (forcedTutorial === "userInfo") {
-      //   nodeBookDispatch({
-      //     type: "setSelectedUser",
-      //     payload: {
-      //       username: "1man",
-      //       chooseUname: true,
-      //       fullName: "Iman",
-      //       imageUrl:
-      //         "https://firebasestorage.googleapis.com/v0/b/onecademy-1.appspot.com/o/ProfilePictures%2F1man_Thu%2C%2006%20Feb%202020%2016%3A26%3A40%20GMT.png?alt=media&token=94459dbb-81f9-462a-83ef-62d1129f5851",
-      //     },
-      //   });
-      //   const result = detectAndCallSidebarTutorial("userInfo", "USER_INFO");
-      //   if (result) return;
-      // }
+      if (forcedTutorial === "pendingProposals" /* || openSidebar === "PENDING_PROPOSALS" */) {
+        const result = detectAndCallSidebarTutorial("pendingProposals", "PENDING_PROPOSALS");
+        if (result) return;
+      }
+
+      // --------------------------
+
+      if (openSidebar === "USER_INFO") {
+        const result = detectAndCallSidebarTutorial("userInfo", "USER_INFO");
+        if (result) return;
+      }
+      if (forcedTutorial === "userInfo") {
+        nodeBookDispatch({
+          type: "setSelectedUser",
+          payload: {
+            username: "1man",
+            chooseUname: true,
+            fullName: "Iman",
+            imageUrl:
+              "https://firebasestorage.googleapis.com/v0/b/onecademy-1.appspot.com/o/ProfilePictures%2F1man_Thu%2C%2006%20Feb%202020%2016%3A26%3A40%20GMT.png?alt=media&token=94459dbb-81f9-462a-83ef-62d1129f5851",
+          },
+        });
+        const result = detectAndCallSidebarTutorial("userInfo", "USER_INFO");
+        if (result) return;
+      }
 
       // // --------------------------
 
@@ -6125,13 +6128,13 @@ const Notebook = ({}: NotebookProps) => {
 
       // // --------------------------
 
-      // if (
-      //   forcedTutorial === "leaderBoard" ||
-      //   (knowledgeGraphTutorialCompleted && isNotProposingNodes && openSidebar === null)
-      // ) {
-      //   const result = detectAndCallSidebarTutorial("leaderBoard", null);
-      //   if (result) return;
-      // }
+      if (
+        forcedTutorial === "leaderBoard" /* ||
+        (knowledgeGraphTutorialCompleted && isNotProposingNodes && openSidebar === null) */
+      ) {
+        const result = detectAndCallSidebarTutorial("leaderBoard", null);
+        if (result) return;
+      }
 
       // // --------------------------
 
@@ -6185,32 +6188,34 @@ const Notebook = ({}: NotebookProps) => {
 
       // // --------------------------
 
-      // if (forcedTutorial === "pathways" || knowledgeGraphTutorialCompleted) {
-      //   const shouldIgnore = forcedTutorial
-      //     ? forcedTutorial !== "pathways"
-      //     : userTutorial["pathways"].done || userTutorial["pathways"].skipped;
-      //   if (!shouldIgnore) {
-      //     if (pathway.node) {
-      //       setDynamicTargetId(pathway.node);
-      //       nodeBookDispatch({ type: "setSelectedNode", payload: pathway.node });
-      //       notebookRef.current.selectedNode = pathway.node;
-      //       scrollToNode(pathway.node);
-      //       startTutorial("pathways");
-      //       return;
-      //     }
-      //   }
-      // }
-      // if (forcedTutorial === "pathways") {
-      //   const result = detectAndForceTutorial("tmpPathways", "rWYUNisPIVMBoQEYXgNj", node =>
-      //     Boolean(node && node.open)
-      //   );
-      //   if (result) return;
-      // }
+      if (forcedTutorial === "pathways" /* || knowledgeGraphTutorialCompleted */) {
+        const shouldIgnore = forcedTutorial
+          ? forcedTutorial !== "pathways"
+          : userTutorial["pathways"].done || userTutorial["pathways"].skipped;
+        if (!shouldIgnore) {
+          if (pathway.node) {
+            setDynamicTargetId(pathway.node);
+            nodeBookDispatch({ type: "setSelectedNode", payload: pathway.node });
+            notebookRef.current.selectedNode = pathway.node;
+            scrollToNode(pathway.node);
+            startTutorial("pathways");
+            return;
+          }
+        }
+      }
+      if (forcedTutorial === "pathways") {
+        const result = detectAndForceTutorial("tmpPathways", "rWYUNisPIVMBoQEYXgNj", node =>
+          Boolean(node && node.open)
+        );
+        if (result) return;
+      }
     };
 
     detectTriggerTutorial();
   }, [
+    detectAndCallSidebarTutorial,
     detectAndCallTutorial,
+    detectAndForceTutorial,
     firstLoading,
     focusView.isEnabled,
     forcedTutorial,
@@ -6218,6 +6223,10 @@ const Notebook = ({}: NotebookProps) => {
     hideNodeContent,
     nodeBookDispatch,
     openNodeHandler,
+    openSidebar,
+    pathway,
+    pathway.node,
+    scrollToNode,
     setDynamicTargetId,
     startTutorial,
     tutorial,
@@ -6461,7 +6470,7 @@ const Notebook = ({}: NotebookProps) => {
       if (!isValid(node)) {
         setTutorial(null);
         setForcedTutorial(null);
-        pathwayRef.current = { node: "", parent: "", child: "" };
+        // pathwayRef.current = { node: "", parent: "", child: "" };
         if (tutorialTargetId) removeStyleFromTarget(tutorialTargetId);
       }
     }
