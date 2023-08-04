@@ -88,7 +88,11 @@ export const RubricItem = ({
           <CustomWrapperButton>
             <Stack direction={"row"} alignItems={"center"}>
               <Tooltip title={"Up-vote rubric"} placement={"top"}>
-                <Button onClick={onUpVoteRubric} sx={{ padding: "0px 4px", color: "inherit", minWidth: "0px" }}>
+                <Button
+                  onClick={onUpVoteRubric}
+                  sx={{ padding: "0px 4px", color: "inherit", minWidth: "0px" }}
+                  disabled={rubric.createdBy === username}
+                >
                   <Box sx={{ display: "flex", fontSize: "14px", alignItems: "center" }}>
                     <DoneIcon
                       sx={{ fontSize: "18px", color: rubric.upvotesBy.includes(username) ? "#00E676" : undefined }}
@@ -107,7 +111,11 @@ export const RubricItem = ({
                 }}
               />
               <Tooltip title={"Down-vote rubric"} placement={"top"}>
-                <Button onClick={onDownVoteRubric} sx={{ padding: "0px 4px", color: "inherit", minWidth: "0px" }}>
+                <Button
+                  onClick={onDownVoteRubric}
+                  sx={{ padding: "0px 4px", color: "inherit", minWidth: "0px" }}
+                  disabled={rubric.createdBy === username}
+                >
                   <Box sx={{ display: "flex", fontSize: "14px", alignItems: "center" }}>
                     <CloseIcon
                       sx={{ fontSize: "18px", color: rubric.downvotesBy.includes(username) ? "red" : undefined }}

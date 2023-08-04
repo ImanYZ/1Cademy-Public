@@ -23,6 +23,13 @@ type RubricsEditorProps = {
   username: string;
 };
 
+// type RubricItemGenerated = {
+//   // key_phrase: string;
+//   keyPhrase: string;
+//   explanation: string;
+//   examples: string[];
+// };
+
 export type UserAnswer = { user: string; userImage: string; answer: string };
 
 export type UserAnswerProcessed = UserAnswer & { points: number };
@@ -47,12 +54,24 @@ export const RubricsEditor = ({ question, username, onReturnToQuestions, onSetQu
   const [tryUserAnswer, setTryUserAnswer] = useState<{ userAnswer: UserAnswer; result: TryRubricResponse[] } | null>(
     null
   );
+  const [disableAddRubric, setDisableAddRubric] = useState(false);
 
   const onAddRubric = () => {
+    setDisableAddRubric(true);
     const id = newId(db);
-    const newRubric = { ...generateEmptyRubric(question.id, username), id };
+    // const response: RubricItemGenerated[] = await Post("/assignment/generateRubrics", {
+    //   questionDescription: question.description,
+    // });
+    // console.log({ response });
+    const newRubric: Rubric = {
+      ...generateEmptyRubric(question.id, username),
+      id,
+      // prompts: response.map(c => c.key_phrase),
+    };
+
     setRubrics(prev => [...prev, newRubric]);
     setEditedRubric({ data: newRubric, isNew: true, isLoading: false });
+    setDisableAddRubric(false);
   };
 
   const onSaveRubric = async (newRubric: Rubric) => {
@@ -102,11 +121,13 @@ export const RubricsEditor = ({ question, username, onReturnToQuestions, onSetQu
   /**
    * valuable = upvotes - downvotes
    */
-  const rubricsSortedByValuable = useMemo(
-    () =>
-      rubrics.sort((a, b) => b.upvotesBy.length - b.downvotesBy.length - (a.upvotesBy.length - a.downvotesBy.length)),
-    [rubrics]
-  );
+  const rubricsSortedByValuable = useMemo(() => {
+    const thereIsNeRubric = editedRubric && editedRubric.isNew;
+    const sorted = rubrics
+      .filter(c => (thereIsNeRubric ? editedRubric.data.id !== c.id : true))
+      .sort((a, b) => b.upvotesBy.length - b.downvotesBy.length - (a.upvotesBy.length - a.downvotesBy.length));
+    return [...sorted, ...(thereIsNeRubric ? rubrics.filter(c => c.id === editedRubric.data.id) : [])];
+  }, [editedRubric, rubrics]);
 
   const onTryRubricOnAnswer = useCallback(
     async (userAnswer: UserAnswer) => {
@@ -206,6 +227,7 @@ export const RubricsEditor = ({ question, username, onReturnToQuestions, onSetQu
                 </Typography>
                 <IconButton
                   onClick={onAddRubric}
+                  disabled={disableAddRubric}
                   size="small"
                   sx={{
                     backgroundColor: theme =>
@@ -330,7 +352,7 @@ export const RubricsEditor = ({ question, username, onReturnToQuestions, onSetQu
 };
 
 const rubricIsEditable = (rubric: Rubric, userName: string) =>
-  rubric.createdBy === userName && rubric.upvotesBy.length - rubric.upvotesBy.length <= 1;
+  rubric.createdBy === userName && rubric.upvotesBy.length - rubric.downvotesBy.length <= 1;
 
 function getRandomValuesFromArray(arr: any[], count: number) {
   const randomValues: any[] = [];
