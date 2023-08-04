@@ -92,6 +92,13 @@ export const RubricsEditor = ({ question, username, onReturnToQuestions, onSetQu
     setEditedRubric(null);
   };
 
+  const onRemoveRubric = async (rubricId: string) => {
+    const hasConfirm = window.confirm("Confirm to remove the rubric");
+    if (!hasConfirm) return;
+    const newRubrics = question.rubrics.filter(c => c.id !== rubricId);
+    await updateQuestion(db, question.id, { rubrics: newRubrics });
+  };
+
   /**
    * valuable = upvotes - downvotes
    */
@@ -190,7 +197,7 @@ export const RubricsEditor = ({ question, username, onReturnToQuestions, onSetQu
                     cur.upvotesBy.length === 1 &&
                     cur.upvotesBy[0] === username &&
                     !cur.downvotesBy.length
-                      ? () => onDisplayForm(cur)
+                      ? () => onRemoveRubric(cur.id)
                       : undefined
                   }
                 />
