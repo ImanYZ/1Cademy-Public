@@ -82,7 +82,7 @@ export const Assignments = ({ username }: AssignmentsProps) => {
   }, [db]);
 
   return (
-    <Box sx={{}}>
+    <Box sx={{ height: "100%" }}>
       {selectedQuestion && (
         <RubricsEditor
           question={selectedQuestion}

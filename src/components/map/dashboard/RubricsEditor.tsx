@@ -11,7 +11,7 @@ import { TryRubricResponse } from "src/types";
 import CsvButton from "@/components/CSVBtn";
 import { Post } from "@/lib/mapApi";
 import { DESIGN_SYSTEM_COLORS } from "@/lib/theme/colors";
-import { newId } from "@/lib/utils/newid";
+import { newId } from "@/lib/utils/newFirestoreId";
 
 import { RubricForm, RubricItem } from "./RubricItem";
 import { UserAnswers, UserListAnswers } from "./UserAnswers";
@@ -123,12 +123,17 @@ export const RubricsEditor = ({ question, username, onReturnToQuestions, onSetQu
       sx={{
         display: "grid",
         gridTemplateColumns: tryRubric ? "1fr 1fr" : "1fr",
+        // gridTemplateRows: tryRubric ? "100%" : undefined,
         maxWidth: tryRubric ? undefined : "788px",
+        height: tryRubric ? "100%" : undefined,
         mx: tryRubric ? undefined : "auto",
         gap: tryRubric ? "20px" : undefined,
+        // overflowY: "auto",
+        // border: "solid 2px olive",
+        position: "relative",
       }}
     >
-      <Stack spacing={"16px"}>
+      <Stack spacing={"16px"} sx={{ height: "100%", overflowY: "auto" }}>
         <Box
           sx={{
             p: "32px",
@@ -237,45 +242,12 @@ export const RubricsEditor = ({ question, username, onReturnToQuestions, onSetQu
             marginTop: "0px",
             p: "24px",
             position: "relative",
+            height: "100%",
+            overflowY: "auto",
             backgroundColor: ({ palette }) =>
               palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookMainBlack : DESIGN_SYSTEM_COLORS.gray50,
           }}
         >
-          {tryRubric && (
-            <IconButton
-              onClick={() => setTryRubric(null)}
-              size="small"
-              sx={{
-                position: "absolute",
-                left: "-16px",
-                top: "22px",
-                p: "0px",
-                border: `solid 1px ${DESIGN_SYSTEM_COLORS.gray300}`,
-                backgroundColor: theme =>
-                  theme.palette.mode === "dark"
-                    ? DESIGN_SYSTEM_COLORS.notebookMainBlack
-                    : DESIGN_SYSTEM_COLORS.baseWhite,
-                color: theme =>
-                  theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.gray200 : DESIGN_SYSTEM_COLORS.gray700,
-                ":hover": {
-                  backgroundColor: theme =>
-                    theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.baseGraphit : DESIGN_SYSTEM_COLORS.gray300,
-                },
-              }}
-            >
-              <KeyboardDoubleArrowLeftIcon
-                sx={{ transform: tryRubric ? "rotate(180deg)" : "rotate(0deg)", transition: "0.2s" }}
-              />
-            </IconButton>
-            // <CustomButton
-            //   onClick={() => setTryRubrics(null)}
-            //   variant="contained"
-            //   color="secondary"
-            //   sx={{ position: "absolute", left: "-24px", top: "70px" }}
-            // >
-
-            // </CustomButton>
-          )}
           {!tryUserAnswer && (
             <UserListAnswers
               setUserAnswers={setUserAnswers}
@@ -293,6 +265,41 @@ export const RubricsEditor = ({ question, username, onReturnToQuestions, onSetQu
             />
           )}
         </Box>
+      )}
+
+      {tryRubric && (
+        <IconButton
+          onClick={() => setTryRubric(null)}
+          size="small"
+          sx={{
+            position: "absolute",
+            left: "50%",
+            transform: "translateX(-4px)",
+            top: "22px",
+            p: "0px",
+            border: `solid 1px ${DESIGN_SYSTEM_COLORS.gray300}`,
+            backgroundColor: theme =>
+              theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookMainBlack : DESIGN_SYSTEM_COLORS.baseWhite,
+            color: theme =>
+              theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.gray200 : DESIGN_SYSTEM_COLORS.gray700,
+            ":hover": {
+              backgroundColor: theme =>
+                theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.baseGraphit : DESIGN_SYSTEM_COLORS.gray300,
+            },
+          }}
+        >
+          <KeyboardDoubleArrowLeftIcon
+            sx={{ transform: tryRubric ? "rotate(180deg)" : "rotate(0deg)", transition: "0.2s" }}
+          />
+        </IconButton>
+        // <CustomButton
+        //   onClick={() => setTryRubrics(null)}
+        //   variant="contained"
+        //   color="secondary"
+        //   sx={{ position: "absolute", left: "-24px", top: "70px" }}
+        // >
+
+        // </CustomButton>
       )}
 
       {/* {tryRubrics && (
