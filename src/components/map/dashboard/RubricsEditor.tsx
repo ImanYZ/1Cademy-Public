@@ -4,15 +4,17 @@ import KeyboardDoubleArrowLeftIcon from "@mui/icons-material/KeyboardDoubleArrow
 import UploadIcon from "@mui/icons-material/Upload";
 import { Box, Divider, IconButton, Stack, Tooltip, Typography } from "@mui/material";
 import { getFirestore } from "firebase/firestore";
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { Question, Rubric, updateQuestion } from "src/client/firestore/questions.firestore";
+import { TryRubricResponse } from "src/types";
 
 import CsvButton from "@/components/CSVBtn";
+import { Post } from "@/lib/mapApi";
 import { DESIGN_SYSTEM_COLORS } from "@/lib/theme/colors";
 import { newId } from "@/lib/utils/newId";
 
 import { RubricForm, RubricItem } from "./RubricItem";
-import { UserListAnswers } from "./UserAnswers";
+import { UserAnswers, UserListAnswers } from "./UserAnswers";
 
 type RubricsEditorProps = {
   question: Question;
@@ -40,7 +42,10 @@ export const RubricsEditor = ({ question, username, onReturnToQuestions, onSetQu
   const [rubrics, setRubrics] = useState<Rubric[]>(question.rubrics);
   const [editedRubric, setEditedRubric] = useState<{ data: Rubric; isNew: boolean; isLoading: boolean } | null>(null);
   const [usersAnswers, setUserAnswers] = useState<UserAnswer[]>([]);
-  const [tryRubrics, setTryRubrics] = useState<Rubric | null>(null);
+  const [tryRubric, setTryRubric] = useState<Rubric | null>(null);
+  const [tryUserAnswer, setTryUserAnswer] = useState<{ userAnswer: UserAnswer; result: TryRubricResponse[] } | null>(
+    null
+  );
 
   const onAddRubric = () => {
     const id = newId(db);
@@ -95,6 +100,17 @@ export const RubricsEditor = ({ question, username, onReturnToQuestions, onSetQu
     [rubrics]
   );
 
+  const onTryRubricOnAnswer = useCallback(
+    async (userAnswer: UserAnswer) => {
+      const response: TryRubricResponse[] = await Post("/assignment/tryRubric", {
+        essayText: userAnswer,
+        rubrics: tryRubric,
+      });
+      setTryUserAnswer({ userAnswer, result: response });
+    },
+    [tryRubric]
+  );
+
   useEffect(() => setRubrics(question.rubrics), [question.rubrics]);
 
   // const tryRubrics = async (rubrics: any) => {
@@ -106,10 +122,10 @@ export const RubricsEditor = ({ question, username, onReturnToQuestions, onSetQu
     <Box
       sx={{
         display: "grid",
-        gridTemplateColumns: tryRubrics ? "1fr 1fr" : "1fr",
-        maxWidth: tryRubrics ? undefined : "788px",
-        mx: tryRubrics ? undefined : "auto",
-        gap: tryRubrics ? "20px" : undefined,
+        gridTemplateColumns: tryRubric ? "1fr 1fr" : "1fr",
+        maxWidth: tryRubric ? undefined : "788px",
+        mx: tryRubric ? undefined : "auto",
+        gap: tryRubric ? "20px" : undefined,
       }}
     >
       <Stack spacing={"16px"}>
@@ -153,7 +169,7 @@ export const RubricsEditor = ({ question, username, onReturnToQuestions, onSetQu
                   username={username}
                   onDuplicateRubric={() => onDuplicateRubric(cur)}
                   rubric={cur}
-                  onTryIt={() => setTryRubrics(cur)}
+                  onTryIt={() => setTryRubric(cur)}
                   onSave={onSaveRubric}
                 />
               )
@@ -215,7 +231,7 @@ export const RubricsEditor = ({ question, username, onReturnToQuestions, onSetQu
         </Box>
       </Stack>
 
-      {tryRubrics && (
+      {tryRubric && (
         <Box
           sx={{
             marginTop: "0px",
@@ -225,9 +241,9 @@ export const RubricsEditor = ({ question, username, onReturnToQuestions, onSetQu
               palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookMainBlack : DESIGN_SYSTEM_COLORS.gray50,
           }}
         >
-          {tryRubrics && (
+          {tryRubric && (
             <IconButton
-              onClick={() => setTryRubrics(null)}
+              onClick={() => setTryRubric(null)}
               size="small"
               sx={{
                 position: "absolute",
@@ -248,7 +264,7 @@ export const RubricsEditor = ({ question, username, onReturnToQuestions, onSetQu
               }}
             >
               <KeyboardDoubleArrowLeftIcon
-                sx={{ transform: tryRubrics ? "rotate(180deg)" : "rotate(0deg)", transition: "0.2s" }}
+                sx={{ transform: tryRubric ? "rotate(180deg)" : "rotate(0deg)", transition: "0.2s" }}
               />
             </IconButton>
             // <CustomButton
@@ -260,10 +276,17 @@ export const RubricsEditor = ({ question, username, onReturnToQuestions, onSetQu
 
             // </CustomButton>
           )}
-          <UserListAnswers
-            setUserAnswers={setUserAnswers}
-            userAnswersProcessed={usersAnswers.map(c => ({ ...c, points: 1 }))}
-          />
+          {!tryUserAnswer && (
+            <UserListAnswers
+              setUserAnswers={setUserAnswers}
+              userAnswersProcessed={usersAnswers.map(c => ({ ...c, points: 1 }))}
+              onTryRubricOnAnswer={onTryRubricOnAnswer}
+            />
+          )}
+
+          {tryUserAnswer && (
+            <UserAnswers result={tryUserAnswer.result} rubric={tryRubric} userAnswers={tryUserAnswer.userAnswer} />
+          )}
         </Box>
       )}
 

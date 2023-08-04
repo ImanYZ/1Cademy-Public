@@ -98,15 +98,30 @@ export const CsvButton = ({ BtnText, addNewData, sx, disabled = false }: CSVButt
 
 export default CsvButton;
 
-const csvFileToArray = (string: any) => {
-  const csvHeader = string.slice(0, string.indexOf("\n")).split(",");
-  const csvRows = string.slice(string.indexOf("\n") + 1).split("\n");
+const csvFileToArray = (csvString: any) => {
+  /**
+   * Example of .csv as string value
+   * -------------------------------
+   *
+   * user,userImage,answer
+   * \r\n
+   * Jonh,https://firebasestorage.googleapis.com/v0/b/onecademy-dev.appspot.com/o/ProfilePictures%2FrUiApafBaWOvSRBrMhA99UCCb0h2%2FTue%2C%2009%20May%202023%2016%3A19%3A45%20GMT_430x1300.jpg?alt=media&token=aa5b4763-007d-4024-a38d-2d44865a6630,\"The process of mRNA translation begins with DNA transcription in the nucleus, producing a complementary mRNA strand. The mRNA then exits the nucleus through nuclear pores and travels to the cytoplasm, where protein synthesis occurs. Ribosomes, either free or bound to the rough ER.\"
+   * \r\n
+   * StarGazer21,,\"The process of mRNA translation starts with the transcription of DNA into mRNA in the cell nucleus. Once the mRNA is formed, it exits the nucleus through nuclear pores and don't enters the cytoplasm.\"
+   * \r\n
+   * Tech Ninja,,I coulndt upload my answer :(
+   * \r\n
+   * MusicLover42,,
+   */
 
-  const array: { [key: string]: string }[] = csvRows.map((i: any) => {
-    const values = i.split(",");
+  const csvHeader = csvString.slice(0, csvString.indexOf("\n")).split(",");
+  const csvRows = csvString.slice(csvString.indexOf("\n") + 1).split("\r\n");
+
+  const array: { [key: string]: string }[] = csvRows.map((i: string) => {
+    const values = i.split(/,(?=(?:[^"]*"[^"]*")*[^"]*$)/);
     const obj = csvHeader.reduce((object: any, header: any, index: number) => {
       const cleanHeader = header.trim();
-      object[cleanHeader] = values[index];
+      object[cleanHeader] = values[index].replace(`\"`, "");
       return object;
     }, {});
     return obj;

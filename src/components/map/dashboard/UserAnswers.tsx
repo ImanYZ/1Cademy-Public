@@ -1,8 +1,9 @@
 import KeyboardArrowLeftIcon from "@mui/icons-material/KeyboardArrowLeft";
 import UploadIcon from "@mui/icons-material/Upload";
 import { Box, Divider, Stack, Typography } from "@mui/material";
-import React from "react";
+import React, { useMemo } from "react";
 import { Rubric } from "src/client/firestore/questions.firestore";
+import { TryRubricResponse } from "src/types";
 
 import CsvButton from "@/components/CSVBtn";
 import OptimizedAvatar2 from "@/components/OptimizedAvatar2";
@@ -11,9 +12,13 @@ import { DESIGN_SYSTEM_COLORS } from "@/lib/theme/colors";
 import { CustomButton } from "../Buttons/Buttons";
 import { UserAnswer, UserAnswerProcessed } from "./RubricsEditor";
 
-type UserAnswersProps = { userAnswers: UserAnswer; rubric: Rubric };
+type UserAnswersProps = { userAnswers: UserAnswer; result: TryRubricResponse[]; rubric: Rubric };
 
-export const UserAnswers = ({ userAnswers, rubric }: UserAnswersProps) => {
+export const UserAnswers = ({ userAnswers, result, rubric }: UserAnswersProps) => {
+  const points = useMemo(
+    () => result.reduce((acu, cur) => (acu + cur.correct ? rubric.points : 0), 0),
+    [result, rubric.points]
+  );
   return (
     <Box>
       <CustomButton>
@@ -43,7 +48,7 @@ export const UserAnswers = ({ userAnswers, rubric }: UserAnswersProps) => {
           </Stack>
         </Stack>
         <Typography>
-          {`According to the rubric, a student should earn ${rubric.points} points for mentioning each of the following rubric items in
+          {`According to the rubric, a student should earn ${points} points for mentioning each of the following rubric items in
           their answer:`}
         </Typography>
       </Stack>
@@ -54,8 +59,13 @@ export const UserAnswers = ({ userAnswers, rubric }: UserAnswersProps) => {
 type UserListAnswersProps = {
   userAnswersProcessed: UserAnswerProcessed[];
   setUserAnswers: (data: UserAnswer[]) => void;
+  onTryRubricOnAnswer: (userAnswer: UserAnswer) => void;
 };
-export const UserListAnswers = ({ userAnswersProcessed, setUserAnswers }: UserListAnswersProps) => {
+export const UserListAnswers = ({
+  userAnswersProcessed,
+  setUserAnswers,
+  onTryRubricOnAnswer,
+}: UserListAnswersProps) => {
   return (
     <Box>
       <Typography sx={{ fontWeight: 600 }}>Random Grading of 10 students</Typography>
@@ -93,11 +103,16 @@ export const UserListAnswers = ({ userAnswersProcessed, setUserAnswers }: UserLi
             direction={"row"}
             spacing={"12px"}
             component={"li"}
+            onClick={() => onTryRubricOnAnswer(cur)}
             sx={{
               p: "16px 12px",
               height: "98px",
               borderBottom: `solid 1px ${DESIGN_SYSTEM_COLORS.gray500}`,
               width: "100%",
+              ":hover": {
+                backgroundColor: theme =>
+                  theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookG800 : DESIGN_SYSTEM_COLORS.gray100,
+              },
             }}
           >
             <OptimizedAvatar2 imageUrl={cur.userImage} alt={`${cur.user} profile picture`} size={40} />
