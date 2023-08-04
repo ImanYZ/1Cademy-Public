@@ -11,7 +11,7 @@ import { TryRubricResponse } from "src/types";
 import CsvButton from "@/components/CSVBtn";
 import { Post } from "@/lib/mapApi";
 import { DESIGN_SYSTEM_COLORS } from "@/lib/theme/colors";
-import { newId } from "@/lib/utils/newId";
+import { newId } from "@/lib/utils/newid";
 
 import { RubricForm, RubricItem } from "./RubricItem";
 import { UserAnswers, UserListAnswers } from "./UserAnswers";
@@ -285,7 +285,12 @@ export const RubricsEditor = ({ question, username, onReturnToQuestions, onSetQu
           )}
 
           {tryUserAnswer && (
-            <UserAnswers result={tryUserAnswer.result} rubric={tryRubric} userAnswers={tryUserAnswer.userAnswer} />
+            <UserAnswers
+              result={tryUserAnswer.result}
+              rubric={tryRubric}
+              userAnswers={tryUserAnswer.userAnswer}
+              onBack={() => setTryUserAnswer(null)}
+            />
           )}
         </Box>
       )}

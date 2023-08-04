@@ -65,14 +65,14 @@ const MOCK_2 = {
     {
       rubric_item: "mRNA exits nucleus via nuclear pore.",
       mentioned: "YES",
-      correct: "NO",
+      correct: "YES",
       sentences: ["Once the mRNA is formed, it exits the nucleus through nuclear pores"],
     },
     {
       rubric_item: "mRNA travels through the cytoplasm to the ribosome or enters the rough endoplasmic reticulum.",
       mentioned: "YES",
       correct: "NO",
-      sentences: [],
+      sentences: ["don't enters the cytoplasm."],
     },
     {
       rubric_item: "mRNA bases are read in triplets called codons (by rRNA)",
