@@ -1,11 +1,6 @@
 import { NextApiRequest, NextApiResponse } from "next";
 import { generateQuestionNode, sendGPTPrompt } from "src/utils/assistant-helpers";
 
-export type IAssistantGetTopicPayload = {
-  url?: string;
-  passage: string;
-};
-
 async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
   try {
     // console.log("called");
