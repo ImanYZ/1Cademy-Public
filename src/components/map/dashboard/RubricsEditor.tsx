@@ -41,17 +41,25 @@ const generateEmptyRubric = (questionId: string, username: string): Rubric => ({
   createdBy: username,
 });
 
+const USER_ANSWERS: UserAnswer[] = [
+  { user: "Jimy 2000", answer: "", userImage: "" },
+  { user: "Jimy 2010", answer: "", userImage: "" },
+  { user: "Jimy 2030", answer: "", userImage: "" },
+];
+
 export const RubricsEditor = ({ question, username, onReturnToQuestions, onSetQuestions }: RubricsEditorProps) => {
   const db = getFirestore();
 
   const [rubrics, setRubrics] = useState<Rubric[]>(question.rubrics);
   const [editedRubric, setEditedRubric] = useState<{ data: Rubric; isNew: boolean; isLoading: boolean } | null>(null);
-  const [usersAnswers, setUserAnswers] = useState<UserAnswer[]>([{ user: "Jimy 2000", answer: "", userImage: "" }]);
+  const [usersAnswers, setUserAnswers] = useState<UserAnswer[]>(USER_ANSWERS);
   const [tryRubric, setTryRubric] = useState<Rubric | null>(null);
   const [tryUserAnswer, setTryUserAnswer] = useState<{ userAnswer: UserAnswer; result: TryRubricResponse[] } | null>(
     null
   );
   const [disableAddRubric, setDisableAddRubric] = useState(false);
+
+  // const [userAnswerGraded, setUserAnswersGraded] = useState([]);
 
   const onAddRubric = () => {
     setDisableAddRubric(true);
@@ -204,6 +212,8 @@ export const RubricsEditor = ({ question, username, onReturnToQuestions, onSetQu
                   onSave={onSaveRubric}
                   onDisplayForm={rubricIsEditable(cur, username) ? () => onDisplayForm(cur) : undefined}
                   onRemoveRubric={cur.createdBy === username ? () => onRemoveRubric(cur.id) : undefined}
+                  selected={tryRubric?.id === cur.id}
+                  tryUserAnswer={tryUserAnswer}
                 />
               )
             )}

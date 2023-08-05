@@ -8,6 +8,7 @@ import { Box, Button, Divider, IconButton, Stack, TextField, Tooltip, Typography
 import { FieldArray, Form, Formik, FormikHelpers } from "formik";
 import React from "react";
 import { Rubric, RubricItemType } from "src/client/firestore/questions.firestore";
+import { TryRubricResponse } from "src/types";
 import * as yup from "yup";
 
 import MarkdownRender from "@/components/Markdown/MarkdownRender";
@@ -15,6 +16,8 @@ import { DESIGN_SYSTEM_COLORS } from "@/lib/theme/colors";
 import shortenNumber from "@/lib/utils/shortenNumber";
 
 import { CustomButton, CustomWrapperButton } from "../Buttons/Buttons";
+import { UserAnswer } from "./RubricsEditor";
+import { getColorFromResult } from "./UserAnswers";
 
 const NO_RUBRICS_MESSAGE = "No Rubric Items";
 
@@ -26,6 +29,11 @@ type RubricItemProps = {
   onSave: (newRubric: Rubric) => Promise<void>;
   onDisplayForm?: () => void;
   onRemoveRubric?: () => void;
+  selected: boolean;
+  tryUserAnswer: {
+    userAnswer: UserAnswer;
+    result: TryRubricResponse[];
+  } | null;
 };
 
 export const RubricItem = ({
@@ -36,6 +44,8 @@ export const RubricItem = ({
   onSave,
   onDisplayForm,
   onRemoveRubric,
+  selected,
+  tryUserAnswer,
 }: RubricItemProps) => {
   const onUpVoteRubric = async () => {
     const wasUpVoted = rubric.upvotesBy.includes(username);
@@ -58,9 +68,17 @@ export const RubricItem = ({
       sx={{
         borderRadius: "4px",
         border: ({ palette }) =>
-          `solid 1px ${palette.mode === "light" ? DESIGN_SYSTEM_COLORS.gray300 : DESIGN_SYSTEM_COLORS.notebookG600}`,
+          selected
+            ? `solid 2px ${DESIGN_SYSTEM_COLORS.primary800}`
+            : `solid 1px ${
+                palette.mode === "light" ? DESIGN_SYSTEM_COLORS.gray300 : DESIGN_SYSTEM_COLORS.notebookG600
+              }`,
         backgroundColor: ({ palette }) =>
-          palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookG900 : DESIGN_SYSTEM_COLORS.gray50,
+          selected
+            ? DESIGN_SYSTEM_COLORS.gray100
+            : palette.mode === "dark"
+            ? DESIGN_SYSTEM_COLORS.notebookG900
+            : DESIGN_SYSTEM_COLORS.gray50,
         p: "14px",
       }}
     >
@@ -74,7 +92,13 @@ export const RubricItem = ({
       <Box component={"ul"}>
         {rubric.prompts.map((c, i) => (
           <Box component={"li"} key={i}>
-            <MarkdownRender text={c.prompt} sx={{ display: "inline" }} />{" "}
+            <MarkdownRender
+              text={c.prompt}
+              sx={{
+                display: "inline",
+                ...(tryUserAnswer && { backgroundColor: getColorFromResult(tryUserAnswer.result[i]) }),
+              }}
+            />{" "}
             <Typography component={"span"}>
               ({c.point} Point{c.point === 1 && "s"})
             </Typography>
@@ -83,9 +107,11 @@ export const RubricItem = ({
       </Box>
       <Stack direction={"row"} justifyContent={"space-between"} alignItems={"center"}>
         <Stack direction={"row"} alignItems={"center"} spacing={"8px"}>
-          <CustomButton variant="contained" onClick={onTryIt}>
-            Try it
-          </CustomButton>
+          {!selected && (
+            <CustomButton variant="contained" onClick={onTryIt}>
+              Try it
+            </CustomButton>
+          )}
         </Stack>
         <Stack direction={"row"} alignItems={"center"} spacing={"8px"}>
           <CustomWrapperButton>
@@ -243,6 +269,7 @@ export const RubricForm = ({ rubric, onSave, cancelFn }: RubricFormProps) => {
                       
                       
                     </Stack> */}
+                    <Typography sx={{ width: "100%" }}>The student's response should mention:</Typography>
 
                     <table>
                       <thead>
