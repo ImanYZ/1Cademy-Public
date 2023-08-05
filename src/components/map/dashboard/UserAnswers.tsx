@@ -17,8 +17,8 @@ type UserAnswersProps = { userAnswers: UserAnswer; result: TryRubricResponse[]; 
 
 const TEXT_HIGHLIGHT: { [key in "success" | "warning" | "error"]: string } = {
   success: "#D7FEE7",
-  warning: "#FDEAD7",
-  error: "#FFE6E6",
+  warning: "#FFE6E6",
+  error: "#FDEAD7",
 };
 
 export const UserAnswers = ({ userAnswers, result, rubric, onBack }: UserAnswersProps) => {
@@ -33,12 +33,14 @@ export const UserAnswers = ({ userAnswers, result, rubric, onBack }: UserAnswers
 
   const replaceSentences = (sentences: string[], text: string, color: string) => {
     return sentences.reduce((acu, cur) => {
-      return acu.replace(cur, `<span style=background-color:${color}>${cur}</span>`);
+      const result = cur.replace(/^[\(\[.?!]|[\)\].?!]$/g, "");
+      return acu.replace(result, `<span style=background-color:${color}>${result}</span>`);
     }, text);
   };
 
   const resultHighlighted = useMemo(() => {
     return result.reduce((acu: string, cur) => {
+      // console.log({ sentence });
       if (cur.correct === "YES" && cur.mentioned === "YES")
         return replaceSentences(cur.sentences, acu, TEXT_HIGHLIGHT["success"]);
       if (cur.correct === "NO" && cur.mentioned === "YES")
