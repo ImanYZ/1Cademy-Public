@@ -1,17 +1,17 @@
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import KeyboardArrowLeftIcon from "@mui/icons-material/KeyboardArrowLeft";
-import UploadIcon from "@mui/icons-material/Upload";
-import { Box, Divider, IconButton, Stack, Typography } from "@mui/material";
+import PlayArrowIcon from "@mui/icons-material/PlayArrow";
+import { Box, Divider, IconButton, Stack, TextField, Typography } from "@mui/material";
+import { FieldArray, Form, Formik } from "formik";
 import React, { useMemo } from "react";
 import { Rubric } from "src/client/firestore/questions.firestore";
 import { TryRubricResponse } from "src/types";
 
-import CsvButton from "@/components/CSVBtn";
 import OptimizedAvatar2 from "@/components/OptimizedAvatar2";
 import { DESIGN_SYSTEM_COLORS } from "@/lib/theme/colors";
 
 import { CustomButton } from "../Buttons/Buttons";
-import { UserAnswer, UserAnswerProcessed } from "./RubricsEditor";
+import { UserAnswer } from "./RubricsEditor";
 
 type UserAnswersProps = { userAnswers: UserAnswer; result: TryRubricResponse[]; rubric: Rubric; onBack: () => void };
 
@@ -23,8 +23,12 @@ const TEXT_HIGHLIGHT: { [key in "success" | "warning" | "error"]: string } = {
 
 export const UserAnswers = ({ userAnswers, result, rubric, onBack }: UserAnswersProps) => {
   const points = useMemo(
-    () => result.reduce((acu, cur) => (acu + cur.correct ? rubric.points : 0), 0),
-    [result, rubric.points]
+    () =>
+      result.reduce(
+        (acu, cur) => (acu + cur.correct ? rubric.prompts.find(c => c.prompt === cur.rubric_item)?.point ?? 0 : 0),
+        0
+      ),
+    [result, rubric.prompts]
   );
 
   const replaceSentences = (sentences: string[], text: string, color: string) => {
@@ -86,47 +90,104 @@ export const UserAnswers = ({ userAnswers, result, rubric, onBack }: UserAnswers
 };
 
 type UserListAnswersProps = {
-  userAnswersProcessed: UserAnswerProcessed[];
+  usersAnswers: UserAnswer[];
   setUserAnswers: (data: UserAnswer[]) => void;
   onTryRubricOnAnswer: (userAnswer: UserAnswer) => void;
 };
-export const UserListAnswers = ({
-  userAnswersProcessed,
-  setUserAnswers,
-  onTryRubricOnAnswer,
-}: UserListAnswersProps) => {
+export const UserListAnswers = ({ setUserAnswers, usersAnswers, onTryRubricOnAnswer }: UserListAnswersProps) => {
   return (
     <Box>
       <Typography sx={{ fontWeight: 600 }}>Random Grading of 10 students</Typography>
       <Stack spacing={"12px"} sx={{ p: "0px" }}>
-        {!userAnswersProcessed.length && (
-          <Stack sx={{ p: "100px" }} alignItems={"center"} justifyContent={"center"} spacing={"20px"}>
-            <Typography>No users found</Typography>
-            <CsvButton
-              BtnText={
-                <>
-                  <UploadIcon sx={{ mr: "8px" }} />
-                  Upload User Answers
-                </>
-              }
-              addNewData={data => setUserAnswers(data.rows as UserAnswer[])}
-              sx={{
-                border: `solid 1px ${DESIGN_SYSTEM_COLORS.gray300}`,
-                backgroundColor: theme =>
-                  theme.palette.mode === "dark"
-                    ? DESIGN_SYSTEM_COLORS.notebookMainBlack
-                    : DESIGN_SYSTEM_COLORS.baseWhite,
-                color: theme =>
-                  theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.gray200 : DESIGN_SYSTEM_COLORS.gray700,
-                ":hover": {
-                  backgroundColor: theme =>
-                    theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.baseGraphit : DESIGN_SYSTEM_COLORS.gray300,
-                },
-              }}
-            />
-          </Stack>
-        )}
-        {userAnswersProcessed.map((cur, idx) => (
+        <Formik initialValues={{ usersAnswers }} onSubmit={({ usersAnswers }) => setUserAnswers(usersAnswers)}>
+          {formik => (
+            <Form>
+              <FieldArray
+                name="usersAnswers"
+                render={() => (
+                  <Stack>
+                    {formik.values.usersAnswers.map((userAnswer, index) => (
+                      <>
+                        <Stack key={index} spacing={"12px"}>
+                          <Stack key={index} direction={"row"} alignItems={"center"} spacing={"12px"}>
+                            <OptimizedAvatar2 imageUrl={userAnswer.userImage} alt={userAnswer.user} size={40} />
+                            <Typography>{userAnswer.user}</Typography>
+                          </Stack>
+                          <TextField
+                            label=""
+                            name={`usersAnswers.${index}.answer`}
+                            fullWidth
+                            multiline
+                            size="small"
+                            onChange={formik.handleChange}
+                            value={userAnswer.answer}
+                            error={
+                              Boolean(
+                                formik.touched.usersAnswers &&
+                                  formik.touched.usersAnswers[index] &&
+                                  (formik.touched.usersAnswers as any)[index]["answer"]
+                              ) &&
+                              Boolean(
+                                formik.errors.usersAnswers &&
+                                  formik.errors.usersAnswers[index] &&
+                                  typeof (formik.errors.usersAnswers as any)[index]["answer"] === "string"
+                              )
+                            }
+                            helperText={
+                              Boolean(
+                                formik.touched.usersAnswers &&
+                                  formik.touched.usersAnswers[index] &&
+                                  (formik.touched.usersAnswers as any)[index]["answer"]
+                              ) &&
+                              formik.errors.usersAnswers &&
+                              formik.errors.usersAnswers[index] &&
+                              (formik.errors.usersAnswers as any)[index]["answer"]
+                            }
+                            onBlur={(event: React.FocusEvent<HTMLInputElement>) => {
+                              formik.handleBlur(event);
+                            }}
+                          />
+
+                          {/* <Field name={`friends.${index}`} /> */}
+                          {/* <button
+                                type="button"
+                                onClick={() => arrayHelpers.remove(index)} // remove a friend from the list
+                              >
+                                -
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => arrayHelpers.insert(index, "")} // insert an empty string at a position
+                              >
+                                +
+                              </button> */}
+                        </Stack>
+                        <Stack direction={"row"} justifyContent={"right"} sx={{ mt: "12px" }} spacing={"12px"}>
+                          {userAnswer.answer !== usersAnswers[index].answer && (
+                            <CustomButton variant="contained" color="secondary" type="submit" size="small">
+                              Save
+                            </CustomButton>
+                          )}
+                          <CustomButton
+                            variant="contained"
+                            type="button"
+                            size="small"
+                            onClick={() => onTryRubricOnAnswer(userAnswer)}
+                          >
+                            <PlayArrowIcon sx={{ mr: "4px" }} />
+                            Chose
+                          </CustomButton>
+                        </Stack>
+                      </>
+                    ))}
+                  </Stack>
+                )}
+              />
+            </Form>
+          )}
+        </Formik>
+
+        {/* {userAnswersProcessed.map((cur, idx) => (
           <Stack
             key={idx}
             direction={"row"}
@@ -149,9 +210,7 @@ export const UserListAnswers = ({
             <Stack spacing={"6px"} sx={{ width: "100%" }}>
               <Stack spacing={"6px"} direction={"row"} alignItems={"center"} justifyContent={"space-between"}>
                 <Typography sx={{ fontSize: "14px", fontWeight: 600 }}>{cur.user}</Typography>
-                {/* <Typography sx={{ fontSize: "12px", fontWeight: 400, color: DESIGN_SYSTEM_COLORS.gray500 }}>
-                  {cur.points} point{cur.points !== 1 && "s"}
-                </Typography> */}
+                
               </Stack>
               <Typography
                 sx={{
@@ -163,7 +222,7 @@ export const UserListAnswers = ({
               </Typography>
             </Stack>
           </Stack>
-        ))}
+        ))} */}
       </Stack>
     </Box>
   );

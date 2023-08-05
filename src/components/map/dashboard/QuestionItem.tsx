@@ -1,4 +1,3 @@
-import DeleteIcon from "@mui/icons-material/Delete";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import ReadMoreIcon from "@mui/icons-material/ReadMore";
 import SortIcon from "@mui/icons-material/Sort";
@@ -45,9 +44,9 @@ export const QuestionItem = ({ question, onSelectQuestion }: QuestionItemProps) 
               <ReadMoreIcon />
             </IconButton>
           </Tooltip>
-          <IconButton>
+          {/* <IconButton>
             <DeleteIcon />
-          </IconButton>
+          </IconButton> */}
         </Stack>
       </Stack>
     </Box>

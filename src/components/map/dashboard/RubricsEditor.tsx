@@ -1,14 +1,12 @@
 import AddIcon from "@mui/icons-material/Add";
 import CloseIcon from "@mui/icons-material/Close";
 import KeyboardDoubleArrowLeftIcon from "@mui/icons-material/KeyboardDoubleArrowLeft";
-import UploadIcon from "@mui/icons-material/Upload";
 import { Box, Divider, IconButton, Stack, Tooltip, Typography } from "@mui/material";
 import { getFirestore } from "firebase/firestore";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { Question, Rubric, updateQuestion } from "src/client/firestore/questions.firestore";
 import { TryRubricResponse } from "src/types";
 
-import CsvButton from "@/components/CSVBtn";
 import { Post } from "@/lib/mapApi";
 import { DESIGN_SYSTEM_COLORS } from "@/lib/theme/colors";
 import { newId } from "@/lib/utils/newFirestoreId";
@@ -37,7 +35,6 @@ export type UserAnswerProcessed = UserAnswer & { points: number };
 const generateEmptyRubric = (questionId: string, username: string): Rubric => ({
   id: "",
   questionId,
-  points: 1,
   prompts: [],
   downvotesBy: [],
   upvotesBy: [username],
@@ -49,7 +46,7 @@ export const RubricsEditor = ({ question, username, onReturnToQuestions, onSetQu
 
   const [rubrics, setRubrics] = useState<Rubric[]>(question.rubrics);
   const [editedRubric, setEditedRubric] = useState<{ data: Rubric; isNew: boolean; isLoading: boolean } | null>(null);
-  const [usersAnswers, setUserAnswers] = useState<UserAnswer[]>([]);
+  const [usersAnswers, setUserAnswers] = useState<UserAnswer[]>([{ user: "Jimy 2000", answer: "", userImage: "" }]);
   const [tryRubric, setTryRubric] = useState<Rubric | null>(null);
   const [tryUserAnswer, setTryUserAnswer] = useState<{ userAnswer: UserAnswer; result: TryRubricResponse[] } | null>(
     null
@@ -132,7 +129,7 @@ export const RubricsEditor = ({ question, username, onReturnToQuestions, onSetQu
   const onTryRubricOnAnswer = useCallback(
     async (userAnswer: UserAnswer) => {
       const response: TryRubricResponse[] = await Post("/assignment/tryRubric", {
-        essayText: userAnswer,
+        essayText: userAnswer.answer,
         rubrics: tryRubric,
       });
       setTryUserAnswer({ userAnswer, result: response });
@@ -241,7 +238,7 @@ export const RubricsEditor = ({ question, username, onReturnToQuestions, onSetQu
                   <AddIcon sx={{ fontSize: "14px" }} />
                 </IconButton>
               </Stack>
-              <CsvButton
+              {/* <CsvButton
                 BtnText={
                   <>
                     <UploadIcon sx={{ mr: "8px" }} />
@@ -262,7 +259,7 @@ export const RubricsEditor = ({ question, username, onReturnToQuestions, onSetQu
                       theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.baseGraphit : DESIGN_SYSTEM_COLORS.gray300,
                   },
                 }}
-              />
+              /> */}
             </Stack>
           )}
         </Box>
@@ -282,8 +279,8 @@ export const RubricsEditor = ({ question, username, onReturnToQuestions, onSetQu
         >
           {!tryUserAnswer && (
             <UserListAnswers
+              usersAnswers={usersAnswers}
               setUserAnswers={setUserAnswers}
-              userAnswersProcessed={getRandomValuesFromArray(usersAnswers, 10).map(c => ({ ...c, points: 1 }))}
               onTryRubricOnAnswer={onTryRubricOnAnswer}
             />
           )}
@@ -354,25 +351,25 @@ export const RubricsEditor = ({ question, username, onReturnToQuestions, onSetQu
 const rubricIsEditable = (rubric: Rubric, userName: string) =>
   rubric.createdBy === userName && rubric.upvotesBy.length - rubric.downvotesBy.length <= 1;
 
-function getRandomValuesFromArray(arr: any[], count: number) {
-  const randomValues: any[] = [];
-  const arrLength = arr.length;
+// function getRandomValuesFromArray(arr: any[], count: number) {
+//   const randomValues: any[] = [];
+//   const arrLength = arr.length;
 
-  // Check if the count is not greater than the array length
-  // if (count > arrLength) {
-  //   console.warn("Requested count is greater than array length.");
-  //   return [];
-  // }
+//   // Check if the count is not greater than the array length
+//   // if (count > arrLength) {
+//   //   console.warn("Requested count is greater than array length.");
+//   //   return [];
+//   // }
 
-  const minCount = Math.min(arrLength, count);
-  while (randomValues.length < minCount) {
-    const randomIndex = Math.floor(Math.random() * arrLength);
+//   const minCount = Math.min(arrLength, count);
+//   while (randomValues.length < minCount) {
+//     const randomIndex = Math.floor(Math.random() * arrLength);
 
-    // Check if the index is unique
-    if (!randomValues.includes(arr[randomIndex])) {
-      randomValues.push(arr[randomIndex]);
-    }
-  }
+//     // Check if the index is unique
+//     if (!randomValues.includes(arr[randomIndex])) {
+//       randomValues.push(arr[randomIndex]);
+//     }
+//   }
 
-  return randomValues;
-}
+//   return randomValues;
+// }

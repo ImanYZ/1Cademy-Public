@@ -11,11 +11,11 @@ import {
 } from "firebase/firestore";
 import { SnapshotChangesTypes } from "src/types";
 
+export type RubricItemType = { prompt: string; point: number };
 export type Rubric = {
   id: string;
   questionId: string;
-  points: number;
-  prompts: string[];
+  prompts: RubricItemType[];
   upvotesBy: string[];
   downvotesBy: string[];
   createdBy: string;

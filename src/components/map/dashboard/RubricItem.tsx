@@ -7,7 +7,7 @@ import EditIcon from "@mui/icons-material/Edit";
 import { Box, Button, Divider, IconButton, Stack, TextField, Tooltip, Typography } from "@mui/material";
 import { FieldArray, Form, Formik, FormikHelpers } from "formik";
 import React from "react";
-import { Rubric } from "src/client/firestore/questions.firestore";
+import { Rubric, RubricItemType } from "src/client/firestore/questions.firestore";
 import * as yup from "yup";
 
 import MarkdownRender from "@/components/Markdown/MarkdownRender";
@@ -64,18 +64,21 @@ export const RubricItem = ({
         p: "14px",
       }}
     >
-      <Typography>
+      {/* <Typography>
         The student should earn {rubric.points} point{rubric.points === 1 ? "s" : ""} for mentioning each of the
         following points in their answer:
-      </Typography>
+      </Typography> */}
       {!rubric.prompts.length && (
         <Typography sx={{ color: DESIGN_SYSTEM_COLORS.gray500 }}>{NO_RUBRICS_MESSAGE}</Typography>
       )}
       <Box component={"ul"}>
         {rubric.prompts.map((c, i) => (
-          <Typography component={"li"} key={i}>
-            {<MarkdownRender text={c} />}
-          </Typography>
+          <Box component={"li"} key={i}>
+            <MarkdownRender text={c.prompt} sx={{ display: "inline" }} />{" "}
+            <Typography component={"span"}>
+              ({c.point} Point{c.point === 1 && "s"})
+            </Typography>
+          </Box>
         ))}
       </Box>
       <Stack direction={"row"} justifyContent={"space-between"} alignItems={"center"}>
@@ -152,22 +155,26 @@ export const RubricItem = ({
 };
 
 type RubricFormProps = { rubric: Rubric; onSave: (newRubric: Rubric) => Promise<void>; cancelFn: () => void };
-type RubricFormValues = { points: number; prompts: string[] };
+type RubricFormValues = { prompts: RubricItemType[] };
 export const RubricForm = ({ rubric, onSave, cancelFn }: RubricFormProps) => {
-  const initialValue: RubricFormValues = { points: rubric.points, prompts: rubric.prompts };
+  const initialValue: RubricFormValues = { prompts: rubric.prompts };
   const validationSchema = yup.object().shape({
-    points: yup.number().min(0).max(10_000).typeError("").required(""),
+    // points: yup.number().min(0).max(10_000).typeError("").required(""),
     prompts: yup
       .array()
-      .min(1, "The rubric must include a minimum of one specific detail.")
-      .of(yup.string().required("Rubric detail should have a description")),
+      .min(1, "The rubric must include a minimum of one item.")
+      .of(
+        yup.object().shape({
+          prompt: yup.string().required("Rubric item should not be empty"),
+          point: yup.number().min(0).max(10_000).typeError("").required(""),
+        })
+      ),
   });
 
   const onSubmit = async (values: RubricFormValues, { setSubmitting, setTouched }: FormikHelpers<RubricFormValues>) => {
     setSubmitting(true);
     setTouched({
-      points: true,
-      prompts: true,
+      prompts: new Array(values.prompts.length).fill(true),
     });
     await onSave({ ...rubric, ...values });
     setSubmitting(false);
@@ -195,7 +202,7 @@ export const RubricForm = ({ rubric, onSave, cancelFn }: RubricFormProps) => {
                   palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookG900 : DESIGN_SYSTEM_COLORS.gray50,
               }}
             >
-              <Box sx={{ width: "100%" }}>
+              {/* <Box sx={{ width: "100%" }}>
                 <Typography display={"inline"}>The student should earn </Typography>
                 <TextField
                   label=""
@@ -217,52 +224,190 @@ export const RubricForm = ({ rubric, onSave, cancelFn }: RubricFormProps) => {
                   point{formik.values.points === 1 ? "" : "s"} for mentioning each of the following rubric items in
                   their answer:
                 </Typography>
-              </Box>
+              </Box> */}
               {!formik.values.prompts.length && (
                 <Typography sx={{ color: DESIGN_SYSTEM_COLORS.gray500 }}>{NO_RUBRICS_MESSAGE}</Typography>
               )}
+
               <FieldArray
                 name="prompts"
                 render={(arrayHelpers: any) => (
                   <>
-                    {formik.values.prompts.map((prompt, index) => (
-                      <Stack key={index} direction={"row"} sx={{ width: "100%" }} alignItems={"flex-start"}>
-                        <TextField
-                          label=""
-                          name={`prompts.${index}`}
-                          fullWidth
-                          multiline
-                          size="small"
-                          onChange={formik.handleChange}
-                          value={prompt}
-                          error={Boolean(
-                            formik.touched.prompts
-                              ? (formik.touched.prompts as any)[index] &&
-                                  formik.errors.prompts &&
-                                  formik.errors.prompts[index]
-                              : false
-                          )}
-                          helperText={
-                            (Boolean(formik.touched.prompts) && (formik.touched.prompts as any))[index] &&
-                            formik.errors.prompts
-                              ? formik.errors.prompts[index] ?? ""
-                              : ""
-                          }
-                          onBlur={(event: React.FocusEvent<HTMLInputElement>) => {
-                            formik.handleBlur(event);
-                          }}
-                        />
+                    {/* <Stack
+                      // key={index}
+                      direction={"row"}
+                      sx={{ width: "100%" }}
+                      // alignItems={"flex-start"}
+                      spacing={"4px"}
+                    >
+                      
+                      
+                    </Stack> */}
 
-                        <Tooltip title="Remove Rubric Item">
-                          <IconButton
-                            type="button"
-                            onClick={() => arrayHelpers.remove(index)} // remove a friend from the list
-                          >
-                            <DeleteIcon />
-                          </IconButton>
-                        </Tooltip>
-                      </Stack>
-                    ))}
+                    <table>
+                      <thead>
+                        <th>
+                          <Typography>Rubric item</Typography>
+                        </th>
+                        <th>
+                          <Typography>Points</Typography>
+                        </th>
+                        <th></th>
+                      </thead>
+                      <tbody>
+                        {formik.values.prompts.map((prompt, index) => (
+                          <tr key={index}>
+                            <td style={{ width: "100%" }}>
+                              <TextField
+                                label=""
+                                name={`prompts.${index}.prompt`}
+                                fullWidth
+                                multiline
+                                size="small"
+                                onChange={formik.handleChange}
+                                value={prompt.prompt}
+                                error={
+                                  Boolean(
+                                    formik.touched.prompts &&
+                                      formik.touched.prompts[index] &&
+                                      (formik.touched.prompts as any)[index]["prompt"]
+                                  ) &&
+                                  Boolean(
+                                    formik.errors.prompts &&
+                                      formik.errors.prompts[index] &&
+                                      typeof (formik.errors.prompts as any)[index]["prompt"] === "string"
+                                  )
+                                }
+                                helperText={
+                                  Boolean(
+                                    formik.touched.prompts &&
+                                      formik.touched.prompts[index] &&
+                                      (formik.touched.prompts as any)[index]["prompt"]
+                                  ) &&
+                                  formik.errors.prompts &&
+                                  formik.errors.prompts[index] &&
+                                  (formik.errors.prompts as any)[index]["prompt"]
+                                }
+                                onBlur={(event: React.FocusEvent<HTMLInputElement>) => {
+                                  formik.handleBlur(event);
+                                }}
+                              />
+                            </td>
+                            <td style={{ verticalAlign: "top" }}>
+                              <TextField
+                                label=""
+                                id="points"
+                                name={`prompts.${index}.point`}
+                                onChange={formik.handleChange}
+                                value={prompt.point}
+                                error={
+                                  Boolean(
+                                    formik.touched.prompts &&
+                                      formik.touched.prompts[index] &&
+                                      (formik.touched.prompts as any)[index]["point"]
+                                  ) &&
+                                  Boolean(
+                                    formik.errors.prompts &&
+                                      formik.errors.prompts[index] &&
+                                      typeof (formik.errors.prompts as any)[index]["point"] === "string"
+                                  )
+                                }
+                                // helperText={formik.touched.points && formik.errors.points}
+                                helperText={
+                                  Boolean(
+                                    formik.touched.prompts &&
+                                      formik.touched.prompts[index] &&
+                                      (formik.touched.prompts as any)[index]["point"]
+                                  ) &&
+                                  formik.errors.prompts &&
+                                  formik.errors.prompts[index] &&
+                                  (formik.errors.prompts as any)[index]["point"]
+                                }
+                                onBlur={(event: React.FocusEvent<HTMLInputElement>) => {
+                                  formik.handleBlur(event);
+                                }}
+                                size="small"
+                                sx={{ width: "50px" }}
+                                inputProps={{}}
+                              />
+                            </td>
+                            <td style={{ verticalAlign: "top" }}>
+                              <Tooltip title="Remove Rubric Item">
+                                <IconButton
+                                  type="button"
+                                  onClick={() => arrayHelpers.remove(index)} // remove a friend from the list
+                                >
+                                  <DeleteIcon />
+                                </IconButton>
+                              </Tooltip>
+                            </td>
+                          </tr>
+                        ))}
+                        {/* </tr> */}
+                      </tbody>
+                    </table>
+
+                    {/* {formik.values.prompts.map((prompt, index) => (
+                      
+                      // <Stack
+                      //   key={index}
+                      //   direction={"row"}
+                      //   sx={{ width: "100%" }}
+                      //   alignItems={"flex-start"}
+                      //   spacing={"4px"}
+                      // >
+                      //   <TextField
+                      //     label=""
+                      //     name={`prompts.${index}.prompt`}
+                      //     fullWidth
+                      //     multiline
+                      //     size="small"
+                      //     onChange={formik.handleChange}
+                      //     value={prompt.prompt}
+                      //     // error={Boolean(
+                      //     //   formik.touched.prompts
+                      //     //     ? (formik.touched.prompts as any)[index] &&
+                      //     //         formik.errors.prompts &&
+                      //     //         formik.errors.prompts[index]
+                      //     //     : false
+                      //     // )}
+                      //     // helperText={
+                      //     //   (Boolean(formik.touched.prompts) && (formik.touched.prompts as any))[index] &&
+                      //     //   formik.errors.prompts
+                      //     //     ? formik.errors.prompts[index] ?? ""
+                      //     //     : ""
+                      //     // }
+                      //     onBlur={(event: React.FocusEvent<HTMLInputElement>) => {
+                      //       formik.handleBlur(event);
+                      //     }}
+                      //   />
+
+                      //   <TextField
+                      //     label=""
+                      //     id="points"
+                      //     name={`prompts.${index}.point`}
+                      //     onChange={formik.handleChange}
+                      //     value={prompt.point}
+                      //     // error={formik.touched.points && formik.errors.hasOwnProperty("points")}
+                      //     // helperText={formik.touched.points && formik.errors.points}
+                      //     onBlur={(event: React.FocusEvent<HTMLInputElement>) => {
+                      //       formik.handleBlur(event);
+                      //     }}
+                      //     size="small"
+                      //     sx={{ width: "50px" }}
+                      //     inputProps={{}}
+                      //   />
+
+                      //   <Tooltip title="Remove Rubric Item">
+                      //     <IconButton
+                      //       type="button"
+                      //       onClick={() => arrayHelpers.remove(index)} // remove a friend from the list
+                      //     >
+                      //       <DeleteIcon />
+                      //     </IconButton>
+                      //   </Tooltip>
+                      // </Stack>
+                    ))} */}
 
                     {formik.errors.prompts && typeof formik.errors.prompts === "string" && formik.touched.prompts && (
                       <Typography sx={{ color: theme => theme.palette.error.main }}>{formik.errors.prompts}</Typography>
@@ -272,7 +417,7 @@ export const RubricForm = ({ rubric, onSave, cancelFn }: RubricFormProps) => {
                         variant="contained"
                         type="button"
                         color="secondary"
-                        onClick={() => arrayHelpers.push("")}
+                        onClick={() => arrayHelpers.push({ prompt: "", point: 1 })}
                       >
                         Add New Rubric Details <AddIcon />
                       </CustomButton>
