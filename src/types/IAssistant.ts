@@ -19,7 +19,7 @@ export type IAssistantEventDetail =
       query: string;
     }
   | {
-      type: "IMPROVEMENT" | "CHILD";
+      type: "IMPROVEMENT" | "CHILD" | "PARENT";
       selectedNode: {
         id: string;
         title: string;
