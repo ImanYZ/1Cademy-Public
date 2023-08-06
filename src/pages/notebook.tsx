@@ -6724,7 +6724,7 @@ const Notebook = ({}: NotebookProps) => {
         nodeBookDispatch({ type: "setSearchQuery", payload: detail.query });
         nodeBookDispatch({ type: "setNodeTitleBlured", payload: true });
       } else if (detail.type === "OPEN_NODE") {
-        openNodeHandler(detail.nodeId);
+        openLinkedNode(detail.nodeId, "Searcher");
       } else if (detail.type === "IMPROVEMENT") {
         setQueryParentChildren({ query: detail.flashcard.title, forced: true });
         setOpenSidebar(null);
@@ -6780,6 +6780,59 @@ const Notebook = ({}: NotebookProps) => {
         notebookRef.current.selectedNode = detail.selectedNode.id;
         nodeBookDispatch({ type: "setSelectedNode", payload: detail.selectedNode.id });
         proposeNewChild(null, detail.flashcard.type);
+        // to apply assistant potential improvement on node editor
+        setTimeout(() => {
+          const selectedNodeId = notebookRef.current.selectedNode!;
+
+          setGraph(graph => {
+            let newGraph = {
+              ...graph,
+              nodes: { ...graph.nodes },
+            };
+            let newNode = { ...newGraph.nodes[selectedNodeId] };
+
+            newNode.title = detail.title;
+            newNode.content = detail.content;
+            newNode.flashcard = detail.flashcard;
+            if (detail.choices) {
+              newNode.choices = detail.choices;
+            }
+            if (detail.referenceNode) {
+              // adding reference of book
+              newNode.referenceIds = newNode.referenceIds || [];
+              newNode.referenceLabels = newNode.referenceLabels || [];
+              newNode.references = newNode.references || [];
+
+              const existingReference = newNode.referenceLabels.find(
+                referenceLabel => referenceLabel === detail.bookUrl
+              );
+              if (!existingReference) {
+                newNode.referenceIds.push(detail.referenceNode.id);
+                newNode.referenceLabels.push(detail.bookUrl);
+                newNode.references.push(detail.referenceNode.title);
+              }
+            }
+
+            newGraph.nodes[selectedNodeId] = newNode;
+
+            return newGraph;
+          });
+          setAbleToPropose(true);
+          setNodeUpdates({
+            nodeIds: [selectedNodeId],
+            updatedAt: new Date(),
+          });
+        }, 1000);
+        if (detail.choices) window.dispatchEvent(new CustomEvent("stop-loader"));
+      } else if (detail.type === "PARENT") {
+        setQueryParentChildren({ query: detail.flashcard.title, forced: true });
+        setOpenSidebar(null);
+        notebookRef.current.choosingNode = null;
+        nodeBookDispatch({ type: "setChoosingNode", payload: null });
+        notebookRef.current.choosingNode = null;
+        notebookRef.current.selectedNode = detail.selectedNode.id;
+        nodeBookDispatch({ type: "setSelectedNode", payload: detail.selectedNode.id });
+        proposeNewParent(null, detail.flashcard.type);
         // to apply assistant potential improvement on node editor
         setTimeout(() => {
           const selectedNodeId = notebookRef.current.selectedNode!;
