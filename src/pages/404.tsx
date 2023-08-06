@@ -1,4 +1,5 @@
 import { Box, Button, Typography } from "@mui/material";
+import Link from "next/link";
 import { useRouter } from "next/router";
 import React from "react";
 
@@ -65,14 +66,18 @@ const Custom404 = () => {
           >
             The page you are looking for doesn’t exist or has been removed.{" "}
           </Typography>
-          <Button
-            variant="contained"
-            fullWidth
-            onClick={() => router.back()}
-            sx={{ borderRadius: "26px", background: theme => theme.palette.common.primary800 }}
-          >
-            Go Back
-          </Button>
+          <Link href={"/"} passHref>
+            <a>
+              <Button
+                variant="contained"
+                fullWidth
+                onClick={() => router.back()}
+                sx={{ borderRadius: "26px", background: theme => theme.palette.common.primary800 }}
+              >
+                Go Back
+              </Button>
+            </a>
+          </Link>
         </Box>
         <Box
           sx={{
