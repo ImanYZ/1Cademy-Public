@@ -1094,7 +1094,7 @@ export const DashboardStudents = ({ currentSemester }: DashboardStudentsProps) =
               {!disableEdit && (
                 <Box>
                   <CsvButton
-                    variant="text"
+                    // variant="text"
                     addNewData={addNewData}
                     disabled={disableEdit}
                     sx={{
