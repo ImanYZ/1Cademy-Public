@@ -3,7 +3,7 @@ import PlayArrowIcon from "@mui/icons-material/PlayArrow";
 import { Box, CircularProgress, Stack, TextField, Typography } from "@mui/material";
 import { FieldArray, Form, Formik } from "formik";
 import React, { useMemo, useState } from "react";
-import { Rubric } from "src/client/firestore/questions.firestore";
+import { Rubric, RubricItemType } from "src/client/firestore/questions.firestore";
 import { TryRubricResponse } from "src/types";
 
 import OptimizedAvatar2 from "@/components/OptimizedAvatar2";
@@ -30,12 +30,70 @@ export const TEXT_HIGHLIGHT: { [key in "success" | "warning" | "error"]: string 
 };
 
 export const UserAnswersProcessed = ({ data, rubric, onBack, onSelectUserAnswer }: UserAnswersProcessedProps) => {
+  // const [thresholdByPoints, setThresholdByPoints] = useState(0);
+
+  // const onChangeThreshold = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  //   const numberValue = Number(e.target.value);
+  //   console.log({ numberValue });
+  //   if (Number.isNaN(numberValue)) return;
+  //   setThresholdByPoints(numberValue);
+  // };
+
+  // const dataAboveThreshold = useMemo(() => {
+  //   return data.filter(cur => getPointsFromResult(cur.result, rubric.prompts) > thresholdByPoints);
+  // }, [data, rubric.prompts, thresholdByPoints]);
+
+  // const dataBellowThreshold = useMemo(() => {
+  //   return data.filter(cur => getPointsFromResult(cur.result, rubric.prompts) <= thresholdByPoints);
+  // }, [data, rubric.prompts, thresholdByPoints]);
+
   return (
-    <Box>
-      <CustomButton variant="contained" color="secondary" sx={{ mb: "24px" }} onClick={onBack}>
-        <KeyboardArrowLeftIcon sx={{ mr: "10px" }} />
-        Back
-      </CustomButton>
+    <Box sx={{ height: "100%", display: "grid", gridTemplateRows: "auto 1fr" }}>
+      <Stack direction={"row"} justifyContent={"space-between"}>
+        <CustomButton variant="contained" color="secondary" sx={{ mb: "24px" }} onClick={onBack}>
+          <KeyboardArrowLeftIcon sx={{ mr: "10px" }} />
+          Back
+        </CustomButton>
+        {/* {data.length > 1 && (
+          <TextField
+            id="outlined-basic"
+            label="Threshold by Points"
+            variant="outlined"
+            size="small"
+            type="number"
+            value={thresholdByPoints}
+            onChange={onChangeThreshold}
+            sx={{ width: "140px" }}
+          />
+        )} */}
+      </Stack>
+
+      {/* <Box sx={{ height: "100%", border: "solid 2px olive", display: "grid", gridTemplateRows: "1fr 1fr" }}>
+        <Box sx={{ overflowY: "auto", border: "solid 2px" }}>
+          {dataAboveThreshold.map((cur, idx) => (
+            <UserAnswerProcessed
+              key={idx}
+              result={cur.result}
+              userAnswer={cur.userAnswer}
+              rubric={rubric}
+              state={cur.state}
+              onSelectUserAnswer={onSelectUserAnswer}
+            />
+          ))}
+        </Box>
+        <Box sx={{ overflowY: "auto", border: "solid 2px" }}>
+          {dataBellowThreshold.map((cur, idx) => (
+            <UserAnswerProcessed
+              key={idx}
+              result={cur.result}
+              userAnswer={cur.userAnswer}
+              rubric={rubric}
+              state={cur.state}
+              onSelectUserAnswer={onSelectUserAnswer}
+            />
+          ))}
+        </Box> */}
+
       {data.map((cur, idx) => (
         <UserAnswerProcessed
           key={idx}
@@ -46,6 +104,28 @@ export const UserAnswersProcessed = ({ data, rubric, onBack, onSelectUserAnswer 
           onSelectUserAnswer={onSelectUserAnswer}
         />
       ))}
+
+      {/* {dataAboveThreshold.map((cur, idx) => (
+        <UserAnswerProcessed
+          key={idx}
+          result={cur.result}
+          userAnswer={cur.userAnswer}
+          rubric={rubric}
+          state={cur.state}
+          onSelectUserAnswer={onSelectUserAnswer}
+        />
+      ))}
+      <Divider />
+      {dataBellowThreshold.map((cur, idx) => (
+        <UserAnswerProcessed
+          key={idx}
+          result={cur.result}
+          userAnswer={cur.userAnswer}
+          rubric={rubric}
+          state={cur.state}
+          onSelectUserAnswer={onSelectUserAnswer}
+        />
+      ))} */}
     </Box>
   );
 };
@@ -59,14 +139,7 @@ type UserAnswerProcessed = {
 };
 
 export const UserAnswerProcessed = ({ userAnswer, result, state, rubric, onSelectUserAnswer }: UserAnswerProcessed) => {
-  const points = useMemo(
-    () =>
-      result.reduce(
-        (acu, cur, index) => acu + (cur.correct === "YES" ? Number(rubric.prompts[index]?.point) ?? 0 : 0),
-        0
-      ),
-    [result, rubric.prompts]
-  );
+  const points = useMemo(() => getPointsFromResult(result, rubric.prompts), [result, rubric.prompts]);
 
   const replaceSentences = (sentences: string[], text: string, color: string) => {
     return sentences.reduce((acu, cur) => {
@@ -307,4 +380,8 @@ export const getHelperTextFromResult = (resultItem: TryRubricResponse): string =
   if (resultItem.correct === "NO" && resultItem.mentioned === "NO")
     return "This rubric was not mentioned in student’s answer.";
   return "";
+};
+
+const getPointsFromResult = (result: TryRubricResponse[], prompts: RubricItemType[]) => {
+  return result.reduce((acu, cur, index) => acu + (cur.correct === "YES" ? Number(prompts[index]?.point) ?? 0 : 0), 0);
 };
