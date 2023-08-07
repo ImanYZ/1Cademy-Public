@@ -44,20 +44,6 @@ export const UserAnswersProcessed = ({ data, rubric, onBack }: UserAnswersProces
           state={cur.state}
         />
       ))}
-      {/* <Stack sx={{ mb: "20px" }}>
-        <Stack direction={"row"} justifyContent={"space-between"}>
-          <Stack direction={"row"} spacing={"12px"} alignItems={"center"} sx={{ mb: "18px" }}>
-            <OptimizedAvatar2 imageUrl={userAnswer.userImage} alt={`${userAnswer.user} profile picture`} size={40} />
-            <Typography sx={{ fontWeight: 600 }}>{userAnswer.user}</Typography>
-          </Stack>
-          <Stack>
-            <Typography>Total score</Typography>
-            <Typography sx={{ fontWeight: 700, color: DESIGN_SYSTEM_COLORS.gray900 }}>{points}</Typography>
-          </Stack>
-        </Stack>
-
-        <Typography dangerouslySetInnerHTML={{ __html: resultHighlighted }} />
-      </Stack> */}
     </Box>
   );
 };
@@ -71,7 +57,7 @@ type UserAnswerProcessed = {
 
 export const UserAnswerProcessed = ({ userAnswer, result, state, rubric }: UserAnswerProcessed) => {
   const points = useMemo(
-    () => result.reduce((acu, cur, index) => (acu + cur.correct ? rubric.prompts[index]?.point ?? 0 : 0), 0),
+    () => result.reduce((acu, cur, index) => acu + (cur.correct === "YES" ? rubric.prompts[index]?.point ?? 0 : 0), 0),
     [result, rubric.prompts]
   );
 

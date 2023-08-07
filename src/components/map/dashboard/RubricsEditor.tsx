@@ -42,9 +42,24 @@ const generateEmptyRubric = (questionId: string, username: string): Rubric => ({
 });
 
 const USER_ANSWERS: UserAnswer[] = [
-  { user: "Jimy 2000", answer: "", userImage: "" },
-  { user: "Jimy 2010", answer: "", userImage: "" },
-  { user: "Jimy 2030", answer: "", userImage: "" },
+  {
+    user: "Jimy 2000",
+    answer:
+      "The Great Depression was a severe worldwide economic downturn that lasted from 1929 to the late 1930s. It caused widespread unemployment, poverty, and a collapse in industrial production and trade, leading to significant social and political upheaval.",
+    userImage: "",
+  },
+  {
+    user: "Jimy 2010",
+    answer:
+      "The Great Depression refers to a catastrophic economic crisis that gripped the global economy during the 1930s. It originated in the United States with the stock market crash of 1929, causing a severe downturn in industrial production, trade, and employment. This period of widespread poverty, bank failures, and economic instability had far-reaching social and political consequences.",
+    userImage: "",
+  },
+  {
+    user: "Jimy 2030",
+    answer:
+      "The Great Depression, spanning from the late 1920s to the early 1940s, was a profound worldwide economic slump. Triggered by the crash of the U.S. stock market in 1929, it led to a sharp decline in consumer spending, mass unemployment, and severe deflation. The Great Depression fundamentally reshaped economic thinking and policy, prompting governments to adopt measures to prevent such catastrophic events in the future.",
+    userImage: "",
+  },
 ];
 
 export const RubricsEditor = ({ question, username, onReturnToQuestions, onSetQuestions }: RubricsEditorProps) => {
@@ -54,7 +69,7 @@ export const RubricsEditor = ({ question, username, onReturnToQuestions, onSetQu
   const [editedRubric, setEditedRubric] = useState<{ data: Rubric; isNew: boolean; isLoading: boolean } | null>(null);
   const [usersAnswers, setUserAnswers] = useState<UserAnswer[]>(USER_ANSWERS);
   const [tryRubric, setTryRubric] = useState<Rubric | null>(null);
-  const [tryUserAnswer, setTryUserAnswer] = useState<UserAnswerData[]>([]);
+  const [tryUserAnswers, setTryUserAnswers] = useState<UserAnswerData[]>([]);
   const [disableAddRubric, setDisableAddRubric] = useState(false);
 
   // const [userAnswerGraded, setUserAnswersGraded] = useState([]);
@@ -138,32 +153,27 @@ export const RubricsEditor = ({ question, username, onReturnToQuestions, onSetQu
         essayText: userAnswer.answer,
         rubrics: tryRubric,
       });
-      setTryUserAnswer([{ userAnswer, result: response, state: "IDLE" }]);
+      setTryUserAnswers([{ userAnswer, result: response, state: "IDLE" }]);
     },
     [tryRubric]
   );
 
   const onTryRubricOnAnswers = useCallback(async () => {
-    setTryUserAnswer(usersAnswers.map(c => ({ userAnswer: c, result: [], state: "LOADING" })));
+    setTryUserAnswers(usersAnswers.map(c => ({ userAnswer: c, result: [], state: "LOADING" })));
     usersAnswers.forEach(async (cur, idx) => {
       try {
         const response: TryRubricResponse[] = await Post("/assignment/tryRubric", {
           essayText: cur.answer,
           rubrics: tryRubric,
         });
-        setTryUserAnswer(prev => prev.map((c, i) => (i === idx ? { ...c, result: response, state: "IDLE" } : c)));
+        setTryUserAnswers(prev => prev.map((c, i) => (i === idx ? { ...c, result: response, state: "IDLE" } : c)));
       } catch (error) {
-        setTryUserAnswer(prev => prev.map((c, i) => (i === idx ? { ...c, state: "ERROR" } : c)));
+        setTryUserAnswers(prev => prev.map((c, i) => (i === idx ? { ...c, state: "ERROR" } : c)));
       }
     });
   }, [tryRubric, usersAnswers]);
 
   useEffect(() => setRubrics(question.rubrics), [question.rubrics]);
-
-  // const tryRubrics = async (rubrics: any) => {
-  //   console.log(rubrics);
-  //   await Post("/assignment/tryRubric", { essayText: "hello", rubrics });
-  // };
 
   return (
     <Box
@@ -223,13 +233,13 @@ export const RubricsEditor = ({ question, username, onReturnToQuestions, onSetQu
                   rubric={cur}
                   onTryIt={() => {
                     setTryRubric(cur);
-                    setTryUserAnswer([]);
+                    setTryUserAnswers([]);
                   }}
                   onSave={onSaveRubric}
                   onDisplayForm={rubricIsEditable(cur, username) ? () => onDisplayForm(cur) : undefined}
                   onRemoveRubric={cur.createdBy === username ? () => onRemoveRubric(cur.id) : undefined}
                   selected={tryRubric?.id === cur.id}
-                  tryUserAnswer={tryUserAnswer.length === 1 ? tryUserAnswer[0] : null}
+                  tryUserAnswer={tryUserAnswers.length === 1 ? tryUserAnswers[0] : null}
                 />
               )
             )}
@@ -303,7 +313,7 @@ export const RubricsEditor = ({ question, username, onReturnToQuestions, onSetQu
               palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookMainBlack : DESIGN_SYSTEM_COLORS.gray50,
           }}
         >
-          {!tryUserAnswer.length && (
+          {!tryUserAnswers.length && (
             <UserListAnswers
               usersAnswers={usersAnswers}
               setUserAnswers={setUserAnswers}
@@ -312,13 +322,13 @@ export const RubricsEditor = ({ question, username, onReturnToQuestions, onSetQu
             />
           )}
 
-          {Boolean(tryUserAnswer.length) && (
+          {Boolean(tryUserAnswers.length) && (
             <UserAnswersProcessed
-              data={tryUserAnswer}
+              data={tryUserAnswers}
               // result={tryUserAnswer.result}
               rubric={tryRubric}
               // userAnswer={tryUserAnswer.userAnswer}
-              onBack={() => setTryUserAnswer([])}
+              onBack={() => setTryUserAnswers([])}
             />
           )}
         </Box>
