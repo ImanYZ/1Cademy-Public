@@ -36,6 +36,7 @@ import { ISemester } from "../../../types/ICourse";
 import { NoDataMessage } from "../../instructors/NoDataMessage";
 import PracticeTool, { PracticeToolRef } from "../../practiceTool/PracticeTool";
 import { DashboardToolbar } from "../Dashobard/DashboradToolbar";
+import { Assignments } from "./Assignments";
 import { Dashboard } from "./Dashboard";
 import { DashboardSettings } from "./DashboardSettings";
 import { DashboardStudents } from "./DashboardStudents";
@@ -56,7 +57,7 @@ type DashboardWrapperProps = {
 
 export type DashboardWrapperRef = PracticeToolRef;
 
-export type ToolbarView = "DASHBOARD" | "PRACTICE" | "SETTINGS" | "STUDENTS";
+export type ToolbarView = "DASHBOARD" | "PRACTICE" | "SETTINGS" | "STUDENTS" | "ASSIGNMENTS";
 
 export const DashboardWrapper = forwardRef<DashboardWrapperRef, DashboardWrapperProps>((props, ref) => {
   const {
@@ -326,6 +327,7 @@ export const DashboardWrapper = forwardRef<DashboardWrapperRef, DashboardWrapper
             {selectToolbarView === "STUDENTS" && (
               <DashboardStudents currentSemester={currentSemester} onSelectUserHandler={onSelectUserHandler} />
             )}
+            {selectToolbarView === "ASSIGNMENTS" && <Assignments username={user.uname} />}
           </>
         ) : (
           <NoDataMessage message="No data in this semester" />
