@@ -20,7 +20,7 @@ type UserAnswersProcessedProps = {
   data: UserAnswerData[];
   rubric: Rubric;
   onBack: () => void;
-  onSelectUserAnswer: (data: UserAnswerData) => void;
+  // onSelectUserAnswer: (data: UserAnswerData) => void;
 };
 
 export const TEXT_HIGHLIGHT: { [key in "success" | "warning" | "error"]: string } = {
@@ -29,7 +29,7 @@ export const TEXT_HIGHLIGHT: { [key in "success" | "warning" | "error"]: string 
   error: "#FDEAD7",
 };
 
-export const UserAnswersProcessed = ({ data, rubric, onBack, onSelectUserAnswer }: UserAnswersProcessedProps) => {
+export const UserAnswersProcessed = ({ data, rubric, onBack }: UserAnswersProcessedProps) => {
   const [thresholdByPoints, setThresholdByPoints] = useState(0);
 
   const onChangeThreshold = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -101,7 +101,7 @@ export const UserAnswersProcessed = ({ data, rubric, onBack, onSelectUserAnswer 
                 userAnswer={cur.userAnswer}
                 rubric={rubric}
                 state={cur.state}
-                onSelectUserAnswer={onSelectUserAnswer}
+                // onSelectUserAnswer={onSelectUserAnswer}
               />
             ))}
           </Box>
@@ -123,7 +123,7 @@ export const UserAnswersProcessed = ({ data, rubric, onBack, onSelectUserAnswer 
                 userAnswer={cur.userAnswer}
                 rubric={rubric}
                 state={cur.state}
-                onSelectUserAnswer={onSelectUserAnswer}
+                // onSelectUserAnswer={onSelectUserAnswer}
               />
             ))}
           </Box>
@@ -138,7 +138,7 @@ export const UserAnswersProcessed = ({ data, rubric, onBack, onSelectUserAnswer 
               userAnswer={cur.userAnswer}
               rubric={rubric}
               state={cur.state}
-              onSelectUserAnswer={onSelectUserAnswer}
+              // onSelectUserAnswer={onSelectUserAnswer}
             />
           </Box>
         ))}
@@ -173,10 +173,9 @@ type UserAnswerProcessed = {
   result: TryRubricResponse[];
   state: UserAnswerState;
   rubric: Rubric;
-  onSelectUserAnswer: (data: UserAnswerData) => void;
 };
 
-export const UserAnswerProcessed = ({ userAnswer, result, state, rubric, onSelectUserAnswer }: UserAnswerProcessed) => {
+export const UserAnswerProcessed = ({ userAnswer, result, state, rubric }: UserAnswerProcessed) => {
   const points = useMemo(() => getPointsFromResult(result, rubric.prompts), [result, rubric.prompts]);
 
   const replaceSentences = (sentences: string[], text: string, color: string) => {
@@ -195,10 +194,7 @@ export const UserAnswerProcessed = ({ userAnswer, result, state, rubric, onSelec
   }, [result, userAnswer.answer]);
 
   return (
-    <Stack
-      sx={{ mb: "30px", cursor: "pointer" }}
-      onClick={() => onSelectUserAnswer({ userAnswer, result, state: "IDLE" })}
-    >
+    <Stack sx={{ mb: "30px" }}>
       <Stack direction={"row"} justifyContent={"space-between"} alignItems={"center"} sx={{ mb: "18px" }}>
         <Stack direction={"row"} spacing={"12px"} alignItems={"center"}>
           <OptimizedAvatar2 imageUrl={userAnswer.userImage} alt={`${userAnswer.user} profile picture`} size={40} />

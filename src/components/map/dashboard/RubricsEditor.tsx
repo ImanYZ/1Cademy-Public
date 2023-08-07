@@ -335,7 +335,7 @@ export const RubricsEditor = ({ question, username, onReturnToQuestions, onSetQu
             setTryUserAnswers([]);
             setSelectedTryUserAnswer(null);
           }}
-          onSelectUserAnswer={setSelectedTryUserAnswer}
+          // onSelectUserAnswer={setSelectedTryUserAnswer}
         />
       )}
 
