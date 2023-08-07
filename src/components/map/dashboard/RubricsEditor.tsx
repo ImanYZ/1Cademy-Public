@@ -71,7 +71,8 @@ export const RubricsEditor = ({ question, username, onReturnToQuestions, onSetQu
   const [tryRubric, setTryRubric] = useState<Rubric | null>(null);
   const [tryUserAnswers, setTryUserAnswers] = useState<UserAnswerData[]>([]);
   const [disableAddRubric, setDisableAddRubric] = useState(false);
-  const [selectedTryUserAnswer, setSelectedTryUserAnswer] = useState<UserAnswerData | null>(null);
+  // const [selectedTryUserAnswer, setSelectedTryUserAnswer] = useState<UserAnswerData | null>(null);
+  const [selectedRubricItem, setSelectedRubricItem] = useState<{ index: Number } | null>(null);
 
   // const [userAnswerGraded, setUserAnswersGraded] = useState([]);
 
@@ -155,7 +156,7 @@ export const RubricsEditor = ({ question, username, onReturnToQuestions, onSetQu
         rubrics: tryRubric,
       });
       setTryUserAnswers([{ userAnswer, result: response, state: "IDLE" }]);
-      setSelectedTryUserAnswer({ userAnswer, result: response, state: "IDLE" });
+      // setSelectedTryUserAnswer({ userAnswer, result: response, state: "IDLE" });
     },
     [tryRubric]
   );
@@ -236,13 +237,16 @@ export const RubricsEditor = ({ question, username, onReturnToQuestions, onSetQu
                   onTryIt={() => {
                     setTryRubric(cur);
                     setTryUserAnswers([]);
-                    setSelectedTryUserAnswer(null);
+                    setSelectedRubricItem(null);
+                    // setSelectedTryUserAnswer(null);
                   }}
                   onSave={onSaveRubric}
                   onDisplayForm={rubricIsEditable(cur, username) ? () => onDisplayForm(cur) : undefined}
                   onRemoveRubric={cur.createdBy === username ? () => onRemoveRubric(cur.id) : undefined}
-                  selected={tryRubric?.id === cur.id}
-                  tryUserAnswer={selectedTryUserAnswer}
+                  isSelected={tryRubric?.id === cur.id}
+                  tryUserAnswer={tryUserAnswers}
+                  onSelectRubricItem={setSelectedRubricItem}
+                  selectedRubricItem={selectedRubricItem}
                 />
               )
             )}
@@ -333,8 +337,10 @@ export const RubricsEditor = ({ question, username, onReturnToQuestions, onSetQu
           // userAnswer={tryUserAnswer.userAnswer}
           onBack={() => {
             setTryUserAnswers([]);
-            setSelectedTryUserAnswer(null);
+            setSelectedRubricItem(null);
+            // setSelectedTryUserAnswer(null);
           }}
+          selectedRubricItem={selectedRubricItem}
           // onSelectUserAnswer={setSelectedTryUserAnswer}
         />
       )}

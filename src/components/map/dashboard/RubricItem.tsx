@@ -6,7 +6,7 @@ import DoneIcon from "@mui/icons-material/Done";
 import EditIcon from "@mui/icons-material/Edit";
 import { Box, Button, Divider, IconButton, Stack, TextField, Tooltip, Typography } from "@mui/material";
 import { FieldArray, Formik, FormikHelpers } from "formik";
-import React from "react";
+import React, { useMemo } from "react";
 import { Rubric, RubricItemType } from "src/client/firestore/questions.firestore";
 import { TryRubricResponse } from "src/types";
 import * as yup from "yup";
@@ -29,11 +29,13 @@ type RubricItemProps = {
   onSave: (newRubric: Rubric) => Promise<void>;
   onDisplayForm?: () => void;
   onRemoveRubric?: () => void;
-  selected: boolean;
+  isSelected: boolean;
   tryUserAnswer: {
     userAnswer: UserAnswer;
     result: TryRubricResponse[];
-  } | null;
+  }[];
+  onSelectRubricItem: (params: { index: Number } | null) => void;
+  selectedRubricItem: { index: Number } | null;
 };
 
 export const RubricItem = ({
@@ -44,8 +46,10 @@ export const RubricItem = ({
   onSave,
   onDisplayForm,
   onRemoveRubric,
-  selected,
+  isSelected,
   tryUserAnswer,
+  onSelectRubricItem,
+  selectedRubricItem,
 }: RubricItemProps) => {
   const onUpVoteRubric = async () => {
     const wasUpVoted = rubric.upvotesBy.includes(username);
@@ -63,18 +67,22 @@ export const RubricItem = ({
     await onSave(newRubric);
   };
 
+  const userAnswerWhereProcessed = useMemo(() => {
+    return tryUserAnswer.reduce((a, c) => a || Boolean(c.result.length), false);
+  }, [tryUserAnswer]);
+
   return (
     <Box
       sx={{
         borderRadius: "4px",
         border: ({ palette }) =>
-          selected
+          isSelected
             ? `solid 2px ${DESIGN_SYSTEM_COLORS.primary800}`
             : `solid 1px ${
                 palette.mode === "light" ? DESIGN_SYSTEM_COLORS.gray300 : DESIGN_SYSTEM_COLORS.notebookG600
               }`,
         backgroundColor: ({ palette }) =>
-          selected
+          isSelected
             ? DESIGN_SYSTEM_COLORS.gray100
             : palette.mode === "dark"
             ? DESIGN_SYSTEM_COLORS.notebookG900
@@ -89,14 +97,44 @@ export const RubricItem = ({
       {!rubric.prompts.length && (
         <Typography sx={{ color: DESIGN_SYSTEM_COLORS.gray500 }}>{NO_RUBRICS_MESSAGE}</Typography>
       )}
-      <Box component={"ul"}>
+      <Stack component={"ul"} spacing={"4px"}>
         {rubric.prompts.map((c, i) => (
-          <Box component={"li"} key={i}>
+          <Box
+            component={"li"}
+            key={i}
+            sx={{
+              border: "solid 2px transparent",
+              borderRadius: "8px",
+              ...(isSelected &&
+                userAnswerWhereProcessed &&
+                selectedRubricItem &&
+                selectedRubricItem.index === i && {
+                  border: theme =>
+                    `solid 2px ${
+                      theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookG600 : DESIGN_SYSTEM_COLORS.gray300
+                    }`,
+                  backgroundColor: theme =>
+                    theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookG600 : DESIGN_SYSTEM_COLORS.gray300,
+                }),
+              ...(isSelected &&
+                userAnswerWhereProcessed && {
+                  cursor: "pointer",
+                  ":hover": {
+                    border: theme =>
+                      `solid 2px ${
+                        theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookG700 : DESIGN_SYSTEM_COLORS.gray600
+                      }`,
+                  },
+                }),
+            }}
+            onClick={() => (isSelected && userAnswerWhereProcessed ? onSelectRubricItem({ index: i }) : undefined)}
+          >
             <MarkdownRender
               text={c.prompt}
               sx={{
                 display: "inline",
-                ...(selected && tryUserAnswer && { backgroundColor: getColorFromResult(tryUserAnswer.result[i]) }),
+                ...(isSelected &&
+                  tryUserAnswer.length === 1 && { backgroundColor: getColorFromResult(tryUserAnswer[0].result[i]) }),
               }}
             />{" "}
             <Typography component={"span"}>
@@ -104,10 +142,10 @@ export const RubricItem = ({
             </Typography>
           </Box>
         ))}
-      </Box>
+      </Stack>
       <Stack direction={"row"} justifyContent={"space-between"} alignItems={"center"}>
         <Stack direction={"row"} alignItems={"center"} spacing={"8px"}>
-          {!selected && (
+          {!isSelected && (
             <CustomButton variant="contained" onClick={onTryIt}>
               Try it
             </CustomButton>

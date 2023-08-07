@@ -20,16 +20,22 @@ type UserAnswersProcessedProps = {
   data: UserAnswerData[];
   rubric: Rubric;
   onBack: () => void;
+  selectedRubricItem: { index: Number } | null;
   // onSelectUserAnswer: (data: UserAnswerData) => void;
 };
 
-export const TEXT_HIGHLIGHT: { [key in "success" | "warning" | "error"]: string } = {
+export const TEXT_HIGHLIGHT: {
+  [key in "success" | "warning" | "error" | "highlightSuccess" | "highlightWarning" | "highlightError"]: string;
+} = {
   success: "#D7FEE7",
   warning: "#FFE6E6",
   error: "#FDEAD7",
+  highlightSuccess: "#6CE9A6",
+  highlightWarning: "#F9DBAF",
+  highlightError: "#ff776e",
 };
 
-export const UserAnswersProcessed = ({ data, rubric, onBack }: UserAnswersProcessedProps) => {
+export const UserAnswersProcessed = ({ data, rubric, onBack, selectedRubricItem }: UserAnswersProcessedProps) => {
   const [thresholdByPoints, setThresholdByPoints] = useState(0);
 
   const onChangeThreshold = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -101,6 +107,7 @@ export const UserAnswersProcessed = ({ data, rubric, onBack }: UserAnswersProces
                 userAnswer={cur.userAnswer}
                 rubric={rubric}
                 state={cur.state}
+                selectedRubricItem={selectedRubricItem}
                 // onSelectUserAnswer={onSelectUserAnswer}
               />
             ))}
@@ -123,6 +130,7 @@ export const UserAnswersProcessed = ({ data, rubric, onBack }: UserAnswersProces
                 userAnswer={cur.userAnswer}
                 rubric={rubric}
                 state={cur.state}
+                selectedRubricItem={selectedRubricItem}
                 // onSelectUserAnswer={onSelectUserAnswer}
               />
             ))}
@@ -138,6 +146,7 @@ export const UserAnswersProcessed = ({ data, rubric, onBack }: UserAnswersProces
               userAnswer={cur.userAnswer}
               rubric={rubric}
               state={cur.state}
+              selectedRubricItem={selectedRubricItem}
               // onSelectUserAnswer={onSelectUserAnswer}
             />
           </Box>
@@ -173,9 +182,10 @@ type UserAnswerProcessed = {
   result: TryRubricResponse[];
   state: UserAnswerState;
   rubric: Rubric;
+  selectedRubricItem: { index: Number } | null;
 };
 
-export const UserAnswerProcessed = ({ userAnswer, result, state, rubric }: UserAnswerProcessed) => {
+export const UserAnswerProcessed = ({ userAnswer, result, state, rubric, selectedRubricItem }: UserAnswerProcessed) => {
   const points = useMemo(() => getPointsFromResult(result, rubric.prompts), [result, rubric.prompts]);
 
   const replaceSentences = (sentences: string[], text: string, color: string) => {
@@ -186,12 +196,21 @@ export const UserAnswerProcessed = ({ userAnswer, result, state, rubric }: UserA
   };
 
   const resultHighlighted = useMemo(() => {
-    return result.reduce((acu: string, cur) => {
-      const color = getColorFromResult(cur);
+    return result.reduce((acu: string, cur, idx) => {
+      const isHighlighted = Boolean(selectedRubricItem && selectedRubricItem.index === idx);
+      const color = getColorFromResult(cur, isHighlighted);
       if (color) return replaceSentences(cur.sentences, acu, color);
       return acu;
     }, userAnswer.answer);
-  }, [result, userAnswer.answer]);
+  }, [result, selectedRubricItem, userAnswer.answer]);
+
+  // const resultsHighlighted = useMemo(() => {
+  //   return result.map((acu: string, cur) => {
+  //     const color = getColorFromResult(cur,selectedRubricItem);
+  //     if (color) return replaceSentences(cur.sentences, acu, color);
+  //     return acu;
+  //   }, userAnswer.answer);
+  // }, [result, userAnswer.answer]);
 
   return (
     <Stack sx={{ mb: "30px" }}>
@@ -397,11 +416,14 @@ export const UserListAnswers = ({
   );
 };
 
-export const getColorFromResult = (resultItem: TryRubricResponse): string => {
+export const getColorFromResult = (resultItem: TryRubricResponse, highlight = false): string => {
   if (!resultItem) return "";
-  if (resultItem.correct === "YES" && resultItem.mentioned === "YES") return TEXT_HIGHLIGHT["success"];
-  if (resultItem.correct === "NO" && resultItem.mentioned === "YES") return TEXT_HIGHLIGHT["warning"];
-  if (resultItem.correct === "NO" && resultItem.mentioned === "NO") return TEXT_HIGHLIGHT["error"];
+  if (resultItem.correct === "YES" && resultItem.mentioned === "YES")
+    return highlight ? TEXT_HIGHLIGHT["highlightSuccess"] : TEXT_HIGHLIGHT["success"];
+  if (resultItem.correct === "NO" && resultItem.mentioned === "YES")
+    return highlight ? TEXT_HIGHLIGHT["highlightWarning"] : TEXT_HIGHLIGHT["warning"];
+  if (resultItem.correct === "NO" && resultItem.mentioned === "NO")
+    return highlight ? TEXT_HIGHLIGHT["highlightError"] : TEXT_HIGHLIGHT["error"];
   return "";
 };
 
