@@ -304,7 +304,7 @@ export const RubricsEditor = ({ question, username, onReturnToQuestions, onSetQu
         </Box>
       </Stack>
 
-      {tryRubric && (
+      {tryRubric && !tryUserAnswers.length && (
         <Box
           sx={{
             marginTop: "0px",
@@ -316,29 +316,27 @@ export const RubricsEditor = ({ question, username, onReturnToQuestions, onSetQu
               palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookMainBlack : DESIGN_SYSTEM_COLORS.gray50,
           }}
         >
-          {!tryUserAnswers.length && (
-            <UserListAnswers
-              usersAnswers={usersAnswers}
-              setUserAnswers={setUserAnswers}
-              onTryRubricOnAnswer={onTryRubricOnAnswer}
-              onTryRubricOnAnswers={onTryRubricOnAnswers}
-            />
-          )}
-
-          {Boolean(tryUserAnswers.length) && (
-            <UserAnswersProcessed
-              data={tryUserAnswers}
-              // result={tryUserAnswer.result}
-              rubric={tryRubric}
-              // userAnswer={tryUserAnswer.userAnswer}
-              onBack={() => {
-                setTryUserAnswers([]);
-                setSelectedTryUserAnswer(null);
-              }}
-              onSelectUserAnswer={setSelectedTryUserAnswer}
-            />
-          )}
+          <UserListAnswers
+            usersAnswers={usersAnswers}
+            setUserAnswers={setUserAnswers}
+            onTryRubricOnAnswer={onTryRubricOnAnswer}
+            onTryRubricOnAnswers={onTryRubricOnAnswers}
+          />
         </Box>
+      )}
+
+      {tryRubric && Boolean(tryUserAnswers.length) && (
+        <UserAnswersProcessed
+          data={tryUserAnswers}
+          // result={tryUserAnswer.result}
+          rubric={tryRubric}
+          // userAnswer={tryUserAnswer.userAnswer}
+          onBack={() => {
+            setTryUserAnswers([]);
+            setSelectedTryUserAnswer(null);
+          }}
+          onSelectUserAnswer={setSelectedTryUserAnswer}
+        />
       )}
 
       {tryRubric && (

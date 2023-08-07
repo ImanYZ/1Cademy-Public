@@ -30,31 +30,41 @@ export const TEXT_HIGHLIGHT: { [key in "success" | "warning" | "error"]: string 
 };
 
 export const UserAnswersProcessed = ({ data, rubric, onBack, onSelectUserAnswer }: UserAnswersProcessedProps) => {
-  // const [thresholdByPoints, setThresholdByPoints] = useState(0);
+  const [thresholdByPoints, setThresholdByPoints] = useState(0);
 
-  // const onChangeThreshold = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-  //   const numberValue = Number(e.target.value);
-  //   console.log({ numberValue });
-  //   if (Number.isNaN(numberValue)) return;
-  //   setThresholdByPoints(numberValue);
-  // };
+  const onChangeThreshold = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const numberValue = Number(e.target.value);
+    if (Number.isNaN(numberValue)) return;
+    setThresholdByPoints(numberValue);
+  };
 
-  // const dataAboveThreshold = useMemo(() => {
-  //   return data.filter(cur => getPointsFromResult(cur.result, rubric.prompts) > thresholdByPoints);
-  // }, [data, rubric.prompts, thresholdByPoints]);
+  const dataAboveThreshold = useMemo(() => {
+    return data.filter(cur => getPointsFromResult(cur.result, rubric.prompts) > thresholdByPoints);
+  }, [data, rubric.prompts, thresholdByPoints]);
 
-  // const dataBellowThreshold = useMemo(() => {
-  //   return data.filter(cur => getPointsFromResult(cur.result, rubric.prompts) <= thresholdByPoints);
-  // }, [data, rubric.prompts, thresholdByPoints]);
+  const dataBellowThreshold = useMemo(() => {
+    return data.filter(cur => getPointsFromResult(cur.result, rubric.prompts) <= thresholdByPoints);
+  }, [data, rubric.prompts, thresholdByPoints]);
 
   return (
-    <Box sx={{ height: "100%", display: "grid", gridTemplateRows: "auto 1fr" }}>
-      <Stack direction={"row"} justifyContent={"space-between"}>
-        <CustomButton variant="contained" color="secondary" sx={{ mb: "24px" }} onClick={onBack}>
+    <Box
+      sx={{
+        position: "relative",
+        // border: "solid 1px red",
+        height: "100%",
+        display: "grid",
+        gridTemplateRows: "auto 1fr",
+        overflow: "auto",
+        backgroundColor: ({ palette }) =>
+          palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookMainBlack : DESIGN_SYSTEM_COLORS.gray50,
+      }}
+    >
+      <Stack direction={"row"} justifyContent={"space-between"} sx={{ p: "24px" }}>
+        <CustomButton variant="contained" color="secondary" onClick={onBack}>
           <KeyboardArrowLeftIcon sx={{ mr: "10px" }} />
           Back
         </CustomButton>
-        {/* {data.length > 1 && (
+        {data.length > 1 && (
           <TextField
             id="outlined-basic"
             label="Threshold by Points"
@@ -65,45 +75,69 @@ export const UserAnswersProcessed = ({ data, rubric, onBack, onSelectUserAnswer 
             onChange={onChangeThreshold}
             sx={{ width: "140px" }}
           />
-        )} */}
+        )}
       </Stack>
 
-      {/* <Box sx={{ height: "100%", border: "solid 2px olive", display: "grid", gridTemplateRows: "1fr 1fr" }}>
-        <Box sx={{ overflowY: "auto", border: "solid 2px" }}>
-          {dataAboveThreshold.map((cur, idx) => (
-            <UserAnswerProcessed
-              key={idx}
-              result={cur.result}
-              userAnswer={cur.userAnswer}
-              rubric={rubric}
-              state={cur.state}
-              onSelectUserAnswer={onSelectUserAnswer}
-            />
-          ))}
-        </Box>
-        <Box sx={{ overflowY: "auto", border: "solid 2px" }}>
-          {dataBellowThreshold.map((cur, idx) => (
-            <UserAnswerProcessed
-              key={idx}
-              result={cur.result}
-              userAnswer={cur.userAnswer}
-              rubric={rubric}
-              state={cur.state}
-              onSelectUserAnswer={onSelectUserAnswer}
-            />
-          ))}
-        </Box> */}
+      {data.length > 1 && (
+        <Box sx={{ height: "100%", display: "grid", gridTemplateRows: "1fr 1fr", overflow: "auto" }}>
+          <Box
+            sx={{
+              p: "24px",
+              overflow: "auto",
+              borderTop: theme =>
+                theme.palette.mode === "dark"
+                  ? `solid 1px ${DESIGN_SYSTEM_COLORS.gray100}`
+                  : `solid 1px ${DESIGN_SYSTEM_COLORS.gray400}`,
+            }}
+          >
+            {dataAboveThreshold.map((cur, idx) => (
+              <UserAnswerProcessed
+                key={idx}
+                result={cur.result}
+                userAnswer={cur.userAnswer}
+                rubric={rubric}
+                state={cur.state}
+                onSelectUserAnswer={onSelectUserAnswer}
+              />
+            ))}
+          </Box>
 
-      {data.map((cur, idx) => (
-        <UserAnswerProcessed
-          key={idx}
-          result={cur.result}
-          userAnswer={cur.userAnswer}
-          rubric={rubric}
-          state={cur.state}
-          onSelectUserAnswer={onSelectUserAnswer}
-        />
-      ))}
+          <Box
+            sx={{
+              p: "24px",
+              overflow: "auto",
+              borderTop: theme =>
+                theme.palette.mode === "dark"
+                  ? `solid 1px ${DESIGN_SYSTEM_COLORS.gray100}`
+                  : `solid 1px ${DESIGN_SYSTEM_COLORS.gray400}`,
+            }}
+          >
+            {dataBellowThreshold.map((cur, idx) => (
+              <UserAnswerProcessed
+                key={idx}
+                result={cur.result}
+                userAnswer={cur.userAnswer}
+                rubric={rubric}
+                state={cur.state}
+                onSelectUserAnswer={onSelectUserAnswer}
+              />
+            ))}
+          </Box>
+        </Box>
+      )}
+
+      {data.length === 1 &&
+        data.map((cur, idx) => (
+          <Box key={idx} sx={{ p: "24px" }}>
+            <UserAnswerProcessed
+              result={cur.result}
+              userAnswer={cur.userAnswer}
+              rubric={rubric}
+              state={cur.state}
+              onSelectUserAnswer={onSelectUserAnswer}
+            />
+          </Box>
+        ))}
 
       {/* {dataAboveThreshold.map((cur, idx) => (
         <UserAnswerProcessed
@@ -303,7 +337,7 @@ export const UserListAnswers = ({
                       </React.Fragment>
                     ))}
 
-                    <Stack direction={"row"} justifyContent={"center"}>
+                    <Stack direction={"row"} justifyContent={"center"} sx={{ mt: "20px" }}>
                       <CustomButton
                         variant="contained"
                         type="button"
