@@ -20,6 +20,7 @@ type UserAnswersProcessedProps = {
   data: UserAnswerData[];
   rubric: Rubric;
   onBack: () => void;
+  onSelectUserAnswer: (data: UserAnswerData) => void;
 };
 
 export const TEXT_HIGHLIGHT: { [key in "success" | "warning" | "error"]: string } = {
@@ -28,7 +29,7 @@ export const TEXT_HIGHLIGHT: { [key in "success" | "warning" | "error"]: string 
   error: "#FDEAD7",
 };
 
-export const UserAnswersProcessed = ({ data, rubric, onBack }: UserAnswersProcessedProps) => {
+export const UserAnswersProcessed = ({ data, rubric, onBack, onSelectUserAnswer }: UserAnswersProcessedProps) => {
   return (
     <Box>
       <CustomButton variant="contained" color="secondary" sx={{ mb: "24px" }} onClick={onBack}>
@@ -42,6 +43,7 @@ export const UserAnswersProcessed = ({ data, rubric, onBack }: UserAnswersProces
           userAnswer={cur.userAnswer}
           rubric={rubric}
           state={cur.state}
+          onSelectUserAnswer={onSelectUserAnswer}
         />
       ))}
     </Box>
@@ -53,11 +55,16 @@ type UserAnswerProcessed = {
   result: TryRubricResponse[];
   state: UserAnswerState;
   rubric: Rubric;
+  onSelectUserAnswer: (data: UserAnswerData) => void;
 };
 
-export const UserAnswerProcessed = ({ userAnswer, result, state, rubric }: UserAnswerProcessed) => {
+export const UserAnswerProcessed = ({ userAnswer, result, state, rubric, onSelectUserAnswer }: UserAnswerProcessed) => {
   const points = useMemo(
-    () => result.reduce((acu, cur, index) => acu + (cur.correct === "YES" ? rubric.prompts[index]?.point ?? 0 : 0), 0),
+    () =>
+      result.reduce(
+        (acu, cur, index) => acu + (cur.correct === "YES" ? Number(rubric.prompts[index]?.point) ?? 0 : 0),
+        0
+      ),
     [result, rubric.prompts]
   );
 
@@ -77,7 +84,10 @@ export const UserAnswerProcessed = ({ userAnswer, result, state, rubric }: UserA
   }, [result, userAnswer.answer]);
 
   return (
-    <Stack sx={{ mb: "30px" }}>
+    <Stack
+      sx={{ mb: "30px", cursor: "pointer" }}
+      onClick={() => onSelectUserAnswer({ userAnswer, result, state: "IDLE" })}
+    >
       <Stack direction={"row"} justifyContent={"space-between"} alignItems={"center"} sx={{ mb: "18px" }}>
         <Stack direction={"row"} spacing={"12px"} alignItems={"center"}>
           <OptimizedAvatar2 imageUrl={userAnswer.userImage} alt={`${userAnswer.user} profile picture`} size={40} />

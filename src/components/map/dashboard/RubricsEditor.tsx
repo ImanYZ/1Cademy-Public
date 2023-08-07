@@ -71,6 +71,7 @@ export const RubricsEditor = ({ question, username, onReturnToQuestions, onSetQu
   const [tryRubric, setTryRubric] = useState<Rubric | null>(null);
   const [tryUserAnswers, setTryUserAnswers] = useState<UserAnswerData[]>([]);
   const [disableAddRubric, setDisableAddRubric] = useState(false);
+  const [selectedTryUserAnswer, setSelectedTryUserAnswer] = useState<UserAnswerData | null>(null);
 
   // const [userAnswerGraded, setUserAnswersGraded] = useState([]);
 
@@ -154,6 +155,7 @@ export const RubricsEditor = ({ question, username, onReturnToQuestions, onSetQu
         rubrics: tryRubric,
       });
       setTryUserAnswers([{ userAnswer, result: response, state: "IDLE" }]);
+      setSelectedTryUserAnswer({ userAnswer, result: response, state: "IDLE" });
     },
     [tryRubric]
   );
@@ -234,12 +236,13 @@ export const RubricsEditor = ({ question, username, onReturnToQuestions, onSetQu
                   onTryIt={() => {
                     setTryRubric(cur);
                     setTryUserAnswers([]);
+                    setSelectedTryUserAnswer(null);
                   }}
                   onSave={onSaveRubric}
                   onDisplayForm={rubricIsEditable(cur, username) ? () => onDisplayForm(cur) : undefined}
                   onRemoveRubric={cur.createdBy === username ? () => onRemoveRubric(cur.id) : undefined}
                   selected={tryRubric?.id === cur.id}
-                  tryUserAnswer={tryUserAnswers.length === 1 ? tryUserAnswers[0] : null}
+                  tryUserAnswer={selectedTryUserAnswer}
                 />
               )
             )}
@@ -328,7 +331,11 @@ export const RubricsEditor = ({ question, username, onReturnToQuestions, onSetQu
               // result={tryUserAnswer.result}
               rubric={tryRubric}
               // userAnswer={tryUserAnswer.userAnswer}
-              onBack={() => setTryUserAnswers([])}
+              onBack={() => {
+                setTryUserAnswers([]);
+                setSelectedTryUserAnswer(null);
+              }}
+              onSelectUserAnswer={setSelectedTryUserAnswer}
             />
           )}
         </Box>
