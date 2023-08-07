@@ -437,7 +437,7 @@ export const RubricForm = ({ rubric, onSave, cancelFn }: RubricFormProps) => {
                         color="secondary"
                         onClick={() => arrayHelpers.push({ prompt: "", point: 1 })}
                       >
-                        Add New Rubric Details <AddIcon />
+                        Add Rubric Item <AddIcon />
                       </CustomButton>
                       <Stack spacing={"8px"} direction={"row"}>
                         <CustomButton variant="contained" type="button" color="secondary" onClick={cancelFn}>
