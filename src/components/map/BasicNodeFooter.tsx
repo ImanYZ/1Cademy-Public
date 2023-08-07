@@ -863,7 +863,7 @@ const CustomIconButton = ({ id, children, disabled = false, sx, onClick, onClick
   );
 };
 
-const CustomButton = ({ id, children, disabled = false, sx, onClick }: CustomIconButtonProps) => (
+export const CustomButton = ({ id, children, disabled = false, sx, onClick }: CustomIconButtonProps) => (
   <Button
     id={id}
     disabled={disabled}

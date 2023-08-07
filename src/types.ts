@@ -75,3 +75,15 @@ export type ClientErrorType =
   | "SAVE_PROPOSED_IMPROVEMENT"
   | "SAVE_PROPOSED_CHILD_NODE"
   | "SAVE_PROPOSED_PARENT_NODE";
+
+/**
+ * Frontend and backend types
+ * ex: Params and Responses of endpoints
+ */
+
+export type TryRubricResponse = {
+  rubric_item: string;
+  mentioned: "YES" | "NO";
+  correct: "YES" | "NO";
+  sentences: string[];
+};

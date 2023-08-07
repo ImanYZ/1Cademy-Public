@@ -77,6 +77,7 @@ import { useAuth } from "@/context/AuthContext";
 import { useHover } from "@/hooks/userHover";
 // import usePrevious from "@/hooks/usePrevious";
 import { useTagsTreeView } from "@/hooks/useTagsTreeView";
+// import { UploadConfirmation, useUploadImage } from "@/hooks/useUploadImage";
 import { DESIGN_SYSTEM_COLORS } from "@/lib/theme/colors";
 import { getAssistantExtensionId } from "@/lib/utils/assistant.utils";
 import { getTutorialTargetIdFromCurrentStep, removeStyleFromTarget } from "@/lib/utils/tutorials/tutorial.utils";
@@ -257,6 +258,7 @@ const Notebook = ({}: NotebookProps) => {
   const [{ user, reputation, settings }, { dispatch }] = useAuth();
   const { allTags, allTagsLoaded } = useTagsTreeView();
   const db = getFirestore();
+  // const storage = getStorage();
   const theme = useTheme();
   const router = useRouter();
 
@@ -435,6 +437,8 @@ const Notebook = ({}: NotebookProps) => {
   const [instructor, setInstructor] = useState<Instructor | null>(null);
 
   const [editingModeNode, setEditingModeNode] = useState(false);
+
+  // const { isUploading, percentageUploaded, uploadImage } = useUploadImage({ storage });
 
   const onChangeTagOfNotebookById = useCallback(
     (notebookId: string, data: { defaultTagId: string; defaultTagName: string }) => {
@@ -4685,6 +4689,53 @@ const Notebook = ({}: NotebookProps) => {
 
     e.preventDefault();
   }, []);
+
+  // const uploadNodeImage = useCallback(
+  //   async (
+  //     event: any,
+  //     nodeRef: any,
+  //     nodeId: string,
+  //     isUploading: boolean,
+  //     setIsUploading: any,
+  //     setPercentageUploaded: any
+  //   ) => {
+  //     if (!user) return;
+
+  //     devLog("UPLOAD NODE IMAGES", { nodeId, isUploading, setIsUploading, setPercentageUploaded });
+  //     if (isUploading || notebookRef.current.choosingNode) return;
+
+  //     try {
+  //       let bucket = process.env.NEXT_PUBLIC_STORAGE_BUCKET ?? "onecademy-dev.appspot.com";
+  //       if (isValidHttpUrl(bucket)) {
+  //         const { hostname } = new URL(bucket);
+  //         bucket = hostname;
+  //       }
+  //       const rootURL = "https://storage.googleapis.com/" + bucket + "/";
+  //       const picturesFolder = rootURL + "UploadedImages";
+  //       let imageFileName = user.userId + "/" + new Date().toUTCString();
+
+  //       const confirmatory: UploadConfirmation = {
+  //         comparator: `${user?.fName} ${user?.lName}`,
+  //         errorMessage: "Entered full name is not correct",
+  //         question:
+  //           "Type your full name below to consent that you have all the rights to upload this image and the image does not violate any laws.",
+  //       };
+  //       const imageGeneratedUrl = await uploadImage({
+  //         event,
+  //         path: picturesFolder,
+  //         imageFileName,
+  //         confirmatory: confirmatory,
+  //       });
+  //       setNodeParts(nodeId, (thisNode: any) => {
+  //         thisNode.nodeImage = imageGeneratedUrl;
+  //         return { ...thisNode };
+  //       });
+  //     } catch (err) {
+  //       console.error("Image Upload Error: ", err);
+  //     }
+  //   },
+  //   [user, uploadImage, setNodeParts]
+  // );
 
   const uploadNodeImage = useCallback(
     (

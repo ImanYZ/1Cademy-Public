@@ -1,8 +1,10 @@
-import { Box, SxProps, Theme } from "@mui/material";
+import { Box, Button, ButtonProps, styled, SxProps, Theme } from "@mui/material";
 import { ReactNode } from "react";
 
+import { DESIGN_SYSTEM_COLORS } from "@/lib/theme/colors";
+
 type CustomIconButtonProps = {
-  id: string;
+  id?: string;
   children: ReactNode;
   onClick?: () => void;
   onClickOnDisable?: () => void;
@@ -53,3 +55,24 @@ export const CustomWrapperButton = ({
     </Box>
   );
 };
+
+export const CustomButton = styled(Button)<ButtonProps>(({ theme }) => ({
+  borderRadius: "26px",
+
+  "&.MuiButton-containedPrimary": {
+    backgroundColor: DESIGN_SYSTEM_COLORS.primary800,
+    ":hover": {
+      backgroundColor: DESIGN_SYSTEM_COLORS.primary900,
+    },
+  },
+
+  "&.MuiButton-containedSecondary": {
+    border: `solid 1px ${DESIGN_SYSTEM_COLORS.gray300}`,
+    backgroundColor:
+      theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookMainBlack : DESIGN_SYSTEM_COLORS.baseWhite,
+    color: theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.gray200 : DESIGN_SYSTEM_COLORS.gray700,
+    ":hover": {
+      backgroundColor: theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.baseGraphit : DESIGN_SYSTEM_COLORS.gray300,
+    },
+  },
+}));
