@@ -96,7 +96,7 @@ export const RubricItem = ({
               text={c.prompt}
               sx={{
                 display: "inline",
-                ...(tryUserAnswer && { backgroundColor: getColorFromResult(tryUserAnswer.result[i]) }),
+                ...(selected && tryUserAnswer && { backgroundColor: getColorFromResult(tryUserAnswer.result[i]) }),
               }}
             />{" "}
             <Typography component={"span"}>

@@ -12,7 +12,7 @@ import { DESIGN_SYSTEM_COLORS } from "@/lib/theme/colors";
 import { newId } from "@/lib/utils/newFirestoreId";
 
 import { RubricForm, RubricItem } from "./RubricItem";
-import { UserAnswers, UserListAnswers } from "./UserAnswers";
+import { UserAnswerData, UserAnswersProcessed, UserListAnswers } from "./UserAnswers";
 
 type RubricsEditorProps = {
   question: Question;
@@ -30,7 +30,7 @@ type RubricsEditorProps = {
 
 export type UserAnswer = { user: string; userImage: string; answer: string };
 
-export type UserAnswerProcessed = UserAnswer & { points: number };
+// export type UserAnswerProcessed = UserAnswer & { points: number };
 
 const generateEmptyRubric = (questionId: string, username: string): Rubric => ({
   id: "",
@@ -54,9 +54,7 @@ export const RubricsEditor = ({ question, username, onReturnToQuestions, onSetQu
   const [editedRubric, setEditedRubric] = useState<{ data: Rubric; isNew: boolean; isLoading: boolean } | null>(null);
   const [usersAnswers, setUserAnswers] = useState<UserAnswer[]>(USER_ANSWERS);
   const [tryRubric, setTryRubric] = useState<Rubric | null>(null);
-  const [tryUserAnswer, setTryUserAnswer] = useState<{ userAnswer: UserAnswer; result: TryRubricResponse[] } | null>(
-    null
-  );
+  const [tryUserAnswer, setTryUserAnswer] = useState<UserAnswerData[]>([]);
   const [disableAddRubric, setDisableAddRubric] = useState(false);
 
   // const [userAnswerGraded, setUserAnswersGraded] = useState([]);
@@ -140,10 +138,25 @@ export const RubricsEditor = ({ question, username, onReturnToQuestions, onSetQu
         essayText: userAnswer.answer,
         rubrics: tryRubric,
       });
-      setTryUserAnswer({ userAnswer, result: response });
+      setTryUserAnswer([{ userAnswer, result: response, state: "IDLE" }]);
     },
     [tryRubric]
   );
+
+  const onTryRubricOnAnswers = useCallback(async () => {
+    setTryUserAnswer(usersAnswers.map(c => ({ userAnswer: c, result: [], state: "LOADING" })));
+    usersAnswers.forEach(async (cur, idx) => {
+      try {
+        const response: TryRubricResponse[] = await Post("/assignment/tryRubric", {
+          essayText: cur.answer,
+          rubrics: tryRubric,
+        });
+        setTryUserAnswer(prev => prev.map((c, i) => (i === idx ? { ...c, result: response, state: "IDLE" } : c)));
+      } catch (error) {
+        setTryUserAnswer(prev => prev.map((c, i) => (i === idx ? { ...c, state: "ERROR" } : c)));
+      }
+    });
+  }, [tryRubric, usersAnswers]);
 
   useEffect(() => setRubrics(question.rubrics), [question.rubrics]);
 
@@ -208,12 +221,15 @@ export const RubricsEditor = ({ question, username, onReturnToQuestions, onSetQu
                   username={username}
                   onDuplicateRubric={() => onDuplicateRubric(cur)}
                   rubric={cur}
-                  onTryIt={() => setTryRubric(cur)}
+                  onTryIt={() => {
+                    setTryRubric(cur);
+                    setTryUserAnswer([]);
+                  }}
                   onSave={onSaveRubric}
                   onDisplayForm={rubricIsEditable(cur, username) ? () => onDisplayForm(cur) : undefined}
                   onRemoveRubric={cur.createdBy === username ? () => onRemoveRubric(cur.id) : undefined}
                   selected={tryRubric?.id === cur.id}
-                  tryUserAnswer={tryUserAnswer}
+                  tryUserAnswer={tryUserAnswer.length === 1 ? tryUserAnswer[0] : null}
                 />
               )
             )}
@@ -287,20 +303,22 @@ export const RubricsEditor = ({ question, username, onReturnToQuestions, onSetQu
               palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookMainBlack : DESIGN_SYSTEM_COLORS.gray50,
           }}
         >
-          {!tryUserAnswer && (
+          {!tryUserAnswer.length && (
             <UserListAnswers
               usersAnswers={usersAnswers}
               setUserAnswers={setUserAnswers}
               onTryRubricOnAnswer={onTryRubricOnAnswer}
+              onTryRubricOnAnswers={onTryRubricOnAnswers}
             />
           )}
 
-          {tryUserAnswer && (
-            <UserAnswers
-              result={tryUserAnswer.result}
+          {Boolean(tryUserAnswer.length) && (
+            <UserAnswersProcessed
+              data={tryUserAnswer}
+              // result={tryUserAnswer.result}
               rubric={tryRubric}
-              userAnswers={tryUserAnswer.userAnswer}
-              onBack={() => setTryUserAnswer(null)}
+              // userAnswer={tryUserAnswer.userAnswer}
+              onBack={() => setTryUserAnswer([])}
             />
           )}
         </Box>

@@ -34,7 +34,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
       `}\n` +
       `Do not print anything other than this array of objects.`;
 
-    const completion = await sendGPTPrompt("gpt-3.5-turbo", [
+    const completion = await sendGPTPrompt("gpt-4", [
       {
         content: prompt,
         role: "user",

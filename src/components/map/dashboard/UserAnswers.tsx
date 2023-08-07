@@ -1,7 +1,6 @@
-import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import KeyboardArrowLeftIcon from "@mui/icons-material/KeyboardArrowLeft";
 import PlayArrowIcon from "@mui/icons-material/PlayArrow";
-import { Box, Divider, IconButton, Stack, TextField, Typography } from "@mui/material";
+import { Box, CircularProgress, Stack, TextField, Typography } from "@mui/material";
 import { FieldArray, Form, Formik } from "formik";
 import React, { useMemo, useState } from "react";
 import { Rubric } from "src/client/firestore/questions.firestore";
@@ -13,7 +12,15 @@ import { DESIGN_SYSTEM_COLORS } from "@/lib/theme/colors";
 import { CustomButton } from "../Buttons/Buttons";
 import { UserAnswer } from "./RubricsEditor";
 
-type UserAnswersProps = { userAnswers: UserAnswer; result: TryRubricResponse[]; rubric: Rubric; onBack: () => void };
+type UserAnswerState = "LOADING" | "ERROR" | "IDLE";
+
+export type UserAnswerData = { userAnswer: UserAnswer; result: TryRubricResponse[]; state: UserAnswerState };
+
+type UserAnswersProcessedProps = {
+  data: UserAnswerData[];
+  rubric: Rubric;
+  onBack: () => void;
+};
 
 export const TEXT_HIGHLIGHT: { [key in "success" | "warning" | "error"]: string } = {
   success: "#D7FEE7",
@@ -21,7 +28,48 @@ export const TEXT_HIGHLIGHT: { [key in "success" | "warning" | "error"]: string 
   error: "#FDEAD7",
 };
 
-export const UserAnswers = ({ userAnswers, result, rubric, onBack }: UserAnswersProps) => {
+export const UserAnswersProcessed = ({ data, rubric, onBack }: UserAnswersProcessedProps) => {
+  return (
+    <Box>
+      <CustomButton variant="contained" color="secondary" sx={{ mb: "24px" }} onClick={onBack}>
+        <KeyboardArrowLeftIcon sx={{ mr: "10px" }} />
+        Back
+      </CustomButton>
+      {data.map((cur, idx) => (
+        <UserAnswerProcessed
+          key={idx}
+          result={cur.result}
+          userAnswer={cur.userAnswer}
+          rubric={rubric}
+          state={cur.state}
+        />
+      ))}
+      {/* <Stack sx={{ mb: "20px" }}>
+        <Stack direction={"row"} justifyContent={"space-between"}>
+          <Stack direction={"row"} spacing={"12px"} alignItems={"center"} sx={{ mb: "18px" }}>
+            <OptimizedAvatar2 imageUrl={userAnswer.userImage} alt={`${userAnswer.user} profile picture`} size={40} />
+            <Typography sx={{ fontWeight: 600 }}>{userAnswer.user}</Typography>
+          </Stack>
+          <Stack>
+            <Typography>Total score</Typography>
+            <Typography sx={{ fontWeight: 700, color: DESIGN_SYSTEM_COLORS.gray900 }}>{points}</Typography>
+          </Stack>
+        </Stack>
+
+        <Typography dangerouslySetInnerHTML={{ __html: resultHighlighted }} />
+      </Stack> */}
+    </Box>
+  );
+};
+
+type UserAnswerProcessed = {
+  userAnswer: UserAnswer;
+  result: TryRubricResponse[];
+  state: UserAnswerState;
+  rubric: Rubric;
+};
+
+export const UserAnswerProcessed = ({ userAnswer, result, state, rubric }: UserAnswerProcessed) => {
   const points = useMemo(
     () => result.reduce((acu, cur, index) => (acu + cur.correct ? rubric.prompts[index]?.point ?? 0 : 0), 0),
     [result, rubric.prompts]
@@ -39,83 +87,37 @@ export const UserAnswers = ({ userAnswers, result, rubric, onBack }: UserAnswers
       const color = getColorFromResult(cur);
       if (color) return replaceSentences(cur.sentences, acu, color);
       return acu;
-    }, userAnswers.answer);
-  }, [result, userAnswers.answer]);
-
-  // const rebricHighlighted = useMemo(() => {
-  //   return result.reduce((acu, cur) => {
-  //     // console.log({ sentence });
-  //     if (cur.correct === "YES" && cur.mentioned === "YES")
-  //       return replaceSentences(cur.sentences, acu, TEXT_HIGHLIGHT["success"]);
-  //     if (cur.correct === "NO" && cur.mentioned === "YES")
-  //       return replaceSentences(cur.sentences, acu, TEXT_HIGHLIGHT["warning"]);
-  //     if (cur.correct === "NO" && cur.mentioned === "NO")
-  //       return replaceSentences(cur.sentences, acu, TEXT_HIGHLIGHT["error"]);
-  //     return acu;
-  //   }, new Array(rubric.prompts.length).fill());
-  // }, [result, userAnswers.answer]);
+    }, userAnswer.answer);
+  }, [result, userAnswer.answer]);
 
   return (
-    <Box>
-      <CustomButton variant="contained" color="secondary" sx={{ mb: "24px" }} onClick={onBack}>
-        <KeyboardArrowLeftIcon sx={{ mr: "10px" }} />
-        Back
-      </CustomButton>
-      <Stack direction={"row"} justifyContent={"space-between"}>
-        <Stack direction={"row"} spacing={"12px"} alignItems={"center"} sx={{ mb: "18px" }}>
-          <OptimizedAvatar2 imageUrl={userAnswers.userImage} alt={`${userAnswers.user} profile picture`} size={40} />
-          <Typography sx={{ fontWeight: 600 }}>{userAnswers.user}</Typography>
+    <Stack sx={{ mb: "30px" }}>
+      <Stack direction={"row"} justifyContent={"space-between"} alignItems={"center"} sx={{ mb: "18px" }}>
+        <Stack direction={"row"} spacing={"12px"} alignItems={"center"}>
+          <OptimizedAvatar2 imageUrl={userAnswer.userImage} alt={`${userAnswer.user} profile picture`} size={40} />
+          <Typography sx={{ fontWeight: 600 }}>{userAnswer.user}</Typography>
         </Stack>
-        <Stack>
-          <Typography>Total score</Typography>
-          <Typography sx={{ fontWeight: 700, color: DESIGN_SYSTEM_COLORS.gray900 }}>{points}</Typography>
-        </Stack>
+        {state === "IDLE" && (
+          <Stack>
+            <Typography>
+              Score:{" "}
+              <Typography component={"span"} sx={{ fontWeight: 700, color: DESIGN_SYSTEM_COLORS.gray900 }}>
+                {points}
+              </Typography>{" "}
+              pts
+            </Typography>
+          </Stack>
+        )}
+        {state === "LOADING" && <CircularProgress sx={{ width: "20px", height: "20px" }} />}
       </Stack>
 
       <Typography dangerouslySetInnerHTML={{ __html: resultHighlighted }} />
-
-      <Divider />
-
-      <Stack>
-        <Stack direction={"row"} justifyContent={"space-between"} alignItems={"center"}>
-          <Stack direction={"row"} spacing={"16px"} alignItems={"center"} sx={{ p: "20px 24px" }}>
-            <svg width="36" height="36" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path
-                d="M17.9825 0.5C8.3225 0.5 0.5 8.34 0.5 18C0.5 27.66 8.3225 35.5 17.9825 35.5C27.66 35.5 35.5 27.66 35.5 18C35.5 8.34 27.66 0.5 17.9825 0.5ZM25.4025 28.5L18 24.0375L10.5975 28.5L12.5575 20.0825L6.03 14.43L14.64 13.695L18 5.75L21.36 13.6775L29.97 14.4125L23.4425 20.065L25.4025 28.5Z"
-                fill="#32D583"
-              />
-            </svg>
-
-            <Stack>
-              <Typography>Total score</Typography>
-              <Typography sx={{ fontWeight: 700, color: DESIGN_SYSTEM_COLORS.gray900 }}>{points}</Typography>
-            </Stack>
-          </Stack>
-          <IconButton>
-            <KeyboardArrowDownIcon />
-          </IconButton>
-        </Stack>
-        <Stack spacing={"14px"}>
-          <Typography>
-            {`According to the rubric, a student should earn points for each correct answer of the rubric items in their answer:`}
-          </Typography>
-          {rubric.prompts.map((cur, idx) => (
-            <Stack key={idx} component={"li"} direction={"row"} spacing={"12px"}>
-              <Typography sx={{ fontSize: "27px" }}>•</Typography>
-              <Stack sx={{ width: "100%" }}>
-                <Typography
-                  component={"span"}
-                  sx={{ backgroundColor: getColorFromResult(result[idx]), mb: "8px", p: "2px 4px" }}
-                >
-                  {cur.prompt}
-                </Typography>
-                <Typography>{getHelperTextFromResult(result[idx])}</Typography>
-              </Stack>
-            </Stack>
-          ))}
-        </Stack>
-      </Stack>
-    </Box>
+      {state === "ERROR" && (
+        <Typography color={"red"}>
+          An error occurred. Please verify if the rubrics make sense or attempt again.
+        </Typography>
+      )}
+    </Stack>
   );
 };
 
@@ -123,9 +125,16 @@ type UserListAnswersProps = {
   usersAnswers: UserAnswer[];
   setUserAnswers: (data: UserAnswer[]) => void;
   onTryRubricOnAnswer: (userAnswer: UserAnswer) => Promise<void>;
+  onTryRubricOnAnswers: () => Promise<void>;
 };
-export const UserListAnswers = ({ setUserAnswers, usersAnswers, onTryRubricOnAnswer }: UserListAnswersProps) => {
+export const UserListAnswers = ({
+  setUserAnswers,
+  usersAnswers,
+  onTryRubricOnAnswer,
+  onTryRubricOnAnswers,
+}: UserListAnswersProps) => {
   const [tryingUserAnswerIdx, setTryingUserAnswerIdx] = useState(-1);
+  // const [isPending, startTransition] = useTransition();
 
   const onTryUserAnswer = async (userAnswer: UserAnswer, idx: number) => {
     setTryingUserAnswerIdx(idx);
@@ -145,8 +154,8 @@ export const UserListAnswers = ({ setUserAnswers, usersAnswers, onTryRubricOnAns
                 render={() => (
                   <Stack>
                     {formik.values.usersAnswers.map((userAnswer, index) => (
-                      <>
-                        <Stack key={index} spacing={"12px"}>
+                      <React.Fragment key={index}>
+                        <Stack spacing={"12px"}>
                           <Stack key={index} direction={"row"} alignItems={"center"} spacing={"12px"}>
                             <OptimizedAvatar2 imageUrl={userAnswer.userImage} alt={userAnswer.user} size={40} />
                             <Typography>{userAnswer.user}</Typography>
@@ -157,7 +166,10 @@ export const UserListAnswers = ({ setUserAnswers, usersAnswers, onTryRubricOnAns
                             fullWidth
                             multiline
                             size="small"
-                            onChange={formik.handleChange}
+                            onChange={e => {
+                              formik.handleChange(e);
+                              formik.submitForm();
+                            }}
                             value={userAnswer.answer}
                             error={
                               Boolean(
@@ -201,11 +213,11 @@ export const UserListAnswers = ({ setUserAnswers, usersAnswers, onTryRubricOnAns
                               </button> */}
                         </Stack>
                         <Stack direction={"row"} justifyContent={"right"} sx={{ mt: "12px" }} spacing={"12px"}>
-                          {userAnswer.answer !== usersAnswers[index].answer && (
+                          {/* {userAnswer.answer !== usersAnswers[index].answer && (
                             <CustomButton variant="contained" color="secondary" type="submit" size="small">
                               Save
                             </CustomButton>
-                          )}
+                          )} */}
                           <CustomButton
                             variant="contained"
                             type="button"
@@ -219,7 +231,7 @@ export const UserListAnswers = ({ setUserAnswers, usersAnswers, onTryRubricOnAns
                             {tryingUserAnswerIdx !== index || tryingUserAnswerIdx === -1 ? "Grade" : "Grading..."}
                           </CustomButton>
                         </Stack>
-                      </>
+                      </React.Fragment>
                     ))}
 
                     <Stack direction={"row"} justifyContent={"center"}>
@@ -228,7 +240,7 @@ export const UserListAnswers = ({ setUserAnswers, usersAnswers, onTryRubricOnAns
                         type="button"
                         size="small"
                         disabled={tryingUserAnswerIdx >= 0}
-                        onClick={() => {}}
+                        onClick={onTryRubricOnAnswers}
                       >
                         <PlayArrowIcon sx={{ mr: "4px" }} />
                         Grade All
