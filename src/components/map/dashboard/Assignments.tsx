@@ -49,7 +49,7 @@ export const Assignments = ({ username }: AssignmentsProps) => {
     title: yup.string().required("Required"),
     description: yup.string().required("Required"),
     imageUrl: yup.string(),
-    rubrics: yup.array(yup.object({ prompt: yup.string().required() })),
+    rubrics: yup.array(),
   });
   const onToggleQuestionForm = () => setDisplayQuestionForm(prev => !prev);
 

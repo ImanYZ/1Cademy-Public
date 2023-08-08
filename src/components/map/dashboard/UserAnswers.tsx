@@ -1,13 +1,20 @@
+import AddIcon from "@mui/icons-material/Add";
 import KeyboardArrowLeftIcon from "@mui/icons-material/KeyboardArrowLeft";
 import PlayArrowIcon from "@mui/icons-material/PlayArrow";
-import { Box, CircularProgress, Stack, TextField, Typography } from "@mui/material";
-import { FieldArray, Form, Formik } from "formik";
-import React, { useMemo, useState } from "react";
+import { Box, CircularProgress, Divider, Stack, TextField, Typography } from "@mui/material";
+import { getFirestore } from "firebase/firestore";
+import { Formik, FormikHelpers } from "formik";
+import React, { useEffect, useMemo, useState } from "react";
+import { addAnswer, Answer, updateAnswer } from "src/client/firestore/answer.firestore";
 import { Rubric, RubricItemType } from "src/client/firestore/questions.firestore";
+import { getNUsers } from "src/client/firestore/user.firestore";
+import { User } from "src/knowledgeTypes";
 import { TryRubricResponse } from "src/types";
+import * as yup from "yup";
 
 import OptimizedAvatar2 from "@/components/OptimizedAvatar2";
 import { DESIGN_SYSTEM_COLORS } from "@/lib/theme/colors";
+import { newId } from "@/lib/utils/newFirestoreId";
 
 import { CustomButton } from "../Buttons/Buttons";
 import { UserAnswer } from "./RubricsEditor";
@@ -244,18 +251,30 @@ export const UserAnswerProcessed = ({ userAnswer, result, state, rubric, selecte
 };
 
 type UserListAnswersProps = {
-  usersAnswers: UserAnswer[];
-  setUserAnswers: (data: UserAnswer[]) => void;
+  usersAnswers: Answer[];
+  setUserAnswers: React.Dispatch<React.SetStateAction<Answer[]>>;
   onTryRubricOnAnswer: (userAnswer: UserAnswer) => Promise<void>;
   onTryRubricOnAnswers: () => Promise<void>;
+  questionId: string;
 };
+
+const validationSchema = yup.object({
+  answer: yup.string().required("User answer is required."),
+});
+
 export const UserListAnswers = ({
   setUserAnswers,
   usersAnswers,
   onTryRubricOnAnswer,
   onTryRubricOnAnswers,
+  questionId,
 }: UserListAnswersProps) => {
+  const db = getFirestore();
+  // const [userAnswersCopy,setUserAnswersCopy]=UserStatus
+  const [userAnswersCopy, setUserAnswersCopy] = useState<Answer[]>([]);
+  const [users, setUsers] = useState<User[]>([]);
   const [tryingUserAnswerIdx, setTryingUserAnswerIdx] = useState(-1);
+  const [newAnswerId, setNewAnswerId] = useState("");
   // const [isPending, startTransition] = useTransition();
 
   const onTryUserAnswer = async (userAnswer: UserAnswer, idx: number) => {
@@ -264,153 +283,153 @@ export const UserListAnswers = ({
     setTryingUserAnswerIdx(-1);
   };
 
+  const onAddUserAnswer = () => {
+    const randomUser = users[Math.floor(Math.random() * users.length - 1)];
+    if (!randomUser) return console.error("Error: there is not users, set up users in the project", { randomUser });
+
+    const id = newId(db);
+    const newUserAnswer: Answer = {
+      answer: "",
+      createdAt: new Date(),
+      question: questionId,
+      id,
+      updatedAt: new Date(),
+      user: randomUser.uname,
+      userImage: randomUser.imageUrl ?? "",
+    };
+    setNewAnswerId(id);
+    setUserAnswersCopy(prev => [...prev, newUserAnswer]);
+  };
+
+  const onCancelUserAnswer = () => {
+    setUserAnswersCopy(prev => prev.filter(c => c.id !== newAnswerId));
+    setNewAnswerId("");
+  };
+
+  const onSubmit = async (values: Answer, formikHelpers: FormikHelpers<Answer>) => {
+    formikHelpers.setSubmitting(true);
+    if (newAnswerId === values.id) {
+      const newAnswerInput = { ...values } as any;
+      delete newAnswerInput.id;
+      await addAnswer(db, values.id, newAnswerInput);
+      setNewAnswerId("");
+      setUserAnswers(prev => [...prev, values]);
+    } else {
+      await updateAnswer(db, values.id, { answer: values.answer });
+      setUserAnswers(prev => prev.map(c => (c.id === values.id ? { ...c, answer: values.answer } : c)));
+    }
+    formikHelpers.setSubmitting(false);
+  };
+
+  useEffect(() => {
+    const getUsers = async () => {
+      const randomUsers: User[] = await getNUsers(db, 10);
+      setUsers(randomUsers);
+    };
+    getUsers();
+  }, [db]);
+
+  useEffect(() => {
+    setUserAnswersCopy(usersAnswers);
+  }, [usersAnswers]);
+
   return (
     <Box>
-      <Typography sx={{ fontWeight: 600 }}>Random Grading of 10 students</Typography>
-      <Stack spacing={"12px"} sx={{ p: "0px" }}>
-        <Formik initialValues={{ usersAnswers }} onSubmit={({ usersAnswers }) => setUserAnswers(usersAnswers)}>
-          {formik => (
-            <Form>
-              <FieldArray
-                name="usersAnswers"
-                render={() => (
-                  <Stack>
-                    {formik.values.usersAnswers.map((userAnswer, index) => (
-                      <React.Fragment key={index}>
-                        <Stack spacing={"12px"}>
-                          <Stack key={index} direction={"row"} alignItems={"center"} spacing={"12px"}>
-                            <OptimizedAvatar2 imageUrl={userAnswer.userImage} alt={userAnswer.user} size={40} />
-                            <Typography>{userAnswer.user}</Typography>
-                          </Stack>
-                          <TextField
-                            label=""
-                            name={`usersAnswers.${index}.answer`}
-                            fullWidth
-                            multiline
-                            size="small"
-                            onChange={e => {
-                              formik.handleChange(e);
-                              formik.submitForm();
-                            }}
-                            value={userAnswer.answer}
-                            error={
-                              Boolean(
-                                formik.touched.usersAnswers &&
-                                  formik.touched.usersAnswers[index] &&
-                                  (formik.touched.usersAnswers as any)[index]["answer"]
-                              ) &&
-                              Boolean(
-                                formik.errors.usersAnswers &&
-                                  formik.errors.usersAnswers[index] &&
-                                  typeof (formik.errors.usersAnswers as any)[index]["answer"] === "string"
-                              )
-                            }
-                            helperText={
-                              Boolean(
-                                formik.touched.usersAnswers &&
-                                  formik.touched.usersAnswers[index] &&
-                                  (formik.touched.usersAnswers as any)[index]["answer"]
-                              ) &&
-                              formik.errors.usersAnswers &&
-                              formik.errors.usersAnswers[index] &&
-                              (formik.errors.usersAnswers as any)[index]["answer"]
-                            }
-                            onBlur={(event: React.FocusEvent<HTMLInputElement>) => {
-                              formik.handleBlur(event);
-                            }}
-                          />
+      <Typography sx={{ fontWeight: 600, mb: "12px" }}>Random Grading of 10 students</Typography>
+      <Stack spacing={"20px"} sx={{ p: "0px" }}>
+        {userAnswersCopy.map((cur, idx) => (
+          <Formik key={cur.id} initialValues={cur} validationSchema={validationSchema} onSubmit={onSubmit}>
+            {formik => {
+              return (
+                <form onSubmit={formik.handleSubmit}>
+                  <Stack direction={"row"} alignItems={"center"} spacing={"12px"} sx={{ mb: "8px" }}>
+                    <OptimizedAvatar2 imageUrl={cur.userImage} alt={cur.user} size={40} />
+                    <Typography>{cur.user}</Typography>
+                  </Stack>
+                  <TextField
+                    label=""
+                    name={`answer`}
+                    fullWidth
+                    multiline
+                    size="small"
+                    onChange={formik.handleChange}
+                    value={formik.values["answer"]}
+                    error={Boolean(formik.touched.answer && formik.errors.answer)}
+                    helperText={Boolean(formik.touched.answer) && formik.errors.answer}
+                    onBlur={formik.handleBlur}
+                  />
+                  <Stack direction={"row"} justifyContent={"space-between"} spacing={"8px"} sx={{ mt: "12px" }}>
+                    <Stack direction={"row"} spacing={"8px"}>
+                      {newAnswerId && cur.id === newAnswerId && (
+                        <CustomButton
+                          onClick={onCancelUserAnswer}
+                          variant="contained"
+                          color="secondary"
+                          size="small"
+                          disabled={formik.isSubmitting}
+                        >
+                          Cancel
+                        </CustomButton>
+                      )}
+                      {((newAnswerId && !usersAnswers[idx]) ||
+                        (usersAnswers[idx] && formik.values["answer"] !== usersAnswers[idx].answer)) && (
+                        <CustomButton
+                          variant="contained"
+                          color="secondary"
+                          size="small"
+                          type="submit"
+                          disabled={formik.isSubmitting}
+                        >
+                          {formik.isSubmitting ? (
+                            <>
+                              Saving <CircularProgress size={"15px"} sx={{ ml: "8px" }} />
+                            </>
+                          ) : (
+                            "Save"
+                          )}
+                        </CustomButton>
+                      )}
+                    </Stack>
 
-                          {/* <Field name={`friends.${index}`} /> */}
-                          {/* <button
-                                type="button"
-                                onClick={() => arrayHelpers.remove(index)} // remove a friend from the list
-                              >
-                                -
-                              </button>
-                              <button
-                                type="button"
-                                onClick={() => arrayHelpers.insert(index, "")} // insert an empty string at a position
-                              >
-                                +
-                              </button> */}
-                        </Stack>
-                        <Stack direction={"row"} justifyContent={"right"} sx={{ mt: "12px" }} spacing={"12px"}>
-                          {/* {userAnswer.answer !== usersAnswers[index].answer && (
-                            <CustomButton variant="contained" color="secondary" type="submit" size="small">
-                              Save
-                            </CustomButton>
-                          )} */}
-                          <CustomButton
-                            variant="contained"
-                            type="button"
-                            size="small"
-                            onClick={() => onTryUserAnswer(userAnswer, index)}
-                            disabled={tryingUserAnswerIdx >= 0}
-                          >
-                            {(tryingUserAnswerIdx !== index || tryingUserAnswerIdx === -1) && (
-                              <PlayArrowIcon sx={{ mr: "4px" }} />
-                            )}
-                            {tryingUserAnswerIdx !== index || tryingUserAnswerIdx === -1 ? "Grade" : "Grading..."}
-                          </CustomButton>
-                        </Stack>
-                      </React.Fragment>
-                    ))}
-
-                    <Stack direction={"row"} justifyContent={"center"} sx={{ mt: "20px" }}>
+                    {newAnswerId !== cur.id && (
                       <CustomButton
                         variant="contained"
-                        type="button"
                         size="small"
-                        disabled={tryingUserAnswerIdx >= 0}
-                        onClick={onTryRubricOnAnswers}
+                        onClick={() =>
+                          onTryUserAnswer({ answer: cur.answer, user: cur.answer, userImage: cur.userImage }, idx)
+                        }
+                        disabled={tryingUserAnswerIdx >= 0 || formik.isSubmitting}
                       >
-                        <PlayArrowIcon sx={{ mr: "4px" }} />
-                        Grade All
+                        {(tryingUserAnswerIdx !== idx || tryingUserAnswerIdx === -1) && (
+                          <PlayArrowIcon sx={{ mr: "4px" }} />
+                        )}
+                        {tryingUserAnswerIdx !== idx || tryingUserAnswerIdx === -1 ? "Grade" : "Grading..."}
                       </CustomButton>
-                    </Stack>
+                    )}
                   </Stack>
-                )}
-              />
-            </Form>
-          )}
-        </Formik>
-
-        {/* {userAnswersProcessed.map((cur, idx) => (
-          <Stack
-            key={idx}
-            direction={"row"}
-            spacing={"12px"}
-            component={"li"}
-            onClick={() => onTryRubricOnAnswer(cur)}
-            sx={{
-              p: "16px 12px",
-              height: "98px",
-              borderBottom: `solid 1px ${DESIGN_SYSTEM_COLORS.gray500}`,
-              width: "100%",
-              cursor: "pointer",
-              ":hover": {
-                backgroundColor: theme =>
-                  theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookG800 : DESIGN_SYSTEM_COLORS.gray100,
-              },
+                </form>
+              );
             }}
-          >
-            <OptimizedAvatar2 imageUrl={cur.userImage} alt={`${cur.user} profile picture`} size={40} />
-            <Stack spacing={"6px"} sx={{ width: "100%" }}>
-              <Stack spacing={"6px"} direction={"row"} alignItems={"center"} justifyContent={"space-between"}>
-                <Typography sx={{ fontSize: "14px", fontWeight: 600 }}>{cur.user}</Typography>
-                
-              </Stack>
-              <Typography
-                sx={{
-                  overflow: "hidden",
-                  fontSize: "14px",
-                }}
-              >
-                {cur.answer}
-              </Typography>
-            </Stack>
-          </Stack>
-        ))} */}
+          </Formik>
+        ))}
+        <Divider />
+        <Stack direction={"row-reverse"} justifyContent={"space-between"} spacing={"8px"} sx={{ mt: "12px" }}>
+          <CustomButton variant="contained" size="small" onClick={onTryRubricOnAnswers}>
+            Grade All
+          </CustomButton>
+          {Boolean(users.length) && !newAnswerId && (
+            <CustomButton
+              onClick={onAddUserAnswer}
+              variant="contained"
+              color="secondary"
+              size="small"
+              // disabled={formik.isSubmitting}
+            >
+              <AddIcon sx={{ mr: "8px" }} />
+              Add User Answer
+            </CustomButton>
+          )}
+        </Stack>
       </Stack>
     </Box>
   );

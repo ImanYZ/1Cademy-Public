@@ -4,6 +4,7 @@ import KeyboardDoubleArrowLeftIcon from "@mui/icons-material/KeyboardDoubleArrow
 import { Box, Divider, IconButton, Stack, Tooltip, Typography } from "@mui/material";
 import { getFirestore } from "firebase/firestore";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
+import { Answer, getAnswersByQuestion } from "src/client/firestore/answer.firestore";
 import { Question, Rubric, updateQuestion } from "src/client/firestore/questions.firestore";
 import { TryRubricResponse } from "src/types";
 
@@ -41,33 +42,12 @@ const generateEmptyRubric = (questionId: string, username: string): Rubric => ({
   createdBy: username,
 });
 
-const USER_ANSWERS: UserAnswer[] = [
-  {
-    user: "Jimy 2000",
-    answer:
-      "The Great Depression was a severe worldwide economic downturn that lasted from 1929 to the late 1930s. It caused widespread unemployment, poverty, and a collapse in industrial production and trade, leading to significant social and political upheaval.",
-    userImage: "",
-  },
-  {
-    user: "Jimy 2010",
-    answer:
-      "The Great Depression refers to a catastrophic economic crisis that gripped the global economy during the 1930s. It originated in the United States with the stock market crash of 1929, causing a severe downturn in industrial production, trade, and employment. This period of widespread poverty, bank failures, and economic instability had far-reaching social and political consequences.",
-    userImage: "",
-  },
-  {
-    user: "Jimy 2030",
-    answer:
-      "The Great Depression, spanning from the late 1920s to the early 1940s, was a profound worldwide economic slump. Triggered by the crash of the U.S. stock market in 1929, it led to a sharp decline in consumer spending, mass unemployment, and severe deflation. The Great Depression fundamentally reshaped economic thinking and policy, prompting governments to adopt measures to prevent such catastrophic events in the future.",
-    userImage: "",
-  },
-];
-
 export const RubricsEditor = ({ question, username, onReturnToQuestions, onSetQuestions }: RubricsEditorProps) => {
   const db = getFirestore();
 
   const [rubrics, setRubrics] = useState<Rubric[]>(question.rubrics);
   const [editedRubric, setEditedRubric] = useState<{ data: Rubric; isNew: boolean; isLoading: boolean } | null>(null);
-  const [usersAnswers, setUserAnswers] = useState<UserAnswer[]>(USER_ANSWERS);
+  const [usersAnswers, setUserAnswers] = useState<Answer[]>([]);
   const [tryRubric, setTryRubric] = useState<Rubric | null>(null);
   const [tryUserAnswers, setTryUserAnswers] = useState<UserAnswerData[]>([]);
   const [disableAddRubric, setDisableAddRubric] = useState(false);
@@ -175,6 +155,16 @@ export const RubricsEditor = ({ question, username, onReturnToQuestions, onSetQu
       }
     });
   }, [tryRubric, usersAnswers]);
+
+  useEffect(() => {
+    if (!tryRubric) return;
+
+    const getQuestions = async () => {
+      const answers = await getAnswersByQuestion(db, question.id);
+      setUserAnswers(answers);
+    };
+    getQuestions();
+  }, [db, question.id, tryRubric]);
 
   useEffect(() => setRubrics(question.rubrics), [question.rubrics]);
 
@@ -325,6 +315,7 @@ export const RubricsEditor = ({ question, username, onReturnToQuestions, onSetQu
             setUserAnswers={setUserAnswers}
             onTryRubricOnAnswer={onTryRubricOnAnswer}
             onTryRubricOnAnswers={onTryRubricOnAnswers}
+            questionId={question.id}
           />
         </Box>
       )}
