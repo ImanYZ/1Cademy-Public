@@ -68,6 +68,11 @@ export const UserAnswersProcessed = ({ data, rubric, onBack, selectedRubricItem 
     return dataSorted.filter(cur => getPointsFromResult(cur.result, rubric.prompts) < thresholdByPoints);
   }, [dataSorted, rubric.prompts, thresholdByPoints]);
 
+  // restart threshold when selected item is clicked
+  useEffect(() => {
+    if (selectedRubricItem) setThresholdByPoints(0);
+  }, [selectedRubricItem]);
+
   return (
     <Box
       sx={{
@@ -103,76 +108,77 @@ export const UserAnswersProcessed = ({ data, rubric, onBack, selectedRubricItem 
         <Box sx={{ height: "100%", display: "grid", gridTemplateRows: "1fr 1fr", overflow: "auto" }}>
           <Box
             sx={{
-              p: "12px 24px",
               overflow: "auto",
-              borderTop: theme =>
-                theme.palette.mode === "dark"
-                  ? `solid 1px ${DESIGN_SYSTEM_COLORS.gray100}`
-                  : `solid 1px ${DESIGN_SYSTEM_COLORS.gray400}`,
+              borderTop: `solid 1px ${DESIGN_SYSTEM_COLORS.gray500}`,
             }}
           >
             <Typography
               sx={{
-                p: "12px",
+                p: "0px 12px",
                 mb: "8px",
                 textAlign: "center",
                 fontWeight: 600,
-                // position: "sticky",
-                // top: "0px",
-                // backgroundColor: theme =>
-                //   theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.gray600 : DESIGN_SYSTEM_COLORS.gray200,
+                position: "sticky",
+                top: "0px",
+                zIndex: 2,
+                backgroundColor: theme =>
+                  theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookG600 : DESIGN_SYSTEM_COLORS.gray200,
               }}
             >
-              Answers with more and equals than {thresholdByPoints} point{thresholdByPoints !== 1 && "s"}
+              {/* <MarkdownRender text="$$"></MarkdownRender> */}
+              Answers with <span style={{ fontSize: "20px", fontWeight: 400 }}>&#8805;</span> {thresholdByPoints} point
+              {thresholdByPoints !== 1 && "s"}
             </Typography>
-            {dataAboveThreshold.map((cur, idx) => (
-              <UserAnswerProcessed
-                key={idx}
-                result={cur.result}
-                userAnswer={cur.userAnswer}
-                rubric={rubric}
-                state={cur.state}
-                selectedRubricItem={selectedRubricItem}
-                // onSelectUserAnswer={onSelectUserAnswer}
-              />
-            ))}
+            <Box sx={{ p: "12px 24px" }}>
+              {dataAboveThreshold.map((cur, idx) => (
+                <UserAnswerProcessed
+                  key={idx}
+                  result={cur.result}
+                  userAnswer={cur.userAnswer}
+                  rubric={rubric}
+                  state={cur.state}
+                  selectedRubricItem={selectedRubricItem}
+                  // onSelectUserAnswer={onSelectUserAnswer}
+                />
+              ))}
+            </Box>
           </Box>
 
           <Box
             sx={{
-              p: "12px 24px",
               overflow: "auto",
-              borderTop: theme =>
-                theme.palette.mode === "dark"
-                  ? `solid 1px ${DESIGN_SYSTEM_COLORS.gray100}`
-                  : `solid 1px ${DESIGN_SYSTEM_COLORS.gray400}`,
+              borderTop: `solid 1px ${DESIGN_SYSTEM_COLORS.gray500}`,
             }}
           >
             <Typography
               sx={{
-                p: "12px",
+                p: "0px 12px",
                 mb: "8px",
                 textAlign: "center",
                 fontWeight: 600,
-                // position: "sticky",
-                // top: "0px",
-                // backgroundColor: theme =>
-                //   theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.gray600 : DESIGN_SYSTEM_COLORS.gray200,
+                position: "sticky",
+                top: "0px",
+                zIndex: 2,
+                backgroundColor: theme =>
+                  theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookG600 : DESIGN_SYSTEM_COLORS.gray200,
               }}
             >
-              Answers with less than {thresholdByPoints} point{thresholdByPoints !== 1 && "s"}
+              Answers with <span style={{ fontSize: "20px", fontWeight: 400 }}>{"<"}</span> {thresholdByPoints} point
+              {thresholdByPoints !== 1 && "s"}
             </Typography>
-            {dataBellowThreshold.map((cur, idx) => (
-              <UserAnswerProcessed
-                key={idx}
-                result={cur.result}
-                userAnswer={cur.userAnswer}
-                rubric={rubric}
-                state={cur.state}
-                selectedRubricItem={selectedRubricItem}
-                // onSelectUserAnswer={onSelectUserAnswer}
-              />
-            ))}
+            <Box sx={{ p: "12px 24px" }}>
+              {dataBellowThreshold.map((cur, idx) => (
+                <UserAnswerProcessed
+                  key={idx}
+                  result={cur.result}
+                  userAnswer={cur.userAnswer}
+                  rubric={rubric}
+                  state={cur.state}
+                  selectedRubricItem={selectedRubricItem}
+                  // onSelectUserAnswer={onSelectUserAnswer}
+                />
+              ))}
+            </Box>
           </Box>
         </Box>
       )}
