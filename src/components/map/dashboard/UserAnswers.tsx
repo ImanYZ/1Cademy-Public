@@ -51,17 +51,19 @@ export const UserAnswersProcessed = ({ data, rubric, onBack, selectedRubricItem 
     setThresholdByPoints(numberValue);
   };
 
+  const dataSorted = useMemo(() => {
+    return data.sort(
+      (a, b) => getPointsFromResult(b.result, rubric.prompts) - getPointsFromResult(a.result, rubric.prompts)
+    );
+  }, [data, rubric.prompts]);
+
   const dataAboveThreshold = useMemo(() => {
-    return data
-      .filter(cur => getPointsFromResult(cur.result, rubric.prompts) > thresholdByPoints)
-      .sort((a, b) => getPointsFromResult(b.result, rubric.prompts) - getPointsFromResult(a.result, rubric.prompts));
-  }, [data, rubric.prompts, thresholdByPoints]);
+    return dataSorted.filter(cur => getPointsFromResult(cur.result, rubric.prompts) > thresholdByPoints);
+  }, [dataSorted, rubric.prompts, thresholdByPoints]);
 
   const dataBellowThreshold = useMemo(() => {
-    return data
-      .filter(cur => getPointsFromResult(cur.result, rubric.prompts) <= thresholdByPoints)
-      .sort((a, b) => getPointsFromResult(b.result, rubric.prompts) - getPointsFromResult(a.result, rubric.prompts));
-  }, [data, rubric.prompts, thresholdByPoints]);
+    return dataSorted.filter(cur => getPointsFromResult(cur.result, rubric.prompts) <= thresholdByPoints);
+  }, [dataSorted, rubric.prompts, thresholdByPoints]);
 
   return (
     <Box
@@ -94,8 +96,7 @@ export const UserAnswersProcessed = ({ data, rubric, onBack, selectedRubricItem 
           />
         )}
       </Stack>
-
-      {data.length > 1 && (
+      {data.length > 1 && thresholdByPoints > 0 && (
         <Box sx={{ height: "100%", display: "grid", gridTemplateRows: "1fr 1fr", overflow: "auto" }}>
           <Box
             sx={{
@@ -144,9 +145,8 @@ export const UserAnswersProcessed = ({ data, rubric, onBack, selectedRubricItem 
           </Box>
         </Box>
       )}
-
-      {data.length === 1 &&
-        data.map((cur, idx) => (
+      {(data.length === 1 || thresholdByPoints === 0) &&
+        dataSorted.map((cur, idx) => (
           <Box key={idx} sx={{ p: "24px" }}>
             <UserAnswerProcessed
               result={cur.result}
@@ -158,7 +158,6 @@ export const UserAnswersProcessed = ({ data, rubric, onBack, selectedRubricItem 
             />
           </Box>
         ))}
-
       {/* {dataAboveThreshold.map((cur, idx) => (
         <UserAnswerProcessed
           key={idx}
@@ -396,14 +395,21 @@ export const UserListAnswers = ({
                         variant="contained"
                         size="small"
                         onClick={() =>
-                          onTryUserAnswer({ answer: cur.answer, user: cur.answer, userImage: cur.userImage }, idx)
+                          onTryUserAnswer({ answer: cur.answer, user: cur.user, userImage: cur.userImage }, idx)
                         }
                         disabled={tryingUserAnswerIdx >= 0 || formik.isSubmitting}
                       >
-                        {(tryingUserAnswerIdx !== idx || tryingUserAnswerIdx === -1) && (
+                        {((!tryingUserAnswerIdx && tryingUserAnswerIdx !== idx) || tryingUserAnswerIdx === -1) && (
                           <PlayArrowIcon sx={{ mr: "4px" }} />
                         )}
-                        {tryingUserAnswerIdx !== idx || tryingUserAnswerIdx === -1 ? "Grade" : "Grading..."}
+                        {tryingUserAnswerIdx !== idx || tryingUserAnswerIdx === -1 ? (
+                          "Grade"
+                        ) : (
+                          <>
+                            Grading
+                            <CircularProgress size={"15px"} sx={{ ml: "8px", color: "white" }} />
+                          </>
+                        )}
                       </CustomButton>
                     )}
                   </Stack>
@@ -414,7 +420,8 @@ export const UserListAnswers = ({
         ))}
         <Divider />
         <Stack direction={"row-reverse"} justifyContent={"space-between"} spacing={"8px"} sx={{ mt: "12px" }}>
-          <CustomButton variant="contained" size="small" onClick={onTryRubricOnAnswers}>
+          <CustomButton variant="contained" onClick={onTryRubricOnAnswers} disabled={!userAnswersCopy.length}>
+            <PlayArrowIcon sx={{ mr: "4px" }} />
             Grade All
           </CustomButton>
           {Boolean(users.length) && !newAnswerId && (

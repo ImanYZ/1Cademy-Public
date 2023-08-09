@@ -149,7 +149,9 @@ export const RubricsEditor = ({ question, username, onReturnToQuestions, onSetQu
           essayText: cur.answer,
           rubrics: tryRubric,
         });
-        setTryUserAnswers(prev => prev.map((c, i) => (i === idx ? { ...c, result: response, state: "IDLE" } : c)));
+        setTryUserAnswers(prev => {
+          return prev.map((c, i) => (i === idx ? { ...c, result: response, state: "IDLE" } : c));
+        });
       } catch (error) {
         setTryUserAnswers(prev => prev.map((c, i) => (i === idx ? { ...c, state: "ERROR" } : c)));
       }
