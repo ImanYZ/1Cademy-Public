@@ -139,7 +139,7 @@ export const RubricItem = ({
               }}
               onClick={() => (isSelected && userAnswerWhereProcessed ? onSelectRubricItem({ index: i }) : undefined)}
             >
-              <Box component={"td"} sx={{ p: "8px" }}>
+              <Box component={"td"} sx={{ p: "8px 4px" }}>
                 <MarkdownRender
                   text={c.prompt}
                   sx={{
@@ -152,7 +152,7 @@ export const RubricItem = ({
                   }}
                 />
               </Box>
-              <Box component={"td"} sx={{ p: "8px" }}>
+              <Box component={"td"} sx={{ p: "8px 4px" }}>
                 <Typography sx={{ fontWeight: 600, fontSize: "12px", whiteSpace: "nowrap" }}>
                   ({c.point} Point{c.point !== 1 && "s"})
                 </Typography>
