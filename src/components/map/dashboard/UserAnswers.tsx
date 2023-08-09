@@ -233,7 +233,7 @@ export const UserAnswerProcessed = ({ userAnswer, result, state, rubric, selecte
           <Stack>
             <Typography>
               Score:{" "}
-              <Typography component={"span"} sx={{ fontWeight: 700, color: DESIGN_SYSTEM_COLORS.gray900 }}>
+              <Typography component={"span"} sx={{ fontWeight: 700 }}>
                 {points}/{rubric.prompts.reduce((a, c) => a + Number(c.point), 0)}
               </Typography>{" "}
               pts
