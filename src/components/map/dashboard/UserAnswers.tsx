@@ -103,7 +103,7 @@ export const UserAnswersProcessed = ({ data, rubric, onBack, selectedRubricItem 
         <Box sx={{ height: "100%", display: "grid", gridTemplateRows: "1fr 1fr", overflow: "auto" }}>
           <Box
             sx={{
-              p: "24px",
+              p: "12px 24px",
               overflow: "auto",
               borderTop: theme =>
                 theme.palette.mode === "dark"
@@ -111,6 +111,20 @@ export const UserAnswersProcessed = ({ data, rubric, onBack, selectedRubricItem 
                   : `solid 1px ${DESIGN_SYSTEM_COLORS.gray400}`,
             }}
           >
+            <Typography
+              sx={{
+                p: "12px",
+                mb: "8px",
+                textAlign: "center",
+                fontWeight: 600,
+                // position: "sticky",
+                // top: "0px",
+                // backgroundColor: theme =>
+                //   theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.gray600 : DESIGN_SYSTEM_COLORS.gray200,
+              }}
+            >
+              Answers with more and equals than {thresholdByPoints} point{thresholdByPoints !== 1 && "s"}
+            </Typography>
             {dataAboveThreshold.map((cur, idx) => (
               <UserAnswerProcessed
                 key={idx}
@@ -126,7 +140,7 @@ export const UserAnswersProcessed = ({ data, rubric, onBack, selectedRubricItem 
 
           <Box
             sx={{
-              p: "24px",
+              p: "12px 24px",
               overflow: "auto",
               borderTop: theme =>
                 theme.palette.mode === "dark"
@@ -134,6 +148,20 @@ export const UserAnswersProcessed = ({ data, rubric, onBack, selectedRubricItem 
                   : `solid 1px ${DESIGN_SYSTEM_COLORS.gray400}`,
             }}
           >
+            <Typography
+              sx={{
+                p: "12px",
+                mb: "8px",
+                textAlign: "center",
+                fontWeight: 600,
+                // position: "sticky",
+                // top: "0px",
+                // backgroundColor: theme =>
+                //   theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.gray600 : DESIGN_SYSTEM_COLORS.gray200,
+              }}
+            >
+              Answers with less than {thresholdByPoints} point{thresholdByPoints !== 1 && "s"}
+            </Typography>
             {dataBellowThreshold.map((cur, idx) => (
               <UserAnswerProcessed
                 key={idx}
