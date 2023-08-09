@@ -229,7 +229,7 @@ export const RubricsEditor = ({ question, username, onReturnToQuestions, onSetQu
                   onDisplayForm={rubricIsEditable(cur, username) ? () => onDisplayForm(cur) : undefined}
                   onRemoveRubric={cur.createdBy === username ? () => onRemoveRubric(cur.id) : undefined}
                   isSelected={tryRubric?.id === cur.id}
-                  tryUserAnswer={tryUserAnswers}
+                  tryUserAnswers={tryUserAnswers}
                   onSelectRubricItem={setSelectedRubricItem}
                   selectedRubricItem={selectedRubricItem}
                 />

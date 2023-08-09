@@ -4,7 +4,7 @@ import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import DeleteIcon from "@mui/icons-material/Delete";
 import DoneIcon from "@mui/icons-material/Done";
 import EditIcon from "@mui/icons-material/Edit";
-import { Box, Button, Divider, IconButton, List, Stack, TextField, Tooltip, Typography } from "@mui/material";
+import { Box, Button, Divider, IconButton, List, Stack, TextField, Tooltip, Typography, useTheme } from "@mui/material";
 import { FieldArray, Formik, FormikHelpers } from "formik";
 import React, { useMemo } from "react";
 import { Rubric, RubricItemType } from "src/client/firestore/questions.firestore";
@@ -30,7 +30,7 @@ type RubricItemProps = {
   onDisplayForm?: () => void;
   onRemoveRubric?: () => void;
   isSelected: boolean;
-  tryUserAnswer: {
+  tryUserAnswers: {
     userAnswer: UserAnswer;
     result: TryRubricResponse[];
   }[];
@@ -47,10 +47,12 @@ export const RubricItem = ({
   onDisplayForm,
   onRemoveRubric,
   isSelected,
-  tryUserAnswer,
+  tryUserAnswers,
   onSelectRubricItem,
   selectedRubricItem,
 }: RubricItemProps) => {
+  const theme = useTheme();
+
   const onUpVoteRubric = async () => {
     const wasUpVoted = rubric.upvotesBy.includes(username);
     const newUpvotes = wasUpVoted ? rubric.upvotesBy.filter(c => c !== username) : [...rubric.upvotesBy, username];
@@ -68,8 +70,8 @@ export const RubricItem = ({
   };
 
   const userAnswerWhereProcessed = useMemo(() => {
-    return tryUserAnswer.reduce((a, c) => a || Boolean(c.result.length), false);
-  }, [tryUserAnswer]);
+    return tryUserAnswers.reduce((a, c) => a || Boolean(c.result.length), false);
+  }, [tryUserAnswers]);
 
   return (
     <Box
@@ -108,11 +110,11 @@ export const RubricItem = ({
               // component={"li"}
               key={i}
               sx={{
-                // border: "solid 2px transparent",
+                border: "solid 2px transparent",
                 borderRadius: "8px",
                 position: "relative",
                 borderBottom: theme =>
-                  `solid 1px ${
+                  `solid 2px ${
                     theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookG600 : DESIGN_SYSTEM_COLORS.gray300
                   }`,
                 ...(isSelected &&
@@ -120,7 +122,7 @@ export const RubricItem = ({
                   selectedRubricItem &&
                   selectedRubricItem.index === i && {
                     border: theme =>
-                      `solid 2px ${
+                      `solid 1px ${
                         theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookG600 : DESIGN_SYSTEM_COLORS.gray300
                       }`,
                     backgroundColor: theme =>
@@ -130,10 +132,10 @@ export const RubricItem = ({
                   userAnswerWhereProcessed && {
                     cursor: "pointer",
                     ":hover": {
-                      border: theme =>
+                      outline: theme =>
                         `solid 2px ${
                           theme.palette.mode === "dark"
-                            ? DESIGN_SYSTEM_COLORS.notebookG700
+                            ? DESIGN_SYSTEM_COLORS.notebookG200
                             : DESIGN_SYSTEM_COLORS.gray600
                         }`,
                     },
@@ -143,13 +145,13 @@ export const RubricItem = ({
             >
               <Box component={"td"} sx={{ p: "8px 4px" }}>
                 <MarkdownRender
-                  text={c.prompt}
+                  text={c.prompt + "x"}
                   sx={{
                     width: "100%",
                     flexGrow: 1,
                     ...(isSelected &&
-                      tryUserAnswer.length === 1 && {
-                        backgroundColor: getColorFromResult(tryUserAnswer[0].result[i]),
+                      tryUserAnswers.length === 1 && {
+                        backgroundColor: getColorFromResult(tryUserAnswers[0].result[i], theme.palette.mode),
                       }),
                   }}
                 />
