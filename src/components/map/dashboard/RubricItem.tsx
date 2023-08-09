@@ -255,8 +255,6 @@ export const RubricForm = ({ rubric, onSave, cancelFn }: RubricFormProps) => {
               alignItems={"center"}
               sx={{
                 borderRadius: "4px",
-                // border: `solid 1px ${DESIGN_SYSTEM_COLORS.gray``300}`,
-                // backgroundColor: DESIGN_SYSTEM_COLORS.gray100,``
                 p: "14px",
                 border: ({ palette }) =>
                   `solid 1px ${
@@ -266,29 +264,6 @@ export const RubricForm = ({ rubric, onSave, cancelFn }: RubricFormProps) => {
                   palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookG900 : DESIGN_SYSTEM_COLORS.gray50,
               }}
             >
-              {/* <Box sx={{ width: "100%" }}>
-                <Typography display={"inline"}>The student should earn </Typography>
-                <TextField
-                  label=""
-                  id="points"
-                  name="points"
-                  onChange={formik.handleChange}
-                  value={formik.values.points}
-                  error={formik.touched.points && formik.errors.hasOwnProperty("points")}
-                  helperText={formik.touched.points && formik.errors.points}
-                  onBlur={(event: React.FocusEvent<HTMLInputElement>) => {
-                    formik.handleBlur(event);
-                  }}
-                  size="small"
-                  sx={{ width: "50px" }}
-                  inputProps={{ style: { padding: "2px 10px", minWidth: "100px" } }}
-                />
-                <Typography display={"inline"}>
-                  {" "}
-                  point{formik.values.points === 1 ? "" : "s"} for mentioning each of the following rubric items in
-                  their answer:
-                </Typography>
-              </Box> */}
               {!formik.values.prompts.length && (
                 <Typography sx={{ color: DESIGN_SYSTEM_COLORS.gray500 }}>{NO_RUBRICS_MESSAGE}</Typography>
               )}
@@ -297,16 +272,6 @@ export const RubricForm = ({ rubric, onSave, cancelFn }: RubricFormProps) => {
                 name="prompts"
                 render={(arrayHelpers: any) => (
                   <>
-                    {/* <Stack
-                      // key={index}
-                      direction={"row"}
-                      sx={{ width: "100%" }}
-                      // alignItems={"flex-start"}
-                      spacing={"4px"}
-                    >
-                      
-                      
-                    </Stack> */}
                     <Typography sx={{ width: "100%" }}>The student's response should mention:</Typography>
 
                     <table>
@@ -399,71 +364,8 @@ export const RubricForm = ({ rubric, onSave, cancelFn }: RubricFormProps) => {
                             </tr>
                           );
                         })}
-                        {/* </tr> */}
                       </tbody>
                     </table>
-
-                    {/* {formik.values.prompts.map((prompt, index) => (
-                      
-                      // <Stack
-                      //   key={index}
-                      //   direction={"row"}
-                      //   sx={{ width: "100%" }}
-                      //   alignItems={"flex-start"}
-                      //   spacing={"4px"}
-                      // >
-                      //   <TextField
-                      //     label=""
-                      //     name={`prompts.${index}.prompt`}
-                      //     fullWidth
-                      //     multiline
-                      //     size="small"
-                      //     onChange={formik.handleChange}
-                      //     value={prompt.prompt}
-                      //     // error={Boolean(
-                      //     //   formik.touched.prompts
-                      //     //     ? (formik.touched.prompts as any)[index] &&
-                      //     //         formik.errors.prompts &&
-                      //     //         formik.errors.prompts[index]
-                      //     //     : false
-                      //     // )}
-                      //     // helperText={
-                      //     //   (Boolean(formik.touched.prompts) && (formik.touched.prompts as any))[index] &&
-                      //     //   formik.errors.prompts
-                      //     //     ? formik.errors.prompts[index] ?? ""
-                      //     //     : ""
-                      //     // }
-                      //     onBlur={(event: React.FocusEvent<HTMLInputElement>) => {
-                      //       formik.handleBlur(event);
-                      //     }}
-                      //   />
-
-                      //   <TextField
-                      //     label=""
-                      //     id="points"
-                      //     name={`prompts.${index}.point`}
-                      //     onChange={formik.handleChange}
-                      //     value={prompt.point}
-                      //     // error={formik.touched.points && formik.errors.hasOwnProperty("points")}
-                      //     // helperText={formik.touched.points && formik.errors.points}
-                      //     onBlur={(event: React.FocusEvent<HTMLInputElement>) => {
-                      //       formik.handleBlur(event);
-                      //     }}
-                      //     size="small"
-                      //     sx={{ width: "50px" }}
-                      //     inputProps={{}}
-                      //   />
-
-                      //   <Tooltip title="Remove Rubric Item">
-                      //     <IconButton
-                      //       type="button"
-                      //       onClick={() => arrayHelpers.remove(index)} // remove a friend from the list
-                      //     >
-                      //       <DeleteIcon />
-                      //     </IconButton>
-                      //   </Tooltip>
-                      // </Stack>
-                    ))} */}
 
                     {formik.errors.prompts && typeof formik.errors.prompts === "string" && formik.touched.prompts && (
                       <Typography sx={{ color: theme => theme.palette.error.main }}>{formik.errors.prompts}</Typography>

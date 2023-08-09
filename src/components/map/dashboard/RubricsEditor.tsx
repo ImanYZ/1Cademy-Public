@@ -22,13 +22,6 @@ type RubricsEditorProps = {
   username: string;
 };
 
-// type RubricItemGenerated = {
-//   // key_phrase: string;
-//   keyPhrase: string;
-//   explanation: string;
-//   examples: string[];
-// };
-
 export type UserAnswer = { user: string; userImage: string; answer: string };
 
 // export type UserAnswerProcessed = UserAnswer & { points: number };
@@ -273,28 +266,6 @@ export const RubricsEditor = ({ question, username, onReturnToQuestions, onSetQu
                   <AddIcon sx={{ fontSize: "14px" }} />
                 </IconButton>
               </Stack>
-              {/* <CsvButton
-                BtnText={
-                  <>
-                    <UploadIcon sx={{ mr: "8px" }} />
-                    Upload User Answers
-                  </>
-                }
-                addNewData={data => setUserAnswers(data.rows as UserAnswer[])}
-                sx={{
-                  border: `solid 1px ${DESIGN_SYSTEM_COLORS.gray300}`,
-                  backgroundColor: theme =>
-                    theme.palette.mode === "dark"
-                      ? DESIGN_SYSTEM_COLORS.notebookMainBlack
-                      : DESIGN_SYSTEM_COLORS.baseWhite,
-                  color: theme =>
-                    theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.gray200 : DESIGN_SYSTEM_COLORS.gray700,
-                  ":hover": {
-                    backgroundColor: theme =>
-                      theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.baseGraphit : DESIGN_SYSTEM_COLORS.gray300,
-                  },
-                }}
-              /> */}
             </Stack>
           )}
         </Box>
@@ -363,55 +334,10 @@ export const RubricsEditor = ({ question, username, onReturnToQuestions, onSetQu
             sx={{ transform: tryRubric ? "rotate(180deg)" : "rotate(0deg)", transition: "0.2s" }}
           />
         </IconButton>
-        // <CustomButton
-        //   onClick={() => setTryRubrics(null)}
-        //   variant="contained"
-        //   color="secondary"
-        //   sx={{ position: "absolute", left: "-24px", top: "70px" }}
-        // >
-
-        // </CustomButton>
       )}
-
-      {/* {tryRubrics && (
-        <CustomButton
-          onClick={() => setTryRubrics(null)}
-          variant="contained"
-          color="secondary"
-          sx={{ position: "absolute", right: "24px", top: "70px" }}
-        >
-          <KeyboardDoubleArrowLeftIcon
-            sx={{ transform: tryRubrics ? "rotate(180deg)" : "rotate(0deg)", transition: "0.2s" }}
-          />
-          {!tryRubrics && "Student’s work"}
-        </CustomButton>
-      )} */}
     </Box>
   );
 };
 
 const rubricIsEditable = (rubric: Rubric, userName: string) =>
   rubric.createdBy === userName && rubric.upvotesBy.length - rubric.downvotesBy.length <= 1;
-
-// function getRandomValuesFromArray(arr: any[], count: number) {
-//   const randomValues: any[] = [];
-//   const arrLength = arr.length;
-
-//   // Check if the count is not greater than the array length
-//   // if (count > arrLength) {
-//   //   console.warn("Requested count is greater than array length.");
-//   //   return [];
-//   // }
-
-//   const minCount = Math.min(arrLength, count);
-//   while (randomValues.length < minCount) {
-//     const randomIndex = Math.floor(Math.random() * arrLength);
-
-//     // Check if the index is unique
-//     if (!randomValues.includes(arr[randomIndex])) {
-//       randomValues.push(arr[randomIndex]);
-//     }
-//   }
-
-//   return randomValues;
-// }
