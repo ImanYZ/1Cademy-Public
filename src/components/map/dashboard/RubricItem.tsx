@@ -83,7 +83,9 @@ export const RubricItem = ({
               }`,
         backgroundColor: ({ palette }) =>
           isSelected
-            ? DESIGN_SYSTEM_COLORS.gray100
+            ? palette.mode === "dark"
+              ? DESIGN_SYSTEM_COLORS.notebookG700
+              : DESIGN_SYSTEM_COLORS.gray100
             : palette.mode === "dark"
             ? DESIGN_SYSTEM_COLORS.notebookG900
             : DESIGN_SYSTEM_COLORS.gray50,

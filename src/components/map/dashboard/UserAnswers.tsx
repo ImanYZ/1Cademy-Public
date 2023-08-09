@@ -1,7 +1,7 @@
 import AddIcon from "@mui/icons-material/Add";
 import KeyboardArrowLeftIcon from "@mui/icons-material/KeyboardArrowLeft";
 import PlayArrowIcon from "@mui/icons-material/PlayArrow";
-import { Box, CircularProgress, Divider, Stack, TextField, Typography } from "@mui/material";
+import { Box, CircularProgress, Divider, Stack, TextField, Typography, useTheme } from "@mui/material";
 import { getFirestore } from "firebase/firestore";
 import { Formik, FormikHelpers } from "formik";
 import React, { useEffect, useMemo, useState } from "react";
@@ -32,14 +32,17 @@ type UserAnswersProcessedProps = {
 };
 
 export const TEXT_HIGHLIGHT: {
-  [key in "success" | "warning" | "error" | "highlightSuccess" | "highlightWarning" | "highlightError"]: string;
+  [key in "success" | "warning" | "error" | "highlightSuccess" | "highlightWarning" | "highlightError"]: {
+    dark: string;
+    light: string;
+  };
 } = {
-  success: "#D7FEE7",
-  warning: "#FFE6E6",
-  error: "#FDEAD7",
-  highlightSuccess: "#6CE9A6",
-  highlightWarning: "#F9DBAF",
-  highlightError: "#ff776e",
+  success: { light: "#D7FEE7", dark: "#304438" },
+  warning: { light: "#FDEAD7", dark: "#5e4b37" },
+  error: { light: "#FFE6E6", dark: "#7f4f4f" },
+  highlightSuccess: { light: "#6CE9A6", dark: "#1e7842" },
+  highlightWarning: { light: "#F9DBAF", dark: "#895927" },
+  highlightError: { light: "#ff776e", dark: "#7a1e1e" },
 };
 
 export const UserAnswersProcessed = ({ data, rubric, onBack, selectedRubricItem }: UserAnswersProcessedProps) => {
@@ -192,6 +195,7 @@ type UserAnswerProcessed = {
 };
 
 export const UserAnswerProcessed = ({ userAnswer, result, state, rubric, selectedRubricItem }: UserAnswerProcessed) => {
+  const theme = useTheme();
   const points = useMemo(() => getPointsFromResult(result, rubric.prompts), [result, rubric.prompts]);
 
   const replaceSentences = (sentences: string[], text: string, color: string) => {
@@ -204,11 +208,11 @@ export const UserAnswerProcessed = ({ userAnswer, result, state, rubric, selecte
   const resultHighlighted = useMemo(() => {
     return result.reduce((acu: string, cur, idx) => {
       const isHighlighted = Boolean(selectedRubricItem && selectedRubricItem.index === idx);
-      const color = getColorFromResult(cur, isHighlighted);
+      const color = getColorFromResult(cur, theme.palette.mode, isHighlighted);
       if (color) return replaceSentences(cur.sentences, acu, color);
       return acu;
     }, userAnswer.answer);
-  }, [result, selectedRubricItem, userAnswer.answer]);
+  }, [result, selectedRubricItem, theme.palette.mode, userAnswer.answer]);
 
   // const resultsHighlighted = useMemo(() => {
   //   return result.map((acu: string, cur) => {
@@ -442,14 +446,18 @@ export const UserListAnswers = ({
   );
 };
 
-export const getColorFromResult = (resultItem: TryRubricResponse, highlight = false): string => {
+export const getColorFromResult = (
+  resultItem: TryRubricResponse,
+  theme: "dark" | "light",
+  highlight = false
+): string => {
   if (!resultItem) return "";
   if (resultItem.correct === "YES" && resultItem.mentioned === "YES")
-    return highlight ? TEXT_HIGHLIGHT["highlightSuccess"] : TEXT_HIGHLIGHT["success"];
+    return highlight ? TEXT_HIGHLIGHT["highlightSuccess"][theme] : TEXT_HIGHLIGHT["success"][theme];
   if (resultItem.correct === "NO" && resultItem.mentioned === "YES")
-    return highlight ? TEXT_HIGHLIGHT["highlightWarning"] : TEXT_HIGHLIGHT["warning"];
+    return highlight ? TEXT_HIGHLIGHT["highlightWarning"][theme] : TEXT_HIGHLIGHT["warning"][theme];
   if (resultItem.correct === "NO" && resultItem.mentioned === "NO")
-    return highlight ? TEXT_HIGHLIGHT["highlightError"] : TEXT_HIGHLIGHT["error"];
+    return highlight ? TEXT_HIGHLIGHT["highlightError"][theme] : TEXT_HIGHLIGHT["error"][theme];
   return "";
 };
 
