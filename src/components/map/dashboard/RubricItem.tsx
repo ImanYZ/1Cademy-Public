@@ -4,7 +4,7 @@ import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import DeleteIcon from "@mui/icons-material/Delete";
 import DoneIcon from "@mui/icons-material/Done";
 import EditIcon from "@mui/icons-material/Edit";
-import { Box, Button, Divider, IconButton, Stack, TextField, Tooltip, Typography } from "@mui/material";
+import { Box, Button, Divider, IconButton, List, Stack, TextField, Tooltip, Typography } from "@mui/material";
 import { FieldArray, Formik, FormikHelpers } from "formik";
 import React, { useMemo } from "react";
 import { Rubric, RubricItemType } from "src/client/firestore/questions.firestore";
@@ -97,52 +97,71 @@ export const RubricItem = ({
       {!rubric.prompts.length && (
         <Typography sx={{ color: DESIGN_SYSTEM_COLORS.gray500 }}>{NO_RUBRICS_MESSAGE}</Typography>
       )}
-      <Stack component={"ul"} spacing={"4px"}>
-        {rubric.prompts.map((c, i) => (
-          <Box
-            component={"li"}
-            key={i}
-            sx={{
-              border: "solid 2px transparent",
-              borderRadius: "8px",
-              ...(isSelected &&
-                userAnswerWhereProcessed &&
-                selectedRubricItem &&
-                selectedRubricItem.index === i && {
-                  border: theme =>
-                    `solid 2px ${
-                      theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookG600 : DESIGN_SYSTEM_COLORS.gray300
-                    }`,
-                  backgroundColor: theme =>
-                    theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookG600 : DESIGN_SYSTEM_COLORS.gray300,
-                }),
-              ...(isSelected &&
-                userAnswerWhereProcessed && {
-                  cursor: "pointer",
-                  ":hover": {
+
+      <Box component={"table"} sx={{ borderCollapse: "collapse" }}>
+        <tbody>
+          {rubric.prompts.map((c, i) => (
+            <Box
+              component={"tr"}
+              // component={"li"}
+              key={i}
+              sx={{
+                // border: "solid 2px transparent",
+                borderRadius: "8px",
+                position: "relative",
+                borderBottom: theme =>
+                  `solid 1px ${
+                    theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookG600 : DESIGN_SYSTEM_COLORS.gray300
+                  }`,
+                ...(isSelected &&
+                  userAnswerWhereProcessed &&
+                  selectedRubricItem &&
+                  selectedRubricItem.index === i && {
                     border: theme =>
                       `solid 2px ${
-                        theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookG700 : DESIGN_SYSTEM_COLORS.gray600
+                        theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookG600 : DESIGN_SYSTEM_COLORS.gray300
                       }`,
-                  },
-                }),
-            }}
-            onClick={() => (isSelected && userAnswerWhereProcessed ? onSelectRubricItem({ index: i }) : undefined)}
-          >
-            <MarkdownRender
-              text={c.prompt}
-              sx={{
-                display: "inline",
+                    backgroundColor: theme =>
+                      theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookG600 : DESIGN_SYSTEM_COLORS.gray300,
+                  }),
                 ...(isSelected &&
-                  tryUserAnswer.length === 1 && { backgroundColor: getColorFromResult(tryUserAnswer[0].result[i]) }),
+                  userAnswerWhereProcessed && {
+                    cursor: "pointer",
+                    ":hover": {
+                      border: theme =>
+                        `solid 2px ${
+                          theme.palette.mode === "dark"
+                            ? DESIGN_SYSTEM_COLORS.notebookG700
+                            : DESIGN_SYSTEM_COLORS.gray600
+                        }`,
+                    },
+                  }),
               }}
-            />{" "}
-            <Typography component={"span"}>
-              ({c.point} Point{c.point === 1 && "s"})
-            </Typography>
-          </Box>
-        ))}
-      </Stack>
+              onClick={() => (isSelected && userAnswerWhereProcessed ? onSelectRubricItem({ index: i }) : undefined)}
+            >
+              <Box component={"td"} sx={{ p: "8px" }}>
+                <MarkdownRender
+                  text={c.prompt}
+                  sx={{
+                    width: "100%",
+                    flexGrow: 1,
+                    ...(isSelected &&
+                      tryUserAnswer.length === 1 && {
+                        backgroundColor: getColorFromResult(tryUserAnswer[0].result[i]),
+                      }),
+                  }}
+                />
+              </Box>
+              <Box component={"td"} sx={{ p: "8px" }}>
+                <Typography sx={{ fontWeight: 600, fontSize: "12px", whiteSpace: "nowrap" }}>
+                  ({c.point} Point{c.point !== 1 && "s"})
+                </Typography>
+              </Box>
+            </Box>
+          ))}
+        </tbody>
+      </Box>
+      <List /* component={"ul"} spacing={"4px"}  */ /* sx={{ pl: "16px" }} */></List>
       <Stack direction={"row"} justifyContent={"space-between"} alignItems={"center"}>
         <Stack direction={"row"} alignItems={"center"} spacing={"8px"}>
           {!isSelected && (
