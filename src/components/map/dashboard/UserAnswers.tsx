@@ -58,11 +58,11 @@ export const UserAnswersProcessed = ({ data, rubric, onBack, selectedRubricItem 
   }, [data, rubric.prompts]);
 
   const dataAboveThreshold = useMemo(() => {
-    return dataSorted.filter(cur => getPointsFromResult(cur.result, rubric.prompts) > thresholdByPoints);
+    return dataSorted.filter(cur => getPointsFromResult(cur.result, rubric.prompts) >= thresholdByPoints);
   }, [dataSorted, rubric.prompts, thresholdByPoints]);
 
   const dataBellowThreshold = useMemo(() => {
-    return dataSorted.filter(cur => getPointsFromResult(cur.result, rubric.prompts) <= thresholdByPoints);
+    return dataSorted.filter(cur => getPointsFromResult(cur.result, rubric.prompts) < thresholdByPoints);
   }, [dataSorted, rubric.prompts, thresholdByPoints]);
 
   return (
