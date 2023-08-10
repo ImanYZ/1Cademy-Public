@@ -123,27 +123,31 @@ export const RubricsEditor = ({ question, username, onReturnToQuestions, onSetQu
   }, [editedRubric, rubrics]);
 
   const onTryRubricOnAnswer = useCallback(
-    async (userAnswer: UserAnswer) => {
+    async (userAnswer: UserAnswer, userAnswerId: string) => {
       const response: TryRubricResponse[] = await Post("/assignment/tryRubric", {
         essayText: userAnswer.answer,
         rubrics: tryRubric,
       });
-      setTryUserAnswers([{ userAnswer, result: response, state: "IDLE" }]);
+      setTryUserAnswers([{ userAnswerId, userAnswer, result: response, state: "IDLE" }]);
       // setSelectedTryUserAnswer({ userAnswer, result: response, state: "IDLE" });
     },
     [tryRubric]
   );
 
   const onTryRubricOnAnswers = useCallback(async () => {
-    setTryUserAnswers(usersAnswers.map(c => ({ userAnswer: c, result: [], state: "LOADING" })));
+    setTryUserAnswers(usersAnswers.map(c => ({ userAnswerId: c.id, userAnswer: c, result: [], state: "LOADING" })));
     usersAnswers.forEach(async (cur, idx) => {
       try {
         const response: TryRubricResponse[] = await Post("/assignment/tryRubric", {
           essayText: cur.answer,
           rubrics: tryRubric,
         });
+
         setTryUserAnswers(prev => {
-          return prev.map((c, i) => (i === idx ? { ...c, result: response, state: "IDLE" } : c));
+          return prev.map(c => {
+            const newValue: UserAnswerData = { ...c, result: response, state: "IDLE" };
+            return cur.id === c.userAnswerId ? { ...newValue } : { ...c };
+          });
         });
       } catch (error) {
         setTryUserAnswers(prev => prev.map((c, i) => (i === idx ? { ...c, state: "ERROR" } : c)));

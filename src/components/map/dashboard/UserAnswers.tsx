@@ -21,7 +21,12 @@ import { UserAnswer } from "./RubricsEditor";
 
 type UserAnswerState = "LOADING" | "ERROR" | "IDLE";
 
-export type UserAnswerData = { userAnswer: UserAnswer; result: TryRubricResponse[]; state: UserAnswerState };
+export type UserAnswerData = {
+  userAnswerId: string;
+  userAnswer: UserAnswer;
+  result: TryRubricResponse[];
+  state: UserAnswerState;
+};
 
 type UserAnswersProcessedProps = {
   data: UserAnswerData[];
@@ -290,7 +295,7 @@ export const UserAnswerProcessed = ({ userAnswer, result, state, rubric, selecte
 type UserListAnswersProps = {
   usersAnswers: Answer[];
   setUserAnswers: React.Dispatch<React.SetStateAction<Answer[]>>;
-  onTryRubricOnAnswer: (userAnswer: UserAnswer) => Promise<void>;
+  onTryRubricOnAnswer: (userAnswer: UserAnswer, userAnswerId: string) => Promise<void>;
   onTryRubricOnAnswers: () => Promise<void>;
   questionId: string;
 };
@@ -314,9 +319,12 @@ export const UserListAnswers = ({
   const [newAnswerId, setNewAnswerId] = useState("");
   // const [isPending, startTransition] = useTransition();
 
-  const onTryUserAnswer = async (userAnswer: UserAnswer, idx: number) => {
+  const onTryUserAnswer = async (userAnswer: Answer, idx: number) => {
     setTryingUserAnswerIdx(idx);
-    await onTryRubricOnAnswer(userAnswer);
+    await onTryRubricOnAnswer(
+      { answer: userAnswer.answer, user: userAnswer.user, userImage: userAnswer.userImage },
+      userAnswer.id
+    );
     setTryingUserAnswerIdx(-1);
   };
 
@@ -432,9 +440,7 @@ export const UserListAnswers = ({
                       <CustomButton
                         variant="contained"
                         size="small"
-                        onClick={() =>
-                          onTryUserAnswer({ answer: cur.answer, user: cur.user, userImage: cur.userImage }, idx)
-                        }
+                        onClick={() => onTryUserAnswer(cur, idx)}
                         disabled={tryingUserAnswerIdx >= 0 || formik.isSubmitting}
                       >
                         {((!tryingUserAnswerIdx && tryingUserAnswerIdx !== idx) || tryingUserAnswerIdx === -1) && (
@@ -498,7 +504,7 @@ export const getColorFromResult = (
 export const getHelperTextFromResult = (resultItem: TryRubricResponse): string => {
   if (!resultItem) return "";
   if (resultItem.correct === "YES" && resultItem.mentioned === "YES")
-    return "This rubric was correctly metioned in student’s answer.";
+    return "This rubric was correctly mentioned in student’s answer.";
   if (resultItem.correct === "NO" && resultItem.mentioned === "YES")
     return "This rubric was explained incorrectly in student’s answer.";
   if (resultItem.correct === "NO" && resultItem.mentioned === "NO")
