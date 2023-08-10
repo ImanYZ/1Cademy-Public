@@ -17,7 +17,7 @@ import { DESIGN_SYSTEM_COLORS } from "@/lib/theme/colors";
 import { newId } from "@/lib/utils/newFirestoreId";
 
 import { CustomButton } from "../Buttons/Buttons";
-import { UserAnswer } from "./RubricsEditor";
+import { SelectedUserAnswer, UserAnswer } from "./RubricsEditor";
 
 type UserAnswerState = "LOADING" | "ERROR" | "IDLE";
 
@@ -33,7 +33,8 @@ type UserAnswersProcessedProps = {
   rubric: Rubric;
   onBack: () => void;
   selectedRubricItem: { index: Number } | null;
-  // onSelectUserAnswer: (data: UserAnswerData) => void;
+  selectedUserAnswer: SelectedUserAnswer;
+  onSelectUserAnswer: (newValue: SelectedUserAnswer) => void;
 };
 
 export const TEXT_HIGHLIGHT: {
@@ -50,7 +51,14 @@ export const TEXT_HIGHLIGHT: {
   highlightError: { light: "#ff776e", dark: "#7a1e1e" },
 };
 
-export const UserAnswersProcessed = ({ data, rubric, onBack, selectedRubricItem }: UserAnswersProcessedProps) => {
+export const UserAnswersProcessed = ({
+  data,
+  rubric,
+  onBack,
+  selectedRubricItem,
+  selectedUserAnswer,
+  onSelectUserAnswer,
+}: UserAnswersProcessedProps) => {
   const [thresholdByPoints, setThresholdByPoints] = useState(0);
 
   const onChangeThreshold = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -134,7 +142,7 @@ export const UserAnswersProcessed = ({ data, rubric, onBack, selectedRubricItem 
               Answers with <span style={{ fontSize: "20px", fontWeight: 400 }}>&#8805;</span> {thresholdByPoints} point
               {thresholdByPoints !== 1 && "s"}
             </Typography>
-            <Box sx={{ p: "12px 24px" }}>
+            <Stack sx={{ p: "4px 10px" }} spacing={"10px"}>
               {dataAboveThreshold.map((cur, idx) => (
                 <UserAnswerProcessed
                   key={idx}
@@ -143,10 +151,17 @@ export const UserAnswersProcessed = ({ data, rubric, onBack, selectedRubricItem 
                   rubric={rubric}
                   state={cur.state}
                   selectedRubricItem={selectedRubricItem}
-                  // onSelectUserAnswer={onSelectUserAnswer}
+                  isSelected={selectedUserAnswer?.userAnswerId === cur.userAnswerId}
+                  onSelectUserAnswer={() => {
+                    onSelectUserAnswer({
+                      result: cur.result,
+                      userAnswer: cur.userAnswer,
+                      userAnswerId: cur.userAnswerId,
+                    });
+                  }}
                 />
               ))}
-            </Box>
+            </Stack>
           </Box>
 
           <Box
@@ -171,7 +186,7 @@ export const UserAnswersProcessed = ({ data, rubric, onBack, selectedRubricItem 
               Answers with <span style={{ fontSize: "20px", fontWeight: 400 }}>{"<"}</span> {thresholdByPoints} point
               {thresholdByPoints !== 1 && "s"}
             </Typography>
-            <Box sx={{ p: "12px 24px" }}>
+            <Stack sx={{ p: "4px 10px" }} spacing={"10px"}>
               {dataBellowThreshold.map((cur, idx) => (
                 <UserAnswerProcessed
                   key={idx}
@@ -180,10 +195,18 @@ export const UserAnswersProcessed = ({ data, rubric, onBack, selectedRubricItem 
                   rubric={rubric}
                   state={cur.state}
                   selectedRubricItem={selectedRubricItem}
+                  isSelected={selectedUserAnswer?.userAnswerId === cur.userAnswerId}
+                  onSelectUserAnswer={() => {
+                    onSelectUserAnswer({
+                      result: cur.result,
+                      userAnswer: cur.userAnswer,
+                      userAnswerId: cur.userAnswerId,
+                    });
+                  }}
                   // onSelectUserAnswer={onSelectUserAnswer}
                 />
               ))}
-            </Box>
+            </Stack>
           </Box>
         </Box>
       )}
@@ -196,7 +219,19 @@ export const UserAnswersProcessed = ({ data, rubric, onBack, selectedRubricItem 
               rubric={rubric}
               state={cur.state}
               selectedRubricItem={selectedRubricItem}
-              // onSelectUserAnswer={onSelectUserAnswer}
+              isSelected={selectedUserAnswer?.userAnswerId === cur.userAnswerId}
+              // onSelectUserAnswer={}
+              onSelectUserAnswer={
+                data.length === 1
+                  ? undefined
+                  : () => {
+                      onSelectUserAnswer({
+                        result: cur.result,
+                        userAnswer: cur.userAnswer,
+                        userAnswerId: cur.userAnswerId,
+                      });
+                    }
+              }
             />
           </Box>
         ))}
@@ -231,9 +266,19 @@ type UserAnswerProcessed = {
   state: UserAnswerState;
   rubric: Rubric;
   selectedRubricItem: { index: Number } | null;
+  isSelected: boolean;
+  onSelectUserAnswer?: () => void;
 };
 
-export const UserAnswerProcessed = ({ userAnswer, result, state, rubric, selectedRubricItem }: UserAnswerProcessed) => {
+export const UserAnswerProcessed = ({
+  userAnswer,
+  result,
+  state,
+  rubric,
+  selectedRubricItem,
+  isSelected,
+  onSelectUserAnswer,
+}: UserAnswerProcessed) => {
   const theme = useTheme();
   const points = useMemo(() => getPointsFromResult(result, rubric.prompts), [result, rubric.prompts]);
 
@@ -262,7 +307,39 @@ export const UserAnswerProcessed = ({ userAnswer, result, state, rubric, selecte
   // }, [result, userAnswer.answer]);
 
   return (
-    <Stack sx={{ mb: "30px" }}>
+    <Stack
+      onClick={onSelectUserAnswer}
+      sx={{
+        p: "12px",
+        border: "solid 2px transparent",
+        // mb: "30px",
+        // boxSizing: "border-box",
+        borderRadius: "4px",
+        ...(isSelected && {
+          border: ({ palette }) =>
+            isSelected
+              ? `solid 2px ${DESIGN_SYSTEM_COLORS.primary800}`
+              : `solid 1px ${
+                  palette.mode === "light" ? DESIGN_SYSTEM_COLORS.gray300 : DESIGN_SYSTEM_COLORS.notebookG600
+                }`,
+          backgroundColor: ({ palette }) =>
+            isSelected
+              ? palette.mode === "dark"
+                ? DESIGN_SYSTEM_COLORS.notebookG700
+                : DESIGN_SYSTEM_COLORS.gray100
+              : palette.mode === "dark"
+              ? DESIGN_SYSTEM_COLORS.notebookG900
+              : DESIGN_SYSTEM_COLORS.gray50,
+        }),
+        ":hover": {
+          cursor: "pointer",
+          border: theme =>
+            `solid 2px ${
+              theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookG200 : DESIGN_SYSTEM_COLORS.gray600
+            }`,
+        },
+      }}
+    >
       <Stack direction={"row"} justifyContent={"space-between"} alignItems={"center"} sx={{ mb: "18px" }}>
         <Stack direction={"row"} spacing={"12px"} alignItems={"center"}>
           <OptimizedAvatar2 imageUrl={userAnswer.userImage} alt={`${userAnswer.user} profile picture`} size={40} />
@@ -283,6 +360,7 @@ export const UserAnswerProcessed = ({ userAnswer, result, state, rubric, selecte
       </Stack>
 
       <Typography dangerouslySetInnerHTML={{ __html: resultHighlighted }} />
+
       {state === "ERROR" && (
         <Typography color={"red"}>
           An error occurred. Please verify if the rubrics make sense or attempt again.
@@ -295,8 +373,8 @@ export const UserAnswerProcessed = ({ userAnswer, result, state, rubric, selecte
 type UserListAnswersProps = {
   usersAnswers: Answer[];
   setUserAnswers: React.Dispatch<React.SetStateAction<Answer[]>>;
-  onTryRubricOnAnswer: (userAnswer: UserAnswer, userAnswerId: string) => Promise<void>;
-  onTryRubricOnAnswers: () => Promise<void>;
+  // onTryRubricOnAnswer: (userAnswer: UserAnswer, userAnswerId: string) => Promise<void>;
+  onTryRubricOnAnswers: (userAnswersToTry: Answer[]) => Promise<void>;
   questionId: string;
 };
 
@@ -307,7 +385,7 @@ const validationSchema = yup.object({
 export const UserListAnswers = ({
   setUserAnswers,
   usersAnswers,
-  onTryRubricOnAnswer,
+  // onTryRubricOnAnswer,
   onTryRubricOnAnswers,
   questionId,
 }: UserListAnswersProps) => {
@@ -315,18 +393,18 @@ export const UserListAnswers = ({
   // const [userAnswersCopy,setUserAnswersCopy]=UserStatus
   const [userAnswersCopy, setUserAnswersCopy] = useState<Answer[]>([]);
   const [users, setUsers] = useState<User[]>([]);
-  const [tryingUserAnswerIdx, setTryingUserAnswerIdx] = useState(-1);
+  // const [tryingUserAnswerIdx, setTryingUserAnswerIdx] = useState(-1);
   const [newAnswerId, setNewAnswerId] = useState("");
   // const [isPending, startTransition] = useTransition();
 
-  const onTryUserAnswer = async (userAnswer: Answer, idx: number) => {
-    setTryingUserAnswerIdx(idx);
-    await onTryRubricOnAnswer(
-      { answer: userAnswer.answer, user: userAnswer.user, userImage: userAnswer.userImage },
-      userAnswer.id
-    );
-    setTryingUserAnswerIdx(-1);
-  };
+  // const onTryUserAnswer = async (userAnswer: Answer, idx: number) => {
+  //   setTryingUserAnswerIdx(idx);
+  //   await onTryRubricOnAnswer(
+  //     { answer: userAnswer.answer, user: userAnswer.user, userImage: userAnswer.userImage },
+  //     userAnswer.id
+  //   );
+  //   setTryingUserAnswerIdx(-1);
+  // };
 
   const onAddUserAnswer = () => {
     const randomUser = users[Math.floor(Math.random() * users.length - 1)];
@@ -440,10 +518,12 @@ export const UserListAnswers = ({
                       <CustomButton
                         variant="contained"
                         size="small"
-                        onClick={() => onTryUserAnswer(cur, idx)}
-                        disabled={tryingUserAnswerIdx >= 0 || formik.isSubmitting}
+                        onClick={() => onTryRubricOnAnswers([cur])}
+                        // disabled={tryingUserAnswerIdx >= 0 || formik.isSubmitting}
                       >
-                        {((!tryingUserAnswerIdx && tryingUserAnswerIdx !== idx) || tryingUserAnswerIdx === -1) && (
+                        <PlayArrowIcon sx={{ mr: "4px" }} />
+                        Grade
+                        {/* {((!tryingUserAnswerIdx && tryingUserAnswerIdx !== idx) || tryingUserAnswerIdx === -1) && (
                           <PlayArrowIcon sx={{ mr: "4px" }} />
                         )}
                         {tryingUserAnswerIdx !== idx || tryingUserAnswerIdx === -1 ? (
@@ -453,7 +533,7 @@ export const UserListAnswers = ({
                             Grading
                             <CircularProgress size={"15px"} sx={{ ml: "8px", color: "white" }} />
                           </>
-                        )}
+                        )} */}
                       </CustomButton>
                     )}
                   </Stack>
@@ -464,7 +544,11 @@ export const UserListAnswers = ({
         ))}
         <Divider />
         <Stack direction={"row-reverse"} justifyContent={"space-between"} spacing={"8px"} sx={{ mt: "12px" }}>
-          <CustomButton variant="contained" onClick={onTryRubricOnAnswers} disabled={!userAnswersCopy.length}>
+          <CustomButton
+            variant="contained"
+            onClick={() => onTryRubricOnAnswers(usersAnswers)}
+            disabled={!userAnswersCopy.length}
+          >
             <PlayArrowIcon sx={{ mr: "4px" }} />
             Grade All
           </CustomButton>

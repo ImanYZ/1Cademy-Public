@@ -24,6 +24,12 @@ type RubricsEditorProps = {
 
 export type UserAnswer = { user: string; userImage: string; answer: string };
 
+export type SelectedUserAnswer = {
+  userAnswerId: string;
+  userAnswer: UserAnswer;
+  result: TryRubricResponse[];
+} | null;
+
 // export type UserAnswerProcessed = UserAnswer & { points: number };
 
 const generateEmptyRubric = (questionId: string, username: string): Rubric => ({
@@ -46,6 +52,7 @@ export const RubricsEditor = ({ question, username, onReturnToQuestions, onSetQu
   const [disableAddRubric, setDisableAddRubric] = useState(false);
   // const [selectedTryUserAnswer, setSelectedTryUserAnswer] = useState<UserAnswerData | null>(null);
   const [selectedRubricItem, setSelectedRubricItem] = useState<{ index: Number } | null>(null);
+  const [selectedUserAnswer, setSelectedUserAnswer] = useState<SelectedUserAnswer>(null);
 
   // const [userAnswerGraded, setUserAnswersGraded] = useState([]);
 
@@ -122,38 +129,49 @@ export const RubricsEditor = ({ question, username, onReturnToQuestions, onSetQu
     return [...sorted, ...(thereIsNeRubric ? rubrics.filter(c => c.id === editedRubric.data.id) : [])];
   }, [editedRubric, rubrics]);
 
-  const onTryRubricOnAnswer = useCallback(
-    async (userAnswer: UserAnswer, userAnswerId: string) => {
-      const response: TryRubricResponse[] = await Post("/assignment/tryRubric", {
-        essayText: userAnswer.answer,
-        rubrics: tryRubric,
+  // const onTryRubricOnAnswer = useCallback(
+  //   async (userAnswer: UserAnswer, userAnswerId: string) => {
+  //     const response: TryRubricResponse[] = await Post("/assignment/tryRubric", {
+  //       essayText: userAnswer.answer,
+  //       rubrics: tryRubric,
+  //     });
+  //     setTryUserAnswers([{ userAnswerId, userAnswer, result: response, state: "IDLE" }]);
+  //     // setSelectedTryUserAnswer({ userAnswer, result: response, state: "IDLE" });
+  //   },
+  //   [tryRubric]
+  // );
+
+  const onTryRubricOnAnswers = useCallback(
+    async (userAnswersToTry: Answer[]) => {
+      setTryUserAnswers(
+        userAnswersToTry.map(c => ({ userAnswerId: c.id, userAnswer: c, result: [], state: "LOADING" }))
+      );
+      userAnswersToTry.forEach(async (cur, idx) => {
+        try {
+          const response: TryRubricResponse[] = await Post("/assignment/tryRubric", {
+            essayText: cur.answer,
+            rubrics: tryRubric,
+          });
+
+          setTryUserAnswers(prev => {
+            return prev.map(c => {
+              const newValue: UserAnswerData = { ...c, result: response, state: "IDLE" };
+              return cur.id === c.userAnswerId ? { ...newValue } : { ...c };
+            });
+          });
+          if (userAnswersToTry.length === 1)
+            setSelectedUserAnswer({
+              result: response,
+              userAnswer: { answer: cur.answer, user: cur.answer, userImage: cur.userImage },
+              userAnswerId: cur.id,
+            });
+        } catch (error) {
+          setTryUserAnswers(prev => prev.map((c, i) => (i === idx ? { ...c, state: "ERROR" } : c)));
+        }
       });
-      setTryUserAnswers([{ userAnswerId, userAnswer, result: response, state: "IDLE" }]);
-      // setSelectedTryUserAnswer({ userAnswer, result: response, state: "IDLE" });
     },
     [tryRubric]
   );
-
-  const onTryRubricOnAnswers = useCallback(async () => {
-    setTryUserAnswers(usersAnswers.map(c => ({ userAnswerId: c.id, userAnswer: c, result: [], state: "LOADING" })));
-    usersAnswers.forEach(async (cur, idx) => {
-      try {
-        const response: TryRubricResponse[] = await Post("/assignment/tryRubric", {
-          essayText: cur.answer,
-          rubrics: tryRubric,
-        });
-
-        setTryUserAnswers(prev => {
-          return prev.map(c => {
-            const newValue: UserAnswerData = { ...c, result: response, state: "IDLE" };
-            return cur.id === c.userAnswerId ? { ...newValue } : { ...c };
-          });
-        });
-      } catch (error) {
-        setTryUserAnswers(prev => prev.map((c, i) => (i === idx ? { ...c, state: "ERROR" } : c)));
-      }
-    });
-  }, [tryRubric, usersAnswers]);
 
   useEffect(() => {
     if (!tryRubric) return;
@@ -236,6 +254,7 @@ export const RubricsEditor = ({ question, username, onReturnToQuestions, onSetQu
                   tryUserAnswers={tryUserAnswers}
                   onSelectRubricItem={setSelectedRubricItem}
                   selectedRubricItem={selectedRubricItem}
+                  selectedUserAnswer={selectedUserAnswer}
                 />
               )
             )}
@@ -290,7 +309,6 @@ export const RubricsEditor = ({ question, username, onReturnToQuestions, onSetQu
           <UserListAnswers
             usersAnswers={usersAnswers}
             setUserAnswers={setUserAnswers}
-            onTryRubricOnAnswer={onTryRubricOnAnswer}
             onTryRubricOnAnswers={onTryRubricOnAnswers}
             questionId={question.id}
           />
@@ -306,16 +324,21 @@ export const RubricsEditor = ({ question, username, onReturnToQuestions, onSetQu
           onBack={() => {
             setTryUserAnswers([]);
             setSelectedRubricItem(null);
+            setSelectedUserAnswer(null);
             // setSelectedTryUserAnswer(null);
           }}
           selectedRubricItem={selectedRubricItem}
-          // onSelectUserAnswer={setSelectedTryUserAnswer}
+          onSelectUserAnswer={setSelectedUserAnswer}
+          selectedUserAnswer={selectedUserAnswer}
         />
       )}
 
       {tryRubric && (
         <IconButton
-          onClick={() => setTryRubric(null)}
+          onClick={() => {
+            setTryRubric(null);
+            setSelectedUserAnswer(null);
+          }}
           size="small"
           sx={{
             position: "absolute",

@@ -16,7 +16,7 @@ import { DESIGN_SYSTEM_COLORS } from "@/lib/theme/colors";
 import shortenNumber from "@/lib/utils/shortenNumber";
 
 import { CustomButton, CustomWrapperButton } from "../Buttons/Buttons";
-import { UserAnswer } from "./RubricsEditor";
+import { SelectedUserAnswer, UserAnswer } from "./RubricsEditor";
 import { getColorFromResult } from "./UserAnswers";
 
 const NO_RUBRICS_MESSAGE = "No Rubric Items";
@@ -36,6 +36,7 @@ type RubricItemProps = {
   }[];
   onSelectRubricItem: (params: { index: Number } | null) => void;
   selectedRubricItem: { index: Number } | null;
+  selectedUserAnswer: SelectedUserAnswer;
 };
 
 export const RubricItem = ({
@@ -50,6 +51,7 @@ export const RubricItem = ({
   tryUserAnswers,
   onSelectRubricItem,
   selectedRubricItem,
+  selectedUserAnswer,
 }: RubricItemProps) => {
   const theme = useTheme();
 
@@ -150,8 +152,8 @@ export const RubricItem = ({
                     width: "100%",
                     flexGrow: 1,
                     ...(isSelected &&
-                      tryUserAnswers.length === 1 && {
-                        backgroundColor: getColorFromResult(tryUserAnswers[0].result[i], theme.palette.mode),
+                      selectedUserAnswer && {
+                        backgroundColor: getColorFromResult(selectedUserAnswer.result[i], theme.palette.mode),
                       }),
                   }}
                 />
