@@ -14,10 +14,9 @@ export type IAssistantGetNotebooksPayload = {
 async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
   try {
     const userData = req.body.data.user.userData as IUser;
-    console.log(userData);
     const instrutor = await db.collection("instructors").where("uname", "==", userData.uname).get();
     if (instrutor.docs.length) {
-      return res.status(200).send(false);
+      return res.status(200).send(true);
     } else {
       return res.status(200).send(false);
     }
