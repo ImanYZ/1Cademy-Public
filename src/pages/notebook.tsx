@@ -1913,6 +1913,22 @@ const Notebook = ({}: NotebookProps) => {
     return () => window.removeEventListener("node-selection", listener);
   }, [nodeBookDispatch, notebookRef]);
 
+  //send id token to assistant extension
+  useEffect(() => {
+    const sendToken = async () => {
+      const idToken = await getIdToken();
+      const nodeClickEvent = new CustomEvent("notebook-id-token", {
+        detail: {
+          idToken,
+        },
+      });
+      window.dispatchEvent(nodeClickEvent);
+    };
+    setInterval(() => {
+      sendToken();
+    }, 10 * 1000);
+  }, []);
+
   const onChangeChosenNode = useCallback(
     async ({ nodeId, title }: OnChangeChosenNode) => {
       if (!notebookRef.current.choosingNode) return;
