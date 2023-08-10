@@ -1,6 +1,15 @@
+import { db } from "@/lib/firestoreServer/admin";
 import { NextApiRequest, NextApiResponse } from "next";
 import { Rubric } from "src/client/firestore/questions.firestore";
 import { generateQuestionNode, sendGPTPrompt } from "src/utils/assistant-helpers";
+
+type UserAnswerFromCache = {
+  questionId: string;
+  rubricId: string;
+  userAnswer: string;
+  result: any[];
+  createdAt: Date;
+};
 
 async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
   try {
@@ -8,6 +17,25 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
     // const { essayText, rubrics } = req.body;
     const essayText: string = req.body.essayText;
     const rubrics: Rubric = req.body.rubrics;
+
+    //---------
+    // get from cache the answer
+    const questionId = rubrics.questionId;
+    const rubricId = rubrics.id;
+    const userAnswersCache = await db
+      .collection("answerResultFromCache")
+      .where("questionId", "==", questionId)
+      .where("rubricId", "==", rubricId)
+      .where("userAnswer", "==", essayText)
+      .limit(1)
+      .get();
+    if (userAnswersCache.docs.length) {
+      const userAnswerFromCache = userAnswersCache.docs[0].data() as UserAnswerFromCache;
+      console.log("from-cache");
+      return res.status(200).json(userAnswerFromCache.result);
+    }
+    //---------
+
     console.log("generateQuestionNode", essayText, rubrics);
 
     const extractArray = (arrayString: any) => {
@@ -45,7 +73,20 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
 
     const responseArray = JSON.parse(extractArray(gptResponse));
 
-    // console.log({ essayText });
+    // ------------
+    // save on cache the result of the user answer
+    const userAnswerData: UserAnswerFromCache = {
+      questionId,
+      rubricId,
+      userAnswer: essayText,
+      createdAt: new Date(),
+      result: responseArray,
+    };
+
+    const userNodeRef = db.collection("answerResultFromCache").doc();
+    userNodeRef.set(userAnswerData); //INFO: we don't wait this because we want to return ASAP
+    // ------------
+    console.log("not-from-cache");
     return res.status(200).json(responseArray);
   } catch (error) {
     console.error(error);
