@@ -2,11 +2,12 @@ import { getAuth, User } from "firebase/auth";
 import React, { useEffect } from "react";
 
 import { getIdToken } from "@/lib/firestoreClient/auth";
+import { getAssistantExtensionId } from "@/lib/utils/assistant.utils";
 import { devLog } from "@/lib/utils/develop.util";
 
 export const Iframe = () => {
   useEffect(() => {
-    const connection = chrome.runtime.connect({ name: "iframeConnection" });
+    const connection = chrome.runtime.connect(getAssistantExtensionId() || "", { name: "iframeConnection" });
 
     connection.onMessage.addListener(message => {
       if (message.type === "REQUEST_ID_TOKEN") {
@@ -18,6 +19,8 @@ export const Iframe = () => {
             token: idToken,
           });
         })();
+      } else if (message.type === "EXTENSION_ID") {
+        localStorage.setItem("ASSISTANT_EXTENSION_ID", message.extensionId);
       }
     });
 
