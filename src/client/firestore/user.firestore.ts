@@ -1,4 +1,4 @@
-import { collection, doc, Firestore, getDoc, getDocs, query, where } from "firebase/firestore";
+import { collection, doc, Firestore, getDoc, getDocs, limit, query, where } from "firebase/firestore";
 
 import { User } from "../../knowledgeTypes";
 
@@ -19,4 +19,14 @@ export const getUserByUname = async (db: Firestore, uname: string): Promise<User
 
   querySnapshot.forEach(c => users.push(c.data() as User));
   return users[0] ?? null;
+};
+
+export const getNUsers = async (db: Firestore, n: number): Promise<User[]> => {
+  const userRef = collection(db, "users");
+  const q = query(userRef, limit(n));
+  const querySnapshot = await getDocs(q);
+  const users: User[] = [];
+
+  querySnapshot.forEach(c => users.push(c.data() as User));
+  return users;
 };

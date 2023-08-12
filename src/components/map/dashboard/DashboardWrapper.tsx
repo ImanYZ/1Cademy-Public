@@ -84,7 +84,7 @@ export const DashboardWrapper = forwardRef<DashboardWrapperRef, DashboardWrapper
   const [selectToolbarView, setSelectToolbarView] = useState<ToolbarView>("DASHBOARD");
 
   const [selectedStudent, setSelectedStudent] = useState<User | null>(null);
-
+  const [toolbarIsCollapsed, setToolbarIsCollapsed] = useState(false);
   const [, /* isLoading */ setIsLoading] = useState(true);
   const [rootFound, setRootFound] = useState<boolean>(false);
 
@@ -273,7 +273,8 @@ export const DashboardWrapper = forwardRef<DashboardWrapperRef, DashboardWrapper
       sx={{
         ...sx,
         display: "grid",
-        gridTemplateColumns: "200px auto",
+        gridTemplateColumns: toolbarIsCollapsed ? "80px auto" : "200px auto",
+        transition: "0.2s",
         gridTemplateRows: "100%",
         // border: "solid 2px yellow",
         background: theme =>
@@ -291,6 +292,8 @@ export const DashboardWrapper = forwardRef<DashboardWrapperRef, DashboardWrapper
         user={user}
         onClose={onClose}
         view={selectToolbarView}
+        isCollapsed={toolbarIsCollapsed}
+        setIsCollapsed={setToolbarIsCollapsed}
       />
       <Box
         sx={{
