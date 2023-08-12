@@ -308,7 +308,7 @@ export const UserAnswerProcessed = ({
         },
       }}
     >
-      <Stack direction={"row"} justifyContent={"space-between"} alignItems={"center"} sx={{ mb: "18px" }}>
+      <Stack direction={"row"} justifyContent={"space-between"} alignItems={"center"} sx={{ mb: "12px" }}>
         <Stack direction={"row"} spacing={"12px"} alignItems={"center"}>
           <OptimizedAvatar2 imageUrl={userAnswer.userImage} alt={`${userAnswer.user} profile picture`} size={40} />
           <Typography sx={{ fontWeight: 600 }}>{userAnswer.user}</Typography>
@@ -483,25 +483,9 @@ export const UserListAnswers = ({
                     </Stack>
 
                     {newAnswerId !== cur.id && (
-                      <CustomButton
-                        variant="contained"
-                        size="small"
-                        onClick={() => onTryRubricOnAnswers([cur])}
-                        // disabled={tryingUserAnswerIdx >= 0 || formik.isSubmitting}
-                      >
+                      <CustomButton variant="contained" size="small" onClick={() => onTryRubricOnAnswers([cur])}>
                         <PlayArrowIcon sx={{ mr: "4px" }} />
                         Grade
-                        {/* {((!tryingUserAnswerIdx && tryingUserAnswerIdx !== idx) || tryingUserAnswerIdx === -1) && (
-                          <PlayArrowIcon sx={{ mr: "4px" }} />
-                        )}
-                        {tryingUserAnswerIdx !== idx || tryingUserAnswerIdx === -1 ? (
-                          "Grade"
-                        ) : (
-                          <>
-                            Grading
-                            <CircularProgress size={"15px"} sx={{ ml: "8px", color: "white" }} />
-                          </>
-                        )} */}
                       </CustomButton>
                     )}
                   </Stack>
