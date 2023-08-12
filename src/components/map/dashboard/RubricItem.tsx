@@ -4,7 +4,7 @@ import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import DeleteIcon from "@mui/icons-material/Delete";
 import DoneIcon from "@mui/icons-material/Done";
 import EditIcon from "@mui/icons-material/Edit";
-import { Box, Button, Divider, IconButton, List, Stack, TextField, Tooltip, Typography, useTheme } from "@mui/material";
+import { Box, Button, Divider, IconButton, Stack, TextField, Tooltip, Typography, useTheme } from "@mui/material";
 import { FieldArray, Formik, FormikHelpers } from "formik";
 import React, { useMemo } from "react";
 import { Rubric, RubricItemType } from "src/client/firestore/questions.firestore";
@@ -167,7 +167,6 @@ export const RubricItem = ({
           ))}
         </tbody>
       </Box>
-      <List /* component={"ul"} spacing={"4px"}  */ /* sx={{ pl: "16px" }} */></List>
       <Stack direction={"row"} justifyContent={"space-between"} alignItems={"center"}>
         <Stack direction={"row"} alignItems={"center"} spacing={"8px"}>
           {!isSelected && (

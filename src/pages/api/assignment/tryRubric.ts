@@ -18,7 +18,6 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
     const essayText: string = req.body.essayText;
     const rubrics: Rubric = req.body.rubrics;
 
-    //---------
     // get from cache the answer
     const questionId = rubrics.questionId;
     const rubricId = rubrics.id;
@@ -34,7 +33,6 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
       console.log("from-cache");
       return res.status(200).json(userAnswerFromCache.result);
     }
-    //---------
 
     console.log("generateQuestionNode", essayText, rubrics);
 
@@ -73,7 +71,6 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
 
     const responseArray = JSON.parse(extractArray(gptResponse));
 
-    // ------------
     // save on cache the result of the user answer
     const userAnswerData: UserAnswerFromCache = {
       questionId,
@@ -85,7 +82,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
 
     const userNodeRef = db.collection("answerResultFromCache").doc();
     userNodeRef.set(userAnswerData); //INFO: we don't wait this because we want to return ASAP
-    // ------------
+
     console.log("not-from-cache");
     return res.status(200).json(responseArray);
   } catch (error) {

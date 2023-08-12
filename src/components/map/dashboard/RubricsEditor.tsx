@@ -129,18 +129,6 @@ export const RubricsEditor = ({ question, username, onReturnToQuestions, onSetQu
     return [...sorted, ...(thereIsNeRubric ? rubrics.filter(c => c.id === editedRubric.data.id) : [])];
   }, [editedRubric, rubrics]);
 
-  // const onTryRubricOnAnswer = useCallback(
-  //   async (userAnswer: UserAnswer, userAnswerId: string) => {
-  //     const response: TryRubricResponse[] = await Post("/assignment/tryRubric", {
-  //       essayText: userAnswer.answer,
-  //       rubrics: tryRubric,
-  //     });
-  //     setTryUserAnswers([{ userAnswerId, userAnswer, result: response, state: "IDLE" }]);
-  //     // setSelectedTryUserAnswer({ userAnswer, result: response, state: "IDLE" });
-  //   },
-  //   [tryRubric]
-  // );
-
   const onTryRubricOnAnswers = useCallback(
     async (userAnswersToTry: Answer[]) => {
       setTryUserAnswers(
@@ -318,14 +306,11 @@ export const RubricsEditor = ({ question, username, onReturnToQuestions, onSetQu
       {tryRubric && Boolean(tryUserAnswers.length) && (
         <UserAnswersProcessed
           data={tryUserAnswers}
-          // result={tryUserAnswer.result}
           rubric={tryRubric}
-          // userAnswer={tryUserAnswer.userAnswer}
           onBack={() => {
             setTryUserAnswers([]);
             setSelectedRubricItem(null);
             setSelectedUserAnswer(null);
-            // setSelectedTryUserAnswer(null);
           }}
           selectedRubricItem={selectedRubricItem}
           onSelectUserAnswer={setSelectedUserAnswer}
