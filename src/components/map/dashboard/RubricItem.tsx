@@ -147,7 +147,7 @@ export const RubricItem = ({
             >
               <Box component={"td"} sx={{ p: "8px 4px" }}>
                 <MarkdownRender
-                  text={c.prompt + "x"}
+                  text={c.prompt}
                   sx={{
                     width: "100%",
                     flexGrow: 1,

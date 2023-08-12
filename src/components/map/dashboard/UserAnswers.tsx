@@ -10,6 +10,9 @@ import { Rubric, RubricItemType } from "src/client/firestore/questions.firestore
 import { getNUsers } from "src/client/firestore/user.firestore";
 import { User } from "src/knowledgeTypes";
 import { TryRubricResponse } from "src/types";
+import stringSimilarity from "string-similarity-js";
+import model from "wink-eng-lite-web-model";
+import winkNLP from "wink-nlp";
 import * as yup from "yup";
 
 import OptimizedAvatar2 from "@/components/OptimizedAvatar2";
@@ -18,6 +21,8 @@ import { newId } from "@/lib/utils/newFirestoreId";
 
 import { CustomButton } from "../Buttons/Buttons";
 import { SelectedUserAnswer, UserAnswer } from "./RubricsEditor";
+
+const nlp = winkNLP(model);
 
 type UserAnswerState = "LOADING" | "ERROR" | "IDLE";
 
@@ -101,8 +106,8 @@ export const UserAnswersProcessed = ({
     >
       <Stack direction={"row"} justifyContent={"space-between"} sx={{ p: "24px" }}>
         <CustomButton variant="contained" color="secondary" onClick={onBack}>
-          <KeyboardArrowLeftIcon sx={{ mr: "10px" }} />
-          Back
+          <KeyboardArrowLeftIcon sx={{ mr: "4px" }} />
+          <Typography sx={{ mr: "6px" }}>Back</Typography>
         </CustomButton>
         {data.length > 1 && (
           <TextField
@@ -282,29 +287,13 @@ export const UserAnswerProcessed = ({
   const theme = useTheme();
   const points = useMemo(() => getPointsFromResult(result, rubric.prompts), [result, rubric.prompts]);
 
-  const replaceSentences = (sentences: string[], text: string, color: string) => {
-    return sentences.reduce((acu, cur) => {
-      const result = cur.replace(/^[\(\[.?!]|[\)\].?!]$/g, "");
-      return acu.replace(result, `<span style=background-color:${color}>${result}</span>`);
-    }, text);
-  };
-
   const resultHighlighted = useMemo(() => {
     return result.reduce((acu: string, cur, idx) => {
       const isHighlighted = Boolean(selectedRubricItem && selectedRubricItem.index === idx);
       const color = getColorFromResult(cur, theme.palette.mode, isHighlighted);
-      if (color) return replaceSentences(cur.sentences, acu, color);
-      return acu;
+      return color ? highlightSentences({ color, sentences: cur.sentences, text: acu }) : acu;
     }, userAnswer.answer);
   }, [result, selectedRubricItem, theme.palette.mode, userAnswer.answer]);
-
-  // const resultsHighlighted = useMemo(() => {
-  //   return result.map((acu: string, cur) => {
-  //     const color = getColorFromResult(cur,selectedRubricItem);
-  //     if (color) return replaceSentences(cur.sentences, acu, color);
-  //     return acu;
-  //   }, userAnswer.answer);
-  // }, [result, userAnswer.answer]);
 
   return (
     <Stack
@@ -598,4 +587,36 @@ export const getHelperTextFromResult = (resultItem: TryRubricResponse): string =
 
 const getPointsFromResult = (result: TryRubricResponse[], prompts: RubricItemType[]) => {
   return result.reduce((acu, cur, index) => acu + (cur.correct === "YES" ? Number(prompts[index]?.point) ?? 0 : 0), 0);
+};
+
+type HighlightSentencesInput = { sentences: string[]; text: string; color: string };
+/**
+ * this function highlight and approximation using NPL and a threshold
+ * like this is non-deterministic problem, we can't create a test
+ */
+export const highlightSentences = ({ sentences, text, color }: HighlightSentencesInput) => {
+  const threshold = 0.9;
+  const tt = sentences.reduce((acuHightLight, curSentence) => {
+    const fixedSentence = curSentence.replace(/^[\(\[.?!]|[\)\].?!]$/g, "");
+    const sentenceIsOnText = acuHightLight.includes(fixedSentence);
+
+    let similarResult = fixedSentence;
+    if (!sentenceIsOnText) {
+      const doc = nlp.readDoc(text);
+      const textSentences = doc.sentences().out();
+      const { sentence, score } = textSentences.reduce(
+        (acu: { score: number; sentence: string }, cur) => {
+          const score = stringSimilarity(cur, fixedSentence);
+          return score > acu.score ? { score, sentence: cur } : acu;
+        },
+        { score: 0, sentence: "" }
+      );
+      if (score < threshold) return acuHightLight;
+      similarResult = sentence;
+    }
+    if (!similarResult) return acuHightLight;
+
+    return acuHightLight.replace(similarResult, `<span style=background-color:${color}>${similarResult}</span>`);
+  }, text);
+  return tt;
 };
