@@ -104,7 +104,7 @@ export const UserAnswersProcessed = ({
           palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookMainBlack : DESIGN_SYSTEM_COLORS.gray50,
       }}
     >
-      <Stack direction={"row"} justifyContent={"space-between"} sx={{ p: "24px" }}>
+      <Stack direction={"row"} justifyContent={"space-between"} sx={{ p: "24px 24px 12px 24px" }}>
         <CustomButton variant="contained" color="secondary" onClick={onBack}>
           <KeyboardArrowLeftIcon sx={{ mr: "4px" }} />
           <Typography sx={{ mr: "6px" }}>Back</Typography>
@@ -217,7 +217,7 @@ export const UserAnswersProcessed = ({
       )}
       {(data.length === 1 || thresholdByPoints === 0) &&
         dataSorted.map((cur, idx) => (
-          <Box key={idx} sx={{ p: "24px" }}>
+          <Box key={idx} sx={{ p: "4px 10px" }}>
             <UserAnswerProcessed
               result={cur.result}
               userAnswer={cur.userAnswer}
@@ -240,27 +240,6 @@ export const UserAnswersProcessed = ({
             />
           </Box>
         ))}
-      {/* {dataAboveThreshold.map((cur, idx) => (
-        <UserAnswerProcessed
-          key={idx}
-          result={cur.result}
-          userAnswer={cur.userAnswer}
-          rubric={rubric}
-          state={cur.state}
-          onSelectUserAnswer={onSelectUserAnswer}
-        />
-      ))}
-      <Divider />
-      {dataBellowThreshold.map((cur, idx) => (
-        <UserAnswerProcessed
-          key={idx}
-          result={cur.result}
-          userAnswer={cur.userAnswer}
-          rubric={rubric}
-          state={cur.state}
-          onSelectUserAnswer={onSelectUserAnswer}
-        />
-      ))} */}
     </Box>
   );
 };
