@@ -21,6 +21,7 @@ import { CourseTag } from "src/instructorsTypes";
 import { ISemester, ISemesterStudent } from "src/types/ICourse";
 
 import { DESIGN_SYSTEM_COLORS } from "@/lib/theme/colors";
+import { Z_INDEX } from "@/lib/utils/constants";
 
 import { UserRole } from "../../knowledgeTypes";
 import { UserProfileSkeleton } from "./skeletons/UserProfileSkeleton";
@@ -35,6 +36,7 @@ type SemesterSelectProps = {
   role: UserRole;
   uname?: string;
   setCurrentSemester: (semester: CourseTag | null) => void;
+  isCollapsed: boolean;
 };
 
 export const SemesterSelect = ({
@@ -47,6 +49,7 @@ export const SemesterSelect = ({
   isMovil,
   role,
   uname,
+  isCollapsed,
 }: SemesterSelectProps) => {
   const db = getFirestore();
   const {
@@ -113,7 +116,7 @@ export const SemesterSelect = ({
         justifyContent: { xs: "center", sm: "space-between" },
       }}
     >
-      <Box sx={{ width: "170px", display: "flex", flexDirection: "column", gap: { xs: "16px", md: "16px" } }}>
+      <Box sx={{ width: "100%", display: "flex", flexDirection: "column", gap: { xs: "16px", md: "16px" } }}>
         <FormControl size={"small"}>
           <InputLabel id="semester-filter-labels">Semester</InputLabel>
           <Select
@@ -123,6 +126,9 @@ export const SemesterSelect = ({
             label="Semester"
             onChange={onChangeSemester}
             fullWidth
+            MenuProps={{
+              style: { zIndex: Z_INDEX.dashboard + 1 },
+            }}
           >
             {semesters.map((cur, idx) => (
               <MenuItem key={idx} value={cur.tagId}>
@@ -156,6 +162,8 @@ export const SemesterSelect = ({
                 aria-label="left aligned"
                 onClick={() => onChangeCourse(course)}
                 sx={{
+                  p: isCollapsed ? "6px 4px" : "",
+                  minWidth: "0px",
                   whiteSpace: " nowrap",
                   border: "none",
                   backgroundColor:
@@ -183,8 +191,8 @@ export const SemesterSelect = ({
                   alignItems={"center"}
                   sx={{ textOverflow: { overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" } }}
                 >
-                  <ArrowRightRoundedIcon fontSize="medium" />
-                  <Typography color={"inherit"} fontSize={"14px"}>
+                  {!isCollapsed && <ArrowRightRoundedIcon fontSize="medium" />}
+                  <Typography color={"inherit"} fontSize={isCollapsed ? "12px" : "14px"}>
                     {course}
                   </Typography>
                 </Stack>

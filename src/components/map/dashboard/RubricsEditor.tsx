@@ -4,6 +4,7 @@ import KeyboardDoubleArrowLeftIcon from "@mui/icons-material/KeyboardDoubleArrow
 import { Box, Divider, IconButton, Stack, Tooltip, Typography } from "@mui/material";
 import { getFirestore } from "firebase/firestore";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
+import { Answer, getAnswersByQuestion } from "src/client/firestore/answer.firestore";
 import { Question, Rubric, updateQuestion } from "src/client/firestore/questions.firestore";
 import { TryRubricResponse } from "src/types";
 
@@ -21,14 +22,13 @@ type RubricsEditorProps = {
   username: string;
 };
 
-// type RubricItemGenerated = {
-//   // key_phrase: string;
-//   keyPhrase: string;
-//   explanation: string;
-//   examples: string[];
-// };
-
 export type UserAnswer = { user: string; userImage: string; answer: string };
+
+export type SelectedUserAnswer = {
+  userAnswerId: string;
+  userAnswer: UserAnswer;
+  result: TryRubricResponse[];
+} | null;
 
 // export type UserAnswerProcessed = UserAnswer & { points: number };
 
@@ -41,37 +41,18 @@ const generateEmptyRubric = (questionId: string, username: string): Rubric => ({
   createdBy: username,
 });
 
-const USER_ANSWERS: UserAnswer[] = [
-  {
-    user: "Jimy 2000",
-    answer:
-      "The Great Depression was a severe worldwide economic downturn that lasted from 1929 to the late 1930s. It caused widespread unemployment, poverty, and a collapse in industrial production and trade, leading to significant social and political upheaval.",
-    userImage: "",
-  },
-  {
-    user: "Jimy 2010",
-    answer:
-      "The Great Depression refers to a catastrophic economic crisis that gripped the global economy during the 1930s. It originated in the United States with the stock market crash of 1929, causing a severe downturn in industrial production, trade, and employment. This period of widespread poverty, bank failures, and economic instability had far-reaching social and political consequences.",
-    userImage: "",
-  },
-  {
-    user: "Jimy 2030",
-    answer:
-      "The Great Depression, spanning from the late 1920s to the early 1940s, was a profound worldwide economic slump. Triggered by the crash of the U.S. stock market in 1929, it led to a sharp decline in consumer spending, mass unemployment, and severe deflation. The Great Depression fundamentally reshaped economic thinking and policy, prompting governments to adopt measures to prevent such catastrophic events in the future.",
-    userImage: "",
-  },
-];
-
 export const RubricsEditor = ({ question, username, onReturnToQuestions, onSetQuestions }: RubricsEditorProps) => {
   const db = getFirestore();
 
   const [rubrics, setRubrics] = useState<Rubric[]>(question.rubrics);
   const [editedRubric, setEditedRubric] = useState<{ data: Rubric; isNew: boolean; isLoading: boolean } | null>(null);
-  const [usersAnswers, setUserAnswers] = useState<UserAnswer[]>(USER_ANSWERS);
+  const [usersAnswers, setUserAnswers] = useState<Answer[]>([]);
   const [tryRubric, setTryRubric] = useState<Rubric | null>(null);
   const [tryUserAnswers, setTryUserAnswers] = useState<UserAnswerData[]>([]);
   const [disableAddRubric, setDisableAddRubric] = useState(false);
-  const [selectedTryUserAnswer, setSelectedTryUserAnswer] = useState<UserAnswerData | null>(null);
+  // const [selectedTryUserAnswer, setSelectedTryUserAnswer] = useState<UserAnswerData | null>(null);
+  const [selectedRubricItem, setSelectedRubricItem] = useState<{ index: Number } | null>(null);
+  const [selectedUserAnswer, setSelectedUserAnswer] = useState<SelectedUserAnswer>(null);
 
   // const [userAnswerGraded, setUserAnswersGraded] = useState([]);
 
@@ -148,32 +129,47 @@ export const RubricsEditor = ({ question, username, onReturnToQuestions, onSetQu
     return [...sorted, ...(thereIsNeRubric ? rubrics.filter(c => c.id === editedRubric.data.id) : [])];
   }, [editedRubric, rubrics]);
 
-  const onTryRubricOnAnswer = useCallback(
-    async (userAnswer: UserAnswer) => {
-      const response: TryRubricResponse[] = await Post("/assignment/tryRubric", {
-        essayText: userAnswer.answer,
-        rubrics: tryRubric,
+  const onTryRubricOnAnswers = useCallback(
+    async (userAnswersToTry: Answer[]) => {
+      setTryUserAnswers(
+        userAnswersToTry.map(c => ({ userAnswerId: c.id, userAnswer: c, result: [], state: "LOADING" }))
+      );
+      userAnswersToTry.forEach(async (cur, idx) => {
+        try {
+          const response: TryRubricResponse[] = await Post("/assignment/tryRubric", {
+            essayText: cur.answer,
+            rubrics: tryRubric,
+          });
+
+          setTryUserAnswers(prev => {
+            return prev.map(c => {
+              const newValue: UserAnswerData = { ...c, result: response, state: "IDLE" };
+              return cur.id === c.userAnswerId ? { ...newValue } : { ...c };
+            });
+          });
+          if (userAnswersToTry.length === 1)
+            setSelectedUserAnswer({
+              result: response,
+              userAnswer: { answer: cur.answer, user: cur.answer, userImage: cur.userImage },
+              userAnswerId: cur.id,
+            });
+        } catch (error) {
+          setTryUserAnswers(prev => prev.map((c, i) => (i === idx ? { ...c, state: "ERROR" } : c)));
+        }
       });
-      setTryUserAnswers([{ userAnswer, result: response, state: "IDLE" }]);
-      setSelectedTryUserAnswer({ userAnswer, result: response, state: "IDLE" });
     },
     [tryRubric]
   );
 
-  const onTryRubricOnAnswers = useCallback(async () => {
-    setTryUserAnswers(usersAnswers.map(c => ({ userAnswer: c, result: [], state: "LOADING" })));
-    usersAnswers.forEach(async (cur, idx) => {
-      try {
-        const response: TryRubricResponse[] = await Post("/assignment/tryRubric", {
-          essayText: cur.answer,
-          rubrics: tryRubric,
-        });
-        setTryUserAnswers(prev => prev.map((c, i) => (i === idx ? { ...c, result: response, state: "IDLE" } : c)));
-      } catch (error) {
-        setTryUserAnswers(prev => prev.map((c, i) => (i === idx ? { ...c, state: "ERROR" } : c)));
-      }
-    });
-  }, [tryRubric, usersAnswers]);
+  useEffect(() => {
+    if (!tryRubric) return;
+
+    const getQuestions = async () => {
+      const answers = await getAnswersByQuestion(db, question.id);
+      setUserAnswers(answers);
+    };
+    getQuestions();
+  }, [db, question.id, tryRubric]);
 
   useEffect(() => setRubrics(question.rubrics), [question.rubrics]);
 
@@ -236,13 +232,17 @@ export const RubricsEditor = ({ question, username, onReturnToQuestions, onSetQu
                   onTryIt={() => {
                     setTryRubric(cur);
                     setTryUserAnswers([]);
-                    setSelectedTryUserAnswer(null);
+                    setSelectedRubricItem(null);
+                    // setSelectedTryUserAnswer(null);
                   }}
                   onSave={onSaveRubric}
                   onDisplayForm={rubricIsEditable(cur, username) ? () => onDisplayForm(cur) : undefined}
                   onRemoveRubric={cur.createdBy === username ? () => onRemoveRubric(cur.id) : undefined}
-                  selected={tryRubric?.id === cur.id}
-                  tryUserAnswer={selectedTryUserAnswer}
+                  isSelected={tryRubric?.id === cur.id}
+                  tryUserAnswers={tryUserAnswers}
+                  onSelectRubricItem={setSelectedRubricItem}
+                  selectedRubricItem={selectedRubricItem}
+                  selectedUserAnswer={selectedUserAnswer}
                 />
               )
             )}
@@ -277,34 +277,12 @@ export const RubricsEditor = ({ question, username, onReturnToQuestions, onSetQu
                   <AddIcon sx={{ fontSize: "14px" }} />
                 </IconButton>
               </Stack>
-              {/* <CsvButton
-                BtnText={
-                  <>
-                    <UploadIcon sx={{ mr: "8px" }} />
-                    Upload User Answers
-                  </>
-                }
-                addNewData={data => setUserAnswers(data.rows as UserAnswer[])}
-                sx={{
-                  border: `solid 1px ${DESIGN_SYSTEM_COLORS.gray300}`,
-                  backgroundColor: theme =>
-                    theme.palette.mode === "dark"
-                      ? DESIGN_SYSTEM_COLORS.notebookMainBlack
-                      : DESIGN_SYSTEM_COLORS.baseWhite,
-                  color: theme =>
-                    theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.gray200 : DESIGN_SYSTEM_COLORS.gray700,
-                  ":hover": {
-                    backgroundColor: theme =>
-                      theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.baseGraphit : DESIGN_SYSTEM_COLORS.gray300,
-                  },
-                }}
-              /> */}
             </Stack>
           )}
         </Box>
       </Stack>
 
-      {tryRubric && (
+      {tryRubric && !tryUserAnswers.length && (
         <Box
           sx={{
             marginTop: "0px",
@@ -316,34 +294,36 @@ export const RubricsEditor = ({ question, username, onReturnToQuestions, onSetQu
               palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookMainBlack : DESIGN_SYSTEM_COLORS.gray50,
           }}
         >
-          {!tryUserAnswers.length && (
-            <UserListAnswers
-              usersAnswers={usersAnswers}
-              setUserAnswers={setUserAnswers}
-              onTryRubricOnAnswer={onTryRubricOnAnswer}
-              onTryRubricOnAnswers={onTryRubricOnAnswers}
-            />
-          )}
-
-          {Boolean(tryUserAnswers.length) && (
-            <UserAnswersProcessed
-              data={tryUserAnswers}
-              // result={tryUserAnswer.result}
-              rubric={tryRubric}
-              // userAnswer={tryUserAnswer.userAnswer}
-              onBack={() => {
-                setTryUserAnswers([]);
-                setSelectedTryUserAnswer(null);
-              }}
-              onSelectUserAnswer={setSelectedTryUserAnswer}
-            />
-          )}
+          <UserListAnswers
+            usersAnswers={usersAnswers}
+            setUserAnswers={setUserAnswers}
+            onTryRubricOnAnswers={onTryRubricOnAnswers}
+            questionId={question.id}
+          />
         </Box>
+      )}
+
+      {tryRubric && Boolean(tryUserAnswers.length) && (
+        <UserAnswersProcessed
+          data={tryUserAnswers}
+          rubric={tryRubric}
+          onBack={() => {
+            setTryUserAnswers([]);
+            setSelectedRubricItem(null);
+            setSelectedUserAnswer(null);
+          }}
+          selectedRubricItem={selectedRubricItem}
+          onSelectUserAnswer={setSelectedUserAnswer}
+          selectedUserAnswer={selectedUserAnswer}
+        />
       )}
 
       {tryRubric && (
         <IconButton
-          onClick={() => setTryRubric(null)}
+          onClick={() => {
+            setTryRubric(null);
+            setSelectedUserAnswer(null);
+          }}
           size="small"
           sx={{
             position: "absolute",
@@ -366,55 +346,10 @@ export const RubricsEditor = ({ question, username, onReturnToQuestions, onSetQu
             sx={{ transform: tryRubric ? "rotate(180deg)" : "rotate(0deg)", transition: "0.2s" }}
           />
         </IconButton>
-        // <CustomButton
-        //   onClick={() => setTryRubrics(null)}
-        //   variant="contained"
-        //   color="secondary"
-        //   sx={{ position: "absolute", left: "-24px", top: "70px" }}
-        // >
-
-        // </CustomButton>
       )}
-
-      {/* {tryRubrics && (
-        <CustomButton
-          onClick={() => setTryRubrics(null)}
-          variant="contained"
-          color="secondary"
-          sx={{ position: "absolute", right: "24px", top: "70px" }}
-        >
-          <KeyboardDoubleArrowLeftIcon
-            sx={{ transform: tryRubrics ? "rotate(180deg)" : "rotate(0deg)", transition: "0.2s" }}
-          />
-          {!tryRubrics && "Student’s work"}
-        </CustomButton>
-      )} */}
     </Box>
   );
 };
 
 const rubricIsEditable = (rubric: Rubric, userName: string) =>
   rubric.createdBy === userName && rubric.upvotesBy.length - rubric.downvotesBy.length <= 1;
-
-// function getRandomValuesFromArray(arr: any[], count: number) {
-//   const randomValues: any[] = [];
-//   const arrLength = arr.length;
-
-//   // Check if the count is not greater than the array length
-//   // if (count > arrLength) {
-//   //   console.warn("Requested count is greater than array length.");
-//   //   return [];
-//   // }
-
-//   const minCount = Math.min(arrLength, count);
-//   while (randomValues.length < minCount) {
-//     const randomIndex = Math.floor(Math.random() * arrLength);
-
-//     // Check if the index is unique
-//     if (!randomValues.includes(arr[randomIndex])) {
-//       randomValues.push(arr[randomIndex]);
-//     }
-//   }
-
-//   return randomValues;
-// }

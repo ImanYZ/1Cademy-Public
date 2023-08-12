@@ -4,9 +4,9 @@ import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import DeleteIcon from "@mui/icons-material/Delete";
 import DoneIcon from "@mui/icons-material/Done";
 import EditIcon from "@mui/icons-material/Edit";
-import { Box, Button, Divider, IconButton, Stack, TextField, Tooltip, Typography } from "@mui/material";
+import { Box, Button, Divider, IconButton, Stack, TextField, Tooltip, Typography, useTheme } from "@mui/material";
 import { FieldArray, Formik, FormikHelpers } from "formik";
-import React from "react";
+import React, { useMemo } from "react";
 import { Rubric, RubricItemType } from "src/client/firestore/questions.firestore";
 import { TryRubricResponse } from "src/types";
 import * as yup from "yup";
@@ -16,7 +16,7 @@ import { DESIGN_SYSTEM_COLORS } from "@/lib/theme/colors";
 import shortenNumber from "@/lib/utils/shortenNumber";
 
 import { CustomButton, CustomWrapperButton } from "../Buttons/Buttons";
-import { UserAnswer } from "./RubricsEditor";
+import { SelectedUserAnswer, UserAnswer } from "./RubricsEditor";
 import { getColorFromResult } from "./UserAnswers";
 
 const NO_RUBRICS_MESSAGE = "No Rubric Items";
@@ -29,11 +29,14 @@ type RubricItemProps = {
   onSave: (newRubric: Rubric) => Promise<void>;
   onDisplayForm?: () => void;
   onRemoveRubric?: () => void;
-  selected: boolean;
-  tryUserAnswer: {
+  isSelected: boolean;
+  tryUserAnswers: {
     userAnswer: UserAnswer;
     result: TryRubricResponse[];
-  } | null;
+  }[];
+  onSelectRubricItem: (params: { index: Number } | null) => void;
+  selectedRubricItem: { index: Number } | null;
+  selectedUserAnswer: SelectedUserAnswer;
 };
 
 export const RubricItem = ({
@@ -44,9 +47,14 @@ export const RubricItem = ({
   onSave,
   onDisplayForm,
   onRemoveRubric,
-  selected,
-  tryUserAnswer,
+  isSelected,
+  tryUserAnswers,
+  onSelectRubricItem,
+  selectedRubricItem,
+  selectedUserAnswer,
 }: RubricItemProps) => {
+  const theme = useTheme();
+
   const onUpVoteRubric = async () => {
     const wasUpVoted = rubric.upvotesBy.includes(username);
     const newUpvotes = wasUpVoted ? rubric.upvotesBy.filter(c => c !== username) : [...rubric.upvotesBy, username];
@@ -63,19 +71,25 @@ export const RubricItem = ({
     await onSave(newRubric);
   };
 
+  const userAnswerWhereProcessed = useMemo(() => {
+    return tryUserAnswers.reduce((a, c) => a || Boolean(c.result.length), false);
+  }, [tryUserAnswers]);
+
   return (
     <Box
       sx={{
         borderRadius: "4px",
         border: ({ palette }) =>
-          selected
+          isSelected
             ? `solid 2px ${DESIGN_SYSTEM_COLORS.primary800}`
             : `solid 1px ${
                 palette.mode === "light" ? DESIGN_SYSTEM_COLORS.gray300 : DESIGN_SYSTEM_COLORS.notebookG600
               }`,
         backgroundColor: ({ palette }) =>
-          selected
-            ? DESIGN_SYSTEM_COLORS.gray100
+          isSelected
+            ? palette.mode === "dark"
+              ? DESIGN_SYSTEM_COLORS.notebookG700
+              : DESIGN_SYSTEM_COLORS.gray100
             : palette.mode === "dark"
             ? DESIGN_SYSTEM_COLORS.notebookG900
             : DESIGN_SYSTEM_COLORS.gray50,
@@ -89,25 +103,73 @@ export const RubricItem = ({
       {!rubric.prompts.length && (
         <Typography sx={{ color: DESIGN_SYSTEM_COLORS.gray500 }}>{NO_RUBRICS_MESSAGE}</Typography>
       )}
-      <Box component={"ul"}>
-        {rubric.prompts.map((c, i) => (
-          <Box component={"li"} key={i}>
-            <MarkdownRender
-              text={c.prompt}
+
+      <Box component={"table"} sx={{ borderCollapse: "collapse" }}>
+        <tbody>
+          {rubric.prompts.map((c, i) => (
+            <Box
+              component={"tr"}
+              // component={"li"}
+              key={i}
               sx={{
-                display: "inline",
-                ...(selected && tryUserAnswer && { backgroundColor: getColorFromResult(tryUserAnswer.result[i]) }),
+                border: "solid 2px transparent",
+                borderRadius: "8px",
+                position: "relative",
+                borderBottom: theme =>
+                  `solid 2px ${
+                    theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookG600 : DESIGN_SYSTEM_COLORS.gray300
+                  }`,
+                ...(isSelected &&
+                  userAnswerWhereProcessed &&
+                  selectedRubricItem &&
+                  selectedRubricItem.index === i && {
+                    border: theme =>
+                      `solid 1px ${
+                        theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookG600 : DESIGN_SYSTEM_COLORS.gray300
+                      }`,
+                    backgroundColor: theme =>
+                      theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookG600 : DESIGN_SYSTEM_COLORS.gray300,
+                  }),
+                ...(isSelected &&
+                  userAnswerWhereProcessed && {
+                    cursor: "pointer",
+                    ":hover": {
+                      outline: theme =>
+                        `solid 2px ${
+                          theme.palette.mode === "dark"
+                            ? DESIGN_SYSTEM_COLORS.notebookG200
+                            : DESIGN_SYSTEM_COLORS.gray600
+                        }`,
+                    },
+                  }),
               }}
-            />{" "}
-            <Typography component={"span"}>
-              ({c.point} Point{c.point === 1 && "s"})
-            </Typography>
-          </Box>
-        ))}
+              onClick={() => (isSelected && userAnswerWhereProcessed ? onSelectRubricItem({ index: i }) : undefined)}
+            >
+              <Box component={"td"} sx={{ p: "8px 4px" }}>
+                <MarkdownRender
+                  text={c.prompt}
+                  sx={{
+                    width: "100%",
+                    flexGrow: 1,
+                    ...(isSelected &&
+                      selectedUserAnswer && {
+                        backgroundColor: getColorFromResult(selectedUserAnswer.result[i], theme.palette.mode),
+                      }),
+                  }}
+                />
+              </Box>
+              <Box component={"td"} sx={{ p: "8px 4px" }}>
+                <Typography sx={{ fontWeight: 600, fontSize: "12px", whiteSpace: "nowrap" }}>
+                  ({c.point} Point{c.point !== 1 && "s"})
+                </Typography>
+              </Box>
+            </Box>
+          ))}
+        </tbody>
       </Box>
       <Stack direction={"row"} justifyContent={"space-between"} alignItems={"center"}>
         <Stack direction={"row"} alignItems={"center"} spacing={"8px"}>
-          {!selected && (
+          {!isSelected && (
             <CustomButton variant="contained" onClick={onTryIt}>
               Try it
             </CustomButton>
@@ -217,8 +279,6 @@ export const RubricForm = ({ rubric, onSave, cancelFn }: RubricFormProps) => {
               alignItems={"center"}
               sx={{
                 borderRadius: "4px",
-                // border: `solid 1px ${DESIGN_SYSTEM_COLORS.gray``300}`,
-                // backgroundColor: DESIGN_SYSTEM_COLORS.gray100,``
                 p: "14px",
                 border: ({ palette }) =>
                   `solid 1px ${
@@ -228,29 +288,6 @@ export const RubricForm = ({ rubric, onSave, cancelFn }: RubricFormProps) => {
                   palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookG900 : DESIGN_SYSTEM_COLORS.gray50,
               }}
             >
-              {/* <Box sx={{ width: "100%" }}>
-                <Typography display={"inline"}>The student should earn </Typography>
-                <TextField
-                  label=""
-                  id="points"
-                  name="points"
-                  onChange={formik.handleChange}
-                  value={formik.values.points}
-                  error={formik.touched.points && formik.errors.hasOwnProperty("points")}
-                  helperText={formik.touched.points && formik.errors.points}
-                  onBlur={(event: React.FocusEvent<HTMLInputElement>) => {
-                    formik.handleBlur(event);
-                  }}
-                  size="small"
-                  sx={{ width: "50px" }}
-                  inputProps={{ style: { padding: "2px 10px", minWidth: "100px" } }}
-                />
-                <Typography display={"inline"}>
-                  {" "}
-                  point{formik.values.points === 1 ? "" : "s"} for mentioning each of the following rubric items in
-                  their answer:
-                </Typography>
-              </Box> */}
               {!formik.values.prompts.length && (
                 <Typography sx={{ color: DESIGN_SYSTEM_COLORS.gray500 }}>{NO_RUBRICS_MESSAGE}</Typography>
               )}
@@ -259,16 +296,6 @@ export const RubricForm = ({ rubric, onSave, cancelFn }: RubricFormProps) => {
                 name="prompts"
                 render={(arrayHelpers: any) => (
                   <>
-                    {/* <Stack
-                      // key={index}
-                      direction={"row"}
-                      sx={{ width: "100%" }}
-                      // alignItems={"flex-start"}
-                      spacing={"4px"}
-                    >
-                      
-                      
-                    </Stack> */}
                     <Typography sx={{ width: "100%" }}>The student's response should mention:</Typography>
 
                     <table>
@@ -361,71 +388,8 @@ export const RubricForm = ({ rubric, onSave, cancelFn }: RubricFormProps) => {
                             </tr>
                           );
                         })}
-                        {/* </tr> */}
                       </tbody>
                     </table>
-
-                    {/* {formik.values.prompts.map((prompt, index) => (
-                      
-                      // <Stack
-                      //   key={index}
-                      //   direction={"row"}
-                      //   sx={{ width: "100%" }}
-                      //   alignItems={"flex-start"}
-                      //   spacing={"4px"}
-                      // >
-                      //   <TextField
-                      //     label=""
-                      //     name={`prompts.${index}.prompt`}
-                      //     fullWidth
-                      //     multiline
-                      //     size="small"
-                      //     onChange={formik.handleChange}
-                      //     value={prompt.prompt}
-                      //     // error={Boolean(
-                      //     //   formik.touched.prompts
-                      //     //     ? (formik.touched.prompts as any)[index] &&
-                      //     //         formik.errors.prompts &&
-                      //     //         formik.errors.prompts[index]
-                      //     //     : false
-                      //     // )}
-                      //     // helperText={
-                      //     //   (Boolean(formik.touched.prompts) && (formik.touched.prompts as any))[index] &&
-                      //     //   formik.errors.prompts
-                      //     //     ? formik.errors.prompts[index] ?? ""
-                      //     //     : ""
-                      //     // }
-                      //     onBlur={(event: React.FocusEvent<HTMLInputElement>) => {
-                      //       formik.handleBlur(event);
-                      //     }}
-                      //   />
-
-                      //   <TextField
-                      //     label=""
-                      //     id="points"
-                      //     name={`prompts.${index}.point`}
-                      //     onChange={formik.handleChange}
-                      //     value={prompt.point}
-                      //     // error={formik.touched.points && formik.errors.hasOwnProperty("points")}
-                      //     // helperText={formik.touched.points && formik.errors.points}
-                      //     onBlur={(event: React.FocusEvent<HTMLInputElement>) => {
-                      //       formik.handleBlur(event);
-                      //     }}
-                      //     size="small"
-                      //     sx={{ width: "50px" }}
-                      //     inputProps={{}}
-                      //   />
-
-                      //   <Tooltip title="Remove Rubric Item">
-                      //     <IconButton
-                      //       type="button"
-                      //       onClick={() => arrayHelpers.remove(index)} // remove a friend from the list
-                      //     >
-                      //       <DeleteIcon />
-                      //     </IconButton>
-                      //   </Tooltip>
-                      // </Stack>
-                    ))} */}
 
                     {formik.errors.prompts && typeof formik.errors.prompts === "string" && formik.touched.prompts && (
                       <Typography sx={{ color: theme => theme.palette.error.main }}>{formik.errors.prompts}</Typography>
@@ -437,7 +401,7 @@ export const RubricForm = ({ rubric, onSave, cancelFn }: RubricFormProps) => {
                         color="secondary"
                         onClick={() => arrayHelpers.push({ prompt: "", point: 1 })}
                       >
-                        Add New Rubric Details <AddIcon />
+                        Add Rubric Item <AddIcon />
                       </CustomButton>
                       <Stack spacing={"8px"} direction={"row"}>
                         <CustomButton variant="contained" type="button" color="secondary" onClick={cancelFn}>
