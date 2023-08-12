@@ -71,7 +71,7 @@ const SignUpPage: NextPageWithLayout = () => {
     tagId: "r98BjyFDCe4YyLA3U8ZE",
     tag: "1Cademy",
     language: "English",
-    birthDate: "",
+    birthDate: null,
     gender: null,
     genderOtherValue: "",
     ethnicity: [],
