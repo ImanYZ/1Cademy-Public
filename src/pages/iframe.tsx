@@ -36,7 +36,7 @@ export const Iframe = () => {
       window.removeEventListener("assistant", listener);
     };
   }, []);
-  return <div></div>;
+  return <div>iframe</div>;
 };
 
 export default Iframe;

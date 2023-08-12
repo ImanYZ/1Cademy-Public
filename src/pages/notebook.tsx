@@ -79,7 +79,6 @@ import { useHover } from "@/hooks/userHover";
 import { useTagsTreeView } from "@/hooks/useTagsTreeView";
 // import { UploadConfirmation, useUploadImage } from "@/hooks/useUploadImage";
 import { DESIGN_SYSTEM_COLORS } from "@/lib/theme/colors";
-import { getAssistantExtensionId } from "@/lib/utils/assistant.utils";
 import { getTutorialTargetIdFromCurrentStep, removeStyleFromTarget } from "@/lib/utils/tutorials/tutorial.utils";
 
 import LoadingImg from "../../public/animated-icon-1cademy.gif";
@@ -1878,26 +1877,6 @@ const Notebook = ({}: NotebookProps) => {
     // [notebookRef.current.choosingNode, notebookRef.current.chosenNode]
   );
 
-  useEffect(() => {
-    // following event listener will help use sending id token to 1Cademy Assistant
-    const listener = (e: any) => {
-      const detail: IAssistantEventDetail = e.detail || {};
-      if (detail.type === "REQUEST_ID_TOKEN") {
-        (async () => {
-          const idToken = await getIdToken();
-          chrome.runtime.sendMessage(getAssistantExtensionId(), {
-            type: "NOTEBOOK_ID_TOKEN",
-            token: idToken,
-          });
-        })();
-      } else if (detail.type === "EXTENSION_ID") {
-        localStorage.setItem("ASSISTANT_EXTENSION_ID", detail.extensionId);
-      }
-    };
-    window.addEventListener("assistant", listener);
-    return () => window.removeEventListener("assistant", listener);
-  }, []);
-
   // assistant will allow to select a node
   useEffect(() => {
     const listener = (e: any) => {
@@ -1912,6 +1891,22 @@ const Notebook = ({}: NotebookProps) => {
     window.addEventListener("node-selection", listener);
     return () => window.removeEventListener("node-selection", listener);
   }, [nodeBookDispatch, notebookRef]);
+
+  //send id token to assistant extension
+  useEffect(() => {
+    const sendToken = async () => {
+      const idToken = await getIdToken();
+      const nodeClickEvent = new CustomEvent("notebook-id-token", {
+        detail: {
+          idToken,
+        },
+      });
+      window.dispatchEvent(nodeClickEvent);
+    };
+    setInterval(() => {
+      sendToken();
+    }, 10 * 1000);
+  }, []);
 
   const onChangeChosenNode = useCallback(
     async ({ nodeId, title }: OnChangeChosenNode) => {
