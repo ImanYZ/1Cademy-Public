@@ -418,7 +418,7 @@ export type User = {
   state?: string;
   // stateId?: string;// this is not used and not exist in DB
   education?: string;
-  birthDate?: string;
+  birthDate?: string | null;
   foundFrom: string;
   occupation: string;
   reason?: string;
@@ -589,7 +589,7 @@ export interface SignUpFormValues {
   tag: string;
   // -----------------------
   language: string;
-  birthDate: string;
+  birthDate: string | null;
   gender: string | null;
   genderOtherValue: string;
   ethnicity: string[];
@@ -624,6 +624,7 @@ export interface SignUpData extends Omit<User, "userId" | "role"> {
   background: UserBackground;
   theme: UserTheme;
   course?: string | null;
+  courseInstructor?: string | null;
 }
 
 export type ThemeActions = {

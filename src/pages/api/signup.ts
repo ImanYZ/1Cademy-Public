@@ -225,6 +225,50 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
         await getAuth().setCustomUserClaims(userRecord.uid, { student: true });
       }
     }
+    if (data?.courseInstructor) {
+      const semesterRef = db.collection("semesters").doc(data?.courseInstructor);
+      const semesterData = (await semesterRef.get()).data();
+      if (semesterData) {
+        let instructors = semesterData.instructors;
+        instructors.push(data.uname);
+        batch.update(semesterRef, {
+          instructors: instructors,
+        });
+        const newCourse = {
+          cTagId: semesterData.cTagId,
+          cTitle: semesterData.cTitle,
+          tagId: semesterData.tagId,
+          title: semesterData.title,
+          uTagId: semesterData.uTagId,
+          uTitle: semesterData.uTitle,
+        };
+
+        const instructorDoc = await db.collection("instructors").where("uname", "==", data.uname).get();
+        if (instructorDoc.empty) {
+          const instructorRef = db.collection("instructors").doc();
+          batch.set(instructorRef, {
+            uname: data.uname,
+            courses: [newCourse],
+            createdAt: Timestamp.fromDate(new Date()),
+            updatedAt: Timestamp.fromDate(new Date()),
+          });
+        } else {
+          const instructorRef = db.collection("instructors").doc(instructorDoc.docs[0].id);
+          const instructorData = instructorDoc.docs[0].data();
+          const courses = instructorData.courses;
+          if (courses.findIndex((course: any) => course.cTagId === semesterData.cTagId) === -1) {
+            courses.push(newCourse);
+            batch.update(instructorRef, {
+              courses,
+              updatedAt: Timestamp.fromDate(new Date()),
+            });
+          }
+        }
+        [batch, writeCounts] = await checkRestartBatchWriteCounts(batch, writeCounts);
+        [batch, writeCounts] = await createOrRestoreStatDocs(data?.course!, data.uname, batch, writeCounts);
+        await getAuth().setCustomUserClaims(userRecord.uid, { instructor: true });
+      }
+    }
 
     const currentTimestamp = admin.firestore.Timestamp.fromDate(new Date());
     userData = {
