@@ -52,82 +52,118 @@ const LivelinessBar = ({ open, setOpen, disabled = false, ...props }: ILivelines
     };
 
     const snapshotInitializer = () => {
-      setUsersInteractions({});
+      // Clearing count of interactions on initialization/re-initialization
+      setUsersInteractions(userInteractions => {
+        for (const uname in userInteractions) {
+          userInteractions[uname] = { ...userInteractions[uname] };
+          userInteractions[uname].count = 0;
+          userInteractions[uname].actions = [];
+        }
+        return { ...userInteractions };
+      });
+
+      // unsubscribe previous snapshot If exists
       unsubscribe.finalizer();
+
       const actionTracksCol = collection(db, "actionTracks24h");
       const q = query(actionTracksCol);
-      unsubscribe.finalizer = onSnapshot(q, async snapshot => {
+      unsubscribe.finalizer = onSnapshot(q, snapshot => {
         const docChanges = snapshot.docChanges();
-        for (const docChange of docChanges) {
-          const actionTrackData = docChange.doc.data() as IActionTrack;
-          // TODO: get user data
-          let doerEmail: string = "";
-          if (docChange.type === "added") {
-            if (!usersInteractions.hasOwnProperty(actionTrackData.doer)) {
-              if (authEmail === "oneweb@umich.edu") {
-                let userQuery = query(collection(db, "users"), where("uname", "==", actionTrackData.doer), limit(1));
-                let userDocs = await getDocs(userQuery);
-                if (userDocs.docs.length > 0) {
-                  doerEmail = userDocs.docs[0].data().email;
+        // Outer setUsersInteractions help us get latest values
+        setUsersInteractions(_usersInteractions => {
+          const usersInteractions = { ..._usersInteractions };
+
+          // Following sync wrap help us query user data during
+          // processing userInteractions came up in snapshot changes
+          (async () => {
+            for (const docChange of docChanges) {
+              const actionTrackData = docChange.doc.data() as IActionTrack;
+
+              let doerEmail: string = "";
+              if (docChange.type === "added") {
+                // Initializing user interaction prop with userData
+                if (!usersInteractions.hasOwnProperty(actionTrackData.doer)) {
+                  // If current user is Iman we show emails of user in livebar
+                  if (authEmail === "oneweb@umich.edu") {
+                    let userQuery = query(
+                      collection(db, "users"),
+                      where("uname", "==", actionTrackData.doer),
+                      limit(1)
+                    );
+                    let userDocs = await getDocs(userQuery);
+                    if (userDocs.docs.length > 0) {
+                      doerEmail = userDocs.docs[0].data().email;
+                    }
+                  }
+
+                  usersInteractions[actionTrackData.doer] = {
+                    imageUrl: actionTrackData.imageUrl,
+                    chooseUname: actionTrackData.chooseUname,
+                    fullname: actionTrackData.fullname,
+                    count: 0,
+                    actions: [],
+                    reputation: null,
+                    email: doerEmail,
+                  };
+                }
+
+                if (actionTrackData.type === "NodeVote") {
+                  if (actionTrackData.action !== "CorrectRM" && actionTrackData.action !== "WrongRM") {
+                    usersInteractions[actionTrackData.doer].actions.push(actionTrackData.action as ActionTrackType);
+                    usersInteractions[actionTrackData.doer].count += 1;
+                    for (const receiver of actionTrackData.receivers) {
+                      if (usersInteractions.hasOwnProperty(receiver)) {
+                        usersInteractions[receiver].reputation = actionTrackData.action === "Correct" ? "Gain" : "Loss";
+                      }
+                    }
+                  }
+                } else if (actionTrackData.type === "RateVersion") {
+                  if (actionTrackData.action.includes("Correct-") || actionTrackData.action.includes("Wrong-")) {
+                    const currentAction: ActionTrackType = actionTrackData.action.includes("Correct-")
+                      ? "Correct"
+                      : "Wrong";
+                    usersInteractions[actionTrackData.doer].actions.push(currentAction);
+                    usersInteractions[actionTrackData.doer].count += 1;
+                    for (const receiver of actionTrackData.receivers) {
+                      if (usersInteractions.hasOwnProperty(receiver)) {
+                        usersInteractions[receiver].reputation = currentAction === "Correct" ? "Gain" : "Loss";
+                      }
+                    }
+                  }
+                } else {
+                  usersInteractions[actionTrackData.doer].actions.push(actionTrackData.type as ActionTrackType);
+                  usersInteractions[actionTrackData.doer].count += 1;
                 }
               }
-              usersInteractions[actionTrackData.doer] = {
-                imageUrl: actionTrackData.imageUrl,
-                chooseUname: actionTrackData.chooseUname,
-                fullname: actionTrackData.fullname,
-                count: 0,
-                actions: [],
-                reputation: null,
-                email: doerEmail,
-              };
-            }
-            if (actionTrackData.type === "NodeVote") {
-              if (actionTrackData.action !== "CorrectRM" && actionTrackData.action !== "WrongRM") {
-                usersInteractions[actionTrackData.doer].actions.push(actionTrackData.action as ActionTrackType);
-                usersInteractions[actionTrackData.doer].count += 1;
-                for (const receiver of actionTrackData.receivers) {
-                  if (usersInteractions.hasOwnProperty(receiver)) {
-                    usersInteractions[receiver].reputation = actionTrackData.action === "Correct" ? "Gain" : "Loss";
+
+              if (docChange.type === "modified") {
+                if (usersInteractions.hasOwnProperty(actionTrackData.doer)) {
+                  usersInteractions[actionTrackData.doer].imageUrl = actionTrackData.imageUrl;
+                  usersInteractions[actionTrackData.doer].fullname = actionTrackData.fullname;
+                }
+              }
+
+              if (docChange.type === "removed") {
+                if (usersInteractions.hasOwnProperty(actionTrackData.doer)) {
+                  usersInteractions[actionTrackData.doer].count -= 1;
+                  if (usersInteractions[actionTrackData.doer].count <= 0) {
+                    delete usersInteractions[actionTrackData.doer];
                   }
                 }
               }
-            } else if (actionTrackData.type === "RateVersion") {
-              if (actionTrackData.action.includes("Correct-") || actionTrackData.action.includes("Wrong-")) {
-                const currentAction: ActionTrackType = actionTrackData.action.includes("Correct-")
-                  ? "Correct"
-                  : "Wrong";
-                usersInteractions[actionTrackData.doer].actions.push(currentAction);
-                usersInteractions[actionTrackData.doer].count += 1;
-                for (const receiver of actionTrackData.receivers) {
-                  if (usersInteractions.hasOwnProperty(receiver)) {
-                    usersInteractions[receiver].reputation = currentAction === "Correct" ? "Gain" : "Loss";
-                  }
-                }
-              }
-            } else {
-              usersInteractions[actionTrackData.doer].actions.push(actionTrackData.type as ActionTrackType);
-              usersInteractions[actionTrackData.doer].count += 1;
             }
-          }
-          if (docChange.type === "modified") {
-            if (usersInteractions.hasOwnProperty(actionTrackData.doer)) {
-              usersInteractions[actionTrackData.doer].imageUrl = actionTrackData.imageUrl;
-              usersInteractions[actionTrackData.doer].fullname = actionTrackData.fullname;
-            }
-          }
-          if (docChange.type === "removed") {
-            if (usersInteractions.hasOwnProperty(actionTrackData.doer)) {
-              usersInteractions[actionTrackData.doer].count -= 1;
-              if (usersInteractions[actionTrackData.doer].count <= 0) {
-                delete usersInteractions[actionTrackData.doer];
-              }
-            }
-          }
-        }
-        setUsersInteractions({ ...usersInteractions });
+            setUsersInteractions({ ...usersInteractions });
+          })();
+
+          return _usersInteractions;
+        });
+
+        // Clear Interaction actions' animation end timeout if new actions came again within 3s
         if (t) {
           clearTimeout(t);
         }
+
+        // This timeout help us removing animating action icons after 3s
         t = setTimeout(() => {
           setUsersInteractions(usersInteractions => {
             let _usersInteractions = { ...usersInteractions } as UserInteractions;
@@ -137,20 +173,27 @@ const LivelinessBar = ({ open, setOpen, disabled = false, ...props }: ILivelines
             }
             return _usersInteractions;
           });
+
+          // Technically its for the first run of snapshot to not animate
+          // first load action icons and if isInitialized is true every
+          // upcoming actions shows a icon animating next to profile image
           setIsInitialized(true);
         }, 3000);
       });
     };
 
-    setInterval(() => {
+    // We are using this interval to re-initialize snapshot
+    const interval = setInterval(() => {
       setIsInitialized(false);
-      setUsersInteractions({});
       snapshotInitializer();
     }, 1440000);
 
     snapshotInitializer();
 
-    return () => unsubscribe.finalizer();
+    return () => {
+      clearInterval(interval);
+      unsubscribe.finalizer();
+    };
   }, [disabled]);
 
   useEffect(() => {
@@ -264,6 +307,9 @@ const LivelinessBar = ({ open, setOpen, disabled = false, ...props }: ILivelines
                 })}
               {!disabled &&
                 unames.map((uname: string) => {
+                  // if user has not interactions then we just skip it from interaction bar
+                  if (usersInteractions[uname].count === 0) return <Box key={uname} style={{ display: "none" }} />;
+
                   const maxActionsLog = Math.log(maxActions);
                   const totalInteraction = usersInteractions[uname].count + Math.abs(minActions);
                   const _count = Math.log(totalInteraction > 0 ? totalInteraction : 1);
