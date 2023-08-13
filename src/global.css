@@ -349,14 +349,14 @@
   margin: 0px -19px 0 0 !important;
 }
 
-.RemoveImageDIV {
+/* .RemoveImageDIV {
   float: right;
   margin-bottom: -34px;
   margin-right: 4px;
 }
 .RemoveImageDIV .CloseButton i {
   font-size: 25px;
-}
+} */
 
 .NewChildProposalWarning {
   color: rgb(255, 115, 0);
