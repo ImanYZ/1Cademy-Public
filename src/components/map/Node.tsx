@@ -17,6 +17,7 @@ import {
   Button,
   CircularProgress,
   Fab,
+  IconButton,
   Paper,
   Switch,
   TextField,
@@ -33,6 +34,7 @@ import { DispatchNodeBookActions, FullNodeData, OpenPart, TNodeUpdates } from "s
 
 import { useNodeBook } from "@/context/NodeBookContext";
 import { Post } from "@/lib/mapApi";
+import { DESIGN_SYSTEM_COLORS } from "@/lib/theme/colors";
 import { getVideoDataByUrl, momentDateToSeconds } from "@/lib/utils/utils";
 import {
   ChosenType,
@@ -375,6 +377,8 @@ const Node = ({
   const [timePickerError, setTimePickerError] = React.useState<any>(false);
   const [contentCopy, setContentCopy] = useState(content);
   const [isLoading, startTransition] = useTransition();
+  const [imageHeight, setImageHeight] = useState(100);
+  const imageElementRef = useRef<HTMLImageElement | null>(null);
 
   const childNodeButtonsAnimation = keyframes({
     from: { left: "500px", zIndex: -999 },
@@ -451,10 +455,10 @@ const Node = ({
       try {
         const { blockSize } = entries[0].borderBoxSize[0];
         const topPosition = (entries[0].target as any)?.style?.top;
-        const isSimilar = blockSize === previousHeightRef.current;
+        const thereIsSignificantChanges = Math.abs(blockSize - previousHeightRef.current) < 10;
         previousHeightRef.current = blockSize;
         previousTopRef.current = topPosition;
-        if (isSimilar) return;
+        if (thereIsSignificantChanges) return;
 
         changeNodeHight(identifier, blockSize);
       } catch (err) {
@@ -552,7 +556,10 @@ const Node = ({
       setAbleToPropose(true);
     }
     setImageLoaded(true);
-  }, []);
+    if (imageElementRef.current) {
+      setImageHeight(imageElementRef.current.clientHeight);
+    }
+  }, [setAbleToPropose, titleCopy]);
 
   const onImageClick = useCallback(() => setOpenMedia(nodeImage), [nodeImage]);
 
@@ -826,6 +833,10 @@ const Node = ({
     setAssistantSelectNode,
     title,
   ]);
+
+  useEffect(() => {
+    setImageLoaded(true);
+  }, [nodeImage]);
 
   if (!user) {
     return null;
@@ -1133,27 +1144,39 @@ const Node = ({
               />
               {editable && <Box sx={{ mb: "12px" }}></Box>}
 
-              <div id={`${identifier}-node-content-media`}>
-                {nodeImage !== "" && (
-                  <>
-                    {editable && (
-                      <div className="RemoveImageDIV">
-                        <MemoizedMetaButton onClick={removeImageHandler} tooltip="Click to remove the image.">
-                          <DeleteForeverIcon sx={{ fontSize: "16px" }} />
-                        </MemoizedMetaButton>
-                      </div>
-                    )}
-
+              <Box id={`${identifier}-node-content-media`}>
+                {nodeImage && (
+                  <Box sx={{ position: "relative", minHeight: imageHeight }}>
                     {/* TODO: change to Next Image */}
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
+                      ref={imageElementRef}
                       src={nodeImage}
                       alt="Node image"
                       className="responsive-img NodeImage"
                       onLoad={onImageLoad}
                       onClick={onImageClick}
                     />
-                  </>
+
+                    {editable && (
+                      <Tooltip title={"Click to remove the image"}>
+                        <IconButton
+                          onClick={removeImageHandler}
+                          color="primary"
+                          size="small"
+                          sx={{
+                            position: "absolute",
+                            right: "4px",
+                            top: "4px",
+                            background: DESIGN_SYSTEM_COLORS.notebookG500,
+                          }}
+                        >
+                          <DeleteForeverIcon sx={{ fontSize: "16px" }} />
+                        </IconButton>
+                      </Tooltip>
+                    )}
+                    {/* TODO: add loading background */}
+                  </Box>
                 )}
                 {nodeType === "Question" && (
                   <Box sx={{ display: "flex", flexDirection: "column" }}>
@@ -1199,7 +1222,7 @@ const Node = ({
                     <Box sx={{ mb: "12px" }}></Box>
                   </>
                 )}
-              </div>
+              </Box>
             </Box>
 
             {editable && (
