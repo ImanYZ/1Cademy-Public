@@ -43,7 +43,7 @@ export type IUser = {
   occupation: string;
   foundFrom: string; // pre-specified values with free text possibility
   fieldOfInterest: string; // free text
-  livelinessBar: "interaction" | "reputation";
+  livelinessBar: "interaction" | "reputation" | "interactionSimplified" | "reputationSimplified";
   birthDate?: Date | Timestamp | null;
   reason: string;
   createdAt: Date | Timestamp;

@@ -1407,7 +1407,8 @@ export const createActionTrack = (
     fullname: string;
   },
   nodeId: string,
-  receivers: string[]
+  receivers: string[],
+  email: string
 ) => {
   const actionTracksCol = collection(db, "actionTracks");
   return setDoc(doc(actionTracksCol), {
@@ -1421,6 +1422,7 @@ export const createActionTrack = (
     fullname: userData.fullname,
     nodeId,
     receivers,
+    email,
   } as IActionTrack);
 };
 

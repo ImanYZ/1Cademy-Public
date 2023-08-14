@@ -507,6 +507,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         fullname: `${userData.fName} ${userData.lName}`,
         nodeId: newVersion.node,
         receivers: [req.body.data.user.userData.uname],
+        email: userData.email,
       } as IActionTrack);
 
       const rateActionRef = db.collection("actionTracks").doc();
@@ -521,6 +522,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         fullname: `${userData.fName} ${userData.lName}`,
         nodeId: newVersion.node,
         receivers: [req.body.data.user.userData.uname],
+        email: userData.email,
       } as IActionTrack);
     });
     console.log("9", {

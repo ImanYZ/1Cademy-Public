@@ -359,6 +359,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         fullname: `${userData.fName} ${userData.lName}`,
         nodeId: versionData.node,
         receivers: [userData.uname],
+        email: userData.email,
       } as IActionTrack);
 
       const rateActionRef = db.collection("actionTracks").doc();
@@ -373,6 +374,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         fullname: `${userData.fName} ${userData.lName}`,
         nodeId: versionData.node,
         receivers: [userData.uname],
+        email: userData.email,
       } as IActionTrack);
     });
 

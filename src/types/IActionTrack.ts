@@ -28,6 +28,7 @@ export type IActionTrack = {
   imageUrl: string;
   receivers: string[]; // single for rateVersion and multiple for node vote
   receiverPoints?: number[];
+  email: string;
 };
 
 /*

@@ -2134,7 +2134,7 @@ const Notebook = ({}: NotebookProps) => {
       });
 
       if (notebookRef.current.choosingNode) return;
-
+      if (!user) return;
       createActionTrack(
         db,
         "NodeOpen",
@@ -2146,7 +2146,8 @@ const Notebook = ({}: NotebookProps) => {
           imageUrl: String(user?.imageUrl),
         },
         linkedNodeID,
-        []
+        [],
+        user.email
       );
 
       gtmEvent("Interaction", {
@@ -2241,6 +2242,7 @@ const Notebook = ({}: NotebookProps) => {
           const username = user?.uname;
           if (notebookRef.current.choosingNode) return;
           if (!username) return;
+          if (!user) return;
 
           const notebookIdx = (thisNode.notebooks ?? []).findIndex(cur => cur === selectedNotebookId);
           if (notebookIdx < 0) return console.error("notebook property has invalid values");
@@ -2301,7 +2303,8 @@ const Notebook = ({}: NotebookProps) => {
               imageUrl: String(user?.imageUrl),
             },
             nodeId,
-            []
+            [],
+            user.email
           );
 
           notebookRef.current.selectedNode = parentNode;
@@ -2688,6 +2691,7 @@ const Notebook = ({}: NotebookProps) => {
   const toggleNode = useCallback(
     (event: any, nodeId: string) => {
       if (notebookRef.current.choosingNode) return;
+      if (!user) return;
 
       notebookRef.current.selectedNode = nodeId; // CHECK: should we remove? the same code bellow in the setState and this doesn't have the dispatch
 
@@ -2760,7 +2764,8 @@ const Notebook = ({}: NotebookProps) => {
             imageUrl: String(user?.imageUrl),
           },
           nodeId,
-          []
+          [],
+          user.email
         );
         return { nodes: oldNodes, edges };
       });
@@ -2836,6 +2841,7 @@ const Notebook = ({}: NotebookProps) => {
 
   const onNodeShare = useCallback(
     (nodeId: string, platform: string) => {
+      if (!user) return;
       gtmEvent("Interaction", {
         customType: "NodeShare",
       });
@@ -2851,7 +2857,8 @@ const Notebook = ({}: NotebookProps) => {
           imageUrl: String(user?.imageUrl),
         },
         nodeId,
-        []
+        [],
+        user.email
       );
     },
     [db, user]
@@ -2878,6 +2885,7 @@ const Notebook = ({}: NotebookProps) => {
   const markStudied = useCallback(
     (event: any, nodeId: string) => {
       if (notebookRef.current.choosingNode) return;
+      if (!user) return;
       setGraph(({ nodes: oldNodes, edges }) => {
         const thisNode = oldNodes[nodeId];
         nodeBookDispatch({ type: "setSelectedNode", payload: nodeId });
@@ -2940,7 +2948,8 @@ const Notebook = ({}: NotebookProps) => {
               imageUrl: String(user?.imageUrl),
             },
             nodeId,
-            []
+            [],
+            user.email
           );
         }
 
@@ -2957,6 +2966,7 @@ const Notebook = ({}: NotebookProps) => {
   const bookmark = useCallback(
     (event: any, nodeId: string) => {
       if (notebookRef.current.choosingNode) return;
+      if (!user) return;
       setGraph(({ nodes: oldNodes, edges }) => {
         const updatedNodeIds: string[] = [];
         updatedNodeIds.push(nodeId);
@@ -3019,7 +3029,8 @@ const Notebook = ({}: NotebookProps) => {
             imageUrl: String(user?.imageUrl),
           },
           nodeId,
-          []
+          [],
+          user.email
         );
         setNodeUpdates({
           nodeIds: updatedNodeIds,

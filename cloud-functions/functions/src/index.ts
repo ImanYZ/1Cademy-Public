@@ -21,7 +21,7 @@ export const actionTracks = functions.https.onRequest(async (req, res) => {
     [uname: string]: {
       uname: string;
       community: string;
-      condition: "Reputation" | "Interactions";
+      condition: "Reputation" | "Interactions" | "InteractionSimplified" | "ReputationSimplified";
       interactions: number;
       reputation: number;
     };
@@ -47,7 +47,16 @@ export const actionTracks = functions.https.onRequest(async (req, res) => {
         userActionTracks[doer] = {
           uname: doer,
           community: usersMap[doer].tag,
-          condition: usersMap[doer].livelinessBar === "reputation" ? "Reputation" : "Interactions",
+          condition:
+            usersMap[doer].livelinessBar === "reputation"
+              ? "Reputation"
+              : usersMap[doer].livelinessBar === "interaction"
+              ? "Interactions"
+              : usersMap[doer].livelinessBar === "interactionSimplified"
+              ? "InteractionSimplified"
+              : usersMap[doer].livelinessBar === "reputationSimplified"
+              ? "ReputationSimplified"
+              : "Interactions",
           interactions: 0,
           reputation: 0,
         };

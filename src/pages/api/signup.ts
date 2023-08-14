@@ -196,7 +196,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
           "Your institution does not match with your email address. Please enter your institutional email address or change the institution name in the form.",
       });
     }
-    let livebarTypes = ["interaction", "reputation"];
+    let livebarTypes = ["interaction", "reputation", "interactionSimplified", "reputationSimplified"];
     const userRecord = await getAuth().createUser({
       email: data.email,
       displayName: data.uname,

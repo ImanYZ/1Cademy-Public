@@ -431,6 +431,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         fullname: `${userData.fName} ${userData.lName}`,
         nodeId: versionData.childType && isAccepted ? newUpdates.nodeId : versionData.node,
         receivers: [versionData.proposer],
+        email: userData.email,
       } as IActionTrack);
     });
 

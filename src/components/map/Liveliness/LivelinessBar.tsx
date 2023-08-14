@@ -1,8 +1,9 @@
 import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowUp";
 import { Box, Tooltip } from "@mui/material";
-import { collection, Firestore, getDocs, limit, onSnapshot, query, where } from "firebase/firestore";
-import React, { useEffect, useMemo, useState } from "react";
+import { Firestore } from "firebase/firestore";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
+import { ActionsTracksChange, getActionTrackSnapshot } from "src/client/firestore/actionTracks.firestore";
 import { ActionTrackType } from "src/knowledgeTypes";
 import { IActionTrack } from "src/types/IActionTrack";
 
@@ -20,8 +21,9 @@ type ILivelinessBarProps = {
   windowHeight: number;
 };
 
-type UserInteractions = {
+export type UserInteractions = {
   [uname: string]: {
+    id: string;
     reputation: "Gain" | "Loss" | null;
     imageUrl: string;
     chooseUname: boolean;
@@ -32,182 +34,44 @@ type UserInteractions = {
   };
 };
 
+const PAST_24H = new Date(new Date().getTime() - 24 * 60 * 60 * 1000);
+
 const LivelinessBar = ({ open, setOpen, disabled = false, ...props }: ILivelinessBarProps) => {
   const { db, onlineUsers, openUserInfoSidebar, authEmail, windowHeight } = props;
   // const [open, setOpen] = useState(false);
-  const [isInitialized, setIsInitialized] = useState(false);
+  // const [isInitialized, setIsInitialized] = useState(false);
   const [usersInteractions, setUsersInteractions] = useState<UserInteractions>({});
   const [barHeight, setBarHeight] = useState<number>(0);
+
   // const theme = useTheme();
 
+  const syncLivelinessBar = useCallback(
+    (changes: ActionsTracksChange[]) => {
+      setUsersInteractions(prevUsersInteractions => {
+        // Following sync wrap help us query user data during
+        // processing userInteractions came up in snapshot changes
+        const _interactions = changes.reduce(
+          (acu, cur) => synchronizeActionsTracks(acu, cur, authEmail || ""),
+          prevUsersInteractions
+        );
+        return _interactions;
+      });
+    },
+    [authEmail]
+  );
+
   useEffect(() => {
-    if (window && window.innerWidth > 768 && window.innerHeight >= 797) setOpen(true);
-    if (disabled) return;
-
-    let t: any = null;
-    const unsubscribe: {
-      finalizer: () => void;
-    } = {
-      finalizer: () => {},
-    };
-
-    const snapshotInitializer = () => {
-      // Clearing count of interactions on initialization/re-initialization
-      setUsersInteractions(userInteractions => {
-        for (const uname in userInteractions) {
-          userInteractions[uname] = { ...userInteractions[uname] };
-          userInteractions[uname].count = 0;
-          userInteractions[uname].actions = [];
-        }
-        return { ...userInteractions };
-      });
-
-      // unsubscribe previous snapshot If exists
-      unsubscribe.finalizer();
-
-      const actionTracksCol = collection(db, "actionTracks24h");
-      const q = query(actionTracksCol);
-      unsubscribe.finalizer = onSnapshot(q, snapshot => {
-        const docChanges = snapshot.docChanges();
-        // Outer setUsersInteractions help us get latest values
-        setUsersInteractions(_usersInteractions => {
-          const usersInteractions = { ..._usersInteractions };
-
-          // Following sync wrap help us query user data during
-          // processing userInteractions came up in snapshot changes
-          (async () => {
-            for (const docChange of docChanges) {
-              const actionTrackData = docChange.doc.data() as IActionTrack;
-
-              let doerEmail: string = "";
-              if (docChange.type === "added") {
-                // Initializing user interaction prop with userData
-                if (!usersInteractions.hasOwnProperty(actionTrackData.doer)) {
-                  // If current user is Iman we show emails of user in livebar
-                  if (authEmail === "oneweb@umich.edu") {
-                    let userQuery = query(
-                      collection(db, "users"),
-                      where("uname", "==", actionTrackData.doer),
-                      limit(1)
-                    );
-                    let userDocs = await getDocs(userQuery);
-                    if (userDocs.docs.length > 0) {
-                      doerEmail = userDocs.docs[0].data().email;
-                    }
-                  }
-
-                  usersInteractions[actionTrackData.doer] = {
-                    imageUrl: actionTrackData.imageUrl,
-                    chooseUname: actionTrackData.chooseUname,
-                    fullname: actionTrackData.fullname,
-                    count: 0,
-                    actions: [],
-                    reputation: null,
-                    email: doerEmail,
-                  };
-                }
-
-                if (actionTrackData.type === "NodeVote") {
-                  if (actionTrackData.action !== "CorrectRM" && actionTrackData.action !== "WrongRM") {
-                    usersInteractions[actionTrackData.doer].actions.push(actionTrackData.action as ActionTrackType);
-                    usersInteractions[actionTrackData.doer].count += 1;
-                    for (const receiver of actionTrackData.receivers) {
-                      if (usersInteractions.hasOwnProperty(receiver)) {
-                        usersInteractions[receiver].reputation = actionTrackData.action === "Correct" ? "Gain" : "Loss";
-                      }
-                    }
-                  }
-                } else if (actionTrackData.type === "RateVersion") {
-                  if (actionTrackData.action.includes("Correct-") || actionTrackData.action.includes("Wrong-")) {
-                    const currentAction: ActionTrackType = actionTrackData.action.includes("Correct-")
-                      ? "Correct"
-                      : "Wrong";
-                    usersInteractions[actionTrackData.doer].actions.push(currentAction);
-                    usersInteractions[actionTrackData.doer].count += 1;
-                    for (const receiver of actionTrackData.receivers) {
-                      if (usersInteractions.hasOwnProperty(receiver)) {
-                        usersInteractions[receiver].reputation = currentAction === "Correct" ? "Gain" : "Loss";
-                      }
-                    }
-                  }
-                } else {
-                  usersInteractions[actionTrackData.doer].actions.push(actionTrackData.type as ActionTrackType);
-                  usersInteractions[actionTrackData.doer].count += 1;
-                }
-              }
-
-              if (docChange.type === "modified") {
-                if (usersInteractions.hasOwnProperty(actionTrackData.doer)) {
-                  usersInteractions[actionTrackData.doer].imageUrl = actionTrackData.imageUrl;
-                  usersInteractions[actionTrackData.doer].fullname = actionTrackData.fullname;
-                }
-              }
-
-              if (docChange.type === "removed") {
-                if (usersInteractions.hasOwnProperty(actionTrackData.doer)) {
-                  usersInteractions[actionTrackData.doer].count -= 1;
-                  if (usersInteractions[actionTrackData.doer].count <= 0) {
-                    delete usersInteractions[actionTrackData.doer];
-                  }
-                }
-              }
-            }
-            setUsersInteractions({ ...usersInteractions });
-          })();
-
-          return _usersInteractions;
-        });
-
-        // Clear Interaction actions' animation end timeout if new actions came again within 3s
-        if (t) {
-          clearTimeout(t);
-        }
-
-        // This timeout help us removing animating action icons after 3s
-        t = setTimeout(() => {
-          setUsersInteractions(usersInteractions => {
-            let _usersInteractions = { ...usersInteractions } as UserInteractions;
-            for (let uname in _usersInteractions) {
-              _usersInteractions[uname].actions = [];
-              _usersInteractions[uname].reputation = null;
-            }
-            return _usersInteractions;
-          });
-
-          // Technically its for the first run of snapshot to not animate
-          // first load action icons and if isInitialized is true every
-          // upcoming actions shows a icon animating next to profile image
-          setIsInitialized(true);
-        }, 3000);
-      });
-    };
-
-    // We are using this interval to re-initialize snapshot
-    const interval = setInterval(() => {
-      setIsInitialized(false);
-      snapshotInitializer();
-    }, 1440000);
-
-    snapshotInitializer();
-
-    return () => {
-      clearInterval(interval);
-      unsubscribe.finalizer();
-    };
-  }, [disabled]);
+    getActionTrackSnapshot(db, { rewindDate: PAST_24H }, syncLivelinessBar);
+  }, [db, syncLivelinessBar]);
 
   useEffect(() => {
     setBarHeight(parseFloat(String(document.getElementById("liveliness-seekbar")?.clientHeight)));
   }, [windowHeight]);
 
-  const unames = useMemo(() => {
-    return Object.keys(usersInteractions);
-  }, [usersInteractions]);
-
   const minActions: number = useMemo(() => {
     return Math.min(
       0,
-      unames.reduce(
+      Object.keys(usersInteractions).reduce(
         (carry, uname: string) => (carry > usersInteractions[uname].count ? usersInteractions[uname].count : carry),
         0
       )
@@ -217,13 +81,13 @@ const LivelinessBar = ({ open, setOpen, disabled = false, ...props }: ILivelines
   const maxActions: number = useMemo(() => {
     return Math.max(
       10,
-      unames.reduce(
+      Object.keys(usersInteractions).reduce(
         (carry, uname: string) => (carry < usersInteractions[uname].count ? usersInteractions[uname].count : carry),
         0
       )
     );
-  }, [usersInteractions, minActions]);
-
+  }, [usersInteractions]);
+  // console.log({ disabled });
   return (
     <>
       <Box
@@ -234,6 +98,7 @@ const LivelinessBar = ({ open, setOpen, disabled = false, ...props }: ILivelines
           zIndex: 1199,
           position: "absolute",
           height: `calc(100% - ${window.innerHeight > 799 ? "375px" : "420px"})`,
+          border: "solid 1px red",
         }}
       >
         <Box
@@ -306,10 +171,7 @@ const LivelinessBar = ({ open, setOpen, disabled = false, ...props }: ILivelines
                   );
                 })}
               {!disabled &&
-                unames.map((uname: string) => {
-                  // if user has not interactions then we just skip it from interaction bar
-                  if (usersInteractions[uname].count === 0) return <Box key={uname} style={{ display: "none" }} />;
-
+                Object.keys(usersInteractions).map((uname: string) => {
                   const maxActionsLog = Math.log(maxActions);
                   const totalInteraction = usersInteractions[uname].count + Math.abs(minActions);
                   const _count = Math.log(totalInteraction > 0 ? totalInteraction : 1);
@@ -387,7 +249,7 @@ const LivelinessBar = ({ open, setOpen, disabled = false, ...props }: ILivelines
                       >
                         <Box
                           sx={{
-                            display: isInitialized ? "block" : "none",
+                            // display: "block",
                             position: "absolute",
                             bottom: "6px",
                             left: "-16px",
@@ -455,3 +317,62 @@ const LivelinessBar = ({ open, setOpen, disabled = false, ...props }: ILivelines
 };
 
 export const MemoizedLivelinessBar = React.memo(LivelinessBar);
+
+export const synchronizeActionsTracks = (
+  prevUserInteractions: UserInteractions,
+  actionTrackChange: ActionsTracksChange,
+  authEmail: string
+) => {
+  const docType = actionTrackChange.type;
+  const curData = actionTrackChange.data as IActionTrack & { id: string };
+
+  if (docType === "added") {
+    if (!prevUserInteractions.hasOwnProperty(curData.doer)) {
+      prevUserInteractions[curData.doer] = {
+        id: curData.id,
+        imageUrl: curData.imageUrl,
+        chooseUname: curData.chooseUname,
+        fullname: curData.fullname,
+        count: 0,
+        actions: [],
+        reputation: null,
+        email: authEmail === "oneweb@umich.edu" ? curData.email : "",
+      };
+    }
+    if (curData.type === "NodeVote") {
+      if (curData.action !== "CorrectRM" && curData.action !== "WrongRM") {
+        prevUserInteractions[curData.doer].actions.push(curData.action as ActionTrackType);
+        prevUserInteractions[curData.doer].count += 1;
+        for (const receiver of curData.receivers) {
+          if (prevUserInteractions.hasOwnProperty(receiver)) {
+            prevUserInteractions[receiver].reputation = curData.action === "Correct" ? "Gain" : "Loss";
+          }
+        }
+      }
+    } else if (curData.type === "RateVersion") {
+      if (curData.action.includes("Correct-") || curData.action.includes("Wrong-")) {
+        const currentAction: ActionTrackType = curData.action.includes("Correct-") ? "Correct" : "Wrong";
+        prevUserInteractions[curData.doer].actions.push(currentAction);
+        prevUserInteractions[curData.doer].count += 1;
+        for (const receiver of curData.receivers) {
+          if (prevUserInteractions.hasOwnProperty(receiver)) {
+            prevUserInteractions[receiver].reputation = currentAction === "Correct" ? "Gain" : "Loss";
+          }
+        }
+      }
+    } else {
+      prevUserInteractions[curData.doer].actions.push(curData.type as ActionTrackType);
+      prevUserInteractions[curData.doer].count += 1;
+    }
+  }
+  if (docType === "modified") {
+    prevUserInteractions[curData.doer].imageUrl = curData.imageUrl;
+    prevUserInteractions[curData.doer].fullname = curData.fullname;
+  }
+
+  if (docType === "removed") {
+    prevUserInteractions[curData.doer].count -= 1;
+    if (prevUserInteractions[curData.doer].count <= 0) delete prevUserInteractions[curData.doer];
+  }
+  return prevUserInteractions;
+};
