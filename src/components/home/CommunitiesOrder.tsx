@@ -357,6 +357,73 @@ export const allCommunities = [
     ],
   },
   {
+    id: "behavioral-sciences",
+    name: "Behavioral_Sciences",
+    tags: [
+      {
+        title: "Behavioral Sciences",
+        node: "2rZY0xTyST3agd7HWcfW",
+      },
+    ],
+    allTime: [],
+    weekly: [],
+    url: "/static/Communities/Behavioral_Sciences.jpg",
+    title: "Behavioral Sciences",
+    width: "33%",
+    leaders: [
+      {
+        name: "Ariana Furlong",
+        image: "Ariana_Furlong.jpeg",
+        about: ``,
+        websites: [
+          {
+            name: "LinkedIn",
+            url: "https://www.linkedin.com/in/ariana-furlong1601/",
+          },
+        ],
+      },
+    ],
+    YouTube: "NPiKhlS6u9Q",
+
+    description: (
+      <>
+        <p>
+          The Behavioral Sciences is centered on the interdisciplinary study of organisms and their interactions with
+          the world at large, investigating behavioral science topics such as decision-making, addiction, self-esteem,
+          and theory of mind. Interns are tasked with investigating behavioral science topics, summarizing research
+          articles, collaborating with fellow interns, and presenting their work at weekly meetings.
+        </p>
+        We encourage interns to personalize their research to their specific interests within the field. Interning with
+        1Cademy provides interns with the opportunity to gain research skills, such as analytical and investigative
+        research skills, helping them gain foundational skills for future research endeavors.
+        <p></p>
+      </>
+    ),
+    accomplishments: ``,
+    gains: [
+      `Gain valuable research skills and experience, such as analyzing scientific journals and articles, summarization, and making connections between disciplines`,
+      `Publish research on topics on the 1Cademy platform related to behavioral science`,
+      `Collaborate with others to review and summarize existing research on behavioral science, and identify topics for further study`,
+      `Work in a flexible, remote environment (about 5-10 hours/week)`,
+    ],
+    requirements: `In addition to the 1Cademy general application process, we require our interns to submit both their most current resume and unofficial transcripts, with GPA included on those transcripts. We require our interns to have a minimum of a 3.5 GPA to apply for this position. All majors are welcome to apply. A personal or academic interest in disability is highly preferred, and answer our quiz questions to evaluate their domain knowledge.`,
+    hasTest: true,
+    qualifications: [
+      `Interest and enthusiasm for behavioral science topics`,
+      `Desire to collaborate with others, present your work, and discuss behavioral science topics at our weekly meetings`,
+      `Fluency in writing and reading in English (will have to summarize research articles)`,
+    ],
+    responsibilities: [
+      `Read and concisely summarize textbook chapters and scientific journal articles about, and relating to, behavioral science`,
+      `Identify connections between different ideas and concepts`,
+      `Contribute your work to the online 1Cademy platform`,
+      `Participate in peer review`,
+      `Attend weekly online meetings`,
+      `Participate in meetings by presenting work, engaging in discussions, and providing feedback`,
+      `All interactions, task fulfillment, and communications will be remote`,
+    ],
+  },
+  {
     id: "disability-studies",
     name: "Disability_Studies",
     tags: [
