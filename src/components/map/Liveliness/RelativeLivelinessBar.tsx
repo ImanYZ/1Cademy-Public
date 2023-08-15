@@ -1,0 +1,333 @@
+import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
+import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowUp";
+import { Box, Tooltip } from "@mui/material";
+import React, { useMemo, useState } from "react";
+import { User } from "src/knowledgeTypes";
+
+import { UserInteractions } from "./LivelinessBar";
+import { UserBubble } from "./UserBubble";
+
+type RelativeLivelinessBarProps = {
+  onlineUsers: string[];
+  openUserInfoSidebar: (uname: string, imageUrl: string, fullName: string, chooseUname: string) => void;
+  // user: any;
+  onToggleDisplay: () => void;
+  open: boolean;
+  user: User;
+};
+
+const RelativeLivelinessBar = ({
+  onToggleDisplay,
+  onlineUsers,
+  open,
+  openUserInfoSidebar,
+}: // user,
+// user,
+RelativeLivelinessBarProps) => {
+  // const { db, onlineUsers, openUserInfoSidebar, authEmail, user, disabled = false, windowHeight } = props;
+  // const [open, setOpen] = useState(false);
+  const [usersInteractions /* setUsersInteractions */] = useState<UserInteractions>({});
+  // const [users, setUsers] = useState<any>({});
+  // const [barHeight, setBarHeight] = useState<number>(0);
+  // const theme = useTheme();
+
+  // useEffect(() => {
+  //   if (window && window.innerWidth > 768 && window.innerHeight >= 797) {
+  //     setOpen(true);
+  //   }
+  //   if (disabled) return;
+
+  //   let t: any = null;
+  //   const unsubscribe: {
+  //     finalizer: () => void;
+  //   } = {
+  //     finalizer: () => {},
+  //   };
+  //   const snapshotInitializer = () => {
+  //     setUsersInteractions({});
+  //     unsubscribe.finalizer();
+  //     const actionTracksCol = collection(db, "actionTracks24h");
+  //     const q = query(actionTracksCol);
+  //     unsubscribe.finalizer = onSnapshot(q, async snapshot => {
+  //       const docChanges = snapshot.docChanges();
+
+  //       for (const docChange of docChanges) {
+  //         const actionTrackData = docChange.doc.data() as IActionTrack;
+  //         for (const receiverData of actionTrackData.receivers) {
+  //           const index = actionTrackData.receivers.indexOf(receiverData);
+  //           const userQuery = query(collection(db, "users"), where("uname", "==", receiverData), limit(1));
+  //           getDocs(userQuery).then(userData => {
+  //             const user = userData.docs[0].data();
+  //             setUsers((prevState: any) => {
+  //               return {
+  //                 ...prevState,
+  //                 [user.uname]: {
+  //                   imageUrl: user.imageUrl,
+  //                   chooseUname: user.chooseUname,
+  //                   email: user.email,
+  //                   fullname: user.fName + " " + user.lName,
+  //                 },
+  //               };
+  //             });
+  //           });
+
+  //           if (docChange.type === "added") {
+  //             if (!usersInteractions.hasOwnProperty(receiverData)) {
+  //               usersInteractions[receiverData] = {
+  //                 count: 0,
+  //                 actions: [],
+  //                 reputation: null,
+  //               };
+  //             }
+  //             if (actionTrackData.type === "NodeVote") {
+  //               if (actionTrackData.action !== "CorrectRM" && actionTrackData.action !== "WrongRM") {
+  //                 usersInteractions[receiverData].actions.push(actionTrackData.action as ActionTrackType);
+  //                 usersInteractions[receiverData].count += actionTrackData.receiverPoints
+  //                   ? Number(actionTrackData.receiverPoints[index])
+  //                   : 0;
+  //                 for (const receiver of actionTrackData.receivers) {
+  //                   if (usersInteractions.hasOwnProperty(receiver)) {
+  //                     usersInteractions[receiver].reputation = actionTrackData.action === "Correct" ? "Gain" : "Loss";
+  //                   }
+  //                 }
+  //               }
+  //             } else if (actionTrackData.type === "RateVersion") {
+  //               if (actionTrackData.action.includes("Correct-") || actionTrackData.action.includes("Wrong-")) {
+  //                 const currentAction: ActionTrackType = actionTrackData.action.includes("Correct-")
+  //                   ? "Correct"
+  //                   : "Wrong";
+  //                 usersInteractions[receiverData].actions.push(currentAction);
+  //                 usersInteractions[receiverData].count += actionTrackData.action.includes("Correct-") ? 1 : -1;
+  //                 if (usersInteractions[receiverData].count < 0) {
+  //                   usersInteractions[receiverData].count = 0;
+  //                 }
+  //                 for (const receiver of actionTrackData.receivers) {
+  //                   if (usersInteractions.hasOwnProperty(receiver)) {
+  //                     usersInteractions[receiver].reputation = currentAction === "Correct" ? "Gain" : "Loss";
+  //                   }
+  //                 }
+  //               }
+  //             }
+  //           }
+
+  //           if (docChange.type === "removed") {
+  //             if (usersInteractions.hasOwnProperty(receiverData)) {
+  //               usersInteractions[receiverData].count -= 1;
+  //               if (usersInteractions[receiverData].count <= 0) {
+  //                 delete usersInteractions[receiverData];
+  //               }
+  //             }
+  //           }
+  //         }
+  //       }
+  //       setUsersInteractions({ ...usersInteractions });
+  //       if (t) {
+  //         clearTimeout(t);
+  //       }
+  //       t = setTimeout(() => {
+  //         setUsersInteractions(usersInteractions => {
+  //           let _usersInteractions = { ...usersInteractions } as UserInteractions;
+  //           for (let uname in _usersInteractions) {
+  //             _usersInteractions[uname].actions = [];
+  //             _usersInteractions[uname].reputation = null;
+  //           }
+  //           return _usersInteractions;
+  //         });
+  //       }, 3000);
+  //     });
+  //   };
+
+  //   setInterval(() => {
+  //     snapshotInitializer();
+  //   }, 1440000);
+
+  //   snapshotInitializer();
+
+  //   return () => unsubscribe.finalizer();
+  // }, [disabled]);
+
+  // useEffect(() => {
+  //   setBarHeight(parseFloat(String(document.getElementById("liveliness-seekbar")?.clientHeight)));
+  // }, [windowHeight]);
+
+  // const unames = useMemo(() => {
+  //   return Object.keys(usersInteractions).filter(uname => user.uname === uname || usersInteractions[uname].count > 0);
+  // }, [usersInteractions]);
+
+  const minActions: number = useMemo(() => {
+    return Math.min(
+      0,
+      Object.keys(usersInteractions).reduce(
+        (carry, uname: string) => (carry > usersInteractions[uname].count ? usersInteractions[uname].count : carry),
+        0
+      )
+    );
+  }, [usersInteractions]);
+
+  const maxActions: number = useMemo(() => {
+    return (
+      Math.max(
+        10,
+        Object.keys(usersInteractions).reduce(
+          (carry, uname: string) => (carry < usersInteractions[uname].count ? usersInteractions[uname].count : carry),
+          0
+        )
+      ) + Math.abs(minActions)
+    );
+  }, [usersInteractions, minActions]);
+
+  const userAboveUsersLogged = useMemo((): UserInteractions => {
+    return usersInteractions; // TODO: get 3 users above user logged
+  }, [usersInteractions]);
+
+  const userBellowUsersLogged = useMemo((): UserInteractions => {
+    return usersInteractions; // TODO: get 3 users above user logged
+  }, [usersInteractions]);
+
+  return (
+    <>
+      <Box
+        sx={{
+          top: "50%",
+          transform: "translateY(-50%)",
+          right: "0px",
+          zIndex: 998,
+          position: "absolute",
+          height: `calc(100% - ${window.innerHeight > 799 ? "375px" : "420px"})`,
+          border: "solid 2px royalBlue",
+        }}
+      >
+        <Box
+          id="live-bar-reputation"
+          sx={{
+            // opacity: disabled ? 0.8 : 1,
+            width: "56px",
+            background: theme =>
+              theme.palette.mode === "dark"
+                ? theme.palette.common.darkBackground
+                : theme.palette.common.lightBackground,
+            borderRadius: "10px 0px 0px 10px",
+            right: 0,
+            top: 0,
+            position: "absolute",
+            height: "100%",
+            transform: !open ? "translate(calc(100%), 0px)" : null,
+            transition: "all 0.2s 0s ease",
+            padding: "5px 0px 0px 28px",
+          }}
+        >
+          <Tooltip title={"24-hour Points Leaderboard."} placement="left">
+            <Box sx={{ width: "100%", height: "100%", position: "absolute", right: "0px" }}></Box>
+          </Tooltip>
+          {/* {window.innerHeight > 799 && (
+            <Box sx={{ color: "ButtonHighlight", fontSize: "23px", marginLeft: "-15px", marginTop: "5px" }}>🏆</Box>
+          )} */}
+          <Box
+            className="seekbar"
+            sx={{
+              height: `calc(100% - ${window.innerHeight > 799 ? "30px" : "28px"})`,
+              width: "1px",
+              borderRight: theme =>
+                theme.palette.mode === "dark" ? "2px solid #bebebe" : "2px solid rgba(0, 0, 0, 0.6)",
+              color: theme => (theme.palette.mode === "dark" ? "#bebebe" : "rgba(0, 0, 0, 0.6)"),
+              position: "relative",
+              marginTop: "10px",
+            }}
+          >
+            <KeyboardArrowDownIcon
+              sx={{
+                fontSize: "20px",
+                position: "absolute",
+                top: "0px",
+                transform: "translate(-9px, -9px)",
+              }}
+            />
+            <Box
+              className="seekbar-users"
+              id="liveliness-seekbar"
+              sx={{
+                width: "100%",
+                height: "100%",
+                position: "absolute",
+                top: "0px",
+              }}
+            >
+              {/* number of no visible users above */}
+              {/* userAboveUsersLogged */}
+              {Object.keys(userAboveUsersLogged).map((uname: string) => (
+                <UserBubble
+                  key={uname}
+                  displayEmails={false}
+                  isOnline={onlineUsers.includes(uname)}
+                  maxActions={maxActions}
+                  minActions={minActions}
+                  openUserInfoSidebar={openUserInfoSidebar}
+                  uname={uname}
+                  userInteraction={usersInteractions[uname]}
+                />
+              ))}
+              {/* userLogged */}
+              {/* userBellowUsersLogged */}
+              {Object.keys(userBellowUsersLogged).map((uname: string) => (
+                <UserBubble
+                  key={uname}
+                  displayEmails={false}
+                  isOnline={onlineUsers.includes(uname)}
+                  maxActions={maxActions}
+                  minActions={minActions}
+                  openUserInfoSidebar={openUserInfoSidebar}
+                  uname={uname}
+                  userInteraction={usersInteractions[uname]}
+                />
+              ))}
+              {/* number of no visible users bellow */}
+              {/* {Object.keys(usersInteractions).map((uname: string) => (
+                <UserBubble
+                  key={uname}
+                  displayEmails={false}
+                  isOnline={onlineUsers.includes(uname)}
+                  maxActions={maxActions}
+                  minActions={minActions}
+                  openUserInfoSidebar={openUserInfoSidebar}
+                  uname={uname}
+                  userInteraction={usersInteractions[uname]}
+                />
+              ))} */}
+            </Box>
+          </Box>
+          <Box
+            sx={{
+              background: theme =>
+                theme.palette.mode === "dark"
+                  ? theme.palette.common.darkBackground
+                  : theme.palette.common.lightBackground,
+              display: "flex",
+              top: "50%",
+              transform: "translate(0px, -50%)",
+              left: "-22px",
+              width: "28px",
+              height: "36px",
+              color: theme => (theme.palette.mode === "dark" ? "#bebebe" : "rgba(0, 0, 0, 0.6)"),
+              position: "absolute",
+              alignItems: "center",
+              justifyContent: "center",
+              fontSize: "20px",
+              borderRadius: "6px 0px 0px 6px",
+              cursor: "pointer",
+            }}
+            onClick={onToggleDisplay}
+          >
+            <ArrowForwardIosIcon
+              fontSize="inherit"
+              sx={{
+                transform: !open ? "scaleX(-1)" : null,
+              }}
+            />
+          </Box>
+        </Box>
+      </Box>
+    </>
+  );
+};
+
+export const MemoizedRelativeLivelinessBar = React.memo(RelativeLivelinessBar);

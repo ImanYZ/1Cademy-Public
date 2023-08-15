@@ -61,6 +61,8 @@ import withAuthUser from "@/components/hoc/withAuthUser";
 import { MemoizedCommunityLeaderboard } from "@/components/map/CommunityLeaderboard/CommunityLeaderboard";
 import { MemoizedFocusedNotebook } from "@/components/map/FocusedNotebook/FocusedNotebook";
 import { MemoizedLivelinessBar } from "@/components/map/Liveliness/LivelinessBar";
+// import { Bar } from "@/components/map/Liveliness/Bar";
+import { MemoizedRelativeLivelinessBar } from "@/components/map/Liveliness/RelativeLivelinessBar";
 import { MemoizedReputationlinessBar } from "@/components/map/Liveliness/ReputationBar";
 import { MemoizedBookmarksSidebar } from "@/components/map/Sidebar/SidebarV2/BookmarksSidebar";
 import { CitationsSidebar } from "@/components/map/Sidebar/SidebarV2/CitationsSidebar";
@@ -7472,6 +7474,25 @@ const Notebook = ({}: NotebookProps) => {
           </MemoizedToolbox>
 
           {/* end Data from map */}
+
+          {/* <Bar
+            authEmail={user?.email}
+            openUserInfoSidebar={openUserInfoSidebar}
+            onlineUsers={onlineUsers}
+            onToggleDisplay={() => setOpenLivelinessBar(prev => !prev)}
+            sx={{ position: "absolute", top: "100px", right: "100px", height: windowHeight / 2 }}
+            open={openLivelinessBar}
+          /> */}
+
+          {window.innerHeight > 399 && user?.livelinessBar === "relative" && (
+            <MemoizedRelativeLivelinessBar
+              onToggleDisplay={() => setOpenLivelinessBar(prev => !prev)}
+              onlineUsers={onlineUsers}
+              open={openLivelinessBar}
+              openUserInfoSidebar={openUserInfoSidebar}
+              user={user}
+            />
+          )}
 
           {window.innerHeight > 399 && user?.livelinessBar === "interaction" && (
             <MemoizedLivelinessBar

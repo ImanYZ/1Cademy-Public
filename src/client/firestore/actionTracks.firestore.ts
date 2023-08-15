@@ -1,4 +1,4 @@
-import { collection, Firestore, onSnapshot, query, Unsubscribe, where } from "firebase/firestore";
+import { collection, Firestore, onSnapshot, query, Unsubscribe } from "firebase/firestore";
 import { SnapshotChangesTypes } from "src/types";
 import { IActionTrack } from "src/types/IActionTrack";
 
@@ -14,9 +14,9 @@ export const getActionTrackSnapshot = (
   },
   callback: (changes: ActionsTracksChange[]) => void
 ): Unsubscribe => {
-  const actionTrackRef = collection(db, "actionTracks");
-  // INFO: when create assignments, change user to assignment and update DB with a script
-  const q = query(actionTrackRef, where("createdAt", ">", data.rewindDate));
+  const actionTrackRef = collection(db, "actionTracks24h");
+  // Todo: we use actionTracks24h because because that is removed automatically after 24h
+  const q = query(actionTrackRef);
   const killSnapshot = onSnapshot(q, snapshot => {
     const docChanges = snapshot.docChanges();
 
@@ -24,7 +24,7 @@ export const getActionTrackSnapshot = (
       const document = change.doc.data() as IActionTrack;
       return { type: change.type, data: { id: change.doc.id, ...document } };
     });
-
+    console.log("01", { actionTrackDocuments });
     callback(actionTrackDocuments);
   });
   return killSnapshot;

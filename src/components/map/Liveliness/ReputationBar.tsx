@@ -191,6 +191,7 @@ const ReputationlinessBar = ({ open, setOpen, ...props }: ILivelinessBarProps) =
           zIndex: 998,
           position: "absolute",
           height: `calc(100% - ${window.innerHeight > 799 ? "375px" : "420px"})`,
+          border: "solid 2px royalBlue",
         }}
       >
         <Box

@@ -2,12 +2,14 @@ import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowUp";
 import { Box, Tooltip } from "@mui/material";
 import { Firestore } from "firebase/firestore";
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import React from "react";
 import { ActionsTracksChange, getActionTrackSnapshot } from "src/client/firestore/actionTracks.firestore";
 import { ActionTrackType } from "src/knowledgeTypes";
 import { IActionTrack } from "src/types/IActionTrack";
 
-import OptimizedAvatar2 from "../../OptimizedAvatar2";
+import OptimizedAvatar2 from "@/components/OptimizedAvatar2";
+
 import { MemoizedActionBubble } from "./ActionBubble";
 
 type ILivelinessBarProps = {
@@ -21,17 +23,19 @@ type ILivelinessBarProps = {
   windowHeight: number;
 };
 
+export type UserInteraction = {
+  id: string;
+  reputation: "Gain" | "Loss" | null;
+  imageUrl: string;
+  chooseUname: boolean;
+  fullname: string;
+  count: number;
+  actions: ActionTrackType[];
+  email?: string;
+};
+
 export type UserInteractions = {
-  [uname: string]: {
-    id: string;
-    reputation: "Gain" | "Loss" | null;
-    imageUrl: string;
-    chooseUname: boolean;
-    fullname: string;
-    count: number;
-    actions: ActionTrackType[];
-    email?: string;
-  };
+  [uname: string]: UserInteraction;
 };
 
 const PAST_24H = new Date(new Date().getTime() - 24 * 60 * 60 * 1000);
@@ -47,13 +51,14 @@ const LivelinessBar = ({ open, setOpen, disabled = false, ...props }: ILivelines
 
   const syncLivelinessBar = useCallback(
     (changes: ActionsTracksChange[]) => {
+      // console.log({ changes });
       setUsersInteractions(prevUsersInteractions => {
         // Following sync wrap help us query user data during
         // processing userInteractions came up in snapshot changes
-        const _interactions = changes.reduce(
-          (acu, cur) => synchronizeActionsTracks(acu, cur, authEmail || ""),
-          prevUsersInteractions
-        );
+        const _interactions = changes.reduce((acu, cur) => synchronizeActionsTracks(acu, cur, authEmail || ""), {
+          ...prevUsersInteractions,
+        });
+        // console.log("02", { _interactions });
         return _interactions;
       });
     },
@@ -61,7 +66,8 @@ const LivelinessBar = ({ open, setOpen, disabled = false, ...props }: ILivelines
   );
 
   useEffect(() => {
-    getActionTrackSnapshot(db, { rewindDate: PAST_24H }, syncLivelinessBar);
+    const killSnapshot = getActionTrackSnapshot(db, { rewindDate: PAST_24H }, syncLivelinessBar);
+    return () => killSnapshot();
   }, [db, syncLivelinessBar]);
 
   useEffect(() => {
@@ -88,6 +94,13 @@ const LivelinessBar = ({ open, setOpen, disabled = false, ...props }: ILivelines
     );
   }, [usersInteractions]);
   // console.log({ disabled });
+  // console.log("03", { usersInteractions });
+
+  // const userInteractions = useMemo(() => {
+  //   return Object.keys(usersInteractions);
+  // }, [usersInteractions]);
+
+  // console.log("04", { userInteractions });
   return (
     <>
       <Box
