@@ -4750,7 +4750,9 @@ const Notebook = ({}: NotebookProps) => {
       try {
         event.preventDefault();
         const image = event.target.files[0];
-        if (
+        if (!image && !image?.type) {
+          alert("Oops! Something went wrong with the image upload. Please try uploading a different image.");
+        } else if (
           image.type !== "image/jpg" &&
           image.type !== "image/jpeg" &&
           image.type !== "image/gif" &&
