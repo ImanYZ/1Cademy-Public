@@ -1,10 +1,11 @@
 import { Box, Typography, useMediaQuery, useTheme } from "@mui/material";
 import { forwardRef, ReactNode } from "react";
 
-import { StatsSchema } from "../../../knowledgeTypes";
+// import { StatsSchema } from "../../../knowledgeTypes";
 import { wrapStringWithBoldTag } from "../../../lib/utils/JSX.utils";
 import { RE_DETECT_NUMBERS_WITH_COMMAS } from "../../../lib/utils/RE";
 import { gray200, gray600 } from "../../../pages/home";
+import { StatsSchema } from "../HomeWrapper";
 import { HomepageSection } from "../SectionsItems";
 
 // TODO: improve this to change the description as React Node and send styles from section Wrapper
@@ -16,7 +17,7 @@ const getDescription = (section: HomepageSection, stats?: StatsSchema): string =
   if (!section.getDescription) return section.description;
   if (!stats) return section.description;
 
-  stats.communities = "49";
+  stats.communities = 49;
   return section.getDescription(statsCopy);
 };
 
