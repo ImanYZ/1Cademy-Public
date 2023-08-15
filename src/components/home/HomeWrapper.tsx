@@ -10,7 +10,7 @@ import { ONE_CADEMY_SECTIONS } from "./SectionsItems";
 
 const observerOption: UseInViewProps = { options: { root: null, rootMargin: "-480px 0px -380px 0px", threshold: 0 } };
 
-type StatsSchema = {
+export type StatsSchema = {
   institutions: number;
   users: number;
   proposals: number;
