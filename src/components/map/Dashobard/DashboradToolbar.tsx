@@ -12,6 +12,7 @@ import {
   Divider,
   IconButton,
   Paper,
+  Skeleton,
   Stack,
   Tooltip,
   Typography,
@@ -41,6 +42,7 @@ type DashboardToolbarProps = {
   onClose: () => void;
   isCollapsed: boolean;
   setIsCollapsed: React.Dispatch<React.SetStateAction<boolean>>;
+  isLoading: boolean;
 };
 
 export const DashboardToolbar = ({
@@ -56,6 +58,7 @@ export const DashboardToolbar = ({
   view,
   isCollapsed,
   setIsCollapsed,
+  isLoading,
 }: DashboardToolbarProps) => {
   const {
     palette: { mode },
@@ -208,17 +211,24 @@ export const DashboardToolbar = ({
         </Box>
         <Divider />
 
-        <SemesterSelect
-          semesters={semesters}
-          setCurrentSemester={onChangeCurrentSemesterHandler}
-          courses={courses}
-          selectedCourse={selectedCourse}
-          setSelectedCourse={onChangeSelectedCourseHandler}
-          isMovil={false}
-          role={user.role}
-          currentSemester={currentSemester}
-          isCollapsed={isCollapsed}
-        />
+        {isLoading && (
+          <Box>
+            <Skeleton variant="rectangular" height={"30px"} width={"100%"} />
+          </Box>
+        )}
+        {!isLoading && (
+          <SemesterSelect
+            semesters={semesters}
+            setCurrentSemester={onChangeCurrentSemesterHandler}
+            courses={courses}
+            selectedCourse={selectedCourse}
+            setSelectedCourse={onChangeSelectedCourseHandler}
+            isMovil={false}
+            role={user.role}
+            currentSemester={currentSemester}
+            isCollapsed={isCollapsed}
+          />
+        )}
       </Stack>
       <Button
         onClick={onClose}

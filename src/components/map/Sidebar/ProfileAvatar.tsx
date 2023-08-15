@@ -49,7 +49,11 @@ const ProfileAvatar = ({ id, userId, userImage, setUserImage, name, lastName }: 
         if (!userAuthObj) return;
 
         const image = event.target.files[0];
-        if (image.type !== "image/jpg" && image.type !== "image/jpeg" && image.type !== "image/png") {
+        if (!image || !image?.type) {
+          alert("Oops! Something went wrong with the image upload. Please try uploading a different image.");
+          setImageUrlError("There is an error with the image, try to upload other one");
+        } else if (image.type !== "image/jpg" && image.type !== "image/jpeg" && image.type !== "image/png") {
+          alert("We only accept JPG, JPEG, or PNG images. Please upload another image.");
           setImageUrlError("We only accept JPG, JPEG, or PNG images. Please upload another image.");
         } else if (image.size > 1024 * 1024) {
           setImageUrlError("We only accept file sizes less than 1MB for profile images. Please upload another image.");

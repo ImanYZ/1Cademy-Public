@@ -1,17 +1,16 @@
-const { db, commitBatch, batchSet, batchUpdate } = require("./admin_Knowledge");
-const { getTypedCollections } = require("./getTypedCollections");
+const { db, commitBatch, batchSet, batchUpdate } = require("./admin");
 
 // On 1Cademy.com nodes do not have their list of contributors and institutions
 // assigned to them. We should run this function every 25 hours in a PubSub to
 // assign these arrays.
-const roundNum = num => Number(Number.parseFloat(Number(num).toFixed(2)));
+const roundNum = (num: any) => Number(Number.parseFloat(Number(num).toFixed(2)));
 exports.assignNodeContributorsInstitutionsStats = async () => {
   // First get the list of all users and create an Object to map their ids to their
   // institution names.
   try {
-    const userInstitutions = {};
-    const userFullnames = {};
-    let institutions = new Set();
+    const userInstitutions: { [key: string]: any } = {};
+    const userFullnames: { [key: string]: string } = {};
+    let institutionsSet = new Set();
     const stats = {
       users: 0,
       institutions: 0,
@@ -26,17 +25,17 @@ exports.assignNodeContributorsInstitutionsStats = async () => {
       userInstitutions[userDoc.id] = userData.deInstit;
       userFullnames[userDoc.id] = userData.fName + " " + userData.lName;
       stats.users += 1;
-      institutions.add(userData.deInstit);
+      institutionsSet.add(userData.deInstit); // aba
     }
-    stats.institutions = institutions.size;
+    stats.institutions = institutionsSet.size;
 
-    const contributors = {};
-    institutions = {};
-    const tags = {};
-    const references = {};
+    const contributors: { [key: string]: any } = {};
+    let institutions: { [key: string]: any } = {};
+    const tags: { [key: string]: string[] } = {};
+    const references: { [key: string]: string[] } = {};
     // Retrieving all the nodes data and saving them in nodesData, so that we don't
     // need to retrieve them one by one, over and over again.
-    const nodesData = {};
+    const nodesData: { [key: string]: any } = {};
     const nodeDocsInitial = await db.collection("nodes").orderBy("createdAt").limit(1).get();
     let lastVisibleNodeDoc = nodeDocsInitial.docs[nodeDocsInitial.docs.length - 1];
     while (lastVisibleNodeDoc) {
@@ -81,7 +80,7 @@ exports.assignNodeContributorsInstitutionsStats = async () => {
       // votes on all accepted proposals every time we run this function.
       // So, we need to create a nodes object to keep track of all the
       // updates and finally batch write all of them into nodes collection.
-      const nodesUpdates = {};
+      const nodesUpdates: { [key: string]: any } = {};
       const { versionsColl } = getTypedCollections(db, nodeType);
       const versionDocs = await versionsColl.get();
       for (let versionDoc of versionDocs.docs) {
@@ -212,4 +211,70 @@ exports.assignNodeContributorsInstitutionsStats = async () => {
   } catch (err) {
     console.log("error ocurred ", err);
   }
+};
+
+const getTypedCollections = (db: any, nodeType: string) => {
+  let versionsColl, userVersionsColl, versionsCommentsColl, userVersionsCommentsColl;
+  if (nodeType === "Concept") {
+    versionsColl = db.collection("conceptVersions");
+    userVersionsColl = db.collection("userConceptVersions");
+    versionsCommentsColl = db.collection("conceptVersionComments");
+    userVersionsCommentsColl = db.collection("userConceptVersionComments");
+  } else if (nodeType === "Code") {
+    versionsColl = db.collection("codeVersions");
+    userVersionsColl = db.collection("userCodeVersions");
+    versionsCommentsColl = db.collection("codeVersionComments");
+    userVersionsCommentsColl = db.collection("userCodeVersionComments");
+  } else if (nodeType === "Relation") {
+    versionsColl = db.collection("relationVersions");
+    userVersionsColl = db.collection("userRelationVersions");
+    versionsCommentsColl = db.collection("relationVersionComments");
+    userVersionsCommentsColl = db.collection("userRelationVersionComments");
+  } else if (nodeType === "Question") {
+    versionsColl = db.collection("questionVersions");
+    userVersionsColl = db.collection("userQuestionVersions");
+    versionsCommentsColl = db.collection("questionVersionComments");
+    userVersionsCommentsColl = db.collection("userQuestionVersionComments");
+  } else if (nodeType === "Reference") {
+    versionsColl = db.collection("referenceVersions");
+    userVersionsColl = db.collection("userReferenceVersions");
+    versionsCommentsColl = db.collection("referenceVersionComments");
+    userVersionsCommentsColl = db.collection("userReferenceVersionComments");
+  } else if (nodeType === "Idea") {
+    versionsColl = db.collection("ideaVersions");
+    userVersionsColl = db.collection("userIdeaVersions");
+    versionsCommentsColl = db.collection("ideaVersionComments");
+    userVersionsCommentsColl = db.collection("userIdeaVersionComments");
+  } else if (nodeType === "Profile") {
+    versionsColl = db.collection("profileVersions");
+    userVersionsColl = db.collection("userProfileVersions");
+    versionsCommentsColl = db.collection("profileVersionComments");
+    userVersionsCommentsColl = db.collection("userProfileVersionComments");
+  } else if (nodeType === "Sequel") {
+    versionsColl = db.collection("sequelVersions");
+    userVersionsColl = db.collection("userSequelVersions");
+    versionsCommentsColl = db.collection("sequelVersionComments");
+    userVersionsCommentsColl = db.collection("userSequelVersionComments");
+  } else if (nodeType === "Advertisement") {
+    versionsColl = db.collection("advertisementVersions");
+    userVersionsColl = db.collection("userAdvertisementVersions");
+    versionsCommentsColl = db.collection("advertisementVersionComments");
+    userVersionsCommentsColl = db.collection("userAdvertisementVersionComments");
+  } else if (nodeType === "News") {
+    versionsColl = db.collection("newsVersions");
+    userVersionsColl = db.collection("userNewsVersions");
+    versionsCommentsColl = db.collection("newsVersionComments");
+    userVersionsCommentsColl = db.collection("userNewsVersionComments");
+  } else if (nodeType === "Private") {
+    versionsColl = db.collection("privateVersions");
+    userVersionsColl = db.collection("userPrivateVersions");
+    versionsCommentsColl = db.collection("privateVersionComments");
+    userVersionsCommentsColl = db.collection("userPrivateVersionComments");
+  }
+  return {
+    versionsColl,
+    userVersionsColl,
+    versionsCommentsColl,
+    userVersionsCommentsColl,
+  };
 };
