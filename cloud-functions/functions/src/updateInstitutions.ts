@@ -1,4 +1,4 @@
-const { db } = require("./admin_Knowledge");
+// const { db } = require("./admin");
 const fs = require("fs");
 const axios = require("axios");
 // On 1Cademy.com when users sign up, we do not make the corresponding changes
@@ -6,7 +6,7 @@ const axios = require("axios");
 // a PubSub to assign these arrays.
 exports.updateInstitutions = async () => {
   const rawdata = fs.readFileSync("./datasets/edited_universities.json");
-  const institutionCountries = {};
+  const institutionCountries: { [key: string]: any } = {};
   for (let institObj of JSON.parse(rawdata)) {
     institutionCountries[institObj.name] = institObj.country;
   }
@@ -18,7 +18,7 @@ exports.updateInstitutions = async () => {
     if (userData.deInstit && !userData.institUpdated) {
       const domainName = userData.email.match("@(.+)$")[0];
       const instQuery = db.collection("institutions").where("name", "==", userData.deInstit).limit(1);
-      await db.runTransaction(async t => {
+      await db.runTransaction(async (t: any) => {
         const instDocs = await t.get(instQuery);
         if (instDocs.docs.length > 0) {
           const instRef = db.collection("institutions").doc(instDocs.docs[0].id);
