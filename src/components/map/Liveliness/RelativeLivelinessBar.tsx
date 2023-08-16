@@ -1,19 +1,22 @@
 import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
-import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowUp";
-import { Box, Tooltip } from "@mui/material";
-import React, { useMemo, useState } from "react";
+import { Box, IconButton, Stack, Tooltip, Typography } from "@mui/material";
+import { getFirestore } from "firebase/firestore";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
+import { ActionsTracksChange, getActionTrackSnapshot } from "src/client/firestore/actionTracks.firestore";
 import { User } from "src/knowledgeTypes";
 
-import { UserInteractions } from "./LivelinessBar";
+import { DESIGN_SYSTEM_COLORS } from "@/lib/theme/colors";
+
+import { PAST_24H, synchronizeActionsTracks, UserInteractionData, UserInteractions } from "./LivelinessBar";
 import { UserBubble } from "./UserBubble";
 
 type RelativeLivelinessBarProps = {
   onlineUsers: string[];
   openUserInfoSidebar: (uname: string, imageUrl: string, fullName: string, chooseUname: string) => void;
-  // user: any;
   onToggleDisplay: () => void;
   open: boolean;
   user: User;
+  authEmail?: string;
 };
 
 const RelativeLivelinessBar = ({
@@ -21,313 +24,224 @@ const RelativeLivelinessBar = ({
   onlineUsers,
   open,
   openUserInfoSidebar,
-}: // user,
-// user,
-RelativeLivelinessBarProps) => {
-  // const { db, onlineUsers, openUserInfoSidebar, authEmail, user, disabled = false, windowHeight } = props;
-  // const [open, setOpen] = useState(false);
-  const [usersInteractions /* setUsersInteractions */] = useState<UserInteractions>({});
-  // const [users, setUsers] = useState<any>({});
-  // const [barHeight, setBarHeight] = useState<number>(0);
-  // const theme = useTheme();
+  authEmail,
+  user,
+}: RelativeLivelinessBarProps) => {
+  const db = getFirestore();
+  const [usersInteractions, setUsersInteractions] = useState<UserInteractions>({});
 
-  // useEffect(() => {
-  //   if (window && window.innerWidth > 768 && window.innerHeight >= 797) {
-  //     setOpen(true);
-  //   }
-  //   if (disabled) return;
+  const usersInteractionsSortedArray = useMemo(
+    () =>
+      Object.keys(usersInteractions)
+        .map(key => ({ ...usersInteractions[key], uname: key }))
+        .sort((a, b) => a.count - b.count),
+    [usersInteractions]
+  );
 
-  //   let t: any = null;
-  //   const unsubscribe: {
-  //     finalizer: () => void;
-  //   } = {
-  //     finalizer: () => {},
-  //   };
-  //   const snapshotInitializer = () => {
-  //     setUsersInteractions({});
-  //     unsubscribe.finalizer();
-  //     const actionTracksCol = collection(db, "actionTracks24h");
-  //     const q = query(actionTracksCol);
-  //     unsubscribe.finalizer = onSnapshot(q, async snapshot => {
-  //       const docChanges = snapshot.docChanges();
+  const userAboveUsersLogged = useMemo(
+    (): UserInteractionData[] => getUsersAbove({ usersInteractionsSortedArray, uname: user.uname }),
+    [user.uname, usersInteractionsSortedArray]
+  );
 
-  //       for (const docChange of docChanges) {
-  //         const actionTrackData = docChange.doc.data() as IActionTrack;
-  //         for (const receiverData of actionTrackData.receivers) {
-  //           const index = actionTrackData.receivers.indexOf(receiverData);
-  //           const userQuery = query(collection(db, "users"), where("uname", "==", receiverData), limit(1));
-  //           getDocs(userQuery).then(userData => {
-  //             const user = userData.docs[0].data();
-  //             setUsers((prevState: any) => {
-  //               return {
-  //                 ...prevState,
-  //                 [user.uname]: {
-  //                   imageUrl: user.imageUrl,
-  //                   chooseUname: user.chooseUname,
-  //                   email: user.email,
-  //                   fullname: user.fName + " " + user.lName,
-  //                 },
-  //               };
-  //             });
-  //           });
+  const userBellowUsersLogged = useMemo(
+    (): UserInteractionData[] => getUsersBellow({ usersInteractionsSortedArray, uname: user.uname }),
+    [user.uname, usersInteractionsSortedArray]
+  );
 
-  //           if (docChange.type === "added") {
-  //             if (!usersInteractions.hasOwnProperty(receiverData)) {
-  //               usersInteractions[receiverData] = {
-  //                 count: 0,
-  //                 actions: [],
-  //                 reputation: null,
-  //               };
-  //             }
-  //             if (actionTrackData.type === "NodeVote") {
-  //               if (actionTrackData.action !== "CorrectRM" && actionTrackData.action !== "WrongRM") {
-  //                 usersInteractions[receiverData].actions.push(actionTrackData.action as ActionTrackType);
-  //                 usersInteractions[receiverData].count += actionTrackData.receiverPoints
-  //                   ? Number(actionTrackData.receiverPoints[index])
-  //                   : 0;
-  //                 for (const receiver of actionTrackData.receivers) {
-  //                   if (usersInteractions.hasOwnProperty(receiver)) {
-  //                     usersInteractions[receiver].reputation = actionTrackData.action === "Correct" ? "Gain" : "Loss";
-  //                   }
-  //                 }
-  //               }
-  //             } else if (actionTrackData.type === "RateVersion") {
-  //               if (actionTrackData.action.includes("Correct-") || actionTrackData.action.includes("Wrong-")) {
-  //                 const currentAction: ActionTrackType = actionTrackData.action.includes("Correct-")
-  //                   ? "Correct"
-  //                   : "Wrong";
-  //                 usersInteractions[receiverData].actions.push(currentAction);
-  //                 usersInteractions[receiverData].count += actionTrackData.action.includes("Correct-") ? 1 : -1;
-  //                 if (usersInteractions[receiverData].count < 0) {
-  //                   usersInteractions[receiverData].count = 0;
-  //                 }
-  //                 for (const receiver of actionTrackData.receivers) {
-  //                   if (usersInteractions.hasOwnProperty(receiver)) {
-  //                     usersInteractions[receiver].reputation = currentAction === "Correct" ? "Gain" : "Loss";
-  //                   }
-  //                 }
-  //               }
-  //             }
-  //           }
-
-  //           if (docChange.type === "removed") {
-  //             if (usersInteractions.hasOwnProperty(receiverData)) {
-  //               usersInteractions[receiverData].count -= 1;
-  //               if (usersInteractions[receiverData].count <= 0) {
-  //                 delete usersInteractions[receiverData];
-  //               }
-  //             }
-  //           }
-  //         }
-  //       }
-  //       setUsersInteractions({ ...usersInteractions });
-  //       if (t) {
-  //         clearTimeout(t);
-  //       }
-  //       t = setTimeout(() => {
-  //         setUsersInteractions(usersInteractions => {
-  //           let _usersInteractions = { ...usersInteractions } as UserInteractions;
-  //           for (let uname in _usersInteractions) {
-  //             _usersInteractions[uname].actions = [];
-  //             _usersInteractions[uname].reputation = null;
-  //           }
-  //           return _usersInteractions;
-  //         });
-  //       }, 3000);
-  //     });
-  //   };
-
-  //   setInterval(() => {
-  //     snapshotInitializer();
-  //   }, 1440000);
-
-  //   snapshotInitializer();
-
-  //   return () => unsubscribe.finalizer();
-  // }, [disabled]);
-
-  // useEffect(() => {
-  //   setBarHeight(parseFloat(String(document.getElementById("liveliness-seekbar")?.clientHeight)));
-  // }, [windowHeight]);
-
-  // const unames = useMemo(() => {
-  //   return Object.keys(usersInteractions).filter(uname => user.uname === uname || usersInteractions[uname].count > 0);
-  // }, [usersInteractions]);
-
-  const minActions: number = useMemo(() => {
-    return Math.min(
-      0,
-      Object.keys(usersInteractions).reduce(
-        (carry, uname: string) => (carry > usersInteractions[uname].count ? usersInteractions[uname].count : carry),
-        0
-      )
-    );
-  }, [usersInteractions]);
-
-  const maxActions: number = useMemo(() => {
+  const userLogged = useMemo((): UserInteractionData => {
+    const userLoggedActions = usersInteractionsSortedArray.find(c => c.uname === user.uname);
     return (
-      Math.max(
-        10,
-        Object.keys(usersInteractions).reduce(
-          (carry, uname: string) => (carry < usersInteractions[uname].count ? usersInteractions[uname].count : carry),
-          0
-        )
-      ) + Math.abs(minActions)
+      userLoggedActions ?? {
+        actions: [],
+        chooseUname: user.chooseUname ?? false,
+        count: 0,
+        fullname: `${user.fName} ${user.lName}`,
+        id: "00",
+        imageUrl: user.imageUrl ?? "",
+        reputation: null,
+        uname: user.uname,
+        email: user.email,
+      }
     );
-  }, [usersInteractions, minActions]);
+  }, [user.chooseUname, user.email, user.fName, user.imageUrl, user.lName, user.uname, usersInteractionsSortedArray]);
 
-  const userAboveUsersLogged = useMemo((): UserInteractions => {
-    return usersInteractions; // TODO: get 3 users above user logged
-  }, [usersInteractions]);
+  const userActionsToDisplay: (UserInteractionData | null)[] = useMemo(() => {
+    return [
+      ...[0, 1, 2].map(c => userAboveUsersLogged[c] ?? null).reverse(),
+      userLogged,
+      ...[0, 1, 2].map(c => userBellowUsersLogged[c] ?? null).reverse(),
+    ];
+  }, [userAboveUsersLogged, userBellowUsersLogged, userLogged]);
 
-  const userBellowUsersLogged = useMemo((): UserInteractions => {
-    return usersInteractions; // TODO: get 3 users above user logged
-  }, [usersInteractions]);
+  const syncLivelinessBar = useCallback(
+    (changes: ActionsTracksChange[]) => {
+      setUsersInteractions(prevUsersInteractions => {
+        return changes.reduce((acu, cur) => synchronizeActionsTracks(acu, cur, authEmail || ""), {
+          ...prevUsersInteractions,
+        });
+      });
+    },
+    [authEmail]
+  );
+
+  const numberOfUsersNoVisibleAbove = useMemo(
+    () => getNumberOfUsersNoVisibleAbove({ uname: user.uname, usersInteractionsSortedArray }),
+    [user.uname, usersInteractionsSortedArray]
+  );
+
+  const numberOfUsersNoVisibleBellow = useMemo(
+    () => getNumberOfUsersNoVisibleBellow({ uname: user.uname, usersInteractionsSortedArray }),
+    [user.uname, usersInteractionsSortedArray]
+  );
+
+  useEffect(() => {
+    const killSnapshot = getActionTrackSnapshot(db, { rewindDate: PAST_24H }, syncLivelinessBar);
+    return () => killSnapshot();
+  }, [db, syncLivelinessBar]);
 
   return (
-    <>
-      <Box
-        sx={{
-          top: "50%",
-          transform: "translateY(-50%)",
-          right: "0px",
-          zIndex: 998,
-          position: "absolute",
-          height: `calc(100% - ${window.innerHeight > 799 ? "375px" : "420px"})`,
-          border: "solid 2px royalBlue",
-        }}
-      >
-        <Box
-          id="live-bar-reputation"
+    <Box
+      id="live-bar-reputation"
+      sx={{
+        top: "100px",
+        bottom: "100px",
+        right: "0px",
+        zIndex: 998,
+        position: "absolute",
+        width: "56px",
+        background: theme =>
+          theme.palette.mode === "dark" ? theme.palette.common.darkBackground : theme.palette.common.lightBackground,
+        borderRadius: "10px 0px 0px 10px",
+        transform: !open ? "translate(calc(100%), 0px)" : null,
+        transition: "all 0.2s 0s ease",
+      }}
+    >
+      {/* bubble users bar */}
+      <Box className="seekbar" sx={{ height: "100%", position: "relative" }}>
+        <Stack
+          id="liveliness-seekbar"
+          justifyContent={"space-between"}
+          alignItems={"center"}
           sx={{
-            // opacity: disabled ? 0.8 : 1,
-            width: "56px",
+            width: "100%",
+            height: "100%",
+          }}
+        >
+          {/* number of no visible users above */}
+          <Typography>+{numberOfUsersNoVisibleAbove}</Typography>
+          <Stack justifyContent={"space-between"} sx={{ height: "100%", transition: "0.2s", position: "relative" }}>
+            {/* background line */}
+            <Box
+              sx={{
+                position: "absolute",
+                left: "50%",
+                border: theme => (theme.palette.mode === "dark" ? "1px solid #bebebe" : "1px solid rgba(0, 0, 0, 0.6)"),
+                top: "0px",
+                bottom: "0px",
+              }}
+            />
+
+            {/* userAboveUsersLogged */}
+            {userActionsToDisplay.map((cur, idx) =>
+              cur ? (
+                <UserBubble
+                  key={cur.uname}
+                  displayEmails={false}
+                  isOnline={onlineUsers.includes(cur.uname)}
+                  openUserInfoSidebar={openUserInfoSidebar}
+                  userInteraction={cur}
+                  size={28}
+                />
+              ) : (
+                <Box key={idx} sx={{ width: "28px", height: "28px" }} />
+              )
+            )}
+          </Stack>
+          {/* number of no visible users bellow */}
+          <Typography>+{numberOfUsersNoVisibleBellow}</Typography>
+        </Stack>
+      </Box>
+
+      {/* toggle button */}
+      <Tooltip title={open ? "Hide relative reputation liveness bar" : "Display relative reputation liveness bar"}>
+        <IconButton
+          sx={{
             background: theme =>
               theme.palette.mode === "dark"
                 ? theme.palette.common.darkBackground
                 : theme.palette.common.lightBackground,
-            borderRadius: "10px 0px 0px 10px",
-            right: 0,
-            top: 0,
+            display: "flex",
+            top: "50%",
+            transform: "translate(0px, -50%)",
+            left: "-22px",
+            width: "28px",
+            height: "36px",
+            color: theme => (theme.palette.mode === "dark" ? "#bebebe" : "rgba(0, 0, 0, 0.6)"),
             position: "absolute",
-            height: "100%",
-            transform: !open ? "translate(calc(100%), 0px)" : null,
-            transition: "all 0.2s 0s ease",
-            padding: "5px 0px 0px 28px",
-          }}
-        >
-          <Tooltip title={"24-hour Points Leaderboard."} placement="left">
-            <Box sx={{ width: "100%", height: "100%", position: "absolute", right: "0px" }}></Box>
-          </Tooltip>
-          {/* {window.innerHeight > 799 && (
-            <Box sx={{ color: "ButtonHighlight", fontSize: "23px", marginLeft: "-15px", marginTop: "5px" }}>🏆</Box>
-          )} */}
-          <Box
-            className="seekbar"
-            sx={{
-              height: `calc(100% - ${window.innerHeight > 799 ? "30px" : "28px"})`,
-              width: "1px",
-              borderRight: theme =>
-                theme.palette.mode === "dark" ? "2px solid #bebebe" : "2px solid rgba(0, 0, 0, 0.6)",
-              color: theme => (theme.palette.mode === "dark" ? "#bebebe" : "rgba(0, 0, 0, 0.6)"),
-              position: "relative",
-              marginTop: "10px",
-            }}
-          >
-            <KeyboardArrowDownIcon
-              sx={{
-                fontSize: "20px",
-                position: "absolute",
-                top: "0px",
-                transform: "translate(-9px, -9px)",
-              }}
-            />
-            <Box
-              className="seekbar-users"
-              id="liveliness-seekbar"
-              sx={{
-                width: "100%",
-                height: "100%",
-                position: "absolute",
-                top: "0px",
-              }}
-            >
-              {/* number of no visible users above */}
-              {/* userAboveUsersLogged */}
-              {Object.keys(userAboveUsersLogged).map((uname: string) => (
-                <UserBubble
-                  key={uname}
-                  displayEmails={false}
-                  isOnline={onlineUsers.includes(uname)}
-                  maxActions={maxActions}
-                  minActions={minActions}
-                  openUserInfoSidebar={openUserInfoSidebar}
-                  uname={uname}
-                  userInteraction={usersInteractions[uname]}
-                />
-              ))}
-              {/* userLogged */}
-              {/* userBellowUsersLogged */}
-              {Object.keys(userBellowUsersLogged).map((uname: string) => (
-                <UserBubble
-                  key={uname}
-                  displayEmails={false}
-                  isOnline={onlineUsers.includes(uname)}
-                  maxActions={maxActions}
-                  minActions={minActions}
-                  openUserInfoSidebar={openUserInfoSidebar}
-                  uname={uname}
-                  userInteraction={usersInteractions[uname]}
-                />
-              ))}
-              {/* number of no visible users bellow */}
-              {/* {Object.keys(usersInteractions).map((uname: string) => (
-                <UserBubble
-                  key={uname}
-                  displayEmails={false}
-                  isOnline={onlineUsers.includes(uname)}
-                  maxActions={maxActions}
-                  minActions={minActions}
-                  openUserInfoSidebar={openUserInfoSidebar}
-                  uname={uname}
-                  userInteraction={usersInteractions[uname]}
-                />
-              ))} */}
-            </Box>
-          </Box>
-          <Box
-            sx={{
+            alignItems: "center",
+            justifyContent: "center",
+            fontSize: "20px",
+            borderRadius: "6px 0px 0px 6px",
+            cursor: "pointer",
+            ":hover": {
               background: theme =>
-                theme.palette.mode === "dark"
-                  ? theme.palette.common.darkBackground
-                  : theme.palette.common.lightBackground,
-              display: "flex",
-              top: "50%",
-              transform: "translate(0px, -50%)",
-              left: "-22px",
-              width: "28px",
-              height: "36px",
-              color: theme => (theme.palette.mode === "dark" ? "#bebebe" : "rgba(0, 0, 0, 0.6)"),
-              position: "absolute",
-              alignItems: "center",
-              justifyContent: "center",
-              fontSize: "20px",
-              borderRadius: "6px 0px 0px 6px",
-              cursor: "pointer",
+                theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookG500 : DESIGN_SYSTEM_COLORS.notebookG50,
+            },
+          }}
+          onClick={onToggleDisplay}
+        >
+          <ArrowForwardIosIcon
+            fontSize="inherit"
+            sx={{
+              transform: !open ? "scaleX(-1)" : null,
             }}
-            onClick={onToggleDisplay}
-          >
-            <ArrowForwardIosIcon
-              fontSize="inherit"
-              sx={{
-                transform: !open ? "scaleX(-1)" : null,
-              }}
-            />
-          </Box>
-        </Box>
-      </Box>
-    </>
+          />
+        </IconButton>
+      </Tooltip>
+    </Box>
   );
 };
 
 export const MemoizedRelativeLivelinessBar = React.memo(RelativeLivelinessBar);
+
+type GetUsersAboveInput = { usersInteractionsSortedArray: UserInteractionData[]; uname: string };
+
+/**
+ * usersInteractionsSortedArray: ascendant sorted array by count property
+ */
+export const getUsersAbove = ({ usersInteractionsSortedArray, uname }: GetUsersAboveInput) => {
+  const userIndex = usersInteractionsSortedArray.findIndex(c => c.uname === uname);
+  if (userIndex < 0) return usersInteractionsSortedArray;
+  return usersInteractionsSortedArray.slice(userIndex + 1, userIndex + 4);
+};
+
+type GetUsersBellowInput = { usersInteractionsSortedArray: UserInteractionData[]; uname: string };
+
+/**
+ * usersInteractionsSortedArray: ascendant sorted array by count property
+ */
+export const getUsersBellow = ({ usersInteractionsSortedArray, uname }: GetUsersBellowInput) => {
+  const userIndex = usersInteractionsSortedArray.findIndex(c => c.uname === uname);
+  if (userIndex < 0) return [];
+  return usersInteractionsSortedArray.slice(Math.max(userIndex - 3, 0), userIndex);
+};
+
+type NumberOfUsersNoVisibleAboveInput = { uname: string; usersInteractionsSortedArray: UserInteractionData[] };
+
+export const getNumberOfUsersNoVisibleAbove = ({
+  uname,
+  usersInteractionsSortedArray,
+}: NumberOfUsersNoVisibleAboveInput) => {
+  const index = usersInteractionsSortedArray.findIndex(c => c.uname === uname);
+  return Math.max(usersInteractionsSortedArray.length - (index + 4), 0);
+};
+
+type NumberOfUsersNoVisibleBellowInput = { uname: string; usersInteractionsSortedArray: UserInteractionData[] };
+
+export const getNumberOfUsersNoVisibleBellow = ({
+  uname,
+  usersInteractionsSortedArray,
+}: NumberOfUsersNoVisibleBellowInput) => {
+  const index = usersInteractionsSortedArray.findIndex(c => c.uname === uname);
+  return Math.max(index - 3, 0);
+};

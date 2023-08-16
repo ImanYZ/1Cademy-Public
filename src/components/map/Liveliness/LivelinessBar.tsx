@@ -38,7 +38,9 @@ export type UserInteractions = {
   [uname: string]: UserInteraction;
 };
 
-const PAST_24H = new Date(new Date().getTime() - 24 * 60 * 60 * 1000);
+export type UserInteractionData = UserInteraction & { uname: string };
+
+export const PAST_24H = new Date(new Date().getTime() - 24 * 60 * 60 * 1000);
 
 const LivelinessBar = ({ open, setOpen, disabled = false, ...props }: ILivelinessBarProps) => {
   const { db, onlineUsers, openUserInfoSidebar, authEmail, windowHeight } = props;

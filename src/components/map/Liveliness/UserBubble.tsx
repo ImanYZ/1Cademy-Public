@@ -1,45 +1,42 @@
 import { Box, Tooltip } from "@mui/material";
-import React, { useMemo } from "react";
+import React, { useEffect, useState } from "react";
 
 import OptimizedAvatar2 from "@/components/OptimizedAvatar2";
 
-import { UserInteraction } from "./LivelinessBar";
+import { UserInteraction, UserInteractionData } from "./LivelinessBar";
 
 type UserBubbleProps = {
-  maxActions: number;
-  minActions: number;
-  userInteraction: UserInteraction;
-  uname: string;
+  userInteraction: UserInteractionData;
   displayEmails: boolean;
   isOnline: boolean;
   openUserInfoSidebar: (uname: string, imageUrl: string, fullName: string, chooseUname: string) => void;
+  size?: number;
 };
 
 export const UserBubble = ({
   userInteraction,
-  uname,
+  // uname,
   displayEmails,
   isOnline,
-  maxActions,
-  minActions,
   openUserInfoSidebar,
+  size = 28,
 }: UserBubbleProps) => {
-  const verticalPosition = useMemo(
-    () =>
-      getSeekPosition({
-        barHeight: 300,
-        maxActions: maxActions,
-        minActions: minActions,
-        userInteraction,
-      }),
-    [maxActions, minActions, userInteraction]
-  );
+  const [className, setClassName] = useState("");
+
+  useEffect(() => {
+    if (userInteraction.count < 0) return;
+    if (userInteraction.reputation === "Gain") setClassName("GainedPoint");
+    if (userInteraction.reputation === "Loss") setClassName("LostPoint");
+
+    const timerId = setTimeout(() => setClassName(""), 1000);
+    () => clearTimeout(timerId);
+  }, [userInteraction.count, userInteraction.reputation]);
 
   return (
     <Tooltip
       title={
         <Box sx={{ textAlign: "center" }}>
-          <Box component={"span"}>{userInteraction.chooseUname ? uname : userInteraction.fullname}</Box>
+          <Box component={"span"}>{userInteraction.chooseUname ? userInteraction.uname : userInteraction.fullname}</Box>
           {displayEmails && (
             <Box component={"p"} sx={{ my: 0 }}>
               {userInteraction.email}
@@ -55,31 +52,25 @@ export const UserBubble = ({
       <Box
         onClick={() =>
           openUserInfoSidebar(
-            uname,
+            userInteraction.uname,
             userInteraction.imageUrl,
             userInteraction.fullname,
             userInteraction.chooseUname ? "1" : "" // TODO: check this
           )
         }
-        className={
-          userInteraction.reputation === "Gain"
-            ? "GainedPoint"
-            : userInteraction.reputation === "Loss"
-            ? "LostPoint"
-            : ""
-        }
+        className={className}
         sx={{
-          width: "28px",
-          height: "28px",
+          width: `${size}px`,
+          height: `${size}px`,
           cursor: "pointer",
           // display: "inline-block",
-          position: "absolute",
-          left: "0px",
-          bottom: "0px",
+          // position: "absolute",
+          // left: "0px",
+          // bottom: "0px",
           transition: "all 0.2s 0s ease",
           background: "linear-gradient(143.7deg, #FDC830 15.15%, #F37335 83.11%);",
           borderRadius: "50%",
-          transform: `translate(-50%, ${verticalPosition}px)`,
+          // transform: `translate(-50%, ${verticalPosition}px)`,
           "& > .user-image": {
             borderRadius: "50%",
             overflow: "hidden",
@@ -110,7 +101,7 @@ export const UserBubble = ({
           <OptimizedAvatar2
             alt={userInteraction.fullname}
             imageUrl={userInteraction.imageUrl}
-            size={28}
+            size={size}
             sx={{ border: "none" }}
           />
         </Box>
