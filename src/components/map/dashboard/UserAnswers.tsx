@@ -377,8 +377,14 @@ export const UserListAnswers = ({
   // };
 
   const onAddUserAnswer = () => {
-    const randomUser = users[Math.floor(Math.random() * users.length - 1)];
+    let randomUser = users[Math.floor(Math.random() * users.length - 1)];
     if (!randomUser) return console.error("Error: there is not users, set up users in the project", { randomUser });
+
+    if (userAnswersCopy.map(c => c.user).includes(randomUser.uname)) {
+      // second try
+      randomUser = users[Math.floor(Math.random() * users.length - 1)];
+      if (!randomUser) return console.error("Error: there is not users, set up users in the project", { randomUser });
+    }
 
     const id = newId(db);
     const newUserAnswer: Answer = {
@@ -417,7 +423,9 @@ export const UserListAnswers = ({
 
   useEffect(() => {
     const getUsers = async () => {
-      const randomUsers: User[] = await getNUsers(db, 10);
+      // INFO: this solution is only for simulation
+      // to implement the solution on NOT_SIMULATION we need to get all user answers and chose 10
+      const randomUsers: User[] = await getNUsers(db, 100);
       setUsers(randomUsers);
     };
     getUsers();
