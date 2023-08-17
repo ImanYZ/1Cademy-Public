@@ -76,7 +76,9 @@ export const RubricItem = ({
   }, [tryUserAnswers]);
 
   return (
-    <Box
+    <Stack
+      direction="column"
+      spacing={2}
       sx={{
         borderRadius: "4px",
         border: ({ palette }) =>
@@ -167,6 +169,7 @@ export const RubricItem = ({
           ))}
         </tbody>
       </Box>
+
       <Stack direction={"row"} justifyContent={"space-between"} alignItems={"center"}>
         <Stack direction={"row"} alignItems={"center"} spacing={"8px"}>
           {!isSelected && (
@@ -238,7 +241,7 @@ export const RubricItem = ({
           )}
         </Stack>
       </Stack>
-    </Box>
+    </Stack>
   );
 };
 
@@ -296,100 +299,103 @@ export const RubricForm = ({ rubric, onSave, cancelFn }: RubricFormProps) => {
                 name="prompts"
                 render={(arrayHelpers: any) => (
                   <>
-                    <Typography sx={{ width: "100%" }}>The student's response should mention:</Typography>
-
-                    <table>
-                      <thead>
-                        <th>
-                          <Typography>Rubric item</Typography>
-                        </th>
-                        <th>
-                          <Typography>Points</Typography>
-                        </th>
-                        <th></th>
-                      </thead>
-                      <tbody>
-                        {formik.values.prompts.map((prompt, index) => {
-                          return (
-                            <tr key={index}>
-                              <td style={{ width: "100%" }}>
-                                <TextField
-                                  label=""
-                                  name={`prompts.${index}.prompt`}
-                                  fullWidth
-                                  multiline
-                                  size="small"
-                                  onChange={formik.handleChange}
-                                  value={prompt.prompt}
-                                  error={
-                                    Boolean(
-                                      formik.touched.prompts &&
-                                        formik.touched.prompts[index] &&
-                                        (formik.touched.prompts as any)[index]["prompt"]
-                                    ) &&
-                                    Boolean(
-                                      formik.errors.prompts &&
+                    {formik.values.prompts.length > 0 && (
+                      <>
+                        <Typography sx={{ width: "100%" }}>The student's response should mention:</Typography>
+                        <table>
+                          <thead>
+                            <th>
+                              <Typography>Rubric item</Typography>
+                            </th>
+                            <th>
+                              <Typography>Points</Typography>
+                            </th>
+                            <th></th>
+                          </thead>
+                          <tbody>
+                            {formik.values.prompts.map((prompt, index) => {
+                              return (
+                                <tr key={index}>
+                                  <td style={{ width: "100%" }}>
+                                    <TextField
+                                      label=""
+                                      name={`prompts.${index}.prompt`}
+                                      fullWidth
+                                      multiline
+                                      size="small"
+                                      onChange={formik.handleChange}
+                                      value={prompt.prompt}
+                                      error={
+                                        Boolean(
+                                          formik.touched.prompts &&
+                                            formik.touched.prompts[index] &&
+                                            (formik.touched.prompts as any)[index]["prompt"]
+                                        ) &&
+                                        Boolean(
+                                          formik.errors.prompts &&
+                                            formik.errors.prompts[index] &&
+                                            typeof (formik.errors.prompts as any)[index]["prompt"] === "string"
+                                        )
+                                      }
+                                      helperText={
+                                        Boolean(
+                                          formik.touched.prompts &&
+                                            formik.touched.prompts[index] &&
+                                            (formik.touched.prompts as any)[index]["prompt"]
+                                        ) &&
+                                        formik.errors.prompts &&
                                         formik.errors.prompts[index] &&
-                                        typeof (formik.errors.prompts as any)[index]["prompt"] === "string"
-                                    )
-                                  }
-                                  helperText={
-                                    Boolean(
-                                      formik.touched.prompts &&
-                                        formik.touched.prompts[index] &&
-                                        (formik.touched.prompts as any)[index]["prompt"]
-                                    ) &&
-                                    formik.errors.prompts &&
-                                    formik.errors.prompts[index] &&
-                                    (formik.errors.prompts as any)[index]["prompt"]
-                                  }
-                                  onBlur={(event: React.FocusEvent<HTMLInputElement>) => {
-                                    formik.handleBlur(event);
-                                  }}
-                                />
-                              </td>
-                              <td style={{ verticalAlign: "top" }}>
-                                <TextField
-                                  label=""
-                                  id="points"
-                                  name={`prompts.${index}.point`}
-                                  onChange={formik.handleChange}
-                                  value={prompt.point}
-                                  error={
-                                    Boolean(
-                                      formik.touched.prompts &&
-                                        formik.touched.prompts[index] &&
-                                        (formik.touched.prompts as any)[index]["point"]
-                                    ) &&
-                                    Boolean(
-                                      formik.errors.prompts &&
-                                        formik.errors.prompts[index] &&
-                                        typeof (formik.errors.prompts as any)[index]["point"] === "string"
-                                    )
-                                  }
-                                  onBlur={(event: React.FocusEvent<HTMLInputElement>) => {
-                                    formik.handleBlur(event);
-                                  }}
-                                  size="small"
-                                  sx={{ width: "50px" }}
-                                  inputProps={{}}
-                                />
-                              </td>
-                              <td style={{ verticalAlign: "top" }}>
-                                <Tooltip title="Remove Rubric Item">
-                                  <IconButton
-                                    type="button"
-                                    onClick={() => arrayHelpers.remove(index)} // remove a friend from the list
-                                  >
-                                    <DeleteIcon />
-                                  </IconButton>
-                                </Tooltip>
-                              </td>
-                            </tr>
-                          );
-                        })}
-                      </tbody>
-                    </table>
+                                        (formik.errors.prompts as any)[index]["prompt"]
+                                      }
+                                      onBlur={(event: React.FocusEvent<HTMLInputElement>) => {
+                                        formik.handleBlur(event);
+                                      }}
+                                    />
+                                  </td>
+                                  <td style={{ verticalAlign: "top" }}>
+                                    <TextField
+                                      label=""
+                                      id="points"
+                                      name={`prompts.${index}.point`}
+                                      onChange={formik.handleChange}
+                                      value={prompt.point}
+                                      error={
+                                        Boolean(
+                                          formik.touched.prompts &&
+                                            formik.touched.prompts[index] &&
+                                            (formik.touched.prompts as any)[index]["point"]
+                                        ) &&
+                                        Boolean(
+                                          formik.errors.prompts &&
+                                            formik.errors.prompts[index] &&
+                                            typeof (formik.errors.prompts as any)[index]["point"] === "string"
+                                        )
+                                      }
+                                      onBlur={(event: React.FocusEvent<HTMLInputElement>) => {
+                                        formik.handleBlur(event);
+                                      }}
+                                      size="small"
+                                      sx={{ width: "50px" }}
+                                      inputProps={{}}
+                                    />
+                                  </td>
+                                  <td style={{ verticalAlign: "top" }}>
+                                    <Tooltip title="Remove Rubric Item">
+                                      <IconButton
+                                        type="button"
+                                        onClick={() => arrayHelpers.remove(index)} // remove a friend from the list
+                                      >
+                                        <DeleteIcon />
+                                      </IconButton>
+                                    </Tooltip>
+                                  </td>
+                                </tr>
+                              );
+                            })}
+                          </tbody>
+                        </table>
+                      </>
+                    )}
 
                     {formik.errors.prompts && typeof formik.errors.prompts === "string" && formik.touched.prompts && (
                       <Typography sx={{ color: theme => theme.palette.error.main }}>{formik.errors.prompts}</Typography>

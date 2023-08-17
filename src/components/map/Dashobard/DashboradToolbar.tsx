@@ -212,9 +212,11 @@ export const DashboardToolbar = ({
         <Divider />
 
         {isLoading && (
-          <Box>
+          <Stack spacing={"10px"}>
             <Skeleton variant="rectangular" height={"30px"} width={"100%"} />
-          </Box>
+            <Skeleton variant="rectangular" height={"20px"} width={"100%"} />
+            <Skeleton variant="rectangular" height={"20px"} width={"100%"} />
+          </Stack>
         )}
         {!isLoading && (
           <SemesterSelect
