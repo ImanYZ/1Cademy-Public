@@ -95,7 +95,6 @@ export const UserAnswersProcessed = ({
     <Box
       sx={{
         position: "relative",
-        // border: "solid 1px red",
         height: "100%",
         display: "grid",
         gridTemplateRows: "auto 1fr",
@@ -215,31 +214,34 @@ export const UserAnswersProcessed = ({
           </Box>
         </Box>
       )}
-      {(data.length === 1 || thresholdByPoints === 0) &&
-        dataSorted.map((cur, idx) => (
-          <Box key={idx} sx={{ p: "4px 10px" }}>
-            <UserAnswerProcessed
-              result={cur.result}
-              userAnswer={cur.userAnswer}
-              rubric={rubric}
-              state={cur.state}
-              selectedRubricItem={selectedRubricItem}
-              isSelected={selectedUserAnswer?.userAnswerId === cur.userAnswerId}
-              // onSelectUserAnswer={}
-              onSelectUserAnswer={
-                data.length === 1
-                  ? undefined
-                  : () => {
-                      onSelectUserAnswer({
-                        result: cur.result,
-                        userAnswer: cur.userAnswer,
-                        userAnswerId: cur.userAnswerId,
-                      });
-                    }
-              }
-            />
-          </Box>
-        ))}
+      {(data.length === 1 || thresholdByPoints === 0) && (
+        <Stack>
+          {dataSorted.map((cur, idx) => (
+            <Box key={idx} sx={{ p: "4px 10px" }}>
+              <UserAnswerProcessed
+                result={cur.result}
+                userAnswer={cur.userAnswer}
+                rubric={rubric}
+                state={cur.state}
+                selectedRubricItem={selectedRubricItem}
+                isSelected={selectedUserAnswer?.userAnswerId === cur.userAnswerId}
+                // onSelectUserAnswer={}
+                onSelectUserAnswer={
+                  data.length === 1
+                    ? undefined
+                    : () => {
+                        onSelectUserAnswer({
+                          result: cur.result,
+                          userAnswer: cur.userAnswer,
+                          userAnswerId: cur.userAnswerId,
+                        });
+                      }
+                }
+              />
+            </Box>
+          ))}
+        </Stack>
+      )}
     </Box>
   );
 };
