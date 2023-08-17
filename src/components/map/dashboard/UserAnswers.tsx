@@ -388,6 +388,7 @@ export const UserListAnswers = ({
       id,
       updatedAt: new Date(),
       user: randomUser.uname,
+      fullName: `${randomUser.fName} ${randomUser.lName}`,
       userImage: randomUser.imageUrl ?? "",
     };
     setNewAnswerId(id);
@@ -436,8 +437,8 @@ export const UserListAnswers = ({
               return (
                 <form onSubmit={formik.handleSubmit}>
                   <Stack direction={"row"} alignItems={"center"} spacing={"12px"} sx={{ mb: "8px" }}>
-                    <OptimizedAvatar2 imageUrl={cur.userImage} alt={cur.user} size={40} />
-                    <Typography>{cur.user}</Typography>
+                    <OptimizedAvatar2 imageUrl={cur.userImage} alt={cur.fullName} size={40} />
+                    <Typography>{cur.fullName}</Typography>
                   </Stack>
                   <TextField
                     label=""

@@ -13,6 +13,7 @@ export type UpdateAnswerInput = Partial<AddAnswerInput>;
 
 type AnswerDocument = {
   user: string;
+  fullName: string;
   userImage: string;
   question: string;
   answer: string;
@@ -32,7 +33,7 @@ export const getAnswersByQuestion = async (db: Firestore, questionId: string): P
     if (cur.exists()) answers.push({ id: cur.id, ...cur.data() } as Answer);
   });
 
-  return answers;
+  return answers.map(c => ({ ...c, fullName: c.fullName ?? "" }));
 };
 
 export const addAnswer = async (db: Firestore, id: string, data: AddAnswerInput): Promise<void> => {
